@@ -272,9 +272,8 @@ public class EclipseBundleData extends DefaultBundleData {
 	}
 
 	public int getPersistentStatus() {
-		boolean isTransient = autoStart || autoStartExceptions != null;
 		// omit the active state if necessary  
-		return isTransient ? (~Constants.BUNDLE_STARTED) & getStatus() : getStatus();
+		return isAutoStartable() ? (~Constants.BUNDLE_STARTED) & getStatus() : getStatus();
 	}
 
 	public void setAutoStartExceptions(String[] autoStartExceptions) {
@@ -310,5 +309,9 @@ public class EclipseBundleData extends DefaultBundleData {
 		autoStartExceptions = new String[numberOfTokens];
 		for (int i = 0; i < numberOfTokens; i++)
 			autoStartExceptions[i] = tokenizer.nextToken().trim();
+	}
+
+	public boolean isAutoStartable() {
+		return autoStart || (autoStartExceptions != null && autoStartExceptions.length > 0);
 	}
 }

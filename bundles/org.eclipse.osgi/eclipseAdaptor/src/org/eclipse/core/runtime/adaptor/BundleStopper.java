@@ -10,11 +10,11 @@
  *******************************************************************************/
 package org.eclipse.core.runtime.adaptor;
 
-import java.util.ArrayList;
-import java.util.List;
+import org.eclipse.osgi.framework.internal.core.AbstractBundle;
 import org.eclipse.osgi.framework.internal.core.BundleHost;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
-import org.eclipse.osgi.service.resolver.*;
+import org.eclipse.osgi.service.resolver.BundleDescription;
+import org.eclipse.osgi.service.resolver.StateHelper;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
@@ -43,24 +43,8 @@ public class BundleStopper {
 		}
 	}
 
-	private BundleDescription[] selectBundlesToStop(Bundle[] allBundles) {
-		State state = EclipseAdaptor.getDefault().getState();
-		List allToStop = new ArrayList(allBundles.length);
-		// gather all active "auto-stoppable" bundles
-		for (int i = 0; i < allBundles.length; i++) {
-			if (!(allBundles[i] instanceof BundleHost) || allBundles[i].getBundleId() == 0 || allBundles[i].getState() != Bundle.ACTIVE)
-				continue;			
-			BundleHost host = ((BundleHost) allBundles[i]);
-			if (!((EclipseBundleData) host.getBundleData()).isAutoStart())
-				continue;
-			allToStop.add(state.getBundle(host.getBundleId()));
-		}
-		return (BundleDescription[]) allToStop.toArray(new BundleDescription[allToStop.size()]);
-	}
-
 	public void stopBundles() {
-		Bundle[] allBundles = EclipseAdaptor.getDefault().getContext().getBundles();
-		BundleDescription[] allToStop = selectBundlesToStop(allBundles);
+		BundleDescription[] allToStop = EclipseAdaptor.getDefault().getState().getResolvedBundles();
 		StateHelper stateHelper = EclipseAdaptor.getDefault().getPlatformAdmin().getStateHelper();
 		Object[][] cycles = stateHelper.sortBundles(allToStop);
 		logCycles(cycles);
@@ -70,11 +54,14 @@ public class BundleStopper {
 	private void stopBundles(BundleDescription[] orderedBundles) {
 		BundleContext context = EclipseAdaptor.getDefault().getContext();
 		// stop all active bundles in the reverse order of Require-Bundle
-		for (int i = orderedBundles.length - 1; i >= 0; i--) {
+		for (int i = orderedBundles.length - 1; i >= 0; i--) {			
 			try {
-				Bundle toStop = context.getBundle(orderedBundles[i].getBundleId());
-				if (toStop.getState() == Bundle.ACTIVE)
-					toStop.stop();
+				AbstractBundle toStop = (AbstractBundle) context.getBundle(orderedBundles[i].getBundleId());
+				if (toStop.getState() != Bundle.ACTIVE || !(toStop instanceof BundleHost) || toStop.getBundleId() == 0)
+					continue;			
+				if (!((EclipseBundleData) toStop.getBundleData()).isAutoStartable())
+					continue;
+				toStop.stop();
 			} catch (Exception e) {
 				String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_BUNDLESTOPPER_ERROR_STOPPING_BUNDLE", orderedBundles[i].toString()); //$NON-NLS-1$
 				FrameworkLogEntry entry = new FrameworkLogEntry(EclipseAdaptorConstants.PI_ECLIPSE_OSGI, message, 0, e, null);
