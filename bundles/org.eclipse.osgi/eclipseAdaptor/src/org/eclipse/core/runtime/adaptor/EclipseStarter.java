@@ -142,7 +142,7 @@ public class EclipseStarter {
 		}
 		// we only get here if an error happened
 		System.getProperties().put(PROP_EXITCODE, "13");
-		System.getProperties().put(PROP_EXITDATA, log.getFile().getPath());
+		System.getProperties().put(PROP_EXITDATA, EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_ERROR_CHECK_LOG", log.getFile().getPath()));
 		return null;
 	}
 
