@@ -65,13 +65,12 @@ public class BundleRepository {
 		return (AbstractBundle[]) bundlesBySymbolicName.get(symbolicName);
 	}
 
-	public AbstractBundle getBundle(String symbolicName, String version) {
+	public AbstractBundle getBundle(String symbolicName, Version version) {
 		AbstractBundle[] bundles = (AbstractBundle[]) bundlesBySymbolicName.get(symbolicName);
 		if (bundles != null) {
-			Version ver = Version.parseVersion(version);
 			if (bundles.length > 0) {
 				for (int i = 0; i < bundles.length; i++) {
-					if (bundles[i].getVersion().equals(ver)) {
+					if (bundles[i].getVersion().equals(version)) {
 						return bundles[i];
 					}
 				}
