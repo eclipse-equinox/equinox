@@ -12,8 +12,7 @@
 package org.eclipse.osgi.event;
 
 import org.osgi.framework.*;
-import org.osgi.framework.BundleEvent;
-import org.osgi.framework.SynchronousBundleListener;
+
 /**
  * A batch <code>BundleEvent</code> listener.
  * 
@@ -27,30 +26,34 @@ import org.osgi.framework.SynchronousBundleListener;
  * <code>BundleEvent</code> object when a bundle has been installed, resolved,
  * started, stopped, updated, unresolved, or uninstalled.
  * <p>
- * <code>BatchBundleListener</code>s are synchronously called during bundle
- * life cycle processing.  Unlike <code>SynchronousBundleListener</code> the
- * framework will batch bundle events during a batching operation and deliver
- * the the list of batched events at the end of the operation.  For example,
- * the framework may batch bundle events during a refresh packages operation.
+ * A <code>BatchBundleListener</code> acts like a <code>BundleListener</code> 
+ * except the framework will call the {@link #batchBegin()} method at the beginning
+ * of a batch process and call the {@link #batchEnd()} at the end of a batch
+ * process.  For example, the framework may notify a <code>BatchBundleListener</code>
+ * of a batching process during a refresh packages operation or a resolve bundles 
+ * operation.
  * <p>
- * During a batching operation the framework will not deliver any events using
+ * During a batching operation the framework will continue to deliver any events using
  * the {@link BundleListener#bundleChanged(BundleEvent)} method to the
- * <code>BatchBundleListener</code>.  During a non-batching operation the
- * <code>BatchBundleListener</code> will act like a normal <code>BundleListener</code>
- * and the {@link BundleListener#bundleChanged(BundleEvent)} method will be
- * called to deliver the non-batched <code>BundleEvent</code>s.
+ * <code>BatchBundleListener</code>.  It is the responsiblity of the
+ * <code>BatchBundleListener</code> to decide how to handle events when a
+ * batching operation is in progress.
  * <p>
- * <code>AdminPermission</code> is required to add or remove a
- * <code>BatchBundleListener</code> object.
+ * Note that the framework does not guarantee that batching operations will not
+ * overlap.  This can result in the method {@link #batchBegin()} being called
+ * multiple times before the first {@link #batchEnd()} is called. 
  * 
  * @see BundleEvent
- * @see SynchronousBundleListener
+ * @see BundleListener
  */
-public interface BatchBundleListener extends SynchronousBundleListener {
+public interface BatchBundleListener extends BundleListener {
 	/**
-	 * Receives notification that a list of batched <code>BundleEvent</code>s have occurred.
-	 * 
-	 * @param events The <code>BundleEvent</code>s that have occurred.
+	 * Indicates that a batching process has begun.
 	 */
-	public abstract void bundlesChanged(BundleEvent[] events);
+	public abstract void batchBegin();
+
+	/**
+	 * Indicates that a batching process has ended.
+	 */
+	public abstract void batchEnd();
 }

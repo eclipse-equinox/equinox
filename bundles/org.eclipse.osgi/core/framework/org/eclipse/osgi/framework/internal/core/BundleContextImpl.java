@@ -379,9 +379,6 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 
 		if (listener instanceof SynchronousBundleListener) {
 			framework.checkAdminPermission(getBundle(), AdminPermission.LISTENER);
-
-			if (listener instanceof BatchBundleListener) // wrapper batch bundle listeners
-				listener = new BatchListenerWrapper((BatchBundleListener) listener);
 			synchronized (framework.bundleEventSync) {
 				if (bundleEventSync == null) {
 					bundleEventSync = new EventListeners();
@@ -1184,10 +1181,21 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 						}
 
 						BundleEvent event = (BundleEvent) object;
-						if ((event.getType() == Framework.BATCHEVENT_BEGIN || event.getType() == Framework.BATCHEVENT_END) && !(listener instanceof BatchListenerWrapper))
-							break; // do not deliver the BATCHEVENT_BEGIN and BATCHEVENT_END to regular listeners
-
-						listener.bundleChanged((BundleEvent) object);
+						switch (event.getType()) {
+							case Framework.BATCHEVENT_BEGIN : {
+								if (listener instanceof BatchBundleListener)
+									((BatchBundleListener) listener).batchBegin();
+								break;
+							}
+							case Framework.BATCHEVENT_END : {
+								if (listener instanceof BatchBundleListener)
+									((BatchBundleListener) listener).batchEnd();
+								break;
+							}
+							default : {
+								listener.bundleChanged((BundleEvent) object);
+							}
+						}
 						break;
 					}
 
