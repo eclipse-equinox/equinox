@@ -13,42 +13,19 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
-import java.security.AccessController;
-import java.security.Permission;
-import java.security.PrivilegedAction;
-import java.security.PrivilegedActionException;
-import java.security.PrivilegedExceptionAction;
-import java.security.ProtectionDomain;
-import java.util.Dictionary;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Locale;
-
+import java.security.*;
+import java.util.*;
 import org.eclipse.osgi.framework.adaptor.BundleData;
 import org.eclipse.osgi.framework.adaptor.BundleOperation;
 import org.eclipse.osgi.framework.debug.Debug;
-import org.eclipse.osgi.service.resolver.BundleDescription;
-import org.eclipse.osgi.service.resolver.BundleSpecification;
-import org.eclipse.osgi.service.resolver.HostSpecification;
-import org.eclipse.osgi.service.resolver.PackageSpecification;
-import org.eclipse.osgi.service.resolver.Version;
-import org.eclipse.osgi.service.resolver.VersionConstraint;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleEvent;
-import org.osgi.framework.BundleException;
-import org.osgi.framework.BundlePermission;
-import org.osgi.framework.FrameworkEvent;
-import org.osgi.framework.PackagePermission;
+import org.eclipse.osgi.service.resolver.*;
+import org.osgi.framework.*;
 /**
  * This object is given out to bundles and wraps the internal Bundle object. It
  * is destroyed when a bundle is uninstalled and reused if a bundle is updated.
  * This class is abstract and is extended by BundleHost and BundleFragment.
  */
-public abstract class Bundle
-		implements
-			org.osgi.framework.Bundle,
-			Comparable,
-			KeyedElement {
+public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, KeyedElement {
 	/** The Framework this bundle is part of */
 	protected Framework framework;
 	/** The state of the bundle. */
@@ -93,12 +70,9 @@ public abstract class Bundle
 	 * @param framework
 	 *            Framework this bundle is running in
 	 */
-	protected static Bundle createBundle(BundleData bundledata,
-			String location, Framework framework, int startLevel)
-			throws BundleException {
+	protected static Bundle createBundle(BundleData bundledata, String location, Framework framework, int startLevel) throws BundleException {
 		if (bundledata.isFragment())
-			return new BundleFragment(bundledata, location, framework,
-					startLevel);
+			return new BundleFragment(bundledata, location, framework, startLevel);
 		else
 			return new BundleHost(bundledata, location, framework, startLevel);
 	}
@@ -119,8 +93,7 @@ public abstract class Bundle
 	 * @param framework
 	 *            Framework this bundle is running in
 	 */
-	protected Bundle(BundleData bundledata, String location,
-			Framework framework, int startLevel) throws BundleException {
+	protected Bundle(BundleData bundledata, String location, Framework framework, int startLevel) throws BundleException {
 		state = INSTALLED;
 		stateChanging = null;
 		this.id = bundledata.getBundleID();
@@ -173,14 +146,13 @@ public abstract class Bundle
 	protected void close() {
 		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 			if ((state & (INSTALLED)) == 0) {
-				Debug.println("Bundle.close called when state != INSTALLED: "
-						+ this);
+				Debug.println("Bundle.close called when state != INSTALLED: " + this);
 				Debug.printStackTrace(new Exception("Stack trace"));
 			}
 		}
 		state = UNINSTALLED;
 	}
-	/**
+	/** 
 	 * Load and instantiate bundle's BundleActivator class
 	 */
 	protected BundleActivator loadBundleActivator() throws BundleException {
@@ -195,9 +167,7 @@ public abstract class Bundle
 				if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 					Debug.printStackTrace(t);
 				}
-				throw new BundleException(Msg.formatter.getString(
-						"BUNDLE_INVALID_ACTIVATOR_EXCEPTION",
-						activatorClassName), t);
+				throw new BundleException(Msg.formatter.getString("BUNDLE_INVALID_ACTIVATOR_EXCEPTION", activatorClassName), t);
 			}
 		}
 		return (null);
@@ -213,8 +183,7 @@ public abstract class Bundle
 	 * @exception java.lang.ClassNotFoundException
 	 *                if the class definition was not found.
 	 */
-	protected abstract Class loadClass(String name, boolean checkPermission)
-			throws ClassNotFoundException;
+	protected abstract Class loadClass(String name, boolean checkPermission) throws ClassNotFoundException;
 	/**
 	 * Find the specified resource in this bundle.
 	 * 
@@ -337,8 +306,7 @@ public abstract class Bundle
 			completeStateChange();
 		}
 		if (Debug.DEBUG && Debug.DEBUG_BUNDLE_TIME)
-			System.out.println("End starting " + getSymbolicName() + " "
-					+ (System.currentTimeMillis() - start));
+			System.out.println("End starting " + getSymbolicName() + " " + (System.currentTimeMillis() - start));
 	}
 	/**
 	 * Internal worker to start a bundle.
@@ -346,8 +314,7 @@ public abstract class Bundle
 	 * @param persistent
 	 *            if true persistently record the bundle was started.
 	 */
-	protected abstract void startWorker(boolean persistent)
-			throws BundleException;
+	protected abstract void startWorker(boolean persistent) throws BundleException;
 	/**
 	 * Start this bundle w/o marking is persistently started.
 	 * 
@@ -488,8 +455,7 @@ public abstract class Bundle
 	 * @param persistent
 	 *            if true persistently record the bundle was stopped.
 	 */
-	protected abstract void stopWorker(boolean persistent)
-			throws BundleException;
+	protected abstract void stopWorker(boolean persistent) throws BundleException;
 	/**
 	 * Set the persistent status bit for the bundle.
 	 * 
@@ -505,17 +471,14 @@ public abstract class Bundle
 					int status = bundledata.getStatus();
 					boolean test = ((status & mask) != 0);
 					if (test != state) {
-						bundledata.setStatus(state
-								? (status | mask)
-								: (status & ~mask));
+						bundledata.setStatus(state ? (status | mask) : (status & ~mask));
 						bundledata.save();
 					}
 					return null;
 				}
 			});
 		} catch (PrivilegedActionException pae) {
-			framework.publishFrameworkEvent(FrameworkEvent.ERROR, this, pae
-					.getException());
+			framework.publishFrameworkEvent(FrameworkEvent.ERROR, this, pae.getException());
 		}
 	}
 	/**
@@ -660,19 +623,14 @@ public abstract class Bundle
 				public Object run() throws BundleException {
 					/* compute the update location */
 					String updateLocation = location;
-					if (bundledata.getManifest().get(
-							Constants.BUNDLE_UPDATELOCATION) != null) {
-						updateLocation = (String) bundledata.getManifest().get(
-								Constants.BUNDLE_UPDATELOCATION);
+					if (bundledata.getManifest().get(Constants.BUNDLE_UPDATELOCATION) != null) {
+						updateLocation = (String) bundledata.getManifest().get(Constants.BUNDLE_UPDATELOCATION);
 						if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-							Debug
-									.println("   from location: "
-											+ updateLocation);
+							Debug.println("   from location: " + updateLocation);
 						}
 					}
 					/* Map the identity to a URLConnection */
-					URLConnection source = framework.adaptor
-							.mapLocationToURLConnection(updateLocation);
+					URLConnection source = framework.adaptor.mapLocationToURLConnection(updateLocation);
 					/* call the worker */
 					updateWorkerPrivileged(source);
 					return null;
@@ -725,8 +683,7 @@ public abstract class Bundle
 	/**
 	 * Update worker. Assumes the caller has the state change lock.
 	 */
-	protected void updateWorker(PrivilegedExceptionAction action)
-			throws BundleException {
+	protected void updateWorker(PrivilegedExceptionAction action) throws BundleException {
 		boolean bundleActive = false;
 		Bundle host = null;
 		if (isFragment()) {
@@ -763,8 +720,7 @@ public abstract class Bundle
 						startWorker(false);
 					}
 				} catch (BundleException e) {
-					framework.publishFrameworkEvent(FrameworkEvent.ERROR, this,
-							e);
+					framework.publishFrameworkEvent(FrameworkEvent.ERROR, this, e);
 				}
 			}
 		}
@@ -772,29 +728,21 @@ public abstract class Bundle
 	/**
 	 * Update worker. Assumes the caller has the state change lock.
 	 */
-	protected void updateWorkerPrivileged(URLConnection source)
-			throws BundleException {
-		Bundle oldBundle = Bundle.createBundle(this.bundledata, this.location,
-				framework, this.startLevel);
+	protected void updateWorkerPrivileged(URLConnection source) throws BundleException {
+		Bundle oldBundle = Bundle.createBundle(this.bundledata, this.location, framework, this.startLevel);
 		boolean reloaded = false;
-		BundleOperation storage = framework.adaptor.updateBundle(
-				this.bundledata, source);
+		BundleOperation storage = framework.adaptor.updateBundle(this.bundledata, source);
 		BundleRepository bundles = framework.getBundles();
 		try {
 			BundleData newBundleData = storage.begin();
 			// Must call framework createBundle to check execution environment.
-			Bundle newBundle = framework.createBundle(newBundleData,
-					this.location, this.startLevel);
+			Bundle newBundle = framework.createBundle(newBundleData, this.location, this.startLevel);
 			// Check for a bundle already installed with the same symbolicName
 			// and version.
 			String symbolicName = newBundle.getSymbolicName();
-			Bundle installedBundle = symbolicName == null ? null : 
-					framework.getBundleByUniqueId(symbolicName, newBundle.getVersion().toString());
+			Bundle installedBundle = symbolicName == null ? null : framework.getBundleByUniqueId(symbolicName, newBundle.getVersion().toString());
 			if (installedBundle != null && installedBundle != this) {
-				throw new BundleException(Msg.formatter.getString(
-						"BUNDLE_INSTALL_SAME_UNIQUEID", newBundle
-								.getSymbolicName(), newBundle.getVersion()
-								.toString()));
+				throw new BundleException(Msg.formatter.getString("BUNDLE_INSTALL_SAME_UNIQUEID", newBundle.getSymbolicName(), newBundle.getVersion().toString()));
 			}
 			String[] nativepaths = framework.selectNativeCode(newBundle);
 			if (nativepaths != null) {
@@ -806,17 +754,17 @@ public abstract class Bundle
 				exporting = reload(newBundle);
 			}
 			reloaded = true; /*
-							  * indicate we have loaded from the new version of
-							  * the bundle
-							  */
+			 * indicate we have loaded from the new version of
+			 * the bundle
+			 */
 			storage.commit(exporting);
 		} catch (BundleException e) {
 			try {
 				storage.undo();
 				if (reloaded) /*
-							   * if we loaded from the new version of the
-							   * bundle
-							   */{
+				 * if we loaded from the new version of the
+				 * bundle
+				 */{
 					synchronized (bundles) {
 						reload(oldBundle); /* revert to old version */
 					}
@@ -897,8 +845,7 @@ public abstract class Bundle
 	/**
 	 * Uninstall worker. Assumes the caller has the state change lock.
 	 */
-	protected void uninstallWorker(PrivilegedExceptionAction action)
-			throws BundleException {
+	protected void uninstallWorker(PrivilegedExceptionAction action) throws BundleException {
 		boolean bundleActive = false;
 		Bundle host = null;
 		if (isFragment()) {
@@ -933,8 +880,7 @@ public abstract class Bundle
 					 * if we fail to start the original bundle then we are in
 					 * big trouble
 					 */
-					framework.publishFrameworkEvent(FrameworkEvent.ERROR, this,
-							e);
+					framework.publishFrameworkEvent(FrameworkEvent.ERROR, this, e);
 				}
 				// set the bundleActive to false so that the finally will not
 				// try
@@ -951,8 +897,7 @@ public abstract class Bundle
 					 * if we fail to start the original host bundle then we are
 					 * in big trouble
 					 */
-					framework.publishFrameworkEvent(FrameworkEvent.ERROR, this,
-							e);
+					framework.publishFrameworkEvent(FrameworkEvent.ERROR, this, e);
 				}
 			}
 		}
@@ -965,8 +910,7 @@ public abstract class Bundle
 		boolean unloaded = false;
 		//cache the bundle's headers
 		getHeaders();
-		BundleOperation storage = framework.adaptor
-				.uninstallBundle(this.bundledata);
+		BundleOperation storage = framework.adaptor.uninstallBundle(this.bundledata);
 		BundleRepository bundles = framework.getBundles();
 		try {
 			storage.begin();
@@ -1080,9 +1024,8 @@ public abstract class Bundle
 			try {
 				rawHeaders = bundledata.getManifest();
 				manifestLocalization = new ManifestLocalization(this, rawHeaders);
-
 			} catch (BundleException e) {
-				framework.publishFrameworkEvent(FrameworkEvent.ERROR,this,e);
+				framework.publishFrameworkEvent(FrameworkEvent.ERROR, this, e);
 				// return an empty dictinary.
 				return new Hashtable();
 			}
@@ -1225,26 +1168,23 @@ public abstract class Bundle
 					return;
 				}
 				if (doubleFault || (stateChanging == Thread.currentThread())) {
-					throw new BundleException(Msg.formatter
-							.getString("BUNDLE_STATE_CHANGE_EXCEPTION"));
+					throw new BundleException(Msg.formatter.getString("BUNDLE_STATE_CHANGE_EXCEPTION"));
 				}
 				try {
 					if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-						Debug.println(" Waiting for state to change in bundle "
-								+ this);
+						Debug.println(" Waiting for state to change in bundle " + this);
 					}
 					long start = 0;
 					if (Debug.DEBUG)
 						start = System.currentTimeMillis();
 					statechangeLock.wait(5000); /*
-												 * wait for other thread to
-												 * finish changing state
-												 */
+					 * wait for other thread to
+					 * finish changing state
+					 */
 					if (Debug.DEBUG) {
 						long end = System.currentTimeMillis();
 						if (end - start > 0) {
-							System.out.println("Waiting... : "
-									+ getSymbolicName() + " " + (end - start));
+							System.out.println("Waiting... : " + getSymbolicName() + " " + (end - start));
 						}
 					}
 				} catch (InterruptedException e) {
@@ -1262,9 +1202,9 @@ public abstract class Bundle
 			if (stateChanging != null) {
 				stateChanging = null;
 				statechangeLock.notify(); /*
-										   * notify one waiting thread that the
-										   * state change is complete
-										   */
+				 * notify one waiting thread that the
+				 * state change is complete
+				 */
 			}
 		}
 	}
@@ -1307,8 +1247,7 @@ public abstract class Bundle
 	 */
 	protected void checkValid() {
 		if (state == UNINSTALLED) {
-			throw new IllegalStateException(Msg.formatter
-					.getString("BUNDLE_UNINSTALLED_EXCEPTION"));
+			throw new IllegalStateException(Msg.formatter.getString("BUNDLE_UNINSTALLED_EXCEPTION"));
 		}
 	}
 	/**
@@ -1328,8 +1267,7 @@ public abstract class Bundle
 	 */
 	protected void unresolvePermissions(Hashtable unresolvedPackages) {
 		if (domain != null) {
-			BundlePermissionCollection collection = (BundlePermissionCollection) domain
-					.getPermissions();
+			BundlePermissionCollection collection = (BundlePermissionCollection) domain.getPermissions();
 			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 				Debug.println("Unresolving permissions in bundle " + this);
 			}
@@ -1369,18 +1307,16 @@ public abstract class Bundle
 		checkValid();
 		if (bundledata == null) {
 			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-				Debug.println("Bundle.getResourcePaths(" + path
-						+ ") called when bundledata == null: " + this);
+				Debug.println("Bundle.getResourcePaths(" + path + ") called when bundledata == null: " + this);
 				Debug.printStackTrace(new Exception("Stack trace"));
 			}
 			return (null);
 		}
-		return (Enumeration) AccessController
-				.doPrivileged(new PrivilegedAction() {
-					public Object run() {
-						return bundledata.getEntryPaths(path);
-					}
-				});
+		return (Enumeration) AccessController.doPrivileged(new PrivilegedAction() {
+			public Object run() {
+				return bundledata.getEntryPaths(path);
+			}
+		});
 	}
 	/*
 	 * (non-Javadoc)
@@ -1396,8 +1332,7 @@ public abstract class Bundle
 		checkValid();
 		if (bundledata == null) {
 			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-				Debug.println("Bundle.getFile(" + fileName
-						+ ") called when bundledata == null: " + this);
+				Debug.println("Bundle.getFile(" + fileName + ") called when bundledata == null: " + this);
 				Debug.printStackTrace(new Exception("Stack trace"));
 			}
 			return (null);
@@ -1411,7 +1346,6 @@ public abstract class Bundle
 			}
 		});
 	}
-
 	public String getGlobalName() {
 		return getSymbolicName();
 	}
@@ -1428,7 +1362,6 @@ public abstract class Bundle
 		return framework.adaptor.getState().getBundle(getBundleId());
 	}
 	public abstract BundleLoader getBundleLoader();
-
 	/**
 	 * Mark this bundle as resolved.
 	 */
@@ -1445,7 +1378,6 @@ public abstract class Bundle
 		}
 		state = RESOLVED;
 	}
-
 	protected abstract boolean unresolve() throws BundleException;
 	/**
 	 * Return the current context for this bundle.
@@ -1454,8 +1386,7 @@ public abstract class Bundle
 	 */
 	abstract protected BundleContext getContext();
 	protected String getResolutionFailureMessage() {
-		String defaultMessage = Msg.formatter
-				.getString("BUNDLE_UNRESOLVED_EXCEPTION");
+		String defaultMessage = Msg.formatter.getString("BUNDLE_UNRESOLVED_EXCEPTION");
 		// don't spend time if debug info is not needed
 		if (!Debug.DEBUG) {
 			return defaultMessage;
@@ -1474,31 +1405,24 @@ public abstract class Bundle
 		}
 		VersionConstraint[] unsatisfied = framework.adaptor.getPlatformAdmin().getStateHelper().getUnsatisfiedConstraints(bundleDescription);
 		if (unsatisfied.length == 0) {
-			return Msg.formatter
-					.getString("BUNDLE_UNRESOLVED_NOT_CHOSEN_EXCEPTION");
+			return Msg.formatter.getString("BUNDLE_UNRESOLVED_NOT_CHOSEN_EXCEPTION");
 		}
 		StringBuffer missing = new StringBuffer();
 		for (int i = 0; i < unsatisfied.length; i++) {
 			if (unsatisfied[i] instanceof PackageSpecification) {
-				missing.append(Msg.formatter.getString(
-						"BUNDLE_UNRESOLVED_PACKAGE", toString(unsatisfied[i])));
+				missing.append(Msg.formatter.getString("BUNDLE_UNRESOLVED_PACKAGE", toString(unsatisfied[i])));
 			} else if (unsatisfied[i] instanceof BundleSpecification) {
-				missing.append(Msg.formatter.getString(
-						"BUNDLE_UNRESOLVED_BUNDLE", toString(unsatisfied[i])));
+				missing.append(Msg.formatter.getString("BUNDLE_UNRESOLVED_BUNDLE", toString(unsatisfied[i])));
 			} else {
-				missing.append(Msg.formatter.getString(
-						"BUNDLE_UNRESOLVED_HOST", toString(unsatisfied[i])));
+				missing.append(Msg.formatter.getString("BUNDLE_UNRESOLVED_HOST", toString(unsatisfied[i])));
 			}
 			missing.append(',');
 		}
 		missing.deleteCharAt(missing.length() - 1);
-		return Msg.formatter.getString(
-				"BUNDLE_UNRESOLVED_UNSATISFIED_CONSTRAINT_EXCEPTION", missing
-						.toString());
+		return Msg.formatter.getString("BUNDLE_UNRESOLVED_UNSATISFIED_CONSTRAINT_EXCEPTION", missing.toString());
 	}
 	private String toString(VersionConstraint constraint) {
-		org.eclipse.osgi.service.resolver.Version versionSpec = constraint
-				.getVersionSpecification();
+		org.eclipse.osgi.service.resolver.Version versionSpec = constraint.getVersionSpecification();
 		if (versionSpec == null)
 			return constraint.getName();
 		return constraint.getName() + '_' + versionSpec;
@@ -1512,60 +1436,52 @@ public abstract class Bundle
 	public Object getKey() {
 		return new Long(id);
 	}
-
-	protected boolean checkPermissions(){
+	protected boolean checkPermissions() {
 		permissionMsg = null;
 		if (id == 0) // System Bundle always has permission
 			return true;
-
 		BundleDescription bundleDesc = getBundleDescription();
 		if (bundleDesc == null)
 			return false;
-
 		PackageSpecification[] pkgs = bundleDesc.getPackages();
-		for(int i=0; i<pkgs.length; i++) {
+		for (int i = 0; i < pkgs.length; i++) {
 			// check to make sure the exporter has permissions
 			BundleDescription supplier = pkgs[i].getSupplier();
-			Bundle supplierBundle = supplier==null ? null : framework.getBundle(supplier.getBundleId());
+			Bundle supplierBundle = supplier == null ? null : framework.getBundle(supplier.getBundleId());
 			if (supplierBundle == null || !supplierBundle.checkExportPackagePermission(pkgs[i].getName())) {
 				permissionMsg = Msg.formatter.getString("BUNDLE_PERMISSION_EXCEPTION_EXPORT", supplierBundle, pkgs[i].getName());
 				return false;
 			}
-
 			// check to make sure the importer has permissions
 			if (!checkImportPackagePermission(pkgs[i].getName())) {
 				permissionMsg = Msg.formatter.getString("BUNDLE_PERMISSION_EXCEPTION_IMPORT", this, pkgs[i].getName());
 				return false;
 			}
 		}
-
 		BundleSpecification[] bundles = bundleDesc.getRequiredBundles();
-		for (int i=0; i<bundles.length; i++) {
+		for (int i = 0; i < bundles.length; i++) {
 			// check to make sure the provider has permissions
 			BundleDescription supplier = bundles[i].getSupplier();
-			Bundle supplierBundle = supplier==null ? null : framework.getBundle(supplier.getBundleId());
+			Bundle supplierBundle = supplier == null ? null : framework.getBundle(supplier.getBundleId());
 			if (supplierBundle == null || !supplierBundle.checkProvideBundlePermission(bundles[i].getName())) {
 				permissionMsg = Msg.formatter.getString("BUNDLE_PERMISSION_EXCEPTION_PROVIDE", supplierBundle, bundles[i].getName());
 				return false;
 			}
-
 			// check to make sure the requirer has permissions
 			if (!checkRequireBundlePermission(bundles[i].getName())) {
 				permissionMsg = Msg.formatter.getString("BUNDLE_PERMISSION_EXCEPTION_REQUIRE", this, bundles[i].getName());
 				return false;
 			}
 		}
-
 		HostSpecification host = bundleDesc.getHost();
 		if (host != null) {
 			// check to make sure the host has permissions
 			BundleDescription supplier = host.getSupplier();
-			Bundle supplierBundle = supplier==null ? null : framework.getBundle(supplier.getBundleId());
+			Bundle supplierBundle = supplier == null ? null : framework.getBundle(supplier.getBundleId());
 			if (supplierBundle == null || !supplierBundle.checkFragmentHostPermission(host.getName())) {
 				permissionMsg = Msg.formatter.getString("BUNDLE_PERMISSION_EXCEPTION_HOST", supplierBundle, host.getName());
 				return false;
 			}
-
 			// check to make sure the fragment has permissions
 			if (!checkFragmentBundlePermission(host.getName())) {
 				permissionMsg = Msg.formatter.getString("BUNDLE_PERMISSION_EXCEPTION_FRAGMENT", this, host.getName());
@@ -1574,7 +1490,6 @@ public abstract class Bundle
 		}
 		return true;
 	}
-
 	public boolean checkExportPackagePermission(String pkgName) {
 		if (id == 0) // System Bundle always has permission
 			return true;
@@ -1582,7 +1497,6 @@ public abstract class Bundle
 			return domain.implies(new PackagePermission(pkgName, PackagePermission.EXPORT));
 		return true;
 	}
-
 	public boolean checkProvideBundlePermission(String symbolicName) {
 		if (id == 0) // System Bundle always has permission
 			return true;
@@ -1590,7 +1504,6 @@ public abstract class Bundle
 			return domain.implies(new BundlePermission(symbolicName, BundlePermission.PROVIDE_BUNDLE));
 		return true;
 	}
-
 	public boolean checkImportPackagePermission(String pkgName) {
 		if (id == 0) // System Bundle always has permission
 			return true;
@@ -1598,7 +1511,6 @@ public abstract class Bundle
 			return domain.implies(new PackagePermission(pkgName, PackagePermission.IMPORT));
 		return true;
 	}
-
 	public boolean checkRequireBundlePermission(String symbolicName) {
 		if (id == 0) // System Bundle always has permission
 			return true;
@@ -1606,7 +1518,6 @@ public abstract class Bundle
 			return domain.implies(new BundlePermission(symbolicName, BundlePermission.REQUIRE_BUNDLE));
 		return true;
 	}
-
 	public boolean checkFragmentHostPermission(String symbolicName) {
 		if (id == 0) // System Bundle always has permission
 			return true;
@@ -1614,7 +1525,6 @@ public abstract class Bundle
 			return domain.implies(new BundlePermission(symbolicName, BundlePermission.FRAGMENT_HOST));
 		return true;
 	}
-
 	public boolean checkFragmentBundlePermission(String symbolicName) {
 		if (id == 0) // System Bundle always has permission
 			return true;
@@ -1622,5 +1532,4 @@ public abstract class Bundle
 			return domain.implies(new BundlePermission(symbolicName, BundlePermission.FRAGMENT_BUNDLE));
 		return true;
 	}
-
 }

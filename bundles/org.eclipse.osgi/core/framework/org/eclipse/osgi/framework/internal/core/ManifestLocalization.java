@@ -12,14 +12,8 @@ package org.eclipse.osgi.framework.internal.core;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Dictionary;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Locale;
-import java.util.PropertyResourceBundle;
-import java.util.ResourceBundle;
-
+import java.util.*;
+import org.eclipse.osgi.framework.util.Headers;
 import org.osgi.framework.Constants;
 /**
  * This class is used by the Bundle Class to localize manifest headers.
@@ -27,7 +21,7 @@ import org.osgi.framework.Constants;
 public class ManifestLocalization {
 	private Bundle bundle = null;
 	private Dictionary rawHeaders = null;
-	private Dictionary defaultLocaleHeaders = null;
+	private Headers defaultLocaleHeaders = null;
 	public ManifestLocalization(Bundle bundle, Dictionary rawHeaders) {
 		this.bundle = bundle;
 		this.rawHeaders = rawHeaders;
@@ -59,14 +53,13 @@ public class ManifestLocalization {
 			return (rawHeaders);
 		}
 		Enumeration e = this.rawHeaders.keys();
-		Dictionary localeHeaders = new Hashtable(this.rawHeaders.size());
+		Headers localeHeaders = new Headers(this.rawHeaders.size());
 		while (e.hasMoreElements()) {
 			String key = (String) e.nextElement();
 			String value = (String) this.rawHeaders.get(key);
 			if (value.startsWith("%") && (value.length() > 1)) { //$NON-NLS-1$
 				String propertiesKey = value.substring(1);
-				String transValue = (String) localeProperties
-						.getObject(propertiesKey);
+				String transValue = (String) localeProperties.getObject(propertiesKey);
 				if (transValue != null) {
 					value = transValue;
 				}
@@ -75,7 +68,7 @@ public class ManifestLocalization {
 					value = propertiesKey;
 				}
 			}
-			localeHeaders.put(key, value);
+			localeHeaders.set(key, value);
 		}
 		if (defaultLocale) {
 			defaultLocaleHeaders = localeHeaders;
@@ -97,11 +90,9 @@ public class ManifestLocalization {
 	/*
 	 * This method find the appropiate Manifest Localization file inside the bundle.  If not found, return null.
 	 */
-	
 	private ResourceBundle getResourceBundle(String localeString) {
 		URL resourceURL = null;
-		String propertiesLocation = (String) rawHeaders
-				.get(Constants.BUNDLE_MANIFEST_LOCALIZATION);
+		String propertiesLocation = (String) rawHeaders.get(Constants.BUNDLE_MANIFEST_LOCALIZATION);
 		if (propertiesLocation == null) {
 			propertiesLocation = Constants.BUNDLE_DEFAULT_MANIFEST_LOCALIZATION;
 		}
