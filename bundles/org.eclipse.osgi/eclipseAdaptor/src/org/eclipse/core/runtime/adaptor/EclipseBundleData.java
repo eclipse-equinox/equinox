@@ -153,9 +153,11 @@ public class EclipseBundleData extends DefaultBundleData {
 		if (manifest == null)
 			manifest = first ? loadManifest() : new CachedManifest(this);
 		if (manifest.get(org.osgi.framework.Constants.BUNDLE_SYMBOLICNAME) == null) {
-			Dictionary generatedManifest = generateManifest(manifest);
-			if (generatedManifest != null)
-				manifest = generatedManifest;
+			if (getEntry(PluginConverterImpl.PLUGIN_MANIFEST) != null || getEntry(PluginConverterImpl.FRAGMENT_MANIFEST) != null) {
+				Dictionary generatedManifest = generateManifest(manifest);
+				if (generatedManifest != null)
+					manifest = generatedManifest;
+			}
 		}
 		return manifest;
 	}
