@@ -62,15 +62,6 @@ public interface Location {
 	public boolean isReadOnly();
 	
 	/**
-	 * Sets the location's value to the given URL.  If the location already has a value an 
-	 * exception is thrown.
-	 * @param value the value of this location
-	 * @throws IllegalStateException if the location's value is already set
-	 * @deprecated use setURL(URL, boolean)
-	 */
-	public void setURL(URL value) throws IllegalStateException;
-
-	/**
 	 * Sets and optionally locks the location's value to the given URL.  If the location already has a value an 
 	 * exception is thrown.  If locking is requested and fails, false is returned and the URL
 	 * of this location is not set.

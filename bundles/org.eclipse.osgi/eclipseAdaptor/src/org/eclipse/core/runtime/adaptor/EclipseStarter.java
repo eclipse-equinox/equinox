@@ -44,6 +44,7 @@ public class EclipseStarter {
 	private static FrameworkAdaptor adaptor;
 	private static BundleContext context;
 	private static ServiceTracker applicationTracker;
+	private static boolean initialize = false;
 	public static boolean debug = false;
 	private static boolean running = false;
 
@@ -51,6 +52,7 @@ public class EclipseStarter {
 	private static final String CONSOLE = "-console"; //$NON-NLS-1$
 	private static final String CONSOLE_LOG = "-consoleLog"; //$NON-NLS-1$
 	private static final String DEBUG = "-debug"; //$NON-NLS-1$
+	private static final String INITIALIZE = "-initialize"; //$NON-NLS-1$
 	private static final String DEV = "-dev"; //$NON-NLS-1$
 	private static final String WS = "-ws"; //$NON-NLS-1$
 	private static final String OS = "-os"; //$NON-NLS-1$
@@ -77,6 +79,9 @@ public class EclipseStarter {
 	
 	public static final String PROP_EXITCODE = "eclipse.exitcode"; //$NON-NLS-1$
 	public static final String PROP_CONSOLE_LOG = "eclipse.consoleLog"; //$NON-NLS-1$
+	private static final String PROP_VM = "eclipse.vm"; //$NON-NLS-1$
+	private static final String PROP_VMARGS = "eclipse.vmargs"; //$NON-NLS-1$
+	private static final String PROP_COMMANDS = "eclipse.commands"; //$NON-NLS-1$
 
 	/** string containing the classname of the adaptor to be used in this framework instance */
 	protected static final String DEFAULT_ADAPTOR_CLASS = "org.eclipse.core.runtime.adaptor.EclipseAdaptor";
@@ -164,10 +169,13 @@ public class EclipseStarter {
 	public static Object run(Object argument) {
 		if (!running)
 			throw new IllegalStateException("Platform not running");
+		logUnresolvedBundles(context.getBundles());
+		// if we are just initializing, do not run the application just return.
+		if (initialize)
+			return new Integer(0);
 		initializeApplicationTracker();
 		ParameterizedRunnable application = (ParameterizedRunnable)applicationTracker.getService();
 		applicationTracker.close();
-		logUnresolvedBundles(context.getBundles());
 		if (application == null)
 			throw new IllegalStateException(EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_ERROR_NO_APPLICATION"));
 		return application.run(argument);
@@ -295,6 +303,7 @@ public class EclipseStarter {
 			String[] installEntries = getArrayFromList(System.getProperty("osgi.bundles"));
 			String syspath = getSysPath();
 			Bundle[] bundles = new Bundle[installEntries.length];
+			boolean installedSomething = false;
 			for (int i = 0; i < installEntries.length; i++) {
 				String name = installEntries[i];
 				int level = -1;
@@ -309,14 +318,16 @@ public class EclipseStarter {
 					throw new IllegalArgumentException(EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_BUNDLE_NOT_FOUND", name));
 				// don't need to install if it is already installed
 				bundles[i] = getBundleByLocation(location);
-				if (bundles[i] != null)
-					continue;
-				bundles[i] = context.installBundle(location);
-				if (level >= 0 && start != null)
-					start.setBundleStartLevel(bundles[i], level);
+				if (bundles[i] == null) {
+					bundles[i] = context.installBundle(location);
+					installedSomething = true;
+					if (level >= 0 && start != null)
+						start.setBundleStartLevel(bundles[i], level);
+				}
 			}
-			// force all basic bundles we installed to be resolved
-			refreshPackages(bundles);
+			// If we installed something, force all basic bundles we installed to be resolved
+			if (installedSomething)
+				refreshPackages(bundles);
 			// schedule all basic bundles to be started
 			for (int i = 0; i < bundles.length; i++) {
 				if (bundles[i].getState() == Bundle.INSTALLED)
@@ -430,9 +441,15 @@ public class EclipseStarter {
 				continue;
 			}
 
+			// look for the initialization arg
+			if (args[i].equalsIgnoreCase(INITIALIZE)) {
+				initialize = true;
+				found = true;
+			}
+
 			// look for the consoleLog flag
 			if (args[i].equalsIgnoreCase(CONSOLE_LOG)) {
-				System.setProperty(PROP_CONSOLE_LOG, "true"); //$NON-NLS-1$
+				System.getProperties().put(PROP_CONSOLE_LOG, "true"); //$NON-NLS-1$
 				found = true;
 			}
 
@@ -496,7 +513,7 @@ public class EclipseStarter {
 				found = true;
 				continue;
 			}
-	
+
 			// look for the window system.  
 			if (args[i - 1].equalsIgnoreCase(WS)) {
 				System.getProperties().put(PROP_WS, arg);
@@ -520,7 +537,6 @@ public class EclipseStarter {
 				System.getProperties().put(PROP_NL, arg);
 				found = true;
 			}
-	
 			// done checking for args.  Remember where an arg was found 
 			if (found) {
 				configArgs[configArgIndex++] = i - 1;
@@ -799,5 +815,32 @@ public class EclipseStarter {
 
 		return ((String) left[3]).compareTo((String) right[3]); // compare qualifier
 	}
-	
+
+	private static String buildCommandLine(String arg, String value) {
+		StringBuffer result = new StringBuffer(300);
+		String entry = System.getProperty(PROP_VM);
+		if (entry == null)
+			return null;
+		result.append(entry );
+		result.append('\n');
+		// append the vmargs and commands.  Assume that these already end in \n
+		entry = System.getProperty(PROP_VMARGS);
+		if (entry != null) 
+			result.append(entry);
+		entry = System.getProperty(PROP_COMMANDS);
+		if (entry != null)
+			result.append(entry);
+		String commandLine = result.toString();
+		int i = commandLine.indexOf(arg + "\n");
+		if (i == 0)
+			commandLine += arg + "\n" + value + "\n";
+		else {
+			i += arg.length() + 1;
+			String left = commandLine.substring(0, i);
+			int j = commandLine.indexOf('\n', i);
+			String right = commandLine.substring(j);
+			commandLine = left + value + right;
+		}
+		return commandLine;
+	}
 }

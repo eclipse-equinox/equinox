@@ -22,11 +22,9 @@ public class LocationManager {
 	private static Location userLocation = null;
 	private static Location instanceLocation = null;
 
-	/** @deprecated this field will be removed */
-	public static final String PROP_INSTALL_LOCATION = "osgi.installLocation"; //$NON-NLS-1$
-	
 	public static final String PROP_INSTALL_AREA = "osgi.install.area"; //$NON-NLS-1$
 	public static final String PROP_CONFIG_AREA = "osgi.configuration.area"; //$NON-NLS-1$
+	public static final String PROP_SHARED_CONFIG_AREA = "osgi.sharedConfiguration.area"; //$NON-NLS-1$
 	public static final String PROP_INSTANCE_AREA = "osgi.instance.area"; //$NON-NLS-1$
 	public static final String PROP_USER_AREA = "osgi.user.area"; //$NON-NLS-1$
 	public static final String PROP_MANIFEST_CACHE = "osgi.manifest.cache"; //$NON-NLS-1$
@@ -86,32 +84,41 @@ public class LocationManager {
 
 	public static void initializeLocations() {
 		URL defaultLocation =  buildURL(System.getProperty("user.home"), true);
-		userLocation = buildLocation(PROP_USER_AREA, defaultLocation, "user");
+		userLocation = buildLocation(PROP_USER_AREA, defaultLocation, "user", false);
 
 		defaultLocation = buildURL(new File(System.getProperty("user.dir"), "workspace").getAbsolutePath(), true);  //$NON-NLS-1$ //$NON-NLS-2$
-		instanceLocation = buildLocation(PROP_INSTANCE_AREA, defaultLocation, "workspace");
+		instanceLocation = buildLocation(PROP_INSTANCE_AREA, defaultLocation, "workspace", false);
 		
 		mungeConfigurationLocation();
+		// compute a default but it is very unlikely to be used since main will have computed everything
 		defaultLocation = buildURL(computeDefaultConfigurationLocation(), true);
-		configurationLocation = buildLocation(PROP_CONFIG_AREA, defaultLocation, CONFIG_DIR);
+		configurationLocation = buildLocation(PROP_CONFIG_AREA, defaultLocation, CONFIG_DIR, false);
+		// get the parent location based on the system property. This will have been set on the 
+		// way in either by the caller/user or by main.  There will be no parent location if we are not 
+		// cascaded.
+		URL parentLocation = computeSharedConfigurationLocation();
+		if (parentLocation != null && !parentLocation.equals(configurationLocation.getURL())) {
+			Location parent = new BasicLocation(null, parentLocation, true);
+			((BasicLocation)configurationLocation).setParent(parent);
+		}
 		initializeDerivedConfigurationLocations(configurationLocation.getURL());
 
 		// assumes that the property is already set
-		installLocation = buildLocation(PROP_INSTALL_AREA, null, null);
+		installLocation = buildLocation(PROP_INSTALL_AREA, null, null, true);
 	}
 
-	private static Location buildLocation(String property, URL defaultLocation, String userDefaultAppendage) {
+	private static Location buildLocation(String property, URL defaultLocation, String userDefaultAppendage, boolean readOnly) {
 		BasicLocation result = null;
 		String location = System.getProperty(property);
 		System.getProperties().remove(property);
 		// if the instance location is not set, predict where the workspace will be and 
 		// put the instance area inside the workspace meta area.
 		if (location == null) 
-			result = new BasicLocation(property, defaultLocation, false);
+			result = new BasicLocation(property, defaultLocation, readOnly);
 		else if (location.equalsIgnoreCase(NONE))
 			return null;
 		else if (location.equalsIgnoreCase(NO_DEFAULT))
-			result = new BasicLocation(property, null, false);
+			result = new BasicLocation(property, null, readOnly);
 		else {
 			if (location.equalsIgnoreCase(USER_HOME)) 
 				location = computeDefaultUserAreaLocation(userDefaultAppendage);
@@ -119,8 +126,8 @@ public class LocationManager {
 				location = new File(System.getProperty(PROP_USER_DIR), userDefaultAppendage).getAbsolutePath();
 			URL url = buildURL(location, true);
 			if (url != null) {
-				result = new BasicLocation(property, null, false);
-				result.setURL(url);
+				result = new BasicLocation(property, null, readOnly);
+				result.setURL(url, false);
 			}
 		}
 		return result;
@@ -134,6 +141,28 @@ public class LocationManager {
 			System.getProperties().put(PROP_MANIFEST_CACHE, location + "manifests");
 	}
 	
+	private static URL computeInstallConfigurationLocation() {
+		String property = System.getProperty(PROP_INSTALL_AREA);
+		try {
+			return new URL(property);
+		} catch (MalformedURLException e) {
+			// do nothing here since it is basically impossible to get a bogus url 
+		}
+		return null;
+	}
+
+	private static URL computeSharedConfigurationLocation() {
+		String property = System.getProperty(PROP_SHARED_CONFIG_AREA);
+		if (property == null)
+			return null;
+		try {
+			return new URL(property);
+		} catch (MalformedURLException e) {
+			// do nothing here since it is basically impossible to get a bogus url 
+		}
+		return null;
+	}
+	
 	private static String computeDefaultConfigurationLocation() {
 		// 1) We store the config state relative to the 'eclipse' directory if possible
 		// 2) If this directory is read-only 
@@ -142,13 +171,7 @@ public class LocationManager {
 		//    defined in .eclipseproduct marker file. If .eclipseproduct does not
 		//    exist, use "eclipse" as the application-id.
 		
-		String installProperty = System.getProperty(PROP_INSTALL_AREA);
-		URL installURL = null;
-		try {
-			installURL = new URL(installProperty);
-		} catch (MalformedURLException e) {
-			// do nothing here since it is basically impossible to get a bogus url 
-		}
+		URL installURL = computeInstallConfigurationLocation();
 		File installDir = new File(installURL.getFile());
 		if ("file".equals(installURL.getProtocol()) && installDir.canWrite()) //$NON-NLS-1$
 			return new File(installDir, CONFIG_DIR).getAbsolutePath();

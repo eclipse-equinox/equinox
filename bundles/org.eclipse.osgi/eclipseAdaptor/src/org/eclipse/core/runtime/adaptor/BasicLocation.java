@@ -50,7 +50,7 @@ public class BasicLocation implements Location {
 
 	public URL getURL() {
 		if (location == null && defaultValue != null)
-			setURL(defaultValue);
+			setURL(defaultValue, false);
 		return location;
 	}
 
@@ -62,20 +62,13 @@ public class BasicLocation implements Location {
 		return isReadOnly;
 	}
 
-	/**
-	 * @deprecated
-	 */
-	public void setURL(URL value) throws IllegalStateException {
-		setURL(value, false);
-	}
-
 	public synchronized boolean setURL(URL value, boolean lock) throws IllegalStateException {
 		if (location != null)
 			throw new IllegalStateException("Cannot change the location once it is set");
 		File file = null;
 		if (value.getProtocol().equalsIgnoreCase("file"))
 			file = new File(value.getPath(), LOCK_FILENAME);
-
+		lock = lock && !isReadOnly;
 		if (lock) {
 			try {
 				if (!lock(file))
@@ -86,8 +79,9 @@ public class BasicLocation implements Location {
 		}
 		lockFile = file;
 		location = value;
-		System.getProperties().put(property, location.toExternalForm());
-		return true;
+		if (property != null)
+			System.getProperties().put(property, location.toExternalForm());
+		return lock;
 	}
 
 	public void setParent(Location value) {
@@ -101,7 +95,7 @@ public class BasicLocation implements Location {
 	}
 
 	private boolean lock(File lock) throws IOException {
-		if (lock == null)
+		if (lock == null || isReadOnly)
 			return false;
 
 		File parentFile = lock.getParentFile();
