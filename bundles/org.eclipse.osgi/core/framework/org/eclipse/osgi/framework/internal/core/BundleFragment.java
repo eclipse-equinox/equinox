@@ -80,11 +80,7 @@ public class BundleFragment extends AbstractBundle {
 		if (framework.isActive()) {
 			if (hosts != null) {
 				if (state == RESOLVED) {
-					for (int i = 0; i < hosts.length; i++) {
-						exporting = hosts[i].inUse();
-						if (exporting)
-							break;
-					}
+					exporting = true; // if we have a host we cannot be removed until the host is refreshed
 					hosts = null;
 					state = INSTALLED;
 				}
@@ -154,11 +150,7 @@ public class BundleFragment extends AbstractBundle {
 		if (framework.isActive()) {
 			if (hosts != null) {
 				if (state == RESOLVED) {
-					for (int i = 0; i < hosts.length; i++) {
-						exporting = hosts[i].inUse();
-						if (exporting)
-							break;
-					}
+					exporting = true; // if we have a host we cannot be removed until the host is refreshed
 					hosts = null;
 					state = INSTALLED;
 				}
