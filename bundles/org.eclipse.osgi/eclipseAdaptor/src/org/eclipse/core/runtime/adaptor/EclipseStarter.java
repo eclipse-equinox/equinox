@@ -16,11 +16,13 @@ import java.net.*;
 import java.util.*;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.internal.core.OSGi;
+import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
+import org.eclipse.osgi.framework.tracker.ServiceTracker;
+import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.*;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.startlevel.StartLevel;
-import org.eclipse.osgi.framework.tracker.ServiceTracker;
 
 public class EclipseStarter {
 	private static FrameworkAdaptor adaptor;
@@ -129,13 +131,25 @@ public class EclipseStarter {
 		}
 	}
 	private static void logUnresolvedBundles(Bundle[] bundles) {
+		State state = adaptor.getState();
+		FrameworkLog logService = adaptor.getFrameworkLog();
 		for (int i = 0; i < bundles.length; i++)
 			if (bundles[i].getState() == Bundle.INSTALLED) {
-				String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_ERROR_BUNDLE_NOT_RESOLVED", bundles[i]);
-				adaptor.getFrameworkLog().log(new FrameworkLogEntry(0, "org.eclipse.osgi", message, 0, null));
+				String generalMessage = EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_ERROR_BUNDLE_NOT_RESOLVED", bundles[i]);
+				logService.log(new FrameworkLogEntry(0, "org.eclipse.osgi", generalMessage, 0, null));
+				BundleDescription description = state.getBundle(bundles[i].getBundleId());
+				// for some reason, the state does not know about that bundle
+				if (description == null)
+					continue;
+				VersionConstraint[] unsatisfied = description.getUnsatisfiedConstraints();
+				// the bundle wasn't resolved but none of its constraints were
+				// unsatisfiable
+				if (unsatisfied.length == 0)
+					continue;
+				for (int j = 0; j < unsatisfied.length; j++)
+					logService.log(new FrameworkLogEntry(1, "org.eclipse.osgi", EclipseAdaptorMsg.getResolutionFailureMessage(unsatisfied[j]), 0, null));
 			}
-	}
-				
+	}		
 	private static void publishSplashScreen(Runnable endSplashHandler) {
 		// InternalPlatform now how to retrieve this later
 		Dictionary properties = new Hashtable();

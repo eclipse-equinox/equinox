@@ -8,34 +8,48 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.core.runtime.adaptor;
 
 import org.eclipse.osgi.framework.msg.MessageFormat;
+import org.eclipse.osgi.service.resolver.*;
 
 /**
- * This class retrieves strings from a resource bundle
- * and returns them, formatting them with MessageFormat
- * when required.
+ * This class retrieves strings from a resource bundle and returns them,
+ * formatting them with MessageFormat when required.
  * <p>
- * It is used by the system classes to provide national
- * language support, by looking up messages in the
- * <code>
+ * It is used by the system classes to provide national language support, by
+ * looking up messages in the <code>
  *    org.eclipse.osgi.framework.internal.core.ExternalMessages
  * </code>
- * resource bundle. Note that if this file is not available,
- * or an invalid key is looked up, or resource bundle support
- * is not available, the key itself will be returned as the
- * associated message. This means that the <em>KEY</em> should
- * a reasonable human-readable (english) string.
+ * resource bundle. Note that if this file is not available, or an invalid key
+ * is looked up, or resource bundle support is not available, the key itself
+ * will be returned as the associated message. This means that the <em>KEY</em>
+ * should a reasonable human-readable (english) string.
  */
-
 public class EclipseAdaptorMsg {
-
-	static public MessageFormat formatter;
-
+	public static final String NEW_LINE = System.getProperty("line.separator", "\n");
+	public static MessageFormat formatter;
 	// Attempt to load the message bundle.
 	static {
 		formatter = new MessageFormat("org.eclipse.core.runtime.adaptor.EclipseAdaptorMessages");
+	}
+	public static String getResolutionFailureMessage(VersionConstraint unsatisfied) {
+		if (unsatisfied.isResolved())
+			throw new IllegalArgumentException();
+		if (unsatisfied instanceof PackageSpecification)
+			return EclipseAdaptorMsg.formatter.getString("ECLIPSE_MISSING_IMPORTED_PACKAGE", toString(unsatisfied));
+		else if (unsatisfied instanceof BundleSpecification)
+			if (((BundleSpecification) unsatisfied).isOptional())
+				return EclipseAdaptorMsg.formatter.getString("ECLIPSE_MISSING_OPTIONAL_REQUIRED_BUNDLE", toString(unsatisfied));
+			else
+				return EclipseAdaptorMsg.formatter.getString("ECLIPSE_MISSING_REQUIRED_BUNDLE", toString(unsatisfied));
+		else
+			return EclipseAdaptorMsg.formatter.getString("ECLIPSE_MISSING_HOST", toString(unsatisfied));
+	}
+	private static String toString(VersionConstraint constraint) {
+		org.eclipse.osgi.service.resolver.Version versionSpec = constraint.getVersionSpecification();
+		if (versionSpec == null)
+			return constraint.getName();
+		return constraint.getName() + '_' + versionSpec;
 	}
 }

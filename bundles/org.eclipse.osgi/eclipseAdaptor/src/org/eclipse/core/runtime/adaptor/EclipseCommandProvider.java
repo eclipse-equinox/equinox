@@ -9,24 +9,25 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.core.runtime.adaptor;
+
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+
 public class EclipseCommandProvider implements CommandProvider {
-	private static final String NEW_LINE = System.getProperty("line.separator", "\n");
 	private BundleContext context;
 	public EclipseCommandProvider(BundleContext context) {
 		this.context = context;
 	}
 	public String getHelp() {
 		StringBuffer help = new StringBuffer(512);
-		help.append(NEW_LINE);
+		help.append(EclipseAdaptorMsg.NEW_LINE);
 		help.append("---");
 		help.append(EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONSOLE_COMMANDS_HEADER"));
 		help.append("---");
-		help.append(NEW_LINE);
+		help.append(EclipseAdaptorMsg.NEW_LINE);
 		help.append("\tdiag - " + EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONSOLE_HELP_DIAG_COMMAND_DESCRIPTION"));
 		return help.toString();
 	}
@@ -70,31 +71,15 @@ public class EclipseCommandProvider implements CommandProvider {
 				if (unsatisfied.length == 0) {
 					ci.print("  ");
 					ci.println(EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONSOLE_NO_CONSTRAINTS"));
-					nextArg = ci.nextArgument();
-					continue;
 				}
 				for (int i = 0; i < unsatisfied.length; i++) {
 					ci.print("  ");
-					if (unsatisfied[i] instanceof PackageSpecification) {
-						ci.println(EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONSOLE_MISSING_IMPORTED_PACKAGE", toString(unsatisfied[i])));
-					} else if (unsatisfied[i] instanceof BundleSpecification)
-						if (((BundleSpecification) unsatisfied[i]).isOptional())
-							ci.println(EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONSOLE_MISSING_OPTIONAL_REQUIRED_BUNDLE", toString(unsatisfied[i])));
-						else
-							ci.println(EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONSOLE_MISSING_REQUIRED_BUNDLE", toString(unsatisfied[i])));
-					else
-						ci.println(EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONSOLE_MISSING_HOST", toString(unsatisfied[i])));
+					ci.println(EclipseAdaptorMsg.getResolutionFailureMessage(unsatisfied[i]));
 				}
 				nextArg = ci.nextArgument();
 			}
 		} finally {
 			context.ungetService(platformAdminRef);
 		}
-	}
-	private static String toString(VersionConstraint constraint) {
-		org.eclipse.osgi.service.resolver.Version versionSpec = constraint.getVersionSpecification();
-		if (versionSpec == null)
-			return constraint.getName();
-		return constraint.getName() + '_' + versionSpec;
 	}
 }
