@@ -34,7 +34,7 @@ public class EclipseBundleData extends DefaultBundleData {
 	public static final String PROTOCOL = "platform"; //$NON-NLS-1$
 	public static final String FILE = "file"; //$NON-NLS-1$
 
-	private static final String NO_TIMESTAMP_CHECKING = "osgi.noManifestTimeChecking"; //$NON-NLS-1$
+	private static final String PROP_CHECK_CONFIG = "osgi.checkConfiguration"; //$NON-NLS-1$
 	protected String isLegacy = null;
 	protected String pluginClass = null;
 	private String autoStart;
@@ -76,7 +76,7 @@ public class EclipseBundleData extends DefaultBundleData {
 	}
 
 	private boolean checkManifestTimeStamp(BundleFile bundlefile) {
-		if ("true".equalsIgnoreCase(NO_TIMESTAMP_CHECKING)) //$NON-NLS-1$
+		if ("true".equalsIgnoreCase(PROP_CHECK_CONFIG)) //$NON-NLS-1$
 			return true;
 
 		BundleEntry bundleManifestEntry = bundlefile.getEntry("."); //$NON-NLS-1$
