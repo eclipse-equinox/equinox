@@ -28,7 +28,7 @@ import org.osgi.framework.FrameworkEvent;
  * registered in the framework.
  *
  */
-public class StartLevelImpl implements EventSource, EventListener {
+public class StartLevelImpl implements EventDispatcher, EventListener {
 
 	protected static Framework framework;
 	protected static EventManager eventManager;
@@ -400,7 +400,7 @@ public class StartLevelImpl implements EventSource, EventListener {
 	private void issueEvent(StartLevelEvent sle) {
 
 		/* queue to hold set of listeners */
-		EventQueue queue = new EventQueue(eventManager);
+		ListenerQueue queue = new ListenerQueue(eventManager);
 
 		/* add set of StartLevelListeners to queue */
 		queue.queueListeners(startLevelListeners, this);
@@ -418,12 +418,12 @@ public class StartLevelImpl implements EventSource, EventListener {
 	 * class for the events created by this source and the appropriate listener method
 	 * must then be called.
 	 * @param listenerObject This is the optional object that was passed to
-	 * ListenerList.addListener when the listener was added to the ListenerList.
-	 * @param eventAction This value was passed to the EventQueue object via one of its
+	 * EventListeners.addListener when the listener was added to the EventListeners.
+	 * @param eventAction This value was passed to the ListenerQueue object via one of its
 	 * dispatchEvent* method calls. It can provide information (such
 	 * as which listener method to call) so that this method
 	 * can complete the delivery of the event to the listener.
-	 * @param eventObject This object was passed to the EventQueue object via one of its
+	 * @param eventObject This object was passed to the ListenerQueue object via one of its
 	 * dispatchEvent* method calls. This object was created by the event source and
 	 * is passed to this method. It should contain all the necessary information (such
 	 * as what event object to pass) so that this method

@@ -17,7 +17,7 @@ import java.security.*;
 import java.util.*;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.eventmgr.EventListeners;
-import org.eclipse.osgi.framework.eventmgr.EventSource;
+import org.eclipse.osgi.framework.eventmgr.EventDispatcher;
 import org.osgi.framework.*;
 
 /**
@@ -27,7 +27,7 @@ import org.osgi.framework.*;
  * BundleContext object. It is destroyed when a bundle is stopped.
  */
 
-public class BundleContext implements org.osgi.framework.BundleContext, EventSource {
+public class BundleContext implements org.osgi.framework.BundleContext, EventDispatcher {
 
 	/** true if the bundle context is still valid */
 	private boolean valid;
@@ -314,8 +314,6 @@ public class BundleContext implements org.osgi.framework.BundleContext, EventSou
 			if (serviceEvent == null) {
 				serviceEvent = new EventListeners();
 				framework.serviceEvent.addListener(this, this);
-			} else {
-				serviceEvent.removeListener(listener);
 			}
 
 			serviceEvent.addListener(listener, filteredListener);
@@ -399,8 +397,6 @@ public class BundleContext implements org.osgi.framework.BundleContext, EventSou
 				if (bundleEventSync == null) {
 					bundleEventSync = new EventListeners();
 					framework.bundleEventSync.addListener(this, this);
-				} else {
-					bundleEventSync.removeListener(listener);
 				}
 
 				bundleEventSync.addListener(listener, listener);
@@ -410,8 +406,6 @@ public class BundleContext implements org.osgi.framework.BundleContext, EventSou
 				if (bundleEvent == null) {
 					bundleEvent = new EventListeners();
 					framework.bundleEvent.addListener(this, this);
-				} else {
-					bundleEvent.removeListener(listener);
 				}
 
 				bundleEvent.addListener(listener, listener);
@@ -482,8 +476,6 @@ public class BundleContext implements org.osgi.framework.BundleContext, EventSou
 			if (frameworkEvent == null) {
 				frameworkEvent = new EventListeners();
 				framework.frameworkEvent.addListener(this, this);
-			} else {
-				frameworkEvent.removeListener(listener);
 			}
 
 			frameworkEvent.addListener(listener, listener);

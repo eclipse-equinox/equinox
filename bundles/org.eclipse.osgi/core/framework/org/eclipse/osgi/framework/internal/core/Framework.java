@@ -27,7 +27,7 @@ import org.osgi.framework.*;
 /**
  * Core OSGi Framework class.
  */
-public class Framework implements EventSource, EventPublisher {
+public class Framework implements EventDispatcher, EventPublisher {
 	/** FrameworkAdaptor specific functions. */
 	protected FrameworkAdaptor adaptor;
 	/** Framework properties object.  A reference to the 
@@ -1302,9 +1302,9 @@ public class Framework implements EventSource, EventPublisher {
 				frameworkLog.log(event);
 		}
 		/* queue to hold set of listeners */
-		EventQueue listeners = new EventQueue(eventManager);
+		ListenerQueue listeners = new ListenerQueue(eventManager);
 		/* queue to hold set of BundleContexts w/ listeners */
-		EventQueue contexts = new EventQueue(eventManager);
+		ListenerQueue contexts = new ListenerQueue(eventManager);
 		/* synchronize while building the listener list */
 		synchronized (frameworkEvent) {
 			/* add set of BundleContexts w/ listeners to queue */
@@ -1343,9 +1343,9 @@ public class Framework implements EventSource, EventPublisher {
 		/* Dispatch BundleEvent to SynchronousBundleListeners */
 		if (bundleEventSync != null) {
 			/* queue to hold set of listeners */
-			EventQueue listeners = new EventQueue(eventManager);
+			ListenerQueue listeners = new ListenerQueue(eventManager);
 			/* queue to hold set of BundleContexts w/ listeners */
-			EventQueue contexts = new EventQueue(eventManager);
+			ListenerQueue contexts = new ListenerQueue(eventManager);
 			/* synchronize while building the listener list */
 			synchronized (bundleEventSync) {
 				/* add set of BundleContexts w/ listeners to queue */
@@ -1359,9 +1359,9 @@ public class Framework implements EventSource, EventPublisher {
 		/* Dispatch BundleEvent to BundleListeners */
 		if (bundleEvent != null) {
 			/* queue to hold set of listeners */
-			EventQueue listeners = new EventQueue(eventManager);
+			ListenerQueue listeners = new ListenerQueue(eventManager);
 			/* queue to hold set of BundleContexts w/ listeners */
-			EventQueue contexts = new EventQueue(eventManager);
+			ListenerQueue contexts = new ListenerQueue(eventManager);
 			/* synchronize while building the listener list */
 			synchronized (bundleEvent) {
 				/* add set of BundleContexts w/ listeners to queue */
@@ -1398,9 +1398,9 @@ public class Framework implements EventSource, EventPublisher {
 	}
 	public void publishServiceEventPrivileged(ServiceEvent event) {
 		/* queue to hold set of listeners */
-		EventQueue listeners = new EventQueue(eventManager);
+		ListenerQueue listeners = new ListenerQueue(eventManager);
 		/* queue to hold set of BundleContexts w/ listeners */
-		EventQueue contexts = new EventQueue(eventManager);
+		ListenerQueue contexts = new ListenerQueue(eventManager);
 		/* synchronize while building the listener list */
 		synchronized (serviceEvent) {
 			/* add set of BundleContexts w/ listeners to queue */
@@ -1421,13 +1421,13 @@ public class Framework implements EventSource, EventPublisher {
 	 * @param action
 	 *            Event class type
 	 * @param object
-	 *            EventQueue to populate
+	 *            ListenerQueue to populate
 	 */
 	public void dispatchEvent(Object l, Object lo, int action, Object object) {
 		try {
 			BundleContext context = (BundleContext) l;
 			if (context.isValid()) /* if context still valid */{
-				EventQueue queue = (EventQueue) object;
+				ListenerQueue queue = (ListenerQueue) object;
 				switch (action) {
 					case BUNDLEEVENT :
 						{
