@@ -17,7 +17,6 @@ import java.util.jar.JarFile;
 import org.eclipse.osgi.service.pluginconversion.PluginConverter;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
-import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
 public class PluginConverterImpl implements PluginConverter {
