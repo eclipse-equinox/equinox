@@ -24,7 +24,7 @@ public abstract class AbstractStateTest extends EclipseWorkspaceTest {
 		platformAdmin = new SimplePlatformAdmin(getRandomLocation().toFile());
 	}
 
-	AbstractStateTest(String testName) {
+	public AbstractStateTest(String testName) {
 		super(testName);
 	}
 
