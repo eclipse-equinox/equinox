@@ -18,7 +18,7 @@ public abstract class PackageSource implements KeyedElement {
 	protected String id;
 
 	public PackageSource(String id) {
-		this.id = id;
+		this.id = id.intern();
 	}
 
 	public String getId() {
@@ -43,9 +43,9 @@ public abstract class PackageSource implements KeyedElement {
 		return false;
 	}
 
-	public abstract Class loadClass(String name, String pkgName);
-	public abstract URL getResource(String name, String pkgName);
-	public abstract Enumeration getResources(String name, String pkgName) throws IOException;
+	public abstract Class loadClass(String name);
+	public abstract URL getResource(String name);
+	public abstract Enumeration getResources(String name) throws IOException;
 
 	//TODO This does not handle properly the multiple source package properly
 	//TODO See how this relates with FilteredSourcePackage. Overwriting or doing a double dispatch might be good.

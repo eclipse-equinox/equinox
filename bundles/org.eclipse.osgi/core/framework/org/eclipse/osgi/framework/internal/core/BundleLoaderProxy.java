@@ -27,19 +27,16 @@ import org.osgi.service.packageadmin.RequiredBundle;
  * Framework.
  */
 public class BundleLoaderProxy implements RequiredBundle {
-	/* The BundleLoader that this BundleLoaderProxy is managing */
-	BundleLoader loader;
-	/* The Bundle that this BundleLoaderProxy is for */
+	// The BundleLoader that this BundleLoaderProxy is managing
+	private BundleLoader loader;
+	// The Bundle that this BundleLoaderProxy is for
 	private BundleHost bundle;
-	/* the BundleDescription for the Bundle */
+	// the BundleDescription for the Bundle
 	private BundleDescription description;
-	/*
-	 * Indicates if this BundleLoaderProxy is stale; 
-	 * this is true when the bundle is updated or uninstalled.
-	 */
+	// Indicates if this BundleLoaderProxy is stale; 
+	// this is true when the bundle is updated or uninstalled.
 	private boolean stale = false;
-
-	//TODO Needs a comment, and should not that belong to the Loader
+	// cached of package sources for the bundle
 	private KeyedHashSet pkgSources;
 
 	public BundleLoaderProxy(BundleHost bundle, BundleDescription description) {
@@ -48,7 +45,7 @@ public class BundleLoaderProxy implements RequiredBundle {
 		this.pkgSources = new KeyedHashSet(false);
 	}
 
-	public BundleLoader getBundleLoader() {
+	BundleLoader getBundleLoader() {
 		if (loader == null) {
 			synchronized (this) {
 				if (loader == null)
@@ -66,19 +63,19 @@ public class BundleLoaderProxy implements RequiredBundle {
 		return loader;
 	}
 
-	public BundleLoader getBasicBundleLoader() {
+	BundleLoader getBasicBundleLoader() {
 		return loader;
 	}
 
-	public AbstractBundle getBundleHost() {
+	AbstractBundle getBundleHost() {
 		return bundle;
 	}
 
-	public void setStale() {
+	void setStale() {
 		stale = true;
 	}
 
-	public boolean isStale() {
+	boolean isStale() {
 		return stale;
 	}
 
@@ -155,32 +152,35 @@ public class BundleLoaderProxy implements RequiredBundle {
 		return description.isRemovalPending();
 	}
 
-	public BundleDescription getBundleDescription() {
+	BundleDescription getBundleDescription() {
 		return description;
 	}
 
-	public PackageSource getPackageSource(String pkgName) {
+	PackageSource getPackageSource(String pkgName) {
+		// getByKey is called outside of a synch block because we really do not
+		// care too much of duplicates getting created.  Only the first one will
+		// successfully get stored into pkgSources
 		PackageSource pkgSource = (PackageSource) pkgSources.getByKey(pkgName);
 		if (pkgSource == null) {
-			synchronized (pkgSources) {
-				pkgSource = new SingleSourcePackage(pkgName, this);
+			pkgSource = new SingleSourcePackage(pkgName, this);
+			synchronized (pkgSource) {
 				pkgSources.add(pkgSource);
 			}
 		}
 		return pkgSource;
 	}
 
-	public boolean inUse() {
+	boolean inUse() {
 		return description.getDependents().length > 0;
 	}
 
 	// creates a PackageSource from an ExportPackageDescription.  This is called when initializing
-	// a BundleLoader to ensure that proper the proper PackageSource gets created and used for
+	// a BundleLoader to ensure that the proper PackageSource gets created and used for
 	// filtered and reexport packages.  The storeSource flag is used by initialize to indicate
 	// that the source for special case package sources (filtered or re-exported should be stored 
 	// in the cache.  if this flag is set then a normal SinglePackageSource will not be created
 	// (i.e. it will be created lazily)
-	public PackageSource createPackageSource(ExportPackageDescription export, boolean storeSource) {
+	PackageSource createPackageSource(ExportPackageDescription export, boolean storeSource) {
 		PackageSource pkgSource = null;
 		// check to see if it is a reexport
 		if (!export.isRoot()) {
@@ -195,10 +195,12 @@ public class BundleLoaderProxy implements RequiredBundle {
 		}
 
 		if (storeSource) {
-			// if the package source is not null then store the source only if it is not already present
-			//TODO Is it normal that the getByKey in the if is not synchronized?
+			// if the package source is not null then store the source only if it is not already present;
+			// getByKey is called outside of a synch block because we really do not
+			// care too much of duplicates getting created.  Only the first one will
+			// successfully get stored into pkgSources
 			if (pkgSource != null && pkgSources.getByKey(export.getName()) == null)
-				synchronized (pkgSources) {
+				synchronized (pkgSource) {
 					pkgSources.add(pkgSource);
 				}
 		}
@@ -225,7 +227,7 @@ public class BundleLoaderProxy implements RequiredBundle {
 			return source.getSuppliers();
 		}
 
-		public Class loadClass(String name, String pkgName) {
+		public Class loadClass(String name) {
 			try {
 				return getBundleLoader().findClass(name);
 			}
@@ -233,10 +235,10 @@ public class BundleLoaderProxy implements RequiredBundle {
 				return null;
 			}
 		}
-		public URL getResource(String name, String pkgName) {
+		public URL getResource(String name) {
 			return getBundleLoader().findResource(name);
 		}
-		public Enumeration getResources(String name, String pkgName) throws IOException {
+		public Enumeration getResources(String name) throws IOException {
 			return getBundleLoader().findResources(name);
 		}
 	}

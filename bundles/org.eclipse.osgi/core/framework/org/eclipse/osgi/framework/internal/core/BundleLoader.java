@@ -30,7 +30,7 @@ import org.osgi.framework.*;
  * @see org.eclipse.osgi.framework.internal.core.BundleLoaderProxy
  */
 public class BundleLoader implements ClassLoaderDelegate {
-	protected final static String DEFAULT_PACKAGE = "."; //$NON-NLS-1$
+	public final static String DEFAULT_PACKAGE = "."; //$NON-NLS-1$
 
 	/* the proxy */
 	BundleLoaderProxy proxy;
@@ -40,7 +40,9 @@ public class BundleLoader implements ClassLoaderDelegate {
 	BundleClassLoader classloader;
 
 	/* cache of imported packages. Key is packagename, Value is PackageSource */
-	KeyedHashSet importedPackages;
+	KeyedHashSet importedSources;
+	/* cache of required package sources. Key is packagename, value is PackageSource */
+	KeyedHashSet requiredSources;
 	/* flag that indicates this bundle has dynamic imports */
 	boolean hasDynamicImports = false;
 	/* If true, import all packages dynamically. */
@@ -49,10 +51,8 @@ public class BundleLoader implements ClassLoaderDelegate {
 	String[] dynamicImportPackageStems;
 	/* If not null, list of package names to import dynamically. */
 	String[] dynamicImportPackages;
-	/* List of package names that are provided by this BundleLoader */
-	ArrayList providedPackages;
-	/* cache of required package sources. Key is packagename, value is PackageSource */
-	KeyedHashSet requiredPackagesCache;
+	/* List of package names that are exported by this BundleLoader */
+	ArrayList exportedPackages;
 	/* List of required bundle BundleLoaderProxy objects */
 	BundleLoaderProxy[] requiredBundles;
 	/* List of indexes into the requiredBundles list of reexported bundles */
@@ -66,7 +66,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 	 * @return Dot separated package name or null if the class
 	 *         has no package name.
 	 */
-	protected static String getPackageName(String name) {
+	public final static String getPackageName(String name) {
 		if (name != null) {
 			int index = name.lastIndexOf('.'); /* find last period in class name */
 			if (index > 0)
@@ -83,7 +83,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 	 * @return Dot separated package name or null if the resource
 	 *         has no package name.
 	 */
-	protected static String getResourcePackageName(String name) {
+	public final static String getResourcePackageName(String name) {
 		if (name != null) {
 			/* check for leading slash*/
 			int begin = ((name.length() > 1) && (name.charAt(0) == '/')) ? 1 : 0;
@@ -113,10 +113,10 @@ public class BundleLoader implements ClassLoaderDelegate {
 		initialize(proxy.getBundleDescription());
 	}
 
-	protected void initialize(BundleDescription description) {
+	final void initialize(BundleDescription description) {
 		if (!(this instanceof SystemBundleLoader) && SystemBundleLoader.getSystemPackages() != null) {
 			hasDynamicImports = true;
-			importedPackages = new KeyedHashSet();
+			importedSources = new KeyedHashSet();
 		}
 
 		// init the imported packages list taking the bundle...
@@ -139,7 +139,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 			for (int i = 0; i < required.length; i++) {
 				requiredBundles[i] = getLoaderProxy(required[i]);
 				if (reExportSet.contains(required[i].getSymbolicName()))
-					reexported[reexportIndex++] = i;							
+					reexported[reexportIndex++] = i;
 			}
 			if (reexportIndex > 0) {
 				reexportTable = new int[reexportIndex];
@@ -150,20 +150,20 @@ public class BundleLoader implements ClassLoaderDelegate {
 		// init the provided packages set
 		ExportPackageDescription[] exports = description.getSelectedExports();
 		if (exports != null && exports.length > 0) {
-			providedPackages = new ArrayList(exports.length);
+			exportedPackages = new ArrayList(exports.length);
 			for (int i = 0; i < exports.length; i++) {
 				// must force filtered and reexport sources to be created early
 				// to prevent lazy normal package source creation.
 				proxy.createPackageSource(exports[i], true);
-				if (!providedPackages.contains(exports[i].getName()))
-					providedPackages.add(exports[i].getName());
+				if (!exportedPackages.contains(exports[i].getName()))
+					exportedPackages.add(exports[i].getName());
 			}
 		}
 		//This is the fastest way to access to the description for fragments since the hostdescription.getFragments() is slow
 		org.osgi.framework.Bundle[] fragmentObjects = bundle.getFragments();
 		BundleDescription[] fragments = new BundleDescription[fragmentObjects == null ? 0 : fragmentObjects.length];
 		for (int i = 0; i < fragments.length; i++)
-			fragments[i] = ((AbstractBundle) fragmentObjects[i]).getBundleDescription();			
+			fragments[i] = ((AbstractBundle) fragmentObjects[i]).getBundleDescription();
 		// init the dynamic imports tables
 		if (description.hasDynamicImports())
 			addDynamicImportPackage(description.getImportPackages());
@@ -175,18 +175,18 @@ public class BundleLoader implements ClassLoaderDelegate {
 
 	private void addImportedPackages(ExportPackageDescription[] packages) {
 		if (packages != null && packages.length > 0) {
-			if (importedPackages == null)
-				importedPackages = new KeyedHashSet();
+			if (importedSources == null)
+				importedSources = new KeyedHashSet(packages.length, false);
 			for (int i = 0; i < packages.length; i++) {
 				PackageSource source = createExportPackageSource(packages[i]);
 				if (source == null)
 					return;
-				importedPackages.add(source);
+				importedSources.add(source);
 			}
 		}
 	}
 
-	protected PackageSource createExportPackageSource(ExportPackageDescription export) {
+	final PackageSource createExportPackageSource(ExportPackageDescription export) {
 		BundleLoaderProxy exportProxy = getLoaderProxy(export.getExporter());
 		if (exportProxy == null)
 			// TODO log error!!
@@ -210,7 +210,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 	/*
 	 * get the loader proxy for a bundle description
 	 */
-	BundleLoaderProxy getLoaderProxy(BundleDescription source) {
+	final BundleLoaderProxy getLoaderProxy(BundleDescription source) {
 		BundleLoaderProxy sourceProxy = (BundleLoaderProxy) source.getUserObject();
 		if (sourceProxy == null) {
 			// may need to force the proxy to be created
@@ -227,10 +227,10 @@ public class BundleLoader implements ClassLoaderDelegate {
 	 * Close the the BundleLoader.
 	 *
 	 */
-	protected void close() {
+	void close() {
 		if (bundle == null)
 			return;
-		importedPackages = null;
+		importedSources = null;
 
 		if (classloader != null)
 			classloader.close();
@@ -247,7 +247,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 	 * @return     the resulting Class
 	 * @exception  java.lang.ClassNotFoundException  if the class definition was not found.
 	 */
-	protected Class loadClass(String name) throws ClassNotFoundException {
+	final Class loadClass(String name) throws ClassNotFoundException {
 		return createClassLoader().loadClass(name);
 	}
 
@@ -260,7 +260,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 	 * @param name the name of the desired resource.
 	 * @return the resulting resource URL or null if it does not exist.
 	 */
-	protected URL getResource(String name) {
+	final URL getResource(String name) {
 		return createClassLoader().getResource(name);
 	}
 
@@ -273,11 +273,11 @@ public class BundleLoader implements ClassLoaderDelegate {
 	 * @param name the name of the desired resource.
 	 * @return the resulting resource URL or null if it does not exist.
 	 */
-	protected Enumeration getResources(String name) throws IOException {
+	final Enumeration getResources(String name) throws IOException {
 		return createClassLoader().getResources(name);
 	}
 
-	protected BundleClassLoader createClassLoader() {
+	final BundleClassLoader createClassLoader() {
 		if (classloader != null)
 			return classloader;
 		synchronized (this) {
@@ -304,7 +304,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 	 * @param name The name of the class to find.
 	 * @return The loaded Class or null if the class is not found.
 	 */
-	protected Class findLocalClass(String name) {
+	Class findLocalClass(String name) {
 		if (Debug.DEBUG && Debug.DEBUG_LOADER)
 			Debug.println("BundleLoader[" + this + "].findLocalClass(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		try {
@@ -323,27 +323,26 @@ public class BundleLoader implements ClassLoaderDelegate {
 	public Class findClass(String name) throws ClassNotFoundException {
 		if (isClosed())
 			throw new ClassNotFoundException(name);
-
-		if (Debug.DEBUG && Debug.DEBUG_LOADER) {
+		if (Debug.DEBUG && Debug.DEBUG_LOADER)
 			Debug.println("BundleLoader[" + this + "].loadBundleClass(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		String pkgName = getPackageName(name);
+		Class result = null;
+		PackageSource source = findImportedSource(pkgName);
+		if (source != null)
+			result = source.loadClass(name);
+		else {
+			source = findRequiredSource(pkgName);
+			if (source != null)
+				result = source.loadClass(name);
+			if (result == null)
+				result = findLocalClass(name);
 		}
-
-		String packageName = getPackageName(name);
-
-		Class result = findImportedClass(name, packageName);
 		if (result == null)
-			result = findRequiredClass(name, packageName);
-		if (result == null) {
-			result = findLocalClass(name);
-			if (result == null) {
-				throw new ClassNotFoundException(name);
-			}
-		}
-
+			throw new ClassNotFoundException(name);
 		return result;
 	}
 
-	boolean isClosed() {
+	final boolean isClosed() {
 		return bundle == null;
 	}
 
@@ -355,16 +354,19 @@ public class BundleLoader implements ClassLoaderDelegate {
 			return null;
 		if ((name.length() > 1) && (name.charAt(0) == '/')) /* if name has a leading slash */
 			name = name.substring(1); /* remove leading slash before search */
-
-		String packageName = getResourcePackageName(name);
-
-		URL resource = findImportedResource(name, packageName);
-		if (resource == null)
-			resource = findRequiredResource(name, packageName);
-		if (resource == null)
-			resource = findLocalResource(name);
-
-		return resource;
+		String pkgName = getResourcePackageName(name);
+		URL result = null;
+		PackageSource source = findImportedSource(pkgName);
+		if (source != null)
+			result = source.getResource(name);
+		else {
+			source = findRequiredSource(pkgName);
+			if (source != null)
+				result = source.getResource(name);
+			if (result == null)
+				result = findLocalResource(name);
+		}
+		return result;
 	}
 
 	/**
@@ -376,14 +378,18 @@ public class BundleLoader implements ClassLoaderDelegate {
 		if ((name.length() > 1) && (name.charAt(0) == '/')) /* if name has a leading slash */
 			name = name.substring(1); /* remove leading slash before search */
 
-		String packageName = getResourcePackageName(name);
-
-		Enumeration result = findImportedResources(name, packageName);
-		if (result == null)
-			result = findRequiredResources(name, packageName);
-		if (result == null)
-			result = findLocalResources(name);
-
+		String pkgName = getResourcePackageName(name);
+		Enumeration result = null;
+		PackageSource source = findImportedSource(pkgName);
+		if (source != null)
+			result = source.getResources(name);
+		else {
+			source = findRequiredSource(pkgName);
+			if (source != null)
+				result = source.getResources(name);
+			if (result == null)
+				result = findLocalResources(name);
+		}
 		return result;
 	}
 
@@ -392,14 +398,8 @@ public class BundleLoader implements ClassLoaderDelegate {
 	 * @param name The name of the resource to find.
 	 * @return The URL to the resource or null if the resource is not found.
 	 */
-	protected URL findLocalResource(final String name) {
-		if (System.getSecurityManager() == null)
-			return createClassLoader().findLocalResource(name);
-		return (URL) AccessController.doPrivileged(new PrivilegedAction() {
-			public Object run() {
-				return createClassLoader().findLocalResource(name);
-			}
-		});
+	URL findLocalResource(final String name) {
+		return createClassLoader().findLocalResource(name);
 	}
 
 	/**
@@ -409,9 +409,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 	 * @param  name the resource name
 	 * @return an Enumeration of URLs for the resources
 	 */
-	protected Enumeration findLocalResources(String name) {
-		if ((name.length() > 1) && (name.charAt(0) == '/')) /* if name has a leading slash */
-			name = name.substring(1);
+	Enumeration findLocalResources(String name) {
 		return createClassLoader().findLocalResources(name);
 	}
 
@@ -433,7 +431,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 		});
 	}
 
-	protected String findLocalLibrary(final String name) {
+	final String findLocalLibrary(final String name) {
 		String result = bundle.getBundleData().findLibrary(name);
 		if (result != null)
 			return result;
@@ -454,7 +452,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 	/*
 	 * Return the bundle we are associated with.
 	 */
-	protected AbstractBundle getBundle() {
+	final AbstractBundle getBundle() {
 		return bundle;
 	}
 
@@ -470,8 +468,8 @@ public class BundleLoader implements ClassLoaderDelegate {
 		});
 
 	}
-	
-	BundleClassLoader createBCL(final BundleProtectionDomain pd, final String[] cp) {
+
+	private BundleClassLoader createBCL(final BundleProtectionDomain pd, final String[] cp) {
 		BundleClassLoader bcl = bundle.getBundleData().createClassLoader(BundleLoader.this, pd, cp);
 		// attach existing fragments to classloader
 		org.osgi.framework.Bundle[] fragments = bundle.getFragments();
@@ -495,35 +493,9 @@ public class BundleLoader implements ClassLoaderDelegate {
 	 * Return a string representation of this loader.
 	 * @return String
 	 */
-	public String toString() {
+	public final String toString() {
 		BundleData result = bundle.getBundleData();
 		return result == null ? "BundleLoader.bundledata == null!" : result.toString(); //$NON-NLS-1$
-	}
-
-	/**
-	 * Get the BundleLoader for the package if it is imported.
-	 * @param pkgname The name of the package to import.
-	 * @return BundleLoader to load from or null if the package is not imported.
-	 */
-	protected PackageSource getImportPackageSource(String pkgname) {
-		if (pkgname == null)
-			return null;
-		PackageSource source = null;
-		if (importedPackages != null) {
-			source = (PackageSource) importedPackages.getByKey(pkgname);
-			if (source != null)
-				return source;
-		}
-
-		if (isDynamicallyImported(pkgname)) {
-			ExportPackageDescription exportPackage = bundle.framework.adaptor.getState().linkDynamicImport(proxy.getBundleDescription(), pkgname);
-			if (exportPackage != null) {
-				source = createExportPackageSource(exportPackage);
-				importedPackages.add(source);
-				return source;
-			}
-		}
-		return null;
 	}
 
 	/**
@@ -533,7 +505,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 	 * @param pkgname The name of the requested class' package.
 	 * @return true if the package should be imported.
 	 */
-	protected boolean isDynamicallyImported(String pkgname) {
+	final boolean isDynamicallyImported(String pkgname) {
 		if (this instanceof SystemBundleLoader)
 			return false; // system bundle cannot dynamically import
 		// must check for startsWith("java.") to satisfy R3 section 4.7.2
@@ -576,47 +548,13 @@ public class BundleLoader implements ClassLoaderDelegate {
 		return false;
 	}
 
-	/**
-	 * Find a class using the imported packages for this bundle.  Only the 
-	 * ImportClassLoader is used for the search. 
-	 * @param name The name of the class to find.
-	 * @return The loaded class or null if the class does not belong to a package
-	 * that is imported by the bundle.
-	 * @throws ImportClassNotFoundException If the class does belong to a package
-	 * that is imported by the bundle but the class is not found.
-	 */
-	protected Class findImportedClass(String name, String packageName) throws ImportClassNotFoundException {
-		if (Debug.DEBUG && Debug.DEBUG_LOADER)
-			Debug.println("ImportClassLoader[" + this + "].findImportedClass(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-
-		Class result = null;
-
-		try {
-			PackageSource source = getImportPackageSource(packageName);
-			if (source != null) {
-				result = source.loadClass(name, packageName);
-				if (result == null)
-					throw new ImportClassNotFoundException(name);
-			}
-		} finally {
-			if (result == null) {
-				if (Debug.DEBUG && Debug.DEBUG_LOADER)
-					Debug.println("ImportClassLoader[" + this + "] class " + name + " not found in imported package " + packageName); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			} else {
-				if (Debug.DEBUG && Debug.DEBUG_LOADER)
-					Debug.println("BundleLoader[" + this + "] found imported class " + name); //$NON-NLS-1$ //$NON-NLS-2$
-			}
-		}
-		return result;
-	}
-
-	protected void addExportedProvidersFor(String packageName, ArrayList result, KeyedHashSet visited) {
+	final void addExportedProvidersFor(String packageName, ArrayList result, KeyedHashSet visited) {
 		if (!visited.add(bundle))
 			return;
 
 		// See if we locally provide the package.
 		PackageSource local = null;
-		if (isProvidedPackage(packageName))
+		if (isExportedPackage(packageName))
 			local = proxy.getPackageSource(packageName);
 		// Must search required bundles that are exported first.
 		if (requiredBundles != null) {
@@ -640,157 +578,8 @@ public class BundleLoader implements ClassLoaderDelegate {
 			result.add(local);
 	}
 
-	/**
-	 * Gets the PackageSource for the package name specified.  Only
-	 * the required bundles are searched.
-	 * @param packageName The name of the package to find the PackageSource for.
-	 * @return The loaded class or null if the class is not found.
-	 */
-	protected PackageSource getProvidersFor(String packageName) {
-		// first look in the required packages cache
-		if (requiredPackagesCache != null) {
-			PackageSource result = (PackageSource) requiredPackagesCache.getByKey(packageName);
-
-			if (result != null) {
-				if (result.isNullSource()) {
-					return null;
-				}
-				return result;
-			}
-		}
-
-		// didn't find it in the cache search the actual required bundles
-		if (requiredBundles == null)
-			return null;
-		KeyedHashSet visited = new KeyedHashSet(false);
-		ArrayList result = new ArrayList(3);
-		for (int i = 0; i < requiredBundles.length; i++) {
-			BundleLoader requiredLoader = requiredBundles[i].getBundleLoader();
-			requiredLoader.addExportedProvidersFor(packageName, result, visited);
-		}
-
-		// found some so cache the result for next time and return
-		if (requiredPackagesCache == null)
-			requiredPackagesCache = new KeyedHashSet();
-		if (result.size() == 0) {
-			// did not find it in our required bundles lets record the failure
-			// so we do not have to do the search again for this package.
-			requiredPackagesCache.add(new NullPackageSource(packageName));
-			return null;
-		} else if (result.size() == 1) {
-			// if there is just one source, remember just the single source 
-			PackageSource source = (PackageSource) result.get(0);
-			requiredPackagesCache.add(source);
-			return source;
-		} else {
-			// if there was more than one source, build a multisource and cache that.
-			PackageSource[] sources = (PackageSource[]) result.toArray(new PackageSource[result.size()]);
-			PackageSource source = createMultiSource(packageName, sources);
-			requiredPackagesCache.add(source);
-			return source;
-		}
-	}
-
-	/**
-	 * Find a class using the required bundles for this bundle.  Only the
-	 * required bundles are used to search for the class.
-	 * @param name The name of the class to find.
-	 * @return The loaded class or null if the class is not found.
-	 */
-	protected Class findRequiredClass(String name, String packageName) {
-		if (Debug.DEBUG && Debug.DEBUG_LOADER)
-			Debug.println("ImportClassLoader[" + this + "].findRequiredClass(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		PackageSource source = getProvidersFor(packageName);
-		if (source == null)
-			return null;
-		return source.loadClass(name, packageName);
-	}
-
-	protected boolean isProvidedPackage(String name) {
-		return providedPackages == null ? false : providedPackages.contains(name);
-	}
-
-	/**
-	 * Find a resource using the imported packages for this bundle.  Only the 
-	 * ImportClassLoader is used for the search. 
-	 * @param name The name of the resource to find.
-	 * @return The URL of the resource or null if the resource does not belong to a package
-	 * that is imported by the bundle.
-	 * @throws ImportResourceNotFoundException If the resource does belong to a package
-	 * that is imported by the bundle but the resource is not found.
-	 */
-	protected URL findImportedResource(String name, String packageName) {
-		if (Debug.DEBUG && Debug.DEBUG_LOADER)
-			Debug.println("ImportClassLoader[" + this + "].findImportedResource(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-
-		PackageSource source = getImportPackageSource(packageName);
-		if (source != null) {
-			URL url = source.getResource(name, packageName);
-			if (url != null)
-				return url;
-			if (Debug.DEBUG && Debug.DEBUG_LOADER)
-				Debug.println("ImportClassLoader[" + this + "] resource " + name + " not found in imported package " + packageName); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			throw new ImportResourceNotFoundException(name);
-		}
-		return null;
-	}
-
-	/**
-	 * Find a resource using the required bundles for this bundle.  Only the
-	 * required bundles are used to search.
-	 * @param name The name of the resource to find.
-	 * @return The URL for the resource or null if the resource is not found.
-	 */
-	protected URL findRequiredResource(String name, String packageName) {
-		if (Debug.DEBUG && Debug.DEBUG_LOADER)
-			Debug.println("ImportClassLoader[" + this + "].findRequiredResource(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		PackageSource source = getProvidersFor(packageName);
-		if (source == null)
-			return null;
-		return source.getResource(name, packageName);
-	}
-
-	/**
-	 * Returns an Enumeration of URLs representing all the resources with
-	 * the given name.
-	 *
-	 * If the resource is in a package that is imported, call the exporting
-	 * bundle. Otherwise return null.
-	 *
-	 * @param  name the resource name
-	 * @return an Enumeration of URLs for the resources if the package is
-	 * imported, null otherwise.
-	 */
-	protected Enumeration findImportedResources(String name, String packageName) throws IOException{
-		if (Debug.DEBUG && Debug.DEBUG_LOADER)
-			Debug.println("ImportClassLoader[" + this + "].findImportedResources(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-
-		PackageSource source = getImportPackageSource(packageName);
-		if (source != null)
-			return source.getResources(name, packageName);
-		return null;
-	}
-
-	/**
-	 * Returns an Enumeration of URLs representing all the resources with
-	 * the given name.
-	 * Find the resources using the required bundles for this bundle.  Only the
-	 * required bundles are used to search.
-	 *
-	 * If the resource is in a package that is imported, call the exporting
-	 * bundle. Otherwise return null.
-	 *
-	 * @param  name the resource name
-	 * @return an Enumeration of URLs for the resources if the package is
-	 * imported, null otherwise.
-	 */
-	protected Enumeration findRequiredResources(String name, String packageName) throws IOException {
-		if (Debug.DEBUG && Debug.DEBUG_LOADER)
-			Debug.println("ImportClassLoader[" + this + "].findRequiredResources(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		PackageSource source = getProvidersFor(packageName);
-		if (source == null)
-			return null;
-		return source.getResources(name, packageName);
+	final boolean isExportedPackage(String name) {
+		return exportedPackages == null ? false : exportedPackages.contains(name);
 	}
 
 	private void addDynamicImportPackage(ImportPackageSpecification[] packages) {
@@ -817,8 +606,8 @@ public class BundleLoader implements ClassLoaderDelegate {
 
 		hasDynamicImports = true;
 		// make sure importedPackages is not null;
-		if (importedPackages == null) {
-			importedPackages = new KeyedHashSet();
+		if (importedSources == null) {
+			importedSources = new KeyedHashSet(10, false);
 		}
 
 		if (packages == null)
@@ -849,7 +638,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 			String name = packages[i];
 			if (isDynamicallyImported(name))
 				continue;
-			if (name.equals("*")) { /* shortcut */ //$NON-NLS-1$
+			if (name.equals("*")) { /* shortcut *///$NON-NLS-1$
 				dynamicImportPackageAll = true;
 				return;
 			}
@@ -876,7 +665,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 	 * synchronization when calling this method.
 	 * @param packages the DynamicImport-Package elements to add.
 	 */
-	public void addDynamicImportPackage(ManifestElement[] packages) {
+	public final void addDynamicImportPackage(ManifestElement[] packages) {
 		if (packages == null)
 			return;
 		ArrayList dynamicImports = new ArrayList(packages.length);
@@ -886,17 +675,17 @@ public class BundleLoader implements ClassLoaderDelegate {
 			addDynamicImportPackage((String[]) dynamicImports.toArray(new String[dynamicImports.size()]));
 	}
 
-	protected void clear() {
-		providedPackages = null;
+	final void clear() {
+		exportedPackages = null;
 		requiredBundles = null;
-		requiredPackagesCache = null;
+		requiredSources = null;
 		reexportTable = null;
-		importedPackages = null;
+		importedSources = null;
 		dynamicImportPackages = null;
 		dynamicImportPackageStems = null;
 	}
 
-	protected void attachFragment(BundleFragment fragment) throws BundleException {
+	final void attachFragment(BundleFragment fragment) throws BundleException {
 		if (classloader == null)
 			return;
 		String[] classpath = fragment.getBundleData().getClassPath();
@@ -904,19 +693,85 @@ public class BundleLoader implements ClassLoaderDelegate {
 			classloader.attachFragment(fragment.getBundleData(), fragment.domain, classpath);
 	}
 
-	PackageSource getPackageSource(String pkgname) {
-		PackageSource result = getImportPackageSource(pkgname);
-		if (result != null) {
+	private PackageSource findSource(String pkgName) {
+		if (pkgName == null)
+			return null;
+		PackageSource result = findImportedSource(pkgName);
+		if (result != null)
 			return result;
+		return findRequiredSource(pkgName);
+	}
+
+	private PackageSource findImportedSource(String pkgName) {
+		PackageSource source = null;
+		if (importedSources != null) {
+			source = (PackageSource) importedSources.getByKey(pkgName);
+			if (source != null)
+				return source;
 		}
-		PackageSource requireSource = getProvidersFor(pkgname);
-		PackageSource localSource = isProvidedPackage(pkgname) ? proxy.getPackageSource(pkgname) : null;
+		if (isDynamicallyImported(pkgName)) {
+			ExportPackageDescription exportPackage = bundle.framework.adaptor.getState().linkDynamicImport(proxy.getBundleDescription(), pkgName);
+			if (exportPackage != null) {
+				source = createExportPackageSource(exportPackage);
+				importedSources.add(source);
+				return source;
+			}
+		}
+		return null;
+	}
+
+	private PackageSource findRequiredSource(String pkgName) {
+		if (requiredBundles == null)
+			return null;
+		if (requiredSources != null) {
+			PackageSource result = (PackageSource) requiredSources.getByKey(pkgName);
+			if (result != null)
+				return result.isNullSource() ? null : result;
+		}
+		KeyedHashSet visited = new KeyedHashSet(false);
+		ArrayList result = new ArrayList(3);
+		for (int i = 0; i < requiredBundles.length; i++) {
+			BundleLoader requiredLoader = requiredBundles[i].getBundleLoader();
+			requiredLoader.addExportedProvidersFor(pkgName, result, visited);
+		}
+		if (requiredSources == null)
+			requiredSources = new KeyedHashSet(10, false);
+		// found some so cache the result for next time and return
+		if (result.size() == 0) {
+			// did not find it in our required bundles lets record the failure
+			// so we do not have to do the search again for this package.
+			requiredSources.add(NullPackageSource.getNullPackageSource(pkgName));
+			return null;
+		} else if (result.size() == 1) {
+			// if there is just one source, remember just the single source 
+			PackageSource source = (PackageSource) result.get(0);
+			requiredSources.add(source);
+			return source;
+		} else {
+			// if there was more than one source, build a multisource and cache that.
+			PackageSource[] srcs = (PackageSource[]) result.toArray(new PackageSource[result.size()]);
+			PackageSource source = createMultiSource(pkgName, srcs);
+			requiredSources.add(source);
+			return source;
+		}
+	}
+
+	/*
+	 * Gets the package source for the pkgName.  This will return the local package source
+	 * of the bundle exports the package.
+	 */
+	final PackageSource getPackageSource(String pkgName) {
+		PackageSource result = findSource(pkgName);
+		if (!isExportedPackage(pkgName))
+			return result;
+		// if the package is exported then we need to get the local source
+		PackageSource localSource = proxy.getPackageSource(pkgName);
 		if (localSource instanceof BundleLoaderProxy.ReexportPackageSource)
-			localSource = new SingleSourcePackage(pkgname, proxy);
-		if (requireSource == null)
+			localSource = new SingleSourcePackage(pkgName, proxy);
+		if (result == null)
 			return localSource;
 		if (localSource == null)
-			return requireSource;
-		return createMultiSource(pkgname, new PackageSource[] {requireSource, localSource});
+			return result;
+		return createMultiSource(pkgName, new PackageSource[] {result, localSource});
 	}
 }

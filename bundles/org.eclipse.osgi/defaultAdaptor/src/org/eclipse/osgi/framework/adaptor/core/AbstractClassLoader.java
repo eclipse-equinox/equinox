@@ -140,23 +140,19 @@ public abstract class AbstractClassLoader extends ClassLoader implements BundleC
 			Debug.println("BundleClassLoader[" + delegate + "].getResource(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 
-		try {
-			URL url = null;
-			if (name.startsWith(JAVA_RESOURCE)) {
-				// First check the parent classloader for system resources, if it is a java resource.
-				ClassLoader parent = getParentPrivileged();
-				if (parent != null)
-					// we never delegate java resource requests past the parent
-					return parent.getResource(name);
-			}
-			if (url != null)
-				return (url);
-			url = delegate.findResource(name);
-			if (url != null)
-				return (url);
-		} catch (ImportResourceNotFoundException e) {
-			// do nothing; null is returned
+		URL url = null;
+		if (name.startsWith(JAVA_RESOURCE)) {
+			// First check the parent classloader for system resources, if it is a java resource.
+			ClassLoader parent = getParentPrivileged();
+			if (parent != null)
+				// we never delegate java resource requests past the parent
+				return parent.getResource(name);
 		}
+		if (url != null)
+			return (url);
+		url = delegate.findResource(name);
+		if (url != null)
+			return (url);
 
 		if (Debug.DEBUG && Debug.DEBUG_LOADER) {
 			Debug.println("BundleClassLoader[" + delegate + "].getResource(" + name + ") failed."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$

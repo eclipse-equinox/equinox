@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.osgi.framework.internal.core;
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.Enumeration;
 
@@ -30,15 +29,15 @@ public class SingleSourcePackage extends PackageSource {
 		return id + " -> " + supplier; //$NON-NLS-1$
 	}
 
-	public Class loadClass(String name, String pkgName) {
+	public Class loadClass(String name) {
 		return supplier.getBundleLoader().findLocalClass(name);
 	}
 
-	public URL getResource(String name, String pkgName) {
+	public URL getResource(String name) {
 		return supplier.getBundleLoader().findLocalResource(name);
 	}
 
-	public Enumeration getResources(String name, String pkgName) throws IOException {
+	public Enumeration getResources(String name) {
 		return supplier.getBundleLoader().findLocalResources(name);
 	}
 }

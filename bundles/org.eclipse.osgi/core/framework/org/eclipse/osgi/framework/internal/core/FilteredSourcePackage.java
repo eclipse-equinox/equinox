@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.osgi.framework.internal.core;
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.Enumeration;
 import org.eclipse.osgi.util.ManifestElement;
@@ -28,20 +27,20 @@ public class FilteredSourcePackage extends SingleSourcePackage {
 			this.excludes = ManifestElement.getArrayFromList(excludes);
 	}
 
-	public URL getResource(String name, String pkgName) {
-		if (isFiltered(name, pkgName))
+	public URL getResource(String name) {
+		if (isFiltered(name, getId()))
 			return null;
-		return super.getResource(name, pkgName);
+		return super.getResource(name);
 	}
-	public Enumeration getResources(String name, String pkgName) throws IOException {
-		if (isFiltered(name, pkgName))
+	public Enumeration getResources(String name) {
+		if (isFiltered(name, getId()))
 			return null;
-		return super.getResources(name, pkgName);
+		return super.getResources(name);
 	}
-	public Class loadClass(String name, String pkgName) {
-		if (isFiltered(name, pkgName))
+	public Class loadClass(String name) {
+		if (isFiltered(name, getId()))
 			return null;
-		return super.loadClass(name, pkgName);
+		return super.loadClass(name);
 	}
 
 	private boolean isFiltered(String name, String pkgName) {
