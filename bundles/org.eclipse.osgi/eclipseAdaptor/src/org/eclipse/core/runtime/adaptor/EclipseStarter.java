@@ -41,6 +41,7 @@ public class EclipseStarter {
 	// metadata alongside Eclipse's.
 	private static final String DATA = "-data"; //$NON-NLS-1$
 
+	public static final String INSTALL_LOCATION = "osgi.installLocation";
 	
 	// Constants for configuration location discovery
 	private static final String ECLIPSE = "eclipse"; //$NON-NLS-1$
@@ -512,7 +513,7 @@ public class EclipseStarter {
 		//    defined in .eclipseproduct marker file. If .eclipseproduct does not
 		//    exist, use "eclipse" as the application-id.
 		
-		String installProperty = System.getProperty("eclipse.installURL");
+		String installProperty = System.getProperty(INSTALL_LOCATION);
 		URL installURL = null;
 		try {
 			installURL = new URL(installProperty);
