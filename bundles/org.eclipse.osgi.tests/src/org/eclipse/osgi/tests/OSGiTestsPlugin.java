@@ -14,6 +14,8 @@ import org.eclipse.core.runtime.Plugin;
 import org.osgi.framework.BundleContext;
 
 public class OSGiTestsPlugin extends Plugin {
+	public static final String TEST_FILES_ROOT = "test_files/";	
+	
 	private static OSGiTestsPlugin plugin;
 	private BundleContext context;
 
