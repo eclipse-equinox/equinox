@@ -408,7 +408,7 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 	public File getGenerationDir() {
 		if (!dirGeneration.exists() && !dirGeneration.mkdirs()) {
 			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-				Debug.println("Unable to create bundle jar directory: " + dirGeneration.getPath());
+				Debug.println("Unable to create bundle generation directory: " + dirGeneration.getPath());
 			}
 		}
 
@@ -433,6 +433,11 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 	 * @return Top level bundle directory.
 	 */
 	public File getBundleStoreDir() {
+		if (!bundleStoreDir.exists() && !bundleStoreDir.mkdirs()) {
+			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+				Debug.println("Unable to create bundle store directory: " + dirGeneration.getPath());
+			}
+		}
 		return (bundleStoreDir);
 	}
 
