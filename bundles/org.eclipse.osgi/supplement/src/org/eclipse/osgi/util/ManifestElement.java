@@ -17,7 +17,6 @@ import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.internal.core.Msg;
 import org.eclipse.osgi.framework.util.Tokenizer;
 import org.osgi.framework.BundleException;
-import org.osgi.framework.Constants;
 
 /**
  * This class represents a single manifest element.  A manifest element must consist of a single
