@@ -364,7 +364,9 @@ public class FileManager {
 				if (tmpLocker.lock()) {
 					//If I can lock it is a file that has been left behind by a crash
 					new File(managerRoot, files[i]).delete();
+					tmpLocker.release();
 				} else {
+					tmpLocker.release();
 					return;	//The file is still being locked by somebody else
 				}
 			}
