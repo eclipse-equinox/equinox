@@ -59,9 +59,8 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		bundle.setProvidedPackages(newProvidedPackages);		
 		return bundle;			
 	}
-	public BundleSpecification createBundleSpecification(BundleDescription bundle, String requiredGlobalName, Version requiredVersion, byte matchingRule, boolean export, boolean optional) {
+	public BundleSpecification createBundleSpecification(String requiredGlobalName, Version requiredVersion, byte matchingRule, boolean export, boolean optional) {
 		BundleSpecificationImpl bundleSpec = new BundleSpecificationImpl();		
-		bundleSpec.setBundle(bundle);
 		bundleSpec.setName(requiredGlobalName);
 		bundleSpec.setVersionSpecification(requiredVersion);
 		bundleSpec.setMatchingRule(matchingRule);
@@ -78,9 +77,8 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		bundleSpec.setOptional(original.isOptional());
 		return bundleSpec;		
 	}
-	public HostSpecification createHostSpecification(BundleDescription bundle, String hostGlobalName, Version hostVersion, byte matchingRule, boolean reloadHost) {
+	public HostSpecification createHostSpecification(String hostGlobalName, Version hostVersion, byte matchingRule, boolean reloadHost) {
 		HostSpecificationImpl hostSpec = new HostSpecificationImpl();		
-		hostSpec.setBundle(bundle);
 		hostSpec.setName(hostGlobalName);
 		hostSpec.setVersionSpecification(hostVersion);
 		hostSpec.setMatchingRule(matchingRule);
@@ -95,9 +93,8 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		hostSpec.setReloadHost(original.reloadHost());
 		return hostSpec;
 	}
-	public PackageSpecification createPackageSpecification(BundleDescription bundle, String packageName, Version packageVersion, boolean exported) {
+	public PackageSpecification createPackageSpecification(String packageName, Version packageVersion, boolean exported) {
 		PackageSpecificationImpl packageSpec = new PackageSpecificationImpl();		
-		packageSpec.setBundle(bundle);
 		packageSpec.setName(packageName);
 		packageSpec.setVersionSpecification(packageVersion);
 		packageSpec.setExport(exported);

@@ -31,11 +31,11 @@ public interface StateObjectFactory {
 	 */	
 	public BundleDescription createBundleDescription(Dictionary manifest, String location, long id) throws BundleException;
 	public BundleDescription createBundleDescription(BundleDescription original);
-	public BundleSpecification createBundleSpecification(BundleDescription parentBundle, String hostGlobalName, Version hostVersion, byte matchRule, boolean export, boolean optional);
+	public BundleSpecification createBundleSpecification(String hostGlobalName, Version hostVersion, byte matchRule, boolean export, boolean optional);
 	public BundleSpecification createBundleSpecification(BundleSpecification original);	
-	public HostSpecification createHostSpecification(BundleDescription parentBundle, String hostGlobalName, Version hostVersion, byte matchRule, boolean reloadHost);
+	public HostSpecification createHostSpecification(String hostGlobalName, Version hostVersion, byte matchRule, boolean reloadHost);
 	public HostSpecification createHostSpecification(HostSpecification original);	
-	public PackageSpecification createPackageSpecification(BundleDescription parentBundle, String packageName, Version packageVersion, boolean exported);
+	public PackageSpecification createPackageSpecification(String packageName, Version packageVersion, boolean exported);
 	public PackageSpecification createPackageSpecification(PackageSpecification original);
 	/**
 	 * Persists the given state in the given output stream. Closes the stream.
