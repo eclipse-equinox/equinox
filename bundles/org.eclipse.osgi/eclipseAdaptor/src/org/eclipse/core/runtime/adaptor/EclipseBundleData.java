@@ -208,7 +208,14 @@ public class EclipseBundleData extends DefaultBundleData {
 	public synchronized Dictionary getManifest(boolean first) throws BundleException {
 		if (manifest == null)
 			manifest = first ? loadManifest() : new CachedManifest(this);
+		if (manifest.get(org.osgi.framework.Constants.BUNDLE_GLOBALNAME) == null) {
+			Dictionary generatedManifest = generateManifest();
+			if (generatedManifest != null)
+				manifest = generatedManifest;
+		}
+		
 		return manifest;
+		
 	}
 
 	public synchronized Dictionary loadManifest() throws BundleException {		
@@ -216,8 +223,7 @@ public class EclipseBundleData extends DefaultBundleData {
 		if (url != null)
 			return loadManifestFrom(url);
 		Dictionary result = generateManifest();		
-		if (result == null)
-			//TODO: need to NLS this
+		if (result == null)	//TODO: need to NLS this
 			throw new BundleException("Manifest not found: " + getLocation());
 		return result;
 	}

@@ -52,14 +52,17 @@ public class CachedManifest extends Dictionary {
 	}
 
 	public Object get(Object key) {
-		if (Constants.BUNDLE_VERSION.equalsIgnoreCase((String)key)) {
+		String keyString = (String) key; 
+		if (Constants.BUNDLE_VERSION.equalsIgnoreCase(keyString)) {
 			Version result = bundledata.getVersion();
 			return result == null ? null : result.toString();
 		}
-		if ("plugin-class".equalsIgnoreCase((String)key))
+		if ("plugin-class".equalsIgnoreCase(keyString))
 			return bundledata.getPluginClass();
-		if ("legacy".equalsIgnoreCase((String)key))
+		if ("legacy".equalsIgnoreCase(keyString))
 			return bundledata.isLegacy();
+		if (Constants.BUNDLE_GLOBALNAME.equalsIgnoreCase(keyString))
+			return bundledata.getUniqueId();
 		return getManifest().get(key);
 	}
 
