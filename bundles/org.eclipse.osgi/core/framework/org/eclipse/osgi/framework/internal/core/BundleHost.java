@@ -109,6 +109,9 @@ public class BundleHost extends AbstractBundle {
 		}
 		this.bundledata = newBundle.bundledata;
 		this.bundledata.setBundle(this);
+		// create a new domain for the bundle because its signers/symbolic-name may have changed
+		if (framework.isActive() && System.getSecurityManager() != null)
+			domain = framework.permissionAdmin.createProtectionDomain(this);
 		return (exporting);
 	}
 
