@@ -645,6 +645,15 @@ public class PackageAdminImpl implements PackageAdmin {
 						}
 					}
 				}
+				// add in any singleton bundles if needed
+				AbstractBundle[] sameNames = framework.bundles.getBundles(bundle.getSymbolicName());
+				if (sameNames != null && sameNames.length > 1) {
+					for (int j = 0; j < sameNames.length; j++)
+						if (sameNames[j] != bundle && sameNames[j].isSingleton() && !graph.contains(sameNames[j])) {
+							graph.addElement(sameNames[j]);
+							changed = true;
+						}
+				}
 			}
 
 			// look for the bundles in removalPending list
@@ -863,7 +872,7 @@ public class PackageAdminImpl implements PackageAdmin {
 
 		if (versionRange == null) {
 			AbstractBundle[] result = new AbstractBundle[bundles.length];
-			System.arraycopy(bundles,0,result,0,result.length);
+			System.arraycopy(bundles, 0, result, 0, result.length);
 			return result;
 		}
 

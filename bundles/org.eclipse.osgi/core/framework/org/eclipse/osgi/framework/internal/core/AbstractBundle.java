@@ -1268,6 +1268,10 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 		return domain;
 	}
 
+	protected boolean isSingleton() {
+		return singleton;
+	}
+
 	/**
 	 * The bundle must unresolve the permissions in these packages.
 	 * 
