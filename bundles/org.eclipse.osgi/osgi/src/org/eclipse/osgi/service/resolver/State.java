@@ -9,22 +9,27 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.osgi.service.resolver;
-
 /**
  * The state of a system as reported by a resolver. This includes all bundles
  * presented to the resolver relative to this state (i.e., both resolved and
  * unresolved).
  */
 public interface State {
-
 	/**
 	 * Adds the given bundle to this state.
 	 * 
 	 * @param description the description to add
 	 * @return a boolean indicating whether the bundle was successfully added
 	 */
-	public boolean  addBundle(BundleDescription description);
-
+	public boolean addBundle(BundleDescription description);
+	/** 
+	 * Updates an existing bundle definition with the given bundle description.
+	 * 
+	 * @param newDescription a new description for an existing bundle
+	 * @return <code>true</code> if the the update occurred successfully, 
+	 * <code>false</code> otherwise 
+	 */
+	public boolean updateBundle(BundleDescription newDescription);
 	/**
 	 * Returns a delta describing the differences between this state and the
 	 * given state. This state is taken as the base so the absence of a bundle
@@ -34,7 +39,6 @@ public interface State {
 	 * @return
 	 */
 	public StateChangeEvent compare(State state);
-
 	/**
 	 * Removes a bundle description with the given bundle id.
 	 * 
@@ -49,9 +53,8 @@ public interface State {
 	 * @param bundle the bundle description to be removed
 	 * @return <code>true</code>, if if the bundle description was removed, 
 	 * 	<code>false</code> otherwise 	
-	 */	
+	 */
 	public boolean removeBundle(BundleDescription bundle);
-
 	/**
 	 * Returns the delta representing the changes from the time this state was
 	 * first captured until now.
@@ -59,14 +62,12 @@ public interface State {
 	 * @return
 	 */
 	public StateDelta getChanges();
-
 	/**
 	 * Returns descriptions for all bundles known to this state.
 	 * 
 	 * @return the descriptions for all bundles known to this state.
 	 */
 	public BundleDescription[] getBundles();
-
 	/**
 	 * Returns descriptor for all bundles known to this state.
 	 * 
@@ -74,7 +75,6 @@ public interface State {
 	 * @see BundleDescription#getBundleId()
 	 */
 	public BundleDescription getBundle(long id);
-
 	/**
 	 * Returns the bundle descriptor for the bundle with the given name and
 	 * version. null is returned if no such bundle is found in this state. If
@@ -86,7 +86,6 @@ public interface State {
 	 * @return the descriptor for the identified bundle
 	 */
 	public BundleDescription getBundle(String uniqueId, Version version);
-
 	/**
 	 * Returns the id of the state on which this state is based. This
 	 * correlates this state to the system state. For example, if
@@ -97,7 +96,6 @@ public interface State {
 	 * @return the id of the state on which this state is based
 	 */
 	public long getTimeStamp();
-
 	/**
 	 * Returns true if there have been no modifications to this state since the
 	 * last time resolve() was called.
@@ -105,7 +103,6 @@ public interface State {
 	 * @return whether or not this state has changed since last resolved.
 	 */
 	public boolean isResolved();
-
 	/**
 	 * Resolves the given version constraint with the given values. The given
 	 * constraint object is destructively modified to reflect its new resolved
@@ -126,7 +123,6 @@ public interface State {
 	 * <code>resolve</code>
 	 */
 	public void resolveConstraint(VersionConstraint constraint, Version actualVersion, BundleDescription supplier);
-
 	/**
 	 * Sets whether or not the given bundle is selected in this state..
 	 * <p>
@@ -138,7 +134,6 @@ public interface State {
 	 * @param status whether or not the given bundle is selected
 	 */
 	public void resolveBundle(BundleDescription bundle, int status);
-
 	/**
 	 * Returns the resolver associated with this state. A state can work with
 	 * at most one resolver at any given time. Similarly, a resolver can work
@@ -148,7 +143,6 @@ public interface State {
 	 * not have a resolver
 	 */
 	public Resolver getResolver();
-
 	/**
 	 * Sets the resolver associated with this state. A state can work with at
 	 * most one resolver at any given time. Similarly, a resolver can work with
@@ -165,7 +159,6 @@ public interface State {
 	 * </p>
 	 */
 	public void setResolver(Resolver value);
-
 	/**
 	 * Resolves the constraints contained in this state using the resolver
 	 * currently associated with the state and returns a delta describing the
@@ -191,12 +184,10 @@ public interface State {
 	 * interconnections
 	 */
 	public StateDelta resolve(boolean incremental);
-
 	/**
 	 * Same as State.resolve(true);
 	 */
 	public StateDelta resolve();
-
 	/**
 	 * Resolves the constraints contained in this state using the resolver
 	 * currently associated with the state in a incremental, "least-perturbing" 
@@ -209,7 +200,6 @@ public interface State {
 	 * 	interconnections
 	 */
 	public StateDelta resolve(BundleDescription[] discard);
-
 	/**
 	 * Sets the version overrides which are to be applied during the resolutoin
 	 * of this state. Version overrides allow external forces to
@@ -248,25 +238,21 @@ public interface State {
 	 * @param listener the listener
 	 */
 	public void removeStateChangeListener(StateChangeListener listener);
-
 	/**
 	 * Returns whether this state is empty.
 	 * @return <code>true</code> if this state is empty, <code>false</code> 
 	 * 	otherwise
 	 */
 	public boolean isEmpty();
-
 	/**
 	 * Returns all exported packages in this state, according to the OSGi rules for resolution. 
 	 * @see org.osgi.service.packageadmin.PackageAdmin#getExportedPackages(Bundle)
 	 */
 	public PackageSpecification[] getExportedPackages();
-
 	/**
 	 * Returns all bundle descriptions with the given bundle global name.  
 	 */
 	public BundleDescription[] getBundles(String globalName);
-	
 	/**
 	 * Returns the factory that created this state.
 	 * @return the state object factory that created this state 

@@ -148,4 +148,8 @@ public class ResolverHelper {
 		if (element != null)
 			system.unresolve(new IElement[]{element});
 	}
+	public static void update(BundleDescription newDescription, BundleDescription existing, IDependencySystem system) {
+		system.removeElement(getUniqueId(existing), getVersion(existing));
+		system.addElement(createElement(newDescription, system));
+	}
 }

@@ -39,24 +39,22 @@ public class StateDeltaImpl implements StateDelta {
 	void recordBundleAdded(BundleDescriptionImpl added) {
 		Object key = added.getKey();
 		BundleDeltaImpl change = (BundleDeltaImpl) changes.get(key);
-		if (change != null) {
-			if ((change.getType() & BundleDelta.REMOVED) != 0)
-				change.setType(BundleDelta.UPDATED | (change.getType() & ~BundleDelta.REMOVED));
-			else 
-				throw new IllegalStateException();
-		} else
-			changes.put(key, new BundleDeltaImpl(added, BundleDelta.ADDED));
-		
+		// addition after removal/update/addition is illegal
+		if (change != null)
+			throw new IllegalStateException();
+		changes.put(key, new BundleDeltaImpl(added, BundleDelta.ADDED));		
 	}
 	void recordBundleRemoved(BundleDescriptionImpl removed) {
 		Object key = removed.getKey();
 		BundleDeltaImpl change = (BundleDeltaImpl) changes.get(key);
 		if (change != null) {
 			if ((change.getType() & BundleDelta.ADDED) != 0) {
+				// removal after addition == no-op
 				changes.remove(key);
 				return;
 			}
-			change.setType(change.getType() | BundleDelta.REMOVED);
+			// removal after update is regular removal
+			change.setType(BundleDelta.REMOVED);
 		} else
 			changes.put(key, new BundleDeltaImpl(removed, BundleDelta.REMOVED));
 	}
@@ -85,5 +83,13 @@ public class StateDeltaImpl implements StateDelta {
 		// new type will have only one of RESOLVED|UNRESOLVED bits set
 		newType = newType | (currentType & ~(BundleDelta.RESOLVED | BundleDelta.UNRESOLVED));
 		change.setType(newType);				
+	}
+	public void recordBundleUpdated(BundleDescriptionImpl updated) {
+		Object key = updated.getKey();
+		BundleDeltaImpl change = (BundleDeltaImpl) changes.get(key);
+		// update after removal/update/addition is illegal
+		if (change != null)
+			throw new IllegalStateException();
+		changes.put(key, new BundleDeltaImpl(updated, BundleDelta.UPDATED));		
 	}	
 }
