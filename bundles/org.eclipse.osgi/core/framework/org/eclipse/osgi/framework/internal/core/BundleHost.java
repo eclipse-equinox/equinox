@@ -179,8 +179,6 @@ public class BundleHost extends AbstractBundle {
 					framework.bundles.unMarkDependancies(curProxy);
 				}
 				state = INSTALLED;
-				// publish UNRESOLVED event here
-				framework.publishBundleEvent(BundleEvent.UNRESOLVED, this);
 				loader = null;
 				proxy = null;
 				unresolveFragments();
@@ -279,8 +277,6 @@ public class BundleHost extends AbstractBundle {
 				}
 
 				state = INSTALLED;
-				// publish UNRESOLVED event here
-				framework.publishBundleEvent(BundleEvent.UNRESOLVED, this);
 				loader = null;
 				proxy = null;
 				unresolveFragments();

@@ -740,11 +740,15 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 				bundledata.installNativeCode(nativepaths);
 			}
 			boolean exporting;
+			int st = getState();
 			synchronized (bundles) {
 				bundles.markDependancies();
 				exporting = reload(newBundle);
 				manifestLocalization = null;
 			}
+			// send out unresolved events outside synch block (defect #80610)
+			if (st == RESOLVED)
+				framework.publishBundleEvent(BundleEvent.UNRESOLVED, this);
 			reloaded = true; /*
 			 * indicate we have loaded from the new version of
 			 * the bundle
@@ -910,11 +914,15 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 		try {
 			storage.begin();
 			boolean exporting;
+			int st = getState();
 			synchronized (bundles) {
 				bundles.markDependancies();
 				bundles.remove(this); /* remove before calling unload */
 				exporting = unload();
 			}
+			// send out unresolved events outside synch block (defect #80610)
+			if (st == RESOLVED)
+				framework.publishBundleEvent(BundleEvent.UNRESOLVED, this);
 			unloaded = true;
 			storage.commit(exporting);
 			close();

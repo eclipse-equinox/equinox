@@ -82,8 +82,6 @@ public class BundleFragment extends AbstractBundle {
 			if (host != null) {
 				if (state == RESOLVED) {
 					state = INSTALLED;
-					// publish UNRESOLVED event here.
-					framework.publishBundleEvent(BundleEvent.UNRESOLVED, this);
 					host = null;
 				}
 			}

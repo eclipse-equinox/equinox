@@ -330,7 +330,7 @@ public class PackageAdminImpl implements PackageAdmin {
 	 *
 	 * @param refresh the list of bundles to refresh 
 	 */
-	protected void refreshPackages(AbstractBundle[] refresh) {
+	protected synchronized void refreshPackages(AbstractBundle[] refresh) {
 		try {
 			Vector graph = null;
 			synchronized (framework.bundles) {
@@ -346,16 +346,10 @@ public class PackageAdminImpl implements PackageAdmin {
 				State state = framework.adaptor.getState();
 				// resolve the state.
 				state.resolve(false);
-
-				// process the delta.  This will set the state of all
-				// the bundles in the graph.
-				processDelta(graph);
 			}
-			/*
-			 * Resume the suspended bundles outside of the synchronization block.
-			 * This will cause the bundles to be resolved using the most up-to-date
-			 * generations of the bundles.
-			 */
+			// Process the delta and resume the suspended bundles outside of the synchronization block.
+			// This will cause the bundles to be resolved using the most up-to-date generations of the bundles.
+			processDelta(graph);
 			resumeBundles(graph);
 
 		} finally {
@@ -424,22 +418,22 @@ public class PackageAdminImpl implements PackageAdmin {
 				/*
 				 * Unimport detached BundleLoaders for bundles in the graph.
 				 */
-				for (int i = removalPending.size() - 1; i >= 0; i--) {
-					BundleLoaderProxy loaderProxy = (BundleLoaderProxy) removalPending.elementAt(i);
+				synchronized (framework.bundles) {
+					for (int i = removalPending.size() - 1; i >= 0; i--) {
+						BundleLoaderProxy loaderProxy = (BundleLoaderProxy) removalPending.elementAt(i);
 
-					if (graph.contains(loaderProxy.getBundleHost())) {
-						framework.bundles.unMarkDependancies(loaderProxy);
+						if (graph.contains(loaderProxy.getBundleHost())) {
+							framework.bundles.unMarkDependancies(loaderProxy);
+						}
 					}
-				}
 
-				for (int i = 0; i < refresh.length; i++) {
-					AbstractBundle changedBundle = refresh[i];
-					changedBundle.refresh();
-					// send out unresolved events
+					for (int i = 0; i < refresh.length; i++)
+						refresh[i].refresh();
+				}
+				// send out unresolved events outside synch block (defect #80610)
+				for (int i = 0; i < refresh.length; i++)
 					if (previouslyResolved[i])
-						framework.publishBundleEvent(BundleEvent.UNRESOLVED, changedBundle);
-				}
-
+						framework.publishBundleEvent(BundleEvent.UNRESOLVED, refresh[i]);
 				/*
 				 * Cleanup detached BundleLoaders for bundles in the graph.
 				 */
@@ -456,30 +450,31 @@ public class PackageAdminImpl implements PackageAdmin {
 				}
 
 				// set the resolved bundles state
-				List allBundles = framework.bundles.getBundles();
-				int size = allBundles.size();
-				for (int i = 0; i < size; i++) {
-					AbstractBundle bundle = (AbstractBundle) allBundles.get(i);
-					if (bundle.isResolved())
-						continue;
-					BundleDescription bundleDes = bundle.getBundleDescription();
-					if (bundleDes != null) {
-						if (bundleDes.isResolved()) {
-							if (bundle.isFragment()) {
-								BundleHost host = (BundleHost) framework.getBundle(bundleDes.getHost().getSupplier().getBundleId());
-								if (((BundleFragment) bundle).setHost(host)) {
+				synchronized (framework.bundles) {
+					List allBundles = framework.bundles.getBundles();
+					int size = allBundles.size();
+					for (int i = 0; i < size; i++) {
+						AbstractBundle bundle = (AbstractBundle) allBundles.get(i);
+						if (bundle.isResolved())
+							continue;
+						BundleDescription bundleDes = bundle.getBundleDescription();
+						if (bundleDes != null) {
+							if (bundleDes.isResolved()) {
+								if (bundle.isFragment()) {
+									BundleHost host = (BundleHost) framework.getBundle(bundleDes.getHost().getSupplier().getBundleId());
+									if (((BundleFragment) bundle).setHost(host)) {
+										bundle.resolve(bundleDes.isSingleton());
+									}
+								} else {
 									bundle.resolve(bundleDes.isSingleton());
 								}
-							} else {
-								bundle.resolve(bundleDes.isSingleton());
-							}
-							if (bundle.isResolved()) {
-								notify.addElement(bundle);
+								if (bundle.isResolved()) {
+									notify.addElement(bundle);
+								}
 							}
 						}
 					}
 				}
-
 				// update the exported package and bundle lists.
 				exportedPackages = getExportedPackages(exportedPackages);
 				exportedBundles = getExportedBundles(exportedBundles);
