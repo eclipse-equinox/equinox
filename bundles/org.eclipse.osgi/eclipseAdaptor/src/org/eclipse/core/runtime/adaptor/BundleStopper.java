@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.core.runtime.adaptor;
 
+import java.util.Hashtable;
+
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.internal.core.AbstractBundle;
 import org.eclipse.osgi.framework.internal.core.BundleHost;
@@ -27,8 +29,10 @@ import org.osgi.framework.BundleContext;
  * <p>Internal class.</p>
  */
 public class BundleStopper {
-	volatile int stoppingIndex = 0;
-	BundleDescription[] allToStop = null;
+	/* must be a synchronized object */
+	private Hashtable stoppedBundles;
+
+	private BundleDescription[] allToStop = null;
 
 	private void logCycles(Object[][] cycles) {
 		// log cycles
@@ -54,15 +58,16 @@ public class BundleStopper {
 		StateHelper stateHelper = EclipseAdaptor.getDefault().getPlatformAdmin().getStateHelper();
 		Object[][] cycles = stateHelper.sortBundles(allToStop);
 		logCycles(cycles);
+		stoppedBundles = new Hashtable(allToStop.length);
 		basicStopBundles();
 	}
 
 	private void basicStopBundles() {
 		BundleContext context = EclipseAdaptor.getDefault().getContext();
 		// stop all active bundles in the reverse order of Require-Bundle
-		for (stoppingIndex = allToStop.length - 1; stoppingIndex >= 0; stoppingIndex--) {
+		for (int stoppingIndex = allToStop.length - 1; stoppingIndex >= 0; stoppingIndex--) {
+			AbstractBundle toStop = (AbstractBundle) context.getBundle(allToStop[stoppingIndex].getBundleId());
 			try {
-				AbstractBundle toStop = (AbstractBundle) context.getBundle(allToStop[stoppingIndex].getBundleId());
 				if (toStop.getState() != Bundle.ACTIVE || !(toStop instanceof BundleHost) || toStop.getBundleId() == 0)
 					continue;
 				if (!((EclipseBundleData) toStop.getBundleData()).isAutoStartable())
@@ -72,19 +77,15 @@ public class BundleStopper {
 				String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_BUNDLESTOPPER_ERROR_STOPPING_BUNDLE", allToStop[stoppingIndex].toString()); //$NON-NLS-1$
 				FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, message, 0, e, null);
 				EclipseAdaptor.getDefault().getFrameworkLog().log(entry);
+			} finally {
+				stoppedBundles.put(toStop, toStop);
 			}
 		}
 	}
 
-	public boolean isStopped(String symbolicId) {
-		if (!EclipseAdaptor.getDefault().isStopping())
-			return false;
-
-		//We return false for the bundle currently being stopped
-		for (int i = allToStop.length - 1; i > stoppingIndex; i--) {
-			if (symbolicId.equals(allToStop[i].getSymbolicName()))
-				return true;
-		}
-		return false;
+	public boolean isStopped(Bundle bundle) {
+		if (stoppedBundles == null)
+			return null;
+		return stoppedBundles.get(bundle) != null;
 	}
 }

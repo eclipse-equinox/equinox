@@ -142,9 +142,11 @@ public class EclipseClassLoader extends DefaultClassLoader {
 		//Don't reactivate on shut down
 		if (hostdata.getAdaptor().isStopping()) {
 			BundleStopper stopper = EclipseAdaptor.getDefault().getBundleStopper();
-			if (stopper != null && stopper.isStopped(hostdata.getSymbolicName())) {
+			if (stopper != null && stopper.isStopped(hostdata.getBundle())) {
 				String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CLASSLOADER_ALREADY_STOPPED", className, hostdata.getSymbolicName()); //$NON-NLS-1$
-				throw new ClassNotFoundException(message);
+				ClassNotFoundException exception = new ClassNotFoundException(message);
+				EclipseAdaptor.getDefault().getFrameworkLog().log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, message, 0, exception, null)); //$NON-NLS-1$
+				throw exception;
 			}
 		}
 		boolean autoStart = ((EclipseBundleData) hostdata).isAutoStart();
