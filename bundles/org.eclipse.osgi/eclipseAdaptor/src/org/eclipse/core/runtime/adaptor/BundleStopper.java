@@ -32,13 +32,13 @@ public class BundleStopper {
 			for (int i = 0; i < cycles.length; i++) {
 				cycleText.append('[');
 				for (int j = 0; j < cycles[i].length; j++) {
-					cycleText.append(((Bundle) cycles[i][j]).getSymbolicName());
+					cycleText.append(((BundleDescription) cycles[i][j]).getSymbolicName());
 					cycleText.append(',');
 				}
 				cycleText.insert(cycleText.length() - 1, ']');
 			}
 			cycleText.setCharAt(cycleText.length() - 1, ']');
-			String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_BUNDLESTOPPER_ERROR_STOPPING_BUNDLE", cycleText); //$NON-NLS-1$
+			String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_BUNDLESTOPPER_CYCLES_FOUND", cycleText); //$NON-NLS-1$
 			FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, message, 0, null, null);
 			EclipseAdaptor.getDefault().getFrameworkLog().log(entry);
 		}
@@ -55,11 +55,11 @@ public class BundleStopper {
 	private void stopBundles(BundleDescription[] orderedBundles) {
 		BundleContext context = EclipseAdaptor.getDefault().getContext();
 		// stop all active bundles in the reverse order of Require-Bundle
-		for (int i = orderedBundles.length - 1; i >= 0; i--) {			
+		for (int i = orderedBundles.length - 1; i >= 0; i--) {
 			try {
 				AbstractBundle toStop = (AbstractBundle) context.getBundle(orderedBundles[i].getBundleId());
 				if (toStop.getState() != Bundle.ACTIVE || !(toStop instanceof BundleHost) || toStop.getBundleId() == 0)
-					continue;			
+					continue;
 				if (!((EclipseBundleData) toStop.getBundleData()).isAutoStartable())
 					continue;
 				toStop.stop();
