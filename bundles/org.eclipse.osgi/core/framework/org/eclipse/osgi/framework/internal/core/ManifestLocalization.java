@@ -68,12 +68,11 @@ public class ManifestLocalization {
 			String value = (String) this.rawHeaders.get(key);
 			if (value.startsWith("%") && (value.length() > 1)) { //$NON-NLS-1$
 				String propertiesKey = value.substring(1);
-				String transValue = (String) localeProperties.getObject(propertiesKey);
-				if (transValue != null) {
+				try {
+					String transValue = (String) localeProperties.getObject(propertiesKey);
 					value = transValue;
-				}
-				//strip the leading percent and return the raw value
-				else {
+				} catch (MissingResourceException ex) {
+					//strip the leading percent and return the raw value
 					value = propertiesKey;
 				}
 			}
@@ -99,7 +98,8 @@ public class ManifestLocalization {
 	}
 
 	/*
-	 * This method find the appropiate Manifest Localization file inside the bundle.  If not found, return null.
+	 * This method find the appropiate Manifest Localization file inside the
+	 * bundle. If not found, return null.
 	 */
 	protected ResourceBundle getResourceBundle(String localeString) {
 		URL resourceURL = null;
@@ -130,7 +130,8 @@ public class ManifestLocalization {
 	}
 
 	/*
-	 * This method searchs for properties file the same way the ResourceBundle algorithm
+	 * This method searchs for properties file the same way the ResourceBundle
+	 * algorithm
 	 */
 	private URL findProperties(String localeString, String path) {
 		String[] nlVariants = buildNLVariants(localeString);
