@@ -360,8 +360,13 @@ public class FileManager {
 		String[] files = managerRoot.list();
 		for (int i = 0; i < files.length; i++) {
 			if (files[i].endsWith(".instance") && instanceFile!= null && !files[i].equalsIgnoreCase(instanceFile.getName())) { //$NON-NLS-1$
-				if (new File(managerRoot, files[i]).delete() == false)
-					return;
+				Locker tmpLocker = BasicLocation.createLocker(new File(managerRoot, files[i]), lockMode);
+				if (tmpLocker.lock()) {
+					//If I can lock it is a file that has been left behind by a crash
+					new File(managerRoot, files[i]).delete();
+				} else {
+					return;	//The file is still being locked by somebody else
+				}
 			}
 		}
 
