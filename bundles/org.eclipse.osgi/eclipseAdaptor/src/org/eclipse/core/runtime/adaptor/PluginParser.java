@@ -192,7 +192,7 @@ public class PluginParser extends DefaultHandler implements IModel {
 			case RUNTIME_LIBRARY_STATE :
 				if (elementName.equals(LIBRARY)) {
 					String curLibrary = (String) objectStack.pop();
-					if(! curLibrary.trim().equals("")) {
+					if(! curLibrary.trim().equals("")) { //$NON-NLS-1$
 						Vector exportsVector = (Vector) objectStack.pop();
 						if (manifestInfo.libraries == null){
 							manifestInfo.libraries = new HashMap(3);
