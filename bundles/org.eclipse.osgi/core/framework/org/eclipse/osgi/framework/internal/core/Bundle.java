@@ -1042,7 +1042,11 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 	public Dictionary getHeaders(Locale locale) {
 		framework.checkAdminPermission();
 		Dictionary rawHeaders = bundledata.getHeaders();
-		ClassLoader classloader = getBundleLoader().getClassLoader();
+		BundleLoader loader = getBundleLoader();
+		if (loader == null) {
+			return (rawHeaders);
+		}
+		ClassLoader classloader = loader.getClassLoader();
 		if (classloader == null) {
 			return (rawHeaders);
 		}
