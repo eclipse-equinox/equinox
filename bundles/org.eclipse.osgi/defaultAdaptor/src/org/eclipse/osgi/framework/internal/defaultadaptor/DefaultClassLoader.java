@@ -24,7 +24,7 @@ import org.osgi.framework.FrameworkEvent;
  * A concrete implementation of BundleClassLoader.  This implementation 
  * consolidates all Bundle-ClassPath entries into a single ClassLoader.
  */
-public class DefaultClassLoader extends org.eclipse.osgi.framework.adaptor.BundleClassLoader {
+public class DefaultClassLoader extends AbstractClassLoader {
 	/**
 	 * The BundleData object for this BundleClassLoader
 	 */

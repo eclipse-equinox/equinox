@@ -241,14 +241,14 @@ public class BundleLoader implements ClassLoaderDelegate {
 	/**
 	 * This method loads a class from the bundle.  The class is searched for in the
 	 * same manner as it would if it was being loaded from a bundle (i.e. all
-	 * hosts, fragments, import, required bundles and local resources are searched).
-	 *
+	 * hosts, fragments, import, required bundles and local resources are searched.
+	*
 	 * @param      name     the name of the desired Class.
 	 * @return     the resulting Class
 	 * @exception  java.lang.ClassNotFoundException  if the class definition was not found.
 	 */
 	protected Class loadClass(String name) throws ClassNotFoundException {
-		return createClassLoader().loadClass(name, false);
+		return createClassLoader().loadClass(name);
 	}
 
 	/**
@@ -262,17 +262,6 @@ public class BundleLoader implements ClassLoaderDelegate {
 	 */
 	protected URL getResource(String name) {
 		return createClassLoader().getResource(name);
-	}
-
-	/**
-	 * Gets a ResourceBundle using the bundle's classloader.
-	 * @param name The name of the ResourceBundle to get.
-	 * @param locale The locale to use to get the ResourceBundle.
-	 * @return The ResourceBundle.
-	 * @throws java.util.MissingResourceException if the resource is not found.
-	 */
-	protected ResourceBundle getResourceBundle(String name, Locale locale) {
-		return ResourceBundle.getBundle(name, locale, createClassLoader());
 	}
 
 	/**
@@ -1099,10 +1088,6 @@ public class BundleLoader implements ClassLoaderDelegate {
 		importedPackages = null;
 		dynamicImportPackages = null;
 		dynamicImportPackageStems = null;
-	}
-
-	protected ClassLoader getClassLoader() {
-		return classloader;
 	}
 
 	protected void attachFragment(BundleFragment fragment, Properties props) {
