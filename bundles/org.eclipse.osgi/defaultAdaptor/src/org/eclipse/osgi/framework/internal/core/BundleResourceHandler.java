@@ -129,6 +129,9 @@ public abstract class BundleResourceHandler extends URLStreamHandler {
 	 * @exception	IOException 	thrown if an IO error occurs during connection establishment
 	 */
 	protected URLConnection openConnection(URL url) throws IOException {
+		if (bundleEntry != null) // if the bundleEntry is not null then return quick
+			return (new BundleURLConnection(url, bundleEntry));
+
 		// check to make sure that this URL was created using the
 		// parseURL method.  This ensures the security check was done
 		// at URL construction.
@@ -136,9 +139,6 @@ public abstract class BundleResourceHandler extends URLStreamHandler {
 			// No admin security check was made better check now.
 			checkAdminPermission();
 		}
-
-		if (bundleEntry != null)
-			return (new BundleURLConnection(url, bundleEntry));
 
 		String bidString = url.getHost();
 		if (bidString == null) {

@@ -175,7 +175,8 @@ public abstract class AbstractBundleData implements BundleData, Cloneable {
 			return null;
 		}
 		try {
-			return new URL(null, getBundleEntryURL(id, path), new Handler(entry));
+			//use the constant string for the protocol to prevent duplication
+			return new URL(Constants.OSGI_ENTRY_URL_PROTOCOL, Long.toString(id), 0, path, new Handler(entry));
 		} catch (MalformedURLException e) {
 			return null;
 		}
@@ -217,16 +218,6 @@ public abstract class AbstractBundleData implements BundleData, Cloneable {
 
 	public AbstractFrameworkAdaptor getAdaptor() {
 		return adaptor;
-	}
-
-	public static String getBundleEntryURL(long id, String path) {
-		StringBuffer url = new StringBuffer(Constants.OSGI_ENTRY_URL_PROTOCOL);
-		url.append("://").append(id); //$NON-NLS-1$
-		if (path.length() == 0 || path.charAt(0) != '/') {
-			url.append('/');
-		}
-		url.append(path);
-		return url.toString();
 	}
 
 	/* 

@@ -116,14 +116,8 @@ abstract public class BundleFile {
 			return null;
 
 		try {
-			StringBuffer url = new StringBuffer(Constants.OSGI_RESOURCE_URL_PROTOCOL);
-			url.append("://").append(hostBundleID); //$NON-NLS-1$
-			if (index > 0)
-				url.append(':').append(index);
-			if (path.length() == 0 || path.charAt(0) != '/')
-				url.append('/');
-			url.append(path);
-			return new URL(null, url.toString(), new Handler(bundleEntry));
+			//use the constant string for the protocol to prevent duplication
+			return new URL(Constants.OSGI_RESOURCE_URL_PROTOCOL, Long.toString(hostBundleID), index, path, new Handler(bundleEntry));
 		} catch (MalformedURLException e) {
 			return null;
 		}
