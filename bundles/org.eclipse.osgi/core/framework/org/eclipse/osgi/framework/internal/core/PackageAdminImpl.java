@@ -648,18 +648,16 @@ public class PackageAdminImpl implements PackageAdmin {
 			}
 
 			// look for the bundles in removalPending list
+			// we always add removalPending dependants here even if
+			// the removalpending bundle was not in the original list
 			for (int i = removalPending.size() - 1; i >= 0; i--) {
 				BundleLoaderProxy removedLoaderProxy = (BundleLoaderProxy) removalPending.elementAt(i);
 				AbstractBundle removedBundle = removedLoaderProxy.getBundle();
-
-				if (graph.contains(removedBundle)) {
-					// add in the dependents of the removedLoaderProxy
-					AbstractBundle[] dependents = removedLoaderProxy.getDependentBundles();
-					for (int k = 0; k < dependents.length; k++) {
-						if (!graph.contains(dependents[k])) {
-							graph.addElement(dependents[k]);
-							changed = true;
-						}
+				AbstractBundle[] dependents = removedLoaderProxy.getDependentBundles();
+				for (int k = 0; k < dependents.length; k++) {
+					if (!graph.contains(dependents[k])) {
+						graph.addElement(dependents[k]);
+						changed = true;
 					}
 				}
 			}
@@ -709,14 +707,14 @@ public class PackageAdminImpl implements PackageAdmin {
 	public boolean resolveBundles(org.osgi.framework.Bundle[] bundles) {
 		resolveBundles();
 		if (bundles == null)
-			synchronized (framework.bundles){
+			synchronized (framework.bundles) {
 				List bundleList = framework.bundles.getBundles();
 				bundles = (Bundle[]) bundleList.toArray(new AbstractBundle[bundleList.size()]);
 			}
 		for (int i = 0; i < bundles.length; i++)
-			if (!((AbstractBundle)bundles[i]).isResolved())
+			if (!((AbstractBundle) bundles[i]).isResolved())
 				return false;
-		
+
 		return true;
 	}
 
