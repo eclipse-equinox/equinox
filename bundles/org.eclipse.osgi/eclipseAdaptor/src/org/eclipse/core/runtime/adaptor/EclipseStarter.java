@@ -74,14 +74,15 @@ public class EclipseStarter {
 				startConsole(osgi, new String[0]);
 			context = osgi.getBundleContext();			
 			publishSplashScreen(endSplashHandler);
-			loadBundles();
-			setStartLevel(6);
-			initializeApplicationTracker();
-			Runnable application = (Runnable)applicationTracker.getService();
-			applicationTracker.close();
-			if (application == null)
-				throw new IllegalStateException("Unable to acquire application service");
-			application.run();
+			if (loadBundles() != null) { //if the installation of the basic did not fail
+				setStartLevel(6);
+				initializeApplicationTracker();
+				Runnable application = (Runnable)applicationTracker.getService();
+				applicationTracker.close();
+				if (application == null)
+					throw new IllegalStateException("Unable to acquire application service");
+				application.run();
+			}
 		} finally {
 			stopSystemBundle();
 		}
@@ -186,7 +187,7 @@ public class EclipseStarter {
 				System.err.println("Ignoring osgi.bundles element " + name);
 				ex.printStackTrace();
 				ignored.addElement(name);
-				continue;
+				return null;
 			}
 		}
 		refreshPackages((Bundle[])installed.toArray(new Bundle[installed.size()]));
