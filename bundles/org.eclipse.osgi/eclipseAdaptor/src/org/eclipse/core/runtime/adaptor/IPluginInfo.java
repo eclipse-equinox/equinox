@@ -14,6 +14,8 @@ import java.util.*;
 
 /**
  * Interface used as an entry to the IPluginConverter    
+ * 
+ * <p>Internal class.</p>
  */
 public interface IPluginInfo {
 	public Map getLibraries();

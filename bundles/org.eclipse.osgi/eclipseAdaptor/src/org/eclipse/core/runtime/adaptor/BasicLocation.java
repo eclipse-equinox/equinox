@@ -15,6 +15,9 @@ import java.io.IOException;
 import java.net.URL;
 import org.eclipse.osgi.service.datalocation.Location;
 
+/**
+ * Internal class.
+ */
 public class BasicLocation implements Location {
 	private static class MockLocker implements Locker {
 		public boolean lock() throws IOException {

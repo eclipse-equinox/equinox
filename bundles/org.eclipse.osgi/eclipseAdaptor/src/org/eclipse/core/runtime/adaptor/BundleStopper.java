@@ -23,6 +23,8 @@ import org.osgi.framework.BundleContext;
  * Implementation for the runtime shutdown hook that provides 
  * support for legacy bundles. All legacy bundles are stopped 
  * in the proper order.
+ * 
+ * <p>Internal class.</p>
  */
 public class BundleStopper {
 	private void logCycles(Object[][] cycles) {

@@ -27,6 +27,8 @@ import org.eclipse.osgi.service.resolver.*;
  * is looked up, or resource bundle support is not available, the key itself
  * will be returned as the associated message. This means that the <em>KEY</em>
  * should a reasonable human-readable (english) string.
+ * 
+ * <p>Internal class.</p>
  */
 public class EclipseAdaptorMsg {
 	public static final String NEW_LINE = System.getProperty("line.separator", "\n"); //$NON-NLS-1$ //$NON-NLS-2$

@@ -15,6 +15,9 @@ import org.eclipse.osgi.framework.console.CommandProvider;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.*;
 
+/**
+ * Internal class.
+ */
 public class EclipseCommandProvider implements CommandProvider {
 	private BundleContext context;
 

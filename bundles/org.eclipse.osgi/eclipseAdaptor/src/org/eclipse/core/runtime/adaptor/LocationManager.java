@@ -17,6 +17,9 @@ import java.util.Properties;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.service.datalocation.Location;
 
+/**
+ * Internal class.
+ */
 public class LocationManager {
 	private static Location installLocation = null;
 	private static Location configurationLocation = null;

@@ -19,6 +19,8 @@ import org.eclipse.osgi.service.urlconversion.URLConverter;
 /**
  * The service implementation that allows bundleresource or bundleentry
  * URLs to be converted to native file URLs on the local file system.
+ * 
+ * <p>Internal class.</p>
  */
 public class URLConverterImpl implements URLConverter {
 

@@ -15,6 +15,9 @@ import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 
+/**
+ * Internal class.
+ */
 //TODO: minimal implementation for now. This could be smarter
 public class EclipseBundleInstaller implements BundleInstaller {
 	public void installBundle(BundleDescription toInstall) throws BundleException {

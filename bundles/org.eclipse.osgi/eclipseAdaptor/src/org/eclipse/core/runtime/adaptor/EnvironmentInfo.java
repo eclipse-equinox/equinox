@@ -13,6 +13,9 @@ package org.eclipse.core.runtime.adaptor;
 import java.util.*;
 import org.eclipse.osgi.service.environment.Constants;
 
+/**
+ * Internal class.
+ */
 public class EnvironmentInfo implements org.eclipse.osgi.service.environment.EnvironmentInfo {
 	private static EnvironmentInfo singleton;
 	private static String nl;

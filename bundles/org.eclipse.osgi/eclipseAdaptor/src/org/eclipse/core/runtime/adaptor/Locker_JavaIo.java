@@ -12,7 +12,9 @@ package org.eclipse.core.runtime.adaptor;
 
 import java.io.*;
 
-//TODO shouldn't it be LockerJavaIO instead?
+/**
+ * Internal class.
+ */
 public class Locker_JavaIo implements Locker {
 	private File lockFile;
 	private RandomAccessFile lockRAF;

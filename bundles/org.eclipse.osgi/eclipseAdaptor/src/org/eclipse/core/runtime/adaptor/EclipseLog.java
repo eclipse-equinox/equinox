@@ -22,6 +22,9 @@ import org.osgi.framework.*;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 
+/**
+ * Internal class.
+ */
 public class EclipseLog implements FrameworkLog {
 	private static final String PASSWORD = "-password"; //$NON-NLS-1$	
 	protected static final String SESSION = "!SESSION"; //$NON-NLS-1$

@@ -12,6 +12,9 @@ package org.eclipse.core.runtime.adaptor;
 
 import java.io.IOException;
 
+/**
+ * Internal class.
+ */
 public interface Locker {
 	public boolean lock() throws IOException;
 

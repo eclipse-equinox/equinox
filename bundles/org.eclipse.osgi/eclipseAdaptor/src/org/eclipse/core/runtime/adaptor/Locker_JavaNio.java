@@ -14,7 +14,9 @@ import java.io.*;
 import java.nio.channels.FileLock;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 
-//TODO shouldn't it be LockerJavaNIO instead?
+/**
+ * Internal class.
+ */
 public class Locker_JavaNio implements Locker {
 	private File lockFile;
 	private FileLock fileLock;

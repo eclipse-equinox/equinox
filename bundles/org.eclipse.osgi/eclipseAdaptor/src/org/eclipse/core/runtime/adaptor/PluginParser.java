@@ -20,6 +20,9 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.xml.sax.*;
 import org.xml.sax.helpers.DefaultHandler;
 
+/**
+ * Internal class.
+ */
 public class PluginParser extends DefaultHandler implements IModel {
 	private static ServiceTracker xmlTracker = null;
 

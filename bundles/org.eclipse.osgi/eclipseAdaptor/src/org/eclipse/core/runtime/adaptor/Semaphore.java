@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.eclipse.core.runtime.adaptor;
 
+/**
+ * Internal class.
+ */
 public class Semaphore {
 	protected long notifications;
 

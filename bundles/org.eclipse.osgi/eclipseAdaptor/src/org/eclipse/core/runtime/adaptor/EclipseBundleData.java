@@ -26,6 +26,9 @@ import org.eclipse.osgi.service.resolver.Version;
 import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.BundleException;
 
+/**
+ * Internal class.
+ */
 //TODO This class does not override save(). 
 //Maybe for consistency should it be overriden to do nothing. See also EclipseAdaptor.saveMetadataFor(BundleData)
 public class EclipseBundleData extends DefaultBundleData {

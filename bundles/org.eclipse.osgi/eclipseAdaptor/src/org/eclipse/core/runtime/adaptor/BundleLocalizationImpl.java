@@ -18,6 +18,8 @@ import org.osgi.framework.Bundle;
 /**
  * The implementation of the service that gets ResourceBundle objects from a given 
  * bundle with a given locale. 
+ * 
+ * <p>Internal class.</p>
  */
 
 public class BundleLocalizationImpl implements BundleLocalization {

@@ -27,6 +27,9 @@ import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.framework.stats.*;
 import org.osgi.framework.*;
 
+/**
+ * Internal class.
+ */
 public class EclipseClassLoader extends DefaultClassLoader {
 	private static String[] NL_JAR_VARIANTS = buildNLJarVariants(EnvironmentInfo.getDefault().getNL());
 	private static boolean DEFINE_PACKAGES;

@@ -47,6 +47,9 @@ import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 
+/**
+ * Internal class.
+ */
 public class PluginConverterImpl implements PluginConverter {
 	public static boolean DEBUG = false;
 	private static final String SEMICOLON = "; "; //$NON-NLS-1$

@@ -34,6 +34,9 @@ import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.service.urlconversion.URLConverter;
 import org.osgi.framework.*;
 
+/**
+ * Internal class.
+ */
 public class EclipseAdaptor extends DefaultAdaptor {
 	public static final String PROP_CLEAN = "osgi.clean"; //$NON-NLS-1$
 	static final String F_LOG = ".log"; //$NON-NLS-1$

@@ -18,6 +18,9 @@ import org.eclipse.osgi.service.resolver.Version;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 
+/**
+ * Internal class.
+ */
 public class CachedManifest extends Dictionary {
 
 	Dictionary manifest = null;

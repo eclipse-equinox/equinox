@@ -16,6 +16,9 @@ import org.eclipse.osgi.framework.adaptor.ClassLoaderDelegate;
 import org.eclipse.osgi.framework.adaptor.core.*;
 import org.eclipse.osgi.framework.internal.defaultadaptor.DefaultAdaptor;
 
+/**
+ * Internal class.
+ */
 public class EclipseElementFactory implements AdaptorElementFactory {
 
 	public AbstractBundleData createBundleData(AbstractFrameworkAdaptor adaptor, long id) throws IOException {
