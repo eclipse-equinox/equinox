@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003 IBM Corporation and others.
+ * Copyright (c) 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -276,21 +276,10 @@ public class BundleLoader implements ClassLoaderDelegate {
 	}
 
 	/**
-	 * Imports a class from this Bundle Loader.  The local
-	 * classloader is searched then the fragments.
-	 * @param name The name of the class to import.
-	 * @return The loaded Class or null if the class is not found.
-	 */
-	protected Class importClass(String name) {
-		Class result = findLocalClass(name);
-		return result;
-	}
-
-	/**
 	 * Handle the lookup where provided classes can also be imported.
 	 * In this case the exporter need to be consulted. 
 	 */ 
-	protected Class importClass(String name, String packageName){
+	protected Class requireClass(String name, String packageName){
 		Class result = null;
 		try {
 			result = findImportedClass(name, packageName);
@@ -299,7 +288,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 			return null; 
 		}
 		if (result == null)
-			result = importClass(name);
+			result = findLocalClass(name);
 		return result;
 	}
 	
@@ -455,21 +444,10 @@ public class BundleLoader implements ClassLoaderDelegate {
 	}
 
 	/**
-	 * Imports a resource from this Bundle Loader.  The local
-	 * classloader is searched then the fragments.
-	 * @param name The name of the resource to import.
-	 * @return The URL to the resource or null if the resource is not found.
-	 */
-	protected URL importResource(String name) {
-		URL result = findLocalResource(name);
-		return result;
-	}
-
-	/**
 	 * Handle the lookup where provided resources can also be imported.
 	 * In this case the exporter need to be consulted. 
 	 */ 
-	protected URL importResource(String name, String packageName){
+	protected URL requireResource(String name, String packageName){
 		URL result = null;
 		try {
 			result = findImportedResource(name, packageName);
@@ -478,7 +456,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 			return null; 
 		}
 		if (result == null)
-			result = importResource(name);
+			result = findLocalResource(name);
 		return result;
 	}
 
@@ -498,21 +476,10 @@ public class BundleLoader implements ClassLoaderDelegate {
 	}
 
 	/**
-	 * Imports the resources from this Bundle Loader.  The local
-	 * classloader is searched then the fragments.
-	 * @param name The name of the resource to import.
-	 * @return an Enumeration of URLs for the resources or null if the resource is not found.
-	 */
-	protected Enumeration importResources(String name) {
-		Enumeration result = findLocalResources(name);
-		return result;
-	}
-
-	/**
 	 * Handle the lookup where provided resources can also be imported.
 	 * In this case the exporter need to be consulted. 
 	 */ 
-	protected Enumeration importResources(String name, String packageName){
+	protected Enumeration requireResources(String name, String packageName){
 		Enumeration result = null;
 		try {
 			result = findImportedResources(name, packageName);
@@ -521,7 +488,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 			return null; 
 		}
 		if (result == null)
-			result = importResources(name);
+			result = findLocalResources(name);
 		return result;
 	}
 
@@ -542,6 +509,62 @@ public class BundleLoader implements ClassLoaderDelegate {
 			return null;
 		}
 		return createClassLoader().findLocalResources(name);
+	}
+
+	/**
+	 * Finds the object for a bundle.  This method is used for delegation by the bundle's classloader.
+	 */
+	public Object findObject(String object) {
+		if (isClosed())
+			return null;
+		if ((object.length() > 1) && (object.charAt(0) == '/')) /* if name has a leading slash */
+			object = object.substring(1); /* remove leading slash before search */
+
+		try {
+			checkResourcePermission();
+		} catch (SecurityException e) {
+			try {
+				bundle.framework.checkAdminPermission();
+			} catch (SecurityException ee) {
+				return null;
+			}
+		}
+		String packageName = getResourcePackageName(object);
+
+		Object result = null;
+		if (packageName != null) {
+			result = findImportedObject(object, packageName);
+			if (result == null) {
+				result = findRequiredObject(object, packageName);
+			}
+		}
+
+		if (result == null) {
+			result = findLocalObject(object);
+		}
+
+		return result;
+	}
+
+	/**
+	 * Handle the lookup where provided resources can also be imported.
+	 * In this case the exporter need to be consulted. 
+	 */ 
+	protected Object requireObject(String object, String packageName){
+		Object result = null;
+		try {
+			result = findImportedObject(object, packageName);
+		} catch (ImportResourceNotFoundException e) {
+			//Capture the exception and return null because we want to continue the lookup.
+			return null; 
+		}
+		if (result == null)
+			result = findLocalObject(object);
+		return result;
+	}
+	
+	protected Object findLocalObject(String object) {
+		return createClassLoader().findLocalObject(object);
 	}
 
 	/**
@@ -765,7 +788,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 		try {
 			BundleLoader exporter = getPackageExporter(packageName);
 			if (exporter != null) {
-				result = exporter.importClass(name);
+				result = exporter.findLocalClass(name);
 				if (result == null)
 					throw new ImportClassNotFoundException(name);
 			}
@@ -870,12 +893,12 @@ public class BundleLoader implements ClassLoaderDelegate {
 		if (source.isMultivalued()) {
 			BundleLoaderProxy[] bundles = source.getSuppliers();
 			for (int i = 0; i < bundles.length; i++) {
-				Class result = bundles[i].getBundleLoader().importClass(name, packageName);
+				Class result = bundles[i].getBundleLoader().requireClass(name,packageName);
 				if (result != null)
 					return result;
 			}
 		} else
-			return source.getSupplier().getBundleLoader().importClass(name, packageName);
+			return source.getSupplier().getBundleLoader().requireClass(name,packageName);
 		return null;
 	}
 
@@ -900,7 +923,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 
 		BundleLoader exporter = getPackageExporter(packageName);
 		if (exporter != null) {
-			URL url = exporter.importResource(name);
+			URL url = exporter.findLocalResource(name);
 			if (url != null)
 				return url;
 			if (Debug.DEBUG && Debug.DEBUG_LOADER)
@@ -925,12 +948,12 @@ public class BundleLoader implements ClassLoaderDelegate {
 		if (source.isMultivalued()) {
 			BundleLoaderProxy[] bundles = source.getSuppliers();
 			for (int i = 0; i < bundles.length; i++) {
-				URL result = bundles[i].getBundleLoader().importResource(name,packageName);
+				URL result = bundles[i].getBundleLoader().requireResource(name,packageName);
 				if (result != null)
 					return result;
 			}
 		} else
-			return source.getSupplier().getBundleLoader().importResource(name,packageName);
+			return source.getSupplier().getBundleLoader().requireResource(name,packageName);
 		return null;
 	}
 
@@ -953,7 +976,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 			return null;
 		BundleLoader exporter = getPackageExporter(packageName);
 		if (exporter != null)
-			return exporter.importResources(name);
+			return exporter.findLocalResources(name);
 		return null;
 	}
 
@@ -980,12 +1003,63 @@ public class BundleLoader implements ClassLoaderDelegate {
 		if (source.isMultivalued()) {
 			BundleLoaderProxy[] bundles = source.getSuppliers();
 			for (int i = 0; i < bundles.length; i++) {
-				Enumeration result = bundles[i].getBundleLoader().importResources(name,packageName);
+				Enumeration result = bundles[i].getBundleLoader().requireResources(name,packageName);
 				if (result != null)
 					return result;
 			}
 		} else
-			return source.getSupplier().getBundleLoader().importResources(name,packageName);
+			return source.getSupplier().getBundleLoader().requireResources(name,packageName);
+		return null;
+	}
+
+	/**
+	 * Find an object using the imported packages for this bundle.  Only the 
+	 * ImportClassLoader is used for the search. 
+	 * @param object The name of the object to find.
+	 * @return The Object or null if the object does not belong to a package
+	 * that is imported by the bundle.
+	 * @throws ImportResourceNotFoundException If the object does belong to a package
+	 * that is imported by the bundle but the resource is not found.
+	 */
+	protected Object findImportedObject(String object, String packageName) {
+		if (Debug.DEBUG && Debug.DEBUG_LOADER)
+			Debug.println("ImportClassLoader[" + this +"].findImportedObject(" + object + ")");
+		if (!hasImportedPackages)
+			return null;
+
+		BundleLoader exporter = getPackageExporter(packageName);
+		if (exporter != null) {
+			Object result = exporter.findLocalObject(object);
+			if (result != null)
+				return result;
+			if (Debug.DEBUG && Debug.DEBUG_LOADER)
+				Debug.println("ImportClassLoader[" + this +"] object " + object + " not found in imported package " + packageName);
+			throw new ImportResourceNotFoundException(object);
+		}
+		return null;
+	}
+
+	/**
+	 * Find an object using the required bundles for this bundle.  Only the
+	 * required bundles are used to search.
+	 * @param name The name of the object to find.
+	 * @return The Object or null if the object is not found.
+	 */
+	protected Object findRequiredObject(String name, String packageName) {
+		if (Debug.DEBUG && Debug.DEBUG_LOADER)
+			Debug.println("ImportClassLoader[" + this +"].findRequiredResource(" + name + ")");
+		PackageSource source = getProvidersFor(packageName);
+		if (source == null)
+			return null;
+		if (source.isMultivalued()) {
+			BundleLoaderProxy[] bundles = source.getSuppliers();
+			for (int i = 0; i < bundles.length; i++) {
+				Object result = bundles[i].getBundleLoader().requireObject(name,packageName);
+				if (result != null)
+					return result;
+			}
+		} else
+			return source.getSupplier().getBundleLoader().requireObject(name,packageName);
 		return null;
 	}
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003 IBM Corporation and others.
+ * Copyright (c) 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,7 @@
 package org.eclipse.osgi.framework.internal.defaultadaptor;
 
 import java.io.*;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.ProtectionDomain;
 import java.util.*;
@@ -19,6 +20,8 @@ import org.eclipse.osgi.framework.adaptor.ClassLoaderDelegate;
 import org.eclipse.osgi.framework.adaptor.Version;
 import org.eclipse.osgi.framework.adaptor.core.AbstractBundleData;
 import org.eclipse.osgi.framework.debug.Debug;
+import org.eclipse.osgi.framework.internal.core.Constants;
+import org.eclipse.osgi.framework.internal.protocol.bundleentry.Handler;
 import org.osgi.framework.*;
 
 /**
@@ -242,7 +245,21 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 		 * does not exist.
 		 */
 	public URL getEntry(String path) {
-		return bundleFile.getURL(path, 0);
+		BundleEntry entry = bundleFile.getEntry(path);
+		if (entry == null) {
+			return null;
+		}
+		try {
+			StringBuffer url = new StringBuffer(Constants.OSGI_ENTRY_URL_PROTOCOL);
+			url.append(':').append(id);
+			if (path.length() == 0 || path.charAt(0) != '/') {
+				url.append('/');
+			}
+			url.append(path);
+			return new URL(null,url.toString(),new Handler(entry,adaptor.getContext()));
+		} catch (MalformedURLException e) {
+			return null;
+		}
 	}
 
 	/**
@@ -569,6 +586,10 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 
 	public Bundle getBundle() {
 		return bundle;
+	}
+
+	public BundleFile getBaseBundleFile(){
+		return bundleFile;
 	}
 
 	public String toString() {

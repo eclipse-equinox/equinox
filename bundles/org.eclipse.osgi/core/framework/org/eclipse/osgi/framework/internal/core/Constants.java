@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003 IBM Corporation and others.
+ * Copyright (c) 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -39,7 +39,10 @@ public interface Constants extends org.osgi.framework.Constants /* since Framewo
 	public static final String OSGI_FRAMEWORK_PACKAGE = "org.osgi.framework";
 
 	/** Bundle resource URL protocol */
-	public static final String OSGI_URL_PROTOCOL = "bundle";
+	public static final String OSGI_RESOURCE_URL_PROTOCOL = "bundleresource";
+
+	/** Bundle entry URL protocol */
+	public static final String OSGI_ENTRY_URL_PROTOCOL = "bundleentry";
 
 	/** Processor aliases resource */
 	public static final String OSGI_PROCESSOR_ALIASES = "processor.aliases";

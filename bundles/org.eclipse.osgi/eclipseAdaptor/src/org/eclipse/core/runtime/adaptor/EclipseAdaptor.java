@@ -23,6 +23,7 @@ import org.eclipse.osgi.internal.resolver.StateImpl;
 import org.eclipse.osgi.internal.resolver.StateManager;
 import org.eclipse.osgi.service.pluginconversion.PluginConverter;
 import org.eclipse.osgi.service.resolver.*;
+import org.eclipse.osgi.service.urlconversion.URLConverter;
 import org.osgi.framework.*;
 
 public class EclipseAdaptor extends DefaultAdaptor {
@@ -137,6 +138,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		register(org.eclipse.osgi.service.environment.EnvironmentInfo.class.getName(), EnvironmentInfo.getDefault(), bundle);
 		register(PlatformAdmin.class.getName(), stateManager, bundle);
 		register(PluginConverter.class.getName(), new PluginConverterImpl(context), bundle);
+		register(URLConverter.class.getName(), new URLConverterImpl(),bundle);
 		registerEndorsedXMLParser();
 	}
 
@@ -332,9 +334,11 @@ public class EclipseAdaptor extends DefaultAdaptor {
 			out.writeUTF(string);
 		}
 	}
-	BundleContext getContext() {
+	
+	protected BundleContext getContext() {
 		return context;	
 	}
+
 	public File getBundleRootDir() {
 		super.getBundleDir();
 		return bundleRootDir;

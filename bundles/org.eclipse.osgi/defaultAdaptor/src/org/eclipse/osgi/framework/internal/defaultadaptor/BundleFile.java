@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003 IBM Corporation and others.
+ * Copyright (c) 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,7 +19,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.internal.core.Constants;
-import org.eclipse.osgi.framework.internal.protocol.bundle.Handler;
+import org.eclipse.osgi.framework.internal.protocol.bundleresource.Handler;
 
 abstract public class BundleFile {
 	/**
@@ -96,6 +96,13 @@ abstract public class BundleFile {
 	abstract public void open() throws IOException;
 
 	/**
+	 * Determines if any BundleEntries exist in the given directory path.
+	 * @param dir The directory path to check existence of.
+	 * @return true if the BundleFile contains entries under the given directory path;
+	 * false otherwise.
+	 */
+	abstract public boolean containsDir(String dir);
+	/**
 	 * Returns a URL to access the contents of the entry specified by the path
 	 * @param path 
 	 */
@@ -104,16 +111,16 @@ abstract public class BundleFile {
 		if (bundleEntry == null)
 			return null;
 
-		if (System.getSecurityManager() != null) {
-			// If we are running in security mode, we should create bundle URLs
-			try {
-				return new URL(Constants.OSGI_URL_PROTOCOL, bundleID, cpEntry, path, new Handler(bundleEntry));
-			} catch (MalformedURLException e) {
-				return null;
+		try {
+			StringBuffer url = new StringBuffer(Constants.OSGI_RESOURCE_URL_PROTOCOL);
+			url.append(':').append(bundleID);
+			if (path.length() == 0 || path.charAt(0) != '/') {
+				url.append('/');
 			}
-		} else {
-			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=42871
-			return bundleEntry.getURL();
+			url.append(path);
+			return new URL(null, url.toString(), new Handler(bundleEntry,bundledata.adaptor.getContext()));
+		} catch (MalformedURLException e) {
+			return null;
 		}
 	}
 
@@ -206,13 +213,44 @@ abstract public class BundleFile {
 			return null;
 		}
 
+		public boolean containsDir(String dir) {
+			if (dir == null)
+				return false;
+
+			if (dir.length()==0)
+				return true;
+
+			if (dir.charAt(0) == '/')
+				dir = dir.substring(0);
+			
+			if (dir.length() > 0 && dir.charAt(dir.length()-1) != '/')
+				dir = dir + '/';
+			
+			Enumeration entries = zipFile.entries();
+			ZipEntry zipEntry;
+			String entryPath;
+			while (entries.hasMoreElements()) {
+				zipEntry = (ZipEntry) entries.nextElement();
+				entryPath = zipEntry.getName();
+				if (entryPath.startsWith(dir)) {
+					return true;
+				}
+			}
+			return false;
+		}
+
 		public BundleEntry getEntry(String path) {
 			ZipEntry zipEntry = getZipEntry(path);
 			if (zipEntry == null) {
+				if (path.length()== 0 || path.charAt(path.length()-1) == '/') {
+					// this is a directory request lets see if any entries exist in this directory
+					if (containsDir(path))
+						return new BundleEntry.DirBundleEntry(bundlefile,path);
+				}
 				return null;
 			}
 
-			return new BundleEntry.ZipBundleEntry(zipFile, zipEntry, bundlefile);
+			return new BundleEntry.ZipBundleEntry(zipFile, zipEntry, this);
 
 		}
 
@@ -221,10 +259,10 @@ abstract public class BundleFile {
 				return null;
 			}
 
-			if (path.startsWith("/")) {
+			if (path.length() > 0 && path.charAt(0)== '/') {
 				path = path.substring(1);
 			}
-			if (path.length() > 0 & !path.endsWith("/")) {
+			if (path.length() > 0 && path.charAt(path.length()-1) != '/') {
 				path = new StringBuffer(path).append("/").toString();
 			}
 
@@ -293,26 +331,9 @@ abstract public class BundleFile {
 			return new BundleEntry.FileBundleEntry(filePath, path);
 		}
 
-		public URL getURL(String path, int cpEntry) {
-			File filePath = new File(this.bundlefile, path);
-			if (!filePath.exists())
-				return null;
-
-			if (System.getSecurityManager() != null) {
-				// If we are running in security mode, we should create bundle URLs
-				try {
-					BundleEntry bundleEntry = new BundleEntry.FileBundleEntry(filePath, path);
-					return new URL(Constants.OSGI_URL_PROTOCOL, bundleID, cpEntry, path, new Handler(bundleEntry));
-				} catch (MalformedURLException e) {
-					return null;
-				}
-			} else
-				try {
-					// https://bugs.eclipse.org/bugs/show_bug.cgi?id=42871
-					return filePath.toURL();
-				} catch (MalformedURLException e) {
-					return null;
-				}
+		public boolean containsDir(String dir) {
+			File dirPath = new File(this.bundlefile, dir);
+			return dirPath.exists() && dirPath.isDirectory();
 		}
 
 		public Enumeration getEntryPaths(final String path) {
@@ -388,6 +409,16 @@ abstract public class BundleFile {
 				path = path.substring(1);
 			String newpath = new StringBuffer(cp).append(path).toString();
 			return zipBundlefile.getEntry(newpath);
+		}
+
+		public boolean containsDir(String dir){
+			if (dir == null)
+				return false;
+
+			if (dir.length() > 0 && dir.charAt(0) == '/')
+				dir = dir.substring(1);
+			String newdir = new StringBuffer(cp).append(dir).toString();
+			return zipBundlefile.containsDir(newdir);
 		}
 
 		public Enumeration getEntryPaths(String path) {

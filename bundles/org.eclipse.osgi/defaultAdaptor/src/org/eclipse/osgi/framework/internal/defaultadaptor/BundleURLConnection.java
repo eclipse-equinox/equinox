@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003 IBM Corporation and others.
+ * Copyright (c) 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,14 +9,13 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.osgi.framework.internal.protocol.bundle;
+package org.eclipse.osgi.framework.internal.defaultadaptor;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import org.eclipse.osgi.framework.internal.core.Msg;
-import org.eclipse.osgi.framework.internal.defaultadaptor.BundleEntry;
 
 /**
  * URLConnection for BundleClassLoader resources.
@@ -38,7 +37,7 @@ public class BundleURLConnection extends URLConnection {
 	 * @param url  URL for this URLConnection.
 	 * @param bundleEntry  BundleEntry that the URLConnection is associated.
 	 */
-	protected BundleURLConnection(URL url, BundleEntry bundleEntry) {
+	public BundleURLConnection(URL url, BundleEntry bundleEntry) {
 		super(url);
 
 		this.bundleEntry = bundleEntry;
@@ -199,4 +198,7 @@ public class BundleURLConnection extends URLConnection {
 		return (lastModified);
 	}
 
+	public URL getLocalURL() {
+		return bundleEntry.getLocalURL();
+	}
 }

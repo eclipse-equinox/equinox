@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003 IBM Corporation and others.
+ * Copyright (c) 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,7 +15,6 @@ import java.net.URLStreamHandler;
 import java.util.Hashtable;
 import java.util.StringTokenizer;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
-import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.tracker.ServiceTracker;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.url.URLConstants;
@@ -58,9 +57,6 @@ public class StreamHandlerFactory implements java.net.URLStreamHandlerFactory {
 	 * @return a URLStreamHandler for the specific protocol.
 	 */
 	public URLStreamHandler createURLStreamHandler(String protocol) {
-		if (protocol.equals(Constants.OSGI_URL_PROTOCOL)) {
-			return null;
-		}
 
 		//first check for built in handlers
 		String builtInHandlers = System.getProperty("java.protocol.handler.pkgs");

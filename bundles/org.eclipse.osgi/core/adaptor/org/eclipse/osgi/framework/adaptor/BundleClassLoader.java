@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003 IBM Corporation and others.
+ * Copyright (c) 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -263,6 +263,14 @@ public abstract class BundleClassLoader extends ClassLoader {
 	public Class findLocalClass(String classname) throws ClassNotFoundException {
 		return findClass(classname);
 	}
+
+	/**
+	 * Finds a local object in the BundleClassLoader without
+	 * consulting the delegate.
+	 * @param object the object name to fined.
+	 * @return the object found or null if the object does not exist.
+	 */
+	abstract public Object findLocalObject(String object);
 
 	/**
 	 * Closes this class loader.  After this method is called

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003 IBM Corporation and others.
+ * Copyright (c) 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -48,7 +48,7 @@ public abstract class BundleEntry {
 	 */
 	public abstract long getTime();
 
-	public abstract URL getURL();
+	public abstract URL getLocalURL();
 
 	/**
 	 * Return the name of this BundleEntry by calling getName().
@@ -72,14 +72,14 @@ public abstract class BundleEntry {
 		/**
 		 * The BundleFile for this entry.
 		 */
-		private File bundleFile;
+		private BundleFile bundleFile;
 
 		/**
 		 * Constructs the BundleEntry using a ZipEntry.
 		 * @param bundleFile BundleFile object this entry is a member of
 		 * @param entry ZipEntry object of this entry
 		 */
-		ZipBundleEntry(ZipFile zipFile, ZipEntry entry, File bundleFile) {
+		ZipBundleEntry(ZipFile zipFile, ZipEntry entry, BundleFile bundleFile) {
 			this.zipFile = zipFile;
 			this.zipEntry = entry;
 			this.bundleFile = bundleFile;
@@ -122,9 +122,11 @@ public abstract class BundleEntry {
 			return zipEntry.getTime();
 		}
 
-		public URL getURL() {
+		public URL getLocalURL() {
 			try {
-				return new URL("jar:file:" + bundleFile.getAbsolutePath() + "!/" + zipEntry.getName());
+				File file = bundleFile.getFile(zipEntry.getName());
+				return file.toURL();
+				//return new URL("jar:file:" + bundleFile.getAbsolutePath() + "!/" + zipEntry.getName());
 			} catch (MalformedURLException e) {
 				//This can not happen. 
 				return null;
@@ -187,7 +189,7 @@ public abstract class BundleEntry {
 			return file.lastModified();
 		}
 
-		public URL getURL() {
+		public URL getLocalURL() {
 			try {
 				return file.toURL();
 			} catch (MalformedURLException e) {
@@ -196,4 +198,41 @@ public abstract class BundleEntry {
 		}
 	}
 
+	public static class DirBundleEntry extends BundleEntry {
+
+		/**
+		 * File for this entry.
+		 */
+		private File file;
+		private String name;
+
+		public DirBundleEntry(File file, String name){
+			this.name = name;
+			this.file = file;
+		}
+		public InputStream getInputStream() throws IOException {
+			return null;
+		}
+
+		public long getSize() {
+			return 0;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public long getTime() {
+			return 0;
+		}
+
+		public URL getLocalURL() {
+			try {
+				return new URL("jar:file:" + file.getAbsolutePath() + "!/" + name);
+			} catch (MalformedURLException e) {
+				//This can not happen. 
+				return null;
+			}
+		}
+	}
 }

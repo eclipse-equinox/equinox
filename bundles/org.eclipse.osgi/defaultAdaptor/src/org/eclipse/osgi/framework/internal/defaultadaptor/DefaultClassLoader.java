@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003 IBM Corporation and others.
+ * Copyright (c) 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -157,10 +157,8 @@ public class DefaultClassLoader extends org.eclipse.osgi.framework.adaptor.Bundl
 		} else {
 			if (bundledata.bundleFile instanceof BundleFile.ZipBundleFile) {
 				// the classpath entry may be a directory in the bundle jar file.
-				Enumeration entries = bundledata.bundleFile.getEntryPaths(cp);
-				if (entries.hasMoreElements()) {
+				if (bundledata.bundleFile.containsDir(cp))
 					bundlefile = BundleFile.createBundleFile((BundleFile.ZipBundleFile) bundledata.bundleFile, cp);
-				}
 			}
 		}
 		if (bundlefile != null)
@@ -368,20 +366,52 @@ public class DefaultClassLoader extends org.eclipse.osgi.framework.adaptor.Bundl
 		return null;
 	}
 
+	public Object findLocalObject(String object) {
+		BundleEntry result = null;
+		for (int i = 0; i < classpathEntries.length; i++) {
+			if (classpathEntries[i] != null) {
+				result = findObjectImpl(object, classpathEntries[i].bundlefile);
+				if (result != null) {
+					return result;
+				}
+			}
+		}
+		// look in fragments
+		if (fragClasspaths != null) {
+			int size = fragClasspaths.size();
+			for (int i = 0; i < size; i++) {
+				FragmentClasspath fragCP = (FragmentClasspath) fragClasspaths.elementAt(i);
+				for (int j = 0; j < fragCP.classpathEntries.length; j++) {
+					result = findObjectImpl(object, fragCP.classpathEntries[j].bundlefile);
+					if (result != null) {
+						return result;
+					}
+				}
+			}
+		}
+		return null;
+	}
+
+	protected BundleEntry findObjectImpl(String object,BundleFile bundleFile){
+		return bundleFile.getEntry(object);
+	}
+
 	/**
 	 * Closes all the BundleFile objects for this BundleClassLoader.
 	 */
 	public void close() {
 		if (!closed) {
 			super.close();
-			for (int i = 0; i < classpathEntries.length; i++) {
-				if (classpathEntries[i] != null) {
-					try {
-						if (classpathEntries[i].bundlefile != hostdata.bundleFile) {
-							classpathEntries[i].bundlefile.close();
+			if (classpathEntries != null) {
+				for (int i = 0; i < classpathEntries.length; i++) {
+					if (classpathEntries[i] != null) {
+						try {
+							if (classpathEntries[i].bundlefile != hostdata.bundleFile) {
+								classpathEntries[i].bundlefile.close();
+							}
+						} catch (IOException e) {
+							hostdata.adaptor.getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, hostdata.getBundle(), e);
 						}
-					} catch (IOException e) {
-						hostdata.adaptor.getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, hostdata.getBundle(), e);
 					}
 				}
 			}
