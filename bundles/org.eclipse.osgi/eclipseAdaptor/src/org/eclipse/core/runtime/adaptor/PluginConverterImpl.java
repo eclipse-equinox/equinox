@@ -153,7 +153,7 @@ public class PluginConverterImpl implements PluginConverter {
 
 	private void generateActivator() {
 		if (!pluginInfo.isFragment())
-			writeEntry(Constants.BUNDLE_ACTIVATOR, "org.eclipse.core.runtime.compatibility.PluginActivator"); //$NON-NLS-1$
+			writeEntry(Constants.BUNDLE_ACTIVATOR, "org.eclipse.core.internal.compatibility.PluginActivator"); //$NON-NLS-1$
 	}
 
 	private void generateClasspath() {
