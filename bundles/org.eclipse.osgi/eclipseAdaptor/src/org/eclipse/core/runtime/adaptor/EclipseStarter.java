@@ -50,7 +50,7 @@ public class EclipseStarter {
 
 	/** string containing the classname of the adaptor to be used in this framework instance */
 	protected static String adaptorClassName = "org.eclipse.core.runtime.adaptor.EclipseAdaptor";
-
+	
 	// Console information
 	protected static final String consoleClassName = "org.eclipse.osgi.framework.internal.core.FrameworkConsole";
 	private static final String CONSOLE_NAME = "OSGi Console";
@@ -107,48 +107,54 @@ public class EclipseStarter {
 		context.registerService(Runnable.class.getName(),endSplashHandler,properties);		
 	}
 
-	private static String searchForBundle(String name, String syspath) throws MalformedURLException {
-		// TODO this is legacy support for non-URL names.  It should be removed eventually.
+	private static String searchForBundle(String name, String parent) throws MalformedURLException {
 		URL url = null;
+		File fileLocation = null;
 		boolean reference = false;
-		String location = null;
 		try {
 			url = new URL(name);
 		} catch (MalformedURLException e) {
+			// TODO this is legacy support for non-URL names.  It should be removed eventually.
 			// if name was not a URL then construct one.  
 			// Assume it should be a reference and htat it is relative.  This support need not 
 			// be robust as it is temporary..
-			location = "reference:file:"+ syspath + "/" + name;
-			url = new URL(location);
+			fileLocation = new File(parent, name);
+			url = new URL("reference:file:"+ parent + "/" + name);
 			reference = true;
 		}
 		// if the name was a URL then see if it is relative.  If so, insert syspath.
 		if (!reference) {
 			URL baseURL = url;
+			// if it is a reference URL then strip off the reference: and set base to the file:...
 			if (url.getProtocol().equals("reference")) {
 				reference = true;
 				baseURL = new URL(url.getFile());
 			}
 			
-			File fileLocation = new File(baseURL.getFile());
+			fileLocation = new File(baseURL.getFile());
 			// if the location is relative, prefix it with the syspath
 			if (!fileLocation.isAbsolute())
-				fileLocation = new File(syspath, fileLocation.toString());
-	
-			// Put the reference back on if needed
-			if (reference)
-				url = new URL("reference", null, "file:" + fileLocation.getAbsolutePath());
-			location = url.toExternalForm();
+				fileLocation = new File(parent, fileLocation.toString());
+		}
+		// If the result is a reference then search for the real result and 
+		// reconstruct the answer.
+		if (reference) {
+			String result = searchFor(fileLocation.getName(), fileLocation.getParentFile().getAbsolutePath());
+			if (result != null)
+				url = new URL("reference", null, "file:" + result);
+			else
+				return null;
 		}
 
 		// finally we have something worth trying	
 		try {
 			URLConnection result = url.openConnection();
 			result.connect();
-			return location;
+			return url.toExternalForm();
 		} catch (IOException e) {
-			int i = location.lastIndexOf('_');
-			return i == -1? location : location.substring(0, i);
+//			int i = location.lastIndexOf('_');
+//			return i == -1? location : location.substring(0, i);
+			return null;
 		}
 	}
 
@@ -176,7 +182,7 @@ public class EclipseStarter {
 					name = name.substring(0, index);
 			}
 				String location = searchForBundle(name, syspath);
-				if (!isInstalled(location)) {
+				if (location != null && !isInstalled(location)) {
 					Bundle bundle = context.installBundle(location);
 					if (level >= 0 && start != null)
 						start.setBundleStartLevel(bundle, level);
@@ -184,7 +190,7 @@ public class EclipseStarter {
 				} else 
 					ignored.addElement(name);			
 			} catch (Exception ex) {
-				System.err.println("Can not install/find the " + name);
+				System.err.println("Cannot install/find: " + name);
 				ex.printStackTrace();
 				ignored.addElement(name);
 				return null;
@@ -431,6 +437,11 @@ public class EclipseStarter {
 			result = result.substring(0, result.length() - 1);
 		result = result.substring(0, result.lastIndexOf('/'));
 		result = result.substring(0, result.lastIndexOf('/'));
+		if (Character.isUpperCase(result.charAt(0))) {
+			char[] chars = result.toCharArray();
+			chars[0] = Character.toLowerCase(chars[0]);
+			result = new String(chars);
+		}
 		return result;
 	}
 
@@ -594,7 +605,7 @@ public class EclipseStarter {
 	private static void mergeProperties(Properties destination, Properties source) {
 		for (Enumeration e = source.keys(); e.hasMoreElements(); ) {
 			String key = (String)e.nextElement();
-			String value = (String)source.getProperty(key);
+			String value = source.getProperty(key);
 			if (destination.getProperty(key) == null)
 				destination.put(key, value);
 		}
@@ -617,7 +628,7 @@ public class EclipseStarter {
 			context.removeFrameworkListener(listener);
 		}
 	}
-	private static void setStartLevel(final int value) throws BundleException {
+	private static void setStartLevel(final int value) {
 		ServiceTracker tracker = new ServiceTracker(context, StartLevel.class.getName(), null);
 		tracker.open();
 		final StartLevel startLevel = (StartLevel)tracker.getService();
@@ -634,4 +645,97 @@ public class EclipseStarter {
 		context.removeFrameworkListener(listener);
 		tracker.close();
 	}
+	/**
+	 * Searches for the given target directory starting in the "plugins" subdirectory
+	 * of the given location.  If one is found then this location is returned; 
+	 * otherwise an exception is thrown.
+	 * 
+	 * @return the location where target directory was found
+	 * @param start the location to begin searching
+	 */
+	private static String searchFor(final String target, String start) {
+		FileFilter filter = new FileFilter() {
+			public boolean accept(File candidate) {
+				return candidate.isDirectory() && (candidate.getName().equals(target) || candidate.getName().startsWith(target + "_")); //$NON-NLS-1$
+			}
+		};
+		File[] candidates = new File(start).listFiles(filter); //$NON-NLS-1$
+		if (candidates == null)
+			return null;
+		String result = null;
+		Object maxVersion = null;
+		for (int i = 0; i < candidates.length; i++) {
+			String name = candidates[i].getName();
+			String version = ""; //$NON-NLS-1$ // Note: directory with version suffix is always > than directory without version suffix
+			int index = name.indexOf('_');
+			if (index != -1)
+				version = name.substring(index + 1);
+			Object currentVersion = getVersionElements(version);
+			if (maxVersion == null) {
+				result = candidates[i].getAbsolutePath();
+				maxVersion = currentVersion;
+			} else {
+				if (compareVersion((Object[]) maxVersion, (Object[]) currentVersion) < 0) {
+					result = candidates[i].getAbsolutePath();
+					maxVersion = currentVersion;
+				}
+			}
+		}
+		if (result == null)
+			return null;
+		return result.replace(File.separatorChar, '/') + "/"; //$NON-NLS-1$
+	}
+	/**
+	 * Do a quick parse of version identifier so its elements can be correctly compared.
+	 * If we are unable to parse the full version, remaining elements are initialized
+	 * with suitable defaults.
+	 * @return an array of size 4; first three elements are of type Integer (representing
+	 * major, minor and service) and the fourth element is of type String (representing
+	 * qualifier). Note, that returning anything else will cause exceptions in the caller.
+	 */
+	private static Object[] getVersionElements(String version) {
+		Object[] result = { new Integer(0), new Integer(0), new Integer(0), "" }; //$NON-NLS-1$
+		StringTokenizer t = new StringTokenizer(version, "."); //$NON-NLS-1$
+		String token;
+		int i = 0;
+		while (t.hasMoreTokens() && i < 4) {
+			token = t.nextToken();
+			if (i < 3) {
+				// major, minor or service ... numeric values
+				try {
+					result[i++] = new Integer(token);
+				} catch (Exception e) {
+					// invalid number format - use default numbers (0) for the rest
+					break;
+				}
+			} else {
+				// qualifier ... string value
+				result[i++] = token;
+			}
+		}
+		return result;
+	}
+	/**
+	 * Compares version strings. 
+	 * @return result of comparison, as integer;
+	 * <code><0</code> if left < right;
+	 * <code>0</code> if left == right;
+	 * <code>>0</code> if left > right;
+	 */
+	private static int compareVersion(Object[] left, Object[] right) {
+		int result = ((Integer) left[0]).compareTo((Integer) right[0]); // compare major
+		if (result != 0)
+			return result;
+
+		result = ((Integer) left[1]).compareTo((Integer) right[1]); // compare minor
+		if (result != 0)
+			return result;
+
+		result = ((Integer) left[2]).compareTo((Integer) right[2]); // compare service
+		if (result != 0)
+			return result;
+
+		return ((String) left[3]).compareTo((String) right[3]); // compare qualifier
+	}
+	
 }
