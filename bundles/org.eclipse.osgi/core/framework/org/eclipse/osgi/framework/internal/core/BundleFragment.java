@@ -16,7 +16,6 @@ import java.net.URL;
 import java.security.*;
 import org.eclipse.osgi.framework.adaptor.BundleData;
 import org.eclipse.osgi.framework.debug.Debug;
-import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.osgi.framework.*;
 import org.osgi.framework.ServiceReference;
 

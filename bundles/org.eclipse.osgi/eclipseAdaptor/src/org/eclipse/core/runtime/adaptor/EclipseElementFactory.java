@@ -11,8 +11,8 @@
 package org.eclipse.core.runtime.adaptor;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.security.ProtectionDomain;
+
 import org.eclipse.osgi.framework.adaptor.ClassLoaderDelegate;
 import org.eclipse.osgi.framework.adaptor.core.AbstractBundleData;
 import org.eclipse.osgi.framework.internal.defaultadaptor.*;

@@ -18,7 +18,6 @@ import java.security.ProtectionDomain;
 import java.util.Vector;
 import org.eclipse.osgi.framework.adaptor.BundleData;
 import org.eclipse.osgi.framework.debug.Debug;
-import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleException;
 

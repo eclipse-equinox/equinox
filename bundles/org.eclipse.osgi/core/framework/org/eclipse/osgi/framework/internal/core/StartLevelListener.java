@@ -13,10 +13,7 @@ package org.eclipse.osgi.framework.internal.core;
 
 import java.util.EventListener;
 import java.util.List;
-import java.util.Vector;
-
 import org.eclipse.osgi.framework.debug.Debug;
-import org.eclipse.osgi.framework.util.ManifestElement;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.FrameworkEvent;
 

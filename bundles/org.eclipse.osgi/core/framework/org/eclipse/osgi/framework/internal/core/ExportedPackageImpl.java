@@ -11,8 +11,6 @@
 package org.eclipse.osgi.framework.internal.core;
 
 import java.util.ArrayList;
-
-import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.osgi.service.resolver.PackageSpecification;
 import org.eclipse.osgi.service.resolver.Version;
 import org.osgi.framework.Constants;

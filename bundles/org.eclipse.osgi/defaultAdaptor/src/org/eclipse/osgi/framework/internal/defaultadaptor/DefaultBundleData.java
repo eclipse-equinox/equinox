@@ -11,23 +11,16 @@
 
 package org.eclipse.osgi.framework.internal.defaultadaptor;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URL;
 import java.security.ProtectionDomain;
 import java.util.*;
-import java.util.Enumeration;
-import java.util.StringTokenizer;
-import java.util.Vector;
 
 import org.eclipse.osgi.framework.adaptor.ClassLoaderDelegate;
 import org.eclipse.osgi.framework.adaptor.Version;
 import org.eclipse.osgi.framework.adaptor.core.AbstractBundleData;
 import org.eclipse.osgi.framework.debug.Debug;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleException;
-import org.osgi.framework.Constants;
+import org.osgi.framework.*;
 
 /**
  * The <code>BundleData</code> represents a single bundle that is persistently 
