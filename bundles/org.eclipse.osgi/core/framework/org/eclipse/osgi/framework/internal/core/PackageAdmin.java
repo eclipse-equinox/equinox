@@ -753,7 +753,7 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 		for (int i=0; i<descriptions.length; i++) {
 			long bundleId = descriptions[i].getBundleId();
 			Bundle bundle = framework.getBundle(bundleId);
-			if (bundle != null) {
+			if (bundle != null && bundle != framework.systemBundle) {
 				if (descriptions[i].isResolved()){
 					if (bundle.isFragment()) {
 						BundleHost host = (BundleHost)framework.getBundle(descriptions[i].getHost().getSupplier().getBundleId());
