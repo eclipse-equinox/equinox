@@ -117,7 +117,7 @@ public class StateManager implements PlatformAdmin {
 		if (installer == null)
 			throw new IllegalArgumentException("PlatformAdmin.commit() not supported"); //$NON-NLS-1$
 		StateDelta delta = systemState.compare(state);
-		BundleDelta[] changes = delta.getChanges(BundleDelta.ADDED | BundleDelta.REMOVED | BundleDelta.UPDATED, false);
+		BundleDelta[] changes = delta.getChanges();
 		for (int i = 0; i < changes.length; i++)
 			if ((changes[i].getType() & BundleDelta.ADDED) > 0)
 				installer.installBundle(changes[i].getBundle());
@@ -125,8 +125,9 @@ public class StateManager implements PlatformAdmin {
 				installer.uninstallBundle(changes[i].getBundle());
 			else if ((changes[i].getType() & BundleDelta.UPDATED) > 0)
 				installer.updateBundle(changes[i].getBundle());
-			else;
-				// bug in StateDelta#getChanges
+			else
+				;
+		// bug in StateDelta#getChanges
 	}
 
 	public Resolver getResolver() {

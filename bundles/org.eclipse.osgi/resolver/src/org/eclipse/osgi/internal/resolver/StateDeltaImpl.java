@@ -30,8 +30,7 @@ public class StateDeltaImpl implements StateDelta {
 		List result = new ArrayList();
 		for (Iterator changesIter = changes.values().iterator(); changesIter.hasNext();) {
 			BundleDelta change = (BundleDelta) changesIter.next();
-			int flags = change.getType() & mask;
-			if (flags == mask || (!exact && flags != 0))
+			if (mask == change.getType() || (!exact && (change.getType() & mask) == mask))
 				result.add(change);
 		}
 		return (BundleDelta[]) result.toArray(new BundleDelta[result.size()]);
@@ -44,28 +43,49 @@ public class StateDeltaImpl implements StateDelta {
 	void recordBundleAdded(BundleDescriptionImpl added) {
 		Object key = added.getKey();
 		BundleDeltaImpl change = (BundleDeltaImpl) changes.get(key);
-		if (change == null)
+		if (change == null) {
 			changes.put(key, new BundleDeltaImpl(added, BundleDelta.ADDED));
-		else
-			change.setType(change.getType() | BundleDelta.ADDED);
+			return;
+		}
+		if (change.getType() == BundleDelta.REMOVED) {
+			changes.remove(key);
+			return;
+		}
+		if ((change.getType() & BundleDelta.REMOVED) != 0) {
+			change.setType(change.getType() & ~BundleDelta.REMOVED);
+			return;
+		}
+		change.setType(change.getType() | BundleDelta.ADDED);
 	}
 
 	void recordBundleUpdated(BundleDescriptionImpl updated) {
 		Object key = updated.getKey();
 		BundleDeltaImpl change = (BundleDeltaImpl) changes.get(key);
-		if (change == null)
+		if (change == null) {
 			changes.put(key, new BundleDeltaImpl(updated, BundleDelta.UPDATED));
-		else
-			change.setType(change.getType() | BundleDelta.UPDATED);
+			return;
+		}
+		if ((change.getType() & (BundleDelta.ADDED | BundleDelta.REMOVED)) != 0)
+			return;
+		change.setType(change.getType() | BundleDelta.UPDATED);
 	}
 
 	void recordBundleRemoved(BundleDescriptionImpl removed) {
 		Object key = removed.getKey();
 		BundleDeltaImpl change = (BundleDeltaImpl) changes.get(key);
-		if (change == null)
+		if (change == null) {
 			changes.put(key, new BundleDeltaImpl(removed, BundleDelta.REMOVED));
-		else
-			change.setType(change.getType() | BundleDelta.REMOVED);
+			return;
+		}
+		if (change.getType() == BundleDelta.ADDED) {
+			changes.remove(key);
+			return;
+		}
+		if ((change.getType() & BundleDelta.ADDED) != 0) {
+			change.setType(change.getType() & ~BundleDelta.ADDED);
+			return;
+		}
+		change.setType(change.getType() | BundleDelta.REMOVED);
 	}
 
 	void recordConstraintResolved(BundleDescriptionImpl changedLinkage, boolean optional) {

@@ -62,7 +62,7 @@ public class StateImpl implements State {
 	}
 
 	public StateDelta compare(State state) throws BundleException {
-		// client trying to sneak in some alien implementation		
+		// client is trying to sneak in some alien implementation		
 		if (!(state instanceof UserState))
 			throw new IllegalArgumentException("Wrong state implementation"); //$NON-NLS-1$		
 		if (state.getTimeStamp() != this.getTimeStamp())
