@@ -198,10 +198,10 @@ public class Util {
 
 		StringBuffer stringBuffer = new StringBuffer(length);
 		if (onLeft)
-			stringBuffer.append(padding);
+			stringBuffer.append(padding.toString());
 		stringBuffer.append(input);
 		if (!onLeft)
-			stringBuffer.append(padding);
+			stringBuffer.append(padding.toString());
 		return stringBuffer.toString();
 	}
 }

@@ -375,7 +375,7 @@ public class PluginConverterImpl implements PluginConverter {
 			if (element.isOptional()) {
 				modImport.append(';').append(Constants.OPTIONAL_ATTRIBUTE).append("=true");//$NON-NLS-1$
 			}
-			bundleRequire.append(modImport);
+			bundleRequire.append(modImport.toString());
 			if (iter.hasNext())
 				bundleRequire.append(LIST_SEPARATOR);
 		}
