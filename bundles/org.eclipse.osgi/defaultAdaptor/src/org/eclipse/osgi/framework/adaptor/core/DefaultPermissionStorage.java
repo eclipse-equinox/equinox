@@ -23,6 +23,9 @@ import org.eclipse.osgi.framework.internal.reliablefile.*;
  */
 
 class DefaultPermissionStorage implements PermissionStorage {
+	/** Filename used to store the ConditionalPermissions. This name
+	 * is relative to permissionDir.*/
+	private static final String CONDPERMS = "condPerms"; //$NON-NLS-1$
 	/** Directory into which permission data files are stored. */
 	protected File permissionDir;
 
@@ -185,6 +188,9 @@ class DefaultPermissionStorage implements PermissionStorage {
 			if (name.endsWith(ReliableFile.tmpExt)) {
 				continue;
 			}
+			if (name.equals(CONDPERMS)) {
+				continue;
+			}
 
 			File file = new File(permissionDir, name);
 
@@ -307,5 +313,39 @@ class DefaultPermissionStorage implements PermissionStorage {
 		}
 
 		return file;
+	}
+
+	/**
+	 * Serializes the ConditionalPermissionInfos to CONDPERMS.
+	 * 
+	 * @param o the object to be serialized that contains the ConditionalPermissionInfos.
+	 * @throws IOException
+	 * @see org.eclipse.osgi.framework.adaptor.PermissionStorage#serializeConditionalPermissionInfos(Serializable)
+	 */
+	public void serializeConditionalPermissionInfos(Serializable o) throws IOException {
+		FileOutputStream fos = new FileOutputStream(new File(permissionDir, CONDPERMS));
+		ObjectOutputStream oos = new ObjectOutputStream(fos);
+		oos.writeObject(o);
+		oos.close();
+	}
+
+	/**
+	 * Deserializes the ConditionalPermissionInfos from CONDPERMS and returns the object.
+	 * 
+	 * @return the deserialized object that was previously passed to serializeCondationalPermissionInfos.
+	 * @throws IOException
+	 * @see org.eclipse.osgi.framework.adaptor.PermissionStorage#deserializeConditionalPermissionInfos()
+	 */
+	public Object deserializeConditionalPermissionInfos() throws IOException {
+		FileInputStream fis = new FileInputStream(new File(permissionDir, CONDPERMS));
+		ObjectInputStream ois = new ObjectInputStream(fis);
+		Object o;
+		try {
+			o = ois.readObject();
+		} catch (Exception e) {
+			throw new IOException(e.getMessage());
+		}
+		ois.close();
+		return o;
 	}
 }

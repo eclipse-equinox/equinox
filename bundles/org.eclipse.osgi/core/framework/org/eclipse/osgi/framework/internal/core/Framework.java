@@ -83,7 +83,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 	 * The AliasMapper used to alias OS Names.
 	 */
 	protected static AliasMapper aliasMapper = new AliasMapper();
-	protected ConditionalPermissionAdminImpl		 condPermAdmin;
+	protected ConditionalPermissionAdminImpl condPermAdmin;
 
 	/**
 	 * Constructor for the Framework instance. This method initializes the
@@ -133,7 +133,6 @@ public class Framework implements EventDispatcher, EventPublisher {
 				throw new RuntimeException(e.getMessage());
 			}
 			try {
-				// TODO: We need to figure out the storage for ConditionalPermissionAdmin
 				condPermAdmin = new ConditionalPermissionAdminImpl(this, adaptor.getPermissionStorage());
 			} catch (IOException e) /* fatal error */{
 				e.printStackTrace();
@@ -991,7 +990,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 			// this is not optimized; do not think it will get called
 			// that much.
 			final String finalLocation = location;
-			
+
 			//Bundle.getLocation requires AdminPermission (metadata)
 			return (AbstractBundle) AccessController.doPrivileged(new PrivilegedAction() {
 				public Object run() {
@@ -1338,7 +1337,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 			}
 		}
 		/* Collect snapshot of BundleListeners */
-		ListenerQueue listenersAsync = null;;
+		ListenerQueue listenersAsync = null;
 		if (bundleEvent != null) {
 			/* queue to hold set of listeners */
 			listenersAsync = new ListenerQueue(eventManager);

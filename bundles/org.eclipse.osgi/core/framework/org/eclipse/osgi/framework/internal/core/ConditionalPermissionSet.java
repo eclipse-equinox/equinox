@@ -20,12 +20,10 @@ import org.osgi.service.condpermadmin.Condition;
 /**
  * This class represents a PermissionCollection tied to a set of Conditions.
  * Before the permissions are actually used, isNonEmpty should be called.
- * 
- * @version $Revision$
  */
 public class ConditionalPermissionSet extends PermissionCollection {
 	private static final long serialVersionUID = 3258411750729920566L;
-	ConditionalPermissionInfoImpl cpis[];
+	ConditionalPermissionInfoImpl cpis[] = new ConditionalPermissionInfoImpl[0];
 	HashMap cachedPermissionCollections = new HashMap();
 	/**
 	 * These are conditions that need to be satisfied in order to enable the
@@ -59,7 +57,7 @@ public class ConditionalPermissionSet extends PermissionCollection {
 	public void addConditionalPermissionInfo(ConditionalPermissionInfoImpl cpi) {
 		ConditionalPermissionInfoImpl newcpis[] = new ConditionalPermissionInfoImpl[cpis.length + 1];
 		System.arraycopy(cpis, 0, newcpis, 0, cpis.length);
-		cpis[cpis.length] = cpi;
+		newcpis[cpis.length] = cpi;
 		cpis = newcpis;
 		/*
 		 * TODO: I couldn't decide wether it is better to run through the cached
@@ -77,8 +75,6 @@ public class ConditionalPermissionSet extends PermissionCollection {
 	 * @return true if there is at least one active ConditionalPermissionInfo.
 	 */
 	public boolean isNonEmpty() {
-		if (cpis == null)
-			return false;
 		boolean nonEmpty = false;
 		for (int i = 0; i < cpis.length; i++) {
 			if (cpis[i] != null) {
@@ -97,7 +93,7 @@ public class ConditionalPermissionSet extends PermissionCollection {
 			}
 		}
 		if (!nonEmpty) {
-			cpis = null;
+			cpis = new ConditionalPermissionInfoImpl[0];
 		}
 		return nonEmpty;
 	}

@@ -28,7 +28,7 @@ import org.osgi.service.permissionadmin.PermissionInfo;
  * It has methods to facilitate the management of Conditions and Permissions at
  * runtime.
  * 
- * @version $Revision$
+ * @version $Revision: 1.1 $
  */
 public class ConditionalPermissionInfoImpl implements ConditionalPermissionInfo, Serializable {
 	private static final long serialVersionUID = 3258130245704825139L;
@@ -157,7 +157,11 @@ public class ConditionalPermissionInfoImpl implements ConditionalPermissionInfo,
 				}
 				constructor = clazz.getConstructor(clazzes);
 			}
-			conditions[i] = (Condition) constructor.newInstance(conds[i].getArgs());
+			String strArgs[] = conds[i].getArgs();
+			Object args[] = new Object[strArgs.length + 1];
+			args[0] = bundle;
+			System.arraycopy(strArgs, 0, args, 1, strArgs.length);
+			conditions[i] = (Condition) constructor.newInstance(args);
 		}
 		return conditions;
 	}
@@ -175,5 +179,6 @@ public class ConditionalPermissionInfoImpl implements ConditionalPermissionInfo,
 	 */
 	public void delete() {
 		deleted = true;
+		ConditionalPermissionAdminImpl.deleteConditionalPermissionInfo(this);
 	}
 }

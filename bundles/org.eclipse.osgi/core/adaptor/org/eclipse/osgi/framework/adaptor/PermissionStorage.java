@@ -12,6 +12,7 @@
 package org.eclipse.osgi.framework.adaptor;
 
 import java.io.IOException;
+import java.io.Serializable;
 
 /**
  * Permission Storage interface for managing a persistent storage of
@@ -77,4 +78,19 @@ public interface PermissionStorage {
 	 * @throws IOException If a failure occurs modifying peristent storage.
 	 */
 	public abstract void setPermissionData(String location, String[] data) throws IOException;
+
+	/**
+	 * Serializes the object, which represents the ConditionalPermissionInfos, to a
+	 * persistent store.
+	 * 
+	 * @param o the object to be serialized.
+	 */
+	public abstract void serializeConditionalPermissionInfos(Serializable o) throws IOException;
+
+	/**
+	 * Returns the previously serialized object that represents the ConditionalPermissionInfos.
+	 * 
+	 * @return the deserialized object representing the ConditionalPermissionInfos.
+	 */
+	public abstract Object deserializeConditionalPermissionInfos() throws IOException;
 }

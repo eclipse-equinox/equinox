@@ -56,6 +56,12 @@ final class BundleCombinedPermissions extends BundlePermissionCollection {
 		this.conditional = conditional;
 	}
 
+	void checkConditionalPermissionInfo(ConditionalPermissionInfoImpl cpi) {
+		if (conditional != null) {
+			conditional.checkConditionalPermissionInfo(cpi);
+		}
+	}
+
 	/**
 	 * The Permission collection will unresolve the permissions in these packages.
 	 *
@@ -165,9 +171,12 @@ final class BundleCombinedPermissions extends BundlePermissionCollection {
 		 * permission are the exact permissions the bundle has. */
 		if (!isDefault && (assigned != null) && assigned.implies(permission))
 			return true;
-		if ((conditional != null) && !conditional.isEmpty())
-			return conditional.implies(permission);
-
+		if (conditional != null) {
+			boolean conditionalImplies = conditional.implies(permission);
+			if (!conditional.isEmpty()) {
+				return conditionalImplies;
+			}
+		}
 		/* If there aren't any conditional permissions that apply, we use
 		 * the default. */
 		return assigned.implies(permission);

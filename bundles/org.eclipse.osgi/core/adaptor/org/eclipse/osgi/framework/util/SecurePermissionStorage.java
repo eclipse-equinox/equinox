@@ -12,6 +12,7 @@
 package org.eclipse.osgi.framework.util;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.security.*;
 import org.eclipse.osgi.framework.adaptor.PermissionStorage;
 
@@ -23,10 +24,13 @@ public class SecurePermissionStorage implements PermissionStorage, PrivilegedExc
 	private PermissionStorage storage;
 	private String location;
 	private String[] data;
+	private Serializable obj;
 	private int action;
 	private static final int GET = 1;
 	private static final int SET = 2;
 	private static final int LOCATION = 3;
+	private static final int DESERIALIZE = 4;
+	private static final int SERIALIZE = 5;
 
 	public SecurePermissionStorage(PermissionStorage storage) {
 		this.storage = storage;
@@ -41,6 +45,11 @@ public class SecurePermissionStorage implements PermissionStorage, PrivilegedExc
 				return null;
 			case LOCATION :
 				return storage.getLocations();
+			case SERIALIZE :
+				storage.serializeConditionalPermissionInfos(obj);
+				return null;
+			case DESERIALIZE :
+				return storage.deserializeConditionalPermissionInfos();
 		}
 
 		throw new UnsupportedOperationException();
@@ -74,6 +83,26 @@ public class SecurePermissionStorage implements PermissionStorage, PrivilegedExc
 
 		try {
 			AccessController.doPrivileged(this);
+		} catch (PrivilegedActionException e) {
+			throw (IOException) e.getException();
+		}
+	}
+
+	public void serializeConditionalPermissionInfos(Serializable o) throws IOException {
+		this.action = SERIALIZE;
+		this.obj = o;
+		try {
+			AccessController.doPrivileged(this);
+		} catch (PrivilegedActionException e) {
+			throw (IOException) e.getException();
+		}
+
+	}
+
+	public Object deserializeConditionalPermissionInfos() throws IOException {
+		this.action = DESERIALIZE;
+		try {
+			return AccessController.doPrivileged(this);
 		} catch (PrivilegedActionException e) {
 			throw (IOException) e.getException();
 		}

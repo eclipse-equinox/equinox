@@ -180,7 +180,7 @@ public class PermissionAdminImpl implements PermissionAdmin {
 	 * <tt>AdminPermission</tt>.
 	 */
 	public void setPermissions(String location, PermissionInfo[] permissions) {
-		framework.checkAdminPermission(0,AdminPermission.PERMISSION);
+		framework.checkAdminPermission(0, AdminPermission.PERMISSION);
 
 		if (location == null) {
 			throw new NullPointerException();
@@ -293,7 +293,7 @@ public class PermissionAdminImpl implements PermissionAdmin {
 	 * <tt>AdminPermission</tt>.
 	 */
 	public void setDefaultPermissions(PermissionInfo[] permissions) {
-		framework.checkAdminPermission(0,AdminPermission.PERMISSION);
+		framework.checkAdminPermission(0, AdminPermission.PERMISSION);
 
 		PermissionStorage storage = new org.eclipse.osgi.framework.util.SecurePermissionStorage(this.storage);
 
@@ -381,6 +381,8 @@ public class PermissionAdminImpl implements PermissionAdmin {
 		BundlePermissionCollection assigned = getAssignedPermissions(bundle);
 
 		combined.setAssignedPermissions(assigned, assigned == defaultAssignedPermissions);
+
+		combined.setConditionalPermissions(new ConditionalPermissions(bundle, framework.condPermAdmin));
 
 		return new BundleProtectionDomainImpl(bundle, combined);
 	}

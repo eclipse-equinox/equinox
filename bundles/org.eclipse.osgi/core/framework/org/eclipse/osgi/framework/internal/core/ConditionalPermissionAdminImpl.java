@@ -11,10 +11,12 @@
 
 package org.eclipse.osgi.framework.internal.core;
 
+import java.io.IOException;
 import java.security.AccessControlContext;
 import java.util.Enumeration;
 import java.util.Vector;
 import org.eclipse.osgi.framework.adaptor.PermissionStorage;
+import org.osgi.framework.FrameworkEvent;
 import org.osgi.service.condpermadmin.ConditionInfo;
 import org.osgi.service.condpermadmin.ConditionalPermissionAdmin;
 import org.osgi.service.condpermadmin.ConditionalPermissionInfo;
@@ -24,15 +26,15 @@ import org.osgi.service.permissionadmin.PermissionInfo;
  *
  * Implements ConditionalPermissionAdmin.
  * 
- * @version $Revision$
+ * @version $Revision: 1.1 $
  */
 public class ConditionalPermissionAdminImpl implements ConditionalPermissionAdmin {
 	/**
 	 * The Vector of current ConditionalPermissionInfos.  
 	 */
-	Vector condPerms = new Vector();
+	static Vector condPerms;
 	Framework framework;
-	PermissionStorage storage;
+	static PermissionStorage storage;
 
 	/**
 	 * @param framework
@@ -40,8 +42,13 @@ public class ConditionalPermissionAdminImpl implements ConditionalPermissionAdmi
 	 */
 	public ConditionalPermissionAdminImpl(Framework framework, PermissionStorage permissionStorage) {
 		this.framework = framework;
-		this.storage = permissionStorage;
-		// TODO: need to deserialize from storage
+		ConditionalPermissionAdminImpl.storage = permissionStorage;
+		try {
+			condPerms = (Vector) permissionStorage.deserializeConditionalPermissionInfos();
+		} catch (IOException e) {
+			framework.publishFrameworkEvent(FrameworkEvent.ERROR, framework.systemBundle, e);
+			condPerms = new Vector();
+		}
 	}
 
 	/**
@@ -49,8 +56,28 @@ public class ConditionalPermissionAdminImpl implements ConditionalPermissionAdmi
 	 */
 	public ConditionalPermissionInfo addConditionalPermissionInfo(ConditionInfo[] conds, PermissionInfo[] perms) {
 		ConditionalPermissionInfoImpl condPermInfo = new ConditionalPermissionInfoImpl(conds, perms);
-		condPerms.add(condPermInfo);
-		// TODO We need to save it off here
+		synchronized (condPerms) {
+			condPerms.add(condPermInfo);
+			try {
+				storage.serializeConditionalPermissionInfos(condPerms);
+			} catch (IOException e) {
+				framework.publishFrameworkEvent(FrameworkEvent.ERROR, framework.systemBundle, e);
+			}
+		}
+		AbstractBundle bundles[] = framework.getAllBundles();
+		for (int i = 0; i < bundles.length; i++) {
+			AbstractBundle bundle = bundles[i];
+			if (bundle.domain == null) {
+				continue;
+			}
+			BundleCombinedPermissions bcp = (BundleCombinedPermissions) bundle.domain.getPermissions();
+			/* TODO I don't think we need this check */
+			if (perms == null) {
+				continue;
+			}
+
+			bcp.checkConditionalPermissionInfo(condPermInfo);
+		}
 		return condPermInfo;
 	}
 
@@ -62,6 +89,17 @@ public class ConditionalPermissionAdminImpl implements ConditionalPermissionAdmi
 	 */
 	public Enumeration getConditionalPermissionInfos() {
 		return condPerms.elements();
+	}
+
+	static void deleteConditionalPermissionInfo(ConditionalPermissionInfo cpi) {
+		synchronized (condPerms) {
+			condPerms.remove(cpi);
+			try {
+				storage.serializeConditionalPermissionInfos(condPerms);
+			} catch (IOException e) {
+				// TODO We need to log this
+			}
+		}
 	}
 
 	/**

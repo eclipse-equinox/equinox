@@ -28,6 +28,7 @@
 
 package org.osgi.service.condpermadmin;
 
+import java.io.Serializable;
 import java.util.Vector;
 
 /**
@@ -45,7 +46,10 @@ import java.util.Vector;
  * 
  */
 
-public class ConditionInfo {
+/* TODO This Serializable can't stay here since it is part of the public class */
+public class ConditionInfo implements Serializable {
+	private static final long serialVersionUID = 3689354325134618934L;
+
 	private String type;
 
 	private String args[];

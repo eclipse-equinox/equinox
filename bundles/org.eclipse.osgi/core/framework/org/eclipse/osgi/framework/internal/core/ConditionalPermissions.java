@@ -16,6 +16,7 @@ import java.security.PermissionCollection;
 import java.util.Enumeration;
 import java.util.Vector;
 import org.osgi.service.condpermadmin.Condition;
+import org.osgi.service.condpermadmin.ConditionalPermissionAdmin;
 
 /**
  * 
@@ -23,7 +24,7 @@ import org.osgi.service.condpermadmin.Condition;
  * permissions that have yet to be satisfied as well as conditions that are
  * already satisfied.
  * 
- * @version $Revision$
+ * @version $Revision: 1.1 $
  */
 public class ConditionalPermissions extends PermissionCollection {
 	private static final long serialVersionUID = 3907215965749000496L;
@@ -52,8 +53,13 @@ public class ConditionalPermissions extends PermissionCollection {
 	 * 
 	 * @param bundle the bundle for which this ConditionalPermission tracks Permissions.
 	 */
-	public ConditionalPermissions(AbstractBundle bundle) {
+	public ConditionalPermissions(AbstractBundle bundle, ConditionalPermissionAdmin cpa) {
 		this.bundle = bundle;
+		Enumeration en = cpa.getConditionalPermissionInfos();
+		while (en.hasMoreElements()) {
+			ConditionalPermissionInfoImpl cpi = (ConditionalPermissionInfoImpl) en.nextElement();
+			checkConditionalPermissionInfo(cpi);
+		}
 	}
 
 	public void checkConditionalPermissionInfo(ConditionalPermissionInfoImpl cpi) {
@@ -84,7 +90,7 @@ public class ConditionalPermissions extends PermissionCollection {
 				satisfiableCPSs.add(new ConditionalPermissionSet(new ConditionalPermissionInfoImpl[] {cpi}, conds));
 			}
 		} catch (Exception e) {
-			/* TODO: we need to log these somewhere */
+			/* TODO: we need to log these somewhere. In any event we need to just move on... */
 			e.printStackTrace();
 		}
 	}
