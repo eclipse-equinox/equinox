@@ -116,7 +116,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 		/* initialize the adaptor */
 		adaptor.initialize(this);
 		if (Profile.PROFILE && Profile.STARTUP)
-			Profile.logTime("Framework.initialze()", "adapter initialized");  //$NON-NLS-1$//$NON-NLS-2$
+			Profile.logTime("Framework.initialze()", "adapter initialized"); //$NON-NLS-1$//$NON-NLS-2$
 		try {
 			adaptor.initializeStorage();
 			adaptor.compactStorage();
@@ -125,7 +125,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 			throw new RuntimeException(e.getMessage());
 		}
 		if (Profile.PROFILE && Profile.STARTUP)
-			Profile.logTime("Framework.initialze()", "adapter storage initialized");  //$NON-NLS-1$//$NON-NLS-2$
+			Profile.logTime("Framework.initialze()", "adapter storage initialized"); //$NON-NLS-1$//$NON-NLS-2$
 		/*
 		 * This must be done before calling any of the framework getProperty
 		 * methods.
@@ -149,7 +149,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 			}
 		}
 		if (Profile.PROFILE && Profile.STARTUP)
-			Profile.logTime("Framework.initialze()", "done init props & new PermissionAdminImpl");  //$NON-NLS-1$//$NON-NLS-2$
+			Profile.logTime("Framework.initialze()", "done init props & new PermissionAdminImpl"); //$NON-NLS-1$//$NON-NLS-2$
 		startLevelManager = new StartLevelManager(this);
 		/* create the event manager and top level event dispatchers */
 		eventManager = new EventManager("Framework Event Dispatcher"); //$NON-NLS-1$
@@ -175,7 +175,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 		/* install ContentHandlerFactory for OSGi URLStreamHandler support */
 		URLConnection.setContentHandlerFactory(new ContentHandlerFactory(systemBundle.context));
 		if (Profile.PROFILE && Profile.STARTUP)
-			Profile.logTime("Framework.initialze()", "done new URLStream/Content HandlerFactory");  //$NON-NLS-1$//$NON-NLS-2$
+			Profile.logTime("Framework.initialze()", "done new URLStream/Content HandlerFactory"); //$NON-NLS-1$//$NON-NLS-2$
 		/* create bundle objects for all installed bundles. */
 		BundleData[] bundleDatas = adaptor.getInstalledBundles();
 		bundles = new BundleRepository(bundleDatas == null ? 10 : bundleDatas.length + 1, packageAdmin);
@@ -195,7 +195,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 		if (Debug.DEBUG && Debug.DEBUG_GENERAL)
 			System.out.println("Initialize the framework: " + (System.currentTimeMillis() - start)); //$NON-NLS-1$
 		if (Profile.PROFILE && Profile.STARTUP)
-			Profile.logExit("Framework.initialze()");		
+			Profile.logExit("Framework.initialze()");
 	}
 
 	private void createSystemBundle() {
@@ -589,12 +589,13 @@ public class Framework implements EventDispatcher, EventPublisher {
 		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 			Debug.println("install from location: " + location); //$NON-NLS-1$
 		}
+		final AccessControlContext callerContext = AccessController.getContext();
 		return installWorker(location, new PrivilegedExceptionAction() {
 			public Object run() throws BundleException {
 				/* Map the identity to a URLConnection */
 				URLConnection source = adaptor.mapLocationToURLConnection(location);
 				/* call the worker to install the bundle */
-				return installWorkerPrivileged(location, source);
+				return installWorkerPrivileged(location, source, callerContext);
 			}
 		});
 	}
@@ -618,12 +619,13 @@ public class Framework implements EventDispatcher, EventPublisher {
 		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 			Debug.println("install from inputstream: " + location + ", " + in); //$NON-NLS-1$ //$NON-NLS-2$
 		}
+		final AccessControlContext callerContext = AccessController.getContext();
 		return installWorker(location, new PrivilegedExceptionAction() {
 			public Object run() throws BundleException {
 				/* Map the InputStream to a URLConnection */
 				URLConnection source = new BundleSource(in);
 				/* call the worker to install the bundle */
-				return installWorkerPrivileged(location, source);
+				return installWorkerPrivileged(location, source, callerContext);
 			}
 		});
 	}
@@ -678,6 +680,8 @@ public class Framework implements EventDispatcher, EventPublisher {
 			publishBundleEvent(BundleEvent.INSTALLED, bundle);
 			return bundle;
 		} catch (PrivilegedActionException e) {
+			if (e.getException() instanceof RuntimeException)
+				throw (RuntimeException) e.getException();
 			throw (BundleException) e.getException();
 		} finally {
 			synchronized (installLock) {
@@ -701,9 +705,9 @@ public class Framework implements EventDispatcher, EventPublisher {
 	 * @exception BundleException
 	 *                If the provided stream cannot be read.
 	 */
-	protected AbstractBundle installWorkerPrivileged(String location, URLConnection source) throws BundleException {
+	protected AbstractBundle installWorkerPrivileged(String location, URLConnection source, AccessControlContext callerContext) throws BundleException {
 		BundleOperation storage = adaptor.installBundle(location, source);
-		AbstractBundle bundle;
+		final AbstractBundle bundle;
 		try {
 			BundleData bundledata = storage.begin();
 			bundle = createAndVerifyBundle(bundledata);
@@ -719,29 +723,39 @@ public class Framework implements EventDispatcher, EventPublisher {
 				bundle.load();
 				if (System.getSecurityManager() != null && (bundledata.getType() & (BundleData.TYPE_BOOTCLASSPATH_EXTENSION | BundleData.TYPE_FRAMEWORK_EXTENSION)) != 0) {
 					// must check for AllPermission before allow a bundle extension to be installed
-					try {
-						bundle.hasPermission(new AllPermission());
-					} catch (SecurityException se) {
-						throw new BundleException(Msg.formatter.getString("BUNDLE_EXTENSION_PERMISSION"), se); //$NON-NLS-1$
-					}
+					bundle.hasPermission(new AllPermission());
+				}
+				try {
+					AccessController.doPrivileged(new PrivilegedExceptionAction() {
+						public Object run() throws Exception {
+							checkAdminPermission(bundle, AdminPermission.LIFECYCLE);
+							return null;
+						}
+					}, callerContext);
+				} catch (PrivilegedActionException e) {
+					throw e.getException();
 				}
 				storage.commit(false);
-			} catch (BundleException be) {
+			} catch (Throwable error) {
 				synchronized (bundles) {
 					bundle.unload();
 				}
 				bundle.close();
-				throw be;
+				throw error;
 			}
 			/* bundle has been successfully installed */
 			bundles.add(bundle);
-		} catch (BundleException e) {
+		} catch (Throwable t) {
 			try {
 				storage.undo();
 			} catch (BundleException ee) {
 				publishFrameworkEvent(FrameworkEvent.ERROR, systemBundle, ee);
 			}
-			throw e;
+			if (t instanceof RuntimeException)
+				throw (RuntimeException) t;
+			if (t instanceof BundleException)
+				throw (BundleException) t;
+			throw new BundleException(t.getMessage(), t);
 		}
 		return bundle;
 	}

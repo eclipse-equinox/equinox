@@ -31,7 +31,7 @@ import org.osgi.framework.*;
 
 public class BundleContextImpl implements BundleContext, EventDispatcher {
 	public static final String PROP_SCOPE_SERVICE_EVENTS = "osgi.scopeServiceEvents"; //$NON-NLS-1$
-	public static final boolean scopeEvents = Boolean.valueOf(System.getProperty(PROP_SCOPE_SERVICE_EVENTS,"true")).booleanValue(); //$NON-NLS-1$
+	public static final boolean scopeEvents = Boolean.valueOf(System.getProperty(PROP_SCOPE_SERVICE_EVENTS, "true")).booleanValue(); //$NON-NLS-1$
 	/** true if the bundle context is still valid */
 	private boolean valid;
 
@@ -196,8 +196,8 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	 * @return The Bundle object of the installed bundle.
 	 */
 	public org.osgi.framework.Bundle installBundle(String location) throws BundleException {
-		framework.checkAdminPermission(framework.systemBundle, AdminPermission.LIFECYCLE);
 		checkValid();
+		//note AdminPermission is checked after bundle is loaded
 		return framework.installBundle(location);
 	}
 
@@ -215,10 +215,8 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	 * @return The Bundle of the installed bundle.
 	 */
 	public org.osgi.framework.Bundle installBundle(String location, InputStream in) throws BundleException {
-		framework.checkAdminPermission(framework.systemBundle, AdminPermission.LIFECYCLE);
-
 		checkValid();
-
+		//note AdminPermission is checked after bundle is loaded
 		return framework.installBundle(location, in);
 	}
 
@@ -990,11 +988,11 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 				public Object run() throws Exception {
 					if (bundleActivator != null) {
 						if (Profile.PROFILE && Profile.STARTUP)
-							Profile.logTime("BundleContextImpl.startActivator()", "calling "+bundle.getLocation()+" bundle activator");   //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+							Profile.logTime("BundleContextImpl.startActivator()", "calling " + bundle.getLocation() + " bundle activator"); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
 						/* Start the bundle synchronously */
 						bundleActivator.start(BundleContextImpl.this);
 						if (Profile.PROFILE && Profile.STARTUP)
-							Profile.logTime("BundleContextImpl.startActivator()", "returned from "+bundle.getLocation()+" bundle activator");   //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+							Profile.logTime("BundleContextImpl.startActivator()", "returned from " + bundle.getLocation() + " bundle activator"); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
 					}
 					return null;
 				}
