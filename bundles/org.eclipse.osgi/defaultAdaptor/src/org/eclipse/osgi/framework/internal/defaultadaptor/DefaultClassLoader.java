@@ -453,7 +453,7 @@ public class DefaultClassLoader
 		// If not in dev mode then just add the regular classpath entries and return
 		if (System.getProperty("osgi.dev") == null) {
 			for (int i = 0; i < classpath.length; i++) 
-				addClassPathEntry(result, classpath[i],bundledata,domain);
+				findClassPathEntry(result, classpath[i],bundledata,domain);
 			return (ClasspathEntry[])result.toArray(new ClasspathEntry[result.size()]);
 		}
 		
@@ -466,9 +466,9 @@ public class DefaultClassLoader
 			String[] devEntries = getDevEntries(classpath[i], bundledata);
 			if (devEntries != null && devEntries.length > 0) {
 				for (int j = 0; j < devEntries.length; j++) 
-					addClassPathEntry(result, devEntries[j], bundledata, domain);
+					findClassPathEntry(result, devEntries[j], bundledata, domain);
 			} else 
-				addClassPathEntry(result, classpath[i], bundledata, domain);
+				findClassPathEntry(result, classpath[i], bundledata, domain);
 		}
 		return (ClasspathEntry[])result.toArray(new ClasspathEntry[result.size()]);
 	}
@@ -479,12 +479,22 @@ public class DefaultClassLoader
 		String[] defaultDevEntries = bundledata.adaptor.devCP;
 		if (defaultDevEntries != null) 
 			for (int i = 0; i < defaultDevEntries.length; i++) 
-				addClassPathEntry(result, defaultDevEntries[i], bundledata, domain);
+				findClassPathEntry(result, defaultDevEntries[i], bundledata, domain);
 	}
 
-	protected void addClassPathEntry(ArrayList result, String entry, DefaultBundleData bundledata, ProtectionDomain domain) {
-		if (entry.equals(".")) 
+	protected void findClassPathEntry(ArrayList result, String entry, DefaultBundleData bundledata, ProtectionDomain domain) {
+		if (!addClassPathEntry(result,entry,bundledata,domain)) {
+			BundleException be = new BundleException(Msg.formatter.getString("BUNDLE_CLASSPATH_ENTRY_NOT_FOUND_EXCEPTION", entry));
+			bundledata.adaptor.getEventPublisher().publishFrameworkEvent(
+					FrameworkEvent.ERROR,bundledata.getBundle(),be);
+		}
+	}
+
+	protected boolean addClassPathEntry(ArrayList result, String entry, DefaultBundleData bundledata, ProtectionDomain domain) {
+		if (entry.equals(".")) {
 			result.add(new ClasspathEntry(bundledata.bundleFile,domain));
+			return true;
+		}
 		else {
 			Object element = getClasspath(entry, bundledata, domain);
 			if (element != null){
@@ -500,16 +510,13 @@ public class DefaultClassLoader
 						element = getClasspath(entry,fragCP.bundledata,fragCP.domain);
 						if (element != null){
 							result.add(element);
+							return true;
 						}
 					}
 				}
-				if (element == null){
-					BundleException be = new BundleException(Msg.formatter.getString("BUNDLE_CLASSPATH_ENTRY_NOT_FOUND_EXCEPTION", entry));
-					bundledata.adaptor.getEventPublisher().publishFrameworkEvent(
-						FrameworkEvent.ERROR,bundledata.getBundle(),be);
-				}
 			}
 		}
+		return false;
 	}
 	
 	protected String[] getDevEntries(String classpathEntry, DefaultBundleData bundledata) {
