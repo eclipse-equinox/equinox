@@ -50,6 +50,8 @@ public abstract class BundleEntry {
 
 	public abstract URL getLocalURL();
 
+	public abstract URL getFileURL();
+
 	/**
 	 * Return the name of this BundleEntry by calling getName().
 	 *
@@ -124,9 +126,17 @@ public abstract class BundleEntry {
 
 		public URL getLocalURL() {
 			try {
+				return new URL("jar:file:" + bundleFile.bundlefile.getAbsolutePath() + "!/" + zipEntry.getName());
+			} catch (MalformedURLException e) {
+				//This can not happen. 
+				return null;
+			}
+		}
+
+		public URL getFileURL() {
+			try {
 				File file = bundleFile.getFile(zipEntry.getName());
 				return file.toURL();
-				//return new URL("jar:file:" + bundleFile.getAbsolutePath() + "!/" + zipEntry.getName());
 			} catch (MalformedURLException e) {
 				//This can not happen. 
 				return null;
@@ -190,6 +200,10 @@ public abstract class BundleEntry {
 		}
 
 		public URL getLocalURL() {
+			return getFileURL();
+		}
+
+		public URL getFileURL() {
 			try {
 				return file.toURL();
 			} catch (MalformedURLException e) {
@@ -227,6 +241,10 @@ public abstract class BundleEntry {
 		}
 
 		public URL getLocalURL() {
+			return getFileURL();
+		}
+
+		public URL getFileURL() {
 			try {
 				return new URL("jar:file:" + file.getAbsolutePath() + "!/" + name);
 			} catch (MalformedURLException e) {

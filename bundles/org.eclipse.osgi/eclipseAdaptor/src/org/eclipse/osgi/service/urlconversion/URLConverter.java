@@ -28,4 +28,14 @@ public interface URLConverter {
 	 * @throws IOException if an error occurs during the conversion.
 	 */
 	public URL convertToFileURL(URL url) throws IOException;
+
+	/**
+	 * Converts a URL that uses a protocol of bundleentry or bundleresource into
+	 * a URL that uses a local java protocol (file, jar etc).
+	 * @param url The bundleentry or bundleresource URL to convert into a local URL.
+	 * @return The converted file URL or the original URL passed in if it is not
+	 * a bundleentry or bundleresource URL.
+	 * @throws IOException if an error occurs during the conversion.
+	 */
+	public URL convertToLocalURL(URL url) throws IOException;
 }

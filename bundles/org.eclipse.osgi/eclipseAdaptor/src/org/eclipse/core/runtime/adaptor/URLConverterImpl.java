@@ -22,7 +22,18 @@ import org.eclipse.osgi.service.urlconversion.URLConverter;
  * URLs to be converted to native file URLs on the local file system.
  */
 public class URLConverterImpl implements URLConverter{
+
 	public URL convertToFileURL(URL url) throws IOException{
+		URLConnection connection = url.openConnection();
+		if (connection instanceof BundleURLConnection) {
+			return ((BundleURLConnection)connection).getFileURL();
+		}
+		else {
+			return url;
+		}
+	}
+
+	public URL convertToLocalURL(URL url) throws IOException {
 		URLConnection connection = url.openConnection();
 		if (connection instanceof BundleURLConnection) {
 			return ((BundleURLConnection)connection).getLocalURL();

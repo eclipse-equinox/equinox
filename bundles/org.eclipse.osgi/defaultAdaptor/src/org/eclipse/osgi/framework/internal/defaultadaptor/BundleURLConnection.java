@@ -201,4 +201,8 @@ public class BundleURLConnection extends URLConnection {
 	public URL getLocalURL() {
 		return bundleEntry.getLocalURL();
 	}
+
+	public URL getFileURL() {
+		return bundleEntry.getFileURL();
+	}
 }
