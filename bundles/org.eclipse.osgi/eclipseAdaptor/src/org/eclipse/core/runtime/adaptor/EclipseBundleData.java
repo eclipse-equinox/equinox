@@ -12,8 +12,8 @@ package org.eclipse.core.runtime.adaptor;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.*;
 import java.util.ArrayList;
 import java.util.Dictionary;
 
@@ -147,11 +147,11 @@ public class EclipseBundleData extends DefaultBundleData {
 		if (manifest == null)
 			manifest = first ? loadManifest() : new CachedManifest(this);
 		if (manifest.get(org.osgi.framework.Constants.BUNDLE_SYMBOLICNAME) == null) {
-			Dictionary generatedManifest = generateManifest();
+			Dictionary generatedManifest = generateManifest(manifest);
 			if (generatedManifest != null)
 				manifest = generatedManifest;
 		}		
-		return manifest;		
+		return manifest;	
 	}
 
 	public synchronized Dictionary loadManifest() throws BundleException {		
@@ -160,24 +160,39 @@ public class EclipseBundleData extends DefaultBundleData {
 			manifestTimeStamp = getBaseBundleFile().getEntry(".").getTime();
 			return loadManifestFrom(url);
 		}
-		Dictionary result = generateManifest();		
+		Dictionary result = generateManifest(null);		
 		if (result == null)	//TODO: need to NLS this
 			throw new BundleException("Manifest not found: " + getLocation());
 		return result;
 	}
-	
-	private Dictionary generateManifest() throws BundleException {
+
+	private Dictionary generateManifest(Dictionary originalManifest) throws BundleException {
 		PluginConverterImpl converter = PluginConverterImpl.getDefault();
 
 		setManifestTimeStamp(getBaseFile().lastModified());
-		File location = converter.convertManifest(getBaseFile(), null, true);
-		if (location == null)
-			return null;	
-		try {	
-			return loadManifestFrom(location.toURL());
-		} catch (MalformedURLException mfue) {
+		Dictionary generatedManifest = converter.convertManifest(getBaseFile(), true);
+		if (generatedManifest == null)
 			return null;
+
+		//merge the original manifest with the generated one
+		if (originalManifest != null) {
+			Enumeration  enum = originalManifest.keys();
+			while (enum.hasMoreElements()) {
+				 Object key =  enum.nextElement();
+				 generatedManifest.put(key, originalManifest.get(key));
+			}
 		}
+		
+		//write the generated manifest
+		String cacheLocation = (String) System.getProperties().get("osgi.manifest.cache");
+		File bundleManifestLocation = new File(cacheLocation, (String) generatedManifest.get(org.osgi.framework.Constants.BUNDLE_SYMBOLICNAME) + '_' + generatedManifest.get(Constants.BUNDLE_VERSION) + ".MF");
+		try {
+			converter.writeManifest(bundleManifestLocation, generatedManifest, true);
+		} catch (PluginConversionException e) {
+			//TODO Need to log
+		}
+		return generatedManifest;
+
 	}
 	private Dictionary loadManifestFrom(URL manifestURL) throws BundleException {
 		try {

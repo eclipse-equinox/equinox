@@ -24,10 +24,9 @@ public interface PluginConverter {
 	 * @param pluginBaseLocation the base location for the plug-in/fragment manifest to be converted
 	 * (a directory, e.g. the plug-in install location)
 	 * @param bundleManifestLocation the location for the bundle manifest to be generated
-	 * (including the file name). If <code>null</code> is passed as a parameter, the manifest will be generated into the 
-	 * pool of cached manifest. 
-	 * @param compatibilityManifest a boolean indicating if the manifest should contain headers to run with  
-	 * the backward compatibility
+	 * (including the file name). 
+	 * @param compatibilityManifest a boolean indicating if the manifest should contain headers to run  
+	 * in backward compatibility
 	 *	@return the generated manifest file location, if a bundle manifest was successfully 
 	 * generated (or already existed), <code>null</code> otherwise.
 	 */	
@@ -39,11 +38,19 @@ public interface PluginConverter {
 	 * 
 	 * @param pluginBaseLocation the base location for the plug-in/fragment manifest to be converted
 	 * (a directory, e.g. the plug-in install location)
-	 * @param compatibilityManifest a boolean indicating if the manifest should contain headers to run with  
-	 * the backward compatibility
+	 * @param compatibilityManifest a boolean indicating if the manifest should contain headers to run  
+	 * in backward compatibility
 	 *	@return the generated manifest as a dictionary,  if a bundle manifest was successfully 
 	 * generated, <code>null</code> otherwise
 	 */	
 	public Dictionary convertManifest(File pluginBaseLocation, boolean compatibility);
-	
+
+	/** 
+	 * Write the dictionary into the specified location. 
+	 * @param generationLocation the location for the bundle manifest to be written
+	 * @param manifestToWrite the dictionary to write into generationLocation file 
+	 * @param compatibilityManifest a boolean indicating if the file should contain headers to run with
+	 * in  backward compatibility
+	 */
+	public void writeManifest(File generationLocation, Dictionary manifestToWrite, boolean compatibilityManifest) throws Exception;
 }

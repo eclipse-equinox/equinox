@@ -96,7 +96,10 @@ public class PluginConverterImpl implements PluginConverter, IModel {
 		}
 		try {
 			fillManifest(compatibilityManifest);
-			writeManifest(bundleManifestLocation, compatibilityManifest);
+			if (upToDate(bundleManifestLocation, pluginManifestLocation))
+				return bundleManifestLocation;
+			
+			writeManifest(bundleManifestLocation, generatedManifest, compatibilityManifest);
 		} catch (PluginConversionException e) {
 			FrameworkLogEntry entry = new FrameworkLogEntry(PI_ECLIPSE_OSGI, e.getMessage(), 0, e, null);
 			EclipseAdaptor.getDefault().getFrameworkLog().log(entry);
@@ -225,9 +228,7 @@ public class PluginConverterImpl implements PluginConverter, IModel {
 		}
 	}
 	
-	protected void writeManifest(File generationLocation, boolean compatibilityManifest) throws PluginConversionException {
-		if (upToDate(generationLocation, pluginManifestLocation))
-			return;		
+	public  void writeManifest(File generationLocation, Dictionary manifestToWrite, boolean compatibilityManifest) throws PluginConversionException {
 		try {
 			generationLocation.getParentFile().mkdirs();
 			generationLocation.createNewFile();
@@ -238,12 +239,12 @@ public class PluginConverterImpl implements PluginConverter, IModel {
 			// replaces any eventual existing file
 			out = new BufferedWriter(new FileWriter(generationLocation));
 			
-			writeEntry(MANIFEST_VERSION, (String) generatedManifest.remove(MANIFEST_VERSION));
-			writeEntry(GENERATED_FROM, (String) generatedManifest.remove(GENERATED_FROM));	//Need to do this first uptoDate check expect the generated-from tag to be in the first line
-			Enumeration keys = generatedManifest.keys();
+			writeEntry(MANIFEST_VERSION, (String) manifestToWrite.remove(MANIFEST_VERSION));
+			writeEntry(GENERATED_FROM, (String) manifestToWrite.remove(GENERATED_FROM));	//Need to do this first uptoDate check expect the generated-from tag to be in the first line
+			Enumeration keys = manifestToWrite.keys();
 			while (keys.hasMoreElements()) {
 				String key = (String) keys.nextElement();
-				writeEntry(key, (String) generatedManifest.get(key));
+				writeEntry(key, (String) manifestToWrite.get(key));
 			}
 			out.flush();
 		} catch (IOException e) {
