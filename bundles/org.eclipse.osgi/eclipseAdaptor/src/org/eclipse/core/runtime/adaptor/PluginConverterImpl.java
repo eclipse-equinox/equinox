@@ -23,6 +23,7 @@ import org.osgi.framework.Constants;
 
 public class PluginConverterImpl implements PluginConverter, IModel {
 
+	private static final String MANIFEST_VERSION = "Manifest-Version";
 	private static final String PLUGIN_PROPERTIES_FILENAME = "plugin.properties";
 	private static final String PI_ECLIPSE_OSGI = "org.eclipse.osgi";
 	private static PluginConverterImpl instance;	
@@ -237,6 +238,8 @@ public class PluginConverterImpl implements PluginConverter, IModel {
 			}
 			// replaces any eventual existing file
 			out = new BufferedWriter(new FileWriter(generationLocation));
+			
+			writeEntry(MANIFEST_VERSION, (String) generatedManifest.remove(MANIFEST_VERSION));
 			writeEntry(GENERATED_FROM, (String) generatedManifest.remove(GENERATED_FROM));	//Need to do this first uptoDate check expect the generated-from tag to be in the first line
 			Enumeration keys = generatedManifest.keys();
 			while (keys.hasMoreElements()) {
@@ -262,7 +265,7 @@ public class PluginConverterImpl implements PluginConverter, IModel {
 	}
 
 	private void generateManifestVersion() {
-		generatedManifest.put("Manifest-Version", "1.0"); //$NON-NLS-1$ //$NON-NLS-2$
+		generatedManifest.put(MANIFEST_VERSION, "1.0"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	private boolean requireRuntimeCompatibility() {
@@ -571,11 +574,12 @@ public class PluginConverterImpl implements PluginConverter, IModel {
 	private boolean upToDate(File generationLocation, File pluginLocation) {
 		if (!generationLocation.isFile())
 			return false;
-		String firstLine = null;
+		String secondLine = null;
 		BufferedReader reader = null;
 		try {
 			reader = new BufferedReader(new InputStreamReader(new FileInputStream(generationLocation)));
-			firstLine = reader.readLine();
+			reader.readLine();
+			secondLine = reader.readLine();
 		} catch (IOException e) {
 			// not a big deal - we could not read an existing manifest
 			return false;
@@ -588,9 +592,9 @@ public class PluginConverterImpl implements PluginConverter, IModel {
 				}
 		}
 		String tag = GENERATED_FROM + ": "; //$NON-NLS-1$
-		if (firstLine == null || !firstLine.startsWith(tag))
+		if (secondLine == null || !secondLine.startsWith(tag))
 			return false;		
-		String timestampStr = firstLine.substring(tag.length() - 1);
+		String timestampStr = secondLine.substring(tag.length() - 1);
 		try {
 			return Long.parseLong(timestampStr.trim()) == pluginLocation.lastModified();
 		} catch(NumberFormatException nfe) {
