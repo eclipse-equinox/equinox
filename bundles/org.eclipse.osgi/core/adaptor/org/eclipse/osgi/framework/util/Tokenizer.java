@@ -35,7 +35,7 @@ public class Tokenizer
         for ( ;cur < max; cur++)
         {
             char c = val[cur];
-            if ((c == ' ') || (c == '\t'))
+            if ((c == ' ') || (c == '\t') || (c == '\n') || (c == '\r'))
             {
                 continue;
             }
