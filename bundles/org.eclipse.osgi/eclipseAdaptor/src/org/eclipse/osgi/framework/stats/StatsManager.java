@@ -51,8 +51,6 @@ public class StatsManager implements IBundleStats {
 
 	public void endActivation(String pluginId) {
 		// should be called from a synchronized location to protect against concurrent updates
-		if (!EclipseAdaptor.MONITOR_BUNDLES)
-			return;
 		BundleStats plugin = (BundleStats) activationStack.pop();
 		plugin.endActivation();
 	}

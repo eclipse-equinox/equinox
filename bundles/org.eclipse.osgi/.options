@@ -1,3 +1,6 @@
+# Debugging options for org.eclipse.osgi
+
+# Turn on general debugging for org.eclipse.osgi
 org.eclipse.osgi/debug=false
 
 org.eclipse.osgi/debug/loader=false

@@ -26,7 +26,7 @@ import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.*;
 
 public class EclipseAdaptor extends DefaultAdaptor {
-	public static boolean MONITOR_BUNDLES = false;
+
 	public static boolean MONITOR_CLASSES = false;
 	public static boolean MONITOR_RESOURCE_BUNDLES = false;
 	public static String TRACE_FILENAME = "runtime.traces"; //$NON-NLS-1$
@@ -37,7 +37,6 @@ public class EclipseAdaptor extends DefaultAdaptor {
 	private static final String RUNTIME_ADAPTOR = "org.eclipse.core.runtime.adaptor";
 
 	//Option names for spies
-	private static final String OPTION_MONITOR_BUNDLES = RUNTIME_ADAPTOR + "/monitor/bundles"; //$NON-NLS-1$
 	private static final String OPTION_MONITOR_CLASSES = RUNTIME_ADAPTOR + "/monitor/classes"; //$NON-NLS-1$
 	private static final String OPTION_MONITOR_RESOURCEBUNDLES = RUNTIME_ADAPTOR + "/monitor/resourcebundles"; //$NON-NLS-1$
 	private static final String OPTION_TRACE_BUNDLES = RUNTIME_ADAPTOR + "/trace/bundleActivation"; //$NON-NLS-1$
@@ -147,8 +146,6 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		// may be null if debugging is not enabled
 		if (options == null)
 			return;
-		MONITOR_BUNDLES = options.getBooleanOption(OPTION_MONITOR_BUNDLES, false);
-		org.eclipse.osgi.framework.internal.core.Bundle.MONITOR_BUNDLES = MONITOR_BUNDLES;
 		MONITOR_CLASSES = options.getBooleanOption(OPTION_MONITOR_CLASSES, false);
 		MONITOR_RESOURCE_BUNDLES = options.getBooleanOption(OPTION_MONITOR_RESOURCEBUNDLES, false);
 		TRACE_CLASSES = options.getBooleanOption(OPTION_TRACE_CLASSES, false);

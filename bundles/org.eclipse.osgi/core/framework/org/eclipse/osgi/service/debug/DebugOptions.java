@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.osgi.service.environment;
+package org.eclipse.osgi.service.debug;
 
 public interface DebugOptions {
 	public abstract boolean getBooleanOption(String option, boolean defaultValue);

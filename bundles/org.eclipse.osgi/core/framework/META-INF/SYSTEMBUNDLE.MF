@@ -5,7 +5,8 @@ Export-Package: org.osgi.framework; specification-version=1.2,
                 org.osgi.service.startlevel; specification-version=1.0,
                 org.eclipse.osgi.framework.eventmgr,
                 org.eclipse.osgi.framework.msg; specification-version=1.0,
-                org.eclipse.osgi.service.environment
+                org.eclipse.osgi.service.debug,
+                org.eclipse.osgi.service.resolver
 Import-Package: org.osgi.framework; specification-version=1.2,
                 org.osgi.service.packageadmin; specification-version=1.1,
                 org.osgi.service.permissionadmin; specification-version=1.1,
@@ -13,11 +14,12 @@ Import-Package: org.osgi.framework; specification-version=1.2,
                 org.osgi.service.startlevel; specification-version=1.0,
                 org.eclipse.osgi.framework.eventmgr,
                 org.eclipse.osgi.framework.msg; specification-version=1.0,
-                org.eclipse.osgi.service.environment
+                org.eclipse.osgi.service.debug,
+                org.eclipse.osgi.service.resolver
 Export-Service: org.osgi.service.packageadmin.PackageAdmin,
                 org.osgi.service.permissionadmin.PermissionAdmin,
                 org.osgi.service.startlevel.StartLevel,
-                org.eclipse.osgi.service.environment.DebugOptions
+                org.eclipse.osgi.service.debug.DebugOptions
 Bundle-Name: OSGi System Bundle
 Bundle-GlobalName: org.osgi.framework
 Bundle-Activator: org.eclipse.osgi.framework.internal.core.SystemBundleActivator

@@ -16,7 +16,7 @@ import java.net.URL;
 import java.util.Iterator;
 import java.util.Properties;
 
-public class DebugOptions implements org.eclipse.osgi.service.environment.DebugOptions {
+public class DebugOptions implements org.eclipse.osgi.service.debug.DebugOptions {
 	Properties options = null; 
 
 	private static DebugOptions singleton = null;

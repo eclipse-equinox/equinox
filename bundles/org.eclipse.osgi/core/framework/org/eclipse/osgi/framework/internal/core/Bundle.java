@@ -67,8 +67,6 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 	 */
 	protected BundleException resolveException;
 
-	public static boolean MONITOR_BUNDLES = false;
-
 	/**
 	 * Bundle object constructor.
 	 * This constructor should not perform any real work.

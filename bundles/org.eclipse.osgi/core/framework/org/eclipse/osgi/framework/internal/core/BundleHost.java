@@ -17,6 +17,7 @@ import java.security.PermissionCollection;
 import java.security.ProtectionDomain;
 import java.util.Vector;
 import org.eclipse.osgi.framework.adaptor.BundleData;
+import org.eclipse.osgi.framework.adaptor.IBundleStats;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleException;
@@ -430,8 +431,11 @@ public class BundleHost extends Bundle {
 			}
 
 			//STARTUP TIMING Start here
-			if (Debug.DEBUG && MONITOR_BUNDLES)
-				framework.adaptor.getBundleStats().startActivation(getGlobalName());
+			if (Debug.DEBUG && Debug.DEBUG_MONITOR_BUNDLES) {
+				IBundleStats bundleStats = framework.adaptor.getBundleStats();
+				if (bundleStats != null) 
+					bundleStats.startActivation(getGlobalName());
+			}
 
 			try {
 				if (state == INSTALLED) {
@@ -480,8 +484,11 @@ public class BundleHost extends Bundle {
 					}
 				}
 			} finally {
-				if (Debug.DEBUG && MONITOR_BUNDLES)
-					framework.adaptor.getBundleStats().endActivation(getGlobalName());
+				if (Debug.DEBUG && Debug.DEBUG_MONITOR_BUNDLES) {
+					IBundleStats bundleStats = framework.adaptor.getBundleStats();
+					if (bundleStats != null)
+						bundleStats.endActivation(getGlobalName());
+				}
 			}
 		}
         
