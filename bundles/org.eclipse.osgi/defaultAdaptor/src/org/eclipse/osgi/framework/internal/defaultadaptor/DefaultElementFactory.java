@@ -24,7 +24,7 @@ public class DefaultElementFactory implements AdaptorElementFactory{
 	}
 
 	public org.eclipse.osgi.framework.adaptor.BundleClassLoader createClassLoader(ClassLoaderDelegate delegate, ProtectionDomain domain, String[] bundleclasspath, AbstractBundleData data) {
-		return new DefaultClassLoader(delegate, domain, bundleclasspath, data);
+		return new DefaultClassLoader(delegate, domain, bundleclasspath, data.getAdaptor().getBundleClassLoaderParent(), data);
 	}
 
 }

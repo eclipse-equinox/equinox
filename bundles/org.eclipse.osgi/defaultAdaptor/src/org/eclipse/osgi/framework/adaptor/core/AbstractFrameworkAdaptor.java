@@ -52,27 +52,6 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 	 */
 	protected BundleContext context;	//TODO Rename to systemBundleContext
 
-	//TODO These fields does not seems to be very usefull, nor their methods. 
-	/**
-	 * The Vector Initial Capacity value.
-	 */
-	protected int vic;
-
-	/**
-	 * The Vector Capacity Increment value.
-	 */
-	protected int vci;
-
-	/**
-	 * The Hashtable Initial Capacity value.
-	 */
-	protected int hic;
-
-	/**
-	 * The Hashtable Load Factor value.
-	 */
-	protected float hlf;
-
 	/**
 	 * The initial bundle start level.
 	 */
@@ -80,6 +59,13 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 
 	/** This adaptor's manifest file */
 	protected Headers manifest = null;
+
+	/**
+	 * The BundleClassLoader parent to use when creating BundleClassLoaders.
+	 * The behavior of the ParentClassLoader will load classes
+	 * from the boot strap classloader.
+	 */
+	protected static ClassLoader bundleClassLoaderParent = new ParentClassLoader();
 
 	/**
 	 * Initializes the ServiceRegistry, loads the properties for this
@@ -93,10 +79,6 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 		serviceRegistry.initialize();
 		loadProperties();
 		readAdaptorManifest();
-		vic = 10;
-		vci = 10;
-		hic = 10;
-		hlf = 0.75f;
 	}
 
 	/**
@@ -132,34 +114,6 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 	 */
 	public org.eclipse.osgi.framework.adaptor.ServiceRegistry getServiceRegistry() {
 		return serviceRegistry;
-	}
-
-	/**
-	 * @see org.eclipse.osgi.framework.adaptor.FrameworkAdaptor#getVectorInitialCapacity()
-	 */
-	public int getVectorInitialCapacity() {
-		return vic;
-	}
-
-	/**
-	 * @see org.eclipse.osgi.framework.adaptor.FrameworkAdaptor#getVectorCapacityIncrement()
-	 */
-	public int getVectorCapacityIncrement(){
-		return vci;
-	}
-
-	/**
-	 * @see org.eclipse.osgi.framework.adaptor.FrameworkAdaptor#getHashtableInitialCapacity()
-	 */
-	public int getHashtableInitialCapacity() {
-		return hic;
-	}
-
-	/**
-	 * @see org.eclipse.osgi.framework.adaptor.FrameworkAdaptor#getHashtableLoadFactor()
-	 */
-	public float getHashtableLoadFactor() {
-		return hlf;
 	}
 
 	/**
@@ -399,7 +353,20 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 			}
 
 			throw e;
-		}
+		}	
 	}
 
+	public ClassLoader getBundleClassLoaderParent() {
+		return bundleClassLoaderParent;
+	}
+
+	/**
+	 * Empty parent classloader.  This is used by default as the BundleClassLoader
+	 * parent.
+	 */
+	protected static class ParentClassLoader extends ClassLoader {
+		protected ParentClassLoader() {
+			super(null);
+		}
+	}
 }

@@ -134,43 +134,24 @@ public class ServiceUse {
 
 			String[] clazzes = registration.clazzes;
 			int size = clazzes.length;
-
 			PackageAdmin packageAdmin = framework.packageAdmin;
-
 			for (int i = 0; i < size; i++) {
-				Class clazz;
-
-				try {
-					// TODO need to ensure that the class is loaded from the SERVICE or PRIVATE class space
-					clazz = factorybundle.loadClass(clazzes[i], false);
-				} catch (ClassNotFoundException e) {
-					try {
-						// TODO  this code really never should be run.  If the factory's classloader cannot
-						// see the required class (above) then it is not available.  Looking in a global list of
-						// package exporters etc is not a good plan in the face of modules and multiple
-						// versions.  For now just put in a dummy classload call to reduce code impact.
-						clazz = Class.forName(clazzes[i]);
-						//						clazz = packageAdmin.loadClass(clazzes[i]);
-					} catch (ClassNotFoundException ee) {
-						if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
-							Debug.println(clazzes[i] + " class not found");
-						}
-
-						BundleException be = new BundleException(Msg.formatter.getString("SERVICE_CLASS_NOT_FOUND_EXCEPTION", clazzes[i]), e);
-						framework.publishFrameworkEvent(FrameworkEvent.ERROR, factorybundle, be);
-
-						return (null);
+				Class clazz = packageAdmin.loadServiceClass(clazzes[i],factorybundle);
+				if (clazz == null) {
+					if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
+						Debug.println(clazzes[i] + " class not found");
 					}
+					BundleException be = new BundleException(Msg.formatter.getString("SERVICE_CLASS_NOT_FOUND_EXCEPTION", clazzes[i]));
+					framework.publishFrameworkEvent(FrameworkEvent.ERROR, factorybundle, be);
+					return (null);
 				}
 
 				if (!clazz.isInstance(service)) {
 					if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
 						Debug.println("Service object from ServiceFactory is not an instanceof " + clazzes[i]);
 					}
-
 					BundleException be = new BundleException(Msg.formatter.getString("SERVICE_NOT_INSTANCEOF_CLASS_EXCEPTION", factory.getClass().getName(), clazzes[i]));
 					framework.publishFrameworkEvent(FrameworkEvent.ERROR, factorybundle, be);
-
 					return (null);
 				}
 			}

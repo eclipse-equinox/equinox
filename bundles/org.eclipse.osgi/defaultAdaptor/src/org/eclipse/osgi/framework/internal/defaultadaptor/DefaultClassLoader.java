@@ -43,19 +43,6 @@ public class DefaultClassLoader extends AbstractClassLoader {
 	 * only if we cannot determine the size of the class we are loading.
 	 */
 	protected int buffersize = 8 * 1024;
-	
-	/**
-	 * BundleClassLoader constructor.
-	 * @param delegate The ClassLoaderDelegate for this ClassLoader.
-	 * @param domain The ProtectionDomain for this ClassLoader.
-	 * @param bundleclasspath An array of Bundle-ClassPath entries to
-	 * use for loading classes and resources.  This is specified by the 
-	 * Bundle-ClassPath manifest entry.
-	 * @param bundledata The BundleData for this ClassLoader
-	 */
-	public DefaultClassLoader(ClassLoaderDelegate delegate, ProtectionDomain domain, String[] classpath, AbstractBundleData bundledata) {
-		this(delegate, domain, classpath, null, bundledata);
-	}
 
 	/**
 	 * BundleClassLoader constructor.

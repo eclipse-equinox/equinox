@@ -57,6 +57,8 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 
 	private long cumulativeTime;
 
+	private static boolean restrictServiceClasses = false;
+
 	/**
 	 * Constructor.
 	 *
@@ -67,6 +69,7 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 	}
 
 	protected void initialize() {
+		restrictServiceClasses = System.getProperty(Constants.OSGI_RESTRICTSERVICECLASSES) != null;
 		removalPending = new Vector(10, 10);
 
 		State state = framework.adaptor.getState();
@@ -896,4 +899,33 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 
 	public int getBundleType(org.osgi.framework.Bundle bundle) {
 		return ((Bundle)bundle).isFragment() ? PackageAdmin.BUNDLE_TYPE_FRAGMENT : 0;
-	}}
+	}
+
+	protected Class loadServiceClass(String className, Bundle bundle) {
+		try {
+			if (restrictServiceClasses)
+				return framework.adaptor.getBundleClassLoaderParent().loadClass(className);
+			else
+				return bundle.loadClass(className,false);
+		} catch (ClassNotFoundException e) {
+			// do nothing; try exported packages
+		}
+
+		// try exported packages; SERVICE class space
+		String pkgname = BundleLoader.getPackageName(className);
+		if (pkgname != null) {
+			PackageSource exporter = (PackageSource) exportedPackages.getByKey(pkgname);
+			if (exporter != null) {
+				Class serviceClass = exporter.getSupplier().getBundleLoader().findLocalClass(className);
+				if (serviceClass != null)
+					return serviceClass;
+			}
+		}
+
+		// try bundle's PRIVATE class space if we are restricting service classes
+		if (restrictServiceClasses)
+			return bundle.getBundleLoader().findLocalClass(className);
+		
+		return null;
+	}
+}

@@ -37,8 +37,8 @@ public class EclipseClassLoader extends DefaultClassLoader {
 	private List exceptions;	//TODO This could easily be changed to an array
 	// should we try to activate the bundle?
 	private boolean tryActivating;
-	public EclipseClassLoader(ClassLoaderDelegate delegate, ProtectionDomain domain, String[] classpath, BundleData bundleData) {
-		super(delegate, domain, classpath, (org.eclipse.osgi.framework.internal.defaultadaptor.DefaultBundleData) bundleData);
+	public EclipseClassLoader(ClassLoaderDelegate delegate, ProtectionDomain domain, String[] classpath, ClassLoader parent, BundleData bundleData) {
+		super(delegate, domain, classpath, parent, (org.eclipse.osgi.framework.internal.defaultadaptor.DefaultBundleData) bundleData);
 		parseAutoStart(bundleData);
 		// unless autoStart == false and there are no exceptions, we should try activating
 		tryActivating = autoStart || exceptions != null;

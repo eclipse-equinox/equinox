@@ -97,7 +97,9 @@ public interface Constants extends org.osgi.framework.Constants {
 	/** Property file locations and default names. */
 	public static final String OSGI_PROPERTIES = "osgi.framework.properties";
 	public static final String DEFAULT_OSGI_PROPERTIES = "osgi.properties";
-
+	public static final String OSGI_AUTOEXPORTSYSTEMPACKAGES = "osgi.autoExportSystemPackages";
+	public static final String OSGI_RESTRICTSERVICECLASSES = "osgi.restrictServiceClasses";
+	
 	/** Properties set by the framework */
 
 	/** OSGI system package property */
@@ -107,8 +109,6 @@ public interface Constants extends org.osgi.framework.Constants {
 	public static final String OSGI_IMPL_VERSION_KEY = "osgi.framework.version";
 
 	public static final String OSGI_FRAMEWORKBEGINNINGSTARTLEVEL = "osgi.framework.beginningstartlevel";
-
-	public static final String OSGI_AUTOEXPORTSYSTEMPACKAGES = "osgi.autoExportSystemPackages";
 
 	/** Properties defaults */
 	public static final String DEFAULT_STARTLEVEL = "1";

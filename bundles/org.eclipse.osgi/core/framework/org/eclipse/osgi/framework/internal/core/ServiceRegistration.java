@@ -14,6 +14,8 @@ package org.eclipse.osgi.framework.internal.core;
 import java.util.*;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.util.Headers;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.ServiceEvent;
 
 /**
@@ -371,11 +373,12 @@ public class ServiceRegistration implements org.osgi.framework.ServiceRegistrati
 
             ServiceUse use = (ServiceUse)servicesInUse.get(reference);
 
+            Object service = null;
             if (use == null)
             {
                 use = new ServiceUse(user, this);
 
-                Object service = use.getService();
+                service = use.getService();
 
                 if (service != null)
                 {
@@ -388,13 +391,24 @@ public class ServiceRegistration implements org.osgi.framework.ServiceRegistrati
 
                     contextsUsing.addElement(user);
                 }
-
-                return(service);
             }
             else
             {
-                return(use.getService());
+                service = use.getService();
             }
+            for (int i = 0; i < clazzes.length; i++) {
+            	try {
+					Class clazz = user.bundle.loadClass(clazzes[i],false);
+					if (!clazz.isInstance(service)) {
+						BundleException be = new BundleException("Create Error Message");// TODO error message here.
+						framework.publishFrameworkEvent(FrameworkEvent.ERROR,user.bundle,be);
+						return null;
+					}
+				} catch (ClassNotFoundException e) {
+					// do nothing
+				}
+            }
+            return service;
         }
     }
 

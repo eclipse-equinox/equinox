@@ -198,14 +198,9 @@ public class BundleContext implements org.osgi.framework.BundleContext, EventSou
 	 * @return The Bundle object of the installed bundle.
 	 */
 	public org.osgi.framework.Bundle installBundle(String location) throws BundleException {
-
 		framework.checkAdminPermission();
-
 		checkValid();
-		// TODO: check if we only want to use only one type of protocal to install.  Maybe inquire the FrameworkAdaptor?
-
 		return framework.installBundle(location);
-
 	}
 
 	/**
@@ -607,37 +602,19 @@ public class BundleContext implements org.osgi.framework.BundleContext, EventSou
 
 		if (!(service instanceof ServiceFactory)) {
 			PackageAdmin packageAdmin = framework.packageAdmin;
-
 			for (int i = 0; i < size; i++) {
-				Class clazz;
-
-				try {
-					// TODO need to ensure that the class is loaded from the SERVICE or PRIVATE class space
-					clazz = bundle.loadClass(clazzes[i], false);
-				} catch (ClassNotFoundException e) {
-					try {
-						// TODO  this code really never should be run.  If the factory's classloader cannot
-						// see the required class (above) then it is not available.  Looking in a global list of
-						// package exporters etc is not a good plan in the face of modules and multiple
-						// versions.  Actually, it is unclear that we need to verify the pedigree of the service object 
-						// at registration time.  
-						// For now just put in a dummy classload call to reduce code impact.
-						clazz = Class.forName(clazzes[i]);
-						//                        clazz = packageAdmin.loadClass(clazzes[i]);
-					} catch (ClassNotFoundException ee) {
-						if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
-							Debug.println(clazzes[i] + " class not found");
-						}
-
-						throw new IllegalArgumentException(Msg.formatter.getString("SERVICE_CLASS_NOT_FOUND_EXCEPTION", clazzes[i]));
+				Class clazz = packageAdmin.loadServiceClass(clazzes[i],bundle);
+				if (clazz == null) {
+					if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
+						Debug.println(clazzes[i] + " class not found");
 					}
+					throw new IllegalArgumentException(Msg.formatter.getString("SERVICE_CLASS_NOT_FOUND_EXCEPTION", clazzes[i]));
 				}
 
 				if (!clazz.isInstance(service)) {
 					if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
 						Debug.println("Service object is not an instanceof " + clazzes[i]);
 					}
-
 					throw new IllegalArgumentException(Msg.formatter.getString("SERVICE_NOT_INSTANCEOF_CLASS_EXCEPTION", clazzes[i]));
 				}
 			}

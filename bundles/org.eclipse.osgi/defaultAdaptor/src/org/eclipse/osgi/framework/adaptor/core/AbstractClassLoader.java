@@ -53,32 +53,14 @@ public abstract class AbstractClassLoader extends ClassLoader implements BundleC
 	protected boolean closed = false;
 
 	/**
-	 * The default parent classloader to use when one is not specified.
-	 * The behavior of the default parent classloader will be to load classes
-	 * from the boot strap classloader.
-	 */
-	protected static ParentClassLoader defaultParentClassLoader = new ParentClassLoader();
-
-	/**
 	 * BundleClassLoader constructor.
 	 * @param delegate The ClassLoaderDelegate for this bundle.
 	 * @param domain The ProtectionDomain for this bundle.
-	 * @param classpath The classpath entries to use for the host.
-	 */
-	public AbstractClassLoader(ClassLoaderDelegate delegate, ProtectionDomain domain, String[] classpath) {
-		this(delegate, domain, classpath, null);
-	}
-
-	/**
-	 * BundleClassLoader constructor.
-	 * @param delegate The ClassLoaderDelegate for this bundle.
-	 * @param domain The ProtectionDomain for this bundle.
-	 * @param parent The parent classloader to use.
+	 * @param parent The parent classloader to use.  Must not be null.
 	 * @param classpath The classpath entries to use for the host.
 	 */
 	public AbstractClassLoader(ClassLoaderDelegate delegate, ProtectionDomain domain, String[] classpath, ClassLoader parent) {
-		// use the defaultParentClassLoader if a parent is not specified.
-		super(parent == null ? defaultParentClassLoader : parent);
+		super(parent);
 		this.delegate = delegate;
 		this.hostdomain = domain;
 		this.hostclasspath = classpath;
@@ -252,17 +234,6 @@ public abstract class AbstractClassLoader extends ClassLoader implements BundleC
 	 */
 	public void close() {
 		closed = true;
-	}
-
-	/**
-	 * Empty parent classloader.  This is used by default as our parentClassLoader
-	 * The BundleClassLoader constructor may assign a different parentClassLoader
-	 * if desired.
-	 */
-	protected static class ParentClassLoader extends ClassLoader {
-		protected ParentClassLoader() {
-			super(null);
-		}
 	}
 
 	protected ClassLoader getParentPrivileged(){

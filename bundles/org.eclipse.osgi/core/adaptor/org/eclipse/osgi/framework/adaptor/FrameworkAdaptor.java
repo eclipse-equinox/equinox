@@ -179,42 +179,6 @@ public interface FrameworkAdaptor {
 	 */
 	public ServiceRegistry getServiceRegistry();
 
-	//TODO Are those 4 methods necessary? Why do they have to be tight to Vector or Hashtable? A more generic name
-	/**
-	 * The framework uses this value when creating Vectors in data structures
-	 * that have long lifespans. <p>
-	 * This value specifies amount by which the capacity of a vector is 
-	 * automatically incremented when its size becomes greater than its 
-	 * capacity.
-	 * @return The Vector capacity increment.
-	 */
-	public int getVectorCapacityIncrement();
-
-	/**
-	 * The framework uses this value when creating Vectors in data structures
-	 * that have long lifespans. <p>
-	 * This value specifies the initial capacity of a vector
-	 * @return The Vector initial capacity.
-	 */
-	public int getVectorInitialCapacity();
-
-	/**
-	 * The framework uses this value when creating Hashtables in data structures
-	 * that have long lifespans. <p>
-	 * This value specifies the initial capacity of a Hashtable
-	 * @return The Hashtable initial capacity.
-	 */
-	public int getHashtableInitialCapacity();
-
-	/**
-	 * The framework uses this value when creating Hashtables in data structures
-	 * that have long lifespans. <p>
-	 * This value specifies how full the hash table is allowed to get before 
-	 * its capacity is automatically increased.
-	 * @return The Hashtable load factor.
-	 */
-	public float getHashtableLoadFactor();
-
 	/**
 	 * The framework will call this method after the 
 	 * System BundleActivator.start(BundleContext) has been called.  The context is 
@@ -319,4 +283,13 @@ public interface FrameworkAdaptor {
 	 * @return the State for this FrameworkAdaptor.
 	 */
 	public State getState();
+
+	/**
+	 * Returns the parent ClassLoader all BundleClassLoaders created.  All
+	 * BundleClassLoaders that are created must use the ClassLoader returned
+	 * by this method as a parent ClassLoader.  Each call to this method must 
+	 * return the same ClassLoader object.
+	 * @return the parent ClassLoader for all BundleClassLoaders created.
+	 */
+	public ClassLoader getBundleClassLoaderParent();
 }

@@ -30,8 +30,11 @@ import org.osgi.framework.*;
 public class Framework implements EventSource, EventPublisher {
 	/** FrameworkAdaptor specific functions. */
 	protected FrameworkAdaptor adaptor;
-	/** framework properties object. */
-	protected Properties properties;	//TODO What is the difference between this properties and the one from the adaptor? Why can't we have one? 
+	/** Framework properties object.  A reference to the 
+	 * System.getProperies() object.  The properties from
+	 * the adaptor will be merged into these properties.
+	 */
+	protected Properties properties;
 	/** Has the service space been started */
 	protected boolean active;
 	/** The bundles installed in the framework */
@@ -51,11 +54,19 @@ public class Framework implements EventSource, EventPublisher {
 	protected ServiceRegistry serviceRegistry;		//TODO This is duplicated from the adaptor, do we really gain ?
 	/** next free service id. */
 	protected long serviceid;
+	
+	/*
+	 * The following EventListeners objects keep track of event listeners
+	 * by BundleContext.  Each element is a EventListeners that is the list
+	 * of event listeners for a particular BundleContext.  The max number of
+	 * elements each of the following lists will have is the number of bundles
+	 * installed in the Framework.
+	 */
 	/** List of BundleContexts for bundle's BundleListeners. */
-	protected EventListeners bundleEvent;	//TODO Can't we use the one from the bundleContext of the systemBundle. Or am I mixing up things 
+	protected EventListeners bundleEvent;
 	protected static final int BUNDLEEVENT = 1;
 	/** List of BundleContexts for bundle's SynchronousBundleListeners. */
-	protected EventListeners bundleEventSync; //TODO Can't we use the one from the bundleContext of the systemBundle. Or am I mixing up things 
+	protected EventListeners bundleEventSync;
 	protected static final int BUNDLEEVENTSYNC = 2;
 	/** List of BundleContexts for bundle's ServiceListeners. */
 	protected EventListeners serviceEvent;
@@ -142,7 +153,7 @@ public class Framework implements EventSource, EventPublisher {
 		URLConnection.setContentHandlerFactory(new ContentHandlerFactory(systemBundle.context));
 		/* create bundle objects for all installed bundles. */
 		Vector bundleDatas = adaptor.getInstalledBundles();
-		bundles = new BundleRepository(bundleDatas == null ? adaptor.getVectorInitialCapacity() : bundleDatas.size() + 1, packageAdmin);
+		bundles = new BundleRepository(bundleDatas == null ? 10 : bundleDatas.size() + 1, packageAdmin);
 		/* add the system bundle to the Bundle Repository */
 		bundles.add(systemBundle);
 		if (bundleDatas != null) {
