@@ -255,7 +255,7 @@ public abstract class BundleEntry {
 		private String name;
 
 		public DirZipBundleEntry(BundleFile.ZipBundleFile bundleFile, String name) {
-			this.name = name;
+			this.name = (name.length() > 0 && name.charAt(0) == '/') ? name.substring(1) : name;
 			this.bundleFile = bundleFile;
 		}
 
