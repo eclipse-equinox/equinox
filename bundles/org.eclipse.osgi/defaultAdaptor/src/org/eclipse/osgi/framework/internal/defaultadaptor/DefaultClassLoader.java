@@ -499,6 +499,7 @@ public class DefaultClassLoader
 			Object element = getClasspath(entry, bundledata, domain);
 			if (element != null){
 				result.add(element);
+				return true;
 			}
 			else {
 				// need to check in fragments for the classpath entry.
