@@ -219,7 +219,8 @@ public class EclipseStarter {
 		while (e.hasMoreElements()) {
 			Bundle bundle = (Bundle)e.nextElement();
 			try {
-				bundle.start();				
+				if (! bundle.isFragment())
+					bundle.start();				
 			} catch (BundleException ex) {
 				System.out.println("Error starting " + bundle.getLocation());
 				ex.printStackTrace();
