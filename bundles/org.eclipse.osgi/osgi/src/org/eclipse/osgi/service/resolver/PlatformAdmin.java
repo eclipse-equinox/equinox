@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.osgi.service.resolver;
 
+import org.eclipse.osgi.framework.internal.defaultadaptor.DefaultAdaptor;
+import org.eclipse.osgi.internal.resolver.StateManager;
 import org.osgi.framework.BundleException;
 /**
  * Framework service which allows bundle programmers to inspect the bundles and
@@ -20,14 +22,37 @@ import org.osgi.framework.BundleException;
  * If present, there will only be a single instance of this service
  * registered with the Framework.
  */
-public interface PlatformAdmin {
+public final class PlatformAdmin {
+	private static PlatformAdmin singleton = null;
+	private static DefaultAdaptor adaptor = null;
+	
+	static public void initialize(DefaultAdaptor value) {
+		adaptor = value;
+	}
+	static public PlatformAdmin getInstance() {
+		if (adaptor == null)
+			throw new IllegalStateException();
+		if (singleton == null)
+			singleton = new PlatformAdmin();
+		return singleton;
+	}
 
+	// Protect the instantiation of PlatformAdmin
+	private PlatformAdmin() {
+		super();
+	}
+	
+	private StateManager getStateManager() {
+		return adaptor.getStateManager();
+	}
 	/** 
 	 * Returns a state representing the current system.  The returned state 
 	 * will not be associated with any resolver.
 	 * @return a state representing the current framework.
 	 */
-	public State getState();
+	public State getState() {
+		return getStateManager().getState();
+	}
 	
 	/**
 	 * Commit the differences between the current state and the given state.
@@ -38,19 +63,25 @@ public interface PlatformAdmin {
 	 * @throws BundleException if the id of the given state does not match that of the
 	 * 	current state or if the given state is not resolved.
 	 */
-	public void commit(State state) throws BundleException;
+	public void commit(State state) throws BundleException {
+		getStateManager().commit(state);
+	}
 	
 	/**
 	 * Returns a resolver supplied by the system.  The returned resolver 
 	 * will not be associated with any state.
 	 * @return a system resolver
 	 */
-	public Resolver getResolver();
+	public Resolver getResolver() {
+		return getStateManager().getResolver();
+	}
 	
 	/**
 	 * Returns a factory that knows how to create state objects, such as bundle 
 	 * descriptions and the different types of version constraints.
 	 * @return a state object factory
 	 */
-	public StateObjectFactory getFactory();
+	public StateObjectFactory getFactory() {
+		return getStateManager().getFactory();
+	}
 }
