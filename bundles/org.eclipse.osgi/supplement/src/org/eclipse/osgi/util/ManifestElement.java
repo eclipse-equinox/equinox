@@ -27,7 +27,7 @@ import org.osgi.framework.BundleException;
  * ManifestElement ::= headervalues (';' attribute)*
  * headervalues ::= headervalue (';' headervalue)*
  * headervalue ::= <any string value that does not have ';'>
- * attribute ::= key ’=’ value
+ * attribute ::= key '=' value
  * key ::= token
  * value ::= token | quoted-string
  * </pre>

@@ -1,5 +1,5 @@
 /*
- * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/Bundle.java,v 1.10 2004/05/07 21:40:52 hargrave Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/Bundle.java,v 1.11 2004/05/10 14:40:56 hargrave Exp $
  *
  * Copyright (c) The Open Services Gateway Initiative (2000, 2002).
  * All Rights Reserved.
@@ -67,7 +67,7 @@ import java.util.Enumeration;
  * create <tt>Bundle</tt> objects, and these objects are only valid
  * within the Framework that created them.
  *
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public abstract interface Bundle
 {
@@ -658,7 +658,7 @@ public abstract interface Bundle
 
 	/**
 	 *
-	 * Loads the specified class using this bundle’s classloader.
+	 * Loads the specified class using this bundle's classloader.
 	 * 
 	 * <p>If this bundle's state is <tt>INSTALLED</tt>, this method will attempt to
 	 * resolve the bundle before attempting to load the class.
