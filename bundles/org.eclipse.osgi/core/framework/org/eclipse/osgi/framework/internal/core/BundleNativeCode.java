@@ -139,7 +139,7 @@ public class BundleNativeCode {
 	private void setAttribute(ManifestElement element, String attribute) {
 		String attrValue = element.getAttribute(attribute);
 		if (attrValue != null) {
-			StringTokenizer attrSt = new StringTokenizer(attrValue, ",");
+			StringTokenizer attrSt = new StringTokenizer(attrValue, ";");
 			while (attrSt.hasMoreTokens()) {
 				addAttribute(attribute, attrSt.nextToken());
 			}
