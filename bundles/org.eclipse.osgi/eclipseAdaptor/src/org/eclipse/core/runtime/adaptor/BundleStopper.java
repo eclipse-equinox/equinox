@@ -67,18 +67,17 @@ public class BundleStopper {
 		// stop all active bundles in the reverse order of Require-Bundle
 		for (int stoppingIndex = allToStop.length - 1; stoppingIndex >= 0; stoppingIndex--) {
 			AbstractBundle toStop = (AbstractBundle) context.getBundle(allToStop[stoppingIndex].getBundleId());
-			if (toStop.getBundleId() == 0 || !((EclipseBundleData) toStop.getBundleData()).isAutoStartable())
-				continue;
-			try {
-				if (toStop.getState() != Bundle.ACTIVE || !(toStop instanceof BundleHost))
-					continue;
-				toStop.stop();
-			} catch (Exception e) {
-				String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_BUNDLESTOPPER_ERROR_STOPPING_BUNDLE", allToStop[stoppingIndex].toString()); //$NON-NLS-1$
-				FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, message, 0, e, null);
-				EclipseAdaptor.getDefault().getFrameworkLog().log(entry);
-			} finally {
-				stoppedBundles.put(toStop, toStop);
+			if (toStop.getBundleId() != 0 && ((EclipseBundleData) toStop.getBundleData()).isAutoStartable()) {
+				try {
+					if ((toStop.getState() == Bundle.ACTIVE) && (toStop instanceof BundleHost))
+						toStop.stop();
+				} catch (Exception e) {
+					String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_BUNDLESTOPPER_ERROR_STOPPING_BUNDLE", allToStop[stoppingIndex].toString()); //$NON-NLS-1$
+					FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, message, 0, e, null);
+					EclipseAdaptor.getDefault().getFrameworkLog().log(entry);
+				} finally {
+					stoppedBundles.put(toStop, toStop);
+				}
 			}
 		}
 	}
