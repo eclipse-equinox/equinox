@@ -107,19 +107,21 @@ public class ConfigurationSessionTestSuite extends SessionTestSuite {
 		}
 		Bundle bundle = Platform.getBundle(id);
 		Assert.assertNotNull("0.1 " + id, bundle);
-		URL url = null;
+		URL url = bundle.getEntry("/");
+		Assert.assertNotNull("0.2 " + id, url);		
 		try {
-			url = Platform.resolve(bundle.getEntry("/"));
+			url = Platform.resolve(url);
 		} catch (IOException e) {
-			CoreTest.fail("0.2 " + bundle.getEntry("/"), e);
+			CoreTest.fail("0.3 " + url, e);
 		}
-		String externalForm = url.toExternalForm();		
+		String externalForm;		
 		if (url.getProtocol().equals("jar")) {
-			// if it is a JAR'd plug-in, URL is jar:file:/path/file.jar!/
+			// if it is a JAR'd plug-in, URL is jar:file:/path/file.jar!/ - see bug 86195
 			String path = url.getPath();
 			// change it to be file:/path/file.jar
 			externalForm = path.substring(0, path.length() - 2);
-		}
+		} else
+			externalForm  = url.toExternalForm();
 		// workaround for bug 88070		
 		externalForm = "reference:" + externalForm;
 		return externalForm + suffix;
