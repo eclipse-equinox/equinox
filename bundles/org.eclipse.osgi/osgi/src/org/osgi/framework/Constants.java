@@ -1,5 +1,5 @@
 /*
- * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/Constants.java,v 1.3 2004/02/16 21:28:52 jfogell Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/Constants.java,v 1.4 2004/02/18 16:07:59 twatson Exp $
  *
  * Copyright (c) The Open Services Gateway Initiative (2000-2001).
  * All Rights Reserved.
@@ -35,7 +35,7 @@ package org.osgi.framework;
  * <p>The values associated with these keys are of type <tt>java.lang.String</tt>,
  * unless otherwise indicated.
  *
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @author Open Services Gateway Initiative
  * @since 1.1
  * @see Bundle#getHeaders
@@ -272,7 +272,14 @@ public interface Constants {
 	 */
 	public static final String BUNDLE_NATIVECODE_LANGUAGE = "language";
 
-
+	/**
+	 * Manifest header attribute (named &quot;selection-filter&quot;) is used for 
+	 * filtering of bundle native code based upon system properties
+	 * Bundle-NativeCode: http.so ; selection-filter="(ws=gtk)" ...
+	 * </pre>
+	 */
+	public final static String BUNDLE_NATIVECODE_SELECTION_FILTER = "selection-filter";
+	
 	/**
 	 * Manifest header (named &quot;Bundle-RequiredExecutionEnvironment&quot;)
 	 * identifying the required

@@ -8,9 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.osgi.framework.internal.defaultadaptor;
-
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -22,19 +20,18 @@ import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.internal.protocol.bundleentry.Handler;
 import org.eclipse.osgi.service.resolver.Version;
-import org.osgi.framework.*;
-
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleException;
 /**
- * The <code>BundleData</code> represents a single bundle that is persistently 
- * stored by a <code>FrameworkAdaptor</code>.  A <code>BundleData</code> creates
- * the ClassLoader for a bundle, finds native libraries installed in the
- * FrameworkAdaptor for the bundle, creates data files for the bundle,
- * used to access bundle entries, manifest information, and getting and saving
+ * The <code>BundleData</code> represents a single bundle that is
+ * persistently stored by a <code>FrameworkAdaptor</code>. A <code>BundleData</code>
+ * creates the ClassLoader for a bundle, finds native libraries installed in
+ * the FrameworkAdaptor for the bundle, creates data files for the bundle, used
+ * to access bundle entries, manifest information, and getting and saving
  * metadata.
- * 
+ *  
  */
 public class DefaultBundleData extends AbstractBundleData implements Cloneable {
-
 	public static final String METADATA_BUNDLE_GEN = "METADATA_BUNDLE_GEN";
 	public static final String METADATA_BUNDLE_LOC = "METADATA_BUNDLE_LOC";
 	public static final String METADATA_BUNDLE_REF = "METADATA_BUNDLE_REF";
@@ -43,37 +40,26 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 	public static final String METADATA_BUNDLE_ABSL = "METADATA_BUNDLE_ABSL";
 	public static final String METADATA_BUNDLE_STATUS = "METADATA_BUNDLE_STATUS";
 	public static final String METADATA_BUNDLE_METADATA = "METADATA_BUNDLE_METADATA";
-
 	/** top level storage directory for the bundle. */
 	protected File bundleStoreDir;
-
 	/** bundle data directory */
 	protected File dirData;
-
 	/** current generation directory */
 	protected File dirGeneration;
-
 	/** bundle id */
 	protected long id;
-
 	/** bundle location */
 	protected String location;
-
 	/** Is bundle a reference */
 	protected boolean reference;
-
-	/** Bundle's metadata **/
+	/** Bundle's metadata * */
 	protected MetaData metadata;
-
 	/** bundle file */
 	protected File file;
-
 	/** BundleFile object for this BundleData */
 	protected BundleFile bundleFile;
-
 	/** bundle's file name */
 	protected String fileName;
-
 	/** theses values are loaded from the manifest */
 	protected String uniqueId;
 	protected Version version;
@@ -82,65 +68,59 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 	protected String activator;
 	protected String executionEnvironment;
 	protected String dynamicImports;
-
 	/** bundle generation */
 	protected int generation = 1;
-
 	/** native code paths for this BundleData */
 	protected String[] nativepaths;
-
 	/** the DefaultAdaptor for this BundleData */
 	protected DefaultAdaptor adaptor;
-
 	protected int startLevel = -1;
-
 	protected int status = 0;
-
 	/**
-	 * Read data from an existing directory.
-	 * This constructor is used by getInstalledBundles.
-	 *
-	 * @param directory The top level bundle directory.
-	 * @throws NumberFormatException if the directory is not a
-	 * number, the directory contains a ".delete" file or
-	 * the directory does not contain a ".bundle" file.
-	 * @throws IOException If an error occurs initializing the bundle data.
+	 * Read data from an existing directory. This constructor is used by
+	 * getInstalledBundles.
+	 * 
+	 * @param directory
+	 *            The top level bundle directory.
+	 * @throws NumberFormatException
+	 *             if the directory is not a number, the directory contains a
+	 *             ".delete" file or the directory does not contain a ".bundle"
+	 *             file.
+	 * @throws IOException
+	 *             If an error occurs initializing the bundle data.
 	 */
 	public DefaultBundleData(DefaultAdaptor adaptor, long id) {
 		this.adaptor = adaptor;
 		this.id = id;
 		initBundleStoreDirs(String.valueOf(id));
 	}
-
 	/**
-	 * Read data from an existing directory.
-	 * This constructor is used by getInstalledBundles.
-	 *
-	 * @throws NumberFormatException if the directory is not a
-	 * number, the directory contains a ".delete" file or
-	 * the directory does not contain a ".bundle" file.
-	 * @throws IOException If an error occurs initializing the bundle data.
+	 * Read data from an existing directory. This constructor is used by
+	 * getInstalledBundles.
+	 * 
+	 * @throws NumberFormatException
+	 *             if the directory is not a number, the directory contains a
+	 *             ".delete" file or the directory does not contain a ".bundle"
+	 *             file.
+	 * @throws IOException
+	 *             If an error occurs initializing the bundle data.
 	 */
 	public void initializeExistingBundle() throws IOException {
 		String directory = String.valueOf(id);
 		id = Long.parseLong(directory);
-
 		/* if the file is not a directory */
 		if (!bundleStoreDir.exists() || !bundleStoreDir.isDirectory())
 			throw new NumberFormatException();
 		File delete = new File(bundleStoreDir, ".delete");
-
 		/* and the directory is not marked for delete */
 		if (delete.exists()) {
 			throw new NumberFormatException();
 		}
-
 		try {
 			loadFromMetaData();
 		} catch (IOException ioe) {
 			throw new NumberFormatException();
 		}
-
 		if (reference) {
 			file = new File(fileName);
 		} else {
@@ -149,50 +129,53 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 		bundleFile = BundleFile.createBundleFile(file, this);
 		loadFromManifest();
 	}
-
 	public void initializeNewBundle(String location, String fileName, boolean reference, File file) throws IOException {
 		this.location = location;
 		this.fileName = fileName;
 		this.reference = reference;
 		this.file = file;
-
 		loadMetaData();
 		setStartLevel(adaptor.getInitialBundleStartLevel());
-		bundleFile = BundleFile.createBundleFile(this.file,this);
+		bundleFile = BundleFile.createBundleFile(this.file, this);
 		loadFromManifest();
 	}
-
-	protected void initBundleStoreDirs(String bundleID){
+	protected void initBundleStoreDirs(String bundleID) {
 		bundleStoreDir = new File(adaptor.getBundleStoreRootDir(), bundleID);
 		dirGeneration = new File(bundleStoreDir, String.valueOf(generation));
 		dirData = new File(adaptor.getDataRootDir(), bundleID + '/' + DefaultAdaptor.DATA_DIR_NAME);
 	}
-
 	/**
-		 * Creates the ClassLoader for the BundleData.  The ClassLoader created
-		 * must use the <code>ClassLoaderDelegate</code> to delegate class, resource
-		 * and library loading.  The delegate is responsible for finding any resource
-		 * or classes imported by the bundle or provided by bundle fragments or 
-		 * bundle hosts.  The <code>ProtectionDomain</code> domain must be used
-		 * by the Classloader when defining a class.  
-		 * @param delegate The <code>ClassLoaderDelegate</code> to delegate to.
-		 * @param domain The <code>ProtectionDomain</code> to use when defining a class.
-		 * @param bundleclasspath An array of bundle classpaths to use to create this
-		 * classloader.  This is specified by the Bundle-ClassPath manifest entry.
-		 * @return The new ClassLoader for the BundleData.
-		 */
+	 * Creates the ClassLoader for the BundleData. The ClassLoader created must
+	 * use the <code>ClassLoaderDelegate</code> to delegate class, resource
+	 * and library loading. The delegate is responsible for finding any
+	 * resource or classes imported by the bundle or provided by bundle
+	 * fragments or bundle hosts. The <code>ProtectionDomain</code> domain
+	 * must be used by the Classloader when defining a class.
+	 * 
+	 * @param delegate
+	 *            The <code>ClassLoaderDelegate</code> to delegate to.
+	 * @param domain
+	 *            The <code>ProtectionDomain</code> to use when defining a
+	 *            class.
+	 * @param bundleclasspath
+	 *            An array of bundle classpaths to use to create this
+	 *            classloader. This is specified by the Bundle-ClassPath
+	 *            manifest entry.
+	 * @return The new ClassLoader for the BundleData.
+	 */
 	public org.eclipse.osgi.framework.adaptor.BundleClassLoader createClassLoader(ClassLoaderDelegate delegate, ProtectionDomain domain, String[] bundleclasspath) {
 		return adaptor.getElementFactory().createClassLoader(delegate, domain, bundleclasspath, this);
 	}
-
 	/**
-		 * Gets a <code>URL</code> to the bundle entry specified by path.
-		 * This method must not use the BundleClassLoader to find the
-		 * bundle entry since the ClassLoader will delegate to find the resource.
-		 * @param path The bundle entry path.
-		 * @return A URL used to access the entry or null if the entry
-		 * does not exist.
-		 */
+	 * Gets a <code>URL</code> to the bundle entry specified by path. This
+	 * method must not use the BundleClassLoader to find the bundle entry since
+	 * the ClassLoader will delegate to find the resource.
+	 * 
+	 * @param path
+	 *            The bundle entry path.
+	 * @return A URL used to access the entry or null if the entry does not
+	 *         exist.
+	 */
 	public URL getEntry(String path) {
 		BundleEntry entry = bundleFile.getEntry(path);
 		if (entry == null) {
@@ -205,57 +188,56 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 				url.append('/');
 			}
 			url.append(path);
-			return new URL(null,url.toString(),new Handler(entry,adaptor.getContext()));
+			return new URL(null, url.toString(), new Handler(entry, adaptor.getContext()));
 		} catch (MalformedURLException e) {
 			return null;
 		}
 	}
-
 	/**
-	 * Gets all of the bundle entries that exist under the specified path.
-	 * For example: <p>
-	 * <code>getEntryPaths("/META-INF")</code> <p>
+	 * Gets all of the bundle entries that exist under the specified path. For
+	 * example:
+	 * <p>
+	 * <code>getEntryPaths("/META-INF")</code>
+	 * <p>
 	 * This will return all entries from the /META-INF directory of the bundle.
-	 * @param path The path to a directory in the bundle.
+	 * 
+	 * @param path
+	 *            The path to a directory in the bundle.
 	 * @return An Enumeration of the entry paths or null if the specified path
-	 * does not exist.
+	 *         does not exist.
 	 */
 	public Enumeration getEntryPaths(String path) {
 		return bundleFile.getEntryPaths(path);
 	}
-
 	/**
 	 * Returns the absolute path name of a native library. The BundleData
-	 * ClassLoader invokes this method to locate the native libraries that 
-	 * belong to classes loaded from this BundleData. Returns 
-	 * null if the library does not exist in this BundleData.
-	 * @param libname The name of the library to find the absolute path to.
-	 * @return The absolute path name of the native library or null if
-	 * the library does not exist.
+	 * ClassLoader invokes this method to locate the native libraries that
+	 * belong to classes loaded from this BundleData. Returns null if the
+	 * library does not exist in this BundleData.
+	 * 
+	 * @param libname
+	 *            The name of the library to find the absolute path to.
+	 * @return The absolute path name of the native library or null if the
+	 *         library does not exist.
 	 */
 	public String findLibrary(String libname) {
 		String mappedName = System.mapLibraryName(libname);
 		String path = null;
-
 		if (Debug.DEBUG && Debug.DEBUG_LOADER) {
 			Debug.println("  mapped library name: " + mappedName);
 		}
-
 		path = findNativePath(mappedName);
-
 		if (path == null) {
 			if (Debug.DEBUG && Debug.DEBUG_LOADER) {
 				Debug.println("  library does not exist: " + mappedName);
 			}
 			path = findNativePath(libname);
 		}
-
 		if (Debug.DEBUG && Debug.DEBUG_LOADER) {
 			Debug.println("  returning library: " + path);
 		}
 		return path;
 	}
-
 	protected String findNativePath(String libname) {
 		String path = null;
 		if (!libname.startsWith("/")) {
@@ -271,14 +253,14 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 		}
 		return path;
 	}
-
 	/**
-	 * Installs the native code paths for this BundleData.  Each
-	 * element of nativepaths must be installed for lookup when findLibrary 
-	 * is called.
-	 * @param nativepaths The array of native code paths to install for
-	 * the bundle.
-	 * @throws BundleException If any error occurs during install.
+	 * Installs the native code paths for this BundleData. Each element of
+	 * nativepaths must be installed for lookup when findLibrary is called.
+	 * 
+	 * @param nativepaths
+	 *            The array of native code paths to install for the bundle.
+	 * @throws BundleException
+	 *             If any error occurs during install.
 	 */
 	public void installNativeCode(String[] nativepaths) throws BundleException {
 		this.nativepaths = nativepaths;
@@ -296,11 +278,10 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 		}
 		setNativeCodePath(sb.toString());
 	}
-
 	/**
-	 * Return the bundle data directory.
-	 * Attempt to create the directory if it does not exist.
-	 *
+	 * Return the bundle data directory. Attempt to create the directory if it
+	 * does not exist.
+	 * 
 	 * @return Bundle data directory.
 	 */
 	public File getDataFile(String path) {
@@ -309,28 +290,26 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 				Debug.println("Unable to create bundle data directory: " + dirData.getPath());
 			}
 		}
-
 		return (new File(dirData, path));
 	}
-
 	/**
-	 * Get the BundleData bundle ID.  This will be used as the bundle
-	 * ID by the framework.
+	 * Get the BundleData bundle ID. This will be used as the bundle ID by the
+	 * framework.
+	 * 
 	 * @return The BundleData ID.
 	 */
 	public long getBundleID() {
 		return (id);
 	}
-
 	/**
-	 * Get the BundleData Location.  This will be used as the bundle
-	 * location by the framework.
+	 * Get the BundleData Location. This will be used as the bundle location by
+	 * the framework.
+	 * 
 	 * @return the BundleData location.
 	 */
 	public String getLocation() {
 		return (location);
 	}
-
 	/**
 	 * Close all resources for this BundleData
 	 */
@@ -339,20 +318,20 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 			bundleFile.close();
 		}
 	}
-
 	/**
-	 * Opens all resource for this BundleData.  Reopens the BundleData if
-	 * it was previosly closed.
+	 * Opens all resource for this BundleData. Reopens the BundleData if it was
+	 * previosly closed.
 	 */
 	public void open() throws IOException {
 		bundleFile.open();
 	}
-
 	/**
 	 * Load the bundle data from the metadata.
-	 *
-	 * @throws IOException if an read error occurs.
-	 * @throws FileNotFoundException if the metadata file does not exist.
+	 * 
+	 * @throws IOException
+	 *             if an read error occurs.
+	 * @throws FileNotFoundException
+	 *             if the metadata file does not exist.
 	 */
 	protected synchronized void loadFromMetaData() throws IOException {
 		loadMetaData();
@@ -362,28 +341,23 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 		fileName = metadata.get(METADATA_BUNDLE_NAME, null);
 		location = metadata.get(METADATA_BUNDLE_LOC, null);
 		reference = metadata.getBoolean(METADATA_BUNDLE_REF, false);
-
 		String npString = metadata.get(METADATA_BUNDLE_NCP, null);
 		if (npString != null)
 			setNativeCodePath(npString);
-
 		if (generation == -1 || fileName == null || location == null) {
 			throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION"));
 		}
 	}
-
 	protected void loadMetaData() throws IOException {
 		metadata = (new MetaData(new File(getBundleStoreDir(), ".bundle"), "Bundle metadata"));
 		metadata.load();
 	}
-
 	protected void loadFromManifest() throws IOException {
 		try {
 			getManifest();
 		} catch (BundleException e) {
 			throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_ERROR_GETTING_MANIFEST", location));
 		}
-
 		if (manifest == null) {
 			throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_ERROR_GETTING_MANIFEST", location));
 		}
@@ -398,11 +372,10 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 		executionEnvironment = (String) manifest.get(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT);
 		dynamicImports = (String) manifest.get(Constants.DYNAMICIMPORT_PACKAGE);
 	}
-
 	/**
-	 * Return the bundle generation directory.
-	 * Attempt to create the directory if it does not exist.
-	 *
+	 * Return the bundle generation directory. Attempt to create the directory
+	 * if it does not exist.
+	 * 
 	 * @return Bundle generation directory.
 	 */
 	public File getGenerationDir() {
@@ -411,25 +384,21 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 				Debug.println("Unable to create bundle generation directory: " + dirGeneration.getPath());
 			}
 		}
-
 		return (dirGeneration);
 	}
-
 	/**
-	 * Return the bundle file.
-	 * Attempt to create the bundle generation directory if it does not exist.
-	 *
+	 * Return the bundle file. Attempt to create the bundle generation
+	 * directory if it does not exist.
+	 * 
 	 * @return Bundle file.
 	 */
 	protected File getBundleFile() {
 		getGenerationDir(); /* create the generation dir if necessary */
-
 		return (file);
 	}
-
 	/**
 	 * Return the top level bundle directory.
-	 *
+	 * 
 	 * @return Top level bundle directory.
 	 */
 	public File getBundleStoreDir() {
@@ -440,11 +409,11 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 		}
 		return (bundleStoreDir);
 	}
-
 	/**
 	 * Save the bundle data in the data file.
-	 *
-	 * @throws IOException if a write error occurs.
+	 * 
+	 * @throws IOException
+	 *             if a write error occurs.
 	 */
 	public synchronized void save() throws IOException {
 		metadata.setInt(METADATA_BUNDLE_STATUS, status);
@@ -453,29 +422,26 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 		metadata.set(METADATA_BUNDLE_NAME, fileName);
 		metadata.set(METADATA_BUNDLE_LOC, location);
 		metadata.setBoolean(METADATA_BUNDLE_REF, reference);
-		metadata.set(METADATA_BUNDLE_NCP,getNativeCodePath());
+		if (getNativeCodePath() != null) {
+			metadata.set(METADATA_BUNDLE_NCP, getNativeCodePath());
+		}
 		metadata.save();
 	}
-
 	/**
-		* Return a copy of this object with the
-		* generation dependent fields updated to
-		* the next free generation level.
-		*
-		* @throws IOException If there are no more available generation levels.
-		*/
+	 * Return a copy of this object with the generation dependent fields
+	 * updated to the next free generation level.
+	 * 
+	 * @throws IOException
+	 *             If there are no more available generation levels.
+	 */
 	protected DefaultBundleData nextGeneration(String fileName) throws IOException {
 		int nextGeneration = generation;
-
 		while (nextGeneration < Integer.MAX_VALUE) {
 			nextGeneration++;
-
 			File nextDirGeneration = new File(getBundleStoreDir(), String.valueOf(nextGeneration));
-
 			if (nextDirGeneration.exists()) {
 				continue;
 			}
-
 			DefaultBundleData next;
 			try {
 				next = (DefaultBundleData) clone();
@@ -483,7 +449,6 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 				// this shouldn't happen, since we are Cloneable
 				throw new InternalError();
 			}
-
 			next.generation = nextGeneration;
 			next.dirGeneration = nextDirGeneration;
 			next.fileName = fileName;
@@ -493,29 +458,23 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 			next.manifest = null;
 			return (next);
 		}
-
 		throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION"));
 	}
-
 	/**
-		 * Return a copy of this object with the
-		 * generation dependent fields updated to
-		 * the next free generation level.
-		 *
-		 * @throws IOException If there are no more available generation levels.
-		 */
+	 * Return a copy of this object with the generation dependent fields
+	 * updated to the next free generation level.
+	 * 
+	 * @throws IOException
+	 *             If there are no more available generation levels.
+	 */
 	public DefaultBundleData nextGeneration() throws IOException {
 		int nextGeneration = generation;
-
 		while (nextGeneration < Integer.MAX_VALUE) {
 			nextGeneration++;
-
 			File nextDirGeneration = new File(getBundleStoreDir(), String.valueOf(nextGeneration));
-
 			if (nextDirGeneration.exists()) {
 				continue;
 			}
-
 			DefaultBundleData next;
 			try {
 				next = (DefaultBundleData) clone();
@@ -523,7 +482,6 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 				// this shouldn't happen, since we are Cloneable
 				throw new InternalError();
 			}
-
 			next.generation = nextGeneration;
 			next.dirGeneration = nextDirGeneration;
 			if (next.reference) {
@@ -535,38 +493,29 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 			next.manifest = null;
 			return (next);
 		}
-
 		throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION"));
 	}
-
 	public Bundle getBundle() {
 		return bundle;
 	}
-
-	public BundleFile getBaseBundleFile(){
+	public BundleFile getBaseBundleFile() {
 		return bundleFile;
 	}
-
 	public String toString() {
 		return location;
 	}
-
 	public int getStartLevel() {
 		return startLevel;
 	}
-
 	public int getStatus() {
 		return status;
 	}
-
 	public void setStartLevel(int value) {
 		startLevel = value;
 	}
-
 	public void setStatus(int value) {
 		status = value;
 	}
-
 	public boolean isReference() {
 		return reference;
 	}
@@ -579,7 +528,6 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 	public void setGeneration(int value) {
 		generation = value;
 	}
-
 	public String getNativeCodePath() {
 		if (nativepaths == null || nativepaths.length == 0)
 			return null;
@@ -594,7 +542,6 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 		}
 		return sb.toString();
 	}
-
 	protected String[] parseNativeCodePath(String value) {
 		if (value == null)
 			return null;
@@ -606,11 +553,9 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 		}
 		return (String[]) result.toArray(new String[result.size()]);
 	}
-
 	public void setNativeCodePath(String value) {
 		nativepaths = parseNativeCodePath(value);
 	}
-
 	public String getFileName() {
 		return fileName;
 	}
@@ -639,4 +584,3 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 		return adaptor;
 	}
 }
-
