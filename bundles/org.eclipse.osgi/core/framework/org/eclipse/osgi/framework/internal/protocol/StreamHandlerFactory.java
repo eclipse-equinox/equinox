@@ -88,10 +88,8 @@ public class StreamHandlerFactory implements java.net.URLStreamHandlerFactory {
 		try {
 			clazz = Class.forName(name);
 		}
-
-		//Now we checdk the service registry
-		catch (ClassNotFoundException e) {
-
+		//Now we check the service registry
+		catch (Throwable t) {
 			//first check to see if the handler is in the cache
 			URLStreamHandlerProxy handler = (URLStreamHandlerProxy) proxies.get(protocol);
 			if (handler != null) {
