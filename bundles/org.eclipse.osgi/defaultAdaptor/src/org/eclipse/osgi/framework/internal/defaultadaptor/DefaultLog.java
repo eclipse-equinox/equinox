@@ -133,7 +133,7 @@ public class DefaultLog implements FrameworkLog {
 		Throwable t = frameworkEvent.getThrowable();
 		
 		FrameworkLogEntry logEntry = 
-			new FrameworkLogEntry(0, b.getLocation() + " 0 0", "FrameworkEvent.ERROR", 0, t);
+			new FrameworkLogEntry(b.getLocation() + " 0 0", "FrameworkEvent.ERROR", 0, t, null);
 
 		log(logEntry);
 	}
@@ -147,7 +147,7 @@ public class DefaultLog implements FrameworkLog {
 				writeSession();
 				newSession = false;
 			}
-			writeLog(logEntry);
+			writeLog(0, logEntry);
 			writer.flush();
 		}
 		catch (Exception e) {
@@ -158,7 +158,7 @@ public class DefaultLog implements FrameworkLog {
 			//we failed to write, so dump log entry to console instead
 			try {
 				writer = logForStream(System.err);
-				writeLog(logEntry);
+				writeLog(0, logEntry);
 				writer.flush();
 			} catch (Exception e2) {
 				System.err.println("An exception occurred while logging to the console:");//$NON-NLS-1$
@@ -268,10 +268,17 @@ public class DefaultLog implements FrameworkLog {
 		}
 	}
 
-	protected void writeLog(FrameworkLogEntry entry) throws IOException {
-		writeEntry(entry);
+	protected void writeLog(int depth, FrameworkLogEntry entry) throws IOException {
+		writeEntry(depth, entry);
 		writeMessage(entry);
 		writeStack(entry);
+
+		FrameworkLogEntry[] children = entry.getChildren();
+		if (children != null) {
+			for (int i=0; i<children.length; i++) {
+				writeLog(depth+1, children[i]);
+			}
+		}
 	}
 
 	protected void writeSession() throws IOException {
@@ -307,13 +314,13 @@ public class DefaultLog implements FrameworkLog {
 
 	}
 
-	protected void writeEntry(FrameworkLogEntry entry) throws IOException {
-		if (entry.getDepth() == 0) {
+	protected void writeEntry(int depth, FrameworkLogEntry entry) throws IOException {
+		if (depth == 0) {
 			write(ENTRY);
 		} else {
 			write(SUBENTRY);
 			writeSpace();
-			write(Integer.toString(entry.getDepth()));
+			write(Integer.toString(depth));
 		}
 		writeSpace();
 		write(entry.getEntry());

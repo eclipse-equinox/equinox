@@ -63,7 +63,7 @@ public class PluginConverterImpl implements PluginConverter {
 		try {
 			pluginInfo = parsePluginInfo(pluginManifestLocation);
 		} catch (PluginConversionException e) {
-			FrameworkLogEntry entry = new FrameworkLogEntry(0, PI_ECLIPSE_OSGI, e.getMessage(), 0, e.getCause());
+			FrameworkLogEntry entry = new FrameworkLogEntry(PI_ECLIPSE_OSGI, e.getMessage(), 0, e.getCause(), null);
 			EclipseAdaptor.getDefault().getFrameworkLog().log(entry);
 			return null;
 		}
@@ -74,7 +74,7 @@ public class PluginConverterImpl implements PluginConverter {
 		try {
 			generate(bundleManifestLocation);
 		} catch (PluginConversionException e) {
-			FrameworkLogEntry entry = new FrameworkLogEntry(0, PI_ECLIPSE_OSGI, e.getMessage(), 0, e.getCause());
+			FrameworkLogEntry entry = new FrameworkLogEntry(PI_ECLIPSE_OSGI, e.getMessage(), 0, e.getCause(), null);
 			EclipseAdaptor.getDefault().getFrameworkLog().log(entry);
 			return null;
 		}
@@ -90,7 +90,7 @@ public class PluginConverterImpl implements PluginConverter {
 				return false;
 			generate(bundleManifestLocation);
 		} catch (PluginConversionException e) {
-			FrameworkLogEntry entry = new FrameworkLogEntry(0, PI_ECLIPSE_OSGI, e.getMessage(), 0, e);
+			FrameworkLogEntry entry = new FrameworkLogEntry(PI_ECLIPSE_OSGI, e.getMessage(), 0, e, null);
 			EclipseAdaptor.getDefault().getFrameworkLog().log(entry);
 			return false;
 		}
@@ -352,8 +352,13 @@ public class PluginConverterImpl implements PluginConverter {
 			else
 				containsFile = true;
 		}
-		if (containsFile && packageName.length() > 0)
-			exportedPaths.add(packageName);
+		if (containsFile)
+			// Allow the default package to be provided.  If the default package
+			// contains a File then use "." as the package name to provide for default.
+			if (packageName.length() > 0)
+				exportedPaths.add(packageName);
+			else
+				exportedPaths.add(".");
 		return exportedPaths;
 	}
 
@@ -364,7 +369,7 @@ public class PluginConverterImpl implements PluginConverter {
 			file = new JarFile(jarFile);
 		} catch (IOException e) {
 			String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONVERTER_PLUGIN_LIBRARY_IGNORED", jarFile, pluginInfo.getUniqueId());
-			EclipseAdaptor.getDefault().getFrameworkLog().log(new FrameworkLogEntry(0, PI_ECLIPSE_OSGI, message, 0, e));
+			EclipseAdaptor.getDefault().getFrameworkLog().log(new FrameworkLogEntry(PI_ECLIPSE_OSGI, message, 0, e, null));
 			return names;
 		}
 
@@ -378,9 +383,14 @@ public class PluginConverterImpl implements PluginConverter {
 
 			int lastSlash = name.lastIndexOf("/"); //$NON-NLS-1$
 			//Ignore folders that do not contain files
-			if (lastSlash != -1 && lastSlash != name.length() - 1) {
-				if (name.lastIndexOf(' ') == -1)
+			if (lastSlash != -1) {
+				if (lastSlash != name.length() - 1 && name.lastIndexOf(' ') == -1)
 					names.add(name.substring(0, lastSlash).replace('/', '.'));
+			}
+			else {
+				// Allow the default package to be provided.  If the default package
+				// contains a File then use "." as the package name to provide for default.
+				names.add(".");
 			}
 		}
 		return names;

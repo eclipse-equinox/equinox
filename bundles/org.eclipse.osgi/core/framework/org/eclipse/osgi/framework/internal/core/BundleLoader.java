@@ -29,6 +29,8 @@ import org.osgi.framework.*;
  * 
  */
 public class BundleLoader implements ClassLoaderDelegate {
+	private static String DEFAULT_PACKAGE = ".";
+
 	/** Bundle object */
 	protected BundleHost bundle;
 
@@ -346,12 +348,12 @@ public class BundleLoader implements ClassLoaderDelegate {
 		String packageName = getPackageName(name);
 
 		Class result = null;
-		if (packageName != null) {
+		if (packageName != null)
 			result = findImportedClass(name, packageName);
-			if (result == null) {
-				result = findRequiredClass(name, packageName);
-			}
-		}
+
+		// Allow default package lookups from required bundles.
+		if (result == null)
+			result = findRequiredClass(name, packageName);
 
 		if (result == null) {
 			result = findLocalClass(name);
@@ -387,16 +389,15 @@ public class BundleLoader implements ClassLoaderDelegate {
 		String packageName = getResourcePackageName(name);
 
 		URL resource = null;
-		if (packageName != null) {
+		if (packageName != null)
 			resource = findImportedResource(name, packageName);
-			if (resource == null) {
-				resource = findRequiredResource(name, packageName);
-			}
-		}
 
-		if (resource == null) {
+		// Allow default package lookups from required bundles.
+		if (resource == null)
+			resource = findRequiredResource(name, packageName);
+
+		if (resource == null)
 			resource = findLocalResource(name);
-		}
 
 		return resource;
 	}
@@ -422,16 +423,15 @@ public class BundleLoader implements ClassLoaderDelegate {
 		String packageName = getResourcePackageName(name);
 
 		Enumeration result = null;
-		if (packageName != null) {
+		if (packageName != null)
 			result = findImportedResources(name, packageName);
-			if (result == null) {
-				result = findRequiredResources(name, packageName);
-			}
-		}
 
-		if (result == null) {
+		// Allow default package lookups from required bundles.
+		if (result == null)
+			result = findRequiredResources(name, packageName);
+
+		if (result == null)
 			result = findLocalResources(name);
-		}
 
 		return result;
 	}
@@ -525,16 +525,15 @@ public class BundleLoader implements ClassLoaderDelegate {
 		String packageName = getResourcePackageName(object);
 
 		Object result = null;
-		if (packageName != null) {
+		if (packageName != null)
 			result = findImportedObject(object, packageName);
-			if (result == null) {
-				result = findRequiredObject(object, packageName);
-			}
-		}
 
-		if (result == null) {
+		// Allow default package lookups from required bundles.
+		if (result == null)
+			result = findRequiredObject(object, packageName);
+
+		if (result == null)
 			result = findLocalObject(object);
-		}
 
 		return result;
 	}
@@ -846,6 +845,8 @@ public class BundleLoader implements ClassLoaderDelegate {
 	 * @return The loaded class or null if the class is not found.
 	 */
 	protected PackageSource getProvidersFor(String packageName) {
+		if (packageName == null)
+			packageName = DEFAULT_PACKAGE;
 		// first look in the required packages cache
 		if (requiredPackagesCache != null) {
 			PackageSource result = (PackageSource) requiredPackagesCache.getByKey(packageName);

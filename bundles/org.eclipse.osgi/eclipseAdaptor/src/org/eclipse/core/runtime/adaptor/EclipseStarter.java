@@ -136,7 +136,6 @@ public class EclipseStarter {
 		for (int i = 0; i < bundles.length; i++)
 			if (bundles[i].getState() == Bundle.INSTALLED) {
 				String generalMessage = EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_ERROR_BUNDLE_NOT_RESOLVED", bundles[i]);
-				logService.log(new FrameworkLogEntry(0, "org.eclipse.osgi", generalMessage, 0, null));
 				BundleDescription description = state.getBundle(bundles[i].getBundleId());
 				// for some reason, the state does not know about that bundle
 				if (description == null)
@@ -144,10 +143,11 @@ public class EclipseStarter {
 				VersionConstraint[] unsatisfied = description.getUnsatisfiedConstraints();
 				// the bundle wasn't resolved but none of its constraints were
 				// unsatisfiable
-				if (unsatisfied.length == 0)
-					continue;
+				FrameworkLogEntry[] logChildren = unsatisfied.length == 0 ? null : new FrameworkLogEntry[unsatisfied.length];
 				for (int j = 0; j < unsatisfied.length; j++)
-					logService.log(new FrameworkLogEntry(1, "org.eclipse.osgi", EclipseAdaptorMsg.getResolutionFailureMessage(unsatisfied[j]), 0, null));
+					logChildren[j] = new FrameworkLogEntry("org.eclipse.osgi", EclipseAdaptorMsg.getResolutionFailureMessage(unsatisfied[j]), 0, null, null);
+				
+				logService.log(new FrameworkLogEntry("org.eclipse.osgi", generalMessage, 0, null, logChildren));
 			}
 	}		
 	private static void publishSplashScreen(Runnable endSplashHandler) {

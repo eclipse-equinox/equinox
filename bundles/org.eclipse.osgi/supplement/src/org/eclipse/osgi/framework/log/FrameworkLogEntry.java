@@ -12,24 +12,26 @@
 package org.eclipse.osgi.framework.log;
 
 public class FrameworkLogEntry {
-	private int depth;
 	private String entry;
 	private String message;
 	private int stackCode;
 	private Throwable throwable;
+	private FrameworkLogEntry[] children;
 
-	public FrameworkLogEntry(int depth, String entry, String message, int stackCode, Throwable throwable) {
-		this.depth = depth;
+	public FrameworkLogEntry(String entry, String message, int stackCode, Throwable throwable, FrameworkLogEntry[] children) {
 		this.entry = entry;
 		this.message = message;
 		this.stackCode = stackCode;
 		this.throwable = throwable;
+		this.children = children;
 	}
+
 	/**
-	 * @return Returns the depth.
+	 * 
+	 * @return Returns the children.
 	 */
-	public int getDepth() {
-		return depth;
+	public FrameworkLogEntry[] getChildren(){
+		return children;
 	}
 	/**
 	 * @return Returns the entry.
