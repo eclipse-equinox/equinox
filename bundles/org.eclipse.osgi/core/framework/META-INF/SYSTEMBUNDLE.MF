@@ -29,5 +29,5 @@ Bundle-Copyright: Copyright (c) 2003 IBM Corporation and others. All rights rese
 Bundle-Vendor: Eclipse
 Bundle-Version: 3.6.0
 Bundle-DocUrl: http://www.eclipse.org
-Bundle-ContactAddress: pervasive@us.ibm.com
+
 
