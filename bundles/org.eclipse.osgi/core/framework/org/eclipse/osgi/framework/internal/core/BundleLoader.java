@@ -161,7 +161,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 					if (loaderProxy != null) {
 						bound.add(loaderProxy);
 						if (spec.isExported())
-							reexported[reexportIndex++] = i;
+							reexported[reexportIndex++] = bound.size() - 1;							
 					} else {
 						// If the bundle is not optional report an error here.
 						if (!spec.isOptional()) {
