@@ -204,9 +204,9 @@ public class PluginConverterImpl implements PluginConverter {
 		generateProvidePackage();
 		generateRequireBundle();
 		generateLocalizationEntry();
+		generateEclipseHeaders();
 		if (compatibilityManifest) {
 			generateTimestamp();
-			generateEclipseHeaders();
 		}
 	}
 
