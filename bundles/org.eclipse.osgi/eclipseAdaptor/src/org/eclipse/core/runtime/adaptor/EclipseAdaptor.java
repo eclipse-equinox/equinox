@@ -219,6 +219,7 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 		try {
 			File stateLocationTmpFile = File.createTempFile(LocationManager.STATE_FILE, ".new", LocationManager.getOSGiConfigurationDir()); //$NON-NLS-1$
 			stateManager.shutdown(stateLocationTmpFile); //$NON-NLS-1$
+			fileManager.lookup(LocationManager.STATE_FILE, true);
 			fileManager.update(new String[] {LocationManager.STATE_FILE}, new String[] {stateLocationTmpFile.getName()});
 		} catch (IOException e) {
 			frameworkLog.log(new FrameworkEvent(FrameworkEvent.ERROR, context.getBundle(), e));
