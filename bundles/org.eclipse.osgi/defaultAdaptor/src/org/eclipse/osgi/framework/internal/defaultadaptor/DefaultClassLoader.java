@@ -204,14 +204,14 @@ public class DefaultClassLoader extends org.eclipse.osgi.framework.adaptor.Bundl
 	 * it is found.
 	 * @return The loaded class object or null if the class is not found.
 	 */
-	protected Class findClassImpl(String name, BundleFile bundleFile, ProtectionDomain bundledomain) {
+	protected Class findClassImpl(String name, BundleFile bundlefile, ProtectionDomain bundledomain) {
 		if (Debug.DEBUG && Debug.DEBUG_LOADER) {
 			Debug.println("BundleClassLoader[" + hostdata + "].findClass(" + name + ")");
 		}
 
 		String filename = name.replace('.', '/').concat(".class");
 
-		BundleEntry entry = bundleFile.getEntry(filename);
+		BundleEntry entry = bundlefile.getEntry(filename);
 
 		if (entry == null) {
 			return null;
@@ -284,7 +284,7 @@ public class DefaultClassLoader extends org.eclipse.osgi.framework.adaptor.Bundl
 		}
 
 		try {
-			return (defineClass(name, classbytes, 0, bytesread, bundledomain));
+			return (defineClass(name, classbytes, 0, bytesread, bundledomain, bundlefile));
 		} catch (Error e) {
 			if (Debug.DEBUG && Debug.DEBUG_LOADER) {
 				Debug.println("  error defining class " + name);
@@ -292,6 +292,10 @@ public class DefaultClassLoader extends org.eclipse.osgi.framework.adaptor.Bundl
 
 			throw e;
 		}
+	}
+
+	protected Class defineClass(String name, byte[] classbytes, int off, int len, ProtectionDomain bundledomain, BundleFile bundlefile) throws ClassFormatError {
+		return defineClass(name,classbytes,off,len,bundledomain);
 	}
 
 	/** 

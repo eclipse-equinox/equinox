@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import org.eclipse.osgi.framework.adaptor.BundleData;
 import org.eclipse.osgi.framework.adaptor.ClassLoaderDelegate;
 import org.eclipse.osgi.framework.internal.core.Msg;
+import org.eclipse.osgi.framework.internal.defaultadaptor.*;
 import org.eclipse.osgi.framework.internal.defaultadaptor.DefaultBundleData;
 import org.eclipse.osgi.framework.internal.defaultadaptor.DefaultClassLoader;
 import org.eclipse.osgi.framework.stats.ClassloaderStats;
@@ -74,6 +75,25 @@ public class EclipseClassLoader extends DefaultClassLoader {
 			if (EclipseAdaptor.MONITOR_CLASSES)
 				ClassloaderStats.endLoadingClass(getClassloaderId(), name, found);
 		}
+	}
+
+	/**
+	 * Override defineClass to allow for package defining.
+	 */
+	protected Class defineClass(String name, byte[] classbytes, int off, int len, ProtectionDomain bundledomain, BundleFile bundlefile) throws ClassFormatError {
+		// Define the package if it is not the default package.
+		int lastIndex = name.lastIndexOf('.');
+		if (lastIndex != -1) {
+			String packageName = name.substring(0,lastIndex);
+			Package pkg = getPackage(packageName);
+			if (pkg == null) {
+				// The package is not defined yet define it before we define the class.
+				// TODO need to parse code manifest located in the bundlefile to find
+				// implementation/specification information for the package here.
+				definePackage(packageName,null,null,null,null,null,null,null);
+			}
+		}
+		return super.defineClass(name,classbytes,off,len,bundledomain,bundlefile);
 	}
 
 	private String getClassloaderId() {
