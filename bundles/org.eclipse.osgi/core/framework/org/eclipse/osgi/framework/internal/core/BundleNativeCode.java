@@ -134,7 +134,7 @@ public class BundleNativeCode {
 		setAttribute(element, Constants.BUNDLE_NATIVECODE_PROCESSOR);
 		setAttribute(element, Constants.BUNDLE_NATIVECODE_OSVERSION);
 		setAttribute(element, Constants.BUNDLE_NATIVECODE_LANGUAGE);
-		setAttribute(element, Constants.BUNDLE_NATIVECODE_SELECTION_FILTER);
+		setAttribute(element, Constants.SELECTION_FILTER_ATTRIBUTE);
 	}
 	private void setAttribute(ManifestElement element, String attribute) {
 		String[] attrValues = element.getAttributes(attribute);
@@ -200,7 +200,7 @@ public class BundleNativeCode {
 			osversion.addElement(new Version(value));
 			return;
 		}
-		if (key.equals(Constants.BUNDLE_NATIVECODE_SELECTION_FILTER)) {
+		if (key.equals(Constants.SELECTION_FILTER_ATTRIBUTE)) {
 			if (filterString == null) {
 				filterString = value;
 			}

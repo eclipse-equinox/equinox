@@ -1,5 +1,5 @@
 /*
- * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/Constants.java,v 1.9 2004/03/11 20:58:07 twatson Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/Constants.java,v 1.10 2004/03/19 23:07:39 twatson Exp $
  *
  * Copyright (c) The Open Services Gateway Initiative (2000-2001).
  * All Rights Reserved.
@@ -35,7 +35,7 @@ package org.osgi.framework;
  * <p>The values associated with these keys are of type <tt>java.lang.String</tt>,
  * unless otherwise indicated.
  *
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  * @author Open Services Gateway Initiative
  * @since 1.1
  * @see Bundle#getHeaders
@@ -271,14 +271,6 @@ public interface Constants {
 	 * </pre>
 	 */
 	public static final String BUNDLE_NATIVECODE_LANGUAGE = "language";
-
-	/**
-	 * Manifest header attribute (named &quot;selection-filter&quot;) is used for 
-	 * filtering of bundle native code based upon system properties
-	 * Bundle-NativeCode: http.so ; selection-filter="(ws=gtk)" ...
-	 * </pre>
-	 */
-	public final static String BUNDLE_NATIVECODE_SELECTION_FILTER = "selection-filter";
 	
 	/**
 	 * Manifest header (named &quot;Bundle-RequiredExecutionEnvironment&quot;)
@@ -576,4 +568,17 @@ public interface Constants {
 	 * <tt>Dictionary</tt> object returned by the <tt>Bundle.getHeaders</tt> method.
 	 */
 	public final static String FRAGMENT_HOST = "Fragment-Host";
+
+
+	/**
+	 * Manifest header attribute (named &quot;selection-filter&quot;) is used for 
+	 * filtering of bundle native code and bundle classpath elements based upon 
+	 * system properties
+	 * <pre>
+	 * Bundle-NativeCode: http.so ; selection-filter="(ws=gtk)" ...
+	 * Bundle-ClassPath: base.jar, gtk.jar ; selection-filter="(ws=gtk)" ...
+	 * </pre>
+	 */
+	public final static String SELECTION_FILTER_ATTRIBUTE = "selection-filter";
+
 }

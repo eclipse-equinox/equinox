@@ -1178,11 +1178,11 @@ public class BundleLoader implements ClassLoaderDelegate {
 			return new String[] { "." };
 		}
 
-		ArrayList result = new ArrayList(10);	//TODO What about initializing that to classpath.length
+		ArrayList result = new ArrayList(classpath.length);
 		for (int i = 0; i < classpath.length; i++) {
 			Filter filter;
 			try {
-				filter = createFilter(classpath[i].getAttribute("selection-filter"));
+				filter = createFilter(classpath[i].getAttribute(Constants.SELECTION_FILTER_ATTRIBUTE));
 				if (filter == null || filter.match(props)) {
 					if (Debug.DEBUG && Debug.DEBUG_LOADER)
 						Debug.println("  found match for classpath entry " + classpath[i].getValueComponents());
