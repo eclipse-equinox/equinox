@@ -67,10 +67,10 @@ public class BundleStopper {
 		// stop all active bundles in the reverse order of Require-Bundle
 		for (int stoppingIndex = allToStop.length - 1; stoppingIndex >= 0; stoppingIndex--) {
 			AbstractBundle toStop = (AbstractBundle) context.getBundle(allToStop[stoppingIndex].getBundleId());
+			if (toStop.getBundleId() == 0 || !((EclipseBundleData) toStop.getBundleData()).isAutoStartable())
+				continue;
 			try {
-				if (toStop.getState() != Bundle.ACTIVE || !(toStop instanceof BundleHost) || toStop.getBundleId() == 0)
-					continue;
-				if (!((EclipseBundleData) toStop.getBundleData()).isAutoStartable())
+				if (toStop.getState() != Bundle.ACTIVE || !(toStop instanceof BundleHost))
 					continue;
 				toStop.stop();
 			} catch (Exception e) {
