@@ -210,11 +210,31 @@ public class LocationManager {
 
 		URL installURL = computeInstallConfigurationLocation();
 		File installDir = new File(installURL.getFile());
-		if ("file".equals(installURL.getProtocol()) && installDir.canWrite()) //$NON-NLS-1$
+		if ("file".equals(installURL.getProtocol()) && canWrite(installDir)) //$NON-NLS-1$
 			return new File(installDir, CONFIG_DIR).getAbsolutePath();
 
 		// We can't write in the eclipse install dir so try for some place in the user's home dir
 		return computeDefaultUserAreaLocation(CONFIG_DIR);
+	}
+
+	private static boolean canWrite(File installDir) {
+		if (installDir.canWrite() == false)
+			return false;
+
+		if (!installDir.isDirectory())
+			return false;
+
+		File fileTest = null;
+		try {
+			fileTest = File.createTempFile("writtableArea", null, installDir); //$NON-NLS-1$
+		} catch (IOException e) {
+			//If an exception occured while trying to create the file, it means that it is not writtable
+			return false;
+		} finally {
+			if (fileTest != null)
+				fileTest.delete();
+		}
+		return true;
 	}
 
 	private static String computeDefaultUserAreaLocation(String pathAppendage) {
