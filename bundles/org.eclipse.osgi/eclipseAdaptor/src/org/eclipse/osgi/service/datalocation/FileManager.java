@@ -359,7 +359,7 @@ public class FileManager {
 		//Iterate through the temp files and delete them all, except the one representing this filemanager.
 		String[] files = managerRoot.list();
 		for (int i = 0; i < files.length; i++) {
-			if (files[i].endsWith(".instance") && !files[i].equalsIgnoreCase(instanceFile.getName())) { //$NON-NLS-1$
+			if (files[i].endsWith(".instance") && instanceFile!= null && !files[i].equalsIgnoreCase(instanceFile.getName())) { //$NON-NLS-1$
 				if (new File(managerRoot, files[i]).delete() == false)
 					return;
 			}
@@ -408,8 +408,11 @@ public class FileManager {
 		} catch (IOException e) {
 			//Ignore and close.
 		}
-		instanceLocker.release();
-		instanceFile.delete();
+		if (instanceLocker != null)
+			instanceLocker.release();
+		
+		if (instanceFile != null)
+			instanceFile.delete();
 	}
 
 	/**
