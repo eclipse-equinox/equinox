@@ -2,6 +2,10 @@ Export-Package:
  org.eclipse.osgi.framework.stats,
  org.eclipse.osgi.service.environment,
  org.eclipse.osgi.service.pluginconversion
+Provide-Package:
+ org.eclipse.osgi.framework.stats,
+ org.eclipse.osgi.service.environment,
+ org.eclipse.osgi.service.pluginconversion
 Export-Service: 
  org.eclipse.osgi.service.environment.EnvironmentInfo,
  org.eclipse.osgi.service.pluginconversion.PluginConverter

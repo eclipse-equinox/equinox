@@ -286,6 +286,23 @@ public class BundleLoader implements ClassLoaderDelegate {
 		return result;
 	}
 
+	/**
+	 * Handle the lookup where provided classes can also be imported.
+	 * In this case the exporter need to be consulted. 
+	 */ 
+	protected Class importClass(String name, String packageName){
+		Class result = null;
+		try {
+			result = findImportedClass(name, packageName);
+		} catch (ImportClassNotFoundException e) {
+			//Capture the exception and return null because we want to continue the lookup.
+			return null; 
+		}
+		if (result == null)
+			result = importClass(name);
+		return result;
+	}
+	
 	protected BundleClassLoader createClassLoader() {
 		if (classloader != null)
 			return classloader;
@@ -819,12 +836,12 @@ public class BundleLoader implements ClassLoaderDelegate {
 		if (source.isMultivalued()) {
 			BundleLoaderProxy[] bundles = source.getSuppliers();
 			for (int i = 0; i < bundles.length; i++) {
-				Class result = bundles[i].getBundleLoader().importClass(name);
+				Class result = bundles[i].getBundleLoader().importClass(name, packageName);
 				if (result != null)
 					return result;
 			}
 		} else
-			return source.getSupplier().getBundleLoader().importClass(name);
+			return source.getSupplier().getBundleLoader().importClass(name, packageName);
 		return null;
 	}
 

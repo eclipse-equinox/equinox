@@ -950,6 +950,12 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 		return (String) manifest.get(Constants.EXPORT_SERVICE);
 	}
 
+	public String getProvidePackages() {
+		if (manifest == null)
+			return null;
+		return (String) manifest.get(Constants.PROVIDE_PACKAGE);
+	}
+	
 	public AdaptorElementFactory getElementFactory() {
 		if (elementFactory == null)
 			elementFactory = new AdaptorElementFactory();

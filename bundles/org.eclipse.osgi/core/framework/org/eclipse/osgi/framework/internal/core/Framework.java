@@ -218,6 +218,7 @@ public class Framework implements EventSource, EventPublisher {
 			// and merge this into the system bundle's manifest
 			String exportPackages = adaptor.getExportPackages();
 			String exportServices = adaptor.getExportServices();
+			String providePackages = adaptor.getProvidePackages();
 			Headers manifest = Headers.parseManifest(in);
 			if (exportPackages != null) {
 				String value = (String) manifest.get(Constants.EXPORT_PACKAGE);
@@ -239,7 +240,16 @@ public class Framework implements EventSource, EventPublisher {
 				manifest.set(Constants.EXPORT_SERVICE, null);
 				manifest.set(Constants.EXPORT_SERVICE, value);
 			}
-
+			if (providePackages != null) {
+				String value = (String) manifest.get(Constants.PROVIDE_PACKAGE);
+				if (value == null) {
+					value = providePackages;
+				} else {
+					value += "," + providePackages;
+				}
+				manifest.set(Constants.PROVIDE_PACKAGE, null);
+				manifest.set(Constants.PROVIDE_PACKAGE, value);
+			}
 			BundleDescription newSystemBundle = adaptor.getPlatformAdmin().getFactory().createBundleDescription(manifest, Constants.SYSTEM_BUNDLE_LOCATION, 0);
 			if (newSystemBundle == null)
 				throw new BundleException(Msg.formatter.getString("OSGI_SYSTEMBUNDLE_DESCRIPTION_ERROR"));

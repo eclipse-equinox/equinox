@@ -240,6 +240,15 @@ public interface FrameworkAdaptor {
 	public String getExportPackages();
 
 	/**
+	 * Gets the value for Provide-Package for packages that a FrameworkAdaptor is exporting
+	 * to the framework.  The String returned will be parsed by the framework
+	 * and the packages specified will be exported by the System Bundle.
+	 * @return The value for Provide-Package that the System Bundle will export or
+	 * null if none exist.
+	 */
+	public String getProvidePackages();
+	
+	/**
 	 * Gets any Service class names that a FrameworkAdaptor is exporting to the
 	 * framework.  The class names returned will be exported by the System Bundle.
 	 * @return The value of Export-Service that the System Bundle will export or
