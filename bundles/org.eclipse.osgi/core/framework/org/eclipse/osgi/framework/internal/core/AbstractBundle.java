@@ -286,11 +286,6 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	 *                permissions.
 	 */
 	public void start() throws BundleException {
-		long start = 0;
-		if (Debug.DEBUG && Debug.DEBUG_BUNDLE_TIME) {
-			start = System.currentTimeMillis();
-			System.out.println("Starting " + getSymbolicName()); //$NON-NLS-1$
-		}
 		framework.checkAdminPermission();
 		checkValid();
 		beginStateChange();
@@ -299,8 +294,6 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 		} finally {
 			completeStateChange();
 		}
-		if (Debug.DEBUG && Debug.DEBUG_BUNDLE_TIME)
-			System.out.println("End starting " + getSymbolicName() + " " + (System.currentTimeMillis() - start)); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	/**

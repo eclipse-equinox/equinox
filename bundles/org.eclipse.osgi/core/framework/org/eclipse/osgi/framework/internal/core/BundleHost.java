@@ -382,16 +382,10 @@ public class BundleHost extends AbstractBundle {
 	 * @param persistent if true persistently record the bundle was started.
 	 */
 	protected void startWorker(boolean persistent) throws BundleException {
+		long start  = 0;
 		if (framework.active) {
 			if ((state & (STARTING | ACTIVE)) != 0) {
 				return;
-			}
-
-			//STARTUP TIMING Start here
-			if (Debug.DEBUG && Debug.MONITOR_ACTIVATION) {
-				BundleWatcher bundleStats = framework.adaptor.getBundleWatcher();
-				if (bundleStats != null)
-					bundleStats.startActivation(this);
 			}
 
 			try {
@@ -408,6 +402,18 @@ public class BundleHost extends AbstractBundle {
 				}
 
 				if (getStartLevel() <= framework.startLevelManager.getStartLevel()) {
+					//STARTUP TIMING Start here					
+					if (Debug.DEBUG) {
+						if (Debug.MONITOR_ACTIVATION) {
+							BundleWatcher bundleStats = framework.adaptor.getBundleWatcher();
+							if (bundleStats != null)
+								bundleStats.startActivation(this);
+						}
+						if (Debug.DEBUG_BUNDLE_TIME) {
+							start = System.currentTimeMillis();
+							System.out.println("Starting " + getSymbolicName()); //$NON-NLS-1$
+						}
+					}
 					state = STARTING;
 
 					context = createContext();
@@ -440,10 +446,14 @@ public class BundleHost extends AbstractBundle {
 					}
 				}
 			} finally {
-				if (Debug.DEBUG && Debug.MONITOR_ACTIVATION) {
-					BundleWatcher bundleStats = framework.adaptor.getBundleWatcher();
-					if (bundleStats != null)
-						bundleStats.endActivation(this);
+				if (Debug.DEBUG && state==ACTIVE) {
+					if (Debug.MONITOR_ACTIVATION) {
+						BundleWatcher bundleStats = framework.adaptor.getBundleWatcher();
+						if (bundleStats != null)
+							bundleStats.endActivation(this);
+					}
+					if (Debug.DEBUG_BUNDLE_TIME)
+						System.out.println("End starting " + getSymbolicName() + " " + (System.currentTimeMillis() - start)); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 			}
 		}
