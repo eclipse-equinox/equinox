@@ -754,30 +754,25 @@ public class PackageAdminImpl implements PackageAdmin {
 			framework.adaptor.getState().resolve(false);
 			for (int i = 0; i < size; i++) {
 				AbstractBundle bundle = (AbstractBundle) allBundles.get(i);
-				BundleDescription changedBundleDes = bundle.getBundleDescription();
-				boolean previouslyResolved = bundle.isResolved();
+				if (bundle.isResolved() || bundle == framework.systemBundle)
+					continue;
 
-				if (bundle != framework.systemBundle && changedBundleDes != null) {
-					if (changedBundleDes.isResolved() && !previouslyResolved) {
-						if (bundle.isFragment()) {
-							BundleHost host = (BundleHost) framework.getBundle(changedBundleDes.getHost().getSupplier().getBundleId());
-							if (((BundleFragment) bundle).setHost(host)) {
-								bundle.resolve(changedBundleDes.isSingleton());
-							}
-						} else {
+				BundleDescription changedBundleDes = bundle.getBundleDescription();
+				if (changedBundleDes == null) {
+					framework.publishFrameworkEvent(FrameworkEvent.ERROR, bundle, new BundleException(Msg.formatter.getString("BUNDLE_NOT_IN_STATE", bundle.getLocation()))); //$NON-NLS-1$
+				}
+
+				if (changedBundleDes.isResolved()) {
+					if (bundle.isFragment()) {
+						BundleHost host = (BundleHost) framework.getBundle(changedBundleDes.getHost().getSupplier().getBundleId());
+						if (((BundleFragment) bundle).setHost(host)) {
 							bundle.resolve(changedBundleDes.isSingleton());
 						}
-						if (bundle.isResolved()) {
-							notify.add(bundle);
-						}
-					} else if (!changedBundleDes.isResolved() && previouslyResolved) {
-						// Need to log error.  This should not happen since the state should not touch
-						// bundles that we did not pass in to the resolve() call.
-						framework.publishFrameworkEvent(FrameworkEvent.ERROR, bundle, new BundleException(Msg.formatter.getString("STATE_UNRESOLVED_WRONG_BUNDLE", bundle.getLocation()))); //$NON-NLS-1$
+					} else {
+						bundle.resolve(changedBundleDes.isSingleton());
 					}
-				} else {
-					if (bundle != framework.systemBundle) {
-						framework.publishFrameworkEvent(FrameworkEvent.ERROR, bundle, new BundleException(Msg.formatter.getString("BUNDLE_NOT_IN_STATE", bundle.getLocation()))); //$NON-NLS-1$
+					if (bundle.isResolved()) {
+						notify.add(bundle);
 					}
 				}
 			}
