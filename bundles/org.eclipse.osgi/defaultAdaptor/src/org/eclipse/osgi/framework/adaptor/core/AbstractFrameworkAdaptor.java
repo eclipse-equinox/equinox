@@ -26,6 +26,7 @@ import org.eclipse.osgi.framework.util.FrameworkMessageFormat;
 import org.eclipse.osgi.framework.util.Headers;
 import org.eclipse.osgi.internal.resolver.StateManager;
 import org.eclipse.osgi.service.resolver.*;
+import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.*;
 
 /**
@@ -34,6 +35,7 @@ import org.osgi.framework.*;
  */
 public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 	public static final String PROP_PARENT_CLASSLOADER = "osgi.parentClassloader"; //$NON-NLS-1$
+	public static final String PROP_FRAMEWORK_EXTENSIONS = "osgi.framework.extensions"; //$NON-NLS-1$
 	public static final String PARENT_CLASSLOADER_APP = "app"; //$NON-NLS-1$
 	public static final String PARENT_CLASSLOADER_EXT = "ext"; //$NON-NLS-1$
 	public static final String PARENT_CLASSLOADER_BOOT = "boot"; //$NON-NLS-1$
@@ -102,8 +104,6 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 
 	protected AdaptorElementFactory elementFactory;
 
-	public static final String METADATA_ADAPTOR_NEXTID = "METADATA_ADAPTOR_NEXTID"; //$NON-NLS-1$
-
 	static {
 		// check property for specified parent
 		String type = System.getProperty(PROP_PARENT_CLASSLOADER, PARENT_CLASSLOADER_BOOT);
@@ -122,7 +122,9 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 			bundleClassLoaderParent = new ParentClassLoader();
 	}
 
-	private Method addURLMethod = findaddURLMethod(AbstractFrameworkAdaptor.class.getClassLoader().getClass());
+	protected Method addURLMethod = findaddURLMethod(AbstractFrameworkAdaptor.class.getClassLoader().getClass());
+
+	protected String[] configuredExtensions;
 
 	/**
 	 * Constructor for DefaultAdaptor.  This constructor parses the arguments passed
@@ -542,6 +544,11 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 			// if uninstalled or updated then do nothing framework must be restarted.
 			return;
 
+		// first make sure this BundleData is not on the pre-configured osgi.framework.extensions list
+		String[] extensions = getConfiguredExtensions();
+		for (int i = 0; i < extensions.length; i++)
+			if (extensions[i].equals(bundleData.getSymbolicName()))
+				return;
 		File[] files = getExtensionFiles(bundleData);
 		if (files == null)
 			return;
@@ -562,6 +569,17 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 		}
 		// re-initialize FrameworkMessageFormat to pick up new fragments
 		FrameworkMessageFormat.initMessages();
+	}
+
+	protected String[] getConfiguredExtensions() {
+		if (configuredExtensions != null)
+			return configuredExtensions;
+		String prop = System.getProperty(PROP_FRAMEWORK_EXTENSIONS);
+		if (prop == null || prop.trim().length() == 0)
+			configuredExtensions = new String[0];
+		else 
+			configuredExtensions =  ManifestElement.getArrayFromList(prop);
+		return configuredExtensions;
 	}
 
 	protected void processBootExtension(BundleData bundleData, byte type) throws BundleException {
@@ -855,7 +873,6 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 	 * directory containing data directories for installed bundles 
 	 */
 	protected File dataRootDir;
-	public static final String METADATA_ADAPTOR_IBSL = "METADATA_ADAPTOR_IBSL"; //$NON-NLS-1$
 	public static final String DATA_DIR_NAME = "data";//$NON-NLS-1$
 	protected boolean invalidState = false;
 

@@ -47,6 +47,8 @@ import org.osgi.framework.FrameworkEvent;
  * (e.g. startlevel, persistent start state, etc)
  */
 public class DefaultAdaptor extends AbstractFrameworkAdaptor {
+	public static final String METADATA_ADAPTOR_NEXTID = "METADATA_ADAPTOR_NEXTID"; //$NON-NLS-1$
+	public static final String METADATA_ADAPTOR_IBSL = "METADATA_ADAPTOR_IBSL"; //$NON-NLS-1$
 
 	public static final String METADATA_BUNDLE_GEN = "METADATA_BUNDLE_GEN"; //$NON-NLS-1$
 	public static final String METADATA_BUNDLE_LOC = "METADATA_BUNDLE_LOC"; //$NON-NLS-1$
