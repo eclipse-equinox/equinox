@@ -474,9 +474,7 @@ public class PackageAdminImpl implements PackageAdmin {
 
 		if (result.size() == 0)
 			return null;
-		else
-			return (AbstractBundle[]) result.toArray(new AbstractBundle[result.size()]);
-
+		return (AbstractBundle[]) result.toArray(new AbstractBundle[result.size()]);
 	}
 
 	public Bundle[] getFragments(Bundle bundle) {
@@ -493,19 +491,23 @@ public class PackageAdminImpl implements PackageAdmin {
 		return result;
 	}
 
+	Bundle getBundlePriv(Class clazz) {
+		ClassLoader cl = clazz.getClassLoader();
+		if (cl instanceof BundleClassLoader)
+			return ((BundleLoader) ((BundleClassLoader) cl).getDelegate()).bundle;
+		if (cl == getClass().getClassLoader())
+			return framework.systemBundle;
+		return null;
+	}
+
 	public Bundle getBundle(final Class clazz) {
-		ClassLoader cl;
 		if (System.getSecurityManager() == null)
-			cl = clazz.getClassLoader();
-		else
-			cl = (ClassLoader) AccessController.doPrivileged(new PrivilegedAction() {
-				public Object run() {
-					return clazz.getClassLoader();
-				}
-			});
-		if (!(cl instanceof BundleClassLoader))
-			return null;
-		return ((BundleLoader) ((BundleClassLoader) cl).getDelegate()).bundle;
+			return getBundlePriv(clazz);
+		return (Bundle) AccessController.doPrivileged(new PrivilegedAction() {
+			public Object run() {
+				return getBundlePriv(clazz);
+			}
+		});
 	}
 
 	public int getBundleType(Bundle bundle) {
