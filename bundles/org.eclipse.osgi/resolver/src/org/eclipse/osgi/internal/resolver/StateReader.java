@@ -24,7 +24,7 @@ public class StateReader {
 	// cached registry.
 	protected List objectTable = new ArrayList();
 
-	public static final byte STATE_CACHE_VERSION = 3;
+	public static final byte STATE_CACHE_VERSION = 4;
 	public static final byte NULL = 0;
 	public static final byte OBJECT = 1;
 	public static final byte INDEX = 2;
@@ -35,7 +35,7 @@ public class StateReader {
 		return (objectTable.size() - 1);
 	}
 
-	private StateImpl readState(DataInputStream in) throws IOException {
+	private StateImpl readState(DataInputStream in, long expectedTimestamp) throws IOException {
 		if (in.readByte() != STATE_CACHE_VERSION)
 			return null;
 		byte tag = readTag(in);
@@ -43,7 +43,9 @@ public class StateReader {
 			return null;
 		if (tag == INDEX)
 			return (StateImpl) objectTable.get(in.readInt());
-
+		long timestampRead = in.readLong();
+		if (expectedTimestamp >= 0 && timestampRead != expectedTimestamp)
+			return null;
 		StateImpl result = new StateImpl();
 		addToObjectTable(result);
 		int length = in.readInt();
@@ -51,7 +53,7 @@ public class StateReader {
 			return result;
 		for (int i = 0; i < length; i++)
 			result.basicAddBundle(readBundleDescription(in));
-		result.setTimeStamp(in.readLong());
+		result.setTimeStamp(timestampRead);
 		result.setResolved(in.readBoolean());
 		if (!result.isResolved())
 			return result;
@@ -142,9 +144,9 @@ public class StateReader {
 		addToObjectTable(result);
 		return result;		
 	}
-	public final StateImpl loadState(DataInputStream input) throws IOException {
+	public final StateImpl loadState(DataInputStream input, long expectedTimestamp) throws IOException {
 		try {
-			return readState(input);
+			return readState(input, expectedTimestamp);
 		} finally {
 			input.close();
 		}

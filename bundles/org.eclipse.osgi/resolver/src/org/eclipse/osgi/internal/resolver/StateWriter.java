@@ -25,7 +25,6 @@ public class StateWriter {
 	// cached registry.
 	protected Map objectTable = new HashMap();
 
-	public static final byte STATE_CACHE_VERSION = 3;
 	public static final byte NULL = 0;
 	public static final byte OBJECT = 1;
 	public static final byte INDEX = 2;
@@ -53,16 +52,16 @@ public class StateWriter {
 		return false;
 	}
 	private void writeState(StateImpl state, DataOutputStream out) throws IOException {
-		out.write(STATE_CACHE_VERSION);
+		out.write(StateReader.STATE_CACHE_VERSION);
 		if (writePrefix(state, out))
 			return;
+		out.writeLong(state.getTimeStamp());		
 		BundleDescription[] bundles = state.getBundles();		
 		out.writeInt(bundles.length);
 		if (bundles.length == 0)
 			return;
 		for (int i = 0; i < bundles.length; i++)
 			writeBundleDescription((BundleDescriptionImpl) bundles[i], out);
-		out.writeLong(state.getTimeStamp());
 		out.writeBoolean(state.isResolved());
 		if (!state.isResolved())
 			return;

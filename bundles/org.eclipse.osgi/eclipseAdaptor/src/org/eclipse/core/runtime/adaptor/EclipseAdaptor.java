@@ -12,17 +12,16 @@ package org.eclipse.core.runtime.adaptor;
 
 import java.io.*;
 import java.util.*;
-
 import javax.xml.parsers.SAXParserFactory;
-
 import org.eclipse.osgi.framework.adaptor.*;
+import org.eclipse.osgi.framework.adaptor.Version;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.debug.DebugOptions;
 import org.eclipse.osgi.framework.internal.defaultadaptor.*;
 import org.eclipse.osgi.framework.stats.StatsManager;
 import org.eclipse.osgi.internal.resolver.StateImpl;
 import org.eclipse.osgi.internal.resolver.StateManager;
-import org.eclipse.osgi.service.resolver.PlatformAdmin;
+import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.*;
 
 public class EclipseAdaptor extends DefaultAdaptor {
@@ -47,15 +46,64 @@ public class EclipseAdaptor extends DefaultAdaptor {
 	private static final String OPTION_STATE_READER = RUNTIME_ADAPTOR + "/state/reader";//$NON-NLS-1$
 	private static final String OPTION_RESOLVER = RUNTIME_ADAPTOR + "/resolver/timing"; //$NON-NLS-1$
 	private static final String OPTION_RESOLVER_READER = RUNTIME_ADAPTOR + "/resolver/reader/timing"; //$NON-NLS-1$
-	public static final byte BUNDLEDATA_VERSION = 1;
+	public static final byte BUNDLEDATA_VERSION = 2;
 	public static final byte NULL = 0;
 	public static final byte OBJECT = 1;
 
 	int startLevel = 1;
+	private long timeStamp;
 
 	public EclipseAdaptor(String[] args) {
 		super(args);
 		setDebugOptions();
+	}
+	
+	protected StateManager createStateManager() {
+		timeStamp = readTimeStamp();
+		stateManager = new StateManager(getStateBaseLocation(), timeStamp);
+		StateImpl systemState = stateManager.getSystemState();
+		if (systemState != null)
+			return stateManager;
+		systemState = stateManager.createSystemState();				
+		Vector installedBundles = getInstalledBundles();
+		if (installedBundles == null)
+			return stateManager;
+		StateObjectFactory factory = stateManager.getFactory();
+		for (Iterator iter = installedBundles.iterator(); iter.hasNext(); ) {
+			BundleData toAdd = (BundleData) iter.next();
+			try {
+				Dictionary manifest = toAdd.getManifest();
+				BundleDescription newDescription = factory.createBundleDescription(manifest, toAdd.getLocation(),toAdd.getBundleID());
+				systemState.addBundle(newDescription);
+			} catch (BundleException be) {
+				// just ignore bundle datas with invalid manifests
+			}
+		}
+		// we need the state resolved
+		systemState.setTimeStamp(timeStamp);
+		systemState.resolve();
+		return stateManager;
+	}	
+
+	private long readTimeStamp() {
+		File metadata = getMetaDataLocation();
+		if (!metadata.isFile())
+			return 0;
+		try {
+			DataInputStream in = new DataInputStream(new BufferedInputStream(new FileInputStream(metadata)));
+			try {
+				if (in.readByte() == BUNDLEDATA_VERSION)
+					return in.readLong();				
+			} finally {
+				in.close();
+			}
+		} catch (IOException e) {
+			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+				Debug.println("Error reading framework metadata: " + e.getMessage());
+				Debug.printStackTrace(e);
+			}
+		}
+		return 0;
 	}
 
 	public AdaptorElementFactory getElementFactory() {
@@ -147,16 +195,19 @@ public class EclipseAdaptor extends DefaultAdaptor {
 	 */
 	public Vector getInstalledBundles() {
 		File metadata = getMetaDataLocation();
-		Vector result = null;
+		if (!metadata.isFile())
+			return null;
 		try {
 			DataInputStream in = new DataInputStream(new BufferedInputStream(new FileInputStream(metadata)));
 			try {
 				if (in.readByte() != BUNDLEDATA_VERSION)
-					return result;
+					return null;
+				// skip timeStamp - was read by readTimeStamp
+				in.readLong();				
 				startLevel = in.readInt();
 				nextId = in.readLong();
 				int bundleCount = in.readInt();
-				result = new Vector(bundleCount);
+				Vector result = new Vector(bundleCount);
 				for (int i = 0; i < bundleCount; i++) {
 					try {
 						try {
@@ -178,7 +229,8 @@ public class EclipseAdaptor extends DefaultAdaptor {
 							Debug.printStackTrace(e);
 						}
 					}
-				}
+				}				
+				return result;
 			} finally {
 				in.close();
 			}
@@ -188,7 +240,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 				Debug.printStackTrace(e);
 			}
 		}
-		return result;
+		return null;
 	}
 
 	protected void loadMetaDataFor(EclipseBundleData data, DataInputStream in) throws IOException {
@@ -266,11 +318,15 @@ public class EclipseAdaptor extends DefaultAdaptor {
 
 	public void saveMetaData() {
 		File metadata = getMetaDataLocation();
+		// the cache and the state match
+		if (timeStamp == stateManager.getSystemState().getTimeStamp() && metadata.isFile())
+			return;
 		try {
 			DataOutputStream out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(metadata)));
 			try {
 				out.write(BUNDLEDATA_VERSION);
-				out.writeInt(startLevel);
+				out.writeLong(stateManager.getSystemState().getTimeStamp());				
+				out.writeInt(startLevel);				
 				out.writeLong(nextId);
 				Bundle[] bundles = context.getBundles();
 				out.writeInt(bundles.length);
@@ -304,15 +360,16 @@ public class EclipseAdaptor extends DefaultAdaptor {
 	public IBundleStats getBundleStats() {
 		return StatsManager.getDefault();
 	}
-
-	protected StateManager createStateManager() {
-		return new StateManager(new File(System.getProperty("osgi.configuration.area")));
+	
+	protected File getStateBaseLocation() {
+		return new File(System.getProperty("osgi.configuration.area"));
 	}
 
 	protected File getMetaDataFile() {
-		File configAreaDirectory = new File(System.getProperty("osgi.configuration.area"));
+		File configAreaDirectory = getStateBaseLocation();
 		if (!configAreaDirectory.exists())
 			configAreaDirectory.mkdirs();
 		return new File(configAreaDirectory, ".framework");
 	}
+	
 }

@@ -78,12 +78,12 @@ public interface FrameworkAdaptor
 	/**
 	 * Return a list of the installed bundles.  Each element in the
 	 * list must be of type <code>BundleData</code>.  Each <code>BundleData</code>
-	 * corrosponds to one bundle that is persitently stored.
+	 * corresponds to one bundle that is persitently stored.
 	 * This method must construct <code>BundleData</code> objects for all 
 	 * installed bundles and return a Vector containing the objects.
 	 * The returned Vector becomes the property of the framework.
 	 *
-	 * @return Vector of installed BundleData objects.
+	 * @return Vector of installed BundleData objects, or null if none can be found.
 	 */
 	public Vector getInstalledBundles();
 

@@ -68,7 +68,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor
 
 	/** The State Manager */
 	protected StateManager stateManager;
-
+	
 	/**
 	 * Constructor for DefaultAdaptor.  This constructor parses the arguments passed
 	 * and remembers them for later when initialize is called.
@@ -529,7 +529,8 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor
 				{
 					throw new BundleException(AdaptorMsg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION"), e);
 				}
-				stateManager.install(data.getManifest(),data.getLocation(),data.getBundleID());
+				BundleDescription bundleDescription = stateManager.getFactory().createBundleDescription(data.getManifest(), data.getLocation(),data.getBundleID());
+				stateManager.getSystemState().addBundle(bundleDescription);
 			}
 
 		});
@@ -679,8 +680,11 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor
 				{
 					throw new BundleException(AdaptorMsg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION"), e);
 				}
-
-				stateManager.update(newData.getManifest(),newData.getLocation(),newData.getBundleID());
+				long bundleId = newData.getBundleID();
+				State systemState = stateManager.getSystemState();
+				systemState.removeBundle(bundleId);
+				BundleDescription newDescription = stateManager.getFactory().createBundleDescription(newData.getManifest(), newData.getLocation(),bundleId);
+				systemState.addBundle(newDescription);
 
 				File originalGenerationDir = data.getGenerationDir();
 
@@ -826,7 +830,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor
 					}
 				}
 
-				stateManager.uninstall(data);
+				stateManager.getSystemState().removeBundle(data.getBundleID());
 			}
 			/**
 			 * Undo the change to persistent storage.

@@ -11,96 +11,89 @@
 package org.eclipse.osgi.internal.resolver;
 
 import java.io.*;
-import java.util.Dictionary;
-
-import org.eclipse.osgi.framework.adaptor.BundleData;
 import org.eclipse.osgi.service.resolver.*;
-import org.eclipse.osgi.service.resolver.BundleDescription;
-import org.eclipse.osgi.service.resolver.State;
 import org.osgi.framework.BundleException;
 
 public class StateManager implements PlatformAdmin {
 	public static boolean DEBUG_READER = false;
 	private long readStartupTime;
-	
-	private StateImpl state;
+
+	private StateImpl systemState;
 	private File stateLocation;
 	private StateObjectFactory factory;
+	private long lastTimeStamp;
 
 	public StateManager(File bundleRootDir) {
-		stateLocation = new File(bundleRootDir, ".state"); //$NON-NLS-1$
-		readState();
+		// a negative timestamp means no timestamp checking
+		this(bundleRootDir, -1);
 	}
-	
+	public StateManager(File bundleRootDir, long expectedTimeStamp) {
+		stateLocation = new File(bundleRootDir, ".state"); //$NON-NLS-1$
+		readState(expectedTimeStamp);
+	}	
 	public void shutdown() throws IOException {
 		writeState();
-		state = null;
+		systemState = null;
 	}
-	private void readState() {
+	private void readState(long expectedTimeStamp) {
 		if (!stateLocation.isFile())
-			return;		
-		
+			return;
+
 		if (DEBUG_READER)
 			readStartupTime = System.currentTimeMillis();
-			
+
 		FileInputStream fileInput;
 		try {
 			fileInput = new FileInputStream(stateLocation);
 		} catch (FileNotFoundException e) {
 			// TODO: log before bailing
-			e.printStackTrace();			
+			e.printStackTrace();
 			return;
 		}
-		DataInputStream input = null;		
+		DataInputStream input = null;
 		try {
-			input = new DataInputStream(new BufferedInputStream(fileInput,65536));
+			input = new DataInputStream(new BufferedInputStream(fileInput, 65536));
 			StateReader reader = new StateReader();
-			state = reader.loadState(input);
-			state.setResolver(new ResolverImpl());
+			systemState = reader.loadState(input, expectedTimeStamp);
+			// problems in the cache (corrupted/stale), don't create a state object
+			if (systemState == null)
+				return;
+			initializeSystemState();
 		} catch (IOException ioe) {
 			// TODO: how do we log this?
 			ioe.printStackTrace();
-		} finally {			
+		} finally {
 			if (DEBUG_READER)
 				System.out.println("Time to read state: " + (System.currentTimeMillis() - readStartupTime));
-		}		
+		}
 	}
 	private void writeState() throws IOException {
-		if (state == null)
-			return;		
+		if (systemState == null)
+			return;
+		if (stateLocation.isFile() && lastTimeStamp == systemState.getTimeStamp())
+			return;
 		DataOutputStream output = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(stateLocation)));
 		StateWriter writer = new StateWriter();
-		writer.saveState(state, output);
+		writer.saveState(systemState, output);
 	}
-	public State getSystemState() {
-		if (state == null) {
-			state = (StateImpl) factory.createState();
-			state.setResolver(new ResolverImpl());
-		}
-		return state;
+	public StateImpl createSystemState() {
+		systemState = new StateImpl();
+		initializeSystemState();	
+		return systemState;
+	}
+	private void initializeSystemState() {
+		systemState.setResolver(new ResolverImpl());
+		lastTimeStamp = systemState.getTimeStamp();
+	}
+	public StateImpl getSystemState() {
+		return systemState;
 	}
 	public State getState() {
-		return factory.createState(getSystemState());		
-	}
-	public BundleDescription uninstall(BundleData bundledata) {
-		long bundleId = bundledata.getBundleID();
-		return getSystemState().removeBundle(bundleId);
-	}
-	public BundleDescription update(Dictionary manifest, String location, long bundleId) throws BundleException {
- 		State systemState = getSystemState();
- 		systemState.removeBundle(bundleId);
-		BundleDescription newDescription = getFactory().createBundleDescription(manifest, location,bundleId);
-		systemState.addBundle(newDescription);
-		return newDescription;
-	}
-	public BundleDescription install(Dictionary manifest, String location, long bundleId) throws BundleException {
-		BundleDescription bundleDescription = getFactory().createBundleDescription(manifest, location,bundleId);
-		getSystemState().addBundle(bundleDescription);
-		return bundleDescription;
+		return factory.createState(getSystemState());
 	}
 	public StateObjectFactory getFactory() {
 		if (factory == null)
-			factory = new StateObjectFactoryImpl();		
+			factory = new StateObjectFactoryImpl();
 		return factory;
 	}
 	public void commit(State state) throws BundleException {
@@ -110,5 +103,5 @@ public class StateManager implements PlatformAdmin {
 	public Resolver getResolver() {
 		return new ResolverImpl();
 	}
-	
+
 }

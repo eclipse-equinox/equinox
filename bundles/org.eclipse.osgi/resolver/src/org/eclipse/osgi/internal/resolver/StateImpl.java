@@ -11,11 +11,9 @@
 package org.eclipse.osgi.internal.resolver;
 
 import java.util.*;
-
 import org.eclipse.osgi.framework.debug.DebugOptions;
 import org.eclipse.osgi.framework.internal.core.*;
 import org.eclipse.osgi.service.resolver.*;
-import org.osgi.framework.BundleException;
 
 public class StateImpl implements State {
 	transient private Resolver resolver;
@@ -34,7 +32,7 @@ public class StateImpl implements State {
 			throw new IllegalArgumentException("no id set");		
 		if (!basicAddBundle(description))
 			return;
-		timeStamp++;
+		updateTimeStamp();
 		resolved = false;
 		getDelta().recordBundleAdded((BundleDescriptionImpl) description);
 		if (resolver != null)
@@ -55,12 +53,17 @@ public class StateImpl implements State {
 	public boolean removeBundle(BundleDescription toRemove) {
 		if (!bundleDescriptions.remove((KeyedElement) toRemove))
 			return false;
-		timeStamp++;
+		updateTimeStamp();		
 		resolved = false;
 		getDelta().recordBundleRemoved((BundleDescriptionImpl) toRemove);
 		if (resolver != null)
 			resolver.bundleRemoved(toRemove);
 		return true;
+	}
+	private void updateTimeStamp() {
+		if (timeStamp == Long.MAX_VALUE)
+			timeStamp = 0;
+		timeStamp++;		
 	}
 	public StateDelta getChanges() {
 		return changes;
@@ -106,7 +109,6 @@ public class StateImpl implements State {
 	public void resolveConstraint(VersionConstraint constraint, Version actualVersion, BundleDescription supplier) {
 		VersionConstraintImpl modifiable = ((VersionConstraintImpl) constraint);
 		if (modifiable.getActualVersion() != actualVersion || modifiable.getSupplier() != supplier) {
-			timeStamp++;
 			modifiable.setActualVersion(actualVersion);
 			modifiable.setSupplier(supplier);			
 			if (constraint instanceof BundleSpecification || constraint instanceof HostSpecification) {
@@ -116,7 +118,6 @@ public class StateImpl implements State {
 		}
 	}
 	public void resolveBundle(BundleDescription bundle, int status) {
-		timeStamp++;
 		((BundleDescriptionImpl) bundle).setState(status);
 		getDelta().recordBundleResolved((BundleDescriptionImpl) bundle, status);
 		if (status == Bundle.RESOLVED)
@@ -138,7 +139,6 @@ public class StateImpl implements State {
 		BundleSpecification[] requiredBundles = bundle.getRequiredBundles();
 		for (int i = 0; i < requiredBundles.length; i++)
 			((VersionConstraintImpl) requiredBundles[i]).unresolve();
-		timeStamp++;
 	}
 
 	public Resolver getResolver() {
