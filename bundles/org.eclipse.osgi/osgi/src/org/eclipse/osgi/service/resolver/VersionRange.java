@@ -108,9 +108,10 @@ public class VersionRange {
 	}
 
 	public String toString() {
-		if (minVersion != null && Version.maxVersion.equals(maxVersion)) {
+		if (minVersion == null)
+			return Version.emptyVersion.toString();
+		if (Version.maxVersion.equals(maxVersion))
 			return minVersion.toString();
-		}
 		StringBuffer result = new StringBuffer();
 		if (minVersion != null)
 			result.append(minVersion.isInclusive() ? '[' : '(');
