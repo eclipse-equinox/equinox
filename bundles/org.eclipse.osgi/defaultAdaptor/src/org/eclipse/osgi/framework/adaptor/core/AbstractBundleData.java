@@ -222,7 +222,7 @@ public abstract class AbstractBundleData implements BundleData {
 
 	public static String getBundleEntryURL(long id, String path) {
 		StringBuffer url = new StringBuffer(Constants.OSGI_ENTRY_URL_PROTOCOL);
-		url.append("://").append(id);
+		url.append("://").append(id); //$NON-NLS-1$
 		if (path.length() == 0 || path.charAt(0) != '/') {
 			url.append('/');
 		}
@@ -274,7 +274,7 @@ public abstract class AbstractBundleData implements BundleData {
 		for (int i = 0; i < nativePaths.length; i++) {
 			sb.append(nativePaths[i]);
 			if (i < nativePaths.length - 1)
-				sb.append(",");
+				sb.append(',');
 		}
 		return sb.toString();
 	}
@@ -287,7 +287,7 @@ public abstract class AbstractBundleData implements BundleData {
 		if (nativePaths == null)
 			return;
 		ArrayList result = new ArrayList(5);
-		StringTokenizer st = new StringTokenizer(nativePaths, ",");
+		StringTokenizer st = new StringTokenizer(nativePaths, ","); //$NON-NLS-1$
 		while (st.hasMoreTokens()) {
 			String path = st.nextToken();
 			result.add(path);

@@ -83,7 +83,7 @@ public class ReliableFile {
 	 getOutputStream() methods */
 	Checksum appendCrc;
 
-	public static final String MINIMUM_AGING_INTERVAL_KEY = "com.ibm.pvc.reliablefile.minimumAgingInterval";
+	public static final String MINIMUM_AGING_INTERVAL_KEY = "reliablefile.minimumAgingInterval"; //$NON-NLS-1$
 	private static final int AGING_INTERVAL_DEFAULT = 2000; // 2 seconds
 	private static int agingInterval = -1;
 
@@ -176,7 +176,7 @@ public class ReliableFile {
 					if (i >= 0)
 						agingInterval = i;
 				} catch (NumberFormatException nfe) {
-					System.err.println("Invalid property value for key \"" + MINIMUM_AGING_INTERVAL_KEY + "\"."); //$NON-NLS-1$
+					System.err.println("Invalid property value for key \"" + MINIMUM_AGING_INTERVAL_KEY + "\"."); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 			}
 		}
@@ -542,6 +542,8 @@ public class ReliableFile {
 		}
 	}
 
+	private static final int CP_BUF_SIZE = 4096;
+
 	/**
 	 * Copy a file.
 	 *
@@ -549,8 +551,6 @@ public class ReliableFile {
 	 * @param to The target file.
 	 * @throws IOException If the copy failed.
 	 */
-	private static final int CP_BUF_SIZE = 4096;
-
 	private static void cp(File from, File to, int truncateSize) throws IOException {
 		FileInputStream in = null;
 		FileOutputStream out = null;
@@ -745,8 +745,6 @@ public class ReliableFile {
 	/**
 	 * Determine if a File is a valid ReliableFile
 	 *
-	 * @param file File object for verifying.
-	 * @param containsSignature optional boolean array[1] set if file contains a valid signature
 	 * @return <code>true</code> if the file is a valid ReliableFile
 	 * @throws IOException If an error occurs verifying the file.
 	 */

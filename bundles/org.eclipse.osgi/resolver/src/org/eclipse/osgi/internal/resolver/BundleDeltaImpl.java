@@ -40,23 +40,23 @@ public class BundleDeltaImpl implements BundleDelta {
 	}
 
 	public String toString() {
-		return bundleDescription.getSymbolicName() + '_' + bundleDescription.getVersion() + " (" + toTypeString(type) + ")";
+		return bundleDescription.getSymbolicName() + '_' + bundleDescription.getVersion() + " (" + toTypeString(type) + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	private static String toTypeString(int type) {
 		StringBuffer typeStr = new StringBuffer();
 		if ((type & BundleDelta.ADDED) != 0)
-			typeStr.append("ADDED,");
+			typeStr.append("ADDED,"); //$NON-NLS-1$
 		if ((type & BundleDelta.REMOVED) != 0)
-			typeStr.append("REMOVED,");
+			typeStr.append("REMOVED,"); //$NON-NLS-1$
 		if ((type & BundleDelta.RESOLVED) != 0)
-			typeStr.append("RESOLVED,");
+			typeStr.append("RESOLVED,"); //$NON-NLS-1$
 		if ((type & BundleDelta.UNRESOLVED) != 0)
-			typeStr.append("UNRESOLVED,");
+			typeStr.append("UNRESOLVED,"); //$NON-NLS-1$
 		if ((type & BundleDelta.LINKAGE_CHANGED) != 0)
-			typeStr.append("LINKAGE_CHANGED,");
+			typeStr.append("LINKAGE_CHANGED,"); //$NON-NLS-1$
 		if ((type & BundleDelta.UPDATED) != 0)
-			typeStr.append("UPDATED,");
+			typeStr.append("UPDATED,"); //$NON-NLS-1$
 		if (typeStr.length() > 0)
 			typeStr.deleteCharAt(typeStr.length() - 1);
 		return typeStr.toString();

@@ -29,7 +29,7 @@ import org.osgi.framework.BundleException;
 public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 
 	/** Name of the Adaptor manifest file */
-	protected final String ADAPTOR_MANIFEST = "ADAPTOR.MF";
+	protected final String ADAPTOR_MANIFEST = "ADAPTOR.MF"; //$NON-NLS-1$
 
 	protected EventPublisher eventPublisher;
 
@@ -65,9 +65,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 
 	/**
 	 * Initializes the ServiceRegistry, loads the properties for this
-	 * FrameworkAdaptor and initializes all the Vector and Hashtable capacity,
-	 * increment and factor values.
-	 * @see org.eclipse.osgi.framework.adaptor.FrameworkAdaptor#initialize()
+	 * FrameworkAdaptor reads the adaptor manifest file.
 	 */
 	public void initialize(EventPublisher eventPublisher) {
 		this.eventPublisher = eventPublisher;
@@ -91,7 +89,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 		try {
 			return (new URL(location).openConnection());
 		} catch (IOException e) {
-			throw new BundleException(AdaptorMsg.formatter.getString("ADAPTOR_URL_CREATE_EXCEPTION", location), e);
+			throw new BundleException(AdaptorMsg.formatter.getString("ADAPTOR_URL_CREATE_EXCEPTION", location), e); //$NON-NLS-1$
 		}
 	}
 
@@ -217,11 +215,11 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 				}
 			} else {
 				if (Debug.DEBUG && Debug.DEBUG_GENERAL)
-					Debug.println("Skipping osgi.properties: " + resource);
+					Debug.println("Skipping osgi.properties: " + resource); //$NON-NLS-1$
 			}
 		} catch (IOException e) {
 			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-				Debug.println("Unable to load osgi.properties: " + e.getMessage());
+				Debug.println("Unable to load osgi.properties: " + e.getMessage()); //$NON-NLS-1$
 			}
 		}
 	}
@@ -242,7 +240,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 
 		if (in == null) {
 			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-				Debug.println("Unable to find adaptor bundle manifest " + ADAPTOR_MANIFEST);
+				Debug.println("Unable to find adaptor bundle manifest " + ADAPTOR_MANIFEST); //$NON-NLS-1$
 			}
 			manifest = new Headers(new Properties());
 			return;
@@ -250,7 +248,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 		try {
 			manifest = Headers.parseManifest(in);
 		} catch (BundleException e) {
-			Debug.println("Unable to read adaptor bundle manifest " + ADAPTOR_MANIFEST);
+			Debug.println("Unable to read adaptor bundle manifest " + ADAPTOR_MANIFEST); //$NON-NLS-1$
 		}
 	}
 
@@ -292,7 +290,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 	/**
 	 * Read a file from an InputStream and write it to the file system.
 	 *
-	 * @param is InputStream from which to read.
+	 * @param in InputStream from which to read.
 	 * @param file output file to create.
 	 * @exception IOException
 	 */
@@ -329,7 +327,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 			}
 
 			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-				Debug.println("Unable to read file");
+				Debug.println("Unable to read file"); //$NON-NLS-1$
 				Debug.printStackTrace(e);
 			}
 

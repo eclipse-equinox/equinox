@@ -15,35 +15,25 @@ import java.io.IOException;
 import java.net.*;
 
 /**
- * URLStreamHandler for ReferenceClassLoader resources.
+ * URLStreamHandler for reference protocol.  A reference URL is used to hold a 
+ * reference to a local file URL.  A reference URL allows bundles to be installed
+ * by reference.  This means the content of the bundle will not be copied.  Instead
+ * the content of the bundle will be loaded from the reference location specified
+ * by the reference URL.  The Framework only supports reference URLs that refer
+ * to a local file URL.  For example: <p>
+ * <pre>
+ *     reference:file:/eclipse/plugins/org.eclipse.myplugin_1.0.0/
+ *     reference:file:/eclispe/plugins/org.eclipse.mybundle_1.0.0.jar
+ * </pre>
  */
-
 public class Handler extends URLStreamHandler {
-	/**
-	 * Constructor for a BundleClassLoader resource URLStreamHandler.
-	 *
-	 * @param entry BundleEntry this handler represents.
-	 */
 	public Handler() {
 	}
 
-	/**
-	 * Establishes a connection to the resource specified by <code>URL</code>.
-	 * Since different protocols may have unique ways of connecting, it must be
-	 * overridden by the subclass.
-	 *
-	 * @return java.net.URLConnection
-	 * @param url java.net.URL
-	 *
-	 * @exception	IOException 	thrown if an IO error occurs during connection establishment
-	 */
 	protected URLConnection openConnection(URL url) throws IOException {
 		return new ReferenceURLConnection(url);
 	}
 
-	/** 
-	 * Parse reference URL. 
-	 */
 	protected void parseURL(URL url, String str, int start, int end) {
 		if (end < start) {
 			return;

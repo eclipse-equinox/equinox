@@ -49,7 +49,7 @@ public class DefaultClassLoader extends AbstractClassLoader {
 	 * BundleClassLoader constructor.
 	 * @param delegate The ClassLoaderDelegate for this ClassLoader.
 	 * @param domain The ProtectionDomain for this ClassLoader.
-	 * @param bundleclasspath An array of Bundle-ClassPath entries to
+	 * @param classpath An array of Bundle-ClassPath entries to
 	 * use for loading classes and resources.  This is specified by the 
 	 * Bundle-ClassPath manifest entry.
 	 * @param parent The parent ClassLoader.
@@ -195,17 +195,15 @@ public class DefaultClassLoader extends AbstractClassLoader {
 	 * Finds a class in the BundleFile.  If a class is found then the class
 	 * is defined using the ProtectionDomain bundledomain.
 	 * @param name The name of the class to find.
-	 * @param bundleFile The BundleFile to find the class in.
-	 * @param bundledomain The ProtectionDomain to use to defind the class if
-	 * it is found.
+	 * @param classpathEntry The ClasspathEntry to find the class in.
 	 * @return The loaded class object or null if the class is not found.
 	 */
 	protected Class findClassImpl(String name, ClasspathEntry classpathEntry) {
 		if (Debug.DEBUG && Debug.DEBUG_LOADER) {
-			Debug.println("BundleClassLoader[" + hostdata + "].findClass(" + name + ")");
+			Debug.println("BundleClassLoader[" + hostdata + "].findClass(" + name + ")");  //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
 		}
 
-		String filename = name.replace('.', '/').concat(".class");
+		String filename = name.replace('.', '/').concat(".class"); //$NON-NLS-1$
 
 		BundleEntry entry = classpathEntry.getBundleFile().getEntry(filename);
 
@@ -226,7 +224,7 @@ public class DefaultClassLoader extends AbstractClassLoader {
 		int readcount;
 
 		if (Debug.DEBUG && Debug.DEBUG_LOADER) {
-			Debug.println("  about to read " + length + " bytes from " + filename);
+			Debug.println("  about to read " + length + " bytes from " + filename); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 
 		try {
@@ -262,7 +260,7 @@ public class DefaultClassLoader extends AbstractClassLoader {
 				}
 			} catch (IOException e) {
 				if (Debug.DEBUG && Debug.DEBUG_LOADER) {
-					Debug.println("  IOException reading " + filename + " from " + hostdata);
+					Debug.println("  IOException reading " + filename + " from " + hostdata); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 
 				return null;
@@ -275,15 +273,15 @@ public class DefaultClassLoader extends AbstractClassLoader {
 		}
 
 		if (Debug.DEBUG && Debug.DEBUG_LOADER) {
-			Debug.println("  read " + bytesread + " bytes from " + filename);
-			Debug.println("  defining class " + name);
+			Debug.println("  read " + bytesread + " bytes from " + filename); //$NON-NLS-1$ //$NON-NLS-2$
+			Debug.println("  defining class " + name); //$NON-NLS-1$
 		}
 
 		try {
 			return (defineClass(name, classbytes, 0, bytesread, classpathEntry));
 		} catch (Error e) {
 			if (Debug.DEBUG && Debug.DEBUG_LOADER) {
-				Debug.println("  error defining class " + name);
+				Debug.println("  error defining class " + name); //$NON-NLS-1$
 			}
 
 			throw e;
@@ -294,9 +292,6 @@ public class DefaultClassLoader extends AbstractClassLoader {
 		return defineClass(name, classbytes, off, len, classpathEntry.getProtectionDomain());
 	}
 
-	/** 
-	 * @see org.eclipse.osgi.framework.adaptor.BundleClassLoader#findResource(String)
-	 */
 	protected URL findResource(String name) {
 		URL result = null;
 		for (int i = 0; i < classpathEntries.length; i++) {
@@ -468,7 +463,7 @@ public class DefaultClassLoader extends AbstractClassLoader {
 	}
 
 	protected boolean addClassPathEntry(ArrayList result, String entry, AbstractBundleData bundledata, ProtectionDomain domain) {
-		if (entry.equals(".")) {
+		if (entry.equals(".")) { //$NON-NLS-1$
 			result.add(createClassPathEntry(bundledata.getBaseBundleFile(), domain));
 			return true;
 		}

@@ -40,14 +40,10 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 	protected BundleFile baseBundleFile;
 
 	/**
-	 * Read data from an existing directory.
-	 * This constructor is used by getInstalledBundles.
+	 * Constructs a DefaultBundleData for the DefaultAdaptor.
 	 *
-	 * @param directory The top level bundle directory.
-	 * @throws NumberFormatException if the directory is not a
-	 * number, the directory contains a ".delete" file or
-	 * the directory does not contain a ".bundle" file.
-	 * @throws IOException If an error occurs initializing the bundle data.
+	 * @param adaptor the DefaultAdaptor for this DefaultBundleData
+	 * @param id the Bundle ID for this DefaultBundleData
 	 */
 	public DefaultBundleData(DefaultAdaptor adaptor, long id) {
 		super(adaptor, id);
@@ -64,7 +60,7 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 	 * @throws IOException If an error occurs initializing the bundle data.
 	 */
 	public void initializeExistingBundle() throws BundleException, IOException {
-		File delete = new File(getBundleStoreDir(), ".delete");
+		File delete = new File(getBundleStoreDir(), ".delete"); //$NON-NLS-1$
 
 		/* and the directory is not marked for delete */
 		if (delete.exists())
@@ -99,27 +95,27 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 		String path = null;
 
 		if (Debug.DEBUG && Debug.DEBUG_LOADER) {
-			Debug.println("  mapped library name: " + mappedName);
+			Debug.println("  mapped library name: " + mappedName); //$NON-NLS-1$
 		}
 
 		path = findNativePath(mappedName);
 
 		if (path == null) {
 			if (Debug.DEBUG && Debug.DEBUG_LOADER) {
-				Debug.println("  library does not exist: " + mappedName);
+				Debug.println("  library does not exist: " + mappedName); //$NON-NLS-1$
 			}
 			path = findNativePath(libname);
 		}
 
 		if (Debug.DEBUG && Debug.DEBUG_LOADER) {
-			Debug.println("  returning library: " + path);
+			Debug.println("  returning library: " + path); //$NON-NLS-1$
 		}
 		return path;
 	}
 
 	protected String findNativePath(String libname) {
 		String path = null;
-		if (!libname.startsWith("/")) {
+		if (!libname.startsWith("/")) { //$NON-NLS-1$
 			libname = '/' + libname;
 		}
 		String[] nativepaths = getNativePaths();
@@ -152,7 +148,7 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 			}
 			sb.append(nativepaths[i]);
 			if (i < nativepaths.length - 1) {
-				sb.append(",");
+				sb.append(","); //$NON-NLS-1$
 			}
 		}
 		if (sb.length() > 0)
@@ -179,11 +175,11 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 			File dataRoot = ((DefaultAdaptor) adaptor).getDataRootDir();
 			if (dataRoot == null)
 				throw new IllegalStateException(AdaptorMsg.formatter.getString("ADAPTOR_DATA_AREA_NOT_SET")); //$NON-NLS-1$
-			setDataDir(new File(dataRoot, id + "/" + DefaultAdaptor.DATA_DIR_NAME));
+			setDataDir(new File(dataRoot, id + "/" + DefaultAdaptor.DATA_DIR_NAME)); //$NON-NLS-1$
 		}
 		if (!getDataDir().exists() && !getDataDir().mkdirs()) {
 			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-				Debug.println("Unable to create bundle data directory: " + getDataDir().getPath());
+				Debug.println("Unable to create bundle data directory: " + getDataDir().getPath()); //$NON-NLS-1$
 			}
 		}
 
@@ -237,7 +233,7 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 		File generationDir = getGenerationDir();
 		if (!generationDir.exists() && !generationDir.mkdirs()) {
 			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-				Debug.println("Unable to create bundle generation directory: " + generationDir.getPath());
+				Debug.println("Unable to create bundle generation directory: " + generationDir.getPath()); //$NON-NLS-1$
 			}
 		}
 
@@ -270,7 +266,7 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 	protected File createBundleStoreDir() {
 		if (!getBundleStoreDir().exists() && !getBundleStoreDir().mkdirs()) {
 			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-				Debug.println("Unable to create bundle store directory: " + getBundleStoreDir().getPath());
+				Debug.println("Unable to create bundle store directory: " + getBundleStoreDir().getPath()); //$NON-NLS-1$
 			}
 		}
 		return getBundleStoreDir();

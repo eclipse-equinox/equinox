@@ -72,7 +72,7 @@ public class StateManager implements PlatformAdmin {
 			ioe.printStackTrace();
 		} finally {
 			if (DEBUG_READER)
-				System.out.println("Time to read state: " + (System.currentTimeMillis() - readStartupTime));
+				System.out.println("Time to read state: " + (System.currentTimeMillis() - readStartupTime)); //$NON-NLS-1$
 		}
 	}
 

@@ -94,7 +94,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 	 * </ul>
 	 * Any other arguments are ignored.
 	 *
-	 * @param An array of strings containing arguments.
+	 * @param args An array of strings containing arguments.
 	 * This object cannot be used until initialize is called.
 	 *
 	 */
@@ -102,13 +102,13 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 		if (args != null) {
 			for (int i = 0; i < args.length; i++) {
 				String arg = args[i];
-				if (arg.equalsIgnoreCase("reset")) {
+				if (arg.equalsIgnoreCase("reset")) { //$NON-NLS-1$
 					reset = true;
-				} else if (arg.indexOf("=") != -1) {
-					StringTokenizer tok = new StringTokenizer(args[i], "=");
+				} else if (arg.indexOf("=") != -1) { //$NON-NLS-1$
+					StringTokenizer tok = new StringTokenizer(args[i], "="); //$NON-NLS-1$
 					if (tok.countTokens() == 2) {
 						String key = tok.nextToken();
-						if (key.equalsIgnoreCase("bundledir")) {
+						if (key.equalsIgnoreCase("bundledir")) { //$NON-NLS-1$
 							// save file name for initializeStorage to use
 							bundleStore = tok.nextToken();
 						}
@@ -132,7 +132,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 	 * @return the StateManager.
 	 */
 	protected StateManager createStateManager() {
-		File stateLocation = new File(getBundleStoreRootDir(), ".state");
+		File stateLocation = new File(getBundleStoreRootDir(), ".state"); //$NON-NLS-1$
 		stateManager = new StateManager(stateLocation);
 		State systemState = stateManager.getSystemState();
 		if (systemState != null)
@@ -183,7 +183,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 
 			if (bundleStore == null) {
 				/* check the osgi.properties file, but default to "bundles" */
-				bundleStore = properties.getProperty(BUNDLE_STORE, "bundles");
+				bundleStore = properties.getProperty(BUNDLE_STORE, "bundles"); //$NON-NLS-1$
 			}
 		}
 
@@ -231,16 +231,16 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 				makedir = true;
 				if (!rm(bundleStore)) {
 					if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-						Debug.println("Could not remove directory: " + bundleStore.getPath());
+						Debug.println("Could not remove directory: " + bundleStore.getPath()); //$NON-NLS-1$
 					}
 				}
 			} else {
 				if (!bundleStore.isDirectory()) {
 					if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-						Debug.println("Exists but not a directory: " + bundleStore.getPath());
+						Debug.println("Exists but not a directory: " + bundleStore.getPath()); //$NON-NLS-1$
 					}
 
-					throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION"));
+					throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION")); //$NON-NLS-1$
 				}
 			}
 		} else {
@@ -249,21 +249,21 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 		if (makedir) {
 			if (!bundleStore.mkdirs()) {
 				if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-					Debug.println("Unable to create directory: " + bundleStore.getPath());
+					Debug.println("Unable to create directory: " + bundleStore.getPath()); //$NON-NLS-1$
 				}
 
 				throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION")); //$NON-NLS-1$
 			}
 		}
 
-		fwMetadata = new MetaData(getMetaDataFile(), "Framework metadata");
+		fwMetadata = new MetaData(getMetaDataFile(), "Framework metadata"); //$NON-NLS-1$
 		fwMetadata.load();
 		nextId = fwMetadata.getLong(METADATA_ADAPTOR_NEXTID, 1);
 		initialBundleStartLevel = fwMetadata.getInt(METADATA_ADAPTOR_IBSL, 1);
 	}
 
 	protected File getMetaDataFile() {
-		return new File(getBundleStoreRootDir(), ".framework");
+		return new File(getBundleStoreRootDir(), ".framework"); //$NON-NLS-1$
 	}
 
 	/**
@@ -271,13 +271,11 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 	 * any subdirectories.
 	 *
 	 * @param directory The directory to clean.
-	 * @param depth The remaining depth. When depth is zero, this
-	 * method will not recurse any deeper
 	 * @see #compactStorage
 	 */
 	private void compact(File directory) {
 		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-			Debug.println("compact(" + directory.getPath() + ")");
+			Debug.println("compact(" + directory.getPath() + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 
 		String list[] = directory.list();
@@ -296,7 +294,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 			/* if the file is a directory */
 			if (!target.isDirectory())
 				continue;
-			File delete = new File(target, ".delete");
+			File delete = new File(target, ".delete"); //$NON-NLS-1$
 
 			/* and the directory is marked for delete */
 			if (delete.exists()) {
@@ -310,7 +308,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 						out.close();
 					} catch (IOException e) {
 						if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-							Debug.println("Unable to write " + delete.getPath() + ": " + e.getMessage());
+							Debug.println("Unable to write " + delete.getPath() + ": " + e.getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
 						}
 					}
 				}
@@ -359,18 +357,18 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 				data.initializeExistingBundle();
 
 				if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-					Debug.println("BundleData created: " + data);
+					Debug.println("BundleData created: " + data); //$NON-NLS-1$
 				}
 
 				bundleDatas.addElement(data);
 			} catch (BundleException e) {
 				if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-					Debug.println("Unable to open Bundle[" + list[i] + "]: " + e.getMessage());
+					Debug.println("Unable to open Bundle[" + list[i] + "]: " + e.getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
 					Debug.printStackTrace(e);
 				}
 			} catch (IOException e) {
 				if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-					Debug.println("Unable to open Bundle[" + list[i] + "]: " + e.getMessage());
+					Debug.println("Unable to open Bundle[" + list[i] + "]: " + e.getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
 					Debug.printStackTrace(e);
 				}
 			}
@@ -431,7 +429,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 						if (in instanceof ReferenceInputStream) {
 							URL reference = ((ReferenceInputStream) in).getReference();
 
-							if (!"file".equals(reference.getProtocol())) {
+							if (!"file".equals(reference.getProtocol())) { //$NON-NLS-1$
 								throw new BundleException(AdaptorMsg.formatter.getString("ADAPTOR_URL_CREATE_EXCEPTION", reference)); //$NON-NLS-1$
 							}
 
@@ -446,7 +444,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 
 							String fileName = mapLocationToName(location);
 							File outFile = new File(genDir, fileName);
-							if ("file".equals(protocol)) {
+							if ("file".equals(protocol)) { //$NON-NLS-1$
 								File inFile = new File(source.getURL().getPath());
 								if (inFile.isDirectory()) {
 									copyDir(inFile, outFile);
@@ -467,7 +465,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 						}
 					}
 				} catch (IOException ioe) {
-					throw new BundleException(AdaptorMsg.formatter.getString("BUNDLE_READ_EXCEPTION"), ioe);
+					throw new BundleException(AdaptorMsg.formatter.getString("BUNDLE_READ_EXCEPTION"), ioe); //$NON-NLS-1$
 				}
 
 				return (data);
@@ -479,7 +477,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 						data.close();
 					} catch (IOException e) {
 						if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-							Debug.println("Unable to close " + data + ": " + e.getMessage());
+							Debug.println("Unable to close " + data + ": " + e.getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
 						}
 					}
 				}
@@ -491,7 +489,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 						/* mark this bundle to be deleted to ensure it is fully cleaned up
 						 * on next restart.
 						 */
-						File delete = new File(bundleDir, ".delete");
+						File delete = new File(bundleDir, ".delete"); //$NON-NLS-1$
 
 						if (!delete.exists()) {
 							try {
@@ -500,7 +498,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 								out.close();
 							} catch (IOException e) {
 								if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-									Debug.println("Unable to write " + delete.getPath() + ": " + e.getMessage());
+									Debug.println("Unable to write " + delete.getPath() + ": " + e.getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
 								}
 							}
 						}
@@ -512,7 +510,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 				try {
 					data.save();
 				} catch (IOException e) {
-					throw new BundleException(AdaptorMsg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION"), e);
+					throw new BundleException(AdaptorMsg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION"), e); //$NON-NLS-1$
 				}
 				BundleDescription bundleDescription = stateManager.getFactory().createBundleDescription(data.getManifest(), data.getLocation(), data.getBundleID());
 				stateManager.getSystemState().addBundle(bundleDescription);
@@ -531,7 +529,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 	 * then undo will be called on the BundleStorage object
 	 * to undo the change to persistent storage.
 	 *
-	 * @param bundle Bundle to update.
+	 * @param bundledata BundleData to update.
 	 * @param source URLConnection from which the bundle may be read.
 	 * @return BundleOperation object to be used to complete the update.
 	 */
@@ -556,7 +554,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 						if (in instanceof ReferenceInputStream) {
 							ReferenceInputStream refIn = (ReferenceInputStream) in;
 							URL reference = (refIn).getReference();
-							if (!"file".equals(reference.getProtocol())) {
+							if (!"file".equals(reference.getProtocol())) { //$NON-NLS-1$
 								throw new BundleException(AdaptorMsg.formatter.getString("ADAPTOR_URL_CREATE_EXCEPTION", reference)); //$NON-NLS-1$
 							}
 							// check to make sure we are not just trying to update to the same
@@ -586,7 +584,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 								throw new BundleException(AdaptorMsg.formatter.getString("ADAPTOR_DIRECTORY_CREATE_EXCEPTION", bundleGenerationDir.getPath())); //$NON-NLS-1$
 							}
 							File outFile = newData.getBaseFile();
-							if ("file".equals(protocol)) {
+							if ("file".equals(protocol)) { //$NON-NLS-1$
 								File inFile = new File(source.getURL().getPath());
 								if (inFile.isDirectory()) {
 									copyDir(inFile, outFile);
@@ -639,7 +637,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 					 * on next restart.
 					 */
 
-					File delete = new File(originalGenerationDir, ".delete");
+					File delete = new File(originalGenerationDir, ".delete"); //$NON-NLS-1$
 
 					if (!delete.exists()) {
 						try {
@@ -648,7 +646,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 							out.close();
 						} catch (IOException e) {
 							if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-								Debug.println("Unable to write " + delete.getPath() + ": " + e.getMessage());
+								Debug.println("Unable to write " + delete.getPath() + ": " + e.getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
 							}
 
 							eventPublisher.publishFrameworkEvent(FrameworkEvent.ERROR, data.getBundle(), e);
@@ -676,7 +674,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 						 * on next restart.
 						 */
 
-						File delete = new File(nextGenerationDir, ".delete");
+						File delete = new File(nextGenerationDir, ".delete"); //$NON-NLS-1$
 
 						if (!delete.exists()) {
 							try {
@@ -685,7 +683,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 								out.close();
 							} catch (IOException e) {
 								if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-									Debug.println("Unable to write " + delete.getPath() + ": " + e.getMessage());
+									Debug.println("Unable to write " + delete.getPath() + ": " + e.getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
 								}
 							}
 						}
@@ -705,7 +703,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 	 * then undo will be called on the BundleStorage object
 	 * to undo the change to persistent storage.
 	 *
-	 * @param bundle BundleData to uninstall.
+	 * @param bundledata BundleData to uninstall.
 	 * @return BundleOperation object to be used to complete the uninstall.
 	 */
 	public BundleOperation uninstallBundle(final org.eclipse.osgi.framework.adaptor.BundleData bundledata) {
@@ -738,7 +736,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 					 * on next restart.
 					 */
 
-					File delete = new File(bundleDir, ".delete");
+					File delete = new File(bundleDir, ".delete"); //$NON-NLS-1$
 
 					if (!delete.exists()) {
 						try {
@@ -747,7 +745,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 							out.close();
 						} catch (IOException e) {
 							if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-								Debug.println("Unable to write " + delete.getPath() + ": " + e.getMessage());
+								Debug.println("Unable to write " + delete.getPath() + ": " + e.getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
 							}
 						}
 					}
@@ -827,7 +825,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 
 		properties.put(Constants.SERVICE_RANKING, new Integer(Integer.MAX_VALUE));
 
-		properties.put(Constants.SERVICE_PID, bundle.getBundleId() + "." + service.getClass().getName());
+		properties.put(Constants.SERVICE_PID, bundle.getBundleId() + "." + service.getClass().getName()); //$NON-NLS-1$
 
 		return context.registerService(name, service, properties);
 	}
@@ -852,9 +850,9 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 
 			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 				if (file.isDirectory()) {
-					Debug.println("rmdir " + file.getPath());
+					Debug.println("rmdir " + file.getPath()); //$NON-NLS-1$
 				} else {
-					Debug.println("rm " + file.getPath());
+					Debug.println("rm " + file.getPath()); //$NON-NLS-1$
 				}
 			}
 
@@ -862,7 +860,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 
 			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 				if (!success) {
-					Debug.println("  rm failed!!");
+					Debug.println("  rm failed!!"); //$NON-NLS-1$
 				}
 			}
 
@@ -952,17 +950,17 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 		return stateManager;
 	}
 
-	public static final String METADATA_BUNDLE_GEN = "METADATA_BUNDLE_GEN";
-	public static final String METADATA_BUNDLE_LOC = "METADATA_BUNDLE_LOC";
-	public static final String METADATA_BUNDLE_REF = "METADATA_BUNDLE_REF";
-	public static final String METADATA_BUNDLE_NAME = "METADATA_BUNDLE_NAME";
-	public static final String METADATA_BUNDLE_NCP = "METADATA_BUNDLE_NCP";
-	public static final String METADATA_BUNDLE_ABSL = "METADATA_BUNDLE_ABSL";
-	public static final String METADATA_BUNDLE_STATUS = "METADATA_BUNDLE_STATUS";
-	public static final String METADATA_BUNDLE_METADATA = "METADATA_BUNDLE_METADATA";
+	public static final String METADATA_BUNDLE_GEN = "METADATA_BUNDLE_GEN"; //$NON-NLS-1$
+	public static final String METADATA_BUNDLE_LOC = "METADATA_BUNDLE_LOC"; //$NON-NLS-1$
+	public static final String METADATA_BUNDLE_REF = "METADATA_BUNDLE_REF"; //$NON-NLS-1$
+	public static final String METADATA_BUNDLE_NAME = "METADATA_BUNDLE_NAME"; //$NON-NLS-1$
+	public static final String METADATA_BUNDLE_NCP = "METADATA_BUNDLE_NCP"; //$NON-NLS-1$
+	public static final String METADATA_BUNDLE_ABSL = "METADATA_BUNDLE_ABSL"; //$NON-NLS-1$
+	public static final String METADATA_BUNDLE_STATUS = "METADATA_BUNDLE_STATUS"; //$NON-NLS-1$
+	public static final String METADATA_BUNDLE_METADATA = "METADATA_BUNDLE_METADATA"; //$NON-NLS-1$
 
 	protected void loadMetaDataFor(DefaultBundleData data) throws IOException {
-		MetaData bundleMetaData = (new MetaData(new File(data.getBundleStoreDir(), ".bundle"), "Bundle metadata"));
+		MetaData bundleMetaData = (new MetaData(new File(data.getBundleStoreDir(), ".bundle"), "Bundle metadata")); //$NON-NLS-1$ //$NON-NLS-2$
 		bundleMetaData.load();
 
 		data.setLocation(bundleMetaData.get(METADATA_BUNDLE_LOC, null));
@@ -974,12 +972,12 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 		data.setReference(bundleMetaData.getBoolean(METADATA_BUNDLE_REF, false));
 
 		if (data.getGeneration() == -1 || data.getFileName() == null || data.getLocation() == null) {
-			throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION"));
+			throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION")); //$NON-NLS-1$
 		}
 	}
 
 	public void saveMetaDataFor(DefaultBundleData data) throws IOException {
-		MetaData bundleMetadata = (new MetaData(new File(data.createBundleStoreDir(), ".bundle"), "Bundle metadata"));
+		MetaData bundleMetadata = (new MetaData(new File(data.createBundleStoreDir(), ".bundle"), "Bundle metadata")); //$NON-NLS-1$ //$NON-NLS-2$
 		bundleMetadata.load();
 
 		bundleMetadata.set(METADATA_BUNDLE_LOC, data.getLocation());

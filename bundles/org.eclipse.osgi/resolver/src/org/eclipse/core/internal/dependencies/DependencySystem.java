@@ -171,13 +171,13 @@ public class DependencySystem {
 		Object[][] cycles = ComputeNodeOrder.computeNodeOrder(nodes, (Object[][]) dependencies.toArray(new Object[dependencies.size()][]));
 		StringBuffer result = new StringBuffer();
 		for (int i = 0; i < cycles.length; i++) {
-			result.append("{");
+			result.append("{"); //$NON-NLS-1$
 			for (int j = 0; j < cycles[i].length; j++) {
 				result.append(((ElementSet) cycles[i][j]).getId());
-				result.append(",");
+				result.append(","); //$NON-NLS-1$
 			}
 			result.deleteCharAt(result.length() - 1);
-			result.append("},");
+			result.append("},"); //$NON-NLS-1$
 		}
 		if (result.length() > 0)
 			result.deleteCharAt(result.length() - 1);

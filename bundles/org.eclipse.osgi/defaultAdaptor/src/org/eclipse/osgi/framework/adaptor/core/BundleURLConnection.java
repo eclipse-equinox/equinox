@@ -43,47 +43,21 @@ public class BundleURLConnection extends URLConnection {
 		this.contentType = null;
 	}
 
-	/**
-	 * Establishes the connection to the resource specified by this <code>URL</code>
-	 * with this <code>method</code>, along with other options that can only be set before
-	 * this connection is made.
-	 *
-	 * @see 		connected
-	 * @see 		java.io.IOException
-	 * @see 		URLStreamHandler
-	 */
 	public synchronized void connect() throws IOException {
 		if (!connected) {
 			if (bundleEntry != null) {
 				in = bundleEntry.getInputStream();
 				connected = true;
 			} else {
-				throw new IOException(AdaptorMsg.formatter.getString("RESOURCE_NOT_FOUND_EXCEPTION", url));
+				throw new IOException(AdaptorMsg.formatter.getString("RESOURCE_NOT_FOUND_EXCEPTION", url)); //$NON-NLS-1$
 			}
 		}
 	}
 
-	/**
-	 * Answers the length of the content or body in the response header in bytes.
-	 * Answer -1 if <code> Content-Length </code> cannot be found in the response header.
-	 *
-	 * @return int		The length of the content
-	 *
-	 * @see			getContentType()
-	 */
 	public int getContentLength() {
 		return ((int) bundleEntry.getSize());
 	}
 
-	/**
-	 * Answers the type of the content.
-	 * Answers <code> null </code> if there's no such field.
-	 *
-	 * @return java.lang.String		The type of the content
-	 *
-	 * @see			 guessContentTypeFromName()
-	 * @see			 guessContentTypeFromStream()
-	 */
 	public String getContentType() {
 		if (!connected) {
 			try {
@@ -118,44 +92,14 @@ public class BundleURLConnection extends URLConnection {
 		return (contentType);
 	}
 
-	/**
-	 * Answers whether this connection supports input.
-	 *
-	 * @return boolean		true if this connection supports input, false otherwise
-	 *
-	 * @see			setDoInput()
-	 * @see			doInput
-	 */
 	public boolean getDoInput() {
 		return (true);
 	}
 
-	/**
-	 * Answers whether this connection supports output.
-	 *
-	 * @return boolean		true if this connection supports output, false otherwise
-	 *
-	 * @see			setDoOutput()
-	 * @see			doOutput
-	 */
 	public boolean getDoOutput() {
 		return (false);
 	}
 
-	/**
-	 * Creates an InputStream for reading from this URL Connection.
-	 * It throws UnknownServiceException by default.
-	 * This method should be overridden by its subclasses
-	 *
-	 * @return 		InputStream		The InputStream to read from
-	 * @exception 	IOException 	If an InputStream could not be created
-	 *
-	 * @see 		getContent()
-	 * @see 		getOutputStream()
-	 * @see 		java.io.InputStream
-	 * @see 		java.io.IOException
-	 *
-	 */
 	public InputStream getInputStream() throws IOException {
 		if (!connected) {
 			connect();
@@ -164,12 +108,6 @@ public class BundleURLConnection extends URLConnection {
 		return (in);
 	}
 
-	/**
-	 * Answers the value of the field <code>Last-Modified</code> in the response header,
-	 * 		 	0 if no such field exists
-	 *
-	 * @return The last modified time.
-	 */
 	public long getLastModified() {
 		long lastModified = bundleEntry.getTime();
 
@@ -180,10 +118,19 @@ public class BundleURLConnection extends URLConnection {
 		return (lastModified);
 	}
 
+	/**
+	 * Converts the URL to a common local URL protocol (i.e file: or jar: protocol)
+	 * @return the local URL using a common local protocol
+	 */
 	public URL getLocalURL() {
 		return bundleEntry.getLocalURL();
 	}
 
+	/**
+	 * Converts the URL to a URL that uses the file: protocol.  The content of this
+	 * URL may be downloaded or extracted onto the local filesystem to create a file URL.
+	 * @return the local URL that uses the file: protocol
+	 */
 	public URL getFileURL() {
 		return bundleEntry.getFileURL();
 	}

@@ -49,17 +49,17 @@ public class ElementChange {
 	private String getStatusName(int status) {
 		StringBuffer statusStr = new StringBuffer();
 		if ((status & ADDED) != 0)
-			statusStr.append("ADDED|");
+			statusStr.append("ADDED|"); //$NON-NLS-1$
 		if ((status & REMOVED) != 0)
-			statusStr.append("REMOVED|");
+			statusStr.append("REMOVED|"); //$NON-NLS-1$
 		if ((status & RESOLVED) != 0)
-			statusStr.append("RESOLVED|");
+			statusStr.append("RESOLVED|"); //$NON-NLS-1$
 		if ((status & UNRESOLVED) != 0)
-			statusStr.append("UNRESOLVED|");
+			statusStr.append("UNRESOLVED|"); //$NON-NLS-1$
 		if ((status & LINKAGE_CHANGED) != 0)
-			statusStr.append("LINKAGE_CHANGED|");
+			statusStr.append("LINKAGE_CHANGED|"); //$NON-NLS-1$
 		if (statusStr.length() == 0)
-			statusStr.append("UNKNOWN");
+			statusStr.append("UNKNOWN"); //$NON-NLS-1$
 		else
 			statusStr.deleteCharAt(statusStr.length() - 1);
 		return statusStr.toString();

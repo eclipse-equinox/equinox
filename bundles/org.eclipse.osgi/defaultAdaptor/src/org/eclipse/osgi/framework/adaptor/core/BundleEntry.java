@@ -53,8 +53,19 @@ public abstract class BundleEntry {
 	 */
 	public abstract long getTime();
 
+	/**
+	 * Get a URL to the bundle entry that uses a common protocol (i.e. file:
+	 * jar: or http: etc.).  
+	 * @return a URL to the bundle entry that uses a common protocol
+	 */
 	public abstract URL getLocalURL();
 
+	/**
+	 * Get a URL to the content of the bundle entry that uses the file: protocol.
+	 * The content of the bundle entry may be downloaded or extracted to the local
+	 * file system in order to create a file: URL.
+	 * @return a URL to the content of the bundle entry that uses the file: protocol
+	 */
 	public abstract URL getFileURL();
 
 	/**

@@ -22,7 +22,7 @@ import org.osgi.framework.BundleContext;
  */
 
 public abstract class BundleResourceHandler extends URLStreamHandler {
-	public static final String SECURITY_AUTHORIZED = "SECURITY_AUTHORIZED";
+	public static final String SECURITY_AUTHORIZED = "SECURITY_AUTHORIZED"; //$NON-NLS-1$
 	protected static BundleContext context;
 	protected BundleEntry bundleEntry;
 
@@ -50,7 +50,7 @@ public abstract class BundleResourceHandler extends URLStreamHandler {
 		// are allowed access to the resource.
 		checkAdminPermission();
 
-		String spec = "";
+		String spec = ""; //$NON-NLS-1$
 		if (start < end)
 			spec = str.substring(start, end);
 		end -= start;
@@ -62,9 +62,9 @@ public abstract class BundleResourceHandler extends URLStreamHandler {
 		int pathEnd = refIdx >= 0 ? refIdx : end;
 
 		if (spec.length() >= 2 && spec.charAt(0) == '/' || spec.charAt(1) == '/') {
-			int slash = spec.indexOf("/", 2);
+			int slash = spec.indexOf("/", 2); //$NON-NLS-1$
 			if (slash < 0) {
-				throw new IllegalArgumentException(AdaptorMsg.formatter.getString("URL_NO_PATH"));
+				throw new IllegalArgumentException(AdaptorMsg.formatter.getString("URL_NO_PATH")); //$NON-NLS-1$
 			}
 			bundleId = spec.substring(2, slash);
 			path = spec.substring(slash, pathEnd);
@@ -77,7 +77,7 @@ public abstract class BundleResourceHandler extends URLStreamHandler {
 				path = spec.substring(start, pathEnd);
 			} else {
 				// relative path specified.
-				path = url.getPath() == null ? "" : url.getPath();
+				path = url.getPath() == null ? "" : url.getPath(); //$NON-NLS-1$
 				int lastSlash = path.lastIndexOf('/');
 				if (lastSlash >= 0)
 					path = path.substring(0, lastSlash + 1) + spec.substring(start, pathEnd);
@@ -90,17 +90,17 @@ public abstract class BundleResourceHandler extends URLStreamHandler {
 
 		//modify path if there's any relative references
 		int dotIndex;
-		while ((dotIndex = path.indexOf("/./")) >= 0)
+		while ((dotIndex = path.indexOf("/./")) >= 0) //$NON-NLS-1$
 			path = path.substring(0, dotIndex + 1) + path.substring(dotIndex + 3);
-		if (path.endsWith("/."))
+		if (path.endsWith("/.")) //$NON-NLS-1$
 			path = path.substring(0, path.length() - 1);
-		while ((dotIndex = path.indexOf("/../")) >= 0) {
+		while ((dotIndex = path.indexOf("/../")) >= 0) { //$NON-NLS-1$
 			if (dotIndex != 0)
 				path = path.substring(0, path.lastIndexOf('/', dotIndex - 1)) + path.substring(dotIndex + 3);
 			else
 				path = path.substring(dotIndex + 3);
 		}
-		if (path.endsWith("/..") && path.length() > 3)
+		if (path.endsWith("/..") && path.length() > 3) //$NON-NLS-1$
 			path = path.substring(0, path.length() - 2);
 
 		// Setting the authority portion of the URL to SECURITY_ATHORIZED
@@ -135,18 +135,18 @@ public abstract class BundleResourceHandler extends URLStreamHandler {
 		} else {
 			String bidString = url.getHost();
 			if (bidString == null) {
-				throw new IOException(AdaptorMsg.formatter.getString("URL_NO_BUNDLE_ID", url.toExternalForm()));
+				throw new IOException(AdaptorMsg.formatter.getString("URL_NO_BUNDLE_ID", url.toExternalForm())); //$NON-NLS-1$
 			}
 			AbstractBundle bundle = null;
 			try {
 				Long bundleID = new Long(bidString);
 				bundle = (AbstractBundle) context.getBundle(bundleID.longValue());
 			} catch (NumberFormatException nfe) {
-				throw new MalformedURLException(AdaptorMsg.formatter.getString("URL_INVALID_BUNDLE_ID", bidString));
+				throw new MalformedURLException(AdaptorMsg.formatter.getString("URL_INVALID_BUNDLE_ID", bidString)); //$NON-NLS-1$
 			}
 
 			if (bundle == null) {
-				throw new IOException(AdaptorMsg.formatter.getString("URL_NO_BUNDLE_FOUND", url.toExternalForm()));
+				throw new IOException(AdaptorMsg.formatter.getString("URL_NO_BUNDLE_FOUND", url.toExternalForm())); //$NON-NLS-1$
 			}
 			return (new BundleURLConnection(url, findBundleEntry(url, bundle)));
 		}
@@ -170,7 +170,7 @@ public abstract class BundleResourceHandler extends URLStreamHandler {
 	 */
 	protected String toExternalForm(URL url) {
 		StringBuffer result = new StringBuffer(url.getProtocol());
-		result.append("://");
+		result.append("://"); //$NON-NLS-1$
 
 		String bundleId = url.getHost();
 		if ((bundleId != null) && (bundleId.length() > 0)) {
@@ -181,7 +181,7 @@ public abstract class BundleResourceHandler extends URLStreamHandler {
 		if (path != null) {
 			if ((path.length() > 0) && (path.charAt(0) != '/')) /* if name doesn't have a leading slash */
 			{
-				result.append("/");
+				result.append("/"); //$NON-NLS-1$
 			}
 
 			result.append(path);

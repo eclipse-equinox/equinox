@@ -115,6 +115,6 @@ public abstract class VersionConstraintImpl implements VersionConstraint {
 	}
 
 	public String toString() {
-		return "name: " + name + " - version: " + versionRange;
+		return "name: " + name + " - version: " + versionRange; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 }

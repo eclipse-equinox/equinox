@@ -77,7 +77,7 @@ public abstract class AbstractClassLoader extends ClassLoader implements BundleC
 			throw new ClassNotFoundException(name);
 
 		if (Debug.DEBUG && Debug.DEBUG_LOADER)
-			Debug.println("BundleClassLoader[" + delegate + "].loadClass(" + name + ")");
+			Debug.println("BundleClassLoader[" + delegate + "].loadClass(" + name + ")");  //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
 
 		try {
 			// First check the parent classloader for system classes.
@@ -97,7 +97,7 @@ public abstract class AbstractClassLoader extends ClassLoader implements BundleC
 			return (clazz);
 		} catch (Error e) {
 			if (Debug.DEBUG && Debug.DEBUG_LOADER) {
-				Debug.println("BundleClassLoader[" + delegate + "].loadClass(" + name + ") failed.");
+				Debug.println("BundleClassLoader[" + delegate + "].loadClass(" + name + ") failed."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				Debug.printStackTrace(e);
 			}
 			throw e;
@@ -105,7 +105,7 @@ public abstract class AbstractClassLoader extends ClassLoader implements BundleC
 			// If the class is not found do not try to look for it locally.
 			// The delegate would have already done that for us.
 			if (Debug.DEBUG && Debug.DEBUG_LOADER) {
-				Debug.println("BundleClassLoader[" + delegate + "].loadClass(" + name + ") failed.");
+				Debug.println("BundleClassLoader[" + delegate + "].loadClass(" + name + ") failed."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				Debug.printStackTrace(e);
 			}
 			throw e;
@@ -137,7 +137,7 @@ public abstract class AbstractClassLoader extends ClassLoader implements BundleC
 			return null;
 		}
 		if (Debug.DEBUG && Debug.DEBUG_LOADER) {
-			Debug.println("BundleClassLoader[" + delegate + "].getResource(" + name + ")");
+			Debug.println("BundleClassLoader[" + delegate + "].getResource(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 
 		try {
@@ -157,7 +157,7 @@ public abstract class AbstractClassLoader extends ClassLoader implements BundleC
 		}
 
 		if (Debug.DEBUG && Debug.DEBUG_LOADER) {
-			Debug.println("BundleClassLoader[" + delegate + "].getResource(" + name + ") failed.");
+			Debug.println("BundleClassLoader[" + delegate + "].getResource(" + name + ") failed."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 
 		return (null);
@@ -182,7 +182,7 @@ public abstract class AbstractClassLoader extends ClassLoader implements BundleC
 			return (delegate.findResources(name));
 		} catch (Exception e) {
 			if (Debug.DEBUG && Debug.DEBUG_LOADER) {
-				Debug.println("BundleClassLoader[" + delegate + "].findResources(" + name + ") failed.");
+				Debug.println("BundleClassLoader[" + delegate + "].findResources(" + name + ") failed."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				Debug.printStackTrace(e);
 			}
 			return null;

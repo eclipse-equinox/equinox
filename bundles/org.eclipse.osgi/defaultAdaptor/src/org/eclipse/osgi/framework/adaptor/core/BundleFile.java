@@ -107,7 +107,7 @@ abstract public class BundleFile {
 
 		try {
 			StringBuffer url = new StringBuffer(Constants.OSGI_RESOURCE_URL_PROTOCOL);
-			url.append("://").append(hostBundleID);
+			url.append("://").append(hostBundleID); //$NON-NLS-1$
 			if (path.length() == 0 || path.charAt(0) != '/') {
 				url.append('/');
 			}
@@ -143,7 +143,7 @@ abstract public class BundleFile {
 			Enumeration entries = zipFile.entries();
 			while (entries.hasMoreElements()) {
 				String entryPath = ((ZipEntry) entries.nextElement()).getName();
-				if (entryPath.startsWith(dirName) && !entryPath.endsWith("/"))
+				if (entryPath.startsWith(dirName) && !entryPath.endsWith("/")) //$NON-NLS-1$
 					getFile(entryPath);
 			}
 			return getExtractFile(dirName);
@@ -156,7 +156,7 @@ abstract public class BundleFile {
 			File bundleGenerationDir = ((AbstractBundleData) bundledata).createGenerationDir();
 			/* if the generation dir exists, then we have place to cache */
 			if (bundleGenerationDir != null && bundleGenerationDir.exists()) {
-				String path = ".cp"; /* put all these entries in this subdir */
+				String path = ".cp"; /* put all these entries in this subdir */ //$NON-NLS-1$
 				String name = entryName.replace('/', File.separatorChar);
 				if ((name.length() > 1) && (name.charAt(0) == File.separatorChar)) /* if name has a leading slash */{
 					path = path.concat(name);
@@ -181,15 +181,15 @@ abstract public class BundleFile {
 					if (nested.exists()) {
 						/* the entry is already cached */
 						if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-							Debug.println("File already present: " + nested.getPath());
+							Debug.println("File already present: " + nested.getPath()); //$NON-NLS-1$
 						}
 					} else {
-						if (zipEntry.getName().endsWith("/")) {
+						if (zipEntry.getName().endsWith("/")) { //$NON-NLS-1$
 							if (!nested.mkdirs()) {
 								if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-									Debug.println("Unable to create directory: " + nested.getPath());
+									Debug.println("Unable to create directory: " + nested.getPath()); //$NON-NLS-1$
 								}
-								throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_DIRECTORY_CREATE_EXCEPTION", nested.getAbsolutePath()));
+								throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_DIRECTORY_CREATE_EXCEPTION", nested.getAbsolutePath())); //$NON-NLS-1$
 							}
 							extractDirectory(zipEntry.getName());
 						} else {
@@ -198,15 +198,15 @@ abstract public class BundleFile {
 								return null;
 							/* the entry has not been cached */
 							if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-								Debug.println("Creating file: " + nested.getPath());
+								Debug.println("Creating file: " + nested.getPath()); //$NON-NLS-1$
 							}
 							/* create the necessary directories */
 							File dir = new File(nested.getParent());
 							if (!dir.exists() && !dir.mkdirs()) {
 								if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-									Debug.println("Unable to create directory: " + dir.getPath());
+									Debug.println("Unable to create directory: " + dir.getPath()); //$NON-NLS-1$
 								}
-								throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_DIRECTORY_CREATE_EXCEPTION", dir.getAbsolutePath()));
+								throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_DIRECTORY_CREATE_EXCEPTION", dir.getAbsolutePath())); //$NON-NLS-1$
 							}
 							/* copy the entry to the cache */
 							AbstractFrameworkAdaptor.readFile(in, nested);
@@ -273,7 +273,7 @@ abstract public class BundleFile {
 				path = path.substring(1);
 			}
 			if (path.length() > 0 && path.charAt(path.length() - 1) != '/') {
-				path = new StringBuffer(path).append("/").toString();
+				path = new StringBuffer(path).append("/").toString(); //$NON-NLS-1$
 			}
 
 			Vector vEntries = new Vector();
@@ -324,7 +324,7 @@ abstract public class BundleFile {
 		protected DirBundleFile(File basefile) throws IOException {
 			super(basefile);
 			if (!basefile.exists() || !basefile.isDirectory()) {
-				throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_DIRECTORY_EXCEPTION", basefile));
+				throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_DIRECTORY_EXCEPTION", basefile)); //$NON-NLS-1$
 			}
 		}
 
@@ -378,7 +378,7 @@ abstract public class BundleFile {
 						java.io.File childFile = new java.io.File(pathFile, fileList[cur]);
 						StringBuffer sb = new StringBuffer(dirPath).append(fileList[cur++]);
 						if (childFile.isDirectory()) {
-							sb.append("/");
+							sb.append("/"); //$NON-NLS-1$
 						}
 						return sb.toString();
 					}

@@ -242,7 +242,7 @@ public class StateImpl implements State {
 
 		if (StateManager.DEBUG_PLATFORM_ADMIN) {
 			cumulativeTime = cumulativeTime + (System.currentTimeMillis() - start);
-			DebugOptions.getDefault().setOption("org.eclipse.core.runtime.adaptor/resolver/timing/value", Long.toString(cumulativeTime));
+			DebugOptions.getDefault().setOption("org.eclipse.core.runtime.adaptor/resolver/timing/value", Long.toString(cumulativeTime)); //$NON-NLS-1$
 		}
 
 		return savedChanges;

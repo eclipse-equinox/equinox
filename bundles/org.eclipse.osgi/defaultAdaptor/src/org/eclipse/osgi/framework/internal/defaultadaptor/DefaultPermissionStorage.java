@@ -45,18 +45,18 @@ class DefaultPermissionStorage implements PermissionStorage {
 	 * @throws IOException If an error occurs initializing the object.
 	 */
 	protected DefaultPermissionStorage(DefaultAdaptor adaptor) throws IOException {
-		permissionDir = new File(adaptor.getBundleStoreRootDir(), "permdata");
+		permissionDir = new File(adaptor.getBundleStoreRootDir(), "permdata"); //$NON-NLS-1$
 		permissionFiles = new Hashtable();
 
 		if (!permissionDir.exists() && !permissionDir.mkdirs()) {
 			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-				Debug.println("Unable to create directory: " + permissionDir.getPath());
+				Debug.println("Unable to create directory: " + permissionDir.getPath()); //$NON-NLS-1$
 			}
 
-			throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION"));
+			throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION")); //$NON-NLS-1$
 		}
 
-		defaultData = new File(permissionDir, ".default");
+		defaultData = new File(permissionDir, ".default"); //$NON-NLS-1$
 
 		loadLocations();
 	}
@@ -227,7 +227,7 @@ class DefaultPermissionStorage implements PermissionStorage {
 					}
 				default :
 					{
-						throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION"));
+						throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION")); //$NON-NLS-1$
 					}
 			}
 		} finally {
@@ -269,7 +269,7 @@ class DefaultPermissionStorage implements PermissionStorage {
 					}
 				default :
 					{
-						throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION"));
+						throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION")); //$NON-NLS-1$
 					}
 			}
 		} finally {
@@ -278,15 +278,13 @@ class DefaultPermissionStorage implements PermissionStorage {
 	}
 
 	/**
-	 * Save the permission data for the specified key.
+	 * Save the permission data for the specified location.
 	 * This assumes an attempt has been made to load
-	 * the specified key just prior to calling save.
-	 *
-	 * @param key Key to save the permission data for.
+	 * the specified location just prior to calling save.
 	 */
 	protected File save(File file, String location, String[] data) throws IOException {
 		if (file == null) /* we need to create a filename */{
-			file = File.createTempFile("perm", "", permissionDir);
+			file = File.createTempFile("perm", "", permissionDir); //$NON-NLS-1$ //$NON-NLS-2$
 			file.delete(); /* delete the empty file */
 		}
 
