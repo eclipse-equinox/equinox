@@ -98,7 +98,7 @@ public class EclipseBundleData extends DefaultBundleData {
 	 * searches the library along the path specified as the <code>java.library.path</code>
 	 * property.
 	 * 
-	 * @param libname
+	 * @param libName
 	 *                   the library name
 	 * @return the absolute path of the native library
 	 */
@@ -171,8 +171,8 @@ public class EclipseBundleData extends DefaultBundleData {
 			return loadManifestFrom(url);
 		}
 		Dictionary result = generateManifest(null);
-		if (result == null) //TODO need to NLS this
-			throw new BundleException("Manifest not found: " + getLocation());
+		if (result == null)
+			throw new BundleException(EclipseAdaptorMsg.formatter.getString("ECLIPSE_DATA_MANIFEST_NOT_FOUND", getLocation())); //$NON-NLS-1$
 		return result;
 	}
 
@@ -228,8 +228,7 @@ public class EclipseBundleData extends DefaultBundleData {
 		try {
 			return Headers.parseManifest(manifestURL.openStream());
 		} catch (IOException e) {
-			// TODO need to NLS this
-			throw new BundleException("Error reading manifest: " + getLocation(), e);
+			throw new BundleException(EclipseAdaptorMsg.formatter.getString("ECLIPSE_DATA_ERROR_READING_MANIFEST", getLocation()), e); //$NON-NLS-1$
 		}
 	}
 

@@ -92,8 +92,9 @@ public class EclipseStarter {
 
 	private static final String FILE_SCHEME = "file:"; //$NON-NLS-1$
 	private static final String FILE_PROTOCOL = "file"; //$NON-NLS-1$
-	private static final String REFERENCE_SCHEME="reference:"; //$NON-NLS-1$
+	private static final String REFERENCE_SCHEME = "reference:"; //$NON-NLS-1$
 	private static final String REFERENCE_PROTOCOL = "reference"; //$NON-NLS-1$
+	private static final String INITIAL_LOCATION = "initial@";
 	/** string containing the classname of the adaptor to be used in this framework instance */
 	protected static final String DEFAULT_ADAPTOR_CLASS = "org.eclipse.core.runtime.adaptor.EclipseAdaptor"; //$NON-NLS-1$
 
@@ -118,9 +119,9 @@ public class EclipseStarter {
 	 */
 	public static Object run(String[] args, Runnable endSplashHandler) throws Exception {
 		if (debug)
-			System.out.println("Entering EclipseStarter#run() after: " + (System.currentTimeMillis() - Long.parseLong(System.getProperty("eclipse.debug.startupTime"))));  //$NON-NLS-1$//$NON-NLS-2$
+			System.out.println("Entering EclipseStarter#run() after: " + (System.currentTimeMillis() - Long.parseLong(System.getProperty("eclipse.debug.startupTime")))); //$NON-NLS-1$//$NON-NLS-2$
 		if (running)
-			throw new IllegalStateException("Platform already running");
+			throw new IllegalStateException(EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_ALREADY_RUNNING")); //$NON-NLS-1$
 		boolean startupFailed = true;
 		try {
 			startup(args, endSplashHandler);
@@ -131,7 +132,7 @@ public class EclipseStarter {
 			if (endSplashHandler != null)
 				endSplashHandler.run();
 			// may use startupFailed to understand where the error happened
-			FrameworkLogEntry logEntry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, startupFailed ? "Startup error" : "Application error", 1, e, null); //TODO Put the right value here
+			FrameworkLogEntry logEntry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, startupFailed ? EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_STARTUP_ERROR") : EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_APP_ERROR"), 1, e, null); //$NON-NLS-1$//$NON-NLS-2$
 			if (log != null)
 				log.log(logEntry);
 			else
@@ -141,7 +142,7 @@ public class EclipseStarter {
 			try {
 				shutdown();
 			} catch (Throwable e) {
-				FrameworkLogEntry logEntry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, "Shutdown error", 1, e, null); //TODO Put the right value here
+				FrameworkLogEntry logEntry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_SHUTDOWN_ERROR"), 1, e, null); //$NON-NLS-1$
 				if (log != null)
 					log.log(logEntry);
 				else
@@ -195,13 +196,12 @@ public class EclipseStarter {
 	 * <p>
 	 * The given runnable (if not <code>null</code>) is used to tear down the splash screen if required.
 	 * </p>
-	 * @param argument the argument passed to the application
-	 * @return the result of running the application
+	 * @param args the arguments passed to the application
 	 * @throws Exception if anything goes wrong
 	 */
 	public static void startup(String[] args, Runnable endSplashHandler) throws Exception {
 		if (running)
-			throw new IllegalStateException("Platform is already running");
+			throw new IllegalStateException(EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_ALREADY_RUNNING")); //$NON-NLS-1$
 		long start = 0;
 		processCommandLine(args);
 		if (debug) {
@@ -244,7 +244,7 @@ public class EclipseStarter {
 	 */
 	public static Object run(Object argument) throws Exception {
 		if (!running)
-			throw new IllegalStateException("Platform not running");
+			throw new IllegalStateException(EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_NOT_RUNNING")); //$NON-NLS-1$
 		logUnresolvedBundles(context.getBundles());
 		// if we are just initializing, do not run the application just return.
 		if (initialize)
@@ -255,7 +255,7 @@ public class EclipseStarter {
 		if (application == null)
 			throw new IllegalStateException(EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_ERROR_NO_APPLICATION")); //$NON-NLS-1$
 		if (debug)
-			System.out.println("The application is starting after: " + (System.currentTimeMillis() - Long.parseLong(System.getProperty("eclipse.debug.startupTime"))));  //$NON-NLS-1$ //$NON-NLS-2$
+			System.out.println("The application is starting after: " + (System.currentTimeMillis() - Long.parseLong(System.getProperty("eclipse.debug.startupTime")))); //$NON-NLS-1$ //$NON-NLS-2$
 		return application.run(argument);
 	}
 
@@ -323,7 +323,7 @@ public class EclipseStarter {
 
 				logService.log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, generalMessage, 0, null, logChildren));
 			}
-		if(debug)
+		if (debug)
 			System.out.println("Time to log the unresolved Bundles: " + (System.currentTimeMillis() - start)); //$NON-NLS-1$
 	}
 
@@ -399,7 +399,7 @@ public class EclipseStarter {
 	 * Ensure all basic bundles are installed, resolved and scheduled to start. Returns an array containing
 	 * all basic bundles. 
 	 */
-	private static Bundle[] loadBasicBundles() throws BundleException, IOException, IllegalArgumentException, IllegalStateException {
+	private static Bundle[] loadBasicBundles() throws IOException {
 		long startTime = System.currentTimeMillis();
 		ServiceReference reference = context.getServiceReference(StartLevel.class.getName());
 		StartLevel startService = null;
@@ -408,9 +408,10 @@ public class EclipseStarter {
 		String[] installEntries = getArrayFromList(System.getProperty(PROP_BUNDLES), ","); //$NON-NLS-1$
 		int defaultStartLevel = Integer.parseInt(System.getProperty(PROP_BUNDLES_STARTLEVEL));
 		String syspath = getSysPath();
-		Bundle[] bundles = new Bundle[installEntries.length];
+		Bundle[] curInitBundles = getInitialBundles();
+		ArrayList newInitBundles = new ArrayList(installEntries.length);
 		ArrayList startBundles = new ArrayList(installEntries.length);
-		boolean installedSomething = false;
+		boolean refresh = false;
 		for (int i = 0; i < installEntries.length; i++) {
 			String name = installEntries[i];
 			int level = defaultStartLevel;
@@ -434,32 +435,56 @@ public class EclipseStarter {
 			if (location == null)
 				throw new IllegalArgumentException(EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_BUNDLE_NOT_FOUND", name)); //$NON-NLS-1$
 			// don't need to install if it is already installed
-			String locationString = "initial@" + location.toExternalForm(); //$NON-NLS-1$
-			bundles[i] = getBundleByLocation(locationString);
-			if (bundles[i] == null) {
-				InputStream in = location.openStream();
-				bundles[i] = context.installBundle(locationString, in);
-				installedSomething = true;
-				if (level >= 0 && startService != null)
-					startService.setBundleStartLevel(bundles[i], level);
+			String locationString = INITIAL_LOCATION + location.toExternalForm();
+			Bundle osgiBundle = getBundleByLocation(locationString, curInitBundles);
+			try {
+				if (osgiBundle == null) {
+					InputStream in = location.openStream();
+					osgiBundle = context.installBundle(locationString, in);
+					refresh = true;
+					if (level >= 0 && startService != null)
+						startService.setBundleStartLevel(osgiBundle, level);
+				}
+				if (start)
+					startBundles.add(osgiBundle);
+				newInitBundles.add(osgiBundle);
+			} catch (BundleException e) {
+				FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_FAILED_INSTALL", name), 0, e, null); //$NON-NLS-1$
+				log.log(entry);
 			}
-			if (start)
-				startBundles.add(bundles[i]);
 		}
-		// If we installed something, force all basic bundles we installed to be resolved
-		if (installedSomething)
-			refreshPackages(bundles);
+		Bundle[] resultBundles = (Bundle[]) newInitBundles.toArray(new Bundle[newInitBundles.size()]);
+		// check if something was removed from the bundle list
+		for (int i = 0; i < curInitBundles.length; i++) {
+			if (getBundleByLocation(curInitBundles[i].getLocation(), resultBundles) == null) {
+				try {
+					curInitBundles[i].uninstall();
+				} catch (BundleException e) {
+					FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_FAILED_UNINSTALL", curInitBundles[i].getLocation()), 0, e, null); //$NON-NLS-1$
+					log.log(entry);
+				}
+				refresh = true;
+			}
+		}
+		// If we installed/uninstalled something, force all basic bundles we installed to be resolved
+		if (refresh)
+			refreshPackages(resultBundles);
 		// schedule all basic bundles to be started
 		for (Iterator i = startBundles.iterator(); i.hasNext();) {
 			Bundle bundle = (Bundle) i.next();
 			if (bundle.getState() == Bundle.INSTALLED)
 				throw new IllegalStateException(EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_ERROR_BUNDLE_NOT_RESOLVED", bundle.getLocation())); //$NON-NLS-1$
-			bundle.start();
+			try {
+				bundle.start();
+			} catch (BundleException e) {
+				FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_FAILED_START", bundle.getLocation()), 0, e, null); //$NON-NLS-1$
+				log.log(entry);
+			}
 		}
 		context.ungetService(reference);
 		if (debug)
 			System.out.println("Time to load bundles: " + (System.currentTimeMillis() - startTime)); //$NON-NLS-1$
-		return bundles;
+		return resultBundles;
 	}
 
 	private static void refreshPackages(Bundle[] bundles) {
@@ -515,9 +540,9 @@ public class EclipseStarter {
 			t.start();
 		} catch (NumberFormatException nfe) {
 			// TODO log or something other than write on System.err
-			System.err.println("Invalid console port: " + consolePort); 
+			System.err.println(EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_INVALID_PORT", consolePort)); //$NON-NLS-1$
 		} catch (Exception ex) {
-			System.out.println("Failed to find/start: " + CONSOLE_NAME);
+			System.out.println(EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_FAILED_FIND", CONSOLE_NAME)); //$NON-NLS-1$
 		}
 
 	}
@@ -729,10 +754,20 @@ public class EclipseStarter {
 		return result;
 	}
 
-	private static Bundle getBundleByLocation(String location) {
+	private static Bundle[] getInitialBundles() {
 		Bundle[] installed = context.getBundles();
+		ArrayList initial = new ArrayList();
 		for (int i = 0; i < installed.length; i++) {
 			Bundle bundle = installed[i];
+			if (bundle.getLocation().startsWith(INITIAL_LOCATION))
+				initial.add(bundle);
+		}
+		return (Bundle[]) initial.toArray(new Bundle[initial.size()]);
+	}
+
+	private static Bundle getBundleByLocation(String location, Bundle[] bundles) {
+		for (int i = 0; i < bundles.length; i++) {
+			Bundle bundle = bundles[i];
 			if (location.equalsIgnoreCase(bundle.getLocation()))
 				return bundle;
 		}
