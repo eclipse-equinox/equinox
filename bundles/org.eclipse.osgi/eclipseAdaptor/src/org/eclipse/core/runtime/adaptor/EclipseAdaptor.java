@@ -374,7 +374,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 	}
 
 	public void saveMetaDataFor(DefaultBundleData data) throws IOException {
-		if ( ((EclipseBundleData) data).getPersistentStatus() != 0) {
+		if ( ! ((EclipseBundleData) data).isAutoStartable() ) {
 			timeStamp--; //Change the value of the timeStamp, as a marker that something changed.  
 		}
 	}
