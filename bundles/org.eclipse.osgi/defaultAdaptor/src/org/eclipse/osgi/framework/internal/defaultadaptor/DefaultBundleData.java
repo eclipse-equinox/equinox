@@ -703,4 +703,7 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 	public String getDynamicImports(){
 		return dynamicImports;
 	}
+	public DefaultAdaptor getAdaptor() {
+		return adaptor;
+	}
 }
