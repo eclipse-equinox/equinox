@@ -25,19 +25,8 @@ public abstract class SignedBundle extends BundleFile {
 	public abstract void setBundleFile(BundleFile bundleFile) throws IOException;
 
 	/**
-	 * Retrieves the certificate chains that signed this repository. Only
-	 * validated certificate chains are returned. Each element of the returned
-	 * array will contain a chain of distinguished names (DNs) separated by
-	 * semicolons. The first DN is the signer and the last is the root
-	 * Certificate Authority.
-	 * 
-	 * @return the certificate chains that signed this repository.
-	 */
-	public abstract String[] getSigningCertificateChains();
-
-	/**
-	 * Matches a distinguished name chain against a pattern of a distinguished
-	 * name chain.
+	 * Matches the distinguished name chains of a bundle's signers against a 
+	 * pattern of a distinguished name chain.
 	 * 
 	 * @param pattern the pattern of distinguished name (DN) chains to match
 	 *        against the dnChain. Wildcards "*" can be used in three cases:
@@ -59,8 +48,8 @@ public abstract class SignedBundle extends BundleFile {
 	 *        other words, "cn=m*,c=US;cn=you" represents the common name of
 	 *        "m*" not any common name starting with "m".</li>
 	 *        </ol>
-	 * @return true if dnChain matches the pattern. A value of false is returned
-	 * bundle signing is not supported.
+	 * @return true if a dnChain matches the pattern. A value of false is returned
+	 * if bundle signing is not supported.
 	 * @throws IllegalArgumentException
 	 */
 	public abstract boolean matchDNChain(String pattern);

@@ -453,14 +453,6 @@ public abstract class AbstractBundleData implements BundleData, Cloneable {
 
 	///////////////////// End Manifest Value Accessor Methods  /////////////////////
 
-	public String[] getBundleSigners() {
-		if (System.getSecurityManager() == null)
-			return null;
-		if (getBaseBundleFile() instanceof SignedBundle)
-			return ((SignedBundle) getBaseBundleFile()).getSigningCertificateChains();
-		return null;
-	}
-
 	public boolean matchDNChain(String pattern) {
 		if (System.getSecurityManager() == null)
 			return false;

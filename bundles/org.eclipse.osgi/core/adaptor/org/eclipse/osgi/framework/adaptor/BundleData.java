@@ -238,23 +238,11 @@ public interface BundleData {
 	public String getDynamicImports();
 
 	/**
-	 * Retrieves the certificate chains that signed this bundle. Only
-	 * validated certificate chains are returned. Each element of the returned
-	 * array will contain a chain of distinguished names (DNs) separated by
-	 * semicolons. The first DN is the signer and the last is the root
-	 * Certificate Authority.
-	 * 
-	 * @return the certificate chains that signed this repository.  If bundle
-	 * signing is not supported or the bundle is not signed then null is returned.
-	 */
-	public String[] getBundleSigners();
-
-	/**
-	 * Matches a distinguished name chain against a pattern of a distinguished
-	 * name chain.
+	 * Matches the distinguished name chains of a bundle's signers against a 
+	 * pattern of a distinguished name chain.
 	 * 
 	 * @param pattern the pattern of distinguished name (DN) chains to match
-	 *        against the DN chains of the Bundle. Wildcards "*" can be used in three cases:
+	 *        against the dnChain. Wildcards "*" can be used in three cases:
 	 *        <ol>
 	 *        <li>As a DN. In this case, the DN will consist of just the "*".
 	 *        It will match zero or more DNs. For example, "cn=me,c=US;*;cn=you"
@@ -273,8 +261,8 @@ public interface BundleData {
 	 *        other words, "cn=m*,c=US;cn=you" represents the common name of
 	 *        "m*" not any common name starting with "m".</li>
 	 *        </ol>
-	 * @return true if dnChain matches the pattern. A value of false is returned
-	 * bundle signing is not supported.
+	 * @return true if a dnChain matches the pattern. A value of false is returned
+	 * if bundle signing is not supported.
 	 * @throws IllegalArgumentException
 	 */
 	public boolean matchDNChain(String pattern);
