@@ -8,5 +8,6 @@
 	<classpathentry kind="src" path="osgi/src"/>
 	<classpathentry kind="src" path="resolver/src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="osgi/xmlParserAPIs.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
