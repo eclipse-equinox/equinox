@@ -153,6 +153,15 @@ public class EclipseBundleData extends AbstractBundleData {
 				//						debug("found " + path + " as " +
 				// variants[i] + path); //$NON-NLS-1$ //$NON-NLS-2$
 				File libFile = baseBundleFile.getFile(variants[i] + path);
+				// see bug 88697 - HP requires libraries to have executable permissions
+				if (org.eclipse.osgi.service.environment.Constants.OS_HPUX.equals(EnvironmentInfo.getDefault().getOS())) {
+					try {
+						// use the string array method in case there is a space in the path
+						Runtime.getRuntime().exec(new String[] {"chmod", "755", libFile.getAbsolutePath()}).waitFor();
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
 				return libFile.getAbsolutePath();
 			}
 		}
