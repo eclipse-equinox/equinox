@@ -58,7 +58,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 	protected String[] devCP;
 
 	/** Name of the Adaptor manifest file */
-	protected final String ADAPTOR_MANIFEST = "/META-INF/ADAPTOR.MF";
+	protected final String ADAPTOR_MANIFEST = "ADAPTOR.MF";
 
 	/** This adaptor's manifest file */
 	protected Headers manifest = null;
@@ -203,7 +203,14 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 	 * methods of the adpator.
 	 */
 	protected void readAdaptorManifest() {
-		InputStream in = getClass().getResourceAsStream(ADAPTOR_MANIFEST);
+		InputStream in = null;
+		// walk up the class hierarchy until we find the ADAPTOR_MANIFEST.
+		Class adaptorClazz = getClass();
+		while (in == null && DefaultAdaptor.class.isAssignableFrom(adaptorClazz) ) {
+			in = adaptorClazz.getResourceAsStream(ADAPTOR_MANIFEST);
+			adaptorClazz = adaptorClazz.getSuperclass();
+		}
+
 		if (in == null) {
 			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 				Debug.println("Unable to find adaptor bundle manifest " + ADAPTOR_MANIFEST);
