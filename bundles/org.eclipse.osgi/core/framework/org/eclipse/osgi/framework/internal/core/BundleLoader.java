@@ -113,7 +113,10 @@ public class BundleLoader implements ClassLoaderDelegate {
 	}
 
 	protected void initialize(BundleDescription description) {
-		hasDynamicImports = !(this instanceof SystemBundleLoader) && SystemBundleLoader.getSystemPackages() != null;
+		if (!(this instanceof SystemBundleLoader) && SystemBundleLoader.getSystemPackages() != null) {
+			hasDynamicImports = true;
+			importedPackages = new KeyedHashSet();
+		}
 
 		// init the imported packages list taking the bundle...
 		addImportedPackages(description.getResolvedImports());

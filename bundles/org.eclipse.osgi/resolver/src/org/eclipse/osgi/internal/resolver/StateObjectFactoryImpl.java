@@ -98,7 +98,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		return hostSpec;
 	}
 
-	public ImportPackageSpecification createImportPackageSpecification(String packageName, VersionRange versionRange, String bundleSymbolicName, VersionRange bundleVersionRange, String[] propagate, int resolution, Map attributes) {
+	public ImportPackageSpecification createImportPackageSpecification(String packageName, VersionRange versionRange, String bundleSymbolicName, VersionRange bundleVersionRange, String[] propagate, int resolution, Map attributes, BundleDescription importer) {
 		ImportPackageSpecificationImpl packageSpec = new ImportPackageSpecificationImpl();
 		packageSpec.setName(packageName);
 		packageSpec.setVersionRange(versionRange);
@@ -107,6 +107,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		packageSpec.setPropagate(propagate);
 		packageSpec.setResolution(resolution);
 		packageSpec.setAttributes(attributes);
+		packageSpec.setBundle(importer);
 		return packageSpec;
 	}
 

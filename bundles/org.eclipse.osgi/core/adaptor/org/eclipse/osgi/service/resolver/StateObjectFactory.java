@@ -133,9 +133,10 @@ public interface StateObjectFactory {
 	 * {@link ImportPackageSpecification#RESOLUTION_OPTIONAL}, 
 	 * {@link ImportPackageSpecification#RESOLUTION_STATIC}
 	 * @param attributes the arbitrary attributes for the package import (may be <code>null</code>)
+	 * @param importer the importing bundle
 	 * @return the created package specification
 	 */
-	public ImportPackageSpecification createImportPackageSpecification(String packageName, VersionRange versionRange, String bundleSymbolicName, VersionRange bundleVersionRange, String[] propagate, int resolution, Map attributes);
+	public ImportPackageSpecification createImportPackageSpecification(String packageName, VersionRange versionRange, String bundleSymbolicName, VersionRange bundleVersionRange, String[] propagate, int resolution, Map attributes, BundleDescription importer);
 
 	/**
 	 * Creates an import package specification that is a copy of the given import package
@@ -155,16 +156,14 @@ public interface StateObjectFactory {
 	 * @param attributes the arbitrary attributes for the package import (may be <code>null</code>)
 	 * @param mandatory
 	 * @param root
-	 * @return the created package specification
+	 * @return the created package
 	 */
 	public ExportPackageDescription createExportPackageDescription(String packageName, Version version, String grouping, String include, String exclude, Map attributes, String[] mandatory, boolean root);
 
 	/**
 	 * Used by the Resolver to dynamically create ExportPackageDescription objects during the resolution process.
-	 * The Resolver needs to create ExportPackageDescriptions dynamically for the following reasons: <p>
-	 * 1. To create an ExportPackageDescription for a host from a ExportPackageDescription from a fragment.<p>
-	 * 2. To create an ExportPackageDescription that is used as a root for a resolved import that is split.<p>
-	 * 3. To create an ExportPackageDescription that is used to propagate one or more ExportPackageDescriptions.<p>
+	 * The Resolver needs to create ExportPackageDescriptions dynamally for a host when a fragment.
+	 * exports a package<p>
 	 * 
 	 * @param packageName
 	 * @param version
@@ -175,14 +174,14 @@ public interface StateObjectFactory {
 	 * @param mandatory
 	 * @param root
 	 * @param exporter
-	 * @return
+	 * @return the created package
 	 */
 	public ExportPackageDescription createExportPackageDescription(String packageName, Version version, String grouping, String include, String exclude, Map attributes, String[] mandatory, boolean root, BundleDescription exporter);
 
 	/**
 	 * Creates an import package specification that is a copy of the given constraint
 	 * @param original the export package to be copied
-	 * @return the created package specification 
+	 * @return the created package
 	 */
 	public ExportPackageDescription createExportPackageDescription(ExportPackageDescription original);
 	

@@ -851,7 +851,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 			resolverImports[j].setName(null);
 		}
 		if (!found) {
-			ResolverImport newImport = new ResolverImport(rb, state.getFactory().createImportPackageSpecification(requestedPackage, null, null, null, null, ImportPackageSpecification.RESOLUTION_DYNAMIC,null));
+			ResolverImport newImport = new ResolverImport(rb, state.getFactory().createImportPackageSpecification(requestedPackage, null, null, null, null, ImportPackageSpecification.RESOLUTION_DYNAMIC, null, importingBundle));
 			boolean resolved = resolveImport(newImport, true);
 			while (resolved && !checkDynamicGrouping(newImport))
 				resolved = resolveImport(newImport, true);
