@@ -58,9 +58,8 @@ public class StateManager implements PlatformAdmin {
 			e.printStackTrace();
 			return;
 		}
-		DataInputStream input = null;
 		try {
-			input = new DataInputStream(new BufferedInputStream(fileInput, 65536));
+			InputStream input = new BufferedInputStream(fileInput, 65536);
 			systemState = factory.readSystemState(input, expectedTimeStamp);
 			// problems in the cache (corrupted/stale), don't create a state object
 			if (systemState == null)
@@ -81,8 +80,7 @@ public class StateManager implements PlatformAdmin {
 			return;
 		if (cachedState && lastTimeStamp == systemState.getTimeStamp())
 			return;
-		DataOutputStream output = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(stateLocation)));
-		factory.writeState(systemState, output);
+		factory.writeState(systemState, new BufferedOutputStream(new FileOutputStream(stateLocation)));
 	}
 
 	public StateImpl createSystemState() {

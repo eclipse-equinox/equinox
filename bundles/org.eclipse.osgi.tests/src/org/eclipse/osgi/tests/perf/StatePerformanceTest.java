@@ -99,11 +99,9 @@ public class StatePerformanceTest extends AbstractStateTest {
 
 	private State storeAndRetrieve(State toStore) throws IOException {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		DataOutputStream dos = new DataOutputStream(baos);
-		toStore.getFactory().writeState(toStore, dos);
+		toStore.getFactory().writeState(toStore, baos);
 		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-		DataInputStream dis = new DataInputStream(bais);
-		return toStore.getFactory().readState(dis);
+		return toStore.getFactory().readState(bais);
 	}
 
 	public void testCreation() {

@@ -133,14 +133,11 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 	}
 
 	public State createState() {
-		StateImpl state = new UserState();
-		state.setFactory(this);
-		return state;
+		return internalCreateState();
 	}
 
 	public State createState(State original) {
-		StateImpl newState = new UserState();
-		newState.setFactory(this);
+		StateImpl newState = internalCreateState();
 		newState.setTimeStamp(original.getTimeStamp());
 		BundleDescription[] bundles = original.getBundles();
 		for (int i = 0; i < bundles.length; i++)
@@ -149,24 +146,40 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		return newState;
 	}
 
-	public SystemState readSystemState(DataInputStream stream, long expectedTimeStamp) throws IOException {
-		StateReader reader = new StateReader();
-		SystemState restoredState = new SystemState();
-		if (!reader.loadState(restoredState, stream, expectedTimeStamp))
-			return null;
-		restoredState.setFactory(this);
-		return restoredState;
+	private StateImpl internalCreateState() {
+		StateImpl state = new UserState();
+		state.setFactory(this);
+		return state;
+	}
+
+	SystemState readSystemState(InputStream stream, long expectedTimeStamp) throws IOException {		
+		return (SystemState) internalReadState(createSystemState(), new DataInputStream(stream), expectedTimeStamp);
+	}
+
+	public State readState(InputStream stream) throws IOException {
+		return internalReadState(internalCreateState(), new DataInputStream(stream), -1);
 	}
 
 	public State readState(DataInputStream stream) throws IOException {
+		return internalReadState(internalCreateState(), stream, -1);
+	}
+
+	private State internalReadState(StateImpl toRestore, DataInputStream stream, long expectedTimestamp) throws IOException {
 		StateReader reader = new StateReader();
-		StateImpl restoredState = (StateImpl) createState();
-		if (!reader.loadState(restoredState, stream))
+		if (!reader.loadState(toRestore, stream, expectedTimestamp))
 			return null;
-		return restoredState;
+		return toRestore;
 	}
 
 	public void writeState(State state, DataOutputStream stream) throws IOException {
+		internalWriteState(state, stream);
+	}
+
+	public void writeState(State state, OutputStream stream) throws IOException {
+		internalWriteState(state, new DataOutputStream(stream));
+	}
+
+	public void internalWriteState(State state, DataOutputStream stream) throws IOException {
 		if (state.getFactory() != this)
 			throw new IllegalArgumentException();
 		StateWriter writer = new StateWriter();

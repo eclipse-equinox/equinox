@@ -153,16 +153,16 @@ class StateReader {
 		return new VersionRange(readVersion(in), readVersion(in));
 	}
 
+	/**
+	 * expectedTimestamp is the expected value for the timestamp. or -1, if
+	 * 	no checking should be performed 
+	 */
 	public final boolean loadState(StateImpl state, DataInputStream input, long expectedTimestamp) throws IOException {
 		try {
 			return readState(state, input, expectedTimestamp);
 		} finally {
 			input.close();
 		}
-	}
-
-	public final boolean loadState(StateImpl state, DataInputStream input) throws IOException {
-		return loadState(state, input, -1);
 	}
 
 	private String readString(DataInputStream in, boolean intern) throws IOException {

@@ -168,8 +168,23 @@ public interface StateObjectFactory {
 	 * the stream
 	 * @throws IllegalArgumentException if the state provided was not created by 
 	 * this factory
+	 * @since 3.1
 	 */
-	public void writeState(State state, DataOutputStream stream) throws IOException;
+	public void writeState(State state, OutputStream stream) throws IOException;
+	
+	/**
+	 * Persists the given state in the given output stream. Closes the stream.
+	 * 
+	 * @param state the state to be written
+	 * @param stream the stream where to write the state to
+	 * @throws IOException if an IOException happens while writing the state to 
+	 * the stream
+	 * @throws IllegalArgumentException if the state provided was not created by 
+	 * this factory
+	 * @deprecated use #writeState(State, OutputStream) instead
+	 * @see #writeState(State, OutputStream)
+	 */
+	public void writeState(State state, DataOutputStream stream) throws IOException;	
 
 	/**
 	 * Reads a persisted state from the given stream. Closes the stream.
@@ -178,6 +193,19 @@ public interface StateObjectFactory {
 	 * @return the state read
 	 * @throws IOException if an IOException happens while reading the state from 
 	 * the stream
+	 * @since 3.1
 	 */
-	public State readState(DataInputStream stream) throws IOException;
+	public State readState(InputStream stream) throws IOException;
+	
+	/**
+	 * Reads a persisted state from the given stream. Closes the stream.
+	 * 
+	 * @param stream the stream where to read the state from
+	 * @return the state read
+	 * @throws IOException if an IOException happens while reading the state from 
+	 * the stream
+	 * @deprecated use #readState(InputStream) instead
+	 * @see #readState(InputStream)
+	 */
+	public State readState(DataInputStream stream) throws IOException;	
 }
