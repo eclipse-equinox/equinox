@@ -144,13 +144,13 @@ public class BundleDescriptionImpl implements BundleDescription, KeyedElement {
 		return null;
 	}
 
+	// TODO remove this method when we remove the deprecated API
 	public String getUniqueId() {
-		return symbolicName;
+		return getSymbolicName();
 	}
 
-	// TODO remove this method when we remove the deprecated API
 	public String getSymbolicName() {
-		return getSymbolicName();
+		return symbolicName;
 	}
 
 	public PackageSpecification getPackage(String name) {
