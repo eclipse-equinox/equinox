@@ -19,8 +19,6 @@ import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.framework.util.SecureAction;
 import org.osgi.framework.*;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleException;
 
 /**
  * Internal class.
@@ -288,11 +286,11 @@ public class EclipseLog implements FrameworkLog {
 		}
 	}
 
-	private void copyReader(Reader reader, Writer writer) throws IOException {
+	private void copyReader(Reader reader, Writer aWriter) throws IOException {
 		char buffer[] = new char[1024];
 		int count;
 		while ((count = reader.read(buffer, 0, buffer.length)) > 0) {
-			writer.write(buffer, 0, count);
+			aWriter.write(buffer, 0, count);
 		}
 	}
 
