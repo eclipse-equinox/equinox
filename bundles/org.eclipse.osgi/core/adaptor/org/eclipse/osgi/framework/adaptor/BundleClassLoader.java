@@ -14,7 +14,6 @@ package org.eclipse.osgi.framework.adaptor;
 import java.net.URL;
 import java.security.ProtectionDomain;
 import java.util.Enumeration;
-import org.osgi.framework.BundleException;
 
 /**
  * The BundleClassLoader interface is used by the Framework to load local 
@@ -33,7 +32,6 @@ public interface BundleClassLoader /*extends ClassLoader*/{
 	/**
 	 * Initializes the ClassLoader.  This is called after all currently resolved fragment
 	 * bundles have been attached to the BundleClassLoader by the Framework.
-	 * @throws BundleException
 	 */
 	public void initialize();
 
@@ -48,7 +46,7 @@ public interface BundleClassLoader /*extends ClassLoader*/{
 	/**
 	 * Finds all local resources in the BundleClassLoader with the specified
 	 * path without consulting the delegate.
-	 * @param classname
+	 * @param resource the resource path to find.
 	 * @return An Enumeration of all resources found or null if the resource.
 	 * does not exist.
 	 */

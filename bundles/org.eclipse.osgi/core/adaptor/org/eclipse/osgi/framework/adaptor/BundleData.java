@@ -50,7 +50,7 @@ public interface BundleData {
 	 * Gets a <code>URL</code> to the bundle entry specified by path.
 	 * This method must not use the BundleClassLoader to find the
 	 * bundle entry since the ClassLoader will delegate to find the resource.
-	 * @see org.osgi.framework.Bundle.getEntry(String)
+	 * @see org.osgi.framework.Bundle#getEntry(String)
 	 * @param path The bundle entry path.
 	 * @return A URL used to access the entry or null if the entry
 	 * does not exist.
@@ -62,7 +62,7 @@ public interface BundleData {
 	 * For example: <p>
 	 * <code>getEntryPaths("/META-INF")</code> <p>
 	 * This will return all entries from the /META-INF directory of the bundle.
-	 * @see org.osgi.framework.Bundle.getEntryPaths(String path)
+	 * @see org.osgi.framework.Bundle#getEntryPaths(String path)
 	 * @param path The path to a directory in the bundle.
 	 * @return An Enumeration of the entry paths or null if the specified path
 	 * does not exist.
@@ -94,7 +94,7 @@ public interface BundleData {
 	 * Return the bundle data directory.
 	 * Attempt to create the directory if it does not exist.
 	 *
-	 * @see org.osgi.framework.BundleContext.getDataFile(String)
+	 * @see org.osgi.framework.BundleContext#getDataFile(String)
 	 * @return Bundle data directory or null if not supported.
 	 */
 
