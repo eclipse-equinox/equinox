@@ -180,7 +180,7 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 			File dataRoot = ((DefaultAdaptor)adaptor).getDataRootDir();
 			if (dataRoot == null)
 				throw new IllegalStateException(AdaptorMsg.formatter.getString("ADAPTOR_DATA_AREA_NOT_SET")); //$NON-NLS-1$
-			setDataDir(new File(dataRoot, id + '/' + DefaultAdaptor.DATA_DIR_NAME));
+			setDataDir(new File(dataRoot, id + "/" + DefaultAdaptor.DATA_DIR_NAME));
 		}
 		if (!getDataDir().exists() && !getDataDir().mkdirs()) {
 			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
