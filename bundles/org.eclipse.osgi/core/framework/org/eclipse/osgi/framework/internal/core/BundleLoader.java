@@ -466,6 +466,23 @@ public class BundleLoader implements ClassLoaderDelegate {
 	}
 
 	/**
+	 * Handle the lookup where provided resources can also be imported.
+	 * In this case the exporter need to be consulted. 
+	 */ 
+	protected URL importResource(String name, String packageName){
+		URL result = null;
+		try {
+			result = findImportedResource(name, packageName);
+		} catch (ImportResourceNotFoundException e) {
+			//Capture the exception and return null because we want to continue the lookup.
+			return null; 
+		}
+		if (result == null)
+			result = importResource(name);
+		return result;
+	}
+
+	/**
 	 * Finds a resource local to this bundle.  Only the classloader for this bundle is searched.
 	 * @param name The name of the resource to find.
 	 * @return The URL to the resource or null if the resource is not found.
@@ -488,6 +505,23 @@ public class BundleLoader implements ClassLoaderDelegate {
 	 */
 	protected Enumeration importResources(String name) {
 		Enumeration result = findLocalResources(name);
+		return result;
+	}
+
+	/**
+	 * Handle the lookup where provided resources can also be imported.
+	 * In this case the exporter need to be consulted. 
+	 */ 
+	protected Enumeration importResources(String name, String packageName){
+		Enumeration result = null;
+		try {
+			result = findImportedResources(name, packageName);
+		} catch (ImportResourceNotFoundException e) {
+			//Capture the exception and return null because we want to continue the lookup.
+			return null; 
+		}
+		if (result == null)
+			result = importResources(name);
 		return result;
 	}
 
@@ -891,12 +925,12 @@ public class BundleLoader implements ClassLoaderDelegate {
 		if (source.isMultivalued()) {
 			BundleLoaderProxy[] bundles = source.getSuppliers();
 			for (int i = 0; i < bundles.length; i++) {
-				URL result = bundles[i].getBundleLoader().importResource(name);
+				URL result = bundles[i].getBundleLoader().importResource(name,packageName);
 				if (result != null)
 					return result;
 			}
 		} else
-			return source.getSupplier().getBundleLoader().importResource(name);
+			return source.getSupplier().getBundleLoader().importResource(name,packageName);
 		return null;
 	}
 
@@ -946,12 +980,12 @@ public class BundleLoader implements ClassLoaderDelegate {
 		if (source.isMultivalued()) {
 			BundleLoaderProxy[] bundles = source.getSuppliers();
 			for (int i = 0; i < bundles.length; i++) {
-				Enumeration result = bundles[i].getBundleLoader().importResources(name);
+				Enumeration result = bundles[i].getBundleLoader().importResources(name,packageName);
 				if (result != null)
 					return result;
 			}
 		} else
-			return source.getSupplier().getBundleLoader().importResources(name);
+			return source.getSupplier().getBundleLoader().importResources(name,packageName);
 		return null;
 	}
 
