@@ -48,9 +48,11 @@ public class DefaultLog implements FrameworkLog {
 	 */
 	protected Writer writer;
 
+	protected boolean append = false;
+
 	/**
 	 * The default constructor for DefaultLog.  Constructs a DefaultLog
-	 * that uses System.out to log messages to.
+	 * that uses System.err to log messages to.
 	 */
 	public DefaultLog() {
 		this((Writer)null);
@@ -58,13 +60,14 @@ public class DefaultLog implements FrameworkLog {
 
 	/**
 	 * Constructs a DefaultLog that uses the specified Writer to log messages
-	 * to.  If the Writer is null then System.out is used to log messages to.
-	 * @param writer The Writer to log messages to or null if System.out is
+	 * to.  If the Writer is null then System.err is used to log messages to.
+	 * @param writer The Writer to log messages to or null if System.err is
 	 * to be used.
 	 */
 	public DefaultLog(Writer writer) {
+		this.append = false;
 		if (writer == null)
-			// log to System.out by default
+			// log to System.err by default
 			this.writer = logForStream(System.err);
 		else
 			this.writer = writer;
@@ -80,15 +83,9 @@ public class DefaultLog implements FrameworkLog {
 	 * FileWriter from the outFile.
 	 */
 	public DefaultLog(File outFile, boolean append) {
-		try {
-			this.writer = 
-				new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outFile.getAbsolutePath(), append), "UTF-8")); //$NON-NLS-1$
-			this.outFile = outFile;
-		}
-		catch (IOException ioe) {
-			this.writer = logForStream(System.err);
-		}
-
+		this.append = true;
+		this.outFile = outFile;
+		this.writer = null;
 	}
 
 	/**
@@ -96,10 +93,44 @@ public class DefaultLog implements FrameworkLog {
 	 */
 	public void close() {
 		try {
-			writer.close();
+			if (writer != null) {
+				writer.close();
+				writer = null;
+			}
 		}
 		catch (IOException e) {
 			e.printStackTrace();
+		}
+	}
+
+	protected void openFile() {
+		if (writer == null) {
+			if (outFile != null) {
+				try {
+					writer = new BufferedWriter(new OutputStreamWriter(
+							new FileOutputStream(outFile.getAbsolutePath(),
+									append), "UTF-8")); //$NON-NLS-1$
+				} catch (IOException e) {
+					writer = new PrintWriter(System.err);
+				}
+			}
+			else {
+				writer = new PrintWriter(System.err);
+			}
+		}
+	}
+
+	protected void closeFile() {
+		if (outFile != null) {
+			if (writer != null) {
+				try {
+					writer.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				writer = null;
+			}
 		}
 	}
 
@@ -133,6 +164,7 @@ public class DefaultLog implements FrameworkLog {
 		if (logEntry == null)
 			return;
 		try {
+			openFile();
 			if (newSession) {
 				writeSession();
 				newSession = false;
@@ -143,6 +175,9 @@ public class DefaultLog implements FrameworkLog {
 		catch (IOException ioe) {
 			ioe.printStackTrace();
 		}
+		finally {
+			closeFile();
+		}
 	}
 
 	public synchronized void setWriter(Writer newWriter, boolean append) {
@@ -150,10 +185,7 @@ public class DefaultLog implements FrameworkLog {
 	}
 
 	public synchronized void setFile(File newFile, boolean append) throws IOException {
-		Writer newWriter = 
-			new BufferedWriter(new OutputStreamWriter(new FileOutputStream(newFile.getAbsolutePath(), append), "UTF-8")); //$NON-NLS-1$
-
-		setOutput(newFile, newWriter, append);
+		setOutput(newFile, null, append);
 	}
 
 	public synchronized File getFile(){
@@ -166,37 +198,40 @@ public class DefaultLog implements FrameworkLog {
 
 	private void setOutput(File newOutFile, Writer newWriter, boolean append) {
 		if (newOutFile == null || !newOutFile.equals(this.outFile)) {
-			try {
-				this.writer.close();
-
-				// append old outFile to newOut.  We only attempt to do this
-				// if the current Writer is backed by a File.
-				if (append && this.outFile != null) {
-					Reader fileIn = null;
-					try {
-						fileIn =
-							new InputStreamReader(new FileInputStream(this.outFile.getAbsolutePath()), "UTF-8");
-						copyReader(fileIn,newWriter);
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-					finally {
-						if (fileIn != null) {
-							try {
-								fileIn.close();
-							} catch (IOException e) {
-								e.printStackTrace();
-							}
+			if (this.writer != null) {
+				try {
+					this.writer.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				this.writer = null;
+			}
+			// Append old outFile to newWriter. We only attempt to do this
+			// if the current Writer is backed by a File and this is not
+			// a new session.
+			File oldOutFile = this.outFile;
+			this.outFile = newOutFile;
+			this.writer = newWriter;
+			if (append && !newSession && oldOutFile != null) {
+				Reader fileIn = null;
+				try {
+					openFile();
+					fileIn = new InputStreamReader(new FileInputStream(
+							oldOutFile.getAbsolutePath()), "UTF-8");
+					copyReader(fileIn, this.writer);
+				} catch (IOException e) {
+					e.printStackTrace();
+				} finally {
+					if (fileIn != null) {
+						try {
+							fileIn.close();
+						} catch (IOException e) {
+							e.printStackTrace();
 						}
 					}
+					closeFile();
 				}
-
-			} catch (IOException e) {
-				e.printStackTrace();
 			}
-
-			this.writer = newWriter;
-			this.outFile = newOutFile;
 		}
 	}
 
