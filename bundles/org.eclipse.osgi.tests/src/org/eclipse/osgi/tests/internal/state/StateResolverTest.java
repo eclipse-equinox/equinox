@@ -174,6 +174,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertContains("2.3", dependent, state.getBundle(4));
 		assertContains("2.4", dependent, state.getBundle(6));
 	}
+
 	// temporarily disabled
 	public void testLinkageChange() throws BundleException {
 		State state = buildEmptyState();
@@ -224,6 +225,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertFullyResolved("10.2", b2);
 		assertFullyResolved("10.3", b3);
 	}
+
 	// temporarily disabled
 	public void testReinstall() throws BundleException {
 		State state = buildComplexState();
@@ -246,24 +248,34 @@ public class StateResolverTest extends AbstractStateTest {
 	}
 
 	public void testRemoval() throws BundleException {
-		String B1_LOCATION = "org.eclipse.b";
+		String B1_LOCATION = "org.eclipse.b1";
 		final String B1_MANIFEST = "Bundle-SymbolicName: org.eclipse.b1\n" + "Bundle-Version: 1.0\n";
+		String B2_LOCATION = "org.eclipse.b2";
+		final String B2_MANIFEST = "Bundle-SymbolicName: org.eclipse.b2\n" + "Bundle-Version: 1.0\n";
 		State state = platformAdmin.getState();
 		state.setResolver(platformAdmin.getResolver());
 		BundleDescription b1 = platformAdmin.getFactory().createBundleDescription(parseManifest(B1_MANIFEST), B1_LOCATION, 1);
+		BundleDescription b2 = platformAdmin.getFactory().createBundleDescription(parseManifest(B2_MANIFEST), B2_LOCATION, 2);
 		state.addBundle(b1);
+		state.addBundle(b2);
 		StateDelta delta = state.resolve();
+		assertTrue("1.1", contains(state.getResolvedBundles(), b1));
+		assertTrue("1.2", contains(state.getResolvedBundles(), b2));		
 		BundleDelta[] changes = delta.getChanges();
-		assertEquals("1.0", 1, changes.length);
-		assertEquals("1.1", b1, changes[0].getBundle());
-		assertEquals("1.2", (BundleDelta.ADDED | BundleDelta.RESOLVED), changes[0].getType());
-		assertFullyResolved("1.3", b1);
+		assertEquals("1.3", 2, changes.length);
+		assertEquals("1.4 - " + changes[0].getBundle(), (BundleDelta.ADDED | BundleDelta.RESOLVED), changes[0].getType());
+		assertEquals("1.5 - " + changes[1].getBundle(), (BundleDelta.ADDED | BundleDelta.RESOLVED), changes[1].getType());		
+		assertFullyResolved("1.6", b1);
+		assertFullyResolved("1.7", b2);
+		// remove a resolved bundle
 		state.removeBundle(b1);
+		assertTrue("2.0", !contains(state.getResolvedBundles(), b1));
+		assertTrue("2.1", contains(state.getResolvedBundles(), b2));		
 		delta = state.resolve();
 		changes = delta.getChanges();
-		assertEquals("2.0", 1, changes.length);
-		assertEquals("2.1", b1, changes[0].getBundle());
-		assertEquals("2.2", BundleDelta.REMOVED | BundleDelta.UNRESOLVED, changes[0].getType());
+		assertEquals("2.2", 1, changes.length);
+		assertEquals("2.3", b1, changes[0].getBundle());
+		assertEquals("2.4", BundleDelta.REMOVED | BundleDelta.UNRESOLVED, changes[0].getType());
 	}
 
 	public void testRemoveAndAdd() throws BundleException {
@@ -441,13 +453,23 @@ public class StateResolverTest extends AbstractStateTest {
 		assertEquals("1.1", b1, changes[0].getBundle());
 		assertEquals("1.2", (BundleDelta.ADDED | BundleDelta.RESOLVED), changes[0].getType());
 		assertFullyResolved("1.3", b1);
+		assertTrue("1.8", contains(state.getResolvedBundles(), b1));		
 		state.updateBundle(b1);
+		assertTrue("1.9", !contains(state.getResolvedBundles(), b1));		
 		delta = state.resolve();
 		changes = delta.getChanges();
 		assertEquals("2.0", 1, changes.length);
 		assertEquals("2.1", b1, changes[0].getBundle());
 		assertEquals("2.2", BundleDelta.UPDATED, changes[0].getType());
 	}
+
+	private boolean contains(Object[] array, Object element) {
+		for (int i = 0; i < array.length; i++)
+			if (array[i].equals(element))
+				return true;
+		return false;
+	}
+
 }
 //testFragmentUpdateNoVersionChanged()
 //testFragmentUpdateVersionChanged()

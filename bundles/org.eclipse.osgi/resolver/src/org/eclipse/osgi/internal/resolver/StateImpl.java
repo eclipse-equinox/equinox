@@ -52,6 +52,7 @@ public class StateImpl implements State {
 			return false;
 		if (!bundleDescriptions.remove(existing))
 			return false;
+		resolvedBundles.remove(existing);		
 		if (!basicAddBundle(newDescription))
 			return false;
 		resolved = false;
@@ -107,6 +108,7 @@ public class StateImpl implements State {
 	public boolean removeBundle(BundleDescription toRemove) {
 		if (!bundleDescriptions.remove((KeyedElement) toRemove))
 			return false;
+		resolvedBundles.remove((KeyedElement) toRemove);
 		resolved = false;
 		getDelta().recordBundleRemoved((BundleDescriptionImpl) toRemove);
 		if (resolver != null)
