@@ -72,7 +72,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 	private String installURL = null;
 	private boolean exitOnError = true;
 	private BundleStopper stopper;
-	
+
 	/*
 	 * Should be instantiated only by the framework (through reflection). 
 	 */
@@ -121,10 +121,10 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		readHeaders();
 		checkLocationAndReinitialize();
 		File stateLocation = LocationManager.getConfigurationFile(LocationManager.STATE_FILE);
-		if(!stateLocation.isFile()) { //NOTE this check is redundant since it is done in StateManager, however it is more convenient to have it here 
+		if (!stateLocation.isFile()) { //NOTE this check is redundant since it is done in StateManager, however it is more convenient to have it here 
 			Location parentConfiguration = null;
 			if ((parentConfiguration = LocationManager.getConfigurationLocation().getParentLocation()) != null) {
-				stateLocation = new File(parentConfiguration.getURL().getFile(), FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME + '/' + LocationManager.STATE_FILE);				
+				stateLocation = new File(parentConfiguration.getURL().getFile(), FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME + '/' + LocationManager.STATE_FILE);
 			}
 		}
 		stateManager = new StateManager(stateLocation, timeStamp);
@@ -158,7 +158,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 			File stateLocation = LocationManager.getConfigurationFile(LocationManager.STATE_FILE);
 			stateManager.shutdown(stateLocation); //$NON-NLS-1$
 		} catch (IOException e) {
-			frameworkLog.log(new FrameworkEvent(FrameworkEvent.ERROR,context.getBundle(),e));
+			frameworkLog.log(new FrameworkEvent(FrameworkEvent.ERROR, context.getBundle(), e));
 		}
 	}
 
@@ -185,14 +185,14 @@ public class EclipseAdaptor extends DefaultAdaptor {
 	private void readHeaders() {
 		InputStream bundleDataStream = findBundleDataFile();
 		if (bundleDataStream == null)
-			return;			
+			return;
 
 		try {
 			DataInputStream in = new DataInputStream(new BufferedInputStream(bundleDataStream));
 			try {
 				if (in.readByte() == BUNDLEDATA_VERSION) {
 					timeStamp = in.readLong();
-					installURL = in.readUTF();					
+					installURL = in.readUTF();
 					initialBundleStartLevel = in.readInt();
 					nextId = in.readLong();
 				}
@@ -250,8 +250,6 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		register(CommandProvider.class.getName(), new EclipseCommandProvider(context), bundle);
 		register(FrameworkLog.class.getName(), getFrameworkLog(), bundle);
 		register(org.eclipse.osgi.service.localization.BundleLocalization.class.getName(), new BundleLocalizationImpl(), bundle);
-		stopper = new BundleStopper();
-		register(BundleStopper.class.getName(), stopper, bundle);
 		registerEndorsedXMLParser();
 	}
 
@@ -266,7 +264,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		StateManager.DEBUG_PLATFORM_ADMIN = options.getBooleanOption(OPTION_PLATFORM_ADMIN, false);
 		StateManager.DEBUG_PLATFORM_ADMIN_RESOLVER = options.getBooleanOption(OPTION_PLATFORM_ADMIN_RESOLVER, false);
 		PluginConverterImpl.DEBUG = options.getBooleanOption(OPTION_CONVERTER, false);
-		BasicLocation.DEBUG =  options.getBooleanOption(OPTION_LOCATION, false);
+		BasicLocation.DEBUG = options.getBooleanOption(OPTION_LOCATION, false);
 	}
 
 	private void registerEndorsedXMLParser() {
@@ -326,7 +324,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 
 	private InputStream findBundleDataFile() {
 		File metadata = LocationManager.getConfigurationFile(LocationManager.BUNDLE_DATA_FILE);
-		InputStream bundleDataStream = null; 
+		InputStream bundleDataStream = null;
 		if (metadata.isFile()) {
 			try {
 				bundleDataStream = new FileInputStream(metadata);
@@ -336,17 +334,18 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		} else {
 			Location parentConfiguration = null;
 			if ((parentConfiguration = LocationManager.getConfigurationLocation().getParentLocation()) != null) {
-				 try {
+				try {
 					bundleDataStream = new URL(parentConfiguration.getURL(), FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME + '/' + LocationManager.BUNDLE_DATA_FILE).openStream();
 				} catch (MalformedURLException e1) {
 					//This will not happen since all the URLs are derived by us and we are GODS!
 				} catch (IOException e1) {
 					//That's ok we will regenerate the .bundleData
-				}				
+				}
 			}
 		}
 		return bundleDataStream;
 	}
+
 	/**
 	 * @see org.eclipse.osgi.framework.adaptor.FrameworkAdaptor#getInstalledBundles()
 	 */
@@ -354,7 +353,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		InputStream bundleDataStream = findBundleDataFile();
 		if (bundleDataStream == null)
 			return null;
-		
+
 		try {
 			DataInputStream in = new DataInputStream(new BufferedInputStream(bundleDataStream));
 			try {
@@ -534,7 +533,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 				out.close();
 			}
 		} catch (IOException e) {
-			frameworkLog.log(new FrameworkEvent(FrameworkEvent.ERROR,context.getBundle(),e));
+			frameworkLog.log(new FrameworkEvent(FrameworkEvent.ERROR, context.getBundle(), e));
 		}
 	}
 
@@ -548,6 +547,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 
 	public void frameworkStopping(BundleContext context) {
 		super.frameworkStopping(context);
+		stopper = new BundleStopper();
 		stopper.stopBundles();
 	}
 
@@ -564,12 +564,10 @@ public class EclipseAdaptor extends DefaultAdaptor {
 			try {
 				error.printStackTrace();
 				t.printStackTrace();
-			}
-			catch (Throwable t1) {
+			} catch (Throwable t1) {
 				// if we fail that then we are beyond help.
 			}
-		}
-		finally {
+		} finally {
 			// do the exit outside the try block just incase another runtime error was thrown while logging
 			if (exitOnError)
 				System.exit(13);
@@ -578,5 +576,9 @@ public class EclipseAdaptor extends DefaultAdaptor {
 
 	protected void setLog(FrameworkLog log) {
 		frameworkLog = log;
+	}
+
+	public BundleStopper getBundleStopper() {
+		return stopper;
 	}
 }

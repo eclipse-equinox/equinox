@@ -138,10 +138,15 @@ public class EclipseClassLoader extends DefaultClassLoader {
 	/**
 	 * Determines if for loading the given class we should activate the bundle. 
 	 */
-	private boolean shouldActivateFor(String className) {
+	private boolean shouldActivateFor(String className) throws ClassNotFoundException {
 		//Don't reactivate on shut down
-		if (hostdata.getAdaptor().isStopping())
-			return false;
+		if (hostdata.getAdaptor().isStopping()) {
+			BundleStopper stopper = EclipseAdaptor.getDefault().getBundleStopper();
+			if (stopper != null && stopper.isStopped(hostdata.getSymbolicName())) {
+				String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CLASSLOADER_ALREADY_STOPPED", className, hostdata.getSymbolicName()); //$NON-NLS-1$
+				throw new ClassNotFoundException(message);
+			}
+		}
 		boolean autoStart = ((EclipseBundleData) hostdata).isAutoStart();
 		String[] autoStartExceptions = ((EclipseBundleData) hostdata).getAutoStartExceptions();
 		// no exceptions, it is easy to figure it out

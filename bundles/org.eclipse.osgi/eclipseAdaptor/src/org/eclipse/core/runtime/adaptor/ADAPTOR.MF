@@ -16,8 +16,7 @@ Provide-Package:
  org.eclipse.osgi.service.runnable,
  org.eclipse.osgi.service.urlconversion,
  org.eclipse.core.runtime.adaptor.testsupport,
- org.eclipse.osgi.service.localization,
- org.eclipse.core.runtime.adaptor
+ org.eclipse.osgi.service.localization
 Export-Service: 
  org.eclipse.osgi.framework.log.FrameworkLog,
  org.eclipse.osgi.service.environment.EnvironmentInfo,
