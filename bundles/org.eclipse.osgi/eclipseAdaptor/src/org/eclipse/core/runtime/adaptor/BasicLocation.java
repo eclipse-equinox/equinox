@@ -65,7 +65,7 @@ public class BasicLocation implements Location {
 		if (location != null)
 			throw new IllegalStateException(EclipseAdaptorMsg.formatter.getString("ECLIPSE_CANNOT_CHANGE_LOCATION")); //$NON-NLS-1$
 		File file = null;
-		if (value.getProtocol().equalsIgnoreCase("file:")) //$NON-NLS-1$
+		if (value.getProtocol().equalsIgnoreCase("file")) //$NON-NLS-1$
 			file = new File(value.getPath(), LOCK_FILENAME);
 		lock = lock && !isReadOnly;
 		if (lock) {
