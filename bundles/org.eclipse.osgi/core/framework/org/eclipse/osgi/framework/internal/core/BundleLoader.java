@@ -733,19 +733,21 @@ public class BundleLoader implements ClassLoaderDelegate
 		// TODO is it ok to use bundle as the visit token or should it be the loader?
 		if (!visited.add(bundle))
 			return;
+		// Must search required bundles that are exported first.
+		if (requiredBundles != null) {
+			int size = reexportTable == null ? 0 : reexportTable.length;
+			int reexportIndex = 0;
+			for (int i = 0; i < requiredBundles.length; i++) {
+				if (reexportIndex < size && reexportTable[reexportIndex] == i) {
+					reexportIndex++;
+					requiredBundles[i].getBundleLoader().addExportedProvidersFor(packageName, result, visited);
+				}
+			}
+		}
+		// now look locally.
 		PackageSource local = getProvidedPackage(packageName);
 		if (local != null)
 			result.add(local.getSupplier());
-		if (requiredBundles == null) 
-			return;
-		int size = reexportTable == null ? 0 : reexportTable.length;
-		int reexportIndex = 0;
-		for (int i = 0; i < requiredBundles.length; i++) {
-			if (reexportIndex < size && reexportTable[reexportIndex] == i) {
-				reexportIndex++;
-				requiredBundles[i].getBundleLoader().addExportedProvidersFor(packageName, result, visited);
-			}
-		}
 	}
 
 	/**
