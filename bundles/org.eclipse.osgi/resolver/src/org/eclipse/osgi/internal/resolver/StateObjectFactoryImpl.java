@@ -31,8 +31,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		bundle.setRequiredBundles(required);
 		bundle.setPackages(packages);
 		bundle.setHost(host);
-		//TODO: need to fix the state API to use String[] to represent provided packages 
-		//bundle.setProvidedPackages(providedPackages);
+		bundle.setProvidedPackages(providedPackages);
 		return bundle;		
 	}
 	public BundleDescription createBundleDescription(BundleDescription original) {
