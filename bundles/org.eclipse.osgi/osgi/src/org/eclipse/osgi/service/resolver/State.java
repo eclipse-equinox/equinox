@@ -31,11 +31,14 @@ public interface State {
 	 * Returns a delta describing the differences between this state and the
 	 * given state. This state is taken as the base so the absence of a bundle
 	 * in the given state is reported as a deletion, etc.
+	 *<p>Note that the generated StateDelta will contain BundleDeltas with one
+	 *of the following types: BundleDelta.ADDED, BundleDelta.REMOVED and 
+	 *BundleDelta.UPDATED</p>
 	 * 
 	 * @param state
-	 * @return
-	 * @throws BundleException if the id of the given state does not match that of the
-	 * 	current state or if the given state is not resolved.
+	 * @return a delta describing differences between this and the given state 
+	 * @throws BundleException if the timestamp of the given state does not match that of the
+	 * 	current state
 	 */
 	public StateDelta compare(State state) throws BundleException;
 
