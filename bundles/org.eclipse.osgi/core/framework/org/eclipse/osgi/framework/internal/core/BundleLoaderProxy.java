@@ -162,7 +162,7 @@ public class BundleLoaderProxy implements RequiredBundle {
 		// successfully get stored into pkgSources
 		PackageSource pkgSource = (PackageSource) pkgSources.getByKey(pkgName);
 		if (pkgSource == null) {
-			pkgSource = new SingleSourcePackage(pkgName, this);
+			pkgSource = new SingleSourcePackage(pkgName, -1, this);
 			synchronized (pkgSource) {
 				pkgSources.add(pkgSource);
 			}
@@ -190,8 +190,21 @@ public class BundleLoaderProxy implements RequiredBundle {
 			// check to see if it is a filtered export
 			String includes = (String) export.getDirective(Constants.INCLUDE_DIRECTIVE);
 			String excludes = (String) export.getDirective(Constants.EXCLUDE_DIRECTIVE);
-			if (includes != null || excludes != null)
-				pkgSource = new FilteredSourcePackage(export.getName(), this, includes, excludes);
+			String[] friends = (String[]) export.getDirective(Constants.FRIENDS_DIRECTIVE);
+			if (includes != null || excludes != null || friends != null) {
+				ExportPackageDescription[] exports = description.getExportPackages();
+				int index = -1;
+				int first = -1;
+				for (int i = 0; i < exports.length; i++) {
+					if (first == -1 && exports[i].getName().equals(export.getName()))
+						first = i;
+					if (exports[i] == export && first != i) {
+						index = i;
+						break;
+					}
+				}
+				pkgSource = new FilteredSourcePackage(export.getName(), index, this, includes, excludes, friends);
+			}
 		}
 
 		if (storeSource) {

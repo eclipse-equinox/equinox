@@ -147,11 +147,13 @@ public class BundleLoader implements ClassLoaderDelegate {
 		if (exports != null && exports.length > 0) {
 			exportedPackages = new ArrayList(exports.length);
 			for (int i = 0; i < exports.length; i++) {
-				// must force filtered and reexport sources to be created early
-				// to prevent lazy normal package source creation.
-				proxy.createPackageSource(exports[i], true);
-				if (!exportedPackages.contains(exports[i].getName()))
+				if (!exportedPackages.contains(exports[i].getName())) {
 					exportedPackages.add(exports[i].getName());
+					// must force filtered and reexport sources to be created early
+					// to prevent lazy normal package source creation.
+					// We only do this for the first export of a package name. 
+					proxy.createPackageSource(exports[i], true);
+				}
 			}
 		}
 		//This is the fastest way to access to the description for fragments since the hostdescription.getFragments() is slow
@@ -530,7 +532,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 		return false;
 	}
 
-	final void addExportedProvidersFor(String packageName, ArrayList result, KeyedHashSet visited) {
+	final void addExportedProvidersFor(String symbolicName, String packageName, ArrayList result, KeyedHashSet visited) {
 		if (!visited.add(bundle))
 			return;
 
@@ -547,16 +549,16 @@ public class BundleLoader implements ClassLoaderDelegate {
 					// always add required bundles first if we locally provide the package
 					// This allows a bundle to provide a package from a required bundle without 
 					// re-exporting the whole required bundle.
-					requiredBundles[i].getBundleLoader().addExportedProvidersFor(packageName, result, visited);
+					requiredBundles[i].getBundleLoader().addExportedProvidersFor(symbolicName, packageName, result, visited);
 				} else if (reexportIndex < size && reexportTable[reexportIndex] == i) {
 					reexportIndex++;
-					requiredBundles[i].getBundleLoader().addExportedProvidersFor(packageName, result, visited);
+					requiredBundles[i].getBundleLoader().addExportedProvidersFor(symbolicName, packageName, result, visited);
 				}
 			}
 		}
 
 		// now add the locally provided package.
-		if (local != null)
+		if (local != null && local.isFriend(symbolicName))
 			result.add(local);
 	}
 
@@ -714,7 +716,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 		ArrayList result = new ArrayList(3);
 		for (int i = 0; i < requiredBundles.length; i++) {
 			BundleLoader requiredLoader = requiredBundles[i].getBundleLoader();
-			requiredLoader.addExportedProvidersFor(pkgName, result, visited);
+			requiredLoader.addExportedProvidersFor(proxy.getSymbolicName(), pkgName, result, visited);
 		}
 		if (requiredSources == null)
 			requiredSources = new KeyedHashSet(10, false);
@@ -749,7 +751,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 		// if the package is exported then we need to get the local source
 		PackageSource localSource = proxy.getPackageSource(pkgName);
 		if (localSource instanceof BundleLoaderProxy.ReexportPackageSource)
-			localSource = new SingleSourcePackage(pkgName, proxy);
+			localSource = new SingleSourcePackage(pkgName, -1, proxy);
 		if (result == null)
 			return localSource;
 		if (localSource == null)

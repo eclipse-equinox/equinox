@@ -43,6 +43,10 @@ public abstract class PackageSource implements KeyedElement {
 		return false;
 	}
 
+	public boolean isFriend(String symbolicName) {
+		return true;
+	}
+
 	public abstract Class loadClass(String name);
 	public abstract URL getResource(String name);
 	public abstract Enumeration getResources(String name) throws IOException;
@@ -62,8 +66,10 @@ public abstract class PackageSource implements KeyedElement {
 		for (int i = 0; i < suppliers1.length; i++) {
 			boolean found = false;
 			for (int j = 0; j < suppliers2.length; j++)
-				if (suppliers1[i].supplier == suppliers2[j].supplier)
+				if (suppliers2[j].equals(suppliers1[i])) {
 					found = true;
+					break;
+				}
 			if (!found)
 				return false;
 		}

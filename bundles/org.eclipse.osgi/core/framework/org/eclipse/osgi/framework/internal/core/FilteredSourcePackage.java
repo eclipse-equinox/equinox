@@ -18,13 +18,24 @@ public class FilteredSourcePackage extends SingleSourcePackage {
 	private static final char ALL = '*';
 	String[] includes;
 	String[] excludes;
+	String[] friends;
 
-	public FilteredSourcePackage(String name, BundleLoaderProxy supplier, String includes, String excludes) {
-		super(name, supplier);
+	public FilteredSourcePackage(String name, int expid, BundleLoaderProxy supplier, String includes, String excludes, String[] friends) {
+		super(name, expid, supplier);
 		if (includes != null)
 			this.includes = ManifestElement.getArrayFromList(includes);
 		if (excludes != null)
 			this.excludes = ManifestElement.getArrayFromList(excludes);
+		this.friends = friends;
+	}
+
+	public boolean isFriend(String symbolicName) {
+		if (friends == null)
+			return true;
+		for (int i = 0; i < friends.length; i++)
+			if (friends[i].equals(symbolicName))
+				return true;
+		return false;
 	}
 
 	public URL getResource(String name) {

@@ -50,7 +50,7 @@ public class ExportedPackageImpl implements ExportedPackage {
 			return null;
 		AbstractBundle[] bundles = bundle.framework.getAllBundles();
 		ArrayList importers = new ArrayList(10);
-		PackageSource supplierSource = supplier.getBundleLoader().getPackageSource(getName());
+		PackageSource supplierSource = supplier.createPackageSource(exportedPackage, false);
 		for (int i = 0; i < bundles.length; i++) {
 			if (!(bundles[i] instanceof BundleHost))
 				continue;
