@@ -26,9 +26,7 @@ public class BundleFragment extends AbstractBundle {
 
 	/**
 	 * @param bundledata
-	 * @param location
 	 * @param framework
-	 * @param startLevel
 	 * @throws BundleException
 	 */
 	public BundleFragment(BundleData bundledata, Framework framework) throws BundleException {
@@ -43,8 +41,8 @@ public class BundleFragment extends AbstractBundle {
 	protected void load() throws BundleException {
 		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 			if ((state & (INSTALLED)) == 0) {
-				Debug.println("Bundle.load called when state != INSTALLED: " + this);
-				Debug.printStackTrace(new Exception("Stack trace"));
+				Debug.println("Bundle.load called when state != INSTALLED: " + this); //$NON-NLS-1$
+				Debug.printStackTrace(new Exception("Stack trace")); //$NON-NLS-1$
 			}
 		}
 
@@ -60,7 +58,7 @@ public class BundleFragment extends AbstractBundle {
 			try {
 				bundledata.open(); /* make sure the BundleData is open */
 			} catch (IOException e) {
-				throw new BundleException(Msg.formatter.getString("BUNDLE_READ_EXCEPTION"), e);
+				throw new BundleException(Msg.formatter.getString("BUNDLE_READ_EXCEPTION"), e); //$NON-NLS-1$
 			}
 		}
 	}
@@ -71,13 +69,12 @@ public class BundleFragment extends AbstractBundle {
 	 * This method must be called while holding the bundles lock.
 	 *
 	 * @return  true if an exported package is "in use". i.e. it has been imported by a bundle
-	 * @exception org.osgi.framework.BundleException
 	 */
 	protected boolean unresolve() {
 		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 			if ((state & (INSTALLED | RESOLVED)) == 0) {
-				Debug.println("Bundle.reload called when state != INSTALLED | RESOLVED: " + this);
-				Debug.printStackTrace(new Exception("Stack trace"));
+				Debug.println("Bundle.reload called when state != INSTALLED | RESOLVED: " + this); //$NON-NLS-1$
+				Debug.printStackTrace(new Exception("Stack trace")); //$NON-NLS-1$
 			}
 		}
 
@@ -113,8 +110,8 @@ public class BundleFragment extends AbstractBundle {
 	protected boolean reload(AbstractBundle newBundle) throws BundleException {
 		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 			if ((state & (INSTALLED | RESOLVED)) == 0) {
-				Debug.println("Bundle.reload called when state != INSTALLED | RESOLVED: " + this);
-				Debug.printStackTrace(new Exception("Stack trace"));
+				Debug.println("Bundle.reload called when state != INSTALLED | RESOLVED: " + this); //$NON-NLS-1$
+				Debug.printStackTrace(new Exception("Stack trace")); //$NON-NLS-1$
 			}
 		}
 
@@ -155,8 +152,8 @@ public class BundleFragment extends AbstractBundle {
 	protected void refresh() throws BundleException {
 		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 			if ((state & (UNINSTALLED | INSTALLED | RESOLVED)) == 0) {
-				Debug.println("Bundle.refresh called when state != UNINSTALLED | INSTALLED | RESOLVED: " + this);
-				Debug.printStackTrace(new Exception("Stack trace"));
+				Debug.println("Bundle.refresh called when state != UNINSTALLED | INSTALLED | RESOLVED: " + this); //$NON-NLS-1$
+				Debug.printStackTrace(new Exception("Stack trace")); //$NON-NLS-1$
 			}
 		}
 
@@ -177,8 +174,8 @@ public class BundleFragment extends AbstractBundle {
 	protected boolean unload() {
 		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 			if ((state & (UNINSTALLED | INSTALLED | RESOLVED)) == 0) {
-				Debug.println("Bundle.unload called when state != UNINSTALLED | INSTALLED | RESOLVED: " + this);
-				Debug.printStackTrace(new Exception("Stack trace"));
+				Debug.println("Bundle.unload called when state != UNINSTALLED | INSTALLED | RESOLVED: " + this); //$NON-NLS-1$
+				Debug.printStackTrace(new Exception("Stack trace")); //$NON-NLS-1$
 			}
 		}
 
@@ -230,7 +227,7 @@ public class BundleFragment extends AbstractBundle {
 		}
 		// cannot load a class from a fragment because there is no classloader
 		// associated with fragments.
-		throw new ClassNotFoundException(Msg.formatter.getString("BUNDLE_FRAGMENT_CNFE", name));
+		throw new ClassNotFoundException(Msg.formatter.getString("BUNDLE_FRAGMENT_CNFE", name)); //$NON-NLS-1$
 	}
 
 	/**
@@ -278,18 +275,18 @@ public class BundleFragment extends AbstractBundle {
 			}
 
 			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-				Debug.println("Bundle: Active sl = " + framework.startLevelManager.getStartLevel() + "; Bundle " + getBundleId() + " sl = " + getStartLevel());
+				Debug.println("Bundle: Active sl = " + framework.startLevelManager.getStartLevel() + "; Bundle " + getBundleId() + " sl = " + getStartLevel()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
 
 			if (getStartLevel() <= framework.startLevelManager.getStartLevel()) {
 				if (state == UNINSTALLED) {
-					throw new BundleException(Msg.formatter.getString("BUNDLE_UNINSTALLED_EXCEPTION"));
+					throw new BundleException(Msg.formatter.getString("BUNDLE_UNINSTALLED_EXCEPTION")); //$NON-NLS-1$
 				}
 				if (framework.active) {
 					state = ACTIVE;
 
 					if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-						Debug.println("->started " + this);
+						Debug.println("->started " + this); //$NON-NLS-1$
 					}
 
 					framework.publishBundleEvent(BundleEvent.STARTED, this);
@@ -320,7 +317,7 @@ public class BundleFragment extends AbstractBundle {
 			state = RESOLVED;
 
 			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-				Debug.println("->stopped " + this);
+				Debug.println("->stopped " + this); //$NON-NLS-1$
 			}
 
 			framework.publishBundleEvent(BundleEvent.STOPPED, this);
@@ -385,7 +382,7 @@ public class BundleFragment extends AbstractBundle {
 	 * Sets the host for this fragment from the list of available
 	 * BundleExporters.  If a matching host cannot be found then a
 	 * resolve Exception is logged.
-	 * @param exporters The available BundleExporters to resolve the host from.
+	 * @param value the BundleHost to set the host to
 	 */
 	protected boolean setHost(BundleHost value) {
 		host = value;

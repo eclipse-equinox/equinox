@@ -46,8 +46,8 @@ class StartLevelEvent extends EventObject {
 	/**
 	 * Creates a StartLevel event regarding the specified bundle.
 	 *
-	 * @param int type The type of startlevel event (inc or dec)
-	 * @param int newSl the ultimate requested startlevel we are on our way to
+	 * @param type The type of startlevel event (inc or dec)
+	 * @param newSl the ultimate requested startlevel we are on our way to
 	 * @param bundle The affected bundle, or system bundle if it is for the framework
 	 */
 	public StartLevelEvent(int type, int newSl, AbstractBundle bundle) {

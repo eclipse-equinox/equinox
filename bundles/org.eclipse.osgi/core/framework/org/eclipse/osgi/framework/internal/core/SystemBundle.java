@@ -35,8 +35,6 @@ public class SystemBundle extends BundleHost {
 	 * The SystemBundle's state is set to STARTING.
 	 * This method is called when the framework is constructed.
 	 *
-	 * @param bundledata the bundle's BundleData
-	 * @param location identity string for the bundle
 	 * @param framework Framework this bundle is running in
 	 */
 	protected SystemBundle(Framework framework) throws BundleException {
@@ -182,7 +180,7 @@ public class SystemBundle extends BundleHost {
 				public void run() {
 					framework.shutdown();
 				}
-			}, "System Bundle Shutdown");
+			}, "System Bundle Shutdown"); //$NON-NLS-1$
 
 			shutdown.start();
 		}
@@ -202,7 +200,7 @@ public class SystemBundle extends BundleHost {
 		framework.packageAdmin.cleanup();
 
 		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-			Debug.println("->Framework shutdown");
+			Debug.println("->Framework shutdown"); //$NON-NLS-1$
 		}
 	}
 
@@ -222,7 +220,7 @@ public class SystemBundle extends BundleHost {
 
 					framework.launch();
 				}
-			}, "System Bundle Update");
+			}, "System Bundle Update"); //$NON-NLS-1$
 
 			restart.start();
 		}
@@ -251,7 +249,7 @@ public class SystemBundle extends BundleHost {
 	public void uninstall() throws BundleException {
 		framework.checkAdminPermission();
 
-		throw new BundleException(Msg.formatter.getString("BUNDLE_SYSTEMBUNDLE_UNINSTALL_EXCEPTION"));
+		throw new BundleException(Msg.formatter.getString("BUNDLE_SYSTEMBUNDLE_UNINSTALL_EXCEPTION")); //$NON-NLS-1$
 	}
 
 	/**

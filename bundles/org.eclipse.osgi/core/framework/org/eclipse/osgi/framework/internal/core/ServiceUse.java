@@ -110,11 +110,11 @@ public class ServiceUse {
 				});
 			} catch (Throwable t) {
 				if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
-					Debug.println(factory + ".getService() exception: " + t.getMessage());
+					Debug.println(factory + ".getService() exception: " + t.getMessage()); //$NON-NLS-1$
 					Debug.printStackTrace(t);
 				}
 
-				BundleException be = new BundleException(Msg.formatter.getString("SERVICE_FACTORY_EXCEPTION", factory.getClass().getName(), "getService"), t);
+				BundleException be = new BundleException(Msg.formatter.getString("SERVICE_FACTORY_EXCEPTION", factory.getClass().getName(), "getService"), t); //$NON-NLS-1$ //$NON-NLS-2$
 				context.framework.publishFrameworkEvent(FrameworkEvent.ERROR, factorybundle, be);
 
 				return (null);
@@ -122,10 +122,10 @@ public class ServiceUse {
 
 			if (service == null) {
 				if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
-					Debug.println(factory + ".getService() returned null.");
+					Debug.println(factory + ".getService() returned null."); //$NON-NLS-1$
 				}
 
-				BundleException be = new BundleException(Msg.formatter.getString("SERVICE_OBJECT_NULL_EXCEPTION", factory.getClass().getName()));
+				BundleException be = new BundleException(Msg.formatter.getString("SERVICE_OBJECT_NULL_EXCEPTION", factory.getClass().getName())); //$NON-NLS-1$
 				context.framework.publishFrameworkEvent(FrameworkEvent.ERROR, factorybundle, be);
 
 				return (null);
@@ -138,18 +138,18 @@ public class ServiceUse {
 				Class clazz = packageAdmin.loadServiceClass(clazzes[i], factorybundle);
 				if (clazz == null) {
 					if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
-						Debug.println(clazzes[i] + " class not found");
+						Debug.println(clazzes[i] + " class not found"); //$NON-NLS-1$
 					}
-					BundleException be = new BundleException(Msg.formatter.getString("SERVICE_CLASS_NOT_FOUND_EXCEPTION", clazzes[i]));
+					BundleException be = new BundleException(Msg.formatter.getString("SERVICE_CLASS_NOT_FOUND_EXCEPTION", clazzes[i])); //$NON-NLS-1$
 					context.framework.publishFrameworkEvent(FrameworkEvent.ERROR, factorybundle, be);
 					return (null);
 				}
 
 				if (!clazz.isInstance(service)) {
 					if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
-						Debug.println("Service object from ServiceFactory is not an instanceof " + clazzes[i]);
+						Debug.println("Service object from ServiceFactory is not an instanceof " + clazzes[i]); //$NON-NLS-1$
 					}
-					BundleException be = new BundleException(Msg.formatter.getString("SERVICE_NOT_INSTANCEOF_CLASS_EXCEPTION", factory.getClass().getName(), clazzes[i]));
+					BundleException be = new BundleException(Msg.formatter.getString("SERVICE_NOT_INSTANCEOF_CLASS_EXCEPTION", factory.getClass().getName(), clazzes[i])); //$NON-NLS-1$
 					context.framework.publishFrameworkEvent(FrameworkEvent.ERROR, factorybundle, be);
 					return (null);
 				}
@@ -211,12 +211,12 @@ public class ServiceUse {
 					});
 				} catch (Throwable t) {
 					if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-						Debug.println(factory + ".ungetService() exception");
+						Debug.println(factory + ".ungetService() exception"); //$NON-NLS-1$
 						Debug.printStackTrace(t);
 					}
 
 					AbstractBundle factorybundle = registration.context.bundle;
-					BundleException be = new BundleException(Msg.formatter.getString("SERVICE_FACTORY_EXCEPTION", factory.getClass().getName(), "ungetService"), t);
+					BundleException be = new BundleException(Msg.formatter.getString("SERVICE_FACTORY_EXCEPTION", factory.getClass().getName(), "ungetService"), t); //$NON-NLS-1$ //$NON-NLS-2$
 					context.framework.publishFrameworkEvent(FrameworkEvent.ERROR, factorybundle, be);
 				}
 
@@ -250,12 +250,12 @@ public class ServiceUse {
 				});
 			} catch (Throwable t) {
 				if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
-					Debug.println(factory + ".ungetService() exception");
+					Debug.println(factory + ".ungetService() exception"); //$NON-NLS-1$
 					Debug.printStackTrace(t);
 				}
 
 				AbstractBundle factorybundle = registration.context.bundle;
-				BundleException be = new BundleException(Msg.formatter.getString("SERVICE_FACTORY_EXCEPTION", factory.getClass().getName(), "ungetService"), t);
+				BundleException be = new BundleException(Msg.formatter.getString("SERVICE_FACTORY_EXCEPTION", factory.getClass().getName(), "ungetService"), t); //$NON-NLS-1$ //$NON-NLS-2$
 				context.framework.publishFrameworkEvent(FrameworkEvent.ERROR, factorybundle, be);
 			}
 

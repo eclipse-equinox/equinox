@@ -48,7 +48,7 @@ class PermissionsHash extends PermissionCollection {
 	/**
 	 * Adds the argument to the collection.
 	 *
-	 * @param		permission java.security.Permission
+	 * @param		perm java.security.Permission
 	 *					the permission to add to the collection.
 	 * @exception	IllegalStateException
 	 *					if the collection is read only.
@@ -80,7 +80,7 @@ class PermissionsHash extends PermissionCollection {
 	 *					<code>true</code> if the argument permission
 	 *					is implied by the permissions in the receiver,
 	 *					and <code>false</code> if it is not.
-	 * @param		permission java.security.Permission
+	 * @param		perm java.security.Permission
 	 *					the permission to check
 	 */
 	public boolean implies(Permission perm) {

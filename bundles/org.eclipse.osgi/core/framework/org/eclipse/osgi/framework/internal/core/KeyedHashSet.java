@@ -326,18 +326,18 @@ public class KeyedHashSet {
 
 	public String toString() {
 		StringBuffer result = new StringBuffer(100);
-		result.append("{");
+		result.append("{"); //$NON-NLS-1$
 		boolean first = true;
 		for (int i = 0; i < elements.length; i++) {
 			if (elements[i] != null) {
 				if (first)
 					first = false;
 				else
-					result.append(", ");
+					result.append(", "); //$NON-NLS-1$
 				result.append(elements[i]);
 			}
 		}
-		result.append("}");
+		result.append("}"); //$NON-NLS-1$
 		return result.toString();
 	}
 

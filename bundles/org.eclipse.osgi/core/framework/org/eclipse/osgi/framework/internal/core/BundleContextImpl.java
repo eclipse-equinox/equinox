@@ -118,7 +118,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 
 			if (regSize > 0) {
 				if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
-					Debug.println("Unregistering services");
+					Debug.println("Unregistering services"); //$NON-NLS-1$
 				}
 
 				publishedReferences = new ServiceReferenceImpl[regSize];
@@ -146,7 +146,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 
 				if (usedSize > 0) {
 					if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
-						Debug.println("Releasing services");
+						Debug.println("Releasing services"); //$NON-NLS-1$
 					}
 
 					usedRefs = new ServiceReferenceImpl[usedSize];
@@ -298,14 +298,14 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	 * @see ServiceEvent
 	 * @see ServiceListener
 	 * @exception java.lang.IllegalStateException
-	 * If the context bundle {@link <a href="#context_valid">has stopped</a>}.
+	 * If the bundle context has stopped.
 	 */
 	public void addServiceListener(ServiceListener listener, String filter) throws InvalidSyntaxException {
 		checkValid();
 
 		if (Debug.DEBUG && Debug.DEBUG_EVENTS) {
-			String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(listener.hashCode());
-			Debug.println("addServiceListener[" + bundle + "](" + listenerName + ", \"" + filter + "\")");
+			String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(listener.hashCode()); //$NON-NLS-1$
+			Debug.println("addServiceListener[" + bundle + "](" + listenerName + ", \"" + filter + "\")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		}
 
 		ServiceListener filteredListener = (filter == null) ? listener : new FilteredServiceListener(filter, listener);
@@ -334,7 +334,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 			addServiceListener(listener, null);
 		} catch (InvalidSyntaxException e) {
 			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-				Debug.println("InvalidSyntaxException w/ null filter" + e.getMessage());
+				Debug.println("InvalidSyntaxException w/ null filter" + e.getMessage()); //$NON-NLS-1$
 				Debug.printStackTrace(e);
 			}
 		}
@@ -351,14 +351,14 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	 *
 	 * @param listener The service listener to remove.
 	 * @exception java.lang.IllegalStateException
-	 * If the context bundle {@link <a href="#context_valid">has stopped</a>}.
+	 * If the bundle context has stopped.
 	 */
 	public void removeServiceListener(ServiceListener listener) {
 		checkValid();
 
 		if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
-			String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(listener.hashCode());
-			Debug.println("removeServiceListener[" + bundle + "](" + listenerName + ")");
+			String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(listener.hashCode()); //$NON-NLS-1$
+			Debug.println("removeServiceListener[" + bundle + "](" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 
 		if (serviceEvent != null) {
@@ -378,7 +378,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	 *
 	 * @param listener The bundle listener to add.
 	 * @exception java.lang.IllegalStateException
-	 * If the context bundle {@link <a href="#context_valid">has stopped</a>}.
+	 * If the bundle context has stopped.
 	 * @see BundleEvent
 	 * @see BundleListener
 	 */
@@ -386,8 +386,8 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 		checkValid();
 
 		if (Debug.DEBUG && Debug.DEBUG_EVENTS) {
-			String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(listener.hashCode());
-			Debug.println("addBundleListener[" + bundle + "](" + listenerName + ")");
+			String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(listener.hashCode()); //$NON-NLS-1$
+			Debug.println("addBundleListener[" + bundle + "](" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 
 		if (listener instanceof SynchronousBundleListener) {
@@ -424,14 +424,14 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	 *
 	 * @param listener The bundle listener to remove.
 	 * @exception java.lang.IllegalStateException
-	 * If the context bundle {@link <a href="#context_valid">has stopped</a>}.
+	 * If the bundle context has stopped.
 	 */
 	public void removeBundleListener(BundleListener listener) {
 		checkValid();
 
 		if (Debug.DEBUG && Debug.DEBUG_EVENTS) {
-			String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(listener.hashCode());
-			Debug.println("removeBundleListener[" + bundle + "](" + listenerName + ")");
+			String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(listener.hashCode()); //$NON-NLS-1$
+			Debug.println("removeBundleListener[" + bundle + "](" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 
 		if (listener instanceof SynchronousBundleListener) {
@@ -460,7 +460,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	 *
 	 * @param listener The framework listener to add.
 	 * @exception java.lang.IllegalStateException
-	 * If the context bundle {@link <a href="#context_valid">has stopped</a>}.
+	 * If the bundle context has stopped.
 	 * @see FrameworkEvent
 	 * @see FrameworkListener
 	 */
@@ -468,8 +468,8 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 		checkValid();
 
 		if (Debug.DEBUG && Debug.DEBUG_EVENTS) {
-			String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(listener.hashCode());
-			Debug.println("addFrameworkListener[" + bundle + "](" + listenerName + ")");
+			String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(listener.hashCode()); //$NON-NLS-1$
+			Debug.println("addFrameworkListener[" + bundle + "](" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 
 		synchronized (framework.frameworkEvent) {
@@ -493,14 +493,14 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	 *
 	 * @param listener The framework listener to remove.
 	 * @exception java.lang.IllegalStateException
-	 * If the context bundle {@link <a href="#context_valid">has stopped</a>}.
+	 * If the bundle context has stopped.
 	 */
 	public void removeFrameworkListener(FrameworkListener listener) {
 		checkValid();
 
 		if (Debug.DEBUG && Debug.DEBUG_EVENTS) {
-			String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(listener.hashCode());
-			Debug.println("removeFrameworkListener[" + bundle + "](" + listenerName + ")");
+			String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(listener.hashCode()); //$NON-NLS-1$
+			Debug.println("removeFrameworkListener[" + bundle + "](" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 
 		if (frameworkEvent != null) {
@@ -567,7 +567,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	 * all the named classes
 	 * and the Java runtime environment supports permissions.
 	 * @exception java.lang.IllegalStateException
-	 * If the context bundle {@link <a href="#context_valid">has stopped</a>}.
+	 * If the bundle context has stopped.
 	 * @see ServiceRegistrationImpl
 	 * @see ServiceFactory
 	 */
@@ -576,20 +576,20 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 
 		if (service == null) {
 			if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
-				Debug.println("Service object is null");
+				Debug.println("Service object is null"); //$NON-NLS-1$
 			}
 
-			throw new NullPointerException(Msg.formatter.getString("SERVICE_ARGUMENT_NULL_EXCEPTION"));
+			throw new NullPointerException(Msg.formatter.getString("SERVICE_ARGUMENT_NULL_EXCEPTION")); //$NON-NLS-1$
 		}
 
 		int size = clazzes.length;
 
 		if (size == 0) {
 			if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
-				Debug.println("Classes array is empty");
+				Debug.println("Classes array is empty"); //$NON-NLS-1$
 			}
 
-			throw new IllegalArgumentException(Msg.formatter.getString("SERVICE_EMPTY_CLASS_LIST_EXCEPTION"));
+			throw new IllegalArgumentException(Msg.formatter.getString("SERVICE_EMPTY_CLASS_LIST_EXCEPTION")); //$NON-NLS-1$
 		}
 
 		/* copy the array so that changes to the original will not affect us. */
@@ -608,16 +608,16 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 				Class clazz = packageAdmin.loadServiceClass(clazzes[i], bundle);
 				if (clazz == null) {
 					if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
-						Debug.println(clazzes[i] + " class not found");
+						Debug.println(clazzes[i] + " class not found"); //$NON-NLS-1$
 					}
-					throw new IllegalArgumentException(Msg.formatter.getString("SERVICE_CLASS_NOT_FOUND_EXCEPTION", clazzes[i]));
+					throw new IllegalArgumentException(Msg.formatter.getString("SERVICE_CLASS_NOT_FOUND_EXCEPTION", clazzes[i])); //$NON-NLS-1$
 				}
 
 				if (!clazz.isInstance(service)) {
 					if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
-						Debug.println("Service object is not an instanceof " + clazzes[i]);
+						Debug.println("Service object is not an instanceof " + clazzes[i]); //$NON-NLS-1$
 					}
-					throw new IllegalArgumentException(Msg.formatter.getString("SERVICE_NOT_INSTANCEOF_CLASS_EXCEPTION", clazzes[i]));
+					throw new IllegalArgumentException(Msg.formatter.getString("SERVICE_NOT_INSTANCEOF_CLASS_EXCEPTION", clazzes[i])); //$NON-NLS-1$
 				}
 			}
 		}
@@ -703,7 +703,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 		checkValid();
 
 		if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
-			Debug.println("getServiceReferences(" + clazz + ", \"" + filter + "\")");
+			Debug.println("getServiceReferences(" + clazz + ", \"" + filter + "\")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 
 		return (framework.getServiceReferences(clazz, filter));
@@ -733,7 +733,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 		checkValid();
 
 		if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
-			Debug.println("getServiceReference(" + clazz + ")");
+			Debug.println("getServiceReference(" + clazz + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 
 		try {
@@ -785,7 +785,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 			}
 		} catch (InvalidSyntaxException e) {
 			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-				Debug.println("InvalidSyntaxException w/ null filter" + e.getMessage());
+				Debug.println("InvalidSyntaxException w/ null filter" + e.getMessage()); //$NON-NLS-1$
 				Debug.printStackTrace(e);
 			}
 		}
@@ -839,7 +839,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	 * using at least one of the named classes the service was registered under
 	 * and the Java runtime environment supports permissions.
 	 * @exception java.lang.IllegalStateException
-	 * If the context bundle {@link <a href="#context_valid">has stopped</a>}.
+	 * If the bundle context has stopped.
 	 * @see #ungetService
 	 * @see ServiceFactory
 	 */
@@ -893,7 +893,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	 *         is zero or if the service has been unregistered,
 	 *         otherwise <code>true</code>.
 	 * @exception java.lang.IllegalStateException
-	 * If the context bundle {@link <a href="#context_valid">has stopped</a>}.
+	 * If the bundle context has stopped.
 	 * @see #getService
 	 * @see ServiceFactory
 	 */
@@ -927,7 +927,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	 * @return A <code>File</code> object that represents the requested file or
 	 * <code>null</code> if the adaptor does not have file system support.
 	 * @exception java.lang.IllegalStateException
-	 * If the context bundle {@link <a href="#context_valid">has stopped</a>}.
+	 * If the bundle context has stopped.
 	 */
 	public File getDataFile(String filename) {
 		checkValid();
@@ -987,7 +987,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 			String clazz = null;
 			clazz = bundleActivator.getClass().getName();
 
-			throw new BundleException(Msg.formatter.getString("BUNDLE_ACTIVATOR_EXCEPTION", new Object[] {clazz, "start", bundle.getSymbolicName() == null ? "" + bundle.getBundleId() : bundle.getSymbolicName()}), t);
+			throw new BundleException(Msg.formatter.getString("BUNDLE_ACTIVATOR_EXCEPTION", new Object[] {clazz, "start", bundle.getSymbolicName() == null ? "" + bundle.getBundleId() : bundle.getSymbolicName()}), t); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 
 	}
@@ -1020,9 +1020,9 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 				Debug.printStackTrace(t);
 			}
 
-			String clazz = (activator == null) ? "" : activator.getClass().getName();
+			String clazz = (activator == null) ? "" : activator.getClass().getName(); //$NON-NLS-1$
 
-			throw new BundleException(Msg.formatter.getString("BUNDLE_ACTIVATOR_EXCEPTION", new Object[] {clazz, "stop", bundle.getSymbolicName() == null ? "" + bundle.getBundleId() : bundle.getSymbolicName()}, t));
+			throw new BundleException(Msg.formatter.getString("BUNDLE_ACTIVATOR_EXCEPTION", new Object[] {clazz, "stop", bundle.getSymbolicName() == null ? "" + bundle.getBundleId() : bundle.getSymbolicName()}, t)); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		} finally {
 			activator = null;
 		}
@@ -1154,8 +1154,8 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 							BundleListener listener = (BundleListener) l;
 
 							if (Debug.DEBUG && Debug.DEBUG_EVENTS) {
-								String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(listener.hashCode());
-								Debug.println("dispatchBundleEvent[" + tmpBundle + "](" + listenerName + ")");
+								String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(listener.hashCode()); //$NON-NLS-1$
+								Debug.println("dispatchBundleEvent[" + tmpBundle + "](" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 							}
 
 							listener.bundleChanged((BundleEvent) object);
@@ -1170,8 +1170,8 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 								ServiceListener listener = (ServiceListener) l;
 
 								if (Debug.DEBUG && Debug.DEBUG_EVENTS) {
-									String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(listener.hashCode());
-									Debug.println("dispatchServiceEvent[" + tmpBundle + "](" + listenerName + ")");
+									String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(listener.hashCode()); //$NON-NLS-1$
+									Debug.println("dispatchServiceEvent[" + tmpBundle + "](" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 								}
 
 								listener.serviceChanged(event);
@@ -1185,8 +1185,8 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 							FrameworkListener listener = (FrameworkListener) l;
 
 							if (Debug.DEBUG && Debug.DEBUG_EVENTS) {
-								String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(listener.hashCode());
-								Debug.println("dispatchFrameworkEvent[" + tmpBundle + "](" + listenerName + ")");
+								String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(listener.hashCode()); //$NON-NLS-1$
+								Debug.println("dispatchFrameworkEvent[" + tmpBundle + "](" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 							}
 
 							listener.frameworkEvent((FrameworkEvent) object);
@@ -1196,7 +1196,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 			}
 		} catch (Throwable t) {
 			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-				Debug.println("Exception in bottom level event dispatcher: " + t.getMessage());
+				Debug.println("Exception in bottom level event dispatcher: " + t.getMessage()); //$NON-NLS-1$
 				Debug.printStackTrace(t);
 			}
 
@@ -1264,7 +1264,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	 */
 	protected void checkValid() {
 		if (!isValid()) {
-			throw new IllegalStateException(Msg.formatter.getString("BUNDLE_CONTEXT_INVALID_EXCEPTION"));
+			throw new IllegalStateException(Msg.formatter.getString("BUNDLE_CONTEXT_INVALID_EXCEPTION")); //$NON-NLS-1$
 		}
 	}
 

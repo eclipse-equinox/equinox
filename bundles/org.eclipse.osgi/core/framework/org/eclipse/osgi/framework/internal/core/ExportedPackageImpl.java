@@ -79,8 +79,8 @@ public class ExportedPackageImpl extends SingleSourcePackage implements org.osgi
 	public String toString() {
 		StringBuffer result = new StringBuffer(getId());
 		if (specVersion != null) {
-			result.append("; ").append(Constants.PACKAGE_SPECIFICATION_VERSION);
-			result.append("=\"").append(specVersion).append("\"");
+			result.append("; ").append(Constants.PACKAGE_SPECIFICATION_VERSION); //$NON-NLS-1$
+			result.append("=\"").append(specVersion).append("\"");  //$NON-NLS-1$//$NON-NLS-2$
 		}
 		return result.toString();
 	}

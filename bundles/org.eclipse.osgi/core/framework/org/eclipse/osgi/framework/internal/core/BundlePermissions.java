@@ -276,7 +276,7 @@ final class BundlePermissions extends BundlePermissionCollection {
 				if (index > 0) {
 					if (unresolvedPackages.get(name.substring(0, index)) != null) {
 						if (Debug.DEBUG && Debug.DEBUG_SECURITY) {
-							Debug.println("  Unresolving permission class " + name);
+							Debug.println("  Unresolving permission class " + name); //$NON-NLS-1$
 						}
 
 						collections.remove(clazz);

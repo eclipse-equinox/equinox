@@ -43,14 +43,14 @@ public class FilteredServiceListener implements ServiceListener {
 		ServiceReferenceImpl reference = (ServiceReferenceImpl) event.getServiceReference();
 
 		if (Debug.DEBUG && Debug.DEBUG_EVENTS) {
-			String listenerName = this.getClass().getName() + "@" + Integer.toHexString(this.hashCode());
-			Debug.println("filterServiceEvent(" + listenerName + ", \"" + filter + "\", " + reference.registration.properties + ")");
+			String listenerName = this.getClass().getName() + "@" + Integer.toHexString(this.hashCode()); //$NON-NLS-1$
+			Debug.println("filterServiceEvent(" + listenerName + ", \"" + filter + "\", " + reference.registration.properties + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		}
 
 		if (filter.match(reference)) {
 			if (Debug.DEBUG && Debug.DEBUG_EVENTS) {
-				String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(listener.hashCode());
-				Debug.println("dispatchFilteredServiceEvent(" + listenerName + ")");
+				String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(listener.hashCode()); //$NON-NLS-1$
+				Debug.println("dispatchFilteredServiceEvent(" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 
 			listener.serviceChanged(event);

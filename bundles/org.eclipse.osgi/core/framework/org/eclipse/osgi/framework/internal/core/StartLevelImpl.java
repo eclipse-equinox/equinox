@@ -141,7 +141,7 @@ public class StartLevelImpl implements StartLevel {
 	 * announce it has finished moving to the specified start level. This
 	 * event may arrive before the this method return.
 	 *
-	 * @param startlevel The requested start level for the Framework.
+	 * @param newSL The requested start level for the Framework.
 	 * @throws IllegalArgumentException If the specified start level is less than or
 	 * equal to zero.
 	 * @throws SecurityException If the caller does not have the
@@ -199,7 +199,7 @@ public class StartLevelImpl implements StartLevel {
 	 * future. The actual stopping of this bundle must occur asynchronously.
 	 *
 	 * @param bundle The target bundle.
-	 * @param startlevel The new start level for the specified Bundle.
+	 * @param newSL The new start level for the specified Bundle.
 	 * @throws IllegalArgumentException
 	 * If the specified bundle has been uninstalled or
 	 * if the specified start level is less than or equal to zero, or the  specified bundle is

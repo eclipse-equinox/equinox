@@ -47,10 +47,9 @@ final class UnresolvedPermission extends Permission {
 	 * type, name, and certificates set to the arguments
 	 * by definition, actions are ignored
 	 *
-	 * @param 	String type class of permission object
-	 * @param	String name of the permission
-	 * @param	String actions
-	 * @param	Certificate[] certs
+	 * @param 	type the type class of permission object
+	 * @param	name the name of the permission
+	 * @param	actions the actions
 	 */
 	UnresolvedPermission(String type, String name, String actions) {
 		super(type);
@@ -71,7 +70,6 @@ final class UnresolvedPermission extends Permission {
 	 *					if the object is the same as this object
 	 *				<code>false</code>
 	 *					if it is different from this object
-	 * @see			hashCode
 	 */
 	public boolean equals(Object obj) {
 		if (this == obj) {
@@ -106,7 +104,6 @@ final class UnresolvedPermission extends Permission {
 	 *
 	 * @return		a new PermissionCollection or null
 	 *
-	 * @see			BasicPermissionCollection
 	 */
 	public PermissionCollection newPermissionCollection() {
 		return new UnresolvedPermissionCollection();
@@ -121,7 +118,7 @@ final class UnresolvedPermission extends Permission {
 	 *					the actions associated with the receiver.
 	 */
 	public String getActions() {
-		return "";
+		return ""; //$NON-NLS-1$
 	}
 
 	/**
@@ -133,7 +130,6 @@ final class UnresolvedPermission extends Permission {
 	 * @return		int
 	 *					the receiver's hash
 	 *
-	 * @see			equals
 	 */
 	public int hashCode() {
 		return toString().hashCode();
@@ -147,7 +143,7 @@ final class UnresolvedPermission extends Permission {
 	 *					a printable representation for the receiver.
 	 */
 	public String toString() {
-		return "(unresolved " + type + " " + name + " " + actions + ")";
+		return "(unresolved " + type + " " + name + " " + actions + ")";  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 	}
 
 	Permission resolve(Class clazz) {
@@ -158,14 +154,14 @@ final class UnresolvedPermission extends Permission {
 				Permission permission = (Permission) constructor.newInstance(new Object[] {name, actions});
 
 				if (Debug.DEBUG && Debug.DEBUG_SECURITY) {
-					Debug.println("Resolved " + this);
+					Debug.println("Resolved " + this); //$NON-NLS-1$
 				}
 
 				return permission;
 			} catch (Exception e) {
 				/* Ignore any error trying to resolve the permission */
 				if (Debug.DEBUG && Debug.DEBUG_SECURITY) {
-					Debug.println("Exception trying to resolve permission");
+					Debug.println("Exception trying to resolve permission"); //$NON-NLS-1$
 					Debug.printStackTrace(e);
 				}
 			}

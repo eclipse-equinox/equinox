@@ -63,7 +63,7 @@ final class BundleCombinedPermissions extends BundlePermissionCollection {
 	 *
 	 * @param		permission java.security.Permission
 	 *					the permission to add to the collection.
-	 * @exception	SecurtityException
+	 * @exception	SecurityException
 	 *					if the collection is read only.
 	 */
 	public void add(Permission permission) {

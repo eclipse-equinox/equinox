@@ -138,24 +138,24 @@ public class ManifestLocalization {
 			}
 			URL result;
 			for (int i = 0; i < nlVariants.length; i++) {
-				String filePath = path.concat('_' + nlVariants[i] + ".properties");
+				String filePath = path.concat('_' + nlVariants[i] + ".properties"); //$NON-NLS-1$
 				result = findInResolved(filePath, bundleHost);
 				if (result != null)
 					return result;
 			}
 			//If we get to this point, we haven't found it yet.
 			// Look for the base filename
-			String filename = path + ".properties";
+			String filename = path + ".properties"; //$NON-NLS-1$
 			return findInResolved(filename, bundleHost);
 		} else {
 			//only look in the bundle if the bundle is not resolved
 			for (int i = 0; i < nlVariants.length; i++) {
-				String filePath = path.concat('_' + nlVariants[i] + ".properties");
+				String filePath = path.concat('_' + nlVariants[i] + ".properties"); //$NON-NLS-1$
 				return findInBundle(filePath, bundle);
 			}
 			//If we get to this point, we haven't found it yet.
 			// Look for the base filename
-			String filename = path + ".properties";
+			String filename = path + ".properties"; //$NON-NLS-1$
 			return findInBundle(filename, bundle);
 		}
 	}
@@ -192,7 +192,7 @@ public class ManifestLocalization {
 				if (value.length() > 1) {
 					value = value.substring(1);
 				} else {
-					value = "";
+					value = ""; //$NON-NLS-1$
 				}
 			}
 			dictionary.put(key, value);

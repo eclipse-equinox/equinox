@@ -235,7 +235,6 @@ public class BundleNativeCode {
 	 * @return String representation of the object
 	 */
 	public String toString() {
-		Vector nativepaths = this.nativepaths;
 		int size = nativepaths.size();
 		StringBuffer sb = new StringBuffer(50 * size);
 		for (int i = 0; i < size; i++) {

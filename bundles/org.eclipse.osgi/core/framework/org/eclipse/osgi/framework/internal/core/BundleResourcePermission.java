@@ -56,7 +56,7 @@ final class BundleResourcePermission extends Permission {
 	 */
 
 	public String getActions() {
-		return "";
+		return ""; //$NON-NLS-1$
 	}
 
 	/**

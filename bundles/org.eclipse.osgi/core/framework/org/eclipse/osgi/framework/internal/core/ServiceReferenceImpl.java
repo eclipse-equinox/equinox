@@ -80,7 +80,6 @@ public class ServiceReferenceImpl implements ServiceReference, Comparable {
 	 * determine if the service has been unregistered.
 	 *
 	 * @return The bundle which registered the service.
-	 * @see BundleContextImpl#registerService
 	 */
 	public org.osgi.framework.Bundle getBundle() {
 		return (registration.getBundle());
@@ -196,7 +195,7 @@ public class ServiceReferenceImpl implements ServiceReference, Comparable {
 	 *                                  id is less than the argument's service id.
 	 *
 	 *
-	 * @param		another Object
+	 * @param		object
 	 *					an object to compare the receiver to
 	 * @exception	ClassCastException
 	 *					if the argument can not be converted

@@ -102,21 +102,21 @@ public class PermissionAdminImpl implements PermissionAdmin {
 		//      }
 
 		if (Debug.DEBUG && Debug.DEBUG_SECURITY) {
-			Debug.println("Default default assigned bundle permissions");
+			Debug.println("Default default assigned bundle permissions"); //$NON-NLS-1$
 			if (defaultDefaultPermissionInfos == null) {
-				Debug.println("  <none>");
+				Debug.println("  <none>"); //$NON-NLS-1$
 			} else {
 				for (int i = 0; i < defaultDefaultPermissionInfos.length; i++) {
-					Debug.println("  " + defaultDefaultPermissionInfos[i]);
+					Debug.println("  " + defaultDefaultPermissionInfos[i]); //$NON-NLS-1$
 				}
 			}
 
-			Debug.println("Base implied bundle permissions");
+			Debug.println("Base implied bundle permissions"); //$NON-NLS-1$
 			if (baseImpliedPermissionInfos == null) {
-				Debug.println("  <none>");
+				Debug.println("  <none>"); //$NON-NLS-1$
 			} else {
 				for (int i = 0; i < baseImpliedPermissionInfos.length; i++) {
-					Debug.println("  " + baseImpliedPermissionInfos[i]);
+					Debug.println("  " + baseImpliedPermissionInfos[i]); //$NON-NLS-1$
 				}
 			}
 		}
@@ -147,12 +147,12 @@ public class PermissionAdminImpl implements PermissionAdmin {
 			String[] data = storage.getPermissionData(location);
 
 			if (Debug.DEBUG && Debug.DEBUG_SECURITY) {
-				Debug.println("Getting permissions for location: " + location);
+				Debug.println("Getting permissions for location: " + location); //$NON-NLS-1$
 				if (data == null) {
-					Debug.println("  <none>");
+					Debug.println("  <none>"); //$NON-NLS-1$
 				} else {
 					for (int i = 0; i < data.length; i++) {
-						Debug.println("  " + data[i]);
+						Debug.println("  " + data[i]); //$NON-NLS-1$
 					}
 				}
 			}
@@ -171,7 +171,7 @@ public class PermissionAdminImpl implements PermissionAdmin {
 	 *
 	 * @param location The location of the bundle that will be assigned the
 	 *                 permissions.
-	 * @param perms The permissions to be assigned, or <tt>null</tt>
+	 * @param permissions The permissions to be assigned, or <tt>null</tt>
 	 * if the specified location is to be removed from the permission table.
 	 * @exception SecurityException if the caller does not have the
 	 * <tt>AdminPermission</tt>.
@@ -189,12 +189,12 @@ public class PermissionAdminImpl implements PermissionAdmin {
 			String[] data = makePermissionData(permissions);
 
 			if (Debug.DEBUG && Debug.DEBUG_SECURITY) {
-				Debug.println("Setting permissions for location: " + location);
+				Debug.println("Setting permissions for location: " + location); //$NON-NLS-1$
 				if (data == null) {
-					Debug.println("  <none>");
+					Debug.println("  <none>"); //$NON-NLS-1$
 				} else {
 					for (int i = 0; i < data.length; i++) {
-						Debug.println("  " + data[i]);
+						Debug.println("  " + data[i]); //$NON-NLS-1$
 					}
 				}
 			}
@@ -261,12 +261,12 @@ public class PermissionAdminImpl implements PermissionAdmin {
 			String[] data = storage.getPermissionData(null);
 
 			if (Debug.DEBUG && Debug.DEBUG_SECURITY) {
-				Debug.println("Getting default permissions");
+				Debug.println("Getting default permissions"); //$NON-NLS-1$
 				if (data == null) {
-					Debug.println("  <none>");
+					Debug.println("  <none>"); //$NON-NLS-1$
 				} else {
 					for (int i = 0; i < data.length; i++) {
-						Debug.println("  " + data[i]);
+						Debug.println("  " + data[i]); //$NON-NLS-1$
 					}
 				}
 			}
@@ -298,12 +298,12 @@ public class PermissionAdminImpl implements PermissionAdmin {
 			String[] data = makePermissionData(permissions);
 
 			if (Debug.DEBUG && Debug.DEBUG_SECURITY) {
-				Debug.println("Setting default permissions");
+				Debug.println("Setting default permissions"); //$NON-NLS-1$
 				if (data == null) {
-					Debug.println("  <none>");
+					Debug.println("  <none>"); //$NON-NLS-1$
 				} else {
 					for (int i = 0; i < data.length; i++) {
-						Debug.println("  " + data[i]);
+						Debug.println("  " + data[i]); //$NON-NLS-1$
 					}
 				}
 			}
@@ -366,7 +366,7 @@ public class PermissionAdminImpl implements PermissionAdmin {
 	 * This method is called by the Bundle object to create the
 	 * PermissionCollection used by the bundle's ProtectionDomain.
 	 *
-	 * @param location Location string of the bundle.
+	 * @param bundle the bundle object
 	 * @return BundleCombinedPermission object with the bundle's
 	 * dynamic permissions.
 	 */
@@ -392,7 +392,7 @@ public class PermissionAdminImpl implements PermissionAdmin {
 	 */
 	protected BundlePermissionCollection createDefaultAssignedPermissions(PermissionInfo[] info) {
 		if (Debug.DEBUG && Debug.DEBUG_SECURITY) {
-			Debug.println("Creating default assigned permissions");
+			Debug.println("Creating default assigned permissions"); //$NON-NLS-1$
 		}
 
 		if (info == null) {
@@ -420,7 +420,7 @@ public class PermissionAdminImpl implements PermissionAdmin {
 		}
 
 		if (Debug.DEBUG && Debug.DEBUG_SECURITY) {
-			Debug.println("Creating assigned permissions for " + bundle);
+			Debug.println("Creating assigned permissions for " + bundle); //$NON-NLS-1$
 		}
 
 		return createPermissions(info, bundle);
@@ -435,7 +435,7 @@ public class PermissionAdminImpl implements PermissionAdmin {
 	 */
 	protected BundlePermissionCollection getImpliedPermissions(AbstractBundle bundle) {
 		if (Debug.DEBUG && Debug.DEBUG_SECURITY) {
-			Debug.println("Creating implied permissions for " + bundle);
+			Debug.println("Creating implied permissions for " + bundle); //$NON-NLS-1$
 		}
 
 		BundlePermissionCollection collection = createPermissions(baseImpliedPermissionInfos, bundle);
@@ -443,7 +443,7 @@ public class PermissionAdminImpl implements PermissionAdmin {
 		Permission permission = new BundleResourcePermission(bundle.getBundleId());
 
 		if (Debug.DEBUG && Debug.DEBUG_SECURITY) {
-			Debug.println("Created permission: " + permission);
+			Debug.println("Created permission: " + permission); //$NON-NLS-1$
 		}
 
 		collection.add(permission);
@@ -468,7 +468,7 @@ public class PermissionAdminImpl implements PermissionAdmin {
 
 				BufferedReader reader;
 				try {
-					reader = new BufferedReader(new InputStreamReader(in, "UTF8"));
+					reader = new BufferedReader(new InputStreamReader(in, "UTF8")); //$NON-NLS-1$
 				} catch (UnsupportedEncodingException e) {
 					reader = new BufferedReader(new InputStreamReader(in));
 				}
@@ -482,7 +482,7 @@ public class PermissionAdminImpl implements PermissionAdmin {
 
 					line = line.trim();
 
-					if ((line.length() == 0) || line.startsWith("#") || line.startsWith("//")) /* comments */{
+					if ((line.length() == 0) || line.startsWith("#") || line.startsWith("//")) /* comments */{ //$NON-NLS-1$ //$NON-NLS-2$
 						continue;
 					}
 
@@ -531,13 +531,13 @@ public class PermissionAdminImpl implements PermissionAdmin {
 
 			String type = perm.getType();
 
-			if (type.equals("java.io.FilePermission")) {
+			if (type.equals("java.io.FilePermission")) { //$NON-NLS-1$
 				/* map FilePermissions for relative names to
 				 * the bundle's data area
 				 */
 				String name = perm.getName();
 
-				if (!name.equals("<<ALL FILES>>")) {
+				if (!name.equals("<<ALL FILES>>")) { //$NON-NLS-1$
 					File file = new File(name);
 
 					if (!file.isAbsolute()) /* relative name */{
@@ -591,7 +591,7 @@ public class PermissionAdminImpl implements PermissionAdmin {
 
 			if (resolved != null) {
 				if (Debug.DEBUG && Debug.DEBUG_SECURITY) {
-					Debug.println("Created permission: " + resolved);
+					Debug.println("Created permission: " + resolved); //$NON-NLS-1$
 				}
 
 				return resolved;
@@ -600,7 +600,7 @@ public class PermissionAdminImpl implements PermissionAdmin {
 		}
 
 		if (Debug.DEBUG && Debug.DEBUG_SECURITY) {
-			Debug.println("Created permission: " + permission);
+			Debug.println("Created permission: " + permission); //$NON-NLS-1$
 		}
 
 		return permission;

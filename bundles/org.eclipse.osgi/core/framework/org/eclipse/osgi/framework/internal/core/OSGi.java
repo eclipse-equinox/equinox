@@ -97,7 +97,7 @@ public class OSGi {
 	protected void displayBanner() {
 		System.out.println();
 		System.out.print(Msg.formatter.getString("ECLIPSE_OSGI_NAME")); //$NON-NLS-1$
-		System.out.print(" ");
+		System.out.print(" "); //$NON-NLS-1$
 		System.out.println(Msg.formatter.getString("ECLIPSE_OSGI_VERSION")); //$NON-NLS-1$
 		System.out.println();
 		System.out.println(Msg.formatter.getString("OSGI_VERSION")); //$NON-NLS-1$

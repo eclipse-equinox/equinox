@@ -38,6 +38,6 @@ public class NullPackageSource extends PackageSource {
 	}
 
 	public String toString() {
-		return id + " -> null";
+		return id + " -> null"; //$NON-NLS-1$
 	}
 }

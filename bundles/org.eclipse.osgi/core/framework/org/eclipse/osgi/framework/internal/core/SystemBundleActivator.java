@@ -100,7 +100,7 @@ public class SystemBundleActivator implements BundleActivator {
 
 		properties.put(Constants.SERVICE_RANKING, new Integer(Integer.MAX_VALUE));
 
-		properties.put(Constants.SERVICE_PID, bundle.getBundleId() + "." + service.getClass().getName());
+		properties.put(Constants.SERVICE_PID, bundle.getBundleId() + "." + service.getClass().getName()); //$NON-NLS-1$
 
 		return context.registerService(name, service, properties);
 	}

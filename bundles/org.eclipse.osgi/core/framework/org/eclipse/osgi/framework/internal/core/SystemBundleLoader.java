@@ -44,8 +44,7 @@ public class SystemBundleLoader extends BundleLoader {
 
 	/**
 	 * @param bundle The system bundle.
-	 * @param bundledata The system bundle BundleData
-	 * @param manifest The system bundle manifest.
+	 * @param description The BundleDescrition for the system bundle
 	 * @throws BundleException On any error.
 	 */
 	protected SystemBundleLoader(BundleHost bundle, BundleDescription description) throws BundleException {

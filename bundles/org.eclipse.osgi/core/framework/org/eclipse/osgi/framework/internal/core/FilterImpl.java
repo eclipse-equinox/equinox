@@ -251,7 +251,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 				case GREATER :
 					{
 						filter.append(attr);
-						filter.append(">=");
+						filter.append(">="); //$NON-NLS-1$
 						filter.append(encodeValue(value.toString()));
 
 						break;
@@ -259,7 +259,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 				case LESS :
 					{
 						filter.append(attr);
-						filter.append("<=");
+						filter.append("<="); //$NON-NLS-1$
 						filter.append(encodeValue(value.toString()));
 
 						break;
@@ -267,7 +267,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 				case APPROX :
 					{
 						filter.append(attr);
-						filter.append("~=");
+						filter.append("~="); //$NON-NLS-1$
 						filter.append(encodeValue(approxString(value.toString())));
 
 						break;
@@ -276,7 +276,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 				case PRESENT :
 					{
 						filter.append(attr);
-						filter.append("=*");
+						filter.append("=*"); //$NON-NLS-1$
 
 						break;
 					}
@@ -377,7 +377,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 	 * Internal match routine.
 	 * Dictionary parameter must support case-insensitive get.
 	 *
-	 * @param dictionary A dictionary whose
+	 * @param properties A dictionary whose
 	 * keys are used in the match.
 	 * @return If the Dictionary's keys match the filter,
 	 * return <code>true</code>. Otherwise, return <code>false</code>.
@@ -433,7 +433,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 			case PRESENT :
 				{
 					if (Debug.DEBUG && Debug.DEBUG_FILTER) {
-						Debug.println("PRESENT(" + attr + ")");
+						Debug.println("PRESENT(" + attr + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 					}
 
 					Object prop = (properties == null) ? null : properties.get(attr);
@@ -488,7 +488,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 	protected boolean compare(int operation, Object value1, Object value2) {
 		if (value1 == null) {
 			if (Debug.DEBUG && Debug.DEBUG_FILTER) {
-				Debug.println("compare(" + value1 + "," + value2 + ")");
+				Debug.println("compare(" + value1 + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
 
 			return (false);
@@ -556,7 +556,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 			}
 
 			if (Debug.DEBUG && Debug.DEBUG_FILTER) {
-				Debug.println("Type not supported");
+				Debug.println("Type not supported"); //$NON-NLS-1$
 			}
 		} catch (Throwable t) {
 			if (Debug.DEBUG && Debug.DEBUG_FILTER) {
@@ -712,7 +712,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 			case SUBSTRING :
 				{
 					if (Debug.DEBUG && Debug.DEBUG_FILTER) {
-						Debug.println("SUBSTRING(" + string + "," + value2 + ")");
+						Debug.println("SUBSTRING(" + string + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}
 
 					String[] substrings = (String[]) value2;
@@ -731,7 +731,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 									continue; /* ignore first star */
 								} else /* *xxx */{
 									if (Debug.DEBUG && Debug.DEBUG_FILTER) {
-										Debug.println("indexOf(\"" + substr2 + "\"," + pos + ")");
+										Debug.println("indexOf(\"" + substr2 + "\"," + pos + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 									}
 									int index = string.indexOf(substr2, pos);
 									if (index == -1) {
@@ -745,7 +745,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 								int len = substr.length();
 
 								if (Debug.DEBUG && Debug.DEBUG_FILTER) {
-									Debug.println("regionMatches(" + pos + ",\"" + substr + "\")");
+									Debug.println("regionMatches(" + pos + ",\"" + substr + "\")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 								}
 								if (string.regionMatches(pos, substr, 0, len)) {
 									pos += len;
@@ -758,7 +758,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 								return (true);
 							} else /* xxx */{
 								if (Debug.DEBUG && Debug.DEBUG_FILTER) {
-									Debug.println("regionMatches(" + pos + "," + substr + ")");
+									Debug.println("regionMatches(" + pos + "," + substr + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 								}
 								return (string.regionMatches(pos, substr, 0, substr.length()));
 							}
@@ -770,14 +770,14 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 			case EQUAL :
 				{
 					if (Debug.DEBUG && Debug.DEBUG_FILTER) {
-						Debug.println("EQUAL(" + string + "," + value2 + ")");
+						Debug.println("EQUAL(" + string + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}
 					return (string.equals(value2));
 				}
 			case APPROX :
 				{
 					if (Debug.DEBUG && Debug.DEBUG_FILTER) {
-						Debug.println("APPROX(" + string + "," + value2 + ")");
+						Debug.println("APPROX(" + string + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}
 
 					string = approxString(string);
@@ -788,14 +788,14 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 			case GREATER :
 				{
 					if (Debug.DEBUG && Debug.DEBUG_FILTER) {
-						Debug.println("GREATER(" + string + "," + value2 + ")");
+						Debug.println("GREATER(" + string + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}
 					return (string.compareTo((String) value2) >= 0);
 				}
 			case LESS :
 				{
 					if (Debug.DEBUG && Debug.DEBUG_FILTER) {
-						Debug.println("LESS(" + string + "," + value2 + ")");
+						Debug.println("LESS(" + string + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}
 					return (string.compareTo((String) value2) <= 0);
 				}
@@ -811,35 +811,35 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 			case SUBSTRING :
 				{
 					if (Debug.DEBUG && Debug.DEBUG_FILTER) {
-						Debug.println("SUBSTRING(" + intval + "," + value2 + ")");
+						Debug.println("SUBSTRING(" + intval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}
 					return (false);
 				}
 			case EQUAL :
 				{
 					if (Debug.DEBUG && Debug.DEBUG_FILTER) {
-						Debug.println("EQUAL(" + intval + "," + value2 + ")");
+						Debug.println("EQUAL(" + intval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}
 					return (intval == intval2);
 				}
 			case APPROX :
 				{
 					if (Debug.DEBUG && Debug.DEBUG_FILTER) {
-						Debug.println("APPROX(" + intval + "," + value2 + ")");
+						Debug.println("APPROX(" + intval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}
 					return (intval == intval2);
 				}
 			case GREATER :
 				{
 					if (Debug.DEBUG && Debug.DEBUG_FILTER) {
-						Debug.println("GREATER(" + intval + "," + value2 + ")");
+						Debug.println("GREATER(" + intval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}
 					return (intval >= intval2);
 				}
 			case LESS :
 				{
 					if (Debug.DEBUG && Debug.DEBUG_FILTER) {
-						Debug.println("LESS(" + intval + "," + value2 + ")");
+						Debug.println("LESS(" + intval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}
 					return (intval <= intval2);
 				}
@@ -855,35 +855,35 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 			case SUBSTRING :
 				{
 					if (Debug.DEBUG && Debug.DEBUG_FILTER) {
-						Debug.println("SUBSTRING(" + longval + "," + value2 + ")");
+						Debug.println("SUBSTRING(" + longval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}
 					return (false);
 				}
 			case EQUAL :
 				{
 					if (Debug.DEBUG && Debug.DEBUG_FILTER) {
-						Debug.println("EQUAL(" + longval + "," + value2 + ")");
+						Debug.println("EQUAL(" + longval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}
 					return (longval == longval2);
 				}
 			case APPROX :
 				{
 					if (Debug.DEBUG && Debug.DEBUG_FILTER) {
-						Debug.println("APPROX(" + longval + "," + value2 + ")");
+						Debug.println("APPROX(" + longval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}
 					return (longval == longval2);
 				}
 			case GREATER :
 				{
 					if (Debug.DEBUG && Debug.DEBUG_FILTER) {
-						Debug.println("GREATER(" + longval + "," + value2 + ")");
+						Debug.println("GREATER(" + longval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}
 					return (longval >= longval2);
 				}
 			case LESS :
 				{
 					if (Debug.DEBUG && Debug.DEBUG_FILTER) {
-						Debug.println("LESS(" + longval + "," + value2 + ")");
+						Debug.println("LESS(" + longval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}
 					return (longval <= longval2);
 				}
@@ -899,35 +899,35 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 			case SUBSTRING :
 				{
 					if (Debug.DEBUG && Debug.DEBUG_FILTER) {
-						Debug.println("SUBSTRING(" + byteval + "," + value2 + ")");
+						Debug.println("SUBSTRING(" + byteval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}
 					return (false);
 				}
 			case EQUAL :
 				{
 					if (Debug.DEBUG && Debug.DEBUG_FILTER) {
-						Debug.println("EQUAL(" + byteval + "," + value2 + ")");
+						Debug.println("EQUAL(" + byteval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}
 					return (byteval == byteval2);
 				}
 			case APPROX :
 				{
 					if (Debug.DEBUG && Debug.DEBUG_FILTER) {
-						Debug.println("APPROX(" + byteval + "," + value2 + ")");
+						Debug.println("APPROX(" + byteval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}
 					return (byteval == byteval2);
 				}
 			case GREATER :
 				{
 					if (Debug.DEBUG && Debug.DEBUG_FILTER) {
-						Debug.println("GREATER(" + byteval + "," + value2 + ")");
+						Debug.println("GREATER(" + byteval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}
 					return (byteval >= byteval2);
 				}
 			case LESS :
 				{
 					if (Debug.DEBUG && Debug.DEBUG_FILTER) {
-						Debug.println("LESS(" + byteval + "," + value2 + ")");
+						Debug.println("LESS(" + byteval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}
 					return (byteval <= byteval2);
 				}
@@ -943,35 +943,35 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 			case SUBSTRING :
 				{
 					if (Debug.DEBUG && Debug.DEBUG_FILTER) {
-						Debug.println("SUBSTRING(" + shortval + "," + value2 + ")");
+						Debug.println("SUBSTRING(" + shortval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}
 					return (false);
 				}
 			case EQUAL :
 				{
 					if (Debug.DEBUG && Debug.DEBUG_FILTER) {
-						Debug.println("EQUAL(" + shortval + "," + value2 + ")");
+						Debug.println("EQUAL(" + shortval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}
 					return (shortval == shortval2);
 				}
 			case APPROX :
 				{
 					if (Debug.DEBUG && Debug.DEBUG_FILTER) {
-						Debug.println("APPROX(" + shortval + "," + value2 + ")");
+						Debug.println("APPROX(" + shortval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}
 					return (shortval == shortval2);
 				}
 			case GREATER :
 				{
 					if (Debug.DEBUG && Debug.DEBUG_FILTER) {
-						Debug.println("GREATER(" + shortval + "," + value2 + ")");
+						Debug.println("GREATER(" + shortval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}
 					return (shortval >= shortval2);
 				}
 			case LESS :
 				{
 					if (Debug.DEBUG && Debug.DEBUG_FILTER) {
-						Debug.println("LESS(" + shortval + "," + value2 + ")");
+						Debug.println("LESS(" + shortval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}
 					return (shortval <= shortval2);
 				}
@@ -987,35 +987,35 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 			case SUBSTRING :
 				{
 					if (Debug.DEBUG && Debug.DEBUG_FILTER) {
-						Debug.println("SUBSTRING(" + charval + "," + value2 + ")");
+						Debug.println("SUBSTRING(" + charval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}
 					return (false);
 				}
 			case EQUAL :
 				{
 					if (Debug.DEBUG && Debug.DEBUG_FILTER) {
-						Debug.println("EQUAL(" + charval + "," + value2 + ")");
+						Debug.println("EQUAL(" + charval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}
 					return (charval == charval2);
 				}
 			case APPROX :
 				{
 					if (Debug.DEBUG && Debug.DEBUG_FILTER) {
-						Debug.println("APPROX(" + charval + "," + value2 + ")");
+						Debug.println("APPROX(" + charval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}
 					return (Character.toLowerCase(charval) == Character.toLowerCase(charval2));
 				}
 			case GREATER :
 				{
 					if (Debug.DEBUG && Debug.DEBUG_FILTER) {
-						Debug.println("GREATER(" + charval + "," + value2 + ")");
+						Debug.println("GREATER(" + charval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}
 					return (charval >= charval2);
 				}
 			case LESS :
 				{
 					if (Debug.DEBUG && Debug.DEBUG_FILTER) {
-						Debug.println("LESS(" + charval + "," + value2 + ")");
+						Debug.println("LESS(" + charval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}
 					return (charval <= charval2);
 				}
@@ -1031,35 +1031,35 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 			case SUBSTRING :
 				{
 					if (Debug.DEBUG && Debug.DEBUG_FILTER) {
-						Debug.println("SUBSTRING(" + boolval + "," + value2 + ")");
+						Debug.println("SUBSTRING(" + boolval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}
 					return (false);
 				}
 			case EQUAL :
 				{
 					if (Debug.DEBUG && Debug.DEBUG_FILTER) {
-						Debug.println("EQUAL(" + boolval + "," + value2 + ")");
+						Debug.println("EQUAL(" + boolval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}
 					return (boolval == boolval2);
 				}
 			case APPROX :
 				{
 					if (Debug.DEBUG && Debug.DEBUG_FILTER) {
-						Debug.println("APPROX(" + boolval + "," + value2 + ")");
+						Debug.println("APPROX(" + boolval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}
 					return (boolval == boolval2);
 				}
 			case GREATER :
 				{
 					if (Debug.DEBUG && Debug.DEBUG_FILTER) {
-						Debug.println("GREATER(" + boolval + "," + value2 + ")");
+						Debug.println("GREATER(" + boolval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}
 					return (boolval == boolval2);
 				}
 			case LESS :
 				{
 					if (Debug.DEBUG && Debug.DEBUG_FILTER) {
-						Debug.println("LESS(" + boolval + "," + value2 + ")");
+						Debug.println("LESS(" + boolval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}
 					return (boolval == boolval2);
 				}
@@ -1075,35 +1075,35 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 			case SUBSTRING :
 				{
 					if (Debug.DEBUG && Debug.DEBUG_FILTER) {
-						Debug.println("SUBSTRING(" + floatval + "," + value2 + ")");
+						Debug.println("SUBSTRING(" + floatval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}
 					return (false);
 				}
 			case EQUAL :
 				{
 					if (Debug.DEBUG && Debug.DEBUG_FILTER) {
-						Debug.println("EQUAL(" + floatval + "," + value2 + ")");
+						Debug.println("EQUAL(" + floatval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}
 					return (floatval == floatval2);
 				}
 			case APPROX :
 				{
 					if (Debug.DEBUG && Debug.DEBUG_FILTER) {
-						Debug.println("APPROX(" + floatval + "," + value2 + ")");
+						Debug.println("APPROX(" + floatval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}
 					return (floatval == floatval2);
 				}
 			case GREATER :
 				{
 					if (Debug.DEBUG && Debug.DEBUG_FILTER) {
-						Debug.println("GREATER(" + floatval + "," + value2 + ")");
+						Debug.println("GREATER(" + floatval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}
 					return (floatval >= floatval2);
 				}
 			case LESS :
 				{
 					if (Debug.DEBUG && Debug.DEBUG_FILTER) {
-						Debug.println("LESS(" + floatval + "," + value2 + ")");
+						Debug.println("LESS(" + floatval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}
 					return (floatval <= floatval2);
 				}
@@ -1119,35 +1119,35 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 			case SUBSTRING :
 				{
 					if (Debug.DEBUG && Debug.DEBUG_FILTER) {
-						Debug.println("SUBSTRING(" + doubleval + "," + value2 + ")");
+						Debug.println("SUBSTRING(" + doubleval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}
 					return (false);
 				}
 			case EQUAL :
 				{
 					if (Debug.DEBUG && Debug.DEBUG_FILTER) {
-						Debug.println("EQUAL(" + doubleval + "," + value2 + ")");
+						Debug.println("EQUAL(" + doubleval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}
 					return (doubleval == doubleval2);
 				}
 			case APPROX :
 				{
 					if (Debug.DEBUG && Debug.DEBUG_FILTER) {
-						Debug.println("APPROX(" + doubleval + "," + value2 + ")");
+						Debug.println("APPROX(" + doubleval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}
 					return (doubleval == doubleval2);
 				}
 			case GREATER :
 				{
 					if (Debug.DEBUG && Debug.DEBUG_FILTER) {
-						Debug.println("GREATER(" + doubleval + "," + value2 + ")");
+						Debug.println("GREATER(" + doubleval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}
 					return (doubleval >= doubleval2);
 				}
 			case LESS :
 				{
 					if (Debug.DEBUG && Debug.DEBUG_FILTER) {
-						Debug.println("LESS(" + doubleval + "," + value2 + ")");
+						Debug.println("LESS(" + doubleval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}
 					return (doubleval <= doubleval2);
 				}
@@ -1169,35 +1169,35 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 			case SUBSTRING :
 				{
 					if (Debug.DEBUG && Debug.DEBUG_FILTER) {
-						Debug.println("SUBSTRING(" + value1 + "," + value2 + ")");
+						Debug.println("SUBSTRING(" + value1 + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}
 					return (false);
 				}
 			case EQUAL :
 				{
 					if (Debug.DEBUG && Debug.DEBUG_FILTER) {
-						Debug.println("EQUAL(" + value1 + "," + value2 + ")");
+						Debug.println("EQUAL(" + value1 + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}
 					return (value1.compareTo(value2) == 0);
 				}
 			case APPROX :
 				{
 					if (Debug.DEBUG && Debug.DEBUG_FILTER) {
-						Debug.println("APPROX(" + value1 + "," + value2 + ")");
+						Debug.println("APPROX(" + value1 + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}
 					return (value1.compareTo(value2) == 0);
 				}
 			case GREATER :
 				{
 					if (Debug.DEBUG && Debug.DEBUG_FILTER) {
-						Debug.println("GREATER(" + value1 + "," + value2 + ")");
+						Debug.println("GREATER(" + value1 + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}
 					return (value1.compareTo(value2) >= 0);
 				}
 			case LESS :
 				{
 					if (Debug.DEBUG && Debug.DEBUG_FILTER) {
-						Debug.println("LESS(" + value1 + "," + value2 + ")");
+						Debug.println("LESS(" + value1 + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}
 					return (value1.compareTo(value2) <= 0);
 				}
@@ -1258,11 +1258,11 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 			try {
 				parse_filter(parent);
 			} catch (ArrayIndexOutOfBoundsException e) {
-				throw new InvalidSyntaxException(Msg.formatter.getString("FILTER_TERMINATED_ABRUBTLY"), filterstring);
+				throw new InvalidSyntaxException(Msg.formatter.getString("FILTER_TERMINATED_ABRUBTLY"), filterstring); //$NON-NLS-1$
 			}
 
 			if (pos != filter.length) {
-				throw new InvalidSyntaxException(Msg.formatter.getString("FILTER_TRAILING_CHARACTERS", pos), filterstring);
+				throw new InvalidSyntaxException(Msg.formatter.getString("FILTER_TRAILING_CHARACTERS", pos), filterstring); //$NON-NLS-1$
 			}
 		}
 
@@ -1270,7 +1270,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 			skipWhiteSpace();
 
 			if (filter[pos] != '(') {
-				throw new InvalidSyntaxException(Msg.formatter.getString("FILTER_MISSING_LEFTPAREN", pos), filterstring);
+				throw new InvalidSyntaxException(Msg.formatter.getString("FILTER_MISSING_LEFTPAREN", pos), filterstring); //$NON-NLS-1$
 			}
 
 			pos++;
@@ -1280,7 +1280,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 			skipWhiteSpace();
 
 			if (filter[pos] != ')') {
-				throw new InvalidSyntaxException(Msg.formatter.getString("FILTER_MISSING_RIGHTPAREN", pos), filterstring);
+				throw new InvalidSyntaxException(Msg.formatter.getString("FILTER_MISSING_RIGHTPAREN", pos), filterstring); //$NON-NLS-1$
 			}
 
 			pos++;
@@ -1324,7 +1324,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 			skipWhiteSpace();
 
 			if (filter[pos] != '(') {
-				throw new InvalidSyntaxException(Msg.formatter.getString("FILTER_MISSING_LEFTPAREN", pos), filterstring);
+				throw new InvalidSyntaxException(Msg.formatter.getString("FILTER_MISSING_LEFTPAREN", pos), filterstring); //$NON-NLS-1$
 			}
 
 			Vector operands = new Vector(10, 10);
@@ -1348,7 +1348,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 			skipWhiteSpace();
 
 			if (filter[pos] != '(') {
-				throw new InvalidSyntaxException(Msg.formatter.getString("FILTER_MISSING_LEFTPAREN", pos), filterstring);
+				throw new InvalidSyntaxException(Msg.formatter.getString("FILTER_MISSING_LEFTPAREN", pos), filterstring); //$NON-NLS-1$
 			}
 
 			Vector operands = new Vector(10, 10);
@@ -1372,7 +1372,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 			skipWhiteSpace();
 
 			if (filter[pos] != '(') {
-				throw new InvalidSyntaxException(Msg.formatter.getString("FILTER_MISSING_LEFTPAREN", pos), filterstring);
+				throw new InvalidSyntaxException(Msg.formatter.getString("FILTER_MISSING_LEFTPAREN", pos), filterstring); //$NON-NLS-1$
 			}
 
 			FilterImpl child = new FilterImpl();
@@ -1440,7 +1440,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 					}
 			}
 
-			throw new InvalidSyntaxException(Msg.formatter.getString("FILTER_INVALID_OPERATOR", pos), filterstring);
+			throw new InvalidSyntaxException(Msg.formatter.getString("FILTER_INVALID_OPERATOR", pos), filterstring); //$NON-NLS-1$
 		}
 
 		protected String parse_attr() throws InvalidSyntaxException {
@@ -1451,7 +1451,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 
 			char c = filter[pos];
 
-			while ("~<>=()".indexOf(c) == -1) {
+			while ("~<>=()".indexOf(c) == -1) { //$NON-NLS-1$
 				pos++;
 
 				if (!Character.isWhitespace(c)) {
@@ -1464,7 +1464,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 			int length = end - begin;
 
 			if (length == 0) {
-				throw new InvalidSyntaxException(Msg.formatter.getString("FILTER_MISSING_ATTR", pos), filterstring);
+				throw new InvalidSyntaxException(Msg.formatter.getString("FILTER_MISSING_ATTR", pos), filterstring); //$NON-NLS-1$
 			}
 
 			return (new String(filter, begin, length));
@@ -1484,7 +1484,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 
 					case '(' :
 						{
-							throw new InvalidSyntaxException(Msg.formatter.getString("FILTER_INVALID_VALUE", pos), filterstring);
+							throw new InvalidSyntaxException(Msg.formatter.getString("FILTER_INVALID_VALUE", pos), filterstring); //$NON-NLS-1$
 						}
 
 					case '\\' :
@@ -1504,7 +1504,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 			}
 
 			if (sb.length() == 0) {
-				throw new InvalidSyntaxException(Msg.formatter.getString("FILTER_MISSING_VALUE", pos), filterstring);
+				throw new InvalidSyntaxException(Msg.formatter.getString("FILTER_MISSING_VALUE", pos), filterstring); //$NON-NLS-1$
 			}
 
 			return (sb.toString());
@@ -1530,7 +1530,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 
 					case '(' :
 						{
-							throw new InvalidSyntaxException(Msg.formatter.getString("FILTER_INVALID_VALUE", pos), filterstring);
+							throw new InvalidSyntaxException(Msg.formatter.getString("FILTER_INVALID_VALUE", pos), filterstring); //$NON-NLS-1$
 						}
 
 					case '*' :
@@ -1566,7 +1566,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 			int size = operands.size();
 
 			if (size == 0) {
-				throw new InvalidSyntaxException(Msg.formatter.getString("FILTER_MISSING_VALUE", pos), filterstring);
+				throw new InvalidSyntaxException(Msg.formatter.getString("FILTER_MISSING_VALUE", pos), filterstring); //$NON-NLS-1$
 			}
 
 			if (size == 1) {

@@ -90,7 +90,7 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
 			this.properties = createProperties(properties); /* must be valid after unregister is called. */
 
 			if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
-				Debug.println("registerService[" + bundle + "](" + this + ")");
+				Debug.println("registerService[" + bundle + "](" + this + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
 
 			framework.serviceRegistry.publishService(context, this);
@@ -134,12 +134,12 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
 		synchronized (registrationLock) {
 			if (service == null) /* in the process of unregisterING */
 			{
-				throw new IllegalStateException(Msg.formatter.getString("SERVICE_ALREADY_UNREGISTERED_EXCEPTION"));
+				throw new IllegalStateException(Msg.formatter.getString("SERVICE_ALREADY_UNREGISTERED_EXCEPTION")); //$NON-NLS-1$
 			}
 
 			/* remove this object from the service registry */
 			if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
-				Debug.println("unregisterService[" + bundle + "](" + this + ")");
+				Debug.println("unregisterService[" + bundle + "](" + this + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
 
 			synchronized (framework.serviceRegistry) {
@@ -164,7 +164,7 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
 
 				if (size > 0) {
 					if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
-						Debug.println("unregisterService: releasing users");
+						Debug.println("unregisterService: releasing users"); //$NON-NLS-1$
 					}
 
 					users = new BundleContextImpl[size];
@@ -203,7 +203,7 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
 		 * but makes more sense.
 		 */
 		if (reference == null) {
-			throw new IllegalStateException(Msg.formatter.getString("SERVICE_ALREADY_UNREGISTERED_EXCEPTION"));
+			throw new IllegalStateException(Msg.formatter.getString("SERVICE_ALREADY_UNREGISTERED_EXCEPTION")); //$NON-NLS-1$
 		}
 
 		return (reference);
@@ -222,7 +222,7 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
 	 * is synchronously sent.
 	 * </ol>
 	 *
-	 * @param properties The properties for this service.
+	 * @param props The properties for this service.
 	 *        Changes should not be made to this object after calling this method.
 	 *        To update the service's properties this method should be called again.
 	 * @exception java.lang.IllegalStateException If
@@ -235,7 +235,7 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
 		synchronized (registrationLock) {
 			if (service == null) /* in the process of unregistering */
 			{
-				throw new IllegalStateException(Msg.formatter.getString("SERVICE_ALREADY_UNREGISTERED_EXCEPTION"));
+				throw new IllegalStateException(Msg.formatter.getString("SERVICE_ALREADY_UNREGISTERED_EXCEPTION")); //$NON-NLS-1$
 			}
 
 			this.properties = createProperties(props);
@@ -334,7 +334,7 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
 			}
 
 			if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
-				Debug.println("getService[" + user.bundle + "](" + this + ")");
+				Debug.println("getService[" + user.bundle + "](" + this + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
 
 			Hashtable servicesInUse = user.servicesInUse;
@@ -378,8 +378,8 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
 			}
 
 			if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
-				String bundle = (user.bundle == null) ? "" : user.bundle.toString();
-				Debug.println("ungetService[" + bundle + "](" + this + ")");
+				String bundle = (user.bundle == null) ? "" : user.bundle.toString(); //$NON-NLS-1$
+				Debug.println("ungetService[" + bundle + "](" + this + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
 
 			Hashtable servicesInUse = user.servicesInUse;
@@ -416,8 +416,8 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
 			}
 
 			if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
-				String bundle = (user.bundle == null) ? "" : user.bundle.toString();
-				Debug.println("releaseService[" + bundle + "](" + this + ")");
+				String bundle = (user.bundle == null) ? "" : user.bundle.toString(); //$NON-NLS-1$
+				Debug.println("releaseService[" + bundle + "](" + this + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
 
 			Hashtable servicesInUse = user.servicesInUse;
@@ -481,12 +481,12 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
 
 		for (int i = 0; i < size; i++) {
 			if (i > 0) {
-				sb.append(", ");
+				sb.append(", "); //$NON-NLS-1$
 			}
 			sb.append(clazzes[i]);
 		}
 
-		sb.append("}=");
+		sb.append("}="); //$NON-NLS-1$
 		sb.append(properties);
 
 		return (sb.toString());
@@ -499,7 +499,7 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
 		/**
 		 * Create a properties object for the service.
 		 *
-		 * @param properties The properties for this service.
+		 * @param props The properties for this service.
 		 */
 		private Properties(int size, Dictionary props) {
 			super((size << 1) + 1);
@@ -524,7 +524,7 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
 		/**
 		 * Create a properties object for the service.
 		 *
-		 * @param properties The properties for this service.
+		 * @param props The properties for this service.
 		 */
 		protected Properties(Dictionary props) {
 			this((props == null) ? 2 : Math.max(2, props.size()), props);
@@ -632,7 +632,7 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
 				} else /* non array object */
 				{
 					try {
-						return (clazz.getMethod("clone", null).invoke(value, null));
+						return (clazz.getMethod("clone", null).invoke(value, null)); //$NON-NLS-1$
 					} catch (Exception e) {
 						/* clone is not a public method on value's class */
 					} catch (Error e) {
@@ -666,7 +666,7 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
 				String key = keys[i];
 				if (!key.equals(Constants.OBJECTCLASS)) {
 					if (n > 0) {
-						sb.append(", ");
+						sb.append(", "); //$NON-NLS-1$
 					}
 
 					sb.append(key);

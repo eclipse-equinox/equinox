@@ -105,7 +105,7 @@ public class AliasMapper {
 		try {
 			BufferedReader br;
 			try {
-				br = new BufferedReader(new InputStreamReader(in, "UTF8"));
+				br = new BufferedReader(new InputStreamReader(in, "UTF8")); //$NON-NLS-1$
 			} catch (UnsupportedEncodingException e) {
 				br = new BufferedReader(new InputStreamReader(in));
 			}
@@ -115,11 +115,11 @@ public class AliasMapper {
 					break; /* done */
 				}
 				Tokenizer tokenizer = new Tokenizer(line);
-				String master = tokenizer.getString("# \t");
+				String master = tokenizer.getString("# \t"); //$NON-NLS-1$
 				if (master != null) {
 					aliases.put(master.toLowerCase(), master);
 					parseloop: while (true) {
-						String alias = tokenizer.getString("# \t");
+						String alias = tokenizer.getString("# \t"); //$NON-NLS-1$
 						if (alias == null) {
 							break parseloop;
 						}

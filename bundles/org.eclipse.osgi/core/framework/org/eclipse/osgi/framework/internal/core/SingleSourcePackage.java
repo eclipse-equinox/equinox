@@ -31,6 +31,6 @@ public class SingleSourcePackage extends PackageSource {
 	}
 
 	public String toString() {
-		return id + " -> " + supplier;
+		return id + " -> " + supplier; //$NON-NLS-1$
 	}
 }
