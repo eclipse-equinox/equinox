@@ -17,7 +17,6 @@ import java.security.*;
 import java.util.*;
 import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.debug.Debug;
-import org.eclipse.osgi.framework.util.SecureAction;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.*;
@@ -303,7 +302,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 				return classloader;
 
 			try {
-				String[] classpath = getClassPath(bundle, SecureAction.getProperties());
+				String[] classpath = getClassPath(bundle);
 				if (classpath != null) {
 					classloader = createBCLPrevileged(bundle.getProtectionDomain(), classpath);
 				} else {
@@ -497,7 +496,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 			for (int i = 0; i < fragments.length; i++) {
 				AbstractBundle fragment = (AbstractBundle) fragments[i];
 				try {
-					bcl.attachFragment(fragment.getBundleData(), fragment.domain, getClassPath(fragment, SecureAction.getProperties()));
+					bcl.attachFragment(fragment.getBundleData(), fragment.domain, getClassPath(fragment));
 				} catch (BundleException be) {
 					bundle.framework.publishFrameworkEvent(FrameworkEvent.ERROR, bundle, be);
 				}
@@ -953,13 +952,13 @@ public class BundleLoader implements ClassLoaderDelegate {
 		dynamicImportPackageStems = null;
 	}
 
-	protected void attachFragment(BundleFragment fragment, Properties props) throws BundleException {
+	protected void attachFragment(BundleFragment fragment) throws BundleException {
 		initializeFragment(fragment);
 		if (classloader == null)
 			return;
 
 		try {
-			String[] classpath = getClassPath(fragment, props);
+			String[] classpath = getClassPath(fragment);
 			if (classpath != null)
 				classloader.attachFragment(fragment.getBundleData(), fragment.domain, classpath);
 			else
@@ -970,13 +969,13 @@ public class BundleLoader implements ClassLoaderDelegate {
 
 	}
 
-	protected String[] getClassPath(AbstractBundle bundle, Properties props) throws BundleException {
+	static String[] getClassPath(AbstractBundle bundle) throws BundleException {
 		String spec = bundle.getBundleData().getClassPath();
 		ManifestElement[] classpathElements = ManifestElement.parseHeader(Constants.BUNDLE_CLASSPATH, spec);
-		return matchClassPath(classpathElements, props);
+		return getClassPath(classpathElements);
 	}
 
-	protected String[] matchClassPath(ManifestElement[] classpath, Properties props) {
+	static String[] getClassPath(ManifestElement[] classpath) {
 		if (classpath == null) {
 			if (Debug.DEBUG && Debug.DEBUG_LOADER)
 				Debug.println("  no classpath"); //$NON-NLS-1$
@@ -986,21 +985,14 @@ public class BundleLoader implements ClassLoaderDelegate {
 
 		ArrayList result = new ArrayList(classpath.length);
 		for (int i = 0; i < classpath.length; i++) {
-			FilterImpl filter;
-			try {
-				filter = createFilter(classpath[i].getAttribute(Constants.SELECTION_FILTER_ATTRIBUTE));
-				if (filter == null || filter.match(props)) {
-					if (Debug.DEBUG && Debug.DEBUG_LOADER)
-						Debug.println("  found match for classpath entry " + classpath[i].getValueComponents()); //$NON-NLS-1$
-					String[] matchPaths = classpath[i].getValueComponents();
-					for (int j = 0; j < matchPaths.length; j++) {
-						result.add(matchPaths[j]);
-					}
-				}
-			} catch (InvalidSyntaxException e) {
-				bundle.framework.publishFrameworkEvent(FrameworkEvent.ERROR, bundle, e);
+			if (Debug.DEBUG && Debug.DEBUG_LOADER)
+				Debug.println("  found classpath entry " + classpath[i].getValueComponents()); //$NON-NLS-1$
+			String[] paths = classpath[i].getValueComponents();
+			for (int j = 0; j < paths.length; j++) {
+				result.add(paths[j]);
 			}
 		}
+
 		return (String[]) result.toArray(new String[result.size()]);
 	}
 

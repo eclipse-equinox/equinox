@@ -17,7 +17,6 @@ import java.util.Enumeration;
 import org.eclipse.osgi.framework.adaptor.BundleData;
 import org.eclipse.osgi.framework.adaptor.BundleWatcher;
 import org.eclipse.osgi.framework.debug.Debug;
-import org.eclipse.osgi.framework.util.SecureAction;
 import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.osgi.framework.*;
 
@@ -524,7 +523,7 @@ public class BundleHost extends AbstractBundle {
 		// If the Host ClassLoader exists then we must attach
 		// the fragment to the ClassLoader.
 		if (loader != null) {
-			loader.attachFragment(fragment, SecureAction.getProperties());
+			loader.attachFragment(fragment);
 		}
 
 	}
