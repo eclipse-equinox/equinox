@@ -16,11 +16,10 @@ import java.io.InputStream;
 import java.net.URL;
 import java.security.Permission;
 import java.security.ProtectionDomain;
-
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.util.SecureAction;
-import org.osgi.framework.BundleException;
 import org.osgi.framework.AdminPermission;
+import org.osgi.framework.BundleException;
 
 /**
  * This class subclasses Bundle to provide a system Bundle
@@ -113,7 +112,7 @@ public class SystemBundle extends BundleHost {
 	 */
 	protected Class loadClass(String name, boolean checkPermission) throws ClassNotFoundException {
 		if (checkPermission) {
-			framework.checkAdminPermission(0,AdminPermission.CLASS);
+			framework.checkAdminPermission(this, AdminPermission.CLASS);
 			checkValid();
 		}
 		return (Class.forName(name));
@@ -141,7 +140,7 @@ public class SystemBundle extends BundleHost {
 	 *
 	 */
 	public void start() throws BundleException {
-		framework.checkAdminPermission(0,AdminPermission.EXECUTE);
+		framework.checkAdminPermission(this, AdminPermission.EXECUTE);
 	}
 
 	/**
@@ -163,7 +162,7 @@ public class SystemBundle extends BundleHost {
 	 *
 	 */
 	public void stop() throws BundleException {
-		framework.checkAdminPermission(0,AdminPermission.EXECUTE);
+		framework.checkAdminPermission(this, AdminPermission.EXECUTE);
 
 		if (state == ACTIVE) {
 			Thread shutdown = SecureAction.createThread(new Runnable() {
@@ -210,7 +209,7 @@ public class SystemBundle extends BundleHost {
 	 *
 	 */
 	public void update() throws BundleException {
-		framework.checkAdminPermission(0,AdminPermission.LIFECYCLE);
+		framework.checkAdminPermission(this, AdminPermission.LIFECYCLE);
 
 		if (state == ACTIVE) {
 			Thread restart = SecureAction.createThread(new Runnable() {
@@ -246,7 +245,7 @@ public class SystemBundle extends BundleHost {
 	 *
 	 */
 	public void uninstall() throws BundleException {
-		framework.checkAdminPermission(0,AdminPermission.LIFECYCLE);
+		framework.checkAdminPermission(this, AdminPermission.LIFECYCLE);
 
 		throw new BundleException(Msg.formatter.getString("BUNDLE_SYSTEMBUNDLE_UNINSTALL_EXCEPTION")); //$NON-NLS-1$
 	}
@@ -281,7 +280,6 @@ public class SystemBundle extends BundleHost {
 	protected void unresolvePermissions(AbstractBundle[] refreshedBundles) {
 		// Do nothing
 	}
-
 
 	public String getSymbolicName() {
 		return Constants.OSGI_SYSTEM_BUNDLE;

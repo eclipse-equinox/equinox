@@ -127,7 +127,7 @@ public class PackageAdminImpl implements PackageAdmin {
 	}
 
 	public void refreshPackages(Bundle[] input) {
-		framework.checkAdminPermission(0, AdminPermission.RESOLVE);
+		framework.checkAdminPermission(framework.systemBundle, AdminPermission.RESOLVE);
 
 		AbstractBundle[] copy = null;
 		if (input != null) {
@@ -148,7 +148,7 @@ public class PackageAdminImpl implements PackageAdmin {
 	}
 
 	public boolean resolveBundles(Bundle[] bundles) {
-		framework.checkAdminPermission(0, AdminPermission.RESOLVE);
+		framework.checkAdminPermission(framework.systemBundle, AdminPermission.RESOLVE);
 		doResolveBundles(null, false);
 		if (bundles == null)
 			bundles = framework.getAllBundles();

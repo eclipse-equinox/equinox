@@ -178,7 +178,7 @@ public class BundleFragment extends AbstractBundle {
 	protected Class loadClass(String name, boolean checkPermission) throws ClassNotFoundException {
 		if (checkPermission) {
 			try {
-				framework.checkAdminPermission(getBundleId(),AdminPermission.CLASS);
+				framework.checkAdminPermission(this, AdminPermission.CLASS);
 			} catch (SecurityException e) {
 				throw new ClassNotFoundException();
 			}

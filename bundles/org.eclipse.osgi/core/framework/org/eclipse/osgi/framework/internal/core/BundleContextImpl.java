@@ -29,7 +29,7 @@ import org.osgi.framework.*;
 
 public class BundleContextImpl implements BundleContext, EventDispatcher {
 	public static final String PROP_SCOPE_SERVICE_EVENTS = "osgi.scopeServiceEvents"; //$NON-NLS-1$
-	public static final boolean scopeEvents = Boolean.valueOf(System.getProperty(PROP_SCOPE_SERVICE_EVENTS,"true")).booleanValue(); //$NON-NLS-1$
+	public static final boolean scopeEvents = Boolean.valueOf(System.getProperty(PROP_SCOPE_SERVICE_EVENTS, "true")).booleanValue(); //$NON-NLS-1$
 	/** true if the bundle context is still valid */
 	private boolean valid;
 
@@ -194,7 +194,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	 * @return The Bundle object of the installed bundle.
 	 */
 	public org.osgi.framework.Bundle installBundle(String location) throws BundleException {
-		framework.checkAdminPermission(0,AdminPermission.LIFECYCLE);
+		framework.checkAdminPermission(framework.systemBundle, AdminPermission.LIFECYCLE);
 		checkValid();
 		return framework.installBundle(location);
 	}
@@ -213,7 +213,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	 * @return The Bundle of the installed bundle.
 	 */
 	public org.osgi.framework.Bundle installBundle(String location, InputStream in) throws BundleException {
-		framework.checkAdminPermission(0,AdminPermission.LIFECYCLE);
+		framework.checkAdminPermission(framework.systemBundle, AdminPermission.LIFECYCLE);
 
 		checkValid();
 
@@ -377,7 +377,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 		}
 
 		if (listener instanceof SynchronousBundleListener) {
-			framework.checkAdminPermission(getBundle().getBundleId(),AdminPermission.LISTENER);
+			framework.checkAdminPermission(getBundle(), AdminPermission.LISTENER);
 
 			synchronized (framework.bundleEventSync) {
 				if (bundleEventSync == null) {
@@ -421,7 +421,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 		}
 
 		if (listener instanceof SynchronousBundleListener) {
-			framework.checkAdminPermission(getBundle().getBundleId(),AdminPermission.LISTENER);
+			framework.checkAdminPermission(getBundle(), AdminPermission.LISTENER);
 
 			if (bundleEventSync != null) {
 				synchronized (framework.bundleEventSync) {
@@ -725,6 +725,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 		}
 		return (framework.getServiceReferences(clazz, filter, this, true));
 	}
+
 	/**
 	 * Get a service reference.
 	 * Retrieves a {@link ServiceReferenceImpl} for a service

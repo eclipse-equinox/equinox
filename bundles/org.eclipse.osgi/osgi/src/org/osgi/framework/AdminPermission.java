@@ -31,7 +31,6 @@ import java.io.InputStream;
 import java.security.*;
 import java.util.*;
 import org.eclipse.osgi.framework.internal.core.FilterImpl;
-import org.eclipse.osgi.framework.internal.core.Framework;
 import org.osgi.service.permissionadmin.PermissionInfo;
 
 /**
@@ -103,10 +102,10 @@ public final class AdminPermission extends Permission
 {
 	static final long	serialVersionUID	= 207051004521261705L;
 	/**
-	 * The bundleId governed by this AdminPermission - only used if 
-	 * wildcard is false and nameFilter == null
+	 * The bundle governed by this AdminPermission - only used if 
+	 * wildcard is false and filter == null
 	 */
-	protected long nameId;
+	protected Bundle bundle;
 	
 	/**
 	 * Indicates that this AdminPermission refers to all bundles
@@ -114,9 +113,10 @@ public final class AdminPermission extends Permission
 	protected boolean wildcard;
 	
 	/**
-	 * An x.500 distinguished name used to match a bundle's signature, or null
+	 * An x.500 distinguished name used to match a bundle's signature - only used if
+	 * wildcard is false and bundle = null
 	 */
-	protected String nameFilter;
+	protected String filter;
 	
     /**
      * The action string <tt>class</tt> (Value is "class").
@@ -197,18 +197,19 @@ public final class AdminPermission extends Permission
     private String actions = null;
     
     /**
-     * If this AdminPermission was constructed with a bundle id, this dictionary holds
+     * If this AdminPermission was constructed with a bundle, this dictionary holds
      * the properties of that bundle, used to match a filter in implies.
      * This is not initialized until necessary, and then cached in this object.
      */
     protected Dictionary bundleProperties;
     
     /**
-     * Framework reference used to construct <tt><@link AdminPermission#bundleProperties></tt>
-     * above.  This will be null unless this AdminPermission was constructed by PermissionAdmin
+     * If this AdminPermission was constructed with a filter, this dictionary holds
+     * a Filter matching object used to evaluate the filter in implies.
+     * This is not initialized until necessary, and then cached in this object
      */
-    private Framework framework;
-	
+    protected Filter filterImpl;
+    
 	/**
      * Creates a new <tt>AdminPermission</tt> object that matches 
      * all bundles and has all actions.  Equivalent to 
@@ -225,17 +226,17 @@ public final class AdminPermission extends Permission
      * 
      * Null arguments are equivalent to "*"
      *
-     * @param name A long bundle id, an X.500 Distinguished Name suffix or "*" to match all bundles
+     * @param filter an X.500 Distinguished Name suffix or "*" to match all bundles
      * @param actions <tt>class</tt>, <tt>execute</tt>, <tt>lifecycle</tt>, 
      * <tt>listener</tt>, <tt>metadata</tt>, <tt>permission</tt>, <tt>resolve</tt>, 
      * <tt>resource</tt>, <tt>startlevel</tt>, or "*" to indicate all actions
      */
-    public AdminPermission(String name, String actions)
+    public AdminPermission(String filter, String actions)
     {
     	//arguments will be null if called from a PermissionInfo defined with
     	//no args
     	this(
-    			(name == null ? "*" : name), //$NON-NLS-1$
+    			(filter == null ? "*" : filter), //$NON-NLS-1$
 				getMask((actions == null ? "*" : actions)) //$NON-NLS-1$
 				);
     }
@@ -244,67 +245,37 @@ public final class AdminPermission extends Permission
      * Creates a new <tt>AdminPermission</tt> object for use by the <code>Policy</code>
      * object to instantiate new <tt>Permission</tt> objects.
      * 
-     * @param name A bundle id
+     * @param bundle A bundle
      * @param actions <tt>class</tt>, <tt>execute</tt>, <tt>lifecycle</tt>, 
      * <tt>listener</tt>, <tt>metadata</tt>, <tt>permission</tt>, <tt>resolve</tt>, 
      * <tt>resource</tt>, <tt>startlevel</tt>, or "*" to indicate all actions
      */
-    public AdminPermission(long name, String actions) {
-    	super(Long.toString(name));
-    	this.nameId = name;
+    public AdminPermission(Bundle bundle, String actions) {
+    	super(bundle.toString());
+    	this.bundle = bundle;
     	this.wildcard = false;
-    	this.nameFilter = null;
+    	this.filter = null;
     	this.action_mask = getMask(actions);
     }
-
-    /**
-     * Creates a new <tt>AdminPermission</tt> object for use by the <code>Policy</code>
-     * object to instantiate new <tt>Permission</tt> objects.
-     * 
-     * This constructor is used by PermissionAdmin.  Null arguments are equivalent to "*"
-     *
-     * @param name A long bundle id, an X.500 Distinguished Name suffix or "*" to match all bundles
-     * @param actions <tt>class</tt>, <tt>execute</tt>, <tt>lifecycle</tt>, 
-     * <tt>listener</tt>, <tt>metadata</tt>, <tt>permission</tt>, <tt>resolve</tt>, 
-     * <tt>resource</tt>, <tt>startlevel</tt>, or "*" to indicate all actions
-     * @param framework Framework object used to look up bundle properties.
-     */
-    public AdminPermission(String name, String actions, Framework framework)
-    {
-    	//arguments will be null if called from a PermissionInfo defined with
-    	//no args
-    	this(
-    			(name == null ? "*" : name), //$NON-NLS-1$
-				getMask((actions == null ? "*" : actions)) //$NON-NLS-1$
-				);
-    	
-    	this.framework = framework;
-    }
-  
+ 
     /**
      * Package private constructor used by AdminPermissionCollection.
      *
-     * @param name class name
+     * @param filter name filter
      * @param action_mask mask
      */
-    AdminPermission(String name, int action_mask) {
-    	super(name);
+    AdminPermission(String filter, int action_mask) {
+    	super(filter);
     	
-    	//name must be either a long bundleid or * or a suffix
-    	if (name.equals("*")) { //$NON-NLS-1$
+    	//name must be either * or a filter
+    	if (filter.equals("*")) { //$NON-NLS-1$
     		this.wildcard = true;
-    		this.nameFilter = null;
+    		this.filter = null;
     	} else {
-   			try {
-   				this.nameId = Long.parseLong(name);
-   	    		this.wildcard = false;
-   	   			this.nameFilter = null;
-   			} catch (NumberFormatException e) {
-   				this.wildcard = false;
-   				this.nameFilter = name;
-   			}
+			this.wildcard = false;
+			this.filter = filter;
     	}
-
+    	this.bundle = null;
     	this.action_mask = action_mask;
     }
     
@@ -563,27 +534,23 @@ public final class AdminPermission extends Permission
      
     /**
      * Called by <tt><@link AdminPermission#implies(Permission)></tt> on an AdminPermission
-     * which was constructed with a Bundle Id.  This method loads a dictionary with the
+     * which was constructed with a Bundle.  This method loads a dictionary with the
      * filter-matchable properties of this bundle.  The dictionary is cached so this lookup
      * only happens once.
      * 
      * This method should only be called on an AdminPermission which was constructed with a 
-     * bundle id
+     * bundle
      * 
      * @return a dictionary of properties for this bundle
      */
-    private Dictionary getProperties(long bundleId) {
+    private Dictionary getProperties() {
     	if (bundleProperties == null) {
     		bundleProperties = new Hashtable();
-
-    		final Bundle bundle = framework.getBundle(bundleId);
-    		if (bundle == null)
-    			return null;
 
     		AccessController.doPrivileged(new PrivilegedAction() {
 				public Object run() {
 		    		//set Id
-		    		bundleProperties.put("Id",new Long(bundle.getBundleId())); //$NON-NLS-1$
+		    		bundleProperties.put("id",new Long(bundle.getBundleId())); //$NON-NLS-1$
 		    		
 		    		//set location
 		    		bundleProperties.put("location",bundle.getLocation()); //$NON-NLS-1$
@@ -599,28 +566,55 @@ public final class AdminPermission extends Permission
     	}     		
     	return bundleProperties;
     }
+
+    /**
+     * Called by <tt><@link AdminPermission#implies(Permission)></tt> on an AdminPermission
+     * which was constructed with a filter.  This method loads a FilterImpl with the
+     * filter specification of this AdminPermission.  The filter is cached so this work
+     * only happens once.
+     * 
+     * This method should only be called on an AdminPermission which was constructed with a 
+     * filter
+     * 
+     * @return a filterImpl for this bundle
+     */
+    private Filter getFilterImpl() {
+    	if (filterImpl == null) {
+    		try {
+				filterImpl = new FilterImpl(filter);
+			} catch (InvalidSyntaxException e) {
+				//we will return null
+			}
+    	}     		
+    	return filterImpl;
+    }
+    
     /**
      * Determines if the specified permission is implied by this object.
      * This method throws an exception if the specified permission was not
-     * constructed with a bundle id as it's name.
+     * constructed with a bundle.
      * 
      * <p>This method returns <tt>true</tt> if
      * The specified permission is an AdminPermission AND
      * <ul>
-     * 	<li>this object's name is an X.500 Distinguished name suffix that 
-     * matches the specified permission's bundle id OR
-     * 	<li>this object's name is "*" OR
-     * 	<li>this object's name is a bundle id equal to the specified permission's
-     * bundle id
+     * 	<li>this object's filter is an X.500 Distinguished name suffix that 
+     * matches the specified permission's bundle OR
+     * 	<li>this object's filter is "*" OR
+     * 	<li>this object's bundle is a equal to the specified permission's
+     * bundle
      * </ul>
      * AND this object's actions include all of the specified permission's actions 	 
      *
+     * Special case: if the specified permission was constructed with "*", then this method
+     * returns <tt>true</tt> if this object's filter is "*" and this object's actions include
+     * all of the specified permission's actions
+     * 
      * @param p The permission to interrogate.
      *
      * @return <tt>true</tt> if the specified permission is implied by
      * this object; <tt>false</tt> otherwise.
      * @throws RuntimeException if specified permission was not constructed with
-     * a bundle id as it's name
+     * a bundle or "*"
      */
     public boolean implies(Permission p)
     {
@@ -636,7 +630,7 @@ public final class AdminPermission extends Permission
     	}
 
     	//if passed in a filter, puke
-    	if (target.nameFilter != null) {
+    	if (target.filter != null) {
     		throw new RuntimeException("Cannot imply a filter");
     	}
     	
@@ -646,21 +640,16 @@ public final class AdminPermission extends Permission
     	}
 
     	//check our name 
-    	if (nameFilter != null) {
+    	if (filter != null) {
     		//it's a filter
-    		Filter filter = null;
-    		try {
-				filter = new FilterImpl(nameFilter);
-			} catch (InvalidSyntaxException e) {
-				//we will return false
-			}
-			return filter != null && filter.match(getProperties(target.nameId));
+    		Filter filterImpl = getFilterImpl();
+			return filterImpl != null && filterImpl.match(target.getProperties());
     	} else if (wildcard) {
     		//it's "*"
     		return true;
     	} else {
     		//it's a bundle id
-    		return nameId == target.nameId;
+    		return bundle.equals(target.bundle);
     	}
     	    	
     }
@@ -760,9 +749,10 @@ public final class AdminPermission extends Permission
 
         return((action_mask == a.action_mask) &&
         		(wildcard == a.wildcard) &&
-        		(nameId == a.nameId) &&
-				((nameFilter == null) == (a.nameFilter == null)) &&
-				(nameFilter == null ? true : nameFilter.equals(a.nameFilter))
+        		((bundle == null) == (a.bundle == null)) &&
+        		(bundle == null ? true : bundle.equals(a.bundle)) &&
+				((filter == null) == (a.filter == null)) &&
+				(filter == null ? true : filter.equals(a.filter))
 				);
     }
 
@@ -772,9 +762,7 @@ public final class AdminPermission extends Permission
      * @return Hash code value for this object.
      */
 	public int hashCode() {
-		return nameFilter != null ?
-				action_mask ^ nameFilter.hashCode() : 
-				action_mask ^ (int)nameId;
+		return action_mask ^ (filter != null ? filter.hashCode() : bundle.hashCode());
 	}
 	
     /**

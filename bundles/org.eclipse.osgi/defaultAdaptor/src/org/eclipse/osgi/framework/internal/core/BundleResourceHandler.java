@@ -18,6 +18,7 @@ import org.eclipse.osgi.framework.adaptor.core.*;
 import org.eclipse.osgi.framework.internal.core.AbstractBundle;
 import org.osgi.framework.AdminPermission;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Bundle;
 
 /**
  * URLStreamHandler the bundleentry and bundleresource protocols.
@@ -43,7 +44,7 @@ public abstract class BundleResourceHandler extends URLStreamHandler {
 	 * Parse reference URL. 
 	 */
 	protected void parseURL(URL url, String str, int start, int end) {
-		if (end < start) 
+		if (end < start)
 			return;
 		if (url.getPath() != null)
 			// A call to a URL constructor has been made that uses an authorized URL as its context.
@@ -107,8 +108,8 @@ public abstract class BundleResourceHandler extends URLStreamHandler {
 
 		// Check the permission of the caller to see if they
 		// are allowed access to the resource.
-		checkAdminPermission(Long.parseLong(bundleId));
-		
+		checkAdminPermission(context.getBundle(Long.parseLong(bundleId)));
+
 		// Setting the authority portion of the URL to SECURITY_ATHORIZED
 		// ensures that this URL was created by using this parseURL
 		// method.  The openConnection method will only open URLs
@@ -137,7 +138,7 @@ public abstract class BundleResourceHandler extends URLStreamHandler {
 		AbstractBundle bundle = null;
 		long bundleID;
 		try {
-			bundleID =Long.parseLong(bidString);
+			bundleID = Long.parseLong(bidString);
 		} catch (NumberFormatException nfe) {
 			throw new MalformedURLException(AdaptorMsg.formatter.getString("URL_INVALID_BUNDLE_ID", bidString)); //$NON-NLS-1$
 		}
@@ -147,7 +148,7 @@ public abstract class BundleResourceHandler extends URLStreamHandler {
 		// at URL construction.
 		if (!url.getAuthority().equals(SECURITY_AUTHORIZED)) {
 			// No admin security check was made better check now.
-			checkAdminPermission(bundleID);
+			checkAdminPermission(bundle);
 		}
 
 		if (bundle == null) {
@@ -257,11 +258,11 @@ public abstract class BundleResourceHandler extends URLStreamHandler {
 		return true;
 	}
 
-	protected void checkAdminPermission(long bundleId) {
+	protected void checkAdminPermission(Bundle bundle) {
 		SecurityManager sm = System.getSecurityManager();
 
 		if (sm != null) {
-			sm.checkPermission(new AdminPermission(bundleId,AdminPermission.RESOURCE));
+			sm.checkPermission(new AdminPermission(bundle, AdminPermission.RESOURCE));
 		}
 	}
 

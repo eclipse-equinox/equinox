@@ -183,7 +183,7 @@ public class PermissionAdminImpl implements PermissionAdmin {
 	 * <tt>AdminPermission</tt>.
 	 */
 	public void setPermissions(String location, PermissionInfo[] permissions) {
-		framework.checkAdminPermission(0, AdminPermission.PERMISSION);
+		framework.checkAdminPermission(framework.systemBundle, AdminPermission.PERMISSION);
 
 		if (location == null) {
 			throw new NullPointerException();
@@ -296,7 +296,7 @@ public class PermissionAdminImpl implements PermissionAdmin {
 	 * <tt>AdminPermission</tt>.
 	 */
 	public void setDefaultPermissions(PermissionInfo[] permissions) {
-		framework.checkAdminPermission(0, AdminPermission.PERMISSION);
+		framework.checkAdminPermission(framework.systemBundle, AdminPermission.PERMISSION);
 
 		PermissionStorage storage = new org.eclipse.osgi.framework.util.SecurePermissionStorage(this.storage);
 
@@ -386,30 +386,30 @@ public class PermissionAdminImpl implements PermissionAdmin {
 		combined.setAssignedPermissions(assigned, assigned == defaultAssignedPermissions);
 
 		combined.setConditionalPermissions(new ConditionalPermissions(bundle, framework.condPermAdmin));
-		
+
 		/* now process the permissions.perm file, if it exists, and build the
 		 * restrictedPermissions using it. */
-		URL u = bundle.getEntry("META-INF/permissions.perm");
+		URL u = bundle.getEntry("META-INF/permissions.perm"); //$NON-NLS-1$
 		if (u != null) {
 			try {
 				DataInputStream dis = new DataInputStream(u.openStream());
 				String line;
 				Vector piList = new Vector();
-				while((line = dis.readLine()) != null) {
+				while ((line = dis.readLine()) != null) {
 					line = line.trim();
-					if (line.startsWith("#") || line.startsWith("//")) continue;
+					if (line.startsWith("#") || line.startsWith("//") || line.length() == 0)  //$NON-NLS-1$//$NON-NLS-2$
+						continue;
 					try {
 						PermissionInfo pi = new PermissionInfo(line);
 						piList.add(pi);
-					} catch(Exception e) {
+					} catch (Exception e) {
 						// Right now we just eat any exception that happens when
 						// parsing the PermissionInfo
 						framework.publishFrameworkEvent(FrameworkEvent.ERROR, bundle, e);
 					}
 				}
 				ConditionalPermissionInfoImpl cpiArray[] = new ConditionalPermissionInfoImpl[1];
-				cpiArray[0] = new ConditionalPermissionInfoImpl(new ConditionInfo[0], 
-					(PermissionInfo[]) piList.toArray(new PermissionInfo[0]));
+				cpiArray[0] = new ConditionalPermissionInfoImpl(new ConditionInfo[0], (PermissionInfo[]) piList.toArray(new PermissionInfo[0]));
 				ConditionalPermissionSet cps = new ConditionalPermissionSet(cpiArray, new Condition[0]);
 				combined.setRestrictedPermissions(cps);
 			} catch (IOException e) {
@@ -615,11 +615,6 @@ public class PermissionAdminImpl implements PermissionAdmin {
 		String type = info.getType();
 		String name = info.getName();
 		String actions = info.getActions();
-		
-		//special case for AdminPermission - required for RFC 73
-		if (AdminPermission.class.getName().equals(type)) {
-			return new AdminPermission(name,actions,framework);
-		}
 
 		UnresolvedPermission permission = new UnresolvedPermission(type, name, actions);
 

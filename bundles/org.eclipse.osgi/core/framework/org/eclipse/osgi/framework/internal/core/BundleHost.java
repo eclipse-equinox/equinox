@@ -215,7 +215,7 @@ public class BundleHost extends AbstractBundle {
 	protected Class loadClass(String name, boolean checkPermission) throws ClassNotFoundException {
 		if (checkPermission) {
 			try {
-				framework.checkAdminPermission(getBundleId(),AdminPermission.CLASS);
+				framework.checkAdminPermission(this, AdminPermission.CLASS);
 			} catch (SecurityException e) {
 				throw new ClassNotFoundException();
 			}
@@ -249,7 +249,7 @@ public class BundleHost extends AbstractBundle {
 			checkResourcePermission();
 		} catch (SecurityException e) {
 			try {
-				framework.checkAdminPermission(getBundleId(), AdminPermission.RESOURCE);
+				framework.checkAdminPermission(this, AdminPermission.RESOURCE);
 			} catch (SecurityException ee) {
 				return null;
 			}
@@ -266,7 +266,7 @@ public class BundleHost extends AbstractBundle {
 			checkResourcePermission();
 		} catch (SecurityException e) {
 			try {
-				framework.checkAdminPermission(getBundleId(), AdminPermission.RESOURCE);
+				framework.checkAdminPermission(this, AdminPermission.RESOURCE);
 			} catch (SecurityException ee) {
 				return null;
 			}

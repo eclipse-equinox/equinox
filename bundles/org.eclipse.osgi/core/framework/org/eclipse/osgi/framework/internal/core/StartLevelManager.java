@@ -137,7 +137,7 @@ public class StartLevelManager implements EventDispatcher, EventListener, Servic
 	 * permissions.
 	 */
 	public void setInitialBundleStartLevel(int startlevel) {
-		framework.checkAdminPermission(0,AdminPermission.STARTLEVEL);
+		framework.checkAdminPermission(framework.systemBundle, AdminPermission.STARTLEVEL);
 		if (startlevel <= 0) {
 			throw new IllegalArgumentException();
 		}
@@ -222,7 +222,7 @@ public class StartLevelManager implements EventDispatcher, EventListener, Servic
 		if (newSL <= 0) {
 			throw new IllegalArgumentException(Msg.formatter.getString("STARTLEVEL_EXCEPTION_INVALID_REQUESTED_STARTLEVEL", "" + newSL)); //$NON-NLS-1$ //$NON-NLS-2$
 		}
-		framework.checkAdminPermission(0,AdminPermission.STARTLEVEL);
+		framework.checkAdminPermission(framework.systemBundle, AdminPermission.STARTLEVEL);
 
 		if (Debug.DEBUG && Debug.DEBUG_STARTLEVEL) {
 			Debug.println("StartLevelImpl: setStartLevel: " + newSL + "; callerBundle = " + callerBundle.getBundleId()); //$NON-NLS-1$ //$NON-NLS-2$
@@ -396,12 +396,12 @@ public class StartLevelManager implements EventDispatcher, EventListener, Servic
 					});
 				} catch (PrivilegedActionException e) {
 					if (e.getException() instanceof IOException) {
-						throw (IOException)e.getException();
-					} 
-					throw (RuntimeException)e.getException();
+						throw (IOException) e.getException();
+					}
+					throw (RuntimeException) e.getException();
 				}
 
-				framework.checkAdminPermission(bundle.getBundleId(),AdminPermission.EXECUTE);
+				framework.checkAdminPermission(bundle, AdminPermission.EXECUTE);
 
 				// handle starting or stopping the bundle asynchronously
 				issueEvent(new StartLevelEvent(StartLevelEvent.CHANGE_BUNDLE_SL, newSL, (AbstractBundle) bundle));
@@ -452,12 +452,12 @@ public class StartLevelManager implements EventDispatcher, EventListener, Servic
 	public void dispatchEvent(Object listener, Object listenerObject, int eventAction, Object eventObject) {
 		try {
 			switch (eventAction) {
-			case StartLevelEvent.CHANGE_BUNDLE_SL:
-				setBundleSL((StartLevelEvent) eventObject);
-				break;
-			case StartLevelEvent.CHANGE_FW_SL:
-				doSetStartLevel(((StartLevelEvent) eventObject).getNewSL(), ((StartLevelEvent) eventObject).getBundle());
-				break;
+				case StartLevelEvent.CHANGE_BUNDLE_SL :
+					setBundleSL((StartLevelEvent) eventObject);
+					break;
+				case StartLevelEvent.CHANGE_FW_SL :
+					doSetStartLevel(((StartLevelEvent) eventObject).getNewSL(), ((StartLevelEvent) eventObject).getBundle());
+					break;
 			}
 		} catch (Throwable t) {
 			// allow the adaptor to handle this unexpected error
