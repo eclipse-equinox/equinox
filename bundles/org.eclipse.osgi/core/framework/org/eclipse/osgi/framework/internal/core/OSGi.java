@@ -30,8 +30,6 @@ public class OSGi
      */
     public OSGi(FrameworkAdaptor adaptor)
     {
-        displayBanner();
-
         framework = createFramework(adaptor);
     }
 
