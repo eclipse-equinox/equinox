@@ -58,7 +58,6 @@ public class EclipseStarter {
 	private static final String OS = "-os"; //$NON-NLS-1$
 	private static final String ARCH = "-arch"; //$NON-NLS-1$
 	private static final String NL = "-nl"; //$NON-NLS-1$	
-
 	private static final String CONFIGURATION = "-configuration"; //$NON-NLS-1$	
 	private static final String USER = "-user"; //$NON-NLS-1$	
 	// this is more of an Eclipse argument but this OSGi implementation stores its 
@@ -70,6 +69,7 @@ public class EclipseStarter {
 	public static final String PROP_DEV = "osgi.dev"; //$NON-NLS-1$
 	public static final String PROP_CONSOLE = "osgi.console"; //$NON-NLS-1$
 	public static final String PROP_CONSOLE_CLASS= "osgi.consoleClass"; //$NON-NLS-1$
+	public static final String PROP_CHECK_CONFIG = "osgi.checkConfiguration"; //$NON-NLS-1$
 	public static final String PROP_OS = "osgi.os"; //$NON-NLS-1$
 	public static final String PROP_WS = "osgi.ws"; //$NON-NLS-1$
 	public static final String PROP_NL = "osgi.nl"; //$NON-NLS-1$
@@ -170,6 +170,7 @@ public class EclipseStarter {
 		log = createFrameworkLog();
 		loadConfigurationInfo();
 		loadDefaultProperties();
+		finalizeProperties();
 		adaptor = createAdaptor();
 		((EclipseAdaptor) adaptor).setLog(log);
 		OSGi osgi = new OSGi(adaptor);
@@ -865,5 +866,11 @@ public class EclipseStarter {
 			commandLine = left + value + right;
 		}
 		return commandLine;
+	}
+
+	private static void finalizeProperties() {
+		// if check config is unknown and we are in dev mode, 
+		if (System.getProperty(PROP_DEV) != null && System.getProperty(PROP_CHECK_CONFIG) == null)
+			System.getProperties().put(PROP_CHECK_CONFIG, "true");
 	}
 }
