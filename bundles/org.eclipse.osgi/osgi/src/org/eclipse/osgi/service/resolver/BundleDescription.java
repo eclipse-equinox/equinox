@@ -118,9 +118,7 @@ public interface BundleDescription {
 	 * a fragment.
 	 * 
 	 * @return
-	 * @deprecated Use getHosts instead
 	 */
-	// TODO remove before M9
 	public HostSpecification getHost();
 
 	/**
@@ -128,7 +126,9 @@ public interface BundleDescription {
 	 * a fragment.
 	 * 
 	 * @return
+	 * @deprecated Use getHost instead
 	 */
+	// TODO remove before M9
 	public HostSpecification[] getHosts();
 
 	/**

@@ -81,10 +81,10 @@ public class StateHelperImpl implements StateHelper {
 			// it is a bug in the client to call this method when not attached to a state
 			throw new IllegalStateException("Does not belong to a state"); //$NON-NLS-1$		
 		List unsatisfied = new ArrayList();
-		HostSpecification[] hosts = bundle.getHosts();
-		for (int i = 0; i < hosts.length; i++)
-			if (!hosts[i].isResolved() && !isResolvable(hosts[i]))
-				unsatisfied.add(hosts[i]);
+		HostSpecification host = bundle.getHost();
+		if (host != null)
+			if (!host.isResolved() && !isResolvable(host))
+				unsatisfied.add(host);
 		BundleSpecification[] requiredBundles = bundle.getRequiredBundles();
 		for (int i = 0; i < requiredBundles.length; i++)
 			if (!requiredBundles[i].isResolved() && !isResolvable(requiredBundles[i]))
@@ -178,13 +178,12 @@ public class StateHelperImpl implements StateHelper {
 	}
 
 	private void buildReferences(BundleDescription description, List references) {
-		HostSpecification[] hosts = description.getHosts();
+		HostSpecification host = description.getHost();
 		// it is a fragment
-		if (hosts.length > 0) {
-			for (int i = 0; i < hosts.length; i++)
-				// just create a dependency between fragment and host
-				if (hosts[i].getSupplier() != null && hosts[i].getSupplier() != description)
-					references.add(new Object[] {description, hosts[i].getSupplier()});
+		if (host != null) {
+			// just create a dependency between fragment and host
+			if (host.getSupplier() != null && host.getSupplier() != description)
+				references.add(new Object[] {description, host.getSupplier()});
 		} else {
 			// it is a host
 			buildReferences(description, description.getRequiredBundles(), references);
