@@ -151,17 +151,6 @@ public class EclipseStarter {
 	public static boolean isRunning() {
 		return running;
 	}
-	/**
-	 * Starts the platform and sets it up to run a single application. The application is either identified
-	 * in the given arguments (e.g., -application &ltapp id&gt) or in the <code>eclipse.application</code>
-	 * System property.  The platform must not be running already. 
-	 * <p>
-	 * The given runnable (if not <code>null</code>) is used to tear down the splash screen if required.
-	 * </p>
-	 * @param argument the argument passed to the application
-	 * @return the result of running the application
-	 * @throws Exception if anything goes wrong
-	 */
 	
 	protected static FrameworkLog createFrameworkLog() {
 		FrameworkLog frameworkLog;
@@ -189,6 +178,17 @@ public class EclipseStarter {
 		return frameworkLog;
 	}
 	
+	/**
+	 * Starts the platform and sets it up to run a single application. The application is either identified
+	 * in the given arguments (e.g., -application &ltapp id&gt) or in the <code>eclipse.application</code>
+	 * System property.  The platform must not be running already. 
+	 * <p>
+	 * The given runnable (if not <code>null</code>) is used to tear down the splash screen if required.
+	 * </p>
+	 * @param argument the argument passed to the application
+	 * @return the result of running the application
+	 * @throws Exception if anything goes wrong
+	 */		
 	public static void startup(String[] args, Runnable endSplashHandler) throws Exception {
 		if (running)
 			throw new IllegalStateException("Platform is already running");
