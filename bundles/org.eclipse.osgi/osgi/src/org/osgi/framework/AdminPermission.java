@@ -783,8 +783,8 @@ public final class AdminPermission extends Permission
  */
 final class AdminPermissionCollection extends PermissionCollection
 {
-
-    /**
+	private static final long serialVersionUID = 3906372644575328048L;
+	/**
      * Collection of permissions.
      *
      * @serial
