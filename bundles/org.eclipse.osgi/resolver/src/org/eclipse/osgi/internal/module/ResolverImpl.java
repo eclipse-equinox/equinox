@@ -269,6 +269,17 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 			// could not be resolved would have been moved back to UNRESOLVED
 			while (resolvingBundles.size() > 0) {
 				ResolverBundle rb = (ResolverBundle) resolvingBundles.get(0);
+				// Check that we haven't wired to any dropped exports
+				ResolverImport[] imports = rb.getImportPackages();
+				boolean needRewire = false;
+				for(int j=0; j<imports.length; j++) {
+					if(imports[j].getMatchingExport() != null && !resolverExports.contains(imports[j].getMatchingExport())) {
+						imports[j].setMatchingExport(null);
+						needRewire = true;
+					}
+				}
+				if(needRewire)
+					resolveBundle(rb);
 				if (rb.isFullyWired()) {
 					if (DEBUG || DEBUG_CYCLES)
 						ResolverImpl.log("Pushing " + rb + " to RESOLVED"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -664,6 +675,12 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 			if (imports[i].getMatchingExport() != null && imports[i].getMatchingExport().getName().equals(clash.getName())) {
 				imports[i].addUnresolvableWiring(imports[i].getMatchingExport().getExporter());
 				importer.clearWires();
+				// If the clashing import package was also exported then
+				// we need to put the export back into resolverExports
+				ResolverExport removed = importer.getExport(imports[i]);
+				if(removed != null)
+					resolverExports.put(removed);
+				// Try to re-resolve the bundle
 				if (resolveBundle(importer))
 					return true;
 				else
