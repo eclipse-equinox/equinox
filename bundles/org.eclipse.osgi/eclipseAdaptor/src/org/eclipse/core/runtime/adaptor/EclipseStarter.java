@@ -132,8 +132,10 @@ public class EclipseStarter {
 				endSplashHandler.run();
 			// may use startupFailed to understand where the error happened
 			FrameworkLogEntry logEntry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, startupFailed ? EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_STARTUP_ERROR") : EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_APP_ERROR"), 1, e, null); //$NON-NLS-1$//$NON-NLS-2$
-			if (log != null)
+			if (log != null) {
 				log.log(logEntry);
+				logUnresolvedBundles(context.getBundles());
+			}
 			else
 				// TODO desperate measure - ideally, we should write this to disk (a la Main.log)
 				e.printStackTrace();
