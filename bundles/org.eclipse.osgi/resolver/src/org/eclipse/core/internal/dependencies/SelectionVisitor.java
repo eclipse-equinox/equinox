@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2003 IBM Corporation and others.
+ * Copyright (c) 2003, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,8 +13,6 @@ package org.eclipse.core.internal.dependencies;
 
 import java.util.Collection;
 import java.util.Collections;
-import org.eclipse.core.dependencies.IElement;
-import org.eclipse.core.dependencies.ISelectionPolicy;
 
 /**
  * Clients may override to provide alternative policies. 
@@ -28,16 +26,16 @@ public class SelectionVisitor implements IElementSetVisitor {
 		this.selectionPolicy = selectionPolicy;
 	}
 
-	public int getOrder() {
-		return order;
-	}
-
 	public final Collection getAncestors(ElementSet elementSet) {
 		return elementSet.getRequiring();
 	}
 
 	public final Collection getDescendants(ElementSet elementSet) {
 		return elementSet.getRequired();
+	}
+
+	public int getOrder() {
+		return order;
 	}
 
 	public void update(ElementSet elementSet) {
@@ -53,7 +51,7 @@ public class SelectionVisitor implements IElementSetVisitor {
 			return;
 		}
 		// otherwise, we must pick a single one (if any)
-		IElement selected = this.selectionPolicy.selectSingle(elementSet);
+		Element selected = this.selectionPolicy.selectSingle(elementSet);
 		elementSet.setSelected(selected == null ? Collections.EMPTY_SET : Collections.singleton(selected));
 	}
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2003 IBM Corporation and others.
+ * Copyright (c) 2003, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.core.dependencies;
+package org.eclipse.core.internal.dependencies;
 
 import java.util.Set;
 
@@ -23,10 +23,10 @@ public interface ISelectionPolicy {
 	/**
 	 * Returns a set containing the selected elements for the given element set.  
 	 */
-	public Set selectMultiple(IElementSet elementSet);
+	public Set selectMultiple(ElementSet elementSet);
 
 	/**
 	 * Returns the selected element for the given element set.  
 	 */
-	public IElement selectSingle(IElementSet elementSet);
+	public Element selectSingle(ElementSet elementSet);
 }

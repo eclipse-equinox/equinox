@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2003 IBM Corporation and others.
+ * Copyright (c) 2003, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,39 +11,39 @@
 
 package org.eclipse.core.internal.dependencies;
 
-import org.eclipse.core.dependencies.IElement;
-import org.eclipse.core.dependencies.IElementChange;
 
-class ElementChange implements IElementChange {
-	private IElement element;
+/**
+ * Represents a change that happened to an element's resolution status.
+ */
+public class ElementChange {
+	/** State transitions. */
+	public final static int ADDED = 0x01;
+	public final static int LINKAGE_CHANGED = 0x10;
+	public final static int REMOVED = 0x02;
+	public final static int RESOLVED = 0x04;
+	public final static int UNRESOLVED = 0x08;
+	public final static int UPDATED = ADDED | REMOVED;
+	private Element element;
 	private int kind;
 
-	ElementChange(IElement element, int kind) {
+	ElementChange(Element element, int kind) {
 		this.element = element;
 		this.kind = kind;
 	}
 
-	public Object getVersionId() {
-		return element.getVersionId();
+	/**
+	 * Returns the affected element.
+	 */
+
+	public Element getElement() {
+		return element;
 	}
+	/**
+	 * Returns the kind of the transition.
+	 */
 
 	public int getKind() {
 		return kind;
-	}
-
-	public IElement getElement() {
-		return element;
-	}
-
-	public String toString() {
-		StringBuffer result = new StringBuffer();
-		result.append(element.getId());
-		result.append('_');
-		result.append(getVersionId());
-		result.append(" ("); //$NON-NLS-1$
-		result.append(getStatusName(getKind()));
-		result.append(')');
-		return result.toString();
 	}
 
 	private String getStatusName(int status) {
@@ -65,7 +65,22 @@ class ElementChange implements IElementChange {
 		return statusStr.toString();
 	}
 
+	public Object getVersionId() {
+		return element.getVersionId();
+	}
+
 	void setKind(int kind) {
 		this.kind = kind;
+	}
+
+	public String toString() {
+		StringBuffer result = new StringBuffer();
+		result.append(element.getId());
+		result.append('_');
+		result.append(getVersionId());
+		result.append(" ("); //$NON-NLS-1$
+		result.append(getStatusName(getKind()));
+		result.append(')');
+		return result.toString();
 	}
 }

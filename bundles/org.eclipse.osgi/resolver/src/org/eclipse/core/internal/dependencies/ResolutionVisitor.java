@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2003 IBM Corporation and others.
+ * Copyright (c) 2003, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,7 +12,6 @@
 package org.eclipse.core.internal.dependencies;
 
 import java.util.*;
-import org.eclipse.core.dependencies.*;
 
 public class ResolutionVisitor implements IElementSetVisitor {
 	private int order;
@@ -21,16 +20,16 @@ public class ResolutionVisitor implements IElementSetVisitor {
 		this.order = order;
 	}
 
-	public int getOrder() {
-		return order;
-	}
-
 	public Collection getAncestors(ElementSet elementSet) {
 		return elementSet.getRequired();
 	}
 
 	public Collection getDescendants(ElementSet elementSet) {
 		return elementSet.getRequiring();
+	}
+
+	public int getOrder() {
+		return order;
 	}
 
 	public void update(ElementSet elementSet) {
@@ -42,15 +41,15 @@ public class ResolutionVisitor implements IElementSetVisitor {
 		Set resolved = new HashSet();
 
 		for (Iterator elementsIter = elementSet.getSelected().iterator(); elementsIter.hasNext();) {
-			IElement element = (IElement) elementsIter.next();
-			IDependency[] dependencies = element.getDependencies();
+			Element element = (Element) elementsIter.next();
+			Dependency[] dependencies = element.getDependencies();
 			boolean versionResolved = true;
 			for (int i = 0; i < dependencies.length; i++) {
-				IElementSet requiredNode = elementSet.getSystem().getElementSet(dependencies[i].getRequiredObjectId());
+				ElementSet requiredNode = elementSet.getSystem().getElementSet(dependencies[i].getRequiredObjectId());
 				List requiredNodeResolvedVersions = new ArrayList(requiredNode.getResolved());
 				Object highestRequiredVersionId = null;
 				for (Iterator requiredNodeResolvedVersionsIter = requiredNodeResolvedVersions.iterator(); requiredNodeResolvedVersionsIter.hasNext();) {
-					IElement requiredResolvedVersion = (IElement) requiredNodeResolvedVersionsIter.next();
+					Element requiredResolvedVersion = (Element) requiredNodeResolvedVersionsIter.next();
 					if (dependencies[i].getMatchRule().isSatisfied(dependencies[i].getRequiredVersionId(), requiredResolvedVersion.getVersionId()))
 						if (highestRequiredVersionId == null || elementSet.getSystem().compare(requiredResolvedVersion.getVersionId(), highestRequiredVersionId) > 0)
 							highestRequiredVersionId = requiredResolvedVersion.getVersionId();

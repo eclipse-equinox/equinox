@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2003 IBM Corporation and others.
+ * Copyright (c) 2003, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,11 +17,12 @@ import java.util.Collection;
  * Not to be implemented by clients.
  */
 public interface IElementSetVisitor {
-	public int getOrder();
-
-	public abstract void update(ElementSet node);
 
 	public abstract Collection getAncestors(ElementSet node);
 
 	public abstract Collection getDescendants(ElementSet node);
+
+	public int getOrder();
+
+	public abstract void update(ElementSet node);
 }

@@ -11,9 +11,14 @@
 package org.eclipse.core.internal.dependencies;
 
 import java.util.*;
-import org.eclipse.core.dependencies.*;
 
-public class DependencySystem implements IDependencySystem {
+public class DependencySystem {
+	public class CyclicSystemException extends Exception {
+		public CyclicSystemException(String message) {
+			super(message);
+		}
+	}	
+	
 	public final static int SATISFACTION = 0;
 	public final static int SELECTION = 1;
 	public final static int RESOLUTION = 2;
@@ -46,7 +51,7 @@ public class DependencySystem implements IDependencySystem {
 		this(comparator, selectionPolicy, false);
 	}
 
-	public IElementSet getElementSet(Object id) {
+	public ElementSet getElementSet(Object id) {
 		ElementSet elementSet = (ElementSet) this.elementSets.get(id);
 		// create an element set for the given id if one does not exist yet
 		if (elementSet == null)
@@ -67,11 +72,11 @@ public class DependencySystem implements IDependencySystem {
 	/**
 	 * Determines which versions of each element set are resolved.
 	 */
-	public IResolutionDelta resolve() throws CyclicSystemException {
+	public ResolutionDelta resolve() throws CyclicSystemException {
 		return this.resolve(true);
 	}
 
-	public IResolutionDelta resolve(boolean produceDelta) throws CyclicSystemException {
+	public ResolutionDelta resolve(boolean produceDelta) throws CyclicSystemException {
 		Collection roots = discoverRoots();
 		// traverse from roots to leaves - returns leaves
 		Collection satisfied = visit(roots, new SatisfactionVisitor(SATISFACTION));
@@ -157,7 +162,7 @@ public class DependencySystem implements IDependencySystem {
 	// temporary hack (using ComputeNodeOrder) to find out what the cycles are 
 	public String getCycleString() {
 		// find cycles
-		IElementSet[] nodes = (IElementSet[]) elementSets.values().toArray(new IElementSet[elementSets.size()]);
+		ElementSet[] nodes = (ElementSet[]) elementSets.values().toArray(new ElementSet[elementSets.size()]);
 		ArrayList dependencies = new ArrayList();
 		for (int i = 0; i < nodes.length; i++) {
 			for (Iterator required = nodes[i].getRequiring().iterator(); required.hasNext();)
@@ -168,7 +173,7 @@ public class DependencySystem implements IDependencySystem {
 		for (int i = 0; i < cycles.length; i++) {
 			result.append("{");
 			for (int j = 0; j < cycles[i].length; j++) {
-				result.append(((IElementSet) cycles[i][j]).getId());
+				result.append(((ElementSet) cycles[i][j]).getId());
 				result.append(",");
 			}
 			result.deleteCharAt(result.length() - 1);
@@ -188,17 +193,17 @@ public class DependencySystem implements IDependencySystem {
 		return (mark << 8) + (order & 0xFF);
 	}
 
-	public void addElements(IElement[] elementsToAdd) {
+	public void addElements(Element[] elementsToAdd) {
 		for (int i = 0; i < elementsToAdd.length; i++)
 			addElement(elementsToAdd[i]);
 	}
 
-	public void addElement(IElement element) {
+	public void addElement(Element element) {
 		((ElementSet) this.getElementSet(element.getId())).addElement(element);
 		this.elementCount++;
 	}
 
-	public void removeElements(IElement[] elementsToRemove) {
+	public void removeElements(Element[] elementsToRemove) {
 		for (int i = 0; i < elementsToRemove.length; i++)
 			removeElement(elementsToRemove[i]);
 	}
@@ -210,7 +215,7 @@ public class DependencySystem implements IDependencySystem {
 		elementSet.removeElement(versionId);
 	}
 
-	public void removeElement(IElement element) {
+	public void removeElement(Element element) {
 		ElementSet elementSet = (ElementSet) elementSets.get(element.getId());
 		if (elementSet == null)
 			return;
@@ -224,7 +229,7 @@ public class DependencySystem implements IDependencySystem {
 	public Map getNodes() {
 		return this.elementSets;
 	}
-
+	// returns all resolved elements ordered by pre-requisites
 	public List getResolved() {
 		int mark = getNewMark(RESOLUTION);
 		Collection elementSets = discoverRoots();
@@ -265,9 +270,9 @@ public class DependencySystem implements IDependencySystem {
 	public String toString() {
 		StringBuffer result = new StringBuffer();
 		for (Iterator elementSetsIter = elementSets.values().iterator(); elementSetsIter.hasNext();) {
-			IElementSet elementSet = (IElementSet) elementSetsIter.next();
+			ElementSet elementSet = (ElementSet) elementSetsIter.next();
 			for (Iterator elementsIter = elementSet.getAvailable().iterator(); elementsIter.hasNext();) {
-				IElement element = (IElement) elementsIter.next();
+				Element element = (Element) elementsIter.next();
 				result.append(element + ": " + Arrays.asList(element.getDependencies())); //$NON-NLS-1$
 				result.append(',');
 			}
@@ -277,43 +282,47 @@ public class DependencySystem implements IDependencySystem {
 		return result.toString();
 	}
 
-	void recordElementStatusChanged(IElement element, int kind) {
+	void recordElementStatusChanged(Element element, int kind) {
 		this.delta.recordChange(element, kind);
 	}
 
 	void recordDependencyChanged(Collection oldResolved, Collection newResolved, Map present) {
 		for (Iterator oldResolvedIter = oldResolved.iterator(); oldResolvedIter.hasNext();) {
-			IElement element = (IElement) oldResolvedIter.next();
+			Element element = (Element) oldResolvedIter.next();
 			if (!newResolved.contains(element))
-				this.delta.recordChange(element, IElementChange.UNRESOLVED);
+				this.delta.recordChange(element, ElementChange.UNRESOLVED);
 		}
 		for (Iterator newResolvedIter = newResolved.iterator(); newResolvedIter.hasNext();) {
-			IElement element = (IElement) newResolvedIter.next();
+			Element element = (Element) newResolvedIter.next();
 			if (!oldResolved.contains(element))
-				this.delta.recordChange(element, IElementChange.RESOLVED);
+				this.delta.recordChange(element, ElementChange.RESOLVED);
 		}
 	}
 
-	public IElement getElement(Object id, Object versionId) {
+	public Element getElement(Object id, Object versionId) {
 		ElementSet elementSet = (ElementSet) elementSets.get(id);
 		if (elementSet == null)
 			return null;
 		return elementSet.getElement(versionId);
 	}
-
-	public IElement createElement(Object id, Object versionId, IDependency[] dependencies, boolean singleton, Object userObject) {
+	// factory method 
+	public Element createElement(Object id, Object versionId, Dependency[] dependencies, boolean singleton, Object userObject) {
 		return new Element(id, versionId, dependencies, singleton, userObject);
 	}
-
-	public IDependency createDependency(Object requiredObjectId, IMatchRule satisfactionRule, Object requiredVersionId, boolean optional, Object userObject) {
+	// factory method
+	public Dependency createDependency(Object requiredObjectId, IMatchRule satisfactionRule, Object requiredVersionId, boolean optional, Object userObject) {
 		return new Dependency(requiredObjectId, satisfactionRule, requiredVersionId, optional, userObject);
 	}
-
+	// global access to system version comparator
 	public int compare(Object obj1, Object obj2) {
 		return comparator.compare(obj1, obj2);
 	}
+	/**
+	 * Returns the delta for the last resolution operation (<code>null</code> if never 
+	 * resolved or if last resolved with delta production disabled).
+	 */
 
-	public IResolutionDelta getLastDelta() {
+	public ResolutionDelta getLastDelta() {
 		return lastDelta;
 	}
 
@@ -321,12 +330,18 @@ public class DependencySystem implements IDependencySystem {
 		return debug;
 	}
 
-	public Collection getRequiringElements(IElement required) {
-		ElementSet containing = (ElementSet) getElementSet(required.getId());
+	public Collection getRequiringElements(Element required) {
+		ElementSet containing =  getElementSet(required.getId());
 		return containing.getRequiringElements(required.getVersionId());
 	}
-
-	public void unresolve(IElement[] elements) {
+	/**
+	 * Forces a set of elements to be unresolved. All dependencies the elements may 
+	 * have as resolved are also unresolved. Also, any elements currently depending on
+	 * the given elements will NOT be automatically unresolved. No delta is generated. 
+	 * These changes are only temporary, and do not affect the outcome of the next 
+	 * resolution (besides the generated delta).   
+	 */
+	public void unresolve(Element[] elements) {
 		int mark = getNewMark(RESOLUTION);
 		for (int i = 0; i < elements.length; i++) {
 			ElementSet set = (ElementSet) getElementSet(elements[i].getId());

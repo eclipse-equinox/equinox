@@ -10,17 +10,15 @@
  *******************************************************************************/
 package org.eclipse.core.internal.dependencies;
 
-import org.eclipse.core.dependencies.IDependency;
-import org.eclipse.core.dependencies.IElement;
 
-class Element implements IElement {
+public class Element {
 	private Object id;
 	private Object versionId;
-	private IDependency[] dependencies;
+	private Dependency[] dependencies;
 	private boolean singleton;
 	private Object userObject;
 
-	public Element(Object id, Object versionId, IDependency[] dependencies, boolean singleton, Object userObject) {
+	public Element(Object id, Object versionId, Dependency[] dependencies, boolean singleton, Object userObject) {
 		Assert.isNotNull(id);
 		Assert.isNotNull(versionId);
 		Assert.isNotNull(dependencies);
@@ -38,12 +36,12 @@ class Element implements IElement {
 	public Object getVersionId() {
 		return versionId;
 	}
-
-	public IDependency[] getDependencies() {
+	/** @return a non-null reference */
+	public Dependency[] getDependencies() {
 		return dependencies;
 	}
-
-	public IDependency getDependency(Object id) {
+	/** may return null */
+	public Dependency getDependency(Object id) {
 		for (int i = 0; i < dependencies.length; i++)
 			if (dependencies[i].getRequiredObjectId().equals(id))
 				return dependencies[i];

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2003 IBM Corporation and others.
+ * Copyright (c) 2003, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,23 +11,22 @@
 package org.eclipse.core.internal.dependencies;
 
 import java.util.*;
-import org.eclipse.core.dependencies.*;
 
 /**
  * Simple selection policy.
  */
 
 public class SimpleSelectionPolicy implements ISelectionPolicy {
-	public Set selectMultiple(IElementSet elementSet) {
+	public Set selectMultiple(ElementSet elementSet) {
 		// all satisfied are selected
 		return new HashSet(elementSet.getSatisfied());
 	}
 
-	public IElement selectSingle(IElementSet elementSet) {
+	public Element selectSingle(ElementSet elementSet) {
 		// just pick the satisfied element with the highest version
-		IElement highest = null;
+		Element highest = null;
 		for (Iterator satisfiedIter = elementSet.getSatisfied().iterator(); satisfiedIter.hasNext();) {
-			IElement satisfiedVersion = (IElement) satisfiedIter.next();
+			Element satisfiedVersion = (Element) satisfiedIter.next();
 			if (highest == null || elementSet.getSystem().compare(satisfiedVersion.getVersionId(), highest.getVersionId()) > 0)
 				highest = satisfiedVersion;
 		}

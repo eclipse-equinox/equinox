@@ -11,9 +11,8 @@
 package org.eclipse.core.internal.dependencies;
 
 import java.util.*;
-import org.eclipse.core.dependencies.*;
 
-public class ElementSet implements IElementSet {
+public class ElementSet {
 	private DependencySystem system;
 	private Object id;
 	// # of iteration this element set was last visited 
@@ -44,7 +43,7 @@ public class ElementSet implements IElementSet {
 		this.dependencyCounters = new HashMap();
 	}
 
-	public IDependencySystem getSystem() {
+	public DependencySystem getSystem() {
 		return system;
 	}
 
@@ -53,65 +52,80 @@ public class ElementSet implements IElementSet {
 		return singletonsCount == 0;
 	}
 
-	void addElement(IElement element) {
+	void addElement(Element element) {
 		if (this.available.containsKey(element.getVersionId()))
 			return;
 		this.setNeedingUpdate(DependencySystem.SATISFACTION);
 		this.available.put(element.getVersionId(), element);
-		IDependency[] dependencies = element.getDependencies();
+		Dependency[] dependencies = element.getDependencies();
 		for (int i = 0; i < dependencies.length; i++)
 			this.addRequired(dependencies[i].getRequiredObjectId());
 		if (element.isSingleton())
 			this.singletonsCount++;
-		system.recordElementStatusChanged(element, IElementChange.ADDED);
+		system.recordElementStatusChanged(element, ElementChange.ADDED);
 	}
 
-	void removeElement(IElement element) {
+	void removeElement(Element element) {
 		removeElement(element.getVersionId());
 	}
 
 	void removeElement(Object versionId) {
-		IElement toRemove = (IElement) this.available.remove(versionId);
+		Element toRemove = (Element) this.available.remove(versionId);
 		if (toRemove == null)
 			return;
 		this.markNeedingUpdate(DependencySystem.SATISFACTION);
-		IDependency[] dependencies = toRemove.getDependencies();
+		Dependency[] dependencies = toRemove.getDependencies();
 		for (int i = 0; i < dependencies.length; i++)
 			removeRequired(dependencies[i].getRequiredObjectId());
 		// if does not allow concurrency, decrement preventingConcurrencyCount			
 		if (toRemove.isSingleton())
 			this.singletonsCount--;
-		int change = IElementChange.REMOVED;
+		int change = ElementChange.REMOVED;
 		//		if (resolved.contains(toRemove))
-		//			change |= IElementChange.UNRESOLVED;
+		//			change |= ElementChange.UNRESOLVED;
 		system.recordElementStatusChanged(toRemove, change);
 	}
-
+	/**
+	 * Returns the unique id for this element set.
+	 */
 	public Object getId() {
 		return id;
 	}
-
+	/**
+	 * Is this a root element set? 	
+	 */
 	public boolean isRoot() {
 		return required.isEmpty();
 	}
-
+	/**
+	 * Returns all elements available in this element set.
+	 */
 	public Set getAvailable() {
 		return new HashSet(available.values());
 	}
+	/**
+	 * Returns all elements sets required this element set.
+	 */
 
 	public Collection getRequired() {
 		return required;
 	}
+	/**
+	 * Returns all elements sets requiring this element set.
+	 */
 
 	public Collection getRequiring() {
 		return requiring;
 	}
+	/**
+	 * Returns all elements currently resolved in this element set.
+	 */
 
 	public Set getResolved() {
 		return resolved;
 	}
 
-	public void resolveDependency(IElement dependent, IDependency dependency, Object resolvedVersionId) {
+	public void resolveDependency(Element dependent, Dependency dependency, Object resolvedVersionId) {
 		dependency.resolve(resolvedVersionId, this.visitedMark);
 	}
 
@@ -121,11 +135,11 @@ public class ElementSet implements IElementSet {
 		//TODO: this may well be optimized... 
 		// maybe just a pre-requisite changed
 		for (Iterator resolvedIter = this.resolved.iterator(); resolvedIter.hasNext();) {
-			IElement resolvedElement = (IElement) resolvedIter.next();
-			IDependency[] dependencies = resolvedElement.getDependencies();
+			Element resolvedElement = (Element) resolvedIter.next();
+			Dependency[] dependencies = resolvedElement.getDependencies();
 			for (int i = 0; i < dependencies.length; i++)
 				if (dependencies[i].getChangedMark() == this.getVisitedMark()) {
-					system.recordElementStatusChanged(resolvedElement, IElementChange.LINKAGE_CHANGED);
+					system.recordElementStatusChanged(resolvedElement, ElementChange.LINKAGE_CHANGED);
 					break;
 				}
 		}
@@ -136,6 +150,9 @@ public class ElementSet implements IElementSet {
 		this.resolved = Collections.unmodifiableSet(newResolved);
 		system.recordDependencyChanged(oldResolved, newResolved, available);
 	}
+	/**
+	 * Returns all elements currently selected in this element set.
+	 */
 
 	public Set getSelected() {
 		return selected;
@@ -148,6 +165,9 @@ public class ElementSet implements IElementSet {
 		this.setChangedMark(visitedMark);
 		this.selected = Collections.unmodifiableSet(selected);
 	}
+	/**
+	 * Returns all elements currently satisfied in this element set.
+	 */
 
 	public Set getSatisfied() {
 		return satisfied;
@@ -166,7 +186,7 @@ public class ElementSet implements IElementSet {
 	}
 
 	public boolean equals(Object elementSet) {
-		return ((IElementSet) elementSet).getId().equals(this.id);
+		return ((ElementSet) elementSet).getId().equals(this.id);
 	}
 
 	public int hashCode() {
@@ -241,9 +261,13 @@ public class ElementSet implements IElementSet {
 		return getNeedingUpdate() <= order;
 	}
 
-	IElement getElement(Object versionId) {
-		return (IElement) this.available.get(versionId);
+	Element getElement(Object versionId) {
+		return (Element) this.available.get(versionId);
 	}
+	/**
+	 * Assumes resolved system - returns all elements whose dependencies 
+	 * were resolved to point to the specified element.
+	 */
 
 	public Collection getRequiringElements(Object versionId) {
 		Collection result = new LinkedList();
@@ -251,7 +275,7 @@ public class ElementSet implements IElementSet {
 			ElementSet requiringSet = (ElementSet) requiringSetsIter.next();
 			for (Iterator iter = requiringSet.getResolved().iterator(); iter.hasNext();) {
 				Element element = (Element) iter.next();
-				IDependency requisite = element.getDependency(this.id);
+				Dependency requisite = element.getDependency(this.id);
 				if (requisite != null && versionId.equals(requisite.getResolvedVersionId()))
 					result.add(element);
 			}
@@ -259,7 +283,7 @@ public class ElementSet implements IElementSet {
 		return result;
 	}
 
-	public void unresolve(IElement element, int mark) {
+	public void unresolve(Element element, int mark) {
 		setVisitedMark(mark);
 		if (!resolved.contains(element))
 			return;
@@ -267,7 +291,7 @@ public class ElementSet implements IElementSet {
 		newResolved.remove(element);
 		resolved = Collections.unmodifiableSet(newResolved);
 
-		IDependency[] dependencies = element.getDependencies();
+		Dependency[] dependencies = element.getDependencies();
 		// unresolved dependencies
 		for (int i = 0; i < dependencies.length; i++)
 			resolveDependency(element, dependencies[i], null);

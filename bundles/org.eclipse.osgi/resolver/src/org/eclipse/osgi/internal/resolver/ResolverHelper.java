@@ -11,8 +11,7 @@
 package org.eclipse.osgi.internal.resolver;
 
 import java.util.*;
-import org.eclipse.core.dependencies.*;
-import org.eclipse.core.internal.dependencies.DependencySystem;
+import org.eclipse.core.internal.dependencies.*;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.Constants;
 
@@ -112,7 +111,7 @@ public class ResolverHelper {
 		}
 	}
 
-	public static IElement createElement(BundleDescription bundleDescription, IDependencySystem system) {
+	public static Element createElement(BundleDescription bundleDescription, DependencySystem system) {
 		String uniqueId = getUniqueId(bundleDescription);
 		Version version = getVersion(bundleDescription);
 		return system.createElement(uniqueId, version, createPrerequisites(bundleDescription, system), bundleDescription.isSingleton(), bundleDescription);
@@ -133,14 +132,14 @@ public class ResolverHelper {
 		return uniqueId;
 	}
 
-	private static IDependency[] createPrerequisites(BundleDescription bundleDesc, IDependencySystem system) {
+	private static Dependency[] createPrerequisites(BundleDescription bundleDesc, DependencySystem system) {
 		BundleSpecification[] required = bundleDesc.getRequiredBundles();
 		HostSpecification host = bundleDesc.getHost();
 		int dependencyCount = required == null ? 0 : required.length;
 		if (host != null)
 			dependencyCount++;
 		if (dependencyCount == 0)
-			return new IDependency[0];
+			return new Dependency[0];
 		List prereqs = new ArrayList(dependencyCount);
 		for (int i = 0; i < required.length; i++)
 			// ignore if a bundle requires itself (bug 48568 comment 2)		
@@ -148,10 +147,10 @@ public class ResolverHelper {
 				prereqs.add(createPrerequisite(system, required[i]));
 		if (host != null)
 			prereqs.add(createPrerequisite(system, host));
-		return (IDependency[]) prereqs.toArray(new IDependency[prereqs.size()]);
+		return (Dependency[]) prereqs.toArray(new Dependency[prereqs.size()]);
 	}
 
-	private static IDependency createPrerequisite(IDependencySystem system, VersionConstraint constraint) {
+	private static Dependency createPrerequisite(DependencySystem system, VersionConstraint constraint) {
 		boolean optional = (constraint instanceof BundleSpecification) && ((BundleSpecification) constraint).isOptional();
 		Version requiredVersion = constraint.getVersionSpecification();
 		if (NULL_VERSION.equals(requiredVersion))
@@ -159,33 +158,33 @@ public class ResolverHelper {
 		return system.createDependency(constraint.getName(), getMatchRule(constraint.getMatchingRule()), requiredVersion, optional, constraint);
 	}
 
-	public static IDependencySystem createDependencySystem(ISelectionPolicy policy) {
+	public static DependencySystem createDependencySystem(ISelectionPolicy policy) {
 		return new DependencySystem(new ResolverHelper.BundleVersionComparator(), policy);
 	}
 
-	public static IDependencySystem buildDependencySystem(State state, ISelectionPolicy selectionPolicy) {
-		IDependencySystem dependencySystem = createDependencySystem(selectionPolicy);
+	public static DependencySystem buildDependencySystem(State state, ISelectionPolicy selectionPolicy) {
+		DependencySystem dependencySystem = createDependencySystem(selectionPolicy);
 		BundleDescription[] bundles = state.getBundles();
 		for (int i = 0; i < bundles.length; i++)
 			dependencySystem.addElement(ResolverHelper.createElement(bundles[i], dependencySystem));
 		return dependencySystem;
 	}
 
-	public static void remove(BundleDescription description, IDependencySystem system) {
+	public static void remove(BundleDescription description, DependencySystem system) {
 		system.removeElement(getUniqueId(description), getVersion(description));
 	}
 
-	public static void add(BundleDescription description, IDependencySystem system) {
+	public static void add(BundleDescription description, DependencySystem system) {
 		system.addElement(createElement(description, system));
 	}
 
-	public static void unresolve(BundleDescription bundle, IDependencySystem system) {
-		IElement element = system.getElement(getUniqueId(bundle), getVersion(bundle));
+	public static void unresolve(BundleDescription bundle, DependencySystem system) {
+		Element element = system.getElement(getUniqueId(bundle), getVersion(bundle));
 		if (element != null)
-			system.unresolve(new IElement[] {element});
+			system.unresolve(new Element[] {element});
 	}
 
-	public static void update(BundleDescription newDescription, BundleDescription existing, IDependencySystem system) {
+	public static void update(BundleDescription newDescription, BundleDescription existing, DependencySystem system) {
 		system.removeElement(getUniqueId(existing), getVersion(existing));
 		system.addElement(createElement(newDescription, system));
 	}

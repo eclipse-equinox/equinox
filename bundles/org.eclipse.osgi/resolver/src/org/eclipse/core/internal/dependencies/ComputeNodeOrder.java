@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2003 IBM Corporation and others.
+ * Copyright (c) 2003, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,12 +22,6 @@ import java.util.*;
  */
 public class ComputeNodeOrder {
 
-	/*
-	 * Prevent class from being instantiated.
-	 */
-	private ComputeNodeOrder() {
-	}
-
 	/**
 	 * A directed graph. Once the vertexes and edges of the graph have been
 	 * defined, the graph can be queried for the depth-first finish time of each
@@ -43,16 +37,6 @@ public class ComputeNodeOrder {
 		 * values computed during depth-first search (DFS).
 		 */
 		public static class Vertex {
-			/**
-			 * White is for marking vertexes as unvisited.
-			 */
-			public static final String WHITE = "white"; //$NON-NLS-1$
-
-			/**
-			 * Grey is for marking vertexes as discovered but visit not yet
-			 * finished.
-			 */
-			public static final String GREY = "grey"; //$NON-NLS-1$
 
 			/**
 			 * Black is for marking vertexes as visited.
@@ -60,17 +44,30 @@ public class ComputeNodeOrder {
 			public static final String BLACK = "black"; //$NON-NLS-1$
 
 			/**
+			 * Grey is for marking vertexes as discovered but visit not yet
+			 * finished.
+			 */
+			public static final String GREY = "grey"; //$NON-NLS-1$
+			/**
+			 * White is for marking vertexes as unvisited.
+			 */
+			public static final String WHITE = "white"; //$NON-NLS-1$
+
+			/**
+			 * Ordered list of adjacent vertexes. In other words, "this" is the
+			 * "from" vertex and the elements of this list are all "to"
+			 * vertexes.
+			 * 
+			 * Element type: <code>Vertex</code>
+			 */
+			public List adjacent = new ArrayList(3);
+
+			/**
 			 * Color of the vertex. One of <code>WHITE</code> (unvisited),
 			 * <code>GREY</code> (visit in progress), or <code>BLACK</code>
 			 * (visit finished). <code>WHITE</code> initially.
 			 */
 			public String color = WHITE;
-
-			/**
-			 * The DFS predecessor vertex, or <code>null</code> if there is no
-			 * predecessor. <code>null</code> initially.
-			 */
-			public Vertex predecessor = null;
 
 			/**
 			 * Timestamp indicating when the vertex was finished (became BLACK)
@@ -85,13 +82,10 @@ public class ComputeNodeOrder {
 			public Object id;
 
 			/**
-			 * Ordered list of adjacent vertexes. In other words, "this" is the
-			 * "from" vertex and the elements of this list are all "to"
-			 * vertexes.
-			 * 
-			 * Element type: <code>Vertex</code>
+			 * The DFS predecessor vertex, or <code>null</code> if there is no
+			 * predecessor. <code>null</code> initially.
 			 */
-			public List adjacent = new ArrayList(3);
+			public Vertex predecessor = null;
 
 			/**
 			 * Creates a new vertex with the given id.
@@ -102,6 +96,23 @@ public class ComputeNodeOrder {
 				this.id = id;
 			}
 		}
+
+		/**
+		 * Indicates whether the graph contains cycles. Initially
+		 * <code>false</code>.
+		 */
+		private boolean cycles = false;
+
+		/**
+		 * Indicates whether the graph has been initialized. Initially
+		 * <code>false</code>.
+		 */
+		private boolean initialized = false;
+
+		/**
+		 * DFS visit time. Non-negative.
+		 */
+		private int time;
 
 		/**
 		 * Ordered list of all vertexes in this graph.
@@ -118,23 +129,6 @@ public class ComputeNodeOrder {
 		private Map vertexMap = new HashMap(100);
 
 		/**
-		 * DFS visit time. Non-negative.
-		 */
-		private int time;
-
-		/**
-		 * Indicates whether the graph has been initialized. Initially
-		 * <code>false</code>.
-		 */
-		private boolean initialized = false;
-
-		/**
-		 * Indicates whether the graph contains cycles. Initially
-		 * <code>false</code>.
-		 */
-		private boolean cycles = false;
-
-		/**
 		 * Creates a new empty directed graph object.
 		 * <p>
 		 * After this graph's vertexes and edges are defined with
@@ -145,41 +139,6 @@ public class ComputeNodeOrder {
 		 * </p>
 		 */
 		public Digraph() {
-		}
-
-		/**
-		 * Freezes this graph. No more vertexes or edges can be added to this
-		 * graph after this method is called. Has no effect if the graph is
-		 * already frozen.
-		 */
-		public void freeze() {
-			if (!initialized) {
-				initialized = true;
-				// only perform depth-first-search once
-				DFS();
-			}
-		}
-
-		/**
-		 * Defines a new vertex with the given id. The depth-first search is
-		 * performed in the relative order in which vertexes were added to the
-		 * graph.
-		 * 
-		 * @param id the id of the vertex
-		 * @exception IllegalArgumentException if the vertex id is
-		 * already defined or if the graph is frozen
-		 */
-		public void addVertex(Object id) throws IllegalArgumentException {
-			if (initialized) {
-				throw new IllegalArgumentException();
-			}
-			Vertex vertex = new Vertex(id);
-			Object existing = vertexMap.put(id, vertex);
-			// nip problems with duplicate vertexes in the bud
-			if (existing != null) {
-				throw new IllegalArgumentException();
-			}
-			vertexList.add(vertex);
 		}
 
 		/**
@@ -211,34 +170,25 @@ public class ComputeNodeOrder {
 		}
 
 		/**
-		 * Returns the ids of the vertexes in this graph ordered by depth-first
-		 * search finish time. The graph must be frozen.
+		 * Defines a new vertex with the given id. The depth-first search is
+		 * performed in the relative order in which vertexes were added to the
+		 * graph.
 		 * 
-		 * @param increasing <code>true</code> if objects are to be arranged
-		 * into increasing order of depth-first search finish time, and
-		 * <code>false</code> if objects are to be arranged into decreasing
-		 * order of depth-first search finish time
-		 * @return the list of ids ordered by depth-first search finish time
-		 * (element type: <code>Object</code>)
-		 * @exception IllegalArgumentException if the graph is not frozen
+		 * @param id the id of the vertex
+		 * @exception IllegalArgumentException if the vertex id is
+		 * already defined or if the graph is frozen
 		 */
-		public List idsByDFSFinishTime(boolean increasing) {
-			if (!initialized) {
+		public void addVertex(Object id) throws IllegalArgumentException {
+			if (initialized) {
 				throw new IllegalArgumentException();
 			}
-			int len = vertexList.size();
-			Object[] r = new Object[len];
-			for (Iterator allV = vertexList.iterator(); allV.hasNext();) {
-				Vertex vertex = (Vertex) allV.next();
-				int f = vertex.finishTime;
-				// note that finish times start at 1, not 0
-				if (increasing) {
-					r[f - 1] = vertex.id;
-				} else {
-					r[len - f] = vertex.id;
-				}
+			Vertex vertex = new Vertex(id);
+			Object existing = vertexMap.put(id, vertex);
+			// nip problems with duplicate vertexes in the bud
+			if (existing != null) {
+				throw new IllegalArgumentException();
 			}
-			return Arrays.asList(r);
+			vertexList.add(vertex);
 		}
 
 		/**
@@ -253,53 +203,6 @@ public class ComputeNodeOrder {
 				throw new IllegalArgumentException();
 			}
 			return cycles;
-		}
-
-		/**
-		 * Returns the non-trivial components of this graph. A non-trivial
-		 * component is a set of 2 or more vertexes that were traversed
-		 * together. The graph must be frozen.
-		 * 
-		 * @return the possibly empty list of non-trivial components, where
-		 * each component is an array of ids (element type: 
-		 * <code>Object[]</code>)
-		 * @exception IllegalArgumentException if the graph is not frozen
-		 */
-		public List nonTrivialComponents() {
-			if (!initialized) {
-				throw new IllegalArgumentException();
-			}
-			// find the roots of each component
-			// Map<Vertex,List<Object>> components
-			Map components = new HashMap();
-			for (Iterator it = vertexList.iterator(); it.hasNext();) {
-				Vertex vertex = (Vertex) it.next();
-				if (vertex.predecessor == null) {
-					// this vertex is the root of a component
-					// if component is non-trivial we will hit a child
-				} else {
-					// find the root ancestor of this vertex
-					Vertex root = vertex;
-					while (root.predecessor != null) {
-						root = root.predecessor;
-					}
-					List component = (List) components.get(root);
-					if (component == null) {
-						component = new ArrayList(2);
-						component.add(root.id);
-						components.put(root, component);
-					}
-					component.add(vertex.id);
-				}
-			}
-			List result = new ArrayList(components.size());
-			for (Iterator it = components.values().iterator(); it.hasNext();) {
-				List component = (List) it.next();
-				if (component.size() > 1) {
-					result.add(component.toArray());
-				}
-			}
-			return result;
 		}
 
 		//		/**
@@ -440,6 +343,97 @@ public class ComputeNodeOrder {
 			}
 		}
 
+		/**
+		 * Freezes this graph. No more vertexes or edges can be added to this
+		 * graph after this method is called. Has no effect if the graph is
+		 * already frozen.
+		 */
+		public void freeze() {
+			if (!initialized) {
+				initialized = true;
+				// only perform depth-first-search once
+				DFS();
+			}
+		}
+
+		/**
+		 * Returns the ids of the vertexes in this graph ordered by depth-first
+		 * search finish time. The graph must be frozen.
+		 * 
+		 * @param increasing <code>true</code> if objects are to be arranged
+		 * into increasing order of depth-first search finish time, and
+		 * <code>false</code> if objects are to be arranged into decreasing
+		 * order of depth-first search finish time
+		 * @return the list of ids ordered by depth-first search finish time
+		 * (element type: <code>Object</code>)
+		 * @exception IllegalArgumentException if the graph is not frozen
+		 */
+		public List idsByDFSFinishTime(boolean increasing) {
+			if (!initialized) {
+				throw new IllegalArgumentException();
+			}
+			int len = vertexList.size();
+			Object[] r = new Object[len];
+			for (Iterator allV = vertexList.iterator(); allV.hasNext();) {
+				Vertex vertex = (Vertex) allV.next();
+				int f = vertex.finishTime;
+				// note that finish times start at 1, not 0
+				if (increasing) {
+					r[f - 1] = vertex.id;
+				} else {
+					r[len - f] = vertex.id;
+				}
+			}
+			return Arrays.asList(r);
+		}
+
+		/**
+		 * Returns the non-trivial components of this graph. A non-trivial
+		 * component is a set of 2 or more vertexes that were traversed
+		 * together. The graph must be frozen.
+		 * 
+		 * @return the possibly empty list of non-trivial components, where
+		 * each component is an array of ids (element type: 
+		 * <code>Object[]</code>)
+		 * @exception IllegalArgumentException if the graph is not frozen
+		 */
+		public List nonTrivialComponents() {
+			if (!initialized) {
+				throw new IllegalArgumentException();
+			}
+			// find the roots of each component
+			// Map<Vertex,List<Object>> components
+			Map components = new HashMap();
+			for (Iterator it = vertexList.iterator(); it.hasNext();) {
+				Vertex vertex = (Vertex) it.next();
+				if (vertex.predecessor == null) {
+					// this vertex is the root of a component
+					// if component is non-trivial we will hit a child
+				} else {
+					// find the root ancestor of this vertex
+					Vertex root = vertex;
+					while (root.predecessor != null) {
+						root = root.predecessor;
+					}
+					List component = (List) components.get(root);
+					if (component == null) {
+						component = new ArrayList(2);
+						component.add(root.id);
+						components.put(root, component);
+					}
+					component.add(vertex.id);
+				}
+			}
+			List result = new ArrayList(components.size());
+			for (Iterator it = components.values().iterator(); it.hasNext();) {
+				List component = (List) it.next();
+				if (component.size() > 1) {
+					result.add(component.toArray());
+				}
+			}
+			return result;
+		}
+
 	}
 
 	/**
@@ -511,5 +505,11 @@ public class ComputeNodeOrder {
 		for (int i = 0; i < orderedNodes.length; i++)
 			objects[i] = orderedNodes[i];
 		return knots;
+	}
+
+	/*
+	 * Prevent class from being instantiated.
+	 */
+	private ComputeNodeOrder() {
 	}
 }

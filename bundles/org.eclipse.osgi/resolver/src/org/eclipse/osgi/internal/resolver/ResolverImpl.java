@@ -11,13 +11,13 @@
 package org.eclipse.osgi.internal.resolver;
 
 import java.util.*;
-import org.eclipse.core.dependencies.*;
+import org.eclipse.core.internal.dependencies.*;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.Bundle;
 
 public class ResolverImpl implements Resolver {
 	private State state;
-	private IDependencySystem dependencies;
+	private DependencySystem dependencies;
 
 	public void resolve(BundleDescription[] reRefresh) {
 		// unresolving the given bundles will force them to be re-resolved 
@@ -34,10 +34,10 @@ public class ResolverImpl implements Resolver {
 			throw new IllegalStateException("RESOLVER_NO_STATE"); //$NON-NLS-1$
 		if (dependencies == null)
 			dependencies = ResolverHelper.buildDependencySystem(state, new Eclipse30SelectionPolicy());
-		IResolutionDelta delta;
+		ResolutionDelta delta;
 		try {
 			delta = dependencies.resolve();
-		} catch (IDependencySystem.CyclicSystemException e) {
+		} catch (DependencySystem.CyclicSystemException e) {
 			//TODO: this should be logged instead
 			e.printStackTrace();
 			return;
@@ -66,27 +66,27 @@ public class ResolverImpl implements Resolver {
 	/*
 	 * Applies changes in the constraint system to the state object.
 	 */
-	private void processInnerDelta(IResolutionDelta delta) {
+	private void processInnerDelta(ResolutionDelta delta) {
 		//	now apply changes reported in the inner delta to the state
-		IElementChange[] changes = delta.getAllChanges();
+		ElementChange[] changes = delta.getAllChanges();
 		for (int i = 0; i < changes.length; i++) {
-			IElement element = changes[i].getElement();
+			Element element = changes[i].getElement();
 			BundleDescription bundle = (BundleDescription) element.getUserObject();
 			int kind = changes[i].getKind();
-			if ((kind & IElementChange.RESOLVED) != 0) {
+			if ((kind & ElementChange.RESOLVED) != 0) {
 				state.resolveBundle(bundle, Bundle.RESOLVED);
 				resolveConstraints(element, bundle);
-			} else if ((kind & IElementChange.UNRESOLVED) != 0)
+			} else if ((kind & ElementChange.UNRESOLVED) != 0)
 				state.resolveBundle(bundle, Bundle.INSTALLED);
-			else if (kind == IElementChange.LINKAGE_CHANGED)
+			else if (kind == ElementChange.LINKAGE_CHANGED)
 				resolveConstraints(element, bundle);
 		}
 	}
 
-	private void resolveConstraints(IElement element, BundleDescription bundle) {
+	private void resolveConstraints(Element element, BundleDescription bundle) {
 		// tells the state that some of the constraints have
 		// changed
-		IDependency[] dependencies = element.getDependencies();
+		Dependency[] dependencies = element.getDependencies();
 		for (int j = 0; j < dependencies.length; j++) {
 			if (dependencies[j].getResolvedVersionId() == null)
 				// an optional requisite that was not resolved
@@ -190,10 +190,10 @@ public class ResolverImpl implements Resolver {
 		state.resolveBundle(bundle, Bundle.INSTALLED);
 		if (bundle.getUniqueId() == null)
 			return;
-		IElementSet bundleElementSet = dependencies.getElementSet(bundle.getUniqueId());
+		ElementSet bundleElementSet = dependencies.getElementSet(bundle.getUniqueId());
 		Collection requiring = bundleElementSet.getRequiringElements(bundle.getVersion());
 		for (Iterator requiringIter = requiring.iterator(); requiringIter.hasNext();) {
-			IElement requiringElement = (IElement) requiringIter.next();
+			Element requiringElement = (Element) requiringIter.next();
 			BundleDescription requiringBundle = state.getBundle((String) requiringElement.getId(), (Version) requiringElement.getVersionId());
 			if (requiringBundle != null)
 				unresolveRequirementChain(requiringBundle);

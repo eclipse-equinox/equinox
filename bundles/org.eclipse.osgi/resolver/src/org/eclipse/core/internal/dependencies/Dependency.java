@@ -10,10 +10,8 @@
  *******************************************************************************/
 package org.eclipse.core.internal.dependencies;
 
-import org.eclipse.core.dependencies.IDependency;
-import org.eclipse.core.dependencies.IMatchRule;
 
-class Dependency implements IDependency {
+public class Dependency {
 	private int changedMark;
 	private Object requiredObjectId;
 	private Object requiredVersionId;

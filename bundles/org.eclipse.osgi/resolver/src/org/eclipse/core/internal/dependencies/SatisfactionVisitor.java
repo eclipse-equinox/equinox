@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2003 IBM Corporation and others.
+ * Copyright (c) 2003, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,7 +12,6 @@
 package org.eclipse.core.internal.dependencies;
 
 import java.util.*;
-import org.eclipse.core.dependencies.*;
 
 public class SatisfactionVisitor implements IElementSetVisitor {
 	private int order;
@@ -21,16 +20,16 @@ public class SatisfactionVisitor implements IElementSetVisitor {
 		this.order = order;
 	}
 
-	public int getOrder() {
-		return order;
-	}
-
 	public Collection getAncestors(ElementSet elementSet) {
 		return elementSet.getRequired();
 	}
 
 	public Collection getDescendants(ElementSet elementSet) {
 		return elementSet.getRequiring();
+	}
+
+	public int getOrder() {
+		return order;
 	}
 
 	public void update(ElementSet elementSet) {
@@ -42,20 +41,20 @@ public class SatisfactionVisitor implements IElementSetVisitor {
 
 		Set satisfied = new HashSet();
 		for (Iterator elementsIter = elementSet.getAvailable().iterator(); elementsIter.hasNext();) {
-			IElement element = (IElement) elementsIter.next();
-			IDependency[] dependencies = element.getDependencies();
+			Element element = (Element) elementsIter.next();
+			Dependency[] dependencies = element.getDependencies();
 			boolean versionSatisfied = true;
 			for (int i = 0; i < dependencies.length; i++) {
 				// optional pre-requisites are not relevant for satisfaction
 				if (dependencies[i].isOptional())
 					continue;
 
-				IElementSet requiredNode = elementSet.getSystem().getElementSet(dependencies[i].getRequiredObjectId());
+				ElementSet requiredNode = elementSet.getSystem().getElementSet(dependencies[i].getRequiredObjectId());
 
 				Collection requiredNodeSatisfiedVersions = requiredNode.getSatisfied();
 				boolean depSatisfied = false;
 				for (Iterator requiredNodeSatisfiedVersionsIter = requiredNodeSatisfiedVersions.iterator(); requiredNodeSatisfiedVersionsIter.hasNext();) {
-					IElement requiredSatisfiedVersion = (IElement) requiredNodeSatisfiedVersionsIter.next();
+					Element requiredSatisfiedVersion = (Element) requiredNodeSatisfiedVersionsIter.next();
 					if (dependencies[i].getMatchRule().isSatisfied(dependencies[i].getRequiredVersionId(), requiredSatisfiedVersion.getVersionId())) {
 						depSatisfied = true;
 						break;
