@@ -98,6 +98,20 @@ public class SystemBundleLoader extends BundleLoader {
 	}
 
 	/**
+	 * This is not supported by the System Bundle.
+	 */
+	public Object findObject(String object){
+		return null;
+	}
+
+	/**
+	 * This is not supported by the System Bundle.
+	 */
+	protected Object findLocalObject(String object) {
+		return null;
+	}
+
+	/**
 	 * The ClassLoader that loads OSGi framework classes is used to find the resource.
 	 */
 	public URL findResource(String name) {
