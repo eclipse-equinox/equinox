@@ -244,6 +244,8 @@ public class EclipseAdaptor extends DefaultAdaptor {
 							// should never happen
 						}
 					} catch (IOException e) {
+						//Reset the time stamp
+						timeStamp = System.currentTimeMillis();
 						if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 							Debug.println("Error reading framework metadata: " + e.getMessage());
 							Debug.printStackTrace(e);
