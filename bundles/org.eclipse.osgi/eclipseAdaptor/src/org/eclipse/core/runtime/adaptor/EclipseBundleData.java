@@ -73,8 +73,6 @@ public class EclipseBundleData extends DefaultBundleData {
 		if (delete.exists()) 
 			throw new IOException();
 
-		setGenerationDir(new File(getBundleStoreDir(), String.valueOf(getGeneration())));
-		setBaseFile(isReference() ? new File(getFileName()) : new File(createGenerationDir(), getFileName()));
 		createBaseBundleFile();
 		if (! checkManifestTimeStamp())
 			throw new IOException();

@@ -38,12 +38,6 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 	/** The BundleData data directory */
 	protected File dirData;
 
-	/** current generation directory */
-	protected File dirGeneration;
-
-	/** The base File for the BundleData */
-	protected File baseFile;
-
 	/** The base BundleFile object for this BundleData */
 	protected BundleFile baseBundleFile;
 
@@ -79,15 +73,12 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 		if (delete.exists()) 
 			throw new IOException();
 
-		setGenerationDir(new File(getBundleStoreDir(), String.valueOf(getGeneration())));
-		setBaseFile(isReference() ? new File(getFileName()) : new File(createGenerationDir(), getFileName()));
 		createBaseBundleFile();
 
 		loadFromManifest();
 	}
 
 	public void initializeNewBundle() throws IOException {
-		setBaseFile(isReference() ? new File(getFileName()) : new File(createGenerationDir(), getFileName()));
 		createBaseBundleFile();
 
 		loadFromManifest();
@@ -95,7 +86,6 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 
 	protected void initBundleStoreDirs(String bundleID){
 		setBundleStoreDir(new File(((DefaultAdaptor)adaptor).getBundleStoreRootDir(), bundleID));
-		setGenerationDir(new File(getBundleStoreDir(), String.valueOf(getGeneration())));
 	}
 
 	/**
@@ -161,7 +151,7 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 			// extract the native code
 			File nativeFile = baseBundleFile.getFile(nativepaths[i]);
 			if (nativeFile == null) {
-				throw new BundleException(AdaptorMsg.formatter.getString("BUNDLE_NATIVECODE_EXCEPTION", nativepaths[i]));
+				throw new BundleException(AdaptorMsg.formatter.getString("BUNDLE_NATIVECODE_EXCEPTION", nativepaths[i])); //$NON-NLS-1$
 			}
 			sb.append(nativepaths[i]);
 			if (i < nativepaths.length - 1) {
@@ -189,7 +179,7 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 		if (getDataDir() == null) {
 			File dataRoot = ((DefaultAdaptor)adaptor).getDataRootDir();
 			if (dataRoot == null)
-				throw new IllegalStateException(AdaptorMsg.formatter.getString("ADAPTOR_DATA_AREA_NOT_SET"));
+				throw new IllegalStateException(AdaptorMsg.formatter.getString("ADAPTOR_DATA_AREA_NOT_SET")); //$NON-NLS-1$
 			setDataDir(new File(dataRoot, id + "/" + DefaultAdaptor.DATA_DIR_NAME));
 		}
 		if (!getDataDir().exists() && !getDataDir().mkdirs()) {
@@ -222,11 +212,11 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 		try {
 			getManifest();
 		} catch (BundleException e) {
-			throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_ERROR_GETTING_MANIFEST", getLocation()));
+			throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_ERROR_GETTING_MANIFEST", getLocation())); //$NON-NLS-1$
 		}
 
 		if (manifest == null) {
-			throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_ERROR_GETTING_MANIFEST", getLocation()));
+			throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_ERROR_GETTING_MANIFEST", getLocation())); //$NON-NLS-1$
 		}
 		setVersion(new Version((String) manifest.get(Constants.BUNDLE_VERSION)));
 		String symbolicNameHeader = (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME);
@@ -244,12 +234,8 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 		setDynamicImports((String) manifest.get(Constants.DYNAMICIMPORT_PACKAGE));
 	}
 
-	protected void setGenerationDir(File dirGeneration) {
-		this.dirGeneration = dirGeneration;
-	}
-
 	protected File getGenerationDir() {
-		return dirGeneration;
+		return new File(getBundleStoreDir(), String.valueOf(getGeneration()));
 	}
 	
 	/**
@@ -259,13 +245,14 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 	 * @return Bundle generation directory.
 	 */
 	public File createGenerationDir() {
-		if (!getGenerationDir().exists() && !getGenerationDir().mkdirs()) {
+		File generationDir = getGenerationDir();
+		if (!generationDir.exists() && !generationDir.mkdirs()) {
 			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-				Debug.println("Unable to create bundle generation directory: " + getGenerationDir().getPath());
+				Debug.println("Unable to create bundle generation directory: " + generationDir.getPath());
 			}
 		}
 
-		return getGenerationDir();
+		return generationDir;
 	}
 
 	/**
@@ -275,11 +262,7 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 	 * @return the base File object for the bundle.
 	 */
 	protected File getBaseFile() {
-		return (baseFile);
-	}
-
-	protected void setBaseFile(File baseFile) {
-		this.baseFile = baseFile;
+		return isReference() ? new File(getFileName()) : new File(createGenerationDir(), getFileName());
 	}
 
 	protected File getBundleStoreDir() {
@@ -340,19 +323,16 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 			}
 
 			next.setGeneration(nextGeneration);
-			next.setGenerationDir(nextDirGeneration);
 
 			if (referenceFile != null) {
 				next.setReference(true);
 				next.setFileName(referenceFile);
-				next.setBaseFile(new File(referenceFile));
 			}
 			else {
 				if (next.isReference()) {
 					next.setReference(false);
 					next.setFileName(((DefaultAdaptor)adaptor).mapLocationToName(getLocation()));
 				}
-				next.setBaseFile(new File(nextDirGeneration, next.getFileName()));
 			}
 
 			// null out the manifest to force it to be re-read.
@@ -360,7 +340,7 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 			return (next);
 		}
 
-		throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION"));
+		throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION")); //$NON-NLS-1$
 	}
 
 	protected BundleFile createBaseBundleFile() throws IOException{
