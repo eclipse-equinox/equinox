@@ -184,6 +184,7 @@ public class MessageFormat {
 		String[] argStrings = new String[args.length];
 
 		for (int i = 0; i < args.length; ++i) {
+			//TODO: consider using ?: operator
 			if (args[i] == null)
 				argStrings[i] = "<null>";
 			else
