@@ -163,7 +163,7 @@ public class EclipseBundleData extends DefaultBundleData {
 	public synchronized Dictionary getManifest(boolean first) throws BundleException {
 		if (manifest == null)
 			manifest = first ? loadManifest() : new CachedManifest(this);
-		if (SystemBundleData.parseSymbolicName(manifest) == null) {
+		if (manifest.get(org.osgi.framework.Constants.BUNDLE_SYMBOLICNAME) == null) {
 			Dictionary generatedManifest = generateManifest();
 			if (generatedManifest != null)
 				manifest = generatedManifest;
