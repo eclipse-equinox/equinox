@@ -261,7 +261,7 @@ public class PluginConverterImpl implements PluginConverter {
 		if (!pluginInfo.isFragment())
 			if (!requireRuntimeCompatibility()) {
 				String pluginClass = pluginInfo.getPluginClass();
-				if (pluginClass != null)
+				if (pluginClass != null && ! pluginClass.trim().equals("")) //$NON-NLS-1$
 					generatedManifest.put(Constants.BUNDLE_ACTIVATOR, pluginClass);
 			} else {
 				generatedManifest.put(Constants.BUNDLE_ACTIVATOR, COMPATIBILITY_ACTIVATOR);
