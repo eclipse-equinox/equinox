@@ -12,10 +12,11 @@ package org.eclipse.osgi.internal.resolver;
 
 import java.util.*;
 
-import org.eclipse.osgi.framework.internal.core.Constants;
+
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.Constants;
 
 /**
  * This class builds bundle description objects from manifests
@@ -32,9 +33,6 @@ class StateBuilder {
 				result.setSingleton("true".equals(symbolicNameElements[0].getAttribute(Constants.SINGLETON_ATTRIBUTE))); //$NON-NLS-1$
 			}
 		}
-		if (result.getUniqueId() == null)
-			// for backward compatibility TODO remove when it is time
-			result.setUniqueId((String) manifest.get(Constants.BUNDLE_GLOBALNAME));
 		// retrieve other headers
 		String version = (String) manifest.get(Constants.BUNDLE_VERSION);
 		result.setVersion((version != null) ? new Version(version) : Version.emptyVersion);
@@ -77,16 +75,15 @@ class StateBuilder {
 		if (match == null)
 			return VersionConstraint.MAJOR_MATCH;
 
-		// TODO remove deprecated match rules.
 		if (match.equals(Constants.VERSION_MATCH_MICRO))
 			return VersionConstraint.MICRO_MATCH;
-		if (match.equals(Constants.VERSION_MATCH_MINOR) || match.equals(Constants.VERSION_MATCH_EQUIVALENT))
+		if (match.equals(Constants.VERSION_MATCH_MINOR))
 			return VersionConstraint.MINOR_MATCH;
-		if (match.equals(Constants.VERSION_MATCH_MAJOR) || match.equals(Constants.VERSION_MATCH_COMPATIBLE))
+		if (match.equals(Constants.VERSION_MATCH_MAJOR))
 			return VersionConstraint.MAJOR_MATCH;
 		if (match.equals(Constants.VERSION_MATCH_GREATERTHANOREQUAL))
 			return VersionConstraint.GREATER_EQUAL_MATCH;
-		if (match.equals(Constants.VERSION_MATCH_QUALIFIER) || match.equals(Constants.VERSION_MATCH_PERFECT))
+		if (match.equals(Constants.VERSION_MATCH_QUALIFIER))
 			return VersionConstraint.QUALIFIER_MATCH;
 
 		// default to MAJOR match rule.

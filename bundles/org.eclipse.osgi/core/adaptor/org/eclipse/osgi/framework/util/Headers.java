@@ -20,7 +20,6 @@ import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
-import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.internal.core.Msg;
 import org.osgi.framework.BundleException;
 
@@ -125,14 +124,6 @@ public class Headers extends Dictionary
             {
                 value = values.get(keyLower);
             }
- 
-            // TODO this is a hack to support old deprecated manifest headers
-            // remove when we are confident no one is using them.
-            if (value == null)
-            	if (Constants.BUNDLE_GLOBALNAME.equalsIgnoreCase((String)key))
-            		value = get(Constants.BUNDLE_SYMBOLICNAME);
-            	else if (Constants.HOST_BUNDLE.equalsIgnoreCase((String)key))
-            		value = get(Constants.FRAGMENT_HOST);
         }
 
         return(value);
@@ -152,14 +143,6 @@ public class Headers extends Dictionary
     public synchronized Object set(Object key, Object value)
     {
         String header = (key instanceof String) ? ((String)key).toLowerCase() : null;
-
-        // TODO this is a hack to support old deprecated manifest headers
-        // remove when we are confident no one is using them.
-        if (header != null)
-        	if (header.equalsIgnoreCase(Constants.BUNDLE_GLOBALNAME))
-        		set(Constants.BUNDLE_SYMBOLICNAME,value);
-        	else if(header.equalsIgnoreCase(Constants.HOST_BUNDLE))
-        		set(Constants.FRAGMENT_HOST, value);
 
         if (value == null)  /* remove */
         {

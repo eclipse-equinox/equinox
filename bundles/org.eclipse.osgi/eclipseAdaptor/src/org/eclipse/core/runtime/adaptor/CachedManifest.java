@@ -61,8 +61,7 @@ public class CachedManifest extends Dictionary {
 			return bundledata.getPluginClass();
 		if ("legacy".equalsIgnoreCase(keyString))
 			return bundledata.isLegacy();
-		// TODO Remove use of deprecated BUNDLE_GLOBALNAME
-		if (Constants.BUNDLE_GLOBALNAME.equalsIgnoreCase(keyString) || Constants.BUNDLE_SYMBOLICNAME.equalsIgnoreCase(keyString))
+		if (Constants.BUNDLE_SYMBOLICNAME.equalsIgnoreCase(keyString))
 			return bundledata.getSymbolicName();
 		return getManifest().get(key);
 	}
