@@ -105,7 +105,7 @@ public class EclipseStarter {
 	private static final String INITIAL_LOCATION = "initial@"; //$NON-NLS-1$
 	/** string containing the classname of the adaptor to be used in this framework instance */
 	protected static final String DEFAULT_ADAPTOR_CLASS = "org.eclipse.core.runtime.adaptor.EclipseAdaptor"; //$NON-NLS-1$
-	
+
 	private static final int DEFAULT_INITIAL_STARTLEVEL = 6; // default value for legacy purposes
 	private static final String DEFAULT_BUNDLES_STARTLEVEL = "4"; //$NON-NLS-1$
 	// Console information
@@ -118,13 +118,14 @@ public class EclipseStarter {
 	 * This is the main to start osgi.
 	 * It only works when the framework is being jared as a single jar
 	 */
-    public static void main(String[] args) throws Exception {
+	public static void main(String[] args) throws Exception {
 		URL url = EclipseStarter.class.getProtectionDomain().getCodeSource().getLocation();
 		System.getProperties().put(PROP_FRAMEWORK, url.toExternalForm());
-		String filePart = url.getFile(); 
-		System.getProperties().put(PROP_INSTALL_AREA,  filePart.substring(0, filePart.lastIndexOf('/')));
-        run(args, null);
-    }
+		String filePart = url.getFile();
+		System.getProperties().put(PROP_INSTALL_AREA, filePart.substring(0, filePart.lastIndexOf('/')));
+		run(args, null);
+	}
+
 	/**
 	 * Launches the platform and runs a single application. The application is either identified
 	 * in the given arguments (e.g., -application &ltapp id&gt) or in the <code>eclipse.application</code> 
@@ -173,8 +174,12 @@ public class EclipseStarter {
 			}
 			if (Profile.PROFILE && Profile.STARTUP)
 				Profile.logExit("EclipseStarter.run()"); //$NON-NLS-1$
-			if (Profile.PROFILE)
-				System.out.println(Profile.getProfileLog());
+			if (Profile.PROFILE) {
+				String report = Profile.getProfileLog();
+				// avoiding writing to the console if there is nothing to print
+				if (report != null && report.length() > 0)
+					System.out.println(Profile.getProfileLog());
+			}
 		}
 		// first check to see if the framework is forcing a restart
 		if (Boolean.getBoolean("osgi.forcedRestart")) { //$NON-NLS-1$
@@ -798,22 +803,22 @@ public class EclipseStarter {
 
 		URL url = EclipseStarter.class.getProtectionDomain().getCodeSource().getLocation();
 		result = url.getFile();
-        if (result.endsWith(".jar")) {
-            result = result.substring(0, result.lastIndexOf('/'));
-            if ("folder".equals(PROP_FRAMEWORK_SHAPE))
-                result = result.substring(0, result.lastIndexOf('/'));
-        } else {
-            if (result.endsWith("/")) //$NON-NLS-1$
-                result = result.substring(0, result.length() - 1);
-            result = result.substring(0, result.lastIndexOf('/'));
-            result = result.substring(0, result.lastIndexOf('/'));
-        }
+		if (result.endsWith(".jar")) {
+			result = result.substring(0, result.lastIndexOf('/'));
+			if ("folder".equals(PROP_FRAMEWORK_SHAPE))
+				result = result.substring(0, result.lastIndexOf('/'));
+		} else {
+			if (result.endsWith("/")) //$NON-NLS-1$
+				result = result.substring(0, result.length() - 1);
+			result = result.substring(0, result.lastIndexOf('/'));
+			result = result.substring(0, result.lastIndexOf('/'));
+		}
 		if (Character.isUpperCase(result.charAt(0))) {
 			char[] chars = result.toCharArray();
 			chars[0] = Character.toLowerCase(chars[0]);
 			result = new String(chars);
 		}
-        System.getProperties().put(PROP_SYSPATH, result);
+		System.getProperties().put(PROP_SYSPATH, result);
 		return result;
 	}
 
