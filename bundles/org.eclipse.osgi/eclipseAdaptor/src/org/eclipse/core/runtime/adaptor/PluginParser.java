@@ -143,8 +143,7 @@ public class PluginParser extends DefaultHandler implements IModel {
 	// Current object stack (used to hold the current object we are populating in this plugin info
 	Stack objectStack = new Stack();
 	Locator locator = null;
-	boolean inExtensionExtensionPoint = false;
-	
+
 	// Valid States
 	private static final int IGNORED_ELEMENT_STATE = 0;
 	private static final int INITIAL_STATE = 1;
@@ -209,10 +208,8 @@ public class PluginParser extends DefaultHandler implements IModel {
 				}
 				break;
 			case PLUGIN_EXTENSION_POINT_STATE :
-				inExtensionExtensionPoint = false;
 				break;
 			case PLUGIN_EXTENSION_STATE :
-				inExtensionExtensionPoint = false;
 				break;
 			case RUNTIME_LIBRARY_STATE :
 				if (elementName.equals(LIBRARY)) {
@@ -252,14 +249,12 @@ public class PluginParser extends DefaultHandler implements IModel {
 	}
 
 	public void handleExtensionPointState(String elementName, Attributes attributes) {
-		// mark the plugin as singleton and ignore all elements under extension points (if there are any)
-		manifestInfo.singleton = true;
+		// nothing to do for extension-points' children
 		stateStack.push(new Integer(IGNORED_ELEMENT_STATE));
 	}
 
 	public void handleExtensionState(String elementName, Attributes attributes) {
-		// mark the plugin as singleton and ignore all elements under extension (if there are any)
-		manifestInfo.singleton = true;
+		// nothing to do for extensions' children
 		stateStack.push(new Integer(IGNORED_ELEMENT_STATE));
 	}
 
@@ -306,7 +301,7 @@ public class PluginParser extends DefaultHandler implements IModel {
 			}
 			return;
 		}
-		if(elementName.equals(LIBRARY_PACKAGES)) {
+		if (elementName.equals(LIBRARY_PACKAGES)) {
 			stateStack.push(new Integer(IGNORED_ELEMENT_STATE));
 			return;
 		}
@@ -336,10 +331,14 @@ public class PluginParser extends DefaultHandler implements IModel {
 			return;
 		}
 		if (elementName.equals(EXTENSION_POINT)) {
+			// mark the plugin as singleton and ignore all elements under extension (if there are any)
+			manifestInfo.singleton = true;			
 			stateStack.push(new Integer(PLUGIN_EXTENSION_POINT_STATE));
 			return;
 		}
 		if (elementName.equals(EXTENSION)) {
+			// mark the plugin as singleton and ignore all elements under extension (if there are any)
+			manifestInfo.singleton = true;			
 			stateStack.push(new Integer(PLUGIN_EXTENSION_STATE));
 			return;
 		}
@@ -607,7 +606,7 @@ public class PluginParser extends DefaultHandler implements IModel {
 	private void internalError(String elementName) {
 		FrameworkLogEntry error;
 		String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONVERTER_PARSE_UNKNOWNTOP_ELEMENT", elementName); //$NON-NLS-1$
-		error = new FrameworkLogEntry(EclipseAdaptorConstants.PI_ECLIPSE_OSGI, (manifestInfo.pluginId == null ? message : "Plug-in : " + manifestInfo.pluginId + ", " + message) , 0, null, null); //$NON-NLS-1$ //$NON-NLS-2$
+		error = new FrameworkLogEntry(EclipseAdaptorConstants.PI_ECLIPSE_OSGI, (manifestInfo.pluginId == null ? message : "Plug-in : " + manifestInfo.pluginId + ", " + message), 0, null, null); //$NON-NLS-1$ //$NON-NLS-2$
 		EclipseAdaptor.getDefault().getFrameworkLog().log(error);
 	}
 

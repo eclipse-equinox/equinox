@@ -13,8 +13,12 @@ package org.eclipse.osgi.tests.internal.plugins;
 import java.io.IOException;
 import junit.framework.TestCase;
 import org.eclipse.osgi.tests.BundleTestingHelper;
+import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.*;
 
+/**
+ * Provisory home for tests that install plugins.
+ */
 public class InstallTests extends TestCase {
 
 	public InstallTests() {
@@ -64,4 +68,64 @@ public class InstallTests extends TestCase {
 			installed.uninstall();
 		}
 	}
+	/** Ensures we see a bundle with only a extension point as a singleton */
+	public void testInstallBundleWithExtensionPointOnly() throws BundleException, IOException {
+		Bundle installed = null;
+		installed = BundleTestingHelper.installBundle("internal/plugins/installTests/bundle04");
+		try {
+			assertEquals("1.0", "bundle04", installed.getSymbolicName());
+			assertEquals("1.1", Bundle.INSTALLED, installed.getState());
+			assertEquals("1.2", "1.3.7", installed.getHeaders().get(Constants.BUNDLE_VERSION));
+			String symbolicNameString = (String) installed.getHeaders().get(Constants.BUNDLE_SYMBOLICNAME);
+			assertNotNull("1.3", symbolicNameString);
+			ManifestElement[] symbolicNameHeader = ManifestElement.parseHeader(Constants.BUNDLE_SYMBOLICNAME, symbolicNameString);
+			assertEquals("1.4", 1, symbolicNameHeader.length);
+			assertEquals("1.5", "true", symbolicNameHeader[0].getAttribute(Constants.SINGLETON_ATTRIBUTE));
+			
+		} finally {
+			// clean-up
+			installed.uninstall();
+		}
+	}
+	/** Ensures we see a bundle with only a extension as a singleton */
+	public void testInstallBundleWithExtensionOnly() throws BundleException, IOException {
+		Bundle installed = null;
+		installed = BundleTestingHelper.installBundle("internal/plugins/installTests/bundle05");
+		try {
+			assertEquals("1.0", "bundle05", installed.getSymbolicName());
+			assertEquals("1.1", Bundle.INSTALLED, installed.getState());
+			assertEquals("1.2", "1.3.8", installed.getHeaders().get(Constants.BUNDLE_VERSION));
+			String symbolicNameString = (String) installed.getHeaders().get(Constants.BUNDLE_SYMBOLICNAME);
+			assertNotNull("1.3", symbolicNameString);
+			ManifestElement[] symbolicNameHeader = ManifestElement.parseHeader(Constants.BUNDLE_SYMBOLICNAME, symbolicNameString);
+			assertEquals("1.4", 1, symbolicNameHeader.length);
+			assertEquals("1.5", "true", symbolicNameHeader[0].getAttribute(Constants.SINGLETON_ATTRIBUTE));
+			
+		} finally {
+			// clean-up
+			installed.uninstall();
+		}
+	}
+	
+	/** Ensures we see a bundle with only extension and extension point as a singleton */
+	public void testInstallBundleWithExtensionAndExtensionPoint() throws BundleException, IOException {
+		Bundle installed = null;
+		installed = BundleTestingHelper.installBundle("internal/plugins/installTests/bundle06");
+		try {
+			assertEquals("1.0", "bundle06", installed.getSymbolicName());
+			assertEquals("1.1", Bundle.INSTALLED, installed.getState());
+			assertEquals("1.2", "1.3.9", installed.getHeaders().get(Constants.BUNDLE_VERSION));
+			String symbolicNameString = (String) installed.getHeaders().get(Constants.BUNDLE_SYMBOLICNAME);
+			assertNotNull("1.3", symbolicNameString);
+			ManifestElement[] symbolicNameHeader = ManifestElement.parseHeader(Constants.BUNDLE_SYMBOLICNAME, symbolicNameString);
+			assertEquals("1.4", 1, symbolicNameHeader.length);
+			assertEquals("1.5", "true", symbolicNameHeader[0].getAttribute(Constants.SINGLETON_ATTRIBUTE));
+			
+		} finally {
+			// clean-up
+			installed.uninstall();
+		}
+	}	
+	
+	
 }

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<!-- single extension -->
+<plugin
+  name="bundle05"
+  id="bundle05"
+  version="1.3.8"
+  provider-name="Eclipse.org">
+  <extension point="id"/>
+</plugin>
