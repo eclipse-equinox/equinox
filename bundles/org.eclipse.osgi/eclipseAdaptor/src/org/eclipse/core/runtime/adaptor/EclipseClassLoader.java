@@ -18,8 +18,6 @@ import java.util.ArrayList;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import org.eclipse.osgi.framework.adaptor.*;
-import org.eclipse.osgi.framework.adaptor.BundleData;
-import org.eclipse.osgi.framework.adaptor.ClassLoaderDelegate;
 import org.eclipse.osgi.framework.adaptor.core.*;
 import org.eclipse.osgi.framework.internal.core.AbstractBundle;
 import org.eclipse.osgi.framework.internal.core.Msg;
@@ -27,8 +25,6 @@ import org.eclipse.osgi.framework.internal.defaultadaptor.DefaultClassLoader;
 import org.eclipse.osgi.framework.internal.defaultadaptor.DevClassPathHelper;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.framework.stats.*;
-import org.eclipse.osgi.framework.stats.ClassloaderStats;
-import org.eclipse.osgi.framework.stats.ResourceBundleStats;
 import org.osgi.framework.*;
 
 public class EclipseClassLoader extends DefaultClassLoader {
@@ -47,9 +43,10 @@ public class EclipseClassLoader extends DefaultClassLoader {
 		super(delegate, domain, classpath, parent, (org.eclipse.osgi.framework.internal.defaultadaptor.DefaultBundleData) bundleData);
 	}
 
-	public Class findLocalClass(String name) throws ClassNotFoundException {
+	public Class findLocalClass(String className) throws ClassNotFoundException {
+
 		if (StatsManager.MONITOR_CLASSES) //Suport for performance analysis
-			ClassloaderStats.startLoadingClass(getClassloaderId(), name);
+			ClassloaderStats.startLoadingClass(getClassloaderId(), className);
 		boolean found = true;
 
 		try {
@@ -57,11 +54,11 @@ public class EclipseClassLoader extends DefaultClassLoader {
 			// If the bundle is active, uninstalled or stopping then the bundle has already
 			// been initialized (though it may have been destroyed) so just return the class.
 			if ((bundle.getState() & (AbstractBundle.ACTIVE | AbstractBundle.UNINSTALLED | AbstractBundle.STOPPING)) != 0)
-				return super.findLocalClass(name);
+				return super.findLocalClass(className);
 
 			// The bundle is not active and does not require activation, just return the class
-			if (!shouldActivateFor(name))
-				return super.findLocalClass(name);
+			if (!shouldActivateFor(className))
+				return super.findLocalClass(className);
 
 			// The bundle is starting.  Note that if the state changed between the tests 
 			// above and this test (e.g., it was not ACTIVE but now is), that's ok, we will 
@@ -71,7 +68,7 @@ public class EclipseClassLoader extends DefaultClassLoader {
 			if (bundle.getState() == AbstractBundle.STARTING) {
 				// If the thread trying to load the class is the one trying to activate the bundle, then return the class 
 				if (bundle.testStateChanging(Thread.currentThread()) || bundle.testStateChanging(null))
-					return super.findLocalClass(name);
+					return super.findLocalClass(className);
 
 				// If it's another thread, we wait and try again. In any case the class is returned. 
 				// The difference is that an exception can be logged.
@@ -98,10 +95,11 @@ public class EclipseClassLoader extends DefaultClassLoader {
 						timeLeft = start + delay - System.currentTimeMillis();
 					}
 					if (timeLeft <= 0 || bundle.getState() != Bundle.ACTIVE) {
-						String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CLASSLOADER_CONCURRENT_STARTUP", new Object[] {Thread.currentThread(), name, threadChangingState.getName(), bundle.getSymbolicName() == null ? Long.toString(bundle.getBundleId()) : bundle.getSymbolicName()}, Long.toString(delay)); //$NON-NLS-1$ 
+						String bundleName = bundle.getSymbolicName() == null ? Long.toString(bundle.getBundleId()) : bundle.getSymbolicName();
+						String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CLASSLOADER_CONCURRENT_STARTUP", new Object[] {Thread.currentThread().getName(), className, threadChangingState.getName(), bundleName, Long.toString(delay)}); //$NON-NLS-1$ 
 						EclipseAdaptor.getDefault().getFrameworkLog().log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, message, 0, new Exception(EclipseAdaptorMsg.formatter.getString("ECLIPSE_CLASSLOADER_GENERATED_EXCEPTION")), null)); //$NON-NLS-1$
 					}
-					return super.findLocalClass(name);
+					return super.findLocalClass(className);
 				}
 			}
 
@@ -112,13 +110,13 @@ public class EclipseClassLoader extends DefaultClassLoader {
 				String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CLASSLOADER_ACTIVATION", bundle.getSymbolicName(), Long.toString(bundle.getBundleId())); //$NON-NLS-1$
 				EclipseAdaptor.getDefault().getFrameworkLog().log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, message, 0, e, null));
 			}
-			return super.findLocalClass(name);
+			return super.findLocalClass(className);
 		} catch (ClassNotFoundException e) {
 			found = false;
 			throw e;
 		} finally {
 			if (StatsManager.MONITOR_CLASSES)
-				ClassloaderStats.endLoadingClass(getClassloaderId(), name, found);
+				ClassloaderStats.endLoadingClass(getClassloaderId(), className, found);
 		}
 	}
 
