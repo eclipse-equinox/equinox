@@ -62,7 +62,7 @@ class StateWriter {
 		Dictionary props = state.getPlatformProperties();
 		out.writeInt(StateImpl.PROPS.length);
 		for (int i = 0; i < StateImpl.PROPS.length; i++)
-			writeStringOrNull((String) props.get(StateImpl.PROPS[i]), out);
+			writePlatformProp(props.get(StateImpl.PROPS[i]), out);
 		BundleDescription[] bundles = state.getBundles();
 		StateHelperImpl.getInstance().sortBundles(bundles);
 		out.writeInt(bundles.length);
@@ -75,6 +75,23 @@ class StateWriter {
 		out.writeInt(out.size());
 		for (int i = 0; i < bundles.length; i++)
 			writeBundleDescriptionLazyData(bundles[i], out);
+	}
+
+	private void writePlatformProp(Object obj, DataOutputStream out) throws IOException {
+		if (obj == null)
+			out.writeByte(NULL);
+		else {
+			out.writeByte(OBJECT);
+			if (obj instanceof String) {
+				out.writeInt(1);
+				writeStringOrNull((String) obj, out);
+			} else {
+				String[] props = (String[]) obj;
+				out.writeInt(props.length);
+				for (int i = 0; i < props.length; i++)
+					writeStringOrNull(props[i], out);
+			}
+		}
 	}
 
 	private void writeBundleDescription(BundleDescription bundle, DataOutputStream out) throws IOException {

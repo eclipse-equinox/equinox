@@ -30,7 +30,7 @@ class StateReader {
 	private int lazyDataOffset;
 	private int numBundles;
 
-	public static final byte STATE_CACHE_VERSION = 11;
+	public static final byte STATE_CACHE_VERSION = 12;
 	public static final byte NULL = 0;
 	public static final byte OBJECT = 1;
 	public static final byte INDEX = 2;
@@ -68,7 +68,7 @@ class StateReader {
 		Hashtable props = new Hashtable(4);
 		int numProps = in.readInt();
 		for (int i = 0; i < numProps; i++) {
-			String value = readString(in, false);
+			Object value = readPlatformProp(in);
 			if (value != null)
 				props.put(StateImpl.PROPS[i], value);
 		}
@@ -90,6 +90,19 @@ class StateReader {
 		for (int i = 0; i < numBundles; i++)
 			readBundleDescriptionLazyData(in, null);
 		return true;
+	}
+
+	private Object readPlatformProp(DataInputStream in) throws IOException {
+		byte type = in.readByte();
+		if (type == NULL)
+			return null;
+		int num = in.readInt();
+		if (num == 1)
+			return readString(in, false);
+		String[] result = new String[num];
+		for (int i = 0; i < result.length; i++)
+			result[i] = readString(in, false);
+		return result;
 	}
 
 	private BundleDescriptionImpl readBundleDescription(DataInputStream in) throws IOException {

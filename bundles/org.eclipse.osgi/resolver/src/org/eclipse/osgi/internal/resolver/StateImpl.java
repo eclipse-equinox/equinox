@@ -436,19 +436,39 @@ public abstract class StateImpl implements State {
 		return platformProperties;
 	}
 
-	private boolean checkProp(Object origProp, Object newProp) {
-		if ((origProp == null && newProp != null) || (origProp != null && !origProp.equals(newProp)))
+	private boolean checkProp(Object origObj, Object newObj) {
+		if ((origObj == null && newObj != null) || (origObj != null && newObj == null))
 			return true;
+		if (origObj == null)
+			return false;
+		if (origObj.getClass() != newObj.getClass())
+			return true;
+		if (origObj instanceof String)
+			return !origObj.equals(newObj);
+		String[] origProps = (String[]) origObj;
+		String[] newProps = (String[]) newObj;
+		if (origProps.length != newProps.length)
+			return true;
+		for (int i = 0; i < origProps.length; i++) {
+			if (!origProps[i].equals(newProps[i]))
+				return true;
+		}
 		return false;
 	}
 
 	private boolean setProps(Dictionary origProps, Dictionary newProps) {
 		boolean changed = false;
-		for(int i = 0; i < PROPS.length; i++)
-			if (checkProp(origProps.get(PROPS[i]), newProps.get(PROPS[i]))) {
+		for(int i = 0; i < PROPS.length; i++) {
+			Object origProp = origProps.get(PROPS[i]);
+			Object newProp = newProps.get(PROPS[i]);
+			if (checkProp(origProp, newProp)) {
 				changed = true;
-				origProps.put(PROPS[i], newProps.get(PROPS[i]));
+				if (newProp == null)
+					origProps.remove(PROPS[i]);
+				else
+					origProps.put(PROPS[i], newProp);
 			}
+		}
 		return changed;
 	}
 
