@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003 IBM Corporation and others.
+ * Copyright (c) 2003, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -50,7 +50,7 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 	protected Framework framework;
 
 	/** BundleLoaders that are pending removal. Value is BundleLoader */
-	protected Vector removalPending; //TODO It seems that here the Vector is required since synchronization is required when adding / removing 
+	protected Vector removalPending;
 
 	protected KeyedHashSet exportedPackages;
 	protected KeyedHashSet exportedBundles;
@@ -86,30 +86,37 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 
 		for (int i = 0; i < packageSpecs.length; i++) {
 			BundleDescription bundleSpec = packageSpecs[i].getSupplier();
-			if (bundleSpec != null) {
-				Bundle bundle = framework.getBundle(bundleSpec.getBundleId());
-				if (bundle == null || !bundle.checkExportPackagePermission(packageSpecs[i].getName()))
+			if (bundleSpec == null)
+				continue;
+			Bundle bundle = framework.getBundle(bundleSpec.getBundleId());
+			if (bundle == null) {
+				BundleException be = new BundleException(Msg.formatter.getString("BUNDLE_NOT_IN_FRAMEWORK",bundleSpec)); //$NON-NLS-1$
+				framework.publishFrameworkEvent(FrameworkEvent.ERROR,framework.systemBundle,be);
+				continue;
+			}
+			// check export permissions before getting the host;
+			// we want to check the permissions of the fragment
+			if (!bundle.checkExportPackagePermission(packageSpecs[i].getName()))
+				continue;
+			// if we have a host then get the host bundle
+			HostSpecification hostSpec = bundleSpec.getHost();
+			if (hostSpec != null) {
+				bundleSpec = hostSpec.getSupplier();
+				if (bundleSpec == null)
 					continue;
+				bundle = framework.getBundle(bundleSpec.getBundleId());
+				if (bundle == null) {
+					BundleException be = new BundleException(Msg.formatter.getString("BUNDLE_NOT_IN_FRAMEWORK",bundleSpec)); //$NON-NLS-1$
+					framework.publishFrameworkEvent(FrameworkEvent.ERROR,framework.systemBundle,be);
+					continue;
+				}
+			}
 
-				HostSpecification hostSpec = bundleSpec.getHost();
-				if (hostSpec != null) {
-					bundleSpec = hostSpec.getSupplier();
-					if (bundleSpec == null)
-						continue;
-					bundle = framework.getBundle(bundleSpec.getBundleId());
-				}
-				
-				if (bundle != null && bundle.isResolved() && bundle instanceof BundleHost) {
-					ExportedPackageImpl packagesource = new ExportedPackageImpl(packageSpecs[i], ((BundleHost)bundle).getLoaderProxy());
-					packageSet.add(packagesource);
-				} else {
-					// TODO log error
-				}
-			} else {
-				// TODO log error
+			if (bundle.isResolved() && bundle instanceof BundleHost) {
+				ExportedPackageImpl packagesource = new ExportedPackageImpl(packageSpecs[i], ((BundleHost) bundle).getLoaderProxy());
+				packageSet.add(packagesource);
 			}
 		}
-
 		return packageSet;
 	}
 
@@ -119,16 +126,15 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 		for (int i = 0; i < bundleDescripts.length; i++) {
 			BundleDescription bundledes = bundleDescripts[i];
 			Bundle bundle = framework.getBundle(bundledes.getBundleId());
-			if (bundle != null && bundle.isResolved() && bundle.getSymbolicName()!= null &&
-					bundle instanceof BundleHost &&	bundle.checkProvideBundlePermission(bundle.getSymbolicName())) {
-				BundleLoaderProxy loaderProxy = ((BundleHost)bundle).getLoaderProxy();
+			if (bundle != null && bundle.isResolved() && bundle.getSymbolicName() != null && bundle instanceof BundleHost && bundle.checkProvideBundlePermission(bundle.getSymbolicName())) {
+				BundleLoaderProxy loaderProxy = ((BundleHost) bundle).getLoaderProxy();
 				bundleSet.add(loaderProxy);
 			}
 		}
 		return bundleSet;
 	}
 
-	protected void cleanup() {	//This is only called when the framework is shutting down
+	protected void cleanup() { //This is only called when the framework is shutting down
 		removalPending = null;
 		exportedPackages = null;
 		exportedBundles = null;
@@ -177,29 +183,31 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 	 */
 	public org.osgi.service.packageadmin.ExportedPackage[] getExportedPackages(org.osgi.framework.Bundle bundle) {
 		// need to make sure the dependacies are marked before this call.
-		framework.bundles.markDependancies();
+		synchronized (framework.bundles) {
+			framework.bundles.markDependancies();
 
-		KeyedElement[] elements = exportedPackages.elements();
-		if (bundle != null) {
-			Vector result = new Vector();
-			for (int i = 0; i < elements.length; i++) {
-				ExportedPackageImpl pkgElement = (ExportedPackageImpl) elements[i];
-				if (pkgElement.supplier.getBundle() == bundle) {
-					result.add(pkgElement);
+			KeyedElement[] elements = exportedPackages.elements();
+			if (bundle != null) {
+				Vector result = new Vector();
+				for (int i = 0; i < elements.length; i++) {
+					ExportedPackageImpl pkgElement = (ExportedPackageImpl) elements[i];
+					if (pkgElement.supplier.getBundle() == bundle) {
+						result.add(pkgElement);
+					}
 				}
+				if (result.size() == 0) {
+					return null;
+				}
+				ExportedPackageImpl[] pkgElements = new ExportedPackageImpl[result.size()];
+				return (ExportedPackage[]) result.toArray(pkgElements);
+			} else {
+				if (elements.length == 0) {
+					return null;
+				}
+				ExportedPackageImpl[] pkgElements = new ExportedPackageImpl[elements.length];
+				System.arraycopy(elements, 0, pkgElements, 0, pkgElements.length);
+				return pkgElements;
 			}
-			if (result.size() == 0) {
-				return null;
-			}
-			ExportedPackageImpl[] pkgElements = new ExportedPackageImpl[result.size()];
-			return (ExportedPackage[]) result.toArray(pkgElements);
-		} else {
-			if (elements.length == 0) {
-				return null;
-			}
-			ExportedPackageImpl[] pkgElements = new ExportedPackageImpl[elements.length];
-			System.arraycopy(elements, 0, pkgElements, 0, pkgElements.length);
-			return pkgElements;
 		}
 	}
 
@@ -221,8 +229,10 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 	 */
 	public org.osgi.service.packageadmin.ExportedPackage getExportedPackage(String packageName) {
 		// need to make sure the dependacies are marked before this call.
-		framework.bundles.markDependancies();
-		return (ExportedPackageImpl) exportedPackages.getByKey(packageName);
+		synchronized (framework.bundles) {
+			framework.bundles.markDependancies();
+			return (ExportedPackageImpl) exportedPackages.getByKey(packageName);
+		}
 	}
 
 	/**
@@ -670,7 +680,11 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 		for (int i = 0; i < descriptions.length; i++) {
 			long bundleId = descriptions[i].getBundleId();
 			Bundle bundle = framework.getBundle(bundleId);
-			if (bundle != null && bundle != framework.systemBundle) {
+			if (bundle == null ) {
+				BundleException be = new BundleException(Msg.formatter.getString("BUNDLE_NOT_IN_FRAMEWORK",descriptions[i])); //$NON-NLS-1$
+				framework.publishFrameworkEvent(FrameworkEvent.ERROR,framework.systemBundle,be);
+			}
+			if (bundle != framework.systemBundle) {
 				if (descriptions[i].isResolved()) {
 					if (bundle.isFragment()) {
 						BundleHost host = (BundleHost) framework.getBundle(descriptions[i].getHost().getSupplier().getBundleId());
@@ -681,8 +695,6 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 						bundle.resolve();
 					}
 				}
-			} else {
-				// TODO log error!!
 			}
 		}
 		exportedPackages = getExportedPackages(exportedPackages);
@@ -695,9 +707,10 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 	 * That is what this method does.
 	 * @param bundles the set of bundles to attempt to resolve.
 	 */
-	public void resolveBundles(org.osgi.framework.Bundle[] bundles){
+	public void resolveBundles(org.osgi.framework.Bundle[] bundles) {
 		resolveBundles();
 	}
+
 	/**
 	 * Attempt to resolve all unresolved bundles. When this method returns
 	 * all bundles are resolved that can be resolved. A resolved bundle
@@ -724,7 +737,7 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 
 			// first check to see if there is anything to resolve
 			for (int i = 0; i < size; i++) {
-				if (!((Bundle)allBundles.get(i)).isResolved())
+				if (!((Bundle) allBundles.get(i)).isResolved())
 					resolveNeeded = true;
 			}
 			if (!resolveNeeded)
@@ -774,7 +787,7 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 		}
 		if (Debug.DEBUG && Debug.DEBUG_PACKAGEADMIN_TIMING) {
 			cumulativeTime = cumulativeTime + System.currentTimeMillis() - start;
-			DebugOptions.getDefault().setOption("debug.packageadmin/timing/value", Long.toString(cumulativeTime));	//TODO the name of the option should be fully qualified
+			DebugOptions.getDefault().setOption(Debug.OPTION_DEBUG_PACKAGEADMIN_TIMING + "/value", Long.toString(cumulativeTime)); //$NON-NLS-1$
 		}
 	}
 
@@ -812,8 +825,8 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 		return (BundleDescription[]) result.toArray(new BundleDescription[result.size()]);
 	}
 
-	public NamedClassSpace[] getNamedClassSpaces(String symbolicName){
-		if (exportedBundles == null || exportedBundles.size()==0)
+	public NamedClassSpace[] getNamedClassSpaces(String symbolicName) {
+		if (exportedBundles == null || exportedBundles.size() == 0)
 			return null;
 
 		// need to make sure the dependacies are marked before this call.
@@ -827,10 +840,9 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 			NamedClassSpace[] result = new NamedClassSpace[allSymbolicBundles.length];
 			System.arraycopy(allSymbolicBundles, 0, result, 0, result.length);
 			return result;
-		}
-		else {
+		} else {
 			ArrayList result = new ArrayList();
-			for (int i=0; i<allSymbolicBundles.length; i++) {
+			for (int i = 0; i < allSymbolicBundles.length; i++) {
 				NamedClassSpace symBundle = (NamedClassSpace) allSymbolicBundles[i];
 				if (symBundle.getName().equals(symbolicName))
 					result.add(symBundle);
@@ -855,20 +867,20 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 		// version order.
 		ArrayList result = new ArrayList();
 		Version ver = new Version(version);
-		for(int i=0; i<bundles.length; i++) {
+		for (int i = 0; i < bundles.length; i++) {
 			if (matchBundle(bundles[i], ver, match)) {
 				result.add(bundles[i]);
 			}
 		}
 
-		if (result.size()==0)
+		if (result.size() == 0)
 			return null;
 		else
 			return (Bundle[]) result.toArray(new Bundle[result.size()]);
 	}
 
 	private boolean matchBundle(Bundle bundle, Version version, String match) {
-		match = match==null ? Constants.VERSION_MATCH_GREATERTHANOREQUAL : match;
+		match = match == null ? Constants.VERSION_MATCH_GREATERTHANOREQUAL : match;
 		boolean result = false;
 		if (match.equalsIgnoreCase(Constants.VERSION_MATCH_QUALIFIER))
 			result = bundle.getVersion().matchQualifier(version);
@@ -885,11 +897,11 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 	}
 
 	public org.osgi.framework.Bundle[] getFragments(org.osgi.framework.Bundle bundle) {
-		return ((Bundle)bundle).getFragments();
+		return ((Bundle) bundle).getFragments();
 	}
 
 	public org.osgi.framework.Bundle[] getHosts(org.osgi.framework.Bundle bundle) {
-		org.osgi.framework.Bundle host = ((Bundle)bundle).getHost();
+		org.osgi.framework.Bundle host = ((Bundle) bundle).getHost();
 		if (host == null)
 			return null;
 		else
@@ -897,7 +909,7 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 	}
 
 	public int getBundleType(org.osgi.framework.Bundle bundle) {
-		return ((Bundle)bundle).isFragment() ? PackageAdmin.BUNDLE_TYPE_FRAGMENT : 0;
+		return ((Bundle) bundle).isFragment() ? PackageAdmin.BUNDLE_TYPE_FRAGMENT : 0;
 	}
 
 	protected Class loadServiceClass(String className, Bundle bundle) {
@@ -905,7 +917,7 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 			if (restrictServiceClasses || bundle == null)
 				return framework.adaptor.getBundleClassLoaderParent().loadClass(className);
 			else
-				return bundle.loadClass(className,false);
+				return bundle.loadClass(className, false);
 		} catch (ClassNotFoundException e) {
 			// do nothing; try exported packages
 		}
@@ -924,7 +936,7 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 		// try bundle's PRIVATE class space if we are restricting service classes
 		if (restrictServiceClasses && bundle != null)
 			return bundle.getBundleLoader().findLocalClass(className);
-		
+
 		return null;
 	}
 }

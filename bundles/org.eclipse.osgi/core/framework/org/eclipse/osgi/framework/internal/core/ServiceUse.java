@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003 IBM Corporation and others.
+ * Copyright (c) 2003, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -36,7 +36,6 @@ public class ServiceUse {
 	/** bundle's use count for this service */
 	protected int useCount;
 	/** Internal framework object. */
-	protected Framework framework;	//TODO this field or context could be removed. Do we really gain in time in having it here?
 
 	/**
 	 * Constructs a service use encapsulating the service object.
@@ -48,7 +47,6 @@ public class ServiceUse {
 	 */
 	protected ServiceUse(BundleContext context, ServiceRegistration registration) {
 		this.context = context;
-		this.framework = context.framework;
 		this.registration = registration;
 		this.useCount = 0;
 
@@ -116,7 +114,7 @@ public class ServiceUse {
 				}
 
 				BundleException be = new BundleException(Msg.formatter.getString("SERVICE_FACTORY_EXCEPTION", factory.getClass().getName(), "getService"), t);
-				framework.publishFrameworkEvent(FrameworkEvent.ERROR, factorybundle, be);
+				context.framework.publishFrameworkEvent(FrameworkEvent.ERROR, factorybundle, be);
 
 				return (null);
 			}
@@ -127,14 +125,14 @@ public class ServiceUse {
 				}
 
 				BundleException be = new BundleException(Msg.formatter.getString("SERVICE_OBJECT_NULL_EXCEPTION", factory.getClass().getName()));
-				framework.publishFrameworkEvent(FrameworkEvent.ERROR, factorybundle, be);
+				context.framework.publishFrameworkEvent(FrameworkEvent.ERROR, factorybundle, be);
 
 				return (null);
 			}
 
 			String[] clazzes = registration.clazzes;
 			int size = clazzes.length;
-			PackageAdmin packageAdmin = framework.packageAdmin;
+			PackageAdmin packageAdmin = context.framework.packageAdmin;
 			for (int i = 0; i < size; i++) {
 				Class clazz = packageAdmin.loadServiceClass(clazzes[i],factorybundle);
 				if (clazz == null) {
@@ -142,7 +140,7 @@ public class ServiceUse {
 						Debug.println(clazzes[i] + " class not found");
 					}
 					BundleException be = new BundleException(Msg.formatter.getString("SERVICE_CLASS_NOT_FOUND_EXCEPTION", clazzes[i]));
-					framework.publishFrameworkEvent(FrameworkEvent.ERROR, factorybundle, be);
+					context.framework.publishFrameworkEvent(FrameworkEvent.ERROR, factorybundle, be);
 					return (null);
 				}
 
@@ -151,7 +149,7 @@ public class ServiceUse {
 						Debug.println("Service object from ServiceFactory is not an instanceof " + clazzes[i]);
 					}
 					BundleException be = new BundleException(Msg.formatter.getString("SERVICE_NOT_INSTANCEOF_CLASS_EXCEPTION", factory.getClass().getName(), clazzes[i]));
-					framework.publishFrameworkEvent(FrameworkEvent.ERROR, factorybundle, be);
+					context.framework.publishFrameworkEvent(FrameworkEvent.ERROR, factorybundle, be);
 					return (null);
 				}
 			}
@@ -218,7 +216,7 @@ public class ServiceUse {
 
 					Bundle factorybundle = registration.context.bundle;
 					BundleException be = new BundleException(Msg.formatter.getString("SERVICE_FACTORY_EXCEPTION", factory.getClass().getName(), "ungetService"), t);
-					framework.publishFrameworkEvent(FrameworkEvent.ERROR, factorybundle, be);
+					context.framework.publishFrameworkEvent(FrameworkEvent.ERROR, factorybundle, be);
 				}
 
 				service = null;
@@ -257,7 +255,7 @@ public class ServiceUse {
 
 				Bundle factorybundle = registration.context.bundle;
 				BundleException be = new BundleException(Msg.formatter.getString("SERVICE_FACTORY_EXCEPTION", factory.getClass().getName(), "ungetService"), t);
-				framework.publishFrameworkEvent(FrameworkEvent.ERROR, factorybundle, be);
+				context.framework.publishFrameworkEvent(FrameworkEvent.ERROR, factorybundle, be);
 			}
 
 			service = null;

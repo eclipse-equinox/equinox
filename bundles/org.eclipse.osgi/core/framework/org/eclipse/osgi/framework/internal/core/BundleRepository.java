@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003 IBM Corporation and others.
+ * Copyright (c) 2003, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,7 +15,15 @@ import java.util.*;
 
 import org.eclipse.osgi.service.resolver.Version;
 
-//TODO Does this class need to be synchronized?
+/**
+ * The BundleRepository holds all installed Bundle object for the
+ * Framework.  The BundleRepository is also used to mark and unmark
+ * bundle dependancies.
+ *
+ * <p> 
+ * This class is not synchronized.  Any access to the bundle
+ * repository must be synchronized by the caller.
+ */
 public class BundleRepository {
 	/** bundles by install order */
 	private ArrayList bundlesByInstallOrder;	//TODO It does not seems to me that the users of this really care for the ordering. If this is confirmed this can be remove 
@@ -165,7 +173,7 @@ public class BundleRepository {
 		bundlesBySymbolicName.clear();
 	}
 
-	public synchronized void markDependancies() {
+	public void markDependancies() {
 		KeyedElement[] elements = bundlesById.elements();
 		for (int i = 0; i < elements.length; i++) {
 			if (elements[i] instanceof BundleHost) {
@@ -174,7 +182,7 @@ public class BundleRepository {
 		}
 	}
 
-	public synchronized void unMarkDependancies(BundleLoaderProxy user) {
+	public void unMarkDependancies(BundleLoaderProxy user) {
 		KeyedElement[] elements = bundlesById.elements();
 		for (int i = 0; i < elements.length; i++) {
 			if (elements[i] instanceof BundleHost) {

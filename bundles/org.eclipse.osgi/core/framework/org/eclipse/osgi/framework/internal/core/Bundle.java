@@ -1140,8 +1140,7 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 					return;
 				}
 				if (doubleFault || (stateChanging == Thread.currentThread())) {
-					//TODO The message must be improved to indicate the name of the thread and the bundle that was changing state
-					throw new BundleException(Msg.formatter.getString("BUNDLE_STATE_CHANGE_EXCEPTION"));	//$NON-NLS-1$
+					throw new BundleException(Msg.formatter.getString("BUNDLE_STATE_CHANGE_EXCEPTION",getLocation(),stateChanging.getName()));	//$NON-NLS-1$
 				}
 				try {
 					if (Debug.DEBUG && Debug.DEBUG_GENERAL) {

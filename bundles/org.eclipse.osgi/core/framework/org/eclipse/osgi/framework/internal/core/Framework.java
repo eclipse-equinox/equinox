@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003 IBM Corporation and others.
+ * Copyright (c) 2003, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -143,7 +143,10 @@ public class Framework implements EventDispatcher, EventPublisher {
 		/* create the service registry */
 		serviceid = 1;
 		serviceRegistry = adaptor.getServiceRegistry();
-		installLock = new Hashtable(13);	//TODO Is it a magic number? :)
+		// Initialize the installLock; there is no way of knowing 
+		// what the initial size should be, at most it will be the number
+		// of threads trying to install a bundle (probably a very low number).
+		installLock = new Hashtable(10);
 		/* create the system bundle */
 		createSystemBundle();
 		/* install URLStreamHandlerFactory */
@@ -726,16 +729,19 @@ public class Framework implements EventDispatcher, EventPublisher {
 		Bundle bundle;
 		try {
 			BundleData bundledata = storage.begin();
-			bundle = createBundle(bundledata); 			//TODO Why can't this could be done once the check below has been done? 
 			// Check for a bundle already installed with the same UniqueId and version.
-			if (bundle.getSymbolicName() != null) {
-				Bundle installedBundle = getBundleByUniqueId(bundle.getSymbolicName(), bundle.getVersion().toString());
+			if (bundledata.getSymbolicName() != null) {
+				Bundle installedBundle = getBundleByUniqueId(bundledata.getSymbolicName(), bundledata.getVersion().toString());
 				if (installedBundle != null) {
 					throw new BundleException(Msg.formatter.getString("BUNDLE_INSTALL_SAME_UNIQUEID", new Object[] {installedBundle.getSymbolicName(), installedBundle.getVersion().toString(), installedBundle.getLocation()})); //$NON-NLS-1$
 				}
 			}
+			bundle = createBundle(bundledata);
 			try {
-				//TODO Why is the selection of native code not directly done in the bundleData itself?  
+				// Select the native code paths for the bundle;
+				// this is not done by the adaptor because this
+				// should be a static algorithm spec'ed by OSGi
+				// that we do not allow to be adapted.
 				String[] nativepaths = selectNativeCode(bundle);
 				if (nativepaths != null) {
 					bundledata.installNativeCode(nativepaths);
@@ -1050,7 +1056,9 @@ public class Framework implements EventDispatcher, EventPublisher {
 	 *         bundle is installed with the specified location.
 	 */
 	protected Bundle[] getBundleByUniqueId(String uniqueId) {
-		return bundles.getBundles(uniqueId);
+		synchronized (bundles) {
+			return bundles.getBundles(uniqueId);
+		}
 	}
 	/**
 	 * Returns a list of <tt>ServiceReference</tt> objects. This method

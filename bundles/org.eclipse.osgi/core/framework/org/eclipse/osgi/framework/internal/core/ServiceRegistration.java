@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003 IBM Corporation and others.
+ * Copyright (c) 2003, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,8 +14,6 @@ package org.eclipse.osgi.framework.internal.core;
 import java.util.*;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.util.Headers;
-import org.osgi.framework.BundleException;
-import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.ServiceEvent;
 
 /**
@@ -373,12 +371,11 @@ public class ServiceRegistration implements org.osgi.framework.ServiceRegistrati
 
             ServiceUse use = (ServiceUse)servicesInUse.get(reference);
 
-            Object service = null;
             if (use == null)
             {
                 use = new ServiceUse(user, this);
 
-                service = use.getService();
+                Object service = use.getService();
 
                 if (service != null)
                 {
@@ -391,24 +388,13 @@ public class ServiceRegistration implements org.osgi.framework.ServiceRegistrati
 
                     contextsUsing.addElement(user);
                 }
+
+                return(service);
             }
             else
             {
-                service = use.getService();
+                return(use.getService());
             }
-            for (int i = 0; i < clazzes.length; i++) {
-            	try {
-					Class clazz = user.bundle.loadClass(clazzes[i],false);
-					if (!clazz.isInstance(service)) {
-						BundleException be = new BundleException("Create Error Message");// TODO error message here.
-						framework.publishFrameworkEvent(FrameworkEvent.ERROR,user.bundle,be);
-						return null;
-					}
-				} catch (ClassNotFoundException e) {
-					// do nothing
-				}
-            }
-            return service;
         }
     }
 

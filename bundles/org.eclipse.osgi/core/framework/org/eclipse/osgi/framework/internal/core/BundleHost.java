@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003 IBM Corporation and others.
+ * Copyright (c) 2003, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -424,8 +424,7 @@ public class BundleHost extends Bundle {
 					if (state == UNINSTALLED) {
 						context.close();
 						context = null;
-						//TODO Improve error message with the name of the bundle 
-						throw new BundleException(Msg.formatter.getString("BUNDLE_UNINSTALLED_EXCEPTION"));
+						throw new BundleException(Msg.formatter.getString("BUNDLE_UNINSTALLED_EXCEPTION", getLocation())); //$NON-NLS-1$
 					}
 				}
 			} finally {
@@ -583,7 +582,7 @@ public class BundleHost extends Bundle {
 					// then we cannot attach a fragment into the middle
 					// of the fragment chain.
 					if (loader != null) {
-						throw new BundleException(Msg.formatter.getString("FRAGMENT_ATTACHMENT ERROR"));
+						throw new BundleException(Msg.formatter.getString("BUNDLE_LOADER_ATTACHMENT_ERROR", fragments[i].getSymbolicName(),getSymbolicName())); //$NON-NLS-1$
 					}
 					newFragments[i] = fragment;
 					inserted = true;
