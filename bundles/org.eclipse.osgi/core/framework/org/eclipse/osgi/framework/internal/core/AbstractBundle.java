@@ -938,7 +938,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	 *                permissions.
 	 */
 	public Dictionary getHeaders() {
-		return getHeaders(Locale.getDefault().toString());
+		return getHeaders(null);
 	}
 
 	/**
@@ -988,6 +988,8 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 			// return an empty dictinary.
 			return new Hashtable();
 		}
+		if (localeString == null)
+			localeString = Locale.getDefault().toString();
 		return manifestLocalization.getHeaders(localeString);
 	}
 
