@@ -40,9 +40,10 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 	public static final String PARENT_CLASSLOADER_BOOT = "boot"; //$NON-NLS-1$
 	public static final String PARENT_CLASSLOADER_FWK = "fwk"; //$NON-NLS-1$
 
-	public static final byte EXTENSION_INITIALIZE = 0;
-	public static final byte EXTENSION_INSTALLED = 1;
-	public static final byte EXTENSION_UNINSTALLED = 2;
+	public static final byte EXTENSION_INITIALIZE = 0x01;
+	public static final byte EXTENSION_INSTALLED = 0x02;
+	public static final byte EXTENSION_UNINSTALLED = 0x04;
+	public static final byte EXTENSION_UPDATED = 0x08;
 
 	/** Name of the Adaptor manifest file */
 	protected final String ADAPTOR_MANIFEST = "ADAPTOR.MF"; //$NON-NLS-1$
@@ -539,7 +540,8 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 	protected void processFrameworkExtension(BundleData bundleData, byte type) throws BundleException {
 		if (addURLMethod == null)
 			throw new BundleException("Framework extensions are not supported.", new UnsupportedOperationException()); //$NON-NLS-1$
-		if (type == EXTENSION_UNINSTALLED) // if uninstalling then do nothing framework must be restarted to remove.
+		if ((type & (EXTENSION_UNINSTALLED | EXTENSION_UPDATED)) != 0)
+			// if uninstalled or updated then do nothing framework must be restarted.
 			return;
 
 		File[] files = getExtensionFiles(bundleData);
@@ -960,7 +962,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 
 			public void commit(boolean postpone) throws BundleException {
 				processExtension(data, EXTENSION_UNINSTALLED); // remove the old extension
-				processExtension(newData, EXTENSION_INSTALLED); // add the new one
+				processExtension(newData, EXTENSION_UPDATED); // update to the new one
 				try {
 					newData.setLastModified(System.currentTimeMillis());
 					newData.save();
