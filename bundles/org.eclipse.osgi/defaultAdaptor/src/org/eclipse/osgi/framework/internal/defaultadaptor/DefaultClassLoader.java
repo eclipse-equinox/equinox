@@ -209,7 +209,7 @@ public class DefaultClassLoader extends AbstractClassLoader {
 
 		String filename = name.replace('.', '/').concat(".class");
 
-		BundleEntry entry = classpathEntry.bundlefile.getEntry(filename);
+		BundleEntry entry = classpathEntry.getBundleFile().getEntry(filename);
 
 		if (entry == null) {
 			return null;
@@ -293,7 +293,7 @@ public class DefaultClassLoader extends AbstractClassLoader {
 	}
 
 	protected Class defineClass(String name, byte[] classbytes, int off, int len, ClasspathEntry classpathEntry) throws ClassFormatError {
-		return defineClass(name,classbytes,off,len,classpathEntry.domain);
+		return defineClass(name,classbytes,off,len,classpathEntry.getProtectionDomain());
 	}
 
 	/** 
@@ -303,7 +303,7 @@ public class DefaultClassLoader extends AbstractClassLoader {
 		URL result = null;
 		for (int i = 0; i < classpathEntries.length; i++) {
 			if (classpathEntries[i] != null) {
-				result = findResourceImpl(name, classpathEntries[i].bundlefile);
+				result = findResourceImpl(name, classpathEntries[i].getBundleFile());
 				if (result != null) {
 					return result;
 				}
@@ -315,7 +315,7 @@ public class DefaultClassLoader extends AbstractClassLoader {
 			for (int i = 0; i < size; i++) {
 				FragmentClasspath fragCP = (FragmentClasspath) fragClasspaths.elementAt(i);
 				for (int j = 0; j < fragCP.classpathEntries.length; j++) {
-					result = findResourceImpl(name, fragCP.classpathEntries[j].bundlefile);
+					result = findResourceImpl(name, fragCP.classpathEntries[j].getBundleFile());
 					if (result != null) {
 						return result;
 					}
@@ -342,7 +342,7 @@ public class DefaultClassLoader extends AbstractClassLoader {
 		Vector resources = new Vector(6);
 		for (int i = 0; i < classpathEntries.length; i++) {
 			if (classpathEntries[i] != null) {
-				URL url = findResourceImpl(resource, classpathEntries[i].bundlefile);
+				URL url = findResourceImpl(resource, classpathEntries[i].getBundleFile());
 				if (url != null) {
 					resources.addElement(url);
 				}
@@ -354,7 +354,7 @@ public class DefaultClassLoader extends AbstractClassLoader {
 			for (int i = 0; i < size; i++) {
 				FragmentClasspath fragCP = (FragmentClasspath) fragClasspaths.elementAt(i);
 				for (int j = 0; j < fragCP.classpathEntries.length; j++) {
-					URL url = findResourceImpl(resource, fragCP.classpathEntries[j].bundlefile);
+					URL url = findResourceImpl(resource, fragCP.classpathEntries[j].getBundleFile());
 					if (url != null) {
 						resources.addElement(url);
 					}
@@ -371,7 +371,7 @@ public class DefaultClassLoader extends AbstractClassLoader {
 		BundleEntry result = null;
 		for (int i = 0; i < classpathEntries.length; i++) {
 			if (classpathEntries[i] != null) {
-				result = findObjectImpl(object, classpathEntries[i].bundlefile);
+				result = findObjectImpl(object, classpathEntries[i].getBundleFile());
 				if (result != null) {
 					return result;
 				}
@@ -383,7 +383,7 @@ public class DefaultClassLoader extends AbstractClassLoader {
 			for (int i = 0; i < size; i++) {
 				FragmentClasspath fragCP = (FragmentClasspath) fragClasspaths.elementAt(i);
 				for (int j = 0; j < fragCP.classpathEntries.length; j++) {
-					result = findObjectImpl(object, fragCP.classpathEntries[j].bundlefile);
+					result = findObjectImpl(object, fragCP.classpathEntries[j].getBundleFile());
 					if (result != null) {
 						return result;
 					}
@@ -407,8 +407,8 @@ public class DefaultClassLoader extends AbstractClassLoader {
 				for (int i = 0; i < classpathEntries.length; i++) {
 					if (classpathEntries[i] != null) {
 						try {
-							if (classpathEntries[i].bundlefile != hostdata.getBaseBundleFile()) {
-								classpathEntries[i].bundlefile.close();
+							if (classpathEntries[i].getBundleFile() != hostdata.getBaseBundleFile()) {
+								classpathEntries[i].getBundleFile().close();
 							}
 						} catch (IOException e) {
 							hostdata.getAdaptor().getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, hostdata.getBundle(), e);
@@ -544,8 +544,8 @@ public class DefaultClassLoader extends AbstractClassLoader {
 		protected void close() {
 			for (int i = 0; i < classpathEntries.length; i++) {
 				try {
-					if (classpathEntries[i].bundlefile != bundledata.getBaseBundleFile()) {
-						classpathEntries[i].bundlefile.close();
+					if (classpathEntries[i].getBundleFile() != bundledata.getBaseBundleFile()) {
+						classpathEntries[i].getBundleFile().close();
 					}
 				} catch (IOException e) {
 					bundledata.getAdaptor().getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, bundledata.getBundle(), e);
@@ -563,6 +563,12 @@ public class DefaultClassLoader extends AbstractClassLoader {
 		protected ClasspathEntry(BundleFile bundlefile, ProtectionDomain domain) {
 			this.bundlefile = bundlefile;
 			this.domain = domain;
+		}
+		public BundleFile getBundleFile() {
+			return bundlefile;
+		}
+		public ProtectionDomain getProtectionDomain() {
+			return domain;
 		}
 	}
 }

@@ -257,7 +257,7 @@ public class EclipseClassLoader extends DefaultClassLoader {
 			if (initMF)
 				return mf;
 
-			BundleEntry mfEntry = bundlefile.getEntry(org.eclipse.osgi.framework.internal.core.Constants.OSGI_BUNDLE_MANIFEST);
+			BundleEntry mfEntry = getBundleFile().getEntry(org.eclipse.osgi.framework.internal.core.Constants.OSGI_BUNDLE_MANIFEST);
 			if (mfEntry != null)
 				try {
 					InputStream manIn = mfEntry.getInputStream();
