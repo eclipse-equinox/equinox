@@ -583,6 +583,9 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 			Debug.println("update location " + bundledata.getLocation()); //$NON-NLS-1$
 		}
 		framework.checkAdminPermission(this, AdminPermission.LIFECYCLE);
+		if ((bundledata.getType() & (BundleData.TYPE_BOOTCLASSPATH_EXTENSION | BundleData.TYPE_FRAMEWORK_EXTENSION)) != 0)
+			// need special permission to update extensions
+			framework.checkAdminPermission(this, AdminPermission.EXTENSIONLIFECYCLE);
 		checkValid();
 		beginStateChange();
 		try {
@@ -628,6 +631,9 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 			Debug.println("   from: " + in); //$NON-NLS-1$
 		}
 		framework.checkAdminPermission(this, AdminPermission.LIFECYCLE);
+		if ((bundledata.getType() & (BundleData.TYPE_BOOTCLASSPATH_EXTENSION | BundleData.TYPE_FRAMEWORK_EXTENSION)) != 0)
+			// need special permission to update extensions
+			framework.checkAdminPermission(this, AdminPermission.EXTENSIONLIFECYCLE);
 		checkValid();
 		beginStateChange();
 		try {
@@ -706,19 +712,23 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 			}
 			// indicate we have loaded from the new version of the bundle
 			reloaded = true;
-			if (System.getSecurityManager() != null && (bundledata.getType() & (BundleData.TYPE_BOOTCLASSPATH_EXTENSION | BundleData.TYPE_FRAMEWORK_EXTENSION)) != 0) {
-				// must check for AllPermission before allow a bundle extension to be installed
-				hasPermission(new AllPermission());
-			}
-			try {
-				AccessController.doPrivileged(new PrivilegedExceptionAction() {
-					public Object run() throws Exception {
-						framework.checkAdminPermission(newBundle, AdminPermission.LIFECYCLE);
-						return null;
-					}
-				}, callerContext);
-			} catch (PrivilegedActionException e) {
-				throw e.getException();
+			if (System.getSecurityManager() != null) {
+				final boolean extension = (bundledata.getType() & (BundleData.TYPE_BOOTCLASSPATH_EXTENSION | BundleData.TYPE_FRAMEWORK_EXTENSION)) != 0;
+				// must check for AllPermission before allow a bundle extension to be updated
+				if (extension)
+					hasPermission(new AllPermission());
+				try {
+					AccessController.doPrivileged(new PrivilegedExceptionAction() {
+						public Object run() throws Exception {
+							framework.checkAdminPermission(newBundle, AdminPermission.LIFECYCLE);
+							if (extension) // need special permission to update extension bundles
+								framework.checkAdminPermission(newBundle, AdminPermission.EXTENSIONLIFECYCLE);
+							return null;
+						}
+					}, callerContext);
+				} catch (PrivilegedActionException e) {
+					throw e.getException();
+				}
 			}
 			// send out unresolved events outside synch block (defect #80610)
 			if (st == RESOLVED)
@@ -800,6 +810,9 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 			Debug.println("uninstall location: " + bundledata.getLocation()); //$NON-NLS-1$
 		}
 		framework.checkAdminPermission(this, AdminPermission.LIFECYCLE);
+		if ((bundledata.getType() & (BundleData.TYPE_BOOTCLASSPATH_EXTENSION | BundleData.TYPE_FRAMEWORK_EXTENSION)) != 0)
+			// need special permission to uninstall extensions
+			framework.checkAdminPermission(this, AdminPermission.EXTENSIONLIFECYCLE);
 		checkValid();
 		beginStateChange();
 		try {
