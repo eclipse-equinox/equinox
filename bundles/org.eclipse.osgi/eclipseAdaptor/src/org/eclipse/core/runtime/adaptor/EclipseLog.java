@@ -85,6 +85,23 @@ public class EclipseLog implements FrameworkLog {
 		return root;
 	}
 
+	/**
+	 * Helper method for writing out argument arrays.
+	 */
+	protected void writeArgs(String header, String[] args) throws IOException {
+		if (args == null || args.length == 0)
+			return;
+		write(header);
+		for (int i = 0; i < args.length; i++) {
+			//mask out the password argument for security
+			if (i > 0 && PASSWORD.equals(args[i - 1]))
+				write(" (omitted)"); //$NON-NLS-1$
+			else
+				write(" " + args[i]); //$NON-NLS-1$
+		}
+		writeln();
+	}
+
 	protected void writeSession() throws IOException {
 		write(SESSION);
 		writeSpace();
@@ -125,18 +142,8 @@ public class EclipseLog implements FrameworkLog {
 		writeln(", NL=" + EnvironmentInfo.getDefault().getNL()); //$NON-NLS-1$
 		// Add the command-line arguments used to invoke the platform 
 		// XXX: this includes runtime-private arguments - should we do that?
-		String[] args = EnvironmentInfo.getDefault().getNonFrameworkArgs();
-		if (args != null && args.length > 0) {
-			write("Command-line arguments:"); //$NON-NLS-1$
-			for (int i = 0; i < args.length; i++) {
-				//mask out the password argument for security
-				if (i > 0 && PASSWORD.equals(args[i - 1]))
-					write(" (omitted)"); //$NON-NLS-1$
-				else
-					write(" " + args[i]); //$NON-NLS-1$
-			}
-			writeln();
-		}
+		writeArgs("Framework arguments: ", EnvironmentInfo.getDefault().getNonFrameworkArgs()); //$NON-NLS-1$
+		writeArgs("Command-line arguments: ", EnvironmentInfo.getDefault().getCommandLineArgs()); //$NON-NLS-1$
 	}
 
 	/**
