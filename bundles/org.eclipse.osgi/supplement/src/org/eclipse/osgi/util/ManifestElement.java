@@ -207,7 +207,8 @@ public class ManifestElement {
 	}
 
 	/**
-	 * Parses a manifest header value into an array of ManifestElements.
+	 * Parses a manifest header value into an array of ManifestElements.  Each
+	 * ManifestElement returned will have a non-null value returned by getValue().
 	 * @param header the header name to parse.  This is only specified to provide error messages
 	 * when the header value is invalid.
 	 * @param value the header value to parse.

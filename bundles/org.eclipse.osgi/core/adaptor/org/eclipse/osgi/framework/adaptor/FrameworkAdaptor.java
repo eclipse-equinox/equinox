@@ -60,7 +60,8 @@ public interface FrameworkAdaptor {
 
 	/**
 	 * Compact/cleanup the persistent storage for the adaptor.
-	 * @throws ####
+	 * @throws IOException If the adaptor is unable to 
+	 * compact the bundle storage.
 	 *
 	 */
 	public void compactStorage() throws IOException;
@@ -69,7 +70,9 @@ public interface FrameworkAdaptor {
 	 * Return the properties object for the adaptor.
 	 * The properties in the returned object supplement
 	 * the System properties.
-	 * The framework may modify this object.
+	 * The framework may modify this object.  The Framework
+	 * will use the returned properties to set the System
+	 * properties.
 	 *
 	 * @return The properties object for the adaptor.
 	 */
@@ -88,7 +91,8 @@ public interface FrameworkAdaptor {
 	public Vector getInstalledBundles();
 
 	/**
-	 * Map a location to a URLConnection.
+	 * Map a location to a URLConnection.  This is used by the Framework when installing a bundle
+	 * from a spacified location.
 	 *
 	 * @param location of the bundle.
 	 * @return URLConnection that represents the location.
@@ -278,9 +282,30 @@ public interface FrameworkAdaptor {
 	 */
 	public FrameworkLog getFrameworkLog();
 
+	/**
+	 * Creates a BundleData object for the System Bundle.  The BundleData
+	 * returned will be used to define the System Bundle for the Framework.
+	 * @return the BundleData for the System Bundle.
+	 * @throws BundleException if any error occurs while creating the 
+	 * System BundleData.
+	 */
 	public BundleData createSystemBundleData() throws BundleException;
 
+	/**
+	 * Returns the IBundleStats for this FrameworkAdaptor.
+	 * @return the IBundleStats for this FrameworkAdaptor.
+	 */
 	public IBundleStats getBundleStats();
+
+	/**
+	 * Returns the PlatformAdmin for this FrameworkAdaptor.
+	 * @return the PlatformAdmin for this FrameworkAdaptor.
+	 */
 	public PlatformAdmin getPlatformAdmin();
+
+	/**
+	 * Returns the State for this FrameworkAdaptor.
+	 * @return the State for this FrameworkAdaptor.
+	 */
 	public State getState();
 }
