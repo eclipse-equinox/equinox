@@ -383,27 +383,16 @@ public class EclipseStarter {
 		}
 		// TODO this is such a hack it is silly.  There are still cases for race conditions etc
 		// but this should allow for some progress...
-		// Add a patch from John A
-		final boolean[] flag = new boolean[] {false};
+		final Semaphore semaphore = new Semaphore(0);
 		FrameworkListener listener = new FrameworkListener() {
 			public void frameworkEvent(FrameworkEvent event) {
 				if (event.getType() == FrameworkEvent.PACKAGES_REFRESHED)
-					synchronized (flag) {
-						flag[0] = true;
-						flag.notifyAll();
-					}
+					semaphore.release();
 			}
 		};
 		context.addFrameworkListener(listener);
 		packageAdmin.refreshPackages(bundles);
-		synchronized (flag) {
-			while (!flag[0]) {
-				try {
-					flag.wait();
-				} catch (InterruptedException e) {
-				}
-			}
-		}
+		semaphore.acquire();
 		context.removeFrameworkListener(listener);
 		context.ungetService(packageAdminRef);
 	}
