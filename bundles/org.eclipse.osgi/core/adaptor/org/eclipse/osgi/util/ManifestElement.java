@@ -108,7 +108,7 @@ public class ManifestElement {
 
 	/**
 	 * Returns an array of values for the specified attribute.
-	 * @param key the attribute key to return the value for.
+	 * @param key the attribute key to return the values for.
 	 * @return the array of attribute values or null if the attribute does not exist. 
 	 */
 	public String[] getAttributes(String key) {
@@ -208,7 +208,8 @@ public class ManifestElement {
 
 	/**
 	 * Parses a manifest header value into an array of ManifestElements.
-	 * @param header the header name to parse.  This is only specified to provide 
+	 * @param header the header name to parse.  This is only specified to provide error messages
+	 * when the header value is invalid.
 	 * @param value the header value to parse.
 	 * @return the array of ManifestElements that are represented by the header value.
 	 * @throws BundleException if the header value is invalid.
