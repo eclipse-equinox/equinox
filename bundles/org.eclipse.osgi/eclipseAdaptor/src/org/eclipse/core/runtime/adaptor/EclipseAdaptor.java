@@ -473,7 +473,8 @@ public class EclipseAdaptor extends DefaultAdaptor {
 	public void frameworkStopping() {
 		super.frameworkStopping();
 		new BundleStopper().stopBundles();
-	}	protected void setLog(FrameworkLog log) {
+	}	
+	protected void setLog(FrameworkLog log) {
 		frameworkLog = log;
  	}
 }

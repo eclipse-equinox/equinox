@@ -12,6 +12,7 @@ package org.eclipse.core.runtime.adaptor;
 
 import java.util.Dictionary;
 import java.util.Enumeration;
+import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.service.resolver.Version;
 import org.osgi.framework.BundleException;
 
@@ -24,12 +25,14 @@ public class CachedManifest extends Dictionary {
 		this.bundledata = bundledata;
 	}
 	
-	protected Dictionary getManifest() {
+	private Dictionary getManifest() {
 		if (manifest == null)
 			try {
 				manifest = bundledata.loadManifest();
 			} catch (BundleException e) {
-				//TODO: this needs to be logged
+				final String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CACHEDMANIFEST_UNEXPECTED_EXCEPTION", bundledata.getLocation());
+				FrameworkLogEntry entry = new FrameworkLogEntry(EclipseAdaptor.FRAMEWORK_SYMBOLICNAME, message, 0, e, null);
+				EclipseAdaptor.getDefault().getFrameworkLog().log(entry);
 				return null;
 			}
 		return manifest;
@@ -41,7 +44,7 @@ public class CachedManifest extends Dictionary {
 	}
 
 	public boolean isEmpty() {
-		return false;
+		return size() == 0;
 	}
 
 	public Enumeration elements() {
@@ -72,6 +75,7 @@ public class CachedManifest extends Dictionary {
 			return bundledata.getSymbolicName();
 		//TODO: getManifest may return null. 
 		//TODO This can only happen if the converter is not around.
+		//TODO False, it can happen whenever something goes wrong while calling EclipseBundleData.loadManifest (see bug 56562)
 		return getManifest().get(key);
 	}
 
