@@ -65,7 +65,6 @@ public class EclipseAdaptor extends DefaultAdaptor {
 
 	private static EclipseAdaptor instance;
 
-	private int startLevel = 1; //TODO Can't we use AbstractFrameworkAdaptor.initialStartLevel?
 	private long timeStamp = 0;
 	private String installURL = null;
 
@@ -162,7 +161,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 				if (in.readByte() == BUNDLEDATA_VERSION) {
 					timeStamp = in.readLong();
 					installURL = in.readUTF();
-					startLevel = in.readInt();
+					initialBundleStartLevel = in.readInt();
 					nextId = in.readInt();
 				}
 			} finally {
@@ -443,7 +442,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 				out.write(BUNDLEDATA_VERSION);
 				out.writeLong(stateManager.getSystemState().getTimeStamp());
 				out.writeUTF(installURL);
-				out.writeInt(startLevel);
+				out.writeInt(initialBundleStartLevel);
 				out.writeLong(nextId);
 				Bundle[] bundles = context.getBundles();
 				out.writeInt(bundles.length);
