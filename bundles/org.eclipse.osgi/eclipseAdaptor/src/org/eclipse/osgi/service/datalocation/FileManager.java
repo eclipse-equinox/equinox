@@ -205,12 +205,11 @@ public class FileManager {
 	 *                         if there was an unexpected problem while acquiring the
 	 *                         lock.
 	 */
-	private boolean lock() throws IOException {
+	private void lock() throws IOException {
 		if (locker == null)
 			locker = BasicLocation.createLocker(lockFile, null);
-		if (locker == null)
+		if (locker == null || locker.lock()==false)
 			throw new IOException(EclipseAdaptorMsg.formatter.getString("fileManager.cannotLock")); //$NON-NLS-1$
-		return locker.lock();
 	}
 
 	/**
@@ -226,9 +225,12 @@ public class FileManager {
 	public File lookup(String target, boolean add) throws IOException {
 		Entry entry = (Entry) table.get(target);
 		if (entry == null) {
-			if (add)
+			if (add) { 
 				add(target);
-			return null;
+				entry = (Entry) table.get(target);
+			} else {
+				return null;
+			}
 		}
 		return new File(getAbsolutePath(target + '.' + entry.getReadId()));
 	}
