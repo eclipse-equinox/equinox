@@ -59,7 +59,14 @@ public class PluginConverterImpl implements PluginConverter, IModel {
 		instance = this;
 	}
 
+	private void init(){
+		// need to make sure these fields are cleared out for each conversion.
+		out=null;
+		pluginInfo=null;
+		pluginManifestLocation=null;
+	}
 	public synchronized File convertManifest(File pluginBaseLocation, boolean compatibilityManifest) {
+		init();
 		fillPluginInfo(pluginBaseLocation);
 		if (pluginInfo==null)
 			return null;
@@ -78,8 +85,10 @@ public class PluginConverterImpl implements PluginConverter, IModel {
 
 	private void fillPluginInfo(File pluginBaseLocation) {
 		pluginManifestLocation = pluginBaseLocation;
-		URL pluginFile = findPluginManifest(pluginBaseLocation);
 		if (pluginManifestLocation == null)
+			return;
+		URL pluginFile = findPluginManifest(pluginBaseLocation);
+		if (pluginFile == null)
 			return;
 		try {		
 			pluginInfo = parsePluginInfo(pluginFile);
@@ -90,6 +99,7 @@ public class PluginConverterImpl implements PluginConverter, IModel {
 	}
 	
 	public synchronized boolean convertManifest(File pluginBaseLocation, File bundleManifestLocation, boolean compatibilityManifest) {
+		init();
 		fillPluginInfo(pluginBaseLocation);
 		if (pluginInfo == null)
 			return false;
