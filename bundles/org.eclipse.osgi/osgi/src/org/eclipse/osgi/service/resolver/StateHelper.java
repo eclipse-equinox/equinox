@@ -55,7 +55,7 @@ public interface StateHelper {
 	 */
 	public boolean isResolvable(PackageSpecification specification);
 	/**
-	 * Returns whether the given host specification constraint is resolvable. 
+	 * Returns whether the given bundle specification constraint is resolvable. 
 	 * A bundle specification constraint may be 
 	 * resolvable but not resolved, which means that the bundle that provides
 	 * it has not been resolved for some other reason (e.g. another constraint 

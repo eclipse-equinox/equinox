@@ -22,10 +22,10 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		result.setBundleId(id);
 		return result;
 	}
-	public BundleDescription createBundleDescription(long id, String globalName, Version version, String location, BundleSpecification[] required, HostSpecification host,PackageSpecification[] packages, String[] providedPackages, boolean singleton) {
+	public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location, BundleSpecification[] required, HostSpecification host,PackageSpecification[] packages, String[] providedPackages, boolean singleton) {
 		BundleDescriptionImpl bundle = new BundleDescriptionImpl();
 		bundle.setBundleId(id);
-		bundle.setUniqueId(globalName);
+		bundle.setUniqueId(symbolicName);
 		bundle.setVersion(version);
 		bundle.setLocation(location);
 		bundle.setRequiredBundles(required);
@@ -35,9 +35,9 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		bundle.setSingleton(singleton);
 		return bundle;		
 	}
-	public BundleDescription createBundleDescription(long id, String globalName, Version version, String location, BundleSpecification[] required, HostSpecification[] hosts,PackageSpecification[] packages, String[] providedPackages, boolean singleton) {
+	public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location, BundleSpecification[] required, HostSpecification[] hosts,PackageSpecification[] packages, String[] providedPackages, boolean singleton) {
 		HostSpecification host = hosts == null || hosts.length == 0 ? null : hosts[1];
-		return createBundleDescription(id, globalName, version, location, required, host, packages, providedPackages, singleton);
+		return createBundleDescription(id, symbolicName, version, location, required, host, packages, providedPackages, singleton);
 	}
 	public BundleDescription createBundleDescription(BundleDescription original) {
 		BundleDescriptionImpl bundle = new BundleDescriptionImpl();
@@ -64,9 +64,9 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		bundle.setSingleton(original.isSingleton());
 		return bundle;			
 	}
-	public BundleSpecification createBundleSpecification(String requiredGlobalName, Version requiredVersion, byte matchingRule, boolean export, boolean optional) {
+	public BundleSpecification createBundleSpecification(String requiredSymbolicName, Version requiredVersion, byte matchingRule, boolean export, boolean optional) {
 		BundleSpecificationImpl bundleSpec = new BundleSpecificationImpl();		
-		bundleSpec.setName(requiredGlobalName);
+		bundleSpec.setName(requiredSymbolicName);
 		bundleSpec.setVersionSpecification(requiredVersion);
 		bundleSpec.setMatchingRule(matchingRule);
 		bundleSpec.setExported(export);
@@ -82,9 +82,9 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		bundleSpec.setOptional(original.isOptional());
 		return bundleSpec;		
 	}
-	public HostSpecification createHostSpecification(String hostGlobalName, Version hostVersion, byte matchingRule, boolean reloadHost) {
+	public HostSpecification createHostSpecification(String hostSymbolicName, Version hostVersion, byte matchingRule, boolean reloadHost) {
 		HostSpecificationImpl hostSpec = new HostSpecificationImpl();		
-		hostSpec.setName(hostGlobalName);
+		hostSpec.setName(hostSymbolicName);
 		hostSpec.setVersionSpecification(hostVersion);
 		hostSpec.setMatchingRule(matchingRule);
 		hostSpec.setReloadHost(reloadHost);

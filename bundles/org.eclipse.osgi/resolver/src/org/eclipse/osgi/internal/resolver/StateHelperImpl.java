@@ -148,6 +148,7 @@ public class StateHelperImpl implements StateHelper {
 	 * @see StateHelper
 	 */
 	public PackageSpecification getExportedPackage(State state, String packageName, Version version) {
+		// TODO why not use State.getExportedPackages here?
 		BundleDescription[] resolvedBundles = state.getResolvedBundles();
 		boolean ignoreVersion = version == null;
 		for (int i = 0; i < resolvedBundles.length; i++) {

@@ -18,9 +18,9 @@ import org.eclipse.osgi.service.resolver.BundleDescription;
  * This implementation of State does a bookkeeping of all added/removed 
  */
 public class UserState extends StateImpl {
-	private long referenceTimestamp;
-	private List added = new Vector();
-	private List removed = new Vector();
+	private long referenceTimestamp; // TODO what is this used for?
+	private List added = new Vector(); // TODO why not ArrayList
+	private List removed = new Vector(); // TODO why not ArrayList
 	public long getReferenceTimestamp() {
 		return referenceTimestamp;
 	}

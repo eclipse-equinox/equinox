@@ -31,6 +31,7 @@ public interface PlatformAdmin {
 	 * </p> 
 	 * @return a state representing the current framework.
 	 */
+	// TODO Why is the state not associated with any resolver?
 	public State getState();
 	
 	/** 
@@ -43,6 +44,7 @@ public interface PlatformAdmin {
 	 * @param mutable whether the returned state should mutable
 	 * @return a state representing the current framework.
 	 */
+	// TODO Why is the state not associated with any resolver?
 	public State getState(boolean mutable);
 	/**
 	 * Returns a state helper object. State helpers provide convenience methods 

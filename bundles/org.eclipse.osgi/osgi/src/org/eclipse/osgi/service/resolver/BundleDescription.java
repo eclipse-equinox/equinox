@@ -62,7 +62,7 @@ public interface BundleDescription {
 	 * Returns the bundle specification for the bundle with the given unique id
 	 * in this bundle.
 	 * 
-	 * @param uniqueId the id of the required bundle to look for.
+	 * @param name the symbolic name of the required bundle to look for.
 	 * @return the discovered bunde specification or null if none could be
 	 * found.
 	 */
@@ -73,6 +73,7 @@ public interface BundleDescription {
 	 * 
 	 * @return the unique id of this bundle.
 	 */
+	// TODO change to getSymbolicName
 	public String getUniqueId();
 
 	/**

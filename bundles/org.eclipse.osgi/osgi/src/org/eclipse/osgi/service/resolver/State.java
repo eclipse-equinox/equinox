@@ -30,6 +30,7 @@ public interface State {
 	 * @param state
 	 * @return
 	 */
+	// TODO should this return a StateDelta?
 	public StateChangeEvent compare(State state);
 	/**
 	 * Removes a bundle description with the given bundle id.
@@ -73,11 +74,11 @@ public interface State {
 	 * the version argument is null then the bundle with the given name which
 	 * is resolve and/or has the highest version number is returned.
 	 * 
-	 * @param name name of the bundle to query
+	 * @param symbolicName symbolic name of the bundle to query
 	 * @param version version of the bundle to query. null matches any bundle
 	 * @return the descriptor for the identified bundle
 	 */
-	public BundleDescription getBundle(String uniqueId, Version version);
+	public BundleDescription getBundle(String symbolicName, Version version);
 	/**
 	 * Returns the id of the state on which this state is based. This
 	 * correlates this state to the system state. For example, if
@@ -125,6 +126,8 @@ public interface State {
 	 * @param bundle the bundle to update
 	 * @param status whether or not the given bundle is selected
 	 */
+	// TODO unclear what the valid status flags are.
+	// what happens if this is called by someone other than the resolver?
 	public void resolveBundle(BundleDescription bundle, int status);
 	/**
 	 * Returns the resolver associated with this state. A state can work with
@@ -150,6 +153,9 @@ public interface State {
 	 * 
 	 * </p>
 	 */
+	// TODO what happens if you set the Resolver after some bundles have
+	// been added to the state but it is not resolved?  Should setting
+	// the resolver force a state to be unresolved?
 	public void setResolver(Resolver value);
 	/**
 	 * Resolves the constraints contained in this state using the resolver
@@ -242,9 +248,12 @@ public interface State {
 	 */
 	public PackageSpecification[] getExportedPackages();
 	/**
-	 * Returns all bundle descriptions with the given bundle global name.  
+	 * Returns all bundle descriptions with the given bundle symbolic name.
+	 * @param symbolicName symbolic name of the bundles to query
+	 * @return the descriptors for all bundles known to this state with the
+	 * specified symbolic name.
 	 */
-	public BundleDescription[] getBundles(String globalName);
+	public BundleDescription[] getBundles(String symbolicName);
 	/**
 	 * Returns the factory that created this state.
 	 * @return the state object factory that created this state 

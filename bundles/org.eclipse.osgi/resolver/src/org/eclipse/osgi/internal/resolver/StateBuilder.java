@@ -24,7 +24,7 @@ import org.osgi.framework.Constants;
 class StateBuilder {
 	static BundleDescription createBundleDescription(Dictionary manifest, String location) throws BundleException {
 		BundleDescriptionImpl result = new BundleDescriptionImpl();
-		// retrieve the symbolic-name/global-name and the singleton status 
+		// retrieve the symbolic-name and the singleton status 
 		String symbolicNameHeader = (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME);
 		if (symbolicNameHeader != null) {
 			ManifestElement[] symbolicNameElements = ManifestElement.parseHeader(Constants.BUNDLE_SYMBOLICNAME, symbolicNameHeader);

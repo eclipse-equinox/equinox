@@ -72,11 +72,11 @@ public class StateImpl implements State {
 	private StateDeltaImpl getNewDelta() {
 		return new StateDeltaImpl(this);
 	}
-	public BundleDescription[] getBundles(final String requiredUniqueId) {
+	public BundleDescription[] getBundles(final String symbolicName) {
 		final List bundles = new ArrayList();
 		for (Iterator iter = bundleDescriptions.iterator(); iter.hasNext(); ) {
 			BundleDescription bundle = (BundleDescription) iter.next();
-			if (requiredUniqueId.equals(bundle.getUniqueId()))
+			if (symbolicName.equals(bundle.getUniqueId()))
 				bundles.add(bundle);
 		}
 		return (BundleDescription[]) bundles.toArray(new BundleDescription[bundles.size()]);

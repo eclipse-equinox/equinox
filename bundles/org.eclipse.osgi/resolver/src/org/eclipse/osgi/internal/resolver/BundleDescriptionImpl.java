@@ -17,7 +17,7 @@ import org.osgi.framework.Bundle;
 
 public class BundleDescriptionImpl implements BundleDescription, KeyedElement {
 	private long bundleId = -1;	
-	private String uniqueId;
+	private String uniqueId; // TODO change to symbolicName
 	private String location;
 	private int state;
 	private Version version;

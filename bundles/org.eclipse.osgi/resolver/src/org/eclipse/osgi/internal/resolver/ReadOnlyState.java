@@ -41,8 +41,8 @@ public class ReadOnlyState implements State {
 	public BundleDescription getBundle(long id) {
 		return target.getBundle(id);
 	}
-	public BundleDescription getBundle(String uniqueId, Version version) {
-		return target.getBundle(uniqueId, version);
+	public BundleDescription getBundle(String symbolicName, Version version) {
+		return target.getBundle(symbolicName, version);
 	}
 	public long getTimeStamp() {
 		return target.getTimeStamp();
@@ -89,8 +89,8 @@ public class ReadOnlyState implements State {
 	public PackageSpecification[] getExportedPackages() {
 		return target.getExportedPackages();
 	}
-	public BundleDescription[] getBundles(String globalName) {
-		return target.getBundles(globalName);
+	public BundleDescription[] getBundles(String symbolicName) {
+		return target.getBundles(symbolicName);
 	}
 	public StateObjectFactory getFactory() {
 		return target.getFactory();

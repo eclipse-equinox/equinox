@@ -16,6 +16,6 @@ package org.eclipse.osgi.service.resolver;
  * bundle manifest and managed by a state and resolver.
  */
 public interface PackageSpecification extends VersionConstraint {
-
+	// TODO add javadoc
 	public boolean isExported();
 }

@@ -19,6 +19,7 @@ import org.eclipse.osgi.service.resolver.*;
 
 class StateWriter {
 
+	// TODO not sure this comment applies anymore
 	// objectTable will be a hashmap of objects. The objects will be things
 	// like a plugin descriptor, extension, extension point, etc. The integer
 	// index value will be used in the cache to allow cross-references in the
