@@ -47,6 +47,7 @@ import org.eclipse.osgi.framework.internal.protocol.StreamHandlerFactory;
 import org.eclipse.osgi.framework.security.action.CreateThread;
 import org.eclipse.osgi.framework.util.Headers;
 import org.eclipse.osgi.framework.util.ManifestElement;
+import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.osgi.service.resolver.PackageSpecification;
 import org.osgi.framework.AdminPermission;
@@ -284,17 +285,62 @@ public class Framework implements EventSource, EventPublisher {
 				manifest.set(Constants.EXPORT_SERVICE,value);
 			}
 
-			BundleDescription description = adaptor.getPlatformAdmin().getFactory().createBundleDescription(manifest, Constants.SYSTEM_BUNDLE_LOCATION, 0);
-			if (description == null) 
-				throw new BundleException("Unable to construct System Bundle description");
-			adaptor.getState().addBundle(description);
-			// force resolution so packages are properly linked 
-			adaptor.getState().resolve();
+			BundleDescription newSystemBundle = adaptor.getPlatformAdmin().getFactory().createBundleDescription(manifest, Constants.SYSTEM_BUNDLE_LOCATION, 0);
+			if (newSystemBundle == null) 
+				throw new BundleException(Msg.formatter.getString("OSGI_SYSTEMBUNDLE_DESCRIPTION_ERROR"));
+
+			State state = adaptor.getState();
+			BundleDescription oldSystemBundle = state.getBundle(0);
+			if (oldSystemBundle != null) {
+				// need to check to make sure the system bundle description
+				// is up to date in the state.
+				PackageSpecification[] oldPackages = oldSystemBundle.getPackages();
+				PackageSpecification[] newPackages = newSystemBundle.getPackages();
+
+				boolean different = false;
+				if (oldPackages.length == newPackages.length) {
+					for (int i=0; i<oldPackages.length; i++) {
+						if (oldPackages[i].getName().equals(newPackages[i].getName())) {
+							Object oldVersion = oldPackages[i].getVersionSpecification();
+							Object newVersion = newPackages[i].getVersionSpecification();
+							if (oldVersion == null) {
+								if ( newVersion != null) {
+									different = true;
+									break;
+								}
+							}
+							else if (!oldVersion.equals(newVersion)) {
+								different = true;
+								break;
+							}
+						}
+						else {
+							different = true;
+							break;
+						}
+					}
+				}
+				else {
+					different = true;
+				}
+
+				if (different) {
+					state.removeBundle(0);
+					state.addBundle(newSystemBundle);
+					// force resolution so packages are properly linked
+					state.resolve(false);
+				}
+			}
+			else {
+				state.addBundle(newSystemBundle);
+				// force resolution so packages are properly linked
+				state.resolve(false);
+			}
 
 			systemBundle = createSystemBundle(manifest);
 
 			SystemBundleLoader.clearSystemPackages();
-			PackageSpecification[] packages = description.getPackages();
+			PackageSpecification[] packages = newSystemBundle.getPackages();
 			if (packages != null) {
 				String[] systemPackages = new String[packages.length];
 				for (int i = 0; i < packages.length; i++) {
