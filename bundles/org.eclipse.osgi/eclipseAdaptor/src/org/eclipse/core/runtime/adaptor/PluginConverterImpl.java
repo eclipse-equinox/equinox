@@ -388,7 +388,8 @@ public class PluginConverterImpl implements PluginConverter {
 	}
 
 	private void generateEclipseHeaders() {
-		generatedManifest.put(EclipseAdaptor.ECLIPSE_AUTOSTART, "true"); //$NON-NLS-1$
+		if (!pluginInfo.isFragment())
+			generatedManifest.put(EclipseAdaptor.ECLIPSE_AUTOSTART, "true"); //$NON-NLS-1$
 	}
 
 	private Set getExports() {
