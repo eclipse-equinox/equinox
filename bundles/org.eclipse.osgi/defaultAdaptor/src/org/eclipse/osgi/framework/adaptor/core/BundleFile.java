@@ -35,11 +35,6 @@ abstract public class BundleFile {
 	protected BundleData bundledata;
 
 	/**
-	 * The String value of the Bundle ID
-	 */
-	protected String bundleID;
-
-	/**
 	 * BundleFile constructor
 	 * @param bundlefile The File object where this bundle is persistently 
 	 * stored.
@@ -48,7 +43,6 @@ abstract public class BundleFile {
 	public BundleFile(File bundlefile, BundleData bundledata) {
 		this.bundlefile = bundlefile;
 		this.bundledata = bundledata;
-		this.bundleID = String.valueOf(bundledata.getBundleID());
 	}
 
 	/**
@@ -106,16 +100,17 @@ abstract public class BundleFile {
 	abstract public boolean containsDir(String dir);
 	/**
 	 * Returns a URL to access the contents of the entry specified by the path
-	 * @param path 
+	 * @param path the path to the resource
+	 * @param hostBundleID the host bundle ID
 	 */
-	public URL getResourceURL(String path) {
+	public URL getResourceURL(String path, long hostBundleID) {
 		BundleEntry bundleEntry = getEntry(path);
 		if (bundleEntry == null)
 			return null;
 
 		try {
 			StringBuffer url = new StringBuffer(Constants.OSGI_RESOURCE_URL_PROTOCOL);
-			url.append("://").append(bundleID);
+			url.append("://").append(hostBundleID);
 			if (path.length() == 0 || path.charAt(0) != '/') {
 				url.append('/');
 			}

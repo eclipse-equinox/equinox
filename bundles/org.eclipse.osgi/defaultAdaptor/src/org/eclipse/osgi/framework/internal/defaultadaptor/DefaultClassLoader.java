@@ -345,7 +345,7 @@ public class DefaultClassLoader extends AbstractClassLoader {
 	 * @return A URL to the resource or null if the resource does not exist.
 	 */
 	protected URL findResourceImpl(String name, BundleFile bundlefile) {
-		return bundlefile.getResourceURL(name);
+		return bundlefile.getResourceURL(name,hostdata.getBundleID());
 	}
 
 	/**
