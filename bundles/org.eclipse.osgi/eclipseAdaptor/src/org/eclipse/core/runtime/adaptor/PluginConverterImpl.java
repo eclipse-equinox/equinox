@@ -553,7 +553,7 @@ public class PluginConverterImpl implements PluginConverter, IModel {
 		}
 	}
 
-	private boolean upToDate(File generationLocation, File pluginLocation) {
+	public static boolean upToDate(File generationLocation, File pluginLocation) {
 		if (!generationLocation.isFile())
 			return false;
 		String secondLine = null;

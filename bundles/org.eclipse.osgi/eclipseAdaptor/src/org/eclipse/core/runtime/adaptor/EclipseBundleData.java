@@ -11,6 +11,8 @@
 package org.eclipse.core.runtime.adaptor;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
 import java.util.*;
@@ -21,6 +23,7 @@ import org.eclipse.osgi.framework.adaptor.core.*;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.internal.defaultadaptor.*;
 import org.eclipse.osgi.framework.util.Headers;
+import org.eclipse.osgi.service.resolver.Version;
 import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.BundleException;
 
@@ -168,6 +171,18 @@ public class EclipseBundleData extends DefaultBundleData {
 	}
 
 	private Dictionary generateManifest(Dictionary originalManifest) throws BundleException {
+		String cacheLocation = (String) System.getProperties().get("osgi.manifest.cache");
+		if (getSymbolicName() != null) {
+			Version version = getVersion();
+			File currentFile = new File(cacheLocation, getSymbolicName() + '_' + version.toString() + ".MF");
+			if (PluginConverterImpl.upToDate(currentFile,getBaseFile()))
+				try {
+					return Headers.parseManifest(new FileInputStream(currentFile));
+				} catch (FileNotFoundException e) {
+					// do nothing.
+				}
+		}
+
 		PluginConverterImpl converter = PluginConverterImpl.getDefault();
 
 		setManifestTimeStamp(getBaseFile().lastModified());
@@ -185,8 +200,8 @@ public class EclipseBundleData extends DefaultBundleData {
 		}
 		
 		//write the generated manifest
-		String cacheLocation = (String) System.getProperties().get("osgi.manifest.cache");
-		File bundleManifestLocation = new File(cacheLocation, ManifestElement.parseHeader(org.osgi.framework.Constants.BUNDLE_SYMBOLICNAME, (String) generatedManifest.get(org.osgi.framework.Constants.BUNDLE_SYMBOLICNAME))[0].getValue() + '_' + generatedManifest.get(Constants.BUNDLE_VERSION) + ".MF");
+		Version version = new Version((String)generatedManifest.get(Constants.BUNDLE_VERSION));
+		File bundleManifestLocation = new File(cacheLocation, ManifestElement.parseHeader(org.osgi.framework.Constants.BUNDLE_SYMBOLICNAME, (String) generatedManifest.get(org.osgi.framework.Constants.BUNDLE_SYMBOLICNAME))[0].getValue() + '_' + version.toString() + ".MF");
 		try {
 			converter.writeManifest(bundleManifestLocation, generatedManifest, true);
 		} catch (Exception e) {
