@@ -7,7 +7,9 @@
 	<classpathentry kind="src" path="eclipseAdaptor/src"/>
 	<classpathentry kind="src" path="osgi/src"/>
 	<classpathentry kind="src" path="resolver/src"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="osgi/exceptions.jar"/>
+	<classpathentry kind="lib" path="osgi/collx.jar"/>
 	<classpathentry kind="lib" path="osgi/xmlParserAPIs.jar"/>
+	<classpathentry kind="lib" path="osgi/ee.minimum.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
