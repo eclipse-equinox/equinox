@@ -124,6 +124,10 @@ public class DefaultClassLoader extends AbstractClassLoader {
 		fragClasspaths.addElement(fragClasspath);
 	}
 
+	protected String getBundleSymbolicName() {
+		return hostdata.getSymbolicName() + "_" + hostdata.getVersion();
+	}
+
 	/**
 	 * Gets a ClasspathEntry object for the specified ClassPath entry.
 	 * @param cp The ClassPath entry to get the ClasspathEntry for.
@@ -620,4 +624,5 @@ public class DefaultClassLoader extends AbstractClassLoader {
 			return domain;
 		}
 	}
+
 }
