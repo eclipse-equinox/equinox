@@ -49,8 +49,11 @@ public class ResolverImpl implements Resolver {
 		if (state == newState)
 			return;
 		// if it was linked to a previous state, unlink first
-		if (state != null)
-			state.setResolver(null);
+		if (state != null) {
+			State oldState = state;
+			state = null;
+			oldState.setResolver(null);
+		}
 		state = newState;
 		if (newState != null)
 			state.setResolver(this);

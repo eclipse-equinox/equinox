@@ -28,7 +28,7 @@ public class StateImpl implements State {
 
 	private static long cumulativeTime;
 	
-	StateImpl() {
+	protected StateImpl() {
 		// to prevent extra-package instantiation 
 	}
 
@@ -142,9 +142,12 @@ public class StateImpl implements State {
 	}
 	public void setResolver(Resolver newResolver) {
 		if (resolver == newResolver)
-			return;
-		if (resolver != null)
-			resolver.setState(null);
+			return;		
+		if (resolver != null) {
+			Resolver oldResolver = resolver;
+			resolver = null;			
+			oldResolver.setState(null);
+		}
 		resolver = newResolver;
 		if (resolver == null)
 			return;

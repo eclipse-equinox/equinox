@@ -9,15 +9,17 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
+
 import java.io.*;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.BundleException;
+
 public class StateManager implements PlatformAdmin {
 	public static boolean DEBUG = false;
 	public static boolean DEBUG_READER = false;
 	public static boolean DEBUG_PLATFORM_ADMIN = false;
-	public static boolean DEBUG_PLATFORM_ADMIN_RESOLVER = false;	
-	public static boolean MONITOR_PLATFORM_ADMIN = false;	
+	public static boolean DEBUG_PLATFORM_ADMIN_RESOLVER = false;
+	public static boolean MONITOR_PLATFORM_ADMIN = false;
 	private long readStartupTime;
 	private StateImpl systemState;
 	private File stateLocation;
@@ -98,7 +100,7 @@ public class StateManager implements PlatformAdmin {
 	public StateObjectFactory getFactory() {
 		return factory;
 	}
-public synchronized void commit(State state) throws BundleException {
+	public synchronized void commit(State state) throws BundleException {
 		// client trying to sneak in some alien implementation
 		if (!(state instanceof UserState))
 			throw new IllegalArgumentException("Wrong state implementation"); //$NON-NLS-1$
@@ -114,7 +116,7 @@ public synchronized void commit(State state) throws BundleException {
 			// ensure it has not been added then removed
 			if (added != null)
 				installer.installBundle(added);
-	}	
+		}
 		Long[] allRemoved = userState.getAllRemoved();
 		for (int i = 0; i < allRemoved.length; i++) {
 			long removedId = allRemoved[i].longValue();
@@ -133,10 +135,10 @@ public synchronized void commit(State state) throws BundleException {
 	public File getStateLocation() {
 		return stateLocation;
 	}
-	
 	public BundleInstaller getInstaller() {
 		return installer;
-}	public void setInstaller(BundleInstaller installer) {
+	}
+	public void setInstaller(BundleInstaller installer) {
 		this.installer = installer;
 	}
 }
