@@ -1,0 +1,76 @@
+package org.eclipse.core.runtime.adaptor;
+
+import java.net.URL;
+import java.security.ProtectionDomain;
+import org.eclipse.osgi.framework.adaptor.BundleData;
+import org.eclipse.osgi.framework.adaptor.ClassLoaderDelegate;
+import org.eclipse.osgi.framework.internal.core.Constants;
+import org.eclipse.osgi.framework.internal.defaultadaptor.DefaultClassLoader;
+import org.eclipse.osgi.framework.stats.ClassloaderStats;
+import org.eclipse.osgi.framework.stats.ResourceBundleStats;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleException;
+
+public class EclipseClassLoader extends DefaultClassLoader {
+
+	// TODO do we want to have autoActivate on all the time or just for Legacy plugins?
+	private boolean autoActivate = true;
+
+	public EclipseClassLoader(ClassLoaderDelegate delegate, ProtectionDomain domain, String[] classpath, BundleData bundledata) {
+		super(delegate, domain, classpath, (org.eclipse.osgi.framework.internal.defaultadaptor.DefaultBundleData) bundledata);
+	}
+	
+	public Class findLocalClass(String name) throws ClassNotFoundException {
+		// See if we need to do autoactivation. We don't if autoActivation is turned off
+		// or if we have already activated this bundle.
+		if (EclipseAdaptor.MONITOR_CLASSES)
+			ClassloaderStats.startLoadingClass(getClassloaderId(), name);
+
+		boolean found = true;
+
+		try {
+			if (autoActivate) {
+				int state = hostdata.getBundle().getState();
+				// Assume that if we get to this point the bundle is installed, resolved, ... so
+				// we just need to check that it is not already started or being started. There is a
+				// small window where two thread race to start. One will make it first, the other will
+				// throw an exception. Below we catch the exception and ignore it if it is
+				// of this nature.
+				// Ensure that we do the activation outside of any synchronized blocks to avoid deadlock.
+				if (state != Bundle.STARTING && state != Bundle.ACTIVE)
+					try {
+						hostdata.getBundle().start();
+					} catch (BundleException e) {
+						// TODO do nothing for now but we need to filter the type of exception here and
+						// sort the bad from the ok. Basically, failing to start the bundle should not be damning.
+						// Automagic activation is currently a best effort deal.
+					}
+				// once we have tried, there is no need to try again.
+				// TODO revisit this when considering what happens when a bundle is stopped
+				// and then subsequently accessed. That is, should it be restarted?
+				autoActivate = false;
+			}
+			return super.findLocalClass(name);
+		} catch (ClassNotFoundException e) {
+			found = false;
+			throw e;
+		} finally {
+			if (EclipseAdaptor.MONITOR_CLASSES)
+				ClassloaderStats.endLoadingClass(getClassloaderId(), name, found);
+		}
+	}
+
+	private String getClassloaderId() {
+		return hostdata.getBundle().getGlobalName();
+	}
+
+	public URL getResouce(String name) {
+		URL result = super.getResource(name);
+		if (EclipseAdaptor.MONITOR_RESOURCE_BUNDLES) {
+			if (result != null && name.endsWith(".properties")) { //$NON-NLS-1$
+				ClassloaderStats.loadedBundle(getClassloaderId(), new ResourceBundleStats(getClassloaderId(), name, result));
+			}
+		}
+		return result;
+	}
+}

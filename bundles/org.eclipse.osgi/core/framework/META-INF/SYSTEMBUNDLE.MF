@@ -1,0 +1,30 @@
+Export-Package: org.osgi.framework; specification-version=1.2,
+                org.osgi.service.packageadmin; specification-version=1.1,
+                org.osgi.service.permissionadmin; specification-version=1.1,
+                org.osgi.service.url; specification-version=1.0,
+                org.osgi.service.startlevel; specification-version=1.0,
+                org.eclipse.osgi.framework.eventmgr,
+                org.eclipse.osgi.framework.msg; specification-version=1.0,
+                org.eclipse.osgi.service.environment
+Import-Package: org.osgi.framework; specification-version=1.2,
+                org.osgi.service.packageadmin; specification-version=1.1,
+                org.osgi.service.permissionadmin; specification-version=1.1,
+                org.osgi.service.url; specification-version=1.0,
+                org.osgi.service.startlevel; specification-version=1.0,
+                org.eclipse.osgi.framework.eventmgr,
+                org.eclipse.osgi.framework.msg; specification-version=1.0,
+                org.eclipse.osgi.service.environment
+Export-Service: org.osgi.service.packageadmin.PackageAdmin,
+                org.osgi.service.permissionadmin.PermissionAdmin,
+                org.osgi.service.startlevel.StartLevel,
+                org.eclipse.osgi.service.environment.DebugOptions
+Bundle-Name: OSGi System Bundle
+Bundle-GlobalName: org.osgi.framework
+Bundle-Activator: org.eclipse.osgi.framework.internal.core.SystemBundleActivator
+Bundle-Description: OSGi System Bundle
+Bundle-Copyright: Copyright (c) 2003 IBM Corporation and others. All rights reserved. This program and the accompanying materials  are made available under the terms of the Common Public License v1.0 which accompanies this distribution, and is available at http://www.eclipse.org/legal/cpl-v10.html
+Bundle-Vendor: Eclipse
+Bundle-Version: 3.6.0
+Bundle-DocUrl: http://www.eclipse.org
+Bundle-ContactAddress: pervasive@us.ibm.com
+

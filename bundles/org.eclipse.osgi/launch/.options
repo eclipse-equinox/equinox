@@ -1,0 +1,11 @@
+debug=false
+debug.loader=false
+debug.events=false
+debug.services=false
+debug.packages=false
+debug.manifest=false
+debug.filter=false
+debug.security=false
+debug.startlevel=false
+debug.packageadmin=false
+debug.bundleTime=false

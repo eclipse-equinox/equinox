@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin
+   id="org.eclipse.osgi.services"
+   name="org.eclipse.osgi.services"
+   version="1.0.0">
+
+   <runtime>
+      <library name="services.jar">
+         <export name="*"/>
+      </library>
+   </runtime>
+
+</plugin>

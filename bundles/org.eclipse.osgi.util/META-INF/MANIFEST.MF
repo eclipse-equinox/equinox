@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-Name: OSGi-Utility-Classes
+Bundle-GlobalName: org.eclipse.osgi.util
+Bundle-Version: 3.0
+Bundle-Description: OSGi Service Platform Release 3 Utility Classes
+Bundle-Vendor: Eclipse
+Bundle-DocUrl: http://www.eclipse.org
+Bundle-ContactAddress: www.eclipse.org
+Bundle-Copyright: Copyright (c) The Open Services Gateway Initiative (
+ 2001, 2003). All Rights Reserved.
+Bundle-ClassPath: util.jar
+Export-Package: org.osgi.util.tracker; specification-version=1.2,
+ org.osgi.util.measurement; specification-version=1.0, 
+ org.osgi.util.position; specification-version=1.0,
+ org.osgi.util.xml; specification-version=1.0
+Import-Package: org.osgi.framework; specification-version=1.1
+Build-Information: ${build-information}
