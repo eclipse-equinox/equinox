@@ -71,6 +71,7 @@ public class FileManager {
 
 	private File instanceFile = null; //The file reprensenting the running instance. It is created when the table file is read.
 	private Locker instanceLocker = null; //The locker for the instance file.
+	private boolean readOnly; // Whether this file manager is in read-only mode
 
 	// locking related fields
 	private long tableStamp = 0L;
@@ -90,16 +91,30 @@ public class FileManager {
 	 * and also supports null in which case the lock strategy will be the global one.  
 	 */
 	public FileManager(File base, String lockMode) {
+		this(base, lockMode, false);
+	}
+
+	/**
+	 * Returns a new file manager for the area identified by the given base
+	 * directory.
+	 * 
+	 * @param base the directory holding the files to be managed
+	 * @param lockMode the lockMode to use for the given filemanager. It can have one the 3 values: none, java.io, java.nio 
+	 * and also supports null in which case the lock strategy will be the global one.  
+	 */
+	public FileManager(File base, String lockMode, boolean readOnly) {
 		this.base = base;
 		this.lockMode = lockMode;
 		this.managerRoot = new File(base, MANAGER_FOLDER);
-		this.managerRoot.mkdirs();
+		if (!readOnly)
+			this.managerRoot.mkdirs();
 		this.tableFile = new File(managerRoot, TABLE_FILE);
 		this.lockFile = new File(managerRoot, LOCK_FILE);
+		this.readOnly = readOnly;
 	}
 
 	private void initializeInstanceFile() throws IOException {
-		if (instanceFile != null)
+		if (instanceFile != null || readOnly)
 			return;
 		this.instanceFile = File.createTempFile(".tmp", ".instance", managerRoot); //$NON-NLS-1$//$NON-NLS-2$
 		this.instanceFile.deleteOnExit();
@@ -118,7 +133,9 @@ public class FileManager {
 	 * @throws IOException if there are any problems adding the given file to the manager
 	 */
 	public void add(String file) throws IOException {
-		if (! lock())
+		if (readOnly)
+			throw new IOException(EclipseAdaptorMsg.fileManager_illegalInReadOnlyMode); //$NON-NLS-1$			
+		if (!lock())
 			throw new IOException(EclipseAdaptorMsg.fileManager_cannotLock);
 		try {
 			updateTable();
@@ -143,7 +160,9 @@ public class FileManager {
 	 * @throws IOException if there are any problems updating the given files
 	 */
 	public void update(String[] targets, String[] sources) throws IOException {
-		if (! lock())
+		if (readOnly)
+			throw new IOException(EclipseAdaptorMsg.fileManager_illegalInReadOnlyMode); //$NON-NLS-1$		
+		if (!lock())
 			throw new IOException(EclipseAdaptorMsg.fileManager_cannotLock);
 		try {
 			updateTable();
@@ -197,6 +216,10 @@ public class FileManager {
 		return entry.getReadId();
 	}
 
+	public boolean isReadOnly() {
+		return readOnly;
+	}
+
 	/**
 	 * Attempts to lock the state of this manager and returns <code>true</code>
 	 * if the lock could be acquired.
@@ -210,10 +233,12 @@ public class FileManager {
 	 *                         lock.
 	 */
 	private boolean lock() throws IOException {
+		if (readOnly)
+			return false;
 		if (locker == null)
 			locker = BasicLocation.createLocker(lockFile, lockMode);
 		if (locker == null)
-			throw new IOException(EclipseAdaptorMsg.fileManager_cannotLock); 
+			throw new IOException(EclipseAdaptorMsg.fileManager_cannotLock);
 		return locker.lock();
 	}
 
@@ -230,7 +255,7 @@ public class FileManager {
 	public File lookup(String target, boolean add) throws IOException {
 		Entry entry = (Entry) table.get(target);
 		if (entry == null) {
-			if (add) { 
+			if (add) {
 				add(target);
 				entry = (Entry) table.get(target);
 			} else {
@@ -264,9 +289,11 @@ public class FileManager {
 	 * @param file the file to remove
 	 */
 	public void remove(String file) throws IOException {
+		if (readOnly)
+			throw new IOException(EclipseAdaptorMsg.fileManager_illegalInReadOnlyMode); //$NON-NLS-1$		
 		// The removal needs to be done eagerly, so the value is effectively removed from the disktable. 
 		// Otherwise, an updateTable() caused by an update(,)  could cause the file to readded to the local table.
-		if (! lock())
+		if (!lock())
 			throw new IOException(EclipseAdaptorMsg.fileManager_cannotLock);
 		try {
 			updateTable();
@@ -315,6 +342,8 @@ public class FileManager {
 	 * This method should be called while the manager is locked.
 	 */
 	private void save() throws IOException {
+		if (readOnly)
+			return;
 		// if the table file has change on disk, update our data structures then
 		// rewrite the file.
 		if (tableStamp != tableFile.lastModified())
@@ -373,8 +402,8 @@ public class FileManager {
 
 		//If we are here it is because we are the last instance running. After locking the table and getting its latest content, remove all the backup files and change the table
 		//If the exception comes from lock, another instance may have been started after we cleaned up, therefore we abort
-		if (! lock())
-			throw new IOException(EclipseAdaptorMsg.fileManager_cannotLock); 
+		if (!lock())
+			throw new IOException(EclipseAdaptorMsg.fileManager_cannotLock);
 		try {
 			updateTable();
 			Collection managedFiles = table.entrySet();
@@ -411,6 +440,8 @@ public class FileManager {
 	 * It is important to close the manager as it also cleanup old copies of the managed files.
 	 */
 	public void close() {
+		if (readOnly)
+			return;
 		try {
 			cleanup();
 		} catch (IOException e) {
@@ -418,7 +449,7 @@ public class FileManager {
 		}
 		if (instanceLocker != null)
 			instanceLocker.release();
-		
+
 		if (instanceFile != null)
 			instanceFile.delete();
 	}
@@ -429,20 +460,20 @@ public class FileManager {
 	 */
 	public void open(boolean wait) throws IOException {
 		boolean locked = lock();
-		if (! locked && wait==false)
-			throw new IOException(EclipseAdaptorMsg.fileManager_cannotLock); 
-		
+		if (!locked && wait == false)
+			throw new IOException(EclipseAdaptorMsg.fileManager_cannotLock);
+
 		//wait for the lock to be released
-		if (! locked) {
+		if (!locked) {
 			do {
 				try {
 					Thread.sleep(10);
 				} catch (InterruptedException e) {
 					// Ignore the exception and keep waiting
 				}
-			} while(lock());
+			} while (lock());
 		}
-		
+
 		try {
 			updateTable();
 		} finally {
