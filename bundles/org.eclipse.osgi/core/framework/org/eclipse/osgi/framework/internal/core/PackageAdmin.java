@@ -13,11 +13,14 @@ package org.eclipse.osgi.framework.internal.core;
 
 import java.io.IOException;
 import java.util.*;
+
+import org.eclipse.osgi.framework.adaptor.Version;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.debug.DebugOptions;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.*;
 import org.osgi.service.packageadmin.ExportedPackage;
+import org.osgi.service.packageadmin.SymbolicBundle;
 
 /**
  * PackageAdmin service for the OSGi specification.
@@ -755,7 +758,7 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 		 * Resolve the bundles. This will make there exported packages available.
 		 */
 		if (Debug.DEBUG && Debug.DEBUG_PACKAGEADMIN) {
-			Debug.println("refreshPackages: resolve bundles");
+			Debug.println("refreshBundles: resolve bundles");
 		}
 
 		BundleDescription[] resolved;
@@ -846,4 +849,115 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 		}
 		return (BundleDescription[]) result.toArray(new BundleDescription[result.size()]);
 	}
+
+	public SymbolicBundle[] getSymbolicBundles(String symbolicName){
+		if (exportedBundles == null || exportedBundles.size()==0)
+			return null;
+
+		// need to make sure the dependacies are marked before this call.
+		framework.bundles.markDependancies();
+
+		KeyedElement[] allSymbolicBundles = exportedBundles.elements();
+		if (symbolicName == null) {
+			if (allSymbolicBundles.length == 0) {
+				return null;
+			}
+			SymbolicBundle[] result = new SymbolicBundle[allSymbolicBundles.length];
+			System.arraycopy(allSymbolicBundles, 0, result, 0, result.length);
+			return result;
+		}
+		else {
+			ArrayList result = new ArrayList();
+			for (int i=0; i<allSymbolicBundles.length; i++) {
+				SymbolicBundle symBundle = (SymbolicBundle) allSymbolicBundles[i];
+				if (symBundle.getName().equals(symbolicName))
+					result.add(symBundle);
+			}
+			return (SymbolicBundle[]) result.toArray(new SymbolicBundle[result.size()]);
+		}
+	}
+
+	public org.osgi.framework.Bundle getResolvedBundle(String symbolicName, String version, String match){
+		if (symbolicName == null) {
+			throw new IllegalArgumentException();
+		}
+		Bundle[] bundles = framework.getBundleByUniqueId(symbolicName);
+		if (bundles == null)
+			return null;
+
+		// This code depends on the array of bundles being in descending
+		// version order.
+		Version ver = new Version(version);
+		for (int i=0; i<bundles.length; i++) {
+			if (bundles[i].isResolved()){
+				if (version == null)
+					return bundles[i];
+				
+				if (matchBundle(bundles[i],ver,match)) {
+					return bundles[i];
+				}
+			}
+		}
+		return null;
+	}
+
+	public org.osgi.framework.Bundle[] getBundles(String symbolicName, String version, String match) {
+		if (symbolicName == null) {
+			throw new IllegalArgumentException();
+		}
+
+		Bundle bundles[] = framework.getBundleByUniqueId(symbolicName);
+		if (bundles == null)
+			return null;
+
+		if (version == null)
+			return bundles;
+
+		// This code depends on the array of bundles being in descending
+		// version order.
+		ArrayList result = new ArrayList();
+		Version ver = new Version(version);
+		for(int i=0; i<bundles.length; i++) {
+			if (matchBundle(bundles[i], ver, match)) {
+				result.add(bundles[i]);
+			}
+		}
+
+		if (result.size()==0)
+			return null;
+		else
+			return (Bundle[]) result.toArray(new Bundle[result.size()]);
+	}
+
+	private boolean matchBundle(Bundle bundle, Version version, String match) {
+		match = match==null ? Constants.VERSION_MATCH_GREATERTHANOREQUAL : match;
+		boolean result = false;
+		if (match.equalsIgnoreCase(Constants.VERSION_MATCH_PERFECT))
+			result = bundle.getVersion().isPerfect(version);
+		else if (match.equalsIgnoreCase(Constants.VERSION_MATCH_EQUIVALENT))
+			result = bundle.getVersion().isEquivalentTo(version);
+		else if (match.equalsIgnoreCase(Constants.VERSION_MATCH_COMPATIBLE))
+			result = bundle.getVersion().isCompatibleWith(version);
+		else if (match.equalsIgnoreCase(Constants.VERSION_MATCH_GREATERTHANOREQUAL))
+			result = bundle.getVersion().isGreaterOrEqualTo(version);
+
+		return result;
+	}
+
+	public org.osgi.framework.Bundle[] getFragments(org.osgi.framework.Bundle bundle) {
+		return bundle.getFragments();
+	}
+
+	public org.osgi.framework.Bundle[] getHosts(org.osgi.framework.Bundle bundle) {
+		org.osgi.framework.Bundle host = bundle.getHost();
+		if (host == null)
+			return null;
+		else
+			return new org.osgi.framework.Bundle[] {host};
+	}
+
+	public boolean isFragment(org.osgi.framework.Bundle bundle) {
+		return bundle.isFragment();
+	}
+
 }

@@ -20,6 +20,7 @@ import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.eclipse.osgi.framework.launcher.Launcher;
 import org.osgi.framework.BundleException;
+import org.osgi.service.packageadmin.SymbolicBundle;
 
 /**
  * This class provides methods to execute commands from the command line.  It registers
@@ -772,6 +773,91 @@ public class FrameworkCommandProvider implements CommandProvider {
 									intp.println(ConsoleMsg.formatter.getString("CONSOLE_NO_IMPORTED_PACKAGES_MESSAGE"));
 								}
 
+								intp.print("  ");
+                    			if (packageAdmin.isFragment(bundle)) {
+                    				org.osgi.framework.Bundle[] hosts = packageAdmin.getHosts(bundle);
+                    				if (hosts != null) {
+                    					intp.println(ConsoleMsg.formatter.getString("CONSOLE_HOST_MESSAGE"));
+                    					for (int i=0; i<hosts.length; i++) {
+                    						intp.print("    ");
+                    						intp.println(hosts[i]);
+                    					}
+                    				}
+                    				else {
+                    					intp.println(ConsoleMsg.formatter.getString("CONSOLE_NO_HOST_MESSAGE"));
+                    				}
+                    			}
+                    			else {
+                    				org.osgi.framework.Bundle[] fragments = packageAdmin.getFragments(bundle);
+                    				if (fragments != null) {
+                    					intp.println(ConsoleMsg.formatter.getString("CONSOLE_FRAGMENT_MESSAGE"));
+                    					for (int i=0; i<fragments.length; i++) {
+                    						intp.print("    ");
+                    						intp.println(fragments[i]);
+                    					}
+                    				}
+                    				else {
+                    					intp.println(ConsoleMsg.formatter.getString("CONSOLE_NO_FRAGMENT_MESSAGE"));
+                    				}
+                    			}
+
+                    			SymbolicBundle[] symbolicBundles = packageAdmin.getSymbolicBundles(null);
+								SymbolicBundle symbolicBundle = null;
+								if (symbolicBundles != null) {
+									for (int i=0; i<symbolicBundles.length; i++) {
+										if (symbolicBundles[i].getProvidingBundle() == bundle) {
+											symbolicBundle = symbolicBundles[i];
+											break;
+										}
+									}
+								}
+
+								if (symbolicBundle == null) {
+									intp.print("  ");
+									intp.println(ConsoleMsg.formatter.getString("CONSOLE_NO_SYMBOLIC_BUNDLES_MESSAGE"));
+								} else {
+									intp.print("  ");
+									intp.println(ConsoleMsg.formatter.getString("CONSOLE_SYMBOLIC_BUNDLE_MESSAGE"));
+	                    			intp.print("    ");
+	                    			intp.print(symbolicBundle);
+	                    			if (symbolicBundle.isRemovalPending()) {
+	                    				intp.println(ConsoleMsg.formatter.getString("CONSOLE_REMOVAL_PENDING_MESSAGE"));
+	                    			} else {
+	                    				intp.println(ConsoleMsg.formatter.getString("CONSOLE_PROVIDED_MESSAGE"));
+	                    			}
+								}
+
+								title = true;
+								for(int i=0; i<symbolicBundles.length; i++) {
+									if (symbolicBundles[i] == symbolicBundle)
+										continue;
+
+									org.osgi.framework.Bundle[] depBundles =  symbolicBundles[i].getRequiringBundles();
+									if (depBundles == null)
+										continue;
+
+									for (int j=0; j<depBundles.length; j++) {
+										if (depBundles[j] == bundle) {
+											if (title) {
+												intp.print("  ");
+												intp.println(ConsoleMsg.formatter.getString("CONSOLE_REQUIRED_BUNDLES_MESSAGE"));
+												title = false;
+											}
+											intp.print("    ");
+			                    			intp.print(symbolicBundles[i]);
+
+			                    			org.osgi.framework.Bundle provider = symbolicBundles[i].getProvidingBundle();
+											intp.print("<");
+											intp.print(provider);
+											intp.println(">");
+										}
+									}
+								}
+								if (title) {
+									intp.print("  ");
+									intp.println(ConsoleMsg.formatter.getString("CONSOLE_NO_REQUIRED_BUNDLES_MESSAGE"));
+								}
+
 							}
 						} finally {
 							context.ungetService(packageAdminRef);
@@ -1107,8 +1193,6 @@ public class FrameworkCommandProvider implements CommandProvider {
 			Bundle bundle = getBundleFromToken(intp, nextArg, true);
 			if (bundle != null) {
 				intp.printDictionary(bundle.getHeaders(), ConsoleMsg.formatter.getString("CONSOLE_BUNDLE_HEADERS_TITLE"));
-				intp.printBundleResource(bundle, "META-INF/IVEATTRS.XML");
-				intp.printBundleResource(bundle, "META-INF/IVERES.XML");
 			}
 			nextArg = intp.nextArgument();
 		}
@@ -1412,6 +1496,65 @@ public class FrameworkCommandProvider implements CommandProvider {
 			}
 		}
 	}
+
+	public void _symbolicBundles(CommandInterpreter intp) {
+
+		String token = intp.nextArgument();
+
+		org.osgi.framework.ServiceReference packageAdminRef = context.getServiceReference("org.osgi.service.packageadmin.PackageAdmin");
+		if (packageAdminRef != null) {
+			org.osgi.service.packageadmin.PackageAdmin packageAdmin = (org.osgi.service.packageadmin.PackageAdmin) context.getService(packageAdminRef);
+			if (packageAdmin != null) {
+				try {
+					org.osgi.service.packageadmin.SymbolicBundle[] symBundles = null;
+
+					symBundles = packageAdmin.getSymbolicBundles(token);
+
+					if (symBundles == null) {
+						intp.println(ConsoleMsg.formatter.getString("CONSOLE_NO_SYMBOLIC_BUNDLES_MESSAGE"));
+					} else {
+						for (int i = 0; i < symBundles.length; i++) {
+							org.osgi.service.packageadmin.SymbolicBundle symBundle = symBundles[i];
+							intp.print(symBundle);
+
+							boolean removalPending = symBundle.isRemovalPending();
+							if (removalPending) {
+								intp.print("(");
+								intp.print(ConsoleMsg.formatter.getString("CONSOLE_REMOVAL_PENDING_MESSAGE"));
+								intp.println(")");
+							}
+
+							org.osgi.framework.Bundle provider = symBundle.getProvidingBundle();
+							if (provider != null) {
+								intp.print("<");
+								intp.print(provider);
+								intp.println(">");
+
+								org.osgi.framework.Bundle[] requiring = symBundle.getRequiringBundles();
+								if (requiring != null)
+									for (int j = 0; j < requiring.length; j++) {
+										intp.print("  ");
+										intp.print(requiring[j]);
+										intp.print(" ");
+										intp.println(ConsoleMsg.formatter.getString("CONSOLE_REQUIRES_MESSAGE"));
+									}
+							} else {
+								intp.print("<");
+								intp.print(ConsoleMsg.formatter.getString("CONSOLE_STALE_MESSAGE"));
+								intp.println(">");
+							}
+
+						}
+					}
+				} finally {
+					context.ungetService(packageAdminRef);
+				}
+			}
+		} else {
+			intp.println(ConsoleMsg.formatter.getString("CONSOLE_NO_EXPORTED_PACKAGES_NO_PACKAGE_ADMIN_MESSAGE"));
+		}
+	}
+
 
 	/**
 	 * Checks for the presence of the StartLevel Service.  Outputs a message if it is not present.

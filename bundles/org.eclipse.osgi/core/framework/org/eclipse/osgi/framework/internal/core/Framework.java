@@ -1010,16 +1010,16 @@ public class Framework implements EventSource, EventPublisher {
 		/* Pass 2: perform osversion matching */
 		Version osversion;
 		try {
-			osversion = new org.eclipse.osgi.framework.adaptor.Version(getProperty(Constants.FRAMEWORK_OS_VERSION));
+			osversion = new Version(getProperty(Constants.FRAMEWORK_OS_VERSION));
 		} catch (Exception e) {
-			osversion = org.eclipse.osgi.framework.adaptor.Version.emptyVersion;
+			osversion = Version.emptyVersion;
 		}
 
 		matches = 0;
 		maxresult = 0;
 
 		Version[] bestVersion = new Version[elements.length];
-		Version maxVersion = org.eclipse.osgi.framework.adaptor.Version.emptyVersion;
+		Version maxVersion = Version.emptyVersion;
 
 		for (int i = 0; i < elements.length; i++) {
 			if (score[i] > 0) {
@@ -1182,17 +1182,45 @@ public class Framework implements EventSource, EventPublisher {
 	}
 
 	/**
-	 * Retrieve a list of all installed bundles.
+	 * Retrieve the BundleRepository of all installed bundles.
 	 * The list is valid at the time
 	 * of the call to getBundles, but the framework is a very dynamic
 	 * environment and bundles can be installed or uninstalled at anytime.
 	 *
-	 * @return A Vector of {@link Bundle} objects, one
-	 * object per installed bundle.
+	 * @return The BundleRepository.
 	 */
 	protected BundleRepository getBundles() {
 		return (bundles);
 	}
+
+    /**
+     * Retrieve a list of all installed bundles.
+     * The list is valid at the time
+     * of the call to getBundleAlls, but the framework is a very dynamic
+     * environment and bundles can be installed or uninstalled at anytime.
+     *
+     * @return An Array of {@link Bundle} objects, one
+     * object per installed bundle.
+     */
+	protected Bundle[] getAllBundles(){
+		synchronized (bundles)
+		{
+			List allBundles = bundles.getBundles();
+			int size = allBundles.size();
+
+			if (size == 0)
+			{
+				return(null);
+			}
+
+			Bundle[] bundlelist = new Bundle[size];
+
+			allBundles.toArray(bundlelist);
+
+			return(bundlelist);
+		}
+	}
+
 
 	/**
 	 * Resume a bundle.

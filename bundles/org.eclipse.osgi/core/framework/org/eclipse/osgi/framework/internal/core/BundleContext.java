@@ -266,22 +266,7 @@ public class BundleContext implements org.osgi.framework.BundleContext, EventSou
 	 * object per installed bundle.
 	 */
 	public org.osgi.framework.Bundle[] getBundles() {
-		BundleRepository bundles = framework.getBundles();
-
-		synchronized (bundles) {
-			List allBundles = bundles.getBundles();
-			int size = allBundles.size();
-
-			if (size == 0) {
-				return (null);
-			}
-
-			Bundle[] bundlelist = new Bundle[size];
-
-			allBundles.toArray(bundlelist);
-
-			return (bundlelist);
-		}
+		return framework.getAllBundles();
 	}
 
 	/**

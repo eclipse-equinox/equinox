@@ -10,13 +10,21 @@
  *******************************************************************************/
 package org.eclipse.osgi.framework.internal.core;
 
-import org.eclipse.osgi.framework.debug.Debug;
-import org.eclipse.osgi.service.resolver.*;
+import java.util.ArrayList;
 
-public class BundleLoaderProxy implements KeyedElement {
+import org.eclipse.osgi.framework.adaptor.Version;
+import org.eclipse.osgi.framework.debug.Debug;
+import org.eclipse.osgi.service.resolver.BundleDescription;
+import org.eclipse.osgi.service.resolver.BundleSpecification;
+import org.eclipse.osgi.service.resolver.PackageSpecification;
+
+import org.osgi.service.packageadmin.SymbolicBundle;
+
+public class BundleLoaderProxy implements KeyedElement, SymbolicBundle{
 	private BundleLoader loader;
 	private BundleHost bundle;
 	private String uniqueId;
+	private Version version;
 	private String key;
 	private boolean stale = false;
 	private KeyedHashSet users;
@@ -28,7 +36,8 @@ public class BundleLoaderProxy implements KeyedElement {
 		if (this.uniqueId == null) {
 			this.uniqueId = new StringBuffer().append(bundle.id).append("NOUNIQUEID").toString();
 		}
-		this.key = new StringBuffer(uniqueId).append("_").append(bundle.getVersion().toString()).toString();
+		this.version = bundle.getVersion();
+		this.key = new StringBuffer(uniqueId).append("_").append(this.version.toString()).toString();
 		this.users = new KeyedHashSet(false);
 	}
 	public BundleLoader getBundleLoader() {
@@ -63,7 +72,7 @@ public class BundleLoaderProxy implements KeyedElement {
 		if (!(other instanceof BundleLoaderProxy))
 			return false;
 		BundleLoaderProxy otherLoaderProxy = (BundleLoaderProxy) other;
-		return (uniqueId.equals(otherLoaderProxy.uniqueId) && bundle.getVersion().isPerfect(otherLoaderProxy.bundle.getVersion()));
+		return (uniqueId.equals(otherLoaderProxy.uniqueId) && version.isPerfect(otherLoaderProxy.version));
 	}
 
 	public Object getKey() {
@@ -97,7 +106,10 @@ public class BundleLoaderProxy implements KeyedElement {
 	}
 
 	public String toString() {
-		return bundle.getLocation();
+		StringBuffer sb = new StringBuffer(bundle.getGlobalName());
+		sb.append("; ").append(Constants.BUNDLE_VERSION_ATTRIBUTE);
+		sb.append("=\"").append(version.toString()).append("\"");
+		return sb.toString();
 	}
 
 	protected void markDependencies() {
@@ -156,5 +168,39 @@ public class BundleLoaderProxy implements KeyedElement {
 				}
 			}
 		}
+	}
+
+	public org.osgi.framework.Bundle getProvidingBundle() {
+		if (isStale())
+			return null;
+
+		return bundle;
+	}
+	public org.osgi.framework.Bundle[] getRequiringBundles() {
+		if (isStale())
+			return null;
+
+		KeyedElement[] requiringProxies = users.elements();
+		ArrayList requiringBundles = new ArrayList();
+		for (int i = 0; i < requiringProxies.length; i++) {
+			BundleLoaderProxy requiringProxy = (BundleLoaderProxy) requiringProxies[i];
+			BundleLoader requiringLoader = requiringProxy.getBundleLoader();
+			BundleLoaderProxy[] reqBundles = requiringLoader.requiredBundles;
+			if (reqBundles != null)
+				for (int j=0; j<reqBundles.length; j++) 
+					if (reqBundles[j] == this)
+						requiringBundles.add(requiringProxy.getBundle());
+		}
+
+		return (Bundle[]) requiringBundles.toArray(new Bundle[requiringBundles.size()]);
+	}
+	public String getName() {
+		return uniqueId;
+	}
+	public String getVersion() {
+		return version.toString();
+	}
+	public boolean isRemovalPending() {
+		return bundle.framework.packageAdmin.removalPending.contains(this);
 	}
 }

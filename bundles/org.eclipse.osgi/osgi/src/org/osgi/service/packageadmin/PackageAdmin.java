@@ -1,5 +1,5 @@
 /*
- * $Header: /home/technology/org.eclipse.equinox/plugins/org.eclipse.osgi/osgi/src/org/osgi/service/packageadmin/PackageAdmin.java,v 1.1 2003/11/10 17:49:34 jeff Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/service/packageadmin/PackageAdmin.java,v 1.1.6.1 2004/02/11 22:06:30 twatson Exp $
  *
  * Copyright (c) The Open Services Gateway Initiative (2001, 2002).
  * All Rights Reserved.
@@ -51,7 +51,7 @@ import org.osgi.framework.Bundle;
  * old values, <tt>isRemovalPending()</tt> returns <tt>true</tt>, and <tt>getExportingBundle()</tt>
  * and <tt>getImportingBundles()</tt> return <tt>null</tt>.
  *
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.1.6.1 $
  * @author Open Services Gateway Initiative
  */
 public interface PackageAdmin {
@@ -161,4 +161,79 @@ public interface PackageAdmin {
      * permissions.
      */
     public void refreshPackages(Bundle[] bundles);
+
+    public SymbolicBundle[] getSymbolicBundles(String symbolicName);
+
+    /**
+     * Gets the Bundles with the specified symbolic name.  If no bundles are 
+     * installed that have the specified symbolic name then null is returned.  
+     * If the version argument is not null then only the Bundles that have 
+     * the specified symbolic name and a version greater than or equal to the 
+     * specified version are returned.  If the version and match arguments are 
+     * not null then only the Bundles that have the specified symbolic name 
+     * and a version that matches the specified version using the specified 
+     * match rule are returned.  The returned bundles are ordered in 
+     * descending bundle version order.
+     * 
+     * @param symbolicName the symbolic name of the bundles that are to be returned.
+     * @param version the version that the return bundle versions must match, 
+     * or <tt>null</tt> if no version matching is to be done. 
+     * @param match the match rule that the returned bundle versions must match,
+     * or <tt>null</tt> if no version is specified or if the greater than or equal
+     * match rule is to be used.
+     * @return the array of Bundles with the specified name that match the 
+     * specified version and match rule, or <tt>null</tt> if no bundles are found.
+     */
+    public Bundle[] getBundles(String symbolicName, String version, String match);
+
+    /**
+     * Gets the resolved Bundle with the specified symbolic name that has the
+     * highest version.  If no resolved bundles are installed that have the 
+     * specified symbolic name then null is returned.  If the version argument 
+     * is not null then the resolved Bundle that has the specified symbolic 
+     * name that has the highest version greater than or equal to the specified 
+     * version is returned.  If the version and match arguments are not null 
+     * then only the resolved Bundle that has the specified symbolic name 
+     * that has the highest version that matches the specified version using 
+     * the specified match rule is returned.
+     * 
+     * @param symbolicName the symbolic name of the bundle to be returned.
+     * @param version the version that the return bundle version must match, 
+     * or <tt>null</tt> if no version matching is to be done. 
+     * @param match the match rule that the returned bundle version must match,
+     * or <tt>null</tt> if no version is specified or if the greater than or equal
+     * match rule is to be used.
+     * @return the Bundle that has the specified name that has a version 
+     * that matches using the specified match rule, or <tt>null</tt> 
+     * if no bundle is found.
+     */
+    public Bundle getResolvedBundle(String symbolicName, String version, String match);
+
+	/**
+	 * Gets an array of attached fragment bundles for the specified bundle.  If the 
+	 * specified bundle is a fragment then <tt>null</tt> is returned.  If no fragments are 
+	 * attached to the specified bundle then <tt>null</tt> is returned.
+	 * 
+	 * @param bundle the bundle to get the attached fragment bundles for.
+	 * @return an array of fragment bundles or <tt>null</tt> if the bundle does not 
+	 * have any attached fragment bundles. 
+	 */
+    public Bundle[] getFragments(Bundle bundle);
+
+	/**
+	 * Gets an array of host bundles that the specified fragment bundle is 
+	 * attached to or <tt>null</tt> if the specified bundle is not attached to a host.  
+	 * If the bundle is not a fragment bundle then <tt>null</tt> is returned.
+	 * 
+	 * @param bundle the bundle to get the host bundles for.
+	 * @return an array of host bundles or null if the bundle does not have any
+	 * bundles host.
+	 */
+    public Bundle[] getHosts(Bundle bundle);
+
+	/**
+	 * Returns true if the specified bundle is a fragment bundle; otherwise false is returned.
+	 * @return true if the specified bundle is a fragment bundle; otherwise false is returned.
+	 */
+    public boolean isFragment(Bundle bundle);
 }
