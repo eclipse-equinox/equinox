@@ -29,6 +29,12 @@ public class EnvironmentInfo implements org.eclipse.osgi.service.environment.Env
 	// While we recognize the SunOS operating system, we change
 	// this internally to be Solaris.
 	private static final String INTERNAL_OS_SUNOS = "SunOS"; //$NON-NLS-1$
+	private static final String INTERNAL_OS_LINUX = "Linux"; //$NON-NLS-1$
+	private static final String INTERNAL_OS_MACOSX = "Mac OS"; //$NON-NLS-1$
+	private static final String INTERNAL_OS_AIX = "AIX"; //$NON-NLS-1$
+	private static final String INTERNAL_OS_HPUX = "HP-UX"; //$NON-NLS-1$
+	private static final String INTERNAL_OS_QNX = "QNX"; //$NON-NLS-1$
+
 	// While we recognize the i386 architecture, we change
 	// this internally to be x86.
 	private static final String INTERNAL_ARCH_I386 = "i386"; //$NON-NLS-1$
@@ -88,7 +94,7 @@ public class EnvironmentInfo implements org.eclipse.osgi.service.environment.Env
 	 * be setting these values and therefore this code path is obsolete for Eclipse
 	 * when run from the executable.
 	 */
-	private void setupSystemContext() {
+	private static void setupSystemContext() {
 		// if the user didn't set the locale with a command line argument then
 		// use the default.
 		nl = System.getProperty("osgi.nl"); //$NON-NLS-1$
@@ -98,17 +104,17 @@ public class EnvironmentInfo implements org.eclipse.osgi.service.environment.Env
 			try {
 				Locale userLocale = null;
 				switch (segments) {
-					case 1:
+					case 1 :
 						// use the 2 arg constructor to maintain compatibility with 1.3.1
 						userLocale = new Locale(tokenizer.nextToken(), ""); //$NON-NLS-1$
 						break;
-					case 2:
+					case 2 :
 						userLocale = new Locale(tokenizer.nextToken(), tokenizer.nextToken());
 						break;
-					case 3:
+					case 3 :
 						userLocale = new Locale(tokenizer.nextToken(), tokenizer.nextToken(), tokenizer.nextToken());
 						break;
-					default:
+					default :
 						// if the user passed us in a bogus value then log a message and use the default
 						System.err.println(EclipseAdaptorMsg.formatter.getString("error.badNL", nl)); //$NON-NLS-1$
 						userLocale = Locale.getDefault();
@@ -126,38 +132,17 @@ public class EnvironmentInfo implements org.eclipse.osgi.service.environment.Env
 		// argument then use the default.
 		os = System.getProperty("osgi.os"); //$NON-NLS-1$
 		if (os == null) {
-			String name = System.getProperty("os.name");//$NON-NLS-1$
-			// check to see if the VM returned "Windows 98" or some other
-			// flavour which should be converted to win32.
-			if (name.regionMatches(true, 0, Constants.OS_WIN32, 0, 3))
-				os = Constants.OS_WIN32;
-			// EXCEPTION: All mappings of SunOS convert to Solaris
-			if (os == null)
-				os = name.equalsIgnoreCase(INTERNAL_OS_SUNOS) ? Constants.OS_SOLARIS : Constants.OS_UNKNOWN;
+			os = guessOS(System.getProperty("os.name"));//$NON-NLS-1$);
+			System.getProperties().put("osgi.os", os); //$NON-NLS-1$
 		}
-		System.getProperties().put("osgi.os", os); //$NON-NLS-1$
 
 		// if the user didn't set the window system with a command line 
 		// argument then use the default.
 		ws = System.getProperty("osgi.ws"); //$NON-NLS-1$
 		if (ws == null) {
-			// setup default values for known OSes if nothing was specified
-			if (os.equals(Constants.OS_WIN32))
-				ws = Constants.WS_WIN32;
-			else if (os.equals(Constants.OS_LINUX))
-				ws = Constants.WS_MOTIF;
-			else if (os.equals(Constants.OS_MACOSX))
-				ws = Constants.WS_CARBON;
-			else if (os.equals(Constants.OS_HPUX))
-				ws = Constants.WS_MOTIF;
-			else if (os.equals(Constants.OS_AIX))
-				ws = Constants.WS_MOTIF;
-			else if (os.equals(Constants.OS_SOLARIS))
-				ws = Constants.WS_MOTIF;
-			else
-				ws = Constants.WS_UNKNOWN;
+			ws = guessWS(os);
+			System.getProperties().put("osgi.ws", ws); //$NON-NLS-1$
 		}
-		System.getProperties().put("osgi.ws", ws); //$NON-NLS-1$
 
 		// if the user didn't set the system architecture with a command line 
 		// argument then use the default.
@@ -166,8 +151,48 @@ public class EnvironmentInfo implements org.eclipse.osgi.service.environment.Env
 			String name = System.getProperty("os.arch");//$NON-NLS-1$
 			// Map i386 architecture to x86
 			arch = name.equalsIgnoreCase(INTERNAL_ARCH_I386) ? Constants.ARCH_X86 : name;
+			System.getProperties().put("osgi.arch", arch); //$NON-NLS-1$			
 		}
-		System.getProperties().put("osgi.arch", arch); //$NON-NLS-1$
 	}
 
+	public static String guessWS(String os) {
+		// setup default values for known OSes if nothing was specified
+		if (os.equals(Constants.OS_WIN32))
+			return Constants.WS_WIN32;
+		if (os.equals(Constants.OS_LINUX))
+			return Constants.WS_MOTIF;
+		if (os.equals(Constants.OS_MACOSX))
+			return Constants.WS_CARBON;
+		if (os.equals(Constants.OS_HPUX))
+			return Constants.WS_MOTIF;
+		if (os.equals(Constants.OS_AIX))
+			return Constants.WS_MOTIF;
+		if (os.equals(Constants.OS_SOLARIS))
+			return Constants.WS_MOTIF;
+		if (os.equals(Constants.OS_QNX))
+			return Constants.WS_PHOTON;
+		return Constants.WS_UNKNOWN;
+	}
+
+	public static String guessOS(String osName) {
+		// check to see if the OS name is "Windows 98" or some other
+		// flavour which should be converted to win32.
+		if (osName.regionMatches(true, 0, Constants.OS_WIN32, 0, 3))
+			return Constants.OS_WIN32;
+		// EXCEPTION: All mappings of SunOS convert to Solaris
+		if (osName.equalsIgnoreCase(INTERNAL_OS_SUNOS))
+			return Constants.OS_SOLARIS;
+		if (osName.equalsIgnoreCase(INTERNAL_OS_LINUX))
+			return Constants.OS_LINUX;
+		if (osName.equalsIgnoreCase(INTERNAL_OS_QNX))
+			return Constants.OS_QNX;
+		if (osName.equalsIgnoreCase(INTERNAL_OS_AIX))
+			return Constants.OS_AIX;
+		if (osName.equalsIgnoreCase(INTERNAL_OS_HPUX))
+			return Constants.OS_HPUX;
+		// os.name on Mac OS can be either Mac OS or Mac OS X
+		if (osName.regionMatches(true, 0, INTERNAL_OS_MACOSX, 0, INTERNAL_OS_MACOSX.length()))
+			return Constants.OS_MACOSX;
+		return Constants.OS_UNKNOWN;
+	}
 }
