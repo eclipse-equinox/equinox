@@ -195,13 +195,13 @@ public class BundleLoader implements ClassLoaderDelegate {
 		try {
 			String spec = bundle.getBundleData().getDynamicImports();
 			ManifestElement[] imports = ManifestElement.parseHeader(Constants.DYNAMICIMPORT_PACKAGE,spec);
-			initDynamicImportPackage(imports);
+			addDynamicImportPackage(imports);
 			// ...and its fragments
 			for (int i = 0; i < fragments.length; i++)
 				if (fragments[i].isResolved()) {
 					spec = ((Bundle) fragmentObjects[i]).getBundleData().getDynamicImports();
 					imports = ManifestElement.parseHeader(Constants.DYNAMICIMPORT_PACKAGE,spec);
-					initDynamicImportPackage(imports);
+					addDynamicImportPackage(imports);
 				}
 		} catch (BundleException e) {
 			// TODO log an error
@@ -1015,7 +1015,14 @@ public class BundleLoader implements ClassLoaderDelegate {
 		return null;
 	}
 
-	public void initDynamicImportPackage(ManifestElement[] packages) {
+	/**
+	 * Adds a list of DynamicImport-Package manifest elements to the dynamic
+	 * import tables of this BundleLoader.  Duplicate packages are checked and
+	 * not added again.  This method is not thread safe.  Callers should ensure
+	 * synchronization when calling this method.
+	 * @param packages the DynamicImport-Package elements to add.
+	 */
+	public void addDynamicImportPackage(ManifestElement[] packages) {
 		if (packages == null && SystemBundleLoader.getSystemPackages() == null)
 			return;
 
@@ -1051,6 +1058,8 @@ public class BundleLoader implements ClassLoaderDelegate {
 
 		for (int i = 0; i < size; i++) {
 			String name = packages[i].getValue();
+			if (isDynamicallyImported(name))
+				continue;
 			if (name.equals("*")) { /* shortcut */
 				dynamicImportPackageAll = true;
 				return;
