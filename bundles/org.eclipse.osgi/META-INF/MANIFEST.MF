@@ -39,5 +39,10 @@ Bundle-Copyright: Copyright (c) 2003, 2004 IBM Corporation and others. All right
 Bundle-Vendor: Eclipse.org
 Bundle-Version: 3.0.0
 Bundle-DocUrl: http://www.eclipse.org
-
-
+Bundle-ClassPath: 
+ osgi.jar,
+ core.jar,
+ resolver.jar,
+ defaultAdaptor.jar,
+ eclipseAdaptor.jar,
+ console.jar
