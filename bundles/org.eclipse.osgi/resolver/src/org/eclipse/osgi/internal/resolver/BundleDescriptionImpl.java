@@ -28,6 +28,7 @@ public class BundleDescriptionImpl implements BundleDescription, KeyedElement {
 	private String[] providedPackages;
 	private BundleSpecification[] requiredBundles;
 	private State containingState;
+	private Object userObject;
 
 	public BundleDescriptionImpl() {
 	}
@@ -186,8 +187,13 @@ public class BundleDescriptionImpl implements BundleDescription, KeyedElement {
 			if (availableBundles[i].isResolved() && specification.isSatisfiedBy(availableBundles[i].getVersion()))
 				return true;
 		return false;
-	}	
-	
+	}
+	public Object getUserObject() {
+		return userObject;
+	}
+	public void setUserObject(Object userObject) {
+		this.userObject = userObject;
+	}
 	public int hashCode() {		
 		if (uniqueId == null)
 			return (int) (bundleId % Integer.MAX_VALUE);

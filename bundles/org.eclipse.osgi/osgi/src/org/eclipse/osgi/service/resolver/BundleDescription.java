@@ -150,7 +150,26 @@ public interface BundleDescription {
 
 	/**
 	 * Returns all fragments known to this bundle (regardless resolution status).
+	 * 
 	 * @return an array of BundleDescriptions containing all known fragments
 	 */
 	public BundleDescription[] getFragments();
+	/**
+	 * Returns the user object associated to this bundle description, or 
+	 * <code>null</code> if none exists.
+	 *  
+	 * @return the user object associated to this bundle  description,
+	 * or <code>null</code>
+	 */
+	public Object getUserObject();
+	/**
+	 *  Associates a user-provided object to this bundle description, or
+	 * removes an existing association, if <code>null</code> is provided. The 
+	 * provided object is not interpreted in any ways by this bundle 
+	 * description.
+	 * 
+	 * @param userObject an arbitrary object provided by the user, or 
+	 * <code>null</code>
+	 */
+	public void setUserObject(Object userObject);
 }
