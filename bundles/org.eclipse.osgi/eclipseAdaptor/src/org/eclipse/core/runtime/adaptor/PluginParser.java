@@ -24,7 +24,12 @@ public class PluginParser extends DefaultHandler implements IModel {
 		private String pluginId;
 		private String version;
 		private String vendor;
-		// TODO libraries and requires should be ordered.
+ 
+		// an ordered list of library path names.
+		private ArrayList libraryPaths;
+		// TODO Should get rid of the libraries map and just have a
+		// list of library export statements instead.  Library paths must
+		// preserve order.
 		private Map libraries; //represent the libraries and their
 										  // export statement
 		private ArrayList requires;
@@ -86,10 +91,9 @@ public class PluginParser extends DefaultHandler implements IModel {
 			return filters;
 		}
 		public String[] getLibrariesName() {
-			if (libraries == null)
+			if (libraryPaths == null)
 				return new String[0];
-			Set names = libraries.keySet();
-			return (String[]) names.toArray(new String[names.size()]);
+			return (String[]) libraryPaths.toArray(new String[libraryPaths.size()]);
 		}
 		public String getPluginName() {
 			return pluginName;
@@ -178,9 +182,12 @@ public class PluginParser extends DefaultHandler implements IModel {
 				if (elementName.equals(LIBRARY)) {
 					String curLibrary = (String) objectStack.pop();
 					Vector exportsVector = (Vector) objectStack.pop();
-					if (manifestInfo.libraries == null)
+					if (manifestInfo.libraries == null){
 						manifestInfo.libraries = new HashMap(3);
+						manifestInfo.libraryPaths = new ArrayList(3);
+					}
 					manifestInfo.libraries.put(curLibrary, exportsVector);
+					manifestInfo.libraryPaths.add(curLibrary);
 					stateStack.pop();
 				}
 				break;
