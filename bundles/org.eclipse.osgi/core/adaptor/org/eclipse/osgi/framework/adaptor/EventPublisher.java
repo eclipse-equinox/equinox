@@ -23,7 +23,8 @@ public interface EventPublisher {
 	 * Publish a FrameworkEvent.
 	 *
 	 * @param type FrameworkEvent type.
-	 * @param bundle Bundle related to FrameworkEvent.
+	 * @param bundle Bundle related to FrameworkEven or <tt>null</tt> to for the
+	 * system bundle.
 	 * @param throwable Related exception or <tt>null</tt>.
 	 * @see org.osgi.framework.FrameworkEvent
 	 */
