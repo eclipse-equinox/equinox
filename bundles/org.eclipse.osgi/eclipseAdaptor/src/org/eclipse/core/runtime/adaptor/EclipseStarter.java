@@ -293,6 +293,16 @@ public class EclipseStarter {
 			boolean found = false;
 			// check for args without parameters (i.e., a flag arg)
 	
+			// check if debug should be enabled for the entire platform
+			// If this is the last arg or there is a following arg (i.e., arg+1 has a leading -), 
+			// simply enable debug.  Otherwise, assume that that the following arg is
+			// actually the filename of an options file.  This will be processed below.
+			if (args[i].equalsIgnoreCase(ARG_DEBUG) && ((i + 1 == args.length) || ((i + 1 < args.length) && (args[i + 1].startsWith("-"))))) { //$NON-NLS-1$
+				System.getProperties().put("osgi.debug", "");//$NON-NLS-1$ //$NON-NLS-2$
+				found = true;
+				DEBUG = true;
+			}
+			
 			// check if development mode should be enabled for the entire platform
 			// If this is the last arg or there is a following arg (i.e., arg+1 has a leading -), 
 			// simply enable development mode.  Otherwise, assume that that the following arg is
