@@ -632,6 +632,11 @@ public class BundleHost extends Bundle {
 	 * Mark this bundle as resolved.
 	 */
 	protected void resolve() {
+		try {
+			bundledata.open(); /* make sure the BundleData is open */
+		} catch (IOException e) {
+			// TODO need to log error here.
+		}
 		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 			if ((state & (INSTALLED)) == 0) {
 				Debug.println("Bundle.resolve called when state != INSTALLED: " + this);
