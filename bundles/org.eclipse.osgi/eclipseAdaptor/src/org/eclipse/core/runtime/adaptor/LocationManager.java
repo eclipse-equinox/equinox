@@ -50,6 +50,13 @@ public class LocationManager {
 	private static URL buildURL(String spec) {
 		if (spec == null)
 			return null;
+		// if the spec is a file: url then see if it is absolute.  If not, break it up
+		// and make it absolute.
+		if (spec.startsWith("file:")) {
+			File file = new File(spec.substring(5));
+			if (!file.isAbsolute())
+				spec = "file:" + file.getAbsolutePath();
+		}
 		try {
 			return new URL(spec);
 		} catch (MalformedURLException e) {
