@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-Name: %pluginName
-Bundle-GlobalName: org.eclipse.osgi.util
+Bundle-SymbolicName: org.eclipse.osgi.util
 Bundle-Version: 3.0
 Bundle-Description: OSGi Service Platform Release 3 Utility Classes
 Bundle-Vendor: %providerName
