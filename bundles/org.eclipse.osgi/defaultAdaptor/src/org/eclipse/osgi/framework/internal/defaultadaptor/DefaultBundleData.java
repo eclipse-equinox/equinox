@@ -294,7 +294,7 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 				sb.append(",");
 			}
 		}
-		metadata.set(METADATA_BUNDLE_NCP, sb.toString());
+		setNativeCodePath(sb.toString());
 	}
 
 	/**
@@ -453,6 +453,7 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 		metadata.set(METADATA_BUNDLE_NAME, fileName);
 		metadata.set(METADATA_BUNDLE_LOC, location);
 		metadata.setBoolean(METADATA_BUNDLE_REF, reference);
+		metadata.set(METADATA_BUNDLE_NCP,getNativeCodePath());
 		metadata.save();
 	}
 
