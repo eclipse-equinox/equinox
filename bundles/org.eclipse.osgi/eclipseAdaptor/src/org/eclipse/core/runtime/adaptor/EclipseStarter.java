@@ -477,8 +477,13 @@ public class EclipseStarter {
 	 */
 	private static Bundle[] loadBasicBundles() throws IOException {
 		long startTime = System.currentTimeMillis();
-		String[] installEntries = catenateLists(getArrayFromList(System.getProperty(PROP_EXTENSIONS), ","), getArrayFromList(System.getProperty(PROP_BUNDLES), ",")); //$NON-NLS-1$ //$NON-NLS-2$
-
+		String osgiBundles = System.getProperty(PROP_BUNDLES);
+		String osgiExtensions = System.getProperty(PROP_EXTENSIONS);
+		if (osgiExtensions != null && osgiExtensions.length() > 0) {
+			osgiBundles = osgiExtensions + ',' + osgiBundles;
+			System.getProperties().put(PROP_BUNDLES, osgiBundles);
+		}
+		String[] installEntries = getArrayFromList(osgiBundles, ","); //$NON-NLS-1$
 		// get the initial bundle list from the installEntries
 		InitialBundle[] initialBundles = getInitialBundles(installEntries);
 		// get the list of currently installed initial bundles from the framework
@@ -956,15 +961,6 @@ public class EclipseStarter {
 			// its ok if there is no file.  We'll just use the defaults for everything
 			// TODO but it might be nice to log something with gentle wording (i.e., it is not an error)
 		}
-		return result;
-	}
-
-	private static String[] catenateLists(String[] prepend, String[] append) {
-		if (prepend.length == 0)
-			return append;
-		String[] result = new String[prepend.length + append.length];
-		System.arraycopy(prepend, 0, result, 0, prepend.length);
-		System.arraycopy(append, 0, result, prepend.length, append.length);
 		return result;
 	}
 
