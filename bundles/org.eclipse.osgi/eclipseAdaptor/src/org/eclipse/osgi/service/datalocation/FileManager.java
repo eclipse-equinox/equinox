@@ -460,11 +460,11 @@ public class FileManager {
 	 */
 	public void open(boolean wait) throws IOException {
 		boolean locked = lock();
-		if (!locked && wait == false)
-			throw new IOException(EclipseAdaptorMsg.fileManager_cannotLock);
 
 		//wait for the lock to be released
-		if (!locked) {
+		if (!readOnly && !locked) {
+			if (wait == false)
+				throw new IOException(EclipseAdaptorMsg.fileManager_cannotLock);
 			do {
 				try {
 					Thread.sleep(10);
