@@ -24,7 +24,7 @@ import org.osgi.service.condpermadmin.ConditionalPermissionAdmin;
  * permissions that have yet to be satisfied as well as conditions that are
  * already satisfied.
  * 
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class ConditionalPermissions extends PermissionCollection {
 	private static final long serialVersionUID = 3907215965749000496L;
@@ -64,6 +64,10 @@ public class ConditionalPermissions extends PermissionCollection {
 	void checkConditionalPermissionInfo(ConditionalPermissionInfoImpl cpi) {
 		try {
 			Condition conds[] = cpi.getConditions(bundle);
+			if (conds == null) {
+				/* Couldn't process the conditions, so we can't use them */
+				return;
+			}
 			boolean satisfied = true;
 			for (int i = 0; i < conds.length; i++) {
 				Condition cond = conds[i];
