@@ -325,6 +325,10 @@ public interface State {
 	 * osgi.os - the platform operating system<br>
 	 * osgi.arch - the platform architecture<br>
 	 * osgi.ws - the platform windowing system<br>
+	 * <p>
+	 * The values used for the supported properties can be <tt>String</tt> type
+	 * to specify a single value for the property or they can by <tt>String[]</tt>
+	 * to specify a list of values for the property. 
 	 * @param platformProperties the platform properties of the state
 	 * @return false if the platformProperties specified do not change any of the
 	 * supported properties already set.  If any of the supported property values 
