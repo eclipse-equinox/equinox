@@ -818,22 +818,31 @@ public class BundleLoader implements ClassLoaderDelegate {
 	}
 
 	protected void addExportedProvidersFor(String packageName, ArrayList result, KeyedHashSet visited) {
-		// TODO is it ok to use bundle as the visit token or should it be the loader?
 		if (!visited.add(bundle))
 			return;
+
+		// See if we locally provide the package.
+		PackageSource local = getProvidedPackage(packageName);
+		
 		// Must search required bundles that are exported first.
 		if (requiredBundles != null) {
 			int size = reexportTable == null ? 0 : reexportTable.length;
 			int reexportIndex = 0;
 			for (int i = 0; i < requiredBundles.length; i++) {
-				if (reexportIndex < size && reexportTable[reexportIndex] == i) {
+				if (local != null) {
+					// always add required bundles first if we locally provide the package
+					// This allows a bundle to provide a package from a required bundle without 
+					// re-exporting the whole required bundle.
+					requiredBundles[i].getBundleLoader().addExportedProvidersFor(packageName, result, visited);
+				}
+				else if (reexportIndex < size && reexportTable[reexportIndex] == i) {
 					reexportIndex++;
 					requiredBundles[i].getBundleLoader().addExportedProvidersFor(packageName, result, visited);
 				}
 			}
 		}
-		// now look locally.
-		PackageSource local = getProvidedPackage(packageName);
+
+		// now add the locally provided package.
 		if (local != null)
 			result.add(local.getSupplier());
 	}
