@@ -805,12 +805,10 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 					hostBundles[i] = matchingBundles[i].getBundle();
 					if (rb.isNewFragmentExports()) {
 						// update the host's set of selected exports
-						ResolverBundle hostRB = (ResolverBundle) bundleMapping.get(hostBundles[i]);
-						ResolverExport[] hostExports = hostRB.getSelectedExports();
-						ArrayList selectedHostExports = new ArrayList(hostExports.length);
+						ResolverExport[] hostExports = matchingBundles[i].getSelectedExports();
+						ExportPackageDescription[] hostExportsArray = new ExportPackageDescription[hostExports.length];
 						for (int j = 0; j < hostExports.length; j++)
-							selectedHostExports.add(hostExports[j].getExportPackageDescription());
-						ExportPackageDescription[] hostExportsArray = (ExportPackageDescription[]) selectedHostExports.toArray(new ExportPackageDescription[selectedHostExports.size()]);
+							hostExportsArray[j] = hostExports[j].getExportPackageDescription();
 						state.resolveBundle(hostBundles[i], true, null, hostExportsArray, hostBundles[i].getResolvedRequires(), hostBundles[i].getResolvedImports());
 					}
 				}
@@ -871,7 +869,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		}
 		if (!found) {
 			Map directives = new HashMap(1);
-			directives.put (Constants.RESOLUTION_DIRECTIVE, ImportPackageSpecification.RESOLUTION_DYNAMIC);
+			directives.put(Constants.RESOLUTION_DIRECTIVE, ImportPackageSpecification.RESOLUTION_DYNAMIC);
 			ImportPackageSpecification packageSpec = state.getFactory().createImportPackageSpecification(requestedPackage, null, null, null, directives, null, importingBundle);
 			ResolverImport newImport = new ResolverImport(rb, packageSpec);
 			boolean resolved = resolveImport(newImport, true);
