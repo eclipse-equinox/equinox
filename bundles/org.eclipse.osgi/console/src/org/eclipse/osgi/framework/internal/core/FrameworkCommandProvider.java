@@ -1199,28 +1199,6 @@ public class FrameworkCommandProvider implements CommandProvider {
 	}
 
 	/**
-	 * Prints the the meta data of bundles.
-	 *
-	 * @param intp A CommandInterpreter object containing the command and it's arguments.
-	 */
-	public void _meta(CommandInterpreter intp) throws Exception {
-		String nextArg = intp.nextArgument();
-		if (nextArg == null) {
-			intp.println(ConsoleMsg.formatter.getString("CONSOLE_NO_BUNDLE_SPECIFIED_ERROR"));
-		}
-
-		/* TODO figure out if we can remove the meta command.
-		while (nextArg != null) {
-		    Bundle bundle = getBundleFromToken(intp, nextArg, true);
-		    if (bundle != null) {
-		        intp.printDictionary(bundle.getMetadata(), bundle.toString());
-		    }
-		    nextArg = intp.nextArgument();
-		}
-		*/
-	}
-
-	/**
 	 * Handles the props command's abbreviation.  Invokes _props()
 	 *
 	 * @param intp A CommandInterpreter object containing the command and it's arguments.
