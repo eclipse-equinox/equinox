@@ -63,6 +63,8 @@ public class GroupingChecker {
 			if (list != null) {
 				for (int j = 0; j < list.size(); j++) {
 					ResolverExport re = (ResolverExport) list.get(j);
+					if (re.isDropped())
+						continue;
 					if (re.getExporter().isResolvable() && exp.getName().equals(re.getName()) && !imp.isOnRootPath(re.getExporter()) && !imp.isOnRootPathSplit(imp.getMatchingExport().getExporter(), re.getExporter()))
 						return wire;
 				}
@@ -72,6 +74,8 @@ public class GroupingChecker {
 			if (list != null) {
 				for (int j = 0; j < list.size(); j++) {
 					ResolverExport re = (ResolverExport) list.get(j);
+					if (re.isDropped())
+						continue;
 					if (re.getExporter().isResolvable() && wire.getName().equals(re.getName()) && !imports[i].isOnRootPath(re.getExporter()) && !imp.isOnRootPathSplit(imp.getMatchingExport().getExporter(), re.getExporter()))
 						return wire;
 					// Check against requires

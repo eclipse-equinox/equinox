@@ -18,6 +18,7 @@ public class ResolverExport implements VersionSupplier {
 	private ResolverBundle exporter;
 	private ExportPackageDescription exportPackageDescription;
 	private boolean reprovide = false;
+	private boolean dropped = false;
 
 	ResolverExport(ResolverBundle bundle, ExportPackageDescription export) {
 		exporter = bundle;
@@ -119,4 +120,11 @@ public class ResolverExport implements VersionSupplier {
 		return exportPackageDescription.toString();
 	}
 
+	boolean isDropped() {
+		return dropped;
+	}
+
+	void setDropped(boolean dropped) {
+		this.dropped = dropped;
+	}
 }

@@ -545,10 +545,13 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 						if (exp.getExportPackageDescription().isRoot() && !export.getExportPackageDescription().isRoot())
 							continue; // TODO hack to prevent imports from getting wired to re-exports if we offer a root export
 						resolverExports.remove(exp); // Import wins, remove export
+						exp.setDropped(true);
 					}
 					if (((originalState == ResolverBundle.UNRESOLVED || !export.getExportPackageDescription().isRoot()) && !resolveBundle(export.getExporter())) || !resolverExports.contains(export)) {
-						if (exp != null)
+						if (exp != null) {
 							resolverExports.put(exp);
+							exp.setDropped(false);
+						}
 						imp.setMatchingExport(null);
 						continue; // Bundle hasn't resolved || export has not been selected and is unavailable
 					}
