@@ -716,7 +716,7 @@ public class Framework implements EventSource, EventPublisher {
 		Bundle bundle;
 		try {
 			BundleData bundledata = storage.begin();
-			bundle = createBundle(bundledata);
+			bundle = createBundle(bundledata); 			//TODO Why can't this could be done once the check below has been done? 
 			// Check for a bundle already installed with the same UniqueId and version.
 			if (bundle.getSymbolicName() != null) {
 				Bundle installedBundle = getBundleByUniqueId(bundle.getSymbolicName(), bundle.getVersion().toString());

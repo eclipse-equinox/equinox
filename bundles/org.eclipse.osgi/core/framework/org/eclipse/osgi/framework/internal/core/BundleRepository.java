@@ -112,6 +112,7 @@ public class BundleRepository {
 		}
 	}
 
+	//TODO Simplify the nesting here.
 	public boolean remove(Bundle bundle) {
 		// remove by bundle ID
 		boolean removed = bundlesById.remove(bundle);

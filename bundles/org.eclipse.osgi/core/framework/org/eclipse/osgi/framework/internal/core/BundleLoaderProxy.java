@@ -115,7 +115,7 @@ public class BundleLoaderProxy implements KeyedElement, NamedClassSpace{
 	}
 
 	protected void markDependencies() {
-		if (markedUsedDependencies || !bundle.isResolved()) {
+		if (markedUsedDependencies || !bundle.isResolved()) {	//TODO Can we get a bundleLoaderProxy is we are unresolved. If we can get one when the bundle is unresolved is it correct?
 			return;
 		}
 		markedUsedDependencies = true;
