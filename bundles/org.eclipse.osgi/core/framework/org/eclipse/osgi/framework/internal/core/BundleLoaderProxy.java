@@ -91,7 +91,7 @@ public class BundleLoaderProxy implements KeyedElement, NamedClassSpace {
 		if (!(other instanceof BundleLoaderProxy))
 			return false;
 		BundleLoaderProxy otherLoaderProxy = (BundleLoaderProxy) other;
-		return (symbolicName.equals(otherLoaderProxy.symbolicName) && version.matchQualifier(otherLoaderProxy.version));
+		return (symbolicName.equals(otherLoaderProxy.symbolicName) && version.equals(otherLoaderProxy.version));
 	}
 
 	public Object getKey() {

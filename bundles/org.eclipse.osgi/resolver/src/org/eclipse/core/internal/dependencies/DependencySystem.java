@@ -310,8 +310,8 @@ public class DependencySystem {
 		return new Element(id, versionId, dependencies, singleton, userObject);
 	}
 	// factory method
-	public Dependency createDependency(Object requiredObjectId, IMatchRule satisfactionRule, Object requiredVersionId, boolean optional, Object userObject) {
-		return new Dependency(requiredObjectId, satisfactionRule, requiredVersionId, optional, userObject);
+	public Dependency createDependency(Object requiredObjectId, IMatchRule satisfactionRule, boolean optional, Object userObject) {
+		return new Dependency(requiredObjectId, satisfactionRule, optional, userObject);
 	}
 	// global access to system version comparator
 	public int compare(Object obj1, Object obj2) {

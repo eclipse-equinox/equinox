@@ -200,8 +200,8 @@ public class Framework implements EventDispatcher, EventPublisher {
 				if (oldPackages.length == newPackages.length) {
 					for (int i = 0; i < oldPackages.length; i++) {
 						if (oldPackages[i].getName().equals(newPackages[i].getName())) {
-							Object oldVersion = oldPackages[i].getVersionSpecification();
-							Object newVersion = newPackages[i].getVersionSpecification();
+							Object oldVersion = oldPackages[i].getVersionRange().getMinimum();
+							Object newVersion = newPackages[i].getVersionRange().getMinimum();
 							if (oldVersion == null) {
 								if (newVersion != null) {
 									different = true;
@@ -237,7 +237,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 				for (int i = 0; i < packages.length; i++) {
 					PackageSpecification spec = packages[i];
 					if (spec.getName().equals(Constants.OSGI_FRAMEWORK_PACKAGE)) {
-						String version = spec.getVersionSpecification().toString();
+						String version = spec.getVersionRange().getMinimum().toString();
 						if (version != null)
 							properties.put(Constants.FRAMEWORK_VERSION, version);
 					}

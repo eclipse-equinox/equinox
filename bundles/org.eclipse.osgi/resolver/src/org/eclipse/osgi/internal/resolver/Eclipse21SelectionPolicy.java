@@ -31,7 +31,7 @@ public class Eclipse21SelectionPolicy implements ISelectionPolicy {
 				Element bestVersion = null;
 				for (Iterator satisfiedIter = elementSet.getSatisfied().iterator(); satisfiedIter.hasNext();) {
 					Element satisfiedVersion = (Element) satisfiedIter.next();
-					boolean satisfiesDependency = requiringSelectedVersionDependency.getMatchRule().isSatisfied(requiringSelectedVersionDependency.getRequiredVersionId(), satisfiedVersion.getVersionId());
+					boolean satisfiesDependency = requiringSelectedVersionDependency.getMatchRule().isSatisfied(requiringSelectedVersionDependency.getUserObject(), satisfiedVersion.getVersionId());
 					if (satisfiesDependency) {
 						boolean betterThanBest = bestVersion == null || elementSet.getSystem().compare(satisfiedVersion.getVersionId(), bestVersion.getVersionId()) > 0;
 						if (betterThanBest)
@@ -86,7 +86,7 @@ public class Eclipse21SelectionPolicy implements ISelectionPolicy {
 					// the selected version may not require this element set (but it still can be selected)
 					Dependency requiringSelectedVersionDep = requiringSelectedVersion.getDependency(elementSet.getId());
 					if (requiringSelectedVersionDep != null) {
-						boolean satisfiesDependency = requiringSelectedVersionDep.getMatchRule().isSatisfied(requiringSelectedVersionDep.getRequiredVersionId(), satisfiedVersion.getVersionId());
+						boolean satisfiesDependency = requiringSelectedVersionDep.getMatchRule().isSatisfied(requiringSelectedVersionDep.getUserObject(), satisfiedVersion.getVersionId());
 						isRequired |= satisfiesDependency;
 						satisfiesAll &= satisfiesDependency;
 						satisfiesAllMandatory &= (satisfiesDependency | requiringSelectedVersionDep.isOptional());

@@ -145,9 +145,9 @@ public class ResolverImpl implements Resolver {
 					// override previously exported package if any (could
 					// preserve instead)
 					if (required[j].isExported()) {
-						Version toExport = required[j].getVersionSpecification();
+						Version toExport = required[j].getVersionRange().getMinimum();
 						PackageSpecification existing = (PackageSpecification) availablePackages.get(required[j].getName());
-						Version existingVersion = existing == null ? null : existing.getVersionSpecification();
+						Version existingVersion = existing == null ? null : existing.getVersionRange().getMinimum();
 						if (existingVersion == null || (toExport != null && toExport.isGreaterThan(existingVersion)))
 							availablePackages.put(required[j].getName(), required[j]);
 					}
@@ -157,9 +157,8 @@ public class ResolverImpl implements Resolver {
 				PackageSpecification[] required = initialBundles[i].getPackages();
 				for (int j = 0; j < required.length; j++) {
 					PackageSpecification exported = (PackageSpecification) availablePackages.get(required[j].getName());
-					Version exportedVersion = exported == null ? null : exported.getVersionSpecification();
-					Version importedVersion = required[j].getVersionSpecification();
-					if (exported == null || (importedVersion != null && (exportedVersion == null || !exportedVersion.matchGreaterOrEqualTo(importedVersion)))) {
+					Version exportedVersion = exported == null ? null : exported.getVersionRange().getMinimum();
+					if (exported == null || !required[j].isSatisfiedBy(exportedVersion)) {
 						unresolveRequirementChain(initialBundles[i]);
 						success = false;
 						// one missing import is enough to discard this bundle
@@ -174,7 +173,7 @@ public class ResolverImpl implements Resolver {
 			PackageSpecification[] required = resolvedBundles[i].getPackages();
 			for (int j = 0; j < required.length; j++) {
 				PackageSpecification exported = (PackageSpecification) availablePackages.get(required[j].getName());
-				state.resolveConstraint(required[j], exported.getVersionSpecification(), exported.getBundle());
+				state.resolveConstraint(required[j], exported.getVersionRange().getMinimum(), exported.getBundle());
 			}
 		}
 		/* return false if a at least one bundle was unresolved during this */

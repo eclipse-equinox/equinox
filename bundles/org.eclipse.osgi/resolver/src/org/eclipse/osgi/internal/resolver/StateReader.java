@@ -24,7 +24,7 @@ class StateReader {
 	// cached registry.
 	protected List objectTable = new ArrayList();
 
-	public static final byte STATE_CACHE_VERSION = 5;
+	public static final byte STATE_CACHE_VERSION = 6;
 	public static final byte NULL = 0;
 	public static final byte OBJECT = 1;
 	public static final byte INDEX = 2;
@@ -128,7 +128,7 @@ class StateReader {
 	// called by readers for VersionConstraintImpl subclasses
 	private void readVersionConstraint(VersionConstraintImpl version, DataInputStream in) throws IOException {
 		version.setName(readString(in, false));
-		version.setVersionSpecification(readVersion(in));
+		version.setVersionRange(readVersionRange(in));
 		version.setMatchingRule(in.readByte());
 		version.setActualVersion(readVersion(in));
 		version.setSupplier(readBundleDescription(in));
@@ -144,9 +144,15 @@ class StateReader {
 		int minorComponent = in.readInt();
 		int serviceComponent = in.readInt();
 		String qualifierComponent = readString(in, false);
+		boolean inclusive = in.readBoolean();
 		Version result = new Version(majorComponent, minorComponent, serviceComponent, qualifierComponent);
+		result.setInclusive(inclusive);
 		addToObjectTable(result);
 		return result;
+	}
+
+	private VersionRange readVersionRange(DataInputStream in) throws IOException {
+		return new VersionRange(readVersion(in), readVersion(in));
 	}
 
 	public final boolean loadState(StateImpl state, DataInputStream input, long expectedTimestamp) throws IOException {

@@ -126,7 +126,7 @@ class StateWriter {
 	// called by writers for VersionConstraintImpl subclasses
 	private void writeVersionConstraint(VersionConstraintImpl version, DataOutputStream out) throws IOException {
 		writeStringOrNull(version.getName(), out);
-		writeVersion(version.getVersionSpecification(), out);
+		writeVersionRange(version.getVersionRange(), out);
 		out.writeByte(version.getMatchingRule());
 		writeVersion(version.getActualVersion(), out);
 		writeBundleDescription((BundleDescriptionImpl) version.getSupplier(), out);
@@ -140,6 +140,12 @@ class StateWriter {
 		out.writeInt(version.getMinorComponent());
 		out.writeInt(version.getMicroComponent());
 		writeStringOrNull(version.getQualifierComponent(), out);
+		out.writeBoolean(version.isInclusive());
+	}
+
+	private void writeVersionRange(VersionRange versionRange, DataOutputStream out) throws IOException {
+		writeVersion(versionRange.getMinimum(), out);
+		writeVersion(versionRange.getMaximum(), out);
 	}
 
 	private boolean writeIndex(Object object, DataOutputStream out) throws IOException {

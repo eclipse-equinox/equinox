@@ -14,5 +14,5 @@ package org.eclipse.core.internal.dependencies;
  * Must be implemented by clients.
  */
 public interface IMatchRule {
-	public boolean isSatisfied(Object required, Object available);
+	public boolean isSatisfied(Object constraint, Object available);
 }

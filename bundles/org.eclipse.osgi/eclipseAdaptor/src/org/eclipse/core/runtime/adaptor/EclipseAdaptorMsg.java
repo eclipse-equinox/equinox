@@ -50,9 +50,9 @@ public class EclipseAdaptorMsg {
 	}
 
 	private static String toString(VersionConstraint constraint) {
-		org.eclipse.osgi.service.resolver.Version versionSpec = constraint.getVersionSpecification();
-		if (versionSpec == null)
+		org.eclipse.osgi.service.resolver.VersionRange versionRange = constraint.getVersionRange();
+		if (versionRange == null)
 			return constraint.getName();
-		return constraint.getName() + '_' + versionSpec;
+		return constraint.getName() + '_' + versionRange;
 	}
 }

@@ -21,6 +21,8 @@ import org.eclipse.osgi.framework.internal.defaultadaptor.DevClassPathHelper;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.service.pluginconversion.PluginConversionException;
 import org.eclipse.osgi.service.pluginconversion.PluginConverter;
+import org.eclipse.osgi.service.resolver.Version;
+import org.eclipse.osgi.service.resolver.VersionRange;
 import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -295,9 +297,10 @@ public class PluginConverterImpl implements PluginConverter {
 			generatedManifest.put(Constants.BUNDLE_VENDOR, provider);
 		if (pluginInfo.isFragment()) {
 			StringBuffer hostBundle = new StringBuffer();
-			hostBundle.append(pluginInfo.getMasterId()).append(SEMICOLON); //$NON-NLS-1$
-			hostBundle.append(Constants.BUNDLE_VERSION_ATTRIBUTE).append("="); //$NON-NLS-1$
-			hostBundle.append(pluginInfo.getMasterVersion());
+			hostBundle.append(pluginInfo.getMasterId());
+			String versionRange = getVersionRange(pluginInfo.getMasterVersion(), null); // TODO need to get match rule here!
+			if (versionRange != null)
+				hostBundle.append(versionRange);
 			generatedManifest.put(Constants.FRAGMENT_HOST, hostBundle.toString());
 		}
 	}
@@ -340,26 +343,14 @@ public class PluginConverterImpl implements PluginConverter {
 		for (Iterator iter = requiredBundles.iterator(); iter.hasNext();) {
 			PluginParser.Prerequisite element = (PluginParser.Prerequisite) iter.next();
 			StringBuffer modImport = new StringBuffer(element.getName());
-			if (element.getVersion() != null) {
-				modImport.append(';').append(Constants.BUNDLE_VERSION_ATTRIBUTE).append("=").append(element.getVersion()); //$NON-NLS-1$ 
-			}
+			String versionRange = getVersionRange(element.getVersion(), element.getMatch());
+			if (versionRange != null)
+				modImport.append(versionRange);
 			if (element.isExported()) {
 				modImport.append(';').append(Constants.REPROVIDE_ATTRIBUTE).append("=true");//$NON-NLS-1$ 
 			}
 			if (element.isOptional()) {
 				modImport.append(';').append(Constants.OPTIONAL_ATTRIBUTE).append("=true");//$NON-NLS-1$
-			}
-			if (element.getMatch() != null) {
-				modImport.append(';').append(Constants.VERSION_MATCH_ATTRIBUTE).append("="); //$NON-NLS-1$ 
-				if (element.getMatch().equalsIgnoreCase(IModel.PLUGIN_REQUIRES_MATCH_PERFECT)) {
-					modImport.append(Constants.VERSION_MATCH_QUALIFIER);
-				} else if (element.getMatch().equalsIgnoreCase(IModel.PLUGIN_REQUIRES_MATCH_EQUIVALENT)) {
-					modImport.append(Constants.VERSION_MATCH_MINOR);
-				} else if (element.getMatch().equalsIgnoreCase(IModel.PLUGIN_REQUIRES_MATCH_COMPATIBLE)) {
-					modImport.append(Constants.VERSION_MATCH_MAJOR);
-				} else if (element.getMatch().equalsIgnoreCase(IModel.PLUGIN_REQUIRES_MATCH_GREATER_OR_EQUAL)) {
-					modImport.append(Constants.VERSION_MATCH_GREATERTHANOREQUAL);
-				}
 			}
 			bundleRequire.append(modImport);
 			if (iter.hasNext())
@@ -655,4 +646,36 @@ public class PluginConverterImpl implements PluginConverter {
 		return bundleManifestLocation;
 	}
 
+	private String getVersionRange(String reqVersion, String matchRule) {
+		if (reqVersion == null)
+			return null;
+
+		Version minVersion = new Version(reqVersion);
+		Version maxVersion;
+		if (matchRule != null) {
+			if (matchRule.equalsIgnoreCase(IModel.PLUGIN_REQUIRES_MATCH_PERFECT)) {
+				maxVersion = minVersion;
+			} else if (matchRule.equalsIgnoreCase(IModel.PLUGIN_REQUIRES_MATCH_EQUIVALENT)) {
+				maxVersion = new Version(minVersion.getMajorComponent(), minVersion.getMinorComponent() + 1, 0);
+				maxVersion.setInclusive(false);
+			} else if (matchRule.equalsIgnoreCase(IModel.PLUGIN_REQUIRES_MATCH_COMPATIBLE)) {
+				maxVersion = new Version(minVersion.getMajorComponent() + 1, 0, 0);
+				maxVersion.setInclusive(false);
+			} else if (matchRule.equalsIgnoreCase(IModel.PLUGIN_REQUIRES_MATCH_GREATER_OR_EQUAL)) {
+				maxVersion = new Version(Version.maxVersion);
+				maxVersion.setInclusive(false);
+			} else {
+				maxVersion = new Version(minVersion.getMajorComponent() + 1, 0, 0);
+				maxVersion.setInclusive(false);
+			}
+		} else {
+			maxVersion = new Version(minVersion.getMajorComponent() + 1, 0, 0);
+			maxVersion.setInclusive(false);
+		}
+
+		StringBuffer result = new StringBuffer();
+		result.append(';').append(Constants.BUNDLE_VERSION_ATTRIBUTE).append('=');
+		result.append('\"').append(new VersionRange(minVersion, maxVersion).toString()).append('\"');
+		return result.toString();
+	}
 }

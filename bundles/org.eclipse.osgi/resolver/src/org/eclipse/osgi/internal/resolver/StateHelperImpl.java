@@ -105,7 +105,7 @@ public class StateHelperImpl implements StateHelper {
 		PackageSpecification exported = getExportedPackage(specification.getBundle().getContainingState(), specification.getName(), null);
 		if (exported == null)
 			return false;
-		return specification.isSatisfiedBy(exported.getVersionSpecification());
+		return specification.isSatisfiedBy(exported.getVersionRange().getMinimum());
 	}
 
 	/**
@@ -163,7 +163,7 @@ public class StateHelperImpl implements StateHelper {
 		for (int i = 0; i < resolvedBundles.length; i++) {
 			PackageSpecification[] packages = resolvedBundles[i].getPackages();
 			for (int j = 0; j < packages.length; j++)
-				if (packages[j].getName().equals(packageName) && (ignoreVersion || packages[j].getVersionSpecification().equals(version)) && (packages[j].getSupplier() != null))
+				if (packages[j].getName().equals(packageName) && (ignoreVersion || packages[j].getVersionRange().getMinimum().equals(version)) && (packages[j].getSupplier() != null))
 					return packages[j].getSupplier().getPackage(packageName);
 		}
 		return null;

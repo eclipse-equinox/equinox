@@ -22,6 +22,7 @@ public interface VersionConstraint extends Cloneable {
 	public byte MINOR_MATCH = 2;
 	public byte MAJOR_MATCH = 3;
 	public byte GREATER_EQUAL_MATCH = 4;
+	public byte OTHER_MATCH = 5;
 
 	/**
 	 * Returns this constraint's name.
@@ -33,8 +34,8 @@ public interface VersionConstraint extends Cloneable {
 	/**
 	 * Returns the version required by this constraint to be satisfied, or 
 	 * <code>null</code> if none is defined.
-	 * 
-	 * @return the version this constraint requires, or <code>null</code> 
+	 * TODO deprecated use {@link #getVersionRange()} 
+	 * @return the version this constraint requires, or <code>null</code>
 	 */
 	public Version getVersionSpecification();
 
@@ -43,7 +44,7 @@ public interface VersionConstraint extends Cloneable {
 	 * <code>null</code> if it is not resolved.
 	 * 
 	 * @return the version this constraint was resolved against, or <code>null</code>
-	 * @see #isResolved
+	 * @see #isResolved()
 	 */
 	public Version getActualVersion();
 
@@ -52,12 +53,19 @@ public interface VersionConstraint extends Cloneable {
 	 * 
 	 * @return one of the existing matching rules
 	 * @see #NO_MATCH
-	 * @see #PERFECT_MATCH
-	 * @see #EQUIVALENT_MATCH
-	 * @see #COMPATIBLE_MATCH
+	 * @see #QUALIFIER_MATCH
+	 * @see #MICRO_MATCH
+	 * @see #MINOR_MATCH
+	 * @see #MAJOR_MATCH
 	 * @see #GREATER_EQUAL_MATCH
 	 */
 	public byte getMatchingRule();
+
+	/**
+	 * Returns the version range for this constraint.
+	 * @return the version range for this constraint, or <code>null</code>
+	 */
+	public VersionRange getVersionRange();
 
 	/**
 	 * Returns the bundle that declares this constraint.
@@ -70,7 +78,7 @@ public interface VersionConstraint extends Cloneable {
 	 * Returns the bundle that satisfies this constraint, if it is resolved.
 	 *  
 	 * @return a bundle description, or <code>null</code> 
-	 * @see #isResolved
+	 * @see #isResolved()
 	 */
 	public BundleDescription getSupplier();
 

@@ -71,7 +71,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 	public BundleSpecification createBundleSpecification(String requiredSymbolicName, Version requiredVersion, byte matchingRule, boolean export, boolean optional) {
 		BundleSpecificationImpl bundleSpec = new BundleSpecificationImpl();
 		bundleSpec.setName(requiredSymbolicName);
-		bundleSpec.setVersionSpecification(requiredVersion);
+		setVersionRange(bundleSpec, matchingRule, requiredVersion);
 		bundleSpec.setMatchingRule(matchingRule);
 		bundleSpec.setExported(export);
 		bundleSpec.setOptional(optional);
@@ -81,7 +81,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 	public BundleSpecification createBundleSpecification(BundleSpecification original) {
 		BundleSpecificationImpl bundleSpec = new BundleSpecificationImpl();
 		bundleSpec.setName(original.getName());
-		bundleSpec.setVersionSpecification(original.getVersionSpecification());
+		bundleSpec.setVersionRange(original.getVersionRange());
 		bundleSpec.setMatchingRule(original.getMatchingRule());
 		bundleSpec.setExported(original.isExported());
 		bundleSpec.setOptional(original.isOptional());
@@ -91,7 +91,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 	public HostSpecification createHostSpecification(String hostSymbolicName, Version hostVersion, byte matchingRule, boolean reloadHost) {
 		HostSpecificationImpl hostSpec = new HostSpecificationImpl();
 		hostSpec.setName(hostSymbolicName);
-		hostSpec.setVersionSpecification(hostVersion);
+		setVersionRange(hostSpec, matchingRule, hostVersion);
 		hostSpec.setMatchingRule(matchingRule);
 		hostSpec.setReloadHost(reloadHost);
 		return hostSpec;
@@ -100,7 +100,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 	public HostSpecification createHostSpecification(HostSpecification original) {
 		HostSpecificationImpl hostSpec = new HostSpecificationImpl();
 		hostSpec.setName(original.getName());
-		hostSpec.setVersionSpecification(original.getVersionSpecification());
+		hostSpec.setVersionRange(original.getVersionRange());
 		hostSpec.setMatchingRule(original.getMatchingRule());
 		hostSpec.setReloadHost(original.reloadHost());
 		return hostSpec;
@@ -109,7 +109,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 	public PackageSpecification createPackageSpecification(String packageName, Version packageVersion, boolean exported) {
 		PackageSpecificationImpl packageSpec = new PackageSpecificationImpl();
 		packageSpec.setName(packageName);
-		packageSpec.setVersionSpecification(packageVersion);
+		packageSpec.setVersionRange(new VersionRange(packageVersion, Version.maxVersion));
 		packageSpec.setExport(exported);
 		return packageSpec;
 	}
@@ -117,7 +117,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 	public PackageSpecification createPackageSpecification(PackageSpecification original) {
 		PackageSpecificationImpl packageSpec = new PackageSpecificationImpl();
 		packageSpec.setName(original.getName());
-		packageSpec.setVersionSpecification(original.getVersionSpecification());
+		packageSpec.setVersionRange(original.getVersionRange());
 		packageSpec.setExport(original.isExported());
 		return packageSpec;
 	}
@@ -167,5 +167,43 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 			throw new IllegalArgumentException();
 		StateWriter writer = new StateWriter();
 		writer.saveState((StateImpl) state, stream);
+	}
+
+	private void setVersionRange(VersionConstraintImpl constraint, int matchingRule, Version minVersion) {
+		if (matchingRule == VersionConstraint.NO_MATCH || matchingRule == VersionConstraint.OTHER_MATCH)
+			return;
+		if (minVersion == null)
+			return;
+		switch (matchingRule) {
+			case VersionConstraint.QUALIFIER_MATCH : {
+				minVersion.setInclusive(true);
+				constraint.setVersionRange(new VersionRange(minVersion, minVersion));
+				break;
+			}
+			case VersionConstraint.MICRO_MATCH : {
+				Version maxVersion = new Version(minVersion.getMajorComponent(), minVersion.getMinorComponent(), minVersion.getMicroComponent() + 1);
+				maxVersion.setInclusive(false);
+				constraint.setVersionRange(new VersionRange(minVersion, maxVersion));
+				break;
+			}
+			case VersionConstraint.MINOR_MATCH : {
+				Version maxVersion = new Version(minVersion.getMajorComponent(), minVersion.getMinorComponent() + 1, 0);
+				maxVersion.setInclusive(false);
+				constraint.setVersionRange(new VersionRange(minVersion, maxVersion));
+				break;
+			}
+			case VersionConstraint.MAJOR_MATCH : {
+				Version maxVersion = new Version(minVersion.getMajorComponent() + 1, 0, 0);
+				maxVersion.setInclusive(false);
+				constraint.setVersionRange(new VersionRange(minVersion, maxVersion));
+				break;
+			}
+			case VersionConstraint.GREATER_EQUAL_MATCH : {
+				Version maxVersion = new Version(Version.maxVersion);
+				maxVersion.setInclusive(false);
+				constraint.setVersionRange(new VersionRange(minVersion, maxVersion));
+				break;
+			}
+		}
 	}
 }

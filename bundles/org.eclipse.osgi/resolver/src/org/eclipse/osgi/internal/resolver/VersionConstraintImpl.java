@@ -14,8 +14,8 @@ import org.eclipse.osgi.service.resolver.*;
 
 public abstract class VersionConstraintImpl implements VersionConstraint {
 	private String name;
-	private Version versionSpecification;
-	private byte matchingRule = GREATER_EQUAL_MATCH;
+	private VersionRange versionRange;
+	private byte matchingRule = -1;
 	private BundleDescription bundle;
 	private BundleDescription supplier;
 	private Version actualVersion;
@@ -25,7 +25,7 @@ public abstract class VersionConstraintImpl implements VersionConstraint {
 	}
 
 	public Version getVersionSpecification() {
-		return versionSpecification;
+		return versionRange == null ? null : versionRange.getMinimum();
 	}
 
 	public Version getActualVersion() {
@@ -33,7 +33,40 @@ public abstract class VersionConstraintImpl implements VersionConstraint {
 	}
 
 	public byte getMatchingRule() {
+		if (matchingRule != -1)
+			return matchingRule;
+		if (versionRange == null || versionRange.getMinimum() == null) {
+			matchingRule = NO_MATCH;
+			return matchingRule;
+		}
+
+		Version minimum = versionRange.getMinimum();
+		Version maximum = versionRange.getMaximum() == null ? Version.maxVersion : versionRange.getMaximum();
+
+		if (maximum.equals(Version.maxVersion))
+			matchingRule = GREATER_EQUAL_MATCH;
+		else if (minimum.equals(maximum))
+			matchingRule = QUALIFIER_MATCH;
+		else if (!minimum.isInclusive() || maximum.isInclusive())
+			matchingRule = OTHER_MATCH;
+		else if (minimum.getMajorComponent() == maximum.getMajorComponent() - 1)
+			matchingRule = MAJOR_MATCH;
+		else if (minimum.getMajorComponent() != maximum.getMajorComponent())
+			matchingRule = OTHER_MATCH;
+		else if (minimum.getMinorComponent() == maximum.getMinorComponent() - 1)
+			matchingRule = MINOR_MATCH;
+		else if (minimum.getMinorComponent() != maximum.getMinorComponent())
+			matchingRule = OTHER_MATCH;
+		else if (minimum.getMicroComponent() == maximum.getMicroComponent() - 1)
+			matchingRule = MICRO_MATCH;
+		else
+			matchingRule = OTHER_MATCH;
+
 		return matchingRule;
+	}
+
+	public VersionRange getVersionRange() {
+		return versionRange;
 	}
 
 	public BundleDescription getBundle() {
@@ -64,12 +97,12 @@ public abstract class VersionConstraintImpl implements VersionConstraint {
 		this.name = name;
 	}
 
-	public void setVersionSpecification(Version versionSpecification) {
-		this.versionSpecification = versionSpecification;
-	}
-
 	public void setBundle(BundleDescription bundle) {
 		this.bundle = bundle;
+	}
+
+	public void setVersionRange(VersionRange versionRange) {
+		this.versionRange = versionRange;
 	}
 
 	public void unresolve() {
@@ -78,24 +111,10 @@ public abstract class VersionConstraintImpl implements VersionConstraint {
 	}
 
 	public boolean isSatisfiedBy(Version provided) {
-		Version required = getVersionSpecification();
-		if (required == null)
-			return true;
-		switch (getMatchingRule()) {
-			case QUALIFIER_MATCH :
-				return provided.matchQualifier(required);
-			case MICRO_MATCH :
-				return provided.matchMicro(required);
-			case MINOR_MATCH :
-				return provided.matchMinor(required);
-			case GREATER_EQUAL_MATCH :
-				return provided.matchGreaterOrEqualTo(required);
-			default :
-				return provided.matchMajor(required);
-		}
+		return versionRange == null ? true : versionRange.isIncluded(provided);
 	}
 
 	public String toString() {
-		return "name: " + name + " - version: " + versionSpecification;
+		return "name: " + name + " - version: " + versionRange;
 	}
 }

@@ -13,101 +13,27 @@ package org.eclipse.osgi.internal.resolver;
 import java.util.*;
 import org.eclipse.core.internal.dependencies.*;
 import org.eclipse.osgi.service.resolver.*;
-import org.osgi.framework.Constants;
 
 public class ResolverHelper {
 
 	private final static Version NULL_VERSION = new Version(0, 0, 0);
+	private final static IMatchRule GENERAL_MATCHRULE = new GeneralMatchRule();
 
 	static class BundleVersionComparator implements Comparator {
 		public int compare(Object arg0, Object arg1) {
 			Version v1 = (Version) arg0;
 			Version v2 = (Version) arg1;
-			return v1.isGreaterThan(v2) ? 1 : v1.matchQualifier(v2) ? 0 : -1;
+			return v1.isGreaterThan(v2) ? 1 : v1.equals(v2) ? 0 : -1;
 		}
 	}
 
-	private static final IMatchRule MAJOR = new MatchMajorRule();
-	private static final IMatchRule MINOR = new MatchMinorRule();
-	private static final IMatchRule MICRO = new MatchMicroRule();
-	private static final IMatchRule GREATER_OR_EQUAL = new MatchGreaterOrEqualRule();
-	private static final IMatchRule QUALIFIER = new MatchQualifierRule();
-
-	public static IMatchRule getMatchRule(int b) {
-		switch (b) {
-			case VersionConstraint.MINOR_MATCH :
-				return MINOR;
-			case VersionConstraint.MICRO_MATCH :
-				return MICRO;
-			case VersionConstraint.GREATER_EQUAL_MATCH :
-				return GREATER_OR_EQUAL;
-			case VersionConstraint.QUALIFIER_MATCH :
-				return QUALIFIER;
-			case VersionConstraint.MAJOR_MATCH :
-				return MAJOR;
-			case VersionConstraint.NO_MATCH :
-				return MAJOR;
-		}
-		throw new IllegalArgumentException("match byte: " + b); //$NON-NLS-1$
-	}
-
-	private final static class UnsatisfiableRule implements IMatchRule {
-		public boolean isSatisfied(Object required, Object available) {
-			return false;
+	private final static class GeneralMatchRule implements IMatchRule {
+		public boolean isSatisfied(Object constraint, Object available) {
+			return ((VersionConstraint) constraint).isSatisfiedBy((Version) available);
 		}
 
 		public String toString() {
-			return "unsatisfiable"; //$NON-NLS-1$
-		}
-	}
-
-	private final static class MatchQualifierRule implements IMatchRule {
-		public boolean isSatisfied(Object required, Object available) {
-			return ((Version) available).matchQualifier((Version) required);
-		}
-
-		public String toString() {
-			return Constants.VERSION_MATCH_QUALIFIER;
-		}
-	}
-
-	private final static class MatchMajorRule implements IMatchRule {
-		public boolean isSatisfied(Object required, Object available) {
-			return ((Version) available).matchMajor((Version) required);
-		}
-
-		public String toString() {
-			return Constants.VERSION_MATCH_MAJOR;
-		}
-	}
-
-	private final static class MatchGreaterOrEqualRule implements IMatchRule {
-		public boolean isSatisfied(Object required, Object available) {
-			return ((Version) available).matchGreaterOrEqualTo((Version) required);
-		}
-
-		public String toString() {
-			return Constants.VERSION_MATCH_GREATERTHANOREQUAL;
-		}
-	}
-
-	private final static class MatchMinorRule implements IMatchRule {
-		public boolean isSatisfied(Object required, Object available) {
-			return ((Version) available).matchMinor((Version) required);
-		}
-
-		public String toString() {
-			return Constants.VERSION_MATCH_MINOR;
-		}
-	}
-
-	private final static class MatchMicroRule implements IMatchRule {
-		public boolean isSatisfied(Object required, Object available) {
-			return ((Version) available).matchMicro((Version) required);
-		}
-
-		public String toString() {
-			return Constants.VERSION_MATCH_MICRO;
+			return "general"; //$NON-NLS-1$
 		}
 	}
 
@@ -153,10 +79,7 @@ public class ResolverHelper {
 
 	private static Dependency createPrerequisite(DependencySystem system, VersionConstraint constraint) {
 		boolean optional = (constraint instanceof BundleSpecification) && ((BundleSpecification) constraint).isOptional();
-		Version requiredVersion = constraint.getVersionSpecification();
-		if (NULL_VERSION.equals(requiredVersion))
-			requiredVersion = null;
-		return system.createDependency(constraint.getName(), getMatchRule(constraint.getMatchingRule()), requiredVersion, optional, constraint);
+		return system.createDependency(constraint.getName(), GENERAL_MATCHRULE, optional, constraint);
 	}
 
 	public static DependencySystem createDependencySystem(ISelectionPolicy policy) {

@@ -50,7 +50,7 @@ public class ResolutionVisitor implements IElementSetVisitor {
 				Object highestRequiredVersionId = null;
 				for (Iterator requiredNodeResolvedVersionsIter = requiredNodeResolvedVersions.iterator(); requiredNodeResolvedVersionsIter.hasNext();) {
 					Element requiredResolvedVersion = (Element) requiredNodeResolvedVersionsIter.next();
-					if (dependencies[i].getMatchRule().isSatisfied(dependencies[i].getRequiredVersionId(), requiredResolvedVersion.getVersionId()))
+					if (dependencies[i].getMatchRule().isSatisfied(dependencies[i].getUserObject(), requiredResolvedVersion.getVersionId()))
 						if (highestRequiredVersionId == null || elementSet.getSystem().compare(requiredResolvedVersion.getVersionId(), highestRequiredVersionId) > 0)
 							highestRequiredVersionId = requiredResolvedVersion.getVersionId();
 				}

@@ -55,7 +55,7 @@ public class SatisfactionVisitor implements IElementSetVisitor {
 				boolean depSatisfied = false;
 				for (Iterator requiredNodeSatisfiedVersionsIter = requiredNodeSatisfiedVersions.iterator(); requiredNodeSatisfiedVersionsIter.hasNext();) {
 					Element requiredSatisfiedVersion = (Element) requiredNodeSatisfiedVersionsIter.next();
-					if (dependencies[i].getMatchRule().isSatisfied(dependencies[i].getRequiredVersionId(), requiredSatisfiedVersion.getVersionId())) {
+					if (dependencies[i].getMatchRule().isSatisfied(dependencies[i].getUserObject(), requiredSatisfiedVersion.getVersionId())) {
 						depSatisfied = true;
 						break;
 					}

@@ -60,32 +60,10 @@ class StateBuilder {
 	private static BundleSpecification createRequiredBundle(ManifestElement spec) {
 		BundleSpecificationImpl result = new BundleSpecificationImpl();
 		result.setName(spec.getValue());
-		String version = spec.getAttribute(Constants.BUNDLE_VERSION_ATTRIBUTE);
-		if (version != null)
-			result.setVersionSpecification(new Version(version));
-		result.setMatchingRule(parseMatchingRule(spec.getAttribute(Constants.VERSION_MATCH_ATTRIBUTE)));
+		result.setVersionRange(new VersionRange(spec.getAttribute(Constants.BUNDLE_VERSION_ATTRIBUTE)));
 		result.setExported(spec.getAttribute(Constants.REPROVIDE_ATTRIBUTE) != null);
 		result.setOptional(spec.getAttribute(Constants.OPTIONAL_ATTRIBUTE) != null);
 		return result;
-	}
-
-	private static byte parseMatchingRule(String match) {
-		if (match == null)
-			return VersionConstraint.MAJOR_MATCH;
-
-		if (match.equals(Constants.VERSION_MATCH_MICRO))
-			return VersionConstraint.MICRO_MATCH;
-		if (match.equals(Constants.VERSION_MATCH_MINOR))
-			return VersionConstraint.MINOR_MATCH;
-		if (match.equals(Constants.VERSION_MATCH_MAJOR))
-			return VersionConstraint.MAJOR_MATCH;
-		if (match.equals(Constants.VERSION_MATCH_GREATERTHANOREQUAL))
-			return VersionConstraint.GREATER_EQUAL_MATCH;
-		if (match.equals(Constants.VERSION_MATCH_QUALIFIER))
-			return VersionConstraint.QUALIFIER_MATCH;
-
-		// default to MAJOR match rule.
-		return VersionConstraint.MAJOR_MATCH;
 	}
 
 	private static String[] createProvidedPackages(ManifestElement[] specs) {
@@ -114,9 +92,7 @@ class StateBuilder {
 	private static PackageSpecification createPackage(ManifestElement spec, boolean export) {
 		PackageSpecificationImpl result = new PackageSpecificationImpl();
 		result.setName(spec.getValue());
-		String version = spec.getAttribute(Constants.PACKAGE_SPECIFICATION_VERSION);
-		if (version != null)
-			result.setVersionSpecification(new Version(version));
+		result.setVersionRange(new VersionRange(spec.getAttribute(Constants.PACKAGE_SPECIFICATION_VERSION)));
 		result.setExport(export);
 		return result;
 	}
@@ -126,10 +102,7 @@ class StateBuilder {
 			return null;
 		HostSpecificationImpl result = new HostSpecificationImpl();
 		result.setName(spec.getValue());
-		String version = spec.getAttribute(Constants.BUNDLE_VERSION_ATTRIBUTE);
-		if (version != null)
-			result.setVersionSpecification(new Version(version));
-		result.setMatchingRule(parseMatchingRule(spec.getAttribute(Constants.VERSION_MATCH_ATTRIBUTE)));
+		result.setVersionRange(new VersionRange(spec.getAttribute(Constants.BUNDLE_VERSION_ATTRIBUTE)));
 		result.setReloadHost(false); //$NON-NLS-1$
 		return result;
 	}

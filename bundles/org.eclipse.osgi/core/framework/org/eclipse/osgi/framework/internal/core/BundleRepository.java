@@ -72,7 +72,7 @@ public class BundleRepository {
 			Version ver = new Version(version);
 			if (bundles.length > 0) {
 				for (int i = 0; i < bundles.length; i++) {
-					if (bundles[i].getVersion().matchQualifier(ver)) {
+					if (bundles[i].getVersion().equals(ver)) {
 						return bundles[i];
 					}
 				}

@@ -56,10 +56,12 @@ public final class Version implements Comparable {
 	private int minor = 0;
 	private int micro = 0;
 	private String qualifier = ""; //$NON-NLS-1$
+	private boolean inclusive = true;
 
 	private static final String SEPARATOR = "."; //$NON-NLS-1$
 
 	public static Version emptyVersion = new Version(0, 0, 0);
+	public static Version maxVersion = new Version(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE);
 
 	/**
 	 * Creates a plug-in version identifier from a given Version.
@@ -68,6 +70,7 @@ public final class Version implements Comparable {
 	 */
 	public Version(Version version) {
 		this(version.major, version.minor, version.micro, version.qualifier);
+		this.inclusive = version.inclusive;
 	}
 
 	/**
@@ -303,6 +306,24 @@ public final class Version implements Comparable {
 	}
 
 	/**
+	 * Returns whether this Version is inclusive when used as a
+	 * VersionRange minimum or maximum.
+	 * @return <code>true</code> if this Version is inclusive, 
+	 * <code>false</code> otherwise
+	 */
+	public boolean isInclusive() {
+		return inclusive;
+	}
+
+	/**
+	 * Sets the inclusive property of this Version
+	 * @param inclusive
+	 */
+	public void setInclusive(boolean inclusive) {
+		this.inclusive = inclusive;
+	}
+
+	/**
 	 * Compares two version identifiers to see if this one is
 	 * greater than or equal to the argument.
 	 * <p>
@@ -315,13 +336,12 @@ public final class Version implements Comparable {
 	 * micro components are equal and the qualifier component is
 	 * greated than the argument qualifier component (using lexicographic
 	 * string comparison), or all components are equal.
-	 * </p>
-	 *
-	 * @param versionId the other version identifier
+	 * <p>
+	 * TODO deprecated use {@link VersionRange}
+	 * @param id the other version identifier
 	 * @return <code>true</code> is this version identifier
 	 *    is compatible with the given version identifier, and
 	 *    <code>false</code> otherwise
-	 * @since 2.0
 	 */
 	public boolean matchGreaterOrEqualTo(Version id) {
 		if (id == null)
@@ -350,9 +370,9 @@ public final class Version implements Comparable {
 	 * version identifiers are considered to be equivalent if this qualifier is 
 	 * greated or equal to the qualifier of the argument (using lexicographic
 	 * string comparison).
-	 * </p>
-	 *
-	 * @param versionId the other version identifier
+	 * <p>
+	 * TODO deprecated use {@link VersionRange}
+	 * @param id the other version identifier
 	 * @return <code>true</code> is this version identifier
 	 *    is compatible with the given version identifier, and
 	 *    <code>false</code> otherwise
@@ -386,9 +406,9 @@ public final class Version implements Comparable {
 	 * greated or equal to the qualifier of the argument (using lexicographic
 	 * string comparison).
 	 * 
-	 * </p>
-	 *
-	 * @param versionId the other version identifier
+	 * <p>
+	 * TODO deprecated use {@link VersionRange}
+	 * @param id the other version identifier
 	 * @return <code>true</code> is this version identifier
 	 *    is equivalent to the given version identifier, and
 	 *    <code>false</code> otherwise
@@ -418,9 +438,9 @@ public final class Version implements Comparable {
 	 * greated or equal to the qualifier of the argument (using lexicographic
 	 * string comparison).
 	 * 
-	 * </p>
-	 *
-	 * @param versionId the other version identifier
+	 * <p>
+	 * TODO deprecated use {@link VersionRange}
+	 * @param id the other version identifier
 	 * @return <code>true</code> is this version identifier
 	 *    matches on micro to the given version identifier, and
 	 *    <code>false</code> otherwise
@@ -441,28 +461,23 @@ public final class Version implements Comparable {
 	 * <p>
 	 * Two version identifiers are considered to be perfectly equal if their
 	 * major, minor, micro and qualifier components are equal
-	 * </p>
-	 *
-	 * @param versionId the other version identifier
+	 * <p>
+	 * TODO deprecated use {@link VersionRange}
+	 * @param id the other version identifier
 	 * @return <code>true</code> is this version identifier
 	 *    is perfectly equal to the given version identifier, and
 	 *    <code>false</code> otherwise
 	 * @since 2.0
 	 */
 	public boolean matchQualifier(Version id) {
-		if (id == null)
-			return false;
-		if ((major != id.getMajorComponent()) || (minor != id.getMinorComponent()) || (micro != id.getMicroComponent()) || (!qualifier.equals(id.getQualifierComponent())))
-			return false;
-		else
-			return true;
+		return equals(id);
 	}
 
 	/**
 	 * Compares two version identifiers for order using multi-decimal
 	 * comparison. 
 	 *
-	 * @param versionId the other version identifier
+	 * @param id the other version identifier
 	 * @return <code>true</code> is this version identifier
 	 *    is greater than the given version identifier, and
 	 *    <code>false</code> otherwise
@@ -470,8 +485,8 @@ public final class Version implements Comparable {
 	public boolean isGreaterThan(Version id) {
 
 		if (id == null) {
-			if (major == 0 && minor == 0 && micro == 0 && qualifier.equals(""))
-				return false; //$NON-NLS-1$
+			if (major == 0 && minor == 0 && micro == 0 && qualifier.equals("")) //$NON-NLS-1$
+				return false;
 			else
 				return true;
 		}
@@ -529,7 +544,7 @@ public final class Version implements Comparable {
 	 * Returns a negative integer, zero, or a positive integer as this object is less
 	 * than, equal to, or greater than the specified object.<p>
 	 *
-	 * @param   obj the Version object to be compared.
+	 * @param   o the Version object to be compared.
 	 * @return  a negative integer, zero, or a positive integer as this object
 	 *		is less than, equal to, or greater than the specified Version object.
 	 *
