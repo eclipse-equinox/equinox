@@ -466,10 +466,10 @@ public class PackageAdminImpl implements PackageAdmin {
 							if (bundle.isFragment()) {
 								BundleHost host = (BundleHost) framework.getBundle(bundleDes.getHost().getSupplier().getBundleId());
 								if (((BundleFragment) bundle).setHost(host)) {
-									bundle.resolve();
+									bundle.resolve(bundleDes.isSingleton());
 								}
 							} else {
-								bundle.resolve();
+								bundle.resolve(bundleDes.isSingleton());
 							}
 							if (bundle.isResolved()) {
 								notify.addElement(bundle);
@@ -686,10 +686,10 @@ public class PackageAdminImpl implements PackageAdmin {
 					if (bundle.isFragment()) {
 						BundleHost host = (BundleHost) framework.getBundle(descriptions[i].getHost().getSupplier().getBundleId());
 						if (((BundleFragment) bundle).setHost(host)) {
-							bundle.resolve();
+							bundle.resolve(descriptions[i].isSingleton());
 						}
 					} else {
-						bundle.resolve();
+						bundle.resolve(descriptions[i].isSingleton());
 					}
 				}
 			}
@@ -762,10 +762,10 @@ public class PackageAdminImpl implements PackageAdmin {
 						if (bundle.isFragment()) {
 							BundleHost host = (BundleHost) framework.getBundle(changedBundleDes.getHost().getSupplier().getBundleId());
 							if (((BundleFragment) bundle).setHost(host)) {
-								bundle.resolve();
+								bundle.resolve(changedBundleDes.isSingleton());
 							}
 						} else {
-							bundle.resolve();
+							bundle.resolve(changedBundleDes.isSingleton());
 						}
 						if (bundle.isResolved()) {
 							notify.add(bundle);

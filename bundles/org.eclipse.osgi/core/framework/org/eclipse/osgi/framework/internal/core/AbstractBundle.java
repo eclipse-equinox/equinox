@@ -43,13 +43,15 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 
 	/**
 	 * This String captures the dependencies that could not be resolved
-	 * as a result of not having the proper permissions.
-	 * This information is collected by checkPermissions, but an exception
+	 * as a result of a runtime error,  For example not having the proper 
+	 * permissions or a singlton conflict.
+	 * This information is collected by resolve, but an exception
 	 * cannot be thrown during the resolve phase. It is saved here to be thrown
 	 * later (by Bundle.start for example).
 	 */
-	protected String permissionMsg;
+	protected String runtimeResolveError;
 	protected ManifestLocalization manifestLocalization = null;
+	protected boolean singleton = false;
 
 	/**
 	 * Bundle object constructor. This constructor should not perform any real
@@ -1393,7 +1395,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	/**
 	 * Mark this bundle as resolved.
 	 */
-	protected void resolve() {
+	protected void resolve(boolean singleton) {
 		if (domain != null && !checkPermissions()) {
 			state = INSTALLED;
 			return;
@@ -1404,6 +1406,21 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 				Debug.printStackTrace(new Exception("Stack trace"));
 			}
 		}
+		// Need to see if this is a singleton
+		if (singleton) {
+			this.singleton = true;
+			AbstractBundle[] sameNames = framework.bundles.getBundles(getSymbolicName());
+			if (sameNames != null && sameNames.length > 1) {
+				for (int i = 0; i < sameNames.length; i++)
+					if (sameNames[i] != this) {
+						if (sameNames[i].isResolved() && sameNames[i].singleton) {
+							runtimeResolveError = Msg.formatter.getString("BUNDLE_SINGLETON_RESOLVE_ERROR", this.getLocation(), sameNames[i].getLocation());
+							return;
+						}
+					}
+			}
+		}
+
 		if (state == INSTALLED) {
 			state = RESOLVED;
 			// Do not publish RESOLVED event here.  This is done by caller 
@@ -1426,8 +1443,8 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 		if (!Debug.DEBUG) {
 			return defaultMessage;
 		}
-		if (permissionMsg != null) {
-			return permissionMsg; // do not null this field out until a successful resolve is done.
+		if (runtimeResolveError != null) {
+			return runtimeResolveError; // do not null this field out until a successful resolve is done.
 		}
 		BundleDescription bundleDescription = getBundleDescription();
 		if (bundleDescription == null) {
@@ -1477,7 +1494,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	}
 
 	protected boolean checkPermissions() {
-		permissionMsg = null;
+		runtimeResolveError = null;
 		BundleDescription bundleDesc = getBundleDescription();
 		if (bundleDesc == null)
 			return false;
@@ -1487,12 +1504,12 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 			BundleDescription supplier = pkgs[i].getSupplier();
 			AbstractBundle supplierBundle = supplier == null ? null : framework.getBundle(supplier.getBundleId());
 			if (supplierBundle == null || !supplierBundle.checkExportPackagePermission(pkgs[i].getName())) {
-				permissionMsg = Msg.formatter.getString("BUNDLE_PERMISSION_EXCEPTION_EXPORT", supplierBundle, pkgs[i].getName());
+				runtimeResolveError = Msg.formatter.getString("BUNDLE_PERMISSION_EXCEPTION_EXPORT", supplierBundle, pkgs[i].getName());
 				return false;
 			}
 			// check to make sure the importer has permissions
 			if (!checkImportPackagePermission(pkgs[i].getName())) {
-				permissionMsg = Msg.formatter.getString("BUNDLE_PERMISSION_EXCEPTION_IMPORT", this, pkgs[i].getName());
+				runtimeResolveError = Msg.formatter.getString("BUNDLE_PERMISSION_EXCEPTION_IMPORT", this, pkgs[i].getName());
 				return false;
 			}
 		}
@@ -1502,12 +1519,12 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 			BundleDescription supplier = bundles[i].getSupplier();
 			AbstractBundle supplierBundle = supplier == null ? null : framework.getBundle(supplier.getBundleId());
 			if (supplierBundle == null || !supplierBundle.checkProvideBundlePermission(bundles[i].getName())) {
-				permissionMsg = Msg.formatter.getString("BUNDLE_PERMISSION_EXCEPTION_PROVIDE", supplierBundle, bundles[i].getName());
+				runtimeResolveError = Msg.formatter.getString("BUNDLE_PERMISSION_EXCEPTION_PROVIDE", supplierBundle, bundles[i].getName());
 				return false;
 			}
 			// check to make sure the requirer has permissions
 			if (!checkRequireBundlePermission(bundles[i].getName())) {
-				permissionMsg = Msg.formatter.getString("BUNDLE_PERMISSION_EXCEPTION_REQUIRE", this, bundles[i].getName());
+				runtimeResolveError = Msg.formatter.getString("BUNDLE_PERMISSION_EXCEPTION_REQUIRE", this, bundles[i].getName());
 				return false;
 			}
 		}
@@ -1517,12 +1534,12 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 			BundleDescription supplier = host.getSupplier();
 			AbstractBundle supplierBundle = supplier == null ? null : framework.getBundle(supplier.getBundleId());
 			if (supplierBundle == null || !supplierBundle.checkFragmentHostPermission(host.getName())) {
-				permissionMsg = Msg.formatter.getString("BUNDLE_PERMISSION_EXCEPTION_HOST", supplierBundle, host.getName());
+				runtimeResolveError = Msg.formatter.getString("BUNDLE_PERMISSION_EXCEPTION_HOST", supplierBundle, host.getName());
 				return false;
 			}
 			// check to make sure the fragment has permissions
 			if (!checkFragmentBundlePermission(host.getName())) {
-				permissionMsg = Msg.formatter.getString("BUNDLE_PERMISSION_EXCEPTION_FRAGMENT", this, host.getName());
+				runtimeResolveError = Msg.formatter.getString("BUNDLE_PERMISSION_EXCEPTION_FRAGMENT", this, host.getName());
 				return false;
 			}
 		}
