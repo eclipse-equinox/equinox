@@ -11,6 +11,7 @@
 
 package org.eclipse.osgi.framework.adaptor;
 
+import java.io.File;
 import java.security.PermissionCollection;
 import java.security.ProtectionDomain;
 
@@ -19,9 +20,9 @@ import java.security.ProtectionDomain;
  * This is a specialized ProtectionDomain that also has information about the
  * signers and the hash of the bundle.
  * 
- * @version $Revision$
+ * @version $Revision: 1.1 $
  */
-public class BundleProtectionDomain extends ProtectionDomain {
+public abstract class BundleProtectionDomain extends ProtectionDomain {
 
 	/**
 	 * Constructs a special ProtectionDomain that allows access to signature and
@@ -32,5 +33,11 @@ public class BundleProtectionDomain extends ProtectionDomain {
 	public BundleProtectionDomain(PermissionCollection permCollection) {
 		super(null, permCollection);
 	}
+
+	/**
+	 * Loads a list of signed files into this <tt>BundleProtectionDomain</tt>.
+	 * @param signedFiles the list of signed files to load
+	 */
+	public abstract void loadFiles(File[] signedFiles);
 
 }

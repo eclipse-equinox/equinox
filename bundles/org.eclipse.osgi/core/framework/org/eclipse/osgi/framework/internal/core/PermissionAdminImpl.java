@@ -381,7 +381,11 @@ public class PermissionAdminImpl implements PermissionAdmin {
 
 		combined.setAssignedPermissions(assigned);
 
-		return new BundleProtectionDomain(combined);
+		return new BundleProtectionDomain(combined) {
+			public void loadFiles(File[] signedFiles) {
+				// TODO Auto-generated method stub
+			}
+		};
 	}
 
 	/**
