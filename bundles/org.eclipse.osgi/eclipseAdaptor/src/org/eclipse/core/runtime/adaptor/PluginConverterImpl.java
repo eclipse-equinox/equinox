@@ -21,6 +21,7 @@ import org.osgi.framework.Constants;
 
 public class PluginConverterImpl implements PluginConverter, IModel {
 
+	private static final String PLUGIN_PROPERTIES_FILENAME = "plugin.properties";
 	private static final String PI_ECLIPSE_OSGI = "org.eclipse.osgi";
 	private static PluginConverterImpl instance;	
 	
@@ -56,7 +57,7 @@ public class PluginConverterImpl implements PluginConverter, IModel {
 		instance = this;
 	}
 
-	public synchronized File convertManifest(File pluginBaseLocation) {
+	public synchronized File convertManifest(File pluginBaseLocation, boolean compatibilityManifest) {
 		pluginManifestLocation = findPluginManifest(pluginBaseLocation);
 		if (pluginManifestLocation == null)
 			return null;
@@ -72,7 +73,7 @@ public class PluginConverterImpl implements PluginConverter, IModel {
 		String cacheLocation = (String) System.getProperties().get("osgi.manifest.cache");
 		File bundleManifestLocation = new File(cacheLocation, pluginInfo.getUniqueId() + '_' + pluginInfo.getVersion() + ".MF");
 		try {
-			generate(bundleManifestLocation);
+			generate(bundleManifestLocation, compatibilityManifest);
 		} catch (PluginConversionException e) {
 			FrameworkLogEntry entry = new FrameworkLogEntry(PI_ECLIPSE_OSGI, e.getMessage(), 0, e.getCause(), null);
 			EclipseAdaptor.getDefault().getFrameworkLog().log(entry);
@@ -81,7 +82,7 @@ public class PluginConverterImpl implements PluginConverter, IModel {
 		return bundleManifestLocation; 
 	}
 
-	public synchronized boolean convertManifest(File pluginBaseLocation, File bundleManifestLocation) {
+	public synchronized boolean convertManifest(File pluginBaseLocation, File bundleManifestLocation, boolean compatibilityManifest) {
 		pluginManifestLocation = findPluginManifest(pluginBaseLocation);
 		if (pluginManifestLocation == null)
 			return false;
@@ -89,7 +90,7 @@ public class PluginConverterImpl implements PluginConverter, IModel {
 			pluginInfo = parsePluginInfo(pluginManifestLocation);
 			if (pluginInfo == null)
 				return false;
-			generate(bundleManifestLocation);
+			generate(bundleManifestLocation, compatibilityManifest);
 		} catch (PluginConversionException e) {
 			FrameworkLogEntry entry = new FrameworkLogEntry(PI_ECLIPSE_OSGI, e.getMessage(), 0, e, null);
 			EclipseAdaptor.getDefault().getFrameworkLog().log(entry);
@@ -159,7 +160,7 @@ public class PluginConverterImpl implements PluginConverter, IModel {
 		return found;
 	}
 
-	protected void generate(File generationLocation) throws PluginConversionException {
+	protected void generate(File generationLocation, boolean compatibilityManifest) throws PluginConversionException {
 		if (upToDate(generationLocation, pluginManifestLocation))
 			return;		
 		try {
@@ -171,15 +172,18 @@ public class PluginConverterImpl implements PluginConverter, IModel {
 			}
 			// replaces any eventual existing file
 			out = new BufferedWriter(new FileWriter(generationLocation));
-			generateManifestVersion();
-			generateTimestamp();		
+			generateManifestVersion();		
 			generateHeaders();
 			generateClasspath();
-			generateLegacy();
 			generateActivator();
 			generatePluginClass();
 			generateProvidePackage();
 			generateRequireBundle();
+			generateLocalizationEntry();
+			if(compatibilityManifest) {
+				generateTimestamp();
+				generateLegacy();
+			}
 			out.flush();
 		} catch (IOException e) {
 			String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONVERTER_ERROR_CREATING_BUNDLE_MANIFEST",this.pluginInfo.getUniqueId(),generationLocation); //$NON-NLS-1$
@@ -192,6 +196,10 @@ public class PluginConverterImpl implements PluginConverter, IModel {
 					// only report problems writing to/flushing the file
 				}
 		}
+	}
+
+	private void generateLocalizationEntry() throws IOException {
+		writeEntry(Constants.BUNDLE_MANIFEST_LOCALIZATION, PLUGIN_PROPERTIES_FILENAME); 
 	}
 
 	private void generateManifestVersion() throws IOException {

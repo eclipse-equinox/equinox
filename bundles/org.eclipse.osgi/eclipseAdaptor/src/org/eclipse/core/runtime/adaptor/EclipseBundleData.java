@@ -229,7 +229,7 @@ public class EclipseBundleData extends DefaultBundleData {
 
 		setManifestTimeStamp(location.lastModified());
 		setManifestType(PLUGIN);
-		location = converter.convertManifest(location);
+		location = converter.convertManifest(location, true);
 		if (location == null)
 			return null;	
 		try {	
