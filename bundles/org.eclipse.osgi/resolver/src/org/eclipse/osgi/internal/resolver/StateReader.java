@@ -33,7 +33,7 @@ class StateReader {
 	private boolean lazyLoad = true;
 	private int numBundles;
 
-	public static final byte STATE_CACHE_VERSION = 16;
+	public static final byte STATE_CACHE_VERSION = 17;
 	public static final byte NULL = 0;
 	public static final byte OBJECT = 1;
 	public static final byte INDEX = 2;
@@ -184,6 +184,8 @@ class StateReader {
 		result.setStateBit(BundleDescriptionImpl.RESOLVED, in.readBoolean());
 		result.setStateBit(BundleDescriptionImpl.SINGLETON, in.readBoolean());
 		result.setStateBit(BundleDescriptionImpl.HAS_DYNAMICIMPORT, in.readBoolean());
+		result.setStateBit(BundleDescriptionImpl.ATTACH_FRAGMENTS, in.readBoolean());
+		result.setStateBit(BundleDescriptionImpl.DYNAMIC_FRAGMENTS, in.readBoolean());
 		result.setHost(readHostSpec(in));
 
 		// set the bundle dependencies from imports and requires.

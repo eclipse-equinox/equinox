@@ -166,6 +166,8 @@ class StateWriter {
 		out.writeBoolean(bundle.isResolved());
 		out.writeBoolean(bundle.isSingleton());
 		out.writeBoolean(bundle.hasDynamicImports());
+		out.writeBoolean(bundle.attachFragments());
+		out.writeBoolean(bundle.dynamicFragments());
 		writeHostSpec((HostSpecificationImpl) bundle.getHost(), out, force);
 
 		List dependencies = ((BundleDescriptionImpl) bundle).getBundleDependencies();

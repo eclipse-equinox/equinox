@@ -381,7 +381,11 @@ public class ResolverBundle implements VersionSupplier {
 	ResolverExport[] attachFragment(ResolverBundle fragment, boolean addExports) {
 		if (isFragment())
 			return new ResolverExport[0]; // cannot attach to fragments;
-
+		if (!bundle.attachFragments() || (isResolved() && !bundle.dynamicFragments()))
+			return new ResolverExport[0]; // host is restricting attachment
+		if (fragment.getHost().getMatchingBundles() != null && !((HostSpecification)fragment.getHost().getVersionConstraint()).isMultiHost())
+			return new ResolverExport[0]; // fragment is restricting attachment
+		
 		ImportPackageSpecification[] newImports = fragment.getBundle().getImportPackages();
 		BundleSpecification[] newRequires = fragment.getBundle().getRequiredBundles();
 		ExportPackageDescription[] newExports = fragment.getBundle().getExportPackages();
