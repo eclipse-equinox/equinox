@@ -253,12 +253,17 @@ public abstract class StateImpl implements State {
 			if (!incremental) {
 				resolved = false;
 				reResolve = getBundles();
-				flush();
+				// need to get any removal pendings before flushing
+				if (removalPendings.size() > 0) {
+					BundleDescription[] removed = getRemovalPendings();
+					reResolve = mergeBundles(reResolve, removed);
+				}
+				flush(reResolve);
 			}
 			if (resolved && reResolve == null)
 				return new StateDeltaImpl(this);
 			if (removalPendings.size() > 0) {
-				BundleDescription[] removed = (BundleDescription[]) removalPendings.toArray(new BundleDescription[removalPendings.size()]);
+				BundleDescription[] removed = getRemovalPendings();
 				reResolve = mergeBundles(reResolve, removed);
 			}
 			resolver.resolve(reResolve, platformProperties);
@@ -303,12 +308,11 @@ public abstract class StateImpl implements State {
 		return (BundleDescription[]) result.toArray(new BundleDescription[result.size()]);
 	}
 
-	private void flush() {
+	private void flush(BundleDescription[] bundles) {
 		resolver.flush();
 		resolved = false;
 		if (resolvedBundles.isEmpty())
 			return;
-		BundleDescription[] bundles = getResolvedBundles();
 		for (int i = 0; i < bundles.length; i++) {
 			resolveBundle(bundles[i], false, null, null, null, null);
 		}
