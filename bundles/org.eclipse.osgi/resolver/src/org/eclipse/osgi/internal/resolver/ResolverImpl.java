@@ -188,9 +188,9 @@ public class ResolverImpl implements Resolver {
 		if (!bundle.isResolved())
 			return;
 		state.resolveBundle(bundle, Bundle.INSTALLED);
-		if (bundle.getUniqueId() == null)
+		if (bundle.getSymbolicName() == null)
 			return;
-		ElementSet bundleElementSet = dependencies.getElementSet(bundle.getUniqueId());
+		ElementSet bundleElementSet = dependencies.getElementSet(bundle.getSymbolicName());
 		Collection requiring = bundleElementSet.getRequiringElements(bundle.getVersion());
 		for (Iterator requiringIter = requiring.iterator(); requiringIter.hasNext();) {
 			Element requiringElement = (Element) requiringIter.next();

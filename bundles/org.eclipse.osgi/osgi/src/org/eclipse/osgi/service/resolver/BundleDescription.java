@@ -28,7 +28,7 @@ public interface BundleDescription {
 	 * and Export-Package clauses. Exported and imported packages can be told
 	 * apart by checking the isExport flag.
 	 * 
-	 * @see PackageSpecification#isExport
+	 * @see PackageSpecification#isExported()
 	 * @return an array of package specifications
 	 */
 	public PackageSpecification[] getPackages();
@@ -74,9 +74,17 @@ public interface BundleDescription {
 	 * Return unique id of the bundle.
 	 * 
 	 * @return the unique id of this bundle.
+	 * @deprecated use #getSymbolicName().  This method will be removed before M9
 	 */
-	// TODO change to getSymbolicName
+	// TODO remove before M9
 	public String getUniqueId();
+
+	/**
+	 * Returns symbolic name of the bundle.
+	 * 
+	 * @return the symbolic name of this bundle.
+	 */
+	public String getSymbolicName();
 
 	/**
 	 * Returns true if this bundle is resolved in its host state.
@@ -123,6 +131,7 @@ public interface BundleDescription {
 	 * 	all constraints that could not be satisfied.
 	 * @deprecated Use StateHelper#getUnsatisfiedConstraints instead.  
 	 */
+	// TODO remove before M9
 	public VersionConstraint[] getUnsatisfiedConstraints();
 
 	/**
@@ -130,6 +139,7 @@ public interface BundleDescription {
 	 * 
 	 * @deprecated Never implemented. No replacement.
 	 */
+	// TODO remove before M9
 	public Dictionary getManifest();
 
 	/**
@@ -146,6 +156,7 @@ public interface BundleDescription {
 	 * @return
 	 * @deprecated Use getHosts instead
 	 */
+	// TODO remove before M9
 	public HostSpecification getHost();
 
 	/**

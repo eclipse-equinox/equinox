@@ -26,7 +26,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 	public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location, BundleSpecification[] required, HostSpecification host, PackageSpecification[] packages, String[] providedPackages, boolean singleton) {
 		BundleDescriptionImpl bundle = new BundleDescriptionImpl();
 		bundle.setBundleId(id);
-		bundle.setUniqueId(symbolicName);
+		bundle.setSymbolicName(symbolicName);
 		bundle.setVersion(version);
 		bundle.setLocation(location);
 		bundle.setRequiredBundles(required);
@@ -45,7 +45,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 	public BundleDescription createBundleDescription(BundleDescription original) {
 		BundleDescriptionImpl bundle = new BundleDescriptionImpl();
 		bundle.setBundleId(original.getBundleId());
-		bundle.setUniqueId(original.getUniqueId());
+		bundle.setSymbolicName(original.getSymbolicName());
 		bundle.setVersion(original.getVersion());
 		bundle.setLocation(original.getLocation());
 		BundleSpecification[] originalRequired = original.getRequiredBundles();

@@ -84,7 +84,7 @@ public class StateImpl implements State {
 		final List bundles = new ArrayList();
 		for (Iterator iter = bundleDescriptions.iterator(); iter.hasNext();) {
 			BundleDescription bundle = (BundleDescription) iter.next();
-			if (symbolicName.equals(bundle.getUniqueId()))
+			if (symbolicName.equals(bundle.getSymbolicName()))
 				bundles.add(bundle);
 		}
 		return (BundleDescription[]) bundles.toArray(new BundleDescription[bundles.size()]);
@@ -99,10 +99,10 @@ public class StateImpl implements State {
 	}
 
 	// TODO: this does not comply with the spec	
-	public BundleDescription getBundle(String requiredUniqueId, Version requiredVersion) {
+	public BundleDescription getBundle(String name, Version version) {
 		BundleDescription[] bundles = getBundles();
 		for (int i = 0; i < bundles.length; i++) {
-			if (requiredUniqueId.equals(bundles[i].getUniqueId()) && bundles[i].getVersion().equals(requiredVersion))
+			if (name.equals(bundles[i].getSymbolicName()) && bundles[i].getVersion().equals(version))
 				return bundles[i];
 		}
 		return null;

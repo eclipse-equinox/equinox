@@ -112,9 +112,9 @@ public class ResolverHelper {
 	}
 
 	public static Element createElement(BundleDescription bundleDescription, DependencySystem system) {
-		String uniqueId = getUniqueId(bundleDescription);
+		String name = getSymbolicName(bundleDescription);
 		Version version = getVersion(bundleDescription);
-		return system.createElement(uniqueId, version, createPrerequisites(bundleDescription, system), bundleDescription.isSingleton(), bundleDescription);
+		return system.createElement(name, version, createPrerequisites(bundleDescription, system), bundleDescription.isSingleton(), bundleDescription);
 	}
 
 	private static Version getVersion(BundleDescription bundleDescription) {
@@ -124,12 +124,13 @@ public class ResolverHelper {
 		return version;
 	}
 
-	private static String getUniqueId(BundleDescription bundleDescription) {
-		String uniqueId = bundleDescription.getUniqueId();
-		if (uniqueId == null)
+	private static String getSymbolicName(BundleDescription bundleDescription) {
+		String name = bundleDescription.getSymbolicName();
+		// TODO do we still need to return the number as the name if there is no name?
+		if (name == null)
 			// could not be null
-			uniqueId = Long.toString(bundleDescription.getBundleId());
-		return uniqueId;
+			name = Long.toString(bundleDescription.getBundleId());
+		return name;
 	}
 
 	private static Dependency[] createPrerequisites(BundleDescription bundleDesc, DependencySystem system) {
@@ -143,7 +144,7 @@ public class ResolverHelper {
 		List prereqs = new ArrayList(dependencyCount);
 		for (int i = 0; i < required.length; i++)
 			// ignore if a bundle requires itself (bug 48568 comment 2)		
-			if (!required[i].getName().equals(bundleDesc.getUniqueId()))
+			if (!required[i].getName().equals(bundleDesc.getSymbolicName()))
 				prereqs.add(createPrerequisite(system, required[i]));
 		if (host != null)
 			prereqs.add(createPrerequisite(system, host));
@@ -171,7 +172,7 @@ public class ResolverHelper {
 	}
 
 	public static void remove(BundleDescription description, DependencySystem system) {
-		system.removeElement(getUniqueId(description), getVersion(description));
+		system.removeElement(getSymbolicName(description), getVersion(description));
 	}
 
 	public static void add(BundleDescription description, DependencySystem system) {
@@ -179,13 +180,13 @@ public class ResolverHelper {
 	}
 
 	public static void unresolve(BundleDescription bundle, DependencySystem system) {
-		Element element = system.getElement(getUniqueId(bundle), getVersion(bundle));
+		Element element = system.getElement(getSymbolicName(bundle), getVersion(bundle));
 		if (element != null)
 			system.unresolve(new Element[] {element});
 	}
 
 	public static void update(BundleDescription newDescription, BundleDescription existing, DependencySystem system) {
-		system.removeElement(getUniqueId(existing), getVersion(existing));
+		system.removeElement(getSymbolicName(existing), getVersion(existing));
 		system.addElement(createElement(newDescription, system));
 	}
 }

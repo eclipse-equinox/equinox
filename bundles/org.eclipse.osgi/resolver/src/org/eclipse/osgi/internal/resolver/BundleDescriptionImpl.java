@@ -17,7 +17,7 @@ import org.osgi.framework.Bundle;
 
 public class BundleDescriptionImpl implements BundleDescription, KeyedElement {
 	private long bundleId = -1;
-	private String uniqueId; // TODO change to symbolicName
+	private String symbolicName;
 	private String location;
 	private int state;
 	private Version version;
@@ -59,11 +59,12 @@ public class BundleDescriptionImpl implements BundleDescription, KeyedElement {
 		return ((StateImpl) containingState).getFragments(this);
 	}
 
-	public Dictionary getManifest() { //TODO Do we want to keep this method has part of the API?
-		// TODO Auto-generated method stub
+	// TODO remove before M9
+	public Dictionary getManifest() {
 		return null;
 	}
 
+	// TODO remove before M9
 	public HostSpecification getHost() {
 		return host;
 	}
@@ -108,12 +109,12 @@ public class BundleDescriptionImpl implements BundleDescription, KeyedElement {
 		this.state = state;
 	}
 
-	public void setUniqueId(String uniqueId) {
-		this.uniqueId = uniqueId;
+	public void setSymbolicName(String value) {
+		this.symbolicName = value;
 	}
 
-	public void setVersion(Version version) {
-		this.version = version;
+	public void setVersion(Version value) {
+		version = value;
 	}
 
 	public PackageSpecification[] getPackages() {
@@ -144,7 +145,12 @@ public class BundleDescriptionImpl implements BundleDescription, KeyedElement {
 	}
 
 	public String getUniqueId() {
-		return uniqueId;
+		return symbolicName;
+	}
+
+	// TODO remove this method when we remove the deprecated API
+	public String getSymbolicName() {
+		return getSymbolicName();
 	}
 
 	public PackageSpecification getPackage(String name) {
@@ -157,7 +163,7 @@ public class BundleDescriptionImpl implements BundleDescription, KeyedElement {
 	}
 
 	public String toString() {
-		return getUniqueId() + "_" + getVersion(); //$NON-NLS-1$
+		return getSymbolicName() + "_" + getVersion(); //$NON-NLS-1$
 	}
 
 	public long getBundleId() {
@@ -183,7 +189,7 @@ public class BundleDescriptionImpl implements BundleDescription, KeyedElement {
 		return (int) (bundleId % Integer.MAX_VALUE);
 	}
 
-	// TODO: to remove before we freeze
+	// TODO remove before M9
 	public VersionConstraint[] getUnsatisfiedConstraints() {
 		return StateHelperImpl.getInstance().getUnsatisfiedConstraints(this);
 	}
@@ -205,15 +211,15 @@ public class BundleDescriptionImpl implements BundleDescription, KeyedElement {
 	}
 
 	public int hashCode() {
-		if (uniqueId == null)
+		if (symbolicName == null)
 			return (int) (bundleId % Integer.MAX_VALUE);
-		return (int) ((bundleId * (uniqueId.hashCode())) % Integer.MAX_VALUE);
+		return (int) ((bundleId * (symbolicName.hashCode())) % Integer.MAX_VALUE);
 	}
 
 	public boolean equals(Object object) {
 		if (!(object instanceof BundleDescription))
 			return false;
 		BundleDescription other = (BundleDescription) object;
-		return this.bundleId == other.getBundleId() && (this.uniqueId == null & other.getUniqueId() == null || this.uniqueId != null && this.uniqueId.equals(other.getUniqueId()));
+		return this.bundleId == other.getBundleId() && (this.symbolicName == null & other.getSymbolicName() == null || this.symbolicName != null && this.symbolicName.equals(other.getSymbolicName()));
 	}
 }

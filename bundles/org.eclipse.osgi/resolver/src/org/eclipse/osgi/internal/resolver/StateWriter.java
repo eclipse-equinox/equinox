@@ -78,7 +78,7 @@ class StateWriter {
 		if (writePrefix(bundle, out))
 			return;
 		out.writeLong(bundle.getBundleId());
-		writeStringOrNull(bundle.getUniqueId(), out);
+		writeStringOrNull(bundle.getSymbolicName(), out);
 		writeStringOrNull(bundle.getLocation(), out);
 		out.writeInt(bundle.getState());
 		writeVersion(bundle.getVersion(), out);

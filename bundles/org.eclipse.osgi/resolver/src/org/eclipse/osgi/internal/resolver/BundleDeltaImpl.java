@@ -40,7 +40,7 @@ public class BundleDeltaImpl implements BundleDelta {
 	}
 
 	public String toString() {
-		return bundleDescription.getUniqueId() + '_' + bundleDescription.getVersion() + " (" + toTypeString(type) + ")";
+		return bundleDescription.getSymbolicName() + '_' + bundleDescription.getVersion() + " (" + toTypeString(type) + ")";
 	}
 
 	private static String toTypeString(int type) {

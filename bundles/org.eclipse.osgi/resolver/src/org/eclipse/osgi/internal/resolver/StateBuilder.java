@@ -27,7 +27,7 @@ class StateBuilder {
 		if (symbolicNameHeader != null) {
 			ManifestElement[] symbolicNameElements = ManifestElement.parseHeader(Constants.BUNDLE_SYMBOLICNAME, symbolicNameHeader);
 			if (symbolicNameElements.length > 0) {
-				result.setUniqueId(symbolicNameElements[0].getValue());
+				result.setSymbolicName(symbolicNameElements[0].getValue());
 				result.setSingleton("true".equals(symbolicNameElements[0].getAttribute(Constants.SINGLETON_ATTRIBUTE))); //$NON-NLS-1$
 			}
 		}

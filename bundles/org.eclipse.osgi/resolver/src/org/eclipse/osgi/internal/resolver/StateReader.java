@@ -69,7 +69,7 @@ class StateReader {
 		BundleDescriptionImpl result = new BundleDescriptionImpl();
 		addToObjectTable(result);
 		result.setBundleId(in.readLong());
-		result.setUniqueId(readString(in, false));
+		result.setSymbolicName(readString(in, false));
 		result.setLocation(readString(in, false));
 		result.setState(in.readInt());
 		result.setVersion(readVersion(in));
