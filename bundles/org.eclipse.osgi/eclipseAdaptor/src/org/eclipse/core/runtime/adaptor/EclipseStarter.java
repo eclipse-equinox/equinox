@@ -425,11 +425,11 @@ public class EclipseStarter {
 				InputStream in = location.openStream();
 				bundles[i] = context.installBundle(locationString, in);
 				installedSomething = true;
-				if (start)
-					startBundles.add(bundles[i]);
 				if (level >= 0 && startService != null)
 					startService.setBundleStartLevel(bundles[i], level);
 			}
+			if (start)
+				startBundles.add(bundles[i]);
 		}
 		// If we installed something, force all basic bundles we installed to be resolved
 		if (installedSomething)
@@ -852,7 +852,7 @@ public class EclipseStarter {
 		Object maxVersion = null;
 		for (int i = 0; i < candidates.length; i++) {
 			File candidate = new File(start, candidates[i]);
-			if (!candidate.isDirectory() || (!candidate.getName().equals(target) && !candidate.getName().startsWith(target + "_"))) //$NON-NLS-1$
+			if (!candidate.getName().equals(target) && !candidate.getName().startsWith(target + "_")) //$NON-NLS-1$
 				continue;
 			String name = candidate.getName();
 			String version = ""; //$NON-NLS-1$ // Note: directory with version suffix is always > than directory without version suffix
