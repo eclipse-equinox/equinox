@@ -117,30 +117,6 @@ public interface BundleDescription {
 	 */
 	public Version getVersion();
 
-	/**
-	 * Returns an array containing all constraints specified by the given 
-	 * bundle that could not be satisfied. If all constraints could be 
-	 * satisfied, returns an empty array. This does not relate to the fact that
-	 * the bundle became resolved or not. A resolved bundle may have 
-	 * unsatisfied constraints (if they are optional), as well as an unresolved 
-	 * bundle may not have any unsatisfied constraints (which means that it has
-	 * not been picked - for instance, if only one version is allowed and there 
-	 * is a "better" version).  
-	 * 
-	 * @return an array of <code>VersionConstraint</code> objects containing 
-	 * 	all constraints that could not be satisfied.
-	 * @deprecated Use StateHelper#getUnsatisfiedConstraints instead.  
-	 */
-	// TODO remove before M9
-	public VersionConstraint[] getUnsatisfiedConstraints();
-
-	/**
-	 * Returns a read-only dictionary for the Manifest of this bundle.
-	 * 
-	 * @deprecated Never implemented. No replacement.
-	 */
-	// TODO remove before M9
-	public Dictionary getManifest();
 
 	/**
 	 * Returns the string representation of this bundle.

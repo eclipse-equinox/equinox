@@ -60,11 +60,6 @@ public class BundleDescriptionImpl implements BundleDescription, KeyedElement {
 	}
 
 	// TODO remove before M9
-	public Dictionary getManifest() {
-		return null;
-	}
-
-	// TODO remove before M9
 	public HostSpecification getHost() {
 		return host;
 	}
@@ -187,11 +182,6 @@ public class BundleDescriptionImpl implements BundleDescription, KeyedElement {
 
 	public int getKeyHashCode() {
 		return (int) (bundleId % Integer.MAX_VALUE);
-	}
-
-	// TODO remove before M9
-	public VersionConstraint[] getUnsatisfiedConstraints() {
-		return StateHelperImpl.getInstance().getUnsatisfiedConstraints(this);
 	}
 
 	public boolean isSingleton() {
