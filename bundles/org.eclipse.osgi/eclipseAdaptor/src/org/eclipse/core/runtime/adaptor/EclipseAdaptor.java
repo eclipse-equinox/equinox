@@ -11,6 +11,8 @@
 package org.eclipse.core.runtime.adaptor;
 
 import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.*;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.SAXParserFactory;
@@ -56,7 +58,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 	private static final String OPTION_CONVERTER = RUNTIME_ADAPTOR + "/converter/debug"; //$NON-NLS-1$
 	private static final String OPTION_LOCATION = RUNTIME_ADAPTOR + "/debug/location"; //$NON-NLS-1$	
 
-	public static final byte BUNDLEDATA_VERSION = 9;
+	public static final byte BUNDLEDATA_VERSION = 10;
 	public static final byte NULL = 0;
 	public static final byte OBJECT = 1;
 	//Indicate if the framework is stopping
@@ -114,6 +116,12 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		readHeaders();
 		checkLocationAndReinitialize();
 		File stateLocation = LocationManager.getConfigurationFile(LocationManager.STATE_FILE);
+		if(!stateLocation.isFile()) { //NOTE this check is redundant since it is done in StateManager, however it is more convenient to have it here 
+			Location parentConfiguration = null;
+			if ((parentConfiguration = LocationManager.getConfigurationLocation().getParentLocation()) != null) {
+				stateLocation = new File(parentConfiguration.getURL().getFile(), FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME + '/' + LocationManager.STATE_FILE);				
+			}
+		}
 		stateManager = new StateManager(stateLocation, timeStamp);
 		stateManager.setInstaller(new EclipseBundleInstaller());
 		StateImpl systemState = stateManager.getSystemState();
@@ -161,18 +169,18 @@ public class EclipseAdaptor extends DefaultAdaptor {
 	}
 
 	private void readHeaders() {
-		File metadata = LocationManager.getConfigurationFile(LocationManager.BUNDLE_DATA_FILE);
-		if (!metadata.isFile())
-			return;
+		InputStream bundleDataStream = findBundleDataFile();
+		if (bundleDataStream == null)
+			return;			
 
 		try {
-			DataInputStream in = new DataInputStream(new BufferedInputStream(new FileInputStream(metadata)));
+			DataInputStream in = new DataInputStream(new BufferedInputStream(bundleDataStream));
 			try {
 				if (in.readByte() == BUNDLEDATA_VERSION) {
 					timeStamp = in.readLong();
-					installURL = in.readUTF();
+					installURL = in.readUTF();					
 					initialBundleStartLevel = in.readInt();
-					nextId = in.readInt();
+					nextId = in.readLong();
 				}
 			} finally {
 				in.close();
@@ -300,15 +308,39 @@ public class EclipseAdaptor extends DefaultAdaptor {
 			System.out.println("Time spent resolving the dependency system: " + constraintResolution); //$NON-NLS-1$ 
 	}
 
+	private InputStream findBundleDataFile() {
+		File metadata = LocationManager.getConfigurationFile(LocationManager.BUNDLE_DATA_FILE);
+		InputStream bundleDataStream = null; 
+		if (metadata.isFile()) {
+			try {
+				bundleDataStream = new FileInputStream(metadata);
+			} catch (FileNotFoundException e1) {
+				//this can not happen since it is tested before entering here.
+			}
+		} else {
+			Location parentConfiguration = null;
+			if ((parentConfiguration = LocationManager.getConfigurationLocation().getParentLocation()) != null) {
+				 try {
+					bundleDataStream = new URL(parentConfiguration.getURL(), FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME + '/' + LocationManager.BUNDLE_DATA_FILE).openStream();
+				} catch (MalformedURLException e1) {
+					//This will not happen since all the URLs are derived by us and we are GODS!
+				} catch (IOException e1) {
+					//That's ok we will regenerate the .bundleData
+				}				
+			}
+		}
+		return bundleDataStream;
+	}
 	/**
 	 * @see org.eclipse.osgi.framework.adaptor.FrameworkAdaptor#getInstalledBundles()
 	 */
 	public BundleData[] getInstalledBundles() {
-		File metadata = LocationManager.getConfigurationFile(LocationManager.BUNDLE_DATA_FILE);
-		if (!metadata.isFile())
+		InputStream bundleDataStream = findBundleDataFile();
+		if (bundleDataStream == null)
 			return null;
+		
 		try {
-			DataInputStream in = new DataInputStream(new BufferedInputStream(new FileInputStream(metadata)));
+			DataInputStream in = new DataInputStream(new BufferedInputStream(bundleDataStream));
 			try {
 				if (in.readByte() != BUNDLEDATA_VERSION)
 					return null;
@@ -462,12 +494,12 @@ public class EclipseAdaptor extends DefaultAdaptor {
 	public void saveMetaData() {
 		File metadata = LocationManager.getConfigurationFile(LocationManager.BUNDLE_DATA_FILE);
 		// the cache and the state match
-		if (timeStamp == stateManager.getSystemState().getTimeStamp() && metadata.isFile())
+		if (timeStamp == stateManager.getSystemState().getTimeStamp())
 			return;
 		try {
 			DataOutputStream out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(metadata)));
 			try {
-				out.write(BUNDLEDATA_VERSION);
+				out.writeByte(BUNDLEDATA_VERSION);
 				out.writeLong(stateManager.getSystemState().getTimeStamp());
 				out.writeUTF(installURL);
 				out.writeInt(initialBundleStartLevel);

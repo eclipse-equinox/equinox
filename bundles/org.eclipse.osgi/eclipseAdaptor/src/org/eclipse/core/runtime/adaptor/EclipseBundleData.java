@@ -20,6 +20,7 @@ import org.eclipse.osgi.framework.internal.defaultadaptor.DefaultAdaptor;
 import org.eclipse.osgi.framework.internal.defaultadaptor.DefaultBundleData;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.framework.util.Headers;
+import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.service.pluginconversion.PluginConversionException;
 import org.eclipse.osgi.service.resolver.Version;
 import org.eclipse.osgi.util.ManifestElement;
@@ -176,17 +177,28 @@ public class EclipseBundleData extends DefaultBundleData {
 		return result;
 	}
 
+	private Headers checkManifest(String cacheLocation) throws BundleException {
+		Version version = getVersion();
+		File currentFile = new File(cacheLocation, getSymbolicName() + '_' + version.toString() + ".MF"); //$NON-NLS-1$
+		if (PluginConverterImpl.upToDate(currentFile, getBaseFile(), manifestType)) {
+			try {
+				return Headers.parseManifest(new FileInputStream(currentFile));
+			} catch (FileNotFoundException e) {
+				// do nothing.
+			}
+		}
+		return null;
+	}
 	private Dictionary generateManifest(Dictionary originalManifest) throws BundleException {
 		String cacheLocation = System.getProperty(LocationManager.PROP_MANIFEST_CACHE); 
 		if (getSymbolicName() != null) {
-			Version version = getVersion();
-			File currentFile = new File(cacheLocation, getSymbolicName() + '_' + version.toString() + ".MF"); //$NON-NLS-1$
-			if (PluginConverterImpl.upToDate(currentFile, getBaseFile(), manifestType))
-				try {
-					return Headers.parseManifest(new FileInputStream(currentFile));
-				} catch (FileNotFoundException e) {
-					// do nothing.
-				}
+			Headers existingHeaders = checkManifest(cacheLocation);
+			Location parentConfiguration = null;
+			if (existingHeaders == null && (parentConfiguration = LocationManager.getConfigurationLocation().getParentLocation()) != null) {
+				existingHeaders = checkManifest(new File(parentConfiguration.getURL().getFile(), FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME + '/' + LocationManager.MANIFESTS_DIR).toString());				
+			}
+			if (existingHeaders != null)
+				return existingHeaders;
 		}
 
 		PluginConverterImpl converter = PluginConverterImpl.getDefault();

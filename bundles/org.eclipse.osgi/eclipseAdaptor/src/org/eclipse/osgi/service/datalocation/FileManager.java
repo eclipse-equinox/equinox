@@ -66,12 +66,13 @@ public class FileManager {
 	private File base; //The folder managed
 	private File managerRoot; //The folder that will contain all the file related to the functionning of the manager (typically a subdir of base)
 
+	private String lockMode = null;
 	private File tableFile = null;
 	private File lockFile; // The lock file for the table (this file is the same for all the instances)
 	private Locker locker; // The locker for the lock
 
-	private File instanceFile = null; //The file reprensenting the running instance.
-	private Locker instanceLocker = null; //The locker for the instance file
+	private File instanceFile = null; //The file reprensenting the running instance. It is created when the table file is read.
+	private Locker instanceLocker = null; //The locker for the instance file.
 
 	// locking related fields
 	private long tableStamp = 0L;
@@ -87,21 +88,24 @@ public class FileManager {
 	 * directory.
 	 * 
 	 * @param base the directory holding the files to be managed
-	 * @throws IOException if there is a problem restoring the state of the files being managed.
+	 * @param lockMode the lockMode to use for the given filemanager. It can have one the 3 values: none, java.io, java.nio 
+	 * and also supports null in which case the lock strategy will be the global one.  
 	 */
-	public FileManager(File base) throws IOException {
+	public FileManager(File base, String lockMode) {
 		this.base = base;
+		this.lockMode = lockMode;
 		this.managerRoot = new File(base, MANAGER_FOLDER);
 		this.managerRoot.mkdir();
 		this.tableFile = new File(managerRoot, TABLE_FILE);
 		this.lockFile = new File(managerRoot, LOCK_FILE);
-		initializeInstanceFile();
 	}
 
 	private void initializeInstanceFile() throws IOException {
+		if (instanceFile != null)
+			return;
 		this.instanceFile = File.createTempFile(".tmp", ".instance", managerRoot); //$NON-NLS-1$//$NON-NLS-2$
 		this.instanceFile.deleteOnExit();
-		instanceLocker = BasicLocation.createLocker(instanceFile, null);
+		instanceLocker = BasicLocation.createLocker(instanceFile, lockMode);
 		instanceLocker.lock();
 	}
 
@@ -209,7 +213,7 @@ public class FileManager {
 	 */
 	private boolean lock() throws IOException {
 		if (locker == null)
-			locker = BasicLocation.createLocker(lockFile, null);
+			locker = BasicLocation.createLocker(lockFile, lockMode);
 		if (locker == null)
 			throw new IOException(EclipseAdaptorMsg.formatter.getString("fileManager.cannotLock")); //$NON-NLS-1$
 		return locker.lock();
@@ -281,6 +285,7 @@ public class FileManager {
 		long stamp = tableFile.lastModified();
 		if (stamp == tableStamp)
 			return;
+		initializeInstanceFile();
 		Properties diskTable = new Properties();
 		try {
 			FileInputStream input = new FileInputStream(tableFile);
