@@ -33,6 +33,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 	public static final String METADATA_ADAPTOR_NEXTID = "METADATA_ADAPTOR_NEXTID";
 	public static final String METADATA_ADAPTOR_IBSL = "METADATA_ADAPTOR_IBSL";
 	public static final String DATA_DIR_NAME = "data";
+	public static final String BUNDLE_STORE = "osgi.bundlestore";
 
 	/** directory containing installed bundles */
 	protected File bundleStoreRootDir;
@@ -169,16 +170,16 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 		/* if bundleStore was not set by the constructor from the -adaptor cmd line arg */
 		if (bundleStore == null) {
 			/* check the system properties */
-			bundleStore = System.getProperty("org.eclipse.osgi.framework.defaultadaptor.bundledir");
+			bundleStore = System.getProperty(BUNDLE_STORE);
 
 			if (bundleStore == null) {
 				/* check the osgi.properties file, but default to "bundles" */
-				bundleStore = properties.getProperty("org.eclipse.osgi.framework.defaultadaptor.bundledir", "bundles");
+				bundleStore = properties.getProperty(BUNDLE_STORE, "bundles");
 			}
 		}
 
 		/* store bundleStore back into adaptor properties for others to see */
-		properties.put("org.eclipse.osgi.framework.defaultadaptor.bundledir", bundleStore);
+		properties.put(BUNDLE_STORE, bundleStore);
 
 		bundleStoreRootDir = new File(bundleStore);
 

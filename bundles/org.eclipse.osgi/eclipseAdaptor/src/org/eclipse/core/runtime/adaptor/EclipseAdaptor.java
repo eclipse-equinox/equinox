@@ -40,7 +40,8 @@ public class EclipseAdaptor extends DefaultAdaptor {
 	public static boolean TRACE_CLASSES = false;
 	public static boolean TRACE_BUNDLES = false;
 
-	private static final String RUNTIME_ADAPTOR = "org.eclipse.osgi/eclipseadaptor";
+	private static final String FRAMEWORK_SYMBOLICNAME = "org.eclipse.osgi";
+	private static final String RUNTIME_ADAPTOR = FRAMEWORK_SYMBOLICNAME + "/eclipseadaptor";
 
 	//Option names for spies
 	private static final String OPTION_MONITOR_CLASSES = RUNTIME_ADAPTOR + "/monitor/classes"; //$NON-NLS-1$
@@ -78,14 +79,28 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		return instance;
 	}
 
-	protected void initDataRootDir() {
-		Location instanceLocation = LocationManager.getInstanceLocation();
-		if (instanceLocation != null) {
-			// TODO assumes the URL is a file: url
-			URL url = instanceLocation.getURL();
-			if (url != null)
-				dataRootDir = new File(url.getFile());
+	protected void initBundleStoreRootDir() {
+		/* if bundleStore was not set by the constructor from the -adaptor cmd line arg */
+		if (bundleStore == null) {
+			/* check the system properties */
+			bundleStore = System.getProperty(BUNDLE_STORE);
 		}
+
+		Location configurationLocation = LocationManager.getConfigurationLocation();
+		if (configurationLocation != null) {
+			// TODO assumes the URL is a file: url
+			URL url = configurationLocation.getURL();
+			if (url != null)
+				bundleStore = url.getFile() + FRAMEWORK_SYMBOLICNAME + "/bundles";
+			else
+				// last resort just default to "bundles"
+				bundleStore = "bundles";
+		}
+
+		bundleStoreRootDir = new File(bundleStore);
+
+		/* store bundleStore back into adaptor properties for others to see */
+		properties.put(BUNDLE_STORE, bundleStoreRootDir.getAbsolutePath());
 	}
 
 	protected FrameworkLog createFrameworkLog() {

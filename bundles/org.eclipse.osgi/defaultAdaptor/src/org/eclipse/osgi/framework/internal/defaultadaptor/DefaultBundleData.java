@@ -289,7 +289,7 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 			File dataRoot = adaptor.getDataRootDir();
 			if (dataRoot == null)
 				throw new IllegalStateException("Instance data location not set yet");
-			dirData = new File(dataRoot, id + '/' + DefaultAdaptor.DATA_DIR_NAME);
+			dirData = new File(dataRoot, id + "/" + DefaultAdaptor.DATA_DIR_NAME);
 		}
 		if (!dirData.exists() && !dirData.mkdirs()) {
 			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
