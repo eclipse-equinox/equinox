@@ -244,7 +244,7 @@ public class EclipseBundleData extends AbstractBundleData {
 
 		Dictionary generatedManifest;
 		try {
-			generatedManifest = converter.convertManifest(getBaseFile(), true, null, true);
+			generatedManifest = converter.convertManifest(getBaseFile(), true, null, true, null);
 		} catch (PluginConversionException pce) {
 			String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_CONVERTER_ERROR_CONVERTING, getBaseFile()); //$NON-NLS-1$
 			throw new BundleException(message, pce); //$NON-NLS-1$

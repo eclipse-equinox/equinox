@@ -43,6 +43,7 @@ public class PluginConverterImpl implements PluginConverter {
 	private Dictionary generatedManifest;
 	private byte manifestType;
 	private String target;
+	private Dictionary devProperties;
 	static final String TARGET31 = "3.1"; //$NON-NLS-1$
 	private static final String MANIFEST_VERSION = "Manifest-Version"; //$NON-NLS-1$
 	private static final String PLUGIN_PROPERTIES_FILENAME = "plugin"; //$NON-NLS-1$
@@ -80,6 +81,7 @@ public class PluginConverterImpl implements PluginConverter {
 		generatedManifest = new Hashtable(10);
 		manifestType = EclipseBundleData.MANIFEST_TYPE_UNKNOWN;
 		target = null;
+		devProperties = null;
 	}
 
 	private void fillPluginInfo(File pluginBaseLocation) throws PluginConversionException {
@@ -396,8 +398,8 @@ public class PluginConverterImpl implements PluginConverter {
 			return null;
 
 		//If we are in dev mode, then add the binary folders on the list libs with the export clause set to be the cumulation of the export clause of the real libs   
-		if (DevClassPathHelper.inDevelopmentMode()) {
-			String[] devClassPath = DevClassPathHelper.getDevClassPath(pluginInfo.getUniqueId());
+		if (devProperties != null || DevClassPathHelper.inDevelopmentMode()) {
+			String[] devClassPath = DevClassPathHelper.getDevClassPath(pluginInfo.getUniqueId(), devProperties);
 
 			// collect export clauses
 			List allExportClauses = new ArrayList(libs.size());
@@ -421,7 +423,7 @@ public class PluginConverterImpl implements PluginConverter {
 				continue;
 			String libEntryText = (String) element.getKey();
 			File libraryLocation;
-			if (DevClassPathHelper.inDevelopmentMode()) {
+			if (devProperties != null || DevClassPathHelper.inDevelopmentMode()) {
 				// in development time, libEntries may contain absolute locations (linked folders)				
 				File libEntryAsPath = new File(libEntryText);
 				libraryLocation = libEntryAsPath.isAbsolute() ? libEntryAsPath : new File(pluginManifestLocation, libEntryText);
@@ -654,31 +656,35 @@ public class PluginConverterImpl implements PluginConverter {
 		return result.toString();
 	}
 
-	public synchronized Dictionary convertManifest(File pluginBaseLocation, boolean compatibility, String target, boolean analyseJars) throws PluginConversionException {
+	public synchronized Dictionary convertManifest(File pluginBaseLocation, boolean compatibility, String target, boolean analyseJars, Dictionary devProperties) throws PluginConversionException {
 		if (DEBUG)
 			System.out.println("Convert " + pluginBaseLocation); //$NON-NLS-1$
 		init();
 		this.target = target == null ? TARGET31 : target;
+		this.devProperties = devProperties;
 		fillPluginInfo(pluginBaseLocation);
 		fillManifest(compatibility, analyseJars);
 		return generatedManifest;
 	}
 
-	public synchronized File convertManifest(File pluginBaseLocation, File bundleManifestLocation, boolean compatibilityManifest, String target, boolean analyseJars) throws PluginConversionException {
-		if (DEBUG)
-			System.out.println("Convert " + pluginBaseLocation); //$NON-NLS-1$
-		init();
-		this.target = target == null ? TARGET31 : target;
-		fillPluginInfo(pluginBaseLocation);
+	public synchronized Dictionary convertManifest(File pluginBaseLocation, boolean compatibility, String target, boolean analyseJars) throws PluginConversionException {
+		return convertManifest(pluginBaseLocation, compatibility, target, analyseJars, null);
+	}
+
+	public synchronized File convertManifest(File pluginBaseLocation, File bundleManifestLocation, boolean compatibilityManifest, String target, boolean analyseJars, Dictionary devProperties) throws PluginConversionException {
+		convertManifest(pluginBaseLocation, compatibilityManifest, target, analyseJars, devProperties);
 		if (bundleManifestLocation == null) {
 			String cacheLocation = (String) System.getProperties().get(LocationManager.PROP_MANIFEST_CACHE);
 			bundleManifestLocation = new File(cacheLocation, pluginInfo.getUniqueId() + '_' + pluginInfo.getVersion() + ".MF"); //$NON-NLS-1$
 		}
-		fillManifest(compatibilityManifest, analyseJars);
 		if (upToDate(bundleManifestLocation, pluginManifestLocation, manifestType))
 			return bundleManifestLocation;
 		writeManifest(bundleManifestLocation, generatedManifest, compatibilityManifest);
 		return bundleManifestLocation;
+	}
+
+	public synchronized File convertManifest(File pluginBaseLocation, File bundleManifestLocation, boolean compatibilityManifest, String target, boolean analyseJars) throws PluginConversionException {
+		return convertManifest(pluginBaseLocation, bundleManifestLocation, compatibilityManifest, target, analyseJars, null);
 	}
 
 	private String getVersionRange(String reqVersion, String matchRule) {
