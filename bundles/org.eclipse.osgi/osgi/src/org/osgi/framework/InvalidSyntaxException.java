@@ -1,5 +1,5 @@
 /*
- * $Header: /home/technology/org.eclipse.equinox/plugins/org.eclipse.osgi/osgi/src/org/osgi/framework/InvalidSyntaxException.java,v 1.1 2003/11/10 17:49:33 jeff Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/InvalidSyntaxException.java,v 1.1 2003/11/25 21:24:14 dj Exp $
  *
  * Copyright (c) The Open Services Gateway Initiative (2000-2001).
  * All Rights Reserved.
@@ -37,7 +37,6 @@ package org.osgi.framework;
  * <p> See {@link Filter} for a description of the filter string syntax.
  *
  * @version $Revision: 1.1 $
- * @author Open Services Gateway Initiative
  */
 
 public class InvalidSyntaxException extends Exception
@@ -48,9 +47,9 @@ public class InvalidSyntaxException extends Exception
     private transient String filter;
 
     /**
-     * Creates an exception of type <tt>InvalidSyntaxException</tt>. 
+     * Creates an exception of type <tt>InvalidSyntaxException</tt>.
      *
-     * <p>This method creates an <tt>InvalidSyntaxException</tt> object with 
+     * <p>This method creates an <tt>InvalidSyntaxException</tt> object with
      * the specified message and the filter string which generated the exception.
      *
      * @param msg The message.

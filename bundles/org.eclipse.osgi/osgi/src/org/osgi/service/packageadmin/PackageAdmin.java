@@ -1,5 +1,5 @@
 /*
- * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/service/packageadmin/PackageAdmin.java,v 1.9 2004/05/03 14:59:18 twatson Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/service/packageadmin/PackageAdmin.java,v 1.10 2004/05/05 02:43:35 twatson Exp $
  *
  * Copyright (c) The Open Services Gateway Initiative (2001, 2002).
  * All Rights Reserved.
@@ -51,8 +51,7 @@ import org.osgi.framework.Bundle;
  * old values, <tt>isRemovalPending()</tt> returns <tt>true</tt>, and <tt>getExportingBundle()</tt>
  * and <tt>getImportingBundles()</tt> return <tt>null</tt>.
  *
- * @version $Revision: 1.9 $
- * @author Open Services Gateway Initiative
+ * @version $Revision: 1.10 $
  */
 public interface PackageAdmin {
     /**
@@ -162,97 +161,112 @@ public interface PackageAdmin {
      */
     public void refreshPackages(Bundle[] bundles);
 
-    /**
-     * Attempts to resolve the specified bundles.  The Framework must 
-     * attempt to resolve the unresolved bundles that are included in 
-     * the specified bundles.  Additional bundles that are not included 
-     * in the specified bundles may be resolved as a result of calling 
-     * this method.  A permissible implementation of this method is to 
-     * attempt to resolve all unresolved bundles installed in the framework.
-     * 
-     * <p>If <tt>null</tt> is specified then the Framework will attempt to 
-     * resolve all unresolved bundles installed in the Framework.  Calling 
-     * this method must not cause any bundle to be refreshed, stopped, or 
-     * started.  This method will not return until the operation has completed.
-     * 
-     * @param bundles the bundles to attempt to resolve, or <tt>null</tt>
-     * to attempt to resolve all unresolved bundles installed in the Framework.
-     * @return true is returned if all specified bundles are resolved after the 
-     * resolve operation has completed; otherwise false is returned.
-     * @since <b>1.4 EXPERIMENTAL</b> 
-     */
-    public boolean resolveBundles(Bundle[] bundles);
-    
-    /**
-     * This method returns an array of NamedClassSpaces with the specified 
-     * symbolic name.  If the symbolic name argument is <tt>null</tt> then 
-     * all the NamedClassSpaces currently provided in the Framework are to 
-     * be returned.
-     * @param symbolicName the symbolic name of the named class spaces to 
-     * be returned or <tt>null</tt> if all the named class spaces currently 
-     * provided in the Framework are to be returned.
-     * @return the array of named class spaces with the specified symbolic
-     * name or <tt>null</tt> if no named class space exit with that 
-     * symbolic name.
-     * @since <b>1.4 EXPERIMENTAL</b>
-     */
-    public NamedClassSpace[] getNamedClassSpaces(String symbolicName);
+    //================================================================
+	// Post R3 Addenda. EXPERIMENTAL.
+	//================================================================
 
     /**
-     * Gets the Bundles with the specified symbolic name.  If no bundles are 
-     * installed that have the specified symbolic name then null is returned.  
-     * If the versionRange argument is not null then only the Bundles that have 
-     * the specified symbolic name and belong to the specified version range 
-     * are returned.  The returned bundles are ordered in descending bundle 
-     * version order.
+     * Resolve the specified bundles.  The Framework must
+     * attempt to resolve the specified bundles that are unresolved.
+     * Additional bundles that are not included
+     * in the specified bundles may be resolved as a result of calling
+     * this method.  A permissible implementation of this method is to
+     * attempt to resolve all unresolved bundles installed in the framework.
+     *
+     * <p>If <tt>null</tt> is specified then the Framework will attempt to
+     * resolve all unresolved bundles.
+     * This method must not cause any bundle to be refreshed, stopped, or
+     * started.  This method will not return until the operation has completed.
+     *
+     * @param bundles The bundles to resolve or <tt>null</tt>
+     * to resolve all unresolved bundles installed in the Framework.
+     * @return <tt>true</tt> if all specified bundles are resolved;
+     * @since 1.4 <b>EXPERIMENTAL</b>
+     */
+    public boolean resolveBundles(Bundle[] bundles);
+
+    /**
+     * Returns an array of ProvidingBundles for each resolved bundle with the specified
+     * symbolic name.  If the symbolic name argument is <tt>null</tt> then
+     * all resolved bundles with symbolic names are returned.
+     * @param symbolicName The symbolic name of the desired bundles 
+     * or <tt>null</tt> for all bundles with symbolic names.
+     * @return An array of ProvidingBundles with the specified symbolic
+     * name or <tt>null</tt> if no resolved bundles exist with that
+     * symbolic name.
+     * @since 1.4 <b>EXPERIMENTAL</b>
+     */
+    public ProvidingBundle[] getProvidingBundles(String symbolicName);
+
+    /**
+     * Returns the bundles with the specified symbolic name within
+     * the specified version range. If no bundles are
+     * installed that have the specified symbolic name, then <tt>null</tt> is returned.
+     * If a version range is specified, then only the bundles that have
+     * the specified symbolic name and belong to the specified version range
+     * are returned.  The returned bundles are ordered by version
+     * in descending version order so that the first element of the array
+     * contains the bundle with the highest version.
      * @see org.osgi.framework.Constants#BUNDLE_VERSION_ATTRIBUTE
-     * @param symbolicName symbolicName the symbolic name of the bundles that are to be returned.
-     * @param versionRange the version range that each of the returned bundle versions must
-     * belong to, or <tt>null</tt> if no version range checking is to be done.
-     * @return the array of Bundles with the specified name that have a bundle version  
-     * in the specified version range, or <tt>null</tt> if no bundles are found.
-     * @since <b>1.4 EXPERIMENTAL</b>
+     * @param symbolicName The symbolic name of the desired bundles.
+     * @param versionRange The version range of the desired bundles,
+     * or <tt>null</tt> if all versions are desired.
+     * @return An array of bundles with the specified name belonging 
+     * to the specified version range ordered in descending 
+     * version order, 
+     * or <tt>null</tt> if no bundles are found.
+     * @since 1.4 <b>EXPERIMENTAL</b>
      */
     public Bundle[] getBundles(String symbolicName, String versionRange);
 
     /**
-	 * Gets an array of attached fragment bundles for the specified bundle.  If the 
-	 * specified bundle is a fragment then <tt>null</tt> is returned.  If no fragments are 
+	 * Returns an array of attached fragment bundles for the specified bundle.  If the
+	 * specified bundle is a fragment then <tt>null</tt> is returned.  If no fragments are
 	 * attached to the specified bundle then <tt>null</tt> is returned.
-	 * 
-	 * @param bundle the bundle to get the attached fragment bundles for.
-	 * @return an array of fragment bundles or <tt>null</tt> if the bundle does not 
-	 * have any attached fragment bundles. 
-	 * @since <b>1.4 EXPERIMENTAL</b>
+	 *
+	 * @param bundle The bundle whose attached fragment bundles are to be returned.
+	 * @return An array of fragment bundles or <tt>null</tt> if the bundle does not
+	 * have any attached fragment bundles.
+	 * @since 1.4 <b>EXPERIMENTAL</b>
 	 */
     public Bundle[] getFragments(Bundle bundle);
 
 	/**
-	 * Gets an array of host bundles that the specified fragment bundle is 
-	 * attached to or <tt>null</tt> if the specified bundle is not attached to a host.  
-	 * If the bundle is not a fragment bundle then <tt>null</tt> is returned.
-	 * 
-	 * @param bundle the bundle to get the host bundles for.
-	 * @return an array of host bundles or null if the bundle does not have any
-	 * bundles host.
-	 * @since <b>1.4 EXPERIMENTAL</b>
+	 * Returns an array of host bundles to which the specified fragment bundle is
+	 * attached or <tt>null</tt> if the specified bundle is not attached to a host
+	 * or is not a fragment bundle.
+	 *
+	 * @param bundle The bundle whose host bundles are to be returned.
+	 * @return An array of host bundles or <tt>null</tt> if the bundle does not have any
+	 * host bundles.
+	 * @since 1.4 <b>EXPERIMENTAL</b>
 	 */
     public Bundle[] getHosts(Bundle bundle);
 
     /**
-     * A bundle of this type is a fragment bundle.
-     * @since <b>1.4 EXPERIMENTAL</b>
+     * The bundle is a fragment bundle.
+     * 
+     * <p>The value of <tt>BUNDLE_TYPE_FRAGMENT</tt> is 0x00000001.
+     * @since 1.4 <b>EXPERIMENTAL</b>
      */
-    public static final int BUNDLE_TYPE_FRAGMENT = 0x00000001; 
+    public static final int BUNDLE_TYPE_FRAGMENT = 0x00000001;
 
     /**
-	 * Gets the type of the specified bundle.  Currently the only defined bundle 
-	 * type is BUNDLE_TYPE_FRAGMENT.  Additional bundle types may be defined in the 
-	 * future.  If a bundle is not one or more of the defined types then 0 
+	 * Returns the special type of the specified bundle.
+	 * The bundle type values are:
+     * <ul>
+     * <li>{@link #BUNDLE_TYPE_FRAGMENT}
+     * </ul>
+     * 
+     * A bundle may be more than one type at a time. 
+     * A type code is used to identify the bundle type
+     * for future extendability.
+     *
+	 * <p>If a bundle is not one or more of the defined types then 0x00000000
 	 * is returned.
-	 * <p>A bundle may be more than one type at a time.
-	 * @return the type of the bundle.
-	 * @since <b>1.4 EXPERIMENTAL</b>
+	 * 
+	 * @return The special type of the bundle.
+	 * @since 1.4 <b>EXPERIMENTAL</b>
 	 */
     public int getBundleType(Bundle bundle);
 }

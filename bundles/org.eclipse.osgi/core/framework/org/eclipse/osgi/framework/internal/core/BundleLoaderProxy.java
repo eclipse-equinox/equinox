@@ -13,7 +13,7 @@ package org.eclipse.osgi.framework.internal.core;
 import java.util.ArrayList;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.service.resolver.*;
-import org.osgi.service.packageadmin.NamedClassSpace;
+import org.osgi.service.packageadmin.ProvidingBundle;
 
 /**
  * The BundleLoaderProxy proxies a BundleLoader object for a Bundle.  This
@@ -22,7 +22,7 @@ import org.osgi.service.packageadmin.NamedClassSpace;
  * keeps track of the depedencies between the bundles installed in the 
  * Framework.
  */
-public class BundleLoaderProxy implements KeyedElement, NamedClassSpace {
+public class BundleLoaderProxy implements KeyedElement, ProvidingBundle {
 	/** The BundleLoader that this BundleLoaderProxy is managing */
 	private BundleLoader loader;
 	/** The Bundle that this BundleLoaderProxy is for*/
@@ -64,7 +64,7 @@ public class BundleLoaderProxy implements KeyedElement, NamedClassSpace {
 		return loader;
 	}
 
-	public AbstractBundle getBundle() {
+	public AbstractBundle getBundleHost() {
 		return bundle;
 	}
 
@@ -74,7 +74,7 @@ public class BundleLoaderProxy implements KeyedElement, NamedClassSpace {
 
 	public void markUsed(BundleLoaderProxy user) {
 		// only mark as used if the user is not our own bundle.
-		if (user.getBundle() != bundle) {
+		if (user.getBundleHost() != bundle) {
 			users.add(user);
 		}
 	}
@@ -115,7 +115,7 @@ public class BundleLoaderProxy implements KeyedElement, NamedClassSpace {
 		KeyedHashSet bundles = new KeyedHashSet(proxyLoaders.length, false);
 		for (int i = 0; i < proxyLoaders.length; i++) {
 			BundleLoaderProxy loaderProxy = (BundleLoaderProxy) proxyLoaders[i];
-			bundles.add(loaderProxy.getBundle());
+			bundles.add(loaderProxy.getBundleHost());
 		}
 
 		KeyedElement[] elements = bundles.elements();
@@ -191,7 +191,7 @@ public class BundleLoaderProxy implements KeyedElement, NamedClassSpace {
 		}
 	}
 
-	public org.osgi.framework.Bundle getProvidingBundle() {
+	public org.osgi.framework.Bundle getBundle() {
 		if (isStale())
 			return null;
 
@@ -211,13 +211,13 @@ public class BundleLoaderProxy implements KeyedElement, NamedClassSpace {
 			if (reqBundles != null)
 				for (int j = 0; j < reqBundles.length; j++)
 					if (reqBundles[j] == this)
-						requiringBundles.add(requiringProxy.getBundle());
+						requiringBundles.add(requiringProxy.getBundleHost());
 		}
 
 		return (AbstractBundle[]) requiringBundles.toArray(new AbstractBundle[requiringBundles.size()]);
 	}
 
-	public String getName() {
+	public String getSymbolicName() {
 		return symbolicName;
 	}
 

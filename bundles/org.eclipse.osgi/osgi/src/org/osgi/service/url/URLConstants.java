@@ -1,5 +1,5 @@
 /*
- * $Header: /home/technology/org.eclipse.equinox/plugins/org.eclipse.osgi/osgi/src/org/osgi/service/url/URLConstants.java,v 1.1 2003/11/10 17:49:34 jeff Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/service/url/URLConstants.java,v 1.1 2003/11/25 21:24:14 dj Exp $
  *
  * Copyright (c) 2002 - IBM Corporation
  * All Rights Reserved.
@@ -29,7 +29,6 @@ package org.osgi.service.url;
  * unless otherwise indicated.
  *
  * @version $Revision: 1.1 $
- * @author Ben Reed, IBM Corporation (breed@almaden.ibm.com)
  */
 public interface URLConstants
 {

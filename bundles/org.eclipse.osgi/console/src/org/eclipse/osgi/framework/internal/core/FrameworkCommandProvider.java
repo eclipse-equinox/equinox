@@ -21,7 +21,7 @@ import org.eclipse.osgi.framework.console.CommandProvider;
 import org.eclipse.osgi.framework.launcher.Launcher;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.packageadmin.NamedClassSpace;
+import org.osgi.service.packageadmin.ProvidingBundle;
 
 /**
  * This class provides methods to execute commands from the command line.  It registers
@@ -802,11 +802,11 @@ public class FrameworkCommandProvider implements CommandProvider {
                     				}
                     			}
 
-                    			NamedClassSpace[] namedClassSpaces = packageAdmin.getNamedClassSpaces(null);
-								NamedClassSpace namedClassSpace = null;
+                    			ProvidingBundle[] namedClassSpaces = packageAdmin.getProvidingBundles(null);
+								ProvidingBundle namedClassSpace = null;
 								if (namedClassSpaces != null) {
 									for (int i=0; i<namedClassSpaces.length; i++) {
-										if (namedClassSpaces[i].getProvidingBundle() == bundle) {
+										if (namedClassSpaces[i].getBundle() == bundle) {
 											namedClassSpace = namedClassSpaces[i];
 											break;
 										}
@@ -847,7 +847,7 @@ public class FrameworkCommandProvider implements CommandProvider {
 											intp.print("    "); //$NON-NLS-1$
 			                    			intp.print(namedClassSpaces[i]);
 
-			                    			org.osgi.framework.Bundle provider = namedClassSpaces[i].getProvidingBundle();
+			                    			org.osgi.framework.Bundle provider = namedClassSpaces[i].getBundle();
 											intp.print("<"); //$NON-NLS-1$
 											intp.print(provider);
 											intp.println(">"); //$NON-NLS-1$
@@ -1485,15 +1485,15 @@ public class FrameworkCommandProvider implements CommandProvider {
 			org.osgi.service.packageadmin.PackageAdmin packageAdmin = (org.osgi.service.packageadmin.PackageAdmin) context.getService(packageAdminRef);
 			if (packageAdmin != null) {
 				try {
-					org.osgi.service.packageadmin.NamedClassSpace[] symBundles = null;
+					org.osgi.service.packageadmin.ProvidingBundle[] symBundles = null;
 
-					symBundles = packageAdmin.getNamedClassSpaces(token);
+					symBundles = packageAdmin.getProvidingBundles(token);
 
 					if (symBundles == null) {
 						intp.println(ConsoleMsg.formatter.getString("CONSOLE_NO_NAMED_CLASS_SPACES_MESSAGE")); //$NON-NLS-1$
 					} else {
 						for (int i = 0; i < symBundles.length; i++) {
-							org.osgi.service.packageadmin.NamedClassSpace symBundle = symBundles[i];
+							org.osgi.service.packageadmin.ProvidingBundle symBundle = symBundles[i];
 							intp.print(symBundle);
 
 							boolean removalPending = symBundle.isRemovalPending();
@@ -1503,7 +1503,7 @@ public class FrameworkCommandProvider implements CommandProvider {
 								intp.println(")"); //$NON-NLS-1$
 							}
 
-							org.osgi.framework.Bundle provider = symBundle.getProvidingBundle();
+							org.osgi.framework.Bundle provider = symBundle.getBundle();
 							if (provider != null) {
 								intp.print("<"); //$NON-NLS-1$
 								intp.print(provider);

@@ -1,5 +1,5 @@
 /*
- * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/BundleException.java,v 1.1 2003/11/25 21:24:14 dj Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/BundleException.java,v 1.2 2004/04/28 17:22:51 twatson Exp $
  *
  * Copyright (c) The Open Services Gateway Initiative (2000-2001).
  * All Rights Reserved.
@@ -35,8 +35,10 @@ package org.osgi.framework;
  * in the lifecycle of a bundle.
  * <tt>BundleException</tt>s should not be created by bundle developers.
  *
- * @version $Revision: 1.1 $
- * @author Open Services Gateway Initiative
+ * <p> This exception is updated to conform to the general purpose
+ * exception chaining mechanism.
+ *  
+ * @version $Revision: 1.2 $
  */
 
 public class BundleException extends Exception
@@ -44,18 +46,18 @@ public class BundleException extends Exception
     /**
      * Nested exception.
      */
-    private transient Throwable throwable;
+    private transient Throwable cause;
 
     /**
      * Creates a <tt>BundleException</tt> that wraps another exception.
      *
      * @param msg The associated message.
-     * @param throwable The nested exception.
+     * @param cause The cause of this exception.
      */
-    public BundleException(String msg, Throwable throwable)
+    public BundleException(String msg, Throwable cause)
     {
         super(msg);
-        this.throwable = throwable;
+        this.cause = cause;
     }
 
     /**
@@ -66,47 +68,49 @@ public class BundleException extends Exception
     public BundleException(String msg)
     {
         super(msg);
-        this.throwable = null;
+        this.cause = null;
     }
 
     /**
      * Returns any nested exceptions included in this exception.
+     * 
+     * <p>This method predates the general purpose exception chaining mechanism.
+     * The {@link #getCause()} method is now the preferred means of
+     * obtaining this information.
      *
      * @return The nested exception; <tt>null</tt> if there is
      * no nested exception.
      */
     public Throwable getNestedException()
     {
-        return(throwable);
+        return cause;
     }
 
+    //================================================================
+	// Post R3 Addenda. EXPERIMENTAL.
+	//================================================================
+
     /**
-     * Returns any nested exceptions included in this exception.
-     * <p>
-     * This method is the same as calling {@link #getNestedException}.  
-     * This method is for compatiblity with the new 
-     * Throwable.getCause() method that was added in Java 1.4.
-     * 
-     * @return The nested exception; <tt>null</tt> if there is
-     * no nested exception.
-     * @since <b>1.4 EXPERIMENTAL</b>
+     * Returns the cause of this exception or <tt>null</tt> if the
+     * cause was specified when this exception was created.
+     *
+     * @return  The cause of this exception or <tt>null</tt> if no
+     * cause was specified.
+     * @since 1.4 <b>EXPERIMENTAL</b>
      */
     public Throwable getCause() {
-        return getNestedException();
+        return cause;
     }
 
     /**
-     * This method is for compatiblity with the new Throwable.initCause()
-     * method that was added in Java 1.4.
-     * <p>
-     * This method will always throw an {@link IllegalStateException}.
-     * The cause can only be set by the constructor.
-     * @param cause the cause.
-     * @return a reference to this <code>BundleException</code> instance.
+     * The cause of this exception can only be set when constructed.
+     * 
+     * @throws java.lang.IllegalStateException 
+     * This method will always throw an <tt>IllegalStateException</tt>
+     * since the cause of this exception can only be set when constructed.
+     * @since 1.4 <b>EXPERIMENTAL</b>
      */
     public Throwable initCause(Throwable cause) {
     	throw new IllegalStateException();
     }
 }
-
-

@@ -1,5 +1,5 @@
 /*
- * $Header: /home/technology/org.eclipse.equinox/plugins/org.eclipse.osgi/osgi/src/org/osgi/service/startlevel/StartLevel.java,v 1.1 2003/11/10 17:49:34 jeff Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/service/startlevel/StartLevel.java,v 1.1 2003/11/25 21:24:14 dj Exp $
  *
  * Copyright (c) 2002 - IBM Corporation
  * All Rights Reserved.
@@ -67,7 +67,6 @@ import org.osgi.framework.Bundle;
  * of the framework.
  *
  * @version $Revision: 1.1 $
- * @author BJ Hargrave, IBM Corporation (hargrave@us.ibm.com)
  */
 
 public interface StartLevel

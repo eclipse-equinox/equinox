@@ -1,5 +1,5 @@
 /*
- * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/BundleEvent.java,v 1.1 2003/11/25 21:24:14 dj Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/BundleEvent.java,v 1.2 2004/04/20 17:35:59 twatson Exp $
  *
  * Copyright (c) The Open Services Gateway Initiative (2000-2001).
  * All Rights Reserved.
@@ -38,8 +38,7 @@ import java.util.EventObject;
  *
  * <p>OSGi reserves the right to extend the set of types.
  *
- * @version $Revision: 1.1 $
- * @author Open Services Gateway Initiative
+ * @version $Revision: 1.2 $
  */
 
 public class BundleEvent extends EventObject
@@ -55,7 +54,7 @@ public class BundleEvent extends EventObject
     private transient int type;
 
     /**
-     * This bundle has been installed.
+     * The bundle has been installed.
      * <p>The value of <tt>INSTALLED</tt> is 0x00000001.
      *
      * @see BundleContext#installBundle
@@ -63,7 +62,7 @@ public class BundleEvent extends EventObject
     public final static int INSTALLED = 0x00000001;
 
     /**
-     * This bundle has been started.
+     * The bundle has been started.
      * <p>The value of <tt>STARTED</tt> is 0x00000002.
      *
      * @see Bundle#start
@@ -71,7 +70,7 @@ public class BundleEvent extends EventObject
     public final static int STARTED = 0x00000002;
 
     /**
-     * This bundle has been stopped.
+     * The bundle has been stopped.
      * <p>The value of <tt>STOPPED</tt> is 0x00000004.
      *
      * @see Bundle#stop
@@ -79,7 +78,7 @@ public class BundleEvent extends EventObject
     public final static int STOPPED = 0x00000004;
 
     /**
-     * This bundle has been updated.
+     * The bundle has been updated.
      * <p>The value of <tt>UPDATED</tt> is 0x00000008.
      *
      * @see Bundle#update
@@ -87,31 +86,12 @@ public class BundleEvent extends EventObject
     public final static int UPDATED = 0x00000008;
 
     /**
-     * This bundle has been uninstalled.
+     * The bundle has been uninstalled.
      * <p>The value of <tt>UNINSTALLED</tt> is 0x00000010.
      *
      * @see Bundle#uninstall
      */
     public final static int UNINSTALLED = 0x00000010;
-
-	/**
-	 * This bundle has been resolved.
-	 * <p>The value of <tt>RESOLVED</tt> is 0x00000020.
-	 *
-	 * @see Bundle#RESOLVED
-	 * @since <b>1.4 EXPERIMENTAL</b>
-	 */
-	public final static int RESOLVED = 0x00000020;
-
-	/**
-	 * This bundle is no longer resolved.
-	 * <p>The value of <tt>UNRESOLVED</tt> is 0x00000040.
-	 *
-	 * @see Bundle#INSTALLED
-	 * @since <b>1.4 EXPERIMENTAL</b>
-	 */
-	public final static int UNRESOLVED = 0x00000040;
-
 
     /**
      * Creates a bundle event of the specified type.
@@ -147,6 +127,8 @@ public class BundleEvent extends EventObject
      * <li>{@link #STOPPED}
      * <li>{@link #UPDATED}
      * <li>{@link #UNINSTALLED}
+     * <li>{@link #RESOLVED}
+     * <li>{@link #UNRESOLVED}
      * </ul>
      *
      * @return The type of lifecycle event.
@@ -156,6 +138,29 @@ public class BundleEvent extends EventObject
     {
         return type;
     }
+
+    //================================================================
+	// Post R3 Addenda. EXPERIMENTAL.
+	//================================================================
+
+    /**
+	 * The bundle has been resolved.
+	 * <p>The value of <tt>RESOLVED</tt> is 0x00000020.
+	 *
+	 * @see Bundle#RESOLVED
+	 * @since 1.4 <b>EXPERIMENTAL</b>
+	 */
+	public final static int RESOLVED = 0x00000020;
+
+	/**
+	 * The bundle has been unresolved.
+	 * <p>The value of <tt>UNRESOLVED</tt> is 0x00000040.
+	 *
+	 * @see Bundle#INSTALLED
+	 * @since 1.4 <b>EXPERIMENTAL</b>
+	 */
+	public final static int UNRESOLVED = 0x00000040;
+
 }
 
 

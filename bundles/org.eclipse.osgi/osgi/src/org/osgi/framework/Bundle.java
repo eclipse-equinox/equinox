@@ -1,7 +1,7 @@
 /*
- * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/Bundle.java,v 1.8 2004/04/20 17:35:59 twatson Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/Bundle.java,v 1.9 2004/04/20 18:57:11 twatson Exp $
  *
- * Copyright (c) The Open Services Gateway Initiative (2000-2001).
+ * Copyright (c) The Open Services Gateway Initiative (2000, 2002).
  * All Rights Reserved.
  *
  * Implementation of certain elements of the Open Services Gateway Initiative
@@ -30,7 +30,8 @@ package org.osgi.framework;
 
 import java.io.InputStream;
 import java.net.URL;
-import java.util.*;
+import java.util.Dictionary;
+import java.util.Enumeration;
 
 /**
  * An installed bundle in the Framework.
@@ -66,8 +67,7 @@ import java.util.*;
  * create <tt>Bundle</tt> objects, and these objects are only valid
  * within the Framework that created them.
  *
- * @version $Revision: 1.8 $
- * @author Open Services Gateway Initiative
+ * @version $Revision: 1.9 $
  */
 public abstract interface Bundle
 {
@@ -101,7 +101,6 @@ public abstract interface Bundle
      * resolved the bundle's dependencies. These dependencies include:
      * <ul>
      * <li>The bundle's class path from its {@link Constants#BUNDLE_CLASSPATH} Manifest header.
-     * <li>The bundle's native language code from its {@link Constants#BUNDLE_NATIVECODE} Manifest header.
      * <li>The bundle's package dependencies from
      * its {@link Constants#EXPORT_PACKAGE}and {@link Constants#IMPORT_PACKAGE} Manifest headers.
      * </ul>
@@ -157,7 +156,12 @@ public abstract interface Bundle
     /**
      * Starts this bundle.
      *
-     * <p>The following steps are required to start a bundle:
+	 * If the Framework implements the optional Start Level service and the
+	 * current start level is less than this bundle's start level, then the
+	 * Framework must persistently mark this bundle as started and delay the
+	 * starting of this bundle until the Framework's current start level becomes
+	 * equal or more than the bundle's start level.
+	 * <p>Otherwise, the following steps are required to start a bundle:
      * <ol>
      * <li>If this bundle's state is <tt>UNINSTALLED</tt> then
      * an <tt>IllegalStateException</tt> is thrown.
@@ -189,24 +193,24 @@ public abstract interface Bundle
      * because the bundle was uninstalled while the <tt>BundleActivator.start</tt>
      * method was running, a <tt>BundleException</tt> is thrown.
      *
-     * <li>Since it is recorded that this bundle has been started, when
-     * the Framework is restarted this bundle will be automatically started.
+	 * <li>Persistently record that this bundle has been started. When
+	 * the Framework is restarted, this bundle will be automatically started.
      *
      * <li>This bundle's state is set to <tt>ACTIVE</tt>.
      *
      * <li>A bundle event of type {@link BundleEvent#STARTED}is broadcast.
      * </ol>
      *
-     * <h5>Preconditions</h5>
+	 * <b>Preconditions</b>
      * <ul>
      * <li><tt>getState()</tt> in {<tt>INSTALLED</tt>}, {<tt>RESOLVED</tt>}.
      * </ul>
-     * <h5>Postconditions, no exceptions thrown</h5>
+	 * <b>Postconditions, no exceptions thrown</b>
      * <ul>
      * <li><tt>getState()</tt> in {<tt>ACTIVE</tt>}.
      * <li><tt>BundleActivator.start()</tt> has been called and did not throw an exception.
      * </ul>
-     * <h5>Postconditions, when an exception is thrown</h5>
+	 * <b>Postconditions, when an exception is thrown</b>
      * <ul>
      * <li><tt>getState()</tt> not in {<tt>STARTING</tt>}, {<tt>ACTIVE</tt>}.
      * </ul>
@@ -225,7 +229,6 @@ public abstract interface Bundle
     /**
      * Stops this bundle.
      *
-     * </ul>
      * <p> The following steps are required to stop a bundle:
      * <ol>
      * <li>If this bundle's state is <tt>UNINSTALLED</tt> then
@@ -237,12 +240,12 @@ public abstract interface Bundle
      * in a reasonable time, a <tt>BundleException</tt> is thrown to indicate
      * this bundle was unable to be stopped.
      *
+	 * <li>Persistently record that this bundle has been stopped. When the
+	 * Framework is restarted, this bundle will not be automatically started.
+	 *
      * <li>If this bundle's state is not <tt>ACTIVE</tt> then this method returns immediately.
      *
      * <li> This bundle's state is set to <tt>STOPPING</tt>.
-     *
-     * <li>Since it is recorded that this bundle has been stopped,
-     * Framework is restarted this bundle will not be automatically started.
      *
      * <li>The {@link BundleActivator#stop}method of this
      * bundle's <tt>BundleActivator</tt>, if one is specified, is called.
@@ -250,29 +253,29 @@ public abstract interface Bundle
      * A <tt>BundleException</tt> will be thrown after completion of the
      * remaining steps.
      *
-     * <li>Any services registered by this bundle will be unregistered.
-     * <li>Any services used by this bundle will be released.
-     * <li>Any listeners registered by this bundle will be removed.
+	 * <li>Any services registered by this bundle must be unregistered.
+	 * <li>Any services used by this bundle must be released.
+	 * <li>Any listeners registered by this bundle must be removed.
      *
      * <li> If this bundle's state is <tt>UNINSTALLED</tt>,
      * because the bundle was uninstalled while the <tt>BundleActivator.stop</tt>
-     * method was running, a <tt>BundleException</tt> is thrown.
+	 * method was running, a <tt>BundleException</tt> must be thrown.
      *
      * <li>This bundle's state is set to <tt>RESOLVED</tt>.
      *
      * <li>A bundle event of type {@link BundleEvent#STOPPED}is broadcast.
      * </ol>
      *
-     * <h5>Preconditions</h5>
+	 * <b>Preconditions</b>
      * <ul>
      * <li><tt>getState()</tt> in {<tt>ACTIVE</tt>}.
      * </ul>
-     * <h5>Postconditions, no exceptions thrown</h5>
+	 * <b>Postconditions, no exceptions thrown</b>
      * <ul>
      * <li><tt>getState()</tt> not in {<tt>ACTIVE</tt>, <tt>STOPPING</tt>}.
      * <li><tt>BundleActivator.stop</tt> has been called and did not throw an exception.
      * </ul>
-     * <h5>Postconditions, when an exception is thrown</h5>
+	 * <b>Postconditions, when an exception is thrown</b>
      * <ul>
      * <li>None.
      * </ul>
@@ -321,8 +324,15 @@ public abstract interface Bundle
      * of this bundle will be restored and a <tt>BundleException</tt> will be thrown
      * after completion of the remaining steps.
      *
+	 * <li>If the bundle has declared an Bundle-RequiredExecutionEnvironment header, then
+	 * the listed execution environments must be verified against the installed
+	 * execution environments. If they do not all match, the original version
+	 * of this bundle will be restored and a <tt>BundleException</tt> will be thrown
+	 * after completion of the remaining steps.
+	 *
      * <li>This bundle's state is set to <tt>INSTALLED</tt>.
      *
+	 *
      * <li> If this bundle has not declared an <tt>Import-Package</tt> header
      * in its Manifest file (specifically, this bundle does not depend on any packages from
      * other bundles), this bundle's state may be set to <tt>RESOLVED</tt>.
@@ -336,17 +346,17 @@ public abstract interface Bundle
      * type {@link FrameworkEvent#ERROR}is broadcast containing the exception.
      * </ol>
      *
-     * <h5>Preconditions</h5>
+	 * <b>Preconditions</b>
      * <ul>
      * <li><tt>getState()</tt> not in {<tt>UNINSTALLED</tt>}.
      * </ul>
-     * <h5>Postconditions, no exceptions thrown</h5>
+	 * <b>Postconditions, no exceptions thrown</b>
      * <ul>
      * <li><tt>getState()</tt> in
      * {<tt>INSTALLED</tt>, <tt>RESOLVED</tt>, <tt>ACTIVE</tt>}.
      * <li>This bundle has been updated.
      * </ul>
-     * <h5>Postconditions, when an exception is thrown</h5>
+	 * <b>Postconditions, when an exception is thrown</b>
      * <ul>
      * <li><tt>getState()</tt> in {<tt>INSTALLED</tt>, <tt>RESOLVED</tt>, <tt>ACTIVE</tt>}.
      * <li>Original bundle is still used; no update occurred.
@@ -372,6 +382,12 @@ public abstract interface Bundle
      * when it is done, even if an exception is thrown.
      *
      * @param in The <tt>InputStream</tt> from which to read the new bundle.
+	 * @exception BundleException If the provided stream cannot be read or the update fails.
+	 * @exception java.lang.IllegalStateException If this
+	 * bundle has been uninstalled or this bundle tries to change its own state.
+	 * @exception java.lang.SecurityException If the caller does not have
+	 * the appropriate <tt>AdminPermission</tt>, and the Java Runtime Environment
+	 * supports permissions.
      * @see #update()
      */
     public abstract void update(InputStream in) throws BundleException;
@@ -407,22 +423,24 @@ public abstract interface Bundle
      * by the Framework are removed.
      * </ol>
      *
-     * <h5>Preconditions</h5>
+	 * <b>Preconditions</b>
      * <ul>
      * <li><tt>getState()</tt> not in {<tt>UNINSTALLED</tt>}.
      * </ul>
-     * <h5>Postconditions, no exceptions thrown</h5>
+	 * <b>Postconditions, no exceptions thrown</b>
      * <ul>
      * <li><tt>getState()</tt> in {<tt>UNINSTALLED</tt>}.
      * <li>This bundle has been uninstalled.
      * </ul>
-     * <h5>Postconditions, when an exception is thrown</h5>
+	 * <b>Postconditions, when an exception is thrown</b>
      * <ul>
      * <li><tt>getState()</tt> not in {<tt>UNINSTALLED</tt>}.
      * <li>This Bundle has not been uninstalled.
      * </ul>
      *
      * @exception BundleException If the uninstall failed.
+	 * This can occur if another thread is attempting to change the bundle's state
+	 * and does not complete in a timely manner.
      * @exception java.lang.IllegalStateException If this
      * bundle has been uninstalled or this bundle tries to change its own state.
      * @exception java.lang.SecurityException If the caller does not have
@@ -441,8 +459,9 @@ public abstract interface Bundle
      * <p>Manifest header names are case-insensitive. The methods of the returned
      * <tt>Dictionary</tt> object will operate on header names in a case-insensitive manner.
      *
-     * If a Manifest header begins with a '%', it will be evaluated with the specified properties
-	 * file for the default Locale. 
+     * If a Manifest header value starts with &quot;%&quot;, 
+     * it will be localized with the localization properties file 
+     * for the default locale.
      *
      * <p>For example, the following Manifest headers and values are included
      * if they are present in the Manifest file:
@@ -461,45 +480,10 @@ public abstract interface Bundle
      *
      * @exception java.lang.SecurityException If the caller does not have
      * the <tt>AdminPermission</tt>, and the Java Runtime Environment supports permissions.
+     * 
+     * @see Constants#BUNDLE_LOCALIZATION
      */
     public abstract Dictionary getHeaders();
-
-	/**
-		 * Returns this bundle's Manifest headers and values.
-		 * This method returns all the Manifest headers and values
-		 * from the main section of the bundle's Manifest file; that is, all lines prior
-		 * to the first blank line.
-		 *
-		 * <p>Manifest header names are case-insensitive. The methods of the returned
-		 * <tt>Dictionary</tt> object will operate on header names in a case-insensitive manner.
-		 *
-		 * If a Manifest header begins with a '%', it will be evaluated with the specified properties
-		 * file for the specied locale string
-		 * 
-		 * If null is passed as the locale string, the headers will be localized using the default locale.
-		 * If the empty string ("") is passed as the locale string, the headers will not be localized and the 
-		 * any leading '%'s will be stripped off of the header values. 
-		 *
-		 * <p>For example, the following Manifest headers and values are included
-		 * if they are present in the Manifest file:
-		 * <pre>
-		 * Bundle-Name
-		 * Bundle-Vendor
-		 * Bundle-Version
-		 * Bundle-Description
-		 * Bundle-DocURL
-		 * Bundle-ContactAddress
-		 * </pre>
-		 * <p>This method will continue to return Manifest header information
-		 * while this bundle is in the <tt>UNINSTALLED</tt> state.  While the bundle is ununstalled,
-		 * the header information returned will be for only the default locale.  
-		 *
-		 * @return A <tt>Dictionary</tt> object containing this bundle's Manifest headers and values.
-		 *
-		 * @exception java.lang.SecurityException If the caller does not have
-		 * the <tt>AdminPermission</tt>, and the Java Runtime Environment supports permissions.
-		 */
-		public abstract Dictionary getHeaders(String localeString);
 
     /**
      * Returns this bundle's identifier. The bundle is assigned a unique identifier by the Framework
@@ -570,7 +554,7 @@ public abstract interface Bundle
      * <p>The list is valid at the time of the call to this method, however, as the Framework is a very dynamic
      * environment, services can be modified or unregistered at anytime.
      *
-     * @return An array of <tt>ServiceReference</tt>s or <tt>null</tt>.
+	 * @return An array of <tt>ServiceReference</tt> objects or <tt>null</tt>.
      * @exception java.lang.IllegalStateException If this bundle has been uninstalled.
      * @see ServiceReference
      * @see ServicePermission
@@ -624,91 +608,122 @@ public abstract interface Bundle
     public abstract URL getResource(String name);
 
 	//================================================================
-	// Equinox Addenda
+	// Post R3 Addenda. EXPERIMENTAL.
 	//================================================================
 
 	/**
-	 * This method returns the symbolic name of this bundle as specified 
-	 * by its Bundle-SymbolicName manifest header.  The name must be unique, 
-	 * it is recommended to use the same naming convention as Java Packages.  
-	 * This method does not require any security permission to access a 
-	 * bundle’s symbolic name.  If the bundle does not have a specified 
-	 * symbolic name then null is returned. 
-	 * 
+   	 * Returns this bundle's Manifest headers and values 
+   	 * localized to the specifed locale.
+   	 * 
+   	 * <p>This method performs the same function as <tt>Bundle.getHeaders()</tt>
+   	 * except the manifest header values are localized to the specified locale.
+   	 *
+     * If a Manifest header value starts with &quot;%&quot;, 
+     * it will be localized with the localization properties file 
+     * for the specified locale.
+   	 *
+   	 * If <tt>null</tt> is specified as the locale string, the header values will be localized using the default locale.
+   	 * If the empty string (&quot;&quot;) is specified as the locale string, the header values will not be localized 
+   	 * but any leading &quot;%&quot;s will be stripped off of the header values.
+   	 *
+   	 * <p>This method will continue to return Manifest header information
+   	 * while this bundle is in the <tt>UNINSTALLED</tt> state, however
+   	 * the header values will only be localized to the default locale.
+   	 *
+   	 * @return A <tt>Dictionary</tt> object containing this bundle's Manifest headers and values.
+   	 *
+   	 * @exception java.lang.SecurityException If the caller does not have
+   	 * the <tt>AdminPermission</tt>, and the Java Runtime Environment supports permissions.
+     * 
+     * @see #getHeaders()
+     * @see Constants#BUNDLE_LOCALIZATION
+	 * @since 1.4 <b>EXPERIMENTAL</b>
+   	 */
+   	public Dictionary getHeaders(String localeString);
+
+	/**
+	 * Returns the symbolic name of this bundle as specified
+	 * by its <tt>Bundle-SymbolicName</tt> manifest header.  The name must be unique,
+	 * it is recommended to use a reverse domain name naming convention
+	 * like that used for java packages.
+	 * If the bundle does not have a specified
+	 * symbolic name then <tt>null</tt> is returned.
+	 *
      * <p>This method will continue to return this bundle's symbolic name
      * while this bundle is in the <tt>UNINSTALLED</tt> state.
 	 * @return The symbolic name of this bundle.
-	 * @since <b>1.4 EXPERIMENTAL</b>
+	 * @since 1.4 <b>EXPERIMENTAL</b>
 	 */
 	public String getSymbolicName();
 
 	/**
+	 *
+	 * Loads the specified class using this bundle’s classloader.
 	 * 
-	 * This method loads the specified class using this bundle’s classloader.  
-	 * If this bundle's state is INSTALLED, this method will attempt to 
-	 * resolve the bundle before attempting to load the class. 
-	 * <p>
-	 * If the bundle cannot be resolved, the Framework must publish a 
-	 * Framework Event of type ERROR containing a BundleException with 
-	 * details of the reason the bundle could not be resolved. 
-	 * This method must then throw a ClassNotFoundException. 
-     * <p>
-     * If this bundle's state is UNINSTALLED, then an 
-     * IllegalStateException is thrown.
-     * 
-	 * @param classname name of the class to find.
-	 * @return the loaded Class.
-	 * @exception ClassNotFoundException if no such class can be found or 
-	 * if the caller does not have the <tt>AdminPermission</tt>, and the Java 
+	 * <p>If this bundle's state is <tt>INSTALLED</tt>, this method will attempt to
+	 * resolve the bundle before attempting to load the class.
+	 * 
+	 * <p>If the bundle cannot be resolved, a
+	 * Framework event of type {@link FrameworkEvent#ERROR} is
+	 * broadcast containing a <tt>BundleException</tt> with
+	 * details of the reason the bundle could not be resolved.
+	 * This method must then throw a <tt>ClassNotFoundException</tt>.
+	 * 
+     * <p>If this bundle's state is <tt>UNINSTALLED</tt>, then an
+     * <tt>IllegalStateException</tt> is thrown.
+     *
+	 * @param name The name of the class to load.
+	 * @return The Class object for the requested class.
+	 * @exception java.lang.ClassNotFoundException If no such class can be found or
+	 * if the caller does not have the <tt>AdminPermission</tt>, and the Java
 	 * Runtime Environment supports permissions.
 	 * @exception java.lang.IllegalStateException If this bundle has been uninstalled.
-	 * @since <b>1.4 EXPERIMENTAL</b>
+	 * @since 1.4 <b>EXPERIMENTAL</b>
 	 */
-	public Class loadClass(String classname) throws ClassNotFoundException;
-
-	/** 
-	 * This method returns enumeration of all the paths to entries within the 
-	 * bundle whose longest sub-path matches the supplied path argument. 
-	 * Returned paths indicating subdirectory paths end with a ’/’. 
-	 * The returned paths are all relative to the root of the bundle and 
-	 * have a leading ’/’. The supplied named entry "/" indicates the root of 
-	 * the bundle itself.
-	 * <p> 
-	 * This method returns an empty enumeration if no entries could be 
-	 * found that match the specified path or if the caller does not have 
-	 * the AdminPermission or BundlePermission[READ, <target bundle symbolic name>], 
-	 * and the Java Runtime Environment supports permissions.
-	 * </p>
-	 * @param path the path name to get the entry path names for.
-	 * @return An Enumeration of the entry paths that are contained in the 
-	 * 		specified path.
-	 * @exception java.lang.IllegalStateException If this bundle has been uninstalled.
-	 * @since <b>1.4 EXPERIMENTAL</b>
-	 */
-	public Enumeration getEntryPaths(java.lang.String path);
+	public Class loadClass(String name) throws ClassNotFoundException;
 
 	/**
-	 * This method returns a URL to the specified entry in this bundle.  
-	 * The bundle's classloader is not used to search for the named entry. 
-	 * Only the content of the bundle is searched for the named entry.  The 
-	 * named entry "/" indicates the root of the bundle itself.
-	 * <p>
-	 * This method returns a URL to the named entry, or null if the entry 
-	 * could not be found or if the caller does not have the AdminPermission 
-	 * or BundlePermission[READ, <target bundle symbolic name>], 
+	 * Returns enumeration of all the paths to entries within the
+	 * bundle whose longest sub-path matches the supplied path argument.
+	 * The bundle's classloader is not used to search for entries.
+	 * Only the contents of the bundle is searched.
+	 * A specified path of &quot;/&quot; indicates the root of the bundle.
+	 * 
+	 * <p>Returned paths indicating subdirectory paths end with a &quot;/&quot;.
+	 * The returned paths are all relative to the root of the bundle and
+	 * have a leading &quot;/&quot;. 
+	 * 
+	 * <p>This method returns an empty enumeration if no entries could be
+	 * found that match the specified path or if the caller does not have
+	 * <tt>AdminPermission</tt> and the Java Runtime Environment supports permissions.
+	 * 
+	 * @param path the path name to get the entry path names for.
+	 * @return An Enumeration of the entry paths that are contained in the
+	 * 		specified path.
+	 * @exception java.lang.IllegalStateException If this bundle has been uninstalled.
+	 * @since 1.4 <b>EXPERIMENTAL</b>
+	 */
+	public Enumeration getEntryPaths(String path);
+
+	/**
+	 * Returns a URL to the specified entry in this bundle.
+	 * The bundle's classloader is not used to search for the specified entry.
+	 * Only the contents of the bundle is searched for the specified entry.
+	 * A specified path of &quot;/&quot; indicates the root of the bundle.
+	 * 
+	 * <p>This method returns a URL to the specified entry, or <tt>null</tt> if the entry
+	 * could not be found or if the caller does not have the <tt>AdminPermission</tt>
 	 * and the Java Runtime Environment supports permissions.	
-	 * </p>
-	 * @param name The name of the resource.
+	 * 
+	 * @param name The name of the entry.
 	 * See <tt>java.lang.ClassLoader.getResource</tt> for a description of
 	 * the format of a resource name.
-	 * @return a URL to the named resource, or <tt>null</tt> if the resource could
+	 * @return A URL to the specified entry, or <tt>null</tt> if the entry could
 	 * not be found or if the caller does not have
-	 * the <tt>AdminPermission</tt>, and the Java Runtime Environment supports permissions.
+	 * the <tt>AdminPermission</tt> and the Java Runtime Environment supports permissions.
 	 *
 	 * @exception java.lang.IllegalStateException If this bundle has been uninstalled.
-	 * @since <b>1.4 EXPERIMENTAL</b>
+	 * @since 1.4 <b>EXPERIMENTAL</b>
 	 */
 	public URL getEntry(String name);
-
 }
-

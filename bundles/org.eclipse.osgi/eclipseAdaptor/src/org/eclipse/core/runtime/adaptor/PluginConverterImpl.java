@@ -232,7 +232,7 @@ public class PluginConverterImpl implements PluginConverter {
 			writeEntry(Constants.BUNDLE_ACTIVATOR, (String) manifestToWrite.remove(Constants.BUNDLE_ACTIVATOR));
 			writeEntry(Constants.BUNDLE_VENDOR, (String) manifestToWrite.remove(Constants.BUNDLE_VENDOR));
 			writeEntry(Constants.FRAGMENT_HOST, (String) manifestToWrite.remove(Constants.FRAGMENT_HOST));
-			writeEntry(Constants.BUNDLE_MANIFEST_LOCALIZATION, (String) manifestToWrite.remove(Constants.BUNDLE_MANIFEST_LOCALIZATION));
+			writeEntry(Constants.BUNDLE_LOCALIZATION, (String) manifestToWrite.remove(Constants.BUNDLE_LOCALIZATION));
 			writeEntry(Constants.PROVIDE_PACKAGE, (String) manifestToWrite.remove(Constants.PROVIDE_PACKAGE));
 			writeEntry(Constants.REQUIRE_BUNDLE, (String) manifestToWrite.remove(Constants.REQUIRE_BUNDLE));
 			Enumeration keys = manifestToWrite.keys();
@@ -255,7 +255,7 @@ public class PluginConverterImpl implements PluginConverter {
 	}
 
 	private void generateLocalizationEntry() {
-		generatedManifest.put(Constants.BUNDLE_MANIFEST_LOCALIZATION, PLUGIN_PROPERTIES_FILENAME);
+		generatedManifest.put(Constants.BUNDLE_LOCALIZATION, PLUGIN_PROPERTIES_FILENAME);
 	}
 
 	private void generateManifestVersion() {

@@ -35,7 +35,7 @@ public class ExportedPackageImpl extends SingleSourcePackage implements org.osgi
 		if (supplier.isStale()) {
 			return null;
 		}
-		return supplier.getBundle();
+		return supplier.getBundleHost();
 	}
 
 	public org.osgi.framework.Bundle[] getImportingBundles() {
@@ -47,7 +47,7 @@ public class ExportedPackageImpl extends SingleSourcePackage implements org.osgi
 		ArrayList importingBundles = new ArrayList();
 
 		// always add self
-		importingBundles.add(supplier.getBundle());
+		importingBundles.add(supplier.getBundleHost());
 
 		for (int i = 0; i < dependentBundles.length; i++) {
 			AbstractBundle bundle = dependentBundles[i];
@@ -72,7 +72,7 @@ public class ExportedPackageImpl extends SingleSourcePackage implements org.osgi
 	}
 
 	public boolean isRemovalPending() {
-		AbstractBundle bundle = supplier.getBundle();
+		AbstractBundle bundle = supplier.getBundleHost();
 		return bundle.framework.packageAdmin.removalPending.contains(supplier);
 	}
 

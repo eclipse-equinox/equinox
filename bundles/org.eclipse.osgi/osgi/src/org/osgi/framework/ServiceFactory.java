@@ -1,5 +1,5 @@
 /*
- * $Header: /home/technology/org.eclipse.equinox/plugins/org.eclipse.osgi/osgi/src/org/osgi/framework/ServiceFactory.java,v 1.1 2003/11/10 17:49:33 jeff Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/ServiceFactory.java,v 1.1 2003/11/25 21:24:14 dj Exp $
  *
  * Copyright (c) The Open Services Gateway Initiative (2000-2001).
  * All Rights Reserved.
@@ -47,7 +47,6 @@ package org.osgi.framework;
  * made available to other bundles in the OSGi environment.
  *
  * @version $Revision: 1.1 $
- * @author Open Services Gateway Initiative
  * @see BundleContext#getService
  */
 

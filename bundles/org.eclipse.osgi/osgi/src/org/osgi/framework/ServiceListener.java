@@ -1,5 +1,5 @@
 /*
- * $Header: /home/technology/org.eclipse.equinox/plugins/org.eclipse.osgi/osgi/src/org/osgi/framework/ServiceListener.java,v 1.1 2003/11/10 17:49:33 jeff Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/ServiceListener.java,v 1.1 2003/11/25 21:24:14 dj Exp $
  *
  * Copyright (c) The Open Services Gateway Initiative (2000-2001).
  * All Rights Reserved.
@@ -48,7 +48,6 @@ import java.util.EventListener;
  * using at least one of the named classes the service was registered under.
  *
  * @version $Revision: 1.1 $
- * @author Open Services Gateway Initiative
  * @see ServiceEvent
  * @see ServicePermission
  */

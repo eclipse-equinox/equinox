@@ -93,9 +93,9 @@ public class ManifestLocalization {
 	 */
 	protected ResourceBundle getResourceBundle(String localeString) {
 		URL resourceURL = null;
-		String propertiesLocation = (String) rawHeaders.get(Constants.BUNDLE_MANIFEST_LOCALIZATION);
+		String propertiesLocation = (String) rawHeaders.get(Constants.BUNDLE_LOCALIZATION);
 		if (propertiesLocation == null) {
-			propertiesLocation = Constants.BUNDLE_DEFAULT_MANIFEST_LOCALIZATION;
+			propertiesLocation = Constants.BUNDLE_LOCALIZATION_DEFAULT_BASENAME;
 		}
 		resourceURL = findProperties(localeString, propertiesLocation);
 		if (resourceURL == null) {

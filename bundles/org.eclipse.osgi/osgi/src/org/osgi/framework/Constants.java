@@ -1,7 +1,7 @@
 /*
- * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/Constants.java,v 1.14 2004/04/20 18:57:11 twatson Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/Constants.java,v 1.15 2004/05/03 14:59:18 twatson Exp $
  *
- * Copyright (c) The Open Services Gateway Initiative (2000-2001).
+ * Copyright (c) The Open Services Gateway Initiative (2000, 2002).
  * All Rights Reserved.
  *
  * Implementation of certain elements of the Open Services Gateway Initiative
@@ -35,15 +35,15 @@ package org.osgi.framework;
  * <p>The values associated with these keys are of type <tt>java.lang.String</tt>,
  * unless otherwise indicated.
  *
- * @version $Revision: 1.14 $
- * @author Open Services Gateway Initiative
+ * @version $Revision: 1.15 $
  * @since 1.1
  * @see Bundle#getHeaders
  * @see BundleContext#getProperty
  * @see BundleContext#registerService
  */
 
-public interface Constants {
+public interface Constants
+{
 	/**
 	 * Location identifier of the OSGi <i>system bundle</i>, which is
 	 * defined to be &quot;System Bundle&quot;.
@@ -206,7 +206,7 @@ public interface Constants {
 
 	/**
 	 * Manifest header (named &quot;Bundle-UpdateLocation&quot;)
-	 * identifying the location from which a new bundle version is 
+     * identifying the location from which a new bundle version is
 	 * obtained during a bundle update operation.
 	 *
 	 * <p>The attribute value may be retrieved from the
@@ -217,22 +217,22 @@ public interface Constants {
 	/**
 	 * Manifest header attribute (named &quot;specification-version&quot;)
 	 * identifying the version of a package specified in the
-	 * Export-Package or Import-Package Manifest header.
+	 * Export-Package or Import-Package manifest header.
 	 *
-	 * <p>The attribute value is encoded in the Export-Package or 
-	 * Import-Package Manifest header like:
+     * <p>The attribute value is encoded in the Export-Package or
+	 * Import-Package manifest header like:
 	 * <pre>
 	 * Import-Package: org.osgi.framework ; specification-version="1.1"
 	 * </pre>
 	 */
 	public static final String PACKAGE_SPECIFICATION_VERSION =
-		"specification-version";
+    "specification-version";
 
 	/**
 	 * Manifest header attribute (named &quot;processor&quot;) identifying the processor
-	 * required to run native bundle code specified in the Bundle-NativeCode Manifest header).
+	 * required to run native bundle code specified in the Bundle-NativeCode manifest header).
 	 *
-	 * <p>The attribute value is encoded in the Bundle-NativeCode Manifest header like:
+	 * <p>The attribute value is encoded in the Bundle-NativeCode manifest header like:
 	 * <pre>
 	 * Bundle-NativeCode: http.so ; processor=x86 ...
 	 * </pre>
@@ -242,8 +242,8 @@ public interface Constants {
 	/**
 	 * Manifest header attribute (named &quot;osname&quot;) identifying the
 	 * operating system required to run native bundle code specified in the Bundle-NativeCode
-	 * Manifest header).
-	 * <p>The attribute value is encoded in the Bundle-NativeCode Manifest header like:
+	 * manifest header).
+	 * <p>The attribute value is encoded in the Bundle-NativeCode manifest header like:
 	 * <pre>
 	 * Bundle-NativeCode: http.so ; osname=Linux ...
 	 * </pre>
@@ -253,8 +253,8 @@ public interface Constants {
 	/**
 	 * Manifest header attribute (named &quot;osversion&quot;) identifying the
 	 * operating system version required to run native bundle code specified in the Bundle-NativeCode
-	 * Manifest header).
-	 * <p>The attribute value is encoded in the Bundle-NativeCode Manifest header like:
+	 * manifest header).
+	 * <p>The attribute value is encoded in the Bundle-NativeCode manifest header like:
 	 * <pre>
 	 * Bundle-NativeCode: http.so ; osversion="2.34" ...
 	 * </pre>
@@ -264,14 +264,14 @@ public interface Constants {
 	/**
 	 * Manifest header attribute (named &quot;language&quot;) identifying the
 	 * language in which the native bundle code is written specified in the
-	 * Bundle-NativeCode Manifest header. See ISO 639 for possible values.
-	 * <p>The attribute value is encoded in the Bundle-NativeCode Manifest header like:
+	 * Bundle-NativeCode manifest header. See ISO 639 for possible values.
+	 * <p>The attribute value is encoded in the Bundle-NativeCode manifest header like:
 	 * <pre>
 	 * Bundle-NativeCode: http.so ; language=nl_be ...
 	 * </pre>
 	 */
 	public static final String BUNDLE_NATIVECODE_LANGUAGE = "language";
-	
+
 	/**
 	 * Manifest header (named &quot;Bundle-RequiredExecutionEnvironment&quot;)
 	 * identifying the required
@@ -295,16 +295,17 @@ public interface Constants {
 	 * Framework environment property (named &quot;org.osgi.framework.version&quot;)
 	 * identifying the Framework version.
 	 *
-	 * <p>The value of this property may be retrieved by calling the 
+     * <p>The value of this property may be retrieved by calling the
 	* <tt>BundleContext.getProperty</tt> method.
 	 */
-	public static final String FRAMEWORK_VERSION = "org.osgi.framework.version";
+    public static final String FRAMEWORK_VERSION =
+    "org.osgi.framework.version";
 
 	/**
 	 * Framework environment property (named &quot;org.osgi.framework.vendor&quot;)
 	 * identifying the Framework implementation vendor.
 	 *
-	 * <p>The value of this property may be retrieved by calling the 
+     * <p>The value of this property may be retrieved by calling the
 	 * <tt>BundleContext.getProperty</tt> method.
 	 */
 	public static final String FRAMEWORK_VENDOR = "org.osgi.framework.vendor";
@@ -313,11 +314,11 @@ public interface Constants {
 	 * Framework environment property (named &quot;org.osgi.framework.language&quot;)
 	 * identifying the Framework implementation language (see ISO 639 for possible values).
 	 *
-	 * <p>The value of this property may be retrieved by calling the 
+     * <p>The value of this property may be retrieved by calling the
 	 * <tt>BundleContext.getProperty</tt> method.
 	 */
 	public static final String FRAMEWORK_LANGUAGE =
-		"org.osgi.framework.language";
+    "org.osgi.framework.language";
 
 	/**
 	 * Framework environment property (named &quot;org.osgi.framework.os.name&quot;)
@@ -325,7 +326,8 @@ public interface Constants {
 	 *
 	 * <p>The value of this property may be retrieved by calling the <tt>BundleContext.getProperty</tt> method.
 	 */
-	public static final String FRAMEWORK_OS_NAME = "org.osgi.framework.os.name";
+    public static final String FRAMEWORK_OS_NAME =
+    "org.osgi.framework.os.name";
 
 	/**
 	 * Framework environment property (named &quot;org.osgi.framework.os.version&quot;)
@@ -334,7 +336,7 @@ public interface Constants {
 	 * <p>The value of this property may be retrieved by calling the <tt>BundleContext.getProperty</tt> method.
 	 */
 	public static final String FRAMEWORK_OS_VERSION =
-		"org.osgi.framework.os.version";
+    "org.osgi.framework.os.version";
 
 	/**
 	 * Framework environment property (named &quot;org.osgi.framework.processor&quot;)
@@ -342,8 +344,8 @@ public interface Constants {
 	 * <p>The value of this property may be retrieved by calling the <tt>BundleContext.getProperty</tt> method.
 	 */
 	public static final String FRAMEWORK_PROCESSOR =
-		"org.osgi.framework.processor";
-	
+    "org.osgi.framework.processor";
+
 	/**
 	 * Framework environment property (named &quot;org.osgi.framework.executionenvironment&quot;)
 	 * identifying execution environments provided by the Framework.
@@ -400,8 +402,8 @@ public interface Constants {
 	 * Service property (named &quot;service.ranking&quot;)
 	 * identifying a service's ranking number (of type <tt>java.lang.Integer</tt>).
 	 *
-	 * <p>This property may be supplied in the <tt>properties</tt>
-	 * <tt>Dictionary</tt> object passed to the <tt>BundleContext.registerService</tt> method.
+     * <p>This property may be supplied in the <tt>properties
+     * Dictionary</tt> object passed to the <tt>BundleContext.registerService</tt> method.
 	 *
 	 * <p>The service ranking is used by the Framework to determine the
 	 * <i>default</i> service to be returned from a call to the
@@ -416,7 +418,7 @@ public interface Constants {
 	 * <p>If the supplied property value is not of type <tt>java.lang.Integer</tt>,
 	 * it is deemed to have a ranking value of zero.
 	 */
-	public static final String SERVICE_RANKING = "service.ranking";
+     public static final String SERVICE_RANKING = "service.ranking";
 
 	/**
 	 * Service property (named &quot;service.vendor&quot;) identifying a service's vendor.
@@ -424,7 +426,7 @@ public interface Constants {
 	 * <p>This property may be supplied in the properties <tt>Dictionary</tt> object passed to
 	 * the <tt>BundleContext.registerService</tt> method.
 	 */
-	public static final String SERVICE_VENDOR = "service.vendor";
+     public static final String SERVICE_VENDOR = "service.vendor";
 
 	/**
 	 * Service property (named &quot;service.description&quot;)
@@ -435,265 +437,183 @@ public interface Constants {
 	 */
 	public static final String SERVICE_DESCRIPTION = "service.description";
 
+    //================================================================
+	// Post R3 Addenda. EXPERIMENTAL.
 	//================================================================
-	// RFC 71 Addenda
-	//================================================================
-
-
 
 	/**
 	 * Manifest header (named &quot;Bundle-SymbolicName&quot;)
 	 * identifying the bundle's symbolic name.
 	 * <p>The attribute value may be retrieved from the
 	 * <tt>Dictionary</tt> object returned by the <tt>Bundle.getHeaders</tt> method.
-	 * @since <b>1.4 EXPERIMENTAL</b>
+	 * @since 1.4 <b>EXPERIMENTAL</b>
 	 */
 	public final static String BUNDLE_SYMBOLICNAME = "Bundle-SymbolicName";
 	
 	/**
 	 * Manifest header attribute (named &quot;singleton&quot;)
 	 * identifying whether a bundle is a singleton.
-	 * The default value is "false".
-	 * 
+	 * The default value is <tt>false</tt>.
+	 *
 	 * <p>The attribute value is encoded in the Bundle-SymbolicName
 	 * manifest header like:
 	 * <pre>
-	 * Bundle-SymbolicName: org.osgi.framework.module.test; singleton=true
+	 * Bundle-SymbolicName: com.acme.module.test; singleton=true
 	 * </pre>
-	 * @since <b>1.4 EXPERIMENTAL</b>
+	 * @since 1.4 <b>EXPERIMENTAL</b>
 	 */
 	public final static String SINGLETON_ATTRIBUTE = "singleton";
-	/**
-	 * Manifest header (named &quot;Bundle-Localization&quot;)
-	 * identifying the location of the bundle's localization file.
-	 * <p>The attribute value may be retrieved from the
-	 * <tt>Dictionary</tt> object returned by the <tt>Bundle.getHeaders</tt> method.
-	 * @since <b>1.4 EXPERIMENTAL</b>
-	 */
-	public final static String BUNDLE_MANIFEST_LOCALIZATION = "Bundle-Localization";
 	
 	/**
+	 * Manifest header (named &quot;Bundle-Localization&quot;)
+	 * identifying the base name of the bundle's localization file.
+	 * <p>The attribute value may be retrieved from the
+	 * <tt>Dictionary</tt> object returned by the <tt>Bundle.getHeaders</tt> method.
+	 * @since 1.4 <b>EXPERIMENTAL</b>
+	 */
+	public final static String BUNDLE_LOCALIZATION = "Bundle-Localization";
+	
+	/**
+	 * Default value for the Bundle-Localization manifest header.
+	 * 
+	 * @see #BUNDLE_LOCALIZATION
+	 * @since 1.4 <b>EXPERIMENTAL</b>
+	 */
+	public final static String BUNDLE_LOCALIZATION_DEFAULT_BASENAME = "META-INF/bundle";
+
+	/**
 	 * Manifest header (named &quot;Provide-Package&quot;)
-	 * identifying the names of the packages
-	 * that the bundle provides to the Framework as a bundle.
+	 * identifying the packages name
+	 * provided to other bundles which require the bundle.
 	 *
 	 * <p>The attribute value may be retrieved from the
 	 * <tt>Dictionary</tt> object returned by the <tt>Bundle.getHeaders</tt> method.
-	 * @since <b>1.4 EXPERIMENTAL</b>
+	 * @since 1.4 <b>EXPERIMENTAL</b>
 	 */
 	public final static String PROVIDE_PACKAGE = "Provide-Package";
 
 	/**
 	 * Manifest header (named &quot;Require-Bundle&quot;)
-	 * identifying the symbolic names (and optionally, bundle-version, 
-	 * version-match, reprovide, and optional attributes ) of the bundles
-	 * that the bundle is dependent on.
+	 * identifying the symbolic names of other bundles
+	 * required by the bundle.
 	 *
 	 * <p>The attribute value may be retrieved from the
 	 * <tt>Dictionary</tt> object returned by the <tt>Bundle.getHeaders</tt> method.
-	 * @since <b>1.4 EXPERIMENTAL</b>
+	 * @since 1.4 <b>EXPERIMENTAL</b>
 	 */
 	public final static String REQUIRE_BUNDLE = "Require-Bundle";
 
 	/**
 	 * Manifest header attribute (named &quot;bundle-version&quot;)
 	 * identifying a range of versions for a bundle specified in the
-	 * Require-Bundle or Host-Bundle Manifest headers.
+	 * Require-Bundle or Fragment-Host manifest headers.
+	 * The default value is <tt>0.0.0</tt>.
 	 *
-	 * <p>The attribute value is encoded in the Require-Bundle Manifest 
+	 * <p>The attribute value is encoded in the Require-Bundle manifest
 	 * header like:
 	 * <pre>
-	 * Require-Bundle: org.osgi.test.module; bundle-version="1.1"
-	 * Require-Bundle: org.osgi.test.module; bundle-version="[1.0,2.0)"
+	 * Require-Bundle: com.acme.module.test; bundle-version="1.1"
+	 * Require-Bundle: com.acme.module.test; bundle-version="[1.0,2.0)"
 	 * </pre>
 	 * <p>
-	 * The bundle-version attribute value uses the mathematical interval
-	 * notation to specify ranges of bundle versions.  A bundle-version
-	 * with no interval notation specifies a range that includes any 
-	 * bundle version greater than or equal to the bundle version 
-	 * specified.  For example:
-	 * <pre>
-	 * bundle-version="1.0"          1.0 <= X
-	 * bundle-version="[1.0,2.0)"    1.0 <= X <  2.0
-	 * bundle-version="[1.0,2.0]"    1.0 <= X <= 2.0
-	 * bundle-version="(1.0,2.0]"    1.0 <  X <= 2.0
-	 * bundle-version="(1.0,2.0)"    1.0 <  X <  2.0
-	 * </pre>
-	 * @since <b>1.4 EXPERIMENTAL</b>
+	 * The bundle-version attribute value uses a mathematical interval
+	 * notation to specify a range of bundle versions.  A bundle-version
+	 * attribute value specified as a single version means a version range that includes any
+	 * bundle version greater than or equal to the specified version.
+	 * @since 1.4 <b>EXPERIMENTAL</b>
 	 */
 	public static final String BUNDLE_VERSION_ATTRIBUTE = "bundle-version";
 
 	/**
-	 * This constant represents the Require-Bundle manifest header attribute 
-	 * named "reprovide" identifying that any packages that are provided 
-	 * by the required bundle must be reprovided by the requiring bundle.  
-	 * The default value is "false".  
+	 * Manifest header attribute (named &quot;reprovide&quot;)
+	 * for Require-Bundle
+	 * identifying that any packages that are provided
+	 * by the required bundle must be reprovided by the requiring bundle.
+	 * The default value is <tt>false</tt>.
 	 * <p>
-	 * The attribute value is encoded in the Require-Bundle Manifest header like:
+	 * The attribute value is encoded in the Require-Bundle manifest 
+	 * header like:
 	 * <pre>
-	 * Require-Bundle: org.osgi.framework.module.test; 
-	 *  reprovide="true"
+	 * Require-Bundle: com.acme.module.test; reprovide="true"
 	 * </pre>
-	 * @since <b>1.4 EXPERIMENTAL</b>
+	 * @since 1.4 <b>EXPERIMENTAL</b>
 	 */
 	public final static String REPROVIDE_ATTRIBUTE = "reprovide";
 
 	/**
 	 * Manifest header attribute (named &quot;optional&quot;)
+	 * for Require-Bundle
 	 * identifying that a required bundle is optional and that
-	 * this bundle should be resolved if the required bundle is
-	 * not available.  The default value is "false".
-	 * 
-	 * <p>The attribute value is encoded in the Require-Bundle
-	 * Manifest header like:
+	 * the requiring bundle can be resolved if there is no 
+	 * suitable required bundle.
+	 * The default value is <tt>false</tt>.
+	 *
+	 * <p>The attribute value is encoded in the Require-Bundle manifest 
+	 * header like:
 	 * <pre>
-	 * Require-Bundle: org.osgi.framework.module.test;
-	 *  bundle-version="1.1";
-	 *  optional="true"
+	 * Require-Bundle: com.acme.module.test; optional="true"
 	 * </pre>
-	 * @since <b>1.4 EXPERIMENTAL</b>
+	 * @since 1.4 <b>EXPERIMENTAL</b>
 	 */
 	public final static String OPTIONAL_ATTRIBUTE = "optional";
 
 	/**
 	 * Manifest header attribute (named &quot;require-packages&quot;)
-	 * specifies the subset of packages that should be available from 
-	 * the required bundle.  If the require-packages parameter 
-	 * is not specified then all packages provided by a required Bundle 
-	 * are available.  The value of this parameter must be a quoted 
+	 * for Require-Bundle
+	 * specifying the subset of packages that are accessible from
+	 * the required bundle.  If the require-packages parameter
+	 * is not specified then all packages provided by the required bundle
+	 * are accessible.  The value of this parameter must be a quoted
 	 * string.  The syntax of the quoted string value is the same as
-	 * the Provide-Package manifest header.
-	 * 
+	 * that of the Provide-Package manifest header value.
+	 *
 	 * <p> The attribute value is encoded in the Require-Bundle
-	 * Manifest header like:
+	 * manifest header like:
 	 * <pre>
 	 * Require-Bundle: org.osgi.test;
-	 *  bundle-version="1.1";
 	 *  require-packages="org.osgi.test.pkg1,org.osgi.test.pkg2"
 	 * </pre>
-	 * @since <b>1.4 EXPERIMENTAL</b>
+	 * @since 1.4 <b>EXPERIMENTAL</b>
 	 */
 	public final static String REQUIRE_PACKAGES_ATTRIBUTE = "require-packages";
 
 	/**
-	 * String indication location of the default localization file for manifest files.
-	 * @since <b>1.4 EXPERIMENTAL</b>
-	 */
-	public final static String BUNDLE_DEFAULT_MANIFEST_LOCALIZATION = "META-INF/bundle";
-
-	/**
-	 * Manifest header attribute (named &quot;version-match&quot;)
-	 * identifying the match type for a required bundle or fragment host.  
-	 * The default value is "greaterthan-or-equal".
-	 * 
-	 * <p>The attribute value is encoded in the Require-Bundle
-	 * Manifest header like:
-	 * <pre>
-	 * Require-Bundle: org.osgi.framework.module.test;
-	 *  bundle-version="1.1";
-	 *  version-match="qualifier"
-	 * </pre>
-	 * @since <b>1.4 EXPERIMENTAL</b>
-	 * @deprecated use {@link #BUNDLE_VERSION_ATTRIBUTE}
-	 */
-	public final static String VERSION_MATCH_ATTRIBUTE = "version-match";
-
-	/**
-	 * A {@link #VERSION_MATCH_ATTRIBUTE version-match} value
-	 * (named &quot;qualifier&quot;).
-	 * <p>
-	 * Two versions are considered to match on qualifier if their major,
-	 * minor, micro and qualifier components are equal.
-	 * @since <b>1.4 EXPERIMENTAL</b>
-	 * @deprecated use {@link #BUNDLE_VERSION_ATTRIBUTE}
-	 */
-	public final static String VERSION_MATCH_QUALIFIER = "qualifier";
-	/**
-	 * A {@link #VERSION_MATCH_ATTRIBUTE version-match} value
-	 * (named &quot;micro&quot;).
-	 * <p>
-	 * A version is considered to match on micro with another version if 
-	 * its major, minor and micro components are equal to the other 
-	 * version’s major, minor and micro components and its qualifier 
-	 * is greater than or equal to the other version’s qualifier 
-	 * (using String.compareTo).
-	 * @since <b>1.4 EXPERIMENTAL</b>
-	 * @deprecated use {@link #BUNDLE_VERSION_ATTRIBUTE}
-	 */
-	public final static String VERSION_MATCH_MICRO = "micro";
-	/**
-	 * A {@link #VERSION_MATCH_ATTRIBUTE version-match} value
-	 * (named &quot;minor&quot;).
-	 * <p>
-	 * A version is considered to match on minor with another version 
-	 * if its major and minor components are equal to the other version’s 
-	 * major and minor components, and its micro level is greater than 
-	 * or equal to the other version’s micro level. If the micro levels 
-	 * are equal, a version is considered to match on minor with another 
-	 * version if its qualifier is greater than or equal to the other 
-	 * version’s qualifier (using String.compareTo).
-	 * @since <b>1.4 EXPERIMENTAL</b>
-	 * @deprecated use {@link #BUNDLE_VERSION_ATTRIBUTE}
-	 */
-	public final static String VERSION_MATCH_MINOR = "minor";
-	/**
-	 * A {@link #VERSION_MATCH_ATTRIBUTE version-match} value
-	 * (named &quot;major&quot;).
-	 * <p>
-	 * A version identifier is considered to match on major with another 
-	 * version identifier if its major component is equal to the other 
-	 * version’s major component, and its minor component is greater than 
-	 * or equal to the other version’s minor component. If the minor 
-	 * components are equal, a version is considered to be match on major 
-	 * with another version if its micro level is greater than or equal 
-	 * to the other version’s micro level. If the micro levels are equal, 
-	 * a version is considered to match on major with another version if 
-	 * its qualifier is greater than or equal to the other version’s 
-	 * qualifier (using String.compareTo).
-	 * @since <b>1.4 EXPERIMENTAL</b>
-	 * @deprecated use {@link #BUNDLE_VERSION_ATTRIBUTE}
-	 */
-	public final static String VERSION_MATCH_MAJOR = "major";
-	/**
-	 * A {@link #VERSION_MATCH_ATTRIBUTE version-match} value
-	 * (named &quot;greaterthan-or-equal&quot;).
-	 * <p>
-	 * A version is considered to match on greater than or equal with 
-	 * another version identifier if its major component is greater than 
-	 * the other version’s major component, or the major components are 
-	 * equal and its minor component is greater than the other version’s 
-	 * minor component, or the major and minor components are equal and 
-	 * its micro component is greater than the other version’s micro 
-	 * component, or the major, minor and micro components are equal and 
-	 * it’s qualifier component is greater than or equal to the other 
-	 * version’s qualifier component (using String.compareTo).
-	 * @since <b>1.4 EXPERIMENTAL</b>
-	 * @deprecated use {@link #BUNDLE_VERSION_ATTRIBUTE}
-	 */
-	public final static String VERSION_MATCH_GREATERTHANOREQUAL = "greaterthan-or-equal";
-
-	/**
 	 * Manifest header (named &quot;Fragment-Host&quot;)
-	 * identifying the symbolic names (and optionally, version and match 
-	 * attributes ) of the bundles that the bundle is a fragment to.
+	 * identifying the symbolic name 
+	 * of another bundle for which that the bundle is a fragment.
 	 *
 	 * <p>The attribute value may be retrieved from the
 	 * <tt>Dictionary</tt> object returned by the <tt>Bundle.getHeaders</tt> method.
-	 * @since <b>1.4 EXPERIMENTAL</b>
+	 * @since 1.4 <b>EXPERIMENTAL</b>
 	 */
 	public final static String FRAGMENT_HOST = "Fragment-Host";
 
+	/**
+	 * Manifest header attribute (named &quot;multiple-hosts&quot;)
+	 * identifying if the fragment should attach to each bundle
+	 * selected by the Fragment-Host manifest header.
+	 * The default value is <tt>false</tt>.
+	 *
+	 * <p>The attribute value is encoded in the Fragment-Host
+	 * manifest header like:
+	 * <pre>
+	 * Fragment-Host: com.acme.module.test; multiple-hosts="false"
+	 * </pre>
+	 * @since 1.4 <b>EXPERIMENTAL</b>
+	 */
+	public final static String MULTIPLE_HOSTS_ATTRIBUTE = "multiple-hosts";
 
 	/**
-	 * Manifest header attribute (named &quot;selection-filter&quot;) is used for 
-	 * filtering of bundle native code and bundle classpath elements based upon 
-	 * system properties
+	 * Manifest header attribute (named &quot;selection-filter&quot;) is used for
+	 * selection by filtering based upon system properties.
+	 * 
+	 * <p>The attribute value is encoded in 
+	 * manifest headers like:
 	 * <pre>
-	 * Bundle-NativeCode: http.so ; selection-filter="(ws=gtk)" ...
-	 * Bundle-ClassPath: base.jar, gtk.jar ; selection-filter="(ws=gtk)" ...
+	 * Bundle-NativeCode: libgtk.so; selection-filter="(ws=gtk)"; ...
+	 * Bundle-ClassPath: base.jar, gtk.jar; selection-filter="(ws=gtk)", ...
 	 * </pre>
-	 * @since <b>1.4 EXPERIMENTAL</b>
+	 * @since 1.4 <b>EXPERIMENTAL</b>
 	 */
 	public final static String SELECTION_FILTER_ATTRIBUTE = "selection-filter";
-
 }

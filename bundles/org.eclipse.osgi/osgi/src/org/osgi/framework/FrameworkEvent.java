@@ -1,5 +1,5 @@
 /*
- * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/FrameworkEvent.java,v 1.2 2004/04/08 20:41:57 twatson Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/FrameworkEvent.java,v 1.3 2004/04/20 17:35:59 twatson Exp $
  *
  * Copyright (c) The Open Services Gateway Initiative (2000, 2002).
  * All Rights Reserved.
@@ -38,8 +38,7 @@ import java.util.EventObject;
  *
  * <p>OSGi reserves the right to extend the set of event types.
  *
- * @version $Revision: 1.2 $
- * @author Open Services Gateway Initiative
+ * @version $Revision: 1.3 $
  */
 
 public class FrameworkEvent extends EventObject
@@ -107,16 +106,6 @@ public class FrameworkEvent extends EventObject
     public final static int STARTLEVEL_CHANGED = 0x00000008;
 
     /**
-     * A warning has occurred.
-     *
-     * <p>There was a warning associated with a bundle.
-     *
-     * <p>The value of <tt>WARNING</tt> is 0x00000010.
-     * @since <b>1.4 EXPERIMENTAL</b>
-     */
-    public final static int WARNING = 0x00000010;
-
-    /**
      * Creates a Framework event.
      *
      * @param type The event type.
@@ -178,7 +167,6 @@ public class FrameworkEvent extends EventObject
      * <li>{@link #ERROR}
      * <li>{@link #PACKAGES_REFRESHED}
      * <li>{@link #STARTLEVEL_CHANGED}
-     * <li>{@link #WARNING}
      * </ul>
      * @return The type of state change.
      */

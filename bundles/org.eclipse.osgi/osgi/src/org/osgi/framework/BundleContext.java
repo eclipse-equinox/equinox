@@ -1,7 +1,7 @@
 /*
- * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/BundleContext.java,v 1.2 2004/02/19 19:24:51 twatson Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/BundleContext.java,v 1.3 2004/03/04 15:59:07 twatson Exp $
  *
- * Copyright (c) The Open Services Gateway Initiative (2000-2001).
+ * Copyright (c) The Open Services Gateway Initiative (2000, 2002).
  * All Rights Reserved.
  *
  * Implementation of certain elements of the Open Services Gateway Initiative
@@ -40,13 +40,13 @@ import java.util.Dictionary;
  * <p><tt>BundleContext</tt> methods allow a bundle to:
  * <ul>
  * <li>Subscribe to events published by the Framework.
- * <li>Register services in the Framework service registry.
+ * <li>Register service objects with the Framework service registry.
  * <li>Retrieve <tt>ServiceReferences</tt> from the Framework service registry.
  * <li>Get and release service objects for a referenced service.
  * <li>Install new bundles in the Framework.
  * <li>Get the list of bundles installed in the Framework.
  * <li>Get the {@link Bundle}object for a bundle.
- * <li>Create <code>File</code> objects for files in a
+ * <li>Create <tt>File</tt> objects for files in a
  * persistent storage area provided for the bundle by the Framework.
  * </ul>
  *
@@ -56,54 +56,50 @@ import java.util.Dictionary;
  * stopped using the {@link BundleActivator#stop}method.
  * <tt>BundleContext</tt> is generally for the private use of this bundle and
  * is not meant to be shared with other bundles in the OSGi environment. <tt>BundleContext</tt> is used
- * when resolving <tt>ServiceListener</tt>s and <tt>EventListener</tt>s.
+ * when resolving <tt>ServiceListener</tt> and <tt>EventListener</tt> objects.
  *
  * <p> The <tt>BundleContext</tt> object is only valid during an execution instance of
  * this bundle; that is, during the period from when this bundle is called by
  * <tt>BundleActivator.start</tt> until after this bundle is called and returns from
  * <tt>BundleActivator.stop</tt> (or if <tt>BundleActivator.start</tt> terminates with an exception).
  * If the <tt>BundleContext</tt> object is used subsequently,
- * an <tt>IllegalStateException</tt> may be thrown.
- * When this bundle is restarted, a new <tt>BundleContext</tt> object will be created.
+ * an <tt>IllegalStateException</tt> must be thrown.
+ * When this bundle is restarted, a new <tt>BundleContext</tt> object must be created.
  *
  * <p>The Framework is the only entity that can create <tt>BundleContext</tt>
  * objects and they are only valid within the Framework that created them.
  *
- * <p>Note: A single virtual machine may host multiple Framework instances at any
- * given time, but objects created by one Framework instance cannot be used by bundles
- * running in the execution context of another Framework instance.
- *
- * @version $Revision: 1.2 $
- * @author Open Services Gateway Initiative
+ * @version $Revision: 1.3 $
  */
 
-public abstract interface BundleContext {
+public abstract interface BundleContext
+{
 	/**
-	 * Returns the value of the specified environment property.
-	 * <p>The following standard property keys are valid:
-	 * <p>
-	 * <dl>
-	 * <dt>{@link Constants#FRAMEWORK_VERSION}
-	 * <dd>The OSGi Framework version.
-	 * <dt>{@link Constants#FRAMEWORK_VENDOR}
-	 * <dd>The Framework implementation vendor.
-	 * <dt>{@link Constants#FRAMEWORK_LANGUAGE}
-	 * <dd>The language being used.
-	 * See ISO 639 for possible values.
-	 * <dt>{@link Constants#FRAMEWORK_OS_NAME}
-	 * <dd>The host computer operating system.
-	 * <dt>{@link Constants#FRAMEWORK_OS_VERSION}
-	 * <dd>The host computer operating system version number.
-	 * <dt>{@link Constants#FRAMEWORK_PROCESSOR}
-	 * <dd>The host computer processor name.
-	 * </dl>
+	 * Returns the value of the specified property.
+	 * If the key is not found in the Framework properties, the system
+	 * properties are then searched. The method returns
+	 * <tt>null</tt> if the property is not found.
+	 *
+	 * <p>The Framework defines the following standard property keys:</p>
+	 * <ul>
+	 * <li>{@link Constants#FRAMEWORK_VERSION} - The OSGi Framework version.</li>
+	 * <li>{@link Constants#FRAMEWORK_VENDOR}  - The Framework implementation vendor.</li>
+	 * <li>{@link Constants#FRAMEWORK_LANGUAGE} - The language being used. See ISO 639 for possible values. </li>
+	 * <li>{@link Constants#FRAMEWORK_OS_NAME} - The host computer operating system.</li>
+	 * <li>{@link Constants#FRAMEWORK_OS_VERSION} - The host computer operating system version number.</li>
+	 * <li>{@link Constants#FRAMEWORK_PROCESSOR} - The host computer processor name.</li>
+	 * </ul>
+	 * <p>All bundles must have permission to read these properties.
 	 *
 	 * <p>Note: The last four standard properties are used by the
 	 * {@link Constants#BUNDLE_NATIVECODE}<tt>Manifest</tt> header's matching
 	 * algorithm for selecting native language code.
 	 *
 	 * @param key The name of the requested property.
-	 * @return The value of the requested property, or <code>null</code> if the property is undefined.
+	 * @return The value of the requested property, or <tt>null</tt> if the property is undefined.
+	 * @exception java.lang.SecurityException If the caller does not have
+	 * the appropriate <tt>PropertyPermission</tt> to read the property,
+	 * and the Java Runtime Environment supports permissions.
 	 */
 	public abstract String getProperty(String key);
 
@@ -133,30 +129,30 @@ public abstract interface BundleContext {
 	 * <li>The bundle's content is read from the location string. If this fails,
 	 * a {@link BundleException}is thrown.
 	 *
-	 * <li>The bundle's <tt>Bundle-ClassPath</tt> and <tt>Bundle-NativeCode</tt>
+	 * <li>The bundle's <tt>Bundle-NativeCode</tt>
 	 * dependencies are resolved. If this fails, a <tt>BundleException</tt> is thrown.
 	 *
 	 * <li>The bundle's associated resources are allocated. The associated resources minimally
 	 * consist of a unique identifier, and a persistent storage area if the platform has file
 	 * system support. If this step fails, a <tt>BundleException</tt> is thrown.
 	 *
-	 * <li>The bundle's state is set to <tt>INSTALLED</tt>.
+	 * <li>If the bundle has declared an Bundle-RequiredExecutionEnvironment header, then
+	 * the listed execution environments must be verified against the installed
+	 * execution environments. If they are not all present, a <tt>BundleException</tt> must be thrown.
 	 *
-	 * <li>If the bundle has not declared an Import-Package Manifest header
-	 * (that is, the bundle does not depend on any packages from other OSGi bundles), the
-	 * bundle's state may be set to <tt>RESOLVED</tt>.
+	 * <li>The bundle's state is set to <tt>INSTALLED</tt>.
 	 *
 	 * <li>A bundle event of type {@link BundleEvent#INSTALLED}is broadcast.
 	 *
 	 * <li>The <tt>Bundle</tt> object for the newly installed bundle is returned.
 	 * </ol>
 	 *
-	 * <h5>Postconditions, no exceptions thrown</h5>
+	 * <b>Postconditions, no exceptions thrown</b>
 	 * <ul>
 	 * <li><tt>getState()</tt> in {<tt>INSTALLED</tt>}, <tt>RESOLVED</tt>}.
 	 * <li>Bundle has a unique ID.
 	 * </ul>
-	 * <h5>Postconditions, when an exception is thrown</h5>
+	 * <b>Postconditions, when an exception is thrown</b>
 	 * <ul>
 	 * <li>Bundle is not installed and no trace of the bundle exists.
 	 * </ul>
@@ -168,7 +164,7 @@ public abstract interface BundleContext {
 	 * the appropriate <tt>AdminPermission</tt>, and the Java Runtime Environment supports permissions.
 	 */
 	public abstract Bundle installBundle(String location)
-		throws BundleException;
+    throws BundleException;
 
 	/**
 	 * Installs the bundle from the specified <tt>InputStream</tt> object.
@@ -177,15 +173,17 @@ public abstract interface BundleContext {
 	 * except that the bundle's content will be read from the <tt>InputStream</tt> object.
 	 * The location identifier string specified will be used as the identity of the bundle.
 	 *
-	 * <p>This method will always close the <tt>InputStream</tt> object, even if an exception is thrown.
+	 * <p>This method must always close the <tt>InputStream</tt> object, even if an exception is thrown.
 	 * @param location The location identifier of the bundle to install.
 	 * @param in The <tt>InputStream</tt> object from which this bundle will be read.
 	 * @return The <tt>Bundle</tt> object of the installed bundle.
-	 * @exception BundleException If the provided stream cannot be read.
+	 * @exception BundleException If the provided stream cannot be read or the installation failed.
+	 * @exception java.lang.SecurityException If the caller does not have
+	 * the appropriate <tt>AdminPermission</tt>, and the Java Runtime Environment supports permissions.
 	 * @see #installBundle(java.lang.String)
 	 */
-	public abstract Bundle installBundle(String location, InputStream in)
-		throws BundleException;
+    public abstract Bundle installBundle(String location, InputStream input)
+    throws BundleException;
 
 	/**
 	 * Returns the bundle with the specified identifier.
@@ -224,6 +222,18 @@ public abstract interface BundleContext {
 	 * If <tt>filter</tt> is <tt>null</tt>, all services
 	 * are considered to match the filter.
 	 *
+	 * <p>When using a <tt>filter</tt>, it is possible that the <tt>ServiceEvent</tt>s
+	 * for the complete life cycle of a service will not be delivered to
+	 * the listener.
+	 * For example, if the <tt>filter</tt> only matches when the property <tt>x</tt>
+	 * has the value <tt>1</tt>, the listener will not be called
+	 * if the service is registered with the property <tt>x</tt> not set to the value
+	 * <tt>1</tt>. Subsequently, when the service is modified setting
+	 * property <tt>x</tt> to the value <tt>1</tt>, the filter will match
+	 * and the listener will be called with a <tt>ServiceEvent</tt>
+	 * of type <tt>MODIFIED</tt>. Thus, the listener will not be called with a
+	 * <tt>ServiceEvent</tt> of type <tt>REGISTERED</tt>.
+	 *
 	 * <p>If the Java Runtime Environment supports permissions, the
 	 * <tt>ServiceListener</tt> object will be notified of a service event only
 	 * if the bundle that is registering it has the <tt>ServicePermission</tt>
@@ -232,7 +242,7 @@ public abstract interface BundleContext {
 	 * @param listener The <tt>ServiceListener</tt> object to be added.
 	 * @param filter The filter criteria.
 	 *
-	 * @exception InvalidSyntaxException If </tt>filter</tt> contains
+	 * @exception InvalidSyntaxException If <tt>filter</tt> contains
 	 * an invalid filter string which cannot be parsed.
 	 * @exception java.lang.IllegalStateException If this context bundle has stopped.
 	 *
@@ -240,10 +250,9 @@ public abstract interface BundleContext {
 	 * @see ServiceListener
 	 * @see ServicePermission
 	 */
-	public abstract void addServiceListener(
-		ServiceListener listener,
-		String filter)
-		throws InvalidSyntaxException;
+    public abstract void addServiceListener(ServiceListener listener,
+                        String filter)
+    throws InvalidSyntaxException;
 
 	/**
 	 * Adds the specified <tt>ServiceListener</tt> object to this context bundle's list of
@@ -350,9 +359,9 @@ public abstract interface BundleContext {
 	 *
 	 * <p>The following steps are required to register a service:
 	 * <ol>
-	 * <li>If </tt>service</tt> is not a <tt>ServiceFactory</tt>,
+	 * <li>If <tt>service</tt> is not a <tt>ServiceFactory</tt>,
 	 * an <tt>IllegalArgumentException</tt> is thrown if <tt>service</tt> is not an
-	 * <code>instanceof</code> all the classes named.
+	 * <tt>instanceof</tt> all the classes named.
 	 * <li>The Framework adds these service properties to the specified
 	 * <tt>Dictionary</tt> (which may be <tt>null</tt>):
 	 * a property named {@link Constants#SERVICE_ID}identifying the
@@ -370,19 +379,19 @@ public abstract interface BundleContext {
 	 * {@link Constants#OBJECTCLASS}.
 	 * @param service The service object or a <tt>ServiceFactory</tt> object.
 	 * @param properties The properties for this service. The keys in the properties object must
-	 * all be Strings. See {@link Constants}for a list of standard service property keys.
+	 * all be <tt>String</tt> objects. See {@link Constants}for a list of standard service property keys.
 	 * Changes should not be made to this object after calling this method.
 	 * To update the service's properties the {@link ServiceRegistration#setProperties}method must be called.
-	 * <tt>properties</tt> may be <code>null</code> if the service has no properties.
+	 * <tt>properties</tt> may be <tt>null</tt> if the service has no properties.
 	 *
 	 * @return A <tt>ServiceRegistration</tt> object for use by the bundle
 	 * registering the service to update the service's properties or to unregister the service.
 	 *
 	 * @exception java.lang.IllegalArgumentException If one of the following is true:
 	 * <ul>
-	 * <li><tt>service</tt> is null.
+	 * <li><tt>service</tt> is <tt>null</tt>.
 	 * <li><tt>service</tt> is not a <tt>ServiceFactory</tt> object and is not an
-	 * <tt>instanceof</tt> all the named classes in <tt>clazzes</tt>.
+	 * instance of all the named classes in <tt>clazzes</tt>.
 	 * <li><tt>properties</tt> contains case variants of the same key name.
 	 * </ul>
 	 *
@@ -390,19 +399,18 @@ public abstract interface BundleContext {
 	 * <tt>ServicePermission</tt> to register the service for all the named classes and
 	 * the Java Runtime Environment supports permissions.
 	 *
-	 * @exception java.lang.IllegalStateException If this context bundle has stopped.
+	 * @exception java.lang.IllegalStateException If this context bundle was stopped.
 	 *
 	 * @see ServiceRegistration
 	 * @see ServiceFactory
 	 */
-	public abstract ServiceRegistration registerService(
-		String[] clazzes,
-		Object service,
-		Dictionary properties);
+    public abstract ServiceRegistration registerService(String[] clazzes,
+                            Object service,
+                            Dictionary properties);
 
 	/**
 	 * Registers the specified service object with the specified properties
-	 * under the specified class name into the Framework.
+	 * under the specified class name with the Framework.
 	 *
 	 * <p>This method is otherwise identical to
 	 * {@link #registerService(java.lang.String[], java.lang.Object,
@@ -413,10 +421,9 @@ public abstract interface BundleContext {
 	 * @see #registerService(java.lang.String[], java.lang.Object,
 	 * java.util.Dictionary)
 	 */
-	public abstract ServiceRegistration registerService(
-		String clazz,
-		Object service,
-		Dictionary properties);
+    public abstract ServiceRegistration registerService(String clazz,
+                            Object service,
+                            Dictionary properties);
 
 	/**
 	 * Returns a list of <tt>ServiceReference</tt> objects. This method returns a list of
@@ -445,7 +452,7 @@ public abstract interface BundleContext {
 	 * produced.
 	 * If the filter string is <tt>null</tt>, then all registered services
 	 * are considered to satisfy the filter.
-	 * <li>If <code>clazz</code> is not <tt>null</tt>, the set is further reduced to
+	 * <li>If <tt>clazz</tt> is not <tt>null</tt>, the set is further reduced to
 	 * those services which are an <tt>instanceof</tt> and were registered under the specified class.
 	 * The complete list of classes of which a service is an instance and which
 	 * were specified when the service was registered is available from the
@@ -461,10 +468,9 @@ public abstract interface BundleContext {
 	 * @exception InvalidSyntaxException If <tt>filter</tt> contains
 	 * an invalid filter string which cannot be parsed.
 	 */
-	public abstract ServiceReference[] getServiceReferences(
-		String clazz,
-		String filter)
-		throws InvalidSyntaxException;
+    public abstract ServiceReference[] getServiceReferences(String clazz,
+                                String filter)
+    throws InvalidSyntaxException;
 
 	/**
 	 * Returns a <tt>ServiceReference</tt> object for a service that implements, and
@@ -475,11 +481,11 @@ public abstract interface BundleContext {
 	 * environment, services can be modified or unregistered at anytime.
 	 *
 	 * <p> This method is the same as calling {@link #getServiceReferences}with a
-	 * <code>null</code> filter string.
+	 * <tt>null</tt> filter string.
 	 * It is provided as a convenience for when the caller is interested in any service that
 	 * implements the specified class. <p>If multiple such services exist, the service
 	 * with the highest ranking (as specified in its {@link Constants#SERVICE_RANKING}property) is
-	 * returned. 
+	 * returned.
 	 * <p>If there is a tie in ranking, the service with the lowest
 	 * service ID (as specified in its {@link Constants#SERVICE_ID}property); that is,
 	 * the service that was registered first is returned.
@@ -517,15 +523,16 @@ public abstract interface BundleContext {
 	 * zero, subsequent calls to get the services's service object for the
 	 * context bundle will return the cached service object.
 	 * <br>If the service object returned by the <tt>ServiceFactory</tt> object
-	 * is not an <code>instanceof</code> all the classes named when the service was registered or
+	 * is not an <tt>instanceof</tt> all the classes named when the service was registered or
 	 * the <tt>ServiceFactory</tt> object throws an exception, <tt>null</tt> is returned and a
 	 * Framework event of type {@link FrameworkEvent#ERROR}is broadcast.
 	 * <li>The service object for the service is returned.
 	 * </ol>
 	 *
-	 * @param reference A reference to target service object's service.
+	 * @param reference A reference to the service.
 	 * @return A service object for the service associated with <tt>reference</tt>,
-	 * or <tt>null</tt> if the service is not registered.
+	 * or <tt>null</tt> if the service is not registered or does not implement the classes
+	 * under which it was registered in the case of a Service Factory.
 	 * @exception java.lang.SecurityException If the caller does not have
 	 * the <tt>ServicePermission</tt> to get the service using at least one of the named classes
 	 * the service was registered under, and the Java Runtime Environment supports permissions.
@@ -580,7 +587,7 @@ public abstract interface BundleContext {
 	 *
 	 * <p>If the Java Runtime Environment supports permissions,
 	 * the Framework will ensure that the bundle has the <tt>java.io.FilePermission</tt> with actions
-	 * <tt>read</tt>, <tt>write</tt>, <tt>execute</tt>, <tt>delete</tt> for all files (recursively) in the
+	 * <tt>read</tt>, <tt>write</tt>, <tt>delete</tt> for all files (recursively) in the
 	 * persistent storage area provided for the context bundle.
 	 *
 	 * @param filename A relative name to the file to be accessed.
@@ -600,12 +607,14 @@ public abstract interface BundleContext {
 	 *
 	 * @param filter The filter string.
 	 * @return A <tt>Filter</tt> object encapsulating the filter string.
-	 * @exception InvalidSyntaxException If </tt>filter</tt> contains
+	 * @exception InvalidSyntaxException If <tt>filter</tt> contains
 	 * an invalid filter string that cannot be parsed.
+	 * @exception NullPointerException If <tt>filter</tt> is null.
 	 *
 	 * @since 1.1
 	 */
 	public abstract Filter createFilter(String filter)
-		throws InvalidSyntaxException;
-
+    throws InvalidSyntaxException;
 }
+
+

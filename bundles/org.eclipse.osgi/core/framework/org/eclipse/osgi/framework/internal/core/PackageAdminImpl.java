@@ -190,7 +190,7 @@ public class PackageAdminImpl implements PackageAdmin {
 				Vector result = new Vector();
 				for (int i = 0; i < elements.length; i++) {
 					ExportedPackageImpl pkgElement = (ExportedPackageImpl) elements[i];
-					if (pkgElement.supplier.getBundle() == bundle) {
+					if (pkgElement.supplier.getBundleHost() == bundle) {
 						result.add(pkgElement);
 					}
 				}
@@ -425,7 +425,7 @@ public class PackageAdminImpl implements PackageAdmin {
 				for (int i = removalPending.size() - 1; i >= 0; i--) {
 					BundleLoaderProxy loaderProxy = (BundleLoaderProxy) removalPending.elementAt(i);
 
-					if (graph.contains(loaderProxy.getBundle())) {
+					if (graph.contains(loaderProxy.getBundleHost())) {
 						framework.bundles.unMarkDependancies(loaderProxy);
 					}
 				}
@@ -446,7 +446,7 @@ public class PackageAdminImpl implements PackageAdmin {
 				}
 				for (int i = removalPending.size() - 1; i >= 0; i--) {
 					BundleLoaderProxy loaderProxy = (BundleLoaderProxy) removalPending.elementAt(i);
-					AbstractBundle removedBundle = loaderProxy.getBundle();
+					AbstractBundle removedBundle = loaderProxy.getBundleHost();
 
 					if (graph.contains(removedBundle)) {
 						deleteRemovalPending(loaderProxy);
@@ -548,7 +548,7 @@ public class PackageAdminImpl implements PackageAdmin {
 			int size = removalPending.size();
 			for (int i = 0; i < size; i++) {
 				BundleLoaderProxy loaderProxy = (BundleLoaderProxy) removalPending.elementAt(i);
-				AbstractBundle bundle = loaderProxy.getBundle();
+				AbstractBundle bundle = loaderProxy.getBundleHost();
 				if (!graph.contains(bundle)) {
 					if (Debug.DEBUG && Debug.DEBUG_PACKAGEADMIN) {
 						Debug.println(" refresh: " + bundle); //$NON-NLS-1$
@@ -652,7 +652,7 @@ public class PackageAdminImpl implements PackageAdmin {
 			// the removalpending bundle was not in the original list
 			for (int i = removalPending.size() - 1; i >= 0; i--) {
 				BundleLoaderProxy removedLoaderProxy = (BundleLoaderProxy) removalPending.elementAt(i);
-				AbstractBundle removedBundle = removedLoaderProxy.getBundle();
+				AbstractBundle removedBundle = removedLoaderProxy.getBundleHost();
 				AbstractBundle[] dependents = removedLoaderProxy.getDependentBundles();
 				for (int k = 0; k < dependents.length; k++) {
 					if (!graph.contains(dependents[k])) {
@@ -827,7 +827,7 @@ public class PackageAdminImpl implements PackageAdmin {
 		return (BundleDescription[]) result.toArray(new BundleDescription[result.size()]);
 	}
 
-	public NamedClassSpace[] getNamedClassSpaces(String symbolicName) {
+	public ProvidingBundle[] getProvidingBundles(String symbolicName) {
 		if (exportedBundles == null || exportedBundles.size() == 0)
 			return null;
 
@@ -839,17 +839,17 @@ public class PackageAdminImpl implements PackageAdmin {
 			if (allSymbolicBundles.length == 0) {
 				return null;
 			}
-			NamedClassSpace[] result = new NamedClassSpace[allSymbolicBundles.length];
+			ProvidingBundle[] result = new ProvidingBundle[allSymbolicBundles.length];
 			System.arraycopy(allSymbolicBundles, 0, result, 0, result.length);
 			return result;
 		} else {
 			ArrayList result = new ArrayList();
 			for (int i = 0; i < allSymbolicBundles.length; i++) {
-				NamedClassSpace symBundle = (NamedClassSpace) allSymbolicBundles[i];
-				if (symBundle.getName().equals(symbolicName))
+				ProvidingBundle symBundle = (ProvidingBundle) allSymbolicBundles[i];
+				if (symBundle.getSymbolicName().equals(symbolicName))
 					result.add(symBundle);
 			}
-			return (NamedClassSpace[]) result.toArray(new NamedClassSpace[result.size()]);
+			return (ProvidingBundle[]) result.toArray(new ProvidingBundle[result.size()]);
 		}
 	}
 
