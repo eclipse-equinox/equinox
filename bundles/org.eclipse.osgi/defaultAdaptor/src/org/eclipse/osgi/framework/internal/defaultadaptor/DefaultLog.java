@@ -285,8 +285,12 @@ public class DefaultLog implements FrameworkLog {
 
 		// Write out certain values found in System.getProperties()
 		try {
-			String key = "java.fullversion"; //$NON-NLS-1$
-			String value = System.getProperty(key);
+			String key = "eclipse.buildId"; //$NON-NLS-1$
+			String value = System.getProperty(key, "unknown"); //$NON-NLS-1$
+			writeln(key + "=" + value); //$NON-NLS-1$
+
+			key = "java.fullversion"; //$NON-NLS-1$
+			value = System.getProperty(key);
 			if (value == null) {
 				key = "java.version"; //$NON-NLS-1$
 				value = System.getProperty(key);
@@ -301,7 +305,6 @@ public class DefaultLog implements FrameworkLog {
 			// If we're not allowed to get the values of these properties
 			// then just skip over them.
 		}
-
 	}
 
 	protected void writeEntry(int depth, FrameworkLogEntry entry) throws IOException {
