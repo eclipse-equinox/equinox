@@ -95,6 +95,8 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 
 	private FileManager fileManager;
 
+	private boolean reinitialize = false;
+
 	/*
 	 * Should be instantiated only by the framework (through reflection).
 	 */
@@ -142,7 +144,9 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 		return EclipseStarter.createFrameworkLog();
 	}
 
-	protected StateManager createStateManager() {
+	private File[] findStateFiles() {
+		if (reinitialize)
+			return new File[2]; // return null enties to indicate reinitialize
 		File stateFile = null;
 		File lazyFile = null;
 		try {
@@ -185,6 +189,14 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 				}
 			}
 		}
+		return new File[] {stateFile, lazyFile};
+	}
+
+	protected StateManager createStateManager() {
+		File[] stateFiles = findStateFiles();
+		File stateFile = stateFiles[0];
+		File lazyFile = stateFiles[1];
+
 		stateManager = new StateManager(stateFile, lazyFile, context, timeStamp);
 		stateManager.setInstaller(new EclipseBundleInstaller());
 		StateImpl systemState = null;
@@ -246,17 +258,8 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 			return;
 		}
 		if (!EclipseStarter.getSysPath().equals(installURL)) {
-			// delete the metadata file and the framework file when the location of the basic bundles has changed
-
-			try {
-				fileManager.remove(LocationManager.BUNDLE_DATA_FILE);
-				fileManager.remove(LocationManager.STATE_FILE);
-			} catch (IOException ex) {
-				if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-					Debug.println("Error deleting framework metadata: " + ex.getMessage()); //$NON-NLS-1$
-					Debug.printStackTrace(ex);
-				}
-			}
+			// reinitialize bundledata and state files
+			reinitialize = true;
 
 			installURL = EclipseStarter.getSysPath();
 		}
@@ -411,6 +414,8 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 	}
 
 	private InputStream findBundleDataFile() {
+		if (reinitialize)
+			return null; // return null to indicate we are reinitializing
 		File metadata = null;
 		try {
 			metadata = fileManager.lookup(LocationManager.BUNDLE_DATA_FILE, false);
