@@ -17,9 +17,10 @@ import java.util.ArrayList;
  * The ListenerQueue is used to snapshot the set of listeners at the time the event
  * is fired. The snapshot list is then used to dispatch
  * events to those listeners. A ListenerQueue object is associated with a
- * specific EventManager object. ListenerQueue objects that use the same
- * EventManager object will get in order delivery of events
- * within each delivery class: synchronous and asynchronous.
+ * specific EventManager object. ListenerQueue objects constructed with the same
+ * EventManager object will get in-order delivery of events
+ * using asynchronous delivery. No delivery order is guaranteed for synchronous
+ * delivery to avoid any potential deadly embraces.
  *
  * <p>ListenerQueue objects are created as necesssary to build a set of listeners
  * that should receive a specific event or events. Once the set is created, the event
@@ -130,12 +131,12 @@ public class ListenerQueue {
 		synchronized (this) {
 			readOnly = true;
 		}
-		synchronized (manager) { /* synchronize on the EventManager to ensure no interleaving of event delivery */
-			int size = queue.size();
-			for (int i = 0; i < size; i++) { /* iterate over the list of listener lists */
-				ListElement list = (ListElement)queue.get(i);
-				EventManager.dispatchEvent((ListElement[]) list.primary, (EventDispatcher) list.companion, eventAction, eventObject);
-			}
+		// We can't guarantee any delivery order for synchronous events.
+		// Attempts to do so result in deadly embraces.
+		int size = queue.size();
+		for (int i = 0; i < size; i++) { /* iterate over the list of listener lists */
+			ListElement list = (ListElement)queue.get(i);
+			EventManager.dispatchEvent((ListElement[]) list.primary, (EventDispatcher) list.companion, eventAction, eventObject);
 		}
 	}
 }
