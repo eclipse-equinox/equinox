@@ -171,6 +171,7 @@ public class PluginConverterImpl implements PluginConverter, IModel {
 			}
 			// replaces any eventual existing file
 			out = new BufferedWriter(new FileWriter(generationLocation));
+			generateManifestVersion();
 			generateTimestamp();		
 			generateHeaders();
 			generateClasspath();
@@ -192,6 +193,11 @@ public class PluginConverterImpl implements PluginConverter, IModel {
 				}
 		}
 	}
+
+	private void generateManifestVersion() throws IOException {
+		writeEntry("Manifest-Version", "1.0"); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
 	private boolean requireRuntimeCompatibility() {
 		ArrayList requireList = pluginInfo.getRequires();
 		for (Iterator iter = requireList.iterator(); iter.hasNext();) {
