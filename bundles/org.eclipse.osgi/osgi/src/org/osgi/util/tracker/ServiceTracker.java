@@ -1,5 +1,5 @@
 /*
- * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/util/tracker/ServiceTracker.java,v 1.2 2004/05/03 04:23:58 hargrave Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/util/tracker/ServiceTracker.java,v 1.3 2004/05/14 21:23:14 hargrave Exp $
  *
  * Copyright (c) The Open Services Gateway Initiative (2000, 2002).
  * All Rights Reserved.
@@ -52,7 +52,7 @@ import java.util.*;
  * and <tt>getServices</tt> methods can be called to get the service
  * objects for the tracked service.
  *
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 
 public class ServiceTracker implements ServiceTrackerCustomizer
@@ -99,19 +99,19 @@ public class ServiceTracker implements ServiceTrackerCustomizer
 
     /** Modification count. This field is initialized to zero by
      * open, set to -1 by close and incremented by modified. 
-     * Access to this field must be protected by a synchronized region.
+     * This field is volatile since it is accessed by multiple threads.
      */
-    private int trackingCount = -1; 
+    private volatile int trackingCount = -1; 
     
     /** Cached ServiceReference for getServiceReference. 
-     * Access to this field must be protected by a synchronized region.
+     * This field is volatile since it is accessed by multiple threads.
      */
-    private ServiceReference cachedReference;
+    private volatile ServiceReference cachedReference;
     
     /** Cached service object for getService. 
-     * Access to this field must be protected by a synchronized region.
+     * This field is volatile since it is accessed by multiple threads.
      */
-    private Object cachedService;
+    private volatile Object cachedService;
     
     /**
 	 * Create a <tt>ServiceTracker</tt> object on the specified <tt>ServiceReference</tt> object.
@@ -326,7 +326,7 @@ public class ServiceTracker implements ServiceTrackerCustomizer
 
         if (DEBUG)
         {
-    		if ((cachedReference == null) &&(cachedService == null)) {
+    		if ((cachedReference == null) && (cachedService == null)) {
                 System.out.println("ServiceTracker.close[cached cleared]: "+filter); //$NON-NLS-1$
     		}
         }
@@ -501,14 +501,13 @@ public class ServiceTracker implements ServiceTrackerCustomizer
 	 */
     public ServiceReference getServiceReference()
     {
-    	synchronized (this) {
-        	if (cachedReference != null) {
-            	if (DEBUG)
-                {
-                    System.out.println("ServiceTracker.getServiceReference[cached]: "+filter); //$NON-NLS-1$
-                }
-        		return cachedReference;
-        	}
+    	ServiceReference reference = cachedReference;
+    	if (reference != null) {
+        	if (DEBUG)
+            {
+                System.out.println("ServiceTracker.getServiceReference[cached]: "+filter); //$NON-NLS-1$
+            }
+    		return reference;
     	}
     	
     	if (DEBUG)
@@ -577,10 +576,7 @@ public class ServiceTracker implements ServiceTrackerCustomizer
             }
         }
 
-    	synchronized (this) {
-    		cachedReference = references[index];
-            return cachedReference;
-    	}	
+        return cachedReference = references[index];
     }
 
     /**
@@ -655,14 +651,13 @@ public class ServiceTracker implements ServiceTrackerCustomizer
 	 */
     public Object getService()
     {
-    	synchronized (this) {
-        	if (cachedService != null) {
-            	if (DEBUG)
-                {
-                    System.out.println("ServiceTracker.getService[cached]: "+filter); //$NON-NLS-1$
-                }
-        		return cachedService;
-        	}
+    	Object service = cachedService;
+    	if (service != null) {
+        	if (DEBUG)
+            {
+                System.out.println("ServiceTracker.getService[cached]: "+filter); //$NON-NLS-1$
+            }
+    		return service;
     	}
 
     	if (DEBUG)
@@ -677,11 +672,7 @@ public class ServiceTracker implements ServiceTrackerCustomizer
             return null;
         }
 
-        Object service = getService(reference); 
-    	synchronized (this) {
-    		cachedService = service;
-            return cachedService;
-    	}	
+        return cachedService = getService(reference); 
     }
 
     /**
@@ -745,7 +736,7 @@ public class ServiceTracker implements ServiceTrackerCustomizer
 	 * @return The tracking count for this <tt>ServiceTracker</tt> object
 	 * or -1 if this <tt>ServiceTracker</tt> object is not open.
 	 */
-    public synchronized int getTrackingCount()
+    public int getTrackingCount()
     {
         return trackingCount;
     }
@@ -754,7 +745,12 @@ public class ServiceTracker implements ServiceTrackerCustomizer
      * Called by the Tracked object whenever the set of tracked services is modified.
      * Increments the tracking count and clears the cache.
      */
-    private synchronized void modified()
+    /*
+     * This method should be synchronized since it is called by Tracked while
+     * Tracked is synchronized. We don't want synchronization interactions between
+     * the ServiceListener thread and the user thread.
+     */
+    private void modified()
     {
         trackingCount++;            /* increment modification count */
         cachedReference = null;		/* clear cached value */
