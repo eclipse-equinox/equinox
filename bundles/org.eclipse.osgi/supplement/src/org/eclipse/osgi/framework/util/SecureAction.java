@@ -14,6 +14,7 @@ package org.eclipse.osgi.framework.util;
 import java.io.*;
 import java.security.*;
 import java.util.Properties;
+import java.util.zip.ZipFile;
 
 /**
  * Utility class to execute common privileged code.
@@ -28,12 +29,11 @@ public class SecureAction {
 	public static String getProperty(final String property) {
 		if (System.getSecurityManager() == null)
 			return System.getProperty(property);
-		else
-			return (String) AccessController.doPrivileged(new PrivilegedAction() {
-				public Object run() {
-					return System.getProperty(property);
-				}
-			});
+		return (String) AccessController.doPrivileged(new PrivilegedAction() {
+			public Object run() {
+				return System.getProperty(property);
+			}
+		});
 	}
 
 	/**
@@ -47,12 +47,11 @@ public class SecureAction {
 	public static String getProperty(final String property, final String def) {
 		if (System.getSecurityManager() == null)
 			return System.getProperty(property, def);
-		else
-			return (String) AccessController.doPrivileged(new PrivilegedAction() {
-				public Object run() {
-					return System.getProperty(property, def);
-				}
-			});
+		return (String) AccessController.doPrivileged(new PrivilegedAction() {
+			public Object run() {
+				return System.getProperty(property, def);
+			}
+		});
 	}
 
 	/**
@@ -63,12 +62,11 @@ public class SecureAction {
 	public static Properties getProperties() {
 		if (System.getSecurityManager() == null)
 			return System.getProperties();
-		else
-			return (Properties) AccessController.doPrivileged(new PrivilegedAction() {
-				public Object run() {
-					return System.getProperties();
-				}
-			});
+		return (Properties) AccessController.doPrivileged(new PrivilegedAction() {
+			public Object run() {
+				return System.getProperties();
+			}
+		});
 	}
 
 	/**
@@ -81,16 +79,15 @@ public class SecureAction {
 	public static FileInputStream getFileInputStream(final File file) throws FileNotFoundException {
 		if (System.getSecurityManager() == null)
 			return new FileInputStream(file);
-		else
-			try {
-				return (FileInputStream) AccessController.doPrivileged(new PrivilegedExceptionAction() {
-					public Object run() throws FileNotFoundException {
-						return new FileInputStream(file);
-					}
-				});
-			} catch (PrivilegedActionException e) {
-				throw (FileNotFoundException) e.getException();
-			}
+		try {
+			return (FileInputStream) AccessController.doPrivileged(new PrivilegedExceptionAction() {
+				public Object run() throws FileNotFoundException {
+					return new FileInputStream(file);
+				}
+			});
+		} catch (PrivilegedActionException e) {
+			throw (FileNotFoundException) e.getException();
+		}
 	}
 
 	/**
@@ -104,16 +101,79 @@ public class SecureAction {
 	public static FileOutputStream getFileOutputStream(final File file, final boolean append) throws FileNotFoundException {
 		if (System.getSecurityManager() == null)
 			return new FileOutputStream(file.getAbsolutePath(), append);
-		else
-			try {
-				return (FileOutputStream) AccessController.doPrivileged(new PrivilegedExceptionAction() {
-					public Object run() throws FileNotFoundException {
-						return new FileOutputStream(file.getAbsolutePath(), append);
-					}
-				});
-			} catch (PrivilegedActionException e) {
-				throw (FileNotFoundException) e.getException();
+		try {
+			return (FileOutputStream) AccessController.doPrivileged(new PrivilegedExceptionAction() {
+				public Object run() throws FileNotFoundException {
+					return new FileOutputStream(file.getAbsolutePath(), append);
+				}
+			});
+		} catch (PrivilegedActionException e) {
+			throw (FileNotFoundException) e.getException();
+		}
+	}
+
+	public static long length(final File file) {
+		if (System.getSecurityManager() == null)
+			return file.length();
+		return ((Long) AccessController.doPrivileged(new PrivilegedAction() {
+			public Object run() {
+				return new Long(file.length());
 			}
+		})).longValue();
+	}
+
+	public static boolean exists(final File file) {
+		if (System.getSecurityManager() == null)
+			return file.exists();
+		return ((Boolean) AccessController.doPrivileged(new PrivilegedAction() {
+			public Object run() {
+				return new Boolean(file.exists());
+			}
+		})).booleanValue();
+	}
+
+	public static boolean isDirectory(final File file) {
+		if (System.getSecurityManager() == null)
+			return file.isDirectory();
+		return ((Boolean) AccessController.doPrivileged(new PrivilegedAction() {
+			public Object run() {
+				return new Boolean(file.isDirectory());
+			}
+		})).booleanValue();
+	}
+
+	public static long lastModified(final File file) {
+		if (System.getSecurityManager() == null)
+			return file.lastModified();
+		return ((Long) AccessController.doPrivileged(new PrivilegedAction() {
+			public Object run() {
+				return new Long(file.lastModified());
+			}
+		})).longValue();
+	}
+
+	public static String[] list(final File file) {
+		if (System.getSecurityManager() == null)
+			return file.list();
+		return (String[]) AccessController.doPrivileged(new PrivilegedAction() {
+			public Object run() {
+				return file.list();
+			}
+		});
+	}
+
+	public static ZipFile getZipFile(final File file) throws IOException {
+		if (System.getSecurityManager() == null)
+			return new ZipFile(file);
+		try {
+			return (ZipFile) AccessController.doPrivileged(new PrivilegedExceptionAction() {
+				public Object run() throws IOException {
+					return new ZipFile(file);
+				}
+			});
+		} catch (PrivilegedActionException e) {
+			throw (IOException) e.getException();
+		}
 	}
 
 	/**
@@ -126,13 +186,11 @@ public class SecureAction {
 	public static Thread createThread(final Runnable target, final String name) {
 		if (System.getSecurityManager() == null)
 			return new Thread(target, name);
-		else {
-			return (Thread) AccessController.doPrivileged(new PrivilegedAction() {
-				public Object run() {
-					return new Thread(target, name);
-				}
-			});
-		}
+		return (Thread) AccessController.doPrivileged(new PrivilegedAction() {
+			public Object run() {
+				return new Thread(target, name);
+			}
+		});
 	}
 
 }
