@@ -174,13 +174,6 @@ public class Framework implements EventSource, EventPublisher {
 	}
 	private void createSystemBundle() {
 		try {
-			String resource = Constants.OSGI_SYSTEMBUNDLE_MANIFEST;
-			InputStream in = getClass().getResourceAsStream(resource);
-			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-				if (in == null) {
-					Debug.println("Unable to find system bundle manifest " + resource);
-				}
-			}
 			systemBundle = new SystemBundle(this);
 			BundleDescription newSystemBundle = adaptor.getPlatformAdmin().getFactory().createBundleDescription(systemBundle.getHeaders(), Constants.SYSTEM_BUNDLE_LOCATION, 0);
 			if (newSystemBundle == null)
