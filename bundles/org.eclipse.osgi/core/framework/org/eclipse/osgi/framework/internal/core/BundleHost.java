@@ -52,12 +52,12 @@ public class BundleHost extends AbstractBundle {
 	protected void load() throws BundleException {
 		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 			if ((state & (INSTALLED)) == 0) {
-				Debug.println("Bundle.load called when state != INSTALLED: " + this);
-				Debug.printStackTrace(new Exception("Stack trace"));
+				Debug.println("Bundle.load called when state != INSTALLED: " + this); //$NON-NLS-1$
+				Debug.printStackTrace(new Exception("Stack trace")); //$NON-NLS-1$
 			}
 			if (loader != null) {
-				Debug.println("Bundle.load called when loader != null: " + this);
-				Debug.printStackTrace(new Exception("Stack trace"));
+				Debug.println("Bundle.load called when loader != null: " + this); //$NON-NLS-1$
+				Debug.printStackTrace(new Exception("Stack trace")); //$NON-NLS-1$
 			}
 		}
 
@@ -86,8 +86,8 @@ public class BundleHost extends AbstractBundle {
 	protected boolean unresolve() throws BundleException {
 		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 			if ((state & (INSTALLED | RESOLVED)) == 0) {
-				Debug.println("Bundle.reload called when state != INSTALLED | RESOLVED: " + this);
-				Debug.printStackTrace(new Exception("Stack trace"));
+				Debug.println("Bundle.reload called when state != INSTALLED | RESOLVED: " + this); //$NON-NLS-1$
+				Debug.printStackTrace(new Exception("Stack trace")); //$NON-NLS-1$
 			}
 		}
 
@@ -100,7 +100,7 @@ public class BundleHost extends AbstractBundle {
 				if (isActive()) {
 					boolean suspended = framework.suspendBundle(this, true);
 					if (!suspended) {
-						throw new BundleException(Msg.formatter.getString("BUNDLE_STATE_CHANGE_EXCEPTION"));
+						throw new BundleException(Msg.formatter.getString("BUNDLE_STATE_CHANGE_EXCEPTION")); //$NON-NLS-1$
 					}
 				} else {
 					beginStateChange();
@@ -154,8 +154,8 @@ public class BundleHost extends AbstractBundle {
 	protected boolean reload(AbstractBundle newBundle) throws BundleException {
 		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 			if ((state & (INSTALLED | RESOLVED)) == 0) {
-				Debug.println("Bundle.reload called when state != INSTALLED | RESOLVED: " + this);
-				Debug.printStackTrace(new Exception("Stack trace"));
+				Debug.println("Bundle.reload called when state != INSTALLED | RESOLVED: " + this); //$NON-NLS-1$
+				Debug.printStackTrace(new Exception("Stack trace")); //$NON-NLS-1$
 			}
 		}
 
@@ -222,8 +222,8 @@ public class BundleHost extends AbstractBundle {
 	protected void refresh() throws BundleException {
 		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 			if ((state & (UNINSTALLED | INSTALLED | RESOLVED)) == 0) {
-				Debug.println("Bundle.reload called when state != UNINSTALLED | INSTALLED | RESOLVED: " + this);
-				Debug.printStackTrace(new Exception("Stack trace"));
+				Debug.println("Bundle.reload called when state != UNINSTALLED | INSTALLED | RESOLVED: " + this); //$NON-NLS-1$
+				Debug.printStackTrace(new Exception("Stack trace")); //$NON-NLS-1$
 			}
 		}
 		if (state == RESOLVED) {
@@ -253,8 +253,8 @@ public class BundleHost extends AbstractBundle {
 	protected boolean unload() {
 		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 			if ((state & (UNINSTALLED | INSTALLED | RESOLVED)) == 0) {
-				Debug.println("Bundle.unload called when state != UNINSTALLED | INSTALLED | RESOLVED: " + this);
-				Debug.printStackTrace(new Exception("Stack trace"));
+				Debug.println("Bundle.unload called when state != UNINSTALLED | INSTALLED | RESOLVED: " + this); //$NON-NLS-1$
+				Debug.printStackTrace(new Exception("Stack trace")); //$NON-NLS-1$
 			}
 		}
 
@@ -306,9 +306,9 @@ public class BundleHost extends AbstractBundle {
 	 * @exception  java.lang.ClassNotFoundException  if the class definition was not found.
 	 */
 	protected Class loadClass(String name, boolean checkPermission) throws ClassNotFoundException {
+		checkValid();
 		if (checkPermission) {
 			framework.checkAdminPermission();
-			checkValid();
 		}
 		// check to see if the bundle is resolved
 		if (!isResolved()) {
@@ -319,16 +319,16 @@ public class BundleHost extends AbstractBundle {
 		}
 		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 			if ((state & (STARTING | ACTIVE | STOPPING | RESOLVED)) == 0) {
-				Debug.println("Bundle.loadClass(" + name + ") called when state != STARTING | ACTIVE | STOPPING | RESOLVED: " + this);
-				Debug.printStackTrace(new Exception("Stack trace"));
+				Debug.println("Bundle.loadClass(" + name + ") called when state != STARTING | ACTIVE | STOPPING | RESOLVED: " + this); //$NON-NLS-1$ //$NON-NLS-2$
+				Debug.printStackTrace(new Exception("Stack trace")); //$NON-NLS-1$
 			}
 		}
 
 		getBundleLoader();
 		if (loader == null) {
 			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-				Debug.println("Bundle.loadClass(" + name + ") called when loader == null: " + this);
-				Debug.printStackTrace(new Exception("Stack trace"));
+				Debug.println("Bundle.loadClass(" + name + ") called when loader == null: " + this); //$NON-NLS-1$ //$NON-NLS-2$
+				Debug.printStackTrace(new Exception("Stack trace")); //$NON-NLS-1$
 			}
 			throw new ClassNotFoundException(name);
 		}
@@ -355,12 +355,19 @@ public class BundleHost extends AbstractBundle {
 	 */
 	public URL getResource(String name) {
 		checkValid();
-
+		framework.checkAdminPermission();
+		// check to see if the bundle is resolved
+		if (!isResolved()) {
+			framework.packageAdmin.resolveBundles();
+			if (!isResolved()) {
+				return null;
+			}
+		}
 		getBundleLoader();
 		if (loader == null) {
 			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-				Debug.println("Bundle.getResource(" + name + ") called when loader == null: " + this);
-				Debug.printStackTrace(new Exception("Stack trace"));
+				Debug.println("Bundle.getResource(" + name + ") called when loader == null: " + this); //$NON-NLS-1$ //$NON-NLS-2$
+				Debug.printStackTrace(new Exception("Stack trace")); //$NON-NLS-1$
 			}
 
 			return (null);
@@ -397,7 +404,7 @@ public class BundleHost extends AbstractBundle {
 				}
 
 				if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-					Debug.println("Bundle: Active sl = " + framework.startLevelManager.getStartLevel() + "; Bundle " + getBundleId() + " sl = " + getStartLevel());
+					Debug.println("Bundle: Active sl = " + framework.startLevelManager.getStartLevel() + "; Bundle " + getBundleId() + " sl = " + getStartLevel()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				}
 
 				if (getStartLevel() <= framework.startLevelManager.getStartLevel()) {
@@ -411,7 +418,7 @@ public class BundleHost extends AbstractBundle {
 							state = ACTIVE;
 
 							if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-								Debug.println("->started " + this);
+								Debug.println("->started " + this); //$NON-NLS-1$
 							}
 
 							framework.publishBundleEvent(BundleEvent.STARTED, this);
@@ -492,7 +499,7 @@ public class BundleHost extends AbstractBundle {
 				state = RESOLVED;
 
 				if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-					Debug.println("->stopped " + this);
+					Debug.println("->stopped " + this); //$NON-NLS-1$
 				}
 
 				framework.publishBundleEvent(BundleEvent.STOPPED, this);
