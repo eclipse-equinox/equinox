@@ -54,29 +54,28 @@ public class EclipseClassLoader extends DefaultClassLoader {
 
 		try {
 			AbstractBundle bundle = (AbstractBundle) hostdata.getBundle();
-			// If the bundle is active, just return the class
-			if (bundle.getState() == AbstractBundle.ACTIVE)
-				return super.findLocalClass(name);
-
-			//If the bundle is uninstalled, classes can still be loaded from it
-			if (bundle.getState() == AbstractBundle.UNINSTALLED)
-				return super.findLocalClass(name);
-
-			//If the bundle is stopping, we don't want to reactive it but we still want to be able to load classes from it.
-			if (bundle.getState() == AbstractBundle.STOPPING)
+			// If the bundle is active, uninstalled or stopping then the bundle has already
+			// been initialized (though it may have been destroyed) so just return the class.
+			if ((bundle.getState() & (AbstractBundle.ACTIVE | AbstractBundle.UNINSTALLED | AbstractBundle.STOPPING)) != 0)
 				return super.findLocalClass(name);
 
 			// The bundle is not active and does not require activation, just return the class
 			if (!shouldActivateFor(name))
 				return super.findLocalClass(name);
 
-			// The bundle is starting
+			// The bundle is starting.  Note that if the state changed between the tests 
+			// above and this test (e.g., it was not ACTIVE but now is), that's ok, we will 
+			// just try to start it again (else case).
+			// TODO need an explanation here of why we duplicated the mechanism 
+			// from the framework rather than just calling start() and letting it sort it out.
 			if (bundle.getState() == AbstractBundle.STARTING) {
-				//If the thread trying to load the class is the one trying to activate the bundle, then return the class 
+				// If the thread trying to load the class is the one trying to activate the bundle, then return the class 
 				if (bundle.testStateChanging(Thread.currentThread()) || bundle.testStateChanging(null))
 					return super.findLocalClass(name);
 
-				//If it's another thread, we wait and try again. In any case the class is returned. The difference is that an exception can be logged.
+				// If it's another thread, we wait and try again. In any case the class is returned. 
+				// The difference is that an exception can be logged.
+				// TODO do we really need this test?  We just did it on the previous line?
 				if (!bundle.testStateChanging(Thread.currentThread())) {
 					Thread threadChangingState = bundle.getStateChanging();
 					if (StatsManager.TRACE_BUNDLES && threadChangingState != null) {
@@ -87,10 +86,7 @@ public class EclipseClassLoader extends DefaultClassLoader {
 					long delay = 5000;
 					long timeLeft = delay;
 					while (true) {
-						if (bundle.testStateChanging(null))
-							break;
-
-						if (timeLeft <= 0)
+						if (bundle.testStateChanging(null) || timeLeft <= 0)
 							break;
 						try {
 							synchronized (lock) {

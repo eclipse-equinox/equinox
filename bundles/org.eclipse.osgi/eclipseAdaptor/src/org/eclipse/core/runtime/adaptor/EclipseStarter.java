@@ -118,8 +118,6 @@ public class EclipseStarter {
 	 * @throws Exception if anything goes wrong
 	 */
 	public static Object run(String[] args, Runnable endSplashHandler) throws Exception {
-		if (debug)
-			System.out.println("Entering EclipseStarter#run() after: " + (System.currentTimeMillis() - Long.parseLong(System.getProperty("eclipse.debug.startupTime")))); //$NON-NLS-1$//$NON-NLS-2$
 		if (running)
 			throw new IllegalStateException(EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_ALREADY_RUNNING")); //$NON-NLS-1$
 		boolean startupFailed = true;
@@ -204,9 +202,6 @@ public class EclipseStarter {
 			throw new IllegalStateException(EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_ALREADY_RUNNING")); //$NON-NLS-1$
 		long start = 0;
 		processCommandLine(args);
-		if (debug) {
-			start = System.currentTimeMillis();
-		}
 		LocationManager.initializeLocations();
 		log = createFrameworkLog();
 		loadConfigurationInfo();
@@ -225,9 +220,9 @@ public class EclipseStarter {
 		setStartLevel(6);
 		// they should all be active by this time
 		ensureBundlesActive(basicBundles);
-		running = true;
 		if (debug)
-			System.out.println("Time to restart the fwk :" + (System.currentTimeMillis() - start)); //$NON-NLS-1$
+			logUnresolvedBundles(context.getBundles());
+		running = true;
 	}
 
 	/**
@@ -245,7 +240,6 @@ public class EclipseStarter {
 	public static Object run(Object argument) throws Exception {
 		if (!running)
 			throw new IllegalStateException(EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_NOT_RUNNING")); //$NON-NLS-1$
-		logUnresolvedBundles(context.getBundles());
 		// if we are just initializing, do not run the application just return.
 		if (initialize)
 			return new Integer(0);
@@ -255,7 +249,7 @@ public class EclipseStarter {
 		if (application == null)
 			throw new IllegalStateException(EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_ERROR_NO_APPLICATION")); //$NON-NLS-1$
 		if (debug)
-			System.out.println("The application is starting after: " + (System.currentTimeMillis() - Long.parseLong(System.getProperty("eclipse.debug.startupTime")))); //$NON-NLS-1$ //$NON-NLS-2$
+			System.out.println("Starting application: " + (System.currentTimeMillis() - Long.parseLong(System.getProperty("eclipse.startTime")))); //$NON-NLS-1$ //$NON-NLS-2$
 		return application.run(argument);
 	}
 
@@ -292,9 +286,6 @@ public class EclipseStarter {
 	}
 
 	private static void logUnresolvedBundles(Bundle[] bundles) {
-		long start = 0;
-		if (debug)
-			start = System.currentTimeMillis();
 		State state = adaptor.getState();
 		FrameworkLog logService = adaptor.getFrameworkLog();
 		StateHelper stateHelper = adaptor.getPlatformAdmin().getStateHelper();
@@ -323,8 +314,6 @@ public class EclipseStarter {
 
 				logService.log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, generalMessage, 0, null, logChildren));
 			}
-		if (debug)
-			System.out.println("Time to log the unresolved Bundles: " + (System.currentTimeMillis() - start)); //$NON-NLS-1$
 	}
 
 	private static void publishSplashScreen(final Runnable endSplashHandler) {

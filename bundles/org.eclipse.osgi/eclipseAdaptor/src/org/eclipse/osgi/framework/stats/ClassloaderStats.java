@@ -59,8 +59,6 @@ public class ClassloaderStats {
 			return;
 		try {
 			File filterFile = new File(filename);
-			//			if (!filterFile.isAbsolute())
-			//				filterFile = new File(InternalBootLoader.getBootDir() + filename);
 			System.out.print("Runtime tracing elements defined in: " + filterFile.getAbsolutePath() + "..."); //$NON-NLS-1$ //$NON-NLS-2$
 			InputStream input = new FileInputStream(filterFile);
 			System.out.println("  Loaded."); //$NON-NLS-1$
@@ -94,12 +92,14 @@ public class ClassloaderStats {
 
 	// get and create if does not exist
 	private static ClassloaderStats findLoader(String id) {
-		ClassloaderStats result = (ClassloaderStats) loaders.get(id);
-		if (result == null) {
-			result = new ClassloaderStats(id);
-			loaders.put(id, result);
+		synchronized (loaders) {
+			ClassloaderStats result = (ClassloaderStats) loaders.get(id);
+			if (result == null) {
+				result = new ClassloaderStats(id);
+				loaders.put(id, result);
+			}
+			return result;
 		}
-		return result;
 	}
 
 	public static Stack getClassStack() {
@@ -113,8 +113,6 @@ public class ClassloaderStats {
 	}
 
 	public static void endLoadingClass(String id, String className, boolean success) {
-		// must be called from a synchronized location to protect against
-		// concurrent updates
 		findLoader(id).endLoadClass(className, success);
 	}
 
