@@ -30,7 +30,7 @@ public class PluginConverterImpl implements PluginConverter, IModel {
 	private Dictionary generatedManifest;
 	
 	private static final String MANIFEST_VERSION = "Manifest-Version";
-	private static final String PLUGIN_PROPERTIES_FILENAME = "plugin.properties";
+	private static final String PLUGIN_PROPERTIES_FILENAME = "plugin";
 	private static final String PI_ECLIPSE_OSGI = "org.eclipse.osgi";
 	private static PluginConverterImpl instance;	
 	
