@@ -52,7 +52,7 @@ public class BundleDescriptionImpl implements BundleDescription, KeyedElement {
 			return new BundleDescription[0];
 		return ((StateImpl) containingState).getFragments(this);
 	}
-	public Dictionary getManifest() {
+	public Dictionary getManifest() {	//TODO Do we want to keep this method has part of the API?
 		// TODO Auto-generated method stub
 		return null;
 	}
