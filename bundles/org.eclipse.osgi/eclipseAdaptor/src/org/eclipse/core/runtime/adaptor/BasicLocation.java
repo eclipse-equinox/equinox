@@ -47,7 +47,7 @@ public class BasicLocation implements Location {
 		if (location != null)
 			throw new IllegalStateException("Cannot change the location once it is set");
 		location = value;
-		System.getProperties().put(property, location);
+		System.getProperties().put(property, location.toExternalForm());
 	}
 	
 	public void setParent(Location value) {
