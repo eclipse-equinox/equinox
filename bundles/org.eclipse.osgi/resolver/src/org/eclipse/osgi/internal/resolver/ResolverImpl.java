@@ -63,7 +63,6 @@ public class ResolverImpl implements Resolver {
 	private void processInnerDelta(IResolutionDelta delta) {
 		//	now apply changes reported in the inner delta to the state
 		IElementChange[] changes = delta.getAllChanges();
-		List notResolved = null;
 		for (int i = 0; i < changes.length; i++) {
 			IElement element = changes[i].getElement();
 			BundleDescription bundle =  (BundleDescription) element.getUserObject();	
@@ -75,19 +74,7 @@ public class ResolverImpl implements Resolver {
 				state.resolveBundle(bundle, Bundle.INSTALLED);
 			else if (kind == IElementChange.LINKAGE_CHANGED)
 				resolveConstraints(element, bundle);
-			// it was added but not resolved  
-			else if (kind == IElementChange.ADDED) {
-				// save so we can print failure reason messages later
-				if (notResolved == null)
-					notResolved = new ArrayList();
-				notResolved.add(bundle);
-			}
 		}
-		// print failure reason messages now - this must be done after 
-		// all changes have been processed
-		if (notResolved != null)
-			for (Iterator iter = notResolved.iterator(); iter.hasNext();)
-				 System.err.println(getResolutionFailureMessage((BundleDescription) iter.next())); //$NON-NLS-1$		
 	}
 	private void resolveConstraints(IElement element, BundleDescription bundle) {
 		// tells the state that some of the constraints have
@@ -204,32 +191,4 @@ public class ResolverImpl implements Resolver {
 		if (dependencies != null)
 			ResolverHelper.unresolve(bundle, dependencies);
 	}
-	protected String getResolutionFailureMessage(BundleDescription bundleDescription) {
-		// just a sanity check 
-		if (bundleDescription.isResolved())
-			throw new IllegalStateException("bundle *is* resolved");		
-		// only basic message if debug info is not needed
-		VersionConstraint[] unsatisfied = bundleDescription.getUnsatisfiedConstraints();
-		if (unsatisfied.length == 0)
-			return StateMsg.formatter.getString("RESOLVER_BUNDLE_UNRESOLVED", bundleDescription.getUniqueId(), new Long(bundleDescription.getBundleId()));
-		StringBuffer missing = new StringBuffer();
-		for (int i = 0; i < unsatisfied.length; i++) {
-			if (unsatisfied[i] instanceof PackageSpecification) {
-				missing.append(StateMsg.formatter.getString("RESOLVER_BUNDLE_UNRESOLVED_MISSING_PACKAGE", toString(unsatisfied[i])));
-			} else if (unsatisfied[i] instanceof BundleSpecification) {
-				missing.append(StateMsg.formatter.getString("RESOLVER_BUNDLE_UNRESOLVED_MISSING_PREREQ", toString(unsatisfied[i])));
-			} else {
-				missing.append(StateMsg.formatter.getString("RESOLVER_BUNDLE_UNRESOLVED_MISSING_HOST", toString(unsatisfied[i])));
-			}
-			missing.append(',');
-		}
-		missing.deleteCharAt(missing.length() - 1);
-		return StateMsg.formatter.getString("RESOLVER_BUNDLE_UNRESOLVED_DETAILS", new Object[] {bundleDescription.getUniqueId(),new Long(bundleDescription.getBundleId()), missing.toString()});
-	}
-	private static String toString(VersionConstraint constraint) {
-		org.eclipse.osgi.service.resolver.Version versionSpec = constraint.getVersionSpecification();
-		if (versionSpec == null)
-			return constraint.getName();
-		return constraint.getName() + '_' + versionSpec;
-	}	
 }

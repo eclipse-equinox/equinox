@@ -96,6 +96,7 @@ public class EclipseStarter {
 				initializeApplicationTracker();
 				Runnable application = (Runnable)applicationTracker.getService();
 				applicationTracker.close();
+				checkUnresolvedBundles(context.getBundles());
 				if (application == null)
 					throw new IllegalStateException("Unable to acquire application service");
 				application.run();
@@ -117,6 +118,12 @@ public class EclipseStarter {
 		return null;
 	}
 
+	private static void checkUnresolvedBundles(Bundle[] bundles) {
+		for (int i = 0; i < bundles.length; i++)
+			if (bundles[i].getState() == Bundle.INSTALLED)
+				 System.err.println(EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_UNRESOLVED_BUNDLE",bundles[i])); //$NON-NLS-1$						
+	}						
+			
 	private static void publishSplashScreen(Runnable endSplashHandler) {
 		// InternalPlatform now how to retrieve this later
 		Dictionary properties = new Hashtable();

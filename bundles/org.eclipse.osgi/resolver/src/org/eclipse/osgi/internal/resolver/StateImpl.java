@@ -14,6 +14,7 @@ import java.util.*;
 import org.eclipse.osgi.framework.debug.DebugOptions;
 import org.eclipse.osgi.framework.internal.core.*;
 import org.eclipse.osgi.service.resolver.*;
+import org.osgi.framework.Bundle;
 
 public class StateImpl implements State {
 	transient private Resolver resolver;
@@ -27,7 +28,9 @@ public class StateImpl implements State {
 
 	private static long cumulativeTime;
 	
-	StateImpl() {}
+	StateImpl() {
+		// to prevent extra-package instantiation 
+	}
 
 	public boolean addBundle(BundleDescription description) {
 		if (description.getBundleId() < 0)
