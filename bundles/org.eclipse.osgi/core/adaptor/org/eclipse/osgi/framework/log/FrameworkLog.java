@@ -20,6 +20,15 @@ import org.osgi.framework.FrameworkEvent;
  * to the filesystem or allow other ways of accessing the log information.
  */
 public interface FrameworkLog {
+	/**
+	 * A service lookup constant (value "performance") indicating an 
+	 * implementation of the logging service that logs performance events. 
+	 * Create a filter with this property set to <code>"true"</code> in order to 
+	 * obtain a performance log.
+	 * 
+	 * @since 3.1
+	 */
+	public static final String SERVICE_PERFORMANCE = "performance"; //$NON-NLS-1$
 
 	/**
 	 * Logs the information from a FrameworkEvent to the FrameworkLog.

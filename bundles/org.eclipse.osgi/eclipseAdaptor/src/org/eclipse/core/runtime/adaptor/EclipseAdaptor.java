@@ -20,8 +20,7 @@ import org.eclipse.osgi.framework.adaptor.core.*;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.debug.DebugOptions;
-import org.eclipse.osgi.framework.log.FrameworkLog;
-import org.eclipse.osgi.framework.log.FrameworkLogEntry;
+import org.eclipse.osgi.framework.log.*;
 import org.eclipse.osgi.framework.stats.StatsManager;
 import org.eclipse.osgi.internal.resolver.StateImpl;
 import org.eclipse.osgi.internal.resolver.StateManager;
@@ -55,10 +54,6 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 	public static final String DOMFACTORYNAME = "javax.xml.parsers.DocumentBuilderFactory"; //$NON-NLS-1$
 
 	private static final String RUNTIME_ADAPTOR = FRAMEWORK_SYMBOLICNAME + "/eclipseadaptor"; //$NON-NLS-1$
-
-	private static final String OPTION_STATE_READER = RUNTIME_ADAPTOR + "/state/reader";//$NON-NLS-1$
-
-	private static final String OPTION_RESOLVER = RUNTIME_ADAPTOR + "/resolver/timing"; //$NON-NLS-1$
 
 	private static final String OPTION_PLATFORM_ADMIN = RUNTIME_ADAPTOR + "/debug/platformadmin"; //$NON-NLS-1$
 
@@ -110,13 +105,26 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 		return instance;
 	}
 
-	public void initialize(EventPublisher eventPublisher) {
+	private FrameworkLog createPerformanceLog() {
+		String logFileProp = System.getProperty(EclipseStarter.PROP_LOGFILE);
+		if (logFileProp != null) {
+			int lastSlash = logFileProp.lastIndexOf(File.separatorChar);
+			if (lastSlash > 0) {
+				String logFile = logFileProp.substring(0, lastSlash+1) + "performance.log"; //$NON-NLS-1$
+				return new EclipseLog(new File(logFile));
+			}
+		}
+		//if all else fails, write to std err
+		return new EclipseLog(new PrintWriter(System.err));
+	}
+
+	public void initialize(EventPublisher publisher) {
 		if (Boolean.getBoolean(EclipseAdaptor.PROP_CLEAN))
 			cleanOSGiCache();
 		fileManager = initFileManager(LocationManager.getOSGiConfigurationDir(), LocationManager.getConfigurationLocation().isReadOnly() ? "none" : null); //$NON-NLS-1$
 		readHeaders();
 		checkLocationAndReinitialize();
-		super.initialize(eventPublisher);
+		super.initialize(publisher);
 	}
 
 	public void initializeMetadata() {
@@ -297,50 +305,64 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 		return elementFactory;
 	}
 
-	public void frameworkStart(BundleContext context) throws BundleException {
+	public void frameworkStart(BundleContext aContext) throws BundleException {
 		// must register the xml parser and initialize the plugin converter
 		// instance first because we may need it when creating the statemanager
 		// in super.frameworkStart(context)
-		registerEndorsedXMLParser(context);
-		PluginConverter converter = new PluginConverterImpl(context);
-		super.frameworkStart(context);
-		Bundle bundle = context.getBundle();
+		registerEndorsedXMLParser(aContext);
+		PluginConverter converter = new PluginConverterImpl(aContext);
+		super.frameworkStart(aContext);
+		Bundle bundle = aContext.getBundle();
 		Location location;
 
 		// Less than optimal reference to EclipseStarter here. Not sure how we
 		// can make the location
 		// objects available. They are needed very early in EclipseStarter but
-		// these references tie
-		// the adaptor to that starter.
+		// these references tie the adaptor to that starter.
 		location = LocationManager.getUserLocation();
-		Hashtable properties = new Hashtable(1);
+		Hashtable locationProperties = new Hashtable(1);
 		if (location != null) {
-			properties.put("type", LocationManager.PROP_USER_AREA); //$NON-NLS-1$
-			context.registerService(Location.class.getName(), location, properties);
+			locationProperties.put("type", LocationManager.PROP_USER_AREA); //$NON-NLS-1$
+			aContext.registerService(Location.class.getName(), location, locationProperties);
 		}
 		location = LocationManager.getInstanceLocation();
 		if (location != null) {
-			properties.put("type", LocationManager.PROP_INSTANCE_AREA); //$NON-NLS-1$
-			context.registerService(Location.class.getName(), location, properties);
+			locationProperties.put("type", LocationManager.PROP_INSTANCE_AREA); //$NON-NLS-1$
+			aContext.registerService(Location.class.getName(), location, locationProperties);
 		}
 		location = LocationManager.getConfigurationLocation();
 		if (location != null) {
-			properties.put("type", LocationManager.PROP_CONFIG_AREA); //$NON-NLS-1$
-			context.registerService(Location.class.getName(), location, properties);
+			locationProperties.put("type", LocationManager.PROP_CONFIG_AREA); //$NON-NLS-1$
+			aContext.registerService(Location.class.getName(), location, locationProperties);
 		}
 		location = LocationManager.getInstallLocation();
 		if (location != null) {
-			properties.put("type", LocationManager.PROP_INSTALL_AREA); //$NON-NLS-1$
-			context.registerService(Location.class.getName(), location, properties);
+			locationProperties.put("type", LocationManager.PROP_INSTALL_AREA); //$NON-NLS-1$
+			aContext.registerService(Location.class.getName(), location, locationProperties);
 		}
 
 		register(org.eclipse.osgi.service.environment.EnvironmentInfo.class.getName(), EnvironmentInfo.getDefault(), bundle);
 		register(PlatformAdmin.class.getName(), stateManager, bundle);
 		register(PluginConverter.class.getName(), converter, bundle);
 		register(URLConverter.class.getName(), new URLConverterImpl(), bundle);
-		register(CommandProvider.class.getName(), new EclipseCommandProvider(context), bundle);
+		register(CommandProvider.class.getName(), new EclipseCommandProvider(aContext), bundle);
 		register(FrameworkLog.class.getName(), getFrameworkLog(), bundle);
+		registerPerformanceLog(bundle);
 		register(org.eclipse.osgi.service.localization.BundleLocalization.class.getName(), new BundleLocalizationImpl(), bundle);
+	}
+
+	private void registerPerformanceLog(Bundle bundle) {
+		Object service = createPerformanceLog();
+		String serviceName = FrameworkLog.class.getName();
+		Hashtable serviceProperties = new Hashtable(7);
+		Dictionary headers = bundle.getHeaders();
+
+		serviceProperties.put(Constants.SERVICE_VENDOR, headers.get(Constants.BUNDLE_VENDOR));
+		serviceProperties.put(Constants.SERVICE_RANKING, new Integer(Integer.MIN_VALUE));
+		serviceProperties.put(Constants.SERVICE_PID, bundle.getBundleId() + '.' + service.getClass().getName());
+		serviceProperties.put(FrameworkLog.SERVICE_PERFORMANCE, Boolean.TRUE.toString());
+
+		context.registerService(serviceName, service, serviceProperties);
 	}
 
 	private void setDebugOptions() {
@@ -390,9 +412,9 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 		}
 	}
 
-	public void frameworkStop(BundleContext context) throws BundleException {
+	public void frameworkStop(BundleContext aContext) throws BundleException {
 		saveMetaData();
-		super.frameworkStop(context);
+		super.frameworkStop(aContext);
 		printStats();
 		PluginParser.releaseXMLParsing();
 		fileManager.close();
@@ -606,10 +628,7 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 		byte type = in.readByte();
 		if (type == NULL)
 			return null;
-		if (intern)
-			return in.readUTF().intern();
-		else
-			return in.readUTF();
+		return intern ? in.readUTF().intern() : in.readUTF();
 	}
 
 	private void writeStringOrNull(DataOutputStream out, String string) throws IOException {
@@ -664,8 +683,8 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 		return context;
 	}
 
-	public void frameworkStopping(BundleContext context) {
-		super.frameworkStopping(context);
+	public void frameworkStopping(BundleContext aContext) {
+		super.frameworkStopping(aContext);
 		stopper = new BundleStopper();
 		stopper.stopBundles();
 	}
