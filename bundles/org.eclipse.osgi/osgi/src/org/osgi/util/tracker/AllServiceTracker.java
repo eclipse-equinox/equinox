@@ -1,5 +1,5 @@
 /*
- * $Header: $
+ * $Header: /cvshome/build/org.osgi.util.tracker/src/org/osgi/util/tracker/AllServiceTracker.java,v 1.1 2005/01/21 22:26:38 twatson Exp $
  * 
  * Copyright (c) OSGi Alliance (2000, 2004). All Rights Reserved.
  * 

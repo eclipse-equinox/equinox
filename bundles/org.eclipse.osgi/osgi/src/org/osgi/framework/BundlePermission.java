@@ -1,5 +1,5 @@
 /*
- * $Header: $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/BundlePermission.java,v 1.2 2005/01/24 22:19:29 twatson Exp $
  *
  * Copyright (c) The Open Services Gateway Initiative (2000, 2002).
  * All Rights Reserved.

@@ -1,5 +1,5 @@
 /*
- * $Header: $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/AllServiceListener.java,v 1.1 2005/01/21 22:26:40 twatson Exp $
  * 
  * Copyright (c) OSGi Alliance (2000, 2004). All Rights Reserved.
  * 
@@ -49,7 +49,7 @@ package org.osgi.framework;
  * <tt>AllServiceListener</tt> objects have all ServiceEvent objects delivered regardless of the
  * package scope of the listening bundle.
  * 
- * @version $Revision: $
+ * @version $Revision: 1.1 $
  * @see ServiceEvent
  * @see ServicePermission
  */

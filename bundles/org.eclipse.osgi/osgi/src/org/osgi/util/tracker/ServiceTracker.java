@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.util.tracker/src/org/osgi/util/tracker/ServiceTracker.java,v 1.9 2005/01/19 20:35:19 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.util.tracker/src/org/osgi/util/tracker/ServiceTracker.java,v 1.10 2005/01/21 22:26:38 twatson Exp $
  * 
  * Copyright (c) OSGi Alliance (2000, 2004). All Rights Reserved.
  * 
@@ -50,7 +50,7 @@ import org.osgi.framework.*;
  * <code>getServices</code> methods can be called to get the service objects for
  * the tracked service.
  * 
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class ServiceTracker implements ServiceTrackerCustomizer {
 	/* set this to true to compile in debug messages */
