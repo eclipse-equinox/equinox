@@ -167,7 +167,8 @@ public class BundleHost extends AbstractBundle {
 				fragments = null;
 				domain = null;
 			}
-		} else {
+		}
+		if (!exporting){
 			try {
 				this.bundledata.close();
 			} catch (IOException e) { // Do Nothing.

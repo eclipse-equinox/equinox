@@ -323,13 +323,14 @@ public class BundleLoader implements ClassLoaderDelegate {
 	 * Finds the class for a bundle.  This method is used for delegation by the bundle's classloader.
 	 */
 	public Class findClass(String name) throws ClassNotFoundException {
-		if (isClosed())
-			throw new ClassNotFoundException(name);
+		return findClass(name, true);
+	}
+
+	Class findClass(String name, boolean checkParent) throws ClassNotFoundException {
 		if (Debug.DEBUG && Debug.DEBUG_LOADER)
 			Debug.println("BundleLoader[" + this + "].loadBundleClass(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		createClassLoader(); // make sure the classloader is created
 		// First check the parent classloader for system classes.
-		if (parent != null) {
+		if (checkParent && parent != null) {
 			if (Framework.STRICT_DELEGATION) {
 				if (name.startsWith(JAVA_CLASS))
 					// we want to throw ClassNotFoundExceptions if a java.* class cannot be loaded from the parent.
@@ -342,6 +343,8 @@ public class BundleLoader implements ClassLoaderDelegate {
 				}
 		}
 
+		if (isClosed())
+			throw new ClassNotFoundException(name);
 		String pkgName = getPackageName(name);
 		Class result = null;
 		PackageSource source = findImportedSource(pkgName);
@@ -367,13 +370,12 @@ public class BundleLoader implements ClassLoaderDelegate {
 	 * Finds the resource for a bundle.  This method is used for delegation by the bundle's classloader.
 	 */
 	public URL findResource(String name) {
-		if (isClosed())
-			return null;
-		if ((name.length() > 1) && (name.charAt(0) == '/')) /* if name has a leading slash */
-			name = name.substring(1); /* remove leading slash before search */
-		createClassLoader(); // make sure the classloader is created
+		return findResource(name, true);
+	}
+
+	URL findResource(String name, boolean checkParent) {
 		// First check the parent classloader for system resources, if it is a java resource.
-		if (parent != null) {
+		if (checkParent && parent != null) {
 			if (Framework.STRICT_DELEGATION) {
 				if (name.startsWith(JAVA_RESOURCE))
 					// we never delegate java resource requests past the parent
@@ -384,6 +386,11 @@ public class BundleLoader implements ClassLoaderDelegate {
 					return result;
 			}
 		}
+		if (isClosed())
+			return null;
+		if ((name.length() > 1) && (name.charAt(0) == '/')) /* if name has a leading slash */
+			name = name.substring(1); /* remove leading slash before search */
+
 		String pkgName = getResourcePackageName(name);
 		URL result = null;
 		PackageSource source = findImportedSource(pkgName);

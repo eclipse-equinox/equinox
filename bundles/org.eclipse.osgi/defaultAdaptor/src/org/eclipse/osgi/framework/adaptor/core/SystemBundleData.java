@@ -198,14 +198,6 @@ public class SystemBundleData extends AbstractBundleData {
 		return 0;
 	}
 
-	public void close() {
-		// do nothing
-	}
-
-	public void open() {
-		// do nothing
-	}
-
 	public void save() {
 		// do nothing
 	}

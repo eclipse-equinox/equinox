@@ -42,11 +42,6 @@ public abstract class AbstractClassLoader extends ClassLoader implements BundleC
 	protected String[] hostclasspath;
 
 	/**
-	 * Indicates this class loader is closed.
-	 */
-	protected boolean closed = false;
-
-	/**
 	 * BundleClassLoader constructor.
 	 * @param delegate The ClassLoaderDelegate for this bundle.
 	 * @param domain The ProtectionDomain for this bundle.
@@ -72,9 +67,6 @@ public abstract class AbstractClassLoader extends ClassLoader implements BundleC
 	 * @throws ClassNotFoundException if the class is not found.
 	 */
 	protected Class loadClass(String name, boolean resolve) throws ClassNotFoundException {
-		if (closed)
-			throw new ClassNotFoundException(name);
-
 		if (Debug.DEBUG && Debug.DEBUG_LOADER)
 			Debug.println("BundleClassLoader[" + delegate + "].loadClass(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
 		try {
@@ -122,9 +114,6 @@ public abstract class AbstractClassLoader extends ClassLoader implements BundleC
 	 * @return The URL of the resource or null if it does not exist.
 	 */
 	public URL getResource(String name) {
-		if (closed) {
-			return null;
-		}
 		if (Debug.DEBUG && Debug.DEBUG_LOADER) {
 			Debug.println("BundleClassLoader[" + delegate + "].getResource(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
@@ -198,15 +187,8 @@ public abstract class AbstractClassLoader extends ClassLoader implements BundleC
 		return delegate;
 	}
 
-	/**
-	 * Closes this class loader.  After this method is called
-	 * loadClass will always throw ClassNotFoundException,
-	 * getResource, getResourceAsStream, and getResources will
-	 * return null.
-	 *
-	 */
 	public void close() {
-		closed = true;
+		// do nothing
 	}
 
 }

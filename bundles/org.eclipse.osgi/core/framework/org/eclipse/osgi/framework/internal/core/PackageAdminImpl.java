@@ -270,7 +270,14 @@ public class PackageAdminImpl implements PackageAdmin {
 				throw new BundleException(Msg.OSGI_INTERNAL_ERROR); //$NON-NLS-1$
 			}
 			BundleLoaderProxy proxy = (BundleLoaderProxy) bundle.getUserObject();
-			BundleHost.closeBundleLoader(proxy);
+			if (proxy != null) {
+				BundleHost.closeBundleLoader(proxy);
+				try {
+					proxy.getBundleHost().getBundleData().close();
+				} catch (IOException e) {
+					// ignore
+				}
+			}
 		}
 	}
 

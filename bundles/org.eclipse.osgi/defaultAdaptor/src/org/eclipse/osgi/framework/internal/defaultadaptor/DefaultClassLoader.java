@@ -437,18 +437,12 @@ public class DefaultClassLoader extends AbstractClassLoader {
 	 * Closes all the BundleFile objects for this BundleClassLoader.
 	 */
 	public void close() {
-		// do not close if we are shutting down
-		if (closed || hostdata.getAdaptor().isStopping())
-			return;
-
 		super.close();
 		if (classpathEntries != null) {
 			for (int i = 0; i < classpathEntries.length; i++) {
 				if (classpathEntries[i] != null) {
 					try {
-						if (classpathEntries[i].getBundleFile() != hostdata.getBaseBundleFile()) {
-							classpathEntries[i].getBundleFile().close();
-						}
+						classpathEntries[i].getBundleFile().close();
 					} catch (IOException e) {
 						hostdata.getAdaptor().getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, hostdata.getBundle(), e);
 					}
@@ -583,9 +577,7 @@ public class DefaultClassLoader extends AbstractClassLoader {
 		protected void close() {
 			for (int i = 0; i < classpathEntries.length; i++) {
 				try {
-					if (classpathEntries[i].getBundleFile() != bundledata.getBaseBundleFile()) {
-						classpathEntries[i].getBundleFile().close();
-					}
+					classpathEntries[i].getBundleFile().close();
 				} catch (IOException e) {
 					bundledata.getAdaptor().getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, bundledata.getBundle(), e);
 				}

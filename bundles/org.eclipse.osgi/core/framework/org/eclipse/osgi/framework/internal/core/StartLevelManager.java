@@ -680,6 +680,12 @@ public class StartLevelManager implements EventDispatcher, EventListener, Servic
 					Debug.println("SLL: Trying to unload bundle " + bundle); //$NON-NLS-1$
 				}
 				bundle.refresh();
+				try {
+					// make sure we close all the bundle data objects
+					bundle.getBundleData().close();
+				} catch (IOException e) {
+					// ignore, we are shutting down anyway
+				}
 			}
 		}
 	}

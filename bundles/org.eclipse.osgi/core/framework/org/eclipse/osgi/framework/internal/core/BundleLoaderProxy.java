@@ -79,7 +79,6 @@ public class BundleLoaderProxy implements RequiredBundle {
 		return stale;
 	}
 
-
 	public String toString() {
 		String symbolicName = bundle.getSymbolicName();
 		StringBuffer sb = new StringBuffer(symbolicName == null ? bundle.getLocation() : symbolicName);
@@ -131,7 +130,7 @@ public class BundleLoaderProxy implements RequiredBundle {
 					BundleDescription[] dependents = dependent.getDependents();
 					if (dependents == null)
 						return;
-					for(int j = 0; j < dependents.length; j++)
+					for (int j = 0; j < dependents.length; j++)
 						dependentProxy.addRequirers(dependents[j], result);
 				}
 				return;
@@ -185,8 +184,7 @@ public class BundleLoaderProxy implements RequiredBundle {
 		// check to see if it is a reexport
 		if (!export.isRoot()) {
 			pkgSource = new ReexportPackageSource(export.getName());
-		}
-		else {
+		} else {
 			// check to see if it is a filtered export
 			String includes = (String) export.getDirective(Constants.INCLUDE_DIRECTIVE);
 			String excludes = (String) export.getDirective(Constants.EXCLUDE_DIRECTIVE);
@@ -216,17 +214,15 @@ public class BundleLoaderProxy implements RequiredBundle {
 				synchronized (pkgSource) {
 					pkgSources.add(pkgSource);
 				}
-		}
-		else {
+		} else {
 			// we are not storing the special case sources, but pkgSource == null this means this
 			// is a normal package source; get it and return it.
 			if (pkgSource == null)
 				pkgSource = getPackageSource(export.getName());
 		}
-				
+
 		return pkgSource;
 	}
-
 
 	class ReexportPackageSource extends PackageSource {
 		public ReexportPackageSource(String id) {
@@ -242,15 +238,16 @@ public class BundleLoaderProxy implements RequiredBundle {
 
 		public Class loadClass(String name) {
 			try {
-				return getBundleLoader().findClass(name);
-			}
-			catch(ClassNotFoundException e) {
+				return getBundleLoader().findClass(name, false);
+			} catch (ClassNotFoundException e) {
 				return null;
 			}
 		}
+
 		public URL getResource(String name) {
-			return getBundleLoader().findResource(name);
+			return getBundleLoader().findResource(name, false);
 		}
+
 		public Enumeration getResources(String name) throws IOException {
 			return getBundleLoader().findResources(name);
 		}
