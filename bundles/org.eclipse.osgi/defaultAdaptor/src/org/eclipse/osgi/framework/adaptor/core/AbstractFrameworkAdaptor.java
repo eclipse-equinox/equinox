@@ -966,14 +966,14 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 	 */
 	protected StateManager createStateManager() {
 		File stateLocation = new File(getBundleStoreRootDir(), ".state"); //$NON-NLS-1$
-		stateManager = new StateManager(stateLocation);
+		stateManager = new StateManager(stateLocation, context);
 		State systemState = null;
 		if (!invalidState) {
-			systemState = stateManager.readSystemState(context);
+			systemState = stateManager.readSystemState();
 			if (systemState != null)
 				return stateManager;
 		}
-		systemState = stateManager.createSystemState(context);
+		systemState = stateManager.createSystemState();
 		Bundle[] installedBundles = context.getBundles();
 		if (installedBundles == null)
 			return stateManager;

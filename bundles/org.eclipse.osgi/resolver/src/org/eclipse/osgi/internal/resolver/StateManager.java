@@ -33,14 +33,16 @@ public class StateManager implements PlatformAdmin, Runnable {
 	private boolean cachedState = false;
 	private File stateLocation;
 	private long expectedTimeStamp;
+	private BundleContext context;
 
-	public StateManager(File stateLocation) {
+	public StateManager(File stateLocation, BundleContext context) {
 		// a negative timestamp means no timestamp checking
-		this(stateLocation, -1);
+		this(stateLocation, context, -1);
 	}
 
-	public StateManager(File stateLocation, long expectedTimeStamp) {
+	public StateManager(File stateLocation, BundleContext context, long expectedTimeStamp) {
 		this.stateLocation = stateLocation;
+		this.context = context;
 		this.expectedTimeStamp = expectedTimeStamp;
 		factory = new StateObjectFactoryImpl();
 	}
@@ -56,7 +58,7 @@ public class StateManager implements PlatformAdmin, Runnable {
 		//systemState = null;
 	}
 
-	private void readSystemState(BundleContext context, File stateLocation, long expectedTimeStamp) {
+	private void readSystemState(File stateLocation, long expectedTimeStamp) {
 		if (stateLocation == null || !stateLocation.isFile())
 			return;
 		if (DEBUG_READER)
@@ -67,7 +69,7 @@ public class StateManager implements PlatformAdmin, Runnable {
 			// problems in the cache (corrupted/stale), don't create a state object
 			if (systemState == null)
 				return;
-			initializeSystemState(context);
+			initializeSystemState();
 			cachedState = true;
 			try {
 				expireTime = Long.parseLong(System.getProperty(PROP_LAZY_UNLOADING_TIME, Long.toString(expireTime)));
@@ -99,24 +101,24 @@ public class StateManager implements PlatformAdmin, Runnable {
 		factory.writeState(systemState, new BufferedOutputStream(new FileOutputStream(stateLocation)));
 	}
 
-	private void initializeSystemState(BundleContext context) {
-		if (System.getSecurityManager() == null)
-			context = null; // this disables security checks in the resolver
-		systemState.setResolver(getResolver(context));
+	private void initializeSystemState() {
+		systemState.setResolver(getResolver(System.getSecurityManager() != null));
+		if (systemState.setPlatformProperties(System.getProperties()))
+			systemState.resolve(false); // cause a full resolve; some platform properties have changed
 		lastTimeStamp = systemState.getTimeStamp();
 	}
 
-	public synchronized StateImpl createSystemState(BundleContext context) {
+	public synchronized StateImpl createSystemState() {
 		if (systemState == null) {
 			systemState = factory.createSystemState();
-			initializeSystemState(context);
+			initializeSystemState();
 		}
 		return systemState;
 	}
 
-	public synchronized StateImpl readSystemState(BundleContext context) {
+	public synchronized StateImpl readSystemState() {
 		if (systemState == null)
-			readSystemState(context, stateLocation, expectedTimeStamp);
+			readSystemState(stateLocation, expectedTimeStamp);
 		return systemState;
 	}
 
@@ -159,11 +161,11 @@ public class StateManager implements PlatformAdmin, Runnable {
 	}
 
 	public Resolver getResolver() {
-		return getResolver(null);
+		return getResolver(false);
 	}
 
-	private Resolver getResolver(BundleContext context) {
-		return new org.eclipse.osgi.internal.module.ResolverImpl(context);
+	private Resolver getResolver(boolean checkPermissions) {
+		return new org.eclipse.osgi.internal.module.ResolverImpl(context, checkPermissions);
 	}
 
 	public StateHelper getStateHelper() {

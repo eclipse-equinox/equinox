@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.osgi.service.resolver;
 
+import java.util.Dictionary;
+
 import org.osgi.framework.*;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Version;
@@ -314,4 +316,19 @@ public interface State {
 	 */
 	public ExportPackageDescription linkDynamicImport(BundleDescription importingBundle, String requestedPackage);
 
+	/**
+	 * Sets the platform properties of the state.  The platform properties
+	 * are used to match platform filters that are specified in Eclipse-PlatformFilter
+	 * bundle manifest header.  The following propreties are supported by the
+	 * state: <p>
+	 * osgi.nl - the platform language setting<br>
+	 * osgi.os - the platform operating system<br>
+	 * osgi.arch - the platform architecture<br>
+	 * osgi.ws - the platform windowing system<br>
+	 * @param platformProperties the platform properties of the state
+	 * @return false if the platformProperties specified do not change any of the
+	 * supported properties already set.  If any of the supported property values 
+	 * are changed as a result of calling this method then true is returnd
+	 */
+	public boolean setPlatformProperties(Dictionary platformProperties);
 }

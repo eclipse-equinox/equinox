@@ -14,6 +14,7 @@ import java.util.*;
 import org.eclipse.core.runtime.adaptor.testsupport.SimplePlatformAdmin;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.tests.OSGiTest;
+import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.BundleException;
 
 public abstract class AbstractStateTest extends OSGiTest {
@@ -21,7 +22,7 @@ public abstract class AbstractStateTest extends OSGiTest {
 
 	protected void setUp() throws Exception {
 		super.setUp();
-		platformAdmin = new SimplePlatformAdmin(getRandomLocation().toFile());
+		platformAdmin = new SimplePlatformAdmin(getRandomLocation().toFile(), OSGiTestsActivator.getContext());
 	}
 
 	public AbstractStateTest(String testName) {

@@ -12,11 +12,12 @@ package org.eclipse.core.runtime.adaptor.testsupport;
 
 import java.io.File;
 import org.eclipse.osgi.internal.resolver.StateManager;
+import org.osgi.framework.BundleContext;
 
 public class SimplePlatformAdmin extends StateManager {
-	public SimplePlatformAdmin(File bundleRootDir) {
-		super(bundleRootDir);
-		createSystemState(null);
+	public SimplePlatformAdmin(File bundleRootDir, BundleContext context) {
+		super(bundleRootDir, context);
+		createSystemState();
 		setInstaller(new SimpleBundleInstaller(getSystemState()));
 	}
 }

@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
 
+import java.util.Dictionary;
+
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Version;
@@ -122,6 +124,10 @@ public class ReadOnlyState implements State {
 	}
 
 	public void setResolver(Resolver value) {
+		throw new UnsupportedOperationException();
+	}
+
+	public boolean setPlatformProperties(Dictionary platformProperties) {
 		throw new UnsupportedOperationException();
 	}
 

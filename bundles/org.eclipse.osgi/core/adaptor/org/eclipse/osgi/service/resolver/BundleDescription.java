@@ -160,7 +160,7 @@ public interface BundleDescription extends BaseDescription{
 	public Object getUserObject();
 
 	/**
-	 *  Associates a user-provided object to this bundle description, or
+	 * Associates a user-provided object to this bundle description, or
 	 * removes an existing association, if <code>null</code> is provided. The 
 	 * provided object is not interpreted in any ways by this bundle 
 	 * description.
@@ -169,4 +169,10 @@ public interface BundleDescription extends BaseDescription{
 	 * <code>null</code>
 	 */
 	public void setUserObject(Object userObject);
+
+	/**
+	 * Returns the platform filter in the form of an LDAP filter
+	 * @return the platfomr filter in the form of an LDAP filter
+	 */
+	public String getPlatformFilter();
 }

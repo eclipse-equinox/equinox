@@ -114,6 +114,8 @@ public interface Constants extends org.osgi.framework.Constants {
 	/** Properties defaults */
 	public static final String DEFAULT_STARTLEVEL = "1"; //$NON-NLS-1$
 
+	public static final String ECLIPSE_PLATFORMFILTER = "Eclipse-PlatformFilter"; //$NON-NLS-1$
+
 	/**
 	 * Manifest header (named &quot;Provide-Package&quot;)
 	 * identifying the packages name

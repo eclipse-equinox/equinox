@@ -16,6 +16,8 @@ import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.debug.DebugOptions;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Filter;
+import org.osgi.framework.InvalidSyntaxException;
 
 public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver {
 	// Debug fields
@@ -52,13 +54,11 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 	private boolean initialized = false;
 	private PermissionChecker permissionChecker;
 	private GroupingChecker groupingChecker;
+	private BundleContext context;
 
-	public ResolverImpl() {
-		this(null);
-	}
-
-	public ResolverImpl(BundleContext context) {
-		this.permissionChecker = new PermissionChecker(context);
+	public ResolverImpl(BundleContext context, boolean checkPermissions) {
+		this.context = context;
+		this.permissionChecker = new PermissionChecker(context, checkPermissions);
 	}
 
 	protected PermissionChecker getPermissionChecker() {
@@ -78,11 +78,11 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		ArrayList fragmentBundles = new ArrayList();
 		// Add each bundle to the resolver's internal state
 		for (int i = 0; i < bundles.length; i++)
-			initResolverBundle(bundles[i], fragmentBundles);
+			initResolverBundle(bundles[i], fragmentBundles, false);
 		// Add each removal pending bundle to the resolver's internal state
 		BundleDescription[] removedBundles = getRemovalPending();
 		for (int i = 0; i < removedBundles.length; i++)
-			initResolverBundle(removedBundles[i], fragmentBundles);
+			initResolverBundle(removedBundles[i], fragmentBundles, true);
 		// Iterate over the resolved fragments and attach them to their hosts
 		for (Iterator iter = fragmentBundles.iterator(); iter.hasNext();) {
 			ResolverBundle fragment = (ResolverBundle) iter.next();
@@ -99,9 +99,11 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		initialized = true;
 	}
 
-	private void initResolverBundle(BundleDescription bundleDesc, ArrayList fragmentBundles) {
+	private void initResolverBundle(BundleDescription bundleDesc, ArrayList fragmentBundles, boolean pending) {
 		ResolverBundle bundle = new ResolverBundle(bundleDesc, this);
 		bundleMapping.put(bundleDesc, bundle);
+		if (pending)
+			return;
 		resolverBundles.put(bundle);
 		if (bundleDesc.isResolved()) {
 			bundle.setState(ResolverBundle.RESOLVED);
@@ -187,7 +189,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 
 	// Checks a bundle to make sure it is valid.  If this method returns false for
 	// a given bundle, then that bundle will not even be considered for resolution
-	private boolean checkBundleManifest(BundleDescription bundle) {
+	private boolean isResolvable(BundleDescription bundle, Dictionary platformProperties) {
 		ImportPackageSpecification[] imports = bundle.getImportPackages();
 		for (int i = 0; i < imports.length; i++) {
 			// Don't allow non-dynamic imports to specify wildcards
@@ -199,7 +201,18 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 					return false;
 			}
 		}
-		return true;
+		String platformFilter = bundle.getPlatformFilter();
+		if (platformFilter == null) {
+			return true;
+		}
+		if (platformProperties == null)
+			return false;
+		try {
+			Filter filter = context.createFilter(platformFilter);
+			return filter.match(platformProperties);
+		} catch (InvalidSyntaxException e) {
+			return false;
+		}
 	}
 
 	// Attach fragment to its host
@@ -214,7 +227,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		}
 	}
 
-	public synchronized void resolve(BundleDescription[] reRefresh) {
+	public synchronized void resolve(BundleDescription[] reRefresh, Dictionary platformProperties) {
 		if (DEBUG)
 			ResolverImpl.log("*** BEGIN RESOLUTION ***"); //$NON-NLS-1$
 		if (state == null)
@@ -240,7 +253,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		// First check that all the meta-data is valid for each unresolved bundle
 		// This will reset the resolvable flag for each bundle
 		for (int i = 0; i < bundles.length; i++)
-			bundles[i].setResolvable(checkBundleManifest(bundles[i].getBundle()));
+			bundles[i].setResolvable(isResolvable(bundles[i].getBundle(), platformProperties));
 
 		// First attach all fragments to the matching hosts
 		for (int i = 0; i < bundles.length; i++)
@@ -280,10 +293,6 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		resolvedBundles = null;
 		if (DEBUG)
 			ResolverImpl.log("*** END RESOLUTION ***"); //$NON-NLS-1$
-	}
-
-	public synchronized void resolve() {
-		resolve(null);
 	}
 
 	private void resolveFragment(ResolverBundle fragment) {

@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.osgi.service.resolver;
 
+import java.util.Dictionary;
+
 public interface Resolver {
 
 	/**
@@ -28,13 +30,14 @@ public interface Resolver {
 	 * Note the given state is destructively modified to reflect the results of
 	 * resolution.
 	 * </p>
+	 * @param discard the list of bundles to discard the resolve status and 
+	 * reresolve.  A <tt>null</tt> value indicates that all currently unresolved
+	 * bundles in the state should be resolved.
+	 * @param platformProperties the platform properties used to match platform filters
+	 * against.  A <tt>null</tt> value indicates that the system properties should
+	 * be used to match against
 	 */
-	public void resolve();
-
-	/**
-	 * 
-	 */
-	public void resolve(BundleDescription[] discard);
+	public void resolve(BundleDescription[] discard, Dictionary platformProperties);
 
 	/**
 	 * Flushes this resolver of any stored/cached data it may be keeping to

@@ -180,15 +180,15 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 				}
 			}
 		}
-		stateManager = new StateManager(stateLocation, timeStamp);
+		stateManager = new StateManager(stateLocation, context, timeStamp);
 		stateManager.setInstaller(new EclipseBundleInstaller());
 		StateImpl systemState = null;
 		if (!invalidState) {
-			systemState = stateManager.readSystemState(context);
+			systemState = stateManager.readSystemState();
 			if (systemState != null)
 				return stateManager;
 		}
-		systemState = stateManager.createSystemState(context);
+		systemState = stateManager.createSystemState();
 		Bundle[] installedBundles = context.getBundles();
 		if (installedBundles == null)
 			return stateManager;

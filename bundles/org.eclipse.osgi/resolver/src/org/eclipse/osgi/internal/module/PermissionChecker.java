@@ -18,13 +18,15 @@ import org.osgi.framework.BundleContext;
 
 public class PermissionChecker {
 	private BundleContext context;
+	private boolean checkPermissions = false;
 
-	public PermissionChecker(BundleContext context) {
+	public PermissionChecker(BundleContext context, boolean checkPermissions) {
 		this.context = context;
+		this.checkPermissions = checkPermissions;
 	}
 
 	public boolean checkImportPermission(ImportPackageSpecification ips, ExportPackageDescription epd) {
-		if (context == null) // a null context indicates that permissions should not be checked.
+		if (!checkPermissions)
 			return true;
 		boolean success = true;
 		// first check the exporter permissions

@@ -13,6 +13,7 @@ package org.eclipse.osgi.internal.resolver;
 import java.io.*;
 import java.lang.ref.WeakReference;
 import java.util.*;
+
 import org.eclipse.osgi.framework.util.SecureAction;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.Version;
@@ -29,7 +30,7 @@ class StateReader {
 	private int lazyDataOffset;
 	private int numBundles;
 
-	public static final byte STATE_CACHE_VERSION = 10;
+	public static final byte STATE_CACHE_VERSION = 11;
 	public static final byte NULL = 0;
 	public static final byte OBJECT = 1;
 	public static final byte INDEX = 2;
@@ -64,6 +65,14 @@ class StateReader {
 		if (expectedTimestamp >= 0 && timestampRead != expectedTimestamp)
 			return false;
 		addToObjectTable(state, index);
+		Hashtable props = new Hashtable(4);
+		int numProps = in.readInt();
+		for (int i = 0; i < numProps; i++) {
+			String value = readString(in, false);
+			if (value != null)
+				props.put(StateImpl.PROPS[i], value);
+		}
+		state.setPlatformProperties(props);
 		numBundles = in.readInt();
 		if (numBundles == 0)
 			return true;
@@ -137,6 +146,7 @@ class StateReader {
 		}
 
 		result.setLocation(readString(in, false));
+		result.setPlatformFilter(readString(in, false));
 
 		int exportCount = in.readInt();
 		if (exportCount > 0) {
@@ -204,6 +214,7 @@ class StateReader {
 		}
 
 		skipString(in); // location
+		skipString(in); // platformFilter
 
 		int exportCount = in.readInt();
 		if (exportCount > 0)

@@ -59,6 +59,10 @@ class StateWriter {
 		if (writePrefix(state, out))
 			return;
 		out.writeLong(state.getTimeStamp());
+		Dictionary props = state.getPlatformProperties();
+		out.writeInt(StateImpl.PROPS.length);
+		for (int i = 0; i < StateImpl.PROPS.length; i++)
+			writeStringOrNull((String) props.get(StateImpl.PROPS[i]), out);
 		BundleDescription[] bundles = state.getBundles();
 		StateHelperImpl.getInstance().sortBundles(bundles);
 		out.writeInt(bundles.length);
@@ -97,6 +101,7 @@ class StateWriter {
 		int dataStart = out.size(); // save the offset of lazy data start
 
 		writeStringOrNull(bundle.getLocation(), out);
+		writeStringOrNull(bundle.getPlatformFilter(), out);
 
 		ExportPackageDescription[] exports = bundle.getExportPackages();
 		out.writeInt(exports.length);

@@ -47,6 +47,7 @@ class StateBuilder {
 		String version = (String) manifest.get(Constants.BUNDLE_VERSION);
 		result.setVersion((version != null) ? Version.parseVersion(version) : Version.emptyVersion);
 		result.setLocation(location);
+		result.setPlatformFilter((String) manifest.get(Constants.ECLIPSE_PLATFORMFILTER));
 		ManifestElement[] host = ManifestElement.parseHeader(Constants.FRAGMENT_HOST, (String) manifest.get(Constants.FRAGMENT_HOST));
 		if (host != null)
 			result.setHost(createHostSpecification(host[0]));

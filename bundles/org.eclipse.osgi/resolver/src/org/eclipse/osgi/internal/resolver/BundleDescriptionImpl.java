@@ -52,26 +52,31 @@ public class BundleDescriptionImpl extends BaseDescriptionImpl implements Bundle
 		return getName();
 	}
 
-	public synchronized String getLocation() {
+	public String getLocation() {
 		fullyLoad();
 		return lazyData.location;
 	}
 
-	public synchronized ImportPackageSpecification[] getImportPackages() {
+	public String getPlatformFilter() {
+		fullyLoad();
+		return lazyData.platformFilter;
+	}
+
+	public ImportPackageSpecification[] getImportPackages() {
 		fullyLoad();
 		if (lazyData.importPackages == null)
 			return new ImportPackageSpecification[0];
 		return lazyData.importPackages;
 	}
 
-	public synchronized BundleSpecification[] getRequiredBundles() {
+	public BundleSpecification[] getRequiredBundles() {
 		fullyLoad();
 		if (lazyData.requiredBundles == null)
 			return new BundleSpecification[0];
 		return lazyData.requiredBundles;
 	}
 
-	public synchronized ExportPackageDescription[] getExportPackages() {
+	public ExportPackageDescription[] getExportPackages() {
 		fullyLoad();
 		if (lazyData.exportPackages == null)
 			return new ExportPackageDescription[0]; 
@@ -104,21 +109,21 @@ public class BundleDescriptionImpl extends BaseDescriptionImpl implements Bundle
 		return (stateBits & REMOVAL_PENDING) != 0;
 	}
 
-	public synchronized ExportPackageDescription[] getSelectedExports() {
+	public ExportPackageDescription[] getSelectedExports() {
 		fullyLoad();
 		if (lazyData.selectedExports == null)
 			return new ExportPackageDescription[0];
 		return lazyData.selectedExports;
 	}
 
-	public synchronized BundleDescription[] getResolvedRequires() {
+	public BundleDescription[] getResolvedRequires() {
 		fullyLoad();
 		if (lazyData.resolvedRequires == null)
 			return new BundleDescription[0];
 		return lazyData.resolvedRequires;
 	}
 
-	public synchronized ExportPackageDescription[] getResolvedImports() {
+	public ExportPackageDescription[] getResolvedImports() {
 		fullyLoad();
 		if (lazyData.resolvedImports == null)
 			return new ExportPackageDescription[0];
@@ -133,12 +138,17 @@ public class BundleDescriptionImpl extends BaseDescriptionImpl implements Bundle
 		setName(symbolicName);
 	}
 
-	protected synchronized void setLocation(String location) {
+	protected void setLocation(String location) {
 		checkLazyData();
 		lazyData.location = location;
 	}
 
-	protected synchronized void setExportPackages(ExportPackageDescription[] exportPackages) {
+	protected void setPlatformFilter(String platformFilter) {
+		checkLazyData();
+		lazyData.platformFilter = platformFilter;
+	}
+
+	protected void setExportPackages(ExportPackageDescription[] exportPackages) {
 		checkLazyData();
 		lazyData.exportPackages = exportPackages;
 		if (exportPackages != null) {
@@ -148,7 +158,7 @@ public class BundleDescriptionImpl extends BaseDescriptionImpl implements Bundle
 		}
 	}
 
-	protected synchronized void setImportPackages(ImportPackageSpecification[] importPackages) {
+	protected void setImportPackages(ImportPackageSpecification[] importPackages) {
 		checkLazyData();
 		lazyData.importPackages = importPackages;
 		if (importPackages != null) {
@@ -158,7 +168,7 @@ public class BundleDescriptionImpl extends BaseDescriptionImpl implements Bundle
 		}
 	}
 
-	protected synchronized void setRequiredBundles(BundleSpecification[] requiredBundles) {
+	protected void setRequiredBundles(BundleSpecification[] requiredBundles) {
 		checkLazyData();
 		lazyData.requiredBundles = requiredBundles;
 		if (requiredBundles != null)
@@ -206,7 +216,15 @@ public class BundleDescriptionImpl extends BaseDescriptionImpl implements Bundle
 			stateBits &= ~REMOVAL_PENDING;
 	}
 
-	protected synchronized void setSelectedExports(ExportPackageDescription[] selectedExports) {
+	protected void setLazyLoaded(boolean lazyLoad) {
+		fullyLoad();
+		if (lazyLoad)
+			stateBits |= LAZY_LOADED;
+		else
+			stateBits &= ~LAZY_LOADED;
+	}
+
+	protected void setSelectedExports(ExportPackageDescription[] selectedExports) {
 		checkLazyData();
 		lazyData.selectedExports = selectedExports;
 		if (selectedExports != null) {
@@ -216,12 +234,12 @@ public class BundleDescriptionImpl extends BaseDescriptionImpl implements Bundle
 		}
 	}
 
-	protected synchronized void setResolvedImports(ExportPackageDescription[] resolvedImports) {
+	protected void setResolvedImports(ExportPackageDescription[] resolvedImports) {
 		checkLazyData();
 		lazyData.resolvedImports = resolvedImports;
 	}
 
-	protected synchronized void setResolvedRequires(BundleDescription[] resolvedRequires) {
+	protected void setResolvedRequires(BundleDescription[] resolvedRequires) {
 		checkLazyData();
 		lazyData.resolvedRequires = resolvedRequires;
 	}
@@ -340,7 +358,7 @@ public class BundleDescriptionImpl extends BaseDescriptionImpl implements Bundle
 		}
 	}
 
-	synchronized boolean isFullyLoaded() {
+	boolean isFullyLoaded() {
 		return (stateBits & FULLY_LOADED) != 0;
 	}
 
@@ -396,6 +414,7 @@ public class BundleDescriptionImpl extends BaseDescriptionImpl implements Bundle
 	//TODO Consider usage of softReferences
 	private final class LazyData {
 		String location;
+		String platformFilter;
 
 		BundleSpecification[] requiredBundles;
 		ExportPackageDescription[] exportPackages;
