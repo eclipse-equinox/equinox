@@ -55,7 +55,7 @@ public class StateManager implements PlatformAdmin {
 		try {
 			input = new DataInputStream(new BufferedInputStream(fileInput,65536));
 			StateReader reader = new StateReader();
-			state = reader.loadCache(input);
+			state = reader.loadState(input);
 			state.setResolver(new ResolverImpl());
 		} catch (IOException ioe) {
 			// TODO: how do we log this?

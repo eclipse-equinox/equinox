@@ -111,12 +111,6 @@ public class StateReader {
 		result.setExport(in.readBoolean());
 		return result;
 	}
-	private PackageSpecificationImpl readProvidedPackage(DataInputStream in) throws IOException {
-		PackageSpecificationImpl result = new PackageSpecificationImpl();
-		// no chance this will be null
-		result.setName(in.readUTF());
-		return result;
-	}
 	private HostSpecificationImpl readHostSpec(DataInputStream in) throws IOException {
 		byte tag = readTag(in);
 		if (tag == NULL)
@@ -148,7 +142,7 @@ public class StateReader {
 		addToObjectTable(result);
 		return result;		
 	}
-	public final StateImpl loadCache(DataInputStream input) throws IOException {
+	public final StateImpl loadState(DataInputStream input) throws IOException {
 		try {
 			return readState(input);
 		} finally {

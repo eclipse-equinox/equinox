@@ -105,9 +105,6 @@ public class StateWriter {
 		writeVersionConstraint(packageSpec, out);
 		out.writeBoolean(packageSpec.isExported());
 	}
-	private void writeProvidedPackage(PackageSpecificationImpl packageSpec, DataOutputStream out) throws IOException {
-		out.writeUTF(packageSpec.getName());
-	}
 	private void writeHostSpec(HostSpecificationImpl host, DataOutputStream out) throws IOException {
 		if (host == null) {
 			out.writeByte(NULL);
