@@ -34,14 +34,20 @@ public class ResolverImpl implements Resolver {
 			throw new IllegalStateException("RESOLVER_NO_STATE"); //$NON-NLS-1$
 		if (dependencies == null)
 			dependencies = ResolverHelper.buildDependencySystem(state, new Eclipse30SelectionPolicy());
-		ResolutionDelta delta;
-		try {
-			delta = dependencies.resolve();
-		} catch (DependencySystem.CyclicSystemException e) {
-			//TODO: this should be logged instead
-			e.printStackTrace();
-			return;
-		}
+		ResolutionDelta delta = null;
+		// try resolving as many times as necessary to remove all cycles
+		boolean success;
+		do {
+			success = true;
+			try {
+				delta = dependencies.resolve();
+			} catch (DependencySystem.CyclicSystemException e) {
+				success = false;
+				Object[][] cycles = e.getCycles();
+				// disable one of the element sets involved in the cycle 
+				((ElementSet) cycles[0][0]).setEnabled(false);
+			}
+		} while (!success);
 		processInnerDelta(delta);
 		resolvePackages();
 	}

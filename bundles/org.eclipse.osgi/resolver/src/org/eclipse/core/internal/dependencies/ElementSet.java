@@ -29,6 +29,7 @@ public class ElementSet {
 	private Set selected;
 	private Set resolved;
 	private Map dependencyCounters;
+	private boolean enabled = true;
 
 	public ElementSet(Object id, DependencySystem system) {
 		this.id = id;
@@ -85,24 +86,28 @@ public class ElementSet {
 		//			change |= ElementChange.UNRESOLVED;
 		system.recordElementStatusChanged(toRemove, change);
 	}
+
 	/**
 	 * Returns the unique id for this element set.
 	 */
 	public Object getId() {
 		return id;
 	}
+
 	/**
 	 * Is this a root element set? 	
 	 */
 	public boolean isRoot() {
 		return required.isEmpty();
 	}
+
 	/**
 	 * Returns all elements available in this element set.
 	 */
 	public Set getAvailable() {
 		return new HashSet(available.values());
 	}
+
 	/**
 	 * Returns all elements sets required this element set.
 	 */
@@ -110,6 +115,7 @@ public class ElementSet {
 	public Collection getRequired() {
 		return required;
 	}
+
 	/**
 	 * Returns all elements sets requiring this element set.
 	 */
@@ -117,6 +123,7 @@ public class ElementSet {
 	public Collection getRequiring() {
 		return requiring;
 	}
+
 	/**
 	 * Returns all elements currently resolved in this element set.
 	 */
@@ -150,6 +157,7 @@ public class ElementSet {
 		this.resolved = Collections.unmodifiableSet(newResolved);
 		system.recordDependencyChanged(oldResolved, newResolved, available);
 	}
+
 	/**
 	 * Returns all elements currently selected in this element set.
 	 */
@@ -165,6 +173,7 @@ public class ElementSet {
 		this.setChangedMark(visitedMark);
 		this.selected = Collections.unmodifiableSet(selected);
 	}
+
 	/**
 	 * Returns all elements currently satisfied in this element set.
 	 */
@@ -264,6 +273,7 @@ public class ElementSet {
 	Element getElement(Object versionId) {
 		return (Element) this.available.get(versionId);
 	}
+
 	/**
 	 * Assumes resolved system - returns all elements whose dependencies 
 	 * were resolved to point to the specified element.
@@ -305,5 +315,13 @@ public class ElementSet {
 
 	private int getNeedingUpdate() {
 		return needingUpdate;
+	}
+
+	public boolean isEnabled() {
+		return enabled;
+	}
+
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
 	}
 }

@@ -14,11 +14,33 @@ import java.util.*;
 
 public class DependencySystem {
 	public class CyclicSystemException extends Exception {
-		public CyclicSystemException(String message) {
-			super(message);
+		private Object[][] cycles;
+
+		public CyclicSystemException(Object[][] cycles) {
+			this.cycles = cycles;
 		}
-	}	
-	
+
+		public Object[][] getCycles() {
+			return cycles;
+		}
+
+		public String getMessage() {
+			StringBuffer result = new StringBuffer();
+			for (int i = 0; i < cycles.length; i++) {
+				result.append("{"); //$NON-NLS-1$
+				for (int j = 0; j < cycles[i].length; j++) {
+					result.append(((ElementSet) cycles[i][j]).getId());
+					result.append(","); //$NON-NLS-1$
+				}
+				result.deleteCharAt(result.length() - 1);
+				result.append("},"); //$NON-NLS-1$
+			}
+			if (result.length() > 0)
+				result.deleteCharAt(result.length() - 1);
+			return result.toString();
+		}
+	}
+
 	public final static int SATISFACTION = 0;
 	public final static int SELECTION = 1;
 	public final static int RESOLUTION = 2;
@@ -117,30 +139,36 @@ public class DependencySystem {
 				// skip if already visited
 				if (mark == elementSet.getVisitedMark())
 					continue;
-
-				// last time was visited it has been changed, need to recompute
-				// only a change in a previous phase causes the next phase to need to recompute
-				if (elementSet.getVisitedMark() == elementSet.getChangedMark() && visitor.getOrder() > getVisitorOrder(elementSet.getChangedMark()))
-					elementSet.markNeedingUpdate(visitor.getOrder());
-				boolean shouldVisit = true;
-				for (Iterator ancestorIter = visitor.getAncestors(elementSet).iterator(); ancestorIter.hasNext();) {
-					ElementSet ancestorNode = (ElementSet) ancestorIter.next();
-					if (ancestorNode.getVisitedMark() != mark) {
-						// one ancestor element set has not been visited yet - bail out			
-						shouldVisit = false;
-						break;
-					}
-					if (ancestorNode.getChangedMark() == mark)
-						// ancestor has changed - we need to recompute			
+				// skip if not enabled
+				if (elementSet.isEnabled()) {
+					// last time was visited it has been changed, need to recompute
+					// only a change in a previous phase causes the next phase to need to recompute
+					if (elementSet.getVisitedMark() == elementSet.getChangedMark() && visitor.getOrder() > getVisitorOrder(elementSet.getChangedMark()))
 						elementSet.markNeedingUpdate(visitor.getOrder());
-				}
-				if (!shouldVisit)
-					continue;
+					boolean shouldVisit = true;
+					for (Iterator ancestorIter = visitor.getAncestors(elementSet).iterator(); ancestorIter.hasNext();) {
+						ElementSet ancestorNode = (ElementSet) ancestorIter.next();
+						if (ancestorNode.getVisitedMark() != mark) {
+							// one ancestor element set has not been visited yet - bail out			
+							shouldVisit = false;
+							break;
+						}
+						if (ancestorNode.getChangedMark() == mark)
+							// ancestor has changed - we need to recompute			
+							elementSet.markNeedingUpdate(visitor.getOrder());
+					}
+					if (!shouldVisit)
+						continue;
 
-				elementSet.setVisitedMark(mark);
+					elementSet.setVisitedMark(mark);
+					// only update if necessary
+					if (elementSet.isNeedingUpdate(visitor.getOrder()))
+						visitor.update(elementSet);
+				} else
+					elementSet.setVisitedMark(mark);
 
 				// only update if necessary
-				if (elementSet.isNeedingUpdate(visitor.getOrder()))
+				if (elementSet.isEnabled() && elementSet.isNeedingUpdate(visitor.getOrder()))
 					visitor.update(elementSet);
 
 				visitCounter++;
@@ -155,33 +183,19 @@ public class DependencySystem {
 		// if visited more nodes than exist in the graph, a cycle has been found
 		// XXX: is this condition enough for detecting a cycle?  
 		if (visitCounter != this.elementSets.size())
-			throw new CyclicSystemException(getCycleString());
+			throw new CyclicSystemException(getCycles());
 		return leaves;
 	}
 
 	// temporary hack (using ComputeNodeOrder) to find out what the cycles are 
-	public String getCycleString() {
+	public Object[][] getCycles() {
 		// find cycles
 		ElementSet[] nodes = (ElementSet[]) elementSets.values().toArray(new ElementSet[elementSets.size()]);
 		ArrayList dependencies = new ArrayList();
-		for (int i = 0; i < nodes.length; i++) {
+		for (int i = 0; i < nodes.length; i++)
 			for (Iterator required = nodes[i].getRequiring().iterator(); required.hasNext();)
 				dependencies.add(new Object[] {nodes[i], required.next()});
-		}
-		Object[][] cycles = ComputeNodeOrder.computeNodeOrder(nodes, (Object[][]) dependencies.toArray(new Object[dependencies.size()][]));
-		StringBuffer result = new StringBuffer();
-		for (int i = 0; i < cycles.length; i++) {
-			result.append("{"); //$NON-NLS-1$
-			for (int j = 0; j < cycles[i].length; j++) {
-				result.append(((ElementSet) cycles[i][j]).getId());
-				result.append(","); //$NON-NLS-1$
-			}
-			result.deleteCharAt(result.length() - 1);
-			result.append("},"); //$NON-NLS-1$
-		}
-		if (result.length() > 0)
-			result.deleteCharAt(result.length() - 1);
-		return result.toString();
+		return ComputeNodeOrder.computeNodeOrder(nodes, (Object[][]) dependencies.toArray(new Object[dependencies.size()][]));
 	}
 
 	private int getVisitorOrder(int mark) {
@@ -229,6 +243,7 @@ public class DependencySystem {
 	public Map getNodes() {
 		return this.elementSets;
 	}
+
 	// returns all resolved elements ordered by pre-requisites
 	public List getResolved() {
 		int mark = getNewMark(RESOLUTION);
@@ -305,18 +320,22 @@ public class DependencySystem {
 			return null;
 		return elementSet.getElement(versionId);
 	}
+
 	// factory method 
 	public Element createElement(Object id, Object versionId, Dependency[] dependencies, boolean singleton, Object userObject) {
 		return new Element(id, versionId, dependencies, singleton, userObject);
 	}
+
 	// factory method
 	public Dependency createDependency(Object requiredObjectId, IMatchRule satisfactionRule, boolean optional, Object userObject) {
 		return new Dependency(requiredObjectId, satisfactionRule, optional, userObject);
 	}
+
 	// global access to system version comparator
 	public int compare(Object obj1, Object obj2) {
 		return comparator.compare(obj1, obj2);
 	}
+
 	/**
 	 * Returns the delta for the last resolution operation (<code>null</code> if never 
 	 * resolved or if last resolved with delta production disabled).
@@ -331,9 +350,10 @@ public class DependencySystem {
 	}
 
 	public Collection getRequiringElements(Element required) {
-		ElementSet containing =  getElementSet(required.getId());
+		ElementSet containing = getElementSet(required.getId());
 		return containing.getRequiringElements(required.getVersionId());
 	}
+
 	/**
 	 * Forces a set of elements to be unresolved. All dependencies the elements may 
 	 * have as resolved are also unresolved. Also, any elements currently depending on

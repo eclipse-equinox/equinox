@@ -33,7 +33,7 @@ public class AllTests extends TestCase {
 		TestSuite suite = new TestSuite(AllTests.class.getName());
 		suite.addTest(PlatformAdminTest.suite());
 		suite.addTest(StateResolverTest.suite());
+		suite.addTest(StateCycleTest.suite());		
 		return suite;
 	}
-
 }
