@@ -803,9 +803,9 @@ public class EclipseStarter {
 
 		URL url = EclipseStarter.class.getProtectionDomain().getCodeSource().getLocation();
 		result = url.getFile();
-		if (result.endsWith(".jar")) {
+		if (result.endsWith(".jar")) { //$NON-NLS-1$
 			result = result.substring(0, result.lastIndexOf('/'));
-			if ("folder".equals(PROP_FRAMEWORK_SHAPE))
+			if ("folder".equals(System.getProperty(PROP_FRAMEWORK_SHAPE))) //$NON-NLS-1$
 				result = result.substring(0, result.lastIndexOf('/'));
 		} else {
 			if (result.endsWith("/")) //$NON-NLS-1$
