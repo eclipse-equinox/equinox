@@ -26,10 +26,11 @@ public class EclipseStarter {
 	private static BundleContext context;
 	private static String dataLocation = null;
 	private static String configLocation = null;
+	public static boolean DEBUG = false;
 
 	// command line arguments
 	private static final String CONSOLE = "-console"; //$NON-NLS-1$
-	private static final String DEBUG = "-debug"; //$NON-NLS-1$
+	private static final String ARG_DEBUG = "-debug"; //$NON-NLS-1$
 	private static final String DEV = "-dev"; //$NON-NLS-1$
 	private static final String WS = "-ws"; //$NON-NLS-1$
 	private static final String OS = "-os"; //$NON-NLS-1$
@@ -168,7 +169,8 @@ public class EclipseStarter {
 			}
 		}
 		context.ungetService(reference);
-		System.out.println("Time loadBundles in the framework: " + (System.currentTimeMillis() - startTime));
+		if (DEBUG)
+			System.out.println("Time loadBundles in the framework: " + (System.currentTimeMillis() - startTime));
 		return (String[])ignored.toArray(new String[ignored.size()]);
 	}
 
@@ -306,8 +308,9 @@ public class EclipseStarter {
 			}
 	
 			// look for the debug mode and option file location.  
-			if (args[i - 1].equalsIgnoreCase(DEBUG)) {
+			if (args[i - 1].equalsIgnoreCase(ARG_DEBUG)) {
 				System.getProperties().put("osgi.debug", arg);
+				DEBUG = true;
 				found = true;
 				continue;
 			}
@@ -587,11 +590,8 @@ public class EclipseStarter {
 		final Semaphore semaphore = new Semaphore(0);
 		FrameworkListener listener = new FrameworkListener() {
 			public void frameworkEvent(FrameworkEvent event) {
-				if (event.getType() == FrameworkEvent.STARTLEVEL_CHANGED) {
-					System.out.println("startlevel event: " + startLevel.getStartLevel());
-					if (startLevel.getStartLevel() == value)
-						semaphore.release();
-				}
+				if (event.getType() == FrameworkEvent.STARTLEVEL_CHANGED && startLevel.getStartLevel() == value)
+					semaphore.release();
 			}
 		};
 		context.addFrameworkListener(listener);

@@ -242,7 +242,7 @@ public class Framework implements EventSource, EventPublisher {
 		
 		systemBundle.getBundleLoader();  // initialize the bundle loader in case someone accesses it directly
 		
-		if (Debug.DEBUG)
+		if (Debug.DEBUG && Debug.DEBUG_GENERAL)
 			System.out.println("Initialize the framework: " + (System.currentTimeMillis() - start));
 	}
 	
