@@ -69,8 +69,7 @@ public final class Version implements Comparable {
 	 * @param version 
 	 */
 	public Version(Version version) {
-		this(version.major, version.minor, version.micro, version.qualifier);
-		this.inclusive = version.inclusive;
+		this(version.major, version.minor, version.micro, version.qualifier, version.inclusive);
 	}
 
 	/**
@@ -90,10 +89,24 @@ public final class Version implements Comparable {
 	 * @param major major component of the version identifier
 	 * @param minor minor component of the version identifier
 	 * @param micro micro update component of the version identifier
-	 * @param qualifier qualifier component of the version identifier. 
+	 * @param qualifier qualifier component of the version identifier
 	 * Qualifier characters that are not a letter or a digit are replaced.
 	 */
 	public Version(int major, int minor, int micro, String qualifier) throws IllegalArgumentException {
+		this(major, minor, micro, qualifier, true);
+	}
+
+	/**
+	 * Creates a plug-in version identifier from its components.
+	 * 
+	 * @param major major component of the version identifier
+	 * @param minor minor component of the version identifier
+	 * @param micro micro update component of the version identifier
+	 * @param qualifier qualifier component of the version identifier
+	 * @param inclusive inclusive property of the version identifier
+	 * Qualifier characters that are not a letter or a digit are replaced.
+	 */
+	public Version(int major, int minor, int micro, String qualifier, boolean inclusive) throws IllegalArgumentException {
 
 		// Do the test outside of the assert so that they 'Policy.bind' 
 		// will not be evaluated each time (including cases when we would
@@ -112,6 +125,7 @@ public final class Version implements Comparable {
 		this.minor = minor;
 		this.micro = micro;
 		this.qualifier = verifyQualifier(qualifier);
+		this.inclusive = inclusive;
 	}
 
 	/**
@@ -133,6 +147,29 @@ public final class Version implements Comparable {
 	 * Qualifier characters that are not a letter or a digit are replaced.
 	 */
 	public Version(String versionId) {
+		this(versionId, true);
+	}
+
+	/**
+	 * Creates a plug-in version identifier from the given string.
+	 * The string represenation consists of up to 4 tokens 
+	 * separated by decimal point.
+	 * For example, the following are valid version identifiers 
+	 * (as strings):
+	 * <ul>
+	 *   <li><code>0.0.0</code></li>
+	 *   <li><code>1.0.127564</code></li>
+	 *   <li><code>3.7.2.build-127J</code></li>
+	 *   <li><code>1.9</code> (interpreted as <code>1.9.0</code>)</li>
+	 *   <li><code>3</code> (interpreted as <code>3.0.0</code>)</li>
+	 * </ul>
+	 * </p>
+	 * 
+	 * @param versionId string representation of the version identifier. 
+	 * Qualifier characters that are not a letter or a digit are replaced.
+	 * @param inclusive inclusive property of the version identifier
+	 */
+	public Version(String versionId, boolean inclusive) {
 		if (versionId == null)
 			versionId = "0.0.0";
 		Object[] parts = parseVersion(versionId);
@@ -140,6 +177,7 @@ public final class Version implements Comparable {
 		this.minor = ((Integer) parts[1]).intValue();
 		this.micro = ((Integer) parts[2]).intValue();
 		this.qualifier = (String) parts[3];
+		this.inclusive = inclusive;
 	}
 
 	/**
@@ -313,14 +351,6 @@ public final class Version implements Comparable {
 	 */
 	public boolean isInclusive() {
 		return inclusive;
-	}
-
-	/**
-	 * Sets the inclusive property of this Version
-	 * @param inclusive
-	 */
-	public void setInclusive(boolean inclusive) {
-		this.inclusive = inclusive;
 	}
 
 	/**

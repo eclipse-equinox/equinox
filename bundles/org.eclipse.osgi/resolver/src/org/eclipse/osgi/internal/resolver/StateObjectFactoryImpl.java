@@ -176,32 +176,26 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 			return;
 		switch (matchingRule) {
 			case VersionConstraint.QUALIFIER_MATCH : {
-				minVersion.setInclusive(true);
 				constraint.setVersionRange(new VersionRange(minVersion, minVersion));
 				break;
 			}
 			case VersionConstraint.MICRO_MATCH : {
-				Version maxVersion = new Version(minVersion.getMajorComponent(), minVersion.getMinorComponent(), minVersion.getMicroComponent() + 1);
-				maxVersion.setInclusive(false);
+				Version maxVersion = new Version(minVersion.getMajorComponent(), minVersion.getMinorComponent(), minVersion.getMicroComponent() + 1, "", false); //$NON-NLS-1$
 				constraint.setVersionRange(new VersionRange(minVersion, maxVersion));
 				break;
 			}
 			case VersionConstraint.MINOR_MATCH : {
-				Version maxVersion = new Version(minVersion.getMajorComponent(), minVersion.getMinorComponent() + 1, 0);
-				maxVersion.setInclusive(false);
+				Version maxVersion = new Version(minVersion.getMajorComponent(), minVersion.getMinorComponent() + 1, 0, "", false); //$NON-NLS-1$
 				constraint.setVersionRange(new VersionRange(minVersion, maxVersion));
 				break;
 			}
 			case VersionConstraint.MAJOR_MATCH : {
-				Version maxVersion = new Version(minVersion.getMajorComponent() + 1, 0, 0);
-				maxVersion.setInclusive(false);
+				Version maxVersion = new Version(minVersion.getMajorComponent() + 1, 0, 0, "", false); //$NON-NLS-1$
 				constraint.setVersionRange(new VersionRange(minVersion, maxVersion));
 				break;
 			}
 			case VersionConstraint.GREATER_EQUAL_MATCH : {
-				Version maxVersion = new Version(Version.maxVersion);
-				maxVersion.setInclusive(false);
-				constraint.setVersionRange(new VersionRange(minVersion, maxVersion));
+				constraint.setVersionRange(new VersionRange(minVersion, Version.maxVersion));
 				break;
 			}
 		}

@@ -145,8 +145,7 @@ class StateReader {
 		int serviceComponent = in.readInt();
 		String qualifierComponent = readString(in, false);
 		boolean inclusive = in.readBoolean();
-		Version result = new Version(majorComponent, minorComponent, serviceComponent, qualifierComponent);
-		result.setInclusive(inclusive);
+		Version result = new Version(majorComponent, minorComponent, serviceComponent, qualifierComponent, inclusive);
 		addToObjectTable(result);
 		return result;
 	}

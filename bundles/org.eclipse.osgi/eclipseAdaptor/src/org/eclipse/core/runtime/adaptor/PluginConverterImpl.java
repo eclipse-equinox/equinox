@@ -656,21 +656,16 @@ public class PluginConverterImpl implements PluginConverter {
 			if (matchRule.equalsIgnoreCase(IModel.PLUGIN_REQUIRES_MATCH_PERFECT)) {
 				maxVersion = minVersion;
 			} else if (matchRule.equalsIgnoreCase(IModel.PLUGIN_REQUIRES_MATCH_EQUIVALENT)) {
-				maxVersion = new Version(minVersion.getMajorComponent(), minVersion.getMinorComponent() + 1, 0);
-				maxVersion.setInclusive(false);
+				maxVersion = new Version(minVersion.getMajorComponent(), minVersion.getMinorComponent() + 1, 0, "", false); //$NON-NLS-1$
 			} else if (matchRule.equalsIgnoreCase(IModel.PLUGIN_REQUIRES_MATCH_COMPATIBLE)) {
-				maxVersion = new Version(minVersion.getMajorComponent() + 1, 0, 0);
-				maxVersion.setInclusive(false);
+				maxVersion = new Version(minVersion.getMajorComponent() + 1, 0, 0, "", false); //$NON-NLS-1$
 			} else if (matchRule.equalsIgnoreCase(IModel.PLUGIN_REQUIRES_MATCH_GREATER_OR_EQUAL)) {
-				maxVersion = new Version(Version.maxVersion);
-				maxVersion.setInclusive(false);
+				maxVersion = Version.maxVersion;
 			} else {
-				maxVersion = new Version(minVersion.getMajorComponent() + 1, 0, 0);
-				maxVersion.setInclusive(false);
+				maxVersion = new Version(minVersion.getMajorComponent() + 1, 0, 0, "", false); //$NON-NLS-1$
 			}
 		} else {
-			maxVersion = new Version(minVersion.getMajorComponent() + 1, 0, 0);
-			maxVersion.setInclusive(false);
+			maxVersion = new Version(minVersion.getMajorComponent() + 1, 0, 0, "", false); //$NON-NLS-1$
 		}
 
 		StringBuffer result = new StringBuffer();

@@ -16,13 +16,6 @@ public class VersionRange {
 	private Version maxVersion;
 
 	/**
-	 * Constructs an empty VersionRange.  By default an empty VersionRange
-	 * includes all Versions until the minimum and maximum versions are set.
-	 */
-	public VersionRange() {
-	}
-
-	/**
 	 * Constructs a VersionRange with the specified minVersion and maxVersion.
 	 * @param minVersion the minimum version of the range
 	 * @param maxVersion the maximum version of the range
@@ -49,11 +42,8 @@ public class VersionRange {
 			if (last != ']' && last != ')')
 				throw new IllegalArgumentException();
 
-			minVersion = new Version(versionRange.substring(1, comma));
-			minVersion.setInclusive(versionRange.charAt(0) == '[');
-
-			maxVersion = new Version(versionRange.substring(comma + 1, versionRange.length() - 1));
-			maxVersion.setInclusive(last == ']');
+			minVersion = new Version(versionRange.substring(1, comma), versionRange.charAt(0) == '[');
+			maxVersion = new Version(versionRange.substring(comma + 1, versionRange.length() - 1), last == ']');
 		} else {
 			minVersion = new Version(versionRange);
 			maxVersion = Version.maxVersion;
@@ -69,27 +59,11 @@ public class VersionRange {
 	}
 
 	/**
-	 * Sets the minimum version of this VersionRange
-	 * @param minVerion the minimum version
-	 */
-	public void setMinimum(Version minVerion) {
-		this.minVersion = minVerion;
-	}
-
-	/**
 	 * Returns the maximum Version of this VersionRange
 	 * @return the maximum Version of this VersionRange
 	 */
 	public Version getMaximum() {
 		return maxVersion;
-	}
-
-	/**
-	 * Sets teh maximum version of this VersionRange
-	 * @param maxVersion the maximum version
-	 */
-	public void setMaximum(Version maxVersion) {
-		this.maxVersion = maxVersion;
 	}
 
 	/**
