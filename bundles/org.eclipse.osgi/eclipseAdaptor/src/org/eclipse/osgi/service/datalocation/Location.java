@@ -55,7 +55,7 @@ public interface Location {
 	public boolean isSet();
 
 	/**
-	 * Return true if this locaiton represents a read only location.  The read only character
+	 * Return true if this location represents a read only location.  The read only character
 	 * of a location is not in enforced in any way but rather expresses the intention of the
 	 * location's creator.
 	 * @return whether the location is read only
