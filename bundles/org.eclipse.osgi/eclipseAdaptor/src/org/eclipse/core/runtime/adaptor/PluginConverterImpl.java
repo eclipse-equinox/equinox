@@ -189,7 +189,7 @@ public class PluginConverterImpl implements PluginConverter {
 		}
 		try {
 			xmlFileLocation = new URL(baseURL, FRAGMENT_MANIFEST);
-			xmlFileLocation.openStream();
+			stream = xmlFileLocation.openStream();
 			manifestType |= EclipseBundleData.MANIFEST_TYPE_FRAGMENT;
 			return xmlFileLocation;
 		} catch (MalformedURLException e) {
@@ -503,6 +503,11 @@ public class PluginConverterImpl implements PluginConverter {
 				// contains a File then use "." as the package name to provide for default.
 				names.add(DOT);
 			}
+		}
+		try {
+			file.close();
+		} catch (IOException e) {
+			// Nothing to do
 		}
 		return names;
 	}
