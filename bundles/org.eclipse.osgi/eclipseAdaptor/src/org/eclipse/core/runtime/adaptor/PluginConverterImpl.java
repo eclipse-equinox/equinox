@@ -56,7 +56,7 @@ public class PluginConverterImpl implements PluginConverter {
 		instance = this;
 	}
 
-	public File convertManifest(File pluginBaseLocation) {
+	public synchronized File convertManifest(File pluginBaseLocation) {
 		pluginManifestLocation = findPluginManifest(pluginBaseLocation);
 		if (pluginManifestLocation == null)
 			return null;
@@ -80,7 +80,7 @@ public class PluginConverterImpl implements PluginConverter {
 		}
 		return bundleManifestLocation; 
 	}
-	public boolean convertManifest(File pluginBaseLocation, File bundleManifestLocation) {
+	public synchronized boolean convertManifest(File pluginBaseLocation, File bundleManifestLocation) {
 		pluginManifestLocation = findPluginManifest(pluginBaseLocation);
 		if (pluginManifestLocation == null)
 			return false;
