@@ -15,6 +15,7 @@ import java.util.Enumeration;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.service.resolver.Version;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.Constants;
 
 public class CachedManifest extends Dictionary {
 
@@ -59,7 +60,7 @@ public class CachedManifest extends Dictionary {
 
 	public Object get(Object key) {
 		String keyString = (String) key;
-		if (org.osgi.framework.Constants.BUNDLE_VERSION.equalsIgnoreCase(keyString)) {
+		if (Constants.BUNDLE_VERSION.equalsIgnoreCase(keyString)) {
 			Version result = bundledata.getVersion();
 			return result == null ? null : result.toString();
 		}
@@ -69,12 +70,10 @@ public class CachedManifest extends Dictionary {
 			return bundledata.getAutoStop();
 		if (EclipseAdaptorConstants.PLUGIN_CLASS.equalsIgnoreCase(keyString))
 			return bundledata.getPluginClass();
-		if (org.osgi.framework.Constants.BUNDLE_SYMBOLICNAME.equalsIgnoreCase(keyString))
+		if (Constants.BUNDLE_SYMBOLICNAME.equalsIgnoreCase(keyString))
 			return bundledata.getSymbolicName();
-		//TODO: getManifest may return null. 
-		//TODO This can only happen if the converter is not around.
-		//TODO False, it can happen whenever something goes wrong while calling EclipseBundleData.loadManifest (see bug 56562)
-		return getManifest().get(key);
+		Dictionary manifest = getManifest();
+		return manifest == null ? null : manifest.get(key);
 	}
 
 	public Object remove(Object key) {
