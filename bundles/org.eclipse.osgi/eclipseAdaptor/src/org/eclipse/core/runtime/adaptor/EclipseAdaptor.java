@@ -230,6 +230,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 				Vector result = new Vector(bundleCount);
 				long id = -1;
 				State state = stateManager.getSystemState();
+				long stateTimeStamp = state.getTimeStamp();
 				for (int i = 0; i < bundleCount; i++) {
 					try {
 						try {
@@ -246,8 +247,6 @@ public class EclipseAdaptor extends DefaultAdaptor {
 							// should never happen
 						}
 					} catch (IOException e) {
-						//Reset the time stamp
-						timeStamp = System.currentTimeMillis();
 						state.removeBundle(id);
 						if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 							Debug.println("Error reading framework metadata: " + e.getMessage());
@@ -255,7 +254,8 @@ public class EclipseAdaptor extends DefaultAdaptor {
 						}
 					}
 				}
-				state.resolve(false);	//Force a full resolve
+				if (stateTimeStamp != state.getTimeStamp())
+					state.resolve(false);	//time stamp changed force a full resolve
 				return result;
 			} finally {
 				in.close();
