@@ -376,14 +376,6 @@ public class Framework implements EventSource, EventPublisher {
 			}
 		}
 
-		value = properties.getProperty(Constants.FRAMEWORK_WINDOWING_SYSTEM);
-		if (value == null) {
-			//TODO can we pull this property from an Eclipse property?
-			//value = properties.getProperty(Constants.SOME_WS_PROPERTY);
-			if (value != null) {
-				properties.put(Constants.FRAMEWORK_WINDOWING_SYSTEM, value);
-			}
-		}
 
 		value = properties.getProperty(Constants.FRAMEWORK_LANGUAGE);
 		if (value == null) {
@@ -1063,56 +1055,6 @@ public class Framework implements EventSource, EventPublisher {
 					/* continue with next pass */
 					break;
 				}
-		}
-
-		/* Pass 2.5: perform windowing system matching */
-		String windowingsystem = getProperty(Constants.FRAMEWORK_WINDOWING_SYSTEM);
-		matches = 0;
-		maxresult = 0;
-
-		int[] bestMatch = new int[elements.length];
-
-		for (int i = 0; i < elements.length; i++) {
-			if (score[i] > 0) {
-				BundleNativeCode bnc = bundleNativeCode[i];
-
-				int result = bnc.matchWindowingSystem(windowingsystem);
-				bestMatch[i] = result;
-
-				if (result > 0) /* 0 is no match */ {
-					matches++;
-
-					if (result > maxresult) {
-						maxresult = result;
-						index = i;
-					}
-				}
-			}
-
-			switch (matches) {
-				case 0 :
-					{
-						throw new BundleException(Msg.formatter.getString("BUNDLE_NATIVECODE_MATCH_EXCEPTION"));
-					}
-				case 1 :
-					{
-						return bundleNativeCode[index].getPaths();
-					}
-				default :
-					{
-						/* discard all but the highest result */
-						for (int j = 0; j < elements.length; j++) {
-							int result = bestMatch[j];
-
-							if (result < maxresult) {
-								score[j] = 0;
-							}
-						}
-
-						/* continue with next pass */
-						break;
-					}
-			}
 		}
 
 		/* Pass 3: perform language matching */

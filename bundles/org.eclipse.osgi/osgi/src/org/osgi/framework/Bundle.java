@@ -1,5 +1,5 @@
 /*
- * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/Bundle.java,v 1.1 2003/11/25 21:24:14 dj Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/Bundle.java,v 1.2 2004/01/09 22:04:44 jfogell Exp $
  *
  * Copyright (c) The Open Services Gateway Initiative (2000-2001).
  * All Rights Reserved.
@@ -67,7 +67,7 @@ import java.util.*;
  * create <tt>Bundle</tt> objects, and these objects are only valid
  * within the Framework that created them.
  *
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @author Open Services Gateway Initiative
  */
 public abstract interface Bundle
@@ -475,7 +475,11 @@ public abstract interface Bundle
 		 * <tt>Dictionary</tt> object will operate on header names in a case-insensitive manner.
 		 *
 		 * If a Manifest header begins with a '%', it will be evaluated with the specified properties
-		 * file for the specied Locale. 
+		 * file for the specied locale string
+		 * 
+		 * If null is passed as the locale string, the headers will be localized using the default locale.
+		 * If the empty string ("") is passed as the locale string, the headers will not be localized and the 
+		 * any leading '%'s will be stripped off of the header values. 
 		 *
 		 * <p>For example, the following Manifest headers and values are included
 		 * if they are present in the Manifest file:
@@ -488,14 +492,15 @@ public abstract interface Bundle
 		 * Bundle-ContactAddress
 		 * </pre>
 		 * <p>This method will continue to return Manifest header information
-		 * while this bundle is in the <tt>UNINSTALLED</tt> state.
+		 * while this bundle is in the <tt>UNINSTALLED</tt> state.  While the bundle is ununstalled,
+		 * the header information returned will be for only the default locale.  
 		 *
 		 * @return A <tt>Dictionary</tt> object containing this bundle's Manifest headers and values.
 		 *
 		 * @exception java.lang.SecurityException If the caller does not have
 		 * the <tt>AdminPermission</tt>, and the Java Runtime Environment supports permissions.
 		 */
-		public abstract Dictionary getHeaders(Locale locale);
+		public abstract Dictionary getHeaders(String localeString);
 
     /**
      * Returns this bundle's identifier. The bundle is assigned a unique identifier by the Framework

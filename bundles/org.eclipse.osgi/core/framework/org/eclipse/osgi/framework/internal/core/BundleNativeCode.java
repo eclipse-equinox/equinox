@@ -178,14 +178,6 @@ public class BundleNativeCode
     			addAttribute(Constants.BUNDLE_NATIVECODE_LANGUAGE,attrSt.nextToken());
     		}
     	}
-
-		attrValue = element.getAttribute(Constants.BUNDLE_NATIVECODE_WINDOWING_SYSTEM);
-    	if (attrValue!=null){
-    		StringTokenizer attrSt = new StringTokenizer(attrValue,",");
-    		while(attrSt.hasMoreTokens()) {
-    			addAttribute(Constants.BUNDLE_NATIVECODE_WINDOWING_SYSTEM,attrSt.nextToken());
-    		}
-    	}
     }
 
     /**
@@ -269,16 +261,6 @@ public class BundleNativeCode
              language.addElement(value.toLowerCase());
              return;
         }
-		if (key.equals(Constants.BUNDLE_NATIVECODE_WINDOWING_SYSTEM))
-		{
-			if (windowingsystem == null) 
-			{
-				windowingsystem = new Attribute();
-			}
-
-			windowingsystem.addElement(value.toLowerCase());
-			return;
-		}
     }
 
     /**
@@ -348,19 +330,6 @@ public class BundleNativeCode
                 sb.append(language.elementAt(i).toString());
             }
         }
-
-		if (windowingsystem != null)
-		{
-			size = windowingsystem.size();
-			for (int i = 0; i < size; i++)
-			{
-				sb.append(';');
-				sb.append(Constants.BUNDLE_NATIVECODE_WINDOWING_SYSTEM);
-				sb.append('=');
-				sb.append(windowingsystem.elementAt(i).toString());
-			}
-		}
-
         return(sb.toString());
     }
 

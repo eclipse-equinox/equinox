@@ -1,5 +1,5 @@
 /*
- * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/Constants.java,v 1.1 2003/11/25 21:24:14 dj Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/Constants.java,v 1.2 2004/01/09 22:04:44 jfogell Exp $
  *
  * Copyright (c) The Open Services Gateway Initiative (2000-2001).
  * All Rights Reserved.
@@ -35,7 +35,7 @@ package org.osgi.framework;
  * <p>The values associated with these keys are of type <tt>java.lang.String</tt>,
  * unless otherwise indicated.
  *
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @author Open Services Gateway Initiative
  * @since 1.1
  * @see Bundle#getHeaders
@@ -455,7 +455,7 @@ public interface Constants {
 	 * <p>The attribute value may be retrieved from the
 	 * <tt>Dictionary</tt> object returned by the <tt>Bundle.getHeaders</tt> method.
 	 */
-	public final static String BUNDLE_LOCALIZATIONFILE = "Bundle-LocalizationFile";
+	public final static String BUNDLE_MANIFEST_LOCALIZATION = "Bundle-Localization";
 	
 	/**
 	 * Manifest header (named &quot;Provide-Package&quot;)
@@ -524,7 +524,7 @@ public interface Constants {
 	/**
 	 * String indication location of the default localization file for manifest files
 	 */
-	public final static String DEFAULT_MANIFEST_LOCALIZATION_FILE = "META-INF/MANIFEST";
+	public final static String BUNDLE_DEFAULT_MANIFEST_LOCALIZATION = "META-INF/bundle";
 
 	/**
 	 * Manifest header attribute (named &quot;version-match&quot;)
@@ -555,24 +555,4 @@ public interface Constants {
 	 * <tt>Dictionary</tt> object returned by the <tt>Bundle.getHeaders</tt> method.
 	 */
 	public final static String HOST_BUNDLE = "Host-Bundle";
-
-
-	/**
-	 * Framework environment property (named &quot;org.osgi.framework.processor&quot;)
-	 * identifying the Framework host-computer's processor name.
-	 * <p>The value of this property may be retrieved by calling the <tt>BundleContext.getProperty</tt> method.
-	 */
-	public static final String FRAMEWORK_WINDOWING_SYSTEM = "org.osgi.framework.windowing.system";
-
-	/**
-	 * Manifest header attribute (named &quot;ws&quot;) identifying the
-	 * windowing system in which the native bundle code can operate in.
-	 * Bundle-NativeCode Manifest header. 
-	 * <p>The attribute value is encoded in the Bundle-NativeCode Manifest header like:
-	 * <pre>
-	 * Bundle-NativeCode: http.so ; ws=win32 ...
-	 * </pre>
-	 */
-	//TODO define possible values
-	public static final String BUNDLE_NATIVECODE_WINDOWING_SYSTEM = "ws";
 }
