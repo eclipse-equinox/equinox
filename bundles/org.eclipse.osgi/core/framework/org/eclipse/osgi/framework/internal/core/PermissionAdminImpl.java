@@ -476,13 +476,13 @@ public class PermissionAdminImpl implements PermissionAdmin {
 				while (true) {
 					String line = reader.readLine();
 
-					if (line == null) /* EOF */ {
+					if (line == null) /* EOF */{
 						break;
 					}
 
 					line = line.trim();
 
-					if ((line.length() == 0) || line.startsWith("#") || line.startsWith("//")) /* comments */ {
+					if ((line.length() == 0) || line.startsWith("#") || line.startsWith("//")) /* comments */{
 						continue;
 					}
 
@@ -540,14 +540,14 @@ public class PermissionAdminImpl implements PermissionAdmin {
 				if (!name.equals("<<ALL FILES>>")) {
 					File file = new File(name);
 
-					if (!file.isAbsolute()) /* relative name */ {
-						if (bundle == null) /* default permissions */ {
+					if (!file.isAbsolute()) /* relative name */{
+						if (bundle == null) /* default permissions */{
 							continue; /* no relative file permissions */
 						}
 
 						File target = framework.getDataFile(bundle, name);
 
-						if (target == null) /* no bundle data file area */ {
+						if (target == null) /* no bundle data file area */{
 							continue; /* no relative file permissions */
 						}
 

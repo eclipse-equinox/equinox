@@ -48,12 +48,14 @@ public class BasicLocation implements Location {
 	public Location getParentLocation() {
 		return parent;
 	}
+
 	//TODO use synchronized 
 	public URL getURL() {
 		if (location == null && defaultValue != null)
 			setURL(defaultValue, false);
 		return location;
 	}
+
 	//TODO use synchronized
 	public boolean isSet() {
 		return location != null;
@@ -84,6 +86,7 @@ public class BasicLocation implements Location {
 			System.getProperties().put(property, location.toExternalForm());
 		return lock;
 	}
+
 	//TODO use synchronized or remove if passed in constructor	
 	public void setParent(Location value) {
 		parent = value;
@@ -139,11 +142,13 @@ public class BasicLocation implements Location {
 			locker = new Locker_JavaNio(lock);
 		}
 	}
+
 	//TODO use synchronized
 	public void release() {
 		if (locker != null)
 			locker.release();
 	}
+
 	//TODO: isRunningWithNIO or hasNIO or...
 	private boolean runningWithNio() {
 		try {

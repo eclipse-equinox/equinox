@@ -21,7 +21,7 @@ import java.util.*;
  * @since 3.0
  */
 public class ComputeNodeOrder {
-	
+
 	/*
 	 * Prevent class from being instantiated.
 	 */
@@ -194,8 +194,7 @@ public class ComputeNodeOrder {
 		 * @exception IllegalArgumentException if either vertex is undefined or
 		 * if the graph is frozen
 		 */
-		public void addEdge(Object fromId, Object toId)
-			throws IllegalArgumentException {
+		public void addEdge(Object fromId, Object toId) throws IllegalArgumentException {
 			if (initialized) {
 				throw new IllegalArgumentException();
 			}
@@ -284,14 +283,14 @@ public class ComputeNodeOrder {
 					while (root.predecessor != null) {
 						root = root.predecessor;
 					}
-				List component = (List)components.get(root);
-				if (component == null) {
-					component = new ArrayList(2);
-					component.add(root.id);
-					components.put(root, component);
+					List component = (List) components.get(root);
+					if (component == null) {
+						component = new ArrayList(2);
+						component.add(root.id);
+						components.put(root, component);
+					}
+					component.add(vertex.id);
 				}
-				component.add(vertex.id);
-				}					
 			}
 			List result = new ArrayList(components.size());
 			for (Iterator it = components.values().iterator(); it.hasNext();) {
@@ -303,53 +302,53 @@ public class ComputeNodeOrder {
 			return result;
 		}
 
-//		/**
-//		 * Performs a depth-first search of this graph and records interesting
-//		 * info with each vertex, including DFS finish time. Employs a recursive
-//		 * helper method <code>DFSVisit</code>.
-//		 * <p>
-//		 * Although this method is not used, it is the basis of the
-//		 * non-recursive <code>DFS</code> method.
-//		 * </p>
-//		 */
-//		private void recursiveDFS() {
-//			// initialize 
-//			// all vertex.color initially Vertex.WHITE;
-//			// all vertex.predecessor initially null;
-//			time = 0;
-//			for (Iterator allV = vertexList.iterator(); allV.hasNext();) {
-//				Vertex nextVertex = (Vertex) allV.next();
-//				if (nextVertex.color == Vertex.WHITE) {
-//					DFSVisit(nextVertex);
-//				}
-//			}
-//		}
-//
-//		/**
-//		 * Helper method. Performs a depth first search of this graph.
-//		 * 
-//		 * @param vertex the vertex to visit
-//		 */
-//		private void DFSVisit(Vertex vertex) {
-//			// mark vertex as discovered
-//			vertex.color = Vertex.GREY;
-//			List adj = vertex.adjacent;
-//			for (Iterator allAdjacent=adj.iterator(); allAdjacent.hasNext();) {
-//				Vertex adjVertex = (Vertex) allAdjacent.next();
-//				if (adjVertex.color == Vertex.WHITE) {
-//					// explore edge from vertex to adjVertex
-//					adjVertex.predecessor = vertex;
-//					DFSVisit(adjVertex);
-//				} else if (adjVertex.color == Vertex.GREY) {
-//                  // back edge (grey vertex means visit in progress)
-//                  cycles = true;
-//              }
-//			}
-//			// done exploring vertex
-//			vertex.color = Vertex.BLACK;
-//			time++;
-//			vertex.finishTime = time;
-//		}
+		//		/**
+		//		 * Performs a depth-first search of this graph and records interesting
+		//		 * info with each vertex, including DFS finish time. Employs a recursive
+		//		 * helper method <code>DFSVisit</code>.
+		//		 * <p>
+		//		 * Although this method is not used, it is the basis of the
+		//		 * non-recursive <code>DFS</code> method.
+		//		 * </p>
+		//		 */
+		//		private void recursiveDFS() {
+		//			// initialize 
+		//			// all vertex.color initially Vertex.WHITE;
+		//			// all vertex.predecessor initially null;
+		//			time = 0;
+		//			for (Iterator allV = vertexList.iterator(); allV.hasNext();) {
+		//				Vertex nextVertex = (Vertex) allV.next();
+		//				if (nextVertex.color == Vertex.WHITE) {
+		//					DFSVisit(nextVertex);
+		//				}
+		//			}
+		//		}
+		//
+		//		/**
+		//		 * Helper method. Performs a depth first search of this graph.
+		//		 * 
+		//		 * @param vertex the vertex to visit
+		//		 */
+		//		private void DFSVisit(Vertex vertex) {
+		//			// mark vertex as discovered
+		//			vertex.color = Vertex.GREY;
+		//			List adj = vertex.adjacent;
+		//			for (Iterator allAdjacent=adj.iterator(); allAdjacent.hasNext();) {
+		//				Vertex adjVertex = (Vertex) allAdjacent.next();
+		//				if (adjVertex.color == Vertex.WHITE) {
+		//					// explore edge from vertex to adjVertex
+		//					adjVertex.predecessor = vertex;
+		//					DFSVisit(adjVertex);
+		//				} else if (adjVertex.color == Vertex.GREY) {
+		//                  // back edge (grey vertex means visit in progress)
+		//                  cycles = true;
+		//              }
+		//			}
+		//			// done exploring vertex
+		//			vertex.color = Vertex.BLACK;
+		//			time++;
+		//			vertex.finishTime = time;
+		//		}
 
 		/**
 		 * Performs a depth-first search of this graph and records interesting
@@ -365,8 +364,7 @@ public class ComputeNodeOrder {
 			final int AFTER_NEXTED_DFS_VISIT = 4;
 			// use precomputed objects to avoid garbage
 			final Integer NEXT_VERTEX_OBJECT = new Integer(NEXT_VERTEX);
-			final Integer AFTER_NEXTED_DFS_VISIT_OBJECT =
-				new Integer(AFTER_NEXTED_DFS_VISIT);
+			final Integer AFTER_NEXTED_DFS_VISIT_OBJECT = new Integer(AFTER_NEXTED_DFS_VISIT);
 			// initialize 
 			// all vertex.color initially Vertex.WHITE;
 			// all vertex.predecessor initially null;
@@ -377,9 +375,9 @@ public class ComputeNodeOrder {
 			Vertex vertex = null;
 			Iterator allV = vertexList.iterator();
 			state = NEXT_VERTEX;
-			nextStateLoop : while (true) {
+			nextStateLoop: while (true) {
 				switch (state) {
-					case NEXT_VERTEX:
+					case NEXT_VERTEX :
 						// on entry, "allV" contains vertexes yet to be visited
 						if (!allV.hasNext()) {
 							// all done
@@ -395,7 +393,7 @@ public class ComputeNodeOrder {
 							state = NEXT_VERTEX;
 							continue nextStateLoop;
 						}
-					case START_DFS_VISIT:
+					case START_DFS_VISIT :
 						// on entry, "vertex" contains the vertex to be visited
 						// top of stack is return code
 						// mark the vertex as discovered
@@ -403,7 +401,7 @@ public class ComputeNodeOrder {
 						allAdjacent = vertex.adjacent.iterator();
 						state = NEXT_ADJACENT;
 						continue nextStateLoop;
-					case NEXT_ADJACENT:
+					case NEXT_ADJACENT :
 						// on entry, "allAdjacent" contains adjacent vertexes to
 						// be visited; "vertex" contains vertex being visited
 						if (allAdjacent.hasNext()) {
@@ -429,12 +427,10 @@ public class ComputeNodeOrder {
 							vertex.color = Vertex.BLACK;
 							time++;
 							vertex.finishTime = time;
-							state =
-								((Integer) stack.remove(stack.size() - 1))
-									.intValue();
+							state = ((Integer) stack.remove(stack.size() - 1)).intValue();
 							continue nextStateLoop;
 						}
-					case AFTER_NEXTED_DFS_VISIT:
+					case AFTER_NEXTED_DFS_VISIT :
 						// on entry, stack contains "vertex" and "allAjacent"
 						vertex = (Vertex) stack.remove(stack.size() - 1);
 						allAdjacent = (Iterator) stack.remove(stack.size() - 1);
@@ -445,7 +441,7 @@ public class ComputeNodeOrder {
 		}
 
 	}
-	
+
 	/**
 	 * Sorts the given list of probject in a manner that honors the given
 	 * project reference relationships. That is, if project A references project
@@ -472,14 +468,12 @@ public class ComputeNodeOrder {
 	 * references B (element type: <code>IProject[]</code>)
 	 * @return an object describing the resulting project order
 	 */
-	public static Object[][] computeNodeOrder(
-			Object[] objects,
-			Object[][] references) {
-		
+	public static Object[][] computeNodeOrder(Object[] objects, Object[][] references) {
+
 		// Step 1: Create the graph object.
 		final Digraph g1 = new Digraph();
 		// add vertexes
-		for (int i = 0; i < objects.length; i++) 
+		for (int i = 0; i < objects.length; i++)
 			g1.addVertex(objects[i]);
 		// add edges
 		for (int i = 0; i < references.length; i++)
@@ -494,10 +488,10 @@ public class ComputeNodeOrder {
 		final Digraph g2 = new Digraph();
 		// add vertexes
 		List resortedVertexes = g1.idsByDFSFinishTime(false);
-		for (Iterator it = resortedVertexes.iterator(); it.hasNext(); ) 
+		for (Iterator it = resortedVertexes.iterator(); it.hasNext();)
 			g2.addVertex(it.next());
 		// add edges
-		for (int i = 0; i < references.length; i++)			
+		for (int i = 0; i < references.length; i++)
 			g2.addEdge(references[i][0], references[i][1]);
 		g2.freeze();
 
@@ -511,7 +505,7 @@ public class ComputeNodeOrder {
 		if (hasCycles) {
 			List knotList = g2.nonTrivialComponents();
 			knots = (Object[][]) knotList.toArray(new Object[knotList.size()][]);
-		} else  {
+		} else {
 			knots = new Object[0][];
 		}
 		for (int i = 0; i < orderedNodes.length; i++)

@@ -19,12 +19,14 @@ import org.osgi.framework.Bundle;
 public class ResolverImpl implements Resolver {
 	private State state;
 	private IDependencySystem dependencies;
+
 	public void resolve(BundleDescription[] reRefresh) {
 		// unresolving the given bundles will force them to be re-resolved 
 		for (int i = 0; i < reRefresh.length; i++)
 			unresolveBundle(reRefresh[i]);
 		resolve();
 	}
+
 	/**
 	 * TODO: need to devise a way to report problems (a la IStatus)
 	 */
@@ -44,6 +46,7 @@ public class ResolverImpl implements Resolver {
 		processInnerDelta(delta);
 		resolvePackages();
 	}
+
 	public void setState(State newState) {
 		// to avoid infinite (mutual) recursion
 		if (state == newState)
@@ -60,6 +63,7 @@ public class ResolverImpl implements Resolver {
 		// forget any dependency state created before
 		flush();
 	}
+
 	/*
 	 * Applies changes in the constraint system to the state object.
 	 */
@@ -68,7 +72,7 @@ public class ResolverImpl implements Resolver {
 		IElementChange[] changes = delta.getAllChanges();
 		for (int i = 0; i < changes.length; i++) {
 			IElement element = changes[i].getElement();
-			BundleDescription bundle =  (BundleDescription) element.getUserObject();	
+			BundleDescription bundle = (BundleDescription) element.getUserObject();
 			int kind = changes[i].getKind();
 			if ((kind & IElementChange.RESOLVED) != 0) {
 				state.resolveBundle(bundle, Bundle.RESOLVED);
@@ -79,6 +83,7 @@ public class ResolverImpl implements Resolver {
 				resolveConstraints(element, bundle);
 		}
 	}
+
 	private void resolveConstraints(IElement element, BundleDescription bundle) {
 		// tells the state that some of the constraints have
 		// changed
@@ -93,27 +98,33 @@ public class ResolverImpl implements Resolver {
 			state.resolveConstraint(constraint, actualVersion, supplier);
 		}
 	}
+
 	public void bundleAdded(BundleDescription bundle) {
 		if (dependencies == null)
 			return;
 		ResolverHelper.add(bundle, dependencies);
 	}
+
 	public void bundleRemoved(BundleDescription bundle) {
 		if (dependencies == null)
 			return;
 		ResolverHelper.remove(bundle, dependencies);
 	}
+
 	public void bundleUpdated(BundleDescription newDescription, BundleDescription existingDescription) {
 		if (dependencies == null)
 			return;
 		ResolverHelper.update(newDescription, existingDescription, dependencies);
 	}
+
 	public State getState() {
 		return state;
 	}
+
 	public void flush() {
 		dependencies = null;
 	}
+
 	/*
 	 * Ensures that all currently resolved bundles have their import-package
 	 * clauses satisfied.
@@ -170,6 +181,7 @@ public class ResolverImpl implements Resolver {
 		/* return false if a at least one bundle was unresolved during this */
 		return tries > 1;
 	}
+
 	/*
 	 * Unresolves a bundle and all bundles that require it.
 	 */
@@ -181,13 +193,14 @@ public class ResolverImpl implements Resolver {
 			return;
 		IElementSet bundleElementSet = dependencies.getElementSet(bundle.getUniqueId());
 		Collection requiring = bundleElementSet.getRequiringElements(bundle.getVersion());
-		for (Iterator requiringIter = requiring.iterator(); requiringIter.hasNext(); ) {
+		for (Iterator requiringIter = requiring.iterator(); requiringIter.hasNext();) {
 			IElement requiringElement = (IElement) requiringIter.next();
 			BundleDescription requiringBundle = state.getBundle((String) requiringElement.getId(), (Version) requiringElement.getVersionId());
 			if (requiringBundle != null)
 				unresolveRequirementChain(requiringBundle);
 		}
 	}
+
 	private void unresolveBundle(BundleDescription bundle) {
 		if (!bundle.isResolved())
 			return;

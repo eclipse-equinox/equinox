@@ -20,6 +20,6 @@ public interface HostSpecification extends VersionConstraint {
 	// a fragment should force a reload of the host when attaching.
 	// this should be removed.
 	public boolean reloadHost();
-	
+
 	public BundleDescription[] getSuppliers();
 }

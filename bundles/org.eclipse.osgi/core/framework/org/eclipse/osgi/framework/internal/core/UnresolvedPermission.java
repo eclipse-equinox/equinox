@@ -39,7 +39,7 @@ final class UnresolvedPermission extends Permission {
 
 	static {
 		Class string = String.class;
-		constructorArgs = new Class[] { string, string };
+		constructorArgs = new Class[] {string, string};
 	}
 
 	/**
@@ -155,7 +155,7 @@ final class UnresolvedPermission extends Permission {
 			try {
 				Constructor constructor = clazz.getConstructor(constructorArgs);
 
-				Permission permission = (Permission) constructor.newInstance(new Object[] { name, actions });
+				Permission permission = (Permission) constructor.newInstance(new Object[] {name, actions});
 
 				if (Debug.DEBUG && Debug.DEBUG_SECURITY) {
 					Debug.println("Resolved " + this);

@@ -15,11 +15,18 @@ package org.eclipse.core.dependencies;
  */
 public interface IDependency {
 	public Object getRequiredObjectId();
+
 	public Object getRequiredVersionId();
+
 	public IMatchRule getMatchRule();
+
 	public boolean isOptional();
+
 	public Object getResolvedVersionId();
+
 	public int getChangedMark();
+
 	public void resolve(Object resolvedVersionId, int changedMark);
-	public Object getUserObject();	
+
+	public Object getUserObject();
 }

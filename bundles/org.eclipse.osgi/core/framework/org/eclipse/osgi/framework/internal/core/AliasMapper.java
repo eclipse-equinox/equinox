@@ -9,23 +9,27 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.osgi.framework.internal.core;
+
 import java.io.*;
 import java.util.Hashtable;
 import java.util.Vector;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.util.Tokenizer;
+
 /**
  * This class maps aliases.
  */
 public class AliasMapper {
 	private static Hashtable processorAliasTable;
 	private static Hashtable osnameAliasTable;
+
 	/**
 	 * Constructor.
 	 *
 	 */
 	public AliasMapper() {
 	}
+
 	/**
 	 * Return the master alias for the processor.
 	 *
@@ -55,6 +59,7 @@ public class AliasMapper {
 		}
 		return (processor);
 	}
+
 	/**
 	 * Return the master alias for the osname.
 	 *
@@ -88,6 +93,7 @@ public class AliasMapper {
 		}
 		return (osname);
 	}
+
 	/**
 	 * Read alias data and populate a Hashtable.
 	 *
@@ -112,7 +118,7 @@ public class AliasMapper {
 				String master = tokenizer.getString("# \t");
 				if (master != null) {
 					aliases.put(master.toLowerCase(), master);
-					parseloop : while (true) {
+					parseloop: while (true) {
 						String alias = tokenizer.getString("# \t");
 						if (alias == null) {
 							break parseloop;

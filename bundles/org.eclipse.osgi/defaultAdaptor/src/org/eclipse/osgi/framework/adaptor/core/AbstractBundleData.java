@@ -56,7 +56,7 @@ public abstract class AbstractBundleData implements BundleData {
 
 	/** bundle location */
 	private String location;
-	
+
 	/** bundle's file name */
 	private String fileName;
 
@@ -85,6 +85,7 @@ public abstract class AbstractBundleData implements BundleData {
 	private String executionEnvironment;
 	private String dynamicImports;
 	private boolean fragment = false;
+
 	///////////////////// End values from Manifest       /////////////////////
 
 	public AbstractBundleData(AbstractFrameworkAdaptor adaptor, long id) {
@@ -107,13 +108,13 @@ public abstract class AbstractBundleData implements BundleData {
 				// make sure the manifest is still null after we have aquired the lock.
 				if (manifest == null) {
 					URL url = getEntry(Constants.OSGI_BUNDLE_MANIFEST);
-					if (url == null){
-						throw new BundleException(AdaptorMsg.formatter.getString("MANIFEST_NOT_FOUND_EXCEPTION",Constants.OSGI_BUNDLE_MANIFEST,getLocation())); //$NON-NLS-1$
+					if (url == null) {
+						throw new BundleException(AdaptorMsg.formatter.getString("MANIFEST_NOT_FOUND_EXCEPTION", Constants.OSGI_BUNDLE_MANIFEST, getLocation())); //$NON-NLS-1$
 					}
 					try {
 						manifest = Headers.parseManifest(url.openStream());
 					} catch (IOException e) {
-						throw new BundleException(AdaptorMsg.formatter.getString("MANIFEST_NOT_FOUND_EXCEPTION",Constants.OSGI_BUNDLE_MANIFEST,getLocation()), e);  //$NON-NLS-1$
+						throw new BundleException(AdaptorMsg.formatter.getString("MANIFEST_NOT_FOUND_EXCEPTION", Constants.OSGI_BUNDLE_MANIFEST, getLocation()), e); //$NON-NLS-1$
 					}
 				}
 			}
@@ -125,7 +126,7 @@ public abstract class AbstractBundleData implements BundleData {
 	 * Sets the Bundle object for this BundleData.
 	 * @param bundle The Bundle Object for this BundleData.
 	 */
-	public void setBundle(Bundle bundle){
+	public void setBundle(Bundle bundle) {
 		this.bundle = bundle;
 	}
 
@@ -162,11 +163,12 @@ public abstract class AbstractBundleData implements BundleData {
 			return null;
 		}
 		try {
-			return new URL(null, getBundleEntryURL(id,path), new Handler(entry));
+			return new URL(null, getBundleEntryURL(id, path), new Handler(entry));
 		} catch (MalformedURLException e) {
 			return null;
 		}
 	}
+
 	/**
 	 * Gets all of the bundle entries that exist under the specified path. For
 	 * example:
@@ -210,7 +212,6 @@ public abstract class AbstractBundleData implements BundleData {
 	 */
 	abstract public File createGenerationDir();
 
-
 	/**
 	 * Return the base BundleFile for this BundleData.  The base BundleFile
 	 * is the BundleFile that contains all the content of the bundle.
@@ -223,8 +224,7 @@ public abstract class AbstractBundleData implements BundleData {
 	}
 
 	public static String getBundleEntryURL(long id, String path) {
-		StringBuffer url = new StringBuffer(
-				Constants.OSGI_ENTRY_URL_PROTOCOL);
+		StringBuffer url = new StringBuffer(Constants.OSGI_ENTRY_URL_PROTOCOL);
 		url.append("://").append(id);
 		if (path.length() == 0 || path.charAt(0) != '/') {
 			url.append('/');
@@ -237,13 +237,15 @@ public abstract class AbstractBundleData implements BundleData {
 	public String getLocation() {
 		return location;
 	}
+
 	public void setLocation(String location) {
 		this.location = location;
-	}	
+	}
 
 	public String getFileName() {
 		return fileName;
 	}
+
 	public void setFileName(String fileName) {
 		this.fileName = fileName;
 	}
@@ -251,6 +253,7 @@ public abstract class AbstractBundleData implements BundleData {
 	public String[] getNativePaths() {
 		return nativePaths;
 	}
+
 	public String getNativePathsString() {
 		if (nativePaths == null || nativePaths.length == 0)
 			return null;
@@ -262,9 +265,11 @@ public abstract class AbstractBundleData implements BundleData {
 		}
 		return sb.toString();
 	}
+
 	public void setNativePaths(String[] nativePaths) {
 		this.nativePaths = nativePaths;
 	}
+
 	public void setNativePaths(String nativePaths) {
 		if (nativePaths == null)
 			return;
@@ -280,6 +285,7 @@ public abstract class AbstractBundleData implements BundleData {
 	public int getGeneration() {
 		return generation;
 	}
+
 	public void setGeneration(int generation) {
 		this.generation = generation;
 	}
@@ -287,6 +293,7 @@ public abstract class AbstractBundleData implements BundleData {
 	public int getStartLevel() {
 		return startLevel;
 	}
+
 	public void setStartLevel(int startLevel) {
 		this.startLevel = startLevel;
 	}
@@ -294,6 +301,7 @@ public abstract class AbstractBundleData implements BundleData {
 	public int getStatus() {
 		return status;
 	}
+
 	public void setStatus(int status) {
 		this.status = status;
 	}
@@ -301,17 +309,19 @@ public abstract class AbstractBundleData implements BundleData {
 	public boolean isReference() {
 		return reference;
 	}
+
 	public void setReference(boolean reference) {
 		this.reference = reference;
 	}
-	///////////////////// End Meta Data Accessor Methods   ////////////////////
 
+	///////////////////// End Meta Data Accessor Methods   ////////////////////
 
 	///////////////////// Begin Manifest Value Accessor Methods /////////////////////
 
 	public String getSymbolicName() {
 		return symbolicName;
 	}
+
 	public void setSymbolicName(String symbolicName) {
 		this.symbolicName = symbolicName;
 	}
@@ -319,6 +329,7 @@ public abstract class AbstractBundleData implements BundleData {
 	public Version getVersion() {
 		return version;
 	}
+
 	public void setVersion(Version version) {
 		this.version = version;
 	}
@@ -326,6 +337,7 @@ public abstract class AbstractBundleData implements BundleData {
 	public String getActivator() {
 		return activator;
 	}
+
 	public void setActivator(String activator) {
 		this.activator = activator;
 	}
@@ -333,6 +345,7 @@ public abstract class AbstractBundleData implements BundleData {
 	public String getClassPath() {
 		return classpath;
 	}
+
 	public void setClassPath(String classpath) {
 		this.classpath = classpath;
 	}
@@ -340,6 +353,7 @@ public abstract class AbstractBundleData implements BundleData {
 	public String getExecutionEnvironment() {
 		return executionEnvironment;
 	}
+
 	public void setExecutionEnvironment(String executionEnvironment) {
 		this.executionEnvironment = executionEnvironment;
 	}
@@ -347,6 +361,7 @@ public abstract class AbstractBundleData implements BundleData {
 	public String getDynamicImports() {
 		return dynamicImports;
 	}
+
 	public void setDynamicImports(String dynamicImports) {
 		this.dynamicImports = dynamicImports;
 	}
@@ -354,6 +369,7 @@ public abstract class AbstractBundleData implements BundleData {
 	public boolean isFragment() {
 		return fragment;
 	}
+
 	public void setFragment(boolean fragment) {
 		this.fragment = fragment;
 	}

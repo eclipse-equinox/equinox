@@ -208,7 +208,7 @@ public class ServiceReferenceImpl implements ServiceReference, Comparable {
 
 		int compare = this.getRanking() - other.getRanking();
 
-		if (compare == 0) /* rankings are equal */ { /* check service id */
+		if (compare == 0) /* rankings are equal */{ /* check service id */
 			return (int) (other.getId() - this.getId());
 		}
 

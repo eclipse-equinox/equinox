@@ -24,8 +24,9 @@ public interface ISelectionPolicy {
 	 * Returns a set containing the selected elements for the given element set.  
 	 */
 	public Set selectMultiple(IElementSet elementSet);
+
 	/**
 	 * Returns the selected element for the given element set.  
-	 */	
+	 */
 	public IElement selectSingle(IElementSet elementSet);
 }

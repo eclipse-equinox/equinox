@@ -30,10 +30,10 @@ import org.osgi.framework.*;
  */
 public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 
-	public static final String METADATA_ADAPTOR_NEXTID = "METADATA_ADAPTOR_NEXTID";  //$NON-NLS-1$
-	public static final String METADATA_ADAPTOR_IBSL = "METADATA_ADAPTOR_IBSL";  //$NON-NLS-1$
-	public static final String DATA_DIR_NAME = "data";  //$NON-NLS-1$
-	public static final String BUNDLE_STORE = "osgi.bundlestore";  //$NON-NLS-1$
+	public static final String METADATA_ADAPTOR_NEXTID = "METADATA_ADAPTOR_NEXTID"; //$NON-NLS-1$
+	public static final String METADATA_ADAPTOR_IBSL = "METADATA_ADAPTOR_IBSL"; //$NON-NLS-1$
+	public static final String DATA_DIR_NAME = "data"; //$NON-NLS-1$
+	public static final String BUNDLE_STORE = "osgi.bundlestore"; //$NON-NLS-1$
 
 	protected AdaptorElementFactory elementFactory;
 
@@ -59,7 +59,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 
 	/** The State Manager */
 	protected StateManager stateManager;
-	
+
 	/** The FrameworkLog for the adaptor */
 	protected FrameworkLog frameworkLog;
 
@@ -103,7 +103,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 	public void initialize(EventPublisher eventPublisher) {
 		super.initialize(eventPublisher);
 		initBundleStoreRootDir();
-		
+
 		// need to create the FrameworkLog very early
 		frameworkLog = createFrameworkLog();
 		stateManager = createStateManager();
@@ -114,7 +114,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 	 * @return the StateManager.
 	 */
 	protected StateManager createStateManager() {
-		File stateLocation = new File(getBundleStoreRootDir(),".state");
+		File stateLocation = new File(getBundleStoreRootDir(), ".state");
 		stateManager = new StateManager(stateLocation);
 		State systemState = stateManager.getSystemState();
 		if (systemState != null)
@@ -146,6 +146,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 	protected FrameworkLog createFrameworkLog() {
 		return new DefaultLog();
 	}
+
 	/**
 	 * Init the directory to store the bundles in.  Bundledir can be set in 3 different ways.
 	 * Priority is:
@@ -174,7 +175,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 
 	}
 
-	protected void initDataRootDir(){
+	protected void initDataRootDir() {
 		dataRootDir = getBundleStoreRootDir();
 	}
 
@@ -187,7 +188,6 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 			initDataRootDir();
 		return dataRootDir;
 	}
-
 
 	/**
 	 * Initialize the persistent storage.
@@ -275,7 +275,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 				File target = new File(directory, list[i]);
 
 				/* if the file is a directory */
-				if (target.isDirectory()) {	//TODO Simplify the nesting.
+				if (target.isDirectory()) { //TODO Simplify the nesting.
 					File delete = new File(target, ".delete");
 
 					/* and the directory is marked for delete */
@@ -323,7 +323,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 		}
 		int len = list.length;
 
-		Vector bundleDatas = new Vector(len << 1, 10);	//TODO ArrayList? array?
+		Vector bundleDatas = new Vector(len << 1, 10); //TODO ArrayList? array?
 
 		/* create bundle objects for all installed bundles. */
 		for (int i = 0; i < len; i++) {
@@ -336,7 +336,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 				} catch (NumberFormatException nfe) {
 					continue;
 				}
-				data = (DefaultBundleData) getElementFactory().createBundleData(this,id);
+				data = (DefaultBundleData) getElementFactory().createBundleData(this, id);
 				loadMetaDataFor(data);
 				data.initializeExistingBundle();
 
@@ -401,7 +401,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 						} catch (IOException e) {
 							throw new BundleException(AdaptorMsg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION"), e); //$NON-NLS-1$
 						}
-						data = (DefaultBundleData) getElementFactory().createBundleData(DefaultAdaptor.this,id);
+						data = (DefaultBundleData) getElementFactory().createBundleData(DefaultAdaptor.this, id);
 						data.setLocation(location);
 						data.setStartLevel(getInitialBundleStartLevel());
 
@@ -420,18 +420,18 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 							if (!genDir.exists()) {
 								throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_DIRECTORY_CREATE_EXCEPTION", genDir.getPath())); //$NON-NLS-1$
 							}
-							
+
 							String fileName = mapLocationToName(location);
-							File outFile = new File(genDir,fileName);
+							File outFile = new File(genDir, fileName);
 							if ("file".equals(protocol)) {
 								File inFile = new File(source.getURL().getPath());
 								if (inFile.isDirectory()) {
-									copyDir(inFile,outFile);
+									copyDir(inFile, outFile);
 								} else {
-									readFile(in,outFile);
+									readFile(in, outFile);
 								}
 							} else {
-								readFile(in,outFile);
+								readFile(in, outFile);
 							}
 							data.setReference(false);
 							data.setFileName(fileName);
@@ -589,6 +589,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 
 				return (newData);
 			}
+
 			/**
 			 * Commit the change to persistent storage.
 			 *
@@ -641,14 +642,14 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 			 */
 			public void undo() throws BundleException {
 				/*if (bundleFile != null)
-				{
-					bundleFile.close();
-				} */
+				 {
+				 bundleFile.close();
+				 } */
 
 				if (newData != null) {
 					File nextGenerationDir = newData.createGenerationDir();
 
-					if (!rm(nextGenerationDir)) /* delete downloaded bundle */ {
+					if (!rm(nextGenerationDir)) /* delete downloaded bundle */{
 						/* mark this bundle to be deleted to ensure it is fully cleaned up
 						 * on next restart.
 						 */
@@ -699,6 +700,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 				this.data = (DefaultBundleData) bundledata;
 				return (bundledata);
 			}
+
 			/**
 			 * Commit the change to persistent storage.
 			 *
@@ -731,6 +733,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 
 				stateManager.getSystemState().removeBundle(data.getBundleID());
 			}
+
 			/**
 			 * Undo the change to persistent storage.
 			 *
@@ -788,6 +791,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 		frameworkLog.close();
 		frameworkLog = null;
 	}
+
 	/**
 	 * Register a service object.
 	 *
@@ -921,6 +925,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 	public State getState() {
 		return stateManager.getSystemState();
 	}
+
 	public PlatformAdmin getPlatformAdmin() {
 		return stateManager;
 	}

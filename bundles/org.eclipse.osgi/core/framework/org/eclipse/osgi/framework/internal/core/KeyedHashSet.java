@@ -19,20 +19,25 @@ public class KeyedHashSet {
 	protected KeyedElement[] elements;
 	protected boolean replace;
 	private int capacity;
+
 	public KeyedHashSet() {
 		this(MINIMUM_SIZE, true);
 	}
+
 	public KeyedHashSet(boolean replace) {
 		this(MINIMUM_SIZE, replace);
 	}
+
 	public KeyedHashSet(int capacity) {
 		this(capacity, true);
 	}
+
 	public KeyedHashSet(int capacity, boolean replace) {
 		elements = new KeyedElement[Math.max(MINIMUM_SIZE, capacity * 2)];
 		this.replace = replace;
 		this.capacity = capacity;
 	}
+
 	public KeyedHashSet(KeyedHashSet original) {
 		elements = new KeyedElement[original.elements.length];
 		System.arraycopy(original.elements, 0, elements, 0, original.elements.length);
@@ -40,6 +45,7 @@ public class KeyedHashSet {
 		replace = original.replace;
 		capacity = original.capacity;
 	}
+
 	/**
 	 * Adds an element to this set. If an element with the same key already exists,
 	 * replaces it depending on the replace flag.
@@ -90,19 +96,24 @@ public class KeyedHashSet {
 		expand();
 		return add(element);
 	}
+
 	public void addAll(KeyedElement[] elements) {
 		for (int i = 0; i < elements.length; i++)
 			add(elements[i]);
 	}
+
 	public boolean contains(KeyedElement element) {
 		return get(element) != null;
 	}
+
 	public boolean containsKey(Object key) {
 		return getByKey(key) != null;
 	}
+
 	public KeyedElement[] elements() {
 		return (KeyedElement[]) elements(new KeyedElement[elementCount]);
 	}
+
 	public Object[] elements(Object[] result) {
 		int j = 0;
 		for (int i = 0; i < elements.length; i++) {
@@ -112,6 +123,7 @@ public class KeyedHashSet {
 		}
 		return result;
 	}
+
 	/**
 	 * The array isn't large enough so double its size and rehash
 	 * all its current values.
@@ -134,6 +146,7 @@ public class KeyedHashSet {
 			}
 		}
 	}
+
 	/**
 	 * Returns the set element with the given id, or null
 	 * if not found.
@@ -195,9 +208,11 @@ public class KeyedHashSet {
 		// nothing found so return null
 		return null;
 	}
+
 	public boolean isEmpty() {
 		return elementCount == 0;
 	}
+
 	/**
 	 * The element at the given index has been removed so move
 	 * elements to keep the set properly hashed.
@@ -227,6 +242,7 @@ public class KeyedHashSet {
 		}
 		elements[target] = null;
 	}
+
 	public boolean removeByKey(Object key) {
 		if (elementCount == 0)
 			return false;
@@ -256,6 +272,7 @@ public class KeyedHashSet {
 
 		return true;
 	}
+
 	public boolean remove(KeyedElement toRemove) {
 		if (elementCount == 0)
 			return false;
@@ -285,22 +302,28 @@ public class KeyedHashSet {
 		}
 		return false;
 	}
+
 	private int hash(KeyedElement key) {
 		return Math.abs(key.getKeyHashCode()) % elements.length;
 	}
+
 	private int keyHash(Object key) {
 		return Math.abs(key.hashCode()) % elements.length;
 	}
+
 	public void removeAll(KeyedElement[] elements) {
 		for (int i = 0; i < elements.length; i++)
 			remove(elements[i]);
 	}
+
 	private boolean shouldGrow() {
 		return elementCount > elements.length * 0.75;
 	}
+
 	public int size() {
 		return elementCount;
 	}
+
 	public String toString() {
 		StringBuffer result = new StringBuffer(100);
 		result.append("{");
@@ -349,9 +372,11 @@ public class KeyedHashSet {
 	class KeyedHashSetIterator implements Iterator {
 		private int currentIndex = -1;
 		private int found;
+
 		public boolean hasNext() {
 			return found < elementCount;
 		}
+
 		public Object next() {
 			if (!hasNext())
 				throw new NoSuchElementException();
@@ -363,11 +388,13 @@ public class KeyedHashSet {
 			// this would mean we have less elements than we thought
 			throw new NoSuchElementException();
 		}
+
 		public void remove() {
 			// as allowed by the API
 			throw new UnsupportedOperationException();
 		}
 	}
+
 	public void clear() {
 		elements = new KeyedElement[Math.max(MINIMUM_SIZE, capacity * 2)];
 		elementCount = 0;

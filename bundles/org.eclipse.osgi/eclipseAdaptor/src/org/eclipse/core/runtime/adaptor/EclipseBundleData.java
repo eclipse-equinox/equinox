@@ -22,22 +22,21 @@ import org.eclipse.osgi.service.resolver.Version;
 import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.BundleException;
 
-
 //TODO This class does not override save(). 
 //Maybe for consistency should it be overriden to do nothing. See also EclipseAdaptor.saveMetadataFor(BundleData)
 public class EclipseBundleData extends DefaultBundleData {
-	static final byte MANIFEST_TYPE_UNKNOWN  = 0x00;
-	static final byte MANIFEST_TYPE_BUNDLE   = 0x01;
-	static final byte MANIFEST_TYPE_PLUGIN   = 0x02;
+	static final byte MANIFEST_TYPE_UNKNOWN = 0x00;
+	static final byte MANIFEST_TYPE_BUNDLE = 0x01;
+	static final byte MANIFEST_TYPE_PLUGIN = 0x02;
 	static final byte MANIFEST_TYPE_FRAGMENT = 0x04;
-	static final byte MANIFEST_TYPE_JAR      = 0x08;
-	
+	static final byte MANIFEST_TYPE_JAR = 0x08;
+
 	private static String[] libraryVariants = null;
 
 	/** data to detect modification made in the manifest */
 	private long manifestTimeStamp = 0;
 	private byte manifestType = MANIFEST_TYPE_UNKNOWN;
-	
+
 	// URL protocol designations
 	public static final String PROTOCOL = "platform"; //$NON-NLS-1$
 	public static final String FILE = "file"; //$NON-NLS-1$
@@ -73,11 +72,11 @@ public class EclipseBundleData extends DefaultBundleData {
 		File delete = new File(getBundleStoreDir(), ".delete");
 
 		/* and the directory is not marked for delete */
-		if (delete.exists()) 
+		if (delete.exists())
 			throw new IOException();
 
 		createBaseBundleFile();
-		if (! checkManifestTimeStamp())
+		if (!checkManifestTimeStamp())
 			throw new IOException();
 	}
 
@@ -85,7 +84,7 @@ public class EclipseBundleData extends DefaultBundleData {
 		if (!"true".equalsIgnoreCase(System.getProperty(PROP_CHECK_CONFIG))) //$NON-NLS-1$
 			return true;
 
-		return PluginConverterImpl.getTimeStamp(getBaseFile(),getManifestType()) == getManifestTimeStamp();
+		return PluginConverterImpl.getTimeStamp(getBaseFile(), getManifestType()) == getManifestTimeStamp();
 	}
 
 	/**
@@ -140,7 +139,7 @@ public class EclipseBundleData extends DefaultBundleData {
 
 	//TODO Unused method
 	private URL[] getSearchURLs(URL target) {
-		return new URL[] { target };
+		return new URL[] {target};
 	}
 
 	public synchronized Dictionary getManifest() {
@@ -151,6 +150,7 @@ public class EclipseBundleData extends DefaultBundleData {
 			return null;
 		}
 	}
+
 	public synchronized Dictionary getManifest(boolean first) throws BundleException {
 		if (manifest == null)
 			manifest = first ? loadManifest() : new CachedManifest(this);
@@ -158,25 +158,25 @@ public class EclipseBundleData extends DefaultBundleData {
 			Dictionary generatedManifest = generateManifest(manifest);
 			if (generatedManifest != null)
 				manifest = generatedManifest;
-		}		
-		return manifest;	
+		}
+		return manifest;
 	}
 
-	public synchronized Dictionary loadManifest() throws BundleException {		
+	public synchronized Dictionary loadManifest() throws BundleException {
 		URL url = getEntry(Constants.OSGI_BUNDLE_MANIFEST);
 		if (url != null) {
 			manifestTimeStamp = getBaseBundleFile().getEntry(Constants.OSGI_BUNDLE_MANIFEST).getTime();
 			manifestType = MANIFEST_TYPE_BUNDLE;
 			return loadManifestFrom(url);
 		}
-		Dictionary result = generateManifest(null);		
-		if (result == null)	//TODO: need to NLS this
+		Dictionary result = generateManifest(null);
+		if (result == null) //TODO: need to NLS this
 			throw new BundleException("Manifest not found: " + getLocation());
 		return result;
 	}
 
 	private Dictionary generateManifest(Dictionary originalManifest) throws BundleException {
-		String cacheLocation = (String) System.getProperties().get("osgi.manifest.cache");	//TODO This should be a constant
+		String cacheLocation = (String) System.getProperties().get("osgi.manifest.cache"); //TODO This should be a constant
 		if (getSymbolicName() != null) {
 			Version version = getVersion();
 			File currentFile = new File(cacheLocation, getSymbolicName() + '_' + version.toString() + ".MF");
@@ -191,24 +191,24 @@ public class EclipseBundleData extends DefaultBundleData {
 		PluginConverterImpl converter = PluginConverterImpl.getDefault();
 
 		Dictionary generatedManifest = converter.convertManifest(getBaseFile(), true, null);
-		if (generatedManifest == null)	//TODO Why don't we return the original manifest?
+		if (generatedManifest == null) //TODO Why don't we return the original manifest?
 			return null;
 
-		ManifestElement generatedFrom = ManifestElement.parseHeader(PluginConverterImpl.GENERATED_FROM,(String)generatedManifest.get(PluginConverterImpl.GENERATED_FROM))[0];
+		ManifestElement generatedFrom = ManifestElement.parseHeader(PluginConverterImpl.GENERATED_FROM, (String) generatedManifest.get(PluginConverterImpl.GENERATED_FROM))[0];
 		setManifestTimeStamp(Long.parseLong(generatedFrom.getValue()));
 		setManifestType(Byte.parseByte(generatedFrom.getAttribute(PluginConverterImpl.MANIFEST_TYPE_ATTRIBUTE)));
 
 		//merge the original manifest with the generated one
 		if (originalManifest != null) {
-			Enumeration  enum = originalManifest.keys();
+			Enumeration enum = originalManifest.keys();
 			while (enum.hasMoreElements()) {
-				 Object key =  enum.nextElement();
-				 generatedManifest.put(key, originalManifest.get(key));
+				Object key = enum.nextElement();
+				generatedManifest.put(key, originalManifest.get(key));
 			}
 		}
-		
+
 		//write the generated manifest
-		Version version = new Version((String)generatedManifest.get(Constants.BUNDLE_VERSION));
+		Version version = new Version((String) generatedManifest.get(Constants.BUNDLE_VERSION));
 		File bundleManifestLocation = new File(cacheLocation, ManifestElement.parseHeader(org.osgi.framework.Constants.BUNDLE_SYMBOLICNAME, (String) generatedManifest.get(org.osgi.framework.Constants.BUNDLE_SYMBOLICNAME))[0].getValue() + '_' + version.toString() + ".MF");
 		try {
 			converter.writeManifest(bundleManifestLocation, generatedManifest, true);
@@ -218,15 +218,16 @@ public class EclipseBundleData extends DefaultBundleData {
 		return generatedManifest;
 
 	}
+
 	private Dictionary loadManifestFrom(URL manifestURL) throws BundleException {
 		try {
 			return Headers.parseManifest(manifestURL.openStream());
 		} catch (IOException e) {
 			throw new BundleException("Error reading manifest: " + getLocation(), e);
-		}		
+		}
 	}
 
-	protected void loadFromManifest() throws IOException{
+	protected void loadFromManifest() throws IOException {
 		try {
 			getManifest(true);
 		} catch (BundleException e) {
@@ -235,13 +236,15 @@ public class EclipseBundleData extends DefaultBundleData {
 		}
 		super.loadFromManifest();
 		autoStart = (String) manifest.get(EclipseAdaptorConstants.ECLIPSE_AUTOSTART);
-		autoStop = (String) manifest.get(EclipseAdaptorConstants.ECLIPSE_AUTOSTOP);		
-		pluginClass = (String)manifest.get(EclipseAdaptorConstants.PLUGIN_CLASS);
-		isLegacy = (String)manifest.get(EclipseAdaptorConstants.LEGACY);
+		autoStop = (String) manifest.get(EclipseAdaptorConstants.ECLIPSE_AUTOSTOP);
+		pluginClass = (String) manifest.get(EclipseAdaptorConstants.PLUGIN_CLASS);
+		isLegacy = (String) manifest.get(EclipseAdaptorConstants.LEGACY);
 	}
+
 	public String isLegacy() {
 		return isLegacy;
 	}
+
 	public void setLegacy(String value) {
 		isLegacy = value;
 	}
@@ -249,30 +252,39 @@ public class EclipseBundleData extends DefaultBundleData {
 	public String getPluginClass() {
 		return pluginClass;
 	}
+
 	public void setPluginClass(String value) {
 		pluginClass = value;
 	}
+
 	public long getManifestTimeStamp() {
 		return manifestTimeStamp;
 	}
+
 	public void setManifestTimeStamp(long stamp) {
 		manifestTimeStamp = stamp;
 	}
+
 	public byte getManifestType() {
 		return manifestType;
 	}
+
 	public void setManifestType(byte manifestType) {
 		this.manifestType = manifestType;
 	}
+
 	public void setAutoStart(String value) {
 		autoStart = value;
 	}
+
 	public void setAutoStop(String value) {
 		autoStop = value;
-	}	
+	}
+
 	public String getAutoStart() {
 		return autoStart;
 	}
+
 	public String getAutoStop() {
 		return autoStop;
 	}

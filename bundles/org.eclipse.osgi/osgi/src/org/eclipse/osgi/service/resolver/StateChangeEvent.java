@@ -14,10 +14,12 @@ import java.util.EventObject;
 
 public class StateChangeEvent extends EventObject {
 	private StateDelta delta;
+
 	public StateChangeEvent(StateDelta delta) {
 		super(delta.getState());
 		this.delta = delta;
 	}
+
 	/**
 	 * Returns a delta detailing changes to a state object.
 	 * 

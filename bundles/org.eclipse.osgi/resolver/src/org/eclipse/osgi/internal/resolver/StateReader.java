@@ -55,10 +55,11 @@ class StateReader {
 		if (!state.isResolved())
 			return true;
 		int resolvedLength = in.readInt();
-		for(int i = 0;i < resolvedLength;i++)
+		for (int i = 0; i < resolvedLength; i++)
 			state.addResolvedBundle(readBundleDescription(in));
 		return true;
 	}
+
 	private BundleDescriptionImpl readBundleDescription(DataInputStream in) throws IOException {
 		byte tag = readTag(in);
 		if (tag == NULL)
@@ -66,8 +67,8 @@ class StateReader {
 		if (tag == INDEX)
 			return (BundleDescriptionImpl) objectTable.get(in.readInt());
 		BundleDescriptionImpl result = new BundleDescriptionImpl();
-		addToObjectTable(result);		
-		result.setBundleId(in.readLong());		
+		addToObjectTable(result);
+		result.setBundleId(in.readLong());
 		result.setUniqueId(readString(in, false));
 		result.setLocation(readString(in, false));
 		result.setState(in.readInt());
@@ -78,7 +79,7 @@ class StateReader {
 			PackageSpecification[] packages = new PackageSpecification[packageCount];
 			for (int i = 0; i < packages.length; i++)
 				packages[i] = readPackageSpec(in);
-			
+
 			result.setPackages(packages);
 		}
 		int providedPackageCount = in.readInt();
@@ -98,6 +99,7 @@ class StateReader {
 		result.setSingleton(in.readBoolean());
 		return result;
 	}
+
 	private BundleSpecificationImpl readBundleSpec(DataInputStream in) throws IOException {
 		BundleSpecificationImpl result = new BundleSpecificationImpl();
 		readVersionConstraint(result, in);
@@ -105,12 +107,14 @@ class StateReader {
 		result.setOptional(in.readBoolean());
 		return result;
 	}
+
 	private PackageSpecificationImpl readPackageSpec(DataInputStream in) throws IOException {
 		PackageSpecificationImpl result = new PackageSpecificationImpl();
 		readVersionConstraint(result, in);
 		result.setExport(in.readBoolean());
 		return result;
 	}
+
 	private HostSpecificationImpl readHostSpec(DataInputStream in) throws IOException {
 		byte tag = readTag(in);
 		if (tag == NULL)
@@ -120,6 +124,7 @@ class StateReader {
 		result.setReloadHost(in.readBoolean());
 		return result;
 	}
+
 	// called by readers for VersionConstraintImpl subclasses
 	private void readVersionConstraint(VersionConstraintImpl version, DataInputStream in) throws IOException {
 		version.setName(readString(in, false));
@@ -128,6 +133,7 @@ class StateReader {
 		version.setActualVersion(readVersion(in));
 		version.setSupplier(readBundleDescription(in));
 	}
+
 	private Version readVersion(DataInputStream in) throws IOException {
 		byte tag = readTag(in);
 		if (tag == NULL)
@@ -140,8 +146,9 @@ class StateReader {
 		String qualifierComponent = readString(in, false);
 		Version result = new Version(majorComponent, minorComponent, serviceComponent, qualifierComponent);
 		addToObjectTable(result);
-		return result;		
+		return result;
 	}
+
 	public final boolean loadState(StateImpl state, DataInputStream input, long expectedTimestamp) throws IOException {
 		try {
 			return readState(state, input, expectedTimestamp);
@@ -149,9 +156,11 @@ class StateReader {
 			input.close();
 		}
 	}
+
 	public final boolean loadState(StateImpl state, DataInputStream input) throws IOException {
 		return loadState(state, input, -1);
 	}
+
 	private String readString(DataInputStream in, boolean intern) throws IOException {
 		byte type = in.readByte();
 		if (type == NULL)
@@ -161,6 +170,7 @@ class StateReader {
 		else
 			return in.readUTF();
 	}
+
 	private byte readTag(DataInputStream in) throws IOException {
 		return in.readByte();
 	}

@@ -24,7 +24,7 @@ public class Eclipse30SelectionPolicy implements ISelectionPolicy {
 		Set selected = new HashSet();
 		// pre-select all elements that were previously resolved and are satisfied		
 		Collection previouslyResolvedSet = elementSet.getResolved();
-		for (Iterator iter = previouslyResolvedSet.iterator(); iter.hasNext(); ) {
+		for (Iterator iter = previouslyResolvedSet.iterator(); iter.hasNext();) {
 			IElement previouslyResolved = (IElement) iter.next();
 			// if the previously resolved element is satisfied, select it
 			if (elementSet.getSatisfied().contains(previouslyResolved))
@@ -47,7 +47,7 @@ public class Eclipse30SelectionPolicy implements ISelectionPolicy {
 					IElement satisfiedVersion = (IElement) satisfiedIter.next();
 					boolean satisfiesDependency = requiringSelectedVersionDependency.getMatchRule().isSatisfied(requiringSelectedVersionDependency.getRequiredVersionId(), satisfiedVersion.getVersionId());
 					if (satisfiesDependency) {
-						boolean betterThanBest = bestVersion == null || elementSet.getSystem().compare(satisfiedVersion.getVersionId(),bestVersion.getVersionId()) > 0;
+						boolean betterThanBest = bestVersion == null || elementSet.getSystem().compare(satisfiedVersion.getVersionId(), bestVersion.getVersionId()) > 0;
 						if (betterThanBest)
 							bestVersion = satisfiedVersion;
 					}
@@ -61,14 +61,15 @@ public class Eclipse30SelectionPolicy implements ISelectionPolicy {
 			IElement bestVersion = null;
 			for (Iterator satisfiedIter = elementSet.getSatisfied().iterator(); satisfiedIter.hasNext();) {
 				IElement satisfiedVersion = (IElement) satisfiedIter.next();
-				boolean betterThanBest = bestVersion == null || elementSet.getSystem().compare(satisfiedVersion.getVersionId(),bestVersion.getVersionId()) > 0;
+				boolean betterThanBest = bestVersion == null || elementSet.getSystem().compare(satisfiedVersion.getVersionId(), bestVersion.getVersionId()) > 0;
 				if (betterThanBest)
 					bestVersion = satisfiedVersion;
 			}
 			selected = Collections.singleton(bestVersion);
-		}		
+		}
 		return selected;
 	}
+
 	public IElement selectSingle(IElementSet elementSet) {
 		Collection previouslyResolvedSet = elementSet.getResolved();
 		// we already have one element resolved
@@ -79,7 +80,7 @@ public class Eclipse30SelectionPolicy implements ISelectionPolicy {
 			if (elementSet.getSatisfied().contains(previouslyResolved))
 				return previouslyResolved;
 		}
-		
+
 		// none of its versions are required by other element sets - so just pick the highest
 		if (elementSet.getRequiring().isEmpty()) {
 			// otherwise, pick the highest version
@@ -123,8 +124,7 @@ public class Eclipse30SelectionPolicy implements ISelectionPolicy {
 				highestStatus = status;
 			}
 		}
-		return highest;		
-	}		
-	
+		return highest;
+	}
 
 }

@@ -89,21 +89,21 @@ public class StartLevelManager implements EventDispatcher, EventListener, Servic
 	}
 
 	/**
-		 * Return the initial start level value that is assigned
-		 * to a Bundle when it is first installed.
-		 *
-		 * @return The initial start level value for Bundles.
-		 * @see #setInitialBundleStartLevel
-		 */
+	 * Return the initial start level value that is assigned
+	 * to a Bundle when it is first installed.
+	 *
+	 * @return The initial start level value for Bundles.
+	 * @see #setInitialBundleStartLevel
+	 */
 	public int getInitialBundleStartLevel() {
 		return initialBundleStartLevel;
 	}
 
 	/**
-		 * Return the initial start level used when the framework is started.
-		 *
-		 * @return The framework start level.
-		 */
+	 * Return the initial start level used when the framework is started.
+	 *
+	 * @return The framework start level.
+	 */
 	public int getFrameworkStartLevel() {
 		return frameworkBeginningStartLevel;
 	}
@@ -142,78 +142,80 @@ public class StartLevelManager implements EventDispatcher, EventListener, Servic
 		initialBundleStartLevel = startlevel;
 		framework.adaptor.setInitialBundleStartLevel(startlevel);
 	}
+
 	/**
-	     * Return the active start level value of the Framework.
-	     *
-	     * If the Framework is in the process of changing the start level
-	     * this method must return the active start level if this
-	     * differs from the requested start level.
-	     *
-	     * @return The active start level value of the Framework.
-	     */
+	 * Return the active start level value of the Framework.
+	 *
+	 * If the Framework is in the process of changing the start level
+	 * this method must return the active start level if this
+	 * differs from the requested start level.
+	 *
+	 * @return The active start level value of the Framework.
+	 */
 	public int getStartLevel() {
 		return activeSL;
 	}
+
 	/**
-	     * Modify the active start level of the Framework.
-	     *
-	     * <p>The Framework will move to the requested start level. This method
-	     * will return immediately to the caller and the start level
-	     * change will occur asynchronously on another thread.
-	     *
-	     * <p>If the specified start level is
-	     * higher than the active start level, the
-	     * Framework will continue to increase the start level
-	     * until the Framework has reached the specified start level,
-	     * starting bundles at each
-	     * start level which are persistently marked to be started as described in the
-	     * <tt>Bundle.start</tt> method.
-	     *
-	     * At each intermediate start level value on the
-	     * way to and including the target start level, the framework must:
-	     * <ol>
-	     * <li>Change the active start level to the intermediate start level value.
-	     * <li>Start bundles at the intermediate start level in
-	     * ascending order by <tt>Bundle.getBundleId</tt>.
-	     * </ol>
-	     * When this process completes after the specified start level is reached,
-	     * the Framework will broadcast a Framework event of
-	     * type <tt>FrameworkEvent.STARTLEVEL_CHANGED</tt> to announce it has moved to the specified
-	     * start level.
-	     *
-	     * <p>If the specified start level is lower than the active start level, the
-	     * Framework will continue to decrease the start level
-	     * until the Framework has reached the specified start level
-	     * stopping bundles at each
-	     * start level as described in the <tt>Bundle.stop</tt> method except that their
-	     * persistently recorded state indicates that they must be restarted in the
-	     * future.
-	     *
-	     * At each intermediate start level value on the
-	     * way to and including the specified start level, the framework must:
-	     * <ol>
-	     * <li>Stop bundles at the intermediate start level in
-	     * descending order by <tt>Bundle.getBundleId</tt>.
-	     * <li>Change the active start level to the intermediate start level value.
-	     * </ol>
-	     * When this process completes after the specified start level is reached,
-	     * the Framework will broadcast a Framework event of
-	     * type <tt>FrameworkEvent.STARTLEVEL_CHANGED</tt> to announce it has moved to the specified
-	     * start level.
-	     *
-	     * <p>If the specified start level is equal to the active start level, then
-	     * no bundles are started or stopped, however, the Framework must broadcast
-	     * a Framework event of type <tt>FrameworkEvent.STARTLEVEL_CHANGED</tt> to
-	     * announce it has finished moving to the specified start level. This
-	     * event may arrive before the this method return.
-	     *
-	     * @param startlevel The requested start level for the Framework.
-	     * @throws IllegalArgumentException If the specified start level is less than or
-	     * equal to zero.
-	     * @throws SecurityException If the caller does not have the
-	     * <tt>AdminPermission</tt> and the Java runtime environment supports
-	     * permissions.
-	     */
+	 * Modify the active start level of the Framework.
+	 *
+	 * <p>The Framework will move to the requested start level. This method
+	 * will return immediately to the caller and the start level
+	 * change will occur asynchronously on another thread.
+	 *
+	 * <p>If the specified start level is
+	 * higher than the active start level, the
+	 * Framework will continue to increase the start level
+	 * until the Framework has reached the specified start level,
+	 * starting bundles at each
+	 * start level which are persistently marked to be started as described in the
+	 * <tt>Bundle.start</tt> method.
+	 *
+	 * At each intermediate start level value on the
+	 * way to and including the target start level, the framework must:
+	 * <ol>
+	 * <li>Change the active start level to the intermediate start level value.
+	 * <li>Start bundles at the intermediate start level in
+	 * ascending order by <tt>Bundle.getBundleId</tt>.
+	 * </ol>
+	 * When this process completes after the specified start level is reached,
+	 * the Framework will broadcast a Framework event of
+	 * type <tt>FrameworkEvent.STARTLEVEL_CHANGED</tt> to announce it has moved to the specified
+	 * start level.
+	 *
+	 * <p>If the specified start level is lower than the active start level, the
+	 * Framework will continue to decrease the start level
+	 * until the Framework has reached the specified start level
+	 * stopping bundles at each
+	 * start level as described in the <tt>Bundle.stop</tt> method except that their
+	 * persistently recorded state indicates that they must be restarted in the
+	 * future.
+	 *
+	 * At each intermediate start level value on the
+	 * way to and including the specified start level, the framework must:
+	 * <ol>
+	 * <li>Stop bundles at the intermediate start level in
+	 * descending order by <tt>Bundle.getBundleId</tt>.
+	 * <li>Change the active start level to the intermediate start level value.
+	 * </ol>
+	 * When this process completes after the specified start level is reached,
+	 * the Framework will broadcast a Framework event of
+	 * type <tt>FrameworkEvent.STARTLEVEL_CHANGED</tt> to announce it has moved to the specified
+	 * start level.
+	 *
+	 * <p>If the specified start level is equal to the active start level, then
+	 * no bundles are started or stopped, however, the Framework must broadcast
+	 * a Framework event of type <tt>FrameworkEvent.STARTLEVEL_CHANGED</tt> to
+	 * announce it has finished moving to the specified start level. This
+	 * event may arrive before the this method return.
+	 *
+	 * @param startlevel The requested start level for the Framework.
+	 * @throws IllegalArgumentException If the specified start level is less than or
+	 * equal to zero.
+	 * @throws SecurityException If the caller does not have the
+	 * <tt>AdminPermission</tt> and the Java runtime environment supports
+	 * permissions.
+	 */
 	public void setStartLevel(int newSL, org.osgi.framework.Bundle callerBundle) {
 		if (newSL <= 0) {
 			throw new IllegalArgumentException(Msg.formatter.getString("STARTLEVEL_EXCEPTION_INVALID_REQUESTED_STARTLEVEL", "" + newSL));
@@ -300,17 +302,17 @@ public class StartLevelManager implements EventDispatcher, EventListener, Servic
 	}
 
 	/**
-	     * Return the persistent state of the specified bundle.
-	     *
-	     * <p>This method returns the persistent state of a bundle.
-	     * The persistent state of a bundle indicates whether a bundle
-	     * is persistently marked to be started when it's start level is
-	     * reached.
-	     *
-	     * @return <tt>true</tt> if the bundle is persistently marked to be started,
-	     * <tt>false</tt> if the bundle is not persistently marked to be started.
-	     * @exception java.lang.IllegalArgumentException If the specified bundle has been uninstalled.
-	     */
+	 * Return the persistent state of the specified bundle.
+	 *
+	 * <p>This method returns the persistent state of a bundle.
+	 * The persistent state of a bundle indicates whether a bundle
+	 * is persistently marked to be started when it's start level is
+	 * reached.
+	 *
+	 * @return <tt>true</tt> if the bundle is persistently marked to be started,
+	 * <tt>false</tt> if the bundle is not persistently marked to be started.
+	 * @exception java.lang.IllegalArgumentException If the specified bundle has been uninstalled.
+	 */
 	public boolean isBundlePersistentlyStarted(org.osgi.framework.Bundle bundle) {
 
 		if (bundle.getState() == AbstractBundle.UNINSTALLED) {
@@ -320,13 +322,14 @@ public class StartLevelManager implements EventDispatcher, EventListener, Servic
 		int status = b.getBundleData().getStatus();
 		return ((status & org.eclipse.osgi.framework.internal.core.Constants.BUNDLE_STARTED) == Constants.BUNDLE_STARTED);
 	}
+
 	/**
-	     * Return the assigned start level value for the specified Bundle.
-	     *
-	     * @param bundle The target bundle.
-	     * @return The start level value of the specified Bundle.
-	     * @exception java.lang.IllegalArgumentException If the specified bundle has been uninstalled.
-	     */
+	 * Return the assigned start level value for the specified Bundle.
+	 *
+	 * @param bundle The target bundle.
+	 * @return The start level value of the specified Bundle.
+	 * @exception java.lang.IllegalArgumentException If the specified bundle has been uninstalled.
+	 */
 	public int getBundleStartLevel(org.osgi.framework.Bundle bundle) {
 
 		if (bundle.getState() == AbstractBundle.UNINSTALLED) {
@@ -336,33 +339,33 @@ public class StartLevelManager implements EventDispatcher, EventListener, Servic
 	}
 
 	/**
-	     * Assign a start level value to the specified Bundle.
-	     *
-	     * <p>The specified bundle will be assigned the specified start level. The
-	     * start level value assigned to the bundle will be persistently recorded
-	     * by the Framework.
-	     *
-	     * If the new start level for the bundle is lower than or equal to the active start level of
-	     * the Framework, the Framework will start the specified bundle as described
-	     * in the <tt>Bundle.start</tt> method if the bundle is persistently marked
-	     * to be started. The actual starting of this bundle must occur asynchronously.
-	     *
-	     * If the new start level for the bundle is higher than the active start level of
-	     * the Framework, the Framework will stop the specified bundle as described
-	     * in the <tt>Bundle.stop</tt> method except that the persistently recorded
-	     * state for the bundle indicates that the bundle must be restarted in the
-	     * future. The actual stopping of this bundle must occur asynchronously.
-	     *
-	     * @param bundle The target bundle.
-	     * @param startlevel The new start level for the specified Bundle.
-	     * @throws IllegalArgumentException
-	     * If the specified bundle has been uninstalled or
-	     * if the specified start level is less than or equal to zero, or the  specified bundle is
-	     * the system bundle.
-	     * @throws SecurityException if the caller does not have the
-	     * <tt>AdminPermission</tt> and the Java runtime environment supports
-	     * permissions.
-	     */
+	 * Assign a start level value to the specified Bundle.
+	 *
+	 * <p>The specified bundle will be assigned the specified start level. The
+	 * start level value assigned to the bundle will be persistently recorded
+	 * by the Framework.
+	 *
+	 * If the new start level for the bundle is lower than or equal to the active start level of
+	 * the Framework, the Framework will start the specified bundle as described
+	 * in the <tt>Bundle.start</tt> method if the bundle is persistently marked
+	 * to be started. The actual starting of this bundle must occur asynchronously.
+	 *
+	 * If the new start level for the bundle is higher than the active start level of
+	 * the Framework, the Framework will stop the specified bundle as described
+	 * in the <tt>Bundle.stop</tt> method except that the persistently recorded
+	 * state for the bundle indicates that the bundle must be restarted in the
+	 * future. The actual stopping of this bundle must occur asynchronously.
+	 *
+	 * @param bundle The target bundle.
+	 * @param startlevel The new start level for the specified Bundle.
+	 * @throws IllegalArgumentException
+	 * If the specified bundle has been uninstalled or
+	 * if the specified start level is less than or equal to zero, or the  specified bundle is
+	 * the system bundle.
+	 * @throws SecurityException if the caller does not have the
+	 * <tt>AdminPermission</tt> and the Java runtime environment supports
+	 * permissions.
+	 */
 	public void setBundleStartLevel(org.osgi.framework.Bundle bundle, int newSL) {
 
 		String exceptionText = "";

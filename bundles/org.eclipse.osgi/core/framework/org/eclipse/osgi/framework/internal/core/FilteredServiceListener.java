@@ -14,64 +14,56 @@ package org.eclipse.osgi.framework.internal.core;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.osgi.framework.*;
 
-public class FilteredServiceListener implements ServiceListener
-{
-    /** Filter for listener. */
-    protected FilterImpl filter;
+public class FilteredServiceListener implements ServiceListener {
+	/** Filter for listener. */
+	protected FilterImpl filter;
 
-    /** Real listener. */
-    protected ServiceListener listener;
+	/** Real listener. */
+	protected ServiceListener listener;
 
-    /**
-     * Constructor.
-     *
-     * @param filterstring filter for this listener.
-     * @param listener real listener.
-     * @exception InvalidSyntaxException if the filter is invalid.
-     */
-    protected FilteredServiceListener(String filterstring, ServiceListener listener)
-                                     throws InvalidSyntaxException
-    {
-        filter = new FilterImpl(filterstring);
-        this.listener = listener;
-    }
+	/**
+	 * Constructor.
+	 *
+	 * @param filterstring filter for this listener.
+	 * @param listener real listener.
+	 * @exception InvalidSyntaxException if the filter is invalid.
+	 */
+	protected FilteredServiceListener(String filterstring, ServiceListener listener) throws InvalidSyntaxException {
+		filter = new FilterImpl(filterstring);
+		this.listener = listener;
+	}
 
-    /**
-     * Receive notification that a service has had a
-     * change occur in it's lifecycle.
-     *
-     * @param event The ServiceEvent.
-     */
-    public void serviceChanged(ServiceEvent event)
-    {
-        ServiceReferenceImpl reference = (ServiceReferenceImpl)event.getServiceReference();
+	/**
+	 * Receive notification that a service has had a
+	 * change occur in it's lifecycle.
+	 *
+	 * @param event The ServiceEvent.
+	 */
+	public void serviceChanged(ServiceEvent event) {
+		ServiceReferenceImpl reference = (ServiceReferenceImpl) event.getServiceReference();
 
-        if (Debug.DEBUG && Debug.DEBUG_EVENTS)
-        {
-                String listenerName = this.getClass().getName() + "@" + Integer.toHexString(this.hashCode());
-                Debug.println("filterServiceEvent("+listenerName+", \""+filter+"\", "+reference.registration.properties+")");
-        }
+		if (Debug.DEBUG && Debug.DEBUG_EVENTS) {
+			String listenerName = this.getClass().getName() + "@" + Integer.toHexString(this.hashCode());
+			Debug.println("filterServiceEvent(" + listenerName + ", \"" + filter + "\", " + reference.registration.properties + ")");
+		}
 
-        if (filter.match(reference))
-        {
-            if (Debug.DEBUG && Debug.DEBUG_EVENTS)
-            {
-                    String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(listener.hashCode());
-                    Debug.println("dispatchFilteredServiceEvent("+listenerName+")");
-            }
+		if (filter.match(reference)) {
+			if (Debug.DEBUG && Debug.DEBUG_EVENTS) {
+				String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(listener.hashCode());
+				Debug.println("dispatchFilteredServiceEvent(" + listenerName + ")");
+			}
 
-            listener.serviceChanged(event);
-        }
-    }
+			listener.serviceChanged(event);
+		}
+	}
 
-    /**
-     * Get the filter string used by this Filtered listener.
-     *
-     * @return The filter string used by this listener.
-     */
-    public String toString()
-    {
-        return(filter.toString());
-    }
+	/**
+	 * Get the filter string used by this Filtered listener.
+	 *
+	 * @return The filter string used by this listener.
+	 */
+	public String toString() {
+		return (filter.toString());
+	}
 
 }

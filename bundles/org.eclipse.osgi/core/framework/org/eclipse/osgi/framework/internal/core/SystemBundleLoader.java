@@ -33,6 +33,7 @@ public class SystemBundleLoader extends BundleLoader {
 	protected synchronized static void clearSystemPackages() {
 		systemPackages = null;
 	}
+
 	protected static void setSystemPackages(String[] value) {
 		systemPackages = value;
 	}
@@ -100,7 +101,7 @@ public class SystemBundleLoader extends BundleLoader {
 	/**
 	 * This is not supported by the System Bundle.
 	 */
-	public Object findObject(String object){
+	public Object findObject(String object) {
 		return null;
 	}
 

@@ -22,7 +22,7 @@ public class EnvironmentInfo implements org.eclipse.osgi.service.environment.Env
 	static String[] allArgs;
 	static String[] frameworkArgs;
 	static String[] appArgs;
-	
+
 	// While we recognize the SunOS operating system, we change
 	// this internally to be Solaris.
 	private static final String INTERNAL_OS_SUNOS = "SunOS"; //$NON-NLS-1$
@@ -40,7 +40,7 @@ public class EnvironmentInfo implements org.eclipse.osgi.service.environment.Env
 			singleton = new EnvironmentInfo();
 		return singleton;
 	}
-	
+
 	public boolean inDevelopmentMode() {
 		return System.getProperty("osgi.dev") != null;
 	}
@@ -94,11 +94,11 @@ public class EnvironmentInfo implements org.eclipse.osgi.service.environment.Env
 			int segments = tokenizer.countTokens();
 			try {
 				switch (segments) {
-					case 2:
+					case 2 :
 						Locale userLocale = new Locale(tokenizer.nextToken(), tokenizer.nextToken());
 						Locale.setDefault(userLocale);
 						break;
-					case 3:
+					case 3 :
 						userLocale = new Locale(tokenizer.nextToken(), tokenizer.nextToken(), tokenizer.nextToken());
 						Locale.setDefault(userLocale);
 						break;
@@ -155,7 +155,7 @@ public class EnvironmentInfo implements org.eclipse.osgi.service.environment.Env
 			// Map i386 architecture to x86
 			arch = name.equalsIgnoreCase(INTERNAL_ARCH_I386) ? Constants.ARCH_X86 : name;
 		}
-		System.getProperties().put("osgi.arch", arch);		
+		System.getProperties().put("osgi.arch", arch);
 	}
 
 }

@@ -91,8 +91,8 @@ public class PackageAdminImpl implements PackageAdmin {
 				continue;
 			AbstractBundle bundle = framework.getBundle(bundleSpec.getBundleId());
 			if (bundle == null) {
-				BundleException be = new BundleException(Msg.formatter.getString("BUNDLE_NOT_IN_FRAMEWORK",bundleSpec)); //$NON-NLS-1$
-				framework.publishFrameworkEvent(FrameworkEvent.ERROR,framework.systemBundle,be);
+				BundleException be = new BundleException(Msg.formatter.getString("BUNDLE_NOT_IN_FRAMEWORK", bundleSpec)); //$NON-NLS-1$
+				framework.publishFrameworkEvent(FrameworkEvent.ERROR, framework.systemBundle, be);
 				continue;
 			}
 			// check export permissions before getting the host;
@@ -107,8 +107,8 @@ public class PackageAdminImpl implements PackageAdmin {
 					continue;
 				bundle = framework.getBundle(bundleSpec.getBundleId());
 				if (bundle == null) {
-					BundleException be = new BundleException(Msg.formatter.getString("BUNDLE_NOT_IN_FRAMEWORK",bundleSpec)); //$NON-NLS-1$
-					framework.publishFrameworkEvent(FrameworkEvent.ERROR,framework.systemBundle,be);
+					BundleException be = new BundleException(Msg.formatter.getString("BUNDLE_NOT_IN_FRAMEWORK", bundleSpec)); //$NON-NLS-1$
+					framework.publishFrameworkEvent(FrameworkEvent.ERROR, framework.systemBundle, be);
 					continue;
 				}
 			}
@@ -681,9 +681,9 @@ public class PackageAdminImpl implements PackageAdmin {
 		for (int i = 0; i < descriptions.length; i++) {
 			long bundleId = descriptions[i].getBundleId();
 			AbstractBundle bundle = framework.getBundle(bundleId);
-			if (bundle == null ) {
-				BundleException be = new BundleException(Msg.formatter.getString("BUNDLE_NOT_IN_FRAMEWORK",descriptions[i])); //$NON-NLS-1$
-				framework.publishFrameworkEvent(FrameworkEvent.ERROR,framework.systemBundle,be);
+			if (bundle == null) {
+				BundleException be = new BundleException(Msg.formatter.getString("BUNDLE_NOT_IN_FRAMEWORK", descriptions[i])); //$NON-NLS-1$
+				framework.publishFrameworkEvent(FrameworkEvent.ERROR, framework.systemBundle, be);
 			}
 			if (bundle != framework.systemBundle) {
 				if (descriptions[i].isResolved()) {

@@ -14,13 +14,16 @@ import org.eclipse.osgi.service.resolver.PackageSpecification;
 
 public class PackageSpecificationImpl extends VersionConstraintImpl implements PackageSpecification {
 	private boolean export;
+
 	public boolean isExported() {
 		return export;
 	}
+
 	public void setExport(boolean export) {
 		this.export = export;
 	}
+
 	public String toString() {
-		return super.toString() + " (" + (export ? "exp" : " imp") + ")";  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		return super.toString() + " (" + (export ? "exp" : " imp") + ")"; //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 	}
 }

@@ -15,7 +15,6 @@ import java.net.URL;
 import java.security.ProtectionDomain;
 import java.util.Enumeration;
 
-
 /**
  * The BundleClassLoader interface is used by the Framework to load local 
  * classes and resources from a Bundle.  Classes that implement this
@@ -29,7 +28,6 @@ import java.util.Enumeration;
  * @see org.eclipse.osgi.framework.adaptor.BundleData#createClassLoader(ClassLoaderDelegate, ProtectionDomain, String[])
  */
 public interface BundleClassLoader /*extends ClassLoader*/{
-
 
 	/**
 	 * Initializes the ClassLoader.  This is called after all currently resolved fragment
@@ -80,6 +78,7 @@ public interface BundleClassLoader /*extends ClassLoader*/{
 	 * @return
 	 */
 	public URL getResource(String name);
+
 	/**
 	 * This method will first search the parent class loader for the class;
 	 * That failing, this method will invoke 

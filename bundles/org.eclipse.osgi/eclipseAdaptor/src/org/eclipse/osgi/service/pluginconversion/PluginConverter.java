@@ -30,9 +30,9 @@ public interface PluginConverter {
 	 * @param target a string indicating the version of the runtime for which the manifest generated is targeted 
 	 *	@return the generated manifest file location, if a bundle manifest was successfully 
 	 * generated (or already existed), <code>null</code> otherwise.
-	 */	
+	 */
 	public File convertManifest(File pluginBaseLocation, File bundleManifestLocation, boolean compatibilityManifest, String target);
-	
+
 	/**
 	 * Converts a plug-in/fragment manifest at the given source base location (a directory) and 
 	 * generates a corresponding bundle manifest returned as a dictionary.
@@ -44,7 +44,7 @@ public interface PluginConverter {
 	 * @param target a string indicating the version of the runtime for which the manifest generated is targeted
 	 *	@return the generated manifest as a dictionary,  if a bundle manifest was successfully 
 	 * generated, <code>null</code> otherwise
-	 */	
+	 */
 	public Dictionary convertManifest(File pluginBaseLocation, boolean compatibility, String target);
 
 	/** 

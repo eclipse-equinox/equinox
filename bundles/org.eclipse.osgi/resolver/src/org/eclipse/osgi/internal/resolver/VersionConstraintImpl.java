@@ -18,25 +18,32 @@ public abstract class VersionConstraintImpl implements VersionConstraint {
 	private byte matchingRule = GREATER_EQUAL_MATCH;
 	private BundleDescription bundle;
 	private BundleDescription supplier;
-	private Version actualVersion;	
+	private Version actualVersion;
+
 	public String getName() {
 		return name;
 	}
+
 	public Version getVersionSpecification() {
 		return versionSpecification;
 	}
+
 	public Version getActualVersion() {
 		return actualVersion;
 	}
+
 	public byte getMatchingRule() {
 		return matchingRule;
 	}
+
 	public BundleDescription getBundle() {
 		return bundle;
 	}
+
 	public BundleDescription getSupplier() {
 		return supplier;
 	}
+
 	public boolean isResolved() {
 		return supplier != null;
 	}
@@ -44,25 +51,32 @@ public abstract class VersionConstraintImpl implements VersionConstraint {
 	public void setActualVersion(Version actualVersion) {
 		this.actualVersion = actualVersion;
 	}
+
 	public void setSupplier(BundleDescription supplier) {
 		this.supplier = supplier;
 	}
+
 	public void setMatchingRule(byte matchingRule) {
 		this.matchingRule = matchingRule;
 	}
+
 	public void setName(String name) {
 		this.name = name;
 	}
+
 	public void setVersionSpecification(Version versionSpecification) {
 		this.versionSpecification = versionSpecification;
 	}
+
 	public void setBundle(BundleDescription bundle) {
 		this.bundle = bundle;
 	}
+
 	public void unresolve() {
 		actualVersion = null;
 		supplier = null;
 	}
+
 	public boolean isSatisfiedBy(Version provided) {
 		Version required = getVersionSpecification();
 		if (required == null)
@@ -74,12 +88,13 @@ public abstract class VersionConstraintImpl implements VersionConstraint {
 				return provided.matchMicro(required);
 			case MINOR_MATCH :
 				return provided.matchMinor(required);
-			case GREATER_EQUAL_MATCH:
+			case GREATER_EQUAL_MATCH :
 				return provided.matchGreaterOrEqualTo(required);
 			default :
-				return provided.matchMajor(required);				
+				return provided.matchMajor(required);
 		}
 	}
+
 	public String toString() {
 		return "name: " + name + " - version: " + versionSpecification;
 	}

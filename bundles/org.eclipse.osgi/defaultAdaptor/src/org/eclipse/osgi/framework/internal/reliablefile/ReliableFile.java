@@ -327,6 +327,7 @@ public class ReliableFile {
 	 * @throws IOException If the copy failed.
 	 */
 	private static final int CP_BUF_SIZE = 4096;
+
 	private static void cp(File from, File to) throws IOException {
 		FileInputStream in = null;
 		FileOutputStream out = null;
@@ -394,7 +395,7 @@ public class ReliableFile {
 	 * <code>false</code> otherwise.
 	 */
 	public static boolean exists(File file) {
-		if (file.exists()) /* quick test */ {
+		if (file.exists()) /* quick test */{
 			return true;
 		}
 

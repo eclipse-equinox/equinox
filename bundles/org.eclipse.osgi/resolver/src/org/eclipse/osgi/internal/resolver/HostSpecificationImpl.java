@@ -16,16 +16,20 @@ import org.eclipse.osgi.service.resolver.HostSpecification;
 
 public class HostSpecificationImpl extends VersionConstraintImpl implements HostSpecification {
 	private boolean reloadHost;
+
 	public boolean reloadHost() {
 		return reloadHost;
 	}
+
 	public void setReloadHost(boolean reloadHost) {
 		this.reloadHost = reloadHost;
 	}
+
 	public boolean isOptional() {
 		// a fragment cannot exist without its master
 		return false;
 	}
+
 	public BundleDescription[] getSuppliers() {
 		BundleDescription supplier = getSupplier();
 		return (supplier == null) ? new BundleDescription[0] : new BundleDescription[] {supplier};

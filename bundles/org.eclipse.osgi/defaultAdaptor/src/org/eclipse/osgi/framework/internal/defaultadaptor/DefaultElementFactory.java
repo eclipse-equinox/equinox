@@ -17,10 +17,10 @@ import org.eclipse.osgi.framework.adaptor.core.AbstractBundleData;
 import org.eclipse.osgi.framework.adaptor.core.AbstractFrameworkAdaptor;
 import org.eclipse.osgi.framework.adaptor.core.AdaptorElementFactory;
 
-public class DefaultElementFactory implements AdaptorElementFactory{
+public class DefaultElementFactory implements AdaptorElementFactory {
 
 	public AbstractBundleData createBundleData(AbstractFrameworkAdaptor adaptor, long id) throws IOException {
-		return new DefaultBundleData((DefaultAdaptor)adaptor, id);
+		return new DefaultBundleData((DefaultAdaptor) adaptor, id);
 	}
 
 	public org.eclipse.osgi.framework.adaptor.BundleClassLoader createClassLoader(ClassLoaderDelegate delegate, ProtectionDomain domain, String[] bundleclasspath, AbstractBundleData data) {

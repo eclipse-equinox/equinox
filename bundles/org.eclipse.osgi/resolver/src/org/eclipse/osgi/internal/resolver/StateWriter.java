@@ -35,6 +35,7 @@ class StateWriter {
 		// return the index of the object just added (i.e. size - 1)
 		return (objectTable.size() - 1);
 	}
+
 	private int getFromObjectTable(Object object) {
 		if (objectTable != null) {
 			Object objectResult = objectTable.get(object);
@@ -44,6 +45,7 @@ class StateWriter {
 		}
 		return -1;
 	}
+
 	private boolean writePrefix(Object object, DataOutputStream out) throws IOException {
 		if (writeIndex(object, out))
 			return true;
@@ -52,12 +54,13 @@ class StateWriter {
 		out.writeByte(OBJECT);
 		return false;
 	}
+
 	private void writeState(StateImpl state, DataOutputStream out) throws IOException {
 		out.write(StateReader.STATE_CACHE_VERSION);
 		if (writePrefix(state, out))
 			return;
-		out.writeLong(state.getTimeStamp());		
-		BundleDescription[] bundles = state.getBundles();		
+		out.writeLong(state.getTimeStamp());
+		BundleDescription[] bundles = state.getBundles();
 		out.writeInt(bundles.length);
 		if (bundles.length == 0)
 			return;
@@ -67,13 +70,14 @@ class StateWriter {
 		if (!state.isResolved())
 			return;
 		BundleDescription[] resolvedBundles = state.getResolvedBundles();
-		out.writeInt(resolvedBundles.length);	
+		out.writeInt(resolvedBundles.length);
 		for (int i = 0; i < resolvedBundles.length; i++)
-			writeBundleDescription((BundleDescriptionImpl) resolvedBundles[i], out);		
+			writeBundleDescription((BundleDescriptionImpl) resolvedBundles[i], out);
 	}
+
 	private void writeBundleDescription(BundleDescriptionImpl bundle, DataOutputStream out) throws IOException {
 		if (writePrefix(bundle, out))
-			return;		
+			return;
 		out.writeLong(bundle.getBundleId());
 		writeStringOrNull(bundle.getUniqueId(), out);
 		writeStringOrNull(bundle.getLocation(), out);
@@ -95,18 +99,21 @@ class StateWriter {
 		out.writeInt(requiredBundles.length);
 		for (int i = 0; i < requiredBundles.length; i++)
 			writeBundleSpec((BundleSpecificationImpl) requiredBundles[i], out);
-		
+
 		out.writeBoolean(bundle.isSingleton());
 	}
+
 	private void writeBundleSpec(BundleSpecificationImpl bundle, DataOutputStream out) throws IOException {
 		writeVersionConstraint(bundle, out);
 		out.writeBoolean(bundle.isExported());
 		out.writeBoolean(bundle.isOptional());
 	}
+
 	private void writePackageSpec(PackageSpecificationImpl packageSpec, DataOutputStream out) throws IOException {
 		writeVersionConstraint(packageSpec, out);
 		out.writeBoolean(packageSpec.isExported());
 	}
+
 	private void writeHostSpec(HostSpecificationImpl host, DataOutputStream out) throws IOException {
 		if (host == null) {
 			out.writeByte(NULL);
@@ -116,6 +123,7 @@ class StateWriter {
 		writeVersionConstraint(host, out);
 		out.writeBoolean(host.reloadHost());
 	}
+
 	// called by writers for VersionConstraintImpl subclasses
 	private void writeVersionConstraint(VersionConstraintImpl version, DataOutputStream out) throws IOException {
 		writeStringOrNull(version.getName(), out);
@@ -124,6 +132,7 @@ class StateWriter {
 		writeVersion(version.getActualVersion(), out);
 		writeBundleDescription((BundleDescriptionImpl) version.getSupplier(), out);
 	}
+
 	private void writeVersion(Version version, DataOutputStream out) throws IOException {
 		// TODO: should assess whether avoiding sharing versions would be good
 		if (writePrefix(version, out))
@@ -133,6 +142,7 @@ class StateWriter {
 		out.writeInt(version.getMicroComponent());
 		writeStringOrNull(version.getQualifierComponent(), out);
 	}
+
 	private boolean writeIndex(Object object, DataOutputStream out) throws IOException {
 		if (object == null) {
 			out.writeByte(NULL);
@@ -145,6 +155,7 @@ class StateWriter {
 		out.writeInt(index);
 		return true;
 	}
+
 	public void saveState(StateImpl state, DataOutputStream output) throws IOException {
 		try {
 			writeState(state, output);
@@ -152,6 +163,7 @@ class StateWriter {
 			output.close();
 		}
 	}
+
 	private void writeStringOrNull(String string, DataOutputStream out) throws IOException {
 		if (string == null)
 			out.writeByte(NULL);

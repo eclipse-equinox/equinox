@@ -24,6 +24,7 @@ public interface StateObjectFactory {
 	 * @return the created state
 	 */
 	public State createState();
+
 	/**
 	 * Creates a new state that is a copy of the given state. The returned state 
 	 * will contain copies of all bundle descriptions in the given state. No data 
@@ -33,6 +34,7 @@ public interface StateObjectFactory {
 	 * @return the created state
 	 */
 	public State createState(State state);
+
 	/**
 	 * Creates a bundle description from the given parameters.
 	 * 
@@ -54,6 +56,7 @@ public interface StateObjectFactory {
 	 * @deprecated use another version of createBundleDescription
 	 */
 	public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location, BundleSpecification[] required, HostSpecification host, PackageSpecification[] packages, String[] providedPackages, boolean singleton);
+
 	/**
 	 * Creates a bundle description from the given parameters.
 	 * 
@@ -72,8 +75,9 @@ public interface StateObjectFactory {
 	 * <code>null</code>)
 	 * @param singleton whether the bundle created should be a singleton
 	 * @return the created bundle description
-	 */	
-	public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location, BundleSpecification[] required, HostSpecification[] hosts, PackageSpecification[] packages, String[] providedPackages, boolean singleton);	
+	 */
+	public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location, BundleSpecification[] required, HostSpecification[] hosts, PackageSpecification[] packages, String[] providedPackages, boolean singleton);
+
 	/**
 	 * Returns a bundle description based on the information in the supplied manifest dictionary.
 	 * The manifest should contain String keys and String values which correspond to 
@@ -86,6 +90,7 @@ public interface StateObjectFactory {
 	 * @throws BundleException if an error occurs while reading the manifest 
 	 */
 	public BundleDescription createBundleDescription(Dictionary manifest, String location, long id) throws BundleException;
+
 	/**
 	 * Creates a bundle description that is a copy of the given description.
 	 * 
@@ -93,6 +98,7 @@ public interface StateObjectFactory {
 	 * @return the created bundle description
 	 */
 	public BundleDescription createBundleDescription(BundleDescription original);
+
 	/**
 	 * Creates a bundle specification from the given parameters.
 	 * 
@@ -105,6 +111,7 @@ public interface StateObjectFactory {
 	 * @see VersionConstraint for information on the available match rules
 	 */
 	public BundleSpecification createBundleSpecification(String requiredSymbolicName, Version requiredVersion, byte matchRule, boolean export, boolean optional);
+
 	/**
 	 * Creates a bundle specification that is a copy of the given constraint.
 	 *  
@@ -112,6 +119,7 @@ public interface StateObjectFactory {
 	 * @return the created bundle specification
 	 */
 	public BundleSpecification createBundleSpecification(BundleSpecification original);
+
 	/**
 	 * Creates a host specification from the given parameters.
 	 *  
@@ -124,6 +132,7 @@ public interface StateObjectFactory {
 	 * @see VersionConstraint for information on the available match rules 
 	 */
 	public HostSpecification createHostSpecification(String hostSymbolicName, Version hostVersion, byte matchRule, boolean reloadHost);
+
 	/**
 	 * Creates a host specification that is a copy of the given constraint.
 	 * 
@@ -131,6 +140,7 @@ public interface StateObjectFactory {
 	 * @return the created host specification
 	 */
 	public HostSpecification createHostSpecification(HostSpecification original);
+
 	/**
 	 * Creates a package specification from the given parameters.
 	 *  
@@ -141,12 +151,14 @@ public interface StateObjectFactory {
 	 * @return the created package specification
 	 */
 	public PackageSpecification createPackageSpecification(String packageName, Version packageVersion, boolean exported);
+
 	/**
 	 * Creates a package specification that is a copy of the given constraint
 	 * @param original the constraint to be copied
 	 * @return the created package specification 
 	 */
 	public PackageSpecification createPackageSpecification(PackageSpecification original);
+
 	/**
 	 * Persists the given state in the given output stream. Closes the stream.
 	 * 
@@ -158,6 +170,7 @@ public interface StateObjectFactory {
 	 * this factory
 	 */
 	public void writeState(State state, DataOutputStream stream) throws IOException;
+
 	/**
 	 * Reads a persisted state from the given stream. Closes the stream.
 	 * 

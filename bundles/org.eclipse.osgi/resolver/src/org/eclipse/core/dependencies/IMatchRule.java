@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.core.dependencies;
 
-
 /**
  * Must be implemented by clients.
  */

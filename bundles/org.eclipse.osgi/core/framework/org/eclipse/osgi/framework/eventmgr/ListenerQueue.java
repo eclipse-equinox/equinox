@@ -103,7 +103,7 @@ public class ListenerQueue {
 			lists = queue.getElements();
 		}
 		EventThread eventThread = manager.getEventThread();
-		synchronized (eventThread) {	/* synchronize on the EventThread to ensure no interleaving of posting to the event thread */
+		synchronized (eventThread) { /* synchronize on the EventThread to ensure no interleaving of posting to the event thread */
 			int size = lists.length;
 			for (int i = 0; i < size; i++) { /* iterate over the list of listener lists */
 				ListElement list = lists[i];
@@ -129,7 +129,7 @@ public class ListenerQueue {
 			readOnly = true;
 			lists = queue.getElements();
 		}
-		synchronized (manager) {	/* synchronize on the EventManager to ensure no interleaving of event delivery */
+		synchronized (manager) { /* synchronize on the EventManager to ensure no interleaving of event delivery */
 			int size = lists.length;
 			for (int i = 0; i < size; i++) { /* iterate over the list of listener lists */
 				ListElement list = lists[i];

@@ -27,15 +27,15 @@ import org.osgi.service.packageadmin.NamedClassSpace;
  * keeps track of the depedencies between the bundles installed in the 
  * Framework.
  */
-public class BundleLoaderProxy implements KeyedElement, NamedClassSpace{
+public class BundleLoaderProxy implements KeyedElement, NamedClassSpace {
 	/** The BundleLoader that this BundleLoaderProxy is managing */
 	private BundleLoader loader;
 	/** The Bundle that this BundleLoaderProxy is for*/
 	private BundleHost bundle;
 	/** The Symbolic Name of the Bundle; this must be cached incase the Bundle is updated */
-	private String symbolicName;	
+	private String symbolicName;
 	/** The Version of the Bundle; this must be cached incase the Bundle is updated */
-	private Version version;	
+	private Version version;
 	/** The unique hash key for this KeyedElemetn */
 	private String key;
 	/** 
@@ -62,11 +62,13 @@ public class BundleLoaderProxy implements KeyedElement, NamedClassSpace{
 		this.key = new StringBuffer(symbolicName).append("_").append(this.version.toString()).toString(); //$NON-NLS-1$
 		this.users = new KeyedHashSet(false);
 	}
+
 	public BundleLoader getBundleLoader() {
 		if (loader == null)
 			loader = bundle.getBundleLoader();
 		return loader;
 	}
+
 	public AbstractBundle getBundle() {
 		return bundle;
 	}
@@ -104,6 +106,7 @@ public class BundleLoaderProxy implements KeyedElement, NamedClassSpace{
 	public void setStale() {
 		stale = true;
 	}
+
 	public boolean isStale() {
 		return stale;
 	}
@@ -131,12 +134,12 @@ public class BundleLoaderProxy implements KeyedElement, NamedClassSpace{
 		String symbolicName = bundle.getSymbolicName();
 		StringBuffer sb = new StringBuffer(symbolicName == null ? bundle.getLocation() : symbolicName);
 		sb.append("; ").append(Constants.BUNDLE_VERSION_ATTRIBUTE); //$NON-NLS-1$
-		sb.append("=\"").append(version.toString()).append("\"");  //$NON-NLS-1$//$NON-NLS-2$
+		sb.append("=\"").append(version.toString()).append("\""); //$NON-NLS-1$//$NON-NLS-2$
 		return sb.toString();
 	}
 
 	protected void markDependencies() {
-		if (markedUsedDependencies || !bundle.isResolved()) {	//TODO Can we get a bundleLoaderProxy is we are unresolved. If we can get one when the bundle is unresolved is it correct?
+		if (markedUsedDependencies || !bundle.isResolved()) { //TODO Can we get a bundleLoaderProxy is we are unresolved. If we can get one when the bundle is unresolved is it correct?
 			return;
 		}
 		markedUsedDependencies = true;
@@ -199,6 +202,7 @@ public class BundleLoaderProxy implements KeyedElement, NamedClassSpace{
 
 		return bundle;
 	}
+
 	public org.osgi.framework.Bundle[] getRequiringBundles() {
 		if (isStale())
 			return null;
@@ -210,19 +214,22 @@ public class BundleLoaderProxy implements KeyedElement, NamedClassSpace{
 			BundleLoader requiringLoader = requiringProxy.getBundleLoader();
 			BundleLoaderProxy[] reqBundles = requiringLoader.requiredBundles;
 			if (reqBundles != null)
-				for (int j=0; j<reqBundles.length; j++) 
+				for (int j = 0; j < reqBundles.length; j++)
 					if (reqBundles[j] == this)
 						requiringBundles.add(requiringProxy.getBundle());
 		}
 
 		return (AbstractBundle[]) requiringBundles.toArray(new AbstractBundle[requiringBundles.size()]);
 	}
+
 	public String getName() {
 		return symbolicName;
 	}
+
 	public String getVersion() {
 		return version.toString();
 	}
+
 	public boolean isRemovalPending() {
 		return bundle.framework.packageAdmin.removalPending.contains(this);
 	}

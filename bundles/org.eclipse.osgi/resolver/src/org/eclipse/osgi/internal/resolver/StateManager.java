@@ -26,15 +26,18 @@ public class StateManager implements PlatformAdmin {
 	private StateObjectFactoryImpl factory;
 	private long lastTimeStamp;
 	private BundleInstaller installer;
+
 	public StateManager(File stateLocation) {
 		// a negative timestamp means no timestamp checking
 		this(stateLocation, -1);
 	}
+
 	public StateManager(File stateLocation, long expectedTimeStamp) {
 		factory = new StateObjectFactoryImpl();
 		this.stateLocation = stateLocation;
 		readState(expectedTimeStamp);
 	}
+
 	public void shutdown() throws IOException {
 		writeState();
 		//systemState should not be set to null as when the framework
@@ -42,6 +45,7 @@ public class StateManager implements PlatformAdmin {
 		//not be reset, resulting in a null pointer exception
 		//systemState = null;
 	}
+
 	private void readState(long expectedTimeStamp) {
 		if (!stateLocation.isFile())
 			return;
@@ -71,6 +75,7 @@ public class StateManager implements PlatformAdmin {
 				System.out.println("Time to read state: " + (System.currentTimeMillis() - readStartupTime));
 		}
 	}
+
 	private void writeState() throws IOException {
 		if (systemState == null)
 			return;
@@ -79,27 +84,34 @@ public class StateManager implements PlatformAdmin {
 		DataOutputStream output = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(stateLocation)));
 		factory.writeState(systemState, output);
 	}
+
 	public StateImpl createSystemState() {
 		systemState = factory.createSystemState();
 		initializeSystemState();
 		return systemState;
 	}
+
 	private void initializeSystemState() {
 		systemState.setResolver(new ResolverImpl());
 		lastTimeStamp = systemState.getTimeStamp();
 	}
+
 	public StateImpl getSystemState() {
 		return systemState;
 	}
+
 	public State getState(boolean mutable) {
 		return mutable ? factory.createState(systemState) : new ReadOnlyState(systemState);
 	}
+
 	public State getState() {
 		return getState(true);
 	}
+
 	public StateObjectFactory getFactory() {
 		return factory;
 	}
+
 	public synchronized void commit(State state) throws BundleException {
 		// client trying to sneak in some alien implementation
 		if (!(state instanceof UserState))
@@ -129,18 +141,23 @@ public class StateManager implements PlatformAdmin {
 			}
 		}
 	}
+
 	public Resolver getResolver() {
 		return new ResolverImpl();
 	}
+
 	public StateHelper getStateHelper() {
 		return StateHelperImpl.getInstance();
 	}
+
 	public File getStateLocation() {
 		return stateLocation;
 	}
+
 	public BundleInstaller getInstaller() {
 		return installer;
 	}
+
 	public void setInstaller(BundleInstaller installer) {
 		this.installer = installer;
 	}

@@ -22,6 +22,8 @@ import org.osgi.framework.BundleException;
  */
 public interface BundleInstaller {
 	public void installBundle(BundleDescription toInstall) throws BundleException;
+
 	public void uninstallBundle(BundleDescription toUninstall) throws BundleException;
+
 	public void updateBundle(BundleDescription toRefresh) throws BundleException;
 }

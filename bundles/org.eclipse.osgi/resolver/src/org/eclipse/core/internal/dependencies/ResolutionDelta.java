@@ -18,34 +18,42 @@ import org.eclipse.core.dependencies.*;
 
 public class ResolutionDelta implements IResolutionDelta {
 	private Map changes;
+
 	ResolutionDelta() {
 		this.changes = new HashMap();
 	}
+
 	public IElementChange[] getAllChanges() {
 		return (IElementChange[]) changes.values().toArray(new IElementChange[changes.size()]);
 	}
+
 	public IElementChange getChange(Object id, Object versionId, Object userObject) {
 		return (IElementChange) changes.get(new ElementIdentifier(id, versionId, userObject));
 	}
+
 	class ElementIdentifier {
 		private Object id;
 		private Object versionId;
 		private Object userObject;
+
 		ElementIdentifier(Object id, Object versionId, Object userObject) {
 			this.id = id;
 			this.versionId = versionId;
 			this.userObject = userObject;
 		}
+
 		public int hashCode() {
 			return (id.hashCode() << 16) | (versionId.hashCode() & 0xFFFF);
 		}
+
 		public boolean equals(Object anObject) {
 			if (!(anObject instanceof ElementIdentifier))
 				return false;
 			ElementIdentifier change = (ElementIdentifier) anObject;
-			return (change.userObject != null && change.userObject.equals(this.userObject)) || (this.id.equals(change.id) && this.versionId.equals(change.versionId) && change.userObject == null && this.userObject == null);			
+			return (change.userObject != null && change.userObject.equals(this.userObject)) || (this.id.equals(change.id) && this.versionId.equals(change.versionId) && change.userObject == null && this.userObject == null);
 		}
 	}
+
 	/**
 	 * Record a new status change.
 	 */
@@ -58,7 +66,7 @@ public class ResolutionDelta implements IResolutionDelta {
 			return;
 		}
 		// a removal cancels any existing addition
-		if (kind == IElementChange.REMOVED) 
+		if (kind == IElementChange.REMOVED)
 			if (existingChange.getKind() == IElementChange.ADDED) {
 				// if it was just an addition, just forget the change
 				this.changes.remove(new ElementIdentifier(element.getId(), element.getVersionId(), element.getUserObject()));
@@ -71,6 +79,7 @@ public class ResolutionDelta implements IResolutionDelta {
 		// otherwise, just update the new status for the existing change object 
 		existingChange.setKind(existingChange.getKind() | kind);
 	}
+
 	public String toString() {
 		return changes.values().toString();
 	}

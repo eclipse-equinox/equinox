@@ -24,7 +24,7 @@ final class BundlePermissions extends BundlePermissionCollection {
 	 * Maps a Permission's class to an appropriate PermissionCollection.
 	 * Class => PermissionCollection
 	 */
-	private Hashtable collections = new Hashtable(8);	//TODO How dynamic is this? 
+	private Hashtable collections = new Hashtable(8); //TODO How dynamic is this? 
 
 	/**
 	 * Set to an AllPermissionCollection if this Permissions contains AllPermission.
@@ -180,7 +180,7 @@ final class BundlePermissions extends BundlePermissionCollection {
 				// by loading it only from the proper classloader,
 				// i.e. the system classloader or and exporting bundle's
 				// classloader. Otherwise there is a security hole.
-				clazz = packageAdmin.loadServiceClass(name,null);
+				clazz = packageAdmin.loadServiceClass(name, null);
 				if (clazz == null) {
 					return null;
 				}

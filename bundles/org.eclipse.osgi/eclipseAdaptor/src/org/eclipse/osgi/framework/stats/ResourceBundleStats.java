@@ -21,12 +21,12 @@ import java.util.*;
  */
 
 public class ResourceBundleStats {
-	private String pluginId;	// the plugin loading this bundle
-	private String fileName;	// the filename of the bundle 
-	private int keyCount = 0;	// number of keys in the bundle
-	private int keySize = 0;	// size of the keys in the bundle
-	private int valueSize = 0;	// size of the values in the bundle 
-	private long hashSize = 0;	// size of the hashtable
+	private String pluginId; // the plugin loading this bundle
+	private String fileName; // the filename of the bundle 
+	private int keyCount = 0; // number of keys in the bundle
+	private int keySize = 0; // size of the keys in the bundle
+	private int valueSize = 0; // size of the values in the bundle 
+	private long hashSize = 0; // size of the hashtable
 	private long fileSize = 0;
 
 	private static int sizeOf(String value) {
@@ -34,7 +34,7 @@ public class ResourceBundleStats {
 	}
 
 	private static int sizeOf(Properties value) {
-		return (int)Math.round(44 + (16 + (value.size() * 1.25 * 4)) + (24 * value.size()));
+		return (int) Math.round(44 + (16 + (value.size() * 1.25 * 4)) + (24 * value.size()));
 	}
 
 	public ResourceBundleStats(String pluginId, String fileName, URL input) {
@@ -52,7 +52,7 @@ public class ResourceBundleStats {
 	/**
 	 * Compute the size of bundle
 	 */
-	private void initialize(ResourceBundle bundle) { 
+	private void initialize(ResourceBundle bundle) {
 		for (Enumeration enum = bundle.getKeys(); enum.hasMoreElements();) {
 			String key = (String) enum.nextElement();
 			keySize += sizeOf(key);
@@ -80,7 +80,7 @@ public class ResourceBundleStats {
 				}
 				hashSize = sizeOf(props);
 			} finally {
-				if (stream!=null)
+				if (stream != null)
 					stream.close();
 			}
 		} catch (IOException e) {

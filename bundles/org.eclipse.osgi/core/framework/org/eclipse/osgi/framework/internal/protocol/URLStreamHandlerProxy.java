@@ -194,18 +194,18 @@ public class URLStreamHandlerProxy extends URLStreamHandler implements ServiceTr
 
 		if (reference == urlStreamServiceReference) {
 			if (newRank < ranking) //The URLHandler we are currently
-				//using has dropped it's ranking below a URLHandler registered for the same protocol.  
-				//We need to swap out URLHandlers.
-				//this should get us the highest ranked service, if available
-				{
+			//using has dropped it's ranking below a URLHandler registered for the same protocol.  
+			//We need to swap out URLHandlers.
+			//this should get us the highest ranked service, if available
+			{
 				ServiceReference newReference = urlStreamHandlerServiceTracker.getServiceReference();
 				if (newReference != urlStreamServiceReference && newReference != null) {
 					setNewHandler(newReference, ((Integer) newReference.getProperty(Constants.SERVICE_RANKING)).intValue());
 				}
 			}
 		} else if (newRank > ranking) //the service changed is another URLHandler that we are not currently using
-			//If it's ranking is higher, we must swap it in.
-			{
+		//If it's ranking is higher, we must swap it in.
+		{
 			setNewHandler(reference, newRank);
 		}
 	}

@@ -30,10 +30,11 @@ public interface Resolver {
 	 * </p>
 	 */
 	public void resolve();
+
 	/**
 	 * 
 	 */
-	public void resolve(BundleDescription[] discard);	
+	public void resolve(BundleDescription[] discard);
 
 	/**
 	 * Flushes this resolver of any stored/cached data it may be keeping to
@@ -67,21 +68,24 @@ public interface Resolver {
 	 * </pre>
 	 */
 	public void setState(State value);
+
 	/**
 	 * Notifies the resolver a bundle has been added to the state.
 	 * @param bundle
 	 */
 	public void bundleAdded(BundleDescription bundle);
+
 	/**
 	 * Notifies the resolver a bundle has been removed from the state.
 	 * @param bundle
-	 */	
+	 */
 	public void bundleRemoved(BundleDescription bundle);
+
 	/**
 	 * Notifies the resolver a bundle has been updated in the state.
 	 * @param newDescription the new description
 	 * @param existingDescription the existing description
-	 */		
+	 */
 	public void bundleUpdated(BundleDescription newDescription, BundleDescription existingDescription);
-	
+
 }

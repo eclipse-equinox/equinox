@@ -108,7 +108,7 @@ public class ManifestElement {
 	 * Each value component is delemited by a ';'.
 	 * @return the String[] of value components
 	 */
-	public String[] getValueComponents(){
+	public String[] getValueComponents() {
 		return valueComponents;
 	}
 
@@ -168,7 +168,7 @@ public class ManifestElement {
 		}
 		return attributes.keys();
 	}
-	
+
 	/**
 	 * Adds an attribute to this manifest element.
 	 * @param key the key of the attribute
@@ -184,15 +184,13 @@ public class ManifestElement {
 			// create a list to contain multiple values
 			if (curValue instanceof ArrayList) {
 				newList = (ArrayList) curValue;
-			}
-			else {
+			} else {
 				newList = new ArrayList(5);
 				newList.add(curValue);
 			}
 			newList.add(value);
 			attributes.put(key, newList);
-		}
-		else {
+		} else {
 			attributes.put(key, value);
 		}
 	}
@@ -217,7 +215,7 @@ public class ManifestElement {
 
 		Tokenizer tokenizer = new Tokenizer(value);
 
-		parseloop : while (true) {
+		parseloop: while (true) {
 			String next = tokenizer.getToken(";,");
 			if (next == null) {
 				throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_HEADER_EXCEPTION", header, value));
@@ -242,7 +240,7 @@ public class ManifestElement {
 
 				c = tokenizer.getChar();
 
-				if (c == ';') /* more */ {
+				if (c == ';') /* more */{
 					headerValues.add(next);
 					headerValue.append(";").append(next);
 
@@ -275,7 +273,7 @@ public class ManifestElement {
 
 				c = tokenizer.getChar();
 
-				if (c == ';') /* more */ {
+				if (c == ';') /* more */{
 					next = tokenizer.getToken("=");
 
 					if (next == null) {
@@ -292,11 +290,11 @@ public class ManifestElement {
 				Debug.println("");
 			}
 
-			if (c == ',') /* another manifest element */ {
+			if (c == ',') /* another manifest element */{
 				continue parseloop;
 			}
 
-			if (c == '\0') /* end of value */ {
+			if (c == '\0') /* end of value */{
 				break parseloop;
 			}
 

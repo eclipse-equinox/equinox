@@ -36,7 +36,7 @@ public class DefaultClassLoader extends AbstractClassLoader {
 	 */
 	protected ClasspathEntry[] classpathEntries;
 
-	protected Vector fragClasspaths;	//TODO This should be an array or an arraylist if the synchronization is not required
+	protected Vector fragClasspaths; //TODO This should be an array or an arraylist if the synchronization is not required
 
 	/**
 	 * The buffer size to use when loading classes.  This value is used 
@@ -148,12 +148,12 @@ public class DefaultClassLoader extends AbstractClassLoader {
 		}
 
 		// if in dev mode, try using the cp as an absolute path
-		if (bundlefile == null && DevClassPathHelper.inDevelopmentMode()){
+		if (bundlefile == null && DevClassPathHelper.inDevelopmentMode()) {
 			file = new File(cp);
 			if (file.exists() && file.isAbsolute())
 				// if the file exists and is absolute then create BundleFile for it.
 				try {
-					bundlefile = BundleFile.createBundleFile(file,bundledata);
+					bundlefile = BundleFile.createBundleFile(file, bundledata);
 				} catch (IOException e) {
 					bundledata.getAdaptor().getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, bundledata.getBundle(), e);
 				}
@@ -236,22 +236,22 @@ public class DefaultClassLoader extends AbstractClassLoader {
 				if (length > 0) {
 					classbytes = new byte[length];
 
-					readloop : for (; bytesread < length; bytesread += readcount) {
+					readloop: for (; bytesread < length; bytesread += readcount) {
 						readcount = in.read(classbytes, bytesread, length - bytesread);
 
-						if (readcount <= 0) /* if we didn't read anything */ {
+						if (readcount <= 0) /* if we didn't read anything */{
 							break readloop; /* leave the loop */
 						}
 					}
-				} else /* BundleEntry does not know its own length! */ {
+				} else /* BundleEntry does not know its own length! */{
 					length = buffersize;
 					classbytes = new byte[length];
 
-					readloop : while (true) {
+					readloop: while (true) {
 						for (; bytesread < length; bytesread += readcount) {
 							readcount = in.read(classbytes, bytesread, length - bytesread);
 
-							if (readcount <= 0) /* if we didn't read anything */ {
+							if (readcount <= 0) /* if we didn't read anything */{
 								break readloop; /* leave the loop */
 							}
 						}
@@ -293,7 +293,7 @@ public class DefaultClassLoader extends AbstractClassLoader {
 	}
 
 	protected Class defineClass(String name, byte[] classbytes, int off, int len, ClasspathEntry classpathEntry) throws ClassFormatError {
-		return defineClass(name,classbytes,off,len,classpathEntry.getProtectionDomain());
+		return defineClass(name, classbytes, off, len, classpathEntry.getProtectionDomain());
 	}
 
 	/** 
@@ -332,7 +332,7 @@ public class DefaultClassLoader extends AbstractClassLoader {
 	 * @return A URL to the resource or null if the resource does not exist.
 	 */
 	protected URL findResourceImpl(String name, BundleFile bundlefile) {
-		return bundlefile.getResourceURL(name,hostdata.getBundleID());
+		return bundlefile.getResourceURL(name, hostdata.getBundleID());
 	}
 
 	/**
@@ -393,7 +393,7 @@ public class DefaultClassLoader extends AbstractClassLoader {
 		return null;
 	}
 
-	protected BundleEntry findObjectImpl(String object,BundleFile bundleFile){
+	protected BundleEntry findObjectImpl(String object, BundleFile bundleFile) {
 		return bundleFile.getEntry(object);
 	}
 
@@ -462,10 +462,10 @@ public class DefaultClassLoader extends AbstractClassLoader {
 
 	protected void findClassPathEntry(ArrayList result, String entry, AbstractBundleData bundledata, ProtectionDomain domain) {
 		if (!addClassPathEntry(result, entry, bundledata, domain)) {
-//			if (devCP == null) {
-//				BundleException be = new BundleException(Msg.formatter.getString("BUNDLE_CLASSPATH_ENTRY_NOT_FOUND_EXCEPTION", entry, hostdata.getLocation()));
-//				bundledata.getAdaptor().getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, bundledata.getBundle(), be);
-//			}
+			//			if (devCP == null) {
+			//				BundleException be = new BundleException(Msg.formatter.getString("BUNDLE_CLASSPATH_ENTRY_NOT_FOUND_EXCEPTION", entry, hostdata.getLocation()));
+			//				bundledata.getAdaptor().getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, bundledata.getBundle(), be);
+			//			}
 		}
 	}
 
@@ -473,12 +473,12 @@ public class DefaultClassLoader extends AbstractClassLoader {
 		if (entry.equals(".")) {
 			result.add(createClassPathEntry(bundledata.getBaseBundleFile(), domain));
 			return true;
-		} 
+		}
 		Object element = getClasspath(entry, bundledata, domain);
 		if (element != null) {
 			result.add(element);
 			return true;
-		} 
+		}
 		// need to check in fragments for the classpath entry.
 		// only check for fragments if the bundledata is the hostdata.
 		if (fragClasspaths != null && hostdata == bundledata) {
@@ -560,13 +560,16 @@ public class DefaultClassLoader extends AbstractClassLoader {
 	protected class ClasspathEntry {
 		protected BundleFile bundlefile;
 		protected ProtectionDomain domain;
+
 		protected ClasspathEntry(BundleFile bundlefile, ProtectionDomain domain) {
 			this.bundlefile = bundlefile;
 			this.domain = domain;
 		}
+
 		public BundleFile getBundleFile() {
 			return bundlefile;
 		}
+
 		public ProtectionDomain getProtectionDomain() {
 			return domain;
 		}

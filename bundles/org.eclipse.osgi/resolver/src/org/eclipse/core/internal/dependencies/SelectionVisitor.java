@@ -23,19 +23,24 @@ import org.eclipse.core.dependencies.ISelectionPolicy;
 public class SelectionVisitor implements IElementSetVisitor {
 	private int order;
 	private ISelectionPolicy selectionPolicy;
+
 	public SelectionVisitor(int order, ISelectionPolicy selectionPolicy) {
 		this.order = order;
 		this.selectionPolicy = selectionPolicy;
 	}
+
 	public int getOrder() {
 		return order;
 	}
+
 	public final Collection getAncestors(ElementSet elementSet) {
 		return elementSet.getRequiring();
 	}
+
 	public final Collection getDescendants(ElementSet elementSet) {
 		return elementSet.getRequired();
 	}
+
 	public void update(ElementSet elementSet) {
 
 		// no versions satisfied, so no versions selected 

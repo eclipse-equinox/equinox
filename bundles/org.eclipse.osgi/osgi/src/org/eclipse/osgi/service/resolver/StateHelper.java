@@ -30,6 +30,7 @@ public interface StateHelper {
 	 * bundles in the state that depend on them
 	 */
 	public BundleDescription[] getDependentBundles(BundleDescription[] roots);
+
 	/**
 	 * Returns all unsatisfied constraints in the given bundle. Returns an 
 	 * empty array if no unsatisfied constraints can be found.
@@ -42,6 +43,7 @@ public interface StateHelper {
 	 * @return an array containing all unsatisfied constraints for the given bundle
 	 */
 	public VersionConstraint[] getUnsatisfiedConstraints(BundleDescription bundle);
+
 	/**
 	 * Returns whether the given package specification constraint is resolvable. 
 	 * A package specification constraint may be 
@@ -54,6 +56,7 @@ public interface StateHelper {
 	 * <code>false</code> otherwise
 	 */
 	public boolean isResolvable(PackageSpecification specification);
+
 	/**
 	 * Returns whether the given bundle specification constraint is resolvable. 
 	 * A bundle specification constraint may be 
@@ -66,6 +69,7 @@ public interface StateHelper {
 	 * <code>false</code> otherwise
 	 */
 	public boolean isResolvable(BundleSpecification specification);
+
 	/**
 	 * Returns whether the given host specification constraint is resolvable. 
 	 * A host specification constraint may be 
@@ -78,6 +82,7 @@ public interface StateHelper {
 	 * <code>false</code> otherwise
 	 */
 	public boolean isResolvable(HostSpecification specification);
+
 	/**
 	 * Returns all packages exported by the given bundle. Returns an empty array 
 	 * if no packages are exported.
@@ -86,6 +91,7 @@ public interface StateHelper {
 	 * @return all packages exported by the given bundle
 	 */
 	public PackageSpecification[] getExportedPackages(BundleDescription bundle);
+
 	/**
 	 * Returns the package specification corresponding to the given 
 	 * package name/version that has been elected to be exported in the given 

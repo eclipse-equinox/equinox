@@ -27,7 +27,7 @@ public class SingleSourcePackage extends PackageSource {
 	}
 
 	public BundleLoaderProxy[] getSuppliers() {
-		return new BundleLoaderProxy[] { supplier };
+		return new BundleLoaderProxy[] {supplier};
 	}
 
 	public String toString() {

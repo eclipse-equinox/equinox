@@ -19,7 +19,6 @@ public class ExportedPackageImpl extends SingleSourcePackage implements org.osgi
 
 	String specVersion;
 
-
 	public ExportedPackageImpl(PackageSpecification packageSpec, BundleLoaderProxy supplier) {
 		super(packageSpec.getName(), supplier);
 		Version version = packageSpec.getActualVersion();

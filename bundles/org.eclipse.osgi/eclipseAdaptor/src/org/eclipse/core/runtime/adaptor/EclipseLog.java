@@ -18,15 +18,19 @@ import org.eclipse.osgi.framework.internal.defaultadaptor.DefaultLog;
 
 public class EclipseLog extends DefaultLog {
 	private static final String PASSWORD = "-password"; //$NON-NLS-1$	
+
 	public EclipseLog(File logFile) {
 		super(logFile);
 	}
+
 	public EclipseLog(Writer logWriter) {
 		super(logWriter);
 	}
+
 	public EclipseLog() {
 		// default constructor
 	}
+
 	protected String getDate() {
 		try {
 			DateFormat formatter = new SimpleDateFormat("MMM dd, yyyy HH:mm:ss.SS"); //$NON-NLS-1$
@@ -38,6 +42,7 @@ public class EclipseLog extends DefaultLog {
 		}
 		return Long.toString(System.currentTimeMillis());
 	}
+
 	protected void writeSession() throws IOException {
 		write(SESSION);
 		writeSpace();
@@ -88,8 +93,7 @@ public class EclipseLog extends DefaultLog {
 		}
 	}
 
-	public synchronized void setFile(File newFile, boolean append)
-			throws IOException {
+	public synchronized void setFile(File newFile, boolean append) throws IOException {
 		super.setFile(newFile, append);
 		System.setProperty(EclipseStarter.PROP_LOGFILE, newFile.getAbsolutePath());
 	}

@@ -33,15 +33,17 @@ public class FrameworkLogEntry {
 	 * 
 	 * @return Returns the children.
 	 */
-	public FrameworkLogEntry[] getChildren(){
+	public FrameworkLogEntry[] getChildren() {
 		return children;
 	}
+
 	/**
 	 * @return Returns the entry.
 	 */
 	public String getEntry() {
 		return entry;
 	}
+
 	/**
 	 * @return Returns the message.
 	 */
@@ -55,6 +57,7 @@ public class FrameworkLogEntry {
 	public int getStackCode() {
 		return stackCode;
 	}
+
 	/**
 	 * @return Returns the throwable.
 	 */

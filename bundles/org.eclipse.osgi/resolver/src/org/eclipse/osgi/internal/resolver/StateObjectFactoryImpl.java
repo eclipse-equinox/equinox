@@ -18,11 +18,12 @@ import org.osgi.framework.BundleException;
 public class StateObjectFactoryImpl implements StateObjectFactory {
 	public BundleDescription createBundleDescription(Dictionary manifest, String location, long id) throws BundleException {
 		BundleDescriptionImpl result;
-		result = (BundleDescriptionImpl) StateBuilder.createBundleDescription(manifest, location);		
+		result = (BundleDescriptionImpl) StateBuilder.createBundleDescription(manifest, location);
 		result.setBundleId(id);
 		return result;
 	}
-	public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location, BundleSpecification[] required, HostSpecification host,PackageSpecification[] packages, String[] providedPackages, boolean singleton) {
+
+	public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location, BundleSpecification[] required, HostSpecification host, PackageSpecification[] packages, String[] providedPackages, boolean singleton) {
 		BundleDescriptionImpl bundle = new BundleDescriptionImpl();
 		bundle.setBundleId(id);
 		bundle.setUniqueId(symbolicName);
@@ -33,12 +34,14 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		bundle.setHost(host);
 		bundle.setProvidedPackages(providedPackages);
 		bundle.setSingleton(singleton);
-		return bundle;		
+		return bundle;
 	}
-	public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location, BundleSpecification[] required, HostSpecification[] hosts,PackageSpecification[] packages, String[] providedPackages, boolean singleton) {
+
+	public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location, BundleSpecification[] required, HostSpecification[] hosts, PackageSpecification[] packages, String[] providedPackages, boolean singleton) {
 		HostSpecification host = hosts == null || hosts.length == 0 ? null : hosts[1];
 		return createBundleDescription(id, symbolicName, version, location, required, host, packages, providedPackages, singleton);
 	}
+
 	public BundleDescription createBundleDescription(BundleDescription original) {
 		BundleDescriptionImpl bundle = new BundleDescriptionImpl();
 		bundle.setBundleId(original.getBundleId());
@@ -48,80 +51,89 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		BundleSpecification[] originalRequired = original.getRequiredBundles();
 		BundleSpecification[] newRequired = new BundleSpecification[originalRequired.length];
 		for (int i = 0; i < newRequired.length; i++)
-			newRequired[i] = createBundleSpecification(originalRequired[i]);		
+			newRequired[i] = createBundleSpecification(originalRequired[i]);
 		bundle.setRequiredBundles(newRequired);
 		PackageSpecification[] originalPackages = original.getPackages();
 		PackageSpecification[] newPackages = new PackageSpecification[originalPackages.length];
 		for (int i = 0; i < newPackages.length; i++)
-			newPackages[i] = createPackageSpecification(originalPackages[i]);		
+			newPackages[i] = createPackageSpecification(originalPackages[i]);
 		bundle.setPackages(newPackages);
-		if (original.getHost() != null) 
+		if (original.getHost() != null)
 			bundle.setHost(createHostSpecification(original.getHost()));
 		String[] originalProvidedPackages = original.getProvidedPackages();
 		String[] newProvidedPackages = new String[originalProvidedPackages.length];
-		System.arraycopy(originalProvidedPackages,0,newProvidedPackages,0,originalProvidedPackages.length);
-		bundle.setProvidedPackages(newProvidedPackages);		
+		System.arraycopy(originalProvidedPackages, 0, newProvidedPackages, 0, originalProvidedPackages.length);
+		bundle.setProvidedPackages(newProvidedPackages);
 		bundle.setSingleton(original.isSingleton());
-		return bundle;			
+		return bundle;
 	}
+
 	public BundleSpecification createBundleSpecification(String requiredSymbolicName, Version requiredVersion, byte matchingRule, boolean export, boolean optional) {
-		BundleSpecificationImpl bundleSpec = new BundleSpecificationImpl();		
+		BundleSpecificationImpl bundleSpec = new BundleSpecificationImpl();
 		bundleSpec.setName(requiredSymbolicName);
 		bundleSpec.setVersionSpecification(requiredVersion);
 		bundleSpec.setMatchingRule(matchingRule);
 		bundleSpec.setExported(export);
 		bundleSpec.setOptional(optional);
-		return bundleSpec;		
+		return bundleSpec;
 	}
+
 	public BundleSpecification createBundleSpecification(BundleSpecification original) {
-		BundleSpecificationImpl bundleSpec = new BundleSpecificationImpl();		
+		BundleSpecificationImpl bundleSpec = new BundleSpecificationImpl();
 		bundleSpec.setName(original.getName());
 		bundleSpec.setVersionSpecification(original.getVersionSpecification());
 		bundleSpec.setMatchingRule(original.getMatchingRule());
 		bundleSpec.setExported(original.isExported());
 		bundleSpec.setOptional(original.isOptional());
-		return bundleSpec;		
+		return bundleSpec;
 	}
+
 	public HostSpecification createHostSpecification(String hostSymbolicName, Version hostVersion, byte matchingRule, boolean reloadHost) {
-		HostSpecificationImpl hostSpec = new HostSpecificationImpl();		
+		HostSpecificationImpl hostSpec = new HostSpecificationImpl();
 		hostSpec.setName(hostSymbolicName);
 		hostSpec.setVersionSpecification(hostVersion);
 		hostSpec.setMatchingRule(matchingRule);
 		hostSpec.setReloadHost(reloadHost);
 		return hostSpec;
 	}
+
 	public HostSpecification createHostSpecification(HostSpecification original) {
-		HostSpecificationImpl hostSpec = new HostSpecificationImpl();		
+		HostSpecificationImpl hostSpec = new HostSpecificationImpl();
 		hostSpec.setName(original.getName());
 		hostSpec.setVersionSpecification(original.getVersionSpecification());
 		hostSpec.setMatchingRule(original.getMatchingRule());
 		hostSpec.setReloadHost(original.reloadHost());
 		return hostSpec;
 	}
+
 	public PackageSpecification createPackageSpecification(String packageName, Version packageVersion, boolean exported) {
-		PackageSpecificationImpl packageSpec = new PackageSpecificationImpl();		
+		PackageSpecificationImpl packageSpec = new PackageSpecificationImpl();
 		packageSpec.setName(packageName);
 		packageSpec.setVersionSpecification(packageVersion);
 		packageSpec.setExport(exported);
 		return packageSpec;
-	}	
+	}
+
 	public PackageSpecification createPackageSpecification(PackageSpecification original) {
-		PackageSpecificationImpl packageSpec = new PackageSpecificationImpl();		
+		PackageSpecificationImpl packageSpec = new PackageSpecificationImpl();
 		packageSpec.setName(original.getName());
 		packageSpec.setVersionSpecification(original.getVersionSpecification());
 		packageSpec.setExport(original.isExported());
 		return packageSpec;
 	}
+
 	public SystemState createSystemState() {
-		SystemState state =  new SystemState();
-		state.setFactory(this);
-		return state;		
-	}
-	public State createState() {
-		StateImpl state =  new UserState();
+		SystemState state = new SystemState();
 		state.setFactory(this);
 		return state;
 	}
+
+	public State createState() {
+		StateImpl state = new UserState();
+		state.setFactory(this);
+		return state;
+	}
+
 	public State createState(State original) {
 		StateImpl newState = new UserState();
 		newState.setFactory(this);
@@ -132,6 +144,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		newState.setResolved(false);
 		return newState;
 	}
+
 	public SystemState readSystemState(DataInputStream stream, long expectedTimeStamp) throws IOException {
 		StateReader reader = new StateReader();
 		SystemState restoredState = new SystemState();
@@ -139,18 +152,20 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 			return null;
 		restoredState.setFactory(this);
 		return restoredState;
-	}	
+	}
+
 	public State readState(DataInputStream stream) throws IOException {
 		StateReader reader = new StateReader();
-		StateImpl restoredState = (StateImpl) createState(); 
+		StateImpl restoredState = (StateImpl) createState();
 		if (!reader.loadState(restoredState, stream))
 			return null;
-		return restoredState;		
+		return restoredState;
 	}
+
 	public void writeState(State state, DataOutputStream stream) throws IOException {
 		if (state.getFactory() != this)
 			throw new IllegalArgumentException();
 		StateWriter writer = new StateWriter();
-		writer.saveState((StateImpl) state, stream);	
+		writer.saveState((StateImpl) state, stream);
 	}
 }

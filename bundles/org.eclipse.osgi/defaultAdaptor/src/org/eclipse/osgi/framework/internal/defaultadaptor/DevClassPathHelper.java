@@ -20,7 +20,7 @@ public class DevClassPathHelper {
 	static protected boolean inDevelopmentMode = false;
 	static protected String[] devDefaultClasspath;
 	static protected Properties devProperties = null;
-	
+
 	static {
 		// Check the osgi.dev property to see if dev classpath entries have been defined.
 		String osgiDev = System.getProperty("osgi.dev");
@@ -29,13 +29,13 @@ public class DevClassPathHelper {
 				inDevelopmentMode = true;
 				URL location = new URL(osgiDev);
 				devProperties = load(location);
-				devDefaultClasspath = getArrayFromList(devProperties.getProperty("*"));				
+				devDefaultClasspath = getArrayFromList(devProperties.getProperty("*"));
 			} catch (MalformedURLException e) {
 				devDefaultClasspath = getArrayFromList(osgiDev);
 			}
 		}
 	}
-	
+
 	public static String[] getDevClassPath(String id) {
 		String[] result = null;
 		if (id != null && devProperties != null) {
@@ -43,11 +43,11 @@ public class DevClassPathHelper {
 			if (entry != null)
 				result = getArrayFromList(entry);
 		}
-		if (result == null) 
+		if (result == null)
 			result = devDefaultClasspath;
 		return result;
 	}
-	
+
 	/**
 	 * Returns the result of converting a list of comma-separated tokens into an array
 	 * 
@@ -66,7 +66,7 @@ public class DevClassPathHelper {
 		}
 		return list.isEmpty() ? new String[0] : (String[]) list.toArray(new String[list.size()]);
 	}
-	
+
 	public static boolean inDevelopmentMode() {
 		return inDevelopmentMode;
 	}

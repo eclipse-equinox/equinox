@@ -25,28 +25,30 @@ package org.eclipse.core.internal.dependencies;
  * </p>
  */
 public final class Assert {
-/* This class is not intended to be instantiated. */
-private Assert() {
-}
-/** Asserts that the given object is not <code>null</code>. If this
- * is not the case, some kind of unchecked exception is thrown.
- * 
- * @param object the value to test
- * @exception IllegalArgumentException if the object is <code>null</code>
- */
-public static void isNotNull(Object object) {
-	isNotNull(object, ""); //$NON-NLS-1$
-}
-/** Asserts that the given object is not <code>null</code>. If this
- * is not the case, some kind of unchecked exception is thrown.
- * The given message is included in that exception, to aid debugging.
- *
- * @param object the value to test
- * @param message the message to include in the exception
- * @exception IllegalArgumentException if the object is <code>null</code>
- */
-public static void isNotNull(Object object, String message) {
-	if (object == null)
-		throw new NullPointerException("null argument:" + message); //$NON-NLS-1$
-}
+	/* This class is not intended to be instantiated. */
+	private Assert() {
+	}
+
+	/** Asserts that the given object is not <code>null</code>. If this
+	 * is not the case, some kind of unchecked exception is thrown.
+	 * 
+	 * @param object the value to test
+	 * @exception IllegalArgumentException if the object is <code>null</code>
+	 */
+	public static void isNotNull(Object object) {
+		isNotNull(object, ""); //$NON-NLS-1$
+	}
+
+	/** Asserts that the given object is not <code>null</code>. If this
+	 * is not the case, some kind of unchecked exception is thrown.
+	 * The given message is included in that exception, to aid debugging.
+	 *
+	 * @param object the value to test
+	 * @param message the message to include in the exception
+	 * @exception IllegalArgumentException if the object is <code>null</code>
+	 */
+	public static void isNotNull(Object object, String message) {
+		if (object == null)
+			throw new NullPointerException("null argument:" + message); //$NON-NLS-1$
+	}
 }

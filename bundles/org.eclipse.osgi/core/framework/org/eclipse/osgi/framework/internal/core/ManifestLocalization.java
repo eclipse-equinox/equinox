@@ -9,12 +9,14 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.osgi.framework.internal.core;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.*;
 import org.eclipse.osgi.framework.util.Headers;
 import org.osgi.framework.Constants;
+
 /**
  * This class is used by the Bundle Class to localize manifest headers.
  */
@@ -22,10 +24,12 @@ public class ManifestLocalization {
 	private AbstractBundle bundle = null;
 	private Dictionary rawHeaders = null;
 	private Headers defaultLocaleHeaders = null;
+
 	public ManifestLocalization(AbstractBundle bundle, Dictionary rawHeaders) {
 		this.bundle = bundle;
 		this.rawHeaders = rawHeaders;
 	}
+
 	protected Dictionary getHeaders(String localeString) {
 		boolean defaultLocale = false;
 		if (localeString == "") {
@@ -80,6 +84,7 @@ public class ManifestLocalization {
 		}
 		return (localeHeaders);
 	}
+
 	private String[] buildNLVariants(String nl) {
 		ArrayList result = new ArrayList();
 		int lastSeparator;
@@ -92,6 +97,7 @@ public class ManifestLocalization {
 		result.add(nl);
 		return (String[]) result.toArray(new String[result.size()]);
 	}
+
 	/*
 	 * This method find the appropiate Manifest Localization file inside the bundle.  If not found, return null.
 	 */
@@ -122,6 +128,7 @@ public class ManifestLocalization {
 		}
 		return resourceBundle;
 	}
+
 	/*
 	 * This method searchs for properties file the same way the ResourceBundle algorithm
 	 */
@@ -145,9 +152,11 @@ public class ManifestLocalization {
 			return result;
 		return findInFragments(filename);
 	}
+
 	private URL findInBundle(String filePath) {
 		return this.bundle.getEntry(filePath);
 	}
+
 	private URL findInFragments(String filePath) {
 		org.osgi.framework.Bundle[] fragments = this.bundle.getFragments();
 		URL fileURL = null;
@@ -158,6 +167,7 @@ public class ManifestLocalization {
 		}
 		return fileURL;
 	}
+
 	private Dictionary stripPercents(Dictionary dictionary) {
 		//strip out the '%'s and return the raw headers without '%'s
 		Enumeration e = rawHeaders.keys();

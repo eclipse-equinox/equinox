@@ -36,7 +36,7 @@ public class ServiceRegistryImpl implements org.eclipse.osgi.framework.adaptor.S
 	 * Initializes the internal data structures of this ServiceRegistry.
 	 *
 	 */
-	public void initialize(){
+	public void initialize() {
 		publishedServicesByClass = new Hashtable(53);
 		publishedServicesByContext = new Hashtable(53);
 		allPublishedServices = new Vector(50, 20);
@@ -137,7 +137,7 @@ public class ServiceRegistryImpl implements org.eclipse.osgi.framework.adaptor.S
 		int size;
 		Vector references = new Vector();
 
-		if (clazz == null) /* all services */ {
+		if (clazz == null) /* all services */{
 			Vector serviceRegs = allPublishedServices;
 
 			if (serviceRegs == null) {
@@ -158,7 +158,7 @@ public class ServiceRegistryImpl implements org.eclipse.osgi.framework.adaptor.S
 					references.addElement(reference);
 				}
 			}
-		} else /* services registered under the class name */ {
+		} else /* services registered under the class name */{
 			Vector serviceRegs = (Vector) publishedServicesByClass.get(clazz);
 
 			if (serviceRegs == null) {
@@ -192,7 +192,7 @@ public class ServiceRegistryImpl implements org.eclipse.osgi.framework.adaptor.S
 	/**
 	 * @see org.eclipse.osgi.framework.adaptor.ServiceRegistry#lookupServiceReferences(BundleContext)
 	 */
-	public Vector lookupServiceReferences(BundleContext context){
+	public Vector lookupServiceReferences(BundleContext context) {
 		int size;
 		Vector references = new Vector();
 		Vector serviceRegs = (Vector) publishedServicesByContext.get(context);

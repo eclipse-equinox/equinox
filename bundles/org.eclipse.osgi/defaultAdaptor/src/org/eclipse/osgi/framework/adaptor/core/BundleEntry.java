@@ -10,6 +10,7 @@
  *******************************************************************************/
 
 package org.eclipse.osgi.framework.adaptor.core;
+
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -103,8 +104,9 @@ public abstract class BundleEntry {
 		 * @exception java.io.IOException
 		 */
 		public InputStream getInputStream() throws IOException {
-			return (zipFile.getInputStream(zipEntry));	//TODO No secureAction call is made whereas one is made in FileBundleEntry
+			return (zipFile.getInputStream(zipEntry)); //TODO No secureAction call is made whereas one is made in FileBundleEntry
 		}
+
 		/**
 		 * Return size of the uncompressed entry.
 		 *
@@ -113,6 +115,7 @@ public abstract class BundleEntry {
 		public long getSize() {
 			return (zipEntry.getSize());
 		}
+
 		/**
 		 * Return name of the entry.
 		 *
@@ -184,6 +187,7 @@ public abstract class BundleEntry {
 		public InputStream getInputStream() throws IOException {
 			return SecureAction.getFileInputStream(file);
 		}
+
 		/**
 		 * Return size of the uncompressed entry.
 		 *
@@ -192,6 +196,7 @@ public abstract class BundleEntry {
 		public long getSize() {
 			return (file.length());
 		}
+
 		/**
 		 * Return name of the entry.
 		 *
@@ -238,10 +243,11 @@ public abstract class BundleEntry {
 		private BundleFile.ZipBundleFile bundleFile;
 		private String name;
 
-		public DirZipBundleEntry(BundleFile.ZipBundleFile bundleFile, String name){
+		public DirZipBundleEntry(BundleFile.ZipBundleFile bundleFile, String name) {
 			this.name = name;
 			this.bundleFile = bundleFile;
 		}
+
 		public InputStream getInputStream() throws IOException {
 			return null;
 		}

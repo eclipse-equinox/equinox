@@ -16,7 +16,7 @@ public interface StateDelta {
 	 * @return an array of bundle deltas
 	 */
 	public BundleDelta[] getChanges();
-	
+
 	/**
 	 * Returns an array of all the members
 	 * of this delta which match the given flags.  If an exact match is requested 
@@ -29,7 +29,7 @@ public interface StateDelta {
 	 * @return an array of bundle deltas matching the given match criteria.
 	 */
 	public BundleDelta[] getChanges(int mask, boolean exact);
-	
+
 	/**
 	 * Returns the state whose changes are represented by this delta.
 	 * @return

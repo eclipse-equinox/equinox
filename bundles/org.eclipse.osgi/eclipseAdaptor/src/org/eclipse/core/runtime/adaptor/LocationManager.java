@@ -30,13 +30,13 @@ public class LocationManager {
 	public static final String PROP_MANIFEST_CACHE = "osgi.manifest.cache"; //$NON-NLS-1$
 	public static final String PROP_USER_HOME = "user.home"; //$NON-NLS-1$
 	public static final String PROP_USER_DIR = "user.dir"; //$NON-NLS-1$
-	
+
 	// configuration area file/dir names
-	public static final String BUNDLES_DIR = "bundles";	//$NON-NLS-1$
-	public static final String FRAMEWORK_FILE = ".framework";	//$NON-NLS-1$
-	public static final String STATE_FILE = ".state";	//$NON-NLS-1$
-	public static final String BUNDLE_DATA_FILE = ".bundledata";	//$NON-NLS-1$
-	public static final String MANIFESTS_DIR = "manifests";	//$NON-NLS-1$
+	public static final String BUNDLES_DIR = "bundles"; //$NON-NLS-1$
+	public static final String FRAMEWORK_FILE = ".framework"; //$NON-NLS-1$
+	public static final String STATE_FILE = ".state"; //$NON-NLS-1$
+	public static final String BUNDLE_DATA_FILE = ".bundledata"; //$NON-NLS-1$
+	public static final String MANIFESTS_DIR = "manifests"; //$NON-NLS-1$
 
 	// Constants for configuration location discovery
 	private static final String ECLIPSE = "eclipse"; //$NON-NLS-1$
@@ -74,7 +74,7 @@ public class LocationManager {
 			return buildURL("file:" + spec, trailingSlash);
 		}
 	}
-	
+
 	private static void mungeConfigurationLocation() {
 		// if the config property was set, munge it for backwards compatibility.
 		String location = System.getProperty(PROP_CONFIG_AREA);
@@ -88,16 +88,16 @@ public class LocationManager {
 			if (!location.endsWith("/"))
 				location += "/";
 			System.getProperties().put(PROP_CONFIG_AREA, location);
-		} 
+		}
 	}
 
 	public static void initializeLocations() {
-		URL defaultLocation =  buildURL(System.getProperty("user.home"), true);
+		URL defaultLocation = buildURL(System.getProperty("user.home"), true);
 		userLocation = buildLocation(PROP_USER_AREA, defaultLocation, "user", false);
 
-		defaultLocation = buildURL(new File(System.getProperty("user.dir"), "workspace").getAbsolutePath(), true);  //$NON-NLS-1$ //$NON-NLS-2$
+		defaultLocation = buildURL(new File(System.getProperty("user.dir"), "workspace").getAbsolutePath(), true); //$NON-NLS-1$ //$NON-NLS-2$
 		instanceLocation = buildLocation(PROP_INSTANCE_AREA, defaultLocation, "workspace", false);
-		
+
 		mungeConfigurationLocation();
 		// compute a default but it is very unlikely to be used since main will have computed everything
 		defaultLocation = buildURL(computeDefaultConfigurationLocation(), true);
@@ -108,7 +108,7 @@ public class LocationManager {
 		URL parentLocation = computeSharedConfigurationLocation();
 		if (parentLocation != null && !parentLocation.equals(configurationLocation.getURL())) {
 			Location parent = new BasicLocation(null, parentLocation, true);
-			((BasicLocation)configurationLocation).setParent(parent);
+			((BasicLocation) configurationLocation).setParent(parent);
 		}
 		initializeDerivedConfigurationLocations();
 
@@ -122,16 +122,16 @@ public class LocationManager {
 		System.getProperties().remove(property);
 		// if the instance location is not set, predict where the workspace will be and 
 		// put the instance area inside the workspace meta area.
-		if (location == null) 
+		if (location == null)
 			result = new BasicLocation(property, defaultLocation, readOnly);
 		else if (location.equalsIgnoreCase(NONE))
 			return null;
 		else if (location.equalsIgnoreCase(NO_DEFAULT))
 			result = new BasicLocation(property, null, readOnly);
 		else {
-			if (location.equalsIgnoreCase(USER_HOME)) 
+			if (location.equalsIgnoreCase(USER_HOME))
 				location = computeDefaultUserAreaLocation(userDefaultAppendage);
-			if (location.equalsIgnoreCase(USER_DIR)) 
+			if (location.equalsIgnoreCase(USER_DIR))
 				location = new File(System.getProperty(PROP_USER_DIR), userDefaultAppendage).getAbsolutePath();
 			URL url = buildURL(location, true);
 			if (url != null) {
@@ -146,7 +146,7 @@ public class LocationManager {
 		if (System.getProperty(PROP_MANIFEST_CACHE) == null)
 			System.getProperties().put(PROP_MANIFEST_CACHE, getConfigurationFile(MANIFESTS_DIR).getAbsolutePath());
 	}
-	
+
 	private static URL computeInstallConfigurationLocation() {
 		String property = System.getProperty(PROP_INSTALL_AREA);
 		try {
@@ -168,7 +168,7 @@ public class LocationManager {
 		}
 		return null;
 	}
-	
+
 	private static String computeDefaultConfigurationLocation() {
 		// 1) We store the config state relative to the 'eclipse' directory if possible
 		// 2) If this directory is read-only 
@@ -176,7 +176,7 @@ public class LocationManager {
 		//    is unique for each local user, and <application-id> is the one 
 		//    defined in .eclipseproduct marker file. If .eclipseproduct does not
 		//    exist, use "eclipse" as the application-id.
-		
+
 		URL installURL = computeInstallConfigurationLocation();
 		File installDir = new File(installURL.getFile());
 		if ("file".equals(installURL.getProtocol()) && installDir.canWrite()) //$NON-NLS-1$
@@ -197,7 +197,7 @@ public class LocationManager {
 			return null;
 		File installDir = new File(installURL.getFile());
 		String appName = "." + ECLIPSE; //$NON-NLS-1$
-		File eclipseProduct = new File(installDir, PRODUCT_SITE_MARKER );
+		File eclipseProduct = new File(installDir, PRODUCT_SITE_MARKER);
 		if (eclipseProduct.exists()) {
 			Properties props = new Properties();
 			try {
@@ -215,22 +215,25 @@ public class LocationManager {
 			}
 		}
 		String userHome = System.getProperty(PROP_USER_HOME);
-		return new File(userHome, appName + "/" + pathAppendage).getAbsolutePath();   //$NON-NLS-1$
+		return new File(userHome, appName + "/" + pathAppendage).getAbsolutePath(); //$NON-NLS-1$
 	}
-	
+
 	public static Location getUserLocation() {
 		return userLocation;
 	}
+
 	public static Location getConfigurationLocation() {
 		return configurationLocation;
 	}
+
 	public static Location getInstallLocation() {
 		return installLocation;
 	}
+
 	public static Location getInstanceLocation() {
 		return instanceLocation;
 	}
-	
+
 	public static File getOSGiConfigurationDir() {
 		// TODO assumes the URL is a file: url
 		return new File(configurationLocation.getURL().getFile(), EclipseAdaptor.FRAMEWORK_SYMBOLICNAME);

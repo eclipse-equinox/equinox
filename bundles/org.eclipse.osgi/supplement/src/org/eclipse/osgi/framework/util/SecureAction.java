@@ -25,7 +25,7 @@ public class SecureAction {
 	 * @param property the property key.
 	 * @return the value of the property or null if it does not exist.
 	 */
-	public static String getProperty(final String property){
+	public static String getProperty(final String property) {
 		if (System.getSecurityManager() == null)
 			return System.getProperty(property);
 		else
@@ -44,13 +44,13 @@ public class SecureAction {
 	 * @return the value of the property or the def value if the property
 	 * does not exist.
 	 */
-	public static String getProperty(final String property, final String def){
+	public static String getProperty(final String property, final String def) {
 		if (System.getSecurityManager() == null)
-			return System.getProperty(property,def);
+			return System.getProperty(property, def);
 		else
 			return (String) AccessController.doPrivileged(new PrivilegedAction() {
 				public Object run() {
-					return System.getProperty(property,def);
+					return System.getProperty(property, def);
 				}
 			});
 	}
@@ -83,8 +83,8 @@ public class SecureAction {
 			return new FileInputStream(file);
 		else
 			try {
-				return (FileInputStream) AccessController.doPrivileged( new PrivilegedExceptionAction(){
-					public Object run() throws FileNotFoundException{
+				return (FileInputStream) AccessController.doPrivileged(new PrivilegedExceptionAction() {
+					public Object run() throws FileNotFoundException {
 						return new FileInputStream(file);
 					}
 				});
@@ -103,19 +103,19 @@ public class SecureAction {
 	 */
 	public static FileOutputStream getFileOutputStream(final File file, final boolean append) throws FileNotFoundException {
 		if (System.getSecurityManager() == null)
-			return new FileOutputStream(file.getAbsolutePath(),append);
+			return new FileOutputStream(file.getAbsolutePath(), append);
 		else
 			try {
-				return (FileOutputStream) AccessController.doPrivileged( new PrivilegedExceptionAction(){
-					public Object run() throws FileNotFoundException{
-						return new FileOutputStream(file.getAbsolutePath(),append);
+				return (FileOutputStream) AccessController.doPrivileged(new PrivilegedExceptionAction() {
+					public Object run() throws FileNotFoundException {
+						return new FileOutputStream(file.getAbsolutePath(), append);
 					}
 				});
 			} catch (PrivilegedActionException e) {
 				throw (FileNotFoundException) e.getException();
 			}
 	}
-	
+
 	/**
 	 * Creates a new Thread from a Runnable.  Same as calling
 	 * new Thread(target,name).
@@ -124,15 +124,15 @@ public class SecureAction {
 	 * @return The new Thread
 	 */
 	public static Thread createThread(final Runnable target, final String name) {
-		if(System.getSecurityManager() == null)
+		if (System.getSecurityManager() == null)
 			return new Thread(target, name);
 		else {
-			return (Thread) AccessController.doPrivileged( new PrivilegedAction(){
+			return (Thread) AccessController.doPrivileged(new PrivilegedAction() {
 				public Object run() {
 					return new Thread(target, name);
 				}
 			});
 		}
 	}
-	
+
 }

@@ -15,15 +15,19 @@ import org.eclipse.osgi.service.resolver.BundleSpecification;
 public class BundleSpecificationImpl extends VersionConstraintImpl implements BundleSpecification {
 	private boolean exported;
 	private boolean optional;
+
 	public void setExported(boolean exported) {
 		this.exported = exported;
 	}
+
 	public void setOptional(boolean optional) {
 		this.optional = optional;
 	}
+
 	public boolean isExported() {
 		return exported;
 	}
+
 	public boolean isOptional() {
 		return optional;
 	}

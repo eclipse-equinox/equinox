@@ -18,36 +18,42 @@ import org.osgi.framework.Bundle;
 public class StateDeltaImpl implements StateDelta {
 	private State state;
 	private Map changes = new HashMap();
+
 	public StateDeltaImpl(State state) {
 		this.state = state;
 	}
+
 	public BundleDelta[] getChanges() {
 		return (BundleDelta[]) changes.values().toArray(new BundleDelta[changes.size()]);
 	}
+
 	public BundleDelta[] getChanges(int mask, boolean exact) {
 		List result = new ArrayList();
 		for (Iterator changesIter = changes.values().iterator(); changesIter.hasNext();) {
 			BundleDelta change = (BundleDelta) changesIter.next();
 			if (change.getType() == mask || (!exact && (change.getType() & mask) == mask))
-				result.add(change);				
+				result.add(change);
 		}
 		return (BundleDelta[]) result.toArray(new BundleDelta[result.size()]);
 	}
+
 	public State getState() {
 		return state;
 	}
+
 	void recordBundleAdded(BundleDescriptionImpl added) {
 		Object key = added.getKey();
 		BundleDeltaImpl change = (BundleDeltaImpl) changes.get(key);
 		if (change != null) {
 			if ((change.getType() & BundleDelta.REMOVED) != 0)
 				change.setType(BundleDelta.UPDATED | (change.getType() & ~BundleDelta.REMOVED));
-			else 
+			else
 				throw new IllegalStateException();
 		} else
 			changes.put(key, new BundleDeltaImpl(added, BundleDelta.ADDED));
-		
+
 	}
+
 	void recordBundleRemoved(BundleDescriptionImpl removed) {
 		Object key = removed.getKey();
 		BundleDeltaImpl change = (BundleDeltaImpl) changes.get(key);
@@ -60,6 +66,7 @@ public class StateDeltaImpl implements StateDelta {
 		} else
 			changes.put(key, new BundleDeltaImpl(removed, BundleDelta.REMOVED));
 	}
+
 	void recordConstraintResolved(BundleDescriptionImpl changedLinkage, boolean optional) {
 		Object key = changedLinkage.getKey();
 		BundleDeltaImpl change = (BundleDeltaImpl) changes.get(key);
@@ -68,6 +75,7 @@ public class StateDeltaImpl implements StateDelta {
 		if (change == null || (newType == BundleDelta.LINKAGE_CHANGED && change.getType() == BundleDelta.OPTIONAL_LINKAGE_CHANGED))
 			changes.put(key, new BundleDeltaImpl(changedLinkage, newType));
 	}
+
 	void recordBundleResolved(BundleDescriptionImpl resolved, int status) {
 		Object key = resolved.getKey();
 		BundleDeltaImpl change = (BundleDeltaImpl) changes.get(key);
@@ -84,6 +92,6 @@ public class StateDeltaImpl implements StateDelta {
 		}
 		// new type will have only one of RESOLVED|UNRESOLVED bits set
 		newType = newType | (currentType & ~(BundleDelta.RESOLVED | BundleDelta.UNRESOLVED));
-		change.setType(newType);				
-	}	
+		change.setType(newType);
+	}
 }

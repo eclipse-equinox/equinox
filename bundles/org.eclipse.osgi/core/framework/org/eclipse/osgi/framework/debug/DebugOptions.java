@@ -113,6 +113,7 @@ public class DebugOptions implements org.eclipse.osgi.service.debug.DebugOptions
 		if (options.size() == 0)
 			options = null;
 	}
+
 	/**
 	 * Helper method that creates an URL object from the given string
 	 * representation. The string must correspond to a valid URL or file system

@@ -19,16 +19,28 @@ import java.util.Set;
  */
 public interface IPluginInfo {
 	public Map getLibraries();
+
 	public String[] getLibrariesName();
+
 	public ArrayList getRequires();
+
 	public String getMasterId();
+
 	public String getMasterVersion();
+
 	public String getPluginClass();
+
 	public String getUniqueId();
+
 	public String getVersion();
+
 	public boolean isFragment();
+
 	public Set getPackageFilters();
+
 	public String getPluginName();
+
 	public String getProviderName();
+
 	public boolean isSingleton();
 }

@@ -18,7 +18,7 @@ import org.eclipse.core.runtime.Platform;
 import org.osgi.framework.*;
 import org.osgi.service.packageadmin.PackageAdmin;
 
-public class BundleTestingHelper  {
+public class BundleTestingHelper {
 	private static final String TEST_FILES_ROOT = "test_files";
 
 	public static Bundle installBundle(String location) throws BundleException, MalformedURLException, IOException {
@@ -26,6 +26,7 @@ public class BundleTestingHelper  {
 		Bundle installed = InternalPlatform.getDefault().getBundleContext().installBundle(Platform.asLocalURL(entry).toExternalForm());
 		return installed;
 	}
+
 	/**
 	 * Do PackageAdmin.refreshPackages() in a synchronous way.  After installing
 	 * all the requested bundles we need to do a refresh and want to ensure that 
@@ -33,7 +34,7 @@ public class BundleTestingHelper  {
 	 * @param bundles
 	 */
 	//copied from EclipseStarter
-	public  static void refreshPackages(BundleContext context, Bundle[] bundles) {
+	public static void refreshPackages(BundleContext context, Bundle[] bundles) {
 		if (bundles.length == 0)
 			return;
 		ServiceReference packageAdminRef = context.getServiceReference(PackageAdmin.class.getName());
@@ -70,5 +71,5 @@ public class BundleTestingHelper  {
 		context.removeFrameworkListener(listener);
 		context.ungetService(packageAdminRef);
 	}
-	
+
 }

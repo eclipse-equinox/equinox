@@ -24,10 +24,10 @@ import org.osgi.framework.*;
 
 public class ServiceUse {
 	/** ServiceFactory object if the service instance represents a factory,
-	    null otherwise */
+	 null otherwise */
 	protected ServiceFactory factory;
 	/** Service object either registered or that returned by
-	    ServiceFactory.getService() */
+	 ServiceFactory.getService() */
 	protected Object service;
 	/** BundleContext associated with this service use */
 	protected BundleContextImpl context;
@@ -35,6 +35,7 @@ public class ServiceUse {
 	protected ServiceRegistrationImpl registration;
 	/** bundle's use count for this service */
 	protected int useCount;
+
 	/** Internal framework object. */
 
 	/**
@@ -134,7 +135,7 @@ public class ServiceUse {
 			int size = clazzes.length;
 			PackageAdminImpl packageAdmin = context.framework.packageAdmin;
 			for (int i = 0; i < size; i++) {
-				Class clazz = packageAdmin.loadServiceClass(clazzes[i],factorybundle);
+				Class clazz = packageAdmin.loadServiceClass(clazzes[i], factorybundle);
 				if (clazz == null) {
 					if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
 						Debug.println(clazzes[i] + " class not found");

@@ -21,39 +21,35 @@ import org.eclipse.core.runtime.adaptor.EclipseAdaptor;
 public class BundleStats {
 	public String pluginId;
 	public int activationOrder;
-	private long timestamp;				//timeStamp at which this plugin has been activated
-	private boolean duringStartup;		// indicate if the plugin has been activated during startup
-	private long startupTime;		// the time took by the plugin to startup
-	private long startupMethodTime;	// the time took to run the startup method
-	
+	private long timestamp; //timeStamp at which this plugin has been activated
+	private boolean duringStartup; // indicate if the plugin has been activated during startup
+	private long startupTime; // the time took by the plugin to startup
+	private long startupMethodTime; // the time took to run the startup method
+
 	// Indicate the position of the activation trace in the file
-	private long traceStart=-1;
-	private long traceEnd =-1;
+	private long traceStart = -1;
+	private long traceEnd = -1;
 
 	//To keep plugins parentage
-	private ArrayList pluginsActivated = new ArrayList(3);		// TODO create lazily
-	private BundleStats activatedBy=null;
+	private ArrayList pluginsActivated = new ArrayList(3); // TODO create lazily
+	private BundleStats activatedBy = null;
 
-//	static {
-//		// activate the boot plugin manually since we do not control the classloader
-////		activateBootPlugin();
-//	}
+	//	static {
+	//		// activate the boot plugin manually since we do not control the classloader
+	////		activateBootPlugin();
+	//	}
 
 	// hard code the starting of the boot plugin as it does not go through the normal sequence
-//	private static void activateBootPlugin() {
-//		BundleStats plugin = findPlugin(BootLoader.PI_BOOT);
-//		plugin.setTimestamp(System.currentTimeMillis());
-//		plugin.setActivationOrder(plugins.size());
-//	}
-
-
-
-
+	//	private static void activateBootPlugin() {
+	//		BundleStats plugin = findPlugin(BootLoader.PI_BOOT);
+	//		plugin.setTimestamp(System.currentTimeMillis());
+	//		plugin.setActivationOrder(plugins.size());
+	//	}
 
 	// Get the pluginInfo if available, or create it.
 	public BundleStats(String pluginId) {
 		this.pluginId = pluginId;
-//		duringStartup = booting;
+		//		duringStartup = booting;
 	}
 
 	public long getTimestamp() {
@@ -114,7 +110,7 @@ public class BundleStats {
 		return traceEnd;
 	}
 
-	protected  void setTimestamp(long value) {
+	protected void setTimestamp(long value) {
 		timestamp = value;
 	}
 
@@ -127,7 +123,7 @@ public class BundleStats {
 	}
 
 	protected static void setBooting(boolean boot) {
-//		booting = boot;
+		//		booting = boot;
 	}
 
 	protected void endActivation() {
@@ -137,7 +133,6 @@ public class BundleStats {
 	protected void setTraceEnd(long position) {
 		traceEnd = position;
 	}
-
 
 	protected void setActivatedBy(BundleStats value) {
 		activatedBy = value;

@@ -69,60 +69,79 @@ public class Debug {
 	public static void print(boolean x) {
 		out.print(x);
 	}
+
 	public static void print(char x) {
 		out.print(x);
 	}
+
 	public static void print(int x) {
 		out.print(x);
 	}
+
 	public static void print(long x) {
 		out.print(x);
 	}
+
 	public static void print(float x) {
 		out.print(x);
 	}
+
 	public static void print(double x) {
 		out.print(x);
 	}
+
 	public static void print(char x[]) {
 		out.print(x);
 	}
+
 	public static void print(String x) {
 		out.print(x);
 	}
+
 	public static void print(Object x) {
 		out.print(x);
 	}
+
 	public static void println(boolean x) {
 		out.println(x);
 	}
+
 	public static void println(char x) {
 		out.println(x);
 	}
+
 	public static void println(int x) {
 		out.println(x);
 	}
+
 	public static void println(long x) {
 		out.println(x);
 	}
+
 	public static void println(float x) {
 		out.println(x);
 	}
+
 	public static void println(double x) {
 		out.println(x);
 	}
+
 	public static void println(char x[]) {
 		out.println(x);
 	}
+
 	public static void println(String x) {
 		out.println(x);
 	}
+
 	public static void println(Object x) {
 		out.println(x);
 	}
+
 	public static void printStackTrace(Throwable x) {
 		printStackTrace(x, out);
 	}
+
 	private static void printStackTrace(Throwable t, PrintStream out) {
 		t.printStackTrace(out);
 

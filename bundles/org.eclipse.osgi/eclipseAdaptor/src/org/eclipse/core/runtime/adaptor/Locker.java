@@ -14,5 +14,6 @@ import java.io.IOException;
 
 public interface Locker {
 	public boolean lock() throws IOException;
+
 	public void release();
 }

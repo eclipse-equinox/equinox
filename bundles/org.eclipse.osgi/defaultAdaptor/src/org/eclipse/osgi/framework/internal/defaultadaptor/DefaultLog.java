@@ -54,7 +54,7 @@ public class DefaultLog implements FrameworkLog {
 	 * that uses System.err to log messages to.
 	 */
 	public DefaultLog() {
-		this((Writer)null);
+		this((Writer) null);
 	}
 
 	/**
@@ -88,12 +88,11 @@ public class DefaultLog implements FrameworkLog {
 	public void close() {
 		try {
 			if (writer != null) {
-				Writer tmpWriter = writer;				
-				writer = null;				
+				Writer tmpWriter = writer;
+				writer = null;
 				tmpWriter.close();
 			}
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
@@ -102,14 +101,11 @@ public class DefaultLog implements FrameworkLog {
 		if (writer == null) {
 			if (outFile != null) {
 				try {
-					writer = logForStream(
-							SecureAction.getFileOutputStream(outFile,
-									true));
+					writer = logForStream(SecureAction.getFileOutputStream(outFile, true));
 				} catch (IOException e) {
 					writer = logForStream(System.err);
 				}
-			}
-			else {
+			} else {
 				writer = logForStream(System.err);
 			}
 		}
@@ -129,17 +125,16 @@ public class DefaultLog implements FrameworkLog {
 		}
 	}
 
-	public void log(FrameworkEvent frameworkEvent){
+	public void log(FrameworkEvent frameworkEvent) {
 		Bundle b = frameworkEvent.getBundle();
 		Throwable t = frameworkEvent.getThrowable();
-		
-		FrameworkLogEntry logEntry = 
-			new FrameworkLogEntry(b.getLocation() + " 0 0", "FrameworkEvent.ERROR", 0, t, null);
+
+		FrameworkLogEntry logEntry = new FrameworkLogEntry(b.getLocation() + " 0 0", "FrameworkEvent.ERROR", 0, t, null);
 
 		log(logEntry);
 	}
 
-	public synchronized void log(FrameworkLogEntry logEntry){
+	public synchronized void log(FrameworkLogEntry logEntry) {
 		if (logEntry == null)
 			return;
 		try {
@@ -150,8 +145,7 @@ public class DefaultLog implements FrameworkLog {
 			}
 			writeLog(0, logEntry);
 			writer.flush();
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			// any exceptions during logging should be caught 
 			System.err.println("An exception occurred while writing to the platform log:");//$NON-NLS-1$
 			e.printStackTrace(System.err);
@@ -164,9 +158,8 @@ public class DefaultLog implements FrameworkLog {
 			} catch (Exception e2) {
 				System.err.println("An exception occurred while logging to the console:");//$NON-NLS-1$
 				e2.printStackTrace(System.err);
-			}			
-		}
-		finally {
+			}
+		} finally {
 			closeFile();
 		}
 	}
@@ -179,7 +172,7 @@ public class DefaultLog implements FrameworkLog {
 		setOutput(newFile, null, append);
 	}
 
-	public synchronized File getFile(){
+	public synchronized File getFile() {
 		return outFile;
 	}
 
@@ -208,8 +201,7 @@ public class DefaultLog implements FrameworkLog {
 				Reader fileIn = null;
 				try {
 					openFile();
-					fileIn = new InputStreamReader(SecureAction.getFileInputStream(
-							oldOutFile), "UTF-8");
+					fileIn = new InputStreamReader(SecureAction.getFileInputStream(oldOutFile), "UTF-8");
 					copyReader(fileIn, this.writer);
 				} catch (IOException e) {
 					copyFailed = true;
@@ -223,7 +215,7 @@ public class DefaultLog implements FrameworkLog {
 						}
 						// delete the old file if copying didn't fail
 						if (!copyFailed)
-							oldOutFile.delete();						
+							oldOutFile.delete();
 					}
 					closeFile();
 				}
@@ -243,16 +235,16 @@ public class DefaultLog implements FrameworkLog {
 		return new Date().toString();
 	}
 
-	protected String getStackTrace(Throwable t){
-		if (t == null) 
+	protected String getStackTrace(Throwable t) {
+		if (t == null)
 			return null;
 
 		StringWriter sw = new StringWriter();
 		PrintWriter pw = new PrintWriter(sw);
 
 		t.printStackTrace(pw);
-		if (t instanceof BundleException){
-			Throwable n = ((BundleException)t).getNestedException();
+		if (t instanceof BundleException) {
+			Throwable n = ((BundleException) t).getNestedException();
 			if (n != null) {
 				pw.println("Nested exception:");
 				n.printStackTrace(pw);
@@ -261,6 +253,7 @@ public class DefaultLog implements FrameworkLog {
 		return sw.toString();
 
 	}
+
 	protected Writer logForStream(OutputStream output) {
 		try {
 			return new BufferedWriter(new OutputStreamWriter(output, "UTF-8")); //$NON-NLS-1$
@@ -276,8 +269,8 @@ public class DefaultLog implements FrameworkLog {
 
 		FrameworkLogEntry[] children = entry.getChildren();
 		if (children != null) {
-			for (int i=0; i<children.length; i++) {
-				writeLog(depth+1, children[i]);
+			for (int i = 0; i < children.length; i++) {
+				writeLog(depth + 1, children[i]);
 			}
 		}
 	}
@@ -311,7 +304,6 @@ public class DefaultLog implements FrameworkLog {
 			// If we're not allowed to get the values of these properties
 			// then just skip over them.
 		}
-
 
 	}
 
@@ -349,19 +341,22 @@ public class DefaultLog implements FrameworkLog {
 	}
 
 	protected void write(String message) throws IOException {
-		if (message != null){
+		if (message != null) {
 			writer.write(message);
-			if (consoleLog) 
+			if (consoleLog)
 				System.out.print(message);
 		}
 	}
+
 	protected void writeln(String s) throws IOException {
 		write(s);
 		writeln();
 	}
+
 	protected void writeln() throws IOException {
 		write(LINE_SEPARATOR);
 	}
+
 	protected void writeSpace() throws IOException {
 		write(" "); //$NON-NLS-1$
 	}

@@ -21,15 +21,14 @@ import org.eclipse.osgi.service.urlconversion.URLConverter;
  * The service implementation that allows bundleresource or bundleentry
  * URLs to be converted to native file URLs on the local file system.
  */
-public class URLConverterImpl implements URLConverter{
+public class URLConverterImpl implements URLConverter {
 
-	public URL convertToFileURL(URL url) throws IOException{
+	public URL convertToFileURL(URL url) throws IOException {
 		//TODO should close connection at all times 
 		URLConnection connection = url.openConnection();
 		if (connection instanceof BundleURLConnection) {
-			return ((BundleURLConnection)connection).getFileURL();
-		}
-		else {
+			return ((BundleURLConnection) connection).getFileURL();
+		} else {
 			return url;
 		}
 	}
@@ -38,9 +37,8 @@ public class URLConverterImpl implements URLConverter{
 		//TODO should close connection at all times 		
 		URLConnection connection = url.openConnection();
 		if (connection instanceof BundleURLConnection) {
-			return ((BundleURLConnection)connection).getLocalURL();
-		}
-		else {
+			return ((BundleURLConnection) connection).getLocalURL();
+		} else {
 			return url;
 		}
 	}

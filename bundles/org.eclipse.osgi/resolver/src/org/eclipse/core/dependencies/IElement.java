@@ -15,11 +15,16 @@ package org.eclipse.core.dependencies;
  */
 public interface IElement {
 	public Object getId();
+
 	public Object getVersionId();
+
 	/** @return a non-null reference */
 	public IDependency[] getDependencies();
+
 	/** may return null */
 	public IDependency getDependency(Object id);
+
 	public boolean isSingleton();
+
 	public Object getUserObject();
 }

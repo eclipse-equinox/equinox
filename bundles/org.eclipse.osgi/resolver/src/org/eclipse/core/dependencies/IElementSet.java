@@ -18,43 +18,53 @@ import java.util.Set;
  */
 public interface IElementSet {
 	public IDependencySystem getSystem();
+
 	/** @return false if there is at least one version that is a singleton. */
 	public boolean allowsConcurrency();
+
 	/**
 	 * Returns the unique id for this element set.
 	 */
 	public Object getId();
+
 	/**
 	 * Is this a root element set? 	
-	  */
+	 */
 	public boolean isRoot();
+
 	/**
 	 * Returns all elements available in this element set.
 	 */
 	public Set getAvailable();
+
 	/**
 	 * Returns all elements sets required this element set.
 	 */
 	public Collection getRequired();
+
 	/**
 	 * Returns all elements sets requiring this element set.
 	 */
 	public Collection getRequiring();
+
 	/**
 	 * Returns all elements currently resolved in this element set.
-	 */			
+	 */
 	public Set getResolved();
+
 	/**
 	 * Returns all elements currently satisfied in this element set.
-	 */			
+	 */
 	public Set getSatisfied();
+
 	/**
 	 * Returns all elements currently selected in this element set.
-	 */	
+	 */
 	public Set getSelected();
+
 	/**
 	 * Assumes resolved system - returns all elements whose dependencies 
 	 * were resolved to point to the specified element.
 	 */
-	public Collection getRequiringElements(Object versionId);	
+	public Collection getRequiringElements(Object versionId);
 }

@@ -42,7 +42,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	protected Framework framework;
 
 	/** Services that bundle has used. Key is ServiceReference,
-	    Value is ServiceUse */
+	 Value is ServiceUse */
 	protected Hashtable servicesInUse;
 
 	/** Listener list for bundle's BundleListeners */
@@ -164,7 +164,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 
 			servicesInUse = null;
 		}
-		
+
 		bundle = null;
 	}
 
@@ -605,7 +605,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 		if (!(service instanceof ServiceFactory)) {
 			PackageAdminImpl packageAdmin = framework.packageAdmin;
 			for (int i = 0; i < size; i++) {
-				Class clazz = packageAdmin.loadServiceClass(clazzes[i],bundle);
+				Class clazz = packageAdmin.loadServiceClass(clazzes[i], bundle);
 				if (clazz == null) {
 					if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
 						Debug.println(clazzes[i] + " class not found");
@@ -651,7 +651,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	 * @see #registerService(java.lang.String[], java.lang.Object, java.util.Dictionary)
 	 */
 	public org.osgi.framework.ServiceRegistration registerService(String clazz, Object service, Dictionary properties) {
-		String[] clazzes = new String[] { clazz };
+		String[] clazzes = new String[] {clazz};
 
 		return (registerService(clazzes, service, properties));
 	}
@@ -744,7 +744,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 
 				int length = references.length;
 
-				if (length > 1) /* if more than one service, select highest ranking */ {
+				if (length > 1) /* if more than one service, select highest ranking */{
 					int rankings[] = new int[length];
 					int count = 0;
 					int maxRanking = Integer.MIN_VALUE;
@@ -765,7 +765,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 						}
 					}
 
-					if (count > 1) /* if still more than one service, select lowest id */ {
+					if (count > 1) /* if still more than one service, select lowest id */{
 						long minId = Long.MAX_VALUE;
 
 						for (int i = 0; i < length; i++) {
@@ -957,7 +957,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 		}
 
 		/* activator completed successfully. We must use this
-		   same activator object when we stop this bundle. */
+		 same activator object when we stop this bundle. */
 	}
 
 	/**
@@ -987,7 +987,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 			String clazz = null;
 			clazz = bundleActivator.getClass().getName();
 
-			throw new BundleException(Msg.formatter.getString("BUNDLE_ACTIVATOR_EXCEPTION", new Object[] { clazz, "start", bundle.getSymbolicName() == null ? "" + bundle.getBundleId() : bundle.getSymbolicName() }), t);
+			throw new BundleException(Msg.formatter.getString("BUNDLE_ACTIVATOR_EXCEPTION", new Object[] {clazz, "start", bundle.getSymbolicName() == null ? "" + bundle.getBundleId() : bundle.getSymbolicName()}), t);
 		}
 
 	}
@@ -1022,7 +1022,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 
 			String clazz = (activator == null) ? "" : activator.getClass().getName();
 
-			throw new BundleException(Msg.formatter.getString("BUNDLE_ACTIVATOR_EXCEPTION", new Object[] { clazz, "stop", bundle.getSymbolicName() == null ? "" + bundle.getBundleId() : bundle.getSymbolicName() }, t));
+			throw new BundleException(Msg.formatter.getString("BUNDLE_ACTIVATOR_EXCEPTION", new Object[] {clazz, "stop", bundle.getSymbolicName() == null ? "" + bundle.getBundleId() : bundle.getSymbolicName()}, t));
 		} finally {
 			activator = null;
 		}
@@ -1146,7 +1146,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 		// to avoid interference from another thread closing this context
 		AbstractBundle tmpBundle = bundle;
 		try {
-			if (isValid()) /* if context still valid */ {
+			if (isValid()) /* if context still valid */{
 				switch (action) {
 					case Framework.BUNDLEEVENT :
 					case Framework.BUNDLEEVENTSYNC :
@@ -1200,7 +1200,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 				Debug.printStackTrace(t);
 			}
 
-			publisherror : {
+			publisherror: {
 				if (action == Framework.FRAMEWORKEVENT) {
 					FrameworkEvent event = (FrameworkEvent) object;
 					if (event.getType() == FrameworkEvent.ERROR) {
@@ -1267,14 +1267,13 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 			throw new IllegalStateException(Msg.formatter.getString("BUNDLE_CONTEXT_INVALID_EXCEPTION"));
 		}
 	}
-	
+
 	/**
 	 * This method checks that the context is still valid. 
 	 *
 	 * @return true if the context is still valid; false otherwise
 	 */
-	protected boolean isValid()
-	{
+	protected boolean isValid() {
 		return valid;
 	}
 }

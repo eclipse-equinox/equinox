@@ -18,7 +18,10 @@ import java.util.Collection;
  */
 public interface IElementSetVisitor {
 	public int getOrder();
+
 	public abstract void update(ElementSet node);
+
 	public abstract Collection getAncestors(ElementSet node);
-	public abstract Collection getDescendants(ElementSet node);	
+
+	public abstract Collection getDescendants(ElementSet node);
 }

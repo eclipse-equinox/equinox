@@ -16,18 +16,19 @@ package org.eclipse.core.dependencies;
  * Not to be implemented by clients.
  */
 public interface IElementChange {
-	/** State transitions. */ 
+	/** State transitions. */
 	public final static int ADDED = 0x01;
 	public final static int REMOVED = 0x02;
 	public final static int UPDATED = ADDED | REMOVED;
 	public final static int RESOLVED = 0x04;
 	public final static int UNRESOLVED = 0x08;
 	public final static int LINKAGE_CHANGED = 0x10;
-	
+
 	/**
 	 * Returns the affected element.
 	 */
-	public IElement getElement();	
+	public IElement getElement();
+
 	/**
 	 * Returns the kind of the transition.
 	 */

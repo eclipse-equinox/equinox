@@ -61,13 +61,13 @@ public interface BundleDelta {
 	 * @see BundleDelta#getType
 	 */
 	public static final int OPTIONAL_LINKAGE_CHANGED = 0x40;
-	
+
 	/**
 	 * 
 	 * @return
 	 */
 	public BundleDescription getBundle();
-	
+
 	/**
 	 * Returns the type of change which occured.  The return value is composed
 	 * of by bit-wise masking the relevant flags from the set ADDED, REMOVED, 
@@ -78,5 +78,5 @@ public interface BundleDelta {
 	 * @return the type of change which occured
 	 */
 	public int getType();
-	
+
 }

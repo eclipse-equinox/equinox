@@ -54,6 +54,7 @@ final class UnresolvedPermissionCollection extends PermissionCollection {
 		return (new Enumeration() {
 			Enumeration vEnum, pEnum = permissions.elements();
 			Object next = findNext();
+
 			private Object findNext() {
 				if (vEnum != null) {
 					if (vEnum.hasMoreElements())
@@ -64,9 +65,11 @@ final class UnresolvedPermissionCollection extends PermissionCollection {
 				vEnum = ((Vector) pEnum.nextElement()).elements();
 				return (vEnum.nextElement());
 			}
+
 			public boolean hasMoreElements() {
 				return (next != null);
 			}
+
 			public Object nextElement() {
 				Object result = next;
 				next = findNext();

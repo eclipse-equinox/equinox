@@ -24,8 +24,8 @@ public interface Location {
 	 * Returns true if this location allows a default value to be assigned
 	 * @return whether or not this location can assign a default value
 	 */
-	public boolean allowsDefault();	
-	
+	public boolean allowsDefault();
+
 	/**
 	 * Returns the default value of this location if any.  <code>null</code> is returned
 	 * if no default is avaliable.  Note that even locations which allow defaults may still
@@ -33,13 +33,13 @@ public interface Location {
 	 * @return the default value for this location
 	 */
 	public URL getDefault();
-	
+
 	/**
 	 * Returns the parent of this location or <code>null</code> if none is available.
 	 * @return the parent of this location or <code>null</code>
 	 */
 	public Location getParentLocation();
-	
+
 	/**
 	 * Returns the actual URL of this location.  If the location's value has been set, 
 	 * that value is returned.  If the value is not set and the location allows defaults, 
@@ -48,12 +48,13 @@ public interface Location {
 	 * @return the URL for this location or <code>null</code> if none
 	 */
 	public URL getURL();
-	
+
 	/**
 	 * Returns true if this location has a value. 
 	 * @return whether or not the value is set
 	 */
 	public boolean isSet();
+
 	/**
 	 * Return true if this locaiton represents a read only location.  The read only character
 	 * of a location is not in enforced in any way but rather expresses the intention of the
@@ -61,7 +62,7 @@ public interface Location {
 	 * @return whether the location is read only
 	 */
 	public boolean isReadOnly();
-	
+
 	/**
 	 * Sets and optionally locks the location's value to the given URL.  If the location already has a value an 
 	 * exception is thrown.  If locking is requested and fails, false is returned and the URL
@@ -86,7 +87,7 @@ public interface Location {
 	 * @exception IOException if there was an unexpected problem while acquiring the lock.
 	 */
 	public boolean lock() throws IOException;
-	
+
 	/**
 	 * Releases the lock on this location.  If the location is not already locked, no action 
 	 * is taken.

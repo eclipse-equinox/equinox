@@ -34,7 +34,7 @@ public class Eclipse21SelectionPolicy implements ISelectionPolicy {
 					IElement satisfiedVersion = (IElement) satisfiedIter.next();
 					boolean satisfiesDependency = requiringSelectedVersionDependency.getMatchRule().isSatisfied(requiringSelectedVersionDependency.getRequiredVersionId(), satisfiedVersion.getVersionId());
 					if (satisfiesDependency) {
-						boolean betterThanBest = bestVersion == null || elementSet.getSystem().compare(satisfiedVersion.getVersionId(),bestVersion.getVersionId()) > 0;
+						boolean betterThanBest = bestVersion == null || elementSet.getSystem().compare(satisfiedVersion.getVersionId(), bestVersion.getVersionId()) > 0;
 						if (betterThanBest)
 							bestVersion = satisfiedVersion;
 					}
@@ -48,14 +48,15 @@ public class Eclipse21SelectionPolicy implements ISelectionPolicy {
 			IElement bestVersion = null;
 			for (Iterator satisfiedIter = elementSet.getSatisfied().iterator(); satisfiedIter.hasNext();) {
 				IElement satisfiedVersion = (IElement) satisfiedIter.next();
-				boolean betterThanBest = bestVersion == null || elementSet.getSystem().compare(satisfiedVersion.getVersionId(),bestVersion.getVersionId()) > 0;
+				boolean betterThanBest = bestVersion == null || elementSet.getSystem().compare(satisfiedVersion.getVersionId(), bestVersion.getVersionId()) > 0;
 				if (betterThanBest)
 					bestVersion = satisfiedVersion;
 			}
 			selected = Collections.singleton(bestVersion);
-		}		
+		}
 		return selected;
 	}
+
 	public IElement selectSingle(IElementSet elementSet) {
 		// none of its versions are required by other element sets - so just pick the highest
 		if (elementSet.getRequiring().isEmpty()) {
@@ -100,8 +101,7 @@ public class Eclipse21SelectionPolicy implements ISelectionPolicy {
 				highestStatus = status;
 			}
 		}
-		return highest;		
-	}		
-	
+		return highest;
+	}
 
 }

@@ -53,6 +53,7 @@ public class InstallTests extends TestCase {
 			installed.uninstall();
 		}
 	}
+
 	public void testInstallLocationWithUnderscores() throws BundleException, IOException {
 		Bundle installed = null;
 		installed = BundleTestingHelper.installBundle("internal/plugins/installTests/bundle02_1.0.0");
@@ -64,5 +65,5 @@ public class InstallTests extends TestCase {
 			// clean-up
 			installed.uninstall();
 		}
-	}	
+	}
 }

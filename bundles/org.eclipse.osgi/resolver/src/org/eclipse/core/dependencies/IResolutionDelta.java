@@ -17,7 +17,8 @@ package org.eclipse.core.dependencies;
  * @see IElementChange
  */
 public interface IResolutionDelta {
- 	IElementChange[] getAllChanges();
+	IElementChange[] getAllChanges();
+
 	IElementChange getChange(Object id, Object versionId, Object userObject);
 }
 

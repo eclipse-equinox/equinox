@@ -9,6 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.osgi.framework.internal.core;
+
 import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
@@ -23,6 +24,7 @@ import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.*;
+
 /**
  * Core OSGi Framework class.
  */
@@ -48,10 +50,10 @@ public class Framework implements EventDispatcher, EventPublisher {
 	 */
 	protected StartLevelManager startLevelManager;
 	/** The ServiceRegistry */
-	protected ServiceRegistry serviceRegistry;		//TODO This is duplicated from the adaptor, do we really gain ?
+	protected ServiceRegistry serviceRegistry; //TODO This is duplicated from the adaptor, do we really gain ?
 	/** next free service id. */
 	protected long serviceid;
-	
+
 	/*
 	 * The following EventListeners objects keep track of event listeners
 	 * by BundleContext.  Each element is a EventListeners that is the list
@@ -83,6 +85,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 	 * The AliasMapper used to alias OS Names.
 	 */
 	protected static AliasMapper aliasMapper = new AliasMapper();
+
 	/**
 	 * Constructor for the Framework instance. This method initializes the
 	 * framework to an unlaunched state.
@@ -91,6 +94,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 	public Framework(FrameworkAdaptor adaptor) {
 		initialize(adaptor);
 	}
+
 	/**
 	 * Initialize the framework to an unlaunched state. This method is called
 	 * by the Framework constructor.
@@ -178,6 +182,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 		if (Debug.DEBUG && Debug.DEBUG_GENERAL)
 			System.out.println("Initialize the framework: " + (System.currentTimeMillis() - start));
 	}
+
 	private void createSystemBundle() {
 		try {
 			systemBundle = new SystemBundle(this);
@@ -247,6 +252,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 			throw new RuntimeException(Msg.formatter.getString("OSGI_SYSTEMBUNDLE_CREATE_EXCEPTION", e.getMessage()));
 		}
 	}
+
 	/**
 	 * Initialize the System properties by copying properties from the adaptor
 	 * properties object. This method is called by the initialize method.
@@ -339,6 +345,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 		}
 		properties.put(Constants.FRAMEWORK_EXECUTIONENVIRONMENT, ee.toString());
 	}
+
 	/**
 	 * This method return the state of the framework.
 	 *  
@@ -346,6 +353,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 	protected boolean isActive() {
 		return (active);
 	}
+
 	/**
 	 * This method is called to destory the framework instance.
 	 *  
@@ -388,6 +396,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 		packageAdmin = null;
 		adaptor = null;
 	}
+
 	/**
 	 * Start the framework.
 	 * 
@@ -421,6 +430,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 			publishFrameworkEvent(FrameworkEvent.ERROR, systemBundle, be);
 		}
 	}
+
 	/**
 	 * Stop the framework.
 	 * 
@@ -463,6 +473,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 		/* mark framework as stopped */
 		active = false;
 	}
+
 	/**
 	 * Create a new Bundle object.
 	 * 
@@ -479,6 +490,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 		verifyExecutionEnvironment(bundledata.getManifest());
 		return AbstractBundle.createBundle(bundledata, this);
 	}
+
 	/**
 	 * Verifies that the framework supports one of the required Execution
 	 * Environments
@@ -522,6 +534,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 		}
 		throw new BundleException(Msg.formatter.getString("BUNDLE_INSTALL_REQUIRED_EE_EXCEPTION", bundleEE.toString()));
 	}
+
 	/**
 	 * Retrieve the value of the named environment property. Values are
 	 * provided for the following properties:
@@ -552,6 +565,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 	public String getProperty(String key) {
 		return properties.getProperty(key);
 	}
+
 	/**
 	 * Retrieve the value of the named environment property. Values are
 	 * provided for the following properties:
@@ -584,6 +598,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 	protected String getProperty(String key, String def) {
 		return properties.getProperty(key, def);
 	}
+
 	/**
 	 * Set a system property.
 	 * 
@@ -597,6 +612,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 	protected Object setProperty(String key, String value) {
 		return properties.put(key, value);
 	}
+
 	/**
 	 * Install a bundle from a location.
 	 * 
@@ -621,6 +637,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 			}
 		});
 	}
+
 	/**
 	 * Install a bundle from an InputStream.
 	 * 
@@ -649,6 +666,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 			}
 		});
 	}
+
 	/**
 	 * Worker method to install a bundle. It obtains the reservation for the
 	 * location and calls the specified action.
@@ -709,6 +727,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 			}
 		}
 	}
+
 	/**
 	 * Worker method to install a bundle. It calls the FrameworkAdaptor object
 	 * to install the bundle in persistent storage.
@@ -764,6 +783,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 		}
 		return bundle;
 	}
+
 	/**
 	 * Selects a native code clause and return a list of the bundle entries for
 	 * native code to be installed.
@@ -902,6 +922,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 				}
 		}
 	}
+
 	/**
 	 * Retrieve the bundle that has the given unique identifier.
 	 * 
@@ -916,6 +937,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 			return bundles.getBundle(id);
 		}
 	}
+
 	/**
 	 * Retrieve the bundle that has the given unique identifier.
 	 * 
@@ -929,6 +951,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 			return bundles.getBundle(uniqueId, version);
 		}
 	}
+
 	/**
 	 * Retrieve the BundleRepository of all installed bundles. The list is
 	 * valid at the time of the call to getBundles, but the framework is a very
@@ -940,6 +963,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 	protected BundleRepository getBundles() {
 		return (bundles);
 	}
+
 	/**
 	 * Retrieve a list of all installed bundles. The list is valid at the time
 	 * of the call to getBundleAlls, but the framework is a very dynamic
@@ -960,6 +984,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 			return (bundlelist);
 		}
 	}
+
 	/**
 	 * Resume a bundle.
 	 * 
@@ -988,6 +1013,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 			publishFrameworkEvent(FrameworkEvent.ERROR, bundle, be);
 		}
 	}
+
 	/**
 	 * Suspend a bundle.
 	 * 
@@ -1021,6 +1047,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 		}
 		return (changed);
 	}
+
 	/**
 	 * Locate an installed bundle with a given identity.
 	 * 
@@ -1044,6 +1071,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 		}
 		return (null);
 	}
+
 	/**
 	 * Locate an installed bundle with a given unique ID.
 	 * 
@@ -1057,6 +1085,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 			return bundles.getBundles(uniqueId);
 		}
 	}
+
 	/**
 	 * Returns a list of <tt>ServiceReference</tt> objects. This method
 	 * returns a list of <tt>ServiceReference</tt> objects for services which
@@ -1146,6 +1175,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 		}
 		return (references);
 	}
+
 	/**
 	 * Method to return the next available service id. This method should be
 	 * called while holding the registrations lock.
@@ -1157,6 +1187,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 		serviceid++;
 		return (id);
 	}
+
 	/**
 	 * Creates a <code>File</code> object for a file in the persistent
 	 * storage area provided for the bundle by the framework. If the adaptor
@@ -1175,6 +1206,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 			}
 		});
 	}
+
 	/**
 	 * Check for AdminPermission.
 	 */
@@ -1187,6 +1219,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 			sm.checkPermission(adminPermission);
 		}
 	}
+
 	/**
 	 * Check for permission to register a service.
 	 * 
@@ -1201,6 +1234,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 			}
 		}
 	}
+
 	/**
 	 * Check for permission to get a service.
 	 * 
@@ -1222,6 +1256,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 			throw se;
 		}
 	}
+
 	/**
 	 * Check for permission to get a service.
 	 */
@@ -1231,6 +1266,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 			sm.checkPermission(new ServicePermission(name, ServicePermission.GET));
 		}
 	}
+
 	/**
 	 * This is necessary for running from a JXE, otherwise the SecurityManager
 	 * is set much later than we would like!
@@ -1286,6 +1322,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 			}
 		}
 	}
+
 	public void publishFrameworkEventPrivileged(FrameworkEvent event) {
 		/* if the event is an error then it should be logged */
 		if (event.getType() == FrameworkEvent.ERROR) {
@@ -1307,6 +1344,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 		/* dispatch event to set of listeners */
 		listeners.dispatchEventAsynchronous(FRAMEWORKEVENT, event);
 	}
+
 	/**
 	 * Deliver a BundleEvent to SynchronousBundleListeners (synchronous). and
 	 * BundleListeners (asynchronous).
@@ -1331,6 +1369,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 			}
 		}
 	}
+
 	public void publishBundleEventPrivileged(BundleEvent event) {
 		/* Dispatch BundleEvent to SynchronousBundleListeners */
 		if (bundleEventSync != null) {
@@ -1365,6 +1404,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 			listeners.dispatchEventAsynchronous(BUNDLEEVENT, event);
 		}
 	}
+
 	/**
 	 * Deliver a ServiceEvent.
 	 * 
@@ -1388,6 +1428,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 			}
 		}
 	}
+
 	public void publishServiceEventPrivileged(ServiceEvent event) {
 		/* queue to hold set of listeners */
 		ListenerQueue listeners = new ListenerQueue(eventManager);
@@ -1403,6 +1444,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 		/* dispatch event to set of listeners */
 		listeners.dispatchEventSynchronous(SERVICEEVENT, event);
 	}
+
 	/**
 	 * Top level event dispatcher for the framework.
 	 * 
@@ -1448,7 +1490,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 				Debug.println("Exception in Top level event dispatcher: " + t.getMessage());
 				Debug.printStackTrace(t);
 			}
-			publisherror : {
+			publisherror: {
 				if (action == FRAMEWORKEVENT) {
 					FrameworkEvent event = (FrameworkEvent) object;
 					if (event.getType() == FrameworkEvent.ERROR) {
@@ -1460,6 +1502,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 			}
 		}
 	}
+
 	private String[] noMatches(boolean optional) throws BundleException {
 		if (optional) {
 			return null;

@@ -32,6 +32,7 @@ public interface BundleDescription {
 	 * @return an array of package specifications
 	 */
 	public PackageSpecification[] getPackages();
+
 	/**
 	 * Returns an array of package specifications defined by the
 	 * Provide-Package clause.
@@ -39,6 +40,7 @@ public interface BundleDescription {
 	 * @return an array of package names
 	 */
 	public String[] getProvidedPackages();
+
 	/**
 	 * Returns the package specification whose package name matches the given
 	 * name. The packages detailed in getPackages() are searched for the given
@@ -106,6 +108,7 @@ public interface BundleDescription {
 	 * @return the version specification for this bundle.
 	 */
 	public Version getVersion();
+
 	/**
 	 * Returns an array containing all constraints specified by the given 
 	 * bundle that could not be satisfied. If all constraints could be 
@@ -144,13 +147,15 @@ public interface BundleDescription {
 	 * @deprecated Use getHosts instead
 	 */
 	public HostSpecification getHost();
+
 	/**
 	 * Returns the hosts for this bundle. An empty array is returned if this bundle is not
 	 * a fragment.
 	 * 
 	 * @return
-	 */	
+	 */
 	public HostSpecification[] getHosts();
+
 	/**
 	 * Returns the numeric id of this bundle.  Typically a bundle description
 	 * will only have a numeric id if it represents a bundle that is installed in a 
@@ -166,6 +171,7 @@ public interface BundleDescription {
 	 * @return an array of BundleDescriptions containing all known fragments
 	 */
 	public BundleDescription[] getFragments();
+
 	/**
 	 * Returns the user object associated to this bundle description, or 
 	 * <code>null</code> if none exists.
@@ -174,6 +180,7 @@ public interface BundleDescription {
 	 * or <code>null</code>
 	 */
 	public Object getUserObject();
+
 	/**
 	 * Returns whether this bundle is a singleton.  Singleton bundles require 
 	 * that at most one single version of the bundle can be resolved at a time. 
@@ -186,6 +193,7 @@ public interface BundleDescription {
 	 * <code>false</code> otherwise
 	 */
 	public boolean isSingleton();
+
 	/**
 	 *  Associates a user-provided object to this bundle description, or
 	 * removes an existing association, if <code>null</code> is provided. The 

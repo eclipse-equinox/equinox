@@ -10,6 +10,7 @@
  *******************************************************************************/
 
 package org.eclipse.osgi.framework.internal.defaultadaptor;
+
 import java.io.*;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -286,7 +287,7 @@ class DefaultPermissionStorage implements PermissionStorage {
 	 * @param key Key to save the permission data for.
 	 */
 	protected File save(File file, String location, String[] data) throws IOException {
-		if (file == null) /* we need to create a filename */ {
+		if (file == null) /* we need to create a filename */{
 			file = File.createTempFile("perm", "", permissionDir);
 			file.delete(); /* delete the empty file */
 		}

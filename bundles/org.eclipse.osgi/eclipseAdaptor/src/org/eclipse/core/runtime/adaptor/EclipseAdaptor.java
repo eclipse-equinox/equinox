@@ -41,10 +41,10 @@ public class EclipseAdaptor extends DefaultAdaptor {
 	public static boolean TRACE_CLASSES = false;
 	public static boolean TRACE_BUNDLES = false;
 
-	public static final String FRAMEWORK_SYMBOLICNAME = "org.eclipse.osgi";	//$NON-NLS-1$
+	public static final String FRAMEWORK_SYMBOLICNAME = "org.eclipse.osgi"; //$NON-NLS-1$
 
 	//Option names for spies
-	private static final String RUNTIME_ADAPTOR = FRAMEWORK_SYMBOLICNAME + "/eclipseadaptor";	//$NON-NLS-1$
+	private static final String RUNTIME_ADAPTOR = FRAMEWORK_SYMBOLICNAME + "/eclipseadaptor"; //$NON-NLS-1$
 	private static final String OPTION_MONITOR_CLASSES = RUNTIME_ADAPTOR + "/monitor/classes"; //$NON-NLS-1$
 	private static final String OPTION_MONITOR_RESOURCEBUNDLES = RUNTIME_ADAPTOR + "/monitor/resourcebundles"; //$NON-NLS-1$
 	private static final String OPTION_TRACE_BUNDLES = RUNTIME_ADAPTOR + "/trace/bundleActivation"; //$NON-NLS-1$
@@ -54,21 +54,20 @@ public class EclipseAdaptor extends DefaultAdaptor {
 	private static final String OPTION_STATE_READER = RUNTIME_ADAPTOR + "/state/reader";//$NON-NLS-1$
 	private static final String OPTION_RESOLVER = RUNTIME_ADAPTOR + "/resolver/timing"; //$NON-NLS-1$
 	private static final String OPTION_PLATFORM_ADMIN = RUNTIME_ADAPTOR + "/debug/platformadmin"; //$NON-NLS-1$
-	private static final String OPTION_PLATFORM_ADMIN_RESOLVER= RUNTIME_ADAPTOR + "/debug/platformadmin/resolver"; //$NON-NLS-1$
-	private static final String OPTION_MONITOR_PLATFORM_ADMIN = RUNTIME_ADAPTOR + "/resolver/timing"; 	 //$NON-NLS-1$
+	private static final String OPTION_PLATFORM_ADMIN_RESOLVER = RUNTIME_ADAPTOR + "/debug/platformadmin/resolver"; //$NON-NLS-1$
+	private static final String OPTION_MONITOR_PLATFORM_ADMIN = RUNTIME_ADAPTOR + "/resolver/timing"; //$NON-NLS-1$
 	private static final String OPTION_RESOLVER_READER = RUNTIME_ADAPTOR + "/resolver/reader/timing"; //$NON-NLS-1$
 	public static final byte BUNDLEDATA_VERSION = 7;
 	public static final byte NULL = 0;
 	public static final byte OBJECT = 1;
 	//Indicate if the framework is stopping
 	public static boolean stopping = false;
-	
+
 	private static EclipseAdaptor instance;
 
-	private int startLevel = 1;	//TODO Can't we use AbstractFrameworkAdaptor.initialStartLevel?
+	private int startLevel = 1; //TODO Can't we use AbstractFrameworkAdaptor.initialStartLevel?
 	private long timeStamp = 0;
 	private String installURL = null;
-	
 
 	/*
 	 * Should be instantiated only by the framework (through reflection). 
@@ -78,7 +77,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		instance = this;
 		setDebugOptions();
 	}
-	
+
 	public static EclipseAdaptor getDefault() {
 		return instance;
 	}
@@ -113,16 +112,16 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		StateImpl systemState = stateManager.getSystemState();
 		if (systemState != null)
 			return stateManager;
-		systemState = stateManager.createSystemState();				
+		systemState = stateManager.createSystemState();
 		Vector installedBundles = getInstalledBundles();
 		if (installedBundles == null)
 			return stateManager;
 		StateObjectFactory factory = stateManager.getFactory();
-		for (Iterator iter = installedBundles.iterator(); iter.hasNext(); ) {
+		for (Iterator iter = installedBundles.iterator(); iter.hasNext();) {
 			BundleData toAdd = (BundleData) iter.next();
 			try {
 				Dictionary manifest = toAdd.getManifest();
-				BundleDescription newDescription = factory.createBundleDescription(manifest, toAdd.getLocation(),toAdd.getBundleID());
+				BundleDescription newDescription = factory.createBundleDescription(manifest, toAdd.getLocation(), toAdd.getBundleID());
 				systemState.addBundle(newDescription);
 			} catch (BundleException be) {
 				// just ignore bundle datas with invalid manifests
@@ -132,11 +131,11 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		systemState.setTimeStamp(timeStamp);
 		systemState.resolve();
 		return stateManager;
-	}	
+	}
 
 	private void checkLocationAndReinitialize() {
 		if (installURL == null) {
-			installURL = EclipseStarter.getSysPath();	//TODO This reference to the starter should be avoided
+			installURL = EclipseStarter.getSysPath(); //TODO This reference to the starter should be avoided
 			return;
 		}
 		if (!EclipseStarter.getSysPath().equals(installURL)) {
@@ -156,7 +155,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		File metadata = LocationManager.getConfigurationFile(LocationManager.BUNDLE_DATA_FILE);
 		if (!metadata.isFile())
 			return;
-		
+
 		try {
 			DataInputStream in = new DataInputStream(new BufferedInputStream(new FileInputStream(metadata)));
 			try {
@@ -171,7 +170,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 			}
 		} catch (IOException e) {
 			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-				Debug.println("Error reading framework metadata: " + e.getMessage());	//$NON-NLS-1$
+				Debug.println("Error reading framework metadata: " + e.getMessage()); //$NON-NLS-1$
 				Debug.printStackTrace(e);
 			}
 		}
@@ -216,10 +215,10 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		register(org.eclipse.osgi.service.environment.EnvironmentInfo.class.getName(), EnvironmentInfo.getDefault(), bundle);
 		register(PlatformAdmin.class.getName(), stateManager, bundle);
 		register(PluginConverter.class.getName(), new PluginConverterImpl(context), bundle);
-		register(URLConverter.class.getName(), new URLConverterImpl(),bundle);
-		register(CommandProvider.class.getName(), new EclipseCommandProvider(context),bundle);
+		register(URLConverter.class.getName(), new URLConverterImpl(), bundle);
+		register(CommandProvider.class.getName(), new EclipseCommandProvider(context), bundle);
 		register(FrameworkLog.class.getName(), getFrameworkLog(), bundle);
-		register(org.eclipse.osgi.service.localization.BundleLocalization.class.getName(),new BundleLocalizationImpl(),bundle);
+		register(org.eclipse.osgi.service.localization.BundleLocalization.class.getName(), new BundleLocalizationImpl(), bundle);
 		registerEndorsedXMLParser();
 	}
 
@@ -236,7 +235,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		TRACE_FILTERS = options.getOption(OPTION_TRACE_FILTERS);
 		StateManager.DEBUG = options != null;
 		StateManager.DEBUG_READER = options.getBooleanOption(OPTION_RESOLVER_READER, false);
-		StateManager.MONITOR_PLATFORM_ADMIN = options.getBooleanOption(OPTION_MONITOR_PLATFORM_ADMIN, false);		
+		StateManager.MONITOR_PLATFORM_ADMIN = options.getBooleanOption(OPTION_MONITOR_PLATFORM_ADMIN, false);
 		StateManager.DEBUG_PLATFORM_ADMIN = options.getBooleanOption(OPTION_PLATFORM_ADMIN, false);
 		StateManager.DEBUG_PLATFORM_ADMIN_RESOLVER = options.getBooleanOption(OPTION_PLATFORM_ADMIN_RESOLVER, false);
 	}
@@ -246,6 +245,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 			return;
 		new ParsingService();
 	}
+
 	private static boolean is14VMorGreater() {
 		final String DELIM = ".";
 		String vmVersionString = System.getProperty("java.version"); //$NON-NLS-1$
@@ -266,8 +266,9 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		}
 		return false;
 	}
+
 	private class ParsingService implements ServiceFactory {
-		public static final String SAXFACTORYNAME = "javax.xml.parsers.SAXParserFactory";	//$NON-NLS-1$
+		public static final String SAXFACTORYNAME = "javax.xml.parsers.SAXParserFactory"; //$NON-NLS-1$
 
 		public Object getService(Bundle bundle, ServiceRegistration registration) {
 			return SAXParserFactory.newInstance();
@@ -281,13 +282,14 @@ public class EclipseAdaptor extends DefaultAdaptor {
 			context.registerService(SAXFACTORYNAME, this, new Hashtable());
 		}
 	}
+
 	public void frameworkStop(BundleContext context) throws BundleException {
 		saveMetaData();
 		super.frameworkStop(context);
 		if (DebugOptions.getDefault() != null) {
-			System.out.println("Time spent in registry parsing: " + DebugOptions.getDefault().getOption("org.eclipse.core.runtime/registry/parsing/timing/value"));	//$NON-NLS-1$ $NON-NLS-2$
-			System.out.println("Time spent in package admin resolve: " + DebugOptions.getDefault().getOption("debug.packageadmin/timing/value"));	//$NON-NLS-1$ $NON-NLS-2$
-			System.out.println("Time spent resolving the dependency system: " + DebugOptions.getDefault().getOption("org.eclipse.core.runtime.adaptor/resolver/timing/value"));	//$NON-NLS-1$ $NON-NLS-2$
+			System.out.println("Time spent in registry parsing: " + DebugOptions.getDefault().getOption("org.eclipse.core.runtime/registry/parsing/timing/value")); //$NON-NLS-1$ $NON-NLS-2$
+			System.out.println("Time spent in package admin resolve: " + DebugOptions.getDefault().getOption("debug.packageadmin/timing/value")); //$NON-NLS-1$ $NON-NLS-2$
+			System.out.println("Time spent resolving the dependency system: " + DebugOptions.getDefault().getOption("org.eclipse.core.runtime.adaptor/resolver/timing/value")); //$NON-NLS-1$ $NON-NLS-2$
 		}
 	}
 
@@ -308,7 +310,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 				in.readUTF();
 				in.readInt();
 				in.readLong();
-				
+
 				int bundleCount = in.readInt();
 				Vector result = new Vector(bundleCount);
 				long id = -1;
@@ -319,11 +321,11 @@ public class EclipseAdaptor extends DefaultAdaptor {
 						try {
 							id = in.readLong();
 							if (id != 0) {
-								EclipseBundleData data = (EclipseBundleData) getElementFactory().createBundleData(this,id);
+								EclipseBundleData data = (EclipseBundleData) getElementFactory().createBundleData(this, id);
 								loadMetaDataFor(data, in);
 								data.initializeExistingBundle();
 								if (Debug.DEBUG && Debug.DEBUG_GENERAL)
-									Debug.println("BundleData created: " + data);		//$NON-NLS-1$ 
+									Debug.println("BundleData created: " + data); //$NON-NLS-1$ 
 								result.addElement(data);
 							}
 						} catch (NumberFormatException e) {
@@ -332,20 +334,20 @@ public class EclipseAdaptor extends DefaultAdaptor {
 					} catch (IOException e) {
 						state.removeBundle(id);
 						if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-							Debug.println("Error reading framework metadata: " + e.getMessage());		//$NON-NLS-1$ 
+							Debug.println("Error reading framework metadata: " + e.getMessage()); //$NON-NLS-1$ 
 							Debug.printStackTrace(e);
 						}
 					}
 				}
 				if (stateTimeStamp != state.getTimeStamp())
-					state.resolve(false);	//time stamp changed force a full resolve
+					state.resolve(false); //time stamp changed force a full resolve
 				return result;
 			} finally {
 				in.close();
 			}
 		} catch (IOException e) {
 			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-				Debug.println("Error reading framework metadata: " + e.getMessage());		//$NON-NLS-1$ 
+				Debug.println("Error reading framework metadata: " + e.getMessage()); //$NON-NLS-1$ 
 				Debug.printStackTrace(e);
 			}
 		}
@@ -362,7 +364,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		data.setVersion(new Version(readString(in, false)));
 		data.setActivator(readString(in, false));
 		data.setAutoStart(readString(in, false));
-		data.setAutoStop(readString(in, false));		
+		data.setAutoStop(readString(in, false));
 		data.setPluginClass(readString(in, false));
 		data.setLegacy(readString(in, false));
 		data.setClassPath(readString(in, false));
@@ -378,12 +380,12 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		data.setManifestType(in.readByte());
 	}
 
-	public void saveMetaDataFor(DefaultBundleData data) throws IOException  {
+	public void saveMetaDataFor(DefaultBundleData data) throws IOException {
 		// TODO may want to force a write of .bundledata in some cases here.
 		// This is related to bug 55819.  Could set a dirty flag here
 		// and always save the bundledatas when it is set in saveMetaData().
 	}
-	
+
 	protected void saveMetaDataFor(BundleData data, DataOutputStream out) throws IOException {
 		if (data.getBundleID() == 0 || !(data instanceof DefaultBundleData)) {
 			out.writeByte(NULL);
@@ -397,7 +399,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		writeStringOrNull(out, bundleData.getVersion().toString());
 		writeStringOrNull(out, bundleData.getActivator());
 		writeStringOrNull(out, bundleData.getAutoStart());
-		writeStringOrNull(out, bundleData.getAutoStop());		
+		writeStringOrNull(out, bundleData.getAutoStop());
 		writeStringOrNull(out, bundleData.getPluginClass());
 		writeStringOrNull(out, bundleData.isLegacy());
 		writeStringOrNull(out, bundleData.getClassPath());
@@ -422,6 +424,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		else
 			return in.readUTF();
 	}
+
 	private void writeStringOrNull(DataOutputStream out, String string) throws IOException {
 		if (string == null)
 			out.writeByte(NULL);
@@ -442,7 +445,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 				out.write(BUNDLEDATA_VERSION);
 				out.writeLong(stateManager.getSystemState().getTimeStamp());
 				out.writeUTF(installURL);
-				out.writeInt(startLevel);				
+				out.writeInt(startLevel);
 				out.writeLong(nextId);
 				Bundle[] bundles = context.getBundles();
 				out.writeInt(bundles.length);
@@ -459,7 +462,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 			}
 		} catch (IOException e) {
 			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-				Debug.println("Error writing framework metadata: " + e.getMessage());		//$NON-NLS-1$ 
+				Debug.println("Error writing framework metadata: " + e.getMessage()); //$NON-NLS-1$ 
 				Debug.printStackTrace(e);
 			}
 		}
@@ -469,16 +472,17 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		return StatsManager.getDefault();
 	}
 
-	protected BundleContext getContext(){
+	protected BundleContext getContext() {
 		return context;
 	}
-	
+
 	public void frameworkStopping() {
 		super.frameworkStopping();
 		stopping = true;
 		new BundleStopper().stopBundles();
-	}	
+	}
+
 	protected void setLog(FrameworkLog log) {
 		frameworkLog = log;
- 	}
+	}
 }

@@ -120,7 +120,7 @@ import org.osgi.framework.InvalidSyntaxException;
  * data type will evaluate to <code>false</code> .
  */
 
-public class FilterImpl implements Filter /* since Framework 1.1 */ {
+public class FilterImpl implements Filter /* since Framework 1.1 */{
 	/* public methods in org.osgi.framework.Filter */
 
 	/**
@@ -231,9 +231,9 @@ public class FilterImpl implements Filter /* since Framework 1.1 */ {
 						for (int i = 0; i < size; i++) {
 							String substr = substrings[i];
 
-							if (substr == null) /* * */ {
+							if (substr == null) /* * */{
 								filter.append('*');
-							} else /* xxx */ {
+							} else /* xxx */{
 								filter.append(encodeValue(substr));
 							}
 						}
@@ -284,7 +284,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */ {
 
 			filter.append(')');
 
-			if (topLevel) /* only hold onto String object at toplevel */ {
+			if (topLevel) /* only hold onto String object at toplevel */{
 				this.filter = filter.toString();
 			} else {
 				return (filter.toString());
@@ -723,13 +723,13 @@ public class FilterImpl implements Filter /* since Framework 1.1 */ {
 					for (int i = 0; i < size; i++) {
 						String substr = substrings[i];
 
-						if (i + 1 < size) /* if this is not that last substr */ {
-							if (substr == null) /* * */ {
+						if (i + 1 < size) /* if this is not that last substr */{
+							if (substr == null) /* * */{
 								String substr2 = substrings[i + 1];
 
-								if (substr2 == null) /* ** */ {
+								if (substr2 == null) /* ** */{
 									continue; /* ignore first star */
-								} else /* *xxx */ {
+								} else /* *xxx */{
 									if (Debug.DEBUG && Debug.DEBUG_FILTER) {
 										Debug.println("indexOf(\"" + substr2 + "\"," + pos + ")");
 									}
@@ -741,7 +741,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */ {
 									i++;
 									pos = index + substr2.length();
 								}
-							} else /* xxx */ {
+							} else /* xxx */{
 								int len = substr.length();
 
 								if (Debug.DEBUG && Debug.DEBUG_FILTER) {
@@ -753,10 +753,10 @@ public class FilterImpl implements Filter /* since Framework 1.1 */ {
 									return (false);
 								}
 							}
-						} else /* last substr */ {
-							if (substr == null) /* * */ {
+						} else /* last substr */{
+							if (substr == null) /* * */{
 								return (true);
-							} else /* xxx */ {
+							} else /* xxx */{
 								if (Debug.DEBUG && Debug.DEBUG_FILTER) {
 									Debug.println("regionMatches(" + pos + "," + substr + ")");
 								}
@@ -1159,7 +1159,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */ {
 	protected boolean compare_Comparable(int operation, Comparable value1, Object value2) {
 
 		try {
-			java.lang.reflect.Constructor constructor = value1.getClass().getConstructor(new Class[] { value2.getClass()});
+			java.lang.reflect.Constructor constructor = value1.getClass().getConstructor(new Class[] {value2.getClass()});
 			value2 = constructor.newInstance(new Object[] {((String) value2).trim()});
 		} catch (Throwable t) {
 			return (false);
@@ -1473,7 +1473,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */ {
 		protected String parse_value() throws InvalidSyntaxException {
 			StringBuffer sb = new StringBuffer(filter.length - pos);
 
-			parseloop : while (true) {
+			parseloop: while (true) {
 				char c = filter[pos];
 
 				switch (c) {
@@ -1515,7 +1515,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */ {
 
 			Vector operands = new Vector(10, 10);
 
-			parseloop : while (true) {
+			parseloop: while (true) {
 				char c = filter[pos];
 
 				switch (c) {

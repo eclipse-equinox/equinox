@@ -63,21 +63,21 @@ public class EclipseStarter {
 	// this is more of an Eclipse argument but this OSGi implementation stores its 
 	// metadata alongside Eclipse's.
 	private static final String DATA = "-data"; //$NON-NLS-1$
-	
+
 	// System properties
 	public static final String PROP_DEBUG = "osgi.debug"; //$NON-NLS-1$
 	public static final String PROP_DEV = "osgi.dev"; //$NON-NLS-1$
 	public static final String PROP_CONSOLE = "osgi.console"; //$NON-NLS-1$
-	public static final String PROP_CONSOLE_CLASS= "osgi.consoleClass"; //$NON-NLS-1$
+	public static final String PROP_CONSOLE_CLASS = "osgi.consoleClass"; //$NON-NLS-1$
 	public static final String PROP_CHECK_CONFIG = "osgi.checkConfiguration"; //$NON-NLS-1$
 	public static final String PROP_OS = "osgi.os"; //$NON-NLS-1$
 	public static final String PROP_WS = "osgi.ws"; //$NON-NLS-1$
 	public static final String PROP_NL = "osgi.nl"; //$NON-NLS-1$
 	public static final String PROP_ARCH = "osgi.arch"; //$NON-NLS-1$
 	public static final String PROP_ADAPTOR = "osgi.adaptor"; //$NON-NLS-1$
-	public static final String PROP_SYSPATH= "osgi.syspath"; //$NON-NLS-1$
+	public static final String PROP_SYSPATH = "osgi.syspath"; //$NON-NLS-1$
 	public static final String PROP_LOGFILE = "osgi.logfile"; //$NON-NLS-1$
-	
+
 	public static final String PROP_EXITCODE = "eclipse.exitcode"; //$NON-NLS-1$
 	public static final String PROP_EXITDATA = "eclipse.exitdata"; //$NON-NLS-1$
 	public static final String PROP_CONSOLE_LOG = "eclipse.consoleLog"; //$NON-NLS-1$
@@ -87,13 +87,13 @@ public class EclipseStarter {
 
 	/** string containing the classname of the adaptor to be used in this framework instance */
 	protected static final String DEFAULT_ADAPTOR_CLASS = "org.eclipse.core.runtime.adaptor.EclipseAdaptor";
-	
+
 	// Console information
 	protected static final String DEFAULT_CONSOLE_CLASS = "org.eclipse.osgi.framework.internal.core.FrameworkConsole";
 	private static final String CONSOLE_NAME = "OSGi Console";
 
 	private static FrameworkLog log;
-	
+
 	/**
 	 * Launches the platform and runs a single application. The application is either identified
 	 * in the given arguments (e.g., -application &ltapp id&gt) or in the <code>eclipse.application</code> 
@@ -110,12 +110,12 @@ public class EclipseStarter {
 	public static Object run(String[] args, Runnable endSplashHandler) throws Exception {
 		if (running)
 			throw new IllegalStateException("Platform already running");
-		boolean startupFailed = true;		
+		boolean startupFailed = true;
 		try {
 			startup(args, endSplashHandler);
 			startupFailed = false;
 			return run(null);
-		} catch(Throwable e) {
+		} catch (Throwable e) {
 			// ensure the splash screen is down
 			if (endSplashHandler != null)
 				endSplashHandler.run();
@@ -127,23 +127,23 @@ public class EclipseStarter {
 				// TODO desperate measure - ideally, we should write this to disk (a la Main.log)
 				e.printStackTrace();
 		} finally {
-			try {				
+			try {
 				shutdown();
-			} catch(Throwable e) {
+			} catch (Throwable e) {
 				FrameworkLogEntry logEntry = new FrameworkLogEntry("org.eclipse.osgi", "Shutdown error", 1, e, null); //TODO Put the right value here
 				if (log != null)
 					log.log(logEntry);
 				else
 					// TODO desperate measure - ideally, we should write this to disk (a la Main.log)
-					e.printStackTrace();			
-			}			
+					e.printStackTrace();
+			}
 		}
 		// we only get here if an error happened
 		System.getProperties().setProperty(PROP_EXITCODE, "13");
 		System.getProperties().setProperty(PROP_EXITDATA, log.getFile().getPath());
-		return null;		
+		return null;
 	}
-	
+
 	/**
 	 * Returns true if the platform is already running, false otherwise.
 	 * @return whether or not the platform is already running
@@ -151,33 +151,32 @@ public class EclipseStarter {
 	public static boolean isRunning() {
 		return running;
 	}
-	
+
 	protected static FrameworkLog createFrameworkLog() {
 		FrameworkLog frameworkLog;
 		String logFileProp = System.getProperty(EclipseStarter.PROP_LOGFILE);
 		if (logFileProp != null) {
 			frameworkLog = new EclipseLog(new File(logFileProp));
-		}
-		else {
+		} else {
 			Location location = LocationManager.getConfigurationLocation();
 			File configAreaDirectory = null;
 			if (location != null)
 				// TODO assumes the URL is a file: url
 				configAreaDirectory = new File(location.getURL().getFile());
-		
+
 			if (configAreaDirectory != null) {
 				String logFileName = Long.toString(System.currentTimeMillis()) + EclipseAdaptor.F_LOG;
 				File logFile = new File(configAreaDirectory, logFileName);
-				System.setProperty(EclipseStarter.PROP_LOGFILE,logFile.getAbsolutePath());
+				System.setProperty(EclipseStarter.PROP_LOGFILE, logFile.getAbsolutePath());
 				frameworkLog = new EclipseLog(logFile);
-			} else 
+			} else
 				frameworkLog = new EclipseLog();
 		}
-		if ("true".equals(System.getProperty(EclipseStarter.PROP_CONSOLE_LOG))) 
+		if ("true".equals(System.getProperty(EclipseStarter.PROP_CONSOLE_LOG)))
 			frameworkLog.setConsoleLog(true);
 		return frameworkLog;
 	}
-	
+
 	/**
 	 * Starts the platform and sets it up to run a single application. The application is either identified
 	 * in the given arguments (e.g., -application &ltapp id&gt) or in the <code>eclipse.application</code>
@@ -188,7 +187,7 @@ public class EclipseStarter {
 	 * @param argument the argument passed to the application
 	 * @return the result of running the application
 	 * @throws Exception if anything goes wrong
-	 */		
+	 */
 	public static void startup(String[] args, Runnable endSplashHandler) throws Exception {
 		if (running)
 			throw new IllegalStateException("Platform is already running");
@@ -234,7 +233,7 @@ public class EclipseStarter {
 		if (initialize)
 			return new Integer(0);
 		initializeApplicationTracker();
-		ParameterizedRunnable application = (ParameterizedRunnable)applicationTracker.getService();
+		ParameterizedRunnable application = (ParameterizedRunnable) applicationTracker.getService();
 		applicationTracker.close();
 		if (application == null)
 			throw new IllegalStateException(EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_ERROR_NO_APPLICATION"));
@@ -269,9 +268,10 @@ public class EclipseStarter {
 			if (bundles[i].getState() != Bundle.ACTIVE) {
 				String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_ERROR_BUNDLE_NOT_ACTIVE", bundles[i]);
 				throw new IllegalStateException(message);
-			}			
+			}
 		}
 	}
+
 	private static void logUnresolvedBundles(Bundle[] bundles) {
 		State state = adaptor.getState();
 		FrameworkLog logService = adaptor.getFrameworkLog();
@@ -288,15 +288,16 @@ public class EclipseStarter {
 				FrameworkLogEntry[] logChildren = unsatisfied.length == 0 ? null : new FrameworkLogEntry[unsatisfied.length];
 				for (int j = 0; j < unsatisfied.length; j++)
 					logChildren[j] = new FrameworkLogEntry("org.eclipse.osgi", EclipseAdaptorMsg.getResolutionFailureMessage(unsatisfied[j]), 0, null, null);
-				
+
 				logService.log(new FrameworkLogEntry("org.eclipse.osgi", generalMessage, 0, null, logChildren));
 			}
-	}		
+	}
+
 	private static void publishSplashScreen(Runnable endSplashHandler) {
 		// InternalPlatform now how to retrieve this later
 		Dictionary properties = new Hashtable();
-		properties.put("name","splashscreen");
-		context.registerService(Runnable.class.getName(),endSplashHandler,properties);		
+		properties.put("name", "splashscreen");
+		context.registerService(Runnable.class.getName(), endSplashHandler, properties);
 	}
 
 	private static String searchForBundle(String name, String parent) throws MalformedURLException {
@@ -311,7 +312,7 @@ public class EclipseStarter {
 			// Assume it should be a reference and htat it is relative.  This support need not 
 			// be robust as it is temporary..
 			fileLocation = new File(parent, name);
-			url = new URL("reference:file:"+ parent + "/" + name);
+			url = new URL("reference:file:" + parent + "/" + name);
 			reference = true;
 		}
 		// if the name was a URL then see if it is relative.  If so, insert syspath.
@@ -322,7 +323,7 @@ public class EclipseStarter {
 				reference = true;
 				baseURL = new URL(url.getFile());
 			}
-			
+
 			fileLocation = new File(baseURL.getFile());
 			// if the location is relative, prefix it with the syspath
 			if (!fileLocation.isAbsolute())
@@ -344,60 +345,61 @@ public class EclipseStarter {
 			result.connect();
 			return url.toExternalForm();
 		} catch (IOException e) {
-//			int i = location.lastIndexOf('_');
-//			return i == -1? location : location.substring(0, i);
+			//			int i = location.lastIndexOf('_');
+			//			return i == -1? location : location.substring(0, i);
 			return null;
 		}
 	}
+
 	/*
 	 * Ensure all basic bundles are installed, resolved and scheduled to start. Returns an array containing
 	 * all basic bundles. 
 	 */
 	private static Bundle[] loadBasicBundles() throws BundleException, MalformedURLException, IllegalArgumentException, IllegalStateException {
-			long startTime = System.currentTimeMillis();
-			ServiceReference reference = context.getServiceReference(StartLevel.class.getName());
-			StartLevel start = null;
-			if (reference != null)
-				start = (StartLevel) context.getService(reference);
-			String[] installEntries = getArrayFromList(System.getProperty("osgi.bundles"));
-			String syspath = getSysPath();
-			Bundle[] bundles = new Bundle[installEntries.length];
-			boolean installedSomething = false;
-			for (int i = 0; i < installEntries.length; i++) {
-				String name = installEntries[i];
-				int level = -1;
-				int index = name.indexOf('@');
-				if (index >= 0) {
-					String levelString = name.substring(index + 1, name.length());
-					level = Integer.parseInt(levelString);
-					name = name.substring(0, index);
-				}
-				String location = searchForBundle(name, syspath);
-				if (location == null)
-					throw new IllegalArgumentException(EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_BUNDLE_NOT_FOUND", name));
-				// don't need to install if it is already installed
-				bundles[i] = getBundleByLocation(location);
-				if (bundles[i] == null) {
-					bundles[i] = context.installBundle(location);
-					installedSomething = true;
-					if (level >= 0 && start != null)
-						start.setBundleStartLevel(bundles[i], level);
-				}
+		long startTime = System.currentTimeMillis();
+		ServiceReference reference = context.getServiceReference(StartLevel.class.getName());
+		StartLevel start = null;
+		if (reference != null)
+			start = (StartLevel) context.getService(reference);
+		String[] installEntries = getArrayFromList(System.getProperty("osgi.bundles"));
+		String syspath = getSysPath();
+		Bundle[] bundles = new Bundle[installEntries.length];
+		boolean installedSomething = false;
+		for (int i = 0; i < installEntries.length; i++) {
+			String name = installEntries[i];
+			int level = -1;
+			int index = name.indexOf('@');
+			if (index >= 0) {
+				String levelString = name.substring(index + 1, name.length());
+				level = Integer.parseInt(levelString);
+				name = name.substring(0, index);
 			}
-			// If we installed something, force all basic bundles we installed to be resolved
-			if (installedSomething)
-				refreshPackages(bundles);
-			// schedule all basic bundles to be started
-			for (int i = 0; i < bundles.length; i++) {
-				if (bundles[i].getState() == Bundle.INSTALLED)
-					throw new IllegalStateException(EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_ERROR_BUNDLE_NOT_RESOLVED", bundles[i].getLocation()));
-				bundles[i].start();
+			String location = searchForBundle(name, syspath);
+			if (location == null)
+				throw new IllegalArgumentException(EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_BUNDLE_NOT_FOUND", name));
+			// don't need to install if it is already installed
+			bundles[i] = getBundleByLocation(location);
+			if (bundles[i] == null) {
+				bundles[i] = context.installBundle(location);
+				installedSomething = true;
+				if (level >= 0 && start != null)
+					start.setBundleStartLevel(bundles[i], level);
 			}
-			context.ungetService(reference);
-			if (debug)
-				System.out.println("Time loadBundles in the framework: " + (System.currentTimeMillis() - startTime));
-			return bundles;
 		}
+		// If we installed something, force all basic bundles we installed to be resolved
+		if (installedSomething)
+			refreshPackages(bundles);
+		// schedule all basic bundles to be started
+		for (int i = 0; i < bundles.length; i++) {
+			if (bundles[i].getState() == Bundle.INSTALLED)
+				throw new IllegalStateException(EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_ERROR_BUNDLE_NOT_RESOLVED", bundles[i].getLocation()));
+			bundles[i].start();
+		}
+		context.ungetService(reference);
+		if (debug)
+			System.out.println("Time loadBundles in the framework: " + (System.currentTimeMillis() - startTime));
+		return bundles;
+	}
 
 	private static void refreshPackages(Bundle[] bundles) {
 		if (bundles.length == 0)
@@ -405,7 +407,7 @@ public class EclipseStarter {
 		ServiceReference packageAdminRef = context.getServiceReference(PackageAdmin.class.getName());
 		PackageAdmin packageAdmin = null;
 		if (packageAdminRef != null) {
-			packageAdmin = (PackageAdmin)context.getService(packageAdminRef);
+			packageAdmin = (PackageAdmin) context.getService(packageAdminRef);
 			if (packageAdmin == null)
 				return;
 		}
@@ -424,7 +426,7 @@ public class EclipseStarter {
 		context.removeFrameworkListener(listener);
 		context.ungetService(packageAdminRef);
 	}
-	
+
 	/**
 	 *  Invokes the OSGi Console on another thread
 	 *
@@ -440,11 +442,11 @@ public class EclipseStarter {
 			Class[] parameterTypes;
 			Object[] parameters;
 			if (consolePort.length() == 0) {
-				parameterTypes = new Class[] { OSGi.class, String[].class };
-				parameters = new Object[] { osgi, consoleArgs };
+				parameterTypes = new Class[] {OSGi.class, String[].class};
+				parameters = new Object[] {osgi, consoleArgs};
 			} else {
-				parameterTypes = new Class[] { OSGi.class, int.class, String[].class };
-				parameters = new Object[] { osgi, new Integer(consolePort), consoleArgs };
+				parameterTypes = new Class[] {OSGi.class, int.class, String[].class};
+				parameters = new Object[] {osgi, new Integer(consolePort), consoleArgs};
 			}
 			Constructor constructor = consoleClass.getConstructor(parameterTypes);
 			Object console = constructor.newInstance(parameters);
@@ -466,9 +468,9 @@ public class EclipseStarter {
 	private static FrameworkAdaptor createAdaptor() throws Exception {
 		String adaptorClassName = System.getProperty(PROP_ADAPTOR, DEFAULT_ADAPTOR_CLASS);
 		Class adaptorClass = Class.forName(adaptorClassName);
-		Class[] constructorArgs = new Class[] { String[].class };
+		Class[] constructorArgs = new Class[] {String[].class};
 		Constructor constructor = adaptorClass.getConstructor(constructorArgs);
-		return (FrameworkAdaptor) constructor.newInstance(new Object[] { new String[0] });
+		return (FrameworkAdaptor) constructor.newInstance(new Object[] {new String[0]});
 	}
 
 	private static String[] processCommandLine(String[] args) throws Exception {
@@ -479,23 +481,23 @@ public class EclipseStarter {
 		for (int i = 0; i < args.length; i++) {
 			boolean found = false;
 			// check for args without parameters (i.e., a flag arg)
-	
+
 			// check if debug should be enabled for the entire platform
 			// If this is the last arg or there is a following arg (i.e., arg+1 has a leading -), 
 			// simply enable debug.  Otherwise, assume that that the following arg is
 			// actually the filename of an options file.  This will be processed below.
 			if (args[i].equalsIgnoreCase(DEBUG) && ((i + 1 == args.length) || ((i + 1 < args.length) && (args[i + 1].startsWith("-"))))) { //$NON-NLS-1$
-				System.getProperties().put(PROP_DEBUG, "");	//$NON-NLS-1$
+				System.getProperties().put(PROP_DEBUG, ""); //$NON-NLS-1$
 				debug = true;
 				found = true;
 			}
-			
+
 			// check if development mode should be enabled for the entire platform
 			// If this is the last arg or there is a following arg (i.e., arg+1 has a leading -), 
 			// simply enable development mode.  Otherwise, assume that that the following arg is
 			// actually some additional development time class path entries.  This will be processed below.
 			if (args[i].equalsIgnoreCase(DEV) && ((i + 1 == args.length) || ((i + 1 < args.length) && (args[i + 1].startsWith("-"))))) { //$NON-NLS-1$
-				System.getProperties().put(PROP_DEV, "");	//$NON-NLS-1$
+				System.getProperties().put(PROP_DEV, ""); //$NON-NLS-1$
 				found = true;
 			}
 
@@ -513,7 +515,7 @@ public class EclipseStarter {
 
 			// look for the console with no port.  
 			if (args[i].equalsIgnoreCase(CONSOLE) && ((i + 1 == args.length) || ((i + 1 < args.length) && (args[i + 1].startsWith("-"))))) { //$NON-NLS-1$
-				System.getProperties().put(PROP_CONSOLE, "");	//$NON-NLS-1$
+				System.getProperties().put(PROP_CONSOLE, ""); //$NON-NLS-1$
 				found = true;
 			}
 
@@ -527,37 +529,37 @@ public class EclipseStarter {
 				continue;
 			}
 			String arg = args[++i];
-	
+
 			// look for the console and port.  
 			if (args[i - 1].equalsIgnoreCase(CONSOLE)) {
 				System.getProperties().put(PROP_CONSOLE, arg);
 				found = true;
 			}
-	
+
 			// look for the configuration location .  
 			if (args[i - 1].equalsIgnoreCase(CONFIGURATION)) {
 				System.getProperties().put(LocationManager.PROP_CONFIG_AREA, arg);
 				found = true;
 			}
-	
+
 			// look for the data location for this instance.  
 			if (args[i - 1].equalsIgnoreCase(DATA)) {
 				System.getProperties().put(LocationManager.PROP_INSTANCE_AREA, arg);
 				found = true;
 			}
-	
+
 			// look for the user location for this instance.  
 			if (args[i - 1].equalsIgnoreCase(USER)) {
 				System.getProperties().put(LocationManager.PROP_USER_AREA, arg);
 				found = true;
 			}
-	
+
 			// look for the development mode and class path entries.  
 			if (args[i - 1].equalsIgnoreCase(DEV)) {
 				System.getProperties().put(PROP_DEV, arg);
 				found = true;
 			}
-	
+
 			// look for the debug mode and option file location.  
 			if (args[i - 1].equalsIgnoreCase(DEBUG)) {
 				System.getProperties().put(PROP_DEBUG, arg);
@@ -570,19 +572,19 @@ public class EclipseStarter {
 				System.getProperties().put(PROP_WS, arg);
 				found = true;
 			}
-	
+
 			// look for the operating system
 			if (args[i - 1].equalsIgnoreCase(OS)) {
 				System.getProperties().put(PROP_OS, arg);
 				found = true;
 			}
-	
+
 			// look for the system architecture
 			if (args[i - 1].equalsIgnoreCase(ARCH)) {
 				System.getProperties().put(PROP_ARCH, arg);
 				found = true;
 			}
-	
+
 			// look for the nationality/language
 			if (args[i - 1].equalsIgnoreCase(NL)) {
 				System.getProperties().put(PROP_NL, arg);
@@ -594,7 +596,7 @@ public class EclipseStarter {
 				configArgs[configArgIndex++] = i;
 			}
 		}
-	
+
 		// remove all the arguments consumed by this argument parsing
 		if (configArgIndex == 0) {
 			EnvironmentInfo.frameworkArgs = new String[0];
@@ -615,7 +617,7 @@ public class EclipseStarter {
 		}
 		return EnvironmentInfo.appArgs;
 	}
-	
+
 	/**
 	 * Returns the result of converting a list of comma-separated tokens into an array
 	 * 
@@ -637,7 +639,7 @@ public class EclipseStarter {
 
 	protected static String getSysPath() {
 		String result = System.getProperty(PROP_SYSPATH);
-		if (result != null) 
+		if (result != null)
 			return result;
 
 		URL url = EclipseStarter.class.getProtectionDomain().getCodeSource().getLocation();
@@ -675,12 +677,12 @@ public class EclipseStarter {
 		applicationTracker = new ServiceTracker(context, filter, null);
 		applicationTracker.open();
 	}
-	
+
 	private static void loadConfigurationInfo() {
 		Location configArea = LocationManager.getConfigurationLocation();
 		if (configArea == null)
 			return;
-		
+
 		URL location = null;
 		try {
 			location = new URL(configArea.getURL().toExternalForm() + "config.ini");
@@ -689,7 +691,7 @@ public class EclipseStarter {
 		}
 		mergeProperties(System.getProperties(), loadProperties(location));
 	}
-	
+
 	private static void loadDefaultProperties() {
 		URL codeLocation = EclipseStarter.class.getProtectionDomain().getCodeSource().getLocation();
 		if (codeLocation == null)
@@ -707,10 +709,10 @@ public class EclipseStarter {
 		}
 		mergeProperties(System.getProperties(), loadProperties(result));
 	}
-	
+
 	private static Properties loadProperties(URL location) {
 		Properties result = new Properties();
-		if (location ==  null)
+		if (location == null)
 			return result;
 		try {
 			InputStream in = location.openStream();
@@ -722,19 +724,19 @@ public class EclipseStarter {
 		} catch (IOException e) {
 			// its ok if there is no file.  We'll just use the defaults for everything
 			// TODO but it might be nice to log something with gentle wording (i.e., it is not an error)
-		} 
+		}
 		return result;
 	}
-	
+
 	private static void mergeProperties(Properties destination, Properties source) {
-		for (Enumeration e = source.keys(); e.hasMoreElements(); ) {
-			String key = (String)e.nextElement();
+		for (Enumeration e = source.keys(); e.hasMoreElements();) {
+			String key = (String) e.nextElement();
 			String value = source.getProperty(key);
 			if (destination.getProperty(key) == null)
 				destination.put(key, value);
 		}
 	}
-	
+
 	private static void stopSystemBundle() throws BundleException {
 		if (context == null || !running)
 			return;
@@ -746,7 +748,7 @@ public class EclipseStarter {
 					if (event.getType() == FrameworkEvent.STARTLEVEL_CHANGED)
 						semaphore.release();
 				}
-				
+
 			};
 			context.addFrameworkListener(listener);
 			systemBundle.stop();
@@ -757,10 +759,11 @@ public class EclipseStarter {
 		applicationTracker = null;
 		running = false;
 	}
+
 	private static void setStartLevel(final int value) {
 		ServiceTracker tracker = new ServiceTracker(context, StartLevel.class.getName(), null);
 		tracker.open();
-		final StartLevel startLevel = (StartLevel)tracker.getService();
+		final StartLevel startLevel = (StartLevel) tracker.getService();
 		final Semaphore semaphore = new Semaphore(0);
 		FrameworkListener listener = new FrameworkListener() {
 			public void frameworkEvent(FrameworkEvent event) {
@@ -774,6 +777,7 @@ public class EclipseStarter {
 		context.removeFrameworkListener(listener);
 		tracker.close();
 	}
+
 	/**
 	 * Searches for the given target directory starting in the "plugins" subdirectory
 	 * of the given location.  If one is found then this location is returned; 
@@ -814,6 +818,7 @@ public class EclipseStarter {
 			return null;
 		return result.replace(File.separatorChar, '/') + "/"; //$NON-NLS-1$
 	}
+
 	/**
 	 * Do a quick parse of version identifier so its elements can be correctly compared.
 	 * If we are unable to parse the full version, remaining elements are initialized
@@ -823,7 +828,7 @@ public class EclipseStarter {
 	 * qualifier). Note, that returning anything else will cause exceptions in the caller.
 	 */
 	private static Object[] getVersionElements(String version) {
-		Object[] result = { new Integer(0), new Integer(0), new Integer(0), "" }; //$NON-NLS-1$
+		Object[] result = {new Integer(0), new Integer(0), new Integer(0), ""}; //$NON-NLS-1$
 		StringTokenizer t = new StringTokenizer(version, "."); //$NON-NLS-1$
 		String token;
 		int i = 0;
@@ -844,6 +849,7 @@ public class EclipseStarter {
 		}
 		return result;
 	}
+
 	/**
 	 * Compares version strings. 
 	 * @return result of comparison, as integer;
@@ -872,11 +878,11 @@ public class EclipseStarter {
 		String entry = System.getProperty(PROP_VM);
 		if (entry == null)
 			return null;
-		result.append(entry );
+		result.append(entry);
 		result.append('\n');
 		// append the vmargs and commands.  Assume that these already end in \n
 		entry = System.getProperty(PROP_VMARGS);
-		if (entry != null) 
+		if (entry != null)
 			result.append(entry);
 		entry = System.getProperty(PROP_COMMANDS);
 		if (entry != null)

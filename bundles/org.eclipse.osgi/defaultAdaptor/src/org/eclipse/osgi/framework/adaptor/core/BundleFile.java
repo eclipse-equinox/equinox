@@ -32,7 +32,7 @@ abstract public class BundleFile {
 	/**
 	 * The BundleData object for this bundle.
 	 */
-	protected BundleData bundledata;	//TODO This could be moved into Zip
+	protected BundleData bundledata; //TODO This could be moved into Zip
 
 	/**
 	 * BundleFile constructor
@@ -98,6 +98,7 @@ abstract public class BundleFile {
 	 * false otherwise.
 	 */
 	abstract public boolean containsDir(String dir);
+
 	/**
 	 * Returns a URL to access the contents of the entry specified by the path
 	 * @param path the path to the resource
@@ -149,11 +150,11 @@ abstract public class BundleFile {
 			return zipFile.getEntry(path);
 		}
 
-		protected File extractDirectory(String dirName){
+		protected File extractDirectory(String dirName) {
 			Enumeration entries = zipFile.entries();
 			while (entries.hasMoreElements()) {
-				String entryPath = ((ZipEntry)entries.nextElement()).getName();
-				if(entryPath.startsWith(dirName) && !entryPath.endsWith("/"))
+				String entryPath = ((ZipEntry) entries.nextElement()).getName();
+				if (entryPath.startsWith(dirName) && !entryPath.endsWith("/"))
 					getFile(entryPath);
 			}
 			return getExtractFile(dirName);
@@ -163,7 +164,7 @@ abstract public class BundleFile {
 			if (!(bundledata instanceof AbstractBundleData)) {
 				return null;
 			}
-			File bundleGenerationDir = ((AbstractBundleData)bundledata).createGenerationDir();
+			File bundleGenerationDir = ((AbstractBundleData) bundledata).createGenerationDir();
 			/* if the generation dir exists, then we have place to cache */
 			if (bundleGenerationDir != null && bundleGenerationDir.exists()) {
 				String path = ".cp"; /* put all these entries in this subdir */
@@ -173,10 +174,11 @@ abstract public class BundleFile {
 				} else {
 					path = path + File.separator + name;
 				}
-				return new File(bundleGenerationDir, path); 
+				return new File(bundleGenerationDir, path);
 			}
 			return null;
 		}
+
 		public File getFile(String entry) {
 			ZipEntry zipEntry = getZipEntry(entry);
 			if (zipEntry == null) {
@@ -196,28 +198,24 @@ abstract public class BundleFile {
 						if (zipEntry.getName().endsWith("/")) {
 							if (!nested.mkdirs()) {
 								if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-									Debug.println("Unable to create directory: "
-													+ nested.getPath());
+									Debug.println("Unable to create directory: " + nested.getPath());
 								}
-								throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_DIRECTORY_CREATE_EXCEPTION",nested.getAbsolutePath()));
+								throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_DIRECTORY_CREATE_EXCEPTION", nested.getAbsolutePath()));
 							}
 							extractDirectory(zipEntry.getName());
-						}
-						else {
+						} else {
 							InputStream in = zipFile.getInputStream(zipEntry);
 							if (in == null)
 								return null;
 							/* the entry has not been cached */
 							if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-								Debug.println("Creating file: "
-										+ nested.getPath());
+								Debug.println("Creating file: " + nested.getPath());
 							}
 							/* create the necessary directories */
 							File dir = new File(nested.getParent());
 							if (!dir.exists() && !dir.mkdirs()) {
 								if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-									Debug.println("Unable to create directory: "
-													+ dir.getPath());
+									Debug.println("Unable to create directory: " + dir.getPath());
 								}
 								throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_DIRECTORY_CREATE_EXCEPTION", dir.getAbsolutePath()));
 							}
@@ -240,15 +238,15 @@ abstract public class BundleFile {
 			if (dir == null)
 				return false;
 
-			if (dir.length()==0)
+			if (dir.length() == 0)
 				return true;
 
 			if (dir.charAt(0) == '/')
 				dir = dir.substring(0);
-			
-			if (dir.length() > 0 && dir.charAt(dir.length()-1) != '/')
+
+			if (dir.length() > 0 && dir.charAt(dir.length() - 1) != '/')
 				dir = dir + '/';
-			
+
 			Enumeration entries = zipFile.entries();
 			ZipEntry zipEntry;
 			String entryPath;
@@ -265,10 +263,10 @@ abstract public class BundleFile {
 		public BundleEntry getEntry(String path) {
 			ZipEntry zipEntry = getZipEntry(path);
 			if (zipEntry == null) {
-				if (path.length()== 0 || path.charAt(path.length()-1) == '/') {
+				if (path.length() == 0 || path.charAt(path.length() - 1) == '/') {
 					// this is a directory request lets see if any entries exist in this directory
 					if (containsDir(path))
-						return new BundleEntry.DirZipBundleEntry(this,path);
+						return new BundleEntry.DirZipBundleEntry(this, path);
 				}
 				return null;
 			}
@@ -282,10 +280,10 @@ abstract public class BundleFile {
 				throw new NullPointerException();
 			}
 
-			if (path.length() > 0 && path.charAt(0)== '/') {
+			if (path.length() > 0 && path.charAt(0) == '/') {
 				path = path.substring(1);
 			}
-			if (path.length() > 0 && path.charAt(path.length()-1) != '/') {
+			if (path.length() > 0 && path.charAt(path.length() - 1) != '/') {
 				path = new StringBuffer(path).append("/").toString();
 			}
 
@@ -366,16 +364,17 @@ abstract public class BundleFile {
 					public boolean hasMoreElements() {
 						return false;
 					}
+
 					public Object nextElement() {
 						throw new NoSuchElementException();
 					}
 				};
 			if (pathFile.isDirectory()) {
 				final String[] fileList = pathFile.list();
-				final String dirPath = path.length() == 0 || path.charAt(path.length()-1) == '/' 
-					? path : path + '/';
+				final String dirPath = path.length() == 0 || path.charAt(path.length() - 1) == '/' ? path : path + '/';
 				return new Enumeration() {
 					int cur = 0;
+
 					public boolean hasMoreElements() {
 						return cur < fileList.length;
 					}
@@ -396,9 +395,11 @@ abstract public class BundleFile {
 			} else {
 				return new Enumeration() {
 					int cur = 0;
+
 					public boolean hasMoreElements() {
 						return cur < 1;
 					}
+
 					public Object nextElement() {
 						if (cur == 0) {
 							cur = 1;
@@ -423,6 +424,7 @@ abstract public class BundleFile {
 	public static class DirZipBundleFile extends BundleFile {
 		ZipBundleFile zipBundlefile;
 		String cp;
+
 		public DirZipBundleFile(ZipBundleFile zipBundlefile, String cp) {
 			super(zipBundlefile.bundlefile, zipBundlefile.bundledata);
 			this.zipBundlefile = zipBundlefile;
@@ -443,7 +445,7 @@ abstract public class BundleFile {
 			return zipBundlefile.getEntry(newpath);
 		}
 
-		public boolean containsDir(String dir){
+		public boolean containsDir(String dir) {
 			if (dir == null)
 				return false;
 

@@ -9,6 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
+
 import java.util.*;
 import org.eclipse.core.dependencies.*;
 import org.eclipse.core.internal.dependencies.DependencySystem;
@@ -26,6 +27,7 @@ public class ResolverHelper {
 			return v1.isGreaterThan(v2) ? 1 : v1.matchQualifier(v2) ? 0 : -1;
 		}
 	}
+
 	private static final IMatchRule MAJOR = new MatchMajorRule();
 	private static final IMatchRule MINOR = new MatchMinorRule();
 	private static final IMatchRule MICRO = new MatchMicroRule();
@@ -49,65 +51,80 @@ public class ResolverHelper {
 		}
 		throw new IllegalArgumentException("match byte: " + b); //$NON-NLS-1$
 	}
+
 	private final static class UnsatisfiableRule implements IMatchRule {
 		public boolean isSatisfied(Object required, Object available) {
 			return false;
 		}
+
 		public String toString() {
 			return "unsatisfiable"; //$NON-NLS-1$
 		}
 	}
+
 	private final static class MatchQualifierRule implements IMatchRule {
 		public boolean isSatisfied(Object required, Object available) {
 			return ((Version) available).matchQualifier((Version) required);
 		}
+
 		public String toString() {
 			return Constants.VERSION_MATCH_QUALIFIER;
 		}
 	}
+
 	private final static class MatchMajorRule implements IMatchRule {
 		public boolean isSatisfied(Object required, Object available) {
 			return ((Version) available).matchMajor((Version) required);
 		}
+
 		public String toString() {
 			return Constants.VERSION_MATCH_MAJOR;
 		}
 	}
+
 	private final static class MatchGreaterOrEqualRule implements IMatchRule {
 		public boolean isSatisfied(Object required, Object available) {
 			return ((Version) available).matchGreaterOrEqualTo((Version) required);
 		}
+
 		public String toString() {
 			return Constants.VERSION_MATCH_GREATERTHANOREQUAL;
 		}
 	}
+
 	private final static class MatchMinorRule implements IMatchRule {
 		public boolean isSatisfied(Object required, Object available) {
 			return ((Version) available).matchMinor((Version) required);
 		}
+
 		public String toString() {
 			return Constants.VERSION_MATCH_MINOR;
 		}
 	}
+
 	private final static class MatchMicroRule implements IMatchRule {
 		public boolean isSatisfied(Object required, Object available) {
 			return ((Version) available).matchMicro((Version) required);
 		}
+
 		public String toString() {
 			return Constants.VERSION_MATCH_MICRO;
 		}
 	}
+
 	public static IElement createElement(BundleDescription bundleDescription, IDependencySystem system) {
 		String uniqueId = getUniqueId(bundleDescription);
 		Version version = getVersion(bundleDescription);
 		return system.createElement(uniqueId, version, createPrerequisites(bundleDescription, system), bundleDescription.isSingleton(), bundleDescription);
 	}
+
 	private static Version getVersion(BundleDescription bundleDescription) {
 		Version version = bundleDescription.getVersion();
 		if (version == null)
 			version = Version.emptyVersion;
 		return version;
 	}
+
 	private static String getUniqueId(BundleDescription bundleDescription) {
 		String uniqueId = bundleDescription.getUniqueId();
 		if (uniqueId == null)
@@ -115,6 +132,7 @@ public class ResolverHelper {
 			uniqueId = Long.toString(bundleDescription.getBundleId());
 		return uniqueId;
 	}
+
 	private static IDependency[] createPrerequisites(BundleDescription bundleDesc, IDependencySystem system) {
 		BundleSpecification[] required = bundleDesc.getRequiredBundles();
 		HostSpecification host = bundleDesc.getHost();
@@ -132,6 +150,7 @@ public class ResolverHelper {
 			prereqs.add(createPrerequisite(system, host));
 		return (IDependency[]) prereqs.toArray(new IDependency[prereqs.size()]);
 	}
+
 	private static IDependency createPrerequisite(IDependencySystem system, VersionConstraint constraint) {
 		boolean optional = (constraint instanceof BundleSpecification) && ((BundleSpecification) constraint).isOptional();
 		Version requiredVersion = constraint.getVersionSpecification();
@@ -139,9 +158,11 @@ public class ResolverHelper {
 			requiredVersion = null;
 		return system.createDependency(constraint.getName(), getMatchRule(constraint.getMatchingRule()), requiredVersion, optional, constraint);
 	}
+
 	public static IDependencySystem createDependencySystem(ISelectionPolicy policy) {
 		return new DependencySystem(new ResolverHelper.BundleVersionComparator(), policy);
 	}
+
 	public static IDependencySystem buildDependencySystem(State state, ISelectionPolicy selectionPolicy) {
 		IDependencySystem dependencySystem = createDependencySystem(selectionPolicy);
 		BundleDescription[] bundles = state.getBundles();
@@ -149,17 +170,21 @@ public class ResolverHelper {
 			dependencySystem.addElement(ResolverHelper.createElement(bundles[i], dependencySystem));
 		return dependencySystem;
 	}
+
 	public static void remove(BundleDescription description, IDependencySystem system) {
 		system.removeElement(getUniqueId(description), getVersion(description));
 	}
+
 	public static void add(BundleDescription description, IDependencySystem system) {
 		system.addElement(createElement(description, system));
 	}
+
 	public static void unresolve(BundleDescription bundle, IDependencySystem system) {
 		IElement element = system.getElement(getUniqueId(bundle), getVersion(bundle));
 		if (element != null)
-			system.unresolve(new IElement[]{element});
+			system.unresolve(new IElement[] {element});
 	}
+
 	public static void update(BundleDescription newDescription, BundleDescription existing, IDependencySystem system) {
 		system.removeElement(getUniqueId(existing), getVersion(existing));
 		system.addElement(createElement(newDescription, system));

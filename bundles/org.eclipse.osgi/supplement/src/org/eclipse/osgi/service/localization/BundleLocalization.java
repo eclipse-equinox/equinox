@@ -26,6 +26,6 @@ public interface BundleLocalization {
 	 * @return A <code>ResourceBundle</code> object for the given bundle and locale.
 	 * If null is passed for the locale parameter, the default locale is used.
 	 */
-	
+
 	public ResourceBundle getLocalization(Bundle bundle, String locale);
 }

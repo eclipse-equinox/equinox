@@ -9,6 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.osgi.framework.internal.core;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -20,6 +21,7 @@ import org.eclipse.osgi.framework.adaptor.BundleOperation;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.*;
+
 /**
  * This object is given out to bundles and wraps the internal Bundle object. It
  * is destroyed when a bundle is uninstalled and reused if a bundle is updated.
@@ -48,6 +50,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	 */
 	protected String permissionMsg;
 	protected ManifestLocalization manifestLocalization = null;
+
 	/**
 	 * Bundle object constructor. This constructor should not perform any real
 	 * work.
@@ -63,6 +66,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 		else
 			return new BundleHost(bundledata, framework);
 	}
+
 	/**
 	 * Bundle object constructor. This constructor should not perform any real
 	 * work.
@@ -79,12 +83,14 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 		this.framework = framework;
 		bundledata.setBundle(this);
 	}
+
 	/**
 	 * Load the bundle.
 	 * 
 	 * @exception org.osgi.framework.BundleException
 	 */
 	protected abstract void load() throws BundleException;
+
 	/**
 	 * Reload from a new bundle. This method must be called while holding the
 	 * bundles lock.
@@ -96,6 +102,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	 * @exception org.osgi.framework.BundleException
 	 */
 	protected abstract boolean reload(AbstractBundle newBundle) throws BundleException;
+
 	/**
 	 * Refresh the bundle. This is called by Framework.refreshPackages. This
 	 * method must be called while holding the bundles lock.
@@ -107,6 +114,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	 *                imported by a bundle
 	 */
 	protected abstract void refresh() throws BundleException;
+
 	/**
 	 * Unload the bundle. This method must be called while holding the bundles
 	 * lock.
@@ -115,6 +123,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	 *         imported by a bundle
 	 */
 	protected abstract boolean unload();
+
 	/**
 	 * Close the the Bundle's file.
 	 *  
@@ -128,6 +137,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 		}
 		state = UNINSTALLED;
 	}
+
 	/** 
 	 * Load and instantiate bundle's BundleActivator class
 	 */
@@ -148,6 +158,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 		}
 		return (null);
 	}
+
 	/**
 	 * This method loads a class from the bundle.
 	 * 
@@ -160,6 +171,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	 *                if the class definition was not found.
 	 */
 	protected abstract Class loadClass(String name, boolean checkPermission) throws ClassNotFoundException;
+
 	/**
 	 * Find the specified resource in this bundle.
 	 * 
@@ -179,6 +191,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	 *                If this bundle has been uninstalled.
 	 */
 	public abstract URL getResource(String name);
+
 	/**
 	 * Returns the current state of the bundle.
 	 * 
@@ -189,6 +202,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	public int getState() {
 		return (state);
 	}
+
 	/**
 	 * Return true if the bundle is starting or active.
 	 *  
@@ -196,6 +210,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	protected boolean isActive() {
 		return ((state & (ACTIVE | STARTING)) != 0);
 	}
+
 	/**
 	 * Return true if the bundle is resolved.
 	 *  
@@ -203,6 +218,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	protected boolean isResolved() {
 		return (state & (INSTALLED | UNINSTALLED)) == 0;
 	}
+
 	/**
 	 * Start this bundle.
 	 * 
@@ -284,6 +300,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 		if (Debug.DEBUG && Debug.DEBUG_BUNDLE_TIME)
 			System.out.println("End starting " + getSymbolicName() + " " + (System.currentTimeMillis() - start));
 	}
+
 	/**
 	 * Internal worker to start a bundle.
 	 * 
@@ -291,6 +308,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	 *            if true persistently record the bundle was started.
 	 */
 	protected abstract void startWorker(boolean persistent) throws BundleException;
+
 	/**
 	 * Start this bundle w/o marking is persistently started.
 	 * 
@@ -355,6 +373,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 			completeStateChange();
 		}
 	}
+
 	/**
 	 * Stop this bundle.
 	 * 
@@ -425,6 +444,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 			completeStateChange();
 		}
 	}
+
 	/**
 	 * Internal worker to stop a bundle.
 	 * 
@@ -432,6 +452,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	 *            if true persistently record the bundle was stopped.
 	 */
 	protected abstract void stopWorker(boolean persistent) throws BundleException;
+
 	/**
 	 * Set the persistent status bit for the bundle.
 	 * 
@@ -457,6 +478,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 			framework.publishFrameworkEvent(FrameworkEvent.ERROR, this, pae.getException());
 		}
 	}
+
 	/**
 	 * Stop this bundle w/o marking is persistently stopped.
 	 * 
@@ -526,6 +548,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 			}
 		}
 	}
+
 	/**
 	 * Update this bundle. If the bundle is {@link #ACTIVE}, the bundle will
 	 * be stopped before the update and started after the update successfully
@@ -622,6 +645,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 			completeStateChange();
 		}
 	}
+
 	/**
 	 * Update this bundle from an InputStream.
 	 * 
@@ -656,6 +680,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 			completeStateChange();
 		}
 	}
+
 	/**
 	 * Update worker. Assumes the caller has the state change lock.
 	 */
@@ -701,6 +726,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 			}
 		}
 	}
+
 	/**
 	 * Update worker. Assumes the caller has the state change lock.
 	 */
@@ -718,7 +744,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 			String symbolicName = newBundle.getSymbolicName();
 			AbstractBundle installedBundle = symbolicName == null ? null : framework.getBundleByUniqueId(symbolicName, newBundle.getVersion().toString());
 			if (installedBundle != null && installedBundle != this) {
-				throw new BundleException(Msg.formatter.getString("BUNDLE_INSTALL_SAME_UNIQUEID", new Object[] {installedBundle.getSymbolicName(), installedBundle.getVersion(),  installedBundle.getLocation()}));
+				throw new BundleException(Msg.formatter.getString("BUNDLE_INSTALL_SAME_UNIQUEID", new Object[] {installedBundle.getSymbolicName(), installedBundle.getVersion(), installedBundle.getLocation()}));
 			}
 			String[] nativepaths = framework.selectNativeCode(newBundle);
 			if (nativepaths != null) {
@@ -752,6 +778,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 			throw e;
 		}
 	}
+
 	/**
 	 * Uninstall this bundle.
 	 * <p>
@@ -818,6 +845,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 			completeStateChange();
 		}
 	}
+
 	/**
 	 * Uninstall worker. Assumes the caller has the state change lock.
 	 */
@@ -879,6 +907,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 		}
 		framework.publishBundleEvent(BundleEvent.UNINSTALLED, this);
 	}
+
 	/**
 	 * Uninstall worker. Assumes the caller has the state change lock.
 	 */
@@ -918,6 +947,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 			throw e;
 		}
 	}
+
 	/**
 	 * Return the bundle's manifest headers and values from the manifest's
 	 * preliminary section. That is all the manifest's headers and values prior
@@ -955,6 +985,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	public Dictionary getHeaders() {
 		return getHeaders(Locale.getDefault().toString());
 	}
+
 	/**
 	 * Returns this bundle's Manifest headers and values. This method returns
 	 * all the Manifest headers and values from the main section of the
@@ -1004,6 +1035,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 		}
 		return manifestLocalization.getHeaders(localeString);
 	}
+
 	/**
 	 * Retrieve the bundle's unique identifier, which the framework assigned to
 	 * this bundle when it was installed.
@@ -1028,6 +1060,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	public long getBundleId() {
 		return (bundledata.getBundleID());
 	}
+
 	/**
 	 * Retrieve the location identifier of the bundle. This is typically the
 	 * location passed to
@@ -1050,6 +1083,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 		framework.checkAdminPermission();
 		return (bundledata.getLocation());
 	}
+
 	/**
 	 * Provides a list of {@link ServiceReferenceImpl}s for the services
 	 * registered by this bundle or <code>null</code> if the bundle has no
@@ -1067,6 +1101,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	 * @see ServiceReferenceImpl
 	 */
 	public abstract org.osgi.framework.ServiceReference[] getRegisteredServices();
+
 	/**
 	 * Provides a list of {@link ServiceReferenceImpl}s for the services this
 	 * bundle is using, or <code>null</code> if the bundle is not using any
@@ -1084,6 +1119,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	 * @see ServiceReferenceImpl
 	 */
 	public abstract org.osgi.framework.ServiceReference[] getServicesInUse();
+
 	/**
 	 * Determine whether the bundle has the requested permission.
 	 * 
@@ -1112,6 +1148,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 		}
 		return true;
 	}
+
 	/**
 	 * This method marks the bundle's state as changing so that other calls to
 	 * start/stop/suspend/update/uninstall can wait until the state change is
@@ -1140,11 +1177,11 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 					return;
 				}
 				if (doubleFault || (stateChanging == Thread.currentThread())) {
-					throw new BundleException(Msg.formatter.getString("BUNDLE_STATE_CHANGE_EXCEPTION",getLocation(),stateChanging.getName()));	//$NON-NLS-1$
+					throw new BundleException(Msg.formatter.getString("BUNDLE_STATE_CHANGE_EXCEPTION", getLocation(), stateChanging.getName())); //$NON-NLS-1$
 				}
 				try {
 					if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-						Debug.println(" Waiting for state to change in bundle " + this); 	//$NON-NLS-1$
+						Debug.println(" Waiting for state to change in bundle " + this); //$NON-NLS-1$
 					}
 					long start = 0;
 					if (Debug.DEBUG)
@@ -1165,6 +1202,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 			}
 		}
 	}
+
 	/**
 	 * This method completes the bundle state change by setting stateChanging
 	 * to null and notifying one waiter that the state change has completed.
@@ -1180,6 +1218,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 			}
 		}
 	}
+
 	/**
 	 * Return a string representation of this bundle.
 	 * 
@@ -1188,6 +1227,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	public String toString() {
 		return (bundledata.getLocation() + " [" + getBundleId() + "]");
 	}
+
 	/**
 	 * Answers an integer indicating the relative positions of the receiver and
 	 * the argument in the natural order of elements of the receiver's class.
@@ -1210,6 +1250,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 		long idcomp = getBundleId() - ((AbstractBundle) obj).getBundleId();
 		return (idcomp < 0L) ? -1 : ((idcomp > 0L) ? 1 : 0);
 	}
+
 	/**
 	 * This method checks that the bundle is not uninstalled. If the bundle is
 	 * uninstalled, an IllegalStateException is thrown.
@@ -1222,6 +1263,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 			throw new IllegalStateException(Msg.formatter.getString("BUNDLE_UNINSTALLED_EXCEPTION"));
 		}
 	}
+
 	/**
 	 * Get the bundle's ProtectionDomain.
 	 * 
@@ -1230,6 +1272,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	protected ProtectionDomain getProtectionDomain() {
 		return domain;
 	}
+
 	/**
 	 * The bundle must unresolve the permissions in these packages.
 	 * 
@@ -1246,17 +1289,21 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 			collection.unresolvePermissions(unresolvedPackages);
 		}
 	}
+
 	public org.osgi.framework.Bundle[] getFragments() {
 		checkValid();
 		return null;
 	}
+
 	public boolean isFragment() {
 		return false;
 	}
+
 	public org.osgi.framework.Bundle getHost() {
 		checkValid();
 		return null;
 	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -1265,6 +1312,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	public Class loadClass(String classname) throws ClassNotFoundException {
 		return loadClass(classname, true);
 	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -1290,6 +1338,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 			}
 		});
 	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -1318,22 +1367,29 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 			}
 		});
 	}
+
 	public String getSymbolicName() {
 		return bundledata.getSymbolicName();
 	}
+
 	public BundleData getBundleData() {
 		return bundledata;
 	}
+
 	public Version getVersion() {
 		return bundledata.getVersion();
 	}
+
 	protected BundleDescription getBundleDescription() {
 		return framework.adaptor.getState().getBundle(getBundleId());
 	}
-	protected int getStartLevel(){
+
+	protected int getStartLevel() {
 		return bundledata.getStartLevel();
 	}
+
 	public abstract BundleLoader getBundleLoader();
+
 	/**
 	 * Mark this bundle as resolved.
 	 */
@@ -1354,13 +1410,16 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 			// to resolve if appropriate.
 		}
 	}
+
 	protected abstract boolean unresolve() throws BundleException;
+
 	/**
 	 * Return the current context for this bundle.
 	 * 
 	 * @return BundleContext for this bundle.
 	 */
 	abstract protected BundleContextImpl getContext();
+
 	protected String getResolutionFailureMessage() {
 		String defaultMessage = Msg.formatter.getString("BUNDLE_UNRESOLVED_EXCEPTION");
 		// don't spend time if debug info is not needed
@@ -1368,7 +1427,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 			return defaultMessage;
 		}
 		if (permissionMsg != null) {
-			return permissionMsg;	// do not null this field out until a successful resolve is done.
+			return permissionMsg; // do not null this field out until a successful resolve is done.
 		}
 		BundleDescription bundleDescription = getBundleDescription();
 		if (bundleDescription == null) {
@@ -1397,21 +1456,26 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 		missing.deleteCharAt(missing.length() - 1);
 		return Msg.formatter.getString("BUNDLE_UNRESOLVED_UNSATISFIED_CONSTRAINT_EXCEPTION", missing.toString());
 	}
+
 	private String toString(VersionConstraint constraint) {
 		org.eclipse.osgi.service.resolver.Version versionSpec = constraint.getVersionSpecification();
 		if (versionSpec == null)
 			return constraint.getName();
 		return constraint.getName() + '_' + versionSpec;
 	}
+
 	public int getKeyHashCode() {
 		return (int) getBundleId();
 	}
+
 	public boolean compare(KeyedElement other) {
 		return getBundleId() == ((AbstractBundle) other).getBundleId();
 	}
+
 	public Object getKey() {
 		return new Long(getBundleId());
 	}
+
 	protected boolean checkPermissions() {
 		permissionMsg = null;
 		BundleDescription bundleDesc = getBundleDescription();
@@ -1464,36 +1528,43 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 		}
 		return true;
 	}
+
 	protected boolean checkExportPackagePermission(String pkgName) {
 		if (domain != null)
 			return domain.implies(new PackagePermission(pkgName, PackagePermission.EXPORT));
 		return true;
 	}
+
 	protected boolean checkProvideBundlePermission(String symbolicName) {
 		if (domain != null)
 			return domain.implies(new BundlePermission(symbolicName, BundlePermission.PROVIDE_BUNDLE));
 		return true;
 	}
+
 	protected boolean checkImportPackagePermission(String pkgName) {
 		if (domain != null)
 			return domain.implies(new PackagePermission(pkgName, PackagePermission.IMPORT));
 		return true;
 	}
+
 	protected boolean checkRequireBundlePermission(String symbolicName) {
 		if (domain != null)
 			return domain.implies(new BundlePermission(symbolicName, BundlePermission.REQUIRE_BUNDLE));
 		return true;
 	}
+
 	protected boolean checkFragmentHostPermission(String symbolicName) {
 		if (domain != null)
 			return domain.implies(new BundlePermission(symbolicName, BundlePermission.FRAGMENT_HOST));
 		return true;
 	}
+
 	protected boolean checkFragmentBundlePermission(String symbolicName) {
 		if (domain != null)
 			return domain.implies(new BundlePermission(symbolicName, BundlePermission.FRAGMENT_BUNDLE));
 		return true;
 	}
+
 	/* This method is used by the Bundle Localization Service to obtain
 	 * a ResourceBundle that resides in a bundle.  This is not an OSGi
 	 * defined method for org.osgi.framework.Bundle
@@ -1510,6 +1581,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 		}
 		return manifestLocalization.getResourceBundle(localeString);
 	}
+
 	private void initializeManifestLocalization() throws BundleException {
 		if (manifestLocalization == null) {
 			Dictionary rawHeaders;
@@ -1517,12 +1589,15 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 			manifestLocalization = new ManifestLocalization(this, rawHeaders);
 		}
 	}
+
 	public boolean testStateChanging(Object thread) {
 		return stateChanging == thread;
 	}
+
 	public Object getStateChangeLock() {
 		return statechangeLock;
 	}
+
 	public Thread getStateChanging() {
 		return stateChanging;
 	}

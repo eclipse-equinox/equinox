@@ -23,7 +23,8 @@ public class SimpleSelectionPolicy implements ISelectionPolicy {
 		// all satisfied are selected
 		return new HashSet(elementSet.getSatisfied());
 	}
-	public IElement selectSingle(IElementSet elementSet) {		
+
+	public IElement selectSingle(IElementSet elementSet) {
 		// just pick the satisfied element with the highest version
 		IElement highest = null;
 		for (Iterator satisfiedIter = elementSet.getSatisfied().iterator(); satisfiedIter.hasNext();) {

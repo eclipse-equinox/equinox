@@ -49,7 +49,7 @@ public class SystemBundleData implements BundleData {
 		}
 		if (osgiBase != null)
 			try {
-				bundleFile = BundleFile.createBundleFile(osgiBase,this);
+				bundleFile = BundleFile.createBundleFile(osgiBase, this);
 			} catch (IOException e) {
 				// should not happen
 			}
@@ -62,13 +62,13 @@ public class SystemBundleData implements BundleData {
 	public URL getEntry(String path) {
 		if (bundleFile == null)
 			return null;
-		
+
 		BundleEntry entry = bundleFile.getEntry(path);
 		if (entry == null) {
 			return null;
 		}
 		try {
-			return new URL(null, AbstractBundleData.getBundleEntryURL(getBundleID(),path), new Handler(entry));
+			return new URL(null, AbstractBundleData.getBundleEntryURL(getBundleID(), path), new Handler(entry));
 		} catch (MalformedURLException e) {
 			return null;
 		}
@@ -140,6 +140,7 @@ public class SystemBundleData implements BundleData {
 		//TODO may want to cache
 		return parseSymbolicName(manifest);
 	}
+
 	/* 
 	 * Convenience method that retrieves the simbolic name string from the header.
 	 * Note: clients may want to cache the returned value.
@@ -147,35 +148,39 @@ public class SystemBundleData implements BundleData {
 	public static String parseSymbolicName(Dictionary manifest) {
 		String symbolicNameEntry = (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME);
 		if (symbolicNameEntry == null)
-			return null;		
+			return null;
 		try {
 			return ManifestElement.parseHeader(Constants.BUNDLE_SYMBOLICNAME, symbolicNameEntry)[0].getValue();
 		} catch (BundleException e) {
 			// here is not the place to validate a manifest			
 		}
-		return null;		
+		return null;
 	}
 
 	public Version getVersion() {
 		return version;
 	}
+
 	public String getClassPath() {
 		return (String) manifest.get(Constants.BUNDLE_CLASSPATH);
 	}
+
 	public String getActivator() {
 		return (String) manifest.get(Constants.BUNDLE_ACTIVATOR);
 	}
+
 	public String getDynamicImports() {
 		return (String) manifest.get(Constants.DYNAMICIMPORT_PACKAGE);
 	}
+
 	public String getExecutionEnvironment() {
 		return (String) manifest.get(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT);
 	}
 
-	protected File getOsgiBase(){
+	protected File getOsgiBase() {
 		String fwLocation = System.getProperty(OSGI_FRAMEWORK);
 		File result = null;
-		if (fwLocation != null){
+		if (fwLocation != null) {
 			try {
 				URL baseURL = new URL(fwLocation);
 				result = new File(baseURL.getPath());
@@ -192,12 +197,12 @@ public class SystemBundleData implements BundleData {
 		return result;
 	}
 
-	protected Headers createManifest(FrameworkAdaptor adaptor) throws BundleException{
+	protected Headers createManifest(FrameworkAdaptor adaptor) throws BundleException {
 		InputStream in = null;
 
 		if (osgiBase != null && osgiBase.exists()) {
 			try {
-				in = new FileInputStream(new File(osgiBase,Constants.OSGI_BUNDLE_MANIFEST));
+				in = new FileInputStream(new File(osgiBase, Constants.OSGI_BUNDLE_MANIFEST));
 			} catch (FileNotFoundException e) {
 				// do nothing here.  in == null
 			}
@@ -230,7 +235,7 @@ public class SystemBundleData implements BundleData {
 		// to export and merge this into the system bundle's manifest
 		String exportPackages = adaptor.getExportPackages();
 		String exportServices = adaptor.getExportServices();
-		String providePackages =adaptor.getProvidePackages();
+		String providePackages = adaptor.getProvidePackages();
 		if (exportPackages != null) {
 			String value = (String) manifest.get(Constants.EXPORT_PACKAGE);
 			if (value == null) {

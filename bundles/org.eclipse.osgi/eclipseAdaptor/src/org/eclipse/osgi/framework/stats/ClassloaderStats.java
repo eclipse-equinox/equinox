@@ -39,9 +39,9 @@ public class ClassloaderStats {
 	 */
 	private static Map loaders = Collections.synchronizedMap(new HashMap(20));
 	public static File traceFile;
-	
-	private static boolean TRACE_PLUGINS = true;	//TODO make a debug option
-	private static boolean TRACE_CLASSES = true;	//TODO make a debug option
+
+	private static boolean TRACE_PLUGINS = true; //TODO make a debug option
+	private static boolean TRACE_CLASSES = true; //TODO make a debug option
 	private static String TRACE_FILENAME = "c:/trace"; //TODO make a debug option
 	private static String TRACE_FILTERS = "c:/traceFilters"; //TODO make a debug option
 
@@ -49,6 +49,7 @@ public class ClassloaderStats {
 		if (TRACE_CLASSES || TRACE_PLUGINS)
 			initializeTraceOptions();
 	}
+
 	private static void initializeTraceOptions() {
 		// create the trace file
 		String filename = TRACE_FILENAME = "c:/trace";
@@ -58,41 +59,43 @@ public class ClassloaderStats {
 		//load the filters
 		if (!TRACE_CLASSES)
 			return;
-//		filename = TRACE_FILTERS;
-//		if (filename.length() == 0)
-//			return;
-//		try {
-//			File filterFile = new File(filename);
-////			if (!filterFile.isAbsolute())
-////				filterFile = new File(InternalBootLoader.getBootDir() + filename);
-//			System.out.print("Runtime tracing elements defined in: " + filterFile.getAbsolutePath() + "..."); //$NON-NLS-1$ //$NON-NLS-2$
-//			InputStream input = new FileInputStream(filterFile);
-//			System.out.println("  Loaded."); //$NON-NLS-1$
-//			Properties filters = new Properties() {
-//				public Object put(Object key, Object value) {
-//					addFilters((String) key, (String) value);
-//					return null;
-//				}
-//			};
-//			try {
-//				filters.load(input);
-//			} finally {
-//				input.close();
-//			}
-//		} catch (IOException e) {
-//			System.out.println("  No trace filters loaded."); //$NON-NLS-1$
-//		}
+		//		filename = TRACE_FILTERS;
+		//		if (filename.length() == 0)
+		//			return;
+		//		try {
+		//			File filterFile = new File(filename);
+		////			if (!filterFile.isAbsolute())
+		////				filterFile = new File(InternalBootLoader.getBootDir() + filename);
+		//			System.out.print("Runtime tracing elements defined in: " + filterFile.getAbsolutePath() + "..."); //$NON-NLS-1$ //$NON-NLS-2$
+		//			InputStream input = new FileInputStream(filterFile);
+		//			System.out.println("  Loaded."); //$NON-NLS-1$
+		//			Properties filters = new Properties() {
+		//				public Object put(Object key, Object value) {
+		//					addFilters((String) key, (String) value);
+		//					return null;
+		//				}
+		//			};
+		//			try {
+		//				filters.load(input);
+		//			} finally {
+		//				input.close();
+		//			}
+		//		} catch (IOException e) {
+		//			System.out.println("  No trace filters loaded."); //$NON-NLS-1$
+		//		}
 	}
-//	protected static void addFilters(String key, String value) {
-//		String[] filters = DelegatingURLClassLoader.getArrayFromList(value);
-//		if ("plugins".equals(key)) //$NON-NLS-1$
-//			pluginFilters.addAll(Arrays.asList(filters));
-//		if ("packages".equals(key)) //$NON-NLS-1$
-//			packageFilters.addAll(Arrays.asList(filters));
-//	}
+
+	//	protected static void addFilters(String key, String value) {
+	//		String[] filters = DelegatingURLClassLoader.getArrayFromList(value);
+	//		if ("plugins".equals(key)) //$NON-NLS-1$
+	//			pluginFilters.addAll(Arrays.asList(filters));
+	//		if ("packages".equals(key)) //$NON-NLS-1$
+	//			packageFilters.addAll(Arrays.asList(filters));
+	//	}
 	public static void startLoadingClass(String id, String className) {
 		findLoader(id).startLoadClass(className);
 	}
+
 	// get and create if does not exist
 	private static ClassloaderStats findLoader(String id) {
 		ClassloaderStats result = (ClassloaderStats) loaders.get(id);
@@ -102,32 +105,39 @@ public class ClassloaderStats {
 		}
 		return result;
 	}
+
 	public static Stack getClassStack() {
 		return classStack;
 	}
+
 	public static ClassloaderStats[] getLoaders() {
 		//the parameter to toArray is of size zero for thread safety, otherwise this
 		//could return an array with null entries if the map shrinks concurrently
 		return (ClassloaderStats[]) loaders.values().toArray(new ClassloaderStats[0]);
 	}
+
 	public static void endLoadingClass(String id, String className, boolean success) {
 		// must be called from a synchronized location to protect against
 		// concurrent updates
 		findLoader(id).endLoadClass(className, success);
 	}
+
 	public static void loadedBundle(String id, ResourceBundleStats info) {
 		findLoader(id).loadedBundle(info);
 	}
+
 	public static ClassloaderStats getLoader(String id) {
 		return (ClassloaderStats) loaders.get(id);
 	}
+
 	public ClassloaderStats(String id) {
 		this.id = id;
 		keepTraces = pluginFilters.contains(id);
 	}
+
 	public void addBaseClasses(String[] baseClasses) {
-//		if (!id.equals(BootLoader.PI_BOOT))
-//			return;
+		//		if (!id.equals(BootLoader.PI_BOOT))
+		//			return;
 		for (int i = 0; i < baseClasses.length; i++) {
 			String name = baseClasses[i];
 			if (classes.get(name) == null) {
@@ -137,20 +147,25 @@ public class ClassloaderStats {
 			}
 		}
 	}
+
 	private void loadedBundle(ResourceBundleStats bundle) {
 		bundles.add(bundle);
 	}
+
 	public ArrayList getBundles() {
 		return bundles;
 	}
+
 	private synchronized void startLoadClass(String name) {
 		classStack.push(findClass(name));
 	}
+
 	// internal method that return the existing classStats or creates one
 	private ClassStats findClass(String name) {
 		ClassStats result = (ClassStats) classes.get(name);
 		return result == null ? new ClassStats(name, this) : result;
 	}
+
 	private synchronized void endLoadClass(String name, boolean success) {
 		ClassStats current = (ClassStats) classStack.pop();
 		if (!success) {
@@ -176,6 +191,7 @@ public class ClassloaderStats {
 			loadingTime = loadingTime + current.getTimeLoading();
 		}
 	}
+
 	private void traceLoad(String name, ClassStats target) {
 		// Stack trace code
 		if (!keepTraces) {
@@ -207,17 +223,21 @@ public class ClassloaderStats {
 			e.printStackTrace();
 		}
 	}
+
 	public int getClassLoadCount() {
 		return classes.size();
 	}
+
 	public long getClassLoadTime() {
 		return loadingTime;
 	}
+
 	public ClassStats[] getClasses() {
 		//the parameter to toArray is of size zero for thread safety, otherwise this
 		//could return an array with null entries if the map shrinks concurrently
 		return (ClassStats[]) classes.values().toArray(new ClassStats[0]);
 	}
+
 	public String getId() {
 		return id;
 	}

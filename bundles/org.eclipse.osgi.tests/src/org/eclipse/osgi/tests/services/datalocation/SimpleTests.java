@@ -38,7 +38,7 @@ public class SimpleTests extends TestCase {
 	protected void tearDown() throws Exception {
 		super.tearDown();
 	}
-	
+
 	public void testAddRemove() {
 		assertEquals(null, manager1.lookup(TEST1));
 		assertEquals(-1, manager1.getId(TEST1));
@@ -99,10 +99,10 @@ public class SimpleTests extends TestCase {
 	private void update(FileManager manager, String filename) throws IOException {
 		writeFile(new File(base, filename));
 		manager.lock();
-		manager.update(new String[] { TEST1}, new String[] { filename });
+		manager.update(new String[] {TEST1}, new String[] {filename});
 		manager.release();
 	}
-	
+
 	private void writeFile(File filename) {
 		try {
 			FileOutputStream out = new FileOutputStream(filename);

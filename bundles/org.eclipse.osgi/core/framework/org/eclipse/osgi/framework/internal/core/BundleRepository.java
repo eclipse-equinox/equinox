@@ -26,14 +26,14 @@ import org.eclipse.osgi.service.resolver.Version;
  */
 public class BundleRepository {
 	/** bundles by install order */
-	private ArrayList bundlesByInstallOrder;	//TODO It does not seems to me that the users of this really care for the ordering. If this is confirmed this can be remove 
+	private ArrayList bundlesByInstallOrder; //TODO It does not seems to me that the users of this really care for the ordering. If this is confirmed this can be remove 
 	//and getBundles could either return an array (an array is preferable as one if the method calling method finally returns an array and the others do not care)
 
 	/** bundles keyed by bundle Id */
 	private KeyedHashSet bundlesById;
 
 	/** bundles keyed by SymbolicName */
-	private Hashtable bundlesBySymbolicName;	//TODO Does this need to be synchronized
+	private Hashtable bundlesBySymbolicName; //TODO Does this need to be synchronized
 
 	/** PackageAdmin */
 	private PackageAdminImpl packageAdmin;
@@ -163,7 +163,7 @@ public class BundleRepository {
 				bundlesBySymbolicName.put(symbolicName, newBundles);
 			}
 		}
-				
+
 		return true;
 	}
 

@@ -41,7 +41,6 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 	/** The base BundleFile object for this BundleData */
 	protected BundleFile baseBundleFile;
 
-
 	/**
 	 * Read data from an existing directory.
 	 * This constructor is used by getInstalledBundles.
@@ -70,7 +69,7 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 		File delete = new File(getBundleStoreDir(), ".delete");
 
 		/* and the directory is not marked for delete */
-		if (delete.exists()) 
+		if (delete.exists())
 			throw new IOException();
 
 		createBaseBundleFile();
@@ -84,8 +83,8 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 		loadFromManifest();
 	}
 
-	protected void initBundleStoreDirs(String bundleID){
-		setBundleStoreDir(new File(((DefaultAdaptor)adaptor).getBundleStoreRootDir(), bundleID));
+	protected void initBundleStoreDirs(String bundleID) {
+		setBundleStoreDir(new File(((DefaultAdaptor) adaptor).getBundleStoreRootDir(), bundleID));
 	}
 
 	/**
@@ -158,16 +157,18 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 				sb.append(",");
 			}
 		}
-		if (sb.length()>0)
+		if (sb.length() > 0)
 			setNativePaths(sb.toString());
 	}
 
 	protected void setDataDir(File dirData) {
 		this.dirData = dirData;
 	}
+
 	protected File getDataDir() {
 		return dirData;
 	}
+
 	/**
 	 * Return the bundle data directory.
 	 * Attempt to create the directory if it does not exist.
@@ -177,7 +178,7 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 	public File getDataFile(String path) {
 		// lazily initialize dirData to prevent early access to instance location
 		if (getDataDir() == null) {
-			File dataRoot = ((DefaultAdaptor)adaptor).getDataRootDir();
+			File dataRoot = ((DefaultAdaptor) adaptor).getDataRootDir();
 			if (dataRoot == null)
 				throw new IllegalStateException(AdaptorMsg.formatter.getString("ADAPTOR_DATA_AREA_NOT_SET")); //$NON-NLS-1$
 			setDataDir(new File(dataRoot, id + "/" + DefaultAdaptor.DATA_DIR_NAME));
@@ -237,7 +238,7 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 	protected File getGenerationDir() {
 		return new File(getBundleStoreDir(), String.valueOf(getGeneration()));
 	}
-	
+
 	/**
 	 * Return the bundle generation directory.
 	 * Attempt to create the directory if it does not exist.
@@ -272,6 +273,7 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 	protected void setBundleStoreDir(File bundleStoreDir) {
 		this.bundleStoreDir = bundleStoreDir;
 	}
+
 	/**
 	 * Return the top level bundle directory.
 	 *
@@ -292,7 +294,7 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 	 * @throws IOException if a write error occurs.
 	 */
 	public synchronized void save() throws IOException {
-		((DefaultAdaptor)adaptor).saveMetaDataFor(this);
+		((DefaultAdaptor) adaptor).saveMetaDataFor(this);
 	}
 
 	/**
@@ -327,11 +329,10 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 			if (referenceFile != null) {
 				next.setReference(true);
 				next.setFileName(referenceFile);
-			}
-			else {
+			} else {
 				if (next.isReference()) {
 					next.setReference(false);
-					next.setFileName(((DefaultAdaptor)adaptor).mapLocationToName(getLocation()));
+					next.setFileName(((DefaultAdaptor) adaptor).mapLocationToName(getLocation()));
 				}
 			}
 
@@ -343,12 +344,12 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 		throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION")); //$NON-NLS-1$
 	}
 
-	protected BundleFile createBaseBundleFile() throws IOException{
-		baseBundleFile = BundleFile.createBundleFile(getBaseFile(),this);
+	protected BundleFile createBaseBundleFile() throws IOException {
+		baseBundleFile = BundleFile.createBundleFile(getBaseFile(), this);
 		return baseBundleFile;
 	}
-	
-	public BundleFile getBaseBundleFile(){
+
+	public BundleFile getBaseBundleFile() {
 		return baseBundleFile;
 	}
 

@@ -17,19 +17,24 @@ import org.eclipse.core.dependencies.IElementChange;
 class ElementChange implements IElementChange {
 	private IElement element;
 	private int kind;
+
 	ElementChange(IElement element, int kind) {
 		this.element = element;
 		this.kind = kind;
 	}
+
 	public Object getVersionId() {
 		return element.getVersionId();
 	}
+
 	public int getKind() {
 		return kind;
 	}
+
 	public IElement getElement() {
 		return element;
 	}
+
 	public String toString() {
 		StringBuffer result = new StringBuffer();
 		result.append(element.getId());
@@ -40,24 +45,26 @@ class ElementChange implements IElementChange {
 		result.append(')');
 		return result.toString();
 	}
+
 	private String getStatusName(int status) {
 		StringBuffer statusStr = new StringBuffer();
 		if ((status & ADDED) != 0)
 			statusStr.append("ADDED|");
 		if ((status & REMOVED) != 0)
-			statusStr.append("REMOVED|");		
+			statusStr.append("REMOVED|");
 		if ((status & RESOLVED) != 0)
 			statusStr.append("RESOLVED|");
 		if ((status & UNRESOLVED) != 0)
 			statusStr.append("UNRESOLVED|");
 		if ((status & LINKAGE_CHANGED) != 0)
-			statusStr.append("LINKAGE_CHANGED|");		
+			statusStr.append("LINKAGE_CHANGED|");
 		if (statusStr.length() == 0)
 			statusStr.append("UNKNOWN");
 		else
 			statusStr.deleteCharAt(statusStr.length() - 1);
 		return statusStr.toString();
 	}
+
 	void setKind(int kind) {
 		this.kind = kind;
 	}

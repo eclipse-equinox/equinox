@@ -164,8 +164,8 @@ public class BundleLoader implements ClassLoaderDelegate {
 						if (spec.isExported())
 							reexported[reexportIndex++] = i;
 					} else {
-						BundleException be = new BundleException(Msg.formatter.getString("BUNDLE_MISSING_LOADER",bundleKey)); //$NON-NLS-1$
-						bundle.framework.publishFrameworkEvent(FrameworkEvent.ERROR,bundle,be);
+						BundleException be = new BundleException(Msg.formatter.getString("BUNDLE_MISSING_LOADER", bundleKey)); //$NON-NLS-1$
+						bundle.framework.publishFrameworkEvent(FrameworkEvent.ERROR, bundle, be);
 					}
 				}
 			}
@@ -194,17 +194,17 @@ public class BundleLoader implements ClassLoaderDelegate {
 		// init the dynamic imports tables
 		try {
 			String spec = bundle.getBundleData().getDynamicImports();
-			ManifestElement[] imports = ManifestElement.parseHeader(Constants.DYNAMICIMPORT_PACKAGE,spec);
+			ManifestElement[] imports = ManifestElement.parseHeader(Constants.DYNAMICIMPORT_PACKAGE, spec);
 			addDynamicImportPackage(imports);
 			// ...and its fragments
 			for (int i = 0; i < fragments.length; i++)
 				if (fragments[i].isResolved()) {
 					spec = ((AbstractBundle) fragmentObjects[i]).getBundleData().getDynamicImports();
-					imports = ManifestElement.parseHeader(Constants.DYNAMICIMPORT_PACKAGE,spec);
+					imports = ManifestElement.parseHeader(Constants.DYNAMICIMPORT_PACKAGE, spec);
 					addDynamicImportPackage(imports);
 				}
 		} catch (BundleException e) {
-			bundle.framework.publishFrameworkEvent(FrameworkEvent.ERROR,bundle,e);
+			bundle.framework.publishFrameworkEvent(FrameworkEvent.ERROR, bundle, e);
 		}
 	}
 
@@ -215,44 +215,41 @@ public class BundleLoader implements ClassLoaderDelegate {
 		if (packages != null && packages.length > 0)
 			for (int i = 0; i < packages.length; i++)
 				if (importedPackages == null || importedPackages.getByKey(packages[i].getName()) == null)
-					throw new BundleException(Msg.formatter.getString("BUNDLE_FRAGMENT_IMPORT_CONFLICT",packages[i].getName()));
-
-
+					throw new BundleException(Msg.formatter.getString("BUNDLE_FRAGMENT_IMPORT_CONFLICT", packages[i].getName()));
 
 		// if the fragment requires a bundle not aready required throw an exception
 		BundleSpecification[] fragReqBundles = description.getRequiredBundles();
 		if (fragReqBundles != null && fragReqBundles.length > 0) {
-			if (requiredBundles == null) 
-				throw new BundleException(Msg.formatter.getString("BUNDLE_FRAGMENT_REQUIRE_CONFLICT",fragReqBundles[0].getName()));
+			if (requiredBundles == null)
+				throw new BundleException(Msg.formatter.getString("BUNDLE_FRAGMENT_REQUIRE_CONFLICT", fragReqBundles[0].getName()));
 
-			for (int i = 0; i < fragReqBundles.length; i++){
+			for (int i = 0; i < fragReqBundles.length; i++) {
 				boolean found = false;
-				for (int j = 0; j < requiredBundles.length; j++){
+				for (int j = 0; j < requiredBundles.length; j++) {
 					String fragReqKey = new StringBuffer(fragReqBundles[i].getName()).append("_").append(fragReqBundles[i].getActualVersion().toString()).toString();
 					if (fragReqKey.equals(requiredBundles[j].getKey()))
 						found = true;
 				}
 				if (!found)
-					throw new BundleException(Msg.formatter.getString("BUNDLE_FRAGMENT_REQUIRE_CONFLICT",fragReqBundles[i].getName()));
+					throw new BundleException(Msg.formatter.getString("BUNDLE_FRAGMENT_REQUIRE_CONFLICT", fragReqBundles[i].getName()));
 			}
 		}
-
 
 		// if the fragment dynamically imports a package not aready 
 		// dynamically imported throw an exception.
 		try {
 			String spec = fragment.getBundleData().getDynamicImports();
-			ManifestElement[] imports = ManifestElement.parseHeader(Constants.DYNAMICIMPORT_PACKAGE,spec);
-			if (imports != null && imports.length > 0){
+			ManifestElement[] imports = ManifestElement.parseHeader(Constants.DYNAMICIMPORT_PACKAGE, spec);
+			if (imports != null && imports.length > 0) {
 				for (int i = 0; i < imports.length; i++) {
 					String name = imports[i].getValue();
 					if (!isDynamicallyImported(name))
-						throw new BundleException(Msg.formatter.getString("BUNDLE_FRAGMENT_DYNAMICIMPORT_CONFLICT",imports[i]));
+						throw new BundleException(Msg.formatter.getString("BUNDLE_FRAGMENT_DYNAMICIMPORT_CONFLICT", imports[i]));
 				}
 			}
 		} catch (BundleException e) {
-			bundle.framework.publishFrameworkEvent(FrameworkEvent.ERROR,bundle,e);
-		}		
+			bundle.framework.publishFrameworkEvent(FrameworkEvent.ERROR, bundle, e);
+		}
 
 		// init the provided packages
 		String[] provides = description.getProvidedPackages();
@@ -299,7 +296,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 	 * This method loads a class from the bundle.  The class is searched for in the
 	 * same manner as it would if it was being loaded from a bundle (i.e. all
 	 * hosts, fragments, import, required bundles and local resources are searched.
-	*
+	 *
 	 * @param      name     the name of the desired Class.
 	 * @return     the resulting Class
 	 * @exception  java.lang.ClassNotFoundException  if the class definition was not found.
@@ -324,20 +321,20 @@ public class BundleLoader implements ClassLoaderDelegate {
 	/**
 	 * Handle the lookup where provided classes can also be imported.
 	 * In this case the exporter need to be consulted. 
-	 */ 
-	protected Class requireClass(String name, String packageName){
+	 */
+	protected Class requireClass(String name, String packageName) {
 		Class result = null;
 		try {
 			result = findImportedClass(name, packageName);
 		} catch (ImportClassNotFoundException e) {
 			//Capture the exception and return null because we want to continue the lookup.
-			return null; 
+			return null;
 		}
 		if (result == null)
 			result = findLocalClass(name);
 		return result;
 	}
-	
+
 	protected BundleClassLoader createClassLoader() {
 		if (classloader != null)
 			return classloader;
@@ -367,11 +364,11 @@ public class BundleLoader implements ClassLoaderDelegate {
 	 */
 	protected Class findLocalClass(String name) {
 		if (Debug.DEBUG && Debug.DEBUG_LOADER)
-			Debug.println("BundleLoader[" + this +"].findLocalClass(" + name + ")");
+			Debug.println("BundleLoader[" + this + "].findLocalClass(" + name + ")");
 		try {
 			Class clazz = createClassLoader().findLocalClass(name);
 			if (Debug.DEBUG && Debug.DEBUG_LOADER && clazz != null)
-				Debug.println("BundleLoader[" + this +"] found local class " + name);
+				Debug.println("BundleLoader[" + this + "] found local class " + name);
 			return clazz;
 		} catch (ClassNotFoundException e) {
 			return null;
@@ -386,7 +383,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 			throw new ClassNotFoundException(name);
 
 		if (Debug.DEBUG && Debug.DEBUG_LOADER) {
-			Debug.println("BundleLoader[" + this +"].loadBundleClass(" + name + ")");
+			Debug.println("BundleLoader[" + this + "].loadBundleClass(" + name + ")");
 		}
 
 		String packageName = getPackageName(name);
@@ -412,6 +409,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 	boolean isClosed() {
 		return bundle == null;
 	}
+
 	/**
 	 * Finds the resource for a bundle.  This method is used for delegation by the bundle's classloader.
 	 */
@@ -483,14 +481,14 @@ public class BundleLoader implements ClassLoaderDelegate {
 	/**
 	 * Handle the lookup where provided resources can also be imported.
 	 * In this case the exporter need to be consulted. 
-	 */ 
-	protected URL requireResource(String name, String packageName){
+	 */
+	protected URL requireResource(String name, String packageName) {
 		URL result = null;
 		try {
 			result = findImportedResource(name, packageName);
 		} catch (ImportResourceNotFoundException e) {
 			//Capture the exception and return null because we want to continue the lookup.
-			return null; 
+			return null;
 		}
 		if (result == null)
 			result = findLocalResource(name);
@@ -515,14 +513,14 @@ public class BundleLoader implements ClassLoaderDelegate {
 	/**
 	 * Handle the lookup where provided resources can also be imported.
 	 * In this case the exporter need to be consulted. 
-	 */ 
-	protected Enumeration requireResources(String name, String packageName){
+	 */
+	protected Enumeration requireResources(String name, String packageName) {
 		Enumeration result = null;
 		try {
 			result = findImportedResources(name, packageName);
 		} catch (ImportResourceNotFoundException e) {
 			//Capture the exception and return null because we want to continue the lookup.
-			return null; 
+			return null;
 		}
 		if (result == null)
 			result = findLocalResources(name);
@@ -585,20 +583,20 @@ public class BundleLoader implements ClassLoaderDelegate {
 	/**
 	 * Handle the lookup where provided resources can also be imported.
 	 * In this case the exporter need to be consulted. 
-	 */ 
-	protected Object requireObject(String object, String packageName){
+	 */
+	protected Object requireObject(String object, String packageName) {
 		Object result = null;
 		try {
 			result = findImportedObject(object, packageName);
 		} catch (ImportResourceNotFoundException e) {
 			//Capture the exception and return null because we want to continue the lookup.
-			return null; 
+			return null;
 		}
 		if (result == null)
 			result = findLocalObject(object);
 		return result;
 	}
-	
+
 	protected Object findLocalObject(String object) {
 		return createClassLoader().findLocalObject(object);
 	}
@@ -650,11 +648,11 @@ public class BundleLoader implements ClassLoaderDelegate {
 	private BundleClassLoader createBCLPrevileged(final ProtectionDomain pd, final String[] cp) {
 		// Create the classloader as previleged code if security manager is present.
 		if (System.getSecurityManager() == null)
-			return createBCL(pd,cp);
+			return createBCL(pd, cp);
 		else
-			return (BundleClassLoader)AccessController.doPrivileged(new PrivilegedAction() {
+			return (BundleClassLoader) AccessController.doPrivileged(new PrivilegedAction() {
 				public Object run() {
-					return createBCL(pd,cp);
+					return createBCL(pd, cp);
 				}
 			});
 
@@ -669,15 +667,14 @@ public class BundleLoader implements ClassLoaderDelegate {
 				AbstractBundle fragment = (AbstractBundle) fragments[i];
 				try {
 					bcl.attachFragment(fragment.getBundleData(), fragment.domain, getClassPath(fragment, SecureAction.getProperties()));
-				}
-				catch (BundleException be) {
+				} catch (BundleException be) {
 					bundle.framework.publishFrameworkEvent(FrameworkEvent.ERROR, bundle, be);
 				}
 			}
 
 		// finish the initialization of the classloader.
 		bcl.initialize();
-		
+
 		return bcl;
 	}
 
@@ -786,7 +783,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 	 */
 	protected Class findImportedClass(String name, String packageName) throws ImportClassNotFoundException {
 		if (Debug.DEBUG && Debug.DEBUG_LOADER)
-			Debug.println("ImportClassLoader[" + this +"].findImportedClass(" + name + ")");
+			Debug.println("ImportClassLoader[" + this + "].findImportedClass(" + name + ")");
 
 		Class result = null;
 
@@ -800,10 +797,10 @@ public class BundleLoader implements ClassLoaderDelegate {
 		} finally {
 			if (result == null) {
 				if (Debug.DEBUG && Debug.DEBUG_LOADER)
-					Debug.println("ImportClassLoader[" + this +"] class " + name + " not found in imported package " + packageName);
+					Debug.println("ImportClassLoader[" + this + "] class " + name + " not found in imported package " + packageName);
 			} else {
 				if (Debug.DEBUG && Debug.DEBUG_LOADER)
-					Debug.println("BundleLoader[" + this +"] found imported class " + name);
+					Debug.println("BundleLoader[" + this + "] found imported class " + name);
 			}
 		}
 		return result;
@@ -815,7 +812,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 
 		// See if we locally provide the package.
 		PackageSource local = getProvidedPackage(packageName);
-		
+
 		// Must search required bundles that are exported first.
 		if (requiredBundles != null) {
 			int size = reexportTable == null ? 0 : reexportTable.length;
@@ -826,8 +823,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 					// This allows a bundle to provide a package from a required bundle without 
 					// re-exporting the whole required bundle.
 					requiredBundles[i].getBundleLoader().addExportedProvidersFor(packageName, result, visited);
-				}
-				else if (reexportIndex < size && reexportTable[reexportIndex] == i) {
+				} else if (reexportIndex < size && reexportTable[reexportIndex] == i) {
 					reexportIndex++;
 					requiredBundles[i].getBundleLoader().addExportedProvidersFor(packageName, result, visited);
 				}
@@ -902,19 +898,19 @@ public class BundleLoader implements ClassLoaderDelegate {
 	 */
 	protected Class findRequiredClass(String name, String packageName) {
 		if (Debug.DEBUG && Debug.DEBUG_LOADER)
-			Debug.println("ImportClassLoader[" + this +"].findRequiredClass(" + name + ")");
+			Debug.println("ImportClassLoader[" + this + "].findRequiredClass(" + name + ")");
 		PackageSource source = getProvidersFor(packageName);
 		if (source == null)
 			return null;
 		if (source.isMultivalued()) {
 			BundleLoaderProxy[] bundles = source.getSuppliers();
 			for (int i = 0; i < bundles.length; i++) {
-				Class result = bundles[i].getBundleLoader().requireClass(name,packageName);
+				Class result = bundles[i].getBundleLoader().requireClass(name, packageName);
 				if (result != null)
 					return result;
 			}
 		} else
-			return source.getSupplier().getBundleLoader().requireClass(name,packageName);
+			return source.getSupplier().getBundleLoader().requireClass(name, packageName);
 		return null;
 	}
 
@@ -933,7 +929,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 	 */
 	protected URL findImportedResource(String name, String packageName) {
 		if (Debug.DEBUG && Debug.DEBUG_LOADER)
-			Debug.println("ImportClassLoader[" + this +"].findImportedResource(" + name + ")");
+			Debug.println("ImportClassLoader[" + this + "].findImportedResource(" + name + ")");
 
 		BundleLoader exporter = getPackageExporter(packageName);
 		if (exporter != null) {
@@ -941,7 +937,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 			if (url != null)
 				return url;
 			if (Debug.DEBUG && Debug.DEBUG_LOADER)
-				Debug.println("ImportClassLoader[" + this +"] resource " + name + " not found in imported package " + packageName);
+				Debug.println("ImportClassLoader[" + this + "] resource " + name + " not found in imported package " + packageName);
 			throw new ImportResourceNotFoundException(name);
 		}
 		return null;
@@ -955,19 +951,19 @@ public class BundleLoader implements ClassLoaderDelegate {
 	 */
 	protected URL findRequiredResource(String name, String packageName) {
 		if (Debug.DEBUG && Debug.DEBUG_LOADER)
-			Debug.println("ImportClassLoader[" + this +"].findRequiredResource(" + name + ")");
+			Debug.println("ImportClassLoader[" + this + "].findRequiredResource(" + name + ")");
 		PackageSource source = getProvidersFor(packageName);
 		if (source == null)
 			return null;
 		if (source.isMultivalued()) {
 			BundleLoaderProxy[] bundles = source.getSuppliers();
 			for (int i = 0; i < bundles.length; i++) {
-				URL result = bundles[i].getBundleLoader().requireResource(name,packageName);
+				URL result = bundles[i].getBundleLoader().requireResource(name, packageName);
 				if (result != null)
 					return result;
 			}
 		} else
-			return source.getSupplier().getBundleLoader().requireResource(name,packageName);
+			return source.getSupplier().getBundleLoader().requireResource(name, packageName);
 		return null;
 	}
 
@@ -985,7 +981,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 	 */
 	protected Enumeration findImportedResources(String name, String packageName) {
 		if (Debug.DEBUG && Debug.DEBUG_LOADER)
-			Debug.println("ImportClassLoader[" + this +"].findImportedResources(" + name + ")");
+			Debug.println("ImportClassLoader[" + this + "].findImportedResources(" + name + ")");
 
 		BundleLoader exporter = getPackageExporter(packageName);
 		if (exporter != null)
@@ -1009,19 +1005,19 @@ public class BundleLoader implements ClassLoaderDelegate {
 	 */
 	protected Enumeration findRequiredResources(String name, String packageName) {
 		if (Debug.DEBUG && Debug.DEBUG_LOADER)
-			Debug.println("ImportClassLoader[" + this +"].findRequiredResources(" + name + ")");
+			Debug.println("ImportClassLoader[" + this + "].findRequiredResources(" + name + ")");
 		PackageSource source = getProvidersFor(packageName);
 		if (source == null)
 			return null;
 		if (source.isMultivalued()) {
 			BundleLoaderProxy[] bundles = source.getSuppliers();
 			for (int i = 0; i < bundles.length; i++) {
-				Enumeration result = bundles[i].getBundleLoader().requireResources(name,packageName);
+				Enumeration result = bundles[i].getBundleLoader().requireResources(name, packageName);
 				if (result != null)
 					return result;
 			}
 		} else
-			return source.getSupplier().getBundleLoader().requireResources(name,packageName);
+			return source.getSupplier().getBundleLoader().requireResources(name, packageName);
 		return null;
 	}
 
@@ -1036,7 +1032,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 	 */
 	protected Object findImportedObject(String object, String packageName) {
 		if (Debug.DEBUG && Debug.DEBUG_LOADER)
-			Debug.println("ImportClassLoader[" + this +"].findImportedObject(" + object + ")");
+			Debug.println("ImportClassLoader[" + this + "].findImportedObject(" + object + ")");
 
 		BundleLoader exporter = getPackageExporter(packageName);
 		if (exporter != null) {
@@ -1044,7 +1040,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 			if (result != null)
 				return result;
 			if (Debug.DEBUG && Debug.DEBUG_LOADER)
-				Debug.println("ImportClassLoader[" + this +"] object " + object + " not found in imported package " + packageName);
+				Debug.println("ImportClassLoader[" + this + "] object " + object + " not found in imported package " + packageName);
 			throw new ImportResourceNotFoundException(object);
 		}
 		return null;
@@ -1058,19 +1054,19 @@ public class BundleLoader implements ClassLoaderDelegate {
 	 */
 	protected Object findRequiredObject(String name, String packageName) {
 		if (Debug.DEBUG && Debug.DEBUG_LOADER)
-			Debug.println("ImportClassLoader[" + this +"].findRequiredResource(" + name + ")");
+			Debug.println("ImportClassLoader[" + this + "].findRequiredResource(" + name + ")");
 		PackageSource source = getProvidersFor(packageName);
 		if (source == null)
 			return null;
 		if (source.isMultivalued()) {
 			BundleLoaderProxy[] bundles = source.getSuppliers();
 			for (int i = 0; i < bundles.length; i++) {
-				Object result = bundles[i].getBundleLoader().requireObject(name,packageName);
+				Object result = bundles[i].getBundleLoader().requireObject(name, packageName);
 				if (result != null)
 					return result;
 			}
 		} else
-			return source.getSupplier().getBundleLoader().requireObject(name,packageName);
+			return source.getSupplier().getBundleLoader().requireObject(name, packageName);
 		return null;
 	}
 
@@ -1147,7 +1143,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 		dynamicImportPackageStems = null;
 	}
 
-	protected void attachFragment(BundleFragment fragment, Properties props) throws BundleException{
+	protected void attachFragment(BundleFragment fragment, Properties props) throws BundleException {
 		initializeFragment(fragment);
 		if (classloader == null)
 			return;
@@ -1166,7 +1162,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 
 	protected String[] getClassPath(AbstractBundle bundle, Properties props) throws BundleException {
 		String spec = bundle.getBundleData().getClassPath();
-		ManifestElement[] classpathElements = ManifestElement.parseHeader(Constants.BUNDLE_CLASSPATH,spec);
+		ManifestElement[] classpathElements = ManifestElement.parseHeader(Constants.BUNDLE_CLASSPATH, spec);
 		return matchClassPath(classpathElements, props);
 	}
 
@@ -1175,7 +1171,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 			if (Debug.DEBUG && Debug.DEBUG_LOADER)
 				Debug.println("  no classpath");
 			/* create default BundleClassPath */
-			return new String[] { "." };
+			return new String[] {"."};
 		}
 
 		ArrayList result = new ArrayList(classpath.length);
@@ -1187,7 +1183,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 					if (Debug.DEBUG && Debug.DEBUG_LOADER)
 						Debug.println("  found match for classpath entry " + classpath[i].getValueComponents());
 					String[] matchPaths = classpath[i].getValueComponents();
-					for(int j=0; j<matchPaths.length; j++){
+					for (int j = 0; j < matchPaths.length; j++) {
 						result.add(matchPaths[j]);
 					}
 				}

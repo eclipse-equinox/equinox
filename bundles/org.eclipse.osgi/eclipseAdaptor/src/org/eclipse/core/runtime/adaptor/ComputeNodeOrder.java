@@ -379,7 +379,7 @@ public class ComputeNodeOrder {
 			Vertex vertex = null;
 			Iterator allV = vertexList.iterator();
 			state = NEXT_VERTEX;
-			nextStateLoop : while (true) {
+			nextStateLoop: while (true) {
 				switch (state) {
 					case NEXT_VERTEX :
 						// on entry, "allV" contains vertexes yet to be visited

@@ -52,13 +52,14 @@ public class SystemBundle extends BundleHost {
 					try {
 						loader = new SystemBundleLoader(this, getBundleDescription());
 					} catch (BundleException e) {
-						framework.publishFrameworkEvent(FrameworkEvent.ERROR,this,e);
+						framework.publishFrameworkEvent(FrameworkEvent.ERROR, this, e);
 						return null;
 					}
 			}
 		}
 		return loader;
 	}
+
 	/**
 	 * Load the bundle.
 	 * This methods overrides the Bundle method and does nothing.
@@ -296,21 +297,27 @@ public class SystemBundle extends BundleHost {
 	protected boolean checkExportPackagePermission(String pkgName) {
 		return true;
 	}
+
 	protected boolean checkFragmentBundlePermission(String symbolicName) {
 		return true;
 	}
+
 	protected boolean checkFragmentHostPermission(String symbolicName) {
 		return true;
 	}
+
 	protected boolean checkImportPackagePermission(String pkgName) {
 		return true;
 	}
+
 	protected boolean checkPermissions() {
 		return true;
 	}
+
 	protected boolean checkProvideBundlePermission(String symbolicName) {
 		return true;
 	}
+
 	protected boolean checkRequireBundlePermission(String symbolicName) {
 		return true;
 	}

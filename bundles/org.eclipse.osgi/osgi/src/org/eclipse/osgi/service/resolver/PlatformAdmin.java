@@ -11,6 +11,7 @@
 package org.eclipse.osgi.service.resolver;
 
 import org.osgi.framework.BundleException;
+
 /**
  * Framework service which allows bundle programmers to inspect the bundles and
  * packages known to the Framework.  The PlatformAdmin service also allows bundles
@@ -33,7 +34,7 @@ public interface PlatformAdmin {
 	 */
 	// TODO Why is the state not associated with any resolver?
 	public State getState();
-	
+
 	/** 
 	 * Returns a state representing the current system. If there is need to make
 	 * changes to the returned state, a mutable state must be requested. 
@@ -46,6 +47,7 @@ public interface PlatformAdmin {
 	 */
 	// TODO Why is the state not associated with any resolver?
 	public State getState(boolean mutable);
+
 	/**
 	 * Returns a state helper object. State helpers provide convenience methods 
 	 * for manipulating states. 
@@ -58,6 +60,7 @@ public interface PlatformAdmin {
 	 * @see StateHelper
 	 */
 	public StateHelper getStateHelper();
+
 	/**
 	 * Commit the differences between the current state and the given state.
 	 * The given state must return true from State.isResolved() or an exception 
@@ -68,14 +71,14 @@ public interface PlatformAdmin {
 	 * 	current state or if the given state is not resolved.
 	 */
 	public void commit(State state) throws BundleException;
-	
+
 	/**
 	 * Returns a resolver supplied by the system.  The returned resolver 
 	 * will not be associated with any state.
 	 * @return a system resolver
 	 */
 	public Resolver getResolver();
-	
+
 	/**
 	 * Returns a factory that knows how to create state objects, such as bundle 
 	 * descriptions and the different types of version constraints.

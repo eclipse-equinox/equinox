@@ -18,9 +18,11 @@ import org.osgi.framework.ServiceReference;
 
 public class EclipseCommandProvider implements CommandProvider {
 	private BundleContext context;
+
 	public EclipseCommandProvider(BundleContext context) {
 		this.context = context;
 	}
+
 	public String getHelp() {
 		StringBuffer help = new StringBuffer(512);
 		help.append(EclipseAdaptorMsg.NEW_LINE);
@@ -31,6 +33,7 @@ public class EclipseCommandProvider implements CommandProvider {
 		help.append("\tdiag - " + EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONSOLE_HELP_DIAG_COMMAND_DESCRIPTION"));//$NON-NLS-1$
 		return help.toString();
 	}
+
 	private BundleDescription getBundleDescriptionFromToken(State state, String token) {
 		try {
 			long id = Long.parseLong(token);
@@ -42,6 +45,7 @@ public class EclipseCommandProvider implements CommandProvider {
 		}
 		return null;
 	}
+
 	public void _diag(CommandInterpreter ci) throws Exception {
 		String nextArg = ci.nextArgument();
 		if (nextArg == null) {

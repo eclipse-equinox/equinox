@@ -17,15 +17,19 @@ import org.osgi.framework.BundleException;
 
 public class SimpleBundleInstaller implements BundleInstaller {
 	private State state;
+
 	public SimpleBundleInstaller(State state) {
 		this.state = state;
 	}
+
 	public void installBundle(BundleDescription toInstall) throws BundleException {
 		state.addBundle(toInstall);
 	}
+
 	public void uninstallBundle(BundleDescription toUninstall) throws BundleException {
 		state.removeBundle(toUninstall);
 	}
+
 	public void updateBundle(BundleDescription toUpdate) throws BundleException {
 		//TODO
 	}

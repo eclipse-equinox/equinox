@@ -20,11 +20,13 @@ public class EclipseBundleInstaller implements BundleInstaller {
 	public void installBundle(BundleDescription toInstall) throws BundleException {
 		EclipseAdaptor.getDefault().getContext().installBundle(toInstall.getLocation());
 	}
+
 	public void uninstallBundle(BundleDescription toUninstallId) throws BundleException {
 		Bundle toUninstall = EclipseAdaptor.getDefault().getContext().getBundle(toUninstallId.getBundleId());
 		if (toUninstall != null)
 			toUninstall.uninstall();
 	}
+
 	public void updateBundle(BundleDescription toUpdateId) throws BundleException {
 		Bundle toUpdate = EclipseAdaptor.getDefault().getContext().getBundle(toUpdateId.getBundleId());
 		if (toUpdate != null)

@@ -16,6 +16,7 @@ import org.eclipse.osgi.tests.services.datalocation.SimpleTests;
 
 public class AutomatedTests extends TestCase {
 	public final static String PI_OSGI_TESTS = "org.eclipse.osgi.tests";
+
 	/**
 	 * AllTests constructor comment.
 	 * @param name java.lang.String
@@ -23,6 +24,7 @@ public class AutomatedTests extends TestCase {
 	public AutomatedTests() {
 		super(null);
 	}
+
 	/**
 	 * AllTests constructor comment.
 	 * @param name java.lang.String
@@ -30,6 +32,7 @@ public class AutomatedTests extends TestCase {
 	public AutomatedTests(String name) {
 		super(name);
 	}
+
 	public static Test suite() {
 		TestSuite suite = new TestSuite(AutomatedTests.class.getName());
 		suite.addTest(new TestSuite(SimpleTests.class));

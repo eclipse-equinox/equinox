@@ -9,6 +9,7 @@
  *     IBM Corporation - initial API and implementation 
  *******************************************************************************/
 package org.eclipse.core.runtime.adaptor;
+
 import java.io.InputStream;
 import java.util.*;
 import javax.xml.parsers.SAXParserFactory;
@@ -19,21 +20,21 @@ import org.xml.sax.helpers.DefaultHandler;
 public class PluginParser extends DefaultHandler implements IModel {
 	private PluginInfo manifestInfo = new PluginInfo();
 	private BundleContext context;
-	private String target;	// The targeted platform for the given manifest
-	
+	private String target; // The targeted platform for the given manifest
+
 	public class PluginInfo implements IPluginInfo {
 		private String schemaVersion;
 		private String pluginId;
 		private String version;
-		private String vendor;		
- 
+		private String vendor;
+
 		// an ordered list of library path names.
 		private ArrayList libraryPaths;
 		// TODO Should get rid of the libraries map and just have a
 		// list of library export statements instead.  Library paths must
 		// preserve order.
 		private Map libraries; //represent the libraries and their export statement
-		private ArrayList requires; 
+		private ArrayList requires;
 		private boolean requiresExpanded = false; //indicates if the requires have been processed.
 		private boolean compatibilityFound = false; //set to true is the requirement list contain compatilibity 
 		private String pluginClass;
@@ -47,16 +48,19 @@ public class PluginParser extends DefaultHandler implements IModel {
 		public boolean isFragment() {
 			return masterPluginId != null;
 		}
+
 		public String toString() {
 			return "plugin-id: " + pluginId + "  version: " + version + " libraries: " + libraries + " class:" + pluginClass + " master: " + masterPluginId + " master-version: " + masterVersion + " requires: " + requires + " singleton: " + singleton; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$
 		}
+
 		public Map getLibraries() {
 			if (libraries == null)
 				return new HashMap(0);
 			return libraries;
 		}
+
 		public ArrayList getRequires() {
-			if (!TARGET21.equals(target) && schemaVersion == null && ! requiresExpanded) {
+			if (!TARGET21.equals(target) && schemaVersion == null && !requiresExpanded) {
 				requiresExpanded = true;
 				if (requires == null) {
 					requires = new ArrayList(1);
@@ -64,7 +68,7 @@ public class PluginParser extends DefaultHandler implements IModel {
 				} else {
 					//Add elements on the requirement list of ui and help.
 					for (int i = 0; i < requires.size(); i++) {
-						Prerequisite analyzed = (Prerequisite) requires.get(i); 
+						Prerequisite analyzed = (Prerequisite) requires.get(i);
 						if ("org.eclipse.ui".equals(analyzed.getName())) { //$NON-NLS-1$					
 							requires.add(i + 1, new Prerequisite("org.eclipse.ui.workbench.texteditor", null, true, analyzed.isExported(), null)); //$NON-NLS-1$ 
 							requires.add(i + 1, new Prerequisite("org.eclipse.jface.text", null, true, analyzed.isExported(), null)); //$NON-NLS-1$ 
@@ -73,53 +77,64 @@ public class PluginParser extends DefaultHandler implements IModel {
 							requires.add(i + 1, new Prerequisite("org.eclipse.ui.ide", null, true, analyzed.isExported(), null)); //$NON-NLS-1$ 
 						} else if ("org.eclipse.help".equals(analyzed.getName())) { //$NON-NLS-1$ 
 							requires.add(i + 1, new Prerequisite("org.eclipse.help.base", null, true, analyzed.isExported(), null)); //$NON-NLS-1$ 
-						} else if (PluginConverterImpl.PI_RUNTIME.equals(analyzed.getName()) && ! compatibilityFound) {
+						} else if (PluginConverterImpl.PI_RUNTIME.equals(analyzed.getName()) && !compatibilityFound) {
 							requires.add(i + 1, new Prerequisite(PluginConverterImpl.PI_RUNTIME_COMPATIBILITY, null, false, analyzed.isExported(), null));
 						}
 					}
-					if (! requires.contains(new Prerequisite(PluginConverterImpl.PI_RUNTIME_COMPATIBILITY, null, false, false, null))) {
+					if (!requires.contains(new Prerequisite(PluginConverterImpl.PI_RUNTIME_COMPATIBILITY, null, false, false, null))) {
 						requires.add(new Prerequisite(PluginConverterImpl.PI_RUNTIME_COMPATIBILITY, null, false, false, null));
 					}
 				}
 			}
 			if (requires == null)
 				return requires = new ArrayList(0);
-			
+
 			return requires;
 		}
+
 		public String getMasterId() {
 			return masterPluginId;
 		}
+
 		public String getMasterVersion() {
 			return masterVersion;
 		}
+
 		public String getPluginClass() {
 			return pluginClass;
 		}
+
 		public String getUniqueId() {
 			return pluginId;
 		}
+
 		public String getVersion() {
 			return version;
 		}
+
 		public Set getPackageFilters() {
 			return filters;
 		}
+
 		public String[] getLibrariesName() {
 			if (libraryPaths == null)
 				return new String[0];
 			return (String[]) libraryPaths.toArray(new String[libraryPaths.size()]);
 		}
+
 		public String getPluginName() {
 			return pluginName;
 		}
+
 		public String getProviderName() {
 			return vendor;
 		}
+
 		public boolean isSingleton() {
 			return singleton;
 		}
 	}
+
 	// File name for this plugin or fragment
 	// This to help with error reporting
 	String locationName = null;
@@ -151,6 +166,7 @@ public class PluginParser extends DefaultHandler implements IModel {
 		this.context = context;
 		this.target = target;
 	}
+
 	/**
 	 * Receive a Locator object for document events.
 	 * 
@@ -167,8 +183,10 @@ public class PluginParser extends DefaultHandler implements IModel {
 	public void setDocumentLocator(Locator locator) {
 		this.locator = locator;
 	}
+
 	public void endDocument() {
 	}
+
 	public void endElement(String uri, String elementName, String qName) {
 		switch (((Integer) stateStack.peek()).intValue()) {
 			case IGNORED_ELEMENT_STATE :
@@ -199,14 +217,14 @@ public class PluginParser extends DefaultHandler implements IModel {
 			case RUNTIME_LIBRARY_STATE :
 				if (elementName.equals(LIBRARY)) {
 					String curLibrary = (String) objectStack.pop();
-					if(! curLibrary.trim().equals("")) { //$NON-NLS-1$
+					if (!curLibrary.trim().equals("")) { //$NON-NLS-1$
 						Vector exportsVector = (Vector) objectStack.pop();
-						if (manifestInfo.libraries == null){
+						if (manifestInfo.libraries == null) {
 							manifestInfo.libraries = new HashMap(3);
 							manifestInfo.libraryPaths = new ArrayList(3);
 						}
 						manifestInfo.libraries.put(curLibrary, exportsVector);
-						manifestInfo.libraryPaths.add(curLibrary.replace('\\','/'));
+						manifestInfo.libraryPaths.add(curLibrary.replace('\\', '/'));
 					}
 					stateStack.pop();
 				}
@@ -225,23 +243,28 @@ public class PluginParser extends DefaultHandler implements IModel {
 				break;
 		}
 	}
+
 	public void error(SAXParseException ex) {
 		logStatus(ex);
 	}
+
 	public void fatalError(SAXParseException ex) throws SAXException {
 		logStatus(ex);
 		throw ex;
 	}
+
 	public void handleExtensionPointState(String elementName, Attributes attributes) {
 		// mark the plugin as singleton and ignore all elements under extension points (if there are any)
 		manifestInfo.singleton = true;
 		stateStack.push(new Integer(IGNORED_ELEMENT_STATE));
 	}
+
 	public void handleExtensionState(String elementName, Attributes attributes) {
 		// mark the plugin as singleton and ignore all elements under extension (if there are any)
-		manifestInfo.singleton = true;		
+		manifestInfo.singleton = true;
 		stateStack.push(new Integer(CONFIGURATION_ELEMENT_STATE));
 	}
+
 	public void handleInitialState(String elementName, Attributes attributes) {
 		if (elementName.equals(PLUGIN)) {
 			stateStack.push(new Integer(PLUGIN_STATE));
@@ -254,11 +277,13 @@ public class PluginParser extends DefaultHandler implements IModel {
 			//	internalError(Policy.bind("parse.unknownTopElement", elementName)); //$NON-NLS-1$
 		}
 	}
+
 	public void handleLibraryExportState(String elementName, Attributes attributes) {
 		// All elements ignored.
 		stateStack.push(new Integer(IGNORED_ELEMENT_STATE));
 		// internalError(Policy.bind("parse.unknownElement", LIBRARY_EXPORT, elementName)); //$NON-NLS-1$
 	}
+
 	public void handleLibraryState(String elementName, Attributes attributes) {
 		if (elementName.equals(LIBRARY_EXPORT)) {
 			// Change State
@@ -287,6 +312,7 @@ public class PluginParser extends DefaultHandler implements IModel {
 		stateStack.push(new Integer(IGNORED_ELEMENT_STATE));
 		return;
 	}
+
 	public void handlePluginState(String elementName, Attributes attributes) {
 		if (elementName.equals(RUNTIME)) {
 			// We should only have one Runtime element in a plugin or fragment
@@ -319,10 +345,12 @@ public class PluginParser extends DefaultHandler implements IModel {
 		// Set the state to indicate that this element will be ignored
 		stateStack.push(new Integer(IGNORED_ELEMENT_STATE));
 	}
+
 	public void handleRequiresImportState(String elementName, Attributes attributes) {
 		// All elements ignored.
 		stateStack.push(new Integer(IGNORED_ELEMENT_STATE));
 	}
+
 	public void handleRequiresState(String elementName, Attributes attributes) {
 		if (elementName.equals(PLUGIN_REQUIRES_IMPORT)) {
 			parsePluginRequiresImport(attributes);
@@ -332,6 +360,7 @@ public class PluginParser extends DefaultHandler implements IModel {
 		// Set the state to indicate that this element will be ignored
 		stateStack.push(new Integer(IGNORED_ELEMENT_STATE));
 	}
+
 	public void handleRuntimeState(String elementName, Attributes attributes) {
 		if (elementName.equals(LIBRARY)) {
 			// Change State
@@ -344,6 +373,7 @@ public class PluginParser extends DefaultHandler implements IModel {
 		// Set the state to indicate that this element will be ignored
 		stateStack.push(new Integer(IGNORED_ELEMENT_STATE));
 	}
+
 	private void logStatus(SAXParseException ex) {
 		String name = ex.getSystemId();
 		if (name == null)
@@ -355,7 +385,7 @@ public class PluginParser extends DefaultHandler implements IModel {
 		String msg;
 		if (name.equals("")) //$NON-NLS-1$ 
 			msg = "parse.error";//Policy.bind("parse.error",
-											 // ex.getMessage()); //$NON-NLS-1$
+		// ex.getMessage()); //$NON-NLS-1$
 		else
 			msg = "parse.errorNameLineColumn";
 		//Policy.bind("parse.errorNameLineColumn", //$NON-NLS-1$
@@ -364,6 +394,7 @@ public class PluginParser extends DefaultHandler implements IModel {
 		//                factory.error(new Status(IStatus.WARNING, Platform.PI_RUNTIME,
 		// Platform.PARSE_PROBLEM, msg, ex));
 	}
+
 	synchronized public PluginInfo parsePlugin(InputStream in) throws Exception {
 		SAXParserFactory factory = acquireXMLParsing();
 		if (factory == null)
@@ -378,6 +409,7 @@ public class PluginParser extends DefaultHandler implements IModel {
 			releaseXMLParsing();
 		}
 	}
+
 	private SAXParserFactory acquireXMLParsing() {
 		if (context == null) {
 			return SAXParserFactory.newInstance();
@@ -387,10 +419,12 @@ public class PluginParser extends DefaultHandler implements IModel {
 			return null;
 		return (SAXParserFactory) context.getService(parserReference);
 	}
+
 	private void releaseXMLParsing() {
 		if (parserReference != null)
 			context.ungetService(parserReference);
 	}
+
 	public void parseFragmentAttributes(Attributes attributes) {
 		// process attributes
 		objectStack.push(manifestInfo);
@@ -412,12 +446,14 @@ public class PluginParser extends DefaultHandler implements IModel {
 				manifestInfo.masterVersion = attrValue;
 		}
 	}
+
 	public void parseLibraryAttributes(Attributes attributes) {
 		// Push a vector to hold the export mask
 		objectStack.push(new Vector());
 		String current = attributes.getValue("", LIBRARY_NAME); //$NON-NLS-1$ 
 		objectStack.push(current);
 	}
+
 	public void parsePluginAttributes(Attributes attributes) {
 		// process attributes
 		objectStack.push(manifestInfo);
@@ -437,27 +473,34 @@ public class PluginParser extends DefaultHandler implements IModel {
 				manifestInfo.pluginClass = attrValue;
 		}
 	}
+
 	public class Prerequisite {
 		String name;
 		String version;
 		boolean optional;
-		boolean export; 
+		boolean export;
 		String match;
+
 		public boolean isExported() {
 			return export;
 		}
+
 		public String getMatch() {
 			return match;
 		}
+
 		public String getName() {
 			return name;
 		}
+
 		public boolean isOptional() {
 			return optional;
 		}
+
 		public String getVersion() {
 			return version;
 		}
+
 		public Prerequisite(String preqName, String prereqVersion, boolean isOtional, boolean isExported, String prereqMatch) {
 			name = preqName;
 			version = prereqVersion;
@@ -465,28 +508,30 @@ public class PluginParser extends DefaultHandler implements IModel {
 			export = isExported;
 			match = prereqMatch;
 		}
+
 		public String toString() {
 			return name;
 		}
+
 		public boolean equals(Object prereq) {
-			if (! (prereq instanceof Prerequisite) )
+			if (!(prereq instanceof Prerequisite))
 				return false;
 			return name.equals(((Prerequisite) prereq).name);
 		}
 	}
-	
+
 	public void parsePluginRequiresImport(Attributes attributes) {
 		if (manifestInfo.requires == null) {
 			manifestInfo.requires = new ArrayList();
 			// to avoid cycles
-//			if (!manifestInfo.pluginId.equals(PluginConverterImpl.PI_RUNTIME))  //$NON-NLS-1$
-//				manifestInfo.requires.add(new Prerequisite(PluginConverterImpl.PI_RUNTIME, null, false, false, null)); //$NON-NLS-1$
+			//			if (!manifestInfo.pluginId.equals(PluginConverterImpl.PI_RUNTIME))  //$NON-NLS-1$
+			//				manifestInfo.requires.add(new Prerequisite(PluginConverterImpl.PI_RUNTIME, null, false, false, null)); //$NON-NLS-1$
 		}
 		// process attributes
 		String plugin = attributes.getValue("", PLUGIN_REQUIRES_PLUGIN); //$NON-NLS-1$ 
 		if (plugin == null)
 			return;
-		if (plugin.equals(PluginConverterImpl.PI_BOOT))  //$NON-NLS-1$//$NON-NLS-2$
+		if (plugin.equals(PluginConverterImpl.PI_BOOT)) //$NON-NLS-1$//$NON-NLS-2$
 			return;
 		if (plugin.equals(PluginConverterImpl.PI_RUNTIME_COMPATIBILITY))
 			manifestInfo.compatibilityFound = true;
@@ -496,8 +541,10 @@ public class PluginParser extends DefaultHandler implements IModel {
 		String match = attributes.getValue("", PLUGIN_REQUIRES_MATCH); //$NON-NLS-1$
 		manifestInfo.requires.add(new Prerequisite(plugin, version, "true".equalsIgnoreCase(optional) ? true : false, "true".equalsIgnoreCase(export) ? true : false, match)); //$NON-NLS-1$  //$NON-NLS-2$
 	}
+
 	public void parseRequiresAttributes(Attributes attributes) {
 	}
+
 	static String replace(String s, String from, String to) {
 		String str = s;
 		int fromLen = from.length();
@@ -509,9 +556,11 @@ public class PluginParser extends DefaultHandler implements IModel {
 		}
 		return str;
 	}
+
 	public void startDocument() {
 		stateStack.push(new Integer(INITIAL_STATE));
 	}
+
 	public void startElement(String uri, String elementName, String qName, Attributes attributes) {
 		switch (((Integer) stateStack.peek()).intValue()) {
 			case INITIAL_STATE :
@@ -549,9 +598,11 @@ public class PluginParser extends DefaultHandler implements IModel {
 		// //$NON-NLS-1$
 		}
 	}
+
 	public void warning(SAXParseException ex) {
 		logStatus(ex);
 	}
+
 	private void internalError(String message) {
 		//                if (locationName != null)
 		//                        factory.error(new Status(IStatus.WARNING, Platform.PI_RUNTIME,
@@ -561,6 +612,7 @@ public class PluginParser extends DefaultHandler implements IModel {
 		//                        factory.error(new Status(IStatus.WARNING, Platform.PI_RUNTIME,
 		// Platform.PARSE_PROBLEM, message, null));
 	}
+
 	public void processingInstruction(String target, String data) throws SAXException {
 		// Since 3.0, a processing instruction of the form <?eclipse version="3.0"?> at
 		// the start of the manifest file is used to indicate the plug-in manifest

@@ -12,9 +12,11 @@ package org.eclipse.core.runtime.adaptor;
 
 public class Semaphore {
 	protected long notifications;
+
 	public Semaphore(int count) {
 		notifications = count;
 	}
+
 	/**
 	 * Attempts to acquire this semaphore.  Returns only when the semaphore has been acquired.
 	 */
@@ -31,6 +33,7 @@ public class Semaphore {
 			}
 		}
 	}
+
 	/**
 	 * Attempts to acquire this semaphore.  Returns true if it was successfully acquired,
 	 * and false otherwise.
@@ -53,10 +56,12 @@ public class Semaphore {
 			timeLeft = start + delay - System.currentTimeMillis();
 		}
 	}
+
 	public synchronized void release() {
 		notifications++;
 		notifyAll();
 	}
+
 	// for debug only
 	public String toString() {
 		return "Semaphore(" + notifications + ")"; //$NON-NLS-1$ //$NON-NLS-2$

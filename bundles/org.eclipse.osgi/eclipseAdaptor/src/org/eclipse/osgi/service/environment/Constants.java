@@ -12,7 +12,7 @@ package org.eclipse.osgi.service.environment;
 
 public interface Constants {
 	//TODO These constants need to be aligned with the OSGi ones. See page 64-588 of the spec
-	
+
 	/**
 	 * Constant string (value "win32") indicating the platform is running on a
 	 * Window 32-bit operating system (e.g., Windows 98, NT, 2000).
@@ -98,7 +98,7 @@ public interface Constants {
 	 * @since 3.0
 	 */
 	public static final String ARCH_AMD64 = "amd64";//$NON-NLS-1$
-	
+
 	/**
 	 * Constant string (value "win32") indicating the platform is running on a
 	 * machine using the Windows windowing system.

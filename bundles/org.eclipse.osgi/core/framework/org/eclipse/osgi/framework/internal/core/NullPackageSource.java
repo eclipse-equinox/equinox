@@ -20,18 +20,23 @@ public class NullPackageSource extends PackageSource {
 	public NullPackageSource(String name) {
 		this.id = name;
 	}
+
 	public BundleLoaderProxy getSupplier() {
 		return null;
 	}
+
 	public boolean isMultivalued() {
 		return false;
 	}
+
 	public BundleLoaderProxy[] getSuppliers() {
 		return null;
 	}
+
 	public boolean isNullSource() {
 		return true;
 	}
+
 	public String toString() {
 		return id + " -> null";
 	}

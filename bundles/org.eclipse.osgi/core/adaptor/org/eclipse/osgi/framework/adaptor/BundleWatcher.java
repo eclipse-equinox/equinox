@@ -10,7 +10,9 @@
  *******************************************************************************/
 package org.eclipse.osgi.framework.adaptor;
 
-import org.osgi.framework.Bundle;;
+import org.osgi.framework.Bundle;
+
+;
 
 /**
  * Contains information about activated bundles and acts as the main 
@@ -19,5 +21,6 @@ import org.osgi.framework.Bundle;;
 
 public interface BundleWatcher {
 	public void startActivation(Bundle bundle);
+
 	public void endActivation(Bundle bundle);
 }

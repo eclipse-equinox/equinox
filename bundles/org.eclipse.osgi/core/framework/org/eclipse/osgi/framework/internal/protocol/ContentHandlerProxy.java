@@ -98,18 +98,18 @@ public class ContentHandlerProxy extends ContentHandler implements ServiceTracke
 
 		if (reference == contentHandlerServiceReference) {
 			if (newrank < ranking) //The ContentHandler we are currently
-				//using has dropped it's ranking below a ContentHandler registered for the same protocol.  
-				//We need to swap out ContentHandlers.
-				//this should get us the highest ranked service, if available
-				{
+			//using has dropped it's ranking below a ContentHandler registered for the same protocol.  
+			//We need to swap out ContentHandlers.
+			//this should get us the highest ranked service, if available
+			{
 				ServiceReference newReference = contentHandlerServiceTracker.getServiceReference();
 				if (newReference != contentHandlerServiceReference && newReference != null) {
 					setNewHandler(newReference, ((Integer) newReference.getProperty(Constants.SERVICE_RANKING)).intValue());
 				}
 			}
 		} else if (newrank > ranking) //the service changed is another URLHandler that we are not currently using
-			//If it's ranking is higher, we must swap it in.
-			{
+		//If it's ranking is higher, we must swap it in.
+		{
 			setNewHandler(reference, newrank);
 		}
 
@@ -152,8 +152,8 @@ public class ContentHandlerProxy extends ContentHandler implements ServiceTracke
 	class DefaultContentHandler extends ContentHandler {
 
 		/**
-			* @see java.net.ContentHandler#getContent(URLConnection)
-			*/
+		 * @see java.net.ContentHandler#getContent(URLConnection)
+		 */
 		public Object getContent(URLConnection uConn) throws IOException {
 			return uConn.getInputStream();
 		}

@@ -72,7 +72,7 @@ import org.eclipse.osgi.framework.util.Tokenizer;
  * <ul>
  * <li>with the Default FrameworkAdaptor
  * <li>without a console window
-  * <li>without the remote agent
+ * <li>without the remote agent
  * </ul>
  */
 public class Launcher {
@@ -278,7 +278,7 @@ public class Launcher {
 		// They may be enclosed in quotes.
 		// Store them in a vector until we know how many there are.
 		Vector v = new Vector();
-		parseloop : while (true) {
+		parseloop: while (true) {
 			tok.getChar(); // advance to next token
 			String arg = tok.getString(":");
 			if (arg == null) {
@@ -299,11 +299,11 @@ public class Launcher {
 	}
 
 	/**
-		 *  Remembers that the -application option has been requested.  Parses off the application parameters
-		 *  into a String []
-		 *
-		 * @param tok The rest of the -application parameter string that contains the application arguments
-		 */
+	 *  Remembers that the -application option has been requested.  Parses off the application parameters
+	 *  into a String []
+	 *
+	 * @param tok The rest of the -application parameter string that contains the application arguments
+	 */
 	protected void _application(String command) {
 		Tokenizer tok = new Tokenizer(command);
 		// first token is always "-adaptor"
@@ -312,7 +312,7 @@ public class Launcher {
 		// they may be enclosed in quotes
 		// store them in a vector until we know how many there are
 		Vector v = new Vector();
-		parseloop : while (true) {
+		parseloop: while (true) {
 			tok.getChar(); // advance to next token
 			String arg = tok.getString(":");
 			if (arg == null) {
@@ -343,9 +343,9 @@ public class Launcher {
 	protected FrameworkAdaptor doAdaptor() throws Exception {
 
 		Class adaptorClass = Class.forName(adaptorClassName);
-		Class[] constructorArgs = new Class[] { String[].class };
+		Class[] constructorArgs = new Class[] {String[].class};
 		Constructor constructor = adaptorClass.getConstructor(constructorArgs);
-		return (FrameworkAdaptor) constructor.newInstance(new Object[] { adaptorArgs });
+		return (FrameworkAdaptor) constructor.newInstance(new Object[] {adaptorArgs});
 	}
 
 	/**
@@ -383,11 +383,11 @@ public class Launcher {
 		try {
 			Class osgiconsoleClass = Class.forName(osgiConsoleClazz);
 			if (consolePort.length() == 0) {
-				parameterTypes = new Class[] { OSGi.class, String[].class };
-				parameters = new Object[] { osgi, consoleArgs };
+				parameterTypes = new Class[] {OSGi.class, String[].class};
+				parameters = new Object[] {osgi, consoleArgs};
 			} else {
-				parameterTypes = new Class[] { OSGi.class, int.class, String[].class };
-				parameters = new Object[] { osgi, new Integer(consolePort), consoleArgs };
+				parameterTypes = new Class[] {OSGi.class, int.class, String[].class};
+				parameters = new Object[] {osgi, new Integer(consolePort), consoleArgs};
 			}
 			consoleConstructor = osgiconsoleClass.getConstructor(parameterTypes);
 			osgiconsole = consoleConstructor.newInstance(parameters);

@@ -24,23 +24,20 @@ import org.eclipse.osgi.framework.internal.core.AbstractBundle;
  * URLStreamHandler the bundleentry protocol.
  */
 
-public class Handler extends BundleResourceHandler
-{
+public class Handler extends BundleResourceHandler {
 
-    /**
-     * Constructor for a bundle protocol resource URLStreamHandler.
-     */
-    public Handler()
-    {
-    	super();
-    }
+	/**
+	 * Constructor for a bundle protocol resource URLStreamHandler.
+	 */
+	public Handler() {
+		super();
+	}
 
-    public Handler(BundleEntry bundleEntry) {
-    	super(bundleEntry);
-    }
+	public Handler(BundleEntry bundleEntry) {
+		super(bundleEntry);
+	}
 
-    protected BundleEntry findBundleEntry(URL url, AbstractBundle bundle) throws IOException
-    {
+	protected BundleEntry findBundleEntry(URL url, AbstractBundle bundle) throws IOException {
 		AbstractBundleData bundleData = (AbstractBundleData) bundle.getBundleData();
 		BundleEntry entry = bundleData.getBaseBundleFile().getEntry(url.getPath());
 		if (entry == null)

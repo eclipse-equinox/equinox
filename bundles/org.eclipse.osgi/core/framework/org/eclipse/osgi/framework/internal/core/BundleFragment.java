@@ -231,7 +231,7 @@ public class BundleFragment extends AbstractBundle {
 		}
 		// cannot load a class from a fragment because there is no classloader
 		// associated with fragments.
-		throw new ClassNotFoundException(Msg.formatter.getString("BUNDLE_FRAGMENT_CNFE",name));
+		throw new ClassNotFoundException(Msg.formatter.getString("BUNDLE_FRAGMENT_CNFE", name));
 	}
 
 	/**

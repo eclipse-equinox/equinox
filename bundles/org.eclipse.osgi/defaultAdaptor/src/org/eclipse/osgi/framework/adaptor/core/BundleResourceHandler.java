@@ -25,8 +25,7 @@ import org.osgi.framework.BundleContext;
  * URLStreamHandler the bundleentry and bundleresource protocols.
  */
 
-public abstract class BundleResourceHandler extends URLStreamHandler
-{
+public abstract class BundleResourceHandler extends URLStreamHandler {
 	public static final String SECURITY_AUTHORIZED = "SECURITY_AUTHORIZED";
 	protected static BundleContext context;
 	protected BundleEntry bundleEntry;
@@ -34,182 +33,173 @@ public abstract class BundleResourceHandler extends URLStreamHandler
 	/** Single object for permission checks */
 	protected AdminPermission adminPermission;
 
-    /**
-     * Constructor for a bundle protocol resource URLStreamHandler.
-     */
-    public BundleResourceHandler()
-    {
-    }
+	/**
+	 * Constructor for a bundle protocol resource URLStreamHandler.
+	 */
+	public BundleResourceHandler() {
+	}
 
-    public BundleResourceHandler(BundleEntry bundleEntry) {
-    	this.bundleEntry = bundleEntry;
-    }
+	public BundleResourceHandler(BundleEntry bundleEntry) {
+		this.bundleEntry = bundleEntry;
+	}
 
-    /** 
-     * Parse reference URL. 
-     */
-    protected void parseURL(URL url, String str, int start, int end)
-    {
-    	if (end <= start)
-    		return;
-  
+	/** 
+	 * Parse reference URL. 
+	 */
+	protected void parseURL(URL url, String str, int start, int end) {
+		if (end <= start)
+			return;
+
 		// Check the permission of the caller to see if they
 		// are allowed access to the resource.
 		checkAdminPermission();
 
-    	String spec = "";
-    	if (start < end)
-    		spec = str.substring(start, end);
-    	end -= start;
+		String spec = "";
+		if (start < end)
+			spec = str.substring(start, end);
+		end -= start;
 
-    	String path;
-       	String bundleId;
+		String path;
+		String bundleId;
 
-       	int refIdx = spec.indexOf('#');
-       	int pathEnd = refIdx >= 0 ? refIdx : end;
+		int refIdx = spec.indexOf('#');
+		int pathEnd = refIdx >= 0 ? refIdx : end;
 
-   		if (spec.length()>=2 && spec.charAt(0) == '/' || spec.charAt(1) == '/') {
-    		int slash = spec.indexOf("/",2);
-    		if (slash < 0) {
-    			throw new IllegalArgumentException(AdaptorMsg.formatter.getString("URL_NO_PATH"));
-    		}
-    		bundleId = spec.substring(2,slash);
-    		path = spec.substring(slash,pathEnd);
-    	}
-    	else {
-    		// A call to a URL constructor has been made that
-    		// uses an authorized URL as its context.
-    		bundleId = url.getHost();
-    		if (spec.length() > 0 && spec.charAt(0) == '/') {
-    			// does not specify a relative path.
-				path = spec.substring(start,pathEnd);
-			} 
-    		else {
-    			// relative path specified.
-    			path = url.getPath() == null ? "" : url.getPath();
-    			int lastSlash = path.lastIndexOf('/');
-    			if (lastSlash >= 0)
-    				path = path.substring(0,lastSlash+1) + spec.substring(start,pathEnd);
-    			else
-    				path = spec.substring(start,pathEnd);
+		if (spec.length() >= 2 && spec.charAt(0) == '/' || spec.charAt(1) == '/') {
+			int slash = spec.indexOf("/", 2);
+			if (slash < 0) {
+				throw new IllegalArgumentException(AdaptorMsg.formatter.getString("URL_NO_PATH"));
 			}
-    		// null out bundleEntry because it will not be valid for the new path
-    		bundleEntry = null;
-    	}
+			bundleId = spec.substring(2, slash);
+			path = spec.substring(slash, pathEnd);
+		} else {
+			// A call to a URL constructor has been made that
+			// uses an authorized URL as its context.
+			bundleId = url.getHost();
+			if (spec.length() > 0 && spec.charAt(0) == '/') {
+				// does not specify a relative path.
+				path = spec.substring(start, pathEnd);
+			} else {
+				// relative path specified.
+				path = url.getPath() == null ? "" : url.getPath();
+				int lastSlash = path.lastIndexOf('/');
+				if (lastSlash >= 0)
+					path = path.substring(0, lastSlash + 1) + spec.substring(start, pathEnd);
+				else
+					path = spec.substring(start, pathEnd);
+			}
+			// null out bundleEntry because it will not be valid for the new path
+			bundleEntry = null;
+		}
 
-   		//modify path if there's any relative references
-   		int dotIndex;
-   		while ((dotIndex = path.indexOf("/./")) >= 0)
-   			path = path.substring(0, dotIndex + 1) + path.substring(dotIndex + 3);
-   		if (path.endsWith("/.")) 
-   			path = path.substring(0, path.length() - 1);
-   		while ((dotIndex = path.indexOf("/../")) >= 0) {
-   			if (dotIndex != 0)
-   				path = path.substring(0, path.lastIndexOf('/', dotIndex - 1)) + path.substring(dotIndex + 3);
-   			else
-   				path = path.substring(dotIndex + 3);
-   		}
-   		if (path.endsWith("/..") && path.length() > 3)
-   			path = path.substring(0, path.length() - 2 );
- 
-    	// Setting the authority portion of the URL to SECURITY_ATHORIZED
-    	// ensures that this URL was created by using this parseURL
-    	// method.  The openConnection method will only open URLs
-    	// that have the authority set to this.
-    	setURL(url, url.getProtocol(), bundleId, 0, SECURITY_AUTHORIZED, null, path, null, null);
-    }
+		//modify path if there's any relative references
+		int dotIndex;
+		while ((dotIndex = path.indexOf("/./")) >= 0)
+			path = path.substring(0, dotIndex + 1) + path.substring(dotIndex + 3);
+		if (path.endsWith("/."))
+			path = path.substring(0, path.length() - 1);
+		while ((dotIndex = path.indexOf("/../")) >= 0) {
+			if (dotIndex != 0)
+				path = path.substring(0, path.lastIndexOf('/', dotIndex - 1)) + path.substring(dotIndex + 3);
+			else
+				path = path.substring(dotIndex + 3);
+		}
+		if (path.endsWith("/..") && path.length() > 3)
+			path = path.substring(0, path.length() - 2);
 
-    /**
-     * Establishes a connection to the resource specified by <code>URL</code>.
-     * Since different protocols may have unique ways of connecting, it must be
-     * overridden by the subclass.
-     *
-     * @return java.net.URLConnection
-     * @param url java.net.URL
-     *
-     * @exception	IOException 	thrown if an IO error occurs during connection establishment
-     */
-    protected URLConnection openConnection(URL url) throws IOException
-    {
-    	String authority = url.getAuthority();
-    	// check to make sure that this URL was created using the
-    	// parseURL method.  This ensures the security check was done
-    	// at URL construction.
-    	if (!url.getAuthority().equals(SECURITY_AUTHORIZED)) {
-    		// No admin security check was made better check now.
-    		checkAdminPermission();
-    	}
+		// Setting the authority portion of the URL to SECURITY_ATHORIZED
+		// ensures that this URL was created by using this parseURL
+		// method.  The openConnection method will only open URLs
+		// that have the authority set to this.
+		setURL(url, url.getProtocol(), bundleId, 0, SECURITY_AUTHORIZED, null, path, null, null);
+	}
 
-    	if (bundleEntry != null){
-    		return (new BundleURLConnection(url,bundleEntry));
-    	}
-    	else {
-    		String bidString = url.getHost();
-    		if (bidString == null) {
-    			throw new IOException(AdaptorMsg.formatter.getString("URL_NO_BUNDLE_ID", url.toExternalForm()));
-    		}
-    		AbstractBundle bundle = null;
-    		try {
-    			Long bundleID = new Long(bidString);
-    			bundle = (AbstractBundle) context.getBundle(bundleID.longValue());
-    		} catch (NumberFormatException nfe) {
-    			throw new MalformedURLException(AdaptorMsg.formatter.getString("URL_INVALID_BUNDLE_ID", bidString));
-    		}
+	/**
+	 * Establishes a connection to the resource specified by <code>URL</code>.
+	 * Since different protocols may have unique ways of connecting, it must be
+	 * overridden by the subclass.
+	 *
+	 * @return java.net.URLConnection
+	 * @param url java.net.URL
+	 *
+	 * @exception	IOException 	thrown if an IO error occurs during connection establishment
+	 */
+	protected URLConnection openConnection(URL url) throws IOException {
+		String authority = url.getAuthority();
+		// check to make sure that this URL was created using the
+		// parseURL method.  This ensures the security check was done
+		// at URL construction.
+		if (!url.getAuthority().equals(SECURITY_AUTHORIZED)) {
+			// No admin security check was made better check now.
+			checkAdminPermission();
+		}
 
-    		if (bundle == null) {
-    			throw new IOException(AdaptorMsg.formatter.getString("URL_NO_BUNDLE_FOUND", url.toExternalForm()));
-    		}
-    		return(new BundleURLConnection(url, findBundleEntry(url,bundle)));	
-    	}
-    }
+		if (bundleEntry != null) {
+			return (new BundleURLConnection(url, bundleEntry));
+		} else {
+			String bidString = url.getHost();
+			if (bidString == null) {
+				throw new IOException(AdaptorMsg.formatter.getString("URL_NO_BUNDLE_ID", url.toExternalForm()));
+			}
+			AbstractBundle bundle = null;
+			try {
+				Long bundleID = new Long(bidString);
+				bundle = (AbstractBundle) context.getBundle(bundleID.longValue());
+			} catch (NumberFormatException nfe) {
+				throw new MalformedURLException(AdaptorMsg.formatter.getString("URL_INVALID_BUNDLE_ID", bidString));
+			}
 
-    /**
-     * Finds the bundle entry for this protocal.  This is handled
-     * differently for Bundle.gerResource() and Bundle.getEntry()
-     * because getResource uses the bundle classloader and getEntry
-     * only used the base bundle file.
-     * @param url The URL to find the BundleEntry for.
-     * @return
-     */
-    abstract protected BundleEntry findBundleEntry(URL url,AbstractBundle bundle) throws IOException;
+			if (bundle == null) {
+				throw new IOException(AdaptorMsg.formatter.getString("URL_NO_BUNDLE_FOUND", url.toExternalForm()));
+			}
+			return (new BundleURLConnection(url, findBundleEntry(url, bundle)));
+		}
+	}
 
-    /**
-     * Converts a bundle URL to a String.
-     *
-     * @param   url   the URL.
-     * @return  a string representation of the URL.
-     */
-    protected String toExternalForm(URL url)
-    {
-        StringBuffer result = new StringBuffer(url.getProtocol());
-        result.append("://");
+	/**
+	 * Finds the bundle entry for this protocal.  This is handled
+	 * differently for Bundle.gerResource() and Bundle.getEntry()
+	 * because getResource uses the bundle classloader and getEntry
+	 * only used the base bundle file.
+	 * @param url The URL to find the BundleEntry for.
+	 * @return
+	 */
+	abstract protected BundleEntry findBundleEntry(URL url, AbstractBundle bundle) throws IOException;
 
-        String bundleId = url.getHost();
-        if ((bundleId != null) && (bundleId.length() > 0))
-        {
-            result.append(bundleId);
-        }
+	/**
+	 * Converts a bundle URL to a String.
+	 *
+	 * @param   url   the URL.
+	 * @return  a string representation of the URL.
+	 */
+	protected String toExternalForm(URL url) {
+		StringBuffer result = new StringBuffer(url.getProtocol());
+		result.append("://");
 
-        String path = url.getPath();
-        if (path != null)
-        {
-            if ((path.length() > 0) && (path.charAt(0) != '/'))  /* if name doesn't have a leading slash */
-            {
-                result.append("/");
-            }
+		String bundleId = url.getHost();
+		if ((bundleId != null) && (bundleId.length() > 0)) {
+			result.append(bundleId);
+		}
 
-            result.append(path);
-        }
+		String path = url.getPath();
+		if (path != null) {
+			if ((path.length() > 0) && (path.charAt(0) != '/')) /* if name doesn't have a leading slash */
+			{
+				result.append("/");
+			}
 
-        return (result.toString());
-    }
+			result.append(path);
+		}
+
+		return (result.toString());
+	}
 
 	public static void setContext(BundleContext context) {
 		BundleResourceHandler.context = context;
 	}
 
 	protected int hashCode(URL url) {
-		int hash=0;
+		int hash = 0;
 		String protocol = url.getProtocol();
 		if (protocol != null)
 			hash += protocol.hashCode();
@@ -223,7 +213,6 @@ public abstract class BundleResourceHandler extends URLStreamHandler
 			hash += path.hashCode();
 		return hash;
 	}
-
 
 	protected boolean equals(URL url1, URL url2) {
 		return sameFile(url1, url2);
@@ -248,7 +237,7 @@ public abstract class BundleResourceHandler extends URLStreamHandler
 		if (!((p1 == p2) || (p1 != null && p1.equalsIgnoreCase(p2))))
 			return false;
 
-		if (!hostsEqual(url1,url2))
+		if (!hostsEqual(url1, url2))
 			return false;
 
 		String a1 = url1.getAuthority();

@@ -24,14 +24,12 @@ import org.eclipse.osgi.framework.internal.core.BundleLoader;
  * URLStreamHandler the bundleresource protocol.
  */
 
-public class Handler extends BundleResourceHandler
-{
+public class Handler extends BundleResourceHandler {
 
 	/**
 	 * Constructor for a bundle protocol resource URLStreamHandler.
 	 */
-	public Handler()
-	{
+	public Handler() {
 		super();
 	}
 
@@ -39,8 +37,7 @@ public class Handler extends BundleResourceHandler
 		super(bundleEntry);
 	}
 
-	protected BundleEntry findBundleEntry(URL url, AbstractBundle bundle) throws IOException
-	{
+	protected BundleEntry findBundleEntry(URL url, AbstractBundle bundle) throws IOException {
 		BundleLoader bundleLoader = bundle.getBundleLoader();
 		if (bundleLoader == null)
 			throw new FileNotFoundException(url.getPath());

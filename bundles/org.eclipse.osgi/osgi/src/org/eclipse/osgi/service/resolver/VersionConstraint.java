@@ -29,6 +29,7 @@ public interface VersionConstraint extends Cloneable {
 	 * @return this constraint's name
 	 */
 	public String getName();
+
 	/**
 	 * Returns the version required by this constraint to be satisfied, or 
 	 * <code>null</code> if none is defined.
@@ -36,6 +37,7 @@ public interface VersionConstraint extends Cloneable {
 	 * @return the version this constraint requires, or <code>null</code> 
 	 */
 	public Version getVersionSpecification();
+
 	/**
 	 * Returns the actual version this constraint was resolved against, or 
 	 * <code>null</code> if it is not resolved.
@@ -44,6 +46,7 @@ public interface VersionConstraint extends Cloneable {
 	 * @see #isResolved
 	 */
 	public Version getActualVersion();
+
 	/**
 	 * Returns the matching rule for this constraint.
 	 * 
@@ -55,12 +58,14 @@ public interface VersionConstraint extends Cloneable {
 	 * @see #GREATER_EQUAL_MATCH
 	 */
 	public byte getMatchingRule();
+
 	/**
 	 * Returns the bundle that declares this constraint.
 	 * 
 	 * @return a bundle description
 	 */
 	public BundleDescription getBundle();
+
 	/**
 	 * Returns the bundle that satisfies this constraint, if it is resolved.
 	 *  
@@ -68,6 +73,7 @@ public interface VersionConstraint extends Cloneable {
 	 * @see #isResolved
 	 */
 	public BundleDescription getSupplier();
+
 	/**
 	 * Returns whether this constraint is resolved. A resolved constraint 
 	 * is guaranteed to have its supplier defined. 
@@ -76,6 +82,7 @@ public interface VersionConstraint extends Cloneable {
 	 * otherwise
 	 */
 	public boolean isResolved();
+
 	/**
 	 * Returns whether this constraint could be satisfied by the given version.
 	 * This will depend on the required version, the given version, and the 
@@ -87,5 +94,5 @@ public interface VersionConstraint extends Cloneable {
 	 * @return <code>true</code> if this constraint could be resolved, 
 	 * <code>false</code> otherwise 
 	 */
-	boolean isSatisfiedBy(Version version);	
+	boolean isSatisfiedBy(Version version);
 }

@@ -50,7 +50,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 	/**
 	 * The System Bundle's BundleContext.
 	 */
-	protected BundleContext context;	//TODO Rename to systemBundleContext
+	protected BundleContext context; //TODO Rename to systemBundleContext
 
 	/**
 	 * The initial bundle start level.
@@ -119,8 +119,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 	/**
 	 * @see org.eclipse.osgi.framework.adaptor.FrameworkAdaptor#frameworkStart(org.osgi.framework.BundleContext)
 	 */
-	public void frameworkStart(BundleContext context) throws BundleException
-	{
+	public void frameworkStart(BundleContext context) throws BundleException {
 		this.context = context;
 		BundleResourceHandler.setContext(context);
 	}
@@ -128,8 +127,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 	/**
 	 * @see org.eclipse.osgi.framework.adaptor.FrameworkAdaptor#frameworkStop(org.osgi.framework.BundleContext)
 	 */
-	public void frameworkStop(BundleContext context) throws BundleException
-	{
+	public void frameworkStop(BundleContext context) throws BundleException {
 		this.context = null;
 		BundleResourceHandler.setContext(null);
 	}
@@ -143,8 +141,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 	/**
 	 * @see org.eclipse.osgi.framework.adaptor.FrameworkAdaptor#getExportPackages()
 	 */
-	public String getExportPackages()
-	{
+	public String getExportPackages() {
 		if (manifest == null)
 			return null;
 		return (String) manifest.get(Constants.EXPORT_PACKAGE);
@@ -153,8 +150,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 	/**
 	 * @see org.eclipse.osgi.framework.adaptor.FrameworkAdaptor#getExportServices()
 	 */
-	public String getExportServices()
-	{
+	public String getExportServices() {
 		if (manifest == null)
 			return null;
 		return (String) manifest.get(Constants.EXPORT_SERVICE);
@@ -170,7 +166,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 	 * Returns the EventPublisher for this FrameworkAdaptor.
 	 * @return The EventPublisher.
 	 */
-	public EventPublisher getEventPublisher(){
+	public EventPublisher getEventPublisher() {
 		return eventPublisher;
 	}
 
@@ -203,48 +199,32 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 
 		String resource = System.getProperty(Constants.OSGI_PROPERTIES, Constants.DEFAULT_OSGI_PROPERTIES);
 
-		try
-		{
+		try {
 			InputStream in = null;
 			File file = new File(resource);
-			if (file.exists())
-			{
+			if (file.exists()) {
 				in = new FileInputStream(file);
 			}
 
-			if (in == null)
-			{
+			if (in == null) {
 				in = getClass().getResourceAsStream(resource);
 			}
 
-
-			if (in != null)
-			{
-				try
-				{
+			if (in != null) {
+				try {
 					properties.load(new BufferedInputStream(in));
-				}
-				finally
-				{
-					try
-					{
+				} finally {
+					try {
 						in.close();
-					}
-					catch (IOException ee)
-					{
+					} catch (IOException ee) {
 					}
 				}
-			}
-			else
-			{
+			} else {
 				if (Debug.DEBUG && Debug.DEBUG_GENERAL)
 					Debug.println("Skipping osgi.properties: " + resource);
 			}
-		}
-		catch (IOException e)
-		{
-			if (Debug.DEBUG && Debug.DEBUG_GENERAL)
-			{
+		} catch (IOException e) {
+			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 				Debug.println("Unable to load osgi.properties: " + e.getMessage());
 			}
 		}
@@ -259,7 +239,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 		InputStream in = null;
 		// walk up the class hierarchy until we find the ADAPTOR_MANIFEST.
 		Class adaptorClazz = getClass();
-		while (in == null && AbstractFrameworkAdaptor.class.isAssignableFrom(adaptorClazz) ) {
+		while (in == null && AbstractFrameworkAdaptor.class.isAssignableFrom(adaptorClazz)) {
 			in = adaptorClazz.getResourceAsStream(ADAPTOR_MANIFEST);
 			adaptorClazz = adaptorClazz.getSuperclass();
 		}
@@ -278,7 +258,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 		}
 	}
 
-	public BundleData createSystemBundleData() throws BundleException{
+	public BundleData createSystemBundleData() throws BundleException {
 		return new SystemBundleData(this);
 	}
 
@@ -290,19 +270,18 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 	 * @param outDir output directory to copy to.
 	 * @throws IOException if any error occurs during the copy.
 	 */
-	public static void copyDir(File inDir, File outDir) throws IOException{
+	public static void copyDir(File inDir, File outDir) throws IOException {
 		String[] files = inDir.list();
-		if (files != null && files.length>0) {
+		if (files != null && files.length > 0) {
 			outDir.mkdir();
-			for (int i=0; i<files.length; i++) {
-				File inFile = new File(inDir,files[i]);
-				File outFile = new File(outDir,files[i]);
+			for (int i = 0; i < files.length; i++) {
+				File inFile = new File(inDir, files[i]);
+				File outFile = new File(outDir, files[i]);
 				if (inFile.isDirectory()) {
-					copyDir(inFile,outFile);
-				}
-				else {
+					copyDir(inFile, outFile);
+				} else {
 					InputStream in = new FileInputStream(inFile);
-					readFile(in,outFile);
+					readFile(in, outFile);
 				}
 			}
 		}
@@ -311,10 +290,10 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 	/**
 	 * Read a file from an InputStream and write it to the file system.
 	 *
-     * @param is InputStream from which to read.
-     * @param file output file to create.
-     * @exception IOException
-     */
+	 * @param is InputStream from which to read.
+	 * @param file output file to create.
+	 * @exception IOException
+	 */
 	public static void readFile(InputStream in, File file) throws IOException {
 		FileOutputStream fos = null;
 		try {
@@ -353,7 +332,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 			}
 
 			throw e;
-		}	
+		}
 	}
 
 	public ClassLoader getBundleClassLoaderParent() {

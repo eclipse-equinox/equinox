@@ -236,10 +236,10 @@ public abstract class AbstractClassLoader extends ClassLoader implements BundleC
 		closed = true;
 	}
 
-	protected ClassLoader getParentPrivileged(){
+	protected ClassLoader getParentPrivileged() {
 		if (System.getSecurityManager() == null)
 			return getParent();
-		
+
 		return (ClassLoader) AccessController.doPrivileged(new PrivilegedAction() {
 			public Object run() {
 				return getParent();

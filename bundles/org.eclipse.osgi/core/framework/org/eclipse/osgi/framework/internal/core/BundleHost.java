@@ -32,7 +32,7 @@ public class BundleHost extends AbstractBundle {
 	 * The BundleLoader proxy; a lightweight object that acts as a proxy
 	 * to the BundleLoader and allows lazy creation of the BundleLoader object
 	 */
-	private BundleLoaderProxy proxy;	
+	private BundleLoaderProxy proxy;
 
 	/** The BundleContext that represents this Bundle and all of its fragments */
 	protected BundleContextImpl context;
@@ -555,7 +555,7 @@ public class BundleHost extends AbstractBundle {
 			if (fragments == null)
 				return null;
 			org.osgi.framework.Bundle[] result = new org.osgi.framework.Bundle[fragments.length];
-			System.arraycopy(fragments,0,result,0,result.length);
+			System.arraycopy(fragments, 0, result, 0, result.length);
 			return result;
 		}
 	}
@@ -575,19 +575,19 @@ public class BundleHost extends AbstractBundle {
 			boolean inserted = false;
 			// We must keep our fragments ordered by bundle ID; or 
 			// install order.
-			BundleFragment[] newFragments = new BundleFragment[fragments.length+1];
+			BundleFragment[] newFragments = new BundleFragment[fragments.length + 1];
 			for (int i = 0; i < fragments.length; i++) {
 				if (!inserted && fragment.getBundleId() < fragments[i].getBundleId()) {
 					// if the loader has already been created
 					// then we cannot attach a fragment into the middle
 					// of the fragment chain.
 					if (loader != null) {
-						throw new BundleException(Msg.formatter.getString("BUNDLE_LOADER_ATTACHMENT_ERROR", fragments[i].getSymbolicName(),getSymbolicName())); //$NON-NLS-1$
+						throw new BundleException(Msg.formatter.getString("BUNDLE_LOADER_ATTACHMENT_ERROR", fragments[i].getSymbolicName(), getSymbolicName())); //$NON-NLS-1$
 					}
 					newFragments[i] = fragment;
 					inserted = true;
 				}
-				newFragments[inserted ? i+1 : i] = fragments[i]; 
+				newFragments[inserted ? i + 1 : i] = fragments[i];
 			}
 		}
 
@@ -607,7 +607,7 @@ public class BundleHost extends AbstractBundle {
 						loader = new BundleLoader(this, getBundleDescription());
 						getLoaderProxy().setBundleLoader(loader);
 					} catch (BundleException e) {
-						framework.publishFrameworkEvent(FrameworkEvent.ERROR,this,e);
+						framework.publishFrameworkEvent(FrameworkEvent.ERROR, this, e);
 						return null;
 					}
 			}

@@ -19,15 +19,17 @@ public class SystemState extends StateImpl {
 		updateTimeStamp();
 		return true;
 	}
+
 	public boolean removeBundle(BundleDescription toRemove) {
 		if (!super.removeBundle(toRemove))
 			return false;
 		updateTimeStamp();
 		return true;
 	}
+
 	private void updateTimeStamp() {
 		if (timeStamp == Long.MAX_VALUE)
 			timeStamp = 0;
-		timeStamp++;		
+		timeStamp++;
 	}
 }

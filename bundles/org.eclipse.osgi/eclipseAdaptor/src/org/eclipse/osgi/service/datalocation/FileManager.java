@@ -34,24 +34,28 @@ import java.util.*;
  * </p>
  */
 public class FileManager {
-	
+
 	private class Entry {
 		int id;
 		long timeStamp;
-		
+
 		Entry(long timeStamp, int id) {
 			this.timeStamp = timeStamp;
 			this.id = id;
 		}
+
 		int getId() {
 			return id;
 		}
+
 		long getTimeStamp() {
 			return timeStamp;
 		}
+
 		void setId(int value) {
 			id = value;
 		}
+
 		void setTimeStamp(long value) {
 			timeStamp = value;
 		}
@@ -63,13 +67,12 @@ public class FileManager {
 	private File base;
 	private File tableFile = null;
 	private long tableStamp = 0L;
-	
+
 	private Properties table = new Properties();
 	private ArrayList changed = new ArrayList(5);
 
 	private static final String TABLE_FILE = ".fileTable";
 
-	
 	/**
 	 * Returns a new file manager for the area identified by the given base directory.
 	 * 
@@ -122,6 +125,7 @@ public class FileManager {
 			update(target, sources[i]);
 		}
 	}
+
 	/**
 	 * Returns the result of converting a list of comma-separated tokens into an array
 	 * 
@@ -172,7 +176,7 @@ public class FileManager {
 	 * @return the id of the file
 	 */
 	public int getId(String target) {
-		Entry entry = (Entry)table.get(target);
+		Entry entry = (Entry) table.get(target);
 		if (entry == null)
 			return -1;
 		return entry.getId();
@@ -186,7 +190,7 @@ public class FileManager {
 	 * @return whether or not the given file matches the disk content
 	 */
 	public boolean isCurrent(String target) {
-		Entry entry = (Entry)table.get(target);
+		Entry entry = (Entry) table.get(target);
 		long tableStamp = entry == null ? -1 : entry.getTimeStamp();
 		long fileStamp = new File(getAbsolutePath(target)).lastModified();
 		return tableStamp == fileStamp;
@@ -219,7 +223,7 @@ public class FileManager {
 	 * 	the given target is not managed
 	 */
 	public File lookup(String target) {
-		Entry entry = (Entry)table.get(target);
+		Entry entry = (Entry) table.get(target);
 		if (entry == null)
 			return null;
 		File result = new File(getAbsolutePath(target));
@@ -268,7 +272,7 @@ public class FileManager {
 		String destination = target + "." + id;
 		move(target, destination);
 	}
-	
+
 	/**
 	 * Removes the given file from management by this file manager.
 	 * 
@@ -293,14 +297,14 @@ public class FileManager {
 			throw new IOException("could not restore file table");
 		}
 		for (Enumeration e = table.keys(); e.hasMoreElements();) {
-			String file = (String)e.nextElement();
+			String file = (String) e.nextElement();
 			// if the entry has changed internally, update the value.
-			String[] elements = getArrayFromList((String)table.get(file));
+			String[] elements = getArrayFromList((String) table.get(file));
 			if (changed.indexOf(file) == -1) {
 				Entry entry = new Entry(Long.parseLong(elements[0]), Integer.parseInt(elements[1]));
 				table.put(file, entry);
 			} else {
-				Entry entry = (Entry)table.get(file);
+				Entry entry = (Entry) table.get(file);
 				entry.setId(entry.getId() + 1);
 				table.put(file, entry);
 			}
@@ -316,12 +320,12 @@ public class FileManager {
 			restore();
 		Properties props = new Properties();
 		for (Enumeration e = table.keys(); e.hasMoreElements();) {
-			String file = (String)e.nextElement();
-			Entry entry = (Entry)table.get(file);
+			String file = (String) e.nextElement();
+			Entry entry = (Entry) table.get(file);
 			String value = Long.toString(entry.getTimeStamp()) + "," + Integer.toString(entry.getId());
 			props.put(file, value);
 		}
-		
+
 		try {
 			props.store(fileStream, "safe table"); //$NON-NLS-1$
 		} catch (IOException e) {
@@ -332,7 +336,7 @@ public class FileManager {
 	private void update(String target, String source) {
 		String targetFile = getAbsolutePath(target);
 		move(getAbsolutePath(source), targetFile);
-		Entry entry = (Entry)table.get(target);
+		Entry entry = (Entry) table.get(target);
 		entry.setTimeStamp(new File(targetFile).lastModified());
 		entry.setId(entry.getId() + 1);
 		changed.add(target);
@@ -346,7 +350,7 @@ public class FileManager {
 	 * @return the managed timestamp of the given file
 	 */
 	public long getTimeStamp(String target) {
-		Entry entry = (Entry)table.get(target);
+		Entry entry = (Entry) table.get(target);
 		if (entry == null)
 			return 0L;
 		return entry.getTimeStamp();

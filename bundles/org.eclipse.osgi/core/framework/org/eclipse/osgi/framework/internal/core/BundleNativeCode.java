@@ -9,12 +9,14 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.osgi.framework.internal.core;
+
 import java.util.Enumeration;
 import java.util.Vector;
 import org.eclipse.osgi.service.resolver.Version;
 import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
+
 /**
  * This class represents a description of native code.
  * 
@@ -120,6 +122,7 @@ public class BundleNativeCode {
 	 * The AliasMapper used to alias OS Names.
 	 */
 	private static AliasMapper aliasMapper = Framework.aliasMapper;
+
 	/**
 	 * Constructor for BundleNativeCode. It reads bundle native code data from
 	 * the manifest file.
@@ -136,6 +139,7 @@ public class BundleNativeCode {
 		setAttribute(element, Constants.BUNDLE_NATIVECODE_LANGUAGE);
 		setAttribute(element, Constants.SELECTION_FILTER_ATTRIBUTE);
 	}
+
 	private void setAttribute(ManifestElement element, String attribute) {
 		String[] attrValues = element.getAttributes(attribute);
 		if (attrValues != null) {
@@ -144,6 +148,7 @@ public class BundleNativeCode {
 			}
 		}
 	}
+
 	/**
 	 * Returns the native code paths.
 	 * 
@@ -157,6 +162,7 @@ public class BundleNativeCode {
 		nativepaths.toArray(paths);
 		return (paths);
 	}
+
 	/**
 	 * addPath is used to add a new element to the list of native files.
 	 * 
@@ -169,6 +175,7 @@ public class BundleNativeCode {
 		}
 		nativepaths.addElement(nativepath);
 	}
+
 	/**
 	 * addAttribute is used to add the specification-version string to the
 	 * package description. It is the only key supported at this time.
@@ -214,6 +221,7 @@ public class BundleNativeCode {
 			return;
 		}
 	}
+
 	/**
 	 * Override toString. Return a String representation of this object
 	 * 
@@ -267,6 +275,7 @@ public class BundleNativeCode {
 		}
 		return (sb.toString());
 	}
+
 	/**
 	 * Return the match value for the given processor and os name. A higher
 	 * value indicates a better match.
@@ -288,6 +297,7 @@ public class BundleNativeCode {
 		}
 		return (0);
 	}
+
 	/**
 	 * Return the higest matching value for the given os version that is less
 	 * than or equal to the given os version.
@@ -319,6 +329,7 @@ public class BundleNativeCode {
 		}
 		return result;
 	}
+
 	/**
 	 * Return the match value for the given language. A higher value indicates
 	 * a better match.
@@ -336,6 +347,7 @@ public class BundleNativeCode {
 		}
 		return (0);
 	}
+
 	public boolean matchFilter() {
 		if (filterString == null) {
 			return true;
@@ -349,6 +361,7 @@ public class BundleNativeCode {
 		}
 		return filter.match(System.getProperties());
 	}
+
 	/**
 	 * Extension of Vector for attributes.
 	 */
@@ -360,6 +373,7 @@ public class BundleNativeCode {
 		Attribute() {
 			super(10, 10);
 		}
+
 		/**
 		 * Perform an "OR" operation on equals.
 		 * 
@@ -385,6 +399,7 @@ public class BundleNativeCode {
 			}
 			return (false);
 		}
+
 		/**
 		 * Add the object if it is not already in the vector.
 		 * 

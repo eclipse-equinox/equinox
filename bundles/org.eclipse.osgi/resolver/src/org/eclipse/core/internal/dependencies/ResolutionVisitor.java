@@ -17,18 +17,23 @@ import org.eclipse.core.dependencies.*;
 
 public class ResolutionVisitor implements IElementSetVisitor {
 	private int order;
+
 	public ResolutionVisitor(int order) {
 		this.order = order;
 	}
+
 	public int getOrder() {
 		return order;
 	}
+
 	public Collection getAncestors(ElementSet elementSet) {
 		return elementSet.getRequired();
 	}
+
 	public Collection getDescendants(ElementSet elementSet) {
 		return elementSet.getRequiring();
 	}
+
 	public void update(ElementSet elementSet) {
 		// if there are no pre-requisites, all selected versions are resolved
 		if (elementSet.getRequired().isEmpty()) {

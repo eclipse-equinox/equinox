@@ -12,6 +12,8 @@ package org.eclipse.osgi.framework.internal.core;
 
 public interface KeyedElement {
 	public int getKeyHashCode();
+
 	public boolean compare(KeyedElement other);
+
 	public Object getKey();
 }

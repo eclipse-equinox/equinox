@@ -20,11 +20,11 @@ public class CachedManifest extends Dictionary {
 
 	Dictionary manifest = null;
 	EclipseBundleData bundledata;
-	
+
 	public CachedManifest(EclipseBundleData bundledata) {
 		this.bundledata = bundledata;
 	}
-	
+
 	private Dictionary getManifest() {
 		if (manifest == null)
 			try {
@@ -58,7 +58,7 @@ public class CachedManifest extends Dictionary {
 	}
 
 	public Object get(Object key) {
-		String keyString = (String) key; 
+		String keyString = (String) key;
 		if (org.osgi.framework.Constants.BUNDLE_VERSION.equalsIgnoreCase(keyString)) {
 			Version result = bundledata.getVersion();
 			return result == null ? null : result.toString();
@@ -66,7 +66,7 @@ public class CachedManifest extends Dictionary {
 		if (EclipseAdaptorConstants.ECLIPSE_AUTOSTART.equalsIgnoreCase(keyString))
 			return bundledata.getAutoStart();
 		if (EclipseAdaptorConstants.ECLIPSE_AUTOSTOP.equalsIgnoreCase(keyString))
-			return bundledata.getAutoStop();		
+			return bundledata.getAutoStop();
 		if (EclipseAdaptorConstants.PLUGIN_CLASS.equalsIgnoreCase(keyString))
 			return bundledata.getPluginClass();
 		if (EclipseAdaptorConstants.LEGACY.equalsIgnoreCase(keyString))

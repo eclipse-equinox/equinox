@@ -20,6 +20,7 @@ import org.eclipse.osgi.service.resolver.*;
  */
 public class StateHelperImpl implements StateHelper {
 	private static StateHelper instance = new StateHelperImpl();
+
 	/**
 	 * @see StateHelper
 	 */
@@ -49,6 +50,7 @@ public class StateHelperImpl implements StateHelper {
 		} while (changed);
 		return (BundleDescription[]) reachable.toArray(new BundleDescription[reachable.size()]);
 	}
+
 	/*
 	 * Returns whether a bundle has any dependency on any of the given bundles.   
 	 */
@@ -69,6 +71,7 @@ public class StateHelperImpl implements StateHelper {
 				return true;
 		return false;
 	}
+
 	/**
 	 * @see StateHelper
 	 */
@@ -92,6 +95,7 @@ public class StateHelperImpl implements StateHelper {
 				unsatisfied.add(packages[i]);
 		return (VersionConstraint[]) unsatisfied.toArray(new VersionConstraint[unsatisfied.size()]);
 	}
+
 	/**
 	 * @see StateHelper
 	 */
@@ -103,18 +107,21 @@ public class StateHelperImpl implements StateHelper {
 			return false;
 		return specification.isSatisfiedBy(exported.getVersionSpecification());
 	}
+
 	/**
 	 * @see StateHelper
 	 */
 	public boolean isResolvable(BundleSpecification specification) {
 		return isBundleConstraintResolvable(specification);
 	}
+
 	/**
 	 * @see StateHelper
 	 */
 	public boolean isResolvable(HostSpecification specification) {
 		return isBundleConstraintResolvable(specification);
 	}
+
 	/*
 	 * Returns whether a bundle specification/host specification can be resolved.
 	 */
@@ -125,6 +132,7 @@ public class StateHelperImpl implements StateHelper {
 				return true;
 		return false;
 	}
+
 	/**
 	 * @see StateHelper
 	 */
@@ -144,6 +152,7 @@ public class StateHelperImpl implements StateHelper {
 		}
 		return exported;
 	}
+
 	/**
 	 * @see StateHelper
 	 */
@@ -159,7 +168,8 @@ public class StateHelperImpl implements StateHelper {
 		}
 		return null;
 	}
+
 	public static StateHelper getInstance() {
 		return instance;
-	}	
+	}
 }

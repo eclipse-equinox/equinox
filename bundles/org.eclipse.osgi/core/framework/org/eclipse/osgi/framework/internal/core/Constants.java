@@ -99,7 +99,7 @@ public interface Constants extends org.osgi.framework.Constants {
 	public static final String DEFAULT_OSGI_PROPERTIES = "osgi.properties";
 	public static final String OSGI_AUTOEXPORTSYSTEMPACKAGES = "osgi.autoExportSystemPackages";
 	public static final String OSGI_RESTRICTSERVICECLASSES = "osgi.restrictServiceClasses";
-	
+
 	/** Properties set by the framework */
 
 	/** OSGI system package property */
