@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003 IBM Corporation and others.
+ * Copyright (c) 2003, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,7 +25,6 @@ public class StateImpl implements State {
 	private KeyedHashSet bundleDescriptions = new KeyedHashSet(false);
 	private StateObjectFactory factory;	
 
-	public static boolean DEBUG_RESOLVER = false;
 	private static long cumulativeTime;
 	
 	StateImpl() {}
@@ -152,7 +151,7 @@ public class StateImpl implements State {
 		if (resolver == null)
 			throw new IllegalStateException("no resolver set"); //$NON-NLS-1$		
 		long start = 0;
-		if (DEBUG_RESOLVER)
+		if (StateManager.DEBUG_PLATFORM_ADMIN)
 			start = System.currentTimeMillis();
 		if (!incremental)
 			flush();
@@ -167,7 +166,7 @@ public class StateImpl implements State {
 		StateDelta savedChanges = changes == null ? new StateDeltaImpl(this) : changes;
 		changes = new StateDeltaImpl(this);
 
-		if (DEBUG_RESOLVER) {
+		if (StateManager.DEBUG_PLATFORM_ADMIN) {
 			cumulativeTime = cumulativeTime + (System.currentTimeMillis() - start);
 			DebugOptions.getDefault().setOption("org.eclipse.core.runtime.adaptor/resolver/timing/value", Long.toString(cumulativeTime));
 		}
@@ -332,5 +331,21 @@ public class StateImpl implements State {
 	}
 	void setFactory(StateObjectFactory factory) {
 		this.factory = factory;
+	}
+	public boolean updateBundle(BundleDescription newDescription) {
+		if (newDescription.getBundleId() < 0)
+			throw new IllegalArgumentException("no id set");
+		// remove the existing description - a bundle with the same bundle id and global name (if any) must exist
+		BundleDescriptionImpl existing = (BundleDescriptionImpl) bundleDescriptions.get((KeyedElement) newDescription);
+		if (existing == null)
+			return false;
+		bundleDescriptions.remove(existing);
+		// add the new description
+		basicAddBundle(newDescription);
+		resolved = false;
+		getDelta().recordBundleUpdated((BundleDescriptionImpl) newDescription);
+		if (resolver != null)
+			resolver.bundleUpdated(newDescription, existing);
+		return true;
 	}
 }

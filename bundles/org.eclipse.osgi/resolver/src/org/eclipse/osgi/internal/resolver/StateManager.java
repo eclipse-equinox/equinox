@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003 IBM Corporation and others.
+ * Copyright (c) 2003, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,20 +9,19 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
-
 import java.io.*;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.BundleException;
-
 public class StateManager implements PlatformAdmin {
 	public static boolean DEBUG_READER = false;
+	public static boolean DEBUG_PLATFORM_ADMIN = false;
+	public static boolean DEBUG_PLATFORM_ADMIN_RESOLVER = false;	
+	public static boolean MONITOR_PLATFORM_ADMIN = false;	
 	private long readStartupTime;
-
 	private StateImpl systemState;
 	private File stateLocation;
 	private StateObjectFactoryImpl factory;
 	private long lastTimeStamp;
-
 	public StateManager(File bundleRootDir) {
 		// a negative timestamp means no timestamp checking
 		this(bundleRootDir, -1);
@@ -31,23 +30,19 @@ public class StateManager implements PlatformAdmin {
 		factory = new StateObjectFactoryImpl();
 		stateLocation = new File(bundleRootDir, ".state"); //$NON-NLS-1$
 		readState(expectedTimeStamp);
-	}	
+	}
 	public void shutdown() throws IOException {
 		writeState();
-		
 		//systemState should not be set to null as when the framework
 		//is restarted from a shutdown state, the systemState variable will
 		//not be reset, resulting in a null pointer exception
-		
 		//systemState = null;
 	}
 	private void readState(long expectedTimeStamp) {
 		if (!stateLocation.isFile())
 			return;
-
 		if (DEBUG_READER)
 			readStartupTime = System.currentTimeMillis();
-
 		FileInputStream fileInput;
 		try {
 			fileInput = new FileInputStream(stateLocation);
@@ -82,7 +77,7 @@ public class StateManager implements PlatformAdmin {
 	}
 	public StateImpl createSystemState() {
 		systemState = factory.createSystemState();
-		initializeSystemState();	
+		initializeSystemState();
 		return systemState;
 	}
 	private void initializeSystemState() {
@@ -93,17 +88,16 @@ public class StateManager implements PlatformAdmin {
 		return systemState;
 	}
 	public State getState() {
-		return factory.createState(systemState);				
+		return factory.createState(systemState);
 	}
 	public StateObjectFactory getFactory() {
 		return factory;
-	} 
-	public synchronized void commit(State state) throws BundleException {
+	}
+public synchronized void commit(State state) throws BundleException {
 		if (!(state instanceof StateImpl))
 			throw new IllegalArgumentException();
 		if (state.getTimeStamp() != systemState.getTimeStamp())
-			//TODO: create message in the catalog
-			throw new BundleException(""); //$NON-NLS-1$
+			throw new BundleException(StateMsg.formatter.getString("COMMIT_INVALID_TIMESTAMP")); //$NON-NLS-1$
 		StateDelta delta = state.getChanges();
 		BundleDelta[] addedBundles = delta.getChanges(BundleDelta.ADDED, false);
 		for (int i = 0; i < addedBundles.length; i++)
@@ -111,12 +105,11 @@ public class StateManager implements PlatformAdmin {
 		BundleDelta[] removedBundles = delta.getChanges(BundleDelta.REMOVED, false);
 		for (int i = 0; i < removedBundles.length; i++)
 			systemState.removeBundle(removedBundles[i].getBundle());		
-	}
+	}	
 	public Resolver getResolver() {
 		return new ResolverImpl();
 	}
 	public File getStateLocation() {
 		return stateLocation;
 	}
-
 }

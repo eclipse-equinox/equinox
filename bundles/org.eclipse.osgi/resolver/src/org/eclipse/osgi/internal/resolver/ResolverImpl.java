@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003 IBM Corporation and others.
+ * Copyright (c) 2003, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,7 +30,7 @@ public class ResolverImpl implements Resolver {
 	 */
 	public synchronized void resolve() {
 		if (state == null)
-			throw new IllegalStateException("no state set"); //$NON-NLS-1$
+			throw new IllegalStateException("RESOLVER_NO_STATE"); //$NON-NLS-1$
 		if (dependencies == null)
 			dependencies = ResolverHelper.buildDependencySystem(state, new Eclipse30SelectionPolicy());
 		IResolutionDelta delta;
@@ -63,6 +63,7 @@ public class ResolverImpl implements Resolver {
 	private void processInnerDelta(IResolutionDelta delta) {
 		//	now apply changes reported in the inner delta to the state
 		IElementChange[] changes = delta.getAllChanges();
+		List notResolved = null;
 		for (int i = 0; i < changes.length; i++) {
 			IElement element = changes[i].getElement();
 			BundleDescription bundle =  (BundleDescription) element.getUserObject();	
@@ -70,13 +71,23 @@ public class ResolverImpl implements Resolver {
 			if ((kind & IElementChange.RESOLVED) != 0) {
 				state.resolveBundle(bundle, Bundle.RESOLVED);
 				resolveConstraints(element, bundle);
-			} else if (kind == (IElementChange.UNRESOLVED | IElementChange.REMOVED)) {
-				state.resolveBundle(bundle, Bundle.INSTALLED);			
-			} else if (kind == IElementChange.UNRESOLVED) 
+			} else if ((kind & IElementChange.UNRESOLVED) != 0)
 				state.resolveBundle(bundle, Bundle.INSTALLED);
 			else if (kind == IElementChange.LINKAGE_CHANGED)
 				resolveConstraints(element, bundle);
+			// it was added but not resolved  
+			else if (kind == IElementChange.ADDED && StateManager.DEBUG_PLATFORM_ADMIN) {
+				// save so we can print failure reason messages later
+				if (notResolved == null)
+					notResolved = new ArrayList();
+				notResolved.add(bundle);
+			}
 		}
+		// print failure reason messages now - this must be done after 
+		// all changes have been processed
+		if (notResolved != null)
+			for (Iterator iter = notResolved.iterator(); iter.hasNext();)
+				 System.err.println(getResolutionFailureMessage((BundleDescription) iter.next())); //$NON-NLS-1$		
 	}
 	private void resolveConstraints(IElement element, BundleDescription bundle) {
 		// tells the state that some of the constraints have
@@ -101,6 +112,11 @@ public class ResolverImpl implements Resolver {
 		if (dependencies == null)
 			return;
 		ResolverHelper.remove(bundle, dependencies);
+	}
+	public void bundleUpdated(BundleDescription newDescription, BundleDescription existingDescription) {
+		if (dependencies == null)
+			return;
+		ResolverHelper.update(newDescription, existingDescription, dependencies);
 	}
 	public State getState() {
 		return state;
@@ -187,5 +203,36 @@ public class ResolverImpl implements Resolver {
 			return;
 		if (dependencies != null)
 			ResolverHelper.unresolve(bundle, dependencies);
+	}
+	protected String getResolutionFailureMessage(BundleDescription bundleDescription) {
+		// just a sanity check 
+		if (bundleDescription.isResolved())
+			throw new IllegalStateException("bundle *is* resolved");		
+		String defaultMessage = StateMsg.formatter.getString("RESOLVER_BUNDLE_UNRESOLVED", bundleDescription.getUniqueId(), new Long(bundleDescription.getBundleId()));
+		// only basic message if debug info is not needed
+		if (!StateManager.DEBUG_PLATFORM_ADMIN_RESOLVER)
+			return defaultMessage;
+		VersionConstraint[] unsatisfied = bundleDescription.getUnsatisfiedConstraints();
+		if (unsatisfied.length == 0)
+			return defaultMessage;
+		StringBuffer missing = new StringBuffer();
+		for (int i = 0; i < unsatisfied.length; i++) {
+			if (unsatisfied[i] instanceof PackageSpecification) {
+				missing.append(StateMsg.formatter.getString("RESOLVER_BUNDLE_UNRESOLVED_MISSING_PACKAGE", toString(unsatisfied[i])));
+			} else if (unsatisfied[i] instanceof BundleSpecification) {
+				missing.append(StateMsg.formatter.getString("RESOLVER_BUNDLE_UNRESOLVED_MISSING_PREREQ", toString(unsatisfied[i])));
+			} else {
+				missing.append(StateMsg.formatter.getString("RESOLVER_BUNDLE_UNRESOLVED_MISSING_HOST", toString(unsatisfied[i])));
+			}
+			missing.append(',');
+		}
+		missing.deleteCharAt(missing.length() - 1);
+		return StateMsg.formatter.getString("RESOLVER_BUNDLE_UNRESOLVED_DETAILS", new Object[] {bundleDescription.getUniqueId(),new Long(bundleDescription.getBundleId()), missing.toString()});
+	}
+	private static String toString(VersionConstraint constraint) {
+		org.eclipse.osgi.service.resolver.Version versionSpec = constraint.getVersionSpecification();
+		if (versionSpec == null)
+			return constraint.getName();
+		return constraint.getName() + '_' + versionSpec;
 	}	
 }

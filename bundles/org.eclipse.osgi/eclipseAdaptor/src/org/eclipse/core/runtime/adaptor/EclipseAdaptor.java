@@ -35,7 +35,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 	public static boolean TRACE_CLASSES = false;
 	public static boolean TRACE_BUNDLES = false;
 
-	private static final String RUNTIME_ADAPTOR = "org.eclipse.core.runtime.adaptor";
+	private static final String RUNTIME_ADAPTOR = "org.eclipse.osgi/eclipseadaptor";
 
 	//Option names for spies
 	private static final String OPTION_MONITOR_CLASSES = RUNTIME_ADAPTOR + "/monitor/classes"; //$NON-NLS-1$
@@ -46,6 +46,9 @@ public class EclipseAdaptor extends DefaultAdaptor {
 	private static final String OPTION_TRACE_FILTERS = RUNTIME_ADAPTOR + "/trace/filters"; //$NON-NLS-1$
 	private static final String OPTION_STATE_READER = RUNTIME_ADAPTOR + "/state/reader";//$NON-NLS-1$
 	private static final String OPTION_RESOLVER = RUNTIME_ADAPTOR + "/resolver/timing"; //$NON-NLS-1$
+	private static final String OPTION_PLATFORM_ADMIN = RUNTIME_ADAPTOR + "/debug/platformadmin"; //$NON-NLS-1$
+	private static final String OPTION_PLATFORM_ADMIN_RESOLVER= RUNTIME_ADAPTOR + "/debug/platformadmin/resolver"; //$NON-NLS-1$
+	private static final String OPTION_MONITOR_PLATFORM_ADMIN = RUNTIME_ADAPTOR + "/resolver/timing"; 	 //$NON-NLS-1$
 	private static final String OPTION_RESOLVER_READER = RUNTIME_ADAPTOR + "/resolver/reader/timing"; //$NON-NLS-1$
 	public static final byte BUNDLEDATA_VERSION = 4;
 	public static final byte NULL = 0;
@@ -53,7 +56,8 @@ public class EclipseAdaptor extends DefaultAdaptor {
 
 	private int startLevel = 1;
 	private long timeStamp = 0;
-	private String installURL = null; 
+	private String installURL = null;
+
 
 	public EclipseAdaptor(String[] args) {
 		super(args);
@@ -154,7 +158,9 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		TRACE_FILENAME = options.getOption(OPTION_TRACE_FILENAME);
 		TRACE_FILTERS = options.getOption(OPTION_TRACE_FILTERS);
 		StateManager.DEBUG_READER = options.getBooleanOption(OPTION_RESOLVER_READER, false);
-		StateImpl.DEBUG_RESOLVER = options.getBooleanOption(OPTION_RESOLVER, false);
+		StateManager.MONITOR_PLATFORM_ADMIN = options.getBooleanOption(OPTION_MONITOR_PLATFORM_ADMIN, false);		
+		StateManager.DEBUG_PLATFORM_ADMIN = options.getBooleanOption(OPTION_PLATFORM_ADMIN, false);
+		StateManager.DEBUG_PLATFORM_ADMIN_RESOLVER = options.getBooleanOption(OPTION_PLATFORM_ADMIN_RESOLVER, false);
 	}
 
 	private void registerEndorsedXMLParser() {
