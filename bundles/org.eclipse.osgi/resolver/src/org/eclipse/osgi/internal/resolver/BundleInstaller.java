@@ -14,6 +14,10 @@ import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.osgi.framework.BundleException;
 
 /**
+ * A bundle installer allows the platform admin implementation to 
+ * delegate the behavior of installing/uninstalling bundles to 
+ * another object.
+ *  
  * @see StateManager#commit 
  */
 public interface BundleInstaller {
