@@ -332,20 +332,4 @@ public class StateImpl implements State {
 	void setFactory(StateObjectFactory factory) {
 		this.factory = factory;
 	}
-	public boolean updateBundle(BundleDescription newDescription) {
-		if (newDescription.getBundleId() < 0)
-			throw new IllegalArgumentException("no id set");
-		// remove the existing description - a bundle with the same bundle id and global name (if any) must exist
-		BundleDescriptionImpl existing = (BundleDescriptionImpl) bundleDescriptions.get((KeyedElement) newDescription);
-		if (existing == null)
-			return false;
-		bundleDescriptions.remove(existing);
-		// add the new description
-		basicAddBundle(newDescription);
-		resolved = false;
-		getDelta().recordBundleUpdated((BundleDescriptionImpl) newDescription);
-		if (resolver != null)
-			resolver.bundleUpdated(newDescription, existing);
-		return true;
-	}
 }

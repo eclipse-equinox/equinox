@@ -22,14 +22,6 @@ public interface State {
 	 * @return a boolean indicating whether the bundle was successfully added
 	 */
 	public boolean addBundle(BundleDescription description);
-	/** 
-	 * Updates an existing bundle definition with the given bundle description.
-	 * 
-	 * @param newDescription a new description for an existing bundle
-	 * @return <code>true</code> if the the update occurred successfully, 
-	 * <code>false</code> otherwise 
-	 */
-	public boolean updateBundle(BundleDescription newDescription);
 	/**
 	 * Returns a delta describing the differences between this state and the
 	 * given state. This state is taken as the base so the absence of a bundle
