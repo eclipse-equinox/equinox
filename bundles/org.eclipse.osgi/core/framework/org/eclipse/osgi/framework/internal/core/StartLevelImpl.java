@@ -329,7 +329,7 @@ public class StartLevelImpl implements EventSource, EventListener {
 		if (bundle.getState() == Bundle.UNINSTALLED) {
 			throw new IllegalArgumentException(Msg.formatter.getString("BUNDLE_UNINSTALLED_EXCEPTION"));
 		}
-		return ((Bundle) bundle).startLevel;	//TODO This should be a method call
+		return ((Bundle) bundle).getStartLevel();
 	}
 
 	/**
@@ -376,11 +376,10 @@ public class StartLevelImpl implements EventSource, EventListener {
 
 		try {
 			// if the bundle's startlevel is not already at the requested startlevel
-			if (newSL != ((org.eclipse.osgi.framework.internal.core.Bundle) bundle).startLevel) {
+			if (newSL != ((org.eclipse.osgi.framework.internal.core.Bundle) bundle).getStartLevel()) {
 				Bundle b = (Bundle) bundle;
 				b.bundledata.setStartLevel(newSL);
 				b.bundledata.save();
-				((org.eclipse.osgi.framework.internal.core.Bundle) bundle).startLevel = newSL;
 
 				framework.checkAdminPermission();
 
@@ -553,8 +552,7 @@ public class StartLevelImpl implements EventSource, EventListener {
 
 		int fwsl = framework.startLevelImpl.getStartLevel();
 		for (int i = 0; i < launch.length; i++) {
-			int bsl = launch[i].startLevel;	//TODO This should be a method call
-
+			int bsl = launch[i].getStartLevel();
 			if (bsl < fwsl) {
 				// skip bundles who should have already been started
 				continue;
@@ -610,7 +608,7 @@ public class StartLevelImpl implements EventSource, EventListener {
 				// get the list of installed bundles, sorted by startlevel
 				Bundle[] shutdown = this.getInstalledBundles(bundles);
 				for (int i = shutdown.length - 1; i >= 0; i--) {
-					int bsl = shutdown[i].startLevel;
+					int bsl = shutdown[i].getStartLevel();
 					if (bsl > activeSL + 1) {
 						// don't need to mess with bundles with startlevel > the previous active - they should
 						// already have been stopped

@@ -35,7 +35,7 @@ public class BundleLoaderProxy implements KeyedElement, NamedClassSpace{
 		this.bundle = bundle;
 		this.uniqueId = bundle.getSymbolicName();
 		if (this.uniqueId == null) {
-			this.uniqueId = new StringBuffer().append(bundle.id).append("NOUNIQUEID").toString();
+			this.uniqueId = new StringBuffer().append(bundle.getBundleId()).append("NOUNIQUEID").toString();
 		}
 		this.version = bundle.getVersion();
 		this.key = new StringBuffer(uniqueId).append("_").append(this.version.toString()).toString();

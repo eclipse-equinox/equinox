@@ -38,7 +38,7 @@ public class SystemBundle extends BundleHost {
 	 * @param framework Framework this bundle is running in
 	 */
 	protected SystemBundle(Framework framework) throws BundleException {
-		super(framework.adaptor.createSystemBundleData(), Constants.SYSTEM_BUNDLE_LOCATION, framework, 0); // startlevel=0 means framework stopped
+		super(framework.adaptor.createSystemBundleData(), framework); // startlevel=0 means framework stopped
 		state = STARTING;
 		context = createContext();
 	}
@@ -279,5 +279,31 @@ public class SystemBundle extends BundleHost {
 	 * as a result of a packageRefresh
 	 */
 	protected void unresolvePermissions(Hashtable unresolvedPackages) {
+	}
+
+	/*
+	 * The System Bundle always has permission to do anything;
+	 * override the check*Permission methods to always return true.
+	 */
+	protected boolean checkExportPackagePermission(String pkgName) {
+		return true;
+	}
+	protected boolean checkFragmentBundlePermission(String symbolicName) {
+		return true;
+	}
+	protected boolean checkFragmentHostPermission(String symbolicName) {
+		return true;
+	}
+	protected boolean checkImportPackagePermission(String pkgName) {
+		return true;
+	}
+	protected boolean checkPermissions() {
+		return true;
+	}
+	protected boolean checkProvideBundlePermission(String symbolicName) {
+		return true;
+	}
+	protected boolean checkRequireBundlePermission(String symbolicName) {
+		return true;
 	}
 }

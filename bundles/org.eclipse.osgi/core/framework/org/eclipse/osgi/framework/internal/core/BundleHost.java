@@ -37,8 +37,8 @@ public class BundleHost extends Bundle {
 	/** The List of BundleFragments */
 	protected Vector fragments;	//TODO LinkedList or an array. Ideally we would create the array with the right size upfront
 
-	public BundleHost(BundleData bundledata, String location, Framework framework, int startLevel) throws BundleException {
-		super(bundledata, location, framework, startLevel);
+	public BundleHost(BundleData bundledata, Framework framework) throws BundleException {
+		super(bundledata, framework);
 		context = null;
 		loader = null;
 		fragments = null;
@@ -402,10 +402,10 @@ public class BundleHost extends Bundle {
 				}
 
 				if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-					Debug.println("Bundle: Active sl = " + framework.startLevelImpl.getStartLevel() + "; Bundle " + id + " sl = " + this.startLevel);
+					Debug.println("Bundle: Active sl = " + framework.startLevelImpl.getStartLevel() + "; Bundle " + getBundleId() + " sl = " + getStartLevel());
 				}
 
-				if (this.startLevel <= framework.startLevelImpl.getStartLevel()) {
+				if (getStartLevel() <= framework.startLevelImpl.getStartLevel()) {
 					state = STARTING;
 
 					context = createContext();
@@ -596,7 +596,7 @@ public class BundleHost extends Bundle {
 				// install order.
 				for (int i = 0; i < size; i++) {
 					BundleFragment frag = (BundleFragment) fragments.elementAt(i);
-					if (fragment.id < frag.id) {
+					if (fragment.getBundleId() < frag.getBundleId()) {
 						// if the loader has already been created
 						// then we cannot attach a fragment into the middle
 						// of the fragment chain.

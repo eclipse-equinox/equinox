@@ -150,8 +150,7 @@ public class Framework implements EventSource, EventPublisher {
 			for (int i = 0; i < size; i++) {
 				BundleData bundledata = (BundleData) bundleDatas.elementAt(i);
 				try {
-					int absl = bundledata.getStartLevel();
-					Bundle bundle = Bundle.createBundle(bundledata, bundledata.getLocation(), this, absl);
+					Bundle bundle = Bundle.createBundle(bundledata, this);
 					bundles.add(bundle);
 				} catch (BundleException be) {
 					// This is not a fatal error. Publish the framework event,
@@ -469,9 +468,9 @@ public class Framework implements EventSource, EventPublisher {
 	 * @param location
 	 *            identity string for the bundle
 	 */
-	public Bundle createBundle(BundleData bundledata, String location, int startlevel) throws BundleException {
+	public Bundle createBundle(BundleData bundledata) throws BundleException {
 		verifyExecutionEnvironment(bundledata.getManifest());
-		return Bundle.createBundle(bundledata, location, this, startlevel);
+		return Bundle.createBundle(bundledata, this);
 	}
 	/**
 	 * Verifies that the framework supports one of the required Execution
@@ -720,7 +719,7 @@ public class Framework implements EventSource, EventPublisher {
 		Bundle bundle;
 		try {
 			BundleData bundledata = storage.begin();
-			bundle = createBundle(bundledata, location, startLevelImpl.getInitialBundleStartLevel());
+			bundle = createBundle(bundledata);
 			// Check for a bundle already installed with the same UniqueId and version.
 			if (bundle.getSymbolicName() != null) {
 				Bundle installedBundle = getBundleByUniqueId(bundle.getSymbolicName(), bundle.getVersion().toString());

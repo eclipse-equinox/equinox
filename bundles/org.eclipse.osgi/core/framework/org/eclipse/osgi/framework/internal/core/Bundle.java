@@ -25,8 +25,6 @@ import org.osgi.framework.*;
  * is destroyed when a bundle is uninstalled and reused if a bundle is updated.
  * This class is abstract and is extended by BundleHost and BundleFragment.
  */
-
-//TODO All the methods that do the test if (id == 0) should loose this test and be defined in SystemBundle to directly return true.
 public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, KeyedElement {
 	/** The Framework this bundle is part of */
 	protected Framework framework;
@@ -36,17 +34,11 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 	protected volatile Thread stateChanging;
 	/** Bundle's BundleData object */
 	protected BundleData bundledata;	//TODO Access to this variable in Framework and StartLevelImpl should be done through an accessor.
-	/** The unique identifier */
-	protected long id;	//TODO If we don't use compare() methods often, we might decide to get rid of that and do an access to bundleData 
-	/** The identity string for the bundle */
-	protected String location;		//TODO Given what we use this slot for we should access bundledata instead
 	/** Internal object used for state change synchronization */
 	protected Object statechangeLock = new Object();
 	/** ProtectionDomain for the bundle */
 	protected ProtectionDomain domain;
-	/** Bundle assigned startlevel */
-	protected int startLevel;	//TODO Do we really need that here? It is mainly used in the StartLevelImpl
-	
+
 	/**
 	 * This String captures the dependencies that could not be resolved
 	 * as a result of not having the proper permissions.
@@ -73,12 +65,11 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 	 * @param framework
 	 *            Framework this bundle is running in
 	 */
-	//TODO If location and startLevel are removed from here, they are no longer necessary as arguments.
-	protected static Bundle createBundle(BundleData bundledata, String location, Framework framework, int startLevel) throws BundleException {
+	protected static Bundle createBundle(BundleData bundledata, Framework framework) throws BundleException {
 		if (bundledata.isFragment())
-			return new BundleFragment(bundledata, location, framework, startLevel);
+			return new BundleFragment(bundledata, framework);
 		else
-			return new BundleHost(bundledata, location, framework, startLevel);
+			return new BundleHost(bundledata, framework);
 	}
 	/**
 	 * Bundle object constructor. This constructor should not perform any real
@@ -97,15 +88,11 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 	 * @param framework
 	 *            Framework this bundle is running in
 	 */
-	//TODO If location and startLevel are removed from here, they are no longer necessary as arguments.
-	protected Bundle(BundleData bundledata, String location, Framework framework, int startLevel) throws BundleException {
+	protected Bundle(BundleData bundledata, Framework framework) throws BundleException {
 		state = INSTALLED;
 		stateChanging = null;
-		this.id = bundledata.getBundleID();
 		this.bundledata = bundledata;
-		this.location = location;
 		this.framework = framework;
-		this.startLevel = startLevel;
 		bundledata.setBundle(this);
 	}
 	/**
@@ -618,7 +605,7 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 	 */
 	public void update() throws BundleException {
 		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-			Debug.println("update location " + location);
+			Debug.println("update location " + bundledata.getLocation());
 		}
 		framework.checkAdminPermission();
 		checkValid();
@@ -627,7 +614,7 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 			updateWorker(new PrivilegedExceptionAction() {
 				public Object run() throws BundleException {
 					/* compute the update location */
-					String updateLocation = location;
+					String updateLocation = bundledata.getLocation();
 					if (bundledata.getManifest().get(Constants.BUNDLE_UPDATELOCATION) != null) {
 						updateLocation = (String) bundledata.getManifest().get(Constants.BUNDLE_UPDATELOCATION);
 						if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
@@ -665,7 +652,7 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 	 */
 	public void update(final InputStream in) throws BundleException {
 		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-			Debug.println("update location " + location);
+			Debug.println("update location " + bundledata.getLocation());
 			Debug.println("   from: " + in);
 		}
 		framework.checkAdminPermission();
@@ -734,14 +721,14 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 	 * Update worker. Assumes the caller has the state change lock.
 	 */
 	protected void updateWorkerPrivileged(URLConnection source) throws BundleException {
-		Bundle oldBundle = Bundle.createBundle(this.bundledata, this.location, framework, this.startLevel);
+		Bundle oldBundle = Bundle.createBundle(bundledata, framework);
 		boolean reloaded = false;
 		BundleOperation storage = framework.adaptor.updateBundle(this.bundledata, source);
 		BundleRepository bundles = framework.getBundles();
 		try {
 			BundleData newBundleData = storage.begin();
 			// Must call framework createBundle to check execution environment.
-			Bundle newBundle = framework.createBundle(newBundleData, this.location, this.startLevel);
+			Bundle newBundle = framework.createBundle(newBundleData);
 			// Check for a bundle already installed with the same symbolicName
 			// and version.
 			String symbolicName = newBundle.getSymbolicName();
@@ -831,7 +818,7 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 	 */
 	public void uninstall() throws BundleException {
 		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-			Debug.println("uninstall location: " + location);
+			Debug.println("uninstall location: " + bundledata.getLocation());
 		}
 		framework.checkAdminPermission();
 		checkValid();
@@ -1055,7 +1042,7 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 	 * @return This bundle's unique identifier.
 	 */
 	public long getBundleId() {
-		return (id);
+		return (bundledata.getBundleID());
 	}
 	/**
 	 * Retrieve the location identifier of the bundle. This is typically the
@@ -1077,7 +1064,7 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 	 */
 	public String getLocation() {
 		framework.checkAdminPermission();
-		return (location);
+		return (bundledata.getLocation());
 	}
 	/**
 	 * Provides a list of {@link ServiceReference}s for the services
@@ -1215,7 +1202,7 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 	 * @return String
 	 */
 	public String toString() {
-		return (location + " [" + id + "]");
+		return (bundledata.getLocation() + " [" + getBundleId() + "]");
 	}
 	/**
 	 * Answers an integer indicating the relative positions of the receiver and
@@ -1232,11 +1219,11 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 	 *                comparable with the receiver.
 	 */
 	public int compareTo(Object obj) {
-		int slcomp = startLevel - ((Bundle) obj).startLevel;
+		int slcomp = getStartLevel() - ((Bundle) obj).getStartLevel();
 		if (slcomp != 0) {
 			return slcomp;
 		}
-		long idcomp = id - ((Bundle) obj).id;
+		long idcomp = getBundleId() - ((Bundle) obj).getBundleId();
 		return (idcomp < 0L) ? -1 : ((idcomp > 0L) ? 1 : 0);
 	}
 	/**
@@ -1359,6 +1346,9 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 	protected BundleDescription getBundleDescription() {
 		return framework.adaptor.getState().getBundle(getBundleId());
 	}
+	protected int getStartLevel(){
+		return bundledata.getStartLevel();
+	}
 	public abstract BundleLoader getBundleLoader();
 	/**
 	 * Mark this bundle as resolved.
@@ -1394,7 +1384,7 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 			return defaultMessage;
 		}
 		if (permissionMsg != null) {
-			return permissionMsg;	//TODO Why don't we null out this field once the value has been returned? If I'm correct this is no longer needed
+			return permissionMsg;	// do not null this field out until a successful resolve is done.
 		}
 		BundleDescription bundleDescription = getBundleDescription();
 		if (bundleDescription == null) {
@@ -1430,18 +1420,16 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 		return constraint.getName() + '_' + versionSpec;
 	}
 	public int getKeyHashCode() {
-		return (int) id;
+		return (int) getBundleId();
 	}
 	public boolean compare(KeyedElement other) {
-		return id == ((Bundle) other).getBundleId();
+		return getBundleId() == ((Bundle) other).getBundleId();
 	}
 	public Object getKey() {
-		return new Long(id);
+		return new Long(getBundleId());
 	}
 	protected boolean checkPermissions() {
 		permissionMsg = null;
-		if (id == 0) // System Bundle always has permission
-			return true;
 		BundleDescription bundleDesc = getBundleDescription();
 		if (bundleDesc == null)
 			return false;
@@ -1492,44 +1480,32 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 		}
 		return true;
 	}
-	public boolean checkExportPackagePermission(String pkgName) {
-		if (id == 0) // System Bundle always has permission
-			return true;
+	protected boolean checkExportPackagePermission(String pkgName) {
 		if (domain != null)
 			return domain.implies(new PackagePermission(pkgName, PackagePermission.EXPORT));
 		return true;
 	}
-	public boolean checkProvideBundlePermission(String symbolicName) {
-		if (id == 0) // System Bundle always has permission
-			return true;
+	protected boolean checkProvideBundlePermission(String symbolicName) {
 		if (domain != null)
 			return domain.implies(new BundlePermission(symbolicName, BundlePermission.PROVIDE_BUNDLE));
 		return true;
 	}
-	public boolean checkImportPackagePermission(String pkgName) {
-		if (id == 0) // System Bundle always has permission
-			return true;
+	protected boolean checkImportPackagePermission(String pkgName) {
 		if (domain != null)
 			return domain.implies(new PackagePermission(pkgName, PackagePermission.IMPORT));
 		return true;
 	}
-	public boolean checkRequireBundlePermission(String symbolicName) {
-		if (id == 0) // System Bundle always has permission
-			return true;
+	protected boolean checkRequireBundlePermission(String symbolicName) {
 		if (domain != null)
 			return domain.implies(new BundlePermission(symbolicName, BundlePermission.REQUIRE_BUNDLE));
 		return true;
 	}
-	public boolean checkFragmentHostPermission(String symbolicName) {
-		if (id == 0) // System Bundle always has permission
-			return true;
+	protected boolean checkFragmentHostPermission(String symbolicName) {
 		if (domain != null)
 			return domain.implies(new BundlePermission(symbolicName, BundlePermission.FRAGMENT_HOST));
 		return true;
 	}
-	public boolean checkFragmentBundlePermission(String symbolicName) {
-		if (id == 0) // System Bundle always has permission
-			return true;
+	protected boolean checkFragmentBundlePermission(String symbolicName) {
 		if (domain != null)
 			return domain.implies(new BundlePermission(symbolicName, BundlePermission.FRAGMENT_BUNDLE));
 		return true;

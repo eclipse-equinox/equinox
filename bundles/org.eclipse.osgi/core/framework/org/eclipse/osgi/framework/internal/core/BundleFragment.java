@@ -32,8 +32,8 @@ public class BundleFragment extends Bundle {
 	 * @param startLevel
 	 * @throws BundleException
 	 */
-	public BundleFragment(BundleData bundledata, String location, Framework framework, int startLevel) throws BundleException {
-		super(bundledata, location, framework, startLevel);
+	public BundleFragment(BundleData bundledata, Framework framework) throws BundleException {
+		super(bundledata, framework);
 		host = null;
 	}
 
@@ -279,10 +279,10 @@ public class BundleFragment extends Bundle {
 			}
 
 			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-				Debug.println("Bundle: Active sl = " + framework.startLevelImpl.getStartLevel() + "; Bundle " + id + " sl = " + this.startLevel);
+				Debug.println("Bundle: Active sl = " + framework.startLevelImpl.getStartLevel() + "; Bundle " + getBundleId() + " sl = " + getStartLevel());
 			}
 
-			if (this.startLevel <= framework.startLevelImpl.getStartLevel()) {
+			if (getStartLevel() <= framework.startLevelImpl.getStartLevel()) {
 				if (state == UNINSTALLED) {
 					throw new BundleException(Msg.formatter.getString("BUNDLE_UNINSTALLED_EXCEPTION"));
 				}
