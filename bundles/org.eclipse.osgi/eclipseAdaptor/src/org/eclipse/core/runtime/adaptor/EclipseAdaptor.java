@@ -148,6 +148,15 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		return stateManager;
 	}
 
+	public void shutdownStateManager() {
+		try {
+			File stateLocation = LocationManager.getConfigurationFile(LocationManager.STATE_FILE);
+			stateManager.shutdown(stateLocation); //$NON-NLS-1$
+		} catch (IOException e) {
+			frameworkLog.log(new FrameworkEvent(FrameworkEvent.ERROR,context.getBundle(),e));
+		}
+	}
+
 	private void cleanOSGiCache() {
 		File osgiConfig = LocationManager.getOSGiConfigurationDir();
 		if (!rm(osgiConfig)) {
@@ -518,10 +527,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 				out.close();
 			}
 		} catch (IOException e) {
-			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-				Debug.println("Error writing framework metadata: " + e.getMessage()); //$NON-NLS-1$ 
-				Debug.printStackTrace(e);
-			}
+			frameworkLog.log(new FrameworkEvent(FrameworkEvent.ERROR,context.getBundle(),e));
 		}
 	}
 

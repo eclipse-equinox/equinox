@@ -22,7 +22,6 @@ public class StateManager implements PlatformAdmin {
 	public static boolean MONITOR_PLATFORM_ADMIN = false;
 	private long readStartupTime;
 	private StateImpl systemState;
-	private File stateLocation;
 	private StateObjectFactoryImpl factory;
 	private long lastTimeStamp;
 	private BundleInstaller installer;
@@ -34,19 +33,18 @@ public class StateManager implements PlatformAdmin {
 
 	public StateManager(File stateLocation, long expectedTimeStamp) {
 		factory = new StateObjectFactoryImpl();
-		this.stateLocation = stateLocation;
-		readState(expectedTimeStamp);
+		readState(stateLocation, expectedTimeStamp);
 	}
 
-	public void shutdown() throws IOException {
-		writeState();
+	public void shutdown(File stateLocation) throws IOException {
+		writeState(stateLocation);
 		//systemState should not be set to null as when the framework
 		//is restarted from a shutdown state, the systemState variable will
 		//not be reset, resulting in a null pointer exception
 		//systemState = null;
 	}
 
-	private void readState(long expectedTimeStamp) {
+	private void readState(File stateLocation, long expectedTimeStamp) {
 		if (!stateLocation.isFile())
 			return;
 		if (DEBUG_READER)
@@ -76,7 +74,7 @@ public class StateManager implements PlatformAdmin {
 		}
 	}
 
-	private void writeState() throws IOException {
+	private void writeState(File stateLocation) throws IOException {
 		if (systemState == null)
 			return;
 		if (stateLocation.isFile() && lastTimeStamp == systemState.getTimeStamp())
@@ -140,10 +138,6 @@ public class StateManager implements PlatformAdmin {
 
 	public StateHelper getStateHelper() {
 		return StateHelperImpl.getInstance();
-	}
-
-	public File getStateLocation() {
-		return stateLocation;
 	}
 
 	public BundleInstaller getInstaller() {

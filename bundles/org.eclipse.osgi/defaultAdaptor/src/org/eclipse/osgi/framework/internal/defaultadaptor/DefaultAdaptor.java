@@ -158,6 +158,18 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 	}
 
 	/**
+	 * Shutdown the StateManager for the adaptor.  This should persist the state
+	 * for reading when createStateManager is called.
+	 */
+	protected void shutdownStateManager() {
+		try {
+			stateManager.shutdown(new File(getBundleStoreRootDir(), ".state")); //$NON-NLS-1$
+		} catch (IOException e) {
+			frameworkLog.log(new FrameworkEvent(FrameworkEvent.ERROR,context.getBundle(),e));
+		}
+	}
+
+	/**
 	 * 
 	 *
 	 */
@@ -802,11 +814,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 	}
 
 	public void frameworkStop(BundleContext context) throws BundleException {
-		try {
-			stateManager.shutdown();
-		} catch (IOException e) {
-			throw new BundleException(null, e);
-		}
+		shutdownStateManager();
 		super.frameworkStop(context);
 
 		frameworkLog.close();
