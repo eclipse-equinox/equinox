@@ -60,6 +60,7 @@ public class LocationManager {
 		if (spec.startsWith("file:")) {
 			File file = new File(spec.substring(5));
 			if (!file.isAbsolute())
+				// TODO should we ensure URL starts with a "/" (ie file:/c:/eclipse) defect 51165
 				spec = "file:" + file.getAbsolutePath();
 		}
 		try {
@@ -69,6 +70,7 @@ public class LocationManager {
 		} catch (MalformedURLException e) {
 			if (spec.startsWith("file:"))
 				return null;
+			// TODO should we ensure URL starts with a "/" (ie file:/c:/eclipse) defect 51165
 			return buildURL("file:" + spec, trailingSlash);
 		}
 	}
