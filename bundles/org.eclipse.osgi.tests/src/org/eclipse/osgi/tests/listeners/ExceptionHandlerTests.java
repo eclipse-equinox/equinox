@@ -26,15 +26,17 @@ public class ExceptionHandlerTests extends TestCase {
 		
 		public synchronized FrameworkEvent getResult(long timeout) {
 			if (event != null) {
-				return event;
+				FrameworkEvent tmp = event;
+				event = null;
+				return tmp;
 			}
 			try {
 				wait(timeout);
 			} catch (InterruptedException e) {
-				// who cares?
 			}
+			FrameworkEvent tmp = event;
 			event = null;
-			return event;
+			return tmp;
 		}
 	};
 
@@ -57,7 +59,7 @@ public class ExceptionHandlerTests extends TestCase {
 		
 		try {
 			BundleTestingHelper.installBundle(OSGiTests.getContext(), OSGiTests.TEST_FILES_ROOT + "internal/plugins/installTests/bundle09");
-			FrameworkEvent eventReceived = fwkListener.getResult(10000);
+			FrameworkEvent eventReceived = fwkListener.getResult(60000);
 			Assert.assertEquals(FrameworkEvent.ERROR, eventReceived.getType());
 			Assert.assertEquals(true, eventReceived.getThrowable() instanceof NullPointerException);
 		} catch (MalformedURLException e) {
@@ -89,6 +91,7 @@ public class ExceptionHandlerTests extends TestCase {
 			BundleTestingHelper.installBundle(OSGiTests.getContext(), OSGiTests.TEST_FILES_ROOT + "internal/plugins/installTests/bundle10");
 			FrameworkEvent eventReceived = fwkListener.getResult(10000);
 			Assert.assertEquals(FrameworkEvent.ERROR, eventReceived.getType());
+			System.out.println(eventReceived.getThrowable());
 			Assert.assertEquals(true, eventReceived.getThrowable() instanceof VirtualMachineError);
 			System.setProperty("eclipse.exitOnError","true");
 		} catch (MalformedURLException e) {
