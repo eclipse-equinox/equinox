@@ -163,7 +163,14 @@ abstract public class BundleFile {
 		private ZipEntry getZipEntry(String path) {
 			if (path.length() > 0 && path.charAt(0) == '/')
 				path = path.substring(1);
-			return zipFile.getEntry(path);
+			ZipEntry entry = zipFile.getEntry(path);
+			if (entry != null && entry.getSize() == 0 && !entry.isDirectory()) {
+				// work around the directory bug see bug 83542
+				ZipEntry dirEntry = zipFile.getEntry(path + '/');
+				if (dirEntry != null)
+					entry = dirEntry;
+			}
+			return entry;
 		}
 
 		protected File extractDirectory(String dirName) {
