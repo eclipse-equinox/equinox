@@ -157,6 +157,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		TRACE_BUNDLES = options.getBooleanOption(OPTION_TRACE_BUNDLES, false);
 		TRACE_FILENAME = options.getOption(OPTION_TRACE_FILENAME);
 		TRACE_FILTERS = options.getOption(OPTION_TRACE_FILTERS);
+		StateManager.DEBUG = options != null;
 		StateManager.DEBUG_READER = options.getBooleanOption(OPTION_RESOLVER_READER, false);
 		StateManager.MONITOR_PLATFORM_ADMIN = options.getBooleanOption(OPTION_MONITOR_PLATFORM_ADMIN, false);		
 		StateManager.DEBUG_PLATFORM_ADMIN = options.getBooleanOption(OPTION_PLATFORM_ADMIN, false);

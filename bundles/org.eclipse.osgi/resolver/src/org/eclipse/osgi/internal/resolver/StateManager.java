@@ -13,6 +13,7 @@ import java.io.*;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.BundleException;
 public class StateManager implements PlatformAdmin {
+	public static boolean DEBUG = false;
 	public static boolean DEBUG_READER = false;
 	public static boolean DEBUG_PLATFORM_ADMIN = false;
 	public static boolean DEBUG_PLATFORM_ADMIN_RESOLVER = false;	

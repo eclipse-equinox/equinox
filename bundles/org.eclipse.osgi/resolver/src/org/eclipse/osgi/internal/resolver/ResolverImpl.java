@@ -76,7 +76,7 @@ public class ResolverImpl implements Resolver {
 			else if (kind == IElementChange.LINKAGE_CHANGED)
 				resolveConstraints(element, bundle);
 			// it was added but not resolved  
-			else if (kind == IElementChange.ADDED && StateManager.DEBUG_PLATFORM_ADMIN) {
+			else if (kind == IElementChange.ADDED && StateManager.DEBUG) {
 				// save so we can print failure reason messages later
 				if (notResolved == null)
 					notResolved = new ArrayList();
