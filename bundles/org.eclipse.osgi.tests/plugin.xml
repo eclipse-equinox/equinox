@@ -20,11 +20,4 @@
       <export name="*"/>
     </library>
   </runtime>
-
-  <extension point="org.eclipse.core.tests.harness.tests">
-    <test id="preferences.PreferenceForwarderTest">
-      <run class="org.eclipse.core.tests.runtime.PreferenceForwarderTest"/>
-    </test>
- </extension>
-
 </plugin>
