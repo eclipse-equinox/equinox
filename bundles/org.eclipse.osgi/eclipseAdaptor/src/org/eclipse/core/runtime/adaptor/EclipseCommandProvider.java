@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.core.runtime.adaptor;
 
+import java.util.Enumeration;
+import java.util.Properties;
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.eclipse.osgi.service.resolver.*;
@@ -35,6 +37,8 @@ public class EclipseCommandProvider implements CommandProvider {
 		help.append("\tdiag - " + EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONSOLE_HELP_DIAG_COMMAND_DESCRIPTION"));//$NON-NLS-1$ //$NON-NLS-2$
 		help.append(EclipseAdaptorMsg.NEW_LINE);
 		help.append("\tactive - " + EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONSOLE_HELP_ACTIVE_COMMAND_DESCRIPTION"));//$NON-NLS-1$	 //$NON-NLS-2$
+		help.append(EclipseAdaptorMsg.NEW_LINE);
+		help.append("\tgetprop " + EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONSOLE_HELP_GETPROP_COMMAND_DESCRIPTION"));//$NON-NLS-1$	 //$NON-NLS-2$
 		return help.toString();
 	}
 
@@ -118,5 +122,17 @@ public class EclipseCommandProvider implements CommandProvider {
 			}
 		ci.print("  "); //$NON-NLS-1$
 		ci.println(EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONSOLE_BUNDLES_ACTIVE", activeCount)); //$NON-NLS-1$
+	}
+	
+	public void _getprop(CommandInterpreter ci) throws Exception {
+		Properties allProperties = System.getProperties();
+		String filter = ci.nextArgument();
+		Enumeration propertyNames = allProperties.keys();
+		while(propertyNames.hasMoreElements()) {
+			String prop = (String) propertyNames.nextElement();
+			if (filter == null || prop.startsWith(filter)) {
+				ci.println(prop+'='+allProperties.getProperty(prop));
+			}
+		}
 	}
 }
