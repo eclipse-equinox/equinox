@@ -196,6 +196,13 @@ public class BundleLoader implements ClassLoaderDelegate
 			String spec = bundle.getBundleData().getDynamicImports();
 			ManifestElement[] imports = ManifestElement.parsePackageDescription(spec);
 			initDynamicImportPackage(imports);
+			// ...and its fragments
+			for (int i = 0; i < fragments.length; i++) 
+				if (fragments[i].isResolved()){
+					spec = ((Bundle)fragmentObjects[i]).getBundleData().getDynamicImports();
+					imports = ManifestElement.parsePackageDescription(spec);
+					initDynamicImportPackage(imports);
+				}
 		} catch (BundleException e) {
 			// TODO log an error
 		}
@@ -955,8 +962,30 @@ public class BundleLoader implements ClassLoaderDelegate
 			return;
 
 		int size = packages.length;
-		ArrayList stems = new ArrayList(size);
-		ArrayList names = new ArrayList(size);
+		ArrayList stems;
+		if (dynamicImportPackageStems == null) {
+			stems = new ArrayList(size);
+		}
+		else {
+			stems = new ArrayList(size+dynamicImportPackageStems.length);
+			for (int i=0; i<dynamicImportPackageStems.length; i++) {
+				stems.add(dynamicImportPackageStems[i]);
+			}
+		}
+
+		ArrayList names;
+		if (dynamicImportPackages == null) {
+			names = new ArrayList(size);
+		}
+		else {
+			names = new ArrayList(size+dynamicImportPackages.length);
+			for (int i=0; i<dynamicImportPackages.length; i++) {
+				names.add(dynamicImportPackages[i]);
+			}
+		}
+
+		
+
 		for (int i = 0; i < size; i++) {
 			String name = packages[i].getValue();
 			if (name.equals("*")) {    /* shortcut */
@@ -965,7 +994,7 @@ public class BundleLoader implements ClassLoaderDelegate
 			}
 
 			if (name.endsWith(".*"))
-				stems.add(name.substring(1, name.length()-1));
+				stems.add(name.substring(0, name.length()-1));
 			else
 				names.add(name);
 		}
