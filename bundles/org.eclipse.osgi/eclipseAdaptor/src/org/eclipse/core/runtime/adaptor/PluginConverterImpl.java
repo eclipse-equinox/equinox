@@ -158,11 +158,6 @@ public class PluginConverterImpl implements PluginConverter {
 
 	private void generateClasspath() {
 		String[] libraries = pluginInfo.getLibrariesName();
-//		ArrayList expandedPath = new ArrayList();
-//		for (int i = 0; i < libraries.length; i++) {
-//			expandedPath.addAll(getLibrariesExpandingVariables(libraries[i], true));
-//		}
-//		writeEntry(Constants.BUNDLE_CLASSPATH, expandedPath);
 		writeEntry(Constants.BUNDLE_CLASSPATH, libraries);
 	}
 
