@@ -16,7 +16,6 @@ import org.xml.sax.*;
 import org.xml.sax.helpers.DefaultHandler;
 
 public class PluginParser extends DefaultHandler implements IModel {
-	private final static String PI_RUNTIME_COMPATIBILITY = "org.eclipse.core.runtime.compatibility"; //$NON-NLS-1$
 	private PluginInfo manifestInfo = new PluginInfo();
 	private BundleContext context;
 
@@ -51,9 +50,10 @@ public class PluginParser extends DefaultHandler implements IModel {
 			return libraries;
 		}
 		public String[] getRequires() {
-			if (requires == null)
-				return new String[]{ PI_RUNTIME_COMPATIBILITY };
 			if (schemaVersion == null) {
+				if (requires == null)
+					return new String[]{ PluginConverterImpl.PI_RUNTIME_COMPATIBILITY };
+				
 				//Add elements on the requirement list of ui and help.
 				for (int i = 0; i < requires.size(); i++) {
 					if ("org.eclipse.ui".equals(requires.get(i))) { //$NON-NLS-1$ 
@@ -66,12 +66,17 @@ public class PluginParser extends DefaultHandler implements IModel {
 						requires.add(i + 1, "org.eclipse.help.base;" + Constants.OPTIONAL_ATTRIBUTE + "=" + "true"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
 					}
 				}
+				if (!compatibilityRequired)
+					requires.add(PluginConverterImpl.PI_RUNTIME_COMPATIBILITY);
 			}
-			if (! compatibilityRequired)
-				requires.add(PI_RUNTIME_COMPATIBILITY);
-			
-			String[] requireBundles = new String[requires.size()];
-			requires.toArray(requireBundles);
+
+			String[] requireBundles;
+			if (requires != null) {
+				requireBundles = new String[requires.size()];
+				requires.toArray(requireBundles);
+			} else { 
+				requireBundles = new String[0];
+			}
 			return requireBundles;
 		}
 		public String getMasterId() {
@@ -421,16 +426,16 @@ public class PluginParser extends DefaultHandler implements IModel {
 		if (manifestInfo.requires == null) {
 			manifestInfo.requires = new ArrayList();
 			// to avoid cycles
-			if (!manifestInfo.pluginId.equals("org.eclipse.core.runtime"))  //$NON-NLS-1$
-				manifestInfo.requires.add("org.eclipse.core.runtime"); //$NON-NLS-1$
+			if (!manifestInfo.pluginId.equals(PluginConverterImpl.PI_RUNTIME))  //$NON-NLS-1$
+				manifestInfo.requires.add(PluginConverterImpl.PI_RUNTIME); //$NON-NLS-1$
 		}
 		// process attributes
 		String plugin = attributes.getValue("", PLUGIN_REQUIRES_PLUGIN); //$NON-NLS-1$ 
 		if (plugin == null)
 			return;
-		if (plugin.equals("org.eclipse.core.boot") || plugin.equals("org.eclipse.core.runtime"))  //$NON-NLS-1$//$NON-NLS-2$
+		if (plugin.equals(PluginConverterImpl.PI_BOOT) || plugin.equals(PluginConverterImpl.PI_RUNTIME))  //$NON-NLS-1$//$NON-NLS-2$
 			return;
-		if (plugin.equals(PI_RUNTIME_COMPATIBILITY))
+		if (plugin.equals(PluginConverterImpl.PI_RUNTIME_COMPATIBILITY))
 			manifestInfo.compatibilityRequired = true;
 		String version = attributes.getValue("", PLUGIN_REQUIRES_PLUGIN_VERSION); //$NON-NLS-1$ 
 		String optional = attributes.getValue("", PLUGIN_REQUIRES_OPTIONAL); //$NON-NLS-1$ 

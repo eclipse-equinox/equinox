@@ -28,9 +28,12 @@ public class PluginConverterImpl implements PluginConverter {
 	private static final String GENERATED_FROM = "Generated-from"; //$NON-NLS-1$
 	private static final String LEGACY = "Legacy"; //$NON-NLS-1$
 	private static final String[] OS_LIST = {org.eclipse.osgi.service.environment.Constants.OS_AIX, org.eclipse.osgi.service.environment.Constants.OS_HPUX, org.eclipse.osgi.service.environment.Constants.OS_LINUX, org.eclipse.osgi.service.environment.Constants.OS_MACOSX, org.eclipse.osgi.service.environment.Constants.OS_QNX, org.eclipse.osgi.service.environment.Constants.OS_SOLARIS, org.eclipse.osgi.service.environment.Constants.OS_WIN32};
-	private static final String PI_RUNTIME = "org.eclipse.core.runtime"; //$NON-NLS-1$
+	protected static final String PI_RUNTIME = "org.eclipse.core.runtime"; //$NON-NLS-1$
+	protected static final String PI_BOOT = "org.eclipse.core.boot"; //$NON-NLS-1$
+	protected static final String PI_RUNTIME_COMPATIBILITY = "org.eclipse.core.runtime.compatibility"; //$NON-NLS-1$
 	private static final String PLUGIN = "Plugin-Class"; //$NON-NLS-1$
 	private static final String PLUGIN_MANIFEST = "plugin.xml"; //$NON-NLS-1$
+	private static final String COMPATIBILITY_ACTIVATOR = "org.eclipse.core.internal.compatibility.PluginActivator"; //$NON-NLS-1$
 	private static final String[] WS_LIST = {org.eclipse.osgi.service.environment.Constants.WS_CARBON, org.eclipse.osgi.service.environment.Constants.WS_GTK, org.eclipse.osgi.service.environment.Constants.WS_MOTIF, org.eclipse.osgi.service.environment.Constants.WS_PHOTON, org.eclipse.osgi.service.environment.Constants.WS_WIN32};
 	
 	public static PluginConverterImpl getDefault() {
@@ -157,9 +160,22 @@ public class PluginConverterImpl implements PluginConverter {
 		closeFile();
 	}
 
+	private boolean requireRuntimeCompatibility() {
+		String[] requireList = pluginInfo.getRequires();
+		for (int i = 0; i < requireList.length; i++) {
+			if (requireList[i].indexOf(PI_RUNTIME_COMPATIBILITY) != -1)
+				return true;
+		}
+		return false;
+	}
+	
 	private void generateActivator() {
-		if (!pluginInfo.isFragment())
-			writeEntry(Constants.BUNDLE_ACTIVATOR, "org.eclipse.core.internal.compatibility.PluginActivator"); //$NON-NLS-1$
+		if (!pluginInfo.isFragment()) 
+			if (! requireRuntimeCompatibility()) {
+				writeEntry(Constants.BUNDLE_ACTIVATOR, pluginInfo.getPluginClass());
+			} else {
+				writeEntry(Constants.BUNDLE_ACTIVATOR, COMPATIBILITY_ACTIVATOR);
+			}
 	}
 
 	private void generateClasspath() {
@@ -184,7 +200,8 @@ public class PluginConverterImpl implements PluginConverter {
 	}
 
 	private void generatePluginClass() {
-		writeEntry(PLUGIN, pluginInfo.getPluginClass());
+		if (requireRuntimeCompatibility())
+			writeEntry(PLUGIN, pluginInfo.getPluginClass());
 	}
 	private void generateProvidePackage() {
 		StringBuffer providePackage = new StringBuffer();
