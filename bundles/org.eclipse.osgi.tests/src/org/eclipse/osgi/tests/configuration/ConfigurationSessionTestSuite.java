@@ -15,11 +15,13 @@ import java.net.URL;
 import java.util.*;
 import junit.framework.*;
 import org.eclipse.core.internal.runtime.InternalPlatform;
-import org.eclipse.core.runtime.*;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.tests.harness.CoreTest;
 import org.eclipse.core.tests.harness.FileSystemHelper;
 import org.eclipse.core.tests.session.*;
 import org.eclipse.core.tests.session.SetupManager.SetupException;
+import org.osgi.framework.Bundle;
 
 public class ConfigurationSessionTestSuite extends SessionTestSuite {
 	private static final String PROP_BASE_CONFIG_AREA = "osgi.baseConfiguration.area";
@@ -67,7 +69,7 @@ public class ConfigurationSessionTestSuite extends SessionTestSuite {
 		}
 		osgiBundles.deleteCharAt(osgiBundles.length() - 1);
 		contents.put("osgi.bundles", osgiBundles.toString());
-		String osgiFramework = Platform.resolve(Platform.getPluginRegistry().getPluginDescriptor("org.eclipse.osgi").getInstallURL()).toExternalForm();
+		String osgiFramework = getURL("org.eclipse.osgi");
 		contents.put("osgi.framework", osgiFramework);
 		contents.put("osgi.bundles.defaultStartLevel", "4");
 		contents.put("osgi.install.area", Platform.getInstallLocation().getURL().toExternalForm());
@@ -103,15 +105,21 @@ public class ConfigurationSessionTestSuite extends SessionTestSuite {
 			suffix = id.substring(atIndex);
 			id = id.substring(0, atIndex);
 		}
-		IPluginDescriptor descriptor = Platform.getPluginRegistry().getPluginDescriptor(id);
-		Assert.assertNotNull("0.1 " + id, descriptor);
+		Bundle bundle = Platform.getBundle(id);
+		Assert.assertNotNull("0.1 " + id, bundle);
 		URL url = null;
 		try {
-			url = Platform.resolve(descriptor.getInstallURL());
+			url = Platform.resolve(bundle.getEntry("/"));
 		} catch (IOException e) {
-			CoreTest.fail("0.2 " + descriptor.getInstallURL(), e);
+			CoreTest.fail("0.2 " + bundle.getEntry("/"), e);
 		}
-		String externalForm = url.toExternalForm();
+		String externalForm = url.toExternalForm();		
+		if (url.getProtocol().equals("jar")) {
+			// if it is a JAR'd plug-in, URL is jar:file:/path/file.jar!/
+			String path = url.getPath();
+			// change it to be file:/path/file.jar
+			externalForm = path.substring(0, path.length() - 2);
+		}
 		// workaround for bug 88070		
 		externalForm = "reference:" + externalForm;
 		return externalForm + suffix;
