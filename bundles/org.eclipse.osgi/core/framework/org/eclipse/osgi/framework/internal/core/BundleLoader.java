@@ -113,7 +113,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 	}
 
 	protected void initialize(BundleDescription description) {
-		hasDynamicImports = SystemBundleLoader.getSystemPackages() != null;
+		hasDynamicImports = !(this instanceof SystemBundleLoader) && SystemBundleLoader.getSystemPackages() != null;
 
 		// init the imported packages list taking the bundle...
 		addImportedPackages(description.getResolvedImports());
@@ -551,6 +551,8 @@ public class BundleLoader implements ClassLoaderDelegate {
 	 * @return true if the package should be imported.
 	 */
 	protected boolean isDynamicallyImported(String pkgname) {
+		if (this instanceof SystemBundleLoader)
+			return false; // system bundle cannot dynamically import
 		// must check for startsWith("java.") to satisfy R3 section 4.7.2
 		if (pkgname.startsWith("java.")) //$NON-NLS-1$
 			return true;
