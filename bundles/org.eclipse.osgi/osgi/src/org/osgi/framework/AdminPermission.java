@@ -28,13 +28,10 @@
 package org.osgi.framework;
 
 import java.io.InputStream;
-import java.security.Permission;
-import java.security.PermissionCollection;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Iterator;
-
+import java.security.*;
+import java.util.*;
+import org.eclipse.osgi.framework.internal.core.FilterImpl;
+import org.eclipse.osgi.framework.internal.core.Framework;
 import org.osgi.service.permissionadmin.PermissionInfo;
 
 /**
@@ -168,13 +165,13 @@ public final class AdminPermission extends Permission
 
     private final static int ACTION_CLASS		= 0x00000001;
     private final static int ACTION_EXECUTE		= 0x00000002;
-    private final static int ACTION_LIFECYCLE	= 0x00000003;
-    private final static int ACTION_LISTENER	= 0x00000004;
-    private final static int ACTION_METADATA    = 0x00000005;
-    private final static int ACTION_PERMISSION	= 0x00000006;
-    private final static int ACTION_RESOLVE		= 0x00000007;
-    private final static int ACTION_RESOURCE    = 0x00000008;
-    private final static int ACTION_STARTLEVEL	= 0x00000009;
+    private final static int ACTION_LIFECYCLE	= 0x00000004;
+    private final static int ACTION_LISTENER	= 0x00000008;
+    private final static int ACTION_METADATA    = 0x00000010;
+    private final static int ACTION_PERMISSION	= 0x00000020;
+    private final static int ACTION_RESOLVE		= 0x00000040;
+    private final static int ACTION_RESOURCE    = 0x00000080;
+    private final static int ACTION_STARTLEVEL	= 0x00000100;
     private final static int ACTION_ALL = 
 		ACTION_CLASS 		|
 		ACTION_EXECUTE 		|
@@ -198,6 +195,19 @@ public final class AdminPermission extends Permission
      * @serial
      */
     private String actions = null;
+    
+    /**
+     * If this AdminPermission was constructed with a bundle id, this dictionary holds
+     * the properties of that bundle, used to match a filter in implies.
+     * This is not initialized until necessary, and then cached in this object.
+     */
+    protected Dictionary bundleProperties;
+    
+    /**
+     * Framework reference used to construct <tt><@link AdminPermission#bundleProperties></tt>
+     * above.  This will be null unless this AdminPermission was constructed by PermissionAdmin
+     */
+    private Framework framework;
 	
 	/**
      * Creates a new <tt>AdminPermission</tt> object that matches 
@@ -246,7 +256,31 @@ public final class AdminPermission extends Permission
     	this.nameFilter = null;
     	this.action_mask = getMask(actions);
     }
-    
+
+    /**
+     * Creates a new <tt>AdminPermission</tt> object for use by the <code>Policy</code>
+     * object to instantiate new <tt>Permission</tt> objects.
+     * 
+     * This constructor is used by PermissionAdmin.  Null arguments are equivalent to "*"
+     *
+     * @param name A long bundle id, an X.500 Distinguished Name suffix or "*" to match all bundles
+     * @param actions <tt>class</tt>, <tt>execute</tt>, <tt>lifecycle</tt>, 
+     * <tt>listener</tt>, <tt>metadata</tt>, <tt>permission</tt>, <tt>resolve</tt>, 
+     * <tt>resource</tt>, <tt>startlevel</tt>, or "*" to indicate all actions
+     * @param framework Framework object used to look up bundle properties.
+     */
+    public AdminPermission(String name, String actions, Framework framework)
+    {
+    	//arguments will be null if called from a PermissionInfo defined with
+    	//no args
+    	this(
+    			(name == null ? "*" : name), //$NON-NLS-1$
+				getMask((actions == null ? "*" : actions)) //$NON-NLS-1$
+				);
+    	
+    	this.framework = framework;
+    }
+  
     /**
      * Package private constructor used by AdminPermissionCollection.
      *
@@ -528,6 +562,44 @@ public final class AdminPermission extends Permission
     }
      
     /**
+     * Called by <tt><@link AdminPermission#implies(Permission)></tt> on an AdminPermission
+     * which was constructed with a Bundle Id.  This method loads a dictionary with the
+     * filter-matchable properties of this bundle.  The dictionary is cached so this lookup
+     * only happens once.
+     * 
+     * This method should only be called on an AdminPermission which was constructed with a 
+     * bundle id
+     * 
+     * @return a dictionary of properties for this bundle
+     */
+    private Dictionary getProperties(long bundleId) {
+    	if (bundleProperties == null) {
+    		bundleProperties = new Hashtable();
+
+    		final Bundle bundle = framework.getBundle(bundleId);
+    		if (bundle == null)
+    			return null;
+
+    		AccessController.doPrivileged(new PrivilegedAction() {
+				public Object run() {
+		    		//set Id
+		    		bundleProperties.put("Id",new Long(bundle.getBundleId())); //$NON-NLS-1$
+		    		
+		    		//set location
+		    		bundleProperties.put("location",bundle.getLocation()); //$NON-NLS-1$
+		    		
+		    		//set name
+		    		if (bundle.getSymbolicName() != null) {
+		    			bundleProperties.put("name",bundle.getSymbolicName()); //$NON-NLS-1$
+		    		}
+
+		    		return null;
+				}
+			});
+    	}     		
+    	return bundleProperties;
+    }
+    /**
      * Determines if the specified permission is implied by this object.
      * This method throws an exception if the specified permission was not
      * constructed with a bundle id as it's name.
@@ -563,22 +635,26 @@ public final class AdminPermission extends Permission
     		return false;
     	}
 
-    	//if passed in * or a filter, puke
+    	//if passed in a filter, puke
     	if (target.nameFilter != null) {
     		throw new RuntimeException("Cannot imply a filter");
     	}
     	
-    	//special case - wildcard implies wildcard
-    	if (wildcard && target.wildcard) {
-    		return true;
+    	//special case - only wildcard implies wildcard
+    	if (target.wildcard) {
+    		return wildcard;
     	}
 
-    	//check name 
+    	//check our name 
     	if (nameFilter != null) {
     		//it's a filter
-    		//TODO handle filters here
-   		
-    		return false;
+    		Filter filter = null;
+    		try {
+				filter = new FilterImpl(nameFilter);
+			} catch (InvalidSyntaxException e) {
+				//we will return false
+			}
+			return filter != null && filter.match(getProperties(target.nameId));
     	} else if (wildcard) {
     		//it's "*"
     		return true;

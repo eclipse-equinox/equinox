@@ -580,6 +580,11 @@ public class PermissionAdminImpl implements PermissionAdmin {
 		String type = info.getType();
 		String name = info.getName();
 		String actions = info.getActions();
+		
+		//special case for AdminPermission - required for RFC 73
+		if (AdminPermission.class.getName().equals(type)) {
+			return new AdminPermission(name,actions,framework);
+		}
 
 		UnresolvedPermission permission = new UnresolvedPermission(type, name, actions);
 
