@@ -12,9 +12,8 @@ package org.eclipse.osgi.tests.perf;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
-import org.eclipse.core.tests.harness.CorePerformanceTest;
 
-public class AllTests extends CorePerformanceTest {
+public class AllTests extends TestSuite {
 
 	public AllTests() {
 		super();
