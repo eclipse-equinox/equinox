@@ -23,8 +23,10 @@ public interface ParameterizedRunnable {
 	/**
 	 * Executes the block of code encapsulated by this runnable in the context of
 	 * the given object and returns result.  The result may be <code>null</code>.
+	 * 
 	 * @param context the context for evaluating the runnable
 	 * @return the result of evaluating the runnable in the given context
+	 * @throws Exception if there is a problem running this runnable
 	 */
-	public Object run(Object context);
+	public Object run(Object context) throws Exception;
 }

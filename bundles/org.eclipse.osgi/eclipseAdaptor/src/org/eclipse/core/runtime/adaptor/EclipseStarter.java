@@ -226,7 +226,7 @@ public class EclipseStarter {
 	 * @return the result of running the application
 	 * @throws Exception if anything goes wrong
 	 */
-	public static Object run(Object argument) {
+	public static Object run(Object argument) throws Exception {
 		if (!running)
 			throw new IllegalStateException("Platform not running");
 		logUnresolvedBundles(context.getBundles());
