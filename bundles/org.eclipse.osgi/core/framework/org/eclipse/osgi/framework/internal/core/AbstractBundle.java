@@ -1553,8 +1553,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	}
 
 	protected boolean checkProvideBundlePermission(String symbolicName) {
-		if (domain != null)
-			return domain.implies(new BundlePermission(symbolicName, BundlePermission.PROVIDE_BUNDLE));
+		// Return true until BundlePermissions are better defined.
 		return true;
 	}
 
@@ -1565,20 +1564,17 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	}
 
 	protected boolean checkRequireBundlePermission(String symbolicName) {
-		if (domain != null)
-			return domain.implies(new BundlePermission(symbolicName, BundlePermission.REQUIRE_BUNDLE));
+		// Return true until BundlePermissions are better defined.
 		return true;
 	}
 
 	protected boolean checkFragmentHostPermission(String symbolicName) {
-		if (domain != null)
-			return domain.implies(new BundlePermission(symbolicName, BundlePermission.FRAGMENT_HOST));
+		// Return true until BundlePermissions are better defined.
 		return true;
 	}
 
 	protected boolean checkFragmentBundlePermission(String symbolicName) {
-		if (domain != null)
-			return domain.implies(new BundlePermission(symbolicName, BundlePermission.FRAGMENT_BUNDLE));
+		// Return true until BundlePermissions are better defined.
 		return true;
 	}
 
