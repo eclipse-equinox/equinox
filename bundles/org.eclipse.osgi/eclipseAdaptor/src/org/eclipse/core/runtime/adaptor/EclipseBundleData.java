@@ -89,7 +89,23 @@ public class EclipseBundleData extends AbstractBundleData {
 		if (!"true".equalsIgnoreCase(System.getProperty(PROP_CHECK_CONFIG))) //$NON-NLS-1$
 			return true;
 
-		return PluginConverterImpl.getTimeStamp(getBaseFile(), getManifestType()) == getManifestTimeStamp();
+		if (PluginConverterImpl.getTimeStamp(getBaseFile(), getManifestType()) == getManifestTimeStamp()) {
+			if ((getManifestType() & (MANIFEST_TYPE_JAR | MANIFEST_TYPE_BUNDLE)) != 0)
+				return true;
+			String cacheLocation = System.getProperty(LocationManager.PROP_MANIFEST_CACHE);
+			Location parentConfiguration = LocationManager.getConfigurationLocation().getParentLocation();
+			if (parentConfiguration != null) {
+				try {
+					return checkManifestAndParent(cacheLocation, getSymbolicName(), getVersion().toString(), getManifestType()) != null;
+				} catch (BundleException e) {
+					return false;
+				}
+			}
+			File cacheFile = new File(cacheLocation, getSymbolicName() + '_' + getVersion() + ".MF"); //$NON-NLS-1$
+			if (cacheFile.isFile())
+				return true;
+		}
+		return false;
 	}
 
 	/**
