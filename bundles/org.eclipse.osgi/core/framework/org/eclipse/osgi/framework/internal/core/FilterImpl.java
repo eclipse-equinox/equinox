@@ -732,20 +732,20 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 							if (substr == null) /* * */{
 								String substr2 = substrings[i + 1];
 
-								if (substr2 == null) /* ** */{
+								if (substr2 == null) /* ** */
 									continue; /* ignore first star */
-								} else /* *xxx */{
-									if (Debug.DEBUG && Debug.DEBUG_FILTER) {
-										Debug.println("indexOf(\"" + substr2 + "\"," + pos + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-									}
-									int index = string.indexOf(substr2, pos);
-									if (index == -1) {
-										return false;
-									}
-
-									i++;
-									pos = index + substr2.length();
+								/* *xxx */
+								if (Debug.DEBUG && Debug.DEBUG_FILTER) {
+									Debug.println("indexOf(\"" + substr2 + "\"," + pos + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 								}
+								int index = string.indexOf(substr2, pos);
+								if (index == -1) {
+									return false;
+								}
+
+								pos = index + substr2.length();
+								if (i + 2 < size) // if there are more substrings, increment over the string we just matched; otherwise need to do the last substr check
+									i++;
 							} else /* xxx */{
 								int len = substr.length();
 
