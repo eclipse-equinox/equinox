@@ -39,7 +39,6 @@ public abstract class SignedBundle extends BundleFile {
 	 * Matches a distinguished name chain against a pattern of a distinguished
 	 * name chain.
 	 * 
-	 * @param dnChain the distingueshed name chanin
 	 * @param pattern the pattern of distinguished name (DN) chains to match
 	 *        against the dnChain. Wildcards "*" can be used in three cases:
 	 *        <ol>
@@ -64,5 +63,5 @@ public abstract class SignedBundle extends BundleFile {
 	 * bundle signing is not supported.
 	 * @throws IllegalArgumentException
 	 */
-	public abstract boolean matchDNChain(String dnChain, String pattern);
+	public abstract boolean matchDNChain(String pattern);
 }

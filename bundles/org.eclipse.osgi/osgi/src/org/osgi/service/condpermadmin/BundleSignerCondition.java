@@ -1,5 +1,5 @@
 /*
- * $Header$
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/service/condpermadmin/BundleSignerCondition.java,v 1.1 2005/02/24 18:38:38 twatson Exp $
  * 
  * Copyright (c) OSGi Alliance (2005). All Rights Reserved.
  * 
@@ -51,7 +51,7 @@ import org.osgi.framework.Bundle;
  * the corresponding type in that RDN.  If a wildcard is used for a RDN, it must be the
  * first RDN and will match any number of RDNs (including zero RDNs).   
  * 
- * @version $Revision$
+ * @version $Revision: 1.1 $
  */
 public class BundleSignerCondition implements Condition {
 	boolean satisfied;
@@ -64,16 +64,9 @@ public class BundleSignerCondition implements Condition {
 	 */
 	public BundleSignerCondition(Bundle bundle, String dnChain) {
 		AbstractBundle ab = (AbstractBundle) bundle;
-		String signers[] = ab.getBundleData().getBundleSigners();
-		satisfied = false;
-		if (signers != null) {
-			for (int i = 0; i < signers.length; i++)
-				if (ab.getBundleData().matchDNChain(signers[i], dnChain)) {
-					satisfied = true;
-					break;
-				}
-		}
+		satisfied = ab.getBundleData().matchDNChain(dnChain);
 	}
+
 
 	/**
 	 * Always returns true, since this condition is immutable.

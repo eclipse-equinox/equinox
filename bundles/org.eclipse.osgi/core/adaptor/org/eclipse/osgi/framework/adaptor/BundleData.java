@@ -263,9 +263,8 @@ public interface BundleData {
 	 * Matches a distinguished name chain against a pattern of a distinguished
 	 * name chain.
 	 * 
-	 * @param dnChain the distingueshed name chanin
 	 * @param pattern the pattern of distinguished name (DN) chains to match
-	 *        against the dnChain. Wildcards "*" can be used in three cases:
+	 *        against the DN chains of the Bundle. Wildcards "*" can be used in three cases:
 	 *        <ol>
 	 *        <li>As a DN. In this case, the DN will consist of just the "*".
 	 *        It will match zero or more DNs. For example, "cn=me,c=US;*;cn=you"
@@ -288,5 +287,5 @@ public interface BundleData {
 	 * bundle signing is not supported.
 	 * @throws IllegalArgumentException
 	 */
-	public boolean matchDNChain(String dnChain, String pattern);
+	public boolean matchDNChain(String pattern);
 }
