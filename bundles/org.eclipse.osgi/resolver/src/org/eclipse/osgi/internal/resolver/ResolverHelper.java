@@ -100,7 +100,7 @@ public class ResolverHelper {
 	public static IElement createElement(BundleDescription bundleDescription, IDependencySystem system) {
 		String uniqueId = getUniqueId(bundleDescription);
 		Version version = getVersion(bundleDescription);
-		return system.createElement(uniqueId, version, createPrerequisites(bundleDescription, system), true, bundleDescription);
+		return system.createElement(uniqueId, version, createPrerequisites(bundleDescription, system), bundleDescription.isSingleton(), bundleDescription);
 	}
 	private static Version getVersion(BundleDescription bundleDescription) {
 		Version version = bundleDescription.getVersion();
