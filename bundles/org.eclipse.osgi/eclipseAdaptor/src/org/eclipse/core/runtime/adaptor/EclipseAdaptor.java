@@ -182,9 +182,12 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 		}
 		stateManager = new StateManager(stateLocation, timeStamp);
 		stateManager.setInstaller(new EclipseBundleInstaller());
-		StateImpl systemState = stateManager.readSystemState(context);
-		if (systemState != null)
-			return stateManager;
+		StateImpl systemState = null;
+		if (!invalidState) {
+			systemState = stateManager.readSystemState(context);
+			if (systemState != null)
+				return stateManager;
+		}
 		systemState = stateManager.createSystemState(context);
 		Bundle[] installedBundles = context.getBundles();
 		if (installedBundles == null)
@@ -193,11 +196,11 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 		for (int i = 0; i < installedBundles.length; i++) {
 			Bundle toAdd = installedBundles[i];
 			try {
-				Dictionary manifest = toAdd.getHeaders(""); //$NON-NLS-1$
+				Dictionary toAddManifest = toAdd.getHeaders(""); //$NON-NLS-1$
 				// if this is a cached manifest need to get the real one
-				if (manifest instanceof CachedManifest)
-					manifest = ((CachedManifest) manifest).getManifest();
-				BundleDescription newDescription = factory.createBundleDescription(manifest, toAdd.getLocation(), toAdd.getBundleId());
+				if (toAddManifest instanceof CachedManifest)
+					toAddManifest = ((CachedManifest) toAddManifest).getManifest();
+				BundleDescription newDescription = factory.createBundleDescription(toAddManifest, toAdd.getLocation(), toAdd.getBundleId());
 				systemState.addBundle(newDescription);
 			} catch (BundleException be) {
 				// just ignore bundle datas with invalid manifests
@@ -206,6 +209,7 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 		// we need the state resolved
 		systemState.setTimeStamp(timeStamp);
 		systemState.resolve();
+		invalidState = false;
 		return stateManager;
 	}
 

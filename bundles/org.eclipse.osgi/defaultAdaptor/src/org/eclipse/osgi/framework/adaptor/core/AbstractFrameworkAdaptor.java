@@ -680,10 +680,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 				} catch (IOException e) {
 					throw new BundleException(AdaptorMsg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION"), e); //$NON-NLS-1$
 				}
-				if (stateManager != null) {
-					BundleDescription bundleDescription = stateManager.getFactory().createBundleDescription(data.getManifest(), data.getLocation(), data.getBundleID());
-					stateManager.getSystemState().addBundle(bundleDescription);
-				}
+				updateState(data, BundleEvent.INSTALLED);
 			}
 
 		});
@@ -789,6 +786,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 	protected File dataRootDir;
 	public static final String METADATA_ADAPTOR_IBSL = "METADATA_ADAPTOR_IBSL";
 	public static final String DATA_DIR_NAME = "data";
+	protected boolean invalidState = false;
 
 	/**
 	 * Prepare to update a bundle from a URLConnection.
@@ -896,13 +894,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 				} catch (IOException e) {
 					throw new BundleException(AdaptorMsg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION"), e); //$NON-NLS-1$
 				}
-				long bundleId = newData.getBundleID();
-				if (stateManager != null) {
-					State systemState = stateManager.getSystemState();
-					systemState.removeBundle(bundleId);
-					BundleDescription newDescription = stateManager.getFactory().createBundleDescription(newData.getManifest(), newData.getLocation(), bundleId);
-					systemState.addBundle(newDescription);
-				}
+				updateState(newData, BundleEvent.UPDATED);
 				File originalGenerationDir = data.createGenerationDir();
 
 				if (postpone || !rm(originalGenerationDir)) {
@@ -986,9 +978,12 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 	protected StateManager createStateManager() {
 		File stateLocation = new File(getBundleStoreRootDir(), ".state"); //$NON-NLS-1$
 		stateManager = new StateManager(stateLocation);
-		State systemState = stateManager.readSystemState(context);
-		if (systemState != null)
-			return stateManager;
+		State systemState = null;
+		if (!invalidState) {
+			systemState = stateManager.readSystemState(context);
+			if (systemState != null)
+				return stateManager;
+		}
 		systemState = stateManager.createSystemState(context);
 		Bundle[] installedBundles = context.getBundles();
 		if (installedBundles == null)
@@ -1006,6 +1001,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 		}
 		// we need the state resolved
 		systemState.resolve();
+		invalidState = false;
 		return stateManager;
 	}
 
@@ -1068,8 +1064,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 				}
 
 				data.setLastModified(System.currentTimeMillis());
-				if (stateManager != null)
-					stateManager.getSystemState().removeBundle(data.getBundleID());
+				updateState(data, BundleEvent.UNINSTALLED);
 			}
 
 			/**
@@ -1277,6 +1272,26 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 	protected static class ParentClassLoader extends ClassLoader {
 		protected ParentClassLoader() {
 			super(null);
+		}
+	}
+
+	protected void updateState(BundleData bundleData, int type) throws BundleException {
+		if (stateManager == null) {
+			invalidState = true;
+			return;
+		}
+		State systemState = stateManager.getSystemState();
+		switch (type) {
+			case BundleEvent.UPDATED:
+				systemState.removeBundle(bundleData.getBundleID());
+				// fall through to INSTALLED
+			case BundleEvent.INSTALLED:
+				BundleDescription newDescription = stateManager.getFactory().createBundleDescription(bundleData.getManifest(), bundleData.getLocation(), bundleData.getBundleID());
+				systemState.addBundle(newDescription);
+				break;
+			case BundleEvent.UNINSTALLED:
+				systemState.removeBundle(data.getBundleID());
+				break;
 		}
 	}
 }
