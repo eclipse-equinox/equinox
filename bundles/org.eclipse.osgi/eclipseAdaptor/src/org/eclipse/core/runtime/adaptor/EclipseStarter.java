@@ -404,7 +404,7 @@ public class EclipseStarter {
 		return list.isEmpty() ? new String[0] : (String[]) list.toArray(new String[list.size()]);
 	}
 
-	private static String getSysPath() {
+	protected static String getSysPath() {
 		String result = System.getProperty("osgi.syspath");
 		if (result != null) 
 			return result;

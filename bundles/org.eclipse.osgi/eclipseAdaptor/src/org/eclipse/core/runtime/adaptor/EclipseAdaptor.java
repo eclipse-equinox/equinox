@@ -46,12 +46,13 @@ public class EclipseAdaptor extends DefaultAdaptor {
 	private static final String OPTION_STATE_READER = RUNTIME_ADAPTOR + "/state/reader";//$NON-NLS-1$
 	private static final String OPTION_RESOLVER = RUNTIME_ADAPTOR + "/resolver/timing"; //$NON-NLS-1$
 	private static final String OPTION_RESOLVER_READER = RUNTIME_ADAPTOR + "/resolver/reader/timing"; //$NON-NLS-1$
-	public static final byte BUNDLEDATA_VERSION = 2;
+	public static final byte BUNDLEDATA_VERSION = 3;
 	public static final byte NULL = 0;
 	public static final byte OBJECT = 1;
 
-	int startLevel = 1;
-	private long timeStamp;
+	private int startLevel = 1;
+	private long timeStamp = 0;
+	private String installURL = null; 
 
 	public EclipseAdaptor(String[] args) {
 		super(args);
@@ -59,7 +60,8 @@ public class EclipseAdaptor extends DefaultAdaptor {
 	}
 	
 	protected StateManager createStateManager() {
-		timeStamp = readTimeStamp();
+		readHeaders();
+		checkLocationAndReinitialize();
 		stateManager = new StateManager(getStateBaseLocation(), timeStamp);
 		StateImpl systemState = stateManager.getSystemState();
 		if (systemState != null)
@@ -85,15 +87,33 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		return stateManager;
 	}	
 
-	private long readTimeStamp() {
+	private void checkLocationAndReinitialize() {
+		if (timeStamp == 0) {
+			installURL = EclipseStarter.getSysPath();
+			return;
+		}
+		if( ! EclipseStarter.getSysPath().equals(installURL) ) {
+			//delete the metadata file and the framework file when the location of the basic bundles has changed 
+			getMetaDataLocation().delete();
+			getMetaDataFile().delete();
+			installURL = EclipseStarter.getSysPath();
+		}
+	}
+	
+	private void readHeaders() {
 		File metadata = getMetaDataLocation();
 		if (!metadata.isFile())
-			return 0;
+			return;
+		
 		try {
 			DataInputStream in = new DataInputStream(new BufferedInputStream(new FileInputStream(metadata)));
 			try {
-				if (in.readByte() == BUNDLEDATA_VERSION)
-					return in.readLong();				
+				if (in.readByte() == BUNDLEDATA_VERSION) {
+					timeStamp = in.readLong();
+					installURL = in.readUTF();
+					startLevel = in.readInt();
+					nextId = in.readInt();
+				}
 			} finally {
 				in.close();
 			}
@@ -103,7 +123,6 @@ public class EclipseAdaptor extends DefaultAdaptor {
 				Debug.printStackTrace(e);
 			}
 		}
-		return 0;
 	}
 
 	public AdaptorElementFactory getElementFactory() {
@@ -203,9 +222,11 @@ public class EclipseAdaptor extends DefaultAdaptor {
 				if (in.readByte() != BUNDLEDATA_VERSION)
 					return null;
 				// skip timeStamp - was read by readTimeStamp
-				in.readLong();				
-				startLevel = in.readInt();
-				nextId = in.readLong();
+				in.readLong();
+				in.readUTF();
+				in.readInt();
+				in.readLong();
+				
 				int bundleCount = in.readInt();
 				Vector result = new Vector(bundleCount);
 				for (int i = 0; i < bundleCount; i++) {
@@ -325,7 +346,8 @@ public class EclipseAdaptor extends DefaultAdaptor {
 			DataOutputStream out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(metadata)));
 			try {
 				out.write(BUNDLEDATA_VERSION);
-				out.writeLong(stateManager.getSystemState().getTimeStamp());				
+				out.writeLong(stateManager.getSystemState().getTimeStamp());
+				out.writeUTF(installURL);
 				out.writeInt(startLevel);				
 				out.writeLong(nextId);
 				Bundle[] bundles = context.getBundles();
@@ -371,5 +393,4 @@ public class EclipseAdaptor extends DefaultAdaptor {
 			configAreaDirectory.mkdirs();
 		return new File(configAreaDirectory, ".framework");
 	}
-	
 }
