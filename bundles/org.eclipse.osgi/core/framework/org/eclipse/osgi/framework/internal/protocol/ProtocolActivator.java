@@ -14,6 +14,7 @@ package org.eclipse.osgi.framework.internal.protocol;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.osgi.framework.BundleContext;
 
+//TODO this is non-API, and has no internal clients - do we really need it? at least explain why
 public interface ProtocolActivator {
 
 	public void start(BundleContext context, FrameworkAdaptor adaptor);
