@@ -12,13 +12,14 @@
 package org.eclipse.osgi.framework.eventmgr;
 
 /**
- * This class is the central class for the event manager. Each
- * program that wishes to use the event manager should construct
+ * This class is the central class for the Event Manager. Each
+ * program that wishes to use the Event Manager should construct
  * an EventManager object and use that object to construct
- * ListenerQueue for dispatching events.
+ * ListenerQueue for dispatching events. EventListeners objects
+ * should be used to manage listener lists.
  *
  * <p>This example uses the ficticous SomeEvent class and shows how to use this package 
- * to deliver SomeEvents to SomeEventListeners.  
+ * to deliver a SomeEvent to a set of SomeEventListeners.  
  * <pre>
  *
  * 		// Create an EventManager with a name for an asynchronous event dispatch thread
@@ -36,7 +37,7 @@ package org.eclipse.osgi.framework.eventmgr;
  *		listenerQueue.queueListeners(eventListeners, new EventDispatcher() {
  *	        public void dispatchEvent(Object eventListener, Object listenerObject, 
  *                                    int eventAction, Object eventObject) {
- * 				(SomeEventListener)listener.someEventOccured((SomeEvent)eventObject);
+ * 				(SomeEventListener)eventListener.someEventOccured((SomeEvent)eventObject);
  *			}
  *		});
  *		// Deliver the event to the listeners. 
@@ -49,20 +50,36 @@ package org.eclipse.osgi.framework.eventmgr;
  *		eventManager.close();
  * </pre>
  * 
- * <p>At first blush, this package may seem more complicated than necessary
+ * <p>At first glance, this package may seem more complicated than necessary
  * but it has support for some important features. The listener list supports
  * companion objects for each listener object. This is used by the OSGi framework
  * to create wrapper objects for a listener which are passed to the event dispatcher.
- * The ListenerQueue class is used to build the snap shot listeners prior to beginning
- * event dispatch. The OSGi framework uses a 2 level dispatch technique which allows a bundle's
- * listeners to be quickly removed form the listener list. This 2 level technique really means
- * the OSGi framework stores each bundle's listeners is a list and then maintains a list of
- * bundles which have a listener list. The EventDispatcher is also used as the final event
- * deliverer and must cast the listener and event objects to the proper type. The OSGi framework
- * uses EventDispatcher for 2 things. It uses an EventDispacther at the top level (Framework)
- * to build the ListenerQueue of all registered listeners at the time the event is fire. 
- * It also uses an EventDispatcher at the lower level to short circuit delivery of an event 
- * to a bundle that has stopped bewteen the time the ListenerQueue was created and the
+ * The ListenerQueue class is used to build a snap shot of the listeners prior to beginning
+ * event dispatch. 
+ * 
+ * The OSGi framework uses a 2 level listener list (EventListeners) for each listener type (4 types). 
+ * Level one is managed by the framework and contains the list of BundleContexts which have 
+ * registered a listener. Level 2 is managed by each BundleContext for the listeners in that 
+ * context. This allows all the listeners of a bundle to be easily and atomically removed from 
+ * the level one list. To use a "flat" list for all bundles would require the list to know which 
+ * bundle registered a listener object so that the list could be traversed when stopping a bundle 
+ * to remove all the bundle's listeners. 
+ * 
+ * When an event is fired, a snapshot list (ListenerQueue) must be made of the current listeners before delivery 
+ * is attempted. The snapshot list is necessary to allow the listener list to be modified while the 
+ * event is being delivered to the snapshot list. The memory cost of the snapshot list is
+ * low since the ListenerQueue object shares the array of listeners with the EventListeners object.
+ * EventListeners uses copy-on-write semantics for managing the array and will copy the array
+ * before changing it IF the array has been shared with a ListenerQueue. This minimizes 
+ * object creation while guaranteeing the snapshot list is never modified once created.
+ * 
+ * The OSGi framework also uses a 2 level dispatch technique (EventDispatcher).
+ * Level one dispatch is used by the framework to add the level 2 listener list of each 
+ * BundleContext to the snapshot in preparation for delivery of the event.
+ * Level 2 dispatch is used as the final event deliverer and must cast the listener 
+ * and event objects to the proper type before calling the listener. Level 2 dispatch
+ * will cancel delivery of an event 
+ * to a bundle that has stopped bewteen the time the snapshot was created and the
  * attempt was made to deliver the event.
  * 
  * <p> The highly dynamic nature of the OSGi framework had necessitated these features for 
@@ -70,17 +87,17 @@ package org.eclipse.osgi.framework.eventmgr;
  */
 
 public class EventManager {
-	static final boolean DEBUG = true;
+	static final boolean DEBUG = false;
 
 	/**
 	 * EventThread for asynchronous dispatch of events.
 	 */
-	private EventThread thread;
+	private volatile EventThread thread;
 
 	/**
 	 * EventThread Name
 	 */
-	protected String threadName;
+	protected final String threadName;
 
 	/**
 	 * EventManager constructor. An EventManager object is responsible for
@@ -88,11 +105,18 @@ public class EventManager {
 	 *
 	 */
 	public EventManager() {
-		thread = null;
+		this(null);
 	}
 
+	/**
+	 * EventManager constructor. An EventManager object is responsible for
+	 * the delivery of events to listeners via an EventDispatcher.
+	 *
+	 * @param threadName The name to give the event thread associated with
+	 * this EventManager.
+	 */
 	public EventManager(String threadName) {
-		this();
+		thread = null;
 		this.threadName = threadName;
 	}
 
@@ -120,7 +144,8 @@ public class EventManager {
 			/* if there is no thread, then create a new one */
 			if (threadName == null) {
 				thread = new EventThread();
-			} else {
+			} 
+			else {
 				thread = new EventThread(threadName);
 			}
 			thread.start(); /* start the new thread */
@@ -135,8 +160,8 @@ public class EventManager {
 	 * on the next item on the list.
 	 * This method is package private.
 	 *
-	 * @param listeners An array of ListElements with each element containing the primary and 
-	 * companion object for a listener.
+	 * @param listeners A null terminated array of ListElements with each element containing the primary and 
+	 * companion object for a listener. This array must not be modified.
 	 * @param dispatcher Call back object which is called to complete the delivery of
 	 * the event.
 	 * @param eventAction This value was passed by the event source and
@@ -148,12 +173,15 @@ public class EventManager {
 		int size = listeners.length;
 		for (int i = 0; i < size; i++) { /* iterate over the list of listeners */
 			ListElement listener = listeners[i];
+			if (listener == null) {		/* a null element terminates the list */
+				break;
+			}
 			try {
 				/* Call the EventDispatcher to complete the delivery of the event. */
 				dispatcher.dispatchEvent(listener.primary, listener.companion, eventAction, eventObject);
-			} catch (Throwable t) {
+			} 
+			catch (Throwable t) {
 				/* Consume and ignore any exceptions thrown by the listener */
-
 				if (DEBUG) {
 					System.out.println("Exception in " + listener.primary); //$NON-NLS-1$
 					t.printStackTrace();

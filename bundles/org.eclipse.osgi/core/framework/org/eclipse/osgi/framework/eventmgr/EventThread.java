@@ -23,13 +23,13 @@ class EventThread extends Thread {
 	 */
 	private static class Queued {
 		/** listener list for this event */
-		private final ListElement[] listeners;
+		final ListElement[] listeners;
 		/** dispatcher of this event */
-		private final EventDispatcher dispatcher;
+		final EventDispatcher dispatcher;
 		/** action for this event */
-		private final int action;
+		final int action;
 		/** object for this event */
-		private final Object object;
+		final Object object;
 		/** next item in event queue */
 		Queued next;
 
@@ -47,13 +47,6 @@ class EventThread extends Thread {
 			action = a;
 			object = o;
 			next = null;
-		}
-
-		/**
-		 * This method will dispatch this event queue item to its listeners
-		 */
-		void dispatchEvent() {
-			EventManager.dispatchEvent(listeners, dispatcher, action, object);
 		}
 	}
 
@@ -81,7 +74,7 @@ class EventThread extends Thread {
 		init();
 	}
 
-	void init() {
+	private void init() {
 		running = true;
 		head = null;
 		tail = null;
@@ -93,7 +86,9 @@ class EventThread extends Thread {
 	 * Stop thread.
 	 */
 	void close() {
-		running = false;
+		synchronized (this) {
+			running = false;
+		}
 		interrupt();
 	}
 
@@ -102,17 +97,23 @@ class EventThread extends Thread {
 	 * the queue and dispatches them.
 	 */
 	public void run() {
-		while (running) {
+		while (true) {
+			Queued item = getNextEvent();
+			if (item == null) {
+				return;
+			}
+
 			try {
-				getNextEvent().dispatchEvent();
-			} catch (Throwable t) {
+				EventManager.dispatchEvent(item.listeners, item.dispatcher, item.action, item.object);
+			} 
+			catch (Throwable t) {
 			}
 		}
 	}
 
 	/**
-	 * This methods takes the input parameters and creates an Queued
-	 * and queues it.
+	 * This methods takes the input parameters and creates a Queued
+	 * object and queues it.
 	 * The thread is notified.
 	 *
 	 * @param l Listener list for this event
@@ -141,19 +142,20 @@ class EventThread extends Thread {
 	 * items from the queue so that they can be dispatched to their listeners.
 	 * If the queue is empty, the thread waits.
 	 *
-	 * @return The Queued removed from the top of the queue.
+	 * @return The Queued removed from the top of the queue or null
+	 * if the thread has been requested to stop.
 	 */
-	private synchronized Queued getNextEvent() throws InterruptedException {
+	private synchronized Queued getNextEvent() {
 		while (running && (head == null)) {
 			try {
 				wait();
-			} catch (InterruptedException e) {
+			} 
+			catch (InterruptedException e) {
 			}
 		}
 
-		if (!running) /* if we are stopping */
-		{
-			throw new InterruptedException(); /* throw an exception */
+		if (!running) { /* if we are stopping */
+			return null;
 		}
 
 		Queued item = head;

@@ -14,8 +14,8 @@ package org.eclipse.osgi.framework.eventmgr;
 /**
  * ListElement is a package private class. This class
  * represents a primary object (e.g. listener) and its companion object.
- * Objects of this type are placed in an ElementList.
- * Objects of this type are immutable.
+ * ListElements are stored in EventListeners.
+ * ListElements are immutable.
  */
 
 class ListElement {
@@ -31,7 +31,7 @@ class ListElement {
 
 	/**
 	 * Constructor for ElementList element
-	 * @param primary Primary object in element. Used to uniqueness.
+	 * @param primary Primary object in element. Used for uniqueness.
 	 * @param companion Companion object stored with primary object.
 	 */
 	ListElement(final Object primary, final Object companion) {
