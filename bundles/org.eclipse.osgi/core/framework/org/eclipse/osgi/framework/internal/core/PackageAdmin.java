@@ -223,23 +223,6 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 	}
 
 	/**
-	 * Gets the ExportedBundle with the specified Unique ID.  All exported
-	 * bundles will be checked for the specified Unique ID.  
-	 * @param uniqueId The Unique ID of the exported bundle to be returned.
-	 *
-	 * @return The exported bundle with the specified Unique ID, or <tt>null</tt>
-	 *         if no exported bundle with that Unique ID exists.
-	 */
-	//	public ExportedBundle getExportedBundle(String uniqueId) {
-	//		synchronized (framework.bundles) {
-	//			if (bundleExporters != null) {
-	//				return (bundleExporters.getBundle(uniqueId));
-	//			}
-	//		}
-	// TODO implement this using the state object
-	//		return null;
-	//	}
-	/**
 	 * Forces the update (replacement) or removal of packages exported by
 	 * the specified bundles.
 	 *
@@ -460,21 +443,25 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 				}
 
 				// set the resolved bundles state
-				for (int i = 0; i < refresh.length; i++) {
-					Bundle changedBundle = refresh[i];
-					BundleDescription bundleDes = changedBundle.getBundleDescription();
+				List allBundles = framework.bundles.getBundles();
+				int size = allBundles.size();
+				for (int i = 0; i < size; i++) {
+					Bundle bundle = (Bundle) allBundles.get(i);
+					if (bundle.isResolved())
+						continue;
+					BundleDescription bundleDes = bundle.getBundleDescription();
 					if (bundleDes != null) {
 						if (bundleDes.isResolved()) {
-							if (changedBundle.isFragment()) {
+							if (bundle.isFragment()) {
 								BundleHost host = (BundleHost) framework.getBundle(bundleDes.getHost().getSupplier().getBundleId());
-								if (((BundleFragment) changedBundle).setHost(host)) {
-									changedBundle.resolve();
+								if (((BundleFragment) bundle).setHost(host)) {
+									bundle.resolve();
 								}
 							} else {
-								changedBundle.resolve();
+								bundle.resolve();
 							}
-							if (changedBundle.isResolved()) {
-								notify.addElement(changedBundle);
+							if (bundle.isResolved()) {
+								notify.addElement(bundle);
 							}
 						}
 					}
@@ -699,6 +686,16 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 		exportedPackages = getExportedPackages(exportedPackages);
 		exportedBundles = getExportedBundles(exportedBundles);
 	}
+
+	/**
+	 * A permissible implementation of this method is to attempt to 
+	 * resolve all unresolved bundles installed in the framework.
+	 * That is what this method does.
+	 * @param bundles the set of bundles to attempt to resolve.
+	 */
+	public void resolveBundles(org.osgi.framework.Bundle[] bundles){
+		resolveBundles();
+	}
 	/**
 	 * Attempt to resolve all unresolved bundles. When this method returns
 	 * all bundles are resolved that can be resolved. A resolved bundle
@@ -717,16 +714,22 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 			Debug.println("refreshBundles: resolve bundles");
 		}
 
-		BundleDescription[] resolved;
-		// get the state.
-		State state = framework.adaptor.getState();
-		// resolve the state and get the state delta
-		state.resolve(false);
-
 		Vector notify = new Vector();
 		synchronized (framework.bundles) {
+			boolean resolveNeeded = false;
 			List allBundles = framework.bundles.getBundles();
 			int size = allBundles.size();
+
+			// first check to see if there is anything to resolve
+			for (int i = 0; i < size; i++) {
+				if (!((Bundle)allBundles.get(i)).isResolved())
+					resolveNeeded = true;
+			}
+			if (!resolveNeeded)
+				return;
+
+			// get the state and resolve it.
+			framework.adaptor.getState().resolve(false);
 			for (int i = 0; i < size; i++) {
 				Bundle bundle = (Bundle) allBundles.get(i);
 				BundleDescription changedBundleDes = bundle.getBundleDescription();
@@ -889,10 +892,6 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 			return null;
 		else
 			return new org.osgi.framework.Bundle[] {host};
-	}
-
-	public boolean isFragment(org.osgi.framework.Bundle bundle) {
-		return ((Bundle)bundle).isFragment();
 	}
 
 	public int getBundleType(org.osgi.framework.Bundle bundle) {

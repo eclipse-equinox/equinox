@@ -1,5 +1,5 @@
 /*
- * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/service/packageadmin/PackageAdmin.java,v 1.5 2004/03/04 15:59:07 twatson Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/service/packageadmin/PackageAdmin.java,v 1.6 2004/04/05 19:35:12 twatson Exp $
  *
  * Copyright (c) The Open Services Gateway Initiative (2001, 2002).
  * All Rights Reserved.
@@ -51,7 +51,7 @@ import org.osgi.framework.Bundle;
  * old values, <tt>isRemovalPending()</tt> returns <tt>true</tt>, and <tt>getExportingBundle()</tt>
  * and <tt>getImportingBundles()</tt> return <tt>null</tt>.
  *
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  * @author Open Services Gateway Initiative
  */
 public interface PackageAdmin {
@@ -162,6 +162,24 @@ public interface PackageAdmin {
      */
     public void refreshPackages(Bundle[] bundles);
 
+    /**
+     * Attempts to resolve the specified bundles.  The Framework must 
+     * attempt to resolve the unresolved bundles that are included in 
+     * the specified bundles.  Additional bundles that are not included 
+     * in the specified bundles may be resolved as a result of calling 
+     * this method.  A permissible implementation of this method is to 
+     * attempt to resolve all unresolved bundles installed in the framework.
+     * 
+     * <p>If <tt>null</tt> is specified then the Framework will attempt to 
+     * resolve all unresolved bundles installed in the Framework.  Calling 
+     * this method must not cause any bundle to be refreshed, stopped, or 
+     * started.  This method will not return until the operation has completed.
+     * 
+     * @param bundles the bundles to attempt to resolve, or <tt>null</tt>
+     * to attempt to resolve all unresolved bundles installed in the Framework. 
+     */
+    public void resolveBundles(Bundle[] bundles);
+    
     public NamedClassSpace[] getNamedClassSpaces(String symbolicName);
 
     /**
@@ -207,13 +225,6 @@ public interface PackageAdmin {
 	 * bundles host.
 	 */
     public Bundle[] getHosts(Bundle bundle);
-
-	/**
-	 * Returns true if the specified bundle is a fragment bundle; otherwise false is returned.
-	 * @return true if the specified bundle is a fragment bundle; otherwise false is returned.
-	 * @deprecated use getBundleType(Bundle) instead.
-	 */
-    public boolean isFragment(Bundle bundle);
 
     /**
      * A bundle of this type is a fragment bundle.
