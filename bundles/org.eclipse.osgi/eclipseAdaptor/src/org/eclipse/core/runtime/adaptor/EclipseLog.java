@@ -341,6 +341,7 @@ public class EclipseLog implements FrameworkLog {
 
 	protected void writeEntry(int depth, FrameworkLogEntry entry) throws IOException {
 		if (depth == 0) {
+			writeln(); // write a blank line before all !ENTRY tags bug #64406
 			write(ENTRY);
 		} else {
 			write(SUBENTRY);
