@@ -41,8 +41,8 @@ public class FrameworkCommandInterpreter implements CommandInterpreter {
 	private PrintWriter out;
 
 	/** Strings used to format other strings */
-	private String tab = "\t";
-	private String newline = "\r\n";
+	private String tab = "\t"; //$NON-NLS-1$
+	private String newline = "\r\n"; //$NON-NLS-1$
 
 	/**
 	 * The maximum number of lines to print without user prompt.
@@ -82,7 +82,7 @@ public class FrameworkCommandInterpreter implements CommandInterpreter {
 		if (index != -1) {
 			//if we only have one quote, find the second quote
 			if (index == token.lastIndexOf('"')) {
-				token += tok.nextToken("\"");
+				token += tok.nextToken("\""); //$NON-NLS-1$
 			}
 			StringBuffer buf = new StringBuffer(token);
 
@@ -105,14 +105,14 @@ public class FrameworkCommandInterpreter implements CommandInterpreter {
 	    with the name "_cmd" where cmd is the command to execute.  For example,
 	    for a command of "launch" execute searches for a method called "_launch".
 	
-	    @param The name of the command to execute.
+	    @param cmd The name of the command to execute.
 	    @return The object returned by the method executed.
 	*/
 	public Object execute(String cmd) {
 		resetLineCount();
 		Object retval = null;
 		// handle "more" command here
-		if (cmd.equalsIgnoreCase("more")) {
+		if (cmd.equalsIgnoreCase("more")) { //$NON-NLS-1$
 			try {
 				_more();
 			} catch (Exception e) {
@@ -121,7 +121,7 @@ public class FrameworkCommandInterpreter implements CommandInterpreter {
 			return retval;
 		}
 		// handle "disconnect" command here
-		if (cmd.equalsIgnoreCase("disconnect") && con.getUseSocketStream()) {
+		if (cmd.equalsIgnoreCase("disconnect") && con.getUseSocketStream()) { //$NON-NLS-1$
 			try {
 				_disconnect();
 			} catch (Exception e) {
@@ -136,7 +136,7 @@ public class FrameworkCommandInterpreter implements CommandInterpreter {
 		for (int i = 0; !executed && (i < size); i++) {
 			try {
 				Object target = commandProviders[i];
-				Method method = target.getClass().getMethod("_" + cmd, parameterTypes);
+				Method method = target.getClass().getMethod("_" + cmd, parameterTypes); //$NON-NLS-1$
 				retval = method.invoke(target, parameters);
 				executed = true; // stop after the command has been found
 			} catch (NoSuchMethodException ite) {
@@ -191,7 +191,7 @@ public class FrameworkCommandInterpreter implements CommandInterpreter {
 	 */
 	private void setMaximumLinesToScroll(int lines) {
 		if (lines < 0) {
-			throw new IllegalArgumentException(ConsoleMsg.formatter.getString("CONSOLE_LINES_TO_SCROLL_NEGATIVE_ERROR"));
+			throw new IllegalArgumentException(ConsoleMsg.formatter.getString("CONSOLE_LINES_TO_SCROLL_NEGATIVE_ERROR")); //$NON-NLS-1$
 		}
 
 		maxLineCount = lines;
@@ -209,7 +209,7 @@ public class FrameworkCommandInterpreter implements CommandInterpreter {
 	 * <p>
 	 * This method does not increment the line counter for the 'more' prompt.
 	 *
-	 * @param	string	the string to be printed
+	 * @param o the string to be printed
 	 */
 	private void printline(Object o) {
 		print(o + newline);
@@ -232,12 +232,12 @@ public class FrameworkCommandInterpreter implements CommandInterpreter {
 	 * Prints a empty line to the outputstream
 	 */
 	public void println() {
-		println("");
+		println(""); //$NON-NLS-1$
 	}
 
 	/**
 	 * Print a stack trace including nested exceptions.
-	 * @param The offending exception
+	 * @param t The offending exception
 	 */
 	public void printStackTrace(Throwable t) {
 		t.printStackTrace(out);
@@ -250,12 +250,12 @@ public class FrameworkCommandInterpreter implements CommandInterpreter {
 		for (int i = 0; i < size; i++) {
 			Method method = methods[i];
 
-			if (Modifier.isPublic(method.getModifiers()) && method.getName().startsWith("get") && throwable.isAssignableFrom(method.getReturnType()) && (method.getParameterTypes().length == 0)) {
+			if (Modifier.isPublic(method.getModifiers()) && method.getName().startsWith("get") && throwable.isAssignableFrom(method.getReturnType()) && (method.getParameterTypes().length == 0)) { //$NON-NLS-1$
 				try {
 					Throwable nested = (Throwable) method.invoke(t, null);
 
 					if ((nested != null) && (nested != t)) {
-						out.println(ConsoleMsg.formatter.getString("CONSOLE_NESTED_EXCEPTION"));
+						out.println(ConsoleMsg.formatter.getString("CONSOLE_NESTED_EXCEPTION")); //$NON-NLS-1$
 						printStackTrace(nested);
 					}
 				} catch (IllegalAccessException e) {
@@ -311,7 +311,7 @@ public class FrameworkCommandInterpreter implements CommandInterpreter {
 			println(title);
 		}
 		for (i = 0; i < count; i++) {
-			println(" " + keys[i] + " = " + dic.get(keys[i]));
+			println(" " + keys[i] + " = " + dic.get(keys[i]));  //$NON-NLS-1$//$NON-NLS-2$
 		}
 		println();
 	}
@@ -343,10 +343,10 @@ public class FrameworkCommandInterpreter implements CommandInterpreter {
 					}
 				}
 			} catch (Exception e) {
-				System.err.println(ConsoleMsg.formatter.getString("CONSOLE_ERROR_READING_RESOURCE", resource));
+				System.err.println(ConsoleMsg.formatter.getString("CONSOLE_ERROR_READING_RESOURCE", resource)); //$NON-NLS-1$
 			}
 		} else {
-			println(ConsoleMsg.formatter.getString("CONSOLE_RESOURCE_NOT_IN_BUNDLE", resource, bundle.toString()));
+			println(ConsoleMsg.formatter.getString("CONSOLE_RESOURCE_NOT_IN_BUNDLE", resource, bundle.toString())); //$NON-NLS-1$
 		}
 	}
 
@@ -354,13 +354,12 @@ public class FrameworkCommandInterpreter implements CommandInterpreter {
 	 *  Displays the more... prompt if the max line count has been reached 
 	 *  and waits for the operator to hit enter.
 	 *
-	 *  @param The Object to be printed - used to determine how many lines the object takes
 	 */
 	private void check4More() {
 		int max = getMaximumLinesToScroll();
 		if (max > 0) {
 			if (currentLineCount >= max) {
-				out.print(ConsoleMsg.formatter.getString("CONSOLE_MORE"));
+				out.print(ConsoleMsg.formatter.getString("CONSOLE_MORE")); //$NON-NLS-1$
 				out.flush();
 				con.getInput(); // wait for user entry
 				resetLineCount(); //Reset the line counter for the 'more' prompt
@@ -375,16 +374,16 @@ public class FrameworkCommandInterpreter implements CommandInterpreter {
 	public String getHelp() {
 		StringBuffer help = new StringBuffer(256);
 		help.append(newline);
-		help.append(ConsoleMsg.formatter.getString("CONSOLE_HELP_CONTROLLING_CONSOLE_HEADING"));
+		help.append(ConsoleMsg.formatter.getString("CONSOLE_HELP_CONTROLLING_CONSOLE_HEADING")); //$NON-NLS-1$
 		help.append(newline);
 		help.append(tab);
-		help.append("more - ");
-		help.append(ConsoleMsg.formatter.getString("CONSOLE_HELP_MORE"));
+		help.append("more - "); //$NON-NLS-1$
+		help.append(ConsoleMsg.formatter.getString("CONSOLE_HELP_MORE")); //$NON-NLS-1$
 		if (con.getUseSocketStream()) {
 			help.append(newline);
 			help.append(tab);
-			help.append("disconnect - ");
-			help.append(ConsoleMsg.formatter.getString("CONSOLE_HELP_DISCONNECT"));
+			help.append("disconnect - "); //$NON-NLS-1$
+			help.append(ConsoleMsg.formatter.getString("CONSOLE_HELP_DISCONNECT")); //$NON-NLS-1$
 		}
 		return help.toString();
 	}
@@ -394,8 +393,8 @@ public class FrameworkCommandInterpreter implements CommandInterpreter {
 	 *
 	 */
 	public void _more() throws Exception {
-		if (confirm(ConsoleMsg.formatter.getString("CONSOLE_CONFIRM_MORE"), true)) {
-			int lines = prompt(newline + ConsoleMsg.formatter.getString("CONSOLE_MORE_ENTER_LINES"), 24);
+		if (confirm(ConsoleMsg.formatter.getString("CONSOLE_CONFIRM_MORE"), true)) { //$NON-NLS-1$
+			int lines = prompt(newline + ConsoleMsg.formatter.getString("CONSOLE_MORE_ENTER_LINES"), 24); //$NON-NLS-1$
 			setMaximumLinesToScroll(lines);
 		} else {
 			setMaximumLinesToScroll(0);
@@ -403,7 +402,7 @@ public class FrameworkCommandInterpreter implements CommandInterpreter {
 	}
 
 	private void _disconnect() throws Exception {
-		if (confirm(ConsoleMsg.formatter.getString("CONSOLE_CONFIRM_DISCONNECT"), true)) {
+		if (confirm(ConsoleMsg.formatter.getString("CONSOLE_CONFIRM_DISCONNECT"), true)) { //$NON-NLS-1$
 			con.disconnect();
 		}
 	}
@@ -421,13 +420,13 @@ public class FrameworkCommandInterpreter implements CommandInterpreter {
 			if (string.length() > 0) {
 				print(string);
 			} else {
-				print(ConsoleMsg.formatter.getString("CONSOLE_CONFIRM"));
+				print(ConsoleMsg.formatter.getString("CONSOLE_CONFIRM")); //$NON-NLS-1$
 			}
-			print(" (" + ConsoleMsg.formatter.getString("CONSOLE_CONFIRM_VALUES"));
+			print(" (" + ConsoleMsg.formatter.getString("CONSOLE_CONFIRM_VALUES")); //$NON-NLS-1$ //$NON-NLS-2$
 			if (defaultAnswer) {
-				print(ConsoleMsg.formatter.getString("CONSOLE_Y") + ") ");
+				print(ConsoleMsg.formatter.getString("CONSOLE_Y") + ") ");  //$NON-NLS-1$//$NON-NLS-2$
 			} else {
-				print(ConsoleMsg.formatter.getString("CONSOLE_N") + ") ");
+				print(ConsoleMsg.formatter.getString("CONSOLE_N") + ") "); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
 		String input = con.getInput();
@@ -435,7 +434,7 @@ public class FrameworkCommandInterpreter implements CommandInterpreter {
 		if (input.length() == 0) {
 			return defaultAnswer;
 		}
-		return input.toLowerCase().charAt(0) == ConsoleMsg.formatter.getString("CONSOLE_Y").charAt(0);
+		return input.toLowerCase().charAt(0) == ConsoleMsg.formatter.getString("CONSOLE_Y").charAt(0); //$NON-NLS-1$
 	}
 
 	/**
@@ -452,11 +451,11 @@ public class FrameworkCommandInterpreter implements CommandInterpreter {
 			if (defaultAnswer.length() > 0) {
 				StringBuffer buf = new StringBuffer(256);
 				buf.append(string);
-				buf.append(" ");
-				buf.append(ConsoleMsg.formatter.getString("CONSOLE_PROMPT_DEFAULT"));
-				buf.append("=");
+				buf.append(" "); //$NON-NLS-1$
+				buf.append(ConsoleMsg.formatter.getString("CONSOLE_PROMPT_DEFAULT")); //$NON-NLS-1$
+				buf.append("="); //$NON-NLS-1$
 				buf.append(defaultAnswer);
-				buf.append(") ");
+				buf.append(") "); //$NON-NLS-1$
 				print(buf.toString());
 			} else {
 				print(string);
@@ -491,9 +490,9 @@ public class FrameworkCommandInterpreter implements CommandInterpreter {
 				}
 			} catch (NumberFormatException e) {
 			}
-			println(ConsoleMsg.formatter.getString("CONSOLE_INVALID_INPUT"));
+			println(ConsoleMsg.formatter.getString("CONSOLE_INVALID_INPUT")); //$NON-NLS-1$
 		}
-		println(ConsoleMsg.formatter.getString("CONSOLE_TOO_MUCH_INVALID_INPUT"));
+		println(ConsoleMsg.formatter.getString("CONSOLE_TOO_MUCH_INVALID_INPUT")); //$NON-NLS-1$
 		return defaultAnswer;
 	}
 }

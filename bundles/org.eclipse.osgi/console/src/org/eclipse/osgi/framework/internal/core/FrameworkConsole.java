@@ -41,9 +41,9 @@ public class FrameworkConsole implements Runnable {
 	protected CommandProviderTracker cptracker;
 
 	/** Default code page which must be supported by all JVMs */
-	static String defaultEncoding = "iso8859-1";
+	static String defaultEncoding = "iso8859-1"; //$NON-NLS-1$
 	/** The current setting for code page */
-	static String encoding = System.getProperty("file.encoding", defaultEncoding);
+	static String encoding = System.getProperty("file.encoding", defaultEncoding); //$NON-NLS-1$
 
 	/** set to true if accepting commands from port */
 	protected boolean useSocketStream = false;
@@ -105,7 +105,7 @@ public class FrameworkConsole implements Runnable {
 	 */
 	private void getSocketStream(int port) {
 		try {
-			System.out.println(ConsoleMsg.formatter.getString("CONSOLE_LISTENING_ON_PORT", port));
+			System.out.println(ConsoleMsg.formatter.getString("CONSOLE_LISTENING_ON_PORT", port)); //$NON-NLS-1$
 			if (ss == null) {
 				ss = new ServerSocket(port);
 				scsg = new ConsoleSocketGetter(ss);
@@ -125,7 +125,7 @@ public class FrameworkConsole implements Runnable {
 	/**
 	 * Return a BufferedReader from an InputStream.  Handle encoding.
 	 *
-	 * @param An InputStream to wrap with a BufferedReader
+	 * @param _in An InputStream to wrap with a BufferedReader
 	 * @return a BufferedReader
 	 */
 	private BufferedReader createBufferedReader(InputStream _in) {
@@ -142,7 +142,7 @@ public class FrameworkConsole implements Runnable {
 	/**
 	 * Return a PrintWriter from an OutputStream.  Handle encoding.
 	 *
-	 * @param An OutputStream to wrap with a PrintWriter
+	 * @param _out An OutputStream to wrap with a PrintWriter
 	 * @return a PrintWriter
 	 */
 	private PrintWriter createPrintWriter(OutputStream _out) {
@@ -244,7 +244,7 @@ public class FrameworkConsole implements Runnable {
 		// wait to receive commands from console and handle them
 		BufferedReader br = (BufferedReader) in;
 		//cache the console prompt String
-		String consolePrompt = "\r\n" + ConsoleMsg.formatter.getString("CONSOLE_PROMPT");
+		String consolePrompt = "\r\n" + ConsoleMsg.formatter.getString("CONSOLE_PROMPT"); //$NON-NLS-1$ //$NON-NLS-2$
 		while (!disconnect) {
 			out.print(consolePrompt);
 			out.flush();
@@ -276,7 +276,7 @@ public class FrameworkConsole implements Runnable {
 	 *  Process the args on the command line.
 	 *  This method invokes a CommandInterpreter to do the actual work.
 	 *
-	 *  @param a string containing the command line arguments
+	 *  @param cmdline a string containing the command line arguments
 	 */
 	protected void docommand(String cmdline) {
 		if (cmdline != null && cmdline.length() > 0) {
@@ -311,7 +311,7 @@ public class FrameworkConsole implements Runnable {
 			/** The buffered input reader on standard in. */
 			input = ((BufferedReader) in).readLine();
 		} catch (IOException e) {
-			input = "";
+			input = ""; //$NON-NLS-1$
 		}
 		return input;
 	}
@@ -338,11 +338,11 @@ public class FrameworkConsole implements Runnable {
 		 * Constructor - sets the server and starts the thread to
 		 * listen for connections.
 		 *
-		 * @param a ServerSocket to accept connections from
+		 * @param server a ServerSocket to accept connections from
 		 */
 		ConsoleSocketGetter(ServerSocket server) {
 			this.server = server;
-			Thread t = new Thread(this, "ConsoleSocketGetter");
+			Thread t = new Thread(this, "ConsoleSocketGetter"); //$NON-NLS-1$
 			t.start();
 		}
 
@@ -353,9 +353,9 @@ public class FrameworkConsole implements Runnable {
 					socket = ss.accept();
 					if (!acceptConnections) {
 						PrintWriter o = createPrintWriter(socket.getOutputStream());
-						o.println(ConsoleMsg.formatter.getString("CONSOLE_TELNET_CONNECTION_REFUSED"));
-						o.println(ConsoleMsg.formatter.getString("CONSOLE_TELNET_CURRENTLY_USED"));
-						o.println(ConsoleMsg.formatter.getString("CONSOLE_TELNET_ONE_CLIENT_ONLY"));
+						o.println(ConsoleMsg.formatter.getString("CONSOLE_TELNET_CONNECTION_REFUSED")); //$NON-NLS-1$
+						o.println(ConsoleMsg.formatter.getString("CONSOLE_TELNET_CURRENTLY_USED")); //$NON-NLS-1$
+						o.println(ConsoleMsg.formatter.getString("CONSOLE_TELNET_ONE_CLIENT_ONLY")); //$NON-NLS-1$
 						o.close();
 						socket.close();
 					} else {
