@@ -20,4 +20,5 @@ PArisc                                  # Hewlett Packard PA Risc
 PowerPC power ppc                       # Motorola/IBM Power PC
 Sparc                                   # SUN
 x86 pentium i386 i486 i586 i686         # Intel
+s390                                    # IBM System 390
 
