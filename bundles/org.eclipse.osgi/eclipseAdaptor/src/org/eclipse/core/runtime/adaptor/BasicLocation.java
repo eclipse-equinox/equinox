@@ -151,7 +151,14 @@ public class BasicLocation implements Location {
 		setLocker(lock);
 		if (locker == null)
 			return true;
-		return locker.lock();
+		boolean locked = false; 
+		try {
+			locked = locker.lock();
+			return locked;
+		} finally {
+			if (!locked)
+				locker = null;
+		}
 	}
 
 	private void setLocker(File lock) {
