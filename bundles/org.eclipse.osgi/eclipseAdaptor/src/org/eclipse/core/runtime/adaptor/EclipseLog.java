@@ -39,7 +39,34 @@ public class EclipseLog extends DefaultLog {
 		return Long.toString(System.currentTimeMillis());
 	}
 	protected void writeSession() throws IOException {
-		super.writeSession();
+		write(SESSION);
+		writeSpace();
+		//TODO "timestamp" is a more correct name
+		String date = getDate();
+		write(date);
+		writeSpace();
+		for (int i = SESSION.length() + date.length(); i < 78; i++) {
+			write("-"); //$NON-NLS-1$
+		}
+		writeln();
+		// Write out certain values found in System.getProperties()
+		try {
+			String key = "java.fullversion"; //$NON-NLS-1$
+			String value = System.getProperty(key);
+			if (value == null) {
+				key = "java.version"; //$NON-NLS-1$
+				value = System.getProperty(key);
+				writeln(key + "=" + value); //$NON-NLS-1$
+				key = "java.vendor"; //$NON-NLS-1$
+				value = System.getProperty(key);
+				writeln(key + "=" + value); //$NON-NLS-1$
+			} else {
+				writeln(key + "=" + value); //$NON-NLS-1$
+			}
+		} catch (Exception e) {
+			// If we're not allowed to get the values of these properties
+			// then just skip over them.
+		}
 		// The Bootloader has some information that we might be interested in.
 		write("BootLoader constants: OS=" + EnvironmentInfo.getDefault().getOS()); //$NON-NLS-1$
 		write(", ARCH=" + EnvironmentInfo.getDefault().getOSArch()); //$NON-NLS-1$
