@@ -186,6 +186,8 @@ public class ConditionalPermissionSet extends PermissionCollection {
 		PermissionCollection collection = (PermissionCollection) cachedPermissionCollections.get(permClass);
 		if (collection == null) {
 			collection = perm.newPermissionCollection();
+			if (collection == null)
+				collection = new PermissionsHash();
 			for (int i = 0; i < cpis.length; i++) {
 				try {
 					ConditionalPermissionInfoImpl cpi = cpis[i];
