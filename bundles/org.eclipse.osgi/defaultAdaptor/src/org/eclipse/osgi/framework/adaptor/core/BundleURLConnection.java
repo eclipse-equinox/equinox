@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
-import org.eclipse.osgi.framework.internal.core.Msg;
 
 /**
  * URLConnection for BundleClassLoader resources.
@@ -60,7 +59,7 @@ public class BundleURLConnection extends URLConnection {
 				in = bundleEntry.getInputStream();
 				connected = true;
 			} else {
-				throw new IOException(Msg.formatter.getString("RESOURCE_NOT_FOUND_EXCEPTION", url));
+				throw new IOException(AdaptorMsg.formatter.getString("RESOURCE_NOT_FOUND_EXCEPTION", url));
 			}
 		}
 	}

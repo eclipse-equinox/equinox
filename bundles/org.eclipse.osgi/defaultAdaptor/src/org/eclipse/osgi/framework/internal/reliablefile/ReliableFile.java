@@ -13,7 +13,6 @@ package org.eclipse.osgi.framework.internal.reliablefile;
 
 import java.io.*;
 import java.util.Hashtable;
-import org.eclipse.osgi.framework.internal.defaultadaptor.AdaptorMsg;
 
 /**
  * ReliableFile class used by ReliableFileInputStream and ReliableOutputStream.
@@ -95,7 +94,7 @@ public class ReliableFile {
 	 */
 	static ReliableFile getReliableFile(File file) throws IOException {
 		if (file.isDirectory()) {
-			throw new FileNotFoundException(AdaptorMsg.formatter.getString("RELIABLEFILE_FILE_IS_DIRECTORY"));
+			throw new FileNotFoundException(ReliableMsg.formatter.getString("RELIABLEFILE_FILE_IS_DIRECTORY"));
 		}
 
 		synchronized (files) {
@@ -292,7 +291,7 @@ public class ReliableFile {
 	 */
 	private void lock() throws IOException {
 		if (locked) {
-			throw new FileNotFoundException(AdaptorMsg.formatter.getString("RELIABLEFILE_FILE_LOCKED"));
+			throw new FileNotFoundException(ReliableMsg.formatter.getString("RELIABLEFILE_FILE_LOCKED"));
 		}
 
 		locked = true;
@@ -314,7 +313,7 @@ public class ReliableFile {
 	 */
 	private static void mv(File from, File to) throws IOException {
 		if (!from.renameTo(to)) {
-			throw new IOException(AdaptorMsg.formatter.getString("RELIABLEFILE_RENAME_FAILED"));
+			throw new IOException(ReliableMsg.formatter.getString("RELIABLEFILE_RENAME_FAILED"));
 		}
 	}
 
@@ -381,7 +380,7 @@ public class ReliableFile {
 	 */
 	private static void rm(File file) throws IOException {
 		if (file.exists() && !file.delete()) {
-			throw new IOException(AdaptorMsg.formatter.getString("RELIABLEFILE_DELETE_FAILED"));
+			throw new IOException(ReliableMsg.formatter.getString("RELIABLEFILE_DELETE_FAILED"));
 		}
 	}
 

@@ -18,7 +18,6 @@ import java.net.URLConnection;
 import java.net.URLStreamHandler;
 
 import org.eclipse.osgi.framework.internal.core.Bundle;
-import org.eclipse.osgi.framework.internal.defaultadaptor.AdaptorMsg;
 import org.osgi.framework.AdminPermission;
 import org.osgi.framework.BundleContext;
 

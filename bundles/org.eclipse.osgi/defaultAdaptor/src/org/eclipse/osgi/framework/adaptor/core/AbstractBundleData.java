@@ -24,7 +24,6 @@ import java.util.StringTokenizer;
 import org.eclipse.osgi.framework.adaptor.BundleData;
 import org.eclipse.osgi.framework.adaptor.ClassLoaderDelegate;
 import org.eclipse.osgi.framework.internal.core.Constants;
-import org.eclipse.osgi.framework.internal.core.Msg;
 import org.eclipse.osgi.framework.internal.protocol.bundleentry.Handler;
 import org.eclipse.osgi.framework.util.Headers;
 import org.eclipse.osgi.service.resolver.Version;
@@ -109,12 +108,12 @@ public abstract class AbstractBundleData implements BundleData {
 				if (manifest == null) {
 					URL url = getEntry(Constants.OSGI_BUNDLE_MANIFEST);
 					if (url == null){
-						throw new BundleException(Msg.formatter.getString("MANIFEST_NOT_FOUND_EXCEPTION",Constants.OSGI_BUNDLE_MANIFEST,getLocation()));
+						throw new BundleException(AdaptorMsg.formatter.getString("MANIFEST_NOT_FOUND_EXCEPTION",Constants.OSGI_BUNDLE_MANIFEST,getLocation()));
 					}
 					try {
 						manifest = Headers.parseManifest(url.openStream());
 					} catch (IOException e) {
-						throw new BundleException(Msg.formatter.getString("MANIFEST_NOT_FOUND_EXCEPTION",Constants.OSGI_BUNDLE_MANIFEST,getLocation()), e);
+						throw new BundleException(AdaptorMsg.formatter.getString("MANIFEST_NOT_FOUND_EXCEPTION",Constants.OSGI_BUNDLE_MANIFEST,getLocation()), e);
 					}
 				}
 			}

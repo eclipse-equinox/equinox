@@ -24,7 +24,6 @@ import java.util.Enumeration;
 import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.internal.core.Constants;
-import org.eclipse.osgi.framework.internal.defaultadaptor.DefaultAdaptor;
 import org.eclipse.osgi.framework.internal.protocol.bundleentry.Handler;
 import org.eclipse.osgi.framework.util.Headers;
 import org.eclipse.osgi.service.resolver.Version;

@@ -22,7 +22,6 @@ import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.adaptor.IBundleStats;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.internal.core.Constants;
-import org.eclipse.osgi.framework.internal.core.Msg;
 import org.eclipse.osgi.framework.util.Headers;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -113,7 +112,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 		try {
 			return (new URL(location).openConnection());
 		} catch (IOException e) {
-			throw new BundleException(Msg.formatter.getString("ADAPTOR_URL_CREATE_EXCEPTION", location), e);
+			throw new BundleException(AdaptorMsg.formatter.getString("ADAPTOR_URL_CREATE_EXCEPTION", location), e);
 		}
 	}
 

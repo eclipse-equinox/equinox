@@ -101,7 +101,7 @@ public class Framework implements EventSource, EventPublisher {
 			adaptor.compactStorage();
 		} catch (IOException e) /* fatal error */{
 			e.printStackTrace();
-			throw new RuntimeException(Msg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION"));
+			throw new RuntimeException(e);
 		}
 		/*
 		 * This must be done before calling any of the framework getProperty
@@ -116,7 +116,7 @@ public class Framework implements EventSource, EventPublisher {
 				permissionAdmin = new PermissionAdmin(this, adaptor.getPermissionStorage());
 			} catch (IOException e) /* fatal error */{
 				e.printStackTrace();
-				throw new RuntimeException(Msg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION"));
+				throw new RuntimeException(e);
 			}
 		}
 		startLevelFactory = new StartLevelFactory(this);

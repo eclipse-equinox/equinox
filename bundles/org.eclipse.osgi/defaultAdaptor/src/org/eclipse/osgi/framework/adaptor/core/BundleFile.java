@@ -21,7 +21,6 @@ import java.util.zip.ZipFile;
 import org.eclipse.osgi.framework.adaptor.BundleData;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.internal.core.Constants;
-import org.eclipse.osgi.framework.internal.core.Msg;
 import org.eclipse.osgi.framework.internal.protocol.bundleresource.Handler;
 
 abstract public class BundleFile {
@@ -205,7 +204,7 @@ abstract public class BundleFile {
 									Debug.println("Unable to create directory: "
 													+ nested.getPath());
 								}
-								throw new IOException(Msg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION"));
+								throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_DIRECTORY_CREATE_EXCEPTION",nested.getAbsoluteFile()));
 							}
 							extractDirectory(zipEntry.getName());
 						}
@@ -225,7 +224,7 @@ abstract public class BundleFile {
 									Debug.println("Unable to create directory: "
 													+ dir.getPath());
 								}
-								throw new IOException(Msg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION"));
+								throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_DIRECTORY_CREATE_EXCEPTION", dir.getAbsoluteFile()));
 							}
 							/* copy the entry to the cache */
 							AbstractFrameworkAdaptor.readFile(in, nested);
@@ -340,7 +339,7 @@ abstract public class BundleFile {
 		protected DirBundleFile(File bundlefile, BundleData bundledata) throws IOException {
 			super(bundlefile, bundledata);
 			if (!bundlefile.exists() || !bundlefile.isDirectory()) {
-				throw new IOException(Msg.formatter.getString("ADAPTOR_DIRECTORY_EXCEPTION", bundlefile));
+				throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_DIRECTORY_EXCEPTION", bundlefile));
 			}
 		}
 
