@@ -47,6 +47,7 @@ public class FrameworkMessageFormat extends MessageFormat {
 			try {
 				resourceStream = resourceURL.openStream();
 				bundle = new PropertyResourceBundle(resourceStream);
+				this.locale = locale;
 				return;
 			} catch (IOException e) {
 				// Do nothing will just call super below
