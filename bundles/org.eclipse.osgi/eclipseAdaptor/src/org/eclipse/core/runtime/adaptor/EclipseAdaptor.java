@@ -470,7 +470,8 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 					File bundledataLocationDir = new File(parentConfiguration.getURL().getFile(), FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME);
 					FileManager newFileManager = initFileManager(bundledataLocationDir, "none", true); //$NON-NLS-1$
 					File bundleData = newFileManager.lookup(LocationManager.BUNDLE_DATA_FILE, false);
-					bundleDataStream = new FileInputStream(bundleData);
+					if (bundleData != null)
+						bundleDataStream = new FileInputStream(bundleData);
 				} catch (MalformedURLException e1) {
 					// This will not happen since all the URLs are derived by us
 					// and we are GODS!
