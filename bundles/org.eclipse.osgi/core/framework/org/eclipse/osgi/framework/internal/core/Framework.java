@@ -1272,28 +1272,31 @@ public class Framework implements EventSource, EventPublisher {
 	 * @param bundle Bundle to resume.
 	 */
 	protected void resumeBundle(Bundle bundle) {
-		if (!bundle.isActive()) {
-			try {
-				int status = bundle.bundledata.getStatus();
 
-				if ((status & Constants.BUNDLE_STARTED) == 0) {
-					return;
-				}
+		if (bundle.isActive() || bundle.isFragment()) {
+			// if bundle is active or is a fragment then do nothing.
+			return;
+		}
 
-				if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-					Debug.println("Trying to start bundle " + bundle);
-				}
+		try {
+			int status = bundle.bundledata.getStatus();
 
-				bundle.resume();
-			} catch (BundleException be) {
-				if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-					Debug.println(
-						"Bundle resume exception: " + be.getMessage());
-					Debug.printStackTrace(be.getNestedException());
-				}
-
-				publishFrameworkEvent(FrameworkEvent.ERROR, bundle, be);
+			if ((status & Constants.BUNDLE_STARTED) == 0) {
+				return;
 			}
+
+			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+				Debug.println("Trying to start bundle " + bundle);
+			}
+
+			bundle.resume();
+		} catch (BundleException be) {
+			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+				Debug.println("Bundle resume exception: " + be.getMessage());
+				Debug.printStackTrace(be.getNestedException());
+			}
+
+			publishFrameworkEvent(FrameworkEvent.ERROR, bundle, be);
 		}
 	}
 
@@ -1308,26 +1311,28 @@ public class Framework implements EventSource, EventPublisher {
 	protected boolean suspendBundle(Bundle bundle, boolean lock) {
 		boolean changed = false;
 
-		if (bundle.isActive()) {
-			try {
-				if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-					Debug.println("Trying to suspend bundle " + bundle);
-				}
+		if (!bundle.isActive() || bundle.isFragment()) {
+			// if bundle is not active or is a fragment then do nothing.
+			return changed;
+		}
 
-				bundle.suspend(lock);
-			} catch (BundleException be) {
-				if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-					Debug.println(
-						"Bundle suspend exception: " + be.getMessage());
-					Debug.printStackTrace(be.getNestedException());
-				}
-
-				publishFrameworkEvent(FrameworkEvent.ERROR, bundle, be);
+		try {
+			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+				Debug.println("Trying to suspend bundle " + bundle);
 			}
 
-			if (!bundle.isActive()) {
-				changed = true;
+			bundle.suspend(lock);
+		} catch (BundleException be) {
+			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+				Debug.println("Bundle suspend exception: " + be.getMessage());
+				Debug.printStackTrace(be.getNestedException());
 			}
+
+			publishFrameworkEvent(FrameworkEvent.ERROR, bundle, be);
+		}
+
+		if (!bundle.isActive()) {
+			changed = true;
 		}
 
 		return (changed);
