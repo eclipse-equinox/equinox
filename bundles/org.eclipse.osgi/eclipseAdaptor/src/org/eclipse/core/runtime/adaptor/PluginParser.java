@@ -146,15 +146,15 @@ public class PluginParser extends DefaultHandler implements IModel {
 		 */
 		public String validateForm() {
 			if (this.pluginId == null)
-				return EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONVERTER_MISSING_ATTRIBUTE", new String[] {getRoot(), PLUGIN_ID, getRoot()});
+				return EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONVERTER_MISSING_ATTRIBUTE", new String[] {getRoot(), PLUGIN_ID, getRoot()}); //$NON-NLS-1$
 			if (this.pluginName == null)
-				return EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONVERTER_MISSING_ATTRIBUTE", new String[] {getRoot(), PLUGIN_NAME, getRoot()});
+				return EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONVERTER_MISSING_ATTRIBUTE", new String[] {getRoot(), PLUGIN_NAME, getRoot()}); //$NON-NLS-1$
 			if (this.version == null)
-				return EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONVERTER_MISSING_ATTRIBUTE", new String[] {getRoot(), PLUGIN_VERSION, getRoot()});
+				return EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONVERTER_MISSING_ATTRIBUTE", new String[] {getRoot(), PLUGIN_VERSION, getRoot()}); //$NON-NLS-1$
 			if (isFragment() && this.masterPluginId == null)
-				return EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONVERTER_MISSING_ATTRIBUTE", new String[] {getRoot(), FRAGMENT_PLUGIN_ID, getRoot()});;
+				return EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONVERTER_MISSING_ATTRIBUTE", new String[] {getRoot(), FRAGMENT_PLUGIN_ID, getRoot()});  //$NON-NLS-1$
 			if (isFragment() && this.masterVersion == null)
-				return EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONVERTER_MISSING_ATTRIBUTE", new String[] {getRoot(), FRAGMENT_PLUGIN_VERSION, getRoot()});
+				return EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONVERTER_MISSING_ATTRIBUTE", new String[] {getRoot(), FRAGMENT_PLUGIN_VERSION, getRoot()}); //$NON-NLS-1$
 			return null;
 		}
 	}
