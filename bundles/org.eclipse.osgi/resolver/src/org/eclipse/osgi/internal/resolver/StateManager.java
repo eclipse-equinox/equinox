@@ -14,7 +14,7 @@ import java.io.*;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.BundleException;
 
-public class StateManager {
+public class StateManager implements PlatformAdmin {
 	public static boolean DEBUG_READER = false;
 	private long readStartupTime;
 

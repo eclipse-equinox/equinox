@@ -1156,14 +1156,10 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor
 		return null;
 	}
 	
-	// TODO need to clean this up.  get state, statemanger, platform admin etc all need to be harmonized
 	public State getState() {
 		return stateManager.getSystemState();
 	}
-	public StateManager getStateManager() {
-		return stateManager;
-	}
 	public PlatformAdmin getPlatformAdmin() {
-		return PlatformAdmin.getInstance();
+		return stateManager;
 	}
 }

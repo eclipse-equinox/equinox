@@ -135,16 +135,11 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		super.frameworkStart(context);
 		Bundle bundle = context.getBundle();
 		register(org.eclipse.osgi.service.environment.EnvironmentInfo.class.getName(), EnvironmentInfo.getDefault(), bundle);
-		register(PlatformAdmin.class.getName(), PlatformAdmin.getInstance(), bundle);
+		register(PlatformAdmin.class.getName(), stateManager, bundle);
 		register(PluginConverter.class.getName(), new PluginConverterImpl(context), bundle);
 		registerEndorsedXMLParser();
 	}
 
-	public void initialize(EventPublisher eventPublisher) {
-		PlatformAdmin.initialize(this);
-		super.initialize(eventPublisher);
-	}
-	
 	private void setDebugOptions() {
 		DebugOptions options = DebugOptions.getDefault();
 		// may be null if debugging is not enabled
