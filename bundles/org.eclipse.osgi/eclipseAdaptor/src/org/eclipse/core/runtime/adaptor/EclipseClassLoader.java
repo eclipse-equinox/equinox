@@ -70,7 +70,7 @@ public class EclipseClassLoader extends DefaultClassLoader {
 	}
 	
 	public Class findLocalClass(String name) throws ClassNotFoundException {
-		if (EclipseAdaptor.MONITOR_CLASSES)	//Suport for performance
+		if (EclipseAdaptor.MONITOR_CLASSES)	//Suport for performance analysis
 			ClassloaderStats.startLoadingClass(getClassloaderId(), name);
 		boolean found = true;
 		

@@ -27,6 +27,7 @@ public class Semaphore {
 			try {
 				wait();
 			} catch (InterruptedException e) {
+				//Ignore
 			}
 		}
 	}
@@ -47,6 +48,7 @@ public class Semaphore {
 			try {
 				wait(timeLeft);
 			} catch (InterruptedException e) {
+				//Ignore
 			}
 			timeLeft = start + delay - System.currentTimeMillis();
 		}
