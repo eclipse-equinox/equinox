@@ -108,12 +108,12 @@ public abstract class AbstractBundleData implements BundleData {
 				if (manifest == null) {
 					URL url = getEntry(Constants.OSGI_BUNDLE_MANIFEST);
 					if (url == null){
-						throw new BundleException(AdaptorMsg.formatter.getString("MANIFEST_NOT_FOUND_EXCEPTION",Constants.OSGI_BUNDLE_MANIFEST,getLocation()));
+						throw new BundleException(AdaptorMsg.formatter.getString("MANIFEST_NOT_FOUND_EXCEPTION",Constants.OSGI_BUNDLE_MANIFEST,getLocation())); //$NON-NLS-1$
 					}
 					try {
 						manifest = Headers.parseManifest(url.openStream());
 					} catch (IOException e) {
-						throw new BundleException(AdaptorMsg.formatter.getString("MANIFEST_NOT_FOUND_EXCEPTION",Constants.OSGI_BUNDLE_MANIFEST,getLocation()), e);
+						throw new BundleException(AdaptorMsg.formatter.getString("MANIFEST_NOT_FOUND_EXCEPTION",Constants.OSGI_BUNDLE_MANIFEST,getLocation()), e);  //$NON-NLS-1$
 					}
 				}
 			}

@@ -30,6 +30,7 @@ import org.eclipse.osgi.service.resolver.Version;
 import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.BundleException;
 
+//TODO After quickly looking through the code, I don't see why this is not a subclass of AbstractBundleData
 public class SystemBundleData implements BundleData {
 
 	public static final String OSGI_FRAMEWORK = "osgi.framework";

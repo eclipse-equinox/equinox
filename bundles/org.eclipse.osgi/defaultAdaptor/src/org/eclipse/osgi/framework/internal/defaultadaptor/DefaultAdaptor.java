@@ -30,10 +30,10 @@ import org.osgi.framework.*;
  */
 public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 
-	public static final String METADATA_ADAPTOR_NEXTID = "METADATA_ADAPTOR_NEXTID";
-	public static final String METADATA_ADAPTOR_IBSL = "METADATA_ADAPTOR_IBSL";
-	public static final String DATA_DIR_NAME = "data";
-	public static final String BUNDLE_STORE = "osgi.bundlestore";
+	public static final String METADATA_ADAPTOR_NEXTID = "METADATA_ADAPTOR_NEXTID";  //$NON-NLS-1$
+	public static final String METADATA_ADAPTOR_IBSL = "METADATA_ADAPTOR_IBSL";  //$NON-NLS-1$
+	public static final String DATA_DIR_NAME = "data";  //$NON-NLS-1$
+	public static final String BUNDLE_STORE = "osgi.bundlestore";  //$NON-NLS-1$
 
 	protected AdaptorElementFactory elementFactory;
 
@@ -534,33 +534,33 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 							ReferenceInputStream refIn = (ReferenceInputStream) in;
 							URL reference = (refIn).getReference();
 							if (!"file".equals(reference.getProtocol())) {
-								throw new BundleException(AdaptorMsg.formatter.getString("ADAPTOR_URL_CREATE_EXCEPTION", reference));
+								throw new BundleException(AdaptorMsg.formatter.getString("ADAPTOR_URL_CREATE_EXCEPTION", reference)); //$NON-NLS-1$
 							}
 							// check to make sure we are not just trying to update to the same
 							// directory reference.  This would be a no-op.
 							String path = reference.getPath();
 							if (path.equals(data.getFileName())) {
-								throw new BundleException(AdaptorMsg.formatter.getString("ADAPTOR_SAME_REF_UPDATE", reference));
+								throw new BundleException(AdaptorMsg.formatter.getString("ADAPTOR_SAME_REF_UPDATE", reference)); //$NON-NLS-1$
 							}
 							try {
 								newData = data.nextGeneration(reference.getPath());
 							} catch (IOException e) {
-								throw new BundleException(AdaptorMsg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION"), e);
+								throw new BundleException(AdaptorMsg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION"), e); //$NON-NLS-1$
 							}
 							File bundleGenerationDir = newData.createGenerationDir();
 							if (!bundleGenerationDir.exists()) {
-								throw new BundleException(AdaptorMsg.formatter.getString("ADAPTOR_DIRECTORY_CREATE_EXCEPTION", bundleGenerationDir.getPath()));
+								throw new BundleException(AdaptorMsg.formatter.getString("ADAPTOR_DIRECTORY_CREATE_EXCEPTION", bundleGenerationDir.getPath())); //$NON-NLS-1$
 							}
 							newData.createBaseBundleFile();
 						} else {
 							try {
 								newData = data.nextGeneration(null);
 							} catch (IOException e) {
-								throw new BundleException(AdaptorMsg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION"), e);
+								throw new BundleException(AdaptorMsg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION"), e); //$NON-NLS-1$
 							}
 							File bundleGenerationDir = newData.createGenerationDir();
 							if (!bundleGenerationDir.exists()) {
-								throw new BundleException(AdaptorMsg.formatter.getString("ADAPTOR_DIRECTORY_CREATE_EXCEPTION", bundleGenerationDir.getPath()));
+								throw new BundleException(AdaptorMsg.formatter.getString("ADAPTOR_DIRECTORY_CREATE_EXCEPTION", bundleGenerationDir.getPath())); //$NON-NLS-1$
 							}
 							File outFile = newData.getBaseFile();
 							if ("file".equals(protocol)) {
@@ -583,7 +583,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 					}
 					newData.loadFromManifest();
 				} catch (IOException e) {
-					throw new BundleException(AdaptorMsg.formatter.getString("BUNDLE_READ_EXCEPTION"), e);
+					throw new BundleException(AdaptorMsg.formatter.getString("BUNDLE_READ_EXCEPTION"), e); //$NON-NLS-1$
 				}
 
 				return (newData);
@@ -600,7 +600,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 				try {
 					newData.save();
 				} catch (IOException e) {
-					throw new BundleException(AdaptorMsg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION"), e);
+					throw new BundleException(AdaptorMsg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION"), e); //$NON-NLS-1$
 				}
 				long bundleId = newData.getBundleID();
 				State systemState = stateManager.getSystemState();
