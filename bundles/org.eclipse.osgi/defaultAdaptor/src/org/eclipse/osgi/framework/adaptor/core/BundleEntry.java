@@ -87,6 +87,7 @@ public abstract class BundleEntry {
 
 		/**
 		 * Constructs the BundleEntry using a ZipEntry.
+		 * @param zipFile the ZipFile that this BundleEntry belongs to
 		 * @param bundleFile BundleFile object this entry is a member of
 		 * @param entry ZipEntry object of this entry
 		 */
@@ -103,7 +104,7 @@ public abstract class BundleEntry {
 		 * @exception java.io.IOException
 		 */
 		public InputStream getInputStream() throws IOException {
-			return (zipFile.getInputStream(zipEntry)); //TODO No secureAction call is made whereas one is made in FileBundleEntry
+			return (zipFile.getInputStream(zipEntry));
 		}
 
 		/**
@@ -137,7 +138,7 @@ public abstract class BundleEntry {
 
 		public URL getLocalURL() {
 			try {
-				return new URL("jar:file:" + bundleFile.bundlefile.getAbsolutePath() + "!/" + zipEntry.getName());
+				return new URL("jar:file:" + bundleFile.bundlefile.getAbsolutePath() + "!/" + zipEntry.getName()); //$NON-NLS-1$//$NON-NLS-2$
 			} catch (MalformedURLException e) {
 				//This can not happen. 
 				return null;
@@ -168,9 +169,9 @@ public abstract class BundleEntry {
 		private String name;
 
 		/**
-		 * Constructs the BundleEntry using a ZipEntry.	//TODO Bogus comment
-		 * @param bundleFile BundleFile object this entry is a member of
-		 * @param entry ZipEntry object of this entry
+		 * Constructs the BundleEntry using a File.
+		 * @param file BundleFile object this entry is a member of
+		 * @param name the name of this BundleEntry
 		 */
 		FileBundleEntry(File file, String name) {
 			this.file = file;
@@ -265,7 +266,7 @@ public abstract class BundleEntry {
 
 		public URL getLocalURL() {
 			try {
-				return new URL("jar:file:" + bundleFile.bundlefile.getAbsolutePath() + "!/" + name);
+				return new URL("jar:file:" + bundleFile.bundlefile.getAbsolutePath() + "!/" + name); //$NON-NLS-1$ //$NON-NLS-2$
 			} catch (MalformedURLException e) {
 				//This can not happen, unless the jar protocol is not supported.
 				return null;
