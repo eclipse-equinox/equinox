@@ -24,7 +24,7 @@ class StateReader {
 	// cached registry.
 	protected List objectTable = new ArrayList();
 
-	public static final byte STATE_CACHE_VERSION = 6;
+	public static final byte STATE_CACHE_VERSION = 7;
 	public static final byte NULL = 0;
 	public static final byte OBJECT = 1;
 	public static final byte INDEX = 2;
@@ -129,7 +129,6 @@ class StateReader {
 	private void readVersionConstraint(VersionConstraintImpl version, DataInputStream in) throws IOException {
 		version.setName(readString(in, false));
 		version.setVersionRange(readVersionRange(in));
-		version.setMatchingRule(in.readByte());
 		version.setActualVersion(readVersion(in));
 		version.setSupplier(readBundleDescription(in));
 	}

@@ -127,7 +127,6 @@ class StateWriter {
 	private void writeVersionConstraint(VersionConstraintImpl version, DataOutputStream out) throws IOException {
 		writeStringOrNull(version.getName(), out);
 		writeVersionRange(version.getVersionRange(), out);
-		out.writeByte(version.getMatchingRule());
 		writeVersion(version.getActualVersion(), out);
 		writeBundleDescription((BundleDescriptionImpl) version.getSupplier(), out);
 	}

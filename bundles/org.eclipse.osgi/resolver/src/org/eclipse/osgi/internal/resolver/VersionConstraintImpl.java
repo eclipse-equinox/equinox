@@ -24,45 +24,8 @@ public abstract class VersionConstraintImpl implements VersionConstraint {
 		return name;
 	}
 
-	public Version getVersionSpecification() {
-		return versionRange == null ? null : versionRange.getMinimum();
-	}
-
 	public Version getActualVersion() {
 		return actualVersion;
-	}
-
-	public byte getMatchingRule() {
-		if (matchingRule != -1)
-			return matchingRule;
-		if (versionRange == null || versionRange.getMinimum() == null) {
-			matchingRule = NO_MATCH;
-			return matchingRule;
-		}
-
-		Version minimum = versionRange.getMinimum();
-		Version maximum = versionRange.getMaximum() == null ? Version.maxVersion : versionRange.getMaximum();
-
-		if (maximum.equals(Version.maxVersion))
-			matchingRule = GREATER_EQUAL_MATCH;
-		else if (minimum.equals(maximum))
-			matchingRule = QUALIFIER_MATCH;
-		else if (!minimum.isInclusive() || maximum.isInclusive())
-			matchingRule = OTHER_MATCH;
-		else if (minimum.getMajorComponent() == maximum.getMajorComponent() - 1)
-			matchingRule = MAJOR_MATCH;
-		else if (minimum.getMajorComponent() != maximum.getMajorComponent())
-			matchingRule = OTHER_MATCH;
-		else if (minimum.getMinorComponent() == maximum.getMinorComponent() - 1)
-			matchingRule = MINOR_MATCH;
-		else if (minimum.getMinorComponent() != maximum.getMinorComponent())
-			matchingRule = OTHER_MATCH;
-		else if (minimum.getMicroComponent() == maximum.getMicroComponent() - 1)
-			matchingRule = MICRO_MATCH;
-		else
-			matchingRule = OTHER_MATCH;
-
-		return matchingRule;
 	}
 
 	public VersionRange getVersionRange() {
@@ -87,10 +50,6 @@ public abstract class VersionConstraintImpl implements VersionConstraint {
 
 	public void setSupplier(BundleDescription supplier) {
 		this.supplier = supplier;
-	}
-
-	public void setMatchingRule(byte matchingRule) {
-		this.matchingRule = matchingRule;
 	}
 
 	public void setName(String name) {

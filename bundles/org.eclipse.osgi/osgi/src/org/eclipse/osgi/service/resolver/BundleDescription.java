@@ -13,7 +13,6 @@ package org.eclipse.osgi.service.resolver;
 /**
  * This class represents a specific version of a bundle in the system.
  */
-
 public interface BundleDescription {
 
 	/**

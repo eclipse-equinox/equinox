@@ -82,12 +82,11 @@ public abstract class AbstractStateTest extends EclipseWorkspaceTest {
 		if (original == null)
 			return;
 		assertEquals(tag + ".1", original.getName(), copy.getName());
-		assertEquals(tag + ".2", original.getVersionSpecification(), copy.getVersionSpecification());
-		assertEquals(tag + ".3", original.getMatchingRule(), copy.getMatchingRule());
-		assertEquals(tag + ".4", original.getActualVersion(), copy.getActualVersion());
-		assertEquals(tag + ".5", original.getSupplier() == null, copy.getSupplier() == null);
+		assertEquals(tag + ".2", original.getVersionRange(), copy.getVersionRange());
+		assertEquals(tag + ".3", original.getActualVersion(), copy.getActualVersion());
+		assertEquals(tag + ".4", original.getSupplier() == null, copy.getSupplier() == null);
 		if (original.getSupplier() != null)
-			assertEquals(tag + ".6", original.getSupplier().getSymbolicName(), copy.getSupplier().getSymbolicName());
+			assertEquals(tag + ".5", original.getSupplier().getSymbolicName(), copy.getSupplier().getSymbolicName());
 	}
 
 	public static void assertFullyResolved(String tag, BundleDescription bundle) {

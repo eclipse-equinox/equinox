@@ -16,28 +16,12 @@ package org.eclipse.osgi.service.resolver;
  */
 public interface VersionConstraint extends Cloneable {
 
-	public byte NO_MATCH = 0;
-	public byte QUALIFIER_MATCH = 1;
-	public byte MICRO_MATCH = 5;
-	public byte MINOR_MATCH = 2;
-	public byte MAJOR_MATCH = 3;
-	public byte GREATER_EQUAL_MATCH = 4;
-	public byte OTHER_MATCH = 5;
-
 	/**
 	 * Returns this constraint's name.
 	 * 
 	 * @return this constraint's name
 	 */
 	public String getName();
-
-	/**
-	 * Returns the version required by this constraint to be satisfied, or 
-	 * <code>null</code> if none is defined.
-	 * @deprecated use {@link #getVersionRange()} 
-	 * @return the version this constraint requires, or <code>null</code>
-	 */
-	public Version getVersionSpecification();
 
 	/**
 	 * Returns the actual version this constraint was resolved against, or 
@@ -47,20 +31,6 @@ public interface VersionConstraint extends Cloneable {
 	 * @see #isResolved()
 	 */
 	public Version getActualVersion();
-
-	/**
-	 * Returns the matching rule for this constraint.
-	 * 
-	 * @return one of the existing matching rules
-	 * @see #NO_MATCH
-	 * @see #QUALIFIER_MATCH
-	 * @see #MICRO_MATCH
-	 * @see #MINOR_MATCH
-	 * @see #MAJOR_MATCH
-	 * @see #GREATER_EQUAL_MATCH
-	 * @deprecated use {@link #getVersionRange()}
-	 */
-	public byte getMatchingRule();
 
 	/**
 	 * Returns the version range for this constraint.

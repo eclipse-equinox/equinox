@@ -89,6 +89,24 @@ public class VersionRange {
 
 	}
 
+	public boolean equals(Object object) {
+		if (!(object instanceof VersionRange))
+			return false;
+		VersionRange vr = (VersionRange) object;
+		if (minVersion != null && vr.getMinimum() != null) {
+			if (minVersion.equals(vr.getMinimum()) && minVersion.isInclusive() == vr.getMinimum().isInclusive())
+				if (maxVersion != null && vr.getMaximum() != null)
+					if (maxVersion.equals(vr.getMaximum()) && maxVersion.isInclusive() == vr.getMaximum().isInclusive())
+						return true;
+					else
+						return maxVersion == vr.getMaximum();
+		}
+		else {
+			return minVersion == vr.getMinimum();
+		}
+		return false;
+	}
+
 	public String toString() {
 		if (minVersion != null && Version.maxVersion.equals(maxVersion)) {
 			return minVersion.toString();

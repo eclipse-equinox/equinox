@@ -16,6 +16,14 @@ import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.BundleException;
 
 public class StateObjectFactoryImpl implements StateObjectFactory {
+	public static final byte NO_MATCH = 0;
+	public static final byte QUALIFIER_MATCH = 1;
+	public static final byte MICRO_MATCH = 5;
+	public static final byte MINOR_MATCH = 2;
+	public static final byte MAJOR_MATCH = 3;
+	public static final byte GREATER_EQUAL_MATCH = 4;
+	public static final byte OTHER_MATCH = 5;
+
 	public BundleDescription createBundleDescription(Dictionary manifest, String location, long id) throws BundleException {
 		BundleDescriptionImpl result;
 		result = (BundleDescriptionImpl) StateBuilder.createBundleDescription(manifest, location);
@@ -72,7 +80,6 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		BundleSpecificationImpl bundleSpec = new BundleSpecificationImpl();
 		bundleSpec.setName(requiredSymbolicName);
 		setVersionRange(bundleSpec, matchingRule, requiredVersion);
-		bundleSpec.setMatchingRule(matchingRule);
 		bundleSpec.setExported(export);
 		bundleSpec.setOptional(optional);
 		return bundleSpec;
@@ -82,7 +89,6 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		BundleSpecificationImpl bundleSpec = new BundleSpecificationImpl();
 		bundleSpec.setName(original.getName());
 		bundleSpec.setVersionRange(original.getVersionRange());
-		bundleSpec.setMatchingRule(original.getMatchingRule());
 		bundleSpec.setExported(original.isExported());
 		bundleSpec.setOptional(original.isOptional());
 		return bundleSpec;
@@ -92,7 +98,6 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		HostSpecificationImpl hostSpec = new HostSpecificationImpl();
 		hostSpec.setName(hostSymbolicName);
 		setVersionRange(hostSpec, matchingRule, hostVersion);
-		hostSpec.setMatchingRule(matchingRule);
 		hostSpec.setReloadHost(reloadHost);
 		return hostSpec;
 	}
@@ -101,7 +106,6 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		HostSpecificationImpl hostSpec = new HostSpecificationImpl();
 		hostSpec.setName(original.getName());
 		hostSpec.setVersionRange(original.getVersionRange());
-		hostSpec.setMatchingRule(original.getMatchingRule());
 		hostSpec.setReloadHost(original.reloadHost());
 		return hostSpec;
 	}
@@ -170,31 +174,31 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 	}
 
 	private void setVersionRange(VersionConstraintImpl constraint, int matchingRule, Version minVersion) {
-		if (matchingRule == VersionConstraint.NO_MATCH || matchingRule == VersionConstraint.OTHER_MATCH)
+		if (matchingRule == NO_MATCH || matchingRule == OTHER_MATCH)
 			return;
 		if (minVersion == null)
 			return;
 		switch (matchingRule) {
-			case VersionConstraint.QUALIFIER_MATCH : {
+			case QUALIFIER_MATCH : {
 				constraint.setVersionRange(new VersionRange(minVersion, minVersion));
 				break;
 			}
-			case VersionConstraint.MICRO_MATCH : {
+			case MICRO_MATCH : {
 				Version maxVersion = new Version(minVersion.getMajorComponent(), minVersion.getMinorComponent(), minVersion.getMicroComponent() + 1, "", false); //$NON-NLS-1$
 				constraint.setVersionRange(new VersionRange(minVersion, maxVersion));
 				break;
 			}
-			case VersionConstraint.MINOR_MATCH : {
+			case MINOR_MATCH : {
 				Version maxVersion = new Version(minVersion.getMajorComponent(), minVersion.getMinorComponent() + 1, 0, "", false); //$NON-NLS-1$
 				constraint.setVersionRange(new VersionRange(minVersion, maxVersion));
 				break;
 			}
-			case VersionConstraint.MAJOR_MATCH : {
+			case MAJOR_MATCH : {
 				Version maxVersion = new Version(minVersion.getMajorComponent() + 1, 0, 0, "", false); //$NON-NLS-1$
 				constraint.setVersionRange(new VersionRange(minVersion, maxVersion));
 				break;
 			}
-			case VersionConstraint.GREATER_EQUAL_MATCH : {
+			case GREATER_EQUAL_MATCH : {
 				constraint.setVersionRange(new VersionRange(minVersion, Version.maxVersion));
 				break;
 			}
