@@ -100,6 +100,10 @@ public class EclipseClassLoader extends DefaultClassLoader {
 
 				//If it's another thread, we wait and try again. In any case the class is returned. The difference is that an exception can be logged.
 				if (!bundle.testStateChanging(Thread.currentThread())) {
+					Thread threadChangingState = bundle.getStateChanging();
+					if (EclipseAdaptor.TRACE_BUNDLES && threadChangingState != null) {
+						System.out.println("Concurrent startup of bundle " + bundle.getSymbolicName() + " by " + Thread.currentThread() + " and " + threadChangingState.getName() + ". Waiting up to 5000ms for " + threadChangingState + " to finish the initialization.");   //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+					}
 					Object lock = bundle.getStateChangeLock();
 					long start = System.currentTimeMillis();
 					long delay = 5000;
@@ -120,7 +124,7 @@ public class EclipseClassLoader extends DefaultClassLoader {
 						timeLeft = start + delay - System.currentTimeMillis();
 					}
 					if (timeLeft <= 0 || bundle.getState() != Bundle.ACTIVE) {
-						String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CLASSLOADER_CONCURRENT_STARTUP", new Object[] {Thread.currentThread(), name, bundle.getStateChanging().getName(), bundle.getSymbolicName() == null ? Long.toString(bundle.getBundleId()) : bundle.getSymbolicName()}); //$NON-NLS-1$
+						String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CLASSLOADER_CONCURRENT_STARTUP", new Object[] {Thread.currentThread(), name, threadChangingState.getName(), bundle.getSymbolicName() == null ? Long.toString(bundle.getBundleId()) : bundle.getSymbolicName()}); //$NON-NLS-1$ 
 						EclipseAdaptor.getDefault().getFrameworkLog().log(new FrameworkLogEntry(EclipseAdaptorConstants.PI_ECLIPSE_OSGI, message, 0, new Exception("ECLIPSE_CLASSLOADER_GENERATED_EXCEPTION"), null)); //$NON-NLS-1$
 					}
 					return super.findLocalClass(name);
