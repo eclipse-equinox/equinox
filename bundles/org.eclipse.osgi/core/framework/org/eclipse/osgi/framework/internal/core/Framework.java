@@ -21,7 +21,6 @@ import org.eclipse.osgi.framework.internal.protocol.ContentHandlerFactory;
 import org.eclipse.osgi.framework.internal.protocol.StreamHandlerFactory;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.security.action.CreateThread;
-import org.eclipse.osgi.framework.util.Headers;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.*;
@@ -1038,23 +1037,7 @@ public class Framework implements EventSource, EventPublisher {
 	protected Bundle[] getBundleByUniqueId(String uniqueId) {
 		return bundles.getBundles(uniqueId);
 	}
-	protected Bundle getBundleByClassLoader(BundleClassLoader classloader) {
-		synchronized (bundles) {
-			// this is not optimized; do not think it will get called
-			// that much.
-			List allBundles = bundles.getBundles();
-			int size = allBundles.size();
-			for (int i = 0; i < size; i++) {
-				Bundle bundle = (Bundle) allBundles.get(i);
-				if (bundle instanceof BundleHost) {
-					BundleLoader loader = ((BundleHost) bundle).basicGetBundleLoader();
-					if (loader != null && loader.getClassLoader() == classloader)
-						return bundle;
-				}
-			}
-		}
-		return null;
-	}
+
 	/**
 	 * Returns a list of <tt>ServiceReference</tt> objects. This method
 	 * returns a list of <tt>ServiceReference</tt> objects for services which

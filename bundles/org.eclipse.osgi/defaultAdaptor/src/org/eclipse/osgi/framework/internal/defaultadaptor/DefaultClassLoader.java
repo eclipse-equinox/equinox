@@ -21,6 +21,9 @@ import org.eclipse.osgi.framework.adaptor.core.AbstractBundleData;
 import org.eclipse.osgi.framework.adaptor.core.BundleEntry;
 import org.eclipse.osgi.framework.adaptor.core.BundleFile;
 import org.eclipse.osgi.framework.debug.Debug;
+import org.eclipse.osgi.framework.internal.core.Msg;
+import org.eclipse.osgi.framework.util.SecureAction;
+import org.osgi.framework.BundleException;
 import org.osgi.framework.FrameworkEvent;
 
 /**
@@ -33,7 +36,7 @@ public class DefaultClassLoader extends org.eclipse.osgi.framework.adaptor.Bundl
 
 	static {
 		// Check the osgi.dev property to see if dev classpath entries have been defined.
-		String osgiDev = System.getProperty("osgi.dev");
+		String osgiDev = SecureAction.getProperty("osgi.dev");
 		if (osgiDev != null) {
 			// Add each dev classpath entry
 			Vector devClassPath = new Vector(6);
@@ -455,7 +458,7 @@ public class DefaultClassLoader extends org.eclipse.osgi.framework.adaptor.Bundl
 		ArrayList result = new ArrayList(10);
 
 		// If not in dev mode then just add the regular classpath entries and return
-		if (System.getProperty("osgi.dev") == null) {
+		if (devCP == null) {
 			for (int i = 0; i < classpath.length; i++)
 				findClassPathEntry(result, classpath[i], bundledata, domain);
 			return (ClasspathEntry[]) result.toArray(new ClasspathEntry[result.size()]);
@@ -478,7 +481,7 @@ public class DefaultClassLoader extends org.eclipse.osgi.framework.adaptor.Bundl
 	}
 
 	protected void addDefaultDevEntries(ArrayList result, AbstractBundleData bundledata, ProtectionDomain domain) {
-		if (System.getProperty("osgi.dev") == null)
+		if (devCP == null)
 			return;
 		if (devCP != null)
 			for (int i = 0; i < devCP.length; i++)
@@ -487,9 +490,9 @@ public class DefaultClassLoader extends org.eclipse.osgi.framework.adaptor.Bundl
 
 	protected void findClassPathEntry(ArrayList result, String entry, AbstractBundleData bundledata, ProtectionDomain domain) {
 		if (!addClassPathEntry(result, entry, bundledata, domain)) {
-//			if (System.getProperties().get("osgi.dev") == null) {
+//			if (devCP == null) {
 //				BundleException be = new BundleException(Msg.formatter.getString("BUNDLE_CLASSPATH_ENTRY_NOT_FOUND_EXCEPTION", entry, hostdata.getLocation()));
-//				bundledata.adaptor.getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, bundledata.getBundle(), be);
+//				bundledata.getAdaptor().getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, bundledata.getBundle(), be);
 //			}
 		}
 	}

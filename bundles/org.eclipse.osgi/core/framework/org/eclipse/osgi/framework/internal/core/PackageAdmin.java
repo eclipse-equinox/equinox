@@ -74,10 +74,7 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 			state.resolve(false);
 		}
 		exportedPackages = new KeyedHashSet(false);
-		exportedPackages = getExportedPackages(exportedPackages);
-
 		exportedBundles = new KeyedHashSet(false);
-		exportedBundles = getExportedBundles(exportedBundles);
 	}
 
 	private KeyedHashSet getExportedPackages(KeyedHashSet packageSet) {
@@ -87,12 +84,19 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 		for (int i = 0; i < packageSpecs.length; i++) {
 			BundleDescription bundleSpec = packageSpecs[i].getSupplier();
 			if (bundleSpec != null) {
+				Bundle bundle = framework.getBundle(bundleSpec.getBundleId());
+				if (bundle == null || !bundle.checkExportPackagePermission(packageSpecs[i].getName()))
+					continue;
+
 				HostSpecification hostSpec = bundleSpec.getHost();
 				if (hostSpec != null) {
 					bundleSpec = hostSpec.getSupplier();
+					if (bundleSpec == null)
+						continue;
+					bundle = framework.getBundle(bundleSpec.getBundleId());
 				}
-				Bundle bundle = framework.getBundle(bundleSpec.getBundleId());
-				if (bundle != null && bundle instanceof BundleHost) {
+				
+				if (bundle != null && bundle.isResolved() && bundle instanceof BundleHost) {
 					ExportedPackageImpl packagesource = new ExportedPackageImpl(packageSpecs[i], ((BundleHost)bundle).getLoaderProxy());
 					packageSet.add(packagesource);
 				} else {
@@ -112,7 +116,8 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 		for (int i = 0; i < bundleDescripts.length; i++) {
 			BundleDescription bundledes = bundleDescripts[i];
 			Bundle bundle = framework.getBundle(bundledes.getBundleId());
-			if (bundle != null && bundle instanceof BundleHost) {
+			if (bundle != null && bundle.isResolved() && bundle.getSymbolicName()!= null &&
+					bundle instanceof BundleHost &&	bundle.checkProvideBundlePermission(bundle.getSymbolicName())) {
 				BundleLoaderProxy loaderProxy = ((BundleHost)bundle).getLoaderProxy();
 				bundleSet.add(loaderProxy);
 			}
@@ -195,46 +200,6 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 		}
 	}
 
-	/**
-	 * Gets the bundles exported by the specified bundle.
-	 *
-	 * @param bundle The bundle whose exported bundles are to be returned,
-	 *               or <tt>null</tt> if all the bundles currently
-	 *               exported in the framework are to be returned.
-	 *
-	 * @return The array of bundles exported by the specified bundle,
-	 * or <tt>null</tt> if the specified bundle has not exported any bundles.
-	 */
-	//	public ExportedBundle[] getExportedBundles(org.osgi.framework.Bundle bundle) {
-	//		synchronized (framework.bundles) {
-	//			if (bundleExporters != null) {
-	//				Vector bundles = new Vector(bundleExporters.size());
-	//
-	//				Enumeration enum = bundleExporters.elements();
-	//				while (enum.hasMoreElements()) {
-	//					ExportedBundle exportedBundle = (ExportedBundle) enum.nextElement();
-	//
-	//					if ((bundle == null)
-	//						|| (bundle.equals(exportedBundle.getExportingBundle()))) {
-	//						bundles.addElement(exportedBundle);
-	//					}
-	//				}
-	//
-	//				int size = bundles.size();
-	//
-	//				if (size > 0) {
-	//					ExportedBundle[] exported = new ExportedBundle[size];
-	//
-	//					bundles.copyInto(exported);
-	//
-	//					return (exported);
-	//				}
-	//			}
-	//		}
-	//
-	// TODO implement this using the state object
-	//		return (null);
-	//	}
 	/**
 	 * Gets the ExportedPackage with the specified package name.  All exported
 	 * packages
@@ -491,10 +456,6 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 					}
 				}
 
-				// update the exported package and bundle lists.
-				exportedPackages = getExportedPackages(exportedPackages);
-				exportedBundles = getExportedBundles(exportedBundles);
-
 				// set the resolved bundles state
 				for (int i = 0; i < refresh.length; i++) {
 					Bundle changedBundle = refresh[i];
@@ -509,7 +470,7 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 							} else {
 								changedBundle.resolve();
 							}
-							if (!previouslyResolved[i]) {
+							if (!previouslyResolved[i] && changedBundle.isResolved()) {
 								notify.addElement(changedBundle);
 							}
 						} else {
@@ -519,6 +480,10 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 						}
 					}
 				}
+
+				// update the exported package and bundle lists.
+				exportedPackages = getExportedPackages(exportedPackages);
+				exportedBundles = getExportedBundles(exportedBundles);
 			} finally {
 				/*
 				 * Release the state change locks.
@@ -732,6 +697,8 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 				// TODO log error!!
 			}
 		}
+		exportedPackages = getExportedPackages(exportedPackages);
+		exportedBundles = getExportedBundles(exportedBundles);
 	}
 	/**
 	 * Attempt to resolve all unresolved bundles. When this method returns
@@ -772,10 +739,11 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 							BundleHost host = (BundleHost) framework.getBundle(changedBundleDes.getHost().getSupplier().getBundleId());
 							if (((BundleFragment) bundle).setHost(host)) {
 								bundle.resolve();
-								notify.add(bundle);
 							}
 						} else {
 							bundle.resolve();
+						}
+						if (bundle.isResolved()) {
 							notify.add(bundle);
 						}
 					} else if (!changedBundleDes.isResolved() && previouslyResolved) {

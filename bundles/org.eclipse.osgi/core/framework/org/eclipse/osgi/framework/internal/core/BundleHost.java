@@ -19,6 +19,7 @@ import java.util.Vector;
 import org.eclipse.osgi.framework.adaptor.BundleData;
 import org.eclipse.osgi.framework.adaptor.IBundleStats;
 import org.eclipse.osgi.framework.debug.Debug;
+import org.eclipse.osgi.framework.util.SecureAction;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleException;
 
@@ -606,7 +607,7 @@ public class BundleHost extends Bundle {
 		// If the Host ClassLoader has exists then we must attach
 		// the fragment to the ClassLoader.
 		if (loader != null) {
-			loader.attachFragment(fragment, System.getProperties());
+			loader.attachFragment(fragment, SecureAction.getProperties());
 		}
 
 	}
@@ -626,19 +627,6 @@ public class BundleHost extends Bundle {
 			}
 		}
 		return loader;
-	}
-
-	/**
-	 * Mark this bundle as resolved.
-	 */
-	protected void resolve() {
-		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-			if ((state & (INSTALLED)) == 0) {
-				Debug.println("Bundle.resolve called when state != INSTALLED: " + this);
-				Debug.printStackTrace(new Exception("Stack trace"));
-			}
-		}
-		state = RESOLVED;
 	}
 
 	protected BundleLoaderProxy getLoaderProxy() {

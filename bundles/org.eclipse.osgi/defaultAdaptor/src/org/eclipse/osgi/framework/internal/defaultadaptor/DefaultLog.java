@@ -16,6 +16,7 @@ import java.util.Date;
 
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
+import org.eclipse.osgi.framework.util.SecureAction;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.FrameworkEvent;
@@ -102,7 +103,7 @@ public class DefaultLog implements FrameworkLog {
 			if (outFile != null) {
 				try {
 					writer = logForStream(
-							new FileOutputStream(outFile.getAbsolutePath(),
+							SecureAction.getFileOutputStream(outFile,
 									true));
 				} catch (IOException e) {
 					writer = logForStream(System.err);
@@ -207,8 +208,8 @@ public class DefaultLog implements FrameworkLog {
 				Reader fileIn = null;
 				try {
 					openFile();
-					fileIn = new InputStreamReader(new FileInputStream(
-							oldOutFile.getAbsolutePath()), "UTF-8");
+					fileIn = new InputStreamReader(SecureAction.getFileInputStream(
+							oldOutFile), "UTF-8");
 					copyReader(fileIn, this.writer);
 				} catch (IOException e) {
 					copyFailed = true;

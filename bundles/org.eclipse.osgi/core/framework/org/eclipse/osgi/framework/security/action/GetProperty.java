@@ -35,6 +35,9 @@ public class GetProperty implements PrivilegedAction {
 	    @exception java.lang.IllegalArgumentException
 	*/
 	public Object run() {
-		return System.getProperty(property, def);
+		if (property == null)
+			return System.getProperties();
+		else
+			return System.getProperty(property, def);
 	}
 }

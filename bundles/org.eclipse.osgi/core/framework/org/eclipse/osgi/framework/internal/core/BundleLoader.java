@@ -17,6 +17,7 @@ import java.security.*;
 import java.util.*;
 import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.debug.Debug;
+import org.eclipse.osgi.framework.util.SecureAction;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.*;
@@ -286,7 +287,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 				return classloader;
 
 			try {
-				String[] classpath = getClassPath(bundle, System.getProperties());
+				String[] classpath = getClassPath(bundle, SecureAction.getProperties());
 				if (classpath != null) {
 					classloader = createBCLPrevileged(bundle.getProtectionDomain(), classpath);
 				} else {
@@ -588,24 +589,27 @@ public class BundleLoader implements ClassLoaderDelegate {
 	}
 
 	private BundleClassLoader createBCLPrevileged(final ProtectionDomain pd, final String[] cp) {
-		BundleClassLoader bcl;
 		// Create the classloader as previleged code if security manager is present.
 		if (System.getSecurityManager() == null)
-			bcl = bundle.getBundleData().createClassLoader(BundleLoader.this, pd, cp);
+			return createBCL(pd,cp);
 		else
-			bcl = (BundleClassLoader)AccessController.doPrivileged(new PrivilegedAction() {
+			return (BundleClassLoader)AccessController.doPrivileged(new PrivilegedAction() {
 				public Object run() {
-					return bundle.getBundleData().createClassLoader(BundleLoader.this, pd, cp);
+					return createBCL(pd,cp);
 				}
 			});
 
+	}
+
+	private BundleClassLoader createBCL(final ProtectionDomain pd, final String[] cp) {
+		BundleClassLoader bcl = bundle.getBundleData().createClassLoader(BundleLoader.this, pd, cp);
 		// attach existing fragments to classloader
 		org.osgi.framework.Bundle[] fragments = bundle.getFragments();
 		if (fragments != null)
 			for (int i = 0; i < fragments.length; i++) {
 				Bundle fragment = (Bundle) fragments[i];
 				try {
-					bcl.attachFragment(fragment.getBundleData(), fragment.domain, getClassPath(fragment, System.getProperties()));
+					bcl.attachFragment(fragment.getBundleData(), fragment.domain, getClassPath(fragment, SecureAction.getProperties()));
 				}
 				catch (BundleException be) {
 					bundle.framework.publishFrameworkEvent(FrameworkEvent.ERROR, bundle, be);
@@ -616,66 +620,6 @@ public class BundleLoader implements ClassLoaderDelegate {
 		bcl.initialize();
 		
 		return bcl;
-	}
-
-	/**
-	 * Check for PackagePermission to Export.
-	 *
-	 * @return true if bundle has the package permission.
-	 */
-	protected boolean hasExportPackagePermission(String name) {
-		ProtectionDomain domain = bundle.getProtectionDomain();
-		if (domain != null)
-			return domain.implies(new PackagePermission(name, PackagePermission.EXPORT));
-		return true;
-	}
-
-	/**
-	 * Check for BundlePermission to Provide.
-	 *
-	 * @return true if bundle has the permission to export the bundle.
-	 */
-	protected boolean hasProvideBundlePermission(String uniqueId) {
-		ProtectionDomain domain = bundle.getProtectionDomain();
-		if (domain != null)
-			return domain.implies(new BundlePermission(uniqueId, BundlePermission.PROVIDE));
-		return true;
-	}
-
-	/**
-	 * Check for PackagePermission to Import.
-	 *
-	 * @return true if bundle has the package permission.
-	 */
-	protected boolean hasImportPackagePermission(String name) {
-		ProtectionDomain domain = bundle.getProtectionDomain();
-		if (domain != null)
-			return domain.implies(new PackagePermission(name, PackagePermission.IMPORT));
-		return true;
-	}
-
-	/**
-	 * Check for BundlePermission to Require.
-	 *
-	 * @return true if bundle has the require permission.
-	 */
-	protected boolean hasRequireBundlePermission(String uniqueId) {
-		ProtectionDomain domain = bundle.getProtectionDomain();
-		if (domain != null)
-			return domain.implies(new BundlePermission(uniqueId, BundlePermission.REQUIRE));
-		return true;
-	}
-
-	/**
-	 * Check for BundlePermission to Host.
-	 *
-	 * @return true if bundle has the require permission.
-	 */
-	protected boolean hasHostBundlePermission(String uniqueId) {
-		ProtectionDomain domain = bundle.getProtectionDomain();
-		if (domain != null)
-			return domain.implies(new BundlePermission(uniqueId, BundlePermission.HOST));
-		return true;
 	}
 
 	/**
@@ -1158,7 +1102,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 
 	protected String[] getClassPath(Bundle bundle, Properties props) throws BundleException {
 		String spec = bundle.getBundleData().getClassPath();
-		ManifestElement[] classpathElements = ManifestElement.parseClassPath(spec);
+		ManifestElement[] classpathElements = ManifestElement.parseHeader(Constants.BUNDLE_CLASSPATH,spec);
 		return matchClassPath(classpathElements, props);
 	}
 

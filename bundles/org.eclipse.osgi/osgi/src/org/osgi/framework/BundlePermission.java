@@ -1,5 +1,5 @@
 /*
- * $Header: /home/technology/org.eclipse.equinox/plugins/org.eclipse.osgi/osgi/src/org/osgi/framework/BundlePermission.java,v 1.1 2003/11/10 17:51:50 jeff Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/BundlePermission.java,v 1.1 2003/11/25 21:24:14 dj Exp $
  *
  * Copyright (c) The Open Services Gateway Initiative (2000, 2002).
  * All Rights Reserved.
@@ -43,9 +43,9 @@ import java.security.PermissionCollection;
  * <pre>
  * <tt>org.osgi.service.http</tt>
  * </pre>
- * <p><tt>BundlePermission</tt> has three actions: <tt>PROVIDE</tt>, <tt>REQUIRE</tt> and
- * <tt>HOST</tt>.
- * The <tt>PROVIDE</tt> action implies the <tt>REQUIRE</tt> action.
+ * <p><tt>BundlePermission</tt> has three actions: <tt>PROVIDE_BUNDLE</tt>, <tt>REQUIRE_BUNDLE</tt> and
+ * <tt>FRAGMENT_HOST</tt>.
+ * The <tt>PROVIDE_BUNDLE</tt> action implies the <tt>REQUIRE_BUNDLE</tt> action.
  *
  * @author Open Services Gateway Initiative
  */
@@ -54,24 +54,30 @@ public final class BundlePermission extends BasicPermission
 {
 
     /**
-     * The action string <tt>provide</tt>.
+     * The action string <tt>provideBundle</tt>.
      */
-    public final static String PROVIDE = "provide";
+    public final static String PROVIDE_BUNDLE = "provideBundle";
 
     /**
-     * The action string <tt>require</tt>.
+     * The action string <tt>requireBundle</tt>.
      */
-    public final static String REQUIRE = "require";
+    public final static String REQUIRE_BUNDLE = "requireBundle";
 
     /**
-     * The action string <tt>host</tt>.
+     * The action string <tt>fragmentHost</tt>.
      */
-    public final static String HOST = "host";
+    public final static String FRAGMENT_HOST = "fragmentHost";
+
+    /**
+     * The action string <tt>fragmentBundle</tt>.
+     */
+    public final static String FRAGMENT_BUNDLE = "fragmentBundle";
 
     private final static int ACTION_PROVIDE      = 0x00000001;
     private final static int ACTION_REQUIRE      = 0x00000002;
     private final static int ACTION_HOST         = 0x00000004;
-    private final static int ACTION_ALL         = ACTION_PROVIDE | ACTION_REQUIRE | ACTION_HOST;
+    private final static int ACTION_FRAGMENT     = 0x00000008;
+    private final static int ACTION_ALL         = ACTION_PROVIDE | ACTION_REQUIRE | ACTION_HOST | ACTION_FRAGMENT;
     private final static int ACTION_NONE        = 0;
     private final static int ACTION_ERROR       = 0x80000000;
 
@@ -88,28 +94,21 @@ public final class BundlePermission extends BasicPermission
     private String actions = null;
 
     /**
-     * Defines the authority to provide and/or require and or specify a host bundle 
-     * unique ID within the OSGi environment.
-     * <p>The uniqueId is specified as a bundles Unique ID: a dot-separated string. Wildcards may be used.
-     * For example:
-     * <pre>
-     * org.osgi.service.http
-     * javax.servlet.*
-     * *
-     * </pre>
+     * Defines the authority to provide and/or require and or specify a host fragment 
+     * symbolic name within the OSGi environment.
      * <p>Bundle Permissions are granted over all possible versions of a bundle.
      *
      * A bundle that needs to provide a bundle must have the appropriate <tt>BundlePermission</tt>
-     * for the unique ID; a bundle that requires a bundle must have the appropriate
-     * <tt>BundlePermssion</tt> for that unique ID; a bundle that specifies a host bundle
-     * must have teh appropriate <tt>BundlePermission</tt> for that unique ID.
-     * @param uniqueId the bundle unique ID.
-     * @param actions <tt>PROVIDE</tt>, <tt>REQUIRE</tt>, <tt>HOST</tt> (canonical order).
+     * for the symbolic name; a bundle that requires a bundle must have the appropriate
+     * <tt>BundlePermssion</tt> for that symbolic name; a bundle that specifies a fragment host
+     * must have the appropriate <tt>BundlePermission</tt> for that symbolic name.
+     * @param symbolicName the bundle symbolic name.
+     * @param actions <tt>PROVIDE_BUNDLE</tt>, <tt>REQUIRE_BUNDLE</tt>, <tt>FRAGMENT_HOST</tt>, <tt>FRAGMENT_BUNDLE</tt> (canonical order).
      */
 
-    public BundlePermission(String uniqueId, String actions)
+    public BundlePermission(String symbolicName, String actions)
     {
-        this(uniqueId, getMask(actions));
+        this(symbolicName, getMask(actions));
     }
 
     /**
@@ -178,38 +177,77 @@ public final class BundlePermission extends BasicPermission
             // check for the known strings
             int matchlen;
 
-            if (i >= 6 && (a[i-6] == 'p' || a[i-6] == 'P') &&
-                (a[i-5] == 'r' || a[i-5] == 'R') &&
-                (a[i-4] == 'o' || a[i-4] == 'O') &&
-                (a[i-3] == 'v' || a[i-3] == 'V') &&
-                (a[i-2] == 'i' || a[i-2] == 'I') &&
-                (a[i-1] == 'd' || a[i-1] == 'D') &&
-                (a[i] == 'e' || a[i] == 'E'))
+            if (i >= 12 && 
+                (a[i-12] == 'p' || a[i-12] == 'P') &&
+                (a[i-11] == 'r' || a[i-11] == 'R') &&
+                (a[i-10] == 'o' || a[i-10] == 'O') &&
+                (a[i-9]  == 'v' || a[i-9]  == 'V') &&
+                (a[i-8]  == 'i' || a[i-8]  == 'I') &&
+                (a[i-7]  == 'd' || a[i-7]  == 'D') &&
+                (a[i-6]  == 'e' || a[i-6]  == 'E') &&
+				(a[i-5]  == 'b' || a[i-5]  == 'B') &&
+				(a[i-4]  == 'u' || a[i-4]  == 'U') &&
+				(a[i-3]  == 'n' || a[i-3]  == 'N') &&
+				(a[i-2]  == 'd' || a[i-2]  == 'D') &&
+				(a[i-1]  == 'l' || a[i-1]  == 'L') &&
+				(a[i]    == 'e' || a[i]    == 'E'))
             {
-                matchlen = 7;
+                matchlen = 13;
                 mask |= ACTION_PROVIDE | ACTION_REQUIRE;
-
             }
-            else if (i >= 6 && (a[i-6] == 'r' || a[i-6] == 'R') &&
-                     (a[i-5] == 'e' || a[i-5] == 'E') &&
-                     (a[i-4] == 'q' || a[i-4] == 'Q') &&
-                     (a[i-3] == 'u' || a[i-3] == 'U') &&
-                     (a[i-2] == 'i' || a[i-2] == 'I') &&
-                     (a[i-1] == 'r' || a[i-1] == 'R') &&
-                     (a[i] == 'e' || a[i] == 'E'))
+            else if (i >= 12 && 
+            	(a[i-12] == 'r' || a[i-12] == 'R') &&
+                (a[i-11] == 'e' || a[i-11] == 'E') &&
+                (a[i-10] == 'q' || a[i-10] == 'Q') &&
+                (a[i-9]  == 'u' || a[i-9]  == 'U') &&
+                (a[i-8]  == 'i' || a[i-8]  == 'I') &&
+                (a[i-7]  == 'r' || a[i-7]  == 'R') &&
+                (a[i-6]  == 'e' || a[i-6]  == 'E') &&
+				(a[i-5]  == 'b' || a[i-5]  == 'B') &&
+				(a[i-4]  == 'u' || a[i-4]  == 'U') &&
+				(a[i-3]  == 'n' || a[i-3]  == 'N') &&
+				(a[i-2]  == 'd' || a[i-2]  == 'D') &&
+				(a[i-1]  == 'l' || a[i-1]  == 'L') &&
+				(a[i]    == 'e' || a[i]    == 'E'))
             {
-                matchlen = 7;
+                matchlen = 13;
                 mask |= ACTION_REQUIRE;
-
             }
-			else if (i >= 3 && (a[i-3] == 'h' || a[i-3] == 'H') &&
-					 (a[i-2] == 'o' || a[i-2] == 'O') &&
-					 (a[i-1] == 's' || a[i-1] == 'S') &&
-					 (a[i] == 't' || a[i] == 'T'))
+			else if (i >= 11 && 
+				(a[i-11] == 'f' || a[i-11] == 'F') &&
+				(a[i-10] == 'r' || a[i-10] == 'R') &&
+				(a[i-9]  == 'a' || a[i-9]  == 'A') &&
+				(a[i-8]  == 'g' || a[i-8]  == 'G') &&
+				(a[i-7]  == 'm' || a[i-7]  == 'M') &&
+				(a[i-6]  == 'e' || a[i-6]  == 'E') &&
+				(a[i-5]  == 'n' || a[i-3]  == 'N') &&
+				(a[i-4]  == 't' || a[i-4]  == 'T') &&
+				(a[i-3]  == 'h' || a[i-3]  == 'H') &&
+				(a[i-2]  == 'o' || a[i-2]  == 'O') &&
+				(a[i-1]  == 's' || a[i-1]  == 'S') &&
+				(a[i]    == 't' || a[i]    == 'T'))
 			{
-				matchlen = 4;
+				matchlen = 12;
 				mask |= ACTION_HOST;
-
+			}
+			else if (i >= 13 && 
+				(a[i-13] == 'f' || a[i-13] == 'F') &&
+				(a[i-12] == 'r' || a[i-12] == 'R') &&
+				(a[i-11] == 'a' || a[i-11] == 'A') &&
+				(a[i-10] == 'g' || a[i-10] == 'G') &&
+				(a[i-9]  == 'm' || a[i-9]  == 'M') &&
+				(a[i-8]  == 'e' || a[i-8]  == 'E') &&
+				(a[i-7]  == 'n' || a[i-7]  == 'N') &&
+				(a[i-6]  == 't' || a[i-6]  == 'T') &&
+				(a[i-5]  == 'b' || a[i-5]  == 'B') &&
+				(a[i-4]  == 'u' || a[i-4]  == 'U') &&
+				(a[i-3]  == 'n' || a[i-3]  == 'N') &&
+				(a[i-2]  == 'd' || a[i-2]  == 'D') &&
+				(a[i-1]  == 'l' || a[i-1]  == 'L') &&
+				(a[i]    == 'e' || a[i]    == 'E'))
+			{
+				matchlen = 14;
+				mask |= ACTION_FRAGMENT;
 			}
 			else
             {
@@ -290,7 +328,7 @@ public final class BundlePermission extends BasicPermission
      * Returns the canonical string representation of the <tt>BundlePermission</tt> actions.
      *
      * <p>Always returns present <tt>BundlePermission</tt> actions in the following order:
-     * <tt>PROVIDE</tt>, <tt>REQUIRE</tt>, <tt>HOST</tt>.
+     * <tt>PROVIDE_BUNDLE</tt>, <tt>REQUIRE_BUNDLE</tt>, <tt>FRAGMENT_HOST</tt>, <tt>FRAGMENT_BUNDLE.
      * @return Canonical string representation of the <tt>BundlePermission</tt> actions.
      */
 
@@ -303,24 +341,30 @@ public final class BundlePermission extends BasicPermission
 
             if ((action_mask & ACTION_PROVIDE) == ACTION_PROVIDE)
             {
-                sb.append(PROVIDE);
+                sb.append(PROVIDE_BUNDLE);
                 comma = true;
             }
 
             if ((action_mask & ACTION_REQUIRE) == ACTION_REQUIRE)
             {
                 if (comma) sb.append(',');
-                sb.append(REQUIRE);
+                sb.append(REQUIRE_BUNDLE);
                 comma = true;
             }
 
 			if ((action_mask & ACTION_HOST) == ACTION_HOST)
 			{
 				if (comma) sb.append(',');
-				sb.append(HOST);
+				sb.append(FRAGMENT_HOST);
 			}
 
-            actions = sb.toString();
+			if ((action_mask & ACTION_HOST) == ACTION_FRAGMENT)
+			{
+				if (comma) sb.append(',');
+				sb.append(FRAGMENT_BUNDLE);
+			}
+
+			actions = sb.toString();
         }
 
         return(actions);

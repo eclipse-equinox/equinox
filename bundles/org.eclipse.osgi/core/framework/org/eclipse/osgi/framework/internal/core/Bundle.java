@@ -29,14 +29,16 @@ import org.eclipse.osgi.framework.adaptor.BundleOperation;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.osgi.service.resolver.BundleSpecification;
+import org.eclipse.osgi.service.resolver.HostSpecification;
 import org.eclipse.osgi.service.resolver.PackageSpecification;
 import org.eclipse.osgi.service.resolver.Version;
 import org.eclipse.osgi.service.resolver.VersionConstraint;
-import org.osgi.framework.AdminPermission;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.BundlePermission;
 import org.osgi.framework.FrameworkEvent;
+import org.osgi.framework.PackagePermission;
 /**
  * This object is given out to bundles and wraps the internal Bundle object. It
  * is destroyed when a bundle is uninstalled and reused if a bundle is updated.
@@ -66,12 +68,13 @@ public abstract class Bundle
 	/** Bundle assigned startlevel */
 	protected int startLevel;
 	/**
-	 * This exception captures the package names that could not be resolved.
-	 * This information is collected by importPackages, but the exception
+	 * This String captures the dependencies that could not be resolved
+	 * as a result of not having the proper permissions.
+	 * This information is collected by checkPermissions, but an exception
 	 * cannot be thrown during the resolve phase. It is saved here to be thrown
 	 * later (by Bundle.start for example).
 	 */
-	protected BundleException resolveException;
+	protected String permissionMsg;
 	protected ManifestLocalization manifestLocalization = null;
 	/**
 	 * Bundle object constructor. This constructor should not perform any real
@@ -1425,7 +1428,24 @@ public abstract class Bundle
 		return framework.adaptor.getState().getBundle(getBundleId());
 	}
 	public abstract BundleLoader getBundleLoader();
-	protected abstract void resolve();
+
+	/**
+	 * Mark this bundle as resolved.
+	 */
+	protected void resolve() {
+		if (domain != null && !checkPermissions()) {
+			state = INSTALLED;
+			return;
+		}
+		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+			if ((state & (INSTALLED)) == 0) {
+				Debug.println("Bundle.resolve called when state != INSTALLED: " + this);
+				Debug.printStackTrace(new Exception("Stack trace"));
+			}
+		}
+		state = RESOLVED;
+	}
+
 	protected abstract boolean unresolve() throws BundleException;
 	/**
 	 * Return the current context for this bundle.
@@ -1439,6 +1459,9 @@ public abstract class Bundle
 		// don't spend time if debug info is not needed
 		if (!Debug.DEBUG) {
 			return defaultMessage;
+		}
+		if (permissionMsg != null) {
+			return permissionMsg;
 		}
 		BundleDescription bundleDescription = getBundleDescription();
 		if (bundleDescription == null) {
@@ -1490,4 +1513,115 @@ public abstract class Bundle
 	public Object getKey() {
 		return new Long(id);
 	}
+
+	protected boolean checkPermissions(){
+		permissionMsg = null;
+		if (id == 0) // System Bundle always has permission
+			return true;
+
+		BundleDescription bundleDesc = getBundleDescription();
+		if (bundleDesc == null)
+			return false;
+
+		PackageSpecification[] pkgs = bundleDesc.getPackages();
+		for(int i=0; i<pkgs.length; i++) {
+			// check to make sure the exporter has permissions
+			BundleDescription supplier = pkgs[i].getSupplier();
+			Bundle supplierBundle = supplier==null ? null : framework.getBundle(supplier.getBundleId());
+			if (supplierBundle == null || !supplierBundle.checkExportPackagePermission(pkgs[i].getName())) {
+				permissionMsg = Msg.formatter.getString("BUNDLE_PERMISSION_EXCEPTION_EXPORT", supplierBundle, pkgs[i].getName());
+				return false;
+			}
+
+			// check to make sure the importer has permissions
+			if (!checkImportPackagePermission(pkgs[i].getName())) {
+				permissionMsg = Msg.formatter.getString("BUNDLE_PERMISSION_EXCEPTION_IMPORT", this, pkgs[i].getName());
+				return false;
+			}
+		}
+
+		BundleSpecification[] bundles = bundleDesc.getRequiredBundles();
+		for (int i=0; i<bundles.length; i++) {
+			// check to make sure the provider has permissions
+			BundleDescription supplier = bundles[i].getSupplier();
+			Bundle supplierBundle = supplier==null ? null : framework.getBundle(supplier.getBundleId());
+			if (supplierBundle == null || !supplierBundle.checkProvideBundlePermission(bundles[i].getName())) {
+				permissionMsg = Msg.formatter.getString("BUNDLE_PERMISSION_EXCEPTION_PROVIDE", supplierBundle, bundles[i].getName());
+				return false;
+			}
+
+			// check to make sure the requirer has permissions
+			if (!checkRequireBundlePermission(bundles[i].getName())) {
+				permissionMsg = Msg.formatter.getString("BUNDLE_PERMISSION_EXCEPTION_REQUIRE", this, bundles[i].getName());
+				return false;
+			}
+		}
+
+		HostSpecification host = bundleDesc.getHost();
+		if (host != null) {
+			// check to make sure the host has permissions
+			BundleDescription supplier = host.getSupplier();
+			Bundle supplierBundle = supplier==null ? null : framework.getBundle(supplier.getBundleId());
+			if (supplierBundle == null || !supplierBundle.checkFragmentHostPermission(host.getName())) {
+				permissionMsg = Msg.formatter.getString("BUNDLE_PERMISSION_EXCEPTION_HOST", supplierBundle, host.getName());
+				return false;
+			}
+
+			// check to make sure the fragment has permissions
+			if (!checkFragmentBundlePermission(host.getName())) {
+				permissionMsg = Msg.formatter.getString("BUNDLE_PERMISSION_EXCEPTION_FRAGMENT", this, host.getName());
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public boolean checkExportPackagePermission(String pkgName) {
+		if (id == 0) // System Bundle always has permission
+			return true;
+		if (domain != null)
+			return domain.implies(new PackagePermission(pkgName, PackagePermission.EXPORT));
+		return true;
+	}
+
+	public boolean checkProvideBundlePermission(String symbolicName) {
+		if (id == 0) // System Bundle always has permission
+			return true;
+		if (domain != null)
+			return domain.implies(new BundlePermission(symbolicName, BundlePermission.PROVIDE_BUNDLE));
+		return true;
+	}
+
+	public boolean checkImportPackagePermission(String pkgName) {
+		if (id == 0) // System Bundle always has permission
+			return true;
+		if (domain != null)
+			return domain.implies(new PackagePermission(pkgName, PackagePermission.IMPORT));
+		return true;
+	}
+
+	public boolean checkRequireBundlePermission(String symbolicName) {
+		if (id == 0) // System Bundle always has permission
+			return true;
+		if (domain != null)
+			return domain.implies(new BundlePermission(symbolicName, BundlePermission.REQUIRE_BUNDLE));
+		return true;
+	}
+
+	public boolean checkFragmentHostPermission(String symbolicName) {
+		if (id == 0) // System Bundle always has permission
+			return true;
+		if (domain != null)
+			return domain.implies(new BundlePermission(symbolicName, BundlePermission.FRAGMENT_HOST));
+		return true;
+	}
+
+	public boolean checkFragmentBundlePermission(String symbolicName) {
+		if (id == 0) // System Bundle always has permission
+			return true;
+		if (domain != null)
+			return domain.implies(new BundlePermission(symbolicName, BundlePermission.FRAGMENT_BUNDLE));
+		return true;
+	}
+
 }

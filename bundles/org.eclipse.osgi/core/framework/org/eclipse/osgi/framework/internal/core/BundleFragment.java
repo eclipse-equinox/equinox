@@ -416,38 +416,8 @@ public class BundleFragment extends Bundle {
 		// TODO detach the fragment if the host is null???
 	}
 
-	/**
-	 * Check for BundlePermission to Host.
-	 *
-	 * @return true if bundle has the require permission.
-	 */
-	protected boolean hasHostBundlePermission(String uniqueId) {
-		if (domain != null) {
-			return domain.implies(new BundlePermission(uniqueId, BundlePermission.HOST));
-		}
-
-		return true;
-	}
-
 	public BundleLoader getBundleLoader() {
 		return host == null ? null : host.getBundleLoader();
-	}
-
-	/**
-	 * Mark this bundle as resolved
-	 */
-	protected void resolve() {
-		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-			if ((state & (INSTALLED)) == 0) {
-				Debug.println("Bundle.resolve called when state != INSTALLED: " + this);
-				Debug.printStackTrace(new Exception("Stack trace"));
-			}
-			if (host == null) {
-				Debug.println("Bundle.resolve called when host == null: " + this);
-				Debug.printStackTrace(new Exception("Stack trace"));
-			}
-		}
-		state = RESOLVED;
 	}
 
 	/**

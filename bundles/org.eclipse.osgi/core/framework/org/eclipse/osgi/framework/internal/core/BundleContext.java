@@ -15,7 +15,6 @@ import java.io.File;
 import java.io.InputStream;
 import java.security.*;
 import java.util.*;
-import org.eclipse.osgi.framework.adaptor.BundleClassLoader;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.eventmgr.EventListeners;
 import org.eclipse.osgi.framework.eventmgr.EventSource;
@@ -1286,33 +1285,6 @@ public class BundleContext implements org.osgi.framework.BundleContext, EventSou
 		if (bundle == null) {
 			throw new IllegalStateException(Msg.formatter.getString("BUNDLE_CONTEXT_INVALID_EXCEPTION"));
 		}
-	}
-
-	/* (non-Javadoc)
-	 * @see org.osgi.framework.BundleContext#getBundle(java.lang.String)
-	 */
-	public org.osgi.framework.Bundle[] getBundles(String uniqueId) {
-		return framework.getBundleByUniqueId(uniqueId);
-	}
-
-	public org.osgi.framework.Bundle getBundle(String uniqueId) {
-		org.osgi.framework.Bundle[] bundles = getBundles(uniqueId);
-		return bundles == null ? null : bundles[0];
-	}
-
-	/* (non-Javadoc)
-	 * @see org.osgi.framework.BundleContext#getBundleFor(java.lang.Object)
-	 */
-	public org.osgi.framework.Bundle getBundleFor(Object object) {
-		ClassLoader cl = object.getClass().getClassLoader();
-		if (cl == null) {
-			return null;
-		}
-
-		if (cl instanceof BundleClassLoader) {
-			return framework.getBundleByClassLoader((BundleClassLoader) cl);
-		}
-		return null;
 	}
 
 }

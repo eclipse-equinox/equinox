@@ -13,6 +13,8 @@ package org.eclipse.osgi.framework.adaptor;
 
 import java.io.IOException;
 import java.net.URL;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.security.ProtectionDomain;
 import java.util.Enumeration;
 import org.eclipse.osgi.framework.debug.Debug;
@@ -103,7 +105,7 @@ public abstract class BundleClassLoader extends ClassLoader {
 
 		try {
 			// First check the parent classloader for system classes.
-			ClassLoader parent = getParent();
+			ClassLoader parent = getParentPrivileged();
 			if (parent != null)
 				try {
 					return parent.loadClass(name);
@@ -165,7 +167,7 @@ public abstract class BundleClassLoader extends ClassLoader {
 		try {
 			URL url = null;
 			// First check the parent classloader for system resources.
-			ClassLoader parent = getParent();
+			ClassLoader parent = getParentPrivileged();
 			if (parent != null)
 				url = parent.getResource(name);
 			if (url != null) {
@@ -305,4 +307,15 @@ public abstract class BundleClassLoader extends ClassLoader {
 	 * Bundle-ClassPath manifest entry of the fragment.
 	 */
 	abstract public void attachFragment(BundleData bundledata, ProtectionDomain domain, String[] classpath);
+
+	protected ClassLoader getParentPrivileged(){
+		if (System.getSecurityManager() == null)
+			return getParent();
+		
+		return (ClassLoader) AccessController.doPrivileged(new PrivilegedAction() {
+			public Object run() {
+				return getParent();
+			}
+		});
+	}
 }

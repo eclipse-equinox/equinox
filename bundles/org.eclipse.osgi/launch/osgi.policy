@@ -1,0 +1,5 @@
+// Grant SMF AllPermission.
+
+grant codeBase "file:../bin/" {
+        permission java.security.AllPermission;
+};

@@ -16,6 +16,8 @@ import java.net.URL;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import org.eclipse.osgi.framework.util.SecureAction;
+
 /**
  * A BundleEntry represents one entry of a BundleFile.
  */
@@ -180,7 +182,7 @@ public abstract class BundleEntry {
 		 * @exception java.io.IOException
 		 */
 		public InputStream getInputStream() throws IOException {
-			return (new FileInputStream(file));
+			return SecureAction.getFileInputStream(file);
 		}
 		/**
 		 * Return size of the uncompressed entry.
