@@ -139,8 +139,8 @@ public class EclipseStarter {
 			}
 		}
 		// we only get here if an error happened
-		System.getProperties().setProperty(PROP_EXITCODE, "13");
-		System.getProperties().setProperty(PROP_EXITDATA, log.getFile().getPath());
+		System.getProperties().put(PROP_EXITCODE, "13");
+		System.getProperties().put(PROP_EXITDATA, log.getFile().getPath());
 		return null;
 	}
 
@@ -167,7 +167,7 @@ public class EclipseStarter {
 			if (configAreaDirectory != null) {
 				String logFileName = Long.toString(System.currentTimeMillis()) + EclipseAdaptor.F_LOG;
 				File logFile = new File(configAreaDirectory, logFileName);
-				System.setProperty(EclipseStarter.PROP_LOGFILE, logFile.getAbsolutePath());
+				System.getProperties().put(EclipseStarter.PROP_LOGFILE, logFile.getAbsolutePath());
 				frameworkLog = new EclipseLog(logFile);
 			} else
 				frameworkLog = new EclipseLog();
@@ -342,7 +342,7 @@ public class EclipseStarter {
 		// If the result is a reference then search for the real result and 
 		// reconstruct the answer.
 		if (reference) {
-			String result = searchFor(fileLocation.getName(), fileLocation.getParentFile().getAbsolutePath());
+			String result = searchFor(fileLocation.getName(), new File(fileLocation.getParent()).getAbsolutePath());
 			if (result != null)
 				url = new URL("reference", null, "file:" + result);
 			else
@@ -797,29 +797,27 @@ public class EclipseStarter {
 	 * @param start the location to begin searching
 	 */
 	private static String searchFor(final String target, String start) {
-		FileFilter filter = new FileFilter() {
-			public boolean accept(File candidate) {
-				return candidate.isDirectory() && (candidate.getName().equals(target) || candidate.getName().startsWith(target + "_")); //$NON-NLS-1$
-			}
-		};
-		File[] candidates = new File(start).listFiles(filter); //$NON-NLS-1$
+		String[] candidates = new File(start).list();
 		if (candidates == null)
 			return null;
 		String result = null;
 		Object maxVersion = null;
 		for (int i = 0; i < candidates.length; i++) {
-			String name = candidates[i].getName();
+			File candidate = new File(start, candidates[i]);
+			if (!candidate.isDirectory() || (!candidate.getName().equals(target) && !candidate.getName().startsWith(target + "_")))
+				continue;
+			String name = candidate.getName();
 			String version = ""; //$NON-NLS-1$ // Note: directory with version suffix is always > than directory without version suffix
 			int index = name.indexOf('_');
 			if (index != -1)
 				version = name.substring(index + 1);
 			Object currentVersion = getVersionElements(version);
 			if (maxVersion == null) {
-				result = candidates[i].getAbsolutePath();
+				result = candidate.getAbsolutePath();
 				maxVersion = currentVersion;
 			} else {
 				if (compareVersion((Object[]) maxVersion, (Object[]) currentVersion) < 0) {
-					result = candidates[i].getAbsolutePath();
+					result = candidate.getAbsolutePath();
 					maxVersion = currentVersion;
 				}
 			}

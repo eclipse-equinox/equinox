@@ -97,7 +97,7 @@ public class BasicLocation implements Location {
 		if (lock == null || isReadOnly)
 			return false;
 
-		File parentFile = lock.getParentFile();
+		File parentFile = new File(lock.getParent());
 		if (!parentFile.exists())
 			if (!parentFile.mkdirs())
 				return false;
@@ -114,7 +114,7 @@ public class BasicLocation implements Location {
 
 		String lockMode = System.getProperties().getProperty(PROP_OSGI_LOCKING);
 		//	By default set the lock mode to 1.4
-		if (lockMode == null) { 
+		if (lockMode == null) {
 			if (isRunningWithNio()) {
 				locker = new Locker_JavaNio(lock);
 			} else {
@@ -122,15 +122,15 @@ public class BasicLocation implements Location {
 			}
 			return;
 		}
-		
+
 		if ("none".equals(lockMode)) //$NON-NLS-1$
 			return;
-		
+
 		if ("java.io".equals(lockMode)) { //$NON-NLS-1$
 			locker = new Locker_JavaIo(lock);
 			return;
 		}
-		
+
 		if ("java.nio".equals(lockMode)) { //$NON-NLS-1$
 			if (isRunningWithNio()) {
 				locker = new Locker_JavaNio(lock);
@@ -138,8 +138,8 @@ public class BasicLocation implements Location {
 				locker = new Locker_JavaIo(lock);
 			}
 			return;
-		} 
-		
+		}
+
 		//	Backup case if an invalid value has been specified
 		if (isRunningWithNio()) {
 			locker = new Locker_JavaNio(lock);
@@ -155,7 +155,7 @@ public class BasicLocation implements Location {
 
 	private boolean isRunningWithNio() {
 		try {
-			 Class.forName("java.nio.channels.FileLock"); //$NON-NLS-1$
+			Class.forName("java.nio.channels.FileLock"); //$NON-NLS-1$
 		} catch (ClassNotFoundException e) {
 			return false;
 		}

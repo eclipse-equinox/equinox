@@ -31,6 +31,15 @@ import org.osgi.framework.*;
 
 public class EclipseClassLoader extends DefaultClassLoader {
 	private static String[] NL_JAR_VARIANTS = buildNLJarVariants(System.getProperties().getProperty("osgi.nl")); //$NON-NLS-1$
+	private static boolean DEFINE_PACKAGES;
+	static {
+		try {
+			Class.forName("java.lang.Package"); //$NON-NLS-1$
+			DEFINE_PACKAGES = true;
+		} catch (ClassNotFoundException e) {
+			DEFINE_PACKAGES = false;
+		}
+	}
 
 	public EclipseClassLoader(ClassLoaderDelegate delegate, ProtectionDomain domain, String[] classpath, ClassLoader parent, BundleData bundleData) {
 		super(delegate, domain, classpath, parent, (org.eclipse.osgi.framework.internal.defaultadaptor.DefaultBundleData) bundleData);
@@ -148,6 +157,9 @@ public class EclipseClassLoader extends DefaultClassLoader {
 	 * Override defineClass to allow for package defining.
 	 */
 	protected Class defineClass(String name, byte[] classbytes, int off, int len, ClasspathEntry classpathEntry) throws ClassFormatError {
+		if (!DEFINE_PACKAGES)
+			super.defineClass(name, classbytes, off, len, classpathEntry);
+
 		// Define the package if it is not the default package.
 		int lastIndex = name.lastIndexOf('.');
 		if (lastIndex != -1) {

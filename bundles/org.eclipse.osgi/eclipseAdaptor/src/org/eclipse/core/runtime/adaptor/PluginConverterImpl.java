@@ -145,7 +145,7 @@ public class PluginConverterImpl implements PluginConverter {
 			manifestType |= EclipseBundleData.MANIFEST_TYPE_PLUGIN;
 			return xmlFileLocation;
 		} catch (MalformedURLException e) {
-			FrameworkLogEntry entry = new FrameworkLogEntry(EclipseAdaptor.FRAMEWORK_SYMBOLICNAME, e.getMessage(), 0, e.getCause(), null);
+			FrameworkLogEntry entry = new FrameworkLogEntry(EclipseAdaptor.FRAMEWORK_SYMBOLICNAME, e.getMessage(), 0, e, null);
 			EclipseAdaptor.getDefault().getFrameworkLog().log(entry);
 			return null;
 		} catch (IOException ioe) {
@@ -164,7 +164,7 @@ public class PluginConverterImpl implements PluginConverter {
 			manifestType |= EclipseBundleData.MANIFEST_TYPE_FRAGMENT;
 			return xmlFileLocation;
 		} catch (MalformedURLException e) {
-			FrameworkLogEntry entry = new FrameworkLogEntry(EclipseAdaptor.FRAMEWORK_SYMBOLICNAME, e.getMessage(), 0, e.getCause(), null);
+			FrameworkLogEntry entry = new FrameworkLogEntry(EclipseAdaptor.FRAMEWORK_SYMBOLICNAME, e.getMessage(), 0, e, null);
 			EclipseAdaptor.getDefault().getFrameworkLog().log(entry);
 			return null;
 		} catch (IOException ioe) {
@@ -209,7 +209,8 @@ public class PluginConverterImpl implements PluginConverter {
 
 	public void writeManifest(File generationLocation, Dictionary manifestToWrite, boolean compatibilityManifest) throws PluginConversionException {
 		try {
-			generationLocation.getParentFile().mkdirs();
+			File parentFile = new File(generationLocation.getParent());
+			parentFile.mkdirs();
 			generationLocation.createNewFile();
 			if (!generationLocation.isFile()) {
 				String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONVERTER_ERROR_CREATING_BUNDLE_MANIFEST", this.pluginInfo.getUniqueId(), generationLocation); //$NON-NLS-1$
@@ -434,14 +435,15 @@ public class PluginConverterImpl implements PluginConverter {
 
 	private Set getExportsFromDir(File location, String packageName) {
 		String prefix = (packageName.length() > 0) ? (packageName + '.') : ""; //$NON-NLS-1$
-		File[] files = location.listFiles();
+		String[] files = location.list();
 		Set exportedPaths = new HashSet();
 		boolean containsFile = false;
 		for (int i = 0; i < files.length; i++) {
-			if (!isValidPackageName(files[i].getName()))
+			if (!isValidPackageName(files[i]))
 				continue;
-			if (files[i].isDirectory())
-				exportedPaths.addAll(getExportsFromDir(files[i], prefix + files[i].getName()));
+			File pkgFile = new File(location, files[i]);
+			if (pkgFile.isDirectory())
+				exportedPaths.addAll(getExportsFromDir(pkgFile, prefix + files[i]));
 			else
 				containsFile = true;
 		}
@@ -493,7 +495,7 @@ public class PluginConverterImpl implements PluginConverter {
 			return returnValue;
 		}
 		if (var.equals("ws")) { //$NON-NLS-1$
-			return findWSJars(pluginManifestLocation.getParentFile(), libraryPath, filter);
+			return findWSJars(pluginManifestLocation, libraryPath, filter);
 		}
 		if (var.equals("os")) { //$NON-NLS-1$
 			return findOSJars(pluginManifestLocation, libraryPath, filter);
