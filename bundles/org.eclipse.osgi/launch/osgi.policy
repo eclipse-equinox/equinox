@@ -3,3 +3,7 @@
 grant codeBase "file:../bin/" {
         permission java.security.AllPermission;
 };
+
+grant codeBase "file:../../org.eclipse.osgi.jarverifier/bin/" {
+        permission java.security.AllPermission;
+};
