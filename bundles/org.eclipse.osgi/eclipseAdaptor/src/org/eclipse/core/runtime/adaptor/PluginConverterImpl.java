@@ -420,15 +420,13 @@ public class PluginConverterImpl implements PluginConverter {
 				continue;
 			String libEntryText = ((String) element.getKey()).trim();
 			File libraryLocation;
-			if (devProperties != null || DevClassPathHelper.inDevelopmentMode()) {
+			if (libEntryText.equals(".")) //$NON-NLS-1$
+				libraryLocation = pluginManifestLocation;
+			else {
 				// in development time, libEntries may contain absolute locations (linked folders)				
 				File libEntryAsPath = new File(libEntryText);
 				libraryLocation = libEntryAsPath.isAbsolute() ? libEntryAsPath : new File(pluginManifestLocation, libEntryText);
-			} else
-				if (!libEntryText.equals(".")) //$NON-NLS-1$
-					libraryLocation = new File(pluginManifestLocation, libEntryText);
-				else
-					libraryLocation = pluginManifestLocation;
+			}
 			Set exports = null;
 			if (libraryLocation.exists()) {
 				if (libraryLocation.isFile())
