@@ -357,4 +357,12 @@ public class StateImpl implements State {
 	void setFactory(StateObjectFactory factory) {
 		this.factory = factory;
 	}
+	public BundleDescription getBundleByLocation(String location) {
+		for (Iterator i = bundleDescriptions.iterator(); i.hasNext();) {
+			BundleDescription current = (BundleDescription) i.next();
+			if (location.equals(current.getLocation()))
+				return current;
+		}
+		return null;
+	}
 }

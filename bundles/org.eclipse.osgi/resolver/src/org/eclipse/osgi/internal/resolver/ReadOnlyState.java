@@ -24,28 +24,12 @@ public class ReadOnlyState implements State {
 		throw new UnsupportedOperationException();
 	}
 
-	public boolean updateBundle(BundleDescription newDescription) {
-		throw new UnsupportedOperationException();
-	}
-
-	public BundleDescription removeBundle(long bundleId) {
-		throw new UnsupportedOperationException();
-	}
-
-	public boolean removeBundle(BundleDescription bundle) {
+	public void addStateChangeListener(StateChangeListener listener, int flags) {
 		throw new UnsupportedOperationException();
 	}
 
 	public StateDelta compare(State state) throws BundleException {
 		return target.compare(state);
-	}
-
-	public StateDelta getChanges() {
-		return target.getChanges();
-	}
-
-	public BundleDescription[] getBundles() {
-		return target.getBundles();
 	}
 
 	public BundleDescription getBundle(long id) {
@@ -56,51 +40,55 @@ public class ReadOnlyState implements State {
 		return target.getBundle(symbolicName, version);
 	}
 
-	public long getTimeStamp() {
-		return target.getTimeStamp();
+	public BundleDescription getBundleByLocation(String location) {
+		return target.getBundleByLocation(location);
 	}
 
-	public boolean isResolved() {
-		return target.isResolved();
+	public BundleDescription[] getBundles() {
+		return target.getBundles();
 	}
 
-	public void resolveConstraint(VersionConstraint constraint, Version actualVersion, BundleDescription supplier) {
-		throw new UnsupportedOperationException();
+	public BundleDescription[] getBundles(String symbolicName) {
+		return target.getBundles(symbolicName);
 	}
 
-	public void resolveBundle(BundleDescription bundle, int status) {
-		throw new UnsupportedOperationException();
+	public StateDelta getChanges() {
+		return target.getChanges();
 	}
 
-	public Resolver getResolver() {
-		return null;
+	public PackageSpecification[] getExportedPackages() {
+		return target.getExportedPackages();
 	}
 
-	public void setResolver(Resolver value) {
-		throw new UnsupportedOperationException();
-	}
-
-	public StateDelta resolve(boolean incremental) {
-		throw new UnsupportedOperationException();
-	}
-
-	public StateDelta resolve() {
-		throw new UnsupportedOperationException();
-	}
-
-	public StateDelta resolve(BundleDescription[] discard) {
-		throw new UnsupportedOperationException();
-	}
-
-	public void setOverrides(Object value) {
-		throw new UnsupportedOperationException();
+	public StateObjectFactory getFactory() {
+		return target.getFactory();
 	}
 
 	public BundleDescription[] getResolvedBundles() {
 		return target.getResolvedBundles();
 	}
 
-	public void addStateChangeListener(StateChangeListener listener, int flags) {
+	public Resolver getResolver() {
+		return null;
+	}
+
+	public long getTimeStamp() {
+		return target.getTimeStamp();
+	}
+
+	public boolean isEmpty() {
+		return target.isEmpty();
+	}
+
+	public boolean isResolved() {
+		return target.isResolved();
+	}
+
+	public boolean removeBundle(BundleDescription bundle) {
+		throw new UnsupportedOperationException();
+	}
+
+	public BundleDescription removeBundle(long bundleId) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -108,19 +96,35 @@ public class ReadOnlyState implements State {
 		throw new UnsupportedOperationException();
 	}
 
-	public boolean isEmpty() {
-		return target.isEmpty();
+	public StateDelta resolve() {
+		throw new UnsupportedOperationException();
 	}
 
-	public PackageSpecification[] getExportedPackages() {
-		return target.getExportedPackages();
+	public StateDelta resolve(boolean incremental) {
+		throw new UnsupportedOperationException();
 	}
 
-	public BundleDescription[] getBundles(String symbolicName) {
-		return target.getBundles(symbolicName);
+	public StateDelta resolve(BundleDescription[] discard) {
+		throw new UnsupportedOperationException();
 	}
 
-	public StateObjectFactory getFactory() {
-		return target.getFactory();
+	public void resolveBundle(BundleDescription bundle, int status) {
+		throw new UnsupportedOperationException();
+	}
+
+	public void resolveConstraint(VersionConstraint constraint, Version actualVersion, BundleDescription supplier) {
+		throw new UnsupportedOperationException();
+	}
+
+	public void setOverrides(Object value) {
+		throw new UnsupportedOperationException();
+	}
+
+	public void setResolver(Resolver value) {
+		throw new UnsupportedOperationException();
+	}
+
+	public boolean updateBundle(BundleDescription newDescription) {
+		throw new UnsupportedOperationException();
 	}
 }

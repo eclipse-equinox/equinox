@@ -209,6 +209,7 @@ public class BundleDescriptionImpl implements BundleDescription, KeyedElement {
 		if (!(object instanceof BundleDescription))
 			return false;
 		BundleDescription other = (BundleDescription) object;
+		//TODO: couldn't this just be location.equals(other.getLocation())?		
 		return this.bundleId == other.getBundleId() && (this.symbolicName == null & other.getSymbolicName() == null || this.symbolicName != null && this.symbolicName.equals(other.getSymbolicName()));
 	}
 }

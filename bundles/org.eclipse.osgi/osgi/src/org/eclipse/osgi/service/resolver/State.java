@@ -103,6 +103,15 @@ public interface State {
 	 * @return the descriptor for the identified bundle
 	 */
 	public BundleDescription getBundle(String symbolicName, Version version);
+	
+	/**
+	 * Returns the bundle descriptor for the bundle with the given location
+	 * identifier. null is returned if no such bundle is found in this state. 
+	 * 
+	 * @param location location identifier of the bundle to query
+	 * @return the descriptor for the identified bundle
+	 */
+	public BundleDescription getBundleByLocation(String location);
 
 	/**
 	 * Returns the id of the state on which this state is based. This
