@@ -36,7 +36,7 @@ public class AutomatedTests extends TestCase {
 		TestSuite suite = new TestSuite(AutomatedTests.class.getName());
 //		suite.addTest(new TestSuite(SimpleTests.class));
 		suite.addTest(new TestSuite(InstallTests.class));
-		suite.addTest(org.eclipse.osgi.tests.internal.state.AllTests.suite());
+		suite.addTest(org.eclipse.osgi.tests.services.resolver.AllTests.suite());
 		return suite;
 	}
 }

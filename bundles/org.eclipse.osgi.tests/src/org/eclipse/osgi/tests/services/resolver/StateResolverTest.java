@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.osgi.tests.internal.state;
+package org.eclipse.osgi.tests.services.resolver;
 
 import java.util.*;
 import junit.framework.Test;
@@ -260,17 +260,17 @@ public class StateResolverTest extends AbstractStateTest {
 		state.addBundle(b2);
 		StateDelta delta = state.resolve();
 		assertTrue("1.1", contains(state.getResolvedBundles(), b1));
-		assertTrue("1.2", contains(state.getResolvedBundles(), b2));		
+		assertTrue("1.2", contains(state.getResolvedBundles(), b2));
 		BundleDelta[] changes = delta.getChanges();
 		assertEquals("1.3", 2, changes.length);
 		assertEquals("1.4 - " + changes[0].getBundle(), (BundleDelta.ADDED | BundleDelta.RESOLVED), changes[0].getType());
-		assertEquals("1.5 - " + changes[1].getBundle(), (BundleDelta.ADDED | BundleDelta.RESOLVED), changes[1].getType());		
+		assertEquals("1.5 - " + changes[1].getBundle(), (BundleDelta.ADDED | BundleDelta.RESOLVED), changes[1].getType());
 		assertFullyResolved("1.6", b1);
 		assertFullyResolved("1.7", b2);
 		// remove a resolved bundle
 		state.removeBundle(b1);
 		assertTrue("2.0", !contains(state.getResolvedBundles(), b1));
-		assertTrue("2.1", contains(state.getResolvedBundles(), b2));		
+		assertTrue("2.1", contains(state.getResolvedBundles(), b2));
 		delta = state.resolve();
 		changes = delta.getChanges();
 		assertEquals("2.2", 1, changes.length);
@@ -445,7 +445,7 @@ public class StateResolverTest extends AbstractStateTest {
 		State state = buildEmptyState();
 		String B1_LOCATION = "org.eclipse.b";
 		final String B1_RESOLVED = "Bundle-SymbolicName: org.eclipse.b1\n" + "Bundle-Version: 1.0\n";
-		final String B1_UNRESOLVED = "Bundle-SymbolicName: org.eclipse.b1\n" + "Bundle-Version: 2.0\nRequire-Bundle: non.existant.bundle\n";		
+		final String B1_UNRESOLVED = "Bundle-SymbolicName: org.eclipse.b1\n" + "Bundle-Version: 2.0\nRequire-Bundle: non.existant.bundle\n";
 		BundleDescription b1 = state.getFactory().createBundleDescription(parseManifest(B1_RESOLVED), B1_LOCATION, 1);
 		assertTrue("0.9", state.addBundle(b1));
 		StateDelta delta = state.resolve();
@@ -455,26 +455,26 @@ public class StateResolverTest extends AbstractStateTest {
 		assertEquals("1.1", b1, changes[0].getBundle());
 		assertEquals("1.2", (BundleDelta.ADDED | BundleDelta.RESOLVED), changes[0].getType());
 		assertFullyResolved("1.3", b1);
-		assertTrue("1.8", contains(state.getResolvedBundles(), b1));		
-		b1 = state.getFactory().createBundleDescription(parseManifest(B1_UNRESOLVED), B1_LOCATION, 1); 
+		assertTrue("1.8", contains(state.getResolvedBundles(), b1));
+		b1 = state.getFactory().createBundleDescription(parseManifest(B1_UNRESOLVED), B1_LOCATION, 1);
 		assertTrue("1.8b", state.updateBundle(b1));
-		b1 = state.getBundleByLocation(b1.getLocation());		
-		assertTrue("1.9", !contains(state.getResolvedBundles(), b1));		
+		b1 = state.getBundleByLocation(b1.getLocation());
+		assertTrue("1.9", !contains(state.getResolvedBundles(), b1));
 		delta = state.resolve();
 		changes = delta.getChanges();
 		assertEquals("2.0", 1, changes.length);
 		assertEquals("2.1", b1, changes[0].getBundle());
 		assertEquals("2.2", BundleDelta.UPDATED | BundleDelta.UNRESOLVED, changes[0].getType());
-		b1 = state.getFactory().createBundleDescription(parseManifest(B1_RESOLVED), B1_LOCATION, 1); 
+		b1 = state.getFactory().createBundleDescription(parseManifest(B1_RESOLVED), B1_LOCATION, 1);
 		assertTrue("2.3", state.updateBundle(b1));
 		b1 = state.getBundleByLocation(b1.getLocation());
-		assertTrue("2.9", !contains(state.getResolvedBundles(), b1));		
+		assertTrue("2.9", !contains(state.getResolvedBundles(), b1));
 		delta = state.resolve();
 		changes = delta.getChanges();
 		assertEquals("3.0", 1, changes.length);
 		assertEquals("3.1", b1, changes[0].getBundle());
 		assertEquals("3.2", BundleDelta.UPDATED | BundleDelta.RESOLVED, changes[0].getType());
-		assertFullyResolved("3.3", b1);		
+		assertFullyResolved("3.3", b1);
 	}
 
 	private boolean contains(Object[] array, Object element) {

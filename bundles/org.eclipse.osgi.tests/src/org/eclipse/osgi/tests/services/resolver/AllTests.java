@@ -8,23 +8,16 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.osgi.tests.internal.state;
+package org.eclipse.osgi.tests.services.resolver;
 
 import junit.framework.*;
 
 public class AllTests extends TestCase {
-	/**
-	 * AllTests constructor comment.
-	 * @param name java.lang.String
-	 */
+
 	public AllTests() {
 		super(null);
 	}
 
-	/**
-	 * AllTests constructor comment.
-	 * @param name java.lang.String
-	 */
 	public AllTests(String name) {
 		super(name);
 	}
@@ -33,8 +26,9 @@ public class AllTests extends TestCase {
 		TestSuite suite = new TestSuite(AllTests.class.getName());
 		suite.addTest(PlatformAdminTest.suite());
 		suite.addTest(StateResolverTest.suite());
-		suite.addTest(StateCycleTest.suite());		
+		suite.addTest(StateCycleTest.suite());
 		suite.addTest(StateComparisonTest.suite());
+		suite.addTest(VersionRangeTests.suite());
 		return suite;
 	}
 }

@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.osgi.tests.internal.state;
+package org.eclipse.osgi.tests.services.resolver;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -64,7 +64,7 @@ public class StateComparisonTest extends AbstractStateTest {
 		assertEquals("3.2", bundle1, addition.getBundle());
 		assertEquals("3.3", BundleDelta.ADDED, addition.getType());
 	}
-	
+
 	public void testUpdate() throws BundleException {
 		State state1 = buildSimpleState();
 		State state2 = state1.getFactory().createState(state1);
@@ -84,7 +84,6 @@ public class StateComparisonTest extends AbstractStateTest {
 		delta = state2.compare(state1);
 		assertEquals("3.1", 0, delta.getChanges().length);
 	}
-	
 
 	public static Test suite() {
 		return new TestSuite(StateComparisonTest.class);

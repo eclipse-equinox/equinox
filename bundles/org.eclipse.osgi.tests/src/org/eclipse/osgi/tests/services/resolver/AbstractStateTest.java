@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.osgi.tests.internal.state;
+package org.eclipse.osgi.tests.services.resolver;
 
 import java.util.*;
 import org.eclipse.core.runtime.adaptor.testsupport.SimplePlatformAdmin;

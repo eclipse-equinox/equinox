@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.osgi.tests.internal.state;
+package org.eclipse.osgi.tests.services.resolver;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -102,17 +102,18 @@ public class StateCycleTest extends AbstractStateTest {
 		assertTrue("6.0", bundleF.isResolved());
 
 	}
+
 	public void testCycle3() throws BundleException {
 		State state = buildEmptyState();
 		String A_MANIFEST = "Bundle-SymbolicName: org.eclipse.a\nBundle-Version: 1.0\n";
-		state.addBundle(state.getFactory().createBundleDescription(parseManifest(A_MANIFEST), "org.eclipse.a", 1));		
+		state.addBundle(state.getFactory().createBundleDescription(parseManifest(A_MANIFEST), "org.eclipse.a", 1));
 		String B_MANIFEST = "Bundle-SymbolicName: org.eclipse.b\nBundle-Version: 1.0\nRequire-Bundle: org.eclipse.c\n";
 		state.addBundle(state.getFactory().createBundleDescription(parseManifest(B_MANIFEST), "org.eclipse.b", 2));
 		String C_MANIFEST = "Bundle-SymbolicName: org.eclipse.c\nBundle-Version: 1.0\nRequire-Bundle: org.eclipse.d\n";
 		state.addBundle(state.getFactory().createBundleDescription(parseManifest(C_MANIFEST), "org.eclipse.c", 3));
 		String D_MANIFEST = "Bundle-SymbolicName: org.eclipse.d\nBundle-Version: 1.0\nRequire-Bundle: org.eclipse.b\n";
-		state.addBundle(state.getFactory().createBundleDescription(parseManifest(D_MANIFEST), "org.eclipse.d", 4));	
-		
+		state.addBundle(state.getFactory().createBundleDescription(parseManifest(D_MANIFEST), "org.eclipse.d", 4));
+
 		state.resolve();
 		BundleDescription bundleC = state.getBundleByLocation("org.eclipse.c");
 		BundleDescription bundleB = state.getBundleByLocation("org.eclipse.b");
@@ -122,25 +123,25 @@ public class StateCycleTest extends AbstractStateTest {
 		assertContains("0.5", allBundles, bundleC);
 		assertContains("0.6", allBundles, bundleB);
 		assertContains("0.7", allBundles, bundleA);
-		assertContains("0.8", allBundles, bundleD);		
+		assertContains("0.8", allBundles, bundleD);
 
 		assertTrue("0.9", bundleA.isResolved());
 		assertTrue("1.0", !bundleC.isResolved());
 		assertTrue("2.0", !bundleB.isResolved());
-		assertTrue("3.0", !bundleD.isResolved());		
+		assertTrue("3.0", !bundleD.isResolved());
 	}
-	
+
 	public void testCycle4() throws BundleException {
 		State state = buildEmptyState();
 		String A_MANIFEST = "Bundle-SymbolicName: org.eclipse.a\nBundle-Version: 1.0\n";
-		state.addBundle(state.getFactory().createBundleDescription(parseManifest(A_MANIFEST), "org.eclipse.a", 1));		
+		state.addBundle(state.getFactory().createBundleDescription(parseManifest(A_MANIFEST), "org.eclipse.a", 1));
 		String B_MANIFEST = "Bundle-SymbolicName: org.eclipse.b\nBundle-Version: 1.0\nRequire-Bundle: org.eclipse.c\n";
 		state.addBundle(state.getFactory().createBundleDescription(parseManifest(B_MANIFEST), "org.eclipse.b", 2));
 		String C_MANIFEST = "Bundle-SymbolicName: org.eclipse.c\nBundle-Version: 1.0\nRequire-Bundle: org.eclipse.d\n";
 		state.addBundle(state.getFactory().createBundleDescription(parseManifest(C_MANIFEST), "org.eclipse.c", 3));
 		String D_MANIFEST = "Bundle-SymbolicName: org.eclipse.d\nBundle-Version: 1.0\nRequire-Bundle: org.eclipse.b; optional=true\n";
-		state.addBundle(state.getFactory().createBundleDescription(parseManifest(D_MANIFEST), "org.eclipse.d", 4));	
-		
+		state.addBundle(state.getFactory().createBundleDescription(parseManifest(D_MANIFEST), "org.eclipse.d", 4));
+
 		state.resolve();
 		BundleDescription bundleC = state.getBundleByLocation("org.eclipse.c");
 		BundleDescription bundleB = state.getBundleByLocation("org.eclipse.b");
@@ -150,13 +151,12 @@ public class StateCycleTest extends AbstractStateTest {
 		assertContains("0.5", allBundles, bundleC);
 		assertContains("0.6", allBundles, bundleB);
 		assertContains("0.7", allBundles, bundleA);
-		assertContains("0.8", allBundles, bundleD);		
+		assertContains("0.8", allBundles, bundleD);
 
 		assertTrue("0.9", bundleA.isResolved());
 		assertTrue("1.0", !bundleC.isResolved());
 		assertTrue("2.0", !bundleB.isResolved());
-		assertTrue("3.0", !bundleD.isResolved());		
+		assertTrue("3.0", !bundleD.isResolved());
 	}
-	
-	
+
 }
