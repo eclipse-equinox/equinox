@@ -128,13 +128,13 @@ public class ManifestElement {
 	public String getAttribute(String key) {
 		if (attributes == null)
 			return null;
-		Object value = attributes.get(key);
-		if (value == null)
+		Object result = attributes.get(key);
+		if (result == null)
 			return null;
-		if (value instanceof String)
-			return (String) value;
+		if (result instanceof String)
+			return (String) result;
 
-		ArrayList valueList = (ArrayList) value;
+		ArrayList valueList = (ArrayList) result;
 		//return the last attribute value
 		return (String) valueList.get(valueList.size() - 1);
 	}
@@ -147,13 +147,13 @@ public class ManifestElement {
 	public String[] getAttributes(String key) {
 		if (attributes == null)
 			return null;
-		Object value = attributes.get(key);
-		if (value == null)
+		Object result = attributes.get(key);
+		if (result == null)
 			return null;
-		if (value instanceof String)
-			return new String[] {(String) value};
+		if (result instanceof String)
+			return new String[] {(String) result};
 
-		ArrayList valueList = (ArrayList) value;
+		ArrayList valueList = (ArrayList) result;
 		return (String[]) valueList.toArray(new String[valueList.size()]);
 	}
 
@@ -215,9 +215,9 @@ public class ManifestElement {
 		Tokenizer tokenizer = new Tokenizer(value);
 
 		parseloop: while (true) {
-			String next = tokenizer.getToken(";,");
+			String next = tokenizer.getToken(";,"); //$NON-NLS-1$
 			if (next == null) {
-				throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_HEADER_EXCEPTION", header, value));
+				throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_HEADER_EXCEPTION", header, value)); //$NON-NLS-1$
 			}
 
 			ArrayList headerValues = new ArrayList();
@@ -225,26 +225,26 @@ public class ManifestElement {
 			headerValues.add(next);
 
 			if (Debug.DEBUG && Debug.DEBUG_MANIFEST) {
-				Debug.print("paserHeader: " + next);
+				Debug.print("paserHeader: " + next); //$NON-NLS-1$
 			}
 
 			char c = tokenizer.getChar();
 
 			// Header values may be a list of ';' separated values.  Just append them all into one value until the first '=' or ','
 			while (c == ';') {
-				next = tokenizer.getToken(";,=");
+				next = tokenizer.getToken(";,="); //$NON-NLS-1$
 				if (next == null) {
-					throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_HEADER_EXCEPTION", header, value));
+					throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_HEADER_EXCEPTION", header, value)); //$NON-NLS-1$
 				}
 
 				c = tokenizer.getChar();
 
 				if (c == ';') /* more */{
 					headerValues.add(next);
-					headerValue.append(";").append(next);
+					headerValue.append(";").append(next); //$NON-NLS-1$
 
 					if (Debug.DEBUG && Debug.DEBUG_MANIFEST) {
-						Debug.print(";" + next);
+						Debug.print(";" + next); //$NON-NLS-1$
 					}
 				}
 			}
@@ -256,27 +256,27 @@ public class ManifestElement {
 
 			// now add any attributes for the manifestElement.
 			while (c == '=') {
-				String val = tokenizer.getString(";,");
+				String val = tokenizer.getString(";,"); //$NON-NLS-1$
 				if (val == null) {
-					throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_HEADER_EXCEPTION", header, value));
+					throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_HEADER_EXCEPTION", header, value)); //$NON-NLS-1$
 				}
 
 				if (Debug.DEBUG && Debug.DEBUG_MANIFEST) {
-					Debug.print(";" + next + "=" + val);
+					Debug.print(";" + next + "=" + val); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 				try {
 					manifestElement.addAttribute(next, val);
 				} catch (Exception e) {
-					throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_HEADER_EXCEPTION", header, value), e);
+					throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_HEADER_EXCEPTION", header, value), e); //$NON-NLS-1$
 				}
 
 				c = tokenizer.getChar();
 
 				if (c == ';') /* more */{
-					next = tokenizer.getToken("=");
+					next = tokenizer.getToken("="); //$NON-NLS-1$
 
 					if (next == null) {
-						throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_HEADER_EXCEPTION", header, value));
+						throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_HEADER_EXCEPTION", header, value)); //$NON-NLS-1$
 					}
 
 					c = tokenizer.getChar();
@@ -286,7 +286,7 @@ public class ManifestElement {
 			headerElements.addElement(manifestElement);
 
 			if (Debug.DEBUG && Debug.DEBUG_MANIFEST) {
-				Debug.println("");
+				Debug.println(""); //$NON-NLS-1$
 			}
 
 			if (c == ',') /* another manifest element */{
@@ -297,7 +297,7 @@ public class ManifestElement {
 				break parseloop;
 			}
 
-			throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_HEADER_EXCEPTION", header, value));
+			throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_HEADER_EXCEPTION", header, value)); //$NON-NLS-1$
 		}
 
 		int size = headerElements.size();

@@ -73,7 +73,7 @@ public class Headers extends Dictionary {
 
 				if (headers.put(header, key) != null) /* if case-variant already present */
 				{
-					throw new IllegalArgumentException(Msg.formatter.getString("HEADER_DUPLICATE_KEY_EXCEPTION", header));
+					throw new IllegalArgumentException(Msg.formatter.getString("HEADER_DUPLICATE_KEY_EXCEPTION", header)); //$NON-NLS-1$
 				}
 			}
 		}
@@ -152,7 +152,7 @@ public class Headers extends Dictionary {
 				{
 					headers.put(header, oldKey); /* put old case-variant back */
 
-					throw new IllegalArgumentException(Msg.formatter.getString("HEADER_DUPLICATE_KEY_EXCEPTION", header));
+					throw new IllegalArgumentException(Msg.formatter.getString("HEADER_DUPLICATE_KEY_EXCEPTION", header)); //$NON-NLS-1$
 				}
 
 			}
@@ -213,7 +213,7 @@ public class Headers extends Dictionary {
 			Headers headers = new Headers(10);
 			BufferedReader br;
 			try {
-				br = new BufferedReader(new InputStreamReader(in, "UTF8"));
+				br = new BufferedReader(new InputStreamReader(in, "UTF8")); //$NON-NLS-1$
 			} catch (UnsupportedEncodingException e) {
 				br = new BufferedReader(new InputStreamReader(in));
 			}
@@ -244,7 +244,7 @@ public class Headers extends Dictionary {
 				{
 					if (firstLine) /* if no previous line */
 					{
-						throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_SPACE", line));
+						throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_SPACE", line)); //$NON-NLS-1$
 					}
 					value.append(line.substring(1));
 					continue;
@@ -259,7 +259,7 @@ public class Headers extends Dictionary {
 				int colon = line.indexOf(':');
 				if (colon == -1) /* no colon */
 				{
-					throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_LINE_NOCOLON", line));
+					throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_LINE_NOCOLON", line)); //$NON-NLS-1$
 				}
 				header = line.substring(0, colon).trim();
 				value.append(line.substring(colon + 1));
@@ -267,7 +267,7 @@ public class Headers extends Dictionary {
 			}
 			return headers;
 		} catch (IOException e) {
-			throw new BundleException(Msg.formatter.getString("MANIFEST_IOEXCEPTION"), e);
+			throw new BundleException(Msg.formatter.getString("MANIFEST_IOEXCEPTION"), e); //$NON-NLS-1$
 		} finally {
 			try {
 				in.close();
