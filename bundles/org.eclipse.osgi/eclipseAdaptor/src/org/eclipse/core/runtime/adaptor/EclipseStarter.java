@@ -184,7 +184,7 @@ public class EclipseStarter {
 				} else 
 					ignored.addElement(name);			
 			} catch (Exception ex) {
-				System.err.println("Ignoring osgi.bundles element " + name);
+				System.err.println("Can not install/find the " + name);
 				ex.printStackTrace();
 				ignored.addElement(name);
 				return null;
