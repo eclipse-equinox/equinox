@@ -244,7 +244,7 @@ public class Headers extends Dictionary {
 				{
 					if (firstLine) /* if no previous line */
 					{
-						throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_LINE_EXCEPTION", line));
+						throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_SPACE", line));
 					}
 					value.append(line.substring(1));
 					continue;
@@ -259,7 +259,7 @@ public class Headers extends Dictionary {
 				int colon = line.indexOf(':');
 				if (colon == -1) /* no colon */
 				{
-					throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_LINE_EXCEPTION", line));
+					throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_LINE_NOCOLON", line));
 				}
 				header = line.substring(0, colon).trim();
 				value.append(line.substring(colon + 1));
@@ -267,7 +267,7 @@ public class Headers extends Dictionary {
 			}
 			return headers;
 		} catch (IOException e) {
-			throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_LINE_EXCEPTION", ""), e);
+			throw new BundleException(Msg.formatter.getString("MANIFEST_IOEXCEPTION"), e);
 		} finally {
 			try {
 				in.close();

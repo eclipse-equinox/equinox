@@ -1189,19 +1189,17 @@ public class BundleLoader implements ClassLoaderDelegate {
 				}
 			} catch (InvalidSyntaxException e) {
 				bundle.framework.publishFrameworkEvent(FrameworkEvent.ERROR, bundle, e);
-			} catch (BundleException ex) {
-				bundle.framework.publishFrameworkEvent(FrameworkEvent.ERROR, bundle, ex);
 			}
 		}
 		return (String[]) result.toArray(new String[result.size()]);
 	}
 
-	protected FilterImpl createFilter(String filterString) throws InvalidSyntaxException, BundleException {
+	protected FilterImpl createFilter(String filterString) throws InvalidSyntaxException {
 		if (filterString == null)
 			return null;
 		int length = filterString.length();
 		if (length <= 2) {
-			throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_HEADER_EXCEPTION", Constants.BUNDLE_CLASSPATH, filterString));
+			throw new InvalidSyntaxException(Msg.formatter.getString("FILTER_INVALID"), filterString); //$NON-NLS-1$
 		}
 		return new FilterImpl(filterString);
 	}
