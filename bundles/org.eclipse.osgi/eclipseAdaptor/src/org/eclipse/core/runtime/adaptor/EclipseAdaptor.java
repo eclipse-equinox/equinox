@@ -96,6 +96,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 			//delete the metadata file and the framework file when the location of the basic bundles has changed 
 			getMetaDataLocation().delete();
 			getMetaDataFile().delete();
+			stateManager.getStateLocation().delete();
 			installURL = EclipseStarter.getSysPath();
 		}
 	}
