@@ -1,5 +1,5 @@
 /*
- * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/BundlePermission.java,v 1.2 2004/03/10 20:13:14 twatson Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/BundlePermission.java,v 1.3 2004/04/20 17:35:59 twatson Exp $
  *
  * Copyright (c) The Open Services Gateway Initiative (2000, 2002).
  * All Rights Reserved.
@@ -38,13 +38,13 @@ import java.security.PermissionCollection;
 /**
  * A bundle's authority to require or provide or specify a host bundle.
  *
- * <p>A bundle unique ID is a dot-separated string that defines a fully qualified name.
+ * <p>A bundle symbolic name defines a unique fully qualified name.
  * <p>For example:
  * <pre>
- * <tt>org.osgi.service.http</tt>
+ * <tt>org.osgi.example.bundle</tt>
  * </pre>
- * <p><tt>BundlePermission</tt> has three actions: <tt>PROVIDE_BUNDLE</tt>, <tt>REQUIRE_BUNDLE</tt> and
- * <tt>FRAGMENT_HOST</tt>.
+ * <p><tt>BundlePermission</tt> has four actions: <tt>PROVIDE_BUNDLE</tt>, <tt>REQUIRE_BUNDLE</tt>, 
+ * <tt>FRAGMENT_HOST</tt>, and <tt>FRAGMENT_BUNDLE</tt>.
  * The <tt>PROVIDE_BUNDLE</tt> action implies the <tt>REQUIRE_BUNDLE</tt> action.
  *
  * @author Open Services Gateway Initiative
@@ -115,12 +115,12 @@ public final class BundlePermission extends BasicPermission
     /**
      * Bundle private constructor used by BundlePermissionCollection.
      *
-     * @param uniqueId class name
-     * @param action mask
+     * @param symbolicName the bundle symbolic name
+     * @param mask the action mask
      */
-    BundlePermission(String uniqueId, int mask)
+    BundlePermission(String symbolicName, int mask)
     {
-        super(uniqueId);
+        super(symbolicName);
         init(mask);
     }
 
@@ -296,15 +296,15 @@ public final class BundlePermission extends BasicPermission
     /**
      * Determines if the specified permission is implied by this object.
      *
-     * <p>This method checks that the unique ID of the target is implied by the unique ID
+     * <p>This method checks that the symbolic name of the target is implied by the symbolic name
      * of this object. The list of <tt>BundlePermission</tt> actions must either match or allow
      * for the list of the target object to imply the target <tt>BundlePermission</tt> action.
-     * <p>The permission to provide a bundle implies the permission to require the named unique ID.
+     * <p>The permission to provide a bundle implies the permission to require the named symbolic name.
      * <pre>
-     * x.y.*,"provide" -> x.y.z,"provice" is true
+     * x.y.*,"provide" -> x.y.z,"provide" is true
      * *,"require" -> x.y, "require"      is true
      * *,"provide" -> x.y, "require"      is true
-     * x.y,"provide" -> x.y.z, "provice"  is false
+     * x.y,"provide" -> x.y.z, "provide"  is false
      * </pre>
      *
      * @param p The target permission to interrogate.
@@ -385,12 +385,12 @@ public final class BundlePermission extends BasicPermission
     /**
      * Determines the equality of two <tt>BundlePermission</tt> objects.
      *
-     * This method checks that specified bundle has the same bundle unique ID
+     * This method checks that specified bundle has the same bundle symbolic name
      * and <tt>BundlePermission</tt> actions as this <tt>BundlePermission</tt> object.
      *
      * @param obj The object to test for equality with this <tt>BundlePermission</tt> object.
      * @return <tt>true</tt> if <tt>obj</tt> is a <tt>BundlePermission</tt>, and has the
-     * same bundle unique ID and actions as this <tt>BundlePermission</tt> object; <tt>false</tt> otherwise.
+     * same bundle symbolic name and actions as this <tt>BundlePermission</tt> object; <tt>false</tt> otherwise.
      */
     public boolean equals(Object obj)
     {
@@ -499,7 +499,7 @@ final class BundlePermissionCollection extends PermissionCollection
 
     /**
      * Adds a permission to the <tt>BundlePermission</tt> objects. The key for the hash is
-     * the unique ID.
+     * the symbolic name.
      *
      * @param permission The <tt>BundlePermission</tt> object to add.
      *

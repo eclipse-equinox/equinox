@@ -1,5 +1,5 @@
 /*
- * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/Bundle.java,v 1.7 2004/04/20 01:23:45 jeff Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/Bundle.java,v 1.8 2004/04/20 17:35:59 twatson Exp $
  *
  * Copyright (c) The Open Services Gateway Initiative (2000-2001).
  * All Rights Reserved.
@@ -66,7 +66,7 @@ import java.util.*;
  * create <tt>Bundle</tt> objects, and these objects are only valid
  * within the Framework that created them.
  *
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  * @author Open Services Gateway Initiative
  */
 public abstract interface Bundle
@@ -635,6 +635,8 @@ public abstract interface Bundle
 	 * bundle’s symbolic name.  If the bundle does not have a specified 
 	 * symbolic name then null is returned. 
 	 * 
+     * <p>This method will continue to return this bundle's symbolic name
+     * while this bundle is in the <tt>UNINSTALLED</tt> state.
 	 * @return The symbolic name of this bundle.
 	 * @since <b>1.4 EXPERIMENTAL</b>
 	 */
@@ -656,9 +658,10 @@ public abstract interface Bundle
      * 
 	 * @param classname name of the class to find.
 	 * @return the loaded Class.
-	 * @throws ClassNotFoundException if no such class can be found or 
+	 * @exception ClassNotFoundException if no such class can be found or 
 	 * if the caller does not have the <tt>AdminPermission</tt>, and the Java 
 	 * Runtime Environment supports permissions.
+	 * @exception java.lang.IllegalStateException If this bundle has been uninstalled.
 	 * @since <b>1.4 EXPERIMENTAL</b>
 	 */
 	public Class loadClass(String classname) throws ClassNotFoundException;
@@ -671,14 +674,15 @@ public abstract interface Bundle
 	 * have a leading ’/’. The supplied named entry "/" indicates the root of 
 	 * the bundle itself.
 	 * <p> 
-	 * This method returns an empty enumeration if no entries could not be 
-	 * found matching the specified path or if the caller does not have 
+	 * This method returns an empty enumeration if no entries could be 
+	 * found that match the specified path or if the caller does not have 
 	 * the AdminPermission or BundlePermission[READ, <target bundle symbolic name>], 
 	 * and the Java Runtime Environment supports permissions.
 	 * </p>
 	 * @param path the path name to get the entry path names for.
 	 * @return An Enumeration of the entry paths that are contained in the 
 	 * 		specified path.
+	 * @exception java.lang.IllegalStateException If this bundle has been uninstalled.
 	 * @since <b>1.4 EXPERIMENTAL</b>
 	 */
 	public Enumeration getEntryPaths(java.lang.String path);

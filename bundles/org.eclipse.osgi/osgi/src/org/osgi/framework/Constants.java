@@ -1,5 +1,5 @@
 /*
- * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/Constants.java,v 1.12 2004/04/16 17:56:53 twatson Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/Constants.java,v 1.13 2004/04/20 17:35:59 twatson Exp $
  *
  * Copyright (c) The Open Services Gateway Initiative (2000-2001).
  * All Rights Reserved.
@@ -35,7 +35,7 @@ package org.osgi.framework;
  * <p>The values associated with these keys are of type <tt>java.lang.String</tt>,
  * unless otherwise indicated.
  *
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  * @author Open Services Gateway Initiative
  * @since 1.1
  * @see Bundle#getHeaders
@@ -443,7 +443,7 @@ public interface Constants {
 
 	/**
 	 * Manifest header (named &quot;Bundle-SymbolicName&quot;)
-	 * identifying the bundle's unique ID.
+	 * identifying the bundle's symbolic name.
 	 * <p>The attribute value may be retrieved from the
 	 * <tt>Dictionary</tt> object returned by the <tt>Bundle.getHeaders</tt> method.
 	 * @since <b>1.4 EXPERIMENTAL</b>
@@ -485,8 +485,8 @@ public interface Constants {
 
 	/**
 	 * Manifest header (named &quot;Require-Bundle&quot;)
-	 * identifying the unique ID's (and optionally, version, match, export, 
-	 * and optional attributes ) of the bundles
+	 * identifying the symbolic names (and optionally, bundle-version, 
+	 * version-match, reprovide, and optional attributes ) of the bundles
 	 * that the bundle is dependent on.
 	 *
 	 * <p>The attribute value may be retrieved from the
@@ -562,7 +562,7 @@ public interface Constants {
 	public final static String REQUIRE_PACKAGES_ATTRIBUTE = "require-packages";
 
 	/**
-	 * String indication location of the default localization file for manifest files
+	 * String indication location of the default localization file for manifest files.
 	 * @since <b>1.4 EXPERIMENTAL</b>
 	 */
 	public final static String BUNDLE_DEFAULT_MANIFEST_LOCALIZATION = "META-INF/bundle";
@@ -654,8 +654,8 @@ public interface Constants {
 
 	/**
 	 * Manifest header (named &quot;Fragment-Host&quot;)
-	 * identifying the symbolic name (and optionally, version and match 
-	 * attributes ) of the bundle that the bundle is a fragment to.
+	 * identifying the symbolic names (and optionally, version and match 
+	 * attributes ) of the bundles that the bundle is a fragment to.
 	 *
 	 * <p>The attribute value may be retrieved from the
 	 * <tt>Dictionary</tt> object returned by the <tt>Bundle.getHeaders</tt> method.

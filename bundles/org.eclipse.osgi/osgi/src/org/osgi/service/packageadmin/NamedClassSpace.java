@@ -47,8 +47,7 @@ import org.osgi.framework.Bundle;
  */
 public interface NamedClassSpace {
     /**
-     * Returns the bundle providing the package associated with this 
-     * <tt>NamedClassSpace</tt> object.
+     * Returns the bundle providing this <tt>NamedClassSpace</tt> object.
      *
      * @return The providing bundle, or <tt>null</tt> if this <tt>NamedClassSpace</tt>
      *         object has become stale.
@@ -83,11 +82,11 @@ public interface NamedClassSpace {
 	public String getVersion();
 
     /**
-     * Returns <tt>true</tt> if the bundle associated with this <tt>NamedClassSpace</tt>
-     * object has been provided by a bundle that has been updated or uninstalled.
+     * Returns <tt>true</tt> if the bundle providing this <tt>NamedClassSpace</tt>
+     * object has been updated or uninstalled.
      *
-     * @return <tt>true</tt> if the associated bundle is being
-     * provided by a bundle that has been updated or uninstalled, or if this
+     * @return <tt>true</tt> if the bundle providing this <tt>NamedClassSpace</tt>
+     * object has been updated or uninstalled, or if this
      * <tt>NamedClassSpace</tt> object has become stale; <tt>false</tt> otherwise.
      */
 	public boolean isRemovalPending();
