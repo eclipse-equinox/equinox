@@ -20,6 +20,7 @@ import org.eclipse.osgi.framework.adaptor.core.*;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.debug.DebugOptions;
+import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.framework.stats.StatsManager;
@@ -127,6 +128,9 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 		readHeaders();
 		checkLocationAndReinitialize();
 		super.initialize(publisher);
+		// default the bootdelegation to all packages
+		if (System.getProperty(Constants.OSGI_BOOTDELEGATION) == null)
+			System.getProperties().put(Constants.OSGI_BOOTDELEGATION, ""); //$NON-NLS-1$
 	}
 
 	public void initializeMetadata() {

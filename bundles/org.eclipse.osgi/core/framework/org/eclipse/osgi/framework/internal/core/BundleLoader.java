@@ -336,11 +336,10 @@ public class BundleLoader implements ClassLoaderDelegate {
 			Debug.println("BundleLoader[" + this + "].loadBundleClass(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		// First check the parent classloader for system classes.
 		if (checkParent && parent != null) {
-			if (Framework.STRICT_DELEGATION) {
-				if (name.startsWith(JAVA_CLASS))
-					// we want to throw ClassNotFoundExceptions if a java.* class cannot be loaded from the parent.
-					return parent.loadClass(name);
-			} else
+			if (name.startsWith(JAVA_CLASS))
+				// we want to throw ClassNotFoundExceptions if a java.* class cannot be loaded from the parent.
+				return parent.loadClass(name);
+			else if (isBootDelegationPackage(name))
 				try {
 					return parent.loadClass(name);
 				} catch (ClassNotFoundException cnfe) {
@@ -379,13 +378,15 @@ public class BundleLoader implements ClassLoaderDelegate {
 	}
 
 	URL findResource(String name, boolean checkParent) {
+		if ((name.length() > 1) && (name.charAt(0) == '/')) /* if name has a leading slash */
+			name = name.substring(1); /* remove leading slash before search */
+		String pkgName = getResourcePackageName(name);
 		// First check the parent classloader for system resources, if it is a java resource.
 		if (checkParent && parent != null) {
-			if (Framework.STRICT_DELEGATION) {
-				if (name.startsWith(JAVA_RESOURCE))
-					// we never delegate java resource requests past the parent
-					return parent.getResource(name);
-			} else {
+			if (name.startsWith(JAVA_RESOURCE))
+				// we never delegate java resource requests past the parent
+				return parent.getResource(name);
+			else if (isBootDelegationPackage(pkgName)) {
 				URL result = parent.getResource(name);
 				if (result != null)
 					return result;
@@ -393,10 +394,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 		}
 		if (isClosed())
 			return null;
-		if ((name.length() > 1) && (name.charAt(0) == '/')) /* if name has a leading slash */
-			name = name.substring(1); /* remove leading slash before search */
 
-		String pkgName = getResourcePackageName(name);
 		URL result = null;
 		PackageSource source = findImportedSource(pkgName);
 		if (source != null)
@@ -409,6 +407,17 @@ public class BundleLoader implements ClassLoaderDelegate {
 				result = findLocalResource(name);
 		}
 		return result;
+	}
+
+	private boolean isBootDelegationPackage(String name) {
+		if (bundle.framework.bootDelegateAll)
+			return true;
+		if (bundle.framework.bootDelegation == null)
+			return false;
+		for (int i = 0; i < bundle.framework.bootDelegation.length; i++)
+			if (name.startsWith(bundle.framework.bootDelegation[i]))
+				return true;
+		return false;
 	}
 
 	/**
