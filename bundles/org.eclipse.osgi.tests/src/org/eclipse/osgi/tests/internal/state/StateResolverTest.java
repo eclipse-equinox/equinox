@@ -445,10 +445,11 @@ public class StateResolverTest extends AbstractStateTest {
 		State state = buildEmptyState();
 		String B1_LOCATION = "org.eclipse.b";
 		final String B1_RESOLVED = "Bundle-SymbolicName: org.eclipse.b1\n" + "Bundle-Version: 1.0\n";
-		final String B1_UNRESOLVED = "Bundle-SymbolicName: org.eclipse.b1\n" + "Bundle-Version: 1.0\nRequire-Bundle: non.existant.bundle\n";		
+		final String B1_UNRESOLVED = "Bundle-SymbolicName: org.eclipse.b1\n" + "Bundle-Version: 2.0\nRequire-Bundle: non.existant.bundle\n";		
 		BundleDescription b1 = state.getFactory().createBundleDescription(parseManifest(B1_RESOLVED), B1_LOCATION, 1);
-		state.addBundle(b1);
+		assertTrue("0.9", state.addBundle(b1));
 		StateDelta delta = state.resolve();
+		b1 = state.getBundleByLocation(b1.getLocation());
 		BundleDelta[] changes = delta.getChanges();
 		assertEquals("1.0", 1, changes.length);
 		assertEquals("1.1", b1, changes[0].getBundle());
@@ -456,7 +457,8 @@ public class StateResolverTest extends AbstractStateTest {
 		assertFullyResolved("1.3", b1);
 		assertTrue("1.8", contains(state.getResolvedBundles(), b1));		
 		b1 = state.getFactory().createBundleDescription(parseManifest(B1_UNRESOLVED), B1_LOCATION, 1); 
-		state.updateBundle(b1);
+		assertTrue("1.8b", state.updateBundle(b1));
+		b1 = state.getBundleByLocation(b1.getLocation());		
 		assertTrue("1.9", !contains(state.getResolvedBundles(), b1));		
 		delta = state.resolve();
 		changes = delta.getChanges();
@@ -464,7 +466,8 @@ public class StateResolverTest extends AbstractStateTest {
 		assertEquals("2.1", b1, changes[0].getBundle());
 		assertEquals("2.2", BundleDelta.UPDATED | BundleDelta.UNRESOLVED, changes[0].getType());
 		b1 = state.getFactory().createBundleDescription(parseManifest(B1_RESOLVED), B1_LOCATION, 1); 
-		state.updateBundle(b1);
+		assertTrue("2.3", state.updateBundle(b1));
+		b1 = state.getBundleByLocation(b1.getLocation());
 		assertTrue("2.9", !contains(state.getResolvedBundles(), b1));		
 		delta = state.resolve();
 		changes = delta.getChanges();
