@@ -13,7 +13,8 @@ package org.eclipse.core.runtime.adaptor;
 import java.io.*;
 import java.util.*;
 import javax.xml.parsers.SAXParserFactory;
-import org.eclipse.osgi.framework.adaptor.*;
+import org.eclipse.osgi.framework.adaptor.BundleData;
+import org.eclipse.osgi.framework.adaptor.IBundleStats;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.debug.DebugOptions;
@@ -101,7 +102,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 	protected StateManager createStateManager() {
 		readHeaders();
 		checkLocationAndReinitialize();
-		stateManager = new StateManager(getStateBaseLocation(), timeStamp);
+		stateManager = new StateManager(new EclipseBundleInstaller(), getStateBaseLocation(), timeStamp);
 		StateImpl systemState = stateManager.getSystemState();
 		if (systemState != null)
 			return stateManager;

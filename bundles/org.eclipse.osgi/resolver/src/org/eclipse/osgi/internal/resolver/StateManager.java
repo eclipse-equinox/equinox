@@ -9,26 +9,30 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
+
 import java.io.*;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.BundleException;
+
 public class StateManager implements PlatformAdmin {
 	public static boolean DEBUG = false;
 	public static boolean DEBUG_READER = false;
 	public static boolean DEBUG_PLATFORM_ADMIN = false;
-	public static boolean DEBUG_PLATFORM_ADMIN_RESOLVER = false;	
-	public static boolean MONITOR_PLATFORM_ADMIN = false;	
+	public static boolean DEBUG_PLATFORM_ADMIN_RESOLVER = false;
+	public static boolean MONITOR_PLATFORM_ADMIN = false;
 	private long readStartupTime;
 	private StateImpl systemState;
 	private File stateLocation;
 	private StateObjectFactoryImpl factory;
 	private long lastTimeStamp;
-	public StateManager(File bundleRootDir) {
+	private BundleInstaller installer;
+	public StateManager(BundleInstaller installer, File  bundleRootDir) {
 		// a negative timestamp means no timestamp checking
-		this(bundleRootDir, -1);
+		this(installer, bundleRootDir, -1);
 	}
-	public StateManager(File bundleRootDir, long expectedTimeStamp) {
+	public StateManager(BundleInstaller installer, File bundleRootDir, long expectedTimeStamp) {
 		factory = new StateObjectFactoryImpl();
+		this.installer = installer;
 		stateLocation = new File(bundleRootDir, ".state"); //$NON-NLS-1$
 		readState(expectedTimeStamp);
 	}
@@ -97,19 +101,35 @@ public class StateManager implements PlatformAdmin {
 	public StateObjectFactory getFactory() {
 		return factory;
 	}
-public synchronized void commit(State state) throws BundleException {
-		if (!(state instanceof StateImpl))
-			throw new IllegalArgumentException();
+	public synchronized void commit(State state) throws BundleException {
+		// client trying to sneak in some alien implementation
+		if (!(state instanceof UserState))
+			throw new IllegalArgumentException("Wrong state implementation"); //$NON-NLS-1$
+		// no installer have been provided - commit not supported
+		if (installer == null)
+			throw new IllegalArgumentException("PlatformAdmin.commit() not supported"); //$NON-NLS-1$
 		if (state.getTimeStamp() != systemState.getTimeStamp())
 			throw new BundleException(StateMsg.formatter.getString("COMMIT_INVALID_TIMESTAMP")); //$NON-NLS-1$
-		StateDelta delta = state.getChanges();
-		BundleDelta[] addedBundles = delta.getChanges(BundleDelta.ADDED, false);
-		for (int i = 0; i < addedBundles.length; i++)
-			systemState.addBundle(factory.createBundleDescription(addedBundles[i].getBundle()));
-		BundleDelta[] removedBundles = delta.getChanges(BundleDelta.REMOVED, false);
-		for (int i = 0; i < removedBundles.length; i++)
-			systemState.removeBundle(removedBundles[i].getBundle());		
-	}	
+		UserState userState = (UserState) state;
+		Long[] allAdded = userState.getAllAdded();
+		for (int i = 0; i < allAdded.length; i++) {
+			BundleDescription added = userState.getBundle(allAdded[i].longValue());
+			// ensure it has not been added then removed
+			if (added != null)
+				installer.installBundle(added);
+		}
+		Long[] allRemoved = userState.getAllRemoved();
+		for (int i = 0; i < allRemoved.length; i++) {
+			long removedId = allRemoved[i].longValue();
+			BundleDescription removedFromUserState = userState.getBundle(removedId);
+			// ensure it has not been removed then added
+			if (removedFromUserState == null) {
+				BundleDescription existingSystemState = systemState.getBundle(removedId);
+				if (existingSystemState != null)
+					installer.uninstallBundle(existingSystemState);
+			}
+		}
+	}
 	public Resolver getResolver() {
 		return new ResolverImpl();
 	}
