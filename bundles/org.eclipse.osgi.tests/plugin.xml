@@ -4,7 +4,8 @@
   name="Eclipse OSGi Tests"
   id="org.eclipse.osgi.tests"
   version="3.0"
-  provider-name="Eclipse.org">
+  provider-name="Eclipse.org"
+  class="org.eclipse.osgi.tests.OSGiTestsPlugin">
 
   <requires>
     <import plugin="org.eclipse.osgi"/>  

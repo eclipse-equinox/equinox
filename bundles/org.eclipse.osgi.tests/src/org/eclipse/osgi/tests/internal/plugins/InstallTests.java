@@ -12,8 +12,8 @@ package org.eclipse.osgi.tests.internal.plugins;
 
 import java.io.IOException;
 import junit.framework.TestCase;
-import org.eclipse.core.internal.runtime.InternalPlatform;
 import org.eclipse.osgi.tests.BundleTestingHelper;
+import org.eclipse.osgi.tests.OSGiTestsPlugin;
 import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.*;
 import org.osgi.service.packageadmin.PackageAdmin;
@@ -134,48 +134,47 @@ public class InstallTests extends TestCase {
 	/** Ensures two versions of a non-singleton bundle are accepted */
 	public void testInstall2NonSingletonBundles() throws BundleException, IOException {
 		Bundle installed1 = BundleTestingHelper.installBundle("internal/plugins/installTests/bundle07");
-		ServiceReference packageAdminSR = InternalPlatform.getDefault().getBundleContext().getServiceReference(PackageAdmin.class.getName());
-		PackageAdmin packageAdmin = (PackageAdmin) InternalPlatform.getDefault().getBundleContext().getService(packageAdminSR);		
+		ServiceReference packageAdminSR = OSGiTestsPlugin.getContext().getServiceReference(PackageAdmin.class.getName());
+		PackageAdmin packageAdmin = (PackageAdmin) OSGiTestsPlugin.getContext().getService(packageAdminSR);
 		packageAdmin.resolveBundles(null);
 		Bundle installed2 = BundleTestingHelper.installBundle("internal/plugins/installTests/bundle07b");
 		packageAdmin.resolveBundles(null);
-		InternalPlatform.getDefault().getBundleContext().ungetService(packageAdminSR);
+		OSGiTestsPlugin.getContext().ungetService(packageAdminSR);
 		try {
 			assertEquals("1.0", "bundle07", installed2.getSymbolicName());
 			assertEquals("1.1", Bundle.RESOLVED, installed2.getState());
 			assertEquals("1.2", "1.0.0.b", installed2.getHeaders().get(Constants.BUNDLE_VERSION));
-			
+
 			assertEquals("1.3", "bundle07", installed1.getSymbolicName());
 			assertEquals("1.4", Bundle.RESOLVED, installed1.getState());
-			assertEquals("1.5", "1.0.0", installed1.getHeaders().get(Constants.BUNDLE_VERSION));			
+			assertEquals("1.5", "1.0.0", installed1.getHeaders().get(Constants.BUNDLE_VERSION));
 		} finally {
 			installed1.uninstall();
 			installed2.uninstall();
 		}
 	}
-	
+
 	/** Ensures two versions of a singleton bundle are accepted */
 	public void testInstall2SingletonBundles() throws BundleException, IOException {
 		Bundle installed1 = BundleTestingHelper.installBundle("internal/plugins/installTests/bundle08");
-		ServiceReference packageAdminSR = InternalPlatform.getDefault().getBundleContext().getServiceReference(PackageAdmin.class.getName());
-		PackageAdmin packageAdmin = (PackageAdmin) InternalPlatform.getDefault().getBundleContext().getService(packageAdminSR);		
+		ServiceReference packageAdminSR = OSGiTestsPlugin.getContext().getServiceReference(PackageAdmin.class.getName());
+		PackageAdmin packageAdmin = (PackageAdmin) OSGiTestsPlugin.getContext().getService(packageAdminSR);
 		packageAdmin.resolveBundles(null);
 		Bundle installed2 = BundleTestingHelper.installBundle("internal/plugins/installTests/bundle08b");
 		packageAdmin.resolveBundles(null);
-		InternalPlatform.getDefault().getBundleContext().ungetService(packageAdminSR);
+		OSGiTestsPlugin.getContext().ungetService(packageAdminSR);
 		try {
 			assertEquals("1.0", "bundle08", installed1.getSymbolicName());
 			assertEquals("1.1", Bundle.RESOLVED, installed1.getState());
 			assertEquals("1.2", "1.0.0", installed1.getHeaders().get(Constants.BUNDLE_VERSION));
-			
+
 			assertEquals("1.3", "bundle08", installed2.getSymbolicName());
 			assertEquals("1.4", Bundle.INSTALLED, installed2.getState());
-			assertEquals("1.5", "1.0.0.b", installed2.getHeaders().get(Constants.BUNDLE_VERSION));			
+			assertEquals("1.5", "1.0.0.b", installed2.getHeaders().get(Constants.BUNDLE_VERSION));
 		} finally {
 			installed1.uninstall();
 			installed2.uninstall();
 		}
 	}
-	
 
 }
