@@ -76,6 +76,7 @@ public class EclipseStarter {
 	public static final String PROP_ARCH = "osgi.arch"; //$NON-NLS-1$
 	public static final String PROP_ADAPTOR = "osgi.adaptor"; //$NON-NLS-1$
 	public static final String PROP_SYSPATH= "osgi.syspath"; //$NON-NLS-1$
+	public static final String PROP_LOGFILE = "osgi.logfile"; //$NON-NLS-1$
 	
 	public static final String PROP_EXITCODE = "eclipse.exitcode"; //$NON-NLS-1$
 	public static final String PROP_EXITDATA = "eclipse.exitdata"; //$NON-NLS-1$
@@ -164,17 +165,25 @@ public class EclipseStarter {
 	
 	protected static FrameworkLog createFrameworkLog() {
 		FrameworkLog frameworkLog;
-		Location location = LocationManager.getConfigurationLocation();
-		File configAreaDirectory = null;
-		if (location != null)
-			// TODO assumes the URL is a file: url
-			configAreaDirectory = new File(location.getURL().getFile());
+		String logFileProp = System.getProperty(EclipseStarter.PROP_LOGFILE);
+		if (logFileProp != null) {
+			frameworkLog = new EclipseLog(new File(logFileProp));
+		}
+		else {
+			Location location = LocationManager.getConfigurationLocation();
+			File configAreaDirectory = null;
+			if (location != null)
+				// TODO assumes the URL is a file: url
+				configAreaDirectory = new File(location.getURL().getFile());
 		
-		if (configAreaDirectory != null) {
-			File logFile = new File(configAreaDirectory, Long.toString(System.currentTimeMillis()) + EclipseAdaptor.F_LOG);
-			frameworkLog = new EclipseLog(logFile);
-		} else 
-			frameworkLog = new EclipseLog();
+			if (configAreaDirectory != null) {
+				String logFileName = Long.toString(System.currentTimeMillis()) + EclipseAdaptor.F_LOG;
+				File logFile = new File(configAreaDirectory, logFileName);
+				System.setProperty(EclipseStarter.PROP_LOGFILE,logFile.getAbsolutePath());
+				frameworkLog = new EclipseLog(logFile);
+			} else 
+				frameworkLog = new EclipseLog();
+		}
 		if ("true".equals(System.getProperty(EclipseStarter.PROP_CONSOLE_LOG))) 
 			frameworkLog.setConsoleLog(true);
 		return frameworkLog;

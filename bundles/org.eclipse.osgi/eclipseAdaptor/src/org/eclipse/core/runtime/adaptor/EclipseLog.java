@@ -86,4 +86,10 @@ public class EclipseLog extends DefaultLog {
 			writeln();
 		}
 	}
+
+	public synchronized void setFile(File newFile, boolean append)
+			throws IOException {
+		super.setFile(newFile, append);
+		System.setProperty(EclipseStarter.PROP_LOGFILE, newFile.getAbsolutePath());
+	}
 }

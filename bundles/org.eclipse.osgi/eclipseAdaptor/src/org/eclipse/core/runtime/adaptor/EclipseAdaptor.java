@@ -99,15 +99,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 	protected FrameworkLog createFrameworkLog() {
 		if (frameworkLog != null)
 			return frameworkLog;
-		File configAreaDirectory = new File(LocationManager.getConfigurationLocation().getURL().getPath());
-		if (configAreaDirectory != null) {
-			File logFile = new File(configAreaDirectory, Long.toString(System.currentTimeMillis()) + F_LOG);
-			frameworkLog = new EclipseLog(logFile);
-		} else 
-			frameworkLog = new EclipseLog();
-		if ("true".equals(System.getProperty(EclipseStarter.PROP_CONSOLE_LOG))) 	//$NON-NLS-1$
-			frameworkLog.setConsoleLog(true);
-		return frameworkLog;
+		return EclipseStarter.createFrameworkLog();
 	}
 
 	protected StateManager createStateManager() {
