@@ -135,16 +135,13 @@ public class DefaultClassLoader extends AbstractClassLoader {
 		File file = bundledata.getBaseBundleFile().getFile(cp);
 		if (file != null && file.exists()) {
 			try {
-				bundlefile = BundleFile.createBundleFile(file, bundledata);
+				bundlefile = hostdata.getAdaptor().createBundleFile(file, bundledata);
 			} catch (IOException e) {
 				bundledata.getAdaptor().getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, bundledata.getBundle(), e);
 			}
-		} else {
-			if (bundledata.getBaseBundleFile() instanceof BundleFile.ZipBundleFile) {
-				// the classpath entry may be a directory in the bundle jar file.
-				if (bundledata.getBaseBundleFile().containsDir(cp))
-					bundlefile = BundleFile.createBundleFile((BundleFile.ZipBundleFile) bundledata.getBaseBundleFile(), cp);
-			}
+		} else if (bundledata.getBaseBundleFile().containsDir(cp)) {
+			// the classpath entry is a directory in the bundle jar file.
+			bundlefile = new BundleFile.NestedDirBundleFile(bundledata.getBaseBundleFile(), cp);
 		}
 
 		// if in dev mode, try using the cp as an absolute path
@@ -153,7 +150,7 @@ public class DefaultClassLoader extends AbstractClassLoader {
 			if (file.exists() && file.isAbsolute())
 				// if the file exists and is absolute then create BundleFile for it.
 				try {
-					bundlefile = BundleFile.createBundleFile(file, bundledata);
+					bundlefile = hostdata.getAdaptor().createBundleFile(file, bundledata);
 				} catch (IOException e) {
 					bundledata.getAdaptor().getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, bundledata.getBundle(), e);
 				}

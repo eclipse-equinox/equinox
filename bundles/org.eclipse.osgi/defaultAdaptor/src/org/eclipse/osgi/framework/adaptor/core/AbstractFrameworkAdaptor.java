@@ -46,7 +46,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 	/**
 	 * The System Bundle's BundleContext.
 	 */
-	protected BundleContext context; //TODO Rename to systemBundleContext
+	protected BundleContext context;
 
 	/**
 	 * The initial bundle start level.
@@ -258,6 +258,12 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 		return new SystemBundleData(this);
 	}
 
+	/**
+	 * Returns the AdaptorElementFactory for this Adaptor.  This allows
+	 * extending adaptors to control how BundleData and BundleClassLoader
+	 * objects are created.
+	 * @return the AdaptorElementFactory for this Adapotr.
+	 */
 	abstract public AdaptorElementFactory getElementFactory();
 
 	/**
@@ -333,6 +339,25 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 
 	public ClassLoader getBundleClassLoaderParent() {
 		return bundleClassLoaderParent;
+	}
+
+	/**
+	 * Creates a BundleFile object from a File object and a BundleData
+	 * object.  This implementation checks to see if the basefile is 
+	 * a directory or a regular file and creates the proper BundleFile
+	 * type accordingly.  If the file is a regular file this implementation
+	 * assumes that the file is a zip file.
+	 * @param basefile the base File object.
+	 * @param bundledata the BundleData object that BundleFile is associated with.
+	 * @return A new BundleFile object
+	 * @throws IOException if an error occurred creating the BundleFile object.
+	 */
+	public BundleFile createBundleFile(File basefile, BundleData bundledata) throws IOException {
+		if (basefile.isDirectory()) {
+			return new BundleFile.DirBundleFile(basefile);
+		} else {
+			return new BundleFile.ZipBundleFile(basefile, bundledata);
+		}
 	}
 
 	/**

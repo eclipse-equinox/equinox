@@ -36,7 +36,7 @@ public class SystemBundleData implements BundleData {
 	File osgiBase;
 	BundleFile bundleFile;
 
-	public SystemBundleData(FrameworkAdaptor adaptor) throws BundleException {
+	public SystemBundleData(AbstractFrameworkAdaptor adaptor) throws BundleException {
 		osgiBase = getOsgiBase();
 		this.manifest = createManifest(adaptor);
 		String sVersion = (String) manifest.get(Constants.BUNDLE_VERSION);
@@ -45,7 +45,7 @@ public class SystemBundleData implements BundleData {
 		}
 		if (osgiBase != null)
 			try {
-				bundleFile = BundleFile.createBundleFile(osgiBase, this);
+				bundleFile = adaptor.createBundleFile(osgiBase, this);
 			} catch (IOException e) {
 				// should not happen
 			}

@@ -344,7 +344,7 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 	}
 
 	protected BundleFile createBaseBundleFile() throws IOException {
-		baseBundleFile = BundleFile.createBundleFile(getBaseFile(), this);
+		baseBundleFile = getAdaptor().createBundleFile(getBaseFile(), this);
 		return baseBundleFile;
 	}
 

@@ -22,26 +22,23 @@ import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.internal.protocol.bundleresource.Handler;
 
+/**
+ * The BundleFile API is used by Adaptors to read resources out of an 
+ * installed Bundle in the Framework.
+ */
 abstract public class BundleFile {
 	/**
-	 * The File object for this bundle.
+	 * The File object for this BundleFile.
 	 */
-	protected File bundlefile;
-
-	/**
-	 * The BundleData object for this bundle.
-	 */
-	protected BundleData bundledata; //TODO This could be moved into Zip
+	protected File basefile;
 
 	/**
 	 * BundleFile constructor
-	 * @param bundlefile The File object where this bundle is persistently 
-	 * stored.
-	 * @param bundledata The BundleData object for this bundle.
+	 * @param basefile The File object where this BundleFile is 
+	 * persistently stored.
 	 */
-	public BundleFile(File bundlefile, BundleData bundledata) {
-		this.bundlefile = bundlefile;
-		this.bundledata = bundledata;
+	public BundleFile(File basefile) {
+		this.basefile = basefile;
 	}
 
 	/**
@@ -121,24 +118,17 @@ abstract public class BundleFile {
 		}
 	}
 
-	static public BundleFile createBundleFile(File bundlefile, BundleData bundledata) throws IOException {
-		if (bundlefile.isDirectory()) {
-			return new DirBundleFile(bundlefile, bundledata);
-		} else {
-			return new ZipBundleFile(bundlefile, bundledata);
-		}
-	}
-
-	static public BundleFile createBundleFile(ZipBundleFile bundlefile, String cp) {
-		return new DirZipBundleFile(bundlefile, cp);
-	}
-
+	/**
+	 * A BundleFile that uses a ZipFile as it base file.
+	 */
 	public static class ZipBundleFile extends BundleFile {
+		protected BundleData bundledata;
 		protected ZipFile zipFile;
 		protected boolean closed = false;
 
-		protected ZipBundleFile(File bundlefile, BundleData bundledata) throws IOException {
-			super(bundlefile, bundledata);
+		protected ZipBundleFile(File basefile, BundleData bundledata) throws IOException {
+			super(basefile);
+			this.bundledata = bundledata;
 			this.closed = true;
 			open();
 		}
@@ -318,7 +308,7 @@ abstract public class BundleFile {
 
 		public void open() throws IOException {
 			if (closed) {
-				zipFile = new ZipFile(this.bundlefile);
+				zipFile = new ZipFile(this.basefile);
 
 				closed = false;
 			}
@@ -326,17 +316,20 @@ abstract public class BundleFile {
 
 	}
 
+	/**
+	 * A BundleFile that uses a directory as its base file.
+	 */
 	public static class DirBundleFile extends BundleFile {
 
-		protected DirBundleFile(File bundlefile, BundleData bundledata) throws IOException {
-			super(bundlefile, bundledata);
-			if (!bundlefile.exists() || !bundlefile.isDirectory()) {
-				throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_DIRECTORY_EXCEPTION", bundlefile));
+		protected DirBundleFile(File basefile) throws IOException {
+			super(basefile);
+			if (!basefile.exists() || !basefile.isDirectory()) {
+				throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_DIRECTORY_EXCEPTION", basefile));
 			}
 		}
 
 		public File getFile(String path) {
-			File filePath = new File(this.bundlefile, path);
+			File filePath = new File(this.basefile, path);
 			if (filePath.exists()) {
 				return filePath;
 			}
@@ -344,7 +337,7 @@ abstract public class BundleFile {
 		}
 
 		public BundleEntry getEntry(String path) {
-			File filePath = new File(this.bundlefile, path);
+			File filePath = new File(this.basefile, path);
 			if (!filePath.exists()) {
 				return null;
 			}
@@ -352,12 +345,12 @@ abstract public class BundleFile {
 		}
 
 		public boolean containsDir(String dir) {
-			File dirPath = new File(this.bundlefile, dir);
+			File dirPath = new File(this.basefile, dir);
 			return dirPath.exists() && dirPath.isDirectory();
 		}
 
 		public Enumeration getEntryPaths(final String path) {
-			final java.io.File pathFile = new java.io.File(bundlefile, path);
+			final java.io.File pathFile = new java.io.File(basefile, path);
 			if (!pathFile.exists())
 				return new Enumeration() {
 					public boolean hasMoreElements() {
@@ -419,14 +412,24 @@ abstract public class BundleFile {
 		}
 	}
 
-	//TODO Add a comment
-	public static class DirZipBundleFile extends BundleFile {
-		ZipBundleFile zipBundlefile;
+	/**
+	 * A NestedDirBundleFile uses another BundleFile as its source but
+	 * accesses all of its resources relative to a nested directory within
+	 * the other BundleFile object.  This is used to support zipped bundles
+	 * that use a Bundle-ClassPath with an nested directory specified.
+	 * <p>
+	 * For Example:
+	 * <pre>
+	 * Bundle-ClassPath: nested.jar,nesteddir/
+	 * </pre>
+	 */
+	public static class NestedDirBundleFile extends BundleFile {
+		BundleFile baseBundleFile;
 		String cp;
 
-		public DirZipBundleFile(ZipBundleFile zipBundlefile, String cp) {
-			super(zipBundlefile.bundlefile, zipBundlefile.bundledata);
-			this.zipBundlefile = zipBundlefile;
+		public NestedDirBundleFile(BundleFile baseBundlefile, String cp) {
+			super(baseBundlefile.basefile);
+			this.baseBundleFile = baseBundlefile;
 			this.cp = cp;
 			if (cp.charAt(cp.length() - 1) != '/') {
 				this.cp = this.cp + '/';
@@ -441,7 +444,7 @@ abstract public class BundleFile {
 			if (path.length() > 0 && path.charAt(0) == '/')
 				path = path.substring(1);
 			String newpath = new StringBuffer(cp).append(path).toString();
-			return zipBundlefile.getEntry(newpath);
+			return baseBundleFile.getEntry(newpath);
 		}
 
 		public boolean containsDir(String dir) {
@@ -451,7 +454,7 @@ abstract public class BundleFile {
 			if (dir.length() > 0 && dir.charAt(0) == '/')
 				dir = dir.substring(1);
 			String newdir = new StringBuffer(cp).append(dir).toString();
-			return zipBundlefile.containsDir(newdir);
+			return baseBundleFile.containsDir(newdir);
 		}
 
 		public Enumeration getEntryPaths(String path) {

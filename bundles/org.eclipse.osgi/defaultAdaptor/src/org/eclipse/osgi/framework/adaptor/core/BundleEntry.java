@@ -138,7 +138,7 @@ public abstract class BundleEntry {
 
 		public URL getLocalURL() {
 			try {
-				return new URL("jar:file:" + bundleFile.bundlefile.getAbsolutePath() + "!/" + zipEntry.getName()); //$NON-NLS-1$//$NON-NLS-2$
+				return new URL("jar:file:" + bundleFile.basefile.getAbsolutePath() + "!/" + zipEntry.getName()); //$NON-NLS-1$//$NON-NLS-2$
 			} catch (MalformedURLException e) {
 				//This can not happen. 
 				return null;
@@ -266,7 +266,7 @@ public abstract class BundleEntry {
 
 		public URL getLocalURL() {
 			try {
-				return new URL("jar:file:" + bundleFile.bundlefile.getAbsolutePath() + "!/" + name); //$NON-NLS-1$ //$NON-NLS-2$
+				return new URL("jar:file:" + bundleFile.basefile.getAbsolutePath() + "!/" + name); //$NON-NLS-1$ //$NON-NLS-2$
 			} catch (MalformedURLException e) {
 				//This can not happen, unless the jar protocol is not supported.
 				return null;
