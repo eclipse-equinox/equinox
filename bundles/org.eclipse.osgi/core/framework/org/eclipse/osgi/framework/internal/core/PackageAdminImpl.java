@@ -34,7 +34,7 @@ import org.osgi.service.packageadmin.*;
  * exported (as opposed to one that is available for export).
  *
  * <p> Note that the information about exported packages returned by this
- * service is valid only until the next time {@link #refreshPackages} is
+ * service is valid only until the next time {@link #refreshPackages(org.osgi.framework.Bundle[])} is
  * called.
  * If an ExportedPackage becomes stale, (that is, the package it references
  * has been updated or removed as a result of calling
@@ -149,8 +149,8 @@ public class PackageAdminImpl implements PackageAdmin {
 		if (exporting) {
 			/* Reaching here is an internal error */
 			if (Debug.DEBUG && Debug.DEBUG_PACKAGEADMIN) {
-				Debug.println("BundleLoader.unexportPackager returned true! " + loaderProxy);
-				Debug.printStackTrace(new Exception("Stack trace"));
+				Debug.println("BundleLoader.unexportPackager returned true! " + loaderProxy); //$NON-NLS-1$
+				Debug.printStackTrace(new Exception("Stack trace")); //$NON-NLS-1$
 			}
 			throw new BundleException(Msg.formatter.getString("OSGI_INTERNAL_ERROR")); //$NON-NLS-1$
 		}
@@ -221,7 +221,7 @@ public class PackageAdminImpl implements PackageAdmin {
 	 * means that this method may discover an ExportedPackage that was
 	 * not present in the list returned by <tt>getExportedPackages()</tt>.
 	 *
-	 * @param name The name of the exported package to be returned.
+	 * @param packageName The name of the exported package to be returned.
 	 *
 	 * @return The exported package with the specified name, or <tt>null</tt>
 	 *         if no expored package with that name exists.
@@ -291,7 +291,7 @@ public class PackageAdminImpl implements PackageAdmin {
 	 * <tt>FrameworkEvent</tt> of type <tt>ERROR</tt> is
 	 * broadcast, containing the exception.
 	 *
-	 * @param bundles the bundles whose exported packages are to be updated or
+	 * @param input the bundles whose exported packages are to be updated or
 	 * removed,
 	 * or <tt>null</tt> for all previously updated or uninstalled bundles.
 	 *
@@ -318,7 +318,7 @@ public class PackageAdminImpl implements PackageAdmin {
 			public void run() {
 				refreshPackages(bundles);
 			}
-		}, "Refresh Packages");
+		}, "Refresh Packages"); //$NON-NLS-1$
 
 		refresh.start();
 	}
@@ -326,14 +326,14 @@ public class PackageAdminImpl implements PackageAdmin {
 	/**
 	 * Worker routine called on a seperate thread to perform the actual work.
 	 *
-	 * @param Seed for the graph.
+	 * @param refresh the list of bundles to refresh 
 	 */
 	protected void refreshPackages(AbstractBundle[] refresh) {
 		try {
 			Vector graph = null;
 			synchronized (framework.bundles) {
 				if (Debug.DEBUG && Debug.DEBUG_PACKAGEADMIN) {
-					Debug.println("refreshPackages: Initialize graph");
+					Debug.println("refreshPackages: Initialize graph"); //$NON-NLS-1$
 				}
 				// make sure the dependencies are marked first
 				framework.bundles.markDependancies();
@@ -369,7 +369,7 @@ public class PackageAdminImpl implements PackageAdmin {
 		graph.copyInto(refresh);
 		Util.sort(refresh, 0, graph.size());
 		if (Debug.DEBUG && Debug.DEBUG_PACKAGEADMIN) {
-			Debug.println("refreshPackages: restart the bundles");
+			Debug.println("refreshPackages: restart the bundles"); //$NON-NLS-1$
 		}
 		for (int i = 0; i < refresh.length; i++) {
 			AbstractBundle bundle = (AbstractBundle) refresh[i];
@@ -391,7 +391,7 @@ public class PackageAdminImpl implements PackageAdmin {
 				 * Suspend each bundle and grab its state change lock.
 				 */
 				if (Debug.DEBUG && Debug.DEBUG_PACKAGEADMIN) {
-					Debug.println("refreshPackages: Suspend each bundle and acquire its state change lock");
+					Debug.println("refreshPackages: Suspend each bundle and acquire its state change lock"); //$NON-NLS-1$
 				}
 				for (int i = refresh.length - 1; i >= 0; i--) {
 					AbstractBundle changedBundle = refresh[i];
@@ -407,8 +407,8 @@ public class PackageAdminImpl implements PackageAdmin {
 
 					if (Debug.DEBUG && Debug.DEBUG_PACKAGEADMIN) {
 						if (changedBundle.stateChanging == null) {
-							Debug.println("Bundle state change lock is clear! " + changedBundle);
-							Debug.printStackTrace(new Exception("Stack trace"));
+							Debug.println("Bundle state change lock is clear! " + changedBundle); //$NON-NLS-1$
+							Debug.printStackTrace(new Exception("Stack trace")); //$NON-NLS-1$
 						}
 					}
 				}
@@ -417,7 +417,7 @@ public class PackageAdminImpl implements PackageAdmin {
 				 * This will move RESOLVED bundles to the INSTALLED state.
 				 */
 				if (Debug.DEBUG && Debug.DEBUG_PACKAGEADMIN) {
-					Debug.println("refreshPackages: refresh the bundles");
+					Debug.println("refreshPackages: refresh the bundles"); //$NON-NLS-1$
 				}
 				/*
 				 * Unimport detached BundleLoaders for bundles in the graph.
@@ -442,7 +442,7 @@ public class PackageAdminImpl implements PackageAdmin {
 				 * Cleanup detached BundleLoaders for bundles in the graph.
 				 */
 				if (Debug.DEBUG && Debug.DEBUG_PACKAGEADMIN) {
-					Debug.println("refreshPackages: unexport the removal pending packages");
+					Debug.println("refreshPackages: unexport the removal pending packages"); //$NON-NLS-1$
 				}
 				for (int i = removalPending.size() - 1; i >= 0; i--) {
 					BundleLoaderProxy loaderProxy = (BundleLoaderProxy) removalPending.elementAt(i);
@@ -486,7 +486,7 @@ public class PackageAdminImpl implements PackageAdmin {
 				 * Release the state change locks.
 				 */
 				if (Debug.DEBUG && Debug.DEBUG_PACKAGEADMIN) {
-					Debug.println("refreshPackages: release the state change locks");
+					Debug.println("refreshPackages: release the state change locks"); //$NON-NLS-1$
 				}
 				for (int i = 0; i < refresh.length; i++) {
 					AbstractBundle changedBundle = refresh[i];
@@ -497,20 +497,20 @@ public class PackageAdminImpl implements PackageAdmin {
 			 * Take this opportunity to clean up the adaptor storage.
 			 */
 			if (Debug.DEBUG && Debug.DEBUG_PACKAGEADMIN) {
-				Debug.println("refreshPackages: clean up adaptor storage");
+				Debug.println("refreshPackages: clean up adaptor storage"); //$NON-NLS-1$
 			}
 			try {
 				framework.adaptor.compactStorage();
 			} catch (IOException e) {
 				if (Debug.DEBUG && Debug.DEBUG_PACKAGEADMIN) {
-					Debug.println("refreshPackages exception: " + e.getMessage());
+					Debug.println("refreshPackages exception: " + e.getMessage()); //$NON-NLS-1$
 					Debug.printStackTrace(e);
 				}
 				framework.publishFrameworkEvent(FrameworkEvent.ERROR, framework.systemBundle, new BundleException(Msg.formatter.getString("BUNDLE_REFRESH_FAILURE"), e)); //$NON-NLS-1$
 			}
 		} catch (BundleException e) {
 			if (Debug.DEBUG && Debug.DEBUG_PACKAGEADMIN) {
-				Debug.println("refreshPackages exception: " + e.getMessage());
+				Debug.println("refreshPackages exception: " + e.getMessage()); //$NON-NLS-1$
 				Debug.printStackTrace(e.getNestedException());
 			}
 			framework.publishFrameworkEvent(FrameworkEvent.ERROR, framework.systemBundle, new BundleException(Msg.formatter.getString("BUNDLE_REFRESH_FAILURE"), e)); //$NON-NLS-1$
@@ -532,7 +532,7 @@ public class PackageAdminImpl implements PackageAdmin {
 		 * can be immediately resolved.
 		 */
 		if (Debug.DEBUG && Debug.DEBUG_PACKAGEADMIN) {
-			Debug.println("refreshPackages: unresolve permissions");
+			Debug.println("refreshPackages: unresolve permissions"); //$NON-NLS-1$
 		}
 		int size = bundles.size();
 		for (int i = 0; i < size; i++) {
@@ -551,7 +551,7 @@ public class PackageAdminImpl implements PackageAdmin {
 				AbstractBundle bundle = loaderProxy.getBundle();
 				if (!graph.contains(bundle)) {
 					if (Debug.DEBUG && Debug.DEBUG_PACKAGEADMIN) {
-						Debug.println(" refresh: " + bundle);
+						Debug.println(" refresh: " + bundle); //$NON-NLS-1$
 					}
 					graph.addElement(bundle);
 
@@ -582,7 +582,7 @@ public class PackageAdminImpl implements PackageAdmin {
 
 				if (!graph.contains(bundle)) {
 					if (Debug.DEBUG && Debug.DEBUG_PACKAGEADMIN) {
-						Debug.println(" refresh: " + bundle);
+						Debug.println(" refresh: " + bundle); //$NON-NLS-1$
 					}
 					graph.addElement(bundle);
 				}
@@ -594,7 +594,7 @@ public class PackageAdminImpl implements PackageAdmin {
 		 */
 		if (graph.size() == 0) {
 			if (Debug.DEBUG && Debug.DEBUG_PACKAGEADMIN) {
-				Debug.println("refreshPackages: Empty graph");
+				Debug.println("refreshPackages: Empty graph"); //$NON-NLS-1$
 			}
 
 			return graph;
@@ -604,7 +604,7 @@ public class PackageAdminImpl implements PackageAdmin {
 		 * Complete graph.
 		 */
 		if (Debug.DEBUG && Debug.DEBUG_PACKAGEADMIN) {
-			Debug.println("refreshPackages: Complete graph");
+			Debug.println("refreshPackages: Complete graph"); //$NON-NLS-1$
 		}
 
 		boolean changed;
@@ -733,7 +733,7 @@ public class PackageAdminImpl implements PackageAdmin {
 		 * Resolve the bundles. This will make there exported packages available.
 		 */
 		if (Debug.DEBUG && Debug.DEBUG_PACKAGEADMIN) {
-			Debug.println("refreshBundles: resolve bundles");
+			Debug.println("refreshBundles: resolve bundles"); //$NON-NLS-1$
 		}
 
 		Vector notify = new Vector();
@@ -858,7 +858,7 @@ public class PackageAdminImpl implements PackageAdmin {
 			throw new IllegalArgumentException();
 		}
 
-		AbstractBundle bundles[] = framework.getBundleByUniqueId(symbolicName);
+		AbstractBundle bundles[] = framework.getBundleBySymbolicName(symbolicName);
 		if (bundles == null)
 			return null;
 
@@ -885,7 +885,7 @@ public class PackageAdminImpl implements PackageAdmin {
 		if (symbolicName == null) {
 			throw new IllegalArgumentException();
 		}
-		AbstractBundle bundles[] = framework.getBundleByUniqueId(symbolicName);
+		AbstractBundle bundles[] = framework.getBundleBySymbolicName(symbolicName);
 		if (bundles == null)
 			return null;
 

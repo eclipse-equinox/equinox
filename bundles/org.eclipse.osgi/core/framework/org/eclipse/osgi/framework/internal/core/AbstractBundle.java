@@ -133,8 +133,8 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	protected void close() {
 		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 			if ((state & (INSTALLED)) == 0) {
-				Debug.println("Bundle.close called when state != INSTALLED: " + this);
-				Debug.printStackTrace(new Exception("Stack trace"));
+				Debug.println("Bundle.close called when state != INSTALLED: " + this); //$NON-NLS-1$
+				Debug.printStackTrace(new Exception("Stack trace")); //$NON-NLS-1$
 			}
 		}
 		state = UNINSTALLED;
@@ -155,7 +155,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 				if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 					Debug.printStackTrace(t);
 				}
-				throw new BundleException(Msg.formatter.getString("BUNDLE_INVALID_ACTIVATOR_EXCEPTION", activatorClassName, bundledata.getSymbolicName()), t);
+				throw new BundleException(Msg.formatter.getString("BUNDLE_INVALID_ACTIVATOR_EXCEPTION", activatorClassName, bundledata.getSymbolicName()), t); //$NON-NLS-1$
 			}
 		}
 		return (null);
@@ -289,7 +289,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 		long start = 0;
 		if (Debug.DEBUG && Debug.DEBUG_BUNDLE_TIME) {
 			start = System.currentTimeMillis();
-			System.out.println("Starting " + getSymbolicName());
+			System.out.println("Starting " + getSymbolicName()); //$NON-NLS-1$
 		}
 		framework.checkAdminPermission();
 		checkValid();
@@ -300,7 +300,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 			completeStateChange();
 		}
 		if (Debug.DEBUG && Debug.DEBUG_BUNDLE_TIME)
-			System.out.println("End starting " + getSymbolicName() + " " + (System.currentTimeMillis() - start));
+			System.out.println("End starting " + getSymbolicName() + " " + (System.currentTimeMillis() - start)); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	/**
@@ -614,7 +614,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	 */
 	public void update() throws BundleException {
 		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-			Debug.println("update location " + bundledata.getLocation());
+			Debug.println("update location " + bundledata.getLocation()); //$NON-NLS-1$
 		}
 		framework.checkAdminPermission();
 		checkValid();
@@ -627,7 +627,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 					if (bundledata.getManifest().get(Constants.BUNDLE_UPDATELOCATION) != null) {
 						updateLocation = (String) bundledata.getManifest().get(Constants.BUNDLE_UPDATELOCATION);
 						if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-							Debug.println("   from location: " + updateLocation);
+							Debug.println("   from location: " + updateLocation); //$NON-NLS-1$
 						}
 					}
 					/* Map the identity to a URLConnection */
@@ -662,8 +662,8 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	 */
 	public void update(final InputStream in) throws BundleException {
 		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-			Debug.println("update location " + bundledata.getLocation());
-			Debug.println("   from: " + in);
+			Debug.println("update location " + bundledata.getLocation()); //$NON-NLS-1$
+			Debug.println("   from: " + in); //$NON-NLS-1$
 		}
 		framework.checkAdminPermission();
 		checkValid();
@@ -744,9 +744,9 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 			// Check for a bundle already installed with the same symbolicName
 			// and version.
 			String symbolicName = newBundle.getSymbolicName();
-			AbstractBundle installedBundle = symbolicName == null ? null : framework.getBundleByUniqueId(symbolicName, newBundle.getVersion().toString());
+			AbstractBundle installedBundle = symbolicName == null ? null : framework.getBundleBySymbolicName(symbolicName, newBundle.getVersion().toString());
 			if (installedBundle != null && installedBundle != this) {
-				throw new BundleException(Msg.formatter.getString("BUNDLE_INSTALL_SAME_UNIQUEID", new Object[] {installedBundle.getSymbolicName(), installedBundle.getVersion(), installedBundle.getLocation()}));
+				throw new BundleException(Msg.formatter.getString("BUNDLE_INSTALL_SAME_UNIQUEID", new Object[] {installedBundle.getSymbolicName(), installedBundle.getVersion(), installedBundle.getLocation()})); //$NON-NLS-1$
 			}
 			String[] nativepaths = framework.selectNativeCode(newBundle);
 			if (nativepaths != null) {
@@ -831,7 +831,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	 */
 	public void uninstall() throws BundleException {
 		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-			Debug.println("uninstall location: " + bundledata.getLocation());
+			Debug.println("uninstall location: " + bundledata.getLocation()); //$NON-NLS-1$
 		}
 		framework.checkAdminPermission();
 		checkValid();
@@ -1195,7 +1195,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 					if (Debug.DEBUG) {
 						long end = System.currentTimeMillis();
 						if (end - start > 0) {
-							System.out.println("Waiting... : " + getSymbolicName() + ' ' + (end - start));
+							System.out.println("Waiting... : " + getSymbolicName() + ' ' + (end - start)); //$NON-NLS-1$
 						}
 					}
 				} catch (InterruptedException e) {
@@ -1227,7 +1227,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	 * @return String
 	 */
 	public String toString() {
-		return (bundledata.getLocation() + " [" + getBundleId() + "]");
+		return (bundledata.getLocation() + " [" + getBundleId() + "]"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	/**
@@ -1262,7 +1262,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	 */
 	protected void checkValid() {
 		if (state == UNINSTALLED) {
-			throw new IllegalStateException(Msg.formatter.getString("BUNDLE_UNINSTALLED_EXCEPTION", getLocation()));
+			throw new IllegalStateException(Msg.formatter.getString("BUNDLE_UNINSTALLED_EXCEPTION", getLocation())); //$NON-NLS-1$
 		}
 	}
 
@@ -1286,7 +1286,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 		if (domain != null) {
 			BundlePermissionCollection collection = (BundlePermissionCollection) domain.getPermissions();
 			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-				Debug.println("Unresolving permissions in bundle " + this);
+				Debug.println("Unresolving permissions in bundle " + this); //$NON-NLS-1$
 			}
 			collection.unresolvePermissions(unresolvedPackages);
 		}
@@ -1329,8 +1329,8 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 		checkValid();
 		if (bundledata == null) {
 			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-				Debug.println("Bundle.getResourcePaths(" + path + ") called when bundledata == null: " + this);
-				Debug.printStackTrace(new Exception("Stack trace"));
+				Debug.println("Bundle.getResourcePaths(" + path + ") called when bundledata == null: " + this); //$NON-NLS-1$ //$NON-NLS-2$
+				Debug.printStackTrace(new Exception("Stack trace")); //$NON-NLS-1$
 			}
 			return (null);
 		}
@@ -1355,8 +1355,8 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 		checkValid();
 		if (bundledata == null) {
 			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-				Debug.println("Bundle.getFile(" + fileName + ") called when bundledata == null: " + this);
-				Debug.printStackTrace(new Exception("Stack trace"));
+				Debug.println("Bundle.getFile(" + fileName + ") called when bundledata == null: " + this); //$NON-NLS-1$ //$NON-NLS-2$
+				Debug.printStackTrace(new Exception("Stack trace")); //$NON-NLS-1$
 			}
 			return (null);
 		}
@@ -1402,8 +1402,8 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 		}
 		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 			if ((state & (INSTALLED)) == 0) {
-				Debug.println("Bundle.resolve called when state != INSTALLED: " + this);
-				Debug.printStackTrace(new Exception("Stack trace"));
+				Debug.println("Bundle.resolve called when state != INSTALLED: " + this); //$NON-NLS-1$
+				Debug.printStackTrace(new Exception("Stack trace")); //$NON-NLS-1$
 			}
 		}
 		// Need to see if this is a singleton
@@ -1414,7 +1414,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 				for (int i = 0; i < sameNames.length; i++)
 					if (sameNames[i] != this) {
 						if (sameNames[i].isResolved() && sameNames[i].singleton) {
-							runtimeResolveError = Msg.formatter.getString("BUNDLE_SINGLETON_RESOLVE_ERROR", this.getLocation(), sameNames[i].getLocation());
+							runtimeResolveError = Msg.formatter.getString("BUNDLE_SINGLETON_RESOLVE_ERROR", this.getLocation(), sameNames[i].getLocation()); //$NON-NLS-1$
 							return;
 						}
 					}
@@ -1438,7 +1438,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	abstract protected BundleContextImpl getContext();
 
 	protected String getResolutionFailureMessage() {
-		String defaultMessage = Msg.formatter.getString("BUNDLE_UNRESOLVED_EXCEPTION");
+		String defaultMessage = Msg.formatter.getString("BUNDLE_UNRESOLVED_EXCEPTION"); //$NON-NLS-1$
 		// don't spend time if debug info is not needed
 		if (!Debug.DEBUG) {
 			return defaultMessage;
@@ -1457,21 +1457,21 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 		}
 		VersionConstraint[] unsatisfied = framework.adaptor.getPlatformAdmin().getStateHelper().getUnsatisfiedConstraints(bundleDescription);
 		if (unsatisfied.length == 0) {
-			return Msg.formatter.getString("BUNDLE_UNRESOLVED_NOT_CHOSEN_EXCEPTION");
+			return Msg.formatter.getString("BUNDLE_UNRESOLVED_NOT_CHOSEN_EXCEPTION"); //$NON-NLS-1$
 		}
 		StringBuffer missing = new StringBuffer();
 		for (int i = 0; i < unsatisfied.length; i++) {
 			if (unsatisfied[i] instanceof PackageSpecification) {
-				missing.append(Msg.formatter.getString("BUNDLE_UNRESOLVED_PACKAGE", toString(unsatisfied[i])));
+				missing.append(Msg.formatter.getString("BUNDLE_UNRESOLVED_PACKAGE", toString(unsatisfied[i]))); //$NON-NLS-1$
 			} else if (unsatisfied[i] instanceof BundleSpecification) {
-				missing.append(Msg.formatter.getString("BUNDLE_UNRESOLVED_BUNDLE", toString(unsatisfied[i])));
+				missing.append(Msg.formatter.getString("BUNDLE_UNRESOLVED_BUNDLE", toString(unsatisfied[i]))); //$NON-NLS-1$
 			} else {
-				missing.append(Msg.formatter.getString("BUNDLE_UNRESOLVED_HOST", toString(unsatisfied[i])));
+				missing.append(Msg.formatter.getString("BUNDLE_UNRESOLVED_HOST", toString(unsatisfied[i]))); //$NON-NLS-1$
 			}
 			missing.append(',');
 		}
 		missing.deleteCharAt(missing.length() - 1);
-		return Msg.formatter.getString("BUNDLE_UNRESOLVED_UNSATISFIED_CONSTRAINT_EXCEPTION", missing.toString());
+		return Msg.formatter.getString("BUNDLE_UNRESOLVED_UNSATISFIED_CONSTRAINT_EXCEPTION", missing.toString()); //$NON-NLS-1$
 	}
 
 	private String toString(VersionConstraint constraint) {
@@ -1504,12 +1504,12 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 			BundleDescription supplier = pkgs[i].getSupplier();
 			AbstractBundle supplierBundle = supplier == null ? null : framework.getBundle(supplier.getBundleId());
 			if (supplierBundle == null || !supplierBundle.checkExportPackagePermission(pkgs[i].getName())) {
-				runtimeResolveError = Msg.formatter.getString("BUNDLE_PERMISSION_EXCEPTION_EXPORT", supplierBundle, pkgs[i].getName());
+				runtimeResolveError = Msg.formatter.getString("BUNDLE_PERMISSION_EXCEPTION_EXPORT", supplierBundle, pkgs[i].getName()); //$NON-NLS-1$
 				return false;
 			}
 			// check to make sure the importer has permissions
 			if (!checkImportPackagePermission(pkgs[i].getName())) {
-				runtimeResolveError = Msg.formatter.getString("BUNDLE_PERMISSION_EXCEPTION_IMPORT", this, pkgs[i].getName());
+				runtimeResolveError = Msg.formatter.getString("BUNDLE_PERMISSION_EXCEPTION_IMPORT", this, pkgs[i].getName()); //$NON-NLS-1$
 				return false;
 			}
 		}
@@ -1519,12 +1519,12 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 			BundleDescription supplier = bundles[i].getSupplier();
 			AbstractBundle supplierBundle = supplier == null ? null : framework.getBundle(supplier.getBundleId());
 			if (supplierBundle == null || !supplierBundle.checkProvideBundlePermission(bundles[i].getName())) {
-				runtimeResolveError = Msg.formatter.getString("BUNDLE_PERMISSION_EXCEPTION_PROVIDE", supplierBundle, bundles[i].getName());
+				runtimeResolveError = Msg.formatter.getString("BUNDLE_PERMISSION_EXCEPTION_PROVIDE", supplierBundle, bundles[i].getName()); //$NON-NLS-1$
 				return false;
 			}
 			// check to make sure the requirer has permissions
 			if (!checkRequireBundlePermission(bundles[i].getName())) {
-				runtimeResolveError = Msg.formatter.getString("BUNDLE_PERMISSION_EXCEPTION_REQUIRE", this, bundles[i].getName());
+				runtimeResolveError = Msg.formatter.getString("BUNDLE_PERMISSION_EXCEPTION_REQUIRE", this, bundles[i].getName()); //$NON-NLS-1$
 				return false;
 			}
 		}
@@ -1534,12 +1534,12 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 			BundleDescription supplier = host.getSupplier();
 			AbstractBundle supplierBundle = supplier == null ? null : framework.getBundle(supplier.getBundleId());
 			if (supplierBundle == null || !supplierBundle.checkFragmentHostPermission(host.getName())) {
-				runtimeResolveError = Msg.formatter.getString("BUNDLE_PERMISSION_EXCEPTION_HOST", supplierBundle, host.getName());
+				runtimeResolveError = Msg.formatter.getString("BUNDLE_PERMISSION_EXCEPTION_HOST", supplierBundle, host.getName()); //$NON-NLS-1$
 				return false;
 			}
 			// check to make sure the fragment has permissions
 			if (!checkFragmentBundlePermission(host.getName())) {
-				runtimeResolveError = Msg.formatter.getString("BUNDLE_PERMISSION_EXCEPTION_FRAGMENT", this, host.getName());
+				runtimeResolveError = Msg.formatter.getString("BUNDLE_PERMISSION_EXCEPTION_FRAGMENT", this, host.getName()); //$NON-NLS-1$
 				return false;
 			}
 		}

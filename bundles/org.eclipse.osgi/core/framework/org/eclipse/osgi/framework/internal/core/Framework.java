@@ -106,8 +106,8 @@ public class Framework implements EventDispatcher, EventPublisher {
 		active = false;
 		installSecurityManager();
 		if (Debug.DEBUG && Debug.DEBUG_SECURITY) {
-			Debug.println("SecurityManager: " + System.getSecurityManager());
-			Debug.println("ProtectionDomain of Framework.class: \n" + this.getClass().getProtectionDomain());
+			Debug.println("SecurityManager: " + System.getSecurityManager()); //$NON-NLS-1$
+			Debug.println("ProtectionDomain of Framework.class: \n" + this.getClass().getProtectionDomain()); //$NON-NLS-1$
 		}
 		/* initialize the adaptor */
 		adaptor.initialize(this);
@@ -136,7 +136,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 		}
 		startLevelManager = new StartLevelManager(this);
 		/* create the event manager and top level event dispatchers */
-		eventManager = new EventManager("Framework Event Dispatcher");
+		eventManager = new EventManager("Framework Event Dispatcher"); //$NON-NLS-1$
 		bundleEvent = new EventListeners();
 		bundleEventSync = new EventListeners();
 		serviceEvent = new EventListeners();
@@ -180,15 +180,15 @@ public class Framework implements EventDispatcher, EventPublisher {
 		systemBundle.getBundleLoader(); // initialize the bundle loader in case
 		// someone accesses it directly
 		if (Debug.DEBUG && Debug.DEBUG_GENERAL)
-			System.out.println("Initialize the framework: " + (System.currentTimeMillis() - start));
+			System.out.println("Initialize the framework: " + (System.currentTimeMillis() - start)); //$NON-NLS-1$
 	}
 
 	private void createSystemBundle() {
 		try {
 			systemBundle = new SystemBundle(this);
-			BundleDescription newSystemBundle = adaptor.getPlatformAdmin().getFactory().createBundleDescription(systemBundle.getHeaders(""), Constants.SYSTEM_BUNDLE_LOCATION, 0);
+			BundleDescription newSystemBundle = adaptor.getPlatformAdmin().getFactory().createBundleDescription(systemBundle.getHeaders(""), Constants.SYSTEM_BUNDLE_LOCATION, 0); //$NON-NLS-1$
 			if (newSystemBundle == null)
-				throw new BundleException(Msg.formatter.getString("OSGI_SYSTEMBUNDLE_DESCRIPTION_ERROR"));
+				throw new BundleException(Msg.formatter.getString("OSGI_SYSTEMBUNDLE_DESCRIPTION_ERROR")); //$NON-NLS-1$
 			State state = adaptor.getState();
 			BundleDescription oldSystemBundle = state.getBundle(0);
 			if (oldSystemBundle != null) {
@@ -249,7 +249,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 			}
 		} catch (BundleException e) /* fatal error */{
 			e.printStackTrace();
-			throw new RuntimeException(Msg.formatter.getString("OSGI_SYSTEMBUNDLE_CREATE_EXCEPTION", e.getMessage()));
+			throw new RuntimeException(Msg.formatter.getString("OSGI_SYSTEMBUNDLE_CREATE_EXCEPTION", e.getMessage())); //$NON-NLS-1$
 		}
 	}
 
@@ -330,7 +330,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 				}
 			}
 		}
-		value = properties.getProperty(Constants.FRAMEWORK_EXECUTIONENVIRONMENT, "");
+		value = properties.getProperty(Constants.FRAMEWORK_EXECUTIONENVIRONMENT, ""); //$NON-NLS-1$
 		String j2meConfig = properties.getProperty(Constants.J2ME_MICROEDITION_CONFIGURATION);
 		String j2meProfile = properties.getProperty(Constants.J2ME_MICROEDITION_PROFILES);
 		StringBuffer ee = new StringBuffer(value);
@@ -338,7 +338,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 			int ic = value.indexOf(j2meConfig);
 			if (!(ic >= 0) || !(ic + j2meConfig.length() < value.length() && value.charAt(ic + j2meConfig.length()) == '/') || !(value.startsWith(j2meProfile, ic + j2meConfig.length() + 1))) {
 				if (ee.length() > 0) {
-					ee.append(",");
+					ee.append(","); //$NON-NLS-1$
 				}
 				ee.append(j2meConfig).append('/').append(j2meProfile);
 			}
@@ -419,12 +419,12 @@ public class Framework implements EventDispatcher, EventPublisher {
 		/* Resume systembundle */
 		try {
 			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-				Debug.println("Trying to launch framework");
+				Debug.println("Trying to launch framework"); //$NON-NLS-1$
 			}
 			systemBundle.resume();
 		} catch (BundleException be) {
 			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-				Debug.println("Framework launch exception: " + be.getMessage());
+				Debug.println("Framework launch exception: " + be.getMessage()); //$NON-NLS-1$
 				Debug.printStackTrace(be.getNestedException());
 			}
 			publishFrameworkEvent(FrameworkEvent.ERROR, systemBundle, be);
@@ -455,12 +455,12 @@ public class Framework implements EventDispatcher, EventPublisher {
 		/* Suspend systembundle */
 		try {
 			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-				Debug.println("Trying to shutdown Framework");
+				Debug.println("Trying to shutdown Framework"); //$NON-NLS-1$
 			}
 			systemBundle.suspend();
 		} catch (BundleException be) {
 			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-				Debug.println("Framework shutdown exception: " + be.getMessage());
+				Debug.println("Framework shutdown exception: " + be.getMessage()); //$NON-NLS-1$
 				Debug.printStackTrace(be.getNestedException());
 			}
 			publishFrameworkEvent(FrameworkEvent.ERROR, systemBundle, be);
@@ -477,14 +477,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 	/**
 	 * Create a new Bundle object.
 	 * 
-	 * @param id
-	 *            Unique context id assigned to bundle
-	 * @param file
-	 *            the bundle's file
-	 * @param localStore
-	 *            adaptor specific object for the bundle's local storage
-	 * @param location
-	 *            identity string for the bundle
+	 * @param bundledata the BundleData of the Bundle to create
 	 */
 	public AbstractBundle createBundle(BundleData bundledata) throws BundleException {
 		verifyExecutionEnvironment(bundledata.getManifest());
@@ -514,7 +507,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 			return true;
 		}
 		String systemEE = System.getProperty(Constants.FRAMEWORK_EXECUTIONENVIRONMENT);
-		if (systemEE != null && !systemEE.equals("")) {
+		if (systemEE != null && !systemEE.equals("")) { //$NON-NLS-1$
 			ManifestElement[] systemEEs = ManifestElement.parseHeader(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT, systemEE);
 			for (int i = 0; i < systemEEs.length; i++) {
 				for (int j = 0; j < bundleRequiredEE.length; j++) {
@@ -528,11 +521,11 @@ public class Framework implements EventDispatcher, EventPublisher {
 		StringBuffer bundleEE = new StringBuffer(25);
 		for (int i = 0; i < bundleRequiredEE.length; i++) {
 			if (i > 0) {
-				bundleEE.append(",");
+				bundleEE.append(","); //$NON-NLS-1$
 			}
 			bundleEE.append(bundleRequiredEE[i]);
 		}
-		throw new BundleException(Msg.formatter.getString("BUNDLE_INSTALL_REQUIRED_EE_EXCEPTION", bundleEE.toString()));
+		throw new BundleException(Msg.formatter.getString("BUNDLE_INSTALL_REQUIRED_EE_EXCEPTION", bundleEE.toString())); //$NON-NLS-1$
 	}
 
 	/**
@@ -626,7 +619,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 	 */
 	protected AbstractBundle installBundle(final String location) throws BundleException {
 		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-			Debug.println("install from location: " + location);
+			Debug.println("install from location: " + location); //$NON-NLS-1$
 		}
 		return installWorker(location, new PrivilegedExceptionAction() {
 			public Object run() throws BundleException {
@@ -655,7 +648,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 	 */
 	protected AbstractBundle installBundle(final String location, final InputStream in) throws BundleException {
 		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-			Debug.println("install from inputstream: " + location + ", " + in);
+			Debug.println("install from inputstream: " + location + ", " + in); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return installWorker(location, new PrivilegedExceptionAction() {
 			public Object run() throws BundleException {
@@ -702,7 +695,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 				 * recursed to install the same bundle!
 				 */
 				if (current.equals(reservation)) {
-					throw new BundleException(Msg.formatter.getString("BUNDLE_INSTALL_RECURSION_EXCEPTION"));
+					throw new BundleException(Msg.formatter.getString("BUNDLE_INSTALL_RECURSION_EXCEPTION")); //$NON-NLS-1$
 				}
 				try {
 					/* wait for the reservation to be released */
@@ -747,7 +740,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 			BundleData bundledata = storage.begin();
 			// Check for a bundle already installed with the same UniqueId and version.
 			if (bundledata.getSymbolicName() != null) {
-				AbstractBundle installedBundle = getBundleByUniqueId(bundledata.getSymbolicName(), bundledata.getVersion().toString());
+				AbstractBundle installedBundle = getBundleBySymbolicName(bundledata.getSymbolicName(), bundledata.getVersion().toString());
 				if (installedBundle != null) {
 					throw new BundleException(Msg.formatter.getString("BUNDLE_INSTALL_SAME_UNIQUEID", new Object[] {installedBundle.getSymbolicName(), installedBundle.getVersion().toString(), installedBundle.getLocation()})); //$NON-NLS-1$
 				}
@@ -810,7 +803,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 		String osname = getProperty(Constants.FRAMEWORK_OS_NAME);
 		int length = elements.length;
 		boolean optional = false;
-		if (elements[length - 1].getValue().equals("*")) {
+		if (elements[length - 1].getValue().equals("*")) { //$NON-NLS-1$
 			optional = true;
 			length--;
 		}
@@ -931,16 +924,17 @@ public class Framework implements EventDispatcher, EventPublisher {
 	}
 
 	/**
-	 * Retrieve the bundle that has the given unique identifier.
+	 * Retrieve the bundle that has the given symbolic name and version.
 	 * 
-	 * @param id
-	 *            The identifier of the bundle to retrieve.
+	 * @param symbolicName
+	 *            The symbolic name of the bundle to retrieve
+	 * @param version The version of the bundle to retrieve
 	 * @return A {@link AbstractBundle}object, or <code>null</code> if the
 	 *         identifier doesn't match any installed bundle.
 	 */
-	protected AbstractBundle getBundleByUniqueId(String uniqueId, String version) {
+	protected AbstractBundle getBundleBySymbolicName(String symbolicName, String version) {
 		synchronized (bundles) {
-			return bundles.getBundle(uniqueId, version);
+			return bundles.getBundle(symbolicName, version);
 		}
 	}
 
@@ -994,12 +988,12 @@ public class Framework implements EventDispatcher, EventPublisher {
 				return;
 			}
 			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-				Debug.println("Trying to start bundle " + bundle);
+				Debug.println("Trying to start bundle " + bundle); //$NON-NLS-1$
 			}
 			bundle.resume();
 		} catch (BundleException be) {
 			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-				Debug.println("Bundle resume exception: " + be.getMessage());
+				Debug.println("Bundle resume exception: " + be.getMessage()); //$NON-NLS-1$
 				Debug.printStackTrace(be.getNestedException());
 			}
 			publishFrameworkEvent(FrameworkEvent.ERROR, bundle, be);
@@ -1024,12 +1018,12 @@ public class Framework implements EventDispatcher, EventPublisher {
 		}
 		try {
 			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-				Debug.println("Trying to suspend bundle " + bundle);
+				Debug.println("Trying to suspend bundle " + bundle); //$NON-NLS-1$
 			}
 			bundle.suspend(lock);
 		} catch (BundleException be) {
 			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-				Debug.println("Bundle suspend exception: " + be.getMessage());
+				Debug.println("Bundle suspend exception: " + be.getMessage()); //$NON-NLS-1$
 				Debug.printStackTrace(be.getNestedException());
 			}
 			publishFrameworkEvent(FrameworkEvent.ERROR, bundle, be);
@@ -1065,16 +1059,16 @@ public class Framework implements EventDispatcher, EventPublisher {
 	}
 
 	/**
-	 * Locate an installed bundle with a given unique ID.
+	 * Locate an installed bundle with a given symbolic name
 	 * 
-	 * @param uniqueId
-	 *            The Unique Id for the bundle
+	 * @param symbolicName
+	 *            The symbolic name for the bundle
 	 * @return Bundle object for bundle with the specified Unique or null if no
 	 *         bundle is installed with the specified location.
 	 */
-	protected AbstractBundle[] getBundleByUniqueId(String uniqueId) {
+	protected AbstractBundle[] getBundleBySymbolicName(String symbolicName) {
 		synchronized (bundles) {
-			return bundles.getBundles(uniqueId);
+			return bundles.getBundles(symbolicName);
 		}
 	}
 
@@ -1126,7 +1120,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 	 * @param clazz
 	 *            The class name with which the service was registered, or <tt>null</tt>
 	 *            for all services.
-	 * @param filter
+	 * @param filterstring
 	 *            The filter criteria.
 	 * @return An array of <tt>ServiceReference</tt> objects, or <tt>null</tt>
 	 *         if no services are registered which satisfy the search.
@@ -1189,7 +1183,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 	 * A <code>File</code> object for the base directory of the persistent
 	 * storage area provided for the context bundle by the framework can be
 	 * obtained by calling this method with the empty string ("") as the
-	 * parameter. See {@link #getBundle()}for a definition of context bundle.
+	 * parameter.
 	 */
 	protected File getDataFile(final AbstractBundle bundle, final String filename) {
 		return (File) AccessController.doPrivileged(new PrivilegedAction() {
@@ -1264,18 +1258,18 @@ public class Framework implements EventDispatcher, EventPublisher {
 	 * is set much later than we would like!
 	 */
 	protected void installSecurityManager() {
-		String securityManager = System.getProperty("java.security.manager");
+		String securityManager = System.getProperty("java.security.manager"); //$NON-NLS-1$
 		if (securityManager != null) {
 			SecurityManager sm = System.getSecurityManager();
 			if (sm == null) {
 				if (securityManager.length() < 1) {
-					securityManager = "java.lang.SecurityManager";
+					securityManager = "java.lang.SecurityManager"; //$NON-NLS-1$
 				}
 				try {
 					Class clazz = Class.forName(securityManager);
 					sm = (SecurityManager) clazz.newInstance();
 					if (Debug.DEBUG && Debug.DEBUG_SECURITY) {
-						Debug.println("Setting SecurityManager to: " + sm);
+						Debug.println("Setting SecurityManager to: " + sm); //$NON-NLS-1$
 					}
 					System.setSecurityManager(sm);
 					return;
@@ -1402,8 +1396,8 @@ public class Framework implements EventDispatcher, EventPublisher {
 	 * 
 	 * @param type
 	 *            ServiceEvent type.
-	 * @param service
-	 *            Affected service.
+	 * @param reference
+	 *            Affected service reference.
 	 */
 	public void publishServiceEvent(int type, org.osgi.framework.ServiceReference reference) {
 		if (serviceEvent != null) {
@@ -1475,7 +1469,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 			}
 		} catch (Throwable t) {
 			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-				Debug.println("Exception in Top level event dispatcher: " + t.getMessage());
+				Debug.println("Exception in Top level event dispatcher: " + t.getMessage()); //$NON-NLS-1$
 				Debug.printStackTrace(t);
 			}
 			publisherror: {
@@ -1495,6 +1489,6 @@ public class Framework implements EventDispatcher, EventPublisher {
 		if (optional) {
 			return null;
 		}
-		throw new BundleException(Msg.formatter.getString("BUNDLE_NATIVECODE_MATCH_EXCEPTION"));
+		throw new BundleException(Msg.formatter.getString("BUNDLE_NATIVECODE_MATCH_EXCEPTION")); //$NON-NLS-1$
 	}
 }
