@@ -56,7 +56,7 @@ public class StartLevelImpl implements EventSource, EventListener {
 		initialBundleStartLevel = framework.adaptor.getInitialBundleStartLevel();
 
 		// Set Framework Beginning Start Level Property
-		String value = framework.getProperty(Constants.KEY_FRAMEWORKBEGINNINGSTARTLEVEL);
+		String value = framework.getProperty(Constants.OSGI_FRAMEWORKBEGINNINGSTARTLEVEL);
 		if (value == null) {
 			value = Constants.DEFAULT_STARTLEVEL;
 		} else {
@@ -70,7 +70,7 @@ public class StartLevelImpl implements EventSource, EventListener {
 				value = Constants.DEFAULT_STARTLEVEL;
 			}
 		}
-		framework.setProperty(Constants.KEY_FRAMEWORKBEGINNINGSTARTLEVEL, value);
+		framework.setProperty(Constants.OSGI_FRAMEWORKBEGINNINGSTARTLEVEL, value);
 		frameworkBeginningStartLevel = Integer.parseInt(value);
 
 		// create an event manager and a start level listener

@@ -327,7 +327,7 @@ public class Framework implements EventSource, EventPublisher {
 					systemPackages[i] = spec.getName();
 				}
 				// remember the system packages.
-				if (System.getProperty("osgi.autoExportSystemPackages") != null)
+				if (System.getProperty(Constants.OSGI_AUTOEXPORTSYSTEMPACKAGES) != null)
 					SystemBundleLoader.setSystemPackages(systemPackages);
 			}
 		} catch (BundleException e) /* fatal error */ {
