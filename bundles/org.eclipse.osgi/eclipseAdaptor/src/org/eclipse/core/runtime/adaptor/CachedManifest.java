@@ -70,7 +70,8 @@ public class CachedManifest extends Dictionary {
 			return bundledata.isLegacy();
 		if (org.osgi.framework.Constants.BUNDLE_SYMBOLICNAME.equalsIgnoreCase(keyString))
 			return bundledata.getSymbolicName();
-		//TODO: getManifest may return null
+		//TODO: getManifest may return null. 
+		//TODO This can only happen if the converter is not around.
 		return getManifest().get(key);
 	}
 

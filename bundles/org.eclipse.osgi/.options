@@ -17,5 +17,8 @@ org.eclipse.osgi/debug/monitorbundles=false
 org.eclipse.osgi/debug/bundleTime=false
 
 # Eclipse adaptor options
+org.eclipse.osgi/eclipseadaptor/debug = false
+
 org.eclipse.osgi/eclipseadaptor/debug/platformadmin=false
 org.eclipse.osgi/eclipseadaptor/debug/platformadmin/resolver=false
+

@@ -769,7 +769,7 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 		}
 		if (Debug.DEBUG && Debug.DEBUG_PACKAGEADMIN_TIMING) {
 			cumulativeTime = cumulativeTime + System.currentTimeMillis() - start;
-			DebugOptions.getDefault().setOption("debug.packageadmin/timing/value", Long.toString(cumulativeTime));
+			DebugOptions.getDefault().setOption("debug.packageadmin/timing/value", Long.toString(cumulativeTime));	//TODO the name of the option should be fully qualified
 		}
 	}
 

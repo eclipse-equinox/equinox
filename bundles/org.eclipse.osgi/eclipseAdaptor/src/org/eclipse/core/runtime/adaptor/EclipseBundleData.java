@@ -174,11 +174,11 @@ public class EclipseBundleData extends DefaultBundleData {
 	}
 
 	private Dictionary generateManifest(Dictionary originalManifest) throws BundleException {
-		String cacheLocation = (String) System.getProperties().get("osgi.manifest.cache");
+		String cacheLocation = (String) System.getProperties().get("osgi.manifest.cache");	//TODO This should be a constant
 		if (getSymbolicName() != null) {
 			Version version = getVersion();
 			File currentFile = new File(cacheLocation, getSymbolicName() + '_' + version.toString() + ".MF");
-			if (PluginConverterImpl.upToDate(currentFile,getBaseFile(),manifestType))
+			if (PluginConverterImpl.upToDate(currentFile, getBaseFile(), manifestType))
 				try {
 					return Headers.parseManifest(new FileInputStream(currentFile));
 				} catch (FileNotFoundException e) {
