@@ -134,6 +134,8 @@ abstract public class BundleFile {
 
 		public ZipBundleFile(File basefile, BundleData bundledata) throws IOException {
 			super(basefile);
+			if (!basefile.exists())
+				throw new IOException(AdaptorMsg.formatter.getString("ADAPTER_FILEEXIST_EXCEPTION", basefile)); //$NON-NLS-1$
 			this.bundledata = bundledata;
 			this.closed = true;
 		}
