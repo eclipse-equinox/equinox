@@ -1077,7 +1077,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 		return null;
 	}
 
-	protected void initDynamicImportPackage(ManifestElement[] packages) {
+	public void initDynamicImportPackage(ManifestElement[] packages) {
 		if (packages == null && SystemBundleLoader.getSystemPackages() == null)
 			return;
 
