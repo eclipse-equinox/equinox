@@ -256,6 +256,10 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 			}
 		}
 
+		initializeMetadata();
+	}
+
+	protected void initializeMetadata() throws IOException {
 		fwMetadata = new MetaData(getMetaDataFile(), "Framework metadata"); //$NON-NLS-1$
 		fwMetadata.load();
 		nextId = fwMetadata.getLong(METADATA_ADAPTOR_NEXTID, 1);
@@ -416,7 +420,6 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 					try {
 						try {
 							id = getNextBundleId();
-							fwMetadata.save();
 						} catch (IOException e) {
 							throw new BundleException(AdaptorMsg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION"), e); //$NON-NLS-1$
 						}
@@ -870,12 +873,16 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 
 	public void setInitialBundleStartLevel(int value) {
 		super.setInitialBundleStartLevel(value);
-		fwMetadata.setInt(METADATA_ADAPTOR_IBSL, value);
 		try {
-			fwMetadata.save();
+			persistInitialBundleStartLevel(value);
 		} catch (IOException e) {
 			eventPublisher.publishFrameworkEvent(FrameworkEvent.ERROR, context.getBundle(), e);
 		}
+	}
+
+	protected void persistInitialBundleStartLevel(int value) throws IOException {
+		fwMetadata.setInt(METADATA_ADAPTOR_IBSL, value);
+		fwMetadata.save();
 	}
 
 	/**
@@ -906,6 +913,11 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 		return (location.substring(begin + 1, end));
 	}
 
+	protected void persistNextBundleID(long id) throws IOException{
+		fwMetadata.setLong(METADATA_ADAPTOR_NEXTID, nextId);
+		fwMetadata.save();
+	}
+
 	/**
 	 * Return the next valid, unused bundle id.
 	 *
@@ -915,15 +927,13 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 	protected synchronized long getNextBundleId() throws IOException {
 		while (nextId < Long.MAX_VALUE) {
 			long id = nextId;
-
 			nextId++;
-			fwMetadata.setLong(METADATA_ADAPTOR_NEXTID, nextId);
 
 			File bundleDir = new File(getBundleStoreRootDir(), String.valueOf(id));
 			if (bundleDir.exists()) {
 				continue;
 			}
-
+			persistNextBundleID(id);
 			return (id);
 		}
 

@@ -85,6 +85,10 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		super.initialize(eventPublisher);
 	}
 
+	public void initializeMetadata() {
+		// do nothing here; metadata is already initialized by readHeaders.
+	}
+
 	protected void initBundleStoreRootDir() {
 		File configurationLocation = LocationManager.getOSGiConfigurationDir();
 		if (configurationLocation != null) {
@@ -151,14 +155,9 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		if (!EclipseStarter.getSysPath().equals(installURL)) {
 			//delete the metadata file and the framework file when the location of the basic bundles has changed 
 			LocationManager.getConfigurationFile(LocationManager.BUNDLE_DATA_FILE).delete();
-			LocationManager.getConfigurationFile(LocationManager.FRAMEWORK_FILE).delete();
 			LocationManager.getConfigurationFile(LocationManager.STATE_FILE).delete();
 			installURL = EclipseStarter.getSysPath();
 		}
-	}
-
-	protected File getMetaDataFile() {
-		return LocationManager.getConfigurationFile(LocationManager.FRAMEWORK_FILE);
 	}
 
 	private void readHeaders() {
@@ -395,6 +394,15 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		if (!((EclipseBundleData) data).isAutoStartable()) {
 			timeStamp--; //Change the value of the timeStamp, as a marker that something changed.  
 		}
+	}
+
+	public void persistInitialBundleStartLevel(int value) {
+		// Change the value of the timeStamp, as a marker that something changed.  
+		timeStamp--;
+	}
+
+	public void persistNextBundleID(long value) {
+		// Do nothing the timeStamp will have changed because the state will be updated.
 	}
 
 	protected void saveMetaDataFor(BundleData data, DataOutputStream out) throws IOException {
