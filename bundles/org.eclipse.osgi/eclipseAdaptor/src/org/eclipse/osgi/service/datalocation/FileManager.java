@@ -60,9 +60,12 @@ public class FileManager {
 	private FileLock fileLock;
 	private FileOutputStream fileStream;
 	private File base;
-	private Properties table = new Properties();
-
 	private File tableFile = null;
+	private long tableStamp = 0L;
+	
+	private Properties table = new Properties();
+	private ArrayList changed = new ArrayList(5);
+
 	private static final String TABLE_FILE = ".fileTable";
 
 	
@@ -92,6 +95,7 @@ public class FileManager {
 		long fileStamp = target.lastModified();
 		Entry entry = new Entry(fileStamp, 1);
 		table.put(file, entry);
+		changed.add(file);
 	}
 
 	/**
@@ -279,6 +283,7 @@ public class FileManager {
 		try {
 			FileInputStream input = new FileInputStream(tableFile);
 			try {
+				tableStamp = tableFile.lastModified();
 				table.load(input);
 			} finally {
 				input.close();
@@ -288,13 +293,26 @@ public class FileManager {
 		}
 		for (Enumeration e = table.keys(); e.hasMoreElements();) {
 			String file = (String)e.nextElement();
+			// if the entry has changed internally, update the value.
 			String[] elements = getArrayFromList((String)table.get(file));
-			Entry entry = new Entry(Long.parseLong(elements[0]), Integer.parseInt(elements[1]));
-			table.put(file, entry);
+			if (changed.indexOf(file) == -1) {
+				Entry entry = new Entry(Long.parseLong(elements[0]), Integer.parseInt(elements[1]));
+				table.put(file, entry);
+			} else {
+				Entry entry = (Entry)table.get(file);
+				entry.setId(entry.getId() + 1);
+				table.put(file, entry);
+			}
 		}
 	}
 
+	/*
+	 * This method should be called while the manager is locked.
+	 */
 	private void save() throws IOException {
+		// if the table file has change on disk, update our data structures then rewrite the file.
+		if (tableStamp != tableFile.lastModified())
+			restore();
 		Properties props = new Properties();
 		for (Enumeration e = table.keys(); e.hasMoreElements();) {
 			String file = (String)e.nextElement();
@@ -316,6 +334,7 @@ public class FileManager {
 		Entry entry = (Entry)table.get(target);
 		entry.setTimeStamp(new File(targetFile).lastModified());
 		entry.setId(entry.getId() + 1);
+		changed.add(target);
 	}
 
 	/**
