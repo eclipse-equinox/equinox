@@ -39,16 +39,14 @@ public class Framework implements EventDispatcher, EventPublisher {
 	/** The bundles installed in the framework */
 	protected BundleRepository bundles;
 	/** Package Admin object. This object manages the exported packages. */
-	protected PackageAdmin packageAdmin;
+	protected PackageAdminImpl packageAdmin;
 	/** Package Admin object. This object manages the exported packages. */
-	protected PermissionAdmin permissionAdmin;
+	protected PermissionAdminImpl permissionAdmin;
 	/**
 	 * Startlevel object. This object manages the framework and bundle
 	 * startlevels
 	 */
-	protected StartLevelImpl startLevelImpl;
-	/** Startlevel factory object */
-	protected StartLevelFactory startLevelFactory;
+	protected StartLevelManager startLevelManager;
 	/** The ServiceRegistry */
 	protected ServiceRegistry serviceRegistry;		//TODO This is duplicated from the adaptor, do we really gain ?
 	/** next free service id. */
@@ -122,18 +120,17 @@ public class Framework implements EventDispatcher, EventPublisher {
 		 */
 		initializeProperties(adaptor.getProperties());
 		/* initialize admin objects */
-		packageAdmin = new PackageAdmin(this);
+		packageAdmin = new PackageAdminImpl(this);
 		SecurityManager sm = System.getSecurityManager();
 		if (sm != null) {
 			try {
-				permissionAdmin = new PermissionAdmin(this, adaptor.getPermissionStorage());
+				permissionAdmin = new PermissionAdminImpl(this, adaptor.getPermissionStorage());
 			} catch (IOException e) /* fatal error */{
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage());
 			}
 		}
-		startLevelFactory = new StartLevelFactory(this);
-		startLevelImpl = new StartLevelImpl(this);
+		startLevelManager = new StartLevelManager(this);
 		/* create the event manager and top level event dispatchers */
 		eventManager = new EventManager("Framework Event Dispatcher");
 		bundleEvent = new EventListeners();
@@ -163,7 +160,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 			for (int i = 0; i < size; i++) {
 				BundleData bundledata = (BundleData) bundleDatas.elementAt(i);
 				try {
-					Bundle bundle = Bundle.createBundle(bundledata, this);
+					AbstractBundle bundle = AbstractBundle.createBundle(bundledata, this);
 					bundles.add(bundle);
 				} catch (BundleException be) {
 					// This is not a fatal error. Publish the framework event, but
@@ -361,7 +358,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 			List allBundles = bundles.getBundles();
 			int size = allBundles.size();
 			for (int i = 0; i < size; i++) {
-				Bundle bundle = (Bundle) allBundles.get(i);
+				AbstractBundle bundle = (AbstractBundle) allBundles.get(i);
 				bundle.close();
 			}
 			bundles.removeAllBundles();
@@ -478,9 +475,9 @@ public class Framework implements EventDispatcher, EventPublisher {
 	 * @param location
 	 *            identity string for the bundle
 	 */
-	public Bundle createBundle(BundleData bundledata) throws BundleException {
+	public AbstractBundle createBundle(BundleData bundledata) throws BundleException {
 		verifyExecutionEnvironment(bundledata.getManifest());
-		return Bundle.createBundle(bundledata, this);
+		return AbstractBundle.createBundle(bundledata, this);
 	}
 	/**
 	 * Verifies that the framework supports one of the required Execution
@@ -611,7 +608,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 	 *            The location identifier of the bundle to install.
 	 * @return The Bundle object of the installed bundle.
 	 */
-	protected Bundle installBundle(final String location) throws BundleException {
+	protected AbstractBundle installBundle(final String location) throws BundleException {
 		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 			Debug.println("install from location: " + location);
 		}
@@ -639,7 +636,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 	 *            The InputStream from which the bundle will be read.
 	 * @return The Bundle of the installed bundle.
 	 */
-	protected Bundle installBundle(final String location, final InputStream in) throws BundleException {
+	protected AbstractBundle installBundle(final String location, final InputStream in) throws BundleException {
 		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 			Debug.println("install from inputstream: " + location + ", " + in);
 		}
@@ -660,15 +657,15 @@ public class Framework implements EventDispatcher, EventPublisher {
 	 *            The location identifier of the bundle to install.
 	 * @param action
 	 *            A PrivilegedExceptionAction which calls the real worker.
-	 * @return The {@link Bundle}of the installed bundle.
+	 * @return The {@link AbstractBundle}of the installed bundle.
 	 * @exception BundleException
 	 *                If the action throws an error.
 	 */
-	protected Bundle installWorker(String location, PrivilegedExceptionAction action) throws BundleException {
+	protected AbstractBundle installWorker(String location, PrivilegedExceptionAction action) throws BundleException {
 		synchronized (installLock) {
 			while (true) {
 				/* Check that the bundle is not already installed. */
-				Bundle bundle = getBundleByLocation(location);
+				AbstractBundle bundle = getBundleByLocation(location);
 				/* If already installed, return bundle object */
 				if (bundle != null) {
 					return bundle;
@@ -698,7 +695,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 		}
 		/* Don't call adaptor while holding the install lock */
 		try {
-			Bundle bundle = (Bundle) AccessController.doPrivileged(action);
+			AbstractBundle bundle = (AbstractBundle) AccessController.doPrivileged(action);
 			publishBundleEvent(BundleEvent.INSTALLED, bundle);
 			return bundle;
 		} catch (PrivilegedActionException e) {
@@ -720,18 +717,18 @@ public class Framework implements EventDispatcher, EventPublisher {
 	 *            The location identifier of the bundle to install.
 	 * @param source
 	 *            The URLConnection from which the bundle will be read.
-	 * @return The {@link Bundle}of the installed bundle.
+	 * @return The {@link AbstractBundle}of the installed bundle.
 	 * @exception BundleException
 	 *                If the provided stream cannot be read.
 	 */
-	protected Bundle installWorkerPrivileged(String location, URLConnection source) throws BundleException {
+	protected AbstractBundle installWorkerPrivileged(String location, URLConnection source) throws BundleException {
 		BundleOperation storage = adaptor.installBundle(location, source);
-		Bundle bundle;
+		AbstractBundle bundle;
 		try {
 			BundleData bundledata = storage.begin();
 			// Check for a bundle already installed with the same UniqueId and version.
 			if (bundledata.getSymbolicName() != null) {
-				Bundle installedBundle = getBundleByUniqueId(bundledata.getSymbolicName(), bundledata.getVersion().toString());
+				AbstractBundle installedBundle = getBundleByUniqueId(bundledata.getSymbolicName(), bundledata.getVersion().toString());
 				if (installedBundle != null) {
 					throw new BundleException(Msg.formatter.getString("BUNDLE_INSTALL_SAME_UNIQUEID", new Object[] {installedBundle.getSymbolicName(), installedBundle.getVersion().toString(), installedBundle.getLocation()})); //$NON-NLS-1$
 				}
@@ -779,7 +776,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 	 *             If there is no suitable clause.
 	 */
 	public String[] selectNativeCode(org.osgi.framework.Bundle bundle) throws BundleException {
-		String headerValue = (String) ((Bundle) bundle).getBundleData().getManifest().get(Constants.BUNDLE_NATIVECODE);
+		String headerValue = (String) ((AbstractBundle) bundle).getBundleData().getManifest().get(Constants.BUNDLE_NATIVECODE);
 		if (headerValue == null) {
 			return (null);
 		}
@@ -910,11 +907,11 @@ public class Framework implements EventDispatcher, EventPublisher {
 	 * 
 	 * @param id
 	 *            The identifier of the bundle to retrieve.
-	 * @return A {@link Bundle}object, or <code>null</code> if the
+	 * @return A {@link AbstractBundle}object, or <code>null</code> if the
 	 *         identifier doesn't match any installed bundle.
 	 */
 	// changed visibility to gain access through the adaptor
-	public Bundle getBundle(long id) {
+	public AbstractBundle getBundle(long id) {
 		synchronized (bundles) {
 			return bundles.getBundle(id);
 		}
@@ -924,10 +921,10 @@ public class Framework implements EventDispatcher, EventPublisher {
 	 * 
 	 * @param id
 	 *            The identifier of the bundle to retrieve.
-	 * @return A {@link Bundle}object, or <code>null</code> if the
+	 * @return A {@link AbstractBundle}object, or <code>null</code> if the
 	 *         identifier doesn't match any installed bundle.
 	 */
-	protected Bundle getBundleByUniqueId(String uniqueId, String version) {
+	protected AbstractBundle getBundleByUniqueId(String uniqueId, String version) {
 		synchronized (bundles) {
 			return bundles.getBundle(uniqueId, version);
 		}
@@ -948,17 +945,17 @@ public class Framework implements EventDispatcher, EventPublisher {
 	 * of the call to getBundleAlls, but the framework is a very dynamic
 	 * environment and bundles can be installed or uninstalled at anytime.
 	 * 
-	 * @return An Array of {@link Bundle}objects, one object per installed
+	 * @return An Array of {@link AbstractBundle}objects, one object per installed
 	 *         bundle.
 	 */
-	protected Bundle[] getAllBundles() {
+	protected AbstractBundle[] getAllBundles() {
 		synchronized (bundles) {
 			List allBundles = bundles.getBundles();
 			int size = allBundles.size();
 			if (size == 0) {
 				return (null);
 			}
-			Bundle[] bundlelist = new Bundle[size];
+			AbstractBundle[] bundlelist = new AbstractBundle[size];
 			allBundles.toArray(bundlelist);
 			return (bundlelist);
 		}
@@ -969,7 +966,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 	 * @param bundle
 	 *            Bundle to resume.
 	 */
-	protected void resumeBundle(Bundle bundle) {
+	protected void resumeBundle(AbstractBundle bundle) {
 		if (bundle.isActive()) {
 			// if bundle is active.
 			return;
@@ -1001,7 +998,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 	 *            this method.
 	 * @return true if bundle was active and is now suspended.
 	 */
-	protected boolean suspendBundle(Bundle bundle, boolean lock) {
+	protected boolean suspendBundle(AbstractBundle bundle, boolean lock) {
 		boolean changed = false;
 		if (!bundle.isActive() || bundle.isFragment()) {
 			// if bundle is not active or is a fragment then do nothing.
@@ -1032,14 +1029,14 @@ public class Framework implements EventDispatcher, EventPublisher {
 	 * @return Bundle object for bundle with the specified location or null if
 	 *         no bundle is installed with the specified location.
 	 */
-	protected Bundle getBundleByLocation(String location) {
+	protected AbstractBundle getBundleByLocation(String location) {
 		synchronized (bundles) {
 			// this is not optimized; do not think it will get called
 			// that much.
 			List allBundles = bundles.getBundles();
 			int size = allBundles.size();
 			for (int i = 0; i < size; i++) {
-				Bundle bundle = (Bundle) allBundles.get(i);
+				AbstractBundle bundle = (AbstractBundle) allBundles.get(i);
 				if (location.equals(bundle.getLocation())) {
 					return (bundle);
 				}
@@ -1055,7 +1052,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 	 * @return Bundle object for bundle with the specified Unique or null if no
 	 *         bundle is installed with the specified location.
 	 */
-	protected Bundle[] getBundleByUniqueId(String uniqueId) {
+	protected AbstractBundle[] getBundleByUniqueId(String uniqueId) {
 		synchronized (bundles) {
 			return bundles.getBundles(uniqueId);
 		}
@@ -1074,7 +1071,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 	 * <p>
 	 * <tt>filter</tt> is used to select the registered service whose
 	 * properties objects contain keys and values which satisfy the filter. See
-	 * {@link Filter}for a description of the filter string syntax.
+	 * {@link FilterImpl}for a description of the filter string syntax.
 	 * 
 	 * <p>
 	 * If <tt>filter</tt> is <tt>null</tt>, all registered services are
@@ -1116,9 +1113,9 @@ public class Framework implements EventDispatcher, EventPublisher {
 	 *                If <tt>filter</tt> contains an invalid filter string
 	 *                which cannot be parsed.
 	 */
-	protected ServiceReference[] getServiceReferences(String clazz, String filterstring) throws InvalidSyntaxException {
-		Filter filter = (filterstring == null) ? null : new Filter(filterstring);
-		ServiceReference[] references = null;
+	protected ServiceReferenceImpl[] getServiceReferences(String clazz, String filterstring) throws InvalidSyntaxException {
+		FilterImpl filter = (filterstring == null) ? null : new FilterImpl(filterstring);
+		ServiceReferenceImpl[] references = null;
 		if (clazz != null) {
 			try /* test for permission to get clazz */{
 				checkGetServicePermission(clazz);
@@ -1133,7 +1130,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 			}
 			if (clazz == null) {
 				for (int i = services.size() - 1; i >= 0; i--) {
-					ServiceReference ref = (ServiceReference) services.elementAt(i);
+					ServiceReferenceImpl ref = (ServiceReferenceImpl) services.elementAt(i);
 					String[] classes = ref.getClasses();
 					try { /* test for permission to the classes */
 						checkGetServicePermission(classes);
@@ -1143,7 +1140,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 				}
 			}
 			if (services.size() > 0) {
-				references = new ServiceReference[services.size()];
+				references = new ServiceReferenceImpl[services.size()];
 				services.toArray(references);
 			}
 		}
@@ -1171,7 +1168,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 	 * obtained by calling this method with the empty string ("") as the
 	 * parameter. See {@link #getBundle()}for a definition of context bundle.
 	 */
-	protected File getDataFile(final Bundle bundle, final String filename) {
+	protected File getDataFile(final AbstractBundle bundle, final String filename) {
 		return (File) AccessController.doPrivileged(new PrivilegedAction() {
 			public Object run() {
 				return bundle.getBundleData().getDataFile(filename);
@@ -1420,7 +1417,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 	 */
 	public void dispatchEvent(Object l, Object lo, int action, Object object) {
 		try {
-			BundleContext context = (BundleContext) l;
+			BundleContextImpl context = (BundleContextImpl) l;
 			if (context.isValid()) /* if context still valid */{
 				ListenerQueue queue = (ListenerQueue) object;
 				switch (action) {
@@ -1458,7 +1455,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 						break publisherror; /* avoid infinite loop */
 					}
 				}
-				BundleContext context = (BundleContext) l;
+				BundleContextImpl context = (BundleContextImpl) l;
 				publishFrameworkEvent(FrameworkEvent.ERROR, context.bundle, t);
 			}
 		}

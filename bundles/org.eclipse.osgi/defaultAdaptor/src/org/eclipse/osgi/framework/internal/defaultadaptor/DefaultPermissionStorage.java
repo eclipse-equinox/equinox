@@ -14,6 +14,7 @@ import java.io.*;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
+import org.eclipse.osgi.framework.adaptor.PermissionStorage;
 import org.eclipse.osgi.framework.adaptor.core.AdaptorMsg;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.internal.reliablefile.*;
@@ -23,7 +24,7 @@ import org.eclipse.osgi.framework.internal.reliablefile.*;
  */
 
 //TODO switch this class over to use MetaData instead of ReliableFile
-class PermissionStorage implements org.eclipse.osgi.framework.adaptor.PermissionStorage {
+class DefaultPermissionStorage implements PermissionStorage {
 	/** Directory into which permission data files are stored. */
 	protected File permissionDir;
 
@@ -44,7 +45,7 @@ class PermissionStorage implements org.eclipse.osgi.framework.adaptor.Permission
 	 *
 	 * @throws IOException If an error occurs initializing the object.
 	 */
-	protected PermissionStorage(DefaultAdaptor adaptor) throws IOException {
+	protected DefaultPermissionStorage(DefaultAdaptor adaptor) throws IOException {
 		permissionDir = new File(adaptor.getBundleStoreRootDir(), "permdata");
 		permissionFiles = new Hashtable();
 

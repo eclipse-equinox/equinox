@@ -20,7 +20,7 @@ import org.eclipse.osgi.framework.debug.Debug;
 import org.osgi.framework.*;
 import org.osgi.framework.ServiceReference;
 
-public class BundleFragment extends Bundle {
+public class BundleFragment extends AbstractBundle {
 
 	/** The resolved host that this fragment is attached to */
 	protected BundleHost host;
@@ -111,7 +111,7 @@ public class BundleFragment extends Bundle {
 	 * @return  true if an exported package is "in use". i.e. it has been imported by a bundle
 	 * @exception org.osgi.framework.BundleException
 	 */
-	protected boolean reload(Bundle newBundle) throws BundleException {
+	protected boolean reload(AbstractBundle newBundle) throws BundleException {
 		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 			if ((state & (INSTALLED | RESOLVED)) == 0) {
 				Debug.println("Bundle.reload called when state != INSTALLED | RESOLVED: " + this);
@@ -279,10 +279,10 @@ public class BundleFragment extends Bundle {
 			}
 
 			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-				Debug.println("Bundle: Active sl = " + framework.startLevelImpl.getStartLevel() + "; Bundle " + getBundleId() + " sl = " + getStartLevel());
+				Debug.println("Bundle: Active sl = " + framework.startLevelManager.getStartLevel() + "; Bundle " + getBundleId() + " sl = " + getStartLevel());
 			}
 
-			if (getStartLevel() <= framework.startLevelImpl.getStartLevel()) {
+			if (getStartLevel() <= framework.startLevelManager.getStartLevel()) {
 				if (state == UNINSTALLED) {
 					throw new BundleException(Msg.formatter.getString("BUNDLE_UNINSTALLED_EXCEPTION"));
 				}
@@ -341,7 +341,7 @@ public class BundleFragment extends Bundle {
 	 * @return An array of {@link ServiceReference} or <code>null</code>.
 	 * @exception java.lang.IllegalStateException If the
 	 * bundle has been uninstalled.
-	 * @see ServiceRegistration
+	 * @see ServiceRegistrationImpl
 	 * @see ServiceReference
 	 */
 	public ServiceReference[] getRegisteredServices() {
@@ -411,7 +411,7 @@ public class BundleFragment extends Bundle {
 	 *
 	 * @return BundleContext for this bundle.
 	 */
-	protected BundleContext getContext() {
+	protected BundleContextImpl getContext() {
 		// Fragments cannot have a BundleContext.
 		return null;
 	}

@@ -340,9 +340,9 @@ public class BundleNativeCode {
 		if (filterString == null) {
 			return true;
 		}
-		Filter filter;
+		FilterImpl filter;
 		try {
-			filter = new Filter(filterString);
+			filter = new FilterImpl(filterString);
 		} catch (InvalidSyntaxException e) {
 			// TODO Should we log an error???
 			return false;

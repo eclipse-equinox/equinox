@@ -11,16 +11,18 @@
 
 package org.eclipse.osgi.framework.internal.core;
 
+import org.osgi.framework.ServiceReference;
+
 /**
  * A reference to a service.
  *
  * The framework returns ServiceReference objects from the
- * {@link BundleContext#getServiceReference BundleContext.getServiceReference} and
- * {@link BundleContext#getServiceReferences BundleContext.getServiceReferences} methods.
+ * {@link BundleContextImpl#getServiceReference BundleContext.getServiceReference} and
+ * {@link BundleContextImpl#getServiceReferences BundleContext.getServiceReferences} methods.
  * <p>A ServiceReference may be shared between bundles and
  * can be used to examine the properties of the service and to
  * get the service object
- * (See {@link BundleContext#getService BundleContext.getService}).
+ * (See {@link BundleContextImpl#getService BundleContext.getService}).
  * <p>A registered service <i>may</i> have multiple, distinct ServiceReference
  * objects which refer to it.
  * However these ServiceReference objects will have
@@ -28,15 +30,15 @@ package org.eclipse.osgi.framework.internal.core;
  * will return <code>true</code> when compared.
  */
 
-public class ServiceReference implements org.osgi.framework.ServiceReference, Comparable {
+public class ServiceReferenceImpl implements ServiceReference, Comparable {
 	/** Registered Service object. */
-	protected ServiceRegistration registration;
+	protected ServiceRegistrationImpl registration;
 
 	/**
 	 * Construct a reference.
 	 *
 	 */
-	protected ServiceReference(ServiceRegistration registration) {
+	protected ServiceReferenceImpl(ServiceRegistrationImpl registration) {
 		this.registration = registration;
 	}
 
@@ -78,7 +80,7 @@ public class ServiceReference implements org.osgi.framework.ServiceReference, Co
 	 * determine if the service has been unregistered.
 	 *
 	 * @return The bundle which registered the service.
-	 * @see BundleContext#registerService
+	 * @see BundleContextImpl#registerService
 	 */
 	public org.osgi.framework.Bundle getBundle() {
 		return (registration.getBundle());
@@ -92,7 +94,7 @@ public class ServiceReference implements org.osgi.framework.ServiceReference, Co
 	 *
 	 * @return The array of bundles using the service or null if
 	 * no bundles are using the service.
-	 * @see BundleContext#getService
+	 * @see BundleContextImpl#getService
 	 */
 	public org.osgi.framework.Bundle[] getUsingBundles() {
 		return (registration.getUsingBundles());
@@ -146,11 +148,11 @@ public class ServiceReference implements org.osgi.framework.ServiceReference, Co
 			return (true);
 		}
 
-		if (!(obj instanceof ServiceReference)) {
+		if (!(obj instanceof ServiceReferenceImpl)) {
 			return (false);
 		}
 
-		ServiceReference other = (ServiceReference) obj;
+		ServiceReferenceImpl other = (ServiceReferenceImpl) obj;
 
 		return (registration == other.registration);
 	}
@@ -202,7 +204,7 @@ public class ServiceReference implements org.osgi.framework.ServiceReference, Co
 	 *					receiver.
 	 */
 	public int compareTo(Object object) {
-		ServiceReference other = (ServiceReference) object;
+		ServiceReferenceImpl other = (ServiceReferenceImpl) object;
 
 		int compare = this.getRanking() - other.getRanking();
 

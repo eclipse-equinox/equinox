@@ -17,7 +17,7 @@ import org.osgi.framework.*;
 public class FilteredServiceListener implements ServiceListener
 {
     /** Filter for listener. */
-    protected Filter filter;
+    protected FilterImpl filter;
 
     /** Real listener. */
     protected ServiceListener listener;
@@ -32,7 +32,7 @@ public class FilteredServiceListener implements ServiceListener
     protected FilteredServiceListener(String filterstring, ServiceListener listener)
                                      throws InvalidSyntaxException
     {
-        filter = new Filter(filterstring);
+        filter = new FilterImpl(filterstring);
         this.listener = listener;
     }
 
@@ -44,7 +44,7 @@ public class FilteredServiceListener implements ServiceListener
      */
     public void serviceChanged(ServiceEvent event)
     {
-        ServiceReference reference = (ServiceReference)event.getServiceReference();
+        ServiceReferenceImpl reference = (ServiceReferenceImpl)event.getServiceReference();
 
         if (Debug.DEBUG && Debug.DEBUG_EVENTS)
         {

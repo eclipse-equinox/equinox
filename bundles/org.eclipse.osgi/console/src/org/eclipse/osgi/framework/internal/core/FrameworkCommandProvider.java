@@ -76,7 +76,7 @@ public class FrameworkCommandProvider implements CommandProvider {
 	/** The system bundle context */
 	private org.osgi.framework.BundleContext context;
 	/** The start level implementation */
-	private StartLevelImpl slImpl;
+	private StartLevelManager slImpl;
 
 	/** Strings used to format other strings */
 	private String tab = "\t";
@@ -92,7 +92,7 @@ public class FrameworkCommandProvider implements CommandProvider {
 	public FrameworkCommandProvider(OSGi osgi) {
 		this.osgi = osgi;
 		context = osgi.getBundleContext();
-		slImpl = osgi.framework.startLevelImpl;
+		slImpl = osgi.framework.startLevelManager;
 		Dictionary props = new Hashtable();
 		props.put(Constants.SERVICE_RANKING, new Integer(Integer.MAX_VALUE));
 		context.registerService(CommandProvider.class.getName(), this, props);
@@ -221,7 +221,7 @@ public class FrameworkCommandProvider implements CommandProvider {
 			intp.println(ConsoleMsg.formatter.getString("CONSOLE_NO_BUNDLE_SPECIFIED_ERROR"));
 		}
 		while (nextArg != null) {
-			Bundle bundle = getBundleFromToken(intp, nextArg, true);
+			AbstractBundle bundle = getBundleFromToken(intp, nextArg, true);
 			if (bundle != null) {
 				bundle.start();
 			}
@@ -249,7 +249,7 @@ public class FrameworkCommandProvider implements CommandProvider {
 			intp.println(ConsoleMsg.formatter.getString("CONSOLE_NO_BUNDLE_SPECIFIED_ERROR"));
 		}
 		while (nextArg != null) {
-			Bundle bundle = getBundleFromToken(intp, nextArg, true);
+			AbstractBundle bundle = getBundleFromToken(intp, nextArg, true);
 			if (bundle != null) {
 				bundle.stop();
 			}
@@ -276,7 +276,7 @@ public class FrameworkCommandProvider implements CommandProvider {
 		if (url == null) {
 			intp.println(ConsoleMsg.formatter.getString("CONSOLE_NOTHING_TO_INSTALL_ERROR"));
 		} else {
-			Bundle bundle = (Bundle) context.installBundle(url);
+			AbstractBundle bundle = (AbstractBundle) context.installBundle(url);
 			intp.print(ConsoleMsg.formatter.getString("CONSOLE_BUNDLE_ID_MESSAGE"));
 			intp.println(new Long(bundle.getBundleId()));
 
@@ -314,13 +314,13 @@ public class FrameworkCommandProvider implements CommandProvider {
 		while (token != null) {
 
 			if ("*".equals(token)) {
-				Bundle[] bundles = (Bundle[]) context.getBundles();
+				AbstractBundle[] bundles = (AbstractBundle[]) context.getBundles();
 
 				int size = bundles.length;
 
 				if (size > 0) {
 					for (int i = 0; i < size; i++) {
-						Bundle bundle = bundles[i];
+						AbstractBundle bundle = bundles[i];
 
 						if (bundle.getBundleId() != 0) {
 							try {
@@ -334,7 +334,7 @@ public class FrameworkCommandProvider implements CommandProvider {
 					intp.println(ConsoleMsg.formatter.getString("CONSOLE_NO_INSTALLED_BUNDLES_ERROR"));
 				}
 			} else {
-				Bundle bundle = getBundleFromToken(intp, token, true);
+				AbstractBundle bundle = getBundleFromToken(intp, token, true);
 				if (bundle != null) {
 					String source = intp.nextArgument();
 					try {
@@ -372,7 +372,7 @@ public class FrameworkCommandProvider implements CommandProvider {
 			intp.println(ConsoleMsg.formatter.getString("CONSOLE_NO_BUNDLE_SPECIFIED_ERROR"));
 		}
 		while (nextArg != null) {
-			Bundle bundle = getBundleFromToken(intp, nextArg, true);
+			AbstractBundle bundle = getBundleFromToken(intp, nextArg, true);
 			if (bundle != null) {
 				bundle.uninstall();
 			}
@@ -402,7 +402,7 @@ public class FrameworkCommandProvider implements CommandProvider {
 		}
 		intp.println();
 
-		Bundle[] bundles = (Bundle[]) context.getBundles();
+		AbstractBundle[] bundles = (AbstractBundle[]) context.getBundles();
 		int size = bundles.length;
 
 		if (size == 0) {
@@ -414,7 +414,7 @@ public class FrameworkCommandProvider implements CommandProvider {
 		intp.println(ConsoleMsg.formatter.getString("CONSOLE_BUNDLE_LOCATION_MESSAGE"));
 		intp.println(ConsoleMsg.formatter.getString("CONSOLE_STATE_BUNDLE_FILE_NAME_HEADER"));
 		for (int i = 0; i < size; i++) {
-			Bundle bundle = bundles[i];
+			AbstractBundle bundle = bundles[i];
 			intp.print(new Long(bundle.getBundleId()));
 			intp.print(tab);
 			intp.println(bundle.getLocation());
@@ -423,7 +423,7 @@ public class FrameworkCommandProvider implements CommandProvider {
 			intp.println(bundle.bundledata);
 		}
 
-		ServiceReference[] services = (ServiceReference[]) context.getServiceReferences(null, null);
+		ServiceReferenceImpl[] services = (ServiceReferenceImpl[]) context.getServiceReferences(null, null);
 		if (services != null) {
 			intp.println(ConsoleMsg.formatter.getString("CONSOLE_REGISTERED_SERVICES_MESSAGE"));
 			size = services.length;
@@ -461,18 +461,18 @@ public class FrameworkCommandProvider implements CommandProvider {
 			filter = buf.toString();
 		}
 
-		ServiceReference[] services = (ServiceReference[]) context.getServiceReferences(null, filter);
+		ServiceReferenceImpl[] services = (ServiceReferenceImpl[]) context.getServiceReferences(null, filter);
 		if (services != null) {
 			int size = services.length;
 			if (size > 0) {
 				for (int j = 0; j < size; j++) {
-					ServiceReference service = services[j];
+					ServiceReferenceImpl service = services[j];
 					intp.println(service);
 					intp.print("  ");
 					intp.print(ConsoleMsg.formatter.getString("CONSOLE_REGISTERED_BY_BUNDLE_MESSAGE"));
 					intp.print(" ");
 					intp.println(service.getBundle());
-					Bundle[] users = (Bundle[]) service.getUsingBundles();
+					AbstractBundle[] users = (AbstractBundle[]) service.getUsingBundles();
 					if (users != null) {
 						intp.print("  ");
 						intp.println(ConsoleMsg.formatter.getString("CONSOLE_BUNDLES_USING_SERVICE_MESSAGE"));
@@ -580,7 +580,7 @@ public class FrameworkCommandProvider implements CommandProvider {
 	 *  @param intp A CommandInterpreter object containing the command and it's arguments.
 	 */
 	public void _bundles(CommandInterpreter intp) throws Exception {
-		Bundle[] bundles = (Bundle[]) context.getBundles();
+		AbstractBundle[] bundles = (AbstractBundle[]) context.getBundles();
 		int size = bundles.length;
 
 		if (size == 0) {
@@ -589,7 +589,7 @@ public class FrameworkCommandProvider implements CommandProvider {
 		}
 
 		for (int i = 0; i < size; i++) {
-			Bundle bundle = bundles[i];
+			AbstractBundle bundle = bundles[i];
 			long id = bundle.getBundleId();
 			intp.println(bundle);
 			intp.print("  ");
@@ -606,7 +606,7 @@ public class FrameworkCommandProvider implements CommandProvider {
 				intp.println();
 			}
 
-			ServiceReference[] services = (ServiceReference[]) bundle.getRegisteredServices();
+			ServiceReferenceImpl[] services = (ServiceReferenceImpl[]) bundle.getRegisteredServices();
 			if (services != null) {
 				intp.print("  ");
 				intp.println(ConsoleMsg.formatter.getString("CONSOLE_REGISTERED_SERVICES_MESSAGE"));
@@ -619,7 +619,7 @@ public class FrameworkCommandProvider implements CommandProvider {
 				intp.println(ConsoleMsg.formatter.getString("CONSOLE_NO_REGISTERED_SERVICES_MESSAGE"));
 			}
 
-			services = (ServiceReference[]) bundle.getServicesInUse();
+			services = (ServiceReferenceImpl[]) bundle.getServicesInUse();
 			if (services != null) {
 				intp.print("  ");
 				intp.println(ConsoleMsg.formatter.getString("CONSOLE_SERVICES_IN_USE_MESSAGE"));
@@ -654,7 +654,7 @@ public class FrameworkCommandProvider implements CommandProvider {
 			intp.println(ConsoleMsg.formatter.getString("CONSOLE_NO_BUNDLE_SPECIFIED_ERROR"));
 		}
 		while (nextArg != null) {
-			Bundle bundle = getBundleFromToken(intp, nextArg, true);
+			AbstractBundle bundle = getBundleFromToken(intp, nextArg, true);
 			if (bundle != null) {
 				long id = bundle.getBundleId();
 				intp.println(bundle);
@@ -672,7 +672,7 @@ public class FrameworkCommandProvider implements CommandProvider {
 					intp.println();
 				}
 
-				ServiceReference[] services = (ServiceReference[]) bundle.getRegisteredServices();
+				ServiceReferenceImpl[] services = (ServiceReferenceImpl[]) bundle.getRegisteredServices();
 				if (services != null) {
 					intp.print("  ");
 					intp.println(ConsoleMsg.formatter.getString("CONSOLE_REGISTERED_SERVICES_MESSAGE"));
@@ -685,7 +685,7 @@ public class FrameworkCommandProvider implements CommandProvider {
 					intp.println(ConsoleMsg.formatter.getString("CONSOLE_NO_REGISTERED_SERVICES_MESSAGE"));
 				}
 
-				services = (ServiceReference[]) bundle.getServicesInUse();
+				services = (ServiceReferenceImpl[]) bundle.getServicesInUse();
 				if (services != null) {
 					intp.print("  ");
 					intp.println(ConsoleMsg.formatter.getString("CONSOLE_SERVICES_IN_USE_MESSAGE"));
@@ -774,7 +774,7 @@ public class FrameworkCommandProvider implements CommandProvider {
 								}
 
 								intp.print("  ");
-                    			if ((packageAdmin.getBundleType(bundle) & PackageAdmin.BUNDLE_TYPE_FRAGMENT) > 0) {
+                    			if ((packageAdmin.getBundleType(bundle) & PackageAdminImpl.BUNDLE_TYPE_FRAGMENT) > 0) {
                     				org.osgi.framework.Bundle[] hosts = packageAdmin.getHosts(bundle);
                     				if (hosts != null) {
                     					intp.println(ConsoleMsg.formatter.getString("CONSOLE_HOST_MESSAGE"));
@@ -897,7 +897,7 @@ public class FrameworkCommandProvider implements CommandProvider {
 		long logid = -1;
 		String token = intp.nextArgument();
 		if (token != null) {
-			Bundle bundle = getBundleFromToken(intp, token, false);
+			AbstractBundle bundle = getBundleFromToken(intp, token, false);
 
 			if (bundle == null) {
 				try {
@@ -927,7 +927,7 @@ public class FrameworkCommandProvider implements CommandProvider {
 						Method getException = clazz.getMethod("getException", null);
 
 						while (true) {
-							Bundle bundle = (Bundle) getBundle.invoke(logentry, null);
+							AbstractBundle bundle = (AbstractBundle) getBundle.invoke(logentry, null);
 
 							if ((logid == -1) || ((bundle != null) && (logid == bundle.getBundleId()))) {
 								Integer level = (Integer) getLevel.invoke(logentry, null);
@@ -968,7 +968,7 @@ public class FrameworkCommandProvider implements CommandProvider {
 								intp.print(getMessage.invoke(logentry, null));
 								intp.print(" ");
 
-								ServiceReference svcref = (ServiceReference) getServiceReference.invoke(logentry, null);
+								ServiceReferenceImpl svcref = (ServiceReferenceImpl) getServiceReference.invoke(logentry, null);
 								if (svcref != null) {
 									intp.print("{");
 									intp.print(Constants.SERVICE_ID);
@@ -1044,13 +1044,13 @@ public class FrameworkCommandProvider implements CommandProvider {
 			return;
 		}
 
-		Bundle[] bundles = (Bundle[]) context.getBundles();
+		AbstractBundle[] bundles = (AbstractBundle[]) context.getBundles();
 
 		int size = bundles.length;
 
 		if (size > 0) {
 			for (int i = 0; i < size; i++) {
-				Bundle bundle = bundles[i];
+				AbstractBundle bundle = bundles[i];
 
 				if (bundle.getBundleId() != 0) {
 					try {
@@ -1096,14 +1096,14 @@ public class FrameworkCommandProvider implements CommandProvider {
 			org.osgi.service.packageadmin.PackageAdmin packageAdmin = (org.osgi.service.packageadmin.PackageAdmin) context.getService(packageAdminRef);
 			if (packageAdmin != null) {
 				try {
-					Bundle[] refresh = null;
+					AbstractBundle[] refresh = null;
 
 					String token = intp.nextArgument();
 					if (token != null) {
 						Vector bundles = new Vector();
 
 						while (token != null) {
-							Bundle bundle = getBundleFromToken(intp, token, true);
+							AbstractBundle bundle = getBundleFromToken(intp, token, true);
 
 							if (bundle != null) {
 								bundles.addElement(bundle);
@@ -1118,7 +1118,7 @@ public class FrameworkCommandProvider implements CommandProvider {
 							return;
 						}
 
-						refresh = new Bundle[size];
+						refresh = new AbstractBundle[size];
 						bundles.copyInto(refresh);
 					}
 
@@ -1190,7 +1190,7 @@ public class FrameworkCommandProvider implements CommandProvider {
 			intp.println(ConsoleMsg.formatter.getString("CONSOLE_NO_BUNDLE_SPECIFIED_ERROR"));
 		}
 		while (nextArg != null) {
-			Bundle bundle = getBundleFromToken(intp, nextArg, true);
+			AbstractBundle bundle = getBundleFromToken(intp, nextArg, true);
 			if (bundle != null) {
 				intp.printDictionary(bundle.getHeaders(), ConsoleMsg.formatter.getString("CONSOLE_BUNDLE_HEADERS_TITLE"));
 			}
@@ -1274,7 +1274,7 @@ public class FrameworkCommandProvider implements CommandProvider {
 			intp.println(ConsoleMsg.formatter.getString("CONSOLE_FRAMEWORK_IS_SHUTDOWN_MESSAGE"));
 		}
 
-		Bundle[] bundles = (Bundle[]) context.getBundles();
+		AbstractBundle[] bundles = (AbstractBundle[]) context.getBundles();
 		if (bundles.length == 0) {
 			intp.println(ConsoleMsg.formatter.getString("CONSOLE_NO_INSTALLED_BUNDLES_ERROR"));
 		} else {
@@ -1285,20 +1285,20 @@ public class FrameworkCommandProvider implements CommandProvider {
 			intp.print(tab);
 			intp.println(ConsoleMsg.formatter.getString("CONSOLE_STATE_BUNDLE_TITLE"));
 			for (int i = 0; i < bundles.length; i++) {
-				Bundle b = (Bundle) bundles[i];
+				AbstractBundle b = (AbstractBundle) bundles[i];
 				String type = "    ";
 				// :TODO need to determine the type?
 				intp.println(b.getBundleId() + "\t" + type + " \t" + getStateName(b.getState()) + b);
 				if (b.isFragment()) {
-					Bundle master = (Bundle) b.getHost();
+					AbstractBundle master = (AbstractBundle) b.getHost();
 					if (master != null)
 						intp.println("\t\tMaster=" + master.getBundleId());
 				} else {
-					Bundle fragment;
+					AbstractBundle fragment;
 					org.osgi.framework.Bundle fragments[] = b.getFragments();
 					if (fragments != null) {
 						for (int f = 0; f < fragments.length; f++) {
-							fragment = (Bundle) fragments[f];
+							fragment = (AbstractBundle) fragments[f];
 							intp.println("\t\tFragment=" + fragment.getBundleId());
 						}
 					}
@@ -1419,7 +1419,7 @@ public class FrameworkCommandProvider implements CommandProvider {
 	public void _setbsl(CommandInterpreter intp) throws Exception {
 		if (isStartLevelSvcPresent(intp)) {
 			String token;
-			Bundle bundle = null;
+			AbstractBundle bundle = null;
 			token = intp.nextArgument();
 			if (token == null) {
 				intp.println(ConsoleMsg.formatter.getString("STARTLEVEL_NO_STARTLEVEL_OR_BUNDLE_GIVEN"));
@@ -1560,13 +1560,13 @@ public class FrameworkCommandProvider implements CommandProvider {
 	 *  @param A boolean indicating whether or not to output a message
 	 *  @return The requested Bundle object
 	 */
-	protected Bundle getBundleFromToken(CommandInterpreter intp, String token, boolean error) {
-		Bundle bundle;
+	protected AbstractBundle getBundleFromToken(CommandInterpreter intp, String token, boolean error) {
+		AbstractBundle bundle;
 		try {
 			long id = Long.parseLong(token);
-			bundle = (Bundle) context.getBundle(id);
+			bundle = (AbstractBundle) context.getBundle(id);
 		} catch (NumberFormatException nfe) {
-			bundle = ((BundleContext) context).getBundleByLocation(token);
+			bundle = ((BundleContextImpl) context).getBundleByLocation(token);
 		}
 
 		if ((bundle == null) && error) {
@@ -1604,22 +1604,22 @@ public class FrameworkCommandProvider implements CommandProvider {
 	 */
 	protected String getStateName(int state) {
 		switch (state) {
-			case Bundle.UNINSTALLED :
+			case AbstractBundle.UNINSTALLED :
 				return (ConsoleMsg.formatter.getString("CONSOLE_UNINSTALLED_MESSAGE"));
 
-			case Bundle.INSTALLED :
+			case AbstractBundle.INSTALLED :
 				return (ConsoleMsg.formatter.getString("CONSOLE_INSTALLED_MESSAGE"));
 
-			case Bundle.RESOLVED :
+			case AbstractBundle.RESOLVED :
 				return (ConsoleMsg.formatter.getString("CONSOLE_RESOLVED_MESSAGE"));
 
-			case Bundle.STARTING :
+			case AbstractBundle.STARTING :
 				return (ConsoleMsg.formatter.getString("CONSOLE_STARTING_MESSAGE"));
 
-			case Bundle.STOPPING :
+			case AbstractBundle.STOPPING :
 				return (ConsoleMsg.formatter.getString("CONSOLE_STOPPING_MESSAGE"));
 
-			case Bundle.ACTIVE :
+			case AbstractBundle.ACTIVE :
 				return (ConsoleMsg.formatter.getString("CONSOLE_ACTIVE_MESSAGE"));
 
 			default :

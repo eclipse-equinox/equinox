@@ -23,7 +23,7 @@ import org.osgi.framework.*;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleException;
 
-public class BundleHost extends Bundle {
+public class BundleHost extends AbstractBundle {
 
 	/** Loaded state object */
 	protected BundleLoader loader;
@@ -35,7 +35,7 @@ public class BundleHost extends Bundle {
 	private BundleLoaderProxy proxy;	
 
 	/** The BundleContext that represents this Bundle and all of its fragments */
-	protected BundleContext context;
+	protected BundleContextImpl context;
 
 	/** The List of BundleFragments */
 	protected BundleFragment[] fragments;
@@ -153,7 +153,7 @@ public class BundleHost extends Bundle {
 	 * @return  true if an exported package is "in use". i.e. it has been imported by a bundle
 	 * @exception org.osgi.framework.BundleException
 	 */
-	protected boolean reload(Bundle newBundle) throws BundleException {
+	protected boolean reload(AbstractBundle newBundle) throws BundleException {
 		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 			if ((state & (INSTALLED | RESOLVED)) == 0) {
 				Debug.println("Bundle.reload called when state != INSTALLED | RESOLVED: " + this);
@@ -392,10 +392,10 @@ public class BundleHost extends Bundle {
 				}
 
 				if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-					Debug.println("Bundle: Active sl = " + framework.startLevelImpl.getStartLevel() + "; Bundle " + getBundleId() + " sl = " + getStartLevel());
+					Debug.println("Bundle: Active sl = " + framework.startLevelManager.getStartLevel() + "; Bundle " + getBundleId() + " sl = " + getStartLevel());
 				}
 
-				if (getStartLevel() <= framework.startLevelImpl.getStartLevel()) {
+				if (getStartLevel() <= framework.startLevelManager.getStartLevel()) {
 					state = STARTING;
 
 					context = createContext();
@@ -446,8 +446,8 @@ public class BundleHost extends Bundle {
 	 *
 	 * @return BundleContext for this bundle.
 	 */
-	protected BundleContext createContext() {
-		return (new BundleContext(this));
+	protected BundleContextImpl createContext() {
+		return (new BundleContextImpl(this));
 	}
 
 	/**
@@ -455,7 +455,7 @@ public class BundleHost extends Bundle {
 	 *
 	 * @return BundleContext for this bundle.
 	 */
-	protected BundleContext getContext() {
+	protected BundleContextImpl getContext() {
 		return (context);
 	}
 
@@ -496,7 +496,7 @@ public class BundleHost extends Bundle {
 	}
 
 	/**
-	 * Provides a list of {@link ServiceReference}s for the services
+	 * Provides a list of {@link ServiceReferenceImpl}s for the services
 	 * registered by this bundle
 	 * or <code>null</code> if the bundle has no registered
 	 * services.
@@ -505,11 +505,11 @@ public class BundleHost extends Bundle {
 	 * of the call to this method, but the framework is a very dynamic
 	 * environment and services can be modified or unregistered at anytime.
 	 *
-	 * @return An array of {@link ServiceReference} or <code>null</code>.
+	 * @return An array of {@link ServiceReferenceImpl} or <code>null</code>.
 	 * @exception java.lang.IllegalStateException If the
 	 * bundle has been uninstalled.
-	 * @see ServiceRegistration
-	 * @see ServiceReference
+	 * @see ServiceRegistrationImpl
+	 * @see ServiceReferenceImpl
 	 */
 	public org.osgi.framework.ServiceReference[] getRegisteredServices() {
 		checkValid();
@@ -522,7 +522,7 @@ public class BundleHost extends Bundle {
 	}
 
 	/**
-	 * Provides a list of {@link ServiceReference}s for the
+	 * Provides a list of {@link ServiceReferenceImpl}s for the
 	 * services this bundle is using,
 	 * or <code>null</code> if the bundle is not using any services.
 	 * A bundle is considered to be using a service if the bundle's
@@ -532,10 +532,10 @@ public class BundleHost extends Bundle {
 	 * of the call to this method, but the framework is a very dynamic
 	 * environment and services can be modified or unregistered at anytime.
 	 *
-	 * @return An array of {@link ServiceReference} or <code>null</code>.
+	 * @return An array of {@link ServiceReferenceImpl} or <code>null</code>.
 	 * @exception java.lang.IllegalStateException If the
 	 * bundle has been uninstalled.
-	 * @see ServiceReference
+	 * @see ServiceReferenceImpl
 	 */
 	public org.osgi.framework.ServiceReference[] getServicesInUse() {
 		checkValid();

@@ -67,7 +67,7 @@ public class BundleLoaderProxy implements KeyedElement, NamedClassSpace{
 			loader = bundle.getBundleLoader();
 		return loader;
 	}
-	public Bundle getBundle() {
+	public AbstractBundle getBundle() {
 		return bundle;
 	}
 
@@ -112,7 +112,7 @@ public class BundleLoaderProxy implements KeyedElement, NamedClassSpace{
 		return (users.size() > 0);
 	}
 
-	public Bundle[] getDependentBundles() {
+	public AbstractBundle[] getDependentBundles() {
 		KeyedElement[] proxyLoaders = users.elements();
 		KeyedHashSet bundles = new KeyedHashSet(proxyLoaders.length, false);
 		for (int i = 0; i < proxyLoaders.length; i++) {
@@ -121,7 +121,7 @@ public class BundleLoaderProxy implements KeyedElement, NamedClassSpace{
 		}
 
 		KeyedElement[] elements = bundles.elements();
-		Bundle[] result = new Bundle[elements.length];
+		AbstractBundle[] result = new AbstractBundle[elements.length];
 		System.arraycopy(elements, 0, result, 0, elements.length);
 
 		return result;
@@ -215,7 +215,7 @@ public class BundleLoaderProxy implements KeyedElement, NamedClassSpace{
 						requiringBundles.add(requiringProxy.getBundle());
 		}
 
-		return (Bundle[]) requiringBundles.toArray(new Bundle[requiringBundles.size()]);
+		return (AbstractBundle[]) requiringBundles.toArray(new AbstractBundle[requiringBundles.size()]);
 	}
 	public String getName() {
 		return symbolicName;

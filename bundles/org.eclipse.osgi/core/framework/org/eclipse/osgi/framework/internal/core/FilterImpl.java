@@ -15,6 +15,7 @@ import java.util.Dictionary;
 import java.util.Vector;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.util.Headers;
+import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 
 /**
@@ -119,12 +120,12 @@ import org.osgi.framework.InvalidSyntaxException;
  * data type will evaluate to <code>false</code> .
  */
 
-public class Filter implements org.osgi.framework.Filter /* since Framework 1.1 */ {
+public class FilterImpl implements Filter /* since Framework 1.1 */ {
 	/* public methods in org.osgi.framework.Filter */
 
 	/**
-	 * Constructs a {@link Filter} object. This filter object may be used
-	 * to match a {@link ServiceReference} or a Dictionary.
+	 * Constructs a {@link FilterImpl} object. This filter object may be used
+	 * to match a {@link ServiceReferenceImpl} or a Dictionary.
 	 *
 	 * <p> If the filter cannot be parsed, an {@link InvalidSyntaxException}
 	 * will be thrown with a human readable message where the
@@ -134,7 +135,7 @@ public class Filter implements org.osgi.framework.Filter /* since Framework 1.1 
 	 * @exception InvalidSyntaxException If the filter parameter contains
 	 * an invalid filter string that cannot be parsed.
 	 */
-	public Filter(String filter) throws InvalidSyntaxException {
+	public FilterImpl(String filter) throws InvalidSyntaxException {
 		topLevel = true;
 		new Parser(filter).parse(this);
 	}
@@ -150,7 +151,7 @@ public class Filter implements org.osgi.framework.Filter /* since Framework 1.1 
 	 * <code>false</code> otherwise.
 	 */
 	public boolean match(org.osgi.framework.ServiceReference reference) {
-		return (match0(((ServiceReference) reference).registration.properties));
+		return (match0(((ServiceReferenceImpl) reference).registration.properties));
 	}
 
 	/**
@@ -186,7 +187,7 @@ public class Filter implements org.osgi.framework.Filter /* since Framework 1.1 
 					{
 						filter.append('&');
 
-						Filter[] filters = (Filter[]) value;
+						FilterImpl[] filters = (FilterImpl[]) value;
 						int size = filters.length;
 
 						for (int i = 0; i < size; i++) {
@@ -200,7 +201,7 @@ public class Filter implements org.osgi.framework.Filter /* since Framework 1.1 
 					{
 						filter.append('|');
 
-						Filter[] filters = (Filter[]) value;
+						FilterImpl[] filters = (FilterImpl[]) value;
 						int size = filters.length;
 
 						for (int i = 0; i < size; i++) {
@@ -306,7 +307,7 @@ public class Filter implements org.osgi.framework.Filter /* since Framework 1.1 
 			return (true);
 		}
 
-		if (!(obj instanceof Filter)) {
+		if (!(obj instanceof FilterImpl)) {
 			return (false);
 		}
 
@@ -348,7 +349,7 @@ public class Filter implements org.osgi.framework.Filter /* since Framework 1.1 
 	/* true if root Filter object */
 	protected boolean topLevel;
 
-	protected Filter() {
+	protected FilterImpl() {
 		topLevel = false;
 	}
 
@@ -368,7 +369,7 @@ public class Filter implements org.osgi.framework.Filter /* since Framework 1.1 
 	 * @return If the service's properties match the filter,
 	 * return <code>true</code>. Otherwise, return <code>false</code>.
 	 */
-	protected boolean match(ServiceReference reference) {
+	protected boolean match(ServiceReferenceImpl reference) {
 		return (match0(reference.registration.properties));
 	}
 
@@ -385,7 +386,7 @@ public class Filter implements org.osgi.framework.Filter /* since Framework 1.1 
 		switch (operation) {
 			case AND :
 				{
-					Filter[] filters = (Filter[]) value;
+					FilterImpl[] filters = (FilterImpl[]) value;
 					int size = filters.length;
 
 					for (int i = 0; i < size; i++) {
@@ -399,7 +400,7 @@ public class Filter implements org.osgi.framework.Filter /* since Framework 1.1 
 
 			case OR :
 				{
-					Filter[] filters = (Filter[]) value;
+					FilterImpl[] filters = (FilterImpl[]) value;
 					int size = filters.length;
 
 					for (int i = 0; i < size; i++) {
@@ -413,7 +414,7 @@ public class Filter implements org.osgi.framework.Filter /* since Framework 1.1 
 
 			case NOT :
 				{
-					Filter filter = (Filter) value;
+					FilterImpl filter = (FilterImpl) value;
 
 					return (!filter.match0(properties));
 				}
@@ -1253,7 +1254,7 @@ public class Filter implements org.osgi.framework.Filter /* since Framework 1.1 
 			pos = 0;
 		}
 
-		protected void parse(Filter parent) throws InvalidSyntaxException {
+		protected void parse(FilterImpl parent) throws InvalidSyntaxException {
 			try {
 				parse_filter(parent);
 			} catch (ArrayIndexOutOfBoundsException e) {
@@ -1265,7 +1266,7 @@ public class Filter implements org.osgi.framework.Filter /* since Framework 1.1 
 			}
 		}
 
-		protected void parse_filter(Filter parent) throws InvalidSyntaxException {
+		protected void parse_filter(FilterImpl parent) throws InvalidSyntaxException {
 			skipWhiteSpace();
 
 			if (filter[pos] != '(') {
@@ -1287,7 +1288,7 @@ public class Filter implements org.osgi.framework.Filter /* since Framework 1.1 
 			skipWhiteSpace();
 		}
 
-		protected void parse_filtercomp(Filter parent) throws InvalidSyntaxException {
+		protected void parse_filtercomp(FilterImpl parent) throws InvalidSyntaxException {
 			skipWhiteSpace();
 
 			char c = filter[pos];
@@ -1319,7 +1320,7 @@ public class Filter implements org.osgi.framework.Filter /* since Framework 1.1 
 			}
 		}
 
-		protected void parse_and(Filter parent) throws InvalidSyntaxException {
+		protected void parse_and(FilterImpl parent) throws InvalidSyntaxException {
 			skipWhiteSpace();
 
 			if (filter[pos] != '(') {
@@ -1329,21 +1330,21 @@ public class Filter implements org.osgi.framework.Filter /* since Framework 1.1 
 			Vector operands = new Vector(10, 10);
 
 			while (filter[pos] == '(') {
-				Filter child = new Filter();
+				FilterImpl child = new FilterImpl();
 				parse_filter(child);
 				operands.addElement(child);
 			}
 
 			int size = operands.size();
 
-			Filter[] children = new Filter[size];
+			FilterImpl[] children = new FilterImpl[size];
 
 			operands.copyInto(children);
 
-			parent.setFilter(Filter.AND, null, children);
+			parent.setFilter(FilterImpl.AND, null, children);
 		}
 
-		protected void parse_or(Filter parent) throws InvalidSyntaxException {
+		protected void parse_or(FilterImpl parent) throws InvalidSyntaxException {
 			skipWhiteSpace();
 
 			if (filter[pos] != '(') {
@@ -1353,34 +1354,34 @@ public class Filter implements org.osgi.framework.Filter /* since Framework 1.1 
 			Vector operands = new Vector(10, 10);
 
 			while (filter[pos] == '(') {
-				Filter child = new Filter();
+				FilterImpl child = new FilterImpl();
 				parse_filter(child);
 				operands.addElement(child);
 			}
 
 			int size = operands.size();
 
-			Filter[] children = new Filter[size];
+			FilterImpl[] children = new FilterImpl[size];
 
 			operands.copyInto(children);
 
-			parent.setFilter(Filter.OR, null, children);
+			parent.setFilter(FilterImpl.OR, null, children);
 		}
 
-		protected void parse_not(Filter parent) throws InvalidSyntaxException {
+		protected void parse_not(FilterImpl parent) throws InvalidSyntaxException {
 			skipWhiteSpace();
 
 			if (filter[pos] != '(') {
 				throw new InvalidSyntaxException(Msg.formatter.getString("FILTER_MISSING_LEFTPAREN", pos), filterstring);
 			}
 
-			Filter child = new Filter();
+			FilterImpl child = new FilterImpl();
 			parse_filter(child);
 
-			parent.setFilter(Filter.NOT, null, child);
+			parent.setFilter(FilterImpl.NOT, null, child);
 		}
 
-		protected void parse_item(Filter parent) throws InvalidSyntaxException {
+		protected void parse_item(FilterImpl parent) throws InvalidSyntaxException {
 			String attr = parse_attr();
 
 			skipWhiteSpace();
@@ -1390,7 +1391,7 @@ public class Filter implements org.osgi.framework.Filter /* since Framework 1.1 
 					{
 						if (filter[pos + 1] == '=') {
 							pos += 2;
-							parent.setFilter(Filter.APPROX, attr, parse_value());
+							parent.setFilter(FilterImpl.APPROX, attr, parse_value());
 							return;
 						}
 						break;
@@ -1399,7 +1400,7 @@ public class Filter implements org.osgi.framework.Filter /* since Framework 1.1 
 					{
 						if (filter[pos + 1] == '=') {
 							pos += 2;
-							parent.setFilter(Filter.GREATER, attr, parse_value());
+							parent.setFilter(FilterImpl.GREATER, attr, parse_value());
 							return;
 						}
 						break;
@@ -1408,7 +1409,7 @@ public class Filter implements org.osgi.framework.Filter /* since Framework 1.1 
 					{
 						if (filter[pos + 1] == '=') {
 							pos += 2;
-							parent.setFilter(Filter.LESS, attr, parse_value());
+							parent.setFilter(FilterImpl.LESS, attr, parse_value());
 							return;
 						}
 						break;
@@ -1420,7 +1421,7 @@ public class Filter implements org.osgi.framework.Filter /* since Framework 1.1 
 							pos += 2;
 							skipWhiteSpace();
 							if (filter[pos] == ')') {
-								parent.setFilter(Filter.PRESENT, attr, null);
+								parent.setFilter(FilterImpl.PRESENT, attr, null);
 								return; /* present */
 							}
 							pos = oldpos;
@@ -1430,9 +1431,9 @@ public class Filter implements org.osgi.framework.Filter /* since Framework 1.1 
 						Object string = parse_substring();
 
 						if (string instanceof String) {
-							parent.setFilter(Filter.EQUAL, attr, string);
+							parent.setFilter(FilterImpl.EQUAL, attr, string);
 						} else {
-							parent.setFilter(Filter.SUBSTRING, attr, string);
+							parent.setFilter(FilterImpl.SUBSTRING, attr, string);
 						}
 
 						return;

@@ -17,7 +17,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
 
-import org.eclipse.osgi.framework.internal.core.Bundle;
+import org.eclipse.osgi.framework.internal.core.AbstractBundle;
 import org.osgi.framework.AdminPermission;
 import org.osgi.framework.BundleContext;
 
@@ -148,10 +148,10 @@ public abstract class BundleResourceHandler extends URLStreamHandler
     		if (bidString == null) {
     			throw new IOException(AdaptorMsg.formatter.getString("URL_NO_BUNDLE_ID", url.toExternalForm()));
     		}
-    		Bundle bundle = null;
+    		AbstractBundle bundle = null;
     		try {
     			Long bundleID = new Long(bidString);
-    			bundle = (Bundle) context.getBundle(bundleID.longValue());
+    			bundle = (AbstractBundle) context.getBundle(bundleID.longValue());
     		} catch (NumberFormatException nfe) {
     			throw new MalformedURLException(AdaptorMsg.formatter.getString("URL_INVALID_BUNDLE_ID", bidString));
     		}
@@ -171,7 +171,7 @@ public abstract class BundleResourceHandler extends URLStreamHandler
      * @param url The URL to find the BundleEntry for.
      * @return
      */
-    abstract protected BundleEntry findBundleEntry(URL url,Bundle bundle) throws IOException;
+    abstract protected BundleEntry findBundleEntry(URL url,AbstractBundle bundle) throws IOException;
 
     /**
      * Converts a bundle URL to a String.

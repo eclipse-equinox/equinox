@@ -13,13 +13,14 @@ package org.eclipse.osgi.framework.util;
 
 import java.io.IOException;
 import java.security.*;
+import org.eclipse.osgi.framework.adaptor.PermissionStorage;
 
 /**
  * PermissionStorage privileged action class.
  */
 
-public class PermissionStorage implements org.eclipse.osgi.framework.adaptor.PermissionStorage, PrivilegedExceptionAction {
-	private org.eclipse.osgi.framework.adaptor.PermissionStorage storage;
+public class SecurePermissionStorage implements PermissionStorage, PrivilegedExceptionAction {
+	private PermissionStorage storage;
 	private String location;
 	private String[] data;
 	private int action;
@@ -27,7 +28,7 @@ public class PermissionStorage implements org.eclipse.osgi.framework.adaptor.Per
 	private static final int SET = 2;
 	private static final int LOCATION = 3;
 
-	public PermissionStorage(org.eclipse.osgi.framework.adaptor.PermissionStorage storage) {
+	public SecurePermissionStorage(PermissionStorage storage) {
 		this.storage = storage;
 	}
 

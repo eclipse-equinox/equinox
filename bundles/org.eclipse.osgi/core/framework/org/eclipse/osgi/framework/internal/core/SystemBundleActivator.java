@@ -47,8 +47,8 @@ public class SystemBundleActivator implements BundleActivator {
 			permissionAdmin = register(Constants.OSGI_PERMISSIONADMIN_NAME, framework.permissionAdmin);
 		}
 
-		if (framework.startLevelImpl != null) {
-			startLevel = register(Constants.OSGI_STARTLEVEL_NAME, framework.startLevelFactory);
+		if (framework.startLevelManager != null) {
+			startLevel = register(Constants.OSGI_STARTLEVEL_NAME, framework.startLevelManager);
 		}
 
 		DebugOptions dbgOptions = null;

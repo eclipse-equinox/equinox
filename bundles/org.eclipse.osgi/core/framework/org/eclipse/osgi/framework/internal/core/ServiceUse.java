@@ -30,9 +30,9 @@ public class ServiceUse {
 	    ServiceFactory.getService() */
 	protected Object service;
 	/** BundleContext associated with this service use */
-	protected BundleContext context;
+	protected BundleContextImpl context;
 	/** ServiceDescription of the registered service */
-	protected ServiceRegistration registration;
+	protected ServiceRegistrationImpl registration;
 	/** bundle's use count for this service */
 	protected int useCount;
 	/** Internal framework object. */
@@ -45,7 +45,7 @@ public class ServiceUse {
 	 * @param   context bundle getting the service
 	 * @param   registration ServiceRegistration of the service
 	 */
-	protected ServiceUse(BundleContext context, ServiceRegistration registration) {
+	protected ServiceUse(BundleContextImpl context, ServiceRegistrationImpl registration) {
 		this.context = context;
 		this.registration = registration;
 		this.useCount = 0;
@@ -98,7 +98,7 @@ public class ServiceUse {
 	 */
 	protected Object getService() {
 		if ((useCount == 0) && (factory != null)) {
-			Bundle factorybundle = registration.context.bundle;
+			AbstractBundle factorybundle = registration.context.bundle;
 			Object service;
 
 			try {
@@ -132,7 +132,7 @@ public class ServiceUse {
 
 			String[] clazzes = registration.clazzes;
 			int size = clazzes.length;
-			PackageAdmin packageAdmin = context.framework.packageAdmin;
+			PackageAdminImpl packageAdmin = context.framework.packageAdmin;
 			for (int i = 0; i < size; i++) {
 				Class clazz = packageAdmin.loadServiceClass(clazzes[i],factorybundle);
 				if (clazz == null) {
@@ -214,7 +214,7 @@ public class ServiceUse {
 						Debug.printStackTrace(t);
 					}
 
-					Bundle factorybundle = registration.context.bundle;
+					AbstractBundle factorybundle = registration.context.bundle;
 					BundleException be = new BundleException(Msg.formatter.getString("SERVICE_FACTORY_EXCEPTION", factory.getClass().getName(), "ungetService"), t);
 					context.framework.publishFrameworkEvent(FrameworkEvent.ERROR, factorybundle, be);
 				}
@@ -253,7 +253,7 @@ public class ServiceUse {
 					Debug.printStackTrace(t);
 				}
 
-				Bundle factorybundle = registration.context.bundle;
+				AbstractBundle factorybundle = registration.context.bundle;
 				BundleException be = new BundleException(Msg.formatter.getString("SERVICE_FACTORY_EXCEPTION", factory.getClass().getName(), "ungetService"), t);
 				context.framework.publishFrameworkEvent(FrameworkEvent.ERROR, factorybundle, be);
 			}

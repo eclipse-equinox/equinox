@@ -15,12 +15,13 @@ import java.util.*;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.util.Headers;
 import org.osgi.framework.ServiceEvent;
+import org.osgi.framework.ServiceRegistration;
 
 /**
  * A registered service.
  *
  * The framework returns a ServiceRegistration object when a
- * {@link BundleContext#registerService BundleContext.registerService}
+ * {@link BundleContextImpl#registerService BundleContext.registerService}
  * method is successful. This object is for the private use of
  * the registering bundle and should not be shared with other bundles.
  * <p>The ServiceRegistration object may be used to update the properties
@@ -32,19 +33,19 @@ import org.osgi.framework.ServiceEvent;
  * ServiceRegistration object referenced.
  */
 
-public class ServiceRegistration implements org.osgi.framework.ServiceRegistration
+public class ServiceRegistrationImpl implements ServiceRegistration
 {
     /** Reference to this registration. */
-    protected ServiceReference reference;
+    protected ServiceReferenceImpl reference;
 
     /** Internal framework object. */
     protected Framework framework;
 
     /** context which registered this service. */
-    protected BundleContext context;
+    protected BundleContextImpl context;
 
     /** bundle which registered this service. */
-    protected Bundle bundle;
+    protected AbstractBundle bundle;
 
     /** list of contexts using the service.
      * Access to this should be protected by the registrationLock */
@@ -76,7 +77,7 @@ public class ServiceRegistration implements org.osgi.framework.ServiceRegistrati
      * in the framework's service registry.
      *
      */
-    protected ServiceRegistration(BundleContext context, String[] clazzes, Object service, Dictionary properties)
+    protected ServiceRegistrationImpl(BundleContextImpl context, String[] clazzes, Object service, Dictionary properties)
     {
         this.context = context;
         this.bundle = context.bundle;
@@ -85,7 +86,7 @@ public class ServiceRegistration implements org.osgi.framework.ServiceRegistrati
         this.service = service;
         this.contextsUsing = null;
         this.unregistered = false;
-        this.reference = new ServiceReference(this);
+        this.reference = new ServiceReferenceImpl(this);
 
         synchronized (framework.serviceRegistry)
         {
@@ -108,14 +109,14 @@ public class ServiceRegistration implements org.osgi.framework.ServiceRegistrati
      * Unregister the service.
      * Remove a service registration from the framework's service
      * registry.
-     * All {@link ServiceReference} objects for this registration
+     * All {@link ServiceReferenceImpl} objects for this registration
      * can no longer be used to interact with the service.
      *
      * <p>The following steps are followed to unregister a service:
      * <ol>
      * <li>The service is removed from the framework's service
      * registry so that it may no longer be used.
-     * {@link ServiceReference}s for the service may no longer be used
+     * {@link ServiceReferenceImpl}s for the service may no longer be used
      * to get a service object for the service.
      * <li>A {@link ServiceEvent} of type {@link ServiceEvent#UNREGISTERING}
      * is synchronously sent so that bundles using this service
@@ -132,7 +133,7 @@ public class ServiceRegistration implements org.osgi.framework.ServiceRegistrati
      *
      * @exception java.lang.IllegalStateException If
      * this ServiceRegistration has already been unregistered.
-     * @see BundleContext#ungetService
+     * @see BundleContextImpl#ungetService
      */
     public void unregister()
     {
@@ -164,7 +165,7 @@ public class ServiceRegistration implements org.osgi.framework.ServiceRegistrati
         unregistered = true;
 
         int size = 0;
-        BundleContext[] users = null;
+        BundleContextImpl[] users = null;
 
         synchronized (registrationLock)
         {
@@ -179,7 +180,7 @@ public class ServiceRegistration implements org.osgi.framework.ServiceRegistrati
                         Debug.println("unregisterService: releasing users");
                     }
 
-                    users = new BundleContext[size];
+                    users = new BundleContextImpl[size];
                     contextsUsing.copyInto(users);
                 }
             }
@@ -203,12 +204,12 @@ public class ServiceRegistration implements org.osgi.framework.ServiceRegistrati
 
 
     /**
-     * Returns a {@link ServiceReference} object for this registration.
-     * The {@link ServiceReference} object may be shared with other bundles.
+     * Returns a {@link ServiceReferenceImpl} object for this registration.
+     * The {@link ServiceReferenceImpl} object may be shared with other bundles.
      *
      * @exception java.lang.IllegalStateException If
      * this ServiceRegistration has already been unregistered.
-     * @return A {@link ServiceReference} object.
+     * @return A {@link ServiceReferenceImpl} object.
      */
     public org.osgi.framework.ServiceReference getReference()
     {
@@ -335,9 +336,9 @@ public class ServiceRegistration implements org.osgi.framework.ServiceRegistrati
      * determine if the service has been unregistered.
      *
      * @return The bundle which registered the service.
-     * @see BundleContext.registerService
+     * @see BundleContextImpl.registerService
      */
-    protected Bundle getBundle()
+    protected AbstractBundle getBundle()
     {
         if (reference == null)
         {
@@ -353,7 +354,7 @@ public class ServiceRegistration implements org.osgi.framework.ServiceRegistrati
      * @param user BundleContext using service.
      * @return Service object
      */
-    protected Object getService(BundleContext user)
+    protected Object getService(BundleContextImpl user)
     {
         synchronized (registrationLock)
         {
@@ -406,7 +407,7 @@ public class ServiceRegistration implements org.osgi.framework.ServiceRegistrati
      *         is zero or if the service has been unregistered,
      *         otherwise <code>true</code>.
      */
-    protected boolean ungetService(BundleContext user)
+    protected boolean ungetService(BundleContextImpl user)
     {
         synchronized (registrationLock)
         {
@@ -450,7 +451,7 @@ public class ServiceRegistration implements org.osgi.framework.ServiceRegistrati
      *
      * @param user BundleContext using service.
      */
-    protected void releaseService(BundleContext user)
+    protected void releaseService(BundleContextImpl user)
     {
         synchronized (registrationLock)
         {
@@ -486,7 +487,7 @@ public class ServiceRegistration implements org.osgi.framework.ServiceRegistrati
      *
      * @return Array of Bundles using this service.
      */
-    protected Bundle[] getUsingBundles()
+    protected AbstractBundle[] getUsingBundles()
     {
         synchronized (registrationLock)
         {
@@ -507,12 +508,12 @@ public class ServiceRegistration implements org.osgi.framework.ServiceRegistrati
                 return(null);
             }
 
-            Bundle[] bundles = new Bundle[size];
+            AbstractBundle[] bundles = new AbstractBundle[size];
 
             /* Copy vector of BundleContext into an array of Bundle. */
             for (int i = 0; i < size; i++)
             {
-                bundles[i] = ((BundleContext)contextsUsing.elementAt(i)).bundle;
+                bundles[i] = ((BundleContextImpl)contextsUsing.elementAt(i)).bundle;
             }
 
             return(bundles);

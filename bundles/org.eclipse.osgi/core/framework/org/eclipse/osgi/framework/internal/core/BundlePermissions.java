@@ -32,13 +32,13 @@ final class BundlePermissions extends BundlePermissionCollection {
 	private PermissionCollection allPermission;
 
 	/** Used to load classes for unresolved permissions */
-	private PackageAdmin packageAdmin;
+	private PackageAdminImpl packageAdmin;
 
 	/**
 	 * Constructs a new instance of this class.
 	 *
 	 */
-	BundlePermissions(PackageAdmin packageAdmin) {
+	BundlePermissions(PackageAdminImpl packageAdmin) {
 		super();
 
 		this.packageAdmin = packageAdmin;

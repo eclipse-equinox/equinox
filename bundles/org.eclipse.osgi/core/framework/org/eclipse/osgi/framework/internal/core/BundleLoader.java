@@ -127,7 +127,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 		org.osgi.framework.Bundle[] fragmentObjects = bundle.getFragments();
 		BundleDescription[] fragments = new BundleDescription[fragmentObjects == null ? 0 : fragmentObjects.length];
 		for (int i = 0; i < fragments.length; i++) {
-			fragments[i] = ((Bundle) fragmentObjects[i]).getBundleDescription();
+			fragments[i] = ((AbstractBundle) fragmentObjects[i]).getBundleDescription();
 		}
 
 		// init the imported packages list taking the bundle...
@@ -199,7 +199,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 			// ...and its fragments
 			for (int i = 0; i < fragments.length; i++)
 				if (fragments[i].isResolved()) {
-					spec = ((Bundle) fragmentObjects[i]).getBundleData().getDynamicImports();
+					spec = ((AbstractBundle) fragmentObjects[i]).getBundleData().getDynamicImports();
 					imports = ManifestElement.parseHeader(Constants.DYNAMICIMPORT_PACKAGE,spec);
 					addDynamicImportPackage(imports);
 				}
@@ -208,7 +208,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 		}
 	}
 
-	protected void initializeFragment(Bundle fragment) throws BundleException {
+	protected void initializeFragment(AbstractBundle fragment) throws BundleException {
 		BundleDescription description = fragment.getBundleDescription();
 		// if the fragment imports a package not already imported throw an exception
 		PackageSpecification[] packages = description.getPackages();
@@ -632,7 +632,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 
 		// look in fragments imports ...
 		for (int i = 0; i < fragments.length; i++) {
-			result = ((Bundle) fragments[i]).getBundleData().findLibrary(name);
+			result = ((AbstractBundle) fragments[i]).getBundleData().findLibrary(name);
 			if (result != null)
 				return result;
 		}
@@ -643,7 +643,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 	 * Return the bundle we are associated with.
 	 *
 	 */
-	protected Bundle getBundle() {
+	protected AbstractBundle getBundle() {
 		return bundle;
 	}
 
@@ -666,7 +666,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 		org.osgi.framework.Bundle[] fragments = bundle.getFragments();
 		if (fragments != null)
 			for (int i = 0; i < fragments.length; i++) {
-				Bundle fragment = (Bundle) fragments[i];
+				AbstractBundle fragment = (AbstractBundle) fragments[i];
 				try {
 					bcl.attachFragment(fragment.getBundleData(), fragment.domain, getClassPath(fragment, SecureAction.getProperties()));
 				}
@@ -1164,7 +1164,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 
 	}
 
-	protected String[] getClassPath(Bundle bundle, Properties props) throws BundleException {
+	protected String[] getClassPath(AbstractBundle bundle, Properties props) throws BundleException {
 		String spec = bundle.getBundleData().getClassPath();
 		ManifestElement[] classpathElements = ManifestElement.parseHeader(Constants.BUNDLE_CLASSPATH,spec);
 		return matchClassPath(classpathElements, props);
@@ -1180,7 +1180,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 
 		ArrayList result = new ArrayList(classpath.length);
 		for (int i = 0; i < classpath.length; i++) {
-			Filter filter;
+			FilterImpl filter;
 			try {
 				filter = createFilter(classpath[i].getAttribute(Constants.SELECTION_FILTER_ATTRIBUTE));
 				if (filter == null || filter.match(props)) {
@@ -1200,14 +1200,14 @@ public class BundleLoader implements ClassLoaderDelegate {
 		return (String[]) result.toArray(new String[result.size()]);
 	}
 
-	protected Filter createFilter(String filterString) throws InvalidSyntaxException, BundleException {
+	protected FilterImpl createFilter(String filterString) throws InvalidSyntaxException, BundleException {
 		if (filterString == null)
 			return null;
 		int length = filterString.length();
 		if (length <= 2) {
 			throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_HEADER_EXCEPTION", Constants.BUNDLE_CLASSPATH, filterString));
 		}
-		return new Filter(filterString);
+		return new FilterImpl(filterString);
 	}
 
 }

@@ -219,7 +219,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		register(URLConverter.class.getName(), new URLConverterImpl(),bundle);
 		register(CommandProvider.class.getName(), new EclipseCommandProvider(context),bundle);
 		register(FrameworkLog.class.getName(), getFrameworkLog(), bundle);
-		register(org.eclipse.osgi.service.localization.BundleLocalization.class.getName(),new BundleLocalization(),bundle);
+		register(org.eclipse.osgi.service.localization.BundleLocalization.class.getName(),new BundleLocalizationImpl(),bundle);
 		registerEndorsedXMLParser();
 	}
 
@@ -450,7 +450,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 					long id = bundles[i].getBundleId();
 					out.writeLong(id);
 					if (id != 0) {
-						BundleData data = ((org.eclipse.osgi.framework.internal.core.Bundle) bundles[i]).getBundleData();
+						BundleData data = ((org.eclipse.osgi.framework.internal.core.AbstractBundle) bundles[i]).getBundleData();
 						saveMetaDataFor(data, out);
 					}
 				}

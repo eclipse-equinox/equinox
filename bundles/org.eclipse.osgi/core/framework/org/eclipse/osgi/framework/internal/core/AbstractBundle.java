@@ -25,7 +25,7 @@ import org.osgi.framework.*;
  * is destroyed when a bundle is uninstalled and reused if a bundle is updated.
  * This class is abstract and is extended by BundleHost and BundleFragment.
  */
-public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, KeyedElement {
+public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement {
 	/** The Framework this bundle is part of */
 	protected Framework framework;
 	/** The state of the bundle. */
@@ -57,7 +57,7 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 	 * @param framework
 	 *            Framework this bundle is running in
 	 */
-	protected static Bundle createBundle(BundleData bundledata, Framework framework) throws BundleException {
+	protected static AbstractBundle createBundle(BundleData bundledata, Framework framework) throws BundleException {
 		if (bundledata.isFragment())
 			return new BundleFragment(bundledata, framework);
 		else
@@ -72,7 +72,7 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 	 * @param framework
 	 *            Framework this bundle is running in
 	 */
-	protected Bundle(BundleData bundledata, Framework framework) throws BundleException {
+	protected AbstractBundle(BundleData bundledata, Framework framework) throws BundleException {
 		state = INSTALLED;
 		stateChanging = null;
 		this.bundledata = bundledata;
@@ -95,7 +95,7 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 	 *         imported by a bundle
 	 * @exception org.osgi.framework.BundleException
 	 */
-	protected abstract boolean reload(Bundle newBundle) throws BundleException;
+	protected abstract boolean reload(AbstractBundle newBundle) throws BundleException;
 	/**
 	 * Refresh the bundle. This is called by Framework.refreshPackages. This
 	 * method must be called while holding the bundles lock.
@@ -661,9 +661,9 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 	 */
 	protected void updateWorker(PrivilegedExceptionAction action) throws BundleException {
 		boolean bundleActive = false;
-		Bundle host = null;
+		AbstractBundle host = null;
 		if (isFragment()) {
-			host = (Bundle) getHost();
+			host = (AbstractBundle) getHost();
 			bundleActive = (host == null ? false : (host.state == ACTIVE));
 		} else {
 			bundleActive = (state == ACTIVE);
@@ -705,18 +705,18 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 	 * Update worker. Assumes the caller has the state change lock.
 	 */
 	protected void updateWorkerPrivileged(URLConnection source) throws BundleException {
-		Bundle oldBundle = Bundle.createBundle(bundledata, framework);
+		AbstractBundle oldBundle = AbstractBundle.createBundle(bundledata, framework);
 		boolean reloaded = false;
 		BundleOperation storage = framework.adaptor.updateBundle(this.bundledata, source);
 		BundleRepository bundles = framework.getBundles();
 		try {
 			BundleData newBundleData = storage.begin();
 			// Must call framework createBundle to check execution environment.
-			Bundle newBundle = framework.createBundle(newBundleData);
+			AbstractBundle newBundle = framework.createBundle(newBundleData);
 			// Check for a bundle already installed with the same symbolicName
 			// and version.
 			String symbolicName = newBundle.getSymbolicName();
-			Bundle installedBundle = symbolicName == null ? null : framework.getBundleByUniqueId(symbolicName, newBundle.getVersion().toString());
+			AbstractBundle installedBundle = symbolicName == null ? null : framework.getBundleByUniqueId(symbolicName, newBundle.getVersion().toString());
 			if (installedBundle != null && installedBundle != this) {
 				throw new BundleException(Msg.formatter.getString("BUNDLE_INSTALL_SAME_UNIQUEID", new Object[] {installedBundle.getSymbolicName(), installedBundle.getVersion(),  installedBundle.getLocation()}));
 			}
@@ -823,9 +823,9 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 	 */
 	protected void uninstallWorker(PrivilegedExceptionAction action) throws BundleException {
 		boolean bundleActive = false;
-		Bundle host = null;
+		AbstractBundle host = null;
 		if (isFragment()) {
-			host = (Bundle) getHost();
+			host = (AbstractBundle) getHost();
 			bundleActive = (host == null ? false : (host.state == ACTIVE));
 		} else {
 			bundleActive = (state == ACTIVE);
@@ -1031,7 +1031,7 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 	/**
 	 * Retrieve the location identifier of the bundle. This is typically the
 	 * location passed to
-	 * {@link BundleContext#installBundle(String) BundleContext.installBundle}when the
+	 * {@link BundleContextImpl#installBundle(String) BundleContext.installBundle}when the
 	 * bundle was installed. The location identifier of the bundle may change
 	 * during bundle update. Calling this method while framework is updating
 	 * the bundle results in undefined behavior.
@@ -1051,7 +1051,7 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 		return (bundledata.getLocation());
 	}
 	/**
-	 * Provides a list of {@link ServiceReference}s for the services
+	 * Provides a list of {@link ServiceReferenceImpl}s for the services
 	 * registered by this bundle or <code>null</code> if the bundle has no
 	 * registered services.
 	 * 
@@ -1060,15 +1060,15 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 	 * framework is a very dynamic environment and services can be modified or
 	 * unregistered at anytime.
 	 * 
-	 * @return An array of {@link ServiceReference}or <code>null</code>.
+	 * @return An array of {@link ServiceReferenceImpl}or <code>null</code>.
 	 * @exception java.lang.IllegalStateException
 	 *                If the bundle has been uninstalled.
-	 * @see ServiceRegistration
-	 * @see ServiceReference
+	 * @see ServiceRegistrationImpl
+	 * @see ServiceReferenceImpl
 	 */
 	public abstract org.osgi.framework.ServiceReference[] getRegisteredServices();
 	/**
-	 * Provides a list of {@link ServiceReference}s for the services this
+	 * Provides a list of {@link ServiceReferenceImpl}s for the services this
 	 * bundle is using, or <code>null</code> if the bundle is not using any
 	 * services. A bundle is considered to be using a service if the bundle's
 	 * use count for the service is greater than zero.
@@ -1078,10 +1078,10 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 	 * framework is a very dynamic environment and services can be modified or
 	 * unregistered at anytime.
 	 * 
-	 * @return An array of {@link ServiceReference}or <code>null</code>.
+	 * @return An array of {@link ServiceReferenceImpl}or <code>null</code>.
 	 * @exception java.lang.IllegalStateException
 	 *                If the bundle has been uninstalled.
-	 * @see ServiceReference
+	 * @see ServiceReferenceImpl
 	 */
 	public abstract org.osgi.framework.ServiceReference[] getServicesInUse();
 	/**
@@ -1203,11 +1203,11 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 	 *                comparable with the receiver.
 	 */
 	public int compareTo(Object obj) {
-		int slcomp = getStartLevel() - ((Bundle) obj).getStartLevel();
+		int slcomp = getStartLevel() - ((AbstractBundle) obj).getStartLevel();
 		if (slcomp != 0) {
 			return slcomp;
 		}
-		long idcomp = getBundleId() - ((Bundle) obj).getBundleId();
+		long idcomp = getBundleId() - ((AbstractBundle) obj).getBundleId();
 		return (idcomp < 0L) ? -1 : ((idcomp > 0L) ? 1 : 0);
 	}
 	/**
@@ -1360,7 +1360,7 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 	 * 
 	 * @return BundleContext for this bundle.
 	 */
-	abstract protected BundleContext getContext();
+	abstract protected BundleContextImpl getContext();
 	protected String getResolutionFailureMessage() {
 		String defaultMessage = Msg.formatter.getString("BUNDLE_UNRESOLVED_EXCEPTION");
 		// don't spend time if debug info is not needed
@@ -1407,7 +1407,7 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 		return (int) getBundleId();
 	}
 	public boolean compare(KeyedElement other) {
-		return getBundleId() == ((Bundle) other).getBundleId();
+		return getBundleId() == ((AbstractBundle) other).getBundleId();
 	}
 	public Object getKey() {
 		return new Long(getBundleId());
@@ -1421,7 +1421,7 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 		for (int i = 0; i < pkgs.length; i++) {
 			// check to make sure the exporter has permissions
 			BundleDescription supplier = pkgs[i].getSupplier();
-			Bundle supplierBundle = supplier == null ? null : framework.getBundle(supplier.getBundleId());
+			AbstractBundle supplierBundle = supplier == null ? null : framework.getBundle(supplier.getBundleId());
 			if (supplierBundle == null || !supplierBundle.checkExportPackagePermission(pkgs[i].getName())) {
 				permissionMsg = Msg.formatter.getString("BUNDLE_PERMISSION_EXCEPTION_EXPORT", supplierBundle, pkgs[i].getName());
 				return false;
@@ -1436,7 +1436,7 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 		for (int i = 0; i < bundles.length; i++) {
 			// check to make sure the provider has permissions
 			BundleDescription supplier = bundles[i].getSupplier();
-			Bundle supplierBundle = supplier == null ? null : framework.getBundle(supplier.getBundleId());
+			AbstractBundle supplierBundle = supplier == null ? null : framework.getBundle(supplier.getBundleId());
 			if (supplierBundle == null || !supplierBundle.checkProvideBundlePermission(bundles[i].getName())) {
 				permissionMsg = Msg.formatter.getString("BUNDLE_PERMISSION_EXCEPTION_PROVIDE", supplierBundle, bundles[i].getName());
 				return false;
@@ -1451,7 +1451,7 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 		if (host != null) {
 			// check to make sure the host has permissions
 			BundleDescription supplier = host.getSupplier();
-			Bundle supplierBundle = supplier == null ? null : framework.getBundle(supplier.getBundleId());
+			AbstractBundle supplierBundle = supplier == null ? null : framework.getBundle(supplier.getBundleId());
 			if (supplierBundle == null || !supplierBundle.checkFragmentHostPermission(host.getName())) {
 				permissionMsg = Msg.formatter.getString("BUNDLE_PERMISSION_EXCEPTION_HOST", supplierBundle, host.getName());
 				return false;

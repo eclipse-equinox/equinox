@@ -52,7 +52,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 	protected MetaData fwMetadata;
 
 	/** Dictionary containing permission data */
-	protected PermissionStorage permissionStore;
+	protected DefaultPermissionStorage permissionStore;
 
 	/** next available bundle id */
 	protected long nextId = 1;
@@ -755,7 +755,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 		if (permissionStore == null) {
 			synchronized (this) {
 				if (permissionStore == null) {
-					permissionStore = new PermissionStorage(this);
+					permissionStore = new DefaultPermissionStorage(this);
 				}
 			}
 		}

@@ -36,9 +36,9 @@ public class BundleRepository {
 	private Hashtable bundlesBySymbolicName;	//TODO Does this need to be synchronized
 
 	/** PackageAdmin */
-	private PackageAdmin packageAdmin;
+	private PackageAdminImpl packageAdmin;
 
-	public BundleRepository(int initialCapacity, PackageAdmin packageAdmin) {
+	public BundleRepository(int initialCapacity, PackageAdminImpl packageAdmin) {
 		bundlesByInstallOrder = new ArrayList(initialCapacity);
 		bundlesById = new KeyedHashSet(initialCapacity, true);
 		bundlesBySymbolicName = new Hashtable(initialCapacity);
@@ -58,17 +58,17 @@ public class BundleRepository {
 	 * @param bundleId
 	 * @return
 	 */
-	public Bundle getBundle(long bundleId) {
+	public AbstractBundle getBundle(long bundleId) {
 		Long key = new Long(bundleId);
-		return (Bundle) bundlesById.getByKey(key);
+		return (AbstractBundle) bundlesById.getByKey(key);
 	}
 
-	public Bundle[] getBundles(String symbolicName) {
-		return (Bundle[]) bundlesBySymbolicName.get(symbolicName);
+	public AbstractBundle[] getBundles(String symbolicName) {
+		return (AbstractBundle[]) bundlesBySymbolicName.get(symbolicName);
 	}
 
-	public Bundle getBundle(String symbolicName, String version) {
-		Bundle[] bundles = (Bundle[]) bundlesBySymbolicName.get(symbolicName);
+	public AbstractBundle getBundle(String symbolicName, String version) {
+		AbstractBundle[] bundles = (AbstractBundle[]) bundlesBySymbolicName.get(symbolicName);
 		if (bundles != null) {
 			Version ver = new Version(version);
 			if (bundles.length > 0) {
@@ -82,16 +82,16 @@ public class BundleRepository {
 		return null;
 	}
 
-	public void add(Bundle bundle) {
+	public void add(AbstractBundle bundle) {
 		bundlesByInstallOrder.add(bundle);
 		bundlesById.add(bundle);
 		String symbolicName = bundle.getSymbolicName();
 		if (symbolicName != null) {
-			Bundle[] bundles = (Bundle[]) bundlesBySymbolicName.get(symbolicName);
+			AbstractBundle[] bundles = (AbstractBundle[]) bundlesBySymbolicName.get(symbolicName);
 			if (bundles == null) {
 				// making the initial capacity on this 1 since it
 				// should be rare that multiple version exist
-				bundles = new Bundle[1];
+				bundles = new AbstractBundle[1];
 				bundles[0] = bundle;
 				bundlesBySymbolicName.put(symbolicName, bundles);
 				return;
@@ -102,7 +102,7 @@ public class BundleRepository {
 			Version newVersion = bundle.getVersion();
 			boolean added = false;
 			for (int i = 0; i < bundles.length; i++) {
-				Bundle oldBundle = bundles[i];
+				AbstractBundle oldBundle = bundles[i];
 				Version oldVersion = oldBundle.getVersion();
 				if (!added && newVersion.matchGreaterOrEqualTo(oldVersion)) {
 					added = true;
@@ -114,13 +114,13 @@ public class BundleRepository {
 				list.add(bundle);
 			}
 
-			bundles = new Bundle[list.size()];
+			bundles = new AbstractBundle[list.size()];
 			list.toArray(bundles);
 			bundlesBySymbolicName.put(symbolicName, bundles);
 		}
 	}
 
-	public boolean remove(Bundle bundle) {
+	public boolean remove(AbstractBundle bundle) {
 		// remove by bundle ID
 		boolean found = bundlesById.remove(bundle);
 		if (!found)
@@ -133,7 +133,7 @@ public class BundleRepository {
 		if (symbolicName == null)
 			return true;
 
-		Bundle[] bundles = (Bundle[]) bundlesBySymbolicName.get(symbolicName);
+		AbstractBundle[] bundles = (AbstractBundle[]) bundlesBySymbolicName.get(symbolicName);
 		if (bundles == null)
 			return true;
 
@@ -152,7 +152,7 @@ public class BundleRepository {
 				bundlesBySymbolicName.remove(symbolicName);
 			} else {
 				// create a new array with the null entries removed.
-				Bundle[] newBundles = new Bundle[bundles.length - numRemoved];
+				AbstractBundle[] newBundles = new AbstractBundle[bundles.length - numRemoved];
 				int indexCnt = 0;
 				for (int i = 0; i < bundles.length; i++) {
 					if (bundles[i] != null) {

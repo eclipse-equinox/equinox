@@ -12,7 +12,7 @@
 package org.eclipse.osgi.framework.console;
 
 import java.util.Dictionary;
-import org.eclipse.osgi.framework.internal.core.Bundle;
+import org.eclipse.osgi.framework.internal.core.AbstractBundle;
 
 /**	A command interpreter is a shell that can interpret command
   *	lines. This object is passed as parameter when a CommandProvider
@@ -83,6 +83,6 @@ public interface CommandInterpreter {
          * @param bundle	the bundle containing the resource
          * @param resource	the resource to print
          */
-        public void printBundleResource(Bundle bundle, String resource);
+        public void printBundleResource(AbstractBundle bundle, String resource);
 }
 

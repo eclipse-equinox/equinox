@@ -79,7 +79,7 @@ public class SystemBundle extends BundleHost {
 	 * @param newBundle
 	 * @return false
 	 */
-	protected boolean reload(Bundle newBundle) throws BundleException {
+	protected boolean reload(AbstractBundle newBundle) throws BundleException {
 		return (false);
 	}
 
@@ -162,9 +162,9 @@ public class SystemBundle extends BundleHost {
 	 */
 	protected void resume() throws BundleException {
 		/* initialize the startlevel service */
-		framework.startLevelImpl.initialize();
+		framework.startLevelManager.initialize();
 
-		framework.startLevelImpl.launch(framework.startLevelImpl.getFrameworkStartLevel());
+		framework.startLevelManager.launch(framework.startLevelManager.getFrameworkStartLevel());
 
 	}
 
@@ -194,8 +194,8 @@ public class SystemBundle extends BundleHost {
 	 */
 	protected void suspend() throws BundleException {
 
-		framework.startLevelImpl.shutdown();
-		framework.startLevelImpl.cleanup();
+		framework.startLevelManager.shutdown();
+		framework.startLevelManager.cleanup();
 
 		/* clean up the exporting loaders */
 		framework.packageAdmin.cleanup();

@@ -18,7 +18,7 @@ import java.net.URL;
 import org.eclipse.osgi.framework.adaptor.core.AbstractBundleData;
 import org.eclipse.osgi.framework.adaptor.core.BundleEntry;
 import org.eclipse.osgi.framework.adaptor.core.BundleResourceHandler;
-import org.eclipse.osgi.framework.internal.core.Bundle;
+import org.eclipse.osgi.framework.internal.core.AbstractBundle;
 
 /**
  * URLStreamHandler the bundleentry protocol.
@@ -39,7 +39,7 @@ public class Handler extends BundleResourceHandler
     	super(bundleEntry);
     }
 
-    protected BundleEntry findBundleEntry(URL url, Bundle bundle) throws IOException
+    protected BundleEntry findBundleEntry(URL url, AbstractBundle bundle) throws IOException
     {
 		AbstractBundleData bundleData = (AbstractBundleData) bundle.getBundleData();
 		BundleEntry entry = bundleData.getBaseBundleFile().getEntry(url.getPath());

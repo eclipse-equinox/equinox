@@ -17,6 +17,7 @@ import java.util.Vector;
 import org.eclipse.osgi.framework.adaptor.PermissionStorage;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.osgi.framework.FrameworkEvent;
+import org.osgi.service.permissionadmin.PermissionAdmin;
 import org.osgi.service.permissionadmin.PermissionInfo;
 
 /**
@@ -58,7 +59,7 @@ import org.osgi.service.permissionadmin.PermissionInfo;
  * are not reflected in the permissions returned by <tt>getPermissions</tt>
  * and <tt>getDefaultPermissions</tt>.
  */
-public class PermissionAdmin implements org.osgi.service.permissionadmin.PermissionAdmin {
+public class PermissionAdminImpl implements PermissionAdmin {
 	/** framework object */
 	protected Framework framework;
 
@@ -79,7 +80,7 @@ public class PermissionAdmin implements org.osgi.service.permissionadmin.Permiss
 	 *
 	 * @param framework Framework object.
 	 */
-	protected PermissionAdmin(Framework framework, PermissionStorage storage) {
+	protected PermissionAdminImpl(Framework framework, PermissionStorage storage) {
 		this.framework = framework;
 		this.storage = storage;
 
@@ -140,7 +141,7 @@ public class PermissionAdmin implements org.osgi.service.permissionadmin.Permiss
 			throw new NullPointerException();
 		}
 
-		PermissionStorage storage = new org.eclipse.osgi.framework.util.PermissionStorage(this.storage);
+		PermissionStorage storage = new org.eclipse.osgi.framework.util.SecurePermissionStorage(this.storage);
 
 		try {
 			String[] data = storage.getPermissionData(location);
@@ -182,7 +183,7 @@ public class PermissionAdmin implements org.osgi.service.permissionadmin.Permiss
 			throw new NullPointerException();
 		}
 
-		PermissionStorage storage = new org.eclipse.osgi.framework.util.PermissionStorage(this.storage);
+		PermissionStorage storage = new org.eclipse.osgi.framework.util.SecurePermissionStorage(this.storage);
 
 		try {
 			String[] data = makePermissionData(permissions);
@@ -205,7 +206,7 @@ public class PermissionAdmin implements org.osgi.service.permissionadmin.Permiss
 			return;
 		}
 
-		Bundle bundle = framework.getBundleByLocation(location);
+		AbstractBundle bundle = framework.getBundleByLocation(location);
 
 		if ((bundle != null) && (bundle.getBundleId() != 0)) {
 			ProtectionDomain domain = bundle.getProtectionDomain();
@@ -231,7 +232,7 @@ public class PermissionAdmin implements org.osgi.service.permissionadmin.Permiss
 	 * permissions, or <tt>null</tt> if the permission table is empty.
 	 */
 	public String[] getLocations() {
-		PermissionStorage storage = new org.eclipse.osgi.framework.util.PermissionStorage(this.storage);
+		PermissionStorage storage = new org.eclipse.osgi.framework.util.SecurePermissionStorage(this.storage);
 
 		try {
 			String[] locations = storage.getLocations();
@@ -254,7 +255,7 @@ public class PermissionAdmin implements org.osgi.service.permissionadmin.Permiss
 	 * permissions have not been defined.
 	 */
 	public PermissionInfo[] getDefaultPermissions() {
-		PermissionStorage storage = new org.eclipse.osgi.framework.util.PermissionStorage(this.storage);
+		PermissionStorage storage = new org.eclipse.osgi.framework.util.SecurePermissionStorage(this.storage);
 
 		try {
 			String[] data = storage.getPermissionData(null);
@@ -291,7 +292,7 @@ public class PermissionAdmin implements org.osgi.service.permissionadmin.Permiss
 	public void setDefaultPermissions(PermissionInfo[] permissions) {
 		framework.checkAdminPermission();
 
-		PermissionStorage storage = new org.eclipse.osgi.framework.util.PermissionStorage(this.storage);
+		PermissionStorage storage = new org.eclipse.osgi.framework.util.SecurePermissionStorage(this.storage);
 
 		try {
 			String[] data = makePermissionData(permissions);
@@ -369,7 +370,7 @@ public class PermissionAdmin implements org.osgi.service.permissionadmin.Permiss
 	 * @return BundleCombinedPermission object with the bundle's
 	 * dynamic permissions.
 	 */
-	protected PermissionCollection createPermissionCollection(Bundle bundle) {
+	protected PermissionCollection createPermissionCollection(AbstractBundle bundle) {
 		BundlePermissionCollection implied = getImpliedPermissions(bundle);
 
 		BundleCombinedPermissions combined = new BundleCombinedPermissions(implied);
@@ -409,7 +410,7 @@ public class PermissionAdmin implements org.osgi.service.permissionadmin.Permiss
 	 * @param bundle The bundle to create the permissions for.
 	 * @return A PermissionCollection of the assigned permissions.
 	 */
-	protected BundlePermissionCollection getAssignedPermissions(Bundle bundle) {
+	protected BundlePermissionCollection getAssignedPermissions(AbstractBundle bundle) {
 		String location = bundle.getLocation();
 
 		PermissionInfo[] info = getPermissions(location);
@@ -432,7 +433,7 @@ public class PermissionAdmin implements org.osgi.service.permissionadmin.Permiss
 	 * @param bundle The bundle to create the permissions for.
 	 * @return A PermissionCollection of the implied permissions.
 	 */
-	protected BundlePermissionCollection getImpliedPermissions(Bundle bundle) {
+	protected BundlePermissionCollection getImpliedPermissions(AbstractBundle bundle) {
 		if (Debug.DEBUG && Debug.DEBUG_SECURITY) {
 			Debug.println("Creating implied permissions for " + bundle);
 		}
@@ -520,7 +521,7 @@ public class PermissionAdmin implements org.osgi.service.permissionadmin.Permiss
 	 * @param bundle The target bundle for the permissions.
 	 * @return A PermissionCollection containing Permission objects.
 	 */
-	protected BundlePermissionCollection createPermissions(PermissionInfo[] info, final Bundle bundle) {
+	protected BundlePermissionCollection createPermissions(PermissionInfo[] info, final AbstractBundle bundle) {
 		BundlePermissionCollection collection = new BundlePermissions(framework.packageAdmin);
 
 		/* add the permissions */

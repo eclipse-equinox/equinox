@@ -322,7 +322,7 @@ public class FrameworkCommandInterpreter implements CommandInterpreter {
 	 * @param bundle	the bundle containing the resource
 	 * @param resource	the resource to print
 	 */
-	public void printBundleResource(Bundle bundle, String resource) {
+	public void printBundleResource(AbstractBundle bundle, String resource) {
 		URL entry = null;
 		entry = bundle.getEntry(resource);
 		if (entry != null) {

@@ -41,7 +41,7 @@ class StartLevelEvent extends EventObject {
 	 * For a change in bundle startlevel, this is the bundle to be changed.
 	 * For a change in framework startlevel, this is the bundle requesting the change.
 	 */
-	private transient Bundle bundle;
+	private transient AbstractBundle bundle;
 
 	/**
 	 * Creates a StartLevel event regarding the specified bundle.
@@ -50,7 +50,7 @@ class StartLevelEvent extends EventObject {
 	 * @param int newSl the ultimate requested startlevel we are on our way to
 	 * @param bundle The affected bundle, or system bundle if it is for the framework
 	 */
-	public StartLevelEvent(int type, int newSl, Bundle bundle) {
+	public StartLevelEvent(int type, int newSl, AbstractBundle bundle) {
 		super(bundle);
 		this.type = type;
 		this.newSl = newSl;
@@ -65,7 +65,7 @@ class StartLevelEvent extends EventObject {
 		return this.newSl;
 	}
 
-	public Bundle getBundle() {
+	public AbstractBundle getBundle() {
 		return this.bundle;
 	}
 

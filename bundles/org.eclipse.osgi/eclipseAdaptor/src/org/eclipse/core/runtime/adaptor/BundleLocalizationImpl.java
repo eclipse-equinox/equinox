@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.core.runtime.adaptor;
 import java.util.ResourceBundle;
+import org.eclipse.osgi.service.localization.BundleLocalization;
 import org.osgi.framework.Bundle;
 
 /**
@@ -17,16 +18,15 @@ import org.osgi.framework.Bundle;
  * bundle with a given locale. 
  */
 
-public class BundleLocalization implements org.eclipse.osgi.service.localization.BundleLocalization {
+public class BundleLocalizationImpl implements BundleLocalization {
 	/**
 	 * The getLocalization method gets a ResourceBundle object for the given
 	 * locale and bundle.
-	 * 
 	 * 
 	 * @return A <code>ResourceBundle</code> object for the given bundle and locale.
 	 * If null is passed for the locale parameter, the default locale is used.
 	 */
 	public ResourceBundle getLocalization(Bundle bundle, String locale) {
-		return ((org.eclipse.osgi.framework.internal.core.Bundle) (bundle)).getResourceBundle(locale);
+		return ((org.eclipse.osgi.framework.internal.core.AbstractBundle) (bundle)).getResourceBundle(locale);
 	}
 }

@@ -19,10 +19,10 @@ import org.osgi.framework.Constants;
  * This class is used by the Bundle Class to localize manifest headers.
  */
 public class ManifestLocalization {
-	private Bundle bundle = null;
+	private AbstractBundle bundle = null;
 	private Dictionary rawHeaders = null;
 	private Headers defaultLocaleHeaders = null;
-	public ManifestLocalization(Bundle bundle, Dictionary rawHeaders) {
+	public ManifestLocalization(AbstractBundle bundle, Dictionary rawHeaders) {
 		this.bundle = bundle;
 		this.rawHeaders = rawHeaders;
 	}

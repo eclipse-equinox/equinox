@@ -44,14 +44,14 @@ public class ExportedPackageImpl extends SingleSourcePackage implements org.osgi
 			return null;
 		}
 
-		Bundle[] dependentBundles = supplier.getDependentBundles();
+		AbstractBundle[] dependentBundles = supplier.getDependentBundles();
 		ArrayList importingBundles = new ArrayList();
 
 		// always add self
 		importingBundles.add(supplier.getBundle());
 
 		for (int i = 0; i < dependentBundles.length; i++) {
-			Bundle bundle = dependentBundles[i];
+			AbstractBundle bundle = dependentBundles[i];
 			BundleLoader bundleLoader = bundle.getBundleLoader();
 			/* check to make sure this package is really imported;
 			 * do not call bundleLoader.getPackageExporter() here because we do
@@ -63,7 +63,7 @@ public class ExportedPackageImpl extends SingleSourcePackage implements org.osgi
 			}
 		}
 
-		Bundle[] result = new Bundle[importingBundles.size()];
+		AbstractBundle[] result = new AbstractBundle[importingBundles.size()];
 		importingBundles.toArray(result);
 		return result;
 	}
@@ -73,7 +73,7 @@ public class ExportedPackageImpl extends SingleSourcePackage implements org.osgi
 	}
 
 	public boolean isRemovalPending() {
-		Bundle bundle = supplier.getBundle();
+		AbstractBundle bundle = supplier.getBundle();
 		return bundle.framework.packageAdmin.removalPending.contains(supplier);
 	}
 

@@ -18,6 +18,7 @@ import org.eclipse.osgi.framework.debug.DebugOptions;
 import org.eclipse.osgi.framework.util.SecureAction;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.*;
+import org.osgi.service.packageadmin.*;
 import org.osgi.service.packageadmin.ExportedPackage;
 import org.osgi.service.packageadmin.NamedClassSpace;
 
@@ -44,7 +45,7 @@ import org.osgi.service.packageadmin.NamedClassSpace;
  * old values, isRemovalPending() returns true, and getExportingBundle()
  * and getImportingBundles() return null.
  */
-public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin {
+public class PackageAdminImpl implements PackageAdmin {
 
 	/** framework object */
 	protected Framework framework;
@@ -64,7 +65,7 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 	 *
 	 * @param framework Framework object.
 	 */
-	protected PackageAdmin(Framework framework) {
+	protected PackageAdminImpl(Framework framework) {
 		this.framework = framework;
 	}
 
@@ -88,7 +89,7 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 			BundleDescription bundleSpec = packageSpecs[i].getSupplier();
 			if (bundleSpec == null)
 				continue;
-			Bundle bundle = framework.getBundle(bundleSpec.getBundleId());
+			AbstractBundle bundle = framework.getBundle(bundleSpec.getBundleId());
 			if (bundle == null) {
 				BundleException be = new BundleException(Msg.formatter.getString("BUNDLE_NOT_IN_FRAMEWORK",bundleSpec)); //$NON-NLS-1$
 				framework.publishFrameworkEvent(FrameworkEvent.ERROR,framework.systemBundle,be);
@@ -125,7 +126,7 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 		BundleDescription[] bundleDescripts = state.getResolvedBundles();
 		for (int i = 0; i < bundleDescripts.length; i++) {
 			BundleDescription bundledes = bundleDescripts[i];
-			Bundle bundle = framework.getBundle(bundledes.getBundleId());
+			AbstractBundle bundle = framework.getBundle(bundledes.getBundleId());
 			if (bundle != null && bundle.isResolved() && bundle.getSymbolicName() != null && bundle instanceof BundleHost && bundle.checkProvideBundlePermission(bundle.getSymbolicName())) {
 				BundleLoaderProxy loaderProxy = ((BundleHost) bundle).getLoaderProxy();
 				bundleSet.add(loaderProxy);
@@ -303,18 +304,18 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 	public void refreshPackages(org.osgi.framework.Bundle[] input) {
 		framework.checkAdminPermission();
 
-		Bundle[] copy = null;
+		AbstractBundle[] copy = null;
 		if (input != null) {
 			synchronized (input) {
 				int size = input.length;
 
-				copy = new Bundle[size];
+				copy = new AbstractBundle[size];
 
 				System.arraycopy(input, 0, copy, 0, size);
 			}
 		}
 
-		final Bundle[] bundles = copy;
+		final AbstractBundle[] bundles = copy;
 		Thread refresh = SecureAction.createThread(new Runnable() {
 			public void run() {
 				refreshPackages(bundles);
@@ -329,7 +330,7 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 	 *
 	 * @param Seed for the graph.
 	 */
-	protected void refreshPackages(Bundle[] refresh) {
+	protected void refreshPackages(AbstractBundle[] refresh) {
 		try {
 			Vector graph = null;
 			synchronized (framework.bundles) {
@@ -365,7 +366,7 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 
 	private void resumeBundles(Vector graph) {
 
-		Bundle[] refresh = new Bundle[graph.size()];
+		AbstractBundle[] refresh = new AbstractBundle[graph.size()];
 		boolean[] previouslyResolved = new boolean[graph.size()];
 		graph.copyInto(refresh);
 		Util.sort(refresh, 0, graph.size());
@@ -373,14 +374,14 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 			Debug.println("refreshPackages: restart the bundles");
 		}
 		for (int i = 0; i < refresh.length; i++) {
-			Bundle bundle = (Bundle) refresh[i];
+			AbstractBundle bundle = (AbstractBundle) refresh[i];
 			if (bundle.isResolved())
 				framework.resumeBundle(bundle);
 		}
 	}
 
 	private void processDelta(Vector graph) {
-		Bundle[] refresh = new Bundle[graph.size()];
+		AbstractBundle[] refresh = new AbstractBundle[graph.size()];
 		boolean[] previouslyResolved = new boolean[graph.size()];
 		graph.copyInto(refresh);
 		Util.sort(refresh, 0, graph.size());
@@ -395,7 +396,7 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 					Debug.println("refreshPackages: Suspend each bundle and acquire its state change lock");
 				}
 				for (int i = refresh.length - 1; i >= 0; i--) {
-					Bundle changedBundle = refresh[i];
+					AbstractBundle changedBundle = refresh[i];
 					previouslyResolved[i] = changedBundle.isResolved();
 					if (changedBundle.isActive() && !changedBundle.isFragment()) {
 						boolean suspended = framework.suspendBundle(changedBundle, true);
@@ -432,7 +433,7 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 				}
 
 				for (int i = 0; i < refresh.length; i++) {
-					Bundle changedBundle = refresh[i];
+					AbstractBundle changedBundle = refresh[i];
 					changedBundle.refresh();
 					// send out unresolved events
 					if (previouslyResolved[i])
@@ -447,7 +448,7 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 				}
 				for (int i = removalPending.size() - 1; i >= 0; i--) {
 					BundleLoaderProxy loaderProxy = (BundleLoaderProxy) removalPending.elementAt(i);
-					Bundle removedBundle = loaderProxy.getBundle();
+					AbstractBundle removedBundle = loaderProxy.getBundle();
 
 					if (graph.contains(removedBundle)) {
 						deleteRemovalPending(loaderProxy);
@@ -458,7 +459,7 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 				List allBundles = framework.bundles.getBundles();
 				int size = allBundles.size();
 				for (int i = 0; i < size; i++) {
-					Bundle bundle = (Bundle) allBundles.get(i);
+					AbstractBundle bundle = (AbstractBundle) allBundles.get(i);
 					if (bundle.isResolved())
 						continue;
 					BundleDescription bundleDes = bundle.getBundleDescription();
@@ -490,7 +491,7 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 					Debug.println("refreshPackages: release the state change locks");
 				}
 				for (int i = 0; i < refresh.length; i++) {
-					Bundle changedBundle = refresh[i];
+					AbstractBundle changedBundle = refresh[i];
 					changedBundle.completeStateChange();
 				}
 			}
@@ -519,7 +520,7 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 
 		// send out any resolved/unresolved events
 		for (int i = 0; i < notify.size(); i++) {
-			Bundle changedBundle = (Bundle) notify.elementAt(i);
+			AbstractBundle changedBundle = (AbstractBundle) notify.elementAt(i);
 			framework.publishBundleEvent(changedBundle.isResolved() ? BundleEvent.RESOLVED : BundleEvent.UNRESOLVED, changedBundle);
 		}
 
@@ -537,19 +538,19 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 		}
 		int size = bundles.size();
 		for (int i = 0; i < size; i++) {
-			Bundle bundle = (Bundle) bundles.elementAt(i);
+			AbstractBundle bundle = (AbstractBundle) bundles.elementAt(i);
 			bundle.unresolvePermissions(packages);
 		}
 	}
 
-	private Vector computeAffectedBundles(Bundle[] refresh) {
+	private Vector computeAffectedBundles(AbstractBundle[] refresh) {
 		Vector graph = new Vector();
 
 		if (refresh == null) {
 			int size = removalPending.size();
 			for (int i = 0; i < size; i++) {
 				BundleLoaderProxy loaderProxy = (BundleLoaderProxy) removalPending.elementAt(i);
-				Bundle bundle = loaderProxy.getBundle();
+				AbstractBundle bundle = loaderProxy.getBundle();
 				if (!graph.contains(bundle)) {
 					if (Debug.DEBUG && Debug.DEBUG_PACKAGEADMIN) {
 						Debug.println(" refresh: " + bundle);
@@ -557,7 +558,7 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 					graph.addElement(bundle);
 
 					// add in any dependents of the removal pending loader.
-					Bundle[] dependents = loaderProxy.getDependentBundles();
+					AbstractBundle[] dependents = loaderProxy.getDependentBundles();
 					for (int j = 0; j < dependents.length; j++) {
 						if (!graph.contains(dependents[j])) {
 							graph.addElement(dependents[j]);
@@ -567,7 +568,7 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 			}
 		} else {
 			for (int i = 0; i < refresh.length; i++) {
-				Bundle bundle = refresh[i];
+				AbstractBundle bundle = refresh[i];
 				if (bundle == framework.systemBundle) {
 					continue;
 				}
@@ -613,12 +614,12 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 			changed = false;
 			int size = graph.size();
 			for (int i = size - 1; i >= 0; i--) {
-				Bundle bundle = (Bundle) graph.elementAt(i);
+				AbstractBundle bundle = (AbstractBundle) graph.elementAt(i);
 				if (!bundle.isFragment()) {
 					BundleLoaderProxy loaderProxy = ((BundleHost) bundle).getLoaderProxy();
 					if (loaderProxy != null) {
 						// add any dependents
-						Bundle[] dependents = loaderProxy.getDependentBundles();
+						AbstractBundle[] dependents = loaderProxy.getDependentBundles();
 						for (int j = 0; j < dependents.length; j++) {
 							if (!graph.contains(dependents[j])) {
 								graph.addElement(dependents[j]);
@@ -638,7 +639,7 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 					}
 				} else {
 					// add in the host.
-					Bundle host = (Bundle) bundle.getHost();
+					AbstractBundle host = (AbstractBundle) bundle.getHost();
 					if (host != null) {
 						if (!graph.contains(host)) {
 							graph.addElement(host);
@@ -651,11 +652,11 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 			// look for the bundles in removalPending list
 			for (int i = removalPending.size() - 1; i >= 0; i--) {
 				BundleLoaderProxy removedLoaderProxy = (BundleLoaderProxy) removalPending.elementAt(i);
-				Bundle removedBundle = removedLoaderProxy.getBundle();
+				AbstractBundle removedBundle = removedLoaderProxy.getBundle();
 
 				if (graph.contains(removedBundle)) {
 					// add in the dependents of the removedLoaderProxy
-					Bundle[] dependents = removedLoaderProxy.getDependentBundles();
+					AbstractBundle[] dependents = removedLoaderProxy.getDependentBundles();
 					for (int k = 0; k < dependents.length; k++) {
 						if (!graph.contains(dependents[k])) {
 							graph.addElement(dependents[k]);
@@ -679,7 +680,7 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 		BundleDescription[] descriptions = state.getBundles();
 		for (int i = 0; i < descriptions.length; i++) {
 			long bundleId = descriptions[i].getBundleId();
-			Bundle bundle = framework.getBundle(bundleId);
+			AbstractBundle bundle = framework.getBundle(bundleId);
 			if (bundle == null ) {
 				BundleException be = new BundleException(Msg.formatter.getString("BUNDLE_NOT_IN_FRAMEWORK",descriptions[i])); //$NON-NLS-1$
 				framework.publishFrameworkEvent(FrameworkEvent.ERROR,framework.systemBundle,be);
@@ -737,7 +738,7 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 
 			// first check to see if there is anything to resolve
 			for (int i = 0; i < size; i++) {
-				if (!((Bundle) allBundles.get(i)).isResolved())
+				if (!((AbstractBundle) allBundles.get(i)).isResolved())
 					resolveNeeded = true;
 			}
 			if (!resolveNeeded)
@@ -746,7 +747,7 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 			// get the state and resolve it.
 			framework.adaptor.getState().resolve(false);
 			for (int i = 0; i < size; i++) {
-				Bundle bundle = (Bundle) allBundles.get(i);
+				AbstractBundle bundle = (AbstractBundle) allBundles.get(i);
 				BundleDescription changedBundleDes = bundle.getBundleDescription();
 				boolean previouslyResolved = bundle.isResolved();
 
@@ -780,7 +781,7 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 			exportedBundles = getExportedBundles(exportedBundles);
 		}
 		for (int i = 0; i < notify.size(); i++) {
-			Bundle bundle = (Bundle) notify.elementAt(i);
+			AbstractBundle bundle = (AbstractBundle) notify.elementAt(i);
 			if (bundle != null) {
 				framework.publishBundleEvent(bundle.isResolved() ? BundleEvent.RESOLVED : BundleEvent.UNRESOLVED, bundle);
 			}
@@ -816,7 +817,7 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 		ArrayList result = new ArrayList();
 		int size = graph.size();
 		for (int i = 0; i < size; i++) {
-			Bundle bundle = (Bundle) graph.elementAt(i);
+			AbstractBundle bundle = (AbstractBundle) graph.elementAt(i);
 			BundleDescription bundleDes = bundle.getBundleDescription();
 			if (bundleDes != null) {
 				result.add(bundleDes);
@@ -856,7 +857,7 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 			throw new IllegalArgumentException();
 		}
 
-		Bundle bundles[] = framework.getBundleByUniqueId(symbolicName);
+		AbstractBundle bundles[] = framework.getBundleByUniqueId(symbolicName);
 		if (bundles == null)
 			return null;
 
@@ -876,10 +877,10 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 		if (result.size() == 0)
 			return null;
 		else
-			return (Bundle[]) result.toArray(new Bundle[result.size()]);
+			return (AbstractBundle[]) result.toArray(new AbstractBundle[result.size()]);
 	}
 
-	private boolean matchBundle(Bundle bundle, Version version, String match) {
+	private boolean matchBundle(AbstractBundle bundle, Version version, String match) {
 		match = match == null ? Constants.VERSION_MATCH_GREATERTHANOREQUAL : match;
 		boolean result = false;
 		if (match.equalsIgnoreCase(Constants.VERSION_MATCH_QUALIFIER))
@@ -897,11 +898,11 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 	}
 
 	public org.osgi.framework.Bundle[] getFragments(org.osgi.framework.Bundle bundle) {
-		return ((Bundle) bundle).getFragments();
+		return ((AbstractBundle) bundle).getFragments();
 	}
 
 	public org.osgi.framework.Bundle[] getHosts(org.osgi.framework.Bundle bundle) {
-		org.osgi.framework.Bundle host = ((Bundle) bundle).getHost();
+		org.osgi.framework.Bundle host = ((AbstractBundle) bundle).getHost();
 		if (host == null)
 			return null;
 		else
@@ -909,10 +910,10 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 	}
 
 	public int getBundleType(org.osgi.framework.Bundle bundle) {
-		return ((Bundle) bundle).isFragment() ? PackageAdmin.BUNDLE_TYPE_FRAGMENT : 0;
+		return ((AbstractBundle) bundle).isFragment() ? PackageAdminImpl.BUNDLE_TYPE_FRAGMENT : 0;
 	}
 
-	protected Class loadServiceClass(String className, Bundle bundle) {
+	protected Class loadServiceClass(String className, AbstractBundle bundle) {
 		try {
 			if (restrictServiceClasses || bundle == null)
 				return framework.adaptor.getBundleClassLoaderParent().loadClass(className);
