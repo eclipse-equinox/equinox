@@ -22,7 +22,6 @@ public class EclipseElementFactory implements AdaptorElementFactory {
 		return new EclipseBundleData((DefaultAdaptor) adaptor, id);
 	}
 
-	//TODO Crazy optimization we could create a DefaultClassLoader when the bundle is a real bundle.
 	public org.eclipse.osgi.framework.adaptor.BundleClassLoader createClassLoader(ClassLoaderDelegate delegate, ProtectionDomain domain, String[] bundleclasspath, AbstractBundleData data) {
 		return new EclipseClassLoader(delegate, domain, bundleclasspath, data.getAdaptor().getBundleClassLoaderParent(), data);
 	}
