@@ -607,25 +607,23 @@ public class StartLevelManager implements EventDispatcher, EventListener, Servic
 
 		} else {
 			// just decrementing the active startlevel - framework is not shutting down
-			synchronized (bundles) {
-				// get the list of installed bundles, sorted by startlevel
-				AbstractBundle[] shutdown = this.getInstalledBundles(bundles);
-				for (int i = shutdown.length - 1; i >= 0; i--) {
-					int bsl = shutdown[i].getStartLevel();
-					if (bsl > activeSL + 1) {
-						// don't need to mess with bundles with startlevel > the previous active - they should
-						// already have been stopped
-						continue;
-					} else if (bsl <= activeSL) {
-						// don't need to keep going - we've stopped all we're going to stop
-						break;
-					} else if (shutdown[i].isActive()) {
-						// if bundle is active or starting, then stop the bundle
-						if (Debug.DEBUG && Debug.DEBUG_STARTLEVEL) {
-							Debug.println("SLL: stopping bundle " + shutdown[i].getBundleId()); //$NON-NLS-1$
-						}
-						framework.suspendBundle(shutdown[i], false);
+			// get the list of installed bundles, sorted by startlevel
+			AbstractBundle[] shutdown = getInstalledBundles(bundles);
+			for (int i = shutdown.length - 1; i >= 0; i--) {
+				int bsl = shutdown[i].getStartLevel();
+				if (bsl > activeSL + 1) {
+					// don't need to mess with bundles with startlevel > the previous active - they should
+					// already have been stopped
+					continue;
+				} else if (bsl <= activeSL) {
+					// don't need to keep going - we've stopped all we're going to stop
+					break;
+				} else if (shutdown[i].isActive()) {
+					// if bundle is active or starting, then stop the bundle
+					if (Debug.DEBUG && Debug.DEBUG_STARTLEVEL) {
+						Debug.println("SLL: stopping bundle " + shutdown[i].getBundleId()); //$NON-NLS-1$
 					}
+					framework.suspendBundle(shutdown[i], false);
 				}
 			}
 		}
@@ -636,39 +634,37 @@ public class StartLevelManager implements EventDispatcher, EventListener, Servic
 	 * @param bundles list of Bundle objects to be suspended
 	 */
 	private void suspendAllBundles(BundleRepository bundles) {
-		synchronized (bundles) {
-			boolean changed;
-			do {
-				changed = false;
+		boolean changed;
+		do {
+			changed = false;
 
-				AbstractBundle[] shutdown = this.getInstalledBundles(bundles);
+			AbstractBundle[] shutdown = this.getInstalledBundles(bundles);
 
-				// shutdown all running bundles
-				for (int i = shutdown.length - 1; i >= 0; i--) {
-					AbstractBundle bundle = shutdown[i];
+			// shutdown all running bundles
+			for (int i = shutdown.length - 1; i >= 0; i--) {
+				AbstractBundle bundle = shutdown[i];
 
-					if (framework.suspendBundle(bundle, false)) {
-						if (Debug.DEBUG && Debug.DEBUG_STARTLEVEL) {
-							Debug.println("SLL: stopped bundle " + bundle.getBundleId()); //$NON-NLS-1$
-						}
-						changed = true;
+				if (framework.suspendBundle(bundle, false)) {
+					if (Debug.DEBUG && Debug.DEBUG_STARTLEVEL) {
+						Debug.println("SLL: stopped bundle " + bundle.getBundleId()); //$NON-NLS-1$
 					}
+					changed = true;
 				}
-			} while (changed);
+			}
+		} while (changed);
 
-			try {
-				framework.systemBundle.context.stop();
-			} catch (BundleException sbe) {
-				if (Debug.DEBUG && Debug.DEBUG_STARTLEVEL) {
-					Debug.println("SLL: Bundle suspend exception: " + sbe.getMessage()); //$NON-NLS-1$
-					Debug.printStackTrace(sbe.getNestedException());
-				}
-
-				framework.publishFrameworkEvent(FrameworkEvent.ERROR, framework.systemBundle, sbe);
+		try {
+			framework.systemBundle.context.stop();
+		} catch (BundleException sbe) {
+			if (Debug.DEBUG && Debug.DEBUG_STARTLEVEL) {
+				Debug.println("SLL: Bundle suspend exception: " + sbe.getMessage()); //$NON-NLS-1$
+				Debug.printStackTrace(sbe.getNestedException());
 			}
 
-			framework.systemBundle.state = AbstractBundle.STARTING;
+			framework.publishFrameworkEvent(FrameworkEvent.ERROR, framework.systemBundle, sbe);
 		}
+
+		framework.systemBundle.state = AbstractBundle.STARTING;
 	}
 
 	/**
