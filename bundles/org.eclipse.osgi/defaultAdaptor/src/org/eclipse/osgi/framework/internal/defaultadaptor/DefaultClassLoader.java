@@ -18,6 +18,7 @@ import java.util.*;
 import org.eclipse.osgi.framework.adaptor.ClassLoaderDelegate;
 import org.eclipse.osgi.framework.adaptor.core.*;
 import org.eclipse.osgi.framework.debug.Debug;
+import org.osgi.framework.BundleException;
 import org.osgi.framework.FrameworkEvent;
 
 /**
@@ -493,7 +494,7 @@ public class DefaultClassLoader extends AbstractClassLoader {
 	}
 
 	protected String[] getDevEntries(String classpathEntry, AbstractBundleData bundledata) {
-		File propLocation = bundledata.getBaseBundleFile().getFile(classpathEntry + ".properties");
+		File propLocation = bundledata.getBaseBundleFile().getFile(classpathEntry + ".properties"); //$NON-NLS-1$
 		if (propLocation == null)
 			return null;
 		try {
@@ -501,12 +502,13 @@ public class DefaultClassLoader extends AbstractClassLoader {
 			try {
 				Properties devProps = new Properties();
 				devProps.load(in);
-				return DevClassPathHelper.getArrayFromList(devProps.getProperty("bin"));
+				return DevClassPathHelper.getArrayFromList(devProps.getProperty("bin")); //$NON-NLS-1$
 			} finally {
 				in.close();
 			}
 		} catch (IOException e) {
-			// TODO log the failures but ignore and try to keep going
+			BundleException be = new BundleException(AdaptorMsg.formatter.getString("BUNDLE_CLASSPATH_PROPERTIES_ERROR", propLocation), e); //$NON-NLS-1$
+			bundledata.getAdaptor().getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, bundledata.getBundle(), be);
 		}
 		return null;
 	}
