@@ -157,7 +157,7 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 	 */
 	protected BundleActivator loadBundleActivator() throws BundleException {
 		/* load Bundle's BundleActivator if it has one */
-		String activatorClassName = (String) bundledata.getActivator();
+		String activatorClassName = bundledata.getActivator();
 		if (activatorClassName != null) {
 			try {
 				Class activatorClass = loadClass(activatorClassName, false);
@@ -167,7 +167,7 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 				if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 					Debug.printStackTrace(t);
 				}
-				throw new BundleException(Msg.formatter.getString("BUNDLE_INVALID_ACTIVATOR_EXCEPTION", activatorClassName), t);
+				throw new BundleException(Msg.formatter.getString("BUNDLE_INVALID_ACTIVATOR_EXCEPTION", activatorClassName, bundledata.getSymbolicName()), t);
 			}
 		}
 		return (null);
