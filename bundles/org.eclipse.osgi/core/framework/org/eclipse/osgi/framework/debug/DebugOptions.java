@@ -90,18 +90,19 @@ public class DebugOptions implements org.eclipse.osgi.service.debug.DebugOptions
 			e.printStackTrace(System.out);
 			return;
 		}
-		System.out.println("Debug-Options:\n    " + debugOptionsFilename); //$NON-NLS-1$
+		System.out.print("Debug options:\n    " + debugOptionsFilename); //$NON-NLS-1$
 		try {
 			InputStream input = optionsFile.openStream();
 			try {
 				options.load(input);
+				System.out.println(" loaded"); //$NON-NLS-1$
 			} finally {
 				input.close();
 			}
 		} catch (FileNotFoundException e) {
-			//	Its not an error to not find the options file
+			System.out.println(" not found"); //$NON-NLS-1$
 		} catch (IOException e) {
-			System.out.println("Could not parse the options file: " + optionsFile); //$NON-NLS-1$
+			System.out.println(" did not parse"); //$NON-NLS-1$
 			e.printStackTrace(System.out);
 		}
 		// trim off all the blanks since properties files don't do that.
