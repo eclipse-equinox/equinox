@@ -178,7 +178,7 @@ public class EclipseStarter {
 				String report = Profile.getProfileLog();
 				// avoiding writing to the console if there is nothing to print
 				if (report != null && report.length() > 0)
-					System.out.println(Profile.getProfileLog());
+					System.out.println(report);
 			}
 		}
 		// first check to see if the framework is forcing a restart
