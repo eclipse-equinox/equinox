@@ -14,28 +14,29 @@ import java.util.ArrayList;
 
 /**
  * Contains information about activated bundles and acts as the main 
- * entry point for logging plugin activity.
+ * entry point for logging bundle activity.
  */
 
 public class BundleStats {
-	public String pluginId;
+	public String symbolicName;
+	public long id;
 	public int activationOrder;
-	private long timestamp; //timeStamp at which this plugin has been activated
-	private boolean duringStartup; // indicate if the plugin has been activated during startup
-	private long startupTime; // the time took by the plugin to startup
+	private long timestamp; //timeStamp at which this bundle has been activated
+	private boolean duringStartup; // indicate if the bundle has been activated during startup
+	private long startupTime; // the time took by the bundle to startup
 	private long startupMethodTime; // the time took to run the startup method
 
 	// Indicate the position of the activation trace in the file
 	private long traceStart = -1;
 	private long traceEnd = -1;
 
-	//To keep plugins parentage
-	private ArrayList pluginsActivated = new ArrayList(3); // TODO create lazily
+	//To keep bundle parentage
+	private ArrayList bundlesActivated = new ArrayList(3); // TODO create lazily
 	private BundleStats activatedBy = null;
 
-	// Get the pluginInfo if available, or create it.
-	public BundleStats(String pluginId) {
-		this.pluginId = pluginId;
+	public BundleStats(String name, long id) {
+		this.symbolicName = name;
+		this.id = id;
 	}
 
 	public long getTimestamp() {
@@ -46,16 +47,20 @@ public class BundleStats {
 		return activationOrder;
 	}
 
-	protected void activated(BundleStats plugin) {
-		pluginsActivated.add(plugin);
+	protected void activated(BundleStats info) {
+		bundlesActivated.add(info);
 	}
 
 	public BundleStats getActivatedBy() {
 		return activatedBy;
 	}
 
-	public String getPluginId() {
-		return pluginId;
+	public long getId() {
+		return id;
+	}
+
+	public String getSymbolicName() {
+		return symbolicName;
 	}
 
 	public long getStartupTime() {
@@ -66,26 +71,26 @@ public class BundleStats {
 		return startupMethodTime;
 	}
 
-	public boolean isStartupPlugin() {
+	public boolean isStartupBundle() {
 		return duringStartup;
 	}
 
 	public int getClassLoadCount() {
 		if (!StatsManager.MONITOR_CLASSES)
 			return 0;
-		ClassloaderStats loader = ClassloaderStats.getLoader(pluginId);
+		ClassloaderStats loader = ClassloaderStats.getLoader(symbolicName);
 		return loader == null ? 0 : loader.getClassLoadCount();
 	}
 
 	public long getClassLoadTime() {
 		if (!StatsManager.MONITOR_CLASSES)
 			return 0;
-		ClassloaderStats loader = ClassloaderStats.getLoader(pluginId);
+		ClassloaderStats loader = ClassloaderStats.getLoader(symbolicName);
 		return loader == null ? 0 : loader.getClassLoadTime();
 	}
 
-	public ArrayList getPluginsActivated() {
-		return pluginsActivated;
+	public ArrayList getBundlesActivated() {
+		return bundlesActivated;
 	}
 
 	public long getTraceStart() {

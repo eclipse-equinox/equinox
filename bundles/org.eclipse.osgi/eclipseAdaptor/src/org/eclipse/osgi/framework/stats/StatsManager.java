@@ -18,11 +18,10 @@ import org.eclipse.osgi.framework.debug.DebugOptions;
 import org.osgi.framework.Bundle;
 
 public class StatsManager implements BundleWatcher {
-	// This connect plugins and their info, and so allows to access the info without running through
-	// the plugin registry. This map only contains activated plugins. The key is the plugin Id
-	private Hashtable plugins = new Hashtable(20);
+	// This connect bundles and their info, and so allows to access the info without running through
+	// the bundle registry. This map only contains activated bundles. The key is the bundle Id
+	private Hashtable bundles = new Hashtable(20);
 	private Map activationStacks = new HashMap(5);
-//	private Stack activationStack = new Stack(); // a stack of the plugins being activated
 	private static boolean booting = true; // the state of the platform. This value is changed by the InternalPlatform itself.
 
 	private static StatsManager defaultInstance;
@@ -100,18 +99,18 @@ public class StatsManager implements BundleWatcher {
 
 	private void initialize() {
 		// add the system bundle
-		BundleStats plugin = findPlugin(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME);
-		plugin.setTimestamp(System.currentTimeMillis());
-		plugin.setActivationOrder(plugins.size());
-		plugin.setDuringStartup(booting);
+		BundleStats bundle = findBundle(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, 0);
+		bundle.setTimestamp(System.currentTimeMillis());
+		bundle.setActivationOrder(bundles.size());
+		bundle.setDuringStartup(booting);
 	}
 
 	public void startActivation(Bundle bundle) {
 		// should be called from a synchronized location to protect against concurrent updates
-		BundleStats plugin = findPlugin(bundle.getSymbolicName());
-		plugin.setTimestamp(System.currentTimeMillis());
-		plugin.setActivationOrder(plugins.size());
-		plugin.setDuringStartup(booting);
+		BundleStats info = findBundle(bundle.getSymbolicName(), bundle.getBundleId());
+		info.setTimestamp(System.currentTimeMillis());
+		info.setActivationOrder(bundles.size());
+		info.setDuringStartup(booting);
 
 		Stack activationStack = (Stack) activationStacks.get(Thread.currentThread());
 		if (activationStack==null) {
@@ -122,55 +121,55 @@ public class StatsManager implements BundleWatcher {
 		// set the parentage of activation
 		if (activationStack.size() != 0) {
 			BundleStats activatedBy = (BundleStats) activationStack.peek();
-			activatedBy.activated(plugin);
-			plugin.setActivatedBy(activatedBy);
+			activatedBy.activated(info);
+			info.setActivatedBy(activatedBy);
 		}
-		activationStack.push(plugin);
+		activationStack.push(info);
 
 		if (TRACE_BUNDLES == true) {
-			traceActivate(bundle.getSymbolicName(), plugin);
+			traceActivate(bundle, info);
 		}
 	}
 
-	public void endActivation(Bundle pluginId) {
+	public void endActivation(Bundle symbolicName) {
 		Stack activationStack = (Stack) activationStacks.get(Thread.currentThread());
 		// should be called from a synchronized location to protect against concurrent updates
-		BundleStats plugin = (BundleStats) activationStack.pop();
-		plugin.endActivation();
+		BundleStats info = (BundleStats) activationStack.pop();
+		info.endActivation();
 	}
 
-	private void traceActivate(String id, BundleStats plugin) {
+	private void traceActivate(Bundle bundle, BundleStats info) {
 		try {
 			PrintWriter output = new PrintWriter(new FileOutputStream(ClassloaderStats.traceFile.getAbsolutePath(), true));
 			try {
 				long startPosition = ClassloaderStats.traceFile.length();
-				output.println("Activating plugin: " + id); //$NON-NLS-1$
-				output.println("Plugin activation stack:"); //$NON-NLS-1$
+				output.println("Activating bundle: " + bundle.getSymbolicName()); //$NON-NLS-1$
+				output.println("Bundle activation stack:"); //$NON-NLS-1$
 				Stack activationStack = (Stack) activationStacks.get(Thread.currentThread());
 				for (int i = activationStack.size() - 1; i >= 0; i--)
-					output.println("\t" + ((BundleStats) activationStack.get(i)).getPluginId()); //$NON-NLS-1$
+					output.println("\t" + ((BundleStats) activationStack.get(i)).getSymbolicName()); //$NON-NLS-1$
 				output.println("Class loading stack:"); //$NON-NLS-1$
 				Stack classStack = ClassloaderStats.getClassStack();
 				for (int i = classStack.size() - 1; i >= 0; i--)
 					output.println("\t" + ((ClassStats) classStack.get(i)).getClassName()); //$NON-NLS-1$
 				output.println("Stack trace:"); //$NON-NLS-1$
 				new Throwable().printStackTrace(output);
-				plugin.setTraceStart(startPosition);
+				info.setTraceStart(startPosition);
 			} finally {
 				output.close();
-				plugin.setTraceEnd(ClassloaderStats.traceFile.length());
+				info.setTraceEnd(ClassloaderStats.traceFile.length());
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
-	public BundleStats findPlugin(String id) {
-		BundleStats result = (BundleStats) plugins.get(id);
+	public BundleStats findBundle(String symbolicName, long id) {
+		BundleStats result = (BundleStats) bundles.get(new Long(id));
 		try {
 			if (result == null) {
-				result = new BundleStats(id);
-				plugins.put(id, result);
+				result = new BundleStats(symbolicName, id);
+				bundles.put(new Long(id), result);
 			}
 		} catch (IllegalAccessError e) {
 			e.printStackTrace();
@@ -178,12 +177,12 @@ public class StatsManager implements BundleWatcher {
 		return result;
 	}
 
-	public BundleStats[] getPlugins() {
-		return (BundleStats[]) plugins.values().toArray(new BundleStats[plugins.size()]);
+	public BundleStats[] getBundles() {
+		return (BundleStats[]) bundles.values().toArray(new BundleStats[bundles.size()]);
 	}
 
-	public BundleStats getPlugin(String id) {
-		return (BundleStats) plugins.get(id);
+	public BundleStats getBundle(long id) {
+		return (BundleStats) bundles.get(new Long(id));
 	}
 
 }
