@@ -235,7 +235,7 @@ public class BundleFragment extends AbstractBundle {
 	 * @param persistent if true persistently record the bundle was started.
 	 */
 	protected void startWorker(boolean persistent) throws BundleException {
-		throw new BundleException(Msg.formatter.getString("BUNDLE_FRAGMENT_STOP", this)); //$NON-NLS-1$
+		throw new BundleException(Msg.formatter.getString("BUNDLE_FRAGMENT_START", this)); //$NON-NLS-1$
 	}
 
 	/**
