@@ -1019,16 +1019,12 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 	 */
 	public Dictionary getHeaders(String localeString) {
 		framework.checkAdminPermission();
-		if (manifestLocalization == null) {
-			Dictionary rawHeaders;
-			try {
-				rawHeaders = bundledata.getManifest();
-				manifestLocalization = new ManifestLocalization(this, rawHeaders);
-			} catch (BundleException e) {
-				framework.publishFrameworkEvent(FrameworkEvent.ERROR, this, e);
-				// return an empty dictinary.
-				return new Hashtable();
-			}
+		try {
+			initializeManifestLocalization();
+		} catch (BundleException e) {
+			framework.publishFrameworkEvent(FrameworkEvent.ERROR, this, e);
+			// return an empty dictinary.
+			return new Hashtable();
 		}
 		return manifestLocalization.getHeaders(localeString);
 	}
@@ -1535,5 +1531,28 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 		if (domain != null)
 			return domain.implies(new BundlePermission(symbolicName, BundlePermission.FRAGMENT_BUNDLE));
 		return true;
+	}
+	/* This method is used by the Bundle Localization Service to obtain
+	 * a ResourceBundle that resides in a bundle.  This is not an OSGi
+	 * defined method for org.osgi.framework.Bundle
+	 * 
+	 */
+	public ResourceBundle getResourceBundle(String localeString) {
+		try {
+			initializeManifestLocalization();
+		} catch (BundleException ex) {
+			return (null);
+		}
+		if (localeString == null) {
+			localeString = Locale.getDefault().toString();
+		}
+		return manifestLocalization.getResourceBundle(localeString);
+	}
+	private void initializeManifestLocalization() throws BundleException {
+		if (manifestLocalization == null) {
+			Dictionary rawHeaders;
+			rawHeaders = bundledata.getManifest();
+			manifestLocalization = new ManifestLocalization(this, rawHeaders);
+		}
 	}
 }

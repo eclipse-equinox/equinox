@@ -5,7 +5,8 @@ Export-Package:
  org.eclipse.osgi.service.pluginconversion,
  org.eclipse.osgi.service.datalocation,
  org.eclipse.osgi.service.runnable,
- org.eclipse.osgi.service.urlconversion
+ org.eclipse.osgi.service.urlconversion,
+ org.eclipse.osgi.service.localization
 Provide-Package:
  org.eclipse.osgi.framework.log,
  org.eclipse.osgi.framework.stats,
@@ -14,11 +15,13 @@ Provide-Package:
  org.eclipse.osgi.service.datalocation,
  org.eclipse.osgi.service.runnable,
  org.eclipse.osgi.service.urlconversion,
- org.eclipse.core.runtime.adaptor.testsupport 
+ org.eclipse.core.runtime.adaptor.testsupport,
+ org.eclipse.osgi.service.localization
 Export-Service: 
  org.eclipse.osgi.framework.log.FrameworkLog,
  org.eclipse.osgi.service.environment.EnvironmentInfo,
  org.eclipse.osgi.service.pluginconversion.PluginConverter,
  org.eclipse.osgi.service.datalocation.Location,
  org.eclipse.osgi.service.runnable,
- org.eclipse.osgi.service.urlconversion.URLConverter
+ org.eclipse.osgi.service.urlconversion.URLConverter,
+ org.eclipse.osgi.service.localization.BundleLocalization

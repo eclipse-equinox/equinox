@@ -217,6 +217,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		register(URLConverter.class.getName(), new URLConverterImpl(),bundle);
 		register(CommandProvider.class.getName(), new EclipseCommandProvider(context),bundle);
 		register(FrameworkLog.class.getName(), getFrameworkLog(), bundle);
+		register(org.eclipse.osgi.service.localization.BundleLocalization.class.getName(),new BundleLocalization(),bundle);
 		registerEndorsedXMLParser();
 	}
 

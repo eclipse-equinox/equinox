@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003 IBM Corporation and others.
+ * Copyright (c) 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -90,7 +90,7 @@ public class ManifestLocalization {
 	/*
 	 * This method find the appropiate Manifest Localization file inside the bundle.  If not found, return null.
 	 */
-	private ResourceBundle getResourceBundle(String localeString) {
+	protected ResourceBundle getResourceBundle(String localeString) {
 		URL resourceURL = null;
 		String propertiesLocation = (String) rawHeaders.get(Constants.BUNDLE_MANIFEST_LOCALIZATION);
 		if (propertiesLocation == null) {
