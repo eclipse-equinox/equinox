@@ -275,7 +275,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 				File target = new File(directory, list[i]);
 
 				/* if the file is a directory */
-				if (target.isDirectory()) {
+				if (target.isDirectory()) {	//TODO Simplify the nesting.
 					File delete = new File(target, ".delete");
 
 					/* and the directory is marked for delete */
@@ -323,7 +323,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 		}
 		int len = list.length;
 
-		Vector bundleDatas = new Vector(len << 1, 10);
+		Vector bundleDatas = new Vector(len << 1, 10);	//TODO ArrayList? array?
 
 		/* create bundle objects for all installed bundles. */
 		for (int i = 0; i < len; i++) {
@@ -538,6 +538,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 							}
 							// check to make sure we are not just trying to update to the same
 							// directory reference.  This would be a no-op.
+							//TODO Unless the jars and manifest have been updated on disk
 							String path = reference.getPath();
 							if (path.equals(data.getFileName())) {
 								throw new BundleException(AdaptorMsg.formatter.getString("ADAPTOR_SAME_REF_UPDATE", reference)); //$NON-NLS-1$

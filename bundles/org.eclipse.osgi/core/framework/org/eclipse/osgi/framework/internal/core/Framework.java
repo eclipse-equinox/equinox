@@ -133,7 +133,7 @@ public class Framework implements EventSource, EventPublisher {
 		/* create the service registry */
 		serviceid = 1;
 		serviceRegistry = adaptor.getServiceRegistry();
-		installLock = new Hashtable(13);
+		installLock = new Hashtable(13);	//TODO Is it a magic number? :)
 		/* create the system bundle */
 		createSystemBundle();
 		/* install URLStreamHandlerFactory */
@@ -153,11 +153,8 @@ public class Framework implements EventSource, EventPublisher {
 					Bundle bundle = Bundle.createBundle(bundledata, this);
 					bundles.add(bundle);
 				} catch (BundleException be) {
-					// This is not a fatal error. Publish the framework event,
-					// but
-					// since no log service is probably running we will also
-					// print a
-					// stack trace.
+					// This is not a fatal error. Publish the framework event, but
+					// since no log service is probably running we will also print a stack trace.
 					publishFrameworkEvent(FrameworkEvent.ERROR, systemBundle, be);
 					//be.printStackTrace();
 				}
