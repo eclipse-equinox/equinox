@@ -73,14 +73,9 @@ public class BasicLocation implements Location {
 		if (location != null)
 			throw new IllegalStateException("Cannot change the location once it is set");
 		File file = null;
-		if (value.getProtocol().equalsIgnoreCase("file")) {
+		if (value.getProtocol().equalsIgnoreCase("file"))
 			file = new File(value.getPath(), LOCK_FILENAME);
-			File parentFile = file.getParentFile();
-			if (!parentFile.exists()) {
-				if (!parentFile.mkdirs())
-					return false;
-			}
-		}
+
 		if (lock) {
 			try {
 				if (!lock(file))
@@ -108,6 +103,12 @@ public class BasicLocation implements Location {
 	private boolean lock(File lock) throws IOException {
 		if (lock == null)
 			return false;
+
+		File parentFile = lock.getParentFile();
+		if (!parentFile.exists()) {
+			if (!parentFile.mkdirs())
+				return false;
+		}
 		fileStream = new FileOutputStream(lock, true);
 		fileLock = fileStream.getChannel().tryLock();
 		if (fileLock != null)
