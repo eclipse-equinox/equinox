@@ -49,6 +49,7 @@ public interface FrameworkLog {
 	public void setWriter(Writer newWriter, boolean append);
 
 	/**
+	 *TODO: this is just a copy of the description above 
 	 * Sets the current Writer used to log messages to a FileWriter
 	 * using the specified newFile.  If append is set to true then the 
 	 * content of the current Writer will be appended to the 
@@ -80,7 +81,7 @@ public interface FrameworkLog {
 
 	/**
 	 * Closes the FrameworkLog.  After the FrameworkLog is closed messages may
-	 * no longer by logged to it.
+	 * no longer be logged to it.
 	 */
 	public void close();
 }

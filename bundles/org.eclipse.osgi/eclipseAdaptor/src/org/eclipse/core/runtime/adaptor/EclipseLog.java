@@ -41,6 +41,7 @@ public class EclipseLog extends DefaultLog {
 	protected void writeSession() throws IOException {
 		write(SESSION);
 		writeSpace();
+		//TODO "timestamp" is a more correct name
 		String date = getDate();
 		write(date);
 		writeSpace();

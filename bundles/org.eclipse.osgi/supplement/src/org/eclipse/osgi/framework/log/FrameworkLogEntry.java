@@ -12,9 +12,12 @@
 package org.eclipse.osgi.framework.log;
 
 public class FrameworkLogEntry {
+	//TODO "entry" has another meaning here - title, summary, tag are better names 
 	private String entry;
 	private String message;
+	//TODO get rid of this
 	private int stackCode;
+	//TODO: use "reason" or "cause" instead
 	private Throwable throwable;
 	private FrameworkLogEntry[] children;
 
