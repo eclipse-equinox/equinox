@@ -39,7 +39,7 @@ public interface PluginConverter {
 	 * 
 	 * @param pluginBaseLocation the base location for the plug-in/fragment manifest to be converted
 	 * (a directory, e.g. the plug-in install location)
-	 * @param compatibilityManifest a boolean indicating if the manifest should contain headers to run  
+	 * @param compatibility a boolean indicating if the manifest should contain headers to run  
 	 * in backward compatibility
 	 * @param target a string indicating the version of the runtime for which the manifest generated is targeted
 	 *	@return the generated manifest as a dictionary,  if a bundle manifest was successfully 

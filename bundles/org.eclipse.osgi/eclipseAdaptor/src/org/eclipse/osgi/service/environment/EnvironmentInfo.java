@@ -67,8 +67,6 @@ public interface EnvironmentInfo {
 	 * the operating system name is specified on the command line.
 	 *
 	 * @return the string name of the current operating system
-	 * @see #knownOSValues
-	 * 
 	 */
 	public String getOS();
 
