@@ -38,6 +38,11 @@ public class ManifestLocalization {
 				defaultLocale = true;
 			}
 		}
+		try {
+			bundle.checkValid();
+		} catch (IllegalStateException ex) {
+			return (rawHeaders);
+		}
 		ResourceBundle localeProperties = null;
 		localeProperties = getResourceBundle(localeString);
 		if (localeProperties == null) {
