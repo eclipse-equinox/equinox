@@ -10,12 +10,31 @@
  *******************************************************************************/
 package org.eclipse.core.runtime.adaptor;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.internal.defaultadaptor.DevClassPathHelper;
@@ -100,7 +119,10 @@ public class PluginConverterImpl implements PluginConverter {
 			String anExport = (String) iter.next();
 			for (Iterator iter2 = filter.iterator(); iter2.hasNext();) {
 				String aFilter = (String) iter2.next();
-				if (anExport.startsWith(aFilter)) {
+				int dotStar = aFilter.indexOf(".*"); //$NON-NLS-1$
+				if (dotStar != -1)
+					aFilter = aFilter.substring(0, dotStar);
+				if (anExport.equals(aFilter)) {
 					filteredExport.add(anExport);
 					break;
 				}
@@ -655,7 +677,7 @@ public class PluginConverterImpl implements PluginConverter {
 		String versionRange;
 		if (matchRule != null) {
 			if (matchRule.equalsIgnoreCase(IModel.PLUGIN_REQUIRES_MATCH_PERFECT)) {
-				versionRange = new VersionRange(minVersion,minVersion).toString();
+				versionRange = new VersionRange(minVersion, minVersion).toString();
 			} else if (matchRule.equalsIgnoreCase(IModel.PLUGIN_REQUIRES_MATCH_EQUIVALENT)) {
 				versionRange = new VersionRange(minVersion, new Version(minVersion.getMajorComponent(), minVersion.getMinorComponent() + 1, 0, "", false)).toString(); //$NON-NLS-1$
 			} else if (matchRule.equalsIgnoreCase(IModel.PLUGIN_REQUIRES_MATCH_COMPATIBLE)) {
