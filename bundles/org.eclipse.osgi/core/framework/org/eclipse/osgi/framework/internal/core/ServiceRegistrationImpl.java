@@ -47,7 +47,7 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
 
 	/** list of contexts using the service.
 	 * Access to this should be protected by the registrationLock */
-	protected Vector contextsUsing;
+	protected ArrayList contextsUsing;
 
 	/** service classes for this registration. */
 	protected String[] clazzes;
@@ -166,9 +166,7 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
 					if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
 						Debug.println("unregisterService: releasing users"); //$NON-NLS-1$
 					}
-
-					users = new BundleContextImpl[size];
-					contextsUsing.copyInto(users);
+					users = (BundleContextImpl[]) contextsUsing.toArray(new BundleContextImpl[size]);
 				}
 			}
 		}
@@ -349,10 +347,10 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
 					servicesInUse.put(reference, use);
 
 					if (contextsUsing == null) {
-						contextsUsing = new Vector(10, 10);
+						contextsUsing = new ArrayList(10);
 					}
 
-					contextsUsing.addElement(user);
+					contextsUsing.add(user);
 				}
 
 				return (service);
@@ -391,9 +389,8 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
 						/* use count is now zero */
 						servicesInUse.remove(reference);
 
-						contextsUsing.removeElement(user);
+						contextsUsing.remove(user);
 					}
-
 					return (true);
 				}
 			}
@@ -427,7 +424,7 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
 				if (use != null) {
 					use.releaseService();
 
-					contextsUsing.removeElement(user);
+					contextsUsing.remove(user);
 				}
 			}
 		}
@@ -441,26 +438,19 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
 	protected AbstractBundle[] getUsingBundles() {
 		synchronized (registrationLock) {
 			if (unregistered) /* service unregistered */
-			{
 				return (null);
-			}
 
-			if (contextsUsing == null) {
+			if (contextsUsing == null)
 				return (null);
-			}
 
 			int size = contextsUsing.size();
-
-			if (size == 0) {
+			if (size == 0)
 				return (null);
-			}
 
+			/* Copy list of BundleContext into an array of Bundle. */
 			AbstractBundle[] bundles = new AbstractBundle[size];
-
-			/* Copy vector of BundleContext into an array of Bundle. */
-			for (int i = 0; i < size; i++) {
-				bundles[i] = ((BundleContextImpl) contextsUsing.elementAt(i)).bundle;
-			}
+			for (int i = 0; i < size; i++)
+				bundles[i] = ((BundleContextImpl) contextsUsing.get(i)).bundle;
 
 			return (bundles);
 		}
