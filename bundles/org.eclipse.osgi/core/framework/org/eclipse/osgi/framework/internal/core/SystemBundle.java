@@ -18,6 +18,7 @@ import java.security.Permission;
 import java.util.Hashtable;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.FrameworkEvent;
 
 /**
  * This class subclasses Bundle to provide a system Bundle
@@ -50,8 +51,7 @@ public class SystemBundle extends BundleHost {
 					try {
 						loader = new SystemBundleLoader(this, getBundleDescription());
 					} catch (BundleException e) {
-						// TODO log something here
-						e.printStackTrace();
+						framework.publishFrameworkEvent(FrameworkEvent.ERROR,this,e);
 						return null;
 					}
 			}

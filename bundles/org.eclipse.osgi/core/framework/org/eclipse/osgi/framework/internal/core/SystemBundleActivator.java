@@ -55,8 +55,6 @@ public class SystemBundleActivator implements BundleActivator {
 		if ((dbgOptions = DebugOptions.getDefault()) != null) {
 			debugOptions = register(org.eclipse.osgi.service.debug.DebugOptions.class.getName(), dbgOptions);
 		}
-		// TODO we need a way to configure in framework services without modifying
-		// this class. 
 
 		// Always call the adaptor.frameworkStart() at the end of this method.
 		framework.adaptor.frameworkStart(context);
