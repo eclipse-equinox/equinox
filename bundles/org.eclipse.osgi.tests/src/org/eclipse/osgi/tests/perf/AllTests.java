@@ -26,7 +26,7 @@ public class AllTests extends CorePerformanceTest {
 
 	public static Test suite() {
 		TestSuite suite = new TestSuite(AllTests.class.getName());
-		suite.addTest(CachePerformanceTest.suite());
+		suite.addTest(StatePerformanceTest.suite());
 		return suite;
 	}
 }
