@@ -20,6 +20,8 @@ import org.eclipse.osgi.framework.debug.Debug;
  *
  */
 final class BundlePermissions extends BundlePermissionCollection {
+	private static final long serialVersionUID = 3257844389794428984L;
+
 	/**
 	 * Maps a Permission's class to an appropriate PermissionCollection.
 	 * Class => PermissionCollection

@@ -13,6 +13,7 @@ package org.eclipse.osgi.service.resolver;
 import java.util.EventObject;
 
 public class StateChangeEvent extends EventObject {
+	private static final long serialVersionUID = 3258131345132566067L;
 	private StateDelta delta;
 
 	public StateChangeEvent(StateDelta delta) {

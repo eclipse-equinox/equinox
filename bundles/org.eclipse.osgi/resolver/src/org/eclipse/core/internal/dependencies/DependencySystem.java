@@ -14,6 +14,7 @@ import java.util.*;
 
 public class DependencySystem {
 	public class CyclicSystemException extends Exception {
+		private static final long serialVersionUID = 3256442525304043056L;
 		private Object[][] cycles;
 
 		public CyclicSystemException(Object[][] cycles) {

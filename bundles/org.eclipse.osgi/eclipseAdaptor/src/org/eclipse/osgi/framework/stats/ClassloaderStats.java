@@ -63,6 +63,8 @@ public class ClassloaderStats {
 			InputStream input = new FileInputStream(filterFile);
 			System.out.println("  Loaded."); //$NON-NLS-1$
 			Properties filters = new Properties() {
+				private static final long serialVersionUID = 3546359543853365296L;
+
 				public Object put(Object key, Object value) {
 					addFilters((String) key, (String) value);
 					return null;

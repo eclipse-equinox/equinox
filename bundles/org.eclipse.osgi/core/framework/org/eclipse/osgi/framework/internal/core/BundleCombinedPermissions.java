@@ -19,6 +19,7 @@ import java.util.*;
  *
  */
 final class BundleCombinedPermissions extends BundlePermissionCollection {
+	private static final long serialVersionUID = 4049357526208360496L;
 	private BundlePermissionCollection assigned;
 	private BundlePermissionCollection implied;
 

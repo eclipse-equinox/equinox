@@ -15,6 +15,7 @@ package org.eclipse.osgi.service.pluginconversion;
  * Custom exception for errors that can happen during plugin conversion.
  */
 public class PluginConversionException extends Exception {
+	private static final long serialVersionUID = 3258130258472284472L;
 	/**
 	 * Nested exception.
 	 */
