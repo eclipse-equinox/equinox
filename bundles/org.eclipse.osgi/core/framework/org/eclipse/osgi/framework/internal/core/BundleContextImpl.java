@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.security.*;
 import java.util.*;
+import org.eclipse.osgi.event.BatchBundleListener;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.eventmgr.EventDispatcher;
 import org.eclipse.osgi.framework.eventmgr.EventListeners;
@@ -379,6 +380,8 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 		if (listener instanceof SynchronousBundleListener) {
 			framework.checkAdminPermission(getBundle(), AdminPermission.LISTENER);
 
+			if (listener instanceof BatchBundleListener) // wrapper batch bundle listeners
+				listener = new BatchListenerWrapper((BatchBundleListener) listener);
 			synchronized (framework.bundleEventSync) {
 				if (bundleEventSync == null) {
 					bundleEventSync = new EventListeners();
@@ -1179,6 +1182,10 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 							String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(listener.hashCode()); //$NON-NLS-1$
 							Debug.println("dispatchBundleEvent[" + tmpBundle + "](" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 						}
+
+						BundleEvent event = (BundleEvent) object;
+						if ((event.getType() == Framework.BATCHEVENT_BEGIN || event.getType() == Framework.BATCHEVENT_END) && !(listener instanceof BatchListenerWrapper))
+							break; // do not deliver the BATCHEVENT_BEGIN and BATCHEVENT_END to regular listeners
 
 						listener.bundleChanged((BundleEvent) object);
 						break;

@@ -72,6 +72,8 @@ public class Framework implements EventDispatcher, EventPublisher {
 	/** List of BundleContexts for bundle's FrameworkListeners. */
 	protected EventListeners frameworkEvent;
 	protected static final int FRAMEWORKEVENT = 4;
+	protected static final int BATCHEVENT_BEGIN = Integer.MIN_VALUE + 1;
+	protected static final int BATCHEVENT_END = Integer.MIN_VALUE;
 	/** EventManager for event delivery. */
 	protected EventManager eventManager;
 	/* Reservation object for install synchronization */

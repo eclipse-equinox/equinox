@@ -161,6 +161,7 @@ public class PackageAdminImpl implements PackageAdmin {
 
 	synchronized void doResolveBundles(AbstractBundle[] bundles, boolean refreshPackages) {
 		try {
+			framework.publishBundleEvent(Framework.BATCHEVENT_BEGIN, framework.systemBundle);
 			AbstractBundle[] refreshedBundles = null;
 			BundleDescription[] descriptions = null;
 			synchronized (framework.bundles) {
@@ -208,6 +209,7 @@ public class PackageAdminImpl implements PackageAdmin {
 			if (t instanceof Error)
 				throw (Error) t;
 		} finally {
+			framework.publishBundleEvent(Framework.BATCHEVENT_END, framework.systemBundle);
 			if (refreshPackages)
 				framework.publishFrameworkEvent(FrameworkEvent.PACKAGES_REFRESHED, framework.systemBundle, null);
 		}
