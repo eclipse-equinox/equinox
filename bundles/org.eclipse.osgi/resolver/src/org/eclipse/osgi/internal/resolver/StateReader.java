@@ -34,7 +34,7 @@ class StateReader {
 	private int lazyDataOffset; //deprecated
 	private int numBundles;
 
-	public static final byte STATE_CACHE_VERSION = 13;
+	public static final byte STATE_CACHE_VERSION = 14;
 	public static final byte NULL = 0;
 	public static final byte OBJECT = 1;
 	public static final byte INDEX = 2;
