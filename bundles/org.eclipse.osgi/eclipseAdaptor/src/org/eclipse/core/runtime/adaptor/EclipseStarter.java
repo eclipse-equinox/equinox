@@ -793,12 +793,13 @@ public class EclipseStarter {
 				if (osgiBundle == null) {
 					InputStream in = initialBundles[i].location.openStream();
 					osgiBundle = context.installBundle(initialBundles[i].locationString, in);
-					toRefresh.add(osgiBundle);
 					if (initialBundles[i].level >= 0 && startService != null)
 						startService.setBundleStartLevel(osgiBundle, initialBundles[i].level);
 				}
 				if (initialBundles[i].start)
 					startBundles.add(osgiBundle);
+				// include every single basic bundle in case they were not resolved before
+				toRefresh.add(osgiBundle);				
 			} catch (BundleException e) {
 				FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_FAILED_INSTALL", initialBundles[i].location), 0, e, null); //$NON-NLS-1$
 				log.log(entry);
