@@ -418,7 +418,7 @@ public class PluginConverterImpl implements PluginConverter {
 			List filter = (List) element.getValue();
 			if (filter.size() == 0) //If the library is not exported, then ignore it
 				continue;
-			String libEntryText = (String) element.getKey();
+			String libEntryText = ((String) element.getKey()).trim();
 			File libraryLocation;
 			if (devProperties != null || DevClassPathHelper.inDevelopmentMode()) {
 				// in development time, libEntries may contain absolute locations (linked folders)				
