@@ -121,7 +121,8 @@ public class BundleStopper {
 			if (allBundles[i].getState() != Bundle.ACTIVE)
 				continue;
 			// we are looking for two headers:  ECLIPSE_AUTOSTOP and REQUIRE_BUNDLE	
-			Dictionary headers = allBundles[i].getHeaders();
+			// passing "" to getHeaders; do not care to get translated headers
+			Dictionary headers = allBundles[i].getHeaders(""); //$NON-NLS-1$
 			String autoStop = (String) headers.get(EclipseAdaptorConstants.ECLIPSE_AUTOSTOP);
 			if (!"true".equalsIgnoreCase(autoStop)) //$NON-NLS-1$
 				continue;
