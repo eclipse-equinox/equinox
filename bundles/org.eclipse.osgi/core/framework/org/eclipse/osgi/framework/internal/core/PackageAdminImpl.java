@@ -664,11 +664,14 @@ public class PackageAdminImpl implements PackageAdmin {
 			for (int i = removalPending.size() - 1; i >= 0; i--) {
 				BundleLoaderProxy removedLoaderProxy = (BundleLoaderProxy) removalPending.elementAt(i);
 				AbstractBundle removedBundle = removedLoaderProxy.getBundleHost();
-				AbstractBundle[] dependents = removedLoaderProxy.getDependentBundles();
-				for (int k = 0; k < dependents.length; k++) {
-					if (!graph.contains(dependents[k])) {
-						graph.addElement(dependents[k]);
-						changed = true;
+				if (!graph.contains(removedBundle)) {
+					graph.addElement(removedBundle);
+					changed = true;
+					AbstractBundle[] dependents = removedLoaderProxy.getDependentBundles();
+					for (int k = 0; k < dependents.length; k++) {
+						if (!graph.contains(dependents[k])) {
+							graph.addElement(dependents[k]);
+						}
 					}
 				}
 			}
