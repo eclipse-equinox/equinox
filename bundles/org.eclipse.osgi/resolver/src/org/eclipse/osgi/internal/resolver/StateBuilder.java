@@ -41,7 +41,7 @@ class StateBuilder {
 			if (symbolicNameElements.length > 0) {
 				result.setSymbolicName(symbolicNameElements[0].getValue());
 				String singleton = symbolicNameElements[0].getDirective(Constants.SINGLETON_DIRECTIVE);
-				if (singleton == null) // TODO this is for backward compatibility; need to check manifest version < 2 to allow this
+				if (singleton == null) // TODO this is for backward compatibility; need to check manifest version < 2 to allow this after everyone has converted to new syntax
 					singleton = symbolicNameElements[0].getAttribute(Constants.SINGLETON_DIRECTIVE);
 				result.setStateBit(BundleDescriptionImpl.SINGLETON, "true".equals(singleton)); //$NON-NLS-1$
 			}
@@ -192,7 +192,9 @@ class StateBuilder {
 			// alway setting the grouping here even for manifestVersion==1 because if it is null
 			// the result will return a grouping equal to the package name which is unique and will
 			// give the same behavior as OSGi R3.
+			// TODO remove grouping !!!
 			result.setGrouping(exportPackage.getDirective(Constants.GROUPING_DIRECTIVE));
+			result.setUses(exportPackage.getDirectives(Constants.USES_DIRECTIVE));
 
 			// set the rest of the attributes
 			result.setInclude(exportPackage.getDirective(Constants.INCLUDE_DIRECTIVE));

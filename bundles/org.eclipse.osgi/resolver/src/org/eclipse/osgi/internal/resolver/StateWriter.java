@@ -241,6 +241,7 @@ class StateWriter {
 		if (writePrefix(exportPackageDesc, out))
 			return;
 		writeBaseDescription(exportPackageDesc, out);
+		// TODO remove this!!
 		writeStringOrNull(exportPackageDesc.getBasicGrouping(), out);
 		writeStringOrNull(exportPackageDesc.getInclude(), out);
 		writeStringOrNull(exportPackageDesc.getExclude(), out);
@@ -267,6 +268,15 @@ class StateWriter {
 			out.writeInt(mandatory.length);
 			for (int i = 0; i < mandatory.length; i++)
 				writeStringOrNull(mandatory[i], out);
+		}
+
+		String[] uses = exportPackageDesc.getUses();
+		if (uses == null) {
+			out.writeInt(0);
+		} else {
+			out.writeInt(uses.length);
+			for (int i = 0; i < uses.length; i++)
+				writeStringOrNull(uses[i], out);
 		}
 	}
 

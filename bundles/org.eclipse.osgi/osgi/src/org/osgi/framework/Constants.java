@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/Constants.java,v 1.9 2005/02/23 17:16:10 twatson Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/Constants.java,v 1.10 2005/02/23 19:33:24 twatson Exp $
  *
  * Copyright (c) OSGi Alliance (2000, 2004).
  * All Rights Reserved.
@@ -38,7 +38,7 @@ import java.util.Dictionary;
  * The values associated with these keys are of type <code>java.lang.String</code>,
  * unless otherwise indicated.
  * 
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  * @since 1.1
  * @see Bundle#getHeaders()
  * @see BundleContext#getProperty
@@ -822,20 +822,24 @@ public interface Constants {
 	public final static String	RESOLUTION_OPTIONAL						= "optional";
 
 	/**
-	 * Manifest header directive (named &quot;grouping&quot;) identifying the
-	 * package grouping specified in the Import-Package or Export-Package
-	 * manifest header.
+	 * Manifest header directive (named &quot;uses&quot;) identifying a list of
+	 * packages that an exported package uses.
 	 * 
 	 * <p>
-	 * The directive value is encoded in the Import-Package or Export-Package
-	 * manifest header like:
+	 * The directive value is encoded in the Export-Package manifest header like:
 	 * 
 	 * <pre>
-	 *  Export-Package: org.osgi.framework; grouping:=&quot;coregroup&quot;
+	 *  Export-Package: org.osgi.util.tracker; uses:=&quot;org.osgi.framework&quot;
 	 * </pre>
 	 * 
 	 * @since 1.3
 	 */
+	public final static String	USES_DIRECTIVE						= "uses";
+
+	/**
+	 * @deprecated use {@link Constants#USES_DIRECTIVE}
+	 */
+	// TODO remove when framework RI is updated to the "uses" directive.
 	public final static String	GROUPING_DIRECTIVE						= "grouping";
 
 	/**

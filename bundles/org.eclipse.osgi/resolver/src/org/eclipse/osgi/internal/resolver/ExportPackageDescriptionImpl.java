@@ -16,7 +16,9 @@ import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.osgi.service.resolver.ExportPackageDescription;
 
 public class ExportPackageDescriptionImpl extends BaseDescriptionImpl implements ExportPackageDescription {
+	// TODO remove this!!
 	private String grouping;
+	private String[] uses;
 	private Map attributes;
 	private BundleDescription exporter;
 	private String exclude;
@@ -25,14 +27,20 @@ public class ExportPackageDescriptionImpl extends BaseDescriptionImpl implements
 	private boolean root;
 	private int tableIndex;
 
+	// TODO remove this!!
 	public String getGrouping() {
 		if (grouping == null)
 			return getName(); // default is to have a unique grouping using the package name
 		return grouping;
 	}
 
+	// TODO remove this!!
 	protected String getBasicGrouping() {
 		return grouping;
+	}
+
+	public String[] getUses() {
+		return uses;
 	}
 
 	public String getInclude() {
@@ -59,8 +67,13 @@ public class ExportPackageDescriptionImpl extends BaseDescriptionImpl implements
 		return mandatory;
 	}
 
+	// TODO remove this!!
 	protected void setGrouping(String grouping) {
 		this.grouping = grouping;
+	}
+
+	protected void setUses(String[] uses) {
+		this.uses = uses;
 	}
 
 	protected void setInclude(String include) {

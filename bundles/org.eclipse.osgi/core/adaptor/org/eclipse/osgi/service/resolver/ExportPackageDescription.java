@@ -16,8 +16,15 @@ public interface ExportPackageDescription extends BaseDescription {
 	/**
 	 * Returns the export package group for this package.
 	 * @return the export pacakge group for this package
+	 * @deprecated use {@link ExportPackageDescription#getUses}
 	 */
 	public String getGrouping();
+	
+	/**
+	 * Returns the list of package names which this export uses.
+	 * @return the list of package names which this export uses.
+	 */
+	public String[] getUses();
 
 	/**
 	 * Returns the list of classes and resources that are included in the export package

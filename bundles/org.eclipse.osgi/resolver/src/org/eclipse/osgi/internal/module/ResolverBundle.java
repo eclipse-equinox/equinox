@@ -418,7 +418,7 @@ public class ResolverBundle implements VersionSupplier {
 			StateObjectFactory factory = bundle.getContainingState().getFactory();
 			for (int i = 0; i < newExports.length; i++) {
 				if (!isExported(newExports[i].getName())) {
-					ExportPackageDescription hostExport = factory.createExportPackageDescription(newExports[i].getName(), newExports[i].getVersion(), newExports[i].getGrouping(), newExports[i].getInclude(), newExports[i].getExclude(), newExports[i].getAttributes(), newExports[i].getMandatory(), newExports[i].isRoot(), bundle);
+					ExportPackageDescription hostExport = factory.createExportPackageDescription(newExports[i].getName(), newExports[i].getVersion(), newExports[i].getUses(), newExports[i].getInclude(), newExports[i].getExclude(), newExports[i].getAttributes(), newExports[i].getMandatory(), newExports[i].isRoot(), bundle);
 					hostExports.add(new ResolverExport(this, hostExport));
 				}
 			}

@@ -33,7 +33,7 @@ class StateReader {
 	private boolean lazyLoad = true;
 	private int numBundles;
 
-	public static final byte STATE_CACHE_VERSION = 15;
+	public static final byte STATE_CACHE_VERSION = 16;
 	public static final byte NULL = 0;
 	public static final byte OBJECT = 1;
 	public static final byte INDEX = 2;
@@ -316,6 +316,13 @@ class StateReader {
 			exportPackageDesc.setMandatory(mandatory);
 		}
 
+		int usesCount = in.readInt();
+		if (usesCount > 0) {
+			String[] uses = new String[usesCount];
+			for (int i = 0; i < usesCount; i++)
+				uses[i] = readString(in, false);
+			exportPackageDesc.setUses(uses);
+		}
 		return exportPackageDesc;
 	}
 

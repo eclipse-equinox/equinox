@@ -123,19 +123,15 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		return packageSpec;
 	}
 
-	public ExportPackageDescription createExportPackageDescription(String packageName, Version version, String grouping, String include, String exclude, Map attributes, String[] mandatory, boolean root) {
-		return createExportPackageDescription(packageName, version, grouping, include, exclude, attributes, mandatory, root, null);
-	}
-
 	public ExportPackageDescription createExportPackageDescription(ExportPackageDescription original) {
-		return createExportPackageDescription(original.getName(), original.getVersion(), original.getGrouping(), original.getInclude(), original.getExclude(), original.getAttributes(), original.getMandatory(), original.isRoot(), null);
+		return createExportPackageDescription(original.getName(), original.getVersion(), original.getUses(), original.getInclude(), original.getExclude(), original.getAttributes(), original.getMandatory(), original.isRoot(), null);
 	}
 
-	public ExportPackageDescription createExportPackageDescription(String packageName, Version version, String grouping, String include, String exclude, Map attributes, String[] mandatory, boolean root, BundleDescription exporter) {
+	public ExportPackageDescription createExportPackageDescription(String packageName, Version version, String[] uses, String include, String exclude, Map attributes, String[] mandatory, boolean root, BundleDescription exporter) {
 		ExportPackageDescriptionImpl exportPackage = new ExportPackageDescriptionImpl();
 		exportPackage.setName(packageName);
 		exportPackage.setVersion(version);
-		exportPackage.setGrouping(grouping);
+		exportPackage.setUses(uses);
 		exportPackage.setInclude(include);
 		exportPackage.setExclude(exclude);
 		exportPackage.setAttributes(attributes);

@@ -629,7 +629,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 			ResolverExport[] exports = requires[i].getMatchingBundle().getExportPackages();
 			for (int j = 0; j < exports.length; j++) {
 				if (imp.getName().equals(exports[j].getName())) {
-					ExportPackageDescription epd = state.getFactory().createExportPackageDescription(exports[j].getName(), exports[j].getVersion(), exports[j].getName(), exports[j].getExportPackageDescription().getInclude(), exports[j].getExportPackageDescription().getExclude(), exports[j].getExportPackageDescription().getAttributes(), exports[j].getExportPackageDescription().getMandatory(), false, reexporter.getBundle());
+					ExportPackageDescription epd = state.getFactory().createExportPackageDescription(exports[j].getName(), exports[j].getVersion(), null, exports[j].getExportPackageDescription().getInclude(), exports[j].getExportPackageDescription().getExclude(), exports[j].getExportPackageDescription().getAttributes(), exports[j].getExportPackageDescription().getMandatory(), false, reexporter.getBundle());
 					if (imp.getImportPackageSpecification().isSatisfiedBy(epd)) {
 						// Create reexport and add to bundle and resolverExports
 						if (DEBUG_IMPORTS)

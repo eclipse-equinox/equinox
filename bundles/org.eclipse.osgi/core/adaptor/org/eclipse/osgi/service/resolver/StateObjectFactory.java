@@ -145,28 +145,13 @@ public interface StateObjectFactory {
 	public ImportPackageSpecification createImportPackageSpecification(ImportPackageSpecification original);
 
 	/**
-	 * Creates an export package description from the given parameters.
-	 *  
-	 * @param packageName the package name
-	 * @param version the package version (may be <code>null</code>)
-	 * @param grouping the grouping name for the package (may be <code>null</code>)
-	 * @param include
-	 * @param exclude
-	 * @param attributes the arbitrary attributes for the package import (may be <code>null</code>)
-	 * @param mandatory
-	 * @param root
-	 * @return the created package
-	 */
-	public ExportPackageDescription createExportPackageDescription(String packageName, Version version, String grouping, String include, String exclude, Map attributes, String[] mandatory, boolean root);
-
-	/**
 	 * Used by the Resolver to dynamically create ExportPackageDescription objects during the resolution process.
 	 * The Resolver needs to create ExportPackageDescriptions dynamally for a host when a fragment.
 	 * exports a package<p>
 	 * 
 	 * @param packageName
 	 * @param version
-	 * @param grouping
+	 * @param uses
 	 * @param include
 	 * @param exclude
 	 * @param attributes
@@ -175,7 +160,7 @@ public interface StateObjectFactory {
 	 * @param exporter
 	 * @return the created package
 	 */
-	public ExportPackageDescription createExportPackageDescription(String packageName, Version version, String grouping, String include, String exclude, Map attributes, String[] mandatory, boolean root, BundleDescription exporter);
+	public ExportPackageDescription createExportPackageDescription(String packageName, Version version, String[] uses, String include, String exclude, Map attributes, String[] mandatory, boolean root, BundleDescription exporter);
 
 	/**
 	 * Creates an import package specification that is a copy of the given constraint
