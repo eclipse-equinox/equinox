@@ -52,10 +52,6 @@ public class StateManager implements PlatformAdmin, Runnable {
 		if (removalPendings.length > 0)
 			systemState.resolve(removalPendings);
 		writeState(stateLocation);
-		//systemState should not be set to null as when the framework
-		//is restarted from a shutdown state, the systemState variable will
-		//not be reset, resulting in a null pointer exception
-		//systemState = null;
 	}
 
 	private void readSystemState(File stateLocation, long expectedTimeStamp) {
