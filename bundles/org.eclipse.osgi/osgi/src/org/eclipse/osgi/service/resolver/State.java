@@ -11,6 +11,7 @@
 package org.eclipse.osgi.service.resolver;
 
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleException;
 
 /**
  * The state of a system as reported by a resolver. This includes all bundles
@@ -33,8 +34,10 @@ public interface State {
 	 * 
 	 * @param state
 	 * @return
+	 * @throws BundleException if the id of the given state does not match that of the
+	 * 	current state or if the given state is not resolved.
 	 */
-	public StateDelta compare(State state);
+	public StateDelta compare(State state) throws BundleException;
 
 	/**
 	 * Removes a bundle description with the given bundle id.

@@ -11,6 +11,7 @@
 package org.eclipse.osgi.internal.resolver;
 
 import org.eclipse.osgi.service.resolver.*;
+import org.osgi.framework.BundleException;
 
 public class ReadOnlyState implements State {
 	private State target;
@@ -18,7 +19,7 @@ public class ReadOnlyState implements State {
 	public ReadOnlyState(State target) {
 		this.target = target;
 	}
-	
+
 	public boolean addBundle(BundleDescription description) {
 		throw new UnsupportedOperationException();
 	}
@@ -35,7 +36,7 @@ public class ReadOnlyState implements State {
 		throw new UnsupportedOperationException();
 	}
 
-	public StateDelta compare(State state) {
+	public StateDelta compare(State state) throws BundleException {
 		return target.compare(state);
 	}
 

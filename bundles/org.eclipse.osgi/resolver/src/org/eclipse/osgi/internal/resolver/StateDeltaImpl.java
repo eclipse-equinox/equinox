@@ -30,7 +30,8 @@ public class StateDeltaImpl implements StateDelta {
 		List result = new ArrayList();
 		for (Iterator changesIter = changes.values().iterator(); changesIter.hasNext();) {
 			BundleDelta change = (BundleDelta) changesIter.next();
-			if (change.getType() == mask || (!exact && (change.getType() & mask) == mask))
+			int flags = change.getType() & mask;
+			if (flags == mask || (!exact && flags != 0))
 				result.add(change);
 		}
 		return (BundleDelta[]) result.toArray(new BundleDelta[result.size()]);
