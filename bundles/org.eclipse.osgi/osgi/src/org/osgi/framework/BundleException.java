@@ -1,5 +1,5 @@
 /*
- * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/BundleException.java,v 1.3 2004/05/07 21:40:52 hargrave Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/BundleException.java,v 1.4 2004/05/10 14:40:56 hargrave Exp $
  *
  * Copyright (c) The Open Services Gateway Initiative (2000-2001).
  * All Rights Reserved.
@@ -38,7 +38,7 @@ package org.osgi.framework;
  * <p> This exception is updated to conform to the general purpose
  * exception chaining mechanism.
  *  
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 
 public class BundleException extends Exception
@@ -91,7 +91,7 @@ public class BundleException extends Exception
 	//================================================================
 
     /**
-     * Returns the cause of this exception or <tt>null</tt> if the
+     * Returns the cause of this exception or <tt>null</tt> if no
      * cause was specified when this exception was created.
      *
      * @return  The cause of this exception or <tt>null</tt> if no
