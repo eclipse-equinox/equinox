@@ -56,10 +56,7 @@ public class PluginParser extends DefaultHandler implements IModel {
 			return libraries;
 		}
 		public ArrayList getRequires() {
-			if (TARGET21.equals(target))
-				return requires;
-			
-			if (schemaVersion == null && ! requiresExpanded) {
+			if (!TARGET21.equals(target) && schemaVersion == null && ! requiresExpanded) {
 				requiresExpanded = true;
 				if (requires == null) {
 					requires = new ArrayList(1);
