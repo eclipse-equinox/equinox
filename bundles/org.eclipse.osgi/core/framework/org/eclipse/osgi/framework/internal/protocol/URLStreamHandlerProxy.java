@@ -30,7 +30,7 @@ import org.osgi.service.url.URLStreamHandlerService;
  */
 
 public class URLStreamHandlerProxy extends URLStreamHandler implements ServiceTrackerCustomizer {
-
+	// TODO lots of type-based names 
 	protected URLStreamHandlerService realHandlerService;
 
 	protected URLStreamHandlerSetter urlSetter;
@@ -187,13 +187,13 @@ public class URLStreamHandlerProxy extends URLStreamHandler implements ServiceTr
 	/**
 	 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#modifiedService(ServiceReference, Object)
 	 */
-
+	//TODO return earlier, avoid nesting of ifs
 	// check to see if the ranking has changed.  If so, re-select a new URLHandler
 	public void modifiedService(ServiceReference reference, Object service) {
-		int newrank = getRank(reference);
+		int newRank = getRank(reference);
 
 		if (reference == urlStreamServiceReference) {
-			if (newrank < ranking) //The URLHandler we are currently
+			if (newRank < ranking) //The URLHandler we are currently
 				//using has dropped it's ranking below a URLHandler registered for the same protocol.  
 				//We need to swap out URLHandlers.
 				//this should get us the highest ranked service, if available
@@ -203,10 +203,10 @@ public class URLStreamHandlerProxy extends URLStreamHandler implements ServiceTr
 					setNewHandler(newReference, ((Integer) newReference.getProperty(Constants.SERVICE_RANKING)).intValue());
 				}
 			}
-		} else if (newrank > ranking) //the service changed is another URLHandler that we are not currently using
+		} else if (newRank > ranking) //the service changed is another URLHandler that we are not currently using
 			//If it's ranking is higher, we must swap it in.
 			{
-			setNewHandler(reference, newrank);
+			setNewHandler(reference, newRank);
 		}
 	}
 
