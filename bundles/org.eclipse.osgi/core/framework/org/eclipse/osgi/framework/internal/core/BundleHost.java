@@ -310,6 +310,13 @@ public class BundleHost extends AbstractBundle {
 			framework.checkAdminPermission();
 			checkValid();
 		}
+		// check to see if the bundle is resolved
+		if (!isResolved()) {
+			framework.packageAdmin.resolveBundles();
+			if (!isResolved()) {
+				throw new ClassNotFoundException(Msg.formatter.getString("BUNDLE_CNFE_NOT_RESOLVED", getLocation(), name)); //$NON-NLS-1$
+			}
+		}
 		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 			if ((state & (STARTING | ACTIVE | STOPPING)) == 0) {
 				Debug.println("Bundle.loadClass(" + name + ") called when state != STARTING | ACTIVE | STOPPING: " + this);
