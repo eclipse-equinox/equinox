@@ -56,7 +56,7 @@ public interface VersionConstraint extends Cloneable {
 	 */
 	public byte getMatchingRule();
 	/**
-	 * Returns the bundle that declares this coinstraint.
+	 * Returns the bundle that declares this constraint.
 	 * 
 	 * @return a bundle description
 	 */
