@@ -1053,25 +1053,31 @@ public class BundleLoader implements ClassLoaderDelegate
 
 		ArrayList result = new ArrayList(10);
 		for (int i = 0; i < classpath.length; i++) {
-			Filter filter = createFilter(classpath[i].getAttribute("filter"));
-			if (filter == null || filter.match(props)) {
-				if (Debug.DEBUG && Debug.DEBUG_LOADER)
-					Debug.println("  found match for classpath entry " + classpath[i].getValue());
-				result.add(classpath[i].getValue());
+			Filter filter;
+			try {
+				filter = createFilter(classpath[i].getAttribute("selection-filter"));
+				if (filter == null || filter.match(props)) {
+								if (Debug.DEBUG && Debug.DEBUG_LOADER)
+									Debug.println("  found match for classpath entry " + classpath[i].getValue());
+								result.add(classpath[i].getValue());
+				}
+			} catch (InvalidSyntaxException e) {
+				bundle.framework.publishFrameworkEvent(FrameworkEvent.ERROR,bundle,e);
+			} catch (BundleException ex) {
+				bundle.framework.publishFrameworkEvent(FrameworkEvent.ERROR,bundle,ex);
 			}
 		}
 		return (String[]) result.toArray(new String[result.size()]);
 	}
 
-	protected Filter createFilter(String filter) {
-		if (filter == null)
+	protected Filter createFilter(String filterString) throws InvalidSyntaxException, BundleException{
+		if (filterString == null)
 			return null;
-		try {
-			return new Filter(filter);
-		} catch (InvalidSyntaxException e) {
-			bundle.framework.publishFrameworkEvent(FrameworkEvent.ERROR,bundle,e);
-			return null;
-		}
+	    int length = filterString.length();
+	    if(length <= 2) {
+	    	throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_HEADER_EXCEPTION", Constants.BUNDLE_CLASSPATH, filterString));
+	    }
+	    return new Filter(filterString);
 	}
 
 }

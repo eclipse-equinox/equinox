@@ -11,10 +11,7 @@
 
 package org.eclipse.osgi.util;
 
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Vector;
-
+import java.util.*;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.internal.core.Msg;
 import org.eclipse.osgi.framework.util.Tokenizer;
@@ -78,7 +75,7 @@ public class ManifestElement {
 		Tokenizer tokenizer = new Tokenizer(value);
 
 		parseloop : while (true) {
-			String path = tokenizer.getToken(",");
+			String path = tokenizer.getToken(",;");
 			if (path == null) {
 				throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_HEADER_EXCEPTION", Constants.BUNDLE_CLASSPATH, value));
 			}
@@ -87,36 +84,36 @@ public class ManifestElement {
 				Debug.println("Classpath entry: " + path);
 			}
 			ManifestElement classpath = new ManifestElement(path);
+			char c = tokenizer.getChar();
+			attributeloop : while (c == ';') {
+				String key = tokenizer.getToken("=");
+				c = tokenizer.getChar();
+				if (c == '=') {
+					String val = tokenizer.getString(";,");
+					if (val == null) {
+						throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_HEADER_EXCEPTION", Constants.BUNDLE_NATIVECODE, value));
+					}
 
-			int index = path.indexOf(";");
-			if (index != -1) {
-				if ((index + 1) >= path.length()) {
+					if (Debug.DEBUG && Debug.DEBUG_MANIFEST) {
+						Debug.print(";" + key + "=" + val);
+					}
+					try {
+						classpath.addAttribute(key, val);
+					} catch (Exception e) {
+						throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_HEADER_EXCEPTION", Constants.BUNDLE_CLASSPATH, value), e);
+					}
+
+					c = tokenizer.getChar();
+
+					if (c == ';') /* more */ {
+						break attributeloop;
+					}
+
+				} else {
 					throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_HEADER_EXCEPTION", Constants.BUNDLE_CLASSPATH, value));
 				}
-				String filterString = path.substring(index + 1);
-
-				if (!filterString.endsWith(")")) {
-					// we have a space in the filter or an invalid
-					// Bundle-ClassPath header
-					StringBuffer buf = new StringBuffer(filterString);
-					buf.append(' ');
-					while (true) {
-						char nextChar = tokenizer.getChar();
-						if (nextChar == -1) {
-							throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_HEADER_EXCEPTION", Constants.BUNDLE_CLASSPATH, value));
-						}
-						buf.append(nextChar);
-						if (nextChar == ')') {
-							break;
-						}
-					}
-					filterString = buf.toString();
-				}
-				classpath.addAttribute("filter", filterString);
 			}
 			classpaths.addElement(classpath);
-
-			char c = tokenizer.getChar();
 
 			if (c == ',') /* another path */ {
 				continue parseloop;
@@ -140,7 +137,6 @@ public class ManifestElement {
 
 		return (result);
 	}
-
 	/**
 	 * @param value The key to query the manifest for exported packages
 	 * @return The Array of all ManifestElements that describe import or export
