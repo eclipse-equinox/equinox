@@ -102,7 +102,8 @@ public class EclipseAdaptor extends DefaultAdaptor {
 	protected StateManager createStateManager() {
 		readHeaders();
 		checkLocationAndReinitialize();
-		stateManager = new StateManager(new EclipseBundleInstaller(), getStateBaseLocation(), timeStamp);
+		stateManager = new StateManager(getStateBaseLocation(), timeStamp);
+		stateManager.setInstaller(new EclipseBundleInstaller());
 		StateImpl systemState = stateManager.getSystemState();
 		if (systemState != null)
 			return stateManager;

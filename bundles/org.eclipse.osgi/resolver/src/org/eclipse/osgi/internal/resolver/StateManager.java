@@ -26,13 +26,12 @@ public class StateManager implements PlatformAdmin {
 	private StateObjectFactoryImpl factory;
 	private long lastTimeStamp;
 	private BundleInstaller installer;
-	public StateManager(BundleInstaller installer, File  bundleRootDir) {
+	public StateManager(File  bundleRootDir) {
 		// a negative timestamp means no timestamp checking
-		this(installer, bundleRootDir, -1);
+		this(bundleRootDir, -1);
 	}
-	public StateManager(BundleInstaller installer, File bundleRootDir, long expectedTimeStamp) {
+	public StateManager(File bundleRootDir, long expectedTimeStamp) {
 		factory = new StateObjectFactoryImpl();
-		this.installer = installer;
 		stateLocation = new File(bundleRootDir, ".state"); //$NON-NLS-1$
 		readState(expectedTimeStamp);
 	}
@@ -135,5 +134,12 @@ public class StateManager implements PlatformAdmin {
 	}
 	public File getStateLocation() {
 		return stateLocation;
+	}
+	
+	public BundleInstaller getInstaller() {
+		return installer;
+	}
+	public void setInstaller(BundleInstaller installer) {
+		this.installer = installer;
 	}
 }

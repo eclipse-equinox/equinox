@@ -125,7 +125,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 	 * @return the StateManager.
 	 */
 	protected StateManager createStateManager() {
-		stateManager = new StateManager(null, getBundleStoreRootDir());
+		stateManager = new StateManager(getBundleStoreRootDir());
 		State systemState = stateManager.getSystemState();
 		if (systemState != null)
 			return stateManager;
