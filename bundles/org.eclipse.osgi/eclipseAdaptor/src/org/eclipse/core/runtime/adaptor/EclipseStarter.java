@@ -410,10 +410,7 @@ public class EclipseStarter {
 		for (int i = 0; i < installEntries.length; i++) {
 			String name = installEntries[i];
 			int level = defaultStartLevel;
-			// TODO setting start to true is a temporary hack while PDE gets up to speed
-			// with the change in syntax.  After next week's integration build this should be change
-			// back to false.
-			boolean start = true;
+			boolean start = false;
 			int index = name.indexOf('@');
 			if (index >= 0) {
 				String[] attributes = getArrayFromList(name.substring(index + 1, name.length()), ":"); //$NON-NLS-1$
