@@ -11,12 +11,15 @@
 		<export name="*"/>
       </library>
       <library name="core.jar">
+		<export name="*"/>      
       </library>
       <library name="resolver.jar">
+		<export name="*"/>      
       </library>
       <library name="defaultAdaptor.jar">
+		<export name="*"/>      
       </library>
-      <library name="eclipseAdaptor.jar">
+      <library name="eclipseAdaptor.jar">      
 		<export name="*"/>
       </library>
       <library name="console.jar">
