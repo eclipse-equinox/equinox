@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.eclipse.osgi.service.resolver;
 
+import java.io.*;
+import java.io.DataOutput;
+import java.io.IOException;
 import java.util.Dictionary;
 
 public interface StateObjectFactory {
@@ -34,5 +37,19 @@ public interface StateObjectFactory {
 	public HostSpecification createHostSpecification(HostSpecification original);	
 	public PackageSpecification createPackageSpecification(BundleDescription parentBundle, String packageName, Version packageVersion, boolean exported);
 	public PackageSpecification createPackageSpecification(PackageSpecification original);
-
+	/**
+	 * Persists the given state in the given output stream. Closes the stream.
+	 * @param state
+	 * @param stream
+	 * @throws IOException
+	 * @throws IllegalArgumentException if the state provided was not created by this factory
+	 */
+	public void writeState(State state, DataOutputStream stream) throws IOException;
+	/**
+	 * Reads a persisted state from the given stream. Closes the stream.
+	 * @param stream
+	 * @return
+	 * @throws IOException
+	 */
+	public State readState(DataInputStream stream) throws IOException;
 }

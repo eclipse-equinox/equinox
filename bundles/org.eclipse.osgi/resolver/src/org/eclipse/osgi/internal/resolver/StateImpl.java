@@ -23,10 +23,13 @@ public class StateImpl implements State {
 	private boolean resolved = true;
 	private long timeStamp = System.currentTimeMillis();
 	private KeyedHashSet bundleDescriptions = new KeyedHashSet(false);
+	private StateObjectFactory factory;	
 
 	public static boolean DEBUG_RESOLVER = false;
 	private static long cumulativeTime;
 	
+	StateImpl() {}
+
 	public void addBundle(BundleDescription description) {
 		if (description.getBundleId() < 0)
 			throw new IllegalArgumentException("no id set");		
@@ -332,5 +335,11 @@ public class StateImpl implements State {
 	}
 	public void setTimeStamp(long newTimeStamp) {
 		timeStamp = newTimeStamp;		
+	}
+	public StateObjectFactory getFactory() {
+		return factory;
+	}
+	void setFactory(StateObjectFactory factory) {
+		this.factory = factory;
 	}
 }

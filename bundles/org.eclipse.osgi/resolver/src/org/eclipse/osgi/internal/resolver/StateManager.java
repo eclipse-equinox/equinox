@@ -20,7 +20,7 @@ public class StateManager implements PlatformAdmin {
 
 	private StateImpl systemState;
 	private File stateLocation;
-	private StateObjectFactory factory;
+	private StateObjectFactoryImpl factory;
 	private long lastTimeStamp;
 
 	public StateManager(File bundleRootDir) {
@@ -28,6 +28,7 @@ public class StateManager implements PlatformAdmin {
 		this(bundleRootDir, -1);
 	}
 	public StateManager(File bundleRootDir, long expectedTimeStamp) {
+		factory = new StateObjectFactoryImpl();
 		stateLocation = new File(bundleRootDir, ".state"); //$NON-NLS-1$
 		readState(expectedTimeStamp);
 	}	
@@ -53,8 +54,7 @@ public class StateManager implements PlatformAdmin {
 		DataInputStream input = null;
 		try {
 			input = new DataInputStream(new BufferedInputStream(fileInput, 65536));
-			StateReader reader = new StateReader();
-			systemState = reader.loadState(input, expectedTimeStamp);
+			systemState = (StateImpl) factory.readState(input, expectedTimeStamp);
 			// problems in the cache (corrupted/stale), don't create a state object
 			if (systemState == null)
 				return;
@@ -73,11 +73,10 @@ public class StateManager implements PlatformAdmin {
 		if (stateLocation.isFile() && lastTimeStamp == systemState.getTimeStamp())
 			return;
 		DataOutputStream output = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(stateLocation)));
-		StateWriter writer = new StateWriter();
-		writer.saveState(systemState, output);
+		factory.writeState(systemState, output);
 	}
 	public StateImpl createSystemState() {
-		systemState = new StateImpl();
+		systemState = (StateImpl) factory.createState();
 		initializeSystemState();	
 		return systemState;
 	}
@@ -92,8 +91,6 @@ public class StateManager implements PlatformAdmin {
 		return factory.createState(getSystemState());
 	}
 	public StateObjectFactory getFactory() {
-		if (factory == null)
-			factory = new StateObjectFactoryImpl();
 		return factory;
 	}
 	public void commit(State state) throws BundleException {

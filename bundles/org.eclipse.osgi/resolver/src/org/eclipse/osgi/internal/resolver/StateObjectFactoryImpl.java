@@ -10,11 +10,9 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
 
+import java.io.*;
 import java.util.Dictionary;
-
 import org.eclipse.osgi.service.resolver.*;
-import org.eclipse.osgi.service.resolver.BundleDescription;
-import org.eclipse.osgi.service.resolver.StateObjectFactory;
 import org.osgi.framework.BundleException;
 
 public class StateObjectFactoryImpl implements StateObjectFactory {
@@ -117,13 +115,34 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		return packageSpec;
 	}
 	public State createState() {
-		return new StateImpl();
+		StateImpl state =  new StateImpl();
+		state.setFactory(this);
+		return state;
 	}
 	public State createState(State original) {
 		StateImpl newState = new StateImpl();
+		newState.setFactory(this);
 		BundleDescription[] bundles = original.getBundles();
 		for (int i = 0; i < bundles.length; i++)
 			newState.addBundle(createBundleDescription(bundles[i]));
 		return newState;
+	}
+	public State readState(DataInputStream stream, long expectedTimeStamp) throws IOException {
+		StateReader reader = new StateReader();
+		StateImpl restoredState = reader.loadState(stream, expectedTimeStamp);
+		restoredState.setFactory(this);
+		return restoredState;
+	}	
+	public State readState(DataInputStream stream) throws IOException {
+		StateReader reader = new StateReader();
+		StateImpl restoredState = reader.loadState(stream);
+		restoredState.setFactory(this);
+		return restoredState;		
+	}
+	public void writeState(State state, DataOutputStream stream) throws IOException {
+		if (state.getFactory() != this)
+			throw new IllegalArgumentException();
+		StateWriter writer = new StateWriter();
+		writer.saveState((StateImpl) state, stream);	
 	}
 }

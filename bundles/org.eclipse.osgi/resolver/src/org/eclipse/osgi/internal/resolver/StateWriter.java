@@ -17,7 +17,7 @@ import java.util.Map;
 
 import org.eclipse.osgi.service.resolver.*;
 
-public class StateWriter {
+class StateWriter {
 
 	// objectTable will be a hashmap of objects. The objects will be things
 	// like a plugin descriptor, extension, extension point, etc. The integer

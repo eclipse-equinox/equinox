@@ -256,9 +256,7 @@ public interface State {
 	public boolean isEmpty();
 
 	/**
-	 * Returns all exported packages in this state, according to the OSGi rules for resolution.
-	 * 
-	 * @return
+	 * Returns all exported packages in this state, according to the OSGi rules for resolution. 
 	 * @see org.osgi.service.packageadmin.PackageAdmin#getExportedPackages(Bundle)
 	 */
 	public PackageSpecification[] getExportedPackages();
@@ -267,5 +265,10 @@ public interface State {
 	 * Returns all bundle descriptions with the given bundle global name.  
 	 */
 	public BundleDescription[] getBundles(String globalName);
-
+	
+	/**
+	 * Returns the factory that created this state.
+	 * @return the state object factory that created this state 
+	 */
+	public StateObjectFactory getFactory();
 }

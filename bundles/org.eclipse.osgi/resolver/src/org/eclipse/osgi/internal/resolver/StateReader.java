@@ -16,7 +16,7 @@ import java.util.List;
 
 import org.eclipse.osgi.service.resolver.*;
 
-public class StateReader {
+class StateReader {
 
 	// objectTable will be a hashmap of objects. The objects will be things
 	// like a plugin descriptor, extension, extension point, etc. The integer
