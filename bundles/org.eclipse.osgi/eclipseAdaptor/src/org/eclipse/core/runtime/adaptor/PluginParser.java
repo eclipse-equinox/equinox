@@ -16,11 +16,13 @@ import javax.xml.parsers.SAXParserFactory;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTracker;
 import org.xml.sax.*;
 import org.xml.sax.helpers.DefaultHandler;
 
 public class PluginParser extends DefaultHandler implements IModel {
+	private static ServiceTracker xmlTracker = null;
+
 	private PluginInfo manifestInfo = new PluginInfo();
 	private BundleContext context;
 	private String target; // The targeted platform for the given manifest
@@ -152,6 +154,7 @@ public class PluginParser extends DefaultHandler implements IModel {
 		public String getRoot() {
 			return isFragment() ? FRAGMENT : PLUGIN;
 		}
+
 		/*
 		 * Provides some basic form of validation. Since plugin/fragment is the only mandatory
 		 * attribute, it is the only one we cara about here. 
@@ -164,7 +167,7 @@ public class PluginParser extends DefaultHandler implements IModel {
 			if (this.version == null)
 				return EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONVERTER_MISSING_ATTRIBUTE", new String[] {getRoot(), PLUGIN_VERSION, getRoot()}); //$NON-NLS-1$
 			if (isFragment() && this.masterPluginId == null)
-				return EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONVERTER_MISSING_ATTRIBUTE", new String[] {getRoot(), FRAGMENT_PLUGIN_ID, getRoot()});  //$NON-NLS-1$
+				return EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONVERTER_MISSING_ATTRIBUTE", new String[] {getRoot(), FRAGMENT_PLUGIN_ID, getRoot()}); //$NON-NLS-1$
 			if (isFragment() && this.masterVersion == null)
 				return EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONVERTER_MISSING_ATTRIBUTE", new String[] {getRoot(), FRAGMENT_PLUGIN_VERSION, getRoot()}); //$NON-NLS-1$
 			return null;
@@ -190,7 +193,6 @@ public class PluginParser extends DefaultHandler implements IModel {
 	private static final int LIBRARY_EXPORT_STATE = 8;
 	private static final int PLUGIN_REQUIRES_IMPORT_STATE = 9;
 	private static final int FRAGMENT_STATE = 11;
-	private ServiceReference parserReference;
 
 	public PluginParser(BundleContext context, String target) {
 		super();
@@ -430,41 +432,36 @@ public class PluginParser extends DefaultHandler implements IModel {
 	}
 
 	synchronized public PluginInfo parsePlugin(InputStream in) throws Exception {
-		SAXParserFactory factory = acquireXMLParsing();
+		SAXParserFactory factory = acquireXMLParsing(context);
 		if (factory == null) {
 			FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONVERTER_NO_SAX_FACTORY"), 0, null, null); //$NON-NLS-1$
 			EclipseAdaptor.getDefault().getFrameworkLog().log(entry);
 			return null;
 		}
+
+		factory.setNamespaceAware(true);
+		factory.setNamespaceAware(true);
 		try {
-			factory.setNamespaceAware(true);
-			factory.setNamespaceAware(true);
-			try {
-				factory.setFeature("http://xml.org/sax/features/string-interning", true); //$NON-NLS-1$
-			} catch (SAXException se) {
-				// ignore; we can still operate without string-interning
-			}
-			factory.setValidating(false);
-			factory.newSAXParser().parse(in, this);
-			return manifestInfo;
-		} finally {
-			releaseXMLParsing();
+			factory.setFeature("http://xml.org/sax/features/string-interning", true); //$NON-NLS-1$
+		} catch (SAXException se) {
+			// ignore; we can still operate without string-interning
 		}
+		factory.setValidating(false);
+		factory.newSAXParser().parse(in, this);
+		return manifestInfo;
 	}
 
-	private SAXParserFactory acquireXMLParsing() {
-		if (context == null) {
-			return SAXParserFactory.newInstance();
+	public static SAXParserFactory acquireXMLParsing(BundleContext context) {
+		if (xmlTracker == null) {
+			xmlTracker = new ServiceTracker(context, "javax.xml.parsers.SAXParserFactory", null);
+			xmlTracker.open();
 		}
-		parserReference = context.getServiceReference("javax.xml.parsers.SAXParserFactory"); //$NON-NLS-1$ 
-		if (parserReference == null)
-			return null;
-		return (SAXParserFactory) context.getService(parserReference);
+		return (SAXParserFactory) xmlTracker.getService();
 	}
 
-	private void releaseXMLParsing() {
-		if (parserReference != null)
-			context.ungetService(parserReference);
+	public static void releaseXMLParsing() {
+		if (xmlTracker != null)
+			xmlTracker.close();
 	}
 
 	public void parseFragmentAttributes(Attributes attributes) {

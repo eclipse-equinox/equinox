@@ -287,6 +287,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 			System.out.println("Time spent in package admin resolve: " + DebugOptions.getDefault().getOption("debug.packageadmin/timing/value")); //$NON-NLS-1$ //$NON-NLS-2$
 			System.out.println("Time spent resolving the dependency system: " + DebugOptions.getDefault().getOption("org.eclipse.core.runtime.adaptor/resolver/timing/value")); //$NON-NLS-1$ //$NON-NLS-2$
 		}
+		PluginParser.releaseXMLParsing();
 	}
 
 	/**
