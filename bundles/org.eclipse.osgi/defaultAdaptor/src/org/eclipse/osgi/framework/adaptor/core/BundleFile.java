@@ -21,6 +21,7 @@ import org.eclipse.osgi.framework.adaptor.BundleData;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.internal.protocol.bundleresource.Handler;
+import org.osgi.framework.FrameworkEvent;
 
 /**
  * The BundleFile API is used by Adaptors to read resources out of an 
@@ -135,16 +136,31 @@ abstract public class BundleFile {
 			super(basefile);
 			this.bundledata = bundledata;
 			this.closed = true;
-			open();
 		}
 
-		protected ZipEntry getZipEntry(String path) {
+		private boolean checkedOpen() {
+			try {
+				if (closed) {
+					zipFile = new ZipFile(this.basefile);
+					closed = false;
+				}
+			} catch (IOException e) {
+				AbstractBundleData abstractData = (AbstractBundleData) bundledata;
+				abstractData.getAdaptor().getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, abstractData.getBundle(), e);
+				return false;
+			}
+			return true;
+		}
+
+		private ZipEntry getZipEntry(String path) {
 			if (path.length() > 0 && path.charAt(0) == '/')
 				path = path.substring(1);
 			return zipFile.getEntry(path);
 		}
 
 		protected File extractDirectory(String dirName) {
+			if (!checkedOpen())
+				return null;
 			Enumeration entries = zipFile.entries();
 			while (entries.hasMoreElements()) {
 				String entryPath = ((ZipEntry) entries.nextElement()).getName();
@@ -154,14 +170,14 @@ abstract public class BundleFile {
 			return getExtractFile(dirName);
 		}
 
-		protected File getExtractFile(String entryName) {
+		private File getExtractFile(String entryName) {
 			if (!(bundledata instanceof AbstractBundleData)) {
 				return null;
 			}
 			File bundleGenerationDir = ((AbstractBundleData) bundledata).createGenerationDir();
 			/* if the generation dir exists, then we have place to cache */
 			if (bundleGenerationDir != null && bundleGenerationDir.exists()) {
-				String path = ".cp"; /* put all these entries in this subdir */ //$NON-NLS-1$
+				String path = ".cp"; /* put all these entries in this subdir *///$NON-NLS-1$
 				String name = entryName.replace('/', File.separatorChar);
 				if ((name.length() > 1) && (name.charAt(0) == File.separatorChar)) /* if name has a leading slash */{
 					path = path.concat(name);
@@ -174,6 +190,8 @@ abstract public class BundleFile {
 		}
 
 		public File getFile(String entry) {
+			if (!checkedOpen())
+				return null;
 			ZipEntry zipEntry = getZipEntry(entry);
 			if (zipEntry == null) {
 				return null;
@@ -229,6 +247,8 @@ abstract public class BundleFile {
 		}
 
 		public boolean containsDir(String dir) {
+			if (checkedOpen())
+				return false;
 			if (dir == null)
 				return false;
 
@@ -258,6 +278,8 @@ abstract public class BundleFile {
 		}
 
 		public BundleEntry getEntry(String path) {
+			if (!checkedOpen())
+				return null;
 			ZipEntry zipEntry = getZipEntry(path);
 			if (zipEntry == null) {
 				if (path.length() == 0 || path.charAt(path.length() - 1) == '/') {
@@ -273,6 +295,8 @@ abstract public class BundleFile {
 		}
 
 		public Enumeration getEntryPaths(String path) {
+			if (!checkedOpen())
+				return null;
 			if (path == null) {
 				throw new NullPointerException();
 			}
@@ -315,11 +339,7 @@ abstract public class BundleFile {
 		}
 
 		public void open() throws IOException {
-			if (closed) {
-				zipFile = new ZipFile(this.basefile);
-
-				closed = false;
-			}
+			//do nothing
 		}
 
 	}
@@ -479,7 +499,7 @@ abstract public class BundleFile {
 			// do nothing
 		}
 	}
-	
+
 	public File getBaseFile() {
 		return basefile;
 	}
