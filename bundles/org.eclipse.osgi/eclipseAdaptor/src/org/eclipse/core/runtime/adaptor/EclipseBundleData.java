@@ -157,7 +157,7 @@ public class EclipseBundleData extends DefaultBundleData {
 	public synchronized Dictionary loadManifest() throws BundleException {		
 		URL url = getEntry(Constants.OSGI_BUNDLE_MANIFEST);
 		if (url != null) {
-			manifestTimeStamp = getBaseBundleFile().getEntry(".").getTime();
+			manifestTimeStamp = getBaseBundleFile().getEntry("").getTime();
 			return loadManifestFrom(url);
 		}
 		Dictionary result = generateManifest(null);		
