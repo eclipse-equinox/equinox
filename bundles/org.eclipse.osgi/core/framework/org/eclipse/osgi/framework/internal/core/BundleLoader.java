@@ -30,7 +30,7 @@ import org.osgi.framework.*;
  * 
  */
 public class BundleLoader implements ClassLoaderDelegate {
-	private static String DEFAULT_PACKAGE = ".";
+	protected static String DEFAULT_PACKAGE = ".";
 
 	/** Bundle object */
 	protected BundleHost bundle;

@@ -921,14 +921,11 @@ public class PackageAdminImpl implements PackageAdmin {
 
 	protected Class loadServiceClass(String className, AbstractBundle bundle) {
 		try {
-			if (restrictServiceClasses || bundle == null)
-				return framework.adaptor.getBundleClassLoaderParent().loadClass(className);
-			else
-				return bundle.loadClass(className, false);
+			// first try the PARENT class space
+			return framework.adaptor.getBundleClassLoaderParent().loadClass(className);
 		} catch (ClassNotFoundException e) {
 			// do nothing; try exported packages
 		}
-
 		// try exported packages; SERVICE class space
 		String pkgname = BundleLoader.getPackageName(className);
 		if (pkgname != null) {
@@ -939,11 +936,18 @@ public class PackageAdminImpl implements PackageAdmin {
 					return serviceClass;
 			}
 		}
-
-		// try bundle's PRIVATE class space if we are restricting service classes
-		if (restrictServiceClasses && bundle != null)
-			return bundle.getBundleLoader().findLocalClass(className);
-
-		return null;
+		// try bundle's PRIVATE class space
+		if (bundle == null)
+			return null;
+		BundleLoader loader = bundle.getBundleLoader();
+		if (restrictServiceClasses) {
+			// cannot have a service class from a package that a bundle 
+			// provides to a NAMED class space (unless it is exported also).
+			if (pkgname == null)
+				pkgname = BundleLoader.DEFAULT_PACKAGE;
+			if (loader.getProvidedPackage(pkgname) != null)
+				return null;
+		}
+		return loader.findLocalClass(className);
 	}
 }
