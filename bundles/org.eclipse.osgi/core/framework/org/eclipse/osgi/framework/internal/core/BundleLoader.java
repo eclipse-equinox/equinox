@@ -164,8 +164,8 @@ public class BundleLoader implements ClassLoaderDelegate {
 						if (spec.isExported())
 							reexported[reexportIndex++] = i;
 					} else {
-						// TODO log error
-						System.out.println("Could not find loaderProxy: " + bundleKey);
+						BundleException be = new BundleException(Msg.formatter.getString("BUNDLE_MISSING_LOADER",bundleKey)); //$NON-NLS-1$
+						bundle.framework.publishFrameworkEvent(FrameworkEvent.ERROR,bundle,be);
 					}
 				}
 			}
@@ -204,7 +204,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 					addDynamicImportPackage(imports);
 				}
 		} catch (BundleException e) {
-			// TODO log an error
+			bundle.framework.publishFrameworkEvent(FrameworkEvent.ERROR,bundle,e);
 		}
 	}
 
@@ -251,7 +251,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 				}
 			}
 		} catch (BundleException e) {
-			// TODO log an error
+			bundle.framework.publishFrameworkEvent(FrameworkEvent.ERROR,bundle,e);
 		}		
 
 		// init the provided packages

@@ -33,7 +33,7 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 	/** A flag to denote whether a bundle state change is in progress */
 	protected volatile Thread stateChanging;
 	/** Bundle's BundleData object */
-	protected BundleData bundledata;	//TODO Access to this variable in Framework and StartLevelImpl should be done through an accessor.
+	protected BundleData bundledata;
 	/** Internal object used for state change synchronization */
 	protected Object statechangeLock = new Object();
 	/** ProtectionDomain for the bundle */
@@ -52,16 +52,8 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 	 * Bundle object constructor. This constructor should not perform any real
 	 * work.
 	 * 
-	 * @param id
-	 *            Unique context id assigned to bundle
-	 * @param bundleFile
-	 *            the bundle's file
-	 * @param localStore
-	 *            adaptor specific object for the bundle's local storage
-	 * @param manifest
-	 *            Bundle's manifest
-	 * @param location
-	 *            identity string for the bundle
+	 * @param bundledata
+	 *            BundleData for this bundle
 	 * @param framework
 	 *            Framework this bundle is running in
 	 */
@@ -75,16 +67,8 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 	 * Bundle object constructor. This constructor should not perform any real
 	 * work.
 	 * 
-	 * @param id
-	 *            Unique context id assigned to bundle
-	 * @param bundleFile
-	 *            the bundle's file
-	 * @param localStore
-	 *            adaptor specific object for the bundle's local storage
-	 * @param manifest
-	 *            Bundle's manifest
-	 * @param location
-	 *            identity string for the bundle
+	 * @param bundledata
+	 *            BundleData for this bundle
 	 * @param framework
 	 *            Framework this bundle is running in
 	 */
@@ -241,7 +225,7 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 	 * resolve the bundle. If the bundle cannot be resolved, a
 	 * {@link BundleException}is thrown.
 	 * <li>The state of the bundle is set to {@link #STARTING}.
-	 * <li>The {@link BundleActivator#start start}method of the bundle's
+	 * <li>The {@link BundleActivator#start(BundleContext) start}method of the bundle's
 	 * {@link BundleActivator}, if one is specified, is called. If the
 	 * {@link BundleActivator}is invalid or throws an exception, the state of
 	 * the bundle is set back to {@link #RESOLVED}, the bundle's listeners, if
@@ -262,7 +246,7 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 	 * <h5>Postconditons, no exceptions thrown</h5>
 	 * <ul>
 	 * <li>getState() in {{@link #ACTIVE}}.
-	 * <li>{@link BundleActivator#start BundleActivator.start}has been called
+	 * <li>{@link BundleActivator#start(BundleContext) BundleActivator.start}has been called
 	 * and did not throw an exception.
 	 * </ul>
 	 * <h5>Postconditions, when an exception is thrown</h5>
@@ -325,7 +309,7 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 	 * resolve the bundle. If the bundle cannot be resolved, a
 	 * {@link BundleException}is thrown.
 	 * <li>The state of the bundle is set to {@link #STARTING}.
-	 * <li>The {@link BundleActivator#start start}method of the bundle's
+	 * <li>The {@link BundleActivator#start(BundleContext) start}method of the bundle's
 	 * {@link BundleActivator}, if one is specified, is called. If the
 	 * {@link BundleActivator}is invalid or throws an exception, the state of
 	 * the bundle is set back to {@link #RESOLVED}, the bundle's listeners, if
@@ -344,7 +328,7 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 	 * <h5>Postconditons, no exceptions thrown</h5>
 	 * <ul>
 	 * <li>getState() in {{@link #ACTIVE}}.
-	 * <li>{@link BundleActivator#start BundleActivator.start}has been called
+	 * <li>{@link BundleActivator#start(BundleContext) BundleActivator.start}has been called
 	 * and did not throw an exception.
 	 * </ul>
 	 * <h5>Postconditions, when an exception is thrown</h5>
@@ -392,7 +376,7 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 	 * <li>The state of the bundle is set to {@link #STOPPING}.
 	 * <li>It is recorded that this bundle has been stopped, so that when the
 	 * framework is restarted, this bundle will not be automatically started.
-	 * <li>The {@link BundleActivator#stop stop}method of the bundle's
+	 * <li>The {@link BundleActivator#stop(BundleContext) stop}method of the bundle's
 	 * {@link BundleActivator}, if one is specified, is called. If the
 	 * {@link BundleActivator}throws an exception, this method will continue
 	 * to stop the bundle. A {@link BundleException}will be thrown after
@@ -412,7 +396,7 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 	 * <h5>Postconditons, no exceptions thrown</h5>
 	 * <ul>
 	 * <li>getState() not in {{@link #ACTIVE},{@link #STOPPING}}.
-	 * <li>{@link BundleActivator#stop BundleActivator.stop}has been called
+	 * <li>{@link BundleActivator#stop(BundleContext) BundleActivator.stop}has been called
 	 * and did not throw an exception.
 	 * </ul>
 	 * <h5>Postconditions, when an exception is thrown</h5>
@@ -492,7 +476,7 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 	 * does not occur in a reasonable time, a {@link BundleException}is thrown
 	 * to indicate the bundle was unable to be stopped.
 	 * <li>The state of the bundle is set to {@link #STOPPING}.
-	 * <li>The {@link BundleActivator#stop stop}method of the bundle's
+	 * <li>The {@link BundleActivator#stop(BundleContext) stop}method of the bundle's
 	 * {@link BundleActivator}, if one is specified, is called. If the
 	 * {@link BundleActivator}throws an exception, this method will continue
 	 * to stop the bundle. A {@link BundleException}will be thrown after
@@ -512,7 +496,7 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 	 * <h5>Postconditons, no exceptions thrown</h5>
 	 * <ul>
 	 * <li>getState() not in {{@link #ACTIVE},{@link #STOPPING}}.
-	 * <li>{@link BundleActivator#stop BundleActivator.stop}has been called
+	 * <li>{@link BundleActivator#stop(BundleContext) BundleActivator.stop}has been called
 	 * and did not throw an exception.
 	 * </ul>
 	 * <h5>Postconditions, when an exception is thrown</h5>
@@ -553,7 +537,7 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 	 * <li>If the bundle is {@link #UNINSTALLED}then an <code>IllegalStateException</code>
 	 * is thrown.
 	 * <li>If the bundle is {@link #ACTIVE}or {@link #STARTING}, the bundle
-	 * is stopped as described in the {@link #stop}method. If {@link #stop}
+	 * is stopped as described in the {@link #stop()}method. If {@link #stop()}
 	 * throws an exception, the exception is rethrown terminating the update.
 	 * <li>The location for the new version of the bundle is determined from
 	 * either the manifest header <code>Bundle-UpdateLocation</code> if
@@ -569,7 +553,7 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 	 * <li>If the new version of the bundle was successfully installed, a
 	 * {@link BundleEvent}of type {@link BundleEvent#UPDATED}is broadcast.
 	 * <li>If the bundle was originally {@link #ACTIVE}, the updated bundle
-	 * is started as described in the {@link #start}method. If {@link #start}
+	 * is started as described in the {@link #start()}method. If {@link #start()}
 	 * throws an exception, a {@link FrameworkEvent}of type
 	 * {@link FrameworkEvent#ERROR}is broadcast containing the exception.
 	 * </ol>
@@ -642,7 +626,7 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 	 * Update this bundle from an InputStream.
 	 * 
 	 * <p>
-	 * This method performs all the steps listed in {@link #update}, except
+	 * This method performs all the steps listed in {@link #update()}, except
 	 * the bundle will be read in through the supplied <code>InputStream</code>,
 	 * rather than a <code>URL</code>.
 	 * 
@@ -780,7 +764,7 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 	 * <li>If the bundle is {@link #UNINSTALLED}then an <code>IllegalStateException</code>
 	 * is thrown.
 	 * <li>If the bundle is {@link #ACTIVE}or {@link #STARTING}, the bundle
-	 * is stopped as described in the {@link #stop}method. If {@link #stop}
+	 * is stopped as described in the {@link #stop()}method. If {@link #stop()}
 	 * throws an exception, a {@link FrameworkEvent}of type
 	 * {@link FrameworkEvent#ERROR}is broadcast containing the exception.
 	 * <li>A {@link BundleEvent}of type {@link BundleEvent#UNINSTALLED}is
@@ -1047,7 +1031,7 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 	/**
 	 * Retrieve the location identifier of the bundle. This is typically the
 	 * location passed to
-	 * {@link BundleContext#installBundle BundleContext.installBundle}when the
+	 * {@link BundleContext#installBundle(String) BundleContext.installBundle}when the
 	 * bundle was installed. The location identifier of the bundle may change
 	 * during bundle update. Calling this method while framework is updating
 	 * the bundle results in undefined behavior.

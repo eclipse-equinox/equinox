@@ -112,48 +112,51 @@ public class BundleRepository {
 		}
 	}
 
-	//TODO Simplify the nesting here.
 	public boolean remove(Bundle bundle) {
 		// remove by bundle ID
-		boolean removed = bundlesById.remove(bundle);
-		if (removed) {
-			// remove by install order
-			bundlesByInstallOrder.remove(bundle);
-			// remove by symbolic name
-			String symbolicName = bundle.getSymbolicName();
-			if (symbolicName != null) {
-				Bundle[] bundles = (Bundle[]) bundlesBySymbolicName.get(symbolicName);
-				if (bundles != null) {
-					// found some bundles with the global name.
-					// remove all references to the specified bundle.
-					int numRemoved = 0;
-					for (int i = 0; i < bundles.length; i++) {
-						if (bundle == bundles[i]) {
-							numRemoved++;
-							bundles[i] = null;
-						}
-					}
-					if (numRemoved > 0) {
-						if (bundles.length - numRemoved <= 0) {
-							// no bundles left in the array remove the array from the hash
-							bundlesBySymbolicName.remove(symbolicName);
-						} else {
-							// create a new array with the null entries removed.
-							Bundle[] newBundles = new Bundle[bundles.length - numRemoved];
-							int indexCnt = 0;
-							for (int i = 0; i < bundles.length; i++) {
-								if (bundles[i] != null) {
-									newBundles[indexCnt] = bundles[i];
-									indexCnt++;
-								}
-							}
-							bundlesBySymbolicName.put(symbolicName, newBundles);
-						}
-					}
-				}
+		boolean found = bundlesById.remove(bundle);
+		if (!found)
+			return false;
+
+		// remove by install order
+		bundlesByInstallOrder.remove(bundle);
+		// remove by symbolic name
+		String symbolicName = bundle.getSymbolicName();
+		if (symbolicName == null)
+			return true;
+
+		Bundle[] bundles = (Bundle[]) bundlesBySymbolicName.get(symbolicName);
+		if (bundles == null)
+			return true;
+
+		// found some bundles with the global name.
+		// remove all references to the specified bundle.
+		int numRemoved = 0;
+		for (int i = 0; i < bundles.length; i++) {
+			if (bundle == bundles[i]) {
+				numRemoved++;
+				bundles[i] = null;
 			}
 		}
-		return removed;
+		if (numRemoved > 0) {
+			if (bundles.length - numRemoved <= 0) {
+				// no bundles left in the array remove the array from the hash
+				bundlesBySymbolicName.remove(symbolicName);
+			} else {
+				// create a new array with the null entries removed.
+				Bundle[] newBundles = new Bundle[bundles.length - numRemoved];
+				int indexCnt = 0;
+				for (int i = 0; i < bundles.length; i++) {
+					if (bundles[i] != null) {
+						newBundles[indexCnt] = bundles[i];
+						indexCnt++;
+					}
+				}
+				bundlesBySymbolicName.put(symbolicName, newBundles);
+			}
+		}
+				
+		return true;
 	}
 
 	public void removeAllBundles() {

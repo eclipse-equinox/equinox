@@ -903,7 +903,7 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 
 	protected Class loadServiceClass(String className, Bundle bundle) {
 		try {
-			if (restrictServiceClasses)
+			if (restrictServiceClasses || bundle == null)
 				return framework.adaptor.getBundleClassLoaderParent().loadClass(className);
 			else
 				return bundle.loadClass(className,false);
@@ -923,7 +923,7 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 		}
 
 		// try bundle's PRIVATE class space if we are restricting service classes
-		if (restrictServiceClasses)
+		if (restrictServiceClasses && bundle != null)
 			return bundle.getBundleLoader().findLocalClass(className);
 		
 		return null;

@@ -774,7 +774,7 @@ public class Framework implements EventSource, EventPublisher {
 	 *             If there is no suitable clause.
 	 */
 	public String[] selectNativeCode(org.osgi.framework.Bundle bundle) throws BundleException {
-		String headerValue = (String) ((Bundle) bundle).bundledata.getManifest().get(Constants.BUNDLE_NATIVECODE);
+		String headerValue = (String) ((Bundle) bundle).getBundleData().getManifest().get(Constants.BUNDLE_NATIVECODE);
 		if (headerValue == null) {
 			return (null);
 		}
@@ -970,7 +970,7 @@ public class Framework implements EventSource, EventPublisher {
 			return;
 		}
 		try {
-			int status = bundle.bundledata.getStatus();
+			int status = bundle.getBundleData().getStatus();
 			if ((status & Constants.BUNDLE_STARTED) == 0) {
 				return;
 			}
@@ -1167,7 +1167,7 @@ public class Framework implements EventSource, EventPublisher {
 	protected File getDataFile(final Bundle bundle, final String filename) {
 		return (File) AccessController.doPrivileged(new PrivilegedAction() {
 			public Object run() {
-				return bundle.bundledata.getDataFile(filename);
+				return bundle.getBundleData().getDataFile(filename);
 			}
 		});
 	}

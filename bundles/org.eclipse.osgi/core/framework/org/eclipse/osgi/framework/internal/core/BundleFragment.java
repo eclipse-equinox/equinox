@@ -399,7 +399,6 @@ public class BundleFragment extends Bundle {
 			}
 		}
 		return true;
-		// TODO detach the fragment if the host is null???
 	}
 
 	public BundleLoader getBundleLoader() {

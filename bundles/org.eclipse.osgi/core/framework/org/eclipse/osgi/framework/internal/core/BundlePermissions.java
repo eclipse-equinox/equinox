@@ -176,18 +176,12 @@ final class BundlePermissions extends BundlePermissionCollection {
 				PermissionCollection collection = null;
 				Class clazz;
 
-				try {
-					// We really need to resolve the permission
-					// by loading it only from the proper classloader,
-					// i.e. the system classloader or and exporting bundle's
-					// classloader. Otherwise there is a security hole.
-
-					// TODO  It is unclear how this works in the world of modules and multiple 
-					// versions.  Just loading up any old class with the right name does not seem 
-					// appropriate.  For now just put in a dummy classload call to reduce code impact.
-					clazz = Class.forName(name);
-					//                    clazz = packageAdmin.loadClass(name);
-				} catch (ClassNotFoundException e) {
+				// We really need to resolve the permission
+				// by loading it only from the proper classloader,
+				// i.e. the system classloader or and exporting bundle's
+				// classloader. Otherwise there is a security hole.
+				clazz = packageAdmin.loadServiceClass(name,null);
+				if (clazz == null) {
 					return null;
 				}
 

@@ -19,26 +19,47 @@ import org.eclipse.osgi.service.resolver.PackageSpecification;
 import org.eclipse.osgi.service.resolver.Version;
 
 import org.osgi.service.packageadmin.NamedClassSpace;
-//TODO A few comments would be appreciated here Although I guess it is a proxy for the loader for a bundle ;-).
-//TODO Depending on the frequence the compare and hash methods are used, uniqueId version and key may not be necessary. I haven't followed all the code path to see, so feel free to ignore.
+
+/**
+ * The BundleLoaderProxy proxies a BundleLoader object for a Bundle.  This
+ * allows for a Bundle's depedencies to be linked without forcing the 
+ * creating of the BundleLoader or BundleClassLoader objects.  This class
+ * keeps track of the depedencies between the bundles installed in the 
+ * Framework.
+ */
 public class BundleLoaderProxy implements KeyedElement, NamedClassSpace{
+	/** The BundleLoader that this BundleLoaderProxy is managing */
 	private BundleLoader loader;
+	/** The Bundle that this BundleLoaderProxy is for*/
 	private BundleHost bundle;
-	private String uniqueId;	
+	/** The Symbolic Name of the Bundle; this must be cached incase the Bundle is updated */
+	private String symbolicName;	
+	/** The Version of the Bundle; this must be cached incase the Bundle is updated */
 	private Version version;	
+	/** The unique hash key for this KeyedElemetn */
 	private String key;
+	/** 
+	 * Indicates if this BundleLoaderProxy is stale; 
+	 * this is true when the bundle is updated or uninstalled.
+	 */
 	private boolean stale = false;
+	/**
+	 * The set of users that are dependant on this BundleLoaderProxy
+	 */
 	private KeyedHashSet users;
+	/**
+	 * Indicates if the dependencies of this BundleLoaderProxy have been marked
+	 */
 	protected boolean markedUsedDependencies = false;
 
 	public BundleLoaderProxy(BundleHost bundle) {
 		this.bundle = bundle;
-		this.uniqueId = bundle.getSymbolicName();
-		if (this.uniqueId == null) {
-			this.uniqueId = new StringBuffer().append(bundle.getBundleId()).append("NOUNIQUEID").toString();
+		this.symbolicName = bundle.getSymbolicName();
+		if (this.symbolicName == null) {
+			this.symbolicName = new StringBuffer().append(bundle.getBundleId()).append("NOSYMBOLICNAME").toString(); //$NON-NLS-1$
 		}
 		this.version = bundle.getVersion();
-		this.key = new StringBuffer(uniqueId).append("_").append(this.version.toString()).toString();
+		this.key = new StringBuffer(symbolicName).append("_").append(this.version.toString()).toString(); //$NON-NLS-1$
 		this.users = new KeyedHashSet(false);
 	}
 	public BundleLoader getBundleLoader() {
@@ -73,7 +94,7 @@ public class BundleLoaderProxy implements KeyedElement, NamedClassSpace{
 		if (!(other instanceof BundleLoaderProxy))
 			return false;
 		BundleLoaderProxy otherLoaderProxy = (BundleLoaderProxy) other;
-		return (uniqueId.equals(otherLoaderProxy.uniqueId) && version.matchQualifier(otherLoaderProxy.version));
+		return (symbolicName.equals(otherLoaderProxy.symbolicName) && version.matchQualifier(otherLoaderProxy.version));
 	}
 
 	public Object getKey() {
@@ -109,8 +130,8 @@ public class BundleLoaderProxy implements KeyedElement, NamedClassSpace{
 	public String toString() {
 		String symbolicName = bundle.getSymbolicName();
 		StringBuffer sb = new StringBuffer(symbolicName == null ? bundle.getLocation() : symbolicName);
-		sb.append("; ").append(Constants.BUNDLE_VERSION_ATTRIBUTE);
-		sb.append("=\"").append(version.toString()).append("\"");
+		sb.append("; ").append(Constants.BUNDLE_VERSION_ATTRIBUTE); //$NON-NLS-1$
+		sb.append("=\"").append(version.toString()).append("\"");  //$NON-NLS-1$//$NON-NLS-2$
 		return sb.toString();
 	}
 
@@ -123,8 +144,8 @@ public class BundleLoaderProxy implements KeyedElement, NamedClassSpace{
 		BundleDescription bundleDes = bundle.getBundleDescription();
 		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 			if (bundleDes == null) {
-				Debug.println("Bundle.resolved called and getBundleDescription returned null: " + this);
-				Debug.printStackTrace(new Exception("Stack trace"));
+				Debug.println("Bundle.resolved called and getBundleDescription returned null: " + this); //$NON-NLS-1$
+				Debug.printStackTrace(new Exception("Stack trace")); //$NON-NLS-1$
 			}
 		}
 
@@ -161,7 +182,7 @@ public class BundleLoaderProxy implements KeyedElement, NamedClassSpace{
 		if (requiredBundles != null) {
 			for (int i = 0; i < requiredBundles.length; i++) {
 				if (requiredBundles[i].isResolved()) {
-					String bundleKey = new StringBuffer(requiredBundles[i].getName()).append("_").append(requiredBundles[i].getActualVersion().toString()).toString();
+					String bundleKey = new StringBuffer(requiredBundles[i].getName()).append("_").append(requiredBundles[i].getActualVersion().toString()).toString(); //$NON-NLS-1$
 
 					BundleLoaderProxy loaderProxy = (BundleLoaderProxy) bundle.framework.packageAdmin.exportedBundles.getByKey(bundleKey);
 					if (loaderProxy != null) {
@@ -197,7 +218,7 @@ public class BundleLoaderProxy implements KeyedElement, NamedClassSpace{
 		return (Bundle[]) requiringBundles.toArray(new Bundle[requiringBundles.size()]);
 	}
 	public String getName() {
-		return uniqueId;
+		return symbolicName;
 	}
 	public String getVersion() {
 		return version.toString();

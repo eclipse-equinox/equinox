@@ -314,7 +314,7 @@ public class StartLevelImpl implements EventSource, EventListener {
 			throw new IllegalArgumentException(Msg.formatter.getString("BUNDLE_UNINSTALLED_EXCEPTION"));
 		}
 		Bundle b = (Bundle) bundle;
-		int status = b.bundledata.getStatus();
+		int status = b.getBundleData().getStatus();
 		return ((status & org.eclipse.osgi.framework.internal.core.Constants.BUNDLE_STARTED) == Constants.BUNDLE_STARTED);
 	}
 	/**
@@ -378,8 +378,8 @@ public class StartLevelImpl implements EventSource, EventListener {
 			// if the bundle's startlevel is not already at the requested startlevel
 			if (newSL != ((org.eclipse.osgi.framework.internal.core.Bundle) bundle).getStartLevel()) {
 				Bundle b = (Bundle) bundle;
-				b.bundledata.setStartLevel(newSL);
-				b.bundledata.save();
+				b.getBundleData().setStartLevel(newSL);
+				b.getBundleData().save();
 
 				framework.checkAdminPermission();
 

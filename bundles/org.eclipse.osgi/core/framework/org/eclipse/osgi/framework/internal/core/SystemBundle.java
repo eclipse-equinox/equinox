@@ -281,6 +281,13 @@ public class SystemBundle extends BundleHost {
 	protected void unresolvePermissions(Hashtable unresolvedPackages) {
 	}
 
+	/**
+	 * System Bundle can never have fragments.
+	 */
+	public org.osgi.framework.Bundle[] getFragments() {
+		return null;
+	}
+
 	/*
 	 * The System Bundle always has permission to do anything;
 	 * override the check*Permission methods to always return true.

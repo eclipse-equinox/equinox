@@ -33,7 +33,10 @@ public class BundleContext implements org.osgi.framework.BundleContext, EventSou
 	private boolean valid;
 
 	/** Bundle object this context is associated with. */
-	protected BundleHost bundle;	//TODO This should be accessed through accessors
+	// This slot is accessed directly by the Framework instead of using
+	// the getBundle() method because the Framework needs access to the bundle
+	// even when the context is invalid while the close method is being called.
+	protected BundleHost bundle;
 
 	/** Internal framework object. */
 	protected Framework framework;
@@ -270,7 +273,7 @@ public class BundleContext implements org.osgi.framework.BundleContext, EventSou
 	 * Add a service listener with a filter.
 	 * {@link ServiceListener}s are notified when a service has a lifecycle
 	 * state change.
-	 * See {@link #getServiceReferences getServiceReferences}
+	 * See {@link #getServiceReferences(String, String) getServiceReferences}
 	 * for a description of the filter syntax.
 	 * The listener is added to the context bundle's list of listeners.
 	 * See {@link #getBundle() getBundle()}
@@ -283,7 +286,7 @@ public class BundleContext implements org.osgi.framework.BundleContext, EventSou
 	 * are considered to match the filter.
 	 * <p>If the Java runtime environment supports permissions, then additional
 	 * filtering is done.
-	 * {@link Bundle#hasPermission Bundle.hasPermission} is called for the
+	 * {@link Bundle#hasPermission(Object) Bundle.hasPermission} is called for the
 	 * bundle which defines the listener to validate that the listener has the
 	 * {@link ServicePermission} permission to <code>"get"</code> the service
 	 * using at least one of the named classes the service was registered under.

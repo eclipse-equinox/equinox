@@ -15,37 +15,36 @@ import java.io.IOException;
 import java.net.URL;
 import java.security.PermissionCollection;
 import java.security.ProtectionDomain;
-import java.util.Vector;
 import org.eclipse.osgi.framework.adaptor.BundleData;
 import org.eclipse.osgi.framework.adaptor.BundleWatcher;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.util.SecureAction;
+import org.osgi.framework.*;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleException;
 
 public class BundleHost extends Bundle {
 
-	/** Loaded state object. */
+	/** Loaded state object */
 	protected BundleLoader loader;
 
-	//	TODO Little description 
+	/** 
+	 * The BundleLoader proxy; a lightweight object that acts as a proxy
+	 * to the BundleLoader and allows lazy creation of the BundleLoader object
+	 */
 	private BundleLoaderProxy proxy;	
 
 	/** The BundleContext that represents this Bundle and all of its fragments */
 	protected BundleContext context;
 
 	/** The List of BundleFragments */
-	protected Vector fragments;	//TODO LinkedList or an array. Ideally we would create the array with the right size upfront
+	protected BundleFragment[] fragments;
 
 	public BundleHost(BundleData bundledata, Framework framework) throws BundleException {
 		super(bundledata, framework);
 		context = null;
 		loader = null;
 		fragments = null;
-	}
-
-	protected BundleLoader basicGetBundleLoader() {	//TODO Does not seems to be called.
-		return loader;
 	}
 
 	/**
@@ -210,13 +209,8 @@ public class BundleHost extends Bundle {
 	 */
 	protected void unresolveFragments() {
 		if (fragments != null) {
-			// TODO is this sync really needed?  unresolve should only ever be done in with the state change lock aquired no?
-			synchronized (fragments) {
-				int size = fragments.size();
-				for (int i = 0; i < size; i++) {
-					BundleFragment fragment = (BundleFragment) fragments.elementAt(i);
-					fragment.unresolve();
-				}
+			for (int i = 0; i < fragments.length; i++) {
+				fragments[i].unresolve();
 			}
 		}
 	}
@@ -295,10 +289,6 @@ public class BundleHost extends Bundle {
 				fragments = null;
 				domain = null;
 			}
-
-			//TODO Do we need to fix something here?
-			//BUGBUG ? search for any detached loaders for this bundle and
-			// close them if they are not exporting.
 		} else {
 			try {
 				this.bundledata.close();
@@ -562,12 +552,11 @@ public class BundleHost extends Bundle {
 	 * @see org.osgi.framework.Bundle#getFragments()
 	 */
 	public org.osgi.framework.Bundle[] getFragments() {
-
-		synchronized (this) {
+		synchronized (framework.bundles) {
 			if (fragments == null)
 				return null;
-			org.osgi.framework.Bundle[] result = new org.osgi.framework.Bundle[fragments.size()];
-			fragments.toArray(result);
+			org.osgi.framework.Bundle[] result = new org.osgi.framework.Bundle[fragments.length];
+			System.arraycopy(fragments,0,result,0,result.length);
 			return result;
 		}
 	}
@@ -580,36 +569,26 @@ public class BundleHost extends Bundle {
 	 * return true if the fragment successfully attached; false if the fragment
 	 * could not be logically inserted at the end of the fragment chain.
 	 */
-	public void attachFragment(BundleFragment fragment) throws BundleException {
+	protected void attachFragment(BundleFragment fragment) throws BundleException {
 		if (fragments == null) {
-			synchronized (this) {
-				if (fragments == null) {
-					fragments = new Vector(10);
-					fragments.addElement(fragment);
-				}
-			}
+			fragments = new BundleFragment[] {fragment};
 		} else {
-			synchronized (fragments) {
-				int size = fragments.size();
-				boolean inserted = false;
-				// We must keep our fragments ordered by bundle ID; or 
-				// install order.
-				for (int i = 0; i < size; i++) {
-					BundleFragment frag = (BundleFragment) fragments.elementAt(i);
-					if (fragment.getBundleId() < frag.getBundleId()) {
-						// if the loader has already been created
-						// then we cannot attach a fragment into the middle
-						// of the fragment chain.
-						if (loader != null) {
-							throw new BundleException(Msg.formatter.getString("FRAGMENT_ATTACHMENT ERROR"));
-						}
-						fragments.insertElementAt(fragment, i);
-						inserted = true;
+			boolean inserted = false;
+			// We must keep our fragments ordered by bundle ID; or 
+			// install order.
+			BundleFragment[] newFragments = new BundleFragment[fragments.length+1];
+			for (int i = 0; i < fragments.length; i++) {
+				if (!inserted && fragment.getBundleId() < fragments[i].getBundleId()) {
+					// if the loader has already been created
+					// then we cannot attach a fragment into the middle
+					// of the fragment chain.
+					if (loader != null) {
+						throw new BundleException(Msg.formatter.getString("FRAGMENT_ATTACHMENT ERROR"));
 					}
+					newFragments[i] = fragment;
+					inserted = true;
 				}
-				if (!inserted) {
-					fragments.addElement(fragment);
-				}
+				newFragments[inserted ? i+1 : i] = fragments[i]; 
 			}
 		}
 
@@ -629,8 +608,7 @@ public class BundleHost extends Bundle {
 						loader = new BundleLoader(this, getBundleDescription());
 						getLoaderProxy().setBundleLoader(loader);
 					} catch (BundleException e) {
-						// TODO log something here
-						e.printStackTrace();
+						framework.publishFrameworkEvent(FrameworkEvent.ERROR,this,e);
 						return null;
 					}
 			}
