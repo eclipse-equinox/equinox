@@ -861,12 +861,15 @@ public class PackageAdminImpl implements PackageAdmin {
 		if (bundles == null)
 			return null;
 
-		if (versionRange == null)
-			return bundles;
+		if (versionRange == null) {
+			AbstractBundle[] result = new AbstractBundle[bundles.length];
+			System.arraycopy(bundles,0,result,0,result.length);
+			return result;
+		}
 
 		// This code depends on the array of bundles being in descending
 		// version order.
-		ArrayList result = new ArrayList();
+		ArrayList result = new ArrayList(bundles.length);
 		VersionRange range = new VersionRange(versionRange);
 		for (int i = 0; i < bundles.length; i++) {
 			if (range.isIncluded(bundles[i].getVersion())) {
