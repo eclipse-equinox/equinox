@@ -11,10 +11,12 @@
 package org.eclipse.core.runtime.adaptor;
 
 import java.io.*;
+import java.lang.reflect.InvocationTargetException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import org.eclipse.osgi.framework.internal.defaultadaptor.DefaultLog;
+import org.osgi.framework.BundleException;
 
 public class EclipseLog extends DefaultLog {
 	private static final String PASSWORD = "-password"; //$NON-NLS-1$	
@@ -41,6 +43,39 @@ public class EclipseLog extends DefaultLog {
 			// of the information
 		}
 		return Long.toString(System.currentTimeMillis());
+	}
+
+	protected String getStackTrace(Throwable t) {
+		if (t == null)
+			return null;
+
+		StringWriter sw = new StringWriter();
+		PrintWriter pw = new PrintWriter(sw);
+
+		t.printStackTrace(pw);
+		// ensure the root exception is fully logged
+		Throwable root = getRoot(t);
+		if (root != null) {
+			pw.println("Root exception:");
+			root.printStackTrace(pw);
+		}
+		return sw.toString();
+	}
+
+	private Throwable getRoot(Throwable t) {
+		Throwable root = null;
+		if (t instanceof BundleException)
+			root = ((BundleException) t).getNestedException();
+		if (t instanceof InvocationTargetException)
+			root = ((InvocationTargetException) t).getTargetException();
+		// skip inner InvocationTargetExceptions and BundleExceptions
+		if (root instanceof InvocationTargetException || root instanceof BundleException) {
+			Throwable deeplyNested = getRoot(root);
+			if (deeplyNested != null)
+				// if we have something more specific, use it, otherwise keep what we have
+				root = deeplyNested;
+		}
+		return root;
 	}
 
 	protected void writeSession() throws IOException {
