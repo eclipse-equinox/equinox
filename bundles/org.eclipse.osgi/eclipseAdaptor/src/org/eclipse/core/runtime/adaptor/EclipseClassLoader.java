@@ -108,6 +108,7 @@ public class EclipseClassLoader extends DefaultClassLoader {
 			} catch (BundleException e) {
 				String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CLASSLOADER_ACTIVATION", bundle.getSymbolicName(), Long.toString(bundle.getBundleId())); //$NON-NLS-1$
 				EclipseAdaptor.getDefault().getFrameworkLog().log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, message, 0, e, null));
+				throw new ClassNotFoundException(className, e);
 			}
 			return basicFindLocalClass(className);
 		} catch (ClassNotFoundException e) {
