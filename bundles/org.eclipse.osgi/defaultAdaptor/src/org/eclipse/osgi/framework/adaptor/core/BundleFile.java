@@ -128,7 +128,7 @@ abstract public class BundleFile {
 
 		try {
 			//use the constant string for the protocol to prevent duplication
-			return new URL(Constants.OSGI_RESOURCE_URL_PROTOCOL, Long.toString(hostBundleID), index, path, new Handler(bundleEntry));
+			return SecureAction.getURL(Constants.OSGI_RESOURCE_URL_PROTOCOL, Long.toString(hostBundleID), index, path, new Handler(bundleEntry));
 		} catch (MalformedURLException e) {
 			return null;
 		}

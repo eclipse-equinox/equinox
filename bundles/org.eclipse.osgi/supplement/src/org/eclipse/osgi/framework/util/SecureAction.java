@@ -12,6 +12,7 @@
 package org.eclipse.osgi.framework.util;
 
 import java.io.*;
+import java.net.*;
 import java.security.*;
 import java.util.Properties;
 import java.util.zip.ZipFile;
@@ -173,6 +174,20 @@ public class SecureAction {
 			});
 		} catch (PrivilegedActionException e) {
 			throw (IOException) e.getException();
+		}
+	}
+
+	public static URL getURL(final String protocol, final String host, final int port, final String file, final URLStreamHandler handler) throws MalformedURLException {
+		if (System.getSecurityManager() == null)
+			return new URL(protocol, host, port, file, handler);
+		try {
+			return (URL) AccessController.doPrivileged(new PrivilegedExceptionAction() {
+				public Object run() throws MalformedURLException {
+					return new URL(protocol, host, port, file, handler);
+				}
+			});
+		} catch (PrivilegedActionException e) {
+			throw (MalformedURLException) e.getException();
 		}
 	}
 
