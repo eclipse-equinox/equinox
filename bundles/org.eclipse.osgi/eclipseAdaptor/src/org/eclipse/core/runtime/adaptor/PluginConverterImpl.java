@@ -16,11 +16,14 @@ import java.net.URL;
 import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+
+import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.internal.defaultadaptor.DevClassPathHelper;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.service.pluginconversion.PluginConverter;
+import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
+import org.osgi.framework.BundleException;
 
 public class PluginConverterImpl implements PluginConverter {
 	private BundleContext context;
@@ -28,17 +31,19 @@ public class PluginConverterImpl implements PluginConverter {
 	private IPluginInfo pluginInfo;
 	private File pluginManifestLocation;
 	private Dictionary generatedManifest;
+	private byte manifestType;
 	private static final String MANIFEST_VERSION = "Manifest-Version";
 	private static final String PLUGIN_PROPERTIES_FILENAME = "plugin";
 	private static PluginConverterImpl instance;
 	private static final String[] ARCH_LIST = {org.eclipse.osgi.service.environment.Constants.ARCH_PA_RISC, org.eclipse.osgi.service.environment.Constants.ARCH_PPC, org.eclipse.osgi.service.environment.Constants.ARCH_SPARC, org.eclipse.osgi.service.environment.Constants.ARCH_X86, org.eclipse.osgi.service.environment.Constants.ARCH_AMD64};
-	private static final String FRAGMENT_MANIFEST = "fragment.xml"; //$NON-NLS-1$
-	private static final String GENERATED_FROM = "Generated-from"; //$NON-NLS-1$
+	protected static final String FRAGMENT_MANIFEST = "fragment.xml"; //$NON-NLS-1$
+	protected static final String GENERATED_FROM = "Generated-from"; //$NON-NLS-1$
+	protected static final String MANIFEST_TYPE_ATTRIBUTE ="type"; //$NON-NLS-1$
 	private static final String[] OS_LIST = {org.eclipse.osgi.service.environment.Constants.OS_AIX, org.eclipse.osgi.service.environment.Constants.OS_HPUX, org.eclipse.osgi.service.environment.Constants.OS_LINUX, org.eclipse.osgi.service.environment.Constants.OS_MACOSX, org.eclipse.osgi.service.environment.Constants.OS_QNX, org.eclipse.osgi.service.environment.Constants.OS_SOLARIS, org.eclipse.osgi.service.environment.Constants.OS_WIN32};
 	protected static final String PI_RUNTIME = "org.eclipse.core.runtime"; //$NON-NLS-1$
 	protected static final String PI_BOOT = "org.eclipse.core.boot"; //$NON-NLS-1$
 	protected static final String PI_RUNTIME_COMPATIBILITY = "org.eclipse.core.runtime.compatibility"; //$NON-NLS-1$
-	private static final String PLUGIN_MANIFEST = "plugin.xml"; //$NON-NLS-1$
+	protected static final String PLUGIN_MANIFEST = "plugin.xml"; //$NON-NLS-1$
 	private static final String COMPATIBILITY_ACTIVATOR = "org.eclipse.core.internal.compatibility.PluginActivator"; //$NON-NLS-1$
 	private static final String[] WS_LIST = {org.eclipse.osgi.service.environment.Constants.WS_CARBON, org.eclipse.osgi.service.environment.Constants.WS_GTK, org.eclipse.osgi.service.environment.Constants.WS_MOTIF, org.eclipse.osgi.service.environment.Constants.WS_PHOTON, org.eclipse.osgi.service.environment.Constants.WS_WIN32};
 	public static PluginConverterImpl getDefault() {
@@ -57,6 +62,7 @@ public class PluginConverterImpl implements PluginConverter {
 		pluginInfo = null;
 		pluginManifestLocation = null;
 		generatedManifest = new Hashtable(10);
+		manifestType=EclipseBundleData.MANIFEST_TYPE_UNKNOWN;
 	}
 	private void fillPluginInfo(File pluginBaseLocation) {
 		pluginManifestLocation = pluginBaseLocation;
@@ -83,7 +89,7 @@ public class PluginConverterImpl implements PluginConverter {
 		}
 		try {
 			fillManifest(compatibilityManifest);
-			if (upToDate(bundleManifestLocation, pluginManifestLocation))
+			if (upToDate(bundleManifestLocation, pluginManifestLocation, manifestType))
 				return bundleManifestLocation;
 			writeManifest(bundleManifestLocation, generatedManifest, compatibilityManifest);
 		} catch (PluginConversionException e) {
@@ -134,6 +140,7 @@ public class PluginConverterImpl implements PluginConverter {
 		try {
 			if (baseLocation.getName().endsWith("jar")) { //$NON-NLS-1$
 				baseURL = new URL("jar:file:" + baseLocation.toString() + "!/"); //$NON-NLS-1$ //$NON-NLS-2$
+				manifestType |= EclipseBundleData.MANIFEST_TYPE_JAR;
 			} else {
 				baseURL = baseLocation.toURL();
 			}
@@ -143,6 +150,7 @@ public class PluginConverterImpl implements PluginConverter {
 		try {
 			xmlFileLocation = new URL(baseURL, PLUGIN_MANIFEST);
 			stream = xmlFileLocation.openStream();
+			manifestType |= EclipseBundleData.MANIFEST_TYPE_PLUGIN;
 			return xmlFileLocation;
 		} catch (MalformedURLException e) {
 			FrameworkLogEntry entry = new FrameworkLogEntry(EclipseAdaptor.FRAMEWORK_SYMBOLICNAME, e.getMessage(), 0, e.getCause(), null);
@@ -161,6 +169,7 @@ public class PluginConverterImpl implements PluginConverter {
 		try {
 			xmlFileLocation = new URL(baseURL, FRAGMENT_MANIFEST);
 			xmlFileLocation.openStream();
+			manifestType |= EclipseBundleData.MANIFEST_TYPE_FRAGMENT;
 			return xmlFileLocation;
 		} catch (MalformedURLException e) {
 			FrameworkLogEntry entry = new FrameworkLogEntry(EclipseAdaptor.FRAMEWORK_SYMBOLICNAME, e.getMessage(), 0, e.getCause(), null);
@@ -345,7 +354,9 @@ public class PluginConverterImpl implements PluginConverter {
 	}
 	private void generateTimestamp() {
 		// so it is easy to tell which ones are generated
-		generatedManifest.put(GENERATED_FROM, Long.toString(pluginManifestLocation.lastModified()));
+		generatedManifest.put(GENERATED_FROM, 
+				Long.toString(getTimeStamp(pluginManifestLocation,manifestType)) + 
+				";" + MANIFEST_TYPE_ATTRIBUTE + "=" + manifestType);
 	}
 	private void generateEclipseHeaders() {
 		generatedManifest.put(EclipseAdaptorConstants.ECLIPSE_AUTOSTART, "true");
@@ -501,7 +512,7 @@ public class PluginConverterImpl implements PluginConverter {
 				}
 		}
 	}
-	public static boolean upToDate(File generationLocation, File pluginLocation) {
+	public static boolean upToDate(File generationLocation, File pluginLocation, byte manifestType) {
 		if (!generationLocation.isFile())
 			return false;
 		String secondLine = null;
@@ -524,14 +535,35 @@ public class PluginConverterImpl implements PluginConverter {
 		String tag = GENERATED_FROM + ": "; //$NON-NLS-1$
 		if (secondLine == null || !secondLine.startsWith(tag))
 			return false;
-		String timestampStr = secondLine.substring(tag.length() - 1);
+
+		secondLine = secondLine.substring(tag.length());
+		ManifestElement generatedFrom;
 		try {
-			return Long.parseLong(timestampStr.trim()) == pluginLocation.lastModified();
+			generatedFrom = ManifestElement.parseHeader(PluginConverterImpl.GENERATED_FROM,secondLine)[0];
+		} catch (BundleException be) {
+			return false;
+		}
+		String timestampStr = generatedFrom.getValue();
+		try {
+			return Long.parseLong(timestampStr.trim()) == getTimeStamp(pluginLocation,manifestType);
 		} catch (NumberFormatException nfe) {
 			// not a big deal - just a bogus existing manifest that will be ignored
 		}
 		return false;
 	}
+
+	public static long getTimeStamp(File pluginLocation, byte manifestType) {
+		if ((manifestType & EclipseBundleData.MANIFEST_TYPE_JAR) != 0)
+			return pluginLocation.lastModified();
+		else if ((manifestType & EclipseBundleData.MANIFEST_TYPE_PLUGIN) != 0)
+			return new File(pluginLocation,PLUGIN_MANIFEST).lastModified();
+		else if ((manifestType & EclipseBundleData.MANIFEST_TYPE_FRAGMENT) != 0)
+			return new File(pluginLocation,FRAGMENT_MANIFEST).lastModified();
+		else if ((manifestType & EclipseBundleData.MANIFEST_TYPE_BUNDLE) != 0)
+			return new File(pluginLocation,Constants.OSGI_BUNDLE_MANIFEST).lastModified();
+		return -1;
+	}
+
 	private void writeEntry(String key, String value) throws IOException {
 		if (value != null && value.length() > 0) {
 			out.write(key + ": " + value); //$NON-NLS-1$

@@ -14,7 +14,6 @@ import java.io.*;
 import java.net.URL;
 import java.util.*;
 import org.eclipse.osgi.framework.adaptor.core.BundleEntry;
-import org.eclipse.osgi.framework.adaptor.core.BundleFile;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.internal.defaultadaptor.DefaultAdaptor;
 import org.eclipse.osgi.framework.internal.defaultadaptor.DefaultBundleData;
@@ -24,11 +23,17 @@ import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.BundleException;
 
 public class EclipseBundleData extends DefaultBundleData {
-
+	static final byte MANIFEST_TYPE_UNKNOWN  = 0x00;
+	static final byte MANIFEST_TYPE_BUNDLE   = 0x01;
+	static final byte MANIFEST_TYPE_PLUGIN   = 0x02;
+	static final byte MANIFEST_TYPE_FRAGMENT = 0x04;
+	static final byte MANIFEST_TYPE_JAR      = 0x08;
+	
 	private static String[] libraryVariants = null;
 
 	/** data to detect modification made in the manifest */
 	private long manifestTimeStamp = 0;
+	private byte manifestType = MANIFEST_TYPE_UNKNOWN;
 	
 		// URL protocol designations
 	public static final String PROTOCOL = "platform"; //$NON-NLS-1$
@@ -71,16 +76,15 @@ public class EclipseBundleData extends DefaultBundleData {
 		setGenerationDir(new File(getBundleStoreDir(), String.valueOf(getGeneration())));
 		setBaseFile(isReference() ? new File(getFileName()) : new File(createGenerationDir(), getFileName()));
 		createBaseBundleFile();
-		if (! checkManifestTimeStamp(baseBundleFile))
+		if (! checkManifestTimeStamp())
 			throw new IOException();
 	}
 
-	private boolean checkManifestTimeStamp(BundleFile bundlefile) {
-		if (!"true".equalsIgnoreCase(PROP_CHECK_CONFIG)) //$NON-NLS-1$
+	private boolean checkManifestTimeStamp() {
+		if (!"true".equalsIgnoreCase(System.getProperty(PROP_CHECK_CONFIG))) //$NON-NLS-1$
 			return true;
 
-		BundleEntry bundleManifestEntry = bundlefile.getEntry("."); //$NON-NLS-1$
-		return bundleManifestEntry != null && bundleManifestEntry.getTime() == getManifestTimeStamp();
+		return PluginConverterImpl.getTimeStamp(getBaseFile(),getManifestType()) == getManifestTimeStamp();
 	}
 
 	/**
@@ -159,7 +163,8 @@ public class EclipseBundleData extends DefaultBundleData {
 	public synchronized Dictionary loadManifest() throws BundleException {		
 		URL url = getEntry(Constants.OSGI_BUNDLE_MANIFEST);
 		if (url != null) {
-			manifestTimeStamp = getBaseBundleFile().getEntry("").getTime();
+			manifestTimeStamp = getBaseBundleFile().getEntry(Constants.OSGI_BUNDLE_MANIFEST).getTime();
+			manifestType = MANIFEST_TYPE_BUNDLE;
 			return loadManifestFrom(url);
 		}
 		Dictionary result = generateManifest(null);		
@@ -173,7 +178,7 @@ public class EclipseBundleData extends DefaultBundleData {
 		if (getSymbolicName() != null) {
 			Version version = getVersion();
 			File currentFile = new File(cacheLocation, getSymbolicName() + '_' + version.toString() + ".MF");
-			if (PluginConverterImpl.upToDate(currentFile,getBaseFile()))
+			if (PluginConverterImpl.upToDate(currentFile,getBaseFile(),manifestType))
 				try {
 					return Headers.parseManifest(new FileInputStream(currentFile));
 				} catch (FileNotFoundException e) {
@@ -183,10 +188,13 @@ public class EclipseBundleData extends DefaultBundleData {
 
 		PluginConverterImpl converter = PluginConverterImpl.getDefault();
 
-		setManifestTimeStamp(getBaseFile().lastModified());
 		Dictionary generatedManifest = converter.convertManifest(getBaseFile(), true);
 		if (generatedManifest == null)
 			return null;
+
+		ManifestElement generatedFrom = ManifestElement.parseHeader(PluginConverterImpl.GENERATED_FROM,(String)generatedManifest.get(PluginConverterImpl.GENERATED_FROM))[0];
+		setManifestTimeStamp(Long.parseLong(generatedFrom.getValue()));
+		setManifestType(Byte.parseByte(generatedFrom.getAttribute(PluginConverterImpl.MANIFEST_TYPE_ATTRIBUTE)));
 
 		//merge the original manifest with the generated one
 		if (originalManifest != null) {
@@ -246,6 +254,12 @@ public class EclipseBundleData extends DefaultBundleData {
 	}
 	public void setManifestTimeStamp(long stamp) {
 		manifestTimeStamp = stamp;
+	}
+	public byte getManifestType() {
+		return manifestType;
+	}
+	public void setManifestType(byte manifestType) {
+		this.manifestType = manifestType;
 	}
 	public void setAutoStart(String value) {
 		autoStart = value;
