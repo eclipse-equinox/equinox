@@ -18,8 +18,8 @@ import org.eclipse.osgi.framework.internal.defaultadaptor.DefaultLog;
 
 public class EclipseLog extends DefaultLog {
 	private static final String PASSWORD = "-password"; //$NON-NLS-1$	
-	public EclipseLog(File logFile, boolean append) {
-		super(logFile, append);
+	public EclipseLog(File logFile) {
+		super(logFile);
 	}
 	public EclipseLog(Writer logWriter) {
 		super(logWriter);

@@ -48,8 +48,6 @@ public class DefaultLog implements FrameworkLog {
 	 */
 	protected Writer writer;
 
-	protected boolean append = false;
-
 	/**
 	 * The default constructor for DefaultLog.  Constructs a DefaultLog
 	 * that uses System.err to log messages to.
@@ -65,7 +63,6 @@ public class DefaultLog implements FrameworkLog {
 	 * to be used.
 	 */
 	public DefaultLog(Writer writer) {
-		this.append = false;
 		if (writer == null)
 			// log to System.err by default
 			this.writer = logForStream(System.err);
@@ -75,15 +72,11 @@ public class DefaultLog implements FrameworkLog {
 
 	/**
 	 * Constructs a DefaultLog that uses the specified File to create
-	 * a FileWriter to log messages to.
+	 * a FileWriter to log messages to.  Log messages will be appended to
+	 * the specified File.
 	 * @param outFile The File to log messages to.
-	 * @param append If set to true then the contents of outFile will be
-	 * appended to.
-	 * @throws IOException if any problem occurs while constructing a
-	 * FileWriter from the outFile.
 	 */
-	public DefaultLog(File outFile, boolean append) {
-		this.append = true;
+	public DefaultLog(File outFile) {
 		this.outFile = outFile;
 		this.writer = null;
 	}
@@ -110,7 +103,7 @@ public class DefaultLog implements FrameworkLog {
 				try {
 					writer = logForStream(
 							new FileOutputStream(outFile.getAbsolutePath(),
-									append)); //$NON-NLS-1$
+									true));
 				} catch (IOException e) {
 					writer = logForStream(System.err);
 				}

@@ -76,7 +76,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		String configArea = System.getProperty(EclipseStarter.PROP_CONFIG_AREA);
 		if (configArea != null) {
 			File logFile = new File(configArea, Long.toString(System.currentTimeMillis()) + F_LOG);
-			frameworkLog = new EclipseLog(logFile,false);
+			frameworkLog = new EclipseLog(logFile);
 		}
 		else {
 			frameworkLog = new EclipseLog();
