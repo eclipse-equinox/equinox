@@ -115,7 +115,6 @@ public interface FrameworkAdaptor {
 	 * (URLConnections.getInputStream) must be closed by the
 	 * <code>BundleOperation</code> object.
 	 * @return BundleOperation object to be used to complete the install.
-	 * @throws BundleException if the install preparation fails.
 	 */
 	public BundleOperation installBundle(String location, URLConnection source);
 
@@ -135,7 +134,6 @@ public interface FrameworkAdaptor {
 	 * (URLConnections.getInputStream) must be closed by the
 	 * <code>BundleOperation</code> object.
 	 * @return BundleOperation object to be used to complete the update.
-	 * @throws BundleException if the update preparation fails.
 	 */
 	public BundleOperation updateBundle(BundleData bundledata, URLConnection source);
 
@@ -205,10 +203,10 @@ public interface FrameworkAdaptor {
 	 * shutdown is started.  This gives FrameworkAdaptors a chance to
 	 * perform actions before the framework start level is decremented and
 	 * all the bundles are stopped.  This method will get called before the
-	 * {@link #frameworkStop(BundleContext)} method
-	 *
+	 * {@link #frameworkStop(BundleContext)} method.
+	 * @param context The System Bundle's BundleContext.
 	 */
-	public void frameworkStopping();
+	public void frameworkStopping(BundleContext context);
 
 	/**
 	 * Gets the value for Export-Package for packages that a FrameworkAdaptor is exporting

@@ -474,8 +474,8 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		return context;
 	}
 
-	public void frameworkStopping() {
-		super.frameworkStopping();
+	public void frameworkStopping(BundleContext context) {
+		super.frameworkStopping(context);
 		stopping = true;
 		new BundleStopper().stopBundles();
 	}

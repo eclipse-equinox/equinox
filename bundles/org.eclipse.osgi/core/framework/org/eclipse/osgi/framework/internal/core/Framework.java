@@ -448,7 +448,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 		}
 		/* call the FrameworkAdaptor.frameworkStopping method first */
 		try {
-			adaptor.frameworkStopping();
+			adaptor.frameworkStopping(systemBundle.getContext());
 		} catch (Throwable t) {
 			publishFrameworkEvent(FrameworkEvent.ERROR, systemBundle, t);
 		}
@@ -831,19 +831,16 @@ public class Framework implements EventDispatcher, EventPublisher {
 			}
 		}
 		switch (matches) {
-			case 0 :
-				{
-					return noMatches(optional);
-				}
-			case 1 :
-				{
-					return bundleNativeCode[index].getPaths();
-				}
-			default :
-				{
-					/* continue with next pass */
-					break;
-				}
+			case 0 : {
+				return noMatches(optional);
+			}
+			case 1 : {
+				return bundleNativeCode[index].getPaths();
+			}
+			default : {
+				/* continue with next pass */
+				break;
+			}
 		}
 		/* Pass 2: perform osversion matching */
 		Version osversion;
@@ -871,26 +868,23 @@ public class Framework implements EventDispatcher, EventPublisher {
 			}
 		}
 		switch (matches) {
-			case 0 :
-				{
-					return noMatches(optional);
-				}
-			case 1 :
-				{
-					return bundleNativeCode[index].getPaths();
-				}
-			default :
-				{
-					/* discard all but the highest result */
-					for (int i = 0; i < elements.length; i++) {
-						Version result = bestVersion[i];
-						if (result.compareTo(maxVersion) < 0) {
-							score[i] = 0;
-						}
+			case 0 : {
+				return noMatches(optional);
+			}
+			case 1 : {
+				return bundleNativeCode[index].getPaths();
+			}
+			default : {
+				/* discard all but the highest result */
+				for (int i = 0; i < elements.length; i++) {
+					Version result = bestVersion[i];
+					if (result.compareTo(maxVersion) < 0) {
+						score[i] = 0;
 					}
-					/* continue with next pass */
-					break;
 				}
+				/* continue with next pass */
+				break;
+			}
 		}
 		/* Pass 3: perform language matching */
 		String language = getProperty(Constants.FRAMEWORK_LANGUAGE);
@@ -912,14 +906,12 @@ public class Framework implements EventDispatcher, EventPublisher {
 			}
 		}
 		switch (matches) {
-			case 0 :
-				{
-					return noMatches(optional);
-				}
-			default :
-				{
-					return bundleNativeCode[index].getPaths();
-				}
+			case 0 : {
+				return noMatches(optional);
+			}
+			default : {
+				return bundleNativeCode[index].getPaths();
+			}
 		}
 	}
 
@@ -1463,26 +1455,22 @@ public class Framework implements EventDispatcher, EventPublisher {
 			if (context.isValid()) /* if context still valid */{
 				ListenerQueue queue = (ListenerQueue) object;
 				switch (action) {
-					case BUNDLEEVENT :
-						{
-							queue.queueListeners(context.bundleEvent, context);
-							break;
-						}
-					case BUNDLEEVENTSYNC :
-						{
-							queue.queueListeners(context.bundleEventSync, context);
-							break;
-						}
-					case SERVICEEVENT :
-						{
-							queue.queueListeners(context.serviceEvent, context);
-							break;
-						}
-					case FRAMEWORKEVENT :
-						{
-							queue.queueListeners(context.frameworkEvent, context);
-							break;
-						}
+					case BUNDLEEVENT : {
+						queue.queueListeners(context.bundleEvent, context);
+						break;
+					}
+					case BUNDLEEVENTSYNC : {
+						queue.queueListeners(context.bundleEventSync, context);
+						break;
+					}
+					case SERVICEEVENT : {
+						queue.queueListeners(context.serviceEvent, context);
+						break;
+					}
+					case FRAMEWORKEVENT : {
+						queue.queueListeners(context.frameworkEvent, context);
+						break;
+					}
 				}
 			}
 		} catch (Throwable t) {

@@ -129,9 +129,9 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 	}
 
 	/**
-	 * @see org.eclipse.osgi.framework.adaptor.FrameworkAdaptor#frameworkStopping()
+	 * @see org.eclipse.osgi.framework.adaptor.FrameworkAdaptor#frameworkStopping(BundleContext)
 	 */
-	public void frameworkStopping() {
+	public void frameworkStopping(BundleContext context) {
 	}
 
 	/**
