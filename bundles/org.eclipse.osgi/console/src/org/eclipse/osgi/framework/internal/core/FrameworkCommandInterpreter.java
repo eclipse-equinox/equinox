@@ -17,7 +17,6 @@ import java.net.URL;
 import java.util.*;
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
-;
 
 /**
  * This class knows how to parse and execute the command line arguments to the FrameworkConsole.
