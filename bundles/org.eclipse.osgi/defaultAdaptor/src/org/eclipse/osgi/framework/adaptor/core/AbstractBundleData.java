@@ -23,6 +23,7 @@ import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.internal.protocol.bundleentry.Handler;
 import org.eclipse.osgi.framework.util.Headers;
 import org.eclipse.osgi.service.resolver.Version;
+import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 
@@ -227,6 +228,22 @@ public abstract class AbstractBundleData implements BundleData {
 		}
 		url.append(path);
 		return url.toString();
+	}
+
+	/* 
+	 * Convenience method that retrieves the simbolic name string from the header.
+	 * Note: clients may want to cache the returned value.
+	 */
+	public static String parseSymbolicName(Dictionary manifest) {
+		String symbolicNameEntry = (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME);
+		if (symbolicNameEntry == null)
+			return null;
+		try {
+			return ManifestElement.parseHeader(Constants.BUNDLE_SYMBOLICNAME, symbolicNameEntry)[0].getValue();
+		} catch (BundleException e) {
+			// here is not the place to validate a manifest			
+		}
+		return null;
 	}
 
 	///////////////////// Begin Meta Data Accessor Methods ////////////////////

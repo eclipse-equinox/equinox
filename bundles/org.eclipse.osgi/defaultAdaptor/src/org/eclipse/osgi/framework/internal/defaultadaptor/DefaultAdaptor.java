@@ -25,7 +25,26 @@ import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.*;
 
 /**
- *  //TODO Add comment here
+ * The DefaultAdaptor for the Framework.  This adaptor uses
+ * root bundle store directory on the local filesystem to 
+ * store bundle files and bundle data.  
+ * <p>
+ * Each bundle installed in the Framework will have a unique 
+ * directory using the bundle ID as the name.  Each bundles
+ * unique directory has a generational directory a data directory 
+ * and a metadata file.  
+ * <p>
+ * The generational directory is used to store the different 
+ * versions of the bundle that have been installed.  Each time
+ * the bundle is updated a new generational directory will be
+ * created.
+ * <p>
+ * The data directory is used to create data file objects requested
+ * by the bundle.  This directory will not change when updating
+ * a bundle
+ * <p>
+ * The metadata file contains persistent data about the bundle
+ * (e.g. startlevel, persistent start state, etc)
  */
 public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 
@@ -262,41 +281,41 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 		}
 
 		String list[] = directory.list();
+		if (list == null)
+			return;
 
-		if (list != null) {
-			int len = list.length;
+		int len = list.length;
 
-			for (int i = 0; i < len; i++) {
-				if (DATA_DIR_NAME.equals(list[i])) {
-					continue; /* do not examine the bundles data dir. */
-				}
+		for (int i = 0; i < len; i++) {
+			if (DATA_DIR_NAME.equals(list[i])) {
+				continue; /* do not examine the bundles data dir. */
+			}
 
-				File target = new File(directory, list[i]);
+			File target = new File(directory, list[i]);
 
-				/* if the file is a directory */
-				if (target.isDirectory()) { //TODO Simplify the nesting.
-					File delete = new File(target, ".delete");
+			/* if the file is a directory */
+			if (!target.isDirectory())
+				continue;
+			File delete = new File(target, ".delete");
 
-					/* and the directory is marked for delete */
-					if (delete.exists()) {
-						/* if rm fails to delete the directory *
-						 * and .delete was removed
-						 */
-						if (!rm(target) && !delete.exists()) {
-							try {
-								/* recreate .delete */
-								FileOutputStream out = new FileOutputStream(delete);
-								out.close();
-							} catch (IOException e) {
-								if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-									Debug.println("Unable to write " + delete.getPath() + ": " + e.getMessage());
-								}
-							}
+			/* and the directory is marked for delete */
+			if (delete.exists()) {
+				/* if rm fails to delete the directory *
+				 * and .delete was removed
+				 */
+				if (!rm(target) && !delete.exists()) {
+					try {
+						/* recreate .delete */
+						FileOutputStream out = new FileOutputStream(delete);
+						out.close();
+					} catch (IOException e) {
+						if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+							Debug.println("Unable to write " + delete.getPath() + ": " + e.getMessage());
 						}
-					} else {
-						compact(target); /* descend into directory */
 					}
 				}
+			} else {
+				compact(target); /* descend into directory */
 			}
 		}
 	}
@@ -348,7 +367,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 				if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 					Debug.println("Unable to open Bundle[" + list[i] + "]: " + e.getMessage());
 					Debug.printStackTrace(e);
-				}				
+				}
 			} catch (IOException e) {
 				if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 					Debug.println("Unable to open Bundle[" + list[i] + "]: " + e.getMessage());
@@ -542,7 +561,6 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 							}
 							// check to make sure we are not just trying to update to the same
 							// directory reference.  This would be a no-op.
-							//TODO Unless the jars and manifest have been updated on disk
 							String path = reference.getPath();
 							if (path.equals(data.getFileName())) {
 								throw new BundleException(AdaptorMsg.formatter.getString("ADAPTOR_SAME_REF_UPDATE", reference)); //$NON-NLS-1$

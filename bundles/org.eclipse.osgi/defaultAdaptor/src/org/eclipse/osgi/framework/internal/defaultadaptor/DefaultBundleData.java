@@ -215,13 +215,7 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 			throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_ERROR_GETTING_MANIFEST", getLocation())); //$NON-NLS-1$
 		}
 		setVersion(new Version((String) manifest.get(Constants.BUNDLE_VERSION)));
-		String symbolicNameHeader = (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME);
-		if (symbolicNameHeader != null)
-			try {
-				setSymbolicName(ManifestElement.parseHeader(Constants.BUNDLE_SYMBOLICNAME, symbolicNameHeader)[0].getValue());
-			} catch (BundleException e) {
-				// not doing validation here - just ignore
-			}
+		setSymbolicName(AbstractBundleData.parseSymbolicName(manifest));
 		setClassPath((String) manifest.get(Constants.BUNDLE_CLASSPATH));
 		setActivator((String) manifest.get(Constants.BUNDLE_ACTIVATOR));
 		String host = (String) manifest.get(Constants.FRAGMENT_HOST);
