@@ -29,10 +29,11 @@ public class StreamHandlerFactory implements java.net.URLStreamHandlerFactory {
 	/** internal adaptor object */
 	protected FrameworkAdaptor adaptor;
 
-	//TODO maybe handlerTracker?
-	private ServiceTracker urlStreamHandlerTracker;
-	// TODO use ALL_CAPS for constants
-	protected static final String urlStreamHandlerClazz = "org.osgi.service.url.URLStreamHandlerService";
+	private ServiceTracker handlerTracker;
+
+	protected static final String URLSTREAMHANDLERCLASS = "org.osgi.service.url.URLStreamHandlerService"; //$NON-NLS-1$
+	protected static final String PROTOCOL_HANDLER_PKGS= "java.protocol.handler.pkgs"; //$NON-NLS-1$
+	protected static final String INTERNAL_PROTOCOL_HANDLER_PKG = "org.eclipse.osgi.framework.internal.protocol."; //$NON-NLS-1$
 
 	private Hashtable proxies;
 
@@ -46,8 +47,8 @@ public class StreamHandlerFactory implements java.net.URLStreamHandlerFactory {
 		this.adaptor = adaptor;
 
 		proxies = new Hashtable(15);
-		urlStreamHandlerTracker = new ServiceTracker(context, urlStreamHandlerClazz, null);
-		urlStreamHandlerTracker.open();
+		handlerTracker = new ServiceTracker(context, URLSTREAMHANDLERCLASS, null);
+		handlerTracker.open();
 	}
 
 	/**
@@ -61,17 +62,16 @@ public class StreamHandlerFactory implements java.net.URLStreamHandlerFactory {
 	public URLStreamHandler createURLStreamHandler(String protocol) {
 
 		//first check for built in handlers
-		//TODO use a constant for the property name
-		String builtInHandlers = System.getProperty("java.protocol.handler.pkgs");
+		String builtInHandlers = System.getProperty(PROTOCOL_HANDLER_PKGS);
 		Class clazz = null;
 		if (builtInHandlers != null) {
-			StringTokenizer tok = new StringTokenizer(builtInHandlers, "|");
+			StringTokenizer tok = new StringTokenizer(builtInHandlers, "|"); //$NON-NLS-1$
 			while (tok.hasMoreElements()) {
 				StringBuffer name = new StringBuffer();
 				name.append(tok.nextToken());
-				name.append(".");
+				name.append("."); //$NON-NLS-1$
 				name.append(protocol);
-				name.append(".Handler");
+				name.append(".Handler"); //$NON-NLS-1$
 				try {
 					clazz = Class.forName(name.toString());
 					if (clazz != null) {
@@ -83,8 +83,7 @@ public class StreamHandlerFactory implements java.net.URLStreamHandlerFactory {
 		}
 
 		//internal protocol handlers
-		//TODO use constants for the class base package and name
-		String name = "org.eclipse.osgi.framework.internal.protocol." + protocol + ".Handler";
+		String name = INTERNAL_PROTOCOL_HANDLER_PKG + protocol + ".Handler"; //$NON-NLS-1$
 
 		try {
 			clazz = Class.forName(name);
@@ -100,7 +99,7 @@ public class StreamHandlerFactory implements java.net.URLStreamHandlerFactory {
 			}
 			//TODO avoid deep nesting of control structures - return early
 			//look through the service registry for a URLStramHandler registered for this protocol
-			org.osgi.framework.ServiceReference[] serviceReferences = urlStreamHandlerTracker.getServiceReferences();
+			org.osgi.framework.ServiceReference[] serviceReferences = handlerTracker.getServiceReferences();
 			if (serviceReferences != null) {
 				for (int i = 0; i < serviceReferences.length; i++) {
 					String[] protocols = (String[]) (serviceReferences[i].getProperty(URLConstants.URL_HANDLER_PROTOCOL));

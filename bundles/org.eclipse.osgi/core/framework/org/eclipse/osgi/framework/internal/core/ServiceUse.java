@@ -72,7 +72,6 @@ public class ServiceUse {
 	 * for the service is decremented by one.
 	 * When a bundle's use count for a service
 	 * drops to zero, the bundle should no longer use the service.
-	 * See {@link #getBundle()} for a definition of context bundle.
 	 *
 	 * <p>The following steps are followed to get the service object:
 	 * <ol>
@@ -169,7 +168,6 @@ public class ServiceUse {
 	 * If the context bundle's use count for the service is zero, this method
 	 * returns <code>false</code>. Otherwise, the context bundle's use count for the
 	 * service is decremented by one.
-	 * See {@link #getBundle()} for a definition of context bundle.
 	 *
 	 * <p>The service's service object
 	 * should no longer be used and all references to it should be destroyed

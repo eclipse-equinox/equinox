@@ -1453,7 +1453,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 		// just a sanity check - this would be an inconsistency between the
 		// framework and the state
 		if (bundleDescription.isResolved()) {
-			throw new IllegalStateException("bundle *is* resolved");
+			throw new IllegalStateException(Msg.formatter.getString("BUNDLE_UNRESOLVED_STATE_CONFLICT")); //$NON-NLS-1$
 		}
 		VersionConstraint[] unsatisfied = framework.adaptor.getPlatformAdmin().getStateHelper().getUnsatisfiedConstraints(bundleDescription);
 		if (unsatisfied.length == 0) {

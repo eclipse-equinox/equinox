@@ -26,11 +26,11 @@ import org.osgi.util.tracker.ServiceTracker;
  * proxy for that content handler.
  */
 public class ContentHandlerFactory implements java.net.ContentHandlerFactory {
-
 	private ServiceTracker contentHandlerTracker;
 	private BundleContext context;
 
-	private static final String contentHandlerClazz = "java.net.ContentHandler";
+	private static final String contentHandlerClazz = "java.net.ContentHandler"; //$NON-NLS-1$
+	private static final String CONTENT_HANDLER_PKGS= "java.content.handler.pkgs"; //$NON-NLS-1$
 
 	private Hashtable proxies;
 
@@ -51,8 +51,7 @@ public class ContentHandlerFactory implements java.net.ContentHandlerFactory {
 	public ContentHandler createContentHandler(String contentType) {
 		//first, we check to see if there exists a built in content handler for
 		//this content type.  we can not overwrite built in ContentHandlers
-		//TODO use constant for property name
-		String builtInHandlers = System.getProperty("java.content.handler.pkgs");
+		String builtInHandlers = System.getProperty(CONTENT_HANDLER_PKGS);
 		Class clazz = null;
 		if (builtInHandlers != null) {
 			//replace '/' with a '.' and all characters not allowed in a java class name
@@ -62,11 +61,11 @@ public class ContentHandlerFactory implements java.net.ContentHandlerFactory {
 			String convertedContentType = contentType.replace('.', '_');
 			convertedContentType = convertedContentType.replace('/', '.');
 			convertedContentType = convertedContentType.replace('-', '_');
-			StringTokenizer tok = new StringTokenizer(builtInHandlers, "|");
+			StringTokenizer tok = new StringTokenizer(builtInHandlers, "|"); //$NON-NLS-1$
 			while (tok.hasMoreElements()) {
 				StringBuffer name = new StringBuffer();
 				name.append(tok.nextToken());
-				name.append(".");
+				name.append("."); //$NON-NLS-1$
 				name.append(convertedContentType);
 				try {
 					clazz = Class.forName(name.toString());

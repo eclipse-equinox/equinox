@@ -61,7 +61,7 @@ public class URLStreamHandlerProxy extends URLStreamHandler implements ServiceTr
 		this.realHandlerService = (URLStreamHandlerService) context.getService(reference);
 		this.urlStreamServiceReference = reference;
 
-		urlStreamHandlerServiceTracker = new ServiceTracker(context, StreamHandlerFactory.urlStreamHandlerClazz, this);
+		urlStreamHandlerServiceTracker = new ServiceTracker(context, StreamHandlerFactory.URLSTREAMHANDLERCLASS, this);
 		urlStreamHandlerServiceTracker.open();
 	}
 
@@ -141,10 +141,6 @@ public class URLStreamHandlerProxy extends URLStreamHandler implements ServiceTr
 		super.setURL(u, protocol, host, port, authority, userInfo, file, query, ref);
 	}
 
-	/**
-	 * @see java.net.URLStreamHandler#setURL(URL, String, String, int, String, String)
-	 * @deprecated
-	 */
 
 	public void setURL(URL url, String protocol, String host, int port, String file, String ref) {
 

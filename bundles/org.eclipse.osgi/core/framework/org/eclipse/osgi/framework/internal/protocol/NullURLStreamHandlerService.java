@@ -27,80 +27,46 @@ import org.osgi.service.url.URLStreamHandlerSetter;
 
 public class NullURLStreamHandlerService implements URLStreamHandlerService {
 
-	/**
-	 * @see java.net.URLStreamHandler#openConnection(URL)
-	 */
 	public URLConnection openConnection(URL u) throws IOException {
 		throw new MalformedURLException();
 	}
 
-	/**
-	 * @see java.net.URLStreamHandler#equals(URL, URL)
-	 */
 	public boolean equals(URL url1, URL url2) {
 		throw new IllegalStateException();
 	}
 
-	/**
-	 * @see java.net.URLStreamHandler#getDefaultPort()
-	 */
 	public int getDefaultPort() {
 		throw new IllegalStateException();
 	}
 
-	/**
-	 * @see java.net.URLStreamHandler#getHostAddress(URL)
-	 */
 	public InetAddress getHostAddress(URL url) {
 		throw new IllegalStateException();
 	}
 
-	/**
-	 * @see java.net.URLStreamHandler#hashCode(URL)
-	 */
 	public int hashCode(URL url) {
 		throw new IllegalStateException();
 	}
 
-	/**
-	 * @see java.net.URLStreamHandler#hostsEqual(URL, URL)
-	 */
 	public boolean hostsEqual(URL url1, URL url2) {
 		throw new IllegalStateException();
 	}
 
-	/**
-	 * @see java.net.URLStreamHandler#sameFile(URL, URL)
-	 */
 	public boolean sameFile(URL url1, URL url2) {
 		throw new IllegalStateException();
 	}
 
-	/**
-	 * @see java.net.URLStreamHandler#setURL(URL, String, String, int, String, String, String, String, String)
-	 */
 	public void setURL(URL u, String protocol, String host, int port, String authority, String userInfo, String file, String query, String ref) {
 		throw new IllegalStateException();
 	}
 
-	/**
-	 * @see java.net.URLStreamHandler#setURL(URL, String, String, int, String, String)
-	 * @deprecated
-	 */
 	public void setURL(URL u, String protocol, String host, int port, String file, String ref) {
 		throw new IllegalStateException();
 	}
 
-	/**
-	 * @see java.net.URLStreamHandler#toExternalForm(URL)
-	 */
 	public String toExternalForm(URL url) {
 		throw new IllegalStateException();
 	}
 
-	/**
-	 * @see org.osgi.service.url.URLStreamHandlerService#parseURL(URLStreamHandlerSetter, URL, String, int, int)
-	 */
 	public void parseURL(URLStreamHandlerSetter realHandler, URL u, String spec, int start, int limit) {
 		throw new IllegalStateException();
 	}

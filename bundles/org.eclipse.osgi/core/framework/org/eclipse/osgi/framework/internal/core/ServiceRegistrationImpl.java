@@ -20,7 +20,7 @@ import org.osgi.framework.*;
  * A registered service.
  *
  * The framework returns a ServiceRegistration object when a
- * {@link BundleContextImpl#registerService BundleContext.registerService}
+ * {@link BundleContextImpl#registerService(String, Object, Dictionary) BundleContext.registerService}
  * method is successful. This object is for the private use of
  * the registering bundle and should not be shared with other bundles.
  * <p>The ServiceRegistration object may be used to update the properties
@@ -310,7 +310,6 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
 	 * determine if the service has been unregistered.
 	 *
 	 * @return The bundle which registered the service.
-	 * @see BundleContextImpl.registerService
 	 */
 	protected AbstractBundle getBundle() {
 		if (reference == null) {
