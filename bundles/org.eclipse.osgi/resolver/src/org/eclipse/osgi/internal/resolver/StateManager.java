@@ -88,8 +88,11 @@ public class StateManager implements PlatformAdmin {
 	public StateImpl getSystemState() {
 		return systemState;
 	}
+	public State getState(boolean mutable) {
+		return mutable ? factory.createState(systemState) : new ReadOnlyState(systemState);
+	}
 	public State getState() {
-		return factory.createState(systemState);
+		return getState(true);
 	}
 	public StateObjectFactory getFactory() {
 		return factory;

@@ -23,11 +23,27 @@ import org.osgi.framework.BundleException;
 public interface PlatformAdmin {
 
 	/** 
-	 * Returns a state representing the current system.  The returned state 
+	 * Returns a mutable state representing the current system.  The returned state 
 	 * will not be associated with any resolver.
+	 * <p>
+	 * This is a convenience method, fully equivalent to 
+	 * <code>getState(true)</code>.
+	 * </p> 
 	 * @return a state representing the current framework.
 	 */
 	public State getState();
+	
+	/** 
+	 * Returns a state representing the current system. If there is need to make
+	 * changes to the returned state, a mutable state must be requested. 
+	 * Otherwise, an immutable state should be requested. In this case, invoking 
+	 * any of the operations that could cause the state to be changed will throw 
+	 * an <code>java.lang.UnsupportedOperationException</code>. The returned 
+	 * state will not be associated with any resolver. 
+	 * @param mutable whether the returned state should mutable
+	 * @return a state representing the current framework.
+	 */
+	public State getState(boolean mutable);	
 	
 	/**
 	 * Commit the differences between the current state and the given state.
