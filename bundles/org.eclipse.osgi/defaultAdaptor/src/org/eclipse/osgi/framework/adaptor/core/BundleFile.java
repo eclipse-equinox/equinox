@@ -247,7 +247,7 @@ abstract public class BundleFile {
 		}
 
 		public boolean containsDir(String dir) {
-			if (checkedOpen())
+			if (!checkedOpen())
 				return false;
 			if (dir == null)
 				return false;
