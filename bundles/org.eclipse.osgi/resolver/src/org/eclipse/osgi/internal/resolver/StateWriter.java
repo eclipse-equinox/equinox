@@ -79,6 +79,8 @@ class StateWriter {
 	public void saveState(StateImpl state, File stateFile, File lazyFile) throws IOException {
 		DataOutputStream outLazy = null;
 		DataOutputStream outState = null;
+		FileOutputStream fosLazy = null;
+		FileOutputStream fosState = null;
 		try {
 			// first clear the System exports because we don't want to persist them in the system
 			// bundles bundle description data
@@ -90,11 +92,13 @@ class StateWriter {
 			for (int i = 0; i < bundles.length; i++)
 				addToObjectTable(bundles[i]);
 			// first write the lazy data to get the offsets and sizes to the lazy data
-			outLazy = new DataOutputStream(new FileOutputStream(lazyFile));
+			fosLazy = new FileOutputStream(lazyFile);
+			outLazy = new DataOutputStream(fosLazy);
 			for (int i = 0; i < bundles.length; i++)
 				writeBundleDescriptionLazyData(bundles[i], outLazy);
 			// now write the state data
-			outState = new DataOutputStream(new FileOutputStream(stateFile));
+			fosState = new FileOutputStream(stateFile);
+			outState = new DataOutputStream(fosState);
 			outState.write(StateReader.STATE_CACHE_VERSION);
 			if (writePrefix(state, outState))
 				return;
@@ -114,11 +118,23 @@ class StateWriter {
 		} finally {
 			if (outLazy != null)
 				try {
+					outLazy.flush();
+					fosLazy.getFD().sync();
+				} catch (IOException e) {
+					// do nothing, we tried
+				}
+				try {
 					outLazy.close();
 				} catch (IOException e) {
 					// do nothing
 				}
 			if (outState != null)
+				try {
+					outState.flush();
+					fosState.getFD().sync();
+				} catch (IOException e) {
+					// do nothing, we tried
+				}
 				try {
 					outState.close();
 				} catch (IOException e) {
