@@ -25,6 +25,7 @@ public class StateManager implements PlatformAdmin {
 	private StateObjectFactoryImpl factory;
 	private long lastTimeStamp;
 	private BundleInstaller installer;
+	private boolean cachedState = false;
 
 	public StateManager(File stateLocation) {
 		// a negative timestamp means no timestamp checking
@@ -65,6 +66,7 @@ public class StateManager implements PlatformAdmin {
 			if (systemState == null)
 				return;
 			initializeSystemState();
+			cachedState = true;
 		} catch (IOException ioe) {
 			// TODO: how do we log this?
 			ioe.printStackTrace();
@@ -77,7 +79,7 @@ public class StateManager implements PlatformAdmin {
 	private void writeState(File stateLocation) throws IOException {
 		if (systemState == null)
 			return;
-		if (stateLocation.isFile() && lastTimeStamp == systemState.getTimeStamp())
+		if (cachedState && lastTimeStamp == systemState.getTimeStamp())
 			return;
 		DataOutputStream output = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(stateLocation)));
 		factory.writeState(systemState, output);
