@@ -21,7 +21,7 @@ public class StateImpl implements State {
 	transient private Map listeners = new HashMap(11);
 	transient private KeyedHashSet resolvedBundles = new KeyedHashSet();
 	private boolean resolved = true;
-	private long timeStamp = System.currentTimeMillis();
+	protected long timeStamp = System.currentTimeMillis();
 	private KeyedHashSet bundleDescriptions = new KeyedHashSet(false);
 	private StateObjectFactory factory;	
 
@@ -30,19 +30,16 @@ public class StateImpl implements State {
 	
 	StateImpl() {}
 
-	public void addBundle(BundleDescription description) {
+	public boolean addBundle(BundleDescription description) {
 		if (description.getBundleId() < 0)
 			throw new IllegalArgumentException("no id set");		
 		if (!basicAddBundle(description))
-			return;
-		updateTimeStamp();
+			return false;
 		resolved = false;
 		getDelta().recordBundleAdded((BundleDescriptionImpl) description);
 		if (resolver != null)
 			resolver.bundleAdded(description);
-	}
-	public void updateBundle(BundleDescription oldBundle, BundleDescription newBundle) {
-		throw new UnsupportedOperationException("not implemented"); //$NON-NLS-1$
+		return true;
 	}
 	public StateChangeEvent compare(State state) {
 		throw new UnsupportedOperationException("not implemented"); //$NON-NLS-1$
@@ -56,22 +53,16 @@ public class StateImpl implements State {
 	public boolean removeBundle(BundleDescription toRemove) {
 		if (!bundleDescriptions.remove((KeyedElement) toRemove))
 			return false;
-		updateTimeStamp();		
 		resolved = false;
 		getDelta().recordBundleRemoved((BundleDescriptionImpl) toRemove);
 		if (resolver != null)
 			resolver.bundleRemoved(toRemove);
 		return true;
 	}
-	private void updateTimeStamp() {
-		if (timeStamp == Long.MAX_VALUE)
-			timeStamp = 0;
-		timeStamp++;		
-	}
 	public StateDelta getChanges() {
-		return changes;
+		return getDelta();
 	}
-	public StateDeltaImpl getDelta() {
+	private StateDeltaImpl getDelta() {
 		if (changes == null)
 			changes = getNewDelta();
 		return changes;

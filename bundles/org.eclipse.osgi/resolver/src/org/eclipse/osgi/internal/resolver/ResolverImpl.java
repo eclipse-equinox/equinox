@@ -37,6 +37,7 @@ public class ResolverImpl implements Resolver {
 		try {
 			delta = dependencies.resolve();
 		} catch (IDependencySystem.CyclicSystemException e) {
+			//TODO: this should be logged instead
 			e.printStackTrace();
 			return;
 		}

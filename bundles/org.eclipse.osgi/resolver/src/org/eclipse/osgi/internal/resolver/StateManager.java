@@ -54,7 +54,7 @@ public class StateManager implements PlatformAdmin {
 		DataInputStream input = null;
 		try {
 			input = new DataInputStream(new BufferedInputStream(fileInput, 65536));
-			systemState = (StateImpl) factory.readState(input, expectedTimeStamp);
+			systemState = factory.readSystemState(input, expectedTimeStamp);
 			// problems in the cache (corrupted/stale), don't create a state object
 			if (systemState == null)
 				return;
@@ -76,7 +76,7 @@ public class StateManager implements PlatformAdmin {
 		factory.writeState(systemState, output);
 	}
 	public StateImpl createSystemState() {
-		systemState = (StateImpl) factory.createState();
+		systemState = factory.createSystemState();
 		initializeSystemState();	
 		return systemState;
 	}
@@ -88,14 +88,24 @@ public class StateManager implements PlatformAdmin {
 		return systemState;
 	}
 	public State getState() {
-		return factory.createState(getSystemState());
+		return factory.createState(systemState);				
 	}
 	public StateObjectFactory getFactory() {
 		return factory;
-	}
-	public void commit(State state) throws BundleException {
-		//TODO: implement this
-		throw new UnsupportedOperationException("not implemented yet");
+	} 
+	public synchronized void commit(State state) throws BundleException {
+		if (!(state instanceof StateImpl))
+			throw new IllegalArgumentException();
+		if (state.getTimeStamp() != systemState.getTimeStamp())
+			//TODO: create message in the catalog
+			throw new BundleException(""); //$NON-NLS-1$
+		StateDelta delta = state.getChanges();
+		BundleDelta[] addedBundles = delta.getChanges(BundleDelta.ADDED, false);
+		for (int i = 0; i < addedBundles.length; i++)
+			systemState.addBundle(factory.createBundleDescription(addedBundles[i].getBundle()));
+		BundleDelta[] removedBundles = delta.getChanges(BundleDelta.REMOVED, false);
+		for (int i = 0; i < removedBundles.length; i++)
+			systemState.removeBundle(removedBundles[i].getBundle());		
 	}
 	public Resolver getResolver() {
 		return new ResolverImpl();

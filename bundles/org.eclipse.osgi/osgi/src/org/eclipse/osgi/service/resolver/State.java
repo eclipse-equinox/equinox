@@ -21,8 +21,9 @@ public interface State {
 	 * Adds the given bundle to this state.
 	 * 
 	 * @param description the description to add
+	 * @return a boolean indicating whether the bundle was successfully added
 	 */
-	public void addBundle(BundleDescription description);
+	public boolean  addBundle(BundleDescription description);
 
 	/**
 	 * Returns a delta describing the differences between this state and the

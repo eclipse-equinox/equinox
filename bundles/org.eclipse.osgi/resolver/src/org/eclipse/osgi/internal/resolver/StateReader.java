@@ -35,32 +35,29 @@ class StateReader {
 		return (objectTable.size() - 1);
 	}
 
-	private StateImpl readState(DataInputStream in, long expectedTimestamp) throws IOException {
+	private boolean readState(StateImpl state, DataInputStream in, long expectedTimestamp) throws IOException {
 		if (in.readByte() != STATE_CACHE_VERSION)
-			return null;
+			return false;
 		byte tag = readTag(in);
-		if (tag == NULL)
-			return null;
-		if (tag == INDEX)
-			return (StateImpl) objectTable.get(in.readInt());
+		if (tag != OBJECT)
+			return false;
 		long timestampRead = in.readLong();
 		if (expectedTimestamp >= 0 && timestampRead != expectedTimestamp)
-			return null;
-		StateImpl result = new StateImpl();
-		addToObjectTable(result);
+			return false;
+		addToObjectTable(state);
 		int length = in.readInt();
 		if (length == 0)
-			return result;
+			return true;
 		for (int i = 0; i < length; i++)
-			result.basicAddBundle(readBundleDescription(in));
-		result.setTimeStamp(timestampRead);
-		result.setResolved(in.readBoolean());
-		if (!result.isResolved())
-			return result;
+			state.basicAddBundle(readBundleDescription(in));
+		state.setTimeStamp(timestampRead);
+		state.setResolved(in.readBoolean());
+		if (!state.isResolved())
+			return true;
 		int resolvedLength = in.readInt();
 		for(int i = 0;i < resolvedLength;i++)
-			result.addResolvedBundle(readBundleDescription(in));
-		return result;
+			state.addResolvedBundle(readBundleDescription(in));
+		return true;
 	}
 	private BundleDescriptionImpl readBundleDescription(DataInputStream in) throws IOException {
 		byte tag = readTag(in);
@@ -144,15 +141,15 @@ class StateReader {
 		addToObjectTable(result);
 		return result;		
 	}
-	public final StateImpl loadState(DataInputStream input, long expectedTimestamp) throws IOException {
+	public final boolean loadState(StateImpl state, DataInputStream input, long expectedTimestamp) throws IOException {
 		try {
-			return readState(input, expectedTimestamp);
+			return readState(state, input, expectedTimestamp);
 		} finally {
 			input.close();
 		}
 	}
-	public final StateImpl loadState(DataInputStream input) throws IOException {
-		return loadState(input, -1);
+	public final boolean loadState(StateImpl state, DataInputStream input) throws IOException {
+		return loadState(state, input, -1);
 	}
 	private String readString(DataInputStream in, boolean intern) throws IOException {
 		byte type = in.readByte();

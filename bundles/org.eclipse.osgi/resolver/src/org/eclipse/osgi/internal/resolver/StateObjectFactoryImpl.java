@@ -114,29 +114,39 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		packageSpec.setExport(original.isExported());
 		return packageSpec;
 	}
+	public SystemState createSystemState() {
+		SystemState state =  new SystemState();
+		state.setFactory(this);
+		return state;		
+	}
 	public State createState() {
-		StateImpl state =  new StateImpl();
+		StateImpl state =  new UserState();
 		state.setFactory(this);
 		return state;
 	}
 	public State createState(State original) {
-		StateImpl newState = new StateImpl();
+		StateImpl newState = new UserState();
 		newState.setFactory(this);
+		newState.setTimeStamp(original.getTimeStamp());
 		BundleDescription[] bundles = original.getBundles();
 		for (int i = 0; i < bundles.length; i++)
-			newState.addBundle(createBundleDescription(bundles[i]));
+			newState.basicAddBundle(createBundleDescription(bundles[i]));
+		newState.setResolved(false);
 		return newState;
 	}
-	public State readState(DataInputStream stream, long expectedTimeStamp) throws IOException {
+	public SystemState readSystemState(DataInputStream stream, long expectedTimeStamp) throws IOException {
 		StateReader reader = new StateReader();
-		StateImpl restoredState = reader.loadState(stream, expectedTimeStamp);
+		SystemState restoredState = new SystemState();
+		if (!reader.loadState(restoredState, stream, expectedTimeStamp))
+			return null;
 		restoredState.setFactory(this);
 		return restoredState;
 	}	
 	public State readState(DataInputStream stream) throws IOException {
 		StateReader reader = new StateReader();
-		StateImpl restoredState = reader.loadState(stream);
-		restoredState.setFactory(this);
+		StateImpl restoredState = (StateImpl) createState(); 
+		if (!reader.loadState(restoredState, stream))
+			return null;
 		return restoredState;		
 	}
 	public void writeState(State state, DataOutputStream stream) throws IOException {
