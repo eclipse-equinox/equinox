@@ -11,6 +11,7 @@
 
 package org.eclipse.osgi.internal.resolver;
 
+import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.osgi.service.resolver.HostSpecification;
 
 public class HostSpecificationImpl extends VersionConstraintImpl implements HostSpecification {
@@ -24,5 +25,9 @@ public class HostSpecificationImpl extends VersionConstraintImpl implements Host
 	public boolean isOptional() {
 		// a fragment cannot exist without its master
 		return false;
+	}
+	public BundleDescription[] getSuppliers() {
+		BundleDescription supplier = getSupplier();
+		return (supplier == null) ? new BundleDescription[0] : new BundleDescription[] {supplier};
 	}
 }

@@ -17,5 +17,6 @@ package org.eclipse.osgi.service.resolver;
 public interface HostSpecification extends VersionConstraint {
 
 	public boolean reloadHost();
-
+	
+	public BundleDescription[] getSuppliers();
 }
