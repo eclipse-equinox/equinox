@@ -1,5 +1,5 @@
 /*
- * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/ServicePermission.java,v 1.1 2003/11/25 21:24:14 dj Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/ServicePermission.java,v 1.2 2004/05/07 21:40:52 hargrave Exp $
  *
  * Copyright (c) The Open Services Gateway Initiative (2000, 2002).
  * All Rights Reserved.
@@ -47,12 +47,12 @@ import java.security.PermissionCollection;
  * Untrusted bundles should not be able to detect the presence of certain services unless they have
  * the appropriate <tt>ServicePermission</tt> to get the specific service.
  *
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 
 final public class ServicePermission extends BasicPermission
 {
-
+	static final long serialVersionUID = -7662148639076511574L;
     /**
      * The action string <tt>get</tt> (Value is "get").
      */
@@ -382,7 +382,7 @@ final public class ServicePermission extends BasicPermission
 
 final class ServicePermissionCollection extends PermissionCollection
 {
-
+	static final long serialVersionUID = 662615640374640621L;
     /**
      * Table of permissions.
      *

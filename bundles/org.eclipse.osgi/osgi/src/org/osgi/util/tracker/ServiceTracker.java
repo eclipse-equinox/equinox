@@ -1,5 +1,5 @@
 /*
- * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/util/tracker/ServiceTracker.java,v 1.4 2004/05/15 02:15:33 hargrave Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/util/tracker/ServiceTracker.java,v 1.5 2004/05/17 17:26:29 hargrave Exp $
  *
  * Copyright (c) The Open Services Gateway Initiative (2000, 2002).
  * All Rights Reserved.
@@ -52,7 +52,7 @@ import java.util.*;
  * and <tt>getServices</tt> methods can be called to get the service
  * objects for the tracked service.
  *
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 
 public class ServiceTracker implements ServiceTrackerCustomizer
@@ -472,11 +472,11 @@ public class ServiceTracker implements ServiceTrackerCustomizer
 
             ServiceReference references[] = new ServiceReference[length];
 
-            Enumeration enum = tracked.keys();
+            Enumeration enumermation = tracked.keys();
 
             for (int i = 0; i < length; i++)
             {
-                references[i] = (ServiceReference)enum.nextElement();
+                references[i] = (ServiceReference)enumermation.nextElement();
             }
 
             return references;
@@ -774,7 +774,9 @@ public class ServiceTracker implements ServiceTrackerCustomizer
      */
     class Tracked extends Hashtable implements ServiceListener
     {
-        /** List of ServiceReferences in the process of being added. 
+    	static final long serialVersionUID = -7420065199791006079L;
+
+		/** List of ServiceReferences in the process of being added. 
          */
         private ArrayList adding;      
         

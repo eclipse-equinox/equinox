@@ -1,5 +1,5 @@
 /*
- * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/BundleException.java,v 1.4 2004/05/10 14:40:56 hargrave Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/BundleException.java,v 1.5 2004/05/13 00:13:04 hargrave Exp $
  *
  * Copyright (c) The Open Services Gateway Initiative (2000-2001).
  * All Rights Reserved.
@@ -38,11 +38,12 @@ package org.osgi.framework;
  * <p> This exception is updated to conform to the general purpose
  * exception chaining mechanism.
  *  
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 
 public class BundleException extends Exception
 {
+	static final long	serialVersionUID	= 3571095144220455665L;
     /**
      * Nested exception.
      */

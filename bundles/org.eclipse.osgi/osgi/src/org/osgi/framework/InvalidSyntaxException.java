@@ -1,5 +1,5 @@
 /*
- * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/InvalidSyntaxException.java,v 1.1 2003/11/25 21:24:14 dj Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/InvalidSyntaxException.java,v 1.2 2004/05/07 21:40:52 hargrave Exp $
  *
  * Copyright (c) The Open Services Gateway Initiative (2000-2001).
  * All Rights Reserved.
@@ -36,11 +36,12 @@ package org.osgi.framework;
  *
  * <p> See {@link Filter} for a description of the filter string syntax.
  *
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 
 public class InvalidSyntaxException extends Exception
 {
+	static final long	serialVersionUID	= -4295194420816491875L;
     /**
      * The invalid filter string.
      */

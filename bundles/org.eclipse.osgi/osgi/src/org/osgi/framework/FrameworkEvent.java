@@ -1,5 +1,5 @@
 /*
- * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/FrameworkEvent.java,v 1.3 2004/04/20 17:35:59 twatson Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/FrameworkEvent.java,v 1.4 2004/05/07 21:40:52 hargrave Exp $
  *
  * Copyright (c) The Open Services Gateway Initiative (2000, 2002).
  * All Rights Reserved.
@@ -38,11 +38,12 @@ import java.util.EventObject;
  *
  * <p>OSGi reserves the right to extend the set of event types.
  *
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 
 public class FrameworkEvent extends EventObject
 {
+	static final long		serialVersionUID	= 207051004521261705L;
     /**
      * Bundle related to the event.
      */

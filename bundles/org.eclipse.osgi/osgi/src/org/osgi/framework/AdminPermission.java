@@ -1,5 +1,5 @@
 /*
- * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/AdminPermission.java,v 1.1 2003/11/25 21:24:14 dj Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/AdminPermission.java,v 1.2 2004/05/07 21:40:52 hargrave Exp $
  *
  * Copyright (c) The Open Services Gateway Initiative (2000-2001).
  * All Rights Reserved.
@@ -43,11 +43,12 @@ import java.security.PermissionCollection;
  * returns is the hash code of the name "AdminPermission", which is
  * always the same for all instances of <tt>AdminPermission</tt>. <p>
  *
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 
 public final class AdminPermission extends BasicPermission
 {
+	static final long	serialVersionUID	= 207051004521261705L;
     /**
      * Creates a new <tt>AdminPermission</tt> object with its name set to
      * "AdminPermission".
@@ -116,6 +117,7 @@ public final class AdminPermission extends BasicPermission
  */
 final class AdminPermissionCollection extends PermissionCollection
 {
+	static final long	serialVersionUID	= 3226083842806530691L;
     /**
      * True if collection is non-empty.
      *

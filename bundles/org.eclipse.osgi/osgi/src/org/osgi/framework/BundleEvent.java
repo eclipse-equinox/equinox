@@ -1,5 +1,5 @@
 /*
- * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/BundleEvent.java,v 1.3 2004/05/07 21:40:52 hargrave Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/BundleEvent.java,v 1.4 2004/05/10 14:40:56 hargrave Exp $
  *
  * Copyright (c) The Open Services Gateway Initiative (2000-2001).
  * All Rights Reserved.
@@ -38,11 +38,12 @@ import java.util.EventObject;
  *
  * <p>OSGi reserves the right to extend the set of types.
  *
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 
 public class BundleEvent extends EventObject
 {
+	static final long		serialVersionUID	= 4080640865971756012L;
     /**
      * Bundle that had a change occur in its lifecycle.
      */

@@ -1,5 +1,5 @@
 /*
- * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/PackagePermission.java,v 1.1 2003/11/25 21:24:14 dj Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/PackagePermission.java,v 1.2 2004/05/07 21:40:52 hargrave Exp $
  *
  * Copyright (c) The Open Services Gateway Initiative (2000, 2002).
  * All Rights Reserved.
@@ -47,12 +47,12 @@ import java.security.PermissionCollection;
  * <p><tt>PackagePermission</tt> has two actions: <tt>EXPORT</tt> and <tt>IMPORT</tt>.
  * The <tt>EXPORT</tt> action implies the <tt>IMPORT</tt> action.
  *
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 
 public final class PackagePermission extends BasicPermission
 {
-
+	static final long serialVersionUID = -5107705877071099135L;
     /**
      * The action string <tt>export</tt>.
      */
@@ -401,7 +401,7 @@ public final class PackagePermission extends BasicPermission
 
 final class PackagePermissionCollection extends PermissionCollection
 {
-
+	static final long	serialVersionUID	= -3350758995234427603L;
     /**
      * Table of permissions.
      *

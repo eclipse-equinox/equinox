@@ -1,5 +1,5 @@
 /*
- * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/ServiceEvent.java,v 1.1 2003/11/25 21:24:14 dj Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/ServiceEvent.java,v 1.2 2004/05/07 21:40:52 hargrave Exp $
  *
  * Copyright (c) The Open Services Gateway Initiative (2000-2001).
  * All Rights Reserved.
@@ -38,12 +38,13 @@ import java.util.EventObject;
  *
  * <p>OSGi reserves the right to extend the set of types.
  *
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @see ServiceListener
  */
 
 public class ServiceEvent extends EventObject
 {
+	static final long serialVersionUID = 8792901483909409299L;
     /**
      * Reference to the service that had a change occur in its lifecycle.
      */
