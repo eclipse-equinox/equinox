@@ -20,6 +20,7 @@ import java.util.jar.Manifest;
 import org.eclipse.osgi.framework.adaptor.BundleData;
 import org.eclipse.osgi.framework.adaptor.ClassLoaderDelegate;
 import org.eclipse.osgi.framework.adaptor.core.*;
+import org.eclipse.osgi.framework.internal.core.Bundle;
 import org.eclipse.osgi.framework.internal.core.Msg;
 import org.eclipse.osgi.framework.internal.defaultadaptor.DefaultClassLoader;
 import org.eclipse.osgi.framework.internal.defaultadaptor.DevClassPathHelper;
@@ -35,13 +36,10 @@ public class EclipseClassLoader extends DefaultClassLoader {
 	private boolean autoStart;
 	// from Eclipse-AutoStart's "exceptions" attribute
 	private List exceptions;	//TODO This could easily be changed to an array
-	// should we try to activate the bundle?
-	private boolean tryActivating;
+	
 	public EclipseClassLoader(ClassLoaderDelegate delegate, ProtectionDomain domain, String[] classpath, ClassLoader parent, BundleData bundleData) {
 		super(delegate, domain, classpath, parent, (org.eclipse.osgi.framework.internal.defaultadaptor.DefaultBundleData) bundleData);
 		parseAutoStart(bundleData);
-		// unless autoStart == false and there are no exceptions, we should try activating
-		tryActivating = autoStart || exceptions != null;
 	}
 	private void parseAutoStart(BundleData bundleData) {
 		try {
@@ -68,43 +66,72 @@ public class EclipseClassLoader extends DefaultClassLoader {
 			EclipseAdaptor.getDefault().getFrameworkLog().log(new FrameworkLogEntry(EclipseAdaptorConstants.PI_ECLIPSE_OSGI, message, 0, e, null));
 		}
 	}
-	//TODO Need to fix the startup problem identified. Need to have a synchronisation pattern similar to the one in beginStateChange()
+	
 	public Class findLocalClass(String name) throws ClassNotFoundException {
-		// See if we need to do autoactivation. We don't if autoActivation is turned off
-		// or if we have already activated this bundle.
-		if (EclipseAdaptor.MONITOR_CLASSES)
+		if (EclipseAdaptor.MONITOR_CLASSES)	//Suport for performance
 			ClassloaderStats.startLoadingClass(getClassloaderId(), name);
 		boolean found = true;
+		
 		try {
-			// Shot-circuit on tryActivating to avoid always calling a method.
-			if (tryActivating && shouldActivateFor(name)) {
-				int state = hostdata.getBundle().getState();
-				// Assume that if we get to this point the bundle is installed, resolved, ... so
-				// we just need to check that it is not already started or being started. There is a
-				// small window where two thread race to start. One will make it first, the other will
-				// throw an exception. Below we catch the exception and ignore it if it is
-				// of this nature.
-				// Ensure that we do the activation outside of any synchronized blocks to avoid deadlock.
-				if (state != Bundle.STARTING && state != Bundle.ACTIVE)
-					try {
-						hostdata.getBundle().start();
-						tryActivating = false;
-					} catch (BundleException e) {
-						tryActivating = false; //if a 
-						// TODO do nothing for now but we need to filter the type of exception here and
-						// sort the bad from the ok. Basically, failing to start the bundle should not be damning.
-						// Automagic activation is currently a best effort deal.
-						//TODO: log when a log service is available
-						//
-						e.printStackTrace(); //Note add this to help debugging
-						if (e.getNestedException() != null)
-							e.getNestedException().printStackTrace();
+			Bundle bundle = (Bundle) hostdata.getBundle();
+			// If the bundle is active, just return the class
+			if (bundle.getState() == Bundle.ACTIVE)
+				return super.findLocalClass(name);
+			
+			//If the bundle is uninstalled, classes can still be loaded from it
+			if (bundle.getState() == Bundle.UNINSTALLED)
+				 return super.findLocalClass(name);
+			
+			//If the bundle is stopping, we don't want to reactive it but we still want to be able to load classes from it.
+			if (bundle.getState() == Bundle.STOPPING)
+				return super.findLocalClass(name);
+			
+			// The bundle is not active and does not require activation, just return the class
+			if (! shouldActivateFor(name))
+				return super.findLocalClass(name);
+				
+			// The bundle is starting
+			if (bundle.getState() == Bundle.STARTING) {
+				//If the thread trying to load the class is the one trying to activate the bundle, then return the class 
+				if (bundle.testStateChanging(Thread.currentThread()) || bundle.testStateChanging(null))
+					return super.findLocalClass(name);
+		
+				//If it's another thread, we wait and try again. In any case the class is returned. The difference is that an exception can be logged.
+				if (! bundle.testStateChanging(Thread.currentThread())) {
+					Object lock = bundle.getStateChangeLock();
+					long start = System.currentTimeMillis();
+					long delay = 5000;
+					long timeLeft = delay;
+					while (true) {
+						if (bundle.testStateChanging(null))
+							break;
+						
+						if (timeLeft <= 0)
+							break;
+						try {
+							lock.wait(timeLeft);
+						} catch(InterruptedException e) {
+							//Ignore and keep waiting
+						}
+						timeLeft = start + delay - System.currentTimeMillis();
 					}
-				// once we have tried, there is no need to try again.
-				// TODO revisit this when considering what happens when a bundle is stopped
-				// and then subsequently accessed. That is, should it be restarted?
+					if (timeLeft < 0 || bundle.getState() != Bundle.ACTIVE) {
+						String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CLASSLOADER_CONCURRENT_STARTUP", new Object[] {Thread.currentThread(), name, bundle.getStateChanging().getName(), bundle.getSymbolicName() + '(' + bundle.getBundleId() + ')'}); //$NON-NLS-1$
+						EclipseAdaptor.getDefault().getFrameworkLog().log(new FrameworkLogEntry(EclipseAdaptorConstants.PI_ECLIPSE_OSGI, message, 0, null, null));
+					}
+					return super.findLocalClass(name);			
+				}
 			}
-			return super.findLocalClass(name);
+			
+			//The bundle must be started.
+			try {
+				hostdata.getBundle().start();
+			} catch (BundleException e) {
+				String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CLASSLOADER_ACTIVATION", bundle.getSymbolicName(),  Long.toString(bundle.getBundleId())); //$NON-NLS-1$
+				EclipseAdaptor.getDefault().getFrameworkLog().log(new FrameworkLogEntry(EclipseAdaptorConstants.PI_ECLIPSE_OSGI, message, 0, e, null));
+			} finally {
+				return super.findLocalClass(name);
+			}
 		} catch (ClassNotFoundException e) {
 			found = false;
 			throw e;
@@ -117,6 +144,9 @@ public class EclipseClassLoader extends DefaultClassLoader {
 	 * Determines if for loading the given class we should activate the bundle. 
 	 */
 	private boolean shouldActivateFor(String className) {
+		//Don't reactivate on shut down
+		if (EclipseAdaptor.stopping)	
+			return false;
 		// no exceptions, it is easy to figure it out
 		if (exceptions == null)
 			return autoStart;

@@ -1140,6 +1140,7 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 					return;
 				}
 				if (doubleFault || (stateChanging == Thread.currentThread())) {
+					//TODO The message must be improved to indicate the name of the thread and the bundle that was changing state
 					throw new BundleException(Msg.formatter.getString("BUNDLE_STATE_CHANGE_EXCEPTION"));	//$NON-NLS-1$
 				}
 				try {
@@ -1516,5 +1517,14 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 			rawHeaders = bundledata.getManifest();
 			manifestLocalization = new ManifestLocalization(this, rawHeaders);
 		}
+	}
+	public boolean testStateChanging(Object thread) {
+		return stateChanging == thread;
+	}
+	public Object getStateChangeLock() {
+		return statechangeLock;
+	}
+	public Thread getStateChanging() {
+		return stateChanging;
 	}
 }

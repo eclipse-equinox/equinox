@@ -60,12 +60,15 @@ public class EclipseAdaptor extends DefaultAdaptor {
 	public static final byte BUNDLEDATA_VERSION = 7;
 	public static final byte NULL = 0;
 	public static final byte OBJECT = 1;
+	//Indicate if the framework is stopping
+	public static boolean stopping = false;
 	
 	private static EclipseAdaptor instance;
 
 	private int startLevel = 1;	//TODO Can't we use AbstractFrameworkAdaptor.initialStartLevel?
 	private long timeStamp = 0;
 	private String installURL = null;
+	
 
 	/*
 	 * Should be instantiated only by the framework (through reflection). 
@@ -472,6 +475,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 	
 	public void frameworkStopping() {
 		super.frameworkStopping();
+		stopping = true;
 		new BundleStopper().stopBundles();
 	}	
 	protected void setLog(FrameworkLog log) {

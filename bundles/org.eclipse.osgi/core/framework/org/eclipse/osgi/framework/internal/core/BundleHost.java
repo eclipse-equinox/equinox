@@ -424,7 +424,7 @@ public class BundleHost extends Bundle {
 					if (state == UNINSTALLED) {
 						context.close();
 						context = null;
-
+						//TODO Improve error message with the name of the bundle 
 						throw new BundleException(Msg.formatter.getString("BUNDLE_UNINSTALLED_EXCEPTION"));
 					}
 				}
