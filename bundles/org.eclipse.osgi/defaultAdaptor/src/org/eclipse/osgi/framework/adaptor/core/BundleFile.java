@@ -130,7 +130,7 @@ abstract public class BundleFile {
 	public static class ZipBundleFile extends BundleFile {
 		protected BundleData bundledata;
 		protected ZipFile zipFile;
-		protected boolean closed = false;
+		protected boolean closed = true;
 
 		public ZipBundleFile(File basefile, BundleData bundledata) throws IOException {
 			super(basefile);
@@ -138,18 +138,26 @@ abstract public class BundleFile {
 			this.closed = true;
 		}
 
-		private boolean checkedOpen() {
+		protected boolean checkedOpen() {
 			try {
-				if (closed) {
-					zipFile = new ZipFile(this.basefile);
-					closed = false;
-				}
+				return getZipFile() != null;
 			} catch (IOException e) {
 				AbstractBundleData abstractData = (AbstractBundleData) bundledata;
 				abstractData.getAdaptor().getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, abstractData.getBundle(), e);
 				return false;
 			}
-			return true;
+		}
+
+		protected ZipFile basicOpen() throws IOException {
+			return new ZipFile(this.basefile);
+		}
+
+		protected ZipFile getZipFile() throws IOException {
+			if (closed) {
+				zipFile = basicOpen();
+				closed = false;
+			}
+			return zipFile;
 		}
 
 		private ZipEntry getZipEntry(String path) {
@@ -290,7 +298,7 @@ abstract public class BundleFile {
 				return null;
 			}
 
-			return new BundleEntry.ZipBundleEntry(zipFile, zipEntry, this);
+			return new BundleEntry.ZipBundleEntry(zipEntry, this);
 
 		}
 

@@ -15,7 +15,6 @@ import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 import org.eclipse.osgi.framework.util.SecureAction;
 
 /**
@@ -83,18 +82,14 @@ public abstract class BundleEntry {
 	 */
 	public static class ZipBundleEntry extends BundleEntry {
 		/**
-		 * ZipFile for this entry.
-		 */
-		private ZipFile zipFile;
-		/**
 		 * ZipEntry for this entry.
 		 */
-		private ZipEntry zipEntry;
+		protected ZipEntry zipEntry;
 
 		/**
 		 * The BundleFile for this entry.
 		 */
-		private BundleFile bundleFile;
+		protected BundleFile bundleFile;
 
 		/**
 		 * Constructs the BundleEntry using a ZipEntry.
@@ -102,8 +97,7 @@ public abstract class BundleEntry {
 		 * @param bundleFile BundleFile object this entry is a member of
 		 * @param entry ZipEntry object of this entry
 		 */
-		ZipBundleEntry(ZipFile zipFile, ZipEntry entry, BundleFile bundleFile) {
-			this.zipFile = zipFile;
+		protected ZipBundleEntry(ZipEntry entry, BundleFile bundleFile) {
 			this.zipEntry = entry;
 			this.bundleFile = bundleFile;
 		}
@@ -115,7 +109,7 @@ public abstract class BundleEntry {
 		 * @exception java.io.IOException
 		 */
 		public InputStream getInputStream() throws IOException {
-			return (zipFile.getInputStream(zipEntry));
+			return ((BundleFile.ZipBundleFile) bundleFile).getZipFile().getInputStream(zipEntry);
 		}
 
 		/**
@@ -124,7 +118,7 @@ public abstract class BundleEntry {
 		 * @return size of entry
 		 */
 		public long getSize() {
-			return (zipEntry.getSize());
+			return zipEntry.getSize();
 		}
 
 		/**
@@ -133,7 +127,7 @@ public abstract class BundleEntry {
 		 * @return name of entry
 		 */
 		public String getName() {
-			return (zipEntry.getName());
+			return zipEntry.getName();
 		}
 
 		/**
@@ -176,7 +170,6 @@ public abstract class BundleEntry {
 		 * File for this entry.
 		 */
 		private File file;
-
 		private String name;
 
 		/**
