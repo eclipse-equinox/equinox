@@ -329,7 +329,7 @@ public class StartLevelImpl implements EventSource, EventListener {
 		if (bundle.getState() == Bundle.UNINSTALLED) {
 			throw new IllegalArgumentException(Msg.formatter.getString("BUNDLE_UNINSTALLED_EXCEPTION"));
 		}
-		return ((Bundle) bundle).startLevel;
+		return ((Bundle) bundle).startLevel;	//TODO This should be a method call
 	}
 
 	/**
@@ -553,7 +553,7 @@ public class StartLevelImpl implements EventSource, EventListener {
 
 		int fwsl = framework.startLevelImpl.getStartLevel();
 		for (int i = 0; i < launch.length; i++) {
-			int bsl = launch[i].startLevel;
+			int bsl = launch[i].startLevel;	//TODO This should be a method call
 
 			if (bsl < fwsl) {
 				// skip bundles who should have already been started
