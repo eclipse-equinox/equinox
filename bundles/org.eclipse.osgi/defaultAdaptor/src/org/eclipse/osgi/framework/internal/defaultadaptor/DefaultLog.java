@@ -202,6 +202,7 @@ public class DefaultLog implements FrameworkLog {
 			File oldOutFile = this.outFile;
 			this.outFile = newOutFile;
 			this.writer = newWriter;
+			boolean copyFailed = false;
 			if (append && !newSession && oldOutFile != null) {
 				Reader fileIn = null;
 				try {
@@ -210,6 +211,7 @@ public class DefaultLog implements FrameworkLog {
 							oldOutFile.getAbsolutePath()), "UTF-8");
 					copyReader(fileIn, this.writer);
 				} catch (IOException e) {
+					copyFailed = true;
 					e.printStackTrace();
 				} finally {
 					if (fileIn != null) {
@@ -218,6 +220,9 @@ public class DefaultLog implements FrameworkLog {
 						} catch (IOException e) {
 							e.printStackTrace();
 						}
+						// delete the old file if copying didn't fail
+						if (!copyFailed)
+							oldOutFile.delete();						
 					}
 					closeFile();
 				}
