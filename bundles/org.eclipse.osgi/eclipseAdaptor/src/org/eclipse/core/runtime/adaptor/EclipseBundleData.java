@@ -86,22 +86,20 @@ public class EclipseBundleData extends DefaultBundleData {
 	}
 
 	private boolean checkManifestTimeStamp(BundleFile bundlefile) {
-		boolean on = true;
-		if ("true".equalsIgnoreCase(NO_TIMESTAMP_CHECKING))	//$NON-NLS-1$
+		if ("true".equalsIgnoreCase(NO_TIMESTAMP_CHECKING)) //$NON-NLS-1$
 			return true;
-
 		// Otherwise, check the file time stamp
 		switch (getManifestType()) {
-		case MANIFEST:
-			return bundlefile.getEntry(Constants.OSGI_BUNDLE_MANIFEST).getTime()==getManifestTimeStamp();
-		case PLUGIN:
-			BundleEntry manifestEntry = bundlefile.getEntry(PLUGIN_MANIFEST);
-			if (manifestEntry == null)
-				manifestEntry = bundlefile.getEntry(FRAGMENT_MANIFEST);
-
-			return manifestEntry == null ? false : manifestEntry.getTime()==getManifestTimeStamp();
+			case MANIFEST :
+				BundleEntry bundleManifestEntry = bundlefile.getEntry(Constants.OSGI_BUNDLE_MANIFEST);
+				return bundleManifestEntry != null && bundleManifestEntry.getTime() == getManifestTimeStamp();
+			case PLUGIN :
+				BundleEntry pluginManifestEntry = bundlefile.getEntry(PLUGIN_MANIFEST);
+				if (pluginManifestEntry == null)
+					pluginManifestEntry = bundlefile.getEntry(FRAGMENT_MANIFEST);
+				return pluginManifestEntry != null && pluginManifestEntry.getTime() == getManifestTimeStamp();
 		}
-		return true;	 
+		return true;
 	}
 
 	private void initializeBase(String location) throws IOException {
