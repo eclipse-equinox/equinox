@@ -80,10 +80,7 @@ public abstract class AbstractStateTest extends OSGiTest {
 		assertEquals(tag + ".0", original.getName(), copy.getName());
 		assertEquals(tag + ".1", original.getVersion(), copy.getVersion());
 		assertEquals(tag + ".2", original.getAttributes(), copy.getAttributes());
-		assertEquals(tag + ".3", original.getExclude(), copy.getExclude());
-		assertEquals(tag + ".4", original.getUses(), copy.getUses());
-		assertEquals(tag + ".5", original.getInclude(), copy.getInclude());
-		assertEquals(tag + ".6", original.getMandatory(), copy.getMandatory());
+		assertEquals(tag + ".3", original.getDirectives(), original.getDirectives());
 	}
 
 	public void assertEquals(String tag, State original, State copy) {
@@ -131,7 +128,7 @@ public abstract class AbstractStateTest extends OSGiTest {
 		assertEquals(tag + ".1", original.getAttributes(), copy.getAttributes());
 		assertEquals(tag + ".2", original.getBundleSymbolicName(), copy.getBundleSymbolicName());
 		assertEquals(tag + ".3", original.getBundleVersionRange(), copy.getBundleVersionRange());
-		assertEquals(tag + ".5", original.getResolution(), original.getResolution());
+		assertEquals(tag + ".5", original.getDirectives(), original.getDirectives());
 	}
 
 	public void assertEquals(String tag, HostSpecification original, HostSpecification copy) {
