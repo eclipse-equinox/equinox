@@ -411,7 +411,7 @@ public class PluginConverterImpl implements PluginConverter {
 			}
 		}
 
-		Set result = new HashSet(7);
+		Set result = new TreeSet();
 		Set libEntries = libs.entrySet();
 		for (Iterator iter = libEntries.iterator(); iter.hasNext();) {
 			Map.Entry element = (Map.Entry) iter.next();
