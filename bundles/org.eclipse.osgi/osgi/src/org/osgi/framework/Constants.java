@@ -1,5 +1,5 @@
 /*
- * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/Constants.java,v 1.10 2004/03/19 23:07:39 twatson Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/Constants.java,v 1.11 2004/04/09 18:28:54 twatson Exp $
  *
  * Copyright (c) The Open Services Gateway Initiative (2000-2001).
  * All Rights Reserved.
@@ -35,7 +35,7 @@ package org.osgi.framework;
  * <p>The values associated with these keys are of type <tt>java.lang.String</tt>,
  * unless otherwise indicated.
  *
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  * @author Open Services Gateway Initiative
  * @since 1.1
  * @see Bundle#getHeaders
@@ -532,7 +532,26 @@ public interface Constants {
 	 * </pre>
 	 */
 	public final static String OPTIONAL_ATTRIBUTE = "optional";
-	
+
+	/**
+	 * Manifest header attribute (named &quot;require-packages&quot;)
+	 * specifies the subset of packages that should be available from 
+	 * the required bundle.  If the require-packages parameter 
+	 * is not specified then all packages provided by a required Bundle 
+	 * are available.  The value of this parameter must be a quoted 
+	 * string.  The syntax of the quoted string value is the same as
+	 * the Provide-Package manifest header.
+	 * 
+	 * <p> The attribute value is encoded in the Require-Bundle
+	 * Manifest header like:
+	 * <pre>
+	 * Require-Bundle: org.osgi.test;
+	 *  bundle-version="1.1";
+	 *  require-packages="org.osgi.test.pkg1,org.osgi.test.pkg2"
+	 * </pre>
+	 */
+	public final static String REQUIRE_PACKAGES_ATTRIBUTE = "require-packages";
+
 	/**
 	 * String indication location of the default localization file for manifest files
 	 */
