@@ -97,17 +97,26 @@ class EventThread extends Thread {
 	 * the queue and dispatches them.
 	 */
 	public void run() {
-		while (true) {
-			Queued item = getNextEvent();
-			if (item == null) {
-				return;
-			}
-
-			try {
+		try {
+			while (true) {
+				Queued item = getNextEvent();
+				if (item == null) {
+					return;
+				}
 				EventManager.dispatchEvent(item.listeners, item.dispatcher, item.action, item.object);
-			} 
-			catch (Throwable t) {
 			}
+		}
+		catch (RuntimeException e) {
+			if (EventManager.DEBUG) {
+				e.printStackTrace();
+			}
+			throw e;
+		}
+		catch (Error e) {
+			if (EventManager.DEBUG) {
+				e.printStackTrace();
+			}
+			throw e;
 		}
 	}
 
@@ -122,6 +131,10 @@ class EventThread extends Thread {
 	 * @param o Object for this event
 	 */
 	synchronized void postEvent(ListElement[] l, EventDispatcher d, int a, Object o) {
+		if (!isAlive()) {	/* If the thread is not alive, throw an exception */
+			throw new IllegalStateException();
+		}
+		
 		Queued item = new Queued(l, d, a, o);
 
 		if (head == null) /* if the queue was empty */
