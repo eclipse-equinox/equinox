@@ -67,7 +67,7 @@ public class EclipseCommandProvider implements CommandProvider {
 					continue;
 				}
 				ci.println(bundle.getLocation() + " [" + bundle.getBundleId() + "]");
-				VersionConstraint[] unsatisfied = bundle.getUnsatisfiedConstraints();
+				VersionConstraint[] unsatisfied = StateHelper.getUnsatisfiedConstraints(bundle);
 				if (unsatisfied.length == 0) {
 					ci.print("  ");
 					ci.println(EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONSOLE_NO_CONSTRAINTS"));

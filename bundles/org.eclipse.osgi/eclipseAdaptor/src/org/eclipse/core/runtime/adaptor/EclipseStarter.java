@@ -214,7 +214,7 @@ public class EclipseStarter {
 				// for some reason, the state does not know about that bundle
 				if (description == null)
 					continue;
-				VersionConstraint[] unsatisfied = description.getUnsatisfiedConstraints();
+				VersionConstraint[] unsatisfied = StateHelper.getUnsatisfiedConstraints(description);
 				// the bundle wasn't resolved but none of its constraints were
 				// unsatisfiable
 				FrameworkLogEntry[] logChildren = unsatisfied.length == 0 ? null : new FrameworkLogEntry[unsatisfied.length];

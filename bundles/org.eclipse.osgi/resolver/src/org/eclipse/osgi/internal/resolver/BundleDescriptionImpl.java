@@ -154,40 +154,7 @@ public class BundleDescriptionImpl implements BundleDescription, KeyedElement {
 		return (int) (bundleId % Integer.MAX_VALUE);
 	}
 	public VersionConstraint[] getUnsatisfiedConstraints() {
-		if (containingState == null)
-			// it is a bug in the client to call this method when not attached to a state
-			throw new IllegalStateException("Does not belong to a state"); //$NON-NLS-1$		
-		ArrayList unsatisfied = new ArrayList(); 
-		if (host != null && !host.isResolved() && !isResolvable(host))
-			unsatisfied.add(host);		
-		if (requiredBundles != null)
-			for (int i = 0; i < requiredBundles.length; i++)
-				if (!requiredBundles[i].isResolved() && !isResolvable(requiredBundles[i]))
-					unsatisfied.add(requiredBundles[i]);
-		if (packages != null)
-			for (int i = 0; i < packages.length; i++)
-				if (!packages[i].isResolved() && !isResolvable(packages[i]))
-					unsatisfied.add(packages[i]);			
-		return (VersionConstraint[]) unsatisfied.toArray(new VersionConstraint[unsatisfied.size()]);
-	}
-	/**
-	 * @param specification
-	 * @return
-	 */
-	private boolean isResolvable(PackageSpecification specification) {
-		if (specification.isExported())
-			return true;
-		PackageSpecification exported = ((StateImpl) containingState).getExportedPackage(specification.getName(), null);
-		if (exported == null)
-			return false;
-		return specification.isSatisfiedBy(exported.getVersionSpecification());		
-	}
-	private boolean isResolvable(VersionConstraint specification) {		
-		BundleDescription[] availableBundles = containingState.getBundles(specification.getName());
-		for (int i = 0; i < availableBundles.length; i++)
-			if (availableBundles[i].isResolved() && specification.isSatisfiedBy(availableBundles[i].getVersion()))
-				return true;
-		return false;
+		return StateHelper.getUnsatisfiedConstraints(this);
 	}
 	public boolean isSingleton() {
 		return singleton;

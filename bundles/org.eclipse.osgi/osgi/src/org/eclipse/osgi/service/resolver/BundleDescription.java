@@ -114,13 +114,17 @@ public interface BundleDescription {
 	 * bundle may not have any unsatisfied constraints (which means that it has
 	 * not been picked - for instance, if only one version is allowed and there 
 	 * is a "better" version).  
+	 * 
 	 * @return an array of <code>VersionConstraint</code> objects containing 
-	 * 	all constraints that could not be satisfied.  
+	 * 	all constraints that could not be satisfied.
+	 * @deprecated Use StateHelper#getUnsatisfiedConstraints instead.  
 	 */
 	public VersionConstraint[] getUnsatisfiedConstraints();
 
 	/**
 	 * Returns a read-only dictionary for the Manifest of this bundle.
+	 * 
+	 * @deprecated Never implemented. No replacement.
 	 */
 	public Dictionary getManifest();
 

@@ -27,6 +27,7 @@ import java.util.Locale;
 import org.eclipse.osgi.framework.adaptor.BundleData;
 import org.eclipse.osgi.framework.adaptor.BundleOperation;
 import org.eclipse.osgi.framework.debug.Debug;
+import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.osgi.service.resolver.BundleSpecification;
 import org.eclipse.osgi.service.resolver.HostSpecification;
@@ -1472,8 +1473,7 @@ public abstract class Bundle
 		if (bundleDescription.isResolved()) {
 			throw new IllegalStateException("bundle *is* resolved");
 		}
-		VersionConstraint[] unsatisfied = bundleDescription
-				.getUnsatisfiedConstraints();
+		VersionConstraint[] unsatisfied = StateHelper.getUnsatisfiedConstraints(bundleDescription);
 		if (unsatisfied.length == 0) {
 			return Msg.formatter
 					.getString("BUNDLE_UNRESOLVED_NOT_CHOSEN_EXCEPTION");
