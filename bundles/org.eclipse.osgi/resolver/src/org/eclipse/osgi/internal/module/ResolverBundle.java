@@ -38,6 +38,7 @@ public class ResolverBundle implements VersionSupplier {
 	private ArrayList cyclicDependencies = new ArrayList();
 
 	private ResolverImpl resolver;
+	private boolean newFragmentExports;
 
 	ResolverBundle(BundleDescription bundle, ResolverImpl resolver) {
 		this.bundle = bundle;
@@ -385,10 +386,10 @@ public class ResolverBundle implements VersionSupplier {
 		BundleSpecification[] newRequires = fragment.getBundle().getRequiredBundles();
 		ExportPackageDescription[] newExports = fragment.getBundle().getExportPackages();
 
-		if (newImports.length > 0 || newRequires.length > 0 || newExports.length > 0) {
-			if (isResolved())
-				return new ResolverExport[0];
-		}
+		if (isResolved() && (newImports.length > 0 || newRequires.length > 0))
+			return new ResolverExport[0]; // do not allow fragments to require new resources on an already resolved host
+		if (isResolved() && newExports.length > 0)
+			fragment.setNewFragmentExports(true);
 
 		initFragments();
 		if (fragments.contains(fragment))
@@ -424,6 +425,14 @@ public class ResolverBundle implements VersionSupplier {
 			fragmentExports.put(fragment.bundleID, hostExports);
 		}
 		return (ResolverExport[]) hostExports.toArray(new ResolverExport[hostExports.size()]);
+	}
+
+	private void setNewFragmentExports(boolean newFragmentExports) {
+		this.newFragmentExports = newFragmentExports;
+	}
+	
+	boolean isNewFragmentExports() {
+		return newFragmentExports;
 	}
 
 	ResolverExport[] detachFragment(ResolverBundle fragment) {

@@ -792,8 +792,19 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 			ResolverBundle[] matchingBundles = rb.getHost().getMatchingBundles();
 			if (matchingBundles != null && matchingBundles.length > 0) {
 				hostBundles = new BundleDescription[matchingBundles.length];
-				for (int i = 0; i < matchingBundles.length; i++)
+				for (int i = 0; i < matchingBundles.length; i++) {
 					hostBundles[i] = matchingBundles[i].getBundle();
+					if (rb.isNewFragmentExports()) {
+						// update the host's set of selected exports
+						ResolverBundle hostRB = (ResolverBundle) bundleMapping.get(hostBundles[i]);
+						ResolverExport[] hostExports = hostRB.getSelectedExports();
+						ArrayList selectedHostExports = new ArrayList(hostExports.length);
+						for (int j = 0; j < hostExports.length; j++)
+							selectedHostExports.add(hostExports[j].getExportPackageDescription());
+						ExportPackageDescription[] hostExportsArray = (ExportPackageDescription[]) selectedHostExports.toArray(new ExportPackageDescription[selectedHostExports.size()]);
+						state.resolveBundle(hostBundles[i], true, null, hostExportsArray, hostBundles[i].getResolvedRequires(), hostBundles[i].getResolvedImports());
+					}
+				}
 			}
 		}
 
