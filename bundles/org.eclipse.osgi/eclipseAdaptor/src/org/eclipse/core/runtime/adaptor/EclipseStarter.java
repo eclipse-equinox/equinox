@@ -248,8 +248,11 @@ public class EclipseStarter {
 		applicationTracker.close();
 		if (application == null)
 			throw new IllegalStateException(EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_ERROR_NO_APPLICATION")); //$NON-NLS-1$
-		if (debug)
-			System.out.println("Starting application: " + (System.currentTimeMillis() - Long.parseLong(System.getProperty("eclipse.startTime")))); //$NON-NLS-1$ //$NON-NLS-2$
+		if (debug) {
+			String timeString = System.getProperty("eclipse.startTime"); //$NON-NLS-1$ 
+			long time = timeString == null ? 0L : Long.parseLong(timeString);
+			System.out.println("Starting application: " + (System.currentTimeMillis() - time)); //$NON-NLS-1$ 
+		}
 		return application.run(argument);
 	}
 
