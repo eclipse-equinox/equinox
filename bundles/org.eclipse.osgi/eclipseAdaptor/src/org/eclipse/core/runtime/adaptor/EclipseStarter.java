@@ -224,8 +224,9 @@ public class EclipseStarter {
 		// running if they are persistently active.
 		setStartLevel(getStartLevel());
 		// they should all be active by this time
-		ensureBundlesActive(startBundles);
-		if (debug)
+		ensureBundlesActive(startBundles);		
+		if (debug || System.getProperty(PROP_DEV) != null)
+			// only spend time showing unresolved bundles in dev/debug mode
 			logUnresolvedBundles(context.getBundles());
 		running = true;
 	}
