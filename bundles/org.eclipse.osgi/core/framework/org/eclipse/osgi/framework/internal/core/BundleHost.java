@@ -28,13 +28,14 @@ public class BundleHost extends Bundle {
 	/** Loaded state object. */
 	protected BundleLoader loader;
 
-	private BundleLoaderProxy proxy;
+	//	TODO Little description 
+	private BundleLoaderProxy proxy;	
 
 	/** The BundleContext that represents this Bundle and all of its fragments */
 	protected BundleContext context;
 
 	/** The List of BundleFragments */
-	protected Vector fragments;	//TODO LinkList or an array...
+	protected Vector fragments;	//TODO LinkedList or an array...
 
 	public BundleHost(BundleData bundledata, String location, Framework framework, int startLevel) throws BundleException {
 		super(bundledata, location, framework, startLevel);
@@ -43,7 +44,7 @@ public class BundleHost extends Bundle {
 		fragments = null;
 	}
 
-	protected BundleLoader basicGetBundleLoader() {
+	protected BundleLoader basicGetBundleLoader() {	//TODO Does not seems to be called.
 		return loader;
 	}
 

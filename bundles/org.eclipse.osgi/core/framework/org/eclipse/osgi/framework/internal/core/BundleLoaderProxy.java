@@ -19,7 +19,7 @@ import org.eclipse.osgi.service.resolver.PackageSpecification;
 import org.eclipse.osgi.service.resolver.Version;
 
 import org.osgi.service.packageadmin.NamedClassSpace;
-
+//TODO A few comments would be appreciated here Although I guess it is a proxy for the loader for a bundle ;-).  
 public class BundleLoaderProxy implements KeyedElement, NamedClassSpace{
 	private BundleLoader loader;
 	private BundleHost bundle;
