@@ -10,9 +10,10 @@
  *******************************************************************************/
 package org.eclipse.core.runtime.adaptor;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.net.URL;
-import java.nio.channels.FileLock;
+
 import org.eclipse.osgi.service.datalocation.Location;
 
 public class BasicLocation implements Location {
@@ -23,11 +24,10 @@ public class BasicLocation implements Location {
 	private String property;
 
 	// locking related fields
-	private FileLock fileLock;
-	private FileOutputStream fileStream;
 	private File lockFile;
-
-	private static String LOCK_FILENAME = ".metadata/.lock";
+	private Locker locker;
+	private static final String PROP_OSGI_LOCKING = "osgi.locking"; //$NON-NLS-1$
+	private static String LOCK_FILENAME = ".metadata/.lock"; //$NON-NLS-1$
 
 	public BasicLocation(String property, URL defaultValue, boolean isReadOnly) {
 		super();
@@ -64,9 +64,9 @@ public class BasicLocation implements Location {
 
 	public synchronized boolean setURL(URL value, boolean lock) throws IllegalStateException {
 		if (location != null)
-			throw new IllegalStateException("Cannot change the location once it is set");
+			throw new IllegalStateException(EclipseAdaptorMsg.formatter.getString("ECLIPSE_CANNOT_CHANGE_LOCATION")); //$NON-NLS-1$
 		File file = null;
-		if (value.getProtocol().equalsIgnoreCase("file"))
+		if (value.getProtocol().equalsIgnoreCase("file")) //$NON-NLS-1$
 			file = new File(value.getPath(), LOCK_FILENAME);
 		lock = lock && !isReadOnly;
 		if (lock) {
@@ -103,35 +103,51 @@ public class BasicLocation implements Location {
 			if (!parentFile.mkdirs())
 				return false;
 		}
-		// workaround for bug 44735
-		if (System.getProperties().getProperty("org.eclipse.core.runtime.ignoreLockFile") != null)
+
+		setLocker(lock);
+		if (locker == null)
 			return true;
-		fileStream = new FileOutputStream(lock, true);
-		fileLock = fileStream.getChannel().tryLock();
-		if (fileLock != null)
-			return true;
-		fileStream.close();
-		fileStream = null;
-		fileLock = null;
-		return false;
+		return locker.lock(); //TODO Why do we let the IOException flow instead of returning false
+	}
+
+	private void setLocker(File lock) {
+		if (locker != null)
+			return;
+
+		String lockMode = System.getProperties().getProperty(PROP_OSGI_LOCKING);
+		if (lockMode == null) { //By default set the lock mode to 1.4
+			if (runningWithNio()) {
+				locker = new Locker_JavaNio(lock);
+			} else {
+				locker = new Locker_JavaIo(lock);
+			}
+		} else if ("none".equals(lockMode)) { //$NON-NLS-1$
+			return;
+		} else if ("java.io".equals(lockMode)) { //$NON-NLS-1$
+			locker = new Locker_JavaIo(lock);
+		} else if ("java.nio".equals(lockMode)) { //$NON-NLS-1$
+			if (runningWithNio()) {
+				locker = new Locker_JavaNio(lock);
+			} else {
+				locker = new Locker_JavaIo(lock);
+			}
+		} else {
+			//	Backup case if an invalid value has been specified
+			locker = new Locker_JavaNio(lock);
+		}
 	}
 
 	public void release() {
-		if (fileLock != null) {
-			try {
-				fileLock.release();
-			} catch (IOException e) {
-				//don't complain, we're making a best effort to clean up
-			}
-			fileLock = null;
+		if (locker != null)
+			locker.release();
+	}
+
+	private boolean runningWithNio() {
+		try {
+			Class c = Class.forName("java.nio.channels.FileLock"); //$NON-NLS-1$
+		} catch (ClassNotFoundException e) {
+			return false;
 		}
-		if (fileStream != null) {
-			try {
-				fileStream.close();
-			} catch (IOException e) {
-				//don't complain, we're making a best effort to clean up
-			}
-			fileStream = null;
-		}
+		return true;
 	}
 }
