@@ -60,110 +60,50 @@ public class EclipseBundleData extends DefaultBundleData {
 		return (String[]) result.toArray(new String[result.size()]);
 	}
 
-	public EclipseBundleData(DefaultAdaptor adaptor) throws IOException {
-		super(adaptor);
+	public EclipseBundleData(DefaultAdaptor adaptor, long id) throws IOException {
+		super(adaptor, id);
 	}
 
-	public void initializeNewBundle(long id, String location, InputStream in) throws IOException {
-		this.id = id;
+	public void initializeNewBundle(String location, String fileName, boolean reference, File file) throws IOException {
 		this.location = location;
-		this.name = adaptor.mapLocationToName(location);
-		this.reference = false;
+		this.fileName = fileName;
+		this.reference = reference;
+		this.file = file;
 
-		dir = new File(((EclipseAdaptor)adaptor).getBundleRootDir(), String.valueOf(id));
-		dirData = new File(dir, ((EclipseAdaptor)adaptor).getDataDirName());
-		dirGeneration = new File(dir, String.valueOf(generation));
-		file = new File(dirGeneration, name);
-		setStartLevel(adaptor.getInitialBundleStartLevel());
-
-		if (!getGenerationDir().exists())
-		{
-			throw new IOException(
-					AdaptorMsg.formatter.getString(
-							"ADAPTOR_DIRECTORY_CREATE_EXCEPTION",
-							dirGeneration.getPath()));
-		}
-		DefaultAdaptor.readFile(in, file);
-		bundleFile = BundleFile.createBundleFile(file, this);
-		loadFromManifest();
-		initializeBase(location);
-	}
-
-	public void initializeReferencedBundle(long id, String location, String name) throws IOException {
-		this.id = id;
-		this.location = location;
-		this.name = name;
-		this.reference = true;
-	
-		dir = new File(((EclipseAdaptor)adaptor).getBundleRootDir(), String.valueOf(id));
-		dirData = new File(dir, ((EclipseAdaptor)adaptor).getDataDirName());
-		dirGeneration = new File(dir, String.valueOf(generation));
-		file = new File(name);
 		setStartLevel(adaptor.getInitialBundleStartLevel());
 		bundleFile = BundleFile.createBundleFile(file, this);
 		loadFromManifest();
-		// TODO it is unclear where the generation dir should be and what exactly will go in it
-//		if (!getGenerationDir().exists())
-//		{
-//			throw new IOException(
-//					AdaptorMsg.formatter.getString(
-//							"ADAPTOR_DIRECTORY_CREATE_EXCEPTION",
-//							dirGeneration.getPath()));
-//		}
 		initializeBase(location);
 	}
 
 	public void initializeExistingBundle(String directory) throws IOException {
-		id = Long.parseLong(directory);
-		dir = new File(((EclipseAdaptor)adaptor).getBundleRootDir(), String.valueOf(id));
-		dirData = new File(dir, ((EclipseAdaptor)adaptor).getDataDirName());
-		dirGeneration = new File(dir, String.valueOf(generation));
-		file = reference ? new File(name) : new File(dirGeneration, name);
-		if (! checkManifestTimeStamp(file))
-			throw new IOException();
+		
+		file = reference ? new File(fileName) : new File(dirGeneration, fileName);
 		bundleFile = BundleFile.createBundleFile(file,this);
+		if (! checkManifestTimeStamp(bundleFile))
+			throw new IOException();
 		initializeBase(location);
 	}
 
-	private boolean checkManifestTimeStamp(File bundlefile) {
+	private boolean checkManifestTimeStamp(BundleFile bundlefile) {
 		boolean on = true;
 		if ("true".equalsIgnoreCase(NO_TIMESTAMP_CHECKING))	//$NON-NLS-1$
 			return true;
-		
-		// When the bundle is jar'ed, simply check the time stamp of the jar
-		if( ! bundlefile.isDirectory() )	
-			return bundlefile.lastModified() == getManifestTimeStamp();
-		
+
 		// Otherwise, check the file time stamp
 		switch (getManifestType()) {
 		case MANIFEST:
-			return new File(bundlefile, Constants.OSGI_BUNDLE_MANIFEST).lastModified()==getManifestTimeStamp();
+			return bundlefile.getEntry(Constants.OSGI_BUNDLE_MANIFEST).getTime()==getManifestTimeStamp();
 		case PLUGIN:
-			if ( new File(bundlefile, PLUGIN_MANIFEST).lastModified()==getManifestTimeStamp() )
-				return true;
-			else 
-				return new File(bundlefile, FRAGMENT_MANIFEST).lastModified()==getManifestTimeStamp();
+			BundleEntry manifestEntry = bundlefile.getEntry(PLUGIN_MANIFEST);
+			if (manifestEntry == null)
+				manifestEntry = bundlefile.getEntry(FRAGMENT_MANIFEST);
+
+			return manifestEntry == null ? false : manifestEntry.getTime()==getManifestTimeStamp();
 		}
 		return true;	 
 	}
-	
-	void initialize() throws IOException {
-		initializeBase(location);
-		dir = new File(((EclipseAdaptor)adaptor).getBundleRootDir(), Long.toString(id));
-		File delete = new File(dir, ".delete");
-		if (delete.exists())
-			throw new NumberFormatException();
 
-		dirData = new File(dir, ((EclipseAdaptor)adaptor).getDataDirName());
-		dirGeneration = new File(dir, String.valueOf(generation));
-
-		if (reference)
-			file = new File(name);
-		else 
-			file = new File(dirGeneration, name);
-		bundleFile = BundleFile.createBundleFile(file, this);
-	}
-	
 	private void initializeBase(String location) throws IOException {
 		if (!location.endsWith("/"))
 			location += "/";
@@ -342,7 +282,7 @@ public class EclipseBundleData extends DefaultBundleData {
 		this.location = value;
 	}
 	public void setName(String value) {
-		this.name = value;
+		this.fileName = value;
 	}
 	public void setUniqueId(String value){
 		this.uniqueId = value;

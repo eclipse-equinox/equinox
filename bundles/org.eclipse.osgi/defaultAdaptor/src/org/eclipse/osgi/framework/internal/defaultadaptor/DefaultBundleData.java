@@ -44,8 +44,8 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 	public static final String METADATA_BUNDLE_STATUS = "METADATA_BUNDLE_STATUS";
 	public static final String METADATA_BUNDLE_METADATA = "METADATA_BUNDLE_METADATA";
 
-	/** top level bundle directory */
-	protected File dir;
+	/** top level storage directory for the bundle. */
+	protected File bundleStoreDir;
 
 	/** bundle data directory */
 	protected File dirData;
@@ -71,8 +71,8 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 	/** BundleFile object for this BundleData */
 	protected BundleFile bundleFile;
 
-	/** bundle's name */
-	protected String name;
+	/** bundle's file name */
+	protected String fileName;
 
 	/** theses values are loaded from the manifest */
 	protected String uniqueId;
@@ -106,28 +106,29 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 	 * the directory does not contain a ".bundle" file.
 	 * @throws IOException If an error occurs initializing the bundle data.
 	 */
-	public DefaultBundleData(DefaultAdaptor adaptor) {
+	public DefaultBundleData(DefaultAdaptor adaptor, long id) {
 		this.adaptor = adaptor;
+		this.id = id;
+		initBundleStoreDirs(String.valueOf(id));
 	}
 
 	/**
 	 * Read data from an existing directory.
 	 * This constructor is used by getInstalledBundles.
 	 *
-	 * @param directory The top level bundle directory.
 	 * @throws NumberFormatException if the directory is not a
 	 * number, the directory contains a ".delete" file or
 	 * the directory does not contain a ".bundle" file.
 	 * @throws IOException If an error occurs initializing the bundle data.
 	 */
-	public void initializeExistingBundle(String directory) throws IOException {
+	public void initializeExistingBundle() throws IOException {
+		String directory = String.valueOf(id);
 		id = Long.parseLong(directory);
-		dir = new File(adaptor.bundleRootDir, directory);
 
 		/* if the file is not a directory */
-		if (!dir.exists() || !dir.isDirectory())
+		if (!bundleStoreDir.exists() || !bundleStoreDir.isDirectory())
 			throw new NumberFormatException();
-		File delete = new File(dir, ".delete");
+		File delete = new File(bundleStoreDir, ".delete");
 
 		/* and the directory is not marked for delete */
 		if (delete.exists()) {
@@ -140,83 +141,31 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 			throw new NumberFormatException();
 		}
 
-		dirData = new File(dir, adaptor.dataDirName);
-		dirGeneration = new File(dir, String.valueOf(generation));
-
 		if (reference) {
-			file = new File(name);
+			file = new File(fileName);
 		} else {
-			file = new File(dirGeneration, name);
+			file = new File(dirGeneration, fileName);
 		}
 		bundleFile = BundleFile.createBundleFile(file, this);
 		loadFromManifest();
 	}
 
-	/**
-	 * Create data for a new directory.
-	 * This constructor is used by installBundle.
-	 *
-	 * @param id The id of the new bundle.
-	 * @param location The location string of the new bundle.
-	 */
-	public void initializeReferencedBundle(long id, String location, String name) throws IOException {
-		this.id = id;
+	public void initializeNewBundle(String location, String fileName, boolean reference, File file) throws IOException {
 		this.location = location;
-		this.name = name;
-		this.reference = true;
-
-		String directory = String.valueOf(id);
-
-		dir = new File(adaptor.bundleRootDir, directory);
-
-		dirData = new File(dir, adaptor.dataDirName);
-		dirGeneration = new File(dir, String.valueOf(generation));
-
-		this.file = new File(name);
+		this.fileName = fileName;
+		this.reference = reference;
+		this.file = file;
 
 		loadMetaData();
 		setStartLevel(adaptor.getInitialBundleStartLevel());
-
-		if (!getGenerationDir().exists()) {
-			throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_DIRECTORY_CREATE_EXCEPTION", getGenerationDir().getPath()));
-		}
-
-		this.bundleFile = BundleFile.createBundleFile(this.file, this);
+		bundleFile = BundleFile.createBundleFile(this.file,this);
 		loadFromManifest();
 	}
 
-	/**
-	 * Create data for a new directory.
-	 * This constructor is used by installBundle.
-	 *
-	 * @param id The id of the new bundle.
-	 * @param location The location string of the new bundle.
-	 */
-	public void initializeNewBundle(long id, String location, InputStream in) throws IOException {
-		this.id = id;
-		this.location = location;
-		this.name = adaptor.mapLocationToName(location);
-		this.reference = false;
-
-		String directory = String.valueOf(id);
-
-		dir = new File(adaptor.bundleRootDir, directory);
-
-		dirData = new File(dir, adaptor.dataDirName);
-		dirGeneration = new File(dir, String.valueOf(generation));
-
-		file = new File(dirGeneration, name);
-
-		loadMetaData();
-		setStartLevel(adaptor.getInitialBundleStartLevel());
-
-		if (!getGenerationDir().exists()) {
-			throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_DIRECTORY_CREATE_EXCEPTION", dirGeneration.getPath()));
-		}
-
-		DefaultAdaptor.readFile(in, file);
-		bundleFile = BundleFile.createBundleFile(file, this);
-		loadFromManifest();
+	protected void initBundleStoreDirs(String bundleID){
+		bundleStoreDir = new File(adaptor.getBundleStoreRootDir(), bundleID);
+		dirGeneration = new File(bundleStoreDir, String.valueOf(generation));
+		dirData = new File(adaptor.getDataRootDir(), bundleID + '/' + DefaultAdaptor.DATA_DIR_NAME);
 	}
 
 	/**
@@ -374,10 +323,10 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 	}
 
 	/**
-		 * Get the BundleData Location.  This will be used as the bundle
-		 * location by the framework.
-		 * @return the BundleData location.
-		 */
+	 * Get the BundleData Location.  This will be used as the bundle
+	 * location by the framework.
+	 * @return the BundleData location.
+	 */
 	public String getLocation() {
 		return (location);
 	}
@@ -410,7 +359,7 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 		status = metadata.getInt(METADATA_BUNDLE_STATUS, 0);
 		startLevel = metadata.getInt(METADATA_BUNDLE_ABSL, 1);
 		generation = metadata.getInt(METADATA_BUNDLE_GEN, -1);
-		name = metadata.get(METADATA_BUNDLE_NAME, null);
+		fileName = metadata.get(METADATA_BUNDLE_NAME, null);
 		location = metadata.get(METADATA_BUNDLE_LOC, null);
 		reference = metadata.getBoolean(METADATA_BUNDLE_REF, false);
 
@@ -418,13 +367,13 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 		if (npString != null)
 			setNativeCodePath(npString);
 
-		if (generation == -1 || name == null || location == null) {
+		if (generation == -1 || fileName == null || location == null) {
 			throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION"));
 		}
 	}
 
 	protected void loadMetaData() throws IOException {
-		metadata = (new MetaData(new File(dir, ".bundle"), "Bundle metadata"));
+		metadata = (new MetaData(new File(getBundleStoreDir(), ".bundle"), "Bundle metadata"));
 		metadata.load();
 	}
 
@@ -456,7 +405,7 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 	 *
 	 * @return Bundle generation directory.
 	 */
-	protected File getGenerationDir() {
+	public File getGenerationDir() {
 		if (!dirGeneration.exists() && !dirGeneration.mkdirs()) {
 			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 				Debug.println("Unable to create bundle jar directory: " + dirGeneration.getPath());
@@ -483,8 +432,8 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 	 *
 	 * @return Top level bundle directory.
 	 */
-	protected File getBundleDir() {
-		return (dir);
+	public File getBundleStoreDir() {
+		return (bundleStoreDir);
 	}
 
 	/**
@@ -496,7 +445,7 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 		metadata.setInt(METADATA_BUNDLE_STATUS, status);
 		metadata.setInt(METADATA_BUNDLE_ABSL, startLevel);
 		metadata.setInt(METADATA_BUNDLE_GEN, generation);
-		metadata.set(METADATA_BUNDLE_NAME, name);
+		metadata.set(METADATA_BUNDLE_NAME, fileName);
 		metadata.set(METADATA_BUNDLE_LOC, location);
 		metadata.setBoolean(METADATA_BUNDLE_REF, reference);
 		metadata.save();
@@ -509,13 +458,13 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 		*
 		* @throws IOException If there are no more available generation levels.
 		*/
-	protected DefaultBundleData nextGeneration(String name) throws IOException {
+	protected DefaultBundleData nextGeneration(String fileName) throws IOException {
 		int nextGeneration = generation;
 
 		while (nextGeneration < Integer.MAX_VALUE) {
 			nextGeneration++;
 
-			File nextDirGeneration = new File(dir, String.valueOf(nextGeneration));
+			File nextDirGeneration = new File(getBundleStoreDir(), String.valueOf(nextGeneration));
 
 			if (nextDirGeneration.exists()) {
 				continue;
@@ -531,8 +480,8 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 
 			next.generation = nextGeneration;
 			next.dirGeneration = nextDirGeneration;
-			next.name = name;
-			next.file = new File(name);
+			next.fileName = fileName;
+			next.file = new File(fileName);
 			next.reference = true;
 			// null out the manifest to force it to be re-read.
 			next.manifest = null;
@@ -555,7 +504,7 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 		while (nextGeneration < Integer.MAX_VALUE) {
 			nextGeneration++;
 
-			File nextDirGeneration = new File(dir, String.valueOf(nextGeneration));
+			File nextDirGeneration = new File(getBundleStoreDir(), String.valueOf(nextGeneration));
 
 			if (nextDirGeneration.exists()) {
 				continue;
@@ -573,9 +522,9 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 			next.dirGeneration = nextDirGeneration;
 			if (next.reference) {
 				next.reference = false;
-				next.name = adaptor.mapLocationToName(location);
+				next.fileName = adaptor.mapLocationToName(location);
 			}
-			next.file = new File(nextDirGeneration, next.name);
+			next.file = new File(nextDirGeneration, next.fileName);
 			// null out the manifest to force it to be re-read.
 			next.manifest = null;
 			return (next);
@@ -656,8 +605,8 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 		nativepaths = parseNativeCodePath(value);
 	}
 
-	public String getName() {
-		return name;
+	public String getFileName() {
+		return fileName;
 	}
 	public String getUniqueId() {
 		return uniqueId;
@@ -682,18 +631,6 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 	}
 	public DefaultAdaptor getAdaptor() {
 		return adaptor;
-	}
-	public long getManifestTimeStamp() {
-		return 0;
-	}
-	public byte getManifestType() {
-		return 0;
-	}
-	public void setManifestTimeStamp(long stamp) {
-		//do nothing
-	}
-	public void setManifestType(byte type) {
-		//do nothing		
 	}
 }
 

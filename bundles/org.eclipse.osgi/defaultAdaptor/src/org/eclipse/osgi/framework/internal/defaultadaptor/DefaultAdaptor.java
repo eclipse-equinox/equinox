@@ -29,17 +29,18 @@ import org.osgi.framework.*;
  */
 public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 
-	protected static final String METADATA_ADAPTOR_NEXTID = "METADATA_ADAPTOR_NEXTID";
-	protected static final String METADATA_ADAPTOR_IBSL = "METADATA_ADAPTOR_IBSL";
+	public static final String METADATA_ADAPTOR_NEXTID = "METADATA_ADAPTOR_NEXTID";
+	public static final String METADATA_ADAPTOR_IBSL = "METADATA_ADAPTOR_IBSL";
+	public static final String DATA_DIR_NAME = "data";
 
 	/** directory containing installed bundles */
-	protected File bundleRootDir;
+	protected File bundleStoreRootDir;
 
-	/** String containing bundle dir */
-	protected String bundledir = null;
+	/** directory containing data directories for installed bundles */
+	protected File dataRootDir;
 
-	/** name of a bundles data directory */
-	protected String dataDirName = "data";
+	/** String containing bundle store root dir */
+	protected String bundleStore = null;
 
 	protected boolean reset = false;
 
@@ -95,7 +96,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 						String key = tok.nextToken();
 						if (key.equalsIgnoreCase("bundledir")) {
 							// save file name for initializeStorage to use
-							bundledir = tok.nextToken();
+							bundleStore = tok.nextToken();
 						}
 					}
 				}
@@ -105,7 +106,8 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 
 	public void initialize(EventPublisher eventPublisher) {
 		super.initialize(eventPublisher);
-		getBundleDir();
+		initBundleStoreRootDir();
+		initDataRootDir();
 		readAdaptorManifest();
 		stateManager = createStateManager();
 	}
@@ -115,7 +117,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 	 * @return the StateManager.
 	 */
 	protected StateManager createStateManager() {
-		stateManager = new StateManager(bundleRootDir);
+		stateManager = new StateManager(getBundleStoreRootDir());
 		State systemState = stateManager.getSystemState();
 		if (systemState != null)
 			return stateManager;
@@ -140,7 +142,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 	}
 
 	/**
-	 * Get the directory to store the bundles in.  Bundledir can be set in 3 different ways.
+	 * Init the directory to store the bundles in.  Bundledir can be set in 3 different ways.
 	 * Priority is:
 	 * 1 - OSGI Launcher command line -adaptor argument
 	 * 2 - System property org.eclipse.osgi.framework.defaultadaptor.bundledir - could be specified with -D when launching
@@ -149,22 +151,35 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 	 * Bundledir will be stored back to adaptor properties which
 	 * the framework will copy into the System properties.
 	 */
-	protected void getBundleDir() {
-		/* if bundledir was not set by the constructor from the -adaptor cmd line arg */
-		if (bundledir == null) {
+	protected void initBundleStoreRootDir() {
+		/* if bundleStore was not set by the constructor from the -adaptor cmd line arg */
+		if (bundleStore == null) {
 			/* check the system properties */
-			bundledir = System.getProperty("org.eclipse.osgi.framework.defaultadaptor.bundledir");
+			bundleStore = System.getProperty("org.eclipse.osgi.framework.defaultadaptor.bundledir");
 
-			if (bundledir == null) {
+			if (bundleStore == null) {
 				/* check the osgi.properties file, but default to "bundles" */
-				bundledir = properties.getProperty("org.eclipse.osgi.framework.defaultadaptor.bundledir", "bundles");
+				bundleStore = properties.getProperty("org.eclipse.osgi.framework.defaultadaptor.bundledir", "bundles");
 			}
 		}
 
-		/* store bundledir back into adaptor properties for others to see */
-		properties.put("org.eclipse.osgi.framework.defaultadaptor.bundledir", bundledir);
+		/* store bundleStore back into adaptor properties for others to see */
+		properties.put("org.eclipse.osgi.framework.defaultadaptor.bundledir", bundleStore);
 
-		bundleRootDir = new File(bundledir);
+		bundleStoreRootDir = new File(bundleStore);
+
+	}
+
+	protected void initDataRootDir(){
+		dataRootDir = getBundleStoreRootDir();
+	}
+
+	public File getBundleStoreRootDir() {
+		return bundleStoreRootDir;
+	}
+
+	public File getDataRootDir() {
+		return dataRootDir;
 	}
 
 	/**
@@ -204,18 +219,19 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 	 */
 	public void initializeStorage() throws IOException {
 		boolean makedir = false;
-		if (bundleRootDir.exists()) {
+		File bundleStore = getBundleStoreRootDir();
+		if (bundleStore.exists()) {
 			if (reset) {
 				makedir = true;
-				if (!rm(bundleRootDir)) {
+				if (!rm(bundleStore)) {
 					if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-						Debug.println("Could not remove directory: " + bundleRootDir.getPath());
+						Debug.println("Could not remove directory: " + bundleStore.getPath());
 					}
 				}
 			} else {
-				if (!bundleRootDir.isDirectory()) {
+				if (!bundleStore.isDirectory()) {
 					if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-						Debug.println("Exists but not a directory: " + bundleRootDir.getPath());
+						Debug.println("Exists but not a directory: " + bundleStore.getPath());
 					}
 
 					throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION"));
@@ -225,9 +241,9 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 			makedir = true;
 		}
 		if (makedir) {
-			if (!bundleRootDir.mkdirs()) {
+			if (!bundleStore.mkdirs()) {
 				if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-					Debug.println("Unable to create directory: " + bundleRootDir.getPath());
+					Debug.println("Unable to create directory: " + bundleStore.getPath());
 				}
 
 				throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION"));
@@ -241,7 +257,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 	}
 
 	protected File getMetaDataFile() {
-		return new File(bundleRootDir, ".framework");
+		return new File(getBundleStoreRootDir(), ".framework");
 	}
 
 	/**
@@ -264,7 +280,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 			int len = list.length;
 
 			for (int i = 0; i < len; i++) {
-				if (dataDirName.equals(list[i])) {
+				if (DATA_DIR_NAME.equals(list[i])) {
 					continue; /* do not examine the bundles data dir. */
 				}
 
@@ -305,14 +321,14 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 	 *
 	 */
 	public void compactStorage() {
-		compact(bundleRootDir);
+		compact(getBundleStoreRootDir());
 	}
 
 	/**
 	 * @see org.eclipse.osgi.framework.adaptor.FrameworkAdaptor#getInstalledBundles()
 	 */
 	public Vector getInstalledBundles() {
-		String list[] = bundleRootDir.list();
+		String list[] = getBundleStoreRootDir().list();
 
 		if (list == null) {
 			return null;
@@ -327,8 +343,9 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 				DefaultBundleData data;
 
 				try {
-					data = (DefaultBundleData) getElementFactory().getBundleData(this);
-					data.initializeExistingBundle(list[i]);
+					long id = Long.parseLong(list[i]);
+					data = (DefaultBundleData) getElementFactory().getBundleData(this,id);
+					data.initializeExistingBundle();
 				} catch (NumberFormatException e) {
 					continue; /* the directory is not a bundle id */
 				}
@@ -385,7 +402,8 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 					 * before allocating bundle id.
 					 */
 					InputStream in = source.getInputStream();
-
+					URL sourceURL = source.getURL();
+					String protocol = sourceURL == null ? null : sourceURL.getProtocol();
 					try {
 						try {
 							id = getNextBundleId();
@@ -401,11 +419,28 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 								throw new BundleException(AdaptorMsg.formatter.getString("ADAPTOR_URL_CREATE_EXCEPTION", reference));
 							}
 
-							data = (DefaultBundleData) getElementFactory().getBundleData(DefaultAdaptor.this);
-							data.initializeReferencedBundle(id, location, reference.getPath());
+							data = (DefaultBundleData) getElementFactory().getBundleData(DefaultAdaptor.this,id);
+							data.initializeNewBundle(location, reference.getPath(),true, new File(reference.getPath()));
 						} else {
-							data = (DefaultBundleData) getElementFactory().getBundleData(DefaultAdaptor.this);
-							data.initializeNewBundle(id, location, in);
+							data = (DefaultBundleData) getElementFactory().getBundleData(DefaultAdaptor.this,id);
+							File genDir = data.getGenerationDir();
+							if (!genDir.exists()) {
+								throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_DIRECTORY_CREATE_EXCEPTION", genDir.getPath()));
+							}
+							
+							String fileName = mapLocationToName(location);
+							File outFile = new File(genDir,fileName);
+							if ("file".equals(protocol)) {
+								File inFile = new File(source.getURL().getPath());
+								if (inFile.isDirectory()) {
+									copyDir(inFile,outFile);
+								} else {
+									readFile(in,outFile);
+								}
+							} else {
+								readFile(in,outFile);
+							}
+							data.initializeNewBundle(location,fileName,false,outFile);
 						}
 					} finally {
 						try {
@@ -432,7 +467,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 				}
 
 				if (data != null) {
-					File bundleDir = data.getBundleDir();
+					File bundleDir = data.getBundleStoreDir();
 
 					if (!rm(bundleDir)) {
 						/* mark this bundle to be deleted to ensure it is fully cleaned up
@@ -497,33 +532,30 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 				this.data = (DefaultBundleData) bundledata;
 				try {
 					InputStream in = source.getInputStream();
+					URL sourceURL = source.getURL();
+					String protocol = sourceURL == null ? null : sourceURL.getProtocol();
 					try {
 						if (in instanceof ReferenceInputStream) {
-							URL reference = ((ReferenceInputStream) in).getReference();
-
+							ReferenceInputStream refIn = (ReferenceInputStream) in;
+							URL reference = (refIn).getReference();
 							if (!"file".equals(reference.getProtocol())) {
 								throw new BundleException(AdaptorMsg.formatter.getString("ADAPTOR_URL_CREATE_EXCEPTION", reference));
 							}
-
 							// check to make sure we are not just trying to update to the same
 							// directory reference.  This would be a no-op.
 							String path = reference.getPath();
-							if (path.equals(data.getName())) {
+							if (path.equals(data.getFileName())) {
 								throw new BundleException(AdaptorMsg.formatter.getString("ADAPTOR_SAME_REF_UPDATE", reference));
 							}
-
 							try {
 								newData = data.nextGeneration(reference.getPath());
 							} catch (IOException e) {
 								throw new BundleException(AdaptorMsg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION"), e);
 							}
-
 							File bundleGenerationDir = newData.getGenerationDir();
-
 							if (!bundleGenerationDir.exists()) {
 								throw new BundleException(AdaptorMsg.formatter.getString("ADAPTOR_DIRECTORY_CREATE_EXCEPTION", bundleGenerationDir.getPath()));
 							}
-
 							newData.bundleFile = BundleFile.createBundleFile(newData.file, newData);
 						} else {
 							try {
@@ -531,17 +563,22 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 							} catch (IOException e) {
 								throw new BundleException(AdaptorMsg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION"), e);
 							}
-
 							File bundleGenerationDir = newData.getGenerationDir();
-
 							if (!bundleGenerationDir.exists()) {
 								throw new BundleException(AdaptorMsg.formatter.getString("ADAPTOR_DIRECTORY_CREATE_EXCEPTION", bundleGenerationDir.getPath()));
 							}
-
-							File file = newData.getBundleFile();
-
-							readFile(in, file);
-							newData.bundleFile = BundleFile.createBundleFile(file, newData);
+							File outFile = newData.getBundleFile();
+							if ("file".equals(protocol)) {
+								File inFile = new File(source.getURL().getPath());
+								if (inFile.isDirectory()) {
+									copyDir(inFile, outFile);
+								} else {
+									readFile(in, outFile);
+								}
+							} else {
+								readFile(in, outFile);
+							}
+							newData.bundleFile = BundleFile.createBundleFile(outFile, newData);
 						}
 					} finally {
 						try {
@@ -674,7 +711,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 			 * @throws BundleException If a failure occured modifiying peristent storage.
 			 */
 			public void commit(boolean postpone) throws BundleException {
-				File bundleDir = data.getBundleDir();
+				File bundleDir = data.getBundleStoreDir();
 
 				if (postpone || !rm(bundleDir)) {
 					/* mark this bundle to be deleted to ensure it is fully cleaned up
@@ -873,7 +910,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 			nextId++;
 			metadata.setLong(METADATA_ADAPTOR_NEXTID, nextId);
 
-			File bundleDir = new File(bundleRootDir, String.valueOf(id));
+			File bundleDir = new File(getBundleStoreRootDir(), String.valueOf(id));
 			if (bundleDir.exists()) {
 				continue;
 			}
@@ -882,6 +919,23 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 		}
 
 		throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION"));
+	}
+
+	public static void copyDir(File inDir, File outDir) throws IOException{
+		File[] files = inDir.listFiles();
+		if (files != null && files.length>0) {
+			outDir.mkdir();
+			for (int i=0; i<files.length; i++) {
+				File outFile = new File(outDir,files[i].getName());
+				if (files[i].isDirectory()) {
+					copyDir(files[i],outFile);
+				}
+				else {
+					InputStream in = new FileInputStream(files[i]);
+					readFile(in,outFile);
+				}
+			}
+		}
 	}
 
 	/**

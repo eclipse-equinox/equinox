@@ -63,7 +63,11 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		super(args);
 		setDebugOptions();
 	}
-	
+
+	protected void initDataRootDir(){
+		dataRootDir = new File(System.getProperty("osgi.instance.area"));
+	}
+
 	protected StateManager createStateManager() {
 		readHeaders();
 		checkLocationAndReinitialize();
@@ -245,7 +249,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 						try {
 							id = in.readLong();
 							if (id != 0) {
-								EclipseBundleData data = (EclipseBundleData) getElementFactory().getBundleData(this);
+								EclipseBundleData data = (EclipseBundleData) getElementFactory().getBundleData(this,id);
 								loadMetaDataFor(data, in);
 								data.initializeExistingBundle(Long.toString(id));
 								if (Debug.DEBUG && Debug.DEBUG_GENERAL)
@@ -309,7 +313,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		EclipseBundleData bundleData = (EclipseBundleData) data;
 		out.writeByte(OBJECT);
 		writeStringOrNull(out, bundleData.getLocation());
-		writeStringOrNull(out, bundleData.getName());	//TODO Check how this works regarding localization
+		writeStringOrNull(out, bundleData.getFileName());	//TODO Check how this works regarding localization
 		writeStringOrNull(out, bundleData.getUniqueId());
 		writeStringOrNull(out, bundleData.getVersion().toString());
 		writeStringOrNull(out, bundleData.getActivator());
@@ -348,15 +352,6 @@ public class EclipseAdaptor extends DefaultAdaptor {
 	
 	protected BundleContext getContext() {
 		return context;	
-	}
-
-	public File getBundleRootDir() {
-		super.getBundleDir();
-		return bundleRootDir;
-	}
-
-	public String getDataDirName() {
-		return dataDirName;
 	}
 
 	public void saveMetaData() {

@@ -17,8 +17,8 @@ import org.eclipse.osgi.framework.adaptor.core.AbstractBundleData;
 
 public class AdaptorElementFactory {
 
-	public AbstractBundleData getBundleData(DefaultAdaptor adaptor) throws IOException {
-		return new DefaultBundleData(adaptor);
+	public AbstractBundleData getBundleData(DefaultAdaptor adaptor, long id) throws IOException {
+		return new DefaultBundleData(adaptor, id);
 	}
 
 	/**

@@ -471,13 +471,13 @@ public class EclipseStarter {
 			result = new File(location);
 		}
 		System.getProperties().put("osgi.instance.area", result.getAbsolutePath());	
-		System.getProperties().put("org.eclipse.osgi.framework.defaultadaptor.bundledir", result.getAbsolutePath());	
 	}
 
 	private static void setConfigurationLocation() {
 		String location = System.getProperty("osgi.configuration.area");
 		if (location != null) {
 			configLocation = location;
+			System.getProperties().put("org.eclipse.osgi.framework.defaultadaptor.bundledir", configLocation + "/bundles");	
 			if (System.getProperty("osgi.manifest.cache") == null)
 				System.getProperties().put("osgi.manifest.cache", configLocation + "/manifests");
 			return;
@@ -500,6 +500,7 @@ public class EclipseStarter {
 				configLocation = configLocation.substring(0, index);
 		} 
 		System.getProperties().put("osgi.configuration.area", configLocation);
+		System.getProperties().put("org.eclipse.osgi.framework.defaultadaptor.bundledir", configLocation + "/bundles");	
 		if (System.getProperty("osgi.manifest.cache") == null) {
 			System.getProperties().put("osgi.manifest.cache", configLocation + "/manifests");
 		}

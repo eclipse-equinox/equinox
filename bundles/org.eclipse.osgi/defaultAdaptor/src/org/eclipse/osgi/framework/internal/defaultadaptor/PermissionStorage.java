@@ -43,7 +43,7 @@ class PermissionStorage implements org.eclipse.osgi.framework.adaptor.Permission
 	 * @throws IOException If an error occurs initializing the object.
 	 */
 	protected PermissionStorage(DefaultAdaptor adaptor) throws IOException {
-		permissionDir = new File(adaptor.bundleRootDir, "permdata");
+		permissionDir = new File(adaptor.getBundleStoreRootDir(), "permdata");
 		permissionFiles = new Hashtable();
 
 		if (!permissionDir.exists() && !permissionDir.mkdirs()) {
