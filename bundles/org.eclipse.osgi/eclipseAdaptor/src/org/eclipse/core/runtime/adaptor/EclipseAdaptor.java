@@ -189,6 +189,10 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		properties.put("type", LocationManager.PROP_CONFIG_AREA);
 		context.registerService(Location.class.getName(), LocationManager.getConfigurationLocation(), properties);
 
+		properties = new Hashtable(1);
+		properties.put("type", LocationManager.PROP_INSTALL_AREA);
+		context.registerService(Location.class.getName(), LocationManager.getInstallLocation(), properties);
+
 		register(org.eclipse.osgi.service.environment.EnvironmentInfo.class.getName(), EnvironmentInfo.getDefault(), bundle);
 		register(PlatformAdmin.class.getName(), stateManager, bundle);
 		register(PluginConverter.class.getName(), new PluginConverterImpl(context), bundle);

@@ -17,21 +17,29 @@ import java.util.Properties;
 import org.eclipse.osgi.service.datalocation.Location;
 
 public class LocationManager {
+	private static Location installLocation = null;
 	private static Location configurationLocation = null;
 	private static Location userLocation = null;
 	private static Location instanceLocation = null;
 
+	/** @deprecated this field will be removed */
 	public static final String PROP_INSTALL_LOCATION = "osgi.installLocation"; //$NON-NLS-1$
+	
+	public static final String PROP_INSTALL_AREA = "osgi.install.area"; //$NON-NLS-1$
 	public static final String PROP_CONFIG_AREA = "osgi.configuration.area"; //$NON-NLS-1$
 	public static final String PROP_INSTANCE_AREA = "osgi.instance.area"; //$NON-NLS-1$
 	public static final String PROP_USER_AREA = "osgi.user.area"; //$NON-NLS-1$
 	public static final String PROP_MANIFEST_CACHE = "osgi.manifest.cache"; //$NON-NLS-1$
+	public static final String PROP_USER_HOME = "user.home"; //$NON-NLS-1$
+	public static final String PROP_USER_DIR = "user.dir"; //$NON-NLS-1$
 	
 	// Constants for configuration location discovery
 	private static final String ECLIPSE = "eclipse"; //$NON-NLS-1$
 	private static final String PRODUCT_SITE_MARKER = ".eclipseproduct"; //$NON-NLS-1$
 	private static final String PRODUCT_SITE_ID = "id"; //$NON-NLS-1$
 	private static final String PRODUCT_SITE_VERSION = "version"; //$NON-NLS-1$
+
+	private static final String CONFIG_DIR = "configuration"; //$NON-NLS-1$
 
 	// Data mode constants for user, configuration and data locations.
 	private static final String NONE = "<none>"; //$NON-NLS-1$
@@ -40,6 +48,8 @@ public class LocationManager {
 	private static final String USER_DIR = "<user.dir>"; //$NON-NLS-1$
 
 	private static URL buildURL(String spec) {
+		if (spec == null)
+			return null;
 		try {
 			return new URL(spec);
 		} catch (MalformedURLException e) {
@@ -55,9 +65,10 @@ public class LocationManager {
 		if (location != null) {
 			location = buildURL(location).getFile();
 			location = location.replace('\\', '/');
-			int index = location.lastIndexOf('/');
-			if (location.endsWith(".cfg") || location.endsWith("/")) 
-				location = location.substring(0, index);
+			if (location.endsWith(".cfg")) {
+				int index = location.lastIndexOf('/');
+				location = location.substring(0, index + 1);
+			}
 			System.getProperties().put(PROP_CONFIG_AREA, location);
 		} 
 	}
@@ -71,8 +82,11 @@ public class LocationManager {
 		
 		mungeConfigurationLocation();
 		defaultLocation = buildURL(computeDefaultConfigurationLocation());
-		configurationLocation = buildLocation(PROP_CONFIG_AREA, defaultLocation, ".config");
+		configurationLocation = buildLocation(PROP_CONFIG_AREA, defaultLocation, CONFIG_DIR);
 		initializeDerivedConfigurationLocations(configurationLocation.getURL());
+
+		// assumes that the property is already set
+		installLocation = buildLocation(PROP_INSTALL_AREA, null, null);
 	}
 
 	private static Location buildLocation(String property, URL defaultLocation, String userDefaultAppendage) {
@@ -91,7 +105,7 @@ public class LocationManager {
 			if (location.equalsIgnoreCase(USER_HOME)) 
 				location = computeDefaultUserAreaLocation(userDefaultAppendage);
 			if (location.equalsIgnoreCase(USER_DIR)) 
-				location = new File(System.getProperty("user.dir"), userDefaultAppendage).getAbsolutePath();
+				location = new File(System.getProperty(PROP_USER_DIR), userDefaultAppendage).getAbsolutePath();
 			URL url = buildURL(location);
 			if (url != null) {
 				result = new BasicLocation(property, null, false);
@@ -104,9 +118,9 @@ public class LocationManager {
 	private static void initializeDerivedConfigurationLocations(URL base) {
 		// TODO assumes the base URL is a file:
 		String location = base.getFile();
-		System.getProperties().put("org.eclipse.osgi.framework.defaultadaptor.bundledir", location + "/bundles");	
+		System.getProperties().put("org.eclipse.osgi.framework.defaultadaptor.bundledir", location + "bundles");	
 		if (System.getProperty(PROP_MANIFEST_CACHE) == null)
-			System.getProperties().put(PROP_MANIFEST_CACHE, location + "/manifests");
+			System.getProperties().put(PROP_MANIFEST_CACHE, location + "manifests");
 	}
 	
 	private static String computeDefaultConfigurationLocation() {
@@ -117,24 +131,19 @@ public class LocationManager {
 		//    defined in .eclipseproduct marker file. If .eclipseproduct does not
 		//    exist, use "eclipse" as the application-id.
 		
-		String installProperty = System.getProperty(PROP_INSTALL_LOCATION);
+		String installProperty = System.getProperty(PROP_INSTALL_AREA);
 		URL installURL = null;
 		try {
 			installURL = new URL(installProperty);
 		} catch (MalformedURLException e) {
-			// do nothgin here since it is basically impossible to get a bogus url 
+			// do nothing here since it is basically impossible to get a bogus url 
 		}
 		File installDir = new File(installURL.getFile());
-		if ("file".equals(installURL.getProtocol()) && installDir.canWrite()) { //$NON-NLS-1$
-//			if (debug)
-//				debug("Using the installation directory."); //$NON-NLS-1$
-			return new File(installDir, ".config").getAbsolutePath();
-		}
+		if ("file".equals(installURL.getProtocol()) && installDir.canWrite()) //$NON-NLS-1$
+			return new File(installDir, CONFIG_DIR).getAbsolutePath();
 
 		// We can't write in the eclipse install dir so try for some place in the user's home dir
-//		if (debug)
-//			debug("Using the user.home location."); //$NON-NLS-1$
-		return computeDefaultUserAreaLocation(".config");
+		return computeDefaultUserAreaLocation(CONFIG_DIR);
 	}
 
 	private static String computeDefaultUserAreaLocation(String pathAppendage) {
@@ -142,8 +151,10 @@ public class LocationManager {
 		//    is unique for each local user, and <application-id> is the one 
 		//    defined in .eclipseproduct marker file. If .eclipseproduct does not
 		//    exist, use "eclipse" as the application-id.
-		String installProperty = System.getProperty(PROP_INSTALL_LOCATION);
+		String installProperty = System.getProperty(PROP_INSTALL_AREA);
 		URL installURL = buildURL(installProperty);
+		if (installURL == null)
+			return null;
 		File installDir = new File(installURL.getFile());
 		String appName = "." + ECLIPSE; //$NON-NLS-1$
 		File eclipseProduct = new File(installDir, PRODUCT_SITE_MARKER );
@@ -163,8 +174,8 @@ public class LocationManager {
 				// in the user's home dir.
 			}
 		}
-		String userHome = System.getProperty("user.home"); //$NON-NLS-1$
-		return new File(userHome, appName + "/" + pathAppendage).getAbsolutePath();
+		String userHome = System.getProperty(PROP_USER_HOME);
+		return new File(userHome, appName + "/" + pathAppendage).getAbsolutePath();   //$NON-NLS-1$
 	}
 	
 	public static Location getUserLocation() {
@@ -172,6 +183,9 @@ public class LocationManager {
 	}
 	public static Location getConfigurationLocation() {
 		return configurationLocation;
+	}
+	public static Location getInstallLocation() {
+		return installLocation;
 	}
 	public static Location getInstanceLocation() {
 		return instanceLocation;

@@ -50,7 +50,7 @@ public class EnvironmentInfo implements org.eclipse.osgi.service.environment.Env
 		return System.getProperty("osgi.debug") != null;
 	}
 
-	public String[] getAllArgs() {
+	public String[] getCommandLineArgs() {
 		return allArgs;
 	}
 
@@ -58,7 +58,7 @@ public class EnvironmentInfo implements org.eclipse.osgi.service.environment.Env
 		return frameworkArgs;
 	}
 
-	public String[] getApplicationArgs() {
+	public String[] getNonFrameworkArgs() {
 		return appArgs;
 	}
 

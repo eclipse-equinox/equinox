@@ -10,13 +10,13 @@
  *******************************************************************************/
 package org.eclipse.osgi.service.environment;
 
-//TODO There is basically two kinds of info that are required from the running OSGi : some are related to the args that have been passed to the system,
-// some others are relative the state in which the osgi platform is running (debug, dev?, etc...). I temporarily put them here   
-
-
 /**
  * A Framework service which gives access to the command line used to start
- * this running framework.  
+ * this running framework as well as information about the environment
+ * such as the current operating system, machine architecture, locale and 
+ * windowing system.
+ * 
+ * @since 3.0
  */
 public interface EnvironmentInfo {
 	
@@ -24,23 +24,19 @@ public interface EnvironmentInfo {
 	 * Returns all command line arguments specified when the running framework was started.
 	 * @return the array of command line arguments.
 	 */
-	public String[] getAllArgs();
-	
+	public String[] getCommandLineArgs();
 	/**
 	 * Returns the arguments consumed by the framework implementation itself.  Which
 	 * arguments are consumed is implementation specific.
 	 * @return the array of command line arguments consumed by the framework.
 	 */
-	public String[] getFrameworkArgs();
-
+	public String[] getFrameworkArgs();	
 	/**
 	 * Returns the arguments not consumed by the framework implementation itself.  Which
-	 * arguments are consumed is implementation specific. These arguments are available 
-	 * for use by the application.
+	 * arguments are consumed is implementation specific.
 	 * @return the array of command line arguments not consumed by the framework.
 	 */
-	public String[] getApplicationArgs();
-	
+	public String[] getNonFrameworkArgs();
 	/**
 	 * Returns the string name of the current system architecture.  
 	 * The value is a user-defined string if the architecture is 
@@ -48,7 +44,6 @@ public interface EnvironmentInfo {
 	 * returned by <code>java.lang.System.getProperty("os.arch")</code>.
 	 * 
 	 * @return the string name of the current system architecture
-	 * @since 2.0
 	 */
 	public String getOSArch();
 	
@@ -83,7 +78,15 @@ public interface EnvironmentInfo {
 	 */
 	public String getWS();
 	
+	/**
+	 * Returns true if the framework is in debug mode.
+	 * @return whether or not the framework is in debug mode
+	 */
+	public boolean inDebugMode(); 
 	
-	public boolean inDebugMode(); //The same API could exists at the Eclipse level (why should we debug OSGi when we want to debug eclipse and vice-versa)	
-	
+	/**
+	 * Returns true if the framework is in development mode.
+	 * @return whether or not the framework is in development mode
+	 */
+	public boolean inDevelopmentMode(); 
 }

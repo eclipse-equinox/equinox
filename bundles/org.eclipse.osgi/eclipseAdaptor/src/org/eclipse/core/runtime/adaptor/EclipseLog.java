@@ -73,7 +73,7 @@ public class EclipseLog extends DefaultLog {
 		writeln(", NL=" + EnvironmentInfo.getDefault().getNL()); //$NON-NLS-1$
 		// Add the command-line arguments used to invoke the platform 
 		// XXX: this includes runtime-private arguments - should we do that?
-		String[] args = EnvironmentInfo.getDefault().getApplicationArgs();
+		String[] args = EnvironmentInfo.getDefault().getNonFrameworkArgs();
 		if (args != null && args.length > 0) {
 			write("Command-line arguments:"); //$NON-NLS-1$
 			for (int i = 0; i < args.length; i++) {

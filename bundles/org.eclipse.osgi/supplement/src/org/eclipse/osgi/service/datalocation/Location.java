@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.osgi.service.datalocation;
 
+import java.io.IOException;
 import java.net.URL;
 
 /**
@@ -23,6 +24,14 @@ public interface Location {
 	 * @return whether or not this location can assign a default value
 	 */
 	public boolean allowsDefault();	
+	
+	/**
+	 * Returns the default value of this location if any.  <code>null</code> is returned
+	 * if no default is avaliable.  Note that even locations which allow defaults may still
+	 * return <code>null</code>.
+	 * @return the default value for this location
+	 */
+	public URL getDefault();
 	
 	/**
 	 * Returns the parent of this location or <code>null</code> if none is available.
@@ -59,4 +68,23 @@ public interface Location {
 	 * @throws IllegalStateException if the location's value is already set
 	 */
 	public void setURL(URL value) throws IllegalStateException;
+
+	/**
+	 * Attempts to lock this location with a canonical locking mechanism and returns
+	 * <code>true</code> if the lock could be acquired.  Not all locations can be 
+	 * locked.
+	 * <p>
+	 * Locking a location is advisory only.  That is, it does not prevent other applications from 
+	 * modifying the same location
+	 * </p>
+	 * 
+	 * @exception IOException if there was an unexpected problem while acquiring the lock.
+	 */
+	public boolean lock() throws IOException;
+	
+	/**
+	 * Releases the lock on this location.  If the location is not already locked, no action 
+	 * is taken.
+	 */
+	public void release();
 }

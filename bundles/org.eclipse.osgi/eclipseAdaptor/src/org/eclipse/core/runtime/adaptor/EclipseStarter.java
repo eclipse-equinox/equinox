@@ -21,6 +21,7 @@ import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.framework.tracker.ServiceTracker;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.service.resolver.*;
+import org.eclipse.osgi.service.runnable.ParameterizedRunnable;
 import org.osgi.framework.*;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.startlevel.StartLevel;
@@ -47,11 +48,6 @@ public class EclipseStarter {
 	private static final String DATA = "-data"; //$NON-NLS-1$
 	
 	// System properties
-	public static final String PROP_INSTALL_LOCATION = "osgi.installLocation"; //$NON-NLS-1$
-	public static final String PROP_CONFIG_AREA = "osgi.configuration.area"; //$NON-NLS-1$
-	public static final String PROP_INSTANCE_AREA = "osgi.instance.area"; //$NON-NLS-1$
-	public static final String PROP_USER_AREA = "osgi.user.area"; //$NON-NLS-1$
-	public static final String PROP_MANIFEST_CACHE = "osgi.manifest.cache"; //$NON-NLS-1$
 	public static final String PROP_DEBUG = "osgi.debug"; //$NON-NLS-1$
 	public static final String PROP_DEV = "osgi.dev"; //$NON-NLS-1$
 	public static final String PROP_CONSOLE = "osgi.console"; //$NON-NLS-1$
@@ -73,7 +69,24 @@ public class EclipseStarter {
 	protected static final String DEFAULT_CONSOLE_CLASS = "org.eclipse.osgi.framework.internal.core.FrameworkConsole";
 	private static final String CONSOLE_NAME = "OSGi Console";
 	private static ServiceTracker applicationTracker;
+
 	public static Object run(String[] args, Runnable endSplashHandler) throws Exception {
+		try {
+			startup(args, endSplashHandler);
+			run(null);
+		} finally {
+			shutdown();
+		}
+		// Return an Integer containing the exit code.
+		String exitCode = System.getProperty(PROP_EXITCODE);
+		try {
+			return exitCode == null ? new Integer(0) : new Integer(exitCode);
+		} catch (NumberFormatException e) {
+			return new Integer(17);
+		}
+	}
+	
+	public static void startup(String[] args, Runnable endSplashHandler) throws Exception {
 		processCommandLine(args);
 		LocationManager.initializeLocations();
 		loadConfigurationInfo();
@@ -81,39 +94,29 @@ public class EclipseStarter {
 		adaptor = createAdaptor();
 		OSGi osgi = new OSGi(adaptor);
 		osgi.launch();
-		try {
-			String console = System.getProperty(PROP_CONSOLE);
-			if (console != null)
-				startConsole(osgi, new String[0], console);
-			context = osgi.getBundleContext();
-			publishSplashScreen(endSplashHandler);
-			Bundle[] basicBundles = loadBasicBundles();
-			setStartLevel(6);
-			// they should all be active by this time
-			ensureBundlesActive(basicBundles);
-			initializeApplicationTracker();
-			Runnable application = (Runnable) applicationTracker.getService();
-			applicationTracker.close();
-			logUnresolvedBundles(context.getBundles());
-			if (application == null)
-				throw new IllegalStateException(EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_ERROR_NO_APPLICATION"));
-			application.run();			
-		} finally {
-			stopSystemBundle();
-		}
-		// TODO for now, if an exception is not thrown from this method, we have to do
-		// the System.exit.  In the future we will update startup.jar to do the System.exit all 
-		// the time.
-		String exitCode = System.getProperty(PROP_EXITCODE);
-		if (exitCode == null)
-			System.exit(0);
-		try {
-			System.exit(Integer.parseInt(exitCode));
-		} catch (NumberFormatException e) {
-			System.exit(0);
-		}
-		// will never get here - just to make the compiler happy
-		return null;
+		String console = System.getProperty(PROP_CONSOLE);
+		if (console != null)
+			startConsole(osgi, new String[0], console);
+		context = osgi.getBundleContext();
+		publishSplashScreen(endSplashHandler);
+		Bundle[] basicBundles = loadBasicBundles();
+		setStartLevel(6);
+		// they should all be active by this time
+		ensureBundlesActive(basicBundles);
+	}
+
+	public static Object run(Object arg) {
+		initializeApplicationTracker();
+		ParameterizedRunnable application = (ParameterizedRunnable)applicationTracker.getService();
+		applicationTracker.close();
+		logUnresolvedBundles(context.getBundles());
+		if (application == null)
+			throw new IllegalStateException(EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_ERROR_NO_APPLICATION"));
+		return application.run(arg);			
+	}
+
+	public static void shutdown() throws Exception {
+		stopSystemBundle();
 	}
 
 	private static void ensureBundlesActive(Bundle[] bundles) {
@@ -383,7 +386,21 @@ public class EclipseStarter {
 	
 			// look for the configuration location .  
 			if (args[i - 1].equalsIgnoreCase(CONFIGURATION)) {
-				System.getProperties().put(PROP_CONFIG_AREA, arg);
+				System.getProperties().put(LocationManager.PROP_CONFIG_AREA, arg);
+				found = true;
+				continue;
+			}
+	
+			// look for the data location for this instance.  
+			if (args[i - 1].equalsIgnoreCase(DATA)) {
+				System.getProperties().put(LocationManager.PROP_INSTANCE_AREA, arg);
+				found = true;
+				continue;
+			}
+	
+			// look for the user location for this instance.  
+			if (args[i - 1].equalsIgnoreCase(USER)) {
+				System.getProperties().put(LocationManager.PROP_USER_AREA, arg);
 				found = true;
 				continue;
 			}
@@ -391,20 +408,6 @@ public class EclipseStarter {
 			// look for the development mode and class path entries.  
 			if (args[i - 1].equalsIgnoreCase(DEV)) {
 				System.getProperties().put(PROP_DEV, arg);
-				found = true;
-				continue;
-			}
-	
-			// look for the data location for this instance.  
-			if (args[i - 1].equalsIgnoreCase(DATA)) {
-				System.getProperties().put(PROP_INSTANCE_AREA, arg);
-				found = true;
-				continue;
-			}
-	
-			// look for the user location for this instance.  
-			if (args[i - 1].equalsIgnoreCase(USER)) {
-				System.getProperties().put(PROP_USER_AREA, arg);
 				found = true;
 				continue;
 			}
@@ -419,26 +422,26 @@ public class EclipseStarter {
 	
 			// look for the window system.  
 			if (args[i - 1].equalsIgnoreCase(WS)) {
-				found = true;
 				System.getProperties().put(PROP_WS, arg);
+				found = true;
 			}
 	
 			// look for the operating system
 			if (args[i - 1].equalsIgnoreCase(OS)) {
-				found = true;
 				System.getProperties().put(PROP_OS, arg);
+				found = true;
 			}
 	
 			// look for the system architecture
 			if (args[i - 1].equalsIgnoreCase(ARCH)) {
-				found = true;
 				System.getProperties().put(PROP_ARCH, arg);
+				found = true;
 			}
 	
 			// look for the nationality/language
 			if (args[i - 1].equalsIgnoreCase(NL)) {
-				found = true;
 				System.getProperties().put(PROP_NL, arg);
+				found = true;
 			}
 	
 			// done checking for args.  Remember where an arg was found 
@@ -520,7 +523,8 @@ public class EclipseStarter {
 	private static void initializeApplicationTracker() {
 		Filter filter = null;
 		try {
-			filter = context.createFilter("(&(objectClass=java.lang.Runnable)(eclipse.application=*))");
+			String appClass = ParameterizedRunnable.class.getName();
+			filter = context.createFilter("(&(objectClass=" + appClass + ")(eclipse.application=*))");
 		} catch (InvalidSyntaxException e) {
 			// ignore this.  It should never happen as we have tested the above format.
 		}
@@ -535,7 +539,7 @@ public class EclipseStarter {
 		
 		URL location = null;
 		try {
-			location = new URL(configArea.getURL().toExternalForm() + "/config.ini");
+			location = new URL(configArea.getURL().toExternalForm() + "config.ini");
 		} catch (MalformedURLException e) {
 			// its ok.  Thie should never happen
 		}
@@ -587,7 +591,9 @@ public class EclipseStarter {
 		}
 	}
 	
-	private static void stopSystemBundle() throws BundleException{
+	private static void stopSystemBundle() throws BundleException {
+		if (context == null)
+			return;
 		Bundle systemBundle = context.getBundle(0);
 		if (systemBundle.getState() == Bundle.ACTIVE) {
 			final Semaphore semaphore = new Semaphore(0);
