@@ -168,7 +168,7 @@ public class LocationManager {
 	}
 
 	private static String substituteVar(String source, String var, String prop) {
-		String value = System.getProperty(prop, "");
+		String value = System.getProperty(prop, ""); //$NON-NLS-1$
 		return value + source.substring(var.length());
 	}
 

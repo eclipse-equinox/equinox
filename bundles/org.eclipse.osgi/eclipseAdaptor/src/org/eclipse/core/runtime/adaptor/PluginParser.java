@@ -462,7 +462,7 @@ public class PluginParser extends DefaultHandler implements IModel {
 
 	public static SAXParserFactory acquireXMLParsing(BundleContext context) {
 		if (xmlTracker == null) {
-			xmlTracker = new ServiceTracker(context, "javax.xml.parsers.SAXParserFactory", null);
+			xmlTracker = new ServiceTracker(context, "javax.xml.parsers.SAXParserFactory", null); //$NON-NLS-1$
 			xmlTracker.open();
 		}
 		return (SAXParserFactory) xmlTracker.getService();

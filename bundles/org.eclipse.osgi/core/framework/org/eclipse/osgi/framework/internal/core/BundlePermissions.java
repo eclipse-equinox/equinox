@@ -185,10 +185,10 @@ final class BundlePermissions extends BundlePermissionCollection {
 					return null;
 				}
 
-				Enumeration enum = permissions.elements();
+				Enumeration permsEnum = permissions.elements();
 
-				while (enum.hasMoreElements()) {
-					Permission resolved = ((UnresolvedPermission) enum.nextElement()).resolve(clazz);
+				while (permsEnum.hasMoreElements()) {
+					Permission resolved = ((UnresolvedPermission) permsEnum.nextElement()).resolve(clazz);
 
 					if (resolved != null) {
 						if (collection == null) {
@@ -260,10 +260,10 @@ final class BundlePermissions extends BundlePermissionCollection {
 			int size = collections.size();
 
 			Class[] clazzes = new Class[size];
-			Enumeration enum = collections.keys();
+			Enumeration keysEnum = collections.keys();
 
 			for (int i = 0; i < size; i++) {
-				clazzes[i] = (Class) enum.nextElement();
+				clazzes[i] = (Class) keysEnum.nextElement();
 			}
 
 			for (int i = 0; i < size; i++) {

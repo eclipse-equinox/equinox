@@ -53,8 +53,8 @@ public class ResourceBundleStats {
 	 * Compute the size of bundle
 	 */
 	private void initialize(ResourceBundle bundle) {
-		for (Enumeration enum = bundle.getKeys(); enum.hasMoreElements();) {
-			String key = (String) enum.nextElement();
+		for (Enumeration keys = bundle.getKeys(); keys.hasMoreElements();) {
+			String key = (String) keys.nextElement();
 			keySize += sizeOf(key);
 			valueSize += sizeOf(bundle.getString(key));
 			keyCount++;

@@ -489,8 +489,8 @@ public class PluginConverterImpl implements PluginConverter {
 			return names;
 		}
 		//Run through the entries
-		for (Enumeration enum = file.entries(); enum.hasMoreElements();) {
-			JarEntry entry = (JarEntry) enum.nextElement();
+		for (Enumeration entriesEnum = file.entries(); entriesEnum.hasMoreElements();) {
+			JarEntry entry = (JarEntry) entriesEnum.nextElement();
 			String name = entry.getName();
 			if (!isValidPackageName(name))
 				continue;

@@ -90,10 +90,10 @@ class PermissionsHash extends PermissionCollection {
 			return true;
 		}
 
-		Enumeration enum = elements();
+		Enumeration permsEnum = elements();
 
-		while (enum.hasMoreElements()) {
-			if (((Permission) enum.nextElement()).implies(perm)) {
+		while (permsEnum.hasMoreElements()) {
+			if (((Permission) permsEnum.nextElement()).implies(perm)) {
 				return true;
 			}
 		}

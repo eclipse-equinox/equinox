@@ -250,9 +250,9 @@ public class EclipseBundleData extends DefaultBundleData {
 
 		//merge the original manifest with the generated one
 		if (originalManifest != null) {
-			Enumeration enum = originalManifest.keys();
-			while (enum.hasMoreElements()) {
-				Object key = enum.nextElement();
+			Enumeration keysEnum = originalManifest.keys();
+			while (keysEnum.hasMoreElements()) {
+				Object key = keysEnum.nextElement();
 				generatedManifest.put(key, originalManifest.get(key));
 			}
 		}

@@ -80,10 +80,10 @@ class DefaultPermissionStorage implements PermissionStorage {
 
 		String[] locations = new String[size];
 
-		Enumeration enum = permissionFiles.keys();
+		Enumeration keysEnum = permissionFiles.keys();
 
 		for (int i = 0; i < size; i++) {
-			locations[i] = (String) enum.nextElement();
+			locations[i] = (String) keysEnum.nextElement();
 		}
 
 		return locations;
