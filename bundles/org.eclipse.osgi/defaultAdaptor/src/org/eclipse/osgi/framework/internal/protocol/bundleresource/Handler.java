@@ -42,6 +42,8 @@ public class Handler extends BundleResourceHandler
 	protected BundleEntry findBundleEntry(URL url, Bundle bundle) throws IOException
 	{
 		BundleLoader bundleLoader = bundle.getBundleLoader();
+		if (bundleLoader == null)
+			throw new FileNotFoundException(url.getPath());
 		BundleEntry entry = (BundleEntry) bundleLoader.findObject(url.getPath());
 		if (entry == null)
 			throw new FileNotFoundException(url.getPath());
