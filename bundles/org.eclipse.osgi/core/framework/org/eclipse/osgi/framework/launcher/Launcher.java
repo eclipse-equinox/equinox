@@ -14,6 +14,7 @@ package org.eclipse.osgi.framework.launcher;
 import java.lang.reflect.Constructor;
 import java.util.*;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
+import org.eclipse.osgi.framework.internal.core.Msg;
 import org.eclipse.osgi.framework.internal.core.OSGi;
 import org.eclipse.osgi.framework.util.Tokenizer;
 
@@ -76,30 +77,24 @@ import org.eclipse.osgi.framework.util.Tokenizer;
  * </ul>
  */
 public class Launcher {
-	// :TODO Need to NLS enable this class.
 
 	/** default console port */
-	protected String consolePort = "";
+	protected String consolePort = ""; //$NON-NLS-1$
 
 	/** flag to indicate whether or not to start the console */
 	protected boolean console = false;
 
 	/** string containing the classname of the adaptor to be used in this framework instance */
-	protected String adaptorClassName = "org.eclipse.osgi.framework.internal.defaultadaptor.DefaultAdaptor";
+	protected String adaptorClassName = "org.eclipse.osgi.framework.internal.defaultadaptor.DefaultAdaptor"; //$NON-NLS-1$
 
-	protected final String IdeAdentClassName = "org.eclipse.osgi.framework.internal.core.ide.IdeAgent";
-
-	protected final String osgiConsoleClazz = "org.eclipse.osgi.framework.internal.core.FrameworkConsole";
+	protected final String osgiConsoleClazz = "org.eclipse.osgi.framework.internal.core.FrameworkConsole"; //$NON-NLS-1$
 
 	/** array of adaptor arguments to be passed to FrameworkAdaptor.initialize() */
-	String[] adaptorArgs = null;
-
-	/** array of application arguments to be passed to Eclipse applications */
-	String[] applicationArgs = null;
+	protected String[] adaptorArgs = null;
 
 	/* Components that can be installed and activated optionally. */
-	private static final String OSGI_CONSOLE_COMPONENT_NAME = "OSGi Console";
-	private static final String OSGI_CONSOLE_COMPONENT = "osgiconsole.jar";
+	private static final String OSGI_CONSOLE_COMPONENT_NAME = "OSGi Console"; //$NON-NLS-1$
+	private static final String OSGI_CONSOLE_COMPONENT = "console.jar"; //$NON-NLS-1$
 
 	/**
 	 * main method for Launcher. This method creates an Launcher object
@@ -131,7 +126,7 @@ public class Launcher {
 		try {
 			adaptor = doAdaptor();
 		} catch (Exception e) {
-			System.out.println("Unable to create FrameworkAdaptor: ");
+			System.out.println(Msg.formatter.getString("LAUNCHER_ADAPTOR_ERROR")); //$NON-NLS-1$
 			e.printStackTrace();
 			return;
 		}
@@ -144,7 +139,6 @@ public class Launcher {
 				osgi.launch();
 			}
 		}
-		doApplication();
 	}
 
 	/**
@@ -162,30 +156,30 @@ public class Launcher {
 			// -adaptor::"bundledir=c:/my bundle dir":reset should all be one arg, but java breaks it into 3 args, 
 			// ignoring the quotes.  Must put it back together into one arg.
 			String fullarg = args[i];
-			int quoteidx = fullarg.indexOf("\"");
+			int quoteidx = fullarg.indexOf("\""); //$NON-NLS-1$
 			if (quoteidx > 0) {
-				if (quoteidx == fullarg.lastIndexOf("\"")) {
+				if (quoteidx == fullarg.lastIndexOf("\"")) { //$NON-NLS-1$
 					boolean stillparsing = true;
 					i++;
 					while (i < args.length && stillparsing) {
-						fullarg = fullarg + " " + args[i];
+						fullarg = fullarg + " " + args[i]; //$NON-NLS-1$
 						i++;
-						if (quoteidx < fullarg.lastIndexOf("\"")) {
+						if (quoteidx < fullarg.lastIndexOf("\"")) { //$NON-NLS-1$
 							stillparsing = false;
 						}
 					}
 				}
 			} else {
 				// IDE can't pass double quotes due to known eclipse bug (see Bugzilla 93201).  Allowing for use of single quotes.
-				quoteidx = fullarg.indexOf("'");
+				quoteidx = fullarg.indexOf("'"); //$NON-NLS-1$
 				if (quoteidx > 0) {
-					if (quoteidx == fullarg.lastIndexOf("'")) {
+					if (quoteidx == fullarg.lastIndexOf("'")) { //$NON-NLS-1$
 						boolean stillparsing = true;
 						i++;
 						while (i < args.length && stillparsing) {
-							fullarg = fullarg + " " + args[i];
+							fullarg = fullarg + " " + args[i]; //$NON-NLS-1$
 							i++;
-							if (quoteidx < fullarg.lastIndexOf("'")) {
+							if (quoteidx < fullarg.lastIndexOf("'")) { //$NON-NLS-1$
 								stillparsing = false;
 							}
 						}
@@ -196,23 +190,18 @@ public class Launcher {
 
 			Tokenizer tok = new Tokenizer(fullarg);
 			if (tok.hasMoreTokens()) {
-				String command = tok.getString(" ");
-				StringTokenizer subtok = new StringTokenizer(command, ":");
+				String command = tok.getString(" "); //$NON-NLS-1$
+				StringTokenizer subtok = new StringTokenizer(command, ":"); //$NON-NLS-1$
 				String subcommand = subtok.nextToken().toLowerCase();
 
-				if (matchCommand("-console", subcommand, 4)) {
+				if (matchCommand("-console", subcommand, 4)) { //$NON-NLS-1$
 					_console(command);
 					match = true;
 				}
-				if (matchCommand("-adaptor", subcommand, 2)) {
+				if (matchCommand("-adaptor", subcommand, 2)) { //$NON-NLS-1$
 					_adaptor(command);
 					match = true;
 				}
-				if (matchCommand("-application", subcommand, 3)) {
-					_application(command);
-					match = true;
-				}
-
 				if (match == false) {
 					// if the command doesn't match any of the known commands, save it to pass
 					// to the console
@@ -248,7 +237,7 @@ public class Launcher {
 	 */
 	protected void _console(String command) {
 		console = true;
-		StringTokenizer tok = new StringTokenizer(command, ":");
+		StringTokenizer tok = new StringTokenizer(command, ":"); //$NON-NLS-1$
 		// first token is always "-console"
 		String cmd = tok.nextToken();
 		if (tok.hasMoreTokens()) {
@@ -260,16 +249,16 @@ public class Launcher {
 	 *  Remembers that the -adaptor option has been requested.  Parses off the adaptor class
 	 *  file name, the adaptor file name, and the size if they are there.
 	 *
-	 * @param tok The rest of the -adaptor parameter string that contains the class file name,
+	 * @param command The rest of the -adaptor parameter string that contains the class file name,
 	 * and possibly the adaptor file and file size.
 	 */
 	protected void _adaptor(String command) {
 		Tokenizer tok = new Tokenizer(command);
 		// first token is always "-adaptor"
-		String cmd = tok.getToken(":");
+		String cmd = tok.getToken(":"); //$NON-NLS-1$
 		tok.getChar(); // advance to next token
 		// and next token is either adaptor class name or ":" if we should use the default adaptor
-		String adp = tok.getToken(":");
+		String adp = tok.getToken(":"); //$NON-NLS-1$
 		if (adp.length() > 0) {
 			adaptorClassName = adp;
 		}
@@ -280,7 +269,7 @@ public class Launcher {
 		Vector v = new Vector();
 		parseloop: while (true) {
 			tok.getChar(); // advance to next token
-			String arg = tok.getString(":");
+			String arg = tok.getString(":"); //$NON-NLS-1$
 			if (arg == null) {
 				break parseloop;
 			} else {
@@ -294,40 +283,6 @@ public class Launcher {
 			Enumeration e = v.elements();
 			for (int i = 0; i < numArgs; i++) {
 				adaptorArgs[i] = (String) e.nextElement();
-			}
-		}
-	}
-
-	/**
-	 *  Remembers that the -application option has been requested.  Parses off the application parameters
-	 *  into a String []
-	 *
-	 * @param tok The rest of the -application parameter string that contains the application arguments
-	 */
-	protected void _application(String command) {
-		Tokenizer tok = new Tokenizer(command);
-		// first token is always "-adaptor"
-		String cmd = tok.getToken(":");
-		// following tokens are arguments to be processed by the adaptor implementation class
-		// they may be enclosed in quotes
-		// store them in a vector until we know how many there are
-		Vector v = new Vector();
-		parseloop: while (true) {
-			tok.getChar(); // advance to next token
-			String arg = tok.getString(":");
-			if (arg == null) {
-				break parseloop;
-			} else {
-				v.addElement(arg);
-			}
-		}
-		// now that we know how many args there are, move args from vector to String []
-		if (v != null) {
-			int numArgs = v.size();
-			applicationArgs = new String[numArgs];
-			Enumeration e = v.elements();
-			for (int i = 0; i < numArgs; i++) {
-				applicationArgs[i] = (String) e.nextElement();
 			}
 		}
 	}
@@ -349,18 +304,9 @@ public class Launcher {
 	}
 
 	/**
-	 *  Processes the -application command line argument.
-	 * 
-	 */
-	protected void doApplication() {
-		// nothing to do right now - these are argumnents for eclipse applications
-
-	}
-
-	/**
 	 * Creates the OSGi framework object.
 	 *
-	 * @param The FrameworkAdaptor object
+	 * @param adaptor The FrameworkAdaptor object
 	 */
 	protected OSGi doOSGi(FrameworkAdaptor adaptor) {
 		return new OSGi(adaptor);
@@ -395,7 +341,7 @@ public class Launcher {
 			Thread t = new Thread(((Runnable) osgiconsole), OSGI_CONSOLE_COMPONENT_NAME);
 			t.start();
 		} catch (NumberFormatException nfe) {
-			System.err.println("Invalid console port: " + consolePort);
+			System.err.println(Msg.formatter.getString("LAUNCHER_INVALID_PORT", consolePort)); //$NON-NLS-1$
 		} catch (Exception ex) {
 			informAboutMissingComponent(OSGI_CONSOLE_COMPONENT_NAME, OSGI_CONSOLE_COMPONENT);
 		}
@@ -410,8 +356,8 @@ public class Launcher {
 	 */
 	void informAboutMissingComponent(String component, String jar) {
 		System.out.println();
-		System.out.print("Warning: The requested component '" + component + "' is not included in this runtime.");
-		System.out.println(" Add '" + jar + "' to the classpath or rebuild the jxe with it.");
+		System.out.print(Msg.formatter.getString("LAUNCHER_COMPONENT_MISSING", component)); //$NON-NLS-1$
+		System.out.println(Msg.formatter.getString("LAUNCHER_COMPONENT_JAR", jar)); //$NON-NLS-1$
 		System.out.println();
 	}
 }
