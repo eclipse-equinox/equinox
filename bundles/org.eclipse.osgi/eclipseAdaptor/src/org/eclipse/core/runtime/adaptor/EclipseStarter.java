@@ -89,6 +89,7 @@ public class EclipseStarter {
 	private static final String PROP_VM = "eclipse.vm"; //$NON-NLS-1$
 	private static final String PROP_VMARGS = "eclipse.vmargs"; //$NON-NLS-1$
 	private static final String PROP_COMMANDS = "eclipse.commands"; //$NON-NLS-1$
+	private static final String PROP_INITIAL_STARTLEVEL = "eclipse.startlevel"; //$NON-NLS-1$
 
 	private static final String FILE_SCHEME = "file:"; //$NON-NLS-1$
 	private static final String FILE_PROTOCOL = "file"; //$NON-NLS-1$
@@ -217,12 +218,26 @@ public class EclipseStarter {
 		context = osgi.getBundleContext();
 		publishSplashScreen(endSplashHandler);
 		Bundle[] basicBundles = loadBasicBundles();
-		setStartLevel(6);
+		// set the framework start level to the ultimate value.  This will actually start things
+		// running if they are persistently active.
+		setStartLevel(getStartLevel());
 		// they should all be active by this time
 		ensureBundlesActive(basicBundles);
 		if (debug)
 			logUnresolvedBundles(context.getBundles());
 		running = true;
+	}
+	
+	private static int getStartLevel() {
+		String level = System.getProperty(PROP_INITIAL_STARTLEVEL);
+		if (level != null)
+			try {
+				return Integer.parseInt(level);
+			} catch (NumberFormatException e) {
+				if (debug)
+					System.out.println("Start level = " + level + "  parsed. Using hardcoded default: 6"); //$NON-NLS-1$ //$NON-NLS-2$
+			}
+		return 6; // hard coded default value for legacy purposes
 	}
 
 	/**
