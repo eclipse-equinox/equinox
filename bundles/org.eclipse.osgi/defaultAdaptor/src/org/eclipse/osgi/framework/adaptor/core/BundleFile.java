@@ -230,8 +230,11 @@ abstract public class BundleFile {
 			if (dir.length() == 0)
 				return true;
 
-			if (dir.charAt(0) == '/')
-				dir = dir.substring(0);
+			if (dir.charAt(0) == '/') {
+				if (dir.length() == 1)
+					return true;
+				dir = dir.substring(1);
+			}
 
 			if (dir.length() > 0 && dir.charAt(dir.length() - 1) != '/')
 				dir = dir + '/';
