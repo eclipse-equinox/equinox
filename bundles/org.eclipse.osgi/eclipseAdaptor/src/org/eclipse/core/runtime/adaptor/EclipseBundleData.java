@@ -230,6 +230,7 @@ public class EclipseBundleData extends DefaultBundleData {
 		try {
 			getManifest(true);
 		} catch (BundleException e) {
+			//TODO we whould not swallow the exception like that 
 			throw new IOException("Unable to properly read manifest for: " + getLocation());
 		}
 		super.loadFromManifest();
