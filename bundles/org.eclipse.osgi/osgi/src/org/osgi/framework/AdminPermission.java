@@ -31,6 +31,7 @@ import java.io.InputStream;
 import java.security.*;
 import java.util.*;
 import org.eclipse.osgi.framework.internal.core.FilterImpl;
+import org.eclipse.osgi.framework.internal.core.AbstractBundle;
 import org.osgi.service.permissionadmin.PermissionInfo;
 
 /**
@@ -559,7 +560,10 @@ public final class AdminPermission extends Permission
 		    		if (bundle.getSymbolicName() != null) {
 		    			bundleProperties.put("name",bundle.getSymbolicName()); //$NON-NLS-1$
 		    		}
-
+		    		
+		    		//set signers
+		    		bundleProperties.put("signer",new SignerWrapper(bundle)); //$NON-NLS-1$
+		    		
 		    		return null;
 				}
 			});
@@ -567,6 +571,23 @@ public final class AdminPermission extends Permission
     	return bundleProperties;
     }
 
+    public static class SignerWrapper extends Object {
+    	private Bundle bundle;
+    	private String pattern;
+    	public SignerWrapper(String pattern) {
+    		this.pattern = pattern;    			
+    	}
+    	SignerWrapper(Bundle bundle) {
+    		this.bundle = bundle;
+    	}
+    	
+		public boolean equals(Object arg0) {
+			return arg0 instanceof SignerWrapper &&
+				((AbstractBundle)bundle).getBundleData()
+					.matchDNChain(((SignerWrapper)arg0).pattern);
+		}
+    }
+    
     /**
      * Called by <tt><@link AdminPermission#implies(Permission)></tt> on an AdminPermission
      * which was constructed with a filter.  This method loads a FilterImpl with the
@@ -581,6 +602,18 @@ public final class AdminPermission extends Permission
     private Filter getFilterImpl() {
     	if (filterImpl == null) {
     		try {
+        		if (filter.indexOf('*') != -1) {
+        			//escape out * for filter
+        			StringBuffer patternBuffer = new StringBuffer();
+        			for (int pos = 0;pos < filter.length();pos++) {
+        				if (filter.charAt(pos) == '*') {
+        					patternBuffer.append('\\');
+        				}
+        				patternBuffer.append(filter.charAt(pos));
+        			}
+        			filter = patternBuffer.toString();
+        		}
+    			
 				filterImpl = new FilterImpl(filter);
 			} catch (InvalidSyntaxException e) {
 				//we will return null
