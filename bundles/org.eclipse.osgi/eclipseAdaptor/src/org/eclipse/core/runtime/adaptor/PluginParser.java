@@ -1,5 +1,5 @@
 /******************************************************************************* 
- * Copyright (c) 2000, 2003 IBM Corporation and others. 
+ * Copyright (c) 2000, 2004 IBM Corporation and others. 
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0 
  * which accompanies this distribution, and is available at 
@@ -16,6 +16,7 @@ import org.xml.sax.*;
 import org.xml.sax.helpers.DefaultHandler;
 
 public class PluginParser extends DefaultHandler implements IModel {
+	private final static String PI_RUNTIME_COMPATIBILITY = "org.eclipse.core.runtime.compatibility"; //$NON-NLS-1$
 	private PluginInfo manifestInfo = new PluginInfo();
 	private BundleContext context;
 
@@ -30,9 +31,9 @@ public class PluginParser extends DefaultHandler implements IModel {
 		// TODO Should get rid of the libraries map and just have a
 		// list of library export statements instead.  Library paths must
 		// preserve order.
-		private Map libraries; //represent the libraries and their
-										  // export statement
-		private ArrayList requires;
+		private Map libraries; //represent the libraries and their export statement
+		private ArrayList requires; 
+		private boolean compatibilityRequired = false; //set to true is the requirement list contain compatilibity 
 		private String pluginClass;
 		private String masterPluginId;
 		private String masterVersion;
@@ -51,7 +52,7 @@ public class PluginParser extends DefaultHandler implements IModel {
 		}
 		public String[] getRequires() {
 			if (requires == null)
-				return new String[]{"org.eclipse.core.runtime.compatibility"};
+				return new String[]{ PI_RUNTIME_COMPATIBILITY };
 			if (schemaVersion == null) {
 				//Add elements on the requirement list of ui and help.
 				for (int i = 0; i < requires.size(); i++) {
@@ -66,8 +67,9 @@ public class PluginParser extends DefaultHandler implements IModel {
 					}
 				}
 			}
-			if (!requires.contains("org.eclipse.core.runtime.compatibility"))
-				requires.add("org.eclipse.core.runtime.compatibility");
+			if (! compatibilityRequired)
+				requires.add(PI_RUNTIME_COMPATIBILITY);
+			
 			String[] requireBundles = new String[requires.size()];
 			requires.toArray(requireBundles);
 			return requireBundles;
@@ -428,6 +430,8 @@ public class PluginParser extends DefaultHandler implements IModel {
 			return;
 		if (plugin.equals("org.eclipse.core.boot") || plugin.equals("org.eclipse.core.runtime"))  //$NON-NLS-1$//$NON-NLS-2$
 			return;
+		if (plugin.equals(PI_RUNTIME_COMPATIBILITY))
+			manifestInfo.compatibilityRequired = true;
 		String version = attributes.getValue("", PLUGIN_REQUIRES_PLUGIN_VERSION); //$NON-NLS-1$ 
 		String optional = attributes.getValue("", PLUGIN_REQUIRES_OPTIONAL); //$NON-NLS-1$ 
 		String export = attributes.getValue("", PLUGIN_REQUIRES_EXPORT); //$NON-NLS-1$ 
