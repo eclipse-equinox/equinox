@@ -27,7 +27,7 @@ public class PluginConverterImpl implements PluginConverter, IModel {
 	private static final String PI_ECLIPSE_OSGI = "org.eclipse.osgi";
 	private static PluginConverterImpl instance;	
 	
-	private static final String[] ARCH_LIST = {org.eclipse.osgi.service.environment.Constants.ARCH_PA_RISC, org.eclipse.osgi.service.environment.Constants.ARCH_PPC, org.eclipse.osgi.service.environment.Constants.ARCH_SPARC, org.eclipse.osgi.service.environment.Constants.ARCH_X86};
+	private static final String[] ARCH_LIST = {org.eclipse.osgi.service.environment.Constants.ARCH_PA_RISC, org.eclipse.osgi.service.environment.Constants.ARCH_PPC, org.eclipse.osgi.service.environment.Constants.ARCH_SPARC, org.eclipse.osgi.service.environment.Constants.ARCH_X86, org.eclipse.osgi.service.environment.Constants.ARCH_AMD64};
 	private static final String FRAGMENT_MANIFEST = "fragment.xml"; //$NON-NLS-1$
 	private static final String GENERATED_FROM = "Generated-from"; //$NON-NLS-1$
 	private static final String LEGACY = "Legacy"; //$NON-NLS-1$
@@ -48,7 +48,8 @@ public class PluginConverterImpl implements PluginConverter, IModel {
 	private BufferedWriter out;
 	private IPluginInfo pluginInfo;
 	private File pluginManifestLocation;
-
+	private Dictionary generatedManifest;
+	
 	public PluginConverterImpl() {
 		this(null);
 	}
@@ -64,24 +65,9 @@ public class PluginConverterImpl implements PluginConverter, IModel {
 		out=null;
 		pluginInfo=null;
 		pluginManifestLocation=null;
+		generatedManifest = new Hashtable(10);
 	}
-	public synchronized File convertManifest(File pluginBaseLocation, boolean compatibilityManifest) {
-		init();
-		fillPluginInfo(pluginBaseLocation);
-		if (pluginInfo==null)
-			return null;
-		
-		String cacheLocation = (String) System.getProperties().get("osgi.manifest.cache");
-		File bundleManifestLocation = new File(cacheLocation, pluginInfo.getUniqueId() + '_' + pluginInfo.getVersion() + ".MF");
-		try {
-			generate(bundleManifestLocation, compatibilityManifest);
-		} catch (PluginConversionException e) {
-			FrameworkLogEntry entry = new FrameworkLogEntry(PI_ECLIPSE_OSGI, e.getMessage(), 0, e, null);
-			EclipseAdaptor.getDefault().getFrameworkLog().log(entry);
-			return null;
-		}
-		return bundleManifestLocation;
-	}
+	
 
 	private void fillPluginInfo(File pluginBaseLocation) {
 		pluginManifestLocation = pluginBaseLocation;
@@ -98,20 +84,25 @@ public class PluginConverterImpl implements PluginConverter, IModel {
 		}
 	}
 	
-	public synchronized boolean convertManifest(File pluginBaseLocation, File bundleManifestLocation, boolean compatibilityManifest) {
+	public synchronized File convertManifest(File pluginBaseLocation, File bundleManifestLocation, boolean compatibilityManifest) {
 		init();
 		fillPluginInfo(pluginBaseLocation);
 		if (pluginInfo == null)
-			return false;
+			return null;
 	
+		if (bundleManifestLocation==null) {
+			String cacheLocation = (String) System.getProperties().get("osgi.manifest.cache");
+			bundleManifestLocation = new File(cacheLocation, pluginInfo.getUniqueId() + '_' + pluginInfo.getVersion() + ".MF");
+		}
 		try {
-			generate(bundleManifestLocation, compatibilityManifest);
+			fillManifest(compatibilityManifest);
+			writeManifest(bundleManifestLocation, compatibilityManifest);
 		} catch (PluginConversionException e) {
 			FrameworkLogEntry entry = new FrameworkLogEntry(PI_ECLIPSE_OSGI, e.getMessage(), 0, e, null);
 			EclipseAdaptor.getDefault().getFrameworkLog().log(entry);
-			return false;
+			return null;
 		};		
-		return true;
+		return bundleManifestLocation;
 	}
 
 	private Set filterExport(Collection exportToFilter, Collection filter) {
@@ -219,7 +210,22 @@ public class PluginConverterImpl implements PluginConverter, IModel {
 		return found;
 	}
 
-	protected void generate(File generationLocation, boolean compatibilityManifest) throws PluginConversionException {
+	protected void fillManifest(boolean compatibilityManifest) {
+		generateManifestVersion();		
+		generateHeaders();
+		generateClasspath();
+		generateActivator();
+		generatePluginClass();
+		generateProvidePackage();
+		generateRequireBundle();
+		generateLocalizationEntry();
+		if (compatibilityManifest) {
+			generateTimestamp();
+			generateLegacy();
+		}
+	}
+	
+	protected void writeManifest(File generationLocation, boolean compatibilityManifest) throws PluginConversionException {
 		if (upToDate(generationLocation, pluginManifestLocation))
 			return;		
 		try {
@@ -231,17 +237,10 @@ public class PluginConverterImpl implements PluginConverter, IModel {
 			}
 			// replaces any eventual existing file
 			out = new BufferedWriter(new FileWriter(generationLocation));
-			generateManifestVersion();		
-			generateHeaders();
-			generateClasspath();
-			generateActivator();
-			generatePluginClass();
-			generateProvidePackage();
-			generateRequireBundle();
-			generateLocalizationEntry();
-			if(compatibilityManifest) {
-				generateTimestamp();
-				generateLegacy();
+			Enumeration keys = generatedManifest.keys();
+			while (keys.hasMoreElements()) {
+				String key = (String) keys.nextElement();
+				writeEntry(key, (String) generatedManifest.get(key));
 			}
 			out.flush();
 		} catch (IOException e) {
@@ -257,12 +256,12 @@ public class PluginConverterImpl implements PluginConverter, IModel {
 		}
 	}
 
-	private void generateLocalizationEntry() throws IOException {
-		writeEntry(Constants.BUNDLE_MANIFEST_LOCALIZATION, PLUGIN_PROPERTIES_FILENAME); 
+	private void generateLocalizationEntry() {
+		generatedManifest.put(Constants.BUNDLE_MANIFEST_LOCALIZATION, PLUGIN_PROPERTIES_FILENAME); 
 	}
 
-	private void generateManifestVersion() throws IOException {
-		writeEntry("Manifest-Version", "1.0"); //$NON-NLS-1$ //$NON-NLS-2$
+	private void generateManifestVersion() {
+		generatedManifest.put("Manifest-Version", "1.0"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	private boolean requireRuntimeCompatibility() {
@@ -274,26 +273,43 @@ public class PluginConverterImpl implements PluginConverter, IModel {
 		return false;
 	}
 	
-	private void generateActivator() throws IOException {
+	private void generateActivator() {
 		if (!pluginInfo.isFragment()) 
 			if (! requireRuntimeCompatibility()) {
-				writeEntry(Constants.BUNDLE_ACTIVATOR, pluginInfo.getPluginClass());
+				String pluginClass = pluginInfo.getPluginClass();
+				if (pluginClass != null)
+					generatedManifest.put(Constants.BUNDLE_ACTIVATOR, pluginClass);
 			} else {
-				writeEntry(Constants.BUNDLE_ACTIVATOR, COMPATIBILITY_ACTIVATOR);
+				generatedManifest.put(Constants.BUNDLE_ACTIVATOR, COMPATIBILITY_ACTIVATOR);
 			}
 	}
 
-	private void generateClasspath() throws IOException {
-		String[] libraries = pluginInfo.getLibrariesName();
-		writeEntry(Constants.BUNDLE_CLASSPATH, libraries);
+	private void generateClasspath() {
+		String[] classpath = pluginInfo.getLibrariesName();
+		if (classpath.length != 0)
+			generatedManifest.put(Constants.BUNDLE_CLASSPATH, getStringFromArray(classpath,",\n ")); //$NON-NLS-1$
 	}
 
-	private void generateHeaders() throws IOException {
-		writeEntry(Constants.BUNDLE_NAME, pluginInfo.getPluginName());
-		writeEntry(Constants.BUNDLE_VERSION, pluginInfo.getVersion());
-		writeEntry(Constants.BUNDLE_SYMBOLICNAME, getSymbolicNameEntry(pluginInfo));
-		writeEntry(Constants.BUNDLE_VENDOR, pluginInfo.getProviderName());
+	private void generateHeaders() {
+		generatedManifest.put(Constants.BUNDLE_NAME, pluginInfo.getPluginName());
+		generatedManifest.put(Constants.BUNDLE_VERSION, pluginInfo.getVersion());
+		generatedManifest.put(Constants.BUNDLE_SYMBOLICNAME, getSymbolicNameEntry(pluginInfo));
+		
+		String provider = pluginInfo.getProviderName();
+		if (provider != null)
+			generatedManifest.put(Constants.BUNDLE_VENDOR, provider);
+			
+		if (pluginInfo.isFragment()) {
+			StringBuffer hostBundle = new StringBuffer();
+
+			hostBundle.append(pluginInfo.getMasterId()).append("; ");
+			hostBundle.append(Constants.BUNDLE_VERSION_ATTRIBUTE).append("=");
+			hostBundle.append(pluginInfo.getMasterVersion());
+
+			generatedManifest.put(Constants.FRAGMENT_HOST, hostBundle.toString());
+		}
 	}
+	
 	/*
 	 * Generates an entry in the form: 
 	 * 	<symbolic-name>[; singleton=true]
@@ -303,86 +319,70 @@ public class PluginConverterImpl implements PluginConverter, IModel {
 		if (!pluginInfo.isSingleton())
 			return pluginInfo.getUniqueId();		
 		StringBuffer result = new StringBuffer(pluginInfo.getUniqueId());
-		result.append("; ");
+		result.append("; "); //$NON-NLS-1$
 		result.append(Constants.SINGLETON_ATTRIBUTE);
-		result.append("=true");
+		result.append("=true"); //$NON-NLS-1$
 		return result.toString();
 	}
 
-	private void generateLegacy() throws IOException {
-		writeEntry(LEGACY, "true"); //$NON-NLS-1$
+	private void generateLegacy() {
+		generatedManifest.put(LEGACY, "true"); //$NON-NLS-1$
 	}
 
-	private void generatePluginClass() throws IOException {
-		if (requireRuntimeCompatibility())
-			writeEntry(PLUGIN, pluginInfo.getPluginClass());
+	private void generatePluginClass() {
+		if (requireRuntimeCompatibility()) {
+			String pluginClass = pluginInfo.getPluginClass();
+			if(pluginClass != null)
+				generatedManifest.put(PLUGIN, pluginClass);
+		}
 	}
-	private void generateProvidePackage() throws IOException {
-		StringBuffer providePackage = new StringBuffer();
+	
+	private void generateProvidePackage() {
 		Set exports = getExports();
 		if (exports != null) {
-			Iterator iter = exports.iterator();
-			boolean firstPkg = true;
-			while (iter.hasNext()) {
-				String pkg = (String) iter.next();
-				if (firstPkg) {
-					providePackage.append("\n "); //$NON-NLS-1$
-					firstPkg = false;
-				} else {
-					providePackage.append(",\n "); //$NON-NLS-1$
-				}
-				providePackage.append(pkg);
-			}
-			writeEntry(Constants.PROVIDE_PACKAGE, providePackage.toString());
-		}
-
-		if (pluginInfo.isFragment()) {
-			StringBuffer hostBundle = new StringBuffer();
-
-			hostBundle.append(pluginInfo.getMasterId()).append("; ");
-			hostBundle.append(Constants.BUNDLE_VERSION_ATTRIBUTE).append("=");
-			hostBundle.append(pluginInfo.getMasterVersion());
-
-			writeEntry(Constants.FRAGMENT_HOST, hostBundle.toString());
+			generatedManifest.put(Constants.PROVIDE_PACKAGE, getStringFromCollection(exports,",\n "));
 		}
 	}
-	private void generateRequireBundle() throws IOException {
+	
+	private void generateRequireBundle() {
 		ArrayList requiredBundles = pluginInfo.getRequires();
-		String[] bundleRequire = new String[requiredBundles.size()]; 
-		int i = 0;
+		if (requiredBundles.size() == 0) 
+			return;
+		StringBuffer bundleRequire = new StringBuffer(); 
 		for (Iterator iter = requiredBundles.iterator(); iter.hasNext();) {
 			PluginParser.Prerequisite element = (PluginParser.Prerequisite) iter.next();
-			String modImport = element.getName();
+			StringBuffer modImport = new StringBuffer(element.getName());
 			if (element.getVersion() != null) {
-				modImport += "; " + Constants.BUNDLE_VERSION_ATTRIBUTE + "=" + element.getVersion(); //$NON-NLS-1$ //$NON-NLS-2$ 
+				modImport.append(';').append(Constants.BUNDLE_VERSION_ATTRIBUTE).append("=").append(element.getVersion()); //$NON-NLS-1$ 
 			}
 			if (element.isExported()) {
-				modImport += "; " + Constants.PROVIDE_PACKAGES_ATTRIBUTE + "=true";//$NON-NLS-1$ //$NON-NLS-2$ 
+				modImport.append(';').append(Constants.PROVIDE_PACKAGES_ATTRIBUTE).append("=true");//$NON-NLS-1$ 
 			}
 			if (element.isOptional()) {
-				modImport += ";" + Constants.OPTIONAL_ATTRIBUTE + "=true";//$NON-NLS-1$ //$NON-NLS-2$ 
+				modImport.append(';').append(Constants.OPTIONAL_ATTRIBUTE).append("=true");//$NON-NLS-1$
 			}
 			if (element.getMatch() != null) {
-				modImport += ";" + Constants.VERSION_MATCH_ATTRIBUTE + "="; //$NON-NLS-1$ //$NON-NLS-2$ 
+				modImport.append(';').append(Constants.VERSION_MATCH_ATTRIBUTE).append("="); //$NON-NLS-1$ 
 				if (element.getMatch().equalsIgnoreCase(PLUGIN_REQUIRES_MATCH_PERFECT)) {
-					modImport += Constants.VERSION_MATCH_QUALIFIER;
+					modImport.append(Constants.VERSION_MATCH_QUALIFIER);
 				} else if (element.getMatch().equalsIgnoreCase(PLUGIN_REQUIRES_MATCH_EQUIVALENT)) {
-					modImport += Constants.VERSION_MATCH_MINOR;
+					modImport.append(Constants.VERSION_MATCH_MINOR);
 				} else if (element.getMatch().equalsIgnoreCase(PLUGIN_REQUIRES_MATCH_COMPATIBLE)) {
-					modImport += Constants.VERSION_MATCH_MAJOR;
+					modImport.append(Constants.VERSION_MATCH_MAJOR);
 				} else if (element.getMatch().equalsIgnoreCase(PLUGIN_REQUIRES_MATCH_GREATER_OR_EQUAL)) {
-					modImport += Constants.VERSION_MATCH_GREATERTHANOREQUAL;
+					modImport.append(Constants.VERSION_MATCH_GREATERTHANOREQUAL);
 				}
 			}
-			bundleRequire[i++] = modImport;
+			bundleRequire.append(modImport);
+			if (iter.hasNext())
+				bundleRequire.append(",\n "); //$NON-NLS-1$
 		}		
-		writeEntry(Constants.REQUIRE_BUNDLE, bundleRequire);
+		generatedManifest.put(Constants.REQUIRE_BUNDLE, bundleRequire.toString());
 	}
 
-	private void generateTimestamp() throws IOException {
+	private void generateTimestamp() {
 		// so it is easy to tell which ones are generated
-		out.write(GENERATED_FROM + ": " + pluginManifestLocation.lastModified());		 //$NON-NLS-1$
-		out.newLine();
+		generatedManifest.put(GENERATED_FROM, Long.toString(pluginManifestLocation.lastModified()));
 	}
 
 	private Set getExports() {
@@ -627,6 +627,32 @@ public class PluginConverterImpl implements PluginConverter, IModel {
 		}
 		out.newLine();
 	}
+	
+	private String getStringFromArray(String[] values, String separator) {
+		if (values==null)
+			return "";
+		StringBuffer result = new StringBuffer();
+		for (int i = 0; i < values.length; i++) {
+			if (i > 0)
+				result.append(separator);
+			result.append(values[i]);
+		}
+		return result.toString();
+	}
+	
+	private String getStringFromCollection(Collection collection, String separator) {
+		StringBuffer result = new StringBuffer();
+		boolean first = true;
+		for (Iterator i = collection.iterator(); i.hasNext();) {
+			if (first)
+				first = false;
+			else
+				result.append(separator);
+			result.append(i.next());
+		}
+		return result.toString();
+	}
+	
 	public class PluginConversionException extends Exception {		
 		public PluginConversionException() {
 			super();
@@ -641,17 +667,14 @@ public class PluginConverterImpl implements PluginConverter, IModel {
 			super(cause);
 		}
 	}
-	/* (non-Javadoc)
-	 * @see org.eclipse.osgi.service.pluginconversion.PluginConverter#convertManifest(java.io.File)
-	 */
-	public File convertManifest(File pluginLocation) {
-		return convertManifest(pluginLocation, true);
-}
- 
- 	/* (non-Javadoc)
-	 * @see org.eclipse.osgi.service.pluginconversion.PluginConverter#convertManifest(java.io.File, java.io.File)
-	 */
-	public boolean convertManifest(File pluginBaseLocation, File bundleManifestLocation) {
-		return convertManifest(pluginBaseLocation, bundleManifestLocation, true);
+
+	public Dictionary convertManifest(File pluginBaseLocation, boolean compatibility) {
+		init();
+		fillPluginInfo(pluginBaseLocation);
+		if (pluginInfo==null)
+			return null;
+	
+		fillManifest(compatibility);
+		return generatedManifest; 
 	}
 }

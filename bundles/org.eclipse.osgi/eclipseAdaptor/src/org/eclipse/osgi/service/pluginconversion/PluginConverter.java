@@ -11,6 +11,7 @@
 package org.eclipse.osgi.service.pluginconversion;
 
 import java.io.File;
+import java.util.Dictionary;
 
 /**
  * The interface of the service that allows to convert plugin.xml into manifest.mf
@@ -23,39 +24,26 @@ public interface PluginConverter {
 	 * @param pluginBaseLocation the base location for the plug-in/fragment manifest to be converted
 	 * (a directory, e.g. the plug-in install location)
 	 * @param bundleManifestLocation the location for the bundle manifest to be generated
-	 * (including the file name)
+	 * (including the file name). If <code>null</code> is passed as a parameter, the manifest will be generated into the 
+	 * pool of cached manifest. 
 	 * @param compatibilityManifest a boolean indicating if the manifest should contain headers to run with  
 	 * the backward compatibility
-	 * @return <code>true</code>, if a bundle manifest was successfully 
-	 * generated (or already existed) in the specified location, <code>false</code> otherwise
+	 *	@return the generated manifest file location, if a bundle manifest was successfully 
+	 * generated (or already existed), <code>null</code> otherwise.
 	 */	
-	public boolean convertManifest(File pluginBaseLocation, File bundleManifestLocation, boolean compatibilityManifest);
+	public File convertManifest(File pluginBaseLocation, File bundleManifestLocation, boolean compatibilityManifest);
+	
 	/**
-	 * Converts a plug-in/fragment manifest at the given source location (a directory) and 
-	 * generates a corresponding bundle manifest at the default target location (the same 
-	 * location used by the Eclipse adaptor to keep its own cached manifests.  
+	 * Converts a plug-in/fragment manifest at the given source base location (a directory) and 
+	 * generates a corresponding bundle manifest returned as a dictionary.
 	 * 
-	 * @param pluginLocation the location for the plug-in/fragment manifest to be converted
+	 * @param pluginBaseLocation the base location for the plug-in/fragment manifest to be converted
+	 * (a directory, e.g. the plug-in install location)
 	 * @param compatibilityManifest a boolean indicating if the manifest should contain headers to run with  
-	 * the backward compatibility 
-	 * @return the generated manifest file location, if a bundle manifest was successfully 
-	 * generated (or already existed), <code>null</code> otherwise
-	 */
-	public File convertManifest(File pluginLocation, boolean compatibilityManifest);
+	 * the backward compatibility
+	 *	@return the generated manifest as a dictionary,  if a bundle manifest was successfully 
+	 * generated, <code>null</code> otherwise
+	 */	
+	public Dictionary convertManifest(File pluginBaseLocation, boolean compatibility);
 	
-	/**
-	 * 
-	 * @param pluginLocation
-	 * @return
-	 * @deprecated @see #convertManifest(File, boolean)
-	 */
-	public File convertManifest(File pluginLocation);
-	
-	/**
-	 * 
-	 * @param pluginLocation
-	 * @return
-	 * @deprecated @see #convertManifest(File, File, boolean)
-	 */
-	public boolean convertManifest(File pluginBaseLocation, File bundleManifestLocation);
 }
