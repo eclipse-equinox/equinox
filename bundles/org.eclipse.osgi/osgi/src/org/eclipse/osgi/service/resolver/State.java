@@ -83,9 +83,11 @@ public interface State {
 	public BundleDescription[] getBundles();
 
 	/**
-	 * Returns descriptor for all bundles known to this state.
+	 * Returns the bundle descriptor for the bundle with the given id. 
+	 * <code>null</code> is returned if no such bundle is found in 
+	 * this state. 
 	 * 
-	 * @return the descriptors for all bundles known to this state.
+	 * @return the descriptor for the identified bundle
 	 * @see BundleDescription#getBundleId()
 	 */
 	public BundleDescription getBundle(long id);
