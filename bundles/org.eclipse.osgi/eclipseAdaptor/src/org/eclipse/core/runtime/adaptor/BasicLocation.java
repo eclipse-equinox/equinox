@@ -103,6 +103,9 @@ public class BasicLocation implements Location {
 			if (!parentFile.mkdirs())
 				return false;
 		}
+		// workaround for bug 44735
+		if (System.getProperties().getProperty("org.eclipse.core.runtime.ignoreLockFile") != null)
+			return true;
 		fileStream = new FileOutputStream(lock, true);
 		fileLock = fileStream.getChannel().tryLock();
 		if (fileLock != null)
