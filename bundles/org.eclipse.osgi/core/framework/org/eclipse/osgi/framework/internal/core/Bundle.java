@@ -1376,7 +1376,11 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 				Debug.printStackTrace(new Exception("Stack trace"));
 			}
 		}
-		state = RESOLVED;
+		if (state == INSTALLED) {
+			state = RESOLVED;
+			// Do not publish RESOLVED event here.  This is done by caller 
+			// to resolve if appropriate.
+		}
 	}
 	protected abstract boolean unresolve() throws BundleException;
 	/**

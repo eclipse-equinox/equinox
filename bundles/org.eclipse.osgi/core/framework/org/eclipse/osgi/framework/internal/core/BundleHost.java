@@ -129,6 +129,8 @@ public class BundleHost extends Bundle {
 				fragments = null;
 				proxy = null;
 				state = INSTALLED;
+				// publish UNRESOLVED event here
+				framework.publishBundleEvent(BundleEvent.UNRESOLVED, this);
 				completeStateChange();
 			}
 		} else {
@@ -179,6 +181,8 @@ public class BundleHost extends Bundle {
 					framework.bundles.unMarkDependancies(curProxy);
 				}
 				state = INSTALLED;
+				// publish UNRESOLVED event here
+				framework.publishBundleEvent(BundleEvent.UNRESOLVED, this);
 				loader = null;
 				proxy = null;
 				unresolveFragments();
@@ -241,6 +245,8 @@ public class BundleHost extends Bundle {
 			proxy = null;
 			fragments = null;
 			state = INSTALLED;
+			// Do not publish UNRESOLVED event here.  This is done by caller 
+			// to resolve if appropriate.
 		}
 
 	}
@@ -280,6 +286,8 @@ public class BundleHost extends Bundle {
 				}
 
 				state = INSTALLED;
+				// publish UNRESOLVED event here
+				framework.publishBundleEvent(BundleEvent.UNRESOLVED, this);
 				loader = null;
 				proxy = null;
 				unresolveFragments();

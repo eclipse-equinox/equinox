@@ -86,6 +86,8 @@ public class BundleFragment extends Bundle {
 			if (host != null) {
 				if (state == RESOLVED) {
 					state = INSTALLED;
+					// publish UNRESOLVED event here.
+					framework.publishBundleEvent(BundleEvent.UNRESOLVED, this);
 					host = null;
 				}
 			}
@@ -162,6 +164,8 @@ public class BundleFragment extends Bundle {
 		if (state == RESOLVED) {
 			host = null;
 			state = INSTALLED;
+			// Do not publish UNRESOLVED event here.  This is done by caller 
+			// to resolve if appropriate.
 		}
 	}
 
