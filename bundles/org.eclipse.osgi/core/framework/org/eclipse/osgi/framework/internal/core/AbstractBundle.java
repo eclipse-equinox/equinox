@@ -79,7 +79,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	 * @param framework
 	 *            Framework this bundle is running in
 	 */
-	protected AbstractBundle(BundleData bundledata, Framework framework) throws BundleException {
+	protected AbstractBundle(BundleData bundledata, Framework framework) {
 		state = INSTALLED;
 		stateChanging = null;
 		this.bundledata = bundledata;
@@ -89,10 +89,8 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 
 	/**
 	 * Load the bundle.
-	 * 
-	 * @exception org.osgi.framework.BundleException
 	 */
-	protected abstract void load() throws BundleException;
+	protected abstract void load();
 
 	/**
 	 * Reload from a new bundle. This method must be called while holding the
@@ -102,21 +100,16 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	 *            Dummy Bundle which contains new data.
 	 * @return true if an exported package is "in use". i.e. it has been
 	 *         imported by a bundle
-	 * @exception org.osgi.framework.BundleException
 	 */
-	protected abstract boolean reload(AbstractBundle newBundle) throws BundleException;
+	protected abstract boolean reload(AbstractBundle newBundle);
 
 	/**
 	 * Refresh the bundle. This is called by Framework.refreshPackages. This
 	 * method must be called while holding the bundles lock.
 	 * this.loader.unimportPackages must have already been called before
 	 * calling this method!
-	 * 
-	 * @exception org.osgi.framework.BundleException
-	 *                if an exported package is "in use". i.e. it has been
-	 *                imported by a bundle
 	 */
-	protected abstract void refresh() throws BundleException;
+	protected abstract void refresh();
 
 	/**
 	 * Unload the bundle. This method must be called while holding the bundles
