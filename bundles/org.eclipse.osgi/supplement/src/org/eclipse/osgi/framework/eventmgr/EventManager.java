@@ -37,7 +37,11 @@ package org.eclipse.osgi.framework.eventmgr;
  *		listenerQueue.queueListeners(eventListeners, new EventDispatcher() {
  *	        public void dispatchEvent(Object eventListener, Object listenerObject, 
  *                                    int eventAction, Object eventObject) {
- * 				(SomeEventListener)eventListener.someEventOccured((SomeEvent)eventObject);
+ * 				try {
+ *					(SomeEventListener)eventListener.someEventOccured((SomeEvent)eventObject);
+ * 				} catch (Throwable t) {
+ * 					// properly log/handle any Throwable thrown by the listener
+ * 				}
  *			}
  *		});
  *		// Deliver the event to the listeners. 

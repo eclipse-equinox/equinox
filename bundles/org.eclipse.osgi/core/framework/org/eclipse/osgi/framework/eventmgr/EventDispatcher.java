@@ -21,6 +21,10 @@ public interface EventDispatcher {
 	 * This method is called once for each listener.
 	 * This method must cast the event listener object to the appropriate listener
 	 * class for the event type and call the appropriate listener method.
+	 * 
+	 * <p>The method should properly log/handle any exceptions thrown by the called
+	 * listener. The EventManager will ignore any Throwable thrown by this method
+	 * in order to continue delivery of the event to the next listener.
 	 *
 	 * @param eventListener This listener must be cast to the appropriate listener
 	 * class for the event to be delivered and the appropriate listener method
