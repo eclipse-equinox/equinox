@@ -10,13 +10,18 @@
  *******************************************************************************/
 package org.eclipse.core.runtime.adaptor;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.security.ProtectionDomain;
 import java.util.ArrayList;
+import java.util.jar.Attributes;
+import java.util.jar.Manifest;
 
 import org.eclipse.osgi.framework.adaptor.BundleData;
 import org.eclipse.osgi.framework.adaptor.ClassLoaderDelegate;
 import org.eclipse.osgi.framework.adaptor.core.*;
+import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.internal.core.Msg;
 import org.eclipse.osgi.framework.internal.defaultadaptor.*;
 import org.eclipse.osgi.framework.stats.ClassloaderStats;
@@ -30,7 +35,7 @@ public class EclipseClassLoader extends DefaultClassLoader {
 	
 	// TODO do we want to have autoActivate on all the time or just for Legacy plugins?
 	private boolean autoActivate = true;
-	
+
 	public EclipseClassLoader(ClassLoaderDelegate delegate, ProtectionDomain domain, String[] classpath, BundleData bundledata) {
 		super(delegate, domain, classpath, (org.eclipse.osgi.framework.internal.defaultadaptor.DefaultBundleData) bundledata);
 	}
@@ -82,20 +87,47 @@ public class EclipseClassLoader extends DefaultClassLoader {
 	/**
 	 * Override defineClass to allow for package defining.
 	 */
-	protected Class defineClass(String name, byte[] classbytes, int off, int len, ProtectionDomain bundledomain, BundleFile bundlefile) throws ClassFormatError {
+	protected Class defineClass(String name, byte[] classbytes, int off, int len, ClasspathEntry classpathEntry) throws ClassFormatError {
 		// Define the package if it is not the default package.
 		int lastIndex = name.lastIndexOf('.');
 		if (lastIndex != -1) {
 			String packageName = name.substring(0,lastIndex);
 			Package pkg = getPackage(packageName);
 			if (pkg == null) {
+				// get info about the package from the classpath entry's manifest.
+				String specTitle=null, specVersion=null, specVendor=null,
+					implTitle=null, implVersion=null, implVendor=null;
+
+				Manifest mf = ((EclipseClasspathEntry)classpathEntry).getManifest();
+				if (mf != null) {
+					Attributes mainAttributes = mf.getMainAttributes();
+					String dirName = packageName.replace('.', '/') + "/";
+					Attributes packageAttributes = mf.getAttributes(dirName);
+					boolean noEntry = false;
+					if (packageAttributes == null) {
+						noEntry = true;
+						packageAttributes = mainAttributes;
+					}
+					specTitle = packageAttributes.getValue(Attributes.Name.SPECIFICATION_TITLE);
+					if (specTitle == null && !noEntry ) specTitle = mainAttributes.getValue(Attributes.Name.SPECIFICATION_TITLE);
+					specVersion = packageAttributes.getValue(Attributes.Name.SPECIFICATION_VERSION);
+					if (specVersion == null && !noEntry ) specVersion = mainAttributes.getValue(Attributes.Name.SPECIFICATION_VERSION);
+					specVendor = packageAttributes.getValue(Attributes.Name.SPECIFICATION_VENDOR);
+					if (specVendor == null && !noEntry ) specVendor = mainAttributes.getValue(Attributes.Name.SPECIFICATION_VENDOR);
+					implTitle = packageAttributes.getValue(Attributes.Name.IMPLEMENTATION_TITLE);
+					if (implTitle == null && !noEntry ) implTitle = mainAttributes.getValue(Attributes.Name.IMPLEMENTATION_TITLE);
+					implVersion = packageAttributes.getValue(Attributes.Name.IMPLEMENTATION_VERSION);
+					if (implVersion == null && !noEntry ) implVersion = mainAttributes.getValue(Attributes.Name.IMPLEMENTATION_VERSION);
+					implVendor = packageAttributes.getValue(Attributes.Name.IMPLEMENTATION_VENDOR);
+					if (implVendor == null && !noEntry ) implVendor = mainAttributes.getValue(Attributes.Name.IMPLEMENTATION_VENDOR);
+				}
+
 				// The package is not defined yet define it before we define the class.
-				// TODO need to parse code manifest located in the bundlefile to find
-				// implementation/specification information for the package here.
-				definePackage(packageName,null,null,null,null,null,null,null);
+				// TODO still need to seal packages.
+				definePackage(packageName,specTitle,specVersion,specVendor,implTitle,implVersion,implVendor,null);
 			}
 		}
-		return super.defineClass(name,classbytes,off,len,bundledomain,bundlefile);
+		return super.defineClass(name,classbytes,off,len,classpathEntry);
 	}
 
 	private String getClassloaderId() {
@@ -161,5 +193,41 @@ public class EclipseClassLoader extends DefaultClassLoader {
 		if (libPath.startsWith("$nl$")) //$NON-NLS-1$
 			return "nl"; //$NON-NLS-1$
 		return null;
+	}
+
+	/**
+	 * Override to create EclipseClasspathEntry objects.  EclipseClasspathEntry
+	 * allows access to the manifest file for the classpath entry.
+	 */
+	protected ClasspathEntry createClassPathEntry(BundleFile bundlefile, ProtectionDomain domain) {
+		return new EclipseClasspathEntry(bundlefile,domain);
+	}
+
+	/**
+	 * A ClasspathEntry that has a manifest associated with it.
+	 */
+	protected class EclipseClasspathEntry extends ClasspathEntry {
+		Manifest mf;
+		boolean initMF = false;
+		protected EclipseClasspathEntry(BundleFile bundlefile, ProtectionDomain domain) {
+			super(bundlefile, domain);
+		}
+		public Manifest getManifest() {
+			if (initMF)
+				return mf;
+
+			BundleEntry mfEntry = bundlefile.getEntry(Constants.OSGI_BUNDLE_MANIFEST);
+			if (mfEntry != null)
+				try {
+					InputStream manIn = mfEntry.getInputStream();
+					mf = new Manifest(manIn);
+					manIn.close();
+				} catch (IOException e) {
+					// do nothing
+				}
+
+			initMF=true;
+			return mf;
+		}
 	}
 }

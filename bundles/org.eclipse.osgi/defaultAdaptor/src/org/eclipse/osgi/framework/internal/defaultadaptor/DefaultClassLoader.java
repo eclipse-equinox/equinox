@@ -173,7 +173,7 @@ public class DefaultClassLoader extends AbstractClassLoader {
 		}
 
 		if (bundlefile != null)
-			return new ClasspathEntry(bundlefile, domain);
+			return createClassPathEntry(bundlefile, domain);
 		else
 			return null;
 	}
@@ -184,7 +184,7 @@ public class DefaultClassLoader extends AbstractClassLoader {
 			return result;
 		for (int i = 0; i < classpathEntries.length; i++) {
 			if (classpathEntries[i] != null) {
-				result = findClassImpl(name, classpathEntries[i].bundlefile, classpathEntries[i].domain);
+				result = findClassImpl(name, classpathEntries[i]);
 				if (result != null) {
 					return result;
 				}
@@ -196,7 +196,7 @@ public class DefaultClassLoader extends AbstractClassLoader {
 			for (int i = 0; i < size; i++) {
 				FragmentClasspath fragCP = (FragmentClasspath) fragClasspaths.elementAt(i);
 				for (int j = 0; j < fragCP.classpathEntries.length; j++) {
-					result = findClassImpl(name, fragCP.classpathEntries[j].bundlefile, fragCP.classpathEntries[j].domain);
+					result = findClassImpl(name, fragCP.classpathEntries[j]);
 					if (result != null) {
 						return result;
 					}
@@ -215,14 +215,14 @@ public class DefaultClassLoader extends AbstractClassLoader {
 	 * it is found.
 	 * @return The loaded class object or null if the class is not found.
 	 */
-	protected Class findClassImpl(String name, BundleFile bundlefile, ProtectionDomain bundledomain) {
+	protected Class findClassImpl(String name, ClasspathEntry classpathEntry) {
 		if (Debug.DEBUG && Debug.DEBUG_LOADER) {
 			Debug.println("BundleClassLoader[" + hostdata + "].findClass(" + name + ")");
 		}
 
 		String filename = name.replace('.', '/').concat(".class");
 
-		BundleEntry entry = bundlefile.getEntry(filename);
+		BundleEntry entry = classpathEntry.bundlefile.getEntry(filename);
 
 		if (entry == null) {
 			return null;
@@ -295,7 +295,7 @@ public class DefaultClassLoader extends AbstractClassLoader {
 		}
 
 		try {
-			return (defineClass(name, classbytes, 0, bytesread, bundledomain, bundlefile));
+			return (defineClass(name, classbytes, 0, bytesread, classpathEntry));
 		} catch (Error e) {
 			if (Debug.DEBUG && Debug.DEBUG_LOADER) {
 				Debug.println("  error defining class " + name);
@@ -305,8 +305,8 @@ public class DefaultClassLoader extends AbstractClassLoader {
 		}
 	}
 
-	protected Class defineClass(String name, byte[] classbytes, int off, int len, ProtectionDomain bundledomain, BundleFile bundlefile) throws ClassFormatError {
-		return defineClass(name,classbytes,off,len,bundledomain);
+	protected Class defineClass(String name, byte[] classbytes, int off, int len, ClasspathEntry classpathEntry) throws ClassFormatError {
+		return defineClass(name,classbytes,off,len,classpathEntry.domain);
 	}
 
 	/** 
@@ -484,7 +484,7 @@ public class DefaultClassLoader extends AbstractClassLoader {
 
 	protected boolean addClassPathEntry(ArrayList result, String entry, AbstractBundleData bundledata, ProtectionDomain domain) {
 		if (entry.equals(".")) {
-			result.add(new ClasspathEntry(bundledata.getBaseBundleFile(), domain));
+			result.add(createClassPathEntry(bundledata.getBaseBundleFile(), domain));
 			return true;
 		} 
 		Object element = getClasspath(entry, bundledata, domain);
@@ -528,6 +528,16 @@ public class DefaultClassLoader extends AbstractClassLoader {
 	}
 
 	/**
+	 * Creates a ClasspathEntry from a BundleFile and ProtectionDomain.
+	 * @param bundlefile the BundleFile.
+	 * @param domain the ProtectionDomain
+	 * @return the ClasspathEntry
+	 */
+	protected ClasspathEntry createClassPathEntry(BundleFile bundlefile, ProtectionDomain domain) {
+		return new ClasspathEntry(bundlefile, domain);
+	}
+
+	/**
 	 * A data structure to hold information about a fragment classpath.
 	 */
 	protected class FragmentClasspath {
@@ -557,6 +567,9 @@ public class DefaultClassLoader extends AbstractClassLoader {
 		}
 	}
 
+	/**
+	 * A data structure to hold information about a classpath entry.
+	 */
 	protected class ClasspathEntry {
 		protected BundleFile bundlefile;
 		protected ProtectionDomain domain;
