@@ -73,14 +73,6 @@ public class BundleURLConnection extends URLConnection {
 	 * @see			getContentType()
 	 */
 	public int getContentLength() {
-		if (!connected) {
-			try {
-				connect();
-			} catch (IOException e) {
-				return (-1);
-			}
-		}
-
 		return ((int) bundleEntry.getSize());
 	}
 
@@ -180,14 +172,6 @@ public class BundleURLConnection extends URLConnection {
 	 * @return The last modified time.
 	 */
 	public long getLastModified() {
-		if (!connected) {
-			try {
-				connect();
-			} catch (IOException e) {
-				return (0);
-			}
-		}
-
 		long lastModified = bundleEntry.getTime();
 
 		if (lastModified == -1) {
