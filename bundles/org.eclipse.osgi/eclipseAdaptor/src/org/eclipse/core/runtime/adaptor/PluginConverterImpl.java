@@ -78,10 +78,10 @@ public class PluginConverterImpl implements PluginConverter {
 	private void fillPluginInfo(File pluginBaseLocation) throws PluginConversionException {
 		pluginManifestLocation = pluginBaseLocation;
 		if (pluginManifestLocation == null)
-			return;
+			throw new IllegalArgumentException();
 		URL pluginFile = findPluginManifest(pluginBaseLocation);
 		if (pluginFile == null)
-			return;
+			throw new PluginConversionException(EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONVERTER_FILENOTFOUND", pluginBaseLocation.getAbsolutePath())); //$NON-NLS-1$
 		pluginInfo = parsePluginInfo(pluginFile);
 		String validation = pluginInfo.validateForm();
 		if (validation != null)
