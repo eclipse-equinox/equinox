@@ -29,12 +29,14 @@ public class CachedManifest extends Dictionary {
 			try {
 				manifest = bundledata.loadManifest();
 			} catch (BundleException e) {
+				//TODO: this needs to be logged
 				return null;
 			}
 		return manifest;
 	}
 
 	public int size() {
+		//TODO: getManifest may return null
 		return getManifest().size();
 	}
 
@@ -43,10 +45,12 @@ public class CachedManifest extends Dictionary {
 	}
 
 	public Enumeration elements() {
+		//TODO: getManifest may return null		
 		return getManifest().elements();
 	}
 
 	public Enumeration keys() {
+		//TODO: getManifest may return null		
 		return getManifest().keys();
 	}
 
@@ -66,14 +70,17 @@ public class CachedManifest extends Dictionary {
 			return bundledata.isLegacy();
 		if (org.osgi.framework.Constants.BUNDLE_SYMBOLICNAME.equalsIgnoreCase(keyString))
 			return bundledata.getSymbolicName();
+		//TODO: getManifest may return null
 		return getManifest().get(key);
 	}
 
 	public Object remove(Object key) {
+		//TODO: getManifest may return null		
 		return getManifest().remove(key);
 	}
 
 	public Object put(Object key, Object value) {
+		//TODO: getManifest may return null		
 		return getManifest().put(key, value);
 	}
 
