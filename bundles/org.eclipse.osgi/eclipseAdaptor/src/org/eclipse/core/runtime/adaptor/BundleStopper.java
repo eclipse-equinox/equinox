@@ -85,7 +85,7 @@ public class BundleStopper {
 
 	public boolean isStopped(Bundle bundle) {
 		if (stoppedBundles == null)
-			return null;
+			return false;
 		return stoppedBundles.get(bundle) != null;
 	}
 }
