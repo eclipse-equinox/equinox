@@ -29,8 +29,9 @@ public class StreamHandlerFactory implements java.net.URLStreamHandlerFactory {
 	/** internal adaptor object */
 	protected FrameworkAdaptor adaptor;
 
+	//TODO maybe handlerTracker?
 	private ServiceTracker urlStreamHandlerTracker;
-
+	// TODO use ALL_CAPS for constants
 	protected static final String urlStreamHandlerClazz = "org.osgi.service.url.URLStreamHandlerService";
 
 	private Hashtable proxies;
@@ -56,9 +57,11 @@ public class StreamHandlerFactory implements java.net.URLStreamHandlerFactory {
 	 * @param protocol The desired protocol
 	 * @return a URLStreamHandler for the specific protocol.
 	 */
+	//TODO consider refactoring this method - it is too long
 	public URLStreamHandler createURLStreamHandler(String protocol) {
 
 		//first check for built in handlers
+		//TODO use a constant for the property name
 		String builtInHandlers = System.getProperty("java.protocol.handler.pkgs");
 		Class clazz = null;
 		if (builtInHandlers != null) {
@@ -80,6 +83,7 @@ public class StreamHandlerFactory implements java.net.URLStreamHandlerFactory {
 		}
 
 		//internal protocol handlers
+		//TODO use constants for the class base package and name
 		String name = "org.eclipse.osgi.framework.internal.protocol." + protocol + ".Handler";
 
 		try {
@@ -94,7 +98,7 @@ public class StreamHandlerFactory implements java.net.URLStreamHandlerFactory {
 			if (handler != null) {
 				return (handler);
 			}
-
+			//TODO avoid deep nesting of control structures - return early
 			//look through the service registry for a URLStramHandler registered for this protocol
 			org.osgi.framework.ServiceReference[] serviceReferences = urlStreamHandlerTracker.getServiceReferences();
 			if (serviceReferences != null) {
