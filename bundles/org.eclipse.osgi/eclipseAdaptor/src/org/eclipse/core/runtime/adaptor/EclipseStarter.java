@@ -69,8 +69,8 @@ public class EclipseStarter {
 
 	// System properties
 	public static final String PROP_BUNDLES = "osgi.bundles"; //$NON-NLS-1$
-	public static final String PROP_BUNDLES_STARTLEVEL = "osgi.bundles.defaultStartLevel"; //$NON-NLS-1$
-	public static final String PROP_INITIAL_STARTLEVEL = "osgi.startLevel"; //$NON-NLS-1$
+	public static final String PROP_BUNDLES_STARTLEVEL = "osgi.bundles.defaultStartLevel"; //$NON-NLS-1$ //The start level used to install the bundles
+	public static final String PROP_INITIAL_STARTLEVEL = "osgi.startLevel"; //$NON-NLS-1$ //The start level when the fwl start
 	public static final String PROP_DEBUG = "osgi.debug"; //$NON-NLS-1$
 	public static final String PROP_DEV = "osgi.dev"; //$NON-NLS-1$
 	public static final String PROP_CLEAN = "osgi.clean"; //$NON-NLS-1$
@@ -99,7 +99,9 @@ public class EclipseStarter {
 	private static final String INITIAL_LOCATION = "initial@"; //$NON-NLS-1$
 	/** string containing the classname of the adaptor to be used in this framework instance */
 	protected static final String DEFAULT_ADAPTOR_CLASS = "org.eclipse.core.runtime.adaptor.EclipseAdaptor"; //$NON-NLS-1$
-
+	
+	private static final int DEFAULT_INITIAL_STARTLEVEL = 6; // default value for legacy purposes
+	private static final String DEFAULT_BUNDLES_STARTLEVEL = "4";  //$NON-NLS-1$
 	// Console information
 	protected static final String DEFAULT_CONSOLE_CLASS = "org.eclipse.osgi.framework.internal.core.FrameworkConsole"; //$NON-NLS-1$
 	private static final String CONSOLE_NAME = "OSGi Console"; //$NON-NLS-1$
@@ -240,7 +242,7 @@ public class EclipseStarter {
 				if (debug)
 					System.out.println("Start level = " + level + "  parsed. Using hardcoded default: 6"); //$NON-NLS-1$ //$NON-NLS-2$
 			}
-		return 6; // hard coded default value for legacy purposes
+		return DEFAULT_INITIAL_STARTLEVEL;
 	}
 
 	/**
@@ -445,7 +447,7 @@ public class EclipseStarter {
 
 	private static InitialBundle[] getInitialBundles(String[] installEntries) throws MalformedURLException {
 		ArrayList result = new ArrayList(installEntries.length);
-		int defaultStartLevel = Integer.parseInt(System.getProperty(PROP_BUNDLES_STARTLEVEL));
+		int defaultStartLevel = Integer.parseInt(System.getProperty(PROP_BUNDLES_STARTLEVEL, DEFAULT_BUNDLES_STARTLEVEL));
 		String syspath = getSysPath();
 		for (int i = 0; i < installEntries.length; i++) {
 			String name = installEntries[i];
