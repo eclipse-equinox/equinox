@@ -29,8 +29,7 @@ import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.framework.stats.ClassloaderStats;
 import org.eclipse.osgi.framework.stats.ResourceBundleStats;
 import org.eclipse.osgi.util.ManifestElement;
-import org.osgi.framework.BundleException;
-import org.osgi.framework.FrameworkEvent;
+import org.osgi.framework.*;
 
 public class EclipseClassLoader extends DefaultClassLoader {
 	private static String[] NL_JAR_VARIANTS = buildNLJarVariants(System.getProperties().getProperty("osgi.nl")); //$NON-NLS-1$
@@ -120,9 +119,9 @@ public class EclipseClassLoader extends DefaultClassLoader {
 						}
 						timeLeft = start + delay - System.currentTimeMillis();
 					}
-					if (timeLeft <= 0 || bundle.getState() != AbstractBundle.ACTIVE) {
+					if (timeLeft <= 0 || bundle.getState() != Bundle.ACTIVE) {
 						String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CLASSLOADER_CONCURRENT_STARTUP", new Object[] {Thread.currentThread(), name, bundle.getStateChanging().getName(), bundle.getSymbolicName() == null ? Long.toString(bundle.getBundleId()) : bundle.getSymbolicName()}); //$NON-NLS-1$
-						EclipseAdaptor.getDefault().getFrameworkLog().log(new FrameworkLogEntry(EclipseAdaptorConstants.PI_ECLIPSE_OSGI, message, 0, null, null));
+						EclipseAdaptor.getDefault().getFrameworkLog().log(new FrameworkLogEntry(EclipseAdaptorConstants.PI_ECLIPSE_OSGI, message, 0, new Exception("ECLIPSE_CLASSLOADER_GENERATED_EXCEPTION"), null)); //$NON-NLS-1$
 					}
 					return super.findLocalClass(name);
 				}
