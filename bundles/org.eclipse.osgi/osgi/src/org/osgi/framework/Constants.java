@@ -1,5 +1,5 @@
 /*
- * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/Constants.java,v 1.6 2004/03/03 19:15:22 rchaves Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/Constants.java,v 1.7 2004/03/04 15:59:07 twatson Exp $
  *
  * Copyright (c) The Open Services Gateway Initiative (2000-2001).
  * All Rights Reserved.
@@ -35,7 +35,7 @@ package org.osgi.framework;
  * <p>The values associated with these keys are of type <tt>java.lang.String</tt>,
  * unless otherwise indicated.
  *
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  * @author Open Services Gateway Initiative
  * @since 1.1
  * @see Bundle#getHeaders
@@ -513,17 +513,17 @@ public interface Constants {
 
 	/**
 	 * This constant represents the Require-Bundle manifest header attribute 
-	 * named "provide-packages" identifying that any packages that are provided 
-	 * by the required bundle must be provided by the requiring bundle.  
+	 * named "reprovide" identifying that any packages that are provided 
+	 * by the required bundle must be reprovided by the requiring bundle.  
 	 * The default value is "false".  
 	 * <p>
 	 * The attribute value is encoded in the Require-Bundle Manifest header like:
 	 * <pre>
 	 * Require-Bundle: org.osgi.framework.module.test; 
-	 *  provide-packages="true"
+	 *  reprovide="true"
 	 * </pre>
 	 */
-	public final static String PROVIDE_PACKAGES_ATTRIBUTE = "provide-packages";
+	public final static String REPROVIDE_ATTRIBUTE = "reprovide";
 
 	/**
 	 * Manifest header attribute (named &quot;optional&quot;)

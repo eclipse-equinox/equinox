@@ -360,7 +360,7 @@ public class PluginConverterImpl implements PluginConverter, IModel {
 				modImport.append(';').append(Constants.BUNDLE_VERSION_ATTRIBUTE).append("=").append(element.getVersion()); //$NON-NLS-1$ 
 			}
 			if (element.isExported()) {
-				modImport.append(';').append(Constants.PROVIDE_PACKAGES_ATTRIBUTE).append("=true");//$NON-NLS-1$ 
+				modImport.append(';').append(Constants.REPROVIDE_ATTRIBUTE).append("=true");//$NON-NLS-1$ 
 			}
 			if (element.isOptional()) {
 				modImport.append(';').append(Constants.OPTIONAL_ATTRIBUTE).append("=true");//$NON-NLS-1$
