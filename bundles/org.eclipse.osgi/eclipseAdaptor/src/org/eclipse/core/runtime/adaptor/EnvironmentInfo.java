@@ -151,10 +151,9 @@ public class EnvironmentInfo implements org.eclipse.osgi.service.environment.Env
 		// argument then use the default.
 		arch = System.getProperty("osgi.arch");
 		if (arch == null) {
-			arch = System.getProperty("os.arch");//$NON-NLS-1$
+			String name = System.getProperty("os.arch");//$NON-NLS-1$
 			// Map i386 architecture to x86
-			if (arch.equalsIgnoreCase(INTERNAL_ARCH_I386))
-				arch = Constants.ARCH_X86;
+			arch = name.equalsIgnoreCase(INTERNAL_ARCH_I386) ? Constants.ARCH_X86 : name;
 		}
 		System.getProperties().put("osgi.arch", arch);		
 	}
