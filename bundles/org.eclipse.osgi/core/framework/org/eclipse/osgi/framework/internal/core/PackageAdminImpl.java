@@ -853,34 +853,6 @@ public class PackageAdminImpl implements PackageAdmin {
 		}
 	}
 
-	public org.osgi.framework.Bundle[] getBundles(String symbolicName, String version, String match) {
-		if (symbolicName == null) {
-			throw new IllegalArgumentException();
-		}
-
-		AbstractBundle bundles[] = framework.getBundleBySymbolicName(symbolicName);
-		if (bundles == null)
-			return null;
-
-		if (version == null)
-			return bundles;
-
-		// This code depends on the array of bundles being in descending
-		// version order.
-		ArrayList result = new ArrayList();
-		Version ver = new Version(version);
-		for (int i = 0; i < bundles.length; i++) {
-			if (matchBundle(bundles[i], ver, match)) {
-				result.add(bundles[i]);
-			}
-		}
-
-		if (result.size() == 0)
-			return null;
-		else
-			return (AbstractBundle[]) result.toArray(new AbstractBundle[result.size()]);
-	}
-
 	public org.osgi.framework.Bundle[] getBundles(String symbolicName, String versionRange) {
 		if (symbolicName == null) {
 			throw new IllegalArgumentException();
@@ -907,23 +879,6 @@ public class PackageAdminImpl implements PackageAdmin {
 		else
 			return (AbstractBundle[]) result.toArray(new AbstractBundle[result.size()]);
 
-	}
-
-	private boolean matchBundle(AbstractBundle bundle, Version version, String match) {
-		match = match == null ? Constants.VERSION_MATCH_GREATERTHANOREQUAL : match;
-		boolean result = false;
-		if (match.equalsIgnoreCase(Constants.VERSION_MATCH_QUALIFIER))
-			result = bundle.getVersion().matchQualifier(version);
-		else if (match.equalsIgnoreCase(Constants.VERSION_MATCH_MICRO))
-			result = bundle.getVersion().matchMicro(version);
-		else if (match.equalsIgnoreCase(Constants.VERSION_MATCH_MINOR))
-			result = bundle.getVersion().matchMinor(version);
-		else if (match.equalsIgnoreCase(Constants.VERSION_MATCH_MAJOR))
-			result = bundle.getVersion().matchMajor(version);
-		else if (match.equalsIgnoreCase(Constants.VERSION_MATCH_GREATERTHANOREQUAL))
-			result = bundle.getVersion().matchGreaterOrEqualTo(version);
-
-		return result;
 	}
 
 	public org.osgi.framework.Bundle[] getFragments(org.osgi.framework.Bundle bundle) {

@@ -1,5 +1,5 @@
 /*
- * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/service/packageadmin/PackageAdmin.java,v 1.8 2004/04/20 17:35:59 twatson Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/service/packageadmin/PackageAdmin.java,v 1.9 2004/05/03 14:59:18 twatson Exp $
  *
  * Copyright (c) The Open Services Gateway Initiative (2001, 2002).
  * All Rights Reserved.
@@ -51,7 +51,7 @@ import org.osgi.framework.Bundle;
  * old values, <tt>isRemovalPending()</tt> returns <tt>true</tt>, and <tt>getExportingBundle()</tt>
  * and <tt>getImportingBundles()</tt> return <tt>null</tt>.
  *
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  * @author Open Services Gateway Initiative
  */
 public interface PackageAdmin {
@@ -197,30 +197,6 @@ public interface PackageAdmin {
      * @since <b>1.4 EXPERIMENTAL</b>
      */
     public NamedClassSpace[] getNamedClassSpaces(String symbolicName);
-
-    /**
-     * Gets the Bundles with the specified symbolic name.  If no bundles are 
-     * installed that have the specified symbolic name then null is returned.  
-     * If the version argument is not null then only the Bundles that have 
-     * the specified symbolic name and a version greater than or equal to the 
-     * specified version are returned.  If the version and match arguments are 
-     * not null then only the Bundles that have the specified symbolic name 
-     * and a version that matches the specified version using the specified 
-     * match rule are returned.  The returned bundles are ordered in 
-     * descending bundle version order.
-     * 
-     * @param symbolicName the symbolic name of the bundles that are to be returned.
-     * @param version the version that the return bundle versions must match, 
-     * or <tt>null</tt> if no version matching is to be done. 
-     * @param match the match rule that the returned bundle versions must match,
-     * or <tt>null</tt> if no version is specified or if the greater than or equal
-     * match rule is to be used.
-     * @return the array of Bundles with the specified name that match the 
-     * specified version and match rule, or <tt>null</tt> if no bundles are found.
-     * @deprecated use {@link #getBundles(String, String)}
-     * @since <b>1.4 EXPERIMENTAL</b>
-     */
-    public Bundle[] getBundles(String symbolicName, String version, String match);
 
     /**
      * Gets the Bundles with the specified symbolic name.  If no bundles are 
