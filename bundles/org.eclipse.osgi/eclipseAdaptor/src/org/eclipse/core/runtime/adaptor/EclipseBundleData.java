@@ -216,7 +216,7 @@ public class EclipseBundleData extends DefaultBundleData {
 
 		Dictionary generatedManifest;
 		try {
-			generatedManifest = converter.convertManifest(getBaseFile(), true, null);
+			generatedManifest = converter.convertManifest(getBaseFile(), true, null, true);
 		} catch (PluginConversionException pce) {
 			String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONVERTER_ERROR_CONVERTING", getBaseFile()); //$NON-NLS-1$
 			throw new BundleException(message, pce); //$NON-NLS-1$

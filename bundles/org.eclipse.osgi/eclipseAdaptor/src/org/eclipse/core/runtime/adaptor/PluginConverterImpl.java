@@ -221,13 +221,14 @@ public class PluginConverterImpl implements PluginConverter {
 		return found;
 	}
 
-	protected void fillManifest(boolean compatibilityManifest) {
+	protected void fillManifest(boolean compatibilityManifest, boolean analyseJars) {
 		generateManifestVersion();
 		generateHeaders();
 		generateClasspath();
 		generateActivator();
 		generatePluginClass();
-		generateProvidePackage();
+		if (analyseJars)
+			generateProvidePackage();
 		generateRequireBundle();
 		generateLocalizationEntry();
 		generateEclipseHeaders();
@@ -646,17 +647,17 @@ public class PluginConverterImpl implements PluginConverter {
 		return result.toString();
 	}
 
-	public synchronized Dictionary convertManifest(File pluginBaseLocation, boolean compatibility, String target) throws PluginConversionException {
+	public synchronized Dictionary convertManifest(File pluginBaseLocation, boolean compatibility, String target, boolean analyseJars) throws PluginConversionException {
 		if (DEBUG)
 			System.out.println("Convert " + pluginBaseLocation); //$NON-NLS-1$
 		init();
 		this.target = target;
 		fillPluginInfo(pluginBaseLocation);
-		fillManifest(compatibility);
+		fillManifest(compatibility, analyseJars);
 		return generatedManifest;
 	}
 
-	public synchronized File convertManifest(File pluginBaseLocation, File bundleManifestLocation, boolean compatibilityManifest, String target) throws PluginConversionException {
+	public synchronized File convertManifest(File pluginBaseLocation, File bundleManifestLocation, boolean compatibilityManifest, String target, boolean analyseJars) throws PluginConversionException {
 		if (DEBUG)
 			System.out.println("Convert " + pluginBaseLocation); //$NON-NLS-1$
 		init();
@@ -666,7 +667,7 @@ public class PluginConverterImpl implements PluginConverter {
 			String cacheLocation = (String) System.getProperties().get(LocationManager.PROP_MANIFEST_CACHE);
 			bundleManifestLocation = new File(cacheLocation, pluginInfo.getUniqueId() + '_' + pluginInfo.getVersion() + ".MF"); //$NON-NLS-1$
 		}
-		fillManifest(compatibilityManifest);
+		fillManifest(compatibilityManifest, analyseJars);
 		if (upToDate(bundleManifestLocation, pluginManifestLocation, manifestType))
 			return bundleManifestLocation;
 		writeManifest(bundleManifestLocation, generatedManifest, compatibilityManifest);
