@@ -76,7 +76,7 @@ public class EclipseBundleData extends DefaultBundleData {
 	}
 
 	private boolean checkManifestTimeStamp(BundleFile bundlefile) {
-		if ("true".equalsIgnoreCase(PROP_CHECK_CONFIG)) //$NON-NLS-1$
+		if (!"true".equalsIgnoreCase(PROP_CHECK_CONFIG)) //$NON-NLS-1$
 			return true;
 
 		BundleEntry bundleManifestEntry = bundlefile.getEntry("."); //$NON-NLS-1$
