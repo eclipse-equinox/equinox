@@ -13,6 +13,7 @@ package org.eclipse.core.runtime.adaptor;
 import java.io.InputStream;
 import java.util.*;
 import javax.xml.parsers.SAXParserFactory;
+import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.xml.sax.*;
@@ -44,7 +45,7 @@ public class PluginParser extends DefaultHandler implements IModel {
 		private Set filters;
 		private String pluginName;
 		private boolean singleton;
-		private static final String TARGET21 = "2.1";
+		private static final String TARGET21 = "2.1"; //$NON-NLS-1$
 
 		public boolean isFragment() {
 			return masterPluginId != null;
@@ -136,17 +137,14 @@ public class PluginParser extends DefaultHandler implements IModel {
 		}
 	}
 
-	// File name for this plugin or fragment
-	// This to help with error reporting
-	String locationName = null;
-
 	// Current State Information
 	Stack stateStack = new Stack();
 
 	// Current object stack (used to hold the current object we are populating in this plugin info
 	Stack objectStack = new Stack();
 	Locator locator = null;
-
+	boolean inExtensionExtensionPoint = false;
+	
 	// Valid States
 	private static final int IGNORED_ELEMENT_STATE = 0;
 	private static final int INITIAL_STATE = 1;
@@ -158,7 +156,6 @@ public class PluginParser extends DefaultHandler implements IModel {
 	private static final int RUNTIME_LIBRARY_STATE = 7;
 	private static final int LIBRARY_EXPORT_STATE = 8;
 	private static final int PLUGIN_REQUIRES_IMPORT_STATE = 9;
-	private static final int CONFIGURATION_ELEMENT_STATE = 10;
 	private static final int FRAGMENT_STATE = 11;
 	private ServiceReference parserReference;
 
@@ -178,7 +175,7 @@ public class PluginParser extends DefaultHandler implements IModel {
 	 * </p>
 	 * 
 	 * @param locator A locator for all SAX document events.
-	 * @see org.xml.sax.ContentHandler#setDocumentLocator
+	 * @see org.xml.sax.ContentHandler#setDocumentLocator(org.xml.sax.Locator)
 	 * @see org.xml.sax.Locator
 	 */
 	public void setDocumentLocator(Locator locator) {
@@ -212,8 +209,10 @@ public class PluginParser extends DefaultHandler implements IModel {
 				}
 				break;
 			case PLUGIN_EXTENSION_POINT_STATE :
+				inExtensionExtensionPoint = false;
 				break;
 			case PLUGIN_EXTENSION_STATE :
+				inExtensionExtensionPoint = false;
 				break;
 			case RUNTIME_LIBRARY_STATE :
 				if (elementName.equals(LIBRARY)) {
@@ -240,8 +239,6 @@ public class PluginParser extends DefaultHandler implements IModel {
 					stateStack.pop();
 				}
 				break;
-			case CONFIGURATION_ELEMENT_STATE :
-				break;
 		}
 	}
 
@@ -263,7 +260,7 @@ public class PluginParser extends DefaultHandler implements IModel {
 	public void handleExtensionState(String elementName, Attributes attributes) {
 		// mark the plugin as singleton and ignore all elements under extension (if there are any)
 		manifestInfo.singleton = true;
-		stateStack.push(new Integer(CONFIGURATION_ELEMENT_STATE));
+		stateStack.push(new Integer(IGNORED_ELEMENT_STATE));
 	}
 
 	public void handleInitialState(String elementName, Attributes attributes) {
@@ -275,14 +272,13 @@ public class PluginParser extends DefaultHandler implements IModel {
 			parseFragmentAttributes(attributes);
 		} else {
 			stateStack.push(new Integer(IGNORED_ELEMENT_STATE));
-			//	internalError(Policy.bind("parse.unknownTopElement", elementName)); //$NON-NLS-1$
+			internalError(elementName);
 		}
 	}
 
 	public void handleLibraryExportState(String elementName, Attributes attributes) {
 		// All elements ignored.
 		stateStack.push(new Integer(IGNORED_ELEMENT_STATE));
-		// internalError(Policy.bind("parse.unknownElement", LIBRARY_EXPORT, elementName)); //$NON-NLS-1$
 	}
 
 	public void handleLibraryState(String elementName, Attributes attributes) {
@@ -310,7 +306,12 @@ public class PluginParser extends DefaultHandler implements IModel {
 			}
 			return;
 		}
+		if(elementName.equals(LIBRARY_PACKAGES)) {
+			stateStack.push(new Integer(IGNORED_ELEMENT_STATE));
+			return;
+		}
 		stateStack.push(new Integer(IGNORED_ELEMENT_STATE));
+		internalError(elementName);
 		return;
 	}
 
@@ -345,6 +346,7 @@ public class PluginParser extends DefaultHandler implements IModel {
 		// If we get to this point, the element name is one we don't currently accept.
 		// Set the state to indicate that this element will be ignored
 		stateStack.push(new Integer(IGNORED_ELEMENT_STATE));
+		internalError(elementName);
 	}
 
 	public void handleRequiresImportState(String elementName, Attributes attributes) {
@@ -360,6 +362,7 @@ public class PluginParser extends DefaultHandler implements IModel {
 		// If we get to this point, the element name is one we don't currently accept.
 		// Set the state to indicate that this element will be ignored
 		stateStack.push(new Integer(IGNORED_ELEMENT_STATE));
+		internalError(elementName);
 	}
 
 	public void handleRuntimeState(String elementName, Attributes attributes) {
@@ -373,33 +376,32 @@ public class PluginParser extends DefaultHandler implements IModel {
 		// If we get to this point, the element name is one we don't currently accept.
 		// Set the state to indicate that this element will be ignored
 		stateStack.push(new Integer(IGNORED_ELEMENT_STATE));
+		internalError(elementName);
 	}
 
 	private void logStatus(SAXParseException ex) {
 		String name = ex.getSystemId();
-		if (name == null)
-			name = locationName;
 		if (name == null)
 			name = ""; //$NON-NLS-1$ 
 		else
 			name = name.substring(1 + name.lastIndexOf("/")); //$NON-NLS-1$ 
 		String msg;
 		if (name.equals("")) //$NON-NLS-1$ 
-			msg = "parse.error";//Policy.bind("parse.error",
-		// ex.getMessage()); //$NON-NLS-1$
+			msg = EclipseAdaptorMsg.formatter.getString("parse.error", ex.getMessage()); //$NON-NLS-1$
 		else
-			msg = "parse.errorNameLineColumn";
-		//Policy.bind("parse.errorNameLineColumn", //$NON-NLS-1$
-		//                new String[] { name, Integer.toString(ex.getLineNumber()),
-		// Integer.toString(ex.getColumnNumber()), ex.getMessage()});
-		//                factory.error(new Status(IStatus.WARNING, Platform.PI_RUNTIME,
-		// Platform.PARSE_PROBLEM, msg, ex));
+			msg = EclipseAdaptorMsg.formatter.getString("parse.errorNameLineColumn", new String[] {name, Integer.toString(ex.getLineNumber()), Integer.toString(ex.getColumnNumber()), ex.getMessage()}); //$NON-NLS-1$
+
+		FrameworkLogEntry entry = new FrameworkLogEntry(EclipseAdaptorConstants.PI_ECLIPSE_OSGI, msg, 0, ex, null);
+		EclipseAdaptor.getDefault().getFrameworkLog().log(entry);
 	}
 
 	synchronized public PluginInfo parsePlugin(InputStream in) throws Exception {
 		SAXParserFactory factory = acquireXMLParsing();
-		if (factory == null)
-			return null; // TODO we log an error
+		if (factory == null) {
+			FrameworkLogEntry entry = new FrameworkLogEntry(EclipseAdaptorConstants.PI_ECLIPSE_OSGI, EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONVERTER_NO_SAX_FACTORY"), 0, null, null); //$NON-NLS-1$
+			EclipseAdaptor.getDefault().getFrameworkLog().log(entry);
+			return null;
+		}
 		try {
 			factory.setNamespaceAware(true);
 			factory.setFeature("http://xml.org/sax/features/string-interning", true); //$NON-NLS-1$ 
@@ -544,6 +546,7 @@ public class PluginParser extends DefaultHandler implements IModel {
 	}
 
 	public void parseRequiresAttributes(Attributes attributes) {
+		//Nothing to do.
 	}
 
 	static String replace(String s, String from, String to) {
@@ -581,7 +584,6 @@ public class PluginParser extends DefaultHandler implements IModel {
 				handleExtensionPointState(elementName, attributes);
 				break;
 			case PLUGIN_EXTENSION_STATE :
-			case CONFIGURATION_ELEMENT_STATE :
 				handleExtensionState(elementName, attributes);
 				break;
 			case RUNTIME_LIBRARY_STATE :
@@ -595,8 +597,6 @@ public class PluginParser extends DefaultHandler implements IModel {
 				break;
 			default :
 				stateStack.push(new Integer(IGNORED_ELEMENT_STATE));
-		//internalError(Policy.bind("parse.unknownTopElement", elementName));
-		// //$NON-NLS-1$
 		}
 	}
 
@@ -604,14 +604,11 @@ public class PluginParser extends DefaultHandler implements IModel {
 		logStatus(ex);
 	}
 
-	private void internalError(String message) {
-		//                if (locationName != null)
-		//                        factory.error(new Status(IStatus.WARNING, Platform.PI_RUNTIME,
-		// Platform.PARSE_PROBLEM, locationName + ": " + message, null));
-		// //$NON-NLS-1$
-		//                else
-		//                        factory.error(new Status(IStatus.WARNING, Platform.PI_RUNTIME,
-		// Platform.PARSE_PROBLEM, message, null));
+	private void internalError(String elementName) {
+		FrameworkLogEntry error;
+		String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONVERTER_PARSE_UNKNOWNTOP_ELEMENT", elementName); //$NON-NLS-1$
+		error = new FrameworkLogEntry(EclipseAdaptorConstants.PI_ECLIPSE_OSGI, (manifestInfo.pluginId == null ? message : "Plug-in : " + manifestInfo.pluginId + ", " + message) , 0, null, null); //$NON-NLS-1$ //$NON-NLS-2$
+		EclipseAdaptor.getDefault().getFrameworkLog().log(error);
 	}
 
 	public void processingInstruction(String target, String data) throws SAXException {

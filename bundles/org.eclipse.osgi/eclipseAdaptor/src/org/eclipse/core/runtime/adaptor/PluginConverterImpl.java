@@ -25,7 +25,10 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 
 public class PluginConverterImpl implements PluginConverter {
-	private static final String UTF_8 = "UTF-8";
+	private static final String SEMICOLON = "; "; //$NON-NLS-1$
+	private static final String UTF_8 = "UTF-8"; //$NON-NLS-1$
+	private static final String LIST_SEPARATOR = ",\n "; //$NON-NLS-1$
+	private static final String DOT = "."; //$NON-NLS-1$
 	private BundleContext context;
 	private BufferedWriter out;
 	private IPluginInfo pluginInfo;
@@ -33,8 +36,8 @@ public class PluginConverterImpl implements PluginConverter {
 	private Dictionary generatedManifest;
 	private byte manifestType;
 	private String target;
-	private static final String MANIFEST_VERSION = "Manifest-Version";
-	private static final String PLUGIN_PROPERTIES_FILENAME = "plugin";
+	private static final String MANIFEST_VERSION = "Manifest-Version"; //$NON-NLS-1$
+	private static final String PLUGIN_PROPERTIES_FILENAME = "plugin"; //$NON-NLS-1$
 	private static PluginConverterImpl instance;
 	private static final String[] ARCH_LIST = {org.eclipse.osgi.service.environment.Constants.ARCH_PA_RISC, org.eclipse.osgi.service.environment.Constants.ARCH_PPC, org.eclipse.osgi.service.environment.Constants.ARCH_SPARC, org.eclipse.osgi.service.environment.Constants.ARCH_X86, org.eclipse.osgi.service.environment.Constants.ARCH_AMD64};
 	protected static final String FRAGMENT_MANIFEST = "fragment.xml"; //$NON-NLS-1$
@@ -93,7 +96,7 @@ public class PluginConverterImpl implements PluginConverter {
 		if (pluginInfo == null)
 			return null;
 		if (bundleManifestLocation == null) {
-			String cacheLocation = (String) System.getProperties().get("osgi.manifest.cache");
+			String cacheLocation = (String) System.getProperties().get("osgi.manifest.cache"); //$NON-NLS-1$
 			bundleManifestLocation = new File(cacheLocation, pluginInfo.getUniqueId() + '_' + pluginInfo.getVersion() + ".MF"); //$NON-NLS-1$
 		}
 		try {
@@ -233,7 +236,6 @@ public class PluginConverterImpl implements PluginConverter {
 			generationLocation.getParentFile().mkdirs();
 			generationLocation.createNewFile();
 			if (!generationLocation.isFile()) {
-				// TODO better string keys needed
 				String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONVERTER_ERROR_CREATING_BUNDLE_MANIFEST", this.pluginInfo.getUniqueId(), generationLocation); //$NON-NLS-1$
 				throw new PluginConversionException(message);
 			}
@@ -260,7 +262,6 @@ public class PluginConverterImpl implements PluginConverter {
 			}
 			out.flush();
 		} catch (IOException e) {
-			// TODO better string keys needed
 			String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONVERTER_ERROR_CREATING_BUNDLE_MANIFEST", this.pluginInfo.getUniqueId(), generationLocation); //$NON-NLS-1$
 			throw new PluginConversionException(message, e);
 		} finally {
@@ -304,20 +305,20 @@ public class PluginConverterImpl implements PluginConverter {
 	private void generateClasspath() {
 		String[] classpath = pluginInfo.getLibrariesName();
 		if (classpath.length != 0)
-			generatedManifest.put(Constants.BUNDLE_CLASSPATH, getStringFromArray(classpath, ",\n ")); //$NON-NLS-1$
+			generatedManifest.put(Constants.BUNDLE_CLASSPATH, getStringFromArray(classpath, LIST_SEPARATOR));
 	}
 
 	private void generateHeaders() {
 		generatedManifest.put(Constants.BUNDLE_NAME, pluginInfo.getPluginName());
 		generatedManifest.put(Constants.BUNDLE_VERSION, pluginInfo.getVersion());
-		generatedManifest.put(Constants.BUNDLE_SYMBOLICNAME, getSymbolicNameEntry(pluginInfo));
+		generatedManifest.put(Constants.BUNDLE_SYMBOLICNAME, getSymbolicNameEntry());
 		String provider = pluginInfo.getProviderName();
 		if (provider != null)
 			generatedManifest.put(Constants.BUNDLE_VENDOR, provider);
 		if (pluginInfo.isFragment()) {
 			StringBuffer hostBundle = new StringBuffer();
-			hostBundle.append(pluginInfo.getMasterId()).append("; ");
-			hostBundle.append(Constants.BUNDLE_VERSION_ATTRIBUTE).append("=");
+			hostBundle.append(pluginInfo.getMasterId()).append(SEMICOLON); //$NON-NLS-1$
+			hostBundle.append(Constants.BUNDLE_VERSION_ATTRIBUTE).append("="); //$NON-NLS-1$
 			hostBundle.append(pluginInfo.getMasterVersion());
 			generatedManifest.put(Constants.FRAGMENT_HOST, hostBundle.toString());
 		}
@@ -327,12 +328,12 @@ public class PluginConverterImpl implements PluginConverter {
 	 * Generates an entry in the form: 
 	 * 	<symbolic-name>[; singleton=true]
 	 */
-	private String getSymbolicNameEntry(IPluginInfo pluginInfo) {
+	private String getSymbolicNameEntry() {
 		// false is the default, so don't bother adding anything 
 		if (!pluginInfo.isSingleton())
 			return pluginInfo.getUniqueId();
 		StringBuffer result = new StringBuffer(pluginInfo.getUniqueId());
-		result.append("; "); //$NON-NLS-1$
+		result.append(SEMICOLON); //$NON-NLS-1$
 		result.append(Constants.SINGLETON_ATTRIBUTE);
 		result.append("=true"); //$NON-NLS-1$
 		return result.toString();
@@ -349,7 +350,7 @@ public class PluginConverterImpl implements PluginConverter {
 	private void generateProvidePackage() {
 		Set exports = getExports();
 		if (exports != null && exports.size() != 0) {
-			generatedManifest.put(Constants.PROVIDE_PACKAGE, getStringFromCollection(exports, ",\n "));
+			generatedManifest.put(Constants.PROVIDE_PACKAGE, getStringFromCollection(exports, LIST_SEPARATOR));
 		}
 	}
 
@@ -384,7 +385,7 @@ public class PluginConverterImpl implements PluginConverter {
 			}
 			bundleRequire.append(modImport);
 			if (iter.hasNext())
-				bundleRequire.append(",\n "); //$NON-NLS-1$
+				bundleRequire.append(LIST_SEPARATOR);
 		}
 		generatedManifest.put(Constants.REQUIRE_BUNDLE, bundleRequire.toString());
 	}
@@ -475,7 +476,7 @@ public class PluginConverterImpl implements PluginConverter {
 			if (packageName.length() > 0)
 				exportedPaths.add(packageName);
 			else
-				exportedPaths.add(".");
+				exportedPaths.add(DOT);
 		return exportedPaths;
 	}
 
@@ -485,7 +486,7 @@ public class PluginConverterImpl implements PluginConverter {
 		try {
 			file = new JarFile(jarFile);
 		} catch (IOException e) {
-			String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONVERTER_PLUGIN_LIBRARY_IGNORED", jarFile, pluginInfo.getUniqueId());
+			String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONVERTER_PLUGIN_LIBRARY_IGNORED", jarFile, pluginInfo.getUniqueId()); //$NON-NLS-1$
 			EclipseAdaptor.getDefault().getFrameworkLog().log(new FrameworkLogEntry(EclipseAdaptorConstants.PI_ECLIPSE_OSGI, message, 0, e, null));
 			return names;
 		}
@@ -503,7 +504,7 @@ public class PluginConverterImpl implements PluginConverter {
 			} else {
 				// Allow the default package to be provided.  If the default package
 				// contains a File then use "." as the package name to provide for default.
-				names.add(".");
+				names.add(DOT);
 			}
 		}
 		return names;
@@ -626,7 +627,7 @@ public class PluginConverterImpl implements PluginConverter {
 
 	private String getStringFromArray(String[] values, String separator) {
 		if (values == null)
-			return "";
+			return ""; //$NON-NLS-1$
 		StringBuffer result = new StringBuffer();
 		for (int i = 0; i < values.length; i++) {
 			if (i > 0)
@@ -667,7 +668,7 @@ public class PluginConverterImpl implements PluginConverter {
 		}
 	}
 
-	public Dictionary convertManifest(File pluginBaseLocation, boolean compatibility, String target) {
+	public synchronized Dictionary convertManifest(File pluginBaseLocation, boolean compatibility, String target) {
 		init();
 		this.target = target;
 		fillPluginInfo(pluginBaseLocation);
