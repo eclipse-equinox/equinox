@@ -1262,7 +1262,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	 */
 	protected void checkValid() {
 		if (state == UNINSTALLED) {
-			throw new IllegalStateException(Msg.formatter.getString("BUNDLE_UNINSTALLED_EXCEPTION"));
+			throw new IllegalStateException(Msg.formatter.getString("BUNDLE_UNINSTALLED_EXCEPTION", getLocation()));
 		}
 	}
 
