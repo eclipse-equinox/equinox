@@ -126,7 +126,7 @@ abstract public class BundleFile {
 		protected ZipFile zipFile;
 		protected boolean closed = false;
 
-		protected ZipBundleFile(File basefile, BundleData bundledata) throws IOException {
+		public ZipBundleFile(File basefile, BundleData bundledata) throws IOException {
 			super(basefile);
 			this.bundledata = bundledata;
 			this.closed = true;
@@ -321,7 +321,7 @@ abstract public class BundleFile {
 	 */
 	public static class DirBundleFile extends BundleFile {
 
-		protected DirBundleFile(File basefile) throws IOException {
+		public DirBundleFile(File basefile) throws IOException {
 			super(basefile);
 			if (!basefile.exists() || !basefile.isDirectory()) {
 				throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_DIRECTORY_EXCEPTION", basefile)); //$NON-NLS-1$
@@ -470,5 +470,9 @@ abstract public class BundleFile {
 		public void open() {
 			// do nothing
 		}
+	}
+	
+	public File getBaseFile() {
+		return basefile;
 	}
 }

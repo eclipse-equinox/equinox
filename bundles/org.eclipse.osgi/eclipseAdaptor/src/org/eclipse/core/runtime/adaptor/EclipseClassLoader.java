@@ -44,7 +44,6 @@ public class EclipseClassLoader extends DefaultClassLoader {
 	}
 
 	public Class findLocalClass(String className) throws ClassNotFoundException {
-
 		if (StatsManager.MONITOR_CLASSES) //Suport for performance analysis
 			ClassloaderStats.startLoadingClass(getClassloaderId(), className);
 		boolean found = true;
@@ -54,11 +53,11 @@ public class EclipseClassLoader extends DefaultClassLoader {
 			// If the bundle is active, uninstalled or stopping then the bundle has already
 			// been initialized (though it may have been destroyed) so just return the class.
 			if ((bundle.getState() & (AbstractBundle.ACTIVE | AbstractBundle.UNINSTALLED | AbstractBundle.STOPPING)) != 0)
-				return super.findLocalClass(className);
+				return basicFindLocalClass(className);
 
 			// The bundle is not active and does not require activation, just return the class
 			if (!shouldActivateFor(className))
-				return super.findLocalClass(className);
+				return basicFindLocalClass(className);
 
 			// The bundle is starting.  Note that if the state changed between the tests 
 			// above and this test (e.g., it was not ACTIVE but now is), that's ok, we will 
@@ -68,7 +67,7 @@ public class EclipseClassLoader extends DefaultClassLoader {
 			if (bundle.getState() == AbstractBundle.STARTING) {
 				// If the thread trying to load the class is the one trying to activate the bundle, then return the class 
 				if (bundle.testStateChanging(Thread.currentThread()) || bundle.testStateChanging(null))
-					return super.findLocalClass(className);
+					return basicFindLocalClass(className);
 
 				// If it's another thread, we wait and try again. In any case the class is returned. 
 				// The difference is that an exception can be logged.
@@ -99,7 +98,7 @@ public class EclipseClassLoader extends DefaultClassLoader {
 						String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CLASSLOADER_CONCURRENT_STARTUP", new Object[] {Thread.currentThread().getName(), className, threadChangingState.getName(), bundleName, Long.toString(delay)}); //$NON-NLS-1$ 
 						EclipseAdaptor.getDefault().getFrameworkLog().log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, message, 0, new Exception(EclipseAdaptorMsg.formatter.getString("ECLIPSE_CLASSLOADER_GENERATED_EXCEPTION")), null)); //$NON-NLS-1$
 					}
-					return super.findLocalClass(className);
+					return basicFindLocalClass(className);
 				}
 			}
 
@@ -110,7 +109,7 @@ public class EclipseClassLoader extends DefaultClassLoader {
 				String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CLASSLOADER_ACTIVATION", bundle.getSymbolicName(), Long.toString(bundle.getBundleId())); //$NON-NLS-1$
 				EclipseAdaptor.getDefault().getFrameworkLog().log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, message, 0, e, null));
 			}
-			return super.findLocalClass(className);
+			return basicFindLocalClass(className);
 		} catch (ClassNotFoundException e) {
 			found = false;
 			throw e;
@@ -118,6 +117,18 @@ public class EclipseClassLoader extends DefaultClassLoader {
 			if (StatsManager.MONITOR_CLASSES)
 				ClassloaderStats.endLoadingClass(getClassloaderId(), className, found);
 		}
+	}
+
+	/**
+	 * Do the basic work for finding a class. This avoids the activation detection etc
+	 * and can be used by subclasses to override the default (from the superclass) 
+	 * way of finding classes.
+	 * @param name the class to look for
+	 * @return the found class
+	 * @throws ClassNotFoundException if the requested class cannot be found
+	 */
+	protected Class basicFindLocalClass(String name) throws ClassNotFoundException {
+		return super.findLocalClass(name);
 	}
 
 	/**
