@@ -11,7 +11,6 @@
 package org.eclipse.core.runtime.adaptor;
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
-import org.eclipse.osgi.framework.internal.core.ConsoleMsg;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -45,7 +44,7 @@ public class EclipseCommandProvider implements CommandProvider {
 	public void _diag(CommandInterpreter ci) throws Exception {
 		String nextArg = ci.nextArgument();
 		if (nextArg == null) {
-			ci.println(ConsoleMsg.formatter.getString("CONSOLE_NO_BUNDLE_SPECIFIED_ERROR"));
+			ci.println(EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONSOLE_NO_BUNDLE_SPECIFIED_ERROR"));
 			return;
 		}
 		ServiceReference platformAdminRef = context.getServiceReference("org.eclipse.osgi.service.resolver.PlatformAdmin");
@@ -62,7 +61,7 @@ public class EclipseCommandProvider implements CommandProvider {
 			while (nextArg != null) {
 				BundleDescription bundle = getBundleDescriptionFromToken(systemState, nextArg);
 				if (bundle == null) {
-					ci.println(ConsoleMsg.formatter.getString("CONSOLE_CANNOT_FIND_BUNDLE_ERROR", nextArg));
+					ci.println(EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONSOLE_CANNOT_FIND_BUNDLE_ERROR", nextArg));
 					nextArg = ci.nextArgument();
 					continue;
 				}
