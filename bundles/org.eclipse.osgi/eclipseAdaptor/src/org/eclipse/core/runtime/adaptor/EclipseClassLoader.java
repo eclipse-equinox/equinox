@@ -158,7 +158,7 @@ public class EclipseClassLoader extends DefaultClassLoader {
 	 */
 	protected Class defineClass(String name, byte[] classbytes, int off, int len, ClasspathEntry classpathEntry) throws ClassFormatError {
 		if (!DEFINE_PACKAGES)
-			super.defineClass(name, classbytes, off, len, classpathEntry);
+			return super.defineClass(name, classbytes, off, len, classpathEntry);
 
 		// Define the package if it is not the default package.
 		int lastIndex = name.lastIndexOf('.');
