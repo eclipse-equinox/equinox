@@ -119,7 +119,7 @@ public class EclipseStarter {
 			if (endSplashHandler != null)
 				endSplashHandler.run();
 			// may use startupFailed to understand where the error happened
-			FrameworkLogEntry logEntry = new FrameworkLogEntry("Error", "Big error", 1, e, null); //TODO Put the right value here
+			FrameworkLogEntry logEntry = new FrameworkLogEntry("org.eclipse.osgi", startupFailed ? "Startup error" : "Application error", 1, e, null); //TODO Put the right value here
 			if (log != null)
 				log.log(logEntry);
 			else
@@ -129,7 +129,7 @@ public class EclipseStarter {
 			try {				
 				shutdown();
 			} catch(Throwable e) {
-				FrameworkLogEntry logEntry = new FrameworkLogEntry("Error", "Big error", 1, e, null); //TODO Put the right value here
+				FrameworkLogEntry logEntry = new FrameworkLogEntry("org.eclipse.osgi", "Shutdown error", 1, e, null); //TODO Put the right value here
 				if (log != null)
 					log.log(logEntry);
 				else
