@@ -42,11 +42,11 @@ public class EnvironmentInfo implements org.eclipse.osgi.service.environment.Env
 	}
 
 	public boolean inDevelopmentMode() {
-		return System.getProperty("osgi.dev") != null;
+		return System.getProperty("osgi.dev") != null; //$NON-NLS-1$
 	}
 
 	public boolean inDebugMode() {
-		return System.getProperty("osgi.debug") != null;
+		return System.getProperty("osgi.debug") != null; //$NON-NLS-1$
 	}
 
 	public String[] getCommandLineArgs() {
@@ -88,7 +88,7 @@ public class EnvironmentInfo implements org.eclipse.osgi.service.environment.Env
 	private void setupSystemContext() {
 		// if the user didn't set the locale with a command line argument then
 		// use the default.
-		nl = System.getProperty("osgi.nl");
+		nl = System.getProperty("osgi.nl"); //$NON-NLS-1$
 		if (nl != null) {
 			StringTokenizer tokenizer = new StringTokenizer(nl, "_"); //$NON-NLS-1$
 			int segments = tokenizer.countTokens();
@@ -117,11 +117,11 @@ public class EnvironmentInfo implements org.eclipse.osgi.service.environment.Env
 			}
 		}
 		nl = Locale.getDefault().toString();
-		System.getProperties().put("osgi.nl", nl);
+		System.getProperties().put("osgi.nl", nl); //$NON-NLS-1$
 
 		// if the user didn't set the operating system with a command line 
 		// argument then use the default.
-		os = System.getProperty("osgi.os");
+		os = System.getProperty("osgi.os"); //$NON-NLS-1$
 		if (os == null) {
 			String name = System.getProperty("os.name");//$NON-NLS-1$
 			// check to see if the VM returned "Windows 98" or some other
@@ -132,11 +132,11 @@ public class EnvironmentInfo implements org.eclipse.osgi.service.environment.Env
 			if (os == null)
 				os = name.equalsIgnoreCase(INTERNAL_OS_SUNOS) ? Constants.OS_SOLARIS : Constants.OS_UNKNOWN;
 		}
-		System.getProperties().put("osgi.os", os);
+		System.getProperties().put("osgi.os", os); //$NON-NLS-1$
 
 		// if the user didn't set the window system with a command line 
 		// argument then use the default.
-		ws = System.getProperty("osgi.ws");
+		ws = System.getProperty("osgi.ws"); //$NON-NLS-1$
 		if (ws == null) {
 			// setup default values for known OSes if nothing was specified
 			if (os.equals(Constants.OS_WIN32))
@@ -154,17 +154,17 @@ public class EnvironmentInfo implements org.eclipse.osgi.service.environment.Env
 			else
 				ws = Constants.WS_UNKNOWN;
 		}
-		System.getProperties().put("osgi.ws", ws);
+		System.getProperties().put("osgi.ws", ws); //$NON-NLS-1$
 
 		// if the user didn't set the system architecture with a command line 
 		// argument then use the default.
-		arch = System.getProperty("osgi.arch");
+		arch = System.getProperty("osgi.arch"); //$NON-NLS-1$
 		if (arch == null) {
 			String name = System.getProperty("os.arch");//$NON-NLS-1$
 			// Map i386 architecture to x86
 			arch = name.equalsIgnoreCase(INTERNAL_ARCH_I386) ? Constants.ARCH_X86 : name;
 		}
-		System.getProperties().put("osgi.arch", arch);
+		System.getProperties().put("osgi.arch", arch); //$NON-NLS-1$
 	}
 
 }
