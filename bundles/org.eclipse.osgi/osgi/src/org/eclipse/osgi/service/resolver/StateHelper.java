@@ -29,7 +29,7 @@ public class StateHelper {
 		if (roots == null || roots.length == 0)
 			return new BundleDescription[0];
 		Set remaining = new HashSet(Arrays.asList(roots[0].getContainingState().getResolvedBundles()));
-		HashSet reachable = new HashSet(roots.length);
+		Set reachable = new HashSet(roots.length);
 		// put the roots in the graph
 		for (int i = 0; i < roots.length; i++)
 			if (roots[i].isResolved()) {
@@ -87,7 +87,7 @@ public class StateHelper {
 		if (containingState == null)
 			// it is a bug in the client to call this method when not attached to a state
 			throw new IllegalStateException("Does not belong to a state"); //$NON-NLS-1$		
-		ArrayList unsatisfied = new ArrayList(); 
+		List unsatisfied = new ArrayList(); 
 		HostSpecification[] hosts = bundle.getHosts();
 		for (int i = 0; i < hosts.length; i++)
 			if (!hosts[i].isResolved() && !isResolvable(hosts[i]))
