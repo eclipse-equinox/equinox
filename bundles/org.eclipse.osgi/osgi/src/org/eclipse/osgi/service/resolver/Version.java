@@ -180,28 +180,6 @@ public final class Version implements Comparable {
 		this.inclusive = inclusive;
 	}
 
-	/**
-	 * Validates the given string as a plug-in version identifier.
-	 * 
-	 * @param version the string to validate
-	 * @return a status object with code <code>IStatus.OK</code> if
-	 *		the given string is valid as a plug-in version identifier, otherwise a status
-	 *		object indicating what is wrong with the string
-	 * @since 2.0
-	 */
-	public static RuntimeException validateVersion(String version) {
-		try {
-			parseVersion(version);
-		} catch (RuntimeException e) {
-			return e;
-			// OG...
-			// return new Status(IStatus.ERROR, Platform.PI_RUNTIME, IStatus.ERROR, e.getMessage(), e);
-		}
-		return null;
-		// OG...
-		// return new Status(IStatus.OK, Platform.PI_RUNTIME, IStatus.OK, Policy.bind("ok"), null); //$NON-NLS-1$
-	}
-
 	private static Object[] parseVersion(String versionId) {
 
 		// Do the test outside of the assert so that they 'Policy.bind' 
