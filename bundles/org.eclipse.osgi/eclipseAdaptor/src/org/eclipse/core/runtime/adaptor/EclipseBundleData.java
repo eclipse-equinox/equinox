@@ -188,7 +188,7 @@ public class EclipseBundleData extends DefaultBundleData {
 		File bundleManifestLocation = new File(cacheLocation, (String) generatedManifest.get(org.osgi.framework.Constants.BUNDLE_SYMBOLICNAME) + '_' + generatedManifest.get(Constants.BUNDLE_VERSION) + ".MF");
 		try {
 			converter.writeManifest(bundleManifestLocation, generatedManifest, true);
-		} catch (PluginConversionException e) {
+		} catch (Exception e) {
 			//TODO Need to log
 		}
 		return generatedManifest;
