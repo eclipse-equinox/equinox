@@ -12,8 +12,8 @@ package org.eclipse.osgi.internal.resolver;
 
 import java.util.*;
 
-import org.eclipse.osgi.framework.util.ManifestElement;
 import org.eclipse.osgi.service.resolver.*;
+import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 

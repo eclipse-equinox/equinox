@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.osgi.framework.util;
+package org.eclipse.osgi.util;
 
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -17,21 +17,18 @@ import java.util.Vector;
 
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.internal.core.Msg;
+import org.eclipse.osgi.framework.util.Tokenizer;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
-
-
-
 /**
  * This class represents a manifest element.
  */
-public class ManifestElement 
-{
+public class ManifestElement {
 
 	protected String value;
 	protected Hashtable attributes;
 
-	public ManifestElement(){
+	public ManifestElement() {
 		this(null);
 	}
 
@@ -42,7 +39,7 @@ public class ManifestElement
 	public String getValue() {
 		return value;
 	}
-	
+
 	public String getAttribute(String key) {
 		if (attributes == null) {
 			return null;
@@ -50,7 +47,7 @@ public class ManifestElement
 		return (String) attributes.get(key);
 	}
 
-	public Enumeration getKeys(){
+	public Enumeration getKeys() {
 		if (attributes == null) {
 			return null;
 		}
@@ -69,59 +66,47 @@ public class ManifestElement
 		if (curValue != null) {
 			value = curValue + ";" + value;
 		}
-		attributes.put(key,value);
+		attributes.put(key, value);
 	}
 
-
-    public static ManifestElement[] parseClassPath(String value) throws BundleException
-	{
-		if (value == null)
-		{
+	public static ManifestElement[] parseClassPath(String value) throws BundleException {
+		if (value == null) {
 			return (null);
 		}
 		Vector classpaths = new Vector(10);
 
 		Tokenizer tokenizer = new Tokenizer(value);
 
-		parseloop : while (true)
-		{
+		parseloop : while (true) {
 			String path = tokenizer.getToken(",");
-			if (path == null)
-			{
+			if (path == null) {
 				throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_HEADER_EXCEPTION", Constants.BUNDLE_CLASSPATH, value));
 			}
 
-			if (Debug.DEBUG && Debug.DEBUG_MANIFEST)
-			{
+			if (Debug.DEBUG && Debug.DEBUG_MANIFEST) {
 				Debug.println("Classpath entry: " + path);
 			}
 			ManifestElement classpath = new ManifestElement(path);
 
 			int index = path.indexOf(";");
-			if (index != -1)
-			{
-				if ((index + 1) >= path.length())
-				{
+			if (index != -1) {
+				if ((index + 1) >= path.length()) {
 					throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_HEADER_EXCEPTION", Constants.BUNDLE_CLASSPATH, value));
 				}
 				String filterString = path.substring(index + 1);
 
-				if (!filterString.endsWith(")"))
-				{
-					// we have a space in the filter or an invalid Bundle-ClassPath header
+				if (!filterString.endsWith(")")) {
+					// we have a space in the filter or an invalid
+					// Bundle-ClassPath header
 					StringBuffer buf = new StringBuffer(filterString);
 					buf.append(' ');
-					while (true)
-					{
+					while (true) {
 						char nextChar = tokenizer.getChar();
-						if (nextChar == -1)
-						{
-							throw new BundleException(
-								Msg.formatter.getString("MANIFEST_INVALID_HEADER_EXCEPTION", Constants.BUNDLE_CLASSPATH, value));
+						if (nextChar == -1) {
+							throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_HEADER_EXCEPTION", Constants.BUNDLE_CLASSPATH, value));
 						}
 						buf.append(nextChar);
-						if (nextChar == ')')
-						{
+						if (nextChar == ')') {
 							break;
 						}
 					}
@@ -133,13 +118,11 @@ public class ManifestElement
 
 			char c = tokenizer.getChar();
 
-			if (c == ',') /* another path */
-			{
+			if (c == ',') /* another path */ {
 				continue parseloop;
 			}
 
-			if (c == '\0') /* end of value */
-			{
+			if (c == '\0') /* end of value */ {
 				break parseloop;
 			}
 
@@ -148,8 +131,7 @@ public class ManifestElement
 
 		int size = classpaths.size();
 
-		if (size == 0)
-		{
+		if (size == 0) {
 			return (null);
 		}
 
@@ -161,91 +143,72 @@ public class ManifestElement
 
 	/**
 	 * @param value The key to query the manifest for exported packages
-	 * @return The Array of all ManifestElements that describe import or export package statements.
+	 * @return The Array of all ManifestElements that describe import or export
+	 * package statements.
 	 * @throws BundleException
 	 */
-	public static ManifestElement[] parsePackageDescription(String value) 
-			throws BundleException
-	{
-		if (value == null)
-		{
-			return(null);
+	public static ManifestElement[] parsePackageDescription(String value) throws BundleException {
+		if (value == null) {
+			return (null);
 		}
 
 		Vector pkgvec = new Vector(10, 10);
-		
+
 		Tokenizer tokenizer = new Tokenizer(value);
 
-		parseloop:
-		while (true)
-		{
+		parseloop : while (true) {
 			String pkgname = tokenizer.getToken(";,");
-			if (pkgname == null)
-			{
+			if (pkgname == null) {
 				throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_PACKAGE_EXCEPTION", value));
 			}
 
 			ManifestElement pkgdes = new ManifestElement(pkgname);
-			if (Debug.DEBUG && Debug.DEBUG_MANIFEST)
-			{
-				Debug.print("PackageDescription: "+pkgname);
+			if (Debug.DEBUG && Debug.DEBUG_MANIFEST) {
+				Debug.print("PackageDescription: " + pkgname);
 			}
 
 			char c = tokenizer.getChar();
 
-			while (c == ';')       /* attributes */
-			{
+			while (c == ';') /* attributes */ {
 				String key = tokenizer.getToken(";,=");
-				if (key == null)
-				{
+				if (key == null) {
 					throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_PACKAGE_EXCEPTION", value));
 				}
 
 				c = tokenizer.getChar();
 
-				if (c == '=') /* must be an attribute */
-				{
+				if (c == '=') /* must be an attribute */ {
 					String val = tokenizer.getString(";,");
-					if (val == null)
-					{
+					if (val == null) {
 						throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_PACKAGE_EXCEPTION", value));
 					}
 
-					if (Debug.DEBUG && Debug.DEBUG_MANIFEST)
-					{
-						Debug.print(";"+key+"="+val);
+					if (Debug.DEBUG && Debug.DEBUG_MANIFEST) {
+						Debug.print(";" + key + "=" + val);
 					}
-					try
-					{
+					try {
 						pkgdes.addAttribute(key, val);
-					}
-					catch (Exception e)
-					{
+					} catch (Exception e) {
 						throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_PACKAGE_EXCEPTION", value), e);
 					}
 
 					c = tokenizer.getChar();
-				}
-				else    /* error */
-				{
+				} else /* error */ {
 					throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_PACKAGE_EXCEPTION", value));
 				}
 			}
 
 			pkgvec.addElement(pkgdes);
 
-			if (Debug.DEBUG && Debug.DEBUG_MANIFEST)
-			{
+			if (Debug.DEBUG && Debug.DEBUG_MANIFEST) {
 				Debug.println("");
 			}
 
-			if (c == ',')       /* another description */
-			{
+			if (c == ',') /* another description */ {
 				continue parseloop;
 			}
 
-			if (c == '\0')      /* end of value */
-			{
+			if (c == '\0') /* end of value */ {
 				break parseloop;
 			}
 
@@ -254,98 +217,78 @@ public class ManifestElement
 
 		int size = pkgvec.size();
 
-		if (size == 0)
-		{
+		if (size == 0) {
 			return (null);
 		}
 
 		ManifestElement[] result = new ManifestElement[size];
 		pkgvec.copyInto(result);
 
-		return(result);
+		return (result);
 	}
 
-	public static ManifestElement[] parseBundleDescriptions(String value) throws BundleException
-	{
-		if (value == null)
-		{
-			return(null);
+	public static ManifestElement[] parseBundleDescriptions(String value) throws BundleException {
+		if (value == null) {
+			return (null);
 		}
 
 		Vector bundlevec = new Vector(10, 10);
 
 		Tokenizer tokenizer = new Tokenizer(value);
 
-		parseloop:
-		while (true)
-		{
+		parseloop : while (true) {
 			String bundleUID = tokenizer.getToken(";,");
-			if (bundleUID == null)
-			{
+			if (bundleUID == null) {
 				throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_PACKAGE_EXCEPTION", value));
 			}
 
 			ManifestElement bundledes = new ManifestElement(bundleUID);
-			if (Debug.DEBUG && Debug.DEBUG_MANIFEST)
-			{
-				Debug.print("BundleDescription: "+bundleUID);
+			if (Debug.DEBUG && Debug.DEBUG_MANIFEST) {
+				Debug.print("BundleDescription: " + bundleUID);
 			}
 
 			char c = tokenizer.getChar();
 
-			while (c == ';')       /* attributes */
-			{
+			while (c == ';') /* attributes */ {
 				String key = tokenizer.getToken(";,=");
-				if (key == null)
-				{
+				if (key == null) {
 					throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_PACKAGE_EXCEPTION", value));
 				}
 
 				c = tokenizer.getChar();
 
-				if (c == '=') /* must be an attribute */
-				{
+				if (c == '=') /* must be an attribute */ {
 					String val = tokenizer.getString(";,");
-					if (val == null)
-					{
+					if (val == null) {
 						throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_PACKAGE_EXCEPTION", value));
 					}
 
-					if (Debug.DEBUG && Debug.DEBUG_MANIFEST)
-					{
-						Debug.print(";"+key+"="+val);
+					if (Debug.DEBUG && Debug.DEBUG_MANIFEST) {
+						Debug.print(";" + key + "=" + val);
 					}
-					try
-					{
+					try {
 						bundledes.addAttribute(key, val);
-					}
-					catch (Exception e)
-					{
+					} catch (Exception e) {
 						throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_PACKAGE_EXCEPTION", value), e);
 					}
 
 					c = tokenizer.getChar();
-				}
-				else    /* error */
-				{
+				} else /* error */ {
 					throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_PACKAGE_EXCEPTION", value));
 				}
 			}
 
 			bundlevec.addElement(bundledes);
 
-			if (Debug.DEBUG && Debug.DEBUG_MANIFEST)
-			{
+			if (Debug.DEBUG && Debug.DEBUG_MANIFEST) {
 				Debug.println("");
 			}
 
-			if (c == ',')       /* another description */
-			{
+			if (c == ',') /* another description */ {
 				continue parseloop;
 			}
 
-			if (c == '\0')      /* end of value */
-			{
+			if (c == '\0') /* end of value */ {
 				break parseloop;
 			}
 
@@ -354,220 +297,177 @@ public class ManifestElement
 
 		int size = bundlevec.size();
 
-		if (size == 0)
-		{
+		if (size == 0) {
 			return (null);
 		}
 
 		ManifestElement[] result = new ManifestElement[size];
 		bundlevec.copyInto(result);
 
-		return(result);
+		return (result);
 	}
 
-    public static ManifestElement[] parseNativeCodeDescription(String value) throws BundleException
-    {
-        if (value == null)
-        {
-            return(null);
-        }
+	public static ManifestElement[] parseNativeCodeDescription(String value) throws BundleException {
+		if (value == null) {
+			return (null);
+		}
 
-        Vector nativevec = new Vector(10, 10);
+		Vector nativevec = new Vector(10, 10);
 
-        Tokenizer tokenizer = new Tokenizer(value);
+		Tokenizer tokenizer = new Tokenizer(value);
 
-        parseloop:
-        while (true)
-        {
-            String next = tokenizer.getToken(";,");
-            if (next == null)
-            {
-                throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_HEADER_EXCEPTION", Constants.BUNDLE_NATIVECODE, value));
-            }
+		parseloop : while (true) {
+			String next = tokenizer.getToken(";,");
+			if (next == null) {
+				throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_HEADER_EXCEPTION", Constants.BUNDLE_NATIVECODE, value));
+			}
 
-            StringBuffer codepaths = new StringBuffer(next);
+			StringBuffer codepaths = new StringBuffer(next);
 
-            if (Debug.DEBUG && Debug.DEBUG_MANIFEST)
-            {
-                Debug.print("NativeCodeDescription: "+next);
-            }
+			if (Debug.DEBUG && Debug.DEBUG_MANIFEST) {
+				Debug.print("NativeCodeDescription: " + next);
+			}
 
-            char c = tokenizer.getChar();
+			char c = tokenizer.getChar();
 
-            while (c == ';')
-            {
-                next = tokenizer.getToken(";,=");
-                if (next == null)
-                {
-                    throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_HEADER_EXCEPTION", Constants.BUNDLE_NATIVECODE, value));
-                }
+			while (c == ';') {
+				next = tokenizer.getToken(";,=");
+				if (next == null) {
+					throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_HEADER_EXCEPTION", Constants.BUNDLE_NATIVECODE, value));
+				}
 
-                c = tokenizer.getChar();
+				c = tokenizer.getChar();
 
-                if (c == ';')   /* more */
-                {
-                    codepaths.append(";").append(next);
+				if (c == ';') /* more */ {
+					codepaths.append(";").append(next);
 
-                    if (Debug.DEBUG && Debug.DEBUG_MANIFEST)
-                    {
-                        Debug.print(";"+next);
-                    }
-                }
-            }
+					if (Debug.DEBUG && Debug.DEBUG_MANIFEST) {
+						Debug.print(";" + next);
+					}
+				}
+			}
 
-            ManifestElement nativedes = new ManifestElement(codepaths.toString());
+			ManifestElement nativedes = new ManifestElement(codepaths.toString());
 
-            while (c == '=')
-            {
-                String val = tokenizer.getString(";,");
-                if (val == null)
-                {
-                    throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_HEADER_EXCEPTION", Constants.BUNDLE_NATIVECODE, value));
-                }
+			while (c == '=') {
+				String val = tokenizer.getString(";,");
+				if (val == null) {
+					throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_HEADER_EXCEPTION", Constants.BUNDLE_NATIVECODE, value));
+				}
 
-                if (Debug.DEBUG && Debug.DEBUG_MANIFEST)
-                {
-                    Debug.print(";"+next+"="+val);
-                }
-                try
-                {
-                    nativedes.addAttribute(next, val);
-                }
-                catch (Exception e)
-                {
-                    throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_HEADER_EXCEPTION", Constants.BUNDLE_NATIVECODE, value), e);
-                }
+				if (Debug.DEBUG && Debug.DEBUG_MANIFEST) {
+					Debug.print(";" + next + "=" + val);
+				}
+				try {
+					nativedes.addAttribute(next, val);
+				} catch (Exception e) {
+					throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_HEADER_EXCEPTION", Constants.BUNDLE_NATIVECODE, value), e);
+				}
 
-                c = tokenizer.getChar();
+				c = tokenizer.getChar();
 
-                if (c == ';')   /* more */
-                {
-                    next = tokenizer.getToken("=");
+				if (c == ';') /* more */ {
+					next = tokenizer.getToken("=");
 
-                    if (next == null)
-                    {
-                        throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_HEADER_EXCEPTION", Constants.BUNDLE_NATIVECODE, value));
-                    }
+					if (next == null) {
+						throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_HEADER_EXCEPTION", Constants.BUNDLE_NATIVECODE, value));
+					}
 
-                    c = tokenizer.getChar();
-                }
-            }
+					c = tokenizer.getChar();
+				}
+			}
 
-            nativevec.addElement(nativedes);
+			nativevec.addElement(nativedes);
 
-            if (Debug.DEBUG && Debug.DEBUG_MANIFEST)
-            {
-                Debug.println("");
-            }
+			if (Debug.DEBUG && Debug.DEBUG_MANIFEST) {
+				Debug.println("");
+			}
 
-            if (c == ',')       /* another description */
-            {
-                continue parseloop;
-            }
+			if (c == ',') /* another description */ {
+				continue parseloop;
+			}
 
-            if (c == '\0')      /* end of value */
-            {
-                break parseloop;
-            }
+			if (c == '\0') /* end of value */ {
+				break parseloop;
+			}
 
-            throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_HEADER_EXCEPTION", Constants.BUNDLE_NATIVECODE, value));
-        }
+			throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_HEADER_EXCEPTION", Constants.BUNDLE_NATIVECODE, value));
+		}
 
 		int size = nativevec.size();
 
-		if (size == 0)
-		{
+		if (size == 0) {
 			return (null);
 		}
 
 		ManifestElement[] result = new ManifestElement[size];
 		nativevec.copyInto(result);
 
-		return(result);
-    }
+		return (result);
+	}
 
-
-	public static ManifestElement[] parseBasicCommaSeparation(String header, String value) throws BundleException
-	{
-		if (value == null)
-		{
-			return(null);
+	public static ManifestElement[] parseBasicCommaSeparation(String header, String value) throws BundleException {
+		if (value == null) {
+			return (null);
 		}
 
 		Vector bundlevec = new Vector(10, 10);
 
 		Tokenizer tokenizer = new Tokenizer(value);
 
-		parseloop:
-		while (true)
-		{
+		parseloop : while (true) {
 			String elementname = tokenizer.getToken(";,");
-			if (elementname == null)
-			{
+			if (elementname == null) {
 				throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_PACKAGE_EXCEPTION", value));
 			}
 
 			ManifestElement element = new ManifestElement(elementname);
-			if (Debug.DEBUG && Debug.DEBUG_MANIFEST)
-			{
-				Debug.print("ManifestElement: "+elementname);
+			if (Debug.DEBUG && Debug.DEBUG_MANIFEST) {
+				Debug.print("ManifestElement: " + elementname);
 			}
 
 			char c = tokenizer.getChar();
 
-			while (c == ';')       /* attributes */
-			{
+			while (c == ';') /* attributes */ {
 				String key = tokenizer.getToken(";,=");
-				if (key == null)
-				{
+				if (key == null) {
 					throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_PACKAGE_EXCEPTION", value));
 				}
 
 				c = tokenizer.getChar();
 
-				if (c == '=') /* must be an attribute */
-				{
+				if (c == '=') /* must be an attribute */ {
 					String val = tokenizer.getString(";,");
-					if (val == null)
-					{
+					if (val == null) {
 						throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_PACKAGE_EXCEPTION", value));
 					}
 
-					if (Debug.DEBUG && Debug.DEBUG_MANIFEST)
-					{
-						Debug.print(";"+key+"="+val);
+					if (Debug.DEBUG && Debug.DEBUG_MANIFEST) {
+						Debug.print(";" + key + "=" + val);
 					}
-					try
-					{
+					try {
 						element.addAttribute(key, val);
-					}
-					catch (Exception e)
-					{
+					} catch (Exception e) {
 						throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_PACKAGE_EXCEPTION", value), e);
 					}
 
 					c = tokenizer.getChar();
-				}
-				else    /* error */
-				{
+				} else /* error */ {
 					throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_HEADER_EXCEPTION", value));
 				}
 			}
 
 			bundlevec.addElement(element);
 
-			if (Debug.DEBUG && Debug.DEBUG_MANIFEST)
-			{
+			if (Debug.DEBUG && Debug.DEBUG_MANIFEST) {
 				Debug.println("");
 			}
 
-			if (c == ',')       /* another description */
-			{
+			if (c == ',') /* another description */ {
 				continue parseloop;
 			}
 
-			if (c == '\0')      /* end of value */
-			{
+			if (c == '\0') /* end of value */ {
 				break parseloop;
 			}
 
@@ -576,17 +476,15 @@ public class ManifestElement
 
 		int size = bundlevec.size();
 
-		if (size == 0)
-		{
+		if (size == 0) {
 			return (null);
 		}
 
 		ManifestElement[] result = new ManifestElement[size];
 		bundlevec.copyInto(result);
 
-		return(result);
+		return (result);
 
 	}
 
 }
-

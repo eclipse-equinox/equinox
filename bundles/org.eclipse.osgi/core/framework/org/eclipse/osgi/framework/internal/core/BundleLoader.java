@@ -17,8 +17,8 @@ import java.security.*;
 import java.util.*;
 import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.debug.Debug;
-import org.eclipse.osgi.framework.util.ManifestElement;
 import org.eclipse.osgi.service.resolver.*;
+import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.*;
 
 /**
