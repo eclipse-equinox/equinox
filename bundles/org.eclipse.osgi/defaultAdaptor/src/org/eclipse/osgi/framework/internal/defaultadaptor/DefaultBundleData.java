@@ -200,7 +200,7 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 		}
 		try {
 			StringBuffer url = new StringBuffer(Constants.OSGI_ENTRY_URL_PROTOCOL);
-			url.append(':').append(id);
+			url.append("://").append(id);
 			if (path.length() == 0 || path.charAt(0) != '/') {
 				url.append('/');
 			}

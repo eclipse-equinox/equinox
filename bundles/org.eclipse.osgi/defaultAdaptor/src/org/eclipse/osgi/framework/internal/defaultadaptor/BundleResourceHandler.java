@@ -63,6 +63,9 @@ public abstract class BundleResourceHandler extends URLStreamHandler implements 
 
     	String bundleId,path;
     	if (str.startsWith(url.getProtocol())) {
+    		if (str.charAt(start) != '/' || str.charAt(start+1) != '/')
+    			throw new IllegalArgumentException("URL must be opaque.");
+    		start += 2;
     		int slash = str.indexOf("/",start);
     		if (slash < 0) {
     			throw new IllegalArgumentException(AdaptorMsg.formatter.getString("URL_NO_PATH"));
@@ -160,7 +163,7 @@ public abstract class BundleResourceHandler extends URLStreamHandler implements 
     protected String toExternalForm(URL url)
     {
         StringBuffer result = new StringBuffer(url.getProtocol());
-        result.append(":");
+        result.append("://");
 
         String bundleId = url.getHost();
         if ((bundleId != null) && (bundleId.length() > 0))

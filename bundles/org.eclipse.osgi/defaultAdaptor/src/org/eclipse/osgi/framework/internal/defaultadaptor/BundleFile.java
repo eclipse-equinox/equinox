@@ -113,7 +113,7 @@ abstract public class BundleFile {
 
 		try {
 			StringBuffer url = new StringBuffer(Constants.OSGI_RESOURCE_URL_PROTOCOL);
-			url.append(':').append(bundleID);
+			url.append("://").append(bundleID);
 			if (path.length() == 0 || path.charAt(0) != '/') {
 				url.append('/');
 			}
