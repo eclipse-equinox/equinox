@@ -12,6 +12,7 @@ package org.eclipse.core.runtime.adaptor;
 
 import java.io.*;
 import java.util.*;
+import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.SAXParserFactory;
 import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.adaptor.BundleData;
@@ -23,6 +24,7 @@ import org.eclipse.osgi.framework.debug.DebugOptions;
 import org.eclipse.osgi.framework.internal.defaultadaptor.DefaultAdaptor;
 import org.eclipse.osgi.framework.internal.defaultadaptor.DefaultBundleData;
 import org.eclipse.osgi.framework.log.FrameworkLog;
+import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.framework.stats.StatsManager;
 import org.eclipse.osgi.internal.resolver.StateImpl;
 import org.eclipse.osgi.internal.resolver.StateManager;
@@ -35,7 +37,10 @@ import org.osgi.framework.*;
 public class EclipseAdaptor extends DefaultAdaptor {
 	public static final String PROP_CLEAN = "osgi.clean"; //$NON-NLS-1$
 	static final String F_LOG = ".log"; //$NON-NLS-1$
-	
+
+	public static final String SAXFACTORYNAME = "javax.xml.parsers.SAXParserFactory"; //$NON-NLS-1$
+	public static final String DOMFACTORYNAME = "javax.xml.parsers.DocumentBuilderFactory"; //$NON-NLS-1$
+
 	public static final String FRAMEWORK_SYMBOLICNAME = "org.eclipse.osgi"; //$NON-NLS-1$
 	private static final String RUNTIME_ADAPTOR = FRAMEWORK_SYMBOLICNAME + "/eclipseadaptor"; //$NON-NLS-1$
 	private static final String OPTION_STATE_READER = RUNTIME_ADAPTOR + "/state/reader";//$NON-NLS-1$
@@ -45,7 +50,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 	private static final String OPTION_MONITOR_PLATFORM_ADMIN = RUNTIME_ADAPTOR + "/resolver/timing"; //$NON-NLS-1$
 	private static final String OPTION_RESOLVER_READER = RUNTIME_ADAPTOR + "/resolver/reader/timing"; //$NON-NLS-1$
 	private static final String OPTION_CONVERTER = RUNTIME_ADAPTOR + "/converter/debug"; //$NON-NLS-1$
-	
+
 	public static final byte BUNDLEDATA_VERSION = 9;
 	public static final byte NULL = 0;
 	public static final byte OBJECT = 1;
@@ -233,39 +238,23 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		StateManager.MONITOR_PLATFORM_ADMIN = options.getBooleanOption(OPTION_MONITOR_PLATFORM_ADMIN, false);
 		StateManager.DEBUG_PLATFORM_ADMIN = options.getBooleanOption(OPTION_PLATFORM_ADMIN, false);
 		StateManager.DEBUG_PLATFORM_ADMIN_RESOLVER = options.getBooleanOption(OPTION_PLATFORM_ADMIN_RESOLVER, false);
-		PluginConverterImpl.DEBUG = options.getBooleanOption(OPTION_CONVERTER, false); 
+		PluginConverterImpl.DEBUG = options.getBooleanOption(OPTION_CONVERTER, false);
 	}
 
 	private void registerEndorsedXMLParser() {
-		if (!is14VMorGreater())
-			return;
-		new ParsingService();
+		try {
+			Class.forName(SAXFACTORYNAME);
+			context.registerService(SAXFACTORYNAME, new SaxParsingService(), new Hashtable());
+			Class.forName(DOMFACTORYNAME);
+			context.registerService(DOMFACTORYNAME, new DomParsingService(), new Hashtable());
+		} catch (Throwable t) {
+			// In case the JAXP API is not on the boot classpath
+			String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_ADAPTOR_ERROR_XML_SERVICE"); //$NON-NLS-1$
+			getFrameworkLog().log(new FrameworkLogEntry(EclipseAdaptor.FRAMEWORK_SYMBOLICNAME, message, 0, t, null));
+		}
 	}
 
-	private static boolean is14VMorGreater() {
-		final String DELIM = ".";
-		String vmVersionString = System.getProperty("java.version"); //$NON-NLS-1$
-		StringTokenizer tokenizer = new StringTokenizer(vmVersionString, DELIM);
-		int major, minor;
-		// major
-		if (tokenizer.hasMoreTokens()) {
-			major = Integer.parseInt(tokenizer.nextToken());
-			if (major > 1)
-				return true;
-		}
-
-		// minor
-		if (tokenizer.hasMoreTokens()) {
-			minor = Integer.parseInt(tokenizer.nextToken());
-			if (minor > 3)
-				return true;
-		}
-		return false;
-	}
-
-	private class ParsingService implements ServiceFactory {
-		public static final String SAXFACTORYNAME = "javax.xml.parsers.SAXParserFactory"; //$NON-NLS-1$
-
+	private class SaxParsingService implements ServiceFactory {
 		public Object getService(Bundle bundle, ServiceRegistration registration) {
 			return SAXParserFactory.newInstance();
 		}
@@ -273,9 +262,15 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		public void ungetService(Bundle bundle, ServiceRegistration registration, Object service) {
 			//Do nothing.
 		}
+	}
 
-		public ParsingService() {
-			context.registerService(SAXFACTORYNAME, this, new Hashtable());
+	private class DomParsingService implements ServiceFactory {
+		public Object getService(Bundle bundle, ServiceRegistration registration) {
+			return DocumentBuilderFactory.newInstance();
+		}
+
+		public void ungetService(Bundle bundle, ServiceRegistration registration, Object service) {
+			//Do nothing.
 		}
 	}
 
