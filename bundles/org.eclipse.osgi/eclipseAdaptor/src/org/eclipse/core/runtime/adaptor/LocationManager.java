@@ -31,6 +31,13 @@ public class LocationManager {
 	public static final String PROP_USER_HOME = "user.home"; //$NON-NLS-1$
 	public static final String PROP_USER_DIR = "user.dir"; //$NON-NLS-1$
 	
+	// configuration area file/dir names
+	public static final String BUNDLES_DIR = "bundles";	//$NON-NLS-1$
+	public static final String FRAMEWORK_FILE = ".framework";	//$NON-NLS-1$
+	public static final String STATE_FILE = ".state";	//$NON-NLS-1$
+	public static final String BUNDLE_DATA_FILE = ".bundledata";	//$NON-NLS-1$
+	public static final String MANIFESTS_DIR = "manifests";	//$NON-NLS-1$
+
 	// Constants for configuration location discovery
 	private static final String ECLIPSE = "eclipse"; //$NON-NLS-1$
 	private static final String PRODUCT_SITE_MARKER = ".eclipseproduct"; //$NON-NLS-1$
@@ -101,7 +108,7 @@ public class LocationManager {
 			Location parent = new BasicLocation(null, parentLocation, true);
 			((BasicLocation)configurationLocation).setParent(parent);
 		}
-		initializeDerivedConfigurationLocations(configurationLocation.getURL());
+		initializeDerivedConfigurationLocations();
 
 		// assumes that the property is already set
 		installLocation = buildLocation(PROP_INSTALL_AREA, null, null, true);
@@ -133,12 +140,9 @@ public class LocationManager {
 		return result;
 	}
 
-	private static void initializeDerivedConfigurationLocations(URL base) {
-		// TODO assumes the base URL is a file:
-		String location = base.getFile();
-		System.getProperties().put("org.eclipse.osgi.framework.defaultadaptor.bundledir", location + "bundles");	
+	private static void initializeDerivedConfigurationLocations() {
 		if (System.getProperty(PROP_MANIFEST_CACHE) == null)
-			System.getProperties().put(PROP_MANIFEST_CACHE, location + "manifests");
+			System.getProperties().put(PROP_MANIFEST_CACHE, getConfigurationFile(MANIFESTS_DIR).getAbsolutePath());
 	}
 	
 	private static URL computeInstallConfigurationLocation() {
@@ -223,5 +227,17 @@ public class LocationManager {
 	}
 	public static Location getInstanceLocation() {
 		return instanceLocation;
+	}
+	
+	public static File getOSGiConfigurationDir() {
+		// TODO assumes the URL is a file: url
+		return new File(configurationLocation.getURL().getFile(), EclipseAdaptor.FRAMEWORK_SYMBOLICNAME);
+	}
+
+	public static File getConfigurationFile(String filename) {
+		File dir = getOSGiConfigurationDir();
+		if (!dir.exists())
+			dir.mkdirs();
+		return new File(dir, filename);
 	}
 }

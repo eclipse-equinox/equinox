@@ -161,7 +161,7 @@ public class FileManager {
 	/** 
 	 * Returns the current numeric id (appendage) of the given file.  If the file is not 
 	 * current then the content managed by this manager is at the path <code>
-	 * file + "." + getId(file)</code>.
+	 * file + "." + getId(file)</code>.  -1 is returned if the given target file is not managed.
 	 * 
 	 * @param target the managed file to access
 	 * @return the id of the file
@@ -207,25 +207,22 @@ public class FileManager {
 	 * Returns the actual file location to use when reading the given managed file.
 	 * If the file is current then the result will be the same location.  If the file is not current
 	 * the result will be a construction of the managed base location, the target path and
-	 * the target's id.
+	 * the target's id.  <code>null</code> is returned if the given target is not managed.
 	 * 
 	 * @param target the managed file to lookup
-	 * @return the absolute file location to use for the given file
+	 * @return the absolute file location to use for the given file or <code>null</code> if
+	 * 	the given target is not managed
 	 */
 	public File lookup(String target) {
 		Entry entry = (Entry)table.get(target);
-		long tableStamp = entry == null ? -1 : entry.getTimeStamp();
+		if (entry == null)
+			return null;
 		File result = new File(getAbsolutePath(target));
-		long fileStamp = result.lastModified();
-		if (tableStamp == fileStamp)
+		if (entry.getTimeStamp() == result.lastModified())
 			return result;
 		return new File(getAbsolutePath(target + "." + entry.getId()));
 	}
 
-	/**
-	 * @param source
-	 * @param target
-	 */
 	private void move(String source, String target) {
 		File original = new File(source);
 		// its ok if the original does not exist.  The table entry will capture 

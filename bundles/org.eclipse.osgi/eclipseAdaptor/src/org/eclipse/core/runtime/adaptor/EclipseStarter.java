@@ -78,6 +78,7 @@ public class EclipseStarter {
 	public static final String PROP_SYSPATH= "osgi.syspath"; //$NON-NLS-1$
 	
 	public static final String PROP_EXITCODE = "eclipse.exitcode"; //$NON-NLS-1$
+	public static final String PROP_EXITDATA = "eclipse.exitdata"; //$NON-NLS-1$
 	public static final String PROP_CONSOLE_LOG = "eclipse.consoleLog"; //$NON-NLS-1$
 	private static final String PROP_VM = "eclipse.vm"; //$NON-NLS-1$
 	private static final String PROP_VMARGS = "eclipse.vmargs"; //$NON-NLS-1$
@@ -90,9 +91,11 @@ public class EclipseStarter {
 	protected static final String DEFAULT_CONSOLE_CLASS = "org.eclipse.osgi.framework.internal.core.FrameworkConsole";
 	private static final String CONSOLE_NAME = "OSGi Console";
 
+	private static FrameworkLog log;
+	
 	/**
 	 * Launches the platform and runs a single application. The application is either identified
-	 * in the given arguments (e.g., -application &ltapp id&gt) or in the <code>eclipse.application</code>
+	 * in the given arguments (e.g., -application &ltapp id&gt) or in the <code>eclipse.application</code> 
 	 * System property.  This convenience method starts 
 	 * up the platform, runs the indicated application, and then shuts down the 
 	 * platform. The platform must not be running already. 
@@ -105,12 +108,20 @@ public class EclipseStarter {
 	 */
 	public static Object run(String[] args, Runnable endSplashHandler) throws Exception {
 		if (running)
-			throw new IllegalStateException("Platform already running");  
+			throw new IllegalStateException("Platform already running");
 		try {
-			startup(args, endSplashHandler);
-			return run(null);
-		} finally {
-			shutdown();
+			try {
+				startup(args, endSplashHandler);
+				return run(null);
+			} finally {
+				shutdown();
+			}
+		} catch(Exception e) {
+			if (log != null)
+				log.log(new FrameworkLogEntry("Error", "Big error", 1, e, null));	//TODO Put the right value here
+			System.getProperties().setProperty(PROP_EXITCODE, "13");
+			System.getProperties().setProperty(PROP_EXITDATA, log.getFile().getPath());
+			return null;
 		}
 	}
 	
@@ -132,14 +143,35 @@ public class EclipseStarter {
 	 * @return the result of running the application
 	 * @throws Exception if anything goes wrong
 	 */
+	
+	protected static FrameworkLog createFrameworkLog() {
+		FrameworkLog frameworkLog;
+		Location location = LocationManager.getConfigurationLocation();
+		File configAreaDirectory = null;
+		if (location != null)
+			// TODO assumes the URL is a file: url
+			configAreaDirectory = new File(location.getURL().getFile());
+		
+		if (configAreaDirectory != null) {
+			File logFile = new File(configAreaDirectory, Long.toString(System.currentTimeMillis()) + EclipseAdaptor.F_LOG);
+			frameworkLog = new EclipseLog(logFile);
+		} else 
+			frameworkLog = new EclipseLog();
+		if ("true".equals(System.getProperty(EclipseStarter.PROP_CONSOLE_LOG))) 
+			frameworkLog.setConsoleLog(true);
+		return frameworkLog;
+	}
+	
 	public static void startup(String[] args, Runnable endSplashHandler) throws Exception {
 		if (running)
 			throw new IllegalStateException("Platform is already running");
 		processCommandLine(args);
 		LocationManager.initializeLocations();
+		log = createFrameworkLog();
 		loadConfigurationInfo();
 		loadDefaultProperties();
 		adaptor = createAdaptor();
+		((EclipseAdaptor) adaptor).setLog(log);
 		OSGi osgi = new OSGi(adaptor);
 		osgi.launch();
 		String console = System.getProperty(PROP_CONSOLE);
@@ -224,8 +256,7 @@ public class EclipseStarter {
 				if (description == null)
 					continue;
 				VersionConstraint[] unsatisfied = stateHelper.getUnsatisfiedConstraints(description);
-				// the bundle wasn't resolved but none of its constraints were
-				// unsatisfiable
+				// the bundle wasn't resolved but none of its constraints were unsatisfiable
 				FrameworkLogEntry[] logChildren = unsatisfied.length == 0 ? null : new FrameworkLogEntry[unsatisfied.length];
 				for (int j = 0; j < unsatisfied.length; j++)
 					logChildren[j] = new FrameworkLogEntry("org.eclipse.osgi", EclipseAdaptorMsg.getResolutionFailureMessage(unsatisfied[j]), 0, null, null);
@@ -352,16 +383,27 @@ public class EclipseStarter {
 		}
 		// TODO this is such a hack it is silly.  There are still cases for race conditions etc
 		// but this should allow for some progress...
-		final Semaphore semaphore = new Semaphore(0);
+		// Add a patch from John A
+		final boolean[] flag = new boolean[] {false};
 		FrameworkListener listener = new FrameworkListener() {
 			public void frameworkEvent(FrameworkEvent event) {
 				if (event.getType() == FrameworkEvent.PACKAGES_REFRESHED)
-					semaphore.release();
+					synchronized (flag) {
+						flag[0] = true;
+						flag.notifyAll();
+					}
 			}
 		};
 		context.addFrameworkListener(listener);
 		packageAdmin.refreshPackages(bundles);
-		semaphore.acquire();
+		synchronized (flag) {
+			while (!flag[0]) {
+				try {
+					flag.wait();
+				} catch (InterruptedException e) {
+				}
+			}
+		}
 		context.removeFrameworkListener(listener);
 		context.ungetService(packageAdminRef);
 	}

@@ -41,10 +41,10 @@ public class EclipseAdaptor extends DefaultAdaptor {
 	public static boolean TRACE_CLASSES = false;
 	public static boolean TRACE_BUNDLES = false;
 
-	static final String FRAMEWORK_SYMBOLICNAME = "org.eclipse.osgi";
-	private static final String RUNTIME_ADAPTOR = FRAMEWORK_SYMBOLICNAME + "/eclipseadaptor";
+	public static final String FRAMEWORK_SYMBOLICNAME = "org.eclipse.osgi";	//$NON-NLS-1$
 
 	//Option names for spies
+	private static final String RUNTIME_ADAPTOR = FRAMEWORK_SYMBOLICNAME + "/eclipseadaptor";	//$NON-NLS-1$
 	private static final String OPTION_MONITOR_CLASSES = RUNTIME_ADAPTOR + "/monitor/classes"; //$NON-NLS-1$
 	private static final String OPTION_MONITOR_RESOURCEBUNDLES = RUNTIME_ADAPTOR + "/monitor/resourcebundles"; //$NON-NLS-1$
 	private static final String OPTION_TRACE_BUNDLES = RUNTIME_ADAPTOR + "/trace/bundleActivation"; //$NON-NLS-1$
@@ -81,15 +81,14 @@ public class EclipseAdaptor extends DefaultAdaptor {
 	}
 
 	protected void initBundleStoreRootDir() {
-
-		File configurationLocation = getConfigurationLocation();
+		File configurationLocation = LocationManager.getOSGiConfigurationDir();
 		if (configurationLocation != null) {
-			bundleStoreRootDir = new File(configurationLocation,FRAMEWORK_SYMBOLICNAME + "/bundles");
+			bundleStoreRootDir = new File(configurationLocation, LocationManager.BUNDLES_DIR);
 			bundleStore = bundleStoreRootDir.getAbsolutePath();
 		}
 		else {
 			// last resort just default to "bundles"
-			bundleStore = "bundles";
+			bundleStore = LocationManager.BUNDLES_DIR;
 			bundleStoreRootDir = new File(bundleStore);
 		}
 
@@ -98,14 +97,15 @@ public class EclipseAdaptor extends DefaultAdaptor {
 	}
 
 	protected FrameworkLog createFrameworkLog() {
-		FrameworkLog frameworkLog;
-		File configAreaDirectory = getConfigurationLocation();
+		if (frameworkLog != null)
+			return frameworkLog;
+		File configAreaDirectory = new File(LocationManager.getConfigurationLocation().getURL().getPath());
 		if (configAreaDirectory != null) {
 			File logFile = new File(configAreaDirectory, Long.toString(System.currentTimeMillis()) + F_LOG);
 			frameworkLog = new EclipseLog(logFile);
 		} else 
 			frameworkLog = new EclipseLog();
-		if ("true".equals(System.getProperty(EclipseStarter.PROP_CONSOLE_LOG))) 
+		if ("true".equals(System.getProperty(EclipseStarter.PROP_CONSOLE_LOG))) 	//$NON-NLS-1$
 			frameworkLog.setConsoleLog(true);
 		return frameworkLog;
 	}
@@ -113,7 +113,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 	protected StateManager createStateManager() {
 		readHeaders();
 		checkLocationAndReinitialize();
-		File stateLocation = getStateFile();
+		File stateLocation = LocationManager.getConfigurationFile(LocationManager.STATE_FILE);
 		stateManager = new StateManager(stateLocation, timeStamp);
 		stateManager.setInstaller(new EclipseBundleInstaller());
 		StateImpl systemState = stateManager.getSystemState();
@@ -145,17 +145,21 @@ public class EclipseAdaptor extends DefaultAdaptor {
 			installURL = EclipseStarter.getSysPath();
 			return;
 		}
-		if( ! EclipseStarter.getSysPath().equals(installURL) ) {
+		if (!EclipseStarter.getSysPath().equals(installURL) ) {
 			//delete the metadata file and the framework file when the location of the basic bundles has changed 
-			getBundleMetaDataFile().delete();
-			getMetaDataFile().delete();
-			getStateFile().delete();
+			LocationManager.getConfigurationFile(LocationManager.BUNDLE_DATA_FILE).delete();
+			LocationManager.getConfigurationFile(LocationManager.FRAMEWORK_FILE).delete();
+			LocationManager.getConfigurationFile(LocationManager.STATE_FILE).delete();
 			installURL = EclipseStarter.getSysPath();
 		}
 	}
-	
+
+	protected File getMetaDataFile() {
+		return LocationManager.getConfigurationFile(LocationManager.FRAMEWORK_FILE);
+	}
+
 	private void readHeaders() {
-		File metadata = getBundleMetaDataFile();
+		File metadata = LocationManager.getConfigurationFile(LocationManager.BUNDLE_DATA_FILE);
 		if (!metadata.isFile())
 			return;
 		
@@ -173,7 +177,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 			}
 		} catch (IOException e) {
 			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-				Debug.println("Error reading framework metadata: " + e.getMessage());
+				Debug.println("Error reading framework metadata: " + e.getMessage());	//$NON-NLS-1$
 				Debug.printStackTrace(e);
 			}
 		}
@@ -194,25 +198,24 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		// objects available.  They are needed very early in EclipseStarter but these references tie
 		// the adaptor to that starter.
 		location = LocationManager.getUserLocation();
-		if (location != null) {
 		Hashtable properties = new Hashtable(1);
-		properties.put("type", LocationManager.PROP_USER_AREA);
+		if (location != null) {
+			properties.put("type", LocationManager.PROP_USER_AREA);
 			context.registerService(Location.class.getName(), location, properties);
 		}
-
 		location = LocationManager.getInstanceLocation();
 		if (location != null) {
-		properties.put("type", LocationManager.PROP_INSTANCE_AREA);
+			properties.put("type", LocationManager.PROP_INSTANCE_AREA);
 			context.registerService(Location.class.getName(), location, properties);
 		}
 		location = LocationManager.getConfigurationLocation();
 		if (location != null) {
-		properties.put("type", LocationManager.PROP_CONFIG_AREA);
+			properties.put("type", LocationManager.PROP_CONFIG_AREA);
 			context.registerService(Location.class.getName(), location, properties);
 		}
 		location = LocationManager.getInstallLocation();
 		if (location != null) {
-		properties.put("type", LocationManager.PROP_INSTALL_AREA);
+			properties.put("type", LocationManager.PROP_INSTALL_AREA);
 			context.registerService(Location.class.getName(), location, properties);
 		}
 
@@ -269,7 +272,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		return false;
 	}
 	private class ParsingService implements ServiceFactory {
-		public static final String SAXFACTORYNAME = "javax.xml.parsers.SAXParserFactory";
+		public static final String SAXFACTORYNAME = "javax.xml.parsers.SAXParserFactory";	//$NON-NLS-1$
 
 		public Object getService(Bundle bundle, ServiceRegistration registration) {
 			return SAXParserFactory.newInstance();
@@ -286,9 +289,9 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		saveMetaData();
 		super.frameworkStop(context);
 		if (DebugOptions.getDefault() != null) {
-			System.out.println("Time spent in registry parsing: " + DebugOptions.getDefault().getOption("org.eclipse.core.runtime/registry/parsing/timing/value"));
-			System.out.println("Time spent in package admin resolve: " + DebugOptions.getDefault().getOption("debug.packageadmin/timing/value"));
-			System.out.println("Time spent resolving the dependency system: " + DebugOptions.getDefault().getOption("org.eclipse.core.runtime.adaptor/resolver/timing/value"));
+			System.out.println("Time spent in registry parsing: " + DebugOptions.getDefault().getOption("org.eclipse.core.runtime/registry/parsing/timing/value"));	//$NON-NLS-1$ $NON-NLS-2$
+			System.out.println("Time spent in package admin resolve: " + DebugOptions.getDefault().getOption("debug.packageadmin/timing/value"));	//$NON-NLS-1$ $NON-NLS-2$
+			System.out.println("Time spent resolving the dependency system: " + DebugOptions.getDefault().getOption("org.eclipse.core.runtime.adaptor/resolver/timing/value"));	//$NON-NLS-1$ $NON-NLS-2$
 		}
 	}
 
@@ -296,7 +299,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 	 * @see org.eclipse.osgi.framework.adaptor.FrameworkAdaptor#getInstalledBundles()
 	 */
 	public Vector getInstalledBundles() {
-		File metadata = getBundleMetaDataFile();
+		File metadata = LocationManager.getConfigurationFile(LocationManager.BUNDLE_DATA_FILE);
 		if (!metadata.isFile())
 			return null;
 		try {
@@ -324,7 +327,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 								loadMetaDataFor(data, in);
 								data.initializeExistingBundle();
 								if (Debug.DEBUG && Debug.DEBUG_GENERAL)
-									Debug.println("BundleData created: " + data);
+									Debug.println("BundleData created: " + data);		//$NON-NLS-1$ 
 								result.addElement(data);
 							}
 						} catch (NumberFormatException e) {
@@ -333,7 +336,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 					} catch (IOException e) {
 						state.removeBundle(id);
 						if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-							Debug.println("Error reading framework metadata: " + e.getMessage());
+							Debug.println("Error reading framework metadata: " + e.getMessage());		//$NON-NLS-1$ 
 							Debug.printStackTrace(e);
 						}
 					}
@@ -346,7 +349,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 			}
 		} catch (IOException e) {
 			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-				Debug.println("Error reading framework metadata: " + e.getMessage());
+				Debug.println("Error reading framework metadata: " + e.getMessage());		//$NON-NLS-1$ 
 				Debug.printStackTrace(e);
 			}
 		}
@@ -429,7 +432,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 	}
 
 	public void saveMetaData() {
-		File metadata = getBundleMetaDataFile();
+		File metadata = LocationManager.getConfigurationFile(LocationManager.BUNDLE_DATA_FILE);
 		// the cache and the state match
 		if (timeStamp == stateManager.getSystemState().getTimeStamp() && metadata.isFile())
 			return;
@@ -456,7 +459,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 			}
 		} catch (IOException e) {
 			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-				Debug.println("Error writing framework metadata: " + e.getMessage());
+				Debug.println("Error writing framework metadata: " + e.getMessage());		//$NON-NLS-1$ 
 				Debug.printStackTrace(e);
 			}
 		}
@@ -469,38 +472,11 @@ public class EclipseAdaptor extends DefaultAdaptor {
 	protected BundleContext getContext(){
 		return context;
 	}
-	protected File getConfigurationLocation() {
-		Location location = LocationManager.getConfigurationLocation();
-		if (location != null)
-			// TODO assumes the URL is a file: url
-			return new File(location.getURL().getFile());
-		return null;
-	}
-
-	protected File getMetaDataFile() {
-		File configAreaDirectory = getConfigurationLocation();
-		if (!configAreaDirectory.exists())
-			configAreaDirectory.mkdirs();
-		return new File(configAreaDirectory, ".framework");
-	}
-
-	private File getBundleMetaDataFile() {
-		File configAreaDirectory = getConfigurationLocation();
-		if (!configAreaDirectory.exists())
-			configAreaDirectory.mkdirs();
 	
-		return new File(configAreaDirectory, ".bundledata");
-	}
-
-	private File getStateFile() {
-		File configAreaDirectory = getConfigurationLocation();
-		if (!configAreaDirectory.exists())
-			configAreaDirectory.mkdirs();
-	
-		return new File(configAreaDirectory, ".state");
-	}
 	public void frameworkStopping() {
 		super.frameworkStopping();
 		new BundleStopper().stopBundles();
-	}
+	}	protected void setLog(FrameworkLog log) {
+		frameworkLog = log;
+ 	}
 }
