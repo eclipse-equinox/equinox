@@ -362,7 +362,7 @@ public class BundleHost extends Bundle {
 			return (null);
 		}
 
-		return (loader.findResource(name));
+		return (loader.getResource(name));
 	}
 
 	/**

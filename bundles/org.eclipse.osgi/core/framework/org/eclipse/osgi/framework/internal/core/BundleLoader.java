@@ -241,14 +241,27 @@ public class BundleLoader implements ClassLoaderDelegate {
 	/**
 	 * This method loads a class from the bundle.  The class is searched for in the
 	 * same manner as it would if it was being loaded from a bundle (i.e. all
-	 * hosts, fragments, import, required bundles and local resources are searched.
-	*
+	 * hosts, fragments, import, required bundles and local resources are searched).
+	 *
 	 * @param      name     the name of the desired Class.
 	 * @return     the resulting Class
 	 * @exception  java.lang.ClassNotFoundException  if the class definition was not found.
 	 */
 	protected Class loadClass(String name) throws ClassNotFoundException {
 		return createClassLoader().loadClass(name, false);
+	}
+
+	/**
+	 * This method gets a resource from the bundle.  The resource is searched 
+	 * for in the same manner as it would if it was being loaded from a bundle 
+	 * (i.e. all hosts, fragments, import, required bundles and 
+	 * local resources are searched).
+	 *
+	 * @param name the name of the desired resource.
+	 * @return the resulting resource URL or null if it does not exist.
+	 */
+	protected URL getResource(String name) {
+		return createClassLoader().getResource(name);
 	}
 
 	/**
