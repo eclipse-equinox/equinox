@@ -49,10 +49,8 @@ public class EclipseClassLoader extends DefaultClassLoader {
 			String automationHeader = (String) bundleData.getManifest().get(EclipseAdaptorConstants.ECLIPSE_AUTOSTART);
 			ManifestElement[] allElements = ManifestElement.parseHeader(EclipseAdaptorConstants.ECLIPSE_AUTOSTART, automationHeader);
 			//Eclipse-AutoStart not found... look for the Legacy header instead		//TODO This is old code, this can be removed
-			if (allElements == null) {
-				autoStart = "true".equalsIgnoreCase((String) bundleData.getManifest().get(EclipseAdaptorConstants.LEGACY)); //$NON-NLS-1$
+			if (allElements == null)
 				return;
-			}
 			// the single value for this element should be true|false
 			autoStart = "true".equalsIgnoreCase(allElements[0].getValue()); //$NON-NLS-1$
 			// look for any exceptions (the attribute) to the autoActivate setting
@@ -164,15 +162,14 @@ public class EclipseClassLoader extends DefaultClassLoader {
 		if (dotPosition == -1)
 			return autoStart;
 		String packageName = className.substring(0, dotPosition);
-		// should activate if autoStart and package not in exceptions, or if !autoStart and package in exceptions
-		return autoStart ^ exceptionsContained(packageName);
+		// should activate if autoStart and package is not an exception, or if !autoStart and package is exception
+		return autoStart ^ isException(packageName);
 	}
 
-	private boolean exceptionsContained(String packageName) {
-		for (int i = 0; i < exceptions.length; i++) {
+	private boolean isException(String packageName) {
+		for (int i = 0; i < exceptions.length; i++)
 			if (exceptions[i].equals(packageName))
 				return true;
-		}
 		return false;
 	}
 

@@ -42,7 +42,6 @@ public class EclipseBundleData extends DefaultBundleData {
 	public static final String FILE = "file"; //$NON-NLS-1$
 
 	private static final String PROP_CHECK_CONFIG = "osgi.checkConfiguration"; //$NON-NLS-1$
-	protected String isLegacy = null;
 	protected String pluginClass = null;
 	private String autoStart;
 	private String autoStop;
@@ -238,15 +237,6 @@ public class EclipseBundleData extends DefaultBundleData {
 		autoStart = (String) manifest.get(EclipseAdaptorConstants.ECLIPSE_AUTOSTART);
 		autoStop = (String) manifest.get(EclipseAdaptorConstants.ECLIPSE_AUTOSTOP);
 		pluginClass = (String) manifest.get(EclipseAdaptorConstants.PLUGIN_CLASS);
-		isLegacy = (String) manifest.get(EclipseAdaptorConstants.LEGACY);
-	}
-
-	public String isLegacy() {
-		return isLegacy;
-	}
-
-	public void setLegacy(String value) {
-		isLegacy = value;
 	}
 
 	public String getPluginClass() {

@@ -222,7 +222,6 @@ public class PluginConverterImpl implements PluginConverter {
 		generateLocalizationEntry();
 		if (compatibilityManifest) {
 			generateTimestamp();
-			generateLegacy();
 			generateEclipseHeaders();
 		}
 	}
@@ -321,10 +320,6 @@ public class PluginConverterImpl implements PluginConverter {
 		result.append(Constants.SINGLETON_ATTRIBUTE);
 		result.append("=true"); //$NON-NLS-1$
 		return result.toString();
-	}
-
-	private void generateLegacy() {
-		generatedManifest.put(EclipseAdaptorConstants.LEGACY, "true"); //$NON-NLS-1$
 	}
 
 	private void generatePluginClass() {

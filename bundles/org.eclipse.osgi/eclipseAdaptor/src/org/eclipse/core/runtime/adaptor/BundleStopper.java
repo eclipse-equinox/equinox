@@ -120,12 +120,9 @@ public class BundleStopper {
 		for (int i = 0; i < allBundles.length; i++) {
 			if (allBundles[i].getState() != Bundle.ACTIVE)
 				continue;
-			// we are looking for three headers: LEGACY, ECLIPSE_AUTOSTOP and REQUIRE_BUNDLE	
-			//TODO Here we can remove the test on LEGACY
+			// we are looking for two headers:  ECLIPSE_AUTOSTOP and REQUIRE_BUNDLE	
 			Dictionary headers = allBundles[i].getHeaders();
 			String autoStop = (String) headers.get(EclipseAdaptorConstants.ECLIPSE_AUTOSTOP);
-			if (autoStop == null)
-				autoStop = (String) headers.get(EclipseAdaptorConstants.LEGACY); //$NON-NLS-1$
 			if (!"true".equalsIgnoreCase(autoStop)) //$NON-NLS-1$
 				continue;
 			// remember we want to stop this bundle

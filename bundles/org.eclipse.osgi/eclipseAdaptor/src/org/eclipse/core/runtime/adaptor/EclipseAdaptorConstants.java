@@ -21,10 +21,8 @@ interface EclipseAdaptorConstants {
 	String ECLIPSE_AUTOSTART = "Eclipse-AutoStart"; //$NON-NLS-1$
 	/**
 	 * The "Eclipse-AutoStop" header.
-	 */
-	String ECLIPSE_AUTOSTOP = "Eclipse-AutoStop"; //$NON-NLS-1$
-	//TODO decide what to do with this header 
-	String LEGACY = "Legacy"; //$NON-NLS-1$
+	 */	
+	String ECLIPSE_AUTOSTOP = "Eclipse-AutoStop"; //$NON-NLS-1$	
 	//TODO rename it to Eclipse-PluginClass	
 	String PLUGIN_CLASS = "Plugin-Class"; //$NON-NLS-1$
 	/**

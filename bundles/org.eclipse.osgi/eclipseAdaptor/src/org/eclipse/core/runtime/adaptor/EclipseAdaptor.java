@@ -57,7 +57,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 	private static final String OPTION_PLATFORM_ADMIN_RESOLVER = RUNTIME_ADAPTOR + "/debug/platformadmin/resolver"; //$NON-NLS-1$
 	private static final String OPTION_MONITOR_PLATFORM_ADMIN = RUNTIME_ADAPTOR + "/resolver/timing"; //$NON-NLS-1$
 	private static final String OPTION_RESOLVER_READER = RUNTIME_ADAPTOR + "/resolver/reader/timing"; //$NON-NLS-1$
-	public static final byte BUNDLEDATA_VERSION = 7;
+	public static final byte BUNDLEDATA_VERSION = 8;
 	public static final byte NULL = 0;
 	public static final byte OBJECT = 1;
 	//Indicate if the framework is stopping
@@ -366,7 +366,6 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		data.setAutoStart(readString(in, false));
 		data.setAutoStop(readString(in, false));
 		data.setPluginClass(readString(in, false));
-		data.setLegacy(readString(in, false));
 		data.setClassPath(readString(in, false));
 		data.setNativePaths(readString(in, false));
 		data.setExecutionEnvironment(readString(in, false));
@@ -401,7 +400,6 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		writeStringOrNull(out, bundleData.getAutoStart());
 		writeStringOrNull(out, bundleData.getAutoStop());
 		writeStringOrNull(out, bundleData.getPluginClass());
-		writeStringOrNull(out, bundleData.isLegacy());
 		writeStringOrNull(out, bundleData.getClassPath());
 		writeStringOrNull(out, bundleData.getNativePathsString());
 		writeStringOrNull(out, bundleData.getExecutionEnvironment());

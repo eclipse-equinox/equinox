@@ -69,8 +69,6 @@ public class CachedManifest extends Dictionary {
 			return bundledata.getAutoStop();
 		if (EclipseAdaptorConstants.PLUGIN_CLASS.equalsIgnoreCase(keyString))
 			return bundledata.getPluginClass();
-		if (EclipseAdaptorConstants.LEGACY.equalsIgnoreCase(keyString))
-			return bundledata.isLegacy();
 		if (org.osgi.framework.Constants.BUNDLE_SYMBOLICNAME.equalsIgnoreCase(keyString))
 			return bundledata.getSymbolicName();
 		//TODO: getManifest may return null. 
