@@ -849,12 +849,13 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 		if (file.exists()) {
 			if (file.isDirectory()) {
 				String list[] = file.list();
-				int len = list.length;
-				for (int i = 0; i < len; i++) {
-					// we are doing a lot of garbage collecting here
-					rm(new File(file, list[i]));
+				if (list != null) {
+					int len = list.length;
+					for (int i = 0; i < len; i++) {
+						// we are doing a lot of garbage collecting here
+						rm(new File(file, list[i]));
+					}
 				}
-
 			}
 
 			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
@@ -874,9 +875,8 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 			}
 
 			return (success);
-		} else {
-			return (true);
 		}
+		return (true);
 	}
 
 	public void setInitialBundleStartLevel(int value) {

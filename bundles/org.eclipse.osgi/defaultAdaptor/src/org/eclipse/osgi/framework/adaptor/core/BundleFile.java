@@ -368,11 +368,11 @@ abstract public class BundleFile {
 					int cur = 0;
 
 					public boolean hasMoreElements() {
-						return cur < fileList.length;
+						return fileList != null && cur < fileList.length;
 					}
 
 					public Object nextElement() {
-						if (cur >= fileList.length) {
+						if (!hasMoreElements()) {
 							throw new NoSuchElementException();
 						}
 						java.io.File childFile = new java.io.File(pathFile, fileList[cur]);

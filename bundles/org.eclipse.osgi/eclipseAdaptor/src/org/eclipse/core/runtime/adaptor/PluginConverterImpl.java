@@ -458,15 +458,16 @@ public class PluginConverterImpl implements PluginConverter {
 		String[] files = location.list();
 		Set exportedPaths = new HashSet();
 		boolean containsFile = false;
-		for (int i = 0; i < files.length; i++) {
-			if (!isValidPackageName(files[i]))
-				continue;
-			File pkgFile = new File(location, files[i]);
-			if (pkgFile.isDirectory())
-				exportedPaths.addAll(getExportsFromDir(pkgFile, prefix + files[i]));
-			else
-				containsFile = true;
-		}
+		if (files != null)
+			for (int i = 0; i < files.length; i++) {
+				if (!isValidPackageName(files[i]))
+					continue;
+				File pkgFile = new File(location, files[i]);
+				if (pkgFile.isDirectory())
+					exportedPaths.addAll(getExportsFromDir(pkgFile, prefix + files[i]));
+				else
+					containsFile = true;
+			}
 		if (containsFile)
 			// Allow the default package to be provided.  If the default package
 			// contains a File then use "." as the package name to provide for default.

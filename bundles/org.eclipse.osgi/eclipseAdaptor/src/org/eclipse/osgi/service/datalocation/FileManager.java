@@ -358,19 +358,20 @@ public class FileManager {
 	private void cleanup() throws IOException {
 		//Iterate through the temp files and delete them all, except the one representing this filemanager.
 		String[] files = managerRoot.list();
-		for (int i = 0; i < files.length; i++) {
-			if (files[i].endsWith(".instance") && instanceFile!= null && !files[i].equalsIgnoreCase(instanceFile.getName())) { //$NON-NLS-1$
-				Locker tmpLocker = BasicLocation.createLocker(new File(managerRoot, files[i]), lockMode);
-				if (tmpLocker.lock()) {
-					//If I can lock it is a file that has been left behind by a crash
-					new File(managerRoot, files[i]).delete();
-					tmpLocker.release();
-				} else {
-					tmpLocker.release();
-					return;	//The file is still being locked by somebody else
+		if (files != null)
+			for (int i = 0; i < files.length; i++) {
+				if (files[i].endsWith(".instance") && instanceFile != null && !files[i].equalsIgnoreCase(instanceFile.getName())) { //$NON-NLS-1$
+					Locker tmpLocker = BasicLocation.createLocker(new File(managerRoot, files[i]), lockMode);
+					if (tmpLocker.lock()) {
+						//If I can lock it is a file that has been left behind by a crash
+						new File(managerRoot, files[i]).delete();
+						tmpLocker.release();
+					} else {
+						tmpLocker.release();
+						return; //The file is still being locked by somebody else
+					}
 				}
 			}
-		}
 
 		//If we are here it is because we are the last instance running. After locking the table and getting its latest content, remove all the backup files and change the table
 		//If the exception comes from lock, another instance may have been started after we cleaned up, therefore we abort
@@ -399,6 +400,8 @@ public class FileManager {
 	private void deleteCopies(String fileName, String exceptionNumber) {
 		String notToDelete = fileName + '.' + exceptionNumber;
 		String[] files = base.list();
+		if (files == null)
+			return;
 		for (int i = 0; i < files.length; i++) {
 			if (files[i].startsWith(fileName + '.') && !files[i].equals(notToDelete)) //$NON-NLS-1$
 				new File(base, files[i]).delete();

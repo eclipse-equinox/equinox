@@ -167,8 +167,9 @@ class DefaultPermissionStorage implements PermissionStorage {
 	 * @throws IOException If an error occurs reading the files.
 	 */
 	protected void loadLocations() throws IOException {
-		String list[] = permissionDir.list();
-
+		String list[] = permissionDir.list();		
+		if (list == null)
+			return;
 		int len = list.length;
 
 		for (int i = 0; i < len; i++) {
