@@ -179,14 +179,16 @@ public class LocationManager {
 	}
 
 	private static URL computeInstallConfigurationLocation() {
-		String property = System.getProperty(PROP_INSTALL_AREA);
-		try {
-			return new URL(property);
-		} catch (MalformedURLException e) {
-			// do nothing here since it is basically impossible to get a bogus url 
-		}
-		return null;
-	}
+        String property = System.getProperty(PROP_INSTALL_AREA);
+        if (property != null) {
+            try {
+                return new URL(property);
+            } catch (MalformedURLException e) {
+                // do nothing here since it is basically impossible to get a bogus url
+            }
+        }
+        return null;
+    }
 
 	private static URL computeSharedConfigurationLocation() {
 		String property = System.getProperty(PROP_SHARED_CONFIG_AREA);
@@ -209,10 +211,11 @@ public class LocationManager {
 		//    exist, use "eclipse" as the application-id.
 
 		URL installURL = computeInstallConfigurationLocation();
-		File installDir = new File(installURL.getFile());
-		if ("file".equals(installURL.getProtocol()) && canWrite(installDir)) //$NON-NLS-1$
-			return new File(installDir, CONFIG_DIR).getAbsolutePath();
-
+		if (installURL != null) {
+			File installDir = new File(installURL.getFile());
+			if ("file".equals(installURL.getProtocol()) && canWrite(installDir)) //$NON-NLS-1$
+				return new File(installDir, CONFIG_DIR).getAbsolutePath();
+		}
 		// We can't write in the eclipse install dir so try for some place in the user's home dir
 		return computeDefaultUserAreaLocation(CONFIG_DIR);
 	}
