@@ -27,6 +27,9 @@ import org.osgi.framework.BundleContext;
  * <p>Internal class.</p>
  */
 public class BundleStopper {
+	volatile int stoppingIndex = 0;
+	BundleDescription[] allToStop = null;
+
 	private void logCycles(Object[][] cycles) {
 		// log cycles
 		if (cycles.length > 0) {
@@ -47,29 +50,41 @@ public class BundleStopper {
 	}
 
 	public void stopBundles() {
-		BundleDescription[] allToStop = EclipseAdaptor.getDefault().getState().getResolvedBundles();
+		allToStop = EclipseAdaptor.getDefault().getState().getResolvedBundles();
 		StateHelper stateHelper = EclipseAdaptor.getDefault().getPlatformAdmin().getStateHelper();
 		Object[][] cycles = stateHelper.sortBundles(allToStop);
 		logCycles(cycles);
-		stopBundles(allToStop);
+		basicStopBundles();
 	}
 
-	private void stopBundles(BundleDescription[] orderedBundles) {
+	private void basicStopBundles() {
 		BundleContext context = EclipseAdaptor.getDefault().getContext();
 		// stop all active bundles in the reverse order of Require-Bundle
-		for (int i = orderedBundles.length - 1; i >= 0; i--) {
+		for (stoppingIndex = allToStop.length - 1; stoppingIndex >= 0; stoppingIndex--) {
 			try {
-				AbstractBundle toStop = (AbstractBundle) context.getBundle(orderedBundles[i].getBundleId());
+				AbstractBundle toStop = (AbstractBundle) context.getBundle(allToStop[stoppingIndex].getBundleId());
 				if (toStop.getState() != Bundle.ACTIVE || !(toStop instanceof BundleHost) || toStop.getBundleId() == 0)
 					continue;
 				if (!((EclipseBundleData) toStop.getBundleData()).isAutoStartable())
 					continue;
 				toStop.stop();
 			} catch (Exception e) {
-				String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_BUNDLESTOPPER_ERROR_STOPPING_BUNDLE", orderedBundles[i].toString()); //$NON-NLS-1$
+				String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_BUNDLESTOPPER_ERROR_STOPPING_BUNDLE", allToStop[stoppingIndex].toString()); //$NON-NLS-1$
 				FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, message, 0, e, null);
 				EclipseAdaptor.getDefault().getFrameworkLog().log(entry);
 			}
 		}
+	}
+
+	public boolean isStopped(String symbolicId) {
+		if (!EclipseAdaptor.getDefault().isStopping())
+			return false;
+
+		//We return false for the bundle currently being stopped
+		for (int i = allToStop.length - 1; i > stoppingIndex; i--) {
+			if (symbolicId.equals(allToStop[i].getSymbolicName()))
+				return true;
+		}
+		return false;
 	}
 }

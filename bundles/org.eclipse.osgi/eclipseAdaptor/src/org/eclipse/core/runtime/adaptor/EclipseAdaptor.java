@@ -65,14 +65,14 @@ public class EclipseAdaptor extends DefaultAdaptor {
 	public static final byte BUNDLEDATA_VERSION = 10;
 	public static final byte NULL = 0;
 	public static final byte OBJECT = 1;
-	//Indicate if the framework is stopping
 
 	private static EclipseAdaptor instance;
 
 	private long timeStamp = 0;
 	private String installURL = null;
 	private boolean exitOnError = true;
-
+	private BundleStopper stopper;
+	
 	/*
 	 * Should be instantiated only by the framework (through reflection). 
 	 */
@@ -250,6 +250,8 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		register(CommandProvider.class.getName(), new EclipseCommandProvider(context), bundle);
 		register(FrameworkLog.class.getName(), getFrameworkLog(), bundle);
 		register(org.eclipse.osgi.service.localization.BundleLocalization.class.getName(), new BundleLocalizationImpl(), bundle);
+		stopper = new BundleStopper();
+		register(BundleStopper.class.getName(), stopper, bundle);
 		registerEndorsedXMLParser();
 	}
 
@@ -546,7 +548,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 
 	public void frameworkStopping(BundleContext context) {
 		super.frameworkStopping(context);
-		new BundleStopper().stopBundles();
+		stopper.stopBundles();
 	}
 
 	public void handleRuntimeError(Throwable error) {
