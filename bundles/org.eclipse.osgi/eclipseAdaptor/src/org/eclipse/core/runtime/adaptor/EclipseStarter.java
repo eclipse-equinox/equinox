@@ -109,20 +109,38 @@ public class EclipseStarter {
 	public static Object run(String[] args, Runnable endSplashHandler) throws Exception {
 		if (running)
 			throw new IllegalStateException("Platform already running");
+		boolean startupFailed = true;		
 		try {
-			try {
-				startup(args, endSplashHandler);
-				return run(null);
-			} finally {
-				shutdown();
-			}
-		} catch(Exception e) {
+			startup(args, endSplashHandler);
+			startupFailed = false;
+			return run(null);
+		} catch(Throwable e) {
+			// ensure the splash screen is down
+			if (endSplashHandler != null)
+				endSplashHandler.run();
+			// may use startupFailed to understand where the error happened
+			FrameworkLogEntry logEntry = new FrameworkLogEntry("Error", "Big error", 1, e, null); //TODO Put the right value here
 			if (log != null)
-				log.log(new FrameworkLogEntry("Error", "Big error", 1, e, null));	//TODO Put the right value here
-			System.getProperties().setProperty(PROP_EXITCODE, "13");
-			System.getProperties().setProperty(PROP_EXITDATA, log.getFile().getPath());
-			return null;
+				log.log(logEntry);
+			else
+				// TODO desperate measure - ideally, we should write this to disk (a la Main.log)
+				e.printStackTrace();
+		} finally {
+			try {				
+				shutdown();
+			} catch(Throwable e) {
+				FrameworkLogEntry logEntry = new FrameworkLogEntry("Error", "Big error", 1, e, null); //TODO Put the right value here
+				if (log != null)
+					log.log(logEntry);
+				else
+					// TODO desperate measure - ideally, we should write this to disk (a la Main.log)
+					e.printStackTrace();			
+			}			
 		}
+		// we only get here if an error happened
+		System.getProperties().setProperty(PROP_EXITCODE, "13");
+		System.getProperties().setProperty(PROP_EXITDATA, log.getFile().getPath());
+		return null;		
 	}
 	
 	/**
