@@ -31,6 +31,7 @@ import org.osgi.framework.*;
  * Core OSGi Framework class.
  */
 public class Framework implements EventDispatcher, EventPublisher {
+	public static final boolean STRICT_DELEGATION = Boolean.getBoolean(Constants.OSGI_STRICT_DELEGATION);
 	/** FrameworkAdaptor specific functions. */
 	protected FrameworkAdaptor adaptor;
 	/** Framework properties object.  A reference to the 

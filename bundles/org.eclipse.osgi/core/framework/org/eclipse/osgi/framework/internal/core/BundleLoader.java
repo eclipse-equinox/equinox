@@ -288,7 +288,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 				String[] classpath = bundle.getBundleData().getClassPath();
 				if (classpath != null) {
 					BundleClassLoader bcl = createBCLPrevileged(bundle.getProtectionDomain(), classpath);
-					parent = getParentPrivileged((ClassLoader) bcl);
+					parent = getParentPrivileged(bcl);
 					classloader = bcl;
 				} else {
 					bundle.framework.publishFrameworkEvent(FrameworkEvent.ERROR, bundle, new BundleException(Msg.BUNDLE_NO_CLASSPATH_MATCH)); //$NON-NLS-1$
@@ -309,16 +309,8 @@ public class BundleLoader implements ClassLoaderDelegate {
 	Class findLocalClass(String name) {
 		if (Debug.DEBUG && Debug.DEBUG_LOADER)
 			Debug.println("BundleLoader[" + this + "].findLocalClass(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		BundleClassLoader bcl = createClassLoader();
-		// TODO add flag to check system "buddy"
-		if (parent != null)
-			try {
-				return parent.loadClass(name);
-			} catch (ClassNotFoundException e) {
-				// do nothing and continue
-			}
 		try {
-			Class clazz = bcl.findLocalClass(name);
+			Class clazz = createClassLoader().findLocalClass(name);
 			if (Debug.DEBUG && Debug.DEBUG_LOADER && clazz != null)
 				Debug.println("BundleLoader[" + this + "] found local class " + name); //$NON-NLS-1$ //$NON-NLS-2$
 			return clazz;
@@ -335,12 +327,21 @@ public class BundleLoader implements ClassLoaderDelegate {
 			throw new ClassNotFoundException(name);
 		if (Debug.DEBUG && Debug.DEBUG_LOADER)
 			Debug.println("BundleLoader[" + this + "].loadBundleClass(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		if (name.startsWith(JAVA_CLASS)) {
-			// First check the parent classloader for system classes.
-			if (parent != null)
-				// we want to throw ClassNotFoundExceptions if a java.* class cannot be loaded from the parent.
-				return parent.loadClass(name);
+		createClassLoader(); // make sure the classloader is created
+		// First check the parent classloader for system classes.
+		if (parent != null) {
+			if (Framework.STRICT_DELEGATION) {
+				if (name.startsWith(JAVA_CLASS))
+					// we want to throw ClassNotFoundExceptions if a java.* class cannot be loaded from the parent.
+					return parent.loadClass(name);
+			} else
+				try {
+					return parent.loadClass(name);
+				} catch (ClassNotFoundException cnfe) {
+					// we want to continue
+				}
 		}
+
 		String pkgName = getPackageName(name);
 		Class result = null;
 		PackageSource source = findImportedSource(pkgName);
@@ -370,11 +371,18 @@ public class BundleLoader implements ClassLoaderDelegate {
 			return null;
 		if ((name.length() > 1) && (name.charAt(0) == '/')) /* if name has a leading slash */
 			name = name.substring(1); /* remove leading slash before search */
-		if (name.startsWith(JAVA_RESOURCE)) {
-			// First check the parent classloader for system resources, if it is a java resource.
-			if (parent != null)
-				// we never delegate java resource requests past the parent
-				return parent.getResource(name);
+		createClassLoader(); // make sure the classloader is created
+		// First check the parent classloader for system resources, if it is a java resource.
+		if (parent != null) {
+			if (Framework.STRICT_DELEGATION) {
+				if (name.startsWith(JAVA_RESOURCE))
+					// we never delegate java resource requests past the parent
+					return parent.getResource(name);
+			} else {
+				URL result = parent.getResource(name);
+				if (result != null)
+					return result;
+			}
 		}
 		String pkgName = getResourcePackageName(name);
 		URL result = null;
@@ -420,14 +428,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 	 * @return The URL to the resource or null if the resource is not found.
 	 */
 	URL findLocalResource(final String name) {
-		BundleClassLoader bcl = createClassLoader();
-		// TODO add flag to check system "buddy"
-		if (parent != null) {
-			URL url = parent.getResource(name);
-			if (url != null)
-				return url;
-		}
-		return bcl.findLocalResource(name);
+		return createClassLoader().findLocalResource(name);
 	}
 
 	/**
@@ -497,7 +498,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 
 	}
 
-	private BundleClassLoader createBCL(final BundleProtectionDomain pd, final String[] cp) {
+	BundleClassLoader createBCL(final BundleProtectionDomain pd, final String[] cp) {
 		BundleClassLoader bcl = bundle.getBundleData().createClassLoader(BundleLoader.this, pd, cp);
 		// attach existing fragments to classloader
 		org.osgi.framework.Bundle[] fragments = bundle.getFragments();
@@ -789,13 +790,13 @@ public class BundleLoader implements ClassLoaderDelegate {
 		return createMultiSource(pkgName, new PackageSource[] {result, localSource});
 	}
 
-	private ClassLoader getParentPrivileged(final ClassLoader cl) {
+	private ClassLoader getParentPrivileged(final BundleClassLoader bcl) {
 		if (System.getSecurityManager() == null)
-			return cl.getParent();
+			return bcl.getParent();
 
 		return (ClassLoader) AccessController.doPrivileged(new PrivilegedAction() {
 			public Object run() {
-				return cl.getParent();
+				return bcl.getParent();
 			}
 		});
 	}

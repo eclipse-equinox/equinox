@@ -120,4 +120,9 @@ public interface BundleClassLoader /*extends ClassLoader*/{
 	 */
 	public ClassLoaderDelegate getDelegate();
 
+	/**
+	 * Returns the parent classloader used by this BundleClassLoader
+	 * @return the parent classloader used by this BundleClassLoader
+	 */
+	public ClassLoader getParent();
 }
