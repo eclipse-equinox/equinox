@@ -10,18 +10,14 @@
  *******************************************************************************/
 package org.eclipse.core.runtime.adaptor;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 import java.net.URL;
 import java.util.*;
-import java.util.ArrayList;
-import java.util.Dictionary;
-
-import org.eclipse.osgi.framework.adaptor.core.*;
+import org.eclipse.osgi.framework.adaptor.core.BundleEntry;
+import org.eclipse.osgi.framework.adaptor.core.BundleFile;
 import org.eclipse.osgi.framework.internal.core.Constants;
-import org.eclipse.osgi.framework.internal.defaultadaptor.*;
+import org.eclipse.osgi.framework.internal.defaultadaptor.DefaultAdaptor;
+import org.eclipse.osgi.framework.internal.defaultadaptor.DefaultBundleData;
 import org.eclipse.osgi.framework.util.Headers;
 import org.eclipse.osgi.service.resolver.Version;
 import org.eclipse.osgi.util.ManifestElement;
@@ -225,8 +221,8 @@ public class EclipseBundleData extends DefaultBundleData {
 			throw new IOException("Unable to properly read manifest for: " + getLocation());
 		}
 		super.loadFromManifest();
-		pluginClass = (String)manifest.get("Plugin-Class");
-		isLegacy = (String)manifest.get("Legacy");
+		pluginClass = (String)manifest.get(EclipseAdaptorConstants.PLUGIN_CLASS);
+		isLegacy = (String)manifest.get(EclipseAdaptorConstants.LEGACY);
 	}
 	public String isLegacy() {
 		return isLegacy;

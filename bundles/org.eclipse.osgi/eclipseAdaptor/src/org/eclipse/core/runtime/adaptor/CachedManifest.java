@@ -12,7 +12,6 @@ package org.eclipse.core.runtime.adaptor;
 
 import java.util.Dictionary;
 import java.util.Enumeration;
-import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.service.resolver.Version;
 import org.osgi.framework.BundleException;
 
@@ -53,15 +52,15 @@ public class CachedManifest extends Dictionary {
 
 	public Object get(Object key) {
 		String keyString = (String) key; 
-		if (Constants.BUNDLE_VERSION.equalsIgnoreCase(keyString)) {
+		if (org.osgi.framework.Constants.BUNDLE_VERSION.equalsIgnoreCase(keyString)) {
 			Version result = bundledata.getVersion();
 			return result == null ? null : result.toString();
 		}
-		if ("plugin-class".equalsIgnoreCase(keyString))
+		if (EclipseAdaptorConstants.PLUGIN_CLASS.equalsIgnoreCase(keyString))
 			return bundledata.getPluginClass();
-		if ("legacy".equalsIgnoreCase(keyString))
+		if (EclipseAdaptorConstants.LEGACY.equalsIgnoreCase(keyString))
 			return bundledata.isLegacy();
-		if (Constants.BUNDLE_SYMBOLICNAME.equalsIgnoreCase(keyString))
+		if (org.osgi.framework.Constants.BUNDLE_SYMBOLICNAME.equalsIgnoreCase(keyString))
 			return bundledata.getSymbolicName();
 		return getManifest().get(key);
 	}
