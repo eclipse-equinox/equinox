@@ -1,5 +1,5 @@
 /*
- * $Header: /home/technology/org.eclipse.equinox/plugins/org.eclipse.osgi/osgi/src/org/osgi/framework/BundleEvent.java,v 1.2 2003/11/10 17:51:50 jeff Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/BundleEvent.java,v 1.1 2003/11/25 21:24:14 dj Exp $
  *
  * Copyright (c) The Open Services Gateway Initiative (2000-2001).
  * All Rights Reserved.
@@ -38,7 +38,7 @@ import java.util.EventObject;
  *
  * <p>OSGi reserves the right to extend the set of types.
  *
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1 $
  * @author Open Services Gateway Initiative
  */
 
@@ -98,7 +98,8 @@ public class BundleEvent extends EventObject
 	 * This bundle has been resolved.
 	 * <p>The value of <tt>RESOLVED</tt> is 0x00000020.
 	 *
-	 * @see Bundle#uninstall
+	 * @see Bundle#RESOLVED
+	 * @since <b>1.4 EXPERIMENTAL</b>
 	 */
 	public final static int RESOLVED = 0x00000020;
 
@@ -106,7 +107,8 @@ public class BundleEvent extends EventObject
 	 * This bundle is no longer resolved.
 	 * <p>The value of <tt>UNRESOLVED</tt> is 0x00000040.
 	 *
-	 * @see Bundle#uninstall
+	 * @see Bundle#INSTALLED
+	 * @since <b>1.4 EXPERIMENTAL</b>
 	 */
 	public final static int UNRESOLVED = 0x00000040;
 

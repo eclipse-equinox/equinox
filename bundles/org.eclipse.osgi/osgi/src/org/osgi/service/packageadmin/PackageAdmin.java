@@ -1,5 +1,5 @@
 /*
- * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/service/packageadmin/PackageAdmin.java,v 1.6 2004/04/05 19:35:12 twatson Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/service/packageadmin/PackageAdmin.java,v 1.7 2004/04/09 15:05:27 twatson Exp $
  *
  * Copyright (c) The Open Services Gateway Initiative (2001, 2002).
  * All Rights Reserved.
@@ -51,7 +51,7 @@ import org.osgi.framework.Bundle;
  * old values, <tt>isRemovalPending()</tt> returns <tt>true</tt>, and <tt>getExportingBundle()</tt>
  * and <tt>getImportingBundles()</tt> return <tt>null</tt>.
  *
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  * @author Open Services Gateway Initiative
  */
 public interface PackageAdmin {
@@ -176,10 +176,26 @@ public interface PackageAdmin {
      * started.  This method will not return until the operation has completed.
      * 
      * @param bundles the bundles to attempt to resolve, or <tt>null</tt>
-     * to attempt to resolve all unresolved bundles installed in the Framework. 
+     * to attempt to resolve all unresolved bundles installed in the Framework.
+     * @return true is returned if all specified bundles are resolved after the 
+     * resolve operation has completed; otherwise false is returned.
+     * @since <b>1.4 EXPERIMENTAL</b> 
      */
-    public void resolveBundles(Bundle[] bundles);
+    public boolean resolveBundles(Bundle[] bundles);
     
+    /**
+     * This method returns an array of NamedClassSpaces with the specified 
+     * symbolic name.  If the symbolic name argument is <tt>null</tt> then 
+     * all the NamedClassSpaces currently provided in the Framework are to 
+     * be returned.
+     * @param symbolicName the symbolic name of the named class spaces to 
+     * be returned or <tt>null</tt> if all the named class spaces currently 
+     * provided in the Framework are to be returned.
+     * @return the array of named class spaces with the specified symbolic
+     * name or <tt>null</tt> if no named class space exit with that 
+     * symbolic name.
+     * @since <b>1.4 EXPERIMENTAL</b>
+     */
     public NamedClassSpace[] getNamedClassSpaces(String symbolicName);
 
     /**
@@ -201,6 +217,7 @@ public interface PackageAdmin {
      * match rule is to be used.
      * @return the array of Bundles with the specified name that match the 
      * specified version and match rule, or <tt>null</tt> if no bundles are found.
+     * @since <b>1.4 EXPERIMENTAL</b>
      */
     public Bundle[] getBundles(String symbolicName, String version, String match);
 
@@ -212,6 +229,7 @@ public interface PackageAdmin {
 	 * @param bundle the bundle to get the attached fragment bundles for.
 	 * @return an array of fragment bundles or <tt>null</tt> if the bundle does not 
 	 * have any attached fragment bundles. 
+	 * @since <b>1.4 EXPERIMENTAL</b>
 	 */
     public Bundle[] getFragments(Bundle bundle);
 
@@ -223,11 +241,13 @@ public interface PackageAdmin {
 	 * @param bundle the bundle to get the host bundles for.
 	 * @return an array of host bundles or null if the bundle does not have any
 	 * bundles host.
+	 * @since <b>1.4 EXPERIMENTAL</b>
 	 */
     public Bundle[] getHosts(Bundle bundle);
 
     /**
      * A bundle of this type is a fragment bundle.
+     * @since <b>1.4 EXPERIMENTAL</b>
      */
     public static final int BUNDLE_TYPE_FRAGMENT = 0x00000001; 
 
@@ -238,6 +258,7 @@ public interface PackageAdmin {
 	 * is returned.
 	 * <p>A bundle may be more than one type at a time.
 	 * @return the type of the bundle.
+	 * @since <b>1.4 EXPERIMENTAL</b>
 	 */
     public int getBundleType(Bundle bundle);
 }

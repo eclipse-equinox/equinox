@@ -1,5 +1,5 @@
 /*
- * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/BundlePermission.java,v 1.1 2003/11/25 21:24:14 dj Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/BundlePermission.java,v 1.2 2004/03/10 20:13:14 twatson Exp $
  *
  * Copyright (c) The Open Services Gateway Initiative (2000, 2002).
  * All Rights Reserved.
@@ -48,6 +48,7 @@ import java.security.PermissionCollection;
  * The <tt>PROVIDE_BUNDLE</tt> action implies the <tt>REQUIRE_BUNDLE</tt> action.
  *
  * @author Open Services Gateway Initiative
+ * @since <b>1.4 EXPERIMENTAL</b>
  */
 
 public final class BundlePermission extends BasicPermission

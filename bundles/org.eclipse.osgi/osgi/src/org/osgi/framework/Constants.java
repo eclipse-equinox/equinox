@@ -1,5 +1,5 @@
 /*
- * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/Constants.java,v 1.11 2004/04/09 18:28:54 twatson Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/Constants.java,v 1.12 2004/04/16 17:56:53 twatson Exp $
  *
  * Copyright (c) The Open Services Gateway Initiative (2000-2001).
  * All Rights Reserved.
@@ -35,7 +35,7 @@ package org.osgi.framework;
  * <p>The values associated with these keys are of type <tt>java.lang.String</tt>,
  * unless otherwise indicated.
  *
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  * @author Open Services Gateway Initiative
  * @since 1.1
  * @see Bundle#getHeaders
@@ -446,6 +446,7 @@ public interface Constants {
 	 * identifying the bundle's unique ID.
 	 * <p>The attribute value may be retrieved from the
 	 * <tt>Dictionary</tt> object returned by the <tt>Bundle.getHeaders</tt> method.
+	 * @since <b>1.4 EXPERIMENTAL</b>
 	 */
 	public final static String BUNDLE_SYMBOLICNAME = "Bundle-SymbolicName";
 	
@@ -459,6 +460,7 @@ public interface Constants {
 	 * <pre>
 	 * Bundle-SymbolicName: org.osgi.framework.module.test; singleton=true
 	 * </pre>
+	 * @since <b>1.4 EXPERIMENTAL</b>
 	 */
 	public final static String SINGLETON_ATTRIBUTE = "singleton";
 	/**
@@ -466,6 +468,7 @@ public interface Constants {
 	 * identifying the location of the bundle's localization file.
 	 * <p>The attribute value may be retrieved from the
 	 * <tt>Dictionary</tt> object returned by the <tt>Bundle.getHeaders</tt> method.
+	 * @since <b>1.4 EXPERIMENTAL</b>
 	 */
 	public final static String BUNDLE_MANIFEST_LOCALIZATION = "Bundle-Localization";
 	
@@ -476,6 +479,7 @@ public interface Constants {
 	 *
 	 * <p>The attribute value may be retrieved from the
 	 * <tt>Dictionary</tt> object returned by the <tt>Bundle.getHeaders</tt> method.
+	 * @since <b>1.4 EXPERIMENTAL</b>
 	 */
 	public final static String PROVIDE_PACKAGE = "Provide-Package";
 
@@ -487,6 +491,7 @@ public interface Constants {
 	 *
 	 * <p>The attribute value may be retrieved from the
 	 * <tt>Dictionary</tt> object returned by the <tt>Bundle.getHeaders</tt> method.
+	 * @since <b>1.4 EXPERIMENTAL</b>
 	 */
 	public final static String REQUIRE_BUNDLE = "Require-Bundle";
 
@@ -500,6 +505,7 @@ public interface Constants {
 	 * <pre>
 	 * Require-Bundle: org.osgi.framework.module.test; bundle-version="1.1"
 	 * </pre>
+	 * @since <b>1.4 EXPERIMENTAL</b>
 	 */
 	public static final String BUNDLE_VERSION_ATTRIBUTE = "bundle-version";
 
@@ -514,6 +520,7 @@ public interface Constants {
 	 * Require-Bundle: org.osgi.framework.module.test; 
 	 *  reprovide="true"
 	 * </pre>
+	 * @since <b>1.4 EXPERIMENTAL</b>
 	 */
 	public final static String REPROVIDE_ATTRIBUTE = "reprovide";
 
@@ -530,6 +537,7 @@ public interface Constants {
 	 *  bundle-version="1.1";
 	 *  optional="true"
 	 * </pre>
+	 * @since <b>1.4 EXPERIMENTAL</b>
 	 */
 	public final static String OPTIONAL_ATTRIBUTE = "optional";
 
@@ -549,17 +557,19 @@ public interface Constants {
 	 *  bundle-version="1.1";
 	 *  require-packages="org.osgi.test.pkg1,org.osgi.test.pkg2"
 	 * </pre>
+	 * @since <b>1.4 EXPERIMENTAL</b>
 	 */
 	public final static String REQUIRE_PACKAGES_ATTRIBUTE = "require-packages";
 
 	/**
 	 * String indication location of the default localization file for manifest files
+	 * @since <b>1.4 EXPERIMENTAL</b>
 	 */
 	public final static String BUNDLE_DEFAULT_MANIFEST_LOCALIZATION = "META-INF/bundle";
 
 	/**
 	 * Manifest header attribute (named &quot;version-match&quot;)
-	 * identifying the match type for a required bundle.  
+	 * identifying the match type for a required bundle or fragment host.  
 	 * The default value is "greaterthan-or-equal".
 	 * 
 	 * <p>The attribute value is encoded in the Require-Bundle
@@ -567,15 +577,79 @@ public interface Constants {
 	 * <pre>
 	 * Require-Bundle: org.osgi.framework.module.test;
 	 *  bundle-version="1.1";
-	 *  version-match="perfect"
+	 *  version-match="qualifier"
 	 * </pre>
+	 * @since <b>1.4 EXPERIMENTAL</b>
 	 */
 	public final static String VERSION_MATCH_ATTRIBUTE = "version-match";
 
+	/**
+	 * A {@link #VERSION_MATCH_ATTRIBUTE version-match} value
+	 * (named &quot;qualifier&quot;).
+	 * <p>
+	 * Two versions are considered to match on qualifier if their major,
+	 * minor, micro and qualifier components are equal.
+	 * @since <b>1.4 EXPERIMENTAL</b>
+	 */
 	public final static String VERSION_MATCH_QUALIFIER = "qualifier";
+	/**
+	 * A {@link #VERSION_MATCH_ATTRIBUTE version-match} value
+	 * (named &quot;micro&quot;).
+	 * <p>
+	 * A version is considered to match on micro with another version if 
+	 * its major, minor and micro components are equal to the other 
+	 * version’s major, minor and micro components and its qualifier 
+	 * is greater than or equal to the other version’s qualifier 
+	 * (using String.compareTo).
+	 * @since <b>1.4 EXPERIMENTAL</b>
+	 */
 	public final static String VERSION_MATCH_MICRO = "micro";
+	/**
+	 * A {@link #VERSION_MATCH_ATTRIBUTE version-match} value
+	 * (named &quot;minor&quot;).
+	 * <p>
+	 * A version is considered to match on minor with another version 
+	 * if its major and minor components are equal to the other version’s 
+	 * major and minor components, and its micro level is greater than 
+	 * or equal to the other version’s micro level. If the micro levels 
+	 * are equal, a version is considered to match on minor with another 
+	 * version if its qualifier is greater than or equal to the other 
+	 * version’s qualifier (using String.compareTo).
+	 * @since <b>1.4 EXPERIMENTAL</b>
+	 */
 	public final static String VERSION_MATCH_MINOR = "minor";
+	/**
+	 * A {@link #VERSION_MATCH_ATTRIBUTE version-match} value
+	 * (named &quot;major&quot;).
+	 * <p>
+	 * A version identifier is considered to match on major with another 
+	 * version identifier if its major component is equal to the other 
+	 * version’s major component, and its minor component is greater than 
+	 * or equal to the other version’s minor component. If the minor 
+	 * components are equal, a version is considered to be match on major 
+	 * with another version if its micro level is greater than or equal 
+	 * to the other version’s micro level. If the micro levels are equal, 
+	 * a version is considered to match on major with another version if 
+	 * its qualifier is greater than or equal to the other version’s 
+	 * qualifier (using String.compareTo).
+	 * @since <b>1.4 EXPERIMENTAL</b>
+	 */
 	public final static String VERSION_MATCH_MAJOR = "major";
+	/**
+	 * A {@link #VERSION_MATCH_ATTRIBUTE version-match} value
+	 * (named &quot;greaterthan-or-equal&quot;).
+	 * <p>
+	 * A version is considered to match on greater than or equal with 
+	 * another version identifier if its major component is greater than 
+	 * the other version’s major component, or the major components are 
+	 * equal and its minor component is greater than the other version’s 
+	 * minor component, or the major and minor components are equal and 
+	 * its micro component is greater than the other version’s micro 
+	 * component, or the major, minor and micro components are equal and 
+	 * it’s qualifier component is greater than or equal to the other 
+	 * version’s qualifier component (using String.compareTo).
+	 * @since <b>1.4 EXPERIMENTAL</b>
+	 */
 	public final static String VERSION_MATCH_GREATERTHANOREQUAL = "greaterthan-or-equal";
 
 	/**
@@ -585,6 +659,7 @@ public interface Constants {
 	 *
 	 * <p>The attribute value may be retrieved from the
 	 * <tt>Dictionary</tt> object returned by the <tt>Bundle.getHeaders</tt> method.
+	 * @since <b>1.4 EXPERIMENTAL</b>
 	 */
 	public final static String FRAGMENT_HOST = "Fragment-Host";
 
@@ -597,6 +672,7 @@ public interface Constants {
 	 * Bundle-NativeCode: http.so ; selection-filter="(ws=gtk)" ...
 	 * Bundle-ClassPath: base.jar, gtk.jar ; selection-filter="(ws=gtk)" ...
 	 * </pre>
+	 * @since <b>1.4 EXPERIMENTAL</b>
 	 */
 	public final static String SELECTION_FILTER_ATTRIBUTE = "selection-filter";
 

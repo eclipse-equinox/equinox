@@ -1,5 +1,5 @@
 /*
- * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/Bundle.java,v 1.6 2004/03/12 16:36:22 twatson Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/Bundle.java,v 1.7 2004/04/20 01:23:45 jeff Exp $
  *
  * Copyright (c) The Open Services Gateway Initiative (2000-2001).
  * All Rights Reserved.
@@ -66,7 +66,7 @@ import java.util.*;
  * create <tt>Bundle</tt> objects, and these objects are only valid
  * within the Framework that created them.
  *
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  * @author Open Services Gateway Initiative
  */
 public abstract interface Bundle
@@ -636,6 +636,7 @@ public abstract interface Bundle
 	 * symbolic name then null is returned. 
 	 * 
 	 * @return The symbolic name of this bundle.
+	 * @since <b>1.4 EXPERIMENTAL</b>
 	 */
 	public String getSymbolicName();
 
@@ -658,6 +659,7 @@ public abstract interface Bundle
 	 * @throws ClassNotFoundException if no such class can be found or 
 	 * if the caller does not have the <tt>AdminPermission</tt>, and the Java 
 	 * Runtime Environment supports permissions.
+	 * @since <b>1.4 EXPERIMENTAL</b>
 	 */
 	public Class loadClass(String classname) throws ClassNotFoundException;
 
@@ -677,6 +679,7 @@ public abstract interface Bundle
 	 * @param path the path name to get the entry path names for.
 	 * @return An Enumeration of the entry paths that are contained in the 
 	 * 		specified path.
+	 * @since <b>1.4 EXPERIMENTAL</b>
 	 */
 	public Enumeration getEntryPaths(java.lang.String path);
 
@@ -699,6 +702,7 @@ public abstract interface Bundle
 	 * the <tt>AdminPermission</tt>, and the Java Runtime Environment supports permissions.
 	 *
 	 * @exception java.lang.IllegalStateException If this bundle has been uninstalled.
+	 * @since <b>1.4 EXPERIMENTAL</b>
 	 */
 	public URL getEntry(String name);
 

@@ -43,6 +43,7 @@ import org.osgi.framework.Bundle;
  * <tt>getVersion()</tt> continue to return their old values, 
  * <tt>isRemovalPending()</tt> returns true, and <tt>getProvidingBundle()</tt> 
  * and <tt>getRequiringBundles()</tt> return <tt>null</tt>.
+ * @since <b>1.4 EXPERIMENTAL</b>
  */
 public interface NamedClassSpace {
     /**

@@ -1,5 +1,5 @@
 /*
- * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/FrameworkEvent.java,v 1.1 2003/11/25 21:24:14 dj Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/FrameworkEvent.java,v 1.2 2004/04/08 20:41:57 twatson Exp $
  *
  * Copyright (c) The Open Services Gateway Initiative (2000, 2002).
  * All Rights Reserved.
@@ -38,7 +38,7 @@ import java.util.EventObject;
  *
  * <p>OSGi reserves the right to extend the set of event types.
  *
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @author Open Services Gateway Initiative
  */
 
@@ -112,6 +112,7 @@ public class FrameworkEvent extends EventObject
      * <p>There was a warning associated with a bundle.
      *
      * <p>The value of <tt>WARNING</tt> is 0x00000010.
+     * @since <b>1.4 EXPERIMENTAL</b>
      */
     public final static int WARNING = 0x00000010;
 

@@ -706,8 +706,18 @@ public class PackageAdminImpl implements PackageAdmin {
 	 * That is what this method does.
 	 * @param bundles the set of bundles to attempt to resolve.
 	 */
-	public void resolveBundles(org.osgi.framework.Bundle[] bundles) {
+	public boolean resolveBundles(org.osgi.framework.Bundle[] bundles) {
 		resolveBundles();
+		if (bundles == null)
+			synchronized (framework.bundles){
+				List bundleList = framework.bundles.getBundles();
+				bundles = (Bundle[]) bundleList.toArray(new AbstractBundle[bundleList.size()]);
+			}
+		for (int i = 0; i < bundles.length; i++)
+			if (!((AbstractBundle)bundles[i]).isResolved())
+				return false;
+		
+		return true;
 	}
 
 	/**
