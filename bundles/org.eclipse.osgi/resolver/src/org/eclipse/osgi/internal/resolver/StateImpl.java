@@ -195,7 +195,7 @@ public abstract class StateImpl implements State {
 		if (resolver == null)
 			throw new IllegalStateException("no resolver set"); //$NON-NLS-1$		
 		long start = 0;
-		if (StateManager.DEBUG_PLATFORM_ADMIN)
+		if (StateManager.DEBUG_PLATFORM_ADMIN_RESOLVER)
 			start = System.currentTimeMillis();
 		if (!incremental)
 			flush();
@@ -210,7 +210,7 @@ public abstract class StateImpl implements State {
 		StateDelta savedChanges = changes == null ? new StateDeltaImpl(this) : changes;
 		changes = new StateDeltaImpl(this);
 
-		if (StateManager.DEBUG_PLATFORM_ADMIN) {
+		if (StateManager.DEBUG_PLATFORM_ADMIN_RESOLVER) {
 			cumulativeTime = cumulativeTime + (System.currentTimeMillis() - start);
 			DebugOptions.getDefault().setOption("org.eclipse.core.runtime.adaptor/resolver/timing/value", Long.toString(cumulativeTime)); //$NON-NLS-1$
 		}

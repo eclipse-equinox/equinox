@@ -15,8 +15,6 @@ import java.util.*;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.SAXParserFactory;
 import org.eclipse.osgi.framework.adaptor.*;
-import org.eclipse.osgi.framework.adaptor.BundleData;
-import org.eclipse.osgi.framework.adaptor.BundleWatcher;
 import org.eclipse.osgi.framework.adaptor.core.AdaptorElementFactory;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.eclipse.osgi.framework.debug.Debug;
@@ -282,12 +280,23 @@ public class EclipseAdaptor extends DefaultAdaptor {
 	public void frameworkStop(BundleContext context) throws BundleException {
 		saveMetaData();
 		super.frameworkStop(context);
-		if (DebugOptions.getDefault() != null) {
-			System.out.println("Time spent in registry parsing: " + DebugOptions.getDefault().getOption("org.eclipse.core.runtime/registry/parsing/timing/value")); //$NON-NLS-1$ //$NON-NLS-2$
-			System.out.println("Time spent in package admin resolve: " + DebugOptions.getDefault().getOption("debug.packageadmin/timing/value")); //$NON-NLS-1$ //$NON-NLS-2$
-			System.out.println("Time spent resolving the dependency system: " + DebugOptions.getDefault().getOption("org.eclipse.core.runtime.adaptor/resolver/timing/value")); //$NON-NLS-1$ //$NON-NLS-2$
-		}
+		printStats();
 		PluginParser.releaseXMLParsing();
+	}
+
+	private void printStats() {
+		DebugOptions debugOptions = DebugOptions.getDefault();
+		if (debugOptions == null)
+			return;
+		String registryParsing = debugOptions.getOption("org.eclipse.core.runtime/registry/parsing/timing/value"); //$NON-NLS-1$
+		if (registryParsing != null)
+			EclipseAdaptorMsg.debug("Time spent in registry parsing: " + registryParsing); //$NON-NLS-1$
+		String packageAdminResolution = debugOptions.getOption("debug.packageadmin/timing/value"); //$NON-NLS-1$
+		if (packageAdminResolution != null)
+			System.out.println("Time spent in package admin resolve: " + packageAdminResolution); //$NON-NLS-1$			
+		String constraintResolution = debugOptions.getOption("org.eclipse.core.runtime.adaptor/resolver/timing/value"); //$NON-NLS-1$
+		if (constraintResolution != null)
+			System.out.println("Time spent resolving the dependency system: " + constraintResolution); //$NON-NLS-1$ 
 	}
 
 	/**

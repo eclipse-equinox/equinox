@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.core.runtime.adaptor;
 
+import java.util.Date;
 import org.eclipse.osgi.framework.msg.MessageFormat;
 import org.eclipse.osgi.framework.util.FrameworkMessageFormat;
 import org.eclipse.osgi.service.resolver.*;
@@ -47,6 +48,20 @@ public class EclipseAdaptorMsg {
 				return EclipseAdaptorMsg.formatter.getString("ECLIPSE_MISSING_REQUIRED_BUNDLE", toString(unsatisfied));//$NON-NLS-1$
 		else
 			return EclipseAdaptorMsg.formatter.getString("ECLIPSE_MISSING_HOST", toString(unsatisfied)); //$NON-NLS-1$
+	}
+	
+	/**
+	 * Print a debug message to the console. 
+	 * Pre-pend the message with the current date and the name of the current thread.
+	 */
+	public static void debug(String message) {
+		StringBuffer buffer = new StringBuffer();
+		buffer.append(new Date(System.currentTimeMillis()));
+		buffer.append(" - ["); //$NON-NLS-1$
+		buffer.append(Thread.currentThread().getName());
+		buffer.append("] "); //$NON-NLS-1$
+		buffer.append(message);
+		System.out.println(buffer.toString());
 	}
 
 	private static String toString(VersionConstraint constraint) {
