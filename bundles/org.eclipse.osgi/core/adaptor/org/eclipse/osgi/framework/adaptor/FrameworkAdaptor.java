@@ -179,6 +179,7 @@ public interface FrameworkAdaptor {
 	 */
 	public ServiceRegistry getServiceRegistry();
 
+	//TODO Are those 4 methods necessary? Why do they have to be tight to Vector or Hashtable? A more generic name
 	/**
 	 * The framework uses this value when creating Vectors in data structures
 	 * that have long lifespans. <p>
