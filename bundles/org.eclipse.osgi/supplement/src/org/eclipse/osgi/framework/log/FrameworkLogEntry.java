@@ -15,13 +15,15 @@ public class FrameworkLogEntry {
 	private int depth;
 	private String entry;
 	private String message;
-	private String stack;
+	private int stackCode;
+	private Throwable throwable;
 
-	public FrameworkLogEntry(int depth, String entry, String message, String stack) {
+	public FrameworkLogEntry(int depth, String entry, String message, int stackCode, Throwable throwable) {
 		this.depth = depth;
 		this.entry = entry;
 		this.message = message;
-		this.stack = stack;
+		this.stackCode = stackCode;
+		this.throwable = throwable;
 	}
 	/**
 	 * @return Returns the depth.
@@ -41,10 +43,17 @@ public class FrameworkLogEntry {
 	public String getMessage() {
 		return message;
 	}
+
 	/**
-	 * @return Returns the stack.
+	 * @return Returns the stackCode.
 	 */
-	public String getStack() {
-		return stack;
+	public int getStackCode() {
+		return stackCode;
+	}
+	/**
+	 * @return Returns the throwable.
+	 */
+	public Throwable getThrowable() {
+		return throwable;
 	}
 }

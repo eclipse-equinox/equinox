@@ -94,8 +94,9 @@ public class DefaultLog implements FrameworkLog {
 	public void close() {
 		try {
 			if (writer != null) {
-				writer.close();
-				writer = null;
+				Writer tmpWriter = writer;				
+				writer = null;				
+				tmpWriter.close();
 			}
 		}
 		catch (IOException e) {
@@ -107,15 +108,15 @@ public class DefaultLog implements FrameworkLog {
 		if (writer == null) {
 			if (outFile != null) {
 				try {
-					writer = new BufferedWriter(new OutputStreamWriter(
+					writer = logForStream(
 							new FileOutputStream(outFile.getAbsolutePath(),
-									append), "UTF-8")); //$NON-NLS-1$
+									append)); //$NON-NLS-1$
 				} catch (IOException e) {
-					writer = new PrintWriter(System.err);
+					writer = logForStream(System.err);
 				}
 			}
 			else {
-				writer = new PrintWriter(System.err);
+				writer = logForStream(System.err);
 			}
 		}
 	}
@@ -137,25 +138,9 @@ public class DefaultLog implements FrameworkLog {
 	public void log(FrameworkEvent frameworkEvent){
 		Bundle b = frameworkEvent.getBundle();
 		Throwable t = frameworkEvent.getThrowable();
-		String stack = null;
-		if (t != null) {
-			StringWriter sw = new StringWriter();
-			PrintWriter pw = new PrintWriter(sw);
-			// this is the stacktrace code "0"
-			pw.println(" 0");
-			t.printStackTrace(pw);
-			if (t instanceof BundleException){
-				Throwable n = ((BundleException)t).getNestedException();
-				if (n != null) {
-					pw.println("Nested exception:");
-					n.printStackTrace(pw);
-				}
-			}
-			stack = sw.toString();
-		}
 		
 		FrameworkLogEntry logEntry = 
-			new FrameworkLogEntry(0, b.getLocation() + " 0 0", "FrameworkEvent.ERROR", stack);
+			new FrameworkLogEntry(0, b.getLocation() + " 0 0", "FrameworkEvent.ERROR", 0, t);
 
 		log(logEntry);
 	}
@@ -172,8 +157,20 @@ public class DefaultLog implements FrameworkLog {
 			writeLog(logEntry);
 			writer.flush();
 		}
-		catch (IOException ioe) {
-			ioe.printStackTrace();
+		catch (Exception e) {
+			// any exceptions during logging should be caught 
+			System.err.println("An exception occurred while writing to the platform log:");//$NON-NLS-1$
+			e.printStackTrace(System.err);
+			System.err.println("Logging to the console instead.");//$NON-NLS-1$
+			//we failed to write, so dump log entry to console instead
+			try {
+				writer = logForStream(System.err);
+				writeLog(logEntry);
+				writer.flush();
+			} catch (Exception e2) {
+				System.err.println("An exception occurred while logging to the console:");//$NON-NLS-1$
+				e2.printStackTrace(System.err);
+			}			
 		}
 		finally {
 			closeFile();
@@ -246,6 +243,25 @@ public class DefaultLog implements FrameworkLog {
 	protected String getDate() {
 		return new Date().toString();
 	}
+
+	protected String getStackTrace(Throwable t){
+		if (t == null) 
+			return null;
+
+		StringWriter sw = new StringWriter();
+		PrintWriter pw = new PrintWriter(sw);
+
+		t.printStackTrace(pw);
+		if (t instanceof BundleException){
+			Throwable n = ((BundleException)t).getNestedException();
+			if (n != null) {
+				pw.println("Nested exception:");
+				n.printStackTrace(pw);
+			}
+		}
+		return sw.toString();
+
+	}
 	protected Writer logForStream(OutputStream output) {
 		try {
 			return new BufferedWriter(new OutputStreamWriter(output, "UTF-8")); //$NON-NLS-1$
@@ -315,13 +331,14 @@ public class DefaultLog implements FrameworkLog {
 	}
 
 	protected void writeStack(FrameworkLogEntry entry) throws IOException {
-		String stack = entry.getStack();
-		if (stack != null) {
+		Throwable t = entry.getThrowable();
+		if (t != null) {
+			String stack = getStackTrace(t);
 			write(STACK);
 			writeSpace();
+			write(Integer.toString(entry.getStackCode()));
+			writeln();
 			write(stack);
-			if (!stack.endsWith(LINE_SEPARATOR))
-				writeln();
 		}
 	}
 
