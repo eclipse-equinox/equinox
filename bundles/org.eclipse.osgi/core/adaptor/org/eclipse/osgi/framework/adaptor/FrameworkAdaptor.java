@@ -15,6 +15,8 @@ import java.io.IOException;
 import java.net.URLConnection;
 import java.util.Properties;
 import java.util.Vector;
+
+import org.eclipse.osgi.framework.log.*;
 import org.eclipse.osgi.service.resolver.PlatformAdmin;
 import org.eclipse.osgi.service.resolver.State;
 import org.osgi.framework.BundleContext;
@@ -267,6 +269,14 @@ public interface FrameworkAdaptor {
 	 * @param value the initial bundle start level
 	 */
 	public void setInitialBundleStartLevel(int value);
+
+	/**
+	 * Returns the FrameworkLog for the FrameworkAdaptor.  The FrameworkLog
+	 * is used by the Framework and FrameworkAdaptor to log any error messages 
+	 * and FramworkEvents of type ERROR.  
+	 * @return The FrameworkLog to be used by the Framework.
+	 */
+	public FrameworkLog getFrameworkLog();
 
 	public IBundleStats getBundleStats();
 	public PlatformAdmin getPlatformAdmin();

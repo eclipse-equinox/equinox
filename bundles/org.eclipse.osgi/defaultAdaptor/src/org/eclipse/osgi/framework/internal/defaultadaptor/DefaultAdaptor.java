@@ -19,6 +19,7 @@ import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.adaptor.core.AbstractFrameworkAdaptor;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.internal.core.Constants;
+import org.eclipse.osgi.framework.log.*;
 import org.eclipse.osgi.framework.util.Headers;
 import org.eclipse.osgi.internal.resolver.StateManager;
 import org.eclipse.osgi.service.resolver.*;
@@ -66,6 +67,9 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 
 	/** The State Manager */
 	protected StateManager stateManager;
+	
+	/** The FrameworkLog for the adaptor */
+	protected FrameworkLog frameworkLog;
 
 	/**
 	 * Constructor for DefaultAdaptor.  This constructor parses the arguments passed
@@ -108,6 +112,10 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 		super.initialize(eventPublisher);
 		initBundleStoreRootDir();
 		initDataRootDir();
+		
+		// need to create the FrameworkLog very early
+		frameworkLog = createFrameworkLog();
+
 		readAdaptorManifest();
 		stateManager = createStateManager();
 	}
@@ -141,6 +149,13 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 		return stateManager;
 	}
 
+	/**
+	 * 
+	 *
+	 */
+	protected FrameworkLog createFrameworkLog() {
+		return new DefaultLog();
+	}
 	/**
 	 * Init the directory to store the bundles in.  Bundledir can be set in 3 different ways.
 	 * Priority is:
@@ -770,6 +785,9 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 	public void frameworkStart(BundleContext context) throws BundleException {
 		super.frameworkStart(context);
 
+		if (frameworkLog == null) {
+			frameworkLog = createFrameworkLog();
+		}
 		// Check the osgi.dev property to see if dev classpath entries have been defined.
 		String osgiDev = context.getProperty("osgi.dev");
 		if (osgiDev != null) {
@@ -800,6 +818,9 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 			throw new BundleException(null, e);
 		}
 		super.frameworkStop(context);
+
+		frameworkLog.close();
+		frameworkLog = null;
 	}
 	/**
 	 * Register a service object.
@@ -1015,6 +1036,10 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 		if (elementFactory == null)
 			elementFactory = new AdaptorElementFactory();
 		return elementFactory;
+	}
+
+	public FrameworkLog getFrameworkLog() {
+		return frameworkLog;
 	}
 
 	public IBundleStats getBundleStats() {

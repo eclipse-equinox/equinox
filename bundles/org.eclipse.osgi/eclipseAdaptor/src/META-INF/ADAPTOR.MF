@@ -1,14 +1,17 @@
 Export-Package: 
+ org.eclipse.osgi.framework.log,
  org.eclipse.osgi.framework.stats,
  org.eclipse.osgi.service.environment,
  org.eclipse.osgi.service.pluginconversion,
  org.eclipse.osgi.service.urlconversion
 Provide-Package:
+ org.eclipse.osgi.framework.log,
  org.eclipse.osgi.framework.stats,
  org.eclipse.osgi.service.environment,
  org.eclipse.osgi.service.pluginconversion,
  org.eclipse.osgi.service.urlconversion
 Export-Service: 
+ org.eclipse.osgi.framework.log.FrameworkLog,
  org.eclipse.osgi.service.environment.EnvironmentInfo,
  org.eclipse.osgi.service.pluginconversion.PluginConverter,
  org.eclipse.osgi.service.urlconversion.URLConverter

@@ -133,8 +133,10 @@ public class EclipseClassLoader extends DefaultClassLoader {
 				if (addClassPathEntry(result, "nl/" + NL_JAR_VARIANTS[i] + "/" + entry, bundledata, domain)) //$NON-NLS-1$ //$NON-NLS-2$
 					return;
 			}
-			BundleException be = new BundleException(Msg.formatter.getString("BUNDLE_CLASSPATH_ENTRY_NOT_FOUND_EXCEPTION", entry)); //$NON-NLS-1$
-			bundledata.getAdaptor().getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR,bundledata.getBundle(),be);
+			if (System.getProperties().get("osgi.dev") == null) {
+				BundleException be = new BundleException(Msg.formatter.getString("BUNDLE_CLASSPATH_ENTRY_NOT_FOUND_EXCEPTION", entry, hostdata.getLocation())); //$NON-NLS-1$
+				bundledata.getAdaptor().getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR,bundledata.getBundle(),be);
+			}
 		}
 	}
 	

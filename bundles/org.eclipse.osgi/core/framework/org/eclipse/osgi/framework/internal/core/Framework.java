@@ -22,6 +22,7 @@ import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.eventmgr.*;
 import org.eclipse.osgi.framework.internal.protocol.ContentHandlerFactory;
 import org.eclipse.osgi.framework.internal.protocol.StreamHandlerFactory;
+import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.security.action.CreateThread;
 import org.eclipse.osgi.framework.util.Headers;
 import org.eclipse.osgi.service.resolver.*;
@@ -934,7 +935,6 @@ public class Framework implements EventSource, EventPublisher {
 
 			bundles.add(bundle);
 		} catch (BundleException e) {
-			publishFrameworkEvent(FrameworkEvent.ERROR, systemBundle, e);
 			try {
 				storage.undo();
 			} catch (BundleException ee) {
@@ -1579,6 +1579,12 @@ public class Framework implements EventSource, EventPublisher {
 	}
 
 	public void publishFrameworkEventPrivileged(FrameworkEvent event) {
+		/* if the event is an error then it should be logged */
+		if (event.getType() == FrameworkEvent.ERROR) {
+			FrameworkLog frameworkLog = adaptor.getFrameworkLog();
+			if (frameworkLog != null)
+				frameworkLog.log(event);
+		}
 		/* queue to hold set of listeners */
 		EventQueue listeners = new EventQueue(eventManager);
 

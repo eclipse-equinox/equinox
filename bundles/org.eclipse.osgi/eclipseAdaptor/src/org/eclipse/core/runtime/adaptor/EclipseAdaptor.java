@@ -19,6 +19,7 @@ import org.eclipse.osgi.framework.console.CommandProvider;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.debug.DebugOptions;
 import org.eclipse.osgi.framework.internal.defaultadaptor.*;
+import org.eclipse.osgi.framework.log.*;
 import org.eclipse.osgi.framework.stats.StatsManager;
 import org.eclipse.osgi.internal.resolver.StateImpl;
 import org.eclipse.osgi.internal.resolver.StateManager;
@@ -29,6 +30,7 @@ import org.osgi.framework.*;
 
 public class EclipseAdaptor extends DefaultAdaptor {
 
+	static final String F_LOG = ".log"; //$NON-NLS-1$
 	public static boolean MONITOR_CLASSES = false;
 	public static boolean MONITOR_RESOURCE_BUNDLES = false;
 	public static String TRACE_FILENAME = "runtime.traces"; //$NON-NLS-1$
@@ -66,7 +68,23 @@ public class EclipseAdaptor extends DefaultAdaptor {
 	}
 
 	protected void initDataRootDir(){
-		dataRootDir = new File(System.getProperty("osgi.instance.area"));
+		dataRootDir = new File(System.getProperty(EclipseStarter.PROP_INSTANCE_AREA));
+	}
+
+	protected FrameworkLog createFrameworkLog() {
+		DefaultLog frameworkLog;
+		String configArea = System.getProperty(EclipseStarter.PROP_CONFIG_AREA);
+		//if (configArea != null) {
+		// TODO: for now just logging to System.err.  Use the previous line
+		// once we are comfortable with this logging strategy.
+		if (false) {
+			File logFile = new File(configArea, Long.toString(System.currentTimeMillis()) + F_LOG);
+			frameworkLog = new DefaultLog(logFile,false);
+		}
+		else {
+			frameworkLog = new DefaultLog();
+		}
+		return frameworkLog;
 	}
 
 	protected StateManager createStateManager() {
@@ -149,6 +167,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		register(PluginConverter.class.getName(), new PluginConverterImpl(context), bundle);
 		register(URLConverter.class.getName(), new URLConverterImpl(),bundle);
 		register(CommandProvider.class.getName(), new EclipseCommandProvider(context),bundle);
+		register(FrameworkLog.class.getName(), getFrameworkLog(), bundle);
 		registerEndorsedXMLParser();
 	}
 
