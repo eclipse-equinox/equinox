@@ -34,3 +34,5 @@ Bundle-ClassPath: osgi.jar,
  defaultAdaptor.jar,
  eclipseAdaptor.jar,
  console.jar
+Eclipse-ExtensibleAPI: true
+
