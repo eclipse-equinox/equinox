@@ -439,6 +439,9 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 				for (int i = 0; i < refresh.length; i++) {
 					Bundle changedBundle = refresh[i];
 					changedBundle.refresh();
+					// send out unresolved events
+					if (previouslyResolved[i])
+						framework.publishBundleEvent(BundleEvent.UNRESOLVED, changedBundle);
 				}
 
 				/*
@@ -470,11 +473,7 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 							} else {
 								changedBundle.resolve();
 							}
-							if (!previouslyResolved[i] && changedBundle.isResolved()) {
-								notify.addElement(changedBundle);
-							}
-						} else {
-							if (previouslyResolved[i]) {
+							if (changedBundle.isResolved()) {
 								notify.addElement(changedBundle);
 							}
 						}
