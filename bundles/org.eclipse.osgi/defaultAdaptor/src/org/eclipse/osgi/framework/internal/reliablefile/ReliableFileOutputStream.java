@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003 IBM Corporation and others.
+ * Copyright (c) 2003, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,7 @@
 package org.eclipse.osgi.framework.internal.reliablefile;
 
 import java.io.*;
+import java.util.zip.Checksum;
 
 /**
  * A ReliableFile FileOutputStream replacement class.
@@ -26,6 +27,11 @@ public class ReliableFileOutputStream extends FilterOutputStream {
 	 * ReliableFile object for the file.
 	 */
 	private ReliableFile reliable;
+
+	/**
+	 * Checksum calculator
+	 */
+	private Checksum crc;
 
 	/**
 	 * Constructs a new ReliableFileOutputStream on the File <code>file</code>.  If the
@@ -88,6 +94,10 @@ public class ReliableFileOutputStream extends FilterOutputStream {
 		super(reliable.getOutputStream(append));
 
 		this.reliable = reliable;
+		if (append)
+			crc = reliable.getFileChecksum();
+		else
+			crc = reliable.getChecksumCalculator();
 	}
 
 	/**
@@ -101,6 +111,20 @@ public class ReliableFileOutputStream extends FilterOutputStream {
 	public synchronized void close() throws IOException {
 		if (reliable != null) {
 			try {
+				// tag on our signature and checksum
+				out.write(reliable.identifier1);
+				byte crcStr[] = ReliableFile.intToHex((int) crc.getValue()).getBytes();
+				out.write(crcStr);
+				out.write(reliable.identifier2);
+
+				try {
+					out.flush();
+					((FileOutputStream) out).getFD().sync();
+				} catch (IOException e) {
+					// just ignore this Exception
+					//Debug
+					e.printStackTrace();
+				}
 				super.close();
 			} finally {
 				reliable.closeOutputFile();
@@ -112,7 +136,6 @@ public class ReliableFileOutputStream extends FilterOutputStream {
 	/**
 	 * Call close to finalize the underlying ReliableFile.
 	 */
-	//TODO finalizers considered harmful! (bug 56856)	
 	protected void finalize() throws IOException {
 		close();
 	}
@@ -120,7 +143,24 @@ public class ReliableFileOutputStream extends FilterOutputStream {
 	/**
 	 * Override default FilterOutputStream method.
 	 */
-	public void write(byte b[], int off, int len) throws IOException {
-		out.write(b, off, len);
+	public void write(byte[] b) throws IOException {
+		this.write(b, 0, b.length);
 	}
+
+	/**
+	 * Override default FilterOutputStream method.
+	 */
+	public void write(byte[] b, int off, int len) throws IOException {
+		out.write(b, off, len);
+		crc.update(b, off, len);
+	}
+
+	/**
+	 * Override default FilterOutputStream method.
+	 */
+	public void write(int b) throws IOException {
+		out.write(b);
+		crc.update((byte) b);
+	}
+
 }

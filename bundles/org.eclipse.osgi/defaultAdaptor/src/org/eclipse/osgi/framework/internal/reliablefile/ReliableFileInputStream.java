@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003 IBM Corporation and others.
+ * Copyright (c) 2003, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,6 +26,21 @@ public class ReliableFileInputStream extends FilterInputStream {
 	 * ReliableFile object for this file.
 	 */
 	private ReliableFile reliable;
+
+	/** 
+	 * size of crc and signature
+	 */
+	private int sigSize;
+
+	/** 
+	 * current position reading from file
+	 */
+	private int readPos;
+
+	/** 
+	 * total file length available for reading
+	 */
+	private int length;
 
 	/**
 	 * Constructs a new ReliableFileInputStream on the file named <code>name</code>.  If the
@@ -61,6 +76,13 @@ public class ReliableFileInputStream extends FilterInputStream {
 		super(reliable.getInputStream());
 
 		this.reliable = reliable;
+		sigSize = reliable.getSignatureSize();
+		readPos = 0;
+		length = super.available();
+		if (sigSize > length)
+			length = 0; // shouldn't ever happen
+		else
+			length -= sigSize;
 	}
 
 	/**
@@ -83,8 +105,88 @@ public class ReliableFileInputStream extends FilterInputStream {
 	/**
 	 * Call close to finalize the underlying ReliableFile.
 	 */
-	//TODO finalizers considered harmful! (bug 56856) 
 	protected void finalize() throws IOException {
 		close();
+	}
+
+	/**
+	 * Override default FilterInputStream method.
+	 */
+	public synchronized int read(byte b[], int off, int len) throws IOException {
+		if (readPos >= length) {
+			return -1;
+		}
+		int num = super.read(b, off, len);
+
+		if (num != -1) {
+			if (num + readPos > length) {
+				num = length - readPos;
+			}
+			readPos += num;
+		}
+		return num;
+	}
+
+	/**
+	 * Override default FilterInputStream method.
+	 */
+	public synchronized int read(byte b[]) throws IOException {
+		return read(b, 0, b.length);
+	}
+
+	/**
+	 * Override default FilterInputStream method.
+	 */
+	public synchronized int read() throws IOException {
+		if (readPos >= length) {
+			return -1;
+		}
+		int num = super.read();
+
+		if (num != -1) {
+			readPos++;
+		}
+		return num;
+	}
+
+	/**
+	 * Override default available method.
+	 */
+	public synchronized int available() throws IOException {
+		if (readPos < length) // just in case
+			return (length - readPos);
+		else
+			return 0;
+	}
+
+	/**
+	 * Override default skip method.
+	 */
+	public synchronized long skip(long n) throws IOException {
+		long len = super.skip(n);
+		if (readPos + len > length)
+			len = length - readPos;
+		readPos += len;
+		return len;
+	}
+
+	/**
+	 * Override default markSupported method.
+	 */
+	public boolean markSupported() {
+		return false;
+	}
+
+	/**
+	 * Override default mark method.
+	 */
+	public void mark(int readlimit) {
+	}
+
+	/**
+	 * Override default reset method.
+	 */
+	public void reset() throws IOException {
+		throw new IOException("reset not supported."); //$NON-NLS-1$
 	}
 }
