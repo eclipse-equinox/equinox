@@ -401,7 +401,7 @@ public class EclipseStarter {
 			boolean start = true;
 			int index = name.indexOf('@');
 			if (index >= 0) {
-				String[] attributes = getArrayFromList(name.substring(index + 1, name.length()), ";");
+				String[] attributes = getArrayFromList(name.substring(index + 1, name.length()), ":");
 				name = name.substring(0, index);
 				for (int j = 0; j < attributes.length; j++) {
 					String attribute = attributes[j];
