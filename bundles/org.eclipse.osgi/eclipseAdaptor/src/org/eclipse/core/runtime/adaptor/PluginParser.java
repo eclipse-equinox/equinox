@@ -32,6 +32,7 @@ public class PluginParser extends DefaultHandler implements IModel {
 		// preserve order.
 		private Map libraries; //represent the libraries and their export statement
 		private ArrayList requires; 
+		private boolean requiresExpanded = false; //indicates if the requires have been processed.
 		private boolean compatibilityRequired = false; //set to true is the requirement list contain compatilibity 
 		private String pluginClass;
 		private String masterPluginId;
@@ -50,24 +51,27 @@ public class PluginParser extends DefaultHandler implements IModel {
 			return libraries;
 		}
 		public String[] getRequires() {
-			if (schemaVersion == null) {
-				if (requires == null)
-					return new String[]{ PluginConverterImpl.PI_RUNTIME_COMPATIBILITY };
-				
-				//Add elements on the requirement list of ui and help.
-				for (int i = 0; i < requires.size(); i++) {
-					if ("org.eclipse.ui".equals(requires.get(i))) { //$NON-NLS-1$ 
-						requires.add(i + 1, "org.eclipse.ui.workbench.texteditor;" + Constants.OPTIONAL_ATTRIBUTE + "=" + "true"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
-						requires.add(i + 1, "org.eclipse.jface.text;" + Constants.OPTIONAL_ATTRIBUTE + "=" + "true"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
-						requires.add(i + 1, "org.eclipse.ui.editors;" + Constants.OPTIONAL_ATTRIBUTE + "=" + "true"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
-						requires.add(i + 1, "org.eclipse.ui.views;" + Constants.OPTIONAL_ATTRIBUTE + "=" + "true"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
-						requires.add(i + 1, "org.eclipse.ui.ide;" + Constants.OPTIONAL_ATTRIBUTE + "=" + "true"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
-					} else if ("org.eclipse.help".equals(requires.get(i))) { //$NON-NLS-1$ 
-						requires.add(i + 1, "org.eclipse.help.base;" + Constants.OPTIONAL_ATTRIBUTE + "=" + "true"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
+			if (schemaVersion == null && ! requiresExpanded) {
+				requiresExpanded = true;
+				if (requires == null) {
+					requires = new ArrayList(1);
+					requires.add(PluginConverterImpl.PI_RUNTIME_COMPATIBILITY );
+				} else {
+					//Add elements on the requirement list of ui and help.
+					for (int i = 0; i < requires.size(); i++) {
+						if ("org.eclipse.ui".equals(requires.get(i))) { //$NON-NLS-1$ 
+							requires.add(i + 1, "org.eclipse.ui.workbench.texteditor;" + Constants.OPTIONAL_ATTRIBUTE + "=" + "true"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
+							requires.add(i + 1, "org.eclipse.jface.text;" + Constants.OPTIONAL_ATTRIBUTE + "=" + "true"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
+							requires.add(i + 1, "org.eclipse.ui.editors;" + Constants.OPTIONAL_ATTRIBUTE + "=" + "true"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
+							requires.add(i + 1, "org.eclipse.ui.views;" + Constants.OPTIONAL_ATTRIBUTE + "=" + "true"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
+							requires.add(i + 1, "org.eclipse.ui.ide;" + Constants.OPTIONAL_ATTRIBUTE + "=" + "true"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
+						} else if ("org.eclipse.help".equals(requires.get(i))) { //$NON-NLS-1$ 
+							requires.add(i + 1, "org.eclipse.help.base;" + Constants.OPTIONAL_ATTRIBUTE + "=" + "true"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
+						}
 					}
+					if (!compatibilityRequired)
+						requires.add(PluginConverterImpl.PI_RUNTIME_COMPATIBILITY);
 				}
-				if (!compatibilityRequired)
-					requires.add(PluginConverterImpl.PI_RUNTIME_COMPATIBILITY);
 			}
 
 			String[] requireBundles;
