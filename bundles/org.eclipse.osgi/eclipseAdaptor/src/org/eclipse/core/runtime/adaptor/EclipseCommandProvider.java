@@ -30,6 +30,8 @@ public class EclipseCommandProvider implements CommandProvider {
 		help.append("---");
 		help.append(EclipseAdaptorMsg.NEW_LINE);
 		help.append("\tdiag - " + EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONSOLE_HELP_DIAG_COMMAND_DESCRIPTION"));//$NON-NLS-1$
+		help.append(EclipseAdaptorMsg.NEW_LINE);
+		help.append("\tactive - " + EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONSOLE_HELP_ACTIVE_COMMAND_DESCRIPTION"));//$NON-NLS-1$		
 		return help.toString();
 	}
 
