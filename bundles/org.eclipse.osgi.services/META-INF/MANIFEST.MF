@@ -1,15 +1,13 @@
 Manifest-Version: 1.0
-Bundle-Name: %pluginName
+Bundle-Name: %osgiServices
 Bundle-SymbolicName: org.eclipse.osgi.services
 Bundle-Version: 3.0
-Bundle-Description: OSGi Service Platform Release 3 Service Interfaces 
-  and Classes
+Bundle-Description: %osgiServicesDes
 Bundle-Localization: plugin
-Bundle-Vendor: %providerName
+Bundle-Vendor: %eclipse.org
 Bundle-DocUrl: http://www.eclipse.org
 Bundle-ContactAddress: www.eclipse.org
-Bundle-Copyright: Copyright (c) The Open Services Gateway Initiative (
- 2001, 2003). All Rights Reserved.
+Bundle-Copyright: %copyright
 Bundle-ClassPath: services.jar
 Export-Package: org.osgi.service.cm; specification-version=1.1,
  org.osgi.service.device; specification-version=1.1,
