@@ -416,7 +416,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		writeStringOrNull(out, bundleData.getDynamicImports());
 		out.writeInt(bundleData.getGeneration());
 		out.writeInt(bundleData.getStartLevel());
-		out.writeInt(bundleData.getStatus());
+		out.writeInt(bundleData.getPersistentStatus());
 		out.writeBoolean(bundleData.isReference());
 		out.writeBoolean(bundleData.isFragment());
 		out.writeLong(bundleData.getManifestTimeStamp());
