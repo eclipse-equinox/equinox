@@ -54,12 +54,12 @@ public class FrameworkConsole implements Runnable {
 	protected Socket s;
 
 	/**
-	    Constructor for FrameworkConsole.
-	    It creates a service tracker to track CommandProvider registrations.
-	    The console InputStream is set to System.in and the console PrintStream is set to System.out.
-	    @param osgi - an instance of an osgi framework
-	    @param args - any arguments passed on the command line when Launcher is started.
-	*/
+	 Constructor for FrameworkConsole.
+	 It creates a service tracker to track CommandProvider registrations.
+	 The console InputStream is set to System.in and the console PrintStream is set to System.out.
+	 @param osgi - an instance of an osgi framework
+	 @param args - any arguments passed on the command line when Launcher is started.
+	 */
 	public FrameworkConsole(OSGi osgi, String[] args) {
 
 		getDefaultStreams();
@@ -72,12 +72,12 @@ public class FrameworkConsole implements Runnable {
 	}
 
 	/**
-	    Constructor for FrameworkConsole.
-	    It creates a service tracker to track CommandProvider registrations.
-	    The console InputStream is set to System.in and the console PrintStream is set to System.out.
-	    @param osgi - an instance of an osgi framework
-	    @param args - any arguments passed on the command line when Launcher is started.
-	*/
+	 Constructor for FrameworkConsole.
+	 It creates a service tracker to track CommandProvider registrations.
+	 The console InputStream is set to System.in and the console PrintStream is set to System.out.
+	 @param osgi - an instance of an osgi framework
+	 @param args - any arguments passed on the command line when Launcher is started.
+	 */
 	public FrameworkConsole(OSGi osgi, int port, String[] args) {
 
 		getSocketStream(port);
@@ -158,7 +158,7 @@ public class FrameworkConsole implements Runnable {
 
 	/**
 	 *  Return the current output PrintWriter
-	* @return The currently active PrintWriter
+	 * @return The currently active PrintWriter
 	 */
 	public PrintWriter getWriter() {
 		return out;
@@ -173,9 +173,9 @@ public class FrameworkConsole implements Runnable {
 	}
 
 	/**
-	  *  Return if the SocketSteam (telnet to the console) is being used 
-	  * @return Return if the SocketSteam is being used 
-	  */
+	 *  Return if the SocketSteam (telnet to the console) is being used 
+	 * @return Return if the SocketSteam is being used 
+	 */
 	public boolean getUseSocketStream() {
 		return useSocketStream;
 	}
@@ -203,12 +203,16 @@ public class FrameworkConsole implements Runnable {
 	 * Begin doing the active part of the class' code. Starts up the console.
 	 */
 	public void run() {
-		console(args);
-		if (useSocketStream) {
-			while (true) {
-				getSocketStream(port);
-				console();
+		try {
+			console(args);
+			if (useSocketStream) {
+				while (true) {
+					getSocketStream(port);
+					console();
+				}
 			}
+		} catch (IOException e) {
+			e.printStackTrace(out);
 		}
 	}
 
@@ -220,8 +224,9 @@ public class FrameworkConsole implements Runnable {
 	 * is reached. This method will then return.
 	 *
 	 * @param args Initial set of commands to execute.
+	 * @throws IOException
 	 */
-	public void console(String args[]) {
+	public void console(String args[]) throws IOException {
 		// first handle any args passed in from launch
 		if (args != null) {
 			for (int i = 0; i < args.length; i++) {
@@ -237,8 +242,9 @@ public class FrameworkConsole implements Runnable {
 	 * Command output is written to the console PrintStream. The method will
 	 * loop reading commands from the console InputStream until end-of-file
 	 * is reached. This method will then return.
+	 * @throws IOException
 	 */
-	protected void console() {
+	protected void console() throws IOException {
 		Object lock = new Object();
 		disconnect = false;
 		// wait to receive commands from console and handle them
@@ -259,9 +265,9 @@ public class FrameworkConsole implements Runnable {
 					}
 				}
 				cmdline = br.readLine();
-			} catch (Throwable t) {
-				t.printStackTrace();
-				continue;
+			} catch (InterruptedException e) {
+				// do nothing; probably got disconnected
+			} finally {
 			}
 
 			if (cmdline == null) {
@@ -397,6 +403,7 @@ public class FrameworkConsole implements Runnable {
 	class CommandProviderTracker extends ServiceTracker {
 
 		FrameworkConsole con;
+
 		CommandProviderTracker(org.osgi.framework.BundleContext context, String clazz, FrameworkConsole con) {
 			super(context, clazz, null);
 			this.con = con;
