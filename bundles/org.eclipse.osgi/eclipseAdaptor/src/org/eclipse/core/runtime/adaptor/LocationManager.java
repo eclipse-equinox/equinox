@@ -42,10 +42,10 @@ public class LocationManager {
 	private static final String CONFIG_DIR = "configuration"; //$NON-NLS-1$
 
 	// Data mode constants for user, configuration and data locations.
-	private static final String NONE = "<none>"; //$NON-NLS-1$
-	private static final String NO_DEFAULT = "<noDefault>"; //$NON-NLS-1$
-	private static final String USER_HOME = "<user.home>"; //$NON-NLS-1$
-	private static final String USER_DIR = "<user.dir>"; //$NON-NLS-1$
+	private static final String NONE = "@none"; //$NON-NLS-1$
+	private static final String NO_DEFAULT = "@noDefault"; //$NON-NLS-1$
+	private static final String USER_HOME = "@user.home"; //$NON-NLS-1$
+	private static final String USER_DIR = "@user.dir"; //$NON-NLS-1$
 
 	private static URL buildURL(String spec) {
 		if (spec == null)

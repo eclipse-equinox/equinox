@@ -26,10 +26,26 @@ import org.osgi.framework.*;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.startlevel.StartLevel;
 
+/**
+ * Special startup class for the Eclipse Platform. This class cannot be 
+ * instantiated; all functionality is provided by static methods. 
+ * <p>
+ * The Eclipse Platform makes heavy use of Java class loaders for loading 
+ * plug-ins. Even the Eclispe Runtime itself and the OSGi framework need
+ * to be loaded by special class loaders. The upshot is that a 
+ * client program (such as a Java main program, a servlet) cannot directly 
+ * reference any part of Eclipse directly. Instead, a client must use this 
+ * loader class to start the platform, invoking functionality defined 
+ * in plug-ins, and shutting down the platform when done. 
+ * </p>
+ * @since 3.0
+ */
 public class EclipseStarter {
 	private static FrameworkAdaptor adaptor;
 	private static BundleContext context;
+	private static ServiceTracker applicationTracker;
 	public static boolean debug = false;
+	private static boolean running = false;
 
 	// command line arguments
 	private static final String CONSOLE = "-console"; //$NON-NLS-1$
@@ -68,25 +84,52 @@ public class EclipseStarter {
 	// Console information
 	protected static final String DEFAULT_CONSOLE_CLASS = "org.eclipse.osgi.framework.internal.core.FrameworkConsole";
 	private static final String CONSOLE_NAME = "OSGi Console";
-	private static ServiceTracker applicationTracker;
 
+	/**
+	 * Launches the platform and runs a single application. The application is either identified
+	 * in the given arguments (e.g., -application &ltapp id&gt) or in the <code>eclipse.application</code>
+	 * System property.  This convenience method starts 
+	 * up the platform, runs the indicated application, and then shuts down the 
+	 * platform. The platform must not be running already. 
+	 * 
+	 * @param args the command line-style arguments used to configure the platform
+	 * @param endSplashHandler the block of code to run to tear down the splash 
+	 * 	screen or <code>null</code> if no tear down is required
+	 * @return the result of running the application
+	 * @throws Exception if anything goes wrong
+	 */
 	public static Object run(String[] args, Runnable endSplashHandler) throws Exception {
+		if (running)
+			throw new IllegalStateException("Platform already running");  
 		try {
 			startup(args, endSplashHandler);
-			run(null);
+			return run(null);
 		} finally {
 			shutdown();
 		}
-		// Return an Integer containing the exit code.
-		String exitCode = System.getProperty(PROP_EXITCODE);
-		try {
-			return exitCode == null ? new Integer(0) : new Integer(exitCode);
-		} catch (NumberFormatException e) {
-			return new Integer(17);
-		}
 	}
 	
+	/**
+	 * Returns true if the platform is already running, false otherwise.
+	 * @return whether or not the platform is already running
+	 */
+	public static boolean isRunning() {
+		return running;
+	}
+	/**
+	 * Starts the platform and sets it up to run a single application. The application is either identified
+	 * in the given arguments (e.g., -application &ltapp id&gt) or in the <code>eclipse.application</code>
+	 * System property.  The platform must not be running already. 
+	 * <p>
+	 * The given runnable (if not <code>null</code>) is used to tear down the splash screen if required.
+	 * </p>
+	 * @param argument the argument passed to the application
+	 * @return the result of running the application
+	 * @throws Exception if anything goes wrong
+	 */
 	public static void startup(String[] args, Runnable endSplashHandler) throws Exception {
+		if (running)
+			throw new IllegalStateException("Platform is already running");
 		processCommandLine(args);
 		LocationManager.initializeLocations();
 		loadConfigurationInfo();
@@ -103,19 +146,53 @@ public class EclipseStarter {
 		setStartLevel(6);
 		// they should all be active by this time
 		ensureBundlesActive(basicBundles);
+		running = true;
 	}
 
-	public static Object run(Object arg) {
+	/**
+	 * Runs the applicaiton for which the platform was started. The platform 
+	 * must be running. 
+	 * <p>
+	 * The given argument is passed to the application being run.  If it is <code>null</code>
+	 * then the command line arguments used in starting the platform, and not consumed
+	 * by the platform code, are passed to the application as a <code>String[]</code>.
+	 * </p>
+	 * @param argument the argument passed to the application. May be <code>null</code>
+	 * @return the result of running the application
+	 * @throws Exception if anything goes wrong
+	 */
+	public static Object run(Object argument) {
+		if (!running)
+			throw new IllegalStateException("Platform not running");
 		initializeApplicationTracker();
 		ParameterizedRunnable application = (ParameterizedRunnable)applicationTracker.getService();
 		applicationTracker.close();
 		logUnresolvedBundles(context.getBundles());
 		if (application == null)
 			throw new IllegalStateException(EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_ERROR_NO_APPLICATION"));
-		return application.run(arg);			
+		return application.run(argument);
 	}
 
+	/**
+	 * Shuts down the Platform. The state of the Platform is not automatically 
+	 * saved before shutting down. 
+	 * <p>
+	 * On return, the Platform will no longer be running (but could be re-launched 
+	 * with another call to startup). If relaunching, care must be taken to reinitialize
+	 * any System properties which the platform uses (e.g., osgi.instance.area) as
+	 * some policies in the platform do not allow resetting of such properties on 
+	 * subsequent runs.
+	 * </p><p>
+	 * Any objects handed out by running Platform, 
+	 * including Platform runnables obtained via getRunnable, will be 
+	 * permanently invalid. The effects of attempting to invoke methods 
+	 * on invalid objects is undefined. 
+	 * </p>
+	 * @throws Exception if anything goes wrong
+	 */
 	public static void shutdown() throws Exception {
+		if (!running)
+			return;
 		stopSystemBundle();
 	}
 
@@ -592,7 +669,7 @@ public class EclipseStarter {
 	}
 	
 	private static void stopSystemBundle() throws BundleException {
-		if (context == null)
+		if (context == null || !running)
 			return;
 		Bundle systemBundle = context.getBundle(0);
 		if (systemBundle.getState() == Bundle.ACTIVE) {
@@ -609,6 +686,9 @@ public class EclipseStarter {
 			semaphore.acquire();
 			context.removeFrameworkListener(listener);
 		}
+		context = null;
+		applicationTracker = null;
+		running = false;
 	}
 	private static void setStartLevel(final int value) {
 		ServiceTracker tracker = new ServiceTracker(context, StartLevel.class.getName(), null);
