@@ -151,6 +151,9 @@ public class StateReader {
 			input.close();
 		}
 	}
+	public final StateImpl loadState(DataInputStream input) throws IOException {
+		return loadState(input, -1);
+	}
 	private String readString(DataInputStream in, boolean intern) throws IOException {
 		byte type = in.readByte();
 		if (type == NULL)
