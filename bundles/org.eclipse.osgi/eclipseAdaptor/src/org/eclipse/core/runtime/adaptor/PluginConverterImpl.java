@@ -223,7 +223,6 @@ public class PluginConverterImpl implements PluginConverter {
 	private void generateTimestamp() {
 		// so it is easy to tell which ones are generated
 		out.println(GENERATED_FROM + ": " + pluginManifestLocation.lastModified());		 //$NON-NLS-1$
-
 	}
 
 	private Set getExports() {
@@ -418,22 +417,29 @@ public class PluginConverterImpl implements PluginConverter {
 		if (!generationLocation.isFile())
 			return false;
 		String firstLine = null;
+		BufferedReader reader = null;
 		try {
-			BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(generationLocation)));
+			reader = new BufferedReader(new InputStreamReader(new FileInputStream(generationLocation)));
 			firstLine = reader.readLine();
 		} catch (IOException e) {
-			// not a big deal - we cannot read an existing manifest
+			// not a big deal - we could not read an existing manifest
 			return false;
-		}		
+		}	finally {
+			if (reader != null)
+				try {
+					reader.close();
+				} catch (IOException e) {
+					// ignore
+				}
+		}
 		String tag = GENERATED_FROM + ": "; //$NON-NLS-1$
 		if (firstLine == null || !firstLine.startsWith(tag))
 			return false;		
 		String timestampStr = firstLine.substring(tag.length() - 1);
 		try {
-			long timestamp = Long.parseLong(timestampStr.trim());
-			return timestamp == pluginLocation.lastModified();
+			return Long.parseLong(timestampStr.trim()) == pluginLocation.lastModified();
 		} catch(NumberFormatException nfe) {
-			// not a big deal - just a bogus existing manifest
+			// not a big deal - just a bogus existing manifest that will be ignored
 		}
 		return false;
 	}
