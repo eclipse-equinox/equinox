@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-Name: %osgiUtil
 Bundle-SymbolicName: org.eclipse.osgi.util
-Bundle-Version: 3.0
+Bundle-Version: 3.0.0
 Bundle-Description: %osgiUtilDes
 Bundle-Vendor: %eclipse.org
 Bundle-Localization: plugin
