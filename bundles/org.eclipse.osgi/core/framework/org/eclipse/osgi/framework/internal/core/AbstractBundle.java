@@ -1131,6 +1131,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 						}
 					}
 				} catch (InterruptedException e) {
+					//Nothing to do
 				}
 				doubleFault = true;
 			}
@@ -1444,10 +1445,6 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 
 	public boolean testStateChanging(Object thread) {
 		return stateChanging == thread;
-	}
-
-	public Object getStateChangeLock() {
-		return statechangeLock;
 	}
 
 	public Thread getStateChanging() {

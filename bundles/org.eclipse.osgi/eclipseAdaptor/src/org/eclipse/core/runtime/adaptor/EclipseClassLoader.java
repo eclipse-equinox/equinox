@@ -81,17 +81,16 @@ public class EclipseClassLoader extends DefaultClassLoader {
 					if (StatsManager.TRACE_BUNDLES && threadChangingState != null) {
 						System.out.println("Concurrent startup of bundle " + bundle.getSymbolicName() + " by " + Thread.currentThread() + " and " + threadChangingState.getName() + ". Waiting up to 5000ms for " + threadChangingState + " to finish the initialization."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 					}
-					Object lock = bundle.getStateChangeLock();
 					long start = System.currentTimeMillis();
 					long delay = 5000;
 					long timeLeft = delay;
 					while (true) {
-						if (bundle.testStateChanging(null) || timeLeft <= 0)
-							break;
 						try {
-							synchronized (lock) {
-								lock.wait(timeLeft);
+							synchronized (this) {
+								this.wait(100); // temporarily giveup the classloader lock
 							}
+							if (bundle.testStateChanging(null) || timeLeft <= 0)
+								break;
 						} catch (InterruptedException e) {
 							//Ignore and keep waiting
 						}
