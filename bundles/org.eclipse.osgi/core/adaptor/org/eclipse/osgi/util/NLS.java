@@ -25,7 +25,7 @@ import org.eclipse.osgi.framework.msg.MessageFormat;
 public abstract class NLS {
 	
 	
-	public static boolean DEBUG_MESSAGE_BUNDLES = false;
+	public static boolean DEBUG_MESSAGE_BUNDLES = true;
 	/**
 	 * Creates a new NLS instance.
 	 */
