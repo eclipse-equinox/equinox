@@ -125,13 +125,13 @@ public class AliasMapper {
 
 				Tokenizer tokenizer = new Tokenizer(line);
 
-				String master = tokenizer.getString("#");
+				String master = tokenizer.getString("# \t");
 
 				if (master != null) {
 					aliases.put(master.toLowerCase(), master);
 
 					parseloop : while (true) {
-						String alias = tokenizer.getString("#");
+						String alias = tokenizer.getString("# \t");
 
 						if (alias == null) {
 							break parseloop;

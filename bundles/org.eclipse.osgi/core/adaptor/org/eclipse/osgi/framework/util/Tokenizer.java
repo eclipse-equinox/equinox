@@ -54,7 +54,7 @@ public class Tokenizer
         for ( ;cur < max; cur++)
         {
             char c = val[cur];
-            if ((c == ' ') || (c == '\t') || (terminals.indexOf(c) != -1))
+            if ((terminals.indexOf(c) != -1))
             {
                 break;
             }
@@ -64,6 +64,8 @@ public class Tokenizer
         if (count > 0)
         {
             skipWhiteSpace();
+            while (count>0 && (val[begin+count-1] == ' ' || val[begin+count-1] == '\t'))
+            	count--;
             return(new String(val, begin, count));
         }
         return(null);
@@ -111,7 +113,7 @@ public class Tokenizer
                     if (c=='\"') {
                         // but there could be a quoted string in the middle of the string
                         cur = cur+skipQuotedString(val,cur);
-                    } else if ((c == ' ') || (c == '\t') || (terminals.indexOf(c) != -1)) {
+                    } else if ((terminals.indexOf(c) != -1)) {
                         break;
                     }
                 }
@@ -120,6 +122,8 @@ public class Tokenizer
                 if (count > 0)
                 {
                     skipWhiteSpace();
+                    while (count>0 && (val[begin+count-1] == ' ' || val[begin+count-1] == '\t'))
+                    	count--;
                     return(new String(val, begin, count));
                 }
             }
