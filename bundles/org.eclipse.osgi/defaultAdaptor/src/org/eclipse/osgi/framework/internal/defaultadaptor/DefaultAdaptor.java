@@ -127,7 +127,28 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor
 	 * @return the StateManager.
 	 */
 	protected StateManager createStateManager(){
-		return new StateManager(bundleRootDir);
+		stateManager = new StateManager(bundleRootDir);
+		State systemState = stateManager.getSystemState();
+		if (systemState != null)
+			return stateManager;
+		systemState = stateManager.createSystemState();				
+		Vector installedBundles = getInstalledBundles();
+		if (installedBundles == null)
+			return stateManager;
+		StateObjectFactory factory = stateManager.getFactory();
+		for (Iterator iter = installedBundles.iterator(); iter.hasNext(); ) {
+			BundleData toAdd = (BundleData) iter.next();
+			try {
+				Dictionary manifest = toAdd.getManifest();
+				BundleDescription newDescription = factory.createBundleDescription(manifest, toAdd.getLocation(),toAdd.getBundleID());
+				systemState.addBundle(newDescription);
+			} catch (BundleException be) {
+				// just ignore bundle datas with invalid manifests
+			}
+		}
+		// we need the state resolved
+		systemState.resolve();
+		return stateManager;
 	}
 
 	/**
@@ -338,6 +359,9 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor
 	{
 		String list[] = bundleRootDir.list();
 
+		if (list == null) {
+			return null;
+		}
 		int len = list.length;
 
 		Vector bundleDatas = new Vector(len << 1, 10);

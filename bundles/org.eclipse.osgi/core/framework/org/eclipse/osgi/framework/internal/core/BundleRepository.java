@@ -60,15 +60,13 @@ public class BundleRepository {
 	}
 
 	public Bundle getBundle(String globalName, String version){
-		ArrayList list = (ArrayList) bundlesByGlobalName.get(globalName);
-		if (list != null) {
+		Bundle[] bundles = (Bundle[]) bundlesByGlobalName.get(globalName);
+		if (bundles != null) {
 			Version ver = new Version(version);
-			int size = list.size();
-			if (size>0) {
-				for(int i=0; i<size; i++) {
-					Bundle bundle = (Bundle) list.get(i);
-					if (bundle.getVersion().isPerfect(ver)) {
-						return bundle;
+			if (bundles.length>0) {
+				for(int i=0; i<bundles.length; i++) {
+					if (bundles[i].getVersion().isPerfect(ver)) {
+						return bundles[i];
 					}
 				}
 			}
@@ -90,6 +88,7 @@ public class BundleRepository {
 				bundlesByGlobalName.put(globalName,bundles);
 				return;
 			}
+
 			ArrayList list = new ArrayList(bundles.length+1);
 			// find place to insert the bundle
 			Version newVersion = bundle.getVersion();
@@ -107,20 +106,50 @@ public class BundleRepository {
 				list.add(bundle);
 			}
 
+			bundles = new Bundle[list.size()];
 			list.toArray(bundles);
 			bundlesByGlobalName.put(globalName,bundles);
 		}
 	}
 
 	public boolean remove(Bundle bundle) {
+		// remove by bundle ID
 		boolean removed = bundlesById.remove(bundle);
 		if (removed) {
+			// remove by install order
 			bundlesByInstallOrder.remove(bundle);
+			// remove by global name
 			String globalName = bundle.getGlobalName();
 			if (globalName != null) {
-				ArrayList list = (ArrayList) bundlesByGlobalName.get(globalName);
-				if (list != null) {
-					list.remove(bundle);
+				Bundle[] bundles = (Bundle[]) bundlesByGlobalName.get(globalName);
+				if (bundles != null) {
+					// found some bundles with the global name.
+					// remove all references to the specified bundle.
+					int numRemoved=0;
+					for (int i=0; i<bundles.length; i++) {
+						if (bundle == bundles[i]) {
+							numRemoved++;
+							bundles[i]=null;
+						}
+					}
+					if (numRemoved>0) {
+						if (bundles.length-numRemoved <= 0) {
+							// no bundles left in the array remove the array from the hash
+							bundlesByGlobalName.remove(globalName);
+						}
+						else {
+							// create a new array with the null entries removed.
+							Bundle[] newBundles = new Bundle[bundles.length-numRemoved];
+							int indexCnt=0;
+							for (int i=0; i<bundles.length; i++) {
+								if (bundles[i] != null) {
+									newBundles[indexCnt] = bundles[i];
+									indexCnt++;
+								}
+							}
+							bundlesByGlobalName.put(globalName,newBundles);
+						}
+					}
 				}
 			}
 		}
