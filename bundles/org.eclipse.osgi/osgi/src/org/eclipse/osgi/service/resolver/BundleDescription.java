@@ -59,7 +59,7 @@ public interface BundleDescription {
 	public BundleSpecification[] getRequiredBundles();
 
 	/**
-	 * Returns the bundle specification for the bundle with the given unique id
+	 * Returns the bundle specification for the bundle with the given symbolic name
 	 * in this bundle.
 	 * 
 	 * @param name the symbolic name of the required bundle to look for.
@@ -67,15 +67,6 @@ public interface BundleDescription {
 	 * found.
 	 */
 	public BundleSpecification getRequiredBundle(String name);
-
-	/**
-	 * Return unique id of the bundle.
-	 * 
-	 * @return the unique id of this bundle.
-	 * @deprecated use #getSymbolicName().  This method will be removed before M9
-	 */
-	// TODO remove before M9
-	public String getUniqueId();
 
 	/**
 	 * Returns symbolic name of the bundle.
