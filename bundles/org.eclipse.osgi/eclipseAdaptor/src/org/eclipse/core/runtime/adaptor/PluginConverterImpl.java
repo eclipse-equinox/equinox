@@ -237,6 +237,7 @@ public class PluginConverterImpl implements PluginConverter, IModel {
 			}
 			// replaces any eventual existing file
 			out = new BufferedWriter(new FileWriter(generationLocation));
+			writeEntry(GENERATED_FROM, (String) generatedManifest.remove(GENERATED_FROM));	//Need to do this first uptoDate check expect the generated-from tag to be in the first line
 			Enumeration keys = generatedManifest.keys();
 			while (keys.hasMoreElements()) {
 				String key = (String) keys.nextElement();
