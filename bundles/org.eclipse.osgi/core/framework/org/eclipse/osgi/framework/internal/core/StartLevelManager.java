@@ -599,9 +599,6 @@ public class StartLevelManager implements EventDispatcher, EventListener, Servic
 		BundleRepository bundles = framework.bundles;
 
 		if (activeSL == 0) { // stopping the framework
-
-			framework.systemBundle.state = AbstractBundle.STOPPING;
-
 			/* stop all running bundles */
 
 			suspendAllBundles(bundles);

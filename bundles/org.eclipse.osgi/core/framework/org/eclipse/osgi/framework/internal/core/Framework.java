@@ -447,6 +447,11 @@ public class Framework implements EventDispatcher, EventPublisher {
 		if (!active) {
 			return;
 		}
+		/*
+		 * set the state of the System Bundle to STOPPING.
+		 * this must be done first according to section 4.19.2 from the OSGi R3 spec.  
+		 */
+		systemBundle.state = AbstractBundle.STOPPING;
 		/* call the FrameworkAdaptor.frameworkStopping method first */
 		try {
 			adaptor.frameworkStopping(systemBundle.getContext());
