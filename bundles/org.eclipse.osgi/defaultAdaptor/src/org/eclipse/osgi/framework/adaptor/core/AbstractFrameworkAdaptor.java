@@ -655,7 +655,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 		} catch (InstantiationException e) {
 			supportSignedBundles = false;
 		}
-		return null;
+		return base;
 	}
 
 	/**
