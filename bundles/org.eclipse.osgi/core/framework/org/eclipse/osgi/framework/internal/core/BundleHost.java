@@ -318,8 +318,8 @@ public class BundleHost extends AbstractBundle {
 			}
 		}
 		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-			if ((state & (STARTING | ACTIVE | STOPPING)) == 0) {
-				Debug.println("Bundle.loadClass(" + name + ") called when state != STARTING | ACTIVE | STOPPING: " + this);
+			if ((state & (STARTING | ACTIVE | STOPPING | RESOLVED)) == 0) {
+				Debug.println("Bundle.loadClass(" + name + ") called when state != STARTING | ACTIVE | STOPPING | RESOLVED: " + this);
 				Debug.printStackTrace(new Exception("Stack trace"));
 			}
 		}
