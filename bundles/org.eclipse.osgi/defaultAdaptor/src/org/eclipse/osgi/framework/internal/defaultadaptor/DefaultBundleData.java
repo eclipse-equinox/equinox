@@ -285,7 +285,7 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 	 */
 	public File getDataFile(String path) {
 		// lazily initialize dirData to prevent early access to instance location
-		if (dirData != null) {
+		if (dirData == null) {
 			File dataRoot = adaptor.getDataRootDir();
 			if (dataRoot == null)
 				throw new IllegalStateException("Instance data location not set yet");
