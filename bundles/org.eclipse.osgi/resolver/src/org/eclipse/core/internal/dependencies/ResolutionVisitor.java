@@ -59,7 +59,7 @@ public class ResolutionVisitor implements IElementSetVisitor {
 					break;
 				}
 				// new version id will be null if dependency cannot be satisfied but is optional
-				elementSet.resolveDependency(element, dependencies[i], highestRequiredVersionId);
+				elementSet.resolveDependency(dependencies[i], highestRequiredVersionId);
 			}
 			if (versionResolved)
 				resolved.add(element);

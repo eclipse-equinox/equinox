@@ -25,8 +25,8 @@ package org.eclipse.core.internal.dependencies;
  * </p>
  */
 public final class Assert {
-	/* This class is not intended to be instantiated. */
 	private Assert() {
+		// This class is not intended to be instantiated		
 	}
 
 	/** Asserts that the given object is not <code>null</code>. If this

@@ -81,15 +81,15 @@ public class ResolverImpl implements Resolver {
 			int kind = changes[i].getKind();
 			if ((kind & ElementChange.RESOLVED) != 0) {
 				state.resolveBundle(bundle, Bundle.RESOLVED);
-				resolveConstraints(element, bundle);
+				resolveConstraints(element);
 			} else if ((kind & ElementChange.UNRESOLVED) != 0)
 				state.resolveBundle(bundle, Bundle.INSTALLED);
 			else if (kind == ElementChange.LINKAGE_CHANGED)
-				resolveConstraints(element, bundle);
+				resolveConstraints(element);
 		}
 	}
 
-	private void resolveConstraints(Element element, BundleDescription bundle) {
+	private void resolveConstraints(Element element) {
 		// tells the state that some of the constraints have
 		// changed
 		Dependency[] dependencies = element.getDependencies();

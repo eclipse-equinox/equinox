@@ -95,10 +95,6 @@ public class DependencySystem {
 	 * Determines which versions of each element set are resolved.
 	 */
 	public ResolutionDelta resolve() throws CyclicSystemException {
-		return this.resolve(true);
-	}
-
-	public ResolutionDelta resolve(boolean produceDelta) throws CyclicSystemException {
 		Collection roots = discoverRoots();
 		// traverse from roots to leaves - returns leaves
 		Collection satisfied = visit(roots, new SatisfactionVisitor(SATISFACTION));
@@ -213,7 +209,7 @@ public class DependencySystem {
 	}
 
 	public void addElement(Element element) {
-		((ElementSet) this.getElementSet(element.getId())).addElement(element);
+		this.getElementSet(element.getId()).addElement(element);
 		this.elementCount++;
 	}
 
@@ -301,7 +297,7 @@ public class DependencySystem {
 		this.delta.recordChange(element, kind);
 	}
 
-	void recordDependencyChanged(Collection oldResolved, Collection newResolved, Map present) {
+	void recordDependencyChanged(Collection oldResolved, Collection newResolved) {
 		for (Iterator oldResolvedIter = oldResolved.iterator(); oldResolvedIter.hasNext();) {
 			Element element = (Element) oldResolvedIter.next();
 			if (!newResolved.contains(element))
@@ -364,7 +360,7 @@ public class DependencySystem {
 	public void unresolve(Element[] elements) {
 		int mark = getNewMark(RESOLUTION);
 		for (int i = 0; i < elements.length; i++) {
-			ElementSet set = (ElementSet) getElementSet(elements[i].getId());
+			ElementSet set = getElementSet(elements[i].getId());
 			if (set == null)
 				return;
 			set.unresolve(elements[i], mark);

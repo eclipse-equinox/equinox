@@ -132,7 +132,7 @@ public class ElementSet {
 		return resolved;
 	}
 
-	public void resolveDependency(Element dependent, Dependency dependency, Object resolvedVersionId) {
+	public void resolveDependency(Dependency dependency, Object resolvedVersionId) {
 		dependency.resolve(resolvedVersionId, this.visitedMark);
 	}
 
@@ -155,7 +155,7 @@ public class ElementSet {
 		this.setChangedMark(visitedMark);
 		Collection oldResolved = this.resolved;
 		this.resolved = Collections.unmodifiableSet(newResolved);
-		system.recordDependencyChanged(oldResolved, newResolved, available);
+		system.recordDependencyChanged(oldResolved, newResolved);
 	}
 
 	/**
@@ -208,7 +208,7 @@ public class ElementSet {
 
 	private void addRequired(Object requiredId) {
 		this.setNeedingUpdate(DependencySystem.SATISFACTION);
-		ElementSet requiredNode = (ElementSet) system.getElementSet(requiredId);
+		ElementSet requiredNode = system.getElementSet(requiredId);
 		DependencyCounter counter = (DependencyCounter) this.dependencyCounters.get(requiredId);
 		if (counter == null) {
 			this.dependencyCounters.put(requiredId, counter = new DependencyCounter());
@@ -221,7 +221,7 @@ public class ElementSet {
 	}
 
 	private void removeRequired(Object requiredId) {
-		ElementSet requiredNode = (ElementSet) system.getElementSet(requiredId);
+		ElementSet requiredNode = system.getElementSet(requiredId);
 		DependencyCounter counter = (DependencyCounter) this.dependencyCounters.get(requiredId);
 		if (counter == null) {
 			if (system.inDebugMode())
@@ -304,7 +304,7 @@ public class ElementSet {
 		Dependency[] dependencies = element.getDependencies();
 		// unresolved dependencies
 		for (int i = 0; i < dependencies.length; i++)
-			resolveDependency(element, dependencies[i], null);
+			resolveDependency(dependencies[i], null);
 		setChangedMark(mark);
 		setNeedingUpdate(DependencySystem.SATISFACTION);
 	}

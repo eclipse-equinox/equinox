@@ -139,6 +139,7 @@ public class ComputeNodeOrder {
 		 * </p>
 		 */
 		public Digraph() {
+			// no action during construction
 		}
 
 		/**
@@ -507,9 +508,7 @@ public class ComputeNodeOrder {
 		return knots;
 	}
 
-	/*
-	 * Prevent class from being instantiated.
-	 */
 	private ComputeNodeOrder() {
+		// Prevent class from being instantiated.
 	}
 }

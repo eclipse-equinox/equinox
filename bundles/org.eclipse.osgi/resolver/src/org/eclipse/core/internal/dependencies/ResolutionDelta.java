@@ -63,7 +63,7 @@ public class ResolutionDelta {
 	 */
 	void recordChange(Element element, int kind) {
 		// check if a change has already been recorded for the element
-		ElementChange existingChange = (ElementChange) this.getChange(element.getId(), element.getVersionId(), element.getUserObject());
+		ElementChange existingChange = this.getChange(element.getId(), element.getVersionId(), element.getUserObject());
 		// if not, just record it and we are done
 		if (existingChange == null) {
 			this.changes.put(new ElementIdentifier(element.getId(), element.getVersionId(), element.getUserObject()), new ElementChange(element, kind));
