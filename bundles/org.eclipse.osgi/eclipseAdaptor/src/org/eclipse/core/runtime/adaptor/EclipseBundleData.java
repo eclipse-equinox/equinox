@@ -202,13 +202,10 @@ public class EclipseBundleData extends DefaultBundleData {
 	
 	private Dictionary generateManifest() throws BundleException {
 		PluginConverterImpl converter = PluginConverterImpl.getDefault();
-		File location = findPluginManifest(getBaseFile());
-		if (location == null)
-			return null;
 
-		setManifestTimeStamp(location.lastModified());
+		setManifestTimeStamp(getBaseFile().lastModified());
 		setManifestType(PLUGIN);
-		location = converter.convertManifest(location, true);
+		File location = converter.convertManifest(getBaseFile(), true);
 		if (location == null)
 			return null;	
 		try {	

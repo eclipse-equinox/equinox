@@ -9,6 +9,7 @@
  *     IBM Corporation - initial API and implementation 
  *******************************************************************************/
 package org.eclipse.core.runtime.adaptor;
+import java.io.InputStream;
 import java.util.*;
 import javax.xml.parsers.SAXParserFactory;
 import org.osgi.framework.*;
@@ -354,7 +355,7 @@ public class PluginParser extends DefaultHandler implements IModel {
 		//                factory.error(new Status(IStatus.WARNING, Platform.PI_RUNTIME,
 		// Platform.PARSE_PROBLEM, msg, ex));
 	}
-	synchronized public PluginInfo parsePlugin(String in) throws Exception {
+	synchronized public PluginInfo parsePlugin(InputStream in) throws Exception {
 		SAXParserFactory factory = acquireXMLParsing();
 		if (factory == null)
 			return null; // TODO we log an error

@@ -11,6 +11,8 @@
 package org.eclipse.core.runtime.adaptor;
 
 import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -58,44 +60,47 @@ public class PluginConverterImpl implements PluginConverter, IModel {
 	}
 
 	public synchronized File convertManifest(File pluginBaseLocation, boolean compatibilityManifest) {
-		pluginManifestLocation = findPluginManifest(pluginBaseLocation);
-		if (pluginManifestLocation == null)
+		fillPluginInfo(pluginBaseLocation);
+		if (pluginInfo==null)
 			return null;
-		try {
-			pluginInfo = parsePluginInfo(pluginManifestLocation);
-		} catch (PluginConversionException e) {
-			FrameworkLogEntry entry = new FrameworkLogEntry(PI_ECLIPSE_OSGI, e.getMessage(), 0, e.getCause(), null);
-			EclipseAdaptor.getDefault().getFrameworkLog().log(entry);
-			return null;
-		}
-		if (pluginInfo == null)
-			return null;
+		
 		String cacheLocation = (String) System.getProperties().get("osgi.manifest.cache");
 		File bundleManifestLocation = new File(cacheLocation, pluginInfo.getUniqueId() + '_' + pluginInfo.getVersion() + ".MF");
 		try {
 			generate(bundleManifestLocation, compatibilityManifest);
 		} catch (PluginConversionException e) {
-			FrameworkLogEntry entry = new FrameworkLogEntry(PI_ECLIPSE_OSGI, e.getMessage(), 0, e.getCause(), null);
+			FrameworkLogEntry entry = new FrameworkLogEntry(PI_ECLIPSE_OSGI, e.getMessage(), 0, e, null);
 			EclipseAdaptor.getDefault().getFrameworkLog().log(entry);
 			return null;
 		}
-		return bundleManifestLocation; 
+		return bundleManifestLocation;
 	}
 
-	public synchronized boolean convertManifest(File pluginBaseLocation, File bundleManifestLocation, boolean compatibilityManifest) {
-		pluginManifestLocation = findPluginManifest(pluginBaseLocation);
+	private void fillPluginInfo(File pluginBaseLocation) {
+		pluginManifestLocation = pluginBaseLocation;
+		URL pluginFile = findPluginManifest(pluginBaseLocation);
 		if (pluginManifestLocation == null)
-			return false;
+			return;
 		try {		
-			pluginInfo = parsePluginInfo(pluginManifestLocation);
-			if (pluginInfo == null)
-				return false;
+			pluginInfo = parsePluginInfo(pluginFile);
+		} catch (PluginConversionException e) {
+			FrameworkLogEntry entry = new FrameworkLogEntry(PI_ECLIPSE_OSGI, e.getMessage(), 0, e, null);
+			EclipseAdaptor.getDefault().getFrameworkLog().log(entry);
+		}
+	}
+	
+	public synchronized boolean convertManifest(File pluginBaseLocation, File bundleManifestLocation, boolean compatibilityManifest) {
+		fillPluginInfo(pluginBaseLocation);
+		if (pluginInfo == null)
+			return false;
+	
+		try {
 			generate(bundleManifestLocation, compatibilityManifest);
 		} catch (PluginConversionException e) {
 			FrameworkLogEntry entry = new FrameworkLogEntry(PI_ECLIPSE_OSGI, e.getMessage(), 0, e, null);
 			EclipseAdaptor.getDefault().getFrameworkLog().log(entry);
 			return false;
-		}
+		};		
 		return true;
 	}
 
@@ -136,15 +141,59 @@ public class PluginConverterImpl implements PluginConverter, IModel {
 		return found;
 	}
 
-	private File findPluginManifest(File baseLocation) {
-		if (baseLocation.isFile())
-			return baseLocation;
-		File pluginManifestLocation = new File(baseLocation, PLUGIN_MANIFEST); //$NON-NLS-1$
-		if (pluginManifestLocation.isFile())
-			return pluginManifestLocation;
-		pluginManifestLocation = new File(baseLocation, FRAGMENT_MANIFEST); //$NON-NLS-1$
-		if (pluginManifestLocation.isFile())
-			return pluginManifestLocation;
+	private URL findPluginManifest(File baseLocation) {
+		//Here, we can not use the bundlefile because it may explode the jar and returns a location from which we will not be able to derive the jars location 
+		URL xmlFileLocation;
+		InputStream stream = null;
+		URL baseURL = null;
+
+		try {
+			if (baseLocation.getName().endsWith("jar")) {	//$NON-NLS-1$
+				baseURL = new URL("jar:file:" + baseLocation.toString() + "!/"); //$NON-NLS-1$ //$NON-NLS-2$
+			} else {
+				baseURL = baseLocation.toURL();
+			}
+		} catch (MalformedURLException e1) {
+			//this can't happen since we are building the urls ourselves from a file
+		}
+	
+		try {
+			xmlFileLocation = new URL(baseURL, PLUGIN_MANIFEST);
+			stream = xmlFileLocation.openStream();
+			return xmlFileLocation;
+		} catch (MalformedURLException e) {
+			FrameworkLogEntry entry = new FrameworkLogEntry(EclipseAdaptor.FRAMEWORK_SYMBOLICNAME, e.getMessage(), 0, e.getCause(), null);
+			EclipseAdaptor.getDefault().getFrameworkLog().log(entry);
+			return null;
+		} catch(IOException ioe) {
+			//ignore
+		} finally {
+			try {
+				if (stream != null)
+					stream.close();
+			} catch(IOException e) {
+				//ignore
+			}
+		}
+		
+		try {
+			xmlFileLocation = new URL(baseURL, FRAGMENT_MANIFEST); 
+			xmlFileLocation.openStream();
+			return xmlFileLocation;
+		} catch (MalformedURLException e) {
+			FrameworkLogEntry entry = new FrameworkLogEntry(EclipseAdaptor.FRAMEWORK_SYMBOLICNAME, e.getMessage(), 0, e.getCause(), null);
+			EclipseAdaptor.getDefault().getFrameworkLog().log(entry);
+			return null;
+		} catch(IOException ioe) {
+			// Ignore
+		} finally {
+			try {
+				if (stream != null)
+					stream.close();
+			} catch(IOException e) {
+			//ignore
+			}
+		}
 		return null;
 	}
 
@@ -350,7 +399,7 @@ public class PluginConverterImpl implements PluginConverter, IModel {
 			if (filter.size() == 0) //If the library is not exported, then ignore it
 				continue;
 
-			File libraryLocation = new File(pluginManifestLocation.getParent(), (String) element.getKey());
+			File libraryLocation = new File(pluginManifestLocation, (String) element.getKey());
 			Set exports = null;
 			if (libraryLocation.exists()) {
 				if (libraryLocation.isFile())
@@ -473,12 +522,21 @@ public class PluginConverterImpl implements PluginConverter, IModel {
 	 * the plug-in version - runtime/libraries entries - the plug-in class -
 	 * the master plugin (for a fragment)
 	 */
-	private IPluginInfo parsePluginInfo(File pluginManifestLocation) throws PluginConversionException {
+	private IPluginInfo parsePluginInfo(URL pluginLocation) throws PluginConversionException {
+		InputStream input = null;
 		try {
-			return new PluginParser(context).parsePlugin(pluginManifestLocation.toString());
+			input = new BufferedInputStream(pluginLocation.openStream());
+			return new PluginParser(context).parsePlugin(input);
 		} catch (Exception e) {
 			String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONVERTER_ERROR_PARSING_PLUGIN_MANIFEST", pluginManifestLocation); //$NON-NLS-1$
 			throw new PluginConversionException(message, e);
+		} finally {
+			if (input!=null) 
+				try {
+				input.close();
+				} catch(IOException e) {
+					//ignore exception
+				}
 		}
 	}
 

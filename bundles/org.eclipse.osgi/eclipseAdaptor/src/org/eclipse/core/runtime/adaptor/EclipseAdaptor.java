@@ -11,15 +11,16 @@
 package org.eclipse.core.runtime.adaptor;
 
 import java.io.*;
-import java.net.URL;
 import java.util.*;
 import javax.xml.parsers.SAXParserFactory;
-import org.eclipse.osgi.framework.adaptor.*;
+import org.eclipse.osgi.framework.adaptor.BundleData;
+import org.eclipse.osgi.framework.adaptor.IBundleStats;
 import org.eclipse.osgi.framework.adaptor.core.AdaptorElementFactory;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.debug.DebugOptions;
-import org.eclipse.osgi.framework.internal.defaultadaptor.*;
+import org.eclipse.osgi.framework.internal.defaultadaptor.DefaultAdaptor;
+import org.eclipse.osgi.framework.internal.defaultadaptor.DefaultBundleData;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.stats.StatsManager;
 import org.eclipse.osgi.internal.resolver.StateImpl;
@@ -40,7 +41,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 	public static boolean TRACE_CLASSES = false;
 	public static boolean TRACE_BUNDLES = false;
 
-	private static final String FRAMEWORK_SYMBOLICNAME = "org.eclipse.osgi";
+	static final String FRAMEWORK_SYMBOLICNAME = "org.eclipse.osgi";
 	private static final String RUNTIME_ADAPTOR = FRAMEWORK_SYMBOLICNAME + "/eclipseadaptor";
 
 	//Option names for spies
