@@ -12,8 +12,6 @@ package org.eclipse.osgi.framework.internal.core;
 
 import java.io.*;
 import java.net.*;
-import java.net.URL;
-import java.net.URLConnection;
 import java.security.*;
 import java.util.*;
 import org.eclipse.osgi.framework.adaptor.*;
@@ -558,7 +556,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 			if (i > 0) {
 				bundleEE.append(","); //$NON-NLS-1$
 			}
-			bundleEE.append(bundleRequiredEE[i]);
+			bundleEE.append(bundleRequiredEE[i].getValue());
 		}
 		throw new BundleException(NLS.bind(Msg.BUNDLE_INSTALL_REQUIRED_EE_EXCEPTION, bundleEE.toString()));
 	}
@@ -837,7 +835,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 	 * 
 	 * @param bundle
 	 *            Bundle's manifest
-	 * @return Vector of Strings of the bundle entries to install or <tt>null</tt>
+	 * @return a list of Strings of the bundle entries to install or <tt>null</tt>
 	 *         if there are no native code clauses.
 	 * @throws BundleException
 	 *             If there is no suitable clause.
@@ -848,118 +846,53 @@ public class Framework implements EventDispatcher, EventPublisher {
 			return (null);
 		}
 		ManifestElement[] elements = ManifestElement.parseHeader(Constants.BUNDLE_NATIVECODE, headerValue);
-		BundleNativeCode[] bundleNativeCode = new BundleNativeCode[elements.length];
-		/*
-		 * Pass 1: perform processor/osname/filter matching If there is not a
-		 * match on all three, then the native code clause is not selected.
-		 */
-		String processor = getProperty(Constants.FRAMEWORK_PROCESSOR);
-		String osname = getProperty(Constants.FRAMEWORK_OS_NAME);
+		ArrayList bundleNativeCodes = new ArrayList(elements.length);
 		int length = elements.length;
 		boolean optional = false;
 		if (elements[length - 1].getValue().equals("*")) { //$NON-NLS-1$
 			optional = true;
 			length--;
 		}
-		int[] score = new int[length];
-		int matches = 0;
-		int maxresult = 0;
-		int index = 0;
-		for (int i = 0; i < length; i++) {
-			bundleNativeCode[i] = new BundleNativeCode(elements[i], (AbstractBundle) bundle);
-			int result = bundleNativeCode[i].matchProcessorOSNameFilter(processor, osname);
-			score[i] = result;
-			if (result > 0) {
-				matches++;
-				if (result > maxresult) {
-					maxresult = result;
-					index = i;
-				}
-			}
-		}
-		switch (matches) {
-			case 0 : {
-				return noMatches(optional);
-			}
-			case 1 : {
-				return bundleNativeCode[index].getPaths();
-			}
-			default : {
-				/* continue with next pass */
-				break;
-			}
-		}
-		/* Pass 2: perform osversion matching */
+		String processor = getProperty(Constants.FRAMEWORK_PROCESSOR);
+		String osname = getProperty(Constants.FRAMEWORK_OS_NAME);
 		Version osversion;
 		try {
 			osversion = Version.parseVersion(getProperty(Constants.FRAMEWORK_OS_VERSION));
 		} catch (Exception e) {
 			osversion = Version.emptyVersion;
 		}
-		matches = 0;
-		maxresult = 0;
-		Version[] bestVersion = new Version[elements.length];
-		Version maxVersion = Version.emptyVersion;
-		for (int i = 0; i < elements.length; i++) {
-			if (score[i] > 0) {
-				BundleNativeCode bnc = bundleNativeCode[i];
-				Version result = bnc.matchOSVersion(osversion);
-				bestVersion[i] = result;
-				if (result != null) /* null is no match */{
-					matches++;
-					if (result.compareTo(maxVersion) > 0) {
-						maxVersion = result;
-						index = i;
-					}
-				}
-			}
-		}
-		switch (matches) {
-			case 0 : {
-				return noMatches(optional);
-			}
-			case 1 : {
-				return bundleNativeCode[index].getPaths();
-			}
-			default : {
-				/* discard all but the highest result */
-				for (int i = 0; i < elements.length; i++) {
-					Version result = bestVersion[i];
-					if (result.compareTo(maxVersion) < 0) {
-						score[i] = 0;
-					}
-				}
-				/* continue with next pass */
-				break;
-			}
-		}
-		/* Pass 3: perform language matching */
 		String language = getProperty(Constants.FRAMEWORK_LANGUAGE);
-		matches = 0;
-		maxresult = 0;
-		for (int i = 0; i < elements.length; i++) {
-			int result = score[i];
-			if (result > 0) {
-				BundleNativeCode bnc = bundleNativeCode[i];
-				result = bnc.matchLanguage(language);
-				score[i] = result;
-				if (result > 0) {
-					matches++;
-					if (result > maxresult) {
-						maxresult = result;
-						index = i;
-					}
-				}
-			}
+		for (int i = 0; i < length; i++) {
+			BundleNativeCode bnc = new BundleNativeCode(elements[i], (AbstractBundle) bundle);
+			// Pass 1: perform processor/osname/filter matching
+			// Pass 2: perform osversion matching
+			// Pass 3: perform language matching
+			// If there is not a match on all three, then the native code clause is not selected.
+			if (bnc.matchProcessorOSNameFilter(processor, osname) > 0 && bnc.matchOSVersion(osversion) != null && bnc.matchLanguage(language) > 0)
+				bundleNativeCodes.add(bnc);
 		}
-		switch (matches) {
-			case 0 : {
-				return noMatches(optional);
-			}
-			default : {
-				return bundleNativeCode[index].getPaths();
-			}
+
+		if (bundleNativeCodes.size() == 0)
+			return noMatches(optional);
+		// find the highest ranking one with priority on the osversion then the language
+		Iterator iter = bundleNativeCodes.iterator();
+		BundleNativeCode highestRanking = (BundleNativeCode) iter.next();
+		while (iter.hasNext()) {
+			BundleNativeCode bnc = (BundleNativeCode) iter.next();
+			if (isBncGreaterThan(bnc, highestRanking, osversion, language))
+				highestRanking = bnc;
 		}
+		return highestRanking.getPaths();
+	}
+
+	private boolean isBncGreaterThan(BundleNativeCode candidate, BundleNativeCode highestRanking, Version version, String language) {
+		Version currentHigh = highestRanking.matchOSVersion(version);
+		Version candidateHigh = candidate.matchOSVersion(version);
+		if (currentHigh.compareTo(candidateHigh) < 0)
+			return true;
+		if (highestRanking.matchLanguage(language) < candidate.matchLanguage(language))
+			return true;
+		return false;
 	}
 
 	/**
