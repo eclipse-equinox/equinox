@@ -76,8 +76,7 @@ public class EclipseStarter {
 	protected static final String DEFAULT_CONSOLE_CLASS = "org.eclipse.osgi.framework.internal.core.FrameworkConsole";
 	private static final String CONSOLE_NAME = "OSGi Console";
 	private static ServiceTracker applicationTracker;
-
-	public static Object run(String[] args,Runnable endSplashHandler) throws Exception {
+	public static Object run(String[] args, Runnable endSplashHandler) throws Exception {
 		processCommandLine(args);
 		setInstanceLocation();
 		setConfigurationLocation();
@@ -88,21 +87,21 @@ public class EclipseStarter {
 		osgi.launch();
 		try {
 			String console = System.getProperty(PROP_CONSOLE);
-			if (console != null) 
+			if (console != null)
 				startConsole(osgi, new String[0], console);
-			context = osgi.getBundleContext();			
+			context = osgi.getBundleContext();
 			publishSplashScreen(endSplashHandler);
 			Bundle[] basicBundles = loadBasicBundles();
 			setStartLevel(6);
 			// they should all be active by this time
 			ensureBundlesActive(basicBundles);
 			initializeApplicationTracker();
-			Runnable application = (Runnable)applicationTracker.getService();
+			Runnable application = (Runnable) applicationTracker.getService();
 			applicationTracker.close();
 			logUnresolvedBundles(context.getBundles());
 			if (application == null)
-				throw new IllegalStateException("Unable to acquire application service");
-			application.run();
+				throw new IllegalStateException(EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_ERROR_NO_APPLICATION"));
+			application.run();			
 		} finally {
 			stopSystemBundle();
 		}
@@ -115,8 +114,9 @@ public class EclipseStarter {
 		try {
 			System.exit(Integer.parseInt(exitCode));
 		} catch (NumberFormatException e) {
-			System.exit(13);
+			System.exit(0);
 		}
+		// will never get here - just to make the compiler happy
 		return null;
 	}
 
@@ -197,63 +197,49 @@ public class EclipseStarter {
 	 * Ensure all basic bundles are installed, resolved and scheduled to start. Returns an array containing
 	 * all basic bundles. 
 	 */
-	private static Bundle[] loadBasicBundles() throws Exception {
-		long startTime = System.currentTimeMillis();
-		ServiceReference reference = context.getServiceReference(StartLevel.class.getName());
-		StartLevel start = null;
-		if (reference != null) 
-			start = (StartLevel)context.getService(reference);
-		String[] installEntries = getArrayFromList(System.getProperty("osgi.bundles"));
-		String syspath = getSysPath();
-		Bundle[] bundles = new Bundle[installEntries.length];
-		for (int i = 0; i < installEntries.length; i++) {
-			String name = installEntries[i];
-			try {
+	private static Bundle[] loadBasicBundles() throws BundleException, MalformedURLException, IllegalArgumentException, IllegalStateException {
+			long startTime = System.currentTimeMillis();
+			ServiceReference reference = context.getServiceReference(StartLevel.class.getName());
+			StartLevel start = null;
+			if (reference != null)
+				start = (StartLevel) context.getService(reference);
+			String[] installEntries = getArrayFromList(System.getProperty("osgi.bundles"));
+			String syspath = getSysPath();
+			Bundle[] bundles = new Bundle[installEntries.length];
+			for (int i = 0; i < installEntries.length; i++) {
+				String name = installEntries[i];
 				int level = -1;
 				int index = name.indexOf('@');
 				if (index >= 0) {
 					String levelString = name.substring(index + 1, name.length());
 					level = Integer.parseInt(levelString);
 					name = name.substring(0, index);
-				}	
+				}
 				String location = searchForBundle(name, syspath);
 				if (location == null)
-					throw new RuntimeException(EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_BUNDLE_NOT_FOUND",name));
+					throw new IllegalArgumentException(EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_BUNDLE_NOT_FOUND", name));
 				// don't need to install if it is already installed
 				bundles[i] = getBundleByLocation(location);
 				if (bundles[i] != null)
 					continue;
-				bundles[i] = context.installBundle(location);				
+				bundles[i] = context.installBundle(location);
 				if (level >= 0 && start != null)
 					start.setBundleStartLevel(bundles[i], level);
-			} catch (Exception ex) {
-				// there was an error installing one of the basic bundles - log and bail
-				String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_ERROR_INSTALLING_BUNDLE",bundles[i]);
-				adaptor.getFrameworkLog().log(new FrameworkLogEntry(0,"org.eclipse.osgi",message,0,ex));
-				throw ex;
 			}
-		}
-		// force all basic bundles we installed to be resolved
-		refreshPackages(bundles);	
-		// schedule all basic bundles to be started
-		for (int i = 0; i < bundles.length; i++) {
-			try {				
+			// force all basic bundles we installed to be resolved
+			refreshPackages(bundles);
+			// schedule all basic bundles to be started
+			for (int i = 0; i < bundles.length; i++) {
 				if (bundles[i].getState() == Bundle.INSTALLED)
-					throw new RuntimeException(EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_ERROR_BUNDLE_NOT_RESOLVED",bundles[i].getLocation()));
+					throw new IllegalStateException(EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_ERROR_BUNDLE_NOT_RESOLVED", bundles[i].getLocation()));
 				if (!bundles[i].isFragment())
-					bundles[i].start();				
-			} catch (Exception ex) {
-				// there was an error starting one of the basic bundles - log and bail
-				String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_ERROR_STARTING_BUNDLE",bundles[i].getLocation());
-				adaptor.getFrameworkLog().log(new FrameworkLogEntry(0,"org.eclipse.osgi",message,0,ex));
-				throw ex;
-			}			
+					bundles[i].start();
+			}
+			context.ungetService(reference);
+			if (debug)
+				System.out.println("Time loadBundles in the framework: " + (System.currentTimeMillis() - startTime));
+			return bundles;
 		}
-		context.ungetService(reference);
-		if (debug)
-			System.out.println("Time loadBundles in the framework: " + (System.currentTimeMillis() - startTime));		
-		return bundles;
-	}
 
 	private static void refreshPackages(Bundle[] bundles) {
 		if (bundles.length == 0)
