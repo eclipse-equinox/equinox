@@ -430,8 +430,8 @@ public class EclipseStarter {
 		refresh |= installBundles(initialBundles, curInitBundles, startBundles, newInitBundles);
 
 		// If we installed/uninstalled something, force a refresh of all installed bundles
-		if (refresh) {
-			Bundle[] installedBundles = (Bundle[]) newInitBundles.toArray(new Bundle[newInitBundles.size()]);
+		if (refresh) {			
+			Bundle[] installedBundles = newInitBundles.isEmpty() ? null : (Bundle[]) newInitBundles.toArray(new Bundle[newInitBundles.size()]);
 			refreshPackages(installedBundles);
 		}
 
@@ -478,8 +478,6 @@ public class EclipseStarter {
 	}
 
 	private static void refreshPackages(Bundle[] bundles) {
-		if (bundles.length == 0)
-			return;
 		ServiceReference packageAdminRef = context.getServiceReference(PackageAdmin.class.getName());
 		PackageAdmin packageAdmin = null;
 		if (packageAdminRef != null) {
