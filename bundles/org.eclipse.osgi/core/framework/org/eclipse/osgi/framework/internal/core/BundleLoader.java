@@ -46,8 +46,6 @@ public class BundleLoader implements ClassLoaderDelegate {
 	 */
 	protected KeyedHashSet importedPackages;
 
-	protected boolean hasImportedPackages = false;
-
 	protected boolean hasDynamicImports = false;
 	/**
 	 * If true, import all packages dynamically.
@@ -123,7 +121,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 	}
 
 	protected void initialize(BundleDescription description) {
-		hasImportedPackages = hasDynamicImports = SystemBundleLoader.getSystemPackages() != null;
+		hasDynamicImports = SystemBundleLoader.getSystemPackages() != null;
 
 		//This is the fastest way to access to the description for fragments since the hostdescription.getFragments() is slow
 		org.osgi.framework.Bundle[] fragmentObjects = bundle.getFragments();
@@ -214,7 +212,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 		PackageSpecification[] packages = description.getPackages();
 		if (packages != null && packages.length > 0)
 			for (int i = 0; i < packages.length; i++)
-				if (importedPackages.getByKey(packages[i].getName()) == null)
+				if (importedPackages == null || importedPackages.getByKey(packages[i].getName()) == null)
 					throw new BundleException(Msg.formatter.getString("BUNDLE_FRAGMENT_IMPORT_CONFLICT",packages[i].getName()));
 
 
@@ -268,8 +266,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 
 	private void addImportedPackages(PackageSpecification[] packages) {
 		if (packages != null && packages.length > 0) {
-			if (!hasImportedPackages || importedPackages == null) {
-				hasImportedPackages = true;
+			if (importedPackages == null) {
 				importedPackages = new KeyedHashSet();
 			}
 			for (int i = 0; i < packages.length; i++) {
@@ -733,7 +730,10 @@ public class BundleLoader implements ClassLoaderDelegate {
 	 * @return true if the package should be imported.
 	 */
 	protected boolean isDynamicallyImported(String pkgname) {
-		// TODO should we check for startsWith("java.") to satisfy R3 section 4.7.2?
+		// must check for startsWith("java.") to satisfy R3 section 4.7.2
+		if (pkgname.startsWith("java."))
+			return true;
+
 		/* quick shortcut check */
 		if (!hasDynamicImports) {
 			return false;
@@ -783,8 +783,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 	protected Class findImportedClass(String name, String packageName) throws ImportClassNotFoundException {
 		if (Debug.DEBUG && Debug.DEBUG_LOADER)
 			Debug.println("ImportClassLoader[" + this +"].findImportedClass(" + name + ")");
-		if (!hasImportedPackages)
-			return null;
+
 		Class result = null;
 
 		try {
@@ -931,8 +930,6 @@ public class BundleLoader implements ClassLoaderDelegate {
 	protected URL findImportedResource(String name, String packageName) {
 		if (Debug.DEBUG && Debug.DEBUG_LOADER)
 			Debug.println("ImportClassLoader[" + this +"].findImportedResource(" + name + ")");
-		if (!hasImportedPackages)
-			return null;
 
 		BundleLoader exporter = getPackageExporter(packageName);
 		if (exporter != null) {
@@ -985,8 +982,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 	protected Enumeration findImportedResources(String name, String packageName) {
 		if (Debug.DEBUG && Debug.DEBUG_LOADER)
 			Debug.println("ImportClassLoader[" + this +"].findImportedResources(" + name + ")");
-		if (!hasImportedPackages)
-			return null;
+
 		BundleLoader exporter = getPackageExporter(packageName);
 		if (exporter != null)
 			return exporter.findLocalResources(name);
@@ -1037,8 +1033,6 @@ public class BundleLoader implements ClassLoaderDelegate {
 	protected Object findImportedObject(String object, String packageName) {
 		if (Debug.DEBUG && Debug.DEBUG_LOADER)
 			Debug.println("ImportClassLoader[" + this +"].findImportedObject(" + object + ")");
-		if (!hasImportedPackages)
-			return null;
 
 		BundleLoader exporter = getPackageExporter(packageName);
 		if (exporter != null) {
@@ -1087,7 +1081,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 		if (packages == null && SystemBundleLoader.getSystemPackages() == null)
 			return;
 
-		hasDynamicImports = hasImportedPackages = true;
+		hasDynamicImports = true;
 		// make sure importedPackages is not null;
 		if (importedPackages == null) {
 			importedPackages = new KeyedHashSet();
