@@ -42,6 +42,10 @@ public class PluginConverterImpl implements PluginConverter {
 	private IPluginInfo pluginInfo;
 	private File pluginManifestLocation;
 
+	public PluginConverterImpl() {
+		this(null);
+	}
+
 	PluginConverterImpl(BundleContext context) {
 		this.context = context;
 		devPathSpec = System.getProperty("osgi.dev");

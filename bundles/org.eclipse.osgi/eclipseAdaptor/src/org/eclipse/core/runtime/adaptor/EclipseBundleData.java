@@ -170,52 +170,24 @@ public class EclipseBundleData extends DefaultBundleData {
 
 		//		if (DEBUG && DEBUG_SHOW_ACTIONS && debugNative(libName))
 		//			debug("findLibrary(" + libName + ")"); //$NON-NLS-1$ //$NON-NLS-2$
-		if (base == null)
-			return null;
-		String libFileName = null;
-		if (base.getProtocol().equals(FILE)) {
-			// directly access library
-			URL foundPath = searchVariants(new URL[] { base }, libraryVariants, libName);
-			if (foundPath != null)
-				libFileName = foundPath.getFile();
-		} else {
-			if (base.getProtocol().equals(PROTOCOL)) {
-				URL[] searchList = getSearchURLs(base);
-				if ((searchList != null) && (searchList.length != 0)) {
-					URL foundPath = searchVariants(searchList, libraryVariants, libName);
-					if (foundPath != null)
-						libFileName = foundPath.getFile();
-				}
-			}
-		}
 
-		if (libFileName == null)
-			return null;
-		return new File(libFileName).getAbsolutePath();
+		return searchVariants(libraryVariants, libName);
+
 	}
 
-	private URL searchVariants(URL[] basePaths, String[] variants, String path) {
-		// This method assumed basePaths are 'resolved' URLs
+	private String searchVariants(String[] variants, String path) {
 		for (int i = 0; i < variants.length; i++) {
-			for (int j = 0; j < basePaths.length; j++) {
-				String fileName = basePaths[j].getFile() + variants[i] + path;
-				File file = new File(fileName);
-				if (!file.exists()) {
-					//					if (DEBUG && DEBUG_SHOW_FAILURE)
-					//						debug("not found " + file.getAbsolutePath());
-					// //$NON-NLS-1$
-				} else {
-					//					if (DEBUG && DEBUG_SHOW_SUCCESS)
-					//						debug("found " + path + " as " +
-					// file.getAbsolutePath()); //$NON-NLS-1$ //$NON-NLS-2$
-					try {
-						return new URL("file:" + fileName); //$NON-NLS-1$
-					} catch (MalformedURLException e) {
-						// Intentionally ignore this exception
-						// so we continue looking for a matching
-						// URL.
-					}
-				}
+			BundleEntry libEntry = bundleFile.getEntry(variants[i] + path);
+			if (libEntry == null) {
+				//					if (DEBUG && DEBUG_SHOW_FAILURE)
+				//						debug("not found " + variants[i] + path);
+				// //$NON-NLS-1$
+			} else {
+				//					if (DEBUG && DEBUG_SHOW_SUCCESS)
+				//						debug("found " + path + " as " +
+				// variants[i] + path); //$NON-NLS-1$ //$NON-NLS-2$
+				File libFile = bundleFile.getFile(variants[i] + path);
+				return libFile.getAbsolutePath();
 			}
 		}
 		return null;

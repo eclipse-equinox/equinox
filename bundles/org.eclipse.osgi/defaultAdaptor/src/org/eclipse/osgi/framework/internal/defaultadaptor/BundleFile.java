@@ -287,6 +287,9 @@ abstract public class BundleFile {
 
 		public BundleEntry getEntry(String path) {
 			File filePath = new File(this.bundlefile, path);
+			if (!filePath.exists()) {
+				return null;
+			}
 			return new BundleEntry.FileBundleEntry(filePath, path);
 		}
 

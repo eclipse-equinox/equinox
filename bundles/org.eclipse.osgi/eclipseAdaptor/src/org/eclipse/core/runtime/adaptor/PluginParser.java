@@ -357,6 +357,9 @@ public class PluginParser extends DefaultHandler implements IModel {
 		}
 	}
 	private SAXParserFactory acquireXMLParsing() {
+		if (context == null) {
+			return SAXParserFactory.newInstance();
+		}
 		parserReference = context.getServiceReference("javax.xml.parsers.SAXParserFactory"); //$NON-NLS-1$ 
 		if (parserReference == null)
 			return null;
