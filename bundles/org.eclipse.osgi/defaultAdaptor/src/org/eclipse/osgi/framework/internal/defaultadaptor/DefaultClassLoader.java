@@ -34,10 +34,10 @@ public class DefaultClassLoader
 	protected DefaultBundleData hostdata;
 
 	/**
-	 * The BundleFiles for this BundleClassLoader.  Each BundleFile object
+	 * The ClasspathEntries for this BundleClassLoader.  Each ClasspathEntry object
 	 * represents on Bundle-ClassPath entry.
 	 */
-	protected BundleFile[] bundleFiles;
+	protected ClasspathEntry[] classpathEntries;
 
 	protected Vector fragClasspaths;
 	
@@ -84,8 +84,10 @@ public class DefaultClassLoader
 			hostdata.adaptor.getEventPublisher().publishFrameworkEvent(
 					FrameworkEvent.ERROR,hostdata.getBundle(),e);
 		}
+	}
 
-		bundleFiles = buildClasspath(classpath, hostdata);
+	public void initialize() {
+		classpathEntries = buildClasspath(hostclasspath, hostdata, hostdomain);
 	}
 
 	/**
@@ -112,8 +114,8 @@ public class DefaultClassLoader
 			defaultBundledata.adaptor.getEventPublisher().publishFrameworkEvent(
 					FrameworkEvent.ERROR,defaultBundledata.getBundle(),e);
 		}
-		BundleFile[] fragFiles = buildClasspath(classpath,defaultBundledata);
-		FragmentClasspath fragClasspath = new FragmentClasspath(fragFiles,defaultBundledata,domain);
+		ClasspathEntry[] fragEntries = buildClasspath(classpath,defaultBundledata,domain);
+		FragmentClasspath fragClasspath = new FragmentClasspath(fragEntries,defaultBundledata,domain);
 		insertFragment(fragClasspath);
 	}
 
@@ -146,11 +148,13 @@ public class DefaultClassLoader
 	}
 
 	/**
-	 * Gets a BundleFile object for the specified ClassPath entry.
-	 * @param cp The ClassPath entry to get the BundleFile for.
-	 * @return The BundleFile object for the ClassPath entry.
+	 * Gets a ClasspathEntry object for the specified ClassPath entry.
+	 * @param cp The ClassPath entry to get the ClasspathEntry for.
+	 * @param bundledata The BundleData that the ClassPath entry is for.
+	 * @param domain The ProtectionDomain for the ClassPath entry.
+	 * @return The ClasspathEntry object for the ClassPath entry.
 	 */
-	protected BundleFile getClasspath(String cp, DefaultBundleData bundledata){
+	protected ClasspathEntry getClasspath(String cp, DefaultBundleData bundledata, ProtectionDomain domain){
 		BundleFile bundlefile = null;
 		File file = bundledata.bundleFile.getFile(cp);
 		if (file != null && file.exists()) {
@@ -174,26 +178,21 @@ public class DefaultClassLoader
 					bundlefile = BundleFile.createBundleFile(
 							(BundleFile.ZipBundleFile)bundledata.bundleFile, cp);
 				}
-			}
-
-			if (bundlefile == null)
-			{
-				BundleException be = new BundleException(Msg.formatter.getString("BUNDLE_CLASSPATH_ENTRY_NOT_FOUND_EXCEPTION", cp));
-				bundledata.adaptor.getEventPublisher().publishFrameworkEvent(
-						FrameworkEvent.ERROR,bundledata.getBundle(),be);
-			}
-			
+			}			
 		}
-		return bundlefile;
+		if (bundlefile != null)
+			return new ClasspathEntry(bundlefile,domain);
+		else
+			return null;
 	}
 	
 	protected synchronized Class findClass(String name) throws ClassNotFoundException {
 		Class result = findLoadedClass(name);
 		if (result != null)
 			return result;
-		for(int i=0; i<bundleFiles.length; i++) {
-			if (bundleFiles[i] != null){
-				result = findClassImpl(name,bundleFiles[i],domain);
+		for(int i=0; i<classpathEntries.length; i++) {
+			if (classpathEntries[i] != null){
+				result = findClassImpl(name,classpathEntries[i].bundlefile,classpathEntries[i].domain);
 				if (result != null) {
 					return result;
 				}
@@ -204,8 +203,8 @@ public class DefaultClassLoader
 			int size = fragClasspaths.size();
 			for (int i=0; i<size; i++) {
 				FragmentClasspath fragCP = (FragmentClasspath) fragClasspaths.elementAt(i);
-				for (int j=0; j<fragCP.bundlefiles.length; j++) {
-					result = findClassImpl(name,fragCP.bundlefiles[j],fragCP.domain);
+				for (int j=0; j<fragCP.classpathEntries.length; j++) {
+					result = findClassImpl(name,fragCP.classpathEntries[j].bundlefile,fragCP.classpathEntries[j].domain);
 					if (result != null) {
 						return result;
 					}
@@ -350,9 +349,9 @@ public class DefaultClassLoader
 	 */
 	protected URL findResource(String name) {
 		URL result = null;
-		for(int i=0; i<bundleFiles.length; i++) {
-			if (bundleFiles[i] != null){
-				result = findResourceImpl(name,bundleFiles[i],i);
+		for(int i=0; i<classpathEntries.length; i++) {
+			if (classpathEntries[i] != null){
+				result = findResourceImpl(name,classpathEntries[i].bundlefile,i);
 				if (result != null) {
 					return result;
 				}
@@ -363,8 +362,8 @@ public class DefaultClassLoader
 			int size = fragClasspaths.size();
 			for (int i=0; i<size; i++) {
 				FragmentClasspath fragCP = (FragmentClasspath) fragClasspaths.elementAt(i);
-				for (int j=0; j<fragCP.bundlefiles.length; j++) {
-					result = findResourceImpl(name,fragCP.bundlefiles[j],j);
+				for (int j=0; j<fragCP.classpathEntries.length; j++) {
+					result = findResourceImpl(name,fragCP.classpathEntries[j].bundlefile,j);
 					if (result != null) {
 						return result;
 					}
@@ -390,9 +389,9 @@ public class DefaultClassLoader
 	 */
 	public Enumeration findLocalResources(String resource) {
 		Vector resources = new Vector(6);
-		for(int i=0; i<bundleFiles.length; i++) {
-			if (bundleFiles[i] != null){
-				URL url = findResourceImpl(resource,bundleFiles[i],i);
+		for(int i=0; i<classpathEntries.length; i++) {
+			if (classpathEntries[i] != null){
+				URL url = findResourceImpl(resource,classpathEntries[i].bundlefile,i);
 				if (url != null) {
 					resources.addElement(url);
 				}
@@ -403,8 +402,8 @@ public class DefaultClassLoader
 			int size = fragClasspaths.size();
 			for (int i=0; i<size; i++) {
 				FragmentClasspath fragCP = (FragmentClasspath) fragClasspaths.elementAt(i);
-				for (int j=0; j<fragCP.bundlefiles.length; j++) {
-					URL url = findResourceImpl(resource,fragCP.bundlefiles[j],j);
+				for (int j=0; j<fragCP.classpathEntries.length; j++) {
+					URL url = findResourceImpl(resource,fragCP.classpathEntries[j].bundlefile,j);
 					if (url != null) {
 						resources.addElement(url);
 					}
@@ -423,12 +422,12 @@ public class DefaultClassLoader
 	public void close(){
 		if (!closed) {
 			super.close();
-			for (int i=0; i<bundleFiles.length; i++) {
-				if (bundleFiles[i] != null) {
+			for (int i=0; i<classpathEntries.length; i++) {
+				if (classpathEntries[i] != null) {
 					try
 					{
-						if (bundleFiles[i]!=hostdata.bundleFile) {
-							bundleFiles[i].close();
+						if (classpathEntries[i].bundlefile!=hostdata.bundleFile) {
+							classpathEntries[i].bundlefile.close();
 						}
 					}
 					catch (IOException e)
@@ -448,52 +447,72 @@ public class DefaultClassLoader
 		}
 	}
 
-	protected BundleFile[] buildClasspath(String[] classpath, DefaultBundleData bundledata) {
+	protected ClasspathEntry[] buildClasspath(String[] classpath, DefaultBundleData bundledata, ProtectionDomain domain) {
 		ArrayList result = new ArrayList(10);
 
 		// If not in dev mode then just add the regular classpath entries and return
 		if (System.getProperty("osgi.dev") == null) {
 			for (int i = 0; i < classpath.length; i++) 
-				addClassPathEntry(result, classpath[i],bundledata);
-			return (BundleFile[])result.toArray(new BundleFile[result.size()]);
+				addClassPathEntry(result, classpath[i],bundledata,domain);
+			return (ClasspathEntry[])result.toArray(new ClasspathEntry[result.size()]);
 		}
 		
 		// Otherwise, add the legacy entries for backwards compatibility and
 		// then for each classpath entry add the dev entries as spec'd in the 
 		// corresponding properties file.  If none are spec'd, add the 
 		// classpath entry itself
-		addDefaultDevEntries(result, bundledata);
+		addDefaultDevEntries(result, bundledata, domain);
 		for (int i = 0; i < classpath.length; i++) {
 			String[] devEntries = getDevEntries(classpath[i], bundledata);
 			if (devEntries != null && devEntries.length > 0) {
 				for (int j = 0; j < devEntries.length; j++) 
-					addClassPathEntry(result, devEntries[j], bundledata);
+					addClassPathEntry(result, devEntries[j], bundledata, domain);
 			} else 
-				addClassPathEntry(result, classpath[i], bundledata);
+				addClassPathEntry(result, classpath[i], bundledata, domain);
 		}
-		return (BundleFile[])result.toArray(new BundleFile[result.size()]);
+		return (ClasspathEntry[])result.toArray(new ClasspathEntry[result.size()]);
 	}
 	
-	private void addDefaultDevEntries(ArrayList result, DefaultBundleData bundledata) {
+	protected void addDefaultDevEntries(ArrayList result, DefaultBundleData bundledata, ProtectionDomain domain) {
 		if (System.getProperty("osgi.dev") == null)
 			return;
 		String[] defaultDevEntries = bundledata.adaptor.devCP;
 		if (defaultDevEntries != null) 
 			for (int i = 0; i < defaultDevEntries.length; i++) 
-				addClassPathEntry(result, defaultDevEntries[i], bundledata);
+				addClassPathEntry(result, defaultDevEntries[i], bundledata, domain);
 	}
 
-	private void addClassPathEntry(ArrayList result, String entry, DefaultBundleData bundledata) {
+	protected void addClassPathEntry(ArrayList result, String entry, DefaultBundleData bundledata, ProtectionDomain domain) {
 		if (entry.equals(".")) 
-			result.add(bundledata.bundleFile);
+			result.add(new ClasspathEntry(bundledata.bundleFile,domain));
 		else {
-			Object element = getClasspath(entry, bundledata);
-			if (element != null)
+			Object element = getClasspath(entry, bundledata, domain);
+			if (element != null){
 				result.add(element);
+			}
+			else {
+				// need to check in fragments for the classpath entry.
+				// only check for fragments if the bundledata is the hostdata.
+				if (fragClasspaths != null && hostdata == bundledata){
+					int size = fragClasspaths.size();
+					for (int i = 0; i < size; i++) {
+						FragmentClasspath fragCP = (FragmentClasspath) fragClasspaths.elementAt(i);
+						element = getClasspath(entry,fragCP.bundledata,fragCP.domain);
+						if (element != null){
+							result.add(element);
+						}
+					}
+				}
+				if (element == null){
+					BundleException be = new BundleException(Msg.formatter.getString("BUNDLE_CLASSPATH_ENTRY_NOT_FOUND_EXCEPTION", entry));
+					bundledata.adaptor.getEventPublisher().publishFrameworkEvent(
+						FrameworkEvent.ERROR,bundledata.getBundle(),be);
+				}
+			}
 		}
 	}
 	
-	private String[] getDevEntries(String classpathEntry, DefaultBundleData bundledata) {
+	protected String[] getDevEntries(String classpathEntry, DefaultBundleData bundledata) {
 		Properties devProps = null;
 		File propLocation = bundledata.bundleFile.getFile(classpathEntry + ".properties");
 		if (propLocation == null) 
@@ -519,7 +538,7 @@ public class DefaultClassLoader
 	 * @return the array of string tokens
 	 * @param prop the initial comma-separated string
 	 */
-	private String[] getArrayFromList(String prop) {
+	protected String[] getArrayFromList(String prop) {
 		if (prop == null || prop.trim().equals("")) //$NON-NLS-1$
 			return new String[0];
 		Vector list = new Vector();
@@ -536,24 +555,24 @@ public class DefaultClassLoader
 	 * A data structure to hold information about a fragment classpath.
 	 */
 	protected class FragmentClasspath {
-		/** The BundleFiles of the fragments Bundle-Classpath */
-		protected BundleFile[] bundlefiles;
+		/** The ClasspathEntries of the fragments Bundle-Classpath */
+		protected ClasspathEntry[] classpathEntries;
 		/** The BundleData of the fragment */
 		protected DefaultBundleData bundledata;
 		/** The ProtectionDomain of the fragment */
 		protected ProtectionDomain domain;
 
-		protected FragmentClasspath(BundleFile[] bundlefiles, DefaultBundleData bundledata, ProtectionDomain domain){
-			this.bundlefiles = bundlefiles;
+		protected FragmentClasspath(ClasspathEntry[] classpathEntries, DefaultBundleData bundledata, ProtectionDomain domain){
+			this.classpathEntries = classpathEntries;
 			this.bundledata = bundledata;
 			this.domain = domain;
 		}
 		
 		protected void close(){
-			for (int i=0; i<bundlefiles.length; i++) {
+			for (int i=0; i<classpathEntries.length; i++) {
 				try {
-					if (bundlefiles[i] != bundledata.bundleFile) {
-						bundlefiles[i].close();
+					if (classpathEntries[i].bundlefile != bundledata.bundleFile) {
+						classpathEntries[i].bundlefile.close();
 					}
 				}
 				catch (IOException e)
@@ -562,6 +581,15 @@ public class DefaultClassLoader
 						FrameworkEvent.ERROR,bundledata.getBundle(),e);
 				}
 			}
+		}
+	}
+
+	protected class ClasspathEntry {
+		protected BundleFile bundlefile;
+		protected ProtectionDomain domain;
+		protected ClasspathEntry(BundleFile bundlefile, ProtectionDomain domain){
+			this.bundlefile = bundlefile;
+			this.domain = domain;
 		}
 	}
 }

@@ -32,9 +32,14 @@ public abstract class BundleClassLoader extends ClassLoader {
 	protected ClassLoaderDelegate delegate;
 
 	/**
-	 * The ProtectionDomain to use to define classes.
+	 * The host ProtectionDomain to use to define classes.
 	 */
-	protected ProtectionDomain domain;
+	protected ProtectionDomain hostdomain;
+
+	/**
+	 * The host classpath entries for this classloader
+	 */
+	protected String[] hostclasspath;
 
 	/**
 	 * Indicates this class loader is closed.
@@ -58,9 +63,9 @@ public abstract class BundleClassLoader extends ClassLoader {
 	 * @param delegate The ClassLoaderDelegate for this bundle.
 	 * @param domain The ProtectionDomain for this bundle.
 	 */
-	public BundleClassLoader(ClassLoaderDelegate delegate, ProtectionDomain domain, String[] ignored)
+	public BundleClassLoader(ClassLoaderDelegate delegate, ProtectionDomain domain, String[] classpath)
 	{
-		this(delegate, domain, ignored, null);
+		this(delegate, domain, classpath, null);
 	}
 
 	/**
@@ -69,16 +74,24 @@ public abstract class BundleClassLoader extends ClassLoader {
 	 * @param domain The ProtectionDomain for this bundle.
 	 * @param parent The parent classloader to use.
 	 */
-	public BundleClassLoader(ClassLoaderDelegate delegate, ProtectionDomain domain, String[] ignored, ClassLoader parent)
+	public BundleClassLoader(ClassLoaderDelegate delegate, ProtectionDomain domain, String[] classpath, ClassLoader parent)
 	{
 		this.delegate = delegate;
-		this.domain = domain;
+		this.hostdomain = domain;
+		this.hostclasspath = classpath;
 		// use the defaultParentClassLoader if a parent is not specified.
 		if (parent == null)
 			parentClassLoader=defaultParentClassLoader;
 		else 
 			parentClassLoader = parent;
 	}
+
+	/**
+	 * Initializes the ClassLoader.  This is called after all currently resolved fragment
+	 * bundles have been attached to the BundleClassLoader by the Framework.
+	 * @throws BundleException
+	 */
+	public abstract void initialize();
 
 	/**
 	 * Loads a class for the bundle.  First delegate.findClass(name) is called.

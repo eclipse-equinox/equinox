@@ -300,6 +300,7 @@ public class BundleLoader implements ClassLoaderDelegate
 							Bundle fragment = (Bundle)fragments[i];
 							classloader.attachFragment(fragment.getBundleData(), fragment.domain, getClassPath(fragment, System.getProperties()));
 						}
+					classloader.initialize();
 				}
 				else {
 					bundle.framework.publishFrameworkEvent(FrameworkEvent.ERROR, bundle, new BundleException(Msg.formatter.getString("BUNDLE_NO_CLASSPATH_MATCH")));
