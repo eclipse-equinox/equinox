@@ -651,26 +651,27 @@ public class PluginConverterImpl implements PluginConverter {
 			return null;
 
 		Version minVersion = new Version(reqVersion);
-		Version maxVersion;
+		String versionRange;
 		if (matchRule != null) {
 			if (matchRule.equalsIgnoreCase(IModel.PLUGIN_REQUIRES_MATCH_PERFECT)) {
-				maxVersion = minVersion;
+				versionRange = new VersionRange(minVersion,minVersion).toString();
 			} else if (matchRule.equalsIgnoreCase(IModel.PLUGIN_REQUIRES_MATCH_EQUIVALENT)) {
-				maxVersion = new Version(minVersion.getMajorComponent(), minVersion.getMinorComponent() + 1, 0, "", false); //$NON-NLS-1$
+				versionRange = new VersionRange(minVersion, new Version(minVersion.getMajorComponent(), minVersion.getMinorComponent() + 1, 0, "", false)).toString(); //$NON-NLS-1$
 			} else if (matchRule.equalsIgnoreCase(IModel.PLUGIN_REQUIRES_MATCH_COMPATIBLE)) {
-				maxVersion = new Version(minVersion.getMajorComponent() + 1, 0, 0, "", false); //$NON-NLS-1$
+				versionRange = new VersionRange(minVersion, new Version(minVersion.getMajorComponent() + 1, 0, 0, "", false)).toString(); //$NON-NLS-1$
 			} else if (matchRule.equalsIgnoreCase(IModel.PLUGIN_REQUIRES_MATCH_GREATER_OR_EQUAL)) {
-				maxVersion = Version.maxVersion;
+				// just return the reqVersion here without any version range
+				versionRange = reqVersion;
 			} else {
-				maxVersion = new Version(minVersion.getMajorComponent() + 1, 0, 0, "", false); //$NON-NLS-1$
+				versionRange = new VersionRange(minVersion, new Version(minVersion.getMajorComponent() + 1, 0, 0, "", false)).toString(); //$NON-NLS-1$
 			}
 		} else {
-			maxVersion = new Version(minVersion.getMajorComponent() + 1, 0, 0, "", false); //$NON-NLS-1$
+			versionRange = new VersionRange(minVersion, new Version(minVersion.getMajorComponent() + 1, 0, 0, "", false)).toString(); //$NON-NLS-1$
 		}
 
 		StringBuffer result = new StringBuffer();
 		result.append(';').append(Constants.BUNDLE_VERSION_ATTRIBUTE).append('=');
-		result.append('\"').append(new VersionRange(minVersion, maxVersion).toString()).append('\"');
+		result.append('\"').append(versionRange).append('\"');
 		return result.toString();
 	}
 }
