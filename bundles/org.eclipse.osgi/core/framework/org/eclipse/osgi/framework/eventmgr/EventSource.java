@@ -16,6 +16,7 @@ package org.eclipse.osgi.framework.eventmgr;
  * Event Manager to complete the event delivery to the event listener.
  */
 
+//TODO The name of this class is misleading because this actually wraps the listener to be called.
 public abstract interface EventSource {
 	/**
 	 * This method is the call back that is called once for each listener.
