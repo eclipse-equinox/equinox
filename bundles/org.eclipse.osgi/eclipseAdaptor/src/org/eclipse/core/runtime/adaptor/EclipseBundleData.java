@@ -10,7 +10,8 @@
  *******************************************************************************/
 package org.eclipse.core.runtime.adaptor;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -28,9 +29,9 @@ public class EclipseBundleData extends DefaultBundleData {
 
 	/** data to detect modification made in the manifest */
 	protected final byte PLUGIN = 1;
-	protected final byte MANIFEST = 0;
+	protected final byte BUNDLE = 0;
 
-	private byte manifestType = MANIFEST;
+	private byte manifestType = BUNDLE;
 	private long manifestTimeStamp = 0;
 	
 		// URL protocol designations
@@ -88,18 +89,20 @@ public class EclipseBundleData extends DefaultBundleData {
 	private boolean checkManifestTimeStamp(BundleFile bundlefile) {
 		if ("true".equalsIgnoreCase(NO_TIMESTAMP_CHECKING)) //$NON-NLS-1$
 			return true;
-		// Otherwise, check the file time stamp
-		switch (getManifestType()) {
-			case MANIFEST :
-				BundleEntry bundleManifestEntry = bundlefile.getEntry(Constants.OSGI_BUNDLE_MANIFEST);
-				return bundleManifestEntry != null && bundleManifestEntry.getTime() == getManifestTimeStamp();
-			case PLUGIN :
-				BundleEntry pluginManifestEntry = bundlefile.getEntry(PLUGIN_MANIFEST);
-				if (pluginManifestEntry == null)
-					pluginManifestEntry = bundlefile.getEntry(FRAGMENT_MANIFEST);
-				return pluginManifestEntry != null && pluginManifestEntry.getTime() == getManifestTimeStamp();
-		}
-		return true;
+		// always try retrieving a bundle manifest
+		BundleEntry bundleManifestEntry = bundlefile.getEntry(Constants.OSGI_BUNDLE_MANIFEST);
+		// we thought it was a bundle but it does not have a bundle manifest, or the other way around
+		// we need to update this guy
+		if (bundleManifestEntry != null ^ getManifestType() == BUNDLE)
+			return false;
+		if (getManifestType() == BUNDLE)
+			return bundleManifestEntry.getTime() == getManifestTimeStamp();
+		// we don't have a bundle manifest, so let's check the plugin/fragment manifest
+		BundleEntry pluginManifestEntry = bundlefile.getEntry(PLUGIN_MANIFEST);
+		if (pluginManifestEntry == null)
+			pluginManifestEntry = bundlefile.getEntry(FRAGMENT_MANIFEST);
+		// if we have one, check timestamp - if we don't this guy is not anything we know 
+		return pluginManifestEntry != null && pluginManifestEntry.getTime() == getManifestTimeStamp();
 	}
 
 	private void initializeBase(String location) throws IOException {
@@ -196,7 +199,7 @@ public class EclipseBundleData extends DefaultBundleData {
 		if (url != null) {
 			try {
 				manifestTimeStamp = url.openConnection().getLastModified();
-				manifestType = MANIFEST;
+				manifestType = BUNDLE;
 			} catch (IOException e) {
 				//ignore the exception since this is for timeStamp
 			}
