@@ -191,11 +191,13 @@ public class Framework implements EventDispatcher, EventPublisher {
 			State state = adaptor.getState();
 			BundleDescription oldSystemBundle = state.getBundle(0);
 			if (oldSystemBundle != null) {
+				boolean different = false;
+				if (newSystemBundle.getVersion() != null && !newSystemBundle.getVersion().equals(oldSystemBundle.getVersion()))
+					different = true;
 				// need to check to make sure the system bundle description
 				// is up to date in the state.
 				PackageSpecification[] oldPackages = oldSystemBundle.getPackages();
 				PackageSpecification[] newPackages = newSystemBundle.getPackages();
-				boolean different = false;
 				if (oldPackages.length == newPackages.length) {
 					for (int i = 0; i < oldPackages.length; i++) {
 						if (oldPackages[i].getName().equals(newPackages[i].getName())) {
