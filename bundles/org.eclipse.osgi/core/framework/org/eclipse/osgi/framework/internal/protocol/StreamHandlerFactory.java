@@ -101,10 +101,8 @@ public class StreamHandlerFactory implements java.net.URLStreamHandlerFactory {
 			if (serviceReferences != null) {
 				for (int i = 0; i < serviceReferences.length; i++) {
 					Object prop = serviceReferences[i].getProperty(URLConstants.URL_HANDLER_PROTOCOL);
-					if (!(prop instanceof String[]))
-						continue;
-					String[] protocols = (String[]) prop;
-					if (protocols != null) {
+					if (prop != null && prop instanceof String[]) {
+						String[] protocols = (String[]) prop;
 						for (int j = 0; j < protocols.length; j++) {
 							if (protocols[j].equals(protocol)) {
 								handler = new URLStreamHandlerProxy(protocol, serviceReferences[i], context);

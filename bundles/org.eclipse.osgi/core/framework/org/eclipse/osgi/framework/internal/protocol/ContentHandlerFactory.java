@@ -85,8 +85,9 @@ public class ContentHandlerFactory implements java.net.ContentHandlerFactory {
 		org.osgi.framework.ServiceReference[] serviceReferences = contentHandlerTracker.getServiceReferences();
 		if (serviceReferences != null) {
 			for (int i = 0; i < serviceReferences.length; i++) {
-				String[] contentHandler = (String[]) (serviceReferences[i].getProperty(URLConstants.URL_CONTENT_MIMETYPE));
-				if (contentHandler != null) {
+				Object obj = serviceReferences[i].getProperty(URLConstants.URL_CONTENT_MIMETYPE);
+				if (obj != null && obj instanceof String[]) {
+					String[] contentHandler = (String[]) obj;
 					for (int j = 0; j < contentHandler.length; j++) {
 						if (contentHandler[j].equals(contentHandler)) {
 							ContentHandler handler = (ContentHandler) context.getService(serviceReferences[i]);
