@@ -339,7 +339,7 @@ public class PluginConverterImpl implements PluginConverter, IModel {
 	
 	private void generateProvidePackage() {
 		Set exports = getExports();
-		if (exports != null) {
+		if (exports != null && exports.size() != 0) {
 			generatedManifest.put(Constants.PROVIDE_PACKAGE, getStringFromCollection(exports,",\n "));
 		}
 	}
