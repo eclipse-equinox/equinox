@@ -50,7 +50,7 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 	protected Framework framework;
 
 	/** BundleLoaders that are pending removal. Value is BundleLoader */
-	protected Vector removalPending;
+	protected Vector removalPending; //TODO It seems that here the Vector is required since synchronization is required when adding / removing 
 
 	protected KeyedHashSet exportedPackages;
 	protected KeyedHashSet exportedBundles;
@@ -125,7 +125,7 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 		return bundleSet;
 	}
 
-	protected void cleanup() {
+	protected void cleanup() {	//This is only called when the framework is shutting down
 		removalPending = null;
 		exportedPackages = null;
 		exportedBundles = null;

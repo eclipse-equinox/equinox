@@ -18,7 +18,7 @@ import org.osgi.framework.Constants;
 public class ExportedPackageImpl extends SingleSourcePackage implements org.osgi.service.packageadmin.ExportedPackage {
 
 	String specVersion;
-	PackageSpecification packageSpec;
+	PackageSpecification packageSpec;	//TODO Useless
 
 	public ExportedPackageImpl(PackageSpecification packageSpec, BundleLoaderProxy supplier) {
 		super(packageSpec.getName(), supplier);
