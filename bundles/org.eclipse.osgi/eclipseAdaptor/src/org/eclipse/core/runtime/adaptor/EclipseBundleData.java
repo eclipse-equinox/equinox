@@ -44,9 +44,11 @@ public class EclipseBundleData extends DefaultBundleData {
 	public static final String FILE = "file"; //$NON-NLS-1$
 
 	private static final String PROP_CHECK_CONFIG = "osgi.checkConfiguration"; //$NON-NLS-1$
+	// the Plugin-Class header
 	protected String pluginClass = null;
-	private String autoStart;
-	private String autoStop;
+	// the Eclipse-AutoStart header	
+	private boolean autoStart;
+	private String[] autoStartExceptions;
 
 	private static String[] buildLibraryVariants() {
 		ArrayList result = new ArrayList();
@@ -190,7 +192,7 @@ public class EclipseBundleData extends DefaultBundleData {
 		try {
 			generatedManifest = converter.convertManifest(getBaseFile(), true, null);
 		} catch (PluginConversionException pce) {
-			String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONVERTER_ERROR_CONVERTING", getBaseFile());
+			String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONVERTER_ERROR_CONVERTING", getBaseFile()); //$NON-NLS-1$
 			throw new BundleException(message, pce); //$NON-NLS-1$
 		}
 
@@ -230,9 +232,11 @@ public class EclipseBundleData extends DefaultBundleData {
 	protected void loadFromManifest() throws IOException, BundleException {
 		getManifest(true);
 		super.loadFromManifest();
-		autoStart = (String) manifest.get(EclipseAdaptorConstants.ECLIPSE_AUTOSTART);
-		autoStop = (String) manifest.get(EclipseAdaptorConstants.ECLIPSE_AUTOSTOP);
+		// manifest cannot ever be a cached one otherwise the lines below are bogus
+		if (manifest instanceof CachedManifest)
+			throw new IllegalStateException();
 		pluginClass = (String) manifest.get(EclipseAdaptorConstants.PLUGIN_CLASS);
+		parseAutoStart((String) manifest.get(EclipseAdaptorConstants.ECLIPSE_AUTOSTART));
 	}
 
 	public String getPluginClass() {
@@ -259,19 +263,52 @@ public class EclipseBundleData extends DefaultBundleData {
 		this.manifestType = manifestType;
 	}
 
-	public void setAutoStart(String value) {
+	public void setAutoStart(boolean value) {
 		autoStart = value;
 	}
 
-	public void setAutoStop(String value) {
-		autoStop = value;
-	}
-
-	public String getAutoStart() {
+	public boolean isAutoStart() {
 		return autoStart;
 	}
 
-	public String getAutoStop() {
-		return autoStop;
+	public int getPersistentStatus() {
+		boolean isTransient = autoStart || autoStartExceptions != null;
+		// omit the active state if necessary  
+		return isTransient ? (~Constants.BUNDLE_STARTED) & getStatus() : getStatus();
+	}
+
+	public void setAutoStartExceptions(String[] autoStartExceptions) {
+		this.autoStartExceptions = autoStartExceptions;
+	}
+
+	public String[] getAutoStartExceptions() {
+		return autoStartExceptions;
+	}
+
+	private void parseAutoStart(String headerValue) {
+		autoStart = false;
+		autoStartExceptions = null;
+		ManifestElement[] allElements = null;
+		try {
+			allElements = ManifestElement.parseHeader(EclipseAdaptorConstants.ECLIPSE_AUTOSTART, headerValue);
+		} catch (BundleException e) {
+			// just use the default settings (no auto activation)
+			String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CLASSLOADER_CANNOT_GET_HEADERS", getLocation()); //$NON-NLS-1$
+			EclipseAdaptor.getDefault().getFrameworkLog().log(new FrameworkLogEntry(EclipseAdaptorConstants.PI_ECLIPSE_OSGI, message, 0, e, null));
+		}
+		//Eclipse-AutoStart not found... 
+		if (allElements == null)
+			return;
+		// the single value for this element should be true|false
+		autoStart = "true".equalsIgnoreCase(allElements[0].getValue()); //$NON-NLS-1$
+		// look for any exceptions (the attribute) to the autoActivate setting
+		String exceptionsValue = allElements[0].getAttribute(EclipseAdaptorConstants.EXCEPTIONS_ATTRIBUTE);
+		if (exceptionsValue == null)
+			return;
+		StringTokenizer tokenizer = new StringTokenizer(exceptionsValue, ","); //$NON-NLS-1$
+		int numberOfTokens = tokenizer.countTokens();
+		autoStartExceptions = new String[numberOfTokens];
+		for (int i = 0; i < numberOfTokens; i++)
+			autoStartExceptions[i] = tokenizer.nextToken().trim();
 	}
 }

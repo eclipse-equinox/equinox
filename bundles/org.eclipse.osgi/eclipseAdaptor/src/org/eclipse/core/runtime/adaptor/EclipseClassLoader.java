@@ -15,7 +15,6 @@ import java.io.InputStream;
 import java.net.URL;
 import java.security.ProtectionDomain;
 import java.util.ArrayList;
-import java.util.StringTokenizer;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import org.eclipse.osgi.framework.adaptor.BundleData;
@@ -28,45 +27,13 @@ import org.eclipse.osgi.framework.internal.defaultadaptor.DevClassPathHelper;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.framework.stats.ClassloaderStats;
 import org.eclipse.osgi.framework.stats.ResourceBundleStats;
-import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.*;
 
 public class EclipseClassLoader extends DefaultClassLoader {
 	private static String[] NL_JAR_VARIANTS = buildNLJarVariants(System.getProperties().getProperty("osgi.nl")); //$NON-NLS-1$
-	// from Eclipse-AutoStart element value
-	private boolean autoStart;
-	// from Eclipse-AutoStart's "exceptions" attribute
-	private String[] exceptions;
 
 	public EclipseClassLoader(ClassLoaderDelegate delegate, ProtectionDomain domain, String[] classpath, ClassLoader parent, BundleData bundleData) {
 		super(delegate, domain, classpath, parent, (org.eclipse.osgi.framework.internal.defaultadaptor.DefaultBundleData) bundleData);
-		parseAutoStart(bundleData);
-	}
-
-	private void parseAutoStart(BundleData bundleData) {
-		try {
-			String automationHeader = (String) bundleData.getManifest().get(EclipseAdaptorConstants.ECLIPSE_AUTOSTART);
-			ManifestElement[] allElements = ManifestElement.parseHeader(EclipseAdaptorConstants.ECLIPSE_AUTOSTART, automationHeader);
-			//Eclipse-AutoStart not found... look for the Legacy header instead		//TODO This is old code, this can be removed
-			if (allElements == null)
-				return;
-			// the single value for this element should be true|false
-			autoStart = "true".equalsIgnoreCase(allElements[0].getValue()); //$NON-NLS-1$
-			// look for any exceptions (the attribute) to the autoActivate setting
-			String exceptionsValue = allElements[0].getAttribute(EclipseAdaptorConstants.EXCEPTIONS_ATTRIBUTE);
-			if (exceptionsValue != null) {
-				StringTokenizer tokenizer = new StringTokenizer(exceptionsValue, ","); //$NON-NLS-1$
-				int numberOfTokens = tokenizer.countTokens();
-				exceptions = new String[numberOfTokens];
-				for (int i = 0; i < numberOfTokens; i++) {
-					exceptions[i] = tokenizer.nextToken().trim();
-				}
-			}
-		} catch (BundleException e) {
-			// just use the default settings (no auto activation)
-			String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CLASSLOADER_CANNOT_GET_HEADERS", bundleData.getLocation()); //$NON-NLS-1$
-			EclipseAdaptor.getDefault().getFrameworkLog().log(new FrameworkLogEntry(EclipseAdaptorConstants.PI_ECLIPSE_OSGI, message, 0, e, null));
-		}
 	}
 
 	public Class findLocalClass(String name) throws ClassNotFoundException {
@@ -102,7 +69,7 @@ public class EclipseClassLoader extends DefaultClassLoader {
 				if (!bundle.testStateChanging(Thread.currentThread())) {
 					Thread threadChangingState = bundle.getStateChanging();
 					if (EclipseAdaptor.TRACE_BUNDLES && threadChangingState != null) {
-						System.out.println("Concurrent startup of bundle " + bundle.getSymbolicName() + " by " + Thread.currentThread() + " and " + threadChangingState.getName() + ". Waiting up to 5000ms for " + threadChangingState + " to finish the initialization.");   //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+						System.out.println("Concurrent startup of bundle " + bundle.getSymbolicName() + " by " + Thread.currentThread() + " and " + threadChangingState.getName() + ". Waiting up to 5000ms for " + threadChangingState + " to finish the initialization."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 					}
 					Object lock = bundle.getStateChangeLock();
 					long start = System.currentTimeMillis();
@@ -137,9 +104,8 @@ public class EclipseClassLoader extends DefaultClassLoader {
 			} catch (BundleException e) {
 				String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CLASSLOADER_ACTIVATION", bundle.getSymbolicName(), Long.toString(bundle.getBundleId())); //$NON-NLS-1$
 				EclipseAdaptor.getDefault().getFrameworkLog().log(new FrameworkLogEntry(EclipseAdaptorConstants.PI_ECLIPSE_OSGI, message, 0, e, null));
-			} finally {
-				return super.findLocalClass(name);
 			}
+			return super.findLocalClass(name);
 		} catch (ClassNotFoundException e) {
 			found = false;
 			throw e;
@@ -156,8 +122,10 @@ public class EclipseClassLoader extends DefaultClassLoader {
 		//Don't reactivate on shut down
 		if (EclipseAdaptor.stopping)
 			return false;
+		boolean autoStart = ((EclipseBundleData) hostdata).isAutoStart();
+		String[] autoStartExceptions = ((EclipseBundleData) hostdata).getAutoStartExceptions();
 		// no exceptions, it is easy to figure it out
-		if (exceptions == null)
+		if (autoStartExceptions == null)
 			return autoStart;
 		// otherwise, we need to check if the package is in the exceptions list
 		int dotPosition = className.lastIndexOf('.');
@@ -166,12 +134,12 @@ public class EclipseClassLoader extends DefaultClassLoader {
 			return autoStart;
 		String packageName = className.substring(0, dotPosition);
 		// should activate if autoStart and package is not an exception, or if !autoStart and package is exception
-		return autoStart ^ isException(packageName);
+		return autoStart ^ contains(autoStartExceptions, packageName);
 	}
 
-	private boolean isException(String packageName) {
-		for (int i = 0; i < exceptions.length; i++)
-			if (exceptions[i].equals(packageName))
+	private boolean contains(String[] array, String element) {
+		for (int i = 0; i < array.length; i++)
+			if (array[i].equals(element))
 				return true;
 		return false;
 	}

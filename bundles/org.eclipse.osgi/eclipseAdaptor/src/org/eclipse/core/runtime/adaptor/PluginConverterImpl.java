@@ -373,7 +373,6 @@ public class PluginConverterImpl implements PluginConverter {
 
 	private void generateEclipseHeaders() {
 		generatedManifest.put(EclipseAdaptorConstants.ECLIPSE_AUTOSTART, "true");
-		generatedManifest.put(EclipseAdaptorConstants.ECLIPSE_AUTOSTOP, "true");
 	}
 
 	private Set getExports() {
