@@ -92,6 +92,14 @@ public interface Constants {
 	public static final String ARCH_SPARC = "sparc";//$NON-NLS-1$
 
 	/**
+	 * Constant string (value "amd64") indicating the platform is running on an
+	 * AMD64-based architecture.
+	 * 
+	 * @since 3.0
+	 */
+	public static final String ARCH_AMD64 = "amd64";//$NON-NLS-1$
+	
+	/**
 	 * Constant string (value "win32") indicating the platform is running on a
 	 * machine using the Windows windowing system.
 	 */
