@@ -10,12 +10,14 @@
  *******************************************************************************/
 package org.eclipse.osgi.framework.stats;
 
+import org.osgi.framework.Bundle;
+
 import java.io.*;
 import java.util.*;
 import org.eclipse.core.runtime.adaptor.EclipseAdaptor;
-import org.eclipse.osgi.framework.adaptor.IBundleStats;
+import org.eclipse.osgi.framework.adaptor.BundleWatcher;
 
-public class StatsManager implements IBundleStats {
+public class StatsManager implements BundleWatcher {
 	// This connect plugins and their info, and so allows to access the info without running through
 	// the plugin registry. This map only contains activated plugins. The key is the plugin Id
 	private static Map plugins = new HashMap(20);
@@ -34,9 +36,9 @@ public class StatsManager implements IBundleStats {
 		return defaultInstance;
 	}
 	
-	public void startActivation(String bundle) {
+	public void startActivation(Bundle bundle) {
 		// should be called from a synchronized location to protect against concurrent updates
-		BundleStats plugin = findPlugin(bundle);
+		BundleStats plugin = findPlugin(bundle.getSymbolicName());
 		plugin.setTimestamp(System.currentTimeMillis());
 		plugin.setActivationOrder(plugins.size());
 
@@ -49,11 +51,11 @@ public class StatsManager implements IBundleStats {
 		activationStack.push(plugin);
 
 		if (EclipseAdaptor.TRACE_BUNDLES = true) {
-			traceActivate(bundle, plugin);
+			traceActivate(bundle.getSymbolicName(), plugin);
 		}
 	}
 
-	public void endActivation(String pluginId) {
+	public void endActivation(Bundle pluginId) {
 		// should be called from a synchronized location to protect against concurrent updates
 		BundleStats plugin = (BundleStats) activationStack.pop();
 		plugin.endActivation();

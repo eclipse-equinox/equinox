@@ -19,7 +19,7 @@ import java.util.Properties;
 import org.eclipse.osgi.framework.adaptor.BundleData;
 import org.eclipse.osgi.framework.adaptor.EventPublisher;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
-import org.eclipse.osgi.framework.adaptor.IBundleStats;
+import org.eclipse.osgi.framework.adaptor.BundleWatcher;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.util.Headers;
@@ -182,7 +182,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 		initialBundleStartLevel = value;
 	}
 
-	public IBundleStats getBundleStats() {
+	public BundleWatcher getBundleStats() {
 		return null;
 	}
 

@@ -14,7 +14,7 @@ import java.io.*;
 import java.util.*;
 import javax.xml.parsers.SAXParserFactory;
 import org.eclipse.osgi.framework.adaptor.BundleData;
-import org.eclipse.osgi.framework.adaptor.IBundleStats;
+import org.eclipse.osgi.framework.adaptor.BundleWatcher;
 import org.eclipse.osgi.framework.adaptor.core.AdaptorElementFactory;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.eclipse.osgi.framework.debug.Debug;
@@ -462,7 +462,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		}
 	}
 
-	public IBundleStats getBundleStats() {
+	public BundleWatcher getBundleStats() {
 		return StatsManager.getDefault();
 	}
 

@@ -270,7 +270,7 @@ public interface FrameworkAdaptor {
 	 * Returns the IBundleStats for this FrameworkAdaptor.
 	 * @return the IBundleStats for this FrameworkAdaptor.
 	 */
-	public IBundleStats getBundleStats();
+	public BundleWatcher getBundleStats();
 
 	/**
 	 * Returns the PlatformAdmin for this FrameworkAdaptor.
