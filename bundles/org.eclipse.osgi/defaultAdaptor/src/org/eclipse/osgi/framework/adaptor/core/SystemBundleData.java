@@ -76,9 +76,10 @@ public class SystemBundleData extends AbstractBundleData {
 		// check the OSGi system package property
 		// first check the OSGi R4 spec'ed property
 		String systemExportProp = System.getProperty(Constants.OSGI_FRAMEWORK_SYSTEM_PACKAGES);
-		if (systemExportProp == null)
-			// if not set check the original pre OSGi R4 property
-			System.getProperty(Constants.OSGI_SYSTEMPACKAGES);
+		if (systemExportProp != null)
+			appendManifestValue(systemManifest, Constants.EXPORT_PACKAGE, systemExportProp);
+		// now check the original pre OSGi R4 property
+		systemExportProp = System.getProperty(Constants.OSGI_SYSTEMPACKAGES);
 		if (systemExportProp != null)
 			appendManifestValue(systemManifest, Constants.EXPORT_PACKAGE, systemExportProp);
 		// now get any extra packages and services that the adaptor wants
