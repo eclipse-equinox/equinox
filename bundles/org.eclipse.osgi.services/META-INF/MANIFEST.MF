@@ -4,6 +4,7 @@ Bundle-SymbolicName: org.eclipse.osgi.services
 Bundle-Version: 3.0
 Bundle-Description: OSGi Service Platform Release 3 Service Interfaces 
   and Classes
+Bundle-Localization: plugin
 Bundle-Vendor: %providerName
 Bundle-DocUrl: http://www.eclipse.org
 Bundle-ContactAddress: www.eclipse.org

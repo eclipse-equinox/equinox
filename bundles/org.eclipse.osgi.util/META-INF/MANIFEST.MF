@@ -4,6 +4,7 @@ Bundle-SymbolicName: org.eclipse.osgi.util
 Bundle-Version: 3.0
 Bundle-Description: OSGi Service Platform Release 3 Utility Classes
 Bundle-Vendor: %providerName
+Bundle-Localization: plugin
 Bundle-DocUrl: http://www.eclipse.org
 Bundle-ContactAddress: www.eclipse.org
 Bundle-Copyright: Copyright (c) The Open Services Gateway Initiative (
