@@ -58,13 +58,8 @@ public class BundleDescriptionImpl implements BundleDescription, KeyedElement {
 		return ((StateImpl) containingState).getFragments(this);
 	}
 
-	// TODO remove before M9
 	public HostSpecification getHost() {
 		return host;
-	}
-
-	public HostSpecification[] getHosts() {
-		return host == null ? new HostSpecification[0] : new HostSpecification[] {host};
 	}
 
 	public void setContainingState(State value) {

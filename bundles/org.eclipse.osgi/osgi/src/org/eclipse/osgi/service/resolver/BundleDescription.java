@@ -122,16 +122,6 @@ public interface BundleDescription {
 	public HostSpecification getHost();
 
 	/**
-	 * Returns the hosts for this bundle. An empty array is returned if this bundle is not
-	 * a fragment.
-	 * 
-	 * @return
-	 * @deprecated Use getHost instead
-	 */
-	// TODO remove before M9
-	public HostSpecification[] getHosts();
-
-	/**
 	 * Returns the numeric id of this bundle.  Typically a bundle description
 	 * will only have a numeric id if it represents a bundle that is installed in a 
 	 * framework as the framework assigns the ids.  -1 is returned if the id is not known.
