@@ -1,5 +1,5 @@
 /*
- * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/Constants.java,v 1.4 2004/02/18 16:07:59 twatson Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/Constants.java,v 1.5 2004/02/25 23:23:40 jfogell Exp $
  *
  * Copyright (c) The Open Services Gateway Initiative (2000-2001).
  * All Rights Reserved.
@@ -35,7 +35,7 @@ package org.osgi.framework;
  * <p>The values associated with these keys are of type <tt>java.lang.String</tt>,
  * unless otherwise indicated.
  *
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @author Open Services Gateway Initiative
  * @since 1.1
  * @see Bundle#getHeaders
@@ -465,6 +465,18 @@ public interface Constants {
 	 */
 	public final static String BUNDLE_SYMBOLICNAME = "Bundle-SymbolicName";
 	
+	/**
+	 * Manifest header attribute (named &quot;singleton&quot;)
+	 * identifying whether a bundle is a singleton.
+	 * The default value is "false".
+	 * 
+	 * <p>The attribute value is encoded in the Bundle-SymbolicName
+	 * manifest header like:
+	 * <pre>
+	 * Bundle-SymbolicName: org.osgi.framework.module.test; singleton=true
+	 * </pre>
+	 */
+	public final static String SINGLETON_ATTRIBUTE = "singleton";
 	/**
 	 * Manifest header (named &quot;Bundle-Localization&quot;)
 	 * identifying the location of the bundle's localization file.
