@@ -1,5 +1,5 @@
 /*
- * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/Bundle.java,v 1.5 2004/03/04 15:59:07 twatson Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/Bundle.java,v 1.6 2004/03/12 16:36:22 twatson Exp $
  *
  * Copyright (c) The Open Services Gateway Initiative (2000-2001).
  * All Rights Reserved.
@@ -66,7 +66,7 @@ import java.util.*;
  * create <tt>Bundle</tt> objects, and these objects are only valid
  * within the Framework that created them.
  *
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  * @author Open Services Gateway Initiative
  */
 public abstract interface Bundle
@@ -666,13 +666,14 @@ public abstract interface Bundle
 	 * bundle whose longest sub-path matches the supplied path argument. 
 	 * Returned paths indicating subdirectory paths end with a ’/’. 
 	 * The returned paths are all relative to the root of the bundle and 
-	 * have a leading ’/’.
+	 * have a leading ’/’. The supplied named entry "/" indicates the root of 
+	 * the bundle itself.
 	 * <p> 
 	 * This method returns an empty enumeration if no entries could not be 
 	 * found matching the specified path or if the caller does not have 
 	 * the AdminPermission or BundlePermission[READ, <target bundle symbolic name>], 
 	 * and the Java Runtime Environment supports permissions.
-	 * 
+	 * </p>
 	 * @param path the path name to get the entry path names for.
 	 * @return An Enumeration of the entry paths that are contained in the 
 	 * 		specified path.
@@ -682,12 +683,14 @@ public abstract interface Bundle
 	/**
 	 * This method returns a URL to the specified entry in this bundle.  
 	 * The bundle's classloader is not used to search for the named entry. 
-	 * Only the content of the bundle is searched for the named entry.  
+	 * Only the content of the bundle is searched for the named entry.  The 
+	 * named entry "/" indicates the root of the bundle itself.
+	 * <p>
 	 * This method returns a URL to the named entry, or null if the entry 
 	 * could not be found or if the caller does not have the AdminPermission 
 	 * or BundlePermission[READ, <target bundle symbolic name>], 
 	 * and the Java Runtime Environment supports permissions.	
-	 *
+	 * </p>
 	 * @param name The name of the resource.
 	 * See <tt>java.lang.ClassLoader.getResource</tt> for a description of
 	 * the format of a resource name.
