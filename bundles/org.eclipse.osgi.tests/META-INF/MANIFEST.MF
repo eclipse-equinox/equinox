@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-Name: Core OSGi Tests
+Bundle-SymbolicName: org.eclipse.osgi.tests
+Bundle-Version: 3.0.0
+Bundle-ClassPath: osgitests.jar
+Bundle-Vendor: IBM
+Bundle-Localization: plugin
+Require-Bundle: 
+ org.eclipse.core.runtime,
+ org.eclipse.core.tests.harness,
+ org.junit
+Eclipse-AutoStart: true
