@@ -54,9 +54,6 @@ public class BundleContext implements org.osgi.framework.BundleContext, EventSou
 	/** The current instantiation of the activator. */
 	protected BundleActivator activator;
 
-	/** The current instantiation of fragment activators */
-	protected BundleActivator[] fragmentActivators;
-
 	/** private object for locking */
 	protected Object contextLock = new Object();
 
@@ -75,7 +72,6 @@ public class BundleContext implements org.osgi.framework.BundleContext, EventSou
 		frameworkEvent = null;
 		servicesInUse = null;
 		activator = null;
-		fragmentActivators = null;
 	}
 
 	/**
@@ -980,48 +976,6 @@ public class BundleContext implements org.osgi.framework.BundleContext, EventSou
 			}
 		}
 
-		// now start all attached fragments.
-		if (bundle.fragments != null) {
-			synchronized (bundle.fragments) {
-				fragmentActivators = new BundleActivator[bundle.fragments.size()];
-				for (int i = 0; i < fragmentActivators.length; i++) {
-					BundleFragment fragment = (BundleFragment) bundle.fragments.elementAt(i);
-					try {
-						fragmentActivators[i] = fragment.loadBundleActivator();
-					} catch (Throwable t) {
-						framework.publishFrameworkEvent(FrameworkEvent.ERROR, fragment, t);
-					}
-				}
-				for (int i = 0; i < fragmentActivators.length; i++) {
-					Bundle fragment = (Bundle) bundle.fragments.elementAt(i);
-					if (fragmentActivators[i] != null) {
-						try {
-							// set the fragment state to STARTING
-							fragment.state = Bundle.STARTING;
-
-							// call the start() method on the fragment activator
-							startActivator(fragmentActivators[i]);
-
-							// set the fragment state to ACTIVE
-							fragment.state = Bundle.ACTIVE;
-							framework.publishBundleEvent(BundleEvent.STARTED, fragment);
-						} catch (Throwable t) {
-							// set the fragment activator to null so that it will not get called during
-							// host stop.
-							fragmentActivators[i] = null;
-
-							// set the fragment state to resolved.
-							fragment.state = Bundle.RESOLVED;
-							framework.publishFrameworkEvent(FrameworkEvent.ERROR, fragment, t);
-						}
-					} else {
-						fragment.state = Bundle.ACTIVE;
-						framework.publishBundleEvent(BundleEvent.STARTED, fragment);
-					}
-				}
-			}
-		}
-
 		/* activator completed successfully. We must use this
 		   same activator object when we stop this bundle. */
 	}
@@ -1059,49 +1013,6 @@ public class BundleContext implements org.osgi.framework.BundleContext, EventSou
 	}
 
 	/**
-	 * This method is called when a fragment attaches to an already active
-	 * host.
-	 * @param fragment The fragment bundle to start.
-	 */
-	protected void startFragment(BundleFragment fragment) {
-		BundleActivator fragmentActivator = null;
-
-		try {
-			fragmentActivator = fragment.loadBundleActivator();
-		} catch (Throwable t) {
-			framework.publishFrameworkEvent(FrameworkEvent.ERROR, fragment, t);
-		}
-
-		if (fragmentActivator != null) {
-			try {
-				// set the fragment state to STARTING
-				fragment.state = Bundle.STARTING;
-				startActivator(fragmentActivator);
-
-				if (fragmentActivators != null) {
-					BundleActivator[] newFragmentActivators = new BundleActivator[fragmentActivators.length + 1];
-					System.arraycopy(fragmentActivators, 0, newFragmentActivators, 0, fragmentActivators.length);
-					newFragmentActivators[newFragmentActivators.length - 1] = fragmentActivator;
-					fragmentActivators = newFragmentActivators;
-				} else {
-					fragmentActivators = new BundleActivator[] { fragmentActivator };
-				}
-
-				// set the fragment state to ACTIVE
-				fragment.state = Bundle.ACTIVE;
-				framework.publishBundleEvent(BundleEvent.STARTED, fragment);
-			} catch (Throwable t) {
-				// set the fragment state to resolved.
-				fragment.state = Bundle.RESOLVED;
-				framework.publishFrameworkEvent(FrameworkEvent.ERROR, fragment, t);
-			}
-		} else {
-			fragment.state = Bundle.ACTIVE;
-			framework.publishBundleEvent(BundleEvent.STARTED, fragment);
-		}
-	}
-
-	/**
 	 * Call bundle's BundleActivator.stop()
 	 * This method is called by Bundle.stopWorker to stop the bundle.
 	 *
@@ -1113,27 +1024,6 @@ public class BundleContext implements org.osgi.framework.BundleContext, EventSou
 		try {
 			AccessController.doPrivileged(new PrivilegedExceptionAction() {
 				public Object run() throws Exception {
-					// first suspend all attached fragments;
-					if (fragmentActivators != null) {
-						for (int i = fragmentActivators.length - 1; i >= 0; i--) {
-							Bundle fragment = (Bundle) bundle.fragments.elementAt(i);
-							if (fragmentActivators[i] != null) {
-								fragment.state = Bundle.STOPPING;
-
-								try {
-									fragmentActivators[i].stop(BundleContext.this);
-								} catch (Throwable t) {
-									framework.publishFrameworkEvent(FrameworkEvent.ERROR, fragment, t);
-								} finally {
-									fragment.state = Bundle.RESOLVED;
-									framework.publishBundleEvent(BundleEvent.STOPPED, fragment);
-								}
-							} else {
-								fragment.state = Bundle.RESOLVED;
-								framework.publishBundleEvent(BundleEvent.STOPPED, fragment);
-							}
-						}
-					}
 					if (activator != null) {
 						/* Stop the bundle synchronously */
 						activator.stop(BundleContext.this);
@@ -1155,7 +1045,6 @@ public class BundleContext implements org.osgi.framework.BundleContext, EventSou
 			throw new BundleException(Msg.formatter.getString("BUNDLE_ACTIVATOR_EXCEPTION", clazz, "stop"), t);
 		} finally {
 			activator = null;
-			fragmentActivators = null;
 		}
 	}
 

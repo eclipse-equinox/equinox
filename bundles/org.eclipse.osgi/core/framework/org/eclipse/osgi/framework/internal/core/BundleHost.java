@@ -609,9 +609,6 @@ public class BundleHost extends Bundle {
 			loader.attachFragment(fragment, System.getProperties());
 		}
 
-		if (state == ACTIVE && context != null) {
-			context.startFragment(fragment);
-		}
 	}
 
 	public BundleLoader getBundleLoader() {

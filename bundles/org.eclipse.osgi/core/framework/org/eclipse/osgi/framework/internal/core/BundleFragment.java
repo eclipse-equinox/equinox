@@ -277,7 +277,42 @@ public class BundleFragment extends Bundle {
 	 * @param persistent if true persistently record the bundle was started.
 	 */
 	protected void startWorker(boolean persistent) throws BundleException {
-		throw new BundleException(Msg.formatter.getString("FRAGMENT_CANNOT_START"));
+		if (framework.active) {
+			if ((state & (STARTING | ACTIVE)) != 0) {
+				return;
+			}
+
+			if (state == INSTALLED) {
+				framework.packageAdmin.resolveBundles();
+
+				if (state != RESOLVED) {
+					throw new BundleException(getResolutionFailureMessage());
+				}
+			}
+
+			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+				Debug.println("Bundle: Active sl = " + framework.startLevelImpl.getStartLevel() + "; Bundle " + id + " sl = " + this.startLevel);
+			}
+
+			if (this.startLevel <= framework.startLevelImpl.getStartLevel()) {
+				if (state == UNINSTALLED) {
+					throw new BundleException(Msg.formatter.getString("BUNDLE_UNINSTALLED_EXCEPTION"));
+				}
+				if (framework.active) {
+					state = ACTIVE;
+
+					if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+						Debug.println("->started " + this);
+					}
+
+					framework.publishBundleEvent(BundleEvent.STARTED, this);
+				}
+			}
+		}
+
+		if (persistent) {
+			setStatus(Constants.BUNDLE_STARTED, true);
+		}
 	}
 
 	/**
@@ -286,7 +321,23 @@ public class BundleFragment extends Bundle {
 	 * @param persistent if true persistently record the bundle was stopped.
 	 */
 	protected void stopWorker(boolean persistent) throws BundleException {
-		throw new BundleException(Msg.formatter.getString("FRAGMENT_CANNOT_STOP"));
+		if (persistent) {
+			setStatus(Constants.BUNDLE_STARTED, false);
+		}
+
+		if (framework.active) {
+			if ((state & (STOPPING | RESOLVED | INSTALLED)) != 0) {
+				return;
+			}
+
+			state = RESOLVED;
+
+			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+				Debug.println("->stopped " + this);
+			}
+
+			framework.publishBundleEvent(BundleEvent.STOPPED, this);
+		}
 	}
 
 	/**
