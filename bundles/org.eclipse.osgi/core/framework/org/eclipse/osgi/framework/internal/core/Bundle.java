@@ -27,7 +27,6 @@ import java.util.Locale;
 import org.eclipse.osgi.framework.adaptor.BundleData;
 import org.eclipse.osgi.framework.adaptor.BundleOperation;
 import org.eclipse.osgi.framework.debug.Debug;
-import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.osgi.service.resolver.BundleSpecification;
 import org.eclipse.osgi.service.resolver.HostSpecification;
