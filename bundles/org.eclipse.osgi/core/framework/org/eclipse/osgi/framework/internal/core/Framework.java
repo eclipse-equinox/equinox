@@ -421,7 +421,15 @@ public class Framework implements EventDispatcher, EventPublisher {
 	 * 
 	 * @param bundledata the BundleData of the Bundle to create
 	 */
-	public AbstractBundle createBundle(BundleData bundledata) throws BundleException {
+	AbstractBundle createAndVerifyBundle(BundleData bundledata) throws BundleException {
+		// TODO Verify the manifest... for example that the same package is imported twice 
+		// Check for a bundle already installed with the same UniqueId and version.
+		if (bundledata.getSymbolicName() != null) {
+			AbstractBundle installedBundle = getBundleBySymbolicName(bundledata.getSymbolicName(), bundledata.getVersion().toString());
+			if (installedBundle != null) {
+				throw new BundleException(Msg.formatter.getString("BUNDLE_INSTALL_SAME_UNIQUEID", new Object[] {installedBundle.getSymbolicName(), installedBundle.getVersion().toString(), installedBundle.getLocation()})); //$NON-NLS-1$
+			}
+		}
 		verifyExecutionEnvironment(bundledata.getManifest());
 		return AbstractBundle.createBundle(bundledata, this);
 	}
@@ -680,15 +688,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 		AbstractBundle bundle;
 		try {
 			BundleData bundledata = storage.begin();
-			// Check for a bundle already installed with the same UniqueId and version.
-			if (bundledata.getSymbolicName() != null) {
-				AbstractBundle installedBundle = getBundleBySymbolicName(bundledata.getSymbolicName(), bundledata.getVersion().toString());
-				if (installedBundle != null) {
-					throw new BundleException(Msg.formatter.getString("BUNDLE_INSTALL_SAME_UNIQUEID", new Object[] {installedBundle.getSymbolicName(), installedBundle.getVersion().toString(), installedBundle.getLocation()})); //$NON-NLS-1$
-				}
-			}
-			bundle = createBundle(bundledata);
-			//TODO Verify the manifest... for example that the same package is imported twice 
+			bundle = createAndVerifyBundle(bundledata);
 			try {
 				// Select the native code paths for the bundle;
 				// this is not done by the adaptor because this
@@ -731,7 +731,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 	 * @throws BundleException
 	 *             If there is no suitable clause.
 	 */
-	public String[] selectNativeCode(org.osgi.framework.Bundle bundle) throws BundleException {
+	String[] selectNativeCode(org.osgi.framework.Bundle bundle) throws BundleException {
 		String headerValue = (String) ((AbstractBundle) bundle).getBundleData().getManifest().get(Constants.BUNDLE_NATIVECODE);
 		if (headerValue == null) {
 			return (null);

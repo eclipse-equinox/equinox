@@ -698,14 +698,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 		try {
 			BundleData newBundleData = storage.begin();
 			// Must call framework createBundle to check execution environment.
-			AbstractBundle newBundle = framework.createBundle(newBundleData);
-			// Check for a bundle already installed with the same symbolicName
-			// and version.
-			String symbolicName = newBundle.getSymbolicName();
-			AbstractBundle installedBundle = symbolicName == null ? null : framework.getBundleBySymbolicName(symbolicName, newBundle.getVersion().toString());
-			if (installedBundle != null && installedBundle != this) {
-				throw new BundleException(Msg.formatter.getString("BUNDLE_INSTALL_SAME_UNIQUEID", new Object[] {installedBundle.getSymbolicName(), installedBundle.getVersion(), installedBundle.getLocation()})); //$NON-NLS-1$
-			}
+			AbstractBundle newBundle = framework.createAndVerifyBundle(newBundleData);
 			String[] nativepaths = framework.selectNativeCode(newBundle);
 			if (nativepaths != null) {
 				bundledata.installNativeCode(nativepaths);
