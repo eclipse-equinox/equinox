@@ -24,7 +24,8 @@ import org.eclipse.core.runtime.adaptor.Locker;
  * onto actual disk file. The filename is actually never used, and the file is always stored under the
  * given filename suffixed by an integer. If a file needs to be modified, it is written into a new file whose name suffix 
  * is incremented.
- * When a file manager starts, it starts by reading the current table and
+ * Once the instance has been created, open() must be called before performing any other operation.
+ * On open the fileManager starts by reading the current table and
  * thereby obtaining a snapshot of the current directory state. If another
  * entity updates the directory, the file manager is able to detect the change.
  * Given that the file is unique, if another entity used the file manager mechanism, the file manager can
@@ -95,7 +96,6 @@ public class FileManager {
 		this.tableFile = new File(managerRoot, TABLE_FILE);
 		this.lockFile = new File(managerRoot, LOCK_FILE);
 		initializeInstanceFile();
-		updateTable();
 	}
 
 	private void initializeInstanceFile() throws IOException {
@@ -116,7 +116,8 @@ public class FileManager {
 	 * @throws IOException if there are any problems adding the given file to the manager
 	 */
 	public void add(String file) throws IOException {
-		lock();
+		if (! lock())
+			throw new IOException(EclipseAdaptorMsg.formatter.getString("fileManager.cannotLock")); //$NON-NLS-1$
 		try {
 			updateTable();
 			Entry entry = (Entry) table.get(file);
@@ -140,7 +141,8 @@ public class FileManager {
 	 * @throws IOException if there are any problems updating the given files
 	 */
 	public void update(String[] targets, String[] sources) throws IOException {
-		lock();
+		if (! lock())
+			throw new IOException(EclipseAdaptorMsg.formatter.getString("fileManager.cannotLock")); //$NON-NLS-1$;
 		try {
 			updateTable();
 			for (int i = 0; i < targets.length; i++) {
@@ -205,11 +207,12 @@ public class FileManager {
 	 *                         if there was an unexpected problem while acquiring the
 	 *                         lock.
 	 */
-	private void lock() throws IOException {
+	private boolean lock() throws IOException {
 		if (locker == null)
 			locker = BasicLocation.createLocker(lockFile, null);
-		if (locker == null || locker.lock()==false)
+		if (locker == null)
 			throw new IOException(EclipseAdaptorMsg.formatter.getString("fileManager.cannotLock")); //$NON-NLS-1$
+		return locker.lock();
 	}
 
 	/**
@@ -261,7 +264,8 @@ public class FileManager {
 	public void remove(String file) throws IOException {
 		// The removal needs to be done eagerly, so the value is effectively removed from the disktable. 
 		// Otherwise, an updateTable() caused by an update(,)  could cause the file to readded to the local table.
-		lock();
+		if (! lock())
+			throw new IOException(EclipseAdaptorMsg.formatter.getString("fileManager.cannotLock")); //$NON-NLS-1$;
 		try {
 			updateTable();
 			table.remove(file);
@@ -357,7 +361,9 @@ public class FileManager {
 		}
 
 		//If we are here it is because we are the last instance running. After locking the table and getting its latest content, remove all the backup files and change the table
-		lock(); //If the exception comes from here another instance may have been started after we cleaned up, therefore we abort
+		//If the exception comes from lock, another instance may have been started after we cleaned up, therefore we abort
+		if (! lock())
+			throw new IOException(EclipseAdaptorMsg.formatter.getString("fileManager.cannotLock")); //$NON-NLS-1$
 		try {
 			updateTable();
 			Collection managedFiles = table.entrySet();
@@ -399,5 +405,32 @@ public class FileManager {
 		}
 		instanceLocker.release();
 		instanceFile.delete();
+	}
+
+	/**
+	 * This methods opens the fileManager, which loads the table in memory. This method must be called before any operation on the filemanager.
+	 * @param wait indicates if the open operation must wait in case of contention on the lock file.
+	 */
+	public void open(boolean wait) throws IOException {
+		boolean locked = lock();
+		if (! locked && wait==false)
+			throw new IOException(EclipseAdaptorMsg.formatter.getString("fileManager.cannotLock")); //$NON-NLS-1$;
+		
+		//wait for the lock to be released
+		if (! locked) {
+			do {
+				try {
+					Thread.sleep(10);
+				} catch (InterruptedException e) {
+					// Ignore the exception and keep waiting
+				}
+			} while(lock());
+		}
+		
+		try {
+			updateTable();
+		} finally {
+			release();
+		}
 	}
 }
