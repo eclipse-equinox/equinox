@@ -23,7 +23,7 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.Version;
 
 public abstract class StateImpl implements State {
-	public static final String[] PROPS = {"osgi.os", "osgi.ws", "osgi.nl", "osgi.arch", Constants.OSGI_FRAMEWORK_SYSTEM_PACKAGES}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+	public static final String[] PROPS = {"osgi.os", "osgi.ws", "osgi.nl", "osgi.arch", Constants.OSGI_FRAMEWORK_SYSTEM_PACKAGES, Constants.OSGI_RESOLVER_MODE}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ 
 
 	transient private Resolver resolver;
 	transient private StateDeltaImpl changes;
@@ -527,7 +527,9 @@ public abstract class StateImpl implements State {
 	void setSystemExports(String exportSpec) {
 		try {
 			ManifestElement[] elements = ManifestElement.parseHeader(Constants.EXPORT_PACKAGE, exportSpec);
-			systemExports = StateBuilder.createExportPackages(elements, null, null, null, 2);
+			// we can pass false for strict mode here because we never want to mark the system
+			// exports as internal.
+			systemExports = StateBuilder.createExportPackages(elements, null, null, null, 2, false);
 		} catch (BundleException e) {
 			// TODO consider throwing this... 
 		}

@@ -114,11 +114,6 @@ public class BundleLoader implements ClassLoaderDelegate {
 	}
 
 	final void initialize(BundleDescription description) {
-		if (!(this instanceof SystemBundleLoader) && SystemBundleLoader.getSystemPackages() != null) {
-			hasDynamicImports = true;
-			importedSources = new KeyedHashSet();
-		}
-
 		// init the imported packages list taking the bundle...
 		addImportedPackages(description.getResolvedImports());
 
@@ -520,19 +515,6 @@ public class BundleLoader implements ClassLoaderDelegate {
 		if (dynamicImportPackageAll)
 			return true;
 
-		/* 
-		 * If including the system bundle packages by default, dynamically import them.
-		 * Most OSGi framework implementations assume the system bundle packages
-		 * are on the VM classpath.  As a result some bundles neglect to import
-		 * framework packages (e.g. org.osgi.framework).
-		 */
-		String[] systemPackages = SystemBundleLoader.getSystemPackages();
-		if (systemPackages != null) {
-			for (int i = 0; i < systemPackages.length; i++)
-				if (pkgname.equals(systemPackages[i]))
-					return true;
-		}
-
 		/* match against specific names */
 		if (dynamicImportPackages != null)
 			for (int i = 0; i < dynamicImportPackages.length; i++)
@@ -587,7 +569,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 			return;
 		ArrayList dynamicImports = new ArrayList(packages.length);
 		for (int i = 0; i < packages.length; i++)
-			if (packages[i].getResolution() == ImportPackageSpecification.RESOLUTION_DYNAMIC)
+			if (ImportPackageSpecification.RESOLUTION_DYNAMIC.equals(packages[i].getDirective(Constants.RESOLUTION_DIRECTIVE)))
 				dynamicImports.add(packages[i].getName());
 		if (dynamicImports.size() > 0)
 			addDynamicImportPackage((String[]) dynamicImports.toArray(new String[dynamicImports.size()]));
@@ -601,7 +583,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 	 * @param packages the DynamicImport-Package elements to add.
 	 */
 	private void addDynamicImportPackage(String[] packages) {
-		if (packages == null && SystemBundleLoader.getSystemPackages() == null)
+		if (packages == null)
 			return;
 
 		hasDynamicImports = true;

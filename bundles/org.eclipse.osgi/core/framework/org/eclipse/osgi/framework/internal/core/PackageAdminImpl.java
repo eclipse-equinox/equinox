@@ -534,7 +534,7 @@ public class PackageAdminImpl implements PackageAdmin {
 		try {
 			// first check that the system bundle has not changed since last saved state.
 			State state = framework.adaptor.getState();
-			BundleDescription newSystemBundle = state.getFactory().createBundleDescription(systemBundle.getHeaders(""), systemBundle.getLocation(), 0); //$NON-NLS-1$
+			BundleDescription newSystemBundle = state.getFactory().createBundleDescription(state, systemBundle.getHeaders(""), systemBundle.getLocation(), 0); //$NON-NLS-1$
 			if (newSystemBundle == null)
 				throw new BundleException(Msg.OSGI_SYSTEMBUNDLE_DESCRIPTION_ERROR); //$NON-NLS-1$
 			BundleDescription oldSystemBundle = state.getBundle(0);
@@ -579,7 +579,6 @@ public class PackageAdminImpl implements PackageAdmin {
 				// force resolution so packages are properly linked
 				state.resolve(false);
 			}
-			SystemBundleLoader.clearSystemPackages();
 			ExportPackageDescription[] packages = newSystemBundle.getExportPackages();
 			if (packages != null) {
 				String[] systemPackages = new String[packages.length];
@@ -592,9 +591,6 @@ public class PackageAdminImpl implements PackageAdmin {
 					}
 					systemPackages[i] = spec.getName();
 				}
-				// remember the system packages.
-				if (System.getProperty(Constants.OSGI_AUTOEXPORTSYSTEMPACKAGES) != null)
-					SystemBundleLoader.setSystemPackages(systemPackages);
 			}
 		} catch (BundleException e) /* fatal error */{
 			e.printStackTrace();

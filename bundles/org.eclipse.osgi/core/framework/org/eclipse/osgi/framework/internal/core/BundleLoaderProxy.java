@@ -188,8 +188,8 @@ public class BundleLoaderProxy implements RequiredBundle {
 		}
 		else {
 			// check to see if it is a filtered export
-			String includes = export.getInclude();
-			String excludes = export.getExclude();
+			String includes = (String) export.getDirective(Constants.INCLUDE_DIRECTIVE);
+			String excludes = (String) export.getDirective(Constants.EXCLUDE_DIRECTIVE);
 			if (includes != null || excludes != null)
 				pkgSource = new FilteredSourcePackage(export.getName(), this, includes, excludes);
 		}

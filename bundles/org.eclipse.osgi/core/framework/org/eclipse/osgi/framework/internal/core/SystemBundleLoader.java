@@ -24,23 +24,6 @@ public class SystemBundleLoader extends BundleLoader {
 	ClassLoader classLoader;
 
 	/**
-	 * List of packages that the system bundle exports.
-	 */
-	static String[] systemPackages = null;
-
-	synchronized static void clearSystemPackages() {
-		systemPackages = null;
-	}
-
-	static void setSystemPackages(String[] value) {
-		systemPackages = value;
-	}
-
-	static String[] getSystemPackages() {
-		return systemPackages;
-	}
-
-	/**
 	 * @param bundle The system bundle.
 	 * @param proxy The BundleLoaderProxy for the system bundle
 	 * @throws BundleException On any error.

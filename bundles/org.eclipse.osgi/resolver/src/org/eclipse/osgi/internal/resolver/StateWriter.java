@@ -246,40 +246,41 @@ class StateWriter {
 		if (writePrefix(exportPackageDesc, out))
 			return;
 		writeBaseDescription(exportPackageDesc, out);
-		writeStringOrNull(exportPackageDesc.getInclude(), out);
-		writeStringOrNull(exportPackageDesc.getExclude(), out);
 		out.writeBoolean(exportPackageDesc.isRoot());
+		writeMap(out, exportPackageDesc.getAttributes());
+		writeMap(out, exportPackageDesc.getDirectives());
+	}
 
-		Map attributes = exportPackageDesc.getAttributes();
-		if (attributes == null) {
+	private void writeMap(DataOutputStream out, Map source) throws IOException {
+		if (source == null) {
 			out.writeInt(0);
 		} else {
-			out.writeInt(attributes.size());
-			Iterator iter = attributes.keySet().iterator();
+			out.writeInt(source.size());
+			Iterator iter = source.keySet().iterator();
 			while (iter.hasNext()) {
 				String key = (String) iter.next();
-				String value = (String) attributes.get(key);
+				Object value = source.get(key);
 				writeStringOrNull(key, out);
-				writeStringOrNull(value, out);
+				if (value instanceof String) {
+					out.writeByte(0);
+					writeStringOrNull((String) value, out);
+				} else {
+					if (value instanceof String[]) {
+						out.writeByte(1);
+						writeList(out, (String[]) value);
+					}
+				}
 			}
 		}
+	}
 
-		String[] mandatory = exportPackageDesc.getMandatory();
-		if (mandatory == null) {
+	private void writeList(DataOutputStream out, String[] list) throws IOException {
+		if (list == null) {
 			out.writeInt(0);
 		} else {
-			out.writeInt(mandatory.length);
-			for (int i = 0; i < mandatory.length; i++)
-				writeStringOrNull(mandatory[i], out);
-		}
-
-		String[] uses = exportPackageDesc.getUses();
-		if (uses == null) {
-			out.writeInt(0);
-		} else {
-			out.writeInt(uses.length);
-			for (int i = 0; i < uses.length; i++)
-				writeStringOrNull(uses[i], out);
+			out.writeInt(list.length);
+			for (int i = 0; i < list.length; i++)
+				writeStringOrNull(list[i], out);
 		}
 	}
 
@@ -299,21 +300,8 @@ class StateWriter {
 
 		writeStringOrNull(importPackageSpec.getBundleSymbolicName(), out);
 		writeVersionRange(importPackageSpec.getBundleVersionRange(), out);
-		out.writeInt(importPackageSpec.getResolution());
-
-		Map attributes = importPackageSpec.getAttributes();
-		if (attributes == null) {
-			out.writeInt(0);
-		} else {
-			out.writeInt(attributes.size());
-			Iterator iter = attributes.keySet().iterator();
-			while (iter.hasNext()) {
-				String key = (String) iter.next();
-				String value = (String) attributes.get(key);
-				writeStringOrNull(key, out);
-				writeStringOrNull(value, out);
-			}
-		}
+		writeMap(out, importPackageSpec.getAttributes());
+		writeMap(out, importPackageSpec.getDirectives());
 	}
 
 	private void writeHostSpec(HostSpecificationImpl host, DataOutputStream out, boolean force) throws IOException {

@@ -1105,7 +1105,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 			Bundle toAdd = installedBundles[i];
 			try {
 				Dictionary manifest = toAdd.getHeaders(""); //$NON-NLS-1$
-				BundleDescription newDescription = factory.createBundleDescription(manifest, toAdd.getLocation(), toAdd.getBundleId());
+				BundleDescription newDescription = factory.createBundleDescription(systemState, manifest, toAdd.getLocation(), toAdd.getBundleId());
 				systemState.addBundle(newDescription);
 			} catch (BundleException be) {
 				// just ignore bundle datas with invalid manifests
@@ -1399,7 +1399,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 				systemState.removeBundle(bundleData.getBundleID());
 			// fall through to INSTALLED
 			case BundleEvent.INSTALLED :
-				BundleDescription newDescription = stateManager.getFactory().createBundleDescription(bundleData.getManifest(), bundleData.getLocation(), bundleData.getBundleID());
+				BundleDescription newDescription = stateManager.getFactory().createBundleDescription(systemState, bundleData.getManifest(), bundleData.getLocation(), bundleData.getBundleID());
 				systemState.addBundle(newDescription);
 				break;
 			case BundleEvent.UNINSTALLED :

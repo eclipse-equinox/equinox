@@ -65,9 +65,10 @@ public class StateManager implements PlatformAdmin, Runnable {
 			boolean lazyLoad = !Boolean.valueOf(System.getProperty(PROP_NO_LAZY_LOADING)).booleanValue();
 			systemState = factory.readSystemState(stateFile, lazyFile, lazyLoad, expectedTimeStamp);
 			// problems in the cache (corrupted/stale), don't create a state object
-			if (systemState == null)
+			if (systemState == null || !initializeSystemState()) {
+				systemState = null;
 				return;
-			initializeSystemState();
+			}
 			cachedState = true;
 			try {
 				expireTime = Long.parseLong(System.getProperty(PROP_LAZY_UNLOADING_TIME, Long.toString(expireTime)));
@@ -98,11 +99,10 @@ public class StateManager implements PlatformAdmin, Runnable {
 		factory.writeState(systemState, stateFile, lazyFile);
 	}
 
-	private void initializeSystemState() {
+	private boolean initializeSystemState() {
 		systemState.setResolver(getResolver(System.getSecurityManager() != null));
 		lastTimeStamp = systemState.getTimeStamp();
-		if (systemState.setPlatformProperties(System.getProperties()))
-			systemState.resolve(false); // cause a full resolve; some platform properties have changed
+		return !systemState.setPlatformProperties(System.getProperties());
 	}
 
 	public synchronized StateImpl createSystemState() {
@@ -146,7 +146,7 @@ public class StateManager implements PlatformAdmin, Runnable {
 		if (!(state instanceof UserState))
 			throw new IllegalArgumentException("Wrong state implementation"); //$NON-NLS-1$		
 		if (state.getTimeStamp() != systemState.getTimeStamp())
-			throw new BundleException(StateMsg.COMMIT_INVALID_TIMESTAMP);
+			throw new BundleException(StateMsg.COMMIT_INVALID_TIMESTAMP); 		
 		StateDelta delta = state.compare(systemState);
 		BundleDelta[] changes = delta.getChanges();
 		for (int i = 0; i < changes.length; i++)

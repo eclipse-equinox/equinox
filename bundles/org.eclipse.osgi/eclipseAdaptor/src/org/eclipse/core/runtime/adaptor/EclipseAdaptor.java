@@ -225,7 +225,7 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 				// if this is a cached manifest need to get the real one
 				if (toAddManifest instanceof CachedManifest)
 					toAddManifest = ((CachedManifest) toAddManifest).getManifest();
-				BundleDescription newDescription = factory.createBundleDescription(toAddManifest, toAdd.getLocation(), toAdd.getBundleId());
+				BundleDescription newDescription = factory.createBundleDescription(systemState, toAddManifest, toAdd.getLocation(), toAdd.getBundleId());
 				systemState.addBundle(newDescription);
 			} catch (BundleException be) {
 				// just ignore bundle datas with invalid manifests

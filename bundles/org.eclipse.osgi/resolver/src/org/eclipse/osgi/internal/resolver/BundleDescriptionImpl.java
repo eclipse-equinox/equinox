@@ -199,7 +199,7 @@ public class BundleDescriptionImpl extends BaseDescriptionImpl implements Bundle
 				if (Constants.OSGI_SYSTEM_BUNDLE.equals(importPackages[i].getBundleSymbolicName()))
 					((ImportPackageSpecificationImpl) importPackages[i]).setBundleSymbolicName(Constants.getInternalSymbolicName());
 				((ImportPackageSpecificationImpl) importPackages[i]).setBundle(this);
-				if ((importPackages[i].getResolution() & ImportPackageSpecification.RESOLUTION_DYNAMIC) != 0)
+				if (ImportPackageSpecification.RESOLUTION_DYNAMIC.equals(importPackages[i].getDirective(Constants.RESOLUTION_DIRECTIVE)))
 					stateBits |= HAS_DYNAMICIMPORT;
 			}
 		}
