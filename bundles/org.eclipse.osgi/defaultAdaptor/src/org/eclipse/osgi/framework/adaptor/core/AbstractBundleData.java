@@ -460,6 +460,14 @@ public abstract class AbstractBundleData implements BundleData, Cloneable {
 
 	///////////////////// End Manifest Value Accessor Methods  /////////////////////
 
+	public String[] getBundleSigners() {
+		if (System.getSecurityManager() == null)
+			return null;
+		if (getBaseBundleFile() instanceof SignedBundle)
+			return ((SignedBundle) getBaseBundleFile()).getSigningCertificateChains();
+		return null;
+	}
+
 	/**
 	 * Return a copy of this object with the
 	 * generation dependent fields updated to
@@ -514,7 +522,7 @@ public abstract class AbstractBundleData implements BundleData, Cloneable {
 	}
 
 	protected BundleFile createBaseBundleFile() throws IOException {
-		baseBundleFile = getAdaptor().createBundleFile(getBaseFile(), this);
+		baseBundleFile = getAdaptor().createBaseBundleFile(getBaseFile(), this);
 		return baseBundleFile;
 	}
 

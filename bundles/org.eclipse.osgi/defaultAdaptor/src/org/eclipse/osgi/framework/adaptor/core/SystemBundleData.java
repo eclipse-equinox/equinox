@@ -128,10 +128,12 @@ public class SystemBundleData extends AbstractBundleData {
 					return null;
 				}
 
-				public void close() throws IOException {
+				public void close() {
+					// do nothing
 				}
 
-				public void open() throws IOException {
+				public void open() {
+					// do nothing
 				}
 
 				public boolean containsDir(String dir) {
@@ -165,6 +167,7 @@ public class SystemBundleData extends AbstractBundleData {
 	}
 
 	public void installNativeCode(String[] nativepaths) throws BundleException {
+		// do nothing
 	}
 
 	public File getDataFile(String path) {
@@ -179,12 +182,19 @@ public class SystemBundleData extends AbstractBundleData {
 		return 0;
 	}
 
-	public void close() throws IOException {
+	public void close() {
+		// do nothing
 	}
 
-	public void open() throws IOException {
+	public void open() {
+		// do nothing
 	}
 
-	public void save() throws IOException {
+	public void save() {
+		// do nothing
+	}
+
+	public String[] getBundleSigners() {
+		return null; // system bundle cannot be signed
 	}
 }

@@ -36,6 +36,7 @@ import org.osgi.framework.*;
 public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 	public static final String PROP_PARENT_CLASSLOADER = "osgi.parentClassloader"; //$NON-NLS-1$
 	public static final String PROP_FRAMEWORK_EXTENSIONS = "osgi.framework.extensions"; //$NON-NLS-1$
+	public static final String PROP_SIGNINGSUPPORT = "osgi.bundlesigning.support"; //$NON-NLS-1$
 	public static final String PARENT_CLASSLOADER_APP = "app"; //$NON-NLS-1$
 	public static final String PARENT_CLASSLOADER_EXT = "ext"; //$NON-NLS-1$
 	public static final String PARENT_CLASSLOADER_BOOT = "boot"; //$NON-NLS-1$
@@ -48,6 +49,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 
 	/** Name of the Adaptor manifest file */
 	protected final String ADAPTOR_MANIFEST = "ADAPTOR.MF"; //$NON-NLS-1$
+	protected final String DEFAULT_SIGNEDBUNDLE_SUPPORT = "org.eclipse.osgi.framework.pkcs7verify.SignedBundleImpl"; //$NON-NLS-1$
 
 	/**
 	 * The EventPublisher for the FrameworkAdaptor
@@ -125,6 +127,9 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 	protected Method addURLMethod = findaddURLMethod(AbstractFrameworkAdaptor.class.getClassLoader().getClass());
 
 	protected String[] configuredExtensions;
+
+	protected boolean supportSignedBundles = true;
+	protected Class signedBundleSupport = null;
 
 	/**
 	 * Constructor for DefaultAdaptor.  This constructor parses the arguments passed
@@ -577,8 +582,8 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 		String prop = System.getProperty(PROP_FRAMEWORK_EXTENSIONS);
 		if (prop == null || prop.trim().length() == 0)
 			configuredExtensions = new String[0];
-		else 
-			configuredExtensions =  ManifestElement.getArrayFromList(prop);
+		else
+			configuredExtensions = ManifestElement.getArrayFromList(prop);
 		return configuredExtensions;
 	}
 
@@ -626,11 +631,31 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 	 * @throws IOException if an error occurred creating the BundleFile object.
 	 */
 	public BundleFile createBundleFile(File basefile, BundleData bundledata) throws IOException {
-		if (basefile.isDirectory()) {
+		if (basefile.isDirectory())
 			return new BundleFile.DirBundleFile(basefile);
-		} else {
-			return new BundleFile.ZipBundleFile(basefile, bundledata);
+		return new BundleFile.ZipBundleFile(basefile, bundledata);
+	}
+
+	public BundleFile createBaseBundleFile(File basefile, BundleData bundledata) throws IOException {
+		BundleFile base = createBundleFile(basefile, bundledata);
+		if (System.getSecurityManager() == null || !supportSignedBundles)
+			return base;
+		try {
+			if (signedBundleSupport == null) {
+				String clazzName = System.getProperty(PROP_SIGNINGSUPPORT, DEFAULT_SIGNEDBUNDLE_SUPPORT);
+				signedBundleSupport = Class.forName(clazzName);
+			}
+			SignedBundle signedBundle = (SignedBundle) signedBundleSupport.newInstance();
+			signedBundle.setBundleFile(base);
+			return signedBundle;
+		} catch (ClassNotFoundException e) {
+			supportSignedBundles = false;
+		} catch (IllegalAccessException e) {
+			supportSignedBundles = false;
+		} catch (InstantiationException e) {
+			supportSignedBundles = false;
 		}
+		return null;
 	}
 
 	/**
@@ -820,7 +845,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 	 */
 	protected void shutdownStateManager() {
 		try {
-			stateManager.shutdown(new File(getBundleStoreRootDir(), ".state"), new File(getBundleStoreRootDir(), ".lazy"));  //$NON-NLS-1$//$NON-NLS-2$
+			stateManager.shutdown(new File(getBundleStoreRootDir(), ".state"), new File(getBundleStoreRootDir(), ".lazy")); //$NON-NLS-1$//$NON-NLS-2$
 		} catch (IOException e) {
 			frameworkLog.log(new FrameworkEvent(FrameworkEvent.ERROR, context.getBundle(), e));
 		} finally {

@@ -34,6 +34,14 @@ abstract public class BundleFile {
 	protected File basefile;
 
 	/**
+	 * Default constructor
+	 *
+	 */
+	public BundleFile() {
+		// do nothing
+	}
+
+	/**
 	 * BundleFile constructor
 	 * @param basefile The File object where this BundleFile is 
 	 * persistently stored.
@@ -355,7 +363,7 @@ abstract public class BundleFile {
 			}
 		}
 
-		public void open() throws IOException {
+		public void open() {
 			//do nothing
 		}
 
@@ -429,23 +437,22 @@ abstract public class BundleFile {
 					}
 
 				};
-			} else {
-				return new Enumeration() {
-					int cur = 0;
-
-					public boolean hasMoreElements() {
-						return cur < 1;
-					}
-
-					public Object nextElement() {
-						if (cur == 0) {
-							cur = 1;
-							return path;
-						} else
-							throw new NoSuchElementException();
-					}
-				};
 			}
+			return new Enumeration() {
+				int cur = 0;
+
+				public boolean hasMoreElements() {
+					return cur < 1;
+				}
+
+				public Object nextElement() {
+					if (cur == 0) {
+						cur = 1;
+						return path;
+					}
+					throw new NoSuchElementException();
+				}
+			};
 		}
 
 		public void close() {

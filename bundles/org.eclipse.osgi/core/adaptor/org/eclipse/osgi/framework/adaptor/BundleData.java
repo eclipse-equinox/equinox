@@ -246,4 +246,16 @@ public interface BundleData {
 	 * @return the DynamicImport-Packaget for this BundleData.
 	 */
 	public String getDynamicImports();
+
+	/**
+	 * Retrieves the certificate chains that signed this bundle. Only
+	 * validated certificate chains are returned. Each element of the returned
+	 * array will contain a chain of distinguished names (DNs) separated by
+	 * semicolons. The first DN is the signer and the last is the root
+	 * Certificate Authority.
+	 * 
+	 * @return the certificate chains that signed this repository.  If bundle
+	 * signing is not supported or the bundle is not signed then null is returned.
+	 */
+	public String[] getBundleSigners();
 }
