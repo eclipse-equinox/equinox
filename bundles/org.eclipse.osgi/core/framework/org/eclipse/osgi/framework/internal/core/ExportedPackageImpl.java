@@ -57,8 +57,8 @@ public class ExportedPackageImpl implements ExportedPackage {
 			BundleLoader loader = ((BundleHost) bundles[i]).getBundleLoader();
 			if (loader == null)
 				continue;
-			PackageSource source = loader.getPackageSource(getName());
-			if (source != null && source.hasCommonSource(supplierSource))
+			PackageSource importerSource = loader.getPackageSource(getName());
+			if (supplierSource != null && supplierSource.hasCommonSource(importerSource))
 				importers.add(bundles[i]);
 		}
 		return (Bundle[]) importers.toArray(new Bundle[importers.size()]);

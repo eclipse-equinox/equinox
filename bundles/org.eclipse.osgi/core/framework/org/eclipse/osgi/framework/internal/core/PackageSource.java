@@ -47,7 +47,6 @@ public abstract class PackageSource implements KeyedElement {
 	public abstract URL getResource(String name);
 	public abstract Enumeration getResources(String name) throws IOException;
 
-	//TODO This does not handle properly the multiple source package properly
 	//TODO See how this relates with FilteredSourcePackage. Overwriting or doing a double dispatch might be good.
 	public boolean hasCommonSource(PackageSource other) {
 		if (other == null)
@@ -58,11 +57,16 @@ public abstract class PackageSource implements KeyedElement {
 		SingleSourcePackage[] suppliers2 = other.getSuppliers();
 		if (suppliers1 == null || suppliers2 == null)
 			return false;
+		// This will return true if the specified source has at least all
+		// of the suppliers of this source.
 		for (int i = 0; i < suppliers1.length; i++) {
+			boolean found = false;
 			for (int j = 0; j < suppliers2.length; j++)
 				if (suppliers1[i].supplier == suppliers2[j].supplier)
-					return true;
+					found = true;
+			if (!found)
+				return false;
 		}
-		return false;
+		return true;
 	}
 }
