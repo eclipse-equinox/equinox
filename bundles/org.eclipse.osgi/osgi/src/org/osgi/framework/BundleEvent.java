@@ -1,5 +1,5 @@
 /*
- * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/BundleEvent.java,v 1.2 2004/04/20 17:35:59 twatson Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/BundleEvent.java,v 1.3 2004/05/07 21:40:52 hargrave Exp $
  *
  * Copyright (c) The Open Services Gateway Initiative (2000-2001).
  * All Rights Reserved.
@@ -38,7 +38,7 @@ import java.util.EventObject;
  *
  * <p>OSGi reserves the right to extend the set of types.
  *
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 
 public class BundleEvent extends EventObject
@@ -148,7 +148,7 @@ public class BundleEvent extends EventObject
 	 * <p>The value of <tt>RESOLVED</tt> is 0x00000020.
 	 *
 	 * @see Bundle#RESOLVED
-	 * @since 1.4 <b>EXPERIMENTAL</b>
+	 * @since 1.3 <b>EXPERIMENTAL</b>
 	 */
 	public final static int RESOLVED = 0x00000020;
 
@@ -157,7 +157,7 @@ public class BundleEvent extends EventObject
 	 * <p>The value of <tt>UNRESOLVED</tt> is 0x00000040.
 	 *
 	 * @see Bundle#INSTALLED
-	 * @since 1.4 <b>EXPERIMENTAL</b>
+	 * @since 1.3 <b>EXPERIMENTAL</b>
 	 */
 	public final static int UNRESOLVED = 0x00000040;
 

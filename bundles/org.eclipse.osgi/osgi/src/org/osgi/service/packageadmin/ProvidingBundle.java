@@ -1,5 +1,5 @@
 /*
- * $Header$
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/service/packageadmin/ProvidingBundle.java,v 1.1 2004/05/07 21:40:52 hargrave Exp $
  *
  * Copyright (c) The OSGi Alliance (2004).
  * All Rights Reserved.
@@ -48,7 +48,7 @@ import org.osgi.framework.Bundle;
  * <tt>getVersion()</tt> continue to return their old values, 
  * <tt>isRemovalPending()</tt> returns true, and <tt>getBundle()</tt> 
  * and <tt>getRequiringBundles()</tt> return <tt>null</tt>.
- * @since 1.4 <b>EXPERIMENTAL</b>
+ * @since 1.2 <b>EXPERIMENTAL</b>
  */
 public interface ProvidingBundle {
 	/**

@@ -1,5 +1,5 @@
 /*
- * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/Bundle.java,v 1.9 2004/04/20 18:57:11 twatson Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/Bundle.java,v 1.10 2004/05/07 21:40:52 hargrave Exp $
  *
  * Copyright (c) The Open Services Gateway Initiative (2000, 2002).
  * All Rights Reserved.
@@ -67,7 +67,7 @@ import java.util.Enumeration;
  * create <tt>Bundle</tt> objects, and these objects are only valid
  * within the Framework that created them.
  *
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public abstract interface Bundle
 {
@@ -637,7 +637,7 @@ public abstract interface Bundle
      * 
      * @see #getHeaders()
      * @see Constants#BUNDLE_LOCALIZATION
-	 * @since 1.4 <b>EXPERIMENTAL</b>
+	 * @since 1.3 <b>EXPERIMENTAL</b>
    	 */
    	public Dictionary getHeaders(String localeString);
 
@@ -652,7 +652,7 @@ public abstract interface Bundle
      * <p>This method will continue to return this bundle's symbolic name
      * while this bundle is in the <tt>UNINSTALLED</tt> state.
 	 * @return The symbolic name of this bundle.
-	 * @since 1.4 <b>EXPERIMENTAL</b>
+	 * @since 1.3 <b>EXPERIMENTAL</b>
 	 */
 	public String getSymbolicName();
 
@@ -678,7 +678,7 @@ public abstract interface Bundle
 	 * if the caller does not have the <tt>AdminPermission</tt>, and the Java
 	 * Runtime Environment supports permissions.
 	 * @exception java.lang.IllegalStateException If this bundle has been uninstalled.
-	 * @since 1.4 <b>EXPERIMENTAL</b>
+	 * @since 1.3 <b>EXPERIMENTAL</b>
 	 */
 	public Class loadClass(String name) throws ClassNotFoundException;
 
@@ -701,7 +701,7 @@ public abstract interface Bundle
 	 * @return An Enumeration of the entry paths that are contained in the
 	 * 		specified path.
 	 * @exception java.lang.IllegalStateException If this bundle has been uninstalled.
-	 * @since 1.4 <b>EXPERIMENTAL</b>
+	 * @since 1.3 <b>EXPERIMENTAL</b>
 	 */
 	public Enumeration getEntryPaths(String path);
 
@@ -723,7 +723,7 @@ public abstract interface Bundle
 	 * the <tt>AdminPermission</tt> and the Java Runtime Environment supports permissions.
 	 *
 	 * @exception java.lang.IllegalStateException If this bundle has been uninstalled.
-	 * @since 1.4 <b>EXPERIMENTAL</b>
+	 * @since 1.3 <b>EXPERIMENTAL</b>
 	 */
 	public URL getEntry(String name);
 }

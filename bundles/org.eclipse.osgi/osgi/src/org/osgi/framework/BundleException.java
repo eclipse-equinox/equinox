@@ -1,5 +1,5 @@
 /*
- * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/BundleException.java,v 1.2 2004/04/28 17:22:51 twatson Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/BundleException.java,v 1.3 2004/05/07 21:40:52 hargrave Exp $
  *
  * Copyright (c) The Open Services Gateway Initiative (2000-2001).
  * All Rights Reserved.
@@ -38,7 +38,7 @@ package org.osgi.framework;
  * <p> This exception is updated to conform to the general purpose
  * exception chaining mechanism.
  *  
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 
 public class BundleException extends Exception
@@ -96,7 +96,7 @@ public class BundleException extends Exception
      *
      * @return  The cause of this exception or <tt>null</tt> if no
      * cause was specified.
-     * @since 1.4 <b>EXPERIMENTAL</b>
+     * @since 1.3 <b>EXPERIMENTAL</b>
      */
     public Throwable getCause() {
         return cause;
@@ -108,7 +108,7 @@ public class BundleException extends Exception
      * @throws java.lang.IllegalStateException 
      * This method will always throw an <tt>IllegalStateException</tt>
      * since the cause of this exception can only be set when constructed.
-     * @since 1.4 <b>EXPERIMENTAL</b>
+     * @since 1.3 <b>EXPERIMENTAL</b>
      */
     public Throwable initCause(Throwable cause) {
     	throw new IllegalStateException();

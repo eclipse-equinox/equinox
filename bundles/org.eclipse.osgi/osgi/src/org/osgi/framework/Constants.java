@@ -1,5 +1,5 @@
 /*
- * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/Constants.java,v 1.15 2004/05/03 14:59:18 twatson Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/Constants.java,v 1.16 2004/05/07 21:40:52 hargrave Exp $
  *
  * Copyright (c) The Open Services Gateway Initiative (2000, 2002).
  * All Rights Reserved.
@@ -35,7 +35,7 @@ package org.osgi.framework;
  * <p>The values associated with these keys are of type <tt>java.lang.String</tt>,
  * unless otherwise indicated.
  *
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  * @since 1.1
  * @see Bundle#getHeaders
  * @see BundleContext#getProperty
@@ -446,7 +446,7 @@ public interface Constants
 	 * identifying the bundle's symbolic name.
 	 * <p>The attribute value may be retrieved from the
 	 * <tt>Dictionary</tt> object returned by the <tt>Bundle.getHeaders</tt> method.
-	 * @since 1.4 <b>EXPERIMENTAL</b>
+	 * @since 1.3 <b>EXPERIMENTAL</b>
 	 */
 	public final static String BUNDLE_SYMBOLICNAME = "Bundle-SymbolicName";
 	
@@ -460,7 +460,7 @@ public interface Constants
 	 * <pre>
 	 * Bundle-SymbolicName: com.acme.module.test; singleton=true
 	 * </pre>
-	 * @since 1.4 <b>EXPERIMENTAL</b>
+	 * @since 1.3 <b>EXPERIMENTAL</b>
 	 */
 	public final static String SINGLETON_ATTRIBUTE = "singleton";
 	
@@ -469,7 +469,7 @@ public interface Constants
 	 * identifying the base name of the bundle's localization file.
 	 * <p>The attribute value may be retrieved from the
 	 * <tt>Dictionary</tt> object returned by the <tt>Bundle.getHeaders</tt> method.
-	 * @since 1.4 <b>EXPERIMENTAL</b>
+	 * @since 1.3 <b>EXPERIMENTAL</b>
 	 */
 	public final static String BUNDLE_LOCALIZATION = "Bundle-Localization";
 	
@@ -477,7 +477,7 @@ public interface Constants
 	 * Default value for the Bundle-Localization manifest header.
 	 * 
 	 * @see #BUNDLE_LOCALIZATION
-	 * @since 1.4 <b>EXPERIMENTAL</b>
+	 * @since 1.3 <b>EXPERIMENTAL</b>
 	 */
 	public final static String BUNDLE_LOCALIZATION_DEFAULT_BASENAME = "META-INF/bundle";
 
@@ -488,7 +488,7 @@ public interface Constants
 	 *
 	 * <p>The attribute value may be retrieved from the
 	 * <tt>Dictionary</tt> object returned by the <tt>Bundle.getHeaders</tt> method.
-	 * @since 1.4 <b>EXPERIMENTAL</b>
+	 * @since 1.3 <b>EXPERIMENTAL</b>
 	 */
 	public final static String PROVIDE_PACKAGE = "Provide-Package";
 
@@ -499,7 +499,7 @@ public interface Constants
 	 *
 	 * <p>The attribute value may be retrieved from the
 	 * <tt>Dictionary</tt> object returned by the <tt>Bundle.getHeaders</tt> method.
-	 * @since 1.4 <b>EXPERIMENTAL</b>
+	 * @since 1.3 <b>EXPERIMENTAL</b>
 	 */
 	public final static String REQUIRE_BUNDLE = "Require-Bundle";
 
@@ -520,7 +520,7 @@ public interface Constants
 	 * notation to specify a range of bundle versions.  A bundle-version
 	 * attribute value specified as a single version means a version range that includes any
 	 * bundle version greater than or equal to the specified version.
-	 * @since 1.4 <b>EXPERIMENTAL</b>
+	 * @since 1.3 <b>EXPERIMENTAL</b>
 	 */
 	public static final String BUNDLE_VERSION_ATTRIBUTE = "bundle-version";
 
@@ -536,7 +536,7 @@ public interface Constants
 	 * <pre>
 	 * Require-Bundle: com.acme.module.test; reprovide="true"
 	 * </pre>
-	 * @since 1.4 <b>EXPERIMENTAL</b>
+	 * @since 1.3 <b>EXPERIMENTAL</b>
 	 */
 	public final static String REPROVIDE_ATTRIBUTE = "reprovide";
 
@@ -553,7 +553,7 @@ public interface Constants
 	 * <pre>
 	 * Require-Bundle: com.acme.module.test; optional="true"
 	 * </pre>
-	 * @since 1.4 <b>EXPERIMENTAL</b>
+	 * @since 1.3 <b>EXPERIMENTAL</b>
 	 */
 	public final static String OPTIONAL_ATTRIBUTE = "optional";
 
@@ -573,7 +573,7 @@ public interface Constants
 	 * Require-Bundle: org.osgi.test;
 	 *  require-packages="org.osgi.test.pkg1,org.osgi.test.pkg2"
 	 * </pre>
-	 * @since 1.4 <b>EXPERIMENTAL</b>
+	 * @since 1.3 <b>EXPERIMENTAL</b>
 	 */
 	public final static String REQUIRE_PACKAGES_ATTRIBUTE = "require-packages";
 
@@ -584,7 +584,7 @@ public interface Constants
 	 *
 	 * <p>The attribute value may be retrieved from the
 	 * <tt>Dictionary</tt> object returned by the <tt>Bundle.getHeaders</tt> method.
-	 * @since 1.4 <b>EXPERIMENTAL</b>
+	 * @since 1.3 <b>EXPERIMENTAL</b>
 	 */
 	public final static String FRAGMENT_HOST = "Fragment-Host";
 
@@ -599,7 +599,7 @@ public interface Constants
 	 * <pre>
 	 * Fragment-Host: com.acme.module.test; multiple-hosts="false"
 	 * </pre>
-	 * @since 1.4 <b>EXPERIMENTAL</b>
+	 * @since 1.3 <b>EXPERIMENTAL</b>
 	 */
 	public final static String MULTIPLE_HOSTS_ATTRIBUTE = "multiple-hosts";
 
@@ -613,7 +613,7 @@ public interface Constants
 	 * Bundle-NativeCode: libgtk.so; selection-filter="(ws=gtk)"; ...
 	 * Bundle-ClassPath: base.jar, gtk.jar; selection-filter="(ws=gtk)", ...
 	 * </pre>
-	 * @since 1.4 <b>EXPERIMENTAL</b>
+	 * @since 1.3 <b>EXPERIMENTAL</b>
 	 */
 	public final static String SELECTION_FILTER_ATTRIBUTE = "selection-filter";
 }

@@ -1,5 +1,5 @@
 /*
- * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/service/packageadmin/PackageAdmin.java,v 1.10 2004/05/05 02:43:35 twatson Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/service/packageadmin/PackageAdmin.java,v 1.11 2004/05/07 21:40:52 hargrave Exp $
  *
  * Copyright (c) The Open Services Gateway Initiative (2001, 2002).
  * All Rights Reserved.
@@ -51,7 +51,7 @@ import org.osgi.framework.Bundle;
  * old values, <tt>isRemovalPending()</tt> returns <tt>true</tt>, and <tt>getExportingBundle()</tt>
  * and <tt>getImportingBundles()</tt> return <tt>null</tt>.
  *
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public interface PackageAdmin {
     /**
@@ -181,7 +181,7 @@ public interface PackageAdmin {
      * @param bundles The bundles to resolve or <tt>null</tt>
      * to resolve all unresolved bundles installed in the Framework.
      * @return <tt>true</tt> if all specified bundles are resolved;
-     * @since 1.4 <b>EXPERIMENTAL</b>
+     * @since 1.2 <b>EXPERIMENTAL</b>
      */
     public boolean resolveBundles(Bundle[] bundles);
 
@@ -194,7 +194,7 @@ public interface PackageAdmin {
      * @return An array of ProvidingBundles with the specified symbolic
      * name or <tt>null</tt> if no resolved bundles exist with that
      * symbolic name.
-     * @since 1.4 <b>EXPERIMENTAL</b>
+     * @since 1.2 <b>EXPERIMENTAL</b>
      */
     public ProvidingBundle[] getProvidingBundles(String symbolicName);
 
@@ -215,7 +215,7 @@ public interface PackageAdmin {
      * to the specified version range ordered in descending 
      * version order, 
      * or <tt>null</tt> if no bundles are found.
-     * @since 1.4 <b>EXPERIMENTAL</b>
+     * @since 1.2 <b>EXPERIMENTAL</b>
      */
     public Bundle[] getBundles(String symbolicName, String versionRange);
 
@@ -227,7 +227,7 @@ public interface PackageAdmin {
 	 * @param bundle The bundle whose attached fragment bundles are to be returned.
 	 * @return An array of fragment bundles or <tt>null</tt> if the bundle does not
 	 * have any attached fragment bundles.
-	 * @since 1.4 <b>EXPERIMENTAL</b>
+	 * @since 1.2 <b>EXPERIMENTAL</b>
 	 */
     public Bundle[] getFragments(Bundle bundle);
 
@@ -239,7 +239,7 @@ public interface PackageAdmin {
 	 * @param bundle The bundle whose host bundles are to be returned.
 	 * @return An array of host bundles or <tt>null</tt> if the bundle does not have any
 	 * host bundles.
-	 * @since 1.4 <b>EXPERIMENTAL</b>
+	 * @since 1.2 <b>EXPERIMENTAL</b>
 	 */
     public Bundle[] getHosts(Bundle bundle);
 
@@ -247,7 +247,7 @@ public interface PackageAdmin {
      * The bundle is a fragment bundle.
      * 
      * <p>The value of <tt>BUNDLE_TYPE_FRAGMENT</tt> is 0x00000001.
-     * @since 1.4 <b>EXPERIMENTAL</b>
+     * @since 1.2 <b>EXPERIMENTAL</b>
      */
     public static final int BUNDLE_TYPE_FRAGMENT = 0x00000001;
 
@@ -266,7 +266,7 @@ public interface PackageAdmin {
 	 * is returned.
 	 * 
 	 * @return The special type of the bundle.
-	 * @since 1.4 <b>EXPERIMENTAL</b>
+	 * @since 1.2 <b>EXPERIMENTAL</b>
 	 */
     public int getBundleType(Bundle bundle);
 }
