@@ -17,7 +17,6 @@ import java.util.Enumeration;
 import org.eclipse.osgi.framework.adaptor.BundleData;
 import org.eclipse.osgi.framework.adaptor.BundleWatcher;
 import org.eclipse.osgi.framework.debug.Debug;
-import org.eclipse.osgi.framework.stats.StatsManager;
 import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.osgi.framework.*;
 
@@ -308,7 +307,7 @@ public class BundleHost extends AbstractBundle {
 				if (getStartLevel() <= framework.startLevelManager.getStartLevel()) {
 					//STARTUP TIMING Start here					
 					if (Debug.DEBUG) {
-						if (StatsManager.MONITOR_ACTIVATION) {
+						if (Debug.MONITOR_ACTIVATION) {
 							BundleWatcher bundleStats = framework.adaptor.getBundleWatcher();
 							if (bundleStats != null)
 								bundleStats.startActivation(this);
@@ -351,7 +350,7 @@ public class BundleHost extends AbstractBundle {
 				}
 			} finally {
 				if (Debug.DEBUG && state == ACTIVE) {
-					if (StatsManager.MONITOR_ACTIVATION) {
+					if (Debug.MONITOR_ACTIVATION) {
 						BundleWatcher bundleStats = framework.adaptor.getBundleWatcher();
 						if (bundleStats != null)
 							bundleStats.endActivation(this);

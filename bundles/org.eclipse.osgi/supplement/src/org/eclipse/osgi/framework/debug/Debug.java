@@ -28,6 +28,7 @@ public class Debug {
 	public static boolean DEBUG_STARTLEVEL = false; // "debug.startlevel"
 	public static boolean DEBUG_PACKAGEADMIN = false; // "debug.packageadmin"
 	public static boolean DEBUG_PACKAGEADMIN_TIMING = false; //"debug.packageadmin/timing"
+	public static boolean MONITOR_ACTIVATION = false; // "monitor/bundles"
 
 	public static final String ECLIPSE_OSGI = "org.eclipse.osgi"; //$NON-NLS-1$
 	public static final String OPTION_DEBUG_GENERAL = ECLIPSE_OSGI + "/debug"; //$NON-NLS-1$
@@ -59,6 +60,7 @@ public class Debug {
 			DEBUG_STARTLEVEL = dbgOptions.getBooleanOption(OPTION_DEBUG_STARTLEVEL, false);
 			DEBUG_PACKAGEADMIN = dbgOptions.getBooleanOption(OPTION_DEBUG_PACKAGEADMIN, false);
 			DEBUG_PACKAGEADMIN_TIMING = dbgOptions.getBooleanOption(OPTION_DEBUG_PACKAGEADMIN_TIMING, false) || dbgOptions.getBooleanOption("org.eclipse.core.runtime/debug", false); //$NON-NLS-1$
+			MONITOR_ACTIVATION = dbgOptions.getBooleanOption(OPTION_MONITOR_ACTIVATION, false);
 		}
 	}
 	public static PrintStream out = System.out;
