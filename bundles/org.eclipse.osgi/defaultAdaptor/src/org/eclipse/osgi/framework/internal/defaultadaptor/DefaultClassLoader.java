@@ -159,6 +159,19 @@ public class DefaultClassLoader extends org.eclipse.osgi.framework.adaptor.Bundl
 					bundlefile = BundleFile.createBundleFile((BundleFile.ZipBundleFile) bundledata.getBaseBundleFile(), cp);
 			}
 		}
+
+		// if in dev mode, try using the cp as an absolute path
+		if (bundlefile == null && DevClassPathHelper.inDevelopmentMode()){
+			file = new File(cp);
+			if (file.exists() && file.isAbsolute())
+				// if the file exists and is absolute then create BundleFile for it.
+				try {
+					bundlefile = BundleFile.createBundleFile(file,bundledata);
+				} catch (IOException e) {
+					bundledata.getAdaptor().getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, bundledata.getBundle(), e);
+				}
+		}
+
 		if (bundlefile != null)
 			return new ClasspathEntry(bundlefile, domain);
 		else
@@ -430,7 +443,7 @@ public class DefaultClassLoader extends org.eclipse.osgi.framework.adaptor.Bundl
 		ArrayList result = new ArrayList(10);
 
 		// If not in dev mode then just add the regular classpath entries and return
-		if (!DevClassPathHelper.inDevelopmentMode) {
+		if (!DevClassPathHelper.inDevelopmentMode()) {
 			for (int i = 0; i < classpath.length; i++)
 				findClassPathEntry(result, classpath[i], bundledata, domain);
 			return (ClasspathEntry[]) result.toArray(new ClasspathEntry[result.size()]);
