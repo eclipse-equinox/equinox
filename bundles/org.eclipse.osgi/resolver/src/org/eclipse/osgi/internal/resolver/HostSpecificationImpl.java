@@ -23,8 +23,7 @@ public class HostSpecificationImpl extends VersionConstraintImpl implements Host
 		BundleDescription candidate = (BundleDescription) supplier;
 		if (candidate.getHost() != null)
 			return false;
-		if (getName() != null && getName().equals(candidate.getSymbolicName()) &&
-				(getVersionRange() == null || getVersionRange().isIncluded(candidate.getVersion())))
+		if (getName() != null && getName().equals(candidate.getSymbolicName()) && (getVersionRange() == null || getVersionRange().isIncluded(candidate.getVersion())))
 			return true;
 		return false;
 	}
@@ -47,4 +46,11 @@ public class HostSpecificationImpl extends VersionConstraintImpl implements Host
 	public String toString() {
 		return "Fragment-Host: " + getName() + " - version: " + getVersionRange(); //$NON-NLS-1$ //$NON-NLS-2$
 	}
+
+	public BaseDescription getSupplier() {
+		if (hosts == null || hosts.length == 0)
+			return null;
+		return hosts[0];
+	}
+
 }
