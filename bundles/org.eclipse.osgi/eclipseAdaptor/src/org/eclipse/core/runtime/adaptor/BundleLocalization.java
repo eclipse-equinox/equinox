@@ -12,13 +12,13 @@ package org.eclipse.core.runtime.adaptor;
 import java.util.ResourceBundle;
 import org.osgi.framework.Bundle;
 
-/*
+/**
  * The implementation of the service that gets ResourceBundle objects from a given 
  * bundle with a given locale. 
  */
 
 public class BundleLocalization implements org.eclipse.osgi.service.localization.BundleLocalization {
-	/*
+	/**
 	 * The getLocalization method gets a ResourceBundle object for the given
 	 * locale and bundle.
 	 * 

@@ -13,12 +13,12 @@ package org.eclipse.osgi.service.localization;
 import java.util.ResourceBundle;
 import org.osgi.framework.Bundle;
 
-/*
+/**
  * The interface of the service that gets ResourceBundle objects from a given 
  * bundle with a given locale. 
  */
 public interface BundleLocalization {
-	/*
+	/**
 	 * The getLocalization method gets a ResourceBundle object for the given
 	 * locale and bundle.
 	 * 

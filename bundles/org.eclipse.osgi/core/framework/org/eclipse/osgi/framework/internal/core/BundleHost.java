@@ -34,7 +34,7 @@ public class BundleHost extends Bundle {
 	protected BundleContext context;
 
 	/** The List of BundleFragments */
-	protected Vector fragments;
+	protected Vector fragments;	//TODO LinkList or an array...
 
 	public BundleHost(BundleData bundledata, String location, Framework framework, int startLevel) throws BundleException {
 		super(bundledata, location, framework, startLevel);
