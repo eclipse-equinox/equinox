@@ -12,6 +12,7 @@ package org.eclipse.core.runtime.adaptor;
 
 import java.io.*;
 import java.nio.channels.FileLock;
+import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 
 //TODO shouldn't it be LockerJavaNIO instead?
 public class Locker_JavaNio implements Locker {
@@ -25,7 +26,19 @@ public class Locker_JavaNio implements Locker {
 
 	public synchronized boolean lock() throws IOException {
 		fileStream = new FileOutputStream(lockFile, true);
-		fileLock = fileStream.getChannel().tryLock();
+		try {
+			fileLock = fileStream.getChannel().tryLock();
+		} catch (IOException ioe) {
+			// log the original exception if debugging
+			if (BasicLocation.DEBUG) {
+				String basicMessage = EclipseAdaptorMsg.formatter.getString("location.cannotLock", lockFile); //$NON-NLS-1$
+				FrameworkLogEntry basicEntry = new FrameworkLogEntry(EclipseAdaptor.FRAMEWORK_SYMBOLICNAME, basicMessage, 0, ioe, null);
+				EclipseAdaptor.getDefault().getFrameworkLog().log(basicEntry);
+			}
+			// produce a more specific message for clients
+			String specificMessage = EclipseAdaptorMsg.formatter.getString("location.cannotLockNIO", new Object[] {lockFile, ioe.getMessage(), BasicLocation.PROP_OSGI_LOCKING}); //$NON-NLS-1$			
+			throw new IOException(specificMessage);
+		}
 		if (fileLock != null)
 			return true;
 		fileStream.close();

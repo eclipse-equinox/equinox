@@ -221,7 +221,7 @@ public class FileManager {
 	 * 
 	 * @param target the managed file to lookup
 	 * @param add indicate whether the file should be added to the manager if it is not managed.
-	 * @throws IOException if the add if set to true and the addition of the file failed
+	 * @throws IOException if the add flag is set to true and the addition of the file failed
 	 * @return the absolute file location to use for the given file or
 	 *               <code>null</code> if the given target is not managed
 	 */

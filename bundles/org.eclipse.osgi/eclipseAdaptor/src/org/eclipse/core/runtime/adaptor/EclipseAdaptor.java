@@ -54,6 +54,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 	private static final String OPTION_MONITOR_PLATFORM_ADMIN = RUNTIME_ADAPTOR + "/resolver/timing"; //$NON-NLS-1$
 	private static final String OPTION_RESOLVER_READER = RUNTIME_ADAPTOR + "/resolver/reader/timing"; //$NON-NLS-1$
 	private static final String OPTION_CONVERTER = RUNTIME_ADAPTOR + "/converter/debug"; //$NON-NLS-1$
+	private static final String OPTION_LOCATION = RUNTIME_ADAPTOR + "/debug/location"; //$NON-NLS-1$	
 
 	public static final byte BUNDLEDATA_VERSION = 9;
 	public static final byte NULL = 0;
@@ -242,6 +243,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		StateManager.DEBUG_PLATFORM_ADMIN = options.getBooleanOption(OPTION_PLATFORM_ADMIN, false);
 		StateManager.DEBUG_PLATFORM_ADMIN_RESOLVER = options.getBooleanOption(OPTION_PLATFORM_ADMIN_RESOLVER, false);
 		PluginConverterImpl.DEBUG = options.getBooleanOption(OPTION_CONVERTER, false);
+		BasicLocation.DEBUG =  options.getBooleanOption(OPTION_LOCATION, false);
 	}
 
 	private void registerEndorsedXMLParser() {

@@ -35,8 +35,9 @@ public class BasicLocation implements Location {
 	// locking related fields
 	private File lockFile;
 	private Locker locker;
-	private static final String PROP_OSGI_LOCKING = "osgi.locking"; //$NON-NLS-1$
+	public static final String PROP_OSGI_LOCKING = "osgi.locking"; //$NON-NLS-1$
 	private static String LOCK_FILENAME = ".metadata/.lock"; //$NON-NLS-1$
+	public static boolean DEBUG;
 
 	private static boolean isRunningWithNio() {
 		try {
