@@ -1,5 +1,5 @@
 /*
- * $Header$
+ * $Header: /cvshome/build/org.osgi.service.condpermadmin/src/org/osgi/service/condpermadmin/BundleSymbolicNameCondition.java,v 1.1 2005/02/28 18:10:29 breed Exp $
  * 
  * Copyright (c) OSGi Alliance (2005). All Rights Reserved.
  * 
@@ -42,7 +42,7 @@ import org.osgi.framework.InvalidSyntaxException;
  * condition is immutable since the bundle symbolic name cannot change after
  * the bundle has been installed.
  * 
- * @version $Revision$
+ * @version $Revision: 1.1 $
  */
 public class BundleSymbolicNameCondition implements Condition {
 	private boolean	satisfied;

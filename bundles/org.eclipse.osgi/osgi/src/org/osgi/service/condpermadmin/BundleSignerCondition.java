@@ -1,5 +1,5 @@
 /*
- * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/service/condpermadmin/BundleSignerCondition.java,v 1.1 2005/02/24 18:38:38 twatson Exp $
+ * $Header: /cvshome/build/org.osgi.service.condpermadmin/src/org/osgi/service/condpermadmin/BundleSignerCondition.java,v 1.1 2005/02/28 18:10:29 breed Exp $
  * 
  * Copyright (c) OSGi Alliance (2005). All Rights Reserved.
  * 
