@@ -35,6 +35,10 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		bundle.setSingleton(singleton);
 		return bundle;		
 	}
+	public BundleDescription createBundleDescription(long id, String globalName, Version version, String location, BundleSpecification[] required, HostSpecification[] hosts,PackageSpecification[] packages, String[] providedPackages, boolean singleton) {
+		HostSpecification host = hosts == null || hosts.length == 0 ? null : hosts[1];
+		return createBundleDescription(id, globalName, version, location, required, host, packages, providedPackages, singleton);
+	}
 	public BundleDescription createBundleDescription(BundleDescription original) {
 		BundleDescriptionImpl bundle = new BundleDescriptionImpl();
 		bundle.setBundleId(original.getBundleId());

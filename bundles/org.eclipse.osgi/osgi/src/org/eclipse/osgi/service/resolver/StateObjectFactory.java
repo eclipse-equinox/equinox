@@ -51,8 +51,29 @@ public interface StateObjectFactory {
 	 * <code>null</code>)
 	 * @param singleton whether the bundle created should be a singleton
 	 * @return the created bundle description
+	 * @deprecated use another version of createBundleDescription
 	 */
 	public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location, BundleSpecification[] required, HostSpecification host, PackageSpecification[] packages, String[] providedPackages, boolean singleton);
+	/**
+	 * Creates a bundle description from the given parameters.
+	 * 
+	 * @param id id for the bundle 
+	 * @param symbolicName symbolic name for the bundle (may be 
+	 * <code>null</code>) 
+	 * @param version version for the bundle (may be <code>null</code>)
+	 * @param location location for the bundle
+	 * @param required version constraints for all required bundles (may be 
+	 * <code>null</code>)
+	 * @param hosts version constraints specifying the hosts for the bundle to be  
+	 * created (may be <code>null</code>)
+	 * @param packages version constraints for all packages imported and 
+	 * exported (may be <code>null</code>)
+	 * @param providedPackages names of all provided packages (may be 
+	 * <code>null</code>)
+	 * @param singleton whether the bundle created should be a singleton
+	 * @return the created bundle description
+	 */	
+	public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location, BundleSpecification[] required, HostSpecification[] hosts, PackageSpecification[] packages, String[] providedPackages, boolean singleton);	
 	/**
 	 * Returns a bundle description based on the information in the supplied manifest dictionary.
 	 * The manifest should contain String keys and String values which correspond to 

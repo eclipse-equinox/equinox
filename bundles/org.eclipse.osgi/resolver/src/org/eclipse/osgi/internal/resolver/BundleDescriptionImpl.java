@@ -60,6 +60,9 @@ public class BundleDescriptionImpl implements BundleDescription, KeyedElement {
 	public HostSpecification getHost() {
 		return host;
 	}
+	public HostSpecification[] getHosts() {		
+		return host == null ? new HostSpecification[0] : new HostSpecification[] {host};
+	}	
 	public void setContainingState(State value) {
 		containingState = value;
 	}
