@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003 IBM Corporation and others.
+ * Copyright (c) 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,7 +23,7 @@ import org.osgi.framework.ServiceRegistration;
 /**
  * A default implementation of the ServiceRegistry.
  */
-public class ServiceRegistry implements org.eclipse.osgi.framework.adaptor.ServiceRegistry {
+public class ServiceRegistryImpl implements org.eclipse.osgi.framework.adaptor.ServiceRegistry {
 
 	/** Published services by class name. Key is a String class name; Value is a Vector of ServiceRegistrations */
 	protected Hashtable publishedServicesByClass;

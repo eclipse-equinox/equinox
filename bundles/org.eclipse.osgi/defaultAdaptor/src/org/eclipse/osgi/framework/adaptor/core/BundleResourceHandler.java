@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.osgi.framework.internal.defaultadaptor;
+package org.eclipse.osgi.framework.adaptor.core;
 
 import java.io.IOException;
 import java.net.*;
@@ -17,9 +17,8 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
 
-import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.internal.core.Bundle;
-import org.eclipse.osgi.framework.internal.protocol.ProtocolActivator;
+import org.eclipse.osgi.framework.internal.defaultadaptor.AdaptorMsg;
 import org.osgi.framework.AdminPermission;
 import org.osgi.framework.BundleContext;
 
@@ -27,10 +26,10 @@ import org.osgi.framework.BundleContext;
  * URLStreamHandler the bundleentry and bundleresource protocols.
  */
 
-public abstract class BundleResourceHandler extends URLStreamHandler implements ProtocolActivator
+public abstract class BundleResourceHandler extends URLStreamHandler
 {
 	public static final String SECURITY_AUTHORIZED = "SECURITY_AUTHORIZED";
-	protected BundleContext context;
+	protected static BundleContext context;
 	protected BundleEntry bundleEntry;
 
 	/** Single object for permission checks */
@@ -43,8 +42,7 @@ public abstract class BundleResourceHandler extends URLStreamHandler implements 
     {
     }
 
-    public BundleResourceHandler(BundleEntry bundleEntry, BundleContext context) {
-    	this.context = context;
+    public BundleResourceHandler(BundleEntry bundleEntry) {
     	this.bundleEntry = bundleEntry;
     }
 
@@ -207,8 +205,8 @@ public abstract class BundleResourceHandler extends URLStreamHandler implements 
         return (result.toString());
     }
 
-	public void start(BundleContext context, FrameworkAdaptor adaptor) {
-		this.context = context;
+	public static void setContext(BundleContext context) {
+		BundleResourceHandler.context = context;
 	}
 
 	protected int hashCode(URL url) {

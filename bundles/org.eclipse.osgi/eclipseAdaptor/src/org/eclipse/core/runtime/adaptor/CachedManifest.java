@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003 IBM Corporation and others.
+ * Copyright (c) 2003, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -63,7 +63,7 @@ public class CachedManifest extends Dictionary {
 			return bundledata.isLegacy();
 		// TODO Remove use of deprecated BUNDLE_GLOBALNAME
 		if (Constants.BUNDLE_GLOBALNAME.equalsIgnoreCase(keyString) || Constants.BUNDLE_SYMBOLICNAME.equalsIgnoreCase(keyString))
-			return bundledata.getUniqueId();
+			return bundledata.getSymbolicName();
 		return getManifest().get(key);
 	}
 

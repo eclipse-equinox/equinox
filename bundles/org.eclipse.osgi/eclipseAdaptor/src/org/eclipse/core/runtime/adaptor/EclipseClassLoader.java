@@ -16,10 +16,9 @@ import java.util.ArrayList;
 
 import org.eclipse.osgi.framework.adaptor.BundleData;
 import org.eclipse.osgi.framework.adaptor.ClassLoaderDelegate;
+import org.eclipse.osgi.framework.adaptor.core.*;
 import org.eclipse.osgi.framework.internal.core.Msg;
 import org.eclipse.osgi.framework.internal.defaultadaptor.*;
-import org.eclipse.osgi.framework.internal.defaultadaptor.DefaultBundleData;
-import org.eclipse.osgi.framework.internal.defaultadaptor.DefaultClassLoader;
 import org.eclipse.osgi.framework.stats.ClassloaderStats;
 import org.eclipse.osgi.framework.stats.ResourceBundleStats;
 import org.osgi.framework.*;
@@ -113,7 +112,7 @@ public class EclipseClassLoader extends DefaultClassLoader {
 		return result;
 	}
 	
-	protected void findClassPathEntry(ArrayList result, String entry, DefaultBundleData bundledata, ProtectionDomain domain) {
+	protected void findClassPathEntry(ArrayList result, String entry, AbstractBundleData bundledata, ProtectionDomain domain) {
 		String var = hasPrefix(entry);
 		if (var == null) {
 			super.findClassPathEntry(result, entry, bundledata, domain);

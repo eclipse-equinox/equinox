@@ -16,15 +16,15 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Dictionary;
+
+import org.eclipse.osgi.framework.adaptor.core.*;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.internal.defaultadaptor.*;
 import org.eclipse.osgi.framework.util.Headers;
-import org.eclipse.osgi.service.resolver.Version;
 import org.osgi.framework.BundleException;
 
 public class EclipseBundleData extends DefaultBundleData {
 
-	private URL base;
 	private static String[] libraryVariants = null;
 
 	/** data to detect modification made in the manifest */
@@ -65,25 +65,18 @@ public class EclipseBundleData extends DefaultBundleData {
 		super(adaptor, id);
 	}
 
-	public void initializeNewBundle(String location, String fileName, boolean reference, File file) throws IOException {
-		this.location = location;
-		this.fileName = fileName;
-		this.reference = reference;
-		this.file = file;
+	public void initializeExistingBundle() throws IOException {
+		File delete = new File(getBundleStoreDir(), ".delete");
 
-		setStartLevel(adaptor.getInitialBundleStartLevel());
-		bundleFile = BundleFile.createBundleFile(file, this);
-		loadFromManifest();
-		initializeBase(location);
-	}
-
-	public void initializeExistingBundle(String directory) throws IOException {
-		
-		file = reference ? new File(fileName) : new File(dirGeneration, fileName);
-		bundleFile = BundleFile.createBundleFile(file,this);
-		if (! checkManifestTimeStamp(bundleFile))
+		/* and the directory is not marked for delete */
+		if (delete.exists()) 
 			throw new IOException();
-		initializeBase(location);
+
+		setGenerationDir(new File(getBundleStoreDir(), String.valueOf(getGeneration())));
+		setBaseFile(isReference() ? new File(getFileName()) : new File(createGenerationDir(), getFileName()));
+		createBaseBundleFile();
+		if (! checkManifestTimeStamp(baseBundleFile))
+			throw new IOException();
 	}
 
 	private boolean checkManifestTimeStamp(BundleFile bundlefile) {
@@ -103,20 +96,6 @@ public class EclipseBundleData extends DefaultBundleData {
 			pluginManifestEntry = bundlefile.getEntry(FRAGMENT_MANIFEST);
 		// if we have one, check timestamp - if we don't this guy is not anything we know 
 		return pluginManifestEntry != null && pluginManifestEntry.getTime() == getManifestTimeStamp();
-	}
-
-	private void initializeBase(String location) throws IOException {
-		if (!location.endsWith("/"))
-			location += "/";
-		try {
-			base = new URL(location);
-			if (base.getProtocol().equals("reference"))
-				base = new URL(base.getFile());
-		}
-		catch (MalformedURLException e) {
-			base = null;
-		}
-
 	}
 
 	/**
@@ -153,7 +132,7 @@ public class EclipseBundleData extends DefaultBundleData {
 
 	private String searchVariants(String[] variants, String path) {
 		for (int i = 0; i < variants.length; i++) {
-			BundleEntry libEntry = bundleFile.getEntry(variants[i] + path);
+			BundleEntry libEntry = baseBundleFile.getEntry(variants[i] + path);
 			if (libEntry == null) {
 				//					if (DEBUG && DEBUG_SHOW_FAILURE)
 				//						debug("not found " + variants[i] + path);
@@ -162,7 +141,7 @@ public class EclipseBundleData extends DefaultBundleData {
 				//					if (DEBUG && DEBUG_SHOW_SUCCESS)
 				//						debug("found " + path + " as " +
 				// variants[i] + path); //$NON-NLS-1$ //$NON-NLS-2$
-				File libFile = bundleFile.getFile(variants[i] + path);
+				File libFile = baseBundleFile.getFile(variants[i] + path);
 				return libFile.getAbsolutePath();
 			}
 		}
@@ -223,7 +202,7 @@ public class EclipseBundleData extends DefaultBundleData {
 	
 	private Dictionary generateManifest() throws BundleException {
 		PluginConverterImpl converter = PluginConverterImpl.getDefault();
-		File location = findPluginManifest(file);
+		File location = findPluginManifest(getBaseFile());
 		if (location == null)
 			return null;
 
@@ -245,22 +224,12 @@ public class EclipseBundleData extends DefaultBundleData {
 			throw new BundleException("Error reading manifest: " + getLocation(), e);
 		}		
 	}
-	public void save() {
-		// do nothing.  This method is here to override one in the superclass.
-	}
 
-	protected void loadMetaData() {
-		// do nothing.  This method is here to override one in the superclass.
-	}
-
-	protected void loadFromMetaData() {
-		// do nothing.  This method is here to override one in the superclass.
-	}
 	protected void loadFromManifest() throws IOException{
 		try {
 			getManifest(true);
 		} catch (BundleException e) {
-			throw new IOException("Unable to properly read manifest for: " + location);
+			throw new IOException("Unable to properly read manifest for: " + getLocation());
 		}
 		super.loadFromManifest();
 		pluginClass = (String)manifest.get("Plugin-Class");
@@ -278,33 +247,6 @@ public class EclipseBundleData extends DefaultBundleData {
 	}
 	public void setPluginClass(String value) {
 		pluginClass = value;
-	}
-	public void setLocation(String value) {
-		this.location = value;
-	}
-	public void setName(String value) {
-		this.fileName = value;
-	}
-	public void setUniqueId(String value){
-		this.uniqueId = value;
-	}
-	public void setVersion(Version value){
-		this.version = value;
-	}
-	public void setActivator(String value){
-		this.activator = value;
-	}
-	public void setClassPath(String value){
-		this.classpath = value;
-	}
-	public void setFragment(boolean value){
-		this.isFragment = value;
-	}
-	public void setExecutionEnvironment(String value) {
-		this.executionEnvironment = value;
-	}
-	public void setDynamicImports(String value) {
-		this.dynamicImports = value;
 	}
 	public long getManifestTimeStamp() {
 		return manifestTimeStamp;

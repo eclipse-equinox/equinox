@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003 IBM Corporation and others.
+ * Copyright (c) 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,11 +15,15 @@ import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Properties;
+
+import org.eclipse.osgi.framework.adaptor.BundleData;
 import org.eclipse.osgi.framework.adaptor.EventPublisher;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
+import org.eclipse.osgi.framework.adaptor.IBundleStats;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.internal.core.Msg;
+import org.eclipse.osgi.framework.util.Headers;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 
@@ -29,12 +33,15 @@ import org.osgi.framework.BundleException;
  */
 public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 
+	/** Name of the Adaptor manifest file */
+	protected final String ADAPTOR_MANIFEST = "ADAPTOR.MF";
+
 	protected EventPublisher eventPublisher;
 
 	/**
 	 * The ServiceRegistry object for this FrameworkAdaptor.
 	 */
-	protected ServiceRegistry serviceRegistry;
+	protected ServiceRegistryImpl serviceRegistry;
 
 	/**
 	 * The Properties object for this FrameworkAdaptor
@@ -70,6 +77,10 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 	 * The initial bundle start level.
 	 */
 	protected int initialBundleStartLevel = 1;
+
+	/** This adaptor's manifest file */
+	protected Headers manifest = null;
+
 	/**
 	 * Initializes the ServiceRegistry, loads the properties for this
 	 * FrameworkAdaptor and initializes all the Vector and Hashtable capacity,
@@ -78,9 +89,10 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 	 */
 	public void initialize(EventPublisher eventPublisher) {
 		this.eventPublisher = eventPublisher;
-		serviceRegistry = new ServiceRegistry();
+		serviceRegistry = new ServiceRegistryImpl();
 		serviceRegistry.initialize();
 		loadProperties();
+		readAdaptorManifest();
 		vic = 10;
 		vci = 10;
 		hic = 10;
@@ -156,6 +168,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 	public void frameworkStart(BundleContext context) throws BundleException
 	{
 		this.context = context;
+		BundleResourceHandler.setContext(context);
 	}
 
 	/**
@@ -164,6 +177,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 	public void frameworkStop(BundleContext context) throws BundleException
 	{
 		this.context = null;
+		BundleResourceHandler.setContext(null);
 	}
 
 	/**
@@ -171,7 +185,9 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 	 */
 	public String getExportPackages()
 	{
-		return null;
+		if (manifest == null)
+			return null;
+		return (String) manifest.get(Constants.EXPORT_PACKAGE);
 	}
 
 	/**
@@ -179,7 +195,15 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 	 */
 	public String getExportServices()
 	{
-		return null;
+		if (manifest == null)
+			return null;
+		return (String) manifest.get(Constants.EXPORT_SERVICE);
+	}
+
+	public String getProvidePackages() {
+		if (manifest == null)
+			return null;
+		return (String) manifest.get(Constants.PROVIDE_PACKAGE);
 	}
 
 	/**
@@ -188,6 +212,18 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 	 */
 	public EventPublisher getEventPublisher(){
 		return eventPublisher;
+	}
+
+	public int getInitialBundleStartLevel() {
+		return initialBundleStartLevel;
+	}
+
+	public void setInitialBundleStartLevel(int value) {
+		initialBundleStartLevel = value;
+	}
+
+	public IBundleStats getBundleStats() {
+		return null;
 	}
 
 	/**
@@ -253,13 +289,111 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 			}
 		}
 	}
-	
-	public int getInitialBundleStartLevel() {
-		return initialBundleStartLevel;
+
+	/**
+	 * Reads and initializes the adaptor BundleManifest object.  The
+	 * BundleManifest is used by the getExportPackages() and getExportServices()
+	 * methods of the adpator.
+	 */
+	protected void readAdaptorManifest() {
+		InputStream in = null;
+		// walk up the class hierarchy until we find the ADAPTOR_MANIFEST.
+		Class adaptorClazz = getClass();
+		while (in == null && AbstractFrameworkAdaptor.class.isAssignableFrom(adaptorClazz) ) {
+			in = adaptorClazz.getResourceAsStream(ADAPTOR_MANIFEST);
+			adaptorClazz = adaptorClazz.getSuperclass();
+		}
+
+		if (in == null) {
+			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+				Debug.println("Unable to find adaptor bundle manifest " + ADAPTOR_MANIFEST);
+			}
+			manifest = new Headers(new Properties());
+			return;
+		}
+		try {
+			manifest = Headers.parseManifest(in);
+		} catch (BundleException e) {
+			Debug.println("Unable to read adaptor bundle manifest " + ADAPTOR_MANIFEST);
+		}
 	}
 
-	public void setInitialBundleStartLevel(int value) {
-		initialBundleStartLevel = value;
+	public BundleData createSystemBundleData() throws BundleException{
+		return new SystemBundleData(this);
+	}
+
+	abstract public AdaptorElementFactory getElementFactory();
+
+	/**
+	 * Does a recursive copy of one directory to another.
+	 * @param inDir input directory to copy.
+	 * @param outDir output directory to copy to.
+	 * @throws IOException if any error occurs during the copy.
+	 */
+	public static void copyDir(File inDir, File outDir) throws IOException{
+		String[] files = inDir.list();
+		if (files != null && files.length>0) {
+			outDir.mkdir();
+			for (int i=0; i<files.length; i++) {
+				File inFile = new File(inDir,files[i]);
+				File outFile = new File(outDir,files[i]);
+				if (inFile.isDirectory()) {
+					copyDir(inFile,outFile);
+				}
+				else {
+					InputStream in = new FileInputStream(inFile);
+					readFile(in,outFile);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Read a file from an InputStream and write it to the file system.
+	 *
+     * @param is InputStream from which to read.
+     * @param file output file to create.
+     * @exception IOException
+     */
+	public static void readFile(InputStream in, File file) throws IOException {
+		FileOutputStream fos = null;
+		try {
+			fos = new FileOutputStream(file);
+
+			byte buffer[] = new byte[1024];
+			int count;
+			while ((count = in.read(buffer, 0, buffer.length)) > 0) {
+				fos.write(buffer, 0, count);
+			}
+
+			fos.close();
+			fos = null;
+
+			in.close();
+			in = null;
+		} catch (IOException e) {
+			// close open streams
+			if (fos != null) {
+				try {
+					fos.close();
+				} catch (IOException ee) {
+				}
+			}
+
+			if (in != null) {
+				try {
+					in.close();
+				} catch (IOException ee) {
+				}
+			}
+
+			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+				Debug.println("Unable to read file");
+				Debug.printStackTrace(e);
+			}
+
+			throw e;
+		}
 	}
 
 }

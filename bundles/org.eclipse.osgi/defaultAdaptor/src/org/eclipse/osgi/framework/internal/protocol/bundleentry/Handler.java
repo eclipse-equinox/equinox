@@ -11,13 +11,14 @@
 
 package org.eclipse.osgi.framework.internal.protocol.bundleentry;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
+
+import org.eclipse.osgi.framework.adaptor.core.AbstractBundleData;
+import org.eclipse.osgi.framework.adaptor.core.BundleEntry;
+import org.eclipse.osgi.framework.adaptor.core.BundleResourceHandler;
 import org.eclipse.osgi.framework.internal.core.Bundle;
-import org.eclipse.osgi.framework.internal.defaultadaptor.*;
-import org.eclipse.osgi.framework.internal.defaultadaptor.BundleEntry;
-import org.eclipse.osgi.framework.internal.defaultadaptor.DefaultBundleData;
-import org.osgi.framework.BundleContext;
 
 /**
  * URLStreamHandler the bundleentry protocol.
@@ -34,14 +35,17 @@ public class Handler extends BundleResourceHandler
     	super();
     }
 
-    public Handler(BundleEntry bundleEntry, BundleContext context) {
-    	super(bundleEntry,context);
+    public Handler(BundleEntry bundleEntry) {
+    	super(bundleEntry);
     }
 
     protected BundleEntry findBundleEntry(URL url, Bundle bundle) throws IOException
     {
-		DefaultBundleData bundleData = (DefaultBundleData) bundle.getBundleData();
-		return bundleData.getBaseBundleFile().getEntry(url.getPath());
+		AbstractBundleData bundleData = (AbstractBundleData) bundle.getBundleData();
+		BundleEntry entry = bundleData.getBaseBundleFile().getEntry(url.getPath());
+		if (entry == null)
+			throw new FileNotFoundException(url.getPath());
+		return entry;
 
 	}
 

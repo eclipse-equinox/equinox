@@ -223,27 +223,18 @@ public class BundleLoader implements ClassLoaderDelegate {
 	}
 
 	/**
-	 * Close the the Bundle's file.
+	 * Close the the BundleLoader.
 	 *
 	 */
 	protected void close() {
 		if (bundle == null)
 			return;
-		BundleData bundleData = bundle.getBundleData();
 		importedPackages = null;
-		if (bundleData != null) {
-			if (classloader != null)
-				classloader.close();
-			classloader = null;
-			/* close the jar file */
-			try {
-				bundleData.close();
-			} catch (IOException e) {
-				if (Debug.DEBUG && Debug.DEBUG_LOADER)
-					Debug.println("IOException on close :" + e.getMessage());
-			}
-			bundle = null; /* This indicates the BundleLoader is destroyed */
-		}
+
+		if (classloader != null)
+			classloader.close();
+		classloader = null;
+		bundle = null; /* This indicates the BundleLoader is destroyed */
 	}
 
 	/**

@@ -15,10 +15,12 @@ import java.io.*;
 import java.net.URL;
 import java.security.ProtectionDomain;
 import java.util.*;
+
 import org.eclipse.osgi.framework.adaptor.ClassLoaderDelegate;
+import org.eclipse.osgi.framework.adaptor.core.AbstractBundleData;
+import org.eclipse.osgi.framework.adaptor.core.BundleEntry;
+import org.eclipse.osgi.framework.adaptor.core.BundleFile;
 import org.eclipse.osgi.framework.debug.Debug;
-import org.eclipse.osgi.framework.internal.core.Msg;
-import org.osgi.framework.BundleException;
 import org.osgi.framework.FrameworkEvent;
 
 /**
@@ -26,11 +28,32 @@ import org.osgi.framework.FrameworkEvent;
  * consolidates all Bundle-ClassPath entries into a single ClassLoader.
  */
 public class DefaultClassLoader extends org.eclipse.osgi.framework.adaptor.BundleClassLoader {
+	/** Development ClassPath entries */
+	static protected String[] devCP;
+
+	static {
+		// Check the osgi.dev property to see if dev classpath entries have been defined.
+		String osgiDev = System.getProperty("osgi.dev");
+		if (osgiDev != null) {
+			// Add each dev classpath entry
+			Vector devClassPath = new Vector(6);
+			StringTokenizer st = new StringTokenizer(osgiDev, ",");
+			while (st.hasMoreTokens()) {
+				String tok = st.nextToken();
+				if (!tok.equals("")) {
+					devClassPath.addElement(tok);
+				}
+			}
+			devCP = new String[devClassPath.size()];
+			devClassPath.toArray(devCP);
+		}
+	}
+
 
 	/**
 	 * The BundleData object for this BundleClassLoader
 	 */
-	protected DefaultBundleData hostdata;
+	protected AbstractBundleData hostdata;
 
 	/**
 	 * The ClasspathEntries for this BundleClassLoader.  Each ClasspathEntry object
@@ -55,7 +78,7 @@ public class DefaultClassLoader extends org.eclipse.osgi.framework.adaptor.Bundl
 	 * Bundle-ClassPath manifest entry.
 	 * @param bundledata The BundleData for this ClassLoader
 	 */
-	public DefaultClassLoader(ClassLoaderDelegate delegate, ProtectionDomain domain, String[] classpath, DefaultBundleData bundledata) {
+	public DefaultClassLoader(ClassLoaderDelegate delegate, ProtectionDomain domain, String[] classpath, AbstractBundleData bundledata) {
 		this(delegate, domain, classpath, null, bundledata);
 	}
 
@@ -69,14 +92,14 @@ public class DefaultClassLoader extends org.eclipse.osgi.framework.adaptor.Bundl
 	 * @param parent The parent ClassLoader.
 	 * @param bundledata The BundleData for this ClassLoader
 	 */
-	public DefaultClassLoader(ClassLoaderDelegate delegate, ProtectionDomain domain, String[] classpath, ClassLoader parent, DefaultBundleData bundledata) {
+	public DefaultClassLoader(ClassLoaderDelegate delegate, ProtectionDomain domain, String[] classpath, ClassLoader parent, AbstractBundleData bundledata) {
 		super(delegate, domain, classpath, parent);
 		this.hostdata = bundledata;
 
 		try {
 			hostdata.open(); /* make sure the BundleData is open */
 		} catch (IOException e) {
-			hostdata.adaptor.getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, hostdata.getBundle(), e);
+			hostdata.getAdaptor().getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, hostdata.getBundle(), e);
 		}
 	}
 
@@ -98,15 +121,15 @@ public class DefaultClassLoader extends org.eclipse.osgi.framework.adaptor.Bundl
 	 * Bundle-ClassPath manifest entry of the fragment.
 	 */
 	public void attachFragment(org.eclipse.osgi.framework.adaptor.BundleData bundledata, ProtectionDomain domain, String[] classpath) {
-		DefaultBundleData defaultBundledata = (DefaultBundleData) bundledata;
+		AbstractBundleData abstractbundledata = (AbstractBundleData) bundledata;
 		try {
 			bundledata.open(); /* make sure the BundleData is open */
 		} catch (IOException e) {
 
-			defaultBundledata.adaptor.getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, defaultBundledata.getBundle(), e);
+			abstractbundledata.getAdaptor().getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, abstractbundledata.getBundle(), e);
 		}
-		ClasspathEntry[] fragEntries = buildClasspath(classpath, defaultBundledata, domain);
-		FragmentClasspath fragClasspath = new FragmentClasspath(fragEntries, defaultBundledata, domain);
+		ClasspathEntry[] fragEntries = buildClasspath(classpath, abstractbundledata, domain);
+		FragmentClasspath fragClasspath = new FragmentClasspath(fragEntries, abstractbundledata, domain);
 		insertFragment(fragClasspath);
 	}
 
@@ -126,9 +149,9 @@ public class DefaultClassLoader extends org.eclipse.osgi.framework.adaptor.Bundl
 
 		// Find a place in the fragment list to insert this fragment.
 		int size = fragClasspaths.size();
-		long fragID = fragClasspath.bundledata.id;
+		long fragID = fragClasspath.bundledata.getBundleID();
 		for (int i = 0; i < size; i++) {
-			long otherID = ((FragmentClasspath) fragClasspaths.elementAt(i)).bundledata.id;
+			long otherID = ((FragmentClasspath) fragClasspaths.elementAt(i)).bundledata.getBundleID();
 			if (fragID < otherID) {
 				fragClasspaths.insertElementAt(fragClasspath, i);
 				return;
@@ -145,20 +168,20 @@ public class DefaultClassLoader extends org.eclipse.osgi.framework.adaptor.Bundl
 	 * @param domain The ProtectionDomain for the ClassPath entry.
 	 * @return The ClasspathEntry object for the ClassPath entry.
 	 */
-	protected ClasspathEntry getClasspath(String cp, DefaultBundleData bundledata, ProtectionDomain domain) {
+	protected ClasspathEntry getClasspath(String cp, AbstractBundleData bundledata, ProtectionDomain domain) {
 		BundleFile bundlefile = null;
-		File file = bundledata.bundleFile.getFile(cp);
+		File file = bundledata.getBaseBundleFile().getFile(cp);
 		if (file != null && file.exists()) {
 			try {
 				bundlefile = BundleFile.createBundleFile(file, bundledata);
 			} catch (IOException e) {
-				bundledata.adaptor.getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, bundledata.getBundle(), e);
+				bundledata.getAdaptor().getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, bundledata.getBundle(), e);
 			}
 		} else {
-			if (bundledata.bundleFile instanceof BundleFile.ZipBundleFile) {
+			if (bundledata.getBaseBundleFile() instanceof BundleFile.ZipBundleFile) {
 				// the classpath entry may be a directory in the bundle jar file.
-				if (bundledata.bundleFile.containsDir(cp))
-					bundlefile = BundleFile.createBundleFile((BundleFile.ZipBundleFile) bundledata.bundleFile, cp);
+				if (bundledata.getBaseBundleFile().containsDir(cp))
+					bundlefile = BundleFile.createBundleFile((BundleFile.ZipBundleFile) bundledata.getBaseBundleFile(), cp);
 			}
 		}
 		if (bundlefile != null)
@@ -305,7 +328,7 @@ public class DefaultClassLoader extends org.eclipse.osgi.framework.adaptor.Bundl
 		URL result = null;
 		for (int i = 0; i < classpathEntries.length; i++) {
 			if (classpathEntries[i] != null) {
-				result = findResourceImpl(name, classpathEntries[i].bundlefile, i);
+				result = findResourceImpl(name, classpathEntries[i].bundlefile);
 				if (result != null) {
 					return result;
 				}
@@ -317,7 +340,7 @@ public class DefaultClassLoader extends org.eclipse.osgi.framework.adaptor.Bundl
 			for (int i = 0; i < size; i++) {
 				FragmentClasspath fragCP = (FragmentClasspath) fragClasspaths.elementAt(i);
 				for (int j = 0; j < fragCP.classpathEntries.length; j++) {
-					result = findResourceImpl(name, fragCP.classpathEntries[j].bundlefile, j);
+					result = findResourceImpl(name, fragCP.classpathEntries[j].bundlefile);
 					if (result != null) {
 						return result;
 					}
@@ -331,11 +354,10 @@ public class DefaultClassLoader extends org.eclipse.osgi.framework.adaptor.Bundl
 	 * Looks in the specified BundleFile for the resource.
 	 * @param name The name of the resource to find,.
 	 * @param bundlefile The BundleFile to look in.
-	 * @param cpEntry The ClassPath entry index of the BundleFile.
 	 * @return A URL to the resource or null if the resource does not exist.
 	 */
-	protected URL findResourceImpl(String name, BundleFile bundlefile, int cpEntry) {
-		return bundlefile.getURL(name, cpEntry);
+	protected URL findResourceImpl(String name, BundleFile bundlefile) {
+		return bundlefile.getResourceURL(name);
 	}
 
 	/**
@@ -345,7 +367,7 @@ public class DefaultClassLoader extends org.eclipse.osgi.framework.adaptor.Bundl
 		Vector resources = new Vector(6);
 		for (int i = 0; i < classpathEntries.length; i++) {
 			if (classpathEntries[i] != null) {
-				URL url = findResourceImpl(resource, classpathEntries[i].bundlefile, i);
+				URL url = findResourceImpl(resource, classpathEntries[i].bundlefile);
 				if (url != null) {
 					resources.addElement(url);
 				}
@@ -357,7 +379,7 @@ public class DefaultClassLoader extends org.eclipse.osgi.framework.adaptor.Bundl
 			for (int i = 0; i < size; i++) {
 				FragmentClasspath fragCP = (FragmentClasspath) fragClasspaths.elementAt(i);
 				for (int j = 0; j < fragCP.classpathEntries.length; j++) {
-					URL url = findResourceImpl(resource, fragCP.classpathEntries[j].bundlefile, j);
+					URL url = findResourceImpl(resource, fragCP.classpathEntries[j].bundlefile);
 					if (url != null) {
 						resources.addElement(url);
 					}
@@ -410,11 +432,11 @@ public class DefaultClassLoader extends org.eclipse.osgi.framework.adaptor.Bundl
 				for (int i = 0; i < classpathEntries.length; i++) {
 					if (classpathEntries[i] != null) {
 						try {
-							if (classpathEntries[i].bundlefile != hostdata.bundleFile) {
+							if (classpathEntries[i].bundlefile != hostdata.getBaseBundleFile()) {
 								classpathEntries[i].bundlefile.close();
 							}
 						} catch (IOException e) {
-							hostdata.adaptor.getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, hostdata.getBundle(), e);
+							hostdata.getAdaptor().getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, hostdata.getBundle(), e);
 						}
 					}
 				}
@@ -429,7 +451,7 @@ public class DefaultClassLoader extends org.eclipse.osgi.framework.adaptor.Bundl
 		}
 	}
 
-	protected ClasspathEntry[] buildClasspath(String[] classpath, DefaultBundleData bundledata, ProtectionDomain domain) {
+	protected ClasspathEntry[] buildClasspath(String[] classpath, AbstractBundleData bundledata, ProtectionDomain domain) {
 		ArrayList result = new ArrayList(10);
 
 		// If not in dev mode then just add the regular classpath entries and return
@@ -455,16 +477,15 @@ public class DefaultClassLoader extends org.eclipse.osgi.framework.adaptor.Bundl
 		return (ClasspathEntry[]) result.toArray(new ClasspathEntry[result.size()]);
 	}
 
-	protected void addDefaultDevEntries(ArrayList result, DefaultBundleData bundledata, ProtectionDomain domain) {
+	protected void addDefaultDevEntries(ArrayList result, AbstractBundleData bundledata, ProtectionDomain domain) {
 		if (System.getProperty("osgi.dev") == null)
 			return;
-		String[] defaultDevEntries = bundledata.adaptor.devCP;
-		if (defaultDevEntries != null)
-			for (int i = 0; i < defaultDevEntries.length; i++)
-				findClassPathEntry(result, defaultDevEntries[i], bundledata, domain);
+		if (devCP != null)
+			for (int i = 0; i < devCP.length; i++)
+				findClassPathEntry(result, devCP[i], bundledata, domain);
 	}
 
-	protected void findClassPathEntry(ArrayList result, String entry, DefaultBundleData bundledata, ProtectionDomain domain) {
+	protected void findClassPathEntry(ArrayList result, String entry, AbstractBundleData bundledata, ProtectionDomain domain) {
 		if (!addClassPathEntry(result, entry, bundledata, domain)) {
 //			if (System.getProperties().get("osgi.dev") == null) {
 //				BundleException be = new BundleException(Msg.formatter.getString("BUNDLE_CLASSPATH_ENTRY_NOT_FOUND_EXCEPTION", entry, hostdata.getLocation()));
@@ -473,9 +494,9 @@ public class DefaultClassLoader extends org.eclipse.osgi.framework.adaptor.Bundl
 		}
 	}
 
-	protected boolean addClassPathEntry(ArrayList result, String entry, DefaultBundleData bundledata, ProtectionDomain domain) {
+	protected boolean addClassPathEntry(ArrayList result, String entry, AbstractBundleData bundledata, ProtectionDomain domain) {
 		if (entry.equals(".")) {
-			result.add(new ClasspathEntry(bundledata.bundleFile, domain));
+			result.add(new ClasspathEntry(bundledata.getBaseBundleFile(), domain));
 			return true;
 		} else {
 			Object element = getClasspath(entry, bundledata, domain);
@@ -501,9 +522,9 @@ public class DefaultClassLoader extends org.eclipse.osgi.framework.adaptor.Bundl
 		return false;
 	}
 
-	protected String[] getDevEntries(String classpathEntry, DefaultBundleData bundledata) {
+	protected String[] getDevEntries(String classpathEntry, AbstractBundleData bundledata) {
 		Properties devProps = null;
-		File propLocation = bundledata.bundleFile.getFile(classpathEntry + ".properties");
+		File propLocation = bundledata.getBaseBundleFile().getFile(classpathEntry + ".properties");
 		if (propLocation == null)
 			return null;
 		try {
@@ -547,11 +568,11 @@ public class DefaultClassLoader extends org.eclipse.osgi.framework.adaptor.Bundl
 		/** The ClasspathEntries of the fragments Bundle-Classpath */
 		protected ClasspathEntry[] classpathEntries;
 		/** The BundleData of the fragment */
-		protected DefaultBundleData bundledata;
+		protected AbstractBundleData bundledata;
 		/** The ProtectionDomain of the fragment */
 		protected ProtectionDomain domain;
 
-		protected FragmentClasspath(ClasspathEntry[] classpathEntries, DefaultBundleData bundledata, ProtectionDomain domain) {
+		protected FragmentClasspath(ClasspathEntry[] classpathEntries, AbstractBundleData bundledata, ProtectionDomain domain) {
 			this.classpathEntries = classpathEntries;
 			this.bundledata = bundledata;
 			this.domain = domain;
@@ -560,11 +581,11 @@ public class DefaultClassLoader extends org.eclipse.osgi.framework.adaptor.Bundl
 		protected void close() {
 			for (int i = 0; i < classpathEntries.length; i++) {
 				try {
-					if (classpathEntries[i].bundlefile != bundledata.bundleFile) {
+					if (classpathEntries[i].bundlefile != bundledata.getBaseBundleFile()) {
 						classpathEntries[i].bundlefile.close();
 					}
 				} catch (IOException e) {
-					bundledata.adaptor.getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, bundledata.getBundle(), e);
+					bundledata.getAdaptor().getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, bundledata.getBundle(), e);
 				}
 			}
 		}

@@ -92,13 +92,13 @@ public interface BundleData {
 	 * Return the bundle data directory.
 	 * Attempt to create the directory if it does not exist.
 	 *
-	 * @return Bundle data directory.
+	 * @return Bundle data directory or null if not supported.
 	 */
 
 	public File getDataFile(String path);
 
 	/**
-	 * Return the BundleManifest for the BundleData.
+	 * Return the Dictionary of manifest headers for the BundleData.
 	 * @return Dictionary for containing the Manifest headers for the BundleData.
 	 * @throws BundleException if an error occurred while reading the
 	 * bundle manifest data.
@@ -118,12 +118,6 @@ public interface BundleData {
 	 * @return the BundleData location.
 	 */
 	public String getLocation();
-
-	/**
-	 * Return a Dictionary of all manifest headers.
-	 * @return all manifest headers.
-	 */
-	public Dictionary getHeaders();
 
 	/**
 	 * Close all resources for this BundleData
@@ -150,7 +144,7 @@ public interface BundleData {
 	public void setStatus(int value);
 	public void save() throws IOException;
 
-	public String getUniqueId();
+	public String getSymbolicName();
 	public Version getVersion();
 	public boolean isFragment();
 	public String getClassPath();

@@ -17,6 +17,7 @@ import java.net.URL;
 import java.security.Permission;
 import java.util.Hashtable;
 import org.eclipse.osgi.framework.adaptor.BundleData;
+import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.util.Headers;
 import org.osgi.framework.BundleException;
@@ -30,16 +31,6 @@ import org.osgi.framework.BundleException;
 public class SystemBundle extends BundleHost {
 
 	/**
-	 * SystemBundle object constructor.
-	 *
-	 * @param manifest Bundle's manifest
-	 * @param framework Framework this bundle is running in
-	 */
-	protected SystemBundle(Headers manifest, Framework framework) throws BundleException {
-		this(new SystemBundleData(manifest), Constants.SYSTEM_BUNDLE_LOCATION, framework);
-	}
-
-	/**
 	 * Private SystemBundle object constructor.
 	 * This method creates the SystemBundle and its BundleContext.
 	 * The SystemBundle's state is set to STARTING.
@@ -49,8 +40,8 @@ public class SystemBundle extends BundleHost {
 	 * @param location identity string for the bundle
 	 * @param framework Framework this bundle is running in
 	 */
-	private SystemBundle(BundleData bundledata, String location, Framework framework) throws BundleException {
-		super(bundledata, location, framework, 0); // startlevel=0 means framework stopped
+	protected SystemBundle(Framework framework) throws BundleException {
+		super(framework.adaptor.createSystemBundleData(), Constants.SYSTEM_BUNDLE_LOCATION, framework, 0); // startlevel=0 means framework stopped
 		state = STARTING;
 		context = createContext();
 	}
@@ -292,5 +283,4 @@ public class SystemBundle extends BundleHost {
 	 */
 	protected void unresolvePermissions(Hashtable unresolvedPackages) {
 	}
-
 }

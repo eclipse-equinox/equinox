@@ -278,6 +278,8 @@ public interface FrameworkAdaptor {
 	 */
 	public FrameworkLog getFrameworkLog();
 
+	public BundleData createSystemBundleData() throws BundleException;
+
 	public IBundleStats getBundleStats();
 	public PlatformAdmin getPlatformAdmin();
 	public State getState();

@@ -9,13 +9,16 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.osgi.framework.internal.defaultadaptor;
+package org.eclipse.osgi.framework.adaptor.core;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+/**
+ * A BundleEntry represents one entry of a BundleFile.
+ */
 public abstract class BundleEntry {
 	/**
 	 * Return an InputStream for the entry.
@@ -61,6 +64,10 @@ public abstract class BundleEntry {
 		return (getName());
 	}
 
+	/**
+	 * A BundleEntry represented by a ZipEntry in a ZipFile.  The ZipBundleEntry
+	 * class is used for bundles that are installed as a ZipFile on a file system.
+	 */
 	public static class ZipBundleEntry extends BundleEntry {
 		/**
 		 * ZipFile for this entry.
@@ -144,6 +151,10 @@ public abstract class BundleEntry {
 		}
 	}
 
+	/**
+	 * A BundleEntry represented by a File object.  The FileBundleEntry class is
+	 * used for bundles that are installed as extracted zips on a file system.
+	 */
 	public static class FileBundleEntry extends BundleEntry {
 		/**
 		 * File for this entry.
@@ -212,17 +223,22 @@ public abstract class BundleEntry {
 		}
 	}
 
-	public static class DirBundleEntry extends BundleEntry {
+	/**
+	 * Represents a directory entry in a ZipBundleFile.  This object is used to 
+	 * reference a directory entry in a ZipBundleFile when the directory entries are
+	 * not included in the zip file.
+	 */
+	public static class DirZipBundleEntry extends BundleEntry {
 
 		/**
-		 * File for this entry.
+		 * ZipBundleFile for this entry.
 		 */
-		private File file;
+		private BundleFile.ZipBundleFile bundleFile;
 		private String name;
 
-		public DirBundleEntry(File file, String name){
+		public DirZipBundleEntry(BundleFile.ZipBundleFile bundleFile, String name){
 			this.name = name;
-			this.file = file;
+			this.bundleFile = bundleFile;
 		}
 		public InputStream getInputStream() throws IOException {
 			return null;
@@ -241,14 +257,19 @@ public abstract class BundleEntry {
 		}
 
 		public URL getLocalURL() {
-			return getFileURL();
+			try {
+				return new URL("jar:file:" + bundleFile.bundlefile.getAbsolutePath() + "!/" + name);
+			} catch (MalformedURLException e) {
+				//This can not happen, unless the jar protocol is not supported.
+				return null;
+			}
 		}
 
 		public URL getFileURL() {
 			try {
-				return new URL("jar:file:" + file.getAbsolutePath() + "!/" + name);
+				return bundleFile.extractDirectory(name).toURL();
 			} catch (MalformedURLException e) {
-				//This can not happen. 
+				// this cannot happen.
 				return null;
 			}
 		}

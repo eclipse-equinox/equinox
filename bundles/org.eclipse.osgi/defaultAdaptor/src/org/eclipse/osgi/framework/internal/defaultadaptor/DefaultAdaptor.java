@@ -16,11 +16,11 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.*;
 import org.eclipse.osgi.framework.adaptor.*;
+import org.eclipse.osgi.framework.adaptor.core.*;
 import org.eclipse.osgi.framework.adaptor.core.AbstractFrameworkAdaptor;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.log.*;
-import org.eclipse.osgi.framework.util.Headers;
 import org.eclipse.osgi.internal.resolver.StateManager;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.*;
@@ -35,6 +35,8 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 	public static final String DATA_DIR_NAME = "data";
 	public static final String BUNDLE_STORE = "osgi.bundlestore";
 
+	protected AdaptorElementFactory elementFactory;
+
 	/** directory containing installed bundles */
 	protected File bundleStoreRootDir;
 
@@ -47,24 +49,13 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 	protected boolean reset = false;
 
 	/** The MetaData for the default adaptor */
-	protected MetaData metadata;
+	protected MetaData fwMetadata;
 
 	/** Dictionary containing permission data */
 	protected PermissionStorage permissionStore;
 
 	/** next available bundle id */
 	protected long nextId = 1;
-
-	/** Development ClassPath entries */
-	protected String[] devCP;
-
-	/** Name of the Adaptor manifest file */
-	protected final String ADAPTOR_MANIFEST = "ADAPTOR.MF";
-
-	/** This adaptor's manifest file */
-	protected Headers manifest = null;
-
-	protected AdaptorElementFactory elementFactory = null;
 
 	/** The State Manager */
 	protected StateManager stateManager;
@@ -115,8 +106,6 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 		
 		// need to create the FrameworkLog very early
 		frameworkLog = createFrameworkLog();
-
-		readAdaptorManifest();
 		stateManager = createStateManager();
 	}
 
@@ -125,7 +114,8 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 	 * @return the StateManager.
 	 */
 	protected StateManager createStateManager() {
-		stateManager = new StateManager(getBundleStoreRootDir());
+		File stateLocation = new File(getBundleStoreRootDir(),".state");
+		stateManager = new StateManager(stateLocation);
 		State systemState = stateManager.getSystemState();
 		if (systemState != null)
 			return stateManager;
@@ -178,10 +168,9 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 			}
 		}
 
-		/* store bundleStore back into adaptor properties for others to see */
-		properties.put(BUNDLE_STORE, bundleStore);
-
 		bundleStoreRootDir = new File(bundleStore);
+		/* store bundleStore back into adaptor properties for others to see */
+		properties.put(BUNDLE_STORE, bundleStoreRootDir.getAbsolutePath());
 
 	}
 
@@ -199,33 +188,6 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 		return dataRootDir;
 	}
 
-	/**
-	 * Reads and initializes the adaptor BundleManifest object.  The
-	 * BundleManifest is used by the getExportPackages() and getExportServices()
-	 * methods of the adpator.
-	 */
-	protected void readAdaptorManifest() {
-		InputStream in = null;
-		// walk up the class hierarchy until we find the ADAPTOR_MANIFEST.
-		Class adaptorClazz = getClass();
-		while (in == null && DefaultAdaptor.class.isAssignableFrom(adaptorClazz) ) {
-			in = adaptorClazz.getResourceAsStream(ADAPTOR_MANIFEST);
-			adaptorClazz = adaptorClazz.getSuperclass();
-		}
-
-		if (in == null) {
-			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-				Debug.println("Unable to find adaptor bundle manifest " + ADAPTOR_MANIFEST);
-			}
-			manifest = new Headers(new Properties());
-			return;
-		}
-		try {
-			manifest = Headers.parseManifest(in);
-		} catch (BundleException e) {
-			Debug.println("Unable to read adaptor bundle manifest " + ADAPTOR_MANIFEST);
-		}
-	}
 
 	/**
 	 * Initialize the persistent storage.
@@ -276,10 +238,10 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 			}
 		}
 
-		metadata = new MetaData(getMetaDataFile(), "Framework metadata");
-		metadata.load();
-		nextId = metadata.getLong(METADATA_ADAPTOR_NEXTID, 1);
-		initialBundleStartLevel = metadata.getInt(METADATA_ADAPTOR_IBSL, 1);
+		fwMetadata = new MetaData(getMetaDataFile(), "Framework metadata");
+		fwMetadata.load();
+		nextId = fwMetadata.getLong(METADATA_ADAPTOR_NEXTID, 1);
+		initialBundleStartLevel = fwMetadata.getInt(METADATA_ADAPTOR_IBSL, 1);
 	}
 
 	protected File getMetaDataFile() {
@@ -368,13 +330,15 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 			try {
 				DefaultBundleData data;
 
+				long id = -1;
 				try {
-					long id = Long.parseLong(list[i]);
-					data = (DefaultBundleData) getElementFactory().getBundleData(this,id);
-					data.initializeExistingBundle();
-				} catch (NumberFormatException e) {
-					continue; /* the directory is not a bundle id */
+					id = Long.parseLong(list[i]);
+				} catch (NumberFormatException nfe) {
+					continue;
 				}
+				data = (DefaultBundleData) getElementFactory().createBundleData(this,id);
+				loadMetaDataFor(data);
+				data.initializeExistingBundle();
 
 				if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 					Debug.println("BundleData created: " + data);
@@ -433,10 +397,13 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 					try {
 						try {
 							id = getNextBundleId();
-							metadata.save();
+							fwMetadata.save();
 						} catch (IOException e) {
 							throw new BundleException(AdaptorMsg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION"), e);
 						}
+						data = (DefaultBundleData) getElementFactory().createBundleData(DefaultAdaptor.this,id);
+						data.setLocation(location);
+						data.setStartLevel(getInitialBundleStartLevel());
 
 						if (in instanceof ReferenceInputStream) {
 							URL reference = ((ReferenceInputStream) in).getReference();
@@ -445,11 +412,11 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 								throw new BundleException(AdaptorMsg.formatter.getString("ADAPTOR_URL_CREATE_EXCEPTION", reference));
 							}
 
-							data = (DefaultBundleData) getElementFactory().getBundleData(DefaultAdaptor.this,id);
-							data.initializeNewBundle(location, reference.getPath(),true, new File(reference.getPath()));
+							data.setReference(true);
+							data.setFileName(reference.getPath());
+							data.initializeNewBundle();
 						} else {
-							data = (DefaultBundleData) getElementFactory().getBundleData(DefaultAdaptor.this,id);
-							File genDir = data.getGenerationDir();
+							File genDir = data.createGenerationDir();
 							if (!genDir.exists()) {
 								throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_DIRECTORY_CREATE_EXCEPTION", genDir.getPath()));
 							}
@@ -466,7 +433,9 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 							} else {
 								readFile(in,outFile);
 							}
-							data.initializeNewBundle(location,fileName,false,outFile);
+							data.setReference(false);
+							data.setFileName(fileName);
+							data.initializeNewBundle();
 						}
 					} finally {
 						try {
@@ -578,22 +547,22 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 							} catch (IOException e) {
 								throw new BundleException(AdaptorMsg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION"), e);
 							}
-							File bundleGenerationDir = newData.getGenerationDir();
+							File bundleGenerationDir = newData.createGenerationDir();
 							if (!bundleGenerationDir.exists()) {
 								throw new BundleException(AdaptorMsg.formatter.getString("ADAPTOR_DIRECTORY_CREATE_EXCEPTION", bundleGenerationDir.getPath()));
 							}
-							newData.bundleFile = BundleFile.createBundleFile(newData.file, newData);
+							newData.createBaseBundleFile();
 						} else {
 							try {
-								newData = data.nextGeneration();
+								newData = data.nextGeneration(null);
 							} catch (IOException e) {
 								throw new BundleException(AdaptorMsg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION"), e);
 							}
-							File bundleGenerationDir = newData.getGenerationDir();
+							File bundleGenerationDir = newData.createGenerationDir();
 							if (!bundleGenerationDir.exists()) {
 								throw new BundleException(AdaptorMsg.formatter.getString("ADAPTOR_DIRECTORY_CREATE_EXCEPTION", bundleGenerationDir.getPath()));
 							}
-							File outFile = newData.getBundleFile();
+							File outFile = newData.getBaseFile();
 							if ("file".equals(protocol)) {
 								File inFile = new File(source.getURL().getPath());
 								if (inFile.isDirectory()) {
@@ -604,7 +573,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 							} else {
 								readFile(in, outFile);
 							}
-							newData.bundleFile = BundleFile.createBundleFile(outFile, newData);
+							newData.createBaseBundleFile();
 						}
 					} finally {
 						try {
@@ -639,7 +608,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 				BundleDescription newDescription = stateManager.getFactory().createBundleDescription(newData.getManifest(), newData.getLocation(), bundleId);
 				systemState.addBundle(newDescription);
 
-				File originalGenerationDir = data.getGenerationDir();
+				File originalGenerationDir = data.createGenerationDir();
 
 				if (postpone || !rm(originalGenerationDir)) {
 					/* mark this bundle to be deleted to ensure it is fully cleaned up
@@ -676,7 +645,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 				} */
 
 				if (newData != null) {
-					File nextGenerationDir = newData.getGenerationDir();
+					File nextGenerationDir = newData.createGenerationDir();
 
 					if (!rm(nextGenerationDir)) /* delete downloaded bundle */ {
 						/* mark this bundle to be deleted to ensure it is fully cleaned up
@@ -799,21 +768,6 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 		if (frameworkLog == null) {
 			frameworkLog = createFrameworkLog();
 		}
-		// Check the osgi.dev property to see if dev classpath entries have been defined.
-		String osgiDev = context.getProperty("osgi.dev");
-		if (osgiDev != null) {
-			// Add each dev classpath entry
-			Vector devClassPath = new Vector(6);
-			StringTokenizer st = new StringTokenizer(osgiDev, ",");
-			while (st.hasMoreTokens()) {
-				String tok = st.nextToken();
-				if (!tok.equals("")) {
-					devClassPath.addElement(tok);
-				}
-			}
-			devCP = new String[devClassPath.size()];
-			devClassPath.toArray(devCP);
-		}
 
 		State state = stateManager.getSystemState();
 		BundleDescription systemBundle = state.getBundle(0);
@@ -893,21 +847,21 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 
 	public void setInitialBundleStartLevel(int value) {
 		super.setInitialBundleStartLevel(value);
-		metadata.setInt(METADATA_ADAPTOR_IBSL, value);
+		fwMetadata.setInt(METADATA_ADAPTOR_IBSL, value);
 		try {
-			metadata.save();
+			fwMetadata.save();
 		} catch (IOException e) {
 			eventPublisher.publishFrameworkEvent(FrameworkEvent.ERROR, context.getBundle(), e);
 		}
 	}
 
 	/**
-		* Map a location string into a bundle name.
-		* This methods treats the location string as a URL.
-		*
-		* @param location bundle location string.
-		* @return bundle name.
-		*/
+	 * Map a location string into a bundle name.
+	 * This methods treats the location string as a URL.
+	 *
+	 * @param location bundle location string.
+	 * @return bundle name.
+	 */
 	public String mapLocationToName(String location) {
 		int end = location.indexOf('?', 0); /* "?" query */
 
@@ -940,7 +894,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 			long id = nextId;
 
 			nextId++;
-			metadata.setLong(METADATA_ADAPTOR_NEXTID, nextId);
+			fwMetadata.setLong(METADATA_ADAPTOR_NEXTID, nextId);
 
 			File bundleDir = new File(getBundleStoreRootDir(), String.valueOf(id));
 			if (bundleDir.exists()) {
@@ -953,108 +907,14 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 		throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION"));
 	}
 
-	public static void copyDir(File inDir, File outDir) throws IOException{
-		String[] files = inDir.list();
-		if (files != null && files.length>0) {
-			outDir.mkdir();
-			for (int i=0; i<files.length; i++) {
-				File inFile = new File(inDir,files[i]);
-				File outFile = new File(outDir,files[i]);
-				if (inFile.isDirectory()) {
-					copyDir(inFile,outFile);
-				}
-				else {
-					InputStream in = new FileInputStream(inFile);
-					readFile(in,outFile);
-				}
-			}
-		}
-	}
-
-	/**
-	   * Read a file from an InputStream and write it to the file system.
-	   *
-	   * @param is InputStream from which to read.
-	   * @param file output file to create.
-	   * @exception IOException
-	   */
-	public static void readFile(InputStream in, File file) throws IOException {
-		FileOutputStream fos = null;
-		try {
-			fos = new FileOutputStream(file);
-
-			byte buffer[] = new byte[1024];
-			int count;
-			while ((count = in.read(buffer, 0, buffer.length)) > 0) {
-				fos.write(buffer, 0, count);
-			}
-
-			fos.close();
-			fos = null;
-
-			in.close();
-			in = null;
-		} catch (IOException e) {
-			// close open streams
-			if (fos != null) {
-				try {
-					fos.close();
-				} catch (IOException ee) {
-				}
-			}
-
-			if (in != null) {
-				try {
-					in.close();
-				} catch (IOException ee) {
-				}
-			}
-
-			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-				Debug.println("Unable to read file");
-				Debug.printStackTrace(e);
-			}
-
-			throw e;
-		}
-	}
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.osgi.framework.adaptor.FrameworkAdaptor#getExportPackages()
-	 */
-	public String getExportPackages() {
-		if (manifest == null)
-			return null;
-		return (String) manifest.get(Constants.EXPORT_PACKAGE);
-	}
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.osgi.framework.adaptor.FrameworkAdaptor#getExportServices()
-	 */
-	public String getExportServices() {
-		if (manifest == null)
-			return null;
-		return (String) manifest.get(Constants.EXPORT_SERVICE);
-	}
-
-	public String getProvidePackages() {
-		if (manifest == null)
-			return null;
-		return (String) manifest.get(Constants.PROVIDE_PACKAGE);
-	}
-	
 	public AdaptorElementFactory getElementFactory() {
 		if (elementFactory == null)
-			elementFactory = new AdaptorElementFactory();
+			elementFactory = new DefaultElementFactory();
 		return elementFactory;
 	}
 
 	public FrameworkLog getFrameworkLog() {
 		return frameworkLog;
-	}
-
-	public IBundleStats getBundleStats() {
-		return null;
 	}
 
 	public State getState() {
@@ -1063,8 +923,48 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 	public PlatformAdmin getPlatformAdmin() {
 		return stateManager;
 	}
-	
-	protected BundleContext getContext() {
-		return context;	
+
+	public static final String METADATA_BUNDLE_GEN = "METADATA_BUNDLE_GEN";
+	public static final String METADATA_BUNDLE_LOC = "METADATA_BUNDLE_LOC";
+	public static final String METADATA_BUNDLE_REF = "METADATA_BUNDLE_REF";
+	public static final String METADATA_BUNDLE_NAME = "METADATA_BUNDLE_NAME";
+	public static final String METADATA_BUNDLE_NCP = "METADATA_BUNDLE_NCP";
+	public static final String METADATA_BUNDLE_ABSL = "METADATA_BUNDLE_ABSL";
+	public static final String METADATA_BUNDLE_STATUS = "METADATA_BUNDLE_STATUS";
+	public static final String METADATA_BUNDLE_METADATA = "METADATA_BUNDLE_METADATA";
+
+	protected void loadMetaDataFor(DefaultBundleData data) throws IOException {
+		MetaData bundleMetaData = (new MetaData(new File(data.getBundleStoreDir(), ".bundle"), "Bundle metadata"));
+		bundleMetaData.load();
+
+		data.setLocation(bundleMetaData.get(METADATA_BUNDLE_LOC, null));
+		data.setFileName(bundleMetaData.get(METADATA_BUNDLE_NAME, null));
+		data.setGeneration(bundleMetaData.getInt(METADATA_BUNDLE_GEN, -1));
+		data.setNativePaths(bundleMetaData.get(METADATA_BUNDLE_NCP, null));
+		data.setStartLevel(bundleMetaData.getInt(METADATA_BUNDLE_ABSL, 1));
+		data.setStatus(bundleMetaData.getInt(METADATA_BUNDLE_STATUS, 0));
+		data.setReference(bundleMetaData.getBoolean(METADATA_BUNDLE_REF, false));
+
+		if (data.getGeneration() == -1 || data.getFileName() == null || data.getLocation() == null) {
+			throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION"));
+		}
+	}
+
+	public void saveMetaDataFor(DefaultBundleData data) throws IOException {
+		MetaData bundleMetadata = (new MetaData(new File(data.createBundleStoreDir(), ".bundle"), "Bundle metadata"));
+		bundleMetadata.load();
+
+		bundleMetadata.set(METADATA_BUNDLE_LOC, data.getLocation());
+		bundleMetadata.set(METADATA_BUNDLE_NAME, data.getFileName());
+		bundleMetadata.setInt(METADATA_BUNDLE_GEN, data.getGeneration());
+		String nativePaths = data.getNativePathsString();
+		if (nativePaths != null) {
+			bundleMetadata.set(METADATA_BUNDLE_NCP, nativePaths);
+		}
+		bundleMetadata.setInt(METADATA_BUNDLE_ABSL, data.getStartLevel());
+		bundleMetadata.setInt(METADATA_BUNDLE_STATUS, data.getStatus());
+		bundleMetadata.setBoolean(METADATA_BUNDLE_REF, data.isReference());
+
+		bundleMetadata.save();
 	}
 }

@@ -178,55 +178,10 @@ public class Framework implements EventSource, EventPublisher {
 					Debug.println("Unable to find system bundle manifest " + resource);
 				}
 			}
-			Headers manifest = Headers.parseManifest(in);
-			String systemExportProp = System.getProperty(Constants.OSGI_SYSTEMPACKAGES);
-			if (systemExportProp != null) {
-				String value = (String) manifest.get(Constants.EXPORT_PACKAGE);
-				if (value == null) {
-					value = systemExportProp;
-				} else {
-					value += "," + systemExportProp;
-				}
-				manifest.set(Constants.EXPORT_PACKAGE, null);
-				manifest.set(Constants.EXPORT_PACKAGE, value);
-			}
-			// now get any extra packages and services that the adaptor wants
-			// to export
-			// and merge this into the system bundle's manifest
-			String exportPackages = adaptor.getExportPackages();
-			String exportServices = adaptor.getExportServices();
-			String providePackages = adaptor.getProvidePackages();
-			if (exportPackages != null) {
-				String value = (String) manifest.get(Constants.EXPORT_PACKAGE);
-				if (value == null) {
-					value = exportPackages;
-				} else {
-					value += "," + exportPackages;
-				}
-				manifest.set(Constants.EXPORT_PACKAGE, null);
-				manifest.set(Constants.EXPORT_PACKAGE, value);
-			}
-			if (exportServices != null) {
-				String value = (String) manifest.get(Constants.EXPORT_SERVICE);
-				if (value == null) {
-					value = exportServices;
-				} else {
-					value += "," + exportServices;
-				}
-				manifest.set(Constants.EXPORT_SERVICE, null);
-				manifest.set(Constants.EXPORT_SERVICE, value);
-			}
-			if (providePackages != null) {
-				String value = (String) manifest.get(Constants.PROVIDE_PACKAGE);
-				if (value == null) {
-					value = providePackages;
-				} else {
-					value += "," + providePackages;
-				}
-				manifest.set(Constants.PROVIDE_PACKAGE, null);
-				manifest.set(Constants.PROVIDE_PACKAGE, value);
-			}
-			BundleDescription newSystemBundle = adaptor.getPlatformAdmin().getFactory().createBundleDescription(manifest, Constants.SYSTEM_BUNDLE_LOCATION, 0);
+
+			systemBundle = new SystemBundle(this);
+
+			BundleDescription newSystemBundle = adaptor.getPlatformAdmin().getFactory().createBundleDescription(systemBundle.getHeaders(), Constants.SYSTEM_BUNDLE_LOCATION, 0);
 			if (newSystemBundle == null)
 				throw new BundleException(Msg.formatter.getString("OSGI_SYSTEMBUNDLE_DESCRIPTION_ERROR"));
 			State state = adaptor.getState();
@@ -270,7 +225,7 @@ public class Framework implements EventSource, EventPublisher {
 				// force resolution so packages are properly linked
 				state.resolve(false);
 			}
-			systemBundle = createSystemBundle(manifest);
+
 			SystemBundleLoader.clearSystemPackages();
 			PackageSpecification[] packages = newSystemBundle.getPackages();
 			if (packages != null) {
@@ -509,15 +464,7 @@ public class Framework implements EventSource, EventPublisher {
 		verifyExecutionEnvironment(bundledata.getManifest());
 		return Bundle.createBundle(bundledata, location, this, startlevel);
 	}
-	/**
-	 * Create the SystemBundle object.
-	 * 
-	 * @param manifest
-	 *            System Bundle's manifest
-	 */
-	protected SystemBundle createSystemBundle(Headers manifest) throws BundleException {
-		return new SystemBundle(manifest, this);
-	}
+
 	/**
 	 * Verifies that the framework supports one of the required Execution
 	 * Environments

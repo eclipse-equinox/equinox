@@ -106,7 +106,8 @@ public class BundleLoaderProxy implements KeyedElement, NamedClassSpace{
 	}
 
 	public String toString() {
-		StringBuffer sb = new StringBuffer(bundle.getSymbolicName());
+		String symbolicName = bundle.getSymbolicName();
+		StringBuffer sb = new StringBuffer(symbolicName == null ? bundle.getLocation() : symbolicName);
 		sb.append("; ").append(Constants.BUNDLE_VERSION_ATTRIBUTE);
 		sb.append("=\"").append(version.toString()).append("\"");
 		return sb.toString();

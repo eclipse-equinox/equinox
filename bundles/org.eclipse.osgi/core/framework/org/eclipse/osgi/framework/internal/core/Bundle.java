@@ -782,10 +782,11 @@ public abstract class Bundle
 			// Must call framework createBundle to check execution environment.
 			Bundle newBundle = framework.createBundle(newBundleData,
 					this.location, this.startLevel);
-			// Check for a bundle already installed with the same UniqueId
+			// Check for a bundle already installed with the same symbolicName
 			// and version.
-			Bundle installedBundle = framework.getBundleByUniqueId(newBundle
-					.getSymbolicName(), newBundle.getVersion().toString());
+			String symbolicName = newBundle.getSymbolicName();
+			Bundle installedBundle = symbolicName == null ? null : 
+					framework.getBundleByUniqueId(symbolicName, newBundle.getVersion().toString());
 			if (installedBundle != null && installedBundle != this) {
 				throw new BundleException(Msg.formatter.getString(
 						"BUNDLE_INSTALL_SAME_UNIQUEID", newBundle
@@ -1072,8 +1073,16 @@ public abstract class Bundle
 	public Dictionary getHeaders(String localeString) {
 		framework.checkAdminPermission();
 		if (manifestLocalization == null) {
-			Dictionary rawHeaders = bundledata.getHeaders();
-			manifestLocalization = new ManifestLocalization(this, rawHeaders);
+			Dictionary rawHeaders;
+			try {
+				rawHeaders = bundledata.getManifest();
+				manifestLocalization = new ManifestLocalization(this, rawHeaders);
+
+			} catch (BundleException e) {
+				framework.publishFrameworkEvent(FrameworkEvent.ERROR,this,e);
+				// return an empty dictinary.
+				return new Hashtable();
+			}
 		}
 		return manifestLocalization.getHeaders(localeString);
 	}
@@ -1404,7 +1413,7 @@ public abstract class Bundle
 		return getSymbolicName();
 	}
 	public String getSymbolicName() {
-		return bundledata.getUniqueId();
+		return bundledata.getSymbolicName();
 	}
 	public BundleData getBundleData() {
 		return bundledata;

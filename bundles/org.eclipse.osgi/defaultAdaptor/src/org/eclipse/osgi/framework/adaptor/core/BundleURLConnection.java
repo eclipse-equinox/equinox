@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.osgi.framework.internal.defaultadaptor;
+package org.eclipse.osgi.framework.adaptor.core;
 
 import java.io.IOException;
 import java.io.InputStream;

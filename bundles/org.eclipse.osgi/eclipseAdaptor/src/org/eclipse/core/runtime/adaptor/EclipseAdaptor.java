@@ -14,8 +14,8 @@ import java.io.*;
 import java.net.URL;
 import java.util.*;
 import javax.xml.parsers.SAXParserFactory;
-import org.eclipse.osgi.framework.adaptor.BundleData;
-import org.eclipse.osgi.framework.adaptor.IBundleStats;
+import org.eclipse.osgi.framework.adaptor.*;
+import org.eclipse.osgi.framework.adaptor.core.AdaptorElementFactory;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.debug.DebugOptions;
@@ -80,24 +80,17 @@ public class EclipseAdaptor extends DefaultAdaptor {
 	}
 
 	protected void initBundleStoreRootDir() {
-		/* if bundleStore was not set by the constructor from the -adaptor cmd line arg */
-		if (bundleStore == null) {
-			/* check the system properties */
-			bundleStore = System.getProperty(BUNDLE_STORE);
-		}
 
-		Location configurationLocation = LocationManager.getConfigurationLocation();
+		File configurationLocation = getConfigurationLocation();
 		if (configurationLocation != null) {
-			// TODO assumes the URL is a file: url
-			URL url = configurationLocation.getURL();
-			if (url != null)
-				bundleStore = url.getFile() + FRAMEWORK_SYMBOLICNAME + "/bundles";
-			else
-				// last resort just default to "bundles"
-				bundleStore = "bundles";
+			bundleStoreRootDir = new File(configurationLocation,FRAMEWORK_SYMBOLICNAME + "/bundles");
+			bundleStore = bundleStoreRootDir.getAbsolutePath();
 		}
-
-		bundleStoreRootDir = new File(bundleStore);
+		else {
+			// last resort just default to "bundles"
+			bundleStore = "bundles";
+			bundleStoreRootDir = new File(bundleStore);
+		}
 
 		/* store bundleStore back into adaptor properties for others to see */
 		properties.put(BUNDLE_STORE, bundleStoreRootDir.getAbsolutePath());
@@ -105,11 +98,9 @@ public class EclipseAdaptor extends DefaultAdaptor {
 
 	protected FrameworkLog createFrameworkLog() {
 		FrameworkLog frameworkLog;
-		Location configLocation = LocationManager.getConfigurationLocation();
-		if (configLocation != null) {
-			// TODO assumes the URL is a file: url
-			String configArea = configLocation.getURL().getFile();
-			File logFile = new File(configArea, Long.toString(System.currentTimeMillis()) + F_LOG);
+		File configAreaDirectory = getConfigurationLocation();
+		if (configAreaDirectory != null) {
+			File logFile = new File(configAreaDirectory, Long.toString(System.currentTimeMillis()) + F_LOG);
 			frameworkLog = new EclipseLog(logFile);
 		} else 
 			frameworkLog = new EclipseLog();
@@ -121,7 +112,8 @@ public class EclipseAdaptor extends DefaultAdaptor {
 	protected StateManager createStateManager() {
 		readHeaders();
 		checkLocationAndReinitialize();
-		stateManager = new StateManager(getStateBaseLocation(), timeStamp);
+		File stateLocation = getStateFile();
+		stateManager = new StateManager(stateLocation, timeStamp);
 		stateManager.setInstaller(new EclipseBundleInstaller());
 		StateImpl systemState = stateManager.getSystemState();
 		if (systemState != null)
@@ -154,14 +146,15 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		}
 		if( ! EclipseStarter.getSysPath().equals(installURL) ) {
 			//delete the metadata file and the framework file when the location of the basic bundles has changed 
-			getMetaDataLocation().delete();
+			getBundleMetaDataFile().delete();
 			getMetaDataFile().delete();
+			getStateFile().delete();
 			installURL = EclipseStarter.getSysPath();
 		}
 	}
 	
 	private void readHeaders() {
-		File metadata = getMetaDataLocation();
+		File metadata = getBundleMetaDataFile();
 		if (!metadata.isFile())
 			return;
 		
@@ -195,33 +188,33 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		super.frameworkStart(context);
 		Bundle bundle = context.getBundle();
 		Location location;
-		
+
 		// Less than optimal reference to EclipseStarter here.  Not sure how we can make the location
 		// objects available.  They are needed very early in EclipseStarter but these references tie
 		// the adaptor to that starter.
 		location = LocationManager.getUserLocation();
 		if (location != null) {
-			Hashtable properties = new Hashtable(1);
-			properties.put("type", LocationManager.PROP_USER_AREA);
+		Hashtable properties = new Hashtable(1);
+		properties.put("type", LocationManager.PROP_USER_AREA);
 			context.registerService(Location.class.getName(), location, properties);
 		}
 
 		location = LocationManager.getInstanceLocation();
 		if (location != null) {
-			properties.put("type", LocationManager.PROP_INSTANCE_AREA);
+		properties.put("type", LocationManager.PROP_INSTANCE_AREA);
 			context.registerService(Location.class.getName(), location, properties);
 		}
 		location = LocationManager.getConfigurationLocation();
 		if (location != null) {
-			properties.put("type", LocationManager.PROP_CONFIG_AREA);
+		properties.put("type", LocationManager.PROP_CONFIG_AREA);
 			context.registerService(Location.class.getName(), location, properties);
 		}
 		location = LocationManager.getInstallLocation();
 		if (location != null) {
-			properties.put("type", LocationManager.PROP_INSTALL_AREA);
+		properties.put("type", LocationManager.PROP_INSTALL_AREA);
 			context.registerService(Location.class.getName(), location, properties);
 		}
-		
+
 		register(org.eclipse.osgi.service.environment.EnvironmentInfo.class.getName(), EnvironmentInfo.getDefault(), bundle);
 		register(PlatformAdmin.class.getName(), stateManager, bundle);
 		register(PluginConverter.class.getName(), new PluginConverterImpl(context), bundle);
@@ -298,20 +291,11 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		}
 	}
 
-	private File getMetaDataLocation() {
-		Location location = LocationManager.getConfigurationLocation();
-		if (location != null) {
-			// TODO assumes the URL is a file: url
-			String configArea = location.getURL().getFile();
-			return new File(configArea, ".bundledata");
-		}
-		return null;
-	}
 	/**
 	 * @see org.eclipse.osgi.framework.adaptor.FrameworkAdaptor#getInstalledBundles()
 	 */
 	public Vector getInstalledBundles() {
-		File metadata = getMetaDataLocation();
+		File metadata = getBundleMetaDataFile();
 		if (!metadata.isFile())
 			return null;
 		try {
@@ -335,9 +319,9 @@ public class EclipseAdaptor extends DefaultAdaptor {
 						try {
 							id = in.readLong();
 							if (id != 0) {
-								EclipseBundleData data = (EclipseBundleData) getElementFactory().getBundleData(this,id);
+								EclipseBundleData data = (EclipseBundleData) getElementFactory().createBundleData(this,id);
 								loadMetaDataFor(data, in);
-								data.initializeExistingBundle(Long.toString(id));
+								data.initializeExistingBundle();
 								if (Debug.DEBUG && Debug.DEBUG_GENERAL)
 									Debug.println("BundleData created: " + data);
 								result.addElement(data);
@@ -373,14 +357,14 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		if (flag == NULL)
 			return;
 		data.setLocation(readString(in, false));
-		data.setName(readString(in, false));
-		data.setUniqueId(readString(in, false));
+		data.setFileName(readString(in, false));
+		data.setSymbolicName(readString(in, false));
 		data.setVersion(new Version(readString(in, false)));
 		data.setActivator(readString(in, false));
 		data.setPluginClass(readString(in, false));
 		data.setLegacy(readString(in, false));
 		data.setClassPath(readString(in, false));
-		data.setNativeCodePath(readString(in, false));
+		data.setNativePaths(readString(in, false));
 		data.setExecutionEnvironment(readString(in, false));
 		data.setDynamicImports(readString(in, false));
 		data.setGeneration(in.readInt());
@@ -391,6 +375,11 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		data.setManifestTimeStamp(in.readLong());
 		data.setManifestType(in.readByte());
 	}
+
+	public void saveMetaDataFor(DefaultBundleData data) throws IOException  {
+		// TODO may want to force a write of .bundledata in some cases here.
+	}
+	
 	protected void saveMetaDataFor(BundleData data, DataOutputStream out) throws IOException {
 		if (data.getBundleID() == 0 || !(data instanceof DefaultBundleData)) {
 			out.writeByte(NULL);
@@ -399,14 +388,14 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		EclipseBundleData bundleData = (EclipseBundleData) data;
 		out.writeByte(OBJECT);
 		writeStringOrNull(out, bundleData.getLocation());
-		writeStringOrNull(out, bundleData.getFileName());	//TODO Check how this works regarding localization
-		writeStringOrNull(out, bundleData.getUniqueId());
+		writeStringOrNull(out, bundleData.getFileName());
+		writeStringOrNull(out, bundleData.getSymbolicName());
 		writeStringOrNull(out, bundleData.getVersion().toString());
 		writeStringOrNull(out, bundleData.getActivator());
 		writeStringOrNull(out, bundleData.getPluginClass());
 		writeStringOrNull(out, bundleData.isLegacy());
 		writeStringOrNull(out, bundleData.getClassPath());
-		writeStringOrNull(out, bundleData.getNativeCodePath());
+		writeStringOrNull(out, bundleData.getNativePathsString());
 		writeStringOrNull(out, bundleData.getExecutionEnvironment());
 		writeStringOrNull(out, bundleData.getDynamicImports());
 		out.writeInt(bundleData.getGeneration());
@@ -435,13 +424,9 @@ public class EclipseAdaptor extends DefaultAdaptor {
 			out.writeUTF(string);
 		}
 	}
-	
-	protected BundleContext getContext() {
-		return context;	
-	}
 
 	public void saveMetaData() {
-		File metadata = getMetaDataLocation();
+		File metadata = getBundleMetaDataFile();
 		// the cache and the state match
 		if (timeStamp == stateManager.getSystemState().getTimeStamp() && metadata.isFile())
 			return;
@@ -474,19 +459,14 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		}
 	}
 
-	public int getStartLevel() {
-		return startLevel;
-	}
-
-	public void setStartLevel(int value) {
-		startLevel = value;
-	}
-
 	public IBundleStats getBundleStats() {
 		return StatsManager.getDefault();
 	}
-	
-	protected File getStateBaseLocation() {
+
+	protected BundleContext getContext(){
+		return context;
+	}
+	protected File getConfigurationLocation() {
 		Location location = LocationManager.getConfigurationLocation();
 		if (location != null)
 			// TODO assumes the URL is a file: url
@@ -495,9 +475,25 @@ public class EclipseAdaptor extends DefaultAdaptor {
 	}
 
 	protected File getMetaDataFile() {
-		File configAreaDirectory = getStateBaseLocation();
+		File configAreaDirectory = getConfigurationLocation();
 		if (!configAreaDirectory.exists())
 			configAreaDirectory.mkdirs();
 		return new File(configAreaDirectory, ".framework");
+	}
+
+	private File getBundleMetaDataFile() {
+		File configAreaDirectory = getConfigurationLocation();
+		if (!configAreaDirectory.exists())
+			configAreaDirectory.mkdirs();
+	
+		return new File(configAreaDirectory, ".bundledata");
+	}
+
+	private File getStateFile() {
+		File configAreaDirectory = getConfigurationLocation();
+		if (!configAreaDirectory.exists())
+			configAreaDirectory.mkdirs();
+	
+		return new File(configAreaDirectory, ".state");
 	}
 }

@@ -9,30 +9,28 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
-
 import java.io.*;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.BundleException;
-
 public class StateManager implements PlatformAdmin {
 	public static boolean DEBUG = false;
 	public static boolean DEBUG_READER = false;
 	public static boolean DEBUG_PLATFORM_ADMIN = false;
-	public static boolean DEBUG_PLATFORM_ADMIN_RESOLVER = false;
-	public static boolean MONITOR_PLATFORM_ADMIN = false;
+	public static boolean DEBUG_PLATFORM_ADMIN_RESOLVER = false;	
+	public static boolean MONITOR_PLATFORM_ADMIN = false;	
 	private long readStartupTime;
 	private StateImpl systemState;
 	private File stateLocation;
 	private StateObjectFactoryImpl factory;
 	private long lastTimeStamp;
 	private BundleInstaller installer;
-	public StateManager(File  bundleRootDir) {
+	public StateManager(File stateLocation) {
 		// a negative timestamp means no timestamp checking
-		this(bundleRootDir, -1);
+		this(stateLocation, -1);
 	}
-	public StateManager(File bundleRootDir, long expectedTimeStamp) {
+	public StateManager(File stateLocation, long expectedTimeStamp) {
 		factory = new StateObjectFactoryImpl();
-		stateLocation = new File(bundleRootDir, ".state"); //$NON-NLS-1$
+		this.stateLocation = stateLocation;
 		readState(expectedTimeStamp);
 	}
 	public void shutdown() throws IOException {
@@ -100,7 +98,7 @@ public class StateManager implements PlatformAdmin {
 	public StateObjectFactory getFactory() {
 		return factory;
 	}
-	public synchronized void commit(State state) throws BundleException {
+public synchronized void commit(State state) throws BundleException {
 		// client trying to sneak in some alien implementation
 		if (!(state instanceof UserState))
 			throw new IllegalArgumentException("Wrong state implementation"); //$NON-NLS-1$
@@ -116,7 +114,7 @@ public class StateManager implements PlatformAdmin {
 			// ensure it has not been added then removed
 			if (added != null)
 				installer.installBundle(added);
-		}
+	}	
 		Long[] allRemoved = userState.getAllRemoved();
 		for (int i = 0; i < allRemoved.length; i++) {
 			long removedId = allRemoved[i].longValue();
@@ -138,8 +136,7 @@ public class StateManager implements PlatformAdmin {
 	
 	public BundleInstaller getInstaller() {
 		return installer;
-	}
-	public void setInstaller(BundleInstaller installer) {
+}	public void setInstaller(BundleInstaller installer) {
 		this.installer = installer;
 	}
 }

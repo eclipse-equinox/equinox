@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.osgi.framework.internal.defaultadaptor;
+package org.eclipse.osgi.framework.adaptor.core;
 
 import java.io.*;
 import java.net.MalformedURLException;
@@ -17,8 +17,11 @@ import java.net.URL;
 import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+
+import org.eclipse.osgi.framework.adaptor.BundleData;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.internal.core.Constants;
+import org.eclipse.osgi.framework.internal.core.Msg;
 import org.eclipse.osgi.framework.internal.protocol.bundleresource.Handler;
 
 abstract public class BundleFile {
@@ -30,7 +33,7 @@ abstract public class BundleFile {
 	/**
 	 * The BundleData object for this bundle.
 	 */
-	protected DefaultBundleData bundledata;
+	protected BundleData bundledata;
 
 	/**
 	 * The String value of the Bundle ID
@@ -43,7 +46,7 @@ abstract public class BundleFile {
 	 * stored.
 	 * @param bundledata The BundleData object for this bundle.
 	 */
-	public BundleFile(File bundlefile, DefaultBundleData bundledata) {
+	public BundleFile(File bundlefile, BundleData bundledata) {
 		this.bundlefile = bundlefile;
 		this.bundledata = bundledata;
 		this.bundleID = String.valueOf(bundledata.getBundleID());
@@ -106,7 +109,7 @@ abstract public class BundleFile {
 	 * Returns a URL to access the contents of the entry specified by the path
 	 * @param path 
 	 */
-	public URL getURL(String path, int cpEntry) {
+	public URL getResourceURL(String path) {
 		BundleEntry bundleEntry = getEntry(path);
 		if (bundleEntry == null)
 			return null;
@@ -118,13 +121,13 @@ abstract public class BundleFile {
 				url.append('/');
 			}
 			url.append(path);
-			return new URL(null, url.toString(), new Handler(bundleEntry,bundledata.adaptor.getContext()));
+			return new URL(null, url.toString(), new Handler(bundleEntry));
 		} catch (MalformedURLException e) {
 			return null;
 		}
 	}
 
-	static public BundleFile createBundleFile(File bundlefile, DefaultBundleData bundledata) throws IOException {
+	static public BundleFile createBundleFile(File bundlefile, BundleData bundledata) throws IOException {
 		if (bundlefile.isDirectory()) {
 			return new DirBundleFile(bundlefile, bundledata);
 		} else {
@@ -133,14 +136,14 @@ abstract public class BundleFile {
 	}
 
 	static public BundleFile createBundleFile(ZipBundleFile bundlefile, String cp) {
-		return new ZipDirBundleFile(bundlefile, cp);
+		return new DirZipBundleFile(bundlefile, cp);
 	}
 
 	public static class ZipBundleFile extends BundleFile {
 		protected ZipFile zipFile;
 		protected boolean closed = false;
 
-		protected ZipBundleFile(File bundlefile, DefaultBundleData bundledata) throws IOException {
+		protected ZipBundleFile(File bundlefile, BundleData bundledata) throws IOException {
 			super(bundlefile, bundledata);
 			this.closed = true;
 			open();
@@ -152,55 +155,81 @@ abstract public class BundleFile {
 			return zipFile.getEntry(path);
 		}
 
+		protected File extractDirectory(String dirName){
+			Enumeration entries = zipFile.entries();
+			while (entries.hasMoreElements()) {
+				String entryPath = ((ZipEntry)entries.nextElement()).getName();
+				if(entryPath.startsWith(dirName) && !entryPath.endsWith("/"))
+					getFile(entryPath);
+			}
+			return getExtractFile(dirName);
+		}
+
+		protected File getExtractFile(String entryName) {
+			if (!(bundledata instanceof AbstractBundleData)) {
+				return null;
+			}
+			File bundleGenerationDir = ((AbstractBundleData)bundledata).createGenerationDir();
+			/* if the generation dir exists, then we have place to cache */
+			if (bundleGenerationDir != null && bundleGenerationDir.exists()) {
+				String path = ".cp"; /* put all these entries in this subdir */
+				String name = entryName.replace('/', File.separatorChar);
+				if ((name.length() > 1) && (name.charAt(0) == File.separatorChar)) /* if name has a leading slash */{
+					path = path.concat(name);
+				} else {
+					path = path + File.separator + name;
+				}
+				return new File(bundleGenerationDir, path); 
+			}
+			return null;
+		}
 		public File getFile(String entry) {
 			ZipEntry zipEntry = getZipEntry(entry);
-			if (zipEntry == null || zipEntry.isDirectory()) {
+			if (zipEntry == null) {
 				return null;
 			}
 
 			try {
-				File bundleGenerationDir = bundledata.getGenerationDir();
 
-				/* if the generation dir exists, then we have place to cache */
-				if (bundleGenerationDir.exists()) {
-					String path = ".cp"; /* put all these entries in this subdir */
-					String name = zipEntry.getName().replace('/', File.separatorChar);
-
-					if ((name.length() > 1) && (name.charAt(0) == File.separatorChar)) /* if name has a leading slash */ {
-						path = path.concat(name);
-					} else {
-						path = path + File.separator + name;
-					}
-
-					File nested = new File(bundleGenerationDir, path);
-
+				File nested = getExtractFile(zipEntry.getName());
+				if (nested != null) {
 					if (nested.exists()) {
 						/* the entry is already cached */
 						if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 							Debug.println("File already present: " + nested.getPath());
 						}
 					} else {
-						InputStream in = zipFile.getInputStream(zipEntry);
-						if (in == null)
-							return null;
-						/* the entry has not been cached */
-						if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-							Debug.println("Creating file: " + nested.getPath());
-						}
-
-						/* create the necessary directories */
-						File dir = new File(nested.getParent());
-
-						if (!dir.exists() && !dir.mkdirs()) {
-							if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-								Debug.println("Unable to create directory: " + dir.getPath());
+						if (zipEntry.getName().endsWith("/")) {
+							if (!nested.mkdirs()) {
+								if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+									Debug.println("Unable to create directory: "
+													+ nested.getPath());
+								}
+								throw new IOException(Msg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION"));
 							}
-
-							throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION"));
+							extractDirectory(zipEntry.getName());
 						}
-
-						/* copy the entry to the cache */
-						DefaultAdaptor.readFile(in, nested);
+						else {
+							InputStream in = zipFile.getInputStream(zipEntry);
+							if (in == null)
+								return null;
+							/* the entry has not been cached */
+							if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+								Debug.println("Creating file: "
+										+ nested.getPath());
+							}
+							/* create the necessary directories */
+							File dir = new File(nested.getParent());
+							if (!dir.exists() && !dir.mkdirs()) {
+								if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+									Debug.println("Unable to create directory: "
+													+ dir.getPath());
+								}
+								throw new IOException(Msg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION"));
+							}
+							/* copy the entry to the cache */
+							AbstractFrameworkAdaptor.readFile(in, nested);
+						}
 					}
 
 					return nested;
@@ -245,7 +274,7 @@ abstract public class BundleFile {
 				if (path.length()== 0 || path.charAt(path.length()-1) == '/') {
 					// this is a directory request lets see if any entries exist in this directory
 					if (containsDir(path))
-						return new BundleEntry.DirBundleEntry(bundlefile,path);
+						return new BundleEntry.DirZipBundleEntry(this,path);
 				}
 				return null;
 			}
@@ -308,10 +337,10 @@ abstract public class BundleFile {
 
 	public static class DirBundleFile extends BundleFile {
 
-		protected DirBundleFile(File bundlefile, DefaultBundleData bundledata) throws IOException {
+		protected DirBundleFile(File bundlefile, BundleData bundledata) throws IOException {
 			super(bundlefile, bundledata);
 			if (!bundlefile.exists() || !bundlefile.isDirectory()) {
-				throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_DIRECTORY_EXCEPTION", bundlefile));
+				throw new IOException(Msg.formatter.getString("ADAPTOR_DIRECTORY_EXCEPTION", bundlefile));
 			}
 		}
 
@@ -353,12 +382,11 @@ abstract public class BundleFile {
 							throw new NoSuchElementException();
 						}
 						java.io.File childFile = new java.io.File(pathFile, fileList[cur]);
+						StringBuffer sb = new StringBuffer(path).append(fileList[cur++]);
 						if (childFile.isDirectory()) {
-							StringBuffer sb = new StringBuffer(fileList[cur++]).append("/");
-							return sb.toString();
-						} else {
-							return fileList[cur++];
+							sb.append("/");
 						}
+						return sb.toString();
 					}
 
 				};
@@ -388,10 +416,10 @@ abstract public class BundleFile {
 		}
 	}
 
-	public static class ZipDirBundleFile extends BundleFile {
+	public static class DirZipBundleFile extends BundleFile {
 		ZipBundleFile zipBundlefile;
 		String cp;
-		public ZipDirBundleFile(ZipBundleFile zipBundlefile, String cp) {
+		public DirZipBundleFile(ZipBundleFile zipBundlefile, String cp) {
 			super(zipBundlefile.bundlefile, zipBundlefile.bundledata);
 			this.zipBundlefile = zipBundlefile;
 			this.cp = cp;
