@@ -33,7 +33,7 @@ class StateReader {
 	private boolean lazyLoad = true;
 	private int numBundles;
 
-	public static final byte STATE_CACHE_VERSION = 19;
+	public static final byte STATE_CACHE_VERSION = 20;
 	public static final byte NULL = 0;
 	public static final byte OBJECT = 1;
 	public static final byte INDEX = 2;
@@ -79,14 +79,19 @@ class StateReader {
 			if (expectedTimestamp >= 0 && timestampRead != expectedTimestamp)
 				return false;
 			addToObjectTable(state, index);
-			Hashtable props = new Hashtable(StateImpl.PROPS.length);
-			int numProps = in.readInt();
-			for (int i = 0; i < numProps; i++) {
-				Object value = readPlatformProp(in);
-				if (value != null && i < StateImpl.PROPS.length)
-					props.put(StateImpl.PROPS[i], value);
+			int numSets = in.readInt();
+			Dictionary[] platformProps = new Dictionary[numSets];
+			for (int i = 0; i < numSets; i++) {
+				Hashtable props = new Hashtable(StateImpl.PROPS.length);
+				int numProps = in.readInt();
+				for (int j = 0; j < numProps; j++) {
+					Object value = readPlatformProp(in);
+					if (value != null && j < StateImpl.PROPS.length)
+						props.put(StateImpl.PROPS[j], value);
+				}
+				platformProps[i] = props;
 			}
-			state.setPlatformProperties(props);
+			state.setPlatformProperties(platformProps);
 			numBundles = in.readInt();
 			if (numBundles == 0)
 				return true;
@@ -127,14 +132,19 @@ class StateReader {
 		if (expectedTimestamp >= 0 && timestampRead != expectedTimestamp)
 			return false;
 		addToObjectTable(state, index);
-		Hashtable props = new Hashtable(StateImpl.PROPS.length);
-		int numProps = in.readInt();
-		for (int i = 0; i < numProps; i++) {
-			Object value = readPlatformProp(in);
-			if (value != null && i < StateImpl.PROPS.length)
-				props.put(StateImpl.PROPS[i], value);
+		int numSets = in.readInt();
+		Dictionary[] platformProps = new Dictionary[numSets];
+		for (int i = 0; i < numSets; i++) {
+			Hashtable props = new Hashtable(StateImpl.PROPS.length);
+			int numProps = in.readInt();
+			for (int j = 0; j < numProps; j++) {
+				Object value = readPlatformProp(in);
+				if (value != null && j < StateImpl.PROPS.length)
+					props.put(StateImpl.PROPS[j], value);
+			}
+			platformProps[i] = props;
 		}
-		state.setPlatformProperties(props);
+		state.setPlatformProperties(platformProps);
 		numBundles = in.readInt();
 		if (numBundles == 0)
 			return true;

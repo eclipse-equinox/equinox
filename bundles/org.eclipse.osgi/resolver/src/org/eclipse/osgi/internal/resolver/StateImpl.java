@@ -37,7 +37,7 @@ public abstract class StateImpl implements State {
 	boolean fullyLoaded = false;
 	// only used for lazy loading of BundleDescriptions
 	private StateReader reader;
-	private Dictionary platformProperties = new Hashtable(4); // Dictionary here because of Filter API
+	private Dictionary[] platformProperties = {new Hashtable(PROPS.length)}; // Dictionary here because of Filter API
 	private ExportPackageDescription[] systemExports = new ExportPackageDescription[0];
 
 	private static long cumulativeTime;
@@ -436,10 +436,26 @@ public abstract class StateImpl implements State {
 	}
 
 	public synchronized boolean setPlatformProperties(Dictionary platformProperties) {
-		return setProps(this.platformProperties, platformProperties);
+		if (this.platformProperties.length != 1)
+			this.platformProperties = new Dictionary[] {new Hashtable(PROPS.length)};
+		return setProps(this.platformProperties[0], platformProperties);
 	}
 
-	Dictionary getPlatformProperties() {
+	public boolean setPlatformProperties(Dictionary[] platformProperties) {
+		if (platformProperties.length == 0)
+			throw new IllegalArgumentException();
+		if (this.platformProperties.length != platformProperties.length) {
+			this.platformProperties = new Dictionary[platformProperties.length];
+			for (int i = 0; i < platformProperties.length; i++)
+				this.platformProperties[i] = new Hashtable(PROPS.length);
+		}
+		boolean result = false;
+		for (int i = 0; i < platformProperties.length; i++)
+			result |= setProps(this.platformProperties[i], platformProperties[0]);
+		return result;
+	}
+
+	Dictionary[] getPlatformProperties() {
 		return platformProperties;
 	}
 

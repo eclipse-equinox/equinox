@@ -69,7 +69,7 @@ public class ImportPackageSpecificationImpl extends VersionConstraintImpl implem
 		// If it does, are we one of the friends 
 		String[] friends = (String[]) pkgDes.getDirective(Constants.FRIENDS_DIRECTIVE);
 		if (friends != null) {
-			boolean strict = "strict".equals(((StateImpl) getBundle().getContainingState()).getPlatformProperties().get("osgi.resolverMode"));
+			boolean strict = Constants.STRICT_MODE.equals(((StateImpl) getBundle().getContainingState()).getPlatformProperties()[0].get(Constants.OSGI_RESOLVER_MODE));
 			if (strict) {
 				boolean found = false;
 				for (int i = 0; i < friends.length; i++)
@@ -91,7 +91,7 @@ public class ImportPackageSpecificationImpl extends VersionConstraintImpl implem
 
 		String name = getName();
 		// shortcut '*'
-		// TODO we have logic here for "*" exports for now to make progress in the resolver implementation
+		// NOTE: wildcards are supported only in cases where this is a dynamic import
 		if ("*".equals(name) || "*".equals(pkgDes.getName())) {//$NON-NLS-1$ //$NON-NLS-2$
 			matchName = true;
 		} else if (name.endsWith(".*")) { //$NON-NLS-1$

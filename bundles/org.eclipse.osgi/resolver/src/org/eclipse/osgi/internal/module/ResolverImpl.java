@@ -189,7 +189,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 
 	// Checks a bundle to make sure it is valid.  If this method returns false for
 	// a given bundle, then that bundle will not even be considered for resolution
-	private boolean isResolvable(BundleDescription bundle, Dictionary platformProperties) {
+	private boolean isResolvable(BundleDescription bundle, Dictionary[] platformProperties) {
 		ImportPackageSpecification[] imports = bundle.getImportPackages();
 		for (int i = 0; i < imports.length; i++) {
 			// Don't allow non-dynamic imports to specify wildcards
@@ -209,10 +209,13 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 			return false;
 		try {
 			Filter filter = context.createFilter(platformFilter);
-			return filter.match(platformProperties);
+			for (int i = 0; i < platformProperties.length; i++)
+				if (filter.match(platformProperties[i]))
+					return true;
 		} catch (InvalidSyntaxException e) {
 			return false;
 		}
+		return false;
 	}
 
 	// Attach fragment to its host
@@ -227,7 +230,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		}
 	}
 
-	public synchronized void resolve(BundleDescription[] reRefresh, Dictionary platformProperties) {
+	public synchronized void resolve(BundleDescription[] reRefresh, Dictionary[] platformProperties) {
 		if (DEBUG)
 			ResolverImpl.log("*** BEGIN RESOLUTION ***"); //$NON-NLS-1$
 		if (state == null)

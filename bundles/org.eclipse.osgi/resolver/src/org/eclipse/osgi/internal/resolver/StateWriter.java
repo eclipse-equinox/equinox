@@ -54,14 +54,21 @@ class StateWriter {
 	}
 
 	private void writeStateDeprecated(StateImpl state, DataOutputStream out) throws IOException {
+		// first clear the System exports because we don't want to persist them in the system
+		// bundles bundle description data
+		state.setSystemExports(null);
 		out.write(StateReader.STATE_CACHE_VERSION);
 		if (writePrefix(state, out))
 			return;
 		out.writeLong(state.getTimeStamp());
-		Dictionary props = state.getPlatformProperties();
-		out.writeInt(StateImpl.PROPS.length);
-		for (int i = 0; i < StateImpl.PROPS.length; i++)
-			writePlatformProp(props.get(StateImpl.PROPS[i]), out);
+		Dictionary[] propSet = state.getPlatformProperties();
+		out.writeInt(propSet.length);
+		for (int i = 0; i < propSet.length; i++){
+			Dictionary props = propSet[i];
+			out.writeInt(StateImpl.PROPS.length);
+			for (int j = 0; j < StateImpl.PROPS.length; j++)
+				writePlatformProp(props.get(StateImpl.PROPS[j]), out);
+		}
 		BundleDescription[] bundles = state.getBundles();
 		StateHelperImpl.getInstance().sortBundles(bundles);
 		out.writeInt(bundles.length);
@@ -103,10 +110,14 @@ class StateWriter {
 			if (writePrefix(state, outState))
 				return;
 			outState.writeLong(state.getTimeStamp());
-			Dictionary props = state.getPlatformProperties();
-			outState.writeInt(StateImpl.PROPS.length);
-			for (int i = 0; i < StateImpl.PROPS.length; i++)
-				writePlatformProp(props.get(StateImpl.PROPS[i]), outState);
+			Dictionary[] propSet = state.getPlatformProperties();
+			outState.writeInt(propSet.length);
+			for (int i = 0; i < propSet.length; i++){
+				Dictionary props = propSet[i];
+				outState.writeInt(StateImpl.PROPS.length);
+				for (int j = 0; j < StateImpl.PROPS.length; j++)
+					writePlatformProp(props.get(StateImpl.PROPS[j]), outState);
+			}
 			outState.writeInt(bundles.length);
 			if (bundles.length == 0)
 				return;
