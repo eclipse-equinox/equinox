@@ -111,7 +111,6 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 	public void initialize(EventPublisher eventPublisher) {
 		super.initialize(eventPublisher);
 		initBundleStoreRootDir();
-		initDataRootDir();
 		
 		// need to create the FrameworkLog very early
 		frameworkLog = createFrameworkLog();
@@ -194,6 +193,8 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 	}
 
 	public File getDataRootDir() {
+		if (dataRootDir == null)
+			initDataRootDir();
 		return dataRootDir;
 	}
 

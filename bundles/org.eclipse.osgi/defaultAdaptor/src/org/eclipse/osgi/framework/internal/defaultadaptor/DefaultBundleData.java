@@ -142,7 +142,6 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 	protected void initBundleStoreDirs(String bundleID) {
 		bundleStoreDir = new File(adaptor.getBundleStoreRootDir(), bundleID);
 		dirGeneration = new File(bundleStoreDir, String.valueOf(generation));
-		dirData = new File(adaptor.getDataRootDir(), bundleID + '/' + DefaultAdaptor.DATA_DIR_NAME);
 	}
 	/**
 	 * Creates the ClassLoader for the BundleData. The ClassLoader created must
@@ -285,6 +284,13 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 	 * @return Bundle data directory.
 	 */
 	public File getDataFile(String path) {
+		// lazily initialize dirData to prevent early access to instance location
+		if (dirData != null) {
+			File dataRoot = adaptor.getDataRootDir();
+			if (dataRoot == null)
+				throw new IllegalStateException("Instance data location not set yet");
+			dirData = new File(dataRoot, id + '/' + DefaultAdaptor.DATA_DIR_NAME);
+		}
 		if (!dirData.exists() && !dirData.mkdirs()) {
 			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 				Debug.println("Unable to create bundle data directory: " + dirData.getPath());

@@ -11,6 +11,7 @@
 package org.eclipse.core.runtime.adaptor;
 
 import java.io.*;
+import java.net.URL;
 import java.util.*;
 import javax.xml.parsers.SAXParserFactory;
 import org.eclipse.osgi.framework.adaptor.BundleData;
@@ -79,9 +80,12 @@ public class EclipseAdaptor extends DefaultAdaptor {
 
 	protected void initDataRootDir() {
 		Location instanceLocation = LocationManager.getInstanceLocation();
-		if (instanceLocation != null)
+		if (instanceLocation != null) {
 			// TODO assumes the URL is a file: url
-			dataRootDir = new File(instanceLocation.getURL().getFile());
+			URL url = instanceLocation.getURL();
+			if (url != null)
+				dataRootDir = new File(url.getFile());
+		}
 	}
 
 	protected FrameworkLog createFrameworkLog() {
