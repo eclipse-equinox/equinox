@@ -1,3 +1,4 @@
+Manifest-Version: 1.0
 Export-Package: org.osgi.framework; specification-version=1.2,
                 org.osgi.service.packageadmin; specification-version=1.1,
                 org.osgi.service.permissionadmin; specification-version=1.1,
@@ -8,6 +9,7 @@ Export-Package: org.osgi.framework; specification-version=1.2,
                 org.eclipse.osgi.framework.msg; specification-version=1.0,
                 org.eclipse.osgi.service.debug,
                 org.eclipse.osgi.service.resolver,
+                org.eclipse.osgi.service.systembundle,
                 org.eclipse.osgi.util
 Provide-Package: org.osgi.framework,
                 org.osgi.service.packageadmin,
@@ -19,7 +21,8 @@ Provide-Package: org.osgi.framework,
                 org.eclipse.osgi.framework.msg,
                 org.eclipse.osgi.service.debug,
                 org.eclipse.osgi.service.resolver,
-                org.eclipse.osgi.util                
+                org.eclipse.osgi.service.systembundle,
+                org.eclipse.osgi.util
 Import-Package: org.osgi.framework; specification-version=1.2,
                 org.osgi.service.packageadmin; specification-version=1.1,
                 org.osgi.service.permissionadmin; specification-version=1.1,
@@ -28,19 +31,21 @@ Import-Package: org.osgi.framework; specification-version=1.2,
                 org.eclipse.osgi.framework.eventmgr,
                 org.eclipse.osgi.framework.msg; specification-version=1.0,
                 org.eclipse.osgi.service.debug,
-                org.eclipse.osgi.service.resolver
+                org.eclipse.osgi.service.resolver,
+                org.eclipse.osgi.service.systembundle,
+                org.eclipse.osgi.util
 Export-Service: org.osgi.service.packageadmin.PackageAdmin,
                 org.osgi.service.permissionadmin.PermissionAdmin,
                 org.osgi.service.startlevel.StartLevel,
                 org.eclipse.osgi.service.debug.DebugOptions
-Bundle-Name: OSGi System Bundle
+Bundle-Name: %systemBundle
 Bundle-SymbolicName: org.eclipse.osgi; singleton=true
 Bundle-Activator: org.eclipse.osgi.framework.internal.core.SystemBundleActivator
-Bundle-Description: OSGi System Bundle
-Bundle-Copyright: Copyright (c) 2003, 2004 IBM Corporation and others. All rights reserved. This program and the accompanying materials  are made available under the terms of the Common Public License v1.0 which accompanies this distribution, and is available at http://www.eclipse.org/legal/cpl-v10.html
-Bundle-Vendor: Eclipse.org
+Bundle-Description: %systemBundle
+Bundle-Copyright: %copyright
+Bundle-Vendor: %eclipse.org
 Bundle-Version: 3.0.0
-Bundle-Localization: plugin
+Bundle-Localization: systembundle
 Bundle-DocUrl: http://www.eclipse.org
 Bundle-ClassPath: 
  osgi.jar,

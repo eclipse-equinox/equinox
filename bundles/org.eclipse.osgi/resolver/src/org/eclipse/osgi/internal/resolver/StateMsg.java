@@ -12,6 +12,7 @@
 package org.eclipse.osgi.internal.resolver;
 
 import org.eclipse.osgi.framework.msg.MessageFormat;
+import org.eclipse.osgi.framework.util.FrameworkMessageFormat;
 
 /**
  * This class retrieves strings from a resource bundle
@@ -21,7 +22,7 @@ import org.eclipse.osgi.framework.msg.MessageFormat;
  * It is used by the system classes to provide national
  * language support, by looking up messages in the
  * <code>
- *    org.eclipse.osgi.framework.internal.core.ExternalMessages
+ *    org.eclipse.osgi.internal.resolver.StateMessages
  * </code>
  * resource bundle. Note that if this file is not available,
  * or an invalid key is looked up, or resource bundle support
@@ -36,6 +37,6 @@ public class StateMsg {
 
 	// Attempt to load the message bundle.
 	static {
-		formatter = new MessageFormat("org.eclipse.osgi.internal.resolver.StateMessages");
+		formatter = FrameworkMessageFormat.getMessageFormat("org.eclipse.osgi.internal.resolver.StateMessages"); //$NON-NLS-1$
 	}
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003 IBM Corporation and others.
+ * Copyright (c) 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,9 @@
  *******************************************************************************/
 
 package org.eclipse.osgi.framework.internal.core;
+
+import org.eclipse.osgi.framework.msg.MessageFormat;
+import org.eclipse.osgi.framework.util.FrameworkMessageFormat;
 
 /**
  * This class retrieves strings from a resource bundle
@@ -30,10 +33,10 @@ package org.eclipse.osgi.framework.internal.core;
 
 public class Msg {
 
-	static public org.eclipse.osgi.framework.msg.MessageFormat formatter;
+	static public MessageFormat formatter;
 
 	// Attempt to load the message bundle.
 	static {
-		formatter = new org.eclipse.osgi.framework.msg.MessageFormat("org.eclipse.osgi.framework.internal.core.ExternalMessages");
+		formatter = FrameworkMessageFormat.getMessageFormat("org.eclipse.osgi.framework.internal.core.ExternalMessages"); //$NON-NLS-1$
 	}
 }

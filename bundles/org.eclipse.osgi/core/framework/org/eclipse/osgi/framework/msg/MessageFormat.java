@@ -18,8 +18,8 @@ import java.util.*;
 public class MessageFormat {
 
 	// ResourceBundle holding the messages.
-	private ResourceBundle bundle;
-	private Locale locale;
+	protected ResourceBundle bundle;
+	protected Locale locale;
 
 	public MessageFormat(String bundleName) {
 		init(bundleName, Locale.getDefault(), this.getClass());

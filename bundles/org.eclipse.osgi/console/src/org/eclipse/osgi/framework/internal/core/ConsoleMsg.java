@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003 IBM Corporation and others.
+ * Copyright (c) 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,7 @@
 package org.eclipse.osgi.framework.internal.core;
 
 import org.eclipse.osgi.framework.msg.MessageFormat;
+import org.eclipse.osgi.framework.util.FrameworkMessageFormat;
 
 /**
  * This class retrieves strings from a resource bundle
@@ -21,7 +22,7 @@ import org.eclipse.osgi.framework.msg.MessageFormat;
  * It is used by the system classes to provide national
  * language support, by looking up messages in the
  * <code>
- *    org.eclipse.osgi.framework.internal.core.ExternalMessages
+ *    org.eclipse.osgi.framework.internal.core.ConsoleMessages
  * </code>
  * resource bundle. Note that if this file is not available,
  * or an invalid key is looked up, or resource bundle support
@@ -36,6 +37,6 @@ public class ConsoleMsg {
 
 	// Attempt to load the message bundle.
 	static {
-		formatter = new MessageFormat("org.eclipse.osgi.framework.internal.core.ConsoleMessages");
+		formatter = FrameworkMessageFormat.getMessageFormat("org.eclipse.osgi.framework.internal.core.ConsoleMessages"); //$NON-NLS-1$
 	}
 }

@@ -11,6 +11,7 @@
 package org.eclipse.core.runtime.adaptor;
 
 import org.eclipse.osgi.framework.msg.MessageFormat;
+import org.eclipse.osgi.framework.util.FrameworkMessageFormat;
 import org.eclipse.osgi.service.resolver.*;
 
 /**
@@ -31,7 +32,7 @@ public class EclipseAdaptorMsg {
 	public static MessageFormat formatter;
 	// Attempt to load the message bundle.
 	static {
-		formatter = new MessageFormat("org.eclipse.core.runtime.adaptor.EclipseAdaptorMessages"); //TODO This could be an adaptor constant.
+		formatter = FrameworkMessageFormat.getMessageFormat("org.eclipse.core.runtime.adaptor.EclipseAdaptorMessages"); //TODO This could be an adaptor constant.
 	}
 
 	public static String getResolutionFailureMessage(VersionConstraint unsatisfied) {
