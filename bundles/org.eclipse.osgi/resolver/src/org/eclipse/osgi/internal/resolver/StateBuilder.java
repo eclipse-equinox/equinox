@@ -194,7 +194,7 @@ class StateBuilder {
 			// give the same behavior as OSGi R3.
 			// TODO remove grouping !!!
 			result.setGrouping(exportPackage.getDirective(Constants.GROUPING_DIRECTIVE));
-			result.setUses(exportPackage.getDirectives(Constants.USES_DIRECTIVE));
+			result.setUses(ManifestElement.getArrayFromList(exportPackage.getDirective(Constants.USES_DIRECTIVE)));
 
 			// set the rest of the attributes
 			result.setInclude(exportPackage.getDirective(Constants.INCLUDE_DIRECTIVE));
