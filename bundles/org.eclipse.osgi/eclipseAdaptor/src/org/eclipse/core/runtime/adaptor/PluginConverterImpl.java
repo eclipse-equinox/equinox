@@ -202,6 +202,7 @@ public class PluginConverterImpl implements PluginConverter {
 		if (compatibilityManifest) {
 			generateTimestamp();
 			generateLegacy();
+			generateEclipseParameters();			
 		}
 	}
 	public void writeManifest(File generationLocation, Dictionary manifestToWrite, boolean compatibilityManifest) throws PluginConversionException {
@@ -346,6 +347,9 @@ public class PluginConverterImpl implements PluginConverter {
 	private void generateTimestamp() {
 		// so it is easy to tell which ones are generated
 		generatedManifest.put(GENERATED_FROM, Long.toString(pluginManifestLocation.lastModified()));
+	}
+	private void generateEclipseParameters() {
+		generatedManifest.put(EclipseAdaptorConstants.ECLIPSE_PARAMETERS, EclipseAdaptorConstants.DEFAULT_ECLIPSE_PARAMETERS_VALUE);		
 	}
 	private Set getExports() {
 		Map libs = pluginInfo.getLibraries();

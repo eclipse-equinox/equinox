@@ -27,14 +27,18 @@ interface EclipseAdaptorConstants {
 	/**
 	 * An attribute for the "automate" header, meaning that this bundle should be 
 	 * automatically stopped during shutdown.
-	 */	
+	 */
 	String STOP_ATTRIBUTE = "stop"; //$NON-NLS-1$
 	/**
 	 * The "Plugin-Class" header.
-	 */	
+	 */
 	String PLUGIN_CLASS = "Plugin-Class"; //$NON-NLS-1$
 	/**
 	 * The "Legacy" header.
 	 */
-	String LEGACY = "Legacy"; //$NON-NLS-1$	
+	String LEGACY = "Legacy"; //$NON-NLS-1$
+	/**
+	 * A convenience constant for ECLIPSE_PARAMETERS header's default value.
+	 */
+	String DEFAULT_ECLIPSE_PARAMETERS_VALUE = AUTOMATE + "; " + START_ATTRIBUTE + "=true; " + STOP_ATTRIBUTE + "=true"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 }
