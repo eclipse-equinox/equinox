@@ -136,22 +136,27 @@ public class PluginParser extends DefaultHandler implements IModel {
 		public boolean isSingleton() {
 			return singleton;
 		}
+
 		public String getRoot() {
 			return isFragment() ? FRAGMENT : PLUGIN;
 		}
+		/*
+		 * Provides some basic form of validation. Since plugin/fragment is the only mandatory
+		 * attribute, it is the only one we cara about here. 
+		 */
 		public String validateForm() {
 			if (this.pluginId == null)
-				return EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONVERTER_MISSING_PLUGIN_ATTRIBUTE", getRoot(), PLUGIN_ID);
+				return EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONVERTER_MISSING_ATTRIBUTE", new String[] {getRoot(), PLUGIN_ID, getRoot()});
 			if (this.pluginName == null)
-				return EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONVERTER_MISSING_PLUGIN_ATTRIBUTE", getRoot(), PLUGIN_NAME);
+				return EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONVERTER_MISSING_ATTRIBUTE", new String[] {getRoot(), PLUGIN_NAME, getRoot()});
 			if (this.version == null)
-				return EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONVERTER_MISSING_PLUGIN_ATTRIBUTE", getRoot(), PLUGIN_VERSION);
+				return EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONVERTER_MISSING_ATTRIBUTE", new String[] {getRoot(), PLUGIN_VERSION, getRoot()});
 			if (isFragment() && this.masterPluginId == null)
-				return EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONVERTER_MISSING_PLUGIN_ATTRIBUTE", getRoot(), FRAGMENT_PLUGIN_ID);
+				return EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONVERTER_MISSING_ATTRIBUTE", new String[] {getRoot(), FRAGMENT_PLUGIN_ID, getRoot()});;
 			if (isFragment() && this.masterVersion == null)
-				return EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONVERTER_MISSING_PLUGIN_ATTRIBUTE", getRoot(), FRAGMENT_PLUGIN_VERSION);			
+				return EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONVERTER_MISSING_ATTRIBUTE", new String[] {getRoot(), FRAGMENT_PLUGIN_VERSION, getRoot()});
 			return null;
-		}		
+		}
 	}
 
 	// Current State Information
@@ -282,7 +287,7 @@ public class PluginParser extends DefaultHandler implements IModel {
 		} else if (elementName.equals(FRAGMENT)) {
 			manifestInfo.fragment = true;
 			stateStack.push(new Integer(FRAGMENT_STATE));
-			parseFragmentAttributes(attributes);			
+			parseFragmentAttributes(attributes);
 		} else {
 			stateStack.push(new Integer(IGNORED_ELEMENT_STATE));
 			internalError(elementName);
@@ -350,13 +355,13 @@ public class PluginParser extends DefaultHandler implements IModel {
 		}
 		if (elementName.equals(EXTENSION_POINT)) {
 			// mark the plugin as singleton and ignore all elements under extension (if there are any)
-			manifestInfo.singleton = true;			
+			manifestInfo.singleton = true;
 			stateStack.push(new Integer(PLUGIN_EXTENSION_POINT_STATE));
 			return;
 		}
 		if (elementName.equals(EXTENSION)) {
 			// mark the plugin as singleton and ignore all elements under extension (if there are any)
-			manifestInfo.singleton = true;			
+			manifestInfo.singleton = true;
 			stateStack.push(new Integer(PLUGIN_EXTENSION_STATE));
 			return;
 		}
