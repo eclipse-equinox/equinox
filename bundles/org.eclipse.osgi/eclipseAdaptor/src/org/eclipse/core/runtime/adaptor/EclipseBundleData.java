@@ -21,6 +21,7 @@ import org.eclipse.osgi.framework.adaptor.core.*;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.internal.defaultadaptor.*;
 import org.eclipse.osgi.framework.util.Headers;
+import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.BundleException;
 
 public class EclipseBundleData extends DefaultBundleData {
@@ -185,7 +186,7 @@ public class EclipseBundleData extends DefaultBundleData {
 		
 		//write the generated manifest
 		String cacheLocation = (String) System.getProperties().get("osgi.manifest.cache");
-		File bundleManifestLocation = new File(cacheLocation, (String) generatedManifest.get(org.osgi.framework.Constants.BUNDLE_SYMBOLICNAME) + '_' + generatedManifest.get(Constants.BUNDLE_VERSION) + ".MF");
+		File bundleManifestLocation = new File(cacheLocation, ManifestElement.parseHeader(org.osgi.framework.Constants.BUNDLE_SYMBOLICNAME, (String) generatedManifest.get(org.osgi.framework.Constants.BUNDLE_SYMBOLICNAME))[0].getValue() + '_' + generatedManifest.get(Constants.BUNDLE_VERSION) + ".MF");
 		try {
 			converter.writeManifest(bundleManifestLocation, generatedManifest, true);
 		} catch (Exception e) {
