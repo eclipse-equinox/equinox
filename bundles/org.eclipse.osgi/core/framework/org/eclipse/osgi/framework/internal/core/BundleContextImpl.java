@@ -1007,7 +1007,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 
 			String clazz = (activator == null) ? "" : activator.getClass().getName(); //$NON-NLS-1$
 
-			throw new BundleException(Msg.formatter.getString("BUNDLE_ACTIVATOR_EXCEPTION", new Object[] {clazz, "stop", bundle.getSymbolicName() == null ? "" + bundle.getBundleId() : bundle.getSymbolicName()}, t)); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			throw new BundleException(Msg.formatter.getString("BUNDLE_ACTIVATOR_EXCEPTION", new Object[] {clazz, "stop", bundle.getSymbolicName() == null ? "" + bundle.getBundleId() : bundle.getSymbolicName()}), t); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		} finally {
 			activator = null;
 		}
