@@ -1006,7 +1006,7 @@ public class BundleContext implements org.osgi.framework.BundleContext, EventSou
 			String clazz = null;
 			clazz = bundleActivator.getClass().getName();
 
-			throw new BundleException(Msg.formatter.getString("BUNDLE_ACTIVATOR_EXCEPTION", clazz, "start"), t);
+			throw new BundleException(Msg.formatter.getString("BUNDLE_ACTIVATOR_EXCEPTION", new Object[] { clazz, "start", bundle.getSymbolicName() == null ? "" + bundle.getBundleId() : bundle.getSymbolicName() }), t);
 		}
 
 	}
@@ -1041,7 +1041,7 @@ public class BundleContext implements org.osgi.framework.BundleContext, EventSou
 
 			String clazz = (activator == null) ? "" : activator.getClass().getName();
 
-			throw new BundleException(Msg.formatter.getString("BUNDLE_ACTIVATOR_EXCEPTION", clazz, "stop"), t);
+			throw new BundleException(Msg.formatter.getString("BUNDLE_ACTIVATOR_EXCEPTION", new Object[] { clazz, "stop", bundle.getSymbolicName() == null ? "" + bundle.getBundleId() : bundle.getSymbolicName() }, t));
 		} finally {
 			activator = null;
 		}
