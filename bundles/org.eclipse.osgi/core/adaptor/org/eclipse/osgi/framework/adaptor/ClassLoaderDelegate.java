@@ -83,7 +83,7 @@ public interface ClassLoaderDelegate {
 	 * BundleClassLoader.findLocalObject(). <p>
 	 * 
 	 * If no resource is found then return null.
-	 * @param resource the resource to load.
+	 * @param object the name of the object to load.
 	 * @return the resource or null if resource is not found.
 	 * @throws ImportResourceNotFoundException if trying to import a resource from an
 	 * imported package and the resource is not found.

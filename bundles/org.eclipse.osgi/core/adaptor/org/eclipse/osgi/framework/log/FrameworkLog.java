@@ -29,7 +29,7 @@ public interface FrameworkLog {
 
 	/**
 	 * Logs the FrameworkLogEntry to the FrameworkLog
-	 * @param msg The String msg to log.
+	 * @param logEntry The entry to log.
 	 */
 	public void log(FrameworkLogEntry logEntry);
 
@@ -45,17 +45,16 @@ public interface FrameworkLog {
 	 */
 	public void setWriter(Writer newWriter, boolean append);
 
-	/**
-	 *TODO: this is just a copy of the description above 
-	 * Sets the current Writer used to log messages to a FileWriter
-	 * using the specified newFile.  If append is set to true then the 
+	/** 
+	 * Sets the current File used to log messages to a FileWriter
+	 * using the specified File.  If append is set to true then the 
 	 * content of the current Writer will be appended to the 
-	 * new Writer if possible.
-	 * @param outFile The File to create a new FileWriter which will be
+	 * new File if possible.
+	 * @param newFile The File to create a new FileWriter which will be
 	 * used for logging messages.
 	 * @param append Indicates whether the content of the current Writer
 	 * used for logging messages should be appended to the end of the new 
-	 * Writer.
+	 * File.
 	 * @throws IOException if any problem occurs while constructing a
 	 * FileWriter from the newFile.  If this exception is thrown the 
 	 * FrameworkLog will not be effected and will continue to use the 
