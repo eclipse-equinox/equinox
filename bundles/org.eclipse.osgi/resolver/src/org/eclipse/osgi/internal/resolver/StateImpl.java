@@ -250,8 +250,11 @@ public abstract class StateImpl implements State {
 			long start = 0;
 			if (StateManager.DEBUG_PLATFORM_ADMIN_RESOLVER)
 				start = System.currentTimeMillis();
-			if (!incremental)
+			if (!incremental) {
+				resolved = false;
+				reResolve = getBundles();
 				flush();
+			}
 			if (resolved && reResolve == null)
 				return new StateDeltaImpl(this);
 			if (removalPendings.size() > 0) {
