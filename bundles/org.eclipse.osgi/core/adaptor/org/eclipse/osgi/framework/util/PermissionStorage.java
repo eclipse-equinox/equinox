@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.osgi.framework.security.action;
+package org.eclipse.osgi.framework.util;
 
 import java.io.IOException;
 import java.security.*;

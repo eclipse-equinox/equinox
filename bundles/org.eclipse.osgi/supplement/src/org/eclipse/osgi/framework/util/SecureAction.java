@@ -11,17 +11,9 @@
 
 package org.eclipse.osgi.framework.util;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.security.AccessController;
-import java.security.PrivilegedActionException;
-
-import java.security.PrivilegedExceptionAction;
+import java.io.*;
+import java.security.*;
 import java.util.Properties;
-
-import org.eclipse.osgi.framework.security.action.GetProperty;
 
 /**
  * Utility class to execute common privileged code.
@@ -33,11 +25,15 @@ public class SecureAction {
 	 * @param property the property key.
 	 * @return the value of the property or null if it does not exist.
 	 */
-	public static String getProperty(String property){
+	public static String getProperty(final String property){
 		if (System.getSecurityManager() == null)
 			return System.getProperty(property);
 		else
-			return (String) AccessController.doPrivileged(new GetProperty(property,null));
+			return (String) AccessController.doPrivileged(new PrivilegedAction() {
+				public Object run() {
+					return System.getProperty(property);
+				}
+			});
 	}
 
 	/**
@@ -48,11 +44,15 @@ public class SecureAction {
 	 * @return the value of the property or the def value if the property
 	 * does not exist.
 	 */
-	public static String getProperty(String property, String def){
+	public static String getProperty(final String property, final String def){
 		if (System.getSecurityManager() == null)
 			return System.getProperty(property,def);
 		else
-			return (String) AccessController.doPrivileged(new GetProperty(property,def));
+			return (String) AccessController.doPrivileged(new PrivilegedAction() {
+				public Object run() {
+					return System.getProperty(property,def);
+				}
+			});
 	}
 
 	/**
@@ -64,7 +64,11 @@ public class SecureAction {
 		if (System.getSecurityManager() == null)
 			return System.getProperties();
 		else
-			return (Properties) AccessController.doPrivileged(new GetProperty(null));
+			return (Properties) AccessController.doPrivileged(new PrivilegedAction() {
+				public Object run() {
+					return System.getProperties();
+				}
+			});
 	}
 
 	/**
@@ -92,7 +96,7 @@ public class SecureAction {
 	/**
 	 * Creates a FileInputStream from a File.  Same as calling
 	 * new FileOutputStream(File,boolean).
-	 * @param file the File to craete a FileOutputStream from.
+	 * @param file the File to create a FileOutputStream from.
 	 * @param append indicates if the OutputStream should append content.
 	 * @return The FileOutputStream.
 	 * @throws FileNotFoundException if the File does not exist.
@@ -111,4 +115,24 @@ public class SecureAction {
 				throw (FileNotFoundException) e.getException();
 			}
 	}
+	
+	/**
+	 * Creates a new Thread from a Runnable.  Same as calling
+	 * new Thread(target,name).
+	 * @param target the Runnable to create the Thread from.
+	 * @param name The name of the Thread.
+	 * @return The new Thread
+	 */
+	public static Thread createThread(final Runnable target, final String name) {
+		if(System.getSecurityManager() == null)
+			return new Thread(target, name);
+		else {
+			return (Thread) AccessController.doPrivileged( new PrivilegedAction(){
+				public Object run() {
+					return new Thread(target, name);
+				}
+			});
+		}
+	}
+	
 }

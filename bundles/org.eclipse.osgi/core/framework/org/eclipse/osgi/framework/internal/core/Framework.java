@@ -20,7 +20,6 @@ import org.eclipse.osgi.framework.eventmgr.*;
 import org.eclipse.osgi.framework.internal.protocol.ContentHandlerFactory;
 import org.eclipse.osgi.framework.internal.protocol.StreamHandlerFactory;
 import org.eclipse.osgi.framework.log.FrameworkLog;
-import org.eclipse.osgi.framework.security.action.CreateThread;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.*;
@@ -1256,19 +1255,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 			}
 		}
 	}
-	/**
-	 * Create a thread which inherits the AccessControlContext of the
-	 * framework.
-	 * 
-	 * @param target
-	 *            The Runnable target for the thread.
-	 * @param name
-	 *            The name of the thread.
-	 * @return A Thread object.
-	 */
-	protected Thread createThread(Runnable target, String name) {
-		return (Thread) AccessController.doPrivileged(new CreateThread(target, name));
-	}
+
 	/**
 	 * Deliver a FrameworkEvent.
 	 * 

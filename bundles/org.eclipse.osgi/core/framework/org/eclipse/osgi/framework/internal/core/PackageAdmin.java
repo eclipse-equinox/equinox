@@ -13,9 +13,9 @@ package org.eclipse.osgi.framework.internal.core;
 
 import java.io.IOException;
 import java.util.*;
-
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.debug.DebugOptions;
+import org.eclipse.osgi.framework.util.SecureAction;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.*;
 import org.osgi.service.packageadmin.ExportedPackage;
@@ -305,8 +305,7 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 		}
 
 		final Bundle[] bundles = copy;
-
-		Thread refresh = framework.createThread(new Runnable() {
+		Thread refresh = SecureAction.createThread(new Runnable() {
 			public void run() {
 				refreshPackages(bundles);
 			}

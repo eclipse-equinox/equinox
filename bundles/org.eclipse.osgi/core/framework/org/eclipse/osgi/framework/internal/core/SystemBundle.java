@@ -17,6 +17,7 @@ import java.net.URL;
 import java.security.Permission;
 import java.util.Hashtable;
 import org.eclipse.osgi.framework.debug.Debug;
+import org.eclipse.osgi.framework.util.SecureAction;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.FrameworkEvent;
 
@@ -176,7 +177,7 @@ public class SystemBundle extends BundleHost {
 		framework.checkAdminPermission();
 
 		if (state == ACTIVE) {
-			Thread shutdown = framework.createThread(new Runnable() {
+			Thread shutdown = SecureAction.createThread(new Runnable() {
 				public void run() {
 					framework.shutdown();
 				}
@@ -214,7 +215,7 @@ public class SystemBundle extends BundleHost {
 		framework.checkAdminPermission();
 
 		if (state == ACTIVE) {
-			Thread restart = framework.createThread(new Runnable() {
+			Thread restart = SecureAction.createThread(new Runnable() {
 				public void run() {
 					framework.shutdown();
 

@@ -140,7 +140,7 @@ public class PermissionAdmin implements org.osgi.service.permissionadmin.Permiss
 			throw new NullPointerException();
 		}
 
-		PermissionStorage storage = new org.eclipse.osgi.framework.security.action.PermissionStorage(this.storage);
+		PermissionStorage storage = new org.eclipse.osgi.framework.util.PermissionStorage(this.storage);
 
 		try {
 			String[] data = storage.getPermissionData(location);
@@ -182,7 +182,7 @@ public class PermissionAdmin implements org.osgi.service.permissionadmin.Permiss
 			throw new NullPointerException();
 		}
 
-		PermissionStorage storage = new org.eclipse.osgi.framework.security.action.PermissionStorage(this.storage);
+		PermissionStorage storage = new org.eclipse.osgi.framework.util.PermissionStorage(this.storage);
 
 		try {
 			String[] data = makePermissionData(permissions);
@@ -231,7 +231,7 @@ public class PermissionAdmin implements org.osgi.service.permissionadmin.Permiss
 	 * permissions, or <tt>null</tt> if the permission table is empty.
 	 */
 	public String[] getLocations() {
-		PermissionStorage storage = new org.eclipse.osgi.framework.security.action.PermissionStorage(this.storage);
+		PermissionStorage storage = new org.eclipse.osgi.framework.util.PermissionStorage(this.storage);
 
 		try {
 			String[] locations = storage.getLocations();
@@ -254,7 +254,7 @@ public class PermissionAdmin implements org.osgi.service.permissionadmin.Permiss
 	 * permissions have not been defined.
 	 */
 	public PermissionInfo[] getDefaultPermissions() {
-		PermissionStorage storage = new org.eclipse.osgi.framework.security.action.PermissionStorage(this.storage);
+		PermissionStorage storage = new org.eclipse.osgi.framework.util.PermissionStorage(this.storage);
 
 		try {
 			String[] data = storage.getPermissionData(null);
@@ -291,7 +291,7 @@ public class PermissionAdmin implements org.osgi.service.permissionadmin.Permiss
 	public void setDefaultPermissions(PermissionInfo[] permissions) {
 		framework.checkAdminPermission();
 
-		PermissionStorage storage = new org.eclipse.osgi.framework.security.action.PermissionStorage(this.storage);
+		PermissionStorage storage = new org.eclipse.osgi.framework.util.PermissionStorage(this.storage);
 
 		try {
 			String[] data = makePermissionData(permissions);
