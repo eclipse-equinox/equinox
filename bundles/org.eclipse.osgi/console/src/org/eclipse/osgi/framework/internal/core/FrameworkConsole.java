@@ -245,17 +245,36 @@ public class FrameworkConsole implements Runnable {
 	 * @throws IOException
 	 */
 	protected void console() throws IOException {
+		Object lock = new Object();
 		disconnect = false;
 		// wait to receive commands from console and handle them
 		BufferedReader br = (BufferedReader) in;
 		//cache the console prompt String
 		String consolePrompt = "\r\n" + ConsoleMsg.formatter.getString("CONSOLE_PROMPT"); //$NON-NLS-1$ //$NON-NLS-2$
+		boolean block = System.getProperty("osgi.dev") != null; //$NON-NLS-1$
 		while (!disconnect) {
 			out.print(consolePrompt);
 			out.flush();
-			String cmdline = br.readLine();
-			if (cmdline == null)
+
+			String cmdline = null;
+			if (block) {
+				// bug 40066: avoid waiting on input stream - apparently generates contention with other native calls 
+				try {
+					synchronized (lock) {
+						while (!br.ready())
+							lock.wait(300);
+					}
+					cmdline = br.readLine();
+				} catch (InterruptedException e) {
+					// do nothing; probably got disconnected
+				}
+			} else
+				cmdline = br.readLine();
+
+			if (cmdline == null) {
 				break;
+			}
+
 			docommand(cmdline);
 		}
 	}
