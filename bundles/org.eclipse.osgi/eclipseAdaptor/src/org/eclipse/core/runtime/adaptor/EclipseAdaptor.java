@@ -328,7 +328,9 @@ public class EclipseAdaptor extends DefaultAdaptor {
 			out.writeUTF(string);
 		}
 	}
-
+	BundleContext getContext() {
+		return context;	
+	}
 	public File getBundleRootDir() {
 		super.getBundleDir();
 		return bundleRootDir;
