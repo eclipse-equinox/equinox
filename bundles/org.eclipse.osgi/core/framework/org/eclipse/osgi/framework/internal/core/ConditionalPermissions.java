@@ -8,13 +8,13 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.osgi.framework.internal.core;
 
 import java.security.Permission;
 import java.security.PermissionCollection;
 import java.util.Enumeration;
 import java.util.Vector;
+import org.osgi.framework.FrameworkEvent;
 import org.osgi.service.condpermadmin.Condition;
 import org.osgi.service.condpermadmin.ConditionalPermissionAdmin;
 
@@ -24,7 +24,7 @@ import org.osgi.service.condpermadmin.ConditionalPermissionAdmin;
  * permissions that have yet to be satisfied as well as conditions that are
  * already satisfied.
  * 
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class ConditionalPermissions extends PermissionCollection {
 	private static final long serialVersionUID = 3907215965749000496L;
@@ -45,7 +45,6 @@ public class ConditionalPermissions extends PermissionCollection {
 	 * ConditionalPermissionSet.
 	 */
 	Vector satisfiableCPSs = new Vector();
-
 	boolean empty;
 
 	/**
@@ -62,7 +61,7 @@ public class ConditionalPermissions extends PermissionCollection {
 		}
 	}
 
-	public void checkConditionalPermissionInfo(ConditionalPermissionInfoImpl cpi) {
+	void checkConditionalPermissionInfo(ConditionalPermissionInfoImpl cpi) {
 		try {
 			Condition conds[] = cpi.getConditions(bundle);
 			boolean satisfied = true;
@@ -70,11 +69,7 @@ public class ConditionalPermissions extends PermissionCollection {
 				Condition cond = conds[i];
 				if (cond.isMutable()) {
 					satisfied = false;
-				} else if (!cond.isSatisfied() /*
-				 * Note: the RFC says if
-				 * !mutable, evaluated must be
-				 * true
-				 */) {
+				} else if (!cond.isSatisfied()) {// Note: the RFC says if !mutable, evaluated must be true
 					/*
 					 * We can just dump here since we have an immutable and
 					 * unsatisfied condition.
@@ -90,8 +85,7 @@ public class ConditionalPermissions extends PermissionCollection {
 				satisfiableCPSs.add(new ConditionalPermissionSet(new ConditionalPermissionInfoImpl[] {cpi}, conds));
 			}
 		} catch (Exception e) {
-			/* TODO: we need to log these somewhere. In any event we need to just move on... */
-			e.printStackTrace();
+			bundle.framework.publishFrameworkEvent(FrameworkEvent.ERROR, bundle, e);
 		}
 	}
 
@@ -111,38 +105,64 @@ public class ConditionalPermissions extends PermissionCollection {
 			this.empty = false;
 			return true;
 		}
-
 		boolean newEmpty = !satisfiedCPS.isNonEmpty();
-
+		boolean satisfied = false;
+		Vector unevalCondsSets = null;
+		SecurityManager sm = System.getSecurityManager();
+		FrameworkSecurityManager fsm = null;
+		if (sm instanceof FrameworkSecurityManager) {
+			fsm = (FrameworkSecurityManager) sm;
+		}
 		ConditionalPermissionSet cpsArray[] = (ConditionalPermissionSet[]) satisfiableCPSs.toArray(new ConditionalPermissionSet[0]);
 		cpsLoop: for (int i = 0; i < cpsArray.length; i++) {
 			if (cpsArray[i].isNonEmpty()) {
 				newEmpty = false;
 				if (cpsArray[i].implies(perm)) {
 					Condition conds[] = cpsArray[i].getNeededConditions();
-					Vector unevaluatedConds = new Vector();
+					Vector unevaluatedConds = null;
 					for (int j = 0; j < conds.length; j++) {
+						if (conds[j] == null) {
+							continue;
+						}
 						if (conds[j].isEvaluated() && !conds[j].isSatisfied()) {
 							continue cpsLoop;
 						}
 						if (!conds[j].isEvaluated()) {
-							unevaluatedConds.add(conds[j]);
+							if (fsm == null) {
+								// If there is no FrameworkSecurityManager, we must evaluate now
+								if (!conds[j].isSatisfied()) {
+									continue cpsLoop;
+								}
+							} else {
+								if (unevaluatedConds == null) {
+									unevaluatedConds = new Vector();
+								}
+								unevaluatedConds.add(conds[j]);
+							}
 						}
 					}
-					/*
-					 * TODO: we need to add the unevaluatedConds to the
-					 * ThreadLocal variable. We also need to track where we left
-					 * off incase we need to do another pass
-					 */
-					this.empty = false;
-					return true;
+					if (unevaluatedConds == null) {
+						this.empty = false;
+						return true;
+					}
+					if (unevalCondsSets == null)
+						unevalCondsSets = new Vector(2);
+					unevalCondsSets.add(unevaluatedConds.toArray(new Condition[0]));
+					satisfied = true;
 				}
 			} else {
 				satisfiedCPIs.remove(cpsArray[i]);
 			}
 		}
 		this.empty = newEmpty;
-		return false;
+		if (satisfied && fsm != null) {
+			// There must be at least one set of Conditions to evaluate since
+			// we didn't return right we we realized the permission was satisfied
+			// so unevalCondsSets must be non-null.
+			Condition[][] condArray = (Condition[][]) unevalCondsSets.toArray(new Condition[0][]);
+			satisfied = fsm.addConditionsForDomain(condArray);
+		}
+		return satisfied;
 	}
 
 	/**
@@ -174,14 +194,27 @@ public class ConditionalPermissions extends PermissionCollection {
 
 	/**
 	 * This method returns true if there are no ConditionalPermissionInfos in
-	 * this PermissionCollection. The empty condition is only checked during
-	 * the implies method, it should only be checked after implies has been
-	 * called.
+	 * this PermissionCollection. The empty condition is only checked during the
+	 * implies method, it should only be checked after implies has been called.
 	 * 
 	 * @return false if there are any Conditions that may provide permissions to
-	 * this bundle.
+	 *         this bundle.
 	 */
-	public boolean isEmpty() {
+	boolean isEmpty() {
 		return empty;
+	}
+
+	/**
+	 * @param refreshedBundles
+	 */
+	void unresolvePermissions(AbstractBundle[] refreshedBundles) {
+		satisfiedCPS.unresolvePermissions(refreshedBundles);
+		synchronized (satisfiableCPSs) {
+			Enumeration en = satisfiableCPSs.elements();
+			while (en.hasMoreElements()) {
+				ConditionalPermissionSet cs = (ConditionalPermissionSet) en.nextElement();
+				cs.unresolvePermissions(refreshedBundles);
+			}
+		}
 	}
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003,2004 IBM Corporation and others.
+ * Copyright (c) 2003, 2004, 2005 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -269,7 +269,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	 *                permissions.
 	 */
 	public void start() throws BundleException {
-		framework.checkAdminPermission(getBundleId(),AdminPermission.EXECUTE);
+		framework.checkAdminPermission(getBundleId(), AdminPermission.EXECUTE);
 		checkValid();
 		beginStateChange();
 		try {
@@ -413,7 +413,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	 *                permissions.
 	 */
 	public void stop() throws BundleException {
-		framework.checkAdminPermission(getBundleId(),AdminPermission.EXECUTE);
+		framework.checkAdminPermission(getBundleId(), AdminPermission.EXECUTE);
 		checkValid();
 		beginStateChange();
 		try {
@@ -592,7 +592,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 			Debug.println("update location " + bundledata.getLocation()); //$NON-NLS-1$
 		}
-		framework.checkAdminPermission(getBundleId(),AdminPermission.LIFECYCLE);
+		framework.checkAdminPermission(getBundleId(), AdminPermission.LIFECYCLE);
 		checkValid();
 		beginStateChange();
 		try {
@@ -635,7 +635,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 			Debug.println("update location " + bundledata.getLocation()); //$NON-NLS-1$
 			Debug.println("   from: " + in); //$NON-NLS-1$
 		}
-		framework.checkAdminPermission(getBundleId(),AdminPermission.LIFECYCLE);
+		framework.checkAdminPermission(getBundleId(), AdminPermission.LIFECYCLE);
 		checkValid();
 		beginStateChange();
 		try {
@@ -795,7 +795,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 			Debug.println("uninstall location: " + bundledata.getLocation()); //$NON-NLS-1$
 		}
-		framework.checkAdminPermission(getBundleId(),AdminPermission.LIFECYCLE);
+		framework.checkAdminPermission(getBundleId(), AdminPermission.LIFECYCLE);
 		checkValid();
 		beginStateChange();
 		try {
@@ -839,7 +839,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 				}
 			}
 			throw (BundleException) pae.getException();
-		} 
+		}
 		framework.publishBundleEvent(BundleEvent.UNINSTALLED, this);
 	}
 
@@ -963,7 +963,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	 *                and the Java Runtime Environment supports permissions.
 	 */
 	public Dictionary getHeaders(String localeString) {
-		framework.checkAdminPermission(getBundleId(),AdminPermission.METADATA);
+		framework.checkAdminPermission(getBundleId(), AdminPermission.METADATA);
 		try {
 			initializeManifestLocalization();
 		} catch (BundleException e) {
@@ -1018,7 +1018,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	 *                permissions.
 	 */
 	public String getLocation() {
-		framework.checkAdminPermission(getBundleId(),AdminPermission.METADATA);
+		framework.checkAdminPermission(getBundleId(), AdminPermission.METADATA);
 		return (bundledata.getLocation());
 	}
 
@@ -1044,6 +1044,21 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 		checkValid();
 		if (domain != null) {
 			if (permission instanceof Permission) {
+				SecurityManager sm = System.getSecurityManager();
+				if (sm instanceof FrameworkSecurityManager) {
+					/*
+					 * If the FrameworkSecurityManager is active, we need to do checks the "right" way.
+					 * We can exploit our knowledge that the security context of FrameworkSecurityManager
+					 * is an AccessControlContext to invoke it properly with the ProtectionDomain.
+					 */
+					AccessControlContext acc = new AccessControlContext(new ProtectionDomain[] {domain});
+					try {
+						sm.checkPermission((Permission) permission, acc);
+						return true;
+					} catch (Exception e) {
+						return false;
+					}
+				}
 				return domain.implies((Permission) permission);
 			}
 			return false;
@@ -1231,7 +1246,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	 */
 	public Enumeration getEntryPaths(final String path) {
 		try {
-			framework.checkAdminPermission(getBundleId(),AdminPermission.RESOURCE);
+			framework.checkAdminPermission(getBundleId(), AdminPermission.RESOURCE);
 		} catch (SecurityException e) {
 			return null;
 		}
@@ -1257,7 +1272,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	 */
 	public URL getEntry(String fileName) {
 		try {
-			framework.checkAdminPermission(getBundleId(),AdminPermission.RESOURCE);
+			framework.checkAdminPermission(getBundleId(), AdminPermission.RESOURCE);
 		} catch (SecurityException e) {
 			return null;
 		}

@@ -54,7 +54,7 @@ public class ConditionalPermissionSet extends PermissionCollection {
 	 *        <b>Only a CondtitionalPermissionInfo whose Conditions are
 	 *        immutable and satisfied may be added. </b>
 	 */
-	public void addConditionalPermissionInfo(ConditionalPermissionInfoImpl cpi) {
+	void addConditionalPermissionInfo(ConditionalPermissionInfoImpl cpi) {
 		ConditionalPermissionInfoImpl newcpis[] = new ConditionalPermissionInfoImpl[cpis.length + 1];
 		System.arraycopy(cpis, 0, newcpis, 0, cpis.length);
 		newcpis[cpis.length] = cpi;
@@ -74,7 +74,7 @@ public class ConditionalPermissionSet extends PermissionCollection {
 	 * 
 	 * @return true if there is at least one active ConditionalPermissionInfo.
 	 */
-	public boolean isNonEmpty() {
+	boolean isNonEmpty() {
 		boolean nonEmpty = false;
 		for (int i = 0; i < cpis.length; i++) {
 			if (cpis[i] != null) {
@@ -107,7 +107,7 @@ public class ConditionalPermissionSet extends PermissionCollection {
 	 *         permissions. If null is returned, these permissions can never be
 	 *         used.
 	 */
-	public Condition[] getNeededConditions() {
+	Condition[] getNeededConditions() {
 		if (neededConditions == null || neededConditions.length == 0)
 			return neededConditions;
 		boolean foundNonNullCondition = false;
@@ -183,5 +183,16 @@ public class ConditionalPermissionSet extends PermissionCollection {
 	 */
 	public Enumeration elements() {
 		return null;
+	}
+
+	/**
+	 * This method simply clears the resolved permission table. I think in both the 
+	 * short-term and the amoritized case, this is more efficient than walking through 
+	 * and clearing specific entries.
+	 * 
+	 * @param refreshedBundles not used.
+	 */
+	void unresolvePermissions(AbstractBundle[] refreshedBundles) {
+		cachedPermissionCollections.clear();
 	}
 }

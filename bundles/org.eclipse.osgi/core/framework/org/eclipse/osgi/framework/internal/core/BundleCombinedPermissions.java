@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2004 IBM Corporation and others.
+ * Copyright (c) 2003, 2004, 2005 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,6 +23,7 @@ final class BundleCombinedPermissions extends BundlePermissionCollection {
 	private BundlePermissionCollection assigned;
 	private BundlePermissionCollection implied;
 	private ConditionalPermissions conditional;
+	private ConditionalPermissionSet restrictedPermissions;
 	private boolean isDefault;
 
 	/**
@@ -75,6 +76,14 @@ final class BundleCombinedPermissions extends BundlePermissionCollection {
 
 		if (implied != null) {
 			implied.unresolvePermissions(refreshedBundles);
+		}
+
+		if (conditional != null) {
+			conditional.unresolvePermissions(refreshedBundles);
+		}
+
+		if (restrictedPermissions != null) {
+			restrictedPermissions.unresolvePermissions(refreshedBundles);
 		}
 	}
 
@@ -167,6 +176,12 @@ final class BundleCombinedPermissions extends BundlePermissionCollection {
 		if ((implied != null) && implied.implies(permission))
 			return true;
 
+		/* We must be allowed by the restricted permissions to have any hope of
+		 * passing the check */
+		if ((restrictedPermissions != null) && !restrictedPermissions.implies(permission)) {
+			return false;
+		}
+
 		/* If we aren't using the default permissions, then the assigned
 		 * permission are the exact permissions the bundle has. */
 		if (!isDefault && (assigned != null) && assigned.implies(permission))
@@ -180,5 +195,16 @@ final class BundleCombinedPermissions extends BundlePermissionCollection {
 		/* If there aren't any conditional permissions that apply, we use
 		 * the default. */
 		return assigned.implies(permission);
+	}
+
+	/**
+	 * Sets the restricted Permissions of the Bundle. This set of Permissions limit the
+	 * Permissions available to the Bundle.
+	 * 
+	 * @param restrictedPermissions the maximum set of permissions allowed to the Bundle 
+	 * irrespective of the actual permissions assigned to it.
+	 */
+	public void setRestrictedPermissions(ConditionalPermissionSet restrictedPermissions) {
+		this.restrictedPermissions = restrictedPermissions;
 	}
 }
