@@ -1,5 +1,5 @@
 /*
- * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/Bundle.java,v 1.3 2004/02/16 21:28:52 jfogell Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/Bundle.java,v 1.4 2004/02/19 19:24:51 twatson Exp $
  *
  * Copyright (c) The Open Services Gateway Initiative (2000-2001).
  * All Rights Reserved.
@@ -67,7 +67,7 @@ import java.util.*;
  * create <tt>Bundle</tt> objects, and these objects are only valid
  * within the Framework that created them.
  *
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @author Open Services Gateway Initiative
  */
 public abstract interface Bundle
@@ -639,27 +639,6 @@ public abstract interface Bundle
 	 * @return The symbolic name of this bundle.
 	 */
 	public String getSymbolicName();
-	
-	/**
-	 * 
-	 * @deprecated use getSymbolicName()
-	 */
-	public String getGlobalName();
-
-	/**
-	 * @deprecated use org.osgi.service.packageadmin.PackageAdmin.getFragments(Bundle bundle)
-	 */
-	public abstract org.osgi.framework.Bundle[] getFragments();
-
-	/**
-	 * @deprecated use org.osgi.service.packageadmin.PackageAdmin.isFragment(Bundle)
-	 */
-	public boolean isFragment();
-
-	/**
-	 * @deprecated use org.osgi.service.packageadmin.PackageAdmin.getHosts(Bundle)
-	 */
-	public org.osgi.framework.Bundle getHost();
 
 	/**
 	 * 

@@ -20,9 +20,9 @@ import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
+import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.internal.core.Msg;
 import org.osgi.framework.BundleException;
-import org.osgi.framework.Constants;
 
 /**
  * Headers classes. This class implements a Dictionary that has

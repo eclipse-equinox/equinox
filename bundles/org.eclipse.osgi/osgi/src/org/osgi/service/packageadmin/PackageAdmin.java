@@ -1,5 +1,5 @@
 /*
- * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/service/packageadmin/PackageAdmin.java,v 1.3 2004/03/01 21:53:56 twatson Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/service/packageadmin/PackageAdmin.java,v 1.4 2004/03/01 22:24:42 twatson Exp $
  *
  * Copyright (c) The Open Services Gateway Initiative (2001, 2002).
  * All Rights Reserved.
@@ -51,7 +51,7 @@ import org.osgi.framework.Bundle;
  * old values, <tt>isRemovalPending()</tt> returns <tt>true</tt>, and <tt>getExportingBundle()</tt>
  * and <tt>getImportingBundles()</tt> return <tt>null</tt>.
  *
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @author Open Services Gateway Initiative
  */
 public interface PackageAdmin {
@@ -185,29 +185,6 @@ public interface PackageAdmin {
      * specified version and match rule, or <tt>null</tt> if no bundles are found.
      */
     public Bundle[] getBundles(String symbolicName, String version, String match);
-
-    /**
-     * Gets the resolved Bundle with the specified symbolic name that has the
-     * highest version.  If no resolved bundles are installed that have the 
-     * specified symbolic name then null is returned.  If the version argument 
-     * is not null then the resolved Bundle that has the specified symbolic 
-     * name that has the highest version greater than or equal to the specified 
-     * version is returned.  If the version and match arguments are not null 
-     * then only the resolved Bundle that has the specified symbolic name 
-     * that has the highest version that matches the specified version using 
-     * the specified match rule is returned.
-     * 
-     * @param symbolicName the symbolic name of the bundle to be returned.
-     * @param version the version that the return bundle version must match, 
-     * or <tt>null</tt> if no version matching is to be done. 
-     * @param match the match rule that the returned bundle version must match,
-     * or <tt>null</tt> if no version is specified or if the greater than or equal
-     * match rule is to be used.
-     * @return the Bundle that has the specified name that has a version 
-     * that matches using the specified match rule, or <tt>null</tt> 
-     * if no bundle is found.
-     */
-    public Bundle getResolvedBundle(String symbolicName, String version, String match);
 
 	/**
 	 * Gets an array of attached fragment bundles for the specified bundle.  If the 

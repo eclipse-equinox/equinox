@@ -320,8 +320,7 @@ public class EclipseStarter {
 			for (int i = 0; i < bundles.length; i++) {
 				if (bundles[i].getState() == Bundle.INSTALLED)
 					throw new IllegalStateException(EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_ERROR_BUNDLE_NOT_RESOLVED", bundles[i].getLocation()));
-				if (!bundles[i].isFragment())
-					bundles[i].start();
+				bundles[i].start();
 			}
 			context.ungetService(reference);
 			if (debug)

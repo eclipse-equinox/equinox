@@ -193,13 +193,13 @@ public class BundleLoader implements ClassLoaderDelegate {
 		// init the dynamic imports tables
 		try {
 			String spec = bundle.getBundleData().getDynamicImports();
-			ManifestElement[] imports = ManifestElement.parsePackageDescription(spec);
+			ManifestElement[] imports = ManifestElement.parseHeader(Constants.DYNAMICIMPORT_PACKAGE,spec);
 			initDynamicImportPackage(imports);
 			// ...and its fragments
 			for (int i = 0; i < fragments.length; i++)
 				if (fragments[i].isResolved()) {
 					spec = ((Bundle) fragmentObjects[i]).getBundleData().getDynamicImports();
-					imports = ManifestElement.parsePackageDescription(spec);
+					imports = ManifestElement.parseHeader(Constants.DYNAMICIMPORT_PACKAGE,spec);
 					initDynamicImportPackage(imports);
 				}
 		} catch (BundleException e) {

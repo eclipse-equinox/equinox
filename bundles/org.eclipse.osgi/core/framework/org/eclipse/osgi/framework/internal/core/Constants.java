@@ -113,4 +113,42 @@ public interface Constants extends org.osgi.framework.Constants {
 	/** Properties defaults */
 	public static final String DEFAULT_STARTLEVEL = "1";
 
+	//////////////////// deprecated constants DO NOT USE //////////////////
+	// TODO these constants are only here to support bundles that may be
+	// using deprecated headers.  Should be removed.
+	/**
+	 * Manifest header (named &quot;Bundle-GlobalName&quot;)
+	 * identifying the bundle's unique ID.
+	 * <p>The attribute value may be retrieved from the
+	 * <tt>Dictionary</tt> object returned by the <tt>Bundle.getHeaders</tt> method.
+	 * @deprecated use BUNDLE_SYMBOLICNAME
+	 * TODO: remove after code has been updated to not reference it.
+	 */
+
+	public final static String BUNDLE_GLOBALNAME = "Bundle-GlobalName";
+	/**
+	 * @deprecated use VERSION_MATCH_QUALIFIER instead
+	 */
+	public final static String VERSION_MATCH_PERFECT = "perfect";
+	
+	/**
+	 * @deprecated use VERSION_MATCH_MINOR instead
+	 */
+	public final static String VERSION_MATCH_EQUIVALENT = "equivalent";
+	
+	/**
+	 * @deprecated use VERSION_MATCH_MAJOR instead
+	 */
+	public final static String VERSION_MATCH_COMPATIBLE = "compatible";
+
+	/**
+	 * Manifest header (named &quot;Host-Bundle&quot;)
+	 * identifying the unique ID (and optionally, version and match 
+	 * attributes ) of the bundle that the bundle is a fragment to.
+	 *
+	 * <p>The attribute value may be retrieved from the
+	 * <tt>Dictionary</tt> object returned by the <tt>Bundle.getHeaders</tt> method.
+	 * @deprecated use FRAGMENT_HOST instead.
+	 */
+	public final static String HOST_BUNDLE = "Host-Bundle";
 }

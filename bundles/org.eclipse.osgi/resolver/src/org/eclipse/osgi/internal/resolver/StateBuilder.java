@@ -11,10 +11,11 @@
 package org.eclipse.osgi.internal.resolver;
 
 import java.util.*;
+
+import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.BundleException;
-import org.osgi.framework.Constants;
 
 /**
  * This class builds bundle description objects from manifests
@@ -28,15 +29,15 @@ class StateBuilder {
 		String version = (String) manifest.get(Constants.BUNDLE_VERSION);
 		result.setVersion((version != null) ? new Version(version) : Version.emptyVersion);
 		result.setLocation(location);
-		ManifestElement[] host = ManifestElement.parseBundleDescriptions((String) manifest.get(Constants.FRAGMENT_HOST));
+		ManifestElement[] host = ManifestElement.parseHeader(Constants.FRAGMENT_HOST,(String) manifest.get(Constants.FRAGMENT_HOST));
 		if (host != null)
 			result.setHost(createHostSpecification(host[0]));
-		ManifestElement[] imports = ManifestElement.parsePackageDescription((String) manifest.get(Constants.IMPORT_PACKAGE));
-		ManifestElement[] exports = ManifestElement.parsePackageDescription((String) manifest.get(Constants.EXPORT_PACKAGE));
+		ManifestElement[] imports = ManifestElement.parseHeader(Constants.IMPORT_PACKAGE,(String) manifest.get(Constants.IMPORT_PACKAGE));
+		ManifestElement[] exports = ManifestElement.parseHeader(Constants.EXPORT_PACKAGE,(String) manifest.get(Constants.EXPORT_PACKAGE));
 		result.setPackages(createPackages(exports, imports));
-		ManifestElement[] provides = ManifestElement.parsePackageDescription((String) manifest.get(Constants.PROVIDE_PACKAGE));
+		ManifestElement[] provides = ManifestElement.parseHeader(Constants.PROVIDE_PACKAGE,(String) manifest.get(Constants.PROVIDE_PACKAGE));
 		result.setProvidedPackages(createProvidedPackages(provides));
-		ManifestElement[] requires = ManifestElement.parseBundleDescriptions((String) manifest.get(Constants.REQUIRE_BUNDLE));
+		ManifestElement[] requires = ManifestElement.parseHeader(Constants.REQUIRE_BUNDLE,(String) manifest.get(Constants.REQUIRE_BUNDLE));
 		result.setRequiredBundles(createRequiredBundles(requires));
 		return result;
 	}

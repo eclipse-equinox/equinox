@@ -483,13 +483,13 @@ public class Framework implements EventSource, EventPublisher {
 		if (headerValue == null) {
 			return true;
 		}
-		ManifestElement[] bundleRequiredEE = ManifestElement.parseBasicCommaSeparation(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT, headerValue);
+		ManifestElement[] bundleRequiredEE = ManifestElement.parseHeader(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT, headerValue);
 		if (bundleRequiredEE.length == 0) {
 			return true;
 		}
 		String systemEE = System.getProperty(Constants.FRAMEWORK_EXECUTIONENVIRONMENT);
-		if (systemEE != null) {
-			ManifestElement[] systemEEs = ManifestElement.parseBasicCommaSeparation(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT, systemEE);
+		if (systemEE != null && !systemEE.equals("")) {
+			ManifestElement[] systemEEs = ManifestElement.parseHeader(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT, systemEE);
 			for (int i = 0; i < systemEEs.length; i++) {
 				for (int j = 0; j < bundleRequiredEE.length; j++) {
 					if (systemEEs[i].getValue().equals(bundleRequiredEE[j].getValue())) {
@@ -763,7 +763,7 @@ public class Framework implements EventSource, EventPublisher {
 		if (headerValue == null) {
 			return (null);
 		}
-		ManifestElement[] elements = ManifestElement.parseNativeCodeDescription(headerValue);
+		ManifestElement[] elements = ManifestElement.parseHeader(Constants.BUNDLE_NATIVECODE,headerValue);
 		BundleNativeCode[] bundleNativeCode = new BundleNativeCode[elements.length];
 		/*
 		 * Pass 1: perform processor/osname/filter matching If there is not a

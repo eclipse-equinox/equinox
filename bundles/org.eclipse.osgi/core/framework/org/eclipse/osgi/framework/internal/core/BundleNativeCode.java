@@ -137,11 +137,10 @@ public class BundleNativeCode {
 		setAttribute(element, Constants.BUNDLE_NATIVECODE_SELECTION_FILTER);
 	}
 	private void setAttribute(ManifestElement element, String attribute) {
-		String attrValue = element.getAttribute(attribute);
-		if (attrValue != null) {
-			StringTokenizer attrSt = new StringTokenizer(attrValue, ";");
-			while (attrSt.hasMoreTokens()) {
-				addAttribute(attribute, attrSt.nextToken());
+		String[] attrValues = element.getAttributes(attribute);
+		if (attrValues != null) {
+			for (int i=0; i<attrValues.length; i++) {
+				addAttribute(attribute, attrValues[i]);
 			}
 		}
 	}

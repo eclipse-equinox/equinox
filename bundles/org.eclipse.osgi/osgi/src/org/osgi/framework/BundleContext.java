@@ -1,5 +1,5 @@
 /*
- * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/BundleContext.java,v 1.1 2003/11/25 21:24:14 dj Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/BundleContext.java,v 1.2 2004/02/19 19:24:51 twatson Exp $
  *
  * Copyright (c) The Open Services Gateway Initiative (2000-2001).
  * All Rights Reserved.
@@ -73,7 +73,7 @@ import java.util.Dictionary;
  * given time, but objects created by one Framework instance cannot be used by bundles
  * running in the execution context of another Framework instance.
  *
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @author Open Services Gateway Initiative
  */
 
@@ -608,27 +608,4 @@ public abstract interface BundleContext {
 	public abstract Filter createFilter(String filter)
 		throws InvalidSyntaxException;
 
-	//================================================================
-	// Equinox Addenda
-	//================================================================
-	/**
-	 * @deprecated to be removed. Use
-	 *   org.osgi.service.packageadmin.PackageAdmin.getBundles(String, String, String)
-	 */
-	public abstract Bundle[] getBundles(String symbolicName);
-
-	/**
-	 * @deprecated to be removed.  Use 
-	 *   org.osgi.service.packageadmin.PackageAdmin.getResolvedBundle(String, String, String)
-	 */
-	public abstract Bundle getBundle(String symbolicName);
-
-	// TODO  hack alert.  This likely is not required in the API.  It allows you to find out 
-	// what bundle loaded a given object.  This is useful for debugging etc but...
-	/**
-	 * @deprecated To be removed, no replacement
-	 */
-	public abstract Bundle getBundleFor(Object object);
-
-	//================================================================
 }

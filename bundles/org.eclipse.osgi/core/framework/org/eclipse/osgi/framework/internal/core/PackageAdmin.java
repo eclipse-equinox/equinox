@@ -867,30 +867,6 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 		}
 	}
 
-	public org.osgi.framework.Bundle getResolvedBundle(String symbolicName, String version, String match){
-		if (symbolicName == null) {
-			throw new IllegalArgumentException();
-		}
-		Bundle[] bundles = framework.getBundleByUniqueId(symbolicName);
-		if (bundles == null)
-			return null;
-
-		// This code depends on the array of bundles being in descending
-		// version order.
-		Version ver = new Version(version);
-		for (int i=0; i<bundles.length; i++) {
-			if (bundles[i].isResolved()){
-				if (version == null)
-					return bundles[i];
-				
-				if (matchBundle(bundles[i],ver,match)) {
-					return bundles[i];
-				}
-			}
-		}
-		return null;
-	}
-
 	public org.osgi.framework.Bundle[] getBundles(String symbolicName, String version, String match) {
 		if (symbolicName == null) {
 			throw new IllegalArgumentException();
@@ -937,11 +913,11 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 	}
 
 	public org.osgi.framework.Bundle[] getFragments(org.osgi.framework.Bundle bundle) {
-		return bundle.getFragments();
+		return ((Bundle)bundle).getFragments();
 	}
 
 	public org.osgi.framework.Bundle[] getHosts(org.osgi.framework.Bundle bundle) {
-		org.osgi.framework.Bundle host = bundle.getHost();
+		org.osgi.framework.Bundle host = ((Bundle)bundle).getHost();
 		if (host == null)
 			return null;
 		else
@@ -949,7 +925,7 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 	}
 
 	public boolean isFragment(org.osgi.framework.Bundle bundle) {
-		return bundle.isFragment();
+		return ((Bundle)bundle).isFragment();
 	}
 
 }

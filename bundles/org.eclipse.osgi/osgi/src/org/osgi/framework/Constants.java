@@ -1,5 +1,5 @@
 /*
- * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/Constants.java,v 1.5 2004/02/25 23:23:40 jfogell Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/Constants.java,v 1.6 2004/03/03 19:15:22 rchaves Exp $
  *
  * Copyright (c) The Open Services Gateway Initiative (2000-2001).
  * All Rights Reserved.
@@ -35,7 +35,7 @@ package org.osgi.framework;
  * <p>The values associated with these keys are of type <tt>java.lang.String</tt>,
  * unless otherwise indicated.
  *
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  * @author Open Services Gateway Initiative
  * @since 1.1
  * @see Bundle#getHeaders
@@ -444,18 +444,10 @@ public interface Constants {
 	public static final String SERVICE_DESCRIPTION = "service.description";
 
 	//================================================================
-	// Equinox Addenda
+	// RFC 71 Addenda
 	//================================================================
 
-	/**
-	 * Manifest header (named &quot;Bundle-GlobalName&quot;)
-	 * identifying the bundle's unique ID.
-	 * <p>The attribute value may be retrieved from the
-	 * <tt>Dictionary</tt> object returned by the <tt>Bundle.getHeaders</tt> method.
-	 * @deprecated use BUNDLE_SYMBOLICNAME
-	 * TODO: remove after code has been updated to not reference it.
-	 */
-	public final static String BUNDLE_GLOBALNAME = "Bundle-GlobalName";
+
 
 	/**
 	 * Manifest header (named &quot;Bundle-SymbolicName&quot;)
@@ -574,33 +566,6 @@ public interface Constants {
 	public final static String VERSION_MATCH_MINOR = "minor";
 	public final static String VERSION_MATCH_MAJOR = "major";
 	public final static String VERSION_MATCH_GREATERTHANOREQUAL = "greaterthan-or-equal";
-
-
-	/**
-	 * @deprecated use VERSION_MATCH_QUALIFIER instead
-	 */
-	public final static String VERSION_MATCH_PERFECT = "perfect";
-	
-	/**
-	 * @deprecated use VERSION_MATCH_MINOR instead
-	 */
-	public final static String VERSION_MATCH_EQUIVALENT = "equivalent";
-	
-	/**
-	 * @deprecated use VERSION_MATCH_MAJOR instead
-	 */
-	public final static String VERSION_MATCH_COMPATIBLE = "compatible";
-
-	/**
-	 * Manifest header (named &quot;Host-Bundle&quot;)
-	 * identifying the unique ID (and optionally, version and match 
-	 * attributes ) of the bundle that the bundle is a fragment to.
-	 *
-	 * <p>The attribute value may be retrieved from the
-	 * <tt>Dictionary</tt> object returned by the <tt>Bundle.getHeaders</tt> method.
-	 * @deprecated use FRAGMENT_HOST instead.
-	 */
-	public final static String HOST_BUNDLE = "Host-Bundle";
 
 	/**
 	 * Manifest header (named &quot;Fragment-Host&quot;)
