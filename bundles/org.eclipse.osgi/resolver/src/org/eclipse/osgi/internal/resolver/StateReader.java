@@ -83,7 +83,7 @@ class StateReader {
 			int numProps = in.readInt();
 			for (int i = 0; i < numProps; i++) {
 				Object value = readPlatformProp(in);
-				if (value != null)
+				if (value != null && i < StateImpl.PROPS.length)
 					props.put(StateImpl.PROPS[i], value);
 			}
 			state.setPlatformProperties(props);
@@ -131,7 +131,7 @@ class StateReader {
 		int numProps = in.readInt();
 		for (int i = 0; i < numProps; i++) {
 			Object value = readPlatformProp(in);
-			if (value != null)
+			if (value != null && i < StateImpl.PROPS.length)
 				props.put(StateImpl.PROPS[i], value);
 		}
 		state.setPlatformProperties(props);

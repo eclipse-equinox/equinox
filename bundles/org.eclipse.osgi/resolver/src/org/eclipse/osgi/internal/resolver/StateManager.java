@@ -100,9 +100,9 @@ public class StateManager implements PlatformAdmin, Runnable {
 
 	private void initializeSystemState() {
 		systemState.setResolver(getResolver(System.getSecurityManager() != null));
+		lastTimeStamp = systemState.getTimeStamp();
 		if (systemState.setPlatformProperties(System.getProperties()))
 			systemState.resolve(false); // cause a full resolve; some platform properties have changed
-		lastTimeStamp = systemState.getTimeStamp();
 	}
 
 	public synchronized StateImpl createSystemState() {
@@ -146,7 +146,7 @@ public class StateManager implements PlatformAdmin, Runnable {
 		if (!(state instanceof UserState))
 			throw new IllegalArgumentException("Wrong state implementation"); //$NON-NLS-1$		
 		if (state.getTimeStamp() != systemState.getTimeStamp())
-			throw new BundleException(StateMsg.COMMIT_INVALID_TIMESTAMP); 		
+			throw new BundleException(StateMsg.COMMIT_INVALID_TIMESTAMP);
 		StateDelta delta = state.compare(systemState);
 		BundleDelta[] changes = delta.getChanges();
 		for (int i = 0; i < changes.length; i++)

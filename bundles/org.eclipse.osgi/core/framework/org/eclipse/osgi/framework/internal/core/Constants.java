@@ -101,17 +101,17 @@ public class Constants implements org.osgi.framework.Constants {
 	public static final String OSGI_CHECKSERVICECLASSSOURCE = "osgi.checkServiceClassSource"; //$NON-NLS-1$
 	public static final String OSGI_RESTRICTSERVICECLASSES = "osgi.restrictServiceClasses"; //$NON-NLS-1$
 
-	/** Properties set by the framework */
-
 	/** OSGI system package property */
-	public static final String OSGI_SYSTEMPACKAGES = "osgi.framework.systempackages"; //$NON-NLS-1$
 	public static final String OSGI_FRAMEWORK_SYSTEM_PACKAGES = "org.osgi.framework.system.packages"; //$NON-NLS-1$
-
+	/** OSGi java profile; used to give a URL to a java profile */
+	public static final String OSGI_JAVA_PROFILE = "osgi.java.profile"; //$NON-NLS-1$
 	public static final String OSGI_SYSTEM_BUNDLE = "system.bundle"; //$NON-NLS-1$
 	private static String INTERNAL_SYSTEM_BUNDLE = "org.eclipse.osgi"; //$NON-NLS-1$
+
 	public static String getInternalSymbolicName() {
 		return INTERNAL_SYSTEM_BUNDLE;
 	}
+
 	static void setInternalSymbolicName(String name) {
 		INTERNAL_SYSTEM_BUNDLE = name;
 	}
@@ -138,7 +138,6 @@ public class Constants implements org.osgi.framework.Constants {
 	 */
 	// TODO should remove this!!
 	public final static String PROVIDE_PACKAGE = "Provide-Package";
-
 
 	/**
 	 * Manifest header attribute (named &quot;reprovide&quot;)
@@ -198,6 +197,5 @@ public class Constants implements org.osgi.framework.Constants {
 	 */
 	// TODO should remove this!!
 	public final static String REQUIRE_PACKAGES_ATTRIBUTE = "require-packages";
-
 
 }

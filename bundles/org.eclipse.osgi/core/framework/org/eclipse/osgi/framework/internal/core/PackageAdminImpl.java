@@ -518,13 +518,25 @@ public class PackageAdminImpl implements PackageAdmin {
 	}
 
 	protected void setResolvedBundles(SystemBundle systemBundle) {
+		checkSystemBundle(systemBundle);
+		// Now set the actual state of the bundles from the persisted state.
+		State state = framework.adaptor.getState();
+		BundleDescription[] descriptions = state.getBundles();
+		for (int i = 0; i < descriptions.length; i++) {
+			long bundleId = descriptions[i].getBundleId();
+			if (bundleId == 0)
+				continue;
+			setResolved(descriptions[i]);
+		}
+	}
+
+	private void checkSystemBundle(SystemBundle systemBundle) {
 		try {
-			// first check that the system bundle has not changed since
-			// last saved state.
-			BundleDescription newSystemBundle = framework.adaptor.getState().getFactory().createBundleDescription(systemBundle.getHeaders(""), systemBundle.getLocation(), 0); //$NON-NLS-1$
+			// first check that the system bundle has not changed since last saved state.
+			State state = framework.adaptor.getState();
+			BundleDescription newSystemBundle = state.getFactory().createBundleDescription(systemBundle.getHeaders(""), systemBundle.getLocation(), 0); //$NON-NLS-1$
 			if (newSystemBundle == null)
 				throw new BundleException(Msg.OSGI_SYSTEMBUNDLE_DESCRIPTION_ERROR); //$NON-NLS-1$
-			State state = framework.adaptor.getState();
 			BundleDescription oldSystemBundle = state.getBundle(0);
 			if (oldSystemBundle != null) {
 				boolean different = false;
@@ -534,8 +546,8 @@ public class PackageAdminImpl implements PackageAdmin {
 				// is up to date in the state.
 				ExportPackageDescription[] oldPackages = oldSystemBundle.getExportPackages();
 				ExportPackageDescription[] newPackages = newSystemBundle.getExportPackages();
-				if (oldPackages.length == newPackages.length) {
-					for (int i = 0; i < oldPackages.length; i++) {
+				if (oldPackages.length >= newPackages.length) {
+					for (int i = 0; i < newPackages.length; i++) {
 						if (oldPackages[i].getName().equals(newPackages[i].getName())) {
 							Object oldVersion = oldPackages[i].getVersion();
 							Object newVersion = newPackages[i].getVersion();
@@ -587,16 +599,6 @@ public class PackageAdminImpl implements PackageAdmin {
 		} catch (BundleException e) /* fatal error */{
 			e.printStackTrace();
 			throw new RuntimeException(NLS.bind(Msg.OSGI_SYSTEMBUNDLE_CREATE_EXCEPTION, e.getMessage())); //$NON-NLS-1$
-		}
-
-		// Now set the actual state of the bundles from the persisted state.
-		State state = framework.adaptor.getState();
-		BundleDescription[] descriptions = state.getBundles();
-		for (int i = 0; i < descriptions.length; i++) {
-			long bundleId = descriptions[i].getBundleId();
-			if (bundleId == 0)
-				continue;
-			setResolved(descriptions[i]);
 		}
 	}
 }

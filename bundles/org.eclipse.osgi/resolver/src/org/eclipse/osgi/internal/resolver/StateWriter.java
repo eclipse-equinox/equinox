@@ -80,6 +80,9 @@ class StateWriter {
 		DataOutputStream outLazy = null;
 		DataOutputStream outState = null;
 		try {
+			// first clear the System exports because we don't want to persist them in the system
+			// bundles bundle description data
+			state.setSystemExports(null);
 			BundleDescription[] bundles = state.getBundles();
 			StateHelperImpl.getInstance().sortBundles(bundles);
 			// need to prime the object table with all bundles
@@ -180,7 +183,7 @@ class StateWriter {
 	private void writeBundleDescriptionLazyData(BundleDescription bundle, DataOutputStream out) throws IOException {
 		int dataStart = out.size(); // save the offset of lazy data start
 		int index = getFromObjectTable(bundle);
-		((BundleDescriptionImpl)bundle).setLazyDataOffset(out.size());
+		((BundleDescriptionImpl) bundle).setLazyDataOffset(out.size());
 		out.writeInt(index);
 
 		writeStringOrNull(bundle.getLocation(), out);
@@ -229,7 +232,7 @@ class StateWriter {
 		}
 
 		// save the size of the lazy data
-		((BundleDescriptionImpl)bundle).setLazyDataSize(out.size() - dataStart);
+		((BundleDescriptionImpl) bundle).setLazyDataSize(out.size() - dataStart);
 	}
 
 	private void writeBundleSpec(BundleSpecificationImpl bundle, DataOutputStream out) throws IOException {
