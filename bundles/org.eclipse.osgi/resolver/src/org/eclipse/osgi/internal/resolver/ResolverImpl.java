@@ -76,7 +76,7 @@ public class ResolverImpl implements Resolver {
 			else if (kind == IElementChange.LINKAGE_CHANGED)
 				resolveConstraints(element, bundle);
 			// it was added but not resolved  
-			else if (kind == IElementChange.ADDED && StateManager.DEBUG) {
+			else if (kind == IElementChange.ADDED) {
 				// save so we can print failure reason messages later
 				if (notResolved == null)
 					notResolved = new ArrayList();
@@ -208,13 +208,10 @@ public class ResolverImpl implements Resolver {
 		// just a sanity check 
 		if (bundleDescription.isResolved())
 			throw new IllegalStateException("bundle *is* resolved");		
-		String defaultMessage = StateMsg.formatter.getString("RESOLVER_BUNDLE_UNRESOLVED", bundleDescription.getUniqueId(), new Long(bundleDescription.getBundleId()));
 		// only basic message if debug info is not needed
-		if (!StateManager.DEBUG_PLATFORM_ADMIN_RESOLVER)
-			return defaultMessage;
 		VersionConstraint[] unsatisfied = bundleDescription.getUnsatisfiedConstraints();
 		if (unsatisfied.length == 0)
-			return defaultMessage;
+			return StateMsg.formatter.getString("RESOLVER_BUNDLE_UNRESOLVED", bundleDescription.getUniqueId(), new Long(bundleDescription.getBundleId()));
 		StringBuffer missing = new StringBuffer();
 		for (int i = 0; i < unsatisfied.length; i++) {
 			if (unsatisfied[i] instanceof PackageSpecification) {
