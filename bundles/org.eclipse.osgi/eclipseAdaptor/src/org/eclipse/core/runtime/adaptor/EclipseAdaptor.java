@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2004 IBM Corporation and others.
+ * Copyright (c) 2003, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,6 +15,7 @@ import java.util.*;
 import javax.xml.parsers.SAXParserFactory;
 import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.adaptor.Version;
+import org.eclipse.osgi.framework.console.CommandProvider;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.debug.DebugOptions;
 import org.eclipse.osgi.framework.internal.defaultadaptor.*;
@@ -147,6 +148,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		register(PlatformAdmin.class.getName(), stateManager, bundle);
 		register(PluginConverter.class.getName(), new PluginConverterImpl(context), bundle);
 		register(URLConverter.class.getName(), new URLConverterImpl(),bundle);
+		register(CommandProvider.class.getName(), new EclipseCommandProvider(context),bundle);
 		registerEndorsedXMLParser();
 	}
 

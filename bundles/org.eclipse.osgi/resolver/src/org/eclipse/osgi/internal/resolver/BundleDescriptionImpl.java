@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003 IBM Corporation and others.
+ * Copyright (c) 2003, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -156,7 +156,7 @@ public class BundleDescriptionImpl implements BundleDescription, KeyedElement {
 			// it is a bug in the client to call this method when not attached to a state
 			throw new IllegalStateException("Does not belong to a state"); //$NON-NLS-1$		
 		ArrayList unsatisfied = new ArrayList(); 
-		if (host != null && host.isResolved() && !isResolvable(host))
+		if (host != null && !host.isResolved() && !isResolvable(host))
 			unsatisfied.add(host);		
 		if (requiredBundles != null)
 			for (int i = 0; i < requiredBundles.length; i++)
