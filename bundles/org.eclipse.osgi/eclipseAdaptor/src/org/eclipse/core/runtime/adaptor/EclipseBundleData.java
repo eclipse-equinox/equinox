@@ -241,12 +241,11 @@ public class EclipseBundleData extends DefaultBundleData {
 		String symbolicName = ManifestElement.parseHeader(org.osgi.framework.Constants.BUNDLE_SYMBOLICNAME, (String) generatedManifest.get(org.osgi.framework.Constants.BUNDLE_SYMBOLICNAME))[0].getValue();
 		ManifestElement generatedFrom = ManifestElement.parseHeader(PluginConverterImpl.GENERATED_FROM, (String) generatedManifest.get(PluginConverterImpl.GENERATED_FROM))[0];
 		Headers existingHeaders = checkManifestAndParent(cacheLocation, symbolicName, version.toString(), Byte.parseByte(generatedFrom.getAttribute(PluginConverterImpl.MANIFEST_TYPE_ATTRIBUTE)));
-		if (existingHeaders != null)
-			return existingHeaders;
-
 		//We don't have a manifest.
 		setManifestTimeStamp(Long.parseLong(generatedFrom.getValue()));
 		setManifestType(Byte.parseByte(generatedFrom.getAttribute(PluginConverterImpl.MANIFEST_TYPE_ATTRIBUTE)));
+		if (existingHeaders != null)
+			return existingHeaders;
 
 		//merge the original manifest with the generated one
 		if (originalManifest != null) {
