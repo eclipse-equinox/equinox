@@ -74,12 +74,14 @@ public class EclipseCommandProvider implements CommandProvider {
 				VersionConstraint[] unsatisfied = platformAdmin.getStateHelper().getUnsatisfiedConstraints(bundle);
 				if (unsatisfied.length == 0) {
 					// init default message
-					String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONSOLE_NO_CONSTRAINTS");					
-					// another version might have been picked
-					String symbolicName = bundle.getSymbolicName();
-					BundleDescription resolved = symbolicName == null ? null : getResolvedBundle(systemState, symbolicName);
-					if (resolved != null)
-						message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONSOLE_OTHER_VERSION", resolved.getLocation());
+					String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONSOLE_NO_CONSTRAINTS");
+					if (!bundle.isResolved()) {
+						// another version might have been picked					
+						String symbolicName = bundle.getSymbolicName();
+						BundleDescription resolved = symbolicName == null ? null : getResolvedBundle(systemState, symbolicName);
+						if (resolved != null)
+							message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONSOLE_OTHER_VERSION", resolved.getLocation());
+					}
 					ci.print("  ");
 					ci.println(message);//$NON-NLS-1$
 				}
