@@ -17,8 +17,8 @@ import java.io.File;
  */
 public interface PluginConverter {
 	/**
-	 * Converts a plug-in/fragment manifest in the given source base location (a directory) and 
-	 * generates a corresponding bundle manifest in the given default target locaton (a file).
+	 * Converts a plug-in/fragment manifest at the given source base location (a directory) and 
+	 * generates a corresponding bundle manifest at the given default target locaton (a file).
 	 * 
 	 * @param pluginBaseLocation the base location for the plug-in/fragment manifest to be converted
 	 * (a directory, e.g. the plug-in install location)
@@ -29,8 +29,9 @@ public interface PluginConverter {
 	 */	
 	public boolean convertManifest(File pluginBaseLocation, File bundleManifestLocation);
 	/**
-	 * Converts a plug-in/fragment manifest in the given source location (a directory) and 
-	 * generates a corresponding bundle manifest in a default target locaton.
+	 * Converts a plug-in/fragment manifest at the given source location (a directory) and 
+	 * generates a corresponding bundle manifest at the default target location (the same 
+	 * location used by the Eclipse adaptor to keep its own cached manifests.  
 	 * 
 	 * @param pluginLocation the location for the plug-in/fragment manifest to be converted
 	 * @return the generated manifest file location, if a bundle manifest was successfully 
