@@ -28,7 +28,6 @@ public class BasicLocation implements Location {
 	private static final String PROP_OSGI_LOCKING = "osgi.locking"; //$NON-NLS-1$
 	private static String LOCK_FILENAME = ".metadata/.lock"; //$NON-NLS-1$
 
-	//TODO could not this constructor take the parent as well?
 	public BasicLocation(String property, URL defaultValue, boolean isReadOnly) {
 		super();
 		this.property = property;
@@ -48,15 +47,13 @@ public class BasicLocation implements Location {
 		return parent;
 	}
 
-	//TODO use synchronized 
-	public URL getURL() {
+	public synchronized URL getURL() {
 		if (location == null && defaultValue != null)
 			setURL(defaultValue, false);
 		return location;
 	}
 
-	//TODO use synchronized
-	public boolean isSet() {
+	public synchronized boolean isSet() {
 		return location != null;
 	}
 
@@ -68,7 +65,7 @@ public class BasicLocation implements Location {
 		if (location != null)
 			throw new IllegalStateException(EclipseAdaptorMsg.formatter.getString("ECLIPSE_CANNOT_CHANGE_LOCATION")); //$NON-NLS-1$
 		File file = null;
-		if (value.getProtocol().equalsIgnoreCase("file")) //$NON-NLS-1$
+		if (value.getProtocol().equalsIgnoreCase("file:")) //$NON-NLS-1$
 			file = new File(value.getPath(), LOCK_FILENAME);
 		lock = lock && !isReadOnly;
 		if (lock) {
@@ -86,8 +83,7 @@ public class BasicLocation implements Location {
 		return lock;
 	}
 
-	//TODO use synchronized or remove if passed in constructor	
-	public void setParent(Location value) {
+	public synchronized void setParent(Location value) {
 		parent = value;
 	}
 
@@ -102,7 +98,6 @@ public class BasicLocation implements Location {
 			return false;
 
 		File parentFile = lock.getParentFile();
-		//TODO if (!parentFile.mkdirs()) would be enough/more correct
 		if (!parentFile.exists())
 			if (!parentFile.mkdirs())
 				return false;
@@ -110,48 +105,57 @@ public class BasicLocation implements Location {
 		setLocker(lock);
 		if (locker == null)
 			return true;
-		return locker.lock(); //TODO Why do we let the IOException flow instead of returning false
-		//TODO 2: because false means locked by somebody else, exceptions means error locking
+		return locker.lock();
 	}
 
 	private void setLocker(File lock) {
 		if (locker != null)
 			return;
-		// TODO return early, avoid if/else/if/else...
+
 		String lockMode = System.getProperties().getProperty(PROP_OSGI_LOCKING);
-		if (lockMode == null) { //By default set the lock mode to 1.4
-			if (runningWithNio()) {
+		//	By default set the lock mode to 1.4
+		if (lockMode == null) { 
+			if (isRunningWithNio()) {
 				locker = new Locker_JavaNio(lock);
 			} else {
 				locker = new Locker_JavaIo(lock);
 			}
-		} else if ("none".equals(lockMode)) { //$NON-NLS-1$
 			return;
-		} else if ("java.io".equals(lockMode)) { //$NON-NLS-1$
+		}
+		
+		if ("none".equals(lockMode)) //$NON-NLS-1$
+			return;
+		
+		if ("java.io".equals(lockMode)) { //$NON-NLS-1$
 			locker = new Locker_JavaIo(lock);
-		} else if ("java.nio".equals(lockMode)) { //$NON-NLS-1$
-			if (runningWithNio()) {
+			return;
+		}
+		
+		if ("java.nio".equals(lockMode)) { //$NON-NLS-1$
+			if (isRunningWithNio()) {
 				locker = new Locker_JavaNio(lock);
 			} else {
 				locker = new Locker_JavaIo(lock);
 			}
-		} else {
-			//TODO need to check NIO is available 
-			//	Backup case if an invalid value has been specified
+			return;
+		} 
+		
+		//	Backup case if an invalid value has been specified
+		if (isRunningWithNio()) {
 			locker = new Locker_JavaNio(lock);
+		} else {
+			locker = new Locker_JavaIo(lock);
 		}
 	}
 
-	//TODO use synchronized
-	public void release() {
+	public synchronized void release() {
 		if (locker != null)
 			locker.release();
 	}
 
-	//TODO: isRunningWithNIO or hasNIO or...
-	private boolean runningWithNio() {
+	private boolean isRunningWithNio() {
 		try {
-			Class c = Class.forName("java.nio.channels.FileLock"); //$NON-NLS-1$
+			 Class.forName("java.nio.channels.FileLock"); //$NON-NLS-1$
 		} catch (ClassNotFoundException e) {
 			return false;
 		}
