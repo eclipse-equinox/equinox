@@ -139,9 +139,9 @@ public class EventManager {
 	 * companion object for a listener.
 	 * @param dispatcher Call back object which is called to complete the delivery of
 	 * the event.
-	 * @param action This value was passed by the event source and
+	 * @param eventAction This value was passed by the event source and
 	 * is passed to this method. This is passed on to the call back object.
-	 * @param object This object was created by the event source and
+	 * @param eventObject This object was created by the event source and
 	 * is passed to this method. This is passed on to the call back object.
 	 */
 	static void dispatchEvent(ListElement[] listeners, EventDispatcher dispatcher, int eventAction, Object eventObject) {

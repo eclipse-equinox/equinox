@@ -39,7 +39,7 @@ class EventThread extends Thread {
 		 * @param l Listener list for this event
 		 * @param d Dispatcher for this event
 		 * @param a Action for this event
-		 * @param e Object for this event
+		 * @param o Object for this event
 		 */
 		Queued(ListElement[] l, EventDispatcher d, int a, Object o) {
 			listeners = l;
