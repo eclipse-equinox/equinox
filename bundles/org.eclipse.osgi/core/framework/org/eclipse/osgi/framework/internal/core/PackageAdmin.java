@@ -75,6 +75,10 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 	protected void initialize() {
 		removalPending = new Vector(10, 10);
 
+		State state = framework.adaptor.getState();
+		if (!state.isResolved()) {
+			state.resolve(false);
+		}
 		exportedPackages = new KeyedHashSet(false);
 		exportedPackages = getExportedPackages(exportedPackages);
 
@@ -746,9 +750,6 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 	 */
 	protected void setResolvedBundles(){
 		State state = framework.adaptor.getState();
-		if (!state.isResolved()) {
-			state.resolve(false);
-		}
 		BundleDescription[] descriptions = state.getBundles();
 		for (int i=0; i<descriptions.length; i++) {
 			long bundleId = descriptions[i].getBundleId();
