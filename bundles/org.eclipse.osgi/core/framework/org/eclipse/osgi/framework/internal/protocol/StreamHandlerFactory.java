@@ -100,7 +100,10 @@ public class StreamHandlerFactory implements java.net.URLStreamHandlerFactory {
 			org.osgi.framework.ServiceReference[] serviceReferences = handlerTracker.getServiceReferences();
 			if (serviceReferences != null) {
 				for (int i = 0; i < serviceReferences.length; i++) {
-					String[] protocols = (String[]) (serviceReferences[i].getProperty(URLConstants.URL_HANDLER_PROTOCOL));
+					Object prop = serviceReferences[i].getProperty(URLConstants.URL_HANDLER_PROTOCOL);
+					if (!(prop instanceof String[]))
+						continue;
+					String[] protocols = (String[]) prop;
 					if (protocols != null) {
 						for (int j = 0; j < protocols.length; j++) {
 							if (protocols[j].equals(protocol)) {
