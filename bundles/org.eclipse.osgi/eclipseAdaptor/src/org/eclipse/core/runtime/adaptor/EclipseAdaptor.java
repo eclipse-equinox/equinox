@@ -198,22 +198,22 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		location = LocationManager.getUserLocation();
 		Hashtable properties = new Hashtable(1);
 		if (location != null) {
-			properties.put("type", LocationManager.PROP_USER_AREA);
+			properties.put("type", LocationManager.PROP_USER_AREA); //$NON-NLS-1$
 			context.registerService(Location.class.getName(), location, properties);
 		}
 		location = LocationManager.getInstanceLocation();
 		if (location != null) {
-			properties.put("type", LocationManager.PROP_INSTANCE_AREA);
+			properties.put("type", LocationManager.PROP_INSTANCE_AREA); //$NON-NLS-1$
 			context.registerService(Location.class.getName(), location, properties);
 		}
 		location = LocationManager.getConfigurationLocation();
 		if (location != null) {
-			properties.put("type", LocationManager.PROP_CONFIG_AREA);
+			properties.put("type", LocationManager.PROP_CONFIG_AREA); //$NON-NLS-1$
 			context.registerService(Location.class.getName(), location, properties);
 		}
 		location = LocationManager.getInstallLocation();
 		if (location != null) {
-			properties.put("type", LocationManager.PROP_INSTALL_AREA);
+			properties.put("type", LocationManager.PROP_INSTALL_AREA); //$NON-NLS-1$
 			context.registerService(Location.class.getName(), location, properties);
 		}
 
@@ -374,9 +374,9 @@ public class EclipseAdaptor extends DefaultAdaptor {
 	}
 
 	public void saveMetaDataFor(DefaultBundleData data) throws IOException {
-		// TODO may want to force a write of .bundledata in some cases here.
-		// This is related to bug 55819.  Could set a dirty flag here
-		// and always save the bundledatas when it is set in saveMetaData().
+		if ( ((EclipseBundleData) data).getPersistentStatus() != 0) {
+			timeStamp--; //Change the value of the timeStamp, as a marker that something changed.  
+		}
 	}
 
 	protected void saveMetaDataFor(BundleData data, DataOutputStream out) throws IOException {
