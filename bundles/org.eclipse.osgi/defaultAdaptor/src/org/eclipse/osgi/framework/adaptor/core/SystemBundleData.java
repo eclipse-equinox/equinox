@@ -12,13 +12,9 @@
 package org.eclipse.osgi.framework.adaptor.core;
 
 import java.io.*;
-import java.io.File;
-import java.io.IOException;
 import java.net.URL;
 import java.util.Enumeration;
-import org.eclipse.osgi.framework.adaptor.BundleClassLoader;
-import org.eclipse.osgi.framework.adaptor.BundleProtectionDomain;
-import org.eclipse.osgi.framework.adaptor.ClassLoaderDelegate;
+import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.util.Headers;
@@ -42,6 +38,13 @@ public class SystemBundleData extends AbstractBundleData {
 		if (frameworkLocation != null)
 			// TODO assumes the location is a file URL
 			return new File(frameworkLocation.substring(5));
+		try {
+			URL url = getClass().getProtectionDomain().getCodeSource().getLocation();
+			// assumes file URL
+			return new File(url.getPath());
+		} catch (Throwable e) {
+			// do nothing
+		}
 		frameworkLocation = System.getProperty("user.dir"); //$NON-NLS-1$
 		if (frameworkLocation != null)
 			return new File(frameworkLocation);
