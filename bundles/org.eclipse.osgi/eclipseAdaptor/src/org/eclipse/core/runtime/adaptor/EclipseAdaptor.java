@@ -21,6 +21,7 @@ import org.eclipse.osgi.framework.internal.defaultadaptor.*;
 import org.eclipse.osgi.framework.stats.StatsManager;
 import org.eclipse.osgi.internal.resolver.StateImpl;
 import org.eclipse.osgi.internal.resolver.StateManager;
+import org.eclipse.osgi.service.pluginconversion.IPluginConverter;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.*;
 
@@ -137,6 +138,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		Bundle bundle = context.getBundle();
 		register(org.eclipse.osgi.service.environment.EnvironmentInfo.class.getName(), EnvironmentInfo.getDefault(), bundle);
 		register(PlatformAdmin.class.getName(), stateManager, bundle);
+		register(IPluginConverter.class.getName(), new PluginConverter(context), bundle);
 		registerEndorsedXMLParser();
 	}
 

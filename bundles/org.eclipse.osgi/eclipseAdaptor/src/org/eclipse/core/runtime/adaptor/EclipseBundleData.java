@@ -13,11 +13,13 @@ package org.eclipse.core.runtime.adaptor;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Dictionary;
 import org.eclipse.osgi.framework.adaptor.Version;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.internal.defaultadaptor.*;
 import org.eclipse.osgi.framework.util.Headers;
+import org.eclipse.osgi.service.pluginconversion.*;
 import org.osgi.framework.BundleException;
 
 public class EclipseBundleData extends DefaultBundleData {
@@ -25,13 +27,7 @@ public class EclipseBundleData extends DefaultBundleData {
 	private URL base;
 	private static String[] libraryVariants = null;
 
-	/**
-	 * At the first time will try to find the manifest in an alternative
-	 * location if needed.
-	 */
-	private boolean firstManifestLookup = true;
-
-	// URL protocol designations
+		// URL protocol designations
 	public static final String PROTOCOL = "platform"; //$NON-NLS-1$
 	public static final String FILE = "file"; //$NON-NLS-1$
 	protected String isLegacy = null;
@@ -244,61 +240,35 @@ public class EclipseBundleData extends DefaultBundleData {
 		return manifest;
 	}
 
-	public synchronized Dictionary loadManifest() throws BundleException {
-		Dictionary result = null;
-		try {
-			URL url = getEntry(Constants.OSGI_BUNDLE_MANIFEST);
-			if (url == null)
-				throw new BundleException("Error reading manifest " + getLocation());
-			try {
-				result = Headers.parseManifest(url.openStream());
-			} catch (IOException e) {
-				throw new BundleException("Error reading manifest " + getLocation(), e);
-			}
-			return result;
-		} catch (BundleException e) {
-			if (firstManifestLookup)
-				result =  loadManifestFromAlternativeLocation();
-			if (result == null)
-				// TODO log the error somewhere
-				throw new BundleException("Manifest not found: " + getLocation(), e);
-		} finally {
-			firstManifestLookup = false;
-		}
+	public synchronized Dictionary loadManifest() throws BundleException {		
+		URL url = getEntry(Constants.OSGI_BUNDLE_MANIFEST);
+		if (url != null)
+			return loadManifestFrom(url);
+		Dictionary result = generateManifest();		
+		if (result == null)
+			//TODO: need to NLS this
+			throw new BundleException("Manifest not found: " + getLocation());
 		return result;
 	}
 
-	private Dictionary loadManifestFromAlternativeLocation() throws BundleException { 
-		String cacheLocation = (String) System.getProperties().get("osgi.manifest.cache");
-		File generationLocation = new File(cacheLocation + '/' + computeFileName(this.file.toString()) + ".MF");
-		if (!generationLocation.isFile())
+	private Dictionary generateManifest() throws BundleException {
+		IPluginConverter converter = PluginConverter.getDefault();
+		File location = converter.convertManifest(file);
+		if (location == null)
+			return null;	
+		try {
+			return loadManifestFrom(location.toURL());
+		} catch (MalformedURLException mfue) {
 			return null;
-		URL url = null;
-		try {
-			url = generationLocation.toURL();
-		} catch (MalformedURLException e) {
-			//ignore. because the url format is correct
 		}
+	}
+	private Dictionary loadManifestFrom(URL manifestURL) throws BundleException {
 		try {
-			return Headers.parseManifest(url.openStream());
+			return Headers.parseManifest(manifestURL.openStream());
 		} catch (IOException e) {
-			throw new BundleException("Manifest not found: " + getLocation(), e);
-		}
+			throw new BundleException("Error reading manifest: " + getLocation(), e);
+		}		
 	}
-	/*
-	 * Derives a file name from a a path string. Example: c:\autoexec.bat ->
-	 * c__autoexec.bat
-	 */
-	private String computeFileName(String filePath) {
-		StringBuffer newName = new StringBuffer(filePath);
-		for (int i = 0; i < filePath.length(); i++) {
-			char c = newName.charAt(i);
-			if (c == ':' || c == '/' || c == '\\')
-				newName.setCharAt(i, '_');
-		}
-		return newName.toString();
-	}
-
 	public void save() {
 		// do nothing.  This method is here to override one in the superclass.
 	}
