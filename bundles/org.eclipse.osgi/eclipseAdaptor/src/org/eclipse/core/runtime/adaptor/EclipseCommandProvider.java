@@ -73,8 +73,15 @@ public class EclipseCommandProvider implements CommandProvider {
 				ci.println(bundle.getLocation() + " [" + bundle.getBundleId() + "]");
 				VersionConstraint[] unsatisfied = platformAdmin.getStateHelper().getUnsatisfiedConstraints(bundle);
 				if (unsatisfied.length == 0) {
+					// init default message
+					String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONSOLE_NO_CONSTRAINTS");					
+					// another version might have been picked
+					String symbolicName = bundle.getSymbolicName();
+					BundleDescription resolved = symbolicName == null ? null : getResolvedBundle(systemState, symbolicName);
+					if (resolved != null)
+						message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONSOLE_OTHER_VERSION", resolved.getLocation());
 					ci.print("  ");
-					ci.println(EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONSOLE_NO_CONSTRAINTS"));//$NON-NLS-1$
+					ci.println(message);//$NON-NLS-1$
 				}
 				for (int i = 0; i < unsatisfied.length; i++) {
 					ci.print("  ");
@@ -85,5 +92,13 @@ public class EclipseCommandProvider implements CommandProvider {
 		} finally {
 			context.ungetService(platformAdminRef);
 		}
+	}
+
+	private BundleDescription getResolvedBundle(State state, String symbolicName) {
+		BundleDescription[] homonyms = state.getBundles(symbolicName);
+		for (int i = 0; i < homonyms.length; i++)
+			if (homonyms[i].isResolved())
+				return homonyms[i];
+		return null;
 	}
 }

@@ -283,11 +283,21 @@ public class EclipseStarter {
 				// for some reason, the state does not know about that bundle
 				if (description == null)
 					continue;
+				FrameworkLogEntry[] logChildren = null;
 				VersionConstraint[] unsatisfied = stateHelper.getUnsatisfiedConstraints(description);
-				// the bundle wasn't resolved but none of its constraints were unsatisfiable
-				FrameworkLogEntry[] logChildren = unsatisfied.length == 0 ? null : new FrameworkLogEntry[unsatisfied.length];
-				for (int j = 0; j < unsatisfied.length; j++)
-					logChildren[j] = new FrameworkLogEntry("org.eclipse.osgi", EclipseAdaptorMsg.getResolutionFailureMessage(unsatisfied[j]), 0, null, null);
+				if (unsatisfied.length > 0) {
+					// the bundle wasn't resolved due to some of its constraints were unsatisfiable
+					logChildren = new FrameworkLogEntry[unsatisfied.length];
+					for (int j = 0; j < unsatisfied.length; j++)
+						logChildren[j] = new FrameworkLogEntry("org.eclipse.osgi", EclipseAdaptorMsg.getResolutionFailureMessage(unsatisfied[j]), 0, null, null);
+				} else if (description.getSymbolicName() != null) {
+					BundleDescription[] homonyms = state.getBundles(description.getSymbolicName());
+					for (int j = 0; j < homonyms.length; j++)
+						if (homonyms[j].isResolved()) {
+							logChildren = new FrameworkLogEntry[1];
+							logChildren[0] = new FrameworkLogEntry("org.eclipse.osgi", EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONSOLE_OTHER_VERSION", homonyms[j].getLocation()), 0, null, null);
+						}
+				}
 
 				logService.log(new FrameworkLogEntry("org.eclipse.osgi", generalMessage, 0, null, logChildren));
 			}
