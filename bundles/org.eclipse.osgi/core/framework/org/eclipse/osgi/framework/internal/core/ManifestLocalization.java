@@ -107,6 +107,8 @@ public class ManifestLocalization {
 			resourceStream = resourceURL.openStream();
 			resourceBundle = new PropertyResourceBundle(resourceStream);
 		} catch (IOException e2) {
+			return null;
+		} finally {
 			if (resourceStream != null) {
 				try {
 					resourceStream.close();
@@ -114,7 +116,6 @@ public class ManifestLocalization {
 					//Ignore exception
 				}
 			}
-			return null;
 		}
 		return resourceBundle;
 	}
