@@ -31,6 +31,9 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 	/** Name of the Adaptor manifest file */
 	protected final String ADAPTOR_MANIFEST = "ADAPTOR.MF"; //$NON-NLS-1$
 
+	/**
+	 * The EventPublisher for the FrameworkAdaptor
+	 */
 	protected EventPublisher eventPublisher;
 
 	/**
@@ -55,6 +58,12 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 
 	/** This adaptor's manifest file */
 	protected Headers manifest = null;
+
+	/**	
+	 * Indicates the Framework is stopoing; 
+	 * set to true when frameworkStopping(BundleContext) is called 
+	 */
+	protected boolean stopping = false;
 
 	/**
 	 * The BundleClassLoader parent to use when creating BundleClassLoaders.
@@ -114,6 +123,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 	 * @see org.eclipse.osgi.framework.adaptor.FrameworkAdaptor#frameworkStart(org.osgi.framework.BundleContext)
 	 */
 	public void frameworkStart(BundleContext context) throws BundleException {
+		this.stopping = false;
 		this.context = context;
 		BundleResourceHandler.setContext(context);
 	}
@@ -130,6 +140,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 	 * @see org.eclipse.osgi.framework.adaptor.FrameworkAdaptor#frameworkStopping(BundleContext)
 	 */
 	public void frameworkStopping(BundleContext context) {
+		this.stopping = true;
 	}
 
 	/**
@@ -162,6 +173,10 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 	 */
 	public EventPublisher getEventPublisher() {
 		return eventPublisher;
+	}
+
+	public boolean isStopping() {
+		return stopping;
 	}
 
 	public int getInitialBundleStartLevel() {

@@ -130,7 +130,7 @@ public class EclipseClassLoader extends DefaultClassLoader {
 	 */
 	private boolean shouldActivateFor(String className) {
 		//Don't reactivate on shut down
-		if (EclipseAdaptor.stopping)
+		if (hostdata.getAdaptor().isStopping())
 			return false;
 		boolean autoStart = ((EclipseBundleData) hostdata).isAutoStart();
 		String[] autoStartExceptions = ((EclipseBundleData) hostdata).getAutoStartExceptions();

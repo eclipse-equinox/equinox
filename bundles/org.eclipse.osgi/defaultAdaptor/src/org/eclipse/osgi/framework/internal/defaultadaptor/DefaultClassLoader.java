@@ -200,7 +200,7 @@ public class DefaultClassLoader extends AbstractClassLoader {
 	 */
 	protected Class findClassImpl(String name, ClasspathEntry classpathEntry) {
 		if (Debug.DEBUG && Debug.DEBUG_LOADER) {
-			Debug.println("BundleClassLoader[" + hostdata + "].findClass(" + name + ")");  //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
+			Debug.println("BundleClassLoader[" + hostdata + "].findClass(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
 		}
 
 		String filename = name.replace('.', '/').concat(".class"); //$NON-NLS-1$
@@ -394,27 +394,29 @@ public class DefaultClassLoader extends AbstractClassLoader {
 	 * Closes all the BundleFile objects for this BundleClassLoader.
 	 */
 	public void close() {
-		if (!closed) {
-			super.close();
-			if (classpathEntries != null) {
-				for (int i = 0; i < classpathEntries.length; i++) {
-					if (classpathEntries[i] != null) {
-						try {
-							if (classpathEntries[i].getBundleFile() != hostdata.getBaseBundleFile()) {
-								classpathEntries[i].getBundleFile().close();
-							}
-						} catch (IOException e) {
-							hostdata.getAdaptor().getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, hostdata.getBundle(), e);
+		// do not close if we are shutting down
+		if (closed || hostdata.getAdaptor().isStopping())
+			return;
+
+		super.close();
+		if (classpathEntries != null) {
+			for (int i = 0; i < classpathEntries.length; i++) {
+				if (classpathEntries[i] != null) {
+					try {
+						if (classpathEntries[i].getBundleFile() != hostdata.getBaseBundleFile()) {
+							classpathEntries[i].getBundleFile().close();
 						}
+					} catch (IOException e) {
+						hostdata.getAdaptor().getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, hostdata.getBundle(), e);
 					}
 				}
 			}
-			if (fragClasspaths != null) {
-				int size = fragClasspaths.size();
-				for (int i = 0; i < size; i++) {
-					FragmentClasspath fragCP = (FragmentClasspath) fragClasspaths.elementAt(i);
-					fragCP.close();
-				}
+		}
+		if (fragClasspaths != null) {
+			int size = fragClasspaths.size();
+			for (int i = 0; i < size; i++) {
+				FragmentClasspath fragCP = (FragmentClasspath) fragClasspaths.elementAt(i);
+				fragCP.close();
 			}
 		}
 	}

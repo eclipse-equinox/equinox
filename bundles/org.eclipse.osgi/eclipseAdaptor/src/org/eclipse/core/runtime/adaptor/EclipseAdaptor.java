@@ -55,7 +55,6 @@ public class EclipseAdaptor extends DefaultAdaptor {
 	public static final byte NULL = 0;
 	public static final byte OBJECT = 1;
 	//Indicate if the framework is stopping
-	public static boolean stopping = false;
 
 	private static EclipseAdaptor instance;
 
@@ -478,7 +477,6 @@ public class EclipseAdaptor extends DefaultAdaptor {
 
 	public void frameworkStopping(BundleContext context) {
 		super.frameworkStopping(context);
-		stopping = true;
 		new BundleStopper().stopBundles();
 	}
 
