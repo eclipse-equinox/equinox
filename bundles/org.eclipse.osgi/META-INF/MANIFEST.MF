@@ -44,7 +44,7 @@ Bundle-Activator: org.eclipse.osgi.framework.internal.core.SystemBundleActivator
 Bundle-Description: %systemBundle
 Bundle-Copyright: %copyright
 Bundle-Vendor: %eclipse.org
-Bundle-Version: 3.0.0
+Bundle-Version: 3.1.0
 Bundle-Localization: systembundle
 Bundle-DocUrl: http://www.eclipse.org
 Bundle-ClassPath: osgi.jar,
