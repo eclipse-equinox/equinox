@@ -176,9 +176,8 @@ public class DefaultClassLoader extends AbstractClassLoader {
 		for (int i = 0; i < classpathEntries.length; i++) {
 			if (classpathEntries[i] != null) {
 				result = findClassImpl(name, classpathEntries[i]);
-				if (result != null) {
+				if (result != null)
 					return result;
-				}
 			}
 		}
 		// look in fragments.
@@ -188,16 +187,11 @@ public class DefaultClassLoader extends AbstractClassLoader {
 				FragmentClasspath fragCP = (FragmentClasspath) fragClasspaths.elementAt(i);
 				for (int j = 0; j < fragCP.classpathEntries.length; j++) {
 					result = findClassImpl(name, fragCP.classpathEntries[j]);
-					if (result != null) {
+					if (result != null)
 						return result;
-					}
 				}
 			}
 		}
-		// Finally check the parent classloader for system classes.
-		ClassLoader parent = getParentPrivileged();
-		if (parent != null)
-			return parent.loadClass(name);
 		throw new ClassNotFoundException(name);
 	}
 
@@ -314,9 +308,8 @@ public class DefaultClassLoader extends AbstractClassLoader {
 		for (int i = 0; i < classpathEntries.length; i++) {
 			if (classpathEntries[i] != null) {
 				result = findResourceImpl(name, classpathEntries[i].getBundleFile());
-				if (result != null) {
+				if (result != null)
 					return result;
-				}
 			}
 		}
 		// look in fragments
@@ -326,16 +319,11 @@ public class DefaultClassLoader extends AbstractClassLoader {
 				FragmentClasspath fragCP = (FragmentClasspath) fragClasspaths.elementAt(i);
 				for (int j = 0; j < fragCP.classpathEntries.length; j++) {
 					result = findResourceImpl(name, fragCP.classpathEntries[j].getBundleFile());
-					if (result != null) {
+					if (result != null)
 						return result;
-					}
 				}
 			}
 		}
-		// Finally check the parent classloader for system resources.
-		ClassLoader parent = getParentPrivileged();
-		if (parent != null)
-			return parent.getResource(name);
 		return null;
 	}
 

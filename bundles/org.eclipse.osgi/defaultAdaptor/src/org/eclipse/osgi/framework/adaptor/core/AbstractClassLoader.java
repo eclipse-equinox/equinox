@@ -23,10 +23,6 @@ import org.eclipse.osgi.framework.debug.Debug;
  * class lookups to a parent classloader and the to a ClassLoaderDelegate.
  */
 public abstract class AbstractClassLoader extends ClassLoader implements BundleClassLoader {
-
-	public static final String JAVA_CLASS = "java."; //$NON-NLS-1$
-	public static final String JAVA_RESOURCE = "java/"; //$NON-NLS-1$
-
 	/**
 	 * The delegate used to get classes and resources from.  The delegate
 	 * must always be queried first before the local ClassLoader is searched for
@@ -81,17 +77,8 @@ public abstract class AbstractClassLoader extends ClassLoader implements BundleC
 		if (Debug.DEBUG && Debug.DEBUG_LOADER)
 			Debug.println("BundleClassLoader[" + delegate + "].loadClass(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
 		try {
-			Class clazz = null;
-			if (name.startsWith(JAVA_CLASS)) {
-				// First check the parent classloader for system classes.
-				ClassLoader parent = getParentPrivileged();
-				if (parent != null)
-					// we want to throw ClassNotFoundExceptions if a java.* class cannot be loaded from the parent.
-					clazz = parent.loadClass(name);
-			}
 			// Just ask the delegate.  This could result in findLocalClass(name) being called.
-			if (clazz == null)
-				clazz = delegate.findClass(name);
+			Class clazz = delegate.findClass(name);
 			// resolve the class if asked to.
 			if (resolve)
 				resolveClass(clazz);
@@ -141,17 +128,7 @@ public abstract class AbstractClassLoader extends ClassLoader implements BundleC
 			Debug.println("BundleClassLoader[" + delegate + "].getResource(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 
-		URL url = null;
-		if (name.startsWith(JAVA_RESOURCE)) {
-			// First check the parent classloader for system resources, if it is a java resource.
-			ClassLoader parent = getParentPrivileged();
-			if (parent != null)
-				// we never delegate java resource requests past the parent
-				return parent.getResource(name);
-		}
-		if (url != null)
-			return (url);
-		url = delegate.findResource(name);
+		URL url = delegate.findResource(name);
 		if (url != null)
 			return (url);
 
@@ -177,10 +154,6 @@ public abstract class AbstractClassLoader extends ClassLoader implements BundleC
 	 * @return An Enumeration of all resources found or null if the resource.
 	 */
 	protected Enumeration findResources(String name) {
-		if (name.startsWith(JAVA_RESOURCE))
-			// if this is a java resource then we already searched the parent in getResources.
-			// return null because we do not want to delegate java resource requests
-			return null;
 		try {
 			return (delegate.findResources(name));
 		} catch (Exception e) {
@@ -242,14 +215,4 @@ public abstract class AbstractClassLoader extends ClassLoader implements BundleC
 		closed = true;
 	}
 
-	protected ClassLoader getParentPrivileged() {
-		if (System.getSecurityManager() == null)
-			return getParent();
-
-		return (ClassLoader) AccessController.doPrivileged(new PrivilegedAction() {
-			public Object run() {
-				return getParent();
-			}
-		});
-	}
 }
