@@ -47,7 +47,7 @@ public class LocationManager {
 	private static final String USER_HOME = "@user.home"; //$NON-NLS-1$
 	private static final String USER_DIR = "@user.dir"; //$NON-NLS-1$
 
-	private static URL buildURL(String spec) {
+	private static URL buildURL(String spec, boolean trailingSlash) {
 		if (spec == null)
 			return null;
 		// if the spec is a file: url then see if it is absolute.  If not, break it up
@@ -58,11 +58,13 @@ public class LocationManager {
 				spec = "file:" + file.getAbsolutePath();
 		}
 		try {
+			if (trailingSlash && !spec.endsWith("/"))
+				spec += "/";
 			return new URL(spec);
 		} catch (MalformedURLException e) {
 			if (spec.startsWith("file:"))
 				return null;
-			return buildURL("file:" + spec);
+			return buildURL("file:" + spec, trailingSlash);
 		}
 	}
 	
@@ -70,25 +72,27 @@ public class LocationManager {
 		// if the config property was set, munge it for backwards compatibility.
 		String location = System.getProperty(PROP_CONFIG_AREA);
 		if (location != null) {
-			location = buildURL(location).getFile();
+			location = buildURL(location, false).getFile();
 			location = location.replace('\\', '/');
 			if (location.endsWith(".cfg")) {
 				int index = location.lastIndexOf('/');
 				location = location.substring(0, index + 1);
 			}
+			if (!location.endsWith("/"))
+				location += "/";
 			System.getProperties().put(PROP_CONFIG_AREA, location);
 		} 
 	}
 
 	public static void initializeLocations() {
-		URL defaultLocation =  buildURL(System.getProperty("user.home"));
+		URL defaultLocation =  buildURL(System.getProperty("user.home"), true);
 		userLocation = buildLocation(PROP_USER_AREA, defaultLocation, "user");
 
-		defaultLocation = buildURL(new File(System.getProperty("user.dir"), "workspace").getAbsolutePath());  //$NON-NLS-1$ //$NON-NLS-2$
+		defaultLocation = buildURL(new File(System.getProperty("user.dir"), "workspace").getAbsolutePath(), true);  //$NON-NLS-1$ //$NON-NLS-2$
 		instanceLocation = buildLocation(PROP_INSTANCE_AREA, defaultLocation, "workspace");
 		
 		mungeConfigurationLocation();
-		defaultLocation = buildURL(computeDefaultConfigurationLocation());
+		defaultLocation = buildURL(computeDefaultConfigurationLocation(), true);
 		configurationLocation = buildLocation(PROP_CONFIG_AREA, defaultLocation, CONFIG_DIR);
 		initializeDerivedConfigurationLocations(configurationLocation.getURL());
 
@@ -113,7 +117,7 @@ public class LocationManager {
 				location = computeDefaultUserAreaLocation(userDefaultAppendage);
 			if (location.equalsIgnoreCase(USER_DIR)) 
 				location = new File(System.getProperty(PROP_USER_DIR), userDefaultAppendage).getAbsolutePath();
-			URL url = buildURL(location);
+			URL url = buildURL(location, true);
 			if (url != null) {
 				result = new BasicLocation(property, null, false);
 				result.setURL(url);
@@ -159,7 +163,7 @@ public class LocationManager {
 		//    defined in .eclipseproduct marker file. If .eclipseproduct does not
 		//    exist, use "eclipse" as the application-id.
 		String installProperty = System.getProperty(PROP_INSTALL_AREA);
-		URL installURL = buildURL(installProperty);
+		URL installURL = buildURL(installProperty, true);
 		if (installURL == null)
 			return null;
 		File installDir = new File(installURL.getFile());
