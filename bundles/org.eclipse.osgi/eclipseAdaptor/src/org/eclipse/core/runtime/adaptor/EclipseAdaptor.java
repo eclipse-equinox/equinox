@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2003 IBM Corporation and others.
+ * Copyright (c) 2000, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -88,7 +88,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 	}	
 
 	private void checkLocationAndReinitialize() {
-		if (timeStamp == 0) {
+		if (installURL == null) {
 			installURL = EclipseStarter.getSysPath();
 			return;
 		}
@@ -228,10 +228,12 @@ public class EclipseAdaptor extends DefaultAdaptor {
 				
 				int bundleCount = in.readInt();
 				Vector result = new Vector(bundleCount);
+				long id = -1;
+				State state = stateManager.getSystemState();
 				for (int i = 0; i < bundleCount; i++) {
 					try {
 						try {
-							long id = in.readLong();
+							id = in.readLong();
 							if (id != 0) {
 								EclipseBundleData data = (EclipseBundleData) getElementFactory().getBundleData(this);
 								loadMetaDataFor(data, in);
@@ -246,12 +248,14 @@ public class EclipseAdaptor extends DefaultAdaptor {
 					} catch (IOException e) {
 						//Reset the time stamp
 						timeStamp = System.currentTimeMillis();
+						state.removeBundle(id);
 						if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 							Debug.println("Error reading framework metadata: " + e.getMessage());
 							Debug.printStackTrace(e);
 						}
 					}
-				}				
+				}
+				state.resolve(false);	//Force a full resolve
 				return result;
 			} finally {
 				in.close();
