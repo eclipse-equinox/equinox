@@ -39,23 +39,14 @@ public class SystemBundleData extends AbstractBundleData {
 	}
 
 	private File getOsgiBase() {
-		String fwLocation = System.getProperty(OSGI_FRAMEWORK);
-		File result = null;
-		if (fwLocation != null) {
-			try {
-				URL baseURL = new URL(fwLocation);
-				result = new File(baseURL.getPath());
-			} catch (MalformedURLException e) {
-				// do nothing, result will be null
-			}
-		}
-		if (result == null) {
-			fwLocation = System.getProperty("user.dir"); //$NON-NLS-1$
-			if (fwLocation != null) {
-				result = new File(fwLocation);
-			}
-		}
-		return result;
+		String frameworkLocation = System.getProperty(OSGI_FRAMEWORK);
+		if (frameworkLocation != null)
+			// TODO assumes the location is a file URL
+			return new File(frameworkLocation.substring(5));
+		frameworkLocation = System.getProperty("user.dir"); //$NON-NLS-1$
+		if (frameworkLocation != null) 
+			return new File(frameworkLocation);
+		return null;
 	}
 
 	private Headers createManifest(File osgiBase) throws BundleException {

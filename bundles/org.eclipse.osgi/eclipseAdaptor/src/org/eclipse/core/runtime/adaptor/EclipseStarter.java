@@ -331,7 +331,7 @@ public class EclipseStarter {
 			// Assume it should be a reference and htat it is relative.  This support need not 
 			// be robust as it is temporary..
 			fileLocation = new File(parent, name);
-			url = new URL("reference:file:" + parent + "/" + name);
+			url = new URL("reference", "", "file:" + fileLocation.toString());
 			reference = true;
 		}
 		// if the name was a URL then see if it is relative.  If so, insert syspath.
@@ -340,11 +340,15 @@ public class EclipseStarter {
 			// if it is a reference URL then strip off the reference: and set base to the file:...
 			if (url.getProtocol().equals("reference")) {
 				reference = true;
-				baseURL = new URL(url.getFile());
+				String baseSpec = url.getFile();
+				if (baseSpec.startsWith("file:"))
+					baseURL = new File(baseSpec.substring(5)).toURL();
+				else
+					baseURL = new URL(baseSpec);
 			}
 
 			fileLocation = new File(baseURL.getFile());
-			// if the location is relative, prefix it with the syspath
+			// if the location is relative, prefix it with the parent
 			if (!fileLocation.isAbsolute())
 				fileLocation = new File(parent, fileLocation.toString());
 		}

@@ -52,35 +52,41 @@ public class LocationManager {
 	private static final String USER_HOME = "@user.home"; //$NON-NLS-1$
 	private static final String USER_DIR = "@user.dir"; //$NON-NLS-1$
 
-	private static URL buildURL(String spec, boolean trailingSlash) {
+	public static URL buildURL(String spec, boolean trailingSlash) {
 		if (spec == null)
 			return null;
-		// if the spec is a file: url then see if it is absolute.  If not, break it up
-		// and make it absolute.
-		if (spec.startsWith("file:")) {
-			File file = new File(spec.substring(5));
-			if (!file.isAbsolute())
-				// TODO should we ensure URL starts with a "/" (ie file:/c:/eclipse) defect 51165
-				spec = "file:" + file.getAbsolutePath();
-		}
+		boolean isFile = spec.startsWith("file:"); //$NON-NLS-1$
 		try {
-			if (trailingSlash && !spec.endsWith("/"))
-				spec += "/";
-			return new URL(spec);
+			if (isFile)
+				return adjustTrailingSlash(new File(spec.substring(5)).toURL(), trailingSlash);
+			else
+				return new URL(spec);
 		} catch (MalformedURLException e) {
-			if (spec.startsWith("file:"))
+			// if we failed and it is a file spec, there is nothing more we can do
+			// otherwise, try to make the spec into a file URL.
+			if (isFile)
 				return null;
-			// TODO should we ensure URL starts with a "/" (ie file:/c:/eclipse) defect 51165
-			return buildURL("file:" + spec, trailingSlash);
+			try {
+				return adjustTrailingSlash(new File(spec).toURL(), trailingSlash);
+			} catch (MalformedURLException e1) {
+				return null;
+			}
 		}
+	}
+
+	private static URL adjustTrailingSlash(URL url, boolean trailingSlash) throws MalformedURLException {
+		String file = url.getFile();
+		if (trailingSlash == (file.endsWith("/")))
+			return url;
+		file = trailingSlash ? file + "/" : file.substring(0, file.length() - 1);
+		return new URL(url.getProtocol(), url.getHost(), file);
 	}
 
 	private static void mungeConfigurationLocation() {
 		// if the config property was set, munge it for backwards compatibility.
 		String location = System.getProperty(PROP_CONFIG_AREA);
 		if (location != null) {
-			location = buildURL(location, false).getFile();
-			location = location.replace('\\', '/');
+			location = buildURL(location, false).toExternalForm();
 			if (location.endsWith(".cfg")) {
 				int index = location.lastIndexOf('/');
 				location = location.substring(0, index + 1);

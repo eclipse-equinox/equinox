@@ -28,8 +28,12 @@ public class ReferenceURLConnection extends URLConnection {
 
 	public synchronized void connect() throws IOException {
 		if (!connected) {
-			URL ref = new URL(url.getPath());
-			if (!new File(ref.getFile()).exists())
+			// TODO assumes that reference URLs are always based on file: URLs.
+			// There are not solid usecases to the contrary. Yet.
+			// Construct the ref URL carefully so as to preserve UNC paths etc.
+			File file = new File(url.getPath().substring(5));
+			URL ref = file.toURL();
+			if (!file.exists())
 				throw new FileNotFoundException();
 			reference = ref;
 		}

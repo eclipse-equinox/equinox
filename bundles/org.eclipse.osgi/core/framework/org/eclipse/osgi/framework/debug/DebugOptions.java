@@ -33,6 +33,36 @@ public class DebugOptions implements org.eclipse.osgi.service.debug.DebugOptions
 		return singleton;
 	}
 
+	public static URL buildURL(String spec, boolean trailingSlash) {
+		if (spec == null)
+			return null;
+		boolean isFile = spec.startsWith("file:"); //$NON-NLS-1$
+		try {
+			if (isFile)
+				return adjustTrailingSlash(new File(spec.substring(5)).toURL(), trailingSlash);
+			else
+				return new URL(spec);
+		} catch (MalformedURLException e) {
+			// if we failed and it is a file spec, there is nothing more we can do
+			// otherwise, try to make the spec into a file URL.
+			if (isFile)
+				return null;
+			try {
+				return adjustTrailingSlash(new File(spec).toURL(), trailingSlash);
+			} catch (MalformedURLException e1) {
+				return null;
+			}
+		}
+	}
+
+	private static URL adjustTrailingSlash(URL url, boolean trailingSlash) throws MalformedURLException {
+		String file = url.getFile();
+		if (trailingSlash == (file.endsWith("/"))) //$NON-NLS-1$
+			return url;
+		file = trailingSlash ? file + "/" : file.substring(0, file.length() - 1); //$NON-NLS-1$
+		return new URL(url.getProtocol(), url.getHost(), file);
+	}
+
 	private DebugOptions() {
 		super();
 		loadOptions();
@@ -85,16 +115,14 @@ public class DebugOptions implements org.eclipse.osgi.service.debug.DebugOptions
 			String userDir = System.getProperty("user.dir").replace(File.separatorChar, '/'); //$NON-NLS-1$
 			if (!userDir.endsWith("/")) //$NON-NLS-1$
 				userDir += "/"; //$NON-NLS-1$
-			debugOptionsFilename = "file:" + userDir + OPTIONS; //$NON-NLS-1$
+			debugOptionsFilename = new File(userDir, OPTIONS).toString();
 		}
-		try {
-			optionsFile = getURL(debugOptionsFilename);
-		} catch (MalformedURLException e) {
+		optionsFile = buildURL(debugOptionsFilename, false);
+		if (optionsFile == null) {
 			System.out.println("Unable to construct URL for options file: " + debugOptionsFilename); //$NON-NLS-1$
-			e.printStackTrace(System.out);
 			return;
 		}
-		System.out.print("Debug options:\n    " + debugOptionsFilename); //$NON-NLS-1$
+		System.out.print("Debug options:\n    " + optionsFile.toExternalForm()); //$NON-NLS-1$
 		try {
 			InputStream input = optionsFile.openStream();
 			try {
@@ -116,24 +144,5 @@ public class DebugOptions implements org.eclipse.osgi.service.debug.DebugOptions
 		}
 		if (options.size() == 0)
 			options = null;
-	}
-
-	/**
-	 * Helper method that creates an URL object from the given string
-	 * representation. The string must correspond to a valid URL or file system
-	 * path.
-	 */
-	private URL getURL(String urlString) throws MalformedURLException {
-		try {
-			return new URL(urlString);
-		} catch (MalformedURLException e) {
-			// if it is not a well formed URL, tries to create a "file:" URL
-			try {
-				return new File(urlString).toURL();
-			} catch (MalformedURLException ex) {
-				// re-throw the original exception if nothing works
-				throw e;
-			}
-		}
 	}
 }
