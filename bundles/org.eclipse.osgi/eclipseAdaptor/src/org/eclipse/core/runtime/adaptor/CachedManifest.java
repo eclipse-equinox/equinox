@@ -14,9 +14,8 @@ import java.util.Dictionary;
 import java.util.Enumeration;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
+import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
-import org.osgi.framework.BundleException;
-import org.osgi.framework.Constants;
 
 /**
  * Internal class.
@@ -35,7 +34,7 @@ public class CachedManifest extends Dictionary {
 			try {
 				manifest = bundledata.loadManifest();
 			} catch (BundleException e) {
-				final String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CACHEDMANIFEST_UNEXPECTED_EXCEPTION", bundledata.getLocation()); //$NON-NLS-1$
+				final String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_CACHEDMANIFEST_UNEXPECTED_EXCEPTION, bundledata.getLocation());
 				FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, message, 0, e, null);
 				EclipseAdaptor.getDefault().getFrameworkLog().log(entry);
 				return null;

@@ -387,7 +387,7 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 			bc.registerService(DOMFACTORYNAME, new DomParsingService(), new Hashtable());
 		} catch (ClassNotFoundException e) {
 			// In case the JAXP API is not on the boot classpath
-			String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_ADAPTOR_ERROR_XML_SERVICE"); //$NON-NLS-1$
+			String message = EclipseAdaptorMsg.ECLIPSE_ADAPTOR_ERROR_XML_SERVICE; 
 			getFrameworkLog().log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, message, 0, e, null));
 		}
 	}
@@ -703,9 +703,9 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 		try {
 			// check the prop each time this happens (should NEVER happen!)
 			exitOnError = Boolean.valueOf(System.getProperty(PROP_EXITONERROR, "true")).booleanValue(); //$NON-NLS-1$
-			String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_ADAPTOR_RUNTIME_ERROR"); //$NON-NLS-1$
+			String message = EclipseAdaptorMsg.ECLIPSE_ADAPTOR_RUNTIME_ERROR; 
 			if (exitOnError && isFatalException(error))
-				message += ' ' + EclipseAdaptorMsg.formatter.getString("ECLIPSE_ADAPTOR_EXITING"); //$NON-NLS-1$
+				message += ' ' + EclipseAdaptorMsg.ECLIPSE_ADAPTOR_EXITING;
 			FrameworkLogEntry logEntry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, message, 0, error, null);
 			frameworkLog.log(logEntry);
 		} catch (Throwable t) {

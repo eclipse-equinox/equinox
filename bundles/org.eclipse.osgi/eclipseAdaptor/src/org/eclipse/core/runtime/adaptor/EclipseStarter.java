@@ -14,7 +14,6 @@ import java.io.*;
 import java.lang.reflect.Constructor;
 import java.net.*;
 import java.util.*;
-
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.internal.core.OSGi;
 import org.eclipse.osgi.framework.log.FrameworkLog;
@@ -24,6 +23,7 @@ import org.eclipse.osgi.profile.Profile;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.service.runnable.ParameterizedRunnable;
+import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.startlevel.StartLevel;
@@ -142,7 +142,7 @@ public class EclipseStarter {
 		if (Profile.PROFILE && Profile.STARTUP)
 			Profile.logEnter("EclipseStarter.run()", null); //$NON-NLS-1$
 		if (running)
-			throw new IllegalStateException(EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_ALREADY_RUNNING")); //$NON-NLS-1$
+			throw new IllegalStateException(EclipseAdaptorMsg.ECLIPSE_STARTUP_ALREADY_RUNNING);
 		boolean startupFailed = true;
 		try {
 			startup(args, endSplashHandler);
@@ -153,7 +153,7 @@ public class EclipseStarter {
 			if (endSplashHandler != null)
 				endSplashHandler.run();
 			// may use startupFailed to understand where the error happened
-			FrameworkLogEntry logEntry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, startupFailed ? EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_STARTUP_ERROR") : EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_APP_ERROR"), 1, e, null); //$NON-NLS-1$//$NON-NLS-2$
+			FrameworkLogEntry logEntry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, startupFailed ? EclipseAdaptorMsg.ECLIPSE_STARTUP_STARTUP_ERROR : EclipseAdaptorMsg.ECLIPSE_STARTUP_APP_ERROR, 1, e, null); //$NON-NLS-1$//$NON-NLS-2$
 			if (log != null) {
 				log.log(logEntry);
 				logUnresolvedBundles(context.getBundles());
@@ -164,7 +164,7 @@ public class EclipseStarter {
 			try {
 				shutdown();
 			} catch (Throwable e) {
-				FrameworkLogEntry logEntry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_SHUTDOWN_ERROR"), 1, e, null); //$NON-NLS-1$
+				FrameworkLogEntry logEntry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, EclipseAdaptorMsg.ECLIPSE_STARTUP_SHUTDOWN_ERROR, 1, e, null);
 				if (log != null)
 					log.log(logEntry);
 				else
@@ -183,7 +183,7 @@ public class EclipseStarter {
 		}
 		// we only get here if an error happened
 		System.getProperties().put(PROP_EXITCODE, "13"); //$NON-NLS-1$
-		System.getProperties().put(PROP_EXITDATA, EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_ERROR_CHECK_LOG", log.getFile().getPath())); //$NON-NLS-1$
+		System.getProperties().put(PROP_EXITDATA, NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_ERROR_CHECK_LOG, log.getFile().getPath()));
 		return null;
 	}
 
@@ -234,7 +234,7 @@ public class EclipseStarter {
 		if (Profile.PROFILE && Profile.STARTUP)
 			Profile.logEnter("EclipseStarter.startup()", null); //$NON-NLS-1$
 		if (running)
-			throw new IllegalStateException(EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_ALREADY_RUNNING")); //$NON-NLS-1$
+			throw new IllegalStateException(EclipseAdaptorMsg.ECLIPSE_STARTUP_ALREADY_RUNNING);
 		processCommandLine(args);
 		LocationManager.initializeLocations();
 		log = createFrameworkLog();
@@ -311,7 +311,7 @@ public class EclipseStarter {
 		if (Profile.PROFILE && Profile.STARTUP)
 			Profile.logEnter("EclipseStarter.run(Object)()", null); //$NON-NLS-1$
 		if (!running)
-			throw new IllegalStateException(EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_NOT_RUNNING")); //$NON-NLS-1$
+			throw new IllegalStateException(EclipseAdaptorMsg.ECLIPSE_STARTUP_NOT_RUNNING);
 		// if we are just initializing, do not run the application just return.
 		if (initialize)
 			return new Integer(0);
@@ -321,7 +321,7 @@ public class EclipseStarter {
 		ParameterizedRunnable application = (ParameterizedRunnable) applicationTracker.getService();
 		applicationTracker.close();
 		if (application == null)
-			throw new IllegalStateException(EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_ERROR_NO_APPLICATION")); //$NON-NLS-1$
+			throw new IllegalStateException(EclipseAdaptorMsg.ECLIPSE_STARTUP_ERROR_NO_APPLICATION);
 		if (debug) {
 			String timeString = System.getProperty("eclipse.startTime"); //$NON-NLS-1$ 
 			long time = timeString == null ? 0L : Long.parseLong(timeString);
@@ -363,7 +363,7 @@ public class EclipseStarter {
 	private static void ensureBundlesActive(Bundle[] bundles) {
 		for (int i = 0; i < bundles.length; i++) {
 			if (bundles[i].getState() != Bundle.ACTIVE) {
-				String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_ERROR_BUNDLE_NOT_ACTIVE", bundles[i]); //$NON-NLS-1$
+				String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_ERROR_BUNDLE_NOT_ACTIVE, bundles[i]);
 				throw new IllegalStateException(message);
 			}
 		}
@@ -375,7 +375,7 @@ public class EclipseStarter {
 		StateHelper stateHelper = adaptor.getPlatformAdmin().getStateHelper();
 		for (int i = 0; i < bundles.length; i++)
 			if (bundles[i].getState() == Bundle.INSTALLED) {
-				String generalMessage = EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_ERROR_BUNDLE_NOT_RESOLVED", bundles[i]); //$NON-NLS-1$
+				String generalMessage = NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_ERROR_BUNDLE_NOT_RESOLVED, bundles[i]);
 				BundleDescription description = state.getBundle(bundles[i].getBundleId());
 				// for some reason, the state does not know about that bundle
 				if (description == null)
@@ -392,7 +392,7 @@ public class EclipseStarter {
 					for (int j = 0; j < homonyms.length; j++)
 						if (homonyms[j].isResolved()) {
 							logChildren = new FrameworkLogEntry[1];
-							logChildren[0] = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONSOLE_OTHER_VERSION", homonyms[j].getLocation()), 0, null, null); //$NON-NLS-1$
+							logChildren[0] = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, NLS.bind(EclipseAdaptorMsg.ECLIPSE_CONSOLE_OTHER_VERSION, homonyms[j].getLocation()), 0, null, null); //$NON-NLS-1$
 						}
 				}
 
@@ -534,7 +534,7 @@ public class EclipseStarter {
 			}
 			URL location = searchForBundle(name, syspath);
 			if (location == null) {
-				FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_BUNDLE_NOT_FOUND", installEntries[i]), 0, null, null); //$NON-NLS-1$
+				FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_BUNDLE_NOT_FOUND, installEntries[i]), 0, null, null);
 				log.log(entry);
 				// skip this entry
 				continue;
@@ -596,9 +596,9 @@ public class EclipseStarter {
 			t.start();
 		} catch (NumberFormatException nfe) {
 			// TODO log or something other than write on System.err
-			System.err.println(EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_INVALID_PORT", consolePort)); //$NON-NLS-1$
+			System.err.println(NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_INVALID_PORT, consolePort));
 		} catch (Exception ex) {
-			System.out.println(EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_FAILED_FIND", CONSOLE_NAME)); //$NON-NLS-1$
+			System.out.println(NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_FAILED_FIND, CONSOLE_NAME));
 		}
 
 	}
@@ -851,7 +851,7 @@ public class EclipseStarter {
 					curInitBundles[i].uninstall();
 					toRefresh.add(curInitBundles[i]);
 				} catch (BundleException e) {
-					FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_FAILED_UNINSTALL", curInitBundles[i].getLocation()), 0, e, null); //$NON-NLS-1$
+					FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_FAILED_UNINSTALL, curInitBundles[i].getLocation()), 0, e, null);
 					log.log(entry);
 				}
 		}
@@ -878,10 +878,10 @@ public class EclipseStarter {
 				if ((osgiBundle.getState() & Bundle.INSTALLED) != 0)
 					toRefresh.add(osgiBundle);
 			} catch (BundleException e) {
-				FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_FAILED_INSTALL", initialBundles[i].location), 0, e, null); //$NON-NLS-1$
+				FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_FAILED_INSTALL, initialBundles[i].location), 0, e, null);
 				log.log(entry);
 			} catch (IOException e) {
-				FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_FAILED_INSTALL", initialBundles[i].location), 0, e, null); //$NON-NLS-1$
+				FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_FAILED_INSTALL, initialBundles[i].location), 0, e, null);
 				log.log(entry);
 			}
 		}
@@ -892,11 +892,11 @@ public class EclipseStarter {
 		for (int i = 0; i < bundles.length; i++) {
 			Bundle bundle = bundles[i];
 			if (bundle.getState() == Bundle.INSTALLED)
-				throw new IllegalStateException(EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_ERROR_BUNDLE_NOT_RESOLVED", bundle.getLocation())); //$NON-NLS-1$
+				throw new IllegalStateException(NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_ERROR_BUNDLE_NOT_RESOLVED, bundle.getLocation()));
 			try {
 				bundle.start();
 			} catch (BundleException e) {
-				FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_FAILED_START", bundle.getLocation()), 0, e, null); //$NON-NLS-1$
+				FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_FAILED_START, bundle.getLocation()), 0, e, null);
 				log.log(entry);
 			}
 		}

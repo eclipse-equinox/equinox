@@ -25,6 +25,7 @@ import org.eclipse.osgi.framework.internal.defaultadaptor.DefaultClassLoader;
 import org.eclipse.osgi.framework.internal.defaultadaptor.DevClassPathHelper;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.framework.stats.*;
+import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 
 /**
@@ -98,8 +99,8 @@ public class EclipseClassLoader extends DefaultClassLoader {
 					}
 					if (timeLeft <= 0 || bundle.getState() != Bundle.ACTIVE) {
 						String bundleName = bundle.getSymbolicName() == null ? Long.toString(bundle.getBundleId()) : bundle.getSymbolicName();
-						String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CLASSLOADER_CONCURRENT_STARTUP", new Object[] {Thread.currentThread().getName(), className, threadChangingState.getName(), bundleName, Long.toString(delay)}); //$NON-NLS-1$ 
-						EclipseAdaptor.getDefault().getFrameworkLog().log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, message, 0, new Exception(EclipseAdaptorMsg.formatter.getString("ECLIPSE_CLASSLOADER_GENERATED_EXCEPTION")), null)); //$NON-NLS-1$
+						String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_CLASSLOADER_CONCURRENT_STARTUP, new Object[] {Thread.currentThread().getName(), className, threadChangingState.getName(), bundleName, Long.toString(delay)});
+						EclipseAdaptor.getDefault().getFrameworkLog().log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, message, 0, new Exception(EclipseAdaptorMsg.ECLIPSE_CLASSLOADER_GENERATED_EXCEPTION), null));
 					}
 					return basicFindLocalClass(className);
 				}
@@ -109,7 +110,7 @@ public class EclipseClassLoader extends DefaultClassLoader {
 			try {
 				hostdata.getBundle().start();
 			} catch (BundleException e) {
-				String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CLASSLOADER_ACTIVATION", bundle.getSymbolicName(), Long.toString(bundle.getBundleId())); //$NON-NLS-1$
+				String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_CLASSLOADER_ACTIVATION, bundle.getSymbolicName(), Long.toString(bundle.getBundleId())); //$NON-NLS-1$
 				EclipseAdaptor.getDefault().getFrameworkLog().log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, message, 0, e, null));
 				throw new ClassNotFoundException(className, e);
 			}
@@ -143,7 +144,7 @@ public class EclipseClassLoader extends DefaultClassLoader {
 		if (hostdata.getAdaptor().isStopping()) {
 			BundleStopper stopper = EclipseAdaptor.getDefault().getBundleStopper();
 			if (stopper != null && stopper.isStopped(hostdata.getBundle())) {
-				String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CLASSLOADER_ALREADY_STOPPED", className, hostdata.getSymbolicName()); //$NON-NLS-1$
+				String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_CLASSLOADER_ALREADY_STOPPED, className, hostdata.getSymbolicName());
 				ClassNotFoundException exception = new ClassNotFoundException(message);
 				EclipseAdaptor.getDefault().getFrameworkLog().log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, message, 0, exception, null)); //$NON-NLS-1$
 				throw exception;
@@ -259,7 +260,8 @@ public class EclipseClassLoader extends DefaultClassLoader {
 			}
 			// is we are not in development mode, post some framework errors.
 			if (!DevClassPathHelper.inDevelopmentMode()) {
-				BundleException be = new BundleException(Msg.formatter.getString("BUNDLE_CLASSPATH_ENTRY_NOT_FOUND_EXCEPTION", entry, hostdata.getLocation())); //$NON-NLS-1$
+				//BundleException be = new BundleException(Msg.formatter.getString("BUNDLE_CLASSPATH_ENTRY_NOT_FOUND_EXCEPTION", entry, hostdata.getLocation())); //$NON-NLS-1$
+				BundleException be = new BundleException(NLS.bind(Msg.BUNDLE_CLASSPATH_ENTRY_NOT_FOUND_EXCEPTION,entry)); //$NON-NLS-1$
 				bundledata.getAdaptor().getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, bundledata.getBundle(), be);
 			}
 		}

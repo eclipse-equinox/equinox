@@ -15,10 +15,8 @@ import java.io.IOException;
 import java.net.*;
 import org.eclipse.osgi.framework.adaptor.BundleClassLoader;
 import org.eclipse.osgi.framework.adaptor.core.*;
-import org.eclipse.osgi.framework.internal.core.AbstractBundle;
-import org.osgi.framework.AdminPermission;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.Bundle;
+import org.eclipse.osgi.util.NLS;
+import org.osgi.framework.*;
 
 /**
  * URLStreamHandler the bundleentry and bundleresource protocols.
@@ -133,14 +131,14 @@ public abstract class BundleResourceHandler extends URLStreamHandler {
 
 		String bidString = url.getHost();
 		if (bidString == null) {
-			throw new IOException(AdaptorMsg.formatter.getString("URL_NO_BUNDLE_ID", url.toExternalForm())); //$NON-NLS-1$
+			throw new IOException(NLS.bind(AdaptorMsg.URL_NO_BUNDLE_ID, url.toExternalForm())); //$NON-NLS-1$
 		}
 		AbstractBundle bundle = null;
 		long bundleID;
 		try {
 			bundleID = Long.parseLong(bidString);
 		} catch (NumberFormatException nfe) {
-			throw new MalformedURLException(AdaptorMsg.formatter.getString("URL_INVALID_BUNDLE_ID", bidString)); //$NON-NLS-1$
+			throw new MalformedURLException(NLS.bind(AdaptorMsg.URL_INVALID_BUNDLE_ID, bidString)); //$NON-NLS-1$
 		}
 		bundle = (AbstractBundle) context.getBundle(bundleID);
 		// check to make sure that this URL was created using the
@@ -152,7 +150,7 @@ public abstract class BundleResourceHandler extends URLStreamHandler {
 		}
 
 		if (bundle == null) {
-			throw new IOException(AdaptorMsg.formatter.getString("URL_NO_BUNDLE_FOUND", url.toExternalForm())); //$NON-NLS-1$
+			throw new IOException(NLS.bind(AdaptorMsg.URL_NO_BUNDLE_FOUND, url.toExternalForm())); //$NON-NLS-1$
 		}
 		return (new BundleURLConnection(url, findBundleEntry(url, bundle)));
 	}

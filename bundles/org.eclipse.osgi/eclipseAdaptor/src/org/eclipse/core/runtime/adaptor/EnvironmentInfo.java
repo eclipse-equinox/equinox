@@ -12,6 +12,7 @@ package org.eclipse.core.runtime.adaptor;
 
 import java.util.*;
 import org.eclipse.osgi.service.environment.Constants;
+import org.eclipse.osgi.util.NLS;
 
 /**
  * Internal class.
@@ -118,7 +119,7 @@ public class EnvironmentInfo implements org.eclipse.osgi.service.environment.Env
 						break;
 					default :
 						// if the user passed us in a bogus value then log a message and use the default
-						System.err.println(EclipseAdaptorMsg.formatter.getString("error.badNL", nl)); //$NON-NLS-1$
+						System.err.println(NLS.bind(EclipseAdaptorMsg.error_badNL, nl)); 
 						userLocale = Locale.getDefault();
 						break;
 				}

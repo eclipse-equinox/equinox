@@ -13,7 +13,9 @@ package org.eclipse.osgi.framework.adaptor.core;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.*;
+import java.net.URL;
+import java.net.URLConnection;
+import org.eclipse.osgi.util.NLS;
 
 /**
  * URLConnection for BundleClassLoader resources.
@@ -49,7 +51,7 @@ public class BundleURLConnection extends URLConnection {
 				in = bundleEntry.getInputStream();
 				connected = true;
 			} else {
-				throw new IOException(AdaptorMsg.formatter.getString("RESOURCE_NOT_FOUND_EXCEPTION", url)); //$NON-NLS-1$
+				throw new IOException(NLS.bind(AdaptorMsg.RESOURCE_NOT_FOUND_EXCEPTION, url)); //$NON-NLS-1$
 			}
 		}
 	}

@@ -21,6 +21,7 @@ import org.eclipse.osgi.framework.util.Headers;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.service.pluginconversion.PluginConversionException;
 import org.eclipse.osgi.util.ManifestElement;
+import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Version;
 
@@ -203,7 +204,7 @@ public class EclipseBundleData extends AbstractBundleData {
 		}
 		Dictionary result = generateManifest(null);
 		if (result == null)
-			throw new BundleException(EclipseAdaptorMsg.formatter.getString("ECLIPSE_DATA_MANIFEST_NOT_FOUND", getLocation())); //$NON-NLS-1$
+			throw new BundleException(NLS.bind(EclipseAdaptorMsg.ECLIPSE_DATA_MANIFEST_NOT_FOUND, getLocation()));
 		return result;
 	}
 
@@ -245,7 +246,7 @@ public class EclipseBundleData extends AbstractBundleData {
 		try {
 			generatedManifest = converter.convertManifest(getBaseFile(), true, null, true);
 		} catch (PluginConversionException pce) {
-			String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONVERTER_ERROR_CONVERTING", getBaseFile()); //$NON-NLS-1$
+			String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_CONVERTER_ERROR_CONVERTING, getBaseFile()); //$NON-NLS-1$
 			throw new BundleException(message, pce); //$NON-NLS-1$
 		}
 
@@ -284,7 +285,7 @@ public class EclipseBundleData extends AbstractBundleData {
 		try {
 			return Headers.parseManifest(manifestURL.openStream());
 		} catch (IOException e) {
-			throw new BundleException(EclipseAdaptorMsg.formatter.getString("ECLIPSE_DATA_ERROR_READING_MANIFEST", getLocation()), e); //$NON-NLS-1$
+			throw new BundleException(NLS.bind(EclipseAdaptorMsg.ECLIPSE_DATA_ERROR_READING_MANIFEST, getLocation()), e);
 		}
 	}
 
@@ -351,7 +352,7 @@ public class EclipseBundleData extends AbstractBundleData {
 			allElements = ManifestElement.parseHeader(EclipseAdaptor.ECLIPSE_AUTOSTART, headerValue);
 		} catch (BundleException e) {
 			// just use the default settings (no auto activation)
-			String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CLASSLOADER_CANNOT_GET_HEADERS", getLocation()); //$NON-NLS-1$
+			String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_CLASSLOADER_CANNOT_GET_HEADERS, getLocation());
 			EclipseAdaptor.getDefault().getFrameworkLog().log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, message, 0, e, null));
 		}
 		//Eclipse-AutoStart not found... 

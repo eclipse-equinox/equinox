@@ -16,6 +16,7 @@ import java.net.URL;
 import java.util.Enumeration;
 import org.eclipse.osgi.framework.adaptor.BundleData;
 import org.eclipse.osgi.framework.debug.Debug;
+import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 
 public class BundleFragment extends AbstractBundle {
@@ -55,7 +56,7 @@ public class BundleFragment extends AbstractBundle {
 			try {
 				bundledata.open(); /* make sure the BundleData is open */
 			} catch (IOException e) {
-				throw new BundleException(Msg.formatter.getString("BUNDLE_READ_EXCEPTION"), e); //$NON-NLS-1$
+				throw new BundleException(Msg.BUNDLE_READ_EXCEPTION, e); //$NON-NLS-1$
 			}
 		}
 	}
@@ -189,7 +190,7 @@ public class BundleFragment extends AbstractBundle {
 		}
 		// cannot load a class from a fragment because there is no classloader
 		// associated with fragments.
-		throw new ClassNotFoundException(Msg.formatter.getString("BUNDLE_FRAGMENT_CNFE", name)); //$NON-NLS-1$
+		throw new ClassNotFoundException(NLS.bind(Msg.BUNDLE_FRAGMENT_CNFE, name)); //$NON-NLS-1$
 	}
 
 	/**
@@ -230,7 +231,7 @@ public class BundleFragment extends AbstractBundle {
 	 * @param persistent if true persistently record the bundle was started.
 	 */
 	protected void startWorker(boolean persistent) throws BundleException {
-		throw new BundleException(Msg.formatter.getString("BUNDLE_FRAGMENT_START", this)); //$NON-NLS-1$
+		throw new BundleException(NLS.bind(Msg.BUNDLE_FRAGMENT_START, this)); //$NON-NLS-1$
 	}
 
 	/**
@@ -239,7 +240,7 @@ public class BundleFragment extends AbstractBundle {
 	 * @param persistent if true persistently record the bundle was stopped.
 	 */
 	protected void stopWorker(boolean persistent) throws BundleException {
-		throw new BundleException(Msg.formatter.getString("BUNDLE_FRAGMENT_STOP", this)); //$NON-NLS-1$
+		throw new BundleException(NLS.bind(Msg.BUNDLE_FRAGMENT_STOP, this)); //$NON-NLS-1$
 	}
 
 	/**

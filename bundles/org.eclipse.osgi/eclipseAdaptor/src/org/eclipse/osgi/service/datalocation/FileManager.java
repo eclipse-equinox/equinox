@@ -13,8 +13,6 @@ package org.eclipse.osgi.service.datalocation;
 import java.io.*;
 import java.util.*;
 import org.eclipse.core.runtime.adaptor.*;
-import org.eclipse.core.runtime.adaptor.BasicLocation;
-import org.eclipse.core.runtime.adaptor.Locker;
 
 /**
  * File managers provide a facility for tracking the state of files being used and updated by several
@@ -121,7 +119,7 @@ public class FileManager {
 	 */
 	public void add(String file) throws IOException {
 		if (! lock())
-			throw new IOException(EclipseAdaptorMsg.formatter.getString("fileManager.cannotLock")); //$NON-NLS-1$
+			throw new IOException(EclipseAdaptorMsg.fileManager_cannotLock);
 		try {
 			updateTable();
 			Entry entry = (Entry) table.get(file);
@@ -146,7 +144,7 @@ public class FileManager {
 	 */
 	public void update(String[] targets, String[] sources) throws IOException {
 		if (! lock())
-			throw new IOException(EclipseAdaptorMsg.formatter.getString("fileManager.cannotLock")); //$NON-NLS-1$;
+			throw new IOException(EclipseAdaptorMsg.fileManager_cannotLock);
 		try {
 			updateTable();
 			for (int i = 0; i < targets.length; i++) {
@@ -215,7 +213,7 @@ public class FileManager {
 		if (locker == null)
 			locker = BasicLocation.createLocker(lockFile, lockMode);
 		if (locker == null)
-			throw new IOException(EclipseAdaptorMsg.formatter.getString("fileManager.cannotLock")); //$NON-NLS-1$
+			throw new IOException(EclipseAdaptorMsg.fileManager_cannotLock); 
 		return locker.lock();
 	}
 
@@ -269,7 +267,7 @@ public class FileManager {
 		// The removal needs to be done eagerly, so the value is effectively removed from the disktable. 
 		// Otherwise, an updateTable() caused by an update(,)  could cause the file to readded to the local table.
 		if (! lock())
-			throw new IOException(EclipseAdaptorMsg.formatter.getString("fileManager.cannotLock")); //$NON-NLS-1$;
+			throw new IOException(EclipseAdaptorMsg.fileManager_cannotLock);
 		try {
 			updateTable();
 			table.remove(file);
@@ -336,7 +334,7 @@ public class FileManager {
 				fileStream.close();
 			}
 		} catch (IOException e) {
-			throw new IOException(EclipseAdaptorMsg.formatter.getString("fileManager.couldNotSave")); //$NON-NLS-1$
+			throw new IOException(EclipseAdaptorMsg.fileManager_couldNotSave);
 		}
 	}
 
@@ -376,7 +374,7 @@ public class FileManager {
 		//If we are here it is because we are the last instance running. After locking the table and getting its latest content, remove all the backup files and change the table
 		//If the exception comes from lock, another instance may have been started after we cleaned up, therefore we abort
 		if (! lock())
-			throw new IOException(EclipseAdaptorMsg.formatter.getString("fileManager.cannotLock")); //$NON-NLS-1$
+			throw new IOException(EclipseAdaptorMsg.fileManager_cannotLock); 
 		try {
 			updateTable();
 			Collection managedFiles = table.entrySet();
@@ -432,7 +430,7 @@ public class FileManager {
 	public void open(boolean wait) throws IOException {
 		boolean locked = lock();
 		if (! locked && wait==false)
-			throw new IOException(EclipseAdaptorMsg.formatter.getString("fileManager.cannotLock")); //$NON-NLS-1$;
+			throw new IOException(EclipseAdaptorMsg.fileManager_cannotLock); 
 		
 		//wait for the lock to be released
 		if (! locked) {

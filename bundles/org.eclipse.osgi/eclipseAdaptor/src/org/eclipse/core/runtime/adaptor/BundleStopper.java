@@ -11,13 +11,13 @@
 package org.eclipse.core.runtime.adaptor;
 
 import java.util.Hashtable;
-
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.internal.core.AbstractBundle;
 import org.eclipse.osgi.framework.internal.core.BundleHost;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.osgi.service.resolver.StateHelper;
+import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
@@ -47,7 +47,7 @@ public class BundleStopper {
 				cycleText.insert(cycleText.length() - 1, ']');
 			}
 			cycleText.setCharAt(cycleText.length() - 1, ']');
-			String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_BUNDLESTOPPER_CYCLES_FOUND", cycleText); //$NON-NLS-1$
+			String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_BUNDLESTOPPER_CYCLES_FOUND, cycleText); //$NON-NLS-1$
 			FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, message, 0, null, null);
 			EclipseAdaptor.getDefault().getFrameworkLog().log(entry);
 		}
@@ -72,7 +72,7 @@ public class BundleStopper {
 					if ((toStop.getState() == Bundle.ACTIVE) && (toStop instanceof BundleHost))
 						toStop.stop();
 				} catch (Exception e) {
-					String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_BUNDLESTOPPER_ERROR_STOPPING_BUNDLE", allToStop[stoppingIndex].toString()); //$NON-NLS-1$
+					String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_BUNDLESTOPPER_ERROR_STOPPING_BUNDLE, allToStop[stoppingIndex].toString());
 					FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, message, 0, e, null);
 					EclipseAdaptor.getDefault().getFrameworkLog().log(entry);
 				} finally {

@@ -18,6 +18,7 @@ import org.eclipse.osgi.framework.adaptor.BundleData;
 import org.eclipse.osgi.framework.adaptor.BundleWatcher;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.service.resolver.BundleDescription;
+import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 
 public class BundleHost extends AbstractBundle {
@@ -225,7 +226,7 @@ public class BundleHost extends AbstractBundle {
 		}
 		BundleLoader loader = checkLoader();
 		if (loader == null)
-			throw new ClassNotFoundException(Msg.formatter.getString("BUNDLE_CNFE_NOT_RESOLVED", getLocation(), name)); //$NON-NLS-1$
+			throw new ClassNotFoundException(NLS.bind(Msg.BUNDLE_CNFE_NOT_RESOLVED, getLocation(), name)); //$NON-NLS-1$
 		return (loader.loadClass(name));
 	}
 
@@ -348,7 +349,7 @@ public class BundleHost extends AbstractBundle {
 					if (state == UNINSTALLED) {
 						context.close();
 						context = null;
-						throw new BundleException(Msg.formatter.getString("BUNDLE_UNINSTALLED_EXCEPTION", getLocation())); //$NON-NLS-1$
+						throw new BundleException(NLS.bind(Msg.BUNDLE_UNINSTALLED_EXCEPTION, getLocation())); //$NON-NLS-1$
 					}
 				}
 			} finally {
@@ -511,7 +512,7 @@ public class BundleHost extends AbstractBundle {
 					// then we cannot attach a fragment into the middle
 					// of the fragment chain.
 					if (loader != null) {
-						throw new BundleException(Msg.formatter.getString("BUNDLE_LOADER_ATTACHMENT_ERROR", fragments[i].getSymbolicName(), getSymbolicName())); //$NON-NLS-1$
+						throw new BundleException(NLS.bind(Msg.BUNDLE_LOADER_ATTACHMENT_ERROR, fragments[i].getSymbolicName(), getSymbolicName())); //$NON-NLS-1$
 					}
 					newFragments[i] = fragment;
 					inserted = true;

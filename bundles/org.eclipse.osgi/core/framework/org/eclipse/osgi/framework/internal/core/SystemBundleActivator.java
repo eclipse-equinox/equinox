@@ -14,7 +14,6 @@ package org.eclipse.osgi.framework.internal.core;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import org.eclipse.osgi.framework.debug.DebugOptions;
-import org.eclipse.osgi.framework.util.FrameworkMessageFormat;
 import org.osgi.framework.*;
 import org.osgi.service.condpermadmin.ConditionalPermissionAdmin;
 
@@ -39,8 +38,6 @@ public class SystemBundleActivator implements BundleActivator {
 		this.context = context;
 		bundle = (SystemBundle) context.getBundle();
 		framework = bundle.framework;
-
-		FrameworkMessageFormat.setContext(context);
 
 		if (framework.packageAdmin != null)
 			packageAdmin = register(Constants.OSGI_PACKAGEADMIN_NAME, framework.packageAdmin);
@@ -80,7 +77,6 @@ public class SystemBundleActivator implements BundleActivator {
 		framework = null;
 		bundle = null;
 		this.context = null;
-		FrameworkMessageFormat.setContext(null);
 	}
 
 	/**

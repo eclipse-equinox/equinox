@@ -15,6 +15,7 @@ import java.io.*;
 import java.net.*;
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
+import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -105,7 +106,7 @@ public class FrameworkConsole implements Runnable {
 	 */
 	private void getSocketStream(int port) {
 		try {
-			System.out.println(ConsoleMsg.formatter.getString("CONSOLE_LISTENING_ON_PORT", port)); //$NON-NLS-1$
+			System.out.println(NLS.bind(ConsoleMsg.CONSOLE_LISTENING_ON_PORT, String.valueOf(port))); 
 			if (ss == null) {
 				ss = new ServerSocket(port);
 				scsg = new ConsoleSocketGetter(ss);
@@ -250,7 +251,7 @@ public class FrameworkConsole implements Runnable {
 		// wait to receive commands from console and handle them
 		BufferedReader br = (BufferedReader) in;
 		//cache the console prompt String
-		String consolePrompt = "\r\n" + ConsoleMsg.formatter.getString("CONSOLE_PROMPT"); //$NON-NLS-1$ //$NON-NLS-2$
+		String consolePrompt = "\r\n" + ConsoleMsg.CONSOLE_PROMPT; //$NON-NLS-1$
 		boolean block = System.getProperty("osgi.dev") != null; //$NON-NLS-1$
 		while (!disconnect) {
 			out.print(consolePrompt);
@@ -361,9 +362,9 @@ public class FrameworkConsole implements Runnable {
 					socket = ss.accept();
 					if (!acceptConnections) {
 						PrintWriter o = createPrintWriter(socket.getOutputStream());
-						o.println(ConsoleMsg.formatter.getString("CONSOLE_TELNET_CONNECTION_REFUSED")); //$NON-NLS-1$
-						o.println(ConsoleMsg.formatter.getString("CONSOLE_TELNET_CURRENTLY_USED")); //$NON-NLS-1$
-						o.println(ConsoleMsg.formatter.getString("CONSOLE_TELNET_ONE_CLIENT_ONLY")); //$NON-NLS-1$
+						o.println(ConsoleMsg.CONSOLE_TELNET_CONNECTION_REFUSED); 
+						o.println(ConsoleMsg.CONSOLE_TELNET_CURRENTLY_USED);
+						o.println(ConsoleMsg.CONSOLE_TELNET_ONE_CLIENT_ONLY); 
 						o.close();
 						socket.close();
 					} else {

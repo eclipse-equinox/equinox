@@ -13,12 +13,14 @@ package org.eclipse.osgi.framework.internal.core;
 
 import java.io.IOException;
 import java.net.URL;
-import java.security.*;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.*;
 import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.util.ManifestElement;
+import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 
 /**
@@ -107,7 +109,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 		try {
 			bundle.getBundleData().open(); /* make sure the BundleData is open */
 		} catch (IOException e) {
-			throw new BundleException(Msg.formatter.getString("BUNDLE_READ_EXCEPTION"), e); //$NON-NLS-1$
+			throw new BundleException(Msg.BUNDLE_READ_EXCEPTION, e); //$NON-NLS-1$
 		}
 		initialize(proxy.getBundleDescription());
 	}
@@ -184,7 +186,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 						continue;
 					String name = imports[i].getName();
 					if (!isDynamicallyImported(name))
-						throw new BundleException(Msg.formatter.getString("BUNDLE_FRAGMENT_IMPORT_CONFLICT", new Object[] {fragment.getLocation(), imports[i], bundle.getLocation()})); //$NON-NLS-1$
+						throw new BundleException(NLS.bind(Msg.BUNDLE_FRAGMENT_IMPORT_CONFLICT, new Object[] {fragment.getLocation(), imports[i], bundle.getLocation()})); //$NON-NLS-1$
 				}
 			}
 		} catch (BundleException e) {
@@ -309,7 +311,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 				if (classpath != null) {
 					classloader = createBCLPrevileged(bundle.getProtectionDomain(), classpath);
 				} else {
-					bundle.framework.publishFrameworkEvent(FrameworkEvent.ERROR, bundle, new BundleException(Msg.formatter.getString("BUNDLE_NO_CLASSPATH_MATCH"))); //$NON-NLS-1$
+					bundle.framework.publishFrameworkEvent(FrameworkEvent.ERROR, bundle, new BundleException(Msg.BUNDLE_NO_CLASSPATH_MATCH)); //$NON-NLS-1$
 				}
 			} catch (BundleException e) {
 				bundle.framework.publishFrameworkEvent(FrameworkEvent.ERROR, bundle, e);
@@ -926,7 +928,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 			if (classpath != null)
 				classloader.attachFragment(fragment.getBundleData(), fragment.domain, classpath);
 			else
-				bundle.framework.publishFrameworkEvent(FrameworkEvent.ERROR, bundle, new BundleException(Msg.formatter.getString("BUNDLE_NO_CLASSPATH_MATCH"))); //$NON-NLS-1$
+				bundle.framework.publishFrameworkEvent(FrameworkEvent.ERROR, bundle, new BundleException(Msg.BUNDLE_NO_CLASSPATH_MATCH)); //$NON-NLS-1$
 		} catch (BundleException e) {
 			bundle.framework.publishFrameworkEvent(FrameworkEvent.ERROR, bundle, e);
 		}
@@ -938,7 +940,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 			return null;
 		int length = filterString.length();
 		if (length <= 2) {
-			throw new InvalidSyntaxException(Msg.formatter.getString("FILTER_INVALID"), filterString); //$NON-NLS-1$
+			throw new InvalidSyntaxException(Msg.FILTER_INVALID, filterString); //$NON-NLS-1$
 		}
 		return new FilterImpl(filterString);
 	}

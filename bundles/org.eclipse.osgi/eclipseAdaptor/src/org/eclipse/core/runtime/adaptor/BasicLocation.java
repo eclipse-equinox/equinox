@@ -113,7 +113,7 @@ public class BasicLocation implements Location {
 
 	public synchronized boolean setURL(URL value, boolean lock) throws IllegalStateException {
 		if (location != null)
-			throw new IllegalStateException(EclipseAdaptorMsg.formatter.getString("ECLIPSE_CANNOT_CHANGE_LOCATION")); //$NON-NLS-1$
+			throw new IllegalStateException(EclipseAdaptorMsg.ECLIPSE_CANNOT_CHANGE_LOCATION);
 		File file = null;
 		if (value.getProtocol().equalsIgnoreCase("file")) //$NON-NLS-1$
 			file = new File(value.getFile(), LOCK_FILENAME);

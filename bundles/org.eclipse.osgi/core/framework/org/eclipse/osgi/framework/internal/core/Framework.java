@@ -23,6 +23,7 @@ import org.eclipse.osgi.framework.internal.protocol.StreamHandlerFactory;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.profile.Profile;
 import org.eclipse.osgi.util.ManifestElement;
+import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 
 /**
@@ -203,7 +204,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 			systemBundle = new SystemBundle(this);
 		} catch (BundleException e) { // fatal error
 			e.printStackTrace();
-			throw new RuntimeException(Msg.formatter.getString("OSGI_SYSTEMBUNDLE_CREATE_EXCEPTION", e.getMessage())); //$NON-NLS-1$
+			throw new RuntimeException(NLS.bind(Msg.OSGI_SYSTEMBUNDLE_CREATE_EXCEPTION, e.getMessage()));
 		}
 	}
 
@@ -445,7 +446,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 		if (bundledata.getSymbolicName() != null) {
 			AbstractBundle installedBundle = getBundleBySymbolicName(bundledata.getSymbolicName(), bundledata.getVersion());
 			if (installedBundle != null && installedBundle.getBundleId() != bundledata.getBundleID()) {
-				throw new BundleException(Msg.formatter.getString("BUNDLE_INSTALL_SAME_UNIQUEID", new Object[] {installedBundle.getSymbolicName(), installedBundle.getVersion().toString(), installedBundle.getLocation()})); //$NON-NLS-1$
+				throw new BundleException(NLS.bind(Msg.BUNDLE_INSTALL_SAME_UNIQUEID, new Object[] {installedBundle.getSymbolicName(), installedBundle.getVersion().toString(), installedBundle.getLocation()}));
 			}
 		}
 		verifyExecutionEnvironment(bundledata.getManifest());
@@ -493,7 +494,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 			}
 			bundleEE.append(bundleRequiredEE[i]);
 		}
-		throw new BundleException(Msg.formatter.getString("BUNDLE_INSTALL_REQUIRED_EE_EXCEPTION", bundleEE.toString())); //$NON-NLS-1$
+		throw new BundleException(NLS.bind(Msg.BUNDLE_INSTALL_REQUIRED_EE_EXCEPTION, bundleEE.toString()));
 	}
 
 	/**
@@ -665,7 +666,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 				 * recursed to install the same bundle!
 				 */
 				if (current.equals(reservation)) {
-					throw new BundleException(Msg.formatter.getString("BUNDLE_INSTALL_RECURSION_EXCEPTION")); //$NON-NLS-1$
+					throw new BundleException(Msg.BUNDLE_INSTALL_RECURSION_EXCEPTION);
 				}
 				try {
 					/* wait for the reservation to be released */
@@ -1503,6 +1504,6 @@ public class Framework implements EventDispatcher, EventPublisher {
 		if (optional) {
 			return null;
 		}
-		throw new BundleException(Msg.formatter.getString("BUNDLE_NATIVECODE_MATCH_EXCEPTION")); //$NON-NLS-1$
+		throw new BundleException(Msg.BUNDLE_NATIVECODE_MATCH_EXCEPTION);
 	}
 }

@@ -18,6 +18,7 @@ import java.util.*;
 import org.eclipse.osgi.framework.adaptor.ClassLoaderDelegate;
 import org.eclipse.osgi.framework.adaptor.core.*;
 import org.eclipse.osgi.framework.debug.Debug;
+import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.FrameworkEvent;
 
@@ -558,7 +559,7 @@ public class DefaultClassLoader extends AbstractClassLoader {
 				in.close();
 			}
 		} catch (IOException e) {
-			BundleException be = new BundleException(AdaptorMsg.formatter.getString("BUNDLE_CLASSPATH_PROPERTIES_ERROR", propLocation), e); //$NON-NLS-1$
+			BundleException be = new BundleException(NLS.bind(AdaptorMsg.BUNDLE_CLASSPATH_PROPERTIES_ERROR, propLocation), e); //$NON-NLS-1$
 			bundledata.getAdaptor().getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, bundledata.getBundle(), be);
 		}
 		return null;

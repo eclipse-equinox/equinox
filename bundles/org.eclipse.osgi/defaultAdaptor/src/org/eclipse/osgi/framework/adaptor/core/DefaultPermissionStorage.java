@@ -60,7 +60,7 @@ class DefaultPermissionStorage implements PermissionStorage {
 				Debug.println("Unable to create directory: " + permissionDir.getPath()); //$NON-NLS-1$
 			}
 
-			throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION")); //$NON-NLS-1$
+			throw new IOException(AdaptorMsg.ADAPTOR_STORAGE_EXCEPTION); //$NON-NLS-1$
 		}
 
 		defaultData = new File(permissionDir, ".default"); //$NON-NLS-1$
@@ -236,7 +236,7 @@ class DefaultPermissionStorage implements PermissionStorage {
 					break;
 				}
 				default : {
-					throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION")); //$NON-NLS-1$
+					throw new IOException(AdaptorMsg.ADAPTOR_STORAGE_EXCEPTION);
 				}
 			}
 		} finally {
@@ -276,7 +276,7 @@ class DefaultPermissionStorage implements PermissionStorage {
 					return data;
 				}
 				default : {
-					throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION")); //$NON-NLS-1$
+					throw new IOException(AdaptorMsg.ADAPTOR_STORAGE_EXCEPTION); 
 				}
 			}
 		} finally {

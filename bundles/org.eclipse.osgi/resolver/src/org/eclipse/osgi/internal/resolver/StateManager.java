@@ -146,7 +146,7 @@ public class StateManager implements PlatformAdmin, Runnable {
 		if (!(state instanceof UserState))
 			throw new IllegalArgumentException("Wrong state implementation"); //$NON-NLS-1$		
 		if (state.getTimeStamp() != systemState.getTimeStamp())
-			throw new BundleException(StateMsg.formatter.getString("COMMIT_INVALID_TIMESTAMP")); //$NON-NLS-1$		
+			throw new BundleException(StateMsg.COMMIT_INVALID_TIMESTAMP); 		
 		StateDelta delta = state.compare(systemState);
 		BundleDelta[] changes = delta.getChanges();
 		for (int i = 0; i < changes.length; i++)

@@ -21,6 +21,7 @@ import org.eclipse.osgi.framework.adaptor.BundleData;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.internal.protocol.bundleresource.Handler;
+import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.FrameworkEvent;
 
 /**
@@ -143,7 +144,7 @@ abstract public class BundleFile {
 		public ZipBundleFile(File basefile, BundleData bundledata) throws IOException {
 			super(basefile);
 			if (!basefile.exists())
-				throw new IOException(AdaptorMsg.formatter.getString("ADAPTER_FILEEXIST_EXCEPTION", basefile)); //$NON-NLS-1$
+				throw new IOException(NLS.bind(AdaptorMsg.ADAPTER_FILEEXIST_EXCEPTION, basefile));
 			this.bundledata = bundledata;
 			this.closed = true;
 		}
@@ -237,7 +238,7 @@ abstract public class BundleFile {
 								if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 									Debug.println("Unable to create directory: " + nested.getPath()); //$NON-NLS-1$
 								}
-								throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_DIRECTORY_CREATE_EXCEPTION", nested.getAbsolutePath())); //$NON-NLS-1$
+								throw new IOException(NLS.bind(AdaptorMsg.ADAPTOR_DIRECTORY_CREATE_EXCEPTION, nested.getAbsolutePath()));
 							}
 							extractDirectory(zipEntry.getName());
 						} else {
@@ -254,7 +255,7 @@ abstract public class BundleFile {
 								if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 									Debug.println("Unable to create directory: " + dir.getPath()); //$NON-NLS-1$
 								}
-								throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_DIRECTORY_CREATE_EXCEPTION", dir.getAbsolutePath())); //$NON-NLS-1$
+								throw new IOException(NLS.bind(AdaptorMsg.ADAPTOR_DIRECTORY_CREATE_EXCEPTION, dir.getAbsolutePath()));
 							}
 							/* copy the entry to the cache */
 							AbstractFrameworkAdaptor.readFile(in, nested);
@@ -377,7 +378,7 @@ abstract public class BundleFile {
 		public DirBundleFile(File basefile) throws IOException {
 			super(basefile);
 			if (!basefile.exists() || !basefile.isDirectory()) {
-				throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_DIRECTORY_EXCEPTION", basefile)); //$NON-NLS-1$
+				throw new IOException(NLS.bind(AdaptorMsg.ADAPTOR_DIRECTORY_EXCEPTION, basefile));
 			}
 		}
 

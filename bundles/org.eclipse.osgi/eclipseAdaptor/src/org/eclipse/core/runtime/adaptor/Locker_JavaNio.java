@@ -13,6 +13,7 @@ package org.eclipse.core.runtime.adaptor;
 import java.io.*;
 import java.nio.channels.FileLock;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
+import org.eclipse.osgi.util.NLS;
 
 /**
  * Internal class.
@@ -33,12 +34,12 @@ public class Locker_JavaNio implements Locker {
 		} catch (IOException ioe) {
 			// log the original exception if debugging
 			if (BasicLocation.DEBUG) {
-				String basicMessage = EclipseAdaptorMsg.formatter.getString("location.cannotLock", lockFile); //$NON-NLS-1$
+				String basicMessage = NLS.bind(EclipseAdaptorMsg.location_cannotLock, lockFile);
 				FrameworkLogEntry basicEntry = new FrameworkLogEntry(EclipseAdaptor.FRAMEWORK_SYMBOLICNAME, basicMessage, 0, ioe, null);
 				EclipseAdaptor.getDefault().getFrameworkLog().log(basicEntry);
 			}
 			// produce a more specific message for clients
-			String specificMessage = EclipseAdaptorMsg.formatter.getString("location.cannotLockNIO", new Object[] {lockFile, ioe.getMessage(), BasicLocation.PROP_OSGI_LOCKING}); //$NON-NLS-1$			
+			String specificMessage = NLS.bind(EclipseAdaptorMsg.location_cannotLockNIO, new Object[] {lockFile, ioe.getMessage(), BasicLocation.PROP_OSGI_LOCKING});
 			throw new IOException(specificMessage);
 		}
 		if (fileLock != null)

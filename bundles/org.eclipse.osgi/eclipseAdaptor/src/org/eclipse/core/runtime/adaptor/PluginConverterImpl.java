@@ -24,6 +24,7 @@ import org.eclipse.osgi.service.pluginconversion.PluginConversionException;
 import org.eclipse.osgi.service.pluginconversion.PluginConverter;
 import org.eclipse.osgi.service.resolver.VersionRange;
 import org.eclipse.osgi.util.ManifestElement;
+import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 
 /**
@@ -87,7 +88,7 @@ public class PluginConverterImpl implements PluginConverter {
 			throw new IllegalArgumentException();
 		URL pluginFile = findPluginManifest(pluginBaseLocation);
 		if (pluginFile == null)
-			throw new PluginConversionException(EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONVERTER_FILENOTFOUND", pluginBaseLocation.getAbsolutePath())); //$NON-NLS-1$
+			throw new PluginConversionException(NLS.bind(EclipseAdaptorMsg.ECLIPSE_CONVERTER_FILENOTFOUND, pluginBaseLocation.getAbsolutePath()));
 		pluginInfo = parsePluginInfo(pluginFile);
 		String validation = pluginInfo.validateForm();
 		if (validation != null)
@@ -223,7 +224,7 @@ public class PluginConverterImpl implements PluginConverter {
 			parentFile.mkdirs();
 			generationLocation.createNewFile();
 			if (!generationLocation.isFile()) {
-				String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONVERTER_ERROR_CREATING_BUNDLE_MANIFEST", this.pluginInfo.getUniqueId(), generationLocation); //$NON-NLS-1$
+				String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_CONVERTER_ERROR_CREATING_BUNDLE_MANIFEST, this.pluginInfo.getUniqueId(), generationLocation);
 				throw new PluginConversionException(message);
 			}
 			// replaces any eventual existing file
@@ -254,7 +255,7 @@ public class PluginConverterImpl implements PluginConverter {
 			}
 			out.flush();
 		} catch (IOException e) {
-			String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONVERTER_ERROR_CREATING_BUNDLE_MANIFEST", this.pluginInfo.getUniqueId(), generationLocation); //$NON-NLS-1$
+			String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_CONVERTER_ERROR_CREATING_BUNDLE_MANIFEST, this.pluginInfo.getUniqueId(), generationLocation); //$NON-NLS-1$
 			throw new PluginConversionException(message, e);
 		} finally {
 			if (out != null)
@@ -484,7 +485,7 @@ public class PluginConverterImpl implements PluginConverter {
 		try {
 			file = new JarFile(jarFile);
 		} catch (IOException e) {
-			String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONVERTER_PLUGIN_LIBRARY_IGNORED", jarFile, pluginInfo.getUniqueId()); //$NON-NLS-1$
+			String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_CONVERTER_PLUGIN_LIBRARY_IGNORED, jarFile, pluginInfo.getUniqueId());
 			EclipseAdaptor.getDefault().getFrameworkLog().log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, message, 0, e, null));
 			return names;
 		}
@@ -557,7 +558,7 @@ public class PluginConverterImpl implements PluginConverter {
 			input = new BufferedInputStream(pluginLocation.openStream());
 			return new PluginParser(context, target).parsePlugin(input);
 		} catch (Exception e) {
-			String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONVERTER_ERROR_PARSING_PLUGIN_MANIFEST", pluginManifestLocation); //$NON-NLS-1$
+			String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_CONVERTER_ERROR_PARSING_PLUGIN_MANIFEST, pluginManifestLocation);
 			throw new PluginConversionException(message, e);
 		} finally {
 			if (input != null)

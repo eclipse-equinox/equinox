@@ -15,7 +15,6 @@ import java.util.Vector;
 import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.*;
 import org.osgi.framework.Constants;
-import org.osgi.framework.InvalidSyntaxException;
 
 /**
  * This class represents a description of native code.
@@ -361,7 +360,7 @@ public class BundleNativeCode {
 		try {
 			filter = new FilterImpl(filterString);
 		} catch (InvalidSyntaxException e) {
-			BundleException be = new BundleException(Msg.formatter.getString("BUNDLE_NATIVECODE_INVALID_FILTER"), e); //$NON-NLS-1$
+			BundleException be = new BundleException(Msg.BUNDLE_NATIVECODE_INVALID_FILTER, e); //$NON-NLS-1$
 			bundle.framework.publishFrameworkEvent(FrameworkEvent.ERROR, bundle, be);
 			return false;
 		}

@@ -275,17 +275,13 @@ public class ManifestElement {
 		if (value == null) {
 			return (null);
 		}
-
 		Vector headerElements = new Vector(10, 10);
-
 		Tokenizer tokenizer = new Tokenizer(value);
-
 		parseloop: while (true) {
 			String next = tokenizer.getToken(";,"); //$NON-NLS-1$
 			if (next == null) {
-				throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_HEADER_EXCEPTION", header, value)); //$NON-NLS-1$
+				throw new BundleException(NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, header, value));
 			}
-
 			ArrayList headerValues = new ArrayList();
 			StringBuffer headerValue = new StringBuffer(next);
 			headerValues.add(next);
@@ -293,45 +289,38 @@ public class ManifestElement {
 			if (Debug.DEBUG && Debug.DEBUG_MANIFEST) {
 				Debug.print("paserHeader: " + next); //$NON-NLS-1$
 			}
-
 			char c = tokenizer.getChar();
-
 			// Header values may be a list of ';' separated values.  Just append them all into one value until the first '=' or ','
 			while (c == ';') {
 				next = tokenizer.getToken(";,=:"); //$NON-NLS-1$
 				if (next == null) {
-					throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_HEADER_EXCEPTION", header, value)); //$NON-NLS-1$
+					throw new BundleException(NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, header, value));
 				}
-
 				c = tokenizer.getChar();
-
 				if (c == ';') /* more */{
 					headerValues.add(next);
 					headerValue.append(";").append(next); //$NON-NLS-1$
-
 					if (Debug.DEBUG && Debug.DEBUG_MANIFEST) {
 						Debug.print(";" + next); //$NON-NLS-1$
 					}
 				}
 			}
-
 			// found the header value create a manifestElement for it.
 			ManifestElement manifestElement = new ManifestElement();
 			manifestElement.value = headerValue.toString();
 			manifestElement.valueComponents = (String[]) headerValues.toArray(new String[headerValues.size()]);
-
 			boolean directive = false;
 			if (c == ':') {
 				c = tokenizer.getChar();
 				if (c != '=')
-					throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_HEADER_EXCEPTION", header, value)); //$NON-NLS-1$
+					throw new BundleException(NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, header, value));
 				directive = true;
 			}
 			// now add any attributes for the manifestElement.
 			while (c == '=') {
 				String val = tokenizer.getString(";,"); //$NON-NLS-1$
 				if (val == null) {
-					throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_HEADER_EXCEPTION", header, value)); //$NON-NLS-1$
+					throw new BundleException(NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, header, value));
 				}
 
 				if (Debug.DEBUG && Debug.DEBUG_MANIFEST) {
@@ -344,54 +333,41 @@ public class ManifestElement {
 						manifestElement.addAttribute(next, val);
 					directive = false;
 				} catch (Exception e) {
-					throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_HEADER_EXCEPTION", header, value), e); //$NON-NLS-1$
+					throw new BundleException(NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, header, value)); 
 				}
-
 				c = tokenizer.getChar();
-
 				if (c == ';') /* more */{
 					next = tokenizer.getToken("=:"); //$NON-NLS-1$
-
 					if (next == null) {
-						throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_HEADER_EXCEPTION", header, value)); //$NON-NLS-1$
+						throw new BundleException(NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, header, value)); 
 					}
-
 					c = tokenizer.getChar();
 					if (c == ':') {
 						c = tokenizer.getChar();
 						if (c != '=')
-							throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_HEADER_EXCEPTION", header, value)); //$NON-NLS-1$
+							throw new BundleException(NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, header, value)); 
 						directive = true;
 					}
 				}
 			}
-
 			headerElements.addElement(manifestElement);
-
 			if (Debug.DEBUG && Debug.DEBUG_MANIFEST) {
 				Debug.println(""); //$NON-NLS-1$
 			}
-
 			if (c == ',') /* another manifest element */{
 				continue parseloop;
 			}
-
 			if (c == '\0') /* end of value */{
 				break parseloop;
 			}
-
-			throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_HEADER_EXCEPTION", header, value)); //$NON-NLS-1$
+			throw new BundleException(NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, header, value)); 
 		}
-
 		int size = headerElements.size();
-
 		if (size == 0) {
 			return (null);
 		}
-
 		ManifestElement[] result = new ManifestElement[size];
 		headerElements.copyInto(result);
-
 		return (result);
 	}
 

@@ -16,17 +16,14 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
-import org.eclipse.osgi.framework.adaptor.BundleData;
-import org.eclipse.osgi.framework.adaptor.BundleProtectionDomain;
-import org.eclipse.osgi.framework.adaptor.ClassLoaderDelegate;
+import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.internal.protocol.bundleentry.Handler;
 import org.eclipse.osgi.framework.util.Headers;
 import org.eclipse.osgi.util.ManifestElement;
+import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleException;
 
 /**
  * An abstract BundleData class that has default implementations that most
@@ -121,12 +118,12 @@ public abstract class AbstractBundleData implements BundleData, Cloneable {
 				if (manifest == null) {
 					URL url = getEntry(Constants.OSGI_BUNDLE_MANIFEST);
 					if (url == null) {
-						throw new BundleException(AdaptorMsg.formatter.getString("MANIFEST_NOT_FOUND_EXCEPTION", Constants.OSGI_BUNDLE_MANIFEST, getLocation())); //$NON-NLS-1$
+						throw new BundleException(NLS.bind(AdaptorMsg.MANIFEST_NOT_FOUND_EXCEPTION, Constants.OSGI_BUNDLE_MANIFEST, getLocation()));
 					}
 					try {
 						manifest = Headers.parseManifest(url.openStream());
 					} catch (IOException e) {
-						throw new BundleException(AdaptorMsg.formatter.getString("MANIFEST_NOT_FOUND_EXCEPTION", Constants.OSGI_BUNDLE_MANIFEST, getLocation()), e); //$NON-NLS-1$
+						throw new BundleException(NLS.bind(AdaptorMsg.MANIFEST_NOT_FOUND_EXCEPTION, Constants.OSGI_BUNDLE_MANIFEST, getLocation()), e);
 					}
 				}
 			}
@@ -366,7 +363,7 @@ public abstract class AbstractBundleData implements BundleData, Cloneable {
 		getManifest();
 
 		if (manifest == null) {
-			throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_ERROR_GETTING_MANIFEST", getLocation())); //$NON-NLS-1$
+			throw new IOException(NLS.bind(AdaptorMsg.ADAPTOR_ERROR_GETTING_MANIFEST, getLocation())); //$NON-NLS-1$
 		}
 		setVersion(Version.parseVersion((String) manifest.get(Constants.BUNDLE_VERSION)));
 		setSymbolicName(AbstractBundleData.parseSymbolicName(manifest));
@@ -512,7 +509,7 @@ public abstract class AbstractBundleData implements BundleData, Cloneable {
 			return (next);
 		}
 
-		throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION")); //$NON-NLS-1$
+		throw new IOException(AdaptorMsg.ADAPTOR_STORAGE_EXCEPTION);
 	}
 
 	public void initializeNewBundle() throws IOException, BundleException {
@@ -663,7 +660,7 @@ public abstract class AbstractBundleData implements BundleData, Cloneable {
 		if (getDataDir() == null) {
 			File dataRoot = adaptor.getDataRootDir();
 			if (dataRoot == null)
-				throw new IllegalStateException(AdaptorMsg.formatter.getString("ADAPTOR_DATA_AREA_NOT_SET")); //$NON-NLS-1$
+				throw new IllegalStateException(AdaptorMsg.ADAPTOR_DATA_AREA_NOT_SET);
 			setDataDir(new File(dataRoot, id + "/" + AbstractFrameworkAdaptor.DATA_DIR_NAME)); //$NON-NLS-1$
 		}
 		if (!getDataDir().exists() && !getDataDir().mkdirs()) {
@@ -689,7 +686,7 @@ public abstract class AbstractBundleData implements BundleData, Cloneable {
 			// extract the native code
 			File nativeFile = baseBundleFile.getFile(nativepaths[i]);
 			if (nativeFile == null) {
-				throw new BundleException(AdaptorMsg.formatter.getString("BUNDLE_NATIVECODE_EXCEPTION", nativepaths[i])); //$NON-NLS-1$
+				throw new BundleException(NLS.bind(AdaptorMsg.BUNDLE_NATIVECODE_EXCEPTION, nativepaths[i]));
 			}
 			sb.append(nativepaths[i]);
 			if (i < nativepaths.length - 1) {

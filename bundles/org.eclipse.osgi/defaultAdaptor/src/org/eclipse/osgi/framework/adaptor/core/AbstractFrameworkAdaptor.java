@@ -22,11 +22,11 @@ import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.internal.core.BundleResourceHandler;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.log.FrameworkLog;
-import org.eclipse.osgi.framework.util.FrameworkMessageFormat;
 import org.eclipse.osgi.framework.util.Headers;
 import org.eclipse.osgi.internal.resolver.StateManager;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.util.ManifestElement;
+import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 
 /**
@@ -220,7 +220,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 		try {
 			return (new URL(location).openConnection());
 		} catch (IOException e) {
-			throw new BundleException(AdaptorMsg.formatter.getString("ADAPTOR_URL_CREATE_EXCEPTION", location), e); //$NON-NLS-1$
+			throw new BundleException(NLS.bind(AdaptorMsg.ADAPTOR_URL_CREATE_EXCEPTION, location), e); 
 		}
 	}
 
@@ -400,7 +400,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 			return (id);
 		}
 
-		throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION")); //$NON-NLS-1$
+		throw new IOException(AdaptorMsg.ADAPTOR_STORAGE_EXCEPTION);
 	}
 
 	protected void initDataRootDir() {
@@ -572,8 +572,6 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 					eventPublisher.publishFrameworkEvent(FrameworkEvent.ERROR, ((AbstractBundleData) bundleData).getBundle(), exceptionLog);
 			}
 		}
-		// re-initialize FrameworkMessageFormat to pick up new fragments
-		FrameworkMessageFormat.initMessages();
 	}
 
 	protected String[] getConfiguredExtensions() {
@@ -700,7 +698,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 						try {
 							id = getNextBundleId();
 						} catch (IOException e) {
-							throw new BundleException(AdaptorMsg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION"), e); //$NON-NLS-1$
+							throw new BundleException(AdaptorMsg.ADAPTOR_STORAGE_EXCEPTION, e);
 						}
 						data = getElementFactory().createBundleData(AbstractFrameworkAdaptor.this, id);
 						data.setLastModified(System.currentTimeMillis());
@@ -711,7 +709,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 							URL reference = ((ReferenceInputStream) in).getReference();
 
 							if (!"file".equals(reference.getProtocol())) { //$NON-NLS-1$
-								throw new BundleException(AdaptorMsg.formatter.getString("ADAPTOR_URL_CREATE_EXCEPTION", reference)); //$NON-NLS-1$
+								throw new BundleException(NLS.bind(AdaptorMsg.ADAPTOR_URL_CREATE_EXCEPTION, reference));
 							}
 
 							data.setReference(true);
@@ -720,7 +718,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 						} else {
 							File genDir = data.createGenerationDir();
 							if (!genDir.exists()) {
-								throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_DIRECTORY_CREATE_EXCEPTION", genDir.getPath())); //$NON-NLS-1$
+								throw new IOException(NLS.bind(AdaptorMsg.ADAPTOR_DIRECTORY_CREATE_EXCEPTION, genDir.getPath()));
 							}
 
 							String fileName = mapLocationToName(location);
@@ -746,7 +744,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 						}
 					}
 				} catch (IOException ioe) {
-					throw new BundleException(AdaptorMsg.formatter.getString("BUNDLE_READ_EXCEPTION"), ioe); //$NON-NLS-1$
+					throw new BundleException(AdaptorMsg.BUNDLE_READ_EXCEPTION, ioe);
 				}
 
 				return (data);
@@ -792,7 +790,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 				try {
 					data.save();
 				} catch (IOException e) {
-					throw new BundleException(AdaptorMsg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION"), e); //$NON-NLS-1$
+					throw new BundleException(AdaptorMsg.ADAPTOR_STORAGE_EXCEPTION, e);
 				}
 				updateState(data, BundleEvent.INSTALLED);
 			}
@@ -937,33 +935,33 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 							ReferenceInputStream refIn = (ReferenceInputStream) in;
 							URL reference = (refIn).getReference();
 							if (!"file".equals(reference.getProtocol())) { //$NON-NLS-1$
-								throw new BundleException(AdaptorMsg.formatter.getString("ADAPTOR_URL_CREATE_EXCEPTION", reference)); //$NON-NLS-1$
+								throw new BundleException(NLS.bind(AdaptorMsg.ADAPTOR_URL_CREATE_EXCEPTION, reference));
 							}
 							// check to make sure we are not just trying to update to the same
 							// directory reference.  This would be a no-op.
 							String path = reference.getPath();
 							if (path.equals(data.getFileName())) {
-								throw new BundleException(AdaptorMsg.formatter.getString("ADAPTOR_SAME_REF_UPDATE", reference)); //$NON-NLS-1$
+								throw new BundleException(NLS.bind(AdaptorMsg.ADAPTOR_SAME_REF_UPDATE, reference));
 							}
 							try {
 								newData = data.nextGeneration(reference.getPath());
 							} catch (IOException e) {
-								throw new BundleException(AdaptorMsg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION"), e); //$NON-NLS-1$
+								throw new BundleException(AdaptorMsg.ADAPTOR_STORAGE_EXCEPTION, e);
 							}
 							File bundleGenerationDir = newData.createGenerationDir();
 							if (!bundleGenerationDir.exists()) {
-								throw new BundleException(AdaptorMsg.formatter.getString("ADAPTOR_DIRECTORY_CREATE_EXCEPTION", bundleGenerationDir.getPath())); //$NON-NLS-1$
+								throw new BundleException(NLS.bind(AdaptorMsg.ADAPTOR_DIRECTORY_CREATE_EXCEPTION, bundleGenerationDir.getPath()));
 							}
 							newData.createBaseBundleFile();
 						} else {
 							try {
 								newData = data.nextGeneration(null);
 							} catch (IOException e) {
-								throw new BundleException(AdaptorMsg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION"), e); //$NON-NLS-1$
+								throw new BundleException(AdaptorMsg.ADAPTOR_STORAGE_EXCEPTION, e);
 							}
 							File bundleGenerationDir = newData.createGenerationDir();
 							if (!bundleGenerationDir.exists()) {
-								throw new BundleException(AdaptorMsg.formatter.getString("ADAPTOR_DIRECTORY_CREATE_EXCEPTION", bundleGenerationDir.getPath())); //$NON-NLS-1$
+								throw new BundleException(NLS.bind(AdaptorMsg.ADAPTOR_DIRECTORY_CREATE_EXCEPTION, bundleGenerationDir.getPath()));
 							}
 							File outFile = newData.getBaseFile();
 							if ("file".equals(protocol)) { //$NON-NLS-1$
@@ -986,7 +984,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 					}
 					newData.loadFromManifest();
 				} catch (IOException e) {
-					throw new BundleException(AdaptorMsg.formatter.getString("BUNDLE_READ_EXCEPTION"), e); //$NON-NLS-1$
+					throw new BundleException(AdaptorMsg.BUNDLE_READ_EXCEPTION, e);
 				}
 
 				return (newData);
@@ -1007,7 +1005,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 					newData.setLastModified(System.currentTimeMillis());
 					newData.save();
 				} catch (IOException e) {
-					throw new BundleException(AdaptorMsg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION"), e); //$NON-NLS-1$
+					throw new BundleException(AdaptorMsg.ADAPTOR_STORAGE_EXCEPTION, e);
 				}
 				updateState(newData, BundleEvent.UPDATED);
 				File originalGenerationDir = data.createGenerationDir();
@@ -1271,7 +1269,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 						Debug.println("Exists but not a directory: " + bundleStore.getPath()); //$NON-NLS-1$
 					}
 
-					throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION")); //$NON-NLS-1$
+					throw new IOException(AdaptorMsg.ADAPTOR_STORAGE_EXCEPTION);
 				}
 			}
 		} else {
@@ -1283,7 +1281,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 					Debug.println("Unable to create directory: " + bundleStore.getPath()); //$NON-NLS-1$
 				}
 
-				throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION")); //$NON-NLS-1$
+				throw new IOException(AdaptorMsg.ADAPTOR_STORAGE_EXCEPTION);
 			}
 		}
 

@@ -16,13 +16,11 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.security.*;
 import java.util.*;
-import org.eclipse.osgi.framework.adaptor.BundleData;
-import org.eclipse.osgi.framework.adaptor.BundleOperation;
-import org.eclipse.osgi.framework.adaptor.BundleProtectionDomain;
+import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.service.resolver.*;
+import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
-import org.osgi.framework.Version;
 
 /**
  * This object is given out to bundles and wraps the internal Bundle object. It
@@ -158,7 +156,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 				if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 					Debug.printStackTrace(t);
 				}
-				throw new BundleException(Msg.formatter.getString("BUNDLE_INVALID_ACTIVATOR_EXCEPTION", activatorClassName, bundledata.getSymbolicName()), t); //$NON-NLS-1$
+				throw new BundleException(NLS.bind(Msg.BUNDLE_INVALID_ACTIVATOR_EXCEPTION, activatorClassName, bundledata.getSymbolicName()), t);
 			}
 		}
 		return (null);
@@ -1108,7 +1106,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 					return;
 				}
 				if (doubleFault || (stateChanging == Thread.currentThread())) {
-					throw new BundleException(Msg.formatter.getString("BUNDLE_STATE_CHANGE_EXCEPTION", getLocation(), stateChanging.getName())); //$NON-NLS-1$
+					throw new BundleException(NLS.bind(Msg.BUNDLE_STATE_CHANGE_EXCEPTION, getLocation(), stateChanging.getName()));
 				}
 				try {
 					if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
@@ -1191,7 +1189,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	 */
 	protected void checkValid() {
 		if (state == UNINSTALLED) {
-			throw new IllegalStateException(Msg.formatter.getString("BUNDLE_UNINSTALLED_EXCEPTION", getLocation())); //$NON-NLS-1$
+			throw new IllegalStateException(NLS.bind(Msg.BUNDLE_UNINSTALLED_EXCEPTION, getLocation()));
 		}
 	}
 
@@ -1359,7 +1357,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	abstract protected BundleContextImpl getContext();
 
 	protected String getResolutionFailureMessage() {
-		String defaultMessage = Msg.formatter.getString("BUNDLE_UNRESOLVED_EXCEPTION"); //$NON-NLS-1$
+		String defaultMessage = Msg.BUNDLE_UNRESOLVED_EXCEPTION;
 		// don't spend time if debug info is not needed
 		if (!Debug.DEBUG) {
 			return defaultMessage;
@@ -1374,25 +1372,25 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 		// just a sanity check - this would be an inconsistency between the
 		// framework and the state
 		if (bundleDescription.isResolved()) {
-			throw new IllegalStateException(Msg.formatter.getString("BUNDLE_UNRESOLVED_STATE_CONFLICT")); //$NON-NLS-1$
+			throw new IllegalStateException(Msg.BUNDLE_UNRESOLVED_STATE_CONFLICT); 
 		}
 		VersionConstraint[] unsatisfied = framework.adaptor.getPlatformAdmin().getStateHelper().getUnsatisfiedConstraints(bundleDescription);
 		if (unsatisfied.length == 0) {
-			return Msg.formatter.getString("BUNDLE_UNRESOLVED_NOT_CHOSEN_EXCEPTION"); //$NON-NLS-1$
+			return Msg.BUNDLE_UNRESOLVED_NOT_CHOSEN_EXCEPTION;
 		}
 		StringBuffer missing = new StringBuffer();
 		for (int i = 0; i < unsatisfied.length; i++) {
 			if (unsatisfied[i] instanceof ImportPackageSpecification) {
-				missing.append(Msg.formatter.getString("BUNDLE_UNRESOLVED_PACKAGE", toString(unsatisfied[i]))); //$NON-NLS-1$
+				missing.append(NLS.bind(Msg.BUNDLE_UNRESOLVED_PACKAGE, toString(unsatisfied[i])));
 			} else if (unsatisfied[i] instanceof HostSpecification) {
-				missing.append(Msg.formatter.getString("BUNDLE_UNRESOLVED_HOST", toString(unsatisfied[i]))); //$NON-NLS-1$
+				missing.append(NLS.bind(Msg.BUNDLE_UNRESOLVED_HOST, toString(unsatisfied[i]))); 
 			} else {
-				missing.append(Msg.formatter.getString("BUNDLE_UNRESOLVED_BUNDLE", toString(unsatisfied[i]))); //$NON-NLS-1$
+				missing.append(NLS.bind(Msg.BUNDLE_UNRESOLVED_BUNDLE, toString(unsatisfied[i]))); 
 			}
 			missing.append(',');
 		}
 		missing.deleteCharAt(missing.length() - 1);
-		return Msg.formatter.getString("BUNDLE_UNRESOLVED_UNSATISFIED_CONSTRAINT_EXCEPTION", missing.toString()); //$NON-NLS-1$
+		return NLS.bind(Msg.BUNDLE_UNRESOLVED_UNSATISFIED_CONSTRAINT_EXCEPTION, missing.toString()); 
 	}
 
 	private String toString(VersionConstraint constraint) {

@@ -70,8 +70,7 @@ public class SystemBundleData extends AbstractBundleData {
 		}
 
 		if (in == null)
-			throw new BundleException(AdaptorMsg.formatter.getString("SYSTEMBUNDLE_MISSING_MANIFEST")); //$NON-NLS-1$
-
+			throw new BundleException(AdaptorMsg.SYSTEMBUNDLE_MISSING_MANIFEST);
 		Headers systemManifest = Headers.parseManifest(in);
 		// check the OSGi system package property
 		// first check the OSGi R4 spec'ed property

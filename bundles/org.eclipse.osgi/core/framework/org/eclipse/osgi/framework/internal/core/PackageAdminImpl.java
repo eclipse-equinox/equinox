@@ -14,17 +14,15 @@ package org.eclipse.osgi.framework.internal.core;
 import java.io.IOException;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.util.*;
 import java.util.ArrayList;
+import java.util.Iterator;
 import org.eclipse.osgi.framework.adaptor.BundleClassLoader;
 import org.eclipse.osgi.framework.adaptor.BundleData;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.util.SecureAction;
 import org.eclipse.osgi.service.resolver.*;
-import org.eclipse.osgi.service.resolver.BundleDescription;
-import org.eclipse.osgi.service.resolver.VersionRange;
+import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
-import org.osgi.framework.Bundle;
 import org.osgi.service.packageadmin.*;
 
 /**
@@ -245,7 +243,7 @@ public class PackageAdminImpl implements PackageAdmin {
 		if (bundle.isActive() && !bundle.isFragment()) {
 			boolean suspended = framework.suspendBundle(bundle, true);
 			if (!suspended) {
-				throw new BundleException(Msg.formatter.getString("BUNDLE_STATE_CHANGE_EXCEPTION")); //$NON-NLS-1$
+				throw new BundleException(Msg.BUNDLE_STATE_CHANGE_EXCEPTION); //$NON-NLS-1$
 			}
 		} else {
 			if (bundle.getStateChanging() != Thread.currentThread())
@@ -269,7 +267,7 @@ public class PackageAdminImpl implements PackageAdmin {
 					Debug.println("Bundles still depend on removed bundle! " + bundle); //$NON-NLS-1$
 					Debug.printStackTrace(new Exception("Stack trace")); //$NON-NLS-1$
 				}
-				throw new BundleException(Msg.formatter.getString("OSGI_INTERNAL_ERROR")); //$NON-NLS-1$
+				throw new BundleException(Msg.OSGI_INTERNAL_ERROR); //$NON-NLS-1$
 			}
 			BundleLoaderProxy proxy = (BundleLoaderProxy) bundle.getUserObject();
 			BundleHost.closeBundleLoader(proxy);
@@ -281,7 +279,7 @@ public class PackageAdminImpl implements PackageAdmin {
 			return null;
 		AbstractBundle bundle = framework.getBundle(bundleDescription.getBundleId());
 		if (bundle == null) {
-			BundleException be = new BundleException(Msg.formatter.getString("BUNDLE_NOT_IN_FRAMEWORK", bundleDescription)); //$NON-NLS-1$
+			BundleException be = new BundleException(NLS.bind(Msg.BUNDLE_NOT_IN_FRAMEWORK, bundleDescription)); //$NON-NLS-1$
 			framework.publishFrameworkEvent(FrameworkEvent.ERROR, framework.systemBundle, be);
 			return null;
 		}
@@ -405,7 +403,7 @@ public class PackageAdminImpl implements PackageAdmin {
 						Debug.println("refreshPackages exception: " + e.getMessage()); //$NON-NLS-1$
 						Debug.printStackTrace(e);
 					}
-					framework.publishFrameworkEvent(FrameworkEvent.ERROR, framework.systemBundle, new BundleException(Msg.formatter.getString("BUNDLE_REFRESH_FAILURE"), e)); //$NON-NLS-1$
+					framework.publishFrameworkEvent(FrameworkEvent.ERROR, framework.systemBundle, new BundleException(Msg.BUNDLE_REFRESH_FAILURE, e)); //$NON-NLS-1$
 				}
 			}
 		} catch (BundleException e) {
@@ -413,7 +411,7 @@ public class PackageAdminImpl implements PackageAdmin {
 				Debug.println("refreshPackages exception: " + e.getMessage()); //$NON-NLS-1$
 				Debug.printStackTrace(e.getNestedException());
 			}
-			framework.publishFrameworkEvent(FrameworkEvent.ERROR, framework.systemBundle, new BundleException(Msg.formatter.getString("BUNDLE_REFRESH_FAILURE"), e)); //$NON-NLS-1$
+			framework.publishFrameworkEvent(FrameworkEvent.ERROR, framework.systemBundle, new BundleException(Msg.BUNDLE_REFRESH_FAILURE, e)); //$NON-NLS-1$
 		}
 
 		// send out any resolved.  This must be done after the state change locks have been release.
@@ -525,7 +523,7 @@ public class PackageAdminImpl implements PackageAdmin {
 			// last saved state.
 			BundleDescription newSystemBundle = framework.adaptor.getState().getFactory().createBundleDescription(systemBundle.getHeaders(""), systemBundle.getLocation(), 0); //$NON-NLS-1$
 			if (newSystemBundle == null)
-				throw new BundleException(Msg.formatter.getString("OSGI_SYSTEMBUNDLE_DESCRIPTION_ERROR")); //$NON-NLS-1$
+				throw new BundleException(Msg.OSGI_SYSTEMBUNDLE_DESCRIPTION_ERROR); //$NON-NLS-1$
 			State state = framework.adaptor.getState();
 			BundleDescription oldSystemBundle = state.getBundle(0);
 			if (oldSystemBundle != null) {
@@ -588,7 +586,7 @@ public class PackageAdminImpl implements PackageAdmin {
 			}
 		} catch (BundleException e) /* fatal error */{
 			e.printStackTrace();
-			throw new RuntimeException(Msg.formatter.getString("OSGI_SYSTEMBUNDLE_CREATE_EXCEPTION", e.getMessage())); //$NON-NLS-1$
+			throw new RuntimeException(NLS.bind(Msg.OSGI_SYSTEMBUNDLE_CREATE_EXCEPTION, e.getMessage())); //$NON-NLS-1$
 		}
 
 		// Now set the actual state of the bundles from the persisted state.
