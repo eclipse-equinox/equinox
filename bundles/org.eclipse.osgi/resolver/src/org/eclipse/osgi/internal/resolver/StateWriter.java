@@ -12,17 +12,16 @@ package org.eclipse.osgi.internal.resolver;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import org.eclipse.osgi.service.resolver.*;
+import org.osgi.framework.Version;
 
 class StateWriter {
 
-	// TODO not sure this comment applies anymore
 	// objectTable will be a hashmap of objects. The objects will be things
-	// like a plugin descriptor, extension, extension point, etc. The integer
+	// like BundleDescription, ExportPackageDescription, Version etc.. The integer
 	// index value will be used in the cache to allow cross-references in the
-	// cached registry.
+	// cached state.
 	protected Map objectTable = new HashMap();
 
 	public static final byte NULL = 0;
@@ -49,8 +48,9 @@ class StateWriter {
 		if (writeIndex(object, out))
 			return true;
 		// add this object to the object table first
-		addToObjectTable(object);
+		int index = addToObjectTable(object);
 		out.writeByte(OBJECT);
+		out.writeInt(index);
 		return false;
 	}
 
@@ -60,57 +60,177 @@ class StateWriter {
 			return;
 		out.writeLong(state.getTimeStamp());
 		BundleDescription[] bundles = state.getBundles();
+		StateHelperImpl.getInstance().sortBundles(bundles);
 		out.writeInt(bundles.length);
 		if (bundles.length == 0)
 			return;
 		for (int i = 0; i < bundles.length; i++)
-			writeBundleDescription((BundleDescriptionImpl) bundles[i], out);
+			writeBundleDescription(bundles[i], out);
 		out.writeBoolean(state.isResolved());
-		if (!state.isResolved())
-			return;
-		BundleDescription[] resolvedBundles = state.getResolvedBundles();
-		out.writeInt(resolvedBundles.length);
-		for (int i = 0; i < resolvedBundles.length; i++)
-			writeBundleDescription((BundleDescriptionImpl) resolvedBundles[i], out);
+		// save the lazy data offset
+		out.writeInt(out.size());
+		for (int i = 0; i < bundles.length; i++)
+			writeBundleDescriptionLazyData(bundles[i], out);
 	}
 
-	private void writeBundleDescription(BundleDescriptionImpl bundle, DataOutputStream out) throws IOException {
+	private void writeBundleDescription(BundleDescription bundle, DataOutputStream out) throws IOException {
 		if (writePrefix(bundle, out))
 			return;
-		out.writeLong(bundle.getBundleId());
-		writeStringOrNull(bundle.getSymbolicName(), out);
-		writeStringOrNull(bundle.getLocation(), out);
-		out.writeInt(bundle.getState());
-		writeVersion(bundle.getVersion(), out);
+		// first write out non-lazy loaded data
+		out.writeLong(bundle.getBundleId()); // ID must be the first thing
+		writeBaseDescription(bundle, out);
+		out.writeBoolean(bundle.isResolved());
+		out.writeBoolean(bundle.isSingleton());
 		writeHostSpec((HostSpecificationImpl) bundle.getHost(), out);
 
-		PackageSpecification[] packages = bundle.getPackages();
-		out.writeInt(packages.length);
-		for (int i = 0; i < packages.length; i++)
-			writePackageSpec((PackageSpecificationImpl) packages[i], out);
+		List dependencies = ((BundleDescriptionImpl)bundle).getBundleDependencies();
+		out.writeInt(dependencies.size());
+		for (Iterator iter = dependencies.iterator(); iter.hasNext();)
+			writeBundleDescription((BundleDescription) iter.next(), out);
+		// the rest is lazy loaded data
+	}
 
-		String[] providedPackages = bundle.getProvidedPackages();
-		out.writeInt(providedPackages.length);
-		for (int i = 0; i < providedPackages.length; i++)
-			out.writeUTF(providedPackages[i]);
+	private void writeBundleDescriptionLazyData(BundleDescription bundle, DataOutputStream out) throws IOException {
+		int index = getFromObjectTable(bundle);
+		out.writeInt(index);
+
+		int dataStart = out.size(); // save the offset of lazy data start
+
+		writeStringOrNull(bundle.getLocation(), out);
+
+		ExportPackageDescription[] exports = bundle.getExportPackages();
+		out.writeInt(exports.length);
+		for (int i = 0; i < exports.length; i++)
+			writeExportPackageDesc((ExportPackageDescriptionImpl) exports[i], out);
+
+		ImportPackageSpecification[] imports = bundle.getImportPackages();
+		out.writeInt(imports.length);
+		for (int i = 0; i < imports.length; i++)
+			writeImportPackageSpec(imports[i], out);
 
 		BundleSpecification[] requiredBundles = bundle.getRequiredBundles();
 		out.writeInt(requiredBundles.length);
 		for (int i = 0; i < requiredBundles.length; i++)
 			writeBundleSpec((BundleSpecificationImpl) requiredBundles[i], out);
 
-		out.writeBoolean(bundle.isSingleton());
+		ExportPackageDescription[] selectedExports = bundle.getSelectedExports();
+		if (selectedExports == null) {
+			out.writeInt(0);
+		}
+		else {
+			out.writeInt(selectedExports.length);
+			for (int i = 0; i < selectedExports.length; i++)
+				writeExportPackageDesc((ExportPackageDescriptionImpl) selectedExports[i], out);
+		}
+
+		ExportPackageDescription[] resolvedImports = bundle.getResolvedImports();
+		if (resolvedImports == null) {
+			out.writeInt(0);
+		}
+		else {
+			out.writeInt(resolvedImports.length);
+			for (int i = 0; i < resolvedImports.length; i++)
+				writeExportPackageDesc((ExportPackageDescriptionImpl) resolvedImports[i], out);
+		}
+
+		BundleDescription[] resolvedRequires = bundle.getResolvedRequires();
+		if (resolvedRequires == null) {
+			out.writeInt(0);
+		}
+		else {
+			out.writeInt(resolvedRequires.length);
+			for (int i = 0; i < resolvedRequires.length; i++)
+				writeBundleDescription(resolvedRequires[i], out);
+		}
+		
+		// write the size of the lazy data
+		out.writeInt(out.size() - dataStart);
 	}
 
 	private void writeBundleSpec(BundleSpecificationImpl bundle, DataOutputStream out) throws IOException {
 		writeVersionConstraint(bundle, out);
+		writeBundleDescription((BundleDescription) bundle.getSupplier(), out);
 		out.writeBoolean(bundle.isExported());
 		out.writeBoolean(bundle.isOptional());
 	}
 
-	private void writePackageSpec(PackageSpecificationImpl packageSpec, DataOutputStream out) throws IOException {
-		writeVersionConstraint(packageSpec, out);
-		out.writeBoolean(packageSpec.isExported());
+	private void writeExportPackageDesc(ExportPackageDescriptionImpl exportPackageDesc, DataOutputStream out) throws IOException {
+		if (writePrefix(exportPackageDesc, out))
+			return;
+		writeBaseDescription(exportPackageDesc, out);
+		writeStringOrNull(exportPackageDesc.getBasicGrouping(), out);
+		writeStringOrNull(exportPackageDesc.getInclude(), out);
+		writeStringOrNull(exportPackageDesc.getExclude(), out);
+		out.writeBoolean(exportPackageDesc.isRoot());
+
+		Map attributes = exportPackageDesc.getAttributes();
+		if (attributes == null) {
+			out.writeInt(0);
+		}
+		else {
+			out.writeInt(attributes.size());
+			Iterator iter = attributes.keySet().iterator();
+			while (iter.hasNext()) {
+				String key = (String) iter.next();
+				String value = (String) attributes.get(key);
+				writeStringOrNull(key, out);
+				writeStringOrNull(value,out);
+			}
+		}
+
+		String[] mandatory = exportPackageDesc.getMandatory();
+		if (mandatory == null) {
+			out.writeInt(0);
+		}
+		else {
+			out.writeInt(mandatory.length);
+			for (int i = 0; i < mandatory.length; i++)
+				writeStringOrNull(mandatory[i],out);
+		}
+	}
+
+	private void writeBaseDescription(BaseDescription rootDesc, DataOutputStream out) throws IOException {
+		writeStringOrNull(rootDesc.getName(), out);
+		writeVersion(rootDesc.getVersion(), out);
+	}
+
+	private void writeImportPackageSpec(ImportPackageSpecification importPackageSpec, DataOutputStream out) throws IOException {
+		writeVersionConstraint(importPackageSpec, out);
+		// TODO this is a hack until the state dynamic loading is cleaned up
+		// we should only write the supplier if we are resolved
+		if (importPackageSpec.getBundle().isResolved())
+			writeExportPackageDesc((ExportPackageDescriptionImpl) importPackageSpec.getSupplier(), out);
+		else
+			out.writeByte(NULL);
+
+		writeStringOrNull(importPackageSpec.getBundleSymbolicName(), out);
+		writeVersionRange(importPackageSpec.getBundleVersionRange(), out);
+		out.writeInt(importPackageSpec.getResolution());
+
+		String[] propagate = importPackageSpec.getPropagate();
+		if (propagate == null) {
+			out.writeInt(0);
+		}
+		else {
+			out.writeInt(propagate.length);
+			for (int i = 0; i < propagate.length; i++)
+				writeStringOrNull(propagate[i],out);
+		}
+
+		Map attributes = importPackageSpec.getAttributes();
+		if (attributes == null) {
+			out.writeInt(0);
+		}
+		else {
+			out.writeInt(attributes.size());
+			Iterator iter = attributes.keySet().iterator();
+			while (iter.hasNext()) {
+				String key = (String) iter.next();
+				String value = (String) attributes.get(key);
+				writeStringOrNull(key, out);
+				writeStringOrNull(value,out);
+			}
+		}
 	}
 
 	private void writeHostSpec(HostSpecificationImpl host, DataOutputStream out) throws IOException {
@@ -120,31 +240,44 @@ class StateWriter {
 		}
 		out.writeByte(OBJECT);
 		writeVersionConstraint(host, out);
-		out.writeBoolean(host.reloadHost());
+		BundleDescription[] hosts = host.getHosts();
+		if (hosts == null) {
+			out.writeInt(0);
+			return;
+		}
+		out.writeInt(hosts.length);
+		for (int i = 0; i < hosts.length; i++)
+			writeBundleDescription(hosts[i], out);
 	}
 
 	// called by writers for VersionConstraintImpl subclasses
-	private void writeVersionConstraint(VersionConstraintImpl version, DataOutputStream out) throws IOException {
-		writeStringOrNull(version.getName(), out);
-		writeVersionRange(version.getVersionRange(), out);
-		writeVersion(version.getActualVersion(), out);
-		writeBundleDescription((BundleDescriptionImpl) version.getSupplier(), out);
+	private void writeVersionConstraint(VersionConstraint constraint, DataOutputStream out) throws IOException {
+		writeStringOrNull(constraint.getName(), out);
+		writeVersionRange(constraint.getVersionRange(), out);
 	}
 
 	private void writeVersion(Version version, DataOutputStream out) throws IOException {
-		// TODO: should assess whether avoiding sharing versions would be good
-		if (writePrefix(version, out))
+		if (version == null || version.equals(Version.emptyVersion)) {
+			out.writeByte(NULL);
 			return;
-		out.writeInt(version.getMajorComponent());
-		out.writeInt(version.getMinorComponent());
-		out.writeInt(version.getMicroComponent());
-		writeStringOrNull(version.getQualifierComponent(), out);
-		out.writeBoolean(version.isInclusive());
+		}
+		out.writeByte(OBJECT);
+		out.writeInt(version.getMajor());
+		out.writeInt(version.getMinor());
+		out.writeInt(version.getMicro());
+		writeQualifier(version.getQualifier(), out);
 	}
 
 	private void writeVersionRange(VersionRange versionRange, DataOutputStream out) throws IOException {
+		if (versionRange == null|| versionRange.equals(VersionRange.emptyRange)) {
+			out.writeByte(NULL);
+			return;
+		}
+		out.writeByte(OBJECT);
 		writeVersion(versionRange.getMinimum(), out);
+		out.writeBoolean(versionRange.getIncludeMinimum());
 		writeVersion(versionRange.getMaximum(), out);
+		out.writeBoolean(versionRange.getIncludeMaximum());
 	}
 
 	private boolean writeIndex(Object object, DataOutputStream out) throws IOException {
@@ -175,5 +308,11 @@ class StateWriter {
 			out.writeByte(OBJECT);
 			out.writeUTF(string);
 		}
+	}
+
+	private void writeQualifier(String string, DataOutputStream out) throws IOException {
+		if (string != null && string.length() == 0)
+			string = null;
+		writeStringOrNull(string, out);
 	}
 }

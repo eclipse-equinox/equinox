@@ -81,10 +81,10 @@ public interface FrameworkAdaptor {
 	/**
 	 * Return a list of the installed bundles.  Each element in the
 	 * list must be of type <code>BundleData</code>.  Each <code>BundleData</code>
-	 * corresponds to one bundle that is persitently stored.
+	 * corresponds to one bundle that is persistently stored.
 	 * This method must construct <code>BundleData</code> objects for all 
-	 * installed bundles and return a Vector containing the objects.
-	 * The returned Vector becomes the property of the framework.
+	 * installed bundles and return an array containing the objects.
+	 * The returned array becomes the property of the framework.
 	 *
 	 * @return Array of installed BundleData objects, or null if none can be found.
 	 */
@@ -272,12 +272,20 @@ public interface FrameworkAdaptor {
 
 	/**
 	 * Returns the PlatformAdmin for this FrameworkAdaptor.
+	 * <p>
+	 * This method will not be called until after 
+	 * {@link FrameworkAdaptor#frameworkStart(BundleContext)} is called.
 	 * @return the PlatformAdmin for this FrameworkAdaptor.
 	 */
 	public PlatformAdmin getPlatformAdmin();
 
 	/**
 	 * Returns the State for this FrameworkAdaptor.
+	 * <p>
+	 * This method will not be called until after 
+	 * {@link FrameworkAdaptor#frameworkStart(BundleContext)} is called.
+	 * The State returned is used by the framework to resolve bundle
+	 * dependencies.
 	 * @return the State for this FrameworkAdaptor.
 	 */
 	public State getState();

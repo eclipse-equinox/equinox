@@ -10,24 +10,49 @@
  *******************************************************************************/
 package org.eclipse.osgi.framework.internal.core;
 
-public class MultiSourcePackage extends PackageSource {
-	BundleLoaderProxy[] suppliers;
+import java.io.IOException;
+import java.net.URL;
+import java.util.Enumeration;
 
-	MultiSourcePackage(String id, BundleLoaderProxy[] suppliers) {
-		this.id = id;
+public class MultiSourcePackage extends PackageSource {
+	SingleSourcePackage[] suppliers;
+
+	MultiSourcePackage(String id, SingleSourcePackage[] suppliers) {
+		super(id);
 		this.suppliers = suppliers;
 	}
 
-	public BundleLoaderProxy[] getSuppliers() {
+	public SingleSourcePackage[] getSuppliers() {
 		return suppliers;
 	}
 
-	public boolean isMultivalued() {
-		return true;
+	public Class loadClass(String name, String pkgName) {
+		Class result = null;
+		for (int i = 0; i < suppliers.length; i++) {
+			result = suppliers[i].loadClass(name, pkgName);
+			if (result != null)
+				return result;
+		}
+		return result;
 	}
 
-	public BundleLoaderProxy getSupplier() {
-		return null;
+	public URL getResource(String name, String pkgName) {
+		URL result = null;
+		for (int i = 0; i < suppliers.length; i++) {
+			result = suppliers[i].getResource(name, pkgName);
+			if (result != null)
+				return result;
+		}
+		return result;
 	}
 
+	public Enumeration getResources(String name, String pkgName) throws IOException {
+		Enumeration result = null;
+		for (int i = 0; i < suppliers.length; i++) {
+			result = suppliers[i].getResources(name, pkgName);
+			if (result != null)
+				return result;
+		}
+		return result;
+	}
 }

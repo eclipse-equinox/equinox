@@ -28,7 +28,8 @@ import org.osgi.framework.*;
  */
 
 public class BundleContextImpl implements BundleContext, EventDispatcher {
-
+	public static final String PROP_SCOPE_SERVICE_EVENTS = "osgi.scopeServiceEvents"; //$NON-NLS-1$
+	public static final boolean scopeEvents = Boolean.valueOf(System.getProperty(PROP_SCOPE_SERVICE_EVENTS,"true")).booleanValue(); //$NON-NLS-1$
 	/** true if the bundle context is still valid */
 	private boolean valid;
 
@@ -293,7 +294,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 			Debug.println("addServiceListener[" + bundle + "](" + listenerName + ", \"" + filter + "\")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		}
 
-		ServiceListener filteredListener = (filter == null) ? listener : new FilteredServiceListener(filter, listener);
+		ServiceListener filteredListener = new FilteredServiceListener(filter, listener, this);
 
 		synchronized (framework.serviceEvent) {
 			if (serviceEvent == null) {
@@ -588,26 +589,51 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 		framework.checkRegisterServicePermission(clazzes);
 
 		if (!(service instanceof ServiceFactory)) {
-			PackageAdminImpl packageAdmin = framework.packageAdmin;
-			for (int i = 0; i < size; i++) {
-				Class clazz = packageAdmin.loadServiceClass(clazzes[i], bundle);
-				if (clazz == null) {
-					if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
-						Debug.println(clazzes[i] + " class not found"); //$NON-NLS-1$
-					}
-					throw new IllegalArgumentException(Msg.formatter.getString("SERVICE_CLASS_NOT_FOUND_EXCEPTION", clazzes[i])); //$NON-NLS-1$
+			String invalidService = checkServiceClass(clazzes, service);
+			if (invalidService != null) {
+				if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
+					Debug.println("Service object is not an instanceof " + invalidService); //$NON-NLS-1$
 				}
-
-				if (!clazz.isInstance(service)) {
-					if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
-						Debug.println("Service object is not an instanceof " + clazzes[i]); //$NON-NLS-1$
-					}
-					throw new IllegalArgumentException(Msg.formatter.getString("SERVICE_NOT_INSTANCEOF_CLASS_EXCEPTION", clazzes[i])); //$NON-NLS-1$
-				}
+				throw new IllegalArgumentException(Msg.formatter.getString("SERVICE_NOT_INSTANCEOF_CLASS_EXCEPTION", invalidService)); //$NON-NLS-1$
 			}
 		}
 
 		return (createServiceRegistration(clazzes, service, properties));
+	}
+
+	//Return the name of the class that is not satisfied by the service object 
+	static String checkServiceClass(final String[] clazzes, final Object serviceObject) {
+		ClassLoader cl = (ClassLoader) AccessController.doPrivileged(new PrivilegedAction() {
+			public Object run() {
+				return serviceObject.getClass().getClassLoader();
+			}
+		});
+		for (int i = 0; i < clazzes.length; i++) {
+			try {
+				Class serviceClazz = cl == null ? Class.forName(clazzes[i]) : cl.loadClass(clazzes[i]);
+				if (!serviceClazz.isInstance(serviceObject))
+					return clazzes[i];
+			} catch (ClassNotFoundException e) {
+				//This check is rarely done
+				if (extensiveCheckServiceClass(clazzes[i], serviceObject.getClass()))
+					return clazzes[i];
+			}
+		}
+		return null;
+	}
+
+	private static boolean extensiveCheckServiceClass(String clazz, Class serviceClazz) {
+		if (clazz.equals(serviceClazz.getName()))
+			return false;
+		Class[] interfaces = serviceClazz.getInterfaces();
+		for (int i = 0; i < interfaces.length; i++)
+			if (!extensiveCheckServiceClass(clazz, interfaces[i]))
+				return false;
+		Class superClazz = serviceClazz.getSuperclass();
+		if (superClazz != null)
+			if (!extensiveCheckServiceClass(clazz, superClazz))
+				return false;
+		return true;
 	}
 
 	/**
@@ -686,14 +712,19 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	 */
 	public org.osgi.framework.ServiceReference[] getServiceReferences(String clazz, String filter) throws InvalidSyntaxException {
 		checkValid();
-
 		if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
 			Debug.println("getServiceReferences(" + clazz + ", \"" + filter + "\")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
-
-		return (framework.getServiceReferences(clazz, filter));
+		return (framework.getServiceReferences(clazz, filter, this, false));
 	}
 
+	public ServiceReference[] getAllServiceReferences(String clazz, String filter) throws InvalidSyntaxException {
+		checkValid();
+		if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
+			Debug.println("getAllServiceReferences(" + clazz + ", \"" + filter + "\")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		}
+		return (framework.getServiceReferences(clazz, filter, this, true));
+	}
 	/**
 	 * Get a service reference.
 	 * Retrieves a {@link ServiceReferenceImpl} for a service
@@ -722,7 +753,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 		}
 
 		try {
-			ServiceReference[] references = framework.getServiceReferences(clazz, null);
+			ServiceReference[] references = framework.getServiceReferences(clazz, null, this, false);
 
 			if (references != null) {
 				int index = 0;
@@ -1155,16 +1186,12 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 					case Framework.SERVICEEVENT : {
 						ServiceEvent event = (ServiceEvent) object;
 
-						if (hasListenServicePermission(event)) {
-							ServiceListener listener = (ServiceListener) l;
-
-							if (Debug.DEBUG && Debug.DEBUG_EVENTS) {
-								String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(listener.hashCode()); //$NON-NLS-1$
-								Debug.println("dispatchServiceEvent[" + tmpBundle + "](" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-							}
-
-							listener.serviceChanged(event);
+						ServiceListener listener = (ServiceListener) l;
+						if (Debug.DEBUG && Debug.DEBUG_EVENTS) {
+							String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(listener.hashCode()); //$NON-NLS-1$
+							Debug.println("dispatchServiceEvent[" + tmpBundle + "](" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 						}
+						listener.serviceChanged(event);
 
 						break;
 					}
@@ -1264,5 +1291,15 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	 */
 	protected boolean isValid() {
 		return valid;
+	}
+
+	boolean isAssignableTo(ServiceReferenceImpl reference) {
+		if (!scopeEvents)
+			return true;
+		String[] clazzes = reference.getClasses();
+		for (int i = 0; i < clazzes.length; i++)
+			if (reference.isAssignableTo(bundle, clazzes[i]))
+				return true;
+		return false;
 	}
 }

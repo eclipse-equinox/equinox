@@ -59,6 +59,10 @@ public class SystemBundleActivator implements BundleActivator {
 
 		// Always call the adaptor.frameworkStart() at the end of this method.
 		framework.adaptor.frameworkStart(context);
+		// attempt to resolve all bundles
+		// this is done after the adaptor.frameworkStart has been called
+		// this should be the first time the resolver State is accessed
+		framework.packageAdmin.setResolvedBundles(bundle);
 	}
 
 	public void stop(BundleContext context) throws Exception {

@@ -469,10 +469,6 @@ public class StartLevelManager implements EventDispatcher, EventListener, Servic
 
 			/* Load all installed bundles */
 			loadInstalledBundles(launch);
-
-			/* attempt to resolve all bundles */
-			framework.packageAdmin.setResolvedBundles();
-
 			/* Resume all bundles */
 			resumeBundles(launch, true);
 

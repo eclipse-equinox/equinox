@@ -29,6 +29,7 @@ public class AllTests extends TestCase {
 		suite.addTest(StateCycleTest.suite());
 		suite.addTest(StateComparisonTest.suite());
 		suite.addTest(VersionRangeTests.suite());
+		suite.addTest(R4ResolverTest.suite());
 		return suite;
 	}
 }

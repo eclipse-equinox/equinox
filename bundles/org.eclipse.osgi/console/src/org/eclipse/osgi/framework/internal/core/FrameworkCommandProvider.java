@@ -21,7 +21,7 @@ import org.eclipse.osgi.framework.console.CommandProvider;
 import org.eclipse.osgi.framework.launcher.Launcher;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.packageadmin.ProvidingBundle;
+import org.osgi.service.packageadmin.RequiredBundle;
 
 /**
  * This class provides methods to execute commands from the command line.  It registers
@@ -704,7 +704,7 @@ public class FrameworkCommandProvider implements CommandProvider {
 					org.osgi.service.packageadmin.PackageAdmin packageAdmin = (org.osgi.service.packageadmin.PackageAdmin) context.getService(packageAdminRef);
 					if (packageAdmin != null) {
 						try {
-							org.osgi.service.packageadmin.ExportedPackage exportedpkgs[] = packageAdmin.getExportedPackages(null);
+							org.osgi.service.packageadmin.ExportedPackage exportedpkgs[] = packageAdmin.getExportedPackages((org.osgi.framework.Bundle)null);
 
 							if (exportedpkgs == null) {
 								intp.print("  "); //$NON-NLS-1$
@@ -802,26 +802,26 @@ public class FrameworkCommandProvider implements CommandProvider {
                     				}
                     			}
 
-                    			ProvidingBundle[] namedClassSpaces = packageAdmin.getProvidingBundles(null);
-								ProvidingBundle namedClassSpace = null;
-								if (namedClassSpaces != null) {
-									for (int i=0; i<namedClassSpaces.length; i++) {
-										if (namedClassSpaces[i].getBundle() == bundle) {
-											namedClassSpace = namedClassSpaces[i];
+                    			RequiredBundle[] requiredBundles = packageAdmin.getRequiredBundles(null);
+								RequiredBundle requiredBundle = null;
+								if (requiredBundles != null) {
+									for (int i=0; i<requiredBundles.length; i++) {
+										if (requiredBundles[i].getBundle() == bundle) {
+											requiredBundle = requiredBundles[i];
 											break;
 										}
 									}
 								}
 
-								if (namedClassSpace == null) {
+								if (requiredBundle == null) {
 									intp.print("  "); //$NON-NLS-1$
 									intp.println(ConsoleMsg.formatter.getString("CONSOLE_NO_NAMED_CLASS_SPACES_MESSAGE")); //$NON-NLS-1$
 								} else {
 									intp.print("  "); //$NON-NLS-1$
 									intp.println(ConsoleMsg.formatter.getString("CONSOLE_NAMED_CLASS_SPACE_MESSAGE")); //$NON-NLS-1$
 	                    			intp.print("    "); //$NON-NLS-1$
-	                    			intp.print(namedClassSpace);
-	                    			if (namedClassSpace.isRemovalPending()) {
+	                    			intp.print(requiredBundle);
+	                    			if (requiredBundle.isRemovalPending()) {
 	                    				intp.println(ConsoleMsg.formatter.getString("CONSOLE_REMOVAL_PENDING_MESSAGE")); //$NON-NLS-1$
 	                    			} else {
 	                    				intp.println(ConsoleMsg.formatter.getString("CONSOLE_PROVIDED_MESSAGE")); //$NON-NLS-1$
@@ -829,11 +829,11 @@ public class FrameworkCommandProvider implements CommandProvider {
 								}
 
 								title = true;
-								for(int i=0; i<namedClassSpaces.length; i++) {
-									if (namedClassSpaces[i] == namedClassSpace)
+								for(int i=0; i<requiredBundles.length; i++) {
+									if (requiredBundles[i] == requiredBundle)
 										continue;
 
-									org.osgi.framework.Bundle[] depBundles =  namedClassSpaces[i].getRequiringBundles();
+									org.osgi.framework.Bundle[] depBundles =  requiredBundles[i].getRequiringBundles();
 									if (depBundles == null)
 										continue;
 
@@ -845,9 +845,9 @@ public class FrameworkCommandProvider implements CommandProvider {
 												title = false;
 											}
 											intp.print("    "); //$NON-NLS-1$
-			                    			intp.print(namedClassSpaces[i]);
+			                    			intp.print(requiredBundles[i]);
 
-			                    			org.osgi.framework.Bundle provider = namedClassSpaces[i].getBundle();
+			                    			org.osgi.framework.Bundle provider = requiredBundles[i].getBundle();
 											intp.print("<"); //$NON-NLS-1$
 											intp.print(provider);
 											intp.println(">"); //$NON-NLS-1$
@@ -1025,6 +1025,8 @@ public class FrameworkCommandProvider implements CommandProvider {
 		}
 
 		long after = Runtime.getRuntime().freeMemory();
+		intp.print(ConsoleMsg.formatter.getString("CONSOLE_TOTAL_MEMORY_MESSAGE")); //$NON-NLS-1$
+		intp.println(String.valueOf(Runtime.getRuntime().totalMemory()));
 		intp.print(ConsoleMsg.formatter.getString("CONSOLE_FREE_MEMORY_BEFORE_GARBAGE_COLLECTION_MESSAGE")); //$NON-NLS-1$
 		intp.println(String.valueOf(before));
 		intp.print(ConsoleMsg.formatter.getString("CONSOLE_FREE_MEMORY_AFTER_GARBAGE_COLLECTION_MESSAGE")); //$NON-NLS-1$
@@ -1292,9 +1294,10 @@ public class FrameworkCommandProvider implements CommandProvider {
 					label = label + "_" + b.getVersion(); //$NON-NLS-1$
 				intp.println(b.getBundleId() + "\t" + getStateName(b.getState()) + label); //$NON-NLS-1$ 
 				if (b.isFragment()) {
-					AbstractBundle master = (AbstractBundle) b.getHost();
-					if (master != null)
-						intp.println("\t            Master=" + master.getBundleId()); //$NON-NLS-1$
+					BundleLoaderProxy[] hosts = b.getHosts();
+					if (hosts != null)
+						for (int j = 0; j < hosts.length; j++)
+							intp.println("\t            Master=" + hosts[j].getBundleHost().getBundleId()); //$NON-NLS-1$
 				} else {
 					org.osgi.framework.Bundle fragments[] = b.getFragments();
 					if (fragments != null) {
@@ -1478,6 +1481,10 @@ public class FrameworkCommandProvider implements CommandProvider {
 		}
 	}
 
+	public void _requiredBundles(CommandInterpreter intp) {
+		_classSpaces(intp);
+	}
+
 	public void _classSpaces(CommandInterpreter intp) {
 
 		String token = intp.nextArgument();
@@ -1487,15 +1494,15 @@ public class FrameworkCommandProvider implements CommandProvider {
 			org.osgi.service.packageadmin.PackageAdmin packageAdmin = (org.osgi.service.packageadmin.PackageAdmin) context.getService(packageAdminRef);
 			if (packageAdmin != null) {
 				try {
-					org.osgi.service.packageadmin.ProvidingBundle[] symBundles = null;
+					org.osgi.service.packageadmin.RequiredBundle[] symBundles = null;
 
-					symBundles = packageAdmin.getProvidingBundles(token);
+					symBundles = packageAdmin.getRequiredBundles(token);
 
 					if (symBundles == null) {
 						intp.println(ConsoleMsg.formatter.getString("CONSOLE_NO_NAMED_CLASS_SPACES_MESSAGE")); //$NON-NLS-1$
 					} else {
 						for (int i = 0; i < symBundles.length; i++) {
-							org.osgi.service.packageadmin.ProvidingBundle symBundle = symBundles[i];
+							org.osgi.service.packageadmin.RequiredBundle symBundle = symBundles[i];
 							intp.print(symBundle);
 
 							boolean removalPending = symBundle.isRemovalPending();

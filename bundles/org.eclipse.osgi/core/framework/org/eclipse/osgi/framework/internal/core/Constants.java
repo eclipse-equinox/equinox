@@ -113,4 +113,79 @@ public interface Constants extends org.osgi.framework.Constants {
 
 	/** Properties defaults */
 	public static final String DEFAULT_STARTLEVEL = "1"; //$NON-NLS-1$
+
+	/**
+	 * Manifest header (named &quot;Provide-Package&quot;)
+	 * identifying the packages name
+	 * provided to other bundles which require the bundle.
+	 *
+	 * <p>The attribute value may be retrieved from the
+	 * <tt>Dictionary</tt> object returned by the <tt>Bundle.getHeaders</tt> method.
+	 * @since 1.3
+	 * @deprecated
+	 */
+	// TODO should remove this!!
+	public final static String PROVIDE_PACKAGE = "Provide-Package";
+
+
+	/**
+	 * Manifest header attribute (named &quot;reprovide&quot;)
+	 * for Require-Bundle
+	 * identifying that any packages that are provided
+	 * by the required bundle must be reprovided by the requiring bundle.
+	 * The default value is <tt>false</tt>.
+	 * <p>
+	 * The attribute value is encoded in the Require-Bundle manifest 
+	 * header like:
+	 * <pre>
+	 * Require-Bundle: com.acme.module.test; reprovide="true"
+	 * </pre>
+	 * @since 1.3 <b>EXPERIMENTAL</b>
+	 * @deprecated
+	 */
+	// TODO should remove this!!
+	public final static String REPROVIDE_ATTRIBUTE = "reprovide";
+
+	/**
+	 * Manifest header attribute (named &quot;optional&quot;)
+	 * for Require-Bundle
+	 * identifying that a required bundle is optional and that
+	 * the requiring bundle can be resolved if there is no 
+	 * suitable required bundle.
+	 * The default value is <tt>false</tt>.
+	 *
+	 * <p>The attribute value is encoded in the Require-Bundle manifest 
+	 * header like:
+	 * <pre>
+	 * Require-Bundle: com.acme.module.test; optional="true"
+	 * </pre>
+	 * @since 1.3 <b>EXPERIMENTAL</b>
+	 * @deprecated
+	 */
+	// TODO should remove this!!
+	public final static String OPTIONAL_ATTRIBUTE = "optional";
+
+	/**
+	 * Manifest header attribute (named &quot;require-packages&quot;)
+	 * for Require-Bundle
+	 * specifying the subset of packages that are accessible from
+	 * the required bundle.  If the require-packages parameter
+	 * is not specified then all packages provided by the required bundle
+	 * are accessible.  The value of this parameter must be a quoted
+	 * string.  The syntax of the quoted string value is the same as
+	 * that of the Provide-Package manifest header value.
+	 *
+	 * <p> The attribute value is encoded in the Require-Bundle
+	 * manifest header like:
+	 * <pre>
+	 * Require-Bundle: org.osgi.test;
+	 *  require-packages="org.osgi.test.pkg1,org.osgi.test.pkg2"
+	 * </pre>
+	 * @since 1.3 <b>EXPERIMENTAL</b>
+	 * @deprecated
+	 */
+	// TODO should remove this!!
+	public final static String REQUIRE_PACKAGES_ATTRIBUTE = "require-packages";
+
+
 }

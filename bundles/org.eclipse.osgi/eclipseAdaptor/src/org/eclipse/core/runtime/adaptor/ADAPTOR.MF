@@ -6,15 +6,6 @@ Export-Package:
  org.eclipse.osgi.service.datalocation,
  org.eclipse.osgi.service.runnable,
  org.eclipse.osgi.service.urlconversion,
- org.eclipse.osgi.service.localization
-Provide-Package:
- org.eclipse.osgi.framework.log,
- org.eclipse.osgi.framework.stats,
- org.eclipse.osgi.service.environment,
- org.eclipse.osgi.service.pluginconversion,
- org.eclipse.osgi.service.datalocation,
- org.eclipse.osgi.service.runnable,
- org.eclipse.osgi.service.urlconversion,
  org.eclipse.core.runtime.adaptor.testsupport,
  org.eclipse.osgi.service.localization
 Export-Service: 

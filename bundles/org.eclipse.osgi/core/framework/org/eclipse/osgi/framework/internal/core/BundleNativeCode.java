@@ -12,7 +12,6 @@ package org.eclipse.osgi.framework.internal.core;
 
 import java.util.Enumeration;
 import java.util.Vector;
-import org.eclipse.osgi.service.resolver.Version;
 import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.*;
 import org.osgi.framework.Constants;
@@ -211,7 +210,7 @@ public class BundleNativeCode {
 			if (osversion == null) {
 				osversion = new Attribute();
 			}
-			osversion.addElement(new Version(value));
+			osversion.addElement(Version.parseVersion(value));
 			return;
 		}
 		if (key.equals(Constants.SELECTION_FILTER_ATTRIBUTE)) {

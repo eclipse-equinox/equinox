@@ -31,7 +31,7 @@ import org.osgi.framework.*;
  * bundle wants to keep its service registered, it should keep the
  * ServiceRegistration object referenced.
  */
-
+//TODO That's kind of big
 public class ServiceRegistrationImpl implements ServiceRegistration {
 	/** Reference to this registration. */
 	protected ServiceReferenceImpl reference;

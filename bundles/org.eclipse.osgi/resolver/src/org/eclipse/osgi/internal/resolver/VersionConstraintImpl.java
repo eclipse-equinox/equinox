@@ -15,20 +15,16 @@ import org.eclipse.osgi.service.resolver.*;
 public abstract class VersionConstraintImpl implements VersionConstraint {
 	private String name;
 	private VersionRange versionRange;
-	private byte matchingRule = -1;
 	private BundleDescription bundle;
-	private BundleDescription supplier;
-	private Version actualVersion;
+	private BaseDescription supplier;
 
 	public String getName() {
 		return name;
 	}
 
-	public Version getActualVersion() {
-		return actualVersion;
-	}
-
 	public VersionRange getVersionRange() {
+		if (versionRange == null)
+			return VersionRange.emptyRange;
 		return versionRange;
 	}
 
@@ -36,44 +32,30 @@ public abstract class VersionConstraintImpl implements VersionConstraint {
 		return bundle;
 	}
 
-	public BundleDescription getSupplier() {
-		return supplier;
-	}
-
 	public boolean isResolved() {
 		return supplier != null;
 	}
 
-	public void setActualVersion(Version actualVersion) {
-		this.actualVersion = actualVersion;
+	public BaseDescription getSupplier() {
+		return supplier;
 	}
 
-	public void setSupplier(BundleDescription supplier) {
-		this.supplier = supplier;
+	public boolean isSatisfiedBy(BaseDescription supplier) {
+		return false;
 	}
-
-	public void setName(String name) {
+	protected void setName(String name) {
 		this.name = name;
 	}
 
-	public void setBundle(BundleDescription bundle) {
-		this.bundle = bundle;
-	}
-
-	public void setVersionRange(VersionRange versionRange) {
+	protected void setVersionRange(VersionRange versionRange) {
 		this.versionRange = versionRange;
 	}
 
-	public void unresolve() {
-		actualVersion = null;
-		supplier = null;
+	protected void setBundle(BundleDescription bundle) {
+		this.bundle = bundle;
 	}
 
-	public boolean isSatisfiedBy(Version provided) {
-		return versionRange == null ? true : versionRange.isIncluded(provided);
-	}
-
-	public String toString() {
-		return "name: " + name + " - version: " + versionRange; //$NON-NLS-1$ //$NON-NLS-2$
+	protected void setSupplier(BaseDescription supplier) {
+		this.supplier = supplier;
 	}
 }

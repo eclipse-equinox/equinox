@@ -11,21 +11,27 @@
 package org.eclipse.osgi.internal.resolver;
 
 import java.util.*;
+import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.debug.DebugOptions;
 import org.eclipse.osgi.framework.internal.core.KeyedElement;
 import org.eclipse.osgi.framework.internal.core.KeyedHashSet;
 import org.eclipse.osgi.service.resolver.*;
-import org.osgi.framework.Bundle;
+import org.osgi.framework.Version;
 
 public abstract class StateImpl implements State {
 	transient private Resolver resolver;
 	transient private StateDeltaImpl changes;
-	transient private Map listeners = new HashMap(11);
-	transient private KeyedHashSet resolvedBundles = new KeyedHashSet();
+	transient private boolean resolving = false;
+	transient private HashSet removalPendings = new HashSet();
 	private boolean resolved = true;
-	protected long timeStamp = System.currentTimeMillis();
+	private long timeStamp = System.currentTimeMillis();
 	private KeyedHashSet bundleDescriptions = new KeyedHashSet(false);
 	private StateObjectFactory factory;
+	private KeyedHashSet resolvedBundles = new KeyedHashSet();
+	boolean fullyLoaded = false;
+
+	// only used for lazy loading of BundleDescriptions
+	private StateReader reader;
 
 	private static long cumulativeTime;
 
@@ -34,8 +40,6 @@ public abstract class StateImpl implements State {
 	}
 
 	public boolean addBundle(BundleDescription description) {
-		if (description.getLocation() == null)
-			throw new IllegalArgumentException("no location set"); //$NON-NLS-1$
 		if (!basicAddBundle(description))
 			return false;
 		resolved = false;
@@ -56,16 +60,26 @@ public abstract class StateImpl implements State {
 			return false;
 		resolved = false;
 		getDelta().recordBundleUpdated((BundleDescriptionImpl) newDescription);
-		if (resolver != null)
-			resolver.bundleUpdated(newDescription, existing);
+		if (resolver != null) {
+			boolean pending = existing.getDependents().length > 0;
+			resolver.bundleUpdated(newDescription, existing, pending);
+			if (pending){
+				getDelta().recordBundleRemovalPending(existing);
+				removalPendings.add(existing);
+			}
+			else {
+				// an existing bundle has been updated with no dependents it can safely be unresolved now
+				synchronized (this) {
+					try {
+						resolving = true;
+						resolveBundle(existing, false, null, null, null, null);
+					} finally {
+						resolving = false;
+					}
+				}
+			}
+		}
 		return true;
-	}
-
-	public BundleDescription removeBundle(String location) {
-		BundleDescription toRemove = getBundleByLocation(location);
-		if (toRemove == null || !removeBundle(toRemove))
-			return null;
-		return toRemove;
 	}
 
 	public BundleDescription removeBundle(long bundleId) {
@@ -81,8 +95,26 @@ public abstract class StateImpl implements State {
 		resolvedBundles.remove((KeyedElement) toRemove);
 		resolved = false;
 		getDelta().recordBundleRemoved((BundleDescriptionImpl) toRemove);
-		if (resolver != null)
-			resolver.bundleRemoved(toRemove);
+		if (resolver != null) {
+			boolean pending = toRemove.getDependents().length > 0;
+			resolver.bundleRemoved(toRemove, pending);
+			if (pending) {
+				getDelta().recordBundleRemovalPending((BundleDescriptionImpl) toRemove);
+				removalPendings.add(toRemove);
+			}
+			else {
+				// a bundle has been removed with no dependents it can safely be unresolved now
+				synchronized (this) {
+					try {
+						resolving = true;
+						resolveBundle(toRemove, false, null, null, null, null);
+					}
+					finally {
+						resolving = false;
+					}
+				}
+			}
+		}
 		return true;
 	}
 
@@ -92,12 +124,8 @@ public abstract class StateImpl implements State {
 
 	private StateDeltaImpl getDelta() {
 		if (changes == null)
-			changes = getNewDelta();
+			changes = new StateDeltaImpl(this);
 		return changes;
-	}
-
-	private StateDeltaImpl getNewDelta() {
-		return new StateDeltaImpl(this);
 	}
 
 	public BundleDescription[] getBundles(final String symbolicName) {
@@ -115,7 +143,16 @@ public abstract class StateImpl implements State {
 	}
 
 	public BundleDescription getBundle(long id) {
-		return (BundleDescription) bundleDescriptions.getByKey(new Long(id));
+		BundleDescription result = (BundleDescription) bundleDescriptions.getByKey(new Long(id));
+		if (result != null)
+			return result;
+		// need to look in removal pending bundles;
+		for (Iterator iter = removalPendings.iterator(); iter.hasNext();) {
+			BundleDescription removedBundle = (BundleDescription) iter.next();
+			if (removedBundle.getBundleId() == id) // just return the first matching id
+				return removedBundle;
+		}
+		return null;
 	}
 
 	// TODO: this does not comply with the spec	
@@ -136,86 +173,129 @@ public abstract class StateImpl implements State {
 		return resolved || isEmpty();
 	}
 
-	public void resolveConstraint(VersionConstraint constraint, Version actualVersion, BundleDescription supplier) {
-		VersionConstraintImpl modifiable = ((VersionConstraintImpl) constraint);
-		if (modifiable.getActualVersion() != actualVersion || modifiable.getSupplier() != supplier) {
-			modifiable.setActualVersion(actualVersion);
-			modifiable.setSupplier(supplier);
-			if (constraint instanceof BundleSpecification || constraint instanceof HostSpecification) {
-				boolean optional = (constraint instanceof BundleSpecification) && ((BundleSpecification) constraint).isOptional();
-				getDelta().recordConstraintResolved((BundleDescriptionImpl) constraint.getBundle(), optional);
-			}
-		}
+	public void resolveConstraint(VersionConstraint constraint, BaseDescription supplier) {
+		((VersionConstraintImpl)constraint).setSupplier(supplier);
 	}
 
-	public void resolveBundle(BundleDescription bundle, int status) {
-		((BundleDescriptionImpl) bundle).setState(status);
-		getDelta().recordBundleResolved((BundleDescriptionImpl) bundle, status);
-		if (status == Bundle.RESOLVED)
-			resolvedBundles.add((KeyedElement) bundle);
+	public void resolveBundle(BundleDescription bundle, boolean status, BundleDescription[] hosts, ExportPackageDescription[] selectedExports, BundleDescription[] resolvedRequires, ExportPackageDescription[] resolvedImports) {
+		if (!resolving)
+			throw new IllegalStateException(); // TODO need error message here!
+		BundleDescriptionImpl modifiable = (BundleDescriptionImpl) bundle;
+		// must record the change before setting the resolve state to 
+		// accurately record if a change has happened.
+		getDelta().recordBundleResolved(modifiable, status);
+		modifiable.setResolved(status);
+		if (status) {
+			resolveConstraints(modifiable, hosts, selectedExports, resolvedRequires, resolvedImports);
+			resolvedBundles.add(modifiable);
+		}
 		else {
 			// ensures no links are left 
-			unresolveConstraints(bundle);
+			unresolveConstraints(modifiable);
 			// remove the bundle from the resolved pool
-			resolvedBundles.remove((KeyedElement) bundle);
+			resolvedBundles.remove(modifiable);
 		}
 	}
 
-	private void unresolveConstraints(BundleDescription bundle) {
-		HostSpecification host = bundle.getHost();
+	public void removeBundleComplete(BundleDescription bundle) {
+		if (!resolving)
+			throw new IllegalStateException(); // TODO need error message here!
+		getDelta().recordBundleRemovalComplete((BundleDescriptionImpl) bundle);
+		removalPendings.remove(bundle);
+	}
+
+	private void resolveConstraints(BundleDescriptionImpl bundle, BundleDescription[] hosts, ExportPackageDescription[] selectedExports, BundleDescription[] resolvedRequires, ExportPackageDescription[] resolvedImports) {
+		HostSpecificationImpl hostSpec = (HostSpecificationImpl) bundle.getHost();
+		if (hostSpec != null) {
+			if (hosts != null) {
+				hostSpec.setHosts(hosts);
+				for (int i = 0; i < hosts.length; i++)
+					((BundleDescriptionImpl)hosts[i]).addDependency(bundle);
+			}
+		}
+
+		bundle.setSelectedExports(selectedExports);
+		bundle.setResolvedRequires(resolvedRequires);
+		bundle.setResolvedImports(resolvedImports);
+		
+		bundle.addDependencies(hosts);
+		bundle.addDependencies(resolvedRequires);
+		bundle.addDependencies(resolvedImports);
+	}
+
+	private void unresolveConstraints(BundleDescriptionImpl bundle) {
+		HostSpecificationImpl host = (HostSpecificationImpl) bundle.getHost();
 		if (host != null)
-			((VersionConstraintImpl) host).unresolve();
-		PackageSpecification[] packages = bundle.getPackages();
-		for (int i = 0; i < packages.length; i++)
-			((VersionConstraintImpl) packages[i]).unresolve();
-		BundleSpecification[] requiredBundles = bundle.getRequiredBundles();
-		for (int i = 0; i < requiredBundles.length; i++)
-			((VersionConstraintImpl) requiredBundles[i]).unresolve();
+			host.setHosts(null);
+
+
+		bundle.setSelectedExports(null);
+		bundle.setResolvedImports(null);
+		bundle.setResolvedRequires(null);
+
+		bundle.removeDependencies();
 	}
 
-	public Resolver getResolver() {
-		return resolver;
-	}
+	private synchronized StateDelta resolve(boolean incremental, BundleDescription[] reResolve) {
+		try {
+			resolving = true;
+			if (resolver == null)
+				throw new IllegalStateException("no resolver set"); //$NON-NLS-1$
+			fullyLoad();
+			long start = 0;
+			if (StateManager.DEBUG_PLATFORM_ADMIN_RESOLVER)
+				start = System.currentTimeMillis();
+			if (!incremental)
+				flush();
+			if (resolved && reResolve == null)
+				return new StateDeltaImpl(this);
+			if (removalPendings.size() > 0) {
+				BundleDescription[] removed = (BundleDescription[]) removalPendings.toArray(new BundleDescription[removalPendings.size()]);
+				reResolve = mergeBundles(reResolve, removed);
+			}
+			if (reResolve != null)
+				resolver.resolve(reResolve);
+			else
+				resolver.resolve();
+			resolved = true;
 
-	public void setResolver(Resolver newResolver) {
-		if (resolver == newResolver)
-			return;
-		if (resolver != null) {
-			Resolver oldResolver = resolver;
-			resolver = null;
-			oldResolver.setState(null);
+			StateDelta savedChanges = changes == null ? new StateDeltaImpl(this) : changes;
+			changes = new StateDeltaImpl(this);
+
+			if (StateManager.DEBUG_PLATFORM_ADMIN_RESOLVER) {
+				long time = System.currentTimeMillis() - start;
+				Debug.println("Time spent resolving: " + time); //$NON-NLS-1$
+				cumulativeTime = cumulativeTime + time;
+				DebugOptions.getDefault().setOption("org.eclipse.core.runtime.adaptor/resolver/timing/value", Long.toString(cumulativeTime)); //$NON-NLS-1$
+			}
+
+			return savedChanges;
+		} finally {
+			resolving = false;
 		}
-		resolver = newResolver;
-		if (resolver == null)
-			return;
-		resolver.setState(this);
 	}
 
-	private StateDelta resolve(boolean incremental, BundleDescription[] reResolve) {
-		if (resolver == null)
-			throw new IllegalStateException("no resolver set"); //$NON-NLS-1$		
-		long start = 0;
-		if (StateManager.DEBUG_PLATFORM_ADMIN_RESOLVER)
-			start = System.currentTimeMillis();
-		if (!incremental)
-			flush();
-		if (resolved && reResolve == null)
-			return new StateDeltaImpl(this);
-		if (reResolve != null)
-			resolver.resolve(reResolve);
-		else
-			resolver.resolve();
-		resolved = true;
-		// TODO: need to fire events for listeners
-		StateDelta savedChanges = changes == null ? new StateDeltaImpl(this) : changes;
-		changes = new StateDeltaImpl(this);
-
-		if (StateManager.DEBUG_PLATFORM_ADMIN_RESOLVER) {
-			cumulativeTime = cumulativeTime + (System.currentTimeMillis() - start);
-			DebugOptions.getDefault().setOption("org.eclipse.core.runtime.adaptor/resolver/timing/value", Long.toString(cumulativeTime)); //$NON-NLS-1$
+	private BundleDescription[] mergeBundles(BundleDescription[] reResolve, BundleDescription[] removed) {
+		if (reResolve == null)
+			return removed; // just return all the removed bundles
+		if (reResolve.length == 0)
+			return reResolve; // if reResolve length==0 then we want to prevent pending removal
+		// merge in all removal pending bundles that are not already in the list
+		ArrayList result = new ArrayList(reResolve.length + removed.length);
+		for (int i = 0; i < reResolve.length; i++)
+			result.add(reResolve[i]);
+		for (int i = 0; i < removed.length; i++) {
+			boolean found = false;
+			for (int j = 0; j < reResolve.length; j++) {
+				if (removed[i] == reResolve[j]) {
+					found = true;
+					break;
+				}
+			}
+			if (!found)
+				result.add(removed[i]);
 		}
-
-		return savedChanges;
+		return (BundleDescription[]) result.toArray(new BundleDescription[result.size()]);
 	}
 
 	private void flush() {
@@ -223,9 +303,9 @@ public abstract class StateImpl implements State {
 		resolved = false;
 		if (resolvedBundles.isEmpty())
 			return;
-		for (Iterator iter = resolvedBundles.iterator(); iter.hasNext();) {
-			BundleDescriptionImpl resolvedBundle = (BundleDescriptionImpl) iter.next();
-			resolvedBundle.setState(0);
+		BundleDescription[] bundles = getResolvedBundles();
+		for (int i = 0; i < bundles.length; i++) {
+			resolveBundle(bundles[i], false, null, null, null, null);
 		}
 		resolvedBundles.clear();
 	}
@@ -250,25 +330,15 @@ public abstract class StateImpl implements State {
 		return (BundleDescription[]) resolvedBundles.elements(new BundleDescription[resolvedBundles.size()]);
 	}
 
-	public void addStateChangeListener(StateChangeListener listener, int flags) {
-		if (listeners.containsKey(listener))
-			return;
-		listeners.put(listener, new Integer(flags));
-	}
-
-	public void removeStateChangeListener(StateChangeListener listener) {
-		listeners.remove(listener);
-	}
-
 	public boolean isEmpty() {
 		return bundleDescriptions.isEmpty();
 	}
 
-	public void setResolved(boolean resolved) {
+	void setResolved(boolean resolved) {
 		this.resolved = resolved;
 	}
 
-	public boolean basicAddBundle(BundleDescription description) {
+	boolean basicAddBundle(BundleDescription description) {
 		((BundleDescriptionImpl) description).setContainingState(this);
 		return bundleDescriptions.add((BundleDescriptionImpl) description);
 	}
@@ -277,41 +347,43 @@ public abstract class StateImpl implements State {
 		resolvedBundles.add(resolved);
 	}
 
-	public PackageSpecification[] getExportedPackages() {
+	public ExportPackageDescription[] getExportedPackages() {
+		fullyLoad();
 		final List allExportedPackages = new ArrayList();
 		for (Iterator iter = resolvedBundles.iterator(); iter.hasNext();) {
 			BundleDescription bundle = (BundleDescription) iter.next();
-			PackageSpecification[] bundlePackages = bundle.getPackages();
+			ExportPackageDescription[] bundlePackages = bundle.getSelectedExports();
+			if (bundlePackages == null)
+				continue;
 			for (int i = 0; i < bundlePackages.length; i++)
-				if (bundlePackages[i].isExported() && bundlePackages[i].getSupplier() == bundle)
-					allExportedPackages.add(bundlePackages[i]);
+				allExportedPackages.add(bundlePackages[i]);
 		}
-		return (PackageSpecification[]) allExportedPackages.toArray(new PackageSpecification[allExportedPackages.size()]);
-	}
-
-	public BundleDescription[] getImportingBundles(final PackageSpecification exportedPackage) {
-		if (!exportedPackage.isResolved())
-			return null;
-		final List allImportingBundles = new ArrayList();
-		for (Iterator iter = resolvedBundles.iterator(); iter.hasNext();) {
+		for (Iterator iter = removalPendings.iterator(); iter.hasNext();) {
 			BundleDescription bundle = (BundleDescription) iter.next();
-			PackageSpecification[] bundlePackages = bundle.getPackages();
+			ExportPackageDescription[] bundlePackages = bundle.getSelectedExports();
+			if (bundlePackages == null)
+				continue;
 			for (int i = 0; i < bundlePackages.length; i++)
-				if (bundlePackages[i].getName().equals(exportedPackage.getName()) && bundlePackages[i].getSupplier() == exportedPackage.getBundle()) {
-					allImportingBundles.add(bundle);
-					break;
-				}
+				allExportedPackages.add(bundlePackages[i]);
 		}
-		return (BundleDescription[]) allImportingBundles.toArray(new BundleDescription[allImportingBundles.size()]);
+		return (ExportPackageDescription[]) allExportedPackages.toArray(new ExportPackageDescription[allExportedPackages.size()]);
 	}
 
-	public BundleDescription[] getFragments(final BundleDescription host) {
+	BundleDescription[] getFragments(final BundleDescription host) {
 		final List fragments = new ArrayList();
 		for (Iterator iter = bundleDescriptions.iterator(); iter.hasNext();) {
 			BundleDescription bundle = (BundleDescription) iter.next();
 			HostSpecification hostSpec = bundle.getHost();
-			if (hostSpec != null && hostSpec.getSupplier() == host)
-				fragments.add(bundle);
+			
+			if (hostSpec != null) {
+				BundleDescription[] hosts = hostSpec.getHosts();
+				if (hosts != null)
+					for(int i = 0; i < hosts.length; i++)
+						if (hosts[i] == host) {
+							fragments.add(bundle);
+							break;
+						}
+			}
 		}
 		return (BundleDescription[]) fragments.toArray(new BundleDescription[fragments.size()]);
 	}
@@ -327,7 +399,6 @@ public abstract class StateImpl implements State {
 	void setFactory(StateObjectFactory factory) {
 		this.factory = factory;
 	}
-
 	public BundleDescription getBundleByLocation(String location) {
 		for (Iterator i = bundleDescriptions.iterator(); i.hasNext();) {
 			BundleDescription current = (BundleDescription) i.next();
@@ -335,5 +406,62 @@ public abstract class StateImpl implements State {
 				return current;
 		}
 		return null;
+	}
+
+	public Resolver getResolver() {
+		return resolver;
+	}
+
+	public void setResolver(Resolver newResolver) {
+		if (resolver == newResolver)
+			return;
+		if (resolver != null) {
+			Resolver oldResolver = resolver;
+			resolver = null;
+			oldResolver.setState(null);
+		}
+		resolver = newResolver;
+		if (resolver == null)
+			return;
+		resolver.setState(this);
+	}
+
+	BundleDescription[] getRemovalPendings() {
+		return (BundleDescription[]) removalPendings.toArray(new BundleDescription[removalPendings.size()]);
+	}
+
+	public synchronized ExportPackageDescription linkDynamicImport(BundleDescription importingBundle, String requestedPackage) {
+		if (resolver == null)
+			throw new IllegalStateException("no resolver set"); //$NON-NLS-1$
+		fullyLoad();
+		// ask the resolver to resolve our dynamic import
+		ExportPackageDescriptionImpl result = (ExportPackageDescriptionImpl) resolver.resolveDynamicImport(importingBundle, requestedPackage);
+		if (result == null)
+			return null;
+		// need to add the result to the list of resolved imports
+		((BundleDescriptionImpl)importingBundle).addDynamicResolvedImport(result);
+		return result;
+	}
+
+	void setReader(StateReader reader) {
+		this.reader = reader;
+	}
+	StateReader getReader() {
+		return reader;
+	}
+	synchronized void fullyLoad() {
+		if (fullyLoaded == true)
+			return;
+		if (reader != null && reader.isLazyLoaded())
+			reader.fullyLoad();
+		fullyLoaded = true;
+	}
+
+	
+	synchronized void unloadLazyData(long expireTime) {
+		long currentTime = System.currentTimeMillis();
+		BundleDescription[] bundles = getBundles();
+		for (int i = 0; i < bundles.length; i++)
+			((BundleDescriptionImpl)bundles[i]).unload(currentTime, expireTime);
 	}
 }

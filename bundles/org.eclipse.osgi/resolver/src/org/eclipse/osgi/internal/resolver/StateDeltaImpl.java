@@ -11,8 +11,8 @@
 package org.eclipse.osgi.internal.resolver;
 
 import java.util.*;
+
 import org.eclipse.osgi.service.resolver.*;
-import org.osgi.framework.Bundle;
 
 public class StateDeltaImpl implements StateDelta {
 	private State state;
@@ -41,78 +41,89 @@ public class StateDeltaImpl implements StateDelta {
 	}
 
 	void recordBundleAdded(BundleDescriptionImpl added) {
-		Object key = added.getKey();
-		BundleDeltaImpl change = (BundleDeltaImpl) changes.get(key);
+		BundleDeltaImpl change = (BundleDeltaImpl) changes.get(added);
 		if (change == null) {
-			changes.put(key, new BundleDeltaImpl(added, BundleDelta.ADDED));
+			changes.put(added, new BundleDeltaImpl(added, BundleDelta.ADDED));
 			return;
 		}
 		if (change.getType() == BundleDelta.REMOVED) {
-			changes.remove(key);
+			changes.remove(added);
 			return;
 		}
-		if ((change.getType() & BundleDelta.REMOVED) != 0) {
-			change.setType(change.getType() & ~BundleDelta.REMOVED);
-			return;
-		}
-		change.setType(change.getType() | BundleDelta.ADDED);
+		int newType = change.getType();
+		if ((newType & BundleDelta.REMOVED) != 0)
+			newType &= ~BundleDelta.REMOVED;
+		change.setType(newType | BundleDelta.ADDED);
+		change.setBundle(added);
 	}
 
 	void recordBundleUpdated(BundleDescriptionImpl updated) {
-		Object key = updated.getKey();
-		BundleDeltaImpl change = (BundleDeltaImpl) changes.get(key);
+		BundleDeltaImpl change = (BundleDeltaImpl) changes.get(updated);
 		if (change == null) {
-			changes.put(key, new BundleDeltaImpl(updated, BundleDelta.UPDATED));
+			changes.put(updated, new BundleDeltaImpl(updated, BundleDelta.UPDATED));
 			return;
 		}
 		if ((change.getType() & (BundleDelta.ADDED | BundleDelta.REMOVED)) != 0)
 			return;
 		change.setType(change.getType() | BundleDelta.UPDATED);
+		change.setBundle(updated);
 	}
 
 	void recordBundleRemoved(BundleDescriptionImpl removed) {
-		Object key = removed.getKey();
-		BundleDeltaImpl change = (BundleDeltaImpl) changes.get(key);
+		BundleDeltaImpl change = (BundleDeltaImpl) changes.get(removed);
 		if (change == null) {
-			changes.put(key, new BundleDeltaImpl(removed, BundleDelta.REMOVED));
+			changes.put(removed, new BundleDeltaImpl(removed, BundleDelta.REMOVED));
 			return;
 		}
 		if (change.getType() == BundleDelta.ADDED) {
-			changes.remove(key);
+			changes.remove(removed);
 			return;
 		}
-		if ((change.getType() & BundleDelta.ADDED) != 0) {
-			change.setType(change.getType() & ~BundleDelta.ADDED);
+		int newType = change.getType();
+		if ((newType & BundleDelta.ADDED) != 0)
+			newType &= ~BundleDelta.ADDED;
+		change.setType(newType | BundleDelta.REMOVED);
+	}
+
+	void recordBundleRemovalPending(BundleDescriptionImpl removed) {
+		removed.setRemovalPending(true);
+		BundleDeltaImpl change = (BundleDeltaImpl) changes.get(removed);
+		if (change == null) {
+			changes.put(removed, new BundleDeltaImpl(removed, BundleDelta.REMOVAL_PENDING));
 			return;
 		}
-		change.setType(change.getType() | BundleDelta.REMOVED);
+		int newType = change.getType();
+		if ((newType & BundleDelta.REMOVAL_COMPLETE) != 0)
+			newType &= ~BundleDelta.REMOVAL_COMPLETE;
+		change.setType(newType | BundleDelta.REMOVAL_PENDING);
 	}
 
-	void recordConstraintResolved(BundleDescriptionImpl changedLinkage, boolean optional) {
-		Object key = changedLinkage.getKey();
-		BundleDeltaImpl change = (BundleDeltaImpl) changes.get(key);
-		int newType = optional ? BundleDelta.OPTIONAL_LINKAGE_CHANGED : BundleDelta.LINKAGE_CHANGED;
-		// LINKAGE_CHANGED overrides OPTIONAL_LINKAGE_CHANGED, but nothing else
-		if (change == null || (newType == BundleDelta.LINKAGE_CHANGED && change.getType() == BundleDelta.OPTIONAL_LINKAGE_CHANGED))
-			changes.put(key, new BundleDeltaImpl(changedLinkage, newType));
+	void recordBundleRemovalComplete(BundleDescriptionImpl removed) {
+		BundleDeltaImpl change = (BundleDeltaImpl) changes.get(removed);
+		if (change == null) {
+			changes.put(removed, new BundleDeltaImpl(removed, BundleDelta.REMOVAL_COMPLETE));
+			return;
+		}
+		int newType = change.getType();
+		if ((newType & BundleDelta.REMOVAL_PENDING) != 0)
+			newType &= ~BundleDelta.REMOVAL_PENDING;
+		change.setType(newType | BundleDelta.REMOVAL_COMPLETE);
 	}
 
-	void recordBundleResolved(BundleDescriptionImpl resolved, int status) {
-		Object key = resolved.getKey();
-		BundleDeltaImpl change = (BundleDeltaImpl) changes.get(key);
-		int newType = status == Bundle.RESOLVED ? BundleDelta.RESOLVED : BundleDelta.UNRESOLVED;
+	void recordBundleResolved(BundleDescriptionImpl resolved, boolean result) {
+		if (resolved.isResolved() == result)
+			return;  // do not record anything if nothing has changed
+		BundleDeltaImpl change = (BundleDeltaImpl) changes.get(resolved);
+		int newType = result ? BundleDelta.RESOLVED : BundleDelta.UNRESOLVED;
 		if (change == null) {
 			change = new BundleDeltaImpl(resolved, newType);
-			changes.put(key, change);
+			changes.put(resolved, change);
 			return;
 		}
-		int currentType = change.getType();
-		if ((newType == BundleDelta.RESOLVED && currentType == BundleDelta.UNRESOLVED) || (newType == BundleDelta.UNRESOLVED && currentType == BundleDelta.RESOLVED)) {
-			changes.remove(key);
-			return;
-		}
+
 		// new type will have only one of RESOLVED|UNRESOLVED bits set
-		newType = newType | (currentType & ~(BundleDelta.RESOLVED | BundleDelta.UNRESOLVED));
+		newType = newType | (change.getType() & ~(BundleDelta.RESOLVED | BundleDelta.UNRESOLVED));
 		change.setType(newType);
+		change.setBundle(resolved);
 	}
 }

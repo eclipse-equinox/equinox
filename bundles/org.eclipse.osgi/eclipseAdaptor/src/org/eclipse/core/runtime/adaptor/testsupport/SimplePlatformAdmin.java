@@ -16,7 +16,7 @@ import org.eclipse.osgi.internal.resolver.StateManager;
 public class SimplePlatformAdmin extends StateManager {
 	public SimplePlatformAdmin(File bundleRootDir) {
 		super(bundleRootDir);
-		createSystemState();
+		createSystemState(null);
 		setInstaller(new SimpleBundleInstaller(getSystemState()));
 	}
 }

@@ -28,94 +28,153 @@ public abstract class AbstractStateTest extends OSGiTest {
 		super(testName);
 	}
 
-	public static void assertContains(String tag, Object[] array, Object element) {
+	public void assertContains(String tag, Object[] array, Object element) {
 		for (int i = 0; i < array.length; i++)
 			if (array[i] == element)
 				return;
 		fail(tag);
 	}
 
-	public static void assertEquals(State original, State copy) {
+	public void assertEquals(State original, State copy) {
 		assertEquals("", original, copy);
 	}
 
-	public static void assertEquals(String tag, BundleDescription original, BundleDescription copy) {
+	public void assertEquals(String tag, BundleDescription original, BundleDescription copy) {
+		if (original == copy)
+			return;
 		assertEquals(tag + ".0", original.getBundleId(), copy.getBundleId());
 		assertEquals(tag + ".1", original.getSymbolicName(), copy.getSymbolicName());
 		assertEquals(tag + ".2", original.getVersion(), copy.getVersion());
 		assertEquals(tag + ".3", original.getLocation(), copy.getLocation());
-		assertEquals(tag + ".4", original.getState(), copy.getState());
+		assertEquals(tag + ".4", original.isResolved(), copy.isResolved());
 		assertEquals(tag + ".5", original.getHost(), copy.getHost());
-		PackageSpecification[] originalPackages = original.getPackages();
-		PackageSpecification[] copyPackages = copy.getPackages();
-		assertEquals(tag + ".6", originalPackages.length, copyPackages.length);
-		for (int i = 0; i < originalPackages.length; i++)
-			assertEquals(tag + ".7." + i, originalPackages[i], copyPackages[i]);
-		String[] originalProvidedPackages = original.getProvidedPackages();
-		String[] copyProvidedPackages = copy.getProvidedPackages();
-		assertEquals(tag + ".8", originalProvidedPackages.length, copyProvidedPackages.length);
-		for (int i = 0; i < originalProvidedPackages.length; i++)
-			assertEquals(tag + ".9." + i, originalProvidedPackages[i], copyProvidedPackages[i]);
+		ExportPackageDescription[] originalExportPackages = original.getExportPackages();
+		ExportPackageDescription[] copyExportPackages = copy.getExportPackages();
+		assertEquals(tag + ".6", originalExportPackages.length, copyExportPackages.length);
+		for (int i = 0; i < originalExportPackages.length; i++)
+			assertEquals(tag + ".7." + i, originalExportPackages[i], copyExportPackages[i]);
+		ImportPackageSpecification[] originalImportPackages = original.getImportPackages();
+		ImportPackageSpecification[] copyImportPackages = copy.getImportPackages();
+		assertEquals(tag + ".8", originalImportPackages.length, copyImportPackages.length);
+		for (int i = 0; i < originalImportPackages.length; i++)
+			assertEquals(tag + ".9." + i, originalImportPackages[i], copyImportPackages[i]);
 		BundleSpecification[] originalRequiredBundles = original.getRequiredBundles();
 		BundleSpecification[] copyRequiredBundles = copy.getRequiredBundles();
 		assertEquals(tag + ".10", originalRequiredBundles.length, copyRequiredBundles.length);
 		for (int i = 0; i < originalRequiredBundles.length; i++)
 			assertEquals(tag + ".11." + i, originalRequiredBundles[i], copyRequiredBundles[i]);
+		ExportPackageDescription[] originalResolvedImports = original.getResolvedImports();
+		ExportPackageDescription[] copyResolvedImports = copy.getResolvedImports();
+		assertEquals(tag + ".12", originalResolvedImports.length, copyResolvedImports.length);
+		for (int i = 0; i < originalResolvedImports.length; i++)
+			assertEquals(tag + ".13." + i, originalResolvedImports[i], copyResolvedImports[i]);
+		BundleDescription[] originalResolvedRequires = original.getResolvedRequires();
+		BundleDescription[] copyResolvedRequires = copy.getResolvedRequires();
+		assertEquals(tag + ".14", originalResolvedRequires.length, copyResolvedRequires.length);
+		for (int i = 0; i < originalResolvedRequires.length; i++)
+			assertEquals(tag + ".15." + i, originalResolvedRequires[i], copyResolvedRequires[i]);
 	}
 
-	public static void assertEquals(String tag, State original, State copy) {
+	public void assertEquals(String tag, ExportPackageDescription original, ExportPackageDescription copy) {
+		assertEquals(tag + ".0", original.getName(), copy.getName());
+		assertEquals(tag + ".1", original.getVersion(), copy.getVersion());
+		assertEquals(tag + ".2", original.getAttributes(), copy.getAttributes());
+		assertEquals(tag + ".3", original.getExclude(), copy.getExclude());
+		assertEquals(tag + ".4", original.getGrouping(), copy.getGrouping());
+		assertEquals(tag + ".5", original.getInclude(), copy.getInclude());
+		assertEquals(tag + ".6", original.getMandatory(), copy.getMandatory());
+	}
+
+	public void assertEquals(String tag, State original, State copy) {
 		BundleDescription[] originalBundles = original.getBundles();
 		BundleDescription[] copyBundles = copy.getBundles();
 		assertEquals(tag + ".1", originalBundles.length, copyBundles.length);
 		for (int i = 0; i < originalBundles.length; i++)
 			assertEquals(tag + ".2." + i, originalBundles[i], copyBundles[i]);
 		assertEquals(tag + ".3", original.isResolved(), copy.isResolved());
-		BundleDescription[] originalResolvedBundles = original.getBundles();
-		BundleDescription[] copyResolvedBundles = copy.getBundles();
+		BundleDescription[] originalResolvedBundles = original.getResolvedBundles();
+		BundleDescription[] copyResolvedBundles = copy.getResolvedBundles();
 		assertEquals(tag + ".4", originalResolvedBundles.length, copyResolvedBundles.length);
 		for (int i = 0; i < originalResolvedBundles.length; i++)
 			assertEquals(tag + ".5." + i, originalResolvedBundles[i], copyResolvedBundles[i]);
 	}
 
-	public static void assertEquals(String tag, VersionConstraint original, VersionConstraint copy) {
+	private void assertVersionConstraintEquals(String tag, VersionConstraint original, VersionConstraint copy) {
 		assertEquals(tag + ".0", original == null, copy == null);
 		if (original == null)
 			return;
 		assertEquals(tag + ".1", original.getName(), copy.getName());
 		assertEquals(tag + ".2", original.getVersionRange(), copy.getVersionRange());
-		assertEquals(tag + ".3", original.getActualVersion(), copy.getActualVersion());
 		assertEquals(tag + ".4", original.getSupplier() == null, copy.getSupplier() == null);
-		if (original.getSupplier() != null)
-			assertEquals(tag + ".5", original.getSupplier().getSymbolicName(), copy.getSupplier().getSymbolicName());
+		if (original.getSupplier() != null) {
+			Object o = original.getSupplier();
+			if (o instanceof BundleDescription)
+				assertEquals(tag + ".5", (BundleDescription)original.getSupplier(), (BundleDescription)copy.getSupplier());
+			else
+				assertEquals(tag + ".5", (ExportPackageDescription)original.getSupplier(), (ExportPackageDescription)copy.getSupplier());
+		}
 	}
 
-	public static void assertFullyResolved(String tag, BundleDescription bundle) {
+	public void assertEquals(String tag, BundleSpecification original, BundleSpecification copy) {
+		assertVersionConstraintEquals(tag + ".0", original, copy);
+		if (original == null)
+			return;
+		assertEquals(tag + ".1", original.isExported(), copy.isExported());
+		assertEquals(tag + ".2", original.isOptional(), copy.isOptional());
+	}
+
+	public void assertEquals(String tag, ImportPackageSpecification original, ImportPackageSpecification copy) {
+		assertVersionConstraintEquals(tag + ".0", original, copy);
+		if (original == null)
+			return;
+		assertEquals(tag + ".1", original.getAttributes(), copy.getAttributes());
+		assertEquals(tag + ".2", original.getBundleSymbolicName(), copy.getBundleSymbolicName());
+		assertEquals(tag + ".3", original.getBundleVersionRange(), copy.getBundleVersionRange());
+		assertEquals(tag + ".4", original.getPropagate(), original.getPropagate());
+		assertEquals(tag + ".5", original.getResolution(), original.getResolution());
+	}
+
+	public void assertEquals(String tag, HostSpecification original, HostSpecification copy) {
+		assertVersionConstraintEquals(tag + ".0", original, copy);
+		if (original == null)
+			return;
+		BundleDescription[] originalHosts = original.getHosts();
+		BundleDescription[] copyHosts = copy.getHosts();
+		assertEquals(tag + ".1", originalHosts == null, copyHosts == null);
+		if (originalHosts == null)
+			return;
+		assertEquals(tag + ".2", originalHosts.length, copyHosts.length);
+		for (int i = 0; i < originalHosts.length; i++)
+			assertEquals(tag + ".3." + i, originalHosts[i], copyHosts[i]);
+	}
+
+	public void assertFullyResolved(String tag, BundleDescription bundle) {
 		assertTrue(tag + "a", bundle.isResolved());
-		PackageSpecification[] packages = bundle.getPackages();
+		ImportPackageSpecification[] packages = bundle.getImportPackages();
 		for (int i = 0; i < packages.length; i++)
 			assertNotNull(tag + "b_" + i, packages[i].getSupplier());
 		HostSpecification host = bundle.getHost();
 		if (host != null)
-			assertNotNull(tag + "c", host.getSupplier());
+			assertNotNull(tag + "c", host.getHosts());
 		BundleSpecification[] requiredBundles = bundle.getRequiredBundles();
 		for (int i = 0; i < requiredBundles.length; i++)
 			assertNotNull(tag + "d_" + i, requiredBundles[i].getSupplier());
 	}
 
-	public static void assertFullyUnresolved(String tag, BundleDescription bundle) {
+	public void assertFullyUnresolved(String tag, BundleDescription bundle) {
 		assertFalse(tag + "a", bundle.isResolved());
-		PackageSpecification[] packages = bundle.getPackages();
+		ImportPackageSpecification[] packages = bundle.getImportPackages();
 		for (int i = 0; i < packages.length; i++)
 			assertNull(tag + "b_" + i, packages[i].getSupplier());
 		HostSpecification host = bundle.getHost();
 		if (host != null)
-			assertNull(tag + "c", host.getSupplier());
+			assertNull(tag + "c", host.getHosts());
 		BundleSpecification[] requiredBundles = bundle.getRequiredBundles();
 		for (int i = 0; i < requiredBundles.length; i++)
 			assertNull(tag + "d_" + i, requiredBundles[i].getSupplier());
 	}
 
-	public static void assertIdentical(String tag, State original, State copy) {
+	public void assertIdentical(String tag, State original, State copy) {
 		assertEquals(tag + ".0a", original.isResolved(), copy.isResolved());
 		assertEquals(tag + ".0b", original.getTimeStamp(), copy.getTimeStamp());
 		assertEquals(tag, original, copy);

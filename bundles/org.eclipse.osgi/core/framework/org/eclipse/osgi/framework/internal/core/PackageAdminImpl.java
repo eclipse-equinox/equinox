@@ -12,12 +12,18 @@
 package org.eclipse.osgi.framework.internal.core;
 
 import java.io.IOException;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.*;
+import java.util.ArrayList;
+import org.eclipse.osgi.framework.adaptor.BundleClassLoader;
 import org.eclipse.osgi.framework.debug.Debug;
-import org.eclipse.osgi.framework.debug.DebugOptions;
 import org.eclipse.osgi.framework.util.SecureAction;
 import org.eclipse.osgi.service.resolver.*;
+import org.eclipse.osgi.service.resolver.BundleDescription;
+import org.eclipse.osgi.service.resolver.VersionRange;
 import org.osgi.framework.*;
+import org.osgi.framework.Bundle;
 import org.osgi.service.packageadmin.*;
 
 /**
@@ -44,21 +50,8 @@ import org.osgi.service.packageadmin.*;
  * and getImportingBundles() return null.
  */
 public class PackageAdminImpl implements PackageAdmin {
-
 	/** framework object */
 	protected Framework framework;
-
-	/** BundleLoaders that are pending removal. Value is BundleLoader */
-	protected Vector removalPending;
-
-	protected KeyedHashSet exportedPackages;
-	protected KeyedHashSet exportedBundles;
-
-	private long cumulativeTime;
-
-	private static boolean checkServiceClassSource = true;
-	private static boolean restrictServiceClasses = false;
-
 	/**
 	 * Constructor.
 	 *
@@ -68,319 +61,265 @@ public class PackageAdminImpl implements PackageAdmin {
 		this.framework = framework;
 	}
 
-	protected void initialize() {
-		checkServiceClassSource = Boolean.valueOf(System.getProperty(Constants.OSGI_CHECKSERVICECLASSSOURCE,"true")).booleanValue(); //$NON-NLS-1$
-		restrictServiceClasses = Boolean.valueOf(System.getProperty(Constants.OSGI_RESTRICTSERVICECLASSES,"false")).booleanValue(); //$NON-NLS-1$
-		removalPending = new Vector(10, 10);
-
-		State state = framework.adaptor.getState();
-		if (!state.isResolved()) {
-			state.resolve(false);
-		}
-		exportedPackages = new KeyedHashSet(false);
-		exportedBundles = new KeyedHashSet(false);
-	}
-
-	private KeyedHashSet getExportedPackages(KeyedHashSet packageSet) {
-		State state = framework.adaptor.getState();
-		PackageSpecification[] packageSpecs = state.getExportedPackages();
-
-		for (int i = 0; i < packageSpecs.length; i++) {
-			BundleDescription bundleSpec = packageSpecs[i].getSupplier();
-			if (bundleSpec == null)
-				continue;
-			AbstractBundle bundle = framework.getBundle(bundleSpec.getBundleId());
-			if (bundle == null) {
-				BundleException be = new BundleException(Msg.formatter.getString("BUNDLE_NOT_IN_FRAMEWORK", bundleSpec)); //$NON-NLS-1$
-				framework.publishFrameworkEvent(FrameworkEvent.ERROR, framework.systemBundle, be);
-				continue;
-			}
-			// check export permissions before getting the host;
-			// we want to check the permissions of the fragment
-			if (!bundle.checkExportPackagePermission(packageSpecs[i].getName()))
-				continue;
-			// if we have a host then get the host bundle
-			HostSpecification hostSpec = bundleSpec.getHost();
-			if (hostSpec != null) {
-				bundleSpec = hostSpec.getSupplier();
-				if (bundleSpec == null)
-					continue;
-				bundle = framework.getBundle(bundleSpec.getBundleId());
-				if (bundle == null) {
-					BundleException be = new BundleException(Msg.formatter.getString("BUNDLE_NOT_IN_FRAMEWORK", bundleSpec)); //$NON-NLS-1$
-					framework.publishFrameworkEvent(FrameworkEvent.ERROR, framework.systemBundle, be);
-					continue;
-				}
-			}
-
-			if (bundle.isResolved() && bundle instanceof BundleHost) {
-				ExportedPackageImpl packagesource = new ExportedPackageImpl(packageSpecs[i], ((BundleHost) bundle).getLoaderProxy());
-				packageSet.add(packagesource);
-			}
-		}
-		return packageSet;
-	}
-
-	private KeyedHashSet getExportedBundles(KeyedHashSet bundleSet) {
-		State state = framework.adaptor.getState();
-		BundleDescription[] bundleDescripts = state.getResolvedBundles();
-		for (int i = 0; i < bundleDescripts.length; i++) {
-			BundleDescription bundledes = bundleDescripts[i];
-			AbstractBundle bundle = framework.getBundle(bundledes.getBundleId());
-			if (bundle != null && bundle.isResolved() && bundle.getSymbolicName() != null && bundle instanceof BundleHost && bundle.checkProvideBundlePermission(bundle.getSymbolicName())) {
-				BundleLoaderProxy loaderProxy = ((BundleHost) bundle).getLoaderProxy();
-				bundleSet.add(loaderProxy);
-			}
-		}
-		return bundleSet;
-	}
-
-	protected void cleanup() { //This is only called when the framework is shutting down
-		removalPending = null;
-		exportedPackages = null;
-		exportedBundles = null;
-	}
-
-	protected void addRemovalPending(BundleLoaderProxy loaderProxy) {
-		removalPending.addElement(loaderProxy);
-	}
-
-	protected void deleteRemovalPending(BundleLoaderProxy loaderProxy) throws BundleException {
-
-		boolean exporting = loaderProxy.inUse();
-		if (exporting) {
-			/* Reaching here is an internal error */
-			if (Debug.DEBUG && Debug.DEBUG_PACKAGEADMIN) {
-				Debug.println("BundleLoader.unexportPackager returned true! " + loaderProxy); //$NON-NLS-1$
-				Debug.printStackTrace(new Exception("Stack trace")); //$NON-NLS-1$
-			}
-			throw new BundleException(Msg.formatter.getString("OSGI_INTERNAL_ERROR")); //$NON-NLS-1$
-		}
-		unexportResources(loaderProxy);
-		BundleLoader loader = loaderProxy.getBundleLoader();
-		loader.clear();
-		loader.close();
-		removalPending.remove(loaderProxy);
-	}
-
-	/**
-	 * Gets the packages exported by the specified bundle.
-	 *
-	 * @param bundle The bundle whose exported packages are to be returned,
-	 *               or <tt>null</tt> if all the packages currently
-	 *               exported in the framework are to be returned.  If the
-	 *               specified bundle is the system bundle (that is, the
-	 *               bundle with id 0), this method returns all the packages
-	 *               on the system classpath whose name does not start with
-	 *               "java.".  In an environment where the exhaustive list
-	 *               of packages on the system classpath is not known in
-	 *               advance, this method will return all currently known
-	 *               packages on the system classpath, that is, all packages
-	 *               on the system classpath that contains one or more classes
-	 *               that have been loaded.
-	 *
-	 * @return The array of packages exported by the specified bundle,
-	 * or <tt>null</tt> if the specified bundle has not exported any packages.
-	 */
-	public org.osgi.service.packageadmin.ExportedPackage[] getExportedPackages(org.osgi.framework.Bundle bundle) {
-		// need to make sure the dependacies are marked before this call.
+	public ExportedPackage[] getExportedPackages(Bundle bundle) {
+		ArrayList allExports = new ArrayList();
 		synchronized (framework.bundles) {
-			framework.bundles.markDependancies();
-
-			KeyedElement[] elements = exportedPackages.elements();
-			if (bundle != null) {
-				Vector result = new Vector();
-				for (int i = 0; i < elements.length; i++) {
-					ExportedPackageImpl pkgElement = (ExportedPackageImpl) elements[i];
-					if (pkgElement.supplier.getBundleHost() == bundle) {
-						result.add(pkgElement);
-					}
-				}
-				if (result.size() == 0) {
-					return null;
-				}
-				ExportedPackageImpl[] pkgElements = new ExportedPackageImpl[result.size()];
-				return (ExportedPackage[]) result.toArray(pkgElements);
-			} else {
-				if (elements.length == 0) {
-					return null;
-				}
-				ExportedPackageImpl[] pkgElements = new ExportedPackageImpl[elements.length];
-				System.arraycopy(elements, 0, pkgElements, 0, pkgElements.length);
-				return pkgElements;
+			ExportPackageDescription[] allDescriptions = framework.adaptor.getState().getExportedPackages();
+			for (int i = 0; i < allDescriptions.length; i++) {
+				if (!allDescriptions[i].isRoot())
+					continue;
+				ExportedPackageImpl exportedPackage = createExportedPackage(allDescriptions[i]);
+				if (exportedPackage == null)
+					continue;
+				if (bundle == null || exportedPackage.supplier.getBundle() == bundle)
+					allExports.add(exportedPackage);
 			}
 		}
+		return (ExportedPackage[]) (allExports.size() == 0 ? null : allExports.toArray(new ExportedPackage[allExports.size()]));
 	}
 
-	/**
-	 * Gets the ExportedPackage with the specified package name.  All exported
-	 * packages
-	 * will be checked for the specified name.  In an environment where the
-	 * exhaustive list of packages on the system classpath is not known in
-	 * advance, this method attempts to see if the named package is on the
-	 * system classpath.
-	 * This
-	 * means that this method may discover an ExportedPackage that was
-	 * not present in the list returned by <tt>getExportedPackages()</tt>.
-	 *
-	 * @param packageName The name of the exported package to be returned.
-	 *
-	 * @return The exported package with the specified name, or <tt>null</tt>
-	 *         if no expored package with that name exists.
-	 */
-	public org.osgi.service.packageadmin.ExportedPackage getExportedPackage(String packageName) {
-		// need to make sure the dependacies are marked before this call.
-		synchronized (framework.bundles) {
-			framework.bundles.markDependancies();
-			return (ExportedPackageImpl) exportedPackages.getByKey(packageName);
+	private ExportedPackageImpl createExportedPackage(ExportPackageDescription description) {
+		BundleDescription exporter = description.getExporter();
+		if (exporter == null || exporter.getHost() != null)
+			return null;
+		BundleLoaderProxy proxy = (BundleLoaderProxy) exporter.getUserObject();
+		if (proxy == null){
+			BundleHost bundle = (BundleHost) framework.getBundle(exporter.getBundleId());
+			if (bundle == null)
+				return null;
+			proxy = bundle.getLoaderProxy();
 		}
+		return new ExportedPackageImpl(description, proxy);
 	}
 
-	/**
-	 * Forces the update (replacement) or removal of packages exported by
-	 * the specified bundles.
-	 *
-	 * <p> If no bundles are specified, this method will update or remove any
-	 * packages exported by any bundles that were previously updated or
-	 * uninstalled. The technique by which this is accomplished
-	 * may vary among different framework implementations. One permissible
-	 * implementation is to stop and restart the Framework.
-	 *
-	 * <p> This method returns to the caller immediately and then performs the
-	 * following steps in its own thread:
-	 *
-	 * <ol>
-	 * <p>
-	 * <li> Compute a graph of bundles starting with the specified ones. If no
-	 * bundles are specified, compute a graph of bundles starting with
-	 * previously updated or uninstalled ones.
-	 * Any bundle that imports a package that is currently exported
-	 * by a bundle in the graph is added to the graph. The graph is fully
-	 * constructed when there is no bundle outside the graph that imports a
-	 * package from a bundle in the graph. The graph may contain
-	 * <tt>UNINSTALLED</tt> bundles that are currently still
-	 * exporting packages.
-	 *
-	 * <p>
-	 * <li> Each bundle in the graph will be stopped as described in the
-	 * <tt>Bundle.stop</tt> method.
-	 *
-	 * <p>
-	 * <li> Each bundle in the graph that is in the
-	 * <tt>RESOLVED</tt> state is moved
-	 * to the <tt>INSTALLED</tt> state.
-	 * The effect of this step is that bundles in the graph are no longer
-	 * <tt>RESOLVED</tt>.
-	 *
-	 * <p>
-	 * <li> Each bundle in the graph that is in the UNINSTALLED state is
-	 * removed from the graph and is now completely removed from the framework.
-	 *
-	 * <p>
-	 * <li> Each bundle in the graph that was in the
-	 * <tt>ACTIVE</tt> state prior to Step 2 is started as
-	 * described in the <tt>Bundle.start</tt> method, causing all
-	 * bundles required for the restart to be resolved.
-	 * It is possible that, as a
-	 * result of the previous steps, packages that were
-	 * previously exported no longer are. Therefore, some bundles
-	 * may be unresolvable until another bundle
-	 * offering a compatible package for export has been installed in the
-	 * framework.
-	 * </ol>
-	 *
-	 * <p> For any exceptions that are thrown during any of these steps, a
-	 * <tt>FrameworkEvent</tt> of type <tt>ERROR</tt> is
-	 * broadcast, containing the exception.
-	 *
-	 * @param input the bundles whose exported packages are to be updated or
-	 * removed,
-	 * or <tt>null</tt> for all previously updated or uninstalled bundles.
-	 *
-	 * @exception SecurityException if the caller does not have the
-	 * <tt>AdminPermission</tt> and the Java runtime environment supports
-	 * permissions.
-	 */
-	public void refreshPackages(org.osgi.framework.Bundle[] input) {
+	public ExportedPackage getExportedPackage(String name) {
+		ExportedPackage[] allExports = getExportedPackages((Bundle)null);
+		if (allExports == null)
+			return null;
+		ExportedPackage result = null;
+		for (int i = 0; i < allExports.length; i++) {
+			if (name.equals(allExports[i].getName())) {
+				if (result == null) {
+					result = allExports[i];
+				}
+				else {
+					// TODO not efficient but this is not called very often
+					Version curVersion = Version.parseVersion(result.getSpecificationVersion());
+					Version newVersion = Version.parseVersion(allExports[i].getSpecificationVersion());
+					if (newVersion.compareTo(curVersion) >= 0)
+						result = allExports[i];
+				}
+			}
+		}
+		return result;
+	}
+
+	public ExportedPackage[] getExportedPackages(String name) {
+		ExportedPackage[] allExports = getExportedPackages((Bundle)null);
+		if (allExports == null)
+			return null;
+		ArrayList result = new ArrayList(1); // rare to have more than one
+		for (int i = 0; i < allExports.length; i++)
+			if (name.equals(allExports[i].getName()))
+				result.add(allExports[i]);
+		return (ExportedPackage[]) (result.size() == 0 ? null : result.toArray(new ExportedPackage[result.size()]));
+	}
+
+	public void refreshPackages(Bundle[] input) {
 		framework.checkAdminPermission();
 
 		AbstractBundle[] copy = null;
 		if (input != null) {
 			synchronized (input) {
-				int size = input.length;
-
-				copy = new AbstractBundle[size];
-
-				System.arraycopy(input, 0, copy, 0, size);
+				copy = new AbstractBundle[input.length];
+				System.arraycopy(input, 0, copy, 0, input.length);
 			}
 		}
 
 		final AbstractBundle[] bundles = copy;
 		Thread refresh = SecureAction.createThread(new Runnable() {
 			public void run() {
-				refreshPackages(bundles);
+				doResolveBundles(bundles, true);
 			}
 		}, "Refresh Packages"); //$NON-NLS-1$
 
 		refresh.start();
 	}
 
-	/**
-	 * Worker routine called on a seperate thread to perform the actual work.
-	 *
-	 * @param refresh the list of bundles to refresh 
-	 */
-	protected synchronized void refreshPackages(AbstractBundle[] refresh) {
+	public boolean resolveBundles(Bundle[] bundles) {
+		doResolveBundles(null, false);
+		if (bundles == null)
+			bundles = framework.getAllBundles();
+		for (int i = 0; i < bundles.length; i++)
+			if (!((AbstractBundle) bundles[i]).isResolved())
+				return false;
+
+		return true;
+	}
+
+	synchronized void doResolveBundles(AbstractBundle[] bundles, boolean refreshPackages) {
 		try {
-			Vector graph = null;
+			AbstractBundle[] refreshedBundles = null;
+			BundleDescription[] descriptions = null;
 			synchronized (framework.bundles) {
-				if (Debug.DEBUG && Debug.DEBUG_PACKAGEADMIN) {
-					Debug.println("refreshPackages: Initialize graph"); //$NON-NLS-1$
+				int numBundles = bundles == null ? 0 : bundles.length;
+				if (!refreshPackages)
+					// in this case we must make descriptions non-null so we do
+					// not force the removal pendings to be processed when resolving
+					// the state.
+					descriptions = new BundleDescription[0];
+				else if (numBundles > 0) {
+					ArrayList results = new ArrayList(numBundles);
+					for (int i = 0; i < numBundles; i++) {
+						BundleDescription description = bundles[i].getBundleDescription();
+						if (description != null && description.getBundleId() != 0 && !results.contains(description))
+							results.add(description);
+						// add in any singleton bundles if needed
+						AbstractBundle[] sameNames = framework.bundles.getBundles(bundles[i].getSymbolicName());
+						if (sameNames != null && sameNames.length > 1) {
+							for (int j = 0; j < sameNames.length; j++)
+								if (sameNames[j] != bundles[i]) {
+									BundleDescription sameName = sameNames[j].getBundleDescription();
+									if (sameName != null && sameName.getBundleId() != 0 && sameName.isSingleton() && !results.contains(sameName))
+										results.add(sameName);
+								}
+						}
+					}
+					descriptions = (BundleDescription[]) (results.size() == 0 ? null : results.toArray(new BundleDescription[results.size()]));
 				}
-				// make sure the dependencies are marked first
-				framework.bundles.markDependancies();
-
-				graph = computeAffectedBundles(refresh);
-
-				// get the state.
-				State state = framework.adaptor.getState();
-				// resolve the state.
-				state.resolve(false);
 			}
-			// Process the delta and resume the suspended bundles outside of the synchronization block.
-			// This will cause the bundles to be resolved using the most up-to-date generations of the bundles.
-			processDelta(graph);
-			resumeBundles(graph);
-
+			StateDelta stateDelta = framework.adaptor.getState().resolve(descriptions);	
+			refreshedBundles = processDelta(stateDelta.getChanges(), refreshPackages);
+			if (refreshPackages) {
+				AbstractBundle[] allBundles = framework.getAllBundles();
+				for (int i = 0; i < allBundles.length; i++)
+					allBundles[i].unresolvePermissions(refreshedBundles);
+				resumeBundles(refreshedBundles);
+			}
+		}catch (Throwable t) {
+			if (Debug.DEBUG && Debug.DEBUG_PACKAGEADMIN) {
+				Debug.println("PackageAdminImpl.doResolveBundles: Error occured :"); //$NON-NLS-1$
+				Debug.printStackTrace(t);
+			}
+			if (t instanceof RuntimeException)
+				throw (RuntimeException)t;
+			if (t instanceof Error)
+				throw (Error)t;
 		} finally {
-			framework.publishFrameworkEvent(FrameworkEvent.PACKAGES_REFRESHED, framework.systemBundle, null);
+			if (refreshPackages)
+				framework.publishFrameworkEvent(FrameworkEvent.PACKAGES_REFRESHED, framework.systemBundle, null);
 		}
-
 	}
 
-	private void resumeBundles(Vector graph) {
-
-		AbstractBundle[] refresh = new AbstractBundle[graph.size()];
-		boolean[] previouslyResolved = new boolean[graph.size()];
-		graph.copyInto(refresh);
-		Util.sort(refresh, 0, graph.size());
+	private void resumeBundles(AbstractBundle[] bundles) {
 		if (Debug.DEBUG && Debug.DEBUG_PACKAGEADMIN) {
-			Debug.println("refreshPackages: restart the bundles"); //$NON-NLS-1$
+			Debug.println("PackageAdminImpl: restart the bundles"); //$NON-NLS-1$
 		}
-		for (int i = 0; i < refresh.length; i++) {
-			AbstractBundle bundle = (AbstractBundle) refresh[i];
-			if (bundle.isResolved())
-				framework.resumeBundle(bundle);
+		if (bundles == null)
+			return;
+		for (int i = 0; i < bundles.length; i++) {
+			if (bundles[i].isResolved())
+				framework.resumeBundle(bundles[i]);
 		}
 	}
 
-	private void processDelta(Vector graph) {
-		AbstractBundle[] refresh = new AbstractBundle[graph.size()];
-		boolean[] previouslyResolved = new boolean[graph.size()];
-		graph.copyInto(refresh);
-		Util.sort(refresh, 0, graph.size());
+	private void insertBundle(AbstractBundle bundle, ArrayList bundleList) {
+		int index = 0;
+		Iterator iter = bundleList.iterator();
+		while (iter.hasNext()) {
+			Object current = iter.next();
+			if (current == bundle)
+				return;
+			if (bundle.compareTo(current) < 0)
+				break;
+			index++;
+		}
+		bundleList.add(index, bundle);
+	}
 
-		Vector notify = new Vector();
+	private void suspendBundle(AbstractBundle bundle) throws BundleException {
+		if (bundle.isActive() && !bundle.isFragment()) {
+			boolean suspended = framework.suspendBundle(bundle, true);
+			if (!suspended) {
+				throw new BundleException(Msg.formatter.getString("BUNDLE_STATE_CHANGE_EXCEPTION")); //$NON-NLS-1$
+			}
+		} else {
+			if (bundle.getStateChanging() != Thread.currentThread())
+				bundle.beginStateChange();
+		}
+
+		if (Debug.DEBUG && Debug.DEBUG_PACKAGEADMIN) {
+			if (bundle.stateChanging == null) {
+				Debug.println("Bundle state change lock is clear! " + bundle); //$NON-NLS-1$
+				Debug.printStackTrace(new Exception("Stack trace")); //$NON-NLS-1$
+			}
+		}
+	}
+
+	private void applyRemovalPending(BundleDelta bundleDelta) throws BundleException {
+		if ((bundleDelta.getType() & BundleDelta.REMOVAL_COMPLETE) != 0) {
+			BundleDescription bundle = bundleDelta.getBundle();
+			if (bundle.getDependents() != null && bundle.getDependents().length > 0) {
+				/* Reaching here is an internal error */
+				if (Debug.DEBUG && Debug.DEBUG_PACKAGEADMIN) {
+					Debug.println("Bundles still depend on removed bundle! " + bundle); //$NON-NLS-1$
+					Debug.printStackTrace(new Exception("Stack trace")); //$NON-NLS-1$
+				}
+				throw new BundleException(Msg.formatter.getString("OSGI_INTERNAL_ERROR")); //$NON-NLS-1$
+			}
+			BundleLoaderProxy proxy = (BundleLoaderProxy) bundle.getUserObject();
+			BundleHost.closeBundleLoader(proxy);
+		}
+	}
+
+	private AbstractBundle setResolved(BundleDescription bundleDescription) {
+		if (!bundleDescription.isResolved())
+			return null;
+		AbstractBundle bundle = framework.getBundle(bundleDescription.getBundleId());
+		if (bundle == null) {
+			BundleException be = new BundleException(Msg.formatter.getString("BUNDLE_NOT_IN_FRAMEWORK", bundleDescription)); //$NON-NLS-1$
+			framework.publishFrameworkEvent(FrameworkEvent.ERROR, framework.systemBundle, be);
+			return null;
+		}
+		if (bundle.isFragment()) {
+			BundleDescription[] hosts = bundleDescription.getHost().getHosts();
+			for (int i = 0; i < hosts.length; i++) {
+				BundleHost host = (BundleHost) framework.getBundle(hosts[0].getBundleId());
+				((BundleFragment) bundle).addHost(host.getLoaderProxy());
+			}
+		}
+		bundle.resolve();
+		return bundle;
+	}
+
+	private AbstractBundle[] applyDeltas(BundleDelta[] bundleDeltas) throws BundleException {
+		ArrayList results = new ArrayList(bundleDeltas.length);
+		for (int i = 0; i < bundleDeltas.length; i++) {
+			int type = bundleDeltas[i].getType();
+			if ((type & (BundleDelta.REMOVAL_PENDING | BundleDelta.REMOVAL_COMPLETE)) != 0) {
+				applyRemovalPending(bundleDeltas[i]);
+			}
+			
+			if ((type & BundleDelta.RESOLVED) != 0) {
+				AbstractBundle bundle = setResolved(bundleDeltas[i].getBundle());
+				if (bundle != null && bundle.isResolved())
+					results.add(bundle);
+			}
+		}
+		return (AbstractBundle[])(results.size() == 0 ? null : results.toArray(new AbstractBundle[results.size()]));
+	}
+
+	private AbstractBundle[] processDelta(BundleDelta[] bundleDeltas, boolean refreshPackages) {
+		ArrayList bundlesList = new ArrayList(bundleDeltas.length);
+		// get all the bundles that are going to be refreshed
+		for (int i = 0; i < bundleDeltas.length; i++) {
+			AbstractBundle changedBundle = framework.getBundle(bundleDeltas[i].getBundle().getBundleId());
+			if (changedBundle != null)
+				insertBundle(changedBundle, bundlesList);
+		}
+		AbstractBundle[] refresh = (AbstractBundle[]) bundlesList.toArray(new AbstractBundle[bundlesList.size()]);
+		boolean[] previouslyResolved = new boolean[refresh.length];
+		AbstractBundle[] resolved = null;
 		try {
 			try {
 				/*
@@ -390,23 +329,9 @@ public class PackageAdminImpl implements PackageAdmin {
 					Debug.println("refreshPackages: Suspend each bundle and acquire its state change lock"); //$NON-NLS-1$
 				}
 				for (int i = refresh.length - 1; i >= 0; i--) {
-					AbstractBundle changedBundle = refresh[i];
-					previouslyResolved[i] = changedBundle.isResolved();
-					if (changedBundle.isActive() && !changedBundle.isFragment()) {
-						boolean suspended = framework.suspendBundle(changedBundle, true);
-						if (!suspended) {
-							throw new BundleException(Msg.formatter.getString("BUNDLE_STATE_CHANGE_EXCEPTION")); //$NON-NLS-1$
-						}
-					} else {
-						changedBundle.beginStateChange();
-					}
-
-					if (Debug.DEBUG && Debug.DEBUG_PACKAGEADMIN) {
-						if (changedBundle.stateChanging == null) {
-							Debug.println("Bundle state change lock is clear! " + changedBundle); //$NON-NLS-1$
-							Debug.printStackTrace(new Exception("Stack trace")); //$NON-NLS-1$
-						}
-					}
+					previouslyResolved[i] = refresh[i].isResolved();
+					if (refreshPackages)
+						suspendBundle(refresh[i]);
 				}
 				/*
 				 * Refresh the bundles which will unexport the packages.
@@ -415,69 +340,28 @@ public class PackageAdminImpl implements PackageAdmin {
 				if (Debug.DEBUG && Debug.DEBUG_PACKAGEADMIN) {
 					Debug.println("refreshPackages: refresh the bundles"); //$NON-NLS-1$
 				}
-				/*
-				 * Unimport detached BundleLoaders for bundles in the graph.
-				 */
+
 				synchronized (framework.bundles) {
-					for (int i = removalPending.size() - 1; i >= 0; i--) {
-						BundleLoaderProxy loaderProxy = (BundleLoaderProxy) removalPending.elementAt(i);
-
-						if (graph.contains(loaderProxy.getBundleHost())) {
-							framework.bundles.unMarkDependancies(loaderProxy);
-						}
-					}
-
 					for (int i = 0; i < refresh.length; i++)
 						refresh[i].refresh();
 				}
 				// send out unresolved events outside synch block (defect #80610)
-				for (int i = 0; i < refresh.length; i++)
+				for (int i = 0; i < refresh.length; i++) {
+					// send out unresolved events
 					if (previouslyResolved[i])
 						framework.publishBundleEvent(BundleEvent.UNRESOLVED, refresh[i]);
+				}
+
 				/*
-				 * Cleanup detached BundleLoaders for bundles in the graph.
+				 * apply Deltas.
 				 */
 				if (Debug.DEBUG && Debug.DEBUG_PACKAGEADMIN) {
-					Debug.println("refreshPackages: unexport the removal pending packages"); //$NON-NLS-1$
+					Debug.println("refreshPackages: applying deltas to bundles"); //$NON-NLS-1$
 				}
-				for (int i = removalPending.size() - 1; i >= 0; i--) {
-					BundleLoaderProxy loaderProxy = (BundleLoaderProxy) removalPending.elementAt(i);
-					AbstractBundle removedBundle = loaderProxy.getBundleHost();
-
-					if (graph.contains(removedBundle)) {
-						deleteRemovalPending(loaderProxy);
-					}
-				}
-
-				// set the resolved bundles state
 				synchronized (framework.bundles) {
-					List allBundles = framework.bundles.getBundles();
-					int size = allBundles.size();
-					for (int i = 0; i < size; i++) {
-						AbstractBundle bundle = (AbstractBundle) allBundles.get(i);
-						if (bundle.isResolved())
-							continue;
-						BundleDescription bundleDes = bundle.getBundleDescription();
-						if (bundleDes != null) {
-							if (bundleDes.isResolved()) {
-								if (bundle.isFragment()) {
-									BundleHost host = (BundleHost) framework.getBundle(bundleDes.getHost().getSupplier().getBundleId());
-									if (((BundleFragment) bundle).setHost(host)) {
-										bundle.resolve(bundleDes.isSingleton());
-									}
-								} else {
-									bundle.resolve(bundleDes.isSingleton());
-								}
-								if (bundle.isResolved()) {
-									notify.addElement(bundle);
-								}
-							}
-						}
-					}
+					resolved = applyDeltas(bundleDeltas);
 				}
-				// update the exported package and bundle lists.
-				exportedPackages = getExportedPackages(exportedPackages);
-				exportedBundles = getExportedBundles(exportedBundles);
+
 			} finally {
 				/*
 				 * Release the state change locks.
@@ -485,25 +369,27 @@ public class PackageAdminImpl implements PackageAdmin {
 				if (Debug.DEBUG && Debug.DEBUG_PACKAGEADMIN) {
 					Debug.println("refreshPackages: release the state change locks"); //$NON-NLS-1$
 				}
-				for (int i = 0; i < refresh.length; i++) {
-					AbstractBundle changedBundle = refresh[i];
-					changedBundle.completeStateChange();
-				}
+				if (refreshPackages)
+					for (int i = 0; i < refresh.length; i++) {
+						AbstractBundle changedBundle = refresh[i];
+						changedBundle.completeStateChange();
+					}
 			}
 			/*
 			 * Take this opportunity to clean up the adaptor storage.
 			 */
-			if (Debug.DEBUG && Debug.DEBUG_PACKAGEADMIN) {
-				Debug.println("refreshPackages: clean up adaptor storage"); //$NON-NLS-1$
-			}
-			try {
-				framework.adaptor.compactStorage();
-			} catch (IOException e) {
-				if (Debug.DEBUG && Debug.DEBUG_PACKAGEADMIN) {
-					Debug.println("refreshPackages exception: " + e.getMessage()); //$NON-NLS-1$
-					Debug.printStackTrace(e);
+			if (refreshPackages) {
+				if (Debug.DEBUG && Debug.DEBUG_PACKAGEADMIN)
+					Debug.println("refreshPackages: clean up adaptor storage"); //$NON-NLS-1$
+				try {
+					framework.adaptor.compactStorage();
+				} catch (IOException e) {
+					if (Debug.DEBUG && Debug.DEBUG_PACKAGEADMIN) {
+						Debug.println("refreshPackages exception: " + e.getMessage()); //$NON-NLS-1$
+						Debug.printStackTrace(e);
+					}
+					framework.publishFrameworkEvent(FrameworkEvent.ERROR, framework.systemBundle, new BundleException(Msg.formatter.getString("BUNDLE_REFRESH_FAILURE"), e)); //$NON-NLS-1$
 				}
-				framework.publishFrameworkEvent(FrameworkEvent.ERROR, framework.systemBundle, new BundleException(Msg.formatter.getString("BUNDLE_REFRESH_FAILURE"), e)); //$NON-NLS-1$
 			}
 		} catch (BundleException e) {
 			if (Debug.DEBUG && Debug.DEBUG_PACKAGEADMIN) {
@@ -513,358 +399,35 @@ public class PackageAdminImpl implements PackageAdmin {
 			framework.publishFrameworkEvent(FrameworkEvent.ERROR, framework.systemBundle, new BundleException(Msg.formatter.getString("BUNDLE_REFRESH_FAILURE"), e)); //$NON-NLS-1$
 		}
 
-		// send out any resolved/unresolved events
-		for (int i = 0; i < notify.size(); i++) {
-			AbstractBundle changedBundle = (AbstractBundle) notify.elementAt(i);
-			framework.publishBundleEvent(changedBundle.isResolved() ? BundleEvent.RESOLVED : BundleEvent.UNRESOLVED, changedBundle);
-		}
+		// send out any resolved.  This must be done after the state change locks have been release.
+		if (Debug.DEBUG && Debug.DEBUG_PACKAGEADMIN)
+			Debug.println("refreshPackages: send out RESOLVED events"); //$NON-NLS-1$
+		if (resolved != null)
+			for (int i = 0; i < resolved.length; i++)
+				framework.publishBundleEvent(BundleEvent.RESOLVED, resolved[i]);
 
+		return refresh;
 	}
 
-	private void unresolvePermissions(Vector bundles, Hashtable packages) {
-		/*
-		 * All bundles must be notified of the unexported packages so that
-		 * they may unresolve permissions if necessary.
-		 * This done after resolve bundles so that unresolved permissions
-		 * can be immediately resolved.
-		 */
-		if (Debug.DEBUG && Debug.DEBUG_PACKAGEADMIN) {
-			Debug.println("refreshPackages: unresolve permissions"); //$NON-NLS-1$
-		}
-		int size = bundles.size();
-		for (int i = 0; i < size; i++) {
-			AbstractBundle bundle = (AbstractBundle) bundles.elementAt(i);
-			bundle.unresolvePermissions(packages);
-		}
-	}
-
-	private Vector computeAffectedBundles(AbstractBundle[] refresh) {
-		Vector graph = new Vector();
-
-		if (refresh == null) {
-			int size = removalPending.size();
-			for (int i = 0; i < size; i++) {
-				BundleLoaderProxy loaderProxy = (BundleLoaderProxy) removalPending.elementAt(i);
-				AbstractBundle bundle = loaderProxy.getBundleHost();
-				if (!graph.contains(bundle)) {
-					if (Debug.DEBUG && Debug.DEBUG_PACKAGEADMIN) {
-						Debug.println(" refresh: " + bundle); //$NON-NLS-1$
-					}
-					graph.addElement(bundle);
-
-					// add in any dependents of the removal pending loader.
-					AbstractBundle[] dependents = loaderProxy.getDependentBundles();
-					for (int j = 0; j < dependents.length; j++) {
-						if (!graph.contains(dependents[j])) {
-							graph.addElement(dependents[j]);
-						}
-					}
-				}
-			}
-		} else {
-			for (int i = 0; i < refresh.length; i++) {
-				AbstractBundle bundle = refresh[i];
-				if (bundle == framework.systemBundle) {
-					continue;
-				}
-				if (bundle.isFragment()) {
-					// if it is a fragment then put the host in the graph
-					BundleHost host = (BundleHost) bundle.getHost();
-					if (host != null) {
-						if (!graph.contains(host)) {
-							graph.addElement(host);
-						}
-					}
-				}
-
-				if (!graph.contains(bundle)) {
-					if (Debug.DEBUG && Debug.DEBUG_PACKAGEADMIN) {
-						Debug.println(" refresh: " + bundle); //$NON-NLS-1$
-					}
-					graph.addElement(bundle);
-				}
-			}
-		}
-
-		/*
-		 * If there is nothing to do, then return.
-		 */
-		if (graph.size() == 0) {
-			if (Debug.DEBUG && Debug.DEBUG_PACKAGEADMIN) {
-				Debug.println("refreshPackages: Empty graph"); //$NON-NLS-1$
-			}
-
-			return graph;
-		}
-
-		/*
-		 * Complete graph.
-		 */
-		if (Debug.DEBUG && Debug.DEBUG_PACKAGEADMIN) {
-			Debug.println("refreshPackages: Complete graph"); //$NON-NLS-1$
-		}
-
-		boolean changed;
-		do {
-			changed = false;
-			int size = graph.size();
-			for (int i = size - 1; i >= 0; i--) {
-				AbstractBundle bundle = (AbstractBundle) graph.elementAt(i);
-				if (!bundle.isFragment()) {
-					BundleLoaderProxy loaderProxy = ((BundleHost) bundle).getLoaderProxy();
-					if (loaderProxy != null) {
-						// add any dependents
-						AbstractBundle[] dependents = loaderProxy.getDependentBundles();
-						for (int j = 0; j < dependents.length; j++) {
-							if (!graph.contains(dependents[j])) {
-								graph.addElement(dependents[j]);
-								changed = true;
-							}
-						}
-					}
-					// add in any fragments
-					org.osgi.framework.Bundle[] frags = bundle.getFragments();
-					if (frags != null) {
-						for (int j = 0; j < frags.length; j++) {
-							if (!graph.contains(frags[j])) {
-								graph.addElement(frags[j]);
-								changed = true;
-							}
-						}
-					}
-				} else {
-					// add in the host.
-					AbstractBundle host = (AbstractBundle) bundle.getHost();
-					if (host != null) {
-						if (!graph.contains(host)) {
-							graph.addElement(host);
-							changed = true;
-						}
-					}
-				}
-				// add in any singleton bundles if needed
-				AbstractBundle[] sameNames = framework.bundles.getBundles(bundle.getSymbolicName());
-				if (sameNames != null && sameNames.length > 1) {
-					for (int j = 0; j < sameNames.length; j++)
-						if (sameNames[j] != bundle && sameNames[j].isSingleton() && !graph.contains(sameNames[j])) {
-							graph.addElement(sameNames[j]);
-							changed = true;
-						}
-				}
-			}
-
-			// look for the bundles in removalPending list
-			// we always add removalPending dependants here even if
-			// the removalpending bundle was not in the original list
-			for (int i = removalPending.size() - 1; i >= 0; i--) {
-				BundleLoaderProxy removedLoaderProxy = (BundleLoaderProxy) removalPending.elementAt(i);
-				AbstractBundle removedBundle = removedLoaderProxy.getBundleHost();
-				if (!graph.contains(removedBundle)) {
-					graph.addElement(removedBundle);
-					changed = true;
-				}
-				AbstractBundle[] dependents = removedLoaderProxy.getDependentBundles();
-				for (int k = 0; k < dependents.length; k++) {
-					if (!graph.contains(dependents[k])) {
-						graph.addElement(dependents[k]);
-						changed = true;
-					}
-				}
-			}
-		} while (changed);
-
-		return graph;
-	}
-
-	/**
-	 * Sets all the bundles in the state that are resolved to the resolved
-	 * state.  This should only be called when the framework is launching.
-	 *
-	 */
-	protected void setResolvedBundles() {
-		State state = framework.adaptor.getState();
-		BundleDescription[] descriptions = state.getBundles();
-		for (int i = 0; i < descriptions.length; i++) {
-			long bundleId = descriptions[i].getBundleId();
-			AbstractBundle bundle = framework.getBundle(bundleId);
-			if (bundle == null) {
-				BundleException be = new BundleException(Msg.formatter.getString("BUNDLE_NOT_IN_FRAMEWORK", descriptions[i])); //$NON-NLS-1$
-				framework.publishFrameworkEvent(FrameworkEvent.ERROR, framework.systemBundle, be);
-				continue;
-			}
-			if (bundle != framework.systemBundle) {
-				if (descriptions[i].isResolved()) {
-					if (bundle.isFragment()) {
-						BundleHost host = (BundleHost) framework.getBundle(descriptions[i].getHost().getSupplier().getBundleId());
-						if (((BundleFragment) bundle).setHost(host)) {
-							bundle.resolve(descriptions[i].isSingleton());
-						}
-					} else {
-						bundle.resolve(descriptions[i].isSingleton());
-					}
-				}
-			}
-		}
-		exportedPackages = getExportedPackages(exportedPackages);
-		exportedBundles = getExportedBundles(exportedBundles);
-	}
-
-	/**
-	 * A permissible implementation of this method is to attempt to 
-	 * resolve all unresolved bundles installed in the framework.
-	 * That is what this method does.
-	 * @param bundles the set of bundles to attempt to resolve.
-	 */
-	public boolean resolveBundles(org.osgi.framework.Bundle[] bundles) {
-		resolveBundles();
-		if (bundles == null)
-			synchronized (framework.bundles) {
-				List bundleList = framework.bundles.getBundles();
-				bundles = (Bundle[]) bundleList.toArray(new AbstractBundle[bundleList.size()]);
-			}
-		for (int i = 0; i < bundles.length; i++)
-			if (!((AbstractBundle) bundles[i]).isResolved())
-				return false;
-
-		return true;
-	}
-
-	/**
-	 * Attempt to resolve all unresolved bundles. When this method returns
-	 * all bundles are resolved that can be resolved. A resolved bundle
-	 * has exported and imported packages. An unresolved bundle neither
-	 * exports nor imports packages.
-	 *
-	 */
-	protected void resolveBundles() {
-		long start = 0;
-		if (Debug.DEBUG && Debug.DEBUG_PACKAGEADMIN_TIMING)
-			start = System.currentTimeMillis();
-		/*
-		 * Resolve the bundles. This will make there exported packages available.
-		 */
-		if (Debug.DEBUG && Debug.DEBUG_PACKAGEADMIN) {
-			Debug.println("refreshBundles: resolve bundles"); //$NON-NLS-1$
-		}
-
-		Vector notify = new Vector();
-		synchronized (framework.bundles) {
-			boolean resolveNeeded = false;
-			List allBundles = framework.bundles.getBundles();
-			int size = allBundles.size();
-
-			// first check to see if there is anything to resolve
-			for (int i = 0; i < size; i++) {
-				if (!((AbstractBundle) allBundles.get(i)).isResolved())
-					resolveNeeded = true;
-			}
-			if (!resolveNeeded)
-				return;
-
-			// get the state and resolve it.
-			framework.adaptor.getState().resolve(false);
-			for (int i = 0; i < size; i++) {
-				AbstractBundle bundle = (AbstractBundle) allBundles.get(i);
-				if (bundle.isResolved() || bundle == framework.systemBundle)
-					continue;
-
-				BundleDescription changedBundleDes = bundle.getBundleDescription();
-				if (changedBundleDes == null) {
-					framework.publishFrameworkEvent(FrameworkEvent.ERROR, bundle, new BundleException(Msg.formatter.getString("BUNDLE_NOT_IN_STATE", bundle.getLocation()))); //$NON-NLS-1$
-				}
-
-				if (changedBundleDes.isResolved()) {
-					if (bundle.isFragment()) {
-						BundleHost host = (BundleHost) framework.getBundle(changedBundleDes.getHost().getSupplier().getBundleId());
-						if (((BundleFragment) bundle).setHost(host)) {
-							bundle.resolve(changedBundleDes.isSingleton());
-						}
-					} else {
-						bundle.resolve(changedBundleDes.isSingleton());
-					}
-					if (bundle.isResolved()) {
-						notify.add(bundle);
-					}
-				}
-			}
-
-			// update the exported package and bundle lists.
-			exportedPackages = getExportedPackages(exportedPackages);
-			exportedBundles = getExportedBundles(exportedBundles);
-		}
-		for (int i = 0; i < notify.size(); i++) {
-			AbstractBundle bundle = (AbstractBundle) notify.elementAt(i);
-			if (bundle != null) {
-				framework.publishBundleEvent(bundle.isResolved() ? BundleEvent.RESOLVED : BundleEvent.UNRESOLVED, bundle);
-			}
-		}
-		if (Debug.DEBUG && Debug.DEBUG_PACKAGEADMIN_TIMING) {
-			cumulativeTime = cumulativeTime + System.currentTimeMillis() - start;
-			DebugOptions.getDefault().setOption(Debug.OPTION_DEBUG_PACKAGEADMIN_TIMING + "/value", Long.toString(cumulativeTime)); //$NON-NLS-1$
-		}
-	}
-
-	protected void unexportResources(BundleLoaderProxy proxy) {
-		KeyedElement[] bundles = exportedBundles.elements();
-		for (int i = 0; i < bundles.length; i++) {
-			BundleLoaderProxy loaderProxy = (BundleLoaderProxy) bundles[i];
-			if (loaderProxy == proxy) {
-				exportedBundles.remove(proxy);
-			}
-		}
-
-		KeyedElement[] packages = exportedPackages.elements();
-		for (int i = 0; i < packages.length; i++) {
-			PackageSource source = (PackageSource) packages[i];
-			BundleLoaderProxy sourceProxy = source.getSupplier();
-			if (sourceProxy == proxy) {
-				exportedPackages.remove(source);
-			}
-		}
-		// make the proxy stale
-		proxy.setStale();
-	}
-
-	protected BundleDescription[] getBundleDescriptions(Vector graph) {
-		ArrayList result = new ArrayList();
-		int size = graph.size();
-		for (int i = 0; i < size; i++) {
-			AbstractBundle bundle = (AbstractBundle) graph.elementAt(i);
-			BundleDescription bundleDes = bundle.getBundleDescription();
-			if (bundleDes != null) {
-				result.add(bundleDes);
-			}
-		}
-		return (BundleDescription[]) result.toArray(new BundleDescription[result.size()]);
-	}
-
-	public ProvidingBundle[] getProvidingBundles(String symbolicName) {
-		if (exportedBundles == null || exportedBundles.size() == 0)
+	public RequiredBundle[] getRequiredBundles(String symbolicName) {
+		AbstractBundle[] bundles;
+		if (symbolicName == null)
+			bundles = framework.getAllBundles();
+		else
+			bundles = framework.getBundleBySymbolicName(symbolicName);
+		if (bundles == null || bundles.length == 0)
 			return null;
-
-		// need to make sure the dependacies are marked before this call.
-		framework.bundles.markDependancies();
-
-		KeyedElement[] allSymbolicBundles = exportedBundles.elements();
-		if (symbolicName == null) {
-			if (allSymbolicBundles.length == 0) {
-				return null;
-			}
-			ProvidingBundle[] result = new ProvidingBundle[allSymbolicBundles.length];
-			System.arraycopy(allSymbolicBundles, 0, result, 0, result.length);
-			return result;
-		} else {
-			ArrayList result = new ArrayList();
-			for (int i = 0; i < allSymbolicBundles.length; i++) {
-				ProvidingBundle symBundle = (ProvidingBundle) allSymbolicBundles[i];
-				if (symBundle.getSymbolicName().equals(symbolicName))
-					result.add(symBundle);
-			}
-			return (ProvidingBundle[]) result.toArray(new ProvidingBundle[result.size()]);
+		
+		ArrayList result = new ArrayList(bundles.length);
+		for (int i = 0; i < bundles.length; i++) {
+			if (bundles[i].isFragment() || !bundles[i].isResolved() || bundles[i].getSymbolicName() == null)
+				continue;
+			result.add(((BundleHost)bundles[i]).getLoaderProxy());
 		}
+		return result.size() == 0 ? null : (RequiredBundle[])result.toArray(new RequiredBundle[result.size()]);
 	}
 
-	public org.osgi.framework.Bundle[] getBundles(String symbolicName, String versionRange) {
+	public Bundle[] getBundles(String symbolicName, String versionRange) {
 		if (symbolicName == null) {
 			throw new IllegalArgumentException();
 		}
@@ -895,61 +458,122 @@ public class PackageAdminImpl implements PackageAdmin {
 
 	}
 
-	public org.osgi.framework.Bundle[] getFragments(org.osgi.framework.Bundle bundle) {
+	public Bundle[] getFragments(Bundle bundle) {
 		return ((AbstractBundle) bundle).getFragments();
 	}
 
-	public org.osgi.framework.Bundle[] getHosts(org.osgi.framework.Bundle bundle) {
-		org.osgi.framework.Bundle host = ((AbstractBundle) bundle).getHost();
-		if (host == null)
+	public Bundle[] getHosts(Bundle bundle) {
+		BundleLoaderProxy[] hosts = ((AbstractBundle) bundle).getHosts();
+		if (hosts == null)
 			return null;
+		Bundle[] result = new Bundle[hosts.length];
+		for (int i = 0; i < hosts.length; i++)
+			result[i] = hosts[i].getBundleHost();
+		return result;
+	}
+
+	public Bundle getBundle(final Class clazz) {
+		ClassLoader cl;
+		if (System.getSecurityManager() == null)
+			cl = clazz.getClassLoader();
 		else
-			return new org.osgi.framework.Bundle[] {host};
-	}
-
-	public int getBundleType(org.osgi.framework.Bundle bundle) {
-		return ((AbstractBundle) bundle).isFragment() ? PackageAdminImpl.BUNDLE_TYPE_FRAGMENT : 0;
-	}
-
-	protected Class loadServiceClass(String className, AbstractBundle bundle) {
-		try {
-			// first try the PARENT class space
-			return framework.adaptor.getBundleClassLoaderParent().loadClass(className);
-		} catch (ClassNotFoundException e) {
-			// do nothing; try exported packages
-		}
-		// try exported packages; SERVICE class space
-		String pkgname = BundleLoader.getPackageName(className);
-		if (pkgname != null) {
-			PackageSource exporter = (PackageSource) exportedPackages.getByKey(pkgname);
-			if (exporter != null) {
-				Class serviceClass = exporter.getSupplier().getBundleLoader().findLocalClass(className);
-				if (serviceClass != null)
-					return serviceClass;
-			}
-		}
-		// try bundle's PRIVATE class space
-		if (bundle == null)
+			cl = (ClassLoader)AccessController.doPrivileged(new PrivilegedAction() {
+				public Object run() {
+					return clazz.getClassLoader();
+				}
+			});
+		if (!(cl instanceof BundleClassLoader))
 			return null;
-		BundleLoader loader = bundle.getBundleLoader();
-		if (!checkServiceClassSource) {
-			try {
-				return loader.findClass(className);
-			} catch (ClassNotFoundException e1) {
-				return null;
+		return ((BundleLoader) ((BundleClassLoader)cl).getDelegate()).bundle;
+	}
+
+	public int getBundleType(Bundle bundle) {
+		return ((AbstractBundle) bundle).isFragment() ? PackageAdmin.BUNDLE_TYPE_FRAGMENT : 0;
+	}
+
+	protected void cleanup() { //This is only called when the framework is shutting down
+	}
+
+	protected void setResolvedBundles(SystemBundle systemBundle) {
+		try {
+			// first check that the system bundle has not changed since
+			// last saved state.
+			BundleDescription newSystemBundle = framework.adaptor.getState().getFactory().createBundleDescription(systemBundle.getHeaders(""), systemBundle.getLocation(), 0); //$NON-NLS-1$
+			if (newSystemBundle == null)
+				throw new BundleException(Msg.formatter.getString("OSGI_SYSTEMBUNDLE_DESCRIPTION_ERROR")); //$NON-NLS-1$
+			State state = framework.adaptor.getState();
+			BundleDescription oldSystemBundle = state.getBundle(0);
+			if (oldSystemBundle != null) {
+				boolean different = false;
+				if (newSystemBundle.getVersion() != null && !newSystemBundle.getVersion().equals(oldSystemBundle.getVersion()))
+					different = true;
+				// need to check to make sure the system bundle description
+				// is up to date in the state.
+				ExportPackageDescription[] oldPackages = oldSystemBundle.getExportPackages();
+				ExportPackageDescription[] newPackages = newSystemBundle.getExportPackages();
+				if (oldPackages.length == newPackages.length) {
+					for (int i = 0; i < oldPackages.length; i++) {
+						if (oldPackages[i].getName().equals(newPackages[i].getName())) {
+							Object oldVersion = oldPackages[i].getVersion();
+							Object newVersion = newPackages[i].getVersion();
+							if (oldVersion == null) {
+								if (newVersion != null) {
+									different = true;
+									break;
+								}
+							} else if (!oldVersion.equals(newVersion)) {
+								different = true;
+								break;
+							}
+						} else {
+							different = true;
+							break;
+						}
+					}
+				} else {
+					different = true;
+				}
+				if (different) {
+					state.removeBundle(0);
+					state.addBundle(newSystemBundle);
+					// force resolution so packages are properly linked
+					state.resolve(false);
+				}
+			} else {
+				state.addBundle(newSystemBundle);
+				// force resolution so packages are properly linked
+				state.resolve(false);
 			}
+			SystemBundleLoader.clearSystemPackages();
+			ExportPackageDescription[] packages = newSystemBundle.getExportPackages();
+			if (packages != null) {
+				String[] systemPackages = new String[packages.length];
+				for (int i = 0; i < packages.length; i++) {
+					ExportPackageDescription spec = packages[i];
+					if (spec.getName().equals(Constants.OSGI_FRAMEWORK_PACKAGE)) {
+						String version = spec.getVersion().toString();
+						if (version != null)
+							System.getProperties().put(Constants.FRAMEWORK_VERSION, version);
+					}
+					systemPackages[i] = spec.getName();
+				}
+				// remember the system packages.
+				if (System.getProperty(Constants.OSGI_AUTOEXPORTSYSTEMPACKAGES) != null)
+					SystemBundleLoader.setSystemPackages(systemPackages);
+			}
+		} catch (BundleException e) /* fatal error */{
+			e.printStackTrace();
+			throw new RuntimeException(Msg.formatter.getString("OSGI_SYSTEMBUNDLE_CREATE_EXCEPTION", e.getMessage())); //$NON-NLS-1$
 		}
-		if (restrictServiceClasses) {
-			// cannot have a service class from a package that a bundle 
-			// provides to a NAMED class space (unless it is exported also).
-			if (pkgname == null)
-				pkgname = BundleLoader.DEFAULT_PACKAGE;
-			if (loader.getProvidedPackage(pkgname) != null)
-				return null;
+
+		// Now set the actual state of the bundles from the persisted state.
+		State state = framework.adaptor.getState();
+		BundleDescription[] descriptions = state.getBundles();
+		for (int i = 0; i < descriptions.length; i++) {
+			long bundleId = descriptions[i].getBundleId();
+			if (bundleId == 0)
+				continue;
+			setResolved(descriptions[i]);
 		}
-		Class  serviceClass = loader.findLocalClass(className);
-		if (serviceClass == null || bundle.getBundleId() == 0)
-			return serviceClass;
-		return serviceClass.getClassLoader() == loader.createClassLoader() ? serviceClass : null;
 	}
 }

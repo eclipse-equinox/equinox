@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.security.PermissionCollection;
 import java.security.ProtectionDomain;
+import java.util.Enumeration;
 import org.eclipse.osgi.framework.adaptor.BundleData;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.osgi.framework.*;
@@ -22,7 +23,7 @@ import org.osgi.framework.*;
 public class BundleFragment extends AbstractBundle {
 
 	/** The resolved host that this fragment is attached to */
-	protected BundleHost host;
+	protected BundleLoaderProxy[] hosts;
 
 	/**
 	 * @param bundledata
@@ -31,7 +32,7 @@ public class BundleFragment extends AbstractBundle {
 	 */
 	public BundleFragment(BundleData bundledata, Framework framework) throws BundleException {
 		super(bundledata, framework);
-		host = null;
+		hosts = null;
 	}
 
 	/**
@@ -64,40 +65,6 @@ public class BundleFragment extends AbstractBundle {
 	}
 
 	/**
-	 * Changes the state from ACTIVE | RESOVED to INSTALLED.  This is called when a 
-	 * host gets reloaded or unloaded.
-	 * This method must be called while holding the bundles lock.
-	 *
-	 * @return  true if an exported package is "in use". i.e. it has been imported by a bundle
-	 */
-	protected boolean unresolve() {
-		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-			if ((state & (INSTALLED | RESOLVED)) == 0) {
-				Debug.println("Bundle.reload called when state != INSTALLED | RESOLVED: " + this); //$NON-NLS-1$
-				Debug.printStackTrace(new Exception("Stack trace")); //$NON-NLS-1$
-			}
-		}
-
-		if (framework.isActive()) {
-			if (host != null) {
-				if (state == RESOLVED) {
-					state = INSTALLED;
-					host = null;
-				}
-			}
-		} else {
-			/* close the outgoing jarfile */
-			try {
-				this.bundledata.close();
-			} catch (IOException e) {
-				// Do Nothing
-			}
-		}
-
-		return (false);
-	}
-
-	/**
 	 * Reload from a new bundle.
 	 * This method must be called while holding the bundles lock.
 	 *
@@ -114,17 +81,26 @@ public class BundleFragment extends AbstractBundle {
 		}
 
 		boolean exporting = false;
-
 		if (framework.isActive()) {
-			if (host != null) {
+			if (hosts != null) {
 				if (state == RESOLVED) {
-					// Unresolving the host will cause the fragment to unresolve
-					exporting = host.unresolve();
+					for (int i = 0; i < hosts.length; i++) {
+						exporting = hosts[i].inUse();
+						if (exporting)
+							break;
+					}
+					hosts = null;
+					state = INSTALLED;
 				}
 			}
-
+		} else {
+			/* close the outgoing jarfile */
+			try {
+				this.bundledata.close();
+			} catch (IOException e) {
+				// Do Nothing
+			}
 		}
-
 		if (!exporting) {
 			/* close the outgoing jarfile */
 			try {
@@ -156,7 +132,7 @@ public class BundleFragment extends AbstractBundle {
 		}
 
 		if (state == RESOLVED) {
-			host = null;
+			hosts = null;
 			state = INSTALLED;
 			// Do not publish UNRESOLVED event here.  This is done by caller 
 			// to resolve if appropriate.
@@ -179,29 +155,21 @@ public class BundleFragment extends AbstractBundle {
 		}
 
 		boolean exporting = false;
-
 		if (framework.isActive()) {
-			if (host != null) {
-				BundleHost resumeHost = host;
+			if (hosts != null) {
 				if (state == RESOLVED) {
-					// Unresolving the host will cause the fragment to unresolve
-					try {
-						exporting = host.unresolve();
-					} catch (BundleException be) {
-						framework.publishFrameworkEvent(FrameworkEvent.ERROR, this, be);
+					for (int i = 0; i < hosts.length; i++) {
+						exporting = hosts[i].inUse();
+						if (exporting)
+							break;
 					}
+					hosts = null;
+					state = INSTALLED;
 				}
-				if (!exporting) {
-					domain = null;
-					try {
-						this.bundledata.close();
-					} catch (IOException e) { // Do Nothing.
-					}
-				}
-				// We must resume the host now that we are unloaded.
-				framework.resumeBundle(resumeHost);
+				domain = null;
 			}
-		} else {
+		}
+		if (!exporting){
 			try {
 				this.bundledata.close();
 			} catch (IOException e) { // Do Nothing.
@@ -254,6 +222,13 @@ public class BundleFragment extends AbstractBundle {
 
 	}
 
+	public Enumeration getResources(String name) {
+		checkValid();
+		// cannot get a resource for a fragment because there is no classloader
+		// associated with fragments.
+		return null;
+	}
+
 	/**
 	 * Internal worker to start a bundle.
 	 *
@@ -266,9 +241,7 @@ public class BundleFragment extends AbstractBundle {
 			}
 
 			if (state == INSTALLED) {
-				framework.packageAdmin.resolveBundles();
-
-				if (state != RESOLVED) {
+				if (!framework.packageAdmin.resolveBundles(new Bundle[] {this})) {
 					throw new BundleException(getResolutionFailureMessage());
 				}
 			}
@@ -369,34 +342,42 @@ public class BundleFragment extends AbstractBundle {
 		return null;
 	}
 
-	public org.osgi.framework.Bundle getHost() {
-		return host;
+	protected BundleLoaderProxy[] getHosts() {
+		return hosts;
 	}
 
-	public boolean isFragment() {
+	protected boolean isFragment() {
 		return true;
 	}
 
 	/**
-	 * Sets the host for this fragment from the list of available
-	 * BundleExporters.  If a matching host cannot be found then a
-	 * resolve Exception is logged.
-	 * @param value the BundleHost to set the host to
+	 * Adds a host bundle for this fragment.
+	 * @param value the BundleHost to add to the set of host bundles
 	 */
-	protected boolean setHost(BundleHost value) {
-		host = value;
+	protected boolean addHost(BundleLoaderProxy host) {
 		if (host != null) {
 			try {
-				host.attachFragment(this);
+				((BundleHost)host.getBundleHost()).attachFragment(this);
 			} catch (BundleException be) {
-				framework.publishFrameworkEvent(FrameworkEvent.ERROR, host, be);
+				framework.publishFrameworkEvent(FrameworkEvent.ERROR, host.getBundleHost(), be);
 				return false;
 			}
 		}
+		if (hosts == null) {
+			hosts = new BundleLoaderProxy[] {host};
+			return true;
+		}
+		for (int i = 0; i < hosts.length; i++) {
+			if (host.getBundleHost() == hosts[i].getBundleHost())
+				return true; // already a host
+		}
+		BundleLoaderProxy[] newHosts = new BundleLoaderProxy[hosts.length + 1];
+		System.arraycopy(hosts,0,newHosts,0,hosts.length);
+		newHosts[newHosts.length - 1] = host; 
 		return true;
 	}
 
-	public BundleLoader getBundleLoader() {
+	protected BundleLoader getBundleLoader() {
 		// Fragments cannot have a BundleLoader.
 		return null;
 	}

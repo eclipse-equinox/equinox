@@ -11,27 +11,40 @@
 
 package org.eclipse.osgi.internal.resolver;
 
-import org.eclipse.osgi.service.resolver.BundleDescription;
-import org.eclipse.osgi.service.resolver.HostSpecification;
+import org.eclipse.osgi.service.resolver.*;
 
 public class HostSpecificationImpl extends VersionConstraintImpl implements HostSpecification {
-	private boolean reloadHost;
 
-	public boolean reloadHost() {
-		return reloadHost;
-	}
+	private BundleDescription[] hosts;
 
-	public void setReloadHost(boolean reloadHost) {
-		this.reloadHost = reloadHost;
-	}
-
-	public boolean isOptional() {
-		// a fragment cannot exist without its master
+	public boolean isSatisfiedBy(BaseDescription supplier) {
+		if (!(supplier instanceof BundleDescription))
+			return false;
+		BundleDescription candidate = (BundleDescription) supplier;
+		if (candidate.getHost() != null)
+			return false;
+		if (getName() != null && getName().equals(candidate.getSymbolicName()) &&
+				(getVersionRange() == null || getVersionRange().isIncluded(candidate.getVersion())))
+			return true;
 		return false;
 	}
 
-	public BundleDescription[] getSuppliers() {
-		BundleDescription supplier = getSupplier();
-		return (supplier == null) ? new BundleDescription[0] : new BundleDescription[] {supplier};
+	public BundleDescription[] getHosts() {
+		return hosts;
+	}
+
+	public boolean isResolved() {
+		return hosts != null && hosts.length > 0;
+	}
+
+	/*
+	 * The resolve algorithm will call this method to set the hosts.
+	 */
+	protected void setHosts(BundleDescription[] hosts) {
+		this.hosts = hosts;
+	}
+
+	public String toString() {
+		return "Fragment-Host: " + getName() + " - version: " + getVersionRange(); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 }

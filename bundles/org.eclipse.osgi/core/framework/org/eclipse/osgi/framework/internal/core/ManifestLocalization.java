@@ -15,6 +15,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.*;
 import org.eclipse.osgi.framework.util.Headers;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 
 /**
@@ -139,20 +140,17 @@ public class ManifestLocalization {
 	}
 
 	private URL findResource(String resource) {
+		AbstractBundle searchBundle = bundle;
 		if (bundle.isResolved()) {
-			AbstractBundle bundleHost;
 			if (bundle.isFragment()) {
 				//if the bundle is a fragment, look in the host first
-				bundleHost = (AbstractBundle) bundle.getHost();
-			} else {
-				//if the bundle is not a fragment, look in the bundle itself,
-				//then the attached fragments
-				bundleHost = bundle;
+				searchBundle = bundle.getHosts()[0].getBundleHost();
+				if (searchBundle.getState() == Bundle.UNINSTALLED)
+					searchBundle = bundle;
 			}
-			return findInResolved(resource, bundleHost);
-		} else {
-			return findInBundle(resource, bundle);
+			return findInResolved(resource, searchBundle);
 		}
+		return findInBundle(resource, searchBundle);
 	}
 
 	private URL findInResolved(String filePath, AbstractBundle bundleHost) {
@@ -171,7 +169,8 @@ public class ManifestLocalization {
 		org.osgi.framework.Bundle[] fragments = searchBundle.getFragments();
 		URL fileURL = null;
 		for (int i = 0; fragments != null && i < fragments.length && fileURL == null; i++) {
-			fileURL = fragments[i].getEntry(filePath);
+			if (fragments[i].getState() != Bundle.UNINSTALLED)
+				fileURL = fragments[i].getEntry(filePath);
 		}
 		return fileURL;
 	}

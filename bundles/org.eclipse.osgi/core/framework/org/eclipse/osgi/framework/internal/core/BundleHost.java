@@ -15,16 +15,15 @@ import java.io.IOException;
 import java.net.URL;
 import java.security.PermissionCollection;
 import java.security.ProtectionDomain;
+import java.util.Enumeration;
 import org.eclipse.osgi.framework.adaptor.BundleData;
 import org.eclipse.osgi.framework.adaptor.BundleWatcher;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.util.SecureAction;
+import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.osgi.framework.*;
 
 public class BundleHost extends AbstractBundle {
-
-	/** Loaded state object */
-	protected BundleLoader loader;
 
 	/** 
 	 * The BundleLoader proxy; a lightweight object that acts as a proxy
@@ -41,7 +40,6 @@ public class BundleHost extends AbstractBundle {
 	public BundleHost(BundleData bundledata, Framework framework) throws BundleException {
 		super(bundledata, framework);
 		context = null;
-		loader = null;
 		fragments = null;
 	}
 
@@ -55,8 +53,8 @@ public class BundleHost extends AbstractBundle {
 				Debug.println("Bundle.load called when state != INSTALLED: " + this); //$NON-NLS-1$
 				Debug.printStackTrace(new Exception("Stack trace")); //$NON-NLS-1$
 			}
-			if (loader != null) {
-				Debug.println("Bundle.load called when loader != null: " + this); //$NON-NLS-1$
+			if (proxy != null) {
+				Debug.println("Bundle.load called when proxy != null: " + this); //$NON-NLS-1$
 				Debug.printStackTrace(new Exception("Stack trace")); //$NON-NLS-1$
 			}
 		}
@@ -71,76 +69,7 @@ public class BundleHost extends AbstractBundle {
 			}
 
 		}
-		loader = null;
-
-	}
-
-	/**
-	 * Changes the state from ACTIVE | RESOVED to INSTALLED.  This is called when a 
-	 * fragment gets reloaded or unloaded.
-	 * This method must be called while holding the bundles lock.
-	 *
-	 * @return  true if an exported package is "in use". i.e. it has been imported by a bundle
-	 * @exception org.osgi.framework.BundleException
-	 */
-	protected boolean unresolve() throws BundleException {
-		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-			if ((state & (INSTALLED | RESOLVED)) == 0) {
-				Debug.println("Bundle.reload called when state != INSTALLED | RESOLVED: " + this); //$NON-NLS-1$
-				Debug.printStackTrace(new Exception("Stack trace")); //$NON-NLS-1$
-			}
-		}
-
-		boolean exporting = false;
-
-		if (framework.isActive()) {
-
-			if (state == RESOLVED) {
-				// suspend and acquire the state change lock
-				if (isActive()) {
-					boolean suspended = framework.suspendBundle(this, true);
-					if (!suspended) {
-						throw new BundleException(Msg.formatter.getString("BUNDLE_STATE_CHANGE_EXCEPTION")); //$NON-NLS-1$
-					}
-				} else {
-					beginStateChange();
-				}
-
-				BundleLoaderProxy curProxy = getLoaderProxy();
-				exporting = curProxy.inUse();
-				if (exporting) {
-					// make sure the BundleLoader is created so it can
-					// be added to the removalPending list.
-					curProxy.getBundleLoader();
-					framework.packageAdmin.addRemovalPending(curProxy);
-				} else {
-					framework.packageAdmin.unexportResources(curProxy);
-					if (loader != null) {
-						loader.clear();
-						loader.close();
-					}
-					framework.bundles.unMarkDependancies(curProxy);
-				}
-
-				unresolveFragments();
-				loader = null;
-				fragments = null;
-				proxy = null;
-				state = INSTALLED;
-				// publish UNRESOLVED event here
-				framework.publishBundleEvent(BundleEvent.UNRESOLVED, this);
-				completeStateChange();
-			}
-		} else {
-			/* close the outgoing jarfile */
-			try {
-				this.bundledata.close();
-			} catch (IOException e) {
-				// Do Nothing
-			}
-		}
-
-		return (exporting);
+		proxy = null;
 	}
 
 	/**
@@ -165,23 +94,13 @@ public class BundleHost extends AbstractBundle {
 			if (state == RESOLVED) {
 				BundleLoaderProxy curProxy = getLoaderProxy();
 				exporting = curProxy.inUse();
-				if (exporting) {
-					// make sure the BundleLoader is created so it can
-					// be added to the removalPending list.
-					curProxy.getBundleLoader();
-					framework.packageAdmin.addRemovalPending(curProxy);
-				} else {
-					framework.packageAdmin.unexportResources(curProxy);
-					if (loader != null) {
-						loader.clear();
-						loader.close();
-					}
-					framework.bundles.unMarkDependancies(curProxy);
-				}
+				if (exporting)
+					// make sure the BundleLoader is created.
+					curProxy.getBundleLoader().createClassLoader();
+				else
+					closeBundleLoader(proxy);
 				state = INSTALLED;
-				loader = null;
 				proxy = null;
-				unresolveFragments();
 				fragments = null;
 			}
 
@@ -199,19 +118,6 @@ public class BundleHost extends AbstractBundle {
 	}
 
 	/**
-	 * Unresolves all attached fragments.  This is called any time the host
-	 * bundle is reloaded, unloaded or is unresovled.
-	 *
-	 */
-	protected void unresolveFragments() {
-		if (fragments != null) {
-			for (int i = 0; i < fragments.length; i++) {
-				fragments[i].unresolve();
-			}
-		}
-	}
-
-	/**
 	 * Refresh the bundle. This is called by Framework.refreshPackages.
 	 * This method must be called while holding the bundles lock.
 	 *
@@ -225,14 +131,7 @@ public class BundleHost extends AbstractBundle {
 			}
 		}
 		if (state == RESOLVED) {
-			BundleLoaderProxy curProxy = getLoaderProxy();
-			framework.packageAdmin.unexportResources(curProxy);
-			if (loader != null) {
-				loader.clear();
-				loader.close();
-			}
-			framework.bundles.unMarkDependancies(curProxy);
-			loader = null;
+			closeBundleLoader(proxy);
 			proxy = null;
 			fragments = null;
 			state = INSTALLED;
@@ -262,24 +161,14 @@ public class BundleHost extends AbstractBundle {
 			if (state == RESOLVED) {
 				BundleLoaderProxy curProxy = getLoaderProxy();
 				exporting = curProxy.inUse();
-				if (exporting) {
-					// make sure the BundleLoader is created so it can
-					// be added to the removalPending list.
-					curProxy.getBundleLoader();
-					framework.packageAdmin.addRemovalPending(curProxy);
-				} else {
-					framework.packageAdmin.unexportResources(curProxy);
-					if (loader != null) {
-						loader.clear();
-						loader.close();
-					}
-					framework.bundles.unMarkDependancies(curProxy);
-				}
+				if (exporting)
+					// make sure the BundleLoader is created.
+					curProxy.getBundleLoader().createClassLoader();
+				else
+					closeBundleLoader(proxy);
 
 				state = INSTALLED;
-				loader = null;
 				proxy = null;
-				unresolveFragments();
 				fragments = null;
 				domain = null;
 			}
@@ -293,6 +182,35 @@ public class BundleHost extends AbstractBundle {
 		return (exporting);
 	}
 
+	private BundleLoader checkLoader(boolean checkPermission) {
+		checkValid();
+		if (checkPermission) {
+			framework.checkAdminPermission();
+		}
+		// check to see if the bundle is resolved
+		if (!isResolved()) {
+			if (!framework.packageAdmin.resolveBundles(new Bundle[] {this})) {
+				return null;
+			}
+		}
+		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+			if ((state & (STARTING | ACTIVE | STOPPING | RESOLVED)) == 0) {
+				Debug.println("Bundle.checkLoader() called when state != STARTING | ACTIVE | STOPPING | RESOLVED: " + this); //$NON-NLS-1$ //$NON-NLS-2$
+				Debug.printStackTrace(new Exception("Stack trace")); //$NON-NLS-1$
+			}
+		}
+
+		BundleLoader loader = getBundleLoader();
+		if (loader == null) {
+			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+				Debug.println("Bundle.checkLoader() called when loader == null: " + this); //$NON-NLS-1$ //$NON-NLS-2$
+				Debug.printStackTrace(new Exception("Stack trace")); //$NON-NLS-1$
+			}
+			return null;
+		}
+		return loader;
+	}
+
 	/**
 	 * This method loads a class from the bundle.
 	 *
@@ -302,33 +220,9 @@ public class BundleHost extends AbstractBundle {
 	 * @exception  java.lang.ClassNotFoundException  if the class definition was not found.
 	 */
 	protected Class loadClass(String name, boolean checkPermission) throws ClassNotFoundException {
-		checkValid();
-		if (checkPermission) {
-			framework.checkAdminPermission();
-		}
-		// check to see if the bundle is resolved
-		if (!isResolved()) {
-			framework.packageAdmin.resolveBundles();
-			if (!isResolved()) {
-				throw new ClassNotFoundException(Msg.formatter.getString("BUNDLE_CNFE_NOT_RESOLVED", getLocation(), name)); //$NON-NLS-1$
-			}
-		}
-		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-			if ((state & (STARTING | ACTIVE | STOPPING | RESOLVED)) == 0) {
-				Debug.println("Bundle.loadClass(" + name + ") called when state != STARTING | ACTIVE | STOPPING | RESOLVED: " + this); //$NON-NLS-1$ //$NON-NLS-2$
-				Debug.printStackTrace(new Exception("Stack trace")); //$NON-NLS-1$
-			}
-		}
-
-		getBundleLoader();
-		if (loader == null) {
-			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-				Debug.println("Bundle.loadClass(" + name + ") called when loader == null: " + this); //$NON-NLS-1$ //$NON-NLS-2$
-				Debug.printStackTrace(new Exception("Stack trace")); //$NON-NLS-1$
-			}
-			throw new ClassNotFoundException(name);
-		}
-
+		BundleLoader loader = checkLoader(checkPermission);
+		if (loader == null)
+			throw new ClassNotFoundException(Msg.formatter.getString("BUNDLE_CNFE_NOT_RESOLVED", getLocation(), name)); //$NON-NLS-1$
 		return (loader.loadClass(name));
 	}
 
@@ -350,26 +244,33 @@ public class BundleHost extends AbstractBundle {
 	 * @exception java.lang.IllegalStateException If this bundle has been uninstalled.
 	 */
 	public URL getResource(String name) {
-		checkValid();
-		framework.checkAdminPermission();
-		// check to see if the bundle is resolved
-		if (!isResolved()) {
-			framework.packageAdmin.resolveBundles();
-			if (!isResolved()) {
-				return null;
-			}
+		BundleLoader loader = null;
+		try {
+			loader = checkLoader(true);
+		} catch (SecurityException e) {
+			return null;
 		}
-		getBundleLoader();
-		if (loader == null) {
-			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-				Debug.println("Bundle.getResource(" + name + ") called when loader == null: " + this); //$NON-NLS-1$ //$NON-NLS-2$
-				Debug.printStackTrace(new Exception("Stack trace")); //$NON-NLS-1$
-			}
-
-			return (null);
-		}
-
+		if (loader == null)
+			return null;
 		return (loader.getResource(name));
+	}
+
+	public Enumeration getResources(String name) {
+		BundleLoader loader = null;
+		try {
+			loader = checkLoader(true);
+		} catch (SecurityException e) {
+			return null;
+		}
+		if (loader == null)
+			return null;
+
+		try {
+			return loader.getResources(name);
+		}
+		catch (IOException e) {
+			return null;
+		}
 	}
 
 	/**
@@ -386,9 +287,7 @@ public class BundleHost extends AbstractBundle {
 
 			try {
 				if (state == INSTALLED) {
-					framework.packageAdmin.resolveBundles();
-
-					if (state != RESOLVED) {
+					if (!framework.packageAdmin.resolveBundles(new Bundle[] {this})) {
 						throw new BundleException(getResolutionFailureMessage());
 					}
 				}
@@ -565,14 +464,11 @@ public class BundleHost extends AbstractBundle {
 		return (context.getServicesInUse());
 	}
 
-	/* (non-Javadoc)
-	 * @see org.osgi.framework.Bundle#getFragments()
-	 */
-	public org.osgi.framework.Bundle[] getFragments() {
+	protected Bundle[] getFragments() {
 		synchronized (framework.bundles) {
 			if (fragments == null)
 				return null;
-			org.osgi.framework.Bundle[] result = new org.osgi.framework.Bundle[fragments.length];
+			Bundle[] result = new Bundle[fragments.length];
 			System.arraycopy(fragments, 0, result, 0, result.length);
 			return result;
 		}
@@ -587,6 +483,8 @@ public class BundleHost extends AbstractBundle {
 	 * could not be logically inserted at the end of the fragment chain.
 	 */
 	protected void attachFragment(BundleFragment fragment) throws BundleException {
+		// do not force the creation of the bundle loader here
+		BundleLoader loader = getLoaderProxy().getBasicBundleLoader();
 		if (fragments == null) {
 			fragments = new BundleFragment[] {fragment};
 		} else {
@@ -595,6 +493,8 @@ public class BundleHost extends AbstractBundle {
 			// install order.
 			BundleFragment[] newFragments = new BundleFragment[fragments.length + 1];
 			for (int i = 0; i < fragments.length; i++) {
+				if (fragment == fragments[i])
+					return; // this fragment is already attached
 				if (!inserted && fragment.getBundleId() < fragments[i].getBundleId()) {
 					// if the loader has already been created
 					// then we cannot attach a fragment into the middle
@@ -612,7 +512,7 @@ public class BundleHost extends AbstractBundle {
 			fragments = newFragments;
 		}
 
-		// If the Host ClassLoader has exists then we must attach
+		// If the Host ClassLoader exists then we must attach
 		// the fragment to the ClassLoader.
 		if (loader != null) {
 			loader.attachFragment(fragment, SecureAction.getProperties());
@@ -620,31 +520,36 @@ public class BundleHost extends AbstractBundle {
 
 	}
 
-	public BundleLoader getBundleLoader() {
-		if (loader == null) {
-			synchronized (this) {
-				if (loader == null)
-					try {
-						loader = new BundleLoader(this, getBundleDescription());
-						getLoaderProxy().setBundleLoader(loader);
-					} catch (BundleException e) {
-						framework.publishFrameworkEvent(FrameworkEvent.ERROR, this, e);
-						return null;
-					}
-			}
-		}
-		return loader;
+	protected BundleLoader getBundleLoader() {
+		return getLoaderProxy().getBundleLoader();
 	}
 
 	protected BundleLoaderProxy getLoaderProxy() {
 		if (proxy == null) {
 			synchronized (this) {
 				if (proxy == null) {
-					proxy = new BundleLoaderProxy(this);
+					BundleDescription bundleDescription = getBundleDescription();
+					proxy = new BundleLoaderProxy(this, bundleDescription);
+					bundleDescription.setUserObject(proxy);
 				}
 			}
 		}
 		return proxy;
 	}
 
+	static void closeBundleLoader(BundleLoaderProxy proxy) {
+		if (proxy == null)
+			return;
+		// First close the BundleLoader
+		BundleLoader loader = proxy.getBasicBundleLoader();
+		if (loader != null) {
+			loader.clear();
+			loader.close();
+		}
+		proxy.setStale();
+		// if proxy is not null then make sure to unset user object
+		// associated with the proxy in the state
+		BundleDescription description = proxy.getBundleDescription();
+		description.setUserObject(null);
+	}
 }

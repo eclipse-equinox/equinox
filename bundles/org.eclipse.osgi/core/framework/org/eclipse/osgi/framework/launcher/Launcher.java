@@ -147,7 +147,7 @@ public class Launcher {
 	 *  @param args The command line arguments
 	 *  @return String [] Any arguments that should be passed to the console
 	 */
-	private String[] parseArgs(String[] args) {
+	protected String[] parseArgs(String[] args) {
 		Vector consoleArgsVector = new Vector();
 		for (int i = 0; i < args.length; i++) {
 			boolean match = false;

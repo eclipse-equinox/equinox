@@ -21,7 +21,6 @@ import org.eclipse.osgi.framework.eventmgr.*;
 import org.eclipse.osgi.framework.internal.protocol.ContentHandlerFactory;
 import org.eclipse.osgi.framework.internal.protocol.StreamHandlerFactory;
 import org.eclipse.osgi.framework.log.FrameworkLog;
-import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.*;
 
@@ -166,18 +165,11 @@ public class Framework implements EventDispatcher, EventPublisher {
 					AbstractBundle bundle = AbstractBundle.createBundle(bundledata, this);
 					bundles.add(bundle);
 				} catch (BundleException be) {
-					// This is not a fatal error. Publish the framework event, but
-					// since no log service is probably running we will also print a stack trace.
+					// This is not a fatal error. Publish the framework event.
 					publishFrameworkEvent(FrameworkEvent.ERROR, systemBundle, be);
-					//be.printStackTrace();
 				}
 			}
 		}
-		// initialize package admin; this must be done after the system bundle
-		// has been added to the state.
-		packageAdmin.initialize();
-		systemBundle.getBundleLoader(); // initialize the bundle loader in case
-		// someone accesses it directly
 		if (Debug.DEBUG && Debug.DEBUG_GENERAL)
 			System.out.println("Initialize the framework: " + (System.currentTimeMillis() - start)); //$NON-NLS-1$
 	}
@@ -185,70 +177,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 	private void createSystemBundle() {
 		try {
 			systemBundle = new SystemBundle(this);
-			BundleDescription newSystemBundle = adaptor.getPlatformAdmin().getFactory().createBundleDescription(systemBundle.getHeaders(""), Constants.SYSTEM_BUNDLE_LOCATION, 0); //$NON-NLS-1$
-			if (newSystemBundle == null)
-				throw new BundleException(Msg.formatter.getString("OSGI_SYSTEMBUNDLE_DESCRIPTION_ERROR")); //$NON-NLS-1$
-			State state = adaptor.getState();
-			BundleDescription oldSystemBundle = state.getBundle(0);
-			if (oldSystemBundle != null) {
-				boolean different = false;
-				if (newSystemBundle.getVersion() != null && !newSystemBundle.getVersion().equals(oldSystemBundle.getVersion()))
-					different = true;
-				// need to check to make sure the system bundle description
-				// is up to date in the state.
-				PackageSpecification[] oldPackages = oldSystemBundle.getPackages();
-				PackageSpecification[] newPackages = newSystemBundle.getPackages();
-				if (oldPackages.length == newPackages.length) {
-					for (int i = 0; i < oldPackages.length; i++) {
-						if (oldPackages[i].getName().equals(newPackages[i].getName())) {
-							Object oldVersion = oldPackages[i].getVersionRange().getMinimum();
-							Object newVersion = newPackages[i].getVersionRange().getMinimum();
-							if (oldVersion == null) {
-								if (newVersion != null) {
-									different = true;
-									break;
-								}
-							} else if (!oldVersion.equals(newVersion)) {
-								different = true;
-								break;
-							}
-						} else {
-							different = true;
-							break;
-						}
-					}
-				} else {
-					different = true;
-				}
-				if (different) {
-					state.removeBundle(0);
-					state.addBundle(newSystemBundle);
-					// force resolution so packages are properly linked
-					state.resolve(false);
-				}
-			} else {
-				state.addBundle(newSystemBundle);
-				// force resolution so packages are properly linked
-				state.resolve(false);
-			}
-			SystemBundleLoader.clearSystemPackages();
-			PackageSpecification[] packages = newSystemBundle.getPackages();
-			if (packages != null) {
-				String[] systemPackages = new String[packages.length];
-				for (int i = 0; i < packages.length; i++) {
-					PackageSpecification spec = packages[i];
-					if (spec.getName().equals(Constants.OSGI_FRAMEWORK_PACKAGE)) {
-						String version = spec.getVersionRange().getMinimum().toString();
-						if (version != null)
-							properties.put(Constants.FRAMEWORK_VERSION, version);
-					}
-					systemPackages[i] = spec.getName();
-				}
-				// remember the system packages.
-				if (System.getProperty(Constants.OSGI_AUTOEXPORTSYSTEMPACKAGES) != null)
-					SystemBundleLoader.setSystemPackages(systemPackages);
-			}
-		} catch (BundleException e) /* fatal error */{
+		} catch (BundleException e) { // fatal error
 			e.printStackTrace();
 			throw new RuntimeException(Msg.formatter.getString("OSGI_SYSTEMBUNDLE_CREATE_EXCEPTION", e.getMessage())); //$NON-NLS-1$
 		}
@@ -623,7 +552,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 	 *            The location identifier of the bundle to install.
 	 * @return The Bundle object of the installed bundle.
 	 */
-	protected AbstractBundle installBundle(final String location) throws BundleException {
+	public AbstractBundle installBundle(final String location) throws BundleException {
 		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 			Debug.println("install from location: " + location); //$NON-NLS-1$
 		}
@@ -752,6 +681,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 				}
 			}
 			bundle = createBundle(bundledata);
+			//TODO Verify the manifest... for example that the same package is imported twice 
 			try {
 				// Select the native code paths for the bundle;
 				// this is not done by the adaptor because this
@@ -844,7 +774,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 		/* Pass 2: perform osversion matching */
 		Version osversion;
 		try {
-			osversion = new Version(getProperty(Constants.FRAMEWORK_OS_VERSION));
+			osversion = Version.parseVersion(getProperty(Constants.FRAMEWORK_OS_VERSION));
 		} catch (Exception e) {
 			osversion = Version.emptyVersion;
 		}
@@ -938,7 +868,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 	 * @return A {@link AbstractBundle}object, or <code>null</code> if the
 	 *         identifier doesn't match any installed bundle.
 	 */
-	protected AbstractBundle getBundleBySymbolicName(String symbolicName, String version) {
+	public AbstractBundle getBundleBySymbolicName(String symbolicName, String version) {
 		synchronized (bundles) {
 			return bundles.getBundle(symbolicName, version);
 		}
@@ -1134,7 +1064,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 	 *                If <tt>filter</tt> contains an invalid filter string
 	 *                which cannot be parsed.
 	 */
-	protected ServiceReference[] getServiceReferences(String clazz, String filterstring) throws InvalidSyntaxException {
+	protected ServiceReference[] getServiceReferences(String clazz, String filterstring, BundleContextImpl context, boolean allservices) throws InvalidSyntaxException {
 		FilterImpl filter = (filterstring == null) ? null : new FilterImpl(filterstring);
 		ServiceReference[] services = null;
 		if (clazz != null) {
@@ -1149,31 +1079,36 @@ public class Framework implements EventDispatcher, EventPublisher {
 			if (services == null) {
 				return null;
 			}
-			if (clazz == null) {
-				int removed = 0;
-				for (int i = services.length - 1; i >= 0; i--) {
-					ServiceReferenceImpl ref = (ServiceReferenceImpl) services[i];
-					String[] classes = ref.getClasses();
-					try { /* test for permission to the classes */
-						checkGetServicePermission(classes);
-					} catch (SecurityException se) {
-						services[i] = null;
-						removed++;
-					}
-				}
-				if (removed > 0) {
-					ServiceReference[] temp = services;
-					services = new ServiceReference[temp.length - removed];
-					for (int i = temp.length - 1; i >= 0; i--) {
-						if (temp[i] == null)
-							removed--;
-						else
-							services[i - removed] = temp[i];
-					}
+			int removed = 0;
+			for (int i = services.length - 1; i >= 0; i--) {
+				ServiceReferenceImpl ref = (ServiceReferenceImpl) services[i];
+				String[] classes = ref.getClasses();
+				if (allservices || context.isAssignableTo((ServiceReferenceImpl) services[i])) {
+					if (clazz == null)
+						try { /* test for permission to the classes */
+							checkGetServicePermission(classes);
+						} catch (SecurityException se) {
+							services[i] = null;
+							removed++;
+						}
+				} else {
+					services[i] = null;
+					removed++;
 				}
 			}
+			if (removed > 0) {
+				ServiceReference[] temp = services;
+				services = new ServiceReference[temp.length - removed];
+				for (int i = temp.length - 1; i >= 0; i--) {
+					if (temp[i] == null)
+						removed--;
+					else
+						services[i - removed] = temp[i];
+				}
+			}
+
 		}
-		return services;
+		return services == null || services.length == 0 ? null : services;
 	}
 
 	/**

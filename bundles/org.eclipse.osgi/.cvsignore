@@ -5,5 +5,4 @@ console.jar
 core.jar
 defaultAdaptor.jar
 eclipseAdaptor.jar
-osgi.jar
 resolver.jar

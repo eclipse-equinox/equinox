@@ -11,6 +11,7 @@
 
 package org.eclipse.osgi.framework.adaptor;
 
+import java.io.IOException;
 import java.net.URL;
 import java.security.ProtectionDomain;
 import java.util.Enumeration;
@@ -62,12 +63,13 @@ public interface BundleClassLoader /*extends ClassLoader*/{
 	public Class findLocalClass(String classname) throws ClassNotFoundException;
 
 	/**
-	 * Finds a local object in the BundleClassLoader without
-	 * consulting the delegate.
-	 * @param object the object name to fined.
-	 * @return the object found or null if the object does not exist.
+	 * This method will first search the parent class loader for the resource;
+	 * That failing, this method will invoke 
+	 * {@link ClassLoaderDelegate#findResource(String)} to find the resource.   
+	 * @param name the resource path to get.
+	 * @return
 	 */
-	public Object findLocalObject(String object);
+	public URL getResource(String name);
 
 	/**
 	 * This method will first search the parent class loader for the resource;
@@ -76,7 +78,7 @@ public interface BundleClassLoader /*extends ClassLoader*/{
 	 * @param name the resource path to get.
 	 * @return
 	 */
-	public URL getResource(String name);
+	public Enumeration getResources(String name) throws IOException;
 
 	/**
 	 * This method will first search the parent class loader for the class;
@@ -110,7 +112,12 @@ public interface BundleClassLoader /*extends ClassLoader*/{
 	 * use for loading classes and resources.  This is specified by the 
 	 * Bundle-ClassPath manifest entry of the fragment.
 	 */
-	abstract public void attachFragment(BundleData bundledata, ProtectionDomain domain, String[] classpath);
+	public void attachFragment(BundleData bundledata, ProtectionDomain domain, String[] classpath);
+
+	/**
+	 * Returns the ClassLoaderDelegate used by this BundleClassLoader
+	 * @return the ClassLoaderDelegate used by this BundleClassLoader
+	 */
+	public ClassLoaderDelegate getDelegate();
 
 }
-

@@ -14,7 +14,7 @@ import java.util.Dictionary;
 import java.util.Enumeration;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
-import org.eclipse.osgi.service.resolver.Version;
+import org.osgi.framework.*;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 
@@ -30,7 +30,7 @@ public class CachedManifest extends Dictionary {
 		this.bundledata = bundledata;
 	}
 
-	private Dictionary getManifest() {
+	Dictionary getManifest() {
 		if (manifest == null)
 			try {
 				manifest = bundledata.loadManifest();

@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.eclipse.osgi.framework.internal.core;
 
+import java.net.URL;
+import java.util.Enumeration;
+
 /**
  * This class is used to optimize finding provided-packages for a bundle.
  * If the package cannot be found in a list of required bundles then this class
@@ -18,18 +21,10 @@ package org.eclipse.osgi.framework.internal.core;
  */
 public class NullPackageSource extends PackageSource {
 	public NullPackageSource(String name) {
-		this.id = name;
+		super(name);
 	}
 
-	public BundleLoaderProxy getSupplier() {
-		return null;
-	}
-
-	public boolean isMultivalued() {
-		return false;
-	}
-
-	public BundleLoaderProxy[] getSuppliers() {
+	public SingleSourcePackage[] getSuppliers() {
 		return null;
 	}
 
@@ -39,5 +34,17 @@ public class NullPackageSource extends PackageSource {
 
 	public String toString() {
 		return id + " -> null"; //$NON-NLS-1$
+	}
+
+	public Class loadClass(String name, String pkgName) {
+		return null;
+	}
+
+	public URL getResource(String name, String pkgName) {
+		return null;
+	}
+
+	public Enumeration getResources(String name, String pkgName) {
+		return null;
 	}
 }

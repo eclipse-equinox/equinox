@@ -15,11 +15,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.security.Permission;
-import java.util.Hashtable;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.util.SecureAction;
 import org.osgi.framework.BundleException;
-import org.osgi.framework.FrameworkEvent;
 
 /**
  * This class subclasses Bundle to provide a system Bundle
@@ -41,21 +39,6 @@ public class SystemBundle extends BundleHost {
 		super(framework.adaptor.createSystemBundleData(), framework); // startlevel=0 means framework stopped
 		state = STARTING;
 		context = createContext();
-	}
-
-	public BundleLoader getBundleLoader() {
-		if (loader == null) {
-			synchronized (this) {
-				if (loader == null)
-					try {
-						loader = new SystemBundleLoader(this, getBundleDescription());
-					} catch (BundleException e) {
-						framework.publishFrameworkEvent(FrameworkEvent.ERROR, this, e);
-						return null;
-					}
-			}
-		}
-		return loader;
 	}
 
 	/**
@@ -88,6 +71,7 @@ public class SystemBundle extends BundleHost {
 	 *
 	 */
 	protected void refresh() throws BundleException {
+		// do nothing
 	}
 
 	/**
@@ -280,10 +264,12 @@ public class SystemBundle extends BundleHost {
 	/**
 	 * No work to do for the SystemBundle.
 	 *
-	 * @param unresolvedPackages A list of the package which have been unresolved
-	 * as a result of a packageRefresh
+	 * @param refreshedBundles
+	 *            A list of bundles which have been refreshed as a result
+	 *            of a packageRefresh
 	 */
-	protected void unresolvePermissions(Hashtable unresolvedPackages) {
+	protected void unresolvePermissions(AbstractBundle[] refreshedBundles) {
+		// Do nothing
 	}
 
 	/**

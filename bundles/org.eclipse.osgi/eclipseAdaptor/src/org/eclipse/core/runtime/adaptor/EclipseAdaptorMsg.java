@@ -41,7 +41,7 @@ public class EclipseAdaptorMsg {
 	public static String getResolutionFailureMessage(VersionConstraint unsatisfied) {
 		if (unsatisfied.isResolved())
 			throw new IllegalArgumentException();
-		if (unsatisfied instanceof PackageSpecification)
+		if (unsatisfied instanceof ImportPackageSpecification)
 			return EclipseAdaptorMsg.formatter.getString("ECLIPSE_MISSING_IMPORTED_PACKAGE", toString(unsatisfied)); //$NON-NLS-1$
 		else if (unsatisfied instanceof BundleSpecification)
 			if (((BundleSpecification) unsatisfied).isOptional())

@@ -10,42 +10,21 @@
  *******************************************************************************/
 package org.eclipse.core.runtime.adaptor;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Dictionary;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.internal.defaultadaptor.DevClassPathHelper;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.service.pluginconversion.PluginConversionException;
 import org.eclipse.osgi.service.pluginconversion.PluginConverter;
-import org.eclipse.osgi.service.resolver.Version;
 import org.eclipse.osgi.service.resolver.VersionRange;
 import org.eclipse.osgi.util.ManifestElement;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.BundleException;
+import org.osgi.framework.*;
 
 /**
  * Internal class.
@@ -252,6 +231,7 @@ public class PluginConverterImpl implements PluginConverter {
 			out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(generationLocation), UTF_8));
 			writeEntry(MANIFEST_VERSION, (String) manifestToWrite.remove(MANIFEST_VERSION));
 			writeEntry(GENERATED_FROM, (String) manifestToWrite.remove(GENERATED_FROM)); //Need to do this first uptoDate check expect the generated-from tag to be in the first line
+			writeEntry(Constants.BUNDLE_MANIFESTVERSION, (String) manifestToWrite.remove(Constants.BUNDLE_MANIFESTVERSION));
 			writeEntry(Constants.BUNDLE_NAME, (String) manifestToWrite.remove(Constants.BUNDLE_NAME));
 			writeEntry(Constants.BUNDLE_SYMBOLICNAME, (String) manifestToWrite.remove(Constants.BUNDLE_SYMBOLICNAME));
 			writeEntry(Constants.BUNDLE_VERSION, (String) manifestToWrite.remove(Constants.BUNDLE_VERSION));
@@ -260,7 +240,7 @@ public class PluginConverterImpl implements PluginConverter {
 			writeEntry(Constants.BUNDLE_VENDOR, (String) manifestToWrite.remove(Constants.BUNDLE_VENDOR));
 			writeEntry(Constants.FRAGMENT_HOST, (String) manifestToWrite.remove(Constants.FRAGMENT_HOST));
 			writeEntry(Constants.BUNDLE_LOCALIZATION, (String) manifestToWrite.remove(Constants.BUNDLE_LOCALIZATION));
-			writeEntry(Constants.PROVIDE_PACKAGE, (String) manifestToWrite.remove(Constants.PROVIDE_PACKAGE));
+			writeEntry(Constants.EXPORT_PACKAGE, (String) manifestToWrite.remove(Constants.EXPORT_PACKAGE));
 			writeEntry(Constants.REQUIRE_BUNDLE, (String) manifestToWrite.remove(Constants.REQUIRE_BUNDLE));
 			Enumeration keys = manifestToWrite.keys();
 			while (keys.hasMoreElements()) {
@@ -316,6 +296,7 @@ public class PluginConverterImpl implements PluginConverter {
 	}
 
 	private void generateHeaders() {
+		generatedManifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
 		generatedManifest.put(Constants.BUNDLE_NAME, pluginInfo.getPluginName());
 		generatedManifest.put(Constants.BUNDLE_VERSION, pluginInfo.getVersion());
 		generatedManifest.put(Constants.BUNDLE_SYMBOLICNAME, getSymbolicNameEntry());
@@ -358,7 +339,7 @@ public class PluginConverterImpl implements PluginConverter {
 	private void generateProvidePackage() {
 		Set exports = getExports();
 		if (exports != null && exports.size() != 0) {
-			generatedManifest.put(Constants.PROVIDE_PACKAGE, getStringFromCollection(exports, LIST_SEPARATOR));
+			generatedManifest.put(Constants.EXPORT_PACKAGE, getStringFromCollection(exports, LIST_SEPARATOR));
 		}
 	}
 
@@ -374,10 +355,10 @@ public class PluginConverterImpl implements PluginConverter {
 			if (versionRange != null)
 				modImport.append(versionRange);
 			if (element.isExported()) {
-				modImport.append(';').append(Constants.REPROVIDE_ATTRIBUTE).append("=true");//$NON-NLS-1$ 
+				modImport.append(';').append(Constants.VISIBILITY_DIRECTIVE).append(":=").append(Constants.VISIBILITY_REEXPORT);//$NON-NLS-1$ 
 			}
 			if (element.isOptional()) {
-				modImport.append(';').append(Constants.OPTIONAL_ATTRIBUTE).append("=true");//$NON-NLS-1$
+				modImport.append(';').append(Constants.RESOLUTION_DIRECTIVE).append(":=").append(Constants.RESOLUTION_OPTIONAL);//$NON-NLS-1$
 			}
 			bundleRequire.append(modImport.toString());
 			if (iter.hasNext())
@@ -684,23 +665,23 @@ public class PluginConverterImpl implements PluginConverter {
 		if (reqVersion == null)
 			return null;
 
-		Version minVersion = new Version(reqVersion);
+		Version minVersion = Version.parseVersion(reqVersion);
 		String versionRange;
 		if (matchRule != null) {
 			if (matchRule.equalsIgnoreCase(IModel.PLUGIN_REQUIRES_MATCH_PERFECT)) {
-				versionRange = new VersionRange(minVersion, minVersion).toString();
+				versionRange = new VersionRange(minVersion, true, minVersion, true).toString();
 			} else if (matchRule.equalsIgnoreCase(IModel.PLUGIN_REQUIRES_MATCH_EQUIVALENT)) {
-				versionRange = new VersionRange(minVersion, new Version(minVersion.getMajorComponent(), minVersion.getMinorComponent() + 1, 0, "", false)).toString(); //$NON-NLS-1$
+				versionRange = new VersionRange(minVersion, true, new Version(minVersion.getMajor(), minVersion.getMinor() + 1, 0, ""), false).toString(); //$NON-NLS-1$
 			} else if (matchRule.equalsIgnoreCase(IModel.PLUGIN_REQUIRES_MATCH_COMPATIBLE)) {
-				versionRange = new VersionRange(minVersion, new Version(minVersion.getMajorComponent() + 1, 0, 0, "", false)).toString(); //$NON-NLS-1$
+				versionRange = new VersionRange(minVersion, true, new Version(minVersion.getMajor() + 1, 0, 0, ""), false).toString(); //$NON-NLS-1$
 			} else if (matchRule.equalsIgnoreCase(IModel.PLUGIN_REQUIRES_MATCH_GREATER_OR_EQUAL)) {
 				// just return the reqVersion here without any version range
 				versionRange = reqVersion;
 			} else {
-				versionRange = new VersionRange(minVersion, new Version(minVersion.getMajorComponent() + 1, 0, 0, "", false)).toString(); //$NON-NLS-1$
+				versionRange = new VersionRange(minVersion, true, new Version(minVersion.getMajor() + 1, 0, 0, ""), false).toString(); //$NON-NLS-1$
 			}
 		} else {
-			versionRange = new VersionRange(minVersion, new Version(minVersion.getMajorComponent() + 1, 0, 0, "", false)).toString(); //$NON-NLS-1$
+			versionRange = new VersionRange(minVersion, true, new Version(minVersion.getMajor() + 1, 0, 0, ""), false).toString(); //$NON-NLS-1$
 		}
 
 		StringBuffer result = new StringBuffer();

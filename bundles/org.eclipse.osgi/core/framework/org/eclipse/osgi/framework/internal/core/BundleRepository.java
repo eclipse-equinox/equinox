@@ -12,7 +12,7 @@
 package org.eclipse.osgi.framework.internal.core;
 
 import java.util.*;
-import org.eclipse.osgi.service.resolver.Version;
+import org.osgi.framework.Version;
 
 /**
  * The BundleRepository holds all installed Bundle object for the
@@ -68,7 +68,7 @@ public class BundleRepository {
 	public AbstractBundle getBundle(String symbolicName, String version) {
 		AbstractBundle[] bundles = (AbstractBundle[]) bundlesBySymbolicName.get(symbolicName);
 		if (bundles != null) {
-			Version ver = new Version(version);
+			Version ver = Version.parseVersion(version);
 			if (bundles.length > 0) {
 				for (int i = 0; i < bundles.length; i++) {
 					if (bundles[i].getVersion().equals(ver)) {
@@ -102,7 +102,7 @@ public class BundleRepository {
 			for (int i = 0; i < bundles.length; i++) {
 				AbstractBundle oldBundle = bundles[i];
 				Version oldVersion = oldBundle.getVersion();
-				if (!added && newVersion.matchGreaterOrEqualTo(oldVersion)) {
+				if (!added && newVersion.compareTo(oldVersion) >= 0) {
 					added = true;
 					list.add(bundle);
 				}
@@ -169,32 +169,5 @@ public class BundleRepository {
 		bundlesByInstallOrder.clear();
 		bundlesById = new KeyedHashSet();
 		bundlesBySymbolicName.clear();
-	}
-
-	public void markDependancies() {
-		KeyedElement[] elements = bundlesById.elements();
-		for (int i = 0; i < elements.length; i++) {
-			if (elements[i] instanceof BundleHost) {
-				((BundleHost) elements[i]).getLoaderProxy().markDependencies();
-			}
-		}
-	}
-
-	public void unMarkDependancies(BundleLoaderProxy user) {
-		KeyedElement[] elements = bundlesById.elements();
-		for (int i = 0; i < elements.length; i++) {
-			if (elements[i] instanceof BundleHost) {
-				BundleLoaderProxy loaderProxy = ((BundleHost) elements[i]).getLoaderProxy();
-				loaderProxy.unMarkUsed(user);
-			}
-		}
-
-		// look in removal pending
-		int size = packageAdmin.removalPending.size();
-		for (int i = 0; i < size; i++) {
-			BundleLoaderProxy loaderProxy = (BundleLoaderProxy) packageAdmin.removalPending.elementAt(i);
-			loaderProxy.unMarkUsed(user);
-		}
-		user.markedUsedDependencies = false;
 	}
 }

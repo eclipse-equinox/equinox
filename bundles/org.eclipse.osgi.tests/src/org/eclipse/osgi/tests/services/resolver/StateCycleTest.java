@@ -56,10 +56,11 @@ public class StateCycleTest extends AbstractStateTest {
 		assertContains("0.9", allBundles, bundleE);
 		assertContains("0.10", allBundles, bundleF);
 
+		// cycles must resolve now
 		assertTrue("1.0", bundleA.isResolved());
-		assertTrue("2.0", !bundleB.isResolved());
-		assertTrue("3.0", !bundleC.isResolved());
-		assertTrue("4.0", !bundleD.isResolved());
+		assertTrue("2.0", bundleB.isResolved());
+		assertTrue("3.0", bundleC.isResolved());
+		assertTrue("4.0", bundleD.isResolved());
 		assertTrue("5.0", bundleE.isResolved());
 		assertTrue("6.0", bundleF.isResolved());
 	}
@@ -94,10 +95,11 @@ public class StateCycleTest extends AbstractStateTest {
 		assertContains("0.9", allBundles, bundleE);
 		assertContains("0.10", allBundles, bundleF);
 
+		// cycles must resolve now
 		assertTrue("1.0", bundleA.isResolved());
-		assertTrue("2.0", !bundleB.isResolved());
-		assertTrue("3.0", !bundleC.isResolved());
-		assertTrue("4.0", !bundleD.isResolved());
+		assertTrue("2.0", bundleB.isResolved());
+		assertTrue("3.0", bundleC.isResolved());
+		assertTrue("4.0", bundleD.isResolved());
 		assertTrue("5.0", bundleE.isResolved());
 		assertTrue("6.0", bundleF.isResolved());
 
@@ -125,10 +127,11 @@ public class StateCycleTest extends AbstractStateTest {
 		assertContains("0.7", allBundles, bundleA);
 		assertContains("0.8", allBundles, bundleD);
 
+		// cycles must resolve now
 		assertTrue("0.9", bundleA.isResolved());
-		assertTrue("1.0", !bundleC.isResolved());
-		assertTrue("2.0", !bundleB.isResolved());
-		assertTrue("3.0", !bundleD.isResolved());
+		assertTrue("1.0", bundleC.isResolved());
+		assertTrue("2.0", bundleB.isResolved());
+		assertTrue("3.0", bundleD.isResolved());
 	}
 
 	public void testCycle4() throws BundleException {
@@ -153,10 +156,11 @@ public class StateCycleTest extends AbstractStateTest {
 		assertContains("0.7", allBundles, bundleA);
 		assertContains("0.8", allBundles, bundleD);
 
+		// cycles must resolve now
 		assertTrue("0.9", bundleA.isResolved());
-		assertTrue("1.0", !bundleC.isResolved());
-		assertTrue("2.0", !bundleB.isResolved());
-		assertTrue("3.0", !bundleD.isResolved());
+		assertTrue("1.0", bundleC.isResolved());
+		assertTrue("2.0", bundleB.isResolved());
+		assertTrue("3.0", bundleD.isResolved());
 	}
 
 }

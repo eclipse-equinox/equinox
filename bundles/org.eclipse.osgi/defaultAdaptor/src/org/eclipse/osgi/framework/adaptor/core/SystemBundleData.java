@@ -21,19 +21,19 @@ import org.eclipse.osgi.framework.adaptor.ClassLoaderDelegate;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.util.Headers;
-import org.eclipse.osgi.service.resolver.Version;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.Version;
 
 public class SystemBundleData extends AbstractBundleData {
 	public static final String OSGI_FRAMEWORK = "osgi.framework"; //$NON-NLS-1$
-	private BundleFile baseBundleFile;
 
 	public SystemBundleData(AbstractFrameworkAdaptor adaptor) throws BundleException {
 		super(adaptor, 0);
 		File osgiBase = getOsgiBase();
-		manifest = createManifest(osgiBase);
 		createBundleFile(osgiBase);
+		manifest = createManifest(osgiBase);
 		setMetaData();
+		setLastModified(System.currentTimeMillis()); // just set the lastModified to the current time
 	}
 
 	private File getOsgiBase() {
@@ -52,8 +52,8 @@ public class SystemBundleData extends AbstractBundleData {
 
 		if (osgiBase != null && osgiBase.exists()) {
 			try {
-				in = new FileInputStream(new File(osgiBase, Constants.OSGI_BUNDLE_MANIFEST));
-			} catch (FileNotFoundException e) {
+				in = baseBundleFile.getEntry(Constants.OSGI_BUNDLE_MANIFEST).getInputStream();
+			} catch (IOException e) {
 				// do nothing here.  in == null
 			}
 		}
@@ -144,7 +144,7 @@ public class SystemBundleData extends AbstractBundleData {
 		setSymbolicName(AbstractBundleData.parseSymbolicName(manifest));
 		String sVersion = (String) manifest.get(Constants.BUNDLE_VERSION);
 		if (sVersion != null)
-			setVersion(new Version(sVersion));
+			setVersion(Version.parseVersion(sVersion));
 	}
 
 	public BundleClassLoader createClassLoader(ClassLoaderDelegate delegate, ProtectionDomain domain, String[] bundleclasspath) {
@@ -153,10 +153,6 @@ public class SystemBundleData extends AbstractBundleData {
 
 	public File createGenerationDir() {
 		return null;
-	}
-
-	public BundleFile getBaseBundleFile() {
-		return baseBundleFile;
 	}
 
 	public String findLibrary(String libname) {

@@ -11,6 +11,7 @@
 
 package org.eclipse.osgi.framework.internal.core;
 
+import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 
 /**
@@ -212,5 +213,31 @@ public class ServiceReferenceImpl implements ServiceReference, Comparable {
 		}
 
 		return compare;
+	}
+
+	public boolean isAssignableTo(Bundle bundle, String className) {
+		AbstractBundle consumer = (AbstractBundle) bundle;
+		if (consumer.isFragment())
+			return false;
+		BundleHost producer = (BundleHost) registration.bundle;
+		if (consumer == producer)
+			return true;
+		String pkgName = BundleLoader.getPackageName(className);
+		if (pkgName.startsWith("java.")) //$NON-NLS-1$
+			return true;
+		BundleLoader producerBL = producer.getBundleLoader();
+		if (producerBL == null)
+			return false;
+		BundleLoader consumerBL = consumer.getBundleLoader();
+		if (consumerBL == null)
+			return false;
+		PackageSource producerSource = producerBL.getPackageSource(pkgName);
+		PackageSource consumerSource = consumerBL.getPackageSource(pkgName);
+		if (producerSource == null) {
+			if (consumerSource == null)
+				return true;
+			return false;
+		}
+		return producerSource.hasCommonSource(consumerSource);
 	}
 }

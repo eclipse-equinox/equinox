@@ -12,42 +12,31 @@ package org.eclipse.osgi.internal.resolver;
 
 import java.io.*;
 import java.util.Dictionary;
+import java.util.Map;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.Version;
 
 public class StateObjectFactoryImpl implements StateObjectFactory {
-	public static final byte NO_MATCH = 0;
-	public static final byte QUALIFIER_MATCH = 1;
-	public static final byte MICRO_MATCH = 5;
-	public static final byte MINOR_MATCH = 2;
-	public static final byte MAJOR_MATCH = 3;
-	public static final byte GREATER_EQUAL_MATCH = 4;
-	public static final byte OTHER_MATCH = 5;
 
 	public BundleDescription createBundleDescription(Dictionary manifest, String location, long id) throws BundleException {
-		BundleDescriptionImpl result;
-		result = (BundleDescriptionImpl) StateBuilder.createBundleDescription(manifest, location);
+		BundleDescriptionImpl result = (BundleDescriptionImpl) StateBuilder.createBundleDescription(manifest, location);
 		result.setBundleId(id);
 		return result;
 	}
 
-	public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location, BundleSpecification[] required, HostSpecification host, PackageSpecification[] packages, String[] providedPackages, boolean singleton) {
+	public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location, BundleSpecification[] required, HostSpecification host, ImportPackageSpecification[] imports, ExportPackageDescription[] exports, String[] providedPackages, boolean singleton) {
 		BundleDescriptionImpl bundle = new BundleDescriptionImpl();
 		bundle.setBundleId(id);
 		bundle.setSymbolicName(symbolicName);
 		bundle.setVersion(version);
 		bundle.setLocation(location);
 		bundle.setRequiredBundles(required);
-		bundle.setPackages(packages);
 		bundle.setHost(host);
-		bundle.setProvidedPackages(providedPackages);
+		bundle.setImportPackages(imports);
+		bundle.setExportPackages(exports);
 		bundle.setSingleton(singleton);
 		return bundle;
-	}
-
-	public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location, BundleSpecification[] required, HostSpecification[] hosts, PackageSpecification[] packages, String[] providedPackages, boolean singleton) {
-		HostSpecification host = hosts == null || hosts.length == 0 ? null : hosts[1];
-		return createBundleDescription(id, symbolicName, version, location, required, host, packages, providedPackages, singleton);
 	}
 
 	public BundleDescription createBundleDescription(BundleDescription original) {
@@ -61,25 +50,26 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		for (int i = 0; i < newRequired.length; i++)
 			newRequired[i] = createBundleSpecification(originalRequired[i]);
 		bundle.setRequiredBundles(newRequired);
-		PackageSpecification[] originalPackages = original.getPackages();
-		PackageSpecification[] newPackages = new PackageSpecification[originalPackages.length];
-		for (int i = 0; i < newPackages.length; i++)
-			newPackages[i] = createPackageSpecification(originalPackages[i]);
-		bundle.setPackages(newPackages);
+		ExportPackageDescription[] originalExports = original.getExportPackages();
+		ExportPackageDescription[] newExports = new ExportPackageDescription[originalExports.length];
+		for (int i = 0; i < newExports.length; i++)
+			newExports[i] = createExportPackageDescription(originalExports[i]);
+		bundle.setExportPackages(newExports);
+		ImportPackageSpecification[] originalImports = original.getImportPackages();
+		ImportPackageSpecification[] newImports = new ImportPackageSpecification[originalImports.length];
+		for (int i = 0; i < newImports.length; i++)
+			newImports[i] = createImportPackageSpecification(originalImports[i]);
+		bundle.setImportPackages(newImports);
 		if (original.getHost() != null)
 			bundle.setHost(createHostSpecification(original.getHost()));
-		String[] originalProvidedPackages = original.getProvidedPackages();
-		String[] newProvidedPackages = new String[originalProvidedPackages.length];
-		System.arraycopy(originalProvidedPackages, 0, newProvidedPackages, 0, originalProvidedPackages.length);
-		bundle.setProvidedPackages(newProvidedPackages);
 		bundle.setSingleton(original.isSingleton());
 		return bundle;
 	}
 
-	public BundleSpecification createBundleSpecification(String requiredSymbolicName, Version requiredVersion, byte matchingRule, boolean export, boolean optional) {
+	public BundleSpecification createBundleSpecification(String requiredSymbolicName, VersionRange requiredVersionRange,boolean export, boolean optional) {
 		BundleSpecificationImpl bundleSpec = new BundleSpecificationImpl();
 		bundleSpec.setName(requiredSymbolicName);
-		setVersionRange(bundleSpec, matchingRule, requiredVersion);
+		bundleSpec.setVersionRange(requiredVersionRange);
 		bundleSpec.setExported(export);
 		bundleSpec.setOptional(optional);
 		return bundleSpec;
@@ -94,11 +84,10 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		return bundleSpec;
 	}
 
-	public HostSpecification createHostSpecification(String hostSymbolicName, Version hostVersion, byte matchingRule, boolean reloadHost) {
+	public HostSpecification createHostSpecification(String hostSymbolicName, VersionRange versionRange) {
 		HostSpecificationImpl hostSpec = new HostSpecificationImpl();
 		hostSpec.setName(hostSymbolicName);
-		setVersionRange(hostSpec, matchingRule, hostVersion);
-		hostSpec.setReloadHost(reloadHost);
+		hostSpec.setVersionRange(versionRange);
 		return hostSpec;
 	}
 
@@ -106,24 +95,53 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		HostSpecificationImpl hostSpec = new HostSpecificationImpl();
 		hostSpec.setName(original.getName());
 		hostSpec.setVersionRange(original.getVersionRange());
-		hostSpec.setReloadHost(original.reloadHost());
 		return hostSpec;
 	}
 
-	public PackageSpecification createPackageSpecification(String packageName, Version packageVersion, boolean exported) {
-		PackageSpecificationImpl packageSpec = new PackageSpecificationImpl();
+	public ImportPackageSpecification createImportPackageSpecification(String packageName, VersionRange versionRange, String bundleSymbolicName, VersionRange bundleVersionRange, String[] propagate, int resolution, Map attributes) {
+		ImportPackageSpecificationImpl packageSpec = new ImportPackageSpecificationImpl();
 		packageSpec.setName(packageName);
-		packageSpec.setVersionRange(new VersionRange(packageVersion, Version.maxVersion));
-		packageSpec.setExport(exported);
+		packageSpec.setVersionRange(versionRange);
+		packageSpec.setBundleSymbolicName(bundleSymbolicName);
+		packageSpec.setBundleVersionRange(bundleVersionRange);
+		packageSpec.setPropagate(propagate);
+		packageSpec.setResolution(resolution);
+		packageSpec.setAttributes(attributes);
 		return packageSpec;
 	}
 
-	public PackageSpecification createPackageSpecification(PackageSpecification original) {
-		PackageSpecificationImpl packageSpec = new PackageSpecificationImpl();
+	public ImportPackageSpecification createImportPackageSpecification(ImportPackageSpecification original) {
+		ImportPackageSpecificationImpl packageSpec = new ImportPackageSpecificationImpl();
 		packageSpec.setName(original.getName());
 		packageSpec.setVersionRange(original.getVersionRange());
-		packageSpec.setExport(original.isExported());
+		packageSpec.setBundleSymbolicName(original.getBundleSymbolicName());
+		packageSpec.setBundleVersionRange(original.getBundleVersionRange());
+		packageSpec.setPropagate(original.getPropagate());
+		packageSpec.setResolution(original.getResolution());
+		packageSpec.setAttributes(original.getAttributes());
 		return packageSpec;
+	}
+
+	public ExportPackageDescription createExportPackageDescription(String packageName, Version version, String grouping, String include, String exclude, Map attributes, String[] mandatory, boolean root) {
+		return createExportPackageDescription(packageName, version, grouping, include, exclude, attributes, mandatory, root, null);
+	}
+
+	public ExportPackageDescription createExportPackageDescription(ExportPackageDescription original) {
+		return createExportPackageDescription(original.getName(), original.getVersion(), original.getGrouping(), original.getInclude(), original.getExclude(), original.getAttributes(), original.getMandatory(), original.isRoot(), null);
+	}
+
+	public ExportPackageDescription createExportPackageDescription(String packageName, Version version, String grouping, String include, String exclude, Map attributes, String[] mandatory, boolean root, BundleDescription exporter) {
+		ExportPackageDescriptionImpl exportPackage = new ExportPackageDescriptionImpl();
+		exportPackage.setName(packageName);
+		exportPackage.setVersion(version);
+		exportPackage.setGrouping(grouping);
+		exportPackage.setInclude(include);
+		exportPackage.setExclude(exclude);
+		exportPackage.setAttributes(attributes);
+		exportPackage.setMandatory(mandatory);
+		exportPackage.setRoot(root);
+		exportPackage.setExporter(exporter);
+		return exportPackage;
 	}
 
 	public SystemState createSystemState() {
@@ -152,8 +170,14 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		return state;
 	}
 
-	SystemState readSystemState(InputStream stream, long expectedTimeStamp) throws IOException {		
-		return (SystemState) internalReadState(createSystemState(), new DataInputStream(stream), expectedTimeStamp);
+	public SystemState readSystemState(File stateLocation, boolean lazyLoad, long expectedTimeStamp) throws IOException {
+		StateReader reader = new StateReader(stateLocation, lazyLoad);
+		SystemState restoredState = new SystemState();
+		restoredState.setReader(reader);
+		restoredState.setFactory(this);
+		if (!reader.loadState(restoredState, expectedTimeStamp))
+			return null;
+		return restoredState;
 	}
 
 	public State readState(InputStream stream) throws IOException {
@@ -184,37 +208,5 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 			throw new IllegalArgumentException();
 		StateWriter writer = new StateWriter();
 		writer.saveState((StateImpl) state, stream);
-	}
-
-	private void setVersionRange(VersionConstraintImpl constraint, int matchingRule, Version minVersion) {
-		if (matchingRule == NO_MATCH || matchingRule == OTHER_MATCH)
-			return;
-		if (minVersion == null)
-			return;
-		switch (matchingRule) {
-			case QUALIFIER_MATCH : {
-				constraint.setVersionRange(new VersionRange(minVersion, minVersion));
-				break;
-			}
-			case MICRO_MATCH : {
-				Version maxVersion = new Version(minVersion.getMajorComponent(), minVersion.getMinorComponent(), minVersion.getMicroComponent() + 1, "", false); //$NON-NLS-1$
-				constraint.setVersionRange(new VersionRange(minVersion, maxVersion));
-				break;
-			}
-			case MINOR_MATCH : {
-				Version maxVersion = new Version(minVersion.getMajorComponent(), minVersion.getMinorComponent() + 1, 0, "", false); //$NON-NLS-1$
-				constraint.setVersionRange(new VersionRange(minVersion, maxVersion));
-				break;
-			}
-			case MAJOR_MATCH : {
-				Version maxVersion = new Version(minVersion.getMajorComponent() + 1, 0, 0, "", false); //$NON-NLS-1$
-				constraint.setVersionRange(new VersionRange(minVersion, maxVersion));
-				break;
-			}
-			case GREATER_EQUAL_MATCH : {
-				constraint.setVersionRange(new VersionRange(minVersion, Version.maxVersion));
-				break;
-			}
-		}
 	}
 }

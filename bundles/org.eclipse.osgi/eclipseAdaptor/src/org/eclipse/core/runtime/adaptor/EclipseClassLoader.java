@@ -43,7 +43,7 @@ public class EclipseClassLoader extends DefaultClassLoader {
 	}
 
 	public EclipseClassLoader(ClassLoaderDelegate delegate, ProtectionDomain domain, String[] classpath, ClassLoader parent, BundleData bundleData) {
-		super(delegate, domain, classpath, parent, (org.eclipse.osgi.framework.internal.defaultadaptor.DefaultBundleData) bundleData);
+		super(delegate, domain, classpath, parent, (EclipseBundleData) bundleData);
 	}
 
 	public Class findLocalClass(String className) throws ClassNotFoundException {

@@ -12,22 +12,20 @@ package org.eclipse.core.runtime.adaptor;
 
 import java.io.*;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.*;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.SAXParserFactory;
 import org.eclipse.osgi.framework.adaptor.*;
-import org.eclipse.osgi.framework.adaptor.core.AdaptorElementFactory;
+import org.eclipse.osgi.framework.adaptor.core.*;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.debug.DebugOptions;
-import org.eclipse.osgi.framework.internal.defaultadaptor.DefaultAdaptor;
-import org.eclipse.osgi.framework.internal.defaultadaptor.DefaultBundleData;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.framework.stats.StatsManager;
 import org.eclipse.osgi.internal.resolver.StateImpl;
 import org.eclipse.osgi.internal.resolver.StateManager;
+import org.eclipse.osgi.service.datalocation.FileManager;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.service.pluginconversion.PluginConverter;
 import org.eclipse.osgi.service.resolver.*;
@@ -37,44 +35,67 @@ import org.osgi.framework.*;
 /**
  * Internal class.
  */
-public class EclipseAdaptor extends DefaultAdaptor {
+public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 	public static final String PROP_CLEAN = "osgi.clean"; //$NON-NLS-1$
+
 	public static final String PROP_EXITONERROR = "eclipse.exitOnError"; //$NON-NLS-1$
+
 	static final String F_LOG = ".log"; //$NON-NLS-1$
 
-	//TODO rename it to Eclipse-PluginClass	
+	// TODO rename it to Eclipse-PluginClass
 	public static final String PLUGIN_CLASS = "Plugin-Class"; //$NON-NLS-1$
 
 	public static final String ECLIPSE_AUTOSTART = "Eclipse-AutoStart"; //$NON-NLS-1$
-	//TODO rename constant to ECLIPSE_AUTOSTART_EXCEPTIONS	
+
+	// TODO rename constant to ECLIPSE_AUTOSTART_EXCEPTIONS
 	public static final String ECLIPSE_AUTOSTART_EXCEPTIONS = "exceptions"; //$NON-NLS-1$
 
 	public static final String SAXFACTORYNAME = "javax.xml.parsers.SAXParserFactory"; //$NON-NLS-1$
+
 	public static final String DOMFACTORYNAME = "javax.xml.parsers.DocumentBuilderFactory"; //$NON-NLS-1$
 
 	private static final String RUNTIME_ADAPTOR = FRAMEWORK_SYMBOLICNAME + "/eclipseadaptor"; //$NON-NLS-1$
+
 	private static final String OPTION_STATE_READER = RUNTIME_ADAPTOR + "/state/reader";//$NON-NLS-1$
+
 	private static final String OPTION_RESOLVER = RUNTIME_ADAPTOR + "/resolver/timing"; //$NON-NLS-1$
+
 	private static final String OPTION_PLATFORM_ADMIN = RUNTIME_ADAPTOR + "/debug/platformadmin"; //$NON-NLS-1$
+
 	private static final String OPTION_PLATFORM_ADMIN_RESOLVER = RUNTIME_ADAPTOR + "/debug/platformadmin/resolver"; //$NON-NLS-1$
+
 	private static final String OPTION_MONITOR_PLATFORM_ADMIN = RUNTIME_ADAPTOR + "/resolver/timing"; //$NON-NLS-1$
+
 	private static final String OPTION_RESOLVER_READER = RUNTIME_ADAPTOR + "/resolver/reader/timing"; //$NON-NLS-1$
+
 	private static final String OPTION_CONVERTER = RUNTIME_ADAPTOR + "/converter/debug"; //$NON-NLS-1$
+
 	private static final String OPTION_LOCATION = RUNTIME_ADAPTOR + "/debug/location"; //$NON-NLS-1$	
 
-	public static final byte BUNDLEDATA_VERSION = 10;
+	public static final byte BUNDLEDATA_COMPATIBLE_VERSION = 10;
+	public static final byte BUNDLEDATA_VERSION_11 = 11;
+	public static final byte BUNDLEDATA_VERSION = 11;
+
 	public static final byte NULL = 0;
+
 	public static final byte OBJECT = 1;
 
 	private static EclipseAdaptor instance;
 
+	private byte cacheVersion;
+
 	private long timeStamp = 0;
+
 	private String installURL = null;
+
 	private boolean exitOnError = true;
+
 	private BundleStopper stopper;
 
+	private FileManager fileManager;
+
 	/*
-	 * Should be instantiated only by the framework (through reflection). 
+	 * Should be instantiated only by the framework (through reflection).
 	 */
 	public EclipseAdaptor(String[] args) {
 		super(args);
@@ -89,6 +110,9 @@ public class EclipseAdaptor extends DefaultAdaptor {
 	public void initialize(EventPublisher eventPublisher) {
 		if (Boolean.getBoolean(EclipseAdaptor.PROP_CLEAN))
 			cleanOSGiCache();
+		fileManager = initFileManager(LocationManager.getOSGiConfigurationDir(), LocationManager.getConfigurationLocation().isReadOnly() ? "none" : null); //$NON-NLS-1$
+		readHeaders();
+		checkLocationAndReinitialize();
 		super.initialize(eventPublisher);
 	}
 
@@ -118,30 +142,62 @@ public class EclipseAdaptor extends DefaultAdaptor {
 	}
 
 	protected StateManager createStateManager() {
-		readHeaders();
-		checkLocationAndReinitialize();
-		File stateLocation = LocationManager.getConfigurationFile(LocationManager.STATE_FILE);
-		if (!stateLocation.isFile()) { //NOTE this check is redundant since it is done in StateManager, however it is more convenient to have it here 
+		File stateLocation = null;
+		try {
+			stateLocation = fileManager.lookup(LocationManager.STATE_FILE, false);
+		} catch (IOException ex) {
+			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+				Debug.println("Error reading state file " + ex.getMessage()); //$NON-NLS-1$
+				Debug.printStackTrace(ex);
+			}
+		}
+		//if it does not exist, try to read it from the parent
+		if (stateLocation == null || !stateLocation.isFile()) { // NOTE this check is redundant since it
+			// is done in StateManager, however it
+			// is more convenient to have it here
 			Location parentConfiguration = null;
-			if ((parentConfiguration = LocationManager.getConfigurationLocation().getParentLocation()) != null) {
-				stateLocation = new File(parentConfiguration.getURL().getFile(), FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME + '/' + LocationManager.STATE_FILE);
+			Location currentConfiguration = LocationManager.getConfigurationLocation();
+			if (currentConfiguration != null && (parentConfiguration = currentConfiguration.getParentLocation()) != null) {
+				try {
+					File stateLocationDir = new File(parentConfiguration.getURL().getFile(), FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME);
+					FileManager newFileManager = initFileManager(stateLocationDir, parentConfiguration.isReadOnly() ? "none" : null); //$NON-NLS-1$);
+					stateLocation = newFileManager.lookup(LocationManager.STATE_FILE, true);
+				} catch (IOException ex) {
+					if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+						Debug.println("Error reading state file " + ex.getMessage()); //$NON-NLS-1$
+						Debug.printStackTrace(ex);
+					}
+				}
+			} else {
+				try {
+					//it did not exist in either place, so create it in the original location
+					stateLocation = fileManager.lookup(LocationManager.STATE_FILE, true);
+				} catch (IOException ex) {
+					if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+						Debug.println("Error reading state file " + ex.getMessage()); //$NON-NLS-1$
+						Debug.printStackTrace(ex);
+					}
+				}
 			}
 		}
 		stateManager = new StateManager(stateLocation, timeStamp);
 		stateManager.setInstaller(new EclipseBundleInstaller());
-		StateImpl systemState = stateManager.getSystemState();
+		StateImpl systemState = stateManager.readSystemState(context);
 		if (systemState != null)
 			return stateManager;
-		systemState = stateManager.createSystemState();
-		BundleData[] installedBundles = getInstalledBundles();
+		systemState = stateManager.createSystemState(context);
+		Bundle[] installedBundles = context.getBundles();
 		if (installedBundles == null)
 			return stateManager;
 		StateObjectFactory factory = stateManager.getFactory();
 		for (int i = 0; i < installedBundles.length; i++) {
-			BundleData toAdd = (BundleData) installedBundles[i];
+			Bundle toAdd = installedBundles[i];
 			try {
-				Dictionary manifest = toAdd.getManifest();
-				BundleDescription newDescription = factory.createBundleDescription(manifest, toAdd.getLocation(), toAdd.getBundleID());
+				Dictionary manifest = toAdd.getHeaders(""); //$NON-NLS-1$
+				// if this is a cached manifest need to get the real one
+				if (manifest instanceof CachedManifest)
+					manifest = ((CachedManifest) manifest).getManifest();
+				BundleDescription newDescription = factory.createBundleDescription(manifest, toAdd.getLocation(), toAdd.getBundleId());
 				systemState.addBundle(newDescription);
 			} catch (BundleException be) {
 				// just ignore bundle datas with invalid manifests
@@ -154,9 +210,12 @@ public class EclipseAdaptor extends DefaultAdaptor {
 	}
 
 	public void shutdownStateManager() {
+		if (timeStamp == stateManager.getSystemState().getTimeStamp())
+			return;
 		try {
-			File stateLocation = LocationManager.getConfigurationFile(LocationManager.STATE_FILE);
-			stateManager.shutdown(stateLocation); //$NON-NLS-1$
+			File stateLocationTmpFile = File.createTempFile(LocationManager.STATE_FILE, ".new", LocationManager.getOSGiConfigurationDir()); //$NON-NLS-1$
+			stateManager.shutdown(stateLocationTmpFile); //$NON-NLS-1$
+			fileManager.update(new String[] {LocationManager.STATE_FILE}, new String[] {stateLocationTmpFile.getName()});
 		} catch (IOException e) {
 			frameworkLog.log(new FrameworkEvent(FrameworkEvent.ERROR, context.getBundle(), e));
 		}
@@ -171,13 +230,22 @@ public class EclipseAdaptor extends DefaultAdaptor {
 
 	private void checkLocationAndReinitialize() {
 		if (installURL == null) {
-			installURL = EclipseStarter.getSysPath(); //TODO This reference to the starter should be avoided
+			installURL = EclipseStarter.getSysPath(); // TODO This reference to the starter should be avoided
 			return;
 		}
 		if (!EclipseStarter.getSysPath().equals(installURL)) {
-			//delete the metadata file and the framework file when the location of the basic bundles has changed 
-			LocationManager.getConfigurationFile(LocationManager.BUNDLE_DATA_FILE).delete();
-			LocationManager.getConfigurationFile(LocationManager.STATE_FILE).delete();
+			// delete the metadata file and the framework file when the location of the basic bundles has changed
+
+			try {
+				fileManager.remove(LocationManager.BUNDLE_DATA_FILE);
+				fileManager.remove(LocationManager.STATE_FILE);
+			} catch (IOException ex) {
+				if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+					Debug.println("Error deleting framework metadata: " + ex.getMessage()); //$NON-NLS-1$
+					Debug.printStackTrace(ex);
+				}
+			}
+
 			installURL = EclipseStarter.getSysPath();
 		}
 	}
@@ -190,7 +258,8 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		try {
 			DataInputStream in = new DataInputStream(new BufferedInputStream(bundleDataStream));
 			try {
-				if (in.readByte() == BUNDLEDATA_VERSION) {
+				cacheVersion = in.readByte();
+				if (cacheVersion >= BUNDLEDATA_COMPATIBLE_VERSION) {
 					timeStamp = in.readLong();
 					installURL = in.readUTF();
 					initialBundleStartLevel = in.readInt();
@@ -214,12 +283,19 @@ public class EclipseAdaptor extends DefaultAdaptor {
 	}
 
 	public void frameworkStart(BundleContext context) throws BundleException {
+		// must register the xml parser and initialize the plugin converter
+		// instance first because we may need it when creating the statemanager
+		// in super.frameworkStart(context)
+		registerEndorsedXMLParser(context);
+		PluginConverter converter = new PluginConverterImpl(context);
 		super.frameworkStart(context);
 		Bundle bundle = context.getBundle();
 		Location location;
 
-		// Less than optimal reference to EclipseStarter here.  Not sure how we can make the location
-		// objects available.  They are needed very early in EclipseStarter but these references tie
+		// Less than optimal reference to EclipseStarter here. Not sure how we
+		// can make the location
+		// objects available. They are needed very early in EclipseStarter but
+		// these references tie
 		// the adaptor to that starter.
 		location = LocationManager.getUserLocation();
 		Hashtable properties = new Hashtable(1);
@@ -245,12 +321,11 @@ public class EclipseAdaptor extends DefaultAdaptor {
 
 		register(org.eclipse.osgi.service.environment.EnvironmentInfo.class.getName(), EnvironmentInfo.getDefault(), bundle);
 		register(PlatformAdmin.class.getName(), stateManager, bundle);
-		register(PluginConverter.class.getName(), new PluginConverterImpl(context), bundle);
+		register(PluginConverter.class.getName(), converter, bundle);
 		register(URLConverter.class.getName(), new URLConverterImpl(), bundle);
 		register(CommandProvider.class.getName(), new EclipseCommandProvider(context), bundle);
 		register(FrameworkLog.class.getName(), getFrameworkLog(), bundle);
 		register(org.eclipse.osgi.service.localization.BundleLocalization.class.getName(), new BundleLocalizationImpl(), bundle);
-		registerEndorsedXMLParser();
 	}
 
 	private void setDebugOptions() {
@@ -267,12 +342,12 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		BasicLocation.DEBUG = options.getBooleanOption(OPTION_LOCATION, false);
 	}
 
-	private void registerEndorsedXMLParser() {
+	private void registerEndorsedXMLParser(BundleContext bc) {
 		try {
 			Class.forName(SAXFACTORYNAME);
-			context.registerService(SAXFACTORYNAME, new SaxParsingService(), new Hashtable());
+			bc.registerService(SAXFACTORYNAME, new SaxParsingService(), new Hashtable());
 			Class.forName(DOMFACTORYNAME);
-			context.registerService(DOMFACTORYNAME, new DomParsingService(), new Hashtable());
+			bc.registerService(DOMFACTORYNAME, new DomParsingService(), new Hashtable());
 		} catch (ClassNotFoundException e) {
 			// In case the JAXP API is not on the boot classpath
 			String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_ADAPTOR_ERROR_XML_SERVICE"); //$NON-NLS-1$
@@ -286,7 +361,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		}
 
 		public void ungetService(Bundle bundle, ServiceRegistration registration, Object service) {
-			//Do nothing.
+			// Do nothing.
 		}
 	}
 
@@ -296,7 +371,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		}
 
 		public void ungetService(Bundle bundle, ServiceRegistration registration, Object service) {
-			//Do nothing.
+			// Do nothing.
 		}
 	}
 
@@ -305,6 +380,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		super.frameworkStop(context);
 		printStats();
 		PluginParser.releaseXMLParsing();
+		fileManager.close();
 	}
 
 	private void printStats() {
@@ -323,23 +399,36 @@ public class EclipseAdaptor extends DefaultAdaptor {
 	}
 
 	private InputStream findBundleDataFile() {
-		File metadata = LocationManager.getConfigurationFile(LocationManager.BUNDLE_DATA_FILE);
+		File metadata = null;
+		try {
+			metadata = fileManager.lookup(LocationManager.BUNDLE_DATA_FILE, false);
+		} catch (IOException ex) {
+			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+				Debug.println("Error reading framework metadata: " + ex.getMessage()); //$NON-NLS-1$
+				Debug.printStackTrace(ex);
+			}
+		}
 		InputStream bundleDataStream = null;
-		if (metadata.isFile()) {
+		if (metadata != null && metadata.isFile()) {
 			try {
 				bundleDataStream = new FileInputStream(metadata);
 			} catch (FileNotFoundException e1) {
-				//this can not happen since it is tested before entering here.
+				// this can not happen since it is tested before entering here.
 			}
 		} else {
+			Location currentConfiguration = LocationManager.getConfigurationLocation();
 			Location parentConfiguration = null;
-			if ((parentConfiguration = LocationManager.getConfigurationLocation().getParentLocation()) != null) {
+			if (currentConfiguration != null && (parentConfiguration = currentConfiguration.getParentLocation()) != null) {
 				try {
-					bundleDataStream = new URL(parentConfiguration.getURL(), FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME + '/' + LocationManager.BUNDLE_DATA_FILE).openStream();
+					File bundledataLocationDir = new File(parentConfiguration.getURL().getFile(), FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME);
+					FileManager newFileManager = initFileManager(bundledataLocationDir, parentConfiguration.isReadOnly() ? "none" : null); //$NON-NLS-1$
+					File bundleData = newFileManager.lookup(LocationManager.BUNDLE_DATA_FILE, true);
+					bundleDataStream = new FileInputStream(bundleData);
 				} catch (MalformedURLException e1) {
-					//This will not happen since all the URLs are derived by us and we are GODS!
+					// This will not happen since all the URLs are derived by us
+					// and we are GODS!
 				} catch (IOException e1) {
-					//That's ok we will regenerate the .bundleData
+					// That's ok we will regenerate the .bundleData
 				}
 			}
 		}
@@ -357,9 +446,9 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		try {
 			DataInputStream in = new DataInputStream(new BufferedInputStream(bundleDataStream));
 			try {
-				if (in.readByte() != BUNDLEDATA_VERSION)
+				if (in.readByte() < BUNDLEDATA_COMPATIBLE_VERSION)
 					return null;
-				// skip timeStamp - was read by readTimeStamp
+				// skip timeStamp - was read by readHeaders
 				in.readLong();
 				in.readUTF();
 				in.readInt();
@@ -368,8 +457,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 				int bundleCount = in.readInt();
 				ArrayList result = new ArrayList(bundleCount);
 				long id = -1;
-				State state = stateManager.getSystemState();
-				long stateTimeStamp = state.getTimeStamp();
+
 				for (int i = 0; i < bundleCount; i++) {
 					try {
 						try {
@@ -386,15 +474,12 @@ public class EclipseAdaptor extends DefaultAdaptor {
 							// should never happen
 						}
 					} catch (IOException e) {
-						state.removeBundle(id);
 						if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 							Debug.println("Error reading framework metadata: " + e.getMessage()); //$NON-NLS-1$ 
 							Debug.printStackTrace(e);
 						}
 					}
 				}
-				if (stateTimeStamp != state.getTimeStamp())
-					state.resolve(false); //time stamp changed force a full resolve
 				return (BundleData[]) result.toArray(new BundleData[result.size()]);
 			} finally {
 				in.close();
@@ -415,7 +500,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		data.setLocation(readString(in, false));
 		data.setFileName(readString(in, false));
 		data.setSymbolicName(readString(in, false));
-		data.setVersion(new Version(readString(in, false)));
+		data.setVersion(Version.parseVersion(readString(in, false)));
 		data.setActivator(readString(in, false));
 		data.setAutoStart(in.readBoolean());
 		int exceptionsCount = in.readInt();
@@ -435,25 +520,30 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		data.setFragment(in.readBoolean());
 		data.setManifestTimeStamp(in.readLong());
 		data.setManifestType(in.readByte());
+		if (cacheVersion >= BUNDLEDATA_VERSION_11)
+			data.setLastModified(in.readLong());
 	}
 
-	public void saveMetaDataFor(DefaultBundleData data) throws IOException {
-		if (!((EclipseBundleData) data).isAutoStartable()) {
-			timeStamp--; //Change the value of the timeStamp, as a marker that something changed.  
+	public void saveMetaDataFor(EclipseBundleData data) throws IOException {
+		if (!data.isAutoStartable()) {
+			timeStamp--; // Change the value of the timeStamp, as a marker
+			// that something changed.
 		}
 	}
 
 	public void persistInitialBundleStartLevel(int value) {
-		// Change the value of the timeStamp, as a marker that something changed.  
+		// Change the value of the timeStamp, as a marker that something
+		// changed.
 		timeStamp--;
 	}
 
 	public void persistNextBundleID(long value) {
-		// Do nothing the timeStamp will have changed because the state will be updated.
+		// Do nothing the timeStamp will have changed because the state will be
+		// updated.
 	}
 
 	protected void saveMetaDataFor(BundleData data, DataOutputStream out) throws IOException {
-		if (data.getBundleID() == 0 || !(data instanceof DefaultBundleData)) {
+		if (data.getBundleID() == 0 || !(data instanceof AbstractBundleData)) {
 			out.writeByte(NULL);
 			return;
 		}
@@ -485,6 +575,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		out.writeBoolean(bundleData.isFragment());
 		out.writeLong(bundleData.getManifestTimeStamp());
 		out.writeByte(bundleData.getManifestType());
+		out.writeLong(bundleData.getLastModified());
 	}
 
 	private String readString(DataInputStream in, boolean intern) throws IOException {
@@ -507,11 +598,12 @@ public class EclipseAdaptor extends DefaultAdaptor {
 	}
 
 	public void saveMetaData() {
-		File metadata = LocationManager.getConfigurationFile(LocationManager.BUNDLE_DATA_FILE);
 		// the cache and the state match
 		if (timeStamp == stateManager.getSystemState().getTimeStamp())
 			return;
+		File metadata = null;
 		try {
+			metadata = File.createTempFile(LocationManager.BUNDLE_DATA_FILE, ".new", LocationManager.getOSGiConfigurationDir());//$NON-NLS-1$
 			DataOutputStream out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(metadata)));
 			try {
 				out.writeByte(BUNDLEDATA_VERSION);
@@ -532,8 +624,11 @@ public class EclipseAdaptor extends DefaultAdaptor {
 			} finally {
 				out.close();
 			}
+			fileManager.lookup(LocationManager.BUNDLE_DATA_FILE, true); //the BundleData file may not have been created at this point.  
+			fileManager.update(new String[] {LocationManager.BUNDLE_DATA_FILE}, new String[] {metadata.getName()});
 		} catch (IOException e) {
 			frameworkLog.log(new FrameworkEvent(FrameworkEvent.ERROR, context.getBundle(), e));
+			return;
 		}
 	}
 
@@ -560,19 +655,21 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		}
 		return false;
 	}
-	
+
 	public void handleRuntimeError(Throwable error) {
 		try {
 			// check the prop each time this happens (should NEVER happen!)
 			exitOnError = Boolean.valueOf(System.getProperty(PROP_EXITONERROR, "true")).booleanValue(); //$NON-NLS-1$
 			String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_ADAPTOR_RUNTIME_ERROR"); //$NON-NLS-1$
 			if (exitOnError && isFatalException(error))
-				message += ' ' + EclipseAdaptorMsg.formatter.getString("ECLIPSE_ADAPTOR_EXITING");  //$NON-NLS-1$
+				message += ' ' + EclipseAdaptorMsg.formatter.getString("ECLIPSE_ADAPTOR_EXITING"); //$NON-NLS-1$
 			FrameworkLogEntry logEntry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, message, 0, error, null);
 			frameworkLog.log(logEntry);
 		} catch (Throwable t) {
-			// we may be in a currupted state and must be able to handle any errors (ie OutOfMemoryError)
-			// that may occur when handling the first error; this is REALLY the last resort.
+			// we may be in a currupted state and must be able to handle any
+			// errors (ie OutOfMemoryError)
+			// that may occur when handling the first error; this is REALLY the
+			// last resort.
 			try {
 				error.printStackTrace();
 				t.printStackTrace();
@@ -580,7 +677,8 @@ public class EclipseAdaptor extends DefaultAdaptor {
 				// if we fail that then we are beyond help.
 			}
 		} finally {
-			// do the exit outside the try block just incase another runtime error was thrown while logging
+			// do the exit outside the try block just incase another runtime
+			// error was thrown while logging
 			if (exitOnError && isFatalException(error))
 				System.exit(13);
 		}
@@ -592,5 +690,20 @@ public class EclipseAdaptor extends DefaultAdaptor {
 
 	public BundleStopper getBundleStopper() {
 		return stopper;
+	}
+
+	private FileManager initFileManager(File baseDir, String lockMode) {
+		FileManager fManager = new FileManager(baseDir, lockMode);
+		if (!baseDir.exists())
+			baseDir.mkdirs();
+		try {
+			fManager.open(true);
+		} catch (IOException ex) {
+			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+				Debug.println("Error reading framework metadata: " + ex.getMessage()); //$NON-NLS-1$
+				Debug.printStackTrace(ex);
+			}
+		}
+		return fManager;
 	}
 }

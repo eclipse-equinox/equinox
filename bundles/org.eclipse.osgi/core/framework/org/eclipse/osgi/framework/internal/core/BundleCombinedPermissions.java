@@ -46,16 +46,16 @@ final class BundleCombinedPermissions extends BundlePermissionCollection {
 	/**
 	 * The Permission collection will unresolve the permissions in these packages.
 	 *
-	 * @param unresolvedPackages A list of the package which have been unresolved
+	 * @param refreshedBundles A list of the bundles which have been refreshed
 	 * as a result of a packageRefresh
 	 */
-	void unresolvePermissions(Hashtable unresolvedPackages) {
+	void unresolvePermissions(AbstractBundle[] refreshedBundles) {
 		if (assigned != null) {
-			assigned.unresolvePermissions(unresolvedPackages);
+			assigned.unresolvePermissions(refreshedBundles);
 		}
 
 		if (implied != null) {
-			implied.unresolvePermissions(unresolvedPackages);
+			implied.unresolvePermissions(refreshedBundles);
 		}
 	}
 

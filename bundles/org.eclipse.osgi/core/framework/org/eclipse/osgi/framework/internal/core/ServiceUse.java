@@ -131,29 +131,13 @@ public class ServiceUse {
 			}
 
 			String[] clazzes = registration.clazzes;
-			int size = clazzes.length;
-			PackageAdminImpl packageAdmin = context.framework.packageAdmin;
-			for (int i = 0; i < size; i++) {
-				Class clazz = packageAdmin.loadServiceClass(clazzes[i], factorybundle);
-				if (clazz == null) {
-					if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
-						Debug.println(clazzes[i] + " class not found"); //$NON-NLS-1$
-					}
-					BundleException be = new BundleException(Msg.formatter.getString("SERVICE_CLASS_NOT_FOUND_EXCEPTION", clazzes[i])); //$NON-NLS-1$
-					context.framework.publishFrameworkEvent(FrameworkEvent.ERROR, factorybundle, be);
-					return (null);
+			String invalidService = BundleContextImpl.checkServiceClass(clazzes, service);
+			if (invalidService != null) {
+				if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
+					Debug.println("Service object is not an instanceof " + invalidService); //$NON-NLS-1$
 				}
-
-				if (!clazz.isInstance(service)) {
-					if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
-						Debug.println("Service object from ServiceFactory is not an instanceof " + clazzes[i]); //$NON-NLS-1$
-					}
-					BundleException be = new BundleException(Msg.formatter.getString("SERVICE_NOT_INSTANCEOF_CLASS_EXCEPTION", factory.getClass().getName(), clazzes[i])); //$NON-NLS-1$
-					context.framework.publishFrameworkEvent(FrameworkEvent.ERROR, factorybundle, be);
-					return (null);
-				}
+				throw new IllegalArgumentException(Msg.formatter.getString("SERVICE_NOT_INSTANCEOF_CLASS_EXCEPTION", invalidService)); //$NON-NLS-1$
 			}
-
 			this.service = service;
 		}
 

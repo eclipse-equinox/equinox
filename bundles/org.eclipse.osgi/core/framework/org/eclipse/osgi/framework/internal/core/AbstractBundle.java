@@ -21,6 +21,7 @@ import org.eclipse.osgi.framework.adaptor.BundleOperation;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.*;
+import org.osgi.framework.Version;
 
 /**
  * This object is given out to bundles and wraps the internal Bundle object. It
@@ -51,7 +52,6 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	 */
 	protected String runtimeResolveError;
 	protected ManifestLocalization manifestLocalization = null;
-	protected boolean singleton = false;
 
 	/**
 	 * Bundle object constructor. This constructor should not perform any real
@@ -173,26 +173,6 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	 *                if the class definition was not found.
 	 */
 	protected abstract Class loadClass(String name, boolean checkPermission) throws ClassNotFoundException;
-
-	/**
-	 * Find the specified resource in this bundle.
-	 * 
-	 * This bundle's class loader is called to search for the named resource.
-	 * If this bundle's state is <tt>INSTALLED</tt>, then only this bundle
-	 * will be searched for the specified resource. Imported packages cannot be
-	 * searched when a bundle has not been resolved.
-	 * 
-	 * @param name
-	 *            The name of the resource. See <tt>java.lang.ClassLoader.getResource</tt>
-	 *            for a description of the format of a resource name.
-	 * @return a URL to the named resource, or <tt>null</tt> if the resource
-	 *         could not be found or if the caller does not have the <tt>AdminPermission</tt>,
-	 *         and the Java Runtime Environment supports permissions.
-	 * 
-	 * @exception java.lang.IllegalStateException
-	 *                If this bundle has been uninstalled.
-	 */
-	public abstract URL getResource(String name);
 
 	/**
 	 * Returns the current state of the bundle.
@@ -676,19 +656,11 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	protected void updateWorker(PrivilegedExceptionAction action) throws BundleException {
 		boolean bundleActive = false;
 		AbstractBundle host = null;
-		if (isFragment()) {
-			host = (AbstractBundle) getHost();
-			bundleActive = (host == null ? false : (host.state == ACTIVE));
-		} else {
+		if (!isFragment())
 			bundleActive = (state == ACTIVE);
-		}
 		if (bundleActive) {
 			try {
-				if (isFragment()) {
-					host.stopWorker(false);
-				} else {
-					stopWorker(false);
-				}
+				stopWorker(false);
 			} catch (BundleException e) {
 				framework.publishFrameworkEvent(FrameworkEvent.ERROR, this, e);
 				if (state == ACTIVE) /* if the bundle is still active */{
@@ -704,11 +676,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 		} finally {
 			if (bundleActive) {
 				try {
-					if (isFragment()) {
-						host.startWorker(false);
-					} else {
-						startWorker(false);
-					}
+					startWorker(false);
 				} catch (BundleException e) {
 					framework.publishFrameworkEvent(FrameworkEvent.ERROR, this, e);
 				}
@@ -742,7 +710,6 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 			boolean exporting;
 			int st = getState();
 			synchronized (bundles) {
-				bundles.markDependancies();
 				exporting = reload(newBundle);
 				manifestLocalization = null;
 			}
@@ -845,20 +812,11 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	 */
 	protected void uninstallWorker(PrivilegedExceptionAction action) throws BundleException {
 		boolean bundleActive = false;
-		AbstractBundle host = null;
-		if (isFragment()) {
-			host = (AbstractBundle) getHost();
-			bundleActive = (host == null ? false : (host.state == ACTIVE));
-		} else {
+		if (!isFragment())
 			bundleActive = (state == ACTIVE);
-		}
 		if (bundleActive) {
 			try {
-				if (isFragment()) {
-					host.stopWorker(true);
-				} else {
-					stopWorker(true);
-				}
+				stopWorker(true);
 			} catch (BundleException e) {
 				framework.publishFrameworkEvent(FrameworkEvent.ERROR, this, e);
 			}
@@ -868,11 +826,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 		} catch (PrivilegedActionException pae) {
 			if (bundleActive) /* if we stopped the bundle */{
 				try {
-					if (isFragment()) {
-						host.startWorker(false);
-					} else {
-						startWorker(false);
-					}
+					startWorker(false);
 				} catch (BundleException e) {
 					/*
 					 * if we fail to start the original bundle then we are in
@@ -880,25 +834,9 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 					 */
 					framework.publishFrameworkEvent(FrameworkEvent.ERROR, this, e);
 				}
-				// set the bundleActive to false so that the finally will not
-				// try
-				// to start the bundle again.
-				bundleActive = false;
 			}
 			throw (BundleException) pae.getException();
-		} finally {
-			if (isFragment() && bundleActive) {
-				try {
-					host.startWorker(false);
-				} catch (BundleException e) {
-					/*
-					 * if we fail to start the original host bundle then we are
-					 * in big trouble
-					 */
-					framework.publishFrameworkEvent(FrameworkEvent.ERROR, this, e);
-				}
-			}
-		}
+		} 
 		framework.publishBundleEvent(BundleEvent.UNINSTALLED, this);
 	}
 
@@ -916,7 +854,6 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 			boolean exporting;
 			int st = getState();
 			synchronized (bundles) {
-				bundles.markDependancies();
 				bundles.remove(this); /* remove before calling unload */
 				exporting = unload();
 			}
@@ -1083,42 +1020,6 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	}
 
 	/**
-	 * Provides a list of {@link ServiceReferenceImpl}s for the services
-	 * registered by this bundle or <code>null</code> if the bundle has no
-	 * registered services.
-	 * 
-	 * <p>
-	 * The list is valid at the time of the call to this method, but the
-	 * framework is a very dynamic environment and services can be modified or
-	 * unregistered at anytime.
-	 * 
-	 * @return An array of {@link ServiceReferenceImpl}or <code>null</code>.
-	 * @exception java.lang.IllegalStateException
-	 *                If the bundle has been uninstalled.
-	 * @see ServiceRegistrationImpl
-	 * @see ServiceReferenceImpl
-	 */
-	public abstract org.osgi.framework.ServiceReference[] getRegisteredServices();
-
-	/**
-	 * Provides a list of {@link ServiceReferenceImpl}s for the services this
-	 * bundle is using, or <code>null</code> if the bundle is not using any
-	 * services. A bundle is considered to be using a service if the bundle's
-	 * use count for the service is greater than zero.
-	 * 
-	 * <p>
-	 * The list is valid at the time of the call to this method, but the
-	 * framework is a very dynamic environment and services can be modified or
-	 * unregistered at anytime.
-	 * 
-	 * @return An array of {@link ServiceReferenceImpl}or <code>null</code>.
-	 * @exception java.lang.IllegalStateException
-	 *                If the bundle has been uninstalled.
-	 * @see ServiceReferenceImpl
-	 */
-	public abstract org.osgi.framework.ServiceReference[] getServicesInUse();
-
-	/**
 	 * Determine whether the bundle has the requested permission.
 	 * 
 	 * <p>
@@ -1271,37 +1172,33 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 		return domain;
 	}
 
-	protected boolean isSingleton() {
-		return singleton;
-	}
-
 	/**
 	 * The bundle must unresolve the permissions in these packages.
 	 * 
-	 * @param unresolvedPackages
-	 *            A list of the package which have been unresolved as a result
+	 * @param refreshedBundles
+	 *            A list of bundles which have been refreshed as a result
 	 *            of a packageRefresh
 	 */
-	protected void unresolvePermissions(Hashtable unresolvedPackages) {
+	protected void unresolvePermissions(AbstractBundle[] refreshedBundles) {
 		if (domain != null) {
 			BundlePermissionCollection collection = (BundlePermissionCollection) domain.getPermissions();
 			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 				Debug.println("Unresolving permissions in bundle " + this); //$NON-NLS-1$
 			}
-			collection.unresolvePermissions(unresolvedPackages);
+			collection.unresolvePermissions(refreshedBundles);
 		}
 	}
 
-	public org.osgi.framework.Bundle[] getFragments() {
+	protected Bundle[] getFragments() {
 		checkValid();
 		return null;
 	}
 
-	public boolean isFragment() {
+	protected boolean isFragment() {
 		return false;
 	}
 
-	public org.osgi.framework.Bundle getHost() {
+	protected BundleLoaderProxy[] getHosts() {
 		checkValid();
 		return null;
 	}
@@ -1374,6 +1271,10 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 		return bundledata.getSymbolicName();
 	}
 
+	public long getLastModified() {
+		return bundledata.getLastModified();
+	}
+
 	public BundleData getBundleData() {
 		return bundledata;
 	}
@@ -1390,45 +1291,24 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 		return bundledata.getStartLevel();
 	}
 
-	public abstract BundleLoader getBundleLoader();
+	protected abstract BundleLoader getBundleLoader();
 
 	/**
 	 * Mark this bundle as resolved.
 	 */
-	protected void resolve(boolean singleton) {
-		if (domain != null && !checkPermissions()) {
-			state = INSTALLED;
-			return;
-		}
+	protected void resolve() {
 		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 			if ((state & (INSTALLED)) == 0) {
 				Debug.println("Bundle.resolve called when state != INSTALLED: " + this); //$NON-NLS-1$
 				Debug.printStackTrace(new Exception("Stack trace")); //$NON-NLS-1$
 			}
 		}
-		// Need to see if this is a singleton
-		if (singleton) {
-			this.singleton = true;
-			AbstractBundle[] sameNames = framework.bundles.getBundles(getSymbolicName());
-			if (sameNames != null && sameNames.length > 1) {
-				for (int i = 0; i < sameNames.length; i++)
-					if (sameNames[i] != this) {
-						if (sameNames[i].isResolved() && sameNames[i].singleton) {
-							runtimeResolveError = Msg.formatter.getString("BUNDLE_SINGLETON_RESOLVE_ERROR", this.getLocation(), sameNames[i].getLocation()); //$NON-NLS-1$
-							return;
-						}
-					}
-			}
-		}
-
 		if (state == INSTALLED) {
 			state = RESOLVED;
 			// Do not publish RESOLVED event here.  This is done by caller 
 			// to resolve if appropriate.
 		}
 	}
-
-	protected abstract boolean unresolve() throws BundleException;
 
 	/**
 	 * Return the current context for this bundle.
@@ -1461,12 +1341,12 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 		}
 		StringBuffer missing = new StringBuffer();
 		for (int i = 0; i < unsatisfied.length; i++) {
-			if (unsatisfied[i] instanceof PackageSpecification) {
+			if (unsatisfied[i] instanceof ImportPackageSpecification) {
 				missing.append(Msg.formatter.getString("BUNDLE_UNRESOLVED_PACKAGE", toString(unsatisfied[i]))); //$NON-NLS-1$
-			} else if (unsatisfied[i] instanceof BundleSpecification) {
-				missing.append(Msg.formatter.getString("BUNDLE_UNRESOLVED_BUNDLE", toString(unsatisfied[i]))); //$NON-NLS-1$
-			} else {
+			} else if (unsatisfied[i] instanceof HostSpecification) {
 				missing.append(Msg.formatter.getString("BUNDLE_UNRESOLVED_HOST", toString(unsatisfied[i]))); //$NON-NLS-1$
+			} else {
+				missing.append(Msg.formatter.getString("BUNDLE_UNRESOLVED_BUNDLE", toString(unsatisfied[i]))); //$NON-NLS-1$
 			}
 			missing.append(',');
 		}
@@ -1491,91 +1371,6 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 
 	public Object getKey() {
 		return new Long(getBundleId());
-	}
-
-	protected boolean checkPermissions() {
-		runtimeResolveError = null;
-		BundleDescription bundleDesc = getBundleDescription();
-		if (bundleDesc == null)
-			return false;
-		PackageSpecification[] pkgs = bundleDesc.getPackages();
-		for (int i = 0; i < pkgs.length; i++) {
-			// check to make sure the exporter has permissions
-			BundleDescription supplier = pkgs[i].getSupplier();
-			AbstractBundle supplierBundle = supplier == null ? null : framework.getBundle(supplier.getBundleId());
-			if (supplierBundle == null || !supplierBundle.checkExportPackagePermission(pkgs[i].getName())) {
-				runtimeResolveError = Msg.formatter.getString("BUNDLE_PERMISSION_EXCEPTION_EXPORT", supplierBundle, pkgs[i].getName()); //$NON-NLS-1$
-				return false;
-			}
-			// check to make sure the importer has permissions
-			if (!checkImportPackagePermission(pkgs[i].getName())) {
-				runtimeResolveError = Msg.formatter.getString("BUNDLE_PERMISSION_EXCEPTION_IMPORT", this, pkgs[i].getName()); //$NON-NLS-1$
-				return false;
-			}
-		}
-		BundleSpecification[] bundles = bundleDesc.getRequiredBundles();
-		for (int i = 0; i < bundles.length; i++) {
-			// check to make sure the provider has permissions
-			BundleDescription supplier = bundles[i].getSupplier();
-			AbstractBundle supplierBundle = supplier == null ? null : framework.getBundle(supplier.getBundleId());
-			if (supplierBundle == null || !supplierBundle.checkProvideBundlePermission(bundles[i].getName())) {
-				runtimeResolveError = Msg.formatter.getString("BUNDLE_PERMISSION_EXCEPTION_PROVIDE", supplierBundle, bundles[i].getName()); //$NON-NLS-1$
-				return false;
-			}
-			// check to make sure the requirer has permissions
-			if (!checkRequireBundlePermission(bundles[i].getName())) {
-				runtimeResolveError = Msg.formatter.getString("BUNDLE_PERMISSION_EXCEPTION_REQUIRE", this, bundles[i].getName()); //$NON-NLS-1$
-				return false;
-			}
-		}
-		HostSpecification host = bundleDesc.getHost();
-		if (host != null) {
-			// check to make sure the host has permissions
-			BundleDescription supplier = host.getSupplier();
-			AbstractBundle supplierBundle = supplier == null ? null : framework.getBundle(supplier.getBundleId());
-			if (supplierBundle == null || !supplierBundle.checkFragmentHostPermission(host.getName())) {
-				runtimeResolveError = Msg.formatter.getString("BUNDLE_PERMISSION_EXCEPTION_HOST", supplierBundle, host.getName()); //$NON-NLS-1$
-				return false;
-			}
-			// check to make sure the fragment has permissions
-			if (!checkFragmentBundlePermission(host.getName())) {
-				runtimeResolveError = Msg.formatter.getString("BUNDLE_PERMISSION_EXCEPTION_FRAGMENT", this, host.getName()); //$NON-NLS-1$
-				return false;
-			}
-		}
-		return true;
-	}
-
-	protected boolean checkExportPackagePermission(String pkgName) {
-		if (domain != null)
-			return domain.implies(new PackagePermission(pkgName, PackagePermission.EXPORT));
-		return true;
-	}
-
-	protected boolean checkProvideBundlePermission(String symbolicName) {
-		// Return true until BundlePermissions are better defined.
-		return true;
-	}
-
-	protected boolean checkImportPackagePermission(String pkgName) {
-		if (domain != null)
-			return domain.implies(new PackagePermission(pkgName, PackagePermission.IMPORT));
-		return true;
-	}
-
-	protected boolean checkRequireBundlePermission(String symbolicName) {
-		// Return true until BundlePermissions are better defined.
-		return true;
-	}
-
-	protected boolean checkFragmentHostPermission(String symbolicName) {
-		// Return true until BundlePermissions are better defined.
-		return true;
-	}
-
-	protected boolean checkFragmentBundlePermission(String symbolicName) {
-		// Return true until BundlePermissions are better defined.
-		return true;
 	}
 
 	/* This method is used by the Bundle Localization Service to obtain

@@ -14,24 +14,21 @@ import java.io.*;
 import java.net.URL;
 import java.util.*;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
-import org.eclipse.osgi.framework.adaptor.core.BundleEntry;
+import org.eclipse.osgi.framework.adaptor.core.*;
 import org.eclipse.osgi.framework.internal.core.Constants;
-import org.eclipse.osgi.framework.internal.defaultadaptor.DefaultAdaptor;
-import org.eclipse.osgi.framework.internal.defaultadaptor.DefaultBundleData;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.framework.util.Headers;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.service.pluginconversion.PluginConversionException;
-import org.eclipse.osgi.service.resolver.Version;
 import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.Version;
 
 /**
  * Internal class.
  */
-//TODO This class does not override save(). 
 //Maybe for consistency should it be overriden to do nothing. See also EclipseAdaptor.saveMetadataFor(BundleData)
-public class EclipseBundleData extends DefaultBundleData {
+public class EclipseBundleData extends AbstractBundleData {
 	static final byte MANIFEST_TYPE_UNKNOWN = 0x00;
 	static final byte MANIFEST_TYPE_BUNDLE = 0x01;
 	static final byte MANIFEST_TYPE_PLUGIN = 0x02;
@@ -72,7 +69,7 @@ public class EclipseBundleData extends DefaultBundleData {
 		return (String[]) result.toArray(new String[result.size()]);
 	}
 
-	public EclipseBundleData(DefaultAdaptor adaptor, long id) throws IOException {
+	public EclipseBundleData(AbstractFrameworkAdaptor adaptor, long id) {
 		super(adaptor, id);
 	}
 
@@ -237,7 +234,7 @@ public class EclipseBundleData extends DefaultBundleData {
 		}
 
 		//Now we know the symbolicId and the version of the bundle, we check to see if don't have a manifest for it already
-		Version version = new Version((String) generatedManifest.get(Constants.BUNDLE_VERSION));
+		Version version = Version.parseVersion((String) generatedManifest.get(Constants.BUNDLE_VERSION));
 		String symbolicName = ManifestElement.parseHeader(org.osgi.framework.Constants.BUNDLE_SYMBOLICNAME, (String) generatedManifest.get(org.osgi.framework.Constants.BUNDLE_SYMBOLICNAME))[0].getValue();
 		ManifestElement generatedFrom = ManifestElement.parseHeader(PluginConverterImpl.GENERATED_FROM, (String) generatedManifest.get(PluginConverterImpl.GENERATED_FROM))[0];
 		Headers existingHeaders = checkManifestAndParent(cacheLocation, symbolicName, version.toString(), Byte.parseByte(generatedFrom.getAttribute(PluginConverterImpl.MANIFEST_TYPE_ATTRIBUTE)));
@@ -359,5 +356,14 @@ public class EclipseBundleData extends DefaultBundleData {
 
 	public boolean isAutoStartable() {
 		return autoStart || (autoStartExceptions != null && autoStartExceptions.length > 0);
+	}
+
+	/**
+	 * Save the bundle data in the data file.
+	 *
+	 * @throws IOException if a write error occurs.
+	 */
+	public synchronized void save() throws IOException {
+		((EclipseAdaptor) adaptor).saveMetaDataFor(this);
 	}
 }

@@ -12,6 +12,7 @@ package org.eclipse.osgi.internal.resolver;
 
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.Version;
 
 public class ReadOnlyState implements State {
 	private State target;
@@ -21,10 +22,6 @@ public class ReadOnlyState implements State {
 	}
 
 	public boolean addBundle(BundleDescription description) {
-		throw new UnsupportedOperationException();
-	}
-
-	public void addStateChangeListener(StateChangeListener listener, int flags) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -56,7 +53,7 @@ public class ReadOnlyState implements State {
 		return target.getChanges();
 	}
 
-	public PackageSpecification[] getExportedPackages() {
+	public ExportPackageDescription[] getExportedPackages() {
 		return target.getExportedPackages();
 	}
 
@@ -66,10 +63,6 @@ public class ReadOnlyState implements State {
 
 	public BundleDescription[] getResolvedBundles() {
 		return target.getResolvedBundles();
-	}
-
-	public Resolver getResolver() {
-		return null;
 	}
 
 	public long getTimeStamp() {
@@ -92,10 +85,6 @@ public class ReadOnlyState implements State {
 		throw new UnsupportedOperationException();
 	}
 
-	public void removeStateChangeListener(StateChangeListener listener) {
-		throw new UnsupportedOperationException();
-	}
-
 	public StateDelta resolve() {
 		throw new UnsupportedOperationException();
 	}
@@ -108,23 +97,36 @@ public class ReadOnlyState implements State {
 		throw new UnsupportedOperationException();
 	}
 
-	public void resolveBundle(BundleDescription bundle, int status) {
-		throw new UnsupportedOperationException();
-	}
-
-	public void resolveConstraint(VersionConstraint constraint, Version actualVersion, BundleDescription supplier) {
-		throw new UnsupportedOperationException();
-	}
-
 	public void setOverrides(Object value) {
-		throw new UnsupportedOperationException();
-	}
-
-	public void setResolver(Resolver value) {
 		throw new UnsupportedOperationException();
 	}
 
 	public boolean updateBundle(BundleDescription newDescription) {
 		throw new UnsupportedOperationException();
 	}
+
+	public void resolveConstraint(VersionConstraint constraint, BaseDescription supplier) {
+		throw new UnsupportedOperationException();
+	}
+
+	public void resolveBundle(BundleDescription bundle, boolean status, BundleDescription[] host, ExportPackageDescription[] selectedExports, BundleDescription[] resolvedRequires, ExportPackageDescription[] resolveImports) {
+		throw new UnsupportedOperationException();
+	}
+
+	public void removeBundleComplete(BundleDescription bundle) {
+		throw new UnsupportedOperationException();
+	}
+
+	public Resolver getResolver() {
+		return null;
+	}
+
+	public void setResolver(Resolver value) {
+		throw new UnsupportedOperationException();
+	}
+
+	public ExportPackageDescription linkDynamicImport(BundleDescription importingBundle, String requestedPackage) {
+		throw new UnsupportedOperationException();
+	}
+
 }

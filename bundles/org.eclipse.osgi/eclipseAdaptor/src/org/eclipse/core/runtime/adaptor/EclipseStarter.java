@@ -800,7 +800,7 @@ public class EclipseStarter {
 					startBundles.add(osgiBundle);
 				// include basic bundles in case they were not resolved before
 				if ((osgiBundle.getState() & Bundle.INSTALLED) != 0)
-					toRefresh.add(osgiBundle);				
+					toRefresh.add(osgiBundle);
 			} catch (BundleException e) {
 				FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_FAILED_INSTALL", initialBundles[i].location), 0, e, null); //$NON-NLS-1$
 				log.log(entry);

@@ -29,16 +29,16 @@ public class SystemState extends StateImpl {
 	}
 
 	public boolean updateBundle(BundleDescription newDescription) {
-		if (!super.removeBundle(newDescription))
+		if (!super.updateBundle(newDescription))
 			return false;
 		updateTimeStamp();
 		return true;
 	}
 
 	private void updateTimeStamp() {
-		if (timeStamp == Long.MAX_VALUE)
-			timeStamp = 0;
-		timeStamp++;
+		if (getTimeStamp() == Long.MAX_VALUE)
+			setTimeStamp(0);
+		setTimeStamp(getTimeStamp()+1);
 	}
 
 	public StateDelta compare(State state) throws BundleException {
@@ -46,4 +46,31 @@ public class SystemState extends StateImpl {
 		throw new UnsupportedOperationException();
 	}
 
+	public StateDelta resolve() {
+		StateDelta delta = super.resolve();
+		if (delta.getChanges().length > 0)
+			updateTimeStamp(); // resolver linkage has changed; update the timestamp
+		return delta;
+	}
+	public StateDelta resolve(boolean incremental) {
+		StateDelta delta = super.resolve(incremental);
+		if (delta.getChanges().length > 0)
+			updateTimeStamp(); // resolver linkage has changed; update the timestamp
+		return delta;
+	}
+	public StateDelta resolve(BundleDescription[] reResolve) {
+		StateDelta delta = super.resolve(reResolve);
+		if (delta.getChanges().length > 0)
+			updateTimeStamp(); // resolver linkage has changed; update the timestamp
+		return delta;
+	}
+
+	public ExportPackageDescription linkDynamicImport(BundleDescription importingBundle, String requestedPackage) {
+		ExportPackageDescription result = super.linkDynamicImport(importingBundle, requestedPackage);
+		if (result == null)
+			return null;
+		// resolver linkage has changed; update the timestamp
+		updateTimeStamp();
+		return result;
+	}
 }

@@ -53,4 +53,12 @@ org.eclipse.osgi/eclipseadaptor/debug/platformadmin=false
 org.eclipse.osgi/eclipseadaptor/debug/platformadmin/resolver=false
 org.eclipse.osgi/eclipseadaptor/converter/debug = false
 
+# OSGi resolver options
+org.eclipse.osgi/resolver/debug = false
+org.eclipse.osgi/resolver/wiring = false
+org.eclipse.osgi/resolver/imports = false
+org.eclipse.osgi/resolver/requires = false
+org.eclipse.osgi/resolver/grouping = false
+org.eclipse.osgi/resolver/cycles = false
+
 

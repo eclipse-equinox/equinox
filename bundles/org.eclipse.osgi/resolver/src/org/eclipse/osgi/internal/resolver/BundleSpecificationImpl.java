@@ -10,17 +10,19 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
 
+import org.eclipse.osgi.service.resolver.*;
+import org.eclipse.osgi.service.resolver.BaseDescription;
 import org.eclipse.osgi.service.resolver.BundleSpecification;
 
 public class BundleSpecificationImpl extends VersionConstraintImpl implements BundleSpecification {
 	private boolean exported;
 	private boolean optional;
 
-	public void setExported(boolean exported) {
+	protected void setExported(boolean exported) {
 		this.exported = exported;
 	}
 
-	public void setOptional(boolean optional) {
+	protected void setOptional(boolean optional) {
 		this.optional = optional;
 	}
 
@@ -30,5 +32,21 @@ public class BundleSpecificationImpl extends VersionConstraintImpl implements Bu
 
 	public boolean isOptional() {
 		return optional;
+	}
+
+	public boolean isSatisfiedBy(BaseDescription supplier) {
+		if (!(supplier instanceof BundleDescription))
+			return false;
+		BundleDescription candidate = (BundleDescription) supplier;
+		if (candidate.getHost() != null)
+			return false;
+		if (getName() != null && getName().equals(candidate.getSymbolicName()) &&
+				(getVersionRange() == null || getVersionRange().isIncluded(candidate.getVersion())))
+			return true;
+		return false;
+	}
+
+	public String toString() {
+		return "Require-Bundle: " + getName() + " - version: " + getVersionRange(); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 }

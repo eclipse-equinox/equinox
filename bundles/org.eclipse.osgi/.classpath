@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="console/src"/>
+	<classpathentry kind="src" path="osgi/src"/>
 	<classpathentry kind="src" path="core/adaptor"/>
 	<classpathentry kind="src" path="core/framework"/>
 	<classpathentry kind="src" path="defaultAdaptor/src"/>
 	<classpathentry kind="src" path="eclipseAdaptor/src"/>
-	<classpathentry kind="src" path="osgi/src"/>
 	<classpathentry kind="src" path="resolver/src"/>
 	<classpathentry kind="lib" path="osgi/exceptions.jar"/>
 	<classpathentry kind="lib" path="osgi/collx.jar"/>

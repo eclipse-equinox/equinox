@@ -12,7 +12,6 @@
 package org.eclipse.osgi.framework.internal.core;
 
 import java.security.PermissionCollection;
-import java.util.Hashtable;
 
 /**
  * An abstract subclass of PermissionCollection.
@@ -22,8 +21,8 @@ abstract class BundlePermissionCollection extends PermissionCollection {
 	/**
 	 * The Permission collection will unresolve the permissions in these packages.
 	 *
-	 * @param unresolvedPackages A list of the package which have been unresolved
+	 * @param refreshedBundles A list of the bundles which have been refreshed
 	 * as a result of a packageRefresh
 	 */
-	abstract void unresolvePermissions(Hashtable unresolvedPackages);
+	abstract void unresolvePermissions(AbstractBundle[] refreshedBundles);
 }

@@ -14,7 +14,6 @@ package org.eclipse.osgi.framework.internal.core;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Enumeration;
-import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.osgi.framework.BundleException;
 
 /**
@@ -44,11 +43,11 @@ public class SystemBundleLoader extends BundleLoader {
 
 	/**
 	 * @param bundle The system bundle.
-	 * @param description The BundleDescrition for the system bundle
+	 * @param proxy The BundleLoaderProxy for the system bundle
 	 * @throws BundleException On any error.
 	 */
-	protected SystemBundleLoader(BundleHost bundle, BundleDescription description) throws BundleException {
-		super(bundle, description);
+	protected SystemBundleLoader(BundleHost bundle, BundleLoaderProxy proxy) throws BundleException {
+		super(bundle, proxy);
 		this.classLoader = getClass().getClassLoader();
 	}
 

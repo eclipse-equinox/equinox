@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.security.ProtectionDomain;
 import org.eclipse.osgi.framework.adaptor.ClassLoaderDelegate;
 import org.eclipse.osgi.framework.adaptor.core.*;
-import org.eclipse.osgi.framework.internal.defaultadaptor.DefaultAdaptor;
 
 /**
  * Internal class.
@@ -22,7 +21,7 @@ import org.eclipse.osgi.framework.internal.defaultadaptor.DefaultAdaptor;
 public class EclipseElementFactory implements AdaptorElementFactory {
 
 	public AbstractBundleData createBundleData(AbstractFrameworkAdaptor adaptor, long id) throws IOException {
-		return new EclipseBundleData((DefaultAdaptor) adaptor, id);
+		return new EclipseBundleData((AbstractFrameworkAdaptor) adaptor, id);
 	}
 
 	public org.eclipse.osgi.framework.adaptor.BundleClassLoader createClassLoader(ClassLoaderDelegate delegate, ProtectionDomain domain, String[] bundleclasspath, AbstractBundleData data) {

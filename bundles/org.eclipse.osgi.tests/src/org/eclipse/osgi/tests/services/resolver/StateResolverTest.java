@@ -14,6 +14,7 @@ import java.util.*;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.eclipse.osgi.service.resolver.*;
+import org.osgi.framework.*;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 
@@ -112,9 +113,10 @@ public class StateResolverTest extends AbstractStateTest {
 			deltasMap.put(resolutions[i].getBundle().getSymbolicName(), resolutions[i]);
 		assertNotNull("3.1", deltasMap.get(b1.getSymbolicName()));
 		assertNotNull("3.2", deltasMap.get(b2.getSymbolicName()));
-		BundleDelta[] unresolutions = delta.getChanges(BundleDelta.UNRESOLVED, false);
-		assertEquals("4.0", 1, unresolutions.length);
-		assertEquals("4.1", unresolutions[0].getBundle(), b3);
+		// TODO why do we expect unresolved deltas here when the bundle was not resolved in the first place?
+		//BundleDelta[] unresolutions = delta.getChanges(BundleDelta.UNRESOLVED, false);
+		//assertEquals("4.0", 1, unresolutions.length);
+		//assertEquals("4.1", unresolutions[0].getBundle(), b3);
 		assertFullyResolved("5.1", b1);
 		assertFullyResolved("5.2", b2);
 		assertFullyUnresolved("5.3", b3);
@@ -123,12 +125,12 @@ public class StateResolverTest extends AbstractStateTest {
 	public void testComplexResolution() throws BundleException {
 		State state = buildComplexState();
 		StateDelta delta = state.resolve();
-		BundleDescription b1 = state.getBundle("org.eclipse.b1", new Version("1.0"));
-		BundleDescription b2 = state.getBundle("org.eclipse.b2", new Version("2.0"));
-		BundleDescription b3 = state.getBundle("org.eclipse.b3", new Version("2.0"));
-		BundleDescription b4 = state.getBundle("org.eclipse.b4", new Version("2.0"));
-		BundleDescription b5 = state.getBundle("org.eclipse.b5", new Version("1.0"));
-		BundleDescription b6 = state.getBundle("org.eclipse.b6", new Version("1.0"));
+		BundleDescription b1 = state.getBundle("org.eclipse.b1", Version.parseVersion("1.0"));
+		BundleDescription b2 = state.getBundle("org.eclipse.b2", Version.parseVersion("2.0"));
+		BundleDescription b3 = state.getBundle("org.eclipse.b3", Version.parseVersion("2.0"));
+		BundleDescription b4 = state.getBundle("org.eclipse.b4", Version.parseVersion("2.0"));
+		BundleDescription b5 = state.getBundle("org.eclipse.b5", Version.parseVersion("1.0"));
+		BundleDescription b6 = state.getBundle("org.eclipse.b6", Version.parseVersion("1.0"));
 		assertNotNull("0.1", b1);
 		assertNotNull("0.2", b2);
 		assertNotNull("0.3", b3);
@@ -209,7 +211,7 @@ public class StateResolverTest extends AbstractStateTest {
 		state.addBundle(b1);
 		delta = state.resolve();
 		changes = delta.getChanges();
-		assertEquals("5.0", 3, changes.length);
+		assertEquals("5.0", 2, changes.length);
 		additions = delta.getChanges(BundleDelta.ADDED, false);
 		assertEquals("6.0", 1, additions.length);
 		assertEquals("6.1", b1, additions[0].getBundle());
@@ -218,9 +220,16 @@ public class StateResolverTest extends AbstractStateTest {
 		BundleDelta[] existingResolved = delta.getChanges(BundleDelta.RESOLVED, true);
 		assertEquals("8.0", 1, existingResolved.length);
 		assertEquals("8.1", b3, existingResolved[0].getBundle());
-		BundleDelta[] optionalLinkageChanged = delta.getChanges(BundleDelta.OPTIONAL_LINKAGE_CHANGED, true);
-		assertEquals("9.0", 1, optionalLinkageChanged.length);
-		assertEquals("9.1", b2, optionalLinkageChanged[0].getBundle());
+		// TODO linkage changed types are no longer valid
+		//BundleDelta[] optionalLinkageChanged = delta.getChanges(BundleDelta.OPTIONAL_LINKAGE_CHANGED, true);
+		//assertEquals("9.0", 1, optionalLinkageChanged.length);
+		//assertEquals("9.1", b2, optionalLinkageChanged[0].getBundle());
+		delta = state.resolve(new BundleDescription[] {b2});
+		changes = delta.getChanges();
+		assertEquals("9.0", 1, changes.length);
+		resolutions = delta.getChanges(BundleDelta.RESOLVED, true);
+		assertEquals("9.1", 1, resolutions.length);
+		assertEquals("9.2", b2, resolutions[0].getBundle());
 		assertFullyResolved("10.1", b1);
 		assertFullyResolved("10.2", b2);
 		assertFullyResolved("10.3", b3);
@@ -233,12 +242,12 @@ public class StateResolverTest extends AbstractStateTest {
 		// remove bundle 4 - should cause 6 to be unresolved
 		state.removeBundle(4);
 		delta = state.resolve();
-		assertEquals("1.0", 1, delta.getChanges(BundleDelta.REMOVED | BundleDelta.UNRESOLVED, true).length);
-		assertEquals("1.1", 4, delta.getChanges(BundleDelta.REMOVED | BundleDelta.UNRESOLVED, true)[0].getBundle().getBundleId());
+		assertEquals("1.0", 1, delta.getChanges(BundleDelta.REMOVED | BundleDelta.UNRESOLVED | BundleDelta.REMOVAL_COMPLETE, true).length);
+		assertEquals("1.1", 4, delta.getChanges(BundleDelta.REMOVED | BundleDelta.UNRESOLVED | BundleDelta.REMOVAL_COMPLETE, true)[0].getBundle().getBundleId());
 		assertEquals("2.0", 1, delta.getChanges(BundleDelta.UNRESOLVED, true).length);
 		assertEquals("2.1", 6, delta.getChanges(BundleDelta.UNRESOLVED, true)[0].getBundle().getBundleId());
 		// reinstall bundle 4 - should cause 6 to be resolved again
-		BundleDescription b4 = delta.getChanges(BundleDelta.REMOVED | BundleDelta.UNRESOLVED, true)[0].getBundle();
+		BundleDescription b4 = delta.getChanges(BundleDelta.REMOVED | BundleDelta.UNRESOLVED | BundleDelta.REMOVAL_COMPLETE, true)[0].getBundle();
 		state.addBundle(b4);
 		delta = state.resolve();
 		assertEquals("3.0", 1, delta.getChanges(BundleDelta.ADDED | BundleDelta.RESOLVED, true).length);
@@ -436,9 +445,17 @@ public class StateResolverTest extends AbstractStateTest {
 		assertEquals("2.3", (BundleDelta.RESOLVED | BundleDelta.ADDED), ((BundleDelta) deltasMap.get(new Long(3))).getType());
 		delta = state.resolve(new BundleDescription[] {state.getBundle(1)});
 		deltas = delta.getChanges();
-		assertEquals("3.0", 1, deltas.length);
-		assertEquals("3.1", 1, deltas[0].getBundle().getBundleId());
-		assertEquals("3.2", BundleDelta.RESOLVED, deltas[0].getType());
+		assertEquals("3.0", 3, deltas.length);
+		deltasMap = new HashMap();
+		for (int i = 0; i < deltas.length; i++)
+			deltasMap.put(new Long(deltas[i].getBundle().getBundleId()), deltas[i]);
+		assertNotNull("3.1", deltasMap.get(new Long(1)));
+		assertNotNull("3.2", deltasMap.get(new Long(2)));
+		assertNotNull("3.3", deltasMap.get(new Long(3)));
+		assertEquals("3.4", BundleDelta.RESOLVED, ((BundleDelta) deltasMap.get(new Long(1))).getType());
+		assertEquals("3.5", BundleDelta.RESOLVED, ((BundleDelta) deltasMap.get(new Long(2))).getType());
+		assertEquals("3.6", BundleDelta.RESOLVED, ((BundleDelta) deltasMap.get(new Long(3))).getType());
+
 	}
 
 	public void testUpdate() throws BundleException {
@@ -456,25 +473,30 @@ public class StateResolverTest extends AbstractStateTest {
 		assertEquals("1.2", (BundleDelta.ADDED | BundleDelta.RESOLVED), changes[0].getType());
 		assertFullyResolved("1.3", b1);
 		assertTrue("1.8", contains(state.getResolvedBundles(), b1));
-		b1 = state.getFactory().createBundleDescription(parseManifest(B1_UNRESOLVED), B1_LOCATION, 1);
-		assertTrue("1.8b", state.updateBundle(b1));
-		b1 = state.getBundleByLocation(b1.getLocation());
-		assertTrue("1.9", !contains(state.getResolvedBundles(), b1));
+		BundleDescription b11 = state.getFactory().createBundleDescription(parseManifest(B1_UNRESOLVED), B1_LOCATION, 1);
+		assertTrue("1.8b", state.updateBundle(b11));
+		b11 = state.getBundle(b11.getBundleId());
+		assertTrue("1.9", !contains(state.getResolvedBundles(), b11));
 		delta = state.resolve();
 		changes = delta.getChanges();
-		assertEquals("2.0", 1, changes.length);
-		assertEquals("2.1", b1, changes[0].getBundle());
-		assertEquals("2.2", BundleDelta.UPDATED | BundleDelta.UNRESOLVED, changes[0].getType());
-		b1 = state.getFactory().createBundleDescription(parseManifest(B1_RESOLVED), B1_LOCATION, 1);
-		assertTrue("2.3", state.updateBundle(b1));
-		b1 = state.getBundleByLocation(b1.getLocation());
-		assertTrue("2.9", !contains(state.getResolvedBundles(), b1));
+		assertEquals("2.0", 2, changes.length);
+		HashMap deltasMap = new HashMap();
+		for (int i = 0; i < changes.length; i++)
+			deltasMap.put(changes[i].getBundle(), changes[i]);
+		assertNotNull("2.1", deltasMap.get(b1));
+		assertNotNull("2.2", deltasMap.get(b11));
+		assertEquals("2.3", BundleDelta.UNRESOLVED, ((BundleDelta) deltasMap.get(b1)).getType());
+		assertEquals("2.4", BundleDelta.UPDATED, ((BundleDelta) deltasMap.get(b11)).getType());
+		BundleDescription b111 = state.getFactory().createBundleDescription(parseManifest(B1_RESOLVED), B1_LOCATION, 1);
+		assertTrue("3.0", state.updateBundle(b111));
+		b111 = state.getBundle(b111.getBundleId());
+		assertTrue("3.1", !contains(state.getResolvedBundles(), b111));
 		delta = state.resolve();
 		changes = delta.getChanges();
-		assertEquals("3.0", 1, changes.length);
-		assertEquals("3.1", b1, changes[0].getBundle());
+		assertEquals("3.2", 1, changes.length);
+		assertEquals("3.1", b111, changes[0].getBundle());
 		assertEquals("3.2", BundleDelta.UPDATED | BundleDelta.RESOLVED, changes[0].getType());
-		assertFullyResolved("3.3", b1);
+		assertFullyResolved("3.3", b111);
 	}
 
 	private boolean contains(Object[] array, Object element) {
