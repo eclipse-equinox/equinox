@@ -32,7 +32,7 @@ package org.osgi.framework;
  *
  * <p><tt>AllServiceListener</tt> is a listener interface that may be implemented by a bundle
  * developer.
- * <p>A <tt>AllServiceListener</tt> object is registered with the Framework using the
+ * <p>An <tt>AllServiceListener</tt> object is registered with the Framework using the
  * <tt>BundleContext.addServiceListener</tt> method.
  * <tt>AllServiceListener</tt> objects are called with a <tt>ServiceEvent</tt> object when
  * a service has been registered or modified, or is in the process of unregistering.
@@ -46,7 +46,7 @@ package org.osgi.framework;
  * 
  * <p>
  * Unlike normal <tt>ServiceListener</tt> objects,
- * <tt>AllServiceListener</tt> s have all ServiceEvent objects delivered regardless of the
+ * <tt>AllServiceListener</tt> objects have all ServiceEvent objects delivered regardless of the
  * package scope of the listening bundle.
  * 
  * @version $Revision: $

@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/SynchronousBundleListener.java,v 1.4 2004/12/15 19:01:03 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/SynchronousBundleListener.java,v 1.5 2005/01/19 20:35:24 hargrave Exp $
  * 
  * Copyright (c) OSGi Alliance (2001, 2004). All Rights Reserved.
  * 
@@ -28,29 +28,29 @@
 package org.osgi.framework;
 
 /**
- * A synchronous <tt>BundleEvent</tt> listener.
+ * A synchronous <code>BundleEvent</code> listener.
  * 
  * <p>
- * <tt>SynchronousBundleListener</tt> is a listener interface that may be
+ * <code>SynchronousBundleListener</code> is a listener interface that may be
  * implemented by a bundle developer.
  * <p>
- * A <tt>SynchronousBundleListener</tt> object is registered with the
+ * A <code>SynchronousBundleListener</code> object is registered with the
  * Framework using the {@link BundleContext#addBundleListener}method.
- * <tt>SynchronousBundleListener</tt> objects are called with a
- * <tt>BundleEvent</tt> object when a bundle has been installed, started,
+ * <code>SynchronousBundleListener</code> objects are called with a
+ * <code>BundleEvent</code> object when a bundle has been installed, started,
  * stopped, updated, or uninstalled.
  * <p>
- * Unlike normal <tt>BundleListener</tt> objects,
- * <tt>SynchronousBundleListener</tt> s are synchronously called during bundle
+ * Unlike normal <code>BundleListener</code> objects,
+ * <code>SynchronousBundleListener</code> s are synchronously called during bundle
  * life cycle processing. The bundle life cycle processing will not proceed
- * until all <tt>SynchronousBundleListener</tt> s have completed.
- * <tt>SynchronousBundleListener</tt> objects will be called prior to
- * <tt>BundleListener</tt> objects.
+ * until all <code>SynchronousBundleListener</code> s have completed.
+ * <code>SynchronousBundleListener</code> objects will be called prior to
+ * <code>BundleListener</code> objects.
  * <p>
- * <tt>AdminPermission</tt> is required to add or remove a
- * <tt>SynchronousBundleListener</tt> object.
+ * <code>AdminPermission</code> is required to add or remove a
+ * <code>SynchronousBundleListener</code> object.
  * 
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @since 1.1
  * @see BundleEvent
  */

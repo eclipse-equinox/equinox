@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/Configurable.java,v 1.5 2004/12/15 19:01:03 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/Configurable.java,v 1.6 2005/01/19 20:35:24 hargrave Exp $
  * 
  * Copyright (c) OSGi Alliance (2000, 2004). All Rights Reserved.
  * 
@@ -30,12 +30,12 @@ package org.osgi.framework;
 /**
  * Supports a configuration object.
  *
- * <p><tt>Configurable</tt> is an interface that should be used by a bundle developer in support
+ * <p><code>Configurable</code> is an interface that should be used by a bundle developer in support
  * of a configurable service.
  * Bundles that need to configure a service may test to determine
- * if the service object is an <tt>instanceof Configurable</tt>.
+ * if the service object is an <code>instanceof Configurable</code>.
  *
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  * @deprecated Please use the Configuration Admin
  */
 public abstract interface Configurable
@@ -43,7 +43,7 @@ public abstract interface Configurable
     /**
      * Returns this service's configuration object.
      *
-     * <p>Services implementing <tt>Configurable</tt> should take care when returning a
+     * <p>Services implementing <code>Configurable</code> should take care when returning a
      * service configuration object since this object is probably sensitive.
      * <p>If the Java Runtime Environment supports permissions, it is recommended that
      * the caller is checked for the appropriate permission before returning the configuration object.

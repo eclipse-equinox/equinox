@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/BundleListener.java,v 1.4 2004/12/15 19:01:03 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/BundleListener.java,v 1.5 2005/01/19 20:35:24 hargrave Exp $
  * 
  * Copyright (c) OSGi Alliance (2000, 2004). All Rights Reserved.
  * 
@@ -30,18 +30,18 @@ package org.osgi.framework;
 import java.util.EventListener;
 
 /**
- * A <tt>BundleEvent</tt> listener.
+ * A <code>BundleEvent</code> listener.
  * 
  * <p>
- * <tt>BundleListener</tt> is a listener interface that may be implemented by
+ * <code>BundleListener</code> is a listener interface that may be implemented by
  * a bundle developer.
  * <p>
- * A <tt>BundleListener</tt> object is registered with the Framework using the
- * {@link BundleContext#addBundleListener}method. <tt>BundleListener</tt> s
- * are called with a <tt>BundleEvent</tt> object when a bundle has been
+ * A <code>BundleListener</code> object is registered with the Framework using the
+ * {@link BundleContext#addBundleListener}method. <code>BundleListener</code> s
+ * are called with a <code>BundleEvent</code> object when a bundle has been
  * installed, started, stopped, updated, or uninstalled.
  * 
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @see BundleEvent
  */
 
@@ -49,7 +49,7 @@ public abstract interface BundleListener extends EventListener {
 	/**
 	 * Receives notification that a bundle has had a lifecycle change.
 	 * 
-	 * @param event The <tt>BundleEvent</tt>.
+	 * @param event The <code>BundleEvent</code>.
 	 */
 	public abstract void bundleChanged(BundleEvent event);
 }
