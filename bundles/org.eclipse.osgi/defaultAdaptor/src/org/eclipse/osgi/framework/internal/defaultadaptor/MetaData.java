@@ -15,16 +15,15 @@ import java.io.*;
 import java.util.Properties;
 
 /**
- * A Default implementation of the MetaData interface.  This class uses a 
- * Properties object to store and get MetaData information.  All data
- * converted into String data before saving.
+ * This class uses a Properties object to store and get MetaData information.  
+ * All data is converted into String data before saving.
  */
 public class MetaData {
 
 	/**
 	 * The Properties file to store the data.
 	 */
-	Properties properties;
+	Properties properties = new Properties();
 
 	/**
 	 * The File object to store and load the Properties object.
@@ -48,14 +47,23 @@ public class MetaData {
 	}
 
 	/**
-	 * @see org.eclipse.osgi.framework.adaptor.MetaData#get(java.lang.String, java.lang.String)
+	 * Gets the metadata value for the key.
+	 * @param key the key of the metadata
+	 * @param def the default value to return if the key does not exist
+	 * @return the value of the metadata or null if the key does not exist
+	 * and the specified default is null.
 	 */
 	public String get(String key, String def) {
 		return properties.getProperty(key, def);
 	}
 
 	/**
-	 * @see org.eclipse.osgi.framework.adaptor.MetaData#getInt(String, int)
+	 * Gets the integer value for the key.
+	 * @param key the key of the metadata
+	 * @param def the default value to return if the key does not exist
+	 * @return the value of the metadata; if the key does not exist or
+	 * the value cannot be converted to an int value then the
+	 * specified default value is returned.
 	 */
 	public int getInt(String key, int def) {
 		String result = get(key, null);
@@ -70,7 +78,12 @@ public class MetaData {
 	}
 
 	/**
-	 * @see org.eclipse.osgi.framework.adaptor.MetaData#getLong(String, long)
+	 * Gets the long value for the key.
+	 * @param key the key of the metadata
+	 * @param def the default value to return if the key does not exist
+	 * @return the value of the metadata; if the key does not exist or
+	 * the value cannot be converted to an long value then the
+	 * specified default value is returned.
 	 */
 	public long getLong(String key, long def) {
 		String result = get(key, null);
@@ -85,7 +98,11 @@ public class MetaData {
 	}
 
 	/**
-	 * @see org.eclipse.osgi.framework.adaptor.MetaData#getBoolean(String, boolean)
+	 * Gets the boolean value for the key.
+	 * @param key the key of the metadata
+	 * @param def the default value to return if the key does not exist
+	 * @return the value of the metadata; if the key does not exist then the
+	 * specified default value is returned.
 	 */
 	public boolean getBoolean(String key, boolean def) {
 		String result = get(key, null);
@@ -96,42 +113,52 @@ public class MetaData {
 	}
 
 	/**
-	 * @see org.eclipse.osgi.framework.adaptor.MetaData#set(String, String)
+	 * Sets the String value for a key.
+	 * @param key the key of the metadata
+	 * @param val the value of the metadata
 	 */
 	public void set(String key, String val) {
 		properties.put(key, val);
 	}
 
 	/**
-	 * @see org.eclipse.osgi.framework.adaptor.MetaData#setInt(String, int)
+	 * Sets the int value for a key.
+	 * @param key the key of the metadata
+	 * @param val the value of the metadata
 	 */
 	public void setInt(String key, int val) {
 		properties.put(key, Integer.toString(val));
 	}
 
 	/**
-	 * @see org.eclipse.osgi.framework.adaptor.MetaData#setLong(String, long)
+	 * Sets the long value for a key.
+	 * @param key the key of the metadata
+	 * @param val the value of the metadata
 	 */
 	public void setLong(String key, long val) {
 		properties.put(key, Long.toString(val));
 	}
 
 	/**
-	 * @see org.eclipse.osgi.framework.adaptor.MetaData#setBoolean(String, boolean)
+	 * Sets the boolean value for a key.
+	 * @param key the key of the metadata
+	 * @param val the value of the metadata
 	 */
 	public void setBoolean(String key, boolean val) {
 		properties.put(key, new Boolean(val).toString());
 	}
 
 	/**
-	 * @see org.eclipse.osgi.framework.adaptor.MetaData#remove(String)
+	 * Removes the metadata value with the specified key.
+	 * @param key the key of the metadata to be removed
 	 */
 	public void remove(String key) {
 		properties.remove(key);
 	}
 
 	/**
-	 * @see org.eclipse.osgi.framework.adaptor.MetaData#save()
+	 * Saves the metadata to persistent storage.
+	 * @throws IOException if there is a problem saving to persistent storage.
 	 */
 	public void save() throws IOException {
 		FileOutputStream fos = new FileOutputStream(datafile);
@@ -139,10 +166,11 @@ public class MetaData {
 	}
 
 	/**
-	 * @see org.eclipse.osgi.framework.adaptor.MetaData#load()
+	 * Loads the metadata from persistent storage
+	 * @throws IOException if there is a problem reading from persistent storage.
 	 */
 	public void load() throws IOException {
-		properties = new Properties();
+		properties.clear();
 		if (datafile.exists()) {
 			FileInputStream fis = new FileInputStream(datafile);
 			properties.load(fis);
@@ -151,7 +179,7 @@ public class MetaData {
 	}
 
 	/**
-	 * Returns the result of toString on the Properties object.
+	 * @see Object#toString()
 	 */
 	public String toString() {
 		return properties.toString();
