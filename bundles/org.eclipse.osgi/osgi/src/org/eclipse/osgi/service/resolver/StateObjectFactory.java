@@ -12,6 +12,7 @@ package org.eclipse.osgi.service.resolver;
 
 import java.io.*;
 import java.util.Dictionary;
+import org.osgi.framework.BundleException;
 
 public interface StateObjectFactory {
 	public State createState();
@@ -26,8 +27,9 @@ public interface StateObjectFactory {
 	 * @param location the URL location of the bundle
 	 * @param id the id of the bundle
 	 * @return a bundle description derived from the given information
+	 * @throws BundleException if an error occurs while reading the manifest 
 	 */	
-	public BundleDescription createBundleDescription(Dictionary manifest, String location, long id);
+	public BundleDescription createBundleDescription(Dictionary manifest, String location, long id) throws BundleException;
 	public BundleDescription createBundleDescription(BundleDescription original);
 	public BundleSpecification createBundleSpecification(BundleDescription parentBundle, String hostGlobalName, Version hostVersion, byte matchRule, boolean export, boolean optional);
 	public BundleSpecification createBundleSpecification(BundleSpecification original);	

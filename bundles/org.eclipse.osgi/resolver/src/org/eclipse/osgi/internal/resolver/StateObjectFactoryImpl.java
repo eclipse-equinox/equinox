@@ -16,13 +16,9 @@ import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.BundleException;
 
 public class StateObjectFactoryImpl implements StateObjectFactory {
-	public BundleDescription createBundleDescription(Dictionary manifest, String location, long id) {
+	public BundleDescription createBundleDescription(Dictionary manifest, String location, long id) throws BundleException {
 		BundleDescriptionImpl result;
-		try {
-			result = (BundleDescriptionImpl) StateBuilder.createBundleDescription(manifest, location);
-		} catch (BundleException e) {
-			throw new IllegalArgumentException(e.getMessage());
-		}
+		result = (BundleDescriptionImpl) StateBuilder.createBundleDescription(manifest, location);		
 		result.setBundleId(id);
 		return result;
 	}
