@@ -19,6 +19,7 @@ import org.eclipse.osgi.framework.internal.core.OSGi;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.framework.stats.StatsManager;
+import org.eclipse.osgi.profile.Profile;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.service.runnable.ParameterizedRunnable;
@@ -99,9 +100,9 @@ public class EclipseStarter {
 	private static final String INITIAL_LOCATION = "initial@"; //$NON-NLS-1$
 	/** string containing the classname of the adaptor to be used in this framework instance */
 	protected static final String DEFAULT_ADAPTOR_CLASS = "org.eclipse.core.runtime.adaptor.EclipseAdaptor"; //$NON-NLS-1$
-	
+
 	private static final int DEFAULT_INITIAL_STARTLEVEL = 6; // default value for legacy purposes
-	private static final String DEFAULT_BUNDLES_STARTLEVEL = "4";  //$NON-NLS-1$
+	private static final String DEFAULT_BUNDLES_STARTLEVEL = "4"; //$NON-NLS-1$
 	// Console information
 	protected static final String DEFAULT_CONSOLE_CLASS = "org.eclipse.osgi.framework.internal.core.FrameworkConsole"; //$NON-NLS-1$
 	private static final String CONSOLE_NAME = "OSGi Console"; //$NON-NLS-1$
@@ -122,6 +123,8 @@ public class EclipseStarter {
 	 * @throws Exception if anything goes wrong
 	 */
 	public static Object run(String[] args, Runnable endSplashHandler) throws Exception {
+		if (Profile.PROFILE && Profile.STARTUP)
+			Profile.logEnter("EclipseStarter.run()", null); //$NON-NLS-1$
 		if (running)
 			throw new IllegalStateException(EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_ALREADY_RUNNING")); //$NON-NLS-1$
 		boolean startupFailed = true;
@@ -152,6 +155,10 @@ public class EclipseStarter {
 					// TODO desperate measure - ideally, we should write this to disk (a la Main.log)
 					e.printStackTrace();
 			}
+			if (Profile.PROFILE && Profile.STARTUP)
+				Profile.logExit("EclipseStarter.run()"); //$NON-NLS-1$
+			if (Profile.PROFILE)
+				System.out.println(Profile.getProfileLog());
 		}
 		// first check to see if the framework is forcing a restart
 		if (Boolean.getBoolean("osgi.forcedRestart")) { //$NON-NLS-1$
@@ -208,34 +215,56 @@ public class EclipseStarter {
 	 * @throws Exception if anything goes wrong
 	 */
 	public static void startup(String[] args, Runnable endSplashHandler) throws Exception {
+		if (Profile.PROFILE && Profile.STARTUP)
+			Profile.logEnter("EclipseStarter.startup()", null); //$NON-NLS-1$
 		if (running)
 			throw new IllegalStateException(EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_ALREADY_RUNNING")); //$NON-NLS-1$
-		long start = 0;
 		processCommandLine(args);
 		LocationManager.initializeLocations();
 		log = createFrameworkLog();
 		loadConfigurationInfo();
 		loadDefaultProperties();
 		finalizeProperties();
+		if (Profile.PROFILE)
+			Profile.initProps(); // catch any Profile properties set in eclipse.properties...
+		if (Profile.PROFILE && Profile.STARTUP)
+			Profile.logTime("EclipseStarter.startup()", "props inited"); //$NON-NLS-1$ //$NON-NLS-2$
 		adaptor = createAdaptor();
+		if (Profile.PROFILE && Profile.STARTUP)
+			Profile.logTime("EclipseStarter.startup()", "adapter created"); //$NON-NLS-1$ //$NON-NLS-2$
 		((EclipseAdaptor) adaptor).setLog(log);
+		if (Profile.PROFILE && Profile.STARTUP)
+			Profile.logTime("EclipseStarter.startup()", "adapter log set"); //$NON-NLS-1$ //$NON-NLS-2$
 		OSGi osgi = new OSGi(adaptor);
+		if (Profile.PROFILE && Profile.STARTUP)
+			Profile.logTime("EclipseStarter.startup()", "OSGi created"); //$NON-NLS-1$ //$NON-NLS-2$
 		osgi.launch();
+		if (Profile.PROFILE && Profile.STARTUP)
+			Profile.logTime("EclipseStarter.startup()", "osgi launched"); //$NON-NLS-1$ //$NON-NLS-2$
 		String console = System.getProperty(PROP_CONSOLE);
-		if (console != null)
+		if (console != null) {
 			startConsole(osgi, new String[0], console);
+			if (Profile.PROFILE && Profile.STARTUP)
+				Profile.logTime("EclipseStarter.startup()", "console started"); //$NON-NLS-1$ //$NON-NLS-2$
+		}
 		context = osgi.getBundleContext();
 		publishSplashScreen(endSplashHandler);
+		if (Profile.PROFILE && Profile.STARTUP)
+			Profile.logTime("EclipseStarter.startup()", "loading basic bundles"); //$NON-NLS-1$ //$NON-NLS-2$
 		Bundle[] startBundles = loadBasicBundles();
 		// set the framework start level to the ultimate value.  This will actually start things
 		// running if they are persistently active.
 		setStartLevel(getStartLevel());
+		if (Profile.PROFILE && Profile.STARTUP)
+			Profile.logTime("EclipseStarter.startup()", "StartLevel set"); //$NON-NLS-1$ //$NON-NLS-2$
 		// they should all be active by this time
 		ensureBundlesActive(startBundles);
 		if (debug || System.getProperty(PROP_DEV) != null)
 			// only spend time showing unresolved bundles in dev/debug mode
 			logUnresolvedBundles(context.getBundles());
 		running = true;
+		if (Profile.PROFILE && Profile.STARTUP)
+			Profile.logExit("EclipseStarter.startup()"); //$NON-NLS-1$
 	}
 
 	private static int getStartLevel() {
@@ -263,12 +292,16 @@ public class EclipseStarter {
 	 * @throws Exception if anything goes wrong
 	 */
 	public static Object run(Object argument) throws Exception {
+		if (Profile.PROFILE && Profile.STARTUP)
+			Profile.logEnter("EclipseStarter.run(Object)()", null); //$NON-NLS-1$
 		if (!running)
 			throw new IllegalStateException(EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_NOT_RUNNING")); //$NON-NLS-1$
 		// if we are just initializing, do not run the application just return.
 		if (initialize)
 			return new Integer(0);
 		initializeApplicationTracker();
+		if (Profile.PROFILE && Profile.STARTUP)
+			Profile.logTime("EclipseStarter.run(Object)()", "applicaton tracker initialized"); //$NON-NLS-1$ //$NON-NLS-2$
 		ParameterizedRunnable application = (ParameterizedRunnable) applicationTracker.getService();
 		applicationTracker.close();
 		if (application == null)
@@ -278,7 +311,14 @@ public class EclipseStarter {
 			long time = timeString == null ? 0L : Long.parseLong(timeString);
 			System.out.println("Starting application: " + (System.currentTimeMillis() - time)); //$NON-NLS-1$ 
 		}
-		return application.run(argument);
+		if (Profile.PROFILE && (Profile.STARTUP || Profile.BENCHMARK))
+			Profile.logTime("EclipseStarter.run(Object)()", "framework initialized! starting application..."); //$NON-NLS-1$ //$NON-NLS-2$
+		try {
+			return application.run(argument);
+		} finally {
+			if (Profile.PROFILE && Profile.STARTUP)
+				Profile.logExit("EclipseStarter.run(Object)()"); //$NON-NLS-1$
+		}
 	}
 
 	/**

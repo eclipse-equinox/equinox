@@ -19,6 +19,7 @@ import org.eclipse.osgi.event.BatchBundleListener;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.eventmgr.EventDispatcher;
 import org.eclipse.osgi.framework.eventmgr.EventListeners;
+import org.eclipse.osgi.profile.Profile;
 import org.osgi.framework.*;
 
 /**
@@ -30,7 +31,7 @@ import org.osgi.framework.*;
 
 public class BundleContextImpl implements BundleContext, EventDispatcher {
 	public static final String PROP_SCOPE_SERVICE_EVENTS = "osgi.scopeServiceEvents"; //$NON-NLS-1$
-	public static final boolean scopeEvents = Boolean.valueOf(System.getProperty(PROP_SCOPE_SERVICE_EVENTS, "true")).booleanValue(); //$NON-NLS-1$
+	public static final boolean scopeEvents = Boolean.valueOf(System.getProperty(PROP_SCOPE_SERVICE_EVENTS,"true")).booleanValue(); //$NON-NLS-1$
 	/** true if the bundle context is still valid */
 	private boolean valid;
 
@@ -982,12 +983,18 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	 * @param bundleActivator that activator to start
 	 */
 	protected void startActivator(final BundleActivator bundleActivator) throws BundleException {
+		if (Profile.PROFILE && Profile.STARTUP)
+			Profile.logEnter("BundleContextImpl.startActivator()", null); //$NON-NLS-1$
 		try {
 			AccessController.doPrivileged(new PrivilegedExceptionAction() {
 				public Object run() throws Exception {
 					if (bundleActivator != null) {
+						if (Profile.PROFILE && Profile.STARTUP)
+							Profile.logTime("BundleContextImpl.startActivator()", "calling "+bundle.getLocation()+" bundle activator");   //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
 						/* Start the bundle synchronously */
 						bundleActivator.start(BundleContextImpl.this);
+						if (Profile.PROFILE && Profile.STARTUP)
+							Profile.logTime("BundleContextImpl.startActivator()", "returned from "+bundle.getLocation()+" bundle activator");   //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
 					}
 					return null;
 				}
@@ -1005,6 +1012,9 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 			clazz = bundleActivator.getClass().getName();
 
 			throw new BundleException(Msg.formatter.getString("BUNDLE_ACTIVATOR_EXCEPTION", new Object[] {clazz, "start", bundle.getSymbolicName() == null ? "" + bundle.getBundleId() : bundle.getSymbolicName()}), t); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		} finally {
+			if (Profile.PROFILE && Profile.STARTUP)
+				Profile.logExit("BundleContextImpl.startActivator()"); //$NON-NLS-1$
 		}
 
 	}

@@ -21,6 +21,7 @@ import org.eclipse.osgi.framework.eventmgr.*;
 import org.eclipse.osgi.framework.internal.protocol.ContentHandlerFactory;
 import org.eclipse.osgi.framework.internal.protocol.StreamHandlerFactory;
 import org.eclipse.osgi.framework.log.FrameworkLog;
+import org.eclipse.osgi.profile.Profile;
 import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.*;
 
@@ -102,6 +103,8 @@ public class Framework implements EventDispatcher, EventPublisher {
 	 *  
 	 */
 	protected void initialize(FrameworkAdaptor adaptor) {
+		if (Profile.PROFILE && Profile.STARTUP)
+			Profile.logEnter("Framework.initialze()", null); //$NON-NLS-1$
 		long start = System.currentTimeMillis();
 		this.adaptor = adaptor;
 		active = false;
@@ -112,6 +115,8 @@ public class Framework implements EventDispatcher, EventPublisher {
 		}
 		/* initialize the adaptor */
 		adaptor.initialize(this);
+		if (Profile.PROFILE && Profile.STARTUP)
+			Profile.logTime("Framework.initialze()", "adapter initialized");  //$NON-NLS-1$//$NON-NLS-2$
 		try {
 			adaptor.initializeStorage();
 			adaptor.compactStorage();
@@ -119,6 +124,8 @@ public class Framework implements EventDispatcher, EventPublisher {
 			e.printStackTrace();
 			throw new RuntimeException(e.getMessage());
 		}
+		if (Profile.PROFILE && Profile.STARTUP)
+			Profile.logTime("Framework.initialze()", "adapter storage initialized");  //$NON-NLS-1$//$NON-NLS-2$
 		/*
 		 * This must be done before calling any of the framework getProperty
 		 * methods.
@@ -141,6 +148,8 @@ public class Framework implements EventDispatcher, EventPublisher {
 				throw new RuntimeException(e.getMessage());
 			}
 		}
+		if (Profile.PROFILE && Profile.STARTUP)
+			Profile.logTime("Framework.initialze()", "done init props & new PermissionAdminImpl");  //$NON-NLS-1$//$NON-NLS-2$
 		startLevelManager = new StartLevelManager(this);
 		/* create the event manager and top level event dispatchers */
 		eventManager = new EventManager("Framework Event Dispatcher"); //$NON-NLS-1$
@@ -148,6 +157,8 @@ public class Framework implements EventDispatcher, EventPublisher {
 		bundleEventSync = new EventListeners();
 		serviceEvent = new EventListeners();
 		frameworkEvent = new EventListeners();
+		if (Profile.PROFILE && Profile.STARTUP)
+			Profile.logTime("Framework.initialze()", "done new EventManager"); //$NON-NLS-1$ //$NON-NLS-2$
 		/* create the service registry */
 		serviceid = 1;
 		serviceRegistry = adaptor.getServiceRegistry();
@@ -157,10 +168,14 @@ public class Framework implements EventDispatcher, EventPublisher {
 		installLock = new Hashtable(10);
 		/* create the system bundle */
 		createSystemBundle();
+		if (Profile.PROFILE && Profile.STARTUP)
+			Profile.logTime("Framework.initialze()", "done createSystemBundle"); //$NON-NLS-1$ //$NON-NLS-2$
 		/* install URLStreamHandlerFactory */
 		URL.setURLStreamHandlerFactory(new StreamHandlerFactory(systemBundle.context, adaptor));
 		/* install ContentHandlerFactory for OSGi URLStreamHandler support */
 		URLConnection.setContentHandlerFactory(new ContentHandlerFactory(systemBundle.context));
+		if (Profile.PROFILE && Profile.STARTUP)
+			Profile.logTime("Framework.initialze()", "done new URLStream/Content HandlerFactory");  //$NON-NLS-1$//$NON-NLS-2$
 		/* create bundle objects for all installed bundles. */
 		BundleData[] bundleDatas = adaptor.getInstalledBundles();
 		bundles = new BundleRepository(bundleDatas == null ? 10 : bundleDatas.length + 1, packageAdmin);
@@ -179,6 +194,8 @@ public class Framework implements EventDispatcher, EventPublisher {
 		}
 		if (Debug.DEBUG && Debug.DEBUG_GENERAL)
 			System.out.println("Initialize the framework: " + (System.currentTimeMillis() - start)); //$NON-NLS-1$
+		if (Profile.PROFILE && Profile.STARTUP)
+			Profile.logExit("Framework.initialze()");		
 	}
 
 	private void createSystemBundle() {
