@@ -31,11 +31,11 @@ import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.*;
 
 public class EclipseClassLoader extends DefaultClassLoader {
-	private static String[] NL_JAR_VARIANTS = buildNLJarVariants(System.getProperties().getProperty("osgi.nl"));
+	private static String[] NL_JAR_VARIANTS = buildNLJarVariants(System.getProperties().getProperty("osgi.nl")); //$NON-NLS-1$
 	// from Eclipse-AutoStart element value
 	private boolean autoStart;
 	// from Eclipse-AutoStart's "exceptions" attribute
-	private List exceptions;	//TODO This could easily be changed to an array
+	private String[] exceptions;
 	
 	public EclipseClassLoader(ClassLoaderDelegate delegate, ProtectionDomain domain, String[] classpath, ClassLoader parent, BundleData bundleData) {
 		super(delegate, domain, classpath, parent, (org.eclipse.osgi.framework.internal.defaultadaptor.DefaultBundleData) bundleData);
@@ -55,10 +55,12 @@ public class EclipseClassLoader extends DefaultClassLoader {
 			// look for any exceptions (the attribute) to the autoActivate setting
 			String exceptionsValue = allElements[0].getAttribute(EclipseAdaptorConstants.EXCEPTIONS_ATTRIBUTE);
 			if (exceptionsValue != null) {
-				exceptions = new ArrayList();
 				StringTokenizer tokenizer = new StringTokenizer(exceptionsValue, ","); //$NON-NLS-1$
-				while (tokenizer.hasMoreTokens())
-					exceptions.add(tokenizer.nextToken().trim());
+				int numberOfTokens = tokenizer.countTokens();
+				exceptions = new String[numberOfTokens];
+				for (int i = 0; i < numberOfTokens; i++) {
+					exceptions[i] = tokenizer.nextToken().trim();
+				}
 			}
 		} catch (BundleException e) {
 			// just use the default settings (no auto activation)
@@ -109,14 +111,16 @@ public class EclipseClassLoader extends DefaultClassLoader {
 						if (timeLeft <= 0)
 							break;
 						try {
-							lock.wait(timeLeft);
+							synchronized(lock) {
+								lock.wait(timeLeft);
+							}
 						} catch(InterruptedException e) {
 							//Ignore and keep waiting
 						}
 						timeLeft = start + delay - System.currentTimeMillis();
 					}
-					if (timeLeft < 0 || bundle.getState() != Bundle.ACTIVE) {
-						String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CLASSLOADER_CONCURRENT_STARTUP", new Object[] {Thread.currentThread(), name, bundle.getStateChanging().getName(), bundle.getSymbolicName() + '(' + bundle.getBundleId() + ')'}); //$NON-NLS-1$
+					if (timeLeft <= 0 || bundle.getState() != Bundle.ACTIVE) {
+						String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CLASSLOADER_CONCURRENT_STARTUP", new Object[] {Thread.currentThread(), name, bundle.getStateChanging().getName(), bundle.getSymbolicName()==null ? Long.toString(bundle.getBundleId()) : bundle.getSymbolicName()}); //$NON-NLS-1$
 						EclipseAdaptor.getDefault().getFrameworkLog().log(new FrameworkLogEntry(EclipseAdaptorConstants.PI_ECLIPSE_OSGI, message, 0, null, null));
 					}
 					return super.findLocalClass(name);			
@@ -157,7 +161,14 @@ public class EclipseClassLoader extends DefaultClassLoader {
 			return autoStart;
 		String packageName = className.substring(0, dotPosition);
 		// should activate if autoStart and package not in exceptions, or if !autoStart and package in exceptions
-		return autoStart ^ exceptions.contains(packageName);
+		return autoStart ^ exceptionsContained(packageName);
+	}
+	private boolean exceptionsContained(String packageName) {
+		for (int i = 0; i < exceptions.length; i++) {
+			if(exceptions[i].equals(packageName))
+				return true;
+		}
+		return false;
 	}
 	/**
 	 * Override defineClass to allow for package defining.
@@ -174,7 +185,7 @@ public class EclipseClassLoader extends DefaultClassLoader {
 				Manifest mf = ((EclipseClasspathEntry) classpathEntry).getManifest();
 				if (mf != null) {
 					Attributes mainAttributes = mf.getMainAttributes();
-					String dirName = packageName.replace('.', '/') + "/";
+					String dirName = packageName.replace('.', '/') + '/';
 					Attributes packageAttributes = mf.getAttributes(dirName);
 					boolean noEntry = false;
 					if (packageAttributes == null) {
