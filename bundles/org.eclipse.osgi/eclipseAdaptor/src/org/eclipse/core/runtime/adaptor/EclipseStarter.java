@@ -130,7 +130,7 @@ public class EclipseStarter {
 			result.connect();
 			return location;
 		} catch (IOException e) {
-			int i = location.indexOf('_');
+			int i = location.lastIndexOf('_');
 			return i == -1? location : location.substring(0, i);
 		}
 	}
