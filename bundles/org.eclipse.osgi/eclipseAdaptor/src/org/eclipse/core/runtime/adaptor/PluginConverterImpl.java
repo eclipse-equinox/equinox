@@ -64,10 +64,6 @@ public class PluginConverterImpl implements PluginConverter {
 		return instance;
 	}
 
-	public PluginConverterImpl() {
-		this(null);
-	}
-
 	PluginConverterImpl(BundleContext context) {
 		this.context = context;
 		instance = this;
