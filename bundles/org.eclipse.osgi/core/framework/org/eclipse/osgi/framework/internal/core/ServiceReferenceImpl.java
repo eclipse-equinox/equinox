@@ -233,11 +233,8 @@ public class ServiceReferenceImpl implements ServiceReference, Comparable {
 			return false;
 		PackageSource producerSource = producerBL.getPackageSource(pkgName);
 		PackageSource consumerSource = consumerBL.getPackageSource(pkgName);
-		if (producerSource == null) {
-			if (consumerSource == null)
-				return true;
-			return false;
-		}
+		if (producerSource == null || consumerSource == null)
+			return true;
 		return producerSource.hasCommonSource(consumerSource);
 	}
 }
