@@ -77,4 +77,11 @@ public interface Resolver {
 	 * @param bundle
 	 */	
 	public void bundleRemoved(BundleDescription bundle);
+	/**
+	 * Notifies the resolver a bundle has been updated in the state.
+	 * @param newDescription the new description
+	 * @param existingDescription the existing description
+	 */		
+	public void bundleUpdated(BundleDescription newDescription, BundleDescription existingDescription);
+	
 }
