@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
 
-import java.util.ArrayList;
 import java.util.Dictionary;
 import org.eclipse.osgi.framework.internal.core.KeyedElement;
 import org.eclipse.osgi.service.resolver.*;
