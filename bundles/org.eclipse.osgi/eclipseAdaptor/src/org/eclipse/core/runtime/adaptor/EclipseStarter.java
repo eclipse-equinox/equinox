@@ -219,12 +219,12 @@ public class EclipseStarter {
 			startConsole(osgi, new String[0], console);
 		context = osgi.getBundleContext();
 		publishSplashScreen(endSplashHandler);
-		Bundle[] basicBundles = loadBasicBundles();
+		Bundle[] startBundles = loadBasicBundles();
 		// set the framework start level to the ultimate value.  This will actually start things
 		// running if they are persistently active.
 		setStartLevel(getStartLevel());
 		// they should all be active by this time
-		ensureBundlesActive(basicBundles);
+		ensureBundlesActive(startBundles);
 		if (debug)
 			logUnresolvedBundles(context.getBundles());
 		running = true;
@@ -409,7 +409,7 @@ public class EclipseStarter {
 
 	/*
 	 * Ensure all basic bundles are installed, resolved and scheduled to start. Returns an array containing
-	 * all basic bundles. 
+	 * all basic bundles that are marked to start. 
 	 */
 	private static Bundle[] loadBasicBundles() throws IOException {
 		long startTime = System.currentTimeMillis();
@@ -462,10 +462,10 @@ public class EclipseStarter {
 				log.log(entry);
 			}
 		}
-		Bundle[] resultBundles = (Bundle[]) newInitBundles.toArray(new Bundle[newInitBundles.size()]);
+		Bundle[] initBundles = (Bundle[]) newInitBundles.toArray(new Bundle[newInitBundles.size()]);
 		// check if something was removed from the bundle list
 		for (int i = 0; i < curInitBundles.length; i++) {
-			if (getBundleByLocation(curInitBundles[i].getLocation(), resultBundles) == null) {
+			if (getBundleByLocation(curInitBundles[i].getLocation(), initBundles) == null) {
 				try {
 					curInitBundles[i].uninstall();
 				} catch (BundleException e) {
@@ -477,10 +477,11 @@ public class EclipseStarter {
 		}
 		// If we installed/uninstalled something, force all basic bundles we installed to be resolved
 		if (refresh)
-			refreshPackages(resultBundles);
+			refreshPackages(initBundles);
 		// schedule all basic bundles to be started
-		for (Iterator i = startBundles.iterator(); i.hasNext();) {
-			Bundle bundle = (Bundle) i.next();
+		Bundle[] startInitBundles = (Bundle[]) startBundles.toArray(new Bundle[startBundles.size()]);
+		for (int i = 0; i < startInitBundles.length; i++) {
+			Bundle bundle = startInitBundles[i];
 			if (bundle.getState() == Bundle.INSTALLED)
 				throw new IllegalStateException(EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_ERROR_BUNDLE_NOT_RESOLVED", bundle.getLocation())); //$NON-NLS-1$
 			try {
@@ -493,7 +494,7 @@ public class EclipseStarter {
 		context.ungetService(reference);
 		if (debug)
 			System.out.println("Time to load bundles: " + (System.currentTimeMillis() - startTime)); //$NON-NLS-1$
-		return resultBundles;
+		return startInitBundles;
 	}
 
 	private static void refreshPackages(Bundle[] bundles) {
