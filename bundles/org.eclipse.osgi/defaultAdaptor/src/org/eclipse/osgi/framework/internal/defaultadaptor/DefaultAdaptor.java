@@ -922,16 +922,17 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 	}
 
 	public static void copyDir(File inDir, File outDir) throws IOException{
-		File[] files = inDir.listFiles();
+		String[] files = inDir.list();
 		if (files != null && files.length>0) {
 			outDir.mkdir();
 			for (int i=0; i<files.length; i++) {
-				File outFile = new File(outDir,files[i].getName());
-				if (files[i].isDirectory()) {
-					copyDir(files[i],outFile);
+				File inFile = new File(inDir,files[i]);
+				File outFile = new File(outDir,files[i]);
+				if (inFile.isDirectory()) {
+					copyDir(inFile,outFile);
 				}
 				else {
-					InputStream in = new FileInputStream(files[i]);
+					InputStream in = new FileInputStream(inFile);
 					readFile(in,outFile);
 				}
 			}
