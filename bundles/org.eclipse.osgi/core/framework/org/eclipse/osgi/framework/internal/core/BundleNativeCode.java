@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003 IBM Corporation and others.
+ * Copyright (c) 2003, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,6 +14,7 @@ import java.util.Enumeration;
 import java.util.Vector;
 import org.eclipse.osgi.service.resolver.Version;
 import org.eclipse.osgi.util.ManifestElement;
+import org.osgi.framework.*;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 
@@ -119,6 +120,11 @@ public class BundleNativeCode {
 	 */
 	private String filterString;
 	/**
+	 * The Framework for this BundleNativeCode
+	 */
+	private AbstractBundle bundle;
+
+	/**
 	 * The AliasMapper used to alias OS Names.
 	 */
 	private static AliasMapper aliasMapper = Framework.aliasMapper;
@@ -128,7 +134,8 @@ public class BundleNativeCode {
 	 * the manifest file.
 	 *  
 	 */
-	protected BundleNativeCode(ManifestElement element) {
+	protected BundleNativeCode(ManifestElement element, AbstractBundle bundle) {
+		this.bundle = bundle;
 		String[] nativePaths = element.getValueComponents();
 		for (int i = 0; i < nativePaths.length; i++) {
 			addPath(nativePaths[i]);
@@ -356,7 +363,8 @@ public class BundleNativeCode {
 		try {
 			filter = new FilterImpl(filterString);
 		} catch (InvalidSyntaxException e) {
-			// TODO Should we log an error???
+			BundleException be = new BundleException(Msg.formatter.getString("BUNDLE_NATIVECODE_INVALID_FILTER"), e); //$NON-NLS-1$
+			bundle.framework.publishFrameworkEvent(FrameworkEvent.ERROR, bundle, be);
 			return false;
 		}
 		return filter.match(System.getProperties());

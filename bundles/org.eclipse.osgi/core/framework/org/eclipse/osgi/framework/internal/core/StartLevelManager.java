@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003 IBM Corporation and others.
+ * Copyright (c) 2003, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -537,18 +537,22 @@ public class StartLevelManager implements EventDispatcher, EventListener, Servic
 
 	/**
 	 *  Resume all bundles in the launch list
-	 * @param Bundle[] a list of Bundle Objects to launch
-	 * @param boolean tells whether or not to launch the framework (system bundle)
+	 * @param launch a list of Bundle Objects to launch
+	 * @param launchingFW tells whether or not to launch the framework (system bundle)
 	 */
 	private void resumeBundles(AbstractBundle[] launch, boolean launchingFW) {
-		BundleException sbe = null;
 		if (launchingFW) {
 			/* Start the system bundle */
 			try {
 				framework.systemBundle.context.start();
 			} catch (BundleException be) {
-				// TODO: We may have to do something more drastic here if the SystemBundle did not start.
-				sbe = be;
+				if (Debug.DEBUG && Debug.DEBUG_STARTLEVEL) {
+					Debug.println("SLL: Bundle resume exception: " + be.getMessage()); //$NON-NLS-1$
+					Debug.printStackTrace(be.getNestedException());
+				}
+
+				framework.publishFrameworkEvent(FrameworkEvent.ERROR, framework.systemBundle, be);
+				throw new RuntimeException(be.getMessage());
 			}
 
 		}
@@ -571,16 +575,8 @@ public class StartLevelManager implements EventDispatcher, EventListener, Servic
 			}
 		}
 
-		if (sbe == null) {
-			framework.systemBundle.state = AbstractBundle.ACTIVE;
-		} else {
-			if (Debug.DEBUG && Debug.DEBUG_STARTLEVEL) {
-				Debug.println("SLL: Bundle resume exception: " + sbe.getMessage());
-				Debug.printStackTrace(sbe.getNestedException());
-			}
+		framework.systemBundle.state = AbstractBundle.ACTIVE;
 
-			framework.publishFrameworkEvent(FrameworkEvent.ERROR, framework.systemBundle, sbe);
-		}
 	}
 
 	/** 

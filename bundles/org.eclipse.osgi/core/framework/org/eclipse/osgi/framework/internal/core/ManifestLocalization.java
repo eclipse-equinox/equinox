@@ -23,7 +23,7 @@ import org.osgi.framework.Constants;
 public class ManifestLocalization {
 	private AbstractBundle bundle = null;
 	private Dictionary rawHeaders = null;
-	private Headers defaultLocaleHeaders = null;
+	private Dictionary defaultLocaleHeaders = null;
 
 	public ManifestLocalization(AbstractBundle bundle, Dictionary rawHeaders) {
 		this.bundle = bundle;
@@ -32,7 +32,7 @@ public class ManifestLocalization {
 
 	protected Dictionary getHeaders(String localeString) {
 		boolean defaultLocale = false;
-		if (localeString == "") {
+		if (localeString == "") { //$NON-NLS-1$
 			return (rawHeaders);
 		}
 		if (localeString.equals(Locale.getDefault().toString())) {
@@ -50,16 +50,7 @@ public class ManifestLocalization {
 		ResourceBundle localeProperties = null;
 		localeProperties = getResourceBundle(localeString);
 		if (localeProperties == null) {
-			//			TODO Need to strip off leading percents. Can do it when
-			//Eclipse no uses Bundle.getHeaders("") instead of
-			// Bundle.getHeaders()
-			//	Dictionary localeHeaders = stripPercents(new Hashtable(
-			//			this.rawHeaders.size()));
-			//if (defaultLocale) {
-			//	defaultLocaleHeaders = localeHeaders;
-			//}
-			//return (localeHeaders);
-			return (rawHeaders);
+			return rawHeaders;
 		}
 		Enumeration e = this.rawHeaders.keys();
 		Headers localeHeaders = new Headers(this.rawHeaders.size());
@@ -72,8 +63,7 @@ public class ManifestLocalization {
 					String transValue = (String) localeProperties.getObject(propertiesKey);
 					value = transValue;
 				} catch (MissingResourceException ex) {
-					//strip the leading percent and return the raw value
-					value = propertiesKey;
+					// Do nothing; just use the raw value
 				}
 			}
 			localeHeaders.set(key, value);

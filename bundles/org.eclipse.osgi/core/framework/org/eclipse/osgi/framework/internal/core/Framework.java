@@ -186,7 +186,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 	private void createSystemBundle() {
 		try {
 			systemBundle = new SystemBundle(this);
-			BundleDescription newSystemBundle = adaptor.getPlatformAdmin().getFactory().createBundleDescription(systemBundle.getHeaders(), Constants.SYSTEM_BUNDLE_LOCATION, 0);
+			BundleDescription newSystemBundle = adaptor.getPlatformAdmin().getFactory().createBundleDescription(systemBundle.getHeaders(""), Constants.SYSTEM_BUNDLE_LOCATION, 0);
 			if (newSystemBundle == null)
 				throw new BundleException(Msg.formatter.getString("OSGI_SYSTEMBUNDLE_DESCRIPTION_ERROR"));
 			State state = adaptor.getState();
@@ -819,7 +819,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 		int maxresult = 0;
 		int index = 0;
 		for (int i = 0; i < length; i++) {
-			bundleNativeCode[i] = new BundleNativeCode(elements[i]);
+			bundleNativeCode[i] = new BundleNativeCode(elements[i], (AbstractBundle) bundle);
 			int result = bundleNativeCode[i].matchProcessorOSNameFilter(processor, osname);
 			score[i] = result;
 			if (result > 0) {
