@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003 IBM Corporation and others.
+ * Copyright (c) 2003,2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1006,8 +1006,75 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 	 * supports permissions.
 	 */
 	public Dictionary getHeaders() {
+		return getHeaders(Locale.getDefault());
+	}
+
+	/**
+		 * Returns this bundle's Manifest headers and values.
+		 * This method returns all the Manifest headers and values
+		 * from the main section of the bundle's Manifest file; that is, all lines prior
+		 * to the first blank line.
+		 *
+		 * <p>Manifest header names are case-insensitive. The methods of the returned
+		 * <tt>Dictionary</tt> object will operate on header names in a case-insensitive manner.
+		 *
+		 * If a Manifest header begins with a '%', it will be evaluated with the specified properties
+		 * file for the specied Locale. 
+		 *
+		 * <p>For example, the following Manifest headers and values are included
+		 * if they are present in the Manifest file:
+		 * <pre>
+		 * Bundle-Name
+		 * Bundle-Vendor
+		 * Bundle-Version
+		 * Bundle-Description
+		 * Bundle-DocURL
+		 * Bundle-ContactAddress
+		 * </pre>
+		 * <p>This method will continue to return Manifest header information
+		 * while this bundle is in the <tt>UNINSTALLED</tt> state.
+		 *
+		 * @return A <tt>Dictionary</tt> object containing this bundle's Manifest headers and values.
+		 *
+		 * @exception java.lang.SecurityException If the caller does not have
+		 * the <tt>AdminPermission</tt>, and the Java Runtime Environment supports permissions.
+		 */
+	public Dictionary getHeaders(Locale locale) {
 		framework.checkAdminPermission();
-		return bundledata.getHeaders();
+		Dictionary rawHeaders = bundledata.getHeaders();
+		ClassLoader classloader = getBundleLoader().getClassLoader();
+		if (classloader == null) {
+			return (rawHeaders);
+		}
+		String propertiesLocation = (String) rawHeaders.get(Constants.BUNDLE_LOCALIZATIONFILE);
+
+		if (propertiesLocation == null) {
+			propertiesLocation = Constants.BUNDLE_LOCALIZATIONFILE;
+		}
+		ResourceBundle localeProperties;
+		try {
+			localeProperties = ResourceBundle.getBundle(propertiesLocation, locale, classloader);
+		} catch (java.util.MissingResourceException ex) {
+			localeProperties = null;
+		}
+		if (localeProperties == null) {
+			return (rawHeaders);
+		}
+
+		Dictionary localeHeaders = new Hashtable(rawHeaders.size());
+		Enumeration e = rawHeaders.keys();
+		while (e.hasMoreElements()) {
+			String key = (String) e.nextElement();
+			String value = (String) rawHeaders.get(key);
+			if (value.startsWith("%") && (value.length() > 1)) {
+				String transValue = (String) localeProperties.getObject(value.substring(1));
+				if (transValue != null) {
+					value = transValue;
+				}
+			}
+			localeHeaders.put(key, value);
+		}
+		return localeHeaders;
 	}
 
 	/**
@@ -1428,4 +1495,5 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 	public Object getKey() {
 		return new Long(id);
 	}
+
 }

@@ -1,5 +1,5 @@
 /*
- * $Header: /home/technology/org.eclipse.equinox/plugins/org.eclipse.osgi/osgi/src/org/osgi/framework/Constants.java,v 1.3 2003/11/25 15:44:22 twatson Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/Constants.java,v 1.1 2003/11/25 21:24:14 dj Exp $
  *
  * Copyright (c) The Open Services Gateway Initiative (2000-2001).
  * All Rights Reserved.
@@ -35,7 +35,7 @@ package org.osgi.framework;
  * <p>The values associated with these keys are of type <tt>java.lang.String</tt>,
  * unless otherwise indicated.
  *
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.1 $
  * @author Open Services Gateway Initiative
  * @since 1.1
  * @see Bundle#getHeaders
@@ -448,6 +448,15 @@ public interface Constants {
 	 */
 	public final static String BUNDLE_GLOBALNAME = "Bundle-GlobalName";
 
+	
+	/**
+	 * Manifest header (named &quot;Bundle-LocalizationFile&quot;)
+	 * identifying the location of the bundle's localization file.
+	 * <p>The attribute value may be retrieved from the
+	 * <tt>Dictionary</tt> object returned by the <tt>Bundle.getHeaders</tt> method.
+	 */
+	public final static String BUNDLE_LOCALIZATIONFILE = "Bundle-LocalizationFile";
+	
 	/**
 	 * Manifest header (named &quot;Provide-Package&quot;)
 	 * identifying the names of the packages
@@ -511,6 +520,11 @@ public interface Constants {
 	 * </pre>
 	 */
 	public final static String OPTIONAL_ATTRIBUTE = "optional";
+	
+	/**
+	 * String indication location of the default localization file for manifest files
+	 */
+	public final static String DEFAULT_MANIFEST_LOCALIZATION_FILE = "META-INF/MANIFEST";
 
 	/**
 	 * Manifest header attribute (named &quot;version-match&quot;)

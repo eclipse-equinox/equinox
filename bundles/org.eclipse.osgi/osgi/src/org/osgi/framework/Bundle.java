@@ -1,5 +1,5 @@
 /*
- * $Header: /home/technology/org.eclipse.equinox/plugins/org.eclipse.osgi/osgi/src/org/osgi/framework/Bundle.java,v 1.4 2003/11/25 16:46:04 prapicau Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/Bundle.java,v 1.1 2003/11/25 21:24:14 dj Exp $
  *
  * Copyright (c) The Open Services Gateway Initiative (2000-2001).
  * All Rights Reserved.
@@ -30,9 +30,8 @@ package org.osgi.framework;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Dictionary;
-import java.util.Enumeration;
 import java.net.URL;
+import java.util.*;
 
 /**
  * An installed bundle in the Framework.
@@ -68,7 +67,7 @@ import java.net.URL;
  * create <tt>Bundle</tt> objects, and these objects are only valid
  * within the Framework that created them.
  *
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.1 $
  * @author Open Services Gateway Initiative
  */
 public abstract interface Bundle
@@ -443,6 +442,9 @@ public abstract interface Bundle
      * <p>Manifest header names are case-insensitive. The methods of the returned
      * <tt>Dictionary</tt> object will operate on header names in a case-insensitive manner.
      *
+     * If a Manifest header begins with a '%', it will be evaluated with the specified properties
+	 * file for the default Locale. 
+     *
      * <p>For example, the following Manifest headers and values are included
      * if they are present in the Manifest file:
      * <pre>
@@ -462,6 +464,38 @@ public abstract interface Bundle
      * the <tt>AdminPermission</tt>, and the Java Runtime Environment supports permissions.
      */
     public abstract Dictionary getHeaders();
+
+	/**
+		 * Returns this bundle's Manifest headers and values.
+		 * This method returns all the Manifest headers and values
+		 * from the main section of the bundle's Manifest file; that is, all lines prior
+		 * to the first blank line.
+		 *
+		 * <p>Manifest header names are case-insensitive. The methods of the returned
+		 * <tt>Dictionary</tt> object will operate on header names in a case-insensitive manner.
+		 *
+		 * If a Manifest header begins with a '%', it will be evaluated with the specified properties
+		 * file for the specied Locale. 
+		 *
+		 * <p>For example, the following Manifest headers and values are included
+		 * if they are present in the Manifest file:
+		 * <pre>
+		 * Bundle-Name
+		 * Bundle-Vendor
+		 * Bundle-Version
+		 * Bundle-Description
+		 * Bundle-DocURL
+		 * Bundle-ContactAddress
+		 * </pre>
+		 * <p>This method will continue to return Manifest header information
+		 * while this bundle is in the <tt>UNINSTALLED</tt> state.
+		 *
+		 * @return A <tt>Dictionary</tt> object containing this bundle's Manifest headers and values.
+		 *
+		 * @exception java.lang.SecurityException If the caller does not have
+		 * the <tt>AdminPermission</tt>, and the Java Runtime Environment supports permissions.
+		 */
+		public abstract Dictionary getHeaders(Locale locale);
 
     /**
      * Returns this bundle's identifier. The bundle is assigned a unique identifier by the Framework
