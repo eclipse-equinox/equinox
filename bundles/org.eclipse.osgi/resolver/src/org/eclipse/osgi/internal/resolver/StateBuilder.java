@@ -67,7 +67,9 @@ class StateBuilder {
 		if (version != null)
 			result.setVersionSpecification(new Version(version));
 		result.setMatchingRule(parseMatchingRule(spec.getAttribute(Constants.VERSION_MATCH_ATTRIBUTE)));
-		result.setExported(spec.getAttribute(Constants.REPROVIDE_ATTRIBUTE) != null);
+		// TODO remove deprecated provide-packages attribute check
+		boolean exported = spec.getAttribute(Constants.REPROVIDE_ATTRIBUTE) != null || spec.getAttribute(Constants.PROVIDE_PACKAGES_ATTRIBUTE) != null;
+		result.setExported(exported);
 		result.setOptional(spec.getAttribute(Constants.OPTIONAL_ATTRIBUTE) != null);
 		return result;
 	}
