@@ -21,9 +21,8 @@ import java.util.EventObject;
  */
 class StartLevelEvent extends EventObject {
     
-    public final static int INC_FW_SL = 0x00000000;
-    public final static int DEC_FW_SL = 0x00000001;
-    public final static int CHANGE_BUNDLE_SL = 0x00000002;
+    public final static int CHANGE_BUNDLE_SL = 0x00000000;
+    public final static int CHANGE_FW_SL = 0x00000001;
     
     /**
      * Event Type
@@ -32,69 +31,43 @@ class StartLevelEvent extends EventObject {
 
     /**
      * StartLevel - value depends on event type: 
-     *  INC_FW_SL - value is the current active startlevel to be incremented
-     *  DEC_FW_SL - value is the current active startlevel to be decremented
      *  CHANGE_BUNDLE_SL - value is the new bundle startlevel
+     *  CHANGE_FW_SL - value is the new framework startlevel
      * 
      */
-    private transient int sl;
+    private transient int newSl;
 
     /**
-     * The final target startlevel - when this is reached, a FrameworkEvent.STARTLEVEL_CHANGED event must be published
-     */
-    private transient int finalSL;
-    
-    /**
-     * Bundle related to the event.
-     * bugbug If the bundle is the System Bundle, then it is a change to the Framework active startlevel.  
-     * Otherwise it is a change to the specified bundle.
+     * For a change in bundle startlevel, this is the bundle to be changed.
+     * For a change in framework startlevel, this is the bundle requesting the change.
      */
     private transient Bundle bundle;
-    
-    /**
-     * Framework object
-     */
-    private transient Framework framework;
-    
-    
     
     /**
      * Creates a StartLevel event regarding the specified bundle.
      *
      * @param int type The type of startlevel event (inc or dec)
-     * @param int sl The next requested startlevel (the interim startlevel)
-     * @param int finalSL the ultimate requested startlevel we are on our way to
+     * @param int newSl the ultimate requested startlevel we are on our way to
      * @param bundle The affected bundle, or system bundle if it is for the framework
-     * @param framework The framework object so we can retrieve things like active startlevel
      */
-    public StartLevelEvent(int type, int sl, int finalSL, Bundle bundle, Framework framework)
+    public StartLevelEvent(int type, int newSl, Bundle bundle)
     {
         super(bundle);
         this.type = type;
-        this.sl = sl;
-        this.finalSL = finalSL;
+        this.newSl = newSl;
         this.bundle = bundle;
-        this.framework = framework;
     }
     
     public int getType() {
         return this.type;
     }
     
-    public int getSL() {
-        return this.sl;
-    }
-    
-    public int getFinalSL() {
-        return this.finalSL;
+    public int getNewSL() {
+        return this.newSl;
     }
     
     public Bundle getBundle() {
         return this.bundle;
-    }
-    
-    public Framework getFramework() {
-        return this.framework;
     }
     
 }
