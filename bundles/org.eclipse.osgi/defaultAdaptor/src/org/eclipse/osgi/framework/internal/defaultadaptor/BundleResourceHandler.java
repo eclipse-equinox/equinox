@@ -64,7 +64,7 @@ public abstract class BundleResourceHandler extends URLStreamHandler implements 
     	String bundleId,path;
     	if (str.startsWith(url.getProtocol())) {
     		if (str.charAt(start) != '/' || str.charAt(start+1) != '/')
-    			throw new IllegalArgumentException("URL must be opaque.");
+    			throw new IllegalArgumentException(AdaptorMsg.formatter.getString("URL_IS_OPAQUE",url.getProtocol()));
     		start += 2;
     		int slash = str.indexOf("/",start);
     		if (slash < 0) {
