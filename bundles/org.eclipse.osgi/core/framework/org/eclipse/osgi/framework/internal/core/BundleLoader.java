@@ -222,13 +222,6 @@ public class BundleLoader implements ClassLoaderDelegate {
 		}
 	}
 
-	protected BundleHost getSupplier(VersionConstraint spec) {
-		BundleDescription supplier = spec.getSupplier();
-		if (supplier == null)
-			return null;
-		return (BundleHost) bundle.framework.getBundle(supplier.getBundleId());
-	}
-
 	/**
 	 * Close the the Bundle's file.
 	 *

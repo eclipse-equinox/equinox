@@ -91,9 +91,9 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 				if (hostSpec != null) {
 					bundleSpec = hostSpec.getSupplier();
 				}
-				BundleHost bundle = (BundleHost) framework.getBundle(bundleSpec.getBundleId());
-				if (bundle != null) {
-					ExportedPackageImpl packagesource = new ExportedPackageImpl(packageSpecs[i], bundle.getLoaderProxy());
+				Bundle bundle = framework.getBundle(bundleSpec.getBundleId());
+				if (bundle != null && bundle instanceof BundleHost) {
+					ExportedPackageImpl packagesource = new ExportedPackageImpl(packageSpecs[i], ((BundleHost)bundle).getLoaderProxy());
 					packageSet.add(packagesource);
 				} else {
 					// TODO log error
@@ -111,13 +111,9 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 		BundleDescription[] bundleDescripts = state.getResolvedBundles();
 		for (int i = 0; i < bundleDescripts.length; i++) {
 			BundleDescription bundledes = bundleDescripts[i];
-			HostSpecification hostSpec = bundledes.getHost();
-			if (hostSpec != null) {
-				bundledes = hostSpec.getSupplier();
-			}
-			BundleHost bundle = (BundleHost) framework.getBundle(bundledes.getBundleId());
+			Bundle bundle = framework.getBundle(bundledes.getBundleId());
 			if (bundle != null && bundle instanceof BundleHost) {
-				BundleLoaderProxy loaderProxy = bundle.getLoaderProxy();
+				BundleLoaderProxy loaderProxy = ((BundleHost)bundle).getLoaderProxy();
 				bundleSet.add(loaderProxy);
 			}
 		}
@@ -418,7 +414,7 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 		}
 		for (int i = 0; i < refresh.length; i++) {
 			Bundle bundle = (Bundle) refresh[i];
-			if (bundle.isResolved() && !bundle.isFragment())
+			if (bundle.isResolved())
 				framework.resumeBundle(bundle);
 		}
 	}
@@ -508,12 +504,7 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 							if (changedBundle.isFragment()) {
 								BundleHost host = (BundleHost) framework.getBundle(bundleDes.getHost().getSupplier().getBundleId());
 								if (((BundleFragment) changedBundle).setHost(host)) {
-									// if a fragment attaches to an active host then
-									// its state would have changed to ACTIVE; no need
-									// to set its state to RESOLVED in this case.
-									if (!changedBundle.isActive()) {
-										changedBundle.resolve();
-									}
+									changedBundle.resolve();
 								}
 							} else {
 								changedBundle.resolve();

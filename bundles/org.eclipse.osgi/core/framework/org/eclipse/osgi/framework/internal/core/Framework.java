@@ -1135,8 +1135,8 @@ public class Framework implements EventSource, EventPublisher {
 	 */
 	protected void resumeBundle(Bundle bundle) {
 
-		if (bundle.isActive() || bundle.isFragment()) {
-			// if bundle is active or is a fragment then do nothing.
+		if (bundle.isActive()) {
+			// if bundle is active.
 			return;
 		}
 
