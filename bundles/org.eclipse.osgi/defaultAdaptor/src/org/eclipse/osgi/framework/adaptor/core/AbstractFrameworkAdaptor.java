@@ -27,6 +27,11 @@ import org.osgi.framework.BundleException;
  * FrameworkAdaptor implementations can use.
  */
 public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
+	public static final String PROP_PARENT_CLASSLOADER = "osgi.parentClassloader"; //$NON-NLS-1$
+	public static final String PARENT_CLASSLOADER_APP = "app"; //$NON-NLS-1$
+	public static final String PARENT_CLASSLOADER_EXT = "ext"; //$NON-NLS-1$
+	public static final String PARENT_CLASSLOADER_BOOT = "boot"; //$NON-NLS-1$
+	public static final String PARENT_CLASSLOADER_FWK = "fwk"; //$NON-NLS-1$
 
 	/** Name of the Adaptor manifest file */
 	protected final String ADAPTOR_MANIFEST = "ADAPTOR.MF"; //$NON-NLS-1$
@@ -70,7 +75,25 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 	 * The behavior of the ParentClassLoader will load classes
 	 * from the boot strap classloader.
 	 */
-	protected static ClassLoader bundleClassLoaderParent = new ParentClassLoader();
+	protected static ClassLoader bundleClassLoaderParent;
+
+	static {
+		// check property for specified parent
+		String type = System.getProperty(PROP_PARENT_CLASSLOADER, PARENT_CLASSLOADER_BOOT);
+		if (PARENT_CLASSLOADER_FWK.equalsIgnoreCase(type))
+			bundleClassLoaderParent = FrameworkAdaptor.class.getClassLoader();
+		else if (PARENT_CLASSLOADER_APP.equalsIgnoreCase(type))
+			bundleClassLoaderParent = ClassLoader.getSystemClassLoader();
+		else if (PARENT_CLASSLOADER_EXT.equalsIgnoreCase(type)) {
+			ClassLoader appCL = ClassLoader.getSystemClassLoader();
+			if (appCL != null)
+				bundleClassLoaderParent = appCL.getParent();
+		}
+
+		// default to boot classloader
+		if (bundleClassLoaderParent == null)
+			bundleClassLoaderParent = new ParentClassLoader();
+	}
 
 	/**
 	 * Initializes the ServiceRegistry, loads the properties for this
