@@ -244,8 +244,14 @@ public class PluginParser extends DefaultHandler implements IModel {
 				}
 				break;
 			case PLUGIN_EXTENSION_POINT_STATE :
+				if (elementName.equals(EXTENSION_POINT)) {
+					stateStack.pop();
+				}
 				break;
 			case PLUGIN_EXTENSION_STATE :
+				if (elementName.equals(EXTENSION)) {
+					stateStack.pop();
+				}
 				break;
 			case RUNTIME_LIBRARY_STATE :
 				if (elementName.equals(LIBRARY)) {
