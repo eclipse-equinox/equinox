@@ -444,8 +444,9 @@ public class StateResolverTest extends AbstractStateTest {
 	public void testUpdate() throws BundleException {
 		State state = buildEmptyState();
 		String B1_LOCATION = "org.eclipse.b";
-		final String B1_MANIFEST = "Bundle-SymbolicName: org.eclipse.b1\n" + "Bundle-Version: 1.0\n";
-		BundleDescription b1 = state.getFactory().createBundleDescription(parseManifest(B1_MANIFEST), B1_LOCATION, 1);
+		final String B1_RESOLVED = "Bundle-SymbolicName: org.eclipse.b1\n" + "Bundle-Version: 1.0\n";
+		final String B1_UNRESOLVED = "Bundle-SymbolicName: org.eclipse.b1\n" + "Bundle-Version: 1.0\nRequire-Bundle: non.existant.bundle\n";		
+		BundleDescription b1 = state.getFactory().createBundleDescription(parseManifest(B1_RESOLVED), B1_LOCATION, 1);
 		state.addBundle(b1);
 		StateDelta delta = state.resolve();
 		BundleDelta[] changes = delta.getChanges();
@@ -454,13 +455,23 @@ public class StateResolverTest extends AbstractStateTest {
 		assertEquals("1.2", (BundleDelta.ADDED | BundleDelta.RESOLVED), changes[0].getType());
 		assertFullyResolved("1.3", b1);
 		assertTrue("1.8", contains(state.getResolvedBundles(), b1));		
+		b1 = state.getFactory().createBundleDescription(parseManifest(B1_UNRESOLVED), B1_LOCATION, 1); 
 		state.updateBundle(b1);
 		assertTrue("1.9", !contains(state.getResolvedBundles(), b1));		
 		delta = state.resolve();
 		changes = delta.getChanges();
 		assertEquals("2.0", 1, changes.length);
 		assertEquals("2.1", b1, changes[0].getBundle());
-		assertEquals("2.2", BundleDelta.UPDATED, changes[0].getType());
+		assertEquals("2.2", BundleDelta.UPDATED | BundleDelta.UNRESOLVED, changes[0].getType());
+		b1 = state.getFactory().createBundleDescription(parseManifest(B1_RESOLVED), B1_LOCATION, 1); 
+		state.updateBundle(b1);
+		assertTrue("2.9", !contains(state.getResolvedBundles(), b1));		
+		delta = state.resolve();
+		changes = delta.getChanges();
+		assertEquals("3.0", 1, changes.length);
+		assertEquals("3.1", b1, changes[0].getBundle());
+		assertEquals("3.2", BundleDelta.UPDATED | BundleDelta.RESOLVED, changes[0].getType());
+		assertFullyResolved("3.3", b1);		
 	}
 
 	private boolean contains(Object[] array, Object element) {
