@@ -19,7 +19,7 @@ import org.eclipse.osgi.service.pluginconversion.PluginConverter;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 
-public class PluginConverterImpl implements PluginConverter {
+public class PluginConverterImpl implements PluginConverter, IModel {
 
 	private static final String PI_ECLIPSE_OSGI = "org.eclipse.osgi";
 	private static PluginConverterImpl instance;	
@@ -80,6 +80,7 @@ public class PluginConverterImpl implements PluginConverter {
 		}
 		return bundleManifestLocation; 
 	}
+
 	public synchronized boolean convertManifest(File pluginBaseLocation, File bundleManifestLocation) {
 		pluginManifestLocation = findPluginManifest(pluginBaseLocation);
 		if (pluginManifestLocation == null)
@@ -192,9 +193,9 @@ public class PluginConverterImpl implements PluginConverter {
 		}
 	}
 	private boolean requireRuntimeCompatibility() {
-		String[] requireList = pluginInfo.getRequires();
-		for (int i = 0; i < requireList.length; i++) {
-			if (requireList[i].indexOf(PI_RUNTIME_COMPATIBILITY) != -1)
+		ArrayList requireList = pluginInfo.getRequires();
+		for (Iterator iter = requireList.iterator(); iter.hasNext();) {
+			if (((PluginParser.Prerequisite) iter.next()).getName().equalsIgnoreCase(PI_RUNTIME_COMPATIBILITY)) 
 				return true;
 		}
 		return false;
@@ -259,11 +260,36 @@ public class PluginConverterImpl implements PluginConverter {
 		}
 	}
 	private void generateRequireBundle() throws IOException {
-		String[] requiredBundles = pluginInfo.getRequires();
-		if (requiredBundles == null && !pluginInfo.getUniqueId().equals(PI_RUNTIME)) // to avoid cycles
-			requiredBundles = new String[]{PI_RUNTIME};
-
-		writeEntry(Constants.REQUIRE_BUNDLE, requiredBundles);
+		ArrayList requiredBundles = pluginInfo.getRequires();
+		String[] bundleRequire = new String[requiredBundles.size()]; 
+		int i = 0;
+		for (Iterator iter = requiredBundles.iterator(); iter.hasNext();) {
+			PluginParser.Prerequisite element = (PluginParser.Prerequisite) iter.next();
+			String modImport = element.getName();
+			if (element.getVersion() != null) {
+				modImport += "; " + Constants.BUNDLE_VERSION_ATTRIBUTE + "=" + element.getVersion(); //$NON-NLS-1$ //$NON-NLS-2$ 
+			}
+			if (element.isExported()) {
+				modImport += "; " + Constants.PROVIDE_PACKAGES_ATTRIBUTE + "=true";//$NON-NLS-1$ //$NON-NLS-2$ 
+			}
+			if (element.isOptional()) {
+				modImport += ";" + Constants.OPTIONAL_ATTRIBUTE + "=true";//$NON-NLS-1$ //$NON-NLS-2$ 
+			}
+			if (element.getMatch() != null) {
+				modImport += ";" + Constants.VERSION_MATCH_ATTRIBUTE + "="; //$NON-NLS-1$ //$NON-NLS-2$ 
+				if (element.getMatch().equalsIgnoreCase(PLUGIN_REQUIRES_MATCH_PERFECT)) {
+					modImport += Constants.VERSION_MATCH_QUALIFIER;
+				} else if (element.getMatch().equalsIgnoreCase(PLUGIN_REQUIRES_MATCH_EQUIVALENT)) {
+					modImport += Constants.VERSION_MATCH_MINOR;
+				} else if (element.getMatch().equalsIgnoreCase(PLUGIN_REQUIRES_MATCH_COMPATIBLE)) {
+					modImport += Constants.VERSION_MATCH_MAJOR;
+				} else if (element.getMatch().equalsIgnoreCase(PLUGIN_REQUIRES_MATCH_GREATER_OR_EQUAL)) {
+					modImport += Constants.VERSION_MATCH_GREATERTHANOREQUAL;
+				}
+			}
+			bundleRequire[i++] = modImport;
+		}		
+		writeEntry(Constants.REQUIRE_BUNDLE, bundleRequire);
 	}
 
 	private void generateTimestamp() throws IOException {

@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.core.runtime.adaptor;
 
+import java.util.*;
 import java.util.Map;
 import java.util.Set;
 
@@ -19,7 +20,7 @@ import java.util.Set;
 public interface IPluginInfo {
 	public Map getLibraries();
 	public String[] getLibrariesName();
-	public String[] getRequires();
+	public ArrayList getRequires();
 	public String getMasterId();
 	public String getMasterVersion();
 	public String getPluginClass();

@@ -33,7 +33,7 @@ public class PluginParser extends DefaultHandler implements IModel {
 		private Map libraries; //represent the libraries and their export statement
 		private ArrayList requires; 
 		private boolean requiresExpanded = false; //indicates if the requires have been processed.
-		private boolean compatibilityRequired = false; //set to true is the requirement list contain compatilibity 
+		private boolean compatibilityFound = false; //set to true is the requirement list contain compatilibity 
 		private String pluginClass;
 		private String masterPluginId;
 		private String masterVersion;
@@ -50,38 +50,34 @@ public class PluginParser extends DefaultHandler implements IModel {
 				return new HashMap(0);
 			return libraries;
 		}
-		public String[] getRequires() {
+		public ArrayList getRequires() {
 			if (schemaVersion == null && ! requiresExpanded) {
 				requiresExpanded = true;
 				if (requires == null) {
 					requires = new ArrayList(1);
-					requires.add(PluginConverterImpl.PI_RUNTIME_COMPATIBILITY );
+					requires.add(new Prerequisite(PluginConverterImpl.PI_RUNTIME_COMPATIBILITY, null, false, false, null));
 				} else {
 					//Add elements on the requirement list of ui and help.
 					for (int i = 0; i < requires.size(); i++) {
-						if ("org.eclipse.ui".equals(requires.get(i))) { //$NON-NLS-1$ 
-							requires.add(i + 1, "org.eclipse.ui.workbench.texteditor;" + Constants.OPTIONAL_ATTRIBUTE + "=" + "true"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
-							requires.add(i + 1, "org.eclipse.jface.text;" + Constants.OPTIONAL_ATTRIBUTE + "=" + "true"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
-							requires.add(i + 1, "org.eclipse.ui.editors;" + Constants.OPTIONAL_ATTRIBUTE + "=" + "true"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
-							requires.add(i + 1, "org.eclipse.ui.views;" + Constants.OPTIONAL_ATTRIBUTE + "=" + "true"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
-							requires.add(i + 1, "org.eclipse.ui.ide;" + Constants.OPTIONAL_ATTRIBUTE + "=" + "true"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
-						} else if ("org.eclipse.help".equals(requires.get(i))) { //$NON-NLS-1$ 
-							requires.add(i + 1, "org.eclipse.help.base;" + Constants.OPTIONAL_ATTRIBUTE + "=" + "true"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
+						Prerequisite analyzed = (Prerequisite) requires.get(i); 
+						if ("org.eclipse.ui".equals(analyzed.getName())) { //$NON-NLS-1$					
+							requires.add(i + 1, new Prerequisite("org.eclipse.ui.workbench.texteditor", null, true, analyzed.isExported(), null)); //$NON-NLS-1$ 
+							requires.add(i + 1, new Prerequisite("org.eclipse.jface.text", null, true, analyzed.isExported(), null)); //$NON-NLS-1$ 
+							requires.add(i + 1, new Prerequisite("org.eclipse.ui.editors", null, true, analyzed.isExported(), null)); //$NON-NLS-1$ 
+							requires.add(i + 1, new Prerequisite("org.eclipse.ui.views", null, true, analyzed.isExported(), null)); //$NON-NLS-1$ 
+							requires.add(i + 1, new Prerequisite("org.eclipse.ui.ide", null, true, analyzed.isExported(), null)); //$NON-NLS-1$ 
+						} else if ("org.eclipse.help".equals(analyzed.getName())) { //$NON-NLS-1$ 
+							requires.add(i + 1, new Prerequisite("org.eclipse.help.base", null, true, analyzed.isExported(), null)); //$NON-NLS-1$ 
+						} else if (PluginConverterImpl.PI_RUNTIME.equals(analyzed.getName()) && ! compatibilityFound) {
+							requires.add(i + 1, new Prerequisite(PluginConverterImpl.PI_RUNTIME_COMPATIBILITY, null, false, analyzed.isExported(), null));
 						}
 					}
-					if (!compatibilityRequired)
-						requires.add(PluginConverterImpl.PI_RUNTIME_COMPATIBILITY);
 				}
 			}
-
-			String[] requireBundles;
-			if (requires != null) {
-				requireBundles = new String[requires.size()];
-				requires.toArray(requireBundles);
-			} else { 
-				requireBundles = new String[0];
-			}
-			return requireBundles;
+			if (requires == null)
+				return requires = new ArrayList(0);
+			
+			return requires;
 		}
 		public String getMasterId() {
 			return masterPluginId;
@@ -428,48 +424,59 @@ public class PluginParser extends DefaultHandler implements IModel {
 				manifestInfo.pluginClass = attrValue;
 		}
 	}
+	public class Prerequisite {
+		String name;
+		String version;
+		boolean optional;
+		boolean export; 
+		String match;
+		public boolean isExported() {
+			return export;
+		}
+		public String getMatch() {
+			return match;
+		}
+		public String getName() {
+			return name;
+		}
+		public boolean isOptional() {
+			return optional;
+		}
+		public String getVersion() {
+			return version;
+		}
+		public Prerequisite(String preqName, String prereqVersion, boolean isOtional, boolean isExported, String prereqMatch) {
+			name = preqName;
+			version = prereqVersion;
+			optional = isOtional;
+			export = isExported;
+			match = prereqMatch;
+		}
+		public String toString() {
+			return name;
+		}
+	}
+	
 	public void parsePluginRequiresImport(Attributes attributes) {
 		if (manifestInfo.requires == null) {
 			manifestInfo.requires = new ArrayList();
 			// to avoid cycles
-			if (!manifestInfo.pluginId.equals(PluginConverterImpl.PI_RUNTIME))  //$NON-NLS-1$
-				manifestInfo.requires.add(PluginConverterImpl.PI_RUNTIME); //$NON-NLS-1$
+//			if (!manifestInfo.pluginId.equals(PluginConverterImpl.PI_RUNTIME))  //$NON-NLS-1$
+//				manifestInfo.requires.add(new Prerequisite(PluginConverterImpl.PI_RUNTIME, null, false, false, null)); //$NON-NLS-1$
 		}
 		// process attributes
 		String plugin = attributes.getValue("", PLUGIN_REQUIRES_PLUGIN); //$NON-NLS-1$ 
 		if (plugin == null)
 			return;
-		if (plugin.equals(PluginConverterImpl.PI_BOOT) || plugin.equals(PluginConverterImpl.PI_RUNTIME))  //$NON-NLS-1$//$NON-NLS-2$
+		if (plugin.equals(PluginConverterImpl.PI_BOOT))  //$NON-NLS-1$//$NON-NLS-2$
 			return;
 		if (plugin.equals(PluginConverterImpl.PI_RUNTIME_COMPATIBILITY))
-			manifestInfo.compatibilityRequired = true;
+			manifestInfo.compatibilityFound = true;
 		String version = attributes.getValue("", PLUGIN_REQUIRES_PLUGIN_VERSION); //$NON-NLS-1$ 
 		String optional = attributes.getValue("", PLUGIN_REQUIRES_OPTIONAL); //$NON-NLS-1$ 
 		String export = attributes.getValue("", PLUGIN_REQUIRES_EXPORT); //$NON-NLS-1$ 
-		String match = attributes.getValue("", PLUGIN_REQUIRES_MATCH); //$NON-NLS-1$ 
-		String modImport = plugin;
-		if (version != null) {
-			modImport += "; " + Constants.BUNDLE_VERSION_ATTRIBUTE + "=" + version; //$NON-NLS-1$ //$NON-NLS-2$ 
-		}
-		if (export != null) {
-			modImport += "; " + Constants.PROVIDE_PACKAGES_ATTRIBUTE + "=" + export;//$NON-NLS-1$ //$NON-NLS-2$ 
-		}
-		if (optional != null) {
-			modImport += ";" + Constants.OPTIONAL_ATTRIBUTE + "=" + "true";//$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
-		}
-		if (match != null) {
-			modImport += ";" + Constants.VERSION_MATCH_ATTRIBUTE + "="; //$NON-NLS-1$ //$NON-NLS-2$ 
-			if (match.equalsIgnoreCase(PLUGIN_REQUIRES_MATCH_PERFECT)) {
-				modImport += Constants.VERSION_MATCH_QUALIFIER;
-			} else if (match.equalsIgnoreCase(PLUGIN_REQUIRES_MATCH_EQUIVALENT)) {
-				modImport += Constants.VERSION_MATCH_MINOR;
-			} else if (match.equalsIgnoreCase(PLUGIN_REQUIRES_MATCH_COMPATIBLE)) {
-				modImport += Constants.VERSION_MATCH_MAJOR;
-			} else if (match.equalsIgnoreCase(PLUGIN_REQUIRES_MATCH_GREATER_OR_EQUAL)) {
-				modImport += Constants.VERSION_MATCH_GREATERTHANOREQUAL;
-			}
-		}
-		manifestInfo.requires.add(modImport);
+		String match = attributes.getValue("", PLUGIN_REQUIRES_MATCH); //$NON-NLS-1$
+		manifestInfo.requires.add(new Prerequisite(plugin, version, "true".equalsIgnoreCase(optional) ? true : false, "true".equalsIgnoreCase(export) ? true : false, match)); //$NON-NLS-1$  //$NON-NLS-2$
 	}
 	public void parseRequiresAttributes(Attributes attributes) {
 	}
