@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003 IBM Corporation and others.
+ * Copyright (c) 2003, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,8 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
-import java.util.Comparator;
-
+import java.util.*;
 import org.eclipse.core.dependencies.*;
 import org.eclipse.core.internal.dependencies.DependencySystem;
 import org.eclipse.osgi.service.resolver.*;
@@ -104,12 +103,6 @@ public class ResolverHelper {
 			uniqueId = Long.toString(bundleDescription.getBundleId());
 		return uniqueId;
 	}
-	/**
-	 * Creates a prerequisite that cannot ever be satisfied.
-	 */
-	private static IDependency[] createUnsatisfiablePrerequisites(IDependencySystem system) {
-		return new IDependency[]{system.createDependency("", new UnsatisfiableRule(), null, false, null)}; //$NON-NLS-1$
-	}
 	private static IDependency[] createPrerequisites(BundleDescription bundleDesc, IDependencySystem system) {
 		BundleSpecification[] required = bundleDesc.getRequiredBundles();
 		HostSpecification host = bundleDesc.getHost();
@@ -118,13 +111,14 @@ public class ResolverHelper {
 			dependencyCount++;
 		if (dependencyCount == 0)
 			return new IDependency[0];
-
-		IDependency[] prereqs = new IDependency[dependencyCount];
+		List prereqs = new ArrayList(dependencyCount);
 		for (int i = 0; i < required.length; i++)
-			prereqs[i] = createPrerequisite(system, required[i]);
+			// ignore if a bundle requires itself (bug 48568 comment 2)		
+			if (!required[i].getName().equals(bundleDesc.getUniqueId()))
+				prereqs.add(createPrerequisite(system, required[i]));
 		if (host != null)
-			prereqs[prereqs.length - 1] = createPrerequisite(system, host);
-		return prereqs;
+			prereqs.add(createPrerequisite(system, host));
+		return (IDependency[]) prereqs.toArray(new IDependency[prereqs.size()]);
 	}
 	private static IDependency createPrerequisite(IDependencySystem system, VersionConstraint constraint) {
 		boolean optional = (constraint instanceof BundleSpecification) && ((BundleSpecification) constraint).isOptional();
