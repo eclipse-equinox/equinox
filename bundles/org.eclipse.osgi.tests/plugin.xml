@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<plugin
+  name="Eclipse OSGi Tests"
+  id="org.eclipse.osgi.tests"
+  version="3.0"
+  provider-name="Eclipse.org">
+
+  <requires>
+    <import plugin="org.eclipse.osgi"/>  
+    <import plugin="org.eclipse.osgi.util"/>  
+    <import plugin="org.eclipse.osgi.services"/>  
+    <import plugin="org.eclipse.core.runtime"/>  
+    <import plugin="org.eclipse.core.tests.harness"/>
+    <import plugin="org.junit"/>
+  </requires>
+
+  <runtime>
+    <library name="osgitests.jar">
+      <export name="*"/>
+    </library>
+  </runtime>
+
+  <extension point="org.eclipse.core.tests.harness.tests">
+    <test id="preferences.PreferenceForwarderTest">
+      <run class="org.eclipse.core.tests.runtime.PreferenceForwarderTest"/>
+    </test>
+ </extension>
+
+</plugin>
