@@ -83,6 +83,7 @@ public class ReliableFileInputStream extends FilterInputStream {
 	/**
 	 * Call close to finalize the underlying ReliableFile.
 	 */
+	//TODO finalizers considered harmful! (bug 56856) 
 	protected void finalize() throws IOException {
 		close();
 	}

@@ -20,6 +20,7 @@ import java.util.Hashtable;
  */
 
 public class ReliableFile {
+	//TODO constants should be all caps
 	/**
 	 * Extension of tmp file used during writing.
 	 * A reliable file with this extension should
@@ -291,6 +292,7 @@ public class ReliableFile {
 	 */
 	private void lock() throws IOException {
 		if (locked) {
+			//TODO why not a regular IOException? 
 			throw new FileNotFoundException(ReliableMsg.formatter.getString("RELIABLEFILE_FILE_LOCKED"));
 		}
 
