@@ -252,10 +252,10 @@ public class EclipseAdaptor extends DefaultAdaptor {
 			context.registerService(SAXFACTORYNAME, new SaxParsingService(), new Hashtable());
 			Class.forName(DOMFACTORYNAME);
 			context.registerService(DOMFACTORYNAME, new DomParsingService(), new Hashtable());
-		} catch (Throwable t) {
+		} catch (ClassNotFoundException e) {
 			// In case the JAXP API is not on the boot classpath
 			String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_ADAPTOR_ERROR_XML_SERVICE"); //$NON-NLS-1$
-			getFrameworkLog().log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, message, 0, t, null));
+			getFrameworkLog().log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, message, 0, e, null));
 		}
 	}
 
