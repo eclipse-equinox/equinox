@@ -19,6 +19,7 @@ import org.eclipse.osgi.framework.internal.core.OSGi;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.framework.tracker.ServiceTracker;
+import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.*;
 import org.osgi.service.packageadmin.PackageAdmin;
@@ -27,24 +28,24 @@ import org.osgi.service.startlevel.StartLevel;
 public class EclipseStarter {
 	private static FrameworkAdaptor adaptor;
 	private static BundleContext context;
-	private static String dataLocation = null;
-	private static String configLocation = null;
 	public static boolean debug = false;
 
 	// command line arguments
 	private static final String CONSOLE = "-console"; //$NON-NLS-1$
-	private static final String CONSOLE_LOG = "-consolelog"; //$NON-NLS-1$
+	private static final String CONSOLE_LOG = "-consoleLog"; //$NON-NLS-1$
 	private static final String DEBUG = "-debug"; //$NON-NLS-1$
 	private static final String DEV = "-dev"; //$NON-NLS-1$
 	private static final String WS = "-ws"; //$NON-NLS-1$
 	private static final String OS = "-os"; //$NON-NLS-1$
 	private static final String ARCH = "-arch"; //$NON-NLS-1$
 	private static final String NL = "-nl"; //$NON-NLS-1$	
+
 	private static final String CONFIGURATION = "-configuration"; //$NON-NLS-1$	
+	private static final String USER = "-user"; //$NON-NLS-1$	
 	// this is more of an Eclipse argument but this OSGi implementation stores its 
 	// metadata alongside Eclipse's.
 	private static final String DATA = "-data"; //$NON-NLS-1$
-
+	
 	// System properties
 	public static final String PROP_INSTALL_LOCATION = "osgi.installLocation"; //$NON-NLS-1$
 	public static final String PROP_CONFIG_AREA = "osgi.configuration.area"; //$NON-NLS-1$
@@ -65,12 +66,6 @@ public class EclipseStarter {
 	public static final String PROP_EXITCODE = "eclipse.exitcode"; //$NON-NLS-1$
 	public static final String PROP_CONSOLE_LOG = "eclipse.consoleLog"; //$NON-NLS-1$
 
-	// Constants for configuration location discovery
-	private static final String ECLIPSE = "eclipse"; //$NON-NLS-1$
-	private static final String PRODUCT_SITE_MARKER = ".eclipseproduct"; //$NON-NLS-1$
-	private static final String PRODUCT_SITE_ID = "id"; //$NON-NLS-1$
-	private static final String PRODUCT_SITE_VERSION = "version"; //$NON-NLS-1$
-
 	/** string containing the classname of the adaptor to be used in this framework instance */
 	protected static final String DEFAULT_ADAPTOR_CLASS = "org.eclipse.core.runtime.adaptor.EclipseAdaptor";
 	
@@ -80,8 +75,7 @@ public class EclipseStarter {
 	private static ServiceTracker applicationTracker;
 	public static Object run(String[] args, Runnable endSplashHandler) throws Exception {
 		processCommandLine(args);
-		setInstanceLocation();
-		setConfigurationLocation();
+		LocationManager.initializeLocations();
 		loadConfigurationInfo();
 		loadDefaultProperties();
 		adaptor = createAdaptor();
@@ -387,9 +381,10 @@ public class EclipseStarter {
 				continue;
 			}
 	
-			// look for the configuraiton location .  
+			// look for the configuration location .  
 			if (args[i - 1].equalsIgnoreCase(CONFIGURATION)) {
-				configLocation = arg;
+				System.getProperties().put(PROP_CONFIG_AREA, arg);
+				found = true;
 				continue;
 			}
 	
@@ -402,7 +397,15 @@ public class EclipseStarter {
 	
 			// look for the data location for this instance.  
 			if (args[i - 1].equalsIgnoreCase(DATA)) {
-				dataLocation = arg;
+				System.getProperties().put(PROP_INSTANCE_AREA, arg);
+				found = true;
+				continue;
+			}
+	
+			// look for the user location for this instance.  
+			if (args[i - 1].equalsIgnoreCase(USER)) {
+				System.getProperties().put(PROP_USER_AREA, arg);
+				found = true;
 				continue;
 			}
 	
@@ -504,55 +507,6 @@ public class EclipseStarter {
 		return result;
 	}
 
-	private static void setInstanceLocation() {
-		File result = null;
-		String location = System.getProperty(PROP_INSTANCE_AREA);
-		// if the instance location is not set, predict where the workspace will be and 
-		// put the instance area inside the workspace meta area.
-		if (location == null) {
-			if (dataLocation == null) 
-				result = new File(System.getProperty("user.dir"), "workspace");//$NON-NLS-1$ //$NON-NLS-2$
-			else
-				result = new File(dataLocation);
-			result = new File(result, ".metadata/bundles");
-		} else {
-			result = new File(location);
-		}
-		System.getProperties().put(PROP_INSTANCE_AREA, result.getAbsolutePath());	
-	}
-
-	private static void setConfigurationLocation() {
-		String location = System.getProperty(PROP_CONFIG_AREA);
-		if (location != null) {
-			configLocation = location;
-			System.getProperties().put("org.eclipse.osgi.framework.defaultadaptor.bundledir", configLocation + "/bundles");	
-			if (System.getProperty(PROP_MANIFEST_CACHE) == null)
-				System.getProperties().put(PROP_MANIFEST_CACHE, configLocation + "/manifests");
-			return;
-		}
-		// -configuration was not specified so compute a configLocation based on the
-		// install location.  If it is read/write then use it.  Otherwise use the user.home
-		if (configLocation == null) {
-			configLocation = getDefaultConfigurationLocation() + "/.config";
-		} else {
-			// if -configuration was specified, then interpret the config location from the 
-			// value given.  Allow for the specification of a config file (.cfg) or a dir.
-			try {
-				configLocation = new URL(configLocation).getFile();
-			} catch (MalformedURLException e) {
-				// TODO do something in the error case
-			}
-			configLocation = configLocation.replace('\\', '/');
-			int index = configLocation.lastIndexOf('/');
-			if (configLocation.endsWith(".cfg") || configLocation.endsWith("/")) 
-				configLocation = configLocation.substring(0, index);
-		} 
-		System.getProperties().put(PROP_CONFIG_AREA, configLocation);
-		System.getProperties().put("org.eclipse.osgi.framework.defaultadaptor.bundledir", configLocation + "/bundles");	
-		if (System.getProperty(PROP_MANIFEST_CACHE) == null) {
-			System.getProperties().put(PROP_MANIFEST_CACHE, configLocation + "/manifests");
-		}
-	}
 	private static Bundle getBundleByLocation(String location) {
 		Bundle[] installed = context.getBundles();
 		for (int i = 0; i < installed.length; i++) {
@@ -563,56 +517,6 @@ public class EclipseStarter {
 		return null;
 	}
 
-	private static String getDefaultConfigurationLocation() {
-		// 1) We store the config state relative to the 'eclipse' directory if possible
-		// 2) If this directory is read-only 
-		//    we store the state in <user.home>/.eclipse/<application-id>_<version> where <user.home> 
-		//    is unique for each local user, and <application-id> is the one 
-		//    defined in .eclipseproduct marker file. If .eclipseproduct does not
-		//    exist, use "eclipse" as the application-id.
-		
-		String installProperty = System.getProperty(PROP_INSTALL_LOCATION);
-		URL installURL = null;
-		try {
-			installURL = new URL(installProperty);
-		} catch (MalformedURLException e) {
-			// do nothgin here since it is basically impossible to get a bogus url 
-		}
-		File installDir = new File(installURL.getFile());
-		if ("file".equals(installURL.getProtocol()) && installDir.canWrite()) { //$NON-NLS-1$
-//			if (debug)
-//				debug("Using the installation directory."); //$NON-NLS-1$
-			return installDir.getAbsolutePath();
-		}
-
-		// We can't write in the eclipse install dir so try for some place in the user's home dir
-//		if (debug)
-//			debug("Using the user.home location."); //$NON-NLS-1$
-		String appName = "." + ECLIPSE; //$NON-NLS-1$
-		File eclipseProduct = new File(installDir, PRODUCT_SITE_MARKER );
-		if (eclipseProduct.exists()) {
-			Properties props = new Properties();
-			try {
-				props.load(new FileInputStream(eclipseProduct));
-				String appId = props.getProperty(PRODUCT_SITE_ID);
-				if (appId == null || appId.trim().length() == 0)
-					appId = ECLIPSE;
-				String appVersion = props.getProperty(PRODUCT_SITE_VERSION);
-				if (appVersion == null || appVersion.trim().length() == 0)
-					appVersion = ""; //$NON-NLS-1$
-				appName += File.separator + appId + "_" + appVersion; //$NON-NLS-1$
-			} catch (IOException e) {
-				// Do nothing if we get an exception.  We will default to a standard location 
-				// in the user's home dir.
-			}
-		}
-
-		String userHome = System.getProperty("user.home"); //$NON-NLS-1$
-		File configDir = new File(userHome, appName);
-		configDir.mkdirs();
-		return configDir.getAbsolutePath();
-	}
-	
 	private static void initializeApplicationTracker() {
 		Filter filter = null;
 		try {
@@ -625,10 +529,16 @@ public class EclipseStarter {
 	}
 	
 	private static void loadConfigurationInfo() {
-		String configArea = System.getProperty(PROP_CONFIG_AREA);
+		Location configArea = LocationManager.getConfigurationLocation();
 		if (configArea == null)
 			return;
-		File location = new File(configArea, "config.ini");
+		
+		URL location = null;
+		try {
+			location = new URL(configArea.getURL().toExternalForm() + "/config.ini");
+		} catch (MalformedURLException e) {
+			// its ok.  Thie should never happen
+		}
 		mergeProperties(System.getProperties(), loadProperties(location));
 	}
 	
@@ -636,28 +546,35 @@ public class EclipseStarter {
 		URL codeLocation = EclipseStarter.class.getProtectionDomain().getCodeSource().getLocation();
 		if (codeLocation == null)
 			return;
-		String frameworkLocation = codeLocation.getFile();
-		File location = new File(new File(frameworkLocation).getParentFile(), "eclipse.properties");
-		mergeProperties(System.getProperties(), loadProperties(location));
+		String location = codeLocation.getFile();
+		if (location.endsWith("/"))
+			location = location.substring(0, location.length() - 1);
+		int i = location.lastIndexOf('/');
+		location = location.substring(0, i + 1) + "eclipse.properties";
+		URL result = null;
+		try {
+			result = new File(location).toURL();
+		} catch (MalformedURLException e) {
+			// its ok.  Thie should never happen
+		}
+		mergeProperties(System.getProperties(), loadProperties(result));
 	}
 	
-	private static Properties loadProperties(File location) {
+	private static Properties loadProperties(URL location) {
 		Properties result = new Properties();
+		if (location ==  null)
+			return result;
 		try {
-			InputStream in = new FileInputStream(location);
+			InputStream in = location.openStream();
 			try {
 				result.load(in);
 			} finally {
 				in.close();
 			}
-		} catch (FileNotFoundException e) {
-			// its ok if there is no config.ini file.  We'll just use the defaults for everything
-			return result;
 		} catch (IOException e) {
-			// but it is not so good if the file is there and has errors.
-			// TODO log an error here and exit?
-			e.printStackTrace();
-		}
+			// its ok if there is no file.  We'll just use the defaults for everything
+			// TODO but it might be nice to log something with gentle wording (i.e., it is not an error)
+		} 
 		return result;
 	}
 	

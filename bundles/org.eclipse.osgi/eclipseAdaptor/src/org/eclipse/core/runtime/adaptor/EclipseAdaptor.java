@@ -18,10 +18,11 @@ import org.eclipse.osgi.framework.console.CommandProvider;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.debug.DebugOptions;
 import org.eclipse.osgi.framework.internal.defaultadaptor.*;
-import org.eclipse.osgi.framework.log.*;
+import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.stats.StatsManager;
 import org.eclipse.osgi.internal.resolver.StateImpl;
 import org.eclipse.osgi.internal.resolver.StateManager;
+import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.service.pluginconversion.PluginConverter;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.service.urlconversion.URLConverter;
@@ -75,25 +76,25 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		return instance;
 	}
 
-	protected void initDataRootDir(){
-		dataRootDir = new File(System.getProperty(EclipseStarter.PROP_INSTANCE_AREA));
+	protected void initDataRootDir() {
+		Location instanceLocation = LocationManager.getInstanceLocation();
+		if (instanceLocation != null)
+			// TODO assumes the URL is a file: url
+			dataRootDir = new File(instanceLocation.getURL().getFile());
 	}
 
 	protected FrameworkLog createFrameworkLog() {
 		FrameworkLog frameworkLog;
-		String configArea = System.getProperty(EclipseStarter.PROP_CONFIG_AREA);
-		if (configArea != null) {
+		Location configLocation = LocationManager.getConfigurationLocation();
+		if (configLocation != null) {
+			// TODO assumes the URL is a file: url
+			String configArea = configLocation.getURL().getFile();
 			File logFile = new File(configArea, Long.toString(System.currentTimeMillis()) + F_LOG);
 			frameworkLog = new EclipseLog(logFile);
-		}
-		else {
+		} else 
 			frameworkLog = new EclipseLog();
-		}
-
-		if ("true".equals(System.getProperty(EclipseStarter.PROP_CONSOLE_LOG))) {
+		if ("true".equals(System.getProperty(EclipseStarter.PROP_CONSOLE_LOG))) 
 			frameworkLog.setConsoleLog(true);
-		}
-
 		return frameworkLog;
 	}
 
@@ -172,6 +173,22 @@ public class EclipseAdaptor extends DefaultAdaptor {
 	public void frameworkStart(BundleContext context) throws BundleException {
 		super.frameworkStart(context);
 		Bundle bundle = context.getBundle();
+
+		// Less than optimal reference to EclipseStarter here.  Not sure how we can make the location
+		// objects available.  They are needed very early in EclipseStarter but these references tie
+		// the adaptor to that starter.
+		Hashtable properties = new Hashtable(1);
+		properties.put("type", LocationManager.PROP_USER_AREA);
+		context.registerService(Location.class.getName(), LocationManager.getUserLocation(), properties);
+
+		properties = new Hashtable(1);
+		properties.put("type", LocationManager.PROP_INSTANCE_AREA);
+		context.registerService(Location.class.getName(), LocationManager.getInstanceLocation(), properties);
+
+		properties = new Hashtable(1);
+		properties.put("type", LocationManager.PROP_CONFIG_AREA);
+		context.registerService(Location.class.getName(), LocationManager.getConfigurationLocation(), properties);
+
 		register(org.eclipse.osgi.service.environment.EnvironmentInfo.class.getName(), EnvironmentInfo.getDefault(), bundle);
 		register(PlatformAdmin.class.getName(), stateManager, bundle);
 		register(PluginConverter.class.getName(), new PluginConverterImpl(context), bundle);
@@ -249,8 +266,13 @@ public class EclipseAdaptor extends DefaultAdaptor {
 	}
 
 	private File getMetaDataLocation() {
-		String configArea = (String) System.getProperty("osgi.configuration.area");
-		return new File(configArea, ".bundledata");
+		Location location = LocationManager.getConfigurationLocation();
+		if (location != null) {
+			// TODO assumes the URL is a file: url
+			String configArea = location.getURL().getFile();
+			return new File(configArea, ".bundledata");
+		}
+		return null;
 	}
 	/**
 	 * @see org.eclipse.osgi.framework.adaptor.FrameworkAdaptor#getInstalledBundles()
@@ -432,7 +454,11 @@ public class EclipseAdaptor extends DefaultAdaptor {
 	}
 	
 	protected File getStateBaseLocation() {
-		return new File(System.getProperty("osgi.configuration.area"));
+		Location location = LocationManager.getConfigurationLocation();
+		if (location != null)
+			// TODO assumes the URL is a file: url
+			return new File(location.getURL().getFile());
+		return null;
 	}
 
 	protected File getMetaDataFile() {
