@@ -344,6 +344,11 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 				}
 
 				bundleDatas.addElement(data);
+			} catch (BundleException e) {
+				if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+					Debug.println("Unable to open Bundle[" + list[i] + "]: " + e.getMessage());
+					Debug.printStackTrace(e);
+				}				
 			} catch (IOException e) {
 				if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 					Debug.println("Unable to open Bundle[" + list[i] + "]: " + e.getMessage());

@@ -17,7 +17,9 @@ import org.eclipse.osgi.framework.adaptor.core.BundleEntry;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.internal.defaultadaptor.DefaultAdaptor;
 import org.eclipse.osgi.framework.internal.defaultadaptor.DefaultBundleData;
+import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.framework.util.Headers;
+import org.eclipse.osgi.service.pluginconversion.PluginConversionException;
 import org.eclipse.osgi.service.resolver.Version;
 import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.BundleException;
@@ -141,13 +143,8 @@ public class EclipseBundleData extends DefaultBundleData {
 		return new URL[] {target};
 	}
 
-	public synchronized Dictionary getManifest() {
-		try {
-			return getManifest(false);
-		} catch (BundleException e) {
-			// TODO: handle exception
-			return null;
-		}
+	public synchronized Dictionary getManifest() throws BundleException {
+		return getManifest(false);
 	}
 
 	public synchronized Dictionary getManifest(boolean first) throws BundleException {
@@ -189,9 +186,13 @@ public class EclipseBundleData extends DefaultBundleData {
 
 		PluginConverterImpl converter = PluginConverterImpl.getDefault();
 
-		Dictionary generatedManifest = converter.convertManifest(getBaseFile(), true, null);
-		if (generatedManifest == null) //TODO Why don't we return the original manifest?
-			return null;
+		Dictionary generatedManifest;
+		try {
+			generatedManifest = converter.convertManifest(getBaseFile(), true, null);
+		} catch (PluginConversionException pce) {
+			String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONVERTER_ERROR_CONVERTING", getBaseFile());
+			throw new BundleException(message, pce); //$NON-NLS-1$
+		}
 
 		ManifestElement generatedFrom = ManifestElement.parseHeader(PluginConverterImpl.GENERATED_FROM, (String) generatedManifest.get(PluginConverterImpl.GENERATED_FROM))[0];
 		setManifestTimeStamp(Long.parseLong(generatedFrom.getValue()));
@@ -226,13 +227,8 @@ public class EclipseBundleData extends DefaultBundleData {
 		}
 	}
 
-	protected void loadFromManifest() throws IOException {
-		try {
-			getManifest(true);
-		} catch (BundleException e) {
-			//TODO we whould not swallow the exception like that 
-			throw new IOException("Unable to properly read manifest for: " + getLocation());
-		}
+	protected void loadFromManifest() throws IOException, BundleException {
+		getManifest(true);
 		super.loadFromManifest();
 		autoStart = (String) manifest.get(EclipseAdaptorConstants.ECLIPSE_AUTOSTART);
 		autoStop = (String) manifest.get(EclipseAdaptorConstants.ECLIPSE_AUTOSTOP);

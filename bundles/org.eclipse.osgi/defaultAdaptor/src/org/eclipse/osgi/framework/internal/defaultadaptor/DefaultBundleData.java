@@ -64,7 +64,7 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 	 * the directory does not contain a ".bundle" file.
 	 * @throws IOException If an error occurs initializing the bundle data.
 	 */
-	public void initializeExistingBundle() throws IOException {
+	public void initializeExistingBundle() throws BundleException, IOException {
 		File delete = new File(getBundleStoreDir(), ".delete");
 
 		/* and the directory is not marked for delete */
@@ -76,7 +76,7 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 		loadFromManifest();
 	}
 
-	public void initializeNewBundle() throws IOException {
+	public void initializeNewBundle() throws IOException, BundleException {
 		createBaseBundleFile();
 
 		loadFromManifest();
@@ -208,12 +208,8 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 		baseBundleFile.open();
 	}
 
-	protected void loadFromManifest() throws IOException {
-		try {
-			getManifest();
-		} catch (BundleException e) {
-			throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_ERROR_GETTING_MANIFEST", getLocation())); //$NON-NLS-1$
-		}
+	protected void loadFromManifest() throws IOException, BundleException {
+		getManifest();
 
 		if (manifest == null) {
 			throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_ERROR_GETTING_MANIFEST", getLocation())); //$NON-NLS-1$
