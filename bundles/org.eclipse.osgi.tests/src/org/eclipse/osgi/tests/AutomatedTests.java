@@ -12,7 +12,6 @@ package org.eclipse.osgi.tests;
 
 import junit.framework.*;
 import org.eclipse.osgi.tests.internal.plugins.InstallTests;
-import org.eclipse.osgi.tests.services.datalocation.SimpleTests;
 
 public class AutomatedTests extends TestCase {
 	public final static String PI_OSGI_TESTS = "org.eclipse.osgi.tests";
