@@ -18,9 +18,9 @@ import org.eclipse.osgi.service.resolver.BundleSpecification;
 import org.eclipse.osgi.service.resolver.PackageSpecification;
 import org.eclipse.osgi.service.resolver.Version;
 
-import org.osgi.service.packageadmin.SymbolicBundle;
+import org.osgi.service.packageadmin.NamedClassSpace;
 
-public class BundleLoaderProxy implements KeyedElement, SymbolicBundle{
+public class BundleLoaderProxy implements KeyedElement, NamedClassSpace{
 	private BundleLoader loader;
 	private BundleHost bundle;
 	private String uniqueId;

@@ -19,7 +19,7 @@ import org.eclipse.osgi.framework.debug.DebugOptions;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.*;
 import org.osgi.service.packageadmin.ExportedPackage;
-import org.osgi.service.packageadmin.SymbolicBundle;
+import org.osgi.service.packageadmin.NamedClassSpace;
 
 /**
  * PackageAdmin service for the OSGi specification.
@@ -840,7 +840,7 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 		return (BundleDescription[]) result.toArray(new BundleDescription[result.size()]);
 	}
 
-	public SymbolicBundle[] getSymbolicBundles(String symbolicName){
+	public NamedClassSpace[] getNamedClassSpace(String symbolicName){
 		if (exportedBundles == null || exportedBundles.size()==0)
 			return null;
 
@@ -852,18 +852,18 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 			if (allSymbolicBundles.length == 0) {
 				return null;
 			}
-			SymbolicBundle[] result = new SymbolicBundle[allSymbolicBundles.length];
+			NamedClassSpace[] result = new NamedClassSpace[allSymbolicBundles.length];
 			System.arraycopy(allSymbolicBundles, 0, result, 0, result.length);
 			return result;
 		}
 		else {
 			ArrayList result = new ArrayList();
 			for (int i=0; i<allSymbolicBundles.length; i++) {
-				SymbolicBundle symBundle = (SymbolicBundle) allSymbolicBundles[i];
+				NamedClassSpace symBundle = (NamedClassSpace) allSymbolicBundles[i];
 				if (symBundle.getName().equals(symbolicName))
 					result.add(symBundle);
 			}
-			return (SymbolicBundle[]) result.toArray(new SymbolicBundle[result.size()]);
+			return (NamedClassSpace[]) result.toArray(new NamedClassSpace[result.size()]);
 		}
 	}
 

@@ -20,7 +20,7 @@ import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.eclipse.osgi.framework.launcher.Launcher;
 import org.osgi.framework.BundleException;
-import org.osgi.service.packageadmin.SymbolicBundle;
+import org.osgi.service.packageadmin.NamedClassSpace;
 
 /**
  * This class provides methods to execute commands from the command line.  It registers
@@ -801,26 +801,26 @@ public class FrameworkCommandProvider implements CommandProvider {
                     				}
                     			}
 
-                    			SymbolicBundle[] symbolicBundles = packageAdmin.getSymbolicBundles(null);
-								SymbolicBundle symbolicBundle = null;
-								if (symbolicBundles != null) {
-									for (int i=0; i<symbolicBundles.length; i++) {
-										if (symbolicBundles[i].getProvidingBundle() == bundle) {
-											symbolicBundle = symbolicBundles[i];
+                    			NamedClassSpace[] namedClassSpaces = packageAdmin.getNamedClassSpace(null);
+								NamedClassSpace namedClassSpace = null;
+								if (namedClassSpaces != null) {
+									for (int i=0; i<namedClassSpaces.length; i++) {
+										if (namedClassSpaces[i].getProvidingBundle() == bundle) {
+											namedClassSpace = namedClassSpaces[i];
 											break;
 										}
 									}
 								}
 
-								if (symbolicBundle == null) {
+								if (namedClassSpace == null) {
 									intp.print("  ");
-									intp.println(ConsoleMsg.formatter.getString("CONSOLE_NO_SYMBOLIC_BUNDLES_MESSAGE"));
+									intp.println(ConsoleMsg.formatter.getString("CONSOLE_NO_NAMED_CLASS_SPACES_MESSAGE"));
 								} else {
 									intp.print("  ");
-									intp.println(ConsoleMsg.formatter.getString("CONSOLE_SYMBOLIC_BUNDLE_MESSAGE"));
+									intp.println(ConsoleMsg.formatter.getString("CONSOLE_NAMED_CLASS_SPACE_MESSAGE"));
 	                    			intp.print("    ");
-	                    			intp.print(symbolicBundle);
-	                    			if (symbolicBundle.isRemovalPending()) {
+	                    			intp.print(namedClassSpace);
+	                    			if (namedClassSpace.isRemovalPending()) {
 	                    				intp.println(ConsoleMsg.formatter.getString("CONSOLE_REMOVAL_PENDING_MESSAGE"));
 	                    			} else {
 	                    				intp.println(ConsoleMsg.formatter.getString("CONSOLE_PROVIDED_MESSAGE"));
@@ -828,11 +828,11 @@ public class FrameworkCommandProvider implements CommandProvider {
 								}
 
 								title = true;
-								for(int i=0; i<symbolicBundles.length; i++) {
-									if (symbolicBundles[i] == symbolicBundle)
+								for(int i=0; i<namedClassSpaces.length; i++) {
+									if (namedClassSpaces[i] == namedClassSpace)
 										continue;
 
-									org.osgi.framework.Bundle[] depBundles =  symbolicBundles[i].getRequiringBundles();
+									org.osgi.framework.Bundle[] depBundles =  namedClassSpaces[i].getRequiringBundles();
 									if (depBundles == null)
 										continue;
 
@@ -844,9 +844,9 @@ public class FrameworkCommandProvider implements CommandProvider {
 												title = false;
 											}
 											intp.print("    ");
-			                    			intp.print(symbolicBundles[i]);
+			                    			intp.print(namedClassSpaces[i]);
 
-			                    			org.osgi.framework.Bundle provider = symbolicBundles[i].getProvidingBundle();
+			                    			org.osgi.framework.Bundle provider = namedClassSpaces[i].getProvidingBundle();
 											intp.print("<");
 											intp.print(provider);
 											intp.println(">");
@@ -1497,7 +1497,7 @@ public class FrameworkCommandProvider implements CommandProvider {
 		}
 	}
 
-	public void _symbolicBundles(CommandInterpreter intp) {
+	public void _classSpaces(CommandInterpreter intp) {
 
 		String token = intp.nextArgument();
 
@@ -1506,15 +1506,15 @@ public class FrameworkCommandProvider implements CommandProvider {
 			org.osgi.service.packageadmin.PackageAdmin packageAdmin = (org.osgi.service.packageadmin.PackageAdmin) context.getService(packageAdminRef);
 			if (packageAdmin != null) {
 				try {
-					org.osgi.service.packageadmin.SymbolicBundle[] symBundles = null;
+					org.osgi.service.packageadmin.NamedClassSpace[] symBundles = null;
 
-					symBundles = packageAdmin.getSymbolicBundles(token);
+					symBundles = packageAdmin.getNamedClassSpace(token);
 
 					if (symBundles == null) {
-						intp.println(ConsoleMsg.formatter.getString("CONSOLE_NO_SYMBOLIC_BUNDLES_MESSAGE"));
+						intp.println(ConsoleMsg.formatter.getString("CONSOLE_NO_NAMED_CLASS_SPACES_MESSAGE"));
 					} else {
 						for (int i = 0; i < symBundles.length; i++) {
-							org.osgi.service.packageadmin.SymbolicBundle symBundle = symBundles[i];
+							org.osgi.service.packageadmin.NamedClassSpace symBundle = symBundles[i];
 							intp.print(symBundle);
 
 							boolean removalPending = symBundle.isRemovalPending();

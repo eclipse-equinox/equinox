@@ -1,5 +1,5 @@
 /*
- * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/service/packageadmin/PackageAdmin.java,v 1.1.6.1 2004/02/11 22:06:30 twatson Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/service/packageadmin/PackageAdmin.java,v 1.2 2004/02/16 20:21:32 twatson Exp $
  *
  * Copyright (c) The Open Services Gateway Initiative (2001, 2002).
  * All Rights Reserved.
@@ -51,7 +51,7 @@ import org.osgi.framework.Bundle;
  * old values, <tt>isRemovalPending()</tt> returns <tt>true</tt>, and <tt>getExportingBundle()</tt>
  * and <tt>getImportingBundles()</tt> return <tt>null</tt>.
  *
- * @version $Revision: 1.1.6.1 $
+ * @version $Revision: 1.2 $
  * @author Open Services Gateway Initiative
  */
 public interface PackageAdmin {
@@ -162,7 +162,7 @@ public interface PackageAdmin {
      */
     public void refreshPackages(Bundle[] bundles);
 
-    public SymbolicBundle[] getSymbolicBundles(String symbolicName);
+    public NamedClassSpace[] getNamedClassSpace(String symbolicName);
 
     /**
      * Gets the Bundles with the specified symbolic name.  If no bundles are 
