@@ -13,8 +13,7 @@ package org.eclipse.core.runtime.adaptor;
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.eclipse.osgi.service.resolver.*;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
+import org.osgi.framework.*;
 
 public class EclipseCommandProvider implements CommandProvider {
 	private BundleContext context;
@@ -102,5 +101,17 @@ public class EclipseCommandProvider implements CommandProvider {
 			if (homonyms[i].isResolved())
 				return homonyms[i];
 		return null;
+	}
+
+	public void _active(CommandInterpreter ci) throws Exception {
+		Bundle[] allBundles = context.getBundles();
+		int activeCount = 0;
+		for (int i = 0; i < allBundles.length; i++)
+			if (allBundles[i].getState() == Bundle.ACTIVE) {
+				ci.println(allBundles[i]);
+				activeCount++;
+			}
+		ci.print("  ");
+		ci.println(EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONSOLE_BUNDLES_ACTIVE", activeCount));
 	}
 }
