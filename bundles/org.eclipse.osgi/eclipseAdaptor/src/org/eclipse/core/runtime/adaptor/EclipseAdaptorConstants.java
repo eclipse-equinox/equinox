@@ -14,31 +14,21 @@ package org.eclipse.core.runtime.adaptor;
  * Declares constants for manifest headers introduced by the Eclipse adaptor. 
  */
 interface EclipseAdaptorConstants {
-	String ECLIPSE_PARAMETERS = "Eclipse-Parameters"; //$NON-NLS-1$
+	public static final String PI_ECLIPSE_OSGI = "org.eclipse.osgi";	 //$NON-NLS-1$
 	/**
-	 * An element for Eclipse-Parameters header.
+	 * The "Eclipse-AutoStart" header.
 	 */
-	String AUTOMATE = "automate"; //$NON-NLS-1$
+	String ECLIPSE_AUTOSTART = "Eclipse-AutoStart"; //$NON-NLS-1$
 	/**
-	 * An attribute for the "automate" header, meaning that this bundle should be 
-	 * automatically started during classloading.
-	 */
-	String START_ATTRIBUTE = "start"; //$NON-NLS-1$
-	/**
-	 * An attribute for the "automate" header, meaning that this bundle should be 
-	 * automatically stopped during shutdown.
-	 */
-	String STOP_ATTRIBUTE = "stop"; //$NON-NLS-1$
-	/**
-	 * The "Plugin-Class" header.
-	 */
+	 * The "Eclipse-AutoStop" header.
+	 */	
+	String ECLIPSE_AUTOSTOP = "Eclipse-AutoStop"; //$NON-NLS-1$
+	//TODO decide what to do with this header 
+	String LEGACY = "Legacy"; //$NON-NLS-1$
+	//TODO rename it to Eclipse-PluginClass	
 	String PLUGIN_CLASS = "Plugin-Class"; //$NON-NLS-1$
 	/**
-	 * The "Legacy" header.
-	 */
-	String LEGACY = "Legacy"; //$NON-NLS-1$
-	/**
-	 * A convenience constant for ECLIPSE_PARAMETERS header's default value.
-	 */
-	String DEFAULT_ECLIPSE_PARAMETERS_VALUE = AUTOMATE + "; " + START_ATTRIBUTE + "=true; " + STOP_ATTRIBUTE + "=true"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	 * The "exceptions" attribute for ECLIPSE_AUTOSTART header.
+	 */	
+	String EXCEPTIONS_ATTRIBUTE = "exceptions";	 //$NON-NLS-1$
 }

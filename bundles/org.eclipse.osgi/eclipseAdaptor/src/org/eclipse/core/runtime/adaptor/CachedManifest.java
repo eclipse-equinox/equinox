@@ -56,6 +56,10 @@ public class CachedManifest extends Dictionary {
 			Version result = bundledata.getVersion();
 			return result == null ? null : result.toString();
 		}
+		if (EclipseAdaptorConstants.ECLIPSE_AUTOSTART.equalsIgnoreCase(keyString))
+			return bundledata.getAutoStart();
+		if (EclipseAdaptorConstants.ECLIPSE_AUTOSTOP.equalsIgnoreCase(keyString))
+			return bundledata.getAutoStop();		
 		if (EclipseAdaptorConstants.PLUGIN_CLASS.equalsIgnoreCase(keyString))
 			return bundledata.getPluginClass();
 		if (EclipseAdaptorConstants.LEGACY.equalsIgnoreCase(keyString))

@@ -30,7 +30,6 @@ public class PluginConverterImpl implements PluginConverter {
 	private Dictionary generatedManifest;
 	private static final String MANIFEST_VERSION = "Manifest-Version";
 	private static final String PLUGIN_PROPERTIES_FILENAME = "plugin";
-	private static final String PI_ECLIPSE_OSGI = "org.eclipse.osgi";
 	private static PluginConverterImpl instance;
 	private static final String[] ARCH_LIST = {org.eclipse.osgi.service.environment.Constants.ARCH_PA_RISC, org.eclipse.osgi.service.environment.Constants.ARCH_PPC, org.eclipse.osgi.service.environment.Constants.ARCH_SPARC, org.eclipse.osgi.service.environment.Constants.ARCH_X86, org.eclipse.osgi.service.environment.Constants.ARCH_AMD64};
 	private static final String FRAGMENT_MANIFEST = "fragment.xml"; //$NON-NLS-1$
@@ -69,7 +68,7 @@ public class PluginConverterImpl implements PluginConverter {
 		try {
 			pluginInfo = parsePluginInfo(pluginFile);
 		} catch (PluginConversionException e) {
-			FrameworkLogEntry entry = new FrameworkLogEntry(PI_ECLIPSE_OSGI, e.getMessage(), 0, e, null);
+			FrameworkLogEntry entry = new FrameworkLogEntry(EclipseAdaptorConstants.PI_ECLIPSE_OSGI, e.getMessage(), 0, e, null);
 			EclipseAdaptor.getDefault().getFrameworkLog().log(entry);
 		}
 	}
@@ -88,7 +87,7 @@ public class PluginConverterImpl implements PluginConverter {
 				return bundleManifestLocation;
 			writeManifest(bundleManifestLocation, generatedManifest, compatibilityManifest);
 		} catch (PluginConversionException e) {
-			FrameworkLogEntry entry = new FrameworkLogEntry(PI_ECLIPSE_OSGI, e.getMessage(), 0, e, null);
+			FrameworkLogEntry entry = new FrameworkLogEntry(EclipseAdaptorConstants.PI_ECLIPSE_OSGI, e.getMessage(), 0, e, null);
 			EclipseAdaptor.getDefault().getFrameworkLog().log(entry);
 			return null;
 		};
@@ -202,7 +201,7 @@ public class PluginConverterImpl implements PluginConverter {
 		if (compatibilityManifest) {
 			generateTimestamp();
 			generateLegacy();
-			generateEclipseParameters();			
+			generateEclipseHeaders();			
 		}
 	}
 	public void writeManifest(File generationLocation, Dictionary manifestToWrite, boolean compatibilityManifest) throws PluginConversionException {
@@ -348,8 +347,9 @@ public class PluginConverterImpl implements PluginConverter {
 		// so it is easy to tell which ones are generated
 		generatedManifest.put(GENERATED_FROM, Long.toString(pluginManifestLocation.lastModified()));
 	}
-	private void generateEclipseParameters() {
-		generatedManifest.put(EclipseAdaptorConstants.ECLIPSE_PARAMETERS, EclipseAdaptorConstants.DEFAULT_ECLIPSE_PARAMETERS_VALUE);		
+	private void generateEclipseHeaders() {
+		generatedManifest.put(EclipseAdaptorConstants.ECLIPSE_AUTOSTART, "true");
+		generatedManifest.put(EclipseAdaptorConstants.ECLIPSE_AUTOSTOP, "true");
 	}
 	private Set getExports() {
 		Map libs = pluginInfo.getLibraries();
@@ -427,7 +427,7 @@ public class PluginConverterImpl implements PluginConverter {
 			file = new JarFile(jarFile);
 		} catch (IOException e) {
 			String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONVERTER_PLUGIN_LIBRARY_IGNORED", jarFile, pluginInfo.getUniqueId());
-			EclipseAdaptor.getDefault().getFrameworkLog().log(new FrameworkLogEntry(PI_ECLIPSE_OSGI, message, 0, e, null));
+			EclipseAdaptor.getDefault().getFrameworkLog().log(new FrameworkLogEntry(EclipseAdaptorConstants.PI_ECLIPSE_OSGI, message, 0, e, null));
 			return names;
 		}
 		//Run through the entries

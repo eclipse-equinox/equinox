@@ -37,6 +37,8 @@ public class EclipseBundleData extends DefaultBundleData {
 	private static final String NO_TIMESTAMP_CHECKING = "osgi.noManifestTimeChecking"; //$NON-NLS-1$
 	protected String isLegacy = null;
 	protected String pluginClass = null;
+	private String autoStart;
+	private String autoStop;
 
 	private static String[] buildLibraryVariants() {
 		ArrayList result = new ArrayList();
@@ -221,6 +223,8 @@ public class EclipseBundleData extends DefaultBundleData {
 			throw new IOException("Unable to properly read manifest for: " + getLocation());
 		}
 		super.loadFromManifest();
+		autoStart = (String) manifest.get(EclipseAdaptorConstants.ECLIPSE_AUTOSTART);
+		autoStop = (String) manifest.get(EclipseAdaptorConstants.ECLIPSE_AUTOSTOP);		
 		pluginClass = (String)manifest.get(EclipseAdaptorConstants.PLUGIN_CLASS);
 		isLegacy = (String)manifest.get(EclipseAdaptorConstants.LEGACY);
 	}
@@ -242,5 +246,17 @@ public class EclipseBundleData extends DefaultBundleData {
 	}
 	public void setManifestTimeStamp(long stamp) {
 		manifestTimeStamp = stamp;
+	}
+	public void setAutoStart(String value) {
+		autoStart = value;
+	}
+	public void setAutoStop(String value) {
+		autoStop = value;
+	}	
+	public String getAutoStart() {
+		return autoStart;
+	}
+	public String getAutoStop() {
+		return autoStop;
 	}
 }
