@@ -175,26 +175,34 @@ public class EclipseAdaptor extends DefaultAdaptor {
 	public void frameworkStart(BundleContext context) throws BundleException {
 		super.frameworkStart(context);
 		Bundle bundle = context.getBundle();
-
+		Location location;
+		
 		// Less than optimal reference to EclipseStarter here.  Not sure how we can make the location
 		// objects available.  They are needed very early in EclipseStarter but these references tie
 		// the adaptor to that starter.
-		Hashtable properties = new Hashtable(1);
-		properties.put("type", LocationManager.PROP_USER_AREA);
-		context.registerService(Location.class.getName(), LocationManager.getUserLocation(), properties);
+		location = LocationManager.getUserLocation();
+		if (location != null) {
+			Hashtable properties = new Hashtable(1);
+			properties.put("type", LocationManager.PROP_USER_AREA);
+			context.registerService(Location.class.getName(), location, properties);
+		}
 
-		properties = new Hashtable(1);
-		properties.put("type", LocationManager.PROP_INSTANCE_AREA);
-		context.registerService(Location.class.getName(), LocationManager.getInstanceLocation(), properties);
-
-		properties = new Hashtable(1);
-		properties.put("type", LocationManager.PROP_CONFIG_AREA);
-		context.registerService(Location.class.getName(), LocationManager.getConfigurationLocation(), properties);
-
-		properties = new Hashtable(1);
-		properties.put("type", LocationManager.PROP_INSTALL_AREA);
-		context.registerService(Location.class.getName(), LocationManager.getInstallLocation(), properties);
-
+		location = LocationManager.getInstanceLocation();
+		if (location != null) {
+			properties.put("type", LocationManager.PROP_INSTANCE_AREA);
+			context.registerService(Location.class.getName(), location, properties);
+		}
+		location = LocationManager.getConfigurationLocation();
+		if (location != null) {
+			properties.put("type", LocationManager.PROP_CONFIG_AREA);
+			context.registerService(Location.class.getName(), location, properties);
+		}
+		location = LocationManager.getInstallLocation();
+		if (location != null) {
+			properties.put("type", LocationManager.PROP_INSTALL_AREA);
+			context.registerService(Location.class.getName(), location, properties);
+		}
+		
 		register(org.eclipse.osgi.service.environment.EnvironmentInfo.class.getName(), EnvironmentInfo.getDefault(), bundle);
 		register(PlatformAdmin.class.getName(), stateManager, bundle);
 		register(PluginConverter.class.getName(), new PluginConverterImpl(context), bundle);
