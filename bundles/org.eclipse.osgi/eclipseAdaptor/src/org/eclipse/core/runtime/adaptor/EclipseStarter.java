@@ -443,7 +443,7 @@ public class EclipseStarter {
 	}
 
 	private static InitialBundle[] getInitialBundles(String[] installEntries) throws MalformedURLException {
-		InitialBundle[] result = new InitialBundle[installEntries.length];
+		ArrayList result = new ArrayList(installEntries.length);
 		int defaultStartLevel = Integer.parseInt(System.getProperty(PROP_BUNDLES_STARTLEVEL));
 		String syspath = getSysPath();
 		for (int i = 0; i < installEntries.length; i++) {
@@ -463,13 +463,16 @@ public class EclipseStarter {
 				}
 			}
 			URL location = searchForBundle(name, syspath);
-			if (location == null)
-				throw new IllegalArgumentException(EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_BUNDLE_NOT_FOUND", name)); //$NON-NLS-1$
-			// don't need to install if it is already installed
+			if (location == null) {
+				FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_BUNDLE_NOT_FOUND", installEntries[i]), 0, null, null); //$NON-NLS-1$
+				log.log(entry);
+				// skip this entry
+				continue;
+			}
 			String locationString = INITIAL_LOCATION + location.toExternalForm();
-			result[i] = new InitialBundle(locationString, location, level, start);
+			result.add(new InitialBundle(locationString, location, level, start));
 		}
-		return result;
+		return (InitialBundle[]) result.toArray(new InitialBundle[result.size()]);
 	}
 
 	private static void refreshPackages(Bundle[] bundles) {
@@ -790,6 +793,7 @@ public class EclipseStarter {
 		for (int i = 0; i < initialBundles.length; i++) {
 			Bundle osgiBundle = getBundleByLocation(initialBundles[i].locationString, curInitBundles);
 			try {
+				// don't need to install if it is already installed
 				if (osgiBundle == null) {
 					InputStream in = initialBundles[i].location.openStream();
 					osgiBundle = context.installBundle(initialBundles[i].locationString, in);
