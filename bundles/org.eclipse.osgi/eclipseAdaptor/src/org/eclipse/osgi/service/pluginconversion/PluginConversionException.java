@@ -14,8 +14,7 @@ package org.eclipse.osgi.service.pluginconversion;
 /**
  * Custom exception for errors that can happen during plugin conversion.
  */
-//TODO make it a checked exception as soon as PDE starts supporting it
-public class PluginConversionException extends RuntimeException {
+public class PluginConversionException extends Exception {
 	/**
 	 * Nested exception.
 	 */
