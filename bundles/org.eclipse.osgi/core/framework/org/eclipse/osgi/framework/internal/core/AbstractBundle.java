@@ -64,10 +64,9 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	 *            Framework this bundle is running in
 	 */
 	protected static AbstractBundle createBundle(BundleData bundledata, Framework framework) throws BundleException {
-		if (bundledata.isFragment())
+		if ((bundledata.getType() & BundleData.TYPE_FRAGMENT) > 0)
 			return new BundleFragment(bundledata, framework);
-		else
-			return new BundleHost(bundledata, framework);
+		return new BundleHost(bundledata, framework);
 	}
 
 	/**

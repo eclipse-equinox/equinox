@@ -443,10 +443,6 @@ public abstract class AbstractBundleData implements BundleData, Cloneable {
 		this.dynamicImports = dynamicImports;
 	}
 
-	public boolean isFragment() {
-		return (type & TYPE_FRAGMENT) > 0;
-	}
-
 	public int getType() {
 		return type;
 	}

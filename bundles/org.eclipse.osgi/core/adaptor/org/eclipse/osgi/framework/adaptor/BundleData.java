@@ -204,16 +204,6 @@ public interface BundleData {
 	public Version getVersion();
 
 	/**
-	 * Indicates whether this BundleData is a fragment bundle.  A bundle
-	 * is considered to be a fragment bundle if its bundle manifest file
-	 * has a Fragment-Host entry.
-	 * @return the value of true if this BundleData represents a fragment bundle;
-	 * false otherwise.
-	 * @deprecated use {@link #getType()}
-	 */
-	public boolean isFragment();
-
-	/**
 	 * Returns the type of bundle this BundleData is for.  
 	 * @return returns the type of bundle this BundleData is for
 	 */
