@@ -16,15 +16,12 @@ package org.eclipse.osgi.framework.internal.core;
  * OSGi implementation.
  */
 
-public interface Constants extends org.osgi.framework.Constants /* since Framework 1.1 */ {
+public interface Constants extends org.osgi.framework.Constants {
 	/** OSGI implementation version - make sure it is 3 digits for ServerConnection.java */
-	public static final String OSGI_IMPL_VERSION = "3.6.0";
-
-	/** OSGI implementation version properties key */
-	public static final String OSGI_IMPL_VERSION_KEY = "org.eclipse.osgi.framework.internal.core.version";
+	public static final String OSGI_IMPL_VERSION = "3.0.0";
 
 	/** Default framework version */
-	public static final String OSGI_FRAMEWORK_VERSION = "1.2";
+	public static final String OSGI_FRAMEWORK_VERSION = "1.3";
 
 	/** Framework vendor */
 	public static final String OSGI_FRAMEWORK_VENDOR = "Eclipse";
@@ -70,17 +67,8 @@ public interface Constants extends org.osgi.framework.Constants /* since Framewo
 	/** Name of OSGi StartLevel */
 	public static final String OSGI_STARTLEVEL_NAME = "org.osgi.service.startlevel.StartLevel";
 
-	/** OSGI system package property */
-	public static final String OSGI_SYSTEMPACKAGES_PROPERTY = "org.eclipse.osgi.framework.internal.core.systempackages";
-
-	/** Bundle loader buffer size property */
-	public static final String OSGI_LOADERBUFFERSIZE_PROPERTY = "org.eclipse.osgi.framework.internal.core.loader.buffersize";
-
 	/** JVM java.vm.name property name */
 	public static final String JVM_VM_NAME = "java.vm.name";
-
-	/** J9 configuration (for example: core, gw, gwp, rm, foun, max) */
-	public static final String JVM_CONFIGURATION = "com.ibm.oti.configuration";
 
 	/** JVM os.arch property name */
 	public static final String JVM_OS_ARCH = "os.arch";
@@ -107,26 +95,20 @@ public interface Constants extends org.osgi.framework.Constants /* since Framewo
 	public static final int BUNDLE_STARTED = 0x00000001;
 
 	/** Property file locations and default names. */
-	public static final String KEY_OSGI_PROPERTIES = "org.eclipse.osgi.framework.internal.core.properties";
+	public static final String OSGI_PROPERTIES = "osgi.framework.properties";
 	public static final String DEFAULT_OSGI_PROPERTIES = "osgi.properties";
 
 	/** Properties set by the framework */
-	public static final String KEY_ENDIAN = "org.eclipse.osgi.framework.internal.core.endian";
-	public static final String KEY_ADDRESSLENGTH = "org.eclipse.osgi.framework.internal.core.addresslength";
-	public static final String KEY_VM = "org.eclipse.osgi.framework.internal.core.vm";
-	public static final String KEY_IMPLTYPE = "org.eclipse.osgi.framework.internal.core.impltype";
-	public static final String KEY_COUNTRY = "org.eclipse.osgi.framework.internal.core.country";
-	public static final String KEY_FRAMEWORKBEGINNINGSTARTLEVEL = "org.eclipse.osgi.framework.internal.core.FrameworkBeginningStartLevel";
+
+	/** OSGI system package property */
+	public static final String OSGI_SYSTEMPACKAGES = "osgi.framework.systempackages";
+
+	/** OSGI implementation version properties key */
+	public static final String OSGI_IMPL_VERSION_KEY = "osgi.framework.version";
+
+	public static final String KEY_FRAMEWORKBEGINNINGSTARTLEVEL = "osgi.framework.beginningstartlevel";
 
 	/** Properties defaults */
-	public static final String DEFAULT_ADDRESSLENGTH = "32";
-	public static final String DEFAULT_ENDIAN = "le";
 	public static final String DEFAULT_STARTLEVEL = "1";
-
-	/** ImplTypes (Execution environments) properties */
-	public static final String IMPLTYPE_FOUNDATION = "JCL_Foundation_1_3";
-	public static final String IMPLTYPE_GWP = "JCL_GatewayPlus_1_3";
-	public static final String IMPLTYPE_MAX = "JCL_Max_1_3";
-	public static final String IMPLTYPE_UNDEFINED = "";
 
 }

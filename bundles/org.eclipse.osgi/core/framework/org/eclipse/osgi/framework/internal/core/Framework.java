@@ -213,13 +213,26 @@ public class Framework implements EventSource, EventPublisher {
 					Debug.println("Unable to find system bundle manifest " + resource);
 				}
 			}
+			Headers manifest = Headers.parseManifest(in);
+
+			String systemExportProp = System.getProperty(Constants.OSGI_SYSTEMPACKAGES);
+			if (systemExportProp != null) {
+				String value = (String) manifest.get(Constants.EXPORT_PACKAGE);
+				if (value == null) {
+					value = systemExportProp;
+				} else {
+					value += "," + systemExportProp;
+				}
+				manifest.set(Constants.EXPORT_PACKAGE, null);
+				manifest.set(Constants.EXPORT_PACKAGE, value);
+			}
 
 			// now get any extra packages and services that the adaptor wants to export
 			// and merge this into the system bundle's manifest
 			String exportPackages = adaptor.getExportPackages();
 			String exportServices = adaptor.getExportServices();
 			String providePackages = adaptor.getProvidePackages();
-			Headers manifest = Headers.parseManifest(in);
+
 			if (exportPackages != null) {
 				String value = (String) manifest.get(Constants.EXPORT_PACKAGE);
 				if (value == null) {
@@ -416,54 +429,6 @@ public class Framework implements EventSource, EventPublisher {
 			}
 		}
 		properties.put(Constants.FRAMEWORK_EXECUTIONENVIRONMENT, ee.toString());
-
-		value = properties.getProperty(Constants.KEY_VM);
-		if (value == null) {
-			value = properties.getProperty(Constants.JVM_VM_NAME);
-			if (value != null) {
-				properties.put(Constants.KEY_VM, value);
-			}
-		}
-
-		value = properties.getProperty(Constants.KEY_COUNTRY);
-		if (value == null) {
-			value = properties.getProperty(Constants.JVM_USER_REGION);
-			if (value != null) {
-				properties.put(Constants.KEY_COUNTRY, value);
-			}
-		}
-
-		value = properties.getProperty(Constants.KEY_ADDRESSLENGTH);
-		if (value == null) {
-			properties.put(Constants.KEY_ADDRESSLENGTH, Constants.DEFAULT_ADDRESSLENGTH);
-		} else if (!value.equals("32") && !value.equals("64")) {
-			System.err.println(Msg.formatter.getString("PROPERTIES_INVALID_ADDRESSLENGTH", value));
-		}
-
-		value = properties.getProperty(Constants.KEY_ENDIAN);
-		if (value == null) {
-			properties.put(Constants.KEY_ENDIAN, Constants.DEFAULT_ENDIAN);
-		} else if (!value.equalsIgnoreCase("le") && !value.equalsIgnoreCase("be")) {
-			System.err.println(Msg.formatter.getString("PROPERTIES_INVALID_ENDIAN", value));
-		}
-
-		value = properties.getProperty(Constants.KEY_IMPLTYPE);
-		if (value == null) {
-			value = properties.getProperty(Constants.JVM_CONFIGURATION);
-			if (value != null) {
-				if (value.equals("foun")) {
-					properties.put(Constants.KEY_IMPLTYPE, Constants.IMPLTYPE_FOUNDATION);
-				} else if (value.equals("max")) {
-					properties.put(Constants.KEY_IMPLTYPE, Constants.IMPLTYPE_MAX);
-				} else if (value.equals("rm") || value.equals("gwp")) {
-					properties.put(Constants.KEY_IMPLTYPE, Constants.IMPLTYPE_GWP);
-				} else {
-					properties.put(Constants.KEY_IMPLTYPE, Constants.IMPLTYPE_UNDEFINED);
-				}
-			} else {
-				properties.put(Constants.KEY_IMPLTYPE, Constants.IMPLTYPE_UNDEFINED);
-			}
-		}
 	}
 
 	/**

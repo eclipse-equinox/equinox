@@ -205,7 +205,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 	protected void loadProperties() {
 		properties = new Properties();
 
-		String resource = System.getProperty(Constants.KEY_OSGI_PROPERTIES, Constants.DEFAULT_OSGI_PROPERTIES);
+		String resource = System.getProperty(Constants.OSGI_PROPERTIES, Constants.DEFAULT_OSGI_PROPERTIES);
 
 		try
 		{
