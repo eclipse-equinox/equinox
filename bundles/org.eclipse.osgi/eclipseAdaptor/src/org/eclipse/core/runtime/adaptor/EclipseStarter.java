@@ -60,7 +60,7 @@ public class EclipseStarter {
 	public static Object run(String[] args,Runnable endSplashHandler) throws Exception {
 		processCommandLine(args);
 		if (System.getProperty("osgi.bundles") == null)
-			System.getProperties().put("osgi.bundles", "org.eclipse.osgi.services_3.0.0@1,org.eclipse.osgi.util_3.0.0@1,org.eclipse.core.runtime.osgi_3.0.0@2,org.eclipse.update.configurator_3.0.0@3,org.eclipse.core.applicationrunner_3.0.0@5");
+			System.getProperties().put("osgi.bundles", "org.eclipse.osgi.services_3.0.0@1,org.eclipse.osgi.util_3.0.0@1,org.eclipse.core.runtime_3.0.0@2,org.eclipse.update.configurator_3.0.0@3,org.eclipse.core.applicationrunner_3.0.0@5");
 		setInstanceLocation();
 		setConfigurationLocation();
 		FrameworkAdaptor adaptor = null;
