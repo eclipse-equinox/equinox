@@ -24,8 +24,6 @@ public class BundleFragment extends Bundle {
 
 	/** The resolved host that this fragment is attached to */
 	protected BundleHost host;
-	/** The current instantiation of the activator. */
-	protected BundleActivator activator;
 
 	/**
 	 * @param bundledata
@@ -227,16 +225,9 @@ public class BundleFragment extends Bundle {
 			framework.checkAdminPermission();
 			checkValid();
 		}
-		if (host == null) {
-			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-				Debug.println("Bundle.loadClass(" + name + ") called when host == null: " + this);
-				Debug.printStackTrace(new Exception("Stack trace"));
-			}
-
-			throw new ClassNotFoundException(name);
-		}
-
-		return (host.loadClass(name, checkPermission));
+		// cannot load a class from a fragment because there is no classloader
+		// associated with fragments.
+		throw new ClassNotFoundException(Msg.formatter.getString("BUNDLE_FRAGMENT_CNFE",name));
 	}
 
 	/**
@@ -258,17 +249,10 @@ public class BundleFragment extends Bundle {
 	 */
 	public URL getResource(String name) {
 		checkValid();
+		// cannot get a resource for a fragment because there is no classloader
+		// associated with fragments.
+		return (null);
 
-		if (host == null) {
-			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-				Debug.println("Bundle.getResource(" + name + ") called when host == null: " + this);
-				Debug.printStackTrace(new Exception("Stack trace"));
-			}
-
-			return (null);
-		}
-
-		return (host.getResource(name));
 	}
 
 	/**
@@ -358,10 +342,9 @@ public class BundleFragment extends Bundle {
 	 */
 	public ServiceReference[] getRegisteredServices() {
 		checkValid();
-		if (host == null) {
-			return null;
-		}
-		return host.getRegisteredServices();
+		// Fragments cannot have a BundleContext and therefore
+		// cannot have any services registered.
+		return null;
 	}
 
 	/**
@@ -382,10 +365,9 @@ public class BundleFragment extends Bundle {
 	 */
 	public ServiceReference[] getServicesInUse() {
 		checkValid();
-		if (host == null) {
-			return null;
-		}
-		return host.getServicesInUse();
+		// Fragments cannot have a BundleContext and therefore
+		// cannot have any services in use.
+		return null;
 	}
 
 	public org.osgi.framework.Bundle getHost() {
@@ -417,7 +399,8 @@ public class BundleFragment extends Bundle {
 	}
 
 	public BundleLoader getBundleLoader() {
-		return host == null ? null : host.getBundleLoader();
+		// Fragments cannot have a BundleLoader.
+		return null;
 	}
 
 	/**
@@ -426,6 +409,7 @@ public class BundleFragment extends Bundle {
 	 * @return BundleContext for this bundle.
 	 */
 	protected BundleContext getContext() {
-		return host == null ? null : host.getContext();
+		// Fragments cannot have a BundleContext.
+		return null;
 	}
 }
