@@ -152,8 +152,8 @@ public class StateHelperImpl implements StateHelper {
 		boolean ignoreVersion = version == null;
 		for (int i = 0; i < resolvedBundles.length; i++) {
 			PackageSpecification[] packages = resolvedBundles[i].getPackages();
-			for (int j = 0; i < packages.length; j++)
-				if (packages[j].getName().equals(packageName) && (ignoreVersion || packages[i].getVersionSpecification().equals(version)) && (packages[j].getSupplier() != null))
+			for (int j = 0; j < packages.length; j++)
+				if (packages[j].getName().equals(packageName) && (ignoreVersion || packages[j].getVersionSpecification().equals(version)) && (packages[j].getSupplier() != null))
 					return packages[j].getSupplier().getPackage(packageName);
 		}
 		return null;
