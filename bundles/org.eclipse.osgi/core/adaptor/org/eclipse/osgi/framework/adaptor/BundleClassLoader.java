@@ -18,7 +18,7 @@ import java.util.Enumeration;
 
 /**
  * The BundleClassLoader interface is used by the Framework to load local 
- * classes and resources from a BundleData object.  Classes that implement this
+ * classes and resources from a Bundle.  Classes that implement this
  * interface must extend java.lang.ClassLoader, either directly or by extending
  * a subclass of java.lang.ClassLoader.<p>
  * 

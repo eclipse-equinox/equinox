@@ -24,9 +24,9 @@ import org.eclipse.osgi.framework.adaptor.ImportResourceNotFoundException;
 import org.eclipse.osgi.framework.debug.Debug;
 
 /**
- * The framework needs access to some protected methods in order to
- * load local resources and classes.  The BundleClassLoader simply exposes
- * some new public methods that call protected methods for the framework.
+ * The AbstractClassLoader provides some basic functionality that all
+ * BundleClassLoaders must provide.  It properly delegates resource and
+ * class lookups to a parent classloader and the to a ClassLoaderDelegate.
  */
 public abstract class AbstractClassLoader extends ClassLoader implements BundleClassLoader {
 
@@ -63,6 +63,7 @@ public abstract class AbstractClassLoader extends ClassLoader implements BundleC
 	 * BundleClassLoader constructor.
 	 * @param delegate The ClassLoaderDelegate for this bundle.
 	 * @param domain The ProtectionDomain for this bundle.
+	 * @param classpath The classpath entries to use for the host.
 	 */
 	public AbstractClassLoader(ClassLoaderDelegate delegate, ProtectionDomain domain, String[] classpath) {
 		this(delegate, domain, classpath, null);
@@ -73,6 +74,7 @@ public abstract class AbstractClassLoader extends ClassLoader implements BundleC
 	 * @param delegate The ClassLoaderDelegate for this bundle.
 	 * @param domain The ProtectionDomain for this bundle.
 	 * @param parent The parent classloader to use.
+	 * @param classpath The classpath entries to use for the host.
 	 */
 	public AbstractClassLoader(ClassLoaderDelegate delegate, ProtectionDomain domain, String[] classpath, ClassLoader parent) {
 		// use the defaultParentClassLoader if a parent is not specified.
@@ -249,7 +251,7 @@ public abstract class AbstractClassLoader extends ClassLoader implements BundleC
 	 *
 	 */
 	public void close() {
-		closed = false;
+		closed = true;
 	}
 
 	/**
