@@ -72,17 +72,14 @@ public class EclipseAdaptor extends DefaultAdaptor {
 	}
 
 	protected FrameworkLog createFrameworkLog() {
-		DefaultLog frameworkLog;
+		FrameworkLog frameworkLog;
 		String configArea = System.getProperty(EclipseStarter.PROP_CONFIG_AREA);
-		//if (configArea != null) {
-		// TODO: for now just logging to System.err.  Use the previous line
-		// once we are comfortable with this logging strategy.
-		if (false) {
+		if (configArea != null) {
 			File logFile = new File(configArea, Long.toString(System.currentTimeMillis()) + F_LOG);
-			frameworkLog = new DefaultLog(logFile,false);
+			frameworkLog = new EclipseLog(logFile,false);
 		}
 		else {
-			frameworkLog = new DefaultLog();
+			frameworkLog = new EclipseLog();
 		}
 		return frameworkLog;
 	}
