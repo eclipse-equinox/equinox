@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.osgi.framework.internal.core;
 
-import java.io.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
