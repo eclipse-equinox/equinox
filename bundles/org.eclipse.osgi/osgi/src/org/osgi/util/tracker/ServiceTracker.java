@@ -1,5 +1,5 @@
 /*
- * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/util/tracker/ServiceTracker.java,v 1.1 2004/04/14 12:49:47 twatson Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/util/tracker/ServiceTracker.java,v 1.2 2004/05/03 04:23:58 hargrave Exp $
  *
  * Copyright (c) The Open Services Gateway Initiative (2000, 2002).
  * All Rights Reserved.
@@ -52,7 +52,7 @@ import java.util.*;
  * and <tt>getServices</tt> methods can be called to get the service
  * objects for the tracked service.
  *
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 
 public class ServiceTracker implements ServiceTrackerCustomizer
@@ -99,25 +99,19 @@ public class ServiceTracker implements ServiceTrackerCustomizer
 
     /** Modification count. This field is initialized to zero by
      * open, set to -1 by close and incremented by modified. 
-     * This field is volatile because it is set by one thread
-     * and read by another. Access to this field must be protected 
-     * by a synchronized region.
+     * Access to this field must be protected by a synchronized region.
      */
-    private volatile int trackingCount = -1; 
+    private int trackingCount = -1; 
     
     /** Cached ServiceReference for getServiceReference. 
-     * This field is volatile because it is set by one thread
-     * and read by another. Access to this field must be protected 
-     * by a synchronized region.
+     * Access to this field must be protected by a synchronized region.
      */
-    private volatile ServiceReference cachedReference;
+    private ServiceReference cachedReference;
     
     /** Cached service object for getService. 
-     * This field is volatile because it is set by one thread
-     * and read by another. Access to this field must be protected 
-     * by a synchronized region.
+     * Access to this field must be protected by a synchronized region.
      */
-    private volatile Object cachedService;
+    private Object cachedService;
     
     /**
 	 * Create a <tt>ServiceTracker</tt> object on the specified <tt>ServiceReference</tt> object.
@@ -585,8 +579,8 @@ public class ServiceTracker implements ServiceTrackerCustomizer
 
     	synchronized (this) {
     		cachedReference = references[index];
+            return cachedReference;
     	}	
-        return cachedReference;
     }
 
     /**
@@ -683,10 +677,11 @@ public class ServiceTracker implements ServiceTrackerCustomizer
             return null;
         }
 
+        Object service = getService(reference); 
     	synchronized (this) {
-    		cachedService = getService(reference);
+    		cachedService = service;
+            return cachedService;
     	}	
-        return cachedService;
     }
 
     /**
@@ -789,8 +784,7 @@ public class ServiceTracker implements ServiceTrackerCustomizer
         
         /** true if the tracked object is closed.
          * This field is volatile because it is set by one thread
-         * and read by another. Access to this field must be protected 
-         * by a synchronized region.
+         * and read by another.
          */
         private volatile boolean closed;     
 
@@ -807,7 +801,7 @@ public class ServiceTracker implements ServiceTrackerCustomizer
         /**
     	 * Called by the owning <tt>ServiceTracker</tt> object when it is closed.
     	 */
-    	protected synchronized void close() {
+    	protected void close() {
             closed = true;
     	}
 
@@ -820,11 +814,9 @@ public class ServiceTracker implements ServiceTrackerCustomizer
 		public void serviceChanged(ServiceEvent event)
 		{
 			/* Check if we had a delayed call (which could happen when we close). */
-			synchronized (this) {
-				if (closed)
-				{
-					return;
-				}
+			if (closed)
+			{
+				return;
 			}
 			
 			ServiceReference reference = event.getServiceReference();
