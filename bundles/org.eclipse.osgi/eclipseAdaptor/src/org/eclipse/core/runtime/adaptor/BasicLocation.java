@@ -21,7 +21,7 @@ public class BasicLocation implements Location {
 	private Location parent;
 	private URL defaultValue;
 	private String property;
-	
+
 	// locking related fields
 	private FileLock fileLock;
 	private FileOutputStream fileStream;
@@ -43,7 +43,7 @@ public class BasicLocation implements Location {
 	public URL getDefault() {
 		return defaultValue;
 	}
-	
+
 	public Location getParentLocation() {
 		return parent;
 	}
@@ -66,7 +66,7 @@ public class BasicLocation implements Location {
 	 * @deprecated
 	 */
 	public void setURL(URL value) throws IllegalStateException {
-		setURL(value , false);
+		setURL(value, false);
 	}
 
 	public synchronized boolean setURL(URL value, boolean lock) throws IllegalStateException {
@@ -75,9 +75,9 @@ public class BasicLocation implements Location {
 		File file = null;
 		if (value.getProtocol().equalsIgnoreCase("file")) {
 			file = new File(value.getPath(), LOCK_FILENAME);
-			file = file.getParentFile();
-			if (!file.exists()) {
-				if (!file.mkdirs())
+			File parentFile = file.getParentFile();
+			if (!parentFile.exists()) {
+				if (!parentFile.mkdirs())
 					return false;
 			}
 		}
@@ -110,7 +110,7 @@ public class BasicLocation implements Location {
 			return false;
 		fileStream = new FileOutputStream(lock, true);
 		fileLock = fileStream.getChannel().tryLock();
-		if (fileLock != null) 
+		if (fileLock != null)
 			return true;
 		fileStream.close();
 		fileStream = null;
