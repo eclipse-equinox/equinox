@@ -126,36 +126,57 @@ public class ManifestLocalization {
 	 */
 	private URL findProperties(String localeString, String path) {
 		String[] nlVariants = buildNLVariants(localeString);
-		URL result = null;
-		for (int i = 0; i < nlVariants.length; i++) {
-			String filePath = path.concat("_" + nlVariants[i] + ".properties");
-			result = findInBundle(filePath);
-			if (result != null)
-				return result;
-			result = findInFragments(filePath);
-			if (result != null)
-				return result;
+		if (bundle.isResolved()) {
+			AbstractBundle bundleHost;
+			if (bundle.isFragment()) {
+				//if the bundle is a fragment, look in the host first
+				bundleHost = (AbstractBundle) bundle.getHost();
+			} else {
+				//if the bundle is not a fragment, look in the bundle itself,
+				//then the attached fragments
+				bundleHost = bundle;
+			}
+			URL result;
+			for (int i = 0; i < nlVariants.length; i++) {
+				String filePath = path.concat('_' + nlVariants[i] + ".properties");
+				result = findInResolved(filePath, bundleHost);
+				if (result != null)
+					return result;
+			}
+			//If we get to this point, we haven't found it yet.
+			// Look for the base filename
+			String filename = path + ".properties";
+			return findInResolved(filename, bundle);
+		} else {
+			//only look in the bundle if the bundle is not resolved
+			for (int i = 0; i < nlVariants.length; i++) {
+				String filePath = path.concat('_' + nlVariants[i] + ".properties");
+				return findInBundle(filePath, bundle);
+			}
+			//If we get to this point, we haven't found it yet.
+			// Look for the base filename
+			String filename = path + ".properties";
+			return findInBundle(filename, bundle);
 		}
-		// If we get to this point, we haven't found it yet.
-		// Look in the plugin and fragment root directories
-		String filename = path + ".properties";
-		result = findInBundle(filename);
+	}
+
+	private URL findInResolved(String filePath, AbstractBundle bundleHost) {
+
+		URL result = findInBundle(filePath, bundleHost);
 		if (result != null)
 			return result;
-		return findInFragments(filename);
+		return findInFragments(filePath, bundleHost);
 	}
 
-	private URL findInBundle(String filePath) {
-		return this.bundle.getEntry(filePath);
+	private URL findInBundle(String filePath, AbstractBundle searchBundle) {
+		return searchBundle.getEntry(filePath);
 	}
 
-	private URL findInFragments(String filePath) {
-		org.osgi.framework.Bundle[] fragments = this.bundle.getFragments();
+	private URL findInFragments(String filePath, AbstractBundle searchBundle) {
+		org.osgi.framework.Bundle[] fragments = searchBundle.getFragments();
 		URL fileURL = null;
-		int i = 0;
-		while (fragments != null && i < fragments.length && fileURL == null) {
+		for (int i = 0; fragments != null && i < fragments.length && fileURL == null; i++) {
 			fileURL = fragments[i].getEntry(filePath);
-			i++;
 		}
 		return fileURL;
 	}
