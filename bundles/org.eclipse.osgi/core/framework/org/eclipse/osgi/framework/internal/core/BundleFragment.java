@@ -185,7 +185,11 @@ public class BundleFragment extends AbstractBundle {
 	 */
 	protected Class loadClass(String name, boolean checkPermission) throws ClassNotFoundException {
 		if (checkPermission) {
-			framework.checkAdminPermission();
+			try {
+				framework.checkAdminPermission(getBundleId(),AdminPermission.CLASS);
+			} catch (SecurityException e) {
+				throw new ClassNotFoundException();
+			}
 			checkValid();
 		}
 		// cannot load a class from a fragment because there is no classloader

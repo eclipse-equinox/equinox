@@ -178,11 +178,9 @@ public class BundleHost extends AbstractBundle {
 		return (exporting);
 	}
 
-	private BundleLoader checkLoader(boolean checkPermission) {
+	private BundleLoader checkLoader() {
 		checkValid();
-		if (checkPermission) {
-			framework.checkAdminPermission();
-		}
+
 		// check to see if the bundle is resolved
 		if (!isResolved()) {
 			if (!framework.packageAdmin.resolveBundles(new Bundle[] {this})) {
@@ -216,7 +214,14 @@ public class BundleHost extends AbstractBundle {
 	 * @exception  java.lang.ClassNotFoundException  if the class definition was not found.
 	 */
 	protected Class loadClass(String name, boolean checkPermission) throws ClassNotFoundException {
-		BundleLoader loader = checkLoader(checkPermission);
+		if (checkPermission) {
+			try {
+				framework.checkAdminPermission(getBundleId(),AdminPermission.CLASS);
+			} catch (SecurityException e) {
+				throw new ClassNotFoundException();
+			}
+		}
+		BundleLoader loader = checkLoader();
 		if (loader == null)
 			throw new ClassNotFoundException(Msg.formatter.getString("BUNDLE_CNFE_NOT_RESOLVED", getLocation(), name)); //$NON-NLS-1$
 		return (loader.loadClass(name));
@@ -242,10 +247,15 @@ public class BundleHost extends AbstractBundle {
 	public URL getResource(String name) {
 		BundleLoader loader = null;
 		try {
-			loader = checkLoader(true);
+			checkResourcePermission();
 		} catch (SecurityException e) {
-			return null;
+			try {
+				framework.checkAdminPermission(getBundleId(), AdminPermission.RESOURCE);
+			} catch (SecurityException ee) {
+				return null;
+			}
 		}
+		loader = checkLoader();
 		if (loader == null)
 			return null;
 		return (loader.getResource(name));
@@ -254,13 +264,17 @@ public class BundleHost extends AbstractBundle {
 	public Enumeration getResources(String name) {
 		BundleLoader loader = null;
 		try {
-			loader = checkLoader(true);
+			checkResourcePermission();
 		} catch (SecurityException e) {
-			return null;
+			try {
+				framework.checkAdminPermission(getBundleId(), AdminPermission.RESOURCE);
+			} catch (SecurityException ee) {
+				return null;
+			}
 		}
+		loader = checkLoader();
 		if (loader == null)
 			return null;
-
 		try {
 			return loader.getResources(name);
 		} catch (IOException e) {

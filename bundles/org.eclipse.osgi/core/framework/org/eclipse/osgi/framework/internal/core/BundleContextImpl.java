@@ -194,7 +194,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	 * @return The Bundle object of the installed bundle.
 	 */
 	public org.osgi.framework.Bundle installBundle(String location) throws BundleException {
-		framework.checkAdminPermission();
+		framework.checkAdminPermission(0,AdminPermission.LIFECYCLE);
 		checkValid();
 		return framework.installBundle(location);
 	}
@@ -213,7 +213,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	 * @return The Bundle of the installed bundle.
 	 */
 	public org.osgi.framework.Bundle installBundle(String location, InputStream in) throws BundleException {
-		framework.checkAdminPermission();
+		framework.checkAdminPermission(0,AdminPermission.LIFECYCLE);
 
 		checkValid();
 
@@ -377,7 +377,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 		}
 
 		if (listener instanceof SynchronousBundleListener) {
-			framework.checkAdminPermission();
+			framework.checkAdminPermission(getBundle().getBundleId(),AdminPermission.LISTENER);
 
 			synchronized (framework.bundleEventSync) {
 				if (bundleEventSync == null) {
@@ -421,7 +421,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 		}
 
 		if (listener instanceof SynchronousBundleListener) {
-			framework.checkAdminPermission();
+			framework.checkAdminPermission(getBundle().getBundleId(),AdminPermission.LISTENER);
 
 			if (bundleEventSync != null) {
 				synchronized (framework.bundleEventSync) {

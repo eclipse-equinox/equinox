@@ -42,6 +42,8 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	protected Object statechangeLock = new Object();
 	/** ProtectionDomain for the bundle */
 	protected BundleProtectionDomain domain;
+	/* Single object for permission checks */
+	BundleResourcePermission resourcePermission;
 
 	/**
 	 * This String captures the dependencies that could not be resolved
@@ -267,7 +269,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	 *                permissions.
 	 */
 	public void start() throws BundleException {
-		framework.checkAdminPermission();
+		framework.checkAdminPermission(getBundleId(),AdminPermission.EXECUTE);
 		checkValid();
 		beginStateChange();
 		try {
@@ -411,7 +413,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	 *                permissions.
 	 */
 	public void stop() throws BundleException {
-		framework.checkAdminPermission();
+		framework.checkAdminPermission(getBundleId(),AdminPermission.EXECUTE);
 		checkValid();
 		beginStateChange();
 		try {
@@ -590,7 +592,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 			Debug.println("update location " + bundledata.getLocation()); //$NON-NLS-1$
 		}
-		framework.checkAdminPermission();
+		framework.checkAdminPermission(getBundleId(),AdminPermission.LIFECYCLE);
 		checkValid();
 		beginStateChange();
 		try {
@@ -633,7 +635,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 			Debug.println("update location " + bundledata.getLocation()); //$NON-NLS-1$
 			Debug.println("   from: " + in); //$NON-NLS-1$
 		}
-		framework.checkAdminPermission();
+		framework.checkAdminPermission(getBundleId(),AdminPermission.LIFECYCLE);
 		checkValid();
 		beginStateChange();
 		try {
@@ -793,7 +795,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 			Debug.println("uninstall location: " + bundledata.getLocation()); //$NON-NLS-1$
 		}
-		framework.checkAdminPermission();
+		framework.checkAdminPermission(getBundleId(),AdminPermission.LIFECYCLE);
 		checkValid();
 		beginStateChange();
 		try {
@@ -961,7 +963,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	 *                and the Java Runtime Environment supports permissions.
 	 */
 	public Dictionary getHeaders(String localeString) {
-		framework.checkAdminPermission();
+		framework.checkAdminPermission(getBundleId(),AdminPermission.METADATA);
 		try {
 			initializeManifestLocalization();
 		} catch (BundleException e) {
@@ -1016,7 +1018,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	 *                permissions.
 	 */
 	public String getLocation() {
-		framework.checkAdminPermission();
+		framework.checkAdminPermission(getBundleId(),AdminPermission.METADATA);
 		return (bundledata.getLocation());
 	}
 
@@ -1164,6 +1166,15 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 		}
 	}
 
+	protected void checkResourcePermission() {
+		SecurityManager sm = System.getSecurityManager();
+		if (sm != null) {
+			if (resourcePermission == null)
+				resourcePermission = new BundleResourcePermission(getBundleId());
+			sm.checkPermission(resourcePermission);
+		}
+	}
+
 	/**
 	 * Get the bundle's ProtectionDomain.
 	 * 
@@ -1220,7 +1231,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	 */
 	public Enumeration getEntryPaths(final String path) {
 		try {
-			framework.checkAdminPermission();
+			framework.checkAdminPermission(getBundleId(),AdminPermission.RESOURCE);
 		} catch (SecurityException e) {
 			return null;
 		}
@@ -1246,7 +1257,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	 */
 	public URL getEntry(String fileName) {
 		try {
-			framework.checkAdminPermission();
+			framework.checkAdminPermission(getBundleId(),AdminPermission.RESOURCE);
 		} catch (SecurityException e) {
 			return null;
 		}

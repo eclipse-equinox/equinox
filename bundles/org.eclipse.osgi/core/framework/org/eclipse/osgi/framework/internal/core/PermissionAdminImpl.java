@@ -19,6 +19,7 @@ import org.eclipse.osgi.framework.adaptor.BundleProtectionDomain;
 import org.eclipse.osgi.framework.adaptor.PermissionStorage;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.osgi.framework.FrameworkEvent;
+import org.osgi.framework.AdminPermission;
 import org.osgi.service.permissionadmin.PermissionAdmin;
 import org.osgi.service.permissionadmin.PermissionInfo;
 
@@ -179,7 +180,7 @@ public class PermissionAdminImpl implements PermissionAdmin {
 	 * <tt>AdminPermission</tt>.
 	 */
 	public void setPermissions(String location, PermissionInfo[] permissions) {
-		framework.checkAdminPermission();
+		framework.checkAdminPermission(0,AdminPermission.PERMISSION);
 
 		if (location == null) {
 			throw new NullPointerException();
@@ -292,7 +293,7 @@ public class PermissionAdminImpl implements PermissionAdmin {
 	 * <tt>AdminPermission</tt>.
 	 */
 	public void setDefaultPermissions(PermissionInfo[] permissions) {
-		framework.checkAdminPermission();
+		framework.checkAdminPermission(0,AdminPermission.PERMISSION);
 
 		PermissionStorage storage = new org.eclipse.osgi.framework.util.SecurePermissionStorage(this.storage);
 

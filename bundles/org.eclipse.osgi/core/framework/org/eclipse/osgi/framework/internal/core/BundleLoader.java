@@ -38,8 +38,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 	BundleHost bundle;
 	/* The is the BundleClassLoader for the bundle */
 	BundleClassLoader classloader;
-	/* Single object for permission checks */
-	BundleResourcePermission resourcePermission;
+
 	/* cache of imported packages. Key is packagename, Value is PackageSource */
 	KeyedHashSet importedPackages;
 	/* flag that indicates this bundle has dynamic imports */
@@ -377,15 +376,6 @@ public class BundleLoader implements ClassLoaderDelegate {
 		if ((name.length() > 1) && (name.charAt(0) == '/')) /* if name has a leading slash */
 			name = name.substring(1); /* remove leading slash before search */
 
-		try {
-			checkResourcePermission();
-		} catch (SecurityException e) {
-			try {
-				bundle.framework.checkAdminPermission();
-			} catch (SecurityException ee) {
-				return null;
-			}
-		}
 		String packageName = getResourcePackageName(name);
 
 		URL resource = findImportedResource(name, packageName);
@@ -406,15 +396,6 @@ public class BundleLoader implements ClassLoaderDelegate {
 		if ((name.length() > 1) && (name.charAt(0) == '/')) /* if name has a leading slash */
 			name = name.substring(1); /* remove leading slash before search */
 
-		try {
-			checkResourcePermission();
-		} catch (SecurityException e) {
-			try {
-				bundle.framework.checkAdminPermission();
-			} catch (SecurityException ee) {
-				return null;
-			}
-		}
 		String packageName = getResourcePackageName(name);
 
 		Enumeration result = findImportedResources(name, packageName);
@@ -451,15 +432,6 @@ public class BundleLoader implements ClassLoaderDelegate {
 	protected Enumeration findLocalResources(String name) {
 		if ((name.length() > 1) && (name.charAt(0) == '/')) /* if name has a leading slash */
 			name = name.substring(1);
-		try {
-			checkResourcePermission();
-		} catch (SecurityException e) {
-			try {
-				bundle.framework.checkAdminPermission();
-			} catch (SecurityException ee) {
-				return null;
-			}
-		}
 		return createClassLoader().findLocalResources(name);
 	}
 
@@ -510,15 +482,15 @@ public class BundleLoader implements ClassLoaderDelegate {
 		// Create the classloader as previleged code if security manager is present.
 		if (System.getSecurityManager() == null)
 			return createBCL(pd, cp);
-
-		return (BundleClassLoader) AccessController.doPrivileged(new PrivilegedAction() {
-			public Object run() {
-				return createBCL(pd, cp);
-			}
-		});
+		else
+			return (BundleClassLoader) AccessController.doPrivileged(new PrivilegedAction() {
+				public Object run() {
+					return createBCL(pd, cp);
+				}
+			});
 
 	}
-
+	
 	BundleClassLoader createBCL(final BundleProtectionDomain pd, final String[] cp) {
 		BundleClassLoader bcl = bundle.getBundleData().createClassLoader(BundleLoader.this, pd, cp);
 		// attach existing fragments to classloader
@@ -546,15 +518,6 @@ public class BundleLoader implements ClassLoaderDelegate {
 	public String toString() {
 		BundleData result = bundle.getBundleData();
 		return result == null ? "BundleLoader.bundledata == null!" : result.toString(); //$NON-NLS-1$
-	}
-
-	protected void checkResourcePermission() {
-		SecurityManager sm = System.getSecurityManager();
-		if (sm != null) {
-			if (resourcePermission == null)
-				resourcePermission = new BundleResourcePermission(bundle.getBundleId());
-			sm.checkPermission(resourcePermission);
-		}
 	}
 
 	/**

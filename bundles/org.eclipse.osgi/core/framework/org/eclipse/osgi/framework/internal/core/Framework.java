@@ -78,8 +78,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 	protected Hashtable installLock;
 	/** System Bundle object */
 	protected SystemBundle systemBundle;
-	/** Single object for permission checks */
-	protected AdminPermission adminPermission;
+
 	/**
 	 * The AliasMapper used to alias OS Names.
 	 */
@@ -991,16 +990,23 @@ public class Framework implements EventDispatcher, EventPublisher {
 		synchronized (bundles) {
 			// this is not optimized; do not think it will get called
 			// that much.
-			List allBundles = bundles.getBundles();
-			int size = allBundles.size();
-			for (int i = 0; i < size; i++) {
-				AbstractBundle bundle = (AbstractBundle) allBundles.get(i);
-				if (location.equals(bundle.getLocation())) {
-					return (bundle);
+			final String finalLocation = location;
+			
+			//Bundle.getLocation requires AdminPermission (metadata)
+			return (AbstractBundle) AccessController.doPrivileged(new PrivilegedAction() {
+				public Object run() {
+					List allBundles = bundles.getBundles();
+					int size = allBundles.size();
+					for (int i = 0; i < size; i++) {
+						AbstractBundle bundle = (AbstractBundle) allBundles.get(i);
+						if (finalLocation.equals(bundle.getLocation())) {
+							return (bundle);
+						}
+					}
+					return (null);
 				}
-			}
+			});
 		}
-		return (null);
 	}
 
 	/**
@@ -1152,15 +1158,12 @@ public class Framework implements EventDispatcher, EventPublisher {
 	}
 
 	/**
-	 * Check for AdminPermission.
+	 * Check for specific AdminPermission (RFC 73)
 	 */
-	protected void checkAdminPermission() {
+	protected void checkAdminPermission(long bundleId, String action) {
 		SecurityManager sm = System.getSecurityManager();
 		if (sm != null) {
-			if (adminPermission == null) {
-				adminPermission = new AdminPermission();
-			}
-			sm.checkPermission(adminPermission);
+			sm.checkPermission(new AdminPermission(bundleId, action));
 		}
 	}
 

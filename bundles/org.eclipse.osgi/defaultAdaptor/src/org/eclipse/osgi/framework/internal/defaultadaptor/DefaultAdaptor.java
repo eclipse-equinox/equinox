@@ -13,6 +13,9 @@ package org.eclipse.osgi.framework.internal.defaultadaptor;
 
 import java.io.File;
 import java.io.IOException;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import org.eclipse.osgi.framework.adaptor.BundleData;
 import org.eclipse.osgi.framework.adaptor.core.*;
@@ -122,7 +125,19 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 
 	protected void persistInitialBundleStartLevel(int value) throws IOException {
 		fwMetadata.setInt(METADATA_ADAPTOR_IBSL, value);
-		fwMetadata.save();
+		try {
+			AccessController.doPrivileged(new PrivilegedExceptionAction() {
+				public Object run() throws Exception {
+					fwMetadata.save();
+					return null;
+				}
+			});
+		} catch (PrivilegedActionException e) {
+			if (e.getException() instanceof IOException) {
+				throw (IOException)e.getException();
+			}
+			throw (RuntimeException)e.getException();
+		}
 	}
 
 	public AdaptorElementFactory getElementFactory() {

@@ -17,6 +17,9 @@ import java.util.List;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.eventmgr.*;
 import org.osgi.framework.*;
+import java.security.AccessController;
+import java.security.PrivilegedExceptionAction;
+import java.security.PrivilegedActionException;
 
 /**
  * StartLevel service implementation for the OSGi specification.
@@ -134,7 +137,7 @@ public class StartLevelManager implements EventDispatcher, EventListener, Servic
 	 * permissions.
 	 */
 	public void setInitialBundleStartLevel(int startlevel) {
-		framework.checkAdminPermission();
+		framework.checkAdminPermission(0,AdminPermission.STARTLEVEL);
 		if (startlevel <= 0) {
 			throw new IllegalArgumentException();
 		}
@@ -219,7 +222,7 @@ public class StartLevelManager implements EventDispatcher, EventListener, Servic
 		if (newSL <= 0) {
 			throw new IllegalArgumentException(Msg.formatter.getString("STARTLEVEL_EXCEPTION_INVALID_REQUESTED_STARTLEVEL", "" + newSL)); //$NON-NLS-1$ //$NON-NLS-2$
 		}
-		framework.checkAdminPermission();
+		framework.checkAdminPermission(0,AdminPermission.STARTLEVEL);
 
 		if (Debug.DEBUG && Debug.DEBUG_STARTLEVEL) {
 			Debug.println("StartLevelImpl: setStartLevel: " + newSL + "; callerBundle = " + callerBundle.getBundleId()); //$NON-NLS-1$ //$NON-NLS-2$
@@ -382,11 +385,23 @@ public class StartLevelManager implements EventDispatcher, EventListener, Servic
 		try {
 			// if the bundle's startlevel is not already at the requested startlevel
 			if (newSL != ((org.eclipse.osgi.framework.internal.core.AbstractBundle) bundle).getStartLevel()) {
-				AbstractBundle b = (AbstractBundle) bundle;
+				final AbstractBundle b = (AbstractBundle) bundle;
 				b.getBundleData().setStartLevel(newSL);
-				b.getBundleData().save();
+				try {
+					AccessController.doPrivileged(new PrivilegedExceptionAction() {
+						public Object run() throws Exception {
+							b.getBundleData().save();
+							return null;
+						}
+					});
+				} catch (PrivilegedActionException e) {
+					if (e.getException() instanceof IOException) {
+						throw (IOException)e.getException();
+					} 
+					throw (RuntimeException)e.getException();
+				}
 
-				framework.checkAdminPermission();
+				framework.checkAdminPermission(bundle.getBundleId(),AdminPermission.EXECUTE);
 
 				// handle starting or stopping the bundle asynchronously
 				issueEvent(new StartLevelEvent(StartLevelEvent.CHANGE_BUNDLE_SL, newSL, (AbstractBundle) bundle));
