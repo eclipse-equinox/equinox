@@ -18,6 +18,7 @@ import org.eclipse.osgi.framework.adaptor.core.AbstractBundleData;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.service.resolver.Version;
+import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.*;
 
 /**
@@ -228,7 +229,13 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 			throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_ERROR_GETTING_MANIFEST", getLocation()));
 		}
 		setVersion(new Version((String) manifest.get(Constants.BUNDLE_VERSION)));
-		setSymbolicName((String) manifest.get(Constants.BUNDLE_SYMBOLICNAME));
+		String symbolicNameHeader = (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME);
+		if (symbolicNameHeader != null)
+			try {
+				setSymbolicName(ManifestElement.parseHeader(Constants.BUNDLE_SYMBOLICNAME, symbolicNameHeader)[0].getValue());
+			} catch (BundleException e) {
+				// not doing validation here - just ignore
+			}
 		setClassPath((String) manifest.get(Constants.BUNDLE_CLASSPATH));
 		setActivator((String) manifest.get(Constants.BUNDLE_ACTIVATOR));
 		String host = (String) manifest.get(Constants.FRAGMENT_HOST);
