@@ -11,14 +11,13 @@
 package org.eclipse.osgi.internal.resolver;
 
 import java.util.*;
-
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 
 /**
- * This class builds bundle description objects from manifests 
+ * This class builds bundle description objects from manifests
  */
 class StateBuilder {
 	static BundleDescription createBundleDescription(Dictionary manifest, String location) throws BundleException {
@@ -28,36 +27,28 @@ class StateBuilder {
 			result.setUniqueId((String) manifest.get(Constants.BUNDLE_NAME));
 		String version = (String) manifest.get(Constants.BUNDLE_VERSION);
 		result.setVersion((version != null) ? new Version(version) : Version.EMPTY_VERSION);
-
 		result.setLocation(location);
-
 		ManifestElement[] host = ManifestElement.parseBundleDescriptions((String) manifest.get(Constants.HOST_BUNDLE));
 		if (host != null)
-			result.setHost(createHostSpecification(result, host[0]));
-
+			result.setHost(createHostSpecification(host[0]));
 		ManifestElement[] imports = ManifestElement.parsePackageDescription((String) manifest.get(Constants.IMPORT_PACKAGE));
 		ManifestElement[] exports = ManifestElement.parsePackageDescription((String) manifest.get(Constants.EXPORT_PACKAGE));
-		result.setPackages(createPackages(result, exports, imports));
-
+		result.setPackages(createPackages(exports, imports));
 		ManifestElement[] provides = ManifestElement.parsePackageDescription((String) manifest.get(Constants.PROVIDE_PACKAGE));
-		result.setProvidedPackages(createProvidedPackages(result, provides));
-
+		result.setProvidedPackages(createProvidedPackages(provides));
 		ManifestElement[] requires = ManifestElement.parseBundleDescriptions((String) manifest.get(Constants.REQUIRE_BUNDLE));
-		result.setRequiredBundles(createRequiredBundles(result, requires));
-
+		result.setRequiredBundles(createRequiredBundles(requires));
 		return result;
 	}
-
-	private static BundleSpecification[] createRequiredBundles(BundleDescriptionImpl parent, ManifestElement[] specs) {
+	private static BundleSpecification[] createRequiredBundles(ManifestElement[] specs) {
 		if (specs == null)
 			return null;
 		BundleSpecification[] result = new BundleSpecification[specs.length];
 		for (int i = 0; i < specs.length; i++)
-			result[i] = createRequiredBundle(parent, specs[i]);
+			result[i] = createRequiredBundle(specs[i]);
 		return result;
 	}
-
-	private static BundleSpecification createRequiredBundle(BundleDescriptionImpl parent, ManifestElement spec) {
+	private static BundleSpecification createRequiredBundle(ManifestElement spec) {
 		BundleSpecificationImpl result = new BundleSpecificationImpl();
 		result.setName(spec.getValue());
 		String version = spec.getAttribute(Constants.BUNDLE_VERSION_ATTRIBUTE);
@@ -79,7 +70,7 @@ class StateBuilder {
 			return VersionConstraint.PERFECT_MATCH;
 		return VersionConstraint.GREATER_EQUAL_MATCH;
 	}
-	private static String[] createProvidedPackages(BundleDescription parent, ManifestElement[] specs) {
+	private static String[] createProvidedPackages(ManifestElement[] specs) {
 		if (specs == null || specs.length == 0)
 			return null;
 		String[] result = new String[specs.length];
@@ -87,22 +78,20 @@ class StateBuilder {
 			result[i] = specs[i].getValue();
 		return result;
 	}
-
-	private static PackageSpecification[] createPackages(BundleDescription parent, ManifestElement[] exported, ManifestElement[] imported) {
+	private static PackageSpecification[] createPackages(ManifestElement[] exported, ManifestElement[] imported) {
 		int capacity = (exported == null ? 0 : exported.length) + (imported == null ? 0 : imported.length);
 		if (capacity == 0)
 			return null;
 		Map packages = new HashMap(capacity);
 		if (imported != null)
 			for (int i = 0; i < imported.length; i++)
-				packages.put(imported[i].getValue(), createPackage(parent, imported[i], false));
+				packages.put(imported[i].getValue(), createPackage(imported[i], false));
 		if (exported != null)
 			for (int i = 0; i < exported.length; i++)
-				packages.put(exported[i].getValue(), createPackage(parent, exported[i], true));
+				packages.put(exported[i].getValue(), createPackage(exported[i], true));
 		return (PackageSpecification[]) packages.values().toArray(new PackageSpecification[packages.size()]);
 	}
-
-	private static PackageSpecification createPackage(BundleDescription parent, ManifestElement spec, boolean export) {
+	private static PackageSpecification createPackage(ManifestElement spec, boolean export) {
 		PackageSpecificationImpl result = new PackageSpecificationImpl();
 		result.setName(spec.getValue());
 		String version = spec.getAttribute(Constants.PACKAGE_SPECIFICATION_VERSION);
@@ -111,8 +100,7 @@ class StateBuilder {
 		result.setExport(export);
 		return result;
 	}
-
-	private static HostSpecification createHostSpecification(BundleDescription parent, ManifestElement spec) {
+	private static HostSpecification createHostSpecification(ManifestElement spec) {
 		if (spec == null)
 			return null;
 		HostSpecificationImpl result = new HostSpecificationImpl();
