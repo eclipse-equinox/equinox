@@ -72,6 +72,7 @@ public class EclipseStarter {
 	// System properties
 	public static final String PROP_BUNDLES = "osgi.bundles"; //$NON-NLS-1$
 	public static final String PROP_BUNDLES_STARTLEVEL = "osgi.bundles.defaultStartLevel"; //$NON-NLS-1$ //The start level used to install the bundles
+	public static final String PROP_EXTENSIONS = "osgi.framework.extensions"; //$NON-NLS-1$
 	public static final String PROP_INITIAL_STARTLEVEL = "osgi.startLevel"; //$NON-NLS-1$ //The start level when the fwl start
 	public static final String PROP_DEBUG = "osgi.debug"; //$NON-NLS-1$
 	public static final String PROP_DEV = "osgi.dev"; //$NON-NLS-1$
@@ -476,7 +477,8 @@ public class EclipseStarter {
 	 */
 	private static Bundle[] loadBasicBundles() throws IOException {
 		long startTime = System.currentTimeMillis();
-		String[] installEntries = getArrayFromList(System.getProperty(PROP_BUNDLES), ","); //$NON-NLS-1$
+		String[] installEntries = catenateLists(getArrayFromList(System.getProperty(PROP_EXTENSIONS), ","), getArrayFromList(System.getProperty(PROP_BUNDLES), ",")); //$NON-NLS-1$ //$NON-NLS-2$
+
 		// get the initial bundle list from the installEntries
 		InitialBundle[] initialBundles = getInitialBundles(installEntries);
 		// get the list of currently installed initial bundles from the framework
@@ -954,6 +956,15 @@ public class EclipseStarter {
 			// its ok if there is no file.  We'll just use the defaults for everything
 			// TODO but it might be nice to log something with gentle wording (i.e., it is not an error)
 		}
+		return result;
+	}
+
+	private static String[] catenateLists(String[] prepend, String[] append) {
+		if (prepend.length == 0)
+			return append;
+		String[] result = new String[prepend.length + append.length];
+		System.arraycopy(prepend, 0, result, 0, prepend.length);
+		System.arraycopy(append, 0, result, prepend.length, append.length);
 		return result;
 	}
 
