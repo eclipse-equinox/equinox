@@ -98,7 +98,7 @@ public class EclipseClassLoader extends DefaultClassLoader {
 						timeLeft = start + delay - System.currentTimeMillis();
 					}
 					if (timeLeft <= 0 || bundle.getState() != Bundle.ACTIVE) {
-						String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CLASSLOADER_CONCURRENT_STARTUP", new Object[] {Thread.currentThread(), name, threadChangingState.getName(), bundle.getSymbolicName() == null ? Long.toString(bundle.getBundleId()) : bundle.getSymbolicName()}); //$NON-NLS-1$ 
+						String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CLASSLOADER_CONCURRENT_STARTUP", new Object[] {Thread.currentThread(), name, threadChangingState.getName(), bundle.getSymbolicName() == null ? Long.toString(bundle.getBundleId()) : bundle.getSymbolicName()}, Long.toString(delay)); //$NON-NLS-1$ 
 						EclipseAdaptor.getDefault().getFrameworkLog().log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, message, 0, new Exception(EclipseAdaptorMsg.formatter.getString("ECLIPSE_CLASSLOADER_GENERATED_EXCEPTION")), null)); //$NON-NLS-1$
 					}
 					return super.findLocalClass(name);
