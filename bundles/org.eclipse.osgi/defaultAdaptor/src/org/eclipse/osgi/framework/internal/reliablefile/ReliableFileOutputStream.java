@@ -134,13 +134,6 @@ public class ReliableFileOutputStream extends FilterOutputStream {
 	}
 
 	/**
-	 * Call close to finalize the underlying ReliableFile.
-	 */
-	protected void finalize() throws IOException {
-		close();
-	}
-
-	/**
 	 * Override default FilterOutputStream method.
 	 */
 	public void write(byte[] b) throws IOException {

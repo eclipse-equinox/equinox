@@ -103,13 +103,6 @@ public class ReliableFileInputStream extends FilterInputStream {
 	}
 
 	/**
-	 * Call close to finalize the underlying ReliableFile.
-	 */
-	protected void finalize() throws IOException {
-		close();
-	}
-
-	/**
 	 * Override default FilterInputStream method.
 	 */
 	public synchronized int read(byte b[], int off, int len) throws IOException {
