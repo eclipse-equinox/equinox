@@ -305,7 +305,7 @@ public class PluginParser extends DefaultHandler implements IModel {
 				while (tok.hasMoreTokens()) {
 					String value = tok.nextToken();
 					if (!exportMask.contains(maskValue))
-						exportMask.addElement(value);
+						exportMask.addElement(value.trim());
 				}
 			}
 			return;

@@ -94,7 +94,7 @@ public class PluginConverterImpl implements PluginConverter {
 			return null;
 		if (bundleManifestLocation == null) {
 			String cacheLocation = (String) System.getProperties().get("osgi.manifest.cache");
-			bundleManifestLocation = new File(cacheLocation, pluginInfo.getUniqueId() + '_' + pluginInfo.getVersion() + ".MF");
+			bundleManifestLocation = new File(cacheLocation, pluginInfo.getUniqueId() + '_' + pluginInfo.getVersion() + ".MF"); //$NON-NLS-1$
 		}
 		try {
 			fillManifest(compatibilityManifest);
@@ -105,7 +105,7 @@ public class PluginConverterImpl implements PluginConverter {
 			FrameworkLogEntry entry = new FrameworkLogEntry(EclipseAdaptorConstants.PI_ECLIPSE_OSGI, e.getMessage(), 0, e, null);
 			EclipseAdaptor.getDefault().getFrameworkLog().log(entry);
 			return null;
-		};
+		}
 		return bundleManifestLocation;
 	}
 
@@ -119,6 +119,7 @@ public class PluginConverterImpl implements PluginConverter {
 				String aFilter = (String) iter2.next();
 				if (anExport.startsWith(aFilter)) {
 					filteredExport.add(anExport);
+					break;
 				}
 			}
 		}
@@ -402,16 +403,24 @@ public class PluginConverterImpl implements PluginConverter {
 		Map libs = pluginInfo.getLibraries();
 		if (libs == null)
 			return null;
-		// Based on similar code from EclipseStarter
-		// Check the osgi.dev property to see if dev classpath entries have been defined.
-		String[] devClassPath = DevClassPathHelper.getDevClassPath(pluginInfo.getUniqueId());
-		// add the dev. time classpath entries
-		List starExport = new ArrayList(1);
-		starExport.add("*"); //$NON-NLS-1$
-		if (devClassPath != null) {
-			for (int i = 0; i < devClassPath.length; i++)
-				libs.put(devClassPath[i], starExport);
+	
+		//If we are in dev mode, then add the binary folders on the list libs with the export clause set to be the cumulation of the export clause of the real libs   
+		if (DevClassPathHelper.inDevelopmentMode()) {
+			String[] devClassPath = DevClassPathHelper.getDevClassPath(pluginInfo.getUniqueId());
+			
+			// collect export clauses
+			List allExportClauses = new ArrayList(libs.size());
+			Set libEntries = libs.entrySet();
+			for (Iterator iter = libEntries.iterator(); iter.hasNext();) {
+				Map.Entry element = (Map.Entry) iter.next();
+				allExportClauses.addAll((List) element.getValue());
+			}
+			if (devClassPath != null) {
+				for (int i = 0; i < devClassPath.length; i++)
+					libs.put(devClassPath[i], allExportClauses);
+			}
 		}
+		
 		Set result = new HashSet(7);
 		Set libEntries = libs.entrySet();
 		for (Iterator iter = libEntries.iterator(); iter.hasNext();) {
