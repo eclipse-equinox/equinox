@@ -71,7 +71,8 @@ public class BundleURLConnection extends URLConnection {
 					}
 				}
 				try {
-					contentType = guessContentTypeFromStream(in);
+					if (in.markSupported())
+						contentType = guessContentTypeFromStream(in);
 				} catch (IOException e) {
 				}
 			}
