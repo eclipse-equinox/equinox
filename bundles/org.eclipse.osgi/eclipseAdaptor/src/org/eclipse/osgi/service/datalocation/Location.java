@@ -20,7 +20,6 @@ import java.net.URL;
  */
 public interface Location {
 	/**
-	 * TODO if we can't set the default location through API, why do we need this method for?
 	 * Returns true if this location allows a default value to be assigned
 	 * @return whether or not this location can assign a default value
 	 */
