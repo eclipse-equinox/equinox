@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.util.tracker/src/org/osgi/util/tracker/ServiceTracker.java,v 1.10 2005/01/21 22:26:38 twatson Exp $
+ * $Header: /cvshome/build/org.osgi.util.tracker/src/org/osgi/util/tracker/ServiceTracker.java,v 1.12 2005/01/25 15:36:40 hargrave Exp $
  * 
  * Copyright (c) OSGi Alliance (2000, 2004). All Rights Reserved.
  * 
@@ -35,28 +35,29 @@ import org.osgi.framework.*;
  * The <code>ServiceTracker</code> class simplifies using services from the
  * Framework's service registry.
  * <p>
- * A <code>ServiceTracker</code> object is constructed with search criteria and a
- * <code>ServiceTrackerCustomizer</code> object. A <code>ServiceTracker</code>
- * object can use the <code>ServiceTrackerCustomizer</code> object to customize
- * the service objects to be tracked. The <code>ServiceTracker</code> object can
- * then be opened to begin tracking all services in the Framework's service
- * registry that match the specified search criteria. The
- * <code>ServiceTracker</code> object correctly handles all of the details of
- * listening to <code>ServiceEvent</code> objects and getting and ungetting
- * services.
+ * A <code>ServiceTracker</code> object is constructed with search criteria
+ * and a <code>ServiceTrackerCustomizer</code> object. A
+ * <code>ServiceTracker</code> object can use the
+ * <code>ServiceTrackerCustomizer</code> object to customize the service
+ * objects to be tracked. The <code>ServiceTracker</code> object can then be
+ * opened to begin tracking all services in the Framework's service registry
+ * that match the specified search criteria. The <code>ServiceTracker</code>
+ * object correctly handles all of the details of listening to
+ * <code>ServiceEvent</code> objects and getting and ungetting services.
  * <p>
- * The <code>getServiceReferences</code> method can be called to get references to
- * the services being tracked. The <code>getService</code> and
- * <code>getServices</code> methods can be called to get the service objects for
- * the tracked service.
+ * The <code>getServiceReferences</code> method can be called to get
+ * references to the services being tracked. The <code>getService</code> and
+ * <code>getServices</code> methods can be called to get the service objects
+ * for the tracked service.
  * 
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.12 $
  */
 public class ServiceTracker implements ServiceTrackerCustomizer {
 	/* set this to true to compile in debug messages */
 	static final boolean					DEBUG			= false;
 	/**
-	 * Bundle context this <code>ServiceTracker</code> object is tracking against.
+	 * Bundle context this <code>ServiceTracker</code> object is tracking
+	 * against.
 	 */
 	protected final BundleContext			context;
 	/**
@@ -86,8 +87,8 @@ public class ServiceTracker implements ServiceTrackerCustomizer {
 	 */
 	private final ServiceReference			trackReference;
 	/**
-	 * Tracked services: <code>ServiceReference</code> object -> customized Object
-	 * and <code>ServiceListener</code> object
+	 * Tracked services: <code>ServiceReference</code> object -> customized
+	 * Object and <code>ServiceListener</code> object
 	 */
 	private Tracked							tracked;
 	/**
@@ -115,15 +116,16 @@ public class ServiceTracker implements ServiceTrackerCustomizer {
 	 * The service referenced by the specified <code>ServiceReference</code>
 	 * object will be tracked by this <code>ServiceTracker</code> object.
 	 * 
-	 * @param context <code>BundleContext</code> object against which the tracking
-	 *        is done.
-	 * @param reference <code>ServiceReference</code> object for the service to be
-	 *        tracked.
+	 * @param context <code>BundleContext</code> object against which the
+	 *        tracking is done.
+	 * @param reference <code>ServiceReference</code> object for the service
+	 *        to be tracked.
 	 * @param customizer The customizer object to call when services are added,
-	 *        modified, or removed in this <code>ServiceTracker</code> object. If
-	 *        customizer is <code>null</code>, then this <code>ServiceTracker</code>
-	 *        object will be used as the <code>ServiceTrackerCustomizer</code>
-	 *        object and the <code>ServiceTracker</code> object will call the
+	 *        modified, or removed in this <code>ServiceTracker</code> object.
+	 *        If customizer is <code>null</code>, then this
+	 *        <code>ServiceTracker</code> object will be used as the
+	 *        <code>ServiceTrackerCustomizer</code> object and the
+	 *        <code>ServiceTracker</code> object will call the
 	 *        <code>ServiceTrackerCustomizer</code> methods on itself.
 	 */
 	public ServiceTracker(BundleContext context, ServiceReference reference,
@@ -137,28 +139,30 @@ public class ServiceTracker implements ServiceTrackerCustomizer {
 			this.filter = context.createFilter(listenerFilter);
 		}
 		catch (InvalidSyntaxException e) { // we could only get this exception
-										   // if the ServiceReference was
-										   // invalid
+			// if the ServiceReference was
+			// invalid
 			throw new IllegalArgumentException(
-					"unexpected InvalidSyntaxException: " + e.getMessage());
+					"unexpected InvalidSyntaxException: " + e.getMessage()); //$NON-NLS-1$
 		}
 	}
 
 	/**
-	 * Create a <code>ServiceTracker</code> object on the specified class name.
+	 * Create a <code>ServiceTracker</code> object on the specified class
+	 * name.
 	 * 
 	 * <p>
 	 * Services registered under the specified class name will be tracked by
 	 * this <code>ServiceTracker</code> object.
 	 * 
-	 * @param context <code>BundleContext</code> object against which the tracking
-	 *        is done.
+	 * @param context <code>BundleContext</code> object against which the
+	 *        tracking is done.
 	 * @param clazz Class name of the services to be tracked.
 	 * @param customizer The customizer object to call when services are added,
-	 *        modified, or removed in this <code>ServiceTracker</code> object. If
-	 *        customizer is <code>null</code>, then this <code>ServiceTracker</code>
-	 *        object will be used as the <code>ServiceTrackerCustomizer</code>
-	 *        object and the <code>ServiceTracker</code> object will call the
+	 *        modified, or removed in this <code>ServiceTracker</code> object.
+	 *        If customizer is <code>null</code>, then this
+	 *        <code>ServiceTracker</code> object will be used as the
+	 *        <code>ServiceTrackerCustomizer</code> object and the
+	 *        <code>ServiceTracker</code> object will call the
 	 *        <code>ServiceTrackerCustomizer</code> methods on itself.
 	 */
 	public ServiceTracker(BundleContext context, String clazz,
@@ -172,10 +176,10 @@ public class ServiceTracker implements ServiceTrackerCustomizer {
 			this.filter = context.createFilter(listenerFilter);
 		}
 		catch (InvalidSyntaxException e) { // we could only get this exception
-										   // if the clazz argument was
-										   // malformed
+			// if the clazz argument was
+			// malformed
 			throw new IllegalArgumentException(
-					"unexpected InvalidSyntaxException: " + e.getMessage());
+					"unexpected InvalidSyntaxException: " + e.getMessage()); //$NON-NLS-1$
 		}
 	}
 
@@ -187,15 +191,15 @@ public class ServiceTracker implements ServiceTrackerCustomizer {
 	 * Services which match the specified <code>Filter</code> object will be
 	 * tracked by this <code>ServiceTracker</code> object.
 	 * 
-	 * @param context <code>BundleContext</code> object against which the tracking
-	 *        is done.
+	 * @param context <code>BundleContext</code> object against which the
+	 *        tracking is done.
 	 * @param filter <code>Filter</code> object to select the services to be
 	 *        tracked.
 	 * @param customizer The customizer object to call when services are added,
-	 *        modified, or removed in this <code>ServiceTracker</code> object. If
-	 *        customizer is null, then this <code>ServiceTracker</code> object
-	 *        will be used as the <code>ServiceTrackerCustomizer</code> object and
-	 *        the <code>ServiceTracker</code> object will call the
+	 *        modified, or removed in this <code>ServiceTracker</code> object.
+	 *        If customizer is null, then this <code>ServiceTracker</code>
+	 *        object will be used as the <code>ServiceTrackerCustomizer</code>
+	 *        object and the <code>ServiceTracker</code> object will call the
 	 *        <code>ServiceTrackerCustomizer</code> methods on itself.
 	 * @since 1.1
 	 */
@@ -207,53 +211,81 @@ public class ServiceTracker implements ServiceTrackerCustomizer {
 		this.listenerFilter = null;
 		this.filter = filter;
 		this.customizer = (customizer == null) ? this : customizer;
-		if ((context == null) || (filter == null)) { // we throw a NPE here to
-													 // be consistent with the
-													 // other constructors
+		if ((context == null) || (filter == null)) { // we throw a NPE here
+			// to
+			// be consistent with the
+			// other constructors
 			throw new NullPointerException();
 		}
 	}
 
 	/**
-	 * Open this <code>ServiceTracker</code> object and begin tracking services.
+	 * Open this <code>ServiceTracker</code> object and begin tracking
+	 * services.
+	 * 
+	 * <p>
+	 * This method calls <code>open(false)</code>.
+	 * 
+	 * @throws java.lang.IllegalStateException if the <code>BundleContext</code>
+	 *         object with which this <code>ServiceTracker</code> object was
+	 *         created is no longer valid.
+	 * @see #open(boolean)
+	 */
+	public void open() {
+		open(false);
+	}
+
+	/**
+	 * Open this <code>ServiceTracker</code> object and begin tracking
+	 * services.
 	 * 
 	 * <p>
 	 * Services which match the search criteria specified when this
 	 * <code>ServiceTracker</code> object was created are now tracked by this
 	 * <code>ServiceTracker</code> object.
 	 * 
+	 * @param trackAllServices If <code>true</code>, then this
+	 *        <code>ServiceTracker</code> will track all matching services
+	 *        regardless of class loader accessibility. If <code>false</code>,
+	 *        then this <code>ServiceTracker</code> will only track matching
+	 *        services which are class loader accessibile to the bundle whose
+	 *        <code>BundleContext</code> is used by this
+	 *        <code>ServiceTracker</code>.
 	 * @throws java.lang.IllegalStateException if the <code>BundleContext</code>
 	 *         object with which this <code>ServiceTracker</code> object was
 	 *         created is no longer valid.
+	 * @since 1.3
 	 */
-	public synchronized void open() {
+	public synchronized void open(boolean trackAllServices) {
 		if (tracked != null) {
 			return;
 		}
 		if (DEBUG) {
 			System.out.println("ServiceTracker.open: " + filter); //$NON-NLS-1$
 		}
-		tracked = createTracked();
+		tracked = trackAllServices ? new AllTracked() : new Tracked();
 		trackingCount = 0;
 		ServiceReference[] references;
 		synchronized (tracked) {
 			try {
 				context.addServiceListener(tracked, listenerFilter);
 				if (listenerFilter == null) { // user supplied filter
-					references = getInitialReferences(null, filter);
+					references = getInitialReferences(trackAllServices, null,
+							filter.toString());
 				}
 				else { // constructor supplied filter
 					if (trackClass == null) {
 						references = new ServiceReference[] {trackReference};
 					}
 					else {
-						references = getInitialReferences(trackClass, null);
+						references = getInitialReferences(trackAllServices,
+								trackClass, null);
 					}
 				}
 			}
 			catch (InvalidSyntaxException e) {
 				throw new RuntimeException(
-						"unexpected InvalidSyntaxException: " + e.getMessage());
+						"unexpected InvalidSyntaxException: " + e.getMessage()); //$NON-NLS-1$
 			}
 		}
 		/* Call tracked outside of synchronized region */
@@ -270,32 +302,33 @@ public class ServiceTracker implements ServiceTrackerCustomizer {
 	}
 
 	/**
-	 * Returns a new <code>Tracked</code> object for this <code>ServiceTracker</code> object.
-	 * @return a new <code>Tracked</code> object for this <code>ServiceTracker</code> object.
-	 */
-	protected Tracked createTracked() {
-		return new Tracked();
-	}
-
-	/**
 	 * Returns the list of initial <code>ServiceReference</code> objects that
 	 * will be tracked by this <code>ServiceTracker</code> object.
-	 * @param trackClass the class name with which the service was registered, 
-	 * or null for all services.
-	 * @param filter the filter criteria or null for all services.
+	 * 
+	 * @param trackAllServices If true, use getAllServiceReferences.
+	 * @param trackClass the class name with which the service was registered,
+	 *        or null for all services.
+	 * @param filterString the filter criteria or null for all services.
 	 * @return the list of initial <code>ServiceReference</code> objects.
 	 * @throws InvalidSyntaxException if the filter uses an invalid syntax.
 	 */
-	protected ServiceReference[] getInitialReferences(String trackClass, Filter filter) throws InvalidSyntaxException {
-		return context.getServiceReferences(trackClass, filter == null ? null : filter.toString());
+	private ServiceReference[] getInitialReferences(boolean trackAllServices,
+			String trackClass, String filterString)
+			throws InvalidSyntaxException {
+		if (trackAllServices) {
+			return context.getAllServiceReferences(trackClass, filterString);
+		}
+		else {
+			return context.getServiceReferences(trackClass, filterString);
+		}
 	}
 
 	/**
 	 * Close this <code>ServiceTracker</code> object.
 	 * 
 	 * <p>
-	 * This method should be called when this <code>ServiceTracker</code> object
-	 * should end the tracking of services.
+	 * This method should be called when this <code>ServiceTracker</code>
+	 * object should end the tracking of services.
 	 */
 	public synchronized void close() {
 		if (tracked == null) {
@@ -333,14 +366,14 @@ public class ServiceTracker implements ServiceTrackerCustomizer {
 	 * <code>ServiceTrackerCustomizer.addingService</code> method.
 	 * 
 	 * <p>
-	 * This method is only called when this <code>ServiceTracker</code> object has
-	 * been constructed with a <code>null ServiceTrackerCustomizer</code>
+	 * This method is only called when this <code>ServiceTracker</code> object
+	 * has been constructed with a <code>null ServiceTrackerCustomizer</code>
 	 * argument.
 	 * 
 	 * The default implementation returns the result of calling
-	 * <code>getService</code>, on the <code>BundleContext</code> object with which
-	 * this <code>ServiceTracker</code> object was created, passing the specified
-	 * <code>ServiceReference</code> object.
+	 * <code>getService</code>, on the <code>BundleContext</code> object
+	 * with which this <code>ServiceTracker</code> object was created, passing
+	 * the specified <code>ServiceReference</code> object.
 	 * <p>
 	 * This method can be overridden in a subclass to customize the service
 	 * object to be tracked for the service being added. In that case, take care
@@ -362,8 +395,8 @@ public class ServiceTracker implements ServiceTrackerCustomizer {
 	 * <code>ServiceTrackerCustomizer.modifiedService</code> method.
 	 * 
 	 * <p>
-	 * This method is only called when this <code>ServiceTracker</code> object has
-	 * been constructed with a <code>null ServiceTrackerCustomizer</code>
+	 * This method is only called when this <code>ServiceTracker</code> object
+	 * has been constructed with a <code>null ServiceTrackerCustomizer</code>
 	 * argument.
 	 * 
 	 * The default implementation does nothing.
@@ -380,18 +413,18 @@ public class ServiceTracker implements ServiceTrackerCustomizer {
 	 * <code>ServiceTrackerCustomizer.removedService</code> method.
 	 * 
 	 * <p>
-	 * This method is only called when this <code>ServiceTracker</code> object has
-	 * been constructed with a <code>null ServiceTrackerCustomizer</code>
+	 * This method is only called when this <code>ServiceTracker</code> object
+	 * has been constructed with a <code>null ServiceTrackerCustomizer</code>
 	 * argument.
 	 * 
 	 * The default implementation calls <code>ungetService</code>, on the
-	 * <code>BundleContext</code> object with which this <code>ServiceTracker</code>
-	 * object was created, passing the specified <code>ServiceReference</code>
-	 * object.
+	 * <code>BundleContext</code> object with which this
+	 * <code>ServiceTracker</code> object was created, passing the specified
+	 * <code>ServiceReference</code> object.
 	 * <p>
 	 * This method can be overridden in a subclass. If the default
-	 * implementation of <code>addingService</code> method was used, this method
-	 * must unget the service.
+	 * implementation of <code>addingService</code> method was used, this
+	 * method must unget the service.
 	 * 
 	 * @param reference Reference to removed service.
 	 * @param service The service object for the removed service.
@@ -407,8 +440,8 @@ public class ServiceTracker implements ServiceTrackerCustomizer {
 	 * <p>
 	 * It is strongly recommended that <code>waitForService</code> is not used
 	 * during the calling of the <code>BundleActivator</code> methods.
-	 * <code>BundleActivator</code> methods are expected to complete in a short
-	 * period of time.
+	 * <code>BundleActivator</code> methods are expected to complete in a
+	 * short period of time.
 	 * 
 	 * @param timeout time interval in milliseconds to wait. If zero, the method
 	 *        will wait indefinately.
@@ -417,7 +450,7 @@ public class ServiceTracker implements ServiceTrackerCustomizer {
 	 */
 	public Object waitForService(long timeout) throws InterruptedException {
 		if (timeout < 0) {
-			throw new IllegalArgumentException("timeout value is negative");
+			throw new IllegalArgumentException("timeout value is negative"); //$NON-NLS-1$
 		}
 		Object object = getService();
 		while (object == null) {
@@ -443,11 +476,11 @@ public class ServiceTracker implements ServiceTrackerCustomizer {
 	}
 
 	/**
-	 * Return an array of <code>ServiceReference</code> objects for all services
-	 * being tracked by this <code>ServiceTracker</code> object.
+	 * Return an array of <code>ServiceReference</code> objects for all
+	 * services being tracked by this <code>ServiceTracker</code> object.
 	 * 
-	 * @return Array of <code>ServiceReference</code> objects or <code>null</code>
-	 *         if no service are being tracked.
+	 * @return Array of <code>ServiceReference</code> objects or
+	 *         <code>null</code> if no service are being tracked.
 	 */
 	public ServiceReference[] getServiceReferences() {
 		Tracked tracked = this.tracked; /*
@@ -483,14 +516,14 @@ public class ServiceTracker implements ServiceTrackerCustomizer {
 	 * 
 	 * <p>
 	 * If there is a tie in ranking, the service with the lowest service ID (as
-	 * specified in its <code>service.id</code> property); that is, the service
-	 * that was registered first is returned.
+	 * specified in its <code>service.id</code> property); that is, the
+	 * service that was registered first is returned.
 	 * <p>
 	 * This is the same algorithm used by
 	 * <code>BundleContext.getServiceReference</code>.
 	 * 
-	 * @return <code>ServiceReference</code> object or <code>null</code> if no
-	 *         service is being tracked.
+	 * @return <code>ServiceReference</code> object or <code>null</code> if
+	 *         no service is being tracked.
 	 * @since 1.1
 	 */
 	public ServiceReference getServiceReference() {
@@ -555,14 +588,14 @@ public class ServiceTracker implements ServiceTrackerCustomizer {
 	}
 
 	/**
-	 * Returns the service object for the specified <code>ServiceReference</code>
-	 * object if the referenced service is being tracked by this
-	 * <code>ServiceTracker</code> object.
+	 * Returns the service object for the specified
+	 * <code>ServiceReference</code> object if the referenced service is being
+	 * tracked by this <code>ServiceTracker</code> object.
 	 * 
 	 * @param reference Reference to the desired service.
-	 * @return Service object or <code>null</code> if the service referenced by
-	 *         the specified <code>ServiceReference</code> object is not being
-	 *         tracked.
+	 * @return Service object or <code>null</code> if the service referenced
+	 *         by the specified <code>ServiceReference</code> object is not
+	 *         being tracked.
 	 */
 	public Object getService(ServiceReference reference) {
 		Tracked tracked = this.tracked; /*
@@ -616,7 +649,8 @@ public class ServiceTracker implements ServiceTrackerCustomizer {
 	 * If any services are being tracked, this method returns the result of
 	 * calling <code>getService(getServiceReference())</code>.
 	 * 
-	 * @return Service object or <code>null</code> if no service is being tracked.
+	 * @return Service object or <code>null</code> if no service is being
+	 *         tracked.
 	 */
 	public Object getService() {
 		Object service = cachedService;
@@ -640,10 +674,10 @@ public class ServiceTracker implements ServiceTrackerCustomizer {
 	/**
 	 * Remove a service from this <code>ServiceTracker</code> object.
 	 * 
-	 * The specified service will be removed from this <code>ServiceTracker</code>
-	 * object. If the specified service was being tracked then the
-	 * <code>ServiceTrackerCustomizer.removedService</code> method will be called
-	 * for that service.
+	 * The specified service will be removed from this
+	 * <code>ServiceTracker</code> object. If the specified service was being
+	 * tracked then the <code>ServiceTrackerCustomizer.removedService</code>
+	 * method will be called for that service.
 	 * 
 	 * @param reference Reference to the service to be removed.
 	 */
@@ -680,21 +714,22 @@ public class ServiceTracker implements ServiceTrackerCustomizer {
 	/**
 	 * Returns the tracking count for this <code>ServiceTracker</code> object.
 	 * 
-	 * The tracking count is initialized to 0 when this <code>ServiceTracker</code>
-	 * object is opened. Every time a service is added or removed from this
-	 * <code>ServiceTracker</code> object the tracking count is incremented.
+	 * The tracking count is initialized to 0 when this
+	 * <code>ServiceTracker</code> object is opened. Every time a service is
+	 * added or removed from this <code>ServiceTracker</code> object the
+	 * tracking count is incremented.
 	 * 
 	 * <p>
 	 * The tracking count can be used to determine if this
 	 * <code>ServiceTracker</code> object has added or removed a service by
 	 * comparing a tracking count value previously collected with the current
 	 * tracking count value. If the value has not changed, then no service has
-	 * been added or removed from this <code>ServiceTracker</code> object since
-	 * the previous tracking count was collected.
+	 * been added or removed from this <code>ServiceTracker</code> object
+	 * since the previous tracking count was collected.
 	 * 
 	 * @since 1.2
-	 * @return The tracking count for this <code>ServiceTracker</code> object or
-	 *         -1 if this <code>ServiceTracker</code> object is not open.
+	 * @return The tracking count for this <code>ServiceTracker</code> object
+	 *         or -1 if this <code>ServiceTracker</code> object is not open.
 	 */
 	public int getTrackingCount() {
 		return trackingCount;
@@ -719,17 +754,17 @@ public class ServiceTracker implements ServiceTrackerCustomizer {
 	}
 
 	/**
-	 * Inner class to track services. If a <code>ServiceTracker</code> object is
-	 * reused (closed then reopened), then a new Tracked object is used. This
+	 * Inner class to track services. If a <code>ServiceTracker</code> object
+	 * is reused (closed then reopened), then a new Tracked object is used. This
 	 * class is a hashtable mapping <code>ServiceReference</code> object ->
-	 * customized Object. This class is the <code>ServiceListener</code> object
-	 * for the tracker. This class is used to synchronize access to the tracked
-	 * services. This is not a public class. It is only for use by the
+	 * customized Object. This class is the <code>ServiceListener</code>
+	 * object for the tracker. This class is used to synchronize access to the
+	 * tracked services. This is not a public class. It is only for use by the
 	 * implementation of the <code>ServiceTracker</code> class.
-	 *  
+	 * 
 	 */
 	class Tracked extends Hashtable implements ServiceListener {
-		static final long serialVersionUID = -7420065199791006079L;
+		static final long			serialVersionUID	= -7420065199791006079L;
 		/**
 		 * List of ServiceReferences in the process of being added.
 		 */
@@ -758,9 +793,9 @@ public class ServiceTracker implements ServiceTrackerCustomizer {
 		}
 
 		/**
-		 * <code>ServiceListener</code> method for the <code>ServiceTracker</code>
-		 * class. This method must NOT be synchronized to avoid deadlock
-		 * potential.
+		 * <code>ServiceListener</code> method for the
+		 * <code>ServiceTracker</code> class. This method must NOT be
+		 * synchronized to avoid deadlock potential.
 		 * 
 		 * @param event <code>ServiceEvent</code> object from the framework.
 		 */
@@ -776,7 +811,8 @@ public class ServiceTracker implements ServiceTrackerCustomizer {
 			switch (event.getType()) {
 				case ServiceEvent.REGISTERED :
 				case ServiceEvent.MODIFIED :
-					if (listenerFilter != null) { // constructor supplied filter
+					if (listenerFilter != null) { // constructor supplied
+						// filter
 						track(reference);
 						/*
 						 * If the customizer throws an unchecked exception, it
@@ -864,10 +900,10 @@ public class ServiceTracker implements ServiceTrackerCustomizer {
 			finally {
 				synchronized (this) {
 					if (adding.remove(reference)) /*
-												   * if the service was not
-												   * untracked during the
-												   * customizer callback
-												   */
+													 * if the service was not
+													 * untracked during the
+													 * customizer callback
+													 */
 					{
 						if (object != null) {
 							this.put(reference, object);
@@ -906,9 +942,9 @@ public class ServiceTracker implements ServiceTrackerCustomizer {
 			Object object;
 			synchronized (this) {
 				if (adding.remove(reference)) /*
-											   * if the service is in the
-											   * process of being added
-											   */
+												 * if the service is in the
+												 * process of being added
+												 */
 				{
 					if (DEBUG) {
 						System.out
@@ -920,10 +956,10 @@ public class ServiceTracker implements ServiceTrackerCustomizer {
 							 */
 				}
 				object = this.remove(reference); /*
-												  * must remove from tracker
-												  * before calling customizer
-												  * callback
-												  */
+													 * must remove from tracker
+													 * before calling customizer
+													 * callback
+													 */
 				if (object == null) /* are we actually tracking the service */
 				{
 					return;
@@ -940,6 +976,24 @@ public class ServiceTracker implements ServiceTrackerCustomizer {
 			 * If the customizer throws an unchecked exception, it is safe to
 			 * let it propagate
 			 */
+		}
+	}
+
+	/**
+	 * Subclass of Tracked which implements the AllServiceListener interface.
+	 * This class is used by the ServiceTracker if isAllServiceTracker returns
+	 * true.
+	 * 
+	 * @since 1.3
+	 */
+	class AllTracked extends Tracked implements AllServiceListener {
+		static final long	serialVersionUID	= 4050764875305137716L;
+
+		/**
+		 * Tracked constructor.
+		 */
+		protected AllTracked() {
+			super();
 		}
 	}
 }
