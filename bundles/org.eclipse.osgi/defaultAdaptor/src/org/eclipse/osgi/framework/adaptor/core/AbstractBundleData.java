@@ -465,6 +465,14 @@ public abstract class AbstractBundleData implements BundleData, Cloneable {
 		return null;
 	}
 
+	public boolean matchDNChain(String dnChain, String pattern) {
+		if (System.getSecurityManager() == null)
+			return false;
+		if (getBaseBundleFile() instanceof SignedBundle)
+			return ((SignedBundle) getBaseBundleFile()).matchDNChain(dnChain, pattern);
+		return false;
+	}
+
 	/**
 	 * Return a copy of this object with the
 	 * generation dependent fields updated to
