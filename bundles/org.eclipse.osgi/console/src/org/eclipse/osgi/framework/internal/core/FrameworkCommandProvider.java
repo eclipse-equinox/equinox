@@ -774,7 +774,7 @@ public class FrameworkCommandProvider implements CommandProvider {
 								}
 
 								intp.print("  ");
-                    			if (packageAdmin.isFragment(bundle)) {
+                    			if ((packageAdmin.getBundleType(bundle) & PackageAdmin.BUNDLE_TYPE_FRAGMENT) > 0) {
                     				org.osgi.framework.Bundle[] hosts = packageAdmin.getHosts(bundle);
                     				if (hosts != null) {
                     					intp.println(ConsoleMsg.formatter.getString("CONSOLE_HOST_MESSAGE"));

@@ -1,5 +1,5 @@
 /*
- * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/service/packageadmin/PackageAdmin.java,v 1.4 2004/03/01 22:24:42 twatson Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/service/packageadmin/PackageAdmin.java,v 1.5 2004/03/04 15:59:07 twatson Exp $
  *
  * Copyright (c) The Open Services Gateway Initiative (2001, 2002).
  * All Rights Reserved.
@@ -51,7 +51,7 @@ import org.osgi.framework.Bundle;
  * old values, <tt>isRemovalPending()</tt> returns <tt>true</tt>, and <tt>getExportingBundle()</tt>
  * and <tt>getImportingBundles()</tt> return <tt>null</tt>.
  *
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @author Open Services Gateway Initiative
  */
 public interface PackageAdmin {
@@ -211,6 +211,22 @@ public interface PackageAdmin {
 	/**
 	 * Returns true if the specified bundle is a fragment bundle; otherwise false is returned.
 	 * @return true if the specified bundle is a fragment bundle; otherwise false is returned.
+	 * @deprecated use getBundleType(Bundle) instead.
 	 */
     public boolean isFragment(Bundle bundle);
+
+    /**
+     * A bundle of this type is a fragment bundle.
+     */
+    public static final int BUNDLE_TYPE_FRAGMENT = 0x00000001; 
+
+    /**
+	 * Gets the type of the specified bundle.  Currently the only defined bundle 
+	 * type is BUNDLE_TYPE_FRAGMENT.  Additional bundle types may be defined in the 
+	 * future.  If a bundle is not one or more of the defined types then 0 
+	 * is returned.
+	 * <p>A bundle may be more than one type at a time.
+	 * @return the type of the bundle.
+	 */
+    public int getBundleType(Bundle bundle);
 }

@@ -895,4 +895,7 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 		return ((Bundle)bundle).isFragment();
 	}
 
+	public int getBundleType(org.osgi.framework.Bundle bundle) {
+		return ((Bundle)bundle).isFragment() ? PackageAdmin.BUNDLE_TYPE_FRAGMENT : 0;
+	}
 }
