@@ -20,7 +20,8 @@ import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.util.ManifestElement;
-import org.osgi.framework.*;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.FrameworkEvent;
 
 /**
  * This object is responsible for all classloader delegation for a bundle.
@@ -44,6 +45,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 
 	/* cache of imported packages. Key is packagename, Value is PackageSource */
 	KeyedHashSet importedSources;
+	boolean importsInit = false;
 	/* cache of required package sources. Key is packagename, value is PackageSource */
 	KeyedHashSet requiredSources;
 	/* flag that indicates this bundle has dynamic imports */
@@ -117,9 +119,6 @@ public class BundleLoader implements ClassLoaderDelegate {
 	}
 
 	final void initialize(BundleDescription description) {
-		// init the imported packages list taking the bundle...
-		addImportedPackages(description.getResolvedImports());
-
 		// init the require bundles list.
 		BundleDescription[] required = description.getResolvedRequires();
 		if (required.length > 0) {
@@ -173,17 +172,19 @@ public class BundleLoader implements ClassLoaderDelegate {
 				addDynamicImportPackage(fragments[i].getImportPackages());
 	}
 
-	private void addImportedPackages(ExportPackageDescription[] packages) {
+	private synchronized void addImportedPackages(ExportPackageDescription[] packages) {
+		if (importsInit)
+			return;
 		if (packages != null && packages.length > 0) {
 			if (importedSources == null)
 				importedSources = new KeyedHashSet(packages.length, false);
 			for (int i = 0; i < packages.length; i++) {
 				PackageSource source = createExportPackageSource(packages[i]);
-				if (source == null)
-					return;
-				importedSources.add(source);
+				if (source != null)
+					importedSources.add(source);
 			}
 		}
+		importsInit = true;
 	}
 
 	final PackageSource createExportPackageSource(ExportPackageDescription export) {
@@ -191,7 +192,11 @@ public class BundleLoader implements ClassLoaderDelegate {
 		if (exportProxy == null)
 			// TODO log error!!
 			return null;
-		return exportProxy.createPackageSource(export, false);
+		PackageSource requiredSource = exportProxy.getBundleLoader().findRequiredSource(export.getName());
+		PackageSource exportSource = exportProxy.createPackageSource(export, false);
+		if (requiredSource == null)
+			return exportSource;
+		return createMultiSource(export.getName(), new PackageSource[] {requiredSource, exportSource});
 	}
 
 	private static PackageSource createMultiSource(String packageName, PackageSource[] sources) {
@@ -725,6 +730,8 @@ public class BundleLoader implements ClassLoaderDelegate {
 	}
 
 	private PackageSource findImportedSource(String pkgName) {
+		if (!importsInit)
+			addImportedPackages(proxy.getBundleDescription().getResolvedImports());
 		PackageSource source = null;
 		if (importedSources != null) {
 			source = (PackageSource) importedSources.getByKey(pkgName);
