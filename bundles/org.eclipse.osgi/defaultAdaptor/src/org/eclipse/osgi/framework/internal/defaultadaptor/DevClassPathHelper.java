@@ -38,7 +38,7 @@ public class DevClassPathHelper {
 	
 	public static String[] getDevClassPath(String id) {
 		String[] result = null;
-		if (devProperties != null) {
+		if (id != null && devProperties != null) {
 			String entry = devProperties.getProperty(id);
 			if (entry != null)
 				result = getArrayFromList(entry);
