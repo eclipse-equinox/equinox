@@ -166,9 +166,8 @@ public class Framework implements EventDispatcher, EventPublisher {
 		bundles.add(systemBundle);
 		if (bundleDatas != null) {
 			for (int i = 0; i < bundleDatas.length; i++) {
-				BundleData bundledata = (BundleData) bundleDatas[i];
 				try {
-					AbstractBundle bundle = AbstractBundle.createBundle(bundledata, this);
+					AbstractBundle bundle = AbstractBundle.createBundle(bundleDatas[i], this);
 					bundles.add(bundle);
 				} catch (BundleException be) {
 					// This is not a fatal error. Publish the framework event.
@@ -1249,12 +1248,14 @@ public class Framework implements EventDispatcher, EventPublisher {
 	 * @param type
 	 *            FrameworkEvent type.
 	 * @param bundle
-	 *            Affected bundle.
+	 *            Affected bundle or null for system bundle.
 	 * @param throwable
 	 *            Related exception or null.
 	 */
 	public void publishFrameworkEvent(int type, org.osgi.framework.Bundle bundle, Throwable throwable) {
 		if (frameworkEvent != null) {
+			if (bundle == null)
+				bundle = systemBundle;
 			final FrameworkEvent event = new FrameworkEvent(type, bundle, throwable);
 			if (System.getSecurityManager() == null) {
 				publishFrameworkEventPrivileged(event);
