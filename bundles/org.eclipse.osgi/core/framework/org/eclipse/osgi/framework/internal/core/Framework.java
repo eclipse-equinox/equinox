@@ -1426,7 +1426,7 @@ public class Framework implements EventSource, EventPublisher {
 	public void dispatchEvent(Object l, Object lo, int action, Object object) {
 		try {
 			BundleContext context = (BundleContext) l;
-			if (context.bundle != null) /* if context still valid */{
+			if (context.isValid()) /* if context still valid */{
 				EventQueue queue = (EventQueue) object;
 				switch (action) {
 					case BUNDLEEVENT :

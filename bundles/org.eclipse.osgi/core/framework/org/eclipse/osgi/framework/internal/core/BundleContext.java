@@ -28,6 +28,10 @@ import org.osgi.framework.*;
  */
 
 public class BundleContext implements org.osgi.framework.BundleContext, EventSource {
+
+	/** true if the bundle context is still valid */
+	private boolean valid;
+
 	/** Bundle object this context is associated with. */
 	protected BundleHost bundle;	//TODO This should be accessed through accessors
 
@@ -64,6 +68,7 @@ public class BundleContext implements org.osgi.framework.BundleContext, EventSou
 	 */
 	protected BundleContext(BundleHost bundle) {
 		this.bundle = bundle;
+		valid = true;
 		framework = bundle.framework;
 		bundleEvent = null;
 		bundleEventSync = null;
@@ -78,7 +83,7 @@ public class BundleContext implements org.osgi.framework.BundleContext, EventSou
 	 *
 	 */
 	protected void close() {
-		bundle = null; /* invalidate context */
+		valid = false; /* invalidate context */
 
 		if (serviceEvent != null) {
 			framework.serviceEvent.removeListener(this);
@@ -156,6 +161,8 @@ public class BundleContext implements org.osgi.framework.BundleContext, EventSou
 
 			servicesInUse = null;
 		}
+		
+		bundle = null;
 	}
 
 	/**
@@ -1143,7 +1150,7 @@ public class BundleContext implements org.osgi.framework.BundleContext, EventSou
 		// to avoid interference from another thread closing this context
 		Bundle tmpBundle = bundle;
 		try {
-			if (tmpBundle != null) /* if context still valid */ {
+			if (isValid()) /* if context still valid */ {
 				switch (action) {
 					case Framework.BUNDLEEVENT :
 					case Framework.BUNDLEEVENTSYNC :
@@ -1260,9 +1267,18 @@ public class BundleContext implements org.osgi.framework.BundleContext, EventSou
 	 * If the context bundle has stopped.
 	 */
 	protected void checkValid() {
-		if (bundle == null) {
+		if (!isValid()) {
 			throw new IllegalStateException(Msg.formatter.getString("BUNDLE_CONTEXT_INVALID_EXCEPTION"));
 		}
 	}
-
+	
+	/**
+	 * This method checks that the context is still valid. 
+	 *
+	 * @return true if the context is still valid; false otherwise
+	 */
+	protected boolean isValid()
+	{
+		return valid;
+	}
 }
