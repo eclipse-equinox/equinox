@@ -497,7 +497,7 @@ public abstract class AbstractBundleData implements BundleData, Cloneable {
 			} else {
 				if (next.isReference()) {
 					next.setReference(false);
-					next.setFileName(((AbstractFrameworkAdaptor) adaptor).mapLocationToName(getLocation()));
+					next.setFileName(AbstractFrameworkAdaptor.BUNDLEFILE_NAME);
 				}
 			}
 

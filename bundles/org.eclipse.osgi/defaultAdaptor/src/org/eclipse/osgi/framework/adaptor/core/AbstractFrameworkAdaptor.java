@@ -41,6 +41,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 	public static final String PARENT_CLASSLOADER_EXT = "ext"; //$NON-NLS-1$
 	public static final String PARENT_CLASSLOADER_BOOT = "boot"; //$NON-NLS-1$
 	public static final String PARENT_CLASSLOADER_FWK = "fwk"; //$NON-NLS-1$
+	public static final String BUNDLEFILE_NAME = "bundlefile"; //$NON-NLS-1$
 
 	public static final byte EXTENSION_INITIALIZE = 0x01;
 	public static final byte EXTENSION_INSTALLED = 0x02;
@@ -721,7 +722,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 								throw new IOException(NLS.bind(AdaptorMsg.ADAPTOR_DIRECTORY_CREATE_EXCEPTION, genDir.getPath()));
 							}
 
-							String fileName = mapLocationToName(location);
+							String fileName = BUNDLEFILE_NAME;
 							File outFile = new File(genDir, fileName);
 							if ("file".equals(protocol)) { //$NON-NLS-1$
 								File inFile = new File(source.getURL().getPath());
@@ -849,34 +850,6 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 		} finally {
 			stateManager = null;
 		}
-	}
-
-	/**
-	 * Map a location string into a bundle name.
-	 * This methods treats the location string as a URL.
-	 *
-	 * @param location bundle location string.
-	 * @return bundle name.
-	 */
-	public String mapLocationToName(String location) {
-		int end = location.indexOf('?', 0); /* "?" query */
-
-		if (end == -1) {
-			end = location.indexOf('#', 0); /* "#" fragment */
-
-			if (end == -1) {
-				end = location.length();
-			}
-		}
-
-		int begin = location.replace('\\', '/').lastIndexOf('/', end);
-		int colon = location.lastIndexOf(':', end);
-
-		if (colon > begin) {
-			begin = colon;
-		}
-
-		return (location.substring(begin + 1, end));
 	}
 
 	public File getBundleStoreRootDir() {
