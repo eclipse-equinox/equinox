@@ -69,6 +69,7 @@ public class EclipseStarter {
 	// System properties
 	public static final String PROP_BUNDLES = "osgi.bundles"; //$NON-NLS-1$
 	public static final String PROP_BUNDLES_STARTLEVEL = "osgi.bundles.defaultStartLevel"; //$NON-NLS-1$
+	public static final String PROP_INITIAL_STARTLEVEL = "osgi.startlevel"; //$NON-NLS-1$
 	public static final String PROP_DEBUG = "osgi.debug"; //$NON-NLS-1$
 	public static final String PROP_DEV = "osgi.dev"; //$NON-NLS-1$
 	public static final String PROP_CLEAN = "osgi.clean"; //$NON-NLS-1$
@@ -89,7 +90,6 @@ public class EclipseStarter {
 	private static final String PROP_VM = "eclipse.vm"; //$NON-NLS-1$
 	private static final String PROP_VMARGS = "eclipse.vmargs"; //$NON-NLS-1$
 	private static final String PROP_COMMANDS = "eclipse.commands"; //$NON-NLS-1$
-	private static final String PROP_INITIAL_STARTLEVEL = "eclipse.startlevel"; //$NON-NLS-1$
 
 	private static final String FILE_SCHEME = "file:"; //$NON-NLS-1$
 	private static final String FILE_PROTOCOL = "file"; //$NON-NLS-1$
