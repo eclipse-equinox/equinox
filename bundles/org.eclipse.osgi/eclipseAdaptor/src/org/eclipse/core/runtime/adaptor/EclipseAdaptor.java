@@ -532,7 +532,7 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 		data.setStartLevel(in.readInt());
 		data.setStatus(in.readInt());
 		data.setReference(in.readBoolean());
-		if (cacheVersion < BUNDLEDATA_VERSION_11)
+		if (cacheVersion <= BUNDLEDATA_VERSION_11)
 			if (in.readBoolean())
 				data.setType(BundleData.TYPE_FRAGMENT);
 		data.setManifestTimeStamp(in.readLong());
