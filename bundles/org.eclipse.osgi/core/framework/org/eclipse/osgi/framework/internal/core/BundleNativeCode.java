@@ -9,7 +9,8 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.osgi.framework.internal.core;
-import java.util.*;
+import java.util.Enumeration;
+import java.util.Vector;
 import org.eclipse.osgi.service.resolver.Version;
 import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.Constants;
@@ -118,7 +119,7 @@ public class BundleNativeCode {
 	/**
 	 * The AliasMapper used to alias OS Names.
 	 */
-	private static AliasMapper aliasMapper = new AliasMapper();
+	private static AliasMapper aliasMapper = Framework.aliasMapper;
 	/**
 	 * Constructor for BundleNativeCode. It reads bundle native code data from
 	 * the manifest file.
@@ -126,10 +127,9 @@ public class BundleNativeCode {
 	 */
 	protected BundleNativeCode(ManifestElement element) {
 		String[] nativePaths = element.getValueComponents();
-		for (int i=0; i<nativePaths.length; i++) {
+		for (int i = 0; i < nativePaths.length; i++) {
 			addPath(nativePaths[i]);
 		}
-
 		setAttribute(element, Constants.BUNDLE_NATIVECODE_OSNAME);
 		setAttribute(element, Constants.BUNDLE_NATIVECODE_PROCESSOR);
 		setAttribute(element, Constants.BUNDLE_NATIVECODE_OSVERSION);

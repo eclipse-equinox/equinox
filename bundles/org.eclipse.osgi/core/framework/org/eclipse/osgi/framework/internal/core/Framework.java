@@ -72,6 +72,10 @@ public class Framework implements EventSource, EventPublisher {
 	/** Single object for permission checks */
 	protected AdminPermission adminPermission;
 	/**
+	 * The AliasMapper used to alias OS Names.
+	 */
+	protected static AliasMapper aliasMapper = new AliasMapper();
+	/**
 	 * Constructor for the Framework instance. This method initializes the
 	 * framework to an unlaunched state.
 	 *  
@@ -177,9 +181,7 @@ public class Framework implements EventSource, EventPublisher {
 					Debug.println("Unable to find system bundle manifest " + resource);
 				}
 			}
-
 			systemBundle = new SystemBundle(this);
-
 			BundleDescription newSystemBundle = adaptor.getPlatformAdmin().getFactory().createBundleDescription(systemBundle.getHeaders(), Constants.SYSTEM_BUNDLE_LOCATION, 0);
 			if (newSystemBundle == null)
 				throw new BundleException(Msg.formatter.getString("OSGI_SYSTEMBUNDLE_DESCRIPTION_ERROR"));
@@ -224,7 +226,6 @@ public class Framework implements EventSource, EventPublisher {
 				// force resolution so packages are properly linked
 				state.resolve(false);
 			}
-
 			SystemBundleLoader.clearSystemPackages();
 			PackageSpecification[] packages = newSystemBundle.getPackages();
 			if (packages != null) {
@@ -275,6 +276,16 @@ public class Framework implements EventSource, EventPublisher {
 		value = properties.getProperty(Constants.FRAMEWORK_OS_NAME);
 		if (value == null) {
 			value = properties.getProperty(Constants.JVM_OS_NAME);
+			try {
+				String canonicalValue = (String) aliasMapper.aliasOSName(value);
+				if (canonicalValue != null) {
+					value = canonicalValue;
+				}
+			} catch (ClassCastException ex) {
+				//A vector was returned from the alias mapper.
+				//The alias mapped to more than one canonical value
+				//such as "win32" for example
+			}
 			if (value != null) {
 				properties.put(Constants.FRAMEWORK_OS_NAME, value);
 			}
@@ -429,9 +440,8 @@ public class Framework implements EventSource, EventPublisher {
 		/* call the FrameworkAdaptor.frameworkStopping method first */
 		try {
 			adaptor.frameworkStopping();
-		}
-		catch (Throwable t) {
-			publishFrameworkEvent(FrameworkEvent.ERROR, systemBundle,t);
+		} catch (Throwable t) {
+			publishFrameworkEvent(FrameworkEvent.ERROR, systemBundle, t);
 		}
 		/* Suspend systembundle */
 		try {
@@ -470,7 +480,6 @@ public class Framework implements EventSource, EventPublisher {
 		verifyExecutionEnvironment(bundledata.getManifest());
 		return Bundle.createBundle(bundledata, location, this, startlevel);
 	}
-
 	/**
 	 * Verifies that the framework supports one of the required Execution
 	 * Environments
@@ -769,7 +778,7 @@ public class Framework implements EventSource, EventPublisher {
 		if (headerValue == null) {
 			return (null);
 		}
-		ManifestElement[] elements = ManifestElement.parseHeader(Constants.BUNDLE_NATIVECODE,headerValue);
+		ManifestElement[] elements = ManifestElement.parseHeader(Constants.BUNDLE_NATIVECODE, headerValue);
 		BundleNativeCode[] bundleNativeCode = new BundleNativeCode[elements.length];
 		/*
 		 * Pass 1: perform processor/osname/filter matching If there is not a
@@ -1044,7 +1053,6 @@ public class Framework implements EventSource, EventPublisher {
 	protected Bundle[] getBundleByUniqueId(String uniqueId) {
 		return bundles.getBundles(uniqueId);
 	}
-
 	/**
 	 * Returns a list of <tt>ServiceReference</tt> objects. This method
 	 * returns a list of <tt>ServiceReference</tt> objects for services which
