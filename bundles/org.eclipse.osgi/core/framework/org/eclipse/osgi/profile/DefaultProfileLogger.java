@@ -9,7 +9,6 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-
 package org.eclipse.osgi.profile;
 
 import java.io.*;
@@ -19,7 +18,7 @@ public class DefaultProfileLogger implements ProfileLogger {
 	private static final String DEFAULTPROFILE_PROP = "osgi.defaultprofile."; //$NON-NLS-1$
 	private static final String PROP_FILENAME = DEFAULTPROFILE_PROP + "logfilename"; //$NON-NLS-1$
 	private static final String PROP_LOGSYNCHRONOUSLY = DEFAULTPROFILE_PROP + "logsynchronously"; //$NON-NLS-1$
-	private static final String PROP_BUFFERSIZE = DEFAULTPROFILE_PROP + "buffersize";	 //$NON-NLS-1$
+	private static final String PROP_BUFFERSIZE = DEFAULTPROFILE_PROP + "buffersize"; //$NON-NLS-1$
 
 	private static final String DEFAULTPROFILE_OPTION = "org.eclipse.osgi/defaultprofile/"; //$NON-NLS-1$
 	private static final String OPTION_FILENAME = DEFAULTPROFILE_OPTION + "logfilename"; //$NON-NLS-1$
@@ -27,11 +26,11 @@ public class DefaultProfileLogger implements ProfileLogger {
 	private static final String OPTION_BUFFERSIZE = DEFAULTPROFILE_OPTION + "buffersize"; //$NON-NLS-1$
 
 	protected boolean logSynchronously = false;
-	protected long startTime=0;
+	protected long startTime = 0;
 	protected static final int DEFAULT_BUFFER_SIZE = 256;
 
-	protected String launchTimeString=null;
-	protected long launchTime=0;
+	protected String launchTimeString = null;
+	protected long launchTime = 0;
 	protected TimeEntry[] timeLogEntries = null;
 	protected int timeEntriesIndex = 0;
 	protected StringBuffer timelog = null;
@@ -39,46 +38,44 @@ public class DefaultProfileLogger implements ProfileLogger {
 	private int bufferSize = DEFAULT_BUFFER_SIZE;
 	private String logFileName = null;
 	private File logFile = null;
-	private StringBuffer entryReport = new StringBuffer(120);	
+	private StringBuffer entryReport = new StringBuffer(120);
 	private StringBuffer padsb = new StringBuffer(16); // to prevent creating this over and over
 	private int indent;
-		
+
 	DefaultProfileLogger() {
 		initProps();
 
 		int size = getBufferSize();
 		timeLogEntries = new TimeEntry[size];
 		timelog = new StringBuffer(4096);
-		for (int i=0; i<size; i++) {
+		for (int i = 0; i < size; i++) {
 			timeLogEntries[i] = timeEntryFactory();
 		}
 		timeEntriesIndex = 0;
 
 		String timeString = System.getProperty("eclipse.startTime"); //$NON-NLS-1$
 		if (timeString != null) {
-			startTime = Long.parseLong(timeString);	
+			startTime = Long.parseLong(timeString);
 		} else {
-			startTime = System.currentTimeMillis(); 
+			startTime = System.currentTimeMillis();
 		}
-		
-		int index=0;
+
+		int index = 0;
 		long mainTime = startTime;
 		launchTimeString = System.getProperty("launch.startMillis"); //$NON-NLS-1$
-		if (launchTimeString != null)
-		{
+		if (launchTimeString != null) {
 			startTime = Long.parseLong(launchTimeString);
-			logTime(Profile.FLAG_NONE, "DefaultProfileLogger.init()", "launch time initialized", null);  //$NON-NLS-1$//$NON-NLS-2$
+			logTime(Profile.FLAG_NONE, "DefaultProfileLogger.init()", "launch time initialized", null); //$NON-NLS-1$//$NON-NLS-2$
 			timeLogEntries[index++].time = getStartTime();
 		}
-		
-		logTime(Profile.FLAG_NONE, "DefaultProfileLogger.init()", "start time initialized", null);  //$NON-NLS-1$//$NON-NLS-2$
-			timeLogEntries[index++].time = mainTime;			
+
+		logTime(Profile.FLAG_NONE, "DefaultProfileLogger.init()", "start time initialized", null); //$NON-NLS-1$//$NON-NLS-2$
+		timeLogEntries[index++].time = mainTime;
 	}
 
-	
 	public void initProps() {
 		String prop;
-		DebugOptions dbgOptions=null;
+		DebugOptions dbgOptions = null;
 		// if osgi.debug is not available, don't force DebugOptions
 		//  to init as this variable may be set later on where 
 		//  DebugOptions will succeed.
@@ -92,7 +89,7 @@ public class DefaultProfileLogger implements ProfileLogger {
 					bufferSize = size;
 			}
 		}
-		
+
 		if ((prop = System.getProperty(PROP_FILENAME)) != null) {
 			logFileName = prop;
 			if (dbgOptions != null)
@@ -110,10 +107,10 @@ public class DefaultProfileLogger implements ProfileLogger {
 					bufferSize = value;
 					if (dbgOptions != null)
 						dbgOptions.setOption(OPTION_BUFFERSIZE, Integer.toString(bufferSize));
-					}
+				}
 			} catch (NumberFormatException e) {
 				// do nothing
-			}	
+			}
 		}
 	}
 
@@ -122,19 +119,18 @@ public class DefaultProfileLogger implements ProfileLogger {
 			makeLog();
 			logTime(Profile.FLAG_NONE, "Profile.logTime()", "log entries rolled", null); //$NON-NLS-1$ //$NON-NLS-2$
 		}
-		
+
 		TimeEntry entry = timeLogEntries[timeEntriesIndex++];
 		entry.time = getTime();
 		entry.id = id;
 		entry.msg = msg;
 		entry.flag = flag;
 		entry.description = description;
-		
+
 		if (logSynchronously) {
 			System.out.print(getProfileLog().substring(2));
 		}
 	}
-
 
 	public synchronized String getProfileLog() {
 		String log;
@@ -143,40 +139,40 @@ public class DefaultProfileLogger implements ProfileLogger {
 		return log;
 	}
 
-	public long getTime() {
+	protected long getTime() {
 		return System.currentTimeMillis();
 	}
-	
+
 	protected TimeEntry findCompareEntry(int index, String id, int flag) {
 		if (index > 0)
 			index--;
 		int prev = index;
-		if (flag != Profile.FLAG_ENTER) { 
+		if (flag != Profile.FLAG_ENTER) {
 			while (index >= 0) {
 				TimeEntry entry = timeLogEntries[index];
 				if (entry.id.equals(id)) {
 					switch (flag) {
-						case Profile.FLAG_NONE:
-							return entry;	
-						case Profile.FLAG_EXIT:
+						case Profile.FLAG_NONE :
+							return entry;
+						case Profile.FLAG_EXIT :
 							if (entry.flag == Profile.FLAG_ENTER)
 								return entry;
-							break;				
+							break;
 					}
 				}
 				index--;
 			}
 		}
-		return timeLogEntries[prev]; 
+		return timeLogEntries[prev];
 	}
-	
+
 	protected String entryReport(TimeEntry entry, TimeEntry compareWith) {
 		// indent level:
 		entryReport.setLength(0);
 		if (entry.flag == Profile.FLAG_ENTER)
 			indent++;
 		long zeroTime = getRelativeTime(getStartTime());
-		
+
 		entryReport.append('-');
 		long entryTime = getRelativeTime(entry.time);
 		long diff = entryTime - zeroTime;
@@ -184,7 +180,7 @@ public class DefaultProfileLogger implements ProfileLogger {
 		entryReport.append(" : "); //$NON-NLS-1$
 		diff = entry.time - compareWith.time;
 		entryReport.append(pad(Long.toString(diff), 5));
-		entryReport.append(pad("", indent*2)); // indent before displaying the entry.id //$NON-NLS-1$
+		entryReport.append(pad("", indent * 2)); // indent before displaying the entry.id //$NON-NLS-1$
 		entryReport.append("  - "); //$NON-NLS-1$
 		entryReport.append(entry.id);
 		entryReport.append(" > "); //$NON-NLS-1$
@@ -199,23 +195,23 @@ public class DefaultProfileLogger implements ProfileLogger {
 			indent -= 1;
 		return entryReport.toString();
 	}
-	
+
 	protected void makeLog() {
-		indent=0;
+		indent = 0;
 		timelog.append("\r\n"); //$NON-NLS-1$
-		for (int i=0; i<timeEntriesIndex; i++) {
+		for (int i = 0; i < timeEntriesIndex; i++) {
 			TimeEntry entry = timeLogEntries[i];
 			TimeEntry cmpEntry = findCompareEntry(i, entry.id, entry.flag);
 			timelog.append(entryReport(entry, cmpEntry));
 		}
 		timeEntriesIndex = 0;
 	}
-	
+
 	protected String pad(String str, int size) {
 		padsb.setLength(0);
 		int len = str.length();
-		int count = size-len;
-		for (int i=0; i<count; i++)
+		int count = size - len;
+		for (int i = 0; i < count; i++)
 			padsb.append(' ');
 		padsb.append(str);
 		return padsb.toString();
@@ -229,7 +225,7 @@ public class DefaultProfileLogger implements ProfileLogger {
 		timelog.setLength(0);
 		return log;
 	}
-	
+
 	protected void writeToProfileLogFile(String log) {
 		File profileLog = getProfileLogFile();
 		if (profileLog == null)
@@ -249,37 +245,37 @@ public class DefaultProfileLogger implements ProfileLogger {
 				}
 		}
 	}
-	
+
 	protected File getProfileLogFile() {
 		if (logFile == null)
-			if ((logFileName != null) && (logFileName.length()>0))
+			if ((logFileName != null) && (logFileName.length() > 0))
 				logFile = new File(logFileName);
 		return logFile;
 	}
-	
+
 	protected long getStartTime() {
 		return startTime;
 	}
-	
+
 	protected long getRelativeTime(long absoluteTime) {
 		return absoluteTime;
 	}
-	
-	public int getBufferSize() {
+
+	protected int getBufferSize() {
 		if (bufferSize < 2)
 			return DEFAULT_BUFFER_SIZE;
 		return bufferSize;
 	}
-	
+
 	protected TimeEntry timeEntryFactory() {
 		return new TimeEntry();
 	}
-	
+
 	protected class TimeEntry {
 		long time;
 		String id;
 		String msg;
 		String description;
 		int flag;
-	}	
+	}
 }
