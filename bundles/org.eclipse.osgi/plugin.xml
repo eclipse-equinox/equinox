@@ -17,6 +17,7 @@
       <library name="defaultAdaptor.jar">
       </library>
       <library name="eclipseAdaptor.jar">
+		<export name="*"/>
       </library>
       <library name="console.jar">
       </library>
