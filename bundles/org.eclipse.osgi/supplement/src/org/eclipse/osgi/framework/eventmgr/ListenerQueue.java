@@ -48,8 +48,9 @@ public class ListenerQueue {
 	/**
 	 * Once the listener queue has been used to dispatch an event, 
 	 * you cannot add modify the queue.
+     * Access to this field must be protected by a synchronized region.
 	 */
-	private volatile boolean readOnly;
+	private boolean readOnly;
 
 	/**
 	 * ListenerQueue constructor. This method creates an empty snapshop list.

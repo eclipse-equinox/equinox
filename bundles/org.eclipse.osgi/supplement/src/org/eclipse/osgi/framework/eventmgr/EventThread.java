@@ -86,9 +86,7 @@ class EventThread extends Thread {
 	 * Stop thread.
 	 */
 	void close() {
-		synchronized (this) {
-			running = false;
-		}
+		running = false;
 		interrupt();
 	}
 

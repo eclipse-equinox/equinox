@@ -35,20 +35,23 @@ public class EventListeners {
 	 * 	list != null IFF size != 0
 	 * 	list[size] == null
 	 *  for all i < size: list[i] != null
+     * Access to this field must be protected by a synchronized region.
 	 */
-	private volatile ListElement[] list = null;
+	private ListElement[] list = null;
 
 	/**
 	 * The current number of elements.
 	 * Maintains invariant: 0 <= size <= list.length.
+     * Access to this field must be protected by a synchronized region.
 	 */
-	private volatile int size = 0;
+	private int size = 0;
 
 	/**
 	 * If true and about to modify the list,
 	 * then the list must be copied first.
+     * Access to this field must be protected by a synchronized region.
 	 */
-	private volatile boolean copyOnWrite = false;
+	private boolean copyOnWrite = false;
 
 	/**
 	 * Creates a listener list with an initial capacity of 10.

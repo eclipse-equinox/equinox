@@ -95,8 +95,9 @@ public class EventManager {
 
 	/**
 	 * EventThread for asynchronous dispatch of events.
+     * Access to this field must be protected by a synchronized region.
 	 */
-	private volatile EventThread thread;
+	private EventThread thread;
 
 	/**
 	 * EventThread Name
