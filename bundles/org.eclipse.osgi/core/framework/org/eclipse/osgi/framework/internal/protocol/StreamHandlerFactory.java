@@ -15,9 +15,9 @@ import java.net.URLStreamHandler;
 import java.util.Hashtable;
 import java.util.StringTokenizer;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
-import org.eclipse.osgi.framework.tracker.ServiceTracker;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.url.URLConstants;
+import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * This class contains the URL stream handler factory for the OSGi framework.

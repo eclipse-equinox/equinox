@@ -14,10 +14,10 @@ package org.eclipse.osgi.framework.internal.protocol;
 import java.io.IOException;
 import java.net.ContentHandler;
 import java.net.URLConnection;
-import org.eclipse.osgi.framework.tracker.ServiceTracker;
-import org.eclipse.osgi.framework.tracker.ServiceTrackerCustomizer;
 import org.osgi.framework.*;
 import org.osgi.service.url.URLConstants;
+import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 /**
  * The ContentHandlerProxy is a ContentHandler that acts as a proxy for registered ContentHandlers.

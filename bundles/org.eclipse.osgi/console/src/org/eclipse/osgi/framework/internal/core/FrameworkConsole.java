@@ -15,8 +15,8 @@ import java.io.*;
 import java.net.*;
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
-import org.eclipse.osgi.framework.tracker.ServiceTracker;
 import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * This class starts OSGi with a console for development use.

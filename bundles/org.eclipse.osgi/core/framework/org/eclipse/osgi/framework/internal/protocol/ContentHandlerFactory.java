@@ -14,9 +14,9 @@ package org.eclipse.osgi.framework.internal.protocol;
 import java.net.ContentHandler;
 import java.util.Hashtable;
 import java.util.StringTokenizer;
-import org.eclipse.osgi.framework.tracker.ServiceTracker;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.url.URLConstants;
+import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * The ContentHandlerFactory is registered with the JVM to provide content handlers

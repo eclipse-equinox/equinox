@@ -13,11 +13,11 @@ package org.eclipse.osgi.framework.internal.protocol;
 
 import java.io.IOException;
 import java.net.*;
-import org.eclipse.osgi.framework.tracker.ServiceTracker;
-import org.eclipse.osgi.framework.tracker.ServiceTrackerCustomizer;
 import org.osgi.framework.*;
 import org.osgi.service.url.URLConstants;
 import org.osgi.service.url.URLStreamHandlerService;
+import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 /**
  * The URLStreamHandlerProxy is a URLStreamHandler that acts as a proxy for registered 
