@@ -12,6 +12,7 @@ package org.eclipse.core.runtime.adaptor;
 
 import java.util.Dictionary;
 import java.util.Enumeration;
+import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.service.resolver.Version;
 import org.osgi.framework.BundleException;
@@ -31,8 +32,8 @@ public class CachedManifest extends Dictionary {
 			try {
 				manifest = bundledata.loadManifest();
 			} catch (BundleException e) {
-				final String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CACHEDMANIFEST_UNEXPECTED_EXCEPTION", bundledata.getLocation());
-				FrameworkLogEntry entry = new FrameworkLogEntry(EclipseAdaptor.FRAMEWORK_SYMBOLICNAME, message, 0, e, null);
+				final String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CACHEDMANIFEST_UNEXPECTED_EXCEPTION", bundledata.getLocation()); //$NON-NLS-1$
+				FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, message, 0, e, null);
 				EclipseAdaptor.getDefault().getFrameworkLog().log(entry);
 				return null;
 			}
@@ -64,12 +65,12 @@ public class CachedManifest extends Dictionary {
 			Version result = bundledata.getVersion();
 			return result == null ? null : result.toString();
 		}
-		if (EclipseAdaptorConstants.PLUGIN_CLASS.equalsIgnoreCase(keyString))
+		if (EclipseAdaptor.PLUGIN_CLASS.equalsIgnoreCase(keyString))
 			return bundledata.getPluginClass();
 		if (Constants.BUNDLE_SYMBOLICNAME.equalsIgnoreCase(keyString))
 			return bundledata.getSymbolicName();
-		Dictionary manifest = getManifest();
-		return manifest == null ? null : manifest.get(key);
+		Dictionary result = getManifest();
+		return result == null ? null : result.get(key);
 	}
 
 	public Object remove(Object key) {

@@ -90,12 +90,16 @@ public class EclipseStarter {
 	private static final String PROP_VMARGS = "eclipse.vmargs"; //$NON-NLS-1$
 	private static final String PROP_COMMANDS = "eclipse.commands"; //$NON-NLS-1$
 
+	private static final String FILE_SCHEME = "file:"; //$NON-NLS-1$
+	private static final String FILE_PROTOCOL = "file"; //$NON-NLS-1$
+	private static final String REFERENCE_SCHEME="reference:"; //$NON-NLS-1$
+	private static final String REFERENCE_PROTOCOL = "reference"; //$NON-NLS-1$
 	/** string containing the classname of the adaptor to be used in this framework instance */
-	protected static final String DEFAULT_ADAPTOR_CLASS = "org.eclipse.core.runtime.adaptor.EclipseAdaptor";
+	protected static final String DEFAULT_ADAPTOR_CLASS = "org.eclipse.core.runtime.adaptor.EclipseAdaptor"; //$NON-NLS-1$
 
 	// Console information
-	protected static final String DEFAULT_CONSOLE_CLASS = "org.eclipse.osgi.framework.internal.core.FrameworkConsole";
-	private static final String CONSOLE_NAME = "OSGi Console";
+	protected static final String DEFAULT_CONSOLE_CLASS = "org.eclipse.osgi.framework.internal.core.FrameworkConsole"; //$NON-NLS-1$
+	private static final String CONSOLE_NAME = "OSGi Console"; //$NON-NLS-1$
 
 	private static FrameworkLog log;
 
@@ -125,7 +129,7 @@ public class EclipseStarter {
 			if (endSplashHandler != null)
 				endSplashHandler.run();
 			// may use startupFailed to understand where the error happened
-			FrameworkLogEntry logEntry = new FrameworkLogEntry("org.eclipse.osgi", startupFailed ? "Startup error" : "Application error", 1, e, null); //TODO Put the right value here
+			FrameworkLogEntry logEntry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, startupFailed ? "Startup error" : "Application error", 1, e, null); //TODO Put the right value here
 			if (log != null)
 				log.log(logEntry);
 			else
@@ -135,7 +139,7 @@ public class EclipseStarter {
 			try {
 				shutdown();
 			} catch (Throwable e) {
-				FrameworkLogEntry logEntry = new FrameworkLogEntry("org.eclipse.osgi", "Shutdown error", 1, e, null); //TODO Put the right value here
+				FrameworkLogEntry logEntry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, "Shutdown error", 1, e, null); //TODO Put the right value here
 				if (log != null)
 					log.log(logEntry);
 				else
@@ -144,8 +148,8 @@ public class EclipseStarter {
 			}
 		}
 		// we only get here if an error happened
-		System.getProperties().put(PROP_EXITCODE, "13");
-		System.getProperties().put(PROP_EXITDATA, EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_ERROR_CHECK_LOG", log.getFile().getPath()));
+		System.getProperties().put(PROP_EXITCODE, "13"); //$NON-NLS-1$
+		System.getProperties().put(PROP_EXITDATA, EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_ERROR_CHECK_LOG", log.getFile().getPath())); //$NON-NLS-1$
 		return null;
 	}
 
@@ -177,7 +181,7 @@ public class EclipseStarter {
 			} else
 				frameworkLog = new EclipseLog();
 		}
-		if ("true".equals(System.getProperty(EclipseStarter.PROP_CONSOLE_LOG)))
+		if ("true".equals(System.getProperty(EclipseStarter.PROP_CONSOLE_LOG))) //$NON-NLS-1$
 			frameworkLog.setConsoleLog(true);
 		return frameworkLog;
 	}
@@ -241,7 +245,7 @@ public class EclipseStarter {
 		ParameterizedRunnable application = (ParameterizedRunnable) applicationTracker.getService();
 		applicationTracker.close();
 		if (application == null)
-			throw new IllegalStateException(EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_ERROR_NO_APPLICATION"));
+			throw new IllegalStateException(EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_ERROR_NO_APPLICATION")); //$NON-NLS-1$
 		return application.run(argument);
 	}
 
@@ -271,7 +275,7 @@ public class EclipseStarter {
 	private static void ensureBundlesActive(Bundle[] bundles) {
 		for (int i = 0; i < bundles.length; i++) {
 			if (bundles[i].getState() != Bundle.ACTIVE) {
-				String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_ERROR_BUNDLE_NOT_ACTIVE", bundles[i]);
+				String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_ERROR_BUNDLE_NOT_ACTIVE", bundles[i]); //$NON-NLS-1$
 				throw new IllegalStateException(message);
 			}
 		}
@@ -283,7 +287,7 @@ public class EclipseStarter {
 		StateHelper stateHelper = adaptor.getPlatformAdmin().getStateHelper();
 		for (int i = 0; i < bundles.length; i++)
 			if (bundles[i].getState() == Bundle.INSTALLED) {
-				String generalMessage = EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_ERROR_BUNDLE_NOT_RESOLVED", bundles[i]);
+				String generalMessage = EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_ERROR_BUNDLE_NOT_RESOLVED", bundles[i]); //$NON-NLS-1$
 				BundleDescription description = state.getBundle(bundles[i].getBundleId());
 				// for some reason, the state does not know about that bundle
 				if (description == null)
@@ -294,24 +298,24 @@ public class EclipseStarter {
 					// the bundle wasn't resolved due to some of its constraints were unsatisfiable
 					logChildren = new FrameworkLogEntry[unsatisfied.length];
 					for (int j = 0; j < unsatisfied.length; j++)
-						logChildren[j] = new FrameworkLogEntry("org.eclipse.osgi", EclipseAdaptorMsg.getResolutionFailureMessage(unsatisfied[j]), 0, null, null);
+						logChildren[j] = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, EclipseAdaptorMsg.getResolutionFailureMessage(unsatisfied[j]), 0, null, null);
 				} else if (description.getSymbolicName() != null) {
 					BundleDescription[] homonyms = state.getBundles(description.getSymbolicName());
 					for (int j = 0; j < homonyms.length; j++)
 						if (homonyms[j].isResolved()) {
 							logChildren = new FrameworkLogEntry[1];
-							logChildren[0] = new FrameworkLogEntry("org.eclipse.osgi", EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONSOLE_OTHER_VERSION", homonyms[j].getLocation()), 0, null, null);
+							logChildren[0] = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONSOLE_OTHER_VERSION", homonyms[j].getLocation()), 0, null, null); //$NON-NLS-1$
 						}
 				}
 
-				logService.log(new FrameworkLogEntry("org.eclipse.osgi", generalMessage, 0, null, logChildren));
+				logService.log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, generalMessage, 0, null, logChildren));
 			}
 	}
 
 	private static void publishSplashScreen(final Runnable endSplashHandler) {
 		// InternalPlatform now how to retrieve this later
 		Dictionary properties = new Hashtable();
-		properties.put("name", "splashscreen");
+		properties.put("name", "splashscreen"); //$NON-NLS-1$ //$NON-NLS-2$
 		Runnable handler = new Runnable() {
 			public void run() {
 				StatsManager.doneBooting();
@@ -333,17 +337,17 @@ public class EclipseStarter {
 			// Assume it should be a reference and htat it is relative.  This support need not 
 			// be robust as it is temporary..
 			fileLocation = new File(parent, name);
-			url = new URL("reference", "", "file:" + fileLocation.toString());
+			url = new URL(REFERENCE_PROTOCOL, null, FILE_SCHEME + fileLocation.toString());
 			reference = true;
 		}
 		// if the name was a URL then see if it is relative.  If so, insert syspath.
 		if (!reference) {
 			URL baseURL = url;
 			// if it is a reference URL then strip off the reference: and set base to the file:...
-			if (url.getProtocol().equals("reference")) {
+			if (url.getProtocol().equals(REFERENCE_PROTOCOL)) {
 				reference = true;
 				String baseSpec = url.getFile();
-				if (baseSpec.startsWith("file:"))
+				if (baseSpec.startsWith(FILE_SCHEME))
 					baseURL = new File(baseSpec.substring(5)).toURL();
 				else
 					baseURL = new URL(baseSpec);
@@ -359,7 +363,7 @@ public class EclipseStarter {
 		if (reference) {
 			String result = searchFor(fileLocation.getName(), new File(fileLocation.getParent()).getAbsolutePath());
 			if (result != null)
-				url = new URL("reference", null, "file:" + result);
+				url = new URL(REFERENCE_PROTOCOL, null, FILE_SCHEME + result);
 			else
 				return null;
 		}
@@ -386,7 +390,7 @@ public class EclipseStarter {
 		StartLevel startService = null;
 		if (reference != null)
 			startService = (StartLevel) context.getService(reference);
-		String[] installEntries = getArrayFromList(System.getProperty(PROP_BUNDLES), ",");
+		String[] installEntries = getArrayFromList(System.getProperty(PROP_BUNDLES), ","); //$NON-NLS-1$
 		int defaultStartLevel = Integer.parseInt(System.getProperty(PROP_BUNDLES_STARTLEVEL));
 		String syspath = getSysPath();
 		Bundle[] bundles = new Bundle[installEntries.length];
@@ -401,11 +405,11 @@ public class EclipseStarter {
 			boolean start = true;
 			int index = name.indexOf('@');
 			if (index >= 0) {
-				String[] attributes = getArrayFromList(name.substring(index + 1, name.length()), ":");
+				String[] attributes = getArrayFromList(name.substring(index + 1, name.length()), ":"); //$NON-NLS-1$
 				name = name.substring(0, index);
 				for (int j = 0; j < attributes.length; j++) {
 					String attribute = attributes[j];
-					if (attribute.equals("start"))
+					if (attribute.equals("start")) //$NON-NLS-1$
 						start = true;
 					else
 						level = Integer.parseInt(attribute);
@@ -413,9 +417,9 @@ public class EclipseStarter {
 			}
 			URL location = searchForBundle(name, syspath);
 			if (location == null)
-				throw new IllegalArgumentException(EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_BUNDLE_NOT_FOUND", name));
+				throw new IllegalArgumentException(EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_BUNDLE_NOT_FOUND", name)); //$NON-NLS-1$
 			// don't need to install if it is already installed
-			String locationString = "initial@" + location.toExternalForm();
+			String locationString = "initial@" + location.toExternalForm(); //$NON-NLS-1$
 			bundles[i] = getBundleByLocation(locationString);
 			if (bundles[i] == null) {
 				InputStream in = location.openStream();
@@ -434,12 +438,12 @@ public class EclipseStarter {
 		for (Iterator i = startBundles.iterator(); i.hasNext();) {
 			Bundle bundle = (Bundle) i.next();
 			if (bundle.getState() == Bundle.INSTALLED)
-				throw new IllegalStateException(EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_ERROR_BUNDLE_NOT_RESOLVED", bundle.getLocation()));
+				throw new IllegalStateException(EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_ERROR_BUNDLE_NOT_RESOLVED", bundle.getLocation())); //$NON-NLS-1$
 			bundle.start();
 		}
 		context.ungetService(reference);
 		if (debug)
-			System.out.println("Time to load bundles: " + (System.currentTimeMillis() - startTime));
+			System.out.println("Time to load bundles: " + (System.currentTimeMillis() - startTime)); //$NON-NLS-1$
 		return bundles;
 	}
 
@@ -495,7 +499,8 @@ public class EclipseStarter {
 			Thread t = new Thread(((Runnable) console), CONSOLE_NAME);
 			t.start();
 		} catch (NumberFormatException nfe) {
-			System.err.println("Invalid console port: " + consolePort);
+			// TODO log or something other than write on System.err
+			System.err.println("Invalid console port: " + consolePort); 
 		} catch (Exception ex) {
 			System.out.println("Failed to find/start: " + CONSOLE_NAME);
 		}
@@ -697,7 +702,7 @@ public class EclipseStarter {
 
 		URL url = EclipseStarter.class.getProtectionDomain().getCodeSource().getLocation();
 		result = url.getFile();
-		if (result.endsWith("/"))
+		if (result.endsWith("/")) //$NON-NLS-1$
 			result = result.substring(0, result.length() - 1);
 		result = result.substring(0, result.lastIndexOf('/'));
 		result = result.substring(0, result.lastIndexOf('/'));
@@ -723,7 +728,7 @@ public class EclipseStarter {
 		Filter filter = null;
 		try {
 			String appClass = ParameterizedRunnable.class.getName();
-			filter = context.createFilter("(&(objectClass=" + appClass + ")(eclipse.application=*))");
+			filter = context.createFilter("(&(objectClass=" + appClass + ")(eclipse.application=*))"); //$NON-NLS-1$ //$NON-NLS-2$
 		} catch (InvalidSyntaxException e) {
 			// ignore this.  It should never happen as we have tested the above format.
 		}
@@ -738,7 +743,7 @@ public class EclipseStarter {
 
 		URL location = null;
 		try {
-			location = new URL(configArea.getURL().toExternalForm() + "config.ini");
+			location = new URL(configArea.getURL().toExternalForm() + LocationManager.CONFIG_FILE);
 		} catch (MalformedURLException e) {
 			// its ok.  Thie should never happen
 		}
@@ -750,10 +755,10 @@ public class EclipseStarter {
 		if (codeLocation == null)
 			return;
 		String location = codeLocation.getFile();
-		if (location.endsWith("/"))
+		if (location.endsWith("/")) //$NON-NLS-1$
 			location = location.substring(0, location.length() - 1);
 		int i = location.lastIndexOf('/');
-		location = location.substring(0, i + 1) + "eclipse.properties";
+		location = location.substring(0, i + 1) + LocationManager.ECLIPSE_PROPERTIES;
 		URL result = null;
 		try {
 			result = new File(location).toURL();
@@ -847,7 +852,7 @@ public class EclipseStarter {
 		Object maxVersion = null;
 		for (int i = 0; i < candidates.length; i++) {
 			File candidate = new File(start, candidates[i]);
-			if (!candidate.isDirectory() || (!candidate.getName().equals(target) && !candidate.getName().startsWith(target + "_")))
+			if (!candidate.isDirectory() || (!candidate.getName().equals(target) && !candidate.getName().startsWith(target + "_"))) //$NON-NLS-1$
 				continue;
 			String name = candidate.getName();
 			String version = ""; //$NON-NLS-1$ // Note: directory with version suffix is always > than directory without version suffix
@@ -939,9 +944,9 @@ public class EclipseStarter {
 		if (entry != null)
 			result.append(entry);
 		String commandLine = result.toString();
-		int i = commandLine.indexOf(arg + "\n");
+		int i = commandLine.indexOf(arg + "\n"); //$NON-NLS-1$
 		if (i == 0)
-			commandLine += arg + "\n" + value + "\n";
+			commandLine += arg + "\n" + value + "\n"; //$NON-NLS-1$ //$NON-NLS-2$
 		else {
 			i += arg.length() + 1;
 			String left = commandLine.substring(0, i);
@@ -955,6 +960,6 @@ public class EclipseStarter {
 	private static void finalizeProperties() {
 		// if check config is unknown and we are in dev mode, 
 		if (System.getProperty(PROP_DEV) != null && System.getProperty(PROP_CHECK_CONFIG) == null)
-			System.getProperties().put(PROP_CHECK_CONFIG, "true");
+			System.getProperties().put(PROP_CHECK_CONFIG, "true"); //$NON-NLS-1$
 	}
 }

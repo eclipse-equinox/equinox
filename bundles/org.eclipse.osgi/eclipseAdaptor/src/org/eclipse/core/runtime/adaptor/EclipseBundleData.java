@@ -13,6 +13,7 @@ package org.eclipse.core.runtime.adaptor;
 import java.io.*;
 import java.net.URL;
 import java.util.*;
+import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.adaptor.core.BundleEntry;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.internal.defaultadaptor.DefaultAdaptor;
@@ -72,7 +73,7 @@ public class EclipseBundleData extends DefaultBundleData {
 	}
 
 	public void initializeExistingBundle() throws IOException {
-		File delete = new File(getBundleStoreDir(), ".delete");
+		File delete = new File(getBundleStoreDir(), ".delete"); //$NON-NLS-1$
 
 		/* and the directory is not marked for delete */
 		if (delete.exists())
@@ -170,16 +171,16 @@ public class EclipseBundleData extends DefaultBundleData {
 			return loadManifestFrom(url);
 		}
 		Dictionary result = generateManifest(null);
-		if (result == null) //TODO: need to NLS this
+		if (result == null) //TODO need to NLS this
 			throw new BundleException("Manifest not found: " + getLocation());
 		return result;
 	}
 
 	private Dictionary generateManifest(Dictionary originalManifest) throws BundleException {
-		String cacheLocation = (String) System.getProperties().get("osgi.manifest.cache"); //TODO This should be a constant
+		String cacheLocation = System.getProperty(LocationManager.PROP_MANIFEST_CACHE); 
 		if (getSymbolicName() != null) {
 			Version version = getVersion();
-			File currentFile = new File(cacheLocation, getSymbolicName() + '_' + version.toString() + ".MF");
+			File currentFile = new File(cacheLocation, getSymbolicName() + '_' + version.toString() + ".MF"); //$NON-NLS-1$
 			if (PluginConverterImpl.upToDate(currentFile, getBaseFile(), manifestType))
 				try {
 					return Headers.parseManifest(new FileInputStream(currentFile));
@@ -213,7 +214,7 @@ public class EclipseBundleData extends DefaultBundleData {
 
 		//write the generated manifest
 		Version version = new Version((String) generatedManifest.get(Constants.BUNDLE_VERSION));
-		File bundleManifestLocation = new File(cacheLocation, ManifestElement.parseHeader(org.osgi.framework.Constants.BUNDLE_SYMBOLICNAME, (String) generatedManifest.get(org.osgi.framework.Constants.BUNDLE_SYMBOLICNAME))[0].getValue() + '_' + version.toString() + ".MF");
+		File bundleManifestLocation = new File(cacheLocation, ManifestElement.parseHeader(org.osgi.framework.Constants.BUNDLE_SYMBOLICNAME, (String) generatedManifest.get(org.osgi.framework.Constants.BUNDLE_SYMBOLICNAME))[0].getValue() + '_' + version.toString() + ".MF"); //$NON-NLS-1$
 		try {
 			converter.writeManifest(bundleManifestLocation, generatedManifest, true);
 		} catch (Exception e) {
@@ -227,6 +228,7 @@ public class EclipseBundleData extends DefaultBundleData {
 		try {
 			return Headers.parseManifest(manifestURL.openStream());
 		} catch (IOException e) {
+			// TODO need to NLS this
 			throw new BundleException("Error reading manifest: " + getLocation(), e);
 		}
 	}
@@ -237,8 +239,8 @@ public class EclipseBundleData extends DefaultBundleData {
 		// manifest cannot ever be a cached one otherwise the lines below are bogus
 		if (manifest instanceof CachedManifest)
 			throw new IllegalStateException();
-		pluginClass = (String) manifest.get(EclipseAdaptorConstants.PLUGIN_CLASS);
-		parseAutoStart((String) manifest.get(EclipseAdaptorConstants.ECLIPSE_AUTOSTART));
+		pluginClass = (String) manifest.get(EclipseAdaptor.PLUGIN_CLASS);
+		parseAutoStart((String) manifest.get(EclipseAdaptor.ECLIPSE_AUTOSTART));
 	}
 
 	public String getPluginClass() {
@@ -291,11 +293,11 @@ public class EclipseBundleData extends DefaultBundleData {
 		autoStartExceptions = null;
 		ManifestElement[] allElements = null;
 		try {
-			allElements = ManifestElement.parseHeader(EclipseAdaptorConstants.ECLIPSE_AUTOSTART, headerValue);
+			allElements = ManifestElement.parseHeader(EclipseAdaptor.ECLIPSE_AUTOSTART, headerValue);
 		} catch (BundleException e) {
 			// just use the default settings (no auto activation)
 			String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CLASSLOADER_CANNOT_GET_HEADERS", getLocation()); //$NON-NLS-1$
-			EclipseAdaptor.getDefault().getFrameworkLog().log(new FrameworkLogEntry(EclipseAdaptorConstants.PI_ECLIPSE_OSGI, message, 0, e, null));
+			EclipseAdaptor.getDefault().getFrameworkLog().log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, message, 0, e, null));
 		}
 		//Eclipse-AutoStart not found... 
 		if (allElements == null)
@@ -303,7 +305,7 @@ public class EclipseBundleData extends DefaultBundleData {
 		// the single value for this element should be true|false
 		autoStart = "true".equalsIgnoreCase(allElements[0].getValue()); //$NON-NLS-1$
 		// look for any exceptions (the attribute) to the autoActivate setting
-		String exceptionsValue = allElements[0].getAttribute(EclipseAdaptorConstants.EXCEPTIONS_ATTRIBUTE);
+		String exceptionsValue = allElements[0].getAttribute(EclipseAdaptor.ECLIPSE_AUTOSTART_EXCEPTIONS);
 		if (exceptionsValue == null)
 			return;
 		StringTokenizer tokenizer = new StringTokenizer(exceptionsValue, ","); //$NON-NLS-1$

@@ -28,11 +28,11 @@ import org.eclipse.osgi.service.resolver.*;
  * should a reasonable human-readable (english) string.
  */
 public class EclipseAdaptorMsg {
-	public static final String NEW_LINE = System.getProperty("line.separator", "\n");
+	public static final String NEW_LINE = System.getProperty("line.separator", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
 	public static MessageFormat formatter;
 	// Attempt to load the message bundle.
 	static {
-		formatter = FrameworkMessageFormat.getMessageFormat("org.eclipse.core.runtime.adaptor.EclipseAdaptorMessages"); //TODO This could be an adaptor constant.
+		formatter = FrameworkMessageFormat.getMessageFormat("org.eclipse.core.runtime.adaptor.EclipseAdaptorMessages"); //$NON-NLS-1$
 	}
 
 	public static String getResolutionFailureMessage(VersionConstraint unsatisfied) {

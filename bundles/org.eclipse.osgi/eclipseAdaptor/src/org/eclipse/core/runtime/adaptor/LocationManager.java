@@ -14,6 +14,7 @@ import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Properties;
+import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.service.datalocation.Location;
 
 public class LocationManager {
@@ -37,6 +38,8 @@ public class LocationManager {
 	public static final String STATE_FILE = ".state"; //$NON-NLS-1$
 	public static final String BUNDLE_DATA_FILE = ".bundledata"; //$NON-NLS-1$
 	public static final String MANIFESTS_DIR = "manifests"; //$NON-NLS-1$
+	public static final String CONFIG_FILE = "config.ini"; //$NON-NLS-1$
+	public static final String ECLIPSE_PROPERTIES = "eclipse.properties"; //$NON-NLS-1$
 
 	// Constants for configuration location discovery
 	private static final String ECLIPSE = "eclipse"; //$NON-NLS-1$
@@ -76,9 +79,9 @@ public class LocationManager {
 
 	private static URL adjustTrailingSlash(URL url, boolean trailingSlash) throws MalformedURLException {
 		String file = url.getFile();
-		if (trailingSlash == (file.endsWith("/")))
+		if (trailingSlash == (file.endsWith("/"))) //$NON-NLS-1$
 			return url;
-		file = trailingSlash ? file + "/" : file.substring(0, file.length() - 1);
+		file = trailingSlash ? file + "/" : file.substring(0, file.length() - 1); //$NON-NLS-1$
 		return new URL(url.getProtocol(), url.getHost(), file);
 	}
 
@@ -87,22 +90,22 @@ public class LocationManager {
 		String location = System.getProperty(PROP_CONFIG_AREA);
 		if (location != null) {
 			location = buildURL(location, false).toExternalForm();
-			if (location.endsWith(".cfg")) {
+			if (location.endsWith(".cfg")) { //$NON-NLS-1$
 				int index = location.lastIndexOf('/');
 				location = location.substring(0, index + 1);
 			}
-			if (!location.endsWith("/"))
-				location += "/";
+			if (!location.endsWith("/")) //$NON-NLS-1$
+				location += "/"; //$NON-NLS-1$
 			System.getProperties().put(PROP_CONFIG_AREA, location);
 		}
 	}
 
 	public static void initializeLocations() {
-		URL defaultLocation = buildURL(System.getProperty("user.home"), true);
-		userLocation = buildLocation(PROP_USER_AREA, defaultLocation, "user", false);
+		URL defaultLocation = buildURL(System.getProperty(PROP_USER_HOME), true);
+		userLocation = buildLocation(PROP_USER_AREA, defaultLocation, "user", false); //$NON-NLS-1$
 
-		defaultLocation = buildURL(new File(System.getProperty("user.dir"), "workspace").getAbsolutePath(), true); //$NON-NLS-1$ //$NON-NLS-2$
-		instanceLocation = buildLocation(PROP_INSTANCE_AREA, defaultLocation, "workspace", false);
+		defaultLocation = buildURL(new File(System.getProperty(PROP_USER_DIR), "workspace").getAbsolutePath(), true); //$NON-NLS-1$
+		instanceLocation = buildLocation(PROP_INSTANCE_AREA, defaultLocation, "workspace", false); //$NON-NLS-1$
 
 		mungeConfigurationLocation();
 		// compute a default but it is very unlikely to be used since main will have computed everything
@@ -242,7 +245,7 @@ public class LocationManager {
 
 	public static File getOSGiConfigurationDir() {
 		// TODO assumes the URL is a file: url
-		return new File(configurationLocation.getURL().getFile(), EclipseAdaptor.FRAMEWORK_SYMBOLICNAME);
+		return new File(configurationLocation.getURL().getFile(), FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME);
 	}
 
 	public static File getConfigurationFile(String filename) {

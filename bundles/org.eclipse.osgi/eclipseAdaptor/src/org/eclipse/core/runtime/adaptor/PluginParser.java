@@ -13,6 +13,7 @@ package org.eclipse.core.runtime.adaptor;
 import java.io.InputStream;
 import java.util.*;
 import javax.xml.parsers.SAXParserFactory;
+import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -424,14 +425,14 @@ public class PluginParser extends DefaultHandler implements IModel {
 		else
 			msg = EclipseAdaptorMsg.formatter.getString("parse.errorNameLineColumn", new String[] {name, Integer.toString(ex.getLineNumber()), Integer.toString(ex.getColumnNumber()), ex.getMessage()}); //$NON-NLS-1$
 
-		FrameworkLogEntry entry = new FrameworkLogEntry(EclipseAdaptorConstants.PI_ECLIPSE_OSGI, msg, 0, ex, null);
+		FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, msg, 0, ex, null);
 		EclipseAdaptor.getDefault().getFrameworkLog().log(entry);
 	}
 
 	synchronized public PluginInfo parsePlugin(InputStream in) throws Exception {
 		SAXParserFactory factory = acquireXMLParsing();
 		if (factory == null) {
-			FrameworkLogEntry entry = new FrameworkLogEntry(EclipseAdaptorConstants.PI_ECLIPSE_OSGI, EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONVERTER_NO_SAX_FACTORY"), 0, null, null); //$NON-NLS-1$
+			FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONVERTER_NO_SAX_FACTORY"), 0, null, null); //$NON-NLS-1$
 			EclipseAdaptor.getDefault().getFrameworkLog().log(entry);
 			return null;
 		}
@@ -642,7 +643,7 @@ public class PluginParser extends DefaultHandler implements IModel {
 	private void internalError(String elementName) {
 		FrameworkLogEntry error;
 		String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONVERTER_PARSE_UNKNOWNTOP_ELEMENT", elementName); //$NON-NLS-1$
-		error = new FrameworkLogEntry(EclipseAdaptorConstants.PI_ECLIPSE_OSGI, (manifestInfo.pluginId == null ? message : "Plug-in : " + manifestInfo.pluginId + ", " + message), 0, null, null); //$NON-NLS-1$ //$NON-NLS-2$
+		error = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, (manifestInfo.pluginId == null ? message : "Plug-in : " + manifestInfo.pluginId + ", " + message), 0, null, null); //$NON-NLS-1$ //$NON-NLS-2$
 		EclipseAdaptor.getDefault().getFrameworkLog().log(error);
 	}
 

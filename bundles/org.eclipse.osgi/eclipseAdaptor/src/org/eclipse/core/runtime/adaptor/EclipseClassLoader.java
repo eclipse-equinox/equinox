@@ -17,6 +17,7 @@ import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
+import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.adaptor.BundleData;
 import org.eclipse.osgi.framework.adaptor.ClassLoaderDelegate;
 import org.eclipse.osgi.framework.adaptor.core.*;
@@ -102,7 +103,7 @@ public class EclipseClassLoader extends DefaultClassLoader {
 					}
 					if (timeLeft <= 0 || bundle.getState() != Bundle.ACTIVE) {
 						String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CLASSLOADER_CONCURRENT_STARTUP", new Object[] {Thread.currentThread(), name, threadChangingState.getName(), bundle.getSymbolicName() == null ? Long.toString(bundle.getBundleId()) : bundle.getSymbolicName()}); //$NON-NLS-1$ 
-						EclipseAdaptor.getDefault().getFrameworkLog().log(new FrameworkLogEntry(EclipseAdaptorConstants.PI_ECLIPSE_OSGI, message, 0, new Exception(EclipseAdaptorMsg.formatter.getString("ECLIPSE_CLASSLOADER_GENERATED_EXCEPTION")), null)); //$NON-NLS-1$
+						EclipseAdaptor.getDefault().getFrameworkLog().log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, message, 0, new Exception(EclipseAdaptorMsg.formatter.getString("ECLIPSE_CLASSLOADER_GENERATED_EXCEPTION")), null)); //$NON-NLS-1$
 					}
 					return super.findLocalClass(name);
 				}
@@ -113,7 +114,7 @@ public class EclipseClassLoader extends DefaultClassLoader {
 				hostdata.getBundle().start();
 			} catch (BundleException e) {
 				String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CLASSLOADER_ACTIVATION", bundle.getSymbolicName(), Long.toString(bundle.getBundleId())); //$NON-NLS-1$
-				EclipseAdaptor.getDefault().getFrameworkLog().log(new FrameworkLogEntry(EclipseAdaptorConstants.PI_ECLIPSE_OSGI, message, 0, e, null));
+				EclipseAdaptor.getDefault().getFrameworkLog().log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, message, 0, e, null));
 			}
 			return super.findLocalClass(name);
 		} catch (ClassNotFoundException e) {

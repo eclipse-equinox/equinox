@@ -38,10 +38,16 @@ public class EclipseAdaptor extends DefaultAdaptor {
 	public static final String PROP_CLEAN = "osgi.clean"; //$NON-NLS-1$
 	static final String F_LOG = ".log"; //$NON-NLS-1$
 
+	//TODO rename it to Eclipse-PluginClass	
+	public static final String PLUGIN_CLASS = "Plugin-Class"; //$NON-NLS-1$
+
+	public static final String ECLIPSE_AUTOSTART = "Eclipse-AutoStart"; //$NON-NLS-1$
+	//TODO rename constant to ECLIPSE_AUTOSTART_EXCEPTIONS	
+	public static final String ECLIPSE_AUTOSTART_EXCEPTIONS = "exceptions"; //$NON-NLS-1$
+
 	public static final String SAXFACTORYNAME = "javax.xml.parsers.SAXParserFactory"; //$NON-NLS-1$
 	public static final String DOMFACTORYNAME = "javax.xml.parsers.DocumentBuilderFactory"; //$NON-NLS-1$
 
-	public static final String FRAMEWORK_SYMBOLICNAME = "org.eclipse.osgi"; //$NON-NLS-1$
 	private static final String RUNTIME_ADAPTOR = FRAMEWORK_SYMBOLICNAME + "/eclipseadaptor"; //$NON-NLS-1$
 	private static final String OPTION_STATE_READER = RUNTIME_ADAPTOR + "/state/reader";//$NON-NLS-1$
 	private static final String OPTION_RESOLVER = RUNTIME_ADAPTOR + "/resolver/timing"; //$NON-NLS-1$
@@ -249,7 +255,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		} catch (Throwable t) {
 			// In case the JAXP API is not on the boot classpath
 			String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_ADAPTOR_ERROR_XML_SERVICE"); //$NON-NLS-1$
-			getFrameworkLog().log(new FrameworkLogEntry(EclipseAdaptor.FRAMEWORK_SYMBOLICNAME, message, 0, t, null));
+			getFrameworkLog().log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, message, 0, t, null));
 		}
 	}
 

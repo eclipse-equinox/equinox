@@ -16,6 +16,7 @@ import java.net.URL;
 import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.internal.defaultadaptor.DevClassPathHelper;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
@@ -148,7 +149,7 @@ public class PluginConverterImpl implements PluginConverter {
 			manifestType |= EclipseBundleData.MANIFEST_TYPE_PLUGIN;
 			return xmlFileLocation;
 		} catch (MalformedURLException e) {
-			FrameworkLogEntry entry = new FrameworkLogEntry(EclipseAdaptor.FRAMEWORK_SYMBOLICNAME, e.getMessage(), 0, e, null);
+			FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, e.getMessage(), 0, e, null);
 			EclipseAdaptor.getDefault().getFrameworkLog().log(entry);
 			return null;
 		} catch (IOException ioe) {
@@ -167,7 +168,7 @@ public class PluginConverterImpl implements PluginConverter {
 			manifestType |= EclipseBundleData.MANIFEST_TYPE_FRAGMENT;
 			return xmlFileLocation;
 		} catch (MalformedURLException e) {
-			FrameworkLogEntry entry = new FrameworkLogEntry(EclipseAdaptor.FRAMEWORK_SYMBOLICNAME, e.getMessage(), 0, e, null);
+			FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, e.getMessage(), 0, e, null);
 			EclipseAdaptor.getDefault().getFrameworkLog().log(entry);
 			return null;
 		} catch (IOException ioe) {
@@ -324,7 +325,7 @@ public class PluginConverterImpl implements PluginConverter {
 		if (requireRuntimeCompatibility()) {
 			String pluginClass = pluginInfo.getPluginClass();
 			if (pluginClass != null)
-				generatedManifest.put(EclipseAdaptorConstants.PLUGIN_CLASS, pluginClass);
+				generatedManifest.put(EclipseAdaptor.PLUGIN_CLASS, pluginClass);
 		}
 	}
 
@@ -361,11 +362,11 @@ public class PluginConverterImpl implements PluginConverter {
 
 	private void generateTimestamp() {
 		// so it is easy to tell which ones are generated
-		generatedManifest.put(GENERATED_FROM, Long.toString(getTimeStamp(pluginManifestLocation, manifestType)) + ";" + MANIFEST_TYPE_ATTRIBUTE + "=" + manifestType);
+		generatedManifest.put(GENERATED_FROM, Long.toString(getTimeStamp(pluginManifestLocation, manifestType)) + ";" + MANIFEST_TYPE_ATTRIBUTE + "=" + manifestType); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	private void generateEclipseHeaders() {
-		generatedManifest.put(EclipseAdaptorConstants.ECLIPSE_AUTOSTART, "true");
+		generatedManifest.put(EclipseAdaptor.ECLIPSE_AUTOSTART, "true"); //$NON-NLS-1$
 	}
 
 	private Set getExports() {
@@ -456,7 +457,7 @@ public class PluginConverterImpl implements PluginConverter {
 			file = new JarFile(jarFile);
 		} catch (IOException e) {
 			String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONVERTER_PLUGIN_LIBRARY_IGNORED", jarFile, pluginInfo.getUniqueId()); //$NON-NLS-1$
-			EclipseAdaptor.getDefault().getFrameworkLog().log(new FrameworkLogEntry(EclipseAdaptorConstants.PI_ECLIPSE_OSGI, message, 0, e, null));
+			EclipseAdaptor.getDefault().getFrameworkLog().log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, message, 0, e, null));
 			return names;
 		}
 		//Run through the entries
@@ -636,7 +637,7 @@ public class PluginConverterImpl implements PluginConverter {
 		this.target = target;
 		fillPluginInfo(pluginBaseLocation);
 		if (bundleManifestLocation == null) {
-			String cacheLocation = (String) System.getProperties().get("osgi.manifest.cache"); //$NON-NLS-1$
+			String cacheLocation = (String) System.getProperties().get(LocationManager.PROP_MANIFEST_CACHE);
 			bundleManifestLocation = new File(cacheLocation, pluginInfo.getUniqueId() + '_' + pluginInfo.getVersion() + ".MF"); //$NON-NLS-1$
 		}
 		fillManifest(compatibilityManifest);

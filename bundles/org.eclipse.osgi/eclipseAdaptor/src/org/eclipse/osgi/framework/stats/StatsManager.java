@@ -12,7 +12,9 @@ package org.eclipse.osgi.framework.stats;
 
 import java.io.*;
 import java.util.*;
+import org.eclipse.core.runtime.adaptor.EclipseAdaptor;
 import org.eclipse.osgi.framework.adaptor.BundleWatcher;
+import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.debug.DebugOptions;
 import org.osgi.framework.Bundle;
 
@@ -98,7 +100,7 @@ public class StatsManager implements BundleWatcher {
 
 	private void initialize() {
 		// add the system bundle
-		BundleStats plugin = findPlugin("org.eclipse.osgi");
+		BundleStats plugin = findPlugin(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME);
 		plugin.setTimestamp(System.currentTimeMillis());
 		plugin.setActivationOrder(plugins.size());
 		plugin.setDuringStartup(booting);

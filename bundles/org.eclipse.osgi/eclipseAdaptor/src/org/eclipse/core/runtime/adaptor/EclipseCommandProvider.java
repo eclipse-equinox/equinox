@@ -25,13 +25,13 @@ public class EclipseCommandProvider implements CommandProvider {
 	public String getHelp() {
 		StringBuffer help = new StringBuffer(512);
 		help.append(EclipseAdaptorMsg.NEW_LINE);
-		help.append("---");
+		help.append("---"); //$NON-NLS-1$
 		help.append(EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONSOLE_COMMANDS_HEADER"));//$NON-NLS-1$
-		help.append("---");
+		help.append("---"); //$NON-NLS-1$
 		help.append(EclipseAdaptorMsg.NEW_LINE);
-		help.append("\tdiag - " + EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONSOLE_HELP_DIAG_COMMAND_DESCRIPTION"));//$NON-NLS-1$
+		help.append("\tdiag - " + EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONSOLE_HELP_DIAG_COMMAND_DESCRIPTION"));//$NON-NLS-1$ //$NON-NLS-2$
 		help.append(EclipseAdaptorMsg.NEW_LINE);
-		help.append("\tactive - " + EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONSOLE_HELP_ACTIVE_COMMAND_DESCRIPTION"));//$NON-NLS-1$		
+		help.append("\tactive - " + EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONSOLE_HELP_ACTIVE_COMMAND_DESCRIPTION"));//$NON-NLS-1$	 //$NON-NLS-2$
 		return help.toString();
 	}
 
@@ -53,9 +53,9 @@ public class EclipseCommandProvider implements CommandProvider {
 			ci.println(EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONSOLE_NO_BUNDLE_SPECIFIED_ERROR"));//$NON-NLS-1$
 			return;
 		}
-		ServiceReference platformAdminRef = context.getServiceReference("org.eclipse.osgi.service.resolver.PlatformAdmin");
+		ServiceReference platformAdminRef = context.getServiceReference(PlatformAdmin.class.getName());
 		if (platformAdminRef == null) {
-			ci.print("  ");
+			ci.print("  "); //$NON-NLS-1$
 			ci.println(EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONSOLE_NO_CONSTRAINTS_NO_PLATFORM_ADMIN_MESSAGE"));//$NON-NLS-1$
 			return;
 		}
@@ -71,23 +71,23 @@ public class EclipseCommandProvider implements CommandProvider {
 					nextArg = ci.nextArgument();
 					continue;
 				}
-				ci.println(bundle.getLocation() + " [" + bundle.getBundleId() + "]");
+				ci.println(bundle.getLocation() + " [" + bundle.getBundleId() + "]"); //$NON-NLS-1$ //$NON-NLS-2$
 				VersionConstraint[] unsatisfied = platformAdmin.getStateHelper().getUnsatisfiedConstraints(bundle);
 				if (unsatisfied.length == 0) {
 					// init default message
-					String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONSOLE_NO_CONSTRAINTS");
+					String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONSOLE_NO_CONSTRAINTS"); //$NON-NLS-1$
 					if (!bundle.isResolved()) {
 						// another version might have been picked					
 						String symbolicName = bundle.getSymbolicName();
 						BundleDescription resolved = symbolicName == null ? null : getResolvedBundle(systemState, symbolicName);
 						if (resolved != null)
-							message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONSOLE_OTHER_VERSION", resolved.getLocation());
+							message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONSOLE_OTHER_VERSION", resolved.getLocation()); //$NON-NLS-1$
 					}
-					ci.print("  ");
+					ci.print("  "); //$NON-NLS-1$
 					ci.println(message);//$NON-NLS-1$
 				}
 				for (int i = 0; i < unsatisfied.length; i++) {
-					ci.print("  ");
+					ci.print("  "); //$NON-NLS-1$
 					ci.println(EclipseAdaptorMsg.getResolutionFailureMessage(unsatisfied[i]));
 				}
 				nextArg = ci.nextArgument();
@@ -113,7 +113,7 @@ public class EclipseCommandProvider implements CommandProvider {
 				ci.println(allBundles[i]);
 				activeCount++;
 			}
-		ci.print("  ");
-		ci.println(EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONSOLE_BUNDLES_ACTIVE", activeCount));
+		ci.print("  "); //$NON-NLS-1$
+		ci.println(EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONSOLE_BUNDLES_ACTIVE", activeCount)); //$NON-NLS-1$
 	}
 }

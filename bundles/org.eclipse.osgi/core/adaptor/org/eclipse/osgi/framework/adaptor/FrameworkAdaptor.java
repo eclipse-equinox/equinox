@@ -38,6 +38,8 @@ import org.osgi.framework.BundleException;
 
 public interface FrameworkAdaptor {
 
+	public static final String FRAMEWORK_SYMBOLICNAME = "org.eclipse.osgi"; //$NON-NLS-1$
+
 	/**
 	 * Initialize the FrameworkAdaptor object so that it is ready to be
 	 * called by the framework.  Handle the arguments that were
