@@ -695,6 +695,7 @@ public class PackageAdminImpl implements PackageAdmin {
 			if (bundle == null) {
 				BundleException be = new BundleException(Msg.formatter.getString("BUNDLE_NOT_IN_FRAMEWORK", descriptions[i])); //$NON-NLS-1$
 				framework.publishFrameworkEvent(FrameworkEvent.ERROR, framework.systemBundle, be);
+				continue;
 			}
 			if (bundle != framework.systemBundle) {
 				if (descriptions[i].isResolved()) {
