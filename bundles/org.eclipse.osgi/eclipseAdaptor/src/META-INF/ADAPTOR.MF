@@ -1,3 +1,5 @@
 Export-Package: 
- org.eclipse.osgi.framework.stats
+ org.eclipse.osgi.framework.stats,
+ org.eclipse.osgi.services.pluginconversion
+ 
 
