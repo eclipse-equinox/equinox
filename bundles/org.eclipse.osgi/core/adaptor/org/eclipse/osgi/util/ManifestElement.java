@@ -236,7 +236,6 @@ public class ManifestElement {
 			// Header values may be a list of ';' separated values.  Just append them all into one value until the first '=' or ','
 			while (c == ';') {
 				next = tokenizer.getToken(";,=");
-				headerValues.add(next);
 				if (next == null) {
 					throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_HEADER_EXCEPTION", header, value));
 				}
@@ -244,6 +243,7 @@ public class ManifestElement {
 				c = tokenizer.getChar();
 
 				if (c == ';') /* more */ {
+					headerValues.add(next);
 					headerValue.append(";").append(next);
 
 					if (Debug.DEBUG && Debug.DEBUG_MANIFEST) {
