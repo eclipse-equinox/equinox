@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.osgi.service.pluginconversion;
+package org.eclipse.core.runtime.adaptor;
 
 import java.util.Map;
 import java.util.Set;

@@ -15,7 +15,7 @@ import java.io.File;
 /**
  * The interface of the service that allows to convert plugin.xml into manifest.mf
  */
-public interface IPluginConverter {
+public interface PluginConverter {
 	/**
 	 * Converts a plug-in/fragment manifest in the given source base location (a directory) and 
 	 * generates a corresponding bundle manifest in the given default target locaton (a file).

@@ -252,7 +252,7 @@ public class EclipseBundleData extends DefaultBundleData {
 	}
 
 	private Dictionary generateManifest() throws BundleException {
-		IPluginConverter converter = PluginConverter.getDefault();
+		PluginConverterImpl converter = PluginConverterImpl.getDefault();
 		File location = converter.convertManifest(file);
 		if (location == null)
 			return null;	
