@@ -32,7 +32,7 @@ public class BundleLoaderProxy implements KeyedElement, SymbolicBundle{
 
 	public BundleLoaderProxy(BundleHost bundle) {
 		this.bundle = bundle;
-		this.uniqueId = bundle.getGlobalName();
+		this.uniqueId = bundle.getSymbolicName();
 		if (this.uniqueId == null) {
 			this.uniqueId = new StringBuffer().append(bundle.id).append("NOUNIQUEID").toString();
 		}
@@ -106,7 +106,7 @@ public class BundleLoaderProxy implements KeyedElement, SymbolicBundle{
 	}
 
 	public String toString() {
-		StringBuffer sb = new StringBuffer(bundle.getGlobalName());
+		StringBuffer sb = new StringBuffer(bundle.getSymbolicName());
 		sb.append("; ").append(Constants.BUNDLE_VERSION_ATTRIBUTE);
 		sb.append("=\"").append(version.toString()).append("\"");
 		return sb.toString();

@@ -22,8 +22,8 @@ public class BundleRepository {
 	/** bundles keyed by bundle Id */
 	private KeyedHashSet bundlesById;
 
-	/** bundles keyed by GlobalName */
-	private Hashtable bundlesByGlobalName;
+	/** bundles keyed by SymbolicName */
+	private Hashtable bundlesBySymbolicName;
 
 	/** PackageAdmin */
 	private PackageAdmin packageAdmin;
@@ -31,7 +31,7 @@ public class BundleRepository {
 	public BundleRepository(int initialCapacity, PackageAdmin packageAdmin) {
 		bundlesByInstallOrder = new ArrayList(initialCapacity);
 		bundlesById = new KeyedHashSet(initialCapacity, true);
-		bundlesByGlobalName = new Hashtable(initialCapacity);
+		bundlesBySymbolicName = new Hashtable(initialCapacity);
 		this.packageAdmin = packageAdmin;
 	}
 
@@ -53,12 +53,12 @@ public class BundleRepository {
 		return (Bundle) bundlesById.getByKey(key);
 	}
 
-	public Bundle[] getBundles(String globalName) {
-		return (Bundle[]) bundlesByGlobalName.get(globalName);
+	public Bundle[] getBundles(String symbolicName) {
+		return (Bundle[]) bundlesBySymbolicName.get(symbolicName);
 	}
 
-	public Bundle getBundle(String globalName, String version) {
-		Bundle[] bundles = (Bundle[]) bundlesByGlobalName.get(globalName);
+	public Bundle getBundle(String symbolicName, String version) {
+		Bundle[] bundles = (Bundle[]) bundlesBySymbolicName.get(symbolicName);
 		if (bundles != null) {
 			Version ver = new Version(version);
 			if (bundles.length > 0) {
@@ -75,15 +75,15 @@ public class BundleRepository {
 	public void add(Bundle bundle) {
 		bundlesByInstallOrder.add(bundle);
 		bundlesById.add(bundle);
-		String globalName = bundle.getGlobalName();
-		if (globalName != null) {
-			Bundle[] bundles = (Bundle[]) bundlesByGlobalName.get(globalName);
+		String symbolicName = bundle.getSymbolicName();
+		if (symbolicName != null) {
+			Bundle[] bundles = (Bundle[]) bundlesBySymbolicName.get(symbolicName);
 			if (bundles == null) {
 				// making the initial capacity on this 1 since it
 				// should be rare that multiple version exist
 				bundles = new Bundle[1];
 				bundles[0] = bundle;
-				bundlesByGlobalName.put(globalName, bundles);
+				bundlesBySymbolicName.put(symbolicName, bundles);
 				return;
 			}
 
@@ -106,7 +106,7 @@ public class BundleRepository {
 
 			bundles = new Bundle[list.size()];
 			list.toArray(bundles);
-			bundlesByGlobalName.put(globalName, bundles);
+			bundlesBySymbolicName.put(symbolicName, bundles);
 		}
 	}
 
@@ -116,10 +116,10 @@ public class BundleRepository {
 		if (removed) {
 			// remove by install order
 			bundlesByInstallOrder.remove(bundle);
-			// remove by global name
-			String globalName = bundle.getGlobalName();
-			if (globalName != null) {
-				Bundle[] bundles = (Bundle[]) bundlesByGlobalName.get(globalName);
+			// remove by symbolic name
+			String symbolicName = bundle.getSymbolicName();
+			if (symbolicName != null) {
+				Bundle[] bundles = (Bundle[]) bundlesBySymbolicName.get(symbolicName);
 				if (bundles != null) {
 					// found some bundles with the global name.
 					// remove all references to the specified bundle.
@@ -133,7 +133,7 @@ public class BundleRepository {
 					if (numRemoved > 0) {
 						if (bundles.length - numRemoved <= 0) {
 							// no bundles left in the array remove the array from the hash
-							bundlesByGlobalName.remove(globalName);
+							bundlesBySymbolicName.remove(symbolicName);
 						} else {
 							// create a new array with the null entries removed.
 							Bundle[] newBundles = new Bundle[bundles.length - numRemoved];
@@ -144,7 +144,7 @@ public class BundleRepository {
 									indexCnt++;
 								}
 							}
-							bundlesByGlobalName.put(globalName, newBundles);
+							bundlesBySymbolicName.put(symbolicName, newBundles);
 						}
 					}
 				}
@@ -156,7 +156,7 @@ public class BundleRepository {
 	public void removeAllBundles() {
 		bundlesByInstallOrder.clear();
 		bundlesById = new KeyedHashSet();
-		bundlesByGlobalName.clear();
+		bundlesBySymbolicName.clear();
 	}
 
 	public synchronized void markDependancies() {

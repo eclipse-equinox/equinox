@@ -379,7 +379,7 @@ public class BundleHost extends Bundle {
 			if (Debug.DEBUG && Debug.DEBUG_MONITOR_BUNDLES) {
 				IBundleStats bundleStats = framework.adaptor.getBundleStats();
 				if (bundleStats != null)
-					bundleStats.startActivation(getGlobalName());
+					bundleStats.startActivation(getSymbolicName());
 			}
 
 			try {
@@ -432,7 +432,7 @@ public class BundleHost extends Bundle {
 				if (Debug.DEBUG && Debug.DEBUG_MONITOR_BUNDLES) {
 					IBundleStats bundleStats = framework.adaptor.getBundleStats();
 					if (bundleStats != null)
-						bundleStats.endActivation(getGlobalName());
+						bundleStats.endActivation(getSymbolicName());
 				}
 			}
 		}

@@ -1,5 +1,5 @@
 /*
- * $Header: /home/technology/org.eclipse.equinox/plugins/org.eclipse.osgi/osgi/src/org/osgi/framework/BundleContext.java,v 1.3 2003/11/25 15:44:22 twatson Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/BundleContext.java,v 1.1 2003/11/25 21:24:14 dj Exp $
  *
  * Copyright (c) The Open Services Gateway Initiative (2000-2001).
  * All Rights Reserved.
@@ -73,7 +73,7 @@ import java.util.Dictionary;
  * given time, but objects created by one Framework instance cannot be used by bundles
  * running in the execution context of another Framework instance.
  *
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.1 $
  * @author Open Services Gateway Initiative
  */
 
@@ -612,25 +612,16 @@ public abstract interface BundleContext {
 	// Equinox Addenda
 	//================================================================
 	/**
-	 * This method returns an array of bundles with the specified global 
-	 * name.  If no bundles are installed with the specified global name 
-	 * then null is returned.  The returned bundles are ordered in 
-	 * descending bundle version order.
-	 *
-	 * @param globalName The global name of the bundle to retrieve.
-	 * @return A <tt>Bundle []</tt> containing all install bundles with the
-	 * specified global name, or <tt>null</tt> if the global name 
-	 * does not match any installed bundle.
+	 * @deprecated to be removed. Use
+	 *   org.osgi.service.packageadmin.PackageAdmin.getBundles(String, String, String)
 	 */
-	public abstract Bundle[] getBundles(String globalName);
+	public abstract Bundle[] getBundles(String symbolicName);
 
 	/**
-	 * 
-	 * @deprecated to be removed.  Use getBundles(String)
-	 * @param object
-	 * @return
+	 * @deprecated to be removed.  Use 
+	 *   org.osgi.service.packageadmin.PackageAdmin.getResolvedBundle(String, String, String)
 	 */
-	public abstract Bundle getBundle(String globalName);
+	public abstract Bundle getBundle(String symbolicName);
 
 	// TODO  hack alert.  This likely is not required in the API.  It allows you to find out 
 	// what bundle loaded a given object.  This is useful for debugging etc but...

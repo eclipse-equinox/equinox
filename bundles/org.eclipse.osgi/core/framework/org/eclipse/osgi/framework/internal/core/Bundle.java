@@ -323,7 +323,7 @@ public abstract class Bundle
 		long start = 0;
 		if (Debug.DEBUG && Debug.DEBUG_BUNDLE_TIME) {
 			start = System.currentTimeMillis();
-			System.out.println("Starting " + getGlobalName());
+			System.out.println("Starting " + getSymbolicName());
 		}
 		framework.checkAdminPermission();
 		checkValid();
@@ -334,7 +334,7 @@ public abstract class Bundle
 			completeStateChange();
 		}
 		if (Debug.DEBUG && Debug.DEBUG_BUNDLE_TIME)
-			System.out.println("End starting " + getGlobalName() + " "
+			System.out.println("End starting " + getSymbolicName() + " "
 					+ (System.currentTimeMillis() - start));
 	}
 	/**
@@ -785,11 +785,11 @@ public abstract class Bundle
 			// Check for a bundle already installed with the same UniqueId
 			// and version.
 			Bundle installedBundle = framework.getBundleByUniqueId(newBundle
-					.getGlobalName(), newBundle.getVersion().toString());
+					.getSymbolicName(), newBundle.getVersion().toString());
 			if (installedBundle != null && installedBundle != this) {
 				throw new BundleException(Msg.formatter.getString(
 						"BUNDLE_INSTALL_SAME_UNIQUEID", newBundle
-								.getGlobalName(), newBundle.getVersion()
+								.getSymbolicName(), newBundle.getVersion()
 								.toString()));
 			}
 			String[] nativepaths = framework.selectNativeCode(newBundle);
@@ -1232,7 +1232,7 @@ public abstract class Bundle
 						long end = System.currentTimeMillis();
 						if (end - start > 0) {
 							System.out.println("Waiting... : "
-									+ getGlobalName() + " " + (end - start));
+									+ getSymbolicName() + " " + (end - start));
 						}
 					}
 				} catch (InterruptedException e) {
@@ -1399,7 +1399,11 @@ public abstract class Bundle
 			}
 		});
 	}
+
 	public String getGlobalName() {
+		return getSymbolicName();
+	}
+	public String getSymbolicName() {
 		return bundledata.getUniqueId();
 	}
 	public BundleData getBundleData() {

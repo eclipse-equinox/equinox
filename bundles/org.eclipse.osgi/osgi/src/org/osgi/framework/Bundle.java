@@ -1,5 +1,5 @@
 /*
- * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/Bundle.java,v 1.2 2004/01/09 22:04:44 jfogell Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/Bundle.java,v 1.3 2004/02/16 21:28:52 jfogell Exp $
  *
  * Copyright (c) The Open Services Gateway Initiative (2000-2001).
  * All Rights Reserved.
@@ -67,7 +67,7 @@ import java.util.*;
  * create <tt>Bundle</tt> objects, and these objects are only valid
  * within the Framework that created them.
  *
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @author Open Services Gateway Initiative
  */
 public abstract interface Bundle
@@ -629,42 +629,35 @@ public abstract interface Bundle
 	//================================================================
 
 	/**
-	 * This method returns the global name of this bundle as specified 
-	 * by its Bundle-GlobalName manifest header.  The name must be unique, 
+	 * This method returns the symbolic name of this bundle as specified 
+	 * by its Bundle-SymbolicName manifest header.  The name must be unique, 
 	 * it is recommended to use the same naming convention as Java Packages.  
 	 * This method does not require any security permission to access a 
-	 * bundle’s global name.  If the bundle does not have a specified 
-	 * global name then null is returned. 
+	 * bundle’s symbolic name.  If the bundle does not have a specified 
+	 * symbolic name then null is returned. 
 	 * 
-	 * @return The global name of this bundle.
+	 * @return The symbolic name of this bundle.
+	 */
+	public String getSymbolicName();
+	
+	/**
+	 * 
+	 * @deprecated use getSymbolicName()
 	 */
 	public String getGlobalName();
 
 	/**
-	 * This method returns the list of attached fragment bundles.  If the 
-	 * bundle is a fragment then null is returned.  If no fragments are 
-	 * attached then null is returned. This method does not require any 
-	 * security permission to access.
-	 * 
-	 * @return an array of fragment bundles or null if the bundle does not 
-	 * have any fragments. 
+	 * @deprecated use org.osgi.service.packageadmin.PackageAdmin.getFragments(Bundle bundle)
 	 */
 	public abstract org.osgi.framework.Bundle[] getFragments();
 
 	/**
-	 * This method indicates that this bundle is a fragment bundle or not.  
-	 * True is returned if the bundle is a fragment; otherwise false is returned.	
-	 * This method does not require any security permission to access.
-	 * @return true if the bundle is a fragment; otherwise false is returned.
+	 * @deprecated use org.osgi.service.packageadmin.PackageAdmin.isFragment(Bundle)
 	 */
 	public boolean isFragment();
 
 	/**
-	 * This method returns the host bundle for this bundle or null if the 
-	 * bundle is not attached to a host.  If the bundle is not a fragment 
-	 * bundle then null is returned.  This method does not require any 
-	 * security permission to access.
-	 * @return the host bundle or null if the bundle does not have a host.
+	 * @deprecated use org.osgi.service.packageadmin.PackageAdmin.getHosts(Bundle)
 	 */
 	public org.osgi.framework.Bundle getHost();
 
@@ -699,7 +692,7 @@ public abstract interface Bundle
 	 * <p> 
 	 * This method returns an empty enumeration if no entries could not be 
 	 * found matching the specified path or if the caller does not have 
-	 * the AdminPermission or BundlePermission[READ, <target bundle global name>], 
+	 * the AdminPermission or BundlePermission[READ, <target bundle symbolic name>], 
 	 * and the Java Runtime Environment supports permissions.
 	 * 
 	 * @param path the path name to get the entry path names for.
@@ -714,7 +707,7 @@ public abstract interface Bundle
 	 * Only the content of the bundle is searched for the named entry.  
 	 * This method returns a URL to the named entry, or null if the entry 
 	 * could not be found or if the caller does not have the AdminPermission 
-	 * or BundlePermission[READ, <target bundle global name>], 
+	 * or BundlePermission[READ, <target bundle symbolic name>], 
 	 * and the Java Runtime Environment supports permissions.	
 	 *
 	 * @param name The name of the resource.

@@ -899,10 +899,10 @@ public class Framework implements EventSource, EventPublisher {
 
 			// Check for a bundle already installed with the same UniqueId
 			// and version.
-			if (bundle.getGlobalName() != null) {
-				Bundle installedBundle = getBundleByUniqueId(bundle.getGlobalName(), bundle.getVersion().toString());
+			if (bundle.getSymbolicName() != null) {
+				Bundle installedBundle = getBundleByUniqueId(bundle.getSymbolicName(), bundle.getVersion().toString());
 				if (installedBundle != null) {
-					throw new BundleException(Msg.formatter.getString("BUNDLE_INSTALL_SAME_UNIQUEID", bundle.getGlobalName(), bundle.getVersion().toString()));
+					throw new BundleException(Msg.formatter.getString("BUNDLE_INSTALL_SAME_UNIQUEID", bundle.getSymbolicName(), bundle.getVersion().toString()));
 				}
 			}
 			try {

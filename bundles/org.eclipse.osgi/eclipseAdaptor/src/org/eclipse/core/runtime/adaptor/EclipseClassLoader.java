@@ -100,7 +100,7 @@ public class EclipseClassLoader extends DefaultClassLoader {
 	}
 
 	private String getClassloaderId() {
-		return hostdata.getBundle().getGlobalName();
+		return hostdata.getBundle().getSymbolicName();
 	}
 
 	public URL getResouce(String name) {
