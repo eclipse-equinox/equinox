@@ -31,7 +31,7 @@ public class Framework implements EventSource, EventPublisher {
 	/** FrameworkAdaptor specific functions. */
 	protected FrameworkAdaptor adaptor;
 	/** framework properties object. */
-	protected Properties properties;
+	protected Properties properties;	//TODO What is the difference between this properties and the one from the adaptor? Why can't we have one? 
 	/** Has the service space been started */
 	protected boolean active;
 	/** The bundles installed in the framework */
@@ -48,14 +48,14 @@ public class Framework implements EventSource, EventPublisher {
 	/** Startlevel factory object */
 	protected StartLevelFactory startLevelFactory;
 	/** The ServiceRegistry */
-	protected ServiceRegistry serviceRegistry;
+	protected ServiceRegistry serviceRegistry;		//TODO This is duplicated from the adaptor, do we really gain ?
 	/** next free service id. */
 	protected long serviceid;
 	/** List of BundleContexts for bundle's BundleListeners. */
-	protected EventListeners bundleEvent;
+	protected EventListeners bundleEvent;	//TODO Can't we use the one from the bundleContext of the systemBundle. Or am I mixing up things 
 	protected static final int BUNDLEEVENT = 1;
 	/** List of BundleContexts for bundle's SynchronousBundleListeners. */
-	protected EventListeners bundleEventSync;
+	protected EventListeners bundleEventSync; //TODO Can't we use the one from the bundleContext of the systemBundle. Or am I mixing up things 
 	protected static final int BUNDLEEVENTSYNC = 2;
 	/** List of BundleContexts for bundle's ServiceListeners. */
 	protected EventListeners serviceEvent;

@@ -29,7 +29,7 @@ import org.osgi.framework.*;
 
 public class BundleContext implements org.osgi.framework.BundleContext, EventSource {
 	/** Bundle object this context is associated with. */
-	protected BundleHost bundle;
+	protected BundleHost bundle;	//TODO This should be accessed through accessors
 
 	/** Internal framework object. */
 	protected Framework framework;
@@ -870,7 +870,7 @@ public class BundleContext implements org.osgi.framework.BundleContext, EventSou
 		if (servicesInUse == null) {
 			synchronized (contextLock) {
 				if (servicesInUse == null) {
-					servicesInUse = new Hashtable(17);
+					servicesInUse = new Hashtable(17);	//TODO Interesting size...
 				}
 			}
 		}

@@ -203,6 +203,7 @@ public class SystemBundleData implements BundleData {
 			}
 		}
 
+		//TODO Do we still support this case? I thought we would only every ship with manifest.mf
 		// If we cannot find the Manifest file then use the old SYSTEMBUNDLE.MF file.
 		if (in == null) {
 			in = getClass().getResourceAsStream(Constants.OSGI_SYSTEMBUNDLE_MANIFEST);

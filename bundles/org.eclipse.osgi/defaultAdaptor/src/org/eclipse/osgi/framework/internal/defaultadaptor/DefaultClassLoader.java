@@ -36,7 +36,7 @@ public class DefaultClassLoader extends AbstractClassLoader {
 	 */
 	protected ClasspathEntry[] classpathEntries;
 
-	protected Vector fragClasspaths;
+	protected Vector fragClasspaths;	//TODO This should be an array or an arraylist if the synchronization is not required
 
 	/**
 	 * The buffer size to use when loading classes.  This value is used 

@@ -191,7 +191,7 @@ public class EclipseBundleData extends DefaultBundleData {
 		PluginConverterImpl converter = PluginConverterImpl.getDefault();
 
 		Dictionary generatedManifest = converter.convertManifest(getBaseFile(), true, null);
-		if (generatedManifest == null)
+		if (generatedManifest == null)	//TODO Why don't we return the original manifest?
 			return null;
 
 		ManifestElement generatedFrom = ManifestElement.parseHeader(PluginConverterImpl.GENERATED_FROM,(String)generatedManifest.get(PluginConverterImpl.GENERATED_FROM))[0];

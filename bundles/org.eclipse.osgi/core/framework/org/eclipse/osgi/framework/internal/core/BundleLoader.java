@@ -1176,7 +1176,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 			return new String[] { "." };
 		}
 
-		ArrayList result = new ArrayList(10);
+		ArrayList result = new ArrayList(10);	//TODO What about initializing that to classpath.length
 		for (int i = 0; i < classpath.length; i++) {
 			Filter filter;
 			try {

@@ -19,12 +19,13 @@ import org.eclipse.osgi.service.resolver.PackageSpecification;
 import org.eclipse.osgi.service.resolver.Version;
 
 import org.osgi.service.packageadmin.NamedClassSpace;
-//TODO A few comments would be appreciated here Although I guess it is a proxy for the loader for a bundle ;-).  
+//TODO A few comments would be appreciated here Although I guess it is a proxy for the loader for a bundle ;-).
+//TODO Depending on the frequence the compare and hash methods are used, uniqueId version and key may not be necessary.
 public class BundleLoaderProxy implements KeyedElement, NamedClassSpace{
 	private BundleLoader loader;
 	private BundleHost bundle;
-	private String uniqueId;
-	private Version version;
+	private String uniqueId;	
+	private Version version;	
 	private String key;
 	private boolean stale = false;
 	private KeyedHashSet users;

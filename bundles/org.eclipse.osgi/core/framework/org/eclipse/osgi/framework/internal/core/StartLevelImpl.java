@@ -507,7 +507,7 @@ public class StartLevelImpl implements EventSource, EventListener {
 
 	/**
 	 * Load all bundles in the list
-	 * @param Bundle[[] a list of bundles to load
+	 * @param Bundle[] a list of bundles to load
 	 */
 	private void loadInstalledBundles(Bundle[] installedBundles) {
 

@@ -36,7 +36,7 @@ public class ServiceUse {
 	/** bundle's use count for this service */
 	protected int useCount;
 	/** Internal framework object. */
-	protected Framework framework;
+	protected Framework framework;	//TODO this field or context could be removed. Do we really gain in time in having it here?
 
 	/**
 	 * Constructs a service use encapsulating the service object.

@@ -52,6 +52,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 	 */
 	protected BundleContext context;	//TODO Rename to systemBundleContext
 
+	//TODO These fields does not seems to be very usefull, nor their methods. 
 	/**
 	 * The Vector Initial Capacity value.
 	 */

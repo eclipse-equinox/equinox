@@ -34,7 +34,7 @@ public class EclipseClassLoader extends DefaultClassLoader {
 	// from Eclipse-AutoStart element value
 	private boolean autoStart;
 	// from Eclipse-AutoStart's "exceptions" attribute
-	private List exceptions;
+	private List exceptions;	//TODO This could easily be changed to an array
 	// should we try to activate the bundle?
 	private boolean tryActivating;
 	public EclipseClassLoader(ClassLoaderDelegate delegate, ProtectionDomain domain, String[] classpath, BundleData bundleData) {
@@ -47,7 +47,7 @@ public class EclipseClassLoader extends DefaultClassLoader {
 		try {
 			String automationHeader = (String) bundleData.getManifest().get(EclipseAdaptorConstants.ECLIPSE_AUTOSTART);
 			ManifestElement[] allElements = ManifestElement.parseHeader(EclipseAdaptorConstants.ECLIPSE_AUTOSTART, automationHeader);
-			//Eclipse-AutoStart not found... look for the Legacy header instead
+			//Eclipse-AutoStart not found... look for the Legacy header instead		//TODO This is old code, this can be removed
 			if (allElements == null) {
 				autoStart = "true".equalsIgnoreCase((String) bundleData.getManifest().get(EclipseAdaptorConstants.LEGACY)); //$NON-NLS-1$
 				return;
