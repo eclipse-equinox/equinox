@@ -16,10 +16,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.security.Permission;
 import java.util.Hashtable;
-import org.eclipse.osgi.framework.adaptor.BundleData;
-import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.debug.Debug;
-import org.eclipse.osgi.framework.util.Headers;
 import org.osgi.framework.BundleException;
 
 /**
