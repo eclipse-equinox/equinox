@@ -1,14 +1,13 @@
 Manifest-Version: 1.0
-Bundle-Name: %pluginName
+Bundle-Name: %osgiUtil
 Bundle-SymbolicName: org.eclipse.osgi.util
 Bundle-Version: 3.0
-Bundle-Description: OSGi Service Platform Release 3 Utility Classes
-Bundle-Vendor: %providerName
+Bundle-Description: %osgiUtilDes
+Bundle-Vendor: %eclipse.org
 Bundle-Localization: plugin
 Bundle-DocUrl: http://www.eclipse.org
 Bundle-ContactAddress: www.eclipse.org
-Bundle-Copyright: Copyright (c) The Open Services Gateway Initiative (
- 2001, 2003). All Rights Reserved.
+Bundle-Copyright: %copyright
 Bundle-ClassPath: util.jar
 Export-Package: org.osgi.util.measurement; specification-version=1.0, 
  org.osgi.util.position; specification-version=1.0,
