@@ -298,7 +298,7 @@ public class PluginConverterImpl implements PluginConverter {
 		if (pluginInfo.isFragment()) {
 			StringBuffer hostBundle = new StringBuffer();
 			hostBundle.append(pluginInfo.getMasterId());
-			String versionRange = getVersionRange(pluginInfo.getMasterVersion(), null); // TODO need to get match rule here!
+			String versionRange = getVersionRange(pluginInfo.getMasterVersion(), pluginInfo.getMasterMatch()); // TODO need to get match rule here!
 			if (versionRange != null)
 				hostBundle.append(versionRange);
 			generatedManifest.put(Constants.FRAGMENT_HOST, hostBundle.toString());

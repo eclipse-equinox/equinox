@@ -42,6 +42,7 @@ public class PluginParser extends DefaultHandler implements IModel {
 		private String pluginClass;
 		private String masterPluginId;
 		private String masterVersion;
+		private String masterMatch;
 		private Set filters;
 		private String pluginName;
 		private boolean singleton;
@@ -107,6 +108,10 @@ public class PluginParser extends DefaultHandler implements IModel {
 
 		public String getMasterVersion() {
 			return masterVersion;
+		}
+
+		public String getMasterMatch() {
+			return masterMatch;
 		}
 
 		public String getPluginClass() {
@@ -475,6 +480,8 @@ public class PluginParser extends DefaultHandler implements IModel {
 				manifestInfo.masterPluginId = attrValue;
 			else if (attrName.equals(FRAGMENT_PLUGIN_VERSION))
 				manifestInfo.masterVersion = attrValue;
+			else if (attrName.equals(FRAGMENT_PLUGIN_MATCH))
+				manifestInfo.masterMatch = attrValue;
 		}
 	}
 

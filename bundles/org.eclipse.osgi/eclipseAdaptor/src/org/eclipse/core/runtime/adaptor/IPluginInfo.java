@@ -26,6 +26,8 @@ public interface IPluginInfo {
 
 	public String getMasterVersion();
 
+	public String getMasterMatch();
+
 	public String getPluginClass();
 
 	public String getUniqueId();
