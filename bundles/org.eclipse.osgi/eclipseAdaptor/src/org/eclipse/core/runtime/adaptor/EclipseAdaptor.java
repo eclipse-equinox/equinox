@@ -90,6 +90,11 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		else {
 			frameworkLog = new EclipseLog();
 		}
+
+		if ("true".equals(System.getProperty(EclipseStarter.PROP_CONSOLE_LOG))) {
+			frameworkLog.setConsoleLog(true);
+		}
+
 		return frameworkLog;
 	}
 

@@ -31,6 +31,7 @@ public class EclipseStarter {
 
 	// command line arguments
 	private static final String CONSOLE = "-console"; //$NON-NLS-1$
+	private static final String CONSOLE_LOG = "-consolelog"; //$NON-NLS-1$
 	private static final String DEBUG = "-debug"; //$NON-NLS-1$
 	private static final String DEV = "-dev"; //$NON-NLS-1$
 	private static final String WS = "-ws"; //$NON-NLS-1$
@@ -60,7 +61,8 @@ public class EclipseStarter {
 	public static final String PROP_SYSPATH= "osgi.syspath"; //$NON-NLS-1$
 	
 	public static final String PROP_EXITCODE = "eclipse.exitcode"; //$NON-NLS-1$
-	
+	public static final String PROP_CONSOLE_LOG = "eclipse.consoleLog"; //$NON-NLS-1$
+
 	// Constants for configuration location discovery
 	private static final String ECLIPSE = "eclipse"; //$NON-NLS-1$
 	private static final String PRODUCT_SITE_MARKER = ".eclipseproduct"; //$NON-NLS-1$
@@ -342,7 +344,13 @@ public class EclipseStarter {
 				found = true;
 				continue;
 			}
-	
+
+			// look for the consoleLog flag
+			if (args[i].equalsIgnoreCase(CONSOLE_LOG)) {
+				System.setProperty(PROP_CONSOLE_LOG, "true"); //$NON-NLS-1$
+				found = true;
+			}
+
 			// look for the console with no port.  
 			if (args[i].equalsIgnoreCase(CONSOLE) && ((i + 1 == args.length) || ((i + 1 < args.length) && (args[i + 1].startsWith("-"))))) { //$NON-NLS-1$
 				System.getProperties().put(PROP_CONSOLE, "");	//$NON-NLS-1$
