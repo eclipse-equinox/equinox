@@ -1,5 +1,5 @@
 /*
- * $Header: /home/technology/org.eclipse.equinox/plugins/org.eclipse.osgi/osgi/src/org/osgi/framework/BundleException.java,v 1.1 2003/11/10 17:49:34 jeff Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/BundleException.java,v 1.1 2003/11/25 21:24:14 dj Exp $
  *
  * Copyright (c) The Open Services Gateway Initiative (2000-2001).
  * All Rights Reserved.
@@ -78,6 +78,34 @@ public class BundleException extends Exception
     public Throwable getNestedException()
     {
         return(throwable);
+    }
+
+    /**
+     * Returns any nested exceptions included in this exception.
+     * <p>
+     * This method is the same as calling {@link #getNestedException}.  
+     * This method is for compatiblity with the new 
+     * Throwable.getCause() method that was added in Java 1.4.
+     * 
+     * @return The nested exception; <tt>null</tt> if there is
+     * no nested exception.
+     * @since <b>1.4 EXPERIMENTAL</b>
+     */
+    public Throwable getCause() {
+        return getNestedException();
+    }
+
+    /**
+     * This method is for compatiblity with the new Throwable.initCause()
+     * method that was added in Java 1.4.
+     * <p>
+     * This method will always throw an {@link IllegalStateException}.
+     * The cause can only be set by the constructor.
+     * @param cause the cause.
+     * @return a reference to this <code>BundleException</code> instance.
+     */
+    public Throwable initCause(Throwable cause) {
+    	throw new IllegalStateException();
     }
 }
 
