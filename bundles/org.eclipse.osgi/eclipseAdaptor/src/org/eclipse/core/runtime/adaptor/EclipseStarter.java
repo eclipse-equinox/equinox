@@ -39,8 +39,6 @@ public class EclipseStarter {
 	private static final String ARCH = "-arch"; //$NON-NLS-1$
 	private static final String NL = "-nl"; //$NON-NLS-1$	
 	private static final String CONFIGURATION = "-configuration"; //$NON-NLS-1$	
-	private static final String PRODUCT = "-product"; //$NON-NLS-1$
-	
 	// this is more of an Eclipse argument but this OSGi implementation stores its 
 	// metadata alongside Eclipse's.
 	private static final String DATA = "-data"; //$NON-NLS-1$
@@ -65,14 +63,12 @@ public class EclipseStarter {
 	public static final String PROP_EXITCODE = "eclipse.exitcode"; //$NON-NLS-1$
 	public static final String PROP_CONSOLE_LOG = "eclipse.consoleLog"; //$NON-NLS-1$
 
-	public static final String PROP_ECLIPSE_PRODUCT = "eclipse.product"; //$NON-NLS-1$
-	
 	// Constants for configuration location discovery
 	private static final String ECLIPSE = "eclipse"; //$NON-NLS-1$
 	private static final String PRODUCT_SITE_MARKER = ".eclipseproduct"; //$NON-NLS-1$
 	private static final String PRODUCT_SITE_ID = "id"; //$NON-NLS-1$
 	private static final String PRODUCT_SITE_VERSION = "version"; //$NON-NLS-1$
-	
+
 	/** string containing the classname of the adaptor to be used in this framework instance */
 	protected static final String DEFAULT_ADAPTOR_CLASS = "org.eclipse.core.runtime.adaptor.EclipseAdaptor";
 	
@@ -428,12 +424,6 @@ public class EclipseStarter {
 				System.getProperties().put(PROP_NL, arg);
 			}
 	
-			// look for the product id
-			if (args[i - 1].equalsIgnoreCase(PRODUCT)) {
-				found = true;
-				System.getProperties().put(PROP_ECLIPSE_PRODUCT, arg);
-			}
-				
 			// done checking for args.  Remember where an arg was found 
 			if (found) {
 				configArgs[configArgIndex++] = i - 1;
