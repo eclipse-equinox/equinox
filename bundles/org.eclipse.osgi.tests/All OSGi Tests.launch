@@ -5,9 +5,6 @@
 <booleanAttribute key="useProduct" value="false"/>
 <booleanAttribute key="tracing" value="false"/>
 <stringAttribute key="location2" value="d:\work\workspaces\runtime-test-workspace"/>
-<listAttribute key="org.eclipse.debug.ui.favoriteGroups">
-<listEntry value="org.eclipse.debug.ui.launchGroup.run"/>
-</listAttribute>
 <stringAttribute key="org.eclipse.jdt.junit.CONTAINER" value=""/>
 <booleanAttribute key="org.eclipse.jdt.junit.KEEPRUNNING_ATTR" value="false"/>
 <booleanAttribute key="automaticAdd" value="true"/>
@@ -19,16 +16,17 @@
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="org.eclipse.osgi.tests.AutomatedTests"/>
 <stringAttribute key="location1" value="c:\temp\test-workspaces"/>
 <stringAttribute key="templateConfig" value=""/>
-<stringAttribute key="vmargs" value=""/>
 <booleanAttribute key="default" value="true"/>
+<stringAttribute key="vmargs" value=""/>
 <booleanAttribute key="clearConfig" value="true"/>
 <booleanAttribute key="org.eclipse.debug.core.appendEnvironmentVariables" value="true"/>
-<stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.pde.ui.workbenchClasspathProvider"/>
 <booleanAttribute key="useDefaultConfigArea" value="true"/>
-<booleanAttribute key="useDefaultConfig" value="true"/>
+<stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.pde.ui.workbenchClasspathProvider"/>
 <stringAttribute key="progargs" value=""/>
+<booleanAttribute key="useDefaultConfig" value="true"/>
 <stringAttribute key="org.eclipse.jdt.junit.TESTNAME" value=""/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="org.eclipse.osgi.tests"/>
 <booleanAttribute key="askclear" value="false"/>
+<booleanAttribute key="includeOptional" value="true"/>
 <stringAttribute key="location0" value="c:\temp\test-workspaces"/>
 </launchConfiguration>
