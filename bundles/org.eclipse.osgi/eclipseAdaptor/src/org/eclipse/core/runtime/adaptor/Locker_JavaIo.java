@@ -45,9 +45,7 @@ public class Locker_JavaIo implements Locker {
 		} catch (IOException e) {
 			//don't complain, we're making a best effort to clean up
 		}
-		if (lockFile != null) {
+		if (lockFile != null)
 			lockFile.delete();
-			lockFile = null;
-		}
 	}
 }

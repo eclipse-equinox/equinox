@@ -16,6 +16,16 @@ import java.net.URL;
 import org.eclipse.osgi.service.datalocation.Location;
 
 public class BasicLocation implements Location {
+	private static class MockLocker implements Locker {
+		public boolean lock() throws IOException {
+			// locking always successful
+			return true;
+		}
+		public void release() {
+			// nothing to release
+		}
+
+	}
 	private boolean isReadOnly;
 	private URL location = null;
 	private Location parent;
@@ -42,7 +52,7 @@ public class BasicLocation implements Location {
 			lockMode = System.getProperties().getProperty(PROP_OSGI_LOCKING);
 		
 		if ("none".equals(lockMode)) //$NON-NLS-1$
-			return null;
+			return new MockLocker();
 		
 		if ("java.io".equals(lockMode)) //$NON-NLS-1$
 			return new Locker_JavaIo(lock);

@@ -15,9 +15,9 @@ import java.nio.channels.FileLock;
 
 //TODO shouldn't it be LockerJavaNIO instead?
 public class Locker_JavaNio implements Locker {
+	private File lockFile;
 	private FileLock fileLock;
 	private FileOutputStream fileStream;
-	private File lockFile;
 
 	public Locker_JavaNio(File lockFile) {
 		this.lockFile = lockFile;
@@ -30,7 +30,6 @@ public class Locker_JavaNio implements Locker {
 			return true;
 		fileStream.close();
 		fileStream = null;
-		fileLock = null;
 		return false;
 	}
 
