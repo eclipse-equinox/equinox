@@ -106,10 +106,43 @@ public class EclipseStarter {
 		context.registerService(Runnable.class.getName(),endSplashHandler,properties);		
 	}
 
-	private static String searchForBundle(String name, String syspath) {
-		String location = "reference:file:"+ syspath +"/"+name;
+	private static String searchForBundle(String name, String syspath) throws MalformedURLException {
+		// TODO this is legacy support for non-URL names.  It should be removed eventually.
+		URL url = null;
+		boolean reference = false;
+		String location = null;
 		try {
-			URLConnection result = new URL(location).openConnection();
+			url = new URL(name);
+		} catch (MalformedURLException e) {
+			// if name was not a URL then construct one.  
+			// Assume it should be a reference and htat it is relative.  This support need not 
+			// be robust as it is temporary..
+			location = "reference:file:"+ syspath + "/" + name;
+			url = new URL(location);
+			reference = true;
+		}
+		// if the name was a URL then see if it is relative.  If so, insert syspath.
+		if (!reference) {
+			URL baseURL = url;
+			if (url.getProtocol().equals("reference")) {
+				reference = true;
+				baseURL = new URL(url.getFile());
+			}
+			
+			File fileLocation = new File(baseURL.getFile());
+			// if the location is relative, prefix it with the syspath
+			if (!fileLocation.isAbsolute())
+				fileLocation = new File(syspath, fileLocation.toString());
+	
+			// Put the reference back on if needed
+			if (reference)
+				url = new URL("reference", null, "file:" + fileLocation.getAbsolutePath());
+			location = url.toExternalForm();
+		}
+
+		// finally we have something worth trying	
+		try {
+			URLConnection result = url.openConnection();
 			result.connect();
 			return location;
 		} catch (IOException e) {
@@ -140,7 +173,7 @@ public class EclipseStarter {
 					String levelString = name.substring(index + 1, name.length());
 					level = Integer.parseInt(levelString);
 					name = name.substring(0, index);
-				}
+			}
 				String location = searchForBundle(name, syspath);
 				if (!isInstalled(location)) {
 					Bundle bundle = context.installBundle(location);
