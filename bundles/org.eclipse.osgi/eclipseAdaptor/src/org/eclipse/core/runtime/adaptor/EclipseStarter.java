@@ -487,7 +487,12 @@ public class EclipseStarter {
 
 	private static String[] processCommandLine(String[] args) throws Exception {
 		EnvironmentInfo.allArgs = args;
-		int[] configArgs = new int[100];
+		if (args.length == 0) {
+			EnvironmentInfo.frameworkArgs = args;
+			EnvironmentInfo.appArgs = args;
+			return args;
+		}
+		int[] configArgs = new int[args.length];
 		configArgs[0] = -1; // need to initialize the first element to something that could not be an index.
 		int configArgIndex = 0;
 		for (int i = 0; i < args.length; i++) {
