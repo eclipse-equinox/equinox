@@ -208,6 +208,64 @@ public class BundleLoader implements ClassLoaderDelegate {
 		}
 	}
 
+	protected void initializeFragment(Bundle fragment) throws BundleException {
+		BundleDescription description = fragment.getBundleDescription();
+		// if the fragment imports a package not already imported throw an exception
+		PackageSpecification[] packages = description.getPackages();
+		if (packages != null && packages.length > 0)
+			for (int i = 0; i < packages.length; i++)
+				if (importedPackages.getByKey(packages[i].getName()) == null)
+					throw new BundleException(Msg.formatter.getString("BUNDLE_FRAGMENT_IMPORT_CONFLICT",packages[i].getName()));
+
+
+
+		// if the fragment requires a bundle not aready required throw an exception
+		BundleSpecification[] fragReqBundles = description.getRequiredBundles();
+		if (fragReqBundles != null && fragReqBundles.length > 0) {
+			if (requiredBundles == null) 
+				throw new BundleException(Msg.formatter.getString("BUNDLE_FRAGMENT_REQUIRE_CONFLICT",fragReqBundles[0].getName()));
+
+			for (int i = 0; i < fragReqBundles.length; i++){
+				boolean found = false;
+				for (int j = 0; j < requiredBundles.length; j++){
+					String fragReqKey = new StringBuffer(fragReqBundles[i].getName()).append("_").append(fragReqBundles[i].getActualVersion().toString()).toString();
+					if (fragReqKey.equals(requiredBundles[j].getKey()))
+						found = true;
+				}
+				if (!found)
+					throw new BundleException(Msg.formatter.getString("BUNDLE_FRAGMENT_REQUIRE_CONFLICT",fragReqBundles[i].getName()));
+			}
+		}
+
+
+		// if the fragment dynamically imports a package not aready 
+		// dynamically imported throw an exception.
+		try {
+			String spec = fragment.getBundleData().getDynamicImports();
+			ManifestElement[] imports = ManifestElement.parseHeader(Constants.DYNAMICIMPORT_PACKAGE,spec);
+			if (imports != null && imports.length > 0){
+				for (int i = 0; i < imports.length; i++) {
+					String name = imports[i].getValue();
+					if (!isDynamicallyImported(name))
+						throw new BundleException(Msg.formatter.getString("BUNDLE_FRAGMENT_DYNAMICIMPORT_CONFLICT",imports[i]));
+				}
+			}
+		} catch (BundleException e) {
+			// TODO log an error
+		}		
+
+		// init the provided packages
+		String[] provides = description.getProvidedPackages();
+		if (provides != null) {
+			if (providedPackages == null)
+				providedPackages = new KeyedHashSet(provides.length);
+			for (int i = 0; i < provides.length; i++)
+				if (providedPackages.getByKey(provides[i]) == null)
+					providedPackages.add(new SingleSourcePackage((String) provides[i], bundle.getLoaderProxy()));
+		}
+
+	}
+
 	private void addImportedPackages(PackageSpecification[] packages) {
 		if (packages != null && packages.length > 0) {
 			if (!hasImportedPackages || importedPackages == null) {
@@ -675,6 +733,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 	 * @return true if the package should be imported.
 	 */
 	protected boolean isDynamicallyImported(String pkgname) {
+		// TODO should we check for startsWith("java.") to satisfy R3 section 4.7.2?
 		/* quick shortcut check */
 		if (!hasDynamicImports) {
 			return false;
@@ -1090,8 +1149,8 @@ public class BundleLoader implements ClassLoaderDelegate {
 		dynamicImportPackageStems = null;
 	}
 
-	protected void attachFragment(BundleFragment fragment, Properties props) {
-		initialize(bundle.getBundleDescription());
+	protected void attachFragment(BundleFragment fragment, Properties props) throws BundleException{
+		initializeFragment(fragment);
 		if (classloader == null)
 			return;
 
