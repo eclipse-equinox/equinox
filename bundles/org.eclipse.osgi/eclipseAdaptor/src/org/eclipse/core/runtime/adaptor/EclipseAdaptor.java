@@ -47,7 +47,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 	private static final String OPTION_STATE_READER = RUNTIME_ADAPTOR + "/state/reader";//$NON-NLS-1$
 	private static final String OPTION_RESOLVER = RUNTIME_ADAPTOR + "/resolver/timing"; //$NON-NLS-1$
 	private static final String OPTION_RESOLVER_READER = RUNTIME_ADAPTOR + "/resolver/reader/timing"; //$NON-NLS-1$
-	public static final byte BUNDLEDATA_VERSION = 3;
+	public static final byte BUNDLEDATA_VERSION = 4;
 	public static final byte NULL = 0;
 	public static final byte OBJECT = 1;
 
@@ -291,6 +291,8 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		data.setStatus(in.readInt());
 		data.setReference(in.readBoolean());
 		data.setFragment(in.readBoolean());
+		data.setManifestTimeStamp(in.readLong());
+		data.setManifestType(in.readByte());
 	}
 	protected void saveMetaDataFor(BundleData data, DataOutputStream out) throws IOException {
 		if (data.getBundleID() == 0 || !(data instanceof DefaultBundleData)) {
@@ -300,7 +302,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		EclipseBundleData bundleData = (EclipseBundleData) data;
 		out.writeByte(OBJECT);
 		writeStringOrNull(out, bundleData.getLocation());
-		writeStringOrNull(out, bundleData.getName());
+		writeStringOrNull(out, bundleData.getName());	//TODO Check how this works regarding localization
 		writeStringOrNull(out, bundleData.getUniqueId());
 		writeStringOrNull(out, bundleData.getVersion().toString());
 		writeStringOrNull(out, bundleData.getActivator());
@@ -315,6 +317,8 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		out.writeInt(bundleData.getStatus());
 		out.writeBoolean(bundleData.isReference());
 		out.writeBoolean(bundleData.isFragment());
+		out.writeLong(bundleData.getManifestTimeStamp());
+		out.writeByte(bundleData.getManifestType());
 	}
 
 	private String readString(DataInputStream in, boolean intern) throws IOException {

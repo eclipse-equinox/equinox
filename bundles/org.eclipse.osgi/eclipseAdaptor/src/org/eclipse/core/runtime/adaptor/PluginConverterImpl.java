@@ -118,6 +118,8 @@ public class PluginConverterImpl implements PluginConverter {
 	}
 
 	private File findPluginManifest(File baseLocation) {
+		if (baseLocation.isFile())
+			return baseLocation;
 		File pluginManifestLocation = new File(baseLocation, PLUGIN_MANIFEST); //$NON-NLS-1$
 		if (pluginManifestLocation.isFile())
 			return pluginManifestLocation;

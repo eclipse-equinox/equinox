@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004 IBM Corporation and others.
+ * Copyright (c) 2003, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -683,4 +683,17 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 	public DefaultAdaptor getAdaptor() {
 		return adaptor;
 	}
+	public long getManifestTimeStamp() {
+		return 0;
+	}
+	public byte getManifestType() {
+		return 0;
+	}
+	public void setManifestTimeStamp(long stamp) {
+		//do nothing
+	}
+	public void setManifestType(byte type) {
+		//do nothing		
+	}
 }
+

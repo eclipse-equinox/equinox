@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003 IBM Corporation and others.
+ * Copyright (c) 2003, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,9 +26,20 @@ public class EclipseBundleData extends DefaultBundleData {
 	private URL base;
 	private static String[] libraryVariants = null;
 
+	/** data to detect modification made in the manifest */
+	protected final byte PLUGIN = 1;
+	protected final byte MANIFEST = 0;
+
+	private byte manifestType = MANIFEST;
+	private long manifestTimeStamp = 0;
+	
 		// URL protocol designations
 	public static final String PROTOCOL = "platform"; //$NON-NLS-1$
 	public static final String FILE = "file"; //$NON-NLS-1$
+
+	private static final String PLUGIN_MANIFEST = "plugin.xml"; //$NON-NLS-1$
+	private static final String FRAGMENT_MANIFEST = "fragment.xml"; //$NON-NLS-1$
+	private static final String NO_TIMESTAMP_CHECKING = "osgi.noManifestTimeChecking"; //$NON-NLS-1$
 	protected String isLegacy = null;
 	protected String pluginClass = null;
 
@@ -108,10 +119,34 @@ public class EclipseBundleData extends DefaultBundleData {
 		dirData = new File(dir, ((EclipseAdaptor)adaptor).getDataDirName());
 		dirGeneration = new File(dir, String.valueOf(generation));
 		file = reference ? new File(name) : new File(dirGeneration, name);
+		if (! checkManifestTimeStamp(file))
+			throw new IOException();
 		bundleFile = BundleFile.createBundleFile(file,this);
 		initializeBase(location);
 	}
 
+	private boolean checkManifestTimeStamp(File bundlefile) {
+		boolean on = true;
+		if ("true".equalsIgnoreCase(NO_TIMESTAMP_CHECKING))	//$NON-NLS-1$
+			return true;
+		
+		// When the bundle is jar'ed, simply check the time stamp of the jar
+		if( ! bundlefile.isDirectory() )	
+			return bundlefile.lastModified() == getManifestTimeStamp();
+		
+		// Otherwise, check the file time stamp
+		switch (getManifestType()) {
+		case MANIFEST:
+			return new File(bundlefile, Constants.OSGI_BUNDLE_MANIFEST).lastModified()==getManifestTimeStamp();
+		case PLUGIN:
+			if ( new File(bundlefile, PLUGIN_MANIFEST).lastModified()==getManifestTimeStamp() )
+				return true;
+			else 
+				return new File(bundlefile, FRAGMENT_MANIFEST).lastModified()==getManifestTimeStamp();
+		}
+		return true;	 
+	}
+	
 	void initialize() throws IOException {
 		initializeBase(location);
 		dir = new File(((EclipseAdaptor)adaptor).getBundleRootDir(), Long.toString(id));
@@ -220,20 +255,43 @@ public class EclipseBundleData extends DefaultBundleData {
 
 	public synchronized Dictionary loadManifest() throws BundleException {		
 		URL url = getEntry(Constants.OSGI_BUNDLE_MANIFEST);
-		if (url != null)
+		if (url != null) {
+			try {
+				manifestTimeStamp = url.openConnection().getLastModified();
+				manifestType = MANIFEST;
+			} catch (IOException e) {
+				//ignore the exception since this is for timeStamp
+			}
 			return loadManifestFrom(url);
+		}
 		Dictionary result = generateManifest();		
 		if (result == null)	//TODO: need to NLS this
 			throw new BundleException("Manifest not found: " + getLocation());
 		return result;
 	}
 
+	private File findPluginManifest(File baseLocation) {
+		File pluginManifestLocation = new File(baseLocation, PLUGIN_MANIFEST); //$NON-NLS-1$
+		if (pluginManifestLocation.isFile())
+			return pluginManifestLocation;
+		pluginManifestLocation = new File(baseLocation, FRAGMENT_MANIFEST); //$NON-NLS-1$
+		if (pluginManifestLocation.isFile())
+			return pluginManifestLocation;
+		return null;
+	}
+	
 	private Dictionary generateManifest() throws BundleException {
 		PluginConverterImpl converter = PluginConverterImpl.getDefault();
-		File location = converter.convertManifest(file);
+		File location = findPluginManifest(file);
+		if (location == null)
+			return null;
+
+		setManifestTimeStamp(location.lastModified());
+		setManifestType(PLUGIN);
+		location = converter.convertManifest(location);
 		if (location == null)
 			return null;	
-		try {
+		try {	
 			return loadManifestFrom(location.toURL());
 		} catch (MalformedURLException mfue) {
 			return null;
@@ -306,5 +364,17 @@ public class EclipseBundleData extends DefaultBundleData {
 	}
 	public void setDynamicImports(String value) {
 		this.dynamicImports = value;
+	}
+	public long getManifestTimeStamp() {
+		return manifestTimeStamp;
+	}
+	public byte getManifestType() {
+		return manifestType;
+	}
+	public void setManifestTimeStamp(long stamp) {
+		manifestTimeStamp = stamp;
+	}
+	public void setManifestType(byte type) {
+		manifestType = type;	
 	}
 }
