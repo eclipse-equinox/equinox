@@ -423,10 +423,10 @@ public class Framework implements EventDispatcher, EventPublisher {
 	 */
 	AbstractBundle createAndVerifyBundle(BundleData bundledata) throws BundleException {
 		// TODO Verify the manifest... for example that the same package is imported twice 
-		// Check for a bundle already installed with the same UniqueId and version.
+		// Check for a bundle already installed with the same symbolic name and version.
 		if (bundledata.getSymbolicName() != null) {
 			AbstractBundle installedBundle = getBundleBySymbolicName(bundledata.getSymbolicName(), bundledata.getVersion().toString());
-			if (installedBundle != null) {
+			if (installedBundle != null && installedBundle.getBundleId() != bundledata.getBundleID()) {
 				throw new BundleException(Msg.formatter.getString("BUNDLE_INSTALL_SAME_UNIQUEID", new Object[] {installedBundle.getSymbolicName(), installedBundle.getVersion().toString(), installedBundle.getLocation()})); //$NON-NLS-1$
 			}
 		}
