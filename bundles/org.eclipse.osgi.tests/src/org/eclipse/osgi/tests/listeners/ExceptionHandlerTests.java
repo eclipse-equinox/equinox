@@ -91,7 +91,6 @@ public class ExceptionHandlerTests extends TestCase {
 			BundleTestingHelper.installBundle(OSGiTests.getContext(), OSGiTests.TEST_FILES_ROOT + "internal/plugins/installTests/bundle10");
 			FrameworkEvent eventReceived = fwkListener.getResult(10000);
 			Assert.assertEquals(FrameworkEvent.ERROR, eventReceived.getType());
-			System.out.println(eventReceived.getThrowable());
 			Assert.assertEquals(true, eventReceived.getThrowable() instanceof VirtualMachineError);
 			System.setProperty("eclipse.exitOnError","true");
 		} catch (MalformedURLException e) {
