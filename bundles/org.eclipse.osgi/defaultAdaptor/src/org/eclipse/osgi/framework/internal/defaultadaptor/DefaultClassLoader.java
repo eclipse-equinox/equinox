@@ -15,15 +15,9 @@ import java.io.*;
 import java.net.URL;
 import java.security.ProtectionDomain;
 import java.util.*;
-
 import org.eclipse.osgi.framework.adaptor.ClassLoaderDelegate;
-import org.eclipse.osgi.framework.adaptor.core.AbstractBundleData;
-import org.eclipse.osgi.framework.adaptor.core.BundleEntry;
-import org.eclipse.osgi.framework.adaptor.core.BundleFile;
+import org.eclipse.osgi.framework.adaptor.core.*;
 import org.eclipse.osgi.framework.debug.Debug;
-import org.eclipse.osgi.framework.internal.core.Msg;
-import org.eclipse.osgi.framework.util.SecureAction;
-import org.osgi.framework.BundleException;
 import org.osgi.framework.FrameworkEvent;
 
 /**
@@ -31,28 +25,6 @@ import org.osgi.framework.FrameworkEvent;
  * consolidates all Bundle-ClassPath entries into a single ClassLoader.
  */
 public class DefaultClassLoader extends org.eclipse.osgi.framework.adaptor.BundleClassLoader {
-	/** Development ClassPath entries */
-	static protected String[] devCP;
-
-	static {
-		// Check the osgi.dev property to see if dev classpath entries have been defined.
-		String osgiDev = SecureAction.getProperty("osgi.dev");
-		if (osgiDev != null) {
-			// Add each dev classpath entry
-			Vector devClassPath = new Vector(6);
-			StringTokenizer st = new StringTokenizer(osgiDev, ",");
-			while (st.hasMoreTokens()) {
-				String tok = st.nextToken();
-				if (!tok.equals("")) {
-					devClassPath.addElement(tok);
-				}
-			}
-			devCP = new String[devClassPath.size()];
-			devClassPath.toArray(devCP);
-		}
-	}
-
-
 	/**
 	 * The BundleData object for this BundleClassLoader
 	 */
@@ -71,7 +43,7 @@ public class DefaultClassLoader extends org.eclipse.osgi.framework.adaptor.Bundl
 	 * only if we cannot determine the size of the class we are loading.
 	 */
 	protected int buffersize = 8 * 1024;
-
+	
 	/**
 	 * BundleClassLoader constructor.
 	 * @param delegate The ClassLoaderDelegate for this ClassLoader.
@@ -458,7 +430,7 @@ public class DefaultClassLoader extends org.eclipse.osgi.framework.adaptor.Bundl
 		ArrayList result = new ArrayList(10);
 
 		// If not in dev mode then just add the regular classpath entries and return
-		if (devCP == null) {
+		if (!DevClassPathHelper.inDevelopmentMode) {
 			for (int i = 0; i < classpath.length; i++)
 				findClassPathEntry(result, classpath[i], bundledata, domain);
 			return (ClasspathEntry[]) result.toArray(new ClasspathEntry[result.size()]);
@@ -481,11 +453,11 @@ public class DefaultClassLoader extends org.eclipse.osgi.framework.adaptor.Bundl
 	}
 
 	protected void addDefaultDevEntries(ArrayList result, AbstractBundleData bundledata, ProtectionDomain domain) {
-		if (devCP == null)
+		String[] devClassPath = DevClassPathHelper.getDevClassPath(bundledata.getSymbolicName());
+		if (devClassPath == null)
 			return;
-		if (devCP != null)
-			for (int i = 0; i < devCP.length; i++)
-				findClassPathEntry(result, devCP[i], bundledata, domain);
+		for (int i = 0; i < devClassPath.length; i++)
+			findClassPathEntry(result, devClassPath[i], bundledata, domain);
 	}
 
 	protected void findClassPathEntry(ArrayList result, String entry, AbstractBundleData bundledata, ProtectionDomain domain) {
@@ -501,24 +473,22 @@ public class DefaultClassLoader extends org.eclipse.osgi.framework.adaptor.Bundl
 		if (entry.equals(".")) {
 			result.add(new ClasspathEntry(bundledata.getBaseBundleFile(), domain));
 			return true;
-		} else {
-			Object element = getClasspath(entry, bundledata, domain);
-			if (element != null) {
-				result.add(element);
-				return true;
-			} else {
-				// need to check in fragments for the classpath entry.
-				// only check for fragments if the bundledata is the hostdata.
-				if (fragClasspaths != null && hostdata == bundledata) {
-					int size = fragClasspaths.size();
-					for (int i = 0; i < size; i++) {
-						FragmentClasspath fragCP = (FragmentClasspath) fragClasspaths.elementAt(i);
-						element = getClasspath(entry, fragCP.bundledata, fragCP.domain);
-						if (element != null) {
-							result.add(element);
-							return true;
-						}
-					}
+		} 
+		Object element = getClasspath(entry, bundledata, domain);
+		if (element != null) {
+			result.add(element);
+			return true;
+		} 
+		// need to check in fragments for the classpath entry.
+		// only check for fragments if the bundledata is the hostdata.
+		if (fragClasspaths != null && hostdata == bundledata) {
+			int size = fragClasspaths.size();
+			for (int i = 0; i < size; i++) {
+				FragmentClasspath fragCP = (FragmentClasspath) fragClasspaths.elementAt(i);
+				element = getClasspath(entry, fragCP.bundledata, fragCP.domain);
+				if (element != null) {
+					result.add(element);
+					return true;
 				}
 			}
 		}
@@ -526,16 +496,15 @@ public class DefaultClassLoader extends org.eclipse.osgi.framework.adaptor.Bundl
 	}
 
 	protected String[] getDevEntries(String classpathEntry, AbstractBundleData bundledata) {
-		Properties devProps = null;
 		File propLocation = bundledata.getBaseBundleFile().getFile(classpathEntry + ".properties");
 		if (propLocation == null)
 			return null;
 		try {
 			InputStream in = new FileInputStream(propLocation);
 			try {
-				devProps = new Properties();
+				Properties devProps = new Properties();
 				devProps.load(in);
-				return getArrayFromList(devProps.getProperty("bin"));
+				return DevClassPathHelper.getArrayFromList(devProps.getProperty("bin"));
 			} finally {
 				in.close();
 			}
@@ -543,25 +512,6 @@ public class DefaultClassLoader extends org.eclipse.osgi.framework.adaptor.Bundl
 			// TODO log the failures but ignore and try to keep going
 		}
 		return null;
-	}
-
-	/**
-	 * Returns the result of converting a list of comma-separated tokens into an array
-	 * 
-	 * @return the array of string tokens
-	 * @param prop the initial comma-separated string
-	 */
-	protected String[] getArrayFromList(String prop) {
-		if (prop == null || prop.trim().equals("")) //$NON-NLS-1$
-			return new String[0];
-		Vector list = new Vector();
-		StringTokenizer tokens = new StringTokenizer(prop, ","); //$NON-NLS-1$
-		while (tokens.hasMoreTokens()) {
-			String token = tokens.nextToken().trim();
-			if (!token.equals("")) //$NON-NLS-1$
-				list.addElement(token);
-		}
-		return list.isEmpty() ? new String[0] : (String[]) list.toArray(new String[list.size()]);
 	}
 
 	/**

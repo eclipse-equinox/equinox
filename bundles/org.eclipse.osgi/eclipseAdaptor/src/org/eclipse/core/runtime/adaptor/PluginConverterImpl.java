@@ -16,13 +16,19 @@ import java.net.URL;
 import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import org.eclipse.osgi.framework.internal.defaultadaptor.DevClassPathHelper;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.service.pluginconversion.PluginConverter;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 
 public class PluginConverterImpl implements PluginConverter, IModel {
-
+	private BundleContext context;
+	private BufferedWriter out;
+	private IPluginInfo pluginInfo;
+	private File pluginManifestLocation;
+	private Dictionary generatedManifest;
+	
 	private static final String MANIFEST_VERSION = "Manifest-Version";
 	private static final String PLUGIN_PROPERTIES_FILENAME = "plugin.properties";
 	private static final String PI_ECLIPSE_OSGI = "org.eclipse.osgi";
@@ -44,12 +50,6 @@ public class PluginConverterImpl implements PluginConverter, IModel {
 	public static PluginConverterImpl getDefault() {
 		return instance;
 	}
-	private BundleContext context;
-	protected String devPathSpec;
-	private BufferedWriter out;
-	private IPluginInfo pluginInfo;
-	private File pluginManifestLocation;
-	private Dictionary generatedManifest;
 	
 	public PluginConverterImpl() {
 		this(null);
@@ -57,7 +57,6 @@ public class PluginConverterImpl implements PluginConverter, IModel {
 
 	PluginConverterImpl(BundleContext context) {
 		this.context = context;
-		devPathSpec = System.getProperty("osgi.dev");
 		instance = this;
 	}
 
@@ -396,28 +395,13 @@ public class PluginConverterImpl implements PluginConverter, IModel {
 
 		// Based on similar code from EclipseStarter
 		// Check the osgi.dev property to see if dev classpath entries have been defined.
-		String[] devClassPath = null;
-		if (devPathSpec != null) {
-			// Add each dev classpath entry
-			Vector tokens = new Vector(6);
-			StringTokenizer t = new StringTokenizer(devPathSpec, ","); //$NON-NLS-1$
-			while (t.hasMoreTokens()) {
-				String token = t.nextToken();
-				if (!token.equals("")) { //$NON-NLS-1$
-					tokens.addElement(token);
-				}
-			}
-			devClassPath = new String[tokens.size()];
-			tokens.toArray(devClassPath);
-		}
-
+		String[] devClassPath = DevClassPathHelper.getDevClassPath(pluginInfo.getUniqueId());
 		// add the dev. time classpath entries
 		List starExport = new ArrayList(1);
 		starExport.add("*"); //$NON-NLS-1$
 		if (devClassPath != null) {
-			for (int i = 0; i < devClassPath.length; i++) {
+			for (int i = 0; i < devClassPath.length; i++)
 				libs.put(devClassPath[i], starExport);
-			}
 		}
 		Set result = new HashSet(7);
 		Set libEntries = libs.entrySet();

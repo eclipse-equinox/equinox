@@ -132,7 +132,8 @@ public class EclipseClassLoader extends DefaultClassLoader {
 				if (addClassPathEntry(result, "nl/" + NL_JAR_VARIANTS[i] + "/" + entry, bundledata, domain)) //$NON-NLS-1$ //$NON-NLS-2$
 					return;
 			}
-			if (System.getProperties().get("osgi.dev") == null) {
+			// is we are not in development mode, post some framework errors.
+			if (!DevClassPathHelper.inDevelopmentMode()) {
 				BundleException be = new BundleException(Msg.formatter.getString("BUNDLE_CLASSPATH_ENTRY_NOT_FOUND_EXCEPTION", entry, hostdata.getLocation())); //$NON-NLS-1$
 				bundledata.getAdaptor().getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR,bundledata.getBundle(),be);
 			}
