@@ -40,6 +40,8 @@ public class BundleConstraint {
 	}
 
 	boolean isSatisfiedBy(ResolverBundle rb) {
+		if (!bundle.getResolver().getPermissionChecker().checkBundlePermission(bundleConstraint, rb.getBundle()))
+			return false;
 		return bundleConstraint.isSatisfiedBy(rb.getBundle());
 	}
 

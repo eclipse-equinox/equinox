@@ -219,10 +219,10 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 	private void attachFragment(ResolverBundle bundle) {
 		if (!bundle.isFragment() || !bundle.isResolvable())
 			return;
-		VersionConstraint hostSpec = bundle.getHost().getVersionConstraint();
-		VersionSupplier[] hosts = resolverBundles.getArray(hostSpec.getName());
+		BundleConstraint hostConstraint = bundle.getHost();
+		VersionSupplier[] hosts = resolverBundles.getArray(hostConstraint.getVersionConstraint().getName());
 		for (int i = 0; i < hosts.length; i++) {
-			if (((ResolverBundle) hosts[i]).isResolvable() && hostSpec.isSatisfiedBy(hosts[i].getBundle()))
+			if (((ResolverBundle) hosts[i]).isResolvable() && hostConstraint.isSatisfiedBy((ResolverBundle) hosts[i]))
 				resolverExports.put(((ResolverBundle) hosts[i]).attachFragment(bundle, true));
 		}
 	}
