@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003 IBM Corporation and others.
+ * Copyright (c) 2003,2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -59,6 +59,7 @@ public class EclipseClassLoader extends DefaultClassLoader {
 						// TODO do nothing for now but we need to filter the type of exception here and
 						// sort the bad from the ok. Basically, failing to start the bundle should not be damning.
 						// Automagic activation is currently a best effort deal.
+						e.printStackTrace(); //Note add this to help debugging
 					}
 				// once we have tried, there is no need to try again.
 				// TODO revisit this when considering what happens when a bundle is stopped
