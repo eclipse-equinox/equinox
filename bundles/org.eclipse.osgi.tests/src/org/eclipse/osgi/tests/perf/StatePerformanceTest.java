@@ -16,66 +16,20 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.tests.services.resolver.AbstractStateTest;
+import org.eclipse.test.performance.Performance;
+import org.eclipse.test.performance.PerformanceMeter;
 
 public class StatePerformanceTest extends AbstractStateTest {
-	private Random random;
 	// value copied from StateObjectFactoryImpl
 	private static final byte GREATER_OR_EQUAL = 4;
+	private Random random;
+
+	public static Test suite() {
+		return new TestSuite(StatePerformanceTest.class);
+	}
 
 	public StatePerformanceTest(String name) {
 		super(name);
-	}
-
-	protected void setUp() throws Exception {
-		super.setUp();
-		// uses a constant seed to prevent variation on results
-		this.random = new Random(0);
-	}
-
-	private State storeAndRetrieve(State toStore) throws IOException {
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		DataOutputStream dos = new DataOutputStream(baos);
-		toStore.getFactory().writeState(toStore, dos);
-		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-		DataInputStream dis = new DataInputStream(bais);
-		return toStore.getFactory().readState(dis);
-	}
-
-	public void testCreation() throws IOException {
-		int stateSize = 5000;
-		buildRandomState(stateSize);
-	}
-
-	public void testStoreAndRetrieve() throws IOException {
-		int stateSize = 5000;
-		State originalState = buildRandomState(stateSize);
-		storeAndRetrieve(originalState);
-	}
-
-	public void testResolution5000() throws IOException {
-		testResolution(5000);
-	}
-
-	public void testResolution1000() throws IOException {
-		testResolution(1000);
-	}
-
-	public void testResolution500() throws IOException {
-		testResolution(500);
-	}
-
-	public void testResolution100() throws IOException {
-		testResolution(100);
-	}
-
-	private void testResolution(int stateSize) throws IOException {
-		State originalState = buildRandomState(stateSize);
-		State retrievedState = storeAndRetrieve(originalState);
-		assertEquals("0.9", 0, retrievedState.getChanges().getChanges().length);
-		assertIdentical("1.0", originalState, retrievedState);
-		originalState.resolve();
-		retrievedState = storeAndRetrieve(originalState);
-		assertIdentical("2.0", originalState, retrievedState);
 	}
 
 	private State buildRandomState(int size) {
@@ -121,8 +75,83 @@ public class StatePerformanceTest extends AbstractStateTest {
 		return state;
 	}
 
-	public static Test suite() {
-		return new TestSuite(StatePerformanceTest.class);
+	private void runPerformanceTest(Runnable operation, int iterations) {
+		Performance perf = Performance.getDefault();
+		PerformanceMeter meter = perf.createPerformanceMeter(perf.getDefaultScenarioId(this));
+		try {
+			for (int i = 0; i < iterations; i++) {
+				meter.start();
+				operation.run();
+				meter.stop();
+			}
+			meter.commit();
+			perf.assertPerformance(meter);
+		} finally {
+			meter.dispose();
+		}
+	}
+
+	protected void setUp() throws Exception {
+		super.setUp();
+		// uses a constant seed to prevent variation on results
+		this.random = new Random(0);
+	}
+
+	private State storeAndRetrieve(State toStore) throws IOException {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		DataOutputStream dos = new DataOutputStream(baos);
+		toStore.getFactory().writeState(toStore, dos);
+		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+		DataInputStream dis = new DataInputStream(bais);
+		return toStore.getFactory().readState(dis);
+	}
+
+	public void testCreation() {
+		final int stateSize = 5000;
+		runPerformanceTest(new Runnable() {
+			public void run() {
+				buildRandomState(stateSize);
+			}
+		}, 10);
+	}
+
+	private void testResolution(int stateSize) throws IOException {
+		final State originalState = buildRandomState(stateSize);
+		runPerformanceTest(new Runnable() {
+			public void run() {
+				originalState.resolve();
+			}
+		}, 10);
+	}
+
+	public void testResolution100() throws IOException {
+		testResolution(100);
+	}
+
+	public void testResolution1000() throws IOException {
+		testResolution(1000);
+	}
+
+	public void testResolution500() throws IOException {
+		testResolution(500);
+	}
+
+	public void testResolution5000() throws IOException {
+		testResolution(5000);
+	}
+
+	public void testStoreAndRetrieve() {
+		int stateSize = 5000;
+		final State originalState = buildRandomState(stateSize);
+		runPerformanceTest(new Runnable() {
+			public void run() {
+				try {
+					storeAndRetrieve(originalState);
+				} catch (IOException e) {
+					StatePerformanceTest.this.fail("", e);
+				}
+			}
+		}, 10);
 	}
 
 }

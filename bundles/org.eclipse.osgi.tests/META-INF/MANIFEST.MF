@@ -8,6 +8,7 @@ Bundle-Localization: plugin
 Require-Bundle: 
  org.eclipse.core.runtime,
  org.eclipse.core.tests.harness,
+ org.eclipse.test.performance,
  org.junit
 Eclipse-AutoStart: true
 Bundle-Activator: org.eclipse.osgi.tests.OSGiTests
