@@ -1,10 +1,10 @@
 Manifest-Version: 1.0
-Bundle-Name: OSGi-Service-Interfaces
+Bundle-Name: %pluginName
 Bundle-GlobalName: org.eclipse.osgi.services
 Bundle-Version: 3.0
 Bundle-Description: OSGi Service Platform Release 3 Service Interfaces 
   and Classes
-Bundle-Vendor: Eclipse
+Bundle-Vendor: %providerName
 Bundle-DocUrl: http://www.eclipse.org
 Bundle-ContactAddress: www.eclipse.org
 Bundle-Copyright: Copyright (c) The Open Services Gateway Initiative (
