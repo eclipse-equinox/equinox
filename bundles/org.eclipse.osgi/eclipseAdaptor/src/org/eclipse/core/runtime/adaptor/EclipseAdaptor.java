@@ -20,7 +20,8 @@ import org.eclipse.osgi.framework.adaptor.core.*;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.debug.DebugOptions;
-import org.eclipse.osgi.framework.log.*;
+import org.eclipse.osgi.framework.log.FrameworkLog;
+import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.framework.stats.StatsManager;
 import org.eclipse.osgi.internal.resolver.StateImpl;
 import org.eclipse.osgi.internal.resolver.StateManager;
@@ -110,7 +111,7 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 		if (logFileProp != null) {
 			int lastSlash = logFileProp.lastIndexOf(File.separatorChar);
 			if (lastSlash > 0) {
-				String logFile = logFileProp.substring(0, lastSlash+1) + "performance.log"; //$NON-NLS-1$
+				String logFile = logFileProp.substring(0, lastSlash + 1) + "performance.log"; //$NON-NLS-1$
 				return new EclipseLog(new File(logFile));
 			}
 		}
@@ -121,7 +122,8 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 	public void initialize(EventPublisher publisher) {
 		if (Boolean.getBoolean(EclipseAdaptor.PROP_CLEAN))
 			cleanOSGiCache();
-		fileManager = initFileManager(LocationManager.getOSGiConfigurationDir(), LocationManager.getConfigurationLocation().isReadOnly() ? "none" : null); //$NON-NLS-1$
+		boolean readOnlyConfiguration = LocationManager.getConfigurationLocation().isReadOnly();
+		fileManager = initFileManager(LocationManager.getOSGiConfigurationDir(), readOnlyConfiguration ? "none" : null, readOnlyConfiguration); //$NON-NLS-1$
 		readHeaders();
 		checkLocationAndReinitialize();
 		super.initialize(publisher);
@@ -175,9 +177,9 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 			if (currentConfiguration != null && (parentConfiguration = currentConfiguration.getParentLocation()) != null) {
 				try {
 					File stateLocationDir = new File(parentConfiguration.getURL().getFile(), FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME);
-					FileManager newFileManager = initFileManager(stateLocationDir, parentConfiguration.isReadOnly() ? "none" : null); //$NON-NLS-1$);
-					stateFile = newFileManager.lookup(LocationManager.STATE_FILE, true);
-					lazyFile = newFileManager.lookup(LocationManager.LAZY_FILE, true);
+					FileManager newFileManager = initFileManager(stateLocationDir, "none", true); //$NON-NLS-1$);
+					stateFile = newFileManager.lookup(LocationManager.STATE_FILE, false);
+					lazyFile = newFileManager.lookup(LocationManager.LAZY_FILE, false);
 				} catch (IOException ex) {
 					if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 						Debug.println("Error reading state file " + ex.getMessage()); //$NON-NLS-1$
@@ -187,8 +189,10 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 			} else {
 				try {
 					//it did not exist in either place, so create it in the original location
-					stateFile = fileManager.lookup(LocationManager.STATE_FILE, true);
-					lazyFile = fileManager.lookup(LocationManager.LAZY_FILE, true);
+					if (canWrite()) {
+						stateFile = fileManager.lookup(LocationManager.STATE_FILE, true);
+						lazyFile = fileManager.lookup(LocationManager.LAZY_FILE, true);
+					}
 				} catch (IOException ex) {
 					if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 						Debug.println("Error reading state file " + ex.getMessage()); //$NON-NLS-1$
@@ -239,7 +243,7 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 	}
 
 	public void shutdownStateManager() {
-		if (stateManager.getCachedTimeStamp() == stateManager.getSystemState().getTimeStamp())
+		if (!canWrite() || stateManager.getCachedTimeStamp() == stateManager.getSystemState().getTimeStamp())
 			return;
 		try {
 			File stateTmpFile = File.createTempFile(LocationManager.STATE_FILE, ".new", LocationManager.getOSGiConfigurationDir()); //$NON-NLS-1$
@@ -387,7 +391,7 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 			bc.registerService(DOMFACTORYNAME, new DomParsingService(), new Hashtable());
 		} catch (ClassNotFoundException e) {
 			// In case the JAXP API is not on the boot classpath
-			String message = EclipseAdaptorMsg.ECLIPSE_ADAPTOR_ERROR_XML_SERVICE; 
+			String message = EclipseAdaptorMsg.ECLIPSE_ADAPTOR_ERROR_XML_SERVICE;
 			getFrameworkLog().log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, message, 0, e, null));
 		}
 	}
@@ -410,6 +414,10 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 		public void ungetService(Bundle bundle, ServiceRegistration registration, Object service) {
 			// Do nothing.
 		}
+	}
+
+	public boolean canWrite() {
+		return !fileManager.isReadOnly();
 	}
 
 	public void frameworkStop(BundleContext aContext) throws BundleException {
@@ -460,8 +468,8 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 			if (currentConfiguration != null && (parentConfiguration = currentConfiguration.getParentLocation()) != null) {
 				try {
 					File bundledataLocationDir = new File(parentConfiguration.getURL().getFile(), FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME);
-					FileManager newFileManager = initFileManager(bundledataLocationDir, parentConfiguration.isReadOnly() ? "none" : null); //$NON-NLS-1$
-					File bundleData = newFileManager.lookup(LocationManager.BUNDLE_DATA_FILE, true);
+					FileManager newFileManager = initFileManager(bundledataLocationDir, "none", true); //$NON-NLS-1$
+					File bundleData = newFileManager.lookup(LocationManager.BUNDLE_DATA_FILE, false);
 					bundleDataStream = new FileInputStream(bundleData);
 				} catch (MalformedURLException e1) {
 					// This will not happen since all the URLs are derived by us
@@ -642,7 +650,7 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 
 	public void saveMetaData() {
 		// the cache and the state match
-		if (timeStamp == stateManager.getSystemState().getTimeStamp())
+		if (!canWrite() | timeStamp == stateManager.getSystemState().getTimeStamp())
 			return;
 		File metadata = null;
 		try {
@@ -703,7 +711,7 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 		try {
 			// check the prop each time this happens (should NEVER happen!)
 			exitOnError = Boolean.valueOf(System.getProperty(PROP_EXITONERROR, "true")).booleanValue(); //$NON-NLS-1$
-			String message = EclipseAdaptorMsg.ECLIPSE_ADAPTOR_RUNTIME_ERROR; 
+			String message = EclipseAdaptorMsg.ECLIPSE_ADAPTOR_RUNTIME_ERROR;
 			if (exitOnError && isFatalException(error))
 				message += ' ' + EclipseAdaptorMsg.ECLIPSE_ADAPTOR_EXITING;
 			FrameworkLogEntry logEntry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, message, 0, error, null);
@@ -735,12 +743,10 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 		return stopper;
 	}
 
-	private FileManager initFileManager(File baseDir, String lockMode) {
-		FileManager fManager = new FileManager(baseDir, lockMode);
-		if (!baseDir.exists())
-			baseDir.mkdirs();
+	private FileManager initFileManager(File baseDir, String lockMode, boolean readOnly) {
+		FileManager fManager = new FileManager(baseDir, lockMode, readOnly);
 		try {
-			fManager.open(true);
+			fManager.open(!readOnly);
 		} catch (IOException ex) {
 			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 				Debug.println("Error reading framework metadata: " + ex.getMessage()); //$NON-NLS-1$

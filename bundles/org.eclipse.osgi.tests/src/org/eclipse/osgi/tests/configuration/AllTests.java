@@ -8,27 +8,15 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.osgi.tests;
+package org.eclipse.osgi.tests.configuration;
 
-import org.eclipse.core.tests.harness.CoreTest;
-import org.osgi.framework.BundleContext;
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
-/**
- * @since 3.1
- */
-public class OSGiTest extends CoreTest {
-
-	public static final String PI_OSGI_TESTS = "org.eclipse.osgi.tests";
-
-	public OSGiTest() {
-		super();
-	}
-
-	public OSGiTest(String name) {
-		super(name);
-	}
-	
-	public BundleContext getContext() {
-		return OSGiTestsActivator.getContext();
+public class AllTests {
+	public static Test suite() {
+		TestSuite suite = new TestSuite(AllTests.class.getName());
+		suite.addTest(ReadOnlyConfigurationAreaTest.suite());
+		return suite;
 	}
 }

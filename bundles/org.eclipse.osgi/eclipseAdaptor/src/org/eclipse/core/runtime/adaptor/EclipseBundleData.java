@@ -258,7 +258,7 @@ public class EclipseBundleData extends AbstractBundleData {
 		//We don't have a manifest.
 		setManifestTimeStamp(Long.parseLong(generatedFrom.getValue()));
 		setManifestType(Byte.parseByte(generatedFrom.getAttribute(PluginConverterImpl.MANIFEST_TYPE_ATTRIBUTE)));
-		if (existingHeaders != null)
+		if (!adaptor.canWrite() || existingHeaders != null)
 			return existingHeaders;
 
 		//merge the original manifest with the generated one
@@ -382,5 +382,9 @@ public class EclipseBundleData extends AbstractBundleData {
 	 */
 	public synchronized void save() throws IOException {
 		((EclipseAdaptor) adaptor).saveMetaDataFor(this);
+	}
+
+	public String toString() {
+		return "BundleData for " + getSymbolicName() + " (" + id + ")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 }

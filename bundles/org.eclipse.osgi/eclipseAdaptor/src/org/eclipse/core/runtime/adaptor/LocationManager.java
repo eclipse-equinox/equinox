@@ -26,6 +26,7 @@ public class LocationManager {
 	private static Location userLocation = null;
 	private static Location instanceLocation = null;
 
+	public static final String READ_ONLY_AREA_SUFFIX = ".readOnly"; //$NON-NLS-1$
 	public static final String PROP_INSTALL_AREA = "osgi.install.area"; //$NON-NLS-1$
 	public static final String PROP_CONFIG_AREA = "osgi.configuration.area"; //$NON-NLS-1$
 	public static final String PROP_CONFIG_AREA_DEFAULT = "osgi.configuration.area.default"; //$NON-NLS-1$
@@ -140,9 +141,11 @@ public class LocationManager {
 		installLocation = buildLocation(PROP_INSTALL_AREA, null, null, true);
 	}
 
-	private static Location buildLocation(String property, URL defaultLocation, String userDefaultAppendage, boolean readOnly) {
-		String location = System.getProperty(property);
-		System.getProperties().remove(property);
+	private static Location buildLocation(String property, URL defaultLocation, String userDefaultAppendage, boolean readOnlyDefault) {
+		String location = (String) System.getProperties().remove(property);
+		// the user/product may specify a non-default readOnly setting   
+		String userReadOnlySetting = System.getProperty(property + READ_ONLY_AREA_SUFFIX);
+		boolean readOnly = (userReadOnlySetting == null ? readOnlyDefault : Boolean.valueOf(userReadOnlySetting).booleanValue());
 		// if the instance location is not set, predict where the workspace will be and 
 		// put the instance area inside the workspace meta area.
 		if (location == null)
@@ -179,16 +182,16 @@ public class LocationManager {
 	}
 
 	private static URL computeInstallConfigurationLocation() {
-        String property = System.getProperty(PROP_INSTALL_AREA);
-        if (property != null) {
-            try {
-                return new URL(property);
-            } catch (MalformedURLException e) {
-                // do nothing here since it is basically impossible to get a bogus url
-            }
-        }
-        return null;
-    }
+		String property = System.getProperty(PROP_INSTALL_AREA);
+		if (property != null) {
+			try {
+				return new URL(property);
+			} catch (MalformedURLException e) {
+				// do nothing here since it is basically impossible to get a bogus url
+			}
+		}
+		return null;
+	}
 
 	private static URL computeSharedConfigurationLocation() {
 		String property = System.getProperty(PROP_SHARED_CONFIG_AREA);

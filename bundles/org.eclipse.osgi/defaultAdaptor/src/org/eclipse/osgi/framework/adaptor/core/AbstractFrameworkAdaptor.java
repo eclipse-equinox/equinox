@@ -844,7 +844,8 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 	 */
 	protected void shutdownStateManager() {
 		try {
-			stateManager.shutdown(new File(getBundleStoreRootDir(), ".state"), new File(getBundleStoreRootDir(), ".lazy")); //$NON-NLS-1$//$NON-NLS-2$
+			if (canWrite())
+				stateManager.shutdown(new File(getBundleStoreRootDir(), ".state"), new File(getBundleStoreRootDir(), ".lazy")); //$NON-NLS-1$//$NON-NLS-2$
 		} catch (IOException e) {
 			frameworkLog.log(new FrameworkEvent(FrameworkEvent.ERROR, context.getBundle(), e));
 		} finally {
@@ -1379,5 +1380,12 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 				systemState.removeBundle(bundleData.getBundleID());
 				break;
 		}
+	}
+	
+	/**
+	 * Whether the adaptor can make changes to the file system. Default is <code>true</code>.
+	 */
+	public boolean canWrite() {
+		return true;
 	}
 }
