@@ -840,7 +840,7 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 		return (BundleDescription[]) result.toArray(new BundleDescription[result.size()]);
 	}
 
-	public NamedClassSpace[] getNamedClassSpace(String symbolicName){
+	public NamedClassSpace[] getNamedClassSpaces(String symbolicName){
 		if (exportedBundles == null || exportedBundles.size()==0)
 			return null;
 

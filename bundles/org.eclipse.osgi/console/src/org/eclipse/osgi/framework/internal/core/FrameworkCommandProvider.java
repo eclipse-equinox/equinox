@@ -801,7 +801,7 @@ public class FrameworkCommandProvider implements CommandProvider {
                     				}
                     			}
 
-                    			NamedClassSpace[] namedClassSpaces = packageAdmin.getNamedClassSpace(null);
+                    			NamedClassSpace[] namedClassSpaces = packageAdmin.getNamedClassSpaces(null);
 								NamedClassSpace namedClassSpace = null;
 								if (namedClassSpaces != null) {
 									for (int i=0; i<namedClassSpaces.length; i++) {
@@ -1508,7 +1508,7 @@ public class FrameworkCommandProvider implements CommandProvider {
 				try {
 					org.osgi.service.packageadmin.NamedClassSpace[] symBundles = null;
 
-					symBundles = packageAdmin.getNamedClassSpace(token);
+					symBundles = packageAdmin.getNamedClassSpaces(token);
 
 					if (symBundles == null) {
 						intp.println(ConsoleMsg.formatter.getString("CONSOLE_NO_NAMED_CLASS_SPACES_MESSAGE"));
