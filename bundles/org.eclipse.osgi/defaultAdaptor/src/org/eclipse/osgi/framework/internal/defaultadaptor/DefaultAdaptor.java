@@ -96,7 +96,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 				if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 					Debug.println("BundleData created: " + data); //$NON-NLS-1$
 				}
-
+				processExtension(data, EXTENSION_INITIALIZE);
 				bundleDatas.add(data);
 			} catch (BundleException e) {
 				if (Debug.DEBUG && Debug.DEBUG_GENERAL) {

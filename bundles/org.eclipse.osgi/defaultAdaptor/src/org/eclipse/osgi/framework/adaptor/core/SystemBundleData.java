@@ -74,7 +74,11 @@ public class SystemBundleData extends AbstractBundleData {
 
 		Headers systemManifest = Headers.parseManifest(in);
 		// check the OSGi system package property
-		String systemExportProp = System.getProperty(Constants.OSGI_SYSTEMPACKAGES);
+		// first check the OSGi R4 spec'ed property
+		String systemExportProp = System.getProperty(Constants.OSGI_FRAMEWORK_SYSTEM_PACKAGES);
+		if (systemExportProp == null)
+			// if not set check the original pre OSGi R4 property
+			System.getProperty(Constants.OSGI_SYSTEMPACKAGES);
 		if (systemExportProp != null)
 			appendManifestValue(systemManifest, Constants.EXPORT_PACKAGE, systemExportProp);
 		// now get any extra packages and services that the adaptor wants
@@ -137,7 +141,7 @@ public class SystemBundleData extends AbstractBundleData {
 
 	private void setMetaData() {
 		setActivator((String) manifest.get(Constants.BUNDLE_ACTIVATOR));
-		setClassPath((String) manifest.get(Constants.BUNDLE_CLASSPATH));
+		setClassPathString((String) manifest.get(Constants.BUNDLE_CLASSPATH));
 		setDynamicImports((String) manifest.get(Constants.DYNAMICIMPORT_PACKAGE));
 		setExecutionEnvironment((String) manifest.get(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT));
 		setLocation(Constants.SYSTEM_BUNDLE_LOCATION);

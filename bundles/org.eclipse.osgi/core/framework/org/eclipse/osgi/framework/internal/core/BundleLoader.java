@@ -302,7 +302,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 				return classloader;
 
 			try {
-				String[] classpath = getClassPath(bundle);
+				String[] classpath = bundle.getBundleData().getClassPath();
 				if (classpath != null) {
 					classloader = createBCLPrevileged(bundle.getProtectionDomain(), classpath);
 				} else {
@@ -496,7 +496,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 			for (int i = 0; i < fragments.length; i++) {
 				AbstractBundle fragment = (AbstractBundle) fragments[i];
 				try {
-					bcl.attachFragment(fragment.getBundleData(), fragment.domain, getClassPath(fragment));
+					bcl.attachFragment(fragment.getBundleData(), fragment.domain, fragment.getBundleData().getClassPath());
 				} catch (BundleException be) {
 					bundle.framework.publishFrameworkEvent(FrameworkEvent.ERROR, bundle, be);
 				}
@@ -917,7 +917,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 			return;
 
 		try {
-			String[] classpath = getClassPath(fragment);
+			String[] classpath = fragment.getBundleData().getClassPath();
 			if (classpath != null)
 				classloader.attachFragment(fragment.getBundleData(), fragment.domain, classpath);
 			else
@@ -926,33 +926,6 @@ public class BundleLoader implements ClassLoaderDelegate {
 			bundle.framework.publishFrameworkEvent(FrameworkEvent.ERROR, bundle, e);
 		}
 
-	}
-
-	static String[] getClassPath(AbstractBundle bundle) throws BundleException {
-		String spec = bundle.getBundleData().getClassPath();
-		ManifestElement[] classpathElements = ManifestElement.parseHeader(Constants.BUNDLE_CLASSPATH, spec);
-		return getClassPath(classpathElements);
-	}
-
-	static String[] getClassPath(ManifestElement[] classpath) {
-		if (classpath == null) {
-			if (Debug.DEBUG && Debug.DEBUG_LOADER)
-				Debug.println("  no classpath"); //$NON-NLS-1$
-			/* create default BundleClassPath */
-			return new String[] {"."}; //$NON-NLS-1$
-		}
-
-		ArrayList result = new ArrayList(classpath.length);
-		for (int i = 0; i < classpath.length; i++) {
-			if (Debug.DEBUG && Debug.DEBUG_LOADER)
-				Debug.println("  found classpath entry " + classpath[i].getValueComponents()); //$NON-NLS-1$
-			String[] paths = classpath[i].getValueComponents();
-			for (int j = 0; j < paths.length; j++) {
-				result.add(paths[j]);
-			}
-		}
-
-		return (String[]) result.toArray(new String[result.size()]);
 	}
 
 	protected FilterImpl createFilter(String filterString) throws InvalidSyntaxException {

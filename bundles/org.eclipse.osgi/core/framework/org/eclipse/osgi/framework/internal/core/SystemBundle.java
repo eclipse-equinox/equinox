@@ -42,6 +42,7 @@ public class SystemBundle extends BundleHost {
 	 */
 	protected SystemBundle(Framework framework) throws BundleException {
 		super(framework.adaptor.createSystemBundleData(), framework); // startlevel=0 means framework stopped
+		Constants.setInternalSymbolicName(bundledata.getSymbolicName());
 		state = STARTING;
 		context = createContext();
 	}
@@ -198,6 +199,10 @@ public class SystemBundle extends BundleHost {
 		}
 	}
 
+	protected void suspend(boolean lock) {
+		// do nothing
+	}
+
 	/**
 	 * Update this bundle.
 	 * This method spawns a thread which will call framework.shutdown
@@ -277,10 +282,8 @@ public class SystemBundle extends BundleHost {
 		// Do nothing
 	}
 
-	/**
-	 * System Bundle can never have fragments.
-	 */
-	public org.osgi.framework.Bundle[] getFragments() {
-		return null;
+
+	public String getSymbolicName() {
+		return Constants.OSGI_SYSTEM_BUNDLE;
 	}
 }

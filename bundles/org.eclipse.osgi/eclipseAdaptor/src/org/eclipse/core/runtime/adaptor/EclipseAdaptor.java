@@ -74,7 +74,8 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 
 	public static final byte BUNDLEDATA_COMPATIBLE_VERSION = 10;
 	public static final byte BUNDLEDATA_VERSION_11 = 11;
-	public static final byte BUNDLEDATA_VERSION = 11;
+	public static final byte BUNDLEDATA_VERSION_12 = 12;
+	public static final byte BUNDLEDATA_VERSION = 12;
 
 	public static final byte NULL = 0;
 
@@ -214,7 +215,7 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 	}
 
 	public void shutdownStateManager() {
-		if (timeStamp == stateManager.getSystemState().getTimeStamp())
+		if (stateManager.getCachedTimeStamp() == stateManager.getSystemState().getTimeStamp())
 			return;
 		try {
 			File stateLocationTmpFile = File.createTempFile(LocationManager.STATE_FILE, ".new", LocationManager.getOSGiConfigurationDir()); //$NON-NLS-1$
@@ -472,10 +473,13 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 								loadMetaDataFor(data, in);
 								data.initializeExistingBundle();
 								if (Debug.DEBUG && Debug.DEBUG_GENERAL)
-									Debug.println("BundleData created: " + data); //$NON-NLS-1$ 
+									Debug.println("BundleData created: " + data); //$NON-NLS-1$
+								processExtension(data, EXTENSION_INITIALIZE);
 								result.add(data);
 							}
 						} catch (NumberFormatException e) {
+							// should never happen
+						} catch (BundleException e) {
 							// should never happen
 						}
 					} catch (IOException e) {
@@ -514,7 +518,7 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 			autoStartExceptions[i] = in.readUTF();
 		data.setAutoStartExceptions(autoStartExceptions);
 		data.setPluginClass(readString(in, false));
-		data.setClassPath(readString(in, false));
+		data.setClassPathString(readString(in, false));
 		data.setNativePaths(readString(in, false));
 		data.setExecutionEnvironment(readString(in, false));
 		data.setDynamicImports(readString(in, false));
@@ -522,11 +526,15 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 		data.setStartLevel(in.readInt());
 		data.setStatus(in.readInt());
 		data.setReference(in.readBoolean());
-		data.setFragment(in.readBoolean());
+		if (cacheVersion < BUNDLEDATA_VERSION_11)
+			if (in.readBoolean())
+				data.setType(BundleData.TYPE_FRAGMENT);
 		data.setManifestTimeStamp(in.readLong());
 		data.setManifestType(in.readByte());
 		if (cacheVersion >= BUNDLEDATA_VERSION_11)
 			data.setLastModified(in.readLong());
+		if (cacheVersion >= BUNDLEDATA_VERSION_12)
+			data.setType(in.readInt());
 	}
 
 	public void saveMetaDataFor(EclipseBundleData data) throws IOException {
@@ -569,7 +577,7 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 				out.writeUTF(autoStartExceptions[i]);
 		}
 		writeStringOrNull(out, bundleData.getPluginClass());
-		writeStringOrNull(out, bundleData.getClassPath());
+		writeStringOrNull(out, bundleData.getClassPathString());
 		writeStringOrNull(out, bundleData.getNativePathsString());
 		writeStringOrNull(out, bundleData.getExecutionEnvironment());
 		writeStringOrNull(out, bundleData.getDynamicImports());
@@ -577,10 +585,10 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 		out.writeInt(bundleData.getStartLevel());
 		out.writeInt(bundleData.getPersistentStatus());
 		out.writeBoolean(bundleData.isReference());
-		out.writeBoolean(bundleData.isFragment());
 		out.writeLong(bundleData.getManifestTimeStamp());
 		out.writeByte(bundleData.getManifestType());
 		out.writeLong(bundleData.getLastModified());
+		out.writeInt(bundleData.getType());
 	}
 
 	private String readString(DataInputStream in, boolean intern) throws IOException {

@@ -12,6 +12,8 @@
 package org.eclipse.osgi.framework.adaptor.core;
 
 import java.io.*;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.*;
@@ -21,6 +23,7 @@ import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.internal.core.BundleResourceHandler;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.log.FrameworkLog;
+import org.eclipse.osgi.framework.util.FrameworkMessageFormat;
 import org.eclipse.osgi.framework.util.Headers;
 import org.eclipse.osgi.internal.resolver.StateManager;
 import org.eclipse.osgi.service.resolver.*;
@@ -36,6 +39,10 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 	public static final String PARENT_CLASSLOADER_EXT = "ext"; //$NON-NLS-1$
 	public static final String PARENT_CLASSLOADER_BOOT = "boot"; //$NON-NLS-1$
 	public static final String PARENT_CLASSLOADER_FWK = "fwk"; //$NON-NLS-1$
+
+	public static final byte EXTENSION_INITIALIZE = 0;
+	public static final byte EXTENSION_INSTALLED = 1;
+	public static final byte EXTENSION_UNINSTALLED = 2;
 
 	/** Name of the Adaptor manifest file */
 	protected final String ADAPTOR_MANIFEST = "ADAPTOR.MF"; //$NON-NLS-1$
@@ -114,6 +121,8 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 		if (bundleClassLoaderParent == null)
 			bundleClassLoaderParent = new ParentClassLoader();
 	}
+
+	private Method addURLMethod = findaddURLMethod(AbstractFrameworkAdaptor.class.getClassLoader().getClass());
 
 	/**
 	 * Constructor for DefaultAdaptor.  This constructor parses the arguments passed
@@ -425,7 +434,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 	 *
 	 */
 	abstract protected FrameworkLog createFrameworkLog();
-	
+
 	public BundleData createSystemBundleData() throws BundleException {
 		return new SystemBundleData(this);
 	}
@@ -501,8 +510,80 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 		}
 	}
 
+	private static Method findaddURLMethod(Class clazz) {
+		if (clazz == null)
+			return null; // ends the recursion when getSuperClass returns null
+		try {
+			Method result = clazz.getDeclaredMethod("addURL", new Class[] {URL.class}); //$NON-NLS-1$ 
+			result.setAccessible(true);
+			return result;
+		} catch (NoSuchMethodException e) {
+			// do nothing look in super class below
+		} catch (SecurityException e) {
+			// if we do not have the permissions then we will not find the method
+		}
+		return findaddURLMethod(clazz.getSuperclass());
+	}
+
 	public ClassLoader getBundleClassLoaderParent() {
 		return bundleClassLoaderParent;
+	}
+
+	protected void processExtension(BundleData bundleData, byte type) throws BundleException {
+		if ((bundleData.getType() & BundleData.TYPE_FRAMEWORK_EXTENSION) != 0)
+			processFrameworkExtension(bundleData, type);
+		else if ((bundleData.getType() & BundleData.TYPE_BOOTCLASSPATH_EXTENSION) != 0)
+			processBootExtension(bundleData, type);
+	}
+
+	protected void processFrameworkExtension(BundleData bundleData, byte type) throws BundleException {
+		if (addURLMethod == null)
+			throw new BundleException("Framework extensions are not supported.", new UnsupportedOperationException()); //$NON-NLS-1$
+		if (type == EXTENSION_UNINSTALLED) // if uninstalling then do nothing framework must be restarted to remove.
+			return;
+
+		File[] files = getExtensionFiles(bundleData);
+		if (files == null)
+			return;
+		for (int i = 0; i < files.length; i++) {
+			if (files[i] == null)
+				continue;
+			Throwable exceptionLog = null;
+			try {
+				addURLMethod.invoke(getClass().getClassLoader(), new Object[] {files[i].toURL()});
+			} catch (InvocationTargetException e) {
+				exceptionLog = e.getTargetException();
+			} catch (Throwable t) {
+				exceptionLog = t;
+			} finally {
+				if (exceptionLog != null)
+					eventPublisher.publishFrameworkEvent(FrameworkEvent.ERROR, ((AbstractBundleData) bundleData).getBundle(), exceptionLog);
+			}
+		}
+		// re-initialize FrameworkMessageFormat to pick up new fragments
+		FrameworkMessageFormat.initMessages();
+	}
+
+	protected void processBootExtension(BundleData bundleData, byte type) throws BundleException {
+		throw new BundleException("Boot classpath extensions are not supported.", new UnsupportedOperationException()); //$NON-NLS-1$
+	}
+
+	protected File[] getExtensionFiles(BundleData bundleData) {
+		File[] files = null;
+		try {
+			String[] paths = bundleData.getClassPath();
+			// TODO need to be smarter about dev path here
+			if (System.getProperty("osgi.dev") != null) { //$NON-NLS-1$
+				String[] origPaths = paths;
+				paths = new String[origPaths.length + 1];
+				System.arraycopy(origPaths, 0, paths, 0, origPaths.length);
+				paths[paths.length - 1] = "bin"; //$NON-NLS-1$
+			}
+			files = ((AbstractBundleData) bundleData).getClasspathFiles(paths);
+		} catch (BundleException e) {
+			eventPublisher.publishFrameworkEvent(FrameworkEvent.ERROR, ((AbstractBundleData) bundleData).getBundle(), e);
+		}
+		return files;
 	}
 
 	public void handleRuntimeError(Throwable error) {
@@ -664,6 +745,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 			}
 
 			public void commit(boolean postpone) throws BundleException {
+				processExtension(data, EXTENSION_INSTALLED);
 				try {
 					data.save();
 				} catch (IOException e) {
@@ -877,6 +959,8 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 			 */
 
 			public void commit(boolean postpone) throws BundleException {
+				processExtension(data, EXTENSION_UNINSTALLED); // remove the old extension
+				processExtension(newData, EXTENSION_INSTALLED); // add the new one
 				try {
 					newData.setLastModified(System.currentTimeMillis());
 					newData.save();
@@ -1052,6 +1136,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 					}
 				}
 
+				processExtension(data, EXTENSION_UNINSTALLED);
 				data.setLastModified(System.currentTimeMillis());
 				updateState(data, BundleEvent.UNINSTALLED);
 			}
@@ -1271,14 +1356,14 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 		}
 		State systemState = stateManager.getSystemState();
 		switch (type) {
-			case BundleEvent.UPDATED:
+			case BundleEvent.UPDATED :
 				systemState.removeBundle(bundleData.getBundleID());
-				// fall through to INSTALLED
-			case BundleEvent.INSTALLED:
+			// fall through to INSTALLED
+			case BundleEvent.INSTALLED :
 				BundleDescription newDescription = stateManager.getFactory().createBundleDescription(bundleData.getManifest(), bundleData.getLocation(), bundleData.getBundleID());
 				systemState.addBundle(newDescription);
 				break;
-			case BundleEvent.UNINSTALLED:
+			case BundleEvent.UNINSTALLED :
 				systemState.removeBundle(bundleData.getBundleID());
 				break;
 		}

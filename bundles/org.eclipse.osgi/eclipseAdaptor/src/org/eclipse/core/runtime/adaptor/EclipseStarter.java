@@ -153,6 +153,11 @@ public class EclipseStarter {
 					e.printStackTrace();
 			}
 		}
+		// first check to see if the framework is forcing a restart
+		if (Boolean.getBoolean("osgi.forcedRestart")) { //$NON-NLS-1$
+			System.getProperties().put(PROP_EXITCODE, "23"); //$NON-NLS-1$
+			return null;
+		}
 		// we only get here if an error happened
 		System.getProperties().put(PROP_EXITCODE, "13"); //$NON-NLS-1$
 		System.getProperties().put(PROP_EXITDATA, EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_ERROR_CHECK_LOG", log.getFile().getPath())); //$NON-NLS-1$

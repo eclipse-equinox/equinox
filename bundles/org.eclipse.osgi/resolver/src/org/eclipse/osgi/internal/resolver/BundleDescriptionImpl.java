@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.Iterator;
 
+import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.internal.core.KeyedElement;
 import org.eclipse.osgi.service.resolver.*;
 
@@ -168,6 +169,8 @@ public class BundleDescriptionImpl extends BaseDescriptionImpl implements Bundle
 		lazyData.importPackages = importPackages;
 		if (importPackages != null) {
 			for (int i = 0; i < importPackages.length; i++) {
+				if (Constants.OSGI_SYSTEM_BUNDLE.equals(importPackages[i].getBundleSymbolicName()))
+					((ImportPackageSpecificationImpl)importPackages[i]).setBundleSymbolicName(Constants.getInternalSymbolicName());
 				((ImportPackageSpecificationImpl)importPackages[i]).setBundle(this);
 				if ((importPackages[i].getResolution() & ImportPackageSpecification.RESOLUTION_DYNAMIC) != 0)
 					stateBits |= HAS_DYNAMICIMPORT;
@@ -179,8 +182,11 @@ public class BundleDescriptionImpl extends BaseDescriptionImpl implements Bundle
 		checkLazyData();
 		lazyData.requiredBundles = requiredBundles;
 		if (requiredBundles != null)
-			for (int i = 0; i < requiredBundles.length; i++)
+			for (int i = 0; i < requiredBundles.length; i++) {
+				if (Constants.OSGI_SYSTEM_BUNDLE.equals(requiredBundles[i].getName()))
+					((VersionConstraintImpl)requiredBundles[i]).setName(Constants.getInternalSymbolicName());
 				((VersionConstraintImpl) requiredBundles[i]).setBundle(this);
+			}
 	}
 
 	protected byte getStateBits() {
@@ -209,8 +215,11 @@ public class BundleDescriptionImpl extends BaseDescriptionImpl implements Bundle
 
 	protected void setHost(HostSpecification host) {
 		this.host = host;
-		if (host != null)
+		if (host != null) {
+			if (Constants.OSGI_SYSTEM_BUNDLE.equals(host.getName()))
+				((VersionConstraintImpl)host).setName(Constants.getInternalSymbolicName());
 			((VersionConstraintImpl) host).setBundle(this);
+		}
 	}
 
 	protected void setLazyLoaded(boolean lazyLoad) {

@@ -29,6 +29,15 @@ import org.osgi.framework.BundleException;
  * metadata.
  */
 public interface BundleData {
+
+	/** The BundleData is for a fragment bundle */
+	public static final int TYPE_FRAGMENT =					0x00000001;
+	/** The BundleData is for a framework extension bundle */
+	public static final int TYPE_FRAMEWORK_EXTENSION =		0x00000002;
+	/** The BundleData is for a bootclasspath extension bundle */
+	public static final int TYPE_BOOTCLASSPATH_EXTENSION =	0x00000004;
+	
+
 	/**
 	 * Creates the ClassLoader for the BundleData.  The ClassLoader created
 	 * must use the <code>ClassLoaderDelegate</code> to delegate class, resource
@@ -200,15 +209,22 @@ public interface BundleData {
 	 * has a Fragment-Host entry.
 	 * @return the value of true if this BundleData represents a fragment bundle;
 	 * false otherwise.
+	 * @deprecated use {@link #getType()}
 	 */
 	public boolean isFragment();
+
+	/**
+	 * Returns the type of bundle this BundleData is for.  
+	 * @return returns the type of bundle this BundleData is for
+	 */
+	public int getType();
 
 	/**
 	 * Returns the Bundle-ClassPath for this BundleData as specified in 
 	 * the bundle manifest file.
 	 * @return the classpath for this BundleData.
 	 */
-	public String getClassPath();
+	public String[] getClassPath() throws BundleException;
 
 	/**
 	 * Returns the Bundle-Activator for this BundleData as specified in 

@@ -95,7 +95,7 @@ public abstract class AbstractBundleData implements BundleData, Cloneable {
 	private String classpath;
 	private String executionEnvironment;
 	private String dynamicImports;
-	private boolean fragment = false;
+	private int type;
 
 	///////////////////// End values from Manifest       /////////////////////
 
@@ -236,6 +236,27 @@ public abstract class AbstractBundleData implements BundleData, Cloneable {
 		return null;
 	}
 
+	static String[] getClassPath(ManifestElement[] classpath) {
+		if (classpath == null) {
+			if (Debug.DEBUG && Debug.DEBUG_LOADER)
+				Debug.println("  no classpath"); //$NON-NLS-1$
+			/* create default BundleClassPath */
+			return new String[] {"."}; //$NON-NLS-1$
+		}
+
+		ArrayList result = new ArrayList(classpath.length);
+		for (int i = 0; i < classpath.length; i++) {
+			if (Debug.DEBUG && Debug.DEBUG_LOADER)
+				Debug.println("  found classpath entry " + classpath[i].getValueComponents()); //$NON-NLS-1$
+			String[] paths = classpath[i].getValueComponents();
+			for (int j = 0; j < paths.length; j++) {
+				result.add(paths[j]);
+			}
+		}
+
+		return (String[]) result.toArray(new String[result.size()]);
+	}
+
 	///////////////////// Begin Meta Data Accessor Methods ////////////////////
 	public String getLocation() {
 		return location;
@@ -349,10 +370,21 @@ public abstract class AbstractBundleData implements BundleData, Cloneable {
 		}
 		setVersion(Version.parseVersion((String) manifest.get(Constants.BUNDLE_VERSION)));
 		setSymbolicName(AbstractBundleData.parseSymbolicName(manifest));
-		setClassPath((String) manifest.get(Constants.BUNDLE_CLASSPATH));
+		setClassPathString((String) manifest.get(Constants.BUNDLE_CLASSPATH));
 		setActivator((String) manifest.get(Constants.BUNDLE_ACTIVATOR));
 		String host = (String) manifest.get(Constants.FRAGMENT_HOST);
-		setFragment(host != null);
+		if (host != null) {
+			int bundleType = TYPE_FRAGMENT;
+			ManifestElement[] hostElement = ManifestElement.parseHeader(Constants.FRAGMENT_HOST, host);
+			if (Constants.getInternalSymbolicName().equals(hostElement[0].getValue()) || Constants.OSGI_SYSTEM_BUNDLE.equals(hostElement[0].getValue())) {
+				String extensionType = hostElement[0].getDirective("extension"); //$NON-NLS-1$
+				if (extensionType == null || extensionType.equals("framework")) //$NON-NLS-1$
+					bundleType |= TYPE_FRAMEWORK_EXTENSION;
+				else
+					bundleType |= TYPE_BOOTCLASSPATH_EXTENSION;
+			}
+			setType(bundleType);
+		}
 		setExecutionEnvironment((String) manifest.get(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT));
 		setDynamicImports((String) manifest.get(Constants.DYNAMICIMPORT_PACKAGE));
 	}
@@ -385,11 +417,16 @@ public abstract class AbstractBundleData implements BundleData, Cloneable {
 		this.activator = activator;
 	}
 
-	public String getClassPath() {
+	public String[] getClassPath() throws BundleException {
+		ManifestElement[] classpathElements = ManifestElement.parseHeader(Constants.BUNDLE_CLASSPATH, classpath);
+		return getClassPath(classpathElements);
+	}
+
+	public String getClassPathString() {
 		return classpath;
 	}
 
-	public void setClassPath(String classpath) {
+	public void setClassPathString(String classpath) {
 		this.classpath = classpath;
 	}
 
@@ -410,11 +447,15 @@ public abstract class AbstractBundleData implements BundleData, Cloneable {
 	}
 
 	public boolean isFragment() {
-		return fragment;
+		return (type & TYPE_FRAGMENT) > 0;
 	}
 
-	public void setFragment(boolean fragment) {
-		this.fragment = fragment;
+	public int getType() {
+		return type;
+	}
+
+	public void setType(int type) {
+		this.type = type;
 	}
 
 	///////////////////// End Manifest Value Accessor Methods  /////////////////////
@@ -485,6 +526,17 @@ public abstract class AbstractBundleData implements BundleData, Cloneable {
 	 */
 	protected File getBaseFile() {
 		return isReference() ? new File(getFileName()) : new File(createGenerationDir(), getFileName());
+	}
+
+	protected File[] getClasspathFiles(String[] classpaths) {
+		File[] results = new File[classpaths.length];
+		for (int i = 0; i < classpaths.length; i++) {
+			if (".".equals(classpaths[i]))
+				results[i] = getBaseFile();
+			else
+				results[i] = getBaseBundleFile().getFile(classpaths[i]);
+		}
+		return results;
 	}
 
 	protected void setDataDir(File dirData) {

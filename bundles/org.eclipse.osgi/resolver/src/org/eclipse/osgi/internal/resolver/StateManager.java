@@ -122,6 +122,10 @@ public class StateManager implements PlatformAdmin, Runnable {
 		return systemState;
 	}
 
+	public long getCachedTimeStamp() {
+		return lastTimeStamp;
+	}
+
 	public State getState(boolean mutable) {
 		return mutable ? factory.createState(systemState) : new ReadOnlyState(systemState);
 	}

@@ -16,7 +16,7 @@ package org.eclipse.osgi.framework.internal.core;
  * OSGi implementation.
  */
 
-public interface Constants extends org.osgi.framework.Constants {
+public class Constants implements org.osgi.framework.Constants {
 	/** OSGI implementation version - make sure it is 3 digits for ServerConnection.java */
 	public static final String OSGI_IMPL_VERSION = "3.0.0"; //$NON-NLS-1$
 
@@ -105,6 +105,16 @@ public interface Constants extends org.osgi.framework.Constants {
 
 	/** OSGI system package property */
 	public static final String OSGI_SYSTEMPACKAGES = "osgi.framework.systempackages"; //$NON-NLS-1$
+	public static final String OSGI_FRAMEWORK_SYSTEM_PACKAGES = "org.osgi.framework.system.packages"; //$NON-NLS-1$
+
+	public static final String OSGI_SYSTEM_BUNDLE = "system.bundle"; //$NON-NLS-1$
+	private static String INTERNAL_SYSTEM_BUNDLE = "org.eclipse.osgi"; //$NON-NLS-1$
+	public static String getInternalSymbolicName() {
+		return INTERNAL_SYSTEM_BUNDLE;
+	}
+	static void setInternalSymbolicName(String name) {
+		INTERNAL_SYSTEM_BUNDLE = name;
+	}
 
 	/** OSGI implementation version properties key */
 	public static final String OSGI_IMPL_VERSION_KEY = "osgi.framework.version"; //$NON-NLS-1$

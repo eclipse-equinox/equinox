@@ -17,6 +17,7 @@ import java.security.PrivilegedAction;
 import java.util.*;
 import java.util.ArrayList;
 import org.eclipse.osgi.framework.adaptor.BundleClassLoader;
+import org.eclipse.osgi.framework.adaptor.BundleData;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.util.SecureAction;
 import org.eclipse.osgi.service.resolver.*;
@@ -52,6 +53,7 @@ import org.osgi.service.packageadmin.*;
 public class PackageAdminImpl implements PackageAdmin {
 	/** framework object */
 	protected Framework framework;
+
 	/**
 	 * Constructor.
 	 *
@@ -83,7 +85,7 @@ public class PackageAdminImpl implements PackageAdmin {
 		if (exporter == null || exporter.getHost() != null)
 			return null;
 		BundleLoaderProxy proxy = (BundleLoaderProxy) exporter.getUserObject();
-		if (proxy == null){
+		if (proxy == null) {
 			BundleHost bundle = (BundleHost) framework.getBundle(exporter.getBundleId());
 			if (bundle == null)
 				return null;
@@ -93,7 +95,7 @@ public class PackageAdminImpl implements PackageAdmin {
 	}
 
 	public ExportedPackage getExportedPackage(String name) {
-		ExportedPackage[] allExports = getExportedPackages((Bundle)null);
+		ExportedPackage[] allExports = getExportedPackages((Bundle) null);
 		if (allExports == null)
 			return null;
 		ExportedPackage result = null;
@@ -101,8 +103,7 @@ public class PackageAdminImpl implements PackageAdmin {
 			if (name.equals(allExports[i].getName())) {
 				if (result == null) {
 					result = allExports[i];
-				}
-				else {
+				} else {
 					// TODO not efficient but this is not called very often
 					Version curVersion = Version.parseVersion(result.getSpecificationVersion());
 					Version newVersion = Version.parseVersion(allExports[i].getSpecificationVersion());
@@ -115,7 +116,7 @@ public class PackageAdminImpl implements PackageAdmin {
 	}
 
 	public ExportedPackage[] getExportedPackages(String name) {
-		ExportedPackage[] allExports = getExportedPackages((Bundle)null);
+		ExportedPackage[] allExports = getExportedPackages((Bundle) null);
 		if (allExports == null)
 			return null;
 		ArrayList result = new ArrayList(1); // rare to have more than one
@@ -126,7 +127,7 @@ public class PackageAdminImpl implements PackageAdmin {
 	}
 
 	public void refreshPackages(Bundle[] input) {
-		framework.checkAdminPermission(0,AdminPermission.RESOLVE);
+		framework.checkAdminPermission(0, AdminPermission.RESOLVE);
 
 		AbstractBundle[] copy = null;
 		if (input != null) {
@@ -147,7 +148,7 @@ public class PackageAdminImpl implements PackageAdmin {
 	}
 
 	public boolean resolveBundles(Bundle[] bundles) {
-		framework.checkAdminPermission(0,AdminPermission.RESOLVE);
+		framework.checkAdminPermission(0, AdminPermission.RESOLVE);
 		doResolveBundles(null, false);
 		if (bundles == null)
 			bundles = framework.getAllBundles();
@@ -189,7 +190,7 @@ public class PackageAdminImpl implements PackageAdmin {
 					descriptions = (BundleDescription[]) (results.size() == 0 ? null : results.toArray(new BundleDescription[results.size()]));
 				}
 			}
-			StateDelta stateDelta = framework.adaptor.getState().resolve(descriptions);	
+			StateDelta stateDelta = framework.adaptor.getState().resolve(descriptions);
 			refreshedBundles = processDelta(stateDelta.getChanges(), refreshPackages);
 			if (refreshPackages) {
 				AbstractBundle[] allBundles = framework.getAllBundles();
@@ -197,15 +198,15 @@ public class PackageAdminImpl implements PackageAdmin {
 					allBundles[i].unresolvePermissions(refreshedBundles);
 				resumeBundles(refreshedBundles);
 			}
-		}catch (Throwable t) {
+		} catch (Throwable t) {
 			if (Debug.DEBUG && Debug.DEBUG_PACKAGEADMIN) {
 				Debug.println("PackageAdminImpl.doResolveBundles: Error occured :"); //$NON-NLS-1$
 				Debug.printStackTrace(t);
 			}
 			if (t instanceof RuntimeException)
-				throw (RuntimeException)t;
+				throw (RuntimeException) t;
 			if (t instanceof Error)
-				throw (Error)t;
+				throw (Error) t;
 		} finally {
 			if (refreshPackages)
 				framework.publishFrameworkEvent(FrameworkEvent.PACKAGES_REFRESHED, framework.systemBundle, null);
@@ -300,14 +301,14 @@ public class PackageAdminImpl implements PackageAdmin {
 			if ((type & (BundleDelta.REMOVAL_PENDING | BundleDelta.REMOVAL_COMPLETE)) != 0) {
 				applyRemovalPending(bundleDeltas[i]);
 			}
-			
+
 			if ((type & BundleDelta.RESOLVED) != 0) {
 				AbstractBundle bundle = setResolved(bundleDeltas[i].getBundle());
 				if (bundle != null && bundle.isResolved())
 					results.add(bundle);
 			}
 		}
-		return (AbstractBundle[])(results.size() == 0 ? null : results.toArray(new AbstractBundle[results.size()]));
+		return (AbstractBundle[]) (results.size() == 0 ? null : results.toArray(new AbstractBundle[results.size()]));
 	}
 
 	private AbstractBundle[] processDelta(BundleDelta[] bundleDeltas, boolean refreshPackages) {
@@ -323,17 +324,30 @@ public class PackageAdminImpl implements PackageAdmin {
 		AbstractBundle[] resolved = null;
 		try {
 			try {
-				/*
-				 * Suspend each bundle and grab its state change lock.
-				 */
 				if (Debug.DEBUG && Debug.DEBUG_PACKAGEADMIN) {
 					Debug.println("refreshPackages: Suspend each bundle and acquire its state change lock"); //$NON-NLS-1$
 				}
+				// find which bundles were previously resolved and handle extension bundles
+				boolean restart = false;
 				for (int i = refresh.length - 1; i >= 0; i--) {
 					previouslyResolved[i] = refresh[i].isResolved();
-					if (refreshPackages)
-						suspendBundle(refresh[i]);
+					if (refresh[i] == framework.systemBundle)
+						restart = true;
+					else if (((refresh[i].bundledata.getType() & BundleData.TYPE_FRAMEWORK_EXTENSION) != 0) && previouslyResolved[i])
+						restart = true;
+					else if ((refresh[i].bundledata.getType() & BundleData.TYPE_BOOTCLASSPATH_EXTENSION) != 0)
+						restart = true;
 				}
+				if (restart) {
+					// must publish PACKAGE_REFRESHED event here because we are done.
+					if (refreshPackages)
+						framework.publishFrameworkEvent(FrameworkEvent.PACKAGES_REFRESHED, framework.systemBundle, null);
+					restartFramework();
+				}
+				// now suspend each bundle and grab its state change lock.
+				if (refreshPackages)
+					for (int i = refresh.length - 1; i >= 0; i--)
+						suspendBundle(refresh[i]);
 				/*
 				 * Refresh the bundles which will unexport the packages.
 				 * This will move RESOLVED bundles to the INSTALLED state.
@@ -410,6 +424,12 @@ public class PackageAdminImpl implements PackageAdmin {
 		return refresh;
 	}
 
+	private void restartFramework() {
+		System.getProperties().put("osgi.forcedRestart", "true"); //$NON-NLS-1$ //$NON-NLS-2$
+		framework.shutdown();
+		System.exit(23);
+	}
+
 	public RequiredBundle[] getRequiredBundles(String symbolicName) {
 		AbstractBundle[] bundles;
 		if (symbolicName == null)
@@ -418,14 +438,14 @@ public class PackageAdminImpl implements PackageAdmin {
 			bundles = framework.getBundleBySymbolicName(symbolicName);
 		if (bundles == null || bundles.length == 0)
 			return null;
-		
+
 		ArrayList result = new ArrayList(bundles.length);
 		for (int i = 0; i < bundles.length; i++) {
 			if (bundles[i].isFragment() || !bundles[i].isResolved() || bundles[i].getSymbolicName() == null)
 				continue;
-			result.add(((BundleHost)bundles[i]).getLoaderProxy());
+			result.add(((BundleHost) bundles[i]).getLoaderProxy());
 		}
-		return result.size() == 0 ? null : (RequiredBundle[])result.toArray(new RequiredBundle[result.size()]);
+		return result.size() == 0 ? null : (RequiredBundle[]) result.toArray(new RequiredBundle[result.size()]);
 	}
 
 	public Bundle[] getBundles(String symbolicName, String versionRange) {
@@ -478,14 +498,14 @@ public class PackageAdminImpl implements PackageAdmin {
 		if (System.getSecurityManager() == null)
 			cl = clazz.getClassLoader();
 		else
-			cl = (ClassLoader)AccessController.doPrivileged(new PrivilegedAction() {
+			cl = (ClassLoader) AccessController.doPrivileged(new PrivilegedAction() {
 				public Object run() {
 					return clazz.getClassLoader();
 				}
 			});
 		if (!(cl instanceof BundleClassLoader))
 			return null;
-		return ((BundleLoader) ((BundleClassLoader)cl).getDelegate()).bundle;
+		return ((BundleLoader) ((BundleClassLoader) cl).getDelegate()).bundle;
 	}
 
 	public int getBundleType(Bundle bundle) {
