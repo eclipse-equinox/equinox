@@ -705,6 +705,8 @@ public class BundleLoader implements ClassLoaderDelegate {
 	 * @return BundleLoader to load from or null if the package is not imported.
 	 */
 	protected BundleLoader getPackageExporter(String pkgname) {
+		if (pkgname == null)
+			return null;
 		if (importedPackages != null) {
 			PackageSource exporter = (PackageSource) importedPackages.getByKey(pkgname);
 			if (exporter != null)
