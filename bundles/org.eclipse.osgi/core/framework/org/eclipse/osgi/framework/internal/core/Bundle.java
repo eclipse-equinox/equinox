@@ -1388,7 +1388,7 @@ public abstract class Bundle
 	 * 
 	 * @see org.osgi.framework.Bundle#getFile(java.lang.String)
 	 */
-	public URL getEntry(String fileName) throws IOException {
+	public URL getEntry(String fileName) {
 		try {
 			framework.checkAdminPermission();
 		} catch (SecurityException e) {

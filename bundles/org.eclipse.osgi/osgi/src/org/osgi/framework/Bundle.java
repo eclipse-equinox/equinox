@@ -1,5 +1,5 @@
 /*
- * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/Bundle.java,v 1.4 2004/02/19 19:24:51 twatson Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/Bundle.java,v 1.5 2004/03/04 15:59:07 twatson Exp $
  *
  * Copyright (c) The Open Services Gateway Initiative (2000-2001).
  * All Rights Reserved.
@@ -28,7 +28,6 @@
 
 package org.osgi.framework;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.*;
@@ -67,7 +66,7 @@ import java.util.*;
  * create <tt>Bundle</tt> objects, and these objects are only valid
  * within the Framework that created them.
  *
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @author Open Services Gateway Initiative
  */
 public abstract interface Bundle
@@ -698,7 +697,7 @@ public abstract interface Bundle
 	 *
 	 * @exception java.lang.IllegalStateException If this bundle has been uninstalled.
 	 */
-	public URL getEntry(String name) throws IOException;
+	public URL getEntry(String name);
 
 }
 

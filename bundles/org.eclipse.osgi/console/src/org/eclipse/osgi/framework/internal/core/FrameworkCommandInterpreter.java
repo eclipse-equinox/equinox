@@ -324,10 +324,7 @@ public class FrameworkCommandInterpreter implements CommandInterpreter {
 	 */
 	public void printBundleResource(Bundle bundle, String resource) {
 		URL entry = null;
-		try {
-			entry = bundle.getEntry(resource);
-		} catch (IOException e1) {
-		}
+		entry = bundle.getEntry(resource);
 		if (entry != null) {
 			try {
 				println(resource);

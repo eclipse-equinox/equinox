@@ -150,22 +150,14 @@ public class ManifestLocalization {
 		return findInFragments(filename);
 	}
 	private URL findInBundle(String filePath) {
-		try {
-			return this.bundle.getEntry(filePath);
-		} catch (IOException e) {
-			return null;
-		}
+		return this.bundle.getEntry(filePath);
 	}
 	private URL findInFragments(String filePath) {
 		org.osgi.framework.Bundle[] fragments = this.bundle.getFragments();
 		URL fileURL = null;
 		int i = 0;
 		while (fragments != null && i < fragments.length && fileURL == null) {
-			try {
-				fileURL = fragments[i].getEntry(filePath);
-			} catch (IOException e) {
-				//ignore
-			}
+			fileURL = fragments[i].getEntry(filePath);
 			i++;
 		}
 		return fileURL;
