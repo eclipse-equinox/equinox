@@ -260,7 +260,7 @@ public class BundleHost extends AbstractBundle {
 		return (loader.getResource(name));
 	}
 
-	public Enumeration getResources(String name) {
+	public Enumeration getResources(String name) throws IOException {
 		BundleLoader loader = null;
 		try {
 			checkResourcePermission();
@@ -274,11 +274,7 @@ public class BundleHost extends AbstractBundle {
 		loader = checkLoader();
 		if (loader == null)
 			return null;
-		try {
-			return loader.getResources(name);
-		} catch (IOException e) {
-			return null;
-		}
+		return loader.getResources(name);
 	}
 
 	/**

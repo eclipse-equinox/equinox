@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/Version.java,v 1.10 2004/12/15 19:01:03 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/Version.java,v 1.12 2005/03/21 20:45:15 heavy Exp $
  * 
- * Copyright (c) OSGi Alliance (2004). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2004,2005). All Rights Reserved.
  * 
  * Implementation of certain elements of the OSGi Specification may be subject
  * to third party intellectual property rights, including without limitation,
@@ -44,9 +44,9 @@ import java.util.StringTokenizer;
  * </ol>
  * 
  * <p>
- * <code>Version</code> instances are immutable.
+ * <code>Version</code> objects are immutable.
  * 
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.12 $
  * @since 1.3
  */
 
@@ -118,6 +118,7 @@ public class Version implements Comparable {
 	 *       digit ::= [0..9]
 	 *       alpha ::= [a..zA..Z]
 	 * </pre>
+	 * There must be no whitespace in version.
 	 * 
 	 * @param version String representation of the version identifier.
 	 * @throws IllegalArgumentException If <code>version</code> is improperly
@@ -322,7 +323,7 @@ public class Version implements Comparable {
 	 * <code>String.compareTo</code>).
 	 * 
 	 * <p>
-	 * A version is considered to be <b>equal to </b> another version if the
+	 * A version is considered to be <b>equal to</b> another version if the
 	 * major, minor and micro components are equal and the qualifier component
 	 * is equal (using <code>String.compareTo</code>).
 	 * 

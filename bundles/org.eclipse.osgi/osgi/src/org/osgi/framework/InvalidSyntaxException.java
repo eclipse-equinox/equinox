@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/InvalidSyntaxException.java,v 1.8 2005/01/19 20:35:24 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/InvalidSyntaxException.java,v 1.9 2005/03/21 20:06:20 heavy Exp $
  * 
- * Copyright (c) OSGi Alliance (2000, 2004). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2000, 2005). All Rights Reserved.
  * 
  * Implementation of certain elements of the OSGi Specification may be subject
  * to third party intellectual property rights, including without limitation,
@@ -35,9 +35,9 @@ package org.osgi.framework;
  * parameter has an invalid syntax and cannot be parsed.
  * 
  * <p>
- * See {@link Filter}for a description of the filter string syntax.
+ * See {@link Filter} for a description of the filter string syntax.
  * 
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 
 public class InvalidSyntaxException extends Exception {

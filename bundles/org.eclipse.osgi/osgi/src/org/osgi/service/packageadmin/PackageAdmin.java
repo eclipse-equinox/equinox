@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.packageadmin/src/org/osgi/service/packageadmin/PackageAdmin.java,v 1.8 2005/01/19 20:35:30 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.service.packageadmin/src/org/osgi/service/packageadmin/PackageAdmin.java,v 1.9 2005/03/11 22:04:29 twatson Exp $
  * 
  * Copyright (c) OSGi Alliance (2001, 2004). All Rights Reserved.
  * 
@@ -52,7 +52,7 @@ import org.osgi.framework.Bundle;
  * <code>getExportingBundle()</code> and <code>getImportingBundles()</code> return
  * <code>null</code>.
  * 
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public interface PackageAdmin {
 	/**
@@ -236,12 +236,15 @@ public interface PackageAdmin {
 	 * If the specified bundle is a fragment then <code>null</code> is returned.
 	 * If no fragments are attached to the specified bundle then <code>null</code>
 	 * is returned.
-	 * ### what do you get when the bundle is not resolved?
+	 * <p>
+	 * This method does not attempt to resolve the specified bundle.  If the 
+	 * specified bundle is not resolved then <code>null</code> is returned. 
 	 * 
 	 * @param bundle The bundle whose attached fragment bundles are to be
 	 *        returned.
 	 * @return An array of fragment bundles or <code>null</code> if the bundle
-	 *         does not have any attached fragment bundles.
+	 *         does not have any attached fragment bundles or the bundle is not
+	 *         resolved.
 	 * @since 1.2
 	 */
 	public Bundle[] getFragments(Bundle bundle);

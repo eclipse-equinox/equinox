@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/FrameworkEvent.java,v 1.7 2005/01/19 20:35:24 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/FrameworkEvent.java,v 1.8 2005/03/21 20:00:55 heavy Exp $
  * 
- * Copyright (c) OSGi Alliance (2004). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2004, 2005). All Rights Reserved.
  * 
  * Implementation of certain elements of the OSGi Specification may be subject
  * to third party intellectual property rights, including without limitation,
@@ -40,7 +40,7 @@ import java.util.EventObject;
  * <p>
  * OSGi Alliance reserves the right to extend the set of event types.
  * 
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 
 public class FrameworkEvent extends EventObject {

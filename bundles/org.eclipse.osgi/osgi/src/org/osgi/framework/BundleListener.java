@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/BundleListener.java,v 1.5 2005/01/19 20:35:24 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/BundleListener.java,v 1.6 2005/03/21 17:56:15 heavy Exp $
  * 
- * Copyright (c) OSGi Alliance (2000, 2004). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2000, 2005). All Rights Reserved.
  * 
  * Implementation of certain elements of the OSGi Specification may be subject
  * to third party intellectual property rights, including without limitation,
@@ -37,11 +37,11 @@ import java.util.EventListener;
  * a bundle developer.
  * <p>
  * A <code>BundleListener</code> object is registered with the Framework using the
- * {@link BundleContext#addBundleListener}method. <code>BundleListener</code> s
+ * {@link BundleContext#addBundleListener} method. <code>BundleListener</code>s
  * are called with a <code>BundleEvent</code> object when a bundle has been
- * installed, started, stopped, updated, or uninstalled.
+ * installed, resolved, started, stopped, updated, unresolved, or uninstalled.
  * 
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  * @see BundleEvent
  */
 
@@ -53,4 +53,3 @@ public abstract interface BundleListener extends EventListener {
 	 */
 	public abstract void bundleChanged(BundleEvent event);
 }
-

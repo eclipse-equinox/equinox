@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/ServiceListener.java,v 1.5 2005/01/19 20:35:24 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/ServiceListener.java,v 1.7 2005/03/21 17:13:53 heavy Exp $
  * 
- * Copyright (c) OSGi Alliance (2000, 2004). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2000, 2005). All Rights Reserved.
  * 
  * Implementation of certain elements of the OSGi Specification may be subject
  * to third party intellectual property rights, including without limitation,
@@ -37,7 +37,7 @@ import java.util.EventListener;
  * <p>A <code>ServiceListener</code> object is registered with the Framework using the
  * <code>BundleContext.addServiceListener</code> method.
  * <code>ServiceListener</code> objects are called with a <code>ServiceEvent</code> object when
- * a service has been registered or modified, or is in the process of unregistering.
+ * a service is registered, modified, or is in the process of unregistering.
  *
  * <p><code>ServiceEvent</code> object delivery to <code>ServiceListener</code> objects is filtered by the
  * filter specified when the listener was registered. If the Java Runtime Environment
@@ -46,7 +46,11 @@ import java.util.EventListener;
  * the listener object's class has the appropriate <code>ServicePermission</code> to get the service
  * using at least one of the named classes the service was registered under.
  *
- * @version $Revision: 1.5 $
+ * <p><code>ServiceEvent</code> object delivery to <code>ServiceListener</code> objects is
+ * further filtered according to package sources as defined in
+ * {@link ServiceReference#isAssignableTo(Bundle, String)}.
+ * 
+ * @version $Revision: 1.7 $
  * @see ServiceEvent
  * @see ServicePermission
  */

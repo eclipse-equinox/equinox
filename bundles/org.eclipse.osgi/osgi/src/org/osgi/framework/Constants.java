@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/Constants.java,v 1.10 2005/02/23 19:33:24 twatson Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/Constants.java,v 1.14 2005/03/21 19:55:23 heavy Exp $
  *
- * Copyright (c) OSGi Alliance (2000, 2004).
+ * Copyright (c) OSGi Alliance (2000, 2005).
  * All Rights Reserved.
  *
  * Implementation of certain elements of the OSGi
@@ -38,7 +38,7 @@ import java.util.Dictionary;
  * The values associated with these keys are of type <code>java.lang.String</code>,
  * unless otherwise indicated.
  * 
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.14 $
  * @since 1.1
  * @see Bundle#getHeaders()
  * @see BundleContext#getProperty
@@ -53,6 +53,13 @@ public interface Constants {
 	public static final String	SYSTEM_BUNDLE_LOCATION					= "System Bundle";
 
 	/**
+	 * Symbolic name of the OSGi <i>system bundle </i>, which is defined
+	 * to be &quot;system.bundle&quot;.
+	 * @since 1.3
+	 */
+	public static final String	SYSTEM_BUNDLE_SYMBOLICNAME				= "system.bundle";
+
+	/**
 	 * Manifest header (named &quot;Bundle-Category&quot;) identifying the
 	 * bundle's category.
 	 * <p>
@@ -63,8 +70,8 @@ public interface Constants {
 
 	/**
 	 * Manifest header (named &quot;Bundle-ClassPath&quot;) identifying a list
-	 * of nested JAR files, which are bundle resources used to extend the
-	 * bundle's classpath.
+	 * of directories and embedded JAR files, which are bundle resources used
+	 * to extend the bundle's classpath.
 	 * 
 	 * <p>
 	 * The attribute value may be retrieved from the <code>Dictionary</code>
@@ -74,9 +81,10 @@ public interface Constants {
 
 	/**
 	 * Manifest header (named &quot;Bundle-Copyright&quot;) identifying the
-	 * bundle's copyright information, which may be retrieved from the
-	 * <code>Dictionary</code> object returned by the <code>Bundle.getHeaders</code>
-	 * method.
+	 * bundle's copyright information.
+	 * <p>
+	 * The attribute value may be retrieved from the <code>Dictionary</code>
+	 * object returned by the <code>Bundle.getHeaders</code> method.
 	 */
 	public static final String	BUNDLE_COPYRIGHT						= "Bundle-Copyright";
 
@@ -110,9 +118,8 @@ public interface Constants {
 	public static final String	BUNDLE_NATIVECODE						= "Bundle-NativeCode";
 
 	/**
-	 * Manifest header (named &quot;Export-Package&quot;) identifying the names
-	 * (and optionally version numbers) of the packages that the bundle offers
-	 * to the Framework for export.
+	 * Manifest header (named &quot;Export-Package&quot;) identifying 
+	 * the packages that the bundle offers to the Framework for export.
 	 * 
 	 * <p>
 	 * The attribute value may be retrieved from the <code>Dictionary</code>
@@ -132,9 +139,8 @@ public interface Constants {
 	public static final String	EXPORT_SERVICE							= "Export-Service";
 
 	/**
-	 * Manifest header (named &quot;Import-Package&quot;) identifying the names
-	 * (and optionally, version numbers) of the packages that the bundle is
-	 * dependent on.
+	 * Manifest header (named &quot;Import-Package&quot;) identifying
+	 * the packages on which the bundle depends.
 	 * 
 	 * <p>
 	 * The attribute value may be retrieved from the <code>Dictionary</code>
@@ -143,8 +149,8 @@ public interface Constants {
 	public static final String	IMPORT_PACKAGE							= "Import-Package";
 
 	/**
-	 * Manifest header (named &quot;DynamicImport-Package&quot;) identifying the
-	 * names of the packages that the bundle may dynamically import during
+	 * Manifest header (named &quot;DynamicImport-Package&quot;) identifying
+	 * the packages that the bundle may dynamically import during
 	 * execution.
 	 * 
 	 * <p>
@@ -247,6 +253,7 @@ public interface Constants {
 	 * <pre>
 	 *  Import-Package: org.osgi.framework ; specification-version=&quot;1.1&quot;
 	 * </pre>
+	 * @deprecated Since 1.3, this has been replaced by {@link #VERSION_ATTRIBUTE}.
 	 */
 	public static final String	PACKAGE_SPECIFICATION_VERSION			= "specification-version";
 
@@ -403,6 +410,36 @@ public interface Constants {
 	 */
 	public static final String	FRAMEWORK_EXECUTIONENVIRONMENT			= "org.osgi.framework.executionenvironment";
 
+	/**
+	 * Framework environment property (named
+	 * &quot;org.osgi.supports.framework.extension&quot;) identifying
+	 * whether the Framework supports framework extension bundles.
+	 * If the value of this property is <code>true</code>, then the Framework
+	 * supports framework extension bundles.
+	 * The default value is <code>false</code>.
+	 * <p>
+	 * The value of this property may be retrieved by calling the
+	 * <code>BundleContext.getProperty</code> method.
+	 * 
+	 * @since 1.3
+	 */
+	public static final String	SUPPORTS_FRAMEWORK_EXTENSION			= "org.osgi.supports.framework.extension";
+
+	/**
+	 * Framework environment property (named
+	 * &quot;org.osgi.supports.bootclasspath.extension&quot;) identifying
+	 * whether the Framework supports bootclasspath extension bundles.
+	 * If the value of this property is <code>true</code>, then the Framework
+	 * supports bootclasspath extension bundles.
+	 * The default value is <code>false</code>.
+	 * <p>
+	 * The value of this property may be retrieved by calling the
+	 * <code>BundleContext.getProperty</code> method.
+	 * 
+	 * @since 1.3
+	 */
+	public static final String	SUPPORTS_BOOTCLASSPATH_EXTENSION		= "org.osgi.supports.bootclasspath.extension";
+
 	/*
 	 * Service properties.
 	 */
@@ -524,11 +561,6 @@ public interface Constants {
 	 * @since 1.3
 	 */
 	public final static String	SINGLETON_DIRECTIVE						= "singleton";
-	/**
-	 * @deprecated use {@link Constants#SINGLETON_DIRECTIVE}
-	 */
-	// TODO remove when framework RI is updated to use the directive constant.
-	public final static String	SINGLETON_ATTRIBUTE						= "singleton";
 
 	/**
 	 * Manifest header directive (named &quot;fragment-attachment&quot;)
@@ -562,7 +594,7 @@ public interface Constants {
 	 * like:
 	 * 
 	 * <pre>
-	 *  Bundle-SymbolicName: com.acme.module.test; fragment-attachment=&quot;always&quot;
+	 *  Bundle-SymbolicName: com.acme.module.test; fragment-attachment:=&quot;always&quot;
 	 * </pre>
 	 * 
 	 * @see Constants#FRAGMENT_ATTACHMENT_DIRECTIVE
@@ -582,7 +614,7 @@ public interface Constants {
 	 * like:
 	 * 
 	 * <pre>
-	 *  Bundle-SymbolicName: com.acme.module.test; fragment-attachment=&quot;resolve-time&quot;
+	 *  Bundle-SymbolicName: com.acme.module.test; fragment-attachment:=&quot;resolve-time&quot;
 	 * </pre>
 	 * 
 	 * @see Constants#FRAGMENT_ATTACHMENT_DIRECTIVE
@@ -601,7 +633,7 @@ public interface Constants {
 	 * like:
 	 * 
 	 * <pre>
-	 *  Bundle-SymbolicName: com.acme.module.test; fragment-attachment=&quot;never&quot;
+	 *  Bundle-SymbolicName: com.acme.module.test; fragment-attachment:=&quot;never&quot;
 	 * </pre>
 	 * 
 	 * @see Constants#FRAGMENT_ATTACHMENT_DIRECTIVE
@@ -616,17 +648,18 @@ public interface Constants {
 	 * The attribute value may be retrieved from the <code>Dictionary</code>
 	 * object returned by the <code>Bundle.getHeaders</code> method.
 	 * 
+	 * @see #BUNDLE_LOCALIZATION_DEFAULT_BASENAME
 	 * @since 1.3
 	 */
 	public final static String	BUNDLE_LOCALIZATION						= "Bundle-Localization";
 
 	/**
-	 * Default value for the Bundle-Localization manifest header.
+	 * Default value for the <code>Bundle-Localization</code> manifest header.
 	 * 
 	 * @see #BUNDLE_LOCALIZATION
 	 * @since 1.3
 	 */
-	public final static String	BUNDLE_LOCALIZATION_DEFAULT_BASENAME	= "META-INF/bundle";
+	public final static String	BUNDLE_LOCALIZATION_DEFAULT_BASENAME	= "OSGI-INF/l10n/bundle";
 
 	/**
 	 * Manifest header (named &quot;Require-Bundle&quot;) identifying the
@@ -685,7 +718,7 @@ public interface Constants {
 	 * The directive value is encoded in the Fragment-Host manifest header like:
 	 * 
 	 * <pre>
-	 *  Fragment-Host: com.acme.module.test; multiple-hosts=&quot;false&quot;
+	 *  Fragment-Host: com.acme.module.test; multiple-hosts:=&quot;false&quot;
 	 * </pre>
 	 * 
 	 * @since 1.3
@@ -744,7 +777,7 @@ public interface Constants {
 
 	/**
 	 * Manifest header attribute (named &quot;bundle-symbolic-name&quot;)
-	 * identifying the symbolic name of a bundle which exports a package
+	 * identifying the symbolic name of a bundle that exports a package
 	 * specified in the Import-Package manifest header.
 	 * 
 	 * <p>
@@ -835,12 +868,6 @@ public interface Constants {
 	 * @since 1.3
 	 */
 	public final static String	USES_DIRECTIVE						= "uses";
-
-	/**
-	 * @deprecated use {@link Constants#USES_DIRECTIVE}
-	 */
-	// TODO remove when framework RI is updated to the "uses" directive.
-	public final static String	GROUPING_DIRECTIVE						= "grouping";
 
 	/**
 	 * Manifest header directive (named &quot;include&quot;) identifying a list

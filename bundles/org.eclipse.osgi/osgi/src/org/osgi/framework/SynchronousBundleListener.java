@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/SynchronousBundleListener.java,v 1.5 2005/01/19 20:35:24 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/SynchronousBundleListener.java,v 1.7 2005/03/21 20:40:27 heavy Exp $
  * 
- * Copyright (c) OSGi Alliance (2001, 2004). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2001, 2005). All Rights Reserved.
  * 
  * Implementation of certain elements of the OSGi Specification may be subject
  * to third party intellectual property rights, including without limitation,
@@ -35,22 +35,22 @@ package org.osgi.framework;
  * implemented by a bundle developer.
  * <p>
  * A <code>SynchronousBundleListener</code> object is registered with the
- * Framework using the {@link BundleContext#addBundleListener}method.
+ * Framework using the {@link BundleContext#addBundleListener} method.
  * <code>SynchronousBundleListener</code> objects are called with a
- * <code>BundleEvent</code> object when a bundle has been installed, started,
- * stopped, updated, or uninstalled.
+ * <code>BundleEvent</code> object when a bundle has been installed,
+ * resolved, started, stopped, updated, unresolved, or uninstalled.
  * <p>
  * Unlike normal <code>BundleListener</code> objects,
- * <code>SynchronousBundleListener</code> s are synchronously called during bundle
- * life cycle processing. The bundle life cycle processing will not proceed
- * until all <code>SynchronousBundleListener</code> s have completed.
+ * <code>SynchronousBundleListener</code>s are synchronously called during bundle
+ * lifecycle processing. The bundle lifecycle processing will not proceed
+ * until all <code>SynchronousBundleListener</code>s have completed.
  * <code>SynchronousBundleListener</code> objects will be called prior to
  * <code>BundleListener</code> objects.
  * <p>
  * <code>AdminPermission</code> is required to add or remove a
  * <code>SynchronousBundleListener</code> object.
  * 
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.7 $
  * @since 1.1
  * @see BundleEvent
  */

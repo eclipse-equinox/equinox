@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/Filter.java,v 1.6 2005/01/19 20:35:24 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/Filter.java,v 1.10 2005/03/21 19:59:11 heavy Exp $
  * 
- * Copyright (c) OSGi Alliance (2000, 2004). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2000, 2005). All Rights Reserved.
  * 
  * Implementation of certain elements of the OSGi Specification may be subject
  * to third party intellectual property rights, including without limitation,
@@ -32,7 +32,7 @@ import java.util.Dictionary;
  * An RFC 1960-based Filter.
  * <p>
  * <code>Filter</code> objects can be created by calling
- * {@link BundleContext#createFilter}with the chosen filter string.
+ * {@link BundleContext#createFilter} with the chosen filter string.
  * <p>
  * A <code>Filter</code> object can be used numerous times to determine if the
  * match argument matches the filter string that was used to create the
@@ -47,14 +47,16 @@ import java.util.Dictionary;
  *     &quot;(o=univ*of*mich*)&quot;
  * </pre>
  * 
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.10 $
  * @since 1.1
+ * @see "Framework specification for a description of the filter string syntax."
  */
 public interface Filter {
 	/**
 	 * Filter using a service's properties.
 	 * <p>
-	 * The filter is executed using properties of the referenced service.
+	 * The filter is executed using the keys and values of the referenced service's
+	 * properties.  The keys are case insensitively matched with the filter.
 	 * 
 	 * @param reference The reference to the service whose properties are used
 	 *        in the match.
@@ -67,6 +69,7 @@ public interface Filter {
 	/**
 	 * Filter using a <code>Dictionary</code> object. The Filter is executed using
 	 * the <code>Dictionary</code> object's keys and values.
+	 * The keys are case insensitively matched with the filter.
 	 * 
 	 * @param dictionary The <code>Dictionary</code> object whose keys are used in
 	 *        the match.
@@ -111,7 +114,7 @@ public interface Filter {
 	/**
 	 * Filter with case sensitivity using a <code>Dictionary</code> object. The
 	 * Filter is executed using the <code>Dictionary</code> object's keys and
-	 * values. The keys are case sensitivley matched with the filter.
+	 * values. The keys are case sensitively matched with the filter.
 	 * 
 	 * @param dictionary The <code>Dictionary</code> object whose keys are used in
 	 *        the match.
