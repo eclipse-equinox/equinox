@@ -33,6 +33,7 @@ class StateBuilder {
 			}
 		}
 		if (result.getUniqueId() == null)
+			// for backward compatibility TODO remove when it is time
 			result.setUniqueId((String) manifest.get(Constants.BUNDLE_GLOBALNAME));
 		// retrieve other headers
 		String version = (String) manifest.get(Constants.BUNDLE_VERSION);
