@@ -18,6 +18,7 @@ import org.eclipse.osgi.service.pluginconversion.PluginConverter;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
 public class PluginConverterImpl implements PluginConverter {
 
@@ -396,17 +397,15 @@ public class PluginConverterImpl implements PluginConverter {
 	 */
 	private IPluginInfo parsePluginInfo(File pluginManifestLocation) {
 		try {
-			return new PluginParser(context).parse(pluginManifestLocation.toString());
-		} catch (IOException e) {
-			//TODO: what to do here? 
-			e.printStackTrace();
+			return new PluginParser(context).parsePlugin(pluginManifestLocation.toString());
+		} catch (SAXParseException se) {
+			se.printStackTrace(); //TODO Do the logging
 			return null;
-		} catch (SAXException e) {
-			//TODO: what to do here?		
-			e.printStackTrace();
+			/* exception details logged by parser */
+		} catch (Exception e) {
+			e.printStackTrace();	//TODO Do the logging
 			return null;
 		}
-
 	}
 
 	private boolean upToDate(File generationLocation, File pluginLocation) {
