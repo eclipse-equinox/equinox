@@ -157,28 +157,36 @@ public class EclipseBundleData extends DefaultBundleData {
 	public synchronized Dictionary getManifest(boolean first) throws BundleException {
 		if (manifest == null)
 			manifest = first ? loadManifest() : new CachedManifest(this);
-		if (manifest.get(org.osgi.framework.Constants.BUNDLE_SYMBOLICNAME) == null) {
-			if (getEntry(PluginConverterImpl.PLUGIN_MANIFEST) != null || getEntry(PluginConverterImpl.FRAGMENT_MANIFEST) != null) {
-				Dictionary generatedManifest = generateManifest(manifest);
-				if (generatedManifest != null)
-					manifest = generatedManifest;
-			}
-		}
 		return manifest;
+	}
+
+	private boolean isComplete(Dictionary manifest) {
+		// a manifest is complete if it has a Bundle-SymbolicName entry...
+		if (manifest.get(org.osgi.framework.Constants.BUNDLE_SYMBOLICNAME) != null)
+			return true;
+		// ...or it does not have a plugin/fragment manifest where to get the other entries from  
+		return getEntry(PluginConverterImpl.PLUGIN_MANIFEST) == null && getEntry(PluginConverterImpl.FRAGMENT_MANIFEST) == null;
 	}
 
 	public synchronized Dictionary loadManifest() throws BundleException {
 		URL url = getEntry(Constants.OSGI_BUNDLE_MANIFEST);
 		if (url != null) {
+			// the bundle has a built-in manifest - we may not have to generate one
+			Dictionary builtIn = loadManifestFrom(url);
+			// if the manifest is not complete, add entries derived from plug-in/fragment manifest
+			if (!isComplete(builtIn)) {
+				Dictionary generatedManifest = generateManifest(builtIn);
+				if (generatedManifest != null)
+					return generatedManifest;
+			}
+			// the manifest is complete or we could not complete it - take it as it is
 			manifestType = MANIFEST_TYPE_BUNDLE;
 			if (getBaseFile().isFile()) {
 				manifestTimeStamp = getBaseFile().lastModified();
 				manifestType |= MANIFEST_TYPE_JAR;
-			}
-			else {
+			} else
 				manifestTimeStamp = getBaseBundleFile().getEntry(Constants.OSGI_BUNDLE_MANIFEST).getTime();
-			}
-			return loadManifestFrom(url);
+			return builtIn;
 		}
 		Dictionary result = generateManifest(null);
 		if (result == null)
