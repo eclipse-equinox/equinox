@@ -67,6 +67,7 @@ public class PluginParser extends DefaultHandler implements IModel {
 				requiresExpanded = true;
 				if (requires == null) {
 					requires = new ArrayList(1);
+					requires.add(new Prerequisite(PluginConverterImpl.PI_RUNTIME, TARGET21, false, false, IModel.PLUGIN_REQUIRES_MATCH_GREATER_OR_EQUAL));
 					requires.add(new Prerequisite(PluginConverterImpl.PI_RUNTIME_COMPATIBILITY, null, false, false, null));
 				} else {
 					//Add elements on the requirement list of ui and help.
@@ -87,6 +88,11 @@ public class PluginParser extends DefaultHandler implements IModel {
 					if (!requires.contains(new Prerequisite(PluginConverterImpl.PI_RUNTIME_COMPATIBILITY, null, false, false, null))) {
 						requires.add(new Prerequisite(PluginConverterImpl.PI_RUNTIME_COMPATIBILITY, null, false, false, null));
 					}
+					//Remove any prereq on runtime and add a prereq on runtime 2.1
+					//This is used to recognize the version for which the given plugin was initially targeted.
+					Prerequisite runtimePrereq = new Prerequisite(PluginConverterImpl.PI_RUNTIME, null, false, false, null);
+					requires.remove(runtimePrereq);
+					requires.add(new Prerequisite(PluginConverterImpl.PI_RUNTIME, TARGET21, false, false, IModel.PLUGIN_REQUIRES_MATCH_GREATER_OR_EQUAL));
 				}
 			}
 			if (requires == null)
