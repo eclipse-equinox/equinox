@@ -15,8 +15,8 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 
 public class Locker_JavaIo implements Locker {
-	File lockFile;
-	RandomAccessFile lockRAF;
+	private File lockFile;
+	private RandomAccessFile lockRAF;
 
 	public Locker_JavaIo(File lockFile) {
 		this.lockFile = lockFile;
