@@ -87,7 +87,8 @@ public class InstallTests extends TestCase {
 			assertNotNull("1.3", symbolicNameString);
 			ManifestElement[] symbolicNameHeader = ManifestElement.parseHeader(Constants.BUNDLE_SYMBOLICNAME, symbolicNameString);
 			assertEquals("1.4", 1, symbolicNameHeader.length);
-			assertEquals("1.5", "true", symbolicNameHeader[0].getAttribute(Constants.SINGLETON_ATTRIBUTE));
+			// TODO When runtime moves to singleton directive this call needs to be getDirective
+			assertEquals("1.5", "true", symbolicNameHeader[0].getAttribute(Constants.SINGLETON_DIRECTIVE));
 
 		} finally {
 			// clean-up
@@ -107,7 +108,8 @@ public class InstallTests extends TestCase {
 			assertNotNull("1.3", symbolicNameString);
 			ManifestElement[] symbolicNameHeader = ManifestElement.parseHeader(Constants.BUNDLE_SYMBOLICNAME, symbolicNameString);
 			assertEquals("1.4", 1, symbolicNameHeader.length);
-			assertEquals("1.5", "true", symbolicNameHeader[0].getAttribute(Constants.SINGLETON_ATTRIBUTE));
+			// TODO When runtime moves to singleton directive this call needs to be getDirective
+			assertEquals("1.5", "true", symbolicNameHeader[0].getAttribute(Constants.SINGLETON_DIRECTIVE));
 
 		} finally {
 			// clean-up
@@ -127,7 +129,8 @@ public class InstallTests extends TestCase {
 			assertNotNull("1.3", symbolicNameString);
 			ManifestElement[] symbolicNameHeader = ManifestElement.parseHeader(Constants.BUNDLE_SYMBOLICNAME, symbolicNameString);
 			assertEquals("1.4", 1, symbolicNameHeader.length);
-			assertEquals("1.5", "true", symbolicNameHeader[0].getAttribute(Constants.SINGLETON_ATTRIBUTE));
+			// TODO When runtime moves to singleton directive this call needs to be getDirective
+			assertEquals("1.5", "true", symbolicNameHeader[0].getAttribute(Constants.SINGLETON_DIRECTIVE));
 
 		} finally {
 			// clean-up
