@@ -1277,9 +1277,8 @@ public class BundleContext implements org.osgi.framework.BundleContext, EventSou
                 	// first suspend all attached fragments;
                 	if (fragmentActivators != null) {
                			for (int i=fragmentActivators.length-1; i>=0; i--) {
+               				Bundle fragment = (Bundle) bundle.fragments.elementAt(i);
                				if (fragmentActivators[i] != null) {
-               					Bundle fragment = (Bundle) bundle.fragments.elementAt(i);
-
                					fragment.state = Bundle.STOPPING;
 
                					try {
@@ -1292,7 +1291,10 @@ public class BundleContext implements org.osgi.framework.BundleContext, EventSou
                						fragment.state = Bundle.RESOLVED;
                						framework.publishBundleEvent(BundleEvent.STOPPED, fragment);
                					}
-
+               				}
+               				else {
+               					fragment.state = Bundle.RESOLVED;
+               					framework.publishBundleEvent(BundleEvent.STOPPED, fragment);
                				}
                			}
                 	}
