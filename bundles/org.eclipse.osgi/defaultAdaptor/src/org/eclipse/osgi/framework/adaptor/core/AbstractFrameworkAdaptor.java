@@ -80,7 +80,6 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 	 * from the boot strap classloader.
 	 */
 	protected static ClassLoader bundleClassLoaderParent;
-	private AbstractBundleData data;
 	/**
 	 * next available bundle id 
 	 */
@@ -309,10 +308,6 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 
 	public BundleWatcher getBundleWatcher() {
 		return null;
-	}
-
-	public void setBundleData(AbstractBundleData data) {
-		this.data = data;
 	}
 
 	/**
@@ -557,8 +552,6 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 	 * @return BundleOperation object to be used to complete the install.
 	 */
 	public BundleOperation installBundle(final String location, final URLConnection source) {
-		final AbstractBundleData bundleData = data;
-		data = null;
 		return (new BundleOperation() {
 			private AbstractBundleData data;
 
@@ -585,11 +578,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 						} catch (IOException e) {
 							throw new BundleException(AdaptorMsg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION"), e); //$NON-NLS-1$
 						}
-						if (bundleData == null) {
-							data = (AbstractBundleData) getElementFactory().createBundleData(AbstractFrameworkAdaptor.this, id);
-						} else {
-							data = bundleData;
-						}
+						data = (AbstractBundleData) getElementFactory().createBundleData(AbstractFrameworkAdaptor.this, id);
 						data.setLastModified(System.currentTimeMillis());
 						data.setLocation(location);
 						data.setStartLevel(getInitialBundleStartLevel());
@@ -1290,7 +1279,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 				systemState.addBundle(newDescription);
 				break;
 			case BundleEvent.UNINSTALLED:
-				systemState.removeBundle(data.getBundleID());
+				systemState.removeBundle(bundleData.getBundleID());
 				break;
 		}
 	}
