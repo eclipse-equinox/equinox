@@ -3,7 +3,6 @@
 	<name>org.eclipse.osgi</name>
 	<comment></comment>
 	<projects>
-		<project>org.eclipse.osgi.services</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

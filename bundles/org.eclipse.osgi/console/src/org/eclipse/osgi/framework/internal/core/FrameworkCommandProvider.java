@@ -846,22 +846,22 @@ public class FrameworkCommandProvider implements CommandProvider {
 							if ((logid == -1) || ((bundle != null) && (logid == bundle.getBundleId()))) {
 								Integer level = (Integer) getLevel.invoke(logentry, null);
 								switch (level.intValue()) {
-									case org.osgi.service.log.LogService.LOG_DEBUG :
+									case 4 :
 										intp.print(">");
 										intp.print(ConsoleMsg.formatter.getString("CONSOLE_DEBUG_MESSAGE"));
 										intp.print(" ");
 										break;
-									case org.osgi.service.log.LogService.LOG_INFO :
+									case 3 :
 										intp.print(">");
 										intp.print(ConsoleMsg.formatter.getString("CONSOLE_INFO_MESSAGE"));
 										intp.print(" ");
 										break;
-									case org.osgi.service.log.LogService.LOG_WARNING :
+									case 2 :
 										intp.print(">");
 										intp.print(ConsoleMsg.formatter.getString("CONSOLE_WARNING_MESSAGE"));
 										intp.print(" ");
 										break;
-									case org.osgi.service.log.LogService.LOG_ERROR :
+									case 1 :
 										intp.print(">");
 										intp.print(ConsoleMsg.formatter.getString("CONSOLE_ERROR_MESSAGE"));
 										intp.print(" ");
