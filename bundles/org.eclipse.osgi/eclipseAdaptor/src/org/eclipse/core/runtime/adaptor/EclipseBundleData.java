@@ -177,10 +177,9 @@ public class EclipseBundleData extends DefaultBundleData {
 		return result;
 	}
 
-	private Headers checkManifest(String cacheLocation) throws BundleException {
-		Version version = getVersion();
-		File currentFile = new File(cacheLocation, getSymbolicName() + '_' + version.toString() + ".MF"); //$NON-NLS-1$
-		if (PluginConverterImpl.upToDate(currentFile, getBaseFile(), manifestType)) {
+	private Headers basicCheckManifest(String cacheLocation, String symbolicName, String version, byte inputType) throws BundleException {
+		File currentFile = new File(cacheLocation, symbolicName + '_' + version + ".MF"); //$NON-NLS-1$
+		if (PluginConverterImpl.upToDate(currentFile, getBaseFile(), inputType)) {
 			try {
 				return Headers.parseManifest(new FileInputStream(currentFile));
 			} catch (FileNotFoundException e) {
@@ -189,14 +188,23 @@ public class EclipseBundleData extends DefaultBundleData {
 		}
 		return null;
 	}
+
+	private Headers checkManifestAndParent(String cacheLocation, String symbolicName, String version, byte inputType) throws BundleException {
+		Headers result = basicCheckManifest(cacheLocation, symbolicName, version, inputType);
+		if (result != null)
+			return result;
+
+		Location parentConfiguration = null;
+		if ((parentConfiguration = LocationManager.getConfigurationLocation().getParentLocation()) != null) {
+			result = basicCheckManifest(new File(parentConfiguration.getURL().getFile(), FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME + '/' + LocationManager.MANIFESTS_DIR).toString(), symbolicName, version, inputType);
+		}
+		return result;
+	}
+
 	private Dictionary generateManifest(Dictionary originalManifest) throws BundleException {
-		String cacheLocation = System.getProperty(LocationManager.PROP_MANIFEST_CACHE); 
+		String cacheLocation = System.getProperty(LocationManager.PROP_MANIFEST_CACHE);
 		if (getSymbolicName() != null) {
-			Headers existingHeaders = checkManifest(cacheLocation);
-			Location parentConfiguration = null;
-			if (existingHeaders == null && (parentConfiguration = LocationManager.getConfigurationLocation().getParentLocation()) != null) {
-				existingHeaders = checkManifest(new File(parentConfiguration.getURL().getFile(), FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME + '/' + LocationManager.MANIFESTS_DIR).toString());				
-			}
+			Headers existingHeaders = checkManifestAndParent(cacheLocation, getSymbolicName(), getVersion().toString(), manifestType);
 			if (existingHeaders != null)
 				return existingHeaders;
 		}
@@ -211,7 +219,15 @@ public class EclipseBundleData extends DefaultBundleData {
 			throw new BundleException(message, pce); //$NON-NLS-1$
 		}
 
+		//Now we know the symbolicId and the version of the bundle, we check to see if don't have a manifest for it already
+		Version version = new Version((String) generatedManifest.get(Constants.BUNDLE_VERSION));
+		String symbolicName = ManifestElement.parseHeader(org.osgi.framework.Constants.BUNDLE_SYMBOLICNAME, (String) generatedManifest.get(org.osgi.framework.Constants.BUNDLE_SYMBOLICNAME))[0].getValue();
 		ManifestElement generatedFrom = ManifestElement.parseHeader(PluginConverterImpl.GENERATED_FROM, (String) generatedManifest.get(PluginConverterImpl.GENERATED_FROM))[0];
+		Headers existingHeaders = checkManifestAndParent(cacheLocation, symbolicName, version.toString(), Byte.parseByte(generatedFrom.getAttribute(PluginConverterImpl.MANIFEST_TYPE_ATTRIBUTE)));
+		if (existingHeaders != null)
+			return existingHeaders;
+
+		//We don't have a manifest.
 		setManifestTimeStamp(Long.parseLong(generatedFrom.getValue()));
 		setManifestType(Byte.parseByte(generatedFrom.getAttribute(PluginConverterImpl.MANIFEST_TYPE_ATTRIBUTE)));
 
@@ -225,8 +241,7 @@ public class EclipseBundleData extends DefaultBundleData {
 		}
 
 		//write the generated manifest
-		Version version = new Version((String) generatedManifest.get(Constants.BUNDLE_VERSION));
-		File bundleManifestLocation = new File(cacheLocation, ManifestElement.parseHeader(org.osgi.framework.Constants.BUNDLE_SYMBOLICNAME, (String) generatedManifest.get(org.osgi.framework.Constants.BUNDLE_SYMBOLICNAME))[0].getValue() + '_' + version.toString() + ".MF"); //$NON-NLS-1$
+		File bundleManifestLocation = new File(cacheLocation, symbolicName + '_' + version.toString() + ".MF"); //$NON-NLS-1$
 		try {
 			converter.writeManifest(bundleManifestLocation, generatedManifest, true);
 		} catch (Exception e) {
