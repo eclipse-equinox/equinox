@@ -131,7 +131,7 @@ public class EclipseStarter {
 	private static void logUnresolvedBundles(Bundle[] bundles) {
 		for (int i = 0; i < bundles.length; i++)
 			if (bundles[i].getState() == Bundle.INSTALLED) {
-				String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_UNRESOLVED_BUNDLE", bundles[i]);
+				String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_ERROR_BUNDLE_NOT_RESOLVED", bundles[i]);
 				adaptor.getFrameworkLog().log(new FrameworkLogEntry(0, "org.eclipse.osgi", message, 0, null));
 			}
 	}
