@@ -20,6 +20,7 @@ import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.eclipse.osgi.framework.launcher.Launcher;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.packageadmin.NamedClassSpace;
 
 /**
@@ -423,7 +424,7 @@ public class FrameworkCommandProvider implements CommandProvider {
 			intp.println(bundle.bundledata);
 		}
 
-		ServiceReferenceImpl[] services = (ServiceReferenceImpl[]) context.getServiceReferences(null, null);
+		ServiceReference[] services = (ServiceReference[]) context.getServiceReferences(null, null);
 		if (services != null) {
 			intp.println(ConsoleMsg.formatter.getString("CONSOLE_REGISTERED_SERVICES_MESSAGE")); //$NON-NLS-1$
 			size = services.length;
@@ -461,12 +462,12 @@ public class FrameworkCommandProvider implements CommandProvider {
 			filter = buf.toString();
 		}
 
-		ServiceReferenceImpl[] services = (ServiceReferenceImpl[]) context.getServiceReferences(null, filter);
+		ServiceReference[] services = (ServiceReference[]) context.getServiceReferences(null, filter);
 		if (services != null) {
 			int size = services.length;
 			if (size > 0) {
 				for (int j = 0; j < size; j++) {
-					ServiceReferenceImpl service = services[j];
+					ServiceReference service = services[j];
 					intp.println(service);
 					intp.print("  "); //$NON-NLS-1$
 					intp.print(ConsoleMsg.formatter.getString("CONSOLE_REGISTERED_BY_BUNDLE_MESSAGE")); //$NON-NLS-1$
@@ -606,7 +607,7 @@ public class FrameworkCommandProvider implements CommandProvider {
 				intp.println();
 			}
 
-			ServiceReferenceImpl[] services = (ServiceReferenceImpl[]) bundle.getRegisteredServices();
+			ServiceReference[] services = (ServiceReference[]) bundle.getRegisteredServices();
 			if (services != null) {
 				intp.print("  "); //$NON-NLS-1$
 				intp.println(ConsoleMsg.formatter.getString("CONSOLE_REGISTERED_SERVICES_MESSAGE")); //$NON-NLS-1$
@@ -619,7 +620,7 @@ public class FrameworkCommandProvider implements CommandProvider {
 				intp.println(ConsoleMsg.formatter.getString("CONSOLE_NO_REGISTERED_SERVICES_MESSAGE")); //$NON-NLS-1$
 			}
 
-			services = (ServiceReferenceImpl[]) bundle.getServicesInUse();
+			services = (ServiceReference[]) bundle.getServicesInUse();
 			if (services != null) {
 				intp.print("  "); //$NON-NLS-1$
 				intp.println(ConsoleMsg.formatter.getString("CONSOLE_SERVICES_IN_USE_MESSAGE")); //$NON-NLS-1$
@@ -672,7 +673,7 @@ public class FrameworkCommandProvider implements CommandProvider {
 					intp.println();
 				}
 
-				ServiceReferenceImpl[] services = (ServiceReferenceImpl[]) bundle.getRegisteredServices();
+				ServiceReference[] services = (ServiceReference[]) bundle.getRegisteredServices();
 				if (services != null) {
 					intp.print("  "); //$NON-NLS-1$
 					intp.println(ConsoleMsg.formatter.getString("CONSOLE_REGISTERED_SERVICES_MESSAGE")); //$NON-NLS-1$
@@ -685,7 +686,7 @@ public class FrameworkCommandProvider implements CommandProvider {
 					intp.println(ConsoleMsg.formatter.getString("CONSOLE_NO_REGISTERED_SERVICES_MESSAGE")); //$NON-NLS-1$
 				}
 
-				services = (ServiceReferenceImpl[]) bundle.getServicesInUse();
+				services = (ServiceReference[]) bundle.getServicesInUse();
 				if (services != null) {
 					intp.print("  "); //$NON-NLS-1$
 					intp.println(ConsoleMsg.formatter.getString("CONSOLE_SERVICES_IN_USE_MESSAGE")); //$NON-NLS-1$

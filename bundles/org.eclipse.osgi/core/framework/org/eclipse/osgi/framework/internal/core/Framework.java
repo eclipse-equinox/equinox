@@ -1128,9 +1128,9 @@ public class Framework implements EventDispatcher, EventPublisher {
 	 *                If <tt>filter</tt> contains an invalid filter string
 	 *                which cannot be parsed.
 	 */
-	protected ServiceReferenceImpl[] getServiceReferences(String clazz, String filterstring) throws InvalidSyntaxException {
+	protected ServiceReference[] getServiceReferences(String clazz, String filterstring) throws InvalidSyntaxException {
 		FilterImpl filter = (filterstring == null) ? null : new FilterImpl(filterstring);
-		ServiceReferenceImpl[] references = null;
+		ServiceReference[] services = null;
 		if (clazz != null) {
 			try /* test for permission to get clazz */{
 				checkGetServicePermission(clazz);
@@ -1139,27 +1139,35 @@ public class Framework implements EventDispatcher, EventPublisher {
 			}
 		}
 		synchronized (serviceRegistry) {
-			Vector services = serviceRegistry.lookupServiceReferences(clazz, filter);
+			services = serviceRegistry.lookupServiceReferences(clazz, filter);
 			if (services == null) {
 				return null;
 			}
 			if (clazz == null) {
-				for (int i = services.size() - 1; i >= 0; i--) {
-					ServiceReferenceImpl ref = (ServiceReferenceImpl) services.elementAt(i);
+				int removed = 0;
+				for (int i = services.length - 1; i >= 0; i--) {
+					ServiceReferenceImpl ref = (ServiceReferenceImpl) services[i];
 					String[] classes = ref.getClasses();
 					try { /* test for permission to the classes */
 						checkGetServicePermission(classes);
 					} catch (SecurityException se) {
-						services.removeElementAt(i);
+						services[i] = null;
+						removed++;
+					}
+				}
+				if (removed > 0) {
+					ServiceReference[] temp = services;
+					services = new ServiceReference[temp.length - removed];
+					for (int i = temp.length - 1; i >= 0; i--) {
+						if (temp[i] == null)
+							removed--;
+						else
+							services[i - removed] = temp[i];
 					}
 				}
 			}
-			if (services.size() > 0) {
-				references = new ServiceReferenceImpl[services.size()];
-				services.toArray(references);
-			}
 		}
-		return (references);
+		return services;
 	}
 
 	/**

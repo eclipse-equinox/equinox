@@ -106,40 +106,25 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 		}
 
 		/* service's registered by the bundle, if any, are unregistered. */
-
-		Vector registeredServices = null;
-		ServiceReferenceImpl[] publishedReferences = null;
-		int regSize = 0;
+		ServiceReference[] publishedReferences = null;
 		synchronized (framework.serviceRegistry) {
-			registeredServices = framework.serviceRegistry.lookupServiceReferences(this);
-			if (registeredServices != null) {
-				regSize = registeredServices.size();
-			}
+			publishedReferences = framework.serviceRegistry.lookupServiceReferences(this);
+		}
 
-			if (regSize > 0) {
-				if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
-					Debug.println("Unregistering services"); //$NON-NLS-1$
+		if (publishedReferences != null) {
+			for (int i = 0; i < publishedReferences.length; i++) {
+				try {
+					((ServiceReferenceImpl) publishedReferences[i]).registration.unregister();
+				} catch (IllegalStateException e) {
+					/* already unregistered */
 				}
-
-				publishedReferences = new ServiceReferenceImpl[regSize];
-				registeredServices.copyInto(publishedReferences);
 			}
 		}
-
-		for (int i = 0; i < regSize; i++) {
-			try {
-				publishedReferences[i].registration.unregister();
-			} catch (IllegalStateException e) {
-				/* already unregistered */
-			}
-		}
-
-		registeredServices = null;
 
 		/* service's used by the bundle, if any, are released. */
 		if (servicesInUse != null) {
 			int usedSize;
-			ServiceReferenceImpl[] usedRefs = null;
+			ServiceReference[] usedRefs = null;
 
 			synchronized (servicesInUse) {
 				usedSize = servicesInUse.size();
@@ -149,17 +134,17 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 						Debug.println("Releasing services"); //$NON-NLS-1$
 					}
 
-					usedRefs = new ServiceReferenceImpl[usedSize];
+					usedRefs = new ServiceReference[usedSize];
 
 					Enumeration enum = servicesInUse.keys();
 					for (int i = 0; i < usedSize; i++) {
-						usedRefs[i] = (ServiceReferenceImpl) enum.nextElement();
+						usedRefs[i] = (ServiceReference) enum.nextElement();
 					}
 				}
 			}
 
 			for (int i = 0; i < usedSize; i++) {
-				usedRefs[i].registration.releaseService(this);
+				((ServiceReferenceImpl) usedRefs[i]).registration.releaseService(this);
 			}
 
 			servicesInUse = null;
@@ -737,7 +722,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 		}
 
 		try {
-			ServiceReferenceImpl[] references = framework.getServiceReferences(clazz, null);
+			ServiceReference[] references = framework.getServiceReferences(clazz, null);
 
 			if (references != null) {
 				int index = 0;
@@ -750,7 +735,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 					int maxRanking = Integer.MIN_VALUE;
 
 					for (int i = 0; i < length; i++) {
-						int ranking = references[i].getRanking();
+						int ranking = ((ServiceReferenceImpl) references[i]).getRanking();
 
 						rankings[i] = ranking;
 
@@ -770,7 +755,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 
 						for (int i = 0; i < length; i++) {
 							if (rankings[i] == maxRanking) {
-								long id = references[i].getId();
+								long id = ((ServiceReferenceImpl) references[i]).getId();
 
 								if (id < minId) {
 									index = i;
@@ -1029,7 +1014,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	}
 
 	/**
-	 * Provides a list of {@link ServiceReferenceImpl}s for the services
+	 * Provides a list of {@link ServiceReference}s for the services
 	 * registered by this bundle
 	 * or <code>null</code> if the bundle has no registered
 	 * services.
@@ -1038,37 +1023,43 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	 * of the call to this method, but the framework is a very dynamic
 	 * environment and services can be modified or unregistered at anytime.
 	 *
-	 * @return An array of {@link ServiceReferenceImpl} or <code>null</code>.
+	 * @return An array of {@link ServiceReference} or <code>null</code>.
 	 * @exception java.lang.IllegalStateException If the
 	 * bundle has been uninstalled.
 	 * @see ServiceRegistrationImpl
 	 * @see ServiceReferenceImpl
 	 */
-	protected ServiceReferenceImpl[] getRegisteredServices() {
-		ServiceReferenceImpl[] references = null;
+	protected ServiceReference[] getRegisteredServices() {
+		ServiceReference[] services = null;
 
 		synchronized (framework.serviceRegistry) {
-			Vector services = framework.serviceRegistry.lookupServiceReferences(this);
+			services = framework.serviceRegistry.lookupServiceReferences(this);
 			if (services == null) {
 				return null;
 			}
-
-			for (int i = services.size() - 1; i >= 0; i--) {
-				ServiceReferenceImpl ref = (ServiceReferenceImpl) services.elementAt(i);
+			int removed = 0;
+			for (int i = services.length - 1; i >= 0; i--) {
+				ServiceReferenceImpl ref = (ServiceReferenceImpl) services[i];
 				String[] classes = ref.getClasses();
 				try { /* test for permission to the classes */
 					framework.checkGetServicePermission(classes);
 				} catch (SecurityException se) {
-					services.removeElementAt(i);
+					services[i] = null;
+					removed++;
 				}
 			}
-
-			if (services.size() > 0) {
-				references = new ServiceReferenceImpl[services.size()];
-				services.toArray(references);
+			if (removed > 0) {
+				ServiceReference[] temp = services;
+				services = new ServiceReference[temp.length - removed];
+				for (int i = temp.length - 1; i >= 0; i--) {
+					if (temp[i] == null)
+						removed--;
+					else
+						services[i - removed] = temp[i];
+				}
 			}
 		}
-		return (references);
+		return (services);
 
 	}
 
@@ -1149,49 +1140,46 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 			if (isValid()) /* if context still valid */{
 				switch (action) {
 					case Framework.BUNDLEEVENT :
-					case Framework.BUNDLEEVENTSYNC :
-						{
-							BundleListener listener = (BundleListener) l;
+					case Framework.BUNDLEEVENTSYNC : {
+						BundleListener listener = (BundleListener) l;
+
+						if (Debug.DEBUG && Debug.DEBUG_EVENTS) {
+							String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(listener.hashCode()); //$NON-NLS-1$
+							Debug.println("dispatchBundleEvent[" + tmpBundle + "](" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+						}
+
+						listener.bundleChanged((BundleEvent) object);
+						break;
+					}
+
+					case Framework.SERVICEEVENT : {
+						ServiceEvent event = (ServiceEvent) object;
+
+						if (hasListenServicePermission(event)) {
+							ServiceListener listener = (ServiceListener) l;
 
 							if (Debug.DEBUG && Debug.DEBUG_EVENTS) {
 								String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(listener.hashCode()); //$NON-NLS-1$
-								Debug.println("dispatchBundleEvent[" + tmpBundle + "](" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+								Debug.println("dispatchServiceEvent[" + tmpBundle + "](" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 							}
 
-							listener.bundleChanged((BundleEvent) object);
-							break;
+							listener.serviceChanged(event);
 						}
 
-					case Framework.SERVICEEVENT :
-						{
-							ServiceEvent event = (ServiceEvent) object;
+						break;
+					}
 
-							if (hasListenServicePermission(event)) {
-								ServiceListener listener = (ServiceListener) l;
+					case Framework.FRAMEWORKEVENT : {
+						FrameworkListener listener = (FrameworkListener) l;
 
-								if (Debug.DEBUG && Debug.DEBUG_EVENTS) {
-									String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(listener.hashCode()); //$NON-NLS-1$
-									Debug.println("dispatchServiceEvent[" + tmpBundle + "](" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-								}
-
-								listener.serviceChanged(event);
-							}
-
-							break;
+						if (Debug.DEBUG && Debug.DEBUG_EVENTS) {
+							String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(listener.hashCode()); //$NON-NLS-1$
+							Debug.println("dispatchFrameworkEvent[" + tmpBundle + "](" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 						}
 
-					case Framework.FRAMEWORKEVENT :
-						{
-							FrameworkListener listener = (FrameworkListener) l;
-
-							if (Debug.DEBUG && Debug.DEBUG_EVENTS) {
-								String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(listener.hashCode()); //$NON-NLS-1$
-								Debug.println("dispatchFrameworkEvent[" + tmpBundle + "](" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-							}
-
-							listener.frameworkEvent((FrameworkEvent) object);
-							break;
-						}
+						listener.frameworkEvent((FrameworkEvent) object);
+						break;
+					}
 				}
 			}
 		} catch (Throwable t) {

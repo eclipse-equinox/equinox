@@ -52,18 +52,18 @@ public interface ServiceRegistry {
 	 * ServiceReferences that match the filter are returned.  If a clazz is
 	 * specified then all ServiceReferences that match the clazz and the
 	 * filter parameter are returned. May be null.
-	 * @return A Vector of all matching ServiceReferences or null
+	 * @return An array of all matching ServiceReferences or null
 	 * if none exist.
 	 */
-	public Vector lookupServiceReferences(String clazz, Filter filter);
+	public ServiceReference[] lookupServiceReferences(String clazz, Filter filter);
 
 	/**
 	 * Performs a lookup for ServiceReferences that are bound to this 
 	 * ServiceRegistry using the specified BundleContext.
 	 * @param context The BundleContext to lookup the ServiceReferences on.
-	 * @return A Vector of all matching ServiceReferences or null if none
+	 * @return An array of all matching ServiceReferences or null if none
 	 * exist.
 	 */
-	public Vector lookupServiceReferences(BundleContext context);
+	public ServiceReference[] lookupServiceReferences(BundleContext context);
 
 }

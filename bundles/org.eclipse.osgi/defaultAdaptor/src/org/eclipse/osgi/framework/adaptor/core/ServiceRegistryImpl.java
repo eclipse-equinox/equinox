@@ -11,8 +11,8 @@
 
 package org.eclipse.osgi.framework.adaptor.core;
 
-import java.util.Hashtable;
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.HashMap;
 import org.osgi.framework.*;
 
 /**
@@ -20,21 +20,21 @@ import org.osgi.framework.*;
  */
 public class ServiceRegistryImpl implements org.eclipse.osgi.framework.adaptor.ServiceRegistry {
 
-	/** Published services by class name. Key is a String class name; Value is a Vector of ServiceRegistrations */
-	protected Hashtable publishedServicesByClass;
+	/** Published services by class name. Key is a String class name; Value is a ArrayList of ServiceRegistrations */
+	protected HashMap publishedServicesByClass;
 	/** All published services. Value is ServiceRegistrations */
-	protected Vector allPublishedServices;
-	/** Published services by BundleContext.  Key is a BundleContext; Value is a Vector of ServiceRegistrations*/
-	protected Hashtable publishedServicesByContext;
+	protected ArrayList allPublishedServices;
+	/** Published services by BundleContext.  Key is a BundleContext; Value is a ArrayList of ServiceRegistrations*/
+	protected HashMap publishedServicesByContext;
 
 	/**
 	 * Initializes the internal data structures of this ServiceRegistry.
 	 *
 	 */
 	public void initialize() {
-		publishedServicesByClass = new Hashtable(53);
-		publishedServicesByContext = new Hashtable(53);
-		allPublishedServices = new Vector(50, 20);
+		publishedServicesByClass = new HashMap(50);
+		publishedServicesByContext = new HashMap(50);
+		allPublishedServices = new ArrayList(50);
 	}
 
 	/**
@@ -43,12 +43,12 @@ public class ServiceRegistryImpl implements org.eclipse.osgi.framework.adaptor.S
 	public void publishService(BundleContext context, ServiceRegistration serviceReg) {
 
 		// Add the ServiceRegistration to the list of Services published by BundleContext.
-		Vector contextServices = (Vector) publishedServicesByContext.get(context);
+		ArrayList contextServices = (ArrayList) publishedServicesByContext.get(context);
 		if (contextServices == null) {
-			contextServices = new Vector(10, 10);
+			contextServices = new ArrayList(10);
 			publishedServicesByContext.put(context, contextServices);
 		}
-		contextServices.addElement(serviceReg);
+		contextServices.add(serviceReg);
 
 		// Add the ServiceRegistration to the list of Services published by Class Name.
 		String[] clazzes = (String[]) serviceReg.getReference().getProperty(Constants.OBJECTCLASS);
@@ -57,18 +57,18 @@ public class ServiceRegistryImpl implements org.eclipse.osgi.framework.adaptor.S
 		for (int i = 0; i < size; i++) {
 			String clazz = clazzes[i];
 
-			Vector services = (Vector) publishedServicesByClass.get(clazz);
+			ArrayList services = (ArrayList) publishedServicesByClass.get(clazz);
 
 			if (services == null) {
-				services = new Vector(10, 10);
+				services = new ArrayList(10);
 				publishedServicesByClass.put(clazz, services);
 			}
 
-			services.addElement(serviceReg);
+			services.add(serviceReg);
 		}
 
 		// Add the ServiceRegistration to the list of all published Services.
-		allPublishedServices.addElement(serviceReg);
+		allPublishedServices.add(serviceReg);
 	}
 
 	/**
@@ -77,9 +77,9 @@ public class ServiceRegistryImpl implements org.eclipse.osgi.framework.adaptor.S
 	public void unpublishService(BundleContext context, ServiceRegistration serviceReg) {
 
 		// Remove the ServiceRegistration from the list of Services published by BundleContext.
-		Vector contextServices = (Vector) publishedServicesByContext.get(context);
+		ArrayList contextServices = (ArrayList) publishedServicesByContext.get(context);
 		if (contextServices != null) {
-			contextServices.removeElement(serviceReg);
+			contextServices.remove(serviceReg);
 		}
 
 		// Remove the ServiceRegistration from the list of Services published by Class Name.
@@ -88,12 +88,12 @@ public class ServiceRegistryImpl implements org.eclipse.osgi.framework.adaptor.S
 
 		for (int i = 0; i < size; i++) {
 			String clazz = clazzes[i];
-			Vector services = (Vector) publishedServicesByClass.get(clazz);
-			services.removeElement(serviceReg);
+			ArrayList services = (ArrayList) publishedServicesByClass.get(clazz);
+			services.remove(serviceReg);
 		}
 
 		// Remove the ServiceRegistration from the list of all published Services.
-		allPublishedServices.removeElement(serviceReg);
+		allPublishedServices.remove(serviceReg);
 
 	}
 
@@ -102,15 +102,15 @@ public class ServiceRegistryImpl implements org.eclipse.osgi.framework.adaptor.S
 	 */
 	public void unpublishServices(BundleContext context) {
 		// Get all the Services published by the BundleContext.
-		Vector serviceRegs = (Vector) publishedServicesByContext.get(context);
+		ArrayList serviceRegs = (ArrayList) publishedServicesByContext.get(context);
 		if (serviceRegs != null) {
 			// Remove this list for the BundleContext
 			publishedServicesByContext.remove(context);
 			int size = serviceRegs.size();
 			for (int i = 0; i < size; i++) {
-				ServiceRegistration serviceReg = (ServiceRegistration) serviceRegs.elementAt(i);
+				ServiceRegistration serviceReg = (ServiceRegistration) serviceRegs.get(i);
 				// Remove each service from the list of all published Services
-				allPublishedServices.removeElement(serviceReg);
+				allPublishedServices.remove(serviceReg);
 
 				// Remove each service from the list of Services published by Class Name. 
 				String[] clazzes = (String[]) serviceReg.getReference().getProperty(Constants.OBJECTCLASS);
@@ -118,8 +118,8 @@ public class ServiceRegistryImpl implements org.eclipse.osgi.framework.adaptor.S
 
 				for (int j = 0; j < numclazzes; j++) {
 					String clazz = clazzes[j];
-					Vector services = (Vector) publishedServicesByClass.get(clazz);
-					services.removeElement(serviceReg);
+					ArrayList services = (ArrayList) publishedServicesByClass.get(clazz);
+					services.remove(serviceReg);
 				}
 			}
 		}
@@ -128,51 +128,31 @@ public class ServiceRegistryImpl implements org.eclipse.osgi.framework.adaptor.S
 	/**
 	 * @see org.eclipse.osgi.framework.adaptor.ServiceRegistry#lookupServiceReferences(String, Filter)
 	 */
-	public Vector lookupServiceReferences(String clazz, Filter filter) {
+	public ServiceReference[] lookupServiceReferences(String clazz, Filter filter) {
 		int size;
-		Vector references = new Vector();
+		ArrayList references;
+		ArrayList serviceRegs;
+		if (clazz == null) /* all services */
+			serviceRegs = allPublishedServices;
+		else
+			/* services registered under the class name */
+			serviceRegs = (ArrayList) publishedServicesByClass.get(clazz);
 
-		if (clazz == null) /* all services */{
-			Vector serviceRegs = allPublishedServices;
+		if (serviceRegs == null)
+			return (null);
 
-			if (serviceRegs == null) {
-				return (null);
-			}
+		size = serviceRegs.size();
 
-			size = serviceRegs.size();
+		if (size == 0)
+			return (null);
 
-			if (size == 0) {
-				return (null);
-			}
+		references = new ArrayList(size);
+		for (int i = 0; i < size; i++) {
+			ServiceRegistration registration = (ServiceRegistration) serviceRegs.get(i);
 
-			for (int i = 0; i < size; i++) {
-				ServiceRegistration registration = (ServiceRegistration) serviceRegs.elementAt(i);
-
-				ServiceReference reference = registration.getReference();
-				if ((filter == null) || filter.match(reference)) {
-					references.addElement(reference);
-				}
-			}
-		} else /* services registered under the class name */{
-			Vector serviceRegs = (Vector) publishedServicesByClass.get(clazz);
-
-			if (serviceRegs == null) {
-				return (null);
-			}
-
-			size = serviceRegs.size();
-
-			if (size == 0) {
-				return (null);
-			}
-
-			for (int i = 0; i < size; i++) {
-				ServiceRegistration registration = (ServiceRegistration) serviceRegs.elementAt(i);
-
-				ServiceReference reference = registration.getReference();
-				if ((filter == null) || filter.match(reference)) {
-					references.addElement(reference);
-				}
+			ServiceReference reference = registration.getReference();
+			if ((filter == null) || filter.match(reference)) {
+				references.add(reference);
 			}
 		}
 
@@ -180,17 +160,17 @@ public class ServiceRegistryImpl implements org.eclipse.osgi.framework.adaptor.S
 			return null;
 		}
 
-		return (references);
+		return (ServiceReference[]) references.toArray(new ServiceReference[references.size()]);
 
 	}
 
 	/**
 	 * @see org.eclipse.osgi.framework.adaptor.ServiceRegistry#lookupServiceReferences(BundleContext)
 	 */
-	public Vector lookupServiceReferences(BundleContext context) {
+	public ServiceReference[] lookupServiceReferences(BundleContext context) {
 		int size;
-		Vector references = new Vector();
-		Vector serviceRegs = (Vector) publishedServicesByContext.get(context);
+		ArrayList references;
+		ArrayList serviceRegs = (ArrayList) publishedServicesByContext.get(context);
 
 		if (serviceRegs == null) {
 			return (null);
@@ -202,18 +182,19 @@ public class ServiceRegistryImpl implements org.eclipse.osgi.framework.adaptor.S
 			return (null);
 		}
 
+		references = new ArrayList(size);
 		for (int i = 0; i < size; i++) {
-			ServiceRegistration registration = (ServiceRegistration) serviceRegs.elementAt(i);
+			ServiceRegistration registration = (ServiceRegistration) serviceRegs.get(i);
 
 			ServiceReference reference = registration.getReference();
-			references.addElement(reference);
+			references.add(reference);
 		}
 
 		if (references.size() == 0) {
 			return null;
 		}
 
-		return (references);
+		return (ServiceReference[]) references.toArray(new ServiceReference[references.size()]);
 	}
 
 }
