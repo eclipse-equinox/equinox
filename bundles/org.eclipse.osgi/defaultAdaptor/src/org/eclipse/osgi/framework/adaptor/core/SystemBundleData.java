@@ -53,7 +53,9 @@ public class SystemBundleData extends AbstractBundleData {
 
 		if (osgiBase != null && osgiBase.exists()) {
 			try {
-				in = baseBundleFile.getEntry(Constants.OSGI_BUNDLE_MANIFEST).getInputStream();
+				BundleEntry entry = baseBundleFile.getEntry(Constants.OSGI_BUNDLE_MANIFEST);
+				if (entry != null)
+					in = entry.getInputStream();
 			} catch (IOException e) {
 				// do nothing here.  in == null
 			}
