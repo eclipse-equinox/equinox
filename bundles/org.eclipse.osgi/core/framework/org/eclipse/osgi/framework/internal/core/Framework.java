@@ -104,7 +104,7 @@ public class Framework implements EventSource, EventPublisher {
 			adaptor.compactStorage();
 		} catch (IOException e) /* fatal error */{
 			e.printStackTrace();
-			throw new RuntimeException(e);
+			throw new RuntimeException(e.getMessage());
 		}
 		/*
 		 * This must be done before calling any of the framework getProperty
@@ -119,7 +119,7 @@ public class Framework implements EventSource, EventPublisher {
 				permissionAdmin = new PermissionAdmin(this, adaptor.getPermissionStorage());
 			} catch (IOException e) /* fatal error */{
 				e.printStackTrace();
-				throw new RuntimeException(e);
+				throw new RuntimeException(e.getMessage());
 			}
 		}
 		startLevelFactory = new StartLevelFactory(this);

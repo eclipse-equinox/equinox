@@ -199,7 +199,7 @@ abstract public class BundleFile {
 									Debug.println("Unable to create directory: "
 													+ nested.getPath());
 								}
-								throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_DIRECTORY_CREATE_EXCEPTION",nested.getAbsoluteFile()));
+								throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_DIRECTORY_CREATE_EXCEPTION",nested.getAbsolutePath()));
 							}
 							extractDirectory(zipEntry.getName());
 						}
@@ -219,7 +219,7 @@ abstract public class BundleFile {
 									Debug.println("Unable to create directory: "
 													+ dir.getPath());
 								}
-								throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_DIRECTORY_CREATE_EXCEPTION", dir.getAbsoluteFile()));
+								throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_DIRECTORY_CREATE_EXCEPTION", dir.getAbsolutePath()));
 							}
 							/* copy the entry to the cache */
 							AbstractFrameworkAdaptor.readFile(in, nested);

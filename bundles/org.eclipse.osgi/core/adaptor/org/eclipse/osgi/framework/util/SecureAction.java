@@ -85,7 +85,7 @@ public class SecureAction {
 					}
 				});
 			} catch (PrivilegedActionException e) {
-				throw (FileNotFoundException) e.getCause();
+				throw (FileNotFoundException) e.getException();
 			}
 	}
 
@@ -99,16 +99,16 @@ public class SecureAction {
 	 */
 	public static FileOutputStream getFileOutputStream(final File file, final boolean append) throws FileNotFoundException {
 		if (System.getSecurityManager() == null)
-			return new FileOutputStream(file,append);
+			return new FileOutputStream(file.getAbsolutePath(),append);
 		else
 			try {
 				return (FileOutputStream) AccessController.doPrivileged( new PrivilegedExceptionAction(){
 					public Object run() throws FileNotFoundException{
-						return new FileOutputStream(file,append);
+						return new FileOutputStream(file.getAbsolutePath(),append);
 					}
 				});
 			} catch (PrivilegedActionException e) {
-				throw (FileNotFoundException) e.getCause();
+				throw (FileNotFoundException) e.getException();
 			}
 	}
 }
