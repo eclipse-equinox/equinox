@@ -73,8 +73,12 @@ public class BasicLocation implements Location {
 		if (location != null)
 			throw new IllegalStateException("Cannot change the location once it is set");
 		File file = null;
-		if (value.getProtocol().equalsIgnoreCase("file"))
+		if (value.getProtocol().equalsIgnoreCase("file")) {
 			file = new File(value.getPath(), LOCK_FILENAME);
+			boolean creation = file.mkdirs();
+			if (! creation)
+				return false;
+		}
 		if (lock) {
 			try {
 				if (!lock(file))
