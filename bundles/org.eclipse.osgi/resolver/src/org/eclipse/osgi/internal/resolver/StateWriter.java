@@ -102,6 +102,7 @@ class StateWriter {
 		writeBaseDescription(bundle, out);
 		out.writeBoolean(bundle.isResolved());
 		out.writeBoolean(bundle.isSingleton());
+		out.writeBoolean(bundle.hasDynamicImports());
 		writeHostSpec((HostSpecificationImpl) bundle.getHost(), out);
 
 		List dependencies = ((BundleDescriptionImpl)bundle).getBundleDependencies();

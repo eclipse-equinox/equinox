@@ -116,12 +116,6 @@ public class BundleLoader implements ClassLoaderDelegate {
 	protected void initialize(BundleDescription description) {
 		hasDynamicImports = SystemBundleLoader.getSystemPackages() != null;
 
-		//This is the fastest way to access to the description for fragments since the hostdescription.getFragments() is slow
-		org.osgi.framework.Bundle[] fragmentObjects = bundle.getFragments();
-		BundleDescription[] fragments = new BundleDescription[fragmentObjects == null ? 0 : fragmentObjects.length];
-		for (int i = 0; i < fragments.length; i++)
-			fragments[i] = ((AbstractBundle) fragmentObjects[i]).getBundleDescription();
-
 		// init the imported packages list taking the bundle...
 		addImportedPackages(description.getResolvedImports());
 
@@ -162,13 +156,17 @@ public class BundleLoader implements ClassLoaderDelegate {
 					providedPackages.add(exports[i].getName());
 			}
 		}
-			
+		//This is the fastest way to access to the description for fragments since the hostdescription.getFragments() is slow
+		org.osgi.framework.Bundle[] fragmentObjects = bundle.getFragments();
+		BundleDescription[] fragments = new BundleDescription[fragmentObjects == null ? 0 : fragmentObjects.length];
+		for (int i = 0; i < fragments.length; i++)
+			fragments[i] = ((AbstractBundle) fragmentObjects[i]).getBundleDescription();			
 		// init the dynamic imports tables
-		ImportPackageSpecification[] imports = description.getImportPackages();
-		addDynamicImportPackage(imports);
+		if (description.hasDynamicImports())
+			addDynamicImportPackage(description.getImportPackages());
 		// ...and its fragments
 		for (int i = 0; i < fragments.length; i++)
-			if (fragments[i].isResolved())
+			if (fragments[i].isResolved() && fragments[i].hasDynamicImports())
 				addDynamicImportPackage(fragments[i].getImportPackages());
 	}
 

@@ -40,7 +40,7 @@ class StateBuilder {
 			ManifestElement[] symbolicNameElements = ManifestElement.parseHeader(Constants.BUNDLE_SYMBOLICNAME, symbolicNameHeader);
 			if (symbolicNameElements.length > 0) {
 				result.setSymbolicName(symbolicNameElements[0].getValue());
-				result.setSingleton("true".equals(symbolicNameElements[0].getAttribute(Constants.SINGLETON_ATTRIBUTE))); //$NON-NLS-1$
+				result.setStateBit(BundleDescriptionImpl.SINGLETON, "true".equals(symbolicNameElements[0].getAttribute(Constants.SINGLETON_ATTRIBUTE))); //$NON-NLS-1$
 			}
 		}
 		// retrieve other headers
@@ -95,7 +95,7 @@ class StateBuilder {
 		ArrayList allImports = null;
 		if (manifestVersion < 2) {
 			// add implicit imports for each exported package if manifest verions is less than 2.
-			if (exported.length == 0 && imported == null)
+			if (exported.length == 0 && imported == null && dynamicImported == null)
 				return null;
 			allImports = new ArrayList(exported.length + (imported == null ? 0 : imported.length));
 			for (int i = 0; i < exported.length; i++) {

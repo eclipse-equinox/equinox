@@ -189,7 +189,7 @@ public abstract class StateImpl implements State {
 		getDelta().recordBundleResolved(modifiable, status);
 		// force the new resolution data to stay in memory; we will not read this from disk anymore
 		modifiable.setLazyLoaded(false);
-		modifiable.setResolved(status);
+		modifiable.setStateBit(BundleDescriptionImpl.RESOLVED, status);
 		if (status) {
 			resolveConstraints(modifiable, hosts, selectedExports, resolvedRequires, resolvedImports);
 			resolvedBundles.add(modifiable);

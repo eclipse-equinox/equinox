@@ -86,7 +86,7 @@ public class StateDeltaImpl implements StateDelta {
 	}
 
 	void recordBundleRemovalPending(BundleDescriptionImpl removed) {
-		removed.setRemovalPending(true);
+		removed.setStateBit(BundleDescriptionImpl.REMOVAL_PENDING, true);
 		BundleDeltaImpl change = (BundleDeltaImpl) changes.get(removed);
 		if (change == null) {
 			changes.put(removed, new BundleDeltaImpl(removed, BundleDelta.REMOVAL_PENDING));

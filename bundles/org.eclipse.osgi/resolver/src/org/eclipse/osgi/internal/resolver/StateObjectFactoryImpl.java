@@ -35,7 +35,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		bundle.setHost(host);
 		bundle.setImportPackages(imports);
 		bundle.setExportPackages(exports);
-		bundle.setSingleton(singleton);
+		bundle.setStateBit(BundleDescriptionImpl.SINGLETON, singleton);
 		return bundle;
 	}
 
@@ -62,7 +62,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		bundle.setImportPackages(newImports);
 		if (original.getHost() != null)
 			bundle.setHost(createHostSpecification(original.getHost()));
-		bundle.setSingleton(original.isSingleton());
+		bundle.setStateBit(BundleDescriptionImpl.SINGLETON, original.isSingleton());
 		return bundle;
 	}
 

@@ -54,6 +54,12 @@ public interface BundleDescription extends BaseDescription{
 	public ImportPackageSpecification[] getImportPackages();
 
 	/**
+	 * Returns true if this bundle has one or more dynamically imported packages.
+	 * @return true if this bundle has one or more dynamically imported packages.
+	 */
+	public boolean hasDynamicImports();
+
+	/**
 	 * Returns all the exported packages from this bundle that have been selected by
 	 * the resolver.  The returned list will include the ExportPackageDescriptions
 	 * returned by {@link #getExportPackages()} that have been selected by the resolver and

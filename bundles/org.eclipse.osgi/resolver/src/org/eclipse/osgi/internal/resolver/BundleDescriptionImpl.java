@@ -18,11 +18,12 @@ import org.eclipse.osgi.framework.internal.core.KeyedElement;
 import org.eclipse.osgi.service.resolver.*;
 
 public class BundleDescriptionImpl extends BaseDescriptionImpl implements BundleDescription, KeyedElement {
-	private static final byte RESOLVED			= 0x01;
-	private static final byte SINGLETON			= 0x02;
-	private static final byte REMOVAL_PENDING	= 0x04;
-	private static final byte FULLY_LOADED		= 0x08;
-	private static final byte LAZY_LOADED		= 0x10;
+	static final byte RESOLVED			= 0x01;
+	static final byte SINGLETON			= 0x02;
+	static final byte REMOVAL_PENDING	= 0x04;
+	static final byte FULLY_LOADED		= 0x08;
+	static final byte LAZY_LOADED		= 0x10;
+	static final byte HAS_DYNAMICIMPORT = 0x20;
 
 	private byte stateBits = FULLY_LOADED; // set the fully loaded by default
 
@@ -109,6 +110,10 @@ public class BundleDescriptionImpl extends BaseDescriptionImpl implements Bundle
 		return (stateBits & REMOVAL_PENDING) != 0;
 	}
 
+	public boolean hasDynamicImports() {
+		return (stateBits & HAS_DYNAMICIMPORT) != 0;
+	}
+
 	public ExportPackageDescription[] getSelectedExports() {
 		fullyLoad();
 		if (lazyData.selectedExports == null)
@@ -164,6 +169,8 @@ public class BundleDescriptionImpl extends BaseDescriptionImpl implements Bundle
 		if (importPackages != null) {
 			for (int i = 0; i < importPackages.length; i++) {
 				((ImportPackageSpecificationImpl)importPackages[i]).setBundle(this);
+				if ((importPackages[i].getResolution() & ImportPackageSpecification.RESOLUTION_DYNAMIC) != 0)
+					stateBits |= HAS_DYNAMICIMPORT;
 			}
 		}
 	}
@@ -176,11 +183,15 @@ public class BundleDescriptionImpl extends BaseDescriptionImpl implements Bundle
 				((VersionConstraintImpl) requiredBundles[i]).setBundle(this);
 	}
 
-	protected void setResolved(boolean resolved) {
-		if (resolved)
-			stateBits |= RESOLVED;
+	protected byte getStateBits() {
+		return stateBits;
+	}
+
+	protected void setStateBit(byte stateBit, boolean on) {
+		if (on)
+			stateBits |= stateBit;
 		else
-			stateBits &= ~RESOLVED;
+			stateBits &= ~stateBit;
 	}
 
 	protected void setContainingState(State value) {
@@ -200,20 +211,6 @@ public class BundleDescriptionImpl extends BaseDescriptionImpl implements Bundle
 		this.host = host;
 		if (host != null)
 			((VersionConstraintImpl) host).setBundle(this);
-	}
-
-	protected void setSingleton(boolean singleton) {
-		if (singleton)
-			stateBits |= SINGLETON;
-		else
-			stateBits &= ~SINGLETON;
-	}
-
-	protected void setRemovalPending(boolean removalPending) {
-		if (removalPending)
-			stateBits |= REMOVAL_PENDING;
-		else
-			stateBits &= ~REMOVAL_PENDING;
 	}
 
 	protected void setLazyLoaded(boolean lazyLoad) {
