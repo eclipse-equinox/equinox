@@ -24,6 +24,10 @@ public class StatsManager implements IBundleStats {
 	
 	private static StatsManager defaultInstance;
 	
+	public static boolean MONITOR_BUNDLES = false;
+	public static boolean MONITOR_CLASSES = false;
+	public static String TRACE_FILENAME = null;
+	
 	public static StatsManager getDefault() {
 		if (defaultInstance == null)
 			defaultInstance = new StatsManager();
