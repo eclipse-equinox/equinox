@@ -224,7 +224,7 @@ public class EclipseStarter {
 		// running if they are persistently active.
 		setStartLevel(getStartLevel());
 		// they should all be active by this time
-		ensureBundlesActive(startBundles);		
+		ensureBundlesActive(startBundles);
 		if (debug || System.getProperty(PROP_DEV) != null)
 			// only spend time showing unresolved bundles in dev/debug mode
 			logUnresolvedBundles(context.getBundles());
@@ -420,20 +420,19 @@ public class EclipseStarter {
 		// get the list of currently installed initial bundles from the framework
 		Bundle[] curInitBundles = getCurrentInitialBundles();
 
+		// list of bundles to be refreshed
+		List toRefresh = new ArrayList(curInitBundles.length);
 		// uninstall any of the currently installed bundles that do not exist in the 
 		// initial bundle list from installEntries.
-		boolean refresh = uninstallBundles(curInitBundles, initialBundles);
+		uninstallBundles(curInitBundles, initialBundles, toRefresh);
 
 		// install the initialBundles that are not already installed.
-		ArrayList newInitBundles = new ArrayList(installEntries.length);
 		ArrayList startBundles = new ArrayList(installEntries.length);
-		refresh |= installBundles(initialBundles, curInitBundles, startBundles, newInitBundles);
+		installBundles(initialBundles, curInitBundles, startBundles, toRefresh);
 
-		// If we installed/uninstalled something, force a refresh of all installed bundles
-		if (refresh) {			
-			Bundle[] installedBundles = newInitBundles.isEmpty() ? null : (Bundle[]) newInitBundles.toArray(new Bundle[newInitBundles.size()]);
-			refreshPackages(installedBundles);
-		}
+		// If we installed/uninstalled something, force a refresh of all installed/uninstalled bundles
+		if (!toRefresh.isEmpty())
+			refreshPackages((Bundle[]) toRefresh.toArray(new Bundle[toRefresh.size()]));
 
 		// schedule all basic bundles to be started
 		Bundle[] startInitBundles = (Bundle[]) startBundles.toArray(new Bundle[startBundles.size()]);
@@ -762,8 +761,7 @@ public class EclipseStarter {
 		return null;
 	}
 
-	private static boolean uninstallBundles(Bundle[] curInitBundles, InitialBundle[] newInitBundles) {
-		boolean uninstalledBundle = false;
+	private static void uninstallBundles(Bundle[] curInitBundles, InitialBundle[] newInitBundles, List toRefresh) {
 		for (int i = 0; i < curInitBundles.length; i++) {
 			boolean found = false;
 			for (int j = 0; j < newInitBundles.length; j++) {
@@ -775,17 +773,15 @@ public class EclipseStarter {
 			if (!found)
 				try {
 					curInitBundles[i].uninstall();
-					uninstalledBundle = true;
+					toRefresh.add(curInitBundles[i]);
 				} catch (BundleException e) {
 					FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_FAILED_UNINSTALL", curInitBundles[i].getLocation()), 0, e, null); //$NON-NLS-1$
 					log.log(entry);
 				}
 		}
-		return uninstalledBundle;
 	}
 
-	private static boolean installBundles(InitialBundle[] initialBundles, Bundle[] curInitBundles, ArrayList startBundles, ArrayList newInitBundles) {
-		boolean installed = false;
+	private static void installBundles(InitialBundle[] initialBundles, Bundle[] curInitBundles, ArrayList startBundles, List toRefresh) {
 		ServiceReference reference = context.getServiceReference(StartLevel.class.getName());
 		StartLevel startService = null;
 		if (reference != null)
@@ -797,13 +793,12 @@ public class EclipseStarter {
 				if (osgiBundle == null) {
 					InputStream in = initialBundles[i].location.openStream();
 					osgiBundle = context.installBundle(initialBundles[i].locationString, in);
-					installed = true;
+					toRefresh.add(osgiBundle);
 					if (initialBundles[i].level >= 0 && startService != null)
 						startService.setBundleStartLevel(osgiBundle, initialBundles[i].level);
 				}
 				if (initialBundles[i].start)
 					startBundles.add(osgiBundle);
-				newInitBundles.add(osgiBundle);
 			} catch (BundleException e) {
 				FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_FAILED_INSTALL", initialBundles[i].location), 0, e, null); //$NON-NLS-1$
 				log.log(entry);
@@ -813,7 +808,6 @@ public class EclipseStarter {
 			}
 		}
 		context.ungetService(reference);
-		return installed;
 	}
 
 	private static void startBundles(Bundle[] bundles) {
