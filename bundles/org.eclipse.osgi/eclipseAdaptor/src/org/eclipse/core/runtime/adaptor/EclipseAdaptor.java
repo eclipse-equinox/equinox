@@ -57,7 +57,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 	private static final String OPTION_PLATFORM_ADMIN_RESOLVER= RUNTIME_ADAPTOR + "/debug/platformadmin/resolver"; //$NON-NLS-1$
 	private static final String OPTION_MONITOR_PLATFORM_ADMIN = RUNTIME_ADAPTOR + "/resolver/timing"; 	 //$NON-NLS-1$
 	private static final String OPTION_RESOLVER_READER = RUNTIME_ADAPTOR + "/resolver/reader/timing"; //$NON-NLS-1$
-	public static final byte BUNDLEDATA_VERSION = 4;
+	public static final byte BUNDLEDATA_VERSION = 5;
 	public static final byte NULL = 0;
 	public static final byte OBJECT = 1;
 	
@@ -374,7 +374,6 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		data.setReference(in.readBoolean());
 		data.setFragment(in.readBoolean());
 		data.setManifestTimeStamp(in.readLong());
-		data.setManifestType(in.readByte());
 	}
 
 	public void saveMetaDataFor(DefaultBundleData data) throws IOException  {
@@ -405,7 +404,6 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		out.writeBoolean(bundleData.isReference());
 		out.writeBoolean(bundleData.isFragment());
 		out.writeLong(bundleData.getManifestTimeStamp());
-		out.writeByte(bundleData.getManifestType());
 	}
 
 	private String readString(DataInputStream in, boolean intern) throws IOException {

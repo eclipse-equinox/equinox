@@ -28,18 +28,12 @@ public class EclipseBundleData extends DefaultBundleData {
 	private static String[] libraryVariants = null;
 
 	/** data to detect modification made in the manifest */
-	protected final byte PLUGIN = 1;
-	protected final byte BUNDLE = 0;
-
-	private byte manifestType = BUNDLE;
 	private long manifestTimeStamp = 0;
 	
 		// URL protocol designations
 	public static final String PROTOCOL = "platform"; //$NON-NLS-1$
 	public static final String FILE = "file"; //$NON-NLS-1$
 
-	private static final String PLUGIN_MANIFEST = "plugin.xml"; //$NON-NLS-1$
-	private static final String FRAGMENT_MANIFEST = "fragment.xml"; //$NON-NLS-1$
 	private static final String NO_TIMESTAMP_CHECKING = "osgi.noManifestTimeChecking"; //$NON-NLS-1$
 	protected String isLegacy = null;
 	protected String pluginClass = null;
@@ -82,20 +76,9 @@ public class EclipseBundleData extends DefaultBundleData {
 	private boolean checkManifestTimeStamp(BundleFile bundlefile) {
 		if ("true".equalsIgnoreCase(NO_TIMESTAMP_CHECKING)) //$NON-NLS-1$
 			return true;
-		// always try retrieving a bundle manifest
-		BundleEntry bundleManifestEntry = bundlefile.getEntry(Constants.OSGI_BUNDLE_MANIFEST);
-		// we thought it was a bundle but it does not have a bundle manifest, or the other way around
-		// we need to update this guy
-		if (bundleManifestEntry != null ^ getManifestType() == BUNDLE)
-			return false;
-		if (getManifestType() == BUNDLE)
-			return bundleManifestEntry.getTime() == getManifestTimeStamp();
-		// we don't have a bundle manifest, so let's check the plugin/fragment manifest
-		BundleEntry pluginManifestEntry = bundlefile.getEntry(PLUGIN_MANIFEST);
-		if (pluginManifestEntry == null)
-			pluginManifestEntry = bundlefile.getEntry(FRAGMENT_MANIFEST);
-		// if we have one, check timestamp - if we don't this guy is not anything we know 
-		return pluginManifestEntry != null && pluginManifestEntry.getTime() == getManifestTimeStamp();
+
+		BundleEntry bundleManifestEntry = bundlefile.getEntry("."); //$NON-NLS-1$
+		return bundleManifestEntry != null && bundleManifestEntry.getTime() == getManifestTimeStamp();
 	}
 
 	/**
@@ -174,12 +157,7 @@ public class EclipseBundleData extends DefaultBundleData {
 	public synchronized Dictionary loadManifest() throws BundleException {		
 		URL url = getEntry(Constants.OSGI_BUNDLE_MANIFEST);
 		if (url != null) {
-			try {
-				manifestTimeStamp = url.openConnection().getLastModified();
-				manifestType = BUNDLE;
-			} catch (IOException e) {
-				//ignore the exception since this is for timeStamp
-			}
+			manifestTimeStamp = getBaseBundleFile().getEntry(".").getTime();
 			return loadManifestFrom(url);
 		}
 		Dictionary result = generateManifest();		
@@ -187,23 +165,12 @@ public class EclipseBundleData extends DefaultBundleData {
 			throw new BundleException("Manifest not found: " + getLocation());
 		return result;
 	}
-
-	private File findPluginManifest(File baseLocation) {
-		File pluginManifestLocation = new File(baseLocation, PLUGIN_MANIFEST); //$NON-NLS-1$
-		if (pluginManifestLocation.isFile())
-			return pluginManifestLocation;
-		pluginManifestLocation = new File(baseLocation, FRAGMENT_MANIFEST); //$NON-NLS-1$
-		if (pluginManifestLocation.isFile())
-			return pluginManifestLocation;
-		return null;
-	}
 	
 	private Dictionary generateManifest() throws BundleException {
 		PluginConverterImpl converter = PluginConverterImpl.getDefault();
 
 		setManifestTimeStamp(getBaseFile().lastModified());
-		setManifestType(PLUGIN);
-		File location = converter.convertManifest(getBaseFile(), true);
+		File location = converter.convertManifest(getBaseFile(), null, true);
 		if (location == null)
 			return null;	
 		try {	
@@ -246,13 +213,7 @@ public class EclipseBundleData extends DefaultBundleData {
 	public long getManifestTimeStamp() {
 		return manifestTimeStamp;
 	}
-	public byte getManifestType() {
-		return manifestType;
-	}
 	public void setManifestTimeStamp(long stamp) {
 		manifestTimeStamp = stamp;
-	}
-	public void setManifestType(byte type) {
-		manifestType = type;	
 	}
 }
