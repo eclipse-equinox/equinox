@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.osgi.framework.internal.core;
 
+import java.io.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -122,7 +123,7 @@ public class ManifestLocalization {
 
 	/*
 	 * This method searchs for properties file the same way the ResourceBundle
-	 * algorithm
+	 * algorithm.
 	 */
 	private URL findProperties(String localeString, String path) {
 		String[] nlVariants = buildNLVariants(localeString);
@@ -146,7 +147,7 @@ public class ManifestLocalization {
 			//If we get to this point, we haven't found it yet.
 			// Look for the base filename
 			String filename = path + ".properties";
-			return findInResolved(filename, bundle);
+			return findInResolved(filename, bundleHost);
 		} else {
 			//only look in the bundle if the bundle is not resolved
 			for (int i = 0; i < nlVariants.length; i++) {
