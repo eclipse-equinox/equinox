@@ -40,7 +40,10 @@ class StateBuilder {
 			ManifestElement[] symbolicNameElements = ManifestElement.parseHeader(Constants.BUNDLE_SYMBOLICNAME, symbolicNameHeader);
 			if (symbolicNameElements.length > 0) {
 				result.setSymbolicName(symbolicNameElements[0].getValue());
-				result.setStateBit(BundleDescriptionImpl.SINGLETON, "true".equals(symbolicNameElements[0].getAttribute(Constants.SINGLETON_ATTRIBUTE))); //$NON-NLS-1$
+				String singleton = symbolicNameElements[0].getDirective(Constants.SINGLETON_DIRECTIVE);
+				if (singleton == null) // TODO this is for backward compatibility; need to check manifest version < 2 to allow this
+					singleton = symbolicNameElements[0].getAttribute(Constants.SINGLETON_DIRECTIVE);
+				result.setStateBit(BundleDescriptionImpl.SINGLETON, "true".equals(singleton)); //$NON-NLS-1$
 			}
 		}
 		// retrieve other headers
