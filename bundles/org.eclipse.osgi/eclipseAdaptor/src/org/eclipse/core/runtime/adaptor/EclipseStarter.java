@@ -67,6 +67,8 @@ public class EclipseStarter {
 	private static final String DATA = "-data"; //$NON-NLS-1$
 
 	// System properties
+	public static final String PROP_BUNDLES = "osgi.bundles"; //$NON-NLS-1$
+	public static final String PROP_BUNDLES_STARTLEVEL = "osgi.bundles.defaultStartLevel"; //$NON-NLS-1$
 	public static final String PROP_DEBUG = "osgi.debug"; //$NON-NLS-1$
 	public static final String PROP_DEV = "osgi.dev"; //$NON-NLS-1$
 	public static final String PROP_CLEAN = "osgi.clean"; //$NON-NLS-1$
@@ -319,7 +321,7 @@ public class EclipseStarter {
 		context.registerService(Runnable.class.getName(), handler, properties);
 	}
 
-	private static String searchForBundle(String name, String parent) throws MalformedURLException {
+	private static URL searchForBundle(String name, String parent) throws MalformedURLException {
 		URL url = null;
 		File fileLocation = null;
 		boolean reference = false;
@@ -366,7 +368,7 @@ public class EclipseStarter {
 		try {
 			URLConnection result = url.openConnection();
 			result.connect();
-			return url.toExternalForm();
+			return url;
 		} catch (IOException e) {
 			//			int i = location.lastIndexOf('_');
 			//			return i == -1? location : location.substring(0, i);
@@ -378,49 +380,66 @@ public class EclipseStarter {
 	 * Ensure all basic bundles are installed, resolved and scheduled to start. Returns an array containing
 	 * all basic bundles. 
 	 */
-	private static Bundle[] loadBasicBundles() throws BundleException, MalformedURLException, IllegalArgumentException, IllegalStateException {
+	private static Bundle[] loadBasicBundles() throws BundleException, IOException, IllegalArgumentException, IllegalStateException {
 		long startTime = System.currentTimeMillis();
 		ServiceReference reference = context.getServiceReference(StartLevel.class.getName());
-		StartLevel start = null;
+		StartLevel startService = null;
 		if (reference != null)
-			start = (StartLevel) context.getService(reference);
-		String[] installEntries = getArrayFromList(System.getProperty("osgi.bundles"));
+			startService = (StartLevel) context.getService(reference);
+		String[] installEntries = getArrayFromList(System.getProperty(PROP_BUNDLES), ",");
+		int defaultStartLevel = Integer.parseInt(System.getProperty(PROP_BUNDLES_STARTLEVEL));
 		String syspath = getSysPath();
 		Bundle[] bundles = new Bundle[installEntries.length];
+		ArrayList startBundles = new ArrayList(installEntries.length);
 		boolean installedSomething = false;
 		for (int i = 0; i < installEntries.length; i++) {
 			String name = installEntries[i];
-			int level = -1;
+			int level = defaultStartLevel;
+			// TODO setting start to true is a temporary hack while PDE gets up to speed
+			// with the change in syntax.  After next week's integration build this should be change
+			// back to false.
+			boolean start = true;
 			int index = name.indexOf('@');
 			if (index >= 0) {
-				String levelString = name.substring(index + 1, name.length());
-				level = Integer.parseInt(levelString);
+				String[] attributes = getArrayFromList(name.substring(index + 1, name.length()), ";");
 				name = name.substring(0, index);
+				for (int j = 0; j < attributes.length; j++) {
+					String attribute = attributes[j];
+					if (attribute.equals("start"))
+						start = true;
+					else
+						level = Integer.parseInt(attribute);
+				}
 			}
-			String location = searchForBundle(name, syspath);
+			URL location = searchForBundle(name, syspath);
 			if (location == null)
 				throw new IllegalArgumentException(EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_BUNDLE_NOT_FOUND", name));
 			// don't need to install if it is already installed
-			bundles[i] = getBundleByLocation(location);
+			String locationString = "initial@" + location.toExternalForm();
+			bundles[i] = getBundleByLocation(locationString);
 			if (bundles[i] == null) {
-				bundles[i] = context.installBundle(location);
+				InputStream in = location.openStream();
+				bundles[i] = context.installBundle(locationString, in);
 				installedSomething = true;
-				if (level >= 0 && start != null)
-					start.setBundleStartLevel(bundles[i], level);
+				if (start)
+					startBundles.add(bundles[i]);
+				if (level >= 0 && startService != null)
+					startService.setBundleStartLevel(bundles[i], level);
 			}
 		}
 		// If we installed something, force all basic bundles we installed to be resolved
 		if (installedSomething)
 			refreshPackages(bundles);
 		// schedule all basic bundles to be started
-		for (int i = 0; i < bundles.length; i++) {
-			if (bundles[i].getState() == Bundle.INSTALLED)
-				throw new IllegalStateException(EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_ERROR_BUNDLE_NOT_RESOLVED", bundles[i].getLocation()));
-			bundles[i].start();
+		for (Iterator i = startBundles.iterator(); i.hasNext();) {
+			Bundle bundle = (Bundle) i.next();
+			if (bundle.getState() == Bundle.INSTALLED)
+				throw new IllegalStateException(EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_ERROR_BUNDLE_NOT_RESOLVED", bundle.getLocation()));
+			bundle.start();
 		}
 		context.ungetService(reference);
 		if (debug)
-			System.out.println("Time loadBundles in the framework: " + (System.currentTimeMillis() - startTime));
+			System.out.println("Time to load bundles: " + (System.currentTimeMillis() - startTime));
 		return bundles;
 	}
 
@@ -658,11 +677,11 @@ public class EclipseStarter {
 	 * @return the array of string tokens
 	 * @param prop the initial comma-separated string
 	 */
-	private static String[] getArrayFromList(String prop) {
+	private static String[] getArrayFromList(String prop, String separator) {
 		if (prop == null || prop.trim().equals("")) //$NON-NLS-1$
 			return new String[0];
 		Vector list = new Vector();
-		StringTokenizer tokens = new StringTokenizer(prop, ","); //$NON-NLS-1$
+		StringTokenizer tokens = new StringTokenizer(prop, separator); //$NON-NLS-1$
 		while (tokens.hasMoreTokens()) {
 			String token = tokens.nextToken().trim();
 			if (!token.equals("")) //$NON-NLS-1$
