@@ -51,7 +51,7 @@ public abstract class StateImpl implements State {
 			return false;
 		if (!bundleDescriptions.remove(existing))
 			return false;
-		resolvedBundles.remove(existing);		
+		resolvedBundles.remove(existing);
 		if (!basicAddBundle(newDescription))
 			return false;
 		resolved = false;
@@ -61,13 +61,13 @@ public abstract class StateImpl implements State {
 		return true;
 	}
 
-	public BundleDescription removeBundle(String location) {	
+	public BundleDescription removeBundle(String location) {
 		BundleDescription toRemove = getBundleByLocation(location);
 		if (toRemove == null || !removeBundle(toRemove))
 			return null;
 		return toRemove;
 	}
-	
+
 	public BundleDescription removeBundle(long bundleId) {
 		BundleDescription toRemove = getBundle(bundleId);
 		if (toRemove == null || !removeBundle(toRemove))
@@ -120,10 +120,10 @@ public abstract class StateImpl implements State {
 
 	// TODO: this does not comply with the spec	
 	public BundleDescription getBundle(String name, Version version) {
-		BundleDescription[] bundles = getBundles();
-		for (int i = 0; i < bundles.length; i++) {
-			if (name.equals(bundles[i].getSymbolicName()) && bundles[i].getVersion().equals(version))
-				return bundles[i];
+		for (Iterator i = bundleDescriptions.iterator(); i.hasNext();) {
+			BundleDescription current = (BundleDescription) i.next();
+			if (name.equals(current.getSymbolicName()) && current.getVersion().equals(version))
+				return current;
 		}
 		return null;
 	}
@@ -327,9 +327,10 @@ public abstract class StateImpl implements State {
 	void setFactory(StateObjectFactory factory) {
 		this.factory = factory;
 	}
+
 	public BundleDescription getBundleByLocation(String location) {
 		for (Iterator i = bundleDescriptions.iterator(); i.hasNext();) {
-			BundleDescription current = (BundleDescription) i.next();			
+			BundleDescription current = (BundleDescription) i.next();
 			if (location.equals(current.getLocation()))
 				return current;
 		}
