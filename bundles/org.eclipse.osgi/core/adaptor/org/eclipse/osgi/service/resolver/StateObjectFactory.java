@@ -213,7 +213,7 @@ public interface StateObjectFactory {
 	public void writeState(State state, DataOutputStream stream) throws IOException;
 
 	/**
-	 * Persists the given state in the given output stream.
+	 * Persists the given state in the given directory.
 	 * 
 	 * @param state the state to be written
 	 * @param stateDirectory the directory where to write the state to
@@ -249,7 +249,7 @@ public interface StateObjectFactory {
 	public State readState(DataInputStream stream) throws IOException;
 
 	/**
-	 * Reads a persisted state from the given stream. Closes the stream.
+	 * Reads a persisted state from the given directory.
 	 * 
 	 * @param stateDirectory the directory where to read the state from
 	 * @return the state read
