@@ -627,4 +627,17 @@ public class PluginConverterImpl implements PluginConverter, IModel {
 			super(cause);
 		}
 	}
+	/* (non-Javadoc)
+	 * @see org.eclipse.osgi.service.pluginconversion.PluginConverter#convertManifest(java.io.File)
+	 */
+	public File convertManifest(File pluginLocation) {
+		return convertManifest(pluginLocation, true);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.osgi.service.pluginconversion.PluginConverter#convertManifest(java.io.File, java.io.File)
+	 */
+	public boolean convertManifest(File pluginBaseLocation, File bundleManifestLocation) {
+		return convertManifest(pluginBaseLocation, bundleManifestLocation, true);
+	}
 }

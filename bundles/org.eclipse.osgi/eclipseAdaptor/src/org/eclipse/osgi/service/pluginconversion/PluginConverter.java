@@ -42,4 +42,20 @@ public interface PluginConverter {
 	 * generated (or already existed), <code>null</code> otherwise
 	 */
 	public File convertManifest(File pluginLocation, boolean compatibilityManifest);
+	
+	/**
+	 * 
+	 * @param pluginLocation
+	 * @return
+	 * @deprecated @see #convertManifest(File, boolean)
+	 */
+	public File convertManifest(File pluginLocation);
+	
+	/**
+	 * 
+	 * @param pluginLocation
+	 * @return
+	 * @deprecated @see #convertManifest(File, File, boolean)
+	 */
+	public boolean convertManifest(File pluginBaseLocation, File bundleManifestLocation);
 }
