@@ -24,7 +24,7 @@ final class BundlePermissions extends BundlePermissionCollection {
 	 * Maps a Permission's class to an appropriate PermissionCollection.
 	 * Class => PermissionCollection
 	 */
-	private Hashtable collections = new Hashtable(8);
+	private Hashtable collections = new Hashtable(8);	//TODO How dynamic is this? 
 
 	/**
 	 * Set to an AllPermissionCollection if this Permissions contains AllPermission.

@@ -131,6 +131,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 		}
 
 		// init the imported packages list taking the bundle...
+		//TODO The state is likely to provide some helpers to do that
 		addImportedPackages(description.getPackages());
 		// ...and its fragments
 		for (int i = 0; i < fragments.length; i++)
@@ -139,6 +140,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 
 		// init the require bundles list.  Need to account for optional bundles so bundles with
 		// no supplier should be skipped.
+		//TODO The state is likely to provide some helpers to do that.
 		BundleSpecification[] required = description.getRequiredBundles();
 		ArrayList bundles = new ArrayList(Arrays.asList(required == null ? new BundleSpecification[0] : required));
 		for (int i = 0; i < fragments.length; i++)

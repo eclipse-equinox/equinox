@@ -84,14 +84,17 @@ public class EclipseClassLoader extends DefaultClassLoader {
 				// throw an exception. Below we catch the exception and ignore it if it is
 				// of this nature.
 				// Ensure that we do the activation outside of any synchronized blocks to avoid deadlock.
-				if (state != Bundle.STARTING && state != Bundle.ACTIVE)
+				if (state != Bundle.STARTING && state != Bundle.ACTIVE)	//TODO Remove starting
 					try {
 						hostdata.getBundle().start();
+						tryActivating = false;
 					} catch (BundleException e) {
+						tryActivating = false; //if a 
 						// TODO do nothing for now but we need to filter the type of exception here and
 						// sort the bad from the ok. Basically, failing to start the bundle should not be damning.
 						// Automagic activation is currently a best effort deal.
 						//TODO: log when a log service is available
+						//
 						e.printStackTrace(); //Note add this to help debugging
 						if (e.getNestedException() != null)
 							e.getNestedException().printStackTrace();
@@ -99,7 +102,6 @@ public class EclipseClassLoader extends DefaultClassLoader {
 				// once we have tried, there is no need to try again.
 				// TODO revisit this when considering what happens when a bundle is stopped
 				// and then subsequently accessed. That is, should it be restarted?
-				tryActivating = false;
 			}
 			return super.findLocalClass(name);
 		} catch (ClassNotFoundException e) {

@@ -108,7 +108,7 @@ class ListenerList {
 		}
 
 		/* We have reached the end of the list and have not found the listener */
-		throw new IllegalArgumentException();
+		throw new IllegalArgumentException();	//TODO This is not usually a good core practice.
 	}
 
 	/**
