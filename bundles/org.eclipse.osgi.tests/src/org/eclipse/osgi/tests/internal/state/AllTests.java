@@ -34,6 +34,7 @@ public class AllTests extends TestCase {
 		suite.addTest(PlatformAdminTest.suite());
 		suite.addTest(StateResolverTest.suite());
 		suite.addTest(StateCycleTest.suite());		
+		suite.addTest(StateComparisonTest.suite());
 		return suite;
 	}
 }

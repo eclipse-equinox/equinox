@@ -16,9 +16,8 @@ import org.eclipse.osgi.framework.internal.core.KeyedElement;
 import org.eclipse.osgi.framework.internal.core.KeyedHashSet;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleException;
 
-public class StateImpl implements State {
+public abstract class StateImpl implements State {
 	transient private Resolver resolver;
 	transient private StateDeltaImpl changes;
 	transient private Map listeners = new HashMap(11);
@@ -35,8 +34,8 @@ public class StateImpl implements State {
 	}
 
 	public boolean addBundle(BundleDescription description) {
-		if (description.getBundleId() < 0)
-			throw new IllegalArgumentException("no id set");
+		if (description.getLocation() == null)
+			throw new IllegalArgumentException("no location set"); //$NON-NLS-1$
 		if (!basicAddBundle(description))
 			return false;
 		resolved = false;
@@ -62,42 +61,13 @@ public class StateImpl implements State {
 		return true;
 	}
 
-	public StateDelta compare(State state) throws BundleException {
-		// client is trying to sneak in some alien implementation		
-		if (!(state instanceof UserState))
-			throw new IllegalArgumentException("Wrong state implementation"); //$NON-NLS-1$		
-		if (state.getTimeStamp() != this.getTimeStamp())
-			throw new BundleException(StateMsg.formatter.getString("COMMIT_INVALID_TIMESTAMP")); //$NON-NLS-1$
-		StateDeltaImpl delta = new StateDeltaImpl(this);
-		UserState userState = (UserState) state;
-		Long[] allAdded = userState.getAllAdded();
-		for (int i = 0; i < allAdded.length; i++) {
-			BundleDescription added = userState.getBundle(allAdded[i].longValue());
-			// ensure it has not been added then removed
-			if (added != null)
-				delta.recordBundleAdded((BundleDescriptionImpl) added);
-		}
-		Long[] allRemoved = userState.getAllRemoved();
-		for (int i = 0; i < allRemoved.length; i++) {
-			long removedId = allRemoved[i].longValue();
-			BundleDescription removedFromUserState = userState.getBundle(removedId);
-			// ensure it has not been removed then added
-			if (removedFromUserState == null) {
-				BundleDescription existingSystemState = getBundle(removedId);
-				if (existingSystemState != null)
-					delta.recordBundleRemoved((BundleDescriptionImpl) existingSystemState);
-			}
-		}
-		Long[] allUpdated = userState.getAllUpdated();
-		for (int i = 0; i < allUpdated.length; i++) {
-			BundleDescription updated = userState.getBundle(allUpdated[i].longValue());
-			// ensure it has not been updated then removed TODO this is trickier than it seems
-			if (updated != null)
-				delta.recordBundleUpdated((BundleDescriptionImpl) updated);
-		}
-		return delta;
+	public BundleDescription removeBundle(String location) {	
+		BundleDescription toRemove = getBundleByLocation(location);
+		if (toRemove == null || !removeBundle(toRemove))
+			return null;
+		return toRemove;
 	}
-
+	
 	public BundleDescription removeBundle(long bundleId) {
 		BundleDescription toRemove = getBundle(bundleId);
 		if (toRemove == null || !removeBundle(toRemove))
@@ -359,7 +329,7 @@ public class StateImpl implements State {
 	}
 	public BundleDescription getBundleByLocation(String location) {
 		for (Iterator i = bundleDescriptions.iterator(); i.hasNext();) {
-			BundleDescription current = (BundleDescription) i.next();
+			BundleDescription current = (BundleDescription) i.next();			
 			if (location.equals(current.getLocation()))
 				return current;
 		}

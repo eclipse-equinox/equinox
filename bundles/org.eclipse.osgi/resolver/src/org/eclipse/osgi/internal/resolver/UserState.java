@@ -12,7 +12,8 @@ package org.eclipse.osgi.internal.resolver;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.eclipse.osgi.service.resolver.BundleDescription;
+import org.eclipse.osgi.service.resolver.*;
+import org.osgi.framework.BundleException;
 
 /**
  * This implementation of State does a bookkeeping of all added/removed 
@@ -25,35 +26,54 @@ public class UserState extends StateImpl {
 	public synchronized boolean addBundle(BundleDescription description) {
 		if (!super.addBundle(description))
 			return false;
-		added.add(new Long(description.getBundleId()));
+		added.add(description.getLocation());
 		return true;
 	}
 
-	public synchronized BundleDescription removeBundle(long bundleId) {
-		BundleDescription description = super.removeBundle(bundleId);
-		if (description == null)
-			return null;
-		removed.add(new Long(description.getBundleId()));
-		return description;
+	public synchronized boolean removeBundle(BundleDescription description) {
+		if (!super.removeBundle(description))
+			return false;
+		removed.add(description.getLocation());
+		return true;
 	}
 
 	public boolean updateBundle(BundleDescription newDescription) {
 		if (!super.updateBundle(newDescription))
 			return false;
-		updated.add(new Long(newDescription.getBundleId()));
+		updated.add(newDescription.getLocation());
 		return true;
 	}
 
-	public Long[] getAllAdded() {
-		return (Long[]) added.toArray(new Long[added.size()]);
+	public String[] getAllAdded() {
+		return (String[]) added.toArray(new String[added.size()]);
 	}
 
-	public Long[] getAllRemoved() {
-		return (Long[]) removed.toArray(new Long[removed.size()]);
+	public String[] getAllRemoved() {
+		return (String[]) removed.toArray(new String[removed.size()]);
 	}
-	
-	public Long[] getAllUpdated() {
-		return (Long[]) updated.toArray(new Long[updated.size()]);
+
+	public String[] getAllUpdated() {
+		return (String[]) updated.toArray(new String[updated.size()]);
 	}
-	
+
+	public StateDelta compare(State baseState) throws BundleException {
+		BundleDescription[] current = this.getBundles();
+		StateDeltaImpl delta = new StateDeltaImpl(this);
+		// process additions and updates
+		for (int i = 0; i < current.length; i++) {
+			BundleDescription existing = baseState.getBundleByLocation(current[i].getLocation());
+			if (existing == null)
+				delta.recordBundleAdded((BundleDescriptionImpl) current[i]);
+			else if (updated.contains(current[i].getLocation()))
+				delta.recordBundleUpdated((BundleDescriptionImpl) current[i]);
+		}
+		// process removals
+		BundleDescription[] existing = baseState.getBundles();
+		for (int i = 0; i < existing.length; i++) {
+			BundleDescription local = getBundleByLocation(existing[i].getLocation());
+			if (local == null)
+				delta.recordBundleRemoved((BundleDescriptionImpl) existing[i]);
+		}
+		return delta;
+	}
 }

@@ -303,8 +303,8 @@ public class KeyedHashSet {
 		return false;
 	}
 
-	private int hash(KeyedElement key) {
-		return Math.abs(key.getKeyHashCode()) % elements.length;
+	private int hash(KeyedElement element) {
+		return Math.abs(element.getKeyHashCode()) % elements.length;
 	}
 
 	private int keyHash(Object key) {

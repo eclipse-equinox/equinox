@@ -116,7 +116,11 @@ public class StateManager implements PlatformAdmin {
 		// no installer have been provided - commit not supported
 		if (installer == null)
 			throw new IllegalArgumentException("PlatformAdmin.commit() not supported"); //$NON-NLS-1$
-		StateDelta delta = systemState.compare(state);
+		if (!(state instanceof UserState))
+			throw new IllegalArgumentException("Wrong state implementation"); //$NON-NLS-1$		
+		if (state.getTimeStamp() != systemState.getTimeStamp())
+			throw new BundleException(StateMsg.formatter.getString("COMMIT_INVALID_TIMESTAMP")); //$NON-NLS-1$		
+		StateDelta delta = state.compare(systemState);
 		BundleDelta[] changes = delta.getChanges();
 		for (int i = 0; i < changes.length; i++)
 			if ((changes[i].getType() & BundleDelta.ADDED) > 0)
@@ -125,9 +129,9 @@ public class StateManager implements PlatformAdmin {
 				installer.uninstallBundle(changes[i].getBundle());
 			else if ((changes[i].getType() & BundleDelta.UPDATED) > 0)
 				installer.updateBundle(changes[i].getBundle());
-			else
-				;
-		// bug in StateDelta#getChanges
+			else {
+				// bug in StateDelta#getChanges
+			}
 	}
 
 	public Resolver getResolver() {

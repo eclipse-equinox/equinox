@@ -10,7 +10,8 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
 
-import org.eclipse.osgi.service.resolver.BundleDescription;
+import org.eclipse.osgi.service.resolver.*;
+import org.osgi.framework.BundleException;
 
 public class SystemState extends StateImpl {
 	public boolean addBundle(BundleDescription description) {
@@ -27,9 +28,22 @@ public class SystemState extends StateImpl {
 		return true;
 	}
 
+	public boolean updateBundle(BundleDescription newDescription) {
+		if (!super.removeBundle(newDescription))
+			return false;
+		updateTimeStamp();
+		return true;
+	}
+
 	private void updateTimeStamp() {
 		if (timeStamp == Long.MAX_VALUE)
 			timeStamp = 0;
 		timeStamp++;
 	}
+
+	public StateDelta compare(State state) throws BundleException {
+		// we don't implement this (no big deal: the system state is private to the framework)
+		throw new UnsupportedOperationException();
+	}
+
 }
