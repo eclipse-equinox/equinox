@@ -43,51 +43,46 @@ public abstract class BundleResourceHandler extends URLStreamHandler {
 	 * Parse reference URL. 
 	 */
 	protected void parseURL(URL url, String str, int start, int end) {
-		if (end <= start)
-			return;
-
 		// Check the permission of the caller to see if they
 		// are allowed access to the resource.
 		checkAdminPermission();
-
+		if (end < start) 
+			return;
+		if (url.getPath() != null)
+			// A call to a URL constructor has been made that uses an authorized  URL as its context.
+			// Null out bundleEntry because it will not be valid for the new path
+			bundleEntry = null;
 		String spec = ""; //$NON-NLS-1$
 		if (start < end)
 			spec = str.substring(start, end);
 		end -= start;
-
-		String path;
-		String bundleId;
-
-		int refIdx = spec.indexOf('#');
-		int pathEnd = refIdx >= 0 ? refIdx : end;
-
-		if (spec.length() >= 2 && spec.charAt(0) == '/' || spec.charAt(1) == '/') {
-			int slash = spec.indexOf("/", 2); //$NON-NLS-1$
-			if (slash < 0) {
-				throw new IllegalArgumentException(AdaptorMsg.formatter.getString("URL_NO_PATH")); //$NON-NLS-1$
+		//Default is to use path and bundleId from context
+		String path = url.getPath();
+		String bundleId = url.getHost();
+		int pathIdx = 0;
+		if (spec.startsWith("//")) { //$NON-NLS-1$
+			int bundleIdIdx = 2;
+			pathIdx = spec.indexOf('/', bundleIdIdx);
+			if (pathIdx == -1) {
+				pathIdx = end;
+				// Use default
+				path = ""; //$NON-NLS-1$
 			}
-			bundleId = spec.substring(2, slash);
-			path = spec.substring(slash, pathEnd);
-		} else {
-			// A call to a URL constructor has been made that
-			// uses an authorized URL as its context.
-			bundleId = url.getHost();
-			if (spec.length() > 0 && spec.charAt(0) == '/') {
-				// does not specify a relative path.
-				path = spec.substring(start, pathEnd);
-			} else {
-				// relative path specified.
-				path = url.getPath() == null ? "" : url.getPath(); //$NON-NLS-1$
-				int lastSlash = path.lastIndexOf('/');
-				if (lastSlash >= 0)
-					path = path.substring(0, lastSlash + 1) + spec.substring(start, pathEnd);
-				else
-					path = spec.substring(start, pathEnd);
-			}
-			// null out bundleEntry because it will not be valid for the new path
-			bundleEntry = null;
+			bundleId = spec.substring(bundleIdIdx, pathIdx);
 		}
-
+		if (pathIdx < end && spec.charAt(pathIdx) == '/')
+			path = spec.substring(pathIdx, end);
+		else if (end > pathIdx) {
+			if (path == null || path.equals("")) //$NON-NLS-1$
+				path = "/"; //$NON-NLS-1$
+			int last = path.lastIndexOf('/') + 1;
+			if (last == 0)
+				path = spec.substring(pathIdx, end);
+			else
+				path = path.substring(0, last) + spec.substring(pathIdx, end);
+		}
+		if (path == null)
+			path = ""; //$NON-NLS-1$
 		//modify path if there's any relative references
 		int dotIndex;
 		while ((dotIndex = path.indexOf("/./")) >= 0) //$NON-NLS-1$
