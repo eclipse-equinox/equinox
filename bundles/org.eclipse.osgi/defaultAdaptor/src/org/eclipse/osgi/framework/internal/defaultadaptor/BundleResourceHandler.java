@@ -53,46 +53,68 @@ public abstract class BundleResourceHandler extends URLStreamHandler implements 
      */
     protected void parseURL(URL url, String str, int start, int end)
     {
-    	if (end <= start) {
+    	if (end <= start)
     		return;
-    	}
-
+  
 		// Check the permission of the caller to see if they
 		// are allowed access to the resource.
 		checkAdminPermission();
 
-    	String bundleId,path;
-    	if (str.startsWith(url.getProtocol())) {
-    		if (str.charAt(start) != '/' || str.charAt(start+1) != '/')
-    			throw new IllegalArgumentException(AdaptorMsg.formatter.getString("URL_IS_OPAQUE",url.getProtocol()));
-    		start += 2;
-    		int slash = str.indexOf("/",start);
+    	String spec = "";
+    	if (start < end)
+    		spec = str.substring(start, end);
+    	end -= start;
+
+    	String path;
+       	String bundleId;
+
+       	int refIdx = spec.indexOf('#');
+       	int pathEnd = refIdx >= 0 ? refIdx : end;
+
+   		if (spec.length()>=2 && spec.charAt(0) == '/' || spec.charAt(1) == '/') {
+    		int slash = spec.indexOf("/",2);
     		if (slash < 0) {
     			throw new IllegalArgumentException(AdaptorMsg.formatter.getString("URL_NO_PATH"));
     		}
-    		bundleId = str.substring(start,slash);
-    		path = str.substring(slash,end);
+    		bundleId = spec.substring(2,slash);
+    		path = spec.substring(slash,pathEnd);
     	}
     	else {
     		// A call to a URL constructor has been made that
     		// uses an authorized URL as its context.
     		bundleId = url.getHost();
-    		if (str.length() > 0 && str.charAt(0) == '/') {
+    		if (spec.length() > 0 && spec.charAt(0) == '/') {
     			// does not specify a relative path.
-				path = str;
+				path = spec.substring(start,pathEnd);
 			} 
     		else {
     			// relative path specified.
-				StringBuffer pathBuffer = new StringBuffer(url.getPath());
-				if (pathBuffer.charAt(pathBuffer.length() - 1) != '/')
-					pathBuffer.append('/');
-				pathBuffer.append(str);
-				path = pathBuffer.toString();
+    			path = url.getPath() == null ? "" : url.getPath();
+    			int lastSlash = path.lastIndexOf('/');
+    			if (lastSlash >= 0)
+    				path = path.substring(0,lastSlash+1) + spec.substring(start,pathEnd);
+    			else
+    				path = spec.substring(start,pathEnd);
 			}
     		// null out bundleEntry because it will not be valid for the new path
     		bundleEntry = null;
     	}
 
+   		//modify path if there's any relative references
+   		int dotIndex;
+   		while ((dotIndex = path.indexOf("/./")) >= 0)
+   			path = path.substring(0, dotIndex + 1) + path.substring(dotIndex + 3);
+   		if (path.endsWith("/.")) 
+   			path = path.substring(0, path.length() - 1);
+   		while ((dotIndex = path.indexOf("/../")) >= 0) {
+   			if (dotIndex != 0)
+   				path = path.substring(0, path.lastIndexOf('/', dotIndex - 1)) + path.substring(dotIndex + 3);
+   			else
+   				path = path.substring(dotIndex + 3);
+   		}
+   		if (path.endsWith("/..") && path.length() > 3)
+   			path = path.substring(0, path.length() - 2 );
+ 
     	// Setting the authority portion of the URL to SECURITY_ATHORIZED
     	// ensures that this URL was created by using this parseURL
     	// method.  The openConnection method will only open URLs
