@@ -9,9 +9,10 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.core.runtime.adaptor;
+package org.eclipse.osgi.internal.resolver;
 
 import java.util.*;
+import org.eclipse.core.runtime.adaptor.BundleStopper;
 
 /**
  * Borrowed from org.eclipse.core.internal.resources.ComputeProjectOrder 
@@ -204,13 +205,9 @@ public class ComputeNodeOrder {
 			}
 			Vertex fromVertex = (Vertex) vertexMap.get(fromId);
 			Vertex toVertex = (Vertex) vertexMap.get(toId);
-			// nip problems with bogus vertexes in the bud
-			if (fromVertex == null) {
-				throw new IllegalArgumentException();
-			}
-			if (toVertex == null) {
-				throw new IllegalArgumentException();
-			}
+			// ignore edges when one of the vertices is unknown
+			if (fromVertex == null || toVertex == null)
+				return;
 			fromVertex.adjacent.add(toVertex);
 		}
 

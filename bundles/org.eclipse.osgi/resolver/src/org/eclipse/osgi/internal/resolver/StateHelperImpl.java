@@ -169,6 +169,44 @@ public class StateHelperImpl implements StateHelper {
 		return null;
 	}
 
+	public Object[][] sortBundles(BundleDescription[] toSort) {
+		List references = new ArrayList(toSort.length);
+		for (int i = 0; i < toSort.length; i++)
+			if (toSort[i].isResolved())
+				buildReferences(toSort[i], references);
+		return ComputeNodeOrder.computeNodeOrder(toSort, (Object[][]) references.toArray(new Object[references.size()][]));
+	}
+
+	private void buildReferences(BundleDescription description, List references) {
+		HostSpecification[] hosts = description.getHosts();
+		// it is a fragment
+		if (hosts.length > 0) {
+			for (int i = 0; i < hosts.length; i++)
+				// just create a dependency between fragment and host
+				if (hosts[i].getSupplier() != null && hosts[i].getSupplier() != description)
+					references.add(new Object[] {description, hosts[i].getSupplier()});
+		} else {
+			// it is a host
+			buildReferences(description, description.getRequiredBundles(), references);
+			buildReferences(description, description.getPackages(), references);
+			BundleDescription[] fragments = description.getFragments();
+			// handles constraints contributed by fragments
+			for (int i = 0; i < fragments.length; i++) {
+				// handles fragment's constraints as if they belonged to the host instead 
+				buildReferences(description, fragments[i].getRequiredBundles(), references);
+				buildReferences(description, fragments[i].getPackages(), references);
+			}
+		}
+	}
+
+	private void buildReferences(BundleDescription actual, VersionConstraint[] constraints, List references) {
+		for (int i = 0; i < constraints.length; i++) {
+			VersionConstraint constraint = constraints[i];
+			if (constraint.getSupplier() != null && constraint.getSupplier() != actual)
+				references.add(new Object[] {actual, constraint.getSupplier()});
+		}
+	}
+
 	public static StateHelper getInstance() {
 		return instance;
 	}

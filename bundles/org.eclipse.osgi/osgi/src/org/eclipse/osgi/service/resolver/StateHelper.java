@@ -107,4 +107,18 @@ public interface StateHelper {
 	 * @return
 	 */
 	public PackageSpecification getExportedPackage(State state, String packageName, Version version);
+	/**
+	 * Sorts the given array of <strong>resolved</strong>bundles in pre-requisite order. If A 
+	 * requires B, A appears after B. 
+	 * Fragments will appear after all of their hosts. Constraints contributed by fragments will 
+	 * be treated as if contributed by theirs hosts, affecting their position. This is true even if
+	 * the fragment does not appear in the given bundle array.
+	 * <p>
+	 * Unresolved bundles are ignored.
+	 * </p>
+	 *  
+	 * @param toSort an array of bundles to be sorted
+	 * @return any cycles found 
+	 */
+	public Object[][] sortBundles(BundleDescription[] toSort);
 }

@@ -10,10 +10,13 @@
  *******************************************************************************/
 package org.eclipse.core.runtime.adaptor;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import org.eclipse.osgi.framework.internal.core.BundleHost;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
-import org.eclipse.osgi.util.ManifestElement;
-import org.osgi.framework.*;
+import org.eclipse.osgi.service.resolver.*;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 
 /**
  * Implementation for the runtime shutdown hook that provides 
@@ -21,81 +24,7 @@ import org.osgi.framework.*;
  * in the proper order.
  */
 public class BundleStopper {
-	private class ReferenceKey {
-		private long referrerId;
-		private long referredId;
-
-		public ReferenceKey(long referrerId, long referredId) {
-			this.referrerId = referrerId;
-			this.referredId = referredId;
-		}
-
-		public boolean equals(Object obj) {
-			return referredId == ((ReferenceKey) obj).referredId && referrerId == ((ReferenceKey) obj).referrerId;
-		}
-
-		public int hashCode() {
-			return ((int) (referredId & 0xFFFF)) << 16 + (int) (referrerId & 0xFFFF);
-		}
-	}
-
-	public void stopBundles() {
-		Map references = new HashMap();
-		Bundle[] allBundles = EclipseAdaptor.getDefault().getContext().getBundles();
-		// a map in the form: bundle -> REQUIRE_BUNDLE header value
-		Map allToStop = new HashMap(allBundles.length);
-		// a map in the form: bundle symbolic name -> bundle
-		Map toStopWithNames = new HashMap(allBundles.length);
-		selectBundlesToStop(allBundles, allToStop, toStopWithNames);
-		Bundle[] orderedBundles = orderBundles(references, allToStop, toStopWithNames);
-		stopBundles(orderedBundles);
-	}
-
-	private void stopBundles(Bundle[] orderedBundles) {
-		// stop all active legacy bundles in the reverse order of Require-Bundle
-		for (int i = orderedBundles.length - 1; i >= 0; i--) {
-			try {
-				if (orderedBundles[i].getState() == Bundle.ACTIVE)
-					orderedBundles[i].stop();
-			} catch (Exception e) {
-				String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_BUNDLESTOPPER_ERROR_STOPPING_BUNDLE", orderedBundles[i].toString()); //$NON-NLS-1$
-				FrameworkLogEntry entry = new FrameworkLogEntry(EclipseAdaptorConstants.PI_ECLIPSE_OSGI, message, 0, e, null);
-				EclipseAdaptor.getDefault().getFrameworkLog().log(entry);
-			}
-		}
-	}
-
-	private Bundle[] orderBundles(Map references, Map allToStop, Map toStopWithNames) {
-		// find dependencies betweeen them
-		for (Iterator i = allToStop.entrySet().iterator(); i.hasNext();) {
-			Map.Entry pair = (Map.Entry) i.next();
-			Bundle toStop = (Bundle) pair.getKey();
-			String requiredBundleNames = (String) pair.getValue();
-			// no Require-Bundle entry - does not depend on other bundles			
-			if (requiredBundleNames == null)
-				continue;
-			try {
-				//TODO Can't we use the State instead of reparsing the headers?
-				ManifestElement[] elements = ManifestElement.parseHeader(Constants.REQUIRE_BUNDLE, requiredBundleNames);
-				for (int j = 0; j < elements.length; j++) {
-					String requiredBundleName = elements[j].getValue();
-					// ignore dependencies on bundles that we are not stopping				
-					Bundle requiredBundle = (Bundle) toStopWithNames.get(requiredBundleName);
-					if (requiredBundle != null)
-						references.put(new ReferenceKey(toStop.getBundleId(), requiredBundle.getBundleId()), new Object[] {toStop, requiredBundle});
-				}
-			} catch (BundleException e) {
-				// should never happen, since the framework accepted this bundle, but...
-				String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_BUNDLESTOPPER_ERROR_STOPPING_BUNDLE", toStop); //$NON-NLS-1$				
-				FrameworkLogEntry entry = new FrameworkLogEntry(EclipseAdaptorConstants.PI_ECLIPSE_OSGI, message, 0, e, null);
-				EclipseAdaptor.getDefault().getFrameworkLog().log(entry);
-			}
-		}
-
-		//TODO The ordering should be done with taking all the required bundles into account, and then the filtering should be done. Otherwise this can result in a bad ordering in the shutting down.
-		//TODO Maybe should we also consider the import?
-		Bundle[] orderedBundles = (Bundle[]) allToStop.keySet().toArray(new Bundle[allToStop.size()]);
-		Object[][] cycles = ComputeNodeOrder.computeNodeOrder(orderedBundles, (Object[][]) references.values().toArray(new Object[references.size()][]));
+	private void logCycles(Object[][] cycles) {
 		// log cycles
 		if (cycles.length > 0) {
 			StringBuffer cycleText = new StringBuffer("["); //$NON-NLS-1$			
@@ -112,26 +41,45 @@ public class BundleStopper {
 			FrameworkLogEntry entry = new FrameworkLogEntry(EclipseAdaptorConstants.PI_ECLIPSE_OSGI, message, 0, null, null);
 			EclipseAdaptor.getDefault().getFrameworkLog().log(entry);
 		}
-		return orderedBundles;
 	}
 
-	private void selectBundlesToStop(Bundle[] allBundles, Map allToStop, Map toStopWithNames) {
+	private BundleDescription[] selectBundlesToStop(Bundle[] allBundles) {
+		State state = EclipseAdaptor.getDefault().getState();
+		List allToStop = new ArrayList(allBundles.length);
 		// gather all active "auto-stoppable" bundles
 		for (int i = 0; i < allBundles.length; i++) {
-			if (allBundles[i].getState() != Bundle.ACTIVE)
+			if (!(allBundles[i] instanceof BundleHost) || allBundles[i].getBundleId() == 0 || allBundles[i].getState() != Bundle.ACTIVE)
+				continue;			
+			BundleHost host = ((BundleHost) allBundles[i]);
+			if (!((EclipseBundleData) host.getBundleData()).isAutoStart())
 				continue;
-			// we are looking for two headers:  ECLIPSE_AUTOSTOP and REQUIRE_BUNDLE	
-			// passing "" to getHeaders; do not care to get translated headers
-			Dictionary headers = allBundles[i].getHeaders(""); //$NON-NLS-1$
-			String autoStop = (String) headers.get(EclipseAdaptorConstants.ECLIPSE_AUTOSTOP);
-			if (!"true".equalsIgnoreCase(autoStop)) //$NON-NLS-1$
-				continue;
-			// remember we want to stop this bundle
-			allToStop.put(allBundles[i], headers.get(Constants.REQUIRE_BUNDLE));
-			// bundles with symbolic names may be required by others (we will order them later)
-			String symbolicName = allBundles[i].getSymbolicName();
-			if (symbolicName != null)
-				toStopWithNames.put(symbolicName, allBundles[i]);
+			allToStop.add(state.getBundle(host.getBundleId()));
+		}
+		return (BundleDescription[]) allToStop.toArray(new BundleDescription[allToStop.size()]);
+	}
+
+	public void stopBundles() {
+		Bundle[] allBundles = EclipseAdaptor.getDefault().getContext().getBundles();
+		BundleDescription[] allToStop = selectBundlesToStop(allBundles);
+		StateHelper stateHelper = EclipseAdaptor.getDefault().getPlatformAdmin().getStateHelper();
+		Object[][] cycles = stateHelper.sortBundles(allToStop);
+		logCycles(cycles);
+		stopBundles(allToStop);
+	}
+
+	private void stopBundles(BundleDescription[] orderedBundles) {
+		BundleContext context = EclipseAdaptor.getDefault().getContext();
+		// stop all active bundles in the reverse order of Require-Bundle
+		for (int i = orderedBundles.length - 1; i >= 0; i--) {
+			try {
+				Bundle toStop = context.getBundle(orderedBundles[i].getBundleId());
+				if (toStop.getState() == Bundle.ACTIVE)
+					toStop.stop();
+			} catch (Exception e) {
+				String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_BUNDLESTOPPER_ERROR_STOPPING_BUNDLE", orderedBundles[i].toString()); //$NON-NLS-1$
+				FrameworkLogEntry entry = new FrameworkLogEntry(EclipseAdaptorConstants.PI_ECLIPSE_OSGI, message, 0, e, null);
+				EclipseAdaptor.getDefault().getFrameworkLog().log(entry);
+			}
 		}
 	}
 }
