@@ -630,12 +630,6 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 					return null;
 				}
 			});
-		} catch (BundleException e) {
-			if (!(e.getNestedException() instanceof NothingToUpdateException)) {
-				throw e;
-			}
-			//There is no work to be done with this update.
-			//Quietly return with no error.
 		} finally {
 			completeStateChange();
 		}
