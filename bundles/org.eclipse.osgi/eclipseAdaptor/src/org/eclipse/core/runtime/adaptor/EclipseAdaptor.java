@@ -310,6 +310,8 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 	}
 
 	public void frameworkStart(BundleContext aContext) throws BundleException {
+		// EnvironmentInfo has to be initialized first to compute defaults for system context (see bug 88925)
+		EnvironmentInfo.getDefault();
 		// must register the xml parser and initialize the plugin converter
 		// instance first because we may need it when creating the statemanager
 		// in super.frameworkStart(context)
