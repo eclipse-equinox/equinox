@@ -10,25 +10,17 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 import org.eclipse.osgi.service.resolver.BundleDescription;
 
 /**
  * This implementation of State does a bookkeeping of all added/removed 
  */
 public class UserState extends StateImpl {
-	private long referenceTimestamp; // TODO what is this used for?
-	private List added = new Vector(); // TODO why not ArrayList
-	private List removed = new Vector(); // TODO why not ArrayList
-
-	public long getReferenceTimestamp() {
-		return referenceTimestamp;
-	}
-
-	public void setReferenceTimestamp(long referenceTimestamp) {
-		this.referenceTimestamp = referenceTimestamp;
-	}
+	private List added = new ArrayList();
+	private List removed = new ArrayList();
+	private List updated = new ArrayList();
 
 	public synchronized boolean addBundle(BundleDescription description) {
 		if (!super.addBundle(description))
@@ -45,6 +37,13 @@ public class UserState extends StateImpl {
 		return description;
 	}
 
+	public boolean updateBundle(BundleDescription newDescription) {
+		if (!super.updateBundle(newDescription))
+			return false;
+		updated.add(new Long(newDescription.getBundleId()));
+		return true;
+	}
+
 	public Long[] getAllAdded() {
 		return (Long[]) added.toArray(new Long[added.size()]);
 	}
@@ -52,4 +51,9 @@ public class UserState extends StateImpl {
 	public Long[] getAllRemoved() {
 		return (Long[]) removed.toArray(new Long[removed.size()]);
 	}
+	
+	public Long[] getAllUpdated() {
+		return (Long[]) updated.toArray(new Long[updated.size()]);
+	}
+	
 }

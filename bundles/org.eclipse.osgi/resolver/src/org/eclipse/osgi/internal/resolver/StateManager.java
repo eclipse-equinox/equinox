@@ -113,33 +113,20 @@ public class StateManager implements PlatformAdmin {
 	}
 
 	public synchronized void commit(State state) throws BundleException {
-		// client trying to sneak in some alien implementation
-		if (!(state instanceof UserState))
-			throw new IllegalArgumentException("Wrong state implementation"); //$NON-NLS-1$
 		// no installer have been provided - commit not supported
 		if (installer == null)
 			throw new IllegalArgumentException("PlatformAdmin.commit() not supported"); //$NON-NLS-1$
-		if (state.getTimeStamp() != systemState.getTimeStamp())
-			throw new BundleException(StateMsg.formatter.getString("COMMIT_INVALID_TIMESTAMP")); //$NON-NLS-1$
-		UserState userState = (UserState) state;
-		Long[] allAdded = userState.getAllAdded();
-		for (int i = 0; i < allAdded.length; i++) {
-			BundleDescription added = userState.getBundle(allAdded[i].longValue());
-			// ensure it has not been added then removed
-			if (added != null)
-				installer.installBundle(added);
-		}
-		Long[] allRemoved = userState.getAllRemoved();
-		for (int i = 0; i < allRemoved.length; i++) {
-			long removedId = allRemoved[i].longValue();
-			BundleDescription removedFromUserState = userState.getBundle(removedId);
-			// ensure it has not been removed then added
-			if (removedFromUserState == null) {
-				BundleDescription existingSystemState = systemState.getBundle(removedId);
-				if (existingSystemState != null)
-					installer.uninstallBundle(existingSystemState);
-			}
-		}
+		StateDelta delta = systemState.compare(state);
+		BundleDelta[] changes = delta.getChanges(BundleDelta.ADDED | BundleDelta.REMOVED | BundleDelta.UPDATED, false);
+		for (int i = 0; i < changes.length; i++)
+			if ((changes[i].getType() & BundleDelta.ADDED) > 0)
+				installer.installBundle(changes[i].getBundle());
+			else if ((changes[i].getType() & BundleDelta.REMOVED) > 0)
+				installer.uninstallBundle(changes[i].getBundle());
+			else if ((changes[i].getType() & BundleDelta.UPDATED) > 0)
+				installer.updateBundle(changes[i].getBundle());
+			else;
+				// bug in StateDelta#getChanges
 	}
 
 	public Resolver getResolver() {

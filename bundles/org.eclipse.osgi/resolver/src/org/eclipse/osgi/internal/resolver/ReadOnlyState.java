@@ -18,7 +18,7 @@ public class ReadOnlyState implements State {
 	public ReadOnlyState(State target) {
 		this.target = target;
 	}
-
+	
 	public boolean addBundle(BundleDescription description) {
 		throw new UnsupportedOperationException();
 	}
@@ -35,7 +35,7 @@ public class ReadOnlyState implements State {
 		throw new UnsupportedOperationException();
 	}
 
-	public StateChangeEvent compare(State state) {
+	public StateDelta compare(State state) {
 		return target.compare(state);
 	}
 

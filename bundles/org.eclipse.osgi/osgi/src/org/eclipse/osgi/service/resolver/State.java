@@ -34,8 +34,7 @@ public interface State {
 	 * @param state
 	 * @return
 	 */
-	// TODO should this return a StateDelta?
-	public StateChangeEvent compare(State state);
+	public StateDelta compare(State state);
 
 	/**
 	 * Removes a bundle description with the given bundle id.
@@ -54,6 +53,15 @@ public interface State {
 	 * 	<code>false</code> otherwise 	
 	 */
 	public boolean removeBundle(BundleDescription bundle);
+
+	/**
+	 * Updates an existing bundle description with the given description. 
+	 * 
+	 * @param bundle the bundle description to replace an existing one
+	 * @return <code>true</code>, if if the bundle description was updated, 
+	 * 	<code>false</code> otherwise 	
+	 */
+	public boolean updateBundle(BundleDescription newDescription);
 
 	/**
 	 * Returns the delta representing the changes from the time this state was

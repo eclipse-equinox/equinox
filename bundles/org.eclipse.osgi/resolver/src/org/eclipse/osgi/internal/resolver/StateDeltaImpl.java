@@ -43,27 +43,28 @@ public class StateDeltaImpl implements StateDelta {
 	void recordBundleAdded(BundleDescriptionImpl added) {
 		Object key = added.getKey();
 		BundleDeltaImpl change = (BundleDeltaImpl) changes.get(key);
-		if (change != null) {
-			if ((change.getType() & BundleDelta.REMOVED) != 0)
-				change.setType(BundleDelta.UPDATED | (change.getType() & ~BundleDelta.REMOVED));
-			else
-				throw new IllegalStateException();
-		} else
+		if (change == null)
 			changes.put(key, new BundleDeltaImpl(added, BundleDelta.ADDED));
+		else
+			change.setType(change.getType() | BundleDelta.ADDED);
+	}
 
+	void recordBundleUpdated(BundleDescriptionImpl updated) {
+		Object key = updated.getKey();
+		BundleDeltaImpl change = (BundleDeltaImpl) changes.get(key);
+		if (change == null)
+			changes.put(key, new BundleDeltaImpl(updated, BundleDelta.UPDATED));
+		else
+			change.setType(change.getType() | BundleDelta.UPDATED);
 	}
 
 	void recordBundleRemoved(BundleDescriptionImpl removed) {
 		Object key = removed.getKey();
 		BundleDeltaImpl change = (BundleDeltaImpl) changes.get(key);
-		if (change != null) {
-			if ((change.getType() & BundleDelta.ADDED) != 0) {
-				changes.remove(key);
-				return;
-			}
-			change.setType(change.getType() | BundleDelta.REMOVED);
-		} else
+		if (change == null)
 			changes.put(key, new BundleDeltaImpl(removed, BundleDelta.REMOVED));
+		else
+			change.setType(change.getType() | BundleDelta.REMOVED);
 	}
 
 	void recordConstraintResolved(BundleDescriptionImpl changedLinkage, boolean optional) {

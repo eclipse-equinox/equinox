@@ -45,8 +45,55 @@ public class StateImpl implements State {
 		return true;
 	}
 
-	public StateChangeEvent compare(State state) {
-		throw new UnsupportedOperationException("not implemented"); //$NON-NLS-1$
+	public boolean updateBundle(BundleDescription newDescription) {
+		BundleDescriptionImpl existing = (BundleDescriptionImpl) bundleDescriptions.get((BundleDescriptionImpl) newDescription);
+		if (existing == null)
+			return false;
+		if (!bundleDescriptions.remove(existing))
+			return false;
+		if (!basicAddBundle(newDescription))
+			return false;
+		resolved = false;
+		getDelta().recordBundleUpdated((BundleDescriptionImpl) newDescription);
+		if (resolver != null)
+			resolver.bundleUpdated(newDescription, existing);
+		return true;
+	}
+
+	public StateDelta compare(State state) {
+		// client trying to sneak in some alien implementation		
+		if (!(state instanceof UserState))
+			throw new IllegalArgumentException("Wrong state implementation"); //$NON-NLS-1$		
+		if (state.getTimeStamp() != this.getTimeStamp())
+			throw new IllegalArgumentException(StateMsg.formatter.getString("COMMIT_INVALID_TIMESTAMP")); //$NON-NLS-1$
+		StateDeltaImpl delta = new StateDeltaImpl(this);
+		UserState userState = (UserState) state;		
+		Long[] allAdded = userState.getAllAdded();
+		for (int i = 0; i < allAdded.length; i++) {
+			BundleDescription added = userState.getBundle(allAdded[i].longValue());
+			// ensure it has not been added then removed
+			if (added != null)
+				delta.recordBundleAdded((BundleDescriptionImpl) added);
+		}
+		Long[] allRemoved = userState.getAllRemoved();
+		for (int i = 0; i < allRemoved.length; i++) {
+			long removedId = allRemoved[i].longValue();
+			BundleDescription removedFromUserState = userState.getBundle(removedId);
+			// ensure it has not been removed then added
+			if (removedFromUserState == null) {
+				BundleDescription existingSystemState = getBundle(removedId);
+				if (existingSystemState != null)
+					delta.recordBundleRemoved((BundleDescriptionImpl) removedFromUserState);
+			}
+		}
+		Long[] allUpdated = userState.getAllUpdated();
+		for (int i = 0; i < allUpdated.length; i++) {
+			BundleDescription updated = userState.getBundle(allUpdated[i].longValue());
+			// ensure it has not been updated then removed TODO this is trickier than it seems
+			if (updated != null)
+				delta.recordBundleUpdated((BundleDescriptionImpl) updated);
+		}		
+		return delta;
 	}
 
 	public BundleDescription removeBundle(long bundleId) {
