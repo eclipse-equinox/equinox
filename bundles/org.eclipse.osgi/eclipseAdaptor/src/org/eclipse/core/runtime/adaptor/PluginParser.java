@@ -72,6 +72,9 @@ public class PluginParser extends DefaultHandler implements IModel {
 							requires.add(i + 1, new Prerequisite(PluginConverterImpl.PI_RUNTIME_COMPATIBILITY, null, false, analyzed.isExported(), null));
 						}
 					}
+					if (! requires.contains(new Prerequisite(PluginConverterImpl.PI_RUNTIME_COMPATIBILITY, null, false, false, null))) {
+						requires.add(new Prerequisite(PluginConverterImpl.PI_RUNTIME_COMPATIBILITY, null, false, false, null));
+					}
 				}
 			}
 			if (requires == null)
@@ -454,6 +457,11 @@ public class PluginParser extends DefaultHandler implements IModel {
 		}
 		public String toString() {
 			return name;
+		}
+		public boolean equals(Object prereq) {
+			if (! (prereq instanceof Prerequisite) )
+				return false;
+			return name.equals(((Prerequisite) prereq).name);
 		}
 	}
 	
