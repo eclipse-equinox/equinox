@@ -16,8 +16,6 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.tests.services.resolver.AbstractStateTest;
-import org.eclipse.test.performance.Performance;
-import org.eclipse.test.performance.PerformanceMeter;
 
 public class StatePerformanceTest extends AbstractStateTest {
 	// value copied from StateObjectFactoryImpl
@@ -75,24 +73,6 @@ public class StatePerformanceTest extends AbstractStateTest {
 		return state;
 	}
 
-	private void runPerformanceTest(Runnable operation, int iterations, final int repetitions) {
-		Performance perf = Performance.getDefault();
-		PerformanceMeter meter = perf.createPerformanceMeter(perf.getDefaultScenarioId(this));
-		try {
-			for (int i = 0; i < iterations; i++) {
-				meter.start();
-				// to ensure short-running tests are not vulnerable to platform clock resolution
-				for (int j = 0; j < repetitions; j++)
-					operation.run();
-				meter.stop();
-			}
-			meter.commit();
-			perf.assertPerformance(meter);
-		} finally {
-			meter.dispose();
-		}
-	}
-
 	protected void setUp() throws Exception {
 		super.setUp();
 		// uses a constant seed to prevent variation on results
@@ -108,7 +88,7 @@ public class StatePerformanceTest extends AbstractStateTest {
 
 	public void testCreation() {
 		final int stateSize = 5000;
-		runPerformanceTest(new Runnable() {
+		runPerformanceTest(this, new Runnable() {
 			public void run() {
 				buildRandomState(stateSize);
 			}
@@ -117,7 +97,7 @@ public class StatePerformanceTest extends AbstractStateTest {
 
 	private void testResolution(int stateSize, int repetitions) throws IOException {
 		final State originalState = buildRandomState(stateSize);
-		runPerformanceTest(new Runnable() {
+		runPerformanceTest(this, new Runnable() {
 			public void run() {
 				originalState.resolve(false);
 			}
@@ -143,7 +123,7 @@ public class StatePerformanceTest extends AbstractStateTest {
 	public void testStoreAndRetrieve() {
 		int stateSize = 5000;
 		final State originalState = buildRandomState(stateSize);
-		runPerformanceTest(new Runnable() {
+		runPerformanceTest(this, new Runnable() {
 			public void run() {
 				try {
 					storeAndRetrieve(originalState);

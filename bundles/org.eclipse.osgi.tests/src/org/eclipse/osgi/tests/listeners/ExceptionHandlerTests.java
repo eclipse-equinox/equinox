@@ -5,7 +5,7 @@ import java.net.MalformedURLException;
 import junit.framework.Assert;
 import junit.framework.TestCase;
 import org.eclipse.core.tests.harness.BundleTestingHelper;
-import org.eclipse.osgi.tests.OSGiTests;
+import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.*;
 
 public class ExceptionHandlerTests extends TestCase {
@@ -48,17 +48,17 @@ public class ExceptionHandlerTests extends TestCase {
 	
 	public void testNonFatalException() {	
 		FrameworkEventListenerWithResult fwkListener = new FrameworkEventListenerWithResult();
-		OSGiTests.getContext().addFrameworkListener(fwkListener);
+		OSGiTestsActivator.getContext().addFrameworkListener(fwkListener);
 
 		BundleListener npeGenerator = new BundleListener() {
 			public void bundleChanged(BundleEvent event) {
 				throw new NullPointerException("Generated exception");
 			}
 		};	
-		OSGiTests.getContext().addBundleListener(npeGenerator);
+		OSGiTestsActivator.getContext().addBundleListener(npeGenerator);
 		
 		try {
-			BundleTestingHelper.installBundle(OSGiTests.getContext(), OSGiTests.TEST_FILES_ROOT + "internal/plugins/installTests/bundle09");
+			BundleTestingHelper.installBundle(OSGiTestsActivator.getContext(), OSGiTestsActivator.TEST_FILES_ROOT + "internal/plugins/installTests/bundle09");
 			FrameworkEvent eventReceived = fwkListener.getResult(60000);
 			Assert.assertEquals(FrameworkEvent.ERROR, eventReceived.getType());
 			Assert.assertEquals(true, eventReceived.getThrowable() instanceof NullPointerException);
@@ -69,26 +69,26 @@ public class ExceptionHandlerTests extends TestCase {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		OSGiTests.getContext().removeFrameworkListener(fwkListener);
-		OSGiTests.getContext().removeBundleListener(npeGenerator);
+		OSGiTestsActivator.getContext().removeFrameworkListener(fwkListener);
+		OSGiTestsActivator.getContext().removeBundleListener(npeGenerator);
 	}
 	
 	
 	public void testFatalException() {	
 		FrameworkEventListenerWithResult fwkListener = new FrameworkEventListenerWithResult();
-		OSGiTests.getContext().addFrameworkListener(fwkListener);
+		OSGiTestsActivator.getContext().addFrameworkListener(fwkListener);
 
 		BundleListener fatalException = new BundleListener() {
 			public void bundleChanged(BundleEvent event) {
 				throw new OutOfMemoryError("Generated exception");
 			}
 		};
-		OSGiTests.getContext().addBundleListener(fatalException);
+		OSGiTestsActivator.getContext().addBundleListener(fatalException);
 		
 	
 		try {
 			System.setProperty("eclipse.exitOnError","false"); //Here we set the value to false, because otherwise we would simply exit
-			BundleTestingHelper.installBundle(OSGiTests.getContext(), OSGiTests.TEST_FILES_ROOT + "internal/plugins/installTests/bundle10");
+			BundleTestingHelper.installBundle(OSGiTestsActivator.getContext(), OSGiTestsActivator.TEST_FILES_ROOT + "internal/plugins/installTests/bundle10");
 			FrameworkEvent eventReceived = fwkListener.getResult(10000);
 			Assert.assertEquals(FrameworkEvent.ERROR, eventReceived.getType());
 			Assert.assertEquals(true, eventReceived.getThrowable() instanceof VirtualMachineError);
@@ -100,8 +100,8 @@ public class ExceptionHandlerTests extends TestCase {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		OSGiTests.getContext().removeFrameworkListener(fwkListener);
-		OSGiTests.getContext().removeBundleListener(fatalException);
+		OSGiTestsActivator.getContext().removeFrameworkListener(fwkListener);
+		OSGiTestsActivator.getContext().removeBundleListener(fatalException);
 	}
  
 }

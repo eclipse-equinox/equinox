@@ -12,11 +12,11 @@ package org.eclipse.osgi.tests.services.resolver;
 
 import java.util.*;
 import org.eclipse.core.runtime.adaptor.testsupport.SimplePlatformAdmin;
-import org.eclipse.core.tests.harness.EclipseWorkspaceTest;
 import org.eclipse.osgi.service.resolver.*;
+import org.eclipse.osgi.tests.OSGiTest;
 import org.osgi.framework.BundleException;
 
-public abstract class AbstractStateTest extends EclipseWorkspaceTest {
+public abstract class AbstractStateTest extends OSGiTest {
 	protected PlatformAdmin platformAdmin;
 
 	protected void setUp() throws Exception {

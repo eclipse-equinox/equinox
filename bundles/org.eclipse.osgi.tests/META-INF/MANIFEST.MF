@@ -11,4 +11,4 @@ Require-Bundle:
  org.eclipse.test.performance,
  org.junit
 Eclipse-AutoStart: true
-Bundle-Activator: org.eclipse.osgi.tests.OSGiTests
+Bundle-Activator: org.eclipse.osgi.tests.OSGiTestsActivator

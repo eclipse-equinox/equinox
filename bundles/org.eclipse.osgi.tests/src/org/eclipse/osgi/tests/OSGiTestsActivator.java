@@ -13,13 +13,13 @@ package org.eclipse.osgi.tests;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
-public class OSGiTests implements BundleActivator {
+public class OSGiTestsActivator implements BundleActivator {
 	public static final String TEST_FILES_ROOT = "test_files/";
 
-	private static OSGiTests instance;
+	private static OSGiTestsActivator instance;
 	private BundleContext context;
 
-	public OSGiTests() {
+	public OSGiTestsActivator() {
 		instance = this;
 	}
 
