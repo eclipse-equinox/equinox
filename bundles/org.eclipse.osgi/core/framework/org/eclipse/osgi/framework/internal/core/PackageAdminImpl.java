@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
-import java.util.Iterator;
 import org.eclipse.osgi.framework.adaptor.BundleClassLoader;
 import org.eclipse.osgi.framework.adaptor.BundleData;
 import org.eclipse.osgi.framework.debug.Debug;
@@ -225,20 +224,6 @@ public class PackageAdminImpl implements PackageAdmin {
 		}
 	}
 
-	private void insertBundle(AbstractBundle bundle, ArrayList bundleList) {
-		int index = 0;
-		Iterator iter = bundleList.iterator();
-		while (iter.hasNext()) {
-			Object current = iter.next();
-			if (current == bundle)
-				return;
-			if (bundle.compareTo(current) < 0)
-				break;
-			index++;
-		}
-		bundleList.add(index, bundle);
-	}
-
 	private void suspendBundle(AbstractBundle bundle) throws BundleException {
 		if (bundle.isActive() && !bundle.isFragment()) {
 			boolean suspended = framework.suspendBundle(bundle, true);
@@ -290,14 +275,16 @@ public class PackageAdminImpl implements PackageAdmin {
 			framework.publishFrameworkEvent(FrameworkEvent.ERROR, framework.systemBundle, be);
 			return null;
 		}
+		boolean resolve = true;
 		if (bundle.isFragment()) {
 			BundleDescription[] hosts = bundleDescription.getHost().getHosts();
 			for (int i = 0; i < hosts.length; i++) {
 				BundleHost host = (BundleHost) framework.getBundle(hosts[0].getBundleId());
-				((BundleFragment) bundle).addHost(host.getLoaderProxy());
+				resolve = ((BundleFragment) bundle).addHost(host.getLoaderProxy());
 			}
 		}
-		bundle.resolve();
+		if (resolve)
+			bundle.resolve();
 		return bundle;
 	}
 
@@ -305,10 +292,8 @@ public class PackageAdminImpl implements PackageAdmin {
 		ArrayList results = new ArrayList(bundleDeltas.length);
 		for (int i = 0; i < bundleDeltas.length; i++) {
 			int type = bundleDeltas[i].getType();
-			if ((type & (BundleDelta.REMOVAL_PENDING | BundleDelta.REMOVAL_COMPLETE)) != 0) {
+			if ((type & (BundleDelta.REMOVAL_PENDING | BundleDelta.REMOVAL_COMPLETE)) != 0)
 				applyRemovalPending(bundleDeltas[i]);
-			}
-
 			if ((type & BundleDelta.RESOLVED) != 0) {
 				AbstractBundle bundle = setResolved(bundleDeltas[i].getBundle());
 				if (bundle != null && bundle.isResolved())
@@ -319,12 +304,13 @@ public class PackageAdminImpl implements PackageAdmin {
 	}
 
 	private AbstractBundle[] processDelta(BundleDelta[] bundleDeltas, boolean refreshPackages) {
+		Util.sort(bundleDeltas, 0, bundleDeltas.length);
 		ArrayList bundlesList = new ArrayList(bundleDeltas.length);
 		// get all the bundles that are going to be refreshed
 		for (int i = 0; i < bundleDeltas.length; i++) {
 			AbstractBundle changedBundle = framework.getBundle(bundleDeltas[i].getBundle().getBundleId());
 			if (changedBundle != null)
-				insertBundle(changedBundle, bundlesList);
+				bundlesList.add(changedBundle);
 		}
 		AbstractBundle[] refresh = (AbstractBundle[]) bundlesList.toArray(new AbstractBundle[bundlesList.size()]);
 		boolean[] previouslyResolved = new boolean[refresh.length];
