@@ -594,6 +594,9 @@ public class BundleHost extends AbstractBundle {
 				}
 				newFragments[inserted ? i + 1 : i] = fragments[i];
 			}
+			if (!inserted)
+				newFragments[newFragments.length-1] = fragment;
+			fragments = newFragments;
 		}
 
 		// If the Host ClassLoader has exists then we must attach
