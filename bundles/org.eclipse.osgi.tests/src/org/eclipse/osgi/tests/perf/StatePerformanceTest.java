@@ -88,20 +88,20 @@ public class StatePerformanceTest extends AbstractStateTest {
 
 	public void testCreation() {
 		final int stateSize = 5000;
-		runPerformanceTest(this, new Runnable() {
-			public void run() {
+		new CorePerformanceTest() {
+			protected void operation() {
 				buildRandomState(stateSize);
 			}
-		}, 10, 10);
+		}.run(this, 10, 10);
 	}
 
 	private void testResolution(int stateSize, int repetitions) throws IOException {
 		final State originalState = buildRandomState(stateSize);
-		runPerformanceTest(this, new Runnable() {
-			public void run() {
+		new CorePerformanceTest() {
+			protected void operation() {
 				originalState.resolve(false);
 			}
-		}, 10, repetitions);
+		}.run(this, 10, repetitions);
 	}
 
 	public void testResolution100() throws IOException {
@@ -123,15 +123,15 @@ public class StatePerformanceTest extends AbstractStateTest {
 	public void testStoreAndRetrieve() {
 		int stateSize = 5000;
 		final State originalState = buildRandomState(stateSize);
-		runPerformanceTest(this, new Runnable() {
-			public void run() {
+		new CorePerformanceTest() {
+			protected void operation() {
 				try {
 					storeAndRetrieve(originalState);
 				} catch (IOException e) {
 					StatePerformanceTest.this.fail("", e);
 				}
 			}
-		}, 10, 10);
+		}.run(this, 10, 10);
 	}
 
 }
