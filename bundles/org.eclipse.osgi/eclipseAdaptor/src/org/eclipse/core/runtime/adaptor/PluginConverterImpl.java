@@ -59,6 +59,7 @@ public class PluginConverterImpl implements PluginConverter {
 	protected static final String PLUGIN_MANIFEST = "plugin.xml"; //$NON-NLS-1$
 	private static final String COMPATIBILITY_ACTIVATOR = "org.eclipse.core.internal.compatibility.PluginActivator"; //$NON-NLS-1$
 	private static final String[] WS_LIST = {org.eclipse.osgi.service.environment.Constants.WS_CARBON, org.eclipse.osgi.service.environment.Constants.WS_GTK, org.eclipse.osgi.service.environment.Constants.WS_MOTIF, org.eclipse.osgi.service.environment.Constants.WS_PHOTON, org.eclipse.osgi.service.environment.Constants.WS_WIN32};
+	private static final String IGNORE_DOT = "@ignoredot@"; //$NON-NLS-1$
 
 	public static PluginConverterImpl getDefault() {
 		return instance;
@@ -397,7 +398,6 @@ public class PluginConverterImpl implements PluginConverter {
 		//If we are in dev mode, then add the binary folders on the list libs with the export clause set to be the cumulation of the export clause of the real libs   
 		if (devProperties != null || DevClassPathHelper.inDevelopmentMode()) {
 			String[] devClassPath = DevClassPathHelper.getDevClassPath(pluginInfo.getUniqueId(), devProperties);
-
 			// collect export clauses
 			List allExportClauses = new ArrayList(libs.size());
 			Set libEntries = libs.entrySet();
@@ -406,6 +406,12 @@ public class PluginConverterImpl implements PluginConverter {
 				allExportClauses.addAll((List) element.getValue());
 			}
 			if (devClassPath != null) {
+				// bug 88498
+				// if there is a devClassPath defined for this plugin and the @ignoredot@ flag is true
+				// then we will ignore the '.' library specified in the plugin.xml
+				String[] ignoreDotProp = DevClassPathHelper.getDevClassPath(IGNORE_DOT, devProperties);
+				if (devClassPath.length > 0 && ignoreDotProp != null && ignoreDotProp.length > 0 && "true".equals(ignoreDotProp[0])) //$NON-NLS-1$
+					libs.remove(DOT);
 				for (int i = 0; i < devClassPath.length; i++)
 					libs.put(devClassPath[i], allExportClauses);
 			}
@@ -420,7 +426,7 @@ public class PluginConverterImpl implements PluginConverter {
 				continue;
 			String libEntryText = ((String) element.getKey()).trim();
 			File libraryLocation;
-			if (libEntryText.equals(".")) //$NON-NLS-1$
+			if (libEntryText.equals(DOT)) //$NON-NLS-1$
 				libraryLocation = pluginManifestLocation;
 			else {
 				// in development time, libEntries may contain absolute locations (linked folders)				
