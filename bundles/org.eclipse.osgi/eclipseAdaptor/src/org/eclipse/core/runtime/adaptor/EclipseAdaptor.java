@@ -85,8 +85,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		if (configurationLocation != null) {
 			bundleStoreRootDir = new File(configurationLocation, LocationManager.BUNDLES_DIR);
 			bundleStore = bundleStoreRootDir.getAbsolutePath();
-		}
-		else {
+		} else {
 			// last resort just default to "bundles"
 			bundleStore = LocationManager.BUNDLES_DIR;
 			bundleStoreRootDir = new File(bundleStore);
@@ -272,6 +271,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		}
 
 		public void ungetService(Bundle bundle, ServiceRegistration registration, Object service) {
+			//Do nothing.
 		}
 
 		public ParsingService() {

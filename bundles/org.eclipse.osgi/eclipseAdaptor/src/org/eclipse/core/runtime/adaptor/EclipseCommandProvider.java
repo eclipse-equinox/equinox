@@ -25,10 +25,10 @@ public class EclipseCommandProvider implements CommandProvider {
 		StringBuffer help = new StringBuffer(512);
 		help.append(EclipseAdaptorMsg.NEW_LINE);
 		help.append("---");
-		help.append(EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONSOLE_COMMANDS_HEADER"));
+		help.append(EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONSOLE_COMMANDS_HEADER"));//$NON-NLS-1$
 		help.append("---");
 		help.append(EclipseAdaptorMsg.NEW_LINE);
-		help.append("\tdiag - " + EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONSOLE_HELP_DIAG_COMMAND_DESCRIPTION"));
+		help.append("\tdiag - " + EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONSOLE_HELP_DIAG_COMMAND_DESCRIPTION"));//$NON-NLS-1$
 		return help.toString();
 	}
 	private BundleDescription getBundleDescriptionFromToken(State state, String token) {
@@ -45,13 +45,13 @@ public class EclipseCommandProvider implements CommandProvider {
 	public void _diag(CommandInterpreter ci) throws Exception {
 		String nextArg = ci.nextArgument();
 		if (nextArg == null) {
-			ci.println(EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONSOLE_NO_BUNDLE_SPECIFIED_ERROR"));
+			ci.println(EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONSOLE_NO_BUNDLE_SPECIFIED_ERROR"));//$NON-NLS-1$
 			return;
 		}
 		ServiceReference platformAdminRef = context.getServiceReference("org.eclipse.osgi.service.resolver.PlatformAdmin");
 		if (platformAdminRef == null) {
 			ci.print("  ");
-			ci.println(EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONSOLE_NO_CONSTRAINTS_NO_PLATFORM_ADMIN_MESSAGE"));
+			ci.println(EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONSOLE_NO_CONSTRAINTS_NO_PLATFORM_ADMIN_MESSAGE"));//$NON-NLS-1$
 			return;
 		}
 		try {
@@ -62,7 +62,7 @@ public class EclipseCommandProvider implements CommandProvider {
 			while (nextArg != null) {
 				BundleDescription bundle = getBundleDescriptionFromToken(systemState, nextArg);
 				if (bundle == null) {
-					ci.println(EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONSOLE_CANNOT_FIND_BUNDLE_ERROR", nextArg));
+					ci.println(EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONSOLE_CANNOT_FIND_BUNDLE_ERROR", nextArg));//$NON-NLS-1$
 					nextArg = ci.nextArgument();
 					continue;
 				}
@@ -70,7 +70,7 @@ public class EclipseCommandProvider implements CommandProvider {
 				VersionConstraint[] unsatisfied = platformAdmin.getStateHelper().getUnsatisfiedConstraints(bundle);
 				if (unsatisfied.length == 0) {
 					ci.print("  ");
-					ci.println(EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONSOLE_NO_CONSTRAINTS"));
+					ci.println(EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONSOLE_NO_CONSTRAINTS"));//$NON-NLS-1$
 				}
 				for (int i = 0; i < unsatisfied.length; i++) {
 					ci.print("  ");

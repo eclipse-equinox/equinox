@@ -234,7 +234,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 					Debug.println("Unable to create directory: " + bundleStore.getPath());
 				}
 
-				throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION"));
+				throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION")); //$NON-NLS-1$
 			}
 		}
 

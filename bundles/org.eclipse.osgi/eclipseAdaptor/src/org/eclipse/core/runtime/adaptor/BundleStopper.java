@@ -40,7 +40,7 @@ public class BundleStopper {
 		Bundle[] allBundles = EclipseAdaptor.getDefault().getContext().getBundles();
 		// a map in the form: bundle -> REQUIRE_BUNDLE header value
 		Map allToStop = new HashMap(allBundles.length);
-		// a map in the form: bundle symbolic name -> bundle		
+		// a map in the form: bundle symbolic name -> bundle
 		Map toStopWithNames = new HashMap(allBundles.length);
 		selectBundlesToStop(allBundles, allToStop, toStopWithNames);
 		Bundle[] orderedBundles = orderBundles(references, allToStop, toStopWithNames);
@@ -69,6 +69,7 @@ public class BundleStopper {
 			if (requiredBundleNames == null)
 				continue;
 			try {
+				//TODO Can't we use the State instead of reparsing the headers?
 				ManifestElement[] elements = ManifestElement.parseHeader(Constants.REQUIRE_BUNDLE, requiredBundleNames);
 				for (int j = 0; j < elements.length; j++) {
 					String requiredBundleName = elements[j].getValue();
@@ -84,6 +85,9 @@ public class BundleStopper {
 				EclipseAdaptor.getDefault().getFrameworkLog().log(entry);			
 			}
 		}
+		
+		//TODO The ordering should be done with taking all the required bundles into account, and then the filtering should be done. Otherwise this can result in a bad ordering in the shutting down.
+		//TODO Maybe should we also consider the import?
 		Bundle[] orderedBundles = (Bundle[]) allToStop.keySet().toArray(new Bundle[allToStop.size()]);
 		Object[][] cycles = ComputeNodeOrder.computeNodeOrder(orderedBundles, (Object[][]) references.values().toArray(new Object[references.size()][]));
 		// log cycles
@@ -109,7 +113,8 @@ public class BundleStopper {
 		for (int i = 0; i < allBundles.length; i++) {
 			if (allBundles[i].getState() != Bundle.ACTIVE)
 				continue;
-			// we are looking for three headers: LEGACY, ECLIPSE_AUTOSTOP and REQUIRE_BUNDLE
+			// we are looking for three headers: LEGACY, ECLIPSE_AUTOSTOP and REQUIRE_BUNDLE	
+			//TODO Here we can remove the test on LEGACY
 			Dictionary headers = allBundles[i].getHeaders();
 			String autoStop = (String) headers.get(EclipseAdaptorConstants.ECLIPSE_AUTOSTOP);
 			if (autoStop == null)

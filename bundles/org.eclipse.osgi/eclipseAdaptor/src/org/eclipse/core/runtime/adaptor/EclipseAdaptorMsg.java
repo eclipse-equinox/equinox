@@ -31,20 +31,20 @@ public class EclipseAdaptorMsg {
 	public static MessageFormat formatter;
 	// Attempt to load the message bundle.
 	static {
-		formatter = new MessageFormat("org.eclipse.core.runtime.adaptor.EclipseAdaptorMessages");
+		formatter = new MessageFormat("org.eclipse.core.runtime.adaptor.EclipseAdaptorMessages");	//TODO This could be an adaptor constant.
 	}
 	public static String getResolutionFailureMessage(VersionConstraint unsatisfied) {
 		if (unsatisfied.isResolved())
 			throw new IllegalArgumentException();
 		if (unsatisfied instanceof PackageSpecification)
-			return EclipseAdaptorMsg.formatter.getString("ECLIPSE_MISSING_IMPORTED_PACKAGE", toString(unsatisfied));
+			return EclipseAdaptorMsg.formatter.getString("ECLIPSE_MISSING_IMPORTED_PACKAGE", toString(unsatisfied));	//$NON-NLS-1$
 		else if (unsatisfied instanceof BundleSpecification)
 			if (((BundleSpecification) unsatisfied).isOptional())
-				return EclipseAdaptorMsg.formatter.getString("ECLIPSE_MISSING_OPTIONAL_REQUIRED_BUNDLE", toString(unsatisfied));
+				return EclipseAdaptorMsg.formatter.getString("ECLIPSE_MISSING_OPTIONAL_REQUIRED_BUNDLE", toString(unsatisfied));	//$NON-NLS-1$
 			else
-				return EclipseAdaptorMsg.formatter.getString("ECLIPSE_MISSING_REQUIRED_BUNDLE", toString(unsatisfied));
+				return EclipseAdaptorMsg.formatter.getString("ECLIPSE_MISSING_REQUIRED_BUNDLE", toString(unsatisfied));//$NON-NLS-1$
 		else
-			return EclipseAdaptorMsg.formatter.getString("ECLIPSE_MISSING_HOST", toString(unsatisfied));
+			return EclipseAdaptorMsg.formatter.getString("ECLIPSE_MISSING_HOST", toString(unsatisfied)); //$NON-NLS-1$
 	}
 	private static String toString(VersionConstraint constraint) {
 		org.eclipse.osgi.service.resolver.Version versionSpec = constraint.getVersionSpecification();

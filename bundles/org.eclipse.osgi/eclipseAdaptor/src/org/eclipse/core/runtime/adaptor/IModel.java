@@ -12,7 +12,6 @@
 package org.eclipse.core.runtime.adaptor;
 
 public interface IModel {
-
 	public static final int INDENT = 2;
 	public static final int RADIX = 36;
 

@@ -68,6 +68,7 @@ public class EclipseClassLoader extends DefaultClassLoader {
 			EclipseAdaptor.getDefault().getFrameworkLog().log(new FrameworkLogEntry(EclipseAdaptorConstants.PI_ECLIPSE_OSGI, message, 0, e, null));
 		}
 	}
+	//TODO Need to fix the startup problem identified. Need to have a synchronisation pattern similar to the one in beginStateChange()
 	public Class findLocalClass(String name) throws ClassNotFoundException {
 		// See if we need to do autoactivation. We don't if autoActivation is turned off
 		// or if we have already activated this bundle.
@@ -84,7 +85,7 @@ public class EclipseClassLoader extends DefaultClassLoader {
 				// throw an exception. Below we catch the exception and ignore it if it is
 				// of this nature.
 				// Ensure that we do the activation outside of any synchronized blocks to avoid deadlock.
-				if (state != Bundle.STARTING && state != Bundle.ACTIVE)	//TODO Remove starting
+				if (state != Bundle.STARTING && state != Bundle.ACTIVE)
 					try {
 						hostdata.getBundle().start();
 						tryActivating = false;
