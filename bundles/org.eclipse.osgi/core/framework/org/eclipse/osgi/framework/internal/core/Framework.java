@@ -1330,7 +1330,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 		/* synchronize while building the listener list */
 		synchronized (frameworkEvent) {
 			/* add set of BundleContexts w/ listeners to queue */
-			contexts.queueListeners(frameworkEvent, Framework.this);
+			contexts.queueListeners(frameworkEvent, this);
 			/* synchronously dispatch to populate listeners queue */
 			contexts.dispatchEventSynchronous(FRAMEWORKEVENT, listeners);
 		}
@@ -1364,37 +1364,47 @@ public class Framework implements EventDispatcher, EventPublisher {
 	}
 
 	public void publishBundleEventPrivileged(BundleEvent event) {
-		/* Dispatch BundleEvent to SynchronousBundleListeners */
+		/*
+		 * We must collect the snapshots of the sync and async listeners
+		 * BEFORE we dispatch the event.
+		 */
+		/* Collect snapshot of SynchronousBundleListeners */
+		ListenerQueue listenersSync = null;
 		if (bundleEventSync != null) {
 			/* queue to hold set of listeners */
-			ListenerQueue listeners = new ListenerQueue(eventManager);
+			listenersSync = new ListenerQueue(eventManager);
 			/* queue to hold set of BundleContexts w/ listeners */
 			ListenerQueue contexts = new ListenerQueue(eventManager);
 			/* synchronize while building the listener list */
 			synchronized (bundleEventSync) {
 				/* add set of BundleContexts w/ listeners to queue */
-				contexts.queueListeners(bundleEventSync, Framework.this);
+				contexts.queueListeners(bundleEventSync, this);
 				/* synchronously dispatch to populate listeners queue */
-				contexts.dispatchEventSynchronous(BUNDLEEVENTSYNC, listeners);
+				contexts.dispatchEventSynchronous(BUNDLEEVENTSYNC, listenersSync);
 			}
-			/* dispatch event to set of listeners */
-			listeners.dispatchEventSynchronous(BUNDLEEVENTSYNC, event);
 		}
-		/* Dispatch BundleEvent to BundleListeners */
+		/* Collect snapshot of BundleListeners */
+		ListenerQueue listenersAsync = null;;
 		if (bundleEvent != null) {
 			/* queue to hold set of listeners */
-			ListenerQueue listeners = new ListenerQueue(eventManager);
+			listenersAsync = new ListenerQueue(eventManager);
 			/* queue to hold set of BundleContexts w/ listeners */
 			ListenerQueue contexts = new ListenerQueue(eventManager);
 			/* synchronize while building the listener list */
 			synchronized (bundleEvent) {
 				/* add set of BundleContexts w/ listeners to queue */
-				contexts.queueListeners(bundleEvent, Framework.this);
+				contexts.queueListeners(bundleEvent, this);
 				/* synchronously dispatch to populate listeners queue */
-				contexts.dispatchEventSynchronous(BUNDLEEVENT, listeners);
+				contexts.dispatchEventSynchronous(BUNDLEEVENT, listenersAsync);
 			}
-			/* dispatch event to set of listeners */
-			listeners.dispatchEventAsynchronous(BUNDLEEVENT, event);
+		}
+		/* Dispatch BundleEvent to SynchronousBundleListeners */
+		if (listenersSync != null) {
+			listenersSync.dispatchEventSynchronous(BUNDLEEVENTSYNC, event);
+		}
+		/* Dispatch BundleEvent to BundleListeners */
+		if (listenersAsync != null) {
+			listenersAsync.dispatchEventAsynchronous(BUNDLEEVENT, event);
 		}
 	}
 
@@ -1430,7 +1440,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 		/* synchronize while building the listener list */
 		synchronized (serviceEvent) {
 			/* add set of BundleContexts w/ listeners to queue */
-			contexts.queueListeners(serviceEvent, Framework.this);
+			contexts.queueListeners(serviceEvent, this);
 			/* synchronously dispatch to populate listeners queue */
 			contexts.dispatchEventSynchronous(SERVICEEVENT, listeners);
 		}
