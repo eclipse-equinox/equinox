@@ -81,6 +81,7 @@ public class StartLevelManager implements EventDispatcher, EventListener, Servic
 	}
 
 	protected void cleanup() {
+		eventManager.close();
 		eventManager = null;
 		startLevelListeners.removeAllListeners();
 		startLevelListeners = null;
