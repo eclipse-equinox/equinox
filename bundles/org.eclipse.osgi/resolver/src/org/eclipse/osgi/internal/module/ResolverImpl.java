@@ -173,8 +173,10 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		// Check if we wired to a reprovided package (in which case the ResolverExport doesn't exist)
 		if (matchingExport == null && exporter != null) {
 			ResolverExport reprovidedExport = new ResolverExport(exporter, importSupplier);
-			exporter.addExport(reprovidedExport);
-			resolverExports.put(reprovidedExport);
+			if (exporter.getExport(imp) == null) {
+				exporter.addExport(reprovidedExport);
+				resolverExports.put(reprovidedExport);
+			}
 			imp.setMatchingExport(reprovidedExport);
 		}
 		// If we still have a null wire and it's not optional, then we have an error
@@ -183,7 +185,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 			// TODO log error!!
 		}
 		if (imp.getMatchingExport() != null) {
-			rewireBundle(matchingExport.getExporter());
+			rewireBundle(imp.getMatchingExport().getExporter());
 		}
 	}
 
@@ -272,13 +274,13 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 				// Check that we haven't wired to any dropped exports
 				ResolverImport[] imports = rb.getImportPackages();
 				boolean needRewire = false;
-				for(int j=0; j<imports.length; j++) {
-					if(imports[j].getMatchingExport() != null && !resolverExports.contains(imports[j].getMatchingExport())) {
+				for (int j = 0; j < imports.length; j++) {
+					if (imports[j].getMatchingExport() != null && !resolverExports.contains(imports[j].getMatchingExport())) {
 						imports[j].setMatchingExport(null);
 						needRewire = true;
 					}
 				}
-				if(needRewire)
+				if (needRewire)
 					resolveBundle(rb);
 				if (rb.isFullyWired()) {
 					if (DEBUG || DEBUG_CYCLES)
@@ -678,7 +680,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 				// If the clashing import package was also exported then
 				// we need to put the export back into resolverExports
 				ResolverExport removed = importer.getExport(imports[i]);
-				if(removed != null)
+				if (removed != null)
 					resolverExports.put(removed);
 				// Try to re-resolve the bundle
 				if (resolveBundle(importer))
