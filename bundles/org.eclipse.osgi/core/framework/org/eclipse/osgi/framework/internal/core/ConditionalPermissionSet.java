@@ -11,11 +11,11 @@
 
 package org.eclipse.osgi.framework.internal.core;
 
-import java.security.Permission;
-import java.security.PermissionCollection;
+import java.security.*;
 import java.util.Enumeration;
 import java.util.HashMap;
 import org.osgi.service.condpermadmin.Condition;
+import org.osgi.service.permissionadmin.PermissionInfo;
 
 /**
  * This class represents a PermissionCollection tied to a set of Conditions.
@@ -25,6 +25,7 @@ public class ConditionalPermissionSet extends PermissionCollection {
 	private static final long serialVersionUID = 3258411750729920566L;
 	ConditionalPermissionInfoImpl cpis[] = new ConditionalPermissionInfoImpl[0];
 	HashMap cachedPermissionCollections = new HashMap();
+	private boolean hasAllPermission = false;
 	/**
 	 * These are conditions that need to be satisfied in order to enable the
 	 * permissions. If the array is empty, no conditions need to be satisfied.
@@ -43,6 +44,7 @@ public class ConditionalPermissionSet extends PermissionCollection {
 	public ConditionalPermissionSet(ConditionalPermissionInfoImpl cpis[], Condition neededConditions[]) {
 		this.cpis = cpis;
 		this.neededConditions = neededConditions;
+		checkForAllPermission();
 	}
 
 	/**
@@ -55,6 +57,9 @@ public class ConditionalPermissionSet extends PermissionCollection {
 	 *        immutable and satisfied may be added. </b>
 	 */
 	void addConditionalPermissionInfo(ConditionalPermissionInfoImpl cpi) {
+		if (neededConditions.length > 0) {
+			throw new RuntimeException("Cannot add ConditionalPermissionInfoImpl to a non satisfied set");
+		}
 		ConditionalPermissionInfoImpl newcpis[] = new ConditionalPermissionInfoImpl[cpis.length + 1];
 		System.arraycopy(cpis, 0, newcpis, 0, cpis.length);
 		newcpis[cpis.length] = cpi;
@@ -66,6 +71,25 @@ public class ConditionalPermissionSet extends PermissionCollection {
 		 * simpler and in the end may be more efficient.
 		 */
 		cachedPermissionCollections.clear();
+		checkForAllPermission();
+	}
+
+	/**
+	 * This runs through the PermissionInfos to see if there is an AllPermission in the mix.
+	 */
+	private void checkForAllPermission() {
+		if (hasAllPermission) {
+			return;
+		}
+		out: for (int i = 0; i < cpis.length; i++) {
+			PermissionInfo perms[] = cpis[i].perms;
+			for (int j = 0; j < perms.length; j++) {
+				if (perms[j].getType().equals(AllPermission.class.getName())) {
+					hasAllPermission = true;
+					break out;
+				}
+			}
+		}
 	}
 
 	/**
@@ -156,6 +180,8 @@ public class ConditionalPermissionSet extends PermissionCollection {
 	 * @see java.security.PermissionCollection#implies(java.security.Permission)
 	 */
 	public boolean implies(Permission perm) {
+		if (hasAllPermission)
+			return true;
 		Class permClass = perm.getClass();
 		PermissionCollection collection = (PermissionCollection) cachedPermissionCollections.get(permClass);
 		if (collection == null) {
@@ -194,5 +220,6 @@ public class ConditionalPermissionSet extends PermissionCollection {
 	 */
 	void unresolvePermissions(AbstractBundle[] refreshedBundles) {
 		cachedPermissionCollections.clear();
+
 	}
 }
