@@ -126,7 +126,7 @@ public class DefaultClassLoader extends AbstractClassLoader {
 	}
 
 	protected String getBundleSymbolicName() {
-		return hostdata.getSymbolicName() + "_" + hostdata.getVersion();
+		return hostdata.getSymbolicName() + "_" + hostdata.getVersion(); //$NON-NLS-1$
 	}
 
 	/**
@@ -164,11 +164,12 @@ public class DefaultClassLoader extends AbstractClassLoader {
 
 		if (bundlefile != null)
 			return createClassPathEntry(bundlefile, domain);
-		else
-			return null;
+		return null;
 	}
 
 	protected synchronized Class findClass(String name) throws ClassNotFoundException {
+		// must call findLoadedClass here even if it was called earlier,
+		// the findLoadedClass and defineClass calls must be atomic
 		Class result = findLoadedClass(name);
 		if (result != null)
 			return result;
@@ -278,6 +279,7 @@ public class DefaultClassLoader extends AbstractClassLoader {
 			try {
 				in.close();
 			} catch (IOException ee) {
+				// nothing to do here
 			}
 		}
 
