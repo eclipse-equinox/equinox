@@ -47,8 +47,8 @@ import java.util.Vector;
  * <p>
  * Clients may instantiate; not intended to be subclassed by clients.
  * </p>
- * @see IPluginDescriptor#getVersionIdentifier
- * @see java.lang.String#compareTo 
+ * @see org.eclipse.core.runtime.IPluginDescriptor#getVersionIdentifier
+ * @see java.lang.String#compareTo
  */
 public final class Version implements Comparable {
 
@@ -113,11 +113,11 @@ public final class Version implements Comparable {
 		// have passed by the assert).
 
 		if (major < 0)
-			throw new IllegalArgumentException("Negative major");
+			throw new IllegalArgumentException("Negative major"); //$NON-NLS-1$
 		if (minor < 0)
-			throw new IllegalArgumentException("Negative minor");
+			throw new IllegalArgumentException("Negative minor"); //$NON-NLS-1$
 		if (micro < 0)
-			throw new IllegalArgumentException("Negative micro");
+			throw new IllegalArgumentException("Negative micro"); //$NON-NLS-1$
 		if (qualifier == null)
 			qualifier = ""; //$NON-NLS-1$
 
@@ -171,7 +171,7 @@ public final class Version implements Comparable {
 	 */
 	public Version(String versionId, boolean inclusive) {
 		if (versionId == null)
-			versionId = "0.0.0";
+			versionId = "0.0.0"; //$NON-NLS-1$
 		Object[] parts = parseVersion(versionId);
 		this.major = ((Integer) parts[0]).intValue();
 		this.minor = ((Integer) parts[1]).intValue();
@@ -208,17 +208,17 @@ public final class Version implements Comparable {
 		// will not be evaluated each time (including cases when we would
 		// have passed by the assert).
 		if (versionId == null)
-			throw new IllegalArgumentException("Null version string");
+			throw new IllegalArgumentException("Null version string"); //$NON-NLS-1$
 
 		String s = versionId.trim();
 		if (s.equals("")) //$NON-NLS-1$
-			throw new IllegalArgumentException("Empty version string");
+			throw new IllegalArgumentException("Empty version string"); //$NON-NLS-1$
 		if (s.startsWith(SEPARATOR))
-			throw new IllegalArgumentException("Invalid version format");
+			throw new IllegalArgumentException("Invalid version format"); //$NON-NLS-1$
 		if (s.endsWith(SEPARATOR))
-			throw new IllegalArgumentException("Invalid version format");
+			throw new IllegalArgumentException("Invalid version format"); //$NON-NLS-1$
 		if (s.indexOf(SEPARATOR + SEPARATOR) != -1)
-			throw new IllegalArgumentException("Invalid version format");
+			throw new IllegalArgumentException("Invalid version format"); //$NON-NLS-1$
 
 		StringTokenizer st = new StringTokenizer(s, SEPARATOR);
 		Vector elements = new Vector(4);
@@ -229,39 +229,39 @@ public final class Version implements Comparable {
 		int elementSize = elements.size();
 
 		if (elementSize <= 0)
-			throw new IllegalArgumentException("Invalid version format (no token)");
+			throw new IllegalArgumentException("Invalid version format (no token)"); //$NON-NLS-1$
 		if (elementSize > 4)
-			throw new IllegalArgumentException("Invalid version format (more than 4 tokens)");
+			throw new IllegalArgumentException("Invalid version format (more than 4 tokens)"); //$NON-NLS-1$
 
 		int[] numbers = new int[3];
 		try {
 			numbers[0] = Integer.parseInt((String) elements.elementAt(0));
 			if (numbers[0] < 0)
-				throw new IllegalArgumentException("Negative major");
+				throw new IllegalArgumentException("Negative major"); //$NON-NLS-1$
 		} catch (NumberFormatException nfe) {
-			throw new IllegalArgumentException("Invalid major");
+			throw new IllegalArgumentException("Invalid major"); //$NON-NLS-1$
 		}
 
 		try {
 			if (elementSize >= 2) {
 				numbers[1] = Integer.parseInt((String) elements.elementAt(1));
 				if (numbers[1] < 0)
-					throw new IllegalArgumentException("Negative minor");
+					throw new IllegalArgumentException("Negative minor"); //$NON-NLS-1$
 			} else
 				numbers[1] = 0;
 		} catch (NumberFormatException nfe) {
-			throw new IllegalArgumentException("Invalid minor");
+			throw new IllegalArgumentException("Invalid minor"); //$NON-NLS-1$
 		}
 
 		try {
 			if (elementSize >= 3) {
 				numbers[2] = Integer.parseInt((String) elements.elementAt(2));
 				if (numbers[2] < 0)
-					throw new IllegalArgumentException("Invalid micro");
+					throw new IllegalArgumentException("Invalid micro"); //$NON-NLS-1$
 			} else
 				numbers[2] = 0;
 		} catch (NumberFormatException nfe) {
-			throw new IllegalArgumentException("Invalid micro");
+			throw new IllegalArgumentException("Invalid micro"); //$NON-NLS-1$
 		}
 
 		// "result" is a 4-element array with the major, minor, micro, and qualifier
@@ -585,7 +585,6 @@ public final class Version implements Comparable {
 		if (!(o instanceof Version))
 			throw new ClassCastException();
 
-		Version version = (Version) o;
 		if (equals(o))
 			return 0;
 

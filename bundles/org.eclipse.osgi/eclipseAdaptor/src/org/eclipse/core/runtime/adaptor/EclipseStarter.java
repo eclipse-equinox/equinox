@@ -94,7 +94,7 @@ public class EclipseStarter {
 	private static final String FILE_PROTOCOL = "file"; //$NON-NLS-1$
 	private static final String REFERENCE_SCHEME = "reference:"; //$NON-NLS-1$
 	private static final String REFERENCE_PROTOCOL = "reference"; //$NON-NLS-1$
-	private static final String INITIAL_LOCATION = "initial@";
+	private static final String INITIAL_LOCATION = "initial@"; //$NON-NLS-1$
 	/** string containing the classname of the adaptor to be used in this framework instance */
 	protected static final String DEFAULT_ADAPTOR_CLASS = "org.eclipse.core.runtime.adaptor.EclipseAdaptor"; //$NON-NLS-1$
 
