@@ -215,7 +215,7 @@ public interface FrameworkAdaptor {
 	public float getHashtableLoadFactor();
 
 	/**
-	 * The framework will call the frameworkStart(BundleContext) method after the 
+	 * The framework will call this method after the 
 	 * System BundleActivator.start(BundleContext) has been called.  The context is 
 	 * the System Bundle's BundleContext.  This method allows FrameworkAdaptors to 
 	 * have access to the OSGi framework to get services, register services and 
@@ -226,7 +226,7 @@ public interface FrameworkAdaptor {
 	public void frameworkStart(BundleContext context) throws BundleException;
 
 	/**
-	 * The framework will call the frameworkStop(BundleContext) method after the 
+	 * The framework will call this method before the 
 	 * System BundleActivator.stop(BundleContext) has been called.  The context is 
 	 * the System Bundle's BundleContext.  This method allows FrameworkAdaptors to 
 	 * have access to the OSGi framework to get services, register services and 
@@ -235,6 +235,16 @@ public interface FrameworkAdaptor {
 	 * @exception BundleException on any error that may occur.
 	 */
 	public void frameworkStop(BundleContext context) throws BundleException;
+
+	/**
+	 * The framework will call this method before the process of framework
+	 * shutdown is started.  This gives FrameworkAdaptors a chance to
+	 * perform actions before the framework start level is decremented and
+	 * all the bundles are stopped.  This method will get called before the
+	 * {@link #frameworkStop(BundleContext)} method
+	 *
+	 */
+	public void frameworkStopping();
 
 	/**
 	 * Gets the value for Export-Package for packages that a FrameworkAdaptor is exporting

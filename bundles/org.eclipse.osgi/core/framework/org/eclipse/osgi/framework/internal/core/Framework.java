@@ -426,6 +426,13 @@ public class Framework implements EventSource, EventPublisher {
 		if (!active) {
 			return;
 		}
+		/* call the FrameworkAdaptor.frameworkStopping method first */
+		try {
+			adaptor.frameworkStopping();
+		}
+		catch (Throwable t) {
+			publishFrameworkEvent(FrameworkEvent.ERROR, systemBundle,t);
+		}
 		/* Suspend systembundle */
 		try {
 			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {

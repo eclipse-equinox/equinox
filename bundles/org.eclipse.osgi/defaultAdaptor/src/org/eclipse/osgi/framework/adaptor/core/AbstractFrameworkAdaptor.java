@@ -180,6 +180,12 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 	}
 
 	/**
+	 * @see org.eclipse.osgi.framework.adaptor.FrameworkAdaptor#frameworkStopping()
+	 */
+	public void frameworkStopping() {
+	}
+
+	/**
 	 * @see org.eclipse.osgi.framework.adaptor.FrameworkAdaptor#getExportPackages()
 	 */
 	public String getExportPackages()
