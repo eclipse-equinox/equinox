@@ -37,13 +37,14 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 	/** The unique identifier */
 	protected long id;
 	/** The identity string for the bundle */
-	protected String location;
+	protected String location;		//TODO Given what we use this slot for we shoudl access bundledata instead
 	/** Internal object used for state change synchronization */
 	protected Object statechangeLock = new Object();
 	/** ProtectionDomain for the bundle */
 	protected ProtectionDomain domain;
 	/** Bundle assigned startlevel */
-	protected int startLevel;
+	protected int startLevel;	//TODO Do we really need that here? It is mainly used in the StartLevelImpl
+	
 	/**
 	 * This String captures the dependencies that could not be resolved
 	 * as a result of not having the proper permissions.
@@ -70,6 +71,7 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 	 * @param framework
 	 *            Framework this bundle is running in
 	 */
+	//TODO If location and startLevel are removed from here, they are no longer necessary as arguments.
 	protected static Bundle createBundle(BundleData bundledata, String location, Framework framework, int startLevel) throws BundleException {
 		if (bundledata.isFragment())
 			return new BundleFragment(bundledata, location, framework, startLevel);
@@ -93,6 +95,7 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 	 * @param framework
 	 *            Framework this bundle is running in
 	 */
+	//TODO If location and startLevel are removed from here, they are no longer necessary as arguments.
 	protected Bundle(BundleData bundledata, String location, Framework framework, int startLevel) throws BundleException {
 		state = INSTALLED;
 		stateChanging = null;
@@ -1164,11 +1167,11 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 					return;
 				}
 				if (doubleFault || (stateChanging == Thread.currentThread())) {
-					throw new BundleException(Msg.formatter.getString("BUNDLE_STATE_CHANGE_EXCEPTION"));
+					throw new BundleException(Msg.formatter.getString("BUNDLE_STATE_CHANGE_EXCEPTION"));	//$NON-NLS-1$
 				}
 				try {
 					if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-						Debug.println(" Waiting for state to change in bundle " + this);
+						Debug.println(" Waiting for state to change in bundle " + this); 	//$NON-NLS-1$
 					}
 					long start = 0;
 					if (Debug.DEBUG)
@@ -1180,7 +1183,7 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 					if (Debug.DEBUG) {
 						long end = System.currentTimeMillis();
 						if (end - start > 0) {
-							System.out.println("Waiting... : " + getSymbolicName() + " " + (end - start));
+							System.out.println("Waiting... : " + getSymbolicName() + ' ' + (end - start));
 						}
 					}
 				} catch (InterruptedException e) {
@@ -1389,7 +1392,7 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 			return defaultMessage;
 		}
 		if (permissionMsg != null) {
-			return permissionMsg;
+			return permissionMsg;	//TODO Why don't we null out this field once the value has been returned? If I'm correct this is no longer needed
 		}
 		BundleDescription bundleDescription = getBundleDescription();
 		if (bundleDescription == null) {
