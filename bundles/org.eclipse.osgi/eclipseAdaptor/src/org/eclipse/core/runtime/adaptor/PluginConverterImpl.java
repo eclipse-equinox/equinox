@@ -329,7 +329,8 @@ public class PluginConverterImpl implements PluginConverter {
 		StringBuffer result = new StringBuffer(pluginInfo.getUniqueId());
 		result.append(SEMICOLON); //$NON-NLS-1$
 		result.append(Constants.SINGLETON_DIRECTIVE);
-		result.append("=true"); //$NON-NLS-1$
+		String assignment = TARGET31.equals(target) ? ":=" : "="; //$NON-NLS-1$ //$NON-NLS-2$
+		result.append(assignment).append("true"); //$NON-NLS-1$
 		return result.toString();
 	}
 
