@@ -15,6 +15,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.security.Permission;
+import java.security.ProtectionDomain;
+
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.util.SecureAction;
 import org.osgi.framework.BundleException;
@@ -26,6 +28,8 @@ import org.osgi.framework.BundleException;
  */
 
 public class SystemBundle extends BundleHost {
+
+	ProtectionDomain systemDomain;
 
 	/**
 	 * Private SystemBundle object constructor.
@@ -50,7 +54,7 @@ public class SystemBundle extends BundleHost {
 		SecurityManager sm = System.getSecurityManager();
 
 		if (sm != null) {
-			domain = getClass().getProtectionDomain();
+			systemDomain = getClass().getProtectionDomain();
 		}
 	}
 
@@ -250,9 +254,9 @@ public class SystemBundle extends BundleHost {
 	 * @return <code>true</code>
 	 */
 	public boolean hasPermission(Object permission) {
-		if (domain != null) {
+		if (systemDomain != null) {
 			if (permission instanceof Permission) {
-				return domain.implies((Permission) permission);
+				return systemDomain.implies((Permission) permission);
 			}
 
 			return false;
@@ -277,37 +281,5 @@ public class SystemBundle extends BundleHost {
 	 */
 	public org.osgi.framework.Bundle[] getFragments() {
 		return null;
-	}
-
-	/*
-	 * The System Bundle always has permission to do anything;
-	 * override the check*Permission methods to always return true.
-	 */
-	protected boolean checkExportPackagePermission(String pkgName) {
-		return true;
-	}
-
-	protected boolean checkFragmentBundlePermission(String symbolicName) {
-		return true;
-	}
-
-	protected boolean checkFragmentHostPermission(String symbolicName) {
-		return true;
-	}
-
-	protected boolean checkImportPackagePermission(String pkgName) {
-		return true;
-	}
-
-	protected boolean checkPermissions() {
-		return true;
-	}
-
-	protected boolean checkProvideBundlePermission(String symbolicName) {
-		return true;
-	}
-
-	protected boolean checkRequireBundlePermission(String symbolicName) {
-		return true;
 	}
 }

@@ -11,14 +11,14 @@
 package org.eclipse.osgi.framework.adaptor.core;
 
 import java.io.IOException;
-import java.security.ProtectionDomain;
 import org.eclipse.osgi.framework.adaptor.BundleClassLoader;
+import org.eclipse.osgi.framework.adaptor.BundleProtectionDomain;
 import org.eclipse.osgi.framework.adaptor.ClassLoaderDelegate;
 
 public interface AdaptorElementFactory {
 
 	public AbstractBundleData createBundleData(AbstractFrameworkAdaptor adaptor, long id) throws IOException;
 
-	public BundleClassLoader createClassLoader(ClassLoaderDelegate delegate, ProtectionDomain domain, String[] bundleclasspath, AbstractBundleData data);
+	public BundleClassLoader createClassLoader(ClassLoaderDelegate delegate, BundleProtectionDomain domain, String[] bundleclasspath, AbstractBundleData data);
 
 }

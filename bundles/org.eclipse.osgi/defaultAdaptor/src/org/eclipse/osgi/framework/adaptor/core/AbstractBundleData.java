@@ -15,9 +15,9 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.security.ProtectionDomain;
 import java.util.*;
 import org.eclipse.osgi.framework.adaptor.BundleData;
+import org.eclipse.osgi.framework.adaptor.BundleProtectionDomain;
 import org.eclipse.osgi.framework.adaptor.ClassLoaderDelegate;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.internal.core.Constants;
@@ -212,7 +212,7 @@ public abstract class AbstractBundleData implements BundleData, Cloneable {
 	 * classloader.  This is specified by the Bundle-ClassPath manifest entry.
 	 * @return The new ClassLoader for the BundleData.
 	 */
-	public org.eclipse.osgi.framework.adaptor.BundleClassLoader createClassLoader(ClassLoaderDelegate delegate, ProtectionDomain domain, String[] bundleclasspath) {
+	public org.eclipse.osgi.framework.adaptor.BundleClassLoader createClassLoader(ClassLoaderDelegate delegate, BundleProtectionDomain domain, String[] bundleclasspath) {
 		return getAdaptor().getElementFactory().createClassLoader(delegate, domain, bundleclasspath, this);
 	}
 

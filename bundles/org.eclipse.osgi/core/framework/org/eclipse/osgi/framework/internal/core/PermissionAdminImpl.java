@@ -14,6 +14,8 @@ package org.eclipse.osgi.framework.internal.core;
 import java.io.*;
 import java.security.*;
 import java.util.Vector;
+
+import org.eclipse.osgi.framework.adaptor.BundleProtectionDomain;
 import org.eclipse.osgi.framework.adaptor.PermissionStorage;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.osgi.framework.FrameworkEvent;
@@ -370,7 +372,7 @@ public class PermissionAdminImpl implements PermissionAdmin {
 	 * @return BundleCombinedPermission object with the bundle's
 	 * dynamic permissions.
 	 */
-	protected PermissionCollection createPermissionCollection(AbstractBundle bundle) {
+	protected BundleProtectionDomain createProtectionDomain(AbstractBundle bundle) {
 		BundlePermissionCollection implied = getImpliedPermissions(bundle);
 
 		BundleCombinedPermissions combined = new BundleCombinedPermissions(implied);
@@ -379,7 +381,7 @@ public class PermissionAdminImpl implements PermissionAdmin {
 
 		combined.setAssignedPermissions(assigned);
 
-		return combined;
+		return new BundleProtectionDomain(combined);
 	}
 
 	/**

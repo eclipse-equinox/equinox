@@ -18,6 +18,7 @@ import java.security.*;
 import java.util.*;
 import org.eclipse.osgi.framework.adaptor.BundleData;
 import org.eclipse.osgi.framework.adaptor.BundleOperation;
+import org.eclipse.osgi.framework.adaptor.BundleProtectionDomain;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.*;
@@ -40,7 +41,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	/** Internal object used for state change synchronization */
 	protected Object statechangeLock = new Object();
 	/** ProtectionDomain for the bundle */
-	protected ProtectionDomain domain;
+	protected BundleProtectionDomain domain;
 
 	/**
 	 * This String captures the dependencies that could not be resolved
@@ -1168,7 +1169,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	 * 
 	 * @return bundle's ProtectionDomain.
 	 */
-	protected ProtectionDomain getProtectionDomain() {
+	protected BundleProtectionDomain getProtectionDomain() {
 		return domain;
 	}
 

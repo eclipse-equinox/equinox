@@ -14,9 +14,9 @@ package org.eclipse.osgi.framework.adaptor.core;
 import java.io.*;
 import java.io.File;
 import java.io.IOException;
-import java.security.ProtectionDomain;
 import java.util.Enumeration;
 import org.eclipse.osgi.framework.adaptor.BundleClassLoader;
+import org.eclipse.osgi.framework.adaptor.BundleProtectionDomain;
 import org.eclipse.osgi.framework.adaptor.ClassLoaderDelegate;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.internal.core.Constants;
@@ -147,7 +147,7 @@ public class SystemBundleData extends AbstractBundleData {
 			setVersion(Version.parseVersion(sVersion));
 	}
 
-	public BundleClassLoader createClassLoader(ClassLoaderDelegate delegate, ProtectionDomain domain, String[] bundleclasspath) {
+	public BundleClassLoader createClassLoader(ClassLoaderDelegate delegate, BundleProtectionDomain domain, String[] bundleclasspath) {
 		return null;
 	}
 

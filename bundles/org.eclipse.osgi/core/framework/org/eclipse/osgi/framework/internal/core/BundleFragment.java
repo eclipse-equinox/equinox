@@ -13,8 +13,6 @@ package org.eclipse.osgi.framework.internal.core;
 
 import java.io.IOException;
 import java.net.URL;
-import java.security.PermissionCollection;
-import java.security.ProtectionDomain;
 import java.util.Enumeration;
 import org.eclipse.osgi.framework.adaptor.BundleData;
 import org.eclipse.osgi.framework.debug.Debug;
@@ -51,9 +49,7 @@ public class BundleFragment extends AbstractBundle {
 			SecurityManager sm = System.getSecurityManager();
 
 			if (sm != null) {
-				PermissionCollection collection = framework.permissionAdmin.createPermissionCollection(this);
-
-				domain = new ProtectionDomain(null, collection);
+				domain = framework.permissionAdmin.createProtectionDomain(this);
 			}
 
 			try {
@@ -169,7 +165,7 @@ public class BundleFragment extends AbstractBundle {
 				domain = null;
 			}
 		}
-		if (!exporting){
+		if (!exporting) {
 			try {
 				this.bundledata.close();
 			} catch (IOException e) { // Do Nothing.
@@ -357,7 +353,7 @@ public class BundleFragment extends AbstractBundle {
 	protected boolean addHost(BundleLoaderProxy host) {
 		if (host != null) {
 			try {
-				((BundleHost)host.getBundleHost()).attachFragment(this);
+				((BundleHost) host.getBundleHost()).attachFragment(this);
 			} catch (BundleException be) {
 				framework.publishFrameworkEvent(FrameworkEvent.ERROR, host.getBundleHost(), be);
 				return false;
@@ -372,8 +368,8 @@ public class BundleFragment extends AbstractBundle {
 				return true; // already a host
 		}
 		BundleLoaderProxy[] newHosts = new BundleLoaderProxy[hosts.length + 1];
-		System.arraycopy(hosts,0,newHosts,0,hosts.length);
-		newHosts[newHosts.length - 1] = host; 
+		System.arraycopy(hosts, 0, newHosts, 0, hosts.length);
+		newHosts[newHosts.length - 1] = host;
 		return true;
 	}
 

@@ -11,7 +11,8 @@
 package org.eclipse.core.runtime.adaptor;
 
 import java.io.IOException;
-import java.security.ProtectionDomain;
+
+import org.eclipse.osgi.framework.adaptor.BundleProtectionDomain;
 import org.eclipse.osgi.framework.adaptor.ClassLoaderDelegate;
 import org.eclipse.osgi.framework.adaptor.core.*;
 
@@ -24,7 +25,7 @@ public class EclipseElementFactory implements AdaptorElementFactory {
 		return new EclipseBundleData((AbstractFrameworkAdaptor) adaptor, id);
 	}
 
-	public org.eclipse.osgi.framework.adaptor.BundleClassLoader createClassLoader(ClassLoaderDelegate delegate, ProtectionDomain domain, String[] bundleclasspath, AbstractBundleData data) {
+	public org.eclipse.osgi.framework.adaptor.BundleClassLoader createClassLoader(ClassLoaderDelegate delegate, BundleProtectionDomain domain, String[] bundleclasspath, AbstractBundleData data) {
 		return new EclipseClassLoader(delegate, domain, bundleclasspath, data.getAdaptor().getBundleClassLoaderParent(), data);
 	}
 

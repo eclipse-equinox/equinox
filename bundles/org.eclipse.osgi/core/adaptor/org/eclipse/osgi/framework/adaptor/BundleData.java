@@ -14,7 +14,6 @@ package org.eclipse.osgi.framework.adaptor;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.security.ProtectionDomain;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import org.osgi.framework.*;
@@ -39,12 +38,12 @@ public interface BundleData {
 	 * The <code>ProtectionDomain</code> domain must be used by the Classloader when 
 	 * defining a class.  
 	 * @param delegate The <code>ClassLoaderDelegate</code> to delegate to.
-	 * @param domain The <code>ProtectionDomain</code> to use when defining a class.
+	 * @param domain The <code>BundleProtectionDomain</code> to use when defining a class.
 	 * @param bundleclasspath An array of bundle classpaths to use to create this
 	 * classloader.  This is specified by the Bundle-ClassPath manifest entry.
 	 * @return The new ClassLoader for the BundleData.
 	 */
-	public BundleClassLoader createClassLoader(ClassLoaderDelegate delegate, ProtectionDomain domain, String[] bundleclasspath);
+	public BundleClassLoader createClassLoader(ClassLoaderDelegate delegate, BundleProtectionDomain domain, String[] bundleclasspath);
 
 	/**
 	 * Gets a <code>URL</code> to the bundle entry specified by path.

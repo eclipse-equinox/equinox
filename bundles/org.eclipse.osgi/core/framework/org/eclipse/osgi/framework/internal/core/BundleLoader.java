@@ -506,20 +506,20 @@ public class BundleLoader implements ClassLoaderDelegate {
 		return bundle;
 	}
 
-	private BundleClassLoader createBCLPrevileged(final ProtectionDomain pd, final String[] cp) {
+	private BundleClassLoader createBCLPrevileged(final BundleProtectionDomain pd, final String[] cp) {
 		// Create the classloader as previleged code if security manager is present.
 		if (System.getSecurityManager() == null)
 			return createBCL(pd, cp);
-		else
-			return (BundleClassLoader) AccessController.doPrivileged(new PrivilegedAction() {
-				public Object run() {
-					return createBCL(pd, cp);
-				}
-			});
+
+		return (BundleClassLoader) AccessController.doPrivileged(new PrivilegedAction() {
+			public Object run() {
+				return createBCL(pd, cp);
+			}
+		});
 
 	}
 
-	private BundleClassLoader createBCL(final ProtectionDomain pd, final String[] cp) {
+	BundleClassLoader createBCL(final BundleProtectionDomain pd, final String[] cp) {
 		BundleClassLoader bcl = bundle.getBundleData().createClassLoader(BundleLoader.this, pd, cp);
 		// attach existing fragments to classloader
 		org.osgi.framework.Bundle[] fragments = bundle.getFragments();

@@ -13,8 +13,6 @@ package org.eclipse.osgi.framework.internal.core;
 
 import java.io.IOException;
 import java.net.URL;
-import java.security.PermissionCollection;
-import java.security.ProtectionDomain;
 import java.util.Enumeration;
 import org.eclipse.osgi.framework.adaptor.BundleData;
 import org.eclipse.osgi.framework.adaptor.BundleWatcher;
@@ -63,9 +61,7 @@ public class BundleHost extends AbstractBundle {
 			SecurityManager sm = System.getSecurityManager();
 
 			if (sm != null) {
-				PermissionCollection collection = framework.permissionAdmin.createPermissionCollection(this);
-
-				domain = new ProtectionDomain(null, collection);
+				domain = framework.permissionAdmin.createProtectionDomain(this);
 			}
 
 		}
@@ -267,8 +263,7 @@ public class BundleHost extends AbstractBundle {
 
 		try {
 			return loader.getResources(name);
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			return null;
 		}
 	}
@@ -279,7 +274,7 @@ public class BundleHost extends AbstractBundle {
 	 * @param persistent if true persistently record the bundle was started.
 	 */
 	protected void startWorker(boolean persistent) throws BundleException {
-		long start  = 0;
+		long start = 0;
 		if (framework.active) {
 			if ((state & (STARTING | ACTIVE)) != 0) {
 				return;
@@ -341,7 +336,7 @@ public class BundleHost extends AbstractBundle {
 					}
 				}
 			} finally {
-				if (Debug.DEBUG && state==ACTIVE) {
+				if (Debug.DEBUG && state == ACTIVE) {
 					if (Debug.MONITOR_ACTIVATION) {
 						BundleWatcher bundleStats = framework.adaptor.getBundleWatcher();
 						if (bundleStats != null)
@@ -508,7 +503,7 @@ public class BundleHost extends AbstractBundle {
 				newFragments[inserted ? i + 1 : i] = fragments[i];
 			}
 			if (!inserted)
-				newFragments[newFragments.length-1] = fragment;
+				newFragments[newFragments.length - 1] = fragment;
 			fragments = newFragments;
 		}
 
