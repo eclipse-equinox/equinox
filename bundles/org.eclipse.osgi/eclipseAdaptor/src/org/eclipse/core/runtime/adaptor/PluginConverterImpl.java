@@ -32,6 +32,7 @@ public class PluginConverterImpl implements PluginConverter {
 	private File pluginManifestLocation;
 	private Dictionary generatedManifest;
 	private byte manifestType;
+	private String target;
 	private static final String MANIFEST_VERSION = "Manifest-Version";
 	private static final String PLUGIN_PROPERTIES_FILENAME = "plugin";
 	private static PluginConverterImpl instance;
@@ -63,6 +64,7 @@ public class PluginConverterImpl implements PluginConverter {
 		pluginManifestLocation = null;
 		generatedManifest = new Hashtable(10);
 		manifestType=EclipseBundleData.MANIFEST_TYPE_UNKNOWN;
+		target = null;
 	}
 	private void fillPluginInfo(File pluginBaseLocation) {
 		pluginManifestLocation = pluginBaseLocation;
@@ -78,8 +80,9 @@ public class PluginConverterImpl implements PluginConverter {
 			EclipseAdaptor.getDefault().getFrameworkLog().log(entry);
 		}
 	}
-	public synchronized File convertManifest(File pluginBaseLocation, File bundleManifestLocation, boolean compatibilityManifest) {
+	public synchronized File convertManifest(File pluginBaseLocation, File bundleManifestLocation, boolean compatibilityManifest, String target) {
 		init();
+		this.target = target;
 		fillPluginInfo(pluginBaseLocation);
 		if (pluginInfo == null)
 			return null;
@@ -499,7 +502,7 @@ public class PluginConverterImpl implements PluginConverter {
 		InputStream input = null;
 		try {
 			input = new BufferedInputStream(pluginLocation.openStream());
-			return new PluginParser(context).parsePlugin(input);
+			return new PluginParser(context, target).parsePlugin(input);
 		} catch (Exception e) {
 			String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONVERTER_ERROR_PARSING_PLUGIN_MANIFEST", pluginManifestLocation); //$NON-NLS-1$
 			throw new PluginConversionException(message, e);
@@ -632,8 +635,9 @@ public class PluginConverterImpl implements PluginConverter {
 			super(cause);
 		}
 	}
-	public Dictionary convertManifest(File pluginBaseLocation, boolean compatibility) {
+	public Dictionary convertManifest(File pluginBaseLocation, boolean compatibility, String target) {
 		init();
+		this.target = target; 
 		fillPluginInfo(pluginBaseLocation);
 		if (pluginInfo == null)
 			return null;

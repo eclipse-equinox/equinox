@@ -188,7 +188,7 @@ public class EclipseBundleData extends DefaultBundleData {
 
 		PluginConverterImpl converter = PluginConverterImpl.getDefault();
 
-		Dictionary generatedManifest = converter.convertManifest(getBaseFile(), true);
+		Dictionary generatedManifest = converter.convertManifest(getBaseFile(), true, null);
 		if (generatedManifest == null)
 			return null;
 

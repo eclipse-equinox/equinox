@@ -19,7 +19,8 @@ import org.xml.sax.helpers.DefaultHandler;
 public class PluginParser extends DefaultHandler implements IModel {
 	private PluginInfo manifestInfo = new PluginInfo();
 	private BundleContext context;
-
+	private String target;	// The targeted platform for the given manifest
+	
 	public class PluginInfo implements IPluginInfo {
 		private String schemaVersion;
 		private String pluginId;
@@ -41,6 +42,8 @@ public class PluginParser extends DefaultHandler implements IModel {
 		private Set filters;
 		private String pluginName;
 		private boolean singleton;
+		private static final String TARGET21 = "2.1";
+
 		public boolean isFragment() {
 			return masterPluginId != null;
 		}
@@ -53,6 +56,9 @@ public class PluginParser extends DefaultHandler implements IModel {
 			return libraries;
 		}
 		public ArrayList getRequires() {
+			if (TARGET21.equals(target))
+				return requires;
+			
 			if (schemaVersion == null && ! requiresExpanded) {
 				requiresExpanded = true;
 				if (requires == null) {
@@ -144,9 +150,10 @@ public class PluginParser extends DefaultHandler implements IModel {
 	private static final int FRAGMENT_STATE = 11;
 	private ServiceReference parserReference;
 
-	public PluginParser(BundleContext context) {
+	public PluginParser(BundleContext context, String target) {
 		super();
 		this.context = context;
+		this.target = target;
 	}
 	/**
 	 * Receive a Locator object for document events.
