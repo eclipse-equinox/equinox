@@ -189,7 +189,7 @@ public class PluginParser extends DefaultHandler implements IModel {
 						manifestInfo.libraryPaths = new ArrayList(3);
 					}
 					manifestInfo.libraries.put(curLibrary, exportsVector);
-					manifestInfo.libraryPaths.add(curLibrary);
+					manifestInfo.libraryPaths.add(curLibrary.replace('\\','/'));
 					stateStack.pop();
 				}
 				break;
