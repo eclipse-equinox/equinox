@@ -612,6 +612,7 @@ public class BundleContext implements org.osgi.framework.BundleContext, EventSou
 				Class clazz;
 
 				try {
+					// TODO need to ensure that the class is loaded from the SERVICE or PRIVATE class space
 					clazz = bundle.loadClass(clazzes[i], false);
 				} catch (ClassNotFoundException e) {
 					try {

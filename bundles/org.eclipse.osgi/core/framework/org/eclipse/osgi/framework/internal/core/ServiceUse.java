@@ -141,6 +141,7 @@ public class ServiceUse {
 				Class clazz;
 
 				try {
+					// TODO need to ensure that the class is loaded from the SERVICE or PRIVATE class space
 					clazz = factorybundle.loadClass(clazzes[i], false);
 				} catch (ClassNotFoundException e) {
 					try {
