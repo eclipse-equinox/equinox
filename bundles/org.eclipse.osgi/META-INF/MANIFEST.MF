@@ -29,7 +29,7 @@ Export-Service: org.osgi.service.packageadmin.PackageAdmin,
  org.osgi.service.startlevel.StartLevel,
  org.eclipse.osgi.service.debug.DebugOptions
 Bundle-Name: %systemBundle
-Bundle-SymbolicName: org.eclipse.osgi; singleton=true
+Bundle-SymbolicName: org.eclipse.osgi; singleton:=true
 Bundle-Activator: org.eclipse.osgi.framework.internal.core.SystemBundleActivator
 Bundle-Description: %systemBundle
 Bundle-Copyright: %copyright
