@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
 
-import java.io.*;
-
+import java.io.File;
+import java.io.IOException;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -31,37 +31,39 @@ public class StateManager implements PlatformAdmin, Runnable {
 	private long lastTimeStamp;
 	private BundleInstaller installer;
 	private boolean cachedState = false;
-	private File stateLocation;
+	private File stateFile;
+	private File lazyFile;
 	private long expectedTimeStamp;
 	private BundleContext context;
 
-	public StateManager(File stateLocation, BundleContext context) {
+	public StateManager(File stateFile, File lazyFile, BundleContext context) {
 		// a negative timestamp means no timestamp checking
-		this(stateLocation, context, -1);
+		this(stateFile, lazyFile, context, -1);
 	}
 
-	public StateManager(File stateLocation, BundleContext context, long expectedTimeStamp) {
-		this.stateLocation = stateLocation;
+	public StateManager(File stateFile, File lazyFile, BundleContext context, long expectedTimeStamp) {
+		this.stateFile = stateFile;
+		this.lazyFile = lazyFile;
 		this.context = context;
 		this.expectedTimeStamp = expectedTimeStamp;
 		factory = new StateObjectFactoryImpl();
 	}
 
-	public void shutdown(File stateLocation) throws IOException {
+	public void shutdown(File stateFile, File lazyFile) throws IOException {
 		BundleDescription[] removalPendings = systemState.getRemovalPendings();
 		if (removalPendings.length > 0)
 			systemState.resolve(removalPendings);
-		writeState(stateLocation);
+		writeState(stateFile, lazyFile);
 	}
 
-	private void readSystemState(File stateLocation, long expectedTimeStamp) {
-		if (stateLocation == null || !stateLocation.isFile())
+	private void readSystemState(File stateFile, File lazyFile, long expectedTimeStamp) {
+		if (stateFile == null || !stateFile.isFile())
 			return;
 		if (DEBUG_READER)
 			readStartupTime = System.currentTimeMillis();
 		try {
 			boolean lazyLoad = !Boolean.valueOf(System.getProperty(PROP_NO_LAZY_LOADING)).booleanValue();
-			systemState = factory.readSystemState(stateLocation, lazyLoad, expectedTimeStamp);
+			systemState = factory.readSystemState(stateFile, lazyFile, lazyLoad, expectedTimeStamp);
 			// problems in the cache (corrupted/stale), don't create a state object
 			if (systemState == null)
 				return;
@@ -69,13 +71,12 @@ public class StateManager implements PlatformAdmin, Runnable {
 			cachedState = true;
 			try {
 				expireTime = Long.parseLong(System.getProperty(PROP_LAZY_UNLOADING_TIME, Long.toString(expireTime)));
-			}
-			catch (NumberFormatException nfe) {
+			} catch (NumberFormatException nfe) {
 				// default to not expire
 				expireTime = 0;
 			}
 			if (lazyLoad && expireTime > 0) {
-				Thread t = new Thread(this,"State Data Manager"); //$NON-NLS-1$
+				Thread t = new Thread(this, "State Data Manager"); //$NON-NLS-1$
 				t.setDaemon(true);
 				t.start();
 			}
@@ -88,13 +89,13 @@ public class StateManager implements PlatformAdmin, Runnable {
 		}
 	}
 
-	private void writeState(File stateLocation) throws IOException {
+	private void writeState(File stateFile, File lazyFile) throws IOException {
 		if (systemState == null)
 			return;
 		if (cachedState && lastTimeStamp == systemState.getTimeStamp())
 			return;
 		systemState.fullyLoad(); // make sure we are fully loaded before saving
-		factory.writeState(systemState, new BufferedOutputStream(new FileOutputStream(stateLocation)));
+		factory.writeState(systemState, stateFile, lazyFile);
 	}
 
 	private void initializeSystemState() {
@@ -114,7 +115,7 @@ public class StateManager implements PlatformAdmin, Runnable {
 
 	public synchronized StateImpl readSystemState() {
 		if (systemState == null)
-			readSystemState(stateLocation, expectedTimeStamp);
+			readSystemState(stateFile, lazyFile, expectedTimeStamp);
 		return systemState;
 	}
 

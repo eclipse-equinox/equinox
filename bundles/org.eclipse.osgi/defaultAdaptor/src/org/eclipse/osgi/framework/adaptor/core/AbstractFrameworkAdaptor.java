@@ -17,7 +17,6 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.*;
-import java.util.Properties;
 import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.internal.core.BundleResourceHandler;
@@ -103,7 +102,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 
 	protected AdaptorElementFactory elementFactory;
 
-	public static final String METADATA_ADAPTOR_NEXTID = "METADATA_ADAPTOR_NEXTID";
+	public static final String METADATA_ADAPTOR_NEXTID = "METADATA_ADAPTOR_NEXTID"; //$NON-NLS-1$
 
 	static {
 		// check property for specified parent
@@ -325,7 +324,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 	 */
 	protected FrameworkLog frameworkLog;
 
-	public static final String BUNDLE_STORE = "osgi.bundlestore";
+	public static final String BUNDLE_STORE = "osgi.bundlestore"; //$NON-NLS-1$
 
 	/**
 	 * This method locates and reads the osgi.properties file.
@@ -375,7 +374,6 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 		}
 	}
 
-	//protected abstract long getNextBundleId();
 	/**
 	 * Return the next valid, unused bundle id.
 	 *
@@ -661,7 +659,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 						} catch (IOException e) {
 							throw new BundleException(AdaptorMsg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION"), e); //$NON-NLS-1$
 						}
-						data = (AbstractBundleData) getElementFactory().createBundleData(AbstractFrameworkAdaptor.this, id);
+						data = getElementFactory().createBundleData(AbstractFrameworkAdaptor.this, id);
 						data.setLastModified(System.currentTimeMillis());
 						data.setLocation(location);
 						data.setStartLevel(getInitialBundleStartLevel());
@@ -804,7 +802,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 	 */
 	protected void shutdownStateManager() {
 		try {
-			stateManager.shutdown(new File(getBundleStoreRootDir(), ".state")); //$NON-NLS-1$
+			stateManager.shutdown(new File(getBundleStoreRootDir(), ".state"), new File(getBundleStoreRootDir(), ".lazy"));  //$NON-NLS-1$//$NON-NLS-2$
 		} catch (IOException e) {
 			frameworkLog.log(new FrameworkEvent(FrameworkEvent.ERROR, context.getBundle(), e));
 		} finally {
@@ -857,8 +855,8 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 	 * directory containing data directories for installed bundles 
 	 */
 	protected File dataRootDir;
-	public static final String METADATA_ADAPTOR_IBSL = "METADATA_ADAPTOR_IBSL";
-	public static final String DATA_DIR_NAME = "data";
+	public static final String METADATA_ADAPTOR_IBSL = "METADATA_ADAPTOR_IBSL"; //$NON-NLS-1$
+	public static final String DATA_DIR_NAME = "data";//$NON-NLS-1$
 	protected boolean invalidState = false;
 
 	/**
@@ -1051,8 +1049,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 	 * @return the StateManager.
 	 */
 	protected StateManager createStateManager() {
-		File stateLocation = new File(getBundleStoreRootDir(), ".state"); //$NON-NLS-1$
-		stateManager = new StateManager(stateLocation, context);
+		stateManager = new StateManager(new File(getBundleStoreRootDir(), ".state"), new File(getBundleStoreRootDir(), ".lazy"), context); //$NON-NLS-1$ //$NON-NLS-2$
 		State systemState = null;
 		if (!invalidState) {
 			systemState = stateManager.readSystemState();

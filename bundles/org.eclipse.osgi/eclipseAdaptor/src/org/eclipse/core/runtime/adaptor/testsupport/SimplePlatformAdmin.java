@@ -16,7 +16,7 @@ import org.osgi.framework.BundleContext;
 
 public class SimplePlatformAdmin extends StateManager {
 	public SimplePlatformAdmin(File bundleRootDir, BundleContext context) {
-		super(bundleRootDir, context);
+		super(new File(bundleRootDir, ".state"), new File(bundleRootDir, ".lazy"), context); //$NON-NLS-1$//$NON-NLS-2$
 		createSystemState();
 		setInstaller(new SimpleBundleInstaller(getSystemState()));
 	}

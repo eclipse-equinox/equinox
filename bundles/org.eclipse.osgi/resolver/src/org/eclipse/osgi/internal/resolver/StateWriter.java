@@ -10,8 +10,7 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
 
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.Version;
@@ -54,7 +53,7 @@ class StateWriter {
 		return false;
 	}
 
-	private void writeState(StateImpl state, DataOutputStream out) throws IOException {
+	private void writeStateDeprecated(StateImpl state, DataOutputStream out) throws IOException {
 		out.write(StateReader.STATE_CACHE_VERSION);
 		if (writePrefix(state, out))
 			return;
@@ -75,6 +74,35 @@ class StateWriter {
 		out.writeInt(out.size());
 		for (int i = 0; i < bundles.length; i++)
 			writeBundleDescriptionLazyData(bundles[i], out);
+	}
+
+	public void saveState(StateImpl state, File stateFile, File lazyFile) throws IOException {
+		DataOutputStream out = new DataOutputStream(new FileOutputStream(stateFile));
+		try {
+			out.write(StateReader.STATE_CACHE_VERSION);
+			if (writePrefix(state, out))
+				return;
+			out.writeLong(state.getTimeStamp());
+			Dictionary props = state.getPlatformProperties();
+			out.writeInt(StateImpl.PROPS.length);
+			for (int i = 0; i < StateImpl.PROPS.length; i++)
+				writePlatformProp(props.get(StateImpl.PROPS[i]), out);
+			BundleDescription[] bundles = state.getBundles();
+			StateHelperImpl.getInstance().sortBundles(bundles);
+			out.writeInt(bundles.length);
+			if (bundles.length == 0)
+				return;
+			for (int i = 0; i < bundles.length; i++)
+				writeBundleDescription(bundles[i], out);
+			out.writeBoolean(state.isResolved());
+			out.close();
+			//now switch to the lazy data file
+			out = new DataOutputStream(new FileOutputStream(lazyFile));
+			for (int i = 0; i < bundles.length; i++)
+				writeBundleDescriptionLazyData(bundles[i], out);
+		} finally {
+			out.close();
+		}
 	}
 
 	private void writePlatformProp(Object obj, DataOutputStream out) throws IOException {
@@ -105,7 +133,7 @@ class StateWriter {
 		out.writeBoolean(bundle.hasDynamicImports());
 		writeHostSpec((HostSpecificationImpl) bundle.getHost(), out);
 
-		List dependencies = ((BundleDescriptionImpl)bundle).getBundleDependencies();
+		List dependencies = ((BundleDescriptionImpl) bundle).getBundleDependencies();
 		out.writeInt(dependencies.size());
 		for (Iterator iter = dependencies.iterator(); iter.hasNext();)
 			writeBundleDescription((BundleDescription) iter.next(), out);
@@ -139,8 +167,7 @@ class StateWriter {
 		ExportPackageDescription[] selectedExports = bundle.getSelectedExports();
 		if (selectedExports == null) {
 			out.writeInt(0);
-		}
-		else {
+		} else {
 			out.writeInt(selectedExports.length);
 			for (int i = 0; i < selectedExports.length; i++)
 				writeExportPackageDesc((ExportPackageDescriptionImpl) selectedExports[i], out);
@@ -149,8 +176,7 @@ class StateWriter {
 		ExportPackageDescription[] resolvedImports = bundle.getResolvedImports();
 		if (resolvedImports == null) {
 			out.writeInt(0);
-		}
-		else {
+		} else {
 			out.writeInt(resolvedImports.length);
 			for (int i = 0; i < resolvedImports.length; i++)
 				writeExportPackageDesc((ExportPackageDescriptionImpl) resolvedImports[i], out);
@@ -159,13 +185,12 @@ class StateWriter {
 		BundleDescription[] resolvedRequires = bundle.getResolvedRequires();
 		if (resolvedRequires == null) {
 			out.writeInt(0);
-		}
-		else {
+		} else {
 			out.writeInt(resolvedRequires.length);
 			for (int i = 0; i < resolvedRequires.length; i++)
 				writeBundleDescription(resolvedRequires[i], out);
 		}
-		
+
 		// write the size of the lazy data
 		out.writeInt(out.size() - dataStart);
 	}
@@ -189,26 +214,24 @@ class StateWriter {
 		Map attributes = exportPackageDesc.getAttributes();
 		if (attributes == null) {
 			out.writeInt(0);
-		}
-		else {
+		} else {
 			out.writeInt(attributes.size());
 			Iterator iter = attributes.keySet().iterator();
 			while (iter.hasNext()) {
 				String key = (String) iter.next();
 				String value = (String) attributes.get(key);
 				writeStringOrNull(key, out);
-				writeStringOrNull(value,out);
+				writeStringOrNull(value, out);
 			}
 		}
 
 		String[] mandatory = exportPackageDesc.getMandatory();
 		if (mandatory == null) {
 			out.writeInt(0);
-		}
-		else {
+		} else {
 			out.writeInt(mandatory.length);
 			for (int i = 0; i < mandatory.length; i++)
-				writeStringOrNull(mandatory[i],out);
+				writeStringOrNull(mandatory[i], out);
 		}
 	}
 
@@ -233,25 +256,23 @@ class StateWriter {
 		String[] propagate = importPackageSpec.getPropagate();
 		if (propagate == null) {
 			out.writeInt(0);
-		}
-		else {
+		} else {
 			out.writeInt(propagate.length);
 			for (int i = 0; i < propagate.length; i++)
-				writeStringOrNull(propagate[i],out);
+				writeStringOrNull(propagate[i], out);
 		}
 
 		Map attributes = importPackageSpec.getAttributes();
 		if (attributes == null) {
 			out.writeInt(0);
-		}
-		else {
+		} else {
 			out.writeInt(attributes.size());
 			Iterator iter = attributes.keySet().iterator();
 			while (iter.hasNext()) {
 				String key = (String) iter.next();
 				String value = (String) attributes.get(key);
 				writeStringOrNull(key, out);
-				writeStringOrNull(value,out);
+				writeStringOrNull(value, out);
 			}
 		}
 	}
@@ -292,7 +313,7 @@ class StateWriter {
 	}
 
 	private void writeVersionRange(VersionRange versionRange, DataOutputStream out) throws IOException {
-		if (versionRange == null|| versionRange.equals(VersionRange.emptyRange)) {
+		if (versionRange == null || versionRange.equals(VersionRange.emptyRange)) {
 			out.writeByte(NULL);
 			return;
 		}
@@ -316,9 +337,9 @@ class StateWriter {
 		return true;
 	}
 
-	public void saveState(StateImpl state, DataOutputStream output) throws IOException {
+	public void saveStateDeprecated(StateImpl state, DataOutputStream output) throws IOException {
 		try {
-			writeState(state, output);
+			writeStateDeprecated(state, output);
 		} finally {
 			output.close();
 		}

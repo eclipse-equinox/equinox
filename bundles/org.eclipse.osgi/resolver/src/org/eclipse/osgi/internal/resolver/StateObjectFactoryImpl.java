@@ -66,7 +66,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		return bundle;
 	}
 
-	public BundleSpecification createBundleSpecification(String requiredSymbolicName, VersionRange requiredVersionRange,boolean export, boolean optional) {
+	public BundleSpecification createBundleSpecification(String requiredSymbolicName, VersionRange requiredVersionRange, boolean export, boolean optional) {
 		BundleSpecificationImpl bundleSpec = new BundleSpecificationImpl();
 		bundleSpec.setName(requiredSymbolicName);
 		bundleSpec.setVersionRange(requiredVersionRange);
@@ -171,8 +171,8 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		return state;
 	}
 
-	public SystemState readSystemState(File stateLocation, boolean lazyLoad, long expectedTimeStamp) throws IOException {
-		StateReader reader = new StateReader(stateLocation, lazyLoad);
+	public SystemState readSystemState(File stateFile, File lazyFile, boolean lazyLoad, long expectedTimeStamp) throws IOException {
+		StateReader reader = new StateReader(stateFile, lazyFile, lazyLoad);
 		SystemState restoredState = new SystemState();
 		restoredState.setReader(reader);
 		restoredState.setFactory(this);
@@ -182,32 +182,59 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 	}
 
 	public State readState(InputStream stream) throws IOException {
-		return internalReadState(internalCreateState(), new DataInputStream(stream), -1);
+		return internalReadStateDeprecated(internalCreateState(), new DataInputStream(stream), -1);
 	}
 
 	public State readState(DataInputStream stream) throws IOException {
-		return internalReadState(internalCreateState(), stream, -1);
+		return internalReadStateDeprecated(internalCreateState(), stream, -1);
 	}
 
-	private State internalReadState(StateImpl toRestore, DataInputStream stream, long expectedTimestamp) throws IOException {
+	public State readState(File stateDirectory) throws IOException {
+		return internalReadState(internalCreateState(), stateDirectory, -1);
+	}
+
+	private State internalReadStateDeprecated(StateImpl toRestore, DataInputStream stream, long expectedTimestamp) throws IOException {
 		StateReader reader = new StateReader();
-		if (!reader.loadState(toRestore, stream, expectedTimestamp))
+		if (!reader.loadStateDeprecated(toRestore, stream, expectedTimestamp))
+			return null;
+		return toRestore;
+	}
+
+	private State internalReadState(StateImpl toRestore, File stateDirectory, long expectedTimestamp) throws IOException {
+		File stateFile = new File(stateDirectory, StateReader.STATE_FILE);
+		File lazyFile = new File(stateDirectory, StateReader.LAZY_FILE);
+		StateReader reader = new StateReader(stateFile, lazyFile, false);
+		if (!reader.loadState(toRestore, expectedTimestamp))
 			return null;
 		return toRestore;
 	}
 
 	public void writeState(State state, DataOutputStream stream) throws IOException {
-		internalWriteState(state, stream);
+		internalWriteStateDeprecated(state, stream);
+	}
+
+	public void writeState(State state, File stateDirectory) throws IOException {
+		if (stateDirectory == null)
+			throw new IOException();
+		StateWriter writer = new StateWriter();
+		File stateFile = new File(stateDirectory, StateReader.STATE_FILE);
+		File lazyFile = new File(stateDirectory, StateReader.LAZY_FILE);
+		writer.saveState((StateImpl) state, stateFile, lazyFile);
 	}
 
 	public void writeState(State state, OutputStream stream) throws IOException {
-		internalWriteState(state, new DataOutputStream(stream));
+		internalWriteStateDeprecated(state, new DataOutputStream(stream));
 	}
 
-	public void internalWriteState(State state, DataOutputStream stream) throws IOException {
+	public void writeState(State state, File stateFile, File lazyFile) throws IOException {
+		StateWriter writer = new StateWriter();
+		writer.saveState((StateImpl) state, stateFile, lazyFile);
+	}
+
+	public void internalWriteStateDeprecated(State state, DataOutputStream stream) throws IOException {
 		if (state.getFactory() != this)
 			throw new IllegalArgumentException();
 		StateWriter writer = new StateWriter();
-		writer.saveState((StateImpl) state, stream);
+		writer.saveStateDeprecated((StateImpl) state, stream);
 	}
 }

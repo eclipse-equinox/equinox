@@ -13,7 +13,6 @@ package org.eclipse.osgi.service.resolver;
 import java.io.*;
 import java.util.Dictionary;
 import java.util.Map;
-
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Version;
 
@@ -184,7 +183,6 @@ public interface StateObjectFactory {
 	 * @return the created package
 	 */
 	public ExportPackageDescription createExportPackageDescription(ExportPackageDescription original);
-	
 
 	/**
 	 * Persists the given state in the given output stream. Closes the stream.
@@ -195,10 +193,11 @@ public interface StateObjectFactory {
 	 * the stream
 	 * @throws IllegalArgumentException if the state provided was not created by 
 	 * this factory
+	 * @deprecated use #writeState(State, File) instead
 	 * @since 3.1
 	 */
 	public void writeState(State state, OutputStream stream) throws IOException;
-	
+
 	/**
 	 * Persists the given state in the given output stream. Closes the stream.
 	 * 
@@ -208,10 +207,22 @@ public interface StateObjectFactory {
 	 * the stream
 	 * @throws IllegalArgumentException if the state provided was not created by 
 	 * this factory
-	 * @deprecated use #writeState(State, OutputStream) instead
+	 * @deprecated use #writeState(State, File) instead
 	 * @see #writeState(State, OutputStream)
 	 */
-	public void writeState(State state, DataOutputStream stream) throws IOException;	
+	public void writeState(State state, DataOutputStream stream) throws IOException;
+
+	/**
+	 * Persists the given state in the given output stream.
+	 * 
+	 * @param state the state to be written
+	 * @param stateDirectory the directory where to write the state to
+	 * @throws IOException if an IOException happens while writing the state to 
+	 * the stream
+	 * @throws IllegalArgumentException if the state provided was not created by 
+	 * this factory
+	 */
+	public void writeState(State state, File stateDirectory) throws IOException;
 
 	/**
 	 * Reads a persisted state from the given stream. Closes the stream.
@@ -220,10 +231,11 @@ public interface StateObjectFactory {
 	 * @return the state read
 	 * @throws IOException if an IOException happens while reading the state from 
 	 * the stream
+	 * @deprecated use #readState(File) instead
 	 * @since 3.1
 	 */
 	public State readState(InputStream stream) throws IOException;
-	
+
 	/**
 	 * Reads a persisted state from the given stream. Closes the stream.
 	 * 
@@ -231,9 +243,19 @@ public interface StateObjectFactory {
 	 * @return the state read
 	 * @throws IOException if an IOException happens while reading the state from 
 	 * the stream
-	 * @deprecated use #readState(InputStream) instead
+	 * @deprecated use #readState(File) instead
 	 * @see #readState(InputStream)
 	 */
-	public State readState(DataInputStream stream) throws IOException;	
+	public State readState(DataInputStream stream) throws IOException;
+
+	/**
+	 * Reads a persisted state from the given stream. Closes the stream.
+	 * 
+	 * @param stateDirectory the directory where to read the state from
+	 * @return the state read
+	 * @throws IOException if an IOException happens while reading the state from 
+	 * the stream
+	 */
+	public State readState(File stateDirectory) throws IOException;
 
 }

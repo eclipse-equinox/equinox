@@ -41,6 +41,7 @@ public class LocationManager {
 	// configuration area file/dir names
 	public static final String BUNDLES_DIR = "bundles"; //$NON-NLS-1$
 	public static final String STATE_FILE = ".state"; //$NON-NLS-1$
+	public static final String LAZY_FILE = ".lazy"; //$NON-NLS-1$
 	public static final String BUNDLE_DATA_FILE = ".bundledata"; //$NON-NLS-1$
 	public static final String MANIFESTS_DIR = "manifests"; //$NON-NLS-1$
 	public static final String CONFIG_FILE = "config.ini"; //$NON-NLS-1$

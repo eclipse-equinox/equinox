@@ -143,9 +143,11 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 	}
 
 	protected StateManager createStateManager() {
-		File stateLocation = null;
+		File stateFile = null;
+		File lazyFile = null;
 		try {
-			stateLocation = fileManager.lookup(LocationManager.STATE_FILE, false);
+			stateFile = fileManager.lookup(LocationManager.STATE_FILE, false);
+			lazyFile = fileManager.lookup(LocationManager.LAZY_FILE, false);
 		} catch (IOException ex) {
 			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 				Debug.println("Error reading state file " + ex.getMessage()); //$NON-NLS-1$
@@ -153,7 +155,7 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 			}
 		}
 		//if it does not exist, try to read it from the parent
-		if (stateLocation == null || !stateLocation.isFile()) { // NOTE this check is redundant since it
+		if (stateFile == null || !stateFile.isFile()) { // NOTE this check is redundant since it
 			// is done in StateManager, however it
 			// is more convenient to have it here
 			Location parentConfiguration = null;
@@ -162,7 +164,8 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 				try {
 					File stateLocationDir = new File(parentConfiguration.getURL().getFile(), FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME);
 					FileManager newFileManager = initFileManager(stateLocationDir, parentConfiguration.isReadOnly() ? "none" : null); //$NON-NLS-1$);
-					stateLocation = newFileManager.lookup(LocationManager.STATE_FILE, true);
+					stateFile = newFileManager.lookup(LocationManager.STATE_FILE, true);
+					lazyFile = newFileManager.lookup(LocationManager.LAZY_FILE, true);
 				} catch (IOException ex) {
 					if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 						Debug.println("Error reading state file " + ex.getMessage()); //$NON-NLS-1$
@@ -172,7 +175,8 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 			} else {
 				try {
 					//it did not exist in either place, so create it in the original location
-					stateLocation = fileManager.lookup(LocationManager.STATE_FILE, true);
+					stateFile = fileManager.lookup(LocationManager.STATE_FILE, true);
+					lazyFile = fileManager.lookup(LocationManager.LAZY_FILE, true);
 				} catch (IOException ex) {
 					if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 						Debug.println("Error reading state file " + ex.getMessage()); //$NON-NLS-1$
@@ -181,7 +185,7 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 				}
 			}
 		}
-		stateManager = new StateManager(stateLocation, context, timeStamp);
+		stateManager = new StateManager(stateFile, lazyFile, context, timeStamp);
 		stateManager.setInstaller(new EclipseBundleInstaller());
 		StateImpl systemState = null;
 		if (!invalidState) {
@@ -218,10 +222,12 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 		if (stateManager.getCachedTimeStamp() == stateManager.getSystemState().getTimeStamp())
 			return;
 		try {
-			File stateLocationTmpFile = File.createTempFile(LocationManager.STATE_FILE, ".new", LocationManager.getOSGiConfigurationDir()); //$NON-NLS-1$
-			stateManager.shutdown(stateLocationTmpFile); //$NON-NLS-1$
+			File stateTmpFile = File.createTempFile(LocationManager.STATE_FILE, ".new", LocationManager.getOSGiConfigurationDir()); //$NON-NLS-1$
+			File lazyTmpFile = File.createTempFile(LocationManager.LAZY_FILE, ".new", LocationManager.getOSGiConfigurationDir()); //$NON-NLS-1$
+			stateManager.shutdown(stateTmpFile, lazyTmpFile);
 			fileManager.lookup(LocationManager.STATE_FILE, true);
-			fileManager.update(new String[] {LocationManager.STATE_FILE}, new String[] {stateLocationTmpFile.getName()});
+			fileManager.lookup(LocationManager.LAZY_FILE, true);
+			fileManager.update(new String[] {LocationManager.STATE_FILE, LocationManager.LAZY_FILE}, new String[] {stateTmpFile.getName(), lazyTmpFile.getName()});
 		} catch (IOException e) {
 			frameworkLog.log(new FrameworkEvent(FrameworkEvent.ERROR, context.getBundle(), e));
 		}
