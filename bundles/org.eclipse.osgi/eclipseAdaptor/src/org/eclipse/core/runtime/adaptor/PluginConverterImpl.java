@@ -63,7 +63,7 @@ public class PluginConverterImpl implements PluginConverter {
 	private static final String MANIFEST_VERSION = "Manifest-Version"; //$NON-NLS-1$
 	private static final String PLUGIN_PROPERTIES_FILENAME = "plugin"; //$NON-NLS-1$
 	private static PluginConverterImpl instance;
-	private static final String[] ARCH_LIST = {org.eclipse.osgi.service.environment.Constants.ARCH_PA_RISC, org.eclipse.osgi.service.environment.Constants.ARCH_PPC, org.eclipse.osgi.service.environment.Constants.ARCH_SPARC, org.eclipse.osgi.service.environment.Constants.ARCH_X86, org.eclipse.osgi.service.environment.Constants.ARCH_AMD64};
+	private static final String[] ARCH_LIST = {org.eclipse.osgi.service.environment.Constants.ARCH_PA_RISC, org.eclipse.osgi.service.environment.Constants.ARCH_PPC, org.eclipse.osgi.service.environment.Constants.ARCH_SPARC, org.eclipse.osgi.service.environment.Constants.ARCH_X86, org.eclipse.osgi.service.environment.Constants.ARCH_AMD64, org.eclipse.osgi.service.environment.Constants.ARCH_IA64};
 	protected static final String FRAGMENT_MANIFEST = "fragment.xml"; //$NON-NLS-1$
 	protected static final String GENERATED_FROM = "Generated-from"; //$NON-NLS-1$
 	protected static final String MANIFEST_TYPE_ATTRIBUTE = "type"; //$NON-NLS-1$

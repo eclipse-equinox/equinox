@@ -100,6 +100,14 @@ public interface Constants {
 	public static final String ARCH_AMD64 = "amd64";//$NON-NLS-1$
 
 	/**
+	 * Constant string (value "ia64") indicating the platform is running on an
+	 * IA64-based architecture.
+	 * 
+	 * @since 3.0
+	 */
+	public static final String ARCH_IA64 = "ia64"; //$NON-NLS-1$
+
+	/**
 	 * Constant string (value "win32") indicating the platform is running on a
 	 * machine using the Windows windowing system.
 	 */
