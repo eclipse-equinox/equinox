@@ -11,8 +11,6 @@
 package org.eclipse.core.runtime.adaptor;
 
 import java.util.*;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Interface used as an entry to the IPluginConverter    

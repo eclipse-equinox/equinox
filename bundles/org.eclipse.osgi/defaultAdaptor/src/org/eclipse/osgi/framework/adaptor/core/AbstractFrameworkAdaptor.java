@@ -15,11 +15,7 @@ import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Properties;
-
-import org.eclipse.osgi.framework.adaptor.BundleData;
-import org.eclipse.osgi.framework.adaptor.EventPublisher;
-import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
-import org.eclipse.osgi.framework.adaptor.BundleWatcher;
+import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.util.Headers;

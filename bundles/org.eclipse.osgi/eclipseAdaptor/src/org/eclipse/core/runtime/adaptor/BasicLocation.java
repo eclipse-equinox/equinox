@@ -13,7 +13,6 @@ package org.eclipse.core.runtime.adaptor;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-
 import org.eclipse.osgi.service.datalocation.Location;
 
 public class BasicLocation implements Location {

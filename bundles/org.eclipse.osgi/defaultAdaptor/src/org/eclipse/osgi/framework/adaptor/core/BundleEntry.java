@@ -16,7 +16,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-
 import org.eclipse.osgi.framework.util.SecureAction;
 
 /**

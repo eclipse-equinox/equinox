@@ -14,7 +14,6 @@ package org.eclipse.osgi.framework.internal.defaultadaptor;
 import java.io.*;
 import java.util.Enumeration;
 import java.util.Hashtable;
-
 import org.eclipse.osgi.framework.adaptor.PermissionStorage;
 import org.eclipse.osgi.framework.adaptor.core.AdaptorMsg;
 import org.eclipse.osgi.framework.debug.Debug;

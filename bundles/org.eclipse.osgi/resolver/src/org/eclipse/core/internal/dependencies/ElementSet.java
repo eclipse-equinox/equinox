@@ -11,7 +11,6 @@
 package org.eclipse.core.internal.dependencies;
 
 import java.util.*;
-
 import org.eclipse.core.dependencies.*;
 
 public class ElementSet implements IElementSet {

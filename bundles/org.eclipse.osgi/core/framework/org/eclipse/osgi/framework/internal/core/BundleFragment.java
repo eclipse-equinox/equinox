@@ -18,7 +18,6 @@ import java.security.ProtectionDomain;
 import org.eclipse.osgi.framework.adaptor.BundleData;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.osgi.framework.*;
-import org.osgi.framework.ServiceReference;
 
 public class BundleFragment extends AbstractBundle {
 

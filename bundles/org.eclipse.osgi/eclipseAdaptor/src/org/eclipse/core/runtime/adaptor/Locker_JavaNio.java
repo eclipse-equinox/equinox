@@ -10,9 +10,7 @@
  *******************************************************************************/
 package org.eclipse.core.runtime.adaptor;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.nio.channels.FileLock;
 
 //TODO shouldn't it be LockerJavaNIO instead?

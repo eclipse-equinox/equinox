@@ -13,10 +13,6 @@ package org.eclipse.osgi.framework.adaptor.core;
 
 import java.io.IOException;
 import java.net.*;
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.URLStreamHandler;
-
 import org.eclipse.osgi.framework.internal.core.AbstractBundle;
 import org.osgi.framework.AdminPermission;
 import org.osgi.framework.BundleContext;

@@ -14,7 +14,6 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.eclipse.osgi.service.resolver.*;
 
 class StateWriter {

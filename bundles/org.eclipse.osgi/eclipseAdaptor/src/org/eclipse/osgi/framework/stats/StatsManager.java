@@ -10,12 +10,11 @@
  *******************************************************************************/
 package org.eclipse.osgi.framework.stats;
 
-import org.osgi.framework.Bundle;
-
 import java.io.*;
 import java.util.*;
 import org.eclipse.core.runtime.adaptor.EclipseAdaptor;
 import org.eclipse.osgi.framework.adaptor.BundleWatcher;
+import org.osgi.framework.Bundle;
 
 public class StatsManager implements BundleWatcher {
 	// This connect plugins and their info, and so allows to access the info without running through

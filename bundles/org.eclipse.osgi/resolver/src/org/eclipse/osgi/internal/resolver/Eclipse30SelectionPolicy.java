@@ -12,7 +12,6 @@
 package org.eclipse.osgi.internal.resolver;
 
 import java.util.*;
-
 import org.eclipse.core.dependencies.*;
 
 /**

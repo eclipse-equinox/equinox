@@ -12,7 +12,6 @@
 package org.eclipse.core.internal.dependencies;
 
 import java.util.*;
-
 import org.eclipse.core.dependencies.*;
 
 public class ResolutionVisitor implements IElementSetVisitor {

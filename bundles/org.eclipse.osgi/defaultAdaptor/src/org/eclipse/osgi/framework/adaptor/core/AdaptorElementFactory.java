@@ -12,10 +12,8 @@ package org.eclipse.osgi.framework.adaptor.core;
 
 import java.io.IOException;
 import java.security.ProtectionDomain;
-
 import org.eclipse.osgi.framework.adaptor.BundleClassLoader;
 import org.eclipse.osgi.framework.adaptor.ClassLoaderDelegate;
-import org.eclipse.osgi.framework.adaptor.core.AbstractBundleData;
 
 public interface AdaptorElementFactory {
 

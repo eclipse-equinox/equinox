@@ -16,8 +16,8 @@ import java.io.InputStream;
 import java.security.*;
 import java.util.*;
 import org.eclipse.osgi.framework.debug.Debug;
-import org.eclipse.osgi.framework.eventmgr.EventListeners;
 import org.eclipse.osgi.framework.eventmgr.EventDispatcher;
+import org.eclipse.osgi.framework.eventmgr.EventListeners;
 import org.osgi.framework.*;
 
 /**

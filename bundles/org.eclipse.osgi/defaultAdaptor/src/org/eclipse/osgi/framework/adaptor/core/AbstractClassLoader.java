@@ -13,14 +13,9 @@ package org.eclipse.osgi.framework.adaptor.core;
 
 import java.io.IOException;
 import java.net.URL;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-import java.security.ProtectionDomain;
+import java.security.*;
 import java.util.Enumeration;
-
-import org.eclipse.osgi.framework.adaptor.BundleClassLoader;
-import org.eclipse.osgi.framework.adaptor.ClassLoaderDelegate;
-import org.eclipse.osgi.framework.adaptor.ImportResourceNotFoundException;
+import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.debug.Debug;
 
 /**

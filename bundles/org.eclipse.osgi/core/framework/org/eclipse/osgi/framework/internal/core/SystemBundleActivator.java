@@ -15,8 +15,6 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import org.eclipse.osgi.framework.debug.DebugOptions;
 import org.osgi.framework.*;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
 
 /**
  * This class activates the System Bundle.

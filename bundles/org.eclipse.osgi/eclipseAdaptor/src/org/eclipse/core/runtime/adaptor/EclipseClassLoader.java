@@ -14,7 +14,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.security.ProtectionDomain;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.StringTokenizer;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import org.eclipse.osgi.framework.adaptor.BundleData;
@@ -28,7 +29,8 @@ import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.framework.stats.ClassloaderStats;
 import org.eclipse.osgi.framework.stats.ResourceBundleStats;
 import org.eclipse.osgi.util.ManifestElement;
-import org.osgi.framework.*;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.FrameworkEvent;
 
 public class EclipseClassLoader extends DefaultClassLoader {
 	private static String[] NL_JAR_VARIANTS = buildNLJarVariants(System.getProperties().getProperty("osgi.nl")); //$NON-NLS-1$

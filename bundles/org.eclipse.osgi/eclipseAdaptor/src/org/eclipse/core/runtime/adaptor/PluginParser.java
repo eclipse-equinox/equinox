@@ -13,7 +13,8 @@ package org.eclipse.core.runtime.adaptor;
 import java.io.InputStream;
 import java.util.*;
 import javax.xml.parsers.SAXParserFactory;
-import org.osgi.framework.*;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.xml.sax.*;
 import org.xml.sax.helpers.DefaultHandler;
 

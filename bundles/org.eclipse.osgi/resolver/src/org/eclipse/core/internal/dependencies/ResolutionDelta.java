@@ -13,7 +13,6 @@ package org.eclipse.core.internal.dependencies;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import org.eclipse.core.dependencies.*;
 
 public class ResolutionDelta implements IResolutionDelta {

@@ -14,8 +14,7 @@ package org.eclipse.osgi.framework.internal.core;
 import java.util.*;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.util.Headers;
-import org.osgi.framework.ServiceEvent;
-import org.osgi.framework.ServiceRegistration;
+import org.osgi.framework.*;
 
 /**
  * A registered service.

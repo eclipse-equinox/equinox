@@ -10,10 +10,10 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
 
-import java.io.*;
+import java.io.DataInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.eclipse.osgi.service.resolver.*;
 
 class StateReader {

@@ -17,7 +17,6 @@ import java.net.URL;
 import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-
 import org.eclipse.osgi.framework.adaptor.BundleData;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.internal.core.Constants;

@@ -14,8 +14,6 @@ import java.io.IOException;
 import junit.framework.TestCase;
 import org.eclipse.osgi.tests.BundleTestingHelper;
 import org.osgi.framework.*;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleException;
 
 public class InstallTests extends TestCase {
 

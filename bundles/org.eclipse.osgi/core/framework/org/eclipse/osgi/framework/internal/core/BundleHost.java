@@ -20,8 +20,6 @@ import org.eclipse.osgi.framework.adaptor.BundleWatcher;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.util.SecureAction;
 import org.osgi.framework.*;
-import org.osgi.framework.BundleEvent;
-import org.osgi.framework.BundleException;
 
 public class BundleHost extends AbstractBundle {
 

@@ -13,12 +13,7 @@ package org.eclipse.osgi.framework.adaptor.core;
 
 import java.util.Hashtable;
 import java.util.Vector;
-
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
-import org.osgi.framework.Filter;
-import org.osgi.framework.ServiceReference;
-import org.osgi.framework.ServiceRegistration;
+import org.osgi.framework.*;
 
 /**
  * A default implementation of the ServiceRegistry.

@@ -13,7 +13,6 @@ package org.eclipse.core.runtime.adaptor;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
-
 import org.eclipse.osgi.framework.adaptor.core.BundleURLConnection;
 import org.eclipse.osgi.service.urlconversion.URLConverter;
 

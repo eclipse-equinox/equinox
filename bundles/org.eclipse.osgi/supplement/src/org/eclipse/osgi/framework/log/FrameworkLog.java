@@ -10,10 +10,7 @@
  *******************************************************************************/
 package org.eclipse.osgi.framework.log;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.Writer;
-
+import java.io.*;
 import org.osgi.framework.FrameworkEvent;
 
 /**

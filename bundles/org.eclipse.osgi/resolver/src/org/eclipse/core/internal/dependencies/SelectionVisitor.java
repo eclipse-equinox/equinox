@@ -13,7 +13,6 @@ package org.eclipse.core.internal.dependencies;
 
 import java.util.Collection;
 import java.util.Collections;
-
 import org.eclipse.core.dependencies.IElement;
 import org.eclipse.core.dependencies.ISelectionPolicy;
 

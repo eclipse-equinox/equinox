@@ -14,6 +14,7 @@ package org.eclipse.osgi.framework.adaptor;
 import java.net.URL;
 import java.security.ProtectionDomain;
 import java.util.Enumeration;
+import org.osgi.framework.BundleException;
 
 /**
  * The BundleClassLoader interface is used by the Framework to load local 

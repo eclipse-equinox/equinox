@@ -19,8 +19,6 @@ import org.eclipse.osgi.framework.util.SecureAction;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.*;
 import org.osgi.service.packageadmin.*;
-import org.osgi.service.packageadmin.ExportedPackage;
-import org.osgi.service.packageadmin.NamedClassSpace;
 
 /**
  * PackageAdmin service for the OSGi specification.

@@ -10,9 +10,7 @@
  *******************************************************************************/
 package org.eclipse.core.runtime.adaptor;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.RandomAccessFile;
+import java.io.*;
 
 //TODO shouldn't it be LockerJavaIO instead?
 public class Locker_JavaIo implements Locker {

@@ -12,7 +12,8 @@ package org.eclipse.osgi.internal.resolver;
 
 import java.util.*;
 import org.eclipse.osgi.framework.debug.DebugOptions;
-import org.eclipse.osgi.framework.internal.core.*;
+import org.eclipse.osgi.framework.internal.core.KeyedElement;
+import org.eclipse.osgi.framework.internal.core.KeyedHashSet;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.Bundle;
 

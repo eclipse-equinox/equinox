@@ -17,8 +17,6 @@ import java.util.List;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.eventmgr.*;
 import org.osgi.framework.*;
-import org.osgi.framework.BundleException;
-import org.osgi.framework.FrameworkEvent;
 
 /**
  * StartLevel service implementation for the OSGi specification.

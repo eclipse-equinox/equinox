@@ -14,10 +14,7 @@ package org.eclipse.osgi.framework.internal.protocol.bundleentry;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
-
-import org.eclipse.osgi.framework.adaptor.core.AbstractBundleData;
-import org.eclipse.osgi.framework.adaptor.core.BundleEntry;
-import org.eclipse.osgi.framework.adaptor.core.BundleResourceHandler;
+import org.eclipse.osgi.framework.adaptor.core.*;
 import org.eclipse.osgi.framework.internal.core.AbstractBundle;
 
 /**

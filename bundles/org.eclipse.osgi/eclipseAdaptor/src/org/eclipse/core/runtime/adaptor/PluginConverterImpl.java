@@ -16,7 +16,6 @@ import java.net.URL;
 import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.internal.defaultadaptor.DevClassPathHelper;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;

@@ -13,13 +13,10 @@ package org.eclipse.osgi.framework.internal.defaultadaptor;
 
 import java.io.*;
 import java.util.Date;
-
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.framework.util.SecureAction;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleException;
-import org.osgi.framework.FrameworkEvent;
+import org.osgi.framework.*;
 
 public class DefaultLog implements FrameworkLog {
 	protected boolean newSession = true;

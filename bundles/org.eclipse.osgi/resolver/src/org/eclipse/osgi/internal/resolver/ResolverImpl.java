@@ -11,7 +11,6 @@
 package org.eclipse.osgi.internal.resolver;
 
 import java.util.*;
-
 import org.eclipse.core.dependencies.*;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.Bundle;

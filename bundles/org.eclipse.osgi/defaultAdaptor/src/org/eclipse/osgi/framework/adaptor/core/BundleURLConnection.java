@@ -13,8 +13,7 @@ package org.eclipse.osgi.framework.adaptor.core;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
-import java.net.URLConnection;
+import java.net.*;
 
 /**
  * URLConnection for BundleClassLoader resources.

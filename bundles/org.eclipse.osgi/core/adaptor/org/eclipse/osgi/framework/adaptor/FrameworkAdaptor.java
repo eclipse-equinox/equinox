@@ -15,8 +15,7 @@ import java.io.IOException;
 import java.net.URLConnection;
 import java.util.Properties;
 import java.util.Vector;
-
-import org.eclipse.osgi.framework.log.*;
+import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.service.resolver.PlatformAdmin;
 import org.eclipse.osgi.service.resolver.State;
 import org.osgi.framework.BundleContext;
