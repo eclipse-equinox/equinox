@@ -11,6 +11,7 @@
 
 package org.eclipse.osgi.framework.internal.defaultadaptor;
 
+import java.io.*;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -159,7 +160,7 @@ abstract public class BundleFile
 		public File getFile(String entry)
 		{
 			ZipEntry zipEntry = getZipEntry(entry);
-			if (zipEntry == null) 
+			if (zipEntry == null || zipEntry.isDirectory()) 
 			{
 				return null;
 			}
@@ -195,6 +196,9 @@ abstract public class BundleFile
 					}
 					else
 					{
+						InputStream in = zipFile.getInputStream(zipEntry);
+						if (in == null)
+							return null;
 						/* the entry has not been cached */
 						if (Debug.DEBUG && Debug.DEBUG_GENERAL)
 						{
@@ -215,7 +219,7 @@ abstract public class BundleFile
 						}
 
 						/* copy the entry to the cache */
-						DefaultAdaptor.readFile(zipFile.getInputStream(zipEntry), nested);
+						DefaultAdaptor.readFile(in, nested);
 					}
 
 					return nested;
