@@ -263,7 +263,7 @@ public interface FrameworkAdaptor {
 	 * null if none exist.
 	 */
 	public String getProvidePackages();
-	
+
 	/**
 	 * Gets any Service class names that a FrameworkAdaptor is exporting to the
 	 * framework.  The class names returned will be exported by the System Bundle.
