@@ -241,7 +241,8 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 			}
 			else
 			{
-				Debug.println("Unable to find osgi.properties");
+				if (Debug.DEBUG && Debug.DEBUG_GENERAL)
+					Debug.println("Skipping osgi.properties: " + resource);
 			}
 		}
 		catch (IOException e)
