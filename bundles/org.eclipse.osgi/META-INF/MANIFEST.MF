@@ -37,11 +37,5 @@ Bundle-Vendor: %eclipse.org
 Bundle-Version: 3.1.0
 Bundle-Localization: systembundle
 Bundle-DocUrl: http://www.eclipse.org
-Bundle-ClassPath: osgi.jar,
- core.jar,
- resolver.jar,
- defaultAdaptor.jar,
- eclipseAdaptor.jar,
- console.jar
 Eclipse-ExtensibleAPI: true
 Eclipse-SystemBundle: true
