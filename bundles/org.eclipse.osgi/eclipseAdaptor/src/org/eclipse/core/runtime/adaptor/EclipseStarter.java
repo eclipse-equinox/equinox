@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003 IBM Corporation and others.
+ * Copyright (c) 2003,2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,13 +16,14 @@ import java.net.*;
 import java.util.*;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.internal.core.OSGi;
+import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.osgi.framework.*;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.startlevel.StartLevel;
 import org.eclipse.osgi.framework.tracker.ServiceTracker;
 
 public class EclipseStarter {
-
+	private static FrameworkAdaptor adaptor;
 	private static BundleContext context;
 	private static String dataLocation = null;
 	private static String configLocation = null;
@@ -80,7 +81,7 @@ public class EclipseStarter {
 		setConfigurationLocation();
 		loadConfigurationInfo();
 		loadDefaultProperties();
-		FrameworkAdaptor adaptor = createAdaptor();
+		adaptor = createAdaptor();
 		OSGi osgi = new OSGi(adaptor);
 		if (osgi == null) 
 			throw new IllegalStateException("OSGi framework could not be started");
@@ -120,9 +121,11 @@ public class EclipseStarter {
 
 	private static void checkUnresolvedBundles(Bundle[] bundles) {
 		for (int i = 0; i < bundles.length; i++)
-			if (bundles[i].getState() == Bundle.INSTALLED)
-				 System.err.println(EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_UNRESOLVED_BUNDLE",bundles[i])); //$NON-NLS-1$						
-	}						
+			if (bundles[i].getState() == Bundle.INSTALLED) {
+				String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_UNRESOLVED_BUNDLE", bundles[i]);
+				adaptor.getFrameworkLog().log(new FrameworkLogEntry(0, "org.eclipse.osgi", message, 0, null));
+			}
+	}
 			
 	private static void publishSplashScreen(Runnable endSplashHandler) {
 		// InternalPlatform now how to retrieve this later
