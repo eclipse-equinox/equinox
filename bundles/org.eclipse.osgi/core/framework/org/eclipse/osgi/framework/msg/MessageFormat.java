@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003 IBM Corporation and others.
+ * Copyright (c) 2003, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -92,7 +92,7 @@ public class MessageFormat {
 	 *					message bundle.
 	 */
 	public String getString(String msg, Object arg) {
-		return getString(msg, new Object[] { arg });
+		return getString(msg, new Object[] {arg});
 	}
 
 	/**
@@ -106,7 +106,7 @@ public class MessageFormat {
 	 *					message bundle.
 	 */
 	public String getString(String msg, int arg) {
-		return getString(msg, new Object[] { Integer.toString(arg)});
+		return getString(msg, new Object[] {Integer.toString(arg)});
 	}
 
 	/**
@@ -120,7 +120,7 @@ public class MessageFormat {
 	 *					message bundle.
 	 */
 	public String getString(String msg, char arg) {
-		return getString(msg, new Object[] { String.valueOf(arg)});
+		return getString(msg, new Object[] {String.valueOf(arg)});
 	}
 
 	/**
@@ -136,7 +136,7 @@ public class MessageFormat {
 	 *					message bundle.
 	 */
 	public String getString(String msg, Object arg1, Object arg2) {
-		return getString(msg, new Object[] { arg1, arg2 });
+		return getString(msg, new Object[] {arg1, arg2});
 	}
 
 	/**
@@ -184,11 +184,7 @@ public class MessageFormat {
 		String[] argStrings = new String[args.length];
 
 		for (int i = 0; i < args.length; ++i) {
-			//TODO: consider using ?: operator
-			if (args[i] == null)
-				argStrings[i] = "<null>";
-			else
-				argStrings[i] = args[i].toString();
+			argStrings[i] = args[i] == null ? "<null>" : args[i].toString(); //$NON-NLS-1$
 		}
 
 		int lastI = 0;
@@ -217,7 +213,7 @@ public class MessageFormat {
 						// Got a good one!
 						answer.append(format.substring(lastI, i));
 						if (argnum >= argStrings.length) {
-							answer.append("<missing argument>");
+							answer.append("<missing argument>"); //$NON-NLS-1$
 						} else {
 							answer.append(argStrings[argnum]);
 						}
