@@ -8,28 +8,24 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.osgi.framework.internal.core;
-
 import java.io.*;
 import java.util.Hashtable;
+import java.util.Vector;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.util.Tokenizer;
-
 /**
  * This class maps aliases.
  */
 public class AliasMapper {
 	private static Hashtable processorAliasTable;
 	private static Hashtable osnameAliasTable;
-
 	/**
 	 * Constructor.
 	 *
 	 */
 	public AliasMapper() {
 	}
-
 	/**
 	 * Return the master alias for the processor.
 	 *
@@ -38,7 +34,6 @@ public class AliasMapper {
 	 */
 	public String aliasProcessor(String processor) {
 		processor = processor.toLowerCase();
-
 		if (processorAliasTable == null) {
 			InputStream in = getClass().getResourceAsStream(Constants.OSGI_PROCESSOR_ALIASES);
 			if (in != null) {
@@ -51,29 +46,23 @@ public class AliasMapper {
 					}
 				}
 			}
-
 		}
-
 		if (processorAliasTable != null) {
 			String alias = (String) processorAliasTable.get(processor);
-
 			if (alias != null) {
 				processor = alias;
 			}
 		}
-
 		return (processor);
 	}
-
 	/**
 	 * Return the master alias for the osname.
 	 *
 	 * @param osname Input name
 	 * @return aliased name (if any)
 	 */
-	public String aliasOSName(String osname) {
+	public Object aliasOSName(String osname) {
 		osname = osname.toLowerCase();
-
 		if (osnameAliasTable == null) {
 			InputStream in = getClass().getResourceAsStream(Constants.OSGI_OSNAME_ALIASES);
 			if (in != null) {
@@ -87,18 +76,18 @@ public class AliasMapper {
 				}
 			}
 		}
-
 		if (osnameAliasTable != null) {
-			String alias = (String) osnameAliasTable.get(osname);
-
-			if (alias != null) {
-				osname = alias;
-			}
+			Object aliasObject = osnameAliasTable.get(osname);
+			//String alias = (String) osnameAliasTable.get(osname);
+			if (aliasObject != null)
+				if (aliasObject instanceof String) {
+					osname = (String) aliasObject;
+				} else {
+					return (Vector) aliasObject;
+				}
 		}
-
 		return (osname);
 	}
-
 	/**
 	 * Read alias data and populate a Hashtable.
 	 *
@@ -107,7 +96,6 @@ public class AliasMapper {
 	 */
 	protected static Hashtable initAliases(InputStream in) {
 		Hashtable aliases = new Hashtable(37);
-
 		try {
 			BufferedReader br;
 			try {
@@ -115,29 +103,33 @@ public class AliasMapper {
 			} catch (UnsupportedEncodingException e) {
 				br = new BufferedReader(new InputStreamReader(in));
 			}
-
 			while (true) {
 				String line = br.readLine();
-
-				if (line == null) /* EOF */ {
+				if (line == null) /* EOF */{
 					break; /* done */
 				}
-
 				Tokenizer tokenizer = new Tokenizer(line);
-
 				String master = tokenizer.getString("# \t");
-
 				if (master != null) {
 					aliases.put(master.toLowerCase(), master);
-
 					parseloop : while (true) {
 						String alias = tokenizer.getString("# \t");
-
 						if (alias == null) {
 							break parseloop;
 						}
-
-						aliases.put(alias.toLowerCase(), master);
+						String lowerCaseAlias = alias.toLowerCase();
+						Object storedMaster = aliases.get(lowerCaseAlias);
+						if (storedMaster == null) {
+							aliases.put(lowerCaseAlias, master);
+						} else if (storedMaster instanceof String) {
+							Vector newMaster = new Vector();
+							newMaster.add(storedMaster);
+							newMaster.add(master);
+							aliases.put(lowerCaseAlias, newMaster);
+						} else {
+							((Vector) storedMaster).add(master);
+							aliases.put(lowerCaseAlias, storedMaster);
+						}
 					}
 				}
 			}
@@ -146,7 +138,6 @@ public class AliasMapper {
 				Debug.printStackTrace(e);
 			}
 		}
-
 		return (aliases);
 	}
 }

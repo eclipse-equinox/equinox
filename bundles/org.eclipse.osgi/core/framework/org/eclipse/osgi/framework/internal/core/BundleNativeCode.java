@@ -9,8 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.osgi.framework.internal.core;
-import java.util.StringTokenizer;
-import java.util.Vector;
+import java.util.*;
 import org.eclipse.osgi.service.resolver.Version;
 import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.Constants;
@@ -139,7 +138,7 @@ public class BundleNativeCode {
 	private void setAttribute(ManifestElement element, String attribute) {
 		String[] attrValues = element.getAttributes(attribute);
 		if (attrValues != null) {
-			for (int i=0; i<attrValues.length; i++) {
+			for (int i = 0; i < attrValues.length; i++) {
 				addAttribute(attribute, attrValues[i]);
 			}
 		}
@@ -282,7 +281,7 @@ public class BundleNativeCode {
 			return (0);
 		}
 		String otherProcessor = aliasMapper.aliasProcessor(processor);
-		String otherOSName = aliasMapper.aliasOSName(osname);
+		String otherOSName = (String) aliasMapper.aliasOSName(osname);
 		if (this.processor.equals(otherProcessor) && this.osname.equals(otherOSName) && matchFilter()) {
 			return (1);
 		}
@@ -305,12 +304,10 @@ public class BundleNativeCode {
 		for (int i = 0; i < size; i++) {
 			Version ver = (Version) this.osversion.elementAt(i);
 			int compare = ver.compareTo(version);
-			if (compare == 0) /* versions are equal; best possible match */
-			{
+			if (compare == 0) /* versions are equal; best possible match */{
 				return ver;
 			}
-			if (compare < 0) /* requested version < current OS version */
-			{
+			if (compare < 0) /* requested version < current OS version */{
 				if ((result == null) || (ver.compareTo(result) > 0)) {
 					result = ver; /*
 					 * remember the highest version less than
@@ -371,8 +368,18 @@ public class BundleNativeCode {
 		 */
 		public synchronized boolean equals(Object obj) {
 			for (int i = 0; i < elementCount; i++) {
-				if (elementData[i].equals(obj)) {
-					return (true);
+				Object data = elementData[i];
+				if (data instanceof String) {
+					if (elementData[i].equals(obj)) {
+						return (true);
+					}
+				} else {
+					Enumeration e = ((Vector) data).elements();
+					while (e.hasMoreElements()) {
+						if (((String) e.nextElement()).equals(obj)) {
+							return true;
+						}
+					}
 				}
 			}
 			return (false);
