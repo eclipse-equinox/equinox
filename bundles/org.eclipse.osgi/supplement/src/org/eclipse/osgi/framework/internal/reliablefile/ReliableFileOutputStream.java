@@ -97,7 +97,7 @@ public class ReliableFileOutputStream extends FilterOutputStream {
 		if (append)
 			crc = reliable.getFileChecksum();
 		else
-			crc = reliable.getChecksumCalculator();
+			crc = ReliableFile.getChecksumCalculator();
 	}
 
 	/**
@@ -112,10 +112,10 @@ public class ReliableFileOutputStream extends FilterOutputStream {
 		if (reliable != null) {
 			try {
 				// tag on our signature and checksum
-				out.write(reliable.identifier1);
+				out.write(ReliableFile.identifier1);
 				byte crcStr[] = ReliableFile.intToHex((int) crc.getValue()).getBytes();
 				out.write(crcStr);
-				out.write(reliable.identifier2);
+				out.write(ReliableFile.identifier2);
 
 				try {
 					out.flush();

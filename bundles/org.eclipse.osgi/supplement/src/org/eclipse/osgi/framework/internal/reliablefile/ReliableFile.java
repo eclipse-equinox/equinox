@@ -223,7 +223,6 @@ public class ReliableFile {
 	/* This method does not need to be synchronized if it only calls release. */
 	void closeInputFile() throws IOException {
 		unlock();
-
 		release();
 	}
 

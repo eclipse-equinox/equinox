@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.osgi.service.resolver;
 
-import java.util.Dictionary;
-
 /**
  * This class represents a specific version of a bundle in the system.
  */

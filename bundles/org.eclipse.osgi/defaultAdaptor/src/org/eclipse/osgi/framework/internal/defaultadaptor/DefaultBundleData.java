@@ -17,7 +17,6 @@ import org.eclipse.osgi.framework.adaptor.core.*;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.service.resolver.Version;
-import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.BundleException;
 
 /**
