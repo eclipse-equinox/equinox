@@ -15,6 +15,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileLock;
 
+//TODO shouldn't it be LockerJavaNIO instead?
 public class Locker_JavaNio implements Locker {
 	private FileLock fileLock;
 	private FileOutputStream fileStream;

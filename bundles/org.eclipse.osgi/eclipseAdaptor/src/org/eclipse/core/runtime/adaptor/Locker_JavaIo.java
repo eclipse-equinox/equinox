@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
+//TODO shouldn't it be LockerJavaIO instead?
 public class Locker_JavaIo implements Locker {
 	private File lockFile;
 	private RandomAccessFile lockRAF;

@@ -29,6 +29,7 @@ public class BasicLocation implements Location {
 	private static final String PROP_OSGI_LOCKING = "osgi.locking"; //$NON-NLS-1$
 	private static String LOCK_FILENAME = ".metadata/.lock"; //$NON-NLS-1$
 
+	//TODO could not this constructor take the parent as well?
 	public BasicLocation(String property, URL defaultValue, boolean isReadOnly) {
 		super();
 		this.property = property;
@@ -47,13 +48,13 @@ public class BasicLocation implements Location {
 	public Location getParentLocation() {
 		return parent;
 	}
-
+	//TODO use synchronized 
 	public URL getURL() {
 		if (location == null && defaultValue != null)
 			setURL(defaultValue, false);
 		return location;
 	}
-
+	//TODO use synchronized
 	public boolean isSet() {
 		return location != null;
 	}
@@ -83,7 +84,7 @@ public class BasicLocation implements Location {
 			System.getProperties().put(property, location.toExternalForm());
 		return lock;
 	}
-
+	//TODO use synchronized or remove if passed in constructor	
 	public void setParent(Location value) {
 		parent = value;
 	}
@@ -99,21 +100,22 @@ public class BasicLocation implements Location {
 			return false;
 
 		File parentFile = lock.getParentFile();
-		if (!parentFile.exists()) {
+		//TODO if (!parentFile.mkdirs()) would be enough/more correct
+		if (!parentFile.exists())
 			if (!parentFile.mkdirs())
 				return false;
-		}
 
 		setLocker(lock);
 		if (locker == null)
 			return true;
 		return locker.lock(); //TODO Why do we let the IOException flow instead of returning false
+		//TODO 2: because false means locked by somebody else, exceptions means error locking
 	}
 
 	private void setLocker(File lock) {
 		if (locker != null)
 			return;
-
+		// TODO return early, avoid if/else/if/else...
 		String lockMode = System.getProperties().getProperty(PROP_OSGI_LOCKING);
 		if (lockMode == null) { //By default set the lock mode to 1.4
 			if (runningWithNio()) {
@@ -132,16 +134,17 @@ public class BasicLocation implements Location {
 				locker = new Locker_JavaIo(lock);
 			}
 		} else {
+			//TODO need to check NIO is available 
 			//	Backup case if an invalid value has been specified
 			locker = new Locker_JavaNio(lock);
 		}
 	}
-
+	//TODO use synchronized
 	public void release() {
 		if (locker != null)
 			locker.release();
 	}
-
+	//TODO: isRunningWithNIO or hasNIO or...
 	private boolean runningWithNio() {
 		try {
 			Class c = Class.forName("java.nio.channels.FileLock"); //$NON-NLS-1$

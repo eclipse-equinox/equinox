@@ -15,6 +15,7 @@ import java.nio.channels.FileLock;
 import java.util.*;
 
 /**
+ * TODO this class must be completed and hooked or removed 
  * File managers provide a facility for tracking the state of files being used and updated
  * by several systems at the same time.  The typical usecase is in shared configuration data
  * areas.
