@@ -33,18 +33,18 @@ public class Debug {
 	public static final String ECLIPSE_OSGI = "org.eclipse.osgi"; //$NON-NLS-1$
 
 	public static final String OPTION_DEBUG_GENERAL = ECLIPSE_OSGI + "/debug";
-	public static final String OPTION_DEBUG_BUNDLE_TIME = "debug/bundleTime";
-	public static final String OPTION_DEBUG_LOADER = "debug/loader";
-	public static final String OPTION_DEBUG_EVENTS = "debug/events";
-	public static final String OPTION_DEBUG_SERVICES = "debug/services";
-	public static final String OPTION_DEBUG_PACKAGES = "debug/packages";
-	public static final String OPTION_DEBUG_MANIFEST = "debug/manifest";
-	public static final String OPTION_DEBUG_FILTER = "debug/filter";
-	public static final String OPTION_DEBUG_SECURITY = "debug/security";
-	public static final String OPTION_DEBUG_STARTLEVEL = "debug/startlevel";
-	public static final String OPTION_DEBUG_PACKAGEADMIN = "debug/packageadmin";
-	public static final String OPTION_DEBUG_PACKAGEADMIN_TIMING = "debug/packageadmin/timing";
-	public static final String OPTION_DEBUG_MONITOR_BUNDLES = "debug/monitorbundles";
+	public static final String OPTION_DEBUG_BUNDLE_TIME = ECLIPSE_OSGI + "/debug/bundleTime";
+	public static final String OPTION_DEBUG_LOADER = ECLIPSE_OSGI + "/debug/loader";
+	public static final String OPTION_DEBUG_EVENTS = ECLIPSE_OSGI + "/debug/events";
+	public static final String OPTION_DEBUG_SERVICES = ECLIPSE_OSGI + "/debug/services";
+	public static final String OPTION_DEBUG_PACKAGES = ECLIPSE_OSGI + "/debug/packages";
+	public static final String OPTION_DEBUG_MANIFEST = ECLIPSE_OSGI + "/debug/manifest";
+	public static final String OPTION_DEBUG_FILTER = ECLIPSE_OSGI + "/debug/filter";
+	public static final String OPTION_DEBUG_SECURITY = ECLIPSE_OSGI + "/debug/security";
+	public static final String OPTION_DEBUG_STARTLEVEL = ECLIPSE_OSGI + "/debug/startlevel";
+	public static final String OPTION_DEBUG_PACKAGEADMIN = ECLIPSE_OSGI + "/debug/packageadmin";
+	public static final String OPTION_DEBUG_PACKAGEADMIN_TIMING = ECLIPSE_OSGI + "/debug/packageadmin/timing";
+	public static final String OPTION_DEBUG_MONITOR_BUNDLES = ECLIPSE_OSGI + "/debug/monitorbundles";
 
 	static {
 		DebugOptions dbgOptions = DebugOptions.getDefault();
