@@ -135,36 +135,29 @@ public class DependencySystem {
 				// skip if already visited
 				if (mark == elementSet.getVisitedMark())
 					continue;
-				// skip if not enabled
-				if (elementSet.isEnabled()) {
-					// last time was visited it has been changed, need to recompute
-					// only a change in a previous phase causes the next phase to need to recompute
-					if (elementSet.getVisitedMark() == elementSet.getChangedMark() && visitor.getOrder() > getVisitorOrder(elementSet.getChangedMark()))
-						elementSet.markNeedingUpdate(visitor.getOrder());
-					boolean shouldVisit = true;
-					for (Iterator ancestorIter = visitor.getAncestors(elementSet).iterator(); ancestorIter.hasNext();) {
-						ElementSet ancestorNode = (ElementSet) ancestorIter.next();
-						if (ancestorNode.getVisitedMark() != mark) {
-							// one ancestor element set has not been visited yet - bail out			
-							shouldVisit = false;
-							break;
-						}
-						if (ancestorNode.getChangedMark() == mark)
-							// ancestor has changed - we need to recompute			
-							elementSet.markNeedingUpdate(visitor.getOrder());
+
+				// last time was visited it has been changed, need to recompute
+				// only a change in a previous phase causes the next phase to need to recompute
+				if (elementSet.getVisitedMark() == elementSet.getChangedMark() && visitor.getOrder() > getVisitorOrder(elementSet.getChangedMark()))
+					elementSet.markNeedingUpdate(visitor.getOrder());
+				boolean shouldVisit = true;
+				for (Iterator ancestorIter = visitor.getAncestors(elementSet).iterator(); ancestorIter.hasNext();) {
+					ElementSet ancestorNode = (ElementSet) ancestorIter.next();
+					if (ancestorNode.getVisitedMark() != mark) {
+						// one ancestor element set has not been visited yet - bail out			
+						shouldVisit = false;
+						break;
 					}
-					if (!shouldVisit)
-						continue;
+					if (ancestorNode.getChangedMark() == mark)
+						// ancestor has changed - we need to recompute			
+						elementSet.markNeedingUpdate(visitor.getOrder());
+				}
+				if (!shouldVisit)
+					continue;
 
-					elementSet.setVisitedMark(mark);
-					// only update if necessary
-					if (elementSet.isNeedingUpdate(visitor.getOrder()))
-						visitor.update(elementSet);
-				} else
-					elementSet.setVisitedMark(mark);
-
+				elementSet.setVisitedMark(mark);
 				// only update if necessary
-				if (elementSet.isEnabled() && elementSet.isNeedingUpdate(visitor.getOrder()))
+				if (elementSet.isNeedingUpdate(visitor.getOrder()))
 					visitor.update(elementSet);
 
 				visitCounter++;
@@ -189,7 +182,7 @@ public class DependencySystem {
 		ElementSet[] nodes = (ElementSet[]) elementSets.values().toArray(new ElementSet[elementSets.size()]);
 		ArrayList dependencies = new ArrayList();
 		for (int i = 0; i < nodes.length; i++)
-			for (Iterator required = nodes[i].getRequiring().iterator(); required.hasNext();)
+			for (Iterator required = nodes[i].getRequired().iterator(); required.hasNext();)
 				dependencies.add(new Object[] {nodes[i], required.next()});
 		return ComputeNodeOrder.computeNodeOrder(nodes, (Object[][]) dependencies.toArray(new Object[dependencies.size()][]));
 	}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2003 IBM Corporation and others.
+ * Copyright (c) 2003, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,7 +29,6 @@ public class ElementSet {
 	private Set selected;
 	private Set resolved;
 	private Map dependencyCounters;
-	private boolean enabled = true;
 
 	public ElementSet(Object id, DependencySystem system) {
 		this.id = id;
@@ -98,7 +97,7 @@ public class ElementSet {
 	 * Is this a root element set? 	
 	 */
 	public boolean isRoot() {
-		return required.isEmpty();
+		return getRequired().isEmpty();
 	}
 
 	/**
@@ -238,6 +237,15 @@ public class ElementSet {
 		}
 	}
 
+	public void removeFromCycle() {
+		Element[] availableElements = (Element[]) this.available.values().toArray(new Element[this.available.size()]);
+		for (int i = 0; i < availableElements.length; i++) {
+			removeElement(availableElements[i]);
+			availableElements[i].removeFromCycle();
+			addElement(availableElements[i]);
+		}
+	}
+
 	int getRequiringCount() {
 		return requiring.size();
 	}
@@ -317,11 +325,4 @@ public class ElementSet {
 		return needingUpdate;
 	}
 
-	public boolean isEnabled() {
-		return enabled;
-	}
-
-	public void setEnabled(boolean enabled) {
-		this.enabled = enabled;
-	}
 }

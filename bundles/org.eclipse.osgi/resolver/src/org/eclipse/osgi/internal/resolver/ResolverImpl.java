@@ -44,8 +44,10 @@ public class ResolverImpl implements Resolver {
 			} catch (DependencySystem.CyclicSystemException e) {
 				success = false;
 				Object[][] cycles = e.getCycles();
-				// disable one of the element sets involved in the cycle 
-				((ElementSet) cycles[0][0]).setEnabled(false);
+				// disable all element sets involved in the cycle 
+				for (int i = 0; i < cycles.length; i++)
+					for (int j = 0; j < cycles[i].length; j++)
+						((ElementSet) cycles[i][j]).removeFromCycle();
 			}
 		} while (!success);
 		processInnerDelta(delta);
