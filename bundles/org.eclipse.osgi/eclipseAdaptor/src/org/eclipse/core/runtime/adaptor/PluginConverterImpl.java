@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003 IBM Corporation and others.
+ * Copyright (c) 2003, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,13 +14,14 @@ import java.io.*;
 import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.service.pluginconversion.PluginConverter;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
-import org.xml.sax.SAXParseException;
 
 public class PluginConverterImpl implements PluginConverter {
 
+	private static final String PI_ECLIPSE_OSGI = "org.eclipse.osgi";
 	private static PluginConverterImpl instance;	
 	
 	private static final String[] ARCH_LIST = {org.eclipse.osgi.service.environment.Constants.ARCH_PA_RISC, org.eclipse.osgi.service.environment.Constants.ARCH_PPC, org.eclipse.osgi.service.environment.Constants.ARCH_SPARC, org.eclipse.osgi.service.environment.Constants.ARCH_X86};
@@ -41,7 +42,7 @@ public class PluginConverterImpl implements PluginConverter {
 	}
 	private BundleContext context;
 	protected String devPathSpec;
-	private PrintWriter out;
+	private BufferedWriter out;
 	private IPluginInfo pluginInfo;
 	private File pluginManifestLocation;
 
@@ -55,31 +56,44 @@ public class PluginConverterImpl implements PluginConverter {
 		instance = this;
 	}
 
-	private void closeFile() {
-		out.close();
-	}
-
 	public File convertManifest(File pluginBaseLocation) {
 		pluginManifestLocation = findPluginManifest(pluginBaseLocation);
 		if (pluginManifestLocation == null)
 			return null;
-		pluginInfo = parsePluginInfo(pluginManifestLocation);
+		try {
+			pluginInfo = parsePluginInfo(pluginManifestLocation);
+		} catch (PluginConversionException e) {
+			FrameworkLogEntry entry = new FrameworkLogEntry(0, PI_ECLIPSE_OSGI, e.getMessage(), 0, e.getCause());
+			EclipseAdaptor.getDefault().getFrameworkLog().log(entry);
+			return null;
+		}
 		if (pluginInfo == null)
 			return null;
 		String cacheLocation = (String) System.getProperties().get("osgi.manifest.cache");
 		File bundleManifestLocation = new File(cacheLocation, pluginInfo.getUniqueId() + '_' + pluginInfo.getVersion() + ".MF");
-		generate(bundleManifestLocation);
-		return bundleManifestLocation;
+		try {
+			generate(bundleManifestLocation);
+		} catch (PluginConversionException e) {
+			FrameworkLogEntry entry = new FrameworkLogEntry(0, PI_ECLIPSE_OSGI, e.getMessage(), 0, e.getCause());
+			EclipseAdaptor.getDefault().getFrameworkLog().log(entry);
+			return null;
+		}
+		return bundleManifestLocation; 
 	}
-
 	public boolean convertManifest(File pluginBaseLocation, File bundleManifestLocation) {
 		pluginManifestLocation = findPluginManifest(pluginBaseLocation);
 		if (pluginManifestLocation == null)
 			return false;
-		pluginInfo = parsePluginInfo(pluginManifestLocation);
-		if (pluginInfo == null)
+		try {		
+			pluginInfo = parsePluginInfo(pluginManifestLocation);
+			if (pluginInfo == null)
+				return false;
+			generate(bundleManifestLocation);
+		} catch (PluginConversionException e) {
+			FrameworkLogEntry entry = new FrameworkLogEntry(0, PI_ECLIPSE_OSGI, e.getMessage(), 0, e);
+			EclipseAdaptor.getDefault().getFrameworkLog().log(entry);
 			return false;
-		generate(bundleManifestLocation);
+		}
 		return true;
 	}
 
@@ -144,22 +158,39 @@ public class PluginConverterImpl implements PluginConverter {
 		return found;
 	}
 
-	protected void generate(File generationLocation) {
+	protected void generate(File generationLocation) throws PluginConversionException {
 		if (upToDate(generationLocation, pluginManifestLocation))
-			return;
-		openFile(generationLocation);
-		generateTimestamp();		
-		generateHeaders();
-		generateClasspath();
-		generateLegacy();
-		generateActivator();
-		generatePluginClass();
-		generateProvidePackage();
-		generateImports();
-		generateRequireBundle();
-		closeFile();
+			return;		
+		try {
+			generationLocation.getParentFile().mkdirs();
+			generationLocation.createNewFile();
+			if (!generationLocation.isFile()) {
+				String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONVERTER_ERROR_CREATING_BUNDLE_MANIFEST",this.pluginInfo.getUniqueId(),generationLocation); //$NON-NLS-1$
+				throw new PluginConversionException(message);					
+			}
+			// replaces any eventual existing file
+			out = new BufferedWriter(new FileWriter(generationLocation));
+			generateTimestamp();		
+			generateHeaders();
+			generateClasspath();
+			generateLegacy();
+			generateActivator();
+			generatePluginClass();
+			generateProvidePackage();
+			generateRequireBundle();
+			out.flush();
+		} catch (IOException e) {
+			String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONVERTER_ERROR_CREATING_BUNDLE_MANIFEST",this.pluginInfo.getUniqueId(),generationLocation); //$NON-NLS-1$
+			throw new PluginConversionException(message, e);
+		} finally {
+			if (out != null)
+				try {
+					out.close();
+				} catch (IOException e) {
+					// only report problems writing to/flushing the file
+				}
+		}
 	}
-
 	private boolean requireRuntimeCompatibility() {
 		String[] requireList = pluginInfo.getRequires();
 		for (int i = 0; i < requireList.length; i++) {
@@ -169,7 +200,7 @@ public class PluginConverterImpl implements PluginConverter {
 		return false;
 	}
 	
-	private void generateActivator() {
+	private void generateActivator() throws IOException {
 		if (!pluginInfo.isFragment()) 
 			if (! requireRuntimeCompatibility()) {
 				writeEntry(Constants.BUNDLE_ACTIVATOR, pluginInfo.getPluginClass());
@@ -178,32 +209,27 @@ public class PluginConverterImpl implements PluginConverter {
 			}
 	}
 
-	private void generateClasspath() {
+	private void generateClasspath() throws IOException {
 		String[] libraries = pluginInfo.getLibrariesName();
 		writeEntry(Constants.BUNDLE_CLASSPATH, libraries);
 	}
 
-	private void generateHeaders() {
+	private void generateHeaders() throws IOException {
 		writeEntry(Constants.BUNDLE_NAME, pluginInfo.getPluginName());
 		writeEntry(Constants.BUNDLE_VERSION, pluginInfo.getVersion());
 		writeEntry(Constants.BUNDLE_GLOBALNAME, pluginInfo.getUniqueId());
 		writeEntry(Constants.BUNDLE_VENDOR, pluginInfo.getProviderName());
 	}
 
-	private void generateImports() {
-		// TODO We should not need DynamicImport-Package or Import-Package
-		// writeEntry(Constants.DYNAMICIMPORT_PACKAGE, "*");
-	}
-
-	private void generateLegacy() {
+	private void generateLegacy() throws IOException {
 		writeEntry(LEGACY, "true"); //$NON-NLS-1$
 	}
 
-	private void generatePluginClass() {
+	private void generatePluginClass() throws IOException {
 		if (requireRuntimeCompatibility())
 			writeEntry(PLUGIN, pluginInfo.getPluginClass());
 	}
-	private void generateProvidePackage() {
+	private void generateProvidePackage() throws IOException {
 		StringBuffer providePackage = new StringBuffer();
 		Set exports = getExports();
 		if (exports != null) {
@@ -232,7 +258,7 @@ public class PluginConverterImpl implements PluginConverter {
 			writeEntry(Constants.HOST_BUNDLE, hostBundle.toString());
 		}
 	}
-	private void generateRequireBundle() {
+	private void generateRequireBundle() throws IOException {
 		String[] requiredBundles = pluginInfo.getRequires();
 		if (requiredBundles == null && !pluginInfo.getUniqueId().equals(PI_RUNTIME)) // to avoid cycles
 			requiredBundles = new String[]{PI_RUNTIME};
@@ -240,9 +266,10 @@ public class PluginConverterImpl implements PluginConverter {
 		writeEntry(Constants.REQUIRE_BUNDLE, requiredBundles);
 	}
 
-	private void generateTimestamp() {
+	private void generateTimestamp() throws IOException {
 		// so it is easy to tell which ones are generated
-		out.println(GENERATED_FROM + ": " + pluginManifestLocation.lastModified());		 //$NON-NLS-1$
+		out.write(GENERATED_FROM + ": " + pluginManifestLocation.lastModified());		 //$NON-NLS-1$
+		out.newLine();
 	}
 
 	private Set getExports() {
@@ -336,8 +363,8 @@ public class PluginConverterImpl implements PluginConverter {
 		try {
 			file = new JarFile(jarFile);
 		} catch (IOException e) {
-			//TODO Log a warning
-			System.err.println("Ignore " + jarFile);
+			String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONVERTER_PLUGIN_LIBRARY_IGNORED", jarFile, pluginInfo.getUniqueId());
+			EclipseAdaptor.getDefault().getFrameworkLog().log(new FrameworkLogEntry(0, PI_ECLIPSE_OSGI, message, 0, e));
 			return names;
 		}
 
@@ -391,43 +418,17 @@ public class PluginConverterImpl implements PluginConverter {
 		return true;
 	}
 
-	private void openFile(File generationLocation) {
-		try {
-			generationLocation.getParentFile().mkdirs();
-			generationLocation.createNewFile();
-		} catch (IOException e) {
-			//TODO Log an error
-			System.err.println("error creating directory writing manifest for " + pluginInfo.getUniqueId());
-			return;
-		}
-		BufferedOutputStream outputFile = null;
-		try {
-			outputFile = new BufferedOutputStream(new FileOutputStream(generationLocation));
-		} catch (FileNotFoundException e) {
-			//TODO Log an error
-			System.err.println("error writing manifest for " + pluginInfo.getUniqueId());
-			return;
-		}
-		out = new PrintWriter(outputFile);
-	}
-	/** 
-	 * Parses the plugin manifest to find out:
-	 * - the plug-in unique identifier
-	 * - the plug-in version
-	 * - runtime/libraries entries
-	 * - the plug-in class
-	 * - the master plugin (for a fragment)
+	/**
+	 * Parses the plugin manifest to find out: - the plug-in unique identifier -
+	 * the plug-in version - runtime/libraries entries - the plug-in class -
+	 * the master plugin (for a fragment)
 	 */
-	private IPluginInfo parsePluginInfo(File pluginManifestLocation) {
+	private IPluginInfo parsePluginInfo(File pluginManifestLocation) throws PluginConversionException {
 		try {
 			return new PluginParser(context).parsePlugin(pluginManifestLocation.toString());
-		} catch (SAXParseException se) {
-			se.printStackTrace(); //TODO Do the logging
-			return null;
-			/* exception details logged by parser */
 		} catch (Exception e) {
-			e.printStackTrace();	//TODO Do the logging
-			return null;
+			String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONVERTER_ERROR_PARSING_PLUGIN_MANIFEST", pluginManifestLocation); //$NON-NLS-1$
+			throw new PluginConversionException(message, e);
 		}
 	}
 
@@ -462,55 +463,50 @@ public class PluginConverterImpl implements PluginConverter {
 		return false;
 	}
 
-	private void writeEntry(String key, Collection value) {
-		if (value == null || value.size() == 0)
-			return;
-		if (value.size() == 1) {
-			out.println(key + ": " + value.iterator().next()); //$NON-NLS-1$
-			return;
+	private void writeEntry(String key, String value) throws IOException {
+		if (value != null && value.length() > 0) {
+			out.write(key + ": " + value); //$NON-NLS-1$
+			out.newLine();
 		}
-		key = key + ": "; //$NON-NLS-1$
-		out.println(key);
-		out.print(' ');
-		boolean first = true;
-		for (Iterator i = value.iterator(); i.hasNext(); ) {
-			if (first)
-				first = false;
-			else {
-				out.println(',');
-				out.print(' ');
-			}
-			out.print(i.next());
-		}
-		out.println();
 	}
 
-	private void writeEntry(String key, String value) {
-		if (value != null && value.length() > 0)
-			out.println(key + ": " + value); //$NON-NLS-1$
-	}
-
-	private void writeEntry(String key, String[] value) {
+	private void writeEntry(String key, String[] value) throws IOException {
 		if (value == null || value.length == 0)
 			return;
 		if (value.length == 1) {
-			out.println(key + ": " + value[0]); //$NON-NLS-1$
+			out.write(key + ": " + value[0]); //$NON-NLS-1$
+			out.newLine();			
 			return;
 		}
 		key = key + ": "; //$NON-NLS-1$
-		out.println(key);
-		out.print(' ');
+		out.write(key);
+		out.newLine();
+		out.write(' ');
 		boolean first = true;
 		for (int i = 0; i < value.length; i++) {
 			if (first)
 				first = false;
 			else {
-				out.println(',');
-				out.print(' ');
+				out.write(',');
+				out.newLine();				
+				out.write(' ');
 			}
-			out.print(value[i]);
+			out.write(value[i]);
 		}
-		out.println();
+		out.newLine();
 	}
-
+	public class PluginConversionException extends Exception {		
+		public PluginConversionException() {
+			super();
+		}
+		public PluginConversionException(String message) {
+			super(message);
+		}
+		public PluginConversionException(String message, Throwable cause) {
+			super(message, cause);
+		}
+		public PluginConversionException(Throwable cause) {
+			super(cause);
+		}
+	}
 }
