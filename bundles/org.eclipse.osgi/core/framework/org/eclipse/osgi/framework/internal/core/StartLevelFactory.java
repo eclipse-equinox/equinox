@@ -25,8 +25,8 @@
  */
 package org.eclipse.osgi.framework.internal.core;
 
+import org.osgi.framework.*;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceRegistration;
 
 /**
@@ -34,35 +34,34 @@ import org.osgi.framework.ServiceRegistration;
  * to those requesting org.osgi.service.startlevel.StartLevel service. 
  */
 public class StartLevelFactory implements ServiceFactory {
-    
-    /** need a reference to the framework */
-    Framework framework;
-    
-    protected StartLevelFactory(Framework framework) {
-        this.framework = framework;
-    }
-    
-  /**
-   * Returns a StartLevel object, created for each requesting bundle.
-   * 
-   * @param   callerBundle  bundle, requested to get StartLevel service.
-   * @pre callerBundle!=null
-   * @param   sReg  ServiceRegistration of the StartLevel service
-   * @pre sReg!=null
-   * @return  StartLevel object
-   */
-  public Object getService(Bundle callerBundle, ServiceRegistration sReg) {
-    return new StartLevel(callerBundle, framework);
-  }
-  
 
-  /**
-   * Does nothing, as the StartLevel bundle does not keep references to StartLevel objects.
-   *
-   * @param   callerBundle  bundle requesting to unget StartLevel service.
-   * @param   sReg  ServiceRegistration of StartLevel
-   * @param   obj  Service object, already been got by this bundle.
-   */
-  public void ungetService(Bundle callerBundle, ServiceRegistration sReg, Object obj) {    
-  }  
+	/** need a reference to the framework */
+	Framework framework;
+
+	protected StartLevelFactory(Framework framework) {
+		this.framework = framework;
+	}
+
+	/**
+	 * Returns a StartLevel object, created for each requesting bundle.
+	 * 
+	 * @param   callerBundle  bundle, requested to get StartLevel service.
+	 * @pre callerBundle!=null
+	 * @param   sReg  ServiceRegistration of the StartLevel service
+	 * @pre sReg!=null
+	 * @return  StartLevel object
+	 */
+	public Object getService(Bundle callerBundle, ServiceRegistration sReg) {
+		return new StartLevel(callerBundle, framework);
+	}
+
+	/**
+	 * Does nothing, as the StartLevel bundle does not keep references to StartLevel objects.
+	 *
+	 * @param   callerBundle  bundle requesting to unget StartLevel service.
+	 * @param   sReg  ServiceRegistration of StartLevel
+	 * @param   obj  Service object, already been got by this bundle.
+	 */
+	public void ungetService(Bundle callerBundle, ServiceRegistration sReg, Object obj) {
+	}
 }

@@ -12,10 +12,7 @@
 package org.eclipse.osgi.framework.adaptor;
 
 import java.util.Vector;
-
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.Filter;
-import org.osgi.framework.ServiceRegistration;
+import org.osgi.framework.*;
 
 /**
  * The ServiceRegistry interface is used by the framework to store and

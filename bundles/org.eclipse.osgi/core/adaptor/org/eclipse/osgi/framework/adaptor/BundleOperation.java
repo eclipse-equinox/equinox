@@ -11,7 +11,7 @@
 
 package org.eclipse.osgi.framework.adaptor;
 
-import org.osgi.framework.*;
+import org.osgi.framework.BundleException;
 
 /**
  * Bundle Storage interface for managing a persistent storage life
@@ -42,34 +42,33 @@ import org.osgi.framework.*;
  * </pre>
  *
  */
-public abstract interface BundleOperation
-{
+public abstract interface BundleOperation {
 
-    /**
-     * Begin the operation on the bundle (install, update, uninstall).
-     *
-     * @return BundleData object for the target bundle.
-     * @throws BundleException If a failure occured modifiying peristent storage.
-     */
-    public abstract BundleData begin() throws BundleException;
+	/**
+	 * Begin the operation on the bundle (install, update, uninstall).
+	 *
+	 * @return BundleData object for the target bundle.
+	 * @throws BundleException If a failure occured modifiying peristent storage.
+	 */
+	public abstract BundleData begin() throws BundleException;
 
-    /**
-     * Commit the operation performed.
-     *
-     * @param postpone If true, the bundle's persistent
-     * storage cannot be immediately reclaimed. This may occur if the
-     * bundle is still exporting a package.
-     * @throws BundleException If a failure occured modifiying peristent storage.
-     */
-    public abstract void commit(boolean postpone) throws BundleException;
+	/**
+	 * Commit the operation performed.
+	 *
+	 * @param postpone If true, the bundle's persistent
+	 * storage cannot be immediately reclaimed. This may occur if the
+	 * bundle is still exporting a package.
+	 * @throws BundleException If a failure occured modifiying peristent storage.
+	 */
+	public abstract void commit(boolean postpone) throws BundleException;
 
-    /**
-     * Undo the change to persistent storage.
-     * <p>This method can be called before calling commit or if commit
-     * throws an exception to undo any changes in progress.
-     *
-     * @throws BundleException If a failure occured modifiying peristent storage.
-     */
-    public abstract void undo() throws BundleException;
+	/**
+	 * Undo the change to persistent storage.
+	 * <p>This method can be called before calling commit or if commit
+	 * throws an exception to undo any changes in progress.
+	 *
+	 * @throws BundleException If a failure occured modifiying peristent storage.
+	 */
+	public abstract void undo() throws BundleException;
 
 }

@@ -89,8 +89,7 @@ public final class Version implements Comparable {
 	 * @param qualifier qualifier component of the version identifier. 
 	 * Qualifier characters that are not a letter or a digit are replaced.
 	 */
-	public Version(int major, int minor, int service, String qualifier)
-		throws IllegalArgumentException {
+	public Version(int major, int minor, int service, String qualifier) throws IllegalArgumentException {
 
 		// Do the test outside of the assert so that they 'Policy.bind' 
 		// will not be evaluated each time (including cases when we would
@@ -129,7 +128,8 @@ public final class Version implements Comparable {
 	 * Qualifier characters that are not a letter or a digit are replaced.
 	 */
 	public Version(String versionId) {
-		if (versionId==null) versionId = "0.0.0";
+		if (versionId == null)
+			versionId = "0.0.0";
 		Object[] parts = parseVersion(versionId);
 		this.major = ((Integer) parts[0]).intValue();
 		this.minor = ((Integer) parts[1]).intValue();
@@ -241,10 +241,7 @@ public final class Version implements Comparable {
 		if (!(object instanceof Version))
 			return false;
 		Version v = (Version) object;
-		return v.getMajorComponent() == major
-			&& v.getMinorComponent() == minor
-			&& v.getServiceComponent() == service
-			&& v.getQualifierComponent().equals(qualifier);
+		return v.getMajorComponent() == major && v.getMinorComponent() == minor && v.getServiceComponent() == service && v.getQualifierComponent().equals(qualifier);
 	}
 	/**
 	 * Returns a hash code value for the object. 
@@ -322,14 +319,9 @@ public final class Version implements Comparable {
 			return true;
 		if ((major == id.getMajorComponent()) && (minor > id.getMinorComponent()))
 			return true;
-		if ((major == id.getMajorComponent())
-			&& (minor == id.getMinorComponent())
-			&& (service > id.getServiceComponent()))
+		if ((major == id.getMajorComponent()) && (minor == id.getMinorComponent()) && (service > id.getServiceComponent()))
 			return true;
-		if ((major == id.getMajorComponent())
-			&& (minor == id.getMinorComponent())
-			&& (service == id.getServiceComponent())
-			&& (qualifier.compareTo(id.getQualifierComponent()) >= 0))
+		if ((major == id.getMajorComponent()) && (minor == id.getMinorComponent()) && (service == id.getServiceComponent()) && (qualifier.compareTo(id.getQualifierComponent()) >= 0))
 			return true;
 		else
 			return false;
@@ -420,10 +412,7 @@ public final class Version implements Comparable {
 	public boolean isPerfect(Version id) {
 		if (id == null)
 			return false;
-		if ((major != id.getMajorComponent())
-			|| (minor != id.getMinorComponent())
-			|| (service != id.getServiceComponent())
-			|| (!qualifier.equals(id.getQualifierComponent())))
+		if ((major != id.getMajorComponent()) || (minor != id.getMinorComponent()) || (service != id.getServiceComponent()) || (!qualifier.equals(id.getQualifierComponent())))
 			return false;
 		else
 			return true;

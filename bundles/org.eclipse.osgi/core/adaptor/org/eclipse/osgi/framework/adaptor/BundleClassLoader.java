@@ -63,8 +63,7 @@ public abstract class BundleClassLoader extends ClassLoader {
 	 * @param delegate The ClassLoaderDelegate for this bundle.
 	 * @param domain The ProtectionDomain for this bundle.
 	 */
-	public BundleClassLoader(ClassLoaderDelegate delegate, ProtectionDomain domain, String[] classpath)
-	{
+	public BundleClassLoader(ClassLoaderDelegate delegate, ProtectionDomain domain, String[] classpath) {
 		this(delegate, domain, classpath, null);
 	}
 
@@ -74,15 +73,14 @@ public abstract class BundleClassLoader extends ClassLoader {
 	 * @param domain The ProtectionDomain for this bundle.
 	 * @param parent The parent classloader to use.
 	 */
-	public BundleClassLoader(ClassLoaderDelegate delegate, ProtectionDomain domain, String[] classpath, ClassLoader parent)
-	{
+	public BundleClassLoader(ClassLoaderDelegate delegate, ProtectionDomain domain, String[] classpath, ClassLoader parent) {
 		this.delegate = delegate;
 		this.hostdomain = domain;
 		this.hostclasspath = classpath;
 		// use the defaultParentClassLoader if a parent is not specified.
 		if (parent == null)
-			parentClassLoader=defaultParentClassLoader;
-		else 
+			parentClassLoader = defaultParentClassLoader;
+		else
 			parentClassLoader = parent;
 	}
 
@@ -113,16 +111,16 @@ public abstract class BundleClassLoader extends ClassLoader {
 
 		try {
 			// First check the parent classloader for system classes.
-			try{
+			try {
 				return parentClassLoader.loadClass(name);
-			} catch (ClassNotFoundException e){
+			} catch (ClassNotFoundException e) {
 				// Do nothing. continue to delegate.
 			}
 
 			// Just ask the delegate.  This could result in findLocalClass(name) being called.
 			Class clazz = delegate.findClass(name);
 			// resolve the class if asked to.
-			if (resolve) 
+			if (resolve)
 				resolveClass(clazz);
 			return (clazz);
 		} catch (Error e) {
@@ -151,7 +149,7 @@ public abstract class BundleClassLoader extends ClassLoader {
 	 * @return The Class object.
 	 * @throws ClassNotFoundException if the class is not found.
 	 */
-	abstract protected Class findClass(String name) throws ClassNotFoundException ;
+	abstract protected Class findClass(String name) throws ClassNotFoundException;
 
 	/**
 	 * Gets a resource for the bundle.  First delegate.findResource(name) is 
@@ -167,31 +165,27 @@ public abstract class BundleClassLoader extends ClassLoader {
 			return null;
 		}
 		if (Debug.DEBUG && Debug.DEBUG_LOADER) {
-			Debug.println("BundleClassLoader[" + delegate +"].getResource("+name+")");
+			Debug.println("BundleClassLoader[" + delegate + "].getResource(" + name + ")");
 		}
 
-		try
-		{
+		try {
 			// First check the parent classloader for system resources.
 			URL url = parentClassLoader.getResource(name);
 			if (url != null) {
-				return(url);
+				return (url);
 			}
 			url = delegate.findResource(name);
 			if (url != null) {
-				return(url);
+				return (url);
 			}
-		}
-		catch (ImportResourceNotFoundException e)
-		{
+		} catch (ImportResourceNotFoundException e) {
 		}
 
-		if (Debug.DEBUG && Debug.DEBUG_LOADER)
-		{
-			Debug.println("BundleClassLoader[" + delegate +"].getResource("+name+") failed.");
+		if (Debug.DEBUG && Debug.DEBUG_LOADER) {
+			Debug.println("BundleClassLoader[" + delegate + "].getResource(" + name + ") failed.");
 		}
 
-		return(null);
+		return (null);
 	}
 
 	/**
@@ -220,11 +214,10 @@ public abstract class BundleClassLoader extends ClassLoader {
 		 * locally if they are not found outside the bundle.
 		 */
 		try {
-			return(delegate.findResources(name));
-		} catch (Exception e){
-			if (Debug.DEBUG && Debug.DEBUG_LOADER)
-			{
-				Debug.println("BundleClassLoader[" + delegate +"].findResources("+name+") failed.");
+			return (delegate.findResources(name));
+		} catch (Exception e) {
+			if (Debug.DEBUG && Debug.DEBUG_LOADER) {
+				Debug.println("BundleClassLoader[" + delegate + "].findResources(" + name + ") failed.");
 				Debug.printStackTrace(e);
 			}
 			return null;
@@ -237,7 +230,7 @@ public abstract class BundleClassLoader extends ClassLoader {
 	 * @param libname The library to find.
 	 * @return The URL of the resource or null if it does not exist.
 	 */
-	protected String findLibrary(String libname){
+	protected String findLibrary(String libname) {
 		return delegate.findLibrary(libname);
 	}
 
@@ -247,7 +240,7 @@ public abstract class BundleClassLoader extends ClassLoader {
 	 * @param resource the resource path to find.
 	 * @return a URL to the resource or null if the resource does not exist.
 	 */
-	public URL findLocalResource(String resource){
+	public URL findLocalResource(String resource) {
 		return this.findResource(resource);
 	}
 
@@ -267,7 +260,7 @@ public abstract class BundleClassLoader extends ClassLoader {
 	 * @return The class object found.
 	 * @throws ClassNotFoundException if the classname does not exist locally.
 	 */
-	public Class findLocalClass(String classname) throws ClassNotFoundException{
+	public Class findLocalClass(String classname) throws ClassNotFoundException {
 		return findClass(classname);
 	}
 
@@ -288,7 +281,7 @@ public abstract class BundleClassLoader extends ClassLoader {
 	 * if desired.
 	 */
 	protected static class ParentClassLoader extends ClassLoader {
-		protected ParentClassLoader(){
+		protected ParentClassLoader() {
 			super(null);
 		}
 	}

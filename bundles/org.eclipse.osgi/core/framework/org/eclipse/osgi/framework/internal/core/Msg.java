@@ -28,14 +28,12 @@ package org.eclipse.osgi.framework.internal.core;
  * a reasonable human-readable (english) string.
  */
 
-public class Msg
-{
+public class Msg {
 
-    static public org.eclipse.osgi.framework.msg.MessageFormat formatter;
+	static public org.eclipse.osgi.framework.msg.MessageFormat formatter;
 
-    // Attempt to load the message bundle.
-    static
-    {
-        formatter = new org.eclipse.osgi.framework.msg.MessageFormat("org.eclipse.osgi.framework.internal.core.ExternalMessages");
-    }
+	// Attempt to load the message bundle.
+	static {
+		formatter = new org.eclipse.osgi.framework.msg.MessageFormat("org.eclipse.osgi.framework.internal.core.ExternalMessages");
+	}
 }

@@ -12,87 +12,69 @@
 package org.eclipse.osgi.framework.security.action;
 
 import java.io.IOException;
-import java.security.AccessController;
-import java.security.PrivilegedActionException;
-import java.security.PrivilegedExceptionAction;
+import java.security.*;
 
 /**
  * PermissionStorage privileged action class.
  */
 
-public class PermissionStorage implements org.eclipse.osgi.framework.adaptor.PermissionStorage, PrivilegedExceptionAction
-{
-    private org.eclipse.osgi.framework.adaptor.PermissionStorage storage;
-    private String location;
-    private String[] data;
-    private int action;
-    private static final int GET = 1;
-    private static final int SET = 2;
-    private static final int LOCATION = 3;
+public class PermissionStorage implements org.eclipse.osgi.framework.adaptor.PermissionStorage, PrivilegedExceptionAction {
+	private org.eclipse.osgi.framework.adaptor.PermissionStorage storage;
+	private String location;
+	private String[] data;
+	private int action;
+	private static final int GET = 1;
+	private static final int SET = 2;
+	private static final int LOCATION = 3;
 
-    public PermissionStorage(org.eclipse.osgi.framework.adaptor.PermissionStorage storage)
-    {
-        this.storage = storage;
-    }
+	public PermissionStorage(org.eclipse.osgi.framework.adaptor.PermissionStorage storage) {
+		this.storage = storage;
+	}
 
-    public Object run() throws IOException
-    {
-        switch (action)
-        {
-            case GET:
-                return storage.getPermissionData(location);
-            case SET:
-                storage.setPermissionData(location, data);
-                return null;
-            case LOCATION:
-                return storage.getLocations();
-        }
+	public Object run() throws IOException {
+		switch (action) {
+			case GET :
+				return storage.getPermissionData(location);
+			case SET :
+				storage.setPermissionData(location, data);
+				return null;
+			case LOCATION :
+				return storage.getLocations();
+		}
 
-        throw new UnsupportedOperationException();
-    }
+		throw new UnsupportedOperationException();
+	}
 
-    public String[] getPermissionData(String location) throws IOException
-    {
-        this.location = location;
-        this.action = GET;
+	public String[] getPermissionData(String location) throws IOException {
+		this.location = location;
+		this.action = GET;
 
-        try
-        {
-            return (String[]) AccessController.doPrivileged(this);
-        }
-        catch (PrivilegedActionException e)
-        {
-            throw (IOException) e.getException();
-        }
-    }
+		try {
+			return (String[]) AccessController.doPrivileged(this);
+		} catch (PrivilegedActionException e) {
+			throw (IOException) e.getException();
+		}
+	}
 
-    public String[] getLocations() throws IOException
-    {
-        this.action = LOCATION;
+	public String[] getLocations() throws IOException {
+		this.action = LOCATION;
 
-        try
-        {
-            return (String[]) AccessController.doPrivileged(this);
-        }
-        catch (PrivilegedActionException e)
-        {
-            throw (IOException) e.getException();
-        }
-    }
+		try {
+			return (String[]) AccessController.doPrivileged(this);
+		} catch (PrivilegedActionException e) {
+			throw (IOException) e.getException();
+		}
+	}
 
-    public void setPermissionData(String location, String[] data) throws IOException
-    {
-        this.location = location;
-        this.data = data;
-        this.action = SET;
+	public void setPermissionData(String location, String[] data) throws IOException {
+		this.location = location;
+		this.data = data;
+		this.action = SET;
 
-        try
-        {
-            AccessController.doPrivileged(this);
-        }
-        catch (PrivilegedActionException e)
-        {
-            throw (IOException) e.getException();
-        }
-    }
+		try {
+			AccessController.doPrivileged(this);
+		} catch (PrivilegedActionException e) {
+			throw (IOException) e.getException();
+		}
+	}
 }

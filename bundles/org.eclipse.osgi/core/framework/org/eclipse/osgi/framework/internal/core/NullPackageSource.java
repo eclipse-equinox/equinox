@@ -29,7 +29,7 @@ public class NullPackageSource extends PackageSource {
 	public BundleLoaderProxy[] getSuppliers() {
 		return null;
 	}
-	public boolean isNullSource(){
+	public boolean isNullSource() {
 		return true;
 	}
 	public String toString() {

@@ -13,11 +13,8 @@ package org.eclipse.osgi.framework.internal.core;
 
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-
 import org.eclipse.osgi.framework.debug.Debug;
-import org.osgi.framework.BundleException;
-import org.osgi.framework.FrameworkEvent;
-import org.osgi.framework.ServiceFactory;
+import org.osgi.framework.*;
 
 /**
  * This class represents the use of a service by a bundle. One is created for each
@@ -25,309 +22,265 @@ import org.osgi.framework.ServiceFactory;
  * and the bundle's use count.
  */
 
-public class ServiceUse
-{	
-    /** ServiceFactory object if the service instance represents a factory,
-        null otherwise */
-    protected ServiceFactory factory;
-    /** Service object either registered or that returned by
-        ServiceFactory.getService() */
-    protected Object service;
-    /** BundleContext associated with this service use */
-    protected BundleContext context;
-    /** ServiceDescription of the registered service */
-    protected ServiceRegistration registration;
-    /** bundle's use count for this service */
-    protected int useCount;
-    /** Internal framework object. */
-    protected Framework framework;
+public class ServiceUse {
+	/** ServiceFactory object if the service instance represents a factory,
+	    null otherwise */
+	protected ServiceFactory factory;
+	/** Service object either registered or that returned by
+	    ServiceFactory.getService() */
+	protected Object service;
+	/** BundleContext associated with this service use */
+	protected BundleContext context;
+	/** ServiceDescription of the registered service */
+	protected ServiceRegistration registration;
+	/** bundle's use count for this service */
+	protected int useCount;
+	/** Internal framework object. */
+	protected Framework framework;
 
-    /**
-     * Constructs a service use encapsulating the service object.
-     * Objects of this class should be constrcuted while holding the
-     * registrations lock.
-     *
-     * @param   context bundle getting the service
-     * @param   registration ServiceRegistration of the service
-     */
-    protected ServiceUse(BundleContext context, ServiceRegistration registration)
-    {
-        this.context = context;
-        this.framework = context.framework;
-        this.registration = registration;
-        this.useCount = 0;
+	/**
+	 * Constructs a service use encapsulating the service object.
+	 * Objects of this class should be constrcuted while holding the
+	 * registrations lock.
+	 *
+	 * @param   context bundle getting the service
+	 * @param   registration ServiceRegistration of the service
+	 */
+	protected ServiceUse(BundleContext context, ServiceRegistration registration) {
+		this.context = context;
+		this.framework = context.framework;
+		this.registration = registration;
+		this.useCount = 0;
 
-        Object service = registration.service;
-        if (service instanceof ServiceFactory)
-        {
-            factory = (ServiceFactory)service;
-            this.service = null;
-        }
-        else
-        {
-            this.factory = null;
-            this.service = service;
-        }
-    }
+		Object service = registration.service;
+		if (service instanceof ServiceFactory) {
+			factory = (ServiceFactory) service;
+			this.service = null;
+		} else {
+			this.factory = null;
+			this.service = service;
+		}
+	}
 
-    /**
-     * Get a service's service object.
-     * Retrieves the service object for a service.
-     * A bundle's use of a service is tracked by a
-     * use count. Each time a service's service object is returned by
-     * {@link #getService}, the context bundle's use count for the service
-     * is incremented by one. Each time the service is release by
-     * {@link #ungetService}, the context bundle's use count
-     * for the service is decremented by one.
-     * When a bundle's use count for a service
-     * drops to zero, the bundle should no longer use the service.
-     * See {@link #getBundle()} for a definition of context bundle.
-     *
-     * <p>The following steps are followed to get the service object:
-     * <ol>
-     * <li>The context bundle's use count for this service is incremented by one.
-     * <li>If the context bundle's use count for the service is now one and
-     * the service was registered with a {@link ServiceFactory},
-     * the {@link ServiceFactory#getService ServiceFactory.getService} method
-     * is called to create a service object for the context bundle.
-     * This service object is cached by the framework.
-     * While the context bundle's use count for the service is greater than zero,
-     * subsequent calls to get the services's service object for the context bundle
-     * will return the cached service object.
-     * <br>If the service object returned by the {@link ServiceFactory}
-     * is not an <code>instanceof</code>
-     * all the classes named when the service was registered or
-     * the {@link ServiceFactory} throws an exception,
-     * <code>null</code> is returned and a
-     * {@link FrameworkEvent} of type {@link FrameworkEvent#ERROR} is broadcast.
-     * <li>The service object for the service is returned.
-     * </ol>
-     *
-     * @return A service object for the service associated with this
-     * reference.
-     */
-    protected Object getService()
-    {
-        if ((useCount == 0) && (factory != null))
-        {
-            Bundle factorybundle = registration.context.bundle;
-            Object service;
+	/**
+	 * Get a service's service object.
+	 * Retrieves the service object for a service.
+	 * A bundle's use of a service is tracked by a
+	 * use count. Each time a service's service object is returned by
+	 * {@link #getService}, the context bundle's use count for the service
+	 * is incremented by one. Each time the service is release by
+	 * {@link #ungetService}, the context bundle's use count
+	 * for the service is decremented by one.
+	 * When a bundle's use count for a service
+	 * drops to zero, the bundle should no longer use the service.
+	 * See {@link #getBundle()} for a definition of context bundle.
+	 *
+	 * <p>The following steps are followed to get the service object:
+	 * <ol>
+	 * <li>The context bundle's use count for this service is incremented by one.
+	 * <li>If the context bundle's use count for the service is now one and
+	 * the service was registered with a {@link ServiceFactory},
+	 * the {@link ServiceFactory#getService ServiceFactory.getService} method
+	 * is called to create a service object for the context bundle.
+	 * This service object is cached by the framework.
+	 * While the context bundle's use count for the service is greater than zero,
+	 * subsequent calls to get the services's service object for the context bundle
+	 * will return the cached service object.
+	 * <br>If the service object returned by the {@link ServiceFactory}
+	 * is not an <code>instanceof</code>
+	 * all the classes named when the service was registered or
+	 * the {@link ServiceFactory} throws an exception,
+	 * <code>null</code> is returned and a
+	 * {@link FrameworkEvent} of type {@link FrameworkEvent#ERROR} is broadcast.
+	 * <li>The service object for the service is returned.
+	 * </ol>
+	 *
+	 * @return A service object for the service associated with this
+	 * reference.
+	 */
+	protected Object getService() {
+		if ((useCount == 0) && (factory != null)) {
+			Bundle factorybundle = registration.context.bundle;
+			Object service;
 
-            try
-            {
-                service = AccessController.doPrivileged(new PrivilegedAction ()
-                {
-                    public Object run()
-                    {
-                        return factory.getService(context.bundle, registration);
-                    }
-                });
-            }
-            catch (Throwable t)
-            {
-                if (Debug.DEBUG && Debug.DEBUG_SERVICES)
-                {
-                    Debug.println(factory + ".getService() exception: " + t.getMessage());
-                    Debug.printStackTrace(t);
-                }
+			try {
+				service = AccessController.doPrivileged(new PrivilegedAction() {
+					public Object run() {
+						return factory.getService(context.bundle, registration);
+					}
+				});
+			} catch (Throwable t) {
+				if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
+					Debug.println(factory + ".getService() exception: " + t.getMessage());
+					Debug.printStackTrace(t);
+				}
 
-                BundleException be = new BundleException(Msg.formatter.getString("SERVICE_FACTORY_EXCEPTION", factory.getClass().getName(), "getService"), t);
-                framework.publishFrameworkEvent(FrameworkEvent.ERROR, factorybundle, be);
+				BundleException be = new BundleException(Msg.formatter.getString("SERVICE_FACTORY_EXCEPTION", factory.getClass().getName(), "getService"), t);
+				framework.publishFrameworkEvent(FrameworkEvent.ERROR, factorybundle, be);
 
-                return(null);
-            }
+				return (null);
+			}
 
-            if (service == null)
-            {
-                if (Debug.DEBUG && Debug.DEBUG_SERVICES)
-                {
-                    Debug.println(factory + ".getService() returned null.");
-                }
+			if (service == null) {
+				if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
+					Debug.println(factory + ".getService() returned null.");
+				}
 
-                BundleException be = new BundleException(Msg.formatter.getString("SERVICE_OBJECT_NULL_EXCEPTION", factory.getClass().getName()));
-                framework.publishFrameworkEvent(FrameworkEvent.ERROR, factorybundle, be);
+				BundleException be = new BundleException(Msg.formatter.getString("SERVICE_OBJECT_NULL_EXCEPTION", factory.getClass().getName()));
+				framework.publishFrameworkEvent(FrameworkEvent.ERROR, factorybundle, be);
 
-                return(null);
-            }
+				return (null);
+			}
 
-            String[] clazzes = registration.clazzes;
-            int size = clazzes.length;
+			String[] clazzes = registration.clazzes;
+			int size = clazzes.length;
 
-            PackageAdmin packageAdmin = framework.packageAdmin;
+			PackageAdmin packageAdmin = framework.packageAdmin;
 
-            for (int i = 0; i < size; i++)
-            {
-                Class clazz;
+			for (int i = 0; i < size; i++) {
+				Class clazz;
 
-                try
-                {
-                    clazz = factorybundle.loadClass(clazzes[i],false);
-                }
-                catch (ClassNotFoundException e)
-                {
-                    try
-                    {
-                    	// TODO  this code really never should be run.  If the factory's classloader cannot
-                    	// see the required class (above) then it is not available.  Looking in a global list of
-                    	// package exporters etc is not a good plan in the face of modules and multiple
-                    	// versions.  For now just put in a dummy classload call to reduce code impact.
+				try {
+					clazz = factorybundle.loadClass(clazzes[i], false);
+				} catch (ClassNotFoundException e) {
+					try {
+						// TODO  this code really never should be run.  If the factory's classloader cannot
+						// see the required class (above) then it is not available.  Looking in a global list of
+						// package exporters etc is not a good plan in the face of modules and multiple
+						// versions.  For now just put in a dummy classload call to reduce code impact.
 						clazz = Class.forName(clazzes[i]);
-//						clazz = packageAdmin.loadClass(clazzes[i]);
-                    }
-                    catch (ClassNotFoundException ee)
-                    {
-                        if (Debug.DEBUG && Debug.DEBUG_SERVICES)
-                        {
-                            Debug.println(clazzes[i] + " class not found");
-                        }
+						//						clazz = packageAdmin.loadClass(clazzes[i]);
+					} catch (ClassNotFoundException ee) {
+						if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
+							Debug.println(clazzes[i] + " class not found");
+						}
 
-                        BundleException be = new BundleException(Msg.formatter.getString("SERVICE_CLASS_NOT_FOUND_EXCEPTION", clazzes[i]), e);
-                        framework.publishFrameworkEvent(FrameworkEvent.ERROR, factorybundle, be);
+						BundleException be = new BundleException(Msg.formatter.getString("SERVICE_CLASS_NOT_FOUND_EXCEPTION", clazzes[i]), e);
+						framework.publishFrameworkEvent(FrameworkEvent.ERROR, factorybundle, be);
 
-                        return(null);
-                    }
-                }
+						return (null);
+					}
+				}
 
-                if (!clazz.isInstance(service))
-                {
-                    if (Debug.DEBUG && Debug.DEBUG_SERVICES)
-                    {
-                        Debug.println("Service object from ServiceFactory is not an instanceof "+clazzes[i]);
-                    }
+				if (!clazz.isInstance(service)) {
+					if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
+						Debug.println("Service object from ServiceFactory is not an instanceof " + clazzes[i]);
+					}
 
-                    BundleException be = new BundleException(Msg.formatter.getString("SERVICE_NOT_INSTANCEOF_CLASS_EXCEPTION", factory.getClass().getName(), clazzes[i]));
-                    framework.publishFrameworkEvent(FrameworkEvent.ERROR, factorybundle, be);
+					BundleException be = new BundleException(Msg.formatter.getString("SERVICE_NOT_INSTANCEOF_CLASS_EXCEPTION", factory.getClass().getName(), clazzes[i]));
+					framework.publishFrameworkEvent(FrameworkEvent.ERROR, factorybundle, be);
 
-                    return(null);
-                }
-            }
+					return (null);
+				}
+			}
 
-            this.service = service;
-        }
+			this.service = service;
+		}
 
-        useCount++;
+		useCount++;
 
-        return(this.service);
-    }
+		return (this.service);
+	}
 
-    /**
-     * Unget a service's service object.
-     * Releases the service object for a service.
-     * If the context bundle's use count for the service is zero, this method
-     * returns <code>false</code>. Otherwise, the context bundle's use count for the
-     * service is decremented by one.
-     * See {@link #getBundle()} for a definition of context bundle.
-     *
-     * <p>The service's service object
-     * should no longer be used and all references to it should be destroyed
-     * when a bundle's use count for the service
-     * drops to zero.
-     *
-     * <p>The following steps are followed to unget the service object:
-     * <ol>
-     * <li>If the context bundle's use count for the service is zero or
-     * the service has been unregistered,
-     * <code>false</code> is returned.
-     * <li>The context bundle's use count for this service is decremented by one.
-     * <li>If the context bundle's use count for the service is now zero and
-     * the service was registered with a {@link ServiceFactory},
-     * the {@link ServiceFactory#ungetService ServiceFactory.ungetService} method
-     * is called to release the service object for the context bundle.
-     * <li><code>true</code> is returned.
-     * </ol>
-     *
-     * @return <code>true</code> if the context bundle's use count for the service
-     *         is zero otherwise <code>false</code>.
-     */
-    protected boolean ungetService()
-    {
-        if (useCount == 0)
-        {
-            return(true);
-        }
+	/**
+	 * Unget a service's service object.
+	 * Releases the service object for a service.
+	 * If the context bundle's use count for the service is zero, this method
+	 * returns <code>false</code>. Otherwise, the context bundle's use count for the
+	 * service is decremented by one.
+	 * See {@link #getBundle()} for a definition of context bundle.
+	 *
+	 * <p>The service's service object
+	 * should no longer be used and all references to it should be destroyed
+	 * when a bundle's use count for the service
+	 * drops to zero.
+	 *
+	 * <p>The following steps are followed to unget the service object:
+	 * <ol>
+	 * <li>If the context bundle's use count for the service is zero or
+	 * the service has been unregistered,
+	 * <code>false</code> is returned.
+	 * <li>The context bundle's use count for this service is decremented by one.
+	 * <li>If the context bundle's use count for the service is now zero and
+	 * the service was registered with a {@link ServiceFactory},
+	 * the {@link ServiceFactory#ungetService ServiceFactory.ungetService} method
+	 * is called to release the service object for the context bundle.
+	 * <li><code>true</code> is returned.
+	 * </ol>
+	 *
+	 * @return <code>true</code> if the context bundle's use count for the service
+	 *         is zero otherwise <code>false</code>.
+	 */
+	protected boolean ungetService() {
+		if (useCount == 0) {
+			return (true);
+		}
 
-        useCount--;
+		useCount--;
 
-        if (useCount == 0)
-        {
-            if (factory != null)
-            {
-                try
-                {
-                    AccessController.doPrivileged(new PrivilegedAction ()
-                    {
-                        public Object run()
-                        {
-                            factory.ungetService(context.bundle, registration, service);
+		if (useCount == 0) {
+			if (factory != null) {
+				try {
+					AccessController.doPrivileged(new PrivilegedAction() {
+						public Object run() {
+							factory.ungetService(context.bundle, registration, service);
 
-                            return null;
-                        }
-                    });
-                }
-                catch (Throwable t)
-                {
-                    if (Debug.DEBUG && Debug.DEBUG_GENERAL)
-                    {
-                        Debug.println(factory + ".ungetService() exception");
-                        Debug.printStackTrace(t);
-                    }
+							return null;
+						}
+					});
+				} catch (Throwable t) {
+					if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+						Debug.println(factory + ".ungetService() exception");
+						Debug.printStackTrace(t);
+					}
 
-                    Bundle factorybundle = registration.context.bundle;
-                    BundleException be = new BundleException(Msg.formatter.getString("SERVICE_FACTORY_EXCEPTION", factory.getClass().getName(), "ungetService"), t);
-                    framework.publishFrameworkEvent(FrameworkEvent.ERROR, factorybundle, be);
-                }
+					Bundle factorybundle = registration.context.bundle;
+					BundleException be = new BundleException(Msg.formatter.getString("SERVICE_FACTORY_EXCEPTION", factory.getClass().getName(), "ungetService"), t);
+					framework.publishFrameworkEvent(FrameworkEvent.ERROR, factorybundle, be);
+				}
 
-                service = null;
-            }
+				service = null;
+			}
 
-            return(true);
-        }
+			return (true);
+		}
 
-        return(false);
-    }
+		return (false);
+	}
 
-    /**
-     * Release a service's service object.
-     * <ol>
-     * <li>The bundle's use count for this service is set to zero.
-     * <li>If the service was registered with a {@link ServiceFactory},
-     * the {@link ServiceFactory#ungetService ServiceFactory.ungetService} method
-     * is called to release the service object for the bundle.
-     * </ol>
-     */
-    protected void releaseService()
-    {
-        if ((useCount > 0) && (factory != null))
-        {
-            try
-            {
-                AccessController.doPrivileged(new PrivilegedAction ()
-                {
-                    public Object run()
-                    {
-                        factory.ungetService(context.bundle, registration, service);
+	/**
+	 * Release a service's service object.
+	 * <ol>
+	 * <li>The bundle's use count for this service is set to zero.
+	 * <li>If the service was registered with a {@link ServiceFactory},
+	 * the {@link ServiceFactory#ungetService ServiceFactory.ungetService} method
+	 * is called to release the service object for the bundle.
+	 * </ol>
+	 */
+	protected void releaseService() {
+		if ((useCount > 0) && (factory != null)) {
+			try {
+				AccessController.doPrivileged(new PrivilegedAction() {
+					public Object run() {
+						factory.ungetService(context.bundle, registration, service);
 
-                        return null;
-                    }
-                });
-            }
-            catch (Throwable t)
-            {
-                if (Debug.DEBUG && Debug.DEBUG_SERVICES)
-                {
-                    Debug.println(factory + ".ungetService() exception");
-                    Debug.printStackTrace(t);
-                }
+						return null;
+					}
+				});
+			} catch (Throwable t) {
+				if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
+					Debug.println(factory + ".ungetService() exception");
+					Debug.printStackTrace(t);
+				}
 
-                Bundle factorybundle = registration.context.bundle;
-                BundleException be = new BundleException(Msg.formatter.getString("SERVICE_FACTORY_EXCEPTION", factory.getClass().getName(), "ungetService"), t);
-                framework.publishFrameworkEvent(FrameworkEvent.ERROR, factorybundle, be);
-            }
+				Bundle factorybundle = registration.context.bundle;
+				BundleException be = new BundleException(Msg.formatter.getString("SERVICE_FACTORY_EXCEPTION", factory.getClass().getName(), "ungetService"), t);
+				framework.publishFrameworkEvent(FrameworkEvent.ERROR, factorybundle, be);
+			}
 
-            service = null;
-        }
+			service = null;
+		}
 
-        useCount = 0;
-    }
+		useCount = 0;
+	}
 }
-

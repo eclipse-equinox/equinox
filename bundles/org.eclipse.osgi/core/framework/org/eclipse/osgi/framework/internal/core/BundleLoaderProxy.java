@@ -11,9 +11,7 @@
 package org.eclipse.osgi.framework.internal.core;
 
 import org.eclipse.osgi.framework.debug.Debug;
-import org.eclipse.osgi.service.resolver.BundleDescription;
-import org.eclipse.osgi.service.resolver.BundleSpecification;
-import org.eclipse.osgi.service.resolver.PackageSpecification;
+import org.eclipse.osgi.service.resolver.*;
 
 public class BundleLoaderProxy implements KeyedElement {
 	private BundleLoader loader;
@@ -46,14 +44,14 @@ public class BundleLoaderProxy implements KeyedElement {
 		loader = value;
 	}
 
-	public void markUsed(BundleLoaderProxy user){
+	public void markUsed(BundleLoaderProxy user) {
 		// only mark as used if the user is not our own bundle.
 		if (user.getBundle() != bundle) {
 			users.add(user);
 		}
 	}
 
-	public void unMarkUsed(BundleLoaderProxy user){
+	public void unMarkUsed(BundleLoaderProxy user) {
 		users.removeByKey(user.getKey());
 	}
 
@@ -65,8 +63,7 @@ public class BundleLoaderProxy implements KeyedElement {
 		if (!(other instanceof BundleLoaderProxy))
 			return false;
 		BundleLoaderProxy otherLoaderProxy = (BundleLoaderProxy) other;
-		return (uniqueId.equals(otherLoaderProxy.uniqueId) && 
-				bundle.getVersion().isPerfect(otherLoaderProxy.bundle.getVersion()));
+		return (uniqueId.equals(otherLoaderProxy.uniqueId) && bundle.getVersion().isPerfect(otherLoaderProxy.bundle.getVersion()));
 	}
 
 	public Object getKey() {
@@ -80,21 +77,21 @@ public class BundleLoaderProxy implements KeyedElement {
 		return stale;
 	}
 
-	public boolean inUse(){
+	public boolean inUse() {
 		return (users.size() > 0);
 	}
 
 	public Bundle[] getDependentBundles() {
 		KeyedElement[] proxyLoaders = users.elements();
-		KeyedHashSet bundles = new KeyedHashSet(proxyLoaders.length,false);
-		for (int i=0; i<proxyLoaders.length; i++) {
+		KeyedHashSet bundles = new KeyedHashSet(proxyLoaders.length, false);
+		for (int i = 0; i < proxyLoaders.length; i++) {
 			BundleLoaderProxy loaderProxy = (BundleLoaderProxy) proxyLoaders[i];
 			bundles.add(loaderProxy.getBundle());
 		}
 
 		KeyedElement[] elements = bundles.elements();
 		Bundle[] result = new Bundle[elements.length];
-		System.arraycopy(elements,0,result,0,elements.length);
+		System.arraycopy(elements, 0, result, 0, elements.length);
 
 		return result;
 	}
@@ -103,7 +100,7 @@ public class BundleLoaderProxy implements KeyedElement {
 		return bundle.getLocation();
 	}
 
-	protected void markDependencies(){
+	protected void markDependencies() {
 		if (markedUsedDependencies || !bundle.isResolved()) {
 			return;
 		}
@@ -124,7 +121,7 @@ public class BundleLoaderProxy implements KeyedElement {
 		markUsedPackages(packages);
 		markUsedBundles(requiredBundles);
 
-		for (int i=0; i<fragDescriptions.length; i++) {
+		for (int i = 0; i < fragDescriptions.length; i++) {
 			if (fragDescriptions[i].isResolved()) {
 				markUsedPackages(fragDescriptions[i].getPackages());
 				markUsedBundles(fragDescriptions[i].getRequiredBundles());
@@ -136,10 +133,9 @@ public class BundleLoaderProxy implements KeyedElement {
 	}
 
 	private void markUsedPackages(PackageSpecification[] packages) {
-		if (packages!=null) {
-			for (int i=0; i<packages.length; i++) {
-				SingleSourcePackage packagesource = 
-				(SingleSourcePackage) bundle.framework.packageAdmin.exportedPackages.getByKey(packages[i].getName());
+		if (packages != null) {
+			for (int i = 0; i < packages.length; i++) {
+				SingleSourcePackage packagesource = (SingleSourcePackage) bundle.framework.packageAdmin.exportedPackages.getByKey(packages[i].getName());
 				if (packagesource != null) {
 					packagesource.getSupplier().markUsed(this);
 				}
@@ -149,12 +145,11 @@ public class BundleLoaderProxy implements KeyedElement {
 
 	private void markUsedBundles(BundleSpecification[] requiredBundles) {
 		if (requiredBundles != null) {
-			for (int i=0; i<requiredBundles.length; i++) {
+			for (int i = 0; i < requiredBundles.length; i++) {
 				if (requiredBundles[i].isResolved()) {
 					String bundleKey = new StringBuffer(requiredBundles[i].getName()).append("_").append(requiredBundles[i].getActualVersion().toString()).toString();
-					
-					BundleLoaderProxy loaderProxy = 
-					(BundleLoaderProxy) bundle.framework.packageAdmin.exportedBundles.getByKey(bundleKey);
+
+					BundleLoaderProxy loaderProxy = (BundleLoaderProxy) bundle.framework.packageAdmin.exportedBundles.getByKey(bundleKey);
 					if (loaderProxy != null) {
 						loaderProxy.markUsed(this);
 					}

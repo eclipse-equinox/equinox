@@ -31,82 +31,73 @@ import java.util.Hashtable;
  * are added.
  *
  */
-class PermissionsHash extends PermissionCollection
-{
-    /**
-     * A hashtable to store the elements of the collection.
-     */
-    Hashtable perms = new Hashtable(8);
+class PermissionsHash extends PermissionCollection {
+	/**
+	 * A hashtable to store the elements of the collection.
+	 */
+	Hashtable perms = new Hashtable(8);
 
-    /**
-     * Constructs a new instance of this class.
-     *
-     */
-    public PermissionsHash()
-    {
-        super();
-    }
+	/**
+	 * Constructs a new instance of this class.
+	 *
+	 */
+	public PermissionsHash() {
+		super();
+	}
 
-    /**
-     * Adds the argument to the collection.
-     *
-     * @param		permission java.security.Permission
-     *					the permission to add to the collection.
-     * @exception	IllegalStateException
-     *					if the collection is read only.
-     */
-    public void add(Permission perm)
-    {
-        if (isReadOnly())
-        {
-            throw new SecurityException();
-        }
+	/**
+	 * Adds the argument to the collection.
+	 *
+	 * @param		permission java.security.Permission
+	 *					the permission to add to the collection.
+	 * @exception	IllegalStateException
+	 *					if the collection is read only.
+	 */
+	public void add(Permission perm) {
+		if (isReadOnly()) {
+			throw new SecurityException();
+		}
 
-        perms.put(perm, perm);
-    }
+		perms.put(perm, perm);
+	}
 
-    /**
-     * Answers an enumeration of the permissions
-     * in the receiver.
-     *
-     * @return		Enumeration
-     *					the permissions in the receiver.
-     */
-    public Enumeration elements()
-    {
-        return perms.keys();
-    }
+	/**
+	 * Answers an enumeration of the permissions
+	 * in the receiver.
+	 *
+	 * @return		Enumeration
+	 *					the permissions in the receiver.
+	 */
+	public Enumeration elements() {
+		return perms.keys();
+	}
 
-    /**
-     * Indicates whether the argument permission is implied
-     * by the permissions contained in the receiver.
-     *
-     * @return		boolean
-     *					<code>true</code> if the argument permission
-     *					is implied by the permissions in the receiver,
-     *					and <code>false</code> if it is not.
-     * @param		permission java.security.Permission
-     *					the permission to check
-     */
-    public boolean implies(Permission perm)
-    {
-        Permission p = (Permission)perms.get(perm);
+	/**
+	 * Indicates whether the argument permission is implied
+	 * by the permissions contained in the receiver.
+	 *
+	 * @return		boolean
+	 *					<code>true</code> if the argument permission
+	 *					is implied by the permissions in the receiver,
+	 *					and <code>false</code> if it is not.
+	 * @param		permission java.security.Permission
+	 *					the permission to check
+	 */
+	public boolean implies(Permission perm) {
+		Permission p = (Permission) perms.get(perm);
 
-        if ((p != null) && p.implies(perm))
-        {
-            return true;
-        }
+		if ((p != null) && p.implies(perm)) {
+			return true;
+		}
 
-        Enumeration enum = elements();
+		Enumeration enum = elements();
 
-        while (enum.hasMoreElements())
-        {
-            if (((Permission) enum.nextElement()).implies(perm))
-            {
-                return true;
-            }
-        }
+		while (enum.hasMoreElements()) {
+			if (((Permission) enum.nextElement()).implies(perm)) {
+				return true;
+			}
+		}
 
-        return false;
-    }
+		return false;
+	}
 }

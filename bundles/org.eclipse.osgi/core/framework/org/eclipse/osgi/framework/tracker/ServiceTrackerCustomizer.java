@@ -30,45 +30,44 @@ import org.osgi.framework.ServiceReference;
  * (<tt>ServiceRegistration.unregister</tt>)
  * a service while being synchronized on any object.
  */
-public interface ServiceTrackerCustomizer
-{
-    /**
-     * A service is being added to the <tt>ServiceTracker</tt> object.
-     *
-     * <p>This method is called before a service which matched
-     * the search parameters of the <tt>ServiceTracker</tt> object is
-     * added to it. This method should return the
-     * service object to be tracked for this <tt>ServiceReference</tt> object.
-     * The returned service object is stored in the <tt>ServiceTracker</tt> object
-     * and is available from the <tt>getService</tt> and <tt>getServices</tt>
-     * methods.
-     *
-     * @param reference Reference to service being added to the <tt>ServiceTracker</tt> object.
-     * @return The service object to be tracked for the
-     * <tt>ServiceReference</tt> object or <tt>null</tt> if the <tt>ServiceReference</tt> object should not
-     * be tracked.
-     */
-    public abstract Object addingService(ServiceReference reference);
+public interface ServiceTrackerCustomizer {
+	/**
+	 * A service is being added to the <tt>ServiceTracker</tt> object.
+	 *
+	 * <p>This method is called before a service which matched
+	 * the search parameters of the <tt>ServiceTracker</tt> object is
+	 * added to it. This method should return the
+	 * service object to be tracked for this <tt>ServiceReference</tt> object.
+	 * The returned service object is stored in the <tt>ServiceTracker</tt> object
+	 * and is available from the <tt>getService</tt> and <tt>getServices</tt>
+	 * methods.
+	 *
+	 * @param reference Reference to service being added to the <tt>ServiceTracker</tt> object.
+	 * @return The service object to be tracked for the
+	 * <tt>ServiceReference</tt> object or <tt>null</tt> if the <tt>ServiceReference</tt> object should not
+	 * be tracked.
+	 */
+	public abstract Object addingService(ServiceReference reference);
 
-    /**
-     * A service tracked by the <tt>ServiceTracker</tt> object has been modified.
-     *
-     * <p>This method is called when a service being tracked
-     * by the <tt>ServiceTracker</tt> object has had it properties modified.
-     *
-     * @param reference Reference to service that has been modified.
-     * @param service The service object for the modified service.
-     */
-    public abstract void modifiedService(ServiceReference reference, Object service);
+	/**
+	 * A service tracked by the <tt>ServiceTracker</tt> object has been modified.
+	 *
+	 * <p>This method is called when a service being tracked
+	 * by the <tt>ServiceTracker</tt> object has had it properties modified.
+	 *
+	 * @param reference Reference to service that has been modified.
+	 * @param service The service object for the modified service.
+	 */
+	public abstract void modifiedService(ServiceReference reference, Object service);
 
-    /**
-     * A service tracked by the <tt>ServiceTracker</tt> object has been removed.
-     *
-     * <p>This method is called after a service is no longer being tracked
-     * by the <tt>ServiceTracker</tt> object.
-     *
-     * @param reference Reference to service that has been removed.
-     * @param service The service object for the removed service.
-     */
-    public abstract void removedService(ServiceReference reference, Object service);
+	/**
+	 * A service tracked by the <tt>ServiceTracker</tt> object has been removed.
+	 *
+	 * <p>This method is called after a service is no longer being tracked
+	 * by the <tt>ServiceTracker</tt> object.
+	 *
+	 * @param reference Reference to service that has been removed.
+	 * @param service The service object for the removed service.
+	 */
+	public abstract void removedService(ServiceReference reference, Object service);
 }

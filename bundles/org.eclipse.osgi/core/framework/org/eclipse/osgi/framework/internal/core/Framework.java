@@ -11,52 +11,22 @@
 
 package org.eclipse.osgi.framework.internal.core;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-import java.security.PrivilegedActionException;
-import java.security.PrivilegedExceptionAction;
-import java.util.Dictionary;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Locale;
-import java.util.NoSuchElementException;
-import java.util.Properties;
-import java.util.StringTokenizer;
-import java.util.Vector;
-
-import org.eclipse.osgi.framework.adaptor.BundleClassLoader;
-import org.eclipse.osgi.framework.adaptor.BundleData;
-import org.eclipse.osgi.framework.adaptor.BundleOperation;
-import org.eclipse.osgi.framework.adaptor.EventPublisher;
-import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
-import org.eclipse.osgi.framework.adaptor.ServiceRegistry;
+import java.security.*;
+import java.util.*;
+import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.adaptor.Version;
 import org.eclipse.osgi.framework.debug.Debug;
-import org.eclipse.osgi.framework.eventmgr.EventListeners;
-import org.eclipse.osgi.framework.eventmgr.EventManager;
-import org.eclipse.osgi.framework.eventmgr.EventQueue;
-import org.eclipse.osgi.framework.eventmgr.EventSource;
+import org.eclipse.osgi.framework.eventmgr.*;
 import org.eclipse.osgi.framework.internal.protocol.ContentHandlerFactory;
 import org.eclipse.osgi.framework.internal.protocol.StreamHandlerFactory;
 import org.eclipse.osgi.framework.security.action.CreateThread;
 import org.eclipse.osgi.framework.util.Headers;
 import org.eclipse.osgi.service.resolver.*;
-import org.eclipse.osgi.service.resolver.BundleDescription;
-import org.eclipse.osgi.service.resolver.PackageSpecification;
 import org.eclipse.osgi.util.ManifestElement;
-import org.osgi.framework.AdminPermission;
-import org.osgi.framework.BundleEvent;
-import org.osgi.framework.BundleException;
-import org.osgi.framework.FrameworkEvent;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceEvent;
-import org.osgi.framework.ServicePermission;
+import org.osgi.framework.*;
 
 /**
  * Core OSGi Framework class.
@@ -116,7 +86,7 @@ public class Framework implements EventSource, EventPublisher {
 
 	/** Single object for permission checks */
 	protected AdminPermission adminPermission;
-	
+
 	/**
 	 * Constructor for the Framework instance.
 	 * This method initializes the framework to an unlaunched state.
@@ -139,11 +109,8 @@ public class Framework implements EventSource, EventPublisher {
 		installSecurityManager();
 
 		if (Debug.DEBUG && Debug.DEBUG_SECURITY) {
-			Debug.println(
-				"SecurityManager: " + System.getSecurityManager());
-			Debug.println(
-				"ProtectionDomain of Framework.class: \n"
-					+ this.getClass().getProtectionDomain());
+			Debug.println("SecurityManager: " + System.getSecurityManager());
+			Debug.println("ProtectionDomain of Framework.class: \n" + this.getClass().getProtectionDomain());
 		}
 
 		/* initialize the adaptor */
@@ -154,8 +121,7 @@ public class Framework implements EventSource, EventPublisher {
 		} catch (IOException e) /* fatal error */ {
 			e.printStackTrace();
 
-			throw new RuntimeException(
-				Msg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION"));
+			throw new RuntimeException(Msg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION"));
 		}
 
 		/* This must be done before calling any of the
@@ -169,13 +135,11 @@ public class Framework implements EventSource, EventPublisher {
 		SecurityManager sm = System.getSecurityManager();
 		if (sm != null) {
 			try {
-				permissionAdmin =
-					new PermissionAdmin(this, adaptor.getPermissionStorage());
+				permissionAdmin = new PermissionAdmin(this, adaptor.getPermissionStorage());
 			} catch (IOException e) /* fatal error */ {
 				e.printStackTrace();
 
-				throw new RuntimeException(
-					Msg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION"));
+				throw new RuntimeException(Msg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION"));
 			}
 		}
 
@@ -197,40 +161,34 @@ public class Framework implements EventSource, EventPublisher {
 
 		/* create the system bundle */
 		createSystemBundle();
-		
+
 		/* install URLStreamHandlerFactory */
-		URL.setURLStreamHandlerFactory(
-				new StreamHandlerFactory(systemBundle.context, adaptor));
+		URL.setURLStreamHandlerFactory(new StreamHandlerFactory(systemBundle.context, adaptor));
 
 		/* install ContentHandlerFactory for OSGi URLStreamHandler support */
-		URLConnection.setContentHandlerFactory(
-				new ContentHandlerFactory(systemBundle.context));
+		URLConnection.setContentHandlerFactory(new ContentHandlerFactory(systemBundle.context));
 
 		/* create bundle objects for all installed bundles. */
 		Vector bundleDatas = adaptor.getInstalledBundles();
 
-		bundles = new BundleRepository(
-				bundleDatas == null ? 
-				adaptor.getVectorInitialCapacity() :
-				bundleDatas.size() + 1,
-				packageAdmin);
+		bundles = new BundleRepository(bundleDatas == null ? adaptor.getVectorInitialCapacity() : bundleDatas.size() + 1, packageAdmin);
 
 		/* add the system bundle to the Bundle Repository */
 		bundles.add(systemBundle);
 
 		if (bundleDatas != null) {
 			int size = bundleDatas.size();
-			for (int i=0; i<size; i++) {
+			for (int i = 0; i < size; i++) {
 				BundleData bundledata = (BundleData) bundleDatas.elementAt(i);
 				try {
 					int absl = bundledata.getStartLevel();
-					Bundle bundle = Bundle.createBundle(bundledata,bundledata.getLocation(),this,absl);
+					Bundle bundle = Bundle.createBundle(bundledata, bundledata.getLocation(), this, absl);
 					bundles.add(bundle);
 				} catch (BundleException be) {
 					// This is not a fatal error.  Publish the framework event, but
 					// since no log service is probably running we will also print a
 					// stack trace.
-					publishFrameworkEvent(FrameworkEvent.ERROR,systemBundle,be);
+					publishFrameworkEvent(FrameworkEvent.ERROR, systemBundle, be);
 					//be.printStackTrace();
 				}
 			}
@@ -239,54 +197,51 @@ public class Framework implements EventSource, EventPublisher {
 		// initialize package admin; this must be done after the system bundle
 		// has been added to the state.
 		packageAdmin.initialize();
-		
-		systemBundle.getBundleLoader();  // initialize the bundle loader in case someone accesses it directly
-		
+
+		systemBundle.getBundleLoader(); // initialize the bundle loader in case someone accesses it directly
+
 		if (Debug.DEBUG && Debug.DEBUG_GENERAL)
 			System.out.println("Initialize the framework: " + (System.currentTimeMillis() - start));
 	}
-	
+
 	private void createSystemBundle() {
 		try {
 			String resource = Constants.OSGI_SYSTEMBUNDLE_MANIFEST;
 			InputStream in = getClass().getResourceAsStream(resource);
 			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 				if (in == null) {
-					Debug.println(
-						"Unable to find system bundle manifest " + resource);
+					Debug.println("Unable to find system bundle manifest " + resource);
 				}
 			}
 
 			// now get any extra packages and services that the adaptor wants to export
 			// and merge this into the system bundle's manifest
 			String exportPackages = adaptor.getExportPackages();
-			String exportServices = adaptor.getExportServices(); 									
+			String exportServices = adaptor.getExportServices();
 			Headers manifest = Headers.parseManifest(in);
 			if (exportPackages != null) {
 				String value = (String) manifest.get(Constants.EXPORT_PACKAGE);
 				if (value == null) {
 					value = exportPackages;
-				}
-				else {
+				} else {
 					value += "," + exportPackages;
 				}
-				manifest.set(Constants.EXPORT_PACKAGE,null);
-				manifest.set(Constants.EXPORT_PACKAGE,value);
+				manifest.set(Constants.EXPORT_PACKAGE, null);
+				manifest.set(Constants.EXPORT_PACKAGE, value);
 			}
 			if (exportServices != null) {
 				String value = (String) manifest.get(Constants.EXPORT_SERVICE);
 				if (value == null) {
 					value = exportServices;
-				}
-				else {
+				} else {
 					value += "," + exportServices;
 				}
-				manifest.set(Constants.EXPORT_SERVICE,null);
-				manifest.set(Constants.EXPORT_SERVICE,value);
+				manifest.set(Constants.EXPORT_SERVICE, null);
+				manifest.set(Constants.EXPORT_SERVICE, value);
 			}
 
 			BundleDescription newSystemBundle = adaptor.getPlatformAdmin().getFactory().createBundleDescription(manifest, Constants.SYSTEM_BUNDLE_LOCATION, 0);
-			if (newSystemBundle == null) 
+			if (newSystemBundle == null)
 				throw new BundleException(Msg.formatter.getString("OSGI_SYSTEMBUNDLE_DESCRIPTION_ERROR"));
 
 			State state = adaptor.getState();
@@ -299,28 +254,25 @@ public class Framework implements EventSource, EventPublisher {
 
 				boolean different = false;
 				if (oldPackages.length == newPackages.length) {
-					for (int i=0; i<oldPackages.length; i++) {
+					for (int i = 0; i < oldPackages.length; i++) {
 						if (oldPackages[i].getName().equals(newPackages[i].getName())) {
 							Object oldVersion = oldPackages[i].getVersionSpecification();
 							Object newVersion = newPackages[i].getVersionSpecification();
 							if (oldVersion == null) {
-								if ( newVersion != null) {
+								if (newVersion != null) {
 									different = true;
 									break;
 								}
-							}
-							else if (!oldVersion.equals(newVersion)) {
+							} else if (!oldVersion.equals(newVersion)) {
 								different = true;
 								break;
 							}
-						}
-						else {
+						} else {
 							different = true;
 							break;
 						}
 					}
-				}
-				else {
+				} else {
 					different = true;
 				}
 
@@ -330,8 +282,7 @@ public class Framework implements EventSource, EventPublisher {
 					// force resolution so packages are properly linked
 					state.resolve(false);
 				}
-			}
-			else {
+			} else {
 				state.addBundle(newSystemBundle);
 				// force resolution so packages are properly linked
 				state.resolve(false);
@@ -347,13 +298,13 @@ public class Framework implements EventSource, EventPublisher {
 					PackageSpecification spec = packages[i];
 					if (spec.getName().equals(Constants.OSGI_FRAMEWORK_PACKAGE)) {
 						String version = spec.getVersionSpecification().toString();
-						if (version != null) 
+						if (version != null)
 							properties.put(Constants.FRAMEWORK_VERSION, version);
 					}
 					systemPackages[i] = spec.getName();
 				}
 				// remember the system packages.
-				if (System.getProperty("osgi.autoExportSystemPackages") != null) 
+				if (System.getProperty("osgi.autoExportSystemPackages") != null)
 					SystemBundleLoader.setSystemPackages(systemPackages);
 			}
 		} catch (BundleException e) /* fatal error */ {
@@ -380,17 +331,11 @@ public class Framework implements EventSource, EventPublisher {
 			}
 		}
 
-		properties.put(
-			Constants.FRAMEWORK_VENDOR,
-			Constants.OSGI_FRAMEWORK_VENDOR);
-		properties.put(
-			Constants.FRAMEWORK_VERSION,
-			Constants.OSGI_FRAMEWORK_VERSION);
+		properties.put(Constants.FRAMEWORK_VENDOR, Constants.OSGI_FRAMEWORK_VENDOR);
+		properties.put(Constants.FRAMEWORK_VERSION, Constants.OSGI_FRAMEWORK_VERSION);
 
 		// Needed for communication with Bundle Server
-		properties.put(
-			Constants.OSGI_IMPL_VERSION_KEY,
-			Constants.OSGI_IMPL_VERSION);
+		properties.put(Constants.OSGI_IMPL_VERSION_KEY, Constants.OSGI_IMPL_VERSION);
 
 		String value = properties.getProperty(Constants.FRAMEWORK_PROCESSOR);
 		if (value == null) {
@@ -419,15 +364,15 @@ public class Framework implements EventSource, EventPublisher {
 				properties.put(Constants.FRAMEWORK_OS_VERSION, value);
 			}
 		}
-		
+
 		value = properties.getProperty(Constants.FRAMEWORK_WINDOWING_SYSTEM);
-			if (value == null) {
-				//TODO can we pull this property from an Eclipse property?
-				//value = properties.getProperty(Constants.SOME_WS_PROPERTY);
-				if (value != null) {
-					properties.put(Constants.FRAMEWORK_WINDOWING_SYSTEM, value);
-				}
+		if (value == null) {
+			//TODO can we pull this property from an Eclipse property?
+			//value = properties.getProperty(Constants.SOME_WS_PROPERTY);
+			if (value != null) {
+				properties.put(Constants.FRAMEWORK_WINDOWING_SYSTEM, value);
 			}
+		}
 
 		value = properties.getProperty(Constants.FRAMEWORK_LANGUAGE);
 		if (value == null) {
@@ -440,18 +385,11 @@ public class Framework implements EventSource, EventPublisher {
 				try {
 					switch (segments) {
 						case 2 :
-							Locale userLocale =
-								new Locale(
-									tokenizer.nextToken(),
-									tokenizer.nextToken());
+							Locale userLocale = new Locale(tokenizer.nextToken(), tokenizer.nextToken());
 							Locale.setDefault(userLocale);
 							break;
 						case 3 :
-							userLocale =
-								new Locale(
-									tokenizer.nextToken(),
-									tokenizer.nextToken(),
-									tokenizer.nextToken());
+							userLocale = new Locale(tokenizer.nextToken(), tokenizer.nextToken(), tokenizer.nextToken());
 							Locale.setDefault(userLocale);
 							break;
 					}
@@ -462,25 +400,13 @@ public class Framework implements EventSource, EventPublisher {
 			}
 		}
 
-		value =
-			properties.getProperty(
-				Constants.FRAMEWORK_EXECUTIONENVIRONMENT,
-				"");
-		String j2meConfig =
-			properties.getProperty(Constants.J2ME_MICROEDITION_CONFIGURATION);
-		String j2meProfile =
-			properties.getProperty(Constants.J2ME_MICROEDITION_PROFILES);
+		value = properties.getProperty(Constants.FRAMEWORK_EXECUTIONENVIRONMENT, "");
+		String j2meConfig = properties.getProperty(Constants.J2ME_MICROEDITION_CONFIGURATION);
+		String j2meProfile = properties.getProperty(Constants.J2ME_MICROEDITION_PROFILES);
 		StringBuffer ee = new StringBuffer(value);
-		if (j2meConfig != null
-			&& j2meConfig.length() > 0
-			&& j2meProfile != null
-			&& j2meProfile.length() > 0) {
+		if (j2meConfig != null && j2meConfig.length() > 0 && j2meProfile != null && j2meProfile.length() > 0) {
 			int ic = value.indexOf(j2meConfig);
-			if (!(ic >= 0)
-				|| !(ic + j2meConfig.length() < value.length()
-					&& value.charAt(ic + j2meConfig.length()) == '/')
-				|| !(value
-					.startsWith(j2meProfile, ic + j2meConfig.length() + 1))) {
+			if (!(ic >= 0) || !(ic + j2meConfig.length() < value.length() && value.charAt(ic + j2meConfig.length()) == '/') || !(value.startsWith(j2meProfile, ic + j2meConfig.length() + 1))) {
 				if (ee.length() > 0) {
 					ee.append(",");
 				}
@@ -507,23 +433,16 @@ public class Framework implements EventSource, EventPublisher {
 
 		value = properties.getProperty(Constants.KEY_ADDRESSLENGTH);
 		if (value == null) {
-			properties.put(
-				Constants.KEY_ADDRESSLENGTH,
-				Constants.DEFAULT_ADDRESSLENGTH);
+			properties.put(Constants.KEY_ADDRESSLENGTH, Constants.DEFAULT_ADDRESSLENGTH);
 		} else if (!value.equals("32") && !value.equals("64")) {
-			System.err.println(
-				Msg.formatter.getString(
-					"PROPERTIES_INVALID_ADDRESSLENGTH",
-					value));
+			System.err.println(Msg.formatter.getString("PROPERTIES_INVALID_ADDRESSLENGTH", value));
 		}
 
 		value = properties.getProperty(Constants.KEY_ENDIAN);
 		if (value == null) {
 			properties.put(Constants.KEY_ENDIAN, Constants.DEFAULT_ENDIAN);
-		} else if (
-			!value.equalsIgnoreCase("le") && !value.equalsIgnoreCase("be")) {
-			System.err.println(
-				Msg.formatter.getString("PROPERTIES_INVALID_ENDIAN", value));
+		} else if (!value.equalsIgnoreCase("le") && !value.equalsIgnoreCase("be")) {
+			System.err.println(Msg.formatter.getString("PROPERTIES_INVALID_ENDIAN", value));
 		}
 
 		value = properties.getProperty(Constants.KEY_IMPLTYPE);
@@ -531,26 +450,16 @@ public class Framework implements EventSource, EventPublisher {
 			value = properties.getProperty(Constants.JVM_CONFIGURATION);
 			if (value != null) {
 				if (value.equals("foun")) {
-					properties.put(
-						Constants.KEY_IMPLTYPE,
-						Constants.IMPLTYPE_FOUNDATION);
+					properties.put(Constants.KEY_IMPLTYPE, Constants.IMPLTYPE_FOUNDATION);
 				} else if (value.equals("max")) {
-					properties.put(
-						Constants.KEY_IMPLTYPE,
-						Constants.IMPLTYPE_MAX);
+					properties.put(Constants.KEY_IMPLTYPE, Constants.IMPLTYPE_MAX);
 				} else if (value.equals("rm") || value.equals("gwp")) {
-					properties.put(
-						Constants.KEY_IMPLTYPE,
-						Constants.IMPLTYPE_GWP);
+					properties.put(Constants.KEY_IMPLTYPE, Constants.IMPLTYPE_GWP);
 				} else {
-					properties.put(
-						Constants.KEY_IMPLTYPE,
-						Constants.IMPLTYPE_UNDEFINED);
+					properties.put(Constants.KEY_IMPLTYPE, Constants.IMPLTYPE_UNDEFINED);
 				}
 			} else {
-				properties.put(
-					Constants.KEY_IMPLTYPE,
-					Constants.IMPLTYPE_UNDEFINED);
+				properties.put(Constants.KEY_IMPLTYPE, Constants.IMPLTYPE_UNDEFINED);
 			}
 		}
 	}
@@ -683,8 +592,7 @@ public class Framework implements EventSource, EventPublisher {
 			systemBundle.suspend();
 		} catch (BundleException be) {
 			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-				Debug.println(
-					"Framework shutdown exception: " + be.getMessage());
+				Debug.println("Framework shutdown exception: " + be.getMessage());
 				Debug.printStackTrace(be.getNestedException());
 			}
 
@@ -737,17 +645,14 @@ public class Framework implements EventSource, EventPublisher {
 		if (headerValue == null) {
 			return true;
 		}
-		ManifestElement[] bundleRequiredEE = ManifestElement.parseBasicCommaSeparation(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT,headerValue);
+		ManifestElement[] bundleRequiredEE = ManifestElement.parseBasicCommaSeparation(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT, headerValue);
 		if (bundleRequiredEE.length == 0) {
 			return true;
 		}
 
-		String systemEE =
-			System.getProperty(Constants.FRAMEWORK_EXECUTIONENVIRONMENT);
+		String systemEE = System.getProperty(Constants.FRAMEWORK_EXECUTIONENVIRONMENT);
 		if (systemEE != null) {
-			ManifestElement[] systemEEs = ManifestElement.parseBasicCommaSeparation(
-					Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT,
-					systemEE);
+			ManifestElement[] systemEEs = ManifestElement.parseBasicCommaSeparation(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT, systemEE);
 			for (int i = 0; i < systemEEs.length; i++) {
 				for (int j = 0; j < bundleRequiredEE.length; j++) {
 					if (systemEEs[i].getValue().equals(bundleRequiredEE[j].getValue())) {
@@ -765,10 +670,7 @@ public class Framework implements EventSource, EventPublisher {
 			}
 			bundleEE.append(bundleRequiredEE[i]);
 		}
-		throw new BundleException(
-			Msg.formatter.getString(
-				"BUNDLE_INSTALL_REQUIRED_EE_EXCEPTION",
-				bundleEE.toString()));
+		throw new BundleException(Msg.formatter.getString("BUNDLE_INSTALL_REQUIRED_EE_EXCEPTION", bundleEE.toString()));
 	}
 
 	/**
@@ -863,8 +765,7 @@ public class Framework implements EventSource, EventPublisher {
 	 * @param location The location identifier of the bundle to install.
 	 * @return The Bundle object of the installed bundle.
 	 */
-	protected Bundle installBundle(final String location)
-		throws BundleException {
+	protected Bundle installBundle(final String location) throws BundleException {
 		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 			Debug.println("install from location: " + location);
 		}
@@ -872,8 +773,7 @@ public class Framework implements EventSource, EventPublisher {
 		return installWorker(location, new PrivilegedExceptionAction() {
 			public Object run() throws BundleException {
 				/* Map the identity to a URLConnection */
-				URLConnection source =
-					adaptor.mapLocationToURLConnection(location);
+				URLConnection source = adaptor.mapLocationToURLConnection(location);
 
 				/* call the worker to install the bundle */
 				return installWorkerPrivileged(location, source);
@@ -894,8 +794,7 @@ public class Framework implements EventSource, EventPublisher {
 	 * @param in The InputStream from which the bundle will be read.
 	 * @return The Bundle of the installed bundle.
 	 */
-	protected Bundle installBundle(final String location, final InputStream in)
-		throws BundleException {
+	protected Bundle installBundle(final String location, final InputStream in) throws BundleException {
 		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 			Debug.println("install from inputstream: " + location + ", " + in);
 		}
@@ -920,10 +819,7 @@ public class Framework implements EventSource, EventPublisher {
 	 * @return The {@link Bundle} of the installed bundle.
 	 * @exception BundleException If the action throws an error.
 	 */
-	protected Bundle installWorker(
-		String location,
-		PrivilegedExceptionAction action)
-		throws BundleException {
+	protected Bundle installWorker(String location, PrivilegedExceptionAction action) throws BundleException {
 		synchronized (installLock) {
 			while (true) {
 				/* Check that the bundle is not already installed. */
@@ -937,8 +833,7 @@ public class Framework implements EventSource, EventPublisher {
 				Thread current = Thread.currentThread();
 
 				/* Check for and make reservation */
-				Thread reservation =
-					(Thread) installLock.put(location, current);
+				Thread reservation = (Thread) installLock.put(location, current);
 
 				/* if the location is not already reserved */
 				if (reservation == null) {
@@ -952,9 +847,7 @@ public class Framework implements EventSource, EventPublisher {
 				 * we have recursed to install the same bundle!
 				 */
 				if (current.equals(reservation)) {
-					throw new BundleException(
-						Msg.formatter.getString(
-							"BUNDLE_INSTALL_RECURSION_EXCEPTION"));
+					throw new BundleException(Msg.formatter.getString("BUNDLE_INSTALL_RECURSION_EXCEPTION"));
 				}
 
 				try {
@@ -994,27 +887,20 @@ public class Framework implements EventSource, EventPublisher {
 	 * @return The {@link Bundle} of the installed bundle.
 	 * @exception BundleException If the provided stream cannot be read.
 	 */
-	protected Bundle installWorkerPrivileged(
-		String location,
-		URLConnection source)
-		throws BundleException {
+	protected Bundle installWorkerPrivileged(String location, URLConnection source) throws BundleException {
 		BundleOperation storage = adaptor.installBundle(location, source);
 
 		Bundle bundle;
 		try {
 			BundleData bundledata = storage.begin();
-			bundle = createBundle(bundledata,location,startLevelImpl.getInitialBundleStartLevel());
+			bundle = createBundle(bundledata, location, startLevelImpl.getInitialBundleStartLevel());
 
 			// Check for a bundle already installed with the same UniqueId
 			// and version.
 			if (bundle.getGlobalName() != null) {
-				Bundle installedBundle = 
-					getBundleByUniqueId(bundle.getGlobalName(),bundle.getVersion().toString());
+				Bundle installedBundle = getBundleByUniqueId(bundle.getGlobalName(), bundle.getVersion().toString());
 				if (installedBundle != null) {
-					throw new BundleException(
-							Msg.formatter.getString(
-								"BUNDLE_INSTALL_SAME_UNIQUEID",
-								bundle.getGlobalName(), bundle.getVersion().toString()));
+					throw new BundleException(Msg.formatter.getString("BUNDLE_INSTALL_SAME_UNIQUEID", bundle.getGlobalName(), bundle.getVersion().toString()));
 				}
 			}
 			try {
@@ -1059,8 +945,7 @@ public class Framework implements EventSource, EventPublisher {
 	 * or <tt>null</tt> if there are no native code clauses.
 	 * @throws BundleException If there is no suitable clause.
 	 */
-	public String[] selectNativeCode(org.osgi.framework.Bundle bundle)
-		throws BundleException {
+	public String[] selectNativeCode(org.osgi.framework.Bundle bundle) throws BundleException {
 		String headerValue = (String) ((Bundle) bundle).bundledata.getManifest().get(Constants.BUNDLE_NATIVECODE);
 
 		if (headerValue == null) {
@@ -1079,7 +964,7 @@ public class Framework implements EventSource, EventPublisher {
 		int maxresult = 0;
 		int index = 0;
 
-		for (int i = 0; i < elements.length; i++) { 
+		for (int i = 0; i < elements.length; i++) {
 			bundleNativeCode[i] = new BundleNativeCode(elements[i]);
 			int result = bundleNativeCode[i].matchProcessorOSName(processor, osname);
 			score[i] = result;
@@ -1098,27 +983,24 @@ public class Framework implements EventSource, EventPublisher {
 		switch (matches) {
 			case 0 :
 				{
-					throw new BundleException(
-						Msg.formatter.getString(
-							"BUNDLE_NATIVECODE_MATCH_EXCEPTION"));
+					throw new BundleException(Msg.formatter.getString("BUNDLE_NATIVECODE_MATCH_EXCEPTION"));
 				}
 			case 1 :
 				{
 					return bundleNativeCode[index].getPaths();
 
-				} 
+				}
 			default :
 				{
 					/* continue with next pass */
 					break;
 				}
 		}
- 
+
 		/* Pass 2: perform osversion matching */
 		Version osversion;
 		try {
-			osversion =
-				new org.eclipse.osgi.framework.adaptor.Version(getProperty(Constants.FRAMEWORK_OS_VERSION));
+			osversion = new org.eclipse.osgi.framework.adaptor.Version(getProperty(Constants.FRAMEWORK_OS_VERSION));
 		} catch (Exception e) {
 			osversion = org.eclipse.osgi.framework.adaptor.Version.emptyVersion;
 		}
@@ -1151,9 +1033,7 @@ public class Framework implements EventSource, EventPublisher {
 		switch (matches) {
 			case 0 :
 				{
-					throw new BundleException(
-						Msg.formatter.getString(
-							"BUNDLE_NATIVECODE_MATCH_EXCEPTION"));
+					throw new BundleException(Msg.formatter.getString("BUNDLE_NATIVECODE_MATCH_EXCEPTION"));
 				}
 			case 1 :
 				{
@@ -1176,35 +1056,33 @@ public class Framework implements EventSource, EventPublisher {
 		}
 
 		/* Pass 2.5: perform windowing system matching */
-			String windowingsystem = getProperty(Constants.FRAMEWORK_WINDOWING_SYSTEM);
-			matches = 0;
-			maxresult = 0;
+		String windowingsystem = getProperty(Constants.FRAMEWORK_WINDOWING_SYSTEM);
+		matches = 0;
+		maxresult = 0;
 
-			int[] bestMatch = new int[elements.length];
+		int[] bestMatch = new int[elements.length];
 
-			for (int i = 0; i < elements.length; i++) {
-				if (score[i] > 0) {
-					BundleNativeCode bnc = bundleNativeCode[i];
+		for (int i = 0; i < elements.length; i++) {
+			if (score[i] > 0) {
+				BundleNativeCode bnc = bundleNativeCode[i];
 
-					int result = bnc.matchWindowingSystem(windowingsystem);
-					bestMatch[i] = result;
+				int result = bnc.matchWindowingSystem(windowingsystem);
+				bestMatch[i] = result;
 
-					if (result > 0) /* 0 is no match */ {
-						matches++;
+				if (result > 0) /* 0 is no match */ {
+					matches++;
 
-						if (result > maxresult) {
-							maxresult = result;
-							index = i;
-						}
+					if (result > maxresult) {
+						maxresult = result;
+						index = i;
 					}
+				}
 			}
 
 			switch (matches) {
 				case 0 :
 					{
-						throw new BundleException(
-							Msg.formatter.getString(
-								"BUNDLE_NATIVECODE_MATCH_EXCEPTION"));
+						throw new BundleException(Msg.formatter.getString("BUNDLE_NATIVECODE_MATCH_EXCEPTION"));
 					}
 				case 1 :
 					{
@@ -1257,9 +1135,7 @@ public class Framework implements EventSource, EventPublisher {
 		switch (matches) {
 			case 0 :
 				{
-					throw new BundleException(
-						Msg.formatter.getString(
-							"BUNDLE_NATIVECODE_MATCH_EXCEPTION"));
+					throw new BundleException(Msg.formatter.getString("BUNDLE_NATIVECODE_MATCH_EXCEPTION"));
 				}
 			default :
 				{
@@ -1289,28 +1165,24 @@ public class Framework implements EventSource, EventPublisher {
 	 * @return A {@link Bundle} object, or <code>null</code>
 	 * if the identifier doesn't match any installed bundle.
 	 */
-	protected Bundle getBundleByUniqueId(String uniqueId, String version)
-	{
-		synchronized (bundles)
-		{
+	protected Bundle getBundleByUniqueId(String uniqueId, String version) {
+		synchronized (bundles) {
 			return bundles.getBundle(uniqueId, version);
 		}
 	}
 
-
-    /**
-     * Retrieve a list of all installed bundles.
-     * The list is valid at the time
-     * of the call to getBundles, but the framework is a very dynamic
-     * environment and bundles can be installed or uninstalled at anytime.
-     *
-     * @return A Vector of {@link Bundle} objects, one
-     * object per installed bundle.
-     */
-    protected BundleRepository getBundles()
-    {
-        return(bundles);
-    }
+	/**
+	 * Retrieve a list of all installed bundles.
+	 * The list is valid at the time
+	 * of the call to getBundles, but the framework is a very dynamic
+	 * environment and bundles can be installed or uninstalled at anytime.
+	 *
+	 * @return A Vector of {@link Bundle} objects, one
+	 * object per installed bundle.
+	 */
+	protected BundleRepository getBundles() {
+		return (bundles);
+	}
 
 	/**
 	 * Resume a bundle.
@@ -1415,15 +1287,12 @@ public class Framework implements EventSource, EventPublisher {
 	 * @return  Bundle object for bundle with the specified Unique or null
 	 *          if no bundle is installed with the specified location.
 	 */
-	protected Bundle[] getBundleByUniqueId(String uniqueId)
-	{
+	protected Bundle[] getBundleByUniqueId(String uniqueId) {
 		return bundles.getBundles(uniqueId);
 	}
 
-	protected Bundle getBundleByClassLoader(BundleClassLoader classloader)
-	{
-		synchronized (bundles)
-		{
+	protected Bundle getBundleByClassLoader(BundleClassLoader classloader) {
+		synchronized (bundles) {
 			// this is not optimized; do not think it will get called
 			// that much.
 			List allBundles = bundles.getBundles();
@@ -1431,7 +1300,7 @@ public class Framework implements EventSource, EventPublisher {
 			for (int i = 0; i < size; i++) {
 				Bundle bundle = (Bundle) allBundles.get(i);
 				if (bundle instanceof BundleHost) {
-					BundleLoader loader = ((BundleHost)bundle).basicGetBundleLoader();
+					BundleLoader loader = ((BundleHost) bundle).basicGetBundleLoader();
 					if (loader != null && loader.getClassLoader() == classloader)
 						return bundle;
 				}
@@ -1483,15 +1352,11 @@ public class Framework implements EventSource, EventPublisher {
 	 * @exception InvalidSyntaxException If <tt>filter</tt> contains
 	 * an invalid filter string which cannot be parsed.
 	 */
-	protected ServiceReference[] getServiceReferences(
-		String clazz,
-		String filterstring)
-		throws InvalidSyntaxException {
+	protected ServiceReference[] getServiceReferences(String clazz, String filterstring) throws InvalidSyntaxException {
 
-		Filter filter =
-			(filterstring == null) ? null : new Filter(filterstring);
+		Filter filter = (filterstring == null) ? null : new Filter(filterstring);
 
-		ServiceReference[] references=null;
+		ServiceReference[] references = null;
 
 		if (clazz != null) {
 			try /* test for permission to get clazz */ {
@@ -1508,7 +1373,7 @@ public class Framework implements EventSource, EventPublisher {
 			}
 
 			if (clazz == null) {
-				for (int i = services.size()-1; i >= 0; i--) {
+				for (int i = services.size() - 1; i >= 0; i--) {
 					ServiceReference ref = (ServiceReference) services.elementAt(i);
 					String[] classes = ref.getClasses();
 					try { /* test for permission to the classes */
@@ -1588,10 +1453,7 @@ public class Framework implements EventSource, EventPublisher {
 			int len = names.length;
 
 			for (int i = 0; i < len; i++) {
-				sm.checkPermission(
-					new ServicePermission(
-						names[i],
-						ServicePermission.REGISTER));
+				sm.checkPermission(new ServicePermission(names[i], ServicePermission.REGISTER));
 			}
 		}
 	}
@@ -1611,8 +1473,7 @@ public class Framework implements EventSource, EventPublisher {
 
 			for (int i = 0; i < len; i++) {
 				try {
-					sm.checkPermission(
-						new ServicePermission(names[i], ServicePermission.GET));
+					sm.checkPermission(new ServicePermission(names[i], ServicePermission.GET));
 
 					return;
 				} catch (SecurityException e) {
@@ -1631,8 +1492,7 @@ public class Framework implements EventSource, EventPublisher {
 		SecurityManager sm = System.getSecurityManager();
 
 		if (sm != null) {
-			sm.checkPermission(
-				new ServicePermission(name, ServicePermission.GET));
+			sm.checkPermission(new ServicePermission(name, ServicePermission.GET));
 		}
 	}
 
@@ -1655,8 +1515,7 @@ public class Framework implements EventSource, EventPublisher {
 					sm = (SecurityManager) clazz.newInstance();
 
 					if (Debug.DEBUG && Debug.DEBUG_SECURITY) {
-						Debug.println(
-							"Setting SecurityManager to: " + sm);
+						Debug.println("Setting SecurityManager to: " + sm);
 					}
 
 					System.setSecurityManager(sm);
@@ -1682,8 +1541,7 @@ public class Framework implements EventSource, EventPublisher {
 	 * @return A Thread object.
 	 */
 	protected Thread createThread(Runnable target, String name) {
-		return (Thread) AccessController.doPrivileged(
-			new CreateThread(target, name));
+		return (Thread) AccessController.doPrivileged(new CreateThread(target, name));
 	}
 
 	/**
@@ -1697,10 +1555,9 @@ public class Framework implements EventSource, EventPublisher {
 		if (frameworkEvent != null) {
 			final FrameworkEvent event = new FrameworkEvent(type, bundle, throwable);
 
-			if (System.getSecurityManager() == null){
+			if (System.getSecurityManager() == null) {
 				publishFrameworkEventPrivileged(event);
-			}
-			else {
+			} else {
 				AccessController.doPrivileged(new PrivilegedAction() {
 					public Object run() {
 						publishFrameworkEventPrivileged(event);
@@ -1710,7 +1567,7 @@ public class Framework implements EventSource, EventPublisher {
 			}
 		}
 	}
-					
+
 	public void publishFrameworkEventPrivileged(FrameworkEvent event) {
 		/* queue to hold set of listeners */
 		EventQueue listeners = new EventQueue(eventManager);
@@ -1742,10 +1599,9 @@ public class Framework implements EventSource, EventPublisher {
 		if ((bundleEventSync != null) || (bundleEvent != null)) {
 			final BundleEvent event = new BundleEvent(type, bundle);
 
-			if (System.getSecurityManager() == null){
+			if (System.getSecurityManager() == null) {
 				publishBundleEventPrivileged(event);
-			}
-			else {
+			} else {
 				AccessController.doPrivileged(new PrivilegedAction() {
 					public Object run() {
 						publishBundleEventPrivileged(event);
@@ -1809,10 +1665,9 @@ public class Framework implements EventSource, EventPublisher {
 		if (serviceEvent != null) {
 			final ServiceEvent event = new ServiceEvent(type, reference);
 
-			if (System.getSecurityManager() == null){
+			if (System.getSecurityManager() == null) {
 				publishServiceEventPrivileged(event);
-			}
-			else {
+			} else {
 				AccessController.doPrivileged(new PrivilegedAction() {
 					public Object run() {
 						publishServiceEventPrivileged(event);
@@ -1822,7 +1677,7 @@ public class Framework implements EventSource, EventPublisher {
 			}
 		}
 	}
-	
+
 	public void publishServiceEventPrivileged(ServiceEvent event) {
 
 		/* queue to hold set of listeners */
@@ -1867,9 +1722,7 @@ public class Framework implements EventSource, EventPublisher {
 						}
 					case BUNDLEEVENTSYNC :
 						{
-							queue.queueListeners(
-								context.bundleEventSync,
-								context);
+							queue.queueListeners(context.bundleEventSync, context);
 							break;
 						}
 					case SERVICEEVENT :
@@ -1879,18 +1732,14 @@ public class Framework implements EventSource, EventPublisher {
 						}
 					case FRAMEWORKEVENT :
 						{
-							queue.queueListeners(
-								context.frameworkEvent,
-								context);
+							queue.queueListeners(context.frameworkEvent, context);
 							break;
 						}
 				}
 			}
 		} catch (Throwable t) {
 			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-				Debug.println(
-					"Exception in Top level event dispatcher: "
-						+ t.getMessage());
+				Debug.println("Exception in Top level event dispatcher: " + t.getMessage());
 				Debug.printStackTrace(t);
 			}
 

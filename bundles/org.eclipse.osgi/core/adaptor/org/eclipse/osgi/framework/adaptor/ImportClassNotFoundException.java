@@ -18,24 +18,20 @@ package org.eclipse.osgi.framework.adaptor;
  * calling parent.loadClass().
  *
  */
-public class ImportClassNotFoundException extends ClassNotFoundException
-{
-    /**
-     * Constructor with no detail message
-     */
-    public ImportClassNotFoundException()
-    {
-	super();
-    }
+public class ImportClassNotFoundException extends ClassNotFoundException {
+	/**
+	 * Constructor with no detail message
+	 */
+	public ImportClassNotFoundException() {
+		super();
+	}
 
-    /**
-     * Constructor with detail message
-     *
-     * @param   s   the detail message.
-     */
-    public ImportClassNotFoundException(String s)
-    {
-	super(s);
-    }
+	/**
+	 * Constructor with detail message
+	 *
+	 * @param   s   the detail message.
+	 */
+	public ImportClassNotFoundException(String s) {
+		super(s);
+	}
 }
-

@@ -19,24 +19,20 @@ import java.net.URL;
  * InputStream subclass which provides a reference (via URL) to the data
  * rather than allowing the input stream to be directly read.
  */
-public class ReferenceInputStream extends InputStream
-{
+public class ReferenceInputStream extends InputStream {
 	protected URL reference;
 
-	public ReferenceInputStream(URL reference)
-	{
+	public ReferenceInputStream(URL reference) {
 		this.reference = reference;
 	}
 
 	/* This method should not be called.
 	 */
-	public int read() throws IOException
-	{
+	public int read() throws IOException {
 		throw new IOException();
 	}
 
-	public URL getReference()
-	{
+	public URL getReference() {
 		return reference;
 	}
 }

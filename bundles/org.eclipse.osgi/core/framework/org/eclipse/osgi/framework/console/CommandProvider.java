@@ -34,13 +34,11 @@ package org.eclipse.osgi.framework.console;
 */
 public interface CommandProvider {
 	public final static String NAME = "org.eclipse.osgi.framework.internal.core.command.CommandProvider";
-        
+
 	/**
 		Answer a string (may be as many lines as you like) with help
 		texts that explain the command.
 	*/
 	public String getHelp();
-	
+
 }
-
-

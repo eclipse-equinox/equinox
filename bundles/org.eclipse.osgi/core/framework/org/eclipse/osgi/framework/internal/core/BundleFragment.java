@@ -13,14 +13,14 @@ package org.eclipse.osgi.framework.internal.core;
 
 import java.io.IOException;
 import java.net.URL;
-import java.security.*;
+import java.security.PermissionCollection;
+import java.security.ProtectionDomain;
 import org.eclipse.osgi.framework.adaptor.BundleData;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.osgi.framework.*;
 import org.osgi.framework.ServiceReference;
 
-public class BundleFragment extends Bundle
-{
+public class BundleFragment extends Bundle {
 
 	/** The resolved host that this fragment is attached to */
 	protected BundleHost host;
@@ -34,44 +34,35 @@ public class BundleFragment extends Bundle
 	 * @param startLevel
 	 * @throws BundleException
 	 */
-	public BundleFragment(BundleData bundledata, String location, Framework framework, int startLevel) throws BundleException
-	{
+	public BundleFragment(BundleData bundledata, String location, Framework framework, int startLevel) throws BundleException {
 		super(bundledata, location, framework, startLevel);
 		host = null;
 	}
-
 
 	/**
 	 * Load the bundle.
 	 * @exception org.osgi.framework.BundleException
 	 */
-	protected void load() throws BundleException
-	{
-		if (Debug.DEBUG && Debug.DEBUG_GENERAL)
-		{
-			if ((state & (INSTALLED)) == 0)
-			{
-				Debug.println("Bundle.load called when state != INSTALLED: "+this);
+	protected void load() throws BundleException {
+		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+			if ((state & (INSTALLED)) == 0) {
+				Debug.println("Bundle.load called when state != INSTALLED: " + this);
 				Debug.printStackTrace(new Exception("Stack trace"));
 			}
 		}
 
-		if (framework.isActive())
-		{
+		if (framework.isActive()) {
 			SecurityManager sm = System.getSecurityManager();
 
-			if (sm != null)
-			{
+			if (sm != null) {
 				PermissionCollection collection = framework.permissionAdmin.createPermissionCollection(this);
 
 				domain = new ProtectionDomain(null, collection);
 			}
 
-			try
-			{
+			try {
 				bundledata.open(); /* make sure the BundleData is open */
-			} catch (IOException e)
-			{
+			} catch (IOException e) {
 				throw new BundleException(Msg.formatter.getString("BUNDLE_READ_EXCEPTION"), e);
 			}
 		}
@@ -85,44 +76,32 @@ public class BundleFragment extends Bundle
 	 * @return  true if an exported package is "in use". i.e. it has been imported by a bundle
 	 * @exception org.osgi.framework.BundleException
 	 */
-	protected boolean unresolve()
-	{
-		if (Debug.DEBUG && Debug.DEBUG_GENERAL)
-		{
-			if ((state & (INSTALLED | RESOLVED)) == 0)
-			{
-				Debug.println("Bundle.reload called when state != INSTALLED | RESOLVED: "+this);
+	protected boolean unresolve() {
+		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+			if ((state & (INSTALLED | RESOLVED)) == 0) {
+				Debug.println("Bundle.reload called when state != INSTALLED | RESOLVED: " + this);
 				Debug.printStackTrace(new Exception("Stack trace"));
 			}
 		}
 
-		if (framework.isActive())
-		{
-			if (host != null)
-			{
-				if (state == RESOLVED)
-				{
+		if (framework.isActive()) {
+			if (host != null) {
+				if (state == RESOLVED) {
 					state = INSTALLED;
 					host = null;
 				}
 			}
-		}
-		else
-		{
+		} else {
 			/* close the outgoing jarfile */
-			try
-			{
+			try {
 				this.bundledata.close();
-			}
-			catch (IOException e)
-			{
+			} catch (IOException e) {
 				// Do Nothing
 			}
 		}
 
-		return(false);
+		return (false);
 	}
-
 
 	/**
 	 * Reload from a new bundle.
@@ -132,50 +111,39 @@ public class BundleFragment extends Bundle
 	 * @return  true if an exported package is "in use". i.e. it has been imported by a bundle
 	 * @exception org.osgi.framework.BundleException
 	 */
-	protected boolean reload(Bundle newBundle) throws BundleException
-	{
-		if (Debug.DEBUG && Debug.DEBUG_GENERAL)
-		{
-			if ((state & (INSTALLED | RESOLVED)) == 0)
-			{
-				Debug.println("Bundle.reload called when state != INSTALLED | RESOLVED: "+this);
+	protected boolean reload(Bundle newBundle) throws BundleException {
+		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+			if ((state & (INSTALLED | RESOLVED)) == 0) {
+				Debug.println("Bundle.reload called when state != INSTALLED | RESOLVED: " + this);
 				Debug.printStackTrace(new Exception("Stack trace"));
 			}
 		}
 
 		boolean exporting = false;
 
-		if (framework.isActive())
-		{
-			if (host != null)
-			{
-				if (state == RESOLVED)
-				{
+		if (framework.isActive()) {
+			if (host != null) {
+				if (state == RESOLVED) {
 					// Unresolving the host will cause the fragment to unresolve
 					exporting = host.unresolve();
 				}
 			}
 
 		}
-		
-		if (!exporting)
-		{
+
+		if (!exporting) {
 			/* close the outgoing jarfile */
-			try
-			{
+			try {
 				this.bundledata.close();
-			}
-			catch (IOException e)
-			{
+			} catch (IOException e) {
 				// Do Nothing
 			}
 		}
 
 		this.bundledata = newBundle.bundledata;
 		this.bundledata.setBundle(this);
-		return(exporting);
+		return (exporting);
 	}
-
 
 	/**
 	 * Refresh the bundle. This is called by Framework.refreshPackages.
@@ -185,19 +153,16 @@ public class BundleFragment extends Bundle
 	 *
 	 * @exception org.osgi.framework.BundleException if an exported package is "in use". i.e. it has been imported by a bundle
 	 */
-	protected void refresh() throws BundleException
-	{
-		if (Debug.DEBUG && Debug.DEBUG_GENERAL)
-		{
-			if ((state & (UNINSTALLED | INSTALLED | RESOLVED)) == 0)
-			{
-				Debug.println("Bundle.refresh called when state != UNINSTALLED | INSTALLED | RESOLVED: "+this);
+	protected void refresh() throws BundleException {
+		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+			if ((state & (UNINSTALLED | INSTALLED | RESOLVED)) == 0) {
+				Debug.println("Bundle.refresh called when state != UNINSTALLED | INSTALLED | RESOLVED: " + this);
 				Debug.printStackTrace(new Exception("Stack trace"));
 			}
 		}
 
 		if (state == RESOLVED) {
-			host=null;
+			host = null;
 			state = INSTALLED;
 		}
 	}
@@ -208,60 +173,45 @@ public class BundleFragment extends Bundle
 	 *
 	 * @return  true if an exported package is "in use". i.e. it has been imported by a bundle
 	 */
-	protected boolean unload()
-	{
-		if (Debug.DEBUG && Debug.DEBUG_GENERAL)
-		{
-			if ((state & (UNINSTALLED | INSTALLED | RESOLVED)) == 0)
-			{
-				Debug.println("Bundle.unload called when state != UNINSTALLED | INSTALLED | RESOLVED: "+this);
+	protected boolean unload() {
+		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+			if ((state & (UNINSTALLED | INSTALLED | RESOLVED)) == 0) {
+				Debug.println("Bundle.unload called when state != UNINSTALLED | INSTALLED | RESOLVED: " + this);
 				Debug.printStackTrace(new Exception("Stack trace"));
 			}
 		}
 
 		boolean exporting = false;
 
-		if (framework.isActive())
-		{
-			if (host != null)
-			{
+		if (framework.isActive()) {
+			if (host != null) {
 				BundleHost resumeHost = host;
-				if (state == RESOLVED)
-				{
+				if (state == RESOLVED) {
 					// Unresolving the host will cause the fragment to unresolve
 					try {
 						exporting = host.unresolve();
-					}
-					catch (BundleException be) {
-						framework.publishFrameworkEvent(FrameworkEvent.ERROR,this,be);
+					} catch (BundleException be) {
+						framework.publishFrameworkEvent(FrameworkEvent.ERROR, this, be);
 					}
 				}
 				if (!exporting) {
 					domain = null;
-					try
-					{
+					try {
 						this.bundledata.close();
-					}
-					catch (IOException e)
-					{ // Do Nothing.
+					} catch (IOException e) { // Do Nothing.
 					}
 				}
 				// We must resume the host now that we are unloaded.
 				framework.resumeBundle(resumeHost);
 			}
-		}
-		else
-		{
-			try
-			{
+		} else {
+			try {
 				this.bundledata.close();
-			}
-			catch (IOException e)
-			{ // Do Nothing.
+			} catch (IOException e) { // Do Nothing.
 			}
 		}
 
-		return(exporting);
+		return (exporting);
 	}
 
 	/**
@@ -272,24 +222,21 @@ public class BundleFragment extends Bundle
 	 * @return     the resulting Class
 	 * @exception  java.lang.ClassNotFoundException  if the class definition was not found.
 	 */
-	protected Class loadClass(String name, boolean checkPermission) throws ClassNotFoundException
-	{
+	protected Class loadClass(String name, boolean checkPermission) throws ClassNotFoundException {
 		if (checkPermission) {
 			framework.checkAdminPermission();
 			checkValid();
 		}
-		if (host == null)
-		{
-			if (Debug.DEBUG && Debug.DEBUG_GENERAL)
-			{
-				Debug.println("Bundle.loadClass("+name+") called when host == null: "+this);
+		if (host == null) {
+			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+				Debug.println("Bundle.loadClass(" + name + ") called when host == null: " + this);
 				Debug.printStackTrace(new Exception("Stack trace"));
 			}
 
 			throw new ClassNotFoundException(name);
 		}
 
-		return(host.loadClass(name,checkPermission));
+		return (host.loadClass(name, checkPermission));
 	}
 
 	/**
@@ -309,22 +256,19 @@ public class BundleFragment extends Bundle
 	 * 
 	 * @exception java.lang.IllegalStateException If this bundle has been uninstalled.
 	 */
-	public URL getResource(String name)
-	{
+	public URL getResource(String name) {
 		checkValid();
 
-		if (host == null)
-		{
-			if (Debug.DEBUG && Debug.DEBUG_GENERAL)
-			{
-				Debug.println("Bundle.getResource("+name+") called when host == null: "+this);
+		if (host == null) {
+			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+				Debug.println("Bundle.getResource(" + name + ") called when host == null: " + this);
 				Debug.printStackTrace(new Exception("Stack trace"));
 			}
 
-			return(null);
+			return (null);
 		}
 
-		return(host.getResource(name));
+		return (host.getResource(name));
 	}
 
 	/**
@@ -332,8 +276,7 @@ public class BundleFragment extends Bundle
 	 *
 	 * @param persistent if true persistently record the bundle was started.
 	 */
-	protected void startWorker(boolean persistent) throws BundleException
-	{
+	protected void startWorker(boolean persistent) throws BundleException {
 		throw new BundleException(Msg.formatter.getString("FRAGMENT_CANNOT_START"));
 	}
 
@@ -342,8 +285,7 @@ public class BundleFragment extends Bundle
 	 *
 	 * @param persistent if true persistently record the bundle was stopped.
 	 */
-	protected void stopWorker(boolean persistent) throws BundleException
-	{
+	protected void stopWorker(boolean persistent) throws BundleException {
 		throw new BundleException(Msg.formatter.getString("FRAGMENT_CANNOT_STOP"));
 	}
 
@@ -363,8 +305,7 @@ public class BundleFragment extends Bundle
 	 * @see ServiceRegistration
 	 * @see ServiceReference
 	 */
-	public ServiceReference[] getRegisteredServices()
-	{
+	public ServiceReference[] getRegisteredServices() {
 		checkValid();
 		if (host == null) {
 			return null;
@@ -388,8 +329,7 @@ public class BundleFragment extends Bundle
 	 * bundle has been uninstalled.
 	 * @see ServiceReference
 	 */
-	public ServiceReference[] getServicesInUse()
-	{
+	public ServiceReference[] getServicesInUse() {
 		checkValid();
 		if (host == null) {
 			return null;
@@ -413,12 +353,11 @@ public class BundleFragment extends Bundle
 	 */
 	protected boolean setHost(BundleHost value) {
 		host = value;
-		if (host != null){
+		if (host != null) {
 			try {
 				host.attachFragment(this);
-			}
-			catch (BundleException be) {
-				framework.publishFrameworkEvent(FrameworkEvent.ERROR,host,be);
+			} catch (BundleException be) {
+				framework.publishFrameworkEvent(FrameworkEvent.ERROR, host, be);
 				return false;
 			}
 		}
@@ -431,16 +370,14 @@ public class BundleFragment extends Bundle
 	 *
 	 * @return true if bundle has the require permission.
 	 */
-	protected boolean hasHostBundlePermission(String uniqueId)
-	{
-		if (domain != null)
-		{
+	protected boolean hasHostBundlePermission(String uniqueId) {
+		if (domain != null) {
 			return domain.implies(new BundlePermission(uniqueId, BundlePermission.HOST));
 		}
 
 		return true;
 	}
-	
+
 	public BundleLoader getBundleLoader() {
 		return host == null ? null : host.getBundleLoader();
 	}
@@ -451,11 +388,11 @@ public class BundleFragment extends Bundle
 	protected void resolve() {
 		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 			if ((state & (INSTALLED)) == 0) {
-				Debug.println("Bundle.resolve called when state != INSTALLED: "+this);
+				Debug.println("Bundle.resolve called when state != INSTALLED: " + this);
 				Debug.printStackTrace(new Exception("Stack trace"));
 			}
 			if (host == null) {
-				Debug.println("Bundle.resolve called when host == null: "+this);
+				Debug.println("Bundle.resolve called when host == null: " + this);
 				Debug.printStackTrace(new Exception("Stack trace"));
 			}
 		}

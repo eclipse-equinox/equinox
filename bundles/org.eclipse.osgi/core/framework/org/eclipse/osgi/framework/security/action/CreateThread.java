@@ -17,19 +17,16 @@ import java.security.PrivilegedAction;
  * Creat a Thread PrivilegedAction class.
  */
 
-public class CreateThread implements PrivilegedAction
-{
-    private Runnable target;
-    private String name;
+public class CreateThread implements PrivilegedAction {
+	private Runnable target;
+	private String name;
 
-    public CreateThread(Runnable target, String name)
-    {
-        this.target = target;
-        this.name = name;
-    }
+	public CreateThread(Runnable target, String name) {
+		this.target = target;
+		this.name = name;
+	}
 
-    public Object run()
-    {
-        return new Thread(target, name);
-    }
+	public Object run() {
+		return new Thread(target, name);
+	}
 }

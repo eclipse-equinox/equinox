@@ -17,7 +17,7 @@ import java.util.Iterator;
 import java.util.Properties;
 
 public class DebugOptions implements org.eclipse.osgi.service.debug.DebugOptions {
-	Properties options = null; 
+	Properties options = null;
 
 	private static DebugOptions singleton = null;
 	private static boolean debugEnabled = true;
@@ -37,16 +37,16 @@ public class DebugOptions implements org.eclipse.osgi.service.debug.DebugOptions
 		super();
 		loadOptions();
 	}
-	
+
 	public boolean getBooleanOption(String option, boolean defaultValue) {
 		String optionValue = getOption(option);
 		return (optionValue != null && optionValue.equalsIgnoreCase("true")) || defaultValue; //$NON-NLS-1$
 	}
-	
+
 	public String getOption(String option) {
 		return options != null ? options.getProperty(option) : null;
 	}
-	
+
 	public int getIntegerOption(String option, int defaultValue) {
 		String value = getOption(option);
 		try {
@@ -57,7 +57,7 @@ public class DebugOptions implements org.eclipse.osgi.service.debug.DebugOptions
 	}
 
 	public void setOption(String option, String value) {
-		if (options != null) 
+		if (options != null)
 			options.put(option, value.trim());
 	}
 
@@ -78,7 +78,7 @@ public class DebugOptions implements org.eclipse.osgi.service.debug.DebugOptions
 			// default options location is user.dir (install location may be r/o so
 			// is not a good candidate for a trace options that need to be updatable by
 			// by the user)
-			String userDir = System.getProperty("user.dir").replace(File.separatorChar,'/'); //$NON-NLS-1$
+			String userDir = System.getProperty("user.dir").replace(File.separatorChar, '/'); //$NON-NLS-1$
 			if (!userDir.endsWith("/")) //$NON-NLS-1$
 				userDir += "/"; //$NON-NLS-1$
 			debugOptionsFilename = "file:" + userDir + OPTIONS; //$NON-NLS-1$

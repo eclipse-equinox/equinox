@@ -15,7 +15,6 @@ import org.eclipse.osgi.service.resolver.PackageSpecification;
 import org.eclipse.osgi.service.resolver.Version;
 import org.osgi.framework.Constants;
 
-
 public class ExportedPackageImpl extends SingleSourcePackage implements org.osgi.service.packageadmin.ExportedPackage {
 
 	String specVersion;
@@ -52,16 +51,15 @@ public class ExportedPackageImpl extends SingleSourcePackage implements org.osgi
 		// always add self
 		importingBundles.add(supplier.getBundle());
 
-		for(int i=0; i<dependentBundles.length; i++) {
+		for (int i = 0; i < dependentBundles.length; i++) {
 			Bundle bundle = dependentBundles[i];
 			BundleLoader bundleLoader = bundle.getBundleLoader();
 			/* check to make sure this package is really imported;
 			 * do not call bundleLoader.getPackageExporter() here because we do
 			 * not want to cause the bundle to dynamically import any packages
 			 * that may not have been referenced yet.
-			 */ 
-			if (bundleLoader.importedPackages != null && 
-					bundleLoader.importedPackages.getByKey(getId()) != null){
+			 */
+			if (bundleLoader.importedPackages != null && bundleLoader.importedPackages.getByKey(getId()) != null) {
 				importingBundles.add(bundle);
 			}
 		}
@@ -80,7 +78,7 @@ public class ExportedPackageImpl extends SingleSourcePackage implements org.osgi
 		return bundle.framework.packageAdmin.removalPending.contains(supplier);
 	}
 
-	public String toString(){
+	public String toString() {
 		StringBuffer result = new StringBuffer(getId());
 		if (specVersion != null) {
 			result.append("; ").append(Constants.PACKAGE_SPECIFICATION_VERSION);

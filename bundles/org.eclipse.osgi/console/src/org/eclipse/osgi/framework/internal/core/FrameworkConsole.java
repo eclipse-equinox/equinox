@@ -11,20 +11,8 @@
 
 package org.eclipse.osgi.framework.internal.core;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.io.Reader;
-import java.io.UnsupportedEncodingException;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.UnknownHostException;
-
+import java.io.*;
+import java.net.*;
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.eclipse.osgi.framework.tracker.ServiceTracker;
@@ -55,8 +43,7 @@ public class FrameworkConsole implements Runnable {
 	/** Default code page which must be supported by all JVMs */
 	static String defaultEncoding = "iso8859-1";
 	/** The current setting for code page */
-	static String encoding =
-		System.getProperty("file.encoding", defaultEncoding);
+	static String encoding = System.getProperty("file.encoding", defaultEncoding);
 
 	/** set to true if accepting commands from port */
 	protected boolean useSocketStream = false;
@@ -118,10 +105,7 @@ public class FrameworkConsole implements Runnable {
 	 */
 	private void getSocketStream(int port) {
 		try {
-			System.out.println(
-				ConsoleMsg.formatter.getString(
-					"CONSOLE_LISTENING_ON_PORT",
-					port));
+			System.out.println(ConsoleMsg.formatter.getString("CONSOLE_LISTENING_ON_PORT", port));
 			if (ss == null) {
 				ss = new ServerSocket(port);
 				scsg = new ConsoleSocketGetter(ss);
@@ -164,16 +148,10 @@ public class FrameworkConsole implements Runnable {
 	private PrintWriter createPrintWriter(OutputStream _out) {
 		PrintWriter writer;
 		try {
-			writer =
-				new PrintWriter(
-					new BufferedWriter(new OutputStreamWriter(_out, encoding)),
-					true);
+			writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(_out, encoding)), true);
 		} catch (UnsupportedEncodingException uee) {
 			// if the encoding is not supported by the jvm, punt and use whatever encodiing there is
-			writer =
-				new PrintWriter(
-					new BufferedWriter(new OutputStreamWriter(_out)),
-					true);
+			writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(_out)), true);
 		}
 		return writer;
 	}
@@ -213,11 +191,7 @@ public class FrameworkConsole implements Runnable {
 		context = osgi.getBundleContext();
 
 		// set up a service tracker to track CommandProvider registrations
-		cptracker =
-			new CommandProviderTracker(
-				context,
-				CommandProvider.class.getName(),
-				this);
+		cptracker = new CommandProviderTracker(context, CommandProvider.class.getName(), this);
 		cptracker.open();
 
 		// register the OSGi command provider
@@ -270,8 +244,7 @@ public class FrameworkConsole implements Runnable {
 		// wait to receive commands from console and handle them
 		BufferedReader br = (BufferedReader) in;
 		//cache the console prompt String
-		String consolePrompt =
-			"\r\n" + ConsoleMsg.formatter.getString("CONSOLE_PROMPT");
+		String consolePrompt = "\r\n" + ConsoleMsg.formatter.getString("CONSOLE_PROMPT");
 		while (!disconnect) {
 			out.print(consolePrompt);
 			out.flush();
@@ -307,11 +280,7 @@ public class FrameworkConsole implements Runnable {
 	 */
 	protected void docommand(String cmdline) {
 		if (cmdline != null && cmdline.length() > 0) {
-			CommandInterpreter intcp =
-				new FrameworkCommandInterpreter(
-					cmdline,
-					cptracker.getServices(),
-					this);
+			CommandInterpreter intcp = new FrameworkCommandInterpreter(cmdline, cptracker.getServices(), this);
 			String command = intcp.nextArgument();
 			if (command != null) {
 				intcp.execute(command);
@@ -383,17 +352,10 @@ public class FrameworkConsole implements Runnable {
 				try {
 					socket = ss.accept();
 					if (!acceptConnections) {
-						PrintWriter o =
-							createPrintWriter(socket.getOutputStream());
-						o.println(
-							ConsoleMsg.formatter.getString(
-								"CONSOLE_TELNET_CONNECTION_REFUSED"));
-						o.println(
-							ConsoleMsg.formatter.getString(
-								"CONSOLE_TELNET_CURRENTLY_USED"));
-						o.println(
-							ConsoleMsg.formatter.getString(
-								"CONSOLE_TELNET_ONE_CLIENT_ONLY"));
+						PrintWriter o = createPrintWriter(socket.getOutputStream());
+						o.println(ConsoleMsg.formatter.getString("CONSOLE_TELNET_CONNECTION_REFUSED"));
+						o.println(ConsoleMsg.formatter.getString("CONSOLE_TELNET_CURRENTLY_USED"));
+						o.println(ConsoleMsg.formatter.getString("CONSOLE_TELNET_ONE_CLIENT_ONLY"));
 						o.close();
 						socket.close();
 					} else {
@@ -435,10 +397,7 @@ public class FrameworkConsole implements Runnable {
 	class CommandProviderTracker extends ServiceTracker {
 
 		FrameworkConsole con;
-		CommandProviderTracker(
-			org.osgi.framework.BundleContext context,
-			String clazz,
-			FrameworkConsole con) {
+		CommandProviderTracker(org.osgi.framework.BundleContext context, String clazz, FrameworkConsole con) {
 			super(context, clazz, null);
 			this.con = con;
 		}
@@ -464,8 +423,7 @@ public class FrameworkConsole implements Runnable {
 		 * added to this <tt>ServiceTracker</tt> object.
 		 */
 		public Object addingService(ServiceReference reference) {
-			CommandProvider cp =
-				(CommandProvider) super.addingService(reference);
+			CommandProvider cp = (CommandProvider) super.addingService(reference);
 			return cp;
 		}
 
@@ -480,14 +438,12 @@ public class FrameworkConsole implements Runnable {
 		 * are being tracked.
 		 */
 		public Object[] getServices() {
-			ServiceReference[] serviceRefs =
-				(ServiceReference[]) super.getServiceReferences();
+			ServiceReference[] serviceRefs = (ServiceReference[]) super.getServiceReferences();
 			Util.dsort(serviceRefs, 0, serviceRefs.length);
 
 			Object[] serviceObjects = new Object[serviceRefs.length];
 			for (int i = 0; i < serviceRefs.length; i++) {
-				serviceObjects[i] =
-					FrameworkConsole.this.context.getService(serviceRefs[i]);
+				serviceObjects[i] = FrameworkConsole.this.context.getService(serviceRefs[i]);
 			}
 			return serviceObjects;
 		}

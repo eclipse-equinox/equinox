@@ -11,17 +11,8 @@
 
 package org.eclipse.osgi.framework.tracker;
 
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Vector;
-
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
-import org.osgi.framework.Filter;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceEvent;
-import org.osgi.framework.ServiceListener;
-import org.osgi.framework.ServiceReference;
+import java.util.*;
+import org.osgi.framework.*;
 
 /**
  * The <tt>ServiceTracker</tt> class simplifies using services

@@ -17,7 +17,6 @@ import java.net.URL;
 import java.security.ProtectionDomain;
 import java.util.Dictionary;
 import java.util.Enumeration;
-
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 
@@ -29,8 +28,7 @@ import org.osgi.framework.BundleException;
  * used to access bundle entries, manifest information, and getting and saving
  * metadata.
  */
-public interface BundleData
-{
+public interface BundleData {
 	/**
 	 * Creates the ClassLoader for the BundleData.  The ClassLoader created
 	 * must use the <code>ClassLoaderDelegate</code> to delegate class, resource
@@ -132,8 +130,8 @@ public interface BundleData
 	public void close() throws IOException;
 
 	/**
-     * Open the BundleData. This method will reopen the BundleData if it has been
-     * previously closed.
+	 * Open the BundleData. This method will reopen the BundleData if it has been
+	 * previously closed.
 	 * @throws IOException If an error occurs opening.
 	 */
 	public void open() throws IOException;
@@ -143,7 +141,7 @@ public interface BundleData
 	 * @param bundle The Bundle Object for this BundleData.
 	 */
 	public void setBundle(Bundle bundle);
-	
+
 	public int getStartLevel();
 	public int getStatus();
 	public void setStartLevel(int value);

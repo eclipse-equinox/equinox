@@ -15,12 +15,9 @@ import java.io.IOException;
 import java.util.EventListener;
 import java.util.List;
 import org.eclipse.osgi.framework.debug.Debug;
-import org.eclipse.osgi.framework.eventmgr.EventListeners;
-import org.eclipse.osgi.framework.eventmgr.EventManager;
-import org.eclipse.osgi.framework.eventmgr.EventQueue;
-import org.eclipse.osgi.framework.eventmgr.EventSource;
-import org.osgi.framework.FrameworkEvent;
+import org.eclipse.osgi.framework.eventmgr.*;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.FrameworkEvent;
 
 /**
  * StartLevel service implementation for the OSGi specification.
@@ -35,7 +32,7 @@ public class StartLevelImpl implements EventSource, EventListener {
 
 	protected static Framework framework;
 	protected static EventManager eventManager;
-	protected static EventListeners startLevelListeners;	
+	protected static EventListeners startLevelListeners;
 
 	/** The framework beginning startlevel.  Default is 1 */
 	protected int frameworkBeginningStartLevel = 1;
@@ -56,34 +53,24 @@ public class StartLevelImpl implements EventSource, EventListener {
 	}
 
 	protected void initialize() {
-		initialBundleStartLevel =
-			framework.adaptor.getInitialBundleStartLevel();
+		initialBundleStartLevel = framework.adaptor.getInitialBundleStartLevel();
 
 		// Set Framework Beginning Start Level Property
-		String value =
-			framework.getProperty(Constants.KEY_FRAMEWORKBEGINNINGSTARTLEVEL);
+		String value = framework.getProperty(Constants.KEY_FRAMEWORKBEGINNINGSTARTLEVEL);
 		if (value == null) {
 			value = Constants.DEFAULT_STARTLEVEL;
 		} else {
 			try {
 				if (Integer.parseInt(value) <= 0) {
-					System.err.println(
-						Msg.formatter.getString(
-							"PROPERTIES_INVALID_FW_STARTLEVEL",
-							Constants.DEFAULT_STARTLEVEL));
+					System.err.println(Msg.formatter.getString("PROPERTIES_INVALID_FW_STARTLEVEL", Constants.DEFAULT_STARTLEVEL));
 					value = Constants.DEFAULT_STARTLEVEL;
 				}
 			} catch (NumberFormatException nfe) {
-				System.err.println(
-					Msg.formatter.getString(
-						"PROPERTIES_INVALID_FW_STARTLEVEL",
-						Constants.DEFAULT_STARTLEVEL));
+				System.err.println(Msg.formatter.getString("PROPERTIES_INVALID_FW_STARTLEVEL", Constants.DEFAULT_STARTLEVEL));
 				value = Constants.DEFAULT_STARTLEVEL;
 			}
 		}
-		framework.setProperty(
-			Constants.KEY_FRAMEWORKBEGINNINGSTARTLEVEL,
-			value);
+		framework.setProperty(Constants.KEY_FRAMEWORKBEGINNINGSTARTLEVEL, value);
 		frameworkBeginningStartLevel = Integer.parseInt(value);
 
 		// create an event manager and a start level listener
@@ -226,25 +213,14 @@ public class StartLevelImpl implements EventSource, EventListener {
 	     */
 	public void setStartLevel(int newSL, org.osgi.framework.Bundle callerBundle) {
 		if (newSL <= 0) {
-			throw new IllegalArgumentException(
-				Msg.formatter.getString(
-					"STARTLEVEL_EXCEPTION_INVALID_REQUESTED_STARTLEVEL",
-					"" + newSL));
+			throw new IllegalArgumentException(Msg.formatter.getString("STARTLEVEL_EXCEPTION_INVALID_REQUESTED_STARTLEVEL", "" + newSL));
 		}
 		framework.checkAdminPermission();
 
 		if (Debug.DEBUG && Debug.DEBUG_STARTLEVEL) {
-			Debug.println(
-				"StartLevelImpl: setStartLevel: "
-					+ newSL
-					+ "; callerBundle = "
-					+ callerBundle.getBundleId());
+			Debug.println("StartLevelImpl: setStartLevel: " + newSL + "; callerBundle = " + callerBundle.getBundleId());
 		}
-		issueEvent(
-			new StartLevelEvent(
-				StartLevelEvent.CHANGE_FW_SL,
-				newSL,
-				(Bundle) callerBundle));
+		issueEvent(new StartLevelEvent(StartLevelEvent.CHANGE_FW_SL, newSL, (Bundle) callerBundle));
 
 	}
 
@@ -287,8 +263,7 @@ public class StartLevelImpl implements EventSource, EventListener {
 			if (newSL > tempSL) {
 				for (int i = tempSL; i < newSL; i++) {
 					if (Debug.DEBUG && Debug.DEBUG_STARTLEVEL) {
-						Debug.println(
-							"sync - incrementing Startlevel from " + tempSL);
+						Debug.println("sync - incrementing Startlevel from " + tempSL);
 					}
 					tempSL++;
 					incFWSL(i + 1, callerBundle);
@@ -296,20 +271,15 @@ public class StartLevelImpl implements EventSource, EventListener {
 			} else {
 				for (int i = tempSL; i > newSL; i--) {
 					if (Debug.DEBUG && Debug.DEBUG_STARTLEVEL) {
-						Debug.println(
-							"sync - decrementing Startlevel from " + tempSL);
+						Debug.println("sync - decrementing Startlevel from " + tempSL);
 					}
 					tempSL--;
 					decFWSL(i - 1);
 				}
 			}
-			framework.publishFrameworkEvent(
-				FrameworkEvent.STARTLEVEL_CHANGED,
-				callerBundle,
-				null);
+			framework.publishFrameworkEvent(FrameworkEvent.STARTLEVEL_CHANGED, callerBundle, null);
 			if (Debug.DEBUG && Debug.DEBUG_STARTLEVEL) {
-				Debug.println(
-					"StartLevelImpl: doSetStartLevel: STARTLEVEL_CHANGED event published");
+				Debug.println("StartLevelImpl: doSetStartLevel: STARTLEVEL_CHANGED event published");
 			}
 		}
 	}
@@ -338,18 +308,14 @@ public class StartLevelImpl implements EventSource, EventListener {
 	     * <tt>false</tt> if the bundle is not persistently marked to be started.
 	     * @exception java.lang.IllegalArgumentException If the specified bundle has been uninstalled.
 	     */
-	public boolean isBundlePersistentlyStarted(
-		org.osgi.framework.Bundle bundle) {
+	public boolean isBundlePersistentlyStarted(org.osgi.framework.Bundle bundle) {
 
 		if (bundle.getState() == Bundle.UNINSTALLED) {
-			throw new IllegalArgumentException(
-				Msg.formatter.getString("BUNDLE_UNINSTALLED_EXCEPTION"));
+			throw new IllegalArgumentException(Msg.formatter.getString("BUNDLE_UNINSTALLED_EXCEPTION"));
 		}
 		Bundle b = (Bundle) bundle;
 		int status = b.bundledata.getStatus();
-		return (
-			(status	& org.eclipse.osgi.framework.internal.core.Constants.BUNDLE_STARTED)
-				== Constants.BUNDLE_STARTED);
+		return ((status & org.eclipse.osgi.framework.internal.core.Constants.BUNDLE_STARTED) == Constants.BUNDLE_STARTED);
 	}
 	/**
 	     * Return the assigned start level value for the specified Bundle.
@@ -361,8 +327,7 @@ public class StartLevelImpl implements EventSource, EventListener {
 	public int getBundleStartLevel(org.osgi.framework.Bundle bundle) {
 
 		if (bundle.getState() == Bundle.UNINSTALLED) {
-			throw new IllegalArgumentException(
-				Msg.formatter.getString("BUNDLE_UNINSTALLED_EXCEPTION"));
+			throw new IllegalArgumentException(Msg.formatter.getString("BUNDLE_UNINSTALLED_EXCEPTION"));
 		}
 		return ((Bundle) bundle).startLevel;
 	}
@@ -395,23 +360,15 @@ public class StartLevelImpl implements EventSource, EventListener {
 	     * <tt>AdminPermission</tt> and the Java runtime environment supports
 	     * permissions.
 	     */
-	public void setBundleStartLevel(
-		org.osgi.framework.Bundle bundle,
-		int newSL) {
+	public void setBundleStartLevel(org.osgi.framework.Bundle bundle, int newSL) {
 
 		String exceptionText = "";
 		if (bundle.getBundleId() == 0) { // system bundle has id=0
-			exceptionText =
-				Msg.formatter.getString(
-					"STARTLEVEL_CANT_CHANGE_SYSTEMBUNDLE_STARTLEVEL");
+			exceptionText = Msg.formatter.getString("STARTLEVEL_CANT_CHANGE_SYSTEMBUNDLE_STARTLEVEL");
 		} else if (bundle.getState() == Bundle.UNINSTALLED) {
-			exceptionText =
-				Msg.formatter.getString("BUNDLE_UNINSTALLED_EXCEPTION");
+			exceptionText = Msg.formatter.getString("BUNDLE_UNINSTALLED_EXCEPTION");
 		} else if (newSL <= 0) {
-			exceptionText =
-				Msg.formatter.getString(
-					"STARTLEVEL_EXCEPTION_INVALID_REQUESTED_STARTLEVEL",
-					"" + newSL);
+			exceptionText = Msg.formatter.getString("STARTLEVEL_EXCEPTION_INVALID_REQUESTED_STARTLEVEL", "" + newSL);
 		}
 		if (exceptionText.length() > 0) {
 			throw new IllegalArgumentException(exceptionText);
@@ -419,22 +376,16 @@ public class StartLevelImpl implements EventSource, EventListener {
 
 		try {
 			// if the bundle's startlevel is not already at the requested startlevel
-			if (newSL
-				!= ((org.eclipse.osgi.framework.internal.core.Bundle) bundle).startLevel) {
+			if (newSL != ((org.eclipse.osgi.framework.internal.core.Bundle) bundle).startLevel) {
 				Bundle b = (Bundle) bundle;
 				b.bundledata.setStartLevel(newSL);
 				b.bundledata.save();
-				((org.eclipse.osgi.framework.internal.core.Bundle) bundle).startLevel =
-					newSL;
+				((org.eclipse.osgi.framework.internal.core.Bundle) bundle).startLevel = newSL;
 
 				framework.checkAdminPermission();
 
 				// handle starting or stopping the bundle asynchronously
-				issueEvent(
-					new StartLevelEvent(
-						StartLevelEvent.CHANGE_BUNDLE_SL,
-						newSL,
-						(Bundle) bundle));
+				issueEvent(new StartLevelEvent(StartLevelEvent.CHANGE_BUNDLE_SL, newSL, (Bundle) bundle));
 			}
 		} catch (IOException e) {
 			framework.publishFrameworkEvent(FrameworkEvent.ERROR, bundle, e);
@@ -479,19 +430,13 @@ public class StartLevelImpl implements EventSource, EventListener {
 	 * as what event object to pass) so that this method
 	 * can complete the delivery of the event to the listener.
 	 */
-	public void dispatchEvent(
-		Object listener,
-		Object listenerObject,
-		int eventAction,
-		Object eventObject) {
+	public void dispatchEvent(Object listener, Object listenerObject, int eventAction, Object eventObject) {
 		switch (eventAction) {
 			case StartLevelEvent.CHANGE_BUNDLE_SL :
 				setBundleSL((StartLevelEvent) eventObject);
 				break;
 			case StartLevelEvent.CHANGE_FW_SL :
-				doSetStartLevel(
-					((StartLevelEvent) eventObject).getNewSL(),
-					((StartLevelEvent) eventObject).getBundle());
+				doSetStartLevel(((StartLevelEvent) eventObject).getNewSL(), ((StartLevelEvent) eventObject).getBundle());
 				break;
 		}
 	}
@@ -527,10 +472,7 @@ public class StartLevelImpl implements EventSource, EventListener {
 				Debug.println("SLL: Framework started");
 			}
 
-			framework.publishFrameworkEvent(
-				FrameworkEvent.STARTED,
-				callerBundle,
-				null);
+			framework.publishFrameworkEvent(FrameworkEvent.STARTED, callerBundle, null);
 
 		} else {
 			// incrementing an already active framework
@@ -581,15 +523,11 @@ public class StartLevelImpl implements EventSource, EventListener {
 
 			} catch (BundleException be) {
 				if (Debug.DEBUG && Debug.DEBUG_STARTLEVEL) {
-					Debug.println(
-						"SLL: Bundle load exception: " + be.getMessage());
+					Debug.println("SLL: Bundle load exception: " + be.getMessage());
 					Debug.printStackTrace(be.getNestedException());
 				}
 
-				framework.publishFrameworkEvent(
-					FrameworkEvent.ERROR,
-					bundle,
-					be);
+				framework.publishFrameworkEvent(FrameworkEvent.ERROR, bundle, be);
 			}
 		}
 	}
@@ -622,13 +560,7 @@ public class StartLevelImpl implements EventSource, EventListener {
 				continue;
 			} else if (bsl == fwsl) {
 				if (Debug.DEBUG && Debug.DEBUG_STARTLEVEL) {
-					Debug.println(
-						"SLL: Active sl = "
-							+ fwsl
-							+ "; Bundle "
-							+ launch[i].getBundleId()
-							+ " sl = "
-							+ bsl);
+					Debug.println("SLL: Active sl = " + fwsl + "; Bundle " + launch[i].getBundleId() + " sl = " + bsl);
 				}
 				framework.resumeBundle(launch[i]);
 			} else {
@@ -641,15 +573,11 @@ public class StartLevelImpl implements EventSource, EventListener {
 			framework.systemBundle.state = Bundle.ACTIVE;
 		} else {
 			if (Debug.DEBUG && Debug.DEBUG_STARTLEVEL) {
-				Debug.println(
-					"SLL: Bundle resume exception: " + sbe.getMessage());
+				Debug.println("SLL: Bundle resume exception: " + sbe.getMessage());
 				Debug.printStackTrace(sbe.getNestedException());
 			}
 
-			framework.publishFrameworkEvent(
-				FrameworkEvent.ERROR,
-				framework.systemBundle,
-				sbe);
+			framework.publishFrameworkEvent(FrameworkEvent.ERROR, framework.systemBundle, sbe);
 		}
 	}
 
@@ -693,9 +621,7 @@ public class StartLevelImpl implements EventSource, EventListener {
 					} else if (shutdown[i].isActive()) {
 						// if bundle is active or starting, then stop the bundle
 						if (Debug.DEBUG && Debug.DEBUG_STARTLEVEL) {
-							Debug.println(
-								"SLL: stopping bundle "
-									+ shutdown[i].getBundleId());
+							Debug.println("SLL: stopping bundle " + shutdown[i].getBundleId());
 						}
 						framework.suspendBundle(shutdown[i], false);
 					}
@@ -722,8 +648,7 @@ public class StartLevelImpl implements EventSource, EventListener {
 
 					if (framework.suspendBundle(bundle, false)) {
 						if (Debug.DEBUG && Debug.DEBUG_STARTLEVEL) {
-							Debug.println(
-								"SLL: stopped bundle " + bundle.getBundleId());
+							Debug.println("SLL: stopped bundle " + bundle.getBundleId());
 						}
 						changed = true;
 					}
@@ -734,15 +659,11 @@ public class StartLevelImpl implements EventSource, EventListener {
 				framework.systemBundle.context.stop();
 			} catch (BundleException sbe) {
 				if (Debug.DEBUG && Debug.DEBUG_STARTLEVEL) {
-					Debug.println(
-						"SLL: Bundle suspend exception: " + sbe.getMessage());
+					Debug.println("SLL: Bundle suspend exception: " + sbe.getMessage());
 					Debug.printStackTrace(sbe.getNestedException());
 				}
 
-				framework.publishFrameworkEvent(
-					FrameworkEvent.ERROR,
-					framework.systemBundle,
-					sbe);
+				framework.publishFrameworkEvent(FrameworkEvent.ERROR, framework.systemBundle, sbe);
 			}
 
 			framework.systemBundle.state = Bundle.STARTING;
@@ -795,15 +716,13 @@ public class StartLevelImpl implements EventSource, EventListener {
 
 			if (bundle.isActive() && (newSL > activeSL)) {
 				if (Debug.DEBUG && Debug.DEBUG_STARTLEVEL) {
-					Debug.println(
-						"SLL: stopping bundle " + bundle.getBundleId());
+					Debug.println("SLL: stopping bundle " + bundle.getBundleId());
 				}
 				framework.suspendBundle(bundle, false);
 			} else {
 				if (!bundle.isActive() && (newSL <= activeSL)) {
 					if (Debug.DEBUG && Debug.DEBUG_STARTLEVEL) {
-						Debug.println(
-							"SLL: starting bundle " + bundle.getBundleId());
+						Debug.println("SLL: starting bundle " + bundle.getBundleId());
 					}
 					framework.resumeBundle(bundle);
 				}

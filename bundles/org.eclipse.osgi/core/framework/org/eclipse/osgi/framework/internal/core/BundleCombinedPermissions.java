@@ -12,9 +12,7 @@
 package org.eclipse.osgi.framework.internal.core;
 
 import java.security.Permission;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 /**
  * A combination of two BundlePermissionCollection classes.

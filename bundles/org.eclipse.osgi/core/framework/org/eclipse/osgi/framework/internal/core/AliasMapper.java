@@ -11,185 +11,142 @@
 
 package org.eclipse.osgi.framework.internal.core;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.util.Hashtable;
-
 import org.eclipse.osgi.framework.debug.Debug;
-import org.eclipse.osgi.framework.util.*;
+import org.eclipse.osgi.framework.util.Tokenizer;
 
 /**
  * This class maps aliases.
  */
-public class AliasMapper
-{
-    private static Hashtable processorAliasTable;
-    private static Hashtable osnameAliasTable;
+public class AliasMapper {
+	private static Hashtable processorAliasTable;
+	private static Hashtable osnameAliasTable;
 
-    /**
-     * Constructor.
-     *
-     */
-    public AliasMapper()
-    {
-    }
+	/**
+	 * Constructor.
+	 *
+	 */
+	public AliasMapper() {
+	}
 
-    /**
-     * Return the master alias for the processor.
-     *
-     * @param processor Input name
-     * @return aliased name (if any)
-     */
-    public String aliasProcessor(String processor)
-    {
-        processor = processor.toLowerCase();
+	/**
+	 * Return the master alias for the processor.
+	 *
+	 * @param processor Input name
+	 * @return aliased name (if any)
+	 */
+	public String aliasProcessor(String processor) {
+		processor = processor.toLowerCase();
 
-        if (processorAliasTable == null)
-        {
-            InputStream in = getClass().getResourceAsStream(Constants.OSGI_PROCESSOR_ALIASES);
-            if (in != null)
-            {
-                try
-                {
-                    processorAliasTable = initAliases(in);
-                }
-                finally
-                {
-                    try
-                    {
-                        in.close();
-                    }
-                    catch (IOException ee)
-                    {
-                    }
-                }
-            }
+		if (processorAliasTable == null) {
+			InputStream in = getClass().getResourceAsStream(Constants.OSGI_PROCESSOR_ALIASES);
+			if (in != null) {
+				try {
+					processorAliasTable = initAliases(in);
+				} finally {
+					try {
+						in.close();
+					} catch (IOException ee) {
+					}
+				}
+			}
 
-        }
+		}
 
-        if (processorAliasTable != null)
-        {
-            String alias = (String)processorAliasTable.get(processor);
+		if (processorAliasTable != null) {
+			String alias = (String) processorAliasTable.get(processor);
 
-            if (alias != null)
-            {
-                processor = alias;
-            }
-        }
+			if (alias != null) {
+				processor = alias;
+			}
+		}
 
-        return(processor);
-    }
+		return (processor);
+	}
 
-    /**
-     * Return the master alias for the osname.
-     *
-     * @param osname Input name
-     * @return aliased name (if any)
-     */
-    public String aliasOSName(String osname)
-    {
-        osname = osname.toLowerCase();
+	/**
+	 * Return the master alias for the osname.
+	 *
+	 * @param osname Input name
+	 * @return aliased name (if any)
+	 */
+	public String aliasOSName(String osname) {
+		osname = osname.toLowerCase();
 
-        if (osnameAliasTable == null)
-        {
-            InputStream in = getClass().getResourceAsStream(Constants.OSGI_OSNAME_ALIASES);
-            if (in != null)
-            {
-                try
-                {
-                    osnameAliasTable = initAliases(in);
-                }
-                finally
-                {
-                    try
-                    {
-                        in.close();
-                    }
-                    catch (IOException ee)
-                    {
-                    }
-                }
-            }
-        }
+		if (osnameAliasTable == null) {
+			InputStream in = getClass().getResourceAsStream(Constants.OSGI_OSNAME_ALIASES);
+			if (in != null) {
+				try {
+					osnameAliasTable = initAliases(in);
+				} finally {
+					try {
+						in.close();
+					} catch (IOException ee) {
+					}
+				}
+			}
+		}
 
-        if (osnameAliasTable != null)
-        {
-            String alias = (String)osnameAliasTable.get(osname);
+		if (osnameAliasTable != null) {
+			String alias = (String) osnameAliasTable.get(osname);
 
-            if (alias != null)
-            {
-                osname = alias;
-            }
-        }
+			if (alias != null) {
+				osname = alias;
+			}
+		}
 
-        return(osname);
-    }
+		return (osname);
+	}
 
-    /**
-     * Read alias data and populate a Hashtable.
-     *
-     * @param in InputStream from which to read alias data.
-     * @return Hashtable of aliases.
-     */
-    protected static Hashtable initAliases(InputStream in)
-    {
-        Hashtable aliases = new Hashtable(37);
+	/**
+	 * Read alias data and populate a Hashtable.
+	 *
+	 * @param in InputStream from which to read alias data.
+	 * @return Hashtable of aliases.
+	 */
+	protected static Hashtable initAliases(InputStream in) {
+		Hashtable aliases = new Hashtable(37);
 
-        try
-        {
-            BufferedReader br;
-            try
-            {
-                br = new BufferedReader(new InputStreamReader(in, "UTF8"));
-            }
-            catch (UnsupportedEncodingException e)
-            {
-                br = new BufferedReader(new InputStreamReader(in));
-            }
+		try {
+			BufferedReader br;
+			try {
+				br = new BufferedReader(new InputStreamReader(in, "UTF8"));
+			} catch (UnsupportedEncodingException e) {
+				br = new BufferedReader(new InputStreamReader(in));
+			}
 
-            while (true)
-            {
-                String line = br.readLine();
+			while (true) {
+				String line = br.readLine();
 
-                if (line == null)               /* EOF */
-                {
-                    break;                      /* done */
-                }
+				if (line == null) /* EOF */ {
+					break; /* done */
+				}
 
-                Tokenizer tokenizer = new Tokenizer(line);
+				Tokenizer tokenizer = new Tokenizer(line);
 
-                String master = tokenizer.getString("#");
+				String master = tokenizer.getString("#");
 
-                if (master != null)
-                {
-                    aliases.put(master.toLowerCase(), master);
+				if (master != null) {
+					aliases.put(master.toLowerCase(), master);
 
-                    parseloop:
-                    while (true)
-                    {
-                        String alias = tokenizer.getString("#");
+					parseloop : while (true) {
+						String alias = tokenizer.getString("#");
 
-                        if (alias == null)
-                        {
-                            break parseloop;
-                        }
+						if (alias == null) {
+							break parseloop;
+						}
 
-                        aliases.put(alias.toLowerCase(), master);
-                    }
-                }
-            }
-        }
-        catch (IOException e)
-        {
-            if (Debug.DEBUG && Debug.DEBUG_GENERAL)
-            {
-                Debug.printStackTrace(e);
-            }
-        }
+						aliases.put(alias.toLowerCase(), master);
+					}
+				}
+			}
+		} catch (IOException e) {
+			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+				Debug.printStackTrace(e);
+			}
+		}
 
-        return(aliases);
-    }
+		return (aliases);
+	}
 }

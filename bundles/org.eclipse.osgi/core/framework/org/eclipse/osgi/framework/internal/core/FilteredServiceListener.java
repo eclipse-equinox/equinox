@@ -12,9 +12,7 @@
 package org.eclipse.osgi.framework.internal.core;
 
 import org.eclipse.osgi.framework.debug.Debug;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceEvent;
-import org.osgi.framework.ServiceListener;
+import org.osgi.framework.*;
 
 public class FilteredServiceListener implements ServiceListener
 {

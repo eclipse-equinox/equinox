@@ -11,13 +11,9 @@
 
 package org.eclipse.osgi.framework.internal.core;
 
-import java.util.Dictionary;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Vector;
-
+import java.util.*;
 import org.eclipse.osgi.framework.debug.Debug;
-import org.eclipse.osgi.framework.util.*;
+import org.eclipse.osgi.framework.util.Headers;
 import org.osgi.framework.ServiceEvent;
 
 /**

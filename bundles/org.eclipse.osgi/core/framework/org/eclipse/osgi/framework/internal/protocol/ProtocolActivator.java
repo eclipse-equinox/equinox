@@ -16,7 +16,6 @@ import org.osgi.framework.BundleContext;
 
 public interface ProtocolActivator {
 
-	public void start (BundleContext context, FrameworkAdaptor adaptor);
+	public void start(BundleContext context, FrameworkAdaptor adaptor);
 
 }
-

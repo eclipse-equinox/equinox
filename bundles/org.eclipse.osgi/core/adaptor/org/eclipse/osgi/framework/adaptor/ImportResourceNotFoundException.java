@@ -18,24 +18,20 @@ package org.eclipse.osgi.framework.adaptor;
  * calling parent.getResource*().
  *
  */
-public class ImportResourceNotFoundException extends RuntimeException
-{
-    /**
-     * Constructor with no detail message
-     */
-    public ImportResourceNotFoundException()
-    {
-        super();
-    }
+public class ImportResourceNotFoundException extends RuntimeException {
+	/**
+	 * Constructor with no detail message
+	 */
+	public ImportResourceNotFoundException() {
+		super();
+	}
 
-    /**
-     * Constructor with detail message
-     *
-     * @param   s   the detail message.
-     */
-    public ImportResourceNotFoundException(String s)
-    {
-        super(s);
-    }
+	/**
+	 * Constructor with detail message
+	 *
+	 * @param   s   the detail message.
+	 */
+	public ImportResourceNotFoundException(String s) {
+		super(s);
+	}
 }
-

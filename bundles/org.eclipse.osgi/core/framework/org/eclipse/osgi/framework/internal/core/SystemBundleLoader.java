@@ -24,7 +24,7 @@ import org.osgi.framework.BundleException;
 public class SystemBundleLoader extends BundleLoader {
 
 	ClassLoader classLoader;
-	
+
 	/**
 	 * List of packages that the system bundle exports.
 	 */

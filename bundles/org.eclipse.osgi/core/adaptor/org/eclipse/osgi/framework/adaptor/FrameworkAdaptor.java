@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.net.URLConnection;
 import java.util.Properties;
 import java.util.Vector;
-
 import org.eclipse.osgi.service.resolver.PlatformAdmin;
 import org.eclipse.osgi.service.resolver.State;
 import org.osgi.framework.BundleContext;
@@ -37,8 +36,7 @@ import org.osgi.framework.BundleException;
  * arguments.
  */
 
-public interface FrameworkAdaptor
-{
+public interface FrameworkAdaptor {
 
 	/**
 	 * Initialize the FrameworkAdaptor object so that it is ready to be
@@ -94,8 +92,7 @@ public interface FrameworkAdaptor
 	 * @return URLConnection that represents the location.
 	 * @throws BundleException if the mapping fails.
 	 */
-	public URLConnection mapLocationToURLConnection(String location)
-		throws BundleException;
+	public URLConnection mapLocationToURLConnection(String location) throws BundleException;
 
 	/**
 	 * Prepare to install a bundle from a URLConnection.
@@ -231,7 +228,7 @@ public interface FrameworkAdaptor
 	 * @param context The System Bundle's BundleContext.
 	 * @exception BundleException on any error that may occur.
 	 */
-	public void frameworkStop(BundleContext context)throws BundleException;
+	public void frameworkStop(BundleContext context) throws BundleException;
 
 	/**
 	 * Gets the value for Export-Package for packages that a FrameworkAdaptor is exporting
@@ -262,7 +259,7 @@ public interface FrameworkAdaptor
 	 */
 	public void setInitialBundleStartLevel(int value);
 
-	public IBundleStats getBundleStats(); 
+	public IBundleStats getBundleStats();
 	public PlatformAdmin getPlatformAdmin();
 	public State getState();
 }

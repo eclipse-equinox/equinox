@@ -13,7 +13,6 @@ package org.eclipse.osgi.framework.internal.core;
 
 import java.util.StringTokenizer;
 import java.util.Vector;
-
 import org.eclipse.osgi.framework.adaptor.Version;
 import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.Constants;

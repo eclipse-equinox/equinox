@@ -11,8 +11,6 @@
 
 package org.eclipse.osgi.framework.eventmgr;
 
-
-
 /**
  * This class is used for asynchronously dispatching events.
  */

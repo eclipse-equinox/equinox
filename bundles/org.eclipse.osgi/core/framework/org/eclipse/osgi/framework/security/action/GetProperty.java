@@ -17,28 +17,24 @@ import java.security.PrivilegedAction;
  * Get System Property PrivilegedAction class.
  */
 
-public class GetProperty implements PrivilegedAction
-{
-    private String property;
-    private String def;
+public class GetProperty implements PrivilegedAction {
+	private String property;
+	private String def;
 
-    public GetProperty(String property)
-    {
-        this.property = property;
-    }
+	public GetProperty(String property) {
+		this.property = property;
+	}
 
-    public GetProperty(String property, String def)
-    {
-        this.property = property;
-        this.def = def;
-    }
+	public GetProperty(String property, String def) {
+		this.property = property;
+		this.def = def;
+	}
 
-    /** 
-        @exception java.lang.NullPointerException
-        @exception java.lang.IllegalArgumentException
-    */
-    public Object run()
-    {
-        return System.getProperty(property, def);
-    }
+	/** 
+	    @exception java.lang.NullPointerException
+	    @exception java.lang.IllegalArgumentException
+	*/
+	public Object run() {
+		return System.getProperty(property, def);
+	}
 }

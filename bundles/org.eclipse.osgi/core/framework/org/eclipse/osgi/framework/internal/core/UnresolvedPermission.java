@@ -14,7 +14,6 @@ package org.eclipse.osgi.framework.internal.core;
 import java.lang.reflect.Constructor;
 import java.security.Permission;
 import java.security.PermissionCollection;
-
 import org.eclipse.osgi.framework.debug.Debug;
 
 /**
@@ -22,175 +21,156 @@ import org.eclipse.osgi.framework.debug.Debug;
  * policy file is read
  *
  */
-final class UnresolvedPermission extends Permission
-{
-    /**
-     * The type of permission this will be
-     */
-    private String type;
-    /**
-     * the action string
-     */
-    private String actions;
-    /**
-     * name of the permission
-     */
-    private String name;
+final class UnresolvedPermission extends Permission {
+	/**
+	 * The type of permission this will be
+	 */
+	private String type;
+	/**
+	 * the action string
+	 */
+	private String actions;
+	/**
+	 * name of the permission
+	 */
+	private String name;
 
-    private static Class[] constructorArgs;
+	private static Class[] constructorArgs;
 
-    static
-    {
-        Class string = String.class;
-        constructorArgs = new Class[]{string, string};
-    }
+	static {
+		Class string = String.class;
+		constructorArgs = new Class[] { string, string };
+	}
 
-    /**
-     * Constructs a new instance of this class with its
-     * type, name, and certificates set to the arguments
-     * by definition, actions are ignored
-     *
-     * @param 	String type class of permission object
-     * @param	String name of the permission
-     * @param	String actions
-     * @param	Certificate[] certs
-     */
-    UnresolvedPermission(String type, String name, String actions)
-    {
-        super(type);
-        this.name = name;
-        this.type = type;
-        this.actions = actions;
-    }
+	/**
+	 * Constructs a new instance of this class with its
+	 * type, name, and certificates set to the arguments
+	 * by definition, actions are ignored
+	 *
+	 * @param 	String type class of permission object
+	 * @param	String name of the permission
+	 * @param	String actions
+	 * @param	Certificate[] certs
+	 */
+	UnresolvedPermission(String type, String name, String actions) {
+		super(type);
+		this.name = name;
+		this.type = type;
+		this.actions = actions;
+	}
 
-   /**
-    * Compares the argument to the receiver, and answers true
-    * if they represent the <em>same</em> object using a class
-    * specific comparison. In this case, the receiver and the
-    * object must have the same class, permission name,
-    * actions, and certificates
-    *
-    * @param		obj		the object to compare with this object
-    * @return		<code>true</code>
-    *					if the object is the same as this object
-    *				<code>false</code>
-    *					if it is different from this object
-    * @see			hashCode
-    */
-    public boolean equals (Object obj)
-    {
-        if (this == obj)
-        {
-            return true;
-        }
-        if (!(obj instanceof UnresolvedPermission))
-        {
-            return false;
-        }
+	/**
+	 * Compares the argument to the receiver, and answers true
+	 * if they represent the <em>same</em> object using a class
+	 * specific comparison. In this case, the receiver and the
+	 * object must have the same class, permission name,
+	 * actions, and certificates
+	 *
+	 * @param		obj		the object to compare with this object
+	 * @return		<code>true</code>
+	 *					if the object is the same as this object
+	 *				<code>false</code>
+	 *					if it is different from this object
+	 * @see			hashCode
+	 */
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (!(obj instanceof UnresolvedPermission)) {
+			return false;
+		}
 
-        UnresolvedPermission perm = (UnresolvedPermission)obj;
+		UnresolvedPermission perm = (UnresolvedPermission) obj;
 
-        return type.equals(perm.type) && name.equals(perm.name) &&
-              actions.equals(perm.actions);
-    }
+		return type.equals(perm.type) && name.equals(perm.name) && actions.equals(perm.actions);
+	}
 
-   /**
-    * Indicates whether the argument permission is implied
-    * by the receiver. UnresolvedPermission objects imply
-    * nothing because nothing is known about them yet.
-    *
-    * @return		boolean always replies false
-    * @param		p java.security.Permission
-    *					the permission to check
-    */
-    public boolean implies(Permission p)
-    {
-        return false;
-    }
+	/**
+	 * Indicates whether the argument permission is implied
+	 * by the receiver. UnresolvedPermission objects imply
+	 * nothing because nothing is known about them yet.
+	 *
+	 * @return		boolean always replies false
+	 * @param		p java.security.Permission
+	 *					the permission to check
+	 */
+	public boolean implies(Permission p) {
+		return false;
+	}
 
-    /**
-     * Answers a new PermissionCollection for holding permissions
-     * of this class. Answer null if any permission collection can
-     * be used.
-     *
-     * @return		a new PermissionCollection or null
-     *
-     * @see			BasicPermissionCollection
-     */
-    public PermissionCollection newPermissionCollection()
-    {
-        return new UnresolvedPermissionCollection();
-    }
+	/**
+	 * Answers a new PermissionCollection for holding permissions
+	 * of this class. Answer null if any permission collection can
+	 * be used.
+	 *
+	 * @return		a new PermissionCollection or null
+	 *
+	 * @see			BasicPermissionCollection
+	 */
+	public PermissionCollection newPermissionCollection() {
+		return new UnresolvedPermissionCollection();
+	}
 
-   /**
-    * Answers the actions associated with the receiver.
-    * Since UnresolvedPermission objects have no actions, answer
-    * the empty string.
-    *
-    * @return		String
-    *					the actions associated with the receiver.
-    */
-    public String getActions()
-    {
-        return "";
-    }
+	/**
+	 * Answers the actions associated with the receiver.
+	 * Since UnresolvedPermission objects have no actions, answer
+	 * the empty string.
+	 *
+	 * @return		String
+	 *					the actions associated with the receiver.
+	 */
+	public String getActions() {
+		return "";
+	}
 
-   /**
-    * Answers an integer hash code for the receiver. Any two
-    * objects which answer <code>true</code> when passed to
-    * <code>equals</code> must answer the same value for this
-    * method.
-    *
-    * @return		int
-    *					the receiver's hash
-    *
-    * @see			equals
-    */
-    public int hashCode()
-    {
-        return toString().hashCode();
-    }
+	/**
+	 * Answers an integer hash code for the receiver. Any two
+	 * objects which answer <code>true</code> when passed to
+	 * <code>equals</code> must answer the same value for this
+	 * method.
+	 *
+	 * @return		int
+	 *					the receiver's hash
+	 *
+	 * @see			equals
+	 */
+	public int hashCode() {
+		return toString().hashCode();
+	}
 
-    /**
-     * Answers a string containing a concise, human-readable
-     * description of the receiver.
-     *
-     * @return		String
-     *					a printable representation for the receiver.
-     */
-    public String toString()
-    {
-        return "(unresolved " + type + " " + name + " " + actions +")";
-    }
+	/**
+	 * Answers a string containing a concise, human-readable
+	 * description of the receiver.
+	 *
+	 * @return		String
+	 *					a printable representation for the receiver.
+	 */
+	public String toString() {
+		return "(unresolved " + type + " " + name + " " + actions + ")";
+	}
 
-    Permission resolve(Class clazz)
-    {
-        if (clazz.getName().equals(type))
-        {
-            try
-            {
-                Constructor constructor = clazz.getConstructor(constructorArgs);
+	Permission resolve(Class clazz) {
+		if (clazz.getName().equals(type)) {
+			try {
+				Constructor constructor = clazz.getConstructor(constructorArgs);
 
-                Permission permission = (Permission)constructor.newInstance(new Object[] {name, actions});
+				Permission permission = (Permission) constructor.newInstance(new Object[] { name, actions });
 
-                if (Debug.DEBUG && Debug.DEBUG_SECURITY)
-                {
-                    Debug.println("Resolved "+this);
-                }
+				if (Debug.DEBUG && Debug.DEBUG_SECURITY) {
+					Debug.println("Resolved " + this);
+				}
 
-                return permission;
-            }
-            catch (Exception e)
-            {
-                /* Ignore any error trying to resolve the permission */
-                if (Debug.DEBUG && Debug.DEBUG_SECURITY)
-                {
-                    Debug.println("Exception trying to resolve permission");
-                    Debug.printStackTrace(e);
-                }
-            }
-        }
+				return permission;
+			} catch (Exception e) {
+				/* Ignore any error trying to resolve the permission */
+				if (Debug.DEBUG && Debug.DEBUG_SECURITY) {
+					Debug.println("Exception trying to resolve permission");
+					Debug.printStackTrace(e);
+				}
+			}
+		}
 
-        return null;
-    }
+		return null;
+	}
 }

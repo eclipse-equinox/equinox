@@ -18,89 +18,75 @@ import java.security.Permission;
  *
  */
 
-final class BundleResourcePermission extends Permission
-{
-    private long id;
+final class BundleResourcePermission extends Permission {
+	private long id;
 
-    BundleResourcePermission(long id)
-    {
-        super(String.valueOf(id));
+	BundleResourcePermission(long id) {
+		super(String.valueOf(id));
 
-        this.id = id;
-    }
+		this.id = id;
+	}
 
-    BundleResourcePermission(String id)
-    {
-        super(id);
+	BundleResourcePermission(String id) {
+		super(id);
 
-        this.id = Long.parseLong(id);
-    }
+		this.id = Long.parseLong(id);
+	}
 
-    /**
-     * Determines if the specified permission is implied by this object.
-     *
-     * @param p The target permission to interrogate.
-     * @return <tt>true</tt> if the specified permission is implied by
-     * this object; <tt>false</tt> otherwise.
-     */
+	/**
+	 * Determines if the specified permission is implied by this object.
+	 *
+	 * @param p The target permission to interrogate.
+	 * @return <tt>true</tt> if the specified permission is implied by
+	 * this object; <tt>false</tt> otherwise.
+	 */
 
-    public boolean implies(Permission p)
-    {
-        if (p instanceof BundleResourcePermission)
-        {
-            BundleResourcePermission target = (BundleResourcePermission) p;
+	public boolean implies(Permission p) {
+		if (p instanceof BundleResourcePermission) {
+			BundleResourcePermission target = (BundleResourcePermission) p;
 
-            return this.id == target.id;
-        }
+			return this.id == target.id;
+		}
 
-        return false;
-    }
+		return false;
+	}
 
-    /**
-     * Returns the empty String.
-     */
+	/**
+	 * Returns the empty String.
+	 */
 
-    public String getActions()
-    {
-        return "";
-    }
+	public String getActions() {
+		return "";
+	}
 
-    /**
-     * Determines the equality of two <tt>BundleResourcePermission</tt> objects.
-     *
-     * @param obj The object to test for equality with this object.
-     * @return <tt>true</tt> if <tt><i>obj</i></tt> is a <tt>BundleResourcePermission</tt>, and has the
-     * same bundle id this object; <tt>false</tt> otherwise.
-     */
-    public boolean equals(Object obj)
-    {
-        if (obj == this)
-        {
-            return(true);
-        }
+	/**
+	 * Determines the equality of two <tt>BundleResourcePermission</tt> objects.
+	 *
+	 * @param obj The object to test for equality with this object.
+	 * @return <tt>true</tt> if <tt><i>obj</i></tt> is a <tt>BundleResourcePermission</tt>, and has the
+	 * same bundle id this object; <tt>false</tt> otherwise.
+	 */
+	public boolean equals(Object obj) {
+		if (obj == this) {
+			return (true);
+		}
 
-        if (!(obj instanceof BundleResourcePermission))
-        {
-            return(false);
-        }
+		if (!(obj instanceof BundleResourcePermission)) {
+			return (false);
+		}
 
-        BundleResourcePermission target = (BundleResourcePermission) obj;
+		BundleResourcePermission target = (BundleResourcePermission) obj;
 
-        return this.id == target.id;
-    }
+		return this.id == target.id;
+	}
 
-    /**
-     * Returns the hash code value for this object.
-     *
-     * @return A hash code value for this object.
-     */
+	/**
+	 * Returns the hash code value for this object.
+	 *
+	 * @return A hash code value for this object.
+	 */
 
-    public int hashCode()
-    {
-        return getName().hashCode();
-    }
+	public int hashCode() {
+		return getName().hashCode();
+	}
 }
-
-
-
-

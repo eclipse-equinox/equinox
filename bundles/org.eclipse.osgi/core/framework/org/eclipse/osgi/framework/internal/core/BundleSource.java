@@ -21,23 +21,19 @@ import java.net.URLConnection;
  * <p>This class implements a URLConnection which
  * wraps an InputStream.
  */
-public class BundleSource extends URLConnection
-{
-    private InputStream in;
+public class BundleSource extends URLConnection {
+	private InputStream in;
 
-    protected BundleSource(InputStream in)
-    {
-        super(null);
-        this.in = in;
-    }
+	protected BundleSource(InputStream in) {
+		super(null);
+		this.in = in;
+	}
 
-    public void connect() throws IOException
-    {
-        connected = true;
-    }
+	public void connect() throws IOException {
+		connected = true;
+	}
 
-    public InputStream getInputStream() throws IOException
-    {
-        return(in);
-    }
+	public InputStream getInputStream() throws IOException {
+		return (in);
+	}
 }

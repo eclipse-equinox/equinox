@@ -12,19 +12,12 @@
 package org.eclipse.osgi.framework.internal.protocol;
 
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.URLStreamHandler;
-
+import java.net.*;
 import org.eclipse.osgi.framework.tracker.ServiceTracker;
 import org.eclipse.osgi.framework.tracker.ServiceTrackerCustomizer;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
-import org.osgi.framework.ServiceReference;
+import org.osgi.framework.*;
 import org.osgi.service.url.URLConstants;
 import org.osgi.service.url.URLStreamHandlerService;
-
 
 /**
  * The URLStreamHandlerProxy is a URLStreamHandler that acts as a proxy for registered 
@@ -35,50 +28,47 @@ import org.osgi.service.url.URLStreamHandlerService;
  * and therefore would not support a dynamic environment of URLStreamHandlerServices being registered 
  * and unregistered.
  */
- 
-public class URLStreamHandlerProxy extends URLStreamHandler implements ServiceTrackerCustomizer{
+
+public class URLStreamHandlerProxy extends URLStreamHandler implements ServiceTrackerCustomizer {
 
 	protected URLStreamHandlerService realHandlerService;
-	
+
 	protected URLStreamHandlerSetter urlSetter;
-	
+
 	protected ServiceTracker urlStreamHandlerServiceTracker;
-	
+
 	protected boolean handlerRegistered;
-	
+
 	protected BundleContext context;
 	protected ServiceReference urlStreamServiceReference;
-	
+
 	protected String protocol;
-	
+
 	protected int ranking = -1;
-	
-	public URLStreamHandlerProxy(String protocol, ServiceReference reference, BundleContext context)
-	{
+
+	public URLStreamHandlerProxy(String protocol, ServiceReference reference, BundleContext context) {
 		handlerRegistered = true;
-	
+
 		this.context = context;
 		this.protocol = protocol;
-		
-		
+
 		urlSetter = new URLStreamHandlerSetter(this);
-		
+
 		//set the ranking
 		Object property = reference.getProperty(Constants.SERVICE_RANKING);
-        ranking = (property instanceof Integer) ? ((Integer)property).intValue() : 0;
-		
-		this.realHandlerService = (URLStreamHandlerService)context.getService(reference);
+		ranking = (property instanceof Integer) ? ((Integer) property).intValue() : 0;
+
+		this.realHandlerService = (URLStreamHandlerService) context.getService(reference);
 		this.urlStreamServiceReference = reference;
-		
-		urlStreamHandlerServiceTracker = new ServiceTracker(context,StreamHandlerFactory.urlStreamHandlerClazz,this);
+
+		urlStreamHandlerServiceTracker = new ServiceTracker(context, StreamHandlerFactory.urlStreamHandlerClazz, this);
 		urlStreamHandlerServiceTracker.open();
 	}
-	
-	private void setNewHandler(ServiceReference reference,int rank)
-	{
+
+	private void setNewHandler(ServiceReference reference, int rank) {
 		this.urlStreamServiceReference = reference;
 		this.ranking = rank;
-		this.realHandlerService = (URLStreamHandlerService)context.getService(reference);
+		this.realHandlerService = (URLStreamHandlerService) context.getService(reference);
 	}
 
 	/**
@@ -127,7 +117,7 @@ public class URLStreamHandlerProxy extends URLStreamHandler implements ServiceTr
 	 * @see java.net.URLStreamHandler#parseURL(URL, String, int, int)
 	 */
 	protected void parseURL(URL url, String str, int start, int end) {
-		realHandlerService.parseURL(urlSetter,url, str, start, end);
+		realHandlerService.parseURL(urlSetter, url, str, start, end);
 	}
 
 	/**
@@ -137,7 +127,6 @@ public class URLStreamHandlerProxy extends URLStreamHandler implements ServiceTr
 		return realHandlerService.sameFile(url1, url2);
 	}
 
-	
 	/**
 	 * @see java.net.URLStreamHandler#toExternalForm(URL)
 	 */
@@ -148,44 +137,20 @@ public class URLStreamHandlerProxy extends URLStreamHandler implements ServiceTr
 	/**
 	 * @see java.net.URLStreamHandler#setURL(URL, String, String, int, String, String, String, String, String)
 	 */
-	public void setURL(
-		URL u,
-		String protocol,
-		String host,
-		int port,
-		String authority,
-		String userInfo,
-		String file,
-		String query,
-		String ref) {
-		super.setURL(
-			u,
-			protocol,
-			host,
-			port,
-			authority,
-			userInfo,
-			file,
-			query,
-			ref);
+	public void setURL(URL u, String protocol, String host, int port, String authority, String userInfo, String file, String query, String ref) {
+		super.setURL(u, protocol, host, port, authority, userInfo, file, query, ref);
 	}
 
 	/**
 	 * @see java.net.URLStreamHandler#setURL(URL, String, String, int, String, String)
 	 * @deprecated
 	 */
-	
-	public void setURL(
-		URL url,
-		String protocol,
-		String host,
-		int port,
-		String file,
-		String ref) {
-	    
-	    //using non-deprecated URLStreamHandler.setURL method. 
-	    //setURL(URL u, String protocol, String host, int port, String authority, String userInfo, String file, String query, String ref) 
-		super.setURL(url, protocol, host, port, null,null,file, null,ref);
+
+	public void setURL(URL url, String protocol, String host, int port, String file, String ref) {
+
+		//using non-deprecated URLStreamHandler.setURL method. 
+		//setURL(URL u, String protocol, String host, int port, String authority, String userInfo, String file, String query, String ref) 
+		super.setURL(url, protocol, host, port, null, null, file, null, ref);
 	}
 
 	/**
@@ -193,33 +158,28 @@ public class URLStreamHandlerProxy extends URLStreamHandler implements ServiceTr
 	 */
 	public Object addingService(ServiceReference reference) {
 		//check to see if our protocol is being registered by another service
-		String[] protocols = (String[])reference.getProperty(URLConstants.URL_HANDLER_PROTOCOL);
-		for(int i=0;i<protocols.length;i++)
-		{
-			if(protocols[i].equals(protocol))
-			{
+		String[] protocols = (String[]) reference.getProperty(URLConstants.URL_HANDLER_PROTOCOL);
+		for (int i = 0; i < protocols.length; i++) {
+			if (protocols[i].equals(protocol)) {
 				//If our protocol is registered by another service, check the service ranking and switch 
 				//URLStreamHandlers if nessecary.
-				
+
 				Object property = reference.getProperty(Constants.SERVICE_RANKING);
 
-                 int newServiceRanking = (property instanceof Integer)
-                                    ? ((Integer)property).intValue() : 0;
+				int newServiceRanking = (property instanceof Integer) ? ((Integer) property).intValue() : 0;
 
-				if(!handlerRegistered)
-				{
-					setNewHandler(reference,newServiceRanking);			
-					handlerRegistered = true;	
+				if (!handlerRegistered) {
+					setNewHandler(reference, newServiceRanking);
+					handlerRegistered = true;
 				}
-				
-				if(newServiceRanking > ranking)
-				{
-					setNewHandler(reference,newServiceRanking);		
+
+				if (newServiceRanking > ranking) {
+					setNewHandler(reference, newServiceRanking);
 				}
-				return (reference);			
-			}	
+				return (reference);
+			}
 		}
-		
+
 		//we don't want to continue hearing events about a URLStreamHandlerService not registered under our protocol
 		return (null);
 	}
@@ -227,31 +187,27 @@ public class URLStreamHandlerProxy extends URLStreamHandler implements ServiceTr
 	/**
 	 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#modifiedService(ServiceReference, Object)
 	 */
-	
+
 	// check to see if the ranking has changed.  If so, re-select a new URLHandler
-	public void modifiedService(ServiceReference reference, Object service) 
-	{
+	public void modifiedService(ServiceReference reference, Object service) {
 		int newrank = getRank(reference);
-	    
-		if(reference == urlStreamServiceReference)
-		{
-			if(newrank < ranking) //The URLHandler we are currently
-			//using has dropped it's ranking below a URLHandler registered for the same protocol.  
-			//We need to swap out URLHandlers.
-			//this should get us the highest ranked service, if available
-			{
-				ServiceReference newReference = urlStreamHandlerServiceTracker.getServiceReference();
-				if(newReference != urlStreamServiceReference && newReference != null)
+
+		if (reference == urlStreamServiceReference) {
+			if (newrank < ranking) //The URLHandler we are currently
+				//using has dropped it's ranking below a URLHandler registered for the same protocol.  
+				//We need to swap out URLHandlers.
+				//this should get us the highest ranked service, if available
 				{
-					setNewHandler(newReference,((Integer)newReference.getProperty(Constants.SERVICE_RANKING)).intValue());	
+				ServiceReference newReference = urlStreamHandlerServiceTracker.getServiceReference();
+				if (newReference != urlStreamServiceReference && newReference != null) {
+					setNewHandler(newReference, ((Integer) newReference.getProperty(Constants.SERVICE_RANKING)).intValue());
 				}
-			}		
+			}
+		} else if (newrank > ranking) //the service changed is another URLHandler that we are not currently using
+			//If it's ranking is higher, we must swap it in.
+			{
+			setNewHandler(reference, newrank);
 		}
-		else if(newrank > ranking)  //the service changed is another URLHandler that we are not currently using
-		//If it's ranking is higher, we must swap it in.
-	    {
-	    	setNewHandler(reference,newrank);
-	    }
 	}
 
 	/**
@@ -260,28 +216,23 @@ public class URLStreamHandlerProxy extends URLStreamHandler implements ServiceTr
 	public void removedService(ServiceReference reference, Object service) {
 		//check to see if our URLStreamHandler was unregistered.  If so, look 
 		//for a lower ranking URLHandler
-		if(reference == urlStreamServiceReference)
-		{
+		if (reference == urlStreamServiceReference) {
 			//this should get us the highest ranking service left, if available
 			ServiceReference newReference = urlStreamHandlerServiceTracker.getServiceReference();
-			if(newReference != null)
-			{
-				setNewHandler(newReference,getRank(newReference));	
-			}
-			else
-			{
-				handlerRegistered = false;	
+			if (newReference != null) {
+				setNewHandler(newReference, getRank(newReference));
+			} else {
+				handlerRegistered = false;
 				realHandlerService = new NullURLStreamHandlerService();
 				ranking = -1;
 			}
-					
+
 		}
 
 	}
-	
-	private int getRank(ServiceReference reference)
-	{
-		return ((Integer)reference.getProperty(Constants.SERVICE_RANKING)).intValue();
+
+	private int getRank(ServiceReference reference) {
+		return ((Integer) reference.getProperty(Constants.SERVICE_RANKING)).intValue();
 	}
 
 }

@@ -30,14 +30,12 @@ import org.eclipse.osgi.framework.msg.MessageFormat;
  * a reasonable human-readable (english) string.
  */
 
-public class ConsoleMsg
-{
+public class ConsoleMsg {
 
-    static public MessageFormat formatter;
+	static public MessageFormat formatter;
 
-    // Attempt to load the message bundle.
-    static
-    {
-        formatter = new MessageFormat("org.eclipse.osgi.framework.internal.core.ConsoleMessages");
-    }
+	// Attempt to load the message bundle.
+	static {
+		formatter = new MessageFormat("org.eclipse.osgi.framework.internal.core.ConsoleMessages");
+	}
 }

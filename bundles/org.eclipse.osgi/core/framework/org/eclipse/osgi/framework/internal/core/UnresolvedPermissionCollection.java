@@ -13,88 +13,73 @@ package org.eclipse.osgi.framework.internal.core;
 
 import java.security.Permission;
 import java.security.PermissionCollection;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Vector;
+import java.util.*;
 
 /**
  * Holds permissions which are of an unknown type when a
  * policy file is read
  *
  */
-final class UnresolvedPermissionCollection extends PermissionCollection
-{
-    /** hash of permission class names => Vectors of UnresolvedPermissions for that class */
-    Hashtable permissions = new Hashtable(8);
+final class UnresolvedPermissionCollection extends PermissionCollection {
+	/** hash of permission class names => Vectors of UnresolvedPermissions for that class */
+	Hashtable permissions = new Hashtable(8);
 
-    UnresolvedPermissionCollection()
-    {
-        super();
-    }
+	UnresolvedPermissionCollection() {
+		super();
+	}
 
-    public void add(Permission permission)
-    {
-        if (isReadOnly())
-        {
-            throw new IllegalStateException();
-        }
+	public void add(Permission permission) {
+		if (isReadOnly()) {
+			throw new IllegalStateException();
+		}
 
-        String name = permission.getName();
+		String name = permission.getName();
 
-        Vector elements;
+		Vector elements;
 
-        synchronized (permissions)
-        {
-            elements = (Vector)permissions.get(name);
+		synchronized (permissions) {
+			elements = (Vector) permissions.get(name);
 
-            if (elements == null)
-            {
-                elements = new Vector(10, 10);
+			if (elements == null) {
+				elements = new Vector(10, 10);
 
-                permissions.put(name, elements);
-            }
-        }
+				permissions.put(name, elements);
+			}
+		}
 
-        elements.addElement(permission);
-    }
+		elements.addElement(permission);
+	}
 
-    public Enumeration elements()
-    {
-        return (new Enumeration()
-               {
-                   Enumeration vEnum, pEnum = permissions.elements();
-                   Object next = findNext();
-                   private Object findNext()
-                   {
-                       if (vEnum != null)
-                       {
-                           if (vEnum.hasMoreElements())
-                               return (vEnum.nextElement());
-                       }
-                       if (!pEnum.hasMoreElements()) return (null);
-                       vEnum = ((Vector)pEnum.nextElement()).elements();
-                       return (vEnum.nextElement());
-                   }
-                   public boolean hasMoreElements()
-                   {
-                       return (next != null);
-                   }
-                   public Object nextElement()
-                   {
-                       Object result = next;
-                       next = findNext();
-                       return (result);
-                   }
-               });
-    }
+	public Enumeration elements() {
+		return (new Enumeration() {
+			Enumeration vEnum, pEnum = permissions.elements();
+			Object next = findNext();
+			private Object findNext() {
+				if (vEnum != null) {
+					if (vEnum.hasMoreElements())
+						return (vEnum.nextElement());
+				}
+				if (!pEnum.hasMoreElements())
+					return (null);
+				vEnum = ((Vector) pEnum.nextElement()).elements();
+				return (vEnum.nextElement());
+			}
+			public boolean hasMoreElements() {
+				return (next != null);
+			}
+			public Object nextElement() {
+				Object result = next;
+				next = findNext();
+				return (result);
+			}
+		});
+	}
 
-    public boolean implies(Permission permission)
-    {
-        return false;
-    }
+	public boolean implies(Permission permission) {
+		return false;
+	}
 
-    Vector getPermissions(String name)
-    {
-        return (Vector)permissions.get(name);
-    }
+	Vector getPermissions(String name) {
+		return (Vector) permissions.get(name);
+	}
 }

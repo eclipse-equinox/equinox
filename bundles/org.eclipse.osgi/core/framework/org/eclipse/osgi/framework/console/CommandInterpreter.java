@@ -12,7 +12,6 @@
 package org.eclipse.osgi.framework.console;
 
 import java.util.Dictionary;
-
 import org.eclipse.osgi.framework.internal.core.Bundle;
 
 /**	A command interpreter is a shell that can interpret command

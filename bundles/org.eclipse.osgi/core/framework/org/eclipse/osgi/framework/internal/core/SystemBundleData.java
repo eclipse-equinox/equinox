@@ -20,24 +20,20 @@ import java.util.Enumeration;
 import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.util.Headers;
 
-
 public class SystemBundleData implements BundleData {
 
 	Headers manifest;
 	Version version;
 
-	public SystemBundleData(Headers manifest){
+	public SystemBundleData(Headers manifest) {
 		this.manifest = manifest;
-		String sVersion=(String)manifest.get(Constants.BUNDLE_VERSION);
+		String sVersion = (String) manifest.get(Constants.BUNDLE_VERSION);
 		if (sVersion != null) {
 			version = new Version(sVersion);
 		}
 	}
 
-	public BundleClassLoader createClassLoader(
-		ClassLoaderDelegate delegate,
-		ProtectionDomain domain,
-		String[] bundleclasspath) {
+	public BundleClassLoader createClassLoader(ClassLoaderDelegate delegate, ProtectionDomain domain, String[] bundleclasspath) {
 		return null;
 	}
 
@@ -68,7 +64,7 @@ public class SystemBundleData implements BundleData {
 		return 0;
 	}
 
-	public String getLocation(){
+	public String getLocation() {
 		return Constants.SYSTEM_BUNDLE_LOCATION;
 	}
 
@@ -79,17 +75,16 @@ public class SystemBundleData implements BundleData {
 	public void close() {
 	}
 
-	public void open(){
+	public void open() {
 	}
 
 	public boolean isFragment() {
 		return false;
 	}
 
-	public void setBundle(org.osgi.framework.Bundle bundle){
+	public void setBundle(org.osgi.framework.Bundle bundle) {
 		// do nothing.
 	}
-
 
 	// The system bundle does not have any meta data capabilities so the following methods just
 	// do nothing or return dummy values.
@@ -111,22 +106,22 @@ public class SystemBundleData implements BundleData {
 	}
 
 	public String getUniqueId() {
-		return (String)getHeaders().get(Constants.BUNDLE_GLOBALNAME);
+		return (String) getHeaders().get(Constants.BUNDLE_GLOBALNAME);
 	}
 
 	public Version getVersion() {
 		return version;
 	}
 	public String getClassPath() {
-		return (String)getHeaders().get(Constants.BUNDLE_CLASSPATH);
+		return (String) getHeaders().get(Constants.BUNDLE_CLASSPATH);
 	}
 	public String getActivator() {
-		return (String)getHeaders().get(Constants.BUNDLE_ACTIVATOR);
+		return (String) getHeaders().get(Constants.BUNDLE_ACTIVATOR);
 	}
-	public String getDynamicImports(){
-		return (String)getHeaders().get(Constants.DYNAMICIMPORT_PACKAGE);
+	public String getDynamicImports() {
+		return (String) getHeaders().get(Constants.DYNAMICIMPORT_PACKAGE);
 	}
-	public String getExecutionEnvironment(){
-		return (String)getHeaders().get(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT);
+	public String getExecutionEnvironment() {
+		return (String) getHeaders().get(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT);
 	}
 }

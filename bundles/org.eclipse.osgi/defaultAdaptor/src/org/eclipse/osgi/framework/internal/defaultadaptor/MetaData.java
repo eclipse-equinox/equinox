@@ -11,10 +11,7 @@
 
 package org.eclipse.osgi.framework.internal.defaultadaptor;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.Properties;
 
 /**
@@ -54,21 +51,20 @@ public class MetaData {
 	 * @see org.eclipse.osgi.framework.adaptor.MetaData#get(java.lang.String, java.lang.String)
 	 */
 	public String get(String key, String def) {
-		return properties.getProperty(key,def);
+		return properties.getProperty(key, def);
 	}
 
 	/**
 	 * @see org.eclipse.osgi.framework.adaptor.MetaData#getInt(String, int)
 	 */
 	public int getInt(String key, int def) {
-		String result = get(key,null);
+		String result = get(key, null);
 		if (result == null) {
 			return def;
 		}
-		try{
+		try {
 			return Integer.parseInt(result);
-		}
-		catch (NumberFormatException nfe) {
+		} catch (NumberFormatException nfe) {
 			return def;
 		}
 	}
@@ -77,14 +73,13 @@ public class MetaData {
 	 * @see org.eclipse.osgi.framework.adaptor.MetaData#getLong(String, long)
 	 */
 	public long getLong(String key, long def) {
-		String result = get(key,null);
+		String result = get(key, null);
 		if (result == null) {
 			return def;
 		}
-		try{
+		try {
 			return Long.parseLong(result);
-		}
-		catch (NumberFormatException nfe) {
+		} catch (NumberFormatException nfe) {
 			return def;
 		}
 	}
@@ -93,7 +88,7 @@ public class MetaData {
 	 * @see org.eclipse.osgi.framework.adaptor.MetaData#getBoolean(String, boolean)
 	 */
 	public boolean getBoolean(String key, boolean def) {
-		String result = get(key,null);
+		String result = get(key, null);
 		if (result == null) {
 			return def;
 		}
@@ -104,34 +99,34 @@ public class MetaData {
 	 * @see org.eclipse.osgi.framework.adaptor.MetaData#set(String, String)
 	 */
 	public void set(String key, String val) {
-		properties.put(key,val);
+		properties.put(key, val);
 	}
 
 	/**
 	 * @see org.eclipse.osgi.framework.adaptor.MetaData#setInt(String, int)
 	 */
 	public void setInt(String key, int val) {
-		properties.put(key,Integer.toString(val));
+		properties.put(key, Integer.toString(val));
 	}
 
 	/**
 	 * @see org.eclipse.osgi.framework.adaptor.MetaData#setLong(String, long)
 	 */
 	public void setLong(String key, long val) {
-		properties.put(key,Long.toString(val));
+		properties.put(key, Long.toString(val));
 	}
 
 	/**
 	 * @see org.eclipse.osgi.framework.adaptor.MetaData#setBoolean(String, boolean)
 	 */
 	public void setBoolean(String key, boolean val) {
-		properties.put(key,new Boolean(val).toString());
+		properties.put(key, new Boolean(val).toString());
 	}
 
 	/**
 	 * @see org.eclipse.osgi.framework.adaptor.MetaData#remove(String)
 	 */
-	public void remove(String key){
+	public void remove(String key) {
 		properties.remove(key);
 	}
 
@@ -140,7 +135,7 @@ public class MetaData {
 	 */
 	public void save() throws IOException {
 		FileOutputStream fos = new FileOutputStream(datafile);
-		properties.store(fos,header);
+		properties.store(fos, header);
 	}
 
 	/**
@@ -158,9 +153,8 @@ public class MetaData {
 	/**
 	 * Returns the result of toString on the Properties object.
 	 */
-	public String toString(){
+	public String toString() {
 		return properties.toString();
 	}
-
 
 }

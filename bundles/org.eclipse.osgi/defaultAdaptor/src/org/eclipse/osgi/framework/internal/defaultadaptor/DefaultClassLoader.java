@@ -25,8 +25,7 @@ import org.osgi.framework.FrameworkEvent;
  * A concrete implementation of BundleClassLoader.  This implementation 
  * consolidates all Bundle-ClassPath entries into a single ClassLoader.
  */
-public class DefaultClassLoader
-	extends org.eclipse.osgi.framework.adaptor.BundleClassLoader {
+public class DefaultClassLoader extends org.eclipse.osgi.framework.adaptor.BundleClassLoader {
 
 	/**
 	 * The BundleData object for this BundleClassLoader
@@ -40,12 +39,12 @@ public class DefaultClassLoader
 	protected ClasspathEntry[] classpathEntries;
 
 	protected Vector fragClasspaths;
-	
+
 	/**
 	 * The buffer size to use when loading classes.  This value is used 
 	 * only if we cannot determine the size of the class we are loading.
 	 */
-	protected int buffersize = 8*1024;
+	protected int buffersize = 8 * 1024;
 
 	/**
 	 * BundleClassLoader constructor.
@@ -56,9 +55,8 @@ public class DefaultClassLoader
 	 * Bundle-ClassPath manifest entry.
 	 * @param bundledata The BundleData for this ClassLoader
 	 */
-	public DefaultClassLoader(ClassLoaderDelegate delegate, ProtectionDomain domain, String[] classpath, DefaultBundleData bundledata)
-	{
-		this(delegate,domain,classpath,null,bundledata);
+	public DefaultClassLoader(ClassLoaderDelegate delegate, ProtectionDomain domain, String[] classpath, DefaultBundleData bundledata) {
+		this(delegate, domain, classpath, null, bundledata);
 	}
 
 	/**
@@ -71,18 +69,14 @@ public class DefaultClassLoader
 	 * @param parent The parent ClassLoader.
 	 * @param bundledata The BundleData for this ClassLoader
 	 */
-	public DefaultClassLoader(ClassLoaderDelegate delegate, ProtectionDomain domain, String[] classpath, ClassLoader parent, DefaultBundleData bundledata)
-	{
-		super(delegate,domain,classpath,parent);
+	public DefaultClassLoader(ClassLoaderDelegate delegate, ProtectionDomain domain, String[] classpath, ClassLoader parent, DefaultBundleData bundledata) {
+		super(delegate, domain, classpath, parent);
 		this.hostdata = bundledata;
 
-		try
-		{
+		try {
 			hostdata.open(); /* make sure the BundleData is open */
-		} catch (IOException e)
-		{
-			hostdata.adaptor.getEventPublisher().publishFrameworkEvent(
-					FrameworkEvent.ERROR,hostdata.getBundle(),e);
+		} catch (IOException e) {
+			hostdata.adaptor.getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, hostdata.getBundle(), e);
 		}
 	}
 
@@ -103,19 +97,16 @@ public class DefaultClassLoader
 	 * use for loading classes and resources.  This is specified by the 
 	 * Bundle-ClassPath manifest entry of the fragment.
 	 */
-	public void attachFragment(org.eclipse.osgi.framework.adaptor.BundleData bundledata,ProtectionDomain domain,String[] classpath) {
+	public void attachFragment(org.eclipse.osgi.framework.adaptor.BundleData bundledata, ProtectionDomain domain, String[] classpath) {
 		DefaultBundleData defaultBundledata = (DefaultBundleData) bundledata;
-		try
-		{
+		try {
 			bundledata.open(); /* make sure the BundleData is open */
-		} catch (IOException e)
-		{
-			
-			defaultBundledata.adaptor.getEventPublisher().publishFrameworkEvent(
-					FrameworkEvent.ERROR,defaultBundledata.getBundle(),e);
+		} catch (IOException e) {
+
+			defaultBundledata.adaptor.getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, defaultBundledata.getBundle(), e);
 		}
-		ClasspathEntry[] fragEntries = buildClasspath(classpath,defaultBundledata,domain);
-		FragmentClasspath fragClasspath = new FragmentClasspath(fragEntries,defaultBundledata,domain);
+		ClasspathEntry[] fragEntries = buildClasspath(classpath, defaultBundledata, domain);
+		FragmentClasspath fragClasspath = new FragmentClasspath(fragEntries, defaultBundledata, domain);
 		insertFragment(fragClasspath);
 	}
 
@@ -136,10 +127,10 @@ public class DefaultClassLoader
 		// Find a place in the fragment list to insert this fragment.
 		int size = fragClasspaths.size();
 		long fragID = fragClasspath.bundledata.id;
-		for (int i=0; i<size; i++) {
-			long otherID = ((FragmentClasspath)fragClasspaths.elementAt(i)).bundledata.id;
+		for (int i = 0; i < size; i++) {
+			long otherID = ((FragmentClasspath) fragClasspaths.elementAt(i)).bundledata.id;
 			if (fragID < otherID) {
-				fragClasspaths.insertElementAt(fragClasspath,i);
+				fragClasspaths.insertElementAt(fragClasspath, i);
 				return;
 			}
 		}
@@ -154,57 +145,49 @@ public class DefaultClassLoader
 	 * @param domain The ProtectionDomain for the ClassPath entry.
 	 * @return The ClasspathEntry object for the ClassPath entry.
 	 */
-	protected ClasspathEntry getClasspath(String cp, DefaultBundleData bundledata, ProtectionDomain domain){
+	protected ClasspathEntry getClasspath(String cp, DefaultBundleData bundledata, ProtectionDomain domain) {
 		BundleFile bundlefile = null;
 		File file = bundledata.bundleFile.getFile(cp);
 		if (file != null && file.exists()) {
-			try
-			{
+			try {
 				bundlefile = BundleFile.createBundleFile(file, bundledata);
+			} catch (IOException e) {
+				bundledata.adaptor.getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, bundledata.getBundle(), e);
 			}
-			catch (IOException e)
-			{
-				bundledata.adaptor.getEventPublisher().publishFrameworkEvent(
-					FrameworkEvent.ERROR,bundledata.getBundle(),e);
-			}
-		}
-		else {
-			if (bundledata.bundleFile instanceof BundleFile.ZipBundleFile)
-			{
+		} else {
+			if (bundledata.bundleFile instanceof BundleFile.ZipBundleFile) {
 				// the classpath entry may be a directory in the bundle jar file.
 				Enumeration entries = bundledata.bundleFile.getEntryPaths(cp);
-				if (entries.hasMoreElements())
-				{
-					bundlefile = BundleFile.createBundleFile(
-							(BundleFile.ZipBundleFile)bundledata.bundleFile, cp);
+				if (entries.hasMoreElements()) {
+					bundlefile = BundleFile.createBundleFile((BundleFile.ZipBundleFile) bundledata.bundleFile, cp);
 				}
-			}			
+			}
 		}
 		if (bundlefile != null)
-			return new ClasspathEntry(bundlefile,domain);
+			return new ClasspathEntry(bundlefile, domain);
 		else
 			return null;
 	}
-	
+
 	protected synchronized Class findClass(String name) throws ClassNotFoundException {
 		Class result = findLoadedClass(name);
 		if (result != null)
 			return result;
-		for(int i=0; i<classpathEntries.length; i++) {
-			if (classpathEntries[i] != null){
-				result = findClassImpl(name,classpathEntries[i].bundlefile,classpathEntries[i].domain);
+		for (int i = 0; i < classpathEntries.length; i++) {
+			if (classpathEntries[i] != null) {
+				result = findClassImpl(name, classpathEntries[i].bundlefile, classpathEntries[i].domain);
 				if (result != null) {
 					return result;
 				}
 			}
 		}
 		// look in fragments.
-		if (fragClasspaths != null){
+		if (fragClasspaths != null) {
 			int size = fragClasspaths.size();
-			for (int i=0; i<size; i++) {
+			for (int i = 0; i < size; i++) {
 				FragmentClasspath fragCP = (FragmentClasspath) fragClasspaths.elementAt(i);
-				for (int j=0; j<fragCP.classpathEntries.length; j++) {
-					result = findClassImpl(name,fragCP.classpathEntries[j].bundlefile,fragCP.classpathEntries[j].domain);
+				for (int j = 0; j < fragCP.classpathEntries.length; j++) {
+					result = findClassImpl(name, fragCP.classpathEntries[j].bundlefile, fragCP.classpathEntries[j].domain);
 					if (result != null) {
 						return result;
 					}
@@ -223,75 +206,57 @@ public class DefaultClassLoader
 	 * it is found.
 	 * @return The loaded class object or null if the class is not found.
 	 */
-	protected Class findClassImpl(String name,BundleFile bundleFile,ProtectionDomain bundledomain){
-		if (Debug.DEBUG && Debug.DEBUG_LOADER)
-		{
-			Debug.println("BundleClassLoader["+hostdata+"].findClass("+name+")");
+	protected Class findClassImpl(String name, BundleFile bundleFile, ProtectionDomain bundledomain) {
+		if (Debug.DEBUG && Debug.DEBUG_LOADER) {
+			Debug.println("BundleClassLoader[" + hostdata + "].findClass(" + name + ")");
 		}
 
 		String filename = name.replace('.', '/').concat(".class");
 
 		BundleEntry entry = bundleFile.getEntry(filename);
 
-		if (entry == null)
-		{
+		if (entry == null) {
 			return null;
 		}
 
 		InputStream in;
-		try
-		{
+		try {
 			in = entry.getInputStream();
-		}
-		catch (IOException e)
-		{
+		} catch (IOException e) {
 			return null;
 		}
 
-		int length = (int)entry.getSize();
+		int length = (int) entry.getSize();
 		byte[] classbytes;
 		int bytesread = 0;
 		int readcount;
 
-		if (Debug.DEBUG && Debug.DEBUG_LOADER)
-		{
-			Debug.println("  about to read "+length+" bytes from "+filename);
+		if (Debug.DEBUG && Debug.DEBUG_LOADER) {
+			Debug.println("  about to read " + length + " bytes from " + filename);
 		}
 
-		try
-		{
-			try
-			{
-				if (length > 0)
-				{
+		try {
+			try {
+				if (length > 0) {
 					classbytes = new byte[length];
 
-					readloop:
-					for (; bytesread < length; bytesread += readcount)
-					{
-						readcount = in.read(classbytes, bytesread, length-bytesread);
+					readloop : for (; bytesread < length; bytesread += readcount) {
+						readcount = in.read(classbytes, bytesread, length - bytesread);
 
-						if (readcount <= 0) /* if we didn't read anything */
-						{
-							break readloop;         /* leave the loop */
+						if (readcount <= 0) /* if we didn't read anything */ {
+							break readloop; /* leave the loop */
 						}
 					}
-				}
-				else    /* BundleEntry does not know its own length! */
-				{
+				} else /* BundleEntry does not know its own length! */ {
 					length = buffersize;
 					classbytes = new byte[length];
 
-					readloop:
-					while (true)
-					{
-						for (; bytesread < length; bytesread += readcount)
-						{
-							readcount = in.read(classbytes, bytesread, length-bytesread);
+					readloop : while (true) {
+						for (; bytesread < length; bytesread += readcount) {
+							readcount = in.read(classbytes, bytesread, length - bytesread);
 
-							if (readcount <= 0) /* if we didn't read anything */
-							{
-								break readloop;         /* leave the loop */
+							if (readcount <= 0) /* if we didn't read anything */ {
+								break readloop; /* leave the loop */
 							}
 						}
 
@@ -301,43 +266,30 @@ public class DefaultClassLoader
 						System.arraycopy(oldbytes, 0, classbytes, 0, bytesread);
 					}
 				}
-			}
-			catch (IOException e)
-			{
-				if (Debug.DEBUG && Debug.DEBUG_LOADER)
-				{
-					Debug.println("  IOException reading "+filename+" from "+hostdata);
+			} catch (IOException e) {
+				if (Debug.DEBUG && Debug.DEBUG_LOADER) {
+					Debug.println("  IOException reading " + filename + " from " + hostdata);
 				}
 
 				return null;
 			}
-		}
-		finally
-		{
-			try
-			{
+		} finally {
+			try {
 				in.close();
-			}
-			catch (IOException ee)
-			{
+			} catch (IOException ee) {
 			}
 		}
 
-		if (Debug.DEBUG && Debug.DEBUG_LOADER)
-		{
-			Debug.println("  read "+bytesread+" bytes from "+filename);
-			Debug.println("  defining class "+name);
+		if (Debug.DEBUG && Debug.DEBUG_LOADER) {
+			Debug.println("  read " + bytesread + " bytes from " + filename);
+			Debug.println("  defining class " + name);
 		}
 
-		try
-		{
-			return(defineClass(name, classbytes, 0, bytesread, bundledomain));
-		}
-		catch (Error e)
-		{
-			if (Debug.DEBUG && Debug.DEBUG_LOADER)
-			{
-				Debug.println("  error defining class "+name);
+		try {
+			return (defineClass(name, classbytes, 0, bytesread, bundledomain));
+		} catch (Error e) {
+			if (Debug.DEBUG && Debug.DEBUG_LOADER) {
+				Debug.println("  error defining class " + name);
 			}
 
 			throw e;
@@ -349,21 +301,21 @@ public class DefaultClassLoader
 	 */
 	protected URL findResource(String name) {
 		URL result = null;
-		for(int i=0; i<classpathEntries.length; i++) {
-			if (classpathEntries[i] != null){
-				result = findResourceImpl(name,classpathEntries[i].bundlefile,i);
+		for (int i = 0; i < classpathEntries.length; i++) {
+			if (classpathEntries[i] != null) {
+				result = findResourceImpl(name, classpathEntries[i].bundlefile, i);
 				if (result != null) {
 					return result;
 				}
 			}
 		}
 		// look in fragments
-		if (fragClasspaths != null){
+		if (fragClasspaths != null) {
 			int size = fragClasspaths.size();
-			for (int i=0; i<size; i++) {
+			for (int i = 0; i < size; i++) {
 				FragmentClasspath fragCP = (FragmentClasspath) fragClasspaths.elementAt(i);
-				for (int j=0; j<fragCP.classpathEntries.length; j++) {
-					result = findResourceImpl(name,fragCP.classpathEntries[j].bundlefile,j);
+				for (int j = 0; j < fragCP.classpathEntries.length; j++) {
+					result = findResourceImpl(name, fragCP.classpathEntries[j].bundlefile, j);
 					if (result != null) {
 						return result;
 					}
@@ -380,8 +332,8 @@ public class DefaultClassLoader
 	 * @param cpEntry The ClassPath entry index of the BundleFile.
 	 * @return A URL to the resource or null if the resource does not exist.
 	 */
-	protected URL findResourceImpl(String name,BundleFile bundlefile,int cpEntry) {
-		return bundlefile.getURL(name,cpEntry);
+	protected URL findResourceImpl(String name, BundleFile bundlefile, int cpEntry) {
+		return bundlefile.getURL(name, cpEntry);
 	}
 
 	/**
@@ -389,28 +341,28 @@ public class DefaultClassLoader
 	 */
 	public Enumeration findLocalResources(String resource) {
 		Vector resources = new Vector(6);
-		for(int i=0; i<classpathEntries.length; i++) {
-			if (classpathEntries[i] != null){
-				URL url = findResourceImpl(resource,classpathEntries[i].bundlefile,i);
+		for (int i = 0; i < classpathEntries.length; i++) {
+			if (classpathEntries[i] != null) {
+				URL url = findResourceImpl(resource, classpathEntries[i].bundlefile, i);
 				if (url != null) {
 					resources.addElement(url);
 				}
 			}
 		}
 		// look in fragments
-		if (fragClasspaths != null){
+		if (fragClasspaths != null) {
 			int size = fragClasspaths.size();
-			for (int i=0; i<size; i++) {
+			for (int i = 0; i < size; i++) {
 				FragmentClasspath fragCP = (FragmentClasspath) fragClasspaths.elementAt(i);
-				for (int j=0; j<fragCP.classpathEntries.length; j++) {
-					URL url = findResourceImpl(resource,fragCP.classpathEntries[j].bundlefile,j);
+				for (int j = 0; j < fragCP.classpathEntries.length; j++) {
+					URL url = findResourceImpl(resource, fragCP.classpathEntries[j].bundlefile, j);
 					if (url != null) {
 						resources.addElement(url);
 					}
 				}
 			}
 		}
-		if (resources.size()>0){
+		if (resources.size() > 0) {
 			return resources.elements();
 		}
 		return null;
@@ -419,27 +371,23 @@ public class DefaultClassLoader
 	/**
 	 * Closes all the BundleFile objects for this BundleClassLoader.
 	 */
-	public void close(){
+	public void close() {
 		if (!closed) {
 			super.close();
-			for (int i=0; i<classpathEntries.length; i++) {
+			for (int i = 0; i < classpathEntries.length; i++) {
 				if (classpathEntries[i] != null) {
-					try
-					{
-						if (classpathEntries[i].bundlefile!=hostdata.bundleFile) {
+					try {
+						if (classpathEntries[i].bundlefile != hostdata.bundleFile) {
 							classpathEntries[i].bundlefile.close();
 						}
-					}
-					catch (IOException e)
-					{
-						hostdata.adaptor.getEventPublisher().publishFrameworkEvent(
-								FrameworkEvent.ERROR,hostdata.getBundle(),e);
+					} catch (IOException e) {
+						hostdata.adaptor.getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, hostdata.getBundle(), e);
 					}
 				}
 			}
 			if (fragClasspaths != null) {
 				int size = fragClasspaths.size();
-				for (int i=0; i<size; i++) {
+				for (int i = 0; i < size; i++) {
 					FragmentClasspath fragCP = (FragmentClasspath) fragClasspaths.elementAt(i);
 					fragCP.close();
 				}
@@ -452,11 +400,11 @@ public class DefaultClassLoader
 
 		// If not in dev mode then just add the regular classpath entries and return
 		if (System.getProperty("osgi.dev") == null) {
-			for (int i = 0; i < classpath.length; i++) 
-				findClassPathEntry(result, classpath[i],bundledata,domain);
-			return (ClasspathEntry[])result.toArray(new ClasspathEntry[result.size()]);
+			for (int i = 0; i < classpath.length; i++)
+				findClassPathEntry(result, classpath[i], bundledata, domain);
+			return (ClasspathEntry[]) result.toArray(new ClasspathEntry[result.size()]);
 		}
-		
+
 		// Otherwise, add the legacy entries for backwards compatibility and
 		// then for each classpath entry add the dev entries as spec'd in the 
 		// corresponding properties file.  If none are spec'd, add the 
@@ -465,51 +413,48 @@ public class DefaultClassLoader
 		for (int i = 0; i < classpath.length; i++) {
 			String[] devEntries = getDevEntries(classpath[i], bundledata);
 			if (devEntries != null && devEntries.length > 0) {
-				for (int j = 0; j < devEntries.length; j++) 
+				for (int j = 0; j < devEntries.length; j++)
 					findClassPathEntry(result, devEntries[j], bundledata, domain);
-			} else 
+			} else
 				findClassPathEntry(result, classpath[i], bundledata, domain);
 		}
-		return (ClasspathEntry[])result.toArray(new ClasspathEntry[result.size()]);
+		return (ClasspathEntry[]) result.toArray(new ClasspathEntry[result.size()]);
 	}
-	
+
 	protected void addDefaultDevEntries(ArrayList result, DefaultBundleData bundledata, ProtectionDomain domain) {
 		if (System.getProperty("osgi.dev") == null)
 			return;
 		String[] defaultDevEntries = bundledata.adaptor.devCP;
-		if (defaultDevEntries != null) 
-			for (int i = 0; i < defaultDevEntries.length; i++) 
+		if (defaultDevEntries != null)
+			for (int i = 0; i < defaultDevEntries.length; i++)
 				findClassPathEntry(result, defaultDevEntries[i], bundledata, domain);
 	}
 
 	protected void findClassPathEntry(ArrayList result, String entry, DefaultBundleData bundledata, ProtectionDomain domain) {
-		if (!addClassPathEntry(result,entry,bundledata,domain)) {
+		if (!addClassPathEntry(result, entry, bundledata, domain)) {
 			BundleException be = new BundleException(Msg.formatter.getString("BUNDLE_CLASSPATH_ENTRY_NOT_FOUND_EXCEPTION", entry));
-			bundledata.adaptor.getEventPublisher().publishFrameworkEvent(
-					FrameworkEvent.ERROR,bundledata.getBundle(),be);
+			bundledata.adaptor.getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, bundledata.getBundle(), be);
 		}
 	}
 
 	protected boolean addClassPathEntry(ArrayList result, String entry, DefaultBundleData bundledata, ProtectionDomain domain) {
 		if (entry.equals(".")) {
-			result.add(new ClasspathEntry(bundledata.bundleFile,domain));
+			result.add(new ClasspathEntry(bundledata.bundleFile, domain));
 			return true;
-		}
-		else {
+		} else {
 			Object element = getClasspath(entry, bundledata, domain);
-			if (element != null){
+			if (element != null) {
 				result.add(element);
 				return true;
-			}
-			else {
+			} else {
 				// need to check in fragments for the classpath entry.
 				// only check for fragments if the bundledata is the hostdata.
-				if (fragClasspaths != null && hostdata == bundledata){
+				if (fragClasspaths != null && hostdata == bundledata) {
 					int size = fragClasspaths.size();
 					for (int i = 0; i < size; i++) {
 						FragmentClasspath fragCP = (FragmentClasspath) fragClasspaths.elementAt(i);
-						element = getClasspath(entry,fragCP.bundledata,fragCP.domain);
-						if (element != null){
+						element = getClasspath(entry, fragCP.bundledata, fragCP.domain);
+						if (element != null) {
 							result.add(element);
 							return true;
 						}
@@ -519,11 +464,11 @@ public class DefaultClassLoader
 		}
 		return false;
 	}
-	
+
 	protected String[] getDevEntries(String classpathEntry, DefaultBundleData bundledata) {
 		Properties devProps = null;
 		File propLocation = bundledata.bundleFile.getFile(classpathEntry + ".properties");
-		if (propLocation == null) 
+		if (propLocation == null)
 			return null;
 		try {
 			InputStream in = new FileInputStream(propLocation);
@@ -570,23 +515,20 @@ public class DefaultClassLoader
 		/** The ProtectionDomain of the fragment */
 		protected ProtectionDomain domain;
 
-		protected FragmentClasspath(ClasspathEntry[] classpathEntries, DefaultBundleData bundledata, ProtectionDomain domain){
+		protected FragmentClasspath(ClasspathEntry[] classpathEntries, DefaultBundleData bundledata, ProtectionDomain domain) {
 			this.classpathEntries = classpathEntries;
 			this.bundledata = bundledata;
 			this.domain = domain;
 		}
-		
-		protected void close(){
-			for (int i=0; i<classpathEntries.length; i++) {
+
+		protected void close() {
+			for (int i = 0; i < classpathEntries.length; i++) {
 				try {
 					if (classpathEntries[i].bundlefile != bundledata.bundleFile) {
 						classpathEntries[i].bundlefile.close();
 					}
-				}
-				catch (IOException e)
-				{
-					bundledata.adaptor.getEventPublisher().publishFrameworkEvent(
-						FrameworkEvent.ERROR,bundledata.getBundle(),e);
+				} catch (IOException e) {
+					bundledata.adaptor.getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, bundledata.getBundle(), e);
 				}
 			}
 		}
@@ -595,7 +537,7 @@ public class DefaultClassLoader
 	protected class ClasspathEntry {
 		protected BundleFile bundlefile;
 		protected ProtectionDomain domain;
-		protected ClasspathEntry(BundleFile bundlefile, ProtectionDomain domain){
+		protected ClasspathEntry(BundleFile bundlefile, ProtectionDomain domain) {
 			this.bundlefile = bundlefile;
 			this.domain = domain;
 		}

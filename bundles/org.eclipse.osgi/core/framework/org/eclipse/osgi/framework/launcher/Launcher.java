@@ -12,10 +12,7 @@
 package org.eclipse.osgi.framework.launcher;
 
 import java.lang.reflect.Constructor;
-import java.util.Enumeration;
-import java.util.StringTokenizer;
-import java.util.Vector;
-
+import java.util.*;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.internal.core.OSGi;
 import org.eclipse.osgi.framework.util.Tokenizer;
@@ -79,7 +76,7 @@ import org.eclipse.osgi.framework.util.Tokenizer;
  * </ul>
  */
 public class Launcher {
-// :TODO Need to NLS enable this class.
+	// :TODO Need to NLS enable this class.
 
 	/** default console port */
 	protected String consolePort = "";
@@ -96,10 +93,10 @@ public class Launcher {
 
 	/** array of adaptor arguments to be passed to FrameworkAdaptor.initialize() */
 	String[] adaptorArgs = null;
-	
+
 	/** array of application arguments to be passed to Eclipse applications */
 	String[] applicationArgs = null;
-	
+
 	/* Components that can be installed and activated optionally. */
 	private static final String OSGI_CONSOLE_COMPONENT_NAME = "OSGi Console";
 	private static final String OSGI_CONSOLE_COMPONENT = "osgiconsole.jar";
@@ -119,7 +116,8 @@ public class Launcher {
 	/**
 	 *  Default constructor.  Nothing at all to do here.
 	 */
-	public Launcher() {}
+	public Launcher() {
+	}
 
 	/**
 	 *  Performs the actual launch based on the command line arguments
@@ -142,8 +140,7 @@ public class Launcher {
 		if (osgi != null) {
 			if (console) {
 				doConsole(osgi, consoleArgs);
-			}
-			else {
+			} else {
 				osgi.launch();
 			}
 		}
@@ -215,7 +212,7 @@ public class Launcher {
 					_application(command);
 					match = true;
 				}
-					
+
 				if (match == false) {
 					// if the command doesn't match any of the known commands, save it to pass
 					// to the console
@@ -273,8 +270,8 @@ public class Launcher {
 		tok.getChar(); // advance to next token
 		// and next token is either adaptor class name or ":" if we should use the default adaptor
 		String adp = tok.getToken(":");
-		if (adp.length() > 0){
-			adaptorClassName = adp; 
+		if (adp.length() > 0) {
+			adaptorClassName = adp;
 		}
 
 		// The following tokens are arguments to be processed by the adaptor implementation class.
@@ -300,41 +297,40 @@ public class Launcher {
 			}
 		}
 	}
-	
+
 	/**
 		 *  Remembers that the -application option has been requested.  Parses off the application parameters
 		 *  into a String []
 		 *
 		 * @param tok The rest of the -application parameter string that contains the application arguments
 		 */
-		protected void _application(String command) {
-			Tokenizer tok = new Tokenizer(command);
-			// first token is always "-adaptor"
-			String cmd = tok.getToken(":");
-			// following tokens are arguments to be processed by the adaptor implementation class
-			// they may be enclosed in quotes
-			// store them in a vector until we know how many there are
-			Vector v = new Vector();
-			parseloop : while (true) {
-				tok.getChar(); // advance to next token
-				String arg = tok.getString(":");
-				if (arg == null) {
-					break parseloop;
-				} else {
-					v.addElement(arg);
-				}
-			}
-			// now that we know how many args there are, move args from vector to String []
-			if (v != null) {
-				int numArgs = v.size();
-				applicationArgs = new String[numArgs];
-				Enumeration e = v.elements();
-				for (int i = 0; i < numArgs; i++) {
-					applicationArgs[i] = (String) e.nextElement();
-				}
+	protected void _application(String command) {
+		Tokenizer tok = new Tokenizer(command);
+		// first token is always "-adaptor"
+		String cmd = tok.getToken(":");
+		// following tokens are arguments to be processed by the adaptor implementation class
+		// they may be enclosed in quotes
+		// store them in a vector until we know how many there are
+		Vector v = new Vector();
+		parseloop : while (true) {
+			tok.getChar(); // advance to next token
+			String arg = tok.getString(":");
+			if (arg == null) {
+				break parseloop;
+			} else {
+				v.addElement(arg);
 			}
 		}
-
+		// now that we know how many args there are, move args from vector to String []
+		if (v != null) {
+			int numArgs = v.size();
+			applicationArgs = new String[numArgs];
+			Enumeration e = v.elements();
+			for (int i = 0; i < numArgs; i++) {
+				applicationArgs[i] = (String) e.nextElement();
+			}
+		}
+	}
 
 	/**
 	 *  Processes the -adaptor command line argument.
@@ -349,8 +345,7 @@ public class Launcher {
 		Class adaptorClass = Class.forName(adaptorClassName);
 		Class[] constructorArgs = new Class[] { String[].class };
 		Constructor constructor = adaptorClass.getConstructor(constructorArgs);
-		return (FrameworkAdaptor) constructor.newInstance(
-			new Object[] { adaptorArgs });
+		return (FrameworkAdaptor) constructor.newInstance(new Object[] { adaptorArgs });
 	}
 
 	/**
@@ -358,10 +353,9 @@ public class Launcher {
 	 * 
 	 */
 	protected void doApplication() {
-	// nothing to do right now - these are argumnents for eclipse applications
+		// nothing to do right now - these are argumnents for eclipse applications
 
 	}
-
 
 	/**
 	 * Creates the OSGi framework object.

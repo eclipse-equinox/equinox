@@ -18,13 +18,12 @@ import java.util.Hashtable;
  * An abstract subclass of PermissionCollection.
  *
  */
-abstract class BundlePermissionCollection extends PermissionCollection
-{
-    /**
-     * The Permission collection will unresolve the permissions in these packages.
-     *
-     * @param unresolvedPackages A list of the package which have been unresolved
-     * as a result of a packageRefresh
-     */
-    abstract void unresolvePermissions(Hashtable unresolvedPackages);
+abstract class BundlePermissionCollection extends PermissionCollection {
+	/**
+	 * The Permission collection will unresolve the permissions in these packages.
+	 *
+	 * @param unresolvedPackages A list of the package which have been unresolved
+	 * as a result of a packageRefresh
+	 */
+	abstract void unresolvePermissions(Hashtable unresolvedPackages);
 }
