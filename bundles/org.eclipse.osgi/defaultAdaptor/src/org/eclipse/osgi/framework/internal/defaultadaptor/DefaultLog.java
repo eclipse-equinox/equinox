@@ -114,7 +114,7 @@ public class DefaultLog implements FrameworkLog {
 				try {
 					writer.close();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
+					// we cannot log here; just print the stacktrace.
 					e.printStackTrace();
 				}
 				writer = null;

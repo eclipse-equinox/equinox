@@ -23,7 +23,6 @@ import org.eclipse.osgi.framework.internal.reliablefile.*;
  * Class to model permission data storage.
  */
 
-//TODO switch this class over to use MetaData instead of ReliableFile
 class DefaultPermissionStorage implements PermissionStorage {
 	/** Directory into which permission data files are stored. */
 	protected File permissionDir;
