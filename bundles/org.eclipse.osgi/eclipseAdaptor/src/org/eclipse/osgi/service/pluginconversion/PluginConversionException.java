@@ -14,7 +14,7 @@ package org.eclipse.osgi.service.pluginconversion;
 /**
  * Custom exception for errors that can happen during plugin conversion.
  */
-public class PluginConversionException extends Exception {
+public class PluginConversionException extends RuntimeException {
 	/**
 	 * Nested exception.
 	 */
