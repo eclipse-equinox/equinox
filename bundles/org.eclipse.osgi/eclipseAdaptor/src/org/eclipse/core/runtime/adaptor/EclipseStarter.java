@@ -304,7 +304,7 @@ public class EclipseStarter {
 			}
 	
 			// look for the console with no port.  
-			if (args[i].equalsIgnoreCase(CONSOLE)) {
+			if (args[i].equalsIgnoreCase(CONSOLE) && ((i + 1 == args.length) || ((i + 1 < args.length) && (args[i + 1].startsWith("-"))))) { //$NON-NLS-1$
 				console = true;
 				found = true;
 				continue;
