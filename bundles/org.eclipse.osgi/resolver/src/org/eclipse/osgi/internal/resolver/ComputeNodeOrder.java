@@ -12,7 +12,6 @@
 package org.eclipse.osgi.internal.resolver;
 
 import java.util.*;
-import org.eclipse.core.runtime.adaptor.BundleStopper;
 
 /**
  * Borrowed from org.eclipse.core.internal.resources.ComputeProjectOrder 
@@ -20,7 +19,7 @@ import org.eclipse.core.runtime.adaptor.BundleStopper;
  * Implementation of a sort algorithm for computing the node order. This
  * algorithm handles cycles in the node reference graph in a reasonable way.
  * 
- * @see BundleStopper#stopBundles
+ * @see org.eclipse.core.runtime.adaptor.BundleStopper#stopBundles
  * @since 3.0
  */
 public class ComputeNodeOrder {
