@@ -12,7 +12,6 @@ package org.eclipse.osgi.framework.stats;
 
 import java.io.*;
 import java.util.*;
-import org.eclipse.core.runtime.adaptor.EclipseAdaptor;
 import org.eclipse.osgi.framework.adaptor.BundleWatcher;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.debug.DebugOptions;
@@ -21,8 +20,9 @@ import org.osgi.framework.Bundle;
 public class StatsManager implements BundleWatcher {
 	// This connect plugins and their info, and so allows to access the info without running through
 	// the plugin registry. This map only contains activated plugins. The key is the plugin Id
-	private Map plugins = new HashMap(20);
-	private Stack activationStack = new Stack(); // a stack of the plugins being activated
+	private Hashtable plugins = new Hashtable(20);
+	private Map activationStacks = new HashMap(5);
+//	private Stack activationStack = new Stack(); // a stack of the plugins being activated
 	private static boolean booting = true; // the state of the platform. This value is changed by the InternalPlatform itself.
 
 	private static StatsManager defaultInstance;
@@ -113,6 +113,12 @@ public class StatsManager implements BundleWatcher {
 		plugin.setActivationOrder(plugins.size());
 		plugin.setDuringStartup(booting);
 
+		Stack activationStack = (Stack) activationStacks.get(Thread.currentThread());
+		if (activationStack==null) {
+			activationStack = new Stack();
+			activationStacks.put(Thread.currentThread(), activationStack);
+		}
+			
 		// set the parentage of activation
 		if (activationStack.size() != 0) {
 			BundleStats activatedBy = (BundleStats) activationStack.peek();
@@ -127,6 +133,7 @@ public class StatsManager implements BundleWatcher {
 	}
 
 	public void endActivation(Bundle pluginId) {
+		Stack activationStack = (Stack) activationStacks.get(Thread.currentThread());
 		// should be called from a synchronized location to protect against concurrent updates
 		BundleStats plugin = (BundleStats) activationStack.pop();
 		plugin.endActivation();
@@ -139,6 +146,7 @@ public class StatsManager implements BundleWatcher {
 				long startPosition = ClassloaderStats.traceFile.length();
 				output.println("Activating plugin: " + id); //$NON-NLS-1$
 				output.println("Plugin activation stack:"); //$NON-NLS-1$
+				Stack activationStack = (Stack) activationStacks.get(Thread.currentThread());
 				for (int i = activationStack.size() - 1; i >= 0; i--)
 					output.println("\t" + ((BundleStats) activationStack.get(i)).getPluginId()); //$NON-NLS-1$
 				output.println("Class loading stack:"); //$NON-NLS-1$
