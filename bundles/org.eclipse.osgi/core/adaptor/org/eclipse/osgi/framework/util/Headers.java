@@ -293,7 +293,7 @@ public class Headers extends Dictionary
     				throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_LINE_EXCEPTION", line));
     			}
     			header = line.substring(0, colon).trim();
-    			value.append(line.substring(colon+1).trim());
+    			value.append(line.substring(colon+1));
     			firstLine = false;
     		}
     		return headers;
