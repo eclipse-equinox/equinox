@@ -28,9 +28,12 @@ public class LocationManager {
 
 	public static final String PROP_INSTALL_AREA = "osgi.install.area"; //$NON-NLS-1$
 	public static final String PROP_CONFIG_AREA = "osgi.configuration.area"; //$NON-NLS-1$
+	public static final String PROP_CONFIG_AREA_DEFAULT = "osgi.configuration.area.default"; //$NON-NLS-1$
 	public static final String PROP_SHARED_CONFIG_AREA = "osgi.sharedConfiguration.area"; //$NON-NLS-1$
 	public static final String PROP_INSTANCE_AREA = "osgi.instance.area"; //$NON-NLS-1$
+	public static final String PROP_INSTANCE_AREA_DEFAULT = "osgi.instance.area.default"; //$NON-NLS-1$
 	public static final String PROP_USER_AREA = "osgi.user.area"; //$NON-NLS-1$
+	public static final String PROP_USER_AREA_DEFAULT = "osgi.user.area.default"; //$NON-NLS-1$
 	public static final String PROP_MANIFEST_CACHE = "osgi.manifest.cache"; //$NON-NLS-1$
 	public static final String PROP_USER_HOME = "user.home"; //$NON-NLS-1$
 	public static final String PROP_USER_DIR = "user.dir"; //$NON-NLS-1$
@@ -103,16 +106,25 @@ public class LocationManager {
 	}
 
 	public static void initializeLocations() {
-		URL defaultLocation = buildURL(System.getProperty(PROP_USER_HOME), true);
-		userLocation = buildLocation(PROP_USER_AREA, defaultLocation, "user", false); //$NON-NLS-1$
+		Location temp = buildLocation(PROP_USER_AREA_DEFAULT, null, "", false); //$NON-NLS-1$
+		URL defaultLocation = temp == null ? null : temp.getURL();
+		if (defaultLocation == null)
+			defaultLocation = buildURL(new File(System.getProperty(PROP_USER_HOME), "user").getAbsolutePath(), true); //$NON-NLS-1$
+		userLocation = buildLocation(PROP_USER_AREA, defaultLocation, "", false); //$NON-NLS-1$
 
-		defaultLocation = buildURL(new File(System.getProperty(PROP_USER_DIR), "workspace").getAbsolutePath(), true); //$NON-NLS-1$
-		instanceLocation = buildLocation(PROP_INSTANCE_AREA, defaultLocation, "workspace", false); //$NON-NLS-1$
+		temp = buildLocation(PROP_INSTANCE_AREA_DEFAULT, null, "", false); //$NON-NLS-1$
+		defaultLocation = temp == null ? null : temp.getURL();
+		if (defaultLocation == null)
+			defaultLocation = buildURL(new File(System.getProperty(PROP_USER_DIR), "workspace").getAbsolutePath(), true); //$NON-NLS-1$
+		instanceLocation = buildLocation(PROP_INSTANCE_AREA, defaultLocation, "", false); //$NON-NLS-1$
 
 		mungeConfigurationLocation();
 		// compute a default but it is very unlikely to be used since main will have computed everything
-		defaultLocation = buildURL(computeDefaultConfigurationLocation(), true);
-		configurationLocation = buildLocation(PROP_CONFIG_AREA, defaultLocation, CONFIG_DIR, false);
+		temp = buildLocation(PROP_CONFIG_AREA_DEFAULT, null, "", false); //$NON-NLS-1$
+		defaultLocation = temp == null ? null : temp.getURL();
+		if (defaultLocation == null)
+			defaultLocation = buildURL(computeDefaultConfigurationLocation(), true);
+		configurationLocation = buildLocation(PROP_CONFIG_AREA, defaultLocation, "", false); //$NON-NLS-1$
 		// get the parent location based on the system property. This will have been set on the 
 		// way in either by the caller/user or by main.  There will be no parent location if we are not 
 		// cascaded.
@@ -140,10 +152,13 @@ public class LocationManager {
 		else if (location.equalsIgnoreCase(NO_DEFAULT))
 			result = new BasicLocation(property, null, readOnly);
 		else {
-			if (location.equalsIgnoreCase(USER_HOME))
-				location = computeDefaultUserAreaLocation(userDefaultAppendage);
-			if (location.equalsIgnoreCase(USER_DIR))
-				location = new File(System.getProperty(PROP_USER_DIR), userDefaultAppendage).getAbsolutePath();
+			if (location.startsWith(USER_HOME)) {
+				String base = substituteVar(location, USER_HOME, PROP_USER_HOME);
+				location = new File(base, userDefaultAppendage).getAbsolutePath();
+			} else if (location.startsWith(USER_DIR)) {
+				String base = substituteVar(location, USER_DIR, PROP_USER_DIR);
+				location = new File(base, userDefaultAppendage).getAbsolutePath();
+			}
 			URL url = buildURL(location, true);
 			if (url != null) {
 				result = new BasicLocation(property, null, readOnly);
@@ -151,6 +166,11 @@ public class LocationManager {
 			}
 		}
 		return result;
+	}
+
+	private static String substituteVar(String source, String var, String prop) {
+		String value = System.getProperty(prop, "");
+		return value + source.substring(var.length());
 	}
 
 	private static void initializeDerivedConfigurationLocations() {
