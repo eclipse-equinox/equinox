@@ -174,7 +174,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 		initialBundleStartLevel = value;
 	}
 
-	public BundleWatcher getBundleStats() {
+	public BundleWatcher getBundleWatcher() {
 		return null;
 	}
 

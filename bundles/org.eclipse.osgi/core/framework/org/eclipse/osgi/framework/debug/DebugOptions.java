@@ -47,6 +47,10 @@ public class DebugOptions implements org.eclipse.osgi.service.debug.DebugOptions
 		return options != null ? options.getProperty(option) : null;
 	}
 
+	public String getOption(String option, String defaultValue) {
+		return options != null ? options.getProperty(option, defaultValue) : defaultValue;
+	}
+
 	public int getIntegerOption(String option, int defaultValue) {
 		String value = getOption(option);
 		try {

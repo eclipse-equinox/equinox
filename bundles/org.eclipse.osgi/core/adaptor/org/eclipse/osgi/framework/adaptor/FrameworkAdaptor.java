@@ -264,10 +264,10 @@ public interface FrameworkAdaptor {
 	public BundleData createSystemBundleData() throws BundleException;
 
 	/**
-	 * Returns the IBundleStats for this FrameworkAdaptor.
-	 * @return the IBundleStats for this FrameworkAdaptor.
+	 * Returns the bundle watcher for this FrameworkAdaptor.
+	 * @return the bundle watcher for this FrameworkAdaptor.
 	 */
-	public BundleWatcher getBundleStats();
+	public BundleWatcher getBundleWatcher();
 
 	/**
 	 * Returns the PlatformAdmin for this FrameworkAdaptor.

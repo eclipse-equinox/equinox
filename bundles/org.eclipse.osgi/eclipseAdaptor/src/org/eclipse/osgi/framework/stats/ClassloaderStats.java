@@ -40,58 +40,54 @@ public class ClassloaderStats {
 	private static Map loaders = Collections.synchronizedMap(new HashMap(20));
 	public static File traceFile;
 
-	private static boolean TRACE_PLUGINS = true; //TODO make a debug option
-	private static boolean TRACE_CLASSES = true; //TODO make a debug option
-	private static String TRACE_FILENAME = "c:/trace"; //TODO make a debug option
-	private static String TRACE_FILTERS = "c:/traceFilters"; //TODO make a debug option
-
 	static {
-		if (TRACE_CLASSES || TRACE_PLUGINS)
+		if (StatsManager.TRACE_CLASSES || StatsManager.TRACE_BUNDLES)
 			initializeTraceOptions();
 	}
 
 	private static void initializeTraceOptions() {
 		// create the trace file
-		String filename = TRACE_FILENAME = "c:/trace";
+		String filename = StatsManager.TRACE_FILENAME;
 		traceFile = new File(filename);
 		traceFile.delete();
 
 		//load the filters
-		if (!TRACE_CLASSES)
+		if (!StatsManager.TRACE_CLASSES)
 			return;
-		//		filename = TRACE_FILTERS;
-		//		if (filename.length() == 0)
-		//			return;
-		//		try {
-		//			File filterFile = new File(filename);
-		////			if (!filterFile.isAbsolute())
-		////				filterFile = new File(InternalBootLoader.getBootDir() + filename);
-		//			System.out.print("Runtime tracing elements defined in: " + filterFile.getAbsolutePath() + "..."); //$NON-NLS-1$ //$NON-NLS-2$
-		//			InputStream input = new FileInputStream(filterFile);
-		//			System.out.println("  Loaded."); //$NON-NLS-1$
-		//			Properties filters = new Properties() {
-		//				public Object put(Object key, Object value) {
-		//					addFilters((String) key, (String) value);
-		//					return null;
-		//				}
-		//			};
-		//			try {
-		//				filters.load(input);
-		//			} finally {
-		//				input.close();
-		//			}
-		//		} catch (IOException e) {
-		//			System.out.println("  No trace filters loaded."); //$NON-NLS-1$
-		//		}
+		filename = StatsManager.TRACE_FILTERS;
+		if (filename == null || filename.length() == 0)
+			return;
+		try {
+			File filterFile = new File(filename);
+			//			if (!filterFile.isAbsolute())
+			//				filterFile = new File(InternalBootLoader.getBootDir() + filename);
+			System.out.print("Runtime tracing elements defined in: " + filterFile.getAbsolutePath() + "..."); //$NON-NLS-1$ //$NON-NLS-2$
+			InputStream input = new FileInputStream(filterFile);
+			System.out.println("  Loaded."); //$NON-NLS-1$
+			Properties filters = new Properties() {
+				public Object put(Object key, Object value) {
+					addFilters((String) key, (String) value);
+					return null;
+				}
+			};
+			try {
+				filters.load(input);
+			} finally {
+				input.close();
+			}
+		} catch (IOException e) {
+			System.out.println("  No trace filters loaded."); //$NON-NLS-1$
+		}
 	}
 
-	//	protected static void addFilters(String key, String value) {
-	//		String[] filters = DelegatingURLClassLoader.getArrayFromList(value);
-	//		if ("plugins".equals(key)) //$NON-NLS-1$
-	//			pluginFilters.addAll(Arrays.asList(filters));
-	//		if ("packages".equals(key)) //$NON-NLS-1$
-	//			packageFilters.addAll(Arrays.asList(filters));
-	//	}
+	protected static void addFilters(String key, String value) {
+		String[] filters = StatsManager.getArrayFromList(value);
+		if ("plugins".equals(key)) //$NON-NLS-1$
+			pluginFilters.addAll(Arrays.asList(filters));
+		if ("packages".equals(key)) //$NON-NLS-1$
+			packageFilters.addAll(Arrays.asList(filters));
+	}
+
 	public static void startLoadingClass(String id, String className) {
 		findLoader(id).startLoadClass(className);
 	}
@@ -136,8 +132,6 @@ public class ClassloaderStats {
 	}
 
 	public void addBaseClasses(String[] baseClasses) {
-		//		if (!id.equals(BootLoader.PI_BOOT))
-		//			return;
 		for (int i = 0; i < baseClasses.length; i++) {
 			String name = baseClasses[i];
 			if (classes.get(name) == null) {

@@ -25,12 +25,13 @@ import org.eclipse.osgi.framework.internal.core.Msg;
 import org.eclipse.osgi.framework.internal.defaultadaptor.DefaultClassLoader;
 import org.eclipse.osgi.framework.internal.defaultadaptor.DevClassPathHelper;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
+import org.eclipse.osgi.framework.stats.*;
 import org.eclipse.osgi.framework.stats.ClassloaderStats;
 import org.eclipse.osgi.framework.stats.ResourceBundleStats;
 import org.osgi.framework.*;
 
 public class EclipseClassLoader extends DefaultClassLoader {
-	private static String[] NL_JAR_VARIANTS = buildNLJarVariants(System.getProperties().getProperty("osgi.nl")); //$NON-NLS-1$
+	private static String[] NL_JAR_VARIANTS = buildNLJarVariants(EnvironmentInfo.getDefault().getNL());
 	private static boolean DEFINE_PACKAGES;
 	static {
 		try {
@@ -46,7 +47,7 @@ public class EclipseClassLoader extends DefaultClassLoader {
 	}
 
 	public Class findLocalClass(String name) throws ClassNotFoundException {
-		if (EclipseAdaptor.MONITOR_CLASSES) //Suport for performance analysis
+		if (StatsManager.MONITOR_CLASSES) //Suport for performance analysis
 			ClassloaderStats.startLoadingClass(getClassloaderId(), name);
 		boolean found = true;
 
@@ -77,7 +78,7 @@ public class EclipseClassLoader extends DefaultClassLoader {
 				//If it's another thread, we wait and try again. In any case the class is returned. The difference is that an exception can be logged.
 				if (!bundle.testStateChanging(Thread.currentThread())) {
 					Thread threadChangingState = bundle.getStateChanging();
-					if (EclipseAdaptor.TRACE_BUNDLES && threadChangingState != null) {
+					if (StatsManager.TRACE_BUNDLES && threadChangingState != null) {
 						System.out.println("Concurrent startup of bundle " + bundle.getSymbolicName() + " by " + Thread.currentThread() + " and " + threadChangingState.getName() + ". Waiting up to 5000ms for " + threadChangingState + " to finish the initialization."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 					}
 					Object lock = bundle.getStateChangeLock();
@@ -119,7 +120,7 @@ public class EclipseClassLoader extends DefaultClassLoader {
 			found = false;
 			throw e;
 		} finally {
-			if (EclipseAdaptor.MONITOR_CLASSES)
+			if (StatsManager.MONITOR_CLASSES)
 				ClassloaderStats.endLoadingClass(getClassloaderId(), name, found);
 		}
 	}
@@ -209,9 +210,9 @@ public class EclipseClassLoader extends DefaultClassLoader {
 		return hostdata.getBundle().getSymbolicName();
 	}
 
-	public URL getResouce(String name) {
+	public URL getResource(String name) {
 		URL result = super.getResource(name);
-		if (EclipseAdaptor.MONITOR_RESOURCE_BUNDLES) {
+		if (StatsManager.MONITOR_RESOURCES) {
 			if (result != null && name.endsWith(".properties")) { //$NON-NLS-1$
 				ClassloaderStats.loadedBundle(getClassloaderId(), new ResourceBundleStats(getClassloaderId(), name, result));
 			}
@@ -226,11 +227,11 @@ public class EclipseClassLoader extends DefaultClassLoader {
 			return;
 		}
 		if (var.equals("ws")) { //$NON-NLS-1$
-			super.findClassPathEntry(result, "ws/" + System.getProperties().getProperty("osgi.ws") + entry.substring(4), bundledata, domain); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			super.findClassPathEntry(result, "ws/" + EnvironmentInfo.getDefault().getWS() + entry.substring(4), bundledata, domain); //$NON-NLS-1$
 			return;
 		}
 		if (var.equals("os")) { //$NON-NLS-1$
-			super.findClassPathEntry(result, "os/" + System.getProperties().getProperty("osgi.os") + entry.substring(4), bundledata, domain); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			super.findClassPathEntry(result, "os/" + EnvironmentInfo.getDefault().getOS() + entry.substring(4), bundledata, domain); //$NON-NLS-1$ 
 			return;
 		}
 		if (var.equals("nl")) { //$NON-NLS-1$

@@ -34,16 +34,10 @@ public class ClassStats {
 	private long traceStart = -1;
 	private long traceEnd = -1;
 
-	static private boolean booting = true; // whether or not the platform is starting up.
-
-	public static void setBooting(boolean value) {
-		booting = value;
-	}
-
 	public ClassStats(String name, ClassloaderStats classloader) {
 		className = name;
 		timestamp = System.currentTimeMillis();
-		duringStartup = booting;
+		duringStartup = StatsManager.isBooting();
 		this.classloader = classloader;
 	}
 

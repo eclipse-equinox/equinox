@@ -11,7 +11,6 @@
 package org.eclipse.osgi.framework.stats;
 
 import java.util.ArrayList;
-import org.eclipse.core.runtime.adaptor.EclipseAdaptor;
 
 /**
  * Contains information about activated bundles and acts as the main 
@@ -34,22 +33,9 @@ public class BundleStats {
 	private ArrayList pluginsActivated = new ArrayList(3); // TODO create lazily
 	private BundleStats activatedBy = null;
 
-	//	static {
-	//		// activate the boot plugin manually since we do not control the classloader
-	////		activateBootPlugin();
-	//	}
-
-	// hard code the starting of the boot plugin as it does not go through the normal sequence
-	//	private static void activateBootPlugin() {
-	//		BundleStats plugin = findPlugin(BootLoader.PI_BOOT);
-	//		plugin.setTimestamp(System.currentTimeMillis());
-	//		plugin.setActivationOrder(plugins.size());
-	//	}
-
 	// Get the pluginInfo if available, or create it.
 	public BundleStats(String pluginId) {
 		this.pluginId = pluginId;
-		//		duringStartup = booting;
 	}
 
 	public long getTimestamp() {
@@ -85,14 +71,14 @@ public class BundleStats {
 	}
 
 	public int getClassLoadCount() {
-		if (!EclipseAdaptor.MONITOR_CLASSES)
+		if (!StatsManager.MONITOR_CLASSES)
 			return 0;
 		ClassloaderStats loader = ClassloaderStats.getLoader(pluginId);
 		return loader == null ? 0 : loader.getClassLoadCount();
 	}
 
 	public long getClassLoadTime() {
-		if (!EclipseAdaptor.MONITOR_CLASSES)
+		if (!StatsManager.MONITOR_CLASSES)
 			return 0;
 		ClassloaderStats loader = ClassloaderStats.getLoader(pluginId);
 		return loader == null ? 0 : loader.getClassLoadTime();
@@ -122,8 +108,8 @@ public class BundleStats {
 		traceStart = time;
 	}
 
-	protected static void setBooting(boolean boot) {
-		//		booting = boot;
+	protected void setDuringStartup(boolean value) {
+		duringStartup = value;
 	}
 
 	protected void endActivation() {

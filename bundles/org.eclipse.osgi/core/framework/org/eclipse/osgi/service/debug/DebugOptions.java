@@ -11,9 +11,11 @@
 package org.eclipse.osgi.service.debug;
 
 public interface DebugOptions {
-	public abstract boolean getBooleanOption(String option, boolean defaultValue);
+	public boolean getBooleanOption(String option, boolean defaultValue);
 
 	public abstract String getOption(String option);
+
+	public abstract String getOption(String option, String defaultValue);
 
 	public abstract int getIntegerOption(String option, int defaultValue);
 

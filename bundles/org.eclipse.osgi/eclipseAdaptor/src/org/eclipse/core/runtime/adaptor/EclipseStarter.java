@@ -18,6 +18,7 @@ import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.internal.core.OSGi;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
+import org.eclipse.osgi.framework.stats.StatsManager;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.service.runnable.ParameterizedRunnable;
@@ -305,11 +306,17 @@ public class EclipseStarter {
 			}
 	}
 
-	private static void publishSplashScreen(Runnable endSplashHandler) {
+	private static void publishSplashScreen(final Runnable endSplashHandler) {
 		// InternalPlatform now how to retrieve this later
 		Dictionary properties = new Hashtable();
 		properties.put("name", "splashscreen");
-		context.registerService(Runnable.class.getName(), endSplashHandler, properties);
+		Runnable handler = new Runnable() {
+			public void run() {
+				StatsManager.doneBooting();
+				endSplashHandler.run();
+			}
+		};
+		context.registerService(Runnable.class.getName(), handler, properties);
 	}
 
 	private static String searchForBundle(String name, String parent) throws MalformedURLException {

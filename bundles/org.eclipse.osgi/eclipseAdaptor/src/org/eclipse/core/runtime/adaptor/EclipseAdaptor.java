@@ -35,22 +35,9 @@ import org.osgi.framework.*;
 public class EclipseAdaptor extends DefaultAdaptor {
 	public static final String PROP_CLEAN = "osgi.clean"; //$NON-NLS-1$
 	static final String F_LOG = ".log"; //$NON-NLS-1$
-	public static boolean MONITOR_CLASSES = false;
-	public static boolean MONITOR_RESOURCE_BUNDLES = false;
-	public static String TRACE_FILENAME = "runtime.traces"; //$NON-NLS-1$
-	public static String TRACE_FILTERS = "trace.properties"; //$NON-NLS-1$
-	public static boolean TRACE_CLASSES = false;
-	public static boolean TRACE_BUNDLES = false;
+	
 	public static final String FRAMEWORK_SYMBOLICNAME = "org.eclipse.osgi"; //$NON-NLS-1$
-
-	//Option names for spies
 	private static final String RUNTIME_ADAPTOR = FRAMEWORK_SYMBOLICNAME + "/eclipseadaptor"; //$NON-NLS-1$
-	private static final String OPTION_MONITOR_CLASSES = RUNTIME_ADAPTOR + "/monitor/classes"; //$NON-NLS-1$
-	private static final String OPTION_MONITOR_RESOURCEBUNDLES = RUNTIME_ADAPTOR + "/monitor/resourcebundles"; //$NON-NLS-1$
-	private static final String OPTION_TRACE_BUNDLES = RUNTIME_ADAPTOR + "/trace/bundleActivation"; //$NON-NLS-1$
-	private static final String OPTION_TRACE_CLASSES = RUNTIME_ADAPTOR + "/trace/classLoading"; //$NON-NLS-1$
-	private static final String OPTION_TRACE_FILENAME = RUNTIME_ADAPTOR + "/trace/filename"; //$NON-NLS-1$
-	private static final String OPTION_TRACE_FILTERS = RUNTIME_ADAPTOR + "/trace/filters"; //$NON-NLS-1$
 	private static final String OPTION_STATE_READER = RUNTIME_ADAPTOR + "/state/reader";//$NON-NLS-1$
 	private static final String OPTION_RESOLVER = RUNTIME_ADAPTOR + "/resolver/timing"; //$NON-NLS-1$
 	private static final String OPTION_PLATFORM_ADMIN = RUNTIME_ADAPTOR + "/debug/platformadmin"; //$NON-NLS-1$
@@ -241,12 +228,6 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		// may be null if debugging is not enabled
 		if (options == null)
 			return;
-		MONITOR_CLASSES = options.getBooleanOption(OPTION_MONITOR_CLASSES, false);
-		MONITOR_RESOURCE_BUNDLES = options.getBooleanOption(OPTION_MONITOR_RESOURCEBUNDLES, false);
-		TRACE_CLASSES = options.getBooleanOption(OPTION_TRACE_CLASSES, false);
-		TRACE_BUNDLES = options.getBooleanOption(OPTION_TRACE_BUNDLES, false);
-		TRACE_FILENAME = options.getOption(OPTION_TRACE_FILENAME);
-		TRACE_FILTERS = options.getOption(OPTION_TRACE_FILTERS);
 		StateManager.DEBUG = options != null;
 		StateManager.DEBUG_READER = options.getBooleanOption(OPTION_RESOLVER_READER, false);
 		StateManager.MONITOR_PLATFORM_ADMIN = options.getBooleanOption(OPTION_MONITOR_PLATFORM_ADMIN, false);
@@ -492,7 +473,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		}
 	}
 
-	public BundleWatcher getBundleStats() {
+	public BundleWatcher getBundleWatcher() {
 		return StatsManager.getDefault();
 	}
 

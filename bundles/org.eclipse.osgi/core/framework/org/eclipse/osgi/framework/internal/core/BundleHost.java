@@ -388,8 +388,8 @@ public class BundleHost extends AbstractBundle {
 			}
 
 			//STARTUP TIMING Start here
-			if (Debug.DEBUG && Debug.DEBUG_MONITOR_BUNDLES) {
-				BundleWatcher bundleStats = framework.adaptor.getBundleStats();
+			if (Debug.DEBUG && Debug.MONITOR_ACTIVATION) {
+				BundleWatcher bundleStats = framework.adaptor.getBundleWatcher();
 				if (bundleStats != null)
 					bundleStats.startActivation(this);
 			}
@@ -440,8 +440,8 @@ public class BundleHost extends AbstractBundle {
 					}
 				}
 			} finally {
-				if (Debug.DEBUG && Debug.DEBUG_MONITOR_BUNDLES) {
-					BundleWatcher bundleStats = framework.adaptor.getBundleStats();
+				if (Debug.DEBUG && Debug.MONITOR_ACTIVATION) {
+					BundleWatcher bundleStats = framework.adaptor.getBundleWatcher();
 					if (bundleStats != null)
 						bundleStats.endActivation(this);
 				}

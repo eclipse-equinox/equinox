@@ -28,10 +28,9 @@ public class Debug {
 	public static boolean DEBUG_STARTLEVEL = false; // "debug.startlevel"
 	public static boolean DEBUG_PACKAGEADMIN = false; // "debug.packageadmin"
 	public static boolean DEBUG_PACKAGEADMIN_TIMING = false; //"debug.packageadmin/timing"
-	public static boolean DEBUG_MONITOR_BUNDLES = false; // "debug.monitorbundles"
+	public static boolean MONITOR_ACTIVATION = false; // "monitor/bundles"
 
 	public static final String ECLIPSE_OSGI = "org.eclipse.osgi"; //$NON-NLS-1$
-
 	public static final String OPTION_DEBUG_GENERAL = ECLIPSE_OSGI + "/debug"; //$NON-NLS-1$
 	public static final String OPTION_DEBUG_BUNDLE_TIME = ECLIPSE_OSGI + "/debug/bundleTime"; //$NON-NLS-1$
 	public static final String OPTION_DEBUG_LOADER = ECLIPSE_OSGI + "/debug/loader"; //$NON-NLS-1$
@@ -44,7 +43,7 @@ public class Debug {
 	public static final String OPTION_DEBUG_STARTLEVEL = ECLIPSE_OSGI + "/debug/startlevel"; //$NON-NLS-1$
 	public static final String OPTION_DEBUG_PACKAGEADMIN = ECLIPSE_OSGI + "/debug/packageadmin"; //$NON-NLS-1$
 	public static final String OPTION_DEBUG_PACKAGEADMIN_TIMING = ECLIPSE_OSGI + "/debug/packageadmin/timing"; //$NON-NLS-1$
-	public static final String OPTION_DEBUG_MONITOR_BUNDLES = ECLIPSE_OSGI + "/debug/monitorbundles"; //$NON-NLS-1$
+	public static final String OPTION_MONITOR_ACTIVATION = ECLIPSE_OSGI + "/monitor/activation"; //$NON-NLS-1$
 
 	static {
 		DebugOptions dbgOptions = DebugOptions.getDefault();
@@ -61,7 +60,7 @@ public class Debug {
 			DEBUG_STARTLEVEL = dbgOptions.getBooleanOption(OPTION_DEBUG_STARTLEVEL, false);
 			DEBUG_PACKAGEADMIN = dbgOptions.getBooleanOption(OPTION_DEBUG_PACKAGEADMIN, false);
 			DEBUG_PACKAGEADMIN_TIMING = dbgOptions.getBooleanOption(OPTION_DEBUG_PACKAGEADMIN_TIMING, false) || dbgOptions.getBooleanOption("org.eclipse.core.runtime/debug", false); //$NON-NLS-1$
-			DEBUG_MONITOR_BUNDLES = dbgOptions.getBooleanOption(OPTION_DEBUG_MONITOR_BUNDLES, false);
+			MONITOR_ACTIVATION = dbgOptions.getBooleanOption(OPTION_MONITOR_ACTIVATION, false);
 		}
 	}
 	public static PrintStream out = System.out;
