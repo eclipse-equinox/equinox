@@ -204,10 +204,12 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 	 */
 	protected void readAdaptorManifest() {
 		InputStream in = getClass().getResourceAsStream(ADAPTOR_MANIFEST);
-		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-			if (in == null) {
+		if (in == null) {
+			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 				Debug.println("Unable to find adaptor bundle manifest " + ADAPTOR_MANIFEST);
 			}
+			manifest = new Headers(new Properties());
+			return;
 		}
 		try {
 			manifest = Headers.parseManifest(in);
