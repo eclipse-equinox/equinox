@@ -299,7 +299,7 @@ public class PluginConverterImpl implements PluginConverter {
 		boolean containsFile = false;
 		for (int i = 0; i < files.length; i++) {
 			if (!isValidPackageName(files[i].getName()))
-				break;
+				continue;
 
 			if (files[i].isDirectory())
 				exportedPaths.addAll(getExportsFromDir(files[i], prefix + files[i].getName()));
@@ -328,7 +328,7 @@ public class PluginConverterImpl implements PluginConverter {
 			String name = entry.getName();
 
 			if (!isValidPackageName(name))
-				break;
+				continue;
 
 			int lastSlash = name.lastIndexOf("/"); //$NON-NLS-1$
 			//Ignore folders that do not contain files
@@ -367,7 +367,7 @@ public class PluginConverterImpl implements PluginConverter {
 	}
 
 	private boolean isValidPackageName(String name) {
-		if (name.indexOf(' ') > 0 || name.equalsIgnoreCase("meta-inf")) //$NON-NLS-1$
+		if (name.indexOf(' ') > 0 || name.equalsIgnoreCase("META-INF") || name.startsWith("META-INF/")) //$NON-NLS-1$ //$NON-NLS-2$
 			return false;
 		return true;
 	}
