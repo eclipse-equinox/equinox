@@ -21,4 +21,5 @@ org.eclipse.osgi/eclipseadaptor/debug = false
 
 org.eclipse.osgi/eclipseadaptor/debug/platformadmin=false
 org.eclipse.osgi/eclipseadaptor/debug/platformadmin/resolver=false
+org.eclipse.osgi/eclipseadaptor/converter/debug = false
 

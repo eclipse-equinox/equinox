@@ -41,7 +41,6 @@ public class EclipseAdaptor extends DefaultAdaptor {
 	public static String TRACE_FILTERS = "trace.properties"; //$NON-NLS-1$
 	public static boolean TRACE_CLASSES = false;
 	public static boolean TRACE_BUNDLES = false;
-
 	public static final String FRAMEWORK_SYMBOLICNAME = "org.eclipse.osgi"; //$NON-NLS-1$
 
 	//Option names for spies
@@ -58,6 +57,8 @@ public class EclipseAdaptor extends DefaultAdaptor {
 	private static final String OPTION_PLATFORM_ADMIN_RESOLVER = RUNTIME_ADAPTOR + "/debug/platformadmin/resolver"; //$NON-NLS-1$
 	private static final String OPTION_MONITOR_PLATFORM_ADMIN = RUNTIME_ADAPTOR + "/resolver/timing"; //$NON-NLS-1$
 	private static final String OPTION_RESOLVER_READER = RUNTIME_ADAPTOR + "/resolver/reader/timing"; //$NON-NLS-1$
+	private static final String OPTION_CONVERTER = RUNTIME_ADAPTOR + "/converter/debug"; //$NON-NLS-1$
+	
 	public static final byte BUNDLEDATA_VERSION = 9;
 	public static final byte NULL = 0;
 	public static final byte OBJECT = 1;
@@ -251,6 +252,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		StateManager.MONITOR_PLATFORM_ADMIN = options.getBooleanOption(OPTION_MONITOR_PLATFORM_ADMIN, false);
 		StateManager.DEBUG_PLATFORM_ADMIN = options.getBooleanOption(OPTION_PLATFORM_ADMIN, false);
 		StateManager.DEBUG_PLATFORM_ADMIN_RESOLVER = options.getBooleanOption(OPTION_PLATFORM_ADMIN_RESOLVER, false);
+		PluginConverterImpl.DEBUG = options.getBooleanOption(OPTION_CONVERTER, false); 
 	}
 
 	private void registerEndorsedXMLParser() {

@@ -16,6 +16,7 @@ import java.net.URL;
 import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.internal.defaultadaptor.DevClassPathHelper;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
@@ -26,6 +27,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 
 public class PluginConverterImpl implements PluginConverter {
+	public static boolean DEBUG = false;
 	private static final String SEMICOLON = "; "; //$NON-NLS-1$
 	private static final String UTF_8 = "UTF-8"; //$NON-NLS-1$
 	private static final String LIST_SEPARATOR = ",\n "; //$NON-NLS-1$
@@ -628,6 +630,8 @@ public class PluginConverterImpl implements PluginConverter {
 	}
 
 	public synchronized Dictionary convertManifest(File pluginBaseLocation, boolean compatibility, String target) throws PluginConversionException {
+		if (DEBUG)
+			System.out.println("Convert " + pluginBaseLocation); //$NON-NLS-1$
 		init();
 		this.target = target;
 		fillPluginInfo(pluginBaseLocation);
@@ -636,6 +640,8 @@ public class PluginConverterImpl implements PluginConverter {
 	}
 
 	public synchronized File convertManifest(File pluginBaseLocation, File bundleManifestLocation, boolean compatibilityManifest, String target) throws PluginConversionException {
+		if (DEBUG)
+			System.out.println("Convert " + pluginBaseLocation); //$NON-NLS-1$
 		init();
 		this.target = target;
 		fillPluginInfo(pluginBaseLocation);
