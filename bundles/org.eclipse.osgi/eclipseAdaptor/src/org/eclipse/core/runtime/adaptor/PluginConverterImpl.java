@@ -25,6 +25,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 
 public class PluginConverterImpl implements PluginConverter {
+	private static final String UTF_8 = "UTF-8";
 	private BundleContext context;
 	private BufferedWriter out;
 	private IPluginInfo pluginInfo;
@@ -237,7 +238,8 @@ public class PluginConverterImpl implements PluginConverter {
 			}
 			// replaces any eventual existing file
 			manifestToWrite = new Hashtable((Map)manifestToWrite);
-			out = new BufferedWriter(new FileWriter(generationLocation));
+			// MANIFEST.MF files must be written using UTF-8
+			out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(generationLocation), UTF_8));
 			writeEntry(MANIFEST_VERSION, (String) manifestToWrite.remove(MANIFEST_VERSION));
 			writeEntry(GENERATED_FROM, (String) manifestToWrite.remove(GENERATED_FROM)); //Need to do this first uptoDate check expect the generated-from tag to be in the first line
 			writeEntry(Constants.BUNDLE_NAME, (String) manifestToWrite.remove(Constants.BUNDLE_NAME));
