@@ -41,4 +41,6 @@ public interface IPluginInfo {
 	public String getProviderName();
 
 	public boolean isSingleton();
+	
+	String validateForm();
 }

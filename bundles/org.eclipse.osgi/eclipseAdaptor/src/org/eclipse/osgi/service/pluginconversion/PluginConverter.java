@@ -31,7 +31,7 @@ public interface PluginConverter {
 	 *	@return the generated manifest file location, if a bundle manifest was successfully 
 	 * generated (or already existed), <code>null</code> otherwise.
 	 */
-	public File convertManifest(File pluginBaseLocation, File bundleManifestLocation, boolean compatibilityManifest, String target);
+	public File convertManifest(File pluginBaseLocation, File bundleManifestLocation, boolean compatibilityManifest, String target) throws PluginConversionException;
 
 	/**
 	 * Converts a plug-in/fragment manifest at the given source base location (a directory) and 
@@ -45,7 +45,7 @@ public interface PluginConverter {
 	 *	@return the generated manifest as a dictionary,  if a bundle manifest was successfully 
 	 * generated, <code>null</code> otherwise
 	 */
-	public Dictionary convertManifest(File pluginBaseLocation, boolean compatibility, String target);
+	public Dictionary convertManifest(File pluginBaseLocation, boolean compatibility, String target) throws PluginConversionException;
 
 	/** 
 	 * Write the dictionary into the specified location. 
@@ -53,6 +53,7 @@ public interface PluginConverter {
 	 * @param manifestToWrite the dictionary to write into generationLocation file 
 	 * @param compatibilityManifest a boolean indicating if the file should contain headers to run with
 	 * in  backward compatibility
+	 * @throws PluginConversionException if an error occurs while writing the given manifest
 	 */
-	public void writeManifest(File generationLocation, Dictionary manifestToWrite, boolean compatibilityManifest) throws Exception;
+	public void writeManifest(File generationLocation, Dictionary manifestToWrite, boolean compatibilityManifest) throws PluginConversionException;
 }

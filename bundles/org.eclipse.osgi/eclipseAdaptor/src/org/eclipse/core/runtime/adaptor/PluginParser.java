@@ -45,10 +45,11 @@ public class PluginParser extends DefaultHandler implements IModel {
 		private Set filters;
 		private String pluginName;
 		private boolean singleton;
+		private boolean fragment;
 		private static final String TARGET21 = "2.1"; //$NON-NLS-1$
 
 		public boolean isFragment() {
-			return masterPluginId != null;
+			return fragment;
 		}
 
 		public String toString() {
@@ -135,6 +136,22 @@ public class PluginParser extends DefaultHandler implements IModel {
 		public boolean isSingleton() {
 			return singleton;
 		}
+		public String getRoot() {
+			return isFragment() ? FRAGMENT : PLUGIN;
+		}
+		public String validateForm() {
+			if (this.pluginId == null)
+				return EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONVERTER_MISSING_PLUGIN_ATTRIBUTE", getRoot(), PLUGIN_ID);
+			if (this.pluginName == null)
+				return EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONVERTER_MISSING_PLUGIN_ATTRIBUTE", getRoot(), PLUGIN_NAME);
+			if (this.version == null)
+				return EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONVERTER_MISSING_PLUGIN_ATTRIBUTE", getRoot(), PLUGIN_VERSION);
+			if (isFragment() && this.masterPluginId == null)
+				return EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONVERTER_MISSING_PLUGIN_ATTRIBUTE", getRoot(), FRAGMENT_PLUGIN_ID);
+			if (isFragment() && this.masterVersion == null)
+				return EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONVERTER_MISSING_PLUGIN_ATTRIBUTE", getRoot(), FRAGMENT_PLUGIN_VERSION);			
+			return null;
+		}		
 	}
 
 	// Current State Information
@@ -263,8 +280,9 @@ public class PluginParser extends DefaultHandler implements IModel {
 			stateStack.push(new Integer(PLUGIN_STATE));
 			parsePluginAttributes(attributes);
 		} else if (elementName.equals(FRAGMENT)) {
+			manifestInfo.fragment = true;
 			stateStack.push(new Integer(FRAGMENT_STATE));
-			parseFragmentAttributes(attributes);
+			parseFragmentAttributes(attributes);			
 		} else {
 			stateStack.push(new Integer(IGNORED_ELEMENT_STATE));
 			internalError(elementName);

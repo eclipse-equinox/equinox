@@ -19,6 +19,7 @@ import java.util.jar.JarFile;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.internal.defaultadaptor.DevClassPathHelper;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
+import org.eclipse.osgi.service.pluginconversion.PluginConversionException;
 import org.eclipse.osgi.service.pluginconversion.PluginConverter;
 import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.BundleContext;
@@ -74,42 +75,17 @@ public class PluginConverterImpl implements PluginConverter {
 		target = null;
 	}
 
-	private void fillPluginInfo(File pluginBaseLocation) {
+	private void fillPluginInfo(File pluginBaseLocation) throws PluginConversionException {
 		pluginManifestLocation = pluginBaseLocation;
 		if (pluginManifestLocation == null)
 			return;
 		URL pluginFile = findPluginManifest(pluginBaseLocation);
 		if (pluginFile == null)
 			return;
-		try {
-			pluginInfo = parsePluginInfo(pluginFile);
-		} catch (PluginConversionException e) {
-			FrameworkLogEntry entry = new FrameworkLogEntry(EclipseAdaptorConstants.PI_ECLIPSE_OSGI, e.getMessage(), 0, e, null);
-			EclipseAdaptor.getDefault().getFrameworkLog().log(entry);
-		}
-	}
-
-	public synchronized File convertManifest(File pluginBaseLocation, File bundleManifestLocation, boolean compatibilityManifest, String target) {
-		init();
-		this.target = target;
-		fillPluginInfo(pluginBaseLocation);
-		if (pluginInfo == null)
-			return null;
-		if (bundleManifestLocation == null) {
-			String cacheLocation = (String) System.getProperties().get("osgi.manifest.cache"); //$NON-NLS-1$
-			bundleManifestLocation = new File(cacheLocation, pluginInfo.getUniqueId() + '_' + pluginInfo.getVersion() + ".MF"); //$NON-NLS-1$
-		}
-		try {
-			fillManifest(compatibilityManifest);
-			if (upToDate(bundleManifestLocation, pluginManifestLocation, manifestType))
-				return bundleManifestLocation;
-			writeManifest(bundleManifestLocation, generatedManifest, compatibilityManifest);
-		} catch (PluginConversionException e) {
-			FrameworkLogEntry entry = new FrameworkLogEntry(EclipseAdaptorConstants.PI_ECLIPSE_OSGI, e.getMessage(), 0, e, null);
-			EclipseAdaptor.getDefault().getFrameworkLog().log(entry);
-			return null;
-		}
-		return bundleManifestLocation;
+		pluginInfo = parsePluginInfo(pluginFile);
+		String validation = pluginInfo.validateForm();
+		if (validation != null)
+			throw new PluginConversionException(validation);
 	}
 
 	private Set filterExport(Collection exportToFilter, Collection filter) {
@@ -240,7 +216,7 @@ public class PluginConverterImpl implements PluginConverter {
 				throw new PluginConversionException(message);
 			}
 			// replaces any eventual existing file
-			manifestToWrite = new Hashtable((Map)manifestToWrite);
+			manifestToWrite = new Hashtable((Map) manifestToWrite);
 			// MANIFEST.MF files must be written using UTF-8
 			out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(generationLocation), UTF_8));
 			writeEntry(MANIFEST_VERSION, (String) manifestToWrite.remove(MANIFEST_VERSION));
@@ -404,11 +380,11 @@ public class PluginConverterImpl implements PluginConverter {
 		Map libs = pluginInfo.getLibraries();
 		if (libs == null)
 			return null;
-	
+
 		//If we are in dev mode, then add the binary folders on the list libs with the export clause set to be the cumulation of the export clause of the real libs   
 		if (DevClassPathHelper.inDevelopmentMode()) {
 			String[] devClassPath = DevClassPathHelper.getDevClassPath(pluginInfo.getUniqueId());
-			
+
 			// collect export clauses
 			List allExportClauses = new ArrayList(libs.size());
 			Set libEntries = libs.entrySet();
@@ -421,7 +397,7 @@ public class PluginConverterImpl implements PluginConverter {
 					libs.put(devClassPath[i], allExportClauses);
 			}
 		}
-		
+
 		Set result = new HashSet(7);
 		Set libEntries = libs.entrySet();
 		for (Iterator iter = libEntries.iterator(); iter.hasNext();) {
@@ -650,31 +626,27 @@ public class PluginConverterImpl implements PluginConverter {
 		return result.toString();
 	}
 
-	public class PluginConversionException extends Exception {
-		public PluginConversionException() {
-			super();
-		}
-
-		public PluginConversionException(String message) {
-			super(message);
-		}
-
-		public PluginConversionException(String message, Throwable cause) {
-			super(message, cause);
-		}
-
-		public PluginConversionException(Throwable cause) {
-			super(cause);
-		}
-	}
-
-	public synchronized Dictionary convertManifest(File pluginBaseLocation, boolean compatibility, String target) {
+	public synchronized Dictionary convertManifest(File pluginBaseLocation, boolean compatibility, String target) throws PluginConversionException {
 		init();
 		this.target = target;
 		fillPluginInfo(pluginBaseLocation);
-		if (pluginInfo == null)
-			return null;
 		fillManifest(compatibility);
 		return generatedManifest;
 	}
+
+	public synchronized File convertManifest(File pluginBaseLocation, File bundleManifestLocation, boolean compatibilityManifest, String target) throws PluginConversionException {
+		init();
+		this.target = target;
+		fillPluginInfo(pluginBaseLocation);
+		if (bundleManifestLocation == null) {
+			String cacheLocation = (String) System.getProperties().get("osgi.manifest.cache"); //$NON-NLS-1$
+			bundleManifestLocation = new File(cacheLocation, pluginInfo.getUniqueId() + '_' + pluginInfo.getVersion() + ".MF"); //$NON-NLS-1$
+		}
+		fillManifest(compatibilityManifest);
+		if (upToDate(bundleManifestLocation, pluginManifestLocation, manifestType))
+			return bundleManifestLocation;
+		writeManifest(bundleManifestLocation, generatedManifest, compatibilityManifest);
+		return bundleManifestLocation;
+	}
+
 }
