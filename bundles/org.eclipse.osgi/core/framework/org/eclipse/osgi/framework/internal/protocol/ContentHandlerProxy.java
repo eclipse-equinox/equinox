@@ -31,6 +31,7 @@ public class ContentHandlerProxy extends ContentHandler implements ServiceTracke
 
 	protected ContentHandler realHandler;
 
+	//TODO avoid type-based names
 	protected ServiceTracker contentHandlerServiceTracker;
 
 	protected BundleContext context;
@@ -120,6 +121,7 @@ public class ContentHandlerProxy extends ContentHandler implements ServiceTracke
 	public void removedService(ServiceReference reference, Object service) {
 		//check to see if our URLStreamHandler was unregistered.  If so, look 
 		//for a lower ranking URLHandler
+		//TODO invert test and return quickly, to reduce indentation
 		if (reference == contentHandlerServiceReference) {
 			//this should get us the highest ranking service left, if available
 			ServiceReference newReference = contentHandlerServiceTracker.getServiceReference();
@@ -144,7 +146,6 @@ public class ContentHandlerProxy extends ContentHandler implements ServiceTracke
 
 	private int getRank(ServiceReference reference) {
 		Object property = reference.getProperty(Constants.SERVICE_RANKING);
-
 		return (property instanceof Integer) ? ((Integer) property).intValue() : 0;
 	}
 

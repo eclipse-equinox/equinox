@@ -47,9 +47,11 @@ public class ContentHandlerFactory implements java.net.ContentHandlerFactory {
 	/**
 	 * @see java.net.ContentHandlerFactory#createContentHandler(String)
 	 */
+	//TODO method is too long... consider reducing indentation (returning quickly) and moving complex steps to private methods
 	public ContentHandler createContentHandler(String contentType) {
 		//first, we check to see if there exists a built in content handler for
 		//this content type.  we can not overwrite built in ContentHandlers
+		//TODO use constant for property name
 		String builtInHandlers = System.getProperty("java.content.handler.pkgs");
 		Class clazz = null;
 		if (builtInHandlers != null) {
