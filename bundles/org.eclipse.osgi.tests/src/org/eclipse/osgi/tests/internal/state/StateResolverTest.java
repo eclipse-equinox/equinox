@@ -175,7 +175,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertContains("2.4", dependent, state.getBundle(6));
 	}
 	// temporarily disabled
-	public void _testLinkageChange() throws BundleException {
+	public void testLinkageChange() throws BundleException {
 		State state = buildEmptyState();
 		// don't add b1 for now
 		String B1_LOCATION = "org.eclipse.b1";
@@ -225,7 +225,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertFullyResolved("10.3", b3);
 	}
 	// temporarily disabled
-	public void _testReinstall() throws BundleException {
+	public void testReinstall() throws BundleException {
 		State state = buildComplexState();
 		StateDelta delta = state.resolve();
 		// remove bundle 4 - should cause 6 to be unresolved
