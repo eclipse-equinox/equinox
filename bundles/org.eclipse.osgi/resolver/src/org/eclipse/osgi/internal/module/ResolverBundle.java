@@ -381,13 +381,21 @@ public class ResolverBundle implements VersionSupplier {
 		if (isFragment())
 			return new ResolverExport[0]; // cannot attach to fragments;
 
+		ImportPackageSpecification[] newImports = fragment.getBundle().getImportPackages();
+		BundleSpecification[] newRequires = fragment.getBundle().getRequiredBundles();
+		ExportPackageDescription[] newExports = fragment.getBundle().getExportPackages();
+
+		if (newImports.length > 0 || newRequires.length > 0 || newExports.length > 0) {
+			if (isResolved())
+				return new ResolverExport[0];
+		}
+
 		initFragments();
 		if (fragments.contains(fragment))
 			return new ResolverExport[0];
 		fragments.add(fragment);
 		fragment.getHost().addMatchingBundle(this);
 
-		ImportPackageSpecification[] newImports = fragment.getBundle().getImportPackages();
 		if (newImports.length > 0) {
 			ArrayList hostImports = new ArrayList(newImports.length);
 			for (int i = 0; i < newImports.length; i++)
@@ -396,7 +404,6 @@ public class ResolverBundle implements VersionSupplier {
 			fragmentImports.put(fragment.bundleID, hostImports);
 		}
 
-		BundleSpecification[] newRequires = fragment.getBundle().getRequiredBundles();
 		if (newRequires.length > 0) {
 			ArrayList hostRequires = new ArrayList(newRequires.length);
 			for (int i = 0; i < newRequires.length; i++)
@@ -405,7 +412,6 @@ public class ResolverBundle implements VersionSupplier {
 			fragmentRequires.put(fragment.bundleID, hostRequires);
 		}
 
-		ExportPackageDescription[] newExports = fragment.getBundle().getExportPackages();
 		ArrayList hostExports = new ArrayList(newExports.length);
 		if (newExports.length > 0 && addExports) {
 			StateObjectFactory factory = bundle.getContainingState().getFactory();
