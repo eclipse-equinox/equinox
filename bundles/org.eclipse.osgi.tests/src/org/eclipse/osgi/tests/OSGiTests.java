@@ -10,30 +10,28 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests;
 
-import org.eclipse.core.runtime.Plugin;
+import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
-public class OSGiTestsPlugin extends Plugin {
-	public static final String TEST_FILES_ROOT = "test_files/";	
-	
-	private static OSGiTestsPlugin plugin;
+public class OSGiTests implements BundleActivator {
+	public static final String TEST_FILES_ROOT = "test_files/";
+
+	private static OSGiTests instance;
 	private BundleContext context;
 
-	public OSGiTestsPlugin() {
-		super();
-		plugin = this;
+	public OSGiTests() {
+		instance = this;
 	}
 
 	public void start(BundleContext context) throws Exception {
-		super.start(context);
 		this.context = context;
 	}
 
 	public void stop(BundleContext context) throws Exception {
-		context = null;
+		this.context = null;
 	}
 
 	public static BundleContext getContext() {
-		return plugin != null ? plugin.context : null;
+		return instance != null ? instance.context : null;
 	}
 }

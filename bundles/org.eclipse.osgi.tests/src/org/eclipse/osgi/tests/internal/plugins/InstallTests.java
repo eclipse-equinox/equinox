@@ -13,7 +13,7 @@ package org.eclipse.osgi.tests.internal.plugins;
 import java.io.IOException;
 import junit.framework.TestCase;
 import org.eclipse.core.tests.harness.BundleTestingHelper;
-import org.eclipse.osgi.tests.OSGiTestsPlugin;
+import org.eclipse.osgi.tests.OSGiTests;
 import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.*;
 import org.osgi.service.packageadmin.PackageAdmin;
@@ -30,7 +30,7 @@ public class InstallTests extends TestCase {
 	public InstallTests(String name) {
 		super(name);
 	}
-	
+
 	protected void setUp() throws Exception {
 		super.setUp();
 	}
@@ -38,7 +38,7 @@ public class InstallTests extends TestCase {
 	public void testInstallInvalidManifest() throws BundleException, IOException {
 		Bundle installed = null;
 		try {
-			installed = BundleTestingHelper.installBundle(OSGiTestsPlugin.getContext(), OSGiTestsPlugin.TEST_FILES_ROOT + "internal/plugins/installTests/bundle03");
+			installed = BundleTestingHelper.installBundle(OSGiTests.getContext(), OSGiTests.TEST_FILES_ROOT + "internal/plugins/installTests/bundle03");
 			// should have failed with BundleException
 			fail("1.0");
 		} catch (BundleException be) {
@@ -52,7 +52,7 @@ public class InstallTests extends TestCase {
 
 	public void testInstallLocationWithSpaces() throws BundleException, IOException {
 		Bundle installed = null;
-		installed = BundleTestingHelper.installBundle(OSGiTestsPlugin.getContext(), OSGiTestsPlugin.TEST_FILES_ROOT + "internal/plugins/installTests/bundle 01");
+		installed = BundleTestingHelper.installBundle(OSGiTests.getContext(), OSGiTests.TEST_FILES_ROOT + "internal/plugins/installTests/bundle 01");
 		try {
 			assertEquals("1.0", "bundle01", installed.getSymbolicName());
 			assertEquals("1.1", Bundle.INSTALLED, installed.getState());
@@ -64,7 +64,7 @@ public class InstallTests extends TestCase {
 
 	public void testInstallLocationWithUnderscores() throws BundleException, IOException {
 		Bundle installed = null;
-		installed = BundleTestingHelper.installBundle(OSGiTestsPlugin.getContext(), OSGiTestsPlugin.TEST_FILES_ROOT + "internal/plugins/installTests/bundle02_1.0.0");
+		installed = BundleTestingHelper.installBundle(OSGiTests.getContext(), OSGiTests.TEST_FILES_ROOT + "internal/plugins/installTests/bundle02_1.0.0");
 		try {
 			assertEquals("1.0", "bundle02", installed.getSymbolicName());
 			assertEquals("1.1", Bundle.INSTALLED, installed.getState());
@@ -78,7 +78,7 @@ public class InstallTests extends TestCase {
 	/** Ensures we see a bundle with only a extension point as a singleton */
 	public void testInstallBundleWithExtensionPointOnly() throws BundleException, IOException {
 		Bundle installed = null;
-		installed = BundleTestingHelper.installBundle(OSGiTestsPlugin.getContext(), OSGiTestsPlugin.TEST_FILES_ROOT + "internal/plugins/installTests/bundle04");
+		installed = BundleTestingHelper.installBundle(OSGiTests.getContext(), OSGiTests.TEST_FILES_ROOT + "internal/plugins/installTests/bundle04");
 		try {
 			assertEquals("1.0", "bundle04", installed.getSymbolicName());
 			assertEquals("1.1", Bundle.INSTALLED, installed.getState());
@@ -98,7 +98,7 @@ public class InstallTests extends TestCase {
 	/** Ensures we see a bundle with only a extension as a singleton */
 	public void testInstallBundleWithExtensionOnly() throws BundleException, IOException {
 		Bundle installed = null;
-		installed = BundleTestingHelper.installBundle(OSGiTestsPlugin.getContext(), OSGiTestsPlugin.TEST_FILES_ROOT + "internal/plugins/installTests/bundle05");
+		installed = BundleTestingHelper.installBundle(OSGiTests.getContext(), OSGiTests.TEST_FILES_ROOT + "internal/plugins/installTests/bundle05");
 		try {
 			assertEquals("1.0", "bundle05", installed.getSymbolicName());
 			assertEquals("1.1", Bundle.INSTALLED, installed.getState());
@@ -118,7 +118,7 @@ public class InstallTests extends TestCase {
 	/** Ensures we see a bundle with only extension and extension point as a singleton */
 	public void testInstallBundleWithExtensionAndExtensionPoint() throws BundleException, IOException {
 		Bundle installed = null;
-		installed = BundleTestingHelper.installBundle(OSGiTestsPlugin.getContext(), OSGiTestsPlugin.TEST_FILES_ROOT + "internal/plugins/installTests/bundle06");
+		installed = BundleTestingHelper.installBundle(OSGiTests.getContext(), OSGiTests.TEST_FILES_ROOT + "internal/plugins/installTests/bundle06");
 		try {
 			assertEquals("1.0", "bundle06", installed.getSymbolicName());
 			assertEquals("1.1", Bundle.INSTALLED, installed.getState());
@@ -137,13 +137,13 @@ public class InstallTests extends TestCase {
 
 	/** Ensures two versions of a non-singleton bundle are accepted */
 	public void testInstall2NonSingletonBundles() throws BundleException, IOException {
-		Bundle installed1 = org.eclipse.core.tests.harness.BundleTestingHelper.installBundle(OSGiTestsPlugin.getContext(), OSGiTestsPlugin.TEST_FILES_ROOT + "internal/plugins/installTests/bundle07");
-		ServiceReference packageAdminSR = OSGiTestsPlugin.getContext().getServiceReference(PackageAdmin.class.getName());
-		PackageAdmin packageAdmin = (PackageAdmin) OSGiTestsPlugin.getContext().getService(packageAdminSR);
+		Bundle installed1 = org.eclipse.core.tests.harness.BundleTestingHelper.installBundle(OSGiTests.getContext(), OSGiTests.TEST_FILES_ROOT + "internal/plugins/installTests/bundle07");
+		ServiceReference packageAdminSR = OSGiTests.getContext().getServiceReference(PackageAdmin.class.getName());
+		PackageAdmin packageAdmin = (PackageAdmin) OSGiTests.getContext().getService(packageAdminSR);
 		packageAdmin.resolveBundles(null);
-		Bundle installed2 = BundleTestingHelper.installBundle(OSGiTestsPlugin.getContext(), OSGiTestsPlugin.TEST_FILES_ROOT + "internal/plugins/installTests/bundle07b");
+		Bundle installed2 = BundleTestingHelper.installBundle(OSGiTests.getContext(), OSGiTests.TEST_FILES_ROOT + "internal/plugins/installTests/bundle07b");
 		packageAdmin.resolveBundles(null);
-		OSGiTestsPlugin.getContext().ungetService(packageAdminSR);
+		OSGiTests.getContext().ungetService(packageAdminSR);
 		try {
 			assertEquals("1.0", "bundle07", installed2.getSymbolicName());
 			assertEquals("1.1", Bundle.RESOLVED, installed2.getState());
@@ -160,13 +160,13 @@ public class InstallTests extends TestCase {
 
 	/** Ensures two versions of a singleton bundle are accepted */
 	public void testInstall2SingletonBundles() throws BundleException, IOException {
-		Bundle installed1 = BundleTestingHelper.installBundle(OSGiTestsPlugin.getContext(), OSGiTestsPlugin.TEST_FILES_ROOT + "internal/plugins/installTests/bundle08");
-		ServiceReference packageAdminSR = OSGiTestsPlugin.getContext().getServiceReference(PackageAdmin.class.getName());
-		PackageAdmin packageAdmin = (PackageAdmin) OSGiTestsPlugin.getContext().getService(packageAdminSR);
+		Bundle installed1 = BundleTestingHelper.installBundle(OSGiTests.getContext(), OSGiTests.TEST_FILES_ROOT + "internal/plugins/installTests/bundle08");
+		ServiceReference packageAdminSR = OSGiTests.getContext().getServiceReference(PackageAdmin.class.getName());
+		PackageAdmin packageAdmin = (PackageAdmin) OSGiTests.getContext().getService(packageAdminSR);
 		packageAdmin.resolveBundles(null);
-		Bundle installed2 = BundleTestingHelper.installBundle(OSGiTestsPlugin.getContext(), OSGiTestsPlugin.TEST_FILES_ROOT + "internal/plugins/installTests/bundle08b");
+		Bundle installed2 = BundleTestingHelper.installBundle(OSGiTests.getContext(), OSGiTests.TEST_FILES_ROOT + "internal/plugins/installTests/bundle08b");
 		packageAdmin.resolveBundles(null);
-		OSGiTestsPlugin.getContext().ungetService(packageAdminSR);
+		OSGiTests.getContext().ungetService(packageAdminSR);
 		try {
 			assertEquals("1.0", "bundle08", installed1.getSymbolicName());
 			assertEquals("1.1", Bundle.RESOLVED, installed1.getState());
