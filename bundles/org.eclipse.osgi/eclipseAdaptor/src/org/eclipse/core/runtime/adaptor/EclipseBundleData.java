@@ -22,6 +22,9 @@ import org.eclipse.osgi.service.resolver.Version;
 import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.BundleException;
 
+
+//TODO This class does not override save(). 
+//Maybe for consistency should it be overriden to do nothing. See also EclipseAdaptor.saveMetadataFor(BundleData)
 public class EclipseBundleData extends DefaultBundleData {
 	static final byte MANIFEST_TYPE_UNKNOWN  = 0x00;
 	static final byte MANIFEST_TYPE_BUNDLE   = 0x01;
@@ -35,7 +38,7 @@ public class EclipseBundleData extends DefaultBundleData {
 	private long manifestTimeStamp = 0;
 	private byte manifestType = MANIFEST_TYPE_UNKNOWN;
 	
-		// URL protocol designations
+	// URL protocol designations
 	public static final String PROTOCOL = "platform"; //$NON-NLS-1$
 	public static final String FILE = "file"; //$NON-NLS-1$
 
@@ -135,6 +138,7 @@ public class EclipseBundleData extends DefaultBundleData {
 		return null;
 	}
 
+	//TODO Unused method
 	private URL[] getSearchURLs(URL target) {
 		return new URL[] { target };
 	}

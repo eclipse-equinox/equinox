@@ -25,6 +25,8 @@ import org.osgi.framework.*;
  * is destroyed when a bundle is uninstalled and reused if a bundle is updated.
  * This class is abstract and is extended by BundleHost and BundleFragment.
  */
+
+//TODO All the methods that do the test if (id == 0) should loose this test and be defined in SystemBundle to directly return true.
 public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, KeyedElement {
 	/** The Framework this bundle is part of */
 	protected Framework framework;
@@ -33,11 +35,11 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 	/** A flag to denote whether a bundle state change is in progress */
 	protected volatile Thread stateChanging;
 	/** Bundle's BundleData object */
-	protected BundleData bundledata;
+	protected BundleData bundledata;	//TODO Access to this variable in Framework and StartLevelImpl should be done through an accessor.
 	/** The unique identifier */
-	protected long id;
+	protected long id;	//TODO If we don't use compare() methods often, we might decide to get rid of that and do an access to bundleData 
 	/** The identity string for the bundle */
-	protected String location;		//TODO Given what we use this slot for we shoudl access bundledata instead
+	protected String location;		//TODO Given what we use this slot for we should access bundledata instead
 	/** Internal object used for state change synchronization */
 	protected Object statechangeLock = new Object();
 	/** ProtectionDomain for the bundle */

@@ -63,7 +63,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 	
 	private static EclipseAdaptor instance;
 
-	private int startLevel = 1;
+	private int startLevel = 1;	//TODO Can't we use AbstractFrameworkAdaptor.initialStartLevel?
 	private long timeStamp = 0;
 	private String installURL = null;
 
@@ -134,7 +134,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 
 	private void checkLocationAndReinitialize() {
 		if (installURL == null) {
-			installURL = EclipseStarter.getSysPath();
+			installURL = EclipseStarter.getSysPath();	//TODO This reference to the starter should be avoided
 			return;
 		}
 		if (!EclipseStarter.getSysPath().equals(installURL)) {

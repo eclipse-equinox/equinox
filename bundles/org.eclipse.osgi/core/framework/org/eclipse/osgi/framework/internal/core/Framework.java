@@ -721,15 +721,15 @@ public class Framework implements EventSource, EventPublisher {
 		try {
 			BundleData bundledata = storage.begin();
 			bundle = createBundle(bundledata, location, startLevelImpl.getInitialBundleStartLevel());
-			// Check for a bundle already installed with the same UniqueId
-			// and version.
+			// Check for a bundle already installed with the same UniqueId and version.
 			if (bundle.getSymbolicName() != null) {
 				Bundle installedBundle = getBundleByUniqueId(bundle.getSymbolicName(), bundle.getVersion().toString());
 				if (installedBundle != null) {
-					throw new BundleException(Msg.formatter.getString("BUNDLE_INSTALL_SAME_UNIQUEID", bundle.getSymbolicName(), bundle.getVersion().toString()));
+					throw new BundleException(Msg.formatter.getString("BUNDLE_INSTALL_SAME_UNIQUEID", bundle.getSymbolicName(), bundle.getVersion().toString())); //$NON-NLS-1$
 				}
 			}
 			try {
+				//TODO Why is the selection of native code not directly done in the bundleData itself?  
 				String[] nativepaths = selectNativeCode(bundle);
 				if (nativepaths != null) {
 					bundledata.installNativeCode(nativepaths);

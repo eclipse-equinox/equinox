@@ -399,7 +399,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 							id = getNextBundleId();
 							fwMetadata.save();
 						} catch (IOException e) {
-							throw new BundleException(AdaptorMsg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION"), e);
+							throw new BundleException(AdaptorMsg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION"), e); //$NON-NLS-1$
 						}
 						data = (DefaultBundleData) getElementFactory().createBundleData(DefaultAdaptor.this,id);
 						data.setLocation(location);
@@ -409,7 +409,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 							URL reference = ((ReferenceInputStream) in).getReference();
 
 							if (!"file".equals(reference.getProtocol())) {
-								throw new BundleException(AdaptorMsg.formatter.getString("ADAPTOR_URL_CREATE_EXCEPTION", reference));
+								throw new BundleException(AdaptorMsg.formatter.getString("ADAPTOR_URL_CREATE_EXCEPTION", reference)); //$NON-NLS-1$
 							}
 
 							data.setReference(true);
@@ -418,7 +418,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 						} else {
 							File genDir = data.createGenerationDir();
 							if (!genDir.exists()) {
-								throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_DIRECTORY_CREATE_EXCEPTION", genDir.getPath()));
+								throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_DIRECTORY_CREATE_EXCEPTION", genDir.getPath())); //$NON-NLS-1$
 							}
 							
 							String fileName = mapLocationToName(location);
@@ -904,7 +904,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 			return (id);
 		}
 
-		throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION"));
+		throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_STORAGE_EXCEPTION")); //$NON-NLS-1$
 	}
 
 	public AdaptorElementFactory getElementFactory() {

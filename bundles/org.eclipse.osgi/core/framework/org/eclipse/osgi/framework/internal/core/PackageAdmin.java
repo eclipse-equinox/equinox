@@ -144,7 +144,7 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 				Debug.println("BundleLoader.unexportPackager returned true! " + loaderProxy);
 				Debug.printStackTrace(new Exception("Stack trace"));
 			}
-			throw new BundleException(Msg.formatter.getString("OSGI_INTERNAL_ERROR"));
+			throw new BundleException(Msg.formatter.getString("OSGI_INTERNAL_ERROR")); //$NON-NLS-1$
 		}
 		unexportResources(loaderProxy);
 		BundleLoader loader = loaderProxy.getBundleLoader();
@@ -405,7 +405,7 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 					if (changedBundle.isActive() && !changedBundle.isFragment()) {
 						boolean suspended = framework.suspendBundle(changedBundle, true);
 						if (!suspended) {
-							throw new BundleException(Msg.formatter.getString("BUNDLE_STATE_CHANGE_EXCEPTION"));
+							throw new BundleException(Msg.formatter.getString("BUNDLE_STATE_CHANGE_EXCEPTION")); //$NON-NLS-1$
 						}
 					} else {
 						changedBundle.beginStateChange();
@@ -508,14 +508,14 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 					Debug.println("refreshPackages exception: " + e.getMessage());
 					Debug.printStackTrace(e);
 				}
-				framework.publishFrameworkEvent(FrameworkEvent.ERROR, framework.systemBundle, new BundleException(Msg.formatter.getString("BUNDLE_REFRESH_FAILURE"), e));
+				framework.publishFrameworkEvent(FrameworkEvent.ERROR, framework.systemBundle, new BundleException(Msg.formatter.getString("BUNDLE_REFRESH_FAILURE"), e)); //$NON-NLS-1$
 			}
 		} catch (BundleException e) {
 			if (Debug.DEBUG && Debug.DEBUG_PACKAGEADMIN) {
 				Debug.println("refreshPackages exception: " + e.getMessage());
 				Debug.printStackTrace(e.getNestedException());
 			}
-			framework.publishFrameworkEvent(FrameworkEvent.ERROR, framework.systemBundle, new BundleException(Msg.formatter.getString("BUNDLE_REFRESH_FAILURE"), e));
+			framework.publishFrameworkEvent(FrameworkEvent.ERROR, framework.systemBundle, new BundleException(Msg.formatter.getString("BUNDLE_REFRESH_FAILURE"), e)); //$NON-NLS-1$
 		}
 
 		// send out any resolved/unresolved events
@@ -748,11 +748,11 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 					} else if (!changedBundleDes.isResolved() && previouslyResolved) {
 						// Need to log error.  This should not happen since the state should not touch
 						// bundles that we did not pass in to the resolve() call.
-						framework.publishFrameworkEvent(FrameworkEvent.ERROR, bundle, new BundleException(Msg.formatter.getString("STATE_UNRESOLVED_WRONG_BUNDLE", bundle.getLocation())));
+						framework.publishFrameworkEvent(FrameworkEvent.ERROR, bundle, new BundleException(Msg.formatter.getString("STATE_UNRESOLVED_WRONG_BUNDLE", bundle.getLocation()))); //$NON-NLS-1$
 					}
 				} else {
 					if (bundle != framework.systemBundle) {
-						framework.publishFrameworkEvent(FrameworkEvent.ERROR, bundle, new BundleException(Msg.formatter.getString("BUNDLE_NOT_IN_STATE", bundle.getLocation())));
+						framework.publishFrameworkEvent(FrameworkEvent.ERROR, bundle, new BundleException(Msg.formatter.getString("BUNDLE_NOT_IN_STATE", bundle.getLocation()))); //$NON-NLS-1$
 					}
 				}
 			}
@@ -897,5 +897,4 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 
 	public int getBundleType(org.osgi.framework.Bundle bundle) {
 		return ((Bundle)bundle).isFragment() ? PackageAdmin.BUNDLE_TYPE_FRAGMENT : 0;
-	}
-}
+	}}

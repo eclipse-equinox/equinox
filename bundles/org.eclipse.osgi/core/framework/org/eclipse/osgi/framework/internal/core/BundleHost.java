@@ -35,7 +35,7 @@ public class BundleHost extends Bundle {
 	protected BundleContext context;
 
 	/** The List of BundleFragments */
-	protected Vector fragments;	//TODO LinkedList or an array...
+	protected Vector fragments;	//TODO LinkedList or an array. Ideally we would create the array with the right size upfront
 
 	public BundleHost(BundleData bundledata, String location, Framework framework, int startLevel) throws BundleException {
 		super(bundledata, location, framework, startLevel);

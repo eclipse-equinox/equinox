@@ -50,7 +50,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 	/**
 	 * The System Bundle's BundleContext.
 	 */
-	protected BundleContext context;
+	protected BundleContext context;	//TODO Rename to systemBundleContext
 
 	/**
 	 * The Vector Initial Capacity value.
