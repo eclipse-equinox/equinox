@@ -14,6 +14,7 @@ import java.io.*;
 import java.util.Random;
 import junit.framework.Test;
 import junit.framework.TestSuite;
+import org.eclipse.core.tests.harness.PerformanceTestRunner;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.tests.services.resolver.AbstractStateTest;
 
@@ -88,8 +89,8 @@ public class StatePerformanceTest extends AbstractStateTest {
 
 	public void testCreation() {
 		final int stateSize = 5000;
-		new CorePerformanceTest() {
-			protected void operation() {
+		new PerformanceTestRunner() {
+			protected void test() {
 				buildRandomState(stateSize);
 			}
 		}.run(this, 10, 10);
@@ -97,8 +98,8 @@ public class StatePerformanceTest extends AbstractStateTest {
 
 	private void testResolution(int stateSize, int repetitions) throws IOException {
 		final State originalState = buildRandomState(stateSize);
-		new CorePerformanceTest() {
-			protected void operation() {
+		new PerformanceTestRunner() {
+			protected void test() {
 				originalState.resolve(false);
 			}
 		}.run(this, 10, repetitions);
@@ -123,8 +124,8 @@ public class StatePerformanceTest extends AbstractStateTest {
 	public void testStoreAndRetrieve() {
 		int stateSize = 5000;
 		final State originalState = buildRandomState(stateSize);
-		new CorePerformanceTest() {
-			protected void operation() {
+		new PerformanceTestRunner() {
+			protected void test() {
 				try {
 					storeAndRetrieve(originalState);
 				} catch (IOException e) {
