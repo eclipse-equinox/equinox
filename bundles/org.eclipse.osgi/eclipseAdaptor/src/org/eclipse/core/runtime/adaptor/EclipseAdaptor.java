@@ -13,6 +13,7 @@ package org.eclipse.core.runtime.adaptor;
 import java.io.*;
 import java.util.*;
 import javax.xml.parsers.SAXParserFactory;
+import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.adaptor.BundleData;
 import org.eclipse.osgi.framework.adaptor.BundleWatcher;
 import org.eclipse.osgi.framework.adaptor.core.AdaptorElementFactory;
@@ -32,7 +33,7 @@ import org.eclipse.osgi.service.urlconversion.URLConverter;
 import org.osgi.framework.*;
 
 public class EclipseAdaptor extends DefaultAdaptor {
-
+	public static final String PROP_CLEAN = "osgi.clean"; //$NON-NLS-1$
 	static final String F_LOG = ".log"; //$NON-NLS-1$
 	public static boolean MONITOR_CLASSES = false;
 	public static boolean MONITOR_RESOURCE_BUNDLES = false;
@@ -79,6 +80,12 @@ public class EclipseAdaptor extends DefaultAdaptor {
 
 	public static EclipseAdaptor getDefault() {
 		return instance;
+	}
+
+	public void initialize(EventPublisher eventPublisher) {
+		if (Boolean.getBoolean(EclipseAdaptor.PROP_CLEAN))
+			cleanOSGiCache();
+		super.initialize(eventPublisher);
 	}
 
 	protected void initBundleStoreRootDir() {
@@ -130,6 +137,13 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		systemState.setTimeStamp(timeStamp);
 		systemState.resolve();
 		return stateManager;
+	}
+
+	private void cleanOSGiCache() {
+		File osgiConfig = LocationManager.getOSGiConfigurationDir();
+		if (!rm(osgiConfig)) {
+			// TODO log error?
+		}
 	}
 
 	private void checkLocationAndReinitialize() {

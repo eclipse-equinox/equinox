@@ -49,6 +49,7 @@ public class EclipseStarter {
 	private static boolean running = false;
 
 	// command line arguments
+	private static final String CLEAN = "-clean"; //$NON-NLS-1$
 	private static final String CONSOLE = "-console"; //$NON-NLS-1$
 	private static final String CONSOLE_LOG = "-consoleLog"; //$NON-NLS-1$
 	private static final String DEBUG = "-debug"; //$NON-NLS-1$
@@ -67,6 +68,7 @@ public class EclipseStarter {
 	// System properties
 	public static final String PROP_DEBUG = "osgi.debug"; //$NON-NLS-1$
 	public static final String PROP_DEV = "osgi.dev"; //$NON-NLS-1$
+	public static final String PROP_CLEAN = "osgi.clean"; //$NON-NLS-1$
 	public static final String PROP_CONSOLE = "osgi.console"; //$NON-NLS-1$
 	public static final String PROP_CONSOLE_CLASS = "osgi.consoleClass"; //$NON-NLS-1$
 	public static final String PROP_CHECK_CONFIG = "osgi.checkConfiguration"; //$NON-NLS-1$
@@ -514,6 +516,12 @@ public class EclipseStarter {
 			// look for the initialization arg
 			if (args[i].equalsIgnoreCase(INITIALIZE)) {
 				initialize = true;
+				found = true;
+			}
+
+			// look for the clean flag.
+			if (args[i].equalsIgnoreCase(CLEAN)) {
+				System.getProperties().put(PROP_CLEAN, "true"); //$NON-NLS-1$
 				found = true;
 			}
 
