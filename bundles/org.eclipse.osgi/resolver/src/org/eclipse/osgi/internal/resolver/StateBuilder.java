@@ -191,7 +191,9 @@ class StateBuilder {
 				continue;
 			ExportPackageDescriptionImpl result = new ExportPackageDescriptionImpl();
 			result.setName(exportNames[i]);
-			String versionString = manifestVersion < 2 ? exportPackage.getAttribute(Constants.PACKAGE_SPECIFICATION_VERSION) : exportPackage.getAttribute(Constants.VERSION_ATTRIBUTE);
+			String versionString = exportPackage.getAttribute(Constants.VERSION_ATTRIBUTE);
+			if (versionString == null) // specification-version aliases to version
+				versionString = exportPackage.getAttribute(Constants.PACKAGE_SPECIFICATION_VERSION);
 			if (versionString != null)
 				result.setVersion(Version.parseVersion(versionString));
 			result.setDirective(Constants.USES_DIRECTIVE, ManifestElement.getArrayFromList(exportPackage.getDirective(Constants.USES_DIRECTIVE)));
