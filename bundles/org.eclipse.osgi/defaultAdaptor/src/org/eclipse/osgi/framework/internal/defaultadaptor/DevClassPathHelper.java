@@ -29,7 +29,8 @@ public class DevClassPathHelper {
 				inDevelopmentMode = true;
 				URL location = new URL(osgiDev);
 				devProperties = load(location);
-				devDefaultClasspath = getArrayFromList(devProperties.getProperty("*"));
+				if (devProperties != null)
+					devDefaultClasspath = getArrayFromList(devProperties.getProperty("*"));
 			} catch (MalformedURLException e) {
 				devDefaultClasspath = getArrayFromList(osgiDev);
 			}
