@@ -91,6 +91,12 @@ public class PluginParser extends DefaultHandler implements IModel {
 			Set names = libraries.keySet();
 			return (String[]) names.toArray(new String[names.size()]);
 		}
+		public String getPluginName() {
+			return pluginName;
+		}
+		public String getProviderName() {
+			return vendor;
+		}
 	}
 	// File name for this plugin or fragment
 	// This to help with error reporting

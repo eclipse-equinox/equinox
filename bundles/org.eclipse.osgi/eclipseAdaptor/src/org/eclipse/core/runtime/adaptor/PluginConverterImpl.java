@@ -162,9 +162,10 @@ public class PluginConverterImpl implements PluginConverter {
 	}
 
 	private void generateHeaders() {
-		writeEntry(Constants.BUNDLE_NAME, pluginInfo.getUniqueId());
+		writeEntry(Constants.BUNDLE_NAME, pluginInfo.getPluginName());
 		writeEntry(Constants.BUNDLE_VERSION, pluginInfo.getVersion());
 		writeEntry(Constants.BUNDLE_GLOBALNAME, pluginInfo.getUniqueId());
+		writeEntry(Constants.BUNDLE_VENDOR, pluginInfo.getProviderName());
 	}
 
 	private void generateImports() {

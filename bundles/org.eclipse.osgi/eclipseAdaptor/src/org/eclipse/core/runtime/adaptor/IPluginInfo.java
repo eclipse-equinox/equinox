@@ -27,4 +27,6 @@ public interface IPluginInfo {
 	public String getVersion();
 	public boolean isFragment();
 	public Set getPackageFilters();
+	public String getPluginName();
+	public String getProviderName();
 }
