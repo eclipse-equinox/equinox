@@ -54,11 +54,6 @@ public abstract class BundleClassLoader extends ClassLoader {
 	protected static ParentClassLoader defaultParentClassLoader = new ParentClassLoader();
 
 	/**
-	 * The BundleClassLoader parent.
-	 */
-	protected ClassLoader parentClassLoader;
-
-	/**
 	 * BundleClassLoader constructor.
 	 * @param delegate The ClassLoaderDelegate for this bundle.
 	 * @param domain The ProtectionDomain for this bundle.
@@ -74,14 +69,11 @@ public abstract class BundleClassLoader extends ClassLoader {
 	 * @param parent The parent classloader to use.
 	 */
 	public BundleClassLoader(ClassLoaderDelegate delegate, ProtectionDomain domain, String[] classpath, ClassLoader parent) {
+		// use the defaultParentClassLoader if a parent is not specified.
+		super(parent == null ? defaultParentClassLoader : parent);
 		this.delegate = delegate;
 		this.hostdomain = domain;
 		this.hostclasspath = classpath;
-		// use the defaultParentClassLoader if a parent is not specified.
-		if (parent == null)
-			parentClassLoader = defaultParentClassLoader;
-		else
-			parentClassLoader = parent;
 	}
 
 	/**
@@ -111,11 +103,13 @@ public abstract class BundleClassLoader extends ClassLoader {
 
 		try {
 			// First check the parent classloader for system classes.
-			try {
-				return parentClassLoader.loadClass(name);
-			} catch (ClassNotFoundException e) {
-				// Do nothing. continue to delegate.
-			}
+			ClassLoader parent = getParent();
+			if (parent != null)
+				try {
+					return parent.loadClass(name);
+				} catch (ClassNotFoundException e) {
+					// Do nothing. continue to delegate.
+				}
 
 			// Just ask the delegate.  This could result in findLocalClass(name) being called.
 			Class clazz = delegate.findClass(name);
@@ -169,8 +163,11 @@ public abstract class BundleClassLoader extends ClassLoader {
 		}
 
 		try {
+			URL url = null;
 			// First check the parent classloader for system resources.
-			URL url = parentClassLoader.getResource(name);
+			ClassLoader parent = getParent();
+			if (parent != null)
+				url = parent.getResource(name);
 			if (url != null) {
 				return (url);
 			}
