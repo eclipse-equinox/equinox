@@ -1,5 +1,5 @@
 /*
- * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/service/packageadmin/PackageAdmin.java,v 1.7 2004/04/09 15:05:27 twatson Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/service/packageadmin/PackageAdmin.java,v 1.8 2004/04/20 17:35:59 twatson Exp $
  *
  * Copyright (c) The Open Services Gateway Initiative (2001, 2002).
  * All Rights Reserved.
@@ -51,7 +51,7 @@ import org.osgi.framework.Bundle;
  * old values, <tt>isRemovalPending()</tt> returns <tt>true</tt>, and <tt>getExportingBundle()</tt>
  * and <tt>getImportingBundles()</tt> return <tt>null</tt>.
  *
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  * @author Open Services Gateway Initiative
  */
 public interface PackageAdmin {
@@ -217,11 +217,29 @@ public interface PackageAdmin {
      * match rule is to be used.
      * @return the array of Bundles with the specified name that match the 
      * specified version and match rule, or <tt>null</tt> if no bundles are found.
+     * @deprecated use {@link #getBundles(String, String)}
      * @since <b>1.4 EXPERIMENTAL</b>
      */
     public Bundle[] getBundles(String symbolicName, String version, String match);
 
-	/**
+    /**
+     * Gets the Bundles with the specified symbolic name.  If no bundles are 
+     * installed that have the specified symbolic name then null is returned.  
+     * If the versionRange argument is not null then only the Bundles that have 
+     * the specified symbolic name and belong to the specified version range 
+     * are returned.  The returned bundles are ordered in descending bundle 
+     * version order.
+     * @see org.osgi.framework.Constants#BUNDLE_VERSION_ATTRIBUTE
+     * @param symbolicName symbolicName the symbolic name of the bundles that are to be returned.
+     * @param versionRange the version range that each of the returned bundle versions must
+     * belong to, or <tt>null</tt> if no version range checking is to be done.
+     * @return the array of Bundles with the specified name that have a bundle version  
+     * in the specified version range, or <tt>null</tt> if no bundles are found.
+     * @since <b>1.4 EXPERIMENTAL</b>
+     */
+    public Bundle[] getBundles(String symbolicName, String versionRange);
+
+    /**
 	 * Gets an array of attached fragment bundles for the specified bundle.  If the 
 	 * specified bundle is a fragment then <tt>null</tt> is returned.  If no fragments are 
 	 * attached to the specified bundle then <tt>null</tt> is returned.

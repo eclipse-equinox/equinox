@@ -34,7 +34,7 @@ public interface VersionConstraint extends Cloneable {
 	/**
 	 * Returns the version required by this constraint to be satisfied, or 
 	 * <code>null</code> if none is defined.
-	 * TODO deprecated use {@link #getVersionRange()} 
+	 * @deprecated use {@link #getVersionRange()} 
 	 * @return the version this constraint requires, or <code>null</code>
 	 */
 	public Version getVersionSpecification();
@@ -58,6 +58,7 @@ public interface VersionConstraint extends Cloneable {
 	 * @see #MINOR_MATCH
 	 * @see #MAJOR_MATCH
 	 * @see #GREATER_EQUAL_MATCH
+	 * @deprecated use {@link #getVersionRange()}
 	 */
 	public byte getMatchingRule();
 

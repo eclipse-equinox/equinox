@@ -881,6 +881,34 @@ public class PackageAdminImpl implements PackageAdmin {
 			return (AbstractBundle[]) result.toArray(new AbstractBundle[result.size()]);
 	}
 
+	public org.osgi.framework.Bundle[] getBundles(String symbolicName, String versionRange) {
+		if (symbolicName == null) {
+			throw new IllegalArgumentException();
+		}
+		AbstractBundle bundles[] = framework.getBundleByUniqueId(symbolicName);
+		if (bundles == null)
+			return null;
+
+		if (versionRange == null)
+			return bundles;
+
+		// This code depends on the array of bundles being in descending
+		// version order.
+		ArrayList result = new ArrayList();
+		VersionRange range = new VersionRange(versionRange);
+		for (int i = 0; i < bundles.length; i++) {
+			if (range.isIncluded(bundles[i].getVersion())) {
+				result.add(bundles[i]);
+			}
+		}
+
+		if (result.size() == 0)
+			return null;
+		else
+			return (AbstractBundle[]) result.toArray(new AbstractBundle[result.size()]);
+
+	}
+
 	private boolean matchBundle(AbstractBundle bundle, Version version, String match) {
 		match = match == null ? Constants.VERSION_MATCH_GREATERTHANOREQUAL : match;
 		boolean result = false;

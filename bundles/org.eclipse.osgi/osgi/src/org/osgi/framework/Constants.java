@@ -1,5 +1,5 @@
 /*
- * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/Constants.java,v 1.13 2004/04/20 17:35:59 twatson Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/Constants.java,v 1.14 2004/04/20 18:57:11 twatson Exp $
  *
  * Copyright (c) The Open Services Gateway Initiative (2000-2001).
  * All Rights Reserved.
@@ -35,7 +35,7 @@ package org.osgi.framework;
  * <p>The values associated with these keys are of type <tt>java.lang.String</tt>,
  * unless otherwise indicated.
  *
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  * @author Open Services Gateway Initiative
  * @since 1.1
  * @see Bundle#getHeaders
@@ -497,13 +497,27 @@ public interface Constants {
 
 	/**
 	 * Manifest header attribute (named &quot;bundle-version&quot;)
-	 * identifying the version of a bundle specified in the
+	 * identifying a range of versions for a bundle specified in the
 	 * Require-Bundle or Host-Bundle Manifest headers.
 	 *
 	 * <p>The attribute value is encoded in the Require-Bundle Manifest 
 	 * header like:
 	 * <pre>
-	 * Require-Bundle: org.osgi.framework.module.test; bundle-version="1.1"
+	 * Require-Bundle: org.osgi.test.module; bundle-version="1.1"
+	 * Require-Bundle: org.osgi.test.module; bundle-version="[1.0,2.0)"
+	 * </pre>
+	 * <p>
+	 * The bundle-version attribute value uses the mathematical interval
+	 * notation to specify ranges of bundle versions.  A bundle-version
+	 * with no interval notation specifies a range that includes any 
+	 * bundle version greater than or equal to the bundle version 
+	 * specified.  For example:
+	 * <pre>
+	 * bundle-version="1.0"          1.0 <= X
+	 * bundle-version="[1.0,2.0)"    1.0 <= X <  2.0
+	 * bundle-version="[1.0,2.0]"    1.0 <= X <= 2.0
+	 * bundle-version="(1.0,2.0]"    1.0 <  X <= 2.0
+	 * bundle-version="(1.0,2.0)"    1.0 <  X <  2.0
 	 * </pre>
 	 * @since <b>1.4 EXPERIMENTAL</b>
 	 */
@@ -580,6 +594,7 @@ public interface Constants {
 	 *  version-match="qualifier"
 	 * </pre>
 	 * @since <b>1.4 EXPERIMENTAL</b>
+	 * @deprecated use {@link #BUNDLE_VERSION_ATTRIBUTE}
 	 */
 	public final static String VERSION_MATCH_ATTRIBUTE = "version-match";
 
@@ -590,6 +605,7 @@ public interface Constants {
 	 * Two versions are considered to match on qualifier if their major,
 	 * minor, micro and qualifier components are equal.
 	 * @since <b>1.4 EXPERIMENTAL</b>
+	 * @deprecated use {@link #BUNDLE_VERSION_ATTRIBUTE}
 	 */
 	public final static String VERSION_MATCH_QUALIFIER = "qualifier";
 	/**
@@ -602,6 +618,7 @@ public interface Constants {
 	 * is greater than or equal to the other version’s qualifier 
 	 * (using String.compareTo).
 	 * @since <b>1.4 EXPERIMENTAL</b>
+	 * @deprecated use {@link #BUNDLE_VERSION_ATTRIBUTE}
 	 */
 	public final static String VERSION_MATCH_MICRO = "micro";
 	/**
@@ -616,6 +633,7 @@ public interface Constants {
 	 * version if its qualifier is greater than or equal to the other 
 	 * version’s qualifier (using String.compareTo).
 	 * @since <b>1.4 EXPERIMENTAL</b>
+	 * @deprecated use {@link #BUNDLE_VERSION_ATTRIBUTE}
 	 */
 	public final static String VERSION_MATCH_MINOR = "minor";
 	/**
@@ -633,6 +651,7 @@ public interface Constants {
 	 * its qualifier is greater than or equal to the other version’s 
 	 * qualifier (using String.compareTo).
 	 * @since <b>1.4 EXPERIMENTAL</b>
+	 * @deprecated use {@link #BUNDLE_VERSION_ATTRIBUTE}
 	 */
 	public final static String VERSION_MATCH_MAJOR = "major";
 	/**
@@ -649,6 +668,7 @@ public interface Constants {
 	 * it’s qualifier component is greater than or equal to the other 
 	 * version’s qualifier component (using String.compareTo).
 	 * @since <b>1.4 EXPERIMENTAL</b>
+	 * @deprecated use {@link #BUNDLE_VERSION_ATTRIBUTE}
 	 */
 	public final static String VERSION_MATCH_GREATERTHANOREQUAL = "greaterthan-or-equal";
 
