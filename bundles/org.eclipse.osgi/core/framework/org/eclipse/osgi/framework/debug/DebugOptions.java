@@ -69,7 +69,7 @@ public class DebugOptions implements org.eclipse.osgi.service.debug.DebugOptions
 		// if no debug option was specified, don't even bother to try.
 		// Must ensure that the options slot is null as this is the signal to the
 		// platform that debugging is not enabled.
-		String debugOptionsFilename = System.getProperty("osgi.debug");
+		String debugOptionsFilename = System.getProperty("osgi.debug"); //$NON-NLS-1$
 		if (debugOptionsFilename == null)
 			return;
 		options = new Properties();

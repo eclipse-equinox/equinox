@@ -19,8 +19,6 @@ import org.eclipse.osgi.framework.internal.core.AbstractBundle;
  *	is invoked.
  */
 public interface CommandInterpreter {
-	public final static String NAME = "org.eclipse.osgi.framework.internal.core.command.CommandInterpreter";
-
 	/**
 	 *	Get the next argument in the input.
 	 *	
@@ -64,7 +62,7 @@ public interface CommandInterpreter {
 
 	/**
 	 * Print a stack trace including nested exceptions.
-	 * @param The offending exception
+	 * @param t The offending exception
 	 */
 	public void printStackTrace(Throwable t);
 
