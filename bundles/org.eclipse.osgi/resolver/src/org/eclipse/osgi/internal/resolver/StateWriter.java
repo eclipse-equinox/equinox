@@ -127,7 +127,7 @@ class StateWriter {
 			return;
 		out.writeInt(version.getMajorComponent());
 		out.writeInt(version.getMinorComponent());
-		out.writeInt(version.getServiceComponent());
+		out.writeInt(version.getMicroComponent());
 		writeStringOrNull(version.getQualifierComponent(), out);
 	}
 	private boolean writeIndex(Object object, DataOutputStream out) throws IOException {

@@ -17,11 +17,11 @@ import java.net.URL;
 import java.security.ProtectionDomain;
 import java.util.*;
 import org.eclipse.osgi.framework.adaptor.ClassLoaderDelegate;
-import org.eclipse.osgi.framework.adaptor.Version;
 import org.eclipse.osgi.framework.adaptor.core.AbstractBundleData;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.internal.protocol.bundleentry.Handler;
+import org.eclipse.osgi.service.resolver.Version;
 import org.osgi.framework.*;
 
 /**
@@ -388,12 +388,12 @@ public class DefaultBundleData extends AbstractBundleData implements Cloneable {
 			throw new IOException(AdaptorMsg.formatter.getString("ADAPTOR_ERROR_GETTING_MANIFEST", location));
 		}
 		version = new Version((String) manifest.get(Constants.BUNDLE_VERSION));
-		uniqueId = (String) manifest.get(Constants.BUNDLE_GLOBALNAME);
+		uniqueId = (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME);
 		if (uniqueId == null)
 			uniqueId = (String) manifest.get(Constants.BUNDLE_NAME);
 		classpath = (String) manifest.get(Constants.BUNDLE_CLASSPATH);
 		activator = (String) manifest.get(Constants.BUNDLE_ACTIVATOR);
-		String host = (String) manifest.get(Constants.HOST_BUNDLE);
+		String host = (String) manifest.get(Constants.FRAGMENT_HOST);
 		isFragment = host != null;
 		executionEnvironment = (String) manifest.get(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT);
 		dynamicImports = (String) manifest.get(Constants.DYNAMICIMPORT_PACKAGE);

@@ -458,11 +458,11 @@ public class PluginParser extends DefaultHandler implements IModel {
 		if (match != null) {
 			modImport += ";" + Constants.VERSION_MATCH_ATTRIBUTE + "="; //$NON-NLS-1$ //$NON-NLS-2$ 
 			if (match.equalsIgnoreCase(PLUGIN_REQUIRES_MATCH_PERFECT)) {
-				modImport += Constants.VERSION_MATCH_PERFECT;
+				modImport += Constants.VERSION_MATCH_QUALIFIER;
 			} else if (match.equalsIgnoreCase(PLUGIN_REQUIRES_MATCH_EQUIVALENT)) {
-				modImport += Constants.VERSION_MATCH_EQUIVALENT;
+				modImport += Constants.VERSION_MATCH_MINOR;
 			} else if (match.equalsIgnoreCase(PLUGIN_REQUIRES_MATCH_COMPATIBLE)) {
-				modImport += Constants.VERSION_MATCH_COMPATIBLE;
+				modImport += Constants.VERSION_MATCH_MAJOR;
 			} else if (match.equalsIgnoreCase(PLUGIN_REQUIRES_MATCH_GREATER_OR_EQUAL)) {
 				modImport += Constants.VERSION_MATCH_GREATERTHANOREQUAL;
 			}

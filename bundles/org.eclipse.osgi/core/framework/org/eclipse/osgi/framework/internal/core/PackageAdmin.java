@@ -14,7 +14,6 @@ package org.eclipse.osgi.framework.internal.core;
 import java.io.IOException;
 import java.util.*;
 
-import org.eclipse.osgi.framework.adaptor.Version;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.debug.DebugOptions;
 import org.eclipse.osgi.service.resolver.*;
@@ -932,14 +931,16 @@ public class PackageAdmin implements org.osgi.service.packageadmin.PackageAdmin 
 	private boolean matchBundle(Bundle bundle, Version version, String match) {
 		match = match==null ? Constants.VERSION_MATCH_GREATERTHANOREQUAL : match;
 		boolean result = false;
-		if (match.equalsIgnoreCase(Constants.VERSION_MATCH_PERFECT))
-			result = bundle.getVersion().isPerfect(version);
-		else if (match.equalsIgnoreCase(Constants.VERSION_MATCH_EQUIVALENT))
-			result = bundle.getVersion().isEquivalentTo(version);
-		else if (match.equalsIgnoreCase(Constants.VERSION_MATCH_COMPATIBLE))
-			result = bundle.getVersion().isCompatibleWith(version);
+		if (match.equalsIgnoreCase(Constants.VERSION_MATCH_QUALIFIER))
+			result = bundle.getVersion().matchQualifier(version);
+		else if (match.equalsIgnoreCase(Constants.VERSION_MATCH_MICRO))
+			result = bundle.getVersion().matchMicro(version);
+		else if (match.equalsIgnoreCase(Constants.VERSION_MATCH_MINOR))
+			result = bundle.getVersion().matchMinor(version);
+		else if (match.equalsIgnoreCase(Constants.VERSION_MATCH_MAJOR))
+			result = bundle.getVersion().matchMajor(version);
 		else if (match.equalsIgnoreCase(Constants.VERSION_MATCH_GREATERTHANOREQUAL))
-			result = bundle.getVersion().isGreaterOrEqualTo(version);
+			result = bundle.getVersion().matchGreaterOrEqualTo(version);
 
 		return result;
 	}

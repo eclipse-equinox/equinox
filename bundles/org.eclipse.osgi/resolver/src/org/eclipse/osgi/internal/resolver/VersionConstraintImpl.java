@@ -68,14 +68,16 @@ public abstract class VersionConstraintImpl implements VersionConstraint {
 		if (required == null)
 			return true;
 		switch (getMatchingRule()) {
-			case PERFECT_MATCH :
-				return provided.isPerfect(required);
-			case EQUIVALENT_MATCH :
-				return provided.isEquivalentTo(required);
-			case COMPATIBLE_MATCH :
-				return provided.isCompatibleWith(required);
+			case QUALIFIER_MATCH :
+				return provided.matchQualifier(required);
+			case MICRO_MATCH :
+				return provided.matchMicro(required);
+			case MINOR_MATCH :
+				return provided.matchMinor(required);
+			case GREATER_EQUAL_MATCH:
+				return provided.matchGreaterOrEqualTo(required);
 			default :
-				return provided.isGreaterOrEqualTo(required);				
+				return provided.matchMajor(required);				
 		}
 	}
 	public String toString() {

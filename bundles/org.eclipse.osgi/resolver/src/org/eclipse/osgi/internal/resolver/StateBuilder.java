@@ -22,13 +22,13 @@ import org.osgi.framework.Constants;
 class StateBuilder {
 	static BundleDescription createBundleDescription(Dictionary manifest, String location) throws BundleException {
 		BundleDescriptionImpl result = new BundleDescriptionImpl();
-		result.setUniqueId((String) manifest.get(Constants.BUNDLE_GLOBALNAME));
+		result.setUniqueId((String) manifest.get(Constants.BUNDLE_SYMBOLICNAME));
 		if (result.getUniqueId() == null)
 			result.setUniqueId((String) manifest.get(Constants.BUNDLE_NAME));
 		String version = (String) manifest.get(Constants.BUNDLE_VERSION);
-		result.setVersion((version != null) ? new Version(version) : Version.EMPTY_VERSION);
+		result.setVersion((version != null) ? new Version(version) : Version.emptyVersion);
 		result.setLocation(location);
-		ManifestElement[] host = ManifestElement.parseBundleDescriptions((String) manifest.get(Constants.HOST_BUNDLE));
+		ManifestElement[] host = ManifestElement.parseBundleDescriptions((String) manifest.get(Constants.FRAGMENT_HOST));
 		if (host != null)
 			result.setHost(createHostSpecification(host[0]));
 		ManifestElement[] imports = ManifestElement.parsePackageDescription((String) manifest.get(Constants.IMPORT_PACKAGE));
@@ -61,14 +61,22 @@ class StateBuilder {
 	}
 	private static byte parseMatchingRule(String match) {
 		if (match == null)
+			return VersionConstraint.MAJOR_MATCH;
+
+		// TODO remove deprecated match rules.
+		if (match.equals(Constants.VERSION_MATCH_MICRO))
+			return VersionConstraint.MICRO_MATCH;
+		if (match.equals(Constants.VERSION_MATCH_MINOR) || match.equals(Constants.VERSION_MATCH_EQUIVALENT))
+			return VersionConstraint.MINOR_MATCH;
+		if (match.equals(Constants.VERSION_MATCH_MAJOR) || match.equals(Constants.VERSION_MATCH_COMPATIBLE))
+			return VersionConstraint.MAJOR_MATCH;
+		if (match.equals(Constants.VERSION_MATCH_GREATERTHANOREQUAL))
 			return VersionConstraint.GREATER_EQUAL_MATCH;
-		if (match.equals(Constants.VERSION_MATCH_EQUIVALENT))
-			return VersionConstraint.EQUIVALENT_MATCH;
-		if (match.equals(Constants.VERSION_MATCH_COMPATIBLE))
-			return VersionConstraint.COMPATIBLE_MATCH;
-		if (match.equals(Constants.VERSION_MATCH_PERFECT))
-			return VersionConstraint.PERFECT_MATCH;
-		return VersionConstraint.GREATER_EQUAL_MATCH;
+		if (match.equals(Constants.VERSION_MATCH_QUALIFIER) || match.equals(Constants.VERSION_MATCH_PERFECT))
+			return VersionConstraint.QUALIFIER_MATCH;
+
+		// default to MAJOR match rule.
+		return VersionConstraint.MAJOR_MATCH;
 	}
 	private static String[] createProvidedPackages(ManifestElement[] specs) {
 		if (specs == null || specs.length == 0)

@@ -17,7 +17,6 @@ import java.net.URLConnection;
 import java.security.*;
 import java.util.*;
 import org.eclipse.osgi.framework.adaptor.*;
-import org.eclipse.osgi.framework.adaptor.Version;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.eventmgr.*;
 import org.eclipse.osgi.framework.internal.protocol.ContentHandlerFactory;

@@ -12,8 +12,8 @@ package org.eclipse.core.runtime.adaptor;
 
 import java.util.Dictionary;
 import java.util.Enumeration;
-import org.eclipse.osgi.framework.adaptor.Version;
 import org.eclipse.osgi.framework.internal.core.Constants;
+import org.eclipse.osgi.service.resolver.Version;
 import org.osgi.framework.BundleException;
 
 public class CachedManifest extends Dictionary {
@@ -61,7 +61,8 @@ public class CachedManifest extends Dictionary {
 			return bundledata.getPluginClass();
 		if ("legacy".equalsIgnoreCase(keyString))
 			return bundledata.isLegacy();
-		if (Constants.BUNDLE_GLOBALNAME.equalsIgnoreCase(keyString))
+		// TODO Remove use of deprecated BUNDLE_GLOBALNAME
+		if (Constants.BUNDLE_GLOBALNAME.equalsIgnoreCase(keyString) || Constants.BUNDLE_SYMBOLICNAME.equalsIgnoreCase(keyString))
 			return bundledata.getUniqueId();
 		return getManifest().get(key);
 	}

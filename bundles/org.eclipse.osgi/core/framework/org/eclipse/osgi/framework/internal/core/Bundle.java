@@ -26,11 +26,11 @@ import java.util.Locale;
 
 import org.eclipse.osgi.framework.adaptor.BundleData;
 import org.eclipse.osgi.framework.adaptor.BundleOperation;
-import org.eclipse.osgi.framework.adaptor.Version;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.osgi.service.resolver.BundleSpecification;
 import org.eclipse.osgi.service.resolver.PackageSpecification;
+import org.eclipse.osgi.service.resolver.Version;
 import org.eclipse.osgi.service.resolver.VersionConstraint;
 import org.osgi.framework.AdminPermission;
 import org.osgi.framework.BundleActivator;

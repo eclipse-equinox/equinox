@@ -13,7 +13,8 @@ package org.eclipse.osgi.framework.internal.core;
 
 import java.util.StringTokenizer;
 import java.util.Vector;
-import org.eclipse.osgi.framework.adaptor.Version;
+
+import org.eclipse.osgi.service.resolver.Version;
 import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.Constants;
 
@@ -368,7 +369,7 @@ public class BundleNativeCode
      * @param  version os version to match against.
      * @return version or null if no match.
      */
-	public org.eclipse.osgi.framework.adaptor.Version matchOSVersion(org.eclipse.osgi.framework.adaptor.Version version)
+	public Version matchOSVersion(Version version)
     {
         if (this.osversion == null)
         {

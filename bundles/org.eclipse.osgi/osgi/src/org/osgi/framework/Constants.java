@@ -1,5 +1,5 @@
 /*
- * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/Constants.java,v 1.2 2004/01/09 22:04:44 jfogell Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/Constants.java,v 1.3 2004/02/16 21:28:52 jfogell Exp $
  *
  * Copyright (c) The Open Services Gateway Initiative (2000-2001).
  * All Rights Reserved.
@@ -35,7 +35,7 @@ package org.osgi.framework;
  * <p>The values associated with these keys are of type <tt>java.lang.String</tt>,
  * unless otherwise indicated.
  *
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @author Open Services Gateway Initiative
  * @since 1.1
  * @see Bundle#getHeaders
@@ -445,12 +445,21 @@ public interface Constants {
 	 * identifying the bundle's unique ID.
 	 * <p>The attribute value may be retrieved from the
 	 * <tt>Dictionary</tt> object returned by the <tt>Bundle.getHeaders</tt> method.
+	 * @deprecated use BUNDLE_SYMBOLICNAME
+	 * TODO: remove after code has been updated to not reference it.
 	 */
 	public final static String BUNDLE_GLOBALNAME = "Bundle-GlobalName";
 
+	/**
+	 * Manifest header (named &quot;Bundle-SymbolicName&quot;)
+	 * identifying the bundle's unique ID.
+	 * <p>The attribute value may be retrieved from the
+	 * <tt>Dictionary</tt> object returned by the <tt>Bundle.getHeaders</tt> method.
+	 */
+	public final static String BUNDLE_SYMBOLICNAME = "Bundle-SymbolicName";
 	
 	/**
-	 * Manifest header (named &quot;Bundle-LocalizationFile&quot;)
+	 * Manifest header (named &quot;Bundle-Localization&quot;)
 	 * identifying the location of the bundle's localization file.
 	 * <p>The attribute value may be retrieved from the
 	 * <tt>Dictionary</tt> object returned by the <tt>Bundle.getHeaders</tt> method.
@@ -541,10 +550,27 @@ public interface Constants {
 	 */
 	public final static String VERSION_MATCH_ATTRIBUTE = "version-match";
 
-	public final static String VERSION_MATCH_PERFECT = "perfect";
-	public final static String VERSION_MATCH_EQUIVALENT = "equivalent";
-	public final static String VERSION_MATCH_COMPATIBLE = "compatible";
+	public final static String VERSION_MATCH_QUALIFIER = "qualifier";
+	public final static String VERSION_MATCH_MICRO = "micro";
+	public final static String VERSION_MATCH_MINOR = "minor";
+	public final static String VERSION_MATCH_MAJOR = "major";
 	public final static String VERSION_MATCH_GREATERTHANOREQUAL = "greaterthan-or-equal";
+
+
+	/**
+	 * @deprecated use VERSION_MATCH_QUALIFIER instead
+	 */
+	public final static String VERSION_MATCH_PERFECT = "perfect";
+	
+	/**
+	 * @deprecated use VERSION_MATCH_MINOR instead
+	 */
+	public final static String VERSION_MATCH_EQUIVALENT = "equivalent";
+	
+	/**
+	 * @deprecated use VERSION_MATCH_MAJOR instead
+	 */
+	public final static String VERSION_MATCH_COMPATIBLE = "compatible";
 
 	/**
 	 * Manifest header (named &quot;Host-Bundle&quot;)
@@ -553,6 +579,17 @@ public interface Constants {
 	 *
 	 * <p>The attribute value may be retrieved from the
 	 * <tt>Dictionary</tt> object returned by the <tt>Bundle.getHeaders</tt> method.
+	 * @deprecated use FRAGMENT_HOST instead.
 	 */
 	public final static String HOST_BUNDLE = "Host-Bundle";
+
+	/**
+	 * Manifest header (named &quot;Fragment-Host&quot;)
+	 * identifying the symbolic name (and optionally, version and match 
+	 * attributes ) of the bundle that the bundle is a fragment to.
+	 *
+	 * <p>The attribute value may be retrieved from the
+	 * <tt>Dictionary</tt> object returned by the <tt>Bundle.getHeaders</tt> method.
+	 */
+	public final static String FRAGMENT_HOST = "Fragment-Host";
 }

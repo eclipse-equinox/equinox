@@ -146,7 +146,7 @@ public class ResolverImpl implements Resolver {
 					PackageSpecification exported = (PackageSpecification) availablePackages.get(required[j].getName());
 					Version exportedVersion = exported == null ? null : exported.getVersionSpecification();
 					Version importedVersion = required[j].getVersionSpecification();
-					if (exported == null || (importedVersion != null && (exportedVersion == null || !exportedVersion.isGreaterOrEqualTo(importedVersion)))) {
+					if (exported == null || (importedVersion != null && (exportedVersion == null || !exportedVersion.matchGreaterOrEqualTo(importedVersion)))) {
 						unresolveRequirementChain(initialBundles[i]);
 						success = false;
 						// one missing import is enough to discard this bundle

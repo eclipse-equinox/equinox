@@ -217,7 +217,7 @@ public class PluginConverterImpl implements PluginConverter {
 	private void generateHeaders() throws IOException {
 		writeEntry(Constants.BUNDLE_NAME, pluginInfo.getPluginName());
 		writeEntry(Constants.BUNDLE_VERSION, pluginInfo.getVersion());
-		writeEntry(Constants.BUNDLE_GLOBALNAME, pluginInfo.getUniqueId());
+		writeEntry(Constants.BUNDLE_SYMBOLICNAME, pluginInfo.getUniqueId());
 		writeEntry(Constants.BUNDLE_VENDOR, pluginInfo.getProviderName());
 	}
 
@@ -255,7 +255,7 @@ public class PluginConverterImpl implements PluginConverter {
 			hostBundle.append(Constants.BUNDLE_VERSION_ATTRIBUTE).append("=");
 			hostBundle.append(pluginInfo.getMasterVersion());
 
-			writeEntry(Constants.HOST_BUNDLE, hostBundle.toString());
+			writeEntry(Constants.FRAGMENT_HOST, hostBundle.toString());
 		}
 	}
 	private void generateRequireBundle() throws IOException {

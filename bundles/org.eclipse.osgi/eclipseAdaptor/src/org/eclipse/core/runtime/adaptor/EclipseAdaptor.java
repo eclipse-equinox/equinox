@@ -14,7 +14,6 @@ import java.io.*;
 import java.util.*;
 import javax.xml.parsers.SAXParserFactory;
 import org.eclipse.osgi.framework.adaptor.*;
-import org.eclipse.osgi.framework.adaptor.Version;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.debug.DebugOptions;

@@ -12,7 +12,8 @@
 package org.eclipse.osgi.framework.internal.core;
 
 import java.util.*;
-import org.eclipse.osgi.framework.adaptor.Version;
+
+import org.eclipse.osgi.service.resolver.Version;
 
 public class BundleRepository {
 	/** bundles by install order */
@@ -62,7 +63,7 @@ public class BundleRepository {
 			Version ver = new Version(version);
 			if (bundles.length > 0) {
 				for (int i = 0; i < bundles.length; i++) {
-					if (bundles[i].getVersion().isPerfect(ver)) {
+					if (bundles[i].getVersion().matchQualifier(ver)) {
 						return bundles[i];
 					}
 				}
@@ -93,7 +94,7 @@ public class BundleRepository {
 			for (int i = 0; i < bundles.length; i++) {
 				Bundle oldBundle = bundles[i];
 				Version oldVersion = oldBundle.getVersion();
-				if (!added && newVersion.isGreaterOrEqualTo(oldVersion)) {
+				if (!added && newVersion.matchGreaterOrEqualTo(oldVersion)) {
 					added = true;
 					list.add(bundle);
 				}

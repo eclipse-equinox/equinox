@@ -19,6 +19,7 @@ import java.util.Dictionary;
 import java.util.Enumeration;
 import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.util.Headers;
+import org.eclipse.osgi.service.resolver.Version;
 
 public class SystemBundleData implements BundleData {
 
@@ -106,7 +107,7 @@ public class SystemBundleData implements BundleData {
 	}
 
 	public String getUniqueId() {
-		return (String) getHeaders().get(Constants.BUNDLE_GLOBALNAME);
+		return (String) getHeaders().get(Constants.BUNDLE_SYMBOLICNAME);
 	}
 
 	public Version getVersion() {

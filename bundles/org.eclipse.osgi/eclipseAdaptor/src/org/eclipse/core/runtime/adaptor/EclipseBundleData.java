@@ -15,10 +15,10 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Dictionary;
-import org.eclipse.osgi.framework.adaptor.Version;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.internal.defaultadaptor.*;
 import org.eclipse.osgi.framework.util.Headers;
+import org.eclipse.osgi.service.resolver.Version;
 import org.osgi.framework.BundleException;
 
 public class EclipseBundleData extends DefaultBundleData {
@@ -183,7 +183,7 @@ public class EclipseBundleData extends DefaultBundleData {
 	public synchronized Dictionary getManifest(boolean first) throws BundleException {
 		if (manifest == null)
 			manifest = first ? loadManifest() : new CachedManifest(this);
-		if (manifest.get(org.osgi.framework.Constants.BUNDLE_GLOBALNAME) == null) {
+		if (manifest.get(org.osgi.framework.Constants.BUNDLE_SYMBOLICNAME) == null) {
 			Dictionary generatedManifest = generateManifest();
 			if (generatedManifest != null)
 				manifest = generatedManifest;

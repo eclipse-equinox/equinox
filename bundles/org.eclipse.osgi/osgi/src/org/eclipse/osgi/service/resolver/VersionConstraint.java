@@ -17,9 +17,10 @@ package org.eclipse.osgi.service.resolver;
 public interface VersionConstraint extends Cloneable {
 
 	public byte NO_MATCH = 0;
-	public byte PERFECT_MATCH = 1;
-	public byte EQUIVALENT_MATCH = 2;
-	public byte COMPATIBLE_MATCH = 3;
+	public byte QUALIFIER_MATCH = 1;
+	public byte MICRO_MATCH = 5;
+	public byte MINOR_MATCH = 2;
+	public byte MAJOR_MATCH = 3;
 	public byte GREATER_EQUAL_MATCH = 4;
 
 	/**

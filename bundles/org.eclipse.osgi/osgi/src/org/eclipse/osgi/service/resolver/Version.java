@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2003 IBM Corporation and others.
+ * Copyright (c) 2000, 2003, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,12 +31,12 @@ import java.util.Vector;
  * </p>
  * <p>
  * The version identifier can be decomposed into a major, minor, 
- * service level component and qualifier components. A difference
+ * micro level component and qualifier components. A difference
  * in the major component is interpreted as an incompatible version
  * change. A difference in the minor (and not the major) component
- * is interpreted as a compatible version change. The service
+ * is interpreted as a compatible version change. The micro
  * level component is interpreted as a cumulative and compatible
- * service update of the minor version component. The qualifier is
+ * micro update of the minor version component. The qualifier is
  * not interpreted, other than in version comparisons. The 
  * qualifiers are compared using lexicographical string comparison.
  * </p>
@@ -54,12 +54,12 @@ public final class Version implements Comparable {
 
 	private int major = 0;
 	private int minor = 0;
-	private int service = 0;
+	private int micro = 0;
 	private String qualifier = ""; //$NON-NLS-1$
 
 	private static final String SEPARATOR = "."; //$NON-NLS-1$
 
-	public static final Version EMPTY_VERSION = new Version(0, 0, 0);
+	public static Version emptyVersion = new Version(0, 0, 0);
 
 	/**
 	 * Creates a plug-in version identifier from a given Version.
@@ -67,7 +67,7 @@ public final class Version implements Comparable {
 	 * @param version 
 	 */
 	public Version(Version version) {
-		this(version.major, version.minor, version.service, version.qualifier);
+		this(version.major, version.minor, version.micro, version.qualifier);
 	}
 
 	/**
@@ -75,22 +75,21 @@ public final class Version implements Comparable {
 	 * 
 	 * @param major major component of the version identifier
 	 * @param minor minor component of the version identifier
-	 * @param service service update component of the version identifier
+	 * @param micro micro update component of the version identifier
 	 */
-	public Version(int major, int minor, int service) {
-		this(major, minor, service, null);
+	public Version(int major, int minor, int micro) {
+		this(major, minor, micro, null);
 	}
 	/**
 	 * Creates a plug-in version identifier from its components.
 	 * 
 	 * @param major major component of the version identifier
 	 * @param minor minor component of the version identifier
-	 * @param service service update component of the version identifier
+	 * @param micro micro update component of the version identifier
 	 * @param qualifier qualifier component of the version identifier. 
 	 * Qualifier characters that are not a letter or a digit are replaced.
 	 */
-	public Version(int major, int minor, int service, String qualifier)
-		throws IllegalArgumentException {
+	public Version(int major, int minor, int micro, String qualifier) throws IllegalArgumentException {
 
 		// Do the test outside of the assert so that they 'Policy.bind' 
 		// will not be evaluated each time (including cases when we would
@@ -100,14 +99,14 @@ public final class Version implements Comparable {
 			throw new IllegalArgumentException("Negative major");
 		if (minor < 0)
 			throw new IllegalArgumentException("Negative minor");
-		if (service < 0)
-			throw new IllegalArgumentException("Negative service");
+		if (micro < 0)
+			throw new IllegalArgumentException("Negative micro");
 		if (qualifier == null)
 			qualifier = ""; //$NON-NLS-1$
 
 		this.major = major;
 		this.minor = minor;
-		this.service = service;
+		this.micro = micro;
 		this.qualifier = verifyQualifier(qualifier);
 	}
 	/**
@@ -129,10 +128,12 @@ public final class Version implements Comparable {
 	 * Qualifier characters that are not a letter or a digit are replaced.
 	 */
 	public Version(String versionId) {
+		if (versionId == null)
+			versionId = "0.0.0";
 		Object[] parts = parseVersion(versionId);
 		this.major = ((Integer) parts[0]).intValue();
 		this.minor = ((Integer) parts[1]).intValue();
-		this.service = ((Integer) parts[2]).intValue();
+		this.micro = ((Integer) parts[2]).intValue();
 		this.qualifier = (String) parts[3];
 	}
 	/**
@@ -211,14 +212,14 @@ public final class Version implements Comparable {
 			if (elementSize >= 3) {
 				numbers[2] = Integer.parseInt((String) elements.elementAt(2));
 				if (numbers[2] < 0)
-					throw new IllegalArgumentException("Invalid service");
+					throw new IllegalArgumentException("Invalid micro");
 			} else
 				numbers[2] = 0;
 		} catch (NumberFormatException nfe) {
-			throw new IllegalArgumentException("Invalid service");
+			throw new IllegalArgumentException("Invalid micro");
 		}
 
-		// "result" is a 4-element array with the major, minor, service, and qualifier
+		// "result" is a 4-element array with the major, minor, micro, and qualifier
 		Object[] result = new Object[4];
 		result[0] = new Integer(numbers[0]);
 		result[1] = new Integer(numbers[1]);
@@ -240,10 +241,7 @@ public final class Version implements Comparable {
 		if (!(object instanceof Version))
 			return false;
 		Version v = (Version) object;
-		return v.getMajorComponent() == major
-			&& v.getMinorComponent() == minor
-			&& v.getServiceComponent() == service
-			&& v.getQualifierComponent().equals(qualifier);
+		return v.getMajorComponent() == major && v.getMinorComponent() == minor && v.getMicroComponent() == micro && v.getQualifierComponent().equals(qualifier);
 	}
 	/**
 	 * Returns a hash code value for the object. 
@@ -251,7 +249,7 @@ public final class Version implements Comparable {
 	 * @return an integer which is a hash code value for this object.
 	 */
 	public int hashCode() {
-		int code = major + minor + service; // R1.0 result
+		int code = major + minor + micro; // R1.0 result
 		if (qualifier.equals("")) //$NON-NLS-1$
 			return code;
 		else
@@ -276,13 +274,13 @@ public final class Version implements Comparable {
 		return minor;
 	}
 	/**
-	 * Returns the service level component of this 
+	 * Returns the micro level component of this 
 	 * version identifier.
 	 *
-	 * @return the service level
+	 * @return the micro level
 	 */
-	public int getServiceComponent() {
-		return service;
+	public int getMicroComponent() {
+		return micro;
 	}
 	/**
 	 * Returns the qualifier component of this 
@@ -301,9 +299,9 @@ public final class Version implements Comparable {
 	 * if its major component is greater than the argument major 
 	 * component, or the major components are equal and its minor component
 	 * is greater than the argument minor component, or the
-	 * major and minor components are equal and its service component is
-	 * greater than the argument service component, or the major, minor and
-	 * service components are equal and the qualifier component is
+	 * major and minor components are equal and its micro component is
+	 * greater than the argument micro component, or the major, minor and
+	 * micro components are equal and the qualifier component is
 	 * greated than the argument qualifier component (using lexicographic
 	 * string comparison), or all components are equal.
 	 * </p>
@@ -314,34 +312,29 @@ public final class Version implements Comparable {
 	 *    <code>false</code> otherwise
 	 * @since 2.0
 	 */
-	public boolean isGreaterOrEqualTo(Version id) {
+	public boolean matchGreaterOrEqualTo(Version id) {
 		if (id == null)
 			return false;
 		if (major > id.getMajorComponent())
 			return true;
 		if ((major == id.getMajorComponent()) && (minor > id.getMinorComponent()))
 			return true;
-		if ((major == id.getMajorComponent())
-			&& (minor == id.getMinorComponent())
-			&& (service > id.getServiceComponent()))
+		if ((major == id.getMajorComponent()) && (minor == id.getMinorComponent()) && (micro > id.getMicroComponent()))
 			return true;
-		if ((major == id.getMajorComponent())
-			&& (minor == id.getMinorComponent())
-			&& (service == id.getServiceComponent())
-			&& (qualifier.compareTo(id.getQualifierComponent()) >= 0))
+		if ((major == id.getMajorComponent()) && (minor == id.getMinorComponent()) && (micro == id.getMicroComponent()) && (qualifier.compareTo(id.getQualifierComponent()) >= 0))
 			return true;
 		else
 			return false;
 	}
 	/**
-	 * Compares two version identifiers for compatibility.
+	 * Compares two version identifiers for major match.
 	 * <p>
-	 * A version identifier is considered to be compatible if its major 
+	 * A version identifier is considered to match on major if its major 
 	 * component equals to the argument major component, and its minor component
 	 * is greater than or equal to the argument minor component.
-	 * If the minor components are equal, than the service level of the
-	 * version identifier must be greater than or equal to the service level
-	 * of the argument identifier. If the service levels are equal, the two 
+	 * If the minor components are equal, than the micro level of the
+	 * version identifier must be greater than or equal to the micro level
+	 * of the argument identifier. If the micro levels are equal, the two 
 	 * version identifiers are considered to be equivalent if this qualifier is 
 	 * greated or equal to the qualifier of the argument (using lexicographic
 	 * string comparison).
@@ -352,7 +345,7 @@ public final class Version implements Comparable {
 	 *    is compatible with the given version identifier, and
 	 *    <code>false</code> otherwise
 	 */
-	public boolean isCompatibleWith(Version id) {
+	public boolean matchMajor(Version id) {
 		if (id == null)
 			return false;
 		if (major != id.getMajorComponent())
@@ -361,9 +354,9 @@ public final class Version implements Comparable {
 			return true;
 		if (minor < id.getMinorComponent())
 			return false;
-		if (service > id.getServiceComponent())
+		if (micro > id.getMicroComponent())
 			return true;
-		if (service < id.getServiceComponent())
+		if (micro < id.getMicroComponent())
 			return false;
 		if (qualifier.compareTo(id.getQualifierComponent()) >= 0)
 			return true;
@@ -374,8 +367,8 @@ public final class Version implements Comparable {
 	 * Compares two version identifiers for equivalency.
 	 * <p>
 	 * Two version identifiers are considered to be equivalent if their major 
-	 * and minor component equal and are at least at the same service level 
-	 * as the argument. If the service levels are equal, the two version
+	 * and minor component equal and are at least at the same micro level 
+	 * as the argument. If the micro levels are equal, the two version
 	 * identifiers are considered to be equivalent if this qualifier is 
 	 * greated or equal to the qualifier of the argument (using lexicographic
 	 * string comparison).
@@ -387,16 +380,41 @@ public final class Version implements Comparable {
 	 *    is equivalent to the given version identifier, and
 	 *    <code>false</code> otherwise
 	 */
-	public boolean isEquivalentTo(Version id) {
+	public boolean matchMinor(Version id) {
 		if (id == null)
 			return false;
 		if (major != id.getMajorComponent())
 			return false;
 		if (minor != id.getMinorComponent())
 			return false;
-		if (service > id.getServiceComponent())
+		if (micro > id.getMicroComponent())
 			return true;
-		if (service < id.getServiceComponent())
+		if (micro < id.getMicroComponent())
+			return false;
+		if (qualifier.compareTo(id.getQualifierComponent()) >= 0)
+			return true;
+		else
+			return false;
+	}
+	/**
+	 * Compares two version identifiers for micro match.
+	 * <p>
+	 * Two version identifiers are considered to micro match if their major, 
+	 * minor and micro components equal and this qualifier is 
+	 * greated or equal to the qualifier of the argument (using lexicographic
+	 * string comparison).
+	 * 
+	 * </p>
+	 *
+	 * @param versionId the other version identifier
+	 * @return <code>true</code> is this version identifier
+	 *    matches on micro to the given version identifier, and
+	 *    <code>false</code> otherwise
+	 */
+	public boolean matchMicro(Version id) {
+		if (id == null)
+			return false;
+		if (major != id.getMajorComponent() || minor != id.getMinorComponent() || micro != id.getMicroComponent())
 			return false;
 		if (qualifier.compareTo(id.getQualifierComponent()) >= 0)
 			return true;
@@ -407,7 +425,7 @@ public final class Version implements Comparable {
 	 * Compares two version identifiers for perfect equality.
 	 * <p>
 	 * Two version identifiers are considered to be perfectly equal if their
-	 * major, minor, service and qualifier components are equal
+	 * major, minor, micro and qualifier components are equal
 	 * </p>
 	 *
 	 * @param versionId the other version identifier
@@ -416,13 +434,10 @@ public final class Version implements Comparable {
 	 *    <code>false</code> otherwise
 	 * @since 2.0
 	 */
-	public boolean isPerfect(Version id) {
+	public boolean matchQualifier(Version id) {
 		if (id == null)
 			return false;
-		if ((major != id.getMajorComponent())
-			|| (minor != id.getMinorComponent())
-			|| (service != id.getServiceComponent())
-			|| (!qualifier.equals(id.getQualifierComponent())))
+		if ((major != id.getMajorComponent()) || (minor != id.getMinorComponent()) || (micro != id.getMicroComponent()) || (!qualifier.equals(id.getQualifierComponent())))
 			return false;
 		else
 			return true;
@@ -439,7 +454,7 @@ public final class Version implements Comparable {
 	public boolean isGreaterThan(Version id) {
 
 		if (id == null) {
-			if (major == 0 && minor == 0 && service == 0 && qualifier.equals(""))
+			if (major == 0 && minor == 0 && micro == 0 && qualifier.equals(""))
 				return false; //$NON-NLS-1$
 			else
 				return true;
@@ -453,9 +468,9 @@ public final class Version implements Comparable {
 			return true;
 		if (minor < id.getMinorComponent())
 			return false;
-		if (service > id.getServiceComponent())
+		if (micro > id.getMicroComponent())
 			return true;
-		if (service < id.getServiceComponent())
+		if (micro < id.getMicroComponent())
 			return false;
 		if (qualifier.compareTo(id.getQualifierComponent()) > 0)
 			return true;
@@ -471,7 +486,7 @@ public final class Version implements Comparable {
 	 * @return the string representation of this plug-in version identifier
 	 */
 	public String toString() {
-		String base = major + SEPARATOR + minor + SEPARATOR + service;
+		String base = major + SEPARATOR + minor + SEPARATOR + micro;
 		// R1.0 result
 		if (qualifier.equals("")) //$NON-NLS-1$
 			return base;

@@ -12,11 +12,11 @@ package org.eclipse.osgi.framework.internal.core;
 
 import java.util.ArrayList;
 
-import org.eclipse.osgi.framework.adaptor.Version;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.osgi.service.resolver.BundleSpecification;
 import org.eclipse.osgi.service.resolver.PackageSpecification;
+import org.eclipse.osgi.service.resolver.Version;
 
 import org.osgi.service.packageadmin.SymbolicBundle;
 
@@ -72,7 +72,7 @@ public class BundleLoaderProxy implements KeyedElement, SymbolicBundle{
 		if (!(other instanceof BundleLoaderProxy))
 			return false;
 		BundleLoaderProxy otherLoaderProxy = (BundleLoaderProxy) other;
-		return (uniqueId.equals(otherLoaderProxy.uniqueId) && version.isPerfect(otherLoaderProxy.version));
+		return (uniqueId.equals(otherLoaderProxy.uniqueId) && version.matchQualifier(otherLoaderProxy.version));
 	}
 
 	public Object getKey() {
