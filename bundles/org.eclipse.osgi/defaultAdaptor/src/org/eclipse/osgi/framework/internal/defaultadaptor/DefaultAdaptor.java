@@ -449,7 +449,6 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor
 						try
 						{
 							id = getNextBundleId();
-							metadata.setLong(METADATA_ADAPTOR_NEXTID, id);
 							metadata.save();
 						}
 						catch (IOException e)
@@ -1053,9 +1052,9 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor
 			long id = nextId;
 
 			nextId++;
-
+			metadata.setLong(METADATA_ADAPTOR_NEXTID, nextId);
+			
 			File bundleDir = new File(bundleRootDir, String.valueOf(id));
-
 			if (bundleDir.exists())
 			{
 				continue;
