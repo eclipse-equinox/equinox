@@ -170,8 +170,14 @@ public class EclipseBundleData extends DefaultBundleData {
 	public synchronized Dictionary loadManifest() throws BundleException {
 		URL url = getEntry(Constants.OSGI_BUNDLE_MANIFEST);
 		if (url != null) {
-			manifestTimeStamp = getBaseBundleFile().getEntry(Constants.OSGI_BUNDLE_MANIFEST).getTime();
 			manifestType = MANIFEST_TYPE_BUNDLE;
+			if (getBaseFile().isFile()) {
+				manifestTimeStamp = getBaseFile().lastModified();
+				manifestType |= MANIFEST_TYPE_JAR;
+			}
+			else {
+				manifestTimeStamp = getBaseBundleFile().getEntry(Constants.OSGI_BUNDLE_MANIFEST).getTime();
+			}
 			return loadManifestFrom(url);
 		}
 		Dictionary result = generateManifest(null);
