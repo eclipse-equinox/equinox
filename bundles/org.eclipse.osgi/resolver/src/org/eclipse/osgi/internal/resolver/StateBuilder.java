@@ -152,7 +152,6 @@ class StateBuilder {
 			if (dynamic) {
 				result.setResolution(ImportPackageSpecification.RESOLUTION_DYNAMIC);
 			} else {
-				result.setPropagate(ManifestElement.getArrayFromList(importPackage.getDirective(Constants.GROUPING_DIRECTIVE)));
 				result.setResolution(getResolution(importPackage.getDirective(Constants.RESOLUTION_DIRECTIVE)));
 			}
 
@@ -192,11 +191,6 @@ class StateBuilder {
 			if (versionString != null)
 				result.setVersion(Version.parseVersion(versionString));
 
-			// alway setting the grouping here even for manifestVersion==1 because if it is null
-			// the result will return a grouping equal to the package name which is unique and will
-			// give the same behavior as OSGi R3.
-			// TODO remove grouping !!!
-			result.setGrouping(exportPackage.getDirective(Constants.GROUPING_DIRECTIVE));
 			result.setUses(ManifestElement.getArrayFromList(exportPackage.getDirective(Constants.USES_DIRECTIVE)));
 
 			// set the rest of the attributes

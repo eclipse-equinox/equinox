@@ -138,8 +138,8 @@ public class TestRFC79_007 extends AbstractStateTest {
 		BundleDescription bundle = null;
 		dictionary_1.put("Bundle-ManifestVersion", "2");
 		dictionary_1.put("Bundle-SymbolicName", "A");
-		dictionary_1.put("Export-Package", "P; grouping:=X, R; grouping:=Y");
-		dictionary_1.put("Import-Package", "Q; version=\"[1, 1]\"; grouping:=X");
+		dictionary_1.put("Export-Package", "P; uses:=Q, R");
+		dictionary_1.put("Import-Package", "Q; version=\"[1, 1]\"");
 		try {
 			bundle = sof.createBundleDescription(dictionary_1, "bundle_1", 1);
 		} catch (BundleException be) {

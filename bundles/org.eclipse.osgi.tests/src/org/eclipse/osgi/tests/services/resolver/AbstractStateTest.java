@@ -81,7 +81,7 @@ public abstract class AbstractStateTest extends OSGiTest {
 		assertEquals(tag + ".1", original.getVersion(), copy.getVersion());
 		assertEquals(tag + ".2", original.getAttributes(), copy.getAttributes());
 		assertEquals(tag + ".3", original.getExclude(), copy.getExclude());
-		assertEquals(tag + ".4", original.getGrouping(), copy.getGrouping());
+		assertEquals(tag + ".4", original.getUses(), copy.getUses());
 		assertEquals(tag + ".5", original.getInclude(), copy.getInclude());
 		assertEquals(tag + ".6", original.getMandatory(), copy.getMandatory());
 	}
@@ -131,7 +131,6 @@ public abstract class AbstractStateTest extends OSGiTest {
 		assertEquals(tag + ".1", original.getAttributes(), copy.getAttributes());
 		assertEquals(tag + ".2", original.getBundleSymbolicName(), copy.getBundleSymbolicName());
 		assertEquals(tag + ".3", original.getBundleVersionRange(), copy.getBundleVersionRange());
-		assertEquals(tag + ".4", original.getPropagate(), original.getPropagate());
 		assertEquals(tag + ".5", original.getResolution(), original.getResolution());
 	}
 

@@ -159,7 +159,7 @@ public class TestRFC79_004 extends AbstractStateTest {
 		BundleDescription bundle = null;
 		dictionary_3.put("Bundle-ManifestVersion", "2");
 		dictionary_3.put("Bundle-SymbolicName", "ApacheCommons");
-		dictionary_3.put("Export-Package", "org.apache.commons.logging; org.apache.commons.io; version=2.0.0; grouping:=commons");
+		dictionary_3.put("Export-Package", "org.apache.commons.logging; org.apache.commons.io; version=2.0.0; uses:=\"org.apache.commons.logging,org.apache.commons.io\"");
 		try {
 			bundle = sof.createBundleDescription(dictionary_3, "bundle_3", 3);
 		} catch (BundleException be) {
@@ -173,7 +173,7 @@ public class TestRFC79_004 extends AbstractStateTest {
 		BundleDescription bundle = null;
 		dictionary_4.put("Bundle-ManifestVersion", "2");
 		dictionary_4.put("Bundle-SymbolicName", "ApacheCommons'");
-		dictionary_4.put("Export-Package", "org.apache.commons.logging; org.apache.commons.io; version=2.1.0; grouping:=commons");
+		dictionary_4.put("Export-Package", "org.apache.commons.logging; org.apache.commons.io; version=2.1.0; uses:=\"org.apache.commons.logging,org.apache.commons.io\"");
 		try {
 			bundle = sof.createBundleDescription(dictionary_4, "bundle_4", 4);
 		} catch (BundleException be) {

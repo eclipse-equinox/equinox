@@ -222,8 +222,8 @@ public class TestRFC79_006 extends AbstractStateTest {
 		BundleDescription bundle = null;
 		dictionary_6.put("Bundle-ManifestVersion", "2");
 		dictionary_6.put("Bundle-SymbolicName", "JAXP");
-		dictionary_6.put("Export-Package", "javax.xml.parsers; version=1.1.0; grouping:=jaxp");
-		dictionary_6.put("Import-Package", "org.w3c.dom; version=\"[2.1.0, 2.1.0]\"; grouping:=jaxp, org.xml.sax; version=\"[1.3.0, 1.3.0]\"; grouping:=jaxp");
+		dictionary_6.put("Export-Package", "javax.xml.parsers; version=1.1.0; uses:=\"org.w3c.dom,org.xml.sax\"");
+		dictionary_6.put("Import-Package", "org.w3c.dom; version=\"[2.1.0, 2.1.0]\", org.xml.sax; version=\"[1.3.0, 1.3.0]\"");
 		try {
 			bundle = sof.createBundleDescription(dictionary_6, "bundle_6", 6);
 		} catch (BundleException be) {

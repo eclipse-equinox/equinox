@@ -121,7 +121,7 @@ public class TestGrouping_006 extends AbstractStateTest {
 		BundleDescription bundle = null;
 		dictionary_3.put("Bundle-ManifestVersion", "2");
 		dictionary_3.put("Bundle-SymbolicName", "C");
-		dictionary_3.put("Export-Package", "x; y; grouping:=g0");
+		dictionary_3.put("Export-Package", "x; y; uses:=\"x,y\"");
 		try {
 			bundle = sof.createBundleDescription(dictionary_3, "bundle_3", 3);
 		} catch (BundleException be) {

@@ -176,7 +176,7 @@ public class TestPropagation_004 extends AbstractStateTest {
 		BundleDescription bundle = null;
 		dictionary_1.put("Bundle-ManifestVersion", "2");
 		dictionary_1.put("Bundle-SymbolicName", "A");
-		dictionary_1.put("Import-Package", "p, q, s");
+		dictionary_1.put("Import-Package", "p, q, s; bundle-symbolic-name=B");
 		try {
 			bundle = sof.createBundleDescription(dictionary_1, "bundle_1", 1);
 		} catch (BundleException be) {
@@ -190,9 +190,9 @@ public class TestPropagation_004 extends AbstractStateTest {
 		BundleDescription bundle = null;
 		dictionary_2.put("Bundle-ManifestVersion", "2");
 		dictionary_2.put("Bundle-SymbolicName", "B");
-		dictionary_2.put("Require-Bundle", "C, D");
-		dictionary_2.put("Export-Package", "p; grouping:=g0");
-		dictionary_2.put("Reexport-Package", "s; grouping:=g0");
+		dictionary_2.put("Require-Bundle", "C, D; visibility:=reexport");
+		dictionary_2.put("Export-Package", "p; uses:=s");
+		//dictionary_2.put("Reexport-Package", "s; uses:=p");
 		try {
 			bundle = sof.createBundleDescription(dictionary_2, "bundle_2", 2);
 		} catch (BundleException be) {
@@ -206,8 +206,8 @@ public class TestPropagation_004 extends AbstractStateTest {
 		BundleDescription bundle = null;
 		dictionary_3.put("Bundle-ManifestVersion", "2");
 		dictionary_3.put("Bundle-SymbolicName", "C");
-		dictionary_3.put("Export-Package", "r; grouping:=g0");
-		dictionary_3.put("Import-Package", "q; bundle-symbolic-name=E; grouping:=g0");
+		dictionary_3.put("Export-Package", "r; uses:=q");
+		dictionary_3.put("Import-Package", "q; bundle-symbolic-name=E; uses:=r");
 		try {
 			bundle = sof.createBundleDescription(dictionary_3, "bundle_3", 3);
 		} catch (BundleException be) {
@@ -221,8 +221,8 @@ public class TestPropagation_004 extends AbstractStateTest {
 		BundleDescription bundle = null;
 		dictionary_4.put("Bundle-ManifestVersion", "2");
 		dictionary_4.put("Bundle-SymbolicName", "D");
-		dictionary_4.put("Export-Package", "s; grouping:=g0");
-		dictionary_4.put("Import-Package", "q; bundle-symbolic-name=F; grouping:=g0");
+		dictionary_4.put("Export-Package", "s; uses:=q");
+		dictionary_4.put("Import-Package", "q; bundle-symbolic-name=F; uses:=s");
 		try {
 			bundle = sof.createBundleDescription(dictionary_4, "bundle_4", 4);
 		} catch (BundleException be) {

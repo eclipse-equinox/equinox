@@ -155,7 +155,7 @@ public class TestGrouping_007 extends AbstractStateTest {
 		BundleDescription bundle = null;
 		dictionary_1.put("Bundle-ManifestVersion", "2");
 		dictionary_1.put("Bundle-SymbolicName", "A");
-		dictionary_1.put("Import-Package", "x; y; bundle-symbolic-name=B, z");
+		dictionary_1.put("Import-Package", "x; y; bundle-symbolic-name=B, z; bundle-symbolic-name=C");
 		try {
 			bundle = sof.createBundleDescription(dictionary_1, "bundle_1", 1);
 		} catch (BundleException be) {
@@ -183,8 +183,8 @@ public class TestGrouping_007 extends AbstractStateTest {
 		BundleDescription bundle = null;
 		dictionary_3.put("Bundle-ManifestVersion", "2");
 		dictionary_3.put("Bundle-SymbolicName", "C");
-		dictionary_3.put("Export-Package", "z; grouping:=g0");
-		dictionary_3.put("Reexport-Package", "x; y; grouping:=g0");
+		dictionary_3.put("Export-Package", "z; uses:=\"x,y\"");
+		dictionary_3.put("Reexport-Package", "x; y");
 		dictionary_3.put("Import-Package", "x; y; bundle-symbolic-name=D");
 		try {
 			bundle = sof.createBundleDescription(dictionary_3, "bundle_3", 3);
@@ -199,7 +199,7 @@ public class TestGrouping_007 extends AbstractStateTest {
 		BundleDescription bundle = null;
 		dictionary_4.put("Bundle-ManifestVersion", "2");
 		dictionary_4.put("Bundle-SymbolicName", "D");
-		dictionary_4.put("Export-Package", "x; y; grouping:=g0");
+		dictionary_4.put("Export-Package", "x; y; uses:=\"x,y\"");
 		try {
 			bundle = sof.createBundleDescription(dictionary_4, "bundle_4", 4);
 		} catch (BundleException be) {

@@ -128,7 +128,7 @@ public class TestDynamic_002 extends AbstractStateTest {
 		BundleDescription bundle = null;
 		dictionary_2.put("Bundle-ManifestVersion", "2");
 		dictionary_2.put("Bundle-SymbolicName", "B");
-		dictionary_2.put("Export-Package", "p; q; grouping:=g0");
+		dictionary_2.put("Export-Package", "p; q; uses:=\"p,q\"");
 		try {
 			bundle = sof.createBundleDescription(dictionary_2, "bundle_2", 2);
 		} catch (BundleException be) {
@@ -142,7 +142,7 @@ public class TestDynamic_002 extends AbstractStateTest {
 		BundleDescription bundle = null;
 		dictionary_3.put("Bundle-ManifestVersion", "2");
 		dictionary_3.put("Bundle-SymbolicName", "C");
-		dictionary_3.put("Export-Package", "q; r; grouping:=g0");
+		dictionary_3.put("Export-Package", "q; r; uses:=\"q,r\"");
 		try {
 			bundle = sof.createBundleDescription(dictionary_3, "bundle_3", 3);
 		} catch (BundleException be) {

@@ -33,7 +33,7 @@ class StateReader {
 	private boolean lazyLoad = true;
 	private int numBundles;
 
-	public static final byte STATE_CACHE_VERSION = 17;
+	public static final byte STATE_CACHE_VERSION = 18;
 	public static final byte NULL = 0;
 	public static final byte OBJECT = 1;
 	public static final byte INDEX = 2;
@@ -297,7 +297,6 @@ class StateReader {
 		addToObjectTable(exportPackageDesc, tableIndex);
 		exportPackageDesc.setTableIndex(tableIndex);
 		readBaseDescription(exportPackageDesc, in);
-		exportPackageDesc.setGrouping(readString(in, false));
 		exportPackageDesc.setInclude(readString(in, false));
 		exportPackageDesc.setExclude(readString(in, false));
 		exportPackageDesc.setRoot(in.readBoolean());
@@ -340,14 +339,6 @@ class StateReader {
 		result.setBundleSymbolicName(readString(in, false));
 		result.setBundleVersionRange(readVersionRange(in));
 		result.setResolution(in.readInt());
-
-		int propagateCount = in.readInt();
-		if (propagateCount > 0) {
-			String[] propagate = new String[propagateCount];
-			for (int i = 0; i < propagateCount; i++)
-				propagate[i] = readString(in, false);
-			result.setPropagate(propagate);
-		}
 
 		int attrCount = in.readInt();
 		if (attrCount > 0) {

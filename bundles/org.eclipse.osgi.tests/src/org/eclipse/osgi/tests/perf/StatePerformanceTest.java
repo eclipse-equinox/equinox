@@ -56,7 +56,7 @@ public class StatePerformanceTest extends AbstractStateTest {
 				if (importedPackageIndex > exportPackageCount)
 					importedPackageIndex = 1;
 				String packageName = "package." + index;
-				importPackages[j] = stateFactory.createImportPackageSpecification(packageName, new VersionRange("1.0.0"), null, null, null, ImportPackageSpecification.RESOLUTION_STATIC, null, null);
+				importPackages[j] = stateFactory.createImportPackageSpecification(packageName, new VersionRange("1.0.0"), null, null, ImportPackageSpecification.RESOLUTION_STATIC, null, null);
 			}
 
 			BundleSpecification[] requiredBundles = new BundleSpecification[Math.min(i, random.nextInt(5))];
