@@ -95,7 +95,7 @@ public class FileManager {
 		this.base = base;
 		this.lockMode = lockMode;
 		this.managerRoot = new File(base, MANAGER_FOLDER);
-		this.managerRoot.mkdir();
+		this.managerRoot.mkdirs();
 		this.tableFile = new File(managerRoot, TABLE_FILE);
 		this.lockFile = new File(managerRoot, LOCK_FILE);
 	}

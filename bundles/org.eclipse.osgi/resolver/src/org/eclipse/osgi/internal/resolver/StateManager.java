@@ -57,7 +57,7 @@ public class StateManager implements PlatformAdmin, Runnable {
 	}
 
 	private void readSystemState(BundleContext context, File stateLocation, long expectedTimeStamp) {
-		if (!stateLocation.isFile())
+		if (stateLocation == null || !stateLocation.isFile())
 			return;
 		if (DEBUG_READER)
 			readStartupTime = System.currentTimeMillis();
