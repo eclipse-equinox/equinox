@@ -27,7 +27,7 @@ public class BasicLocation implements Location {
 	private FileOutputStream fileStream;
 	private File lockFile;
 
-	private static String LOCK_FILENAME = ".lock";
+	private static String LOCK_FILENAME = ".metadata/.lock";
 
 	public BasicLocation(String property, URL defaultValue, boolean isReadOnly) {
 		super();
@@ -62,23 +62,54 @@ public class BasicLocation implements Location {
 		return isReadOnly;
 	}
 
+	/**
+	 * @deprecated
+	 */
 	public void setURL(URL value) throws IllegalStateException {
+		setURL(value , false);
+	}
+
+	public synchronized boolean setURL(URL value, boolean lock) throws IllegalStateException {
 		if (location != null)
 			throw new IllegalStateException("Cannot change the location once it is set");
+		File file = null;
+		if (value.getProtocol().equalsIgnoreCase("file"))
+			file = new File(value.getPath(), LOCK_FILENAME);
+		if (lock) {
+			try {
+				if (!lock(file))
+					return false;
+			} catch (IOException e) {
+				return false;
+			}
+		}
+		lockFile = file;
 		location = value;
 		System.getProperties().put(property, location.toExternalForm());
-		if (location.getProtocol().equalsIgnoreCase("file"))
-			lockFile = new File(location.getPath(), LOCK_FILENAME);
+		return true;
 	}
 
 	public void setParent(Location value) {
 		parent = value;
 	}
 
-	public boolean lock() throws IOException {
-		fileStream = new FileOutputStream(lockFile, true);
+	public synchronized boolean lock() throws IOException {
+		if (!isSet())
+			return false;
+		return lock(lockFile);
+	}
+
+	private boolean lock(File lock) throws IOException {
+		if (lock == null)
+			return false;
+		fileStream = new FileOutputStream(lock, true);
 		fileLock = fileStream.getChannel().tryLock();
-		return fileLock != null;
+		if (fileLock != null) 
+			return true;
+		fileStream.close();
+		fileStream = null;
+		fileLock = null;
+		return false;
 	}
 
 	public void release() {

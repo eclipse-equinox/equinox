@@ -66,8 +66,21 @@ public interface Location {
 	 * exception is thrown.
 	 * @param value the value of this location
 	 * @throws IllegalStateException if the location's value is already set
+	 * @deprecated use setURL(URL, boolean)
 	 */
 	public void setURL(URL value) throws IllegalStateException;
+
+	/**
+	 * Sets and optionally locks the location's value to the given URL.  If the location already has a value an 
+	 * exception is thrown.  If locking is requested and fails, false is returned and the URL
+	 * of this location is not set.
+	 * 
+	 * @param value the value of this location
+	 * @param lock whether or not to lock this location 
+	 * @return whether or not the location was successfully set and, if requested, locked.
+	 * @throws IllegalStateException if the location's value is already set
+	 */
+	public boolean setURL(URL value, boolean lock) throws IllegalStateException;
 
 	/**
 	 * Attempts to lock this location with a canonical locking mechanism and returns
