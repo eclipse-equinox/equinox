@@ -709,13 +709,19 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 				exporting = reload(newBundle);
 				manifestLocalization = null;
 			}
+			// indicate we have loaded from the new version of the bundle
+			reloaded = true; 
+			if (System.getSecurityManager() != null && (bundledata.getType() & (BundleData.TYPE_BOOTCLASSPATH_EXTENSION | BundleData.TYPE_FRAMEWORK_EXTENSION)) != 0) {
+				// must check for AllPermission before allow a bundle extension to be installed
+				try {
+					hasPermission(new AllPermission());
+				} catch (SecurityException se) {
+					throw new BundleException(Msg.formatter.getString("BUNDLE_EXTENSION_PERMISSION"), se); //$NON-NLS-1$
+				}
+			}
 			// send out unresolved events outside synch block (defect #80610)
 			if (st == RESOLVED)
 				framework.publishBundleEvent(BundleEvent.UNRESOLVED, this);
-			reloaded = true; /*
-			 * indicate we have loaded from the new version of
-			 * the bundle
-			 */
 			storage.commit(exporting);
 		} catch (BundleException e) {
 			try {

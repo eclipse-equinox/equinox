@@ -698,6 +698,14 @@ public class Framework implements EventDispatcher, EventPublisher {
 					bundledata.installNativeCode(nativepaths);
 				}
 				bundle.load();
+				if (System.getSecurityManager() != null && (bundledata.getType() & (BundleData.TYPE_BOOTCLASSPATH_EXTENSION | BundleData.TYPE_FRAMEWORK_EXTENSION)) != 0) {
+					// must check for AllPermission before allow a bundle extension to be installed
+					try {
+						bundle.hasPermission(new AllPermission());
+					} catch (SecurityException se) {
+						throw new BundleException(Msg.formatter.getString("BUNDLE_EXTENSION_PERMISSION"), se); //$NON-NLS-1$
+					}
+				}
 				storage.commit(false);
 			} catch (BundleException be) {
 				synchronized (bundles) {
