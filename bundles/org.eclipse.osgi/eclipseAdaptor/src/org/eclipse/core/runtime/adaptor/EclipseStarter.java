@@ -337,14 +337,16 @@ public class EclipseStarter {
 		File fileLocation = null;
 		boolean reference = false;
 		try {
-			url = new URL(name);
+			URL child = new URL(name);
+			url = new URL(new File(parent).toURL(), name);
 		} catch (MalformedURLException e) {
 			// TODO this is legacy support for non-URL names.  It should be removed eventually.
 			// if name was not a URL then construct one.  
 			// Assume it should be a reference and htat it is relative.  This support need not 
 			// be robust as it is temporary..
-			fileLocation = new File(parent, name);
-			url = new URL(REFERENCE_PROTOCOL, null, FILE_SCHEME + fileLocation.toString());
+			File child = new File(name);
+			fileLocation = child.isAbsolute() ? child : new File(parent, name);
+			url = new URL(REFERENCE_PROTOCOL, null, fileLocation.toURL().toExternalForm());
 			reference = true;
 		}
 		// if the name was a URL then see if it is relative.  If so, insert syspath.
@@ -354,9 +356,10 @@ public class EclipseStarter {
 			if (url.getProtocol().equals(REFERENCE_PROTOCOL)) {
 				reference = true;
 				String baseSpec = url.getFile();
-				if (baseSpec.startsWith(FILE_SCHEME))
-					baseURL = new File(baseSpec.substring(5)).toURL();
-				else
+				if (baseSpec.startsWith(FILE_SCHEME)) {
+					File child = new File(baseSpec.substring(5));
+					baseURL = child.isAbsolute() ? child.toURL() : new File(parent, child.getPath()).toURL();
+				} else
 					baseURL = new URL(baseSpec);
 			}
 
