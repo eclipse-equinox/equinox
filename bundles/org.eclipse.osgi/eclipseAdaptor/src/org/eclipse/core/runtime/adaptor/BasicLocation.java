@@ -75,9 +75,11 @@ public class BasicLocation implements Location {
 		File file = null;
 		if (value.getProtocol().equalsIgnoreCase("file")) {
 			file = new File(value.getPath(), LOCK_FILENAME);
-			boolean creation = file.mkdirs();
-			if (! creation)
-				return false;
+			file = file.getParentFile();
+			if (!file.exists()) {
+				if (!file.mkdirs())
+					return false;
+			}
 		}
 		if (lock) {
 			try {
