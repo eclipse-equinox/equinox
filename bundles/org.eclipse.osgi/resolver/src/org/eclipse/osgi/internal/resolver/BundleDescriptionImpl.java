@@ -153,6 +153,7 @@ public class BundleDescriptionImpl implements BundleDescription, KeyedElement {
 	public int getKeyHashCode() {
 		return (int) (bundleId % Integer.MAX_VALUE);
 	}
+	// TODO: to remove before we freeze
 	public VersionConstraint[] getUnsatisfiedConstraints() {
 		return StateHelper.getUnsatisfiedConstraints(this);
 	}

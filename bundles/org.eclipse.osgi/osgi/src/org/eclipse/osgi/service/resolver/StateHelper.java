@@ -11,8 +11,6 @@
 package org.eclipse.osgi.service.resolver;
 
 import java.util.*;
-import org.eclipse.osgi.framework.internal.core.KeyedElement;
-import org.eclipse.osgi.framework.internal.core.KeyedHashSet;
 
 /**
  * A helper class that provides convenience methods for manipulating 
@@ -31,11 +29,11 @@ public class StateHelper {
 		if (roots == null || roots.length == 0)
 			return new BundleDescription[0];
 		Set remaining = new HashSet(Arrays.asList(roots[0].getContainingState().getResolvedBundles()));
-		KeyedHashSet reachable = new KeyedHashSet(roots.length);
+		HashSet reachable = new HashSet(roots.length);
 		// put the roots in the graph
 		for (int i = 0; i < roots.length; i++)
 			if (roots[i].isResolved()) {
-				reachable.add((KeyedElement) roots[i]);
+				reachable.add(roots[i]);
 				remaining.remove(roots[i]);
 			}
 		boolean changed;
@@ -45,31 +43,31 @@ public class StateHelper {
 			for (Iterator remainingIter = remaining.iterator(); remainingIter.hasNext(); ) {
 				BundleDescription candidate = (BundleDescription) remainingIter.next();
 				if (isDependent(candidate, reachable)) {
-					reachable.add((KeyedElement) candidate);
+					reachable.add(candidate);
 					remainingIter.remove();
 					changed = true;
 				}
 			}
 		} while (changed);
-		return (BundleDescription[]) reachable.elements(new BundleDescription[reachable.size()]);		
+		return (BundleDescription[]) reachable.toArray(new BundleDescription[reachable.size()]);		
 	}
 	/*
 	 * Returns whether a bundle has any dependency on any of the given bundles.   
 	 */
-	private static boolean isDependent(BundleDescription candidate, KeyedHashSet bundles) {
+	private static boolean isDependent(BundleDescription candidate, Set bundles) {
 		// is a fragment of any of them?
 		HostSpecification candidateHost = candidate.getHost();
-		if (candidateHost != null && candidateHost.isResolved() && bundles.contains((KeyedElement) candidateHost.getSupplier()))
+		if (candidateHost != null && candidateHost.isResolved() && bundles.contains(candidateHost.getSupplier()))
 			return true;
 		// does require any of them?		
 		BundleSpecification[] candidateRequired = candidate.getRequiredBundles();
 		for (int i = 0; i < candidateRequired.length; i++)
-			if (candidateRequired[i].isResolved() && bundles.contains((KeyedElement) candidateRequired[i].getSupplier()))
+			if (candidateRequired[i].isResolved() && bundles.contains(candidateRequired[i].getSupplier()))
 				return true;
 		// does import any of their packages?			
 		PackageSpecification[] candidatePackages = candidate.getPackages();
 		for (int i = 0; i < candidatePackages.length; i++)
-			if (candidatePackages[i].isResolved() && candidatePackages[i].getSupplier() != candidate && bundles.contains((KeyedElement) candidatePackages[i].getSupplier()))
+			if (candidatePackages[i].isResolved() && candidatePackages[i].getSupplier() != candidate && bundles.contains(candidatePackages[i].getSupplier()))
 				return true;
 		return false;
 	}
@@ -208,5 +206,5 @@ public class StateHelper {
 					return packages[j].getSupplier().getPackage(packageName);
 		}
 		return null;
-	}	
+	}
 }
