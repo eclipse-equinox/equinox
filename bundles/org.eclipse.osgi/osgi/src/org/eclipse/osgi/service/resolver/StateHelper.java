@@ -10,13 +10,17 @@
  *******************************************************************************/
 package org.eclipse.osgi.service.resolver;
 
-import java.util.*;
-
 /**
  * A helper class that provides convenience methods for manipulating 
- * state objects.
+ * state objects. <code>PlatformAdmin</code> provides an access point
+ * for a state helper.
+ * <p>
+ * Clients should not implement this interface.
+ * </p>
+ * 
+ * @see PlatformAdmin#getStateHelper
  */
-public class StateHelper {
+public interface StateHelper {
 	/**
 	 * Returns all bundles in the state depending on the given bundles. The given bundles
 	 * appear in the returned array.
@@ -25,52 +29,7 @@ public class StateHelper {
 	 * @return an array containing bundle descriptions for the given roots and all
 	 * bundles in the state that depend on them
 	 */
-	public static BundleDescription[] getDependentBundles(BundleDescription[] roots) {
-		if (roots == null || roots.length == 0)
-			return new BundleDescription[0];
-		Set remaining = new HashSet(Arrays.asList(roots[0].getContainingState().getResolvedBundles()));
-		Set reachable = new HashSet(roots.length);
-		// put the roots in the graph
-		for (int i = 0; i < roots.length; i++)
-			if (roots[i].isResolved()) {
-				reachable.add(roots[i]);
-				remaining.remove(roots[i]);
-			}
-		boolean changed;
-		do {
-			changed = false;
-			// start over each iteration
-			for (Iterator remainingIter = remaining.iterator(); remainingIter.hasNext(); ) {
-				BundleDescription candidate = (BundleDescription) remainingIter.next();
-				if (isDependent(candidate, reachable)) {
-					reachable.add(candidate);
-					remainingIter.remove();
-					changed = true;
-				}
-			}
-		} while (changed);
-		return (BundleDescription[]) reachable.toArray(new BundleDescription[reachable.size()]);		
-	}
-	/*
-	 * Returns whether a bundle has any dependency on any of the given bundles.   
-	 */
-	private static boolean isDependent(BundleDescription candidate, Set bundles) {
-		// is a fragment of any of them?
-		HostSpecification candidateHost = candidate.getHost();
-		if (candidateHost != null && candidateHost.isResolved() && bundles.contains(candidateHost.getSupplier()))
-			return true;
-		// does require any of them?		
-		BundleSpecification[] candidateRequired = candidate.getRequiredBundles();
-		for (int i = 0; i < candidateRequired.length; i++)
-			if (candidateRequired[i].isResolved() && bundles.contains(candidateRequired[i].getSupplier()))
-				return true;
-		// does import any of their packages?			
-		PackageSpecification[] candidatePackages = candidate.getPackages();
-		for (int i = 0; i < candidatePackages.length; i++)
-			if (candidatePackages[i].isResolved() && candidatePackages[i].getSupplier() != candidate && bundles.contains(candidatePackages[i].getSupplier()))
-				return true;
-		return false;
-	}
+	public BundleDescription[] getDependentBundles(BundleDescription[] roots);
 	/**
 	 * Returns all unsatisfied constraints in the given bundle. Returns an 
 	 * empty array if no unsatisfied constraints can be found.
@@ -82,26 +41,7 @@ public class StateHelper {
 	 * @param bundle the bundle to examine
 	 * @return an array containing all unsatisfied constraints for the given bundle
 	 */
-	public static VersionConstraint[] getUnsatisfiedConstraints(BundleDescription bundle) {
-		State containingState = bundle.getContainingState();
-		if (containingState == null)
-			// it is a bug in the client to call this method when not attached to a state
-			throw new IllegalStateException("Does not belong to a state"); //$NON-NLS-1$		
-		List unsatisfied = new ArrayList(); 
-		HostSpecification[] hosts = bundle.getHosts();
-		for (int i = 0; i < hosts.length; i++)
-			if (!hosts[i].isResolved() && !isResolvable(hosts[i]))
-			unsatisfied.add(hosts[i]);
-		BundleSpecification[] requiredBundles = bundle.getRequiredBundles();
-		for (int i = 0; i < requiredBundles.length; i++)
-			if (!requiredBundles[i].isResolved() && !isResolvable(requiredBundles[i]))
-				unsatisfied.add(requiredBundles[i]);
-		PackageSpecification[] packages = bundle.getPackages();
-		for (int i = 0; i < packages.length; i++)
-			if (!packages[i].isResolved() && !isResolvable(packages[i]))
-				unsatisfied.add(packages[i]);			
-		return (VersionConstraint[]) unsatisfied.toArray(new VersionConstraint[unsatisfied.size()]);
-	}
+	public VersionConstraint[] getUnsatisfiedConstraints(BundleDescription bundle);
 	/**
 	 * Returns whether the given package specification constraint is resolvable. 
 	 * A package specification constraint may be 
@@ -113,14 +53,7 @@ public class StateHelper {
 	 * @return <code>true</code> if the constraint can be resolved, 
 	 * <code>false</code> otherwise
 	 */
-	public static boolean isResolvable(PackageSpecification specification) {
-		if (specification.isExported())
-			return true;
-		PackageSpecification exported = getExportedPackage(specification.getBundle().getContainingState(), specification.getName(), null);
-		if (exported == null)
-			return false;
-		return specification.isSatisfiedBy(exported.getVersionSpecification());		
-	}
+	public boolean isResolvable(PackageSpecification specification);
 	/**
 	 * Returns whether the given host specification constraint is resolvable. 
 	 * A bundle specification constraint may be 
@@ -132,9 +65,7 @@ public class StateHelper {
 	 * @return <code>true</code> if the constraint can be resolved, 
 	 * <code>false</code> otherwise
 	 */
-	public static boolean isResolvable(BundleSpecification specification) {
-		return isBundleConstraintResolvable(specification);
-	}
+	public boolean isResolvable(BundleSpecification specification);
 	/**
 	 * Returns whether the given host specification constraint is resolvable. 
 	 * A host specification constraint may be 
@@ -146,19 +77,7 @@ public class StateHelper {
 	 * @return <code>true</code> if the constraint can be resolved, 
 	 * <code>false</code> otherwise
 	 */
-	public static boolean isResolvable(HostSpecification specification) {
-		return isBundleConstraintResolvable(specification);
-	}
-	/*
-	 * Returns whether a bundle specification/host specification can be resolved.
-	 */
-	private static boolean isBundleConstraintResolvable(VersionConstraint constraint) {		
-		BundleDescription[] availableBundles = constraint.getBundle().getContainingState().getBundles(constraint.getName());
-		for (int i = 0; i < availableBundles.length; i++)
-			if (availableBundles[i].isResolved() && constraint.isSatisfiedBy(availableBundles[i].getVersion()))
-				return true;
-		return false;
-	}
+	public boolean isResolvable(HostSpecification specification);
 	/**
 	 * Returns all packages exported by the given bundle. Returns an empty array 
 	 * if no packages are exported.
@@ -166,22 +85,7 @@ public class StateHelper {
 	 * @param bundle the bundle
 	 * @return all packages exported by the given bundle
 	 */
-	public static PackageSpecification[] getExportedPackages(BundleDescription bundle) {
-		if (!bundle.isResolved())
-			return new PackageSpecification[0];
-		PackageSpecification[] allPackages = bundle.getPackages();
-		PackageSpecification[] exported = new PackageSpecification[allPackages.length];
-		int exportedCount = 0;
-		for (int i = 0; i < allPackages.length; i++)
-			if (allPackages[i].isExported() && allPackages[i].getSupplier() == bundle)
-				exported[exportedCount++] = allPackages[i];
-		if (exportedCount < exported.length) {
-			PackageSpecification[] tmpExported = new PackageSpecification[exportedCount];
-			System.arraycopy(exported, 0, tmpExported, 0, exportedCount);
-			exported = tmpExported;
-		}
-		return exported;
-	}
+	public PackageSpecification[] getExportedPackages(BundleDescription bundle);
 	/**
 	 * Returns the package specification corresponding to the given 
 	 * package name/version that has been elected to be exported in the given 
@@ -196,15 +100,5 @@ public class StateHelper {
 	 * @param version the version of the package (can be <code>null</code>)
 	 * @return
 	 */
-	public static PackageSpecification getExportedPackage(State state, String packageName, Version version) {
-		BundleDescription[] resolvedBundles = state.getResolvedBundles();
-		boolean ignoreVersion = version == null;
-		for (int i = 0; i < resolvedBundles.length; i++) {
-			PackageSpecification[] packages = resolvedBundles[i].getPackages();
-			for (int j = 0; i < packages.length; j++)
-				if (packages[j].getName().equals(packageName) && (ignoreVersion || packages[i].getVersionSpecification().equals(version)) && (packages[j].getSupplier() != null))
-					return packages[j].getSupplier().getPackage(packageName);
-		}
-		return null;
-	}
+	public PackageSpecification getExportedPackage(State state, String packageName, Version version);
 }

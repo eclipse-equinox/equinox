@@ -43,8 +43,19 @@ public interface PlatformAdmin {
 	 * @param mutable whether the returned state should mutable
 	 * @return a state representing the current framework.
 	 */
-	public State getState(boolean mutable);	
-	
+	public State getState(boolean mutable);
+	/**
+	 * Returns a state helper object. State helpers provide convenience methods 
+	 * for manipulating states. 
+	 * <p>
+	 * A possible implementation for this
+	 * method would provide the same single StateHelper instance to all clients.
+	 * </p>
+	 * 
+	 * @return a state helper
+	 * @see StateHelper
+	 */
+	public StateHelper getStateHelper();
 	/**
 	 * Commit the differences between the current state and the given state.
 	 * The given state must return true from State.isResolved() or an exception 

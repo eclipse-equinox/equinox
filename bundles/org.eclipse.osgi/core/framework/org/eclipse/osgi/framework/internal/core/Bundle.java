@@ -1473,7 +1473,7 @@ public abstract class Bundle
 		if (bundleDescription.isResolved()) {
 			throw new IllegalStateException("bundle *is* resolved");
 		}
-		VersionConstraint[] unsatisfied = StateHelper.getUnsatisfiedConstraints(bundleDescription);
+		VersionConstraint[] unsatisfied = framework.adaptor.getPlatformAdmin().getStateHelper().getUnsatisfiedConstraints(bundleDescription);
 		if (unsatisfied.length == 0) {
 			return Msg.formatter
 					.getString("BUNDLE_UNRESOLVED_NOT_CHOSEN_EXCEPTION");

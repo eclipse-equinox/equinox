@@ -207,6 +207,7 @@ public class EclipseStarter {
 	private static void logUnresolvedBundles(Bundle[] bundles) {
 		State state = adaptor.getState();
 		FrameworkLog logService = adaptor.getFrameworkLog();
+		StateHelper stateHelper = adaptor.getPlatformAdmin().getStateHelper();
 		for (int i = 0; i < bundles.length; i++)
 			if (bundles[i].getState() == Bundle.INSTALLED) {
 				String generalMessage = EclipseAdaptorMsg.formatter.getString("ECLIPSE_STARTUP_ERROR_BUNDLE_NOT_RESOLVED", bundles[i]);
@@ -214,7 +215,7 @@ public class EclipseStarter {
 				// for some reason, the state does not know about that bundle
 				if (description == null)
 					continue;
-				VersionConstraint[] unsatisfied = StateHelper.getUnsatisfiedConstraints(description);
+				VersionConstraint[] unsatisfied = stateHelper.getUnsatisfiedConstraints(description);
 				// the bundle wasn't resolved but none of its constraints were
 				// unsatisfiable
 				FrameworkLogEntry[] logChildren = unsatisfied.length == 0 ? null : new FrameworkLogEntry[unsatisfied.length];

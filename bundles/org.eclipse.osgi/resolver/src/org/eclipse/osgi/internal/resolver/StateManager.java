@@ -132,6 +132,9 @@ public class StateManager implements PlatformAdmin {
 	public Resolver getResolver() {
 		return new ResolverImpl();
 	}
+	public StateHelper getStateHelper() {
+		return StateHelperImpl.getInstance();
+	}
 	public File getStateLocation() {
 		return stateLocation;
 	}

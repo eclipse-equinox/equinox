@@ -155,7 +155,7 @@ public class BundleDescriptionImpl implements BundleDescription, KeyedElement {
 	}
 	// TODO: to remove before we freeze
 	public VersionConstraint[] getUnsatisfiedConstraints() {
-		return StateHelper.getUnsatisfiedConstraints(this);
+		return StateHelperImpl.getInstance().getUnsatisfiedConstraints(this);
 	}
 	public boolean isSingleton() {
 		return singleton;
