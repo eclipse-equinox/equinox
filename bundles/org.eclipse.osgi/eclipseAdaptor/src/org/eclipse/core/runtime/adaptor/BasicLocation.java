@@ -38,6 +38,9 @@ public class BasicLocation implements Location {
 	}
 
 	public static Locker createLocker(File lock, String lockMode) {
+		if (lockMode == null)
+			lockMode = System.getProperties().getProperty(PROP_OSGI_LOCKING);
+		
 		if ("none".equals(lockMode)) //$NON-NLS-1$
 			return null;
 		
