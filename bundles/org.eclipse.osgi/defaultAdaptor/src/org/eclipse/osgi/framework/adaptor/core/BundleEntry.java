@@ -103,7 +103,7 @@ public abstract class BundleEntry {
 		 * @exception java.io.IOException
 		 */
 		public InputStream getInputStream() throws IOException {
-			return (zipFile.getInputStream(zipEntry));
+			return (zipFile.getInputStream(zipEntry));	//TODO No secureAction call is made whereas one is made in FileBundleEntry
 		}
 		/**
 		 * Return size of the uncompressed entry.
@@ -166,7 +166,7 @@ public abstract class BundleEntry {
 		private String name;
 
 		/**
-		 * Constructs the BundleEntry using a ZipEntry.
+		 * Constructs the BundleEntry using a ZipEntry.	//TODO Bogus comment
 		 * @param bundleFile BundleFile object this entry is a member of
 		 * @param entry ZipEntry object of this entry
 		 */

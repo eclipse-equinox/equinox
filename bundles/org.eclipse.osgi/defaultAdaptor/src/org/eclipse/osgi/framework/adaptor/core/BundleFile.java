@@ -32,7 +32,7 @@ abstract public class BundleFile {
 	/**
 	 * The BundleData object for this bundle.
 	 */
-	protected BundleData bundledata;
+	protected BundleData bundledata;	//TODO This could be moved into Zip
 
 	/**
 	 * BundleFile constructor
@@ -419,6 +419,7 @@ abstract public class BundleFile {
 		}
 	}
 
+	//TODO Add a comment
 	public static class DirZipBundleFile extends BundleFile {
 		ZipBundleFile zipBundlefile;
 		String cp;
