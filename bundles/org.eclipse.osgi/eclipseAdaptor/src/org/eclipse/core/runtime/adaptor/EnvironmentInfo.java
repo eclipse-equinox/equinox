@@ -95,8 +95,7 @@ public class EnvironmentInfo implements org.eclipse.osgi.service.environment.Env
 	 * when run from the executable.
 	 */
 	private static void setupSystemContext() {
-		// if the user didn't set the locale with a command line argument then
-		// use the default.
+		// if the user didn't set the locale with a command line argument then use the default.
 		nl = System.getProperty("osgi.nl"); //$NON-NLS-1$
 		if (nl != null) {
 			StringTokenizer tokenizer = new StringTokenizer(nl, "_"); //$NON-NLS-1$
@@ -121,6 +120,7 @@ public class EnvironmentInfo implements org.eclipse.osgi.service.environment.Env
 						break;
 				}
 				Locale.setDefault(userLocale);
+				System.getProperties().put("osgi.nl.user", nl); //$NON-NLS-1$
 			} catch (NoSuchElementException e) {
 				// fall through and use the default
 			}
