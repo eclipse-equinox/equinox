@@ -56,15 +56,24 @@ public class EclipseAdaptor extends DefaultAdaptor {
 	public static final byte BUNDLEDATA_VERSION = 4;
 	public static final byte NULL = 0;
 	public static final byte OBJECT = 1;
+	
+	private static EclipseAdaptor instance;
 
 	private int startLevel = 1;
 	private long timeStamp = 0;
 	private String installURL = null;
 
-
+	/*
+	 * Should be instantiated only by the framework (through reflection). 
+	 */
 	public EclipseAdaptor(String[] args) {
 		super(args);
+		instance = this;
 		setDebugOptions();
+	}
+	
+	public static EclipseAdaptor getDefault() {
+		return instance;
 	}
 
 	protected void initDataRootDir(){
