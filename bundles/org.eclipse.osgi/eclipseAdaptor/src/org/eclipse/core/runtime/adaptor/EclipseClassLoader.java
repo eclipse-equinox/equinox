@@ -193,17 +193,17 @@ public class EclipseClassLoader extends DefaultClassLoader {
 			return;
 		}
 		if (var.equals("ws")) { //$NON-NLS-1$
-			super.findClassPathEntry(result, "ws/" + System.getProperties().getProperty("osgi.ws") + "/" + entry.substring(4), bundledata, domain); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			super.findClassPathEntry(result, "ws/" + System.getProperties().getProperty("osgi.ws") + entry.substring(4), bundledata, domain); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			return;
 		}
 		if (var.equals("os")) { //$NON-NLS-1$
-			super.findClassPathEntry(result, "os/" + System.getProperties().getProperty("osgi.os") + "/" + entry.substring(4), bundledata, domain); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			super.findClassPathEntry(result, "os/" + System.getProperties().getProperty("osgi.os") + entry.substring(4), bundledata, domain); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			return;
 		}
 		if (var.equals("nl")) { //$NON-NLS-1$
 			entry = entry.substring(4);
 			for (int i = 0; i < NL_JAR_VARIANTS.length; i++) {
-				if (addClassPathEntry(result, "nl/" + NL_JAR_VARIANTS[i] + "/" + entry, bundledata, domain)) //$NON-NLS-1$ //$NON-NLS-2$
+				if (addClassPathEntry(result, "nl/" + NL_JAR_VARIANTS[i] + entry, bundledata, domain)) //$NON-NLS-1$ //$NON-NLS-2$
 					return;
 			}
 			// is we are not in development mode, post some framework errors.
