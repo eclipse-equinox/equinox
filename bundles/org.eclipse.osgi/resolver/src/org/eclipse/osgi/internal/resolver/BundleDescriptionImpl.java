@@ -33,6 +33,7 @@ public class BundleDescriptionImpl extends BaseDescriptionImpl implements Bundle
 	private StateImpl containingState;
 
 	private Object userObject;
+	private int lazyDataOffset = -1;
 	private int lazyDataSize = -1;
 
 	//TODO These could be arrays
@@ -368,6 +369,14 @@ public class BundleDescriptionImpl extends BaseDescriptionImpl implements Bundle
 		return (stateBits & FULLY_LOADED) != 0;
 	}
 
+	void setLazyDataOffset(int lazyDataOffset) {
+		this.lazyDataOffset = lazyDataOffset;
+	}
+
+	int getLazyDataOffset() {
+		return this.lazyDataOffset;
+	}
+
 	void setLazyDataSize(int lazyDataSize) {
 		this.lazyDataSize = lazyDataSize;
 	}
@@ -403,13 +412,18 @@ public class BundleDescriptionImpl extends BaseDescriptionImpl implements Bundle
 		lazyData.resolvedImports = newImports;
 	}
 
-	synchronized void unload(long currentTime, long expireTime) {
+	void unload(long currentTime, long expireTime) {
 		if ((stateBits & LAZY_LOADED) == 0)
 			return;
 		if (!isFullyLoaded() || (currentTime - lazyTimeStamp - expireTime) <= 0)
 			return;
 		setFullyLoaded(false);
+		LazyData tempData = lazyData;
 		lazyData = null;
+		if (tempData == null || tempData.selectedExports == null)
+			return;
+		for (int i = 0; i < tempData.selectedExports.length; i++)
+			containingState.getReader().objectTable.remove(new Integer(((ExportPackageDescriptionImpl)tempData.selectedExports[i]).getTableIndex()));
 	}
 
 	private void checkLazyData() {

@@ -498,7 +498,7 @@ public abstract class StateImpl implements State {
 	StateReader getReader() {
 		return reader;
 	}
-	synchronized void fullyLoad() {
+	void fullyLoad() {
 		if (fullyLoaded == true)
 			return;
 		if (reader != null && reader.isLazyLoaded())
@@ -507,10 +507,13 @@ public abstract class StateImpl implements State {
 	}
 
 	
-	synchronized void unloadLazyData(long expireTime) {
+	void unloadLazyData(long expireTime) {
 		long currentTime = System.currentTimeMillis();
 		BundleDescription[] bundles = getBundles();
-		for (int i = 0; i < bundles.length; i++)
-			((BundleDescriptionImpl)bundles[i]).unload(currentTime, expireTime);
+		// make sure no other thread is trying to unload or load
+		synchronized (reader) {
+			for (int i = 0; i < bundles.length; i++)
+				((BundleDescriptionImpl)bundles[i]).unload(currentTime, expireTime);
+		}
 	}
 }

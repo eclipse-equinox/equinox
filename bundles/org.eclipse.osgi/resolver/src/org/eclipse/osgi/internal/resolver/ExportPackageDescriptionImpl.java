@@ -23,6 +23,7 @@ public class ExportPackageDescriptionImpl extends BaseDescriptionImpl implements
 	private String include;
 	private String[] mandatory;
 	private boolean root;
+	private int tableIndex;
 
 	public String getGrouping() {
 		if (grouping == null)
@@ -88,5 +89,13 @@ public class ExportPackageDescriptionImpl extends BaseDescriptionImpl implements
 
 	public String toString() {
 		return "Export-Package: " + getName() + "; version=\"" + getVersion() + "\"";  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+	}
+
+	int getTableIndex() {
+		return tableIndex;
+	}
+
+	void setTableIndex(int tableIndex) {
+		this.tableIndex = tableIndex;
 	}
 }

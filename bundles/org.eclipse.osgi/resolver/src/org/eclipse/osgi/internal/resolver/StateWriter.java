@@ -21,13 +21,13 @@ class StateWriter {
 	// like BundleDescription, ExportPackageDescription, Version etc.. The integer
 	// index value will be used in the cache to allow cross-references in the
 	// cached state.
-	protected Map objectTable = new HashMap();
-
-	public static final byte NULL = 0;
-	public static final byte OBJECT = 1;
-	public static final byte INDEX = 2;
+	private Map objectTable = new HashMap();
+	private ArrayList forcedWrite = new ArrayList();
 
 	private int addToObjectTable(Object object) {
+		Integer cur = (Integer) objectTable.get(object);
+		if (cur != null)
+			return cur.intValue();
 		objectTable.put(object, new Integer(objectTable.size()));
 		// return the index of the object just added (i.e. size - 1)
 		return (objectTable.size() - 1);
@@ -48,7 +48,7 @@ class StateWriter {
 			return true;
 		// add this object to the object table first
 		int index = addToObjectTable(object);
-		out.writeByte(OBJECT);
+		out.writeByte(StateReader.OBJECT);
 		out.writeInt(index);
 		return false;
 	}
@@ -68,7 +68,7 @@ class StateWriter {
 		if (bundles.length == 0)
 			return;
 		for (int i = 0; i < bundles.length; i++)
-			writeBundleDescription(bundles[i], out);
+			writeBundleDescription(bundles[i], out, false);
 		out.writeBoolean(state.isResolved());
 		// save the lazy data offset
 		out.writeInt(out.size());
@@ -77,39 +77,58 @@ class StateWriter {
 	}
 
 	public void saveState(StateImpl state, File stateFile, File lazyFile) throws IOException {
-		DataOutputStream out = new DataOutputStream(new FileOutputStream(stateFile));
+		DataOutputStream outLazy = null;
+		DataOutputStream outState = null;
 		try {
-			out.write(StateReader.STATE_CACHE_VERSION);
-			if (writePrefix(state, out))
-				return;
-			out.writeLong(state.getTimeStamp());
-			Dictionary props = state.getPlatformProperties();
-			out.writeInt(StateImpl.PROPS.length);
-			for (int i = 0; i < StateImpl.PROPS.length; i++)
-				writePlatformProp(props.get(StateImpl.PROPS[i]), out);
 			BundleDescription[] bundles = state.getBundles();
 			StateHelperImpl.getInstance().sortBundles(bundles);
-			out.writeInt(bundles.length);
+			// need to prime the object table with all bundles
+			// this allows us to write only indexes to bundles in the lazy data
+			for (int i = 0; i < bundles.length; i++)
+				addToObjectTable(bundles[i]);
+			// first write the lazy data to get the offsets and sizes to the lazy data
+			outLazy = new DataOutputStream(new FileOutputStream(lazyFile));
+			for (int i = 0; i < bundles.length; i++)
+				writeBundleDescriptionLazyData(bundles[i], outLazy);
+			// now write the state data
+			outState = new DataOutputStream(new FileOutputStream(stateFile));
+			outState.write(StateReader.STATE_CACHE_VERSION);
+			if (writePrefix(state, outState))
+				return;
+			outState.writeLong(state.getTimeStamp());
+			Dictionary props = state.getPlatformProperties();
+			outState.writeInt(StateImpl.PROPS.length);
+			for (int i = 0; i < StateImpl.PROPS.length; i++)
+				writePlatformProp(props.get(StateImpl.PROPS[i]), outState);
+			outState.writeInt(bundles.length);
 			if (bundles.length == 0)
 				return;
 			for (int i = 0; i < bundles.length; i++)
-				writeBundleDescription(bundles[i], out);
-			out.writeBoolean(state.isResolved());
-			out.close();
-			//now switch to the lazy data file
-			out = new DataOutputStream(new FileOutputStream(lazyFile));
-			for (int i = 0; i < bundles.length; i++)
-				writeBundleDescriptionLazyData(bundles[i], out);
+				// write out each bundle with the force flag set to make sure
+				// the data is written at least once in the non-lazy state data
+				writeBundleDescription(bundles[i], outState, true);
+			outState.writeBoolean(state.isResolved());
 		} finally {
-			out.close();
+			if (outLazy != null)
+				try {
+					outLazy.close();
+				} catch (IOException e) {
+					// do nothing
+				}
+			if (outState != null)
+				try {
+					outState.close();
+				} catch (IOException e) {
+					// do nothing
+				}
 		}
 	}
 
 	private void writePlatformProp(Object obj, DataOutputStream out) throws IOException {
 		if (obj == null)
-			out.writeByte(NULL);
+			out.writeByte(StateReader.NULL);
 		else {
-			out.writeByte(OBJECT);
+			out.writeByte(StateReader.OBJECT);
 			if (obj instanceof String) {
 				out.writeInt(1);
 				writeStringOrNull((String) obj, out);
@@ -122,29 +141,45 @@ class StateWriter {
 		}
 	}
 
-	private void writeBundleDescription(BundleDescription bundle, DataOutputStream out) throws IOException {
-		if (writePrefix(bundle, out))
+	/*
+	 * The force flag is used when writing the non-lazy state data.  This forces the data to be
+	 * written once even if the object exists in the object table.
+	 * This is needed because we want to write the lazy data first but we only want
+	 * to include indexes to the actual bundles in the lazy data.  To do this we
+	 * prime the object table with all the bundles first.  Then we write the
+	 * lazy data.  Finally we write the non-lazy data and force a write of the
+	 * bundles data once even if the bundle is in the object table.
+	 */
+	private void writeBundleDescription(BundleDescription bundle, DataOutputStream out, boolean force) throws IOException {
+		if (force && !forcedWrite.contains(bundle)) {
+			int index = addToObjectTable(bundle);
+			out.writeByte(StateReader.OBJECT);
+			out.writeInt(index);
+			forcedWrite.add(bundle);
+		} else if (writePrefix(bundle, out))
 			return;
 		// first write out non-lazy loaded data
 		out.writeLong(bundle.getBundleId()); // ID must be the first thing
 		writeBaseDescription(bundle, out);
+		out.writeInt(((BundleDescriptionImpl) bundle).getLazyDataOffset());
+		out.writeInt(((BundleDescriptionImpl) bundle).getLazyDataSize());
 		out.writeBoolean(bundle.isResolved());
 		out.writeBoolean(bundle.isSingleton());
 		out.writeBoolean(bundle.hasDynamicImports());
-		writeHostSpec((HostSpecificationImpl) bundle.getHost(), out);
+		writeHostSpec((HostSpecificationImpl) bundle.getHost(), out, force);
 
 		List dependencies = ((BundleDescriptionImpl) bundle).getBundleDependencies();
 		out.writeInt(dependencies.size());
 		for (Iterator iter = dependencies.iterator(); iter.hasNext();)
-			writeBundleDescription((BundleDescription) iter.next(), out);
+			writeBundleDescription((BundleDescription) iter.next(), out, force);
 		// the rest is lazy loaded data
 	}
 
 	private void writeBundleDescriptionLazyData(BundleDescription bundle, DataOutputStream out) throws IOException {
-		int index = getFromObjectTable(bundle);
-		out.writeInt(index);
-
 		int dataStart = out.size(); // save the offset of lazy data start
+		int index = getFromObjectTable(bundle);
+		((BundleDescriptionImpl)bundle).setLazyDataOffset(out.size());
+		out.writeInt(index);
 
 		writeStringOrNull(bundle.getLocation(), out);
 		writeStringOrNull(bundle.getPlatformFilter(), out);
@@ -188,16 +223,16 @@ class StateWriter {
 		} else {
 			out.writeInt(resolvedRequires.length);
 			for (int i = 0; i < resolvedRequires.length; i++)
-				writeBundleDescription(resolvedRequires[i], out);
+				writeBundleDescription(resolvedRequires[i], out, false);
 		}
 
-		// write the size of the lazy data
-		out.writeInt(out.size() - dataStart);
+		// save the size of the lazy data
+		((BundleDescriptionImpl)bundle).setLazyDataSize(out.size() - dataStart);
 	}
 
 	private void writeBundleSpec(BundleSpecificationImpl bundle, DataOutputStream out) throws IOException {
 		writeVersionConstraint(bundle, out);
-		writeBundleDescription((BundleDescription) bundle.getSupplier(), out);
+		writeBundleDescription((BundleDescription) bundle.getSupplier(), out, false);
 		out.writeBoolean(bundle.isExported());
 		out.writeBoolean(bundle.isOptional());
 	}
@@ -247,7 +282,7 @@ class StateWriter {
 		if (importPackageSpec.getBundle().isResolved())
 			writeExportPackageDesc((ExportPackageDescriptionImpl) importPackageSpec.getSupplier(), out);
 		else
-			out.writeByte(NULL);
+			out.writeByte(StateReader.NULL);
 
 		writeStringOrNull(importPackageSpec.getBundleSymbolicName(), out);
 		writeVersionRange(importPackageSpec.getBundleVersionRange(), out);
@@ -277,12 +312,12 @@ class StateWriter {
 		}
 	}
 
-	private void writeHostSpec(HostSpecificationImpl host, DataOutputStream out) throws IOException {
+	private void writeHostSpec(HostSpecificationImpl host, DataOutputStream out, boolean force) throws IOException {
 		if (host == null) {
-			out.writeByte(NULL);
+			out.writeByte(StateReader.NULL);
 			return;
 		}
-		out.writeByte(OBJECT);
+		out.writeByte(StateReader.OBJECT);
 		writeVersionConstraint(host, out);
 		BundleDescription[] hosts = host.getHosts();
 		if (hosts == null) {
@@ -291,7 +326,7 @@ class StateWriter {
 		}
 		out.writeInt(hosts.length);
 		for (int i = 0; i < hosts.length; i++)
-			writeBundleDescription(hosts[i], out);
+			writeBundleDescription(hosts[i], out, force);
 	}
 
 	// called by writers for VersionConstraintImpl subclasses
@@ -302,10 +337,10 @@ class StateWriter {
 
 	private void writeVersion(Version version, DataOutputStream out) throws IOException {
 		if (version == null || version.equals(Version.emptyVersion)) {
-			out.writeByte(NULL);
+			out.writeByte(StateReader.NULL);
 			return;
 		}
-		out.writeByte(OBJECT);
+		out.writeByte(StateReader.OBJECT);
 		out.writeInt(version.getMajor());
 		out.writeInt(version.getMinor());
 		out.writeInt(version.getMicro());
@@ -314,10 +349,10 @@ class StateWriter {
 
 	private void writeVersionRange(VersionRange versionRange, DataOutputStream out) throws IOException {
 		if (versionRange == null || versionRange.equals(VersionRange.emptyRange)) {
-			out.writeByte(NULL);
+			out.writeByte(StateReader.NULL);
 			return;
 		}
-		out.writeByte(OBJECT);
+		out.writeByte(StateReader.OBJECT);
 		writeVersion(versionRange.getMinimum(), out);
 		out.writeBoolean(versionRange.getIncludeMinimum());
 		writeVersion(versionRange.getMaximum(), out);
@@ -326,13 +361,13 @@ class StateWriter {
 
 	private boolean writeIndex(Object object, DataOutputStream out) throws IOException {
 		if (object == null) {
-			out.writeByte(NULL);
+			out.writeByte(StateReader.NULL);
 			return true;
 		}
 		int index = getFromObjectTable(object);
 		if (index == -1)
 			return false;
-		out.writeByte(INDEX);
+		out.writeByte(StateReader.INDEX);
 		out.writeInt(index);
 		return true;
 	}
@@ -347,9 +382,9 @@ class StateWriter {
 
 	private void writeStringOrNull(String string, DataOutputStream out) throws IOException {
 		if (string == null)
-			out.writeByte(NULL);
+			out.writeByte(StateReader.NULL);
 		else {
-			out.writeByte(OBJECT);
+			out.writeByte(StateReader.OBJECT);
 			out.writeUTF(string);
 		}
 	}
