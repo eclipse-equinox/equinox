@@ -469,7 +469,6 @@ public class EclipseStarter {
 			if (args[i].equalsIgnoreCase(DEV) && ((i + 1 == args.length) || ((i + 1 < args.length) && (args[i + 1].startsWith("-"))))) { //$NON-NLS-1$
 				System.getProperties().put(PROP_DEV, "");	//$NON-NLS-1$
 				found = true;
-				continue;
 			}
 
 			// look for the initialization arg
@@ -488,7 +487,6 @@ public class EclipseStarter {
 			if (args[i].equalsIgnoreCase(CONSOLE) && ((i + 1 == args.length) || ((i + 1 < args.length) && (args[i + 1].startsWith("-"))))) { //$NON-NLS-1$
 				System.getProperties().put(PROP_CONSOLE, "");	//$NON-NLS-1$
 				found = true;
-				continue;
 			}
 
 			if (found) {
@@ -506,35 +504,30 @@ public class EclipseStarter {
 			if (args[i - 1].equalsIgnoreCase(CONSOLE)) {
 				System.getProperties().put(PROP_CONSOLE, arg);
 				found = true;
-				continue;
 			}
 	
 			// look for the configuration location .  
 			if (args[i - 1].equalsIgnoreCase(CONFIGURATION)) {
 				System.getProperties().put(LocationManager.PROP_CONFIG_AREA, arg);
 				found = true;
-				continue;
 			}
 	
 			// look for the data location for this instance.  
 			if (args[i - 1].equalsIgnoreCase(DATA)) {
 				System.getProperties().put(LocationManager.PROP_INSTANCE_AREA, arg);
 				found = true;
-				continue;
 			}
 	
 			// look for the user location for this instance.  
 			if (args[i - 1].equalsIgnoreCase(USER)) {
 				System.getProperties().put(LocationManager.PROP_USER_AREA, arg);
 				found = true;
-				continue;
 			}
 	
 			// look for the development mode and class path entries.  
 			if (args[i - 1].equalsIgnoreCase(DEV)) {
 				System.getProperties().put(PROP_DEV, arg);
 				found = true;
-				continue;
 			}
 	
 			// look for the debug mode and option file location.  
@@ -542,7 +535,6 @@ public class EclipseStarter {
 				System.getProperties().put(PROP_DEBUG, arg);
 				debug = true;
 				found = true;
-				continue;
 			}
 
 			// look for the window system.  
