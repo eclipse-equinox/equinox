@@ -1,5 +1,5 @@
 /*
- * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/util/tracker/ServiceTracker.java,v 1.3 2004/05/14 21:23:14 hargrave Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/util/tracker/ServiceTracker.java,v 1.4 2004/05/15 02:15:33 hargrave Exp $
  *
  * Copyright (c) The Open Services Gateway Initiative (2000, 2002).
  * All Rights Reserved.
@@ -52,7 +52,7 @@ import java.util.*;
  * and <tt>getServices</tt> methods can be called to get the service
  * objects for the tracked service.
  *
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 
 public class ServiceTracker implements ServiceTrackerCustomizer
@@ -746,7 +746,7 @@ public class ServiceTracker implements ServiceTrackerCustomizer
      * Increments the tracking count and clears the cache.
      */
     /*
-     * This method should be synchronized since it is called by Tracked while
+     * This method must not be synchronized since it is called by Tracked while
      * Tracked is synchronized. We don't want synchronization interactions between
      * the ServiceListener thread and the user thread.
      */
