@@ -435,13 +435,18 @@ public class StartLevelManager implements EventDispatcher, EventListener, Servic
 	 * can complete the delivery of the event to the listener.
 	 */
 	public void dispatchEvent(Object listener, Object listenerObject, int eventAction, Object eventObject) {
-		switch (eventAction) {
-			case StartLevelEvent.CHANGE_BUNDLE_SL :
+		try {
+			switch (eventAction) {
+			case StartLevelEvent.CHANGE_BUNDLE_SL:
 				setBundleSL((StartLevelEvent) eventObject);
 				break;
-			case StartLevelEvent.CHANGE_FW_SL :
+			case StartLevelEvent.CHANGE_FW_SL:
 				doSetStartLevel(((StartLevelEvent) eventObject).getNewSL(), ((StartLevelEvent) eventObject).getBundle());
 				break;
+			}
+		} catch (Throwable t) {
+			// allow the adaptor to handle this unexpected error
+			framework.adaptor.handleRuntimeError(t);
 		}
 	}
 

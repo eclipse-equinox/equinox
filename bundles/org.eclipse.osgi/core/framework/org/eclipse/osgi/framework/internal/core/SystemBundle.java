@@ -178,7 +178,12 @@ public class SystemBundle extends BundleHost {
 		if (state == ACTIVE) {
 			Thread shutdown = SecureAction.createThread(new Runnable() {
 				public void run() {
-					framework.shutdown();
+					try {
+						framework.shutdown();
+					} catch (Throwable t) {
+						// allow the adaptor to handle this unexpected error
+						framework.adaptor.handleRuntimeError(t);
+					}
 				}
 			}, "System Bundle Shutdown"); //$NON-NLS-1$
 

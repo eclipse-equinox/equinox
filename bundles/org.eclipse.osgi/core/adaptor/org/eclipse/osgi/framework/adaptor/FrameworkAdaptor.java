@@ -290,4 +290,14 @@ public interface FrameworkAdaptor {
 	 * @return the parent ClassLoader for all BundleClassLoaders created.
 	 */
 	public ClassLoader getBundleClassLoaderParent();
+
+	/**
+	 * Handles a RuntimeException or Error that was caught by the Framework and
+	 * there is not a suitable caller to propagate the Throwable to.  This gives
+	 * the FrameworkAdaptor the ablity to handle such cases.  For example, a 
+	 * FrameworkAdaptor may decide that such unexpected errors should cause an error
+	 * message to be logged, or that the Framework should be terminated immediately.
+	 * @param error The Throwable for the runtime error that is to be handled.
+	 */
+	public void handleRuntimeError(Throwable error);
 }

@@ -1187,7 +1187,8 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 				Debug.println("Exception in bottom level event dispatcher: " + t.getMessage()); //$NON-NLS-1$
 				Debug.printStackTrace(t);
 			}
-
+			// allow the adaptor to handle this unexpected error
+			framework.adaptor.handleRuntimeError(t);
 			publisherror: {
 				if (action == Framework.FRAMEWORKEVENT) {
 					FrameworkEvent event = (FrameworkEvent) object;

@@ -1491,6 +1491,8 @@ public class Framework implements EventDispatcher, EventPublisher {
 				Debug.println("Exception in Top level event dispatcher: " + t.getMessage()); //$NON-NLS-1$
 				Debug.printStackTrace(t);
 			}
+			// allow the adaptor to handle this unexpected error
+			adaptor.handleRuntimeError(t);
 			publisherror: {
 				if (action == FRAMEWORKEVENT) {
 					FrameworkEvent event = (FrameworkEvent) object;

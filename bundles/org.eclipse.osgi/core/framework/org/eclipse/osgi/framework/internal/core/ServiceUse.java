@@ -112,10 +112,10 @@ public class ServiceUse {
 					Debug.println(factory + ".getService() exception: " + t.getMessage()); //$NON-NLS-1$
 					Debug.printStackTrace(t);
 				}
-
+				// allow the adaptor to handle this unexpected error
+				context.framework.adaptor.handleRuntimeError(t);
 				BundleException be = new BundleException(Msg.formatter.getString("SERVICE_FACTORY_EXCEPTION", factory.getClass().getName(), "getService"), t); //$NON-NLS-1$ //$NON-NLS-2$
 				context.framework.publishFrameworkEvent(FrameworkEvent.ERROR, factorybundle, be);
-
 				return (null);
 			}
 

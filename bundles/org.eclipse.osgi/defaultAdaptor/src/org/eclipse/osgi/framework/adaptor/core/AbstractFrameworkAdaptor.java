@@ -377,6 +377,10 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 		return bundleClassLoaderParent;
 	}
 
+	public void handleRuntimeError(Throwable error) {
+		// do nothing by default.
+	}
+
 	/**
 	 * Creates a BundleFile object from a File object and a BundleData
 	 * object.  This implementation checks to see if the basefile is 

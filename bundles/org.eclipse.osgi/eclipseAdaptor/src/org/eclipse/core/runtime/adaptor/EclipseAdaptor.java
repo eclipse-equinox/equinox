@@ -39,6 +39,7 @@ import org.osgi.framework.*;
  */
 public class EclipseAdaptor extends DefaultAdaptor {
 	public static final String PROP_CLEAN = "osgi.clean"; //$NON-NLS-1$
+	public static final String PROP_EXITONERROR = "eclipse.exitOnError"; //$NON-NLS-1$
 	static final String F_LOG = ".log"; //$NON-NLS-1$
 
 	//TODO rename it to Eclipse-PluginClass	
@@ -70,6 +71,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 
 	private long timeStamp = 0;
 	private String installURL = null;
+	private boolean exitOnError = true;
 
 	/*
 	 * Should be instantiated only by the framework (through reflection). 
@@ -545,6 +547,31 @@ public class EclipseAdaptor extends DefaultAdaptor {
 	public void frameworkStopping(BundleContext context) {
 		super.frameworkStopping(context);
 		new BundleStopper().stopBundles();
+	}
+
+	public void handleRuntimeError(Throwable error) {
+		try {
+			// check the prop each time this happens (should NEVER happen!)
+			exitOnError = Boolean.valueOf(System.getProperty(PROP_EXITONERROR, "true")).booleanValue(); //$NON-NLS-1$
+			String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_ADAPTOR_RUNTIME_ERROR"); //$NON-NLS-1$
+			FrameworkLogEntry logEntry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, message, 0, error, null);
+			frameworkLog.log(logEntry);
+		} catch (Throwable t) {
+			// we may be in a currupted state and must be able to handle any errors (ie OutOfMemoryError)
+			// that may occur when handling the first error; this is REALLY the last resort.
+			try {
+				error.printStackTrace();
+				t.printStackTrace();
+			}
+			catch (Throwable t1) {
+				// if we fail that then we are beyond help.
+			}
+		}
+		finally {
+			// do the exit outside the try block just incase another runtime error was thrown while logging
+			if (exitOnError)
+				System.exit(13);
+		}
 	}
 
 	protected void setLog(FrameworkLog log) {
