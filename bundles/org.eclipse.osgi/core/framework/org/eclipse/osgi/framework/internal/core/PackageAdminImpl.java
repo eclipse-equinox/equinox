@@ -56,6 +56,7 @@ public class PackageAdminImpl implements PackageAdmin {
 
 	private long cumulativeTime;
 
+	private static boolean checkServiceClassSource = true;
 	private static boolean restrictServiceClasses = false;
 
 	/**
@@ -68,7 +69,8 @@ public class PackageAdminImpl implements PackageAdmin {
 	}
 
 	protected void initialize() {
-		restrictServiceClasses = System.getProperty(Constants.OSGI_RESTRICTSERVICECLASSES) != null;
+		checkServiceClassSource = Boolean.valueOf(System.getProperty(Constants.OSGI_CHECKSERVICECLASSSOURCE,"true")).booleanValue(); //$NON-NLS-1$
+		restrictServiceClasses = Boolean.valueOf(System.getProperty(Constants.OSGI_RESTRICTSERVICECLASSES,"false")).booleanValue(); //$NON-NLS-1$
 		removalPending = new Vector(10, 10);
 
 		State state = framework.adaptor.getState();
@@ -930,6 +932,13 @@ public class PackageAdminImpl implements PackageAdmin {
 		if (bundle == null)
 			return null;
 		BundleLoader loader = bundle.getBundleLoader();
+		if (!checkServiceClassSource) {
+			try {
+				return loader.findClass(className);
+			} catch (ClassNotFoundException e1) {
+				return null;
+			}
+		}
 		if (restrictServiceClasses) {
 			// cannot have a service class from a package that a bundle 
 			// provides to a NAMED class space (unless it is exported also).
@@ -938,6 +947,9 @@ public class PackageAdminImpl implements PackageAdmin {
 			if (loader.getProvidedPackage(pkgname) != null)
 				return null;
 		}
-		return loader.findLocalClass(className);
+		Class  serviceClass = loader.findLocalClass(className);
+		if (serviceClass == null || bundle.getBundleId() == 0)
+			return serviceClass;
+		return serviceClass.getClassLoader() == loader.createClassLoader() ? serviceClass : null;
 	}
 }

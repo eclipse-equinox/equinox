@@ -98,6 +98,7 @@ public interface Constants extends org.osgi.framework.Constants {
 	public static final String OSGI_PROPERTIES = "osgi.framework.properties"; //$NON-NLS-1$
 	public static final String DEFAULT_OSGI_PROPERTIES = "osgi.properties"; //$NON-NLS-1$
 	public static final String OSGI_AUTOEXPORTSYSTEMPACKAGES = "osgi.autoExportSystemPackages"; //$NON-NLS-1$
+	public static final String OSGI_CHECKSERVICECLASSSOURCE = "osgi.checkServiceClassSource"; //$NON-NLS-1$
 	public static final String OSGI_RESTRICTSERVICECLASSES = "osgi.restrictServiceClasses"; //$NON-NLS-1$
 
 	/** Properties set by the framework */
