@@ -90,6 +90,7 @@ public class EclipseStarter {
 	public static final String PROP_FRAMEWORK = "osgi.framework"; //$NON-NLS-1$
 	public static final String PROP_INSTALL_AREA = "osgi.install.area"; //$NON-NLS-1$
 	public static final String PROP_FRAMEWORK_SHAPE = "osgi.framework.shape"; //$NON-NLS-1$ //the shape of the fwk (jar, or folder)
+	public static final String PROP_NOSHUTDOWN = "osgi.noShutdown"; //$NON-NLS-1$
 
 	public static final String PROP_EXITCODE = "eclipse.exitcode"; //$NON-NLS-1$
 	public static final String PROP_EXITDATA = "eclipse.exitdata"; //$NON-NLS-1$
@@ -97,6 +98,7 @@ public class EclipseStarter {
 	private static final String PROP_VM = "eclipse.vm"; //$NON-NLS-1$
 	private static final String PROP_VMARGS = "eclipse.vmargs"; //$NON-NLS-1$
 	private static final String PROP_COMMANDS = "eclipse.commands"; //$NON-NLS-1$
+	public static final String PROP_IGNOREAPP = "eclipse.ignoreApp"; //$NON-NLS-1$
 
 	private static final String FILE_SCHEME = "file:"; //$NON-NLS-1$
 	private static final String FILE_PROTOCOL = "file"; //$NON-NLS-1$
@@ -123,6 +125,7 @@ public class EclipseStarter {
 		System.getProperties().put(PROP_FRAMEWORK, url.toExternalForm());
 		String filePart = url.getFile();
 		System.getProperties().put(PROP_INSTALL_AREA, filePart.substring(0, filePart.lastIndexOf('/')));
+		System.getProperties().put(PROP_NOSHUTDOWN, "true"); //$NON-NLS-1$
 		run(args, null);
 	}
 
@@ -148,6 +151,8 @@ public class EclipseStarter {
 		try {
 			startup(args, endSplashHandler);
 			startupFailed = false;
+			if (Boolean.getBoolean(PROP_IGNOREAPP))
+				return null;
 			return run(null);
 		} catch (Throwable e) {
 			// ensure the splash screen is down
@@ -163,7 +168,8 @@ public class EclipseStarter {
 				e.printStackTrace();
 		} finally {
 			try {
-				shutdown();
+				if (!Boolean.getBoolean(PROP_NOSHUTDOWN))
+					shutdown();
 			} catch (Throwable e) {
 				FrameworkLogEntry logEntry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, EclipseAdaptorMsg.ECLIPSE_STARTUP_SHUTDOWN_ERROR, 1, e, null);
 				if (log != null)
