@@ -19,7 +19,6 @@ import org.eclipse.osgi.framework.adaptor.Version;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.internal.defaultadaptor.*;
 import org.eclipse.osgi.framework.util.Headers;
-import org.eclipse.osgi.service.pluginconversion.*;
 import org.osgi.framework.BundleException;
 
 public class EclipseBundleData extends DefaultBundleData {

@@ -11,8 +11,6 @@
 package org.eclipse.osgi.service.resolver;
 
 import java.io.*;
-import java.io.DataOutput;
-import java.io.IOException;
 import java.util.Dictionary;
 
 public interface StateObjectFactory {

@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.util.*;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParserFactory;
-import org.eclipse.osgi.service.pluginconversion.*;
 import org.osgi.framework.*;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
