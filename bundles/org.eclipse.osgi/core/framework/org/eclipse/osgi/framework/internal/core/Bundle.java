@@ -1342,9 +1342,6 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 			}
 		});
 	}
-	public String getGlobalName() {
-		return getSymbolicName();
-	}
 	public String getSymbolicName() {
 		return bundledata.getSymbolicName();
 	}
