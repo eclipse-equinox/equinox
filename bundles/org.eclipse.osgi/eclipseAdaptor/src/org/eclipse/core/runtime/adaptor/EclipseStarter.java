@@ -26,11 +26,11 @@ public class EclipseStarter {
 	private static BundleContext context;
 	private static String dataLocation = null;
 	private static String configLocation = null;
-	public static boolean DEBUG = false;
+	public static boolean debug = false;
 
 	// command line arguments
 	private static final String CONSOLE = "-console"; //$NON-NLS-1$
-	private static final String ARG_DEBUG = "-debug"; //$NON-NLS-1$
+	private static final String DEBUG = "-debug"; //$NON-NLS-1$
 	private static final String DEV = "-dev"; //$NON-NLS-1$
 	private static final String WS = "-ws"; //$NON-NLS-1$
 	private static final String OS = "-os"; //$NON-NLS-1$
@@ -41,7 +41,24 @@ public class EclipseStarter {
 	// metadata alongside Eclipse's.
 	private static final String DATA = "-data"; //$NON-NLS-1$
 
-	public static final String INSTALL_LOCATION = "osgi.installLocation";
+	// System properties
+	public static final String PROP_INSTALL_LOCATION = "osgi.installLocation"; //$NON-NLS-1$
+	public static final String PROP_CONFIG_AREA = "osgi.configuration.area"; //$NON-NLS-1$
+	public static final String PROP_INSTANCE_AREA = "osgi.instance.area"; //$NON-NLS-1$
+	public static final String PROP_USER_AREA = "osgi.user.area"; //$NON-NLS-1$
+	public static final String PROP_MANIFEST_CACHE = "osgi.manifest.cache"; //$NON-NLS-1$
+	public static final String PROP_DEBUG = "osgi.debug"; //$NON-NLS-1$
+	public static final String PROP_DEV = "osgi.dev"; //$NON-NLS-1$
+	public static final String PROP_CONSOLE = "osgi.console"; //$NON-NLS-1$
+	public static final String PROP_CONSOLE_CLASS= "osgi.consoleClass"; //$NON-NLS-1$
+	public static final String PROP_OS = "osgi.os"; //$NON-NLS-1$
+	public static final String PROP_WS = "osgi.ws"; //$NON-NLS-1$
+	public static final String PROP_NL = "osgi.nl"; //$NON-NLS-1$
+	public static final String PROP_ARCH = "osgi.arch"; //$NON-NLS-1$
+	public static final String PROP_ADAPTOR = "osgi.adaptor"; //$NON-NLS-1$
+	public static final String PROP_SYSPATH= "osgi.syspath"; //$NON-NLS-1$
+	
+	public static final String PROP_EXITCODE = "eclipse.exitcode"; //$NON-NLS-1$
 	
 	// Constants for configuration location discovery
 	private static final String ECLIPSE = "eclipse"; //$NON-NLS-1$
@@ -50,13 +67,11 @@ public class EclipseStarter {
 	private static final String PRODUCT_SITE_VERSION = "version"; //$NON-NLS-1$
 
 	/** string containing the classname of the adaptor to be used in this framework instance */
-	protected static String adaptorClassName = "org.eclipse.core.runtime.adaptor.EclipseAdaptor";
+	protected static final String DEFAULT_ADAPTOR_CLASS = "org.eclipse.core.runtime.adaptor.EclipseAdaptor";
 	
 	// Console information
-	protected static final String consoleClassName = "org.eclipse.osgi.framework.internal.core.FrameworkConsole";
+	protected static final String DEFAULT_CONSOLE_CLASS = "org.eclipse.osgi.framework.internal.core.FrameworkConsole";
 	private static final String CONSOLE_NAME = "OSGi Console";
-	private static String consolePort = "";
-	private static boolean console = false;
 	private static ServiceTracker applicationTracker;
 
 	public static Object run(String[] args,Runnable endSplashHandler) throws Exception {
@@ -71,8 +86,9 @@ public class EclipseStarter {
 			throw new IllegalStateException("OSGi framework could not be started");
 		osgi.launch();
 		try {
-			if (console) 
-				startConsole(osgi, new String[0]);
+			String console = System.getProperty(PROP_CONSOLE);
+			if (console != null) 
+				startConsole(osgi, new String[0], console);
 			context = osgi.getBundleContext();			
 			publishSplashScreen(endSplashHandler);
 			if (loadBundles() != null) { //if the installation of the basic did not fail
@@ -90,7 +106,7 @@ public class EclipseStarter {
 		// TODO for now, if an exception is not thrown from this method, we have to do
 		// the System.exit.  In the future we will update startup.jar to do the System.exit all 
 		// the time.
-		String exitCode = System.getProperty("eclipse.exitcode");
+		String exitCode = System.getProperty(PROP_EXITCODE);
 		if (exitCode == null)
 			System.exit(0);
 		try {
@@ -210,7 +226,7 @@ public class EclipseStarter {
 			}
 		}
 		context.ungetService(reference);
-		if (DEBUG)
+		if (debug)
 			System.out.println("Time loadBundles in the framework: " + (System.currentTimeMillis() - startTime));
 		return (String[])ignored.toArray(new String[ignored.size()]);
 	}
@@ -247,9 +263,11 @@ public class EclipseStarter {
 	 * @param osgi The current OSGi instance for the console to attach to
 	 * @param consoleArgs An String array containing commands from the command line
 	 * for the console to execute
+	 * @param consolePort the port on which to run the console.  Empty string implies the default port.
 	 */
-	private static void startConsole(OSGi osgi, String[] consoleArgs) {
+	private static void startConsole(OSGi osgi, String[] consoleArgs, String consolePort) {
 		try {
+			String consoleClassName = System.getProperty(PROP_CONSOLE_CLASS, DEFAULT_CONSOLE_CLASS);
 			Class consoleClass = Class.forName(consoleClassName);
 			Class[] parameterTypes;
 			Object[] parameters;
@@ -278,6 +296,7 @@ public class EclipseStarter {
 	 *  @return a FrameworkAdaptor object
 	 */
 	private static FrameworkAdaptor createAdaptor() throws Exception {
+		String adaptorClassName = System.getProperty(PROP_ADAPTOR, DEFAULT_ADAPTOR_CLASS);
 		Class adaptorClass = Class.forName(adaptorClassName);
 		Class[] constructorArgs = new Class[] { String[].class };
 		Constructor constructor = adaptorClass.getConstructor(constructorArgs);
@@ -297,10 +316,10 @@ public class EclipseStarter {
 			// If this is the last arg or there is a following arg (i.e., arg+1 has a leading -), 
 			// simply enable debug.  Otherwise, assume that that the following arg is
 			// actually the filename of an options file.  This will be processed below.
-			if (args[i].equalsIgnoreCase(ARG_DEBUG) && ((i + 1 == args.length) || ((i + 1 < args.length) && (args[i + 1].startsWith("-"))))) { //$NON-NLS-1$
-				System.getProperties().put("osgi.debug", "");//$NON-NLS-1$ //$NON-NLS-2$
+			if (args[i].equalsIgnoreCase(DEBUG) && ((i + 1 == args.length) || ((i + 1 < args.length) && (args[i + 1].startsWith("-"))))) { //$NON-NLS-1$
+				System.getProperties().put(PROP_DEBUG, "");	//$NON-NLS-1$
+				debug = true;
 				found = true;
-				DEBUG = true;
 			}
 			
 			// check if development mode should be enabled for the entire platform
@@ -308,14 +327,14 @@ public class EclipseStarter {
 			// simply enable development mode.  Otherwise, assume that that the following arg is
 			// actually some additional development time class path entries.  This will be processed below.
 			if (args[i].equalsIgnoreCase(DEV) && ((i + 1 == args.length) || ((i + 1 < args.length) && (args[i + 1].startsWith("-"))))) { //$NON-NLS-1$
-				System.getProperties().put("osgi.dev", "");
+				System.getProperties().put(PROP_DEV, "");	//$NON-NLS-1$
 				found = true;
 				continue;
 			}
 	
 			// look for the console with no port.  
 			if (args[i].equalsIgnoreCase(CONSOLE) && ((i + 1 == args.length) || ((i + 1 < args.length) && (args[i + 1].startsWith("-"))))) { //$NON-NLS-1$
-				console = true;
+				System.getProperties().put(PROP_CONSOLE, "");	//$NON-NLS-1$
 				found = true;
 				continue;
 			}
@@ -333,8 +352,7 @@ public class EclipseStarter {
 	
 			// look for the console and port.  
 			if (args[i - 1].equalsIgnoreCase(CONSOLE)) {
-				console = true;
-				consolePort = arg;
+				System.getProperties().put(PROP_CONSOLE, arg);
 				found = true;
 				continue;
 			}
@@ -347,7 +365,7 @@ public class EclipseStarter {
 	
 			// look for the development mode and class path entries.  
 			if (args[i - 1].equalsIgnoreCase(DEV)) {
-				System.getProperties().put("osgi.dev", arg);
+				System.getProperties().put(PROP_DEV, arg);
 				found = true;
 				continue;
 			}
@@ -359,9 +377,9 @@ public class EclipseStarter {
 			}
 	
 			// look for the debug mode and option file location.  
-			if (args[i - 1].equalsIgnoreCase(ARG_DEBUG)) {
-				System.getProperties().put("osgi.debug", arg);
-				DEBUG = true;
+			if (args[i - 1].equalsIgnoreCase(DEBUG)) {
+				System.getProperties().put(PROP_DEBUG, arg);
+				debug = true;
 				found = true;
 				continue;
 			}
@@ -369,25 +387,25 @@ public class EclipseStarter {
 			// look for the window system.  
 			if (args[i - 1].equalsIgnoreCase(WS)) {
 				found = true;
-				System.getProperties().put("osgi.ws", arg);
+				System.getProperties().put(PROP_WS, arg);
 			}
 	
 			// look for the operating system
 			if (args[i - 1].equalsIgnoreCase(OS)) {
 				found = true;
-				System.getProperties().put("osgi.os", arg);
+				System.getProperties().put(PROP_OS, arg);
 			}
 	
 			// look for the system architecture
 			if (args[i - 1].equalsIgnoreCase(ARCH)) {
 				found = true;
-				System.getProperties().put("osgi.arch", arg);
+				System.getProperties().put(PROP_ARCH, arg);
 			}
 	
 			// look for the nationality/language
 			if (args[i - 1].equalsIgnoreCase(NL)) {
 				found = true;
-				System.getProperties().put("osgi.nl", arg);
+				System.getProperties().put(PROP_NL, arg);
 			}
 	
 			// done checking for args.  Remember where an arg was found 
@@ -438,7 +456,7 @@ public class EclipseStarter {
 	}
 
 	protected static String getSysPath() {
-		String result = System.getProperty("osgi.syspath");
+		String result = System.getProperty(PROP_SYSPATH);
 		if (result != null) 
 			return result;
 
@@ -458,7 +476,7 @@ public class EclipseStarter {
 
 	private static void setInstanceLocation() {
 		File result = null;
-		String location = System.getProperty("osgi.instance.area");
+		String location = System.getProperty(PROP_INSTANCE_AREA);
 		// if the instance location is not set, predict where the workspace will be and 
 		// put the instance area inside the workspace meta area.
 		if (location == null) {
@@ -470,16 +488,16 @@ public class EclipseStarter {
 		} else {
 			result = new File(location);
 		}
-		System.getProperties().put("osgi.instance.area", result.getAbsolutePath());	
+		System.getProperties().put(PROP_INSTANCE_AREA, result.getAbsolutePath());	
 	}
 
 	private static void setConfigurationLocation() {
-		String location = System.getProperty("osgi.configuration.area");
+		String location = System.getProperty(PROP_CONFIG_AREA);
 		if (location != null) {
 			configLocation = location;
 			System.getProperties().put("org.eclipse.osgi.framework.defaultadaptor.bundledir", configLocation + "/bundles");	
-			if (System.getProperty("osgi.manifest.cache") == null)
-				System.getProperties().put("osgi.manifest.cache", configLocation + "/manifests");
+			if (System.getProperty(PROP_MANIFEST_CACHE) == null)
+				System.getProperties().put(PROP_MANIFEST_CACHE, configLocation + "/manifests");
 			return;
 		}
 		// -configuration was not specified so compute a configLocation based on the
@@ -499,10 +517,10 @@ public class EclipseStarter {
 			if (configLocation.endsWith(".cfg") || configLocation.endsWith("/")) 
 				configLocation = configLocation.substring(0, index);
 		} 
-		System.getProperties().put("osgi.configuration.area", configLocation);
+		System.getProperties().put(PROP_CONFIG_AREA, configLocation);
 		System.getProperties().put("org.eclipse.osgi.framework.defaultadaptor.bundledir", configLocation + "/bundles");	
-		if (System.getProperty("osgi.manifest.cache") == null) {
-			System.getProperties().put("osgi.manifest.cache", configLocation + "/manifests");
+		if (System.getProperty(PROP_MANIFEST_CACHE) == null) {
+			System.getProperties().put(PROP_MANIFEST_CACHE, configLocation + "/manifests");
 		}
 	}
 	
@@ -524,7 +542,7 @@ public class EclipseStarter {
 		//    defined in .eclipseproduct marker file. If .eclipseproduct does not
 		//    exist, use "eclipse" as the application-id.
 		
-		String installProperty = System.getProperty(INSTALL_LOCATION);
+		String installProperty = System.getProperty(PROP_INSTALL_LOCATION);
 		URL installURL = null;
 		try {
 			installURL = new URL(installProperty);
@@ -533,13 +551,13 @@ public class EclipseStarter {
 		}
 		File installDir = new File(installURL.getFile());
 		if ("file".equals(installURL.getProtocol()) && installDir.canWrite()) { //$NON-NLS-1$
-//			if (DEBUG)
+//			if (debug)
 //				debug("Using the installation directory."); //$NON-NLS-1$
 			return installDir.getAbsolutePath();
 		}
 
 		// We can't write in the eclipse install dir so try for some place in the user's home dir
-//		if (DEBUG)
+//		if (debug)
 //			debug("Using the user.home location."); //$NON-NLS-1$
 		String appName = "." + ECLIPSE; //$NON-NLS-1$
 		File eclipseProduct = new File(installDir, PRODUCT_SITE_MARKER );
@@ -578,7 +596,7 @@ public class EclipseStarter {
 	}
 	
 	private static void loadConfigurationInfo() {
-		String configArea = System.getProperty("osgi.configuration.area");
+		String configArea = System.getProperty(PROP_CONFIG_AREA);
 		if (configArea == null)
 			return;
 		File location = new File(configArea, "config.ini");
