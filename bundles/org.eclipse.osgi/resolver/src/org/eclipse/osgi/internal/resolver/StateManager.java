@@ -34,7 +34,12 @@ public class StateManager implements PlatformAdmin {
 	}	
 	public void shutdown() throws IOException {
 		writeState();
-		systemState = null;
+		
+		//systemState should not be set to null as when the framework
+		//is restarted from a shutdown state, the systemState variable will
+		//not be reset, resulting in a null pointer exception
+		
+		//systemState = null;
 	}
 	private void readState(long expectedTimeStamp) {
 		if (!stateLocation.isFile())
