@@ -84,11 +84,8 @@ public abstract class AbstractClassLoader extends ClassLoader implements BundleC
 				// First check the parent classloader for system classes.
 				ClassLoader parent = getParentPrivileged();
 				if (parent != null)
-					try {
-						return parent.loadClass(name);
-					} catch (ClassNotFoundException e) {
-						// Do nothing. continue to delegate.
-					}
+					// we want to throw ClassNotFoundExceptions if a java.* class cannot be loaded from the parent.
+					return parent.loadClass(name);
 			}
 			// Just ask the delegate.  This could result in findLocalClass(name) being called.
 			Class clazz = delegate.findClass(name);
