@@ -289,6 +289,12 @@ public class DefaultClassLoader extends AbstractClassLoader {
 	}
 
 	protected Class defineClass(String name, byte[] classbytes, int off, int len, ClasspathEntry classpathEntry) throws ClassFormatError {
+		if (name != null && name.startsWith("java.")) { //$NON-NLS-1$
+			// To work around the security issue that prevents any
+			// other classloader except for the bootstrap classloader
+			// from loading packages that start with java.
+			name = null;
+		}
 		return defineClass(name, classbytes, off, len, classpathEntry.getProtectionDomain());
 	}
 
