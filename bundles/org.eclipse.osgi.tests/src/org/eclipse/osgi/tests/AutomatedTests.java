@@ -12,6 +12,7 @@ package org.eclipse.osgi.tests;
 
 import junit.framework.*;
 import org.eclipse.osgi.tests.internal.plugins.InstallTests;
+import org.eclipse.osgi.tests.listeners.ExceptionHandlerTests;
 
 public class AutomatedTests extends TestCase {
 	public final static String PI_OSGI_TESTS = "org.eclipse.osgi.tests";
@@ -37,6 +38,7 @@ public class AutomatedTests extends TestCase {
 //		suite.addTest(new TestSuite(SimpleTests.class));
 		suite.addTest(new TestSuite(InstallTests.class));
 		suite.addTest(org.eclipse.osgi.tests.services.resolver.AllTests.suite());
+		suite.addTest(new TestSuite(ExceptionHandlerTests.class));
 		return suite;
 	}
 }
