@@ -241,7 +241,7 @@ public class BundleHost extends AbstractBundle {
 			// Do not publish UNRESOLVED event here.  This is done by caller 
 			// to resolve if appropriate.
 		}
-
+		manifestLocalization = null;
 	}
 
 	/**

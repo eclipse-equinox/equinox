@@ -749,6 +749,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 			synchronized (bundles) {
 				bundles.markDependancies();
 				exporting = reload(newBundle);
+				manifestLocalization = null;
 			}
 			reloaded = true; /*
 			 * indicate we have loaded from the new version of

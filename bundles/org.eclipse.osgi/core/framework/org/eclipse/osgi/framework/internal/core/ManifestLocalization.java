@@ -24,6 +24,7 @@ public class ManifestLocalization {
 	private AbstractBundle bundle = null;
 	private Dictionary rawHeaders = null;
 	private Dictionary defaultLocaleHeaders = null;
+	private Hashtable cache = new Hashtable(5);
 
 	public ManifestLocalization(AbstractBundle bundle, Dictionary rawHeaders) {
 		this.bundle = bundle;
@@ -84,6 +85,8 @@ public class ManifestLocalization {
 			}
 		}
 		result.add(nl);
+		// always add the default locale string
+		result.add(""); //$NON-NLS-1$
 		return (String[]) result.toArray(new String[result.size()]);
 	}
 
@@ -92,40 +95,50 @@ public class ManifestLocalization {
 	 * bundle. If not found, return null.
 	 */
 	protected ResourceBundle getResourceBundle(String localeString) {
-		URL resourceURL = null;
 		String propertiesLocation = (String) rawHeaders.get(Constants.BUNDLE_LOCALIZATION);
 		if (propertiesLocation == null) {
 			propertiesLocation = Constants.BUNDLE_LOCALIZATION_DEFAULT_BASENAME;
 		}
-		resourceURL = findProperties(localeString, propertiesLocation);
-		if (resourceURL == null) {
-			return null;
-		}
-		ResourceBundle resourceBundle = null;
-		InputStream resourceStream = null;
-		try {
-			resourceStream = resourceURL.openStream();
-			resourceBundle = new PropertyResourceBundle(resourceStream);
-		} catch (IOException e2) {
-			return null;
-		} finally {
-			if (resourceStream != null) {
+
+		BundleResourceBundle result = (BundleResourceBundle) cache.get(localeString);
+		if (result != null)
+			return (ResourceBundle) (result.isEmpty() ? null : result);
+		String[] nlVarients = buildNLVariants(localeString);
+		BundleResourceBundle parent = null;
+		for (int i = nlVarients.length-1; i >= 0; i--) {
+			BundleResourceBundle varientBundle = (BundleResourceBundle) cache.get(nlVarients[i]);
+			URL varientURL = findResource(propertiesLocation + (nlVarients[i].equals("") ? nlVarients[i] : '_' + nlVarients[i]) + ".properties"); //$NON-NLS-1$ //$NON-NLS-2$
+			if (varientURL != null) {
+				InputStream resourceStream = null;
 				try {
-					resourceStream.close();
-				} catch (IOException e3) {
-					//Ignore exception
+					resourceStream = varientURL.openStream();
+					varientBundle = new LocalizationResourceBundle(resourceStream);
+				} catch (IOException e) {
+					// ignore and continue
+				} finally {
+					if (resourceStream != null) {
+						try {
+							resourceStream.close();
+						} catch (IOException e3) {
+							//Ignore exception
+						}
+					}
 				}
 			}
+
+			if (varientBundle == null) {
+				varientBundle = new EmptyResouceBundle();
+			}
+			if (parent != null)
+				varientBundle.setParent((ResourceBundle)parent);
+			cache.put(nlVarients[i], varientBundle);
+			parent = varientBundle;
 		}
-		return resourceBundle;
+		result = (BundleResourceBundle) cache.get(localeString);
+		return (ResourceBundle) (result.isEmpty() ? null : result);
 	}
 
-	/*
-	 * This method searchs for properties file the same way the ResourceBundle
-	 * algorithm.
-	 */
-	private URL findProperties(String localeString, String path) {
-		String[] nlVariants = buildNLVariants(localeString);
+	private URL findResource(String resource) {
 		if (bundle.isResolved()) {
 			AbstractBundle bundleHost;
 			if (bundle.isFragment()) {
@@ -136,27 +149,9 @@ public class ManifestLocalization {
 				//then the attached fragments
 				bundleHost = bundle;
 			}
-			URL result;
-			for (int i = 0; i < nlVariants.length; i++) {
-				String filePath = path.concat('_' + nlVariants[i] + ".properties"); //$NON-NLS-1$
-				result = findInResolved(filePath, bundleHost);
-				if (result != null)
-					return result;
-			}
-			//If we get to this point, we haven't found it yet.
-			// Look for the base filename
-			String filename = path + ".properties"; //$NON-NLS-1$
-			return findInResolved(filename, bundleHost);
+			return findInResolved(resource, bundleHost);
 		} else {
-			//only look in the bundle if the bundle is not resolved
-			for (int i = 0; i < nlVariants.length; i++) {
-				String filePath = path.concat('_' + nlVariants[i] + ".properties"); //$NON-NLS-1$
-				return findInBundle(filePath, bundle);
-			}
-			//If we get to this point, we haven't found it yet.
-			// Look for the base filename
-			String filename = path + ".properties"; //$NON-NLS-1$
-			return findInBundle(filename, bundle);
+			return findInBundle(resource, bundle);
 		}
 	}
 
@@ -181,22 +176,36 @@ public class ManifestLocalization {
 		return fileURL;
 	}
 
-	private Dictionary stripPercents(Dictionary dictionary) {
-		//strip out the '%'s and return the raw headers without '%'s
-		Enumeration e = rawHeaders.keys();
-		while (e.hasMoreElements()) {
-			String key = (String) e.nextElement();
-			String value = (String) rawHeaders.get(key);
-			if (value.startsWith("%")) //$NON-NLS-1$
-			{
-				if (value.length() > 1) {
-					value = value.substring(1);
-				} else {
-					value = ""; //$NON-NLS-1$
-				}
-			}
-			dictionary.put(key, value);
+	private abstract interface BundleResourceBundle{
+		void setParent(ResourceBundle parent);
+		boolean isEmpty();
+	}
+	private class LocalizationResourceBundle extends PropertyResourceBundle implements BundleResourceBundle{
+		public LocalizationResourceBundle(InputStream in) throws IOException {
+			super(in);
 		}
-		return (dictionary);
+		public void setParent(ResourceBundle parent) {
+			super.setParent(parent);
+		}
+		public boolean isEmpty() {
+			return false;
+		}
+	}
+
+	private class EmptyResouceBundle extends ResourceBundle implements BundleResourceBundle{
+		public Enumeration getKeys() {
+			return null;
+		}
+		protected Object handleGetObject(String arg0) throws MissingResourceException {
+			return null;
+		}
+		public void setParent(ResourceBundle parent) {
+			super.setParent(parent);
+		}
+		public boolean isEmpty() {
+			if (parent == null)
+				return true;
+			return ((BundleResourceBundle)parent).isEmpty();
+		}
 	}
 }
