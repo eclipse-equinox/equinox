@@ -11,6 +11,7 @@
 
 package org.eclipse.osgi.framework.adaptor.core;
 
+import java.io.IOException;
 import java.net.URL;
 import java.security.*;
 import java.util.Enumeration;
@@ -152,17 +153,10 @@ public abstract class AbstractClassLoader extends ClassLoader implements BundleC
 	 * delegate.findResources(name) to find all the resources.
 	 * @param name The resource path to find.
 	 * @return An Enumeration of all resources found or null if the resource.
+	 * @throws IOException 
 	 */
-	protected Enumeration findResources(String name) {
-		try {
-			return (delegate.findResources(name));
-		} catch (Exception e) {
-			if (Debug.DEBUG && Debug.DEBUG_LOADER) {
-				Debug.println("BundleClassLoader[" + delegate + "].findResources(" + name + ") failed."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				Debug.printStackTrace(e);
-			}
-			return null;
-		}
+	protected Enumeration findResources(String name) throws IOException {
+		return (delegate.findResources(name));
 	}
 
 	/**
