@@ -38,6 +38,9 @@ public class EnvironmentInfo implements org.eclipse.osgi.service.environment.Env
 	// While we recognize the i386 architecture, we change
 	// this internally to be x86.
 	private static final String INTERNAL_ARCH_I386 = "i386"; //$NON-NLS-1$
+	// While we recognize the amd64 architecture, we change
+	// this internally to be x86_64.
+	private static final String INTERNAL_AMD64 = "amd64"; //$NON-NLS-1$
 
 	private EnvironmentInfo() {
 		super();
@@ -150,7 +153,13 @@ public class EnvironmentInfo implements org.eclipse.osgi.service.environment.Env
 		if (arch == null) {
 			String name = System.getProperty("os.arch");//$NON-NLS-1$
 			// Map i386 architecture to x86
-			arch = name.equalsIgnoreCase(INTERNAL_ARCH_I386) ? Constants.ARCH_X86 : name;
+			if (name.equalsIgnoreCase(INTERNAL_ARCH_I386))
+				arch = Constants.ARCH_X86;
+			// Map amd64 architecture to x86_64
+			else if (name.equalsIgnoreCase(INTERNAL_AMD64))
+				arch = Constants.ARCH_X86_64;
+			else
+				arch = name;
 			System.getProperties().put("osgi.arch", arch); //$NON-NLS-1$			
 		}
 	}
