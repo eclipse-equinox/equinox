@@ -293,7 +293,10 @@ public class PluginConverterImpl implements PluginConverter, IModel {
 	private void generateHeaders() {
 		generatedManifest.put(Constants.BUNDLE_NAME, pluginInfo.getPluginName());
 		generatedManifest.put(Constants.BUNDLE_VERSION, pluginInfo.getVersion());
-		generatedManifest.put(Constants.BUNDLE_SYMBOLICNAME, getSymbolicNameEntry(pluginInfo));
+		generatedManifest.put(Constants.BUNDLE_SYMBOLICNAME, pluginInfo.getUniqueId());
+		//replace line above with the following one when
+		//we are confident clients won't be broken by the singleton attrtibute
+		//generatedManifest.put(Constants.BUNDLE_SYMBOLICNAME, getSymbolicNameEntry(pluginInfo));		
 		
 		String provider = pluginInfo.getProviderName();
 		if (provider != null)
