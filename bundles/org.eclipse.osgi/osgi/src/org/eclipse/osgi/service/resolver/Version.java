@@ -141,7 +141,6 @@ public final class Version implements Comparable {
 	 *   <li><code>1.9</code> (interpreted as <code>1.9.0</code>)</li>
 	 *   <li><code>3</code> (interpreted as <code>3.0.0</code>)</li>
 	 * </ul>
-	 * </p>
 	 * 
 	 * @param versionId string representation of the version identifier. 
 	 * Qualifier characters that are not a letter or a digit are replaced.
@@ -163,7 +162,6 @@ public final class Version implements Comparable {
 	 *   <li><code>1.9</code> (interpreted as <code>1.9.0</code>)</li>
 	 *   <li><code>3</code> (interpreted as <code>3.0.0</code>)</li>
 	 * </ul>
-	 * </p>
 	 * 
 	 * @param versionId string representation of the version identifier. 
 	 * Qualifier characters that are not a letter or a digit are replaced.
@@ -181,7 +179,6 @@ public final class Version implements Comparable {
 	}
 
 	private static Object[] parseVersion(String versionId) {
-
 		// Do the test outside of the assert so that they 'Policy.bind' 
 		// will not be evaluated each time (including cases when we would
 		// have passed by the assert).
@@ -344,8 +341,8 @@ public final class Version implements Comparable {
 	 * micro components are equal and the qualifier component is
 	 * greated than the argument qualifier component (using lexicographic
 	 * string comparison), or all components are equal.
-	 * <p>
-	 * TODO deprecated use {@link VersionRange}
+	 * </p>
+	 * @deprecated use {@link VersionRange}
 	 * @param id the other version identifier
 	 * @return <code>true</code> is this version identifier
 	 *    is compatible with the given version identifier, and
@@ -378,8 +375,8 @@ public final class Version implements Comparable {
 	 * version identifiers are considered to be equivalent if this qualifier is 
 	 * greated or equal to the qualifier of the argument (using lexicographic
 	 * string comparison).
-	 * <p>
-	 * TODO deprecated use {@link VersionRange}
+	 * </p>
+	 * @deprecated use {@link VersionRange}
 	 * @param id the other version identifier
 	 * @return <code>true</code> is this version identifier
 	 *    is compatible with the given version identifier, and
@@ -413,9 +410,8 @@ public final class Version implements Comparable {
 	 * identifiers are considered to be equivalent if this qualifier is 
 	 * greated or equal to the qualifier of the argument (using lexicographic
 	 * string comparison).
-	 * 
-	 * <p>
-	 * TODO deprecated use {@link VersionRange}
+	 * </p>
+	 * @deprecated use {@link VersionRange}
 	 * @param id the other version identifier
 	 * @return <code>true</code> is this version identifier
 	 *    is equivalent to the given version identifier, and
@@ -445,9 +441,8 @@ public final class Version implements Comparable {
 	 * minor and micro components equal and this qualifier is 
 	 * greated or equal to the qualifier of the argument (using lexicographic
 	 * string comparison).
-	 * 
-	 * <p>
-	 * TODO deprecated use {@link VersionRange}
+	 * </p>
+	 * @deprecated use {@link VersionRange}
 	 * @param id the other version identifier
 	 * @return <code>true</code> is this version identifier
 	 *    matches on micro to the given version identifier, and
@@ -469,13 +464,12 @@ public final class Version implements Comparable {
 	 * <p>
 	 * Two version identifiers are considered to be perfectly equal if their
 	 * major, minor, micro and qualifier components are equal
-	 * <p>
-	 * TODO deprecated use {@link VersionRange}
+	 * </p>
+	 * @deprecated use {@link VersionRange}
 	 * @param id the other version identifier
 	 * @return <code>true</code> is this version identifier
 	 *    is perfectly equal to the given version identifier, and
 	 *    <code>false</code> otherwise
-	 * @since 2.0
 	 */
 	public boolean matchQualifier(Version id) {
 		return equals(id);

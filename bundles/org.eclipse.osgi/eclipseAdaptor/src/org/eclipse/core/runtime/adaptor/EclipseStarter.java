@@ -34,11 +34,12 @@ import org.osgi.util.tracker.ServiceTracker;
  * The Eclipse Platform makes heavy use of Java class loaders for loading 
  * plug-ins. Even the Eclispe Runtime itself and the OSGi framework need
  * to be loaded by special class loaders. The upshot is that a 
- * client program (such as a Java main program, a servlet) cannot directly 
+ * client program (such as a Java main program, a servlet) cannot  
  * reference any part of Eclipse directly. Instead, a client must use this 
  * loader class to start the platform, invoking functionality defined 
  * in plug-ins, and shutting down the platform when done. 
  * </p>
+ * <p>Note that the fields on this class are not API. </p>
  * @since 3.0
  */
 public class EclipseStarter {

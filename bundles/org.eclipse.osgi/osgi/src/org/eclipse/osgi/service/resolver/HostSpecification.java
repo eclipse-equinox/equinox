@@ -15,11 +15,19 @@ package org.eclipse.osgi.service.resolver;
  * bundle manifest and managed by a state and resolver.
  */
 public interface HostSpecification extends VersionConstraint {
-	// TODO add javadoc.
 	// TODO what is this method for?  I think it used to specify that
 	// a fragment should force a reload of the host when attaching.
 	// this should be removed.
+	/**
+	 * This method should not be called.
+	 */
 	public boolean reloadHost();
 
+	/**
+	 * Returns an array of bundle descriptions which satisfy this
+	 * host specification.
+	 * 
+	 * @return the host bundles which satisfy this constraint
+	 */
 	public BundleDescription[] getSuppliers();
 }
