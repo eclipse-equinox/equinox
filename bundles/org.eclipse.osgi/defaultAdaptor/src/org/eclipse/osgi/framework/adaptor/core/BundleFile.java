@@ -284,7 +284,7 @@ abstract public class BundleFile {
 
 		public Enumeration getEntryPaths(String path) {
 			if (path == null) {
-				return null;
+				throw new NullPointerException();
 			}
 
 			if (path.length() > 0 && path.charAt(0)== '/') {
@@ -305,8 +305,8 @@ abstract public class BundleFile {
 							vEntries.add(entryPath);
 						} else {
 							entryPath = entryPath.substring(path.length());
-							int i = entryPath.indexOf('/');
-							entryPath = path + entryPath.substring(0, i + 1);
+							int slash = entryPath.indexOf('/');
+							entryPath = path + entryPath.substring(0, slash + 1);
 							if (!vEntries.contains(entryPath)) {
 								vEntries.add(entryPath);
 							}
@@ -367,9 +367,18 @@ abstract public class BundleFile {
 		public Enumeration getEntryPaths(final String path) {
 			final java.io.File pathFile = new java.io.File(bundlefile, path);
 			if (!pathFile.exists())
-				return null;
+				return new Enumeration() {
+					public boolean hasMoreElements() {
+						return false;
+					}
+					public Object nextElement() {
+						throw new NoSuchElementException();
+					}
+				};
 			if (pathFile.isDirectory()) {
 				final String[] fileList = pathFile.list();
+				final String dirPath = path.length() == 0 || path.charAt(path.length()-1) == '/' 
+					? path : path + '/';
 				return new Enumeration() {
 					int cur = 0;
 					public boolean hasMoreElements() {
@@ -381,7 +390,7 @@ abstract public class BundleFile {
 							throw new NoSuchElementException();
 						}
 						java.io.File childFile = new java.io.File(pathFile, fileList[cur]);
-						StringBuffer sb = new StringBuffer(path).append(fileList[cur++]);
+						StringBuffer sb = new StringBuffer(dirPath).append(fileList[cur++]);
 						if (childFile.isDirectory()) {
 							sb.append("/");
 						}
