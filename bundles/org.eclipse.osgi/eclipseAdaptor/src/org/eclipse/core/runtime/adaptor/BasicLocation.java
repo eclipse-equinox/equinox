@@ -28,6 +28,39 @@ public class BasicLocation implements Location {
 	private static final String PROP_OSGI_LOCKING = "osgi.locking"; //$NON-NLS-1$
 	private static String LOCK_FILENAME = ".metadata/.lock"; //$NON-NLS-1$
 
+	private static boolean isRunningWithNio() {
+		try {
+			 Class.forName("java.nio.channels.FileLock"); //$NON-NLS-1$
+		} catch (ClassNotFoundException e) {
+			return false;
+		}
+		return true;
+	}
+
+	public static Locker createLocker(File lock, String lockMode) {
+		if ("none".equals(lockMode)) //$NON-NLS-1$
+			return null;
+		
+		if ("java.io".equals(lockMode)) //$NON-NLS-1$
+			return new Locker_JavaIo(lock);
+		
+		if ("java.nio".equals(lockMode)) { //$NON-NLS-1$
+			if (isRunningWithNio()) {
+				return new Locker_JavaNio(lock);
+			} else {
+				// TODO should we return null here.  NIO was requested but we could not do it...
+				return new Locker_JavaIo(lock);
+			}
+		} 
+		
+		//	Backup case if an invalid value has been specified
+		if (isRunningWithNio()) {
+			return new Locker_JavaNio(lock);
+		} else {
+			return new Locker_JavaIo(lock);
+		}
+	}
+
 	public BasicLocation(String property, URL defaultValue, boolean isReadOnly) {
 		super();
 		this.property = property;
@@ -111,54 +144,12 @@ public class BasicLocation implements Location {
 	private void setLocker(File lock) {
 		if (locker != null)
 			return;
-
 		String lockMode = System.getProperties().getProperty(PROP_OSGI_LOCKING);
-		//	By default set the lock mode to 1.4
-		if (lockMode == null) {
-			if (isRunningWithNio()) {
-				locker = new Locker_JavaNio(lock);
-			} else {
-				locker = new Locker_JavaIo(lock);
-			}
-			return;
-		}
-
-		if ("none".equals(lockMode)) //$NON-NLS-1$
-			return;
-
-		if ("java.io".equals(lockMode)) { //$NON-NLS-1$
-			locker = new Locker_JavaIo(lock);
-			return;
-		}
-
-		if ("java.nio".equals(lockMode)) { //$NON-NLS-1$
-			if (isRunningWithNio()) {
-				locker = new Locker_JavaNio(lock);
-			} else {
-				locker = new Locker_JavaIo(lock);
-			}
-			return;
-		}
-
-		//	Backup case if an invalid value has been specified
-		if (isRunningWithNio()) {
-			locker = new Locker_JavaNio(lock);
-		} else {
-			locker = new Locker_JavaIo(lock);
-		}
+		locker = createLocker(lock, lockMode);
 	}
 
 	public synchronized void release() {
 		if (locker != null)
 			locker.release();
-	}
-
-	private boolean isRunningWithNio() {
-		try {
-			Class.forName("java.nio.channels.FileLock"); //$NON-NLS-1$
-		} catch (ClassNotFoundException e) {
-			return false;
-		}
-		return true;
 	}
 }

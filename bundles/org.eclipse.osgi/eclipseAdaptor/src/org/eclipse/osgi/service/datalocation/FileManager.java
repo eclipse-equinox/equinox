@@ -11,8 +11,9 @@
 package org.eclipse.osgi.service.datalocation;
 
 import java.io.*;
-import java.nio.channels.FileLock;
 import java.util.*;
+import org.eclipse.core.runtime.adaptor.BasicLocation;
+import org.eclipse.core.runtime.adaptor.Locker;
 
 /**
  * TODO this class must be completed and hooked or removed 
@@ -36,42 +37,52 @@ import java.util.*;
 public class FileManager {
 
 	private class Entry {
-		int id;
+		int readId;
+		int writeId;
 		long timeStamp;
 
-		Entry(long timeStamp, int id) {
+		Entry(long timeStamp, int readId, int writeId) {
 			this.timeStamp = timeStamp;
-			this.id = id;
+			this.readId = readId;
+			this.writeId = writeId;
 		}
 
-		int getId() {
-			return id;
+		int getReadId() {
+			return readId;
+		}
+
+		int getWriteId() {
+			return writeId;
 		}
 
 		long getTimeStamp() {
 			return timeStamp;
 		}
 
-		void setId(int value) {
-			id = value;
+		void setReadId(int value) {
+			readId = value;
 		}
 
 		void setTimeStamp(long value) {
 			timeStamp = value;
 		}
+
+		void setWriteId(int value) {
+			writeId = value;
+		}
 	}
 
 	// locking related fields
-	private FileLock fileLock;
-	private FileOutputStream fileStream;
+	private Locker locker;
+	private File lockFile;
 	private File base;
 	private File tableFile = null;
 	private long tableStamp = 0L;
 
 	private Properties table = new Properties();
-	private ArrayList changed = new ArrayList(5);
 
 	private static final String TABLE_FILE = ".fileTable";
+	private static final String LOCK_FILE = ".fileTableLock";
 
 	/**
 	 * Returns a new file manager for the area identified by the given base directory.
@@ -83,7 +94,8 @@ public class FileManager {
 	public FileManager(File base) throws IOException {
 		this.base = base;
 		this.tableFile = new File(this.base, TABLE_FILE);
-		restore();
+		this.lockFile = new File(this.base, LOCK_FILE);
+		updateTable();
 	}
 
 	private String getAbsolutePath(String file) {
@@ -97,9 +109,8 @@ public class FileManager {
 	public void add(String file) {
 		File target = new File(getAbsolutePath(file));
 		long fileStamp = target.lastModified();
-		Entry entry = new Entry(fileStamp, 1);
+		Entry entry = new Entry(fileStamp, 1, 1);
 		table.put(file, entry);
-		changed.add(file);
 	}
 
 	/**
@@ -111,18 +122,26 @@ public class FileManager {
 	 * 
 	 * @param targets the target files to update
 	 * @param sources the new content for the target files
-	 * @throws IOException if there are any problems updating the given files
+	 * @param force whether or not to force updating of files that are out of sync
+	 * @throws IOException if there are any problems updating the given files or
+	 * if some of the files being updated are out of sync.
 	 */
-	public void update(String[] targets, String[] sources) throws IOException {
-		if (fileStream == null)
-			throw new IllegalStateException("Manager must be locked to update");
-		for (int i = 0; i < targets.length; i++)
-			if (!isCurrent(targets[i]))
-				throw new IOException("Target: " + targets[i] + " is out of date");
-		for (int i = 0; i < targets.length; i++) {
-			String target = targets[i];
-			remember(target);
-			update(target, sources[i]);
+	public void update(String[] targets, String[] sources, boolean force) throws IOException {
+		lock();
+		try {
+			updateTable();
+			if (!force) {
+				for (int i = 0; i < targets.length; i++)
+					if (!isCurrent(targets[i]))
+						throw new IOException("Target: " + targets[i] + " is out of date");
+			}
+			for (int i = 0; i < targets.length; i++) {
+				String target = targets[i];
+				update(target, sources[i]);
+			}
+			save();
+		} finally {
+			release();
 		}
 	}
 
@@ -179,7 +198,7 @@ public class FileManager {
 		Entry entry = (Entry) table.get(target);
 		if (entry == null)
 			return -1;
-		return entry.getId();
+		return entry.getReadId();
 	}
 
 	/**
@@ -206,10 +225,12 @@ public class FileManager {
 	 * 
 	 * @exception IOException if there was an unexpected problem while acquiring the lock.
 	 */
-	public boolean lock() throws IOException {
-		fileStream = new FileOutputStream(tableFile, true);
-		fileLock = fileStream.getChannel().tryLock();
-		return fileLock != null;
+	private boolean lock() throws IOException {
+		if (locker == null)
+			locker = BasicLocation.createLocker(lockFile, null);
+		if (locker == null)
+			throw new IOException("unable to create lock manager");
+		return locker.lock();
 	}
 
 	/**
@@ -229,7 +250,7 @@ public class FileManager {
 		File result = new File(getAbsolutePath(target));
 		if (entry.getTimeStamp() == result.lastModified())
 			return result;
-		return new File(getAbsolutePath(target + "." + entry.getId()));
+		return new File(getAbsolutePath(target + "." + entry.getReadId()));
 	}
 
 	private void move(String source, String target) {
@@ -243,34 +264,11 @@ public class FileManager {
 
 	/**
 	 * Saves the state of the file manager and releases any locks held.
-	 * 
-	 * @throws IOException if a problem is encountered while saving the manager information
 	 */
-	public void release() throws IOException {
-		if (fileStream != null) {
-			save();
-			try {
-				fileStream.close();
-			} catch (IOException e) {
-				//don't complain, we're making a best effort to clean up
-			}
-			fileStream = null;
-		}
-		if (fileLock != null) {
-			try {
-				fileLock.release();
-			} catch (IOException e) {
-				//don't complain, we're making a best effort to clean up
-			}
-			fileLock = null;
-		}
-	}
-
-	private void remember(String target) {
-		int id = getId(target);
-		target = getAbsolutePath(target);
-		String destination = target + "." + id;
-		move(target, destination);
+	private void release() throws IOException {
+		if (locker == null)
+			return;
+		locker.release();
 	}
 
 	/**
@@ -282,31 +280,35 @@ public class FileManager {
 		table.remove(file);
 	}
 
-	private void restore() throws IOException {
+	private void updateTable() throws IOException {
 		if (!tableFile.exists())
 			return;
+		long stamp = tableFile.lastModified();
+		if (stamp == tableStamp)
+			return;
+		Properties diskTable = new Properties();
 		try {
 			FileInputStream input = new FileInputStream(tableFile);
 			try {
-				tableStamp = tableFile.lastModified();
-				table.load(input);
+				diskTable.load(input);
 			} finally {
 				input.close();
 			}
 		} catch (IOException e) {
-			throw new IOException("could not restore file table");
+			throw e; // rethrow the exception, we have nothing to add here
 		}
-		for (Enumeration e = table.keys(); e.hasMoreElements();) {
+		tableStamp = stamp;
+		for (Enumeration e = diskTable.keys(); e.hasMoreElements();) {
 			String file = (String) e.nextElement();
-			// if the entry has changed internally, update the value.
-			String[] elements = getArrayFromList((String) table.get(file));
-			if (changed.indexOf(file) == -1) {
-				Entry entry = new Entry(Long.parseLong(elements[0]), Integer.parseInt(elements[1]));
-				table.put(file, entry);
-			} else {
+			String[] elements = getArrayFromList((String) diskTable.get(file));
+			if (elements.length > 0) {
 				Entry entry = (Entry) table.get(file);
-				entry.setId(entry.getId() + 1);
-				table.put(file, entry);
+				int id = Integer.parseInt(elements[1]);
+				if (entry == null) {
+					table.put(file, new Entry(Long.parseLong(elements[0]), id, id));
+				} else {
+					entry.setWriteId(id);
+				}
 			}
 		}
 	}
@@ -317,17 +319,22 @@ public class FileManager {
 	private void save() throws IOException {
 		// if the table file has change on disk, update our data structures then rewrite the file.
 		if (tableStamp != tableFile.lastModified())
-			restore();
+			updateTable();
 		Properties props = new Properties();
 		for (Enumeration e = table.keys(); e.hasMoreElements();) {
 			String file = (String) e.nextElement();
 			Entry entry = (Entry) table.get(file);
-			String value = Long.toString(entry.getTimeStamp()) + "," + Integer.toString(entry.getId());
+			String value = Long.toString(entry.getTimeStamp()) + "," + Integer.toString(entry.getWriteId());
 			props.put(file, value);
 		}
 
+		FileOutputStream fileStream = new FileOutputStream(tableFile);
 		try {
-			props.store(fileStream, "safe table"); //$NON-NLS-1$
+			try {
+				props.store(fileStream, "safe table"); //$NON-NLS-1$
+			} finally {
+				fileStream.close();
+			}
 		} catch (IOException e) {
 			throw new IOException("could not save file table");
 		}
@@ -335,11 +342,17 @@ public class FileManager {
 
 	private void update(String target, String source) {
 		String targetFile = getAbsolutePath(target);
-		move(getAbsolutePath(source), targetFile);
 		Entry entry = (Entry) table.get(target);
+		int newId = entry.getWriteId();
+		// remember the old file 
+		move(targetFile, targetFile + "." + newId);
+		// update the base file
+		move(getAbsolutePath(source), targetFile);
+		// update the entry.  read and write ids should be the same since everything is in sync
+		newId++;
+		entry.setReadId(newId);
+		entry.setWriteId(newId);
 		entry.setTimeStamp(new File(targetFile).lastModified());
-		entry.setId(entry.getId() + 1);
-		changed.add(target);
 	}
 
 	/**
