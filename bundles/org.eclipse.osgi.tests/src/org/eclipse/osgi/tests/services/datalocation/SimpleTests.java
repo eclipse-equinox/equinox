@@ -32,7 +32,6 @@ public class SimpleTests extends TestCase {
 		super.setUp();
 		base = new File(Platform.getConfigurationLocation().getURL().getPath());
 		manager1 = new FileManager(base);
-		manager2 = new FileManager(base);
 	}
 
 	protected void tearDown() throws Exception {
@@ -77,30 +76,31 @@ public class SimpleTests extends TestCase {
 	}
 
 	/*
-	 * should be run after testing single update
+	 * should be run after testing update2
 	 */
 	public void testUpdate3() throws IOException {
-		assertEquals(null, manager2.lookup(TEST1));
-		assertEquals(-1, manager2.getId(TEST1));
-		assertEquals(0, manager2.getTimeStamp(TEST1));
-
-		manager2.add(TEST1);
-		assertEquals(new File(base, TEST1), manager2.lookup(TEST1));
-		assertEquals(1, manager2.getId(TEST1));
-		assertEquals(0, manager2.getTimeStamp(TEST1));
-
-		update(manager2, TEST1 + ".new3");
+		manager2 = new FileManager(base);
 		assertEquals(new File(base, TEST1), manager2.lookup(TEST1));
 		assertEquals(3, manager2.getId(TEST1));
 		assertTrue(manager2.getTimeStamp(TEST1) != 0);
+		assertTrue(new File(base, TEST1 + ".2").exists());
+
+		update(manager2, TEST1 + ".new3");
+		assertEquals(new File(base, TEST1), manager2.lookup(TEST1));
+		assertEquals(4, manager2.getId(TEST1));
+		assertTrue(manager2.getTimeStamp(TEST1) != 0);
 		assertTrue(new File(base, TEST1 + ".3").exists());
+
+		assertNotSame(new File(base, TEST1), manager1.lookup(TEST1));
+		assertEquals(new File(base, TEST1 + ".3"), manager1.lookup(TEST1));
+		assertEquals(3, manager1.getId(TEST1));
+		assertTrue(manager1.getTimeStamp(TEST1) != 0);
+		assertTrue(manager1.getTimeStamp(TEST1) != manager2.getTimeStamp(TEST1));
 	}
 
 	private void update(FileManager manager, String filename) throws IOException {
 		writeFile(new File(base, filename));
-		manager.lock();
-		manager.update(new String[] {TEST1}, new String[] {filename});
-		manager.release();
+		manager.update(new String[] {TEST1}, new String[] {filename}, true);
 	}
 
 	private void writeFile(File filename) {
