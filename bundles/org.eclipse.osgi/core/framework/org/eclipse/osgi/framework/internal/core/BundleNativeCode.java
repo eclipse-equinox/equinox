@@ -125,10 +125,11 @@ public class BundleNativeCode {
 	 *  
 	 */
 	protected BundleNativeCode(ManifestElement element) {
-		StringTokenizer st = new StringTokenizer(element.getValue(), ";");
-		while (st.hasMoreTokens()) {
-			addPath(st.nextToken());
+		String[] nativePaths = element.getValueComponents();
+		for (int i=0; i<nativePaths.length; i++) {
+			addPath(nativePaths[i]);
 		}
+
 		setAttribute(element, Constants.BUNDLE_NATIVECODE_OSNAME);
 		setAttribute(element, Constants.BUNDLE_NATIVECODE_PROCESSOR);
 		setAttribute(element, Constants.BUNDLE_NATIVECODE_OSVERSION);

@@ -1121,8 +1121,11 @@ public class BundleLoader implements ClassLoaderDelegate {
 				filter = createFilter(classpath[i].getAttribute("selection-filter"));
 				if (filter == null || filter.match(props)) {
 					if (Debug.DEBUG && Debug.DEBUG_LOADER)
-						Debug.println("  found match for classpath entry " + classpath[i].getValue());
-					result.add(classpath[i].getValue());
+						Debug.println("  found match for classpath entry " + classpath[i].getValueComponents());
+					String[] matchPaths = classpath[i].getValueComponents();
+					for(int j=0; j<matchPaths.length; j++){
+						result.add(matchPaths[j]);
+					}
 				}
 			} catch (InvalidSyntaxException e) {
 				bundle.framework.publishFrameworkEvent(FrameworkEvent.ERROR, bundle, e);

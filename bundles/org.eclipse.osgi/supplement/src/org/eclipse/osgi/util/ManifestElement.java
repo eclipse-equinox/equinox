@@ -21,8 +21,10 @@ import org.osgi.framework.Constants;
 
 /**
  * This class represents a single manifest element.  A manifest element must consist of a single
- * String value and may optionally have a set of attribute values associated with it. The
- * general syntax of a manifest element is the following <p>
+ * String value.  The String value may be split up into component values each
+ * separated by a ';'.  A manifeset element may optionally have a set of 
+ * attribute values associated with it. The general syntax of a manifest 
+ * element is the following <p>
  * <pre>
  * ManifestElement ::= headervalues (';' attribute)*
  * headervalues ::= headervalue (';' headervalue)*
@@ -41,6 +43,16 @@ import org.osgi.framework.Constants;
  * This manifest element has a value of org.osgi.framework and it has two attributes, specification-version
  * and another-attr. <p>
  * 
+ * The following manifest element is an example of a manifest element that has multiple
+ * components to its value: <p>
+ * 
+ * <pre>
+ * code1.jar;code2.jar;code3.jar;attr1=value1;attr2=value2;attr3=value3
+ * </pre>
+ * <p>
+ * This manifest element has a value of "code1.jar;code2.jar;code3.jar".  
+ * This is an example of a multiple component value.  This value has three
+ * components: code1.jar, code2.jar, and code3.jar.
  * 
  */
 public class ManifestElement {
@@ -49,6 +61,12 @@ public class ManifestElement {
 	 * The value of the manifest element.
 	 */
 	protected String value;
+
+	/**
+	 * The value components of the manifest element.
+	 */
+	protected String[] valueComponents;
+
 	/**
 	 * The table of attributes for the manifest element.
 	 */
@@ -58,24 +76,41 @@ public class ManifestElement {
 	 * Constructs an empty manifest element with no value or attributes.
 	 *
 	 */
-	public ManifestElement() {
-		this(null);
+	protected ManifestElement() {
 	}
 
 	/**
-	 * Constructs a manifest element with the specified value an no attributes.
-	 * @param value The value of the manifest element.
-	 */
-	public ManifestElement(String value) {
-		this.value = value;
-	}
-
-	/**
-	 * Returns the value of the manifest element.
+	 * Returns the value of the manifest element.  The value returned is the
+	 * complete value up to the first attribute.  For example, the 
+	 * following manifest element: <p>
+	 * 
+	 * test1.jar;test2.jar;test3.jar;selection-filter="(os.name=Windows XP)"
+	 * 
+	 * <p>
+	 * This manifest element has a value of "test1.jar;test2.jar;test3.jar"
+	 * 
 	 * @return the value of the manifest element.
 	 */
 	public String getValue() {
 		return value;
+	}
+
+	/**
+	 * Returns the value components of the manifest element. The value
+	 * components returned are the complete list of value components up to 
+	 * the first attribute.  
+	 * For example, the folowing manifest element: <p>
+	 * 
+	 * test1.jar;test2.jar;test3.jar;selection-filter="(os.name=Windows XP)"
+	 * 
+	 * <p>
+	 * This manifest element has the value components array 
+	 * { "test1.jar", "test2.jar", "test3.jar" }
+	 * Each value component is delemited by a ';'.
+	 * @return the String[] of value components
+	 */
+	public String[] getValueComponents(){
+		return valueComponents;
 	}
 
 	/**
@@ -134,15 +169,7 @@ public class ManifestElement {
 		}
 		return attributes.keys();
 	}
-
-	/**
-	 * Sets the value of this manifest element.
-	 * @param value the value to set this manifest element to.
-	 */
-	protected void setValue(String value) {
-		this.value = value;
-	}
-
+	
 	/**
 	 * Adds an attribute to this manifest element.
 	 * @param key the key of the attribute
@@ -230,7 +257,9 @@ public class ManifestElement {
 				throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_HEADER_EXCEPTION", header, value));
 			}
 
+			ArrayList headerValues = new ArrayList();
 			StringBuffer headerValue = new StringBuffer(next);
+			headerValues.add(next);
 
 			if (Debug.DEBUG && Debug.DEBUG_MANIFEST) {
 				Debug.print("paserHeader: " + next);
@@ -241,6 +270,7 @@ public class ManifestElement {
 			// Header values may be a list of ';' separated values.  Just append them all into one value until the first '=' or ','
 			while (c == ';') {
 				next = tokenizer.getToken(";,=");
+				headerValues.add(next);
 				if (next == null) {
 					throw new BundleException(Msg.formatter.getString("MANIFEST_INVALID_HEADER_EXCEPTION", header, value));
 				}
@@ -257,7 +287,9 @@ public class ManifestElement {
 			}
 
 			// found the header value create a manifestElement for it.
-			ManifestElement manifestElement = new ManifestElement(headerValue.toString());
+			ManifestElement manifestElement = new ManifestElement();
+			manifestElement.value = headerValue.toString();
+			manifestElement.valueComponents = (String[]) headerValues.toArray(new String[headerValues.size()]);
 
 			// now add any attributes for the manifestElement.
 			while (c == '=') {
