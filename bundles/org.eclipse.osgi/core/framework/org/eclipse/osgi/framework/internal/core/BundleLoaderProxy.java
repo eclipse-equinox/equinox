@@ -43,6 +43,10 @@ public class BundleLoaderProxy implements KeyedElement, ProvidingBundle {
 	 */
 	private KeyedHashSet users;
 	/**
+	 * 
+	 */
+	private KeyedHashSet pkgSources;
+	/**
 	 * Indicates if the dependencies of this BundleLoaderProxy have been marked
 	 */
 	protected boolean markedUsedDependencies = false;
@@ -56,6 +60,7 @@ public class BundleLoaderProxy implements KeyedElement, ProvidingBundle {
 		this.version = bundle.getVersion();
 		this.key = new StringBuffer(symbolicName).append("_").append(this.version.toString()).toString(); //$NON-NLS-1$
 		this.users = new KeyedHashSet(false);
+		this.pkgSources = new KeyedHashSet(false);
 	}
 
 	public BundleLoader getBundleLoader() {
@@ -227,5 +232,16 @@ public class BundleLoaderProxy implements KeyedElement, ProvidingBundle {
 
 	public boolean isRemovalPending() {
 		return bundle.framework.packageAdmin.removalPending.contains(this);
+	}
+
+	public SingleSourcePackage getPackageSource(String pkgName) {
+		SingleSourcePackage pkgSource = (SingleSourcePackage) pkgSources.getByKey(pkgName);
+		if (pkgSource == null) {
+			synchronized (pkgSources) {
+				pkgSource = new SingleSourcePackage(pkgName,this);
+				pkgSources.add(pkgSource);
+			}
+		}
+		return pkgSource;
 	}
 }

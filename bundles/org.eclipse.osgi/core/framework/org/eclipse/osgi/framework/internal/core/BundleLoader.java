@@ -879,7 +879,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 		} else if (result.size() == 1) {
 			// if there is just one source, remember just the single source
 			BundleLoaderProxy proxy = (BundleLoaderProxy) result.get(0);
-			PackageSource source = new SingleSourcePackage(packageName, proxy);
+			PackageSource source = proxy.getPackageSource(packageName);
 			requiredPackagesCache.add(source);
 			return source;
 		} else {
