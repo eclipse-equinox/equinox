@@ -140,30 +140,29 @@ public class LocationManager {
 	}
 
 	private static Location buildLocation(String property, URL defaultLocation, String userDefaultAppendage, boolean readOnly) {
-		BasicLocation result = null;
 		String location = System.getProperty(property);
 		System.getProperties().remove(property);
 		// if the instance location is not set, predict where the workspace will be and 
 		// put the instance area inside the workspace meta area.
 		if (location == null)
-			result = new BasicLocation(property, defaultLocation, readOnly);
-		else if (location.equalsIgnoreCase(NONE))
+			return new BasicLocation(property, defaultLocation, readOnly);
+		String trimmedLocation = location.trim();
+		if (trimmedLocation.equalsIgnoreCase(NONE))
 			return null;
-		else if (location.equalsIgnoreCase(NO_DEFAULT))
+		if (trimmedLocation.equalsIgnoreCase(NO_DEFAULT))
+			return new BasicLocation(property, null, readOnly);
+		if (trimmedLocation.startsWith(USER_HOME)) {
+			String base = substituteVar(location, USER_HOME, PROP_USER_HOME);
+			location = new File(base, userDefaultAppendage).getAbsolutePath();
+		} else if (trimmedLocation.startsWith(USER_DIR)) {
+			String base = substituteVar(location, USER_DIR, PROP_USER_DIR);
+			location = new File(base, userDefaultAppendage).getAbsolutePath();
+		}
+		URL url = buildURL(location, true);
+		BasicLocation result = null;
+		if (url != null) {
 			result = new BasicLocation(property, null, readOnly);
-		else {
-			if (location.startsWith(USER_HOME)) {
-				String base = substituteVar(location, USER_HOME, PROP_USER_HOME);
-				location = new File(base, userDefaultAppendage).getAbsolutePath();
-			} else if (location.startsWith(USER_DIR)) {
-				String base = substituteVar(location, USER_DIR, PROP_USER_DIR);
-				location = new File(base, userDefaultAppendage).getAbsolutePath();
-			}
-			URL url = buildURL(location, true);
-			if (url != null) {
-				result = new BasicLocation(property, null, readOnly);
-				result.setURL(url, false);
-			}
+			result.setURL(url, false);
 		}
 		return result;
 	}
