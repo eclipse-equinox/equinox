@@ -285,12 +285,8 @@ public class DefaultLog implements FrameworkLog {
 	protected void writeSession() throws IOException {
 		write(SESSION);
 		writeSpace();
-		String date = getDate();
-		write(date);
-		writeSpace();
-		for (int i = SESSION.length() + date.length(); i < 78; i++) {
+		for (int i = SESSION.length(); i < 78; i++)
 			write("-"); //$NON-NLS-1$
-		}
 		writeln();
 
 		// Write out certain values found in System.getProperties()
@@ -311,8 +307,6 @@ public class DefaultLog implements FrameworkLog {
 			// If we're not allowed to get the values of these properties
 			// then just skip over them.
 		}
-
-
 	}
 
 	protected void writeEntry(int depth, FrameworkLogEntry entry) throws IOException {
