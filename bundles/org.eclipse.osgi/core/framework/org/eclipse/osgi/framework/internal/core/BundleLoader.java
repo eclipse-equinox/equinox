@@ -303,13 +303,6 @@ public class BundleLoader implements ClassLoaderDelegate {
 				String[] classpath = getClassPath(bundle, System.getProperties());
 				if (classpath != null) {
 					classloader = createBCLPrevileged(bundle.getProtectionDomain(), classpath);
-					org.osgi.framework.Bundle[] fragments = bundle.getFragments();
-					if (fragments != null)
-						for (int i = 0; i < fragments.length; i++) {
-							Bundle fragment = (Bundle) fragments[i];
-							classloader.attachFragment(fragment.getBundleData(), fragment.domain, getClassPath(fragment, System.getProperties()));
-						}
-					classloader.initialize();
 				} else {
 					bundle.framework.publishFrameworkEvent(FrameworkEvent.ERROR, bundle, new BundleException(Msg.formatter.getString("BUNDLE_NO_CLASSPATH_MATCH")));
 				}
@@ -612,13 +605,34 @@ public class BundleLoader implements ClassLoaderDelegate {
 	}
 
 	private BundleClassLoader createBCLPrevileged(final ProtectionDomain pd, final String[] cp) {
+		BundleClassLoader bcl;
+		// Create the classloader as previleged code if security manager is present.
 		if (System.getSecurityManager() == null)
-			return bundle.getBundleData().createClassLoader(BundleLoader.this, pd, cp);
-		return (BundleClassLoader) AccessController.doPrivileged(new PrivilegedAction() {
-			public Object run() {
-				return bundle.getBundleData().createClassLoader(BundleLoader.this, pd, cp);
+			bcl = bundle.getBundleData().createClassLoader(BundleLoader.this, pd, cp);
+		else
+			bcl = (BundleClassLoader)AccessController.doPrivileged(new PrivilegedAction() {
+				public Object run() {
+					return bundle.getBundleData().createClassLoader(BundleLoader.this, pd, cp);
+				}
+			});
+
+		// attach existing fragments to classloader
+		org.osgi.framework.Bundle[] fragments = bundle.getFragments();
+		if (fragments != null)
+			for (int i = 0; i < fragments.length; i++) {
+				Bundle fragment = (Bundle) fragments[i];
+				try {
+					bcl.attachFragment(fragment.getBundleData(), fragment.domain, getClassPath(fragment, System.getProperties()));
+				}
+				catch (BundleException be) {
+					bundle.framework.publishFrameworkEvent(FrameworkEvent.ERROR, bundle, be);
+				}
 			}
-		});
+
+		// finish the initialization of the classloader.
+		bcl.initialize();
+		
+		return bcl;
 	}
 
 	/**
