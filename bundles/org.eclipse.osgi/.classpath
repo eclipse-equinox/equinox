@@ -7,7 +7,6 @@
 	<classpathentry kind="src" path="eclipseAdaptor/src"/>
 	<classpathentry kind="src" path="osgi/src"/>
 	<classpathentry kind="src" path="resolver/src"/>
-	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="src" path="/org.eclipse.osgi.services"/>
 	<classpathentry kind="output" path="bin"/>
