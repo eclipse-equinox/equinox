@@ -217,13 +217,13 @@ public class BundleLoader implements ClassLoaderDelegate {
 		if (packages != null && packages.length > 0)
 			for (int i = 0; i < packages.length; i++)
 				if (importedPackages == null || importedPackages.getByKey(packages[i].getName()) == null)
-					throw new BundleException(Msg.formatter.getString("BUNDLE_FRAGMENT_IMPORT_CONFLICT", packages[i].getName(), bundle.getLocation())); //$NON-NLS-1$
+					throw new BundleException(Msg.formatter.getString("BUNDLE_FRAGMENT_IMPORT_CONFLICT", new Object[] {fragment.getLocation(), packages[i].getName(), bundle.getLocation()})); //$NON-NLS-1$
 
 		// if the fragment requires a bundle not aready required throw an exception
 		BundleSpecification[] fragReqBundles = description.getRequiredBundles();
 		if (fragReqBundles != null && fragReqBundles.length > 0) {
 			if (requiredBundles == null)
-				throw new BundleException(Msg.formatter.getString("BUNDLE_FRAGMENT_REQUIRE_CONFLICT", fragReqBundles[0].getName(), bundle.getLocation())); //$NON-NLS-1$
+				throw new BundleException(Msg.formatter.getString("BUNDLE_FRAGMENT_REQUIRE_CONFLICT", new Object[] {fragment.getLocation(), fragReqBundles[0].getName(), bundle.getLocation()})); //$NON-NLS-1$
 
 			for (int i = 0; i < fragReqBundles.length; i++) {
 				boolean found = false;
@@ -233,7 +233,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 						found = true;
 				}
 				if (!found)
-					throw new BundleException(Msg.formatter.getString("BUNDLE_FRAGMENT_REQUIRE_CONFLICT", fragReqBundles[i].getName(), bundle.getLocation())); //$NON-NLS-1$
+					throw new BundleException(Msg.formatter.getString("BUNDLE_FRAGMENT_REQUIRE_CONFLICT", new Object[] {fragment.getLocation(), fragReqBundles[i].getName(), bundle.getLocation()})); //$NON-NLS-1$
 			}
 		}
 
@@ -246,7 +246,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 				for (int i = 0; i < imports.length; i++) {
 					String name = imports[i].getValue();
 					if (!isDynamicallyImported(name))
-						throw new BundleException(Msg.formatter.getString("BUNDLE_FRAGMENT_IMPORT_CONFLICT", imports[i], bundle.getLocation())); //$NON-NLS-1$
+						throw new BundleException(Msg.formatter.getString("BUNDLE_FRAGMENT_IMPORT_CONFLICT", new Object[] {fragment.getLocation(), imports[i], bundle.getLocation()})); //$NON-NLS-1$
 				}
 			}
 		} catch (BundleException e) {
