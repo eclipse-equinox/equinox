@@ -231,13 +231,25 @@ public class PluginConverterImpl implements PluginConverter {
 			generationLocation.getParentFile().mkdirs();
 			generationLocation.createNewFile();
 			if (!generationLocation.isFile()) {
+				// TODO better string keys needed
 				String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONVERTER_ERROR_CREATING_BUNDLE_MANIFEST", this.pluginInfo.getUniqueId(), generationLocation); //$NON-NLS-1$
 				throw new PluginConversionException(message);
 			}
 			// replaces any eventual existing file
+			manifestToWrite = new Hashtable((Map)manifestToWrite);
 			out = new BufferedWriter(new FileWriter(generationLocation));
 			writeEntry(MANIFEST_VERSION, (String) manifestToWrite.remove(MANIFEST_VERSION));
 			writeEntry(GENERATED_FROM, (String) manifestToWrite.remove(GENERATED_FROM)); //Need to do this first uptoDate check expect the generated-from tag to be in the first line
+			writeEntry(Constants.BUNDLE_NAME, (String) manifestToWrite.remove(Constants.BUNDLE_NAME));
+			writeEntry(Constants.BUNDLE_SYMBOLICNAME, (String) manifestToWrite.remove(Constants.BUNDLE_SYMBOLICNAME));
+			writeEntry(Constants.BUNDLE_VERSION, (String) manifestToWrite.remove(Constants.BUNDLE_VERSION));
+			writeEntry(Constants.BUNDLE_CLASSPATH, (String) manifestToWrite.remove(Constants.BUNDLE_CLASSPATH));
+			writeEntry(Constants.BUNDLE_ACTIVATOR, (String) manifestToWrite.remove(Constants.BUNDLE_ACTIVATOR));
+			writeEntry(Constants.BUNDLE_VENDOR, (String) manifestToWrite.remove(Constants.BUNDLE_VENDOR));
+			writeEntry(Constants.FRAGMENT_HOST, (String) manifestToWrite.remove(Constants.FRAGMENT_HOST));
+			writeEntry(Constants.BUNDLE_MANIFEST_LOCALIZATION, (String) manifestToWrite.remove(Constants.BUNDLE_MANIFEST_LOCALIZATION));
+			writeEntry(Constants.PROVIDE_PACKAGE, (String) manifestToWrite.remove(Constants.PROVIDE_PACKAGE));
+			writeEntry(Constants.REQUIRE_BUNDLE, (String) manifestToWrite.remove(Constants.REQUIRE_BUNDLE));
 			Enumeration keys = manifestToWrite.keys();
 			while (keys.hasMoreElements()) {
 				String key = (String) keys.nextElement();
@@ -245,6 +257,7 @@ public class PluginConverterImpl implements PluginConverter {
 			}
 			out.flush();
 		} catch (IOException e) {
+			// TODO better string keys needed
 			String message = EclipseAdaptorMsg.formatter.getString("ECLIPSE_CONVERTER_ERROR_CREATING_BUNDLE_MANIFEST", this.pluginInfo.getUniqueId(), generationLocation); //$NON-NLS-1$
 			throw new PluginConversionException(message, e);
 		} finally {
@@ -598,32 +611,6 @@ public class PluginConverterImpl implements PluginConverter {
 			out.write(key + ": " + value); //$NON-NLS-1$
 			out.newLine();
 		}
-	}
-
-	private void writeEntry(String key, String[] value) throws IOException {
-		if (value == null || value.length == 0)
-			return;
-		if (value.length == 1) {
-			out.write(key + ": " + value[0]); //$NON-NLS-1$
-			out.newLine();
-			return;
-		}
-		key = key + ": "; //$NON-NLS-1$
-		out.write(key);
-		out.newLine();
-		out.write(' ');
-		boolean first = true;
-		for (int i = 0; i < value.length; i++) {
-			if (first)
-				first = false;
-			else {
-				out.write(',');
-				out.newLine();
-				out.write(' ');
-			}
-			out.write(value[i]);
-		}
-		out.newLine();
 	}
 
 	private String getStringFromArray(String[] values, String separator) {
