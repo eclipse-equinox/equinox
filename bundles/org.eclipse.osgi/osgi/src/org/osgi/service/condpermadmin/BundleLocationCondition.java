@@ -1,5 +1,5 @@
 /*
- * $Header$
+ * $Header: /cvshome/build/org.osgi.service.condpermadmin/src/org/osgi/service/condpermadmin/BundleLocationCondition.java,v 1.5 2005/01/23 07:31:31 breed Exp $
  * 
  * Copyright (c) OSGi Alliance (2005). All Rights Reserved.
  * 
@@ -36,7 +36,7 @@ import org.osgi.service.condpermadmin.Condition;
  * Checks to see if a Bundle matches the given location pattern. Pattern matching
  * is done using FilePermission style patterns.
  * 
- * @version $Revision$
+ * @version $Revision: 1.5 $
  */
 public class BundleLocationCondition implements Condition {
 	boolean	satisfied;

@@ -1,5 +1,5 @@
 /*
- * $Header$
+ * $Header: /cvshome/build/org.osgi.service.condpermadmin/src/org/osgi/service/condpermadmin/ConditionalPermissionAdmin.java,v 1.4 2005/01/21 22:22:39 breed Exp $
  * 
  * Copyright (c) OSGi Alliance (2005). All Rights Reserved.
  * 
@@ -35,7 +35,7 @@ import org.osgi.service.permissionadmin.PermissionInfo;
  * This is a framework service that allows ConditionalPermissionInfos to be
  * added to, retrieved from, and removed from the framework.
  * 
- * @version $Revision$
+ * @version $Revision: 1.4 $
  */
 public interface ConditionalPermissionAdmin {
 	/**

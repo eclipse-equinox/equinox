@@ -12,7 +12,7 @@
 package org.eclipse.osgi.framework.adaptor;
 
 import java.io.IOException;
-import java.io.Serializable;
+import java.util.Vector;
 
 /**
  * Permission Storage interface for managing a persistent storage of
@@ -83,14 +83,14 @@ public interface PermissionStorage {
 	 * Serializes the object, which represents the ConditionalPermissionInfos, to a
 	 * persistent store.
 	 * 
-	 * @param o the object to be serialized.
+	 * @param o the Vector to be serialized.
 	 */
-	public abstract void serializeConditionalPermissionInfos(Serializable o) throws IOException;
+	public abstract void serializeConditionalPermissionInfos(Vector o) throws IOException;
 
 	/**
 	 * Returns the previously serialized object that represents the ConditionalPermissionInfos.
 	 * 
 	 * @return the deserialized object representing the ConditionalPermissionInfos.
 	 */
-	public abstract Object deserializeConditionalPermissionInfos() throws IOException;
+	public abstract Vector deserializeConditionalPermissionInfos() throws IOException;
 }

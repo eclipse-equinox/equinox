@@ -14,9 +14,14 @@ package org.eclipse.osgi.framework.adaptor.core;
 import java.io.*;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Vector;
 import org.eclipse.osgi.framework.adaptor.PermissionStorage;
 import org.eclipse.osgi.framework.debug.Debug;
+import org.eclipse.osgi.framework.internal.core.ConditionalPermissionInfoImpl;
 import org.eclipse.osgi.framework.internal.reliablefile.*;
+import org.osgi.service.condpermadmin.ConditionInfo;
+import org.osgi.service.condpermadmin.ConditionalPermissionInfo;
+import org.osgi.service.permissionadmin.PermissionInfo;
 
 /**
  * Class to model permission data storage.
@@ -316,17 +321,37 @@ class DefaultPermissionStorage implements PermissionStorage {
 	}
 
 	/**
-	 * Serializes the ConditionalPermissionInfos to CONDPERMS.
+	 * Serializes the ConditionalPermissionInfos to CONDPERMS. Serialization is done
+	 * by writing out each ConditionalPermissionInfo as a set of ConditionInfos 
+	 * followed by PermissionInfos followed by a blank line.
 	 * 
-	 * @param o the object to be serialized that contains the ConditionalPermissionInfos.
+	 * @param v the Vector to be serialized that contains the ConditionalPermissionInfos.
 	 * @throws IOException
-	 * @see org.eclipse.osgi.framework.adaptor.PermissionStorage#serializeConditionalPermissionInfos(Serializable)
+	 * @see org.eclipse.osgi.framework.adaptor.PermissionStorage#serializeConditionalPermissionInfos(Vector)
 	 */
-	public void serializeConditionalPermissionInfos(Serializable o) throws IOException {
-		FileOutputStream fos = new FileOutputStream(new File(permissionDir, CONDPERMS));
-		ObjectOutputStream oos = new ObjectOutputStream(fos);
-		oos.writeObject(o);
-		oos.close();
+	public void serializeConditionalPermissionInfos(Vector v) throws IOException {
+		BufferedWriter writer = null;
+		try {
+			writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(permissionDir, CONDPERMS))));
+			Enumeration en = v.elements();
+			while (en.hasMoreElements()) {
+				ConditionalPermissionInfo cpi = (ConditionalPermissionInfo) en.nextElement();
+				ConditionInfo cis[] = cpi.getConditionInfos();
+				PermissionInfo pis[] = cpi.getPermissionInfos();
+				for (int i = 0; i < cis.length; i++) {
+					writer.write(cis[i].getEncoded());
+					writer.newLine();
+				}
+				for (int i = 0; i < pis.length; i++) {
+					writer.write(pis[i].getEncoded());
+					writer.newLine();
+				}
+				writer.newLine();
+			}
+		} finally {
+			if (writer != null)
+				writer.close();
+		}
 	}
 
 	/**
@@ -336,16 +361,37 @@ class DefaultPermissionStorage implements PermissionStorage {
 	 * @throws IOException
 	 * @see org.eclipse.osgi.framework.adaptor.PermissionStorage#deserializeConditionalPermissionInfos()
 	 */
-	public Object deserializeConditionalPermissionInfos() throws IOException {
-		FileInputStream fis = new FileInputStream(new File(permissionDir, CONDPERMS));
-		ObjectInputStream ois = new ObjectInputStream(fis);
-		Object o;
+	public Vector deserializeConditionalPermissionInfos() throws IOException {
+		BufferedReader reader = null;
+		Vector v = new Vector(15);
 		try {
-			o = ois.readObject();
+			reader = new BufferedReader(new InputStreamReader(new FileInputStream(new File(permissionDir, CONDPERMS))));
+			String line;
+			Vector c = new Vector(3);
+			Vector p = new Vector(3);
+			while((line = reader.readLine()) != null) {
+				if (line.length() == 0) {
+					ConditionalPermissionInfoImpl cpi;
+					cpi = new ConditionalPermissionInfoImpl((ConditionInfo[])c.toArray(new ConditionInfo[0]), (PermissionInfo[])p.toArray(new PermissionInfo[0]));
+					v.add(cpi);
+					c.clear();
+					p.clear();
+				} else if (line.startsWith("(")) { //$NON-NLS-1$
+					p.add(new PermissionInfo(line));
+				} else if (line.startsWith("[")) { //$NON-NLS-1$
+					c.add(new ConditionInfo(line));
+				}
+			}
+		} catch (FileNotFoundException e) {
+			// do nothing return empty vector
+		} catch (IOException e) {
+			throw e;
 		} catch (Exception e) {
 			throw new IOException(e.getMessage());
+		} finally {
+			if (reader != null)
+				reader.close();
 		}
-		ois.close();
-		return o;
+		return v;
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/repository/org/osgi/service/permissionadmin/PermissionInfo.java,v 1.9 2003/12/16 02:15:32 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.service.condpermadmin/src/org/osgi/service/condpermadmin/ConditionInfo.java,v 1.4 2005/01/21 22:22:39 breed Exp $
  *
  * Copyright (c) The Open Services Gateway Initiative (2001, 2002).
  * All Rights Reserved.
@@ -28,7 +28,6 @@
 
 package org.osgi.service.condpermadmin;
 
-import java.io.Serializable;
 import java.util.Vector;
 
 /**
@@ -46,9 +45,7 @@ import java.util.Vector;
  * 
  */
 
-/* TODO This Serializable can't stay here since it is part of the public class */
-public class ConditionInfo implements Serializable {
-	private static final long serialVersionUID = 3689354325134618934L;
+public class ConditionInfo {
 
 	private String type;
 

@@ -26,23 +26,24 @@ import org.osgi.service.permissionadmin.PermissionInfo;
  *
  * Implements ConditionalPermissionAdmin.
  * 
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class ConditionalPermissionAdminImpl implements ConditionalPermissionAdmin {
 	/**
 	 * The Vector of current ConditionalPermissionInfos.  
 	 */
-	static Vector condPerms;
+	Vector condPerms;
 	Framework framework;
-	static PermissionStorage storage;
+	PermissionStorage storage;
 
 	/**
 	 * @param framework
 	 * @param permissionStorage
 	 */
 	public ConditionalPermissionAdminImpl(Framework framework, PermissionStorage permissionStorage) {
+		ConditionalPermissionInfoImpl.setConditionalPermissionAdminImpl(this);
 		this.framework = framework;
-		ConditionalPermissionAdminImpl.storage = permissionStorage;
+		this.storage = permissionStorage;
 		try {
 			condPerms = (Vector) permissionStorage.deserializeConditionalPermissionInfos();
 		} catch (IOException e) {
@@ -61,6 +62,7 @@ public class ConditionalPermissionAdminImpl implements ConditionalPermissionAdmi
 			try {
 				storage.serializeConditionalPermissionInfos(condPerms);
 			} catch (IOException e) {
+				e.printStackTrace();
 				framework.publishFrameworkEvent(FrameworkEvent.ERROR, framework.systemBundle, e);
 			}
 		}
@@ -91,7 +93,7 @@ public class ConditionalPermissionAdminImpl implements ConditionalPermissionAdmi
 		return condPerms.elements();
 	}
 
-	static void deleteConditionalPermissionInfo(ConditionalPermissionInfo cpi) {
+	void deleteConditionalPermissionInfo(ConditionalPermissionInfo cpi) {
 		synchronized (condPerms) {
 			condPerms.remove(cpi);
 			try {

@@ -27,8 +27,6 @@
 
 package org.osgi.service.permissionadmin;
 
-import java.io.Serializable;
-
 /**
  * Permission representation used by the Permission Admin service.
  * 
@@ -48,9 +46,7 @@ import java.io.Serializable;
  * 
  * @version $Revision: 1.6 $
  */
-/* TODO the Serializable can't stay here since this is a public class */
-public class PermissionInfo implements Serializable {
-	private static final long serialVersionUID = 4050763784350348345L;
+public class PermissionInfo {
 	private String	type;
 	private String	name;
 	private String	actions;

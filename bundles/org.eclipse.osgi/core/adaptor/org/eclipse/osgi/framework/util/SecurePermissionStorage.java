@@ -12,8 +12,8 @@
 package org.eclipse.osgi.framework.util;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.security.*;
+import java.util.Vector;
 import org.eclipse.osgi.framework.adaptor.PermissionStorage;
 
 /**
@@ -24,7 +24,7 @@ public class SecurePermissionStorage implements PermissionStorage, PrivilegedExc
 	private PermissionStorage storage;
 	private String location;
 	private String[] data;
-	private Serializable obj;
+	private Vector v;
 	private int action;
 	private static final int GET = 1;
 	private static final int SET = 2;
@@ -46,7 +46,7 @@ public class SecurePermissionStorage implements PermissionStorage, PrivilegedExc
 			case LOCATION :
 				return storage.getLocations();
 			case SERIALIZE :
-				storage.serializeConditionalPermissionInfos(obj);
+				storage.serializeConditionalPermissionInfos(v);
 				return null;
 			case DESERIALIZE :
 				return storage.deserializeConditionalPermissionInfos();
@@ -88,9 +88,9 @@ public class SecurePermissionStorage implements PermissionStorage, PrivilegedExc
 		}
 	}
 
-	public void serializeConditionalPermissionInfos(Serializable o) throws IOException {
+	public void serializeConditionalPermissionInfos(Vector v) throws IOException {
 		this.action = SERIALIZE;
-		this.obj = o;
+		this.v = v;
 		try {
 			AccessController.doPrivileged(this);
 		} catch (PrivilegedActionException e) {
@@ -99,10 +99,10 @@ public class SecurePermissionStorage implements PermissionStorage, PrivilegedExc
 
 	}
 
-	public Object deserializeConditionalPermissionInfos() throws IOException {
+	public Vector deserializeConditionalPermissionInfos() throws IOException {
 		this.action = DESERIALIZE;
 		try {
-			return AccessController.doPrivileged(this);
+			return (Vector) AccessController.doPrivileged(this);
 		} catch (PrivilegedActionException e) {
 			throw (IOException) e.getException();
 		}
