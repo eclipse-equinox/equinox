@@ -734,7 +734,7 @@ public abstract class Bundle implements org.osgi.framework.Bundle, Comparable, K
 			String symbolicName = newBundle.getSymbolicName();
 			Bundle installedBundle = symbolicName == null ? null : framework.getBundleByUniqueId(symbolicName, newBundle.getVersion().toString());
 			if (installedBundle != null && installedBundle != this) {
-				throw new BundleException(Msg.formatter.getString("BUNDLE_INSTALL_SAME_UNIQUEID", newBundle.getSymbolicName(), newBundle.getVersion().toString()));
+				throw new BundleException(Msg.formatter.getString("BUNDLE_INSTALL_SAME_UNIQUEID", new Object[] {installedBundle.getSymbolicName(), installedBundle.getVersion(),  installedBundle.getLocation()}));
 			}
 			String[] nativepaths = framework.selectNativeCode(newBundle);
 			if (nativepaths != null) {

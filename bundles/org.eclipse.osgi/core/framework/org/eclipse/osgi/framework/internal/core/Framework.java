@@ -721,7 +721,7 @@ public class Framework implements EventSource, EventPublisher {
 			if (bundle.getSymbolicName() != null) {
 				Bundle installedBundle = getBundleByUniqueId(bundle.getSymbolicName(), bundle.getVersion().toString());
 				if (installedBundle != null) {
-					throw new BundleException(Msg.formatter.getString("BUNDLE_INSTALL_SAME_UNIQUEID", bundle.getSymbolicName(), bundle.getVersion().toString())); //$NON-NLS-1$
+					throw new BundleException(Msg.formatter.getString("BUNDLE_INSTALL_SAME_UNIQUEID", new Object[] {installedBundle.getSymbolicName(), installedBundle.getVersion().toString(), installedBundle.getLocation()})); //$NON-NLS-1$
 				}
 			}
 			try {
