@@ -13,7 +13,8 @@ Provide-Package:
  org.eclipse.osgi.service.pluginconversion,
  org.eclipse.osgi.service.datalocation,
  org.eclipse.osgi.service.runnable,
- org.eclipse.osgi.service.urlconversion
+ org.eclipse.osgi.service.urlconversion,
+ org.eclipse.core.runtime.adaptor.testsupport 
 Export-Service: 
  org.eclipse.osgi.framework.log.FrameworkLog,
  org.eclipse.osgi.service.environment.EnvironmentInfo,
