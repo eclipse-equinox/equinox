@@ -1463,7 +1463,7 @@ public class Filter implements org.osgi.framework.Filter /* since Framework 1.1 
 			int length = end - begin;
 
 			if (length == 0) {
-				throw new InvalidSyntaxException(Msg.formatter.getString(".FILTER_MISSING_ATTR", pos), filterstring);
+				throw new InvalidSyntaxException(Msg.formatter.getString("FILTER_MISSING_ATTR", pos), filterstring);
 			}
 
 			return (new String(filter, begin, length));
