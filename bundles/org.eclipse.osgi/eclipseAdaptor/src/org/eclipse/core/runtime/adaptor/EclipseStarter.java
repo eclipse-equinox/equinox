@@ -59,48 +59,30 @@ public class EclipseStarter {
 
 	public static Object run(String[] args,Runnable endSplashHandler) throws Exception {
 		processCommandLine(args);
-		if (System.getProperty("osgi.bundles") == null)
-			System.getProperties().put("osgi.bundles", "org.eclipse.osgi.services_3.0.0@1,org.eclipse.osgi.util_3.0.0@1,org.eclipse.core.runtime_3.0.0@2,org.eclipse.update.configurator_3.0.0@3,org.eclipse.core.applicationrunner_3.0.0@5");
 		setInstanceLocation();
 		setConfigurationLocation();
-		FrameworkAdaptor adaptor = null;
-		adaptor = createAdaptor();
+		loadConfigurationInfo();
+		loadDefaultProperties();
+		FrameworkAdaptor adaptor = createAdaptor();
 		OSGi osgi = new OSGi(adaptor);
 		if (osgi == null) 
 			throw new IllegalStateException("OSGi framework could not be started");
 		osgi.launch();
-
 		try {
 			if (console) 
 				startConsole(osgi, new String[0]);
-				
 			context = osgi.getBundleContext();			
 			publishSplashScreen(endSplashHandler);
-			
-			initializeApplicationTracker();
 			loadBundles();
-			// TODO determine how long to wait here
-			Runnable application = (Runnable)applicationTracker.waitForService(9999999999L);
+			setStartLevel(6);
+			initializeApplicationTracker();
+			Runnable application = (Runnable)applicationTracker.getService();
 			applicationTracker.close();
 			if (application == null)
 				throw new IllegalStateException("Unable to acquire application service");
 			application.run();
 		} finally {
-			Bundle systemBundle = context.getBundle(0);
-			if (systemBundle.getState() == Bundle.ACTIVE) {
-				final Semaphore semaphore = new Semaphore(0);
-				FrameworkListener listener = new FrameworkListener() {
-					public void frameworkEvent(FrameworkEvent event) {
-						if (event.getType() == FrameworkEvent.STARTLEVEL_CHANGED)
-							semaphore.release();
-					}
-					
-				};
-				context.addFrameworkListener(listener);
-				systemBundle.stop();
-				semaphore.acquire();
-				context.removeFrameworkListener(listener);
-			}
+			stopSystemBundle();
 		}
 		// TODO for now, if an exception is not thrown from this method, we have to do
 		// the System.exit.  In the future we will update startup.jar to do the System.exit all 
@@ -144,7 +126,6 @@ public class EclipseStarter {
 		String[] bundles = getArrayFromList(System.getProperty("osgi.bundles"));			
 
 		String syspath = getSysPath();
-		Bundle bundle;
 		Vector installed = new Vector();
 		Vector ignored = new Vector();
 		for (int i = 0; i < bundles.length; i++) {
@@ -161,14 +142,14 @@ public class EclipseStarter {
 				}
 				String location = searchForBundle(name, syspath);
 				if (!isInstalled(location)) {
-					bundle = context.installBundle(location);
+					Bundle bundle = context.installBundle(location);
 					if (level >= 0 && start != null)
 						start.setBundleStartLevel(bundle, level);
 					installed.addElement(bundle);
 				} else 
 					ignored.addElement(name);			
 			} catch (Exception ex) {
-				System.err.println("Ignoring " + name);
+				System.err.println("Ignoring osgi.bundles element " + name);
 				ex.printStackTrace();
 				ignored.addElement(name);
 				continue;
@@ -178,7 +159,7 @@ public class EclipseStarter {
 			
 		Enumeration e = installed.elements();
 		while (e.hasMoreElements()) {
-			bundle = (Bundle)e.nextElement();
+			Bundle bundle = (Bundle)e.nextElement();
 			try {
 				bundle.start();				
 			} catch (BundleException ex) {
@@ -186,10 +167,8 @@ public class EclipseStarter {
 				ex.printStackTrace();
 			}
 		}
-		// TODO remove this constant.  At least set it to the max of 6 and the current value...
-		start.setStartLevel(6);
 		context.ungetService(reference);
-		System.out.println("Time (re)start the framework: " + (System.currentTimeMillis() - startTime));
+		System.out.println("Time loadBundles in the framework: " + (System.currentTimeMillis() - startTime));
 		return (String[])ignored.toArray(new String[ignored.size()]);
 	}
 
@@ -445,11 +424,9 @@ public class EclipseStarter {
 			return;
 		}
 		// -configuration was not specified so compute a configLocation based on the
-		// install location.  If it is read/write then use it.  Otherwise use the user.dir
+		// install location.  If it is read/write then use it.  Otherwise use the user.home
 		if (configLocation == null) {
-			configLocation = getDefaultStateLocation() + "/.config";
-			// TODO handle the case where the install location is read only.  Find out
-			// how they do it in the update code and do the same here.
+			configLocation = getDefaultConfigurationLocation() + "/.config";
 		} else {
 			// if -configuration was specified, then interpret the config location from the 
 			// value given.  Allow for the specification of a config file (.cfg) or a dir.
@@ -468,7 +445,7 @@ public class EclipseStarter {
 			System.getProperties().put("osgi.manifest.cache", configLocation + "/manifests");
 		}
 	}
-
+	
 	private static boolean isInstalled(String location) {
 		Bundle[] installed = context.getBundles();
 		for (int i = 0; i < installed.length; i++) {
@@ -479,7 +456,7 @@ public class EclipseStarter {
 		return false;
 	}
 
-	private static String getDefaultStateLocation() {
+	private static String getDefaultConfigurationLocation() {
 		// 1) We store the config state relative to the 'eclipse' directory if possible
 		// 2) If this directory is read-only 
 		//    we store the state in <user.home>/.eclipse/<application-id>_<version> where <user.home> 
@@ -535,11 +512,92 @@ public class EclipseStarter {
 			filter = context.createFilter("(&(objectClass=java.lang.Runnable)(eclipse.application=*))");
 		} catch (InvalidSyntaxException e) {
 			// ignore this.  It should never happen as we have tested the above format.
-			e.printStackTrace();
 		}
 		applicationTracker = new ServiceTracker(context, filter, null);
 		applicationTracker.open();
 	}
+	
+	private static void loadConfigurationInfo() {
+		String configArea = System.getProperty("osgi.configuration.area");
+		if (configArea == null)
+			return;
+		File location = new File(configArea, "config.ini");
+		mergeProperties(System.getProperties(), loadProperties(location));
+	}
+	
+	private static void loadDefaultProperties() {
+		URL codeLocation = EclipseStarter.class.getProtectionDomain().getCodeSource().getLocation();
+		if (codeLocation == null)
+			return;
+		String frameworkLocation = codeLocation.getFile();
+		File location = new File(new File(frameworkLocation).getParentFile(), "eclipse.properties");
+		mergeProperties(System.getProperties(), loadProperties(location));
+	}
+	
+	private static Properties loadProperties(File location) {
+		Properties result = new Properties();
+		try {
+			InputStream in = new FileInputStream(location);
+			try {
+				result.load(in);
+			} finally {
+				in.close();
+			}
+		} catch (FileNotFoundException e) {
+			// its ok if there is no config.ini file.  We'll just use the defaults for everything
+			return result;
+		} catch (IOException e) {
+			// but it is not so good if the file is there and has errors.
+			// TODO log an error here and exit?
+			e.printStackTrace();
+		}
+		return result;
+	}
+	
+	private static void mergeProperties(Properties destination, Properties source) {
+		for (Enumeration e = source.keys(); e.hasMoreElements(); ) {
+			String key = (String)e.nextElement();
+			String value = (String)source.getProperty(key);
+			if (destination.getProperty(key) == null)
+				destination.put(key, value);
+		}
+	}
+	
+	private static void stopSystemBundle() throws BundleException{
+		Bundle systemBundle = context.getBundle(0);
+		if (systemBundle.getState() == Bundle.ACTIVE) {
+			final Semaphore semaphore = new Semaphore(0);
+			FrameworkListener listener = new FrameworkListener() {
+				public void frameworkEvent(FrameworkEvent event) {
+					if (event.getType() == FrameworkEvent.STARTLEVEL_CHANGED)
+						semaphore.release();
+				}
+				
+			};
+			context.addFrameworkListener(listener);
+			systemBundle.stop();
+			semaphore.acquire();
+			context.removeFrameworkListener(listener);
+		}
+	}
+	private static void setStartLevel(final int value) throws BundleException {
+		ServiceTracker tracker = new ServiceTracker(context, StartLevel.class.getName(), null);
+		tracker.open();
+		final StartLevel startLevel = (StartLevel)tracker.getService();
+		final Semaphore semaphore = new Semaphore(0);
+		FrameworkListener listener = new FrameworkListener() {
+			public void frameworkEvent(FrameworkEvent event) {
+				if (event.getType() == FrameworkEvent.STARTLEVEL_CHANGED) {
+					System.out.println("startlevel event: " + startLevel.getStartLevel());
+					if (startLevel.getStartLevel() == value)
+						semaphore.release();
+				}
+			}
+		};
+		context.addFrameworkListener(listener);
+		startLevel.setStartLevel(value);
+		semaphore.acquire();
+		context.removeFrameworkListener(listener);
+		tracker.close();
+	}
 }
-
-
