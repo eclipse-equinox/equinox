@@ -251,24 +251,25 @@ public class FrameworkConsole implements Runnable {
 		BufferedReader br = (BufferedReader) in;
 		//cache the console prompt String
 		String consolePrompt = "\r\n" + ConsoleMsg.formatter.getString("CONSOLE_PROMPT"); //$NON-NLS-1$ //$NON-NLS-2$
+		boolean block = !("arm".equals(System.getProperty("osgi.arch"))); //$NON-NLS-1$ //$NON-NLS-2$
 		while (!disconnect) {
 			out.print(consolePrompt);
 			out.flush();
 
-			// avoid waiting on input stream - apparently generates contention with other native calls
-
 			String cmdline = null;
-			try {
-				synchronized (lock) {
-					while (!br.ready()) {
-						lock.wait(300);
+			if (block) {
+				// avoid waiting on input stream - apparently generates contention with other native calls
+				try {
+					synchronized (lock) {
+						while (!br.ready())
+							lock.wait(300);
 					}
+					cmdline = br.readLine();
+				} catch (InterruptedException e) {
+					// do nothing; probably got disconnected
 				}
+			} else
 				cmdline = br.readLine();
-			} catch (InterruptedException e) {
-				// do nothing; probably got disconnected
-			} finally {
-			}
 
 			if (cmdline == null) {
 				break;
@@ -316,6 +317,7 @@ public class FrameworkConsole implements Runnable {
 		try {
 			/** The buffered input reader on standard in. */
 			input = ((BufferedReader) in).readLine();
+			System.out.println("<" + input + ">");
 		} catch (IOException e) {
 			input = ""; //$NON-NLS-1$
 		}
