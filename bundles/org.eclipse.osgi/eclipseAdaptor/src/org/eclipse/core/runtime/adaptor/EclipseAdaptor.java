@@ -377,6 +377,8 @@ public class EclipseAdaptor extends DefaultAdaptor {
 
 	public void saveMetaDataFor(DefaultBundleData data) throws IOException  {
 		// TODO may want to force a write of .bundledata in some cases here.
+		// This is related to bug 55819.  Could set a dirty flag here
+		// and always save the bundledatas when it is set in saveMetaData().
 	}
 	
 	protected void saveMetaDataFor(BundleData data, DataOutputStream out) throws IOException {
