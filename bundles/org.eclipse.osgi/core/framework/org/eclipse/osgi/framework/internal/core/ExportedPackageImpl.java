@@ -18,12 +18,11 @@ import org.osgi.framework.Constants;
 public class ExportedPackageImpl extends SingleSourcePackage implements org.osgi.service.packageadmin.ExportedPackage {
 
 	String specVersion;
-	PackageSpecification packageSpec;	//TODO Useless
+
 
 	public ExportedPackageImpl(PackageSpecification packageSpec, BundleLoaderProxy supplier) {
 		super(packageSpec.getName(), supplier);
-		this.packageSpec = packageSpec;
-		Version version = this.packageSpec.getActualVersion();
+		Version version = packageSpec.getActualVersion();
 		if (version != null) {
 			this.specVersion = version.toString();
 		}
