@@ -55,7 +55,7 @@ public class EclipseClassLoader extends DefaultClassLoader {
 			AbstractBundle bundle = (AbstractBundle) hostdata.getBundle();
 			// If the bundle is active, uninstalled or stopping then the bundle has already
 			// been initialized (though it may have been destroyed) so just return the class.
-			if ((bundle.getState() & (AbstractBundle.ACTIVE | AbstractBundle.UNINSTALLED | AbstractBundle.STOPPING)) != 0)
+			if ((bundle.getState() & (Bundle.ACTIVE | Bundle.UNINSTALLED | Bundle.STOPPING)) != 0)
 				return basicFindLocalClass(className);
 
 			// The bundle is not active and does not require activation, just return the class
@@ -67,7 +67,7 @@ public class EclipseClassLoader extends DefaultClassLoader {
 			// just try to start it again (else case).
 			// TODO need an explanation here of why we duplicated the mechanism 
 			// from the framework rather than just calling start() and letting it sort it out.
-			if (bundle.getState() == AbstractBundle.STARTING) {
+			if (bundle.getState() == Bundle.STARTING) {
 				// If the thread trying to load the class is the one trying to activate the bundle, then return the class 
 				if (bundle.testStateChanging(Thread.currentThread()) || bundle.testStateChanging(null))
 					return basicFindLocalClass(className);
