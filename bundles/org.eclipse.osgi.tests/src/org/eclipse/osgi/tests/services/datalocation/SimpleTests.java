@@ -31,7 +31,7 @@ public class SimpleTests extends TestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		base = new File(Platform.getConfigurationLocation().getURL().getPath());
-		manager1 = new FileManager(base);
+		manager1 = new FileManager(base, null);
 	}
 
 	protected void tearDown() throws Exception {
