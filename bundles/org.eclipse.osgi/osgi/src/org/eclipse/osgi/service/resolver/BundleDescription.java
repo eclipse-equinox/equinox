@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003 IBM Corporation and others.
+ * Copyright (c) 2003, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -162,6 +162,18 @@ public interface BundleDescription {
 	 * or <code>null</code>
 	 */
 	public Object getUserObject();
+	/**
+	 * Returns whether this bundle is a singleton.  Singleton bundles require 
+	 * that at most one single version of the bundle can be resolved at a time. 
+	 * <p>
+	 * The existence of a single bundle marked as singleton causes all bundles
+	 * with the same symbolic name to be treated as singletons as well.  
+	 * </p>
+	 * 
+	 * @return <code>true</code>, if this bundle is a singleton, 
+	 * <code>false</code> otherwise
+	 */
+	public boolean isSingleton();
 	/**
 	 *  Associates a user-provided object to this bundle description, or
 	 * removes an existing association, if <code>null</code> is provided. The 

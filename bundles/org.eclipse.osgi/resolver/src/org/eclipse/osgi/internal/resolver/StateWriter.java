@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003 IBM Corporation and others.
+ * Copyright (c) 2003, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -94,6 +94,8 @@ class StateWriter {
 		out.writeInt(requiredBundles.length);
 		for (int i = 0; i < requiredBundles.length; i++)
 			writeBundleSpec((BundleSpecificationImpl) requiredBundles[i], out);
+		
+		out.writeBoolean(bundle.isSingleton());
 	}
 	private void writeBundleSpec(BundleSpecificationImpl bundle, DataOutputStream out) throws IOException {
 		writeVersionConstraint(bundle, out);

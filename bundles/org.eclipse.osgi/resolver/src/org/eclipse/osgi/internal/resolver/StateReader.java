@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003 IBM Corporation and others.
+ * Copyright (c) 2003, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,7 +24,7 @@ class StateReader {
 	// cached registry.
 	protected List objectTable = new ArrayList();
 
-	public static final byte STATE_CACHE_VERSION = 4;
+	public static final byte STATE_CACHE_VERSION = 5;
 	public static final byte NULL = 0;
 	public static final byte OBJECT = 1;
 	public static final byte INDEX = 2;
@@ -95,6 +95,7 @@ class StateReader {
 				requiredBundles[i] = readBundleSpec(in);
 			result.setRequiredBundles(requiredBundles);
 		}
+		result.setSingleton(in.readBoolean());
 		return result;
 	}
 	private BundleSpecificationImpl readBundleSpec(DataInputStream in) throws IOException {

@@ -24,7 +24,7 @@ public class PluginParser extends DefaultHandler implements IModel {
 		private String schemaVersion;
 		private String pluginId;
 		private String version;
-		private String vendor;
+		private String vendor;		
  
 		// an ordered list of library path names.
 		private ArrayList libraryPaths;
@@ -40,11 +40,12 @@ public class PluginParser extends DefaultHandler implements IModel {
 		private String masterVersion;
 		private Set filters;
 		private String pluginName;
+		private boolean singleton;
 		public boolean isFragment() {
 			return masterPluginId != null;
 		}
 		public String toString() {
-			return "plugin-id: " + pluginId + "  version: " + version + " libraries: " + libraries + " class:" + pluginClass + " master: " + masterPluginId + " master-version: " + masterVersion + " requires: " + requires; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$
+			return "plugin-id: " + pluginId + "  version: " + version + " libraries: " + libraries + " class:" + pluginClass + " master: " + masterPluginId + " master-version: " + masterVersion + " requires: " + requires + " singleton: " + singleton; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$
 		}
 		public Map getLibraries() {
 			if (libraries == null)
@@ -111,6 +112,9 @@ public class PluginParser extends DefaultHandler implements IModel {
 		}
 		public String getProviderName() {
 			return vendor;
+		}
+		public boolean isSingleton() {
+			return singleton;
 		}
 	}
 	// File name for this plugin or fragment
@@ -226,11 +230,13 @@ public class PluginParser extends DefaultHandler implements IModel {
 		throw ex;
 	}
 	public void handleExtensionPointState(String elementName, Attributes attributes) {
-		// We ignore all elements under extension points (if there are any)
+		// mark the plugin as singleton and ignore all elements under extension points (if there are any)
+		manifestInfo.singleton = true;
 		stateStack.push(new Integer(IGNORED_ELEMENT_STATE));
-		// internalError(Policy.bind("parse.unknownElement", EXTENSION_POINT,elementName)); //$NON-NLS-1$
 	}
 	public void handleExtensionState(String elementName, Attributes attributes) {
+		// mark the plugin as singleton and ignore all elements under extension (if there are any)
+		manifestInfo.singleton = true;		
 		stateStack.push(new Integer(CONFIGURATION_ELEMENT_STATE));
 	}
 	public void handleInitialState(String elementName, Attributes attributes) {

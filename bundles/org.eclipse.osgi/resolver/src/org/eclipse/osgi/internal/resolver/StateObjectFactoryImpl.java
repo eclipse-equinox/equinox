@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003 IBM Corporation and others.
+ * Copyright (c) 2003, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,7 +22,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		result.setBundleId(id);
 		return result;
 	}
-	public BundleDescription createBundleDescription(long id, String globalName, Version version, String location, BundleSpecification[] required, HostSpecification host,PackageSpecification[] packages, String[] providedPackages) {
+	public BundleDescription createBundleDescription(long id, String globalName, Version version, String location, BundleSpecification[] required, HostSpecification host,PackageSpecification[] packages, String[] providedPackages, boolean singleton) {
 		BundleDescriptionImpl bundle = new BundleDescriptionImpl();
 		bundle.setBundleId(id);
 		bundle.setUniqueId(globalName);
@@ -32,6 +32,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		bundle.setPackages(packages);
 		bundle.setHost(host);
 		bundle.setProvidedPackages(providedPackages);
+		bundle.setSingleton(singleton);
 		return bundle;		
 	}
 	public BundleDescription createBundleDescription(BundleDescription original) {
@@ -56,6 +57,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		String[] newProvidedPackages = new String[originalProvidedPackages.length];
 		System.arraycopy(originalProvidedPackages,0,newProvidedPackages,0,originalProvidedPackages.length);
 		bundle.setProvidedPackages(newProvidedPackages);		
+		bundle.setSingleton(original.isSingleton());
 		return bundle;			
 	}
 	public BundleSpecification createBundleSpecification(String requiredGlobalName, Version requiredVersion, byte matchingRule, boolean export, boolean optional) {

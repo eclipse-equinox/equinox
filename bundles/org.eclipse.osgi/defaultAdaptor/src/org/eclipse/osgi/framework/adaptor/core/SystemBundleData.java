@@ -24,9 +24,11 @@ import java.util.Enumeration;
 import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.internal.core.Constants;
+import org.eclipse.osgi.framework.internal.defaultadaptor.DefaultAdaptor;
 import org.eclipse.osgi.framework.internal.protocol.bundleentry.Handler;
 import org.eclipse.osgi.framework.util.Headers;
 import org.eclipse.osgi.service.resolver.Version;
+import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.BundleException;
 
 public class SystemBundleData implements BundleData {
@@ -135,7 +137,23 @@ public class SystemBundleData implements BundleData {
 	}
 
 	public String getSymbolicName() {
-		return (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME);
+		//TODO may want to cache
+		return parseSymbolicName(manifest);
+	}
+	/* 
+	 * Convenience method that retrieves the simbolic name string from the header.
+	 * Note: clients may want to cache the returned value.
+	 */
+	public static String parseSymbolicName(Dictionary manifest) {
+		String symbolicNameEntry = (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME);
+		if (symbolicNameEntry == null)
+			return null;		
+		try {
+			return ManifestElement.parseHeader(Constants.BUNDLE_SYMBOLICNAME, symbolicNameEntry)[0].getValue();
+		} catch (BundleException e) {
+			// here is not the place to validate a manifest			
+		}
+		return null;		
 	}
 
 	public Version getVersion() {

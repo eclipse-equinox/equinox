@@ -12,7 +12,6 @@ package org.eclipse.osgi.internal.resolver;
 
 import java.util.ArrayList;
 import java.util.Dictionary;
-
 import org.eclipse.osgi.framework.internal.core.KeyedElement;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.Bundle;
@@ -27,10 +26,12 @@ public class BundleDescriptionImpl implements BundleDescription, KeyedElement {
 	private PackageSpecification[] packages;
 	private String[] providedPackages;
 	private BundleSpecification[] requiredBundles;
-	private State containingState;
-	private Object userObject;
-
+	private boolean singleton;
+	private State containingState;	
+	private Object userObject;	
+	
 	public BundleDescriptionImpl() {
+		// 
 	}
 	public String getLocation() {
 		return location;
@@ -129,7 +130,7 @@ public class BundleDescriptionImpl implements BundleDescription, KeyedElement {
 		return null;
 	}
 	public String toString() {
-		return getUniqueId() + "_" + getVersion();
+		return getUniqueId() + "_" + getVersion(); //$NON-NLS-1$
 	}
 	public long getBundleId() {
 		return bundleId;
@@ -149,9 +150,6 @@ public class BundleDescriptionImpl implements BundleDescription, KeyedElement {
 	public int getKeyHashCode() {
 		return (int) (bundleId % Integer.MAX_VALUE);
 	}
-	/* (non-Javadoc)
-	 * @see org.eclipse.osgi.service.resolver.BundleDescription#getUnsatisfiedConstraints
-	 */
 	public VersionConstraint[] getUnsatisfiedConstraints() {
 		if (containingState == null)
 			// it is a bug in the client to call this method when not attached to a state
@@ -187,6 +185,12 @@ public class BundleDescriptionImpl implements BundleDescription, KeyedElement {
 			if (availableBundles[i].isResolved() && specification.isSatisfiedBy(availableBundles[i].getVersion()))
 				return true;
 		return false;
+	}
+	public boolean isSingleton() {
+		return singleton;
+	}
+	public void setSingleton(boolean singleton) {
+		this.singleton = singleton;
 	}
 	public Object getUserObject() {
 		return userObject;

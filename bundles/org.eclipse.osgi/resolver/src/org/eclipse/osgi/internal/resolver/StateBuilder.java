@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003 IBM Corporation and others.
+ * Copyright (c) 2003, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,9 +23,18 @@ import org.osgi.framework.BundleException;
 class StateBuilder {
 	static BundleDescription createBundleDescription(Dictionary manifest, String location) throws BundleException {
 		BundleDescriptionImpl result = new BundleDescriptionImpl();
-		result.setUniqueId((String) manifest.get(Constants.BUNDLE_SYMBOLICNAME));
+		// retrieve the symbolic-name/global-name and the singleton status 
+		String symbolicNameHeader = (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME);
+		if (symbolicNameHeader != null) {
+			ManifestElement[] symbolicNameElements = ManifestElement.parseHeader(Constants.BUNDLE_SYMBOLICNAME, symbolicNameHeader);
+			if (symbolicNameElements.length > 0) {
+				result.setUniqueId(symbolicNameElements[0].getValue());
+				result.setSingleton("true".equals(symbolicNameElements[0].getAttribute(Constants.SINGLETON_ATTRIBUTE))); //$NON-NLS-1$
+			}
+		}
 		if (result.getUniqueId() == null)
-			result.setUniqueId((String) manifest.get(Constants.BUNDLE_NAME));
+			result.setUniqueId((String) manifest.get(Constants.BUNDLE_GLOBALNAME));
+		// retrieve other headers
 		String version = (String) manifest.get(Constants.BUNDLE_VERSION);
 		result.setVersion((version != null) ? new Version(version) : Version.emptyVersion);
 		result.setLocation(location);
@@ -41,6 +50,7 @@ class StateBuilder {
 		result.setRequiredBundles(createRequiredBundles(requires));
 		return result;
 	}
+	
 	private static BundleSpecification[] createRequiredBundles(ManifestElement[] specs) {
 		if (specs == null)
 			return null;

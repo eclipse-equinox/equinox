@@ -49,9 +49,10 @@ public interface StateObjectFactory {
 	 * exported (may be <code>null</code>)
 	 * @param providedPackages names of all provided packages (may be 
 	 * <code>null</code>)
+	 * @param singleton whether the bundle created should be a singleton
 	 * @return the created bundle description
 	 */
-	public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location, BundleSpecification[] required, HostSpecification host, PackageSpecification[] packages, String[] providedPackages);
+	public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location, BundleSpecification[] required, HostSpecification host, PackageSpecification[] packages, String[] providedPackages, boolean singleton);
 	/**
 	 * Returns a bundle description based on the information in the supplied manifest dictionary.
 	 * The manifest should contain String keys and String values which correspond to 

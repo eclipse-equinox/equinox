@@ -174,7 +174,7 @@ public class PluginConverterImpl implements PluginConverter, IModel {
 		} catch (MalformedURLException e) {
 			FrameworkLogEntry entry = new FrameworkLogEntry(EclipseAdaptor.FRAMEWORK_SYMBOLICNAME, e.getMessage(), 0, e.getCause(), null);
 			EclipseAdaptor.getDefault().getFrameworkLog().log(entry);
-			return null;
+		return null;
 		} catch(IOException ioe) {
 			//ignore
 		} finally {
@@ -183,9 +183,9 @@ public class PluginConverterImpl implements PluginConverter, IModel {
 					stream.close();
 			} catch(IOException e) {
 				//ignore
-			}
+	}
 		}
-		
+
 		try {
 			xmlFileLocation = new URL(baseURL, FRAGMENT_MANIFEST); 
 			xmlFileLocation.openStream();
@@ -291,8 +291,22 @@ public class PluginConverterImpl implements PluginConverter, IModel {
 	private void generateHeaders() throws IOException {
 		writeEntry(Constants.BUNDLE_NAME, pluginInfo.getPluginName());
 		writeEntry(Constants.BUNDLE_VERSION, pluginInfo.getVersion());
-		writeEntry(Constants.BUNDLE_SYMBOLICNAME, pluginInfo.getUniqueId());
+		writeEntry(Constants.BUNDLE_SYMBOLICNAME, getSymbolicNameEntry(pluginInfo));
 		writeEntry(Constants.BUNDLE_VENDOR, pluginInfo.getProviderName());
+	}
+	/*
+	 * Generates an entry in the form: 
+	 * 	<symbolic-name>[; singleton=true]
+	 */
+	private String getSymbolicNameEntry(IPluginInfo pluginInfo) {
+		// false is the default, so don't bother adding anything 
+		if (!pluginInfo.isSingleton())
+			return pluginInfo.getUniqueId();		
+		StringBuffer result = new StringBuffer(pluginInfo.getUniqueId());
+		result.append("; ");
+		result.append(Constants.SINGLETON_ATTRIBUTE);
+		result.append("=true");
+		return result.toString();
 	}
 
 	private void generateLegacy() throws IOException {
@@ -632,9 +646,9 @@ public class PluginConverterImpl implements PluginConverter, IModel {
 	 */
 	public File convertManifest(File pluginLocation) {
 		return convertManifest(pluginLocation, true);
-	}
-
-	/* (non-Javadoc)
+}
+ 
+ 	/* (non-Javadoc)
 	 * @see org.eclipse.osgi.service.pluginconversion.PluginConverter#convertManifest(java.io.File, java.io.File)
 	 */
 	public boolean convertManifest(File pluginBaseLocation, File bundleManifestLocation) {
