@@ -24,6 +24,7 @@ import org.eclipse.osgi.service.urlconversion.URLConverter;
 public class URLConverterImpl implements URLConverter{
 
 	public URL convertToFileURL(URL url) throws IOException{
+		//TODO should close connection 
 		URLConnection connection = url.openConnection();
 		if (connection instanceof BundleURLConnection) {
 			return ((BundleURLConnection)connection).getFileURL();
@@ -34,6 +35,7 @@ public class URLConverterImpl implements URLConverter{
 	}
 
 	public URL convertToLocalURL(URL url) throws IOException {
+		//TODO should close connection 		
 		URLConnection connection = url.openConnection();
 		if (connection instanceof BundleURLConnection) {
 			return ((BundleURLConnection)connection).getLocalURL();
