@@ -75,13 +75,15 @@ public class StatePerformanceTest extends AbstractStateTest {
 		return state;
 	}
 
-	private void runPerformanceTest(Runnable operation, int iterations) {
+	private void runPerformanceTest(Runnable operation, int iterations, final int repetitions) {
 		Performance perf = Performance.getDefault();
 		PerformanceMeter meter = perf.createPerformanceMeter(perf.getDefaultScenarioId(this));
 		try {
 			for (int i = 0; i < iterations; i++) {
 				meter.start();
-				operation.run();
+				// to ensure short-running tests are not vulnerable to platform clock resolution
+				for (int j = 0; j < repetitions; j++)
+					operation.run();
 				meter.stop();
 			}
 			meter.commit();
@@ -110,32 +112,32 @@ public class StatePerformanceTest extends AbstractStateTest {
 			public void run() {
 				buildRandomState(stateSize);
 			}
-		}, 10);
+		}, 10, 10);
 	}
 
-	private void testResolution(int stateSize) throws IOException {
+	private void testResolution(int stateSize, int repetitions) throws IOException {
 		final State originalState = buildRandomState(stateSize);
 		runPerformanceTest(new Runnable() {
 			public void run() {
-				originalState.resolve();
+				originalState.resolve(false);
 			}
-		}, 10);
+		}, 10, repetitions);
 	}
 
 	public void testResolution100() throws IOException {
-		testResolution(100);
+		testResolution(100, 500);
 	}
 
 	public void testResolution1000() throws IOException {
-		testResolution(1000);
+		testResolution(1000, 15);
 	}
 
 	public void testResolution500() throws IOException {
-		testResolution(500);
+		testResolution(500, 50);
 	}
 
 	public void testResolution5000() throws IOException {
-		testResolution(5000);
+		testResolution(5000, 1);
 	}
 
 	public void testStoreAndRetrieve() {
@@ -149,7 +151,7 @@ public class StatePerformanceTest extends AbstractStateTest {
 					StatePerformanceTest.this.fail("", e);
 				}
 			}
-		}, 10);
+		}, 10, 10);
 	}
 
 }
