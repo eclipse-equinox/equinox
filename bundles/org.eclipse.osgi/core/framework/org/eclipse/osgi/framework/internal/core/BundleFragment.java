@@ -235,40 +235,7 @@ public class BundleFragment extends AbstractBundle {
 	 * @param persistent if true persistently record the bundle was started.
 	 */
 	protected void startWorker(boolean persistent) throws BundleException {
-		if (framework.active) {
-			if ((state & (STARTING | ACTIVE)) != 0) {
-				return;
-			}
-
-			if (state == INSTALLED) {
-				if (!framework.packageAdmin.resolveBundles(new Bundle[] {this})) {
-					throw new BundleException(getResolutionFailureMessage());
-				}
-			}
-
-			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-				Debug.println("Bundle: Active sl = " + framework.startLevelManager.getStartLevel() + "; Bundle " + getBundleId() + " sl = " + getStartLevel()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			}
-
-			if (getStartLevel() <= framework.startLevelManager.getStartLevel()) {
-				if (state == UNINSTALLED) {
-					throw new BundleException(Msg.formatter.getString("BUNDLE_UNINSTALLED_EXCEPTION")); //$NON-NLS-1$
-				}
-				if (framework.active) {
-					state = ACTIVE;
-
-					if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-						Debug.println("->started " + this); //$NON-NLS-1$
-					}
-
-					framework.publishBundleEvent(BundleEvent.STARTED, this);
-				}
-			}
-		}
-
-		if (persistent) {
-			setStatus(Constants.BUNDLE_STARTED, true);
-		}
+		throw new BundleException(Msg.formatter.getString("BUNDLE_FRAGMENT_STOP", this)); //$NON-NLS-1$
 	}
 
 	/**
@@ -277,23 +244,7 @@ public class BundleFragment extends AbstractBundle {
 	 * @param persistent if true persistently record the bundle was stopped.
 	 */
 	protected void stopWorker(boolean persistent) throws BundleException {
-		if (persistent) {
-			setStatus(Constants.BUNDLE_STARTED, false);
-		}
-
-		if (framework.active) {
-			if ((state & (STOPPING | RESOLVED | INSTALLED)) != 0) {
-				return;
-			}
-
-			state = RESOLVED;
-
-			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-				Debug.println("->stopped " + this); //$NON-NLS-1$
-			}
-
-			framework.publishBundleEvent(BundleEvent.STOPPED, this);
-		}
+		throw new BundleException(Msg.formatter.getString("BUNDLE_FRAGMENT_STOP", this)); //$NON-NLS-1$
 	}
 
 	/**
