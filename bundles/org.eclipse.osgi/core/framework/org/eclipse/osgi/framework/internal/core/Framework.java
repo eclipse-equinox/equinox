@@ -84,6 +84,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 	 * The AliasMapper used to alias OS Names.
 	 */
 	protected static AliasMapper aliasMapper = new AliasMapper();
+	protected ConditionalPermissionAdminImpl		 condPermAdmin;
 
 	/**
 	 * Constructor for the Framework instance. This method initializes the
@@ -128,6 +129,13 @@ public class Framework implements EventDispatcher, EventPublisher {
 		if (sm != null) {
 			try {
 				permissionAdmin = new PermissionAdminImpl(this, adaptor.getPermissionStorage());
+			} catch (IOException e) /* fatal error */{
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage());
+			}
+			try {
+				// TODO: We need to figure out the storage for ConditionalPermissionAdmin
+				condPermAdmin = new ConditionalPermissionAdminImpl(this, adaptor.getPermissionStorage());
 			} catch (IOException e) /* fatal error */{
 				e.printStackTrace();
 				throw new RuntimeException(e.getMessage());
@@ -323,6 +331,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 			eventManager = null;
 		}
 		permissionAdmin = null;
+		condPermAdmin = null;
 		packageAdmin = null;
 		adaptor = null;
 	}

@@ -22,6 +22,8 @@ final class BundleCombinedPermissions extends BundlePermissionCollection {
 	private static final long serialVersionUID = 4049357526208360496L;
 	private BundlePermissionCollection assigned;
 	private BundlePermissionCollection implied;
+	private ConditionalPermissions conditional;
+	private boolean isDefault;
 
 	/**
 	 * Create a permission combiner class.
@@ -38,9 +40,20 @@ final class BundleCombinedPermissions extends BundlePermissionCollection {
 	 * Assign the administrator defined permissions.
 	 *
 	 * @param assigned The permissions assigned by the administrator.
+	 * @param isDefault If true, the assigned permissions are the default permissions.
 	 */
-	void setAssignedPermissions(BundlePermissionCollection assigned) {
+	void setAssignedPermissions(BundlePermissionCollection assigned, boolean isDefault) {
 		this.assigned = assigned;
+		this.isDefault = isDefault;
+	}
+
+	/**
+	 * Assign the conditional permissions
+	 * 
+	 * @param conditional The conditional permissions assigned by the administrator
+	 */
+	void setConditionalPermissions(ConditionalPermissions conditional) {
+		this.conditional = conditional;
 	}
 
 	/**
@@ -145,7 +158,18 @@ final class BundleCombinedPermissions extends BundlePermissionCollection {
 	 *					the permission to check
 	 */
 	public boolean implies(Permission permission) {
-		return ((assigned != null) && assigned.implies(permission)) || ((implied != null) && implied.implies(permission));
+		if ((implied != null) && implied.implies(permission))
+			return true;
+
+		/* If we aren't using the default permissions, then the assigned
+		 * permission are the exact permissions the bundle has. */
+		if (!isDefault && (assigned != null) && assigned.implies(permission))
+			return true;
+		if ((conditional != null) && !conditional.isEmpty())
+			return conditional.implies(permission);
+
+		/* If there aren't any conditional permissions that apply, we use
+		 * the default. */
+		return assigned.implies(permission);
 	}
 }
-

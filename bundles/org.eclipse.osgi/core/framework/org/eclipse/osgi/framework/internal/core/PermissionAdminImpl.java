@@ -124,7 +124,7 @@ public class PermissionAdminImpl implements PermissionAdmin {
 		}
 
 		defaultAssignedPermissions = new BundleCombinedPermissions(null);
-		defaultAssignedPermissions.setAssignedPermissions(createDefaultAssignedPermissions(getDefaultPermissions()));
+		defaultAssignedPermissions.setAssignedPermissions(createDefaultAssignedPermissions(getDefaultPermissions()), true);
 	}
 
 	/**
@@ -217,9 +217,9 @@ public class PermissionAdminImpl implements PermissionAdmin {
 				BundleCombinedPermissions combined = (BundleCombinedPermissions) domain.getPermissions();
 
 				if (permissions == null) {
-					combined.setAssignedPermissions(defaultAssignedPermissions);
+					combined.setAssignedPermissions(defaultAssignedPermissions, true);
 				} else {
-					combined.setAssignedPermissions(createPermissions(permissions, bundle));
+					combined.setAssignedPermissions(createPermissions(permissions, bundle), false);
 				}
 			}
 		}
@@ -317,7 +317,7 @@ public class PermissionAdminImpl implements PermissionAdmin {
 			return;
 		}
 
-		defaultAssignedPermissions.setAssignedPermissions(createDefaultAssignedPermissions(permissions));
+		defaultAssignedPermissions.setAssignedPermissions(createDefaultAssignedPermissions(permissions), true);
 	}
 
 	/**
@@ -379,13 +379,9 @@ public class PermissionAdminImpl implements PermissionAdmin {
 
 		BundlePermissionCollection assigned = getAssignedPermissions(bundle);
 
-		combined.setAssignedPermissions(assigned);
+		combined.setAssignedPermissions(assigned, assigned == defaultAssignedPermissions);
 
-		return new BundleProtectionDomain(combined) {
-			public void loadFiles(File[] signedFiles) {
-				// TODO Auto-generated method stub
-			}
-		};
+		return new BundleProtectionDomainImpl(bundle, combined);
 	}
 
 	/**
