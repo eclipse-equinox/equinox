@@ -35,20 +35,9 @@ import org.osgi.framework.Filter;
  * The <tt>AllServiceTracker</tt> class simplifies using services from the
  * Framework's service registry.
  * <p>
- * A <tt>AllServiceTracker</tt> object is constructed with search criteria and a
- * <tt>ServiceTrackerCustomizer</tt> object. A <tt>AllServiceTracker</tt>
- * object can use the <tt>ServiceTrackerCustomizer</tt> object to customize
- * the service objects to be tracked. The <tt>ServiceTracker</tt> object can
- * then be opened to begin tracking all services in the Framework's service
- * registry that match the specified search criteria. The
- * <tt>ServiceTracker</tt> object correctly handles all of the details of
- * listening to <tt>ServiceEvent</tt> objects and getting and ungetting
- * services.
- * <p>
- * The <tt>getServiceReferences</tt> method can be called to get references to
- * the services being tracked. The <tt>getService</tt> and
- * <tt>getServices</tt> methods can be called to get the service objects for
- * the tracked service.
+ * A <tt>AllServiceTracker</tt> object acts the same as a <tt>ServiceTracker</tt> object
+ * except it tracks all service references regardless of the package wiring of the listening
+ * bundle
  * 
  * @version $ $
  */
