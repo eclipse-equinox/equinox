@@ -814,6 +814,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		ResolverImport[] resolverImports = rb.getImportPackages();
 		// Check through the ResolverImports of this bundle.
 		// If there is a matching one then pass it into resolveImport()
+		boolean found = false;
 		for (int j = 0; j < resolverImports.length; j++) {
 			// Make sure it is a dynamic import
 			if ((resolverImports[j].getImportPackageSpecification().getResolution() & ImportPackageSpecification.RESOLUTION_DYNAMIC) == 0) {
@@ -824,6 +825,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 			if (importName.equals("*") || //$NON-NLS-1$
 					(importName.endsWith(".*") && requestedPackage.startsWith(importName.substring(0, importName.length() - 2)))) { //$NON-NLS-1$
 				resolverImports[j].setName(requestedPackage);
+				found = true;
 			}
 			// Resolve the import
 			if (requestedPackage.equals(resolverImports[j].getName())) {
@@ -847,6 +849,14 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 			}
 			// Reset the import package name
 			resolverImports[j].setName(null);
+		}
+		if (!found) {
+			ResolverImport newImport = new ResolverImport(rb, state.getFactory().createImportPackageSpecification(requestedPackage, null, null, null, null, ImportPackageSpecification.RESOLUTION_DYNAMIC,null));
+			boolean resolved = resolveImport(newImport, true);
+			while (resolved && !checkDynamicGrouping(newImport))
+				resolved = resolveImport(newImport, true);
+			if (resolved)
+				return newImport.getMatchingExport().getExportPackageDescription();
 		}
 		if (DEBUG || DEBUG_IMPORTS)
 			ResolverImpl.log("Failed to resolve dynamic import: " + requestedPackage); //$NON-NLS-1$

@@ -556,9 +556,8 @@ public class BundleLoader implements ClassLoaderDelegate {
 			return true;
 
 		/* quick shortcut check */
-		if (!hasDynamicImports) {
+		if (!hasDynamicImports)
 			return false;
-		}
 
 		/* "*" shortcut */
 		if (dynamicImportPackageAll)
@@ -809,6 +808,17 @@ public class BundleLoader implements ClassLoaderDelegate {
 		return source.getResources(name, packageName);
 	}
 
+	private void addDynamicImportPackage(ImportPackageSpecification[] packages) {
+		if (packages == null)
+			return;
+		ArrayList dynamicImports = new ArrayList(packages.length);
+		for (int i = 0; i < packages.length; i++)
+			if (packages[i].getResolution() == ImportPackageSpecification.RESOLUTION_DYNAMIC)
+				dynamicImports.add(packages[i].getName());
+		if (dynamicImports.size() > 0)
+			addDynamicImportPackage((String[]) dynamicImports.toArray(new String[dynamicImports.size()]));
+	}
+
 	/**
 	 * Adds a list of DynamicImport-Package manifest elements to the dynamic
 	 * import tables of this BundleLoader.  Duplicate packages are checked and
@@ -816,7 +826,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 	 * synchronization when calling this method.
 	 * @param packages the DynamicImport-Package elements to add.
 	 */
-	private void addDynamicImportPackage(ImportPackageSpecification[] packages) {
+	private void addDynamicImportPackage(String[] packages) {
 		if (packages == null && SystemBundleLoader.getSystemPackages() == null)
 			return;
 
@@ -851,9 +861,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 		}
 
 		for (int i = 0; i < size; i++) {
-			if (packages[i].getResolution() != ImportPackageSpecification.RESOLUTION_DYNAMIC)
-				continue;
-			String name = packages[i].getName();
+			String name = packages[i];
 			if (isDynamicallyImported(name))
 				continue;
 			if (name.equals("*")) { /* shortcut */ //$NON-NLS-1$
@@ -883,63 +891,14 @@ public class BundleLoader implements ClassLoaderDelegate {
 	 * synchronization when calling this method.
 	 * @param packages the DynamicImport-Package elements to add.
 	 */
-	// TODO need to see about removing this; I know the AspectJ adaptor depends on this.
 	public void addDynamicImportPackage(ManifestElement[] packages) {
-		if (packages == null && SystemBundleLoader.getSystemPackages() == null)
-			return;
-
-		hasDynamicImports = true;
-		// make sure importedPackages is not null;
-		if (importedPackages == null) {
-			importedPackages = new KeyedHashSet();
-		}
-
 		if (packages == null)
 			return;
-
-		int size = packages.length;
-		ArrayList stems;
-		if (dynamicImportPackageStems == null) {
-			stems = new ArrayList(size);
-		} else {
-			stems = new ArrayList(size + dynamicImportPackageStems.length);
-			for (int i = 0; i < dynamicImportPackageStems.length; i++) {
-				stems.add(dynamicImportPackageStems[i]);
-			}
-		}
-
-		ArrayList names;
-		if (dynamicImportPackages == null) {
-			names = new ArrayList(size);
-		} else {
-			names = new ArrayList(size + dynamicImportPackages.length);
-			for (int i = 0; i < dynamicImportPackages.length; i++) {
-				names.add(dynamicImportPackages[i]);
-			}
-		}
-
-		for (int i = 0; i < size; i++) {
-			String name = packages[i].getValue();
-			if (isDynamicallyImported(name))
-				continue;
-			if (name.equals("*")) { /* shortcut */ //$NON-NLS-1$
-				dynamicImportPackageAll = true;
-				return;
-			}
-
-			if (name.endsWith(".*")) //$NON-NLS-1$
-				stems.add(name.substring(0, name.length() - 1));
-			else
-				names.add(name);
-		}
-
-		size = stems.size();
-		if (size > 0)
-			dynamicImportPackageStems = (String[]) stems.toArray(new String[size]);
-
-		size = names.size();
-		if (size > 0)
-			dynamicImportPackages = (String[]) names.toArray(new String[size]);
+		ArrayList dynamicImports = new ArrayList(packages.length);
+		for (int i = 0; i < packages.length; i++)
+			dynamicImports.add(packages[i].getValue());
+		if (dynamicImports.size() > 0)
+			addDynamicImportPackage((String[]) dynamicImports.toArray(new String[dynamicImports.size()]));
 	}
 
 	protected void clear() {
