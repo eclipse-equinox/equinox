@@ -111,12 +111,12 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		if (systemState != null)
 			return stateManager;
 		systemState = stateManager.createSystemState();
-		Vector installedBundles = getInstalledBundles();
+		BundleData[] installedBundles = getInstalledBundles();
 		if (installedBundles == null)
 			return stateManager;
 		StateObjectFactory factory = stateManager.getFactory();
-		for (Iterator iter = installedBundles.iterator(); iter.hasNext();) {
-			BundleData toAdd = (BundleData) iter.next();
+		for (int i = 0; i < installedBundles.length; i++) {
+			BundleData toAdd = (BundleData) installedBundles[i];
 			try {
 				Dictionary manifest = toAdd.getManifest();
 				BundleDescription newDescription = factory.createBundleDescription(manifest, toAdd.getLocation(), toAdd.getBundleID());
@@ -277,16 +277,16 @@ public class EclipseAdaptor extends DefaultAdaptor {
 		saveMetaData();
 		super.frameworkStop(context);
 		if (DebugOptions.getDefault() != null) {
-			System.out.println("Time spent in registry parsing: " + DebugOptions.getDefault().getOption("org.eclipse.core.runtime/registry/parsing/timing/value")); //$NON-NLS-1$ $NON-NLS-2$
-			System.out.println("Time spent in package admin resolve: " + DebugOptions.getDefault().getOption("debug.packageadmin/timing/value")); //$NON-NLS-1$ $NON-NLS-2$
-			System.out.println("Time spent resolving the dependency system: " + DebugOptions.getDefault().getOption("org.eclipse.core.runtime.adaptor/resolver/timing/value")); //$NON-NLS-1$ $NON-NLS-2$
+			System.out.println("Time spent in registry parsing: " + DebugOptions.getDefault().getOption("org.eclipse.core.runtime/registry/parsing/timing/value")); //$NON-NLS-1$ //$NON-NLS-2$
+			System.out.println("Time spent in package admin resolve: " + DebugOptions.getDefault().getOption("debug.packageadmin/timing/value")); //$NON-NLS-1$ //$NON-NLS-2$
+			System.out.println("Time spent resolving the dependency system: " + DebugOptions.getDefault().getOption("org.eclipse.core.runtime.adaptor/resolver/timing/value")); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
 
 	/**
 	 * @see org.eclipse.osgi.framework.adaptor.FrameworkAdaptor#getInstalledBundles()
 	 */
-	public Vector getInstalledBundles() {
+	public BundleData[] getInstalledBundles() {
 		File metadata = LocationManager.getConfigurationFile(LocationManager.BUNDLE_DATA_FILE);
 		if (!metadata.isFile())
 			return null;
@@ -302,7 +302,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 				in.readLong();
 
 				int bundleCount = in.readInt();
-				Vector result = new Vector(bundleCount);
+				ArrayList result = new ArrayList(bundleCount);
 				long id = -1;
 				State state = stateManager.getSystemState();
 				long stateTimeStamp = state.getTimeStamp();
@@ -316,7 +316,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 								data.initializeExistingBundle();
 								if (Debug.DEBUG && Debug.DEBUG_GENERAL)
 									Debug.println("BundleData created: " + data); //$NON-NLS-1$ 
-								result.addElement(data);
+								result.add(data);
 							}
 						} catch (NumberFormatException e) {
 							// should never happen
@@ -331,7 +331,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 				}
 				if (stateTimeStamp != state.getTimeStamp())
 					state.resolve(false); //time stamp changed force a full resolve
-				return result;
+				return (BundleData[]) result.toArray(new BundleData[result.size()]);
 			} finally {
 				in.close();
 			}
@@ -374,7 +374,7 @@ public class EclipseAdaptor extends DefaultAdaptor {
 	}
 
 	public void saveMetaDataFor(DefaultBundleData data) throws IOException {
-		if ( ! ((EclipseBundleData) data).isAutoStartable() ) {
+		if (!((EclipseBundleData) data).isAutoStartable()) {
 			timeStamp--; //Change the value of the timeStamp, as a marker that something changed.  
 		}
 	}

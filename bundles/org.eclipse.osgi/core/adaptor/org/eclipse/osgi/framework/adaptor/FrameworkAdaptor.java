@@ -14,7 +14,6 @@ package org.eclipse.osgi.framework.adaptor;
 import java.io.IOException;
 import java.net.URLConnection;
 import java.util.Properties;
-import java.util.Vector;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.service.resolver.PlatformAdmin;
 import org.eclipse.osgi.service.resolver.State;
@@ -85,9 +84,9 @@ public interface FrameworkAdaptor {
 	 * installed bundles and return a Vector containing the objects.
 	 * The returned Vector becomes the property of the framework.
 	 *
-	 * @return Vector of installed BundleData objects, or null if none can be found.
+	 * @return Array of installed BundleData objects, or null if none can be found.
 	 */
-	public Vector getInstalledBundles();
+	public BundleData[] getInstalledBundles();
 
 	/**
 	 * Map a location to a URLConnection.  This is used by the Framework when installing a bundle

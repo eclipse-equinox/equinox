@@ -11,7 +11,6 @@
 
 package org.eclipse.osgi.framework.adaptor;
 
-import java.util.Vector;
 import org.osgi.framework.*;
 
 /**

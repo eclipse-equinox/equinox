@@ -155,14 +155,13 @@ public class Framework implements EventDispatcher, EventPublisher {
 		/* install ContentHandlerFactory for OSGi URLStreamHandler support */
 		URLConnection.setContentHandlerFactory(new ContentHandlerFactory(systemBundle.context));
 		/* create bundle objects for all installed bundles. */
-		Vector bundleDatas = adaptor.getInstalledBundles();
-		bundles = new BundleRepository(bundleDatas == null ? 10 : bundleDatas.size() + 1, packageAdmin);
+		BundleData[] bundleDatas = adaptor.getInstalledBundles();
+		bundles = new BundleRepository(bundleDatas == null ? 10 : bundleDatas.length + 1, packageAdmin);
 		/* add the system bundle to the Bundle Repository */
 		bundles.add(systemBundle);
 		if (bundleDatas != null) {
-			int size = bundleDatas.size();
-			for (int i = 0; i < size; i++) {
-				BundleData bundledata = (BundleData) bundleDatas.elementAt(i);
+			for (int i = 0; i < bundleDatas.length; i++) {
+				BundleData bundledata = (BundleData) bundleDatas[i];
 				try {
 					AbstractBundle bundle = AbstractBundle.createBundle(bundledata, this);
 					bundles.add(bundle);

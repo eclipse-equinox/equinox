@@ -14,8 +14,6 @@ package org.eclipse.osgi.framework.adaptor.core;
 import java.io.*;
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.security.ProtectionDomain;
 import java.util.Enumeration;
 import org.eclipse.osgi.framework.adaptor.BundleClassLoader;

@@ -138,12 +138,12 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 		if (systemState != null)
 			return stateManager;
 		systemState = stateManager.createSystemState();
-		Vector installedBundles = getInstalledBundles();
+		BundleData[] installedBundles = getInstalledBundles();
 		if (installedBundles == null)
 			return stateManager;
 		StateObjectFactory factory = stateManager.getFactory();
-		for (Iterator iter = installedBundles.iterator(); iter.hasNext();) {
-			BundleData toAdd = (BundleData) iter.next();
+		for (int i = 0; i < installedBundles.length; i++) {
+			BundleData toAdd = installedBundles[i];
 			try {
 				Dictionary manifest = toAdd.getManifest();
 				BundleDescription newDescription = factory.createBundleDescription(manifest, toAdd.getLocation(), toAdd.getBundleID());
@@ -331,18 +331,16 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 	/**
 	 * @see org.eclipse.osgi.framework.adaptor.FrameworkAdaptor#getInstalledBundles()
 	 */
-	public Vector getInstalledBundles() {
+	public BundleData[] getInstalledBundles() {
 		String list[] = getBundleStoreRootDir().list();
 
 		if (list == null) {
 			return null;
 		}
-		int len = list.length;
-
-		Vector bundleDatas = new Vector(len << 1, 10); //TODO ArrayList? array?
+		ArrayList bundleDatas = new ArrayList(list.length);
 
 		/* create bundle objects for all installed bundles. */
-		for (int i = 0; i < len; i++) {
+		for (int i = 0; i < list.length; i++) {
 			try {
 				DefaultBundleData data;
 
@@ -360,7 +358,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 					Debug.println("BundleData created: " + data); //$NON-NLS-1$
 				}
 
-				bundleDatas.addElement(data);
+				bundleDatas.add(data);
 			} catch (BundleException e) {
 				if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 					Debug.println("Unable to open Bundle[" + list[i] + "]: " + e.getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
@@ -374,7 +372,7 @@ public class DefaultAdaptor extends AbstractFrameworkAdaptor {
 			}
 		}
 
-		return (bundleDatas);
+		return (BundleData[]) bundleDatas.toArray(new BundleData[bundleDatas.size()]);
 	}
 
 	/**
