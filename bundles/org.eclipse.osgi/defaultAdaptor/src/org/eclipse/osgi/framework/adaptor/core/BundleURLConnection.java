@@ -59,31 +59,19 @@ public class BundleURLConnection extends URLConnection {
 	}
 
 	public String getContentType() {
-		if (!connected) {
-			try {
-				connect();
-			} catch (IOException e) {
-				return (null);
-			}
-		}
-
 		if (contentType == null) {
 			contentType = guessContentTypeFromName(bundleEntry.getName());
 
 			if (contentType == null) {
-				try {
-					InputStream in = bundleEntry.getInputStream();
-
+				if (!connected) {
 					try {
-						contentType = guessContentTypeFromStream(in);
-					} finally {
-						if (in != null) {
-							try {
-								in.close();
-							} catch (IOException ee) {
-							}
-						}
+						connect();
+					} catch (IOException e) {
+						return (null);
 					}
+				}
+				try {
+					contentType = guessContentTypeFromStream(in);
 				} catch (IOException e) {
 				}
 			}
