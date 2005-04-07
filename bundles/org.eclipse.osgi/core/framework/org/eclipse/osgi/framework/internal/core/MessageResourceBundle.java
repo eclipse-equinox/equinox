@@ -82,7 +82,7 @@ public class MessageResourceBundle {
 	 */
 	static final Object ASSIGNED = new Object();
 
-	private static final boolean DEBUG_MESSAGE_BUNDLES = true;
+	private static final boolean DEBUG_MESSAGE_BUNDLES = false;
 
 	private static final String EXTENSION = ".properties"; //$NON-NLS-1$
 	private static String[] nlSuffixes;
