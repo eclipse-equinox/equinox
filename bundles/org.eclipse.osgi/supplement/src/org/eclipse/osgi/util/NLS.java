@@ -74,14 +74,10 @@ public abstract class NLS {
 
 	/**
 	 * Initialize the given class with the values from the specified message bundle.
-	 * <p>
-	 * Note this is interim API and may change before the 3.1 release.
-	 * </p>
 	 * 
 	 * @param bundleName fully qualified path of the class name
 	 * @param clazz the class where the constants will exist
 	 */
-	
 	public static void initializeMessages(String bundleName, Class clazz) {
 		MessageResourceBundle.load(bundleName, clazz);
 	}
