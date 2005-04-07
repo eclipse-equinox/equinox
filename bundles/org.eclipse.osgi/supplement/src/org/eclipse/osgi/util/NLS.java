@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.osgi.util;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import org.eclipse.osgi.framework.internal.core.MessageResourceBundle;
 import org.eclipse.osgi.framework.msg.MessageFormat;
 
@@ -23,9 +21,12 @@ import org.eclipse.osgi.framework.msg.MessageFormat;
  * @since 3.1
  */
 public abstract class NLS {
-	
-	
+	/**
+	 * @deprecated This was never intended to be API.  It will be
+	 * removed prior to 3.1 M7.
+	 */
 	public static boolean DEBUG_MESSAGE_BUNDLES = false;
+	
 	/**
 	 * Creates a new NLS instance.
 	 */
@@ -60,7 +61,7 @@ public abstract class NLS {
 	 * Bind the given message's substitution locations with the given string values.
 	 * 
 	 * @param message the message to be manipulated
-	 * @param bindings[] An array of objects to be inserted into the message
+	 * @param bindings An array of objects to be inserted into the message
 	 * @return the manipulated String
 	 */
 	public static String bind(String message, Object[] bindings) {
@@ -82,39 +83,6 @@ public abstract class NLS {
 	 */
 	
 	public static void initializeMessages(String bundleName, Class clazz) {
-		long start = System.currentTimeMillis();
-		// load the resource bundle and set the fields
-		final Field[] fields = clazz.getDeclaredFields();
-		MessageResourceBundle.load(bundleName, clazz.getClassLoader(), fields);
-
-		// iterate over the fields in the class to make sure that there aren't any empty ones
-		final int MOD_EXPECTED = Modifier.PUBLIC | Modifier.STATIC;
-		final int MOD_MASK = MOD_EXPECTED | Modifier.FINAL;
-		final int numFields = fields.length;
-		for (int i = 0; i < numFields; i++) {
-			Field field = fields[i];
-			if ((field.getModifiers() & MOD_MASK) != MOD_EXPECTED)
-				continue;
-			try {
-				// Set the value into the field if its empty. We should never get an exception here because
-				// we know we have a public static non-final field. If we do get an exception, silently
-				// log it and continue. This means that the field will (most likely) be un-initialized and
-				// will fail later in the code and if so then we will see both the NPE and this error.
-				if (field.get(clazz) == null) {
-					String value = "Missing message: " + field.getName() + " in: " + bundleName; //$NON-NLS-1$ //$NON-NLS-2$
-					if (DEBUG_MESSAGE_BUNDLES)
-						System.out.println(value);
-					field.set(null, value);
-				}
-			} catch (IllegalArgumentException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IllegalAccessException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		if (DEBUG_MESSAGE_BUNDLES)
-			System.out.println("Time to load message bundle: " + bundleName + " was " + (System.currentTimeMillis() - start) + "ms."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		MessageResourceBundle.load(bundleName, clazz);
 	}
 }
