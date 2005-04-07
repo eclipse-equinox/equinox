@@ -550,6 +550,7 @@ public class EclipseStarter {
 				// skip this entry
 				continue;
 			}
+			location = makeRelative(LocationManager.getInstallLocation().getURL(), location);
 			String locationString = INITIAL_LOCATION + location.toExternalForm();
 			result.add(new InitialBundle(locationString, location, level, start));
 		}
@@ -975,6 +976,53 @@ public class EclipseStarter {
 		return result;
 	}
 
+	/**
+	 * Returns a URL which is equivalent to the given URL relative to the
+	 * specified base URL. Works only for file: URLs
+	 * @throws MalformedURLException 
+	 */
+	private static URL makeRelative(URL base, URL location) throws MalformedURLException {
+		if (base == null)
+			return location;
+		boolean reference = location.getProtocol().equals(REFERENCE_PROTOCOL);
+		URL nonReferenceLocation = location;
+		if (reference)
+			nonReferenceLocation = new URL(location.getPath());
+		if (!"file".equals(base.getProtocol())) //$NON-NLS-1$
+			return location;		
+		// if some URL component does not match, return the original location
+		if (!base.getProtocol().equals(nonReferenceLocation.getProtocol()))
+			return location;
+		if (base.getHost() == null ^ nonReferenceLocation.getHost() == null)
+			return location;
+		if (base.getHost() != null && !base.getHost().equals(nonReferenceLocation.getHost()))
+			return location;
+		if (base.getPort() != nonReferenceLocation.getPort())
+			return location;
+		File locationPath = new File(nonReferenceLocation.getPath());
+		// if location is not absolute, return original location 
+		if (!locationPath.isAbsolute())
+			return location;
+		File relativePath = makeRelative(new File(base.getPath()), locationPath);
+		String urlPath = relativePath.getPath();
+		if (File.separatorChar != '/')
+			urlPath = urlPath.replace(File.separatorChar, '/');
+		if (nonReferenceLocation.getPath().endsWith("/")) //$NON-NLS-1$
+			// restore original trailing slash 
+			urlPath += '/';
+		URL relativeURL = new URL(base.getProtocol(), base.getHost(), base.getPort(), urlPath);
+		if (reference)
+			relativeURL = new URL(REFERENCE_SCHEME + relativeURL.toExternalForm());
+		return relativeURL;
+	}
+
+	private static File makeRelative(File base, File location) {
+		if (!location.isAbsolute())
+			return location;
+		File relative = new File(new FilePath(base).makeRelative(new FilePath(location)));
+		return relative;
+	}
+
 	private static void mergeProperties(Properties destination, Properties source) {
 		for (Enumeration e = source.keys(); e.hasMoreElements();) {
 			String key = (String) e.nextElement();
@@ -1026,8 +1074,8 @@ public class EclipseStarter {
 	}
 
 	/**
-	 * Searches for the given target directory starting in the "plugins" subdirectory
-	 * of the given location.  If one is found then this location is returned; 
+	 * Searches for the given target directory immediately under
+	 * the given start location.  If one is found then this location is returned; 
 	 * otherwise an exception is thrown.
 	 * 
 	 * @return the location where target directory was found

@@ -12,6 +12,7 @@ package org.eclipse.core.runtime.adaptor;
 
 import java.io.*;
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.*;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.SAXParserFactory;
@@ -72,7 +73,8 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 	public static final byte BUNDLEDATA_COMPATIBLE_VERSION = 10;
 	public static final byte BUNDLEDATA_VERSION_11 = 11;
 	public static final byte BUNDLEDATA_VERSION_12 = 12;
-	public static final byte BUNDLEDATA_VERSION = 12;
+	public static final byte BUNDLEDATA_VERSION_13 = 13;
+	public static final byte BUNDLEDATA_VERSION = BUNDLEDATA_VERSION_13;
 
 	public static final byte NULL = 0;
 
@@ -84,7 +86,8 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 
 	private long timeStamp = 0;
 
-	private String installURL = null;
+	// assume a file: installURL 
+	private String installPath = null;
 
 	private boolean exitOnError = true;
 
@@ -126,7 +129,6 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 		boolean readOnlyConfiguration = LocationManager.getConfigurationLocation().isReadOnly();
 		fileManager = initFileManager(LocationManager.getOSGiConfigurationDir(), readOnlyConfiguration ? "none" : null, readOnlyConfiguration); //$NON-NLS-1$
 		readHeaders();
-		checkLocationAndReinitialize();
 		super.initialize(publisher);
 		// default the bootdelegation to all packages
 		if (System.getProperty(Constants.OSGI_BOOTDELEGATION) == null)
@@ -268,19 +270,6 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 		}
 	}
 
-	private void checkLocationAndReinitialize() {
-		if (installURL == null) {
-			installURL = EclipseStarter.getSysPath(); // TODO This reference to the starter should be avoided
-			return;
-		}
-		if (!EclipseStarter.getSysPath().equals(installURL)) {
-			// reinitialize bundledata and state files
-			reinitialize = true;
-
-			installURL = EclipseStarter.getSysPath();
-		}
-	}
-
 	private void readHeaders() {
 		InputStream bundleDataStream = findBundleDataFile();
 		if (bundleDataStream == null)
@@ -292,7 +281,10 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 				cacheVersion = in.readByte();
 				if (cacheVersion >= BUNDLEDATA_COMPATIBLE_VERSION) {
 					timeStamp = in.readLong();
-					installURL = in.readUTF();
+					// removed install URL from bundle data on version 13
+					if (cacheVersion < BUNDLEDATA_VERSION_13)
+						// just skip string
+						in.readUTF();
 					initialBundleStartLevel = in.readInt();
 					nextId = in.readLong();
 				}
@@ -349,6 +341,9 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 		if (location != null) {
 			locationProperties.put("type", LocationManager.PROP_INSTALL_AREA); //$NON-NLS-1$
 			aContext.registerService(Location.class.getName(), location, locationProperties);
+			URL installURL = location.getURL();
+			// assume install URL is file: based
+			installPath = installURL.getPath();
 		}
 
 		register(org.eclipse.osgi.service.environment.EnvironmentInfo.class.getName(), EnvironmentInfo.getDefault(), bundle);
@@ -500,11 +495,14 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 		try {
 			DataInputStream in = new DataInputStream(new BufferedInputStream(bundleDataStream));
 			try {
-				if (in.readByte() < BUNDLEDATA_COMPATIBLE_VERSION)
+				byte version = in.readByte();
+				if (version > BUNDLEDATA_VERSION || version < BUNDLEDATA_COMPATIBLE_VERSION)
 					return null;
 				// skip timeStamp - was read by readHeaders
 				in.readLong();
-				in.readUTF();
+				// removed install URL from bundle data on version 13
+				if (version < BUNDLEDATA_VERSION_13)
+					in.readUTF();
 				in.readInt();
 				in.readLong();
 
@@ -518,7 +516,7 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 							id = in.readLong();
 							if (id != 0) {
 								EclipseBundleData data = (EclipseBundleData) getElementFactory().createBundleData(this, id);
-								loadMetaDataFor(data, in);
+								loadMetaDataFor(data, in, version);
 								data.initializeExistingBundle();
 								if (Debug.DEBUG && Debug.DEBUG_GENERAL)
 									Debug.println("BundleData created: " + data); //$NON-NLS-1$
@@ -550,12 +548,20 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 		return null;
 	}
 
-	protected void loadMetaDataFor(EclipseBundleData data, DataInputStream in) throws IOException {
+	protected void loadMetaDataFor(EclipseBundleData data, DataInputStream in, byte version) throws IOException {
 		byte flag = in.readByte();
 		if (flag == NULL)
 			return;
 		data.setLocation(readString(in, false));
-		data.setFileName(readString(in, false));
+		if (version < BUNDLEDATA_VERSION_13)
+			data.setFileName(readString(in, false));
+		else {
+			String bundleInstallPath = readString(in, false);
+			File storedPath = new File(bundleInstallPath);
+			if (!storedPath.isAbsolute())
+				storedPath = new File(installPath, bundleInstallPath);
+			data.setFileName(storedPath.getAbsolutePath());
+		}
 		data.setSymbolicName(readString(in, false));
 		data.setVersion(Version.parseVersion(readString(in, false)));
 		data.setActivator(readString(in, false));
@@ -611,7 +617,7 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 		EclipseBundleData bundleData = (EclipseBundleData) data;
 		out.writeByte(OBJECT);
 		writeStringOrNull(out, bundleData.getLocation());
-		writeStringOrNull(out, bundleData.getFileName());
+		writeStringOrNull(out, new FilePath(installPath).makeRelative(new FilePath(bundleData.getFileName())));
 		writeStringOrNull(out, bundleData.getSymbolicName());
 		writeStringOrNull(out, bundleData.getVersion().toString());
 		writeStringOrNull(out, bundleData.getActivator());
@@ -666,7 +672,6 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 			try {
 				out.writeByte(BUNDLEDATA_VERSION);
 				out.writeLong(stateManager.getSystemState().getTimeStamp());
-				out.writeUTF(installURL);
 				out.writeInt(initialBundleStartLevel);
 				out.writeLong(nextId);
 				Bundle[] bundles = context.getBundles();

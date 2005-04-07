@@ -12,7 +12,9 @@
 package org.eclipse.osgi.framework.internal.protocol.reference;
 
 import java.io.*;
-import java.net.*;
+import java.net.URL;
+import java.net.URLConnection;
+import org.eclipse.core.runtime.adaptor.LocationManager;
 import org.eclipse.osgi.framework.adaptor.core.ReferenceInputStream;
 
 /**
@@ -32,9 +34,18 @@ public class ReferenceURLConnection extends URLConnection {
 			// There are not solid usecases to the contrary. Yet.
 			// Construct the ref URL carefully so as to preserve UNC paths etc.
 			File file = new File(url.getPath().substring(5));
-			URL ref = file.toURL();
+			URL ref;
+			if (file.isAbsolute())
+				ref = file.toURL();
+			else {
+				URL installURL = LocationManager.getInstallLocation().getURL();
+				// assume install is file: URL as well
+				File installPath = new File(installURL.getPath());
+				file = makeAbsolute(installPath, file);
+				ref = file.toURL();				
+			}
 			if (!file.exists())
-				throw new FileNotFoundException();
+				throw new FileNotFoundException(file.toString());
 			reference = ref;
 		}
 	}
@@ -53,6 +64,13 @@ public class ReferenceURLConnection extends URLConnection {
 		}
 
 		return new ReferenceInputStream(reference);
+	}
+
+	private static File makeAbsolute(File base,File relative) {
+		if (relative.isAbsolute())
+			return relative;		
+		File absolute = new File(base, relative.getPath());
+		return absolute;
 	}
 
 }
