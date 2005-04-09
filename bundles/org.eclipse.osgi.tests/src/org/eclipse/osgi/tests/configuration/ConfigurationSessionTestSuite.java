@@ -24,7 +24,7 @@ import org.eclipse.core.tests.session.SetupManager.SetupException;
 import org.osgi.framework.Bundle;
 
 public class ConfigurationSessionTestSuite extends SessionTestSuite {
-	private static final String PROP_BASE_CONFIG_AREA = "osgi.baseConfiguration.area";
+	private static final String PROP_SHARED_CONFIG_AREA = "osgi.sharedConfiguration.area";
 	private static final String PROP_CONFIG_AREA_READ_ONLY = InternalPlatform.PROP_CONFIG_AREA + ".readOnly";
 	private static final String PROP_CONFIG_CASCADED = "osgi.configuration.cascaded";
 	private Collection bundles = new ArrayList();
@@ -73,10 +73,9 @@ public class ConfigurationSessionTestSuite extends SessionTestSuite {
 		contents.put("osgi.framework", osgiFramework);
 		contents.put("osgi.bundles.defaultStartLevel", "4");
 		contents.put("osgi.install.area", Platform.getInstallLocation().getURL().toExternalForm());
-		if (cascaded) {
-			contents.put(PROP_CONFIG_CASCADED, Boolean.TRUE.toString());
-			contents.put(PROP_BASE_CONFIG_AREA, Platform.getConfigurationLocation().getURL().toExternalForm());
-		}
+		contents.put(PROP_CONFIG_CASCADED, Boolean.toString(cascaded));
+		if (cascaded)
+			contents.put(PROP_SHARED_CONFIG_AREA, Platform.getConfigurationLocation().getURL().toExternalForm());
 		contents.put(PROP_CONFIG_AREA_READ_ONLY, Boolean.toString(readOnly));
 		// save the properties
 		File configINI = configurationLocation.append("config.ini").toFile();
