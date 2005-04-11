@@ -8,7 +8,7 @@ Bundle-Vendor: %eclipse.org
 Bundle-DocUrl: http://www.eclipse.org
 Bundle-ContactAddress: www.eclipse.org
 Bundle-Copyright: %copyright
-Bundle-ClassPath: services.jar
+Bundle-ManifestVersion: 2
 Export-Package: org.osgi.service.cm; specification-version=1.1,
  org.osgi.service.device; specification-version=1.1,
  org.osgi.service.http; specification-version=1.1,
@@ -21,14 +21,3 @@ Export-Package: org.osgi.service.cm; specification-version=1.1,
  org.osgi.service.useradmin; specification-version=1.0,
  org.osgi.service.wireadmin; specification-version=1.0
 Import-Package: org.osgi.framework; specification-version=1.2
-Provide-Package: org.osgi.service.cm,
- org.osgi.service.device,
- org.osgi.service.http,
- org.osgi.service.io,
- org.osgi.service.jini,
- org.osgi.service.log,
- org.osgi.service.metatype,
- org.osgi.service.provisioning,
- org.osgi.service.upnp,
- org.osgi.service.useradmin,
- org.osgi.service.wireadmin

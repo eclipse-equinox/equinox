@@ -8,11 +8,8 @@ Bundle-Localization: plugin
 Bundle-DocUrl: http://www.eclipse.org
 Bundle-ContactAddress: www.eclipse.org
 Bundle-Copyright: %copyright
-Bundle-ClassPath: util.jar
+Bundle-ManifestVersion: 2
 Export-Package: org.osgi.util.measurement; specification-version=1.0, 
  org.osgi.util.position; specification-version=1.0,
  org.osgi.util.xml; specification-version=1.0
-Provide-Package: org.osgi.util.measurement, 
- org.osgi.util.position,
- org.osgi.util.xml
 Import-Package: org.osgi.framework; specification-version=1.1
