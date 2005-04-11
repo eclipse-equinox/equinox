@@ -16,12 +16,20 @@ import java.net.*;
 import java.security.*;
 import java.util.Properties;
 import java.util.zip.ZipFile;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 
 /**
  * Utility class to execute common privileged code.
  */
 public class SecureAction {
-	
+	// make sure we use the correct controlContext;
+	private AccessControlContext controlContext;
+
+	public SecureAction() {
+		// save the control context to be used.
+		this.controlContext = AccessController.getContext();
+	}
 	/**
 	 * Returns a system property.  Same as calling
 	 * System.getProperty(String).
@@ -35,7 +43,7 @@ public class SecureAction {
 			public Object run() {
 				return System.getProperty(property);
 			}
-		});
+		}, controlContext);
 	}
 
 	/**
@@ -53,7 +61,7 @@ public class SecureAction {
 			public Object run() {
 				return System.getProperty(property, def);
 			}
-		});
+		}, controlContext);
 	}
 
 	/**
@@ -68,7 +76,7 @@ public class SecureAction {
 			public Object run() {
 				return System.getProperties();
 			}
-		});
+		}, controlContext);
 	}
 
 	/**
@@ -86,7 +94,7 @@ public class SecureAction {
 				public Object run() throws FileNotFoundException {
 					return new FileInputStream(file);
 				}
-			});
+			}, controlContext);
 		} catch (PrivilegedActionException e) {
 			throw (FileNotFoundException) e.getException();
 		}
@@ -108,7 +116,7 @@ public class SecureAction {
 				public Object run() throws FileNotFoundException {
 					return new FileOutputStream(file.getAbsolutePath(), append);
 				}
-			});
+			}, controlContext);
 		} catch (PrivilegedActionException e) {
 			throw (FileNotFoundException) e.getException();
 		}
@@ -121,7 +129,7 @@ public class SecureAction {
 			public Object run() {
 				return new Long(file.length());
 			}
-		})).longValue();
+		}, controlContext)).longValue();
 	}
 
 	public boolean exists(final File file) {
@@ -131,7 +139,7 @@ public class SecureAction {
 			public Object run() {
 				return new Boolean(file.exists());
 			}
-		})).booleanValue();
+		}, controlContext)).booleanValue();
 	}
 
 	public boolean isDirectory(final File file) {
@@ -141,7 +149,7 @@ public class SecureAction {
 			public Object run() {
 				return new Boolean(file.isDirectory());
 			}
-		})).booleanValue();
+		}, controlContext)).booleanValue();
 	}
 
 	public long lastModified(final File file) {
@@ -151,7 +159,7 @@ public class SecureAction {
 			public Object run() {
 				return new Long(file.lastModified());
 			}
-		})).longValue();
+		}, controlContext)).longValue();
 	}
 
 	public String[] list(final File file) {
@@ -161,7 +169,7 @@ public class SecureAction {
 			public Object run() {
 				return file.list();
 			}
-		});
+		}, controlContext);
 	}
 
 	public ZipFile getZipFile(final File file) throws IOException {
@@ -172,7 +180,7 @@ public class SecureAction {
 				public Object run() throws IOException {
 					return new ZipFile(file);
 				}
-			});
+			}, controlContext);
 		} catch (PrivilegedActionException e) {
 			throw (IOException) e.getException();
 		}
@@ -186,7 +194,7 @@ public class SecureAction {
 				public Object run() throws MalformedURLException {
 					return new URL(protocol, host, port, file, handler);
 				}
-			});
+			}, controlContext);
 		} catch (PrivilegedActionException e) {
 			throw (MalformedURLException) e.getException();
 		}
@@ -206,7 +214,16 @@ public class SecureAction {
 			public Object run() {
 				return new Thread(target, name);
 			}
-		});
+		}, controlContext);
 	}
 
+	public Object getService(final ServiceReference reference, final BundleContext context) {
+		if (System.getSecurityManager() == null)
+			return context.getService(reference);
+		return AccessController.doPrivileged(new PrivilegedAction() {
+			public Object run() {
+				return context.getService(reference);
+			}
+		}, controlContext);
+	}
 }
