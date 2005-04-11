@@ -41,6 +41,8 @@ public abstract class NLS {
 	 * removed prior to 3.1 M7.
 	 */
 	public static boolean DEBUG_MESSAGE_BUNDLES = false;
+	
+	private static final Object[] EMPTY_ARGS = new Object[0];
 
 	/**
 	 * Bind the given message's substitution locations with the given string values.
@@ -50,7 +52,7 @@ public abstract class NLS {
 	 * @return the manipulated String
 	 */
 	public static String bind(String message, Object binding) {
-		return bind(message, new Object[] {binding});
+		return internalBind(message, null, binding, null);
 	}
 
 	/**
@@ -62,7 +64,7 @@ public abstract class NLS {
 	 * @return the manipulated String
 	 */
 	public static String bind(String message, Object binding1, Object binding2) {
-		return bind(message, new Object[] {binding1, binding2});
+		return internalBind(message, null, binding1, binding2);
 	}
 
 	/**
@@ -75,21 +77,16 @@ public abstract class NLS {
 	public static String bind(String message, Object[] bindings) {
 		if (message == null)
 			return "No message available."; //$NON-NLS-1$
-		return internalBind(message, bindings);
+		return internalBind(message, bindings, null, null);
 	}
 
 	/*
 	 * Perform the string substitution on the given message with the specified args.
 	 * See the class comment for exact details.
 	 */
-	private static String internalBind(String message, Object[] args) {
-		if (args == null)
-			args = new String[0];
-		String[] argStrings = new String[args.length];
-
-		// convert all arguments to strings and replace null values
-		for (int i = 0; i < args.length; ++i)
-			argStrings[i] = args[i] == null ? "<null>" : args[i].toString(); //$NON-NLS-1$
+	private static String internalBind(String message, Object[] args, Object argZero, Object argOne) {
+		if (args == null || args.length == 0)
+			args = EMPTY_ARGS;
 
 		int length = message.length();
 		StringBuffer buffer = new StringBuffer(length);
@@ -117,12 +114,18 @@ public abstract class NLS {
 						i = index;
 						break;
 					}
-					if (number >= args.length) {
-						buffer.append("<missing argument>"); //$NON-NLS-1$
-						i = index;
-						break;
+					if (number == 0 && argZero != null)
+						buffer.append(argZero);
+					else if (number == 1 && argOne != null)
+						buffer.append(argOne);
+					else {
+						if (number >= args.length) {
+							buffer.append("<missing argument>"); //$NON-NLS-1$
+							i = index;
+							break;
+						}
+						buffer.append(args[number]);
 					}
-					buffer.append(args[number]);
 					i = index;
 					break;
 				case '\'' :
