@@ -553,15 +553,7 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 		if (flag == NULL)
 			return;
 		data.setLocation(readString(in, false));
-		if (version < BUNDLEDATA_VERSION_13)
-			data.setFileName(readString(in, false));
-		else {
-			String bundleInstallPath = readString(in, false);
-			File storedPath = new File(bundleInstallPath);
-			if (!storedPath.isAbsolute())
-				storedPath = new File(installPath, bundleInstallPath);
-			data.setFileName(storedPath.getAbsolutePath());
-		}
+		data.setFileName(readString(in, false));
 		data.setSymbolicName(readString(in, false));
 		data.setVersion(Version.parseVersion(readString(in, false)));
 		data.setActivator(readString(in, false));
@@ -589,6 +581,13 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 			data.setLastModified(in.readLong());
 		if (cacheVersion >= BUNDLEDATA_VERSION_12)
 			data.setType(in.readInt());
+		if (version >= BUNDLEDATA_VERSION_13 && data.isReference()) {
+			// fileName for bundles installed with reference URLs is stored relative to the install location
+			File storedPath = new File(data.getFileName());
+			if (!storedPath.isAbsolute())
+				storedPath = new File(installPath, data.getFileName());
+			data.setFileName(storedPath.getAbsolutePath());
+		}
 	}
 
 	public void saveMetaDataFor(EclipseBundleData data) throws IOException {
@@ -617,7 +616,8 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 		EclipseBundleData bundleData = (EclipseBundleData) data;
 		out.writeByte(OBJECT);
 		writeStringOrNull(out, bundleData.getLocation());
-		writeStringOrNull(out, new FilePath(installPath).makeRelative(new FilePath(bundleData.getFileName())));
+		String storedFileName = bundleData.isReference() ? new FilePath(installPath).makeRelative(new FilePath(bundleData.getFileName())) : bundleData.getFileName();
+		writeStringOrNull(out, storedFileName);
 		writeStringOrNull(out, bundleData.getSymbolicName());
 		writeStringOrNull(out, bundleData.getVersion().toString());
 		writeStringOrNull(out, bundleData.getActivator());
