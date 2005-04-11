@@ -20,6 +20,7 @@ import org.eclipse.osgi.framework.eventmgr.*;
 import org.eclipse.osgi.framework.internal.protocol.ContentHandlerFactory;
 import org.eclipse.osgi.framework.internal.protocol.StreamHandlerFactory;
 import org.eclipse.osgi.framework.log.FrameworkLog;
+import org.eclipse.osgi.framework.util.SecureAction;
 import org.eclipse.osgi.profile.Profile;
 import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.osgi.util.NLS;
@@ -90,6 +91,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 	 */
 	protected static AliasMapper aliasMapper = new AliasMapper();
 	protected ConditionalPermissionAdminImpl condPermAdmin;
+	SecureAction secureAction = new SecureAction();
 
 	/**
 	 * Constructor for the Framework instance. This method initializes the

@@ -21,13 +21,14 @@ import java.util.zip.ZipFile;
  * Utility class to execute common privileged code.
  */
 public class SecureAction {
+	
 	/**
 	 * Returns a system property.  Same as calling
 	 * System.getProperty(String).
 	 * @param property the property key.
 	 * @return the value of the property or null if it does not exist.
 	 */
-	public static String getProperty(final String property) {
+	public String getProperty(final String property) {
 		if (System.getSecurityManager() == null)
 			return System.getProperty(property);
 		return (String) AccessController.doPrivileged(new PrivilegedAction() {
@@ -45,7 +46,7 @@ public class SecureAction {
 	 * @return the value of the property or the def value if the property
 	 * does not exist.
 	 */
-	public static String getProperty(final String property, final String def) {
+	public String getProperty(final String property, final String def) {
 		if (System.getSecurityManager() == null)
 			return System.getProperty(property, def);
 		return (String) AccessController.doPrivileged(new PrivilegedAction() {
@@ -60,7 +61,7 @@ public class SecureAction {
 	 * System.getProperties().
 	 * @return the system properties.
 	 */
-	public static Properties getProperties() {
+	public Properties getProperties() {
 		if (System.getSecurityManager() == null)
 			return System.getProperties();
 		return (Properties) AccessController.doPrivileged(new PrivilegedAction() {
@@ -77,7 +78,7 @@ public class SecureAction {
 	 * @return The FileInputStream.
 	 * @throws FileNotFoundException if the File does not exist.
 	 */
-	public static FileInputStream getFileInputStream(final File file) throws FileNotFoundException {
+	public FileInputStream getFileInputStream(final File file) throws FileNotFoundException {
 		if (System.getSecurityManager() == null)
 			return new FileInputStream(file);
 		try {
@@ -99,7 +100,7 @@ public class SecureAction {
 	 * @return The FileOutputStream.
 	 * @throws FileNotFoundException if the File does not exist.
 	 */
-	public static FileOutputStream getFileOutputStream(final File file, final boolean append) throws FileNotFoundException {
+	public FileOutputStream getFileOutputStream(final File file, final boolean append) throws FileNotFoundException {
 		if (System.getSecurityManager() == null)
 			return new FileOutputStream(file.getAbsolutePath(), append);
 		try {
@@ -113,7 +114,7 @@ public class SecureAction {
 		}
 	}
 
-	public static long length(final File file) {
+	public long length(final File file) {
 		if (System.getSecurityManager() == null)
 			return file.length();
 		return ((Long) AccessController.doPrivileged(new PrivilegedAction() {
@@ -123,7 +124,7 @@ public class SecureAction {
 		})).longValue();
 	}
 
-	public static boolean exists(final File file) {
+	public boolean exists(final File file) {
 		if (System.getSecurityManager() == null)
 			return file.exists();
 		return ((Boolean) AccessController.doPrivileged(new PrivilegedAction() {
@@ -133,7 +134,7 @@ public class SecureAction {
 		})).booleanValue();
 	}
 
-	public static boolean isDirectory(final File file) {
+	public boolean isDirectory(final File file) {
 		if (System.getSecurityManager() == null)
 			return file.isDirectory();
 		return ((Boolean) AccessController.doPrivileged(new PrivilegedAction() {
@@ -143,7 +144,7 @@ public class SecureAction {
 		})).booleanValue();
 	}
 
-	public static long lastModified(final File file) {
+	public long lastModified(final File file) {
 		if (System.getSecurityManager() == null)
 			return file.lastModified();
 		return ((Long) AccessController.doPrivileged(new PrivilegedAction() {
@@ -153,7 +154,7 @@ public class SecureAction {
 		})).longValue();
 	}
 
-	public static String[] list(final File file) {
+	public String[] list(final File file) {
 		if (System.getSecurityManager() == null)
 			return file.list();
 		return (String[]) AccessController.doPrivileged(new PrivilegedAction() {
@@ -163,7 +164,7 @@ public class SecureAction {
 		});
 	}
 
-	public static ZipFile getZipFile(final File file) throws IOException {
+	public ZipFile getZipFile(final File file) throws IOException {
 		if (System.getSecurityManager() == null)
 			return new ZipFile(file);
 		try {
@@ -177,7 +178,7 @@ public class SecureAction {
 		}
 	}
 
-	public static URL getURL(final String protocol, final String host, final int port, final String file, final URLStreamHandler handler) throws MalformedURLException {
+	public URL getURL(final String protocol, final String host, final int port, final String file, final URLStreamHandler handler) throws MalformedURLException {
 		if (System.getSecurityManager() == null)
 			return new URL(protocol, host, port, file, handler);
 		try {
@@ -198,7 +199,7 @@ public class SecureAction {
 	 * @param name The name of the Thread.
 	 * @return The new Thread
 	 */
-	public static Thread createThread(final Runnable target, final String name) {
+	public Thread createThread(final Runnable target, final String name) {
 		if (System.getSecurityManager() == null)
 			return new Thread(target, name);
 		return (Thread) AccessController.doPrivileged(new PrivilegedAction() {

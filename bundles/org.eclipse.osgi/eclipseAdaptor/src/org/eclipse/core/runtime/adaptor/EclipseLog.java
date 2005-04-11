@@ -37,6 +37,7 @@ public class EclipseLog implements FrameworkLog {
 		String s = System.getProperty("line.separator"); //$NON-NLS-1$
 		LINE_SEPARATOR = s == null ? "\n" : s; //$NON-NLS-1$
 	}
+	private static final SecureAction secureAction = new SecureAction();
 
 	protected boolean consoleLog = false;
 	protected boolean newSession = true;
@@ -163,7 +164,7 @@ public class EclipseLog implements FrameworkLog {
 		if (writer == null) {
 			if (outFile != null) {
 				try {
-					writer = logForStream(SecureAction.getFileOutputStream(outFile, true));
+					writer = logForStream(secureAction.getFileOutputStream(outFile, true));
 				} catch (IOException e) {
 					writer = logForStream(System.err);
 				}
@@ -264,7 +265,7 @@ public class EclipseLog implements FrameworkLog {
 				Reader fileIn = null;
 				try {
 					openFile();
-					fileIn = new InputStreamReader(SecureAction.getFileInputStream(oldOutFile), "UTF-8"); //$NON-NLS-1$
+					fileIn = new InputStreamReader(secureAction.getFileInputStream(oldOutFile), "UTF-8"); //$NON-NLS-1$
 					copyReader(fileIn, this.writer);
 				} catch (IOException e) {
 					copyFailed = true;
