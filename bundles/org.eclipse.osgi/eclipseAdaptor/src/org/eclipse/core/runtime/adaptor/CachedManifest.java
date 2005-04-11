@@ -12,6 +12,7 @@ package org.eclipse.core.runtime.adaptor;
 
 import java.util.Dictionary;
 import java.util.Enumeration;
+import org.eclipse.osgi.framework.adaptor.BundleData;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.util.NLS;
@@ -69,8 +70,11 @@ public class CachedManifest extends Dictionary {
 		}
 		if (EclipseAdaptor.PLUGIN_CLASS.equalsIgnoreCase(keyString))
 			return bundledata.getPluginClass();
-		if (Constants.BUNDLE_SYMBOLICNAME.equalsIgnoreCase(keyString))
-			return bundledata.getSymbolicName();
+		if (Constants.BUNDLE_SYMBOLICNAME.equalsIgnoreCase(keyString)) {
+			if ((bundledata.getType() & BundleData.TYPE_SINGLETON) == 0)
+				return bundledata.getSymbolicName();
+			return bundledata.getSymbolicName() + ';' + Constants.SINGLETON_DIRECTIVE + ":=true"; //$NON-NLS-1$
+		}
 		Dictionary result = getManifest();
 		return result == null ? null : result.get(key);
 	}

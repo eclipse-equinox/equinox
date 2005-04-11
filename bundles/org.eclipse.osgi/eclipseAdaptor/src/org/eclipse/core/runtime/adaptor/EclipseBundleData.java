@@ -298,7 +298,7 @@ public class EclipseBundleData extends AbstractBundleData {
 		}
 	}
 
-	protected void loadFromManifest() throws IOException, BundleException {
+	protected void loadFromManifest() throws BundleException {
 		getManifest(true);
 		super.loadFromManifest();
 		// manifest cannot ever be a cached one otherwise the lines below are bogus
