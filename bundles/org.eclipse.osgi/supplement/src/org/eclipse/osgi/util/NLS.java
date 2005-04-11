@@ -41,7 +41,7 @@ public abstract class NLS {
 	 * removed prior to 3.1 M7.
 	 */
 	public static boolean DEBUG_MESSAGE_BUNDLES = false;
-	
+
 	private static final Object[] EMPTY_ARGS = new Object[0];
 
 	/**
@@ -78,6 +78,16 @@ public abstract class NLS {
 		if (message == null)
 			return "No message available."; //$NON-NLS-1$
 		return internalBind(message, bindings, null, null);
+	}
+
+	/**
+	 * Initialize the given class with the values from the specified message bundle.
+	 * 
+	 * @param bundleName fully qualified path of the class name
+	 * @param clazz the class where the constants will exist
+	 */
+	public static void initializeMessages(String bundleName, Class clazz) {
+		MessageResourceBundle.load(bundleName, clazz);
 	}
 
 	/*
@@ -136,7 +146,7 @@ public abstract class NLS {
 					break;
 				case '\'' :
 					// if a single quote is the last char on the line then skip it
-					int nextIndex = i+1;
+					int nextIndex = i + 1;
 					if (nextIndex >= length) {
 						buffer.append(c);
 						break;
@@ -164,16 +174,6 @@ public abstract class NLS {
 			}
 		}
 		return buffer.toString();
-	}
-
-	/**
-	 * Initialize the given class with the values from the specified message bundle.
-	 * 
-	 * @param bundleName fully qualified path of the class name
-	 * @param clazz the class where the constants will exist
-	 */
-	public static void initializeMessages(String bundleName, Class clazz) {
-		MessageResourceBundle.load(bundleName, clazz);
 	}
 
 	/**
