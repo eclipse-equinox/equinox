@@ -52,7 +52,7 @@ public abstract class NLS {
 	 * @return the manipulated String
 	 */
 	public static String bind(String message, Object binding) {
-		return internalBind(message, null, binding, null);
+		return internalBind(message, null, String.valueOf(binding), null);
 	}
 
 	/**
@@ -64,7 +64,7 @@ public abstract class NLS {
 	 * @return the manipulated String
 	 */
 	public static String bind(String message, Object binding1, Object binding2) {
-		return internalBind(message, null, binding1, binding2);
+		return internalBind(message, null, String.valueOf(binding1), String.valueOf(binding2));
 	}
 
 	/**
@@ -84,12 +84,18 @@ public abstract class NLS {
 	 * Perform the string substitution on the given message with the specified args.
 	 * See the class comment for exact details.
 	 */
-	private static String internalBind(String message, Object[] args, Object argZero, Object argOne) {
+	private static String internalBind(String message, Object[] args, String argZero, String argOne) {
 		if (args == null || args.length == 0)
 			args = EMPTY_ARGS;
 
 		int length = message.length();
-		StringBuffer buffer = new StringBuffer(length);
+		//estimate correct size of string buffer to avoid growth
+		int bufLen = length + (args.length * 5);
+		if (argZero != null)
+			bufLen += argZero.length() - 3;
+		if (argOne != null)
+			bufLen += argOne.length() - 3;
+		StringBuffer buffer = new StringBuffer(bufLen);
 		for (int i = 0; i < length; i++) {
 			char c = message.charAt(i);
 			switch (c) {
@@ -119,7 +125,7 @@ public abstract class NLS {
 					else if (number == 1 && argOne != null)
 						buffer.append(argOne);
 					else {
-						if (number >= args.length) {
+						if (number >= args.length || number < 0) {
 							buffer.append("<missing argument>"); //$NON-NLS-1$
 							i = index;
 							break;
