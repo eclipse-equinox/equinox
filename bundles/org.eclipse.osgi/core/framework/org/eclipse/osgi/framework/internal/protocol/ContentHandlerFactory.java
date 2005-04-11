@@ -92,12 +92,10 @@ public class ContentHandlerFactory implements java.net.ContentHandlerFactory {
 					String[] contentHandler = (String[]) obj;
 					for (int j = 0; j < contentHandler.length; j++) {
 						if (contentHandler[j].equals(contentType)) {
-							ContentHandler handler = (ContentHandler) context.getService(serviceReferences[i]);
 							proxy = new ContentHandlerProxy(contentType, serviceReferences[i], context);
-							proxies.put(contentType, handler);
+							proxies.put(contentType, proxy);
 							return (proxy);
 						}
-
 					}
 				}
 			}
