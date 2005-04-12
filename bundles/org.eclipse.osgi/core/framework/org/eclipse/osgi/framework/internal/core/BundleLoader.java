@@ -467,6 +467,8 @@ public class BundleLoader implements ClassLoaderDelegate {
 		// 5) search the local bundle
 		if (result == null)
 			result = findLocalResources(name);
+		if (result != null)
+			return result;
 		// 6) attempt to find a dynamic import source
 		source = findDynamicSource(pkgName);
 		if (source != null)
