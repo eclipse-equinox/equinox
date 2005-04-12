@@ -12,7 +12,9 @@
 package org.eclipse.osgi.framework.internal.defaultadaptor;
 
 import java.io.*;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.*;
 import java.security.ProtectionDomain;
 import java.util.*;
 import org.eclipse.osgi.framework.adaptor.ClassLoaderDelegate;
@@ -594,7 +596,23 @@ public class DefaultClassLoader extends AbstractClassLoader {
 
 		protected ClasspathEntry(BundleFile bundlefile, ProtectionDomain domain) {
 			this.bundlefile = bundlefile;
-			this.domain = domain;
+			// create a protection domain which knows about the codesource for this classpath entry (bug 89904)
+			try {
+				// use the permissions supplied by the domain passed in from the framework
+				PermissionCollection permissions;
+				if (domain != null)
+					permissions = domain.getPermissions();
+				else {
+					// no domain specified.  Better create a collection that has all permissions
+					// this is done just incase someone sets the security manager later
+					AllPermission allPerm = new AllPermission();
+					permissions = allPerm.newPermissionCollection();
+					permissions.add(allPerm);
+				}
+				this.domain = new ClasspathDomain(bundlefile.getBaseFile().toURL(), permissions);
+			} catch (MalformedURLException e) {
+				this.domain = domain;
+			}
 		}
 
 		public BundleFile getBundleFile() {
@@ -606,4 +624,14 @@ public class DefaultClassLoader extends AbstractClassLoader {
 		}
 	}
 
+	/*
+	 * Very simple protection domain that uses a URL to create a CodeSource for a ProtectionDomain
+	 */
+	protected class ClasspathDomain extends ProtectionDomain {
+
+		public ClasspathDomain(URL codeLocation, PermissionCollection permissions) {
+			super(new CodeSource(codeLocation, null), permissions);
+		}
+		
+	}
 }
