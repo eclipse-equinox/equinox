@@ -15,6 +15,7 @@ import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.*;
+import org.eclipse.osgi.framework.debug.Debug;
 
 /**
  * Class responsible for loading message values from a property file
@@ -82,7 +83,7 @@ public class MessageResourceBundle {
 	 */
 	static final Object ASSIGNED = new Object();
 
-	private static final boolean DEBUG_MESSAGE_BUNDLES = false;
+	private static final boolean DEBUG_MESSAGE_BUNDLES = Debug.DEBUG_MESSAGE_BUNDLES;
 
 	private static final String EXTENSION = ".properties"; //$NON-NLS-1$
 	private static String[] nlSuffixes;
