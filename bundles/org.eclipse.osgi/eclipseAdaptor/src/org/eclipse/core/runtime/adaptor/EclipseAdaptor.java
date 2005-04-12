@@ -70,11 +70,13 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 
 	private static final String OPTION_LOCATION = RUNTIME_ADAPTOR + "/debug/location"; //$NON-NLS-1$	
 
+	// TODO remove all the backlevel versions; we no longer support old versions (bug 91224)
 	public static final byte BUNDLEDATA_COMPATIBLE_VERSION = 10;
 	public static final byte BUNDLEDATA_VERSION_11 = 11;
 	public static final byte BUNDLEDATA_VERSION_12 = 12;
 	public static final byte BUNDLEDATA_VERSION_13 = 13;
-	public static final byte BUNDLEDATA_VERSION = BUNDLEDATA_VERSION_13;
+	public static final byte BUNDLEDATA_VERSION_14 = 14;
+	public static final byte BUNDLEDATA_VERSION = BUNDLEDATA_VERSION_14;
 
 	public static final byte NULL = 0;
 
@@ -279,7 +281,7 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 			DataInputStream in = new DataInputStream(new BufferedInputStream(bundleDataStream));
 			try {
 				cacheVersion = in.readByte();
-				if (cacheVersion >= BUNDLEDATA_COMPATIBLE_VERSION) {
+				if (cacheVersion == BUNDLEDATA_VERSION) {
 					timeStamp = in.readLong();
 					// removed install URL from bundle data on version 13
 					if (cacheVersion < BUNDLEDATA_VERSION_13)
@@ -496,7 +498,7 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 			DataInputStream in = new DataInputStream(new BufferedInputStream(bundleDataStream));
 			try {
 				byte version = in.readByte();
-				if (version > BUNDLEDATA_VERSION || version < BUNDLEDATA_COMPATIBLE_VERSION)
+				if (version != BUNDLEDATA_VERSION)
 					return null;
 				// skip timeStamp - was read by readHeaders
 				in.readLong();
