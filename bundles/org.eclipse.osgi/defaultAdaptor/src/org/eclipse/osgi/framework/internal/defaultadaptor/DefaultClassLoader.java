@@ -30,6 +30,16 @@ import org.osgi.framework.FrameworkEvent;
  */
 public class DefaultClassLoader extends AbstractClassLoader {
 	/**
+	 * A PermissionCollection for AllPermissions; shared across all ProtectionDomains when security is disabled
+	 */
+	static final PermissionCollection ALLPERMISSIONS;
+	static {
+		AllPermission allPerm = new AllPermission();
+		ALLPERMISSIONS = allPerm.newPermissionCollection();
+		if (ALLPERMISSIONS != null)
+			ALLPERMISSIONS.add(allPerm);
+	}
+	/**
 	 * The BundleData object for this BundleClassLoader
 	 */
 	protected AbstractBundleData hostdata;
@@ -605,9 +615,7 @@ public class DefaultClassLoader extends AbstractClassLoader {
 				else {
 					// no domain specified.  Better create a collection that has all permissions
 					// this is done just incase someone sets the security manager later
-					AllPermission allPerm = new AllPermission();
-					permissions = allPerm.newPermissionCollection();
-					permissions.add(allPerm);
+					permissions = ALLPERMISSIONS;
 				}
 				this.domain = new ClasspathDomain(bundlefile.getBaseFile().toURL(), permissions);
 			} catch (MalformedURLException e) {
