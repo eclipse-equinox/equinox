@@ -370,7 +370,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 		// 6) attempt to find a dynamic import source
 		source = findDynamicSource(pkgName);
 		if (source != null)
-			result = source.loadClass(pkgName);
+			result = source.loadClass(name);
 		if (result == null)
 			throw new ClassNotFoundException(name);
 		return result;
@@ -427,7 +427,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 		// 6) attempt to find a dynamic import source
 		source = findDynamicSource(pkgName);
 		if (source != null)
-			result = source.getResource(pkgName);
+			result = source.getResource(name);
 		return result;
 	}
 
@@ -472,7 +472,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 		// 6) attempt to find a dynamic import source
 		source = findDynamicSource(pkgName);
 		if (source != null)
-			result = source.getResources(pkgName);
+			result = source.getResources(name);
 		return result;
 	}
 
