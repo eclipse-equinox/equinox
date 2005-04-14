@@ -70,13 +70,7 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 
 	private static final String OPTION_LOCATION = RUNTIME_ADAPTOR + "/debug/location"; //$NON-NLS-1$	
 
-	// TODO remove all the backlevel versions; we no longer support old versions (bug 91224)
-	public static final byte BUNDLEDATA_COMPATIBLE_VERSION = 10;
-	public static final byte BUNDLEDATA_VERSION_11 = 11;
-	public static final byte BUNDLEDATA_VERSION_12 = 12;
-	public static final byte BUNDLEDATA_VERSION_13 = 13;
-	public static final byte BUNDLEDATA_VERSION_14 = 14;
-	public static final byte BUNDLEDATA_VERSION = BUNDLEDATA_VERSION_14;
+	public static final byte BUNDLEDATA_VERSION = 14;
 
 	public static final byte NULL = 0;
 
@@ -283,10 +277,6 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 				cacheVersion = in.readByte();
 				if (cacheVersion == BUNDLEDATA_VERSION) {
 					timeStamp = in.readLong();
-					// removed install URL from bundle data on version 13
-					if (cacheVersion < BUNDLEDATA_VERSION_13)
-						// just skip string
-						in.readUTF();
 					initialBundleStartLevel = in.readInt();
 					nextId = in.readLong();
 				}
@@ -502,9 +492,6 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 					return null;
 				// skip timeStamp - was read by readHeaders
 				in.readLong();
-				// removed install URL from bundle data on version 13
-				if (version < BUNDLEDATA_VERSION_13)
-					in.readUTF();
 				in.readInt();
 				in.readLong();
 
@@ -574,16 +561,13 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 		data.setStartLevel(in.readInt());
 		data.setStatus(in.readInt());
 		data.setReference(in.readBoolean());
-		if (cacheVersion <= BUNDLEDATA_VERSION_11)
-			if (in.readBoolean())
-				data.setType(BundleData.TYPE_FRAGMENT);
 		data.setManifestTimeStamp(in.readLong());
 		data.setManifestType(in.readByte());
-		if (cacheVersion >= BUNDLEDATA_VERSION_11)
-			data.setLastModified(in.readLong());
-		if (cacheVersion >= BUNDLEDATA_VERSION_12)
-			data.setType(in.readInt());
-		if (version >= BUNDLEDATA_VERSION_13 && data.isReference()) {
+		data.setLastModified(in.readLong());
+		data.setType(in.readInt());
+		// TODO should we rearrange the isRefernce data before the fileName data?
+		// this step is done at the end because the FileName data is read before the isReference data
+		if (data.isReference()) {
 			// fileName for bundles installed with reference URLs is stored relative to the install location
 			File storedPath = new File(data.getFileName());
 			if (!storedPath.isAbsolute())
