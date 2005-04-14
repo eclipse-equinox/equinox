@@ -606,21 +606,7 @@ public class DefaultClassLoader extends AbstractClassLoader {
 
 		protected ClasspathEntry(BundleFile bundlefile, ProtectionDomain domain) {
 			this.bundlefile = bundlefile;
-			// create a protection domain which knows about the codesource for this classpath entry (bug 89904)
-			try {
-				// use the permissions supplied by the domain passed in from the framework
-				PermissionCollection permissions;
-				if (domain != null)
-					permissions = domain.getPermissions();
-				else {
-					// no domain specified.  Better create a collection that has all permissions
-					// this is done just incase someone sets the security manager later
-					permissions = ALLPERMISSIONS;
-				}
-				this.domain = new ClasspathDomain(bundlefile.getBaseFile().toURL(), permissions);
-			} catch (MalformedURLException e) {
-				this.domain = domain;
-			}
+			this.domain = createProtectionDomain(domain);
 		}
 
 		public BundleFile getBundleFile() {
@@ -630,16 +616,35 @@ public class DefaultClassLoader extends AbstractClassLoader {
 		public ProtectionDomain getProtectionDomain() {
 			return domain;
 		}
+
+		/*
+		 * Creates a ProtectionDomain using the permissions of the specified baseDomain
+		 */
+		protected ProtectionDomain createProtectionDomain(ProtectionDomain baseDomain) {
+			// create a protection domain which knows about the codesource for this classpath entry (bug 89904)
+			try {
+				// use the permissions supplied by the domain passed in from the framework
+				PermissionCollection permissions;
+				if (baseDomain != null)
+					permissions = baseDomain.getPermissions();
+				else
+					// no domain specified.  Better use a collection that has all permissions
+					// this is done just incase someone sets the security manager later
+					permissions = ALLPERMISSIONS;
+				return new ClasspathDomain(bundlefile.getBaseFile().toURL(), permissions);
+			} catch (MalformedURLException e) {
+				// Failed to create our own domain; just return the baseDomain
+				return baseDomain;
+			}
+		}
 	}
 
 	/*
 	 * Very simple protection domain that uses a URL to create a CodeSource for a ProtectionDomain
 	 */
 	protected class ClasspathDomain extends ProtectionDomain {
-
 		public ClasspathDomain(URL codeLocation, PermissionCollection permissions) {
 			super(new CodeSource(codeLocation, null), permissions);
 		}
-		
 	}
 }
