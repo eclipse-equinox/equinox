@@ -14,6 +14,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.*;
 import org.eclipse.osgi.framework.debug.Debug;
 
@@ -37,11 +39,13 @@ public class MessageResourceBundle {
 
 		private final String bundleName;
 		private final Map fields;
+		private final boolean isAccessible;
 
-		public MessagesProperties(Map fieldMap, String bundleName) {
+		public MessagesProperties(Map fieldMap, String bundleName, boolean isAccessible) {
 			super();
 			this.fields = fieldMap;
 			this.bundleName = bundleName;
+			this.isAccessible = isAccessible;
 		}
 
 		/* (non-Javadoc)
@@ -57,15 +61,20 @@ public class MessageResourceBundle {
 					System.out.println("Unused message: " + key + " in: " + bundleName); //$NON-NLS-1$ //$NON-NLS-2$
 				return null;
 			}
-			Field field = (Field) fieldObject;
+			final Field field = (Field) fieldObject;
 			//can only set value of public static non-final fields
 			if ((field.getModifiers() & MOD_MASK) != MOD_EXPECTED)
 				return null;
-			// Set the value into the field. We should never get an exception here because
-			// we know we have a public static non-final field. If we do get an exception, silently
-			// log it and continue. This means that the field will (most likely) be un-initialized and
-			// will fail later in the code and if so then we will see both the NPE and this error.
 			try {
+				// Check to see if we are allowed to modify the field. If we aren't (for instance 
+				// if the class is not public) then change the accessible attribute of the field
+				// before trying to set the value.
+				if (!isAccessible)
+					makeAccessible(field);
+				// Set the value into the field. We should never get an exception here because
+				// we know we have a public static non-final field. If we do get an exception, silently
+				// log it and continue. This means that the field will (most likely) be un-initialized and
+				// will fail later in the code and if so then we will see both the NPE and this error.
 				field.set(null, value);
 			} catch (Exception e) {
 				// TODO externalize message
@@ -75,6 +84,23 @@ public class MessageResourceBundle {
 			}
 			return null;
 		}
+
+		/*
+		 * Change the accessibility of the specified field so we can set its value
+		 * to be the appropriate message string.
+		 */
+		private void makeAccessible(final Field field) {
+			if (System.getSecurityManager() == null) {
+				field.setAccessible(true);
+			} else {
+				AccessController.doPrivileged(new PrivilegedAction() {
+					public Object run() {
+						field.setAccessible(true);
+						return null;
+					}
+				});
+			}
+		}
 	}
 
 	/**
@@ -83,7 +109,7 @@ public class MessageResourceBundle {
 	 */
 	static final Object ASSIGNED = new Object();
 
-	private static final boolean DEBUG_MESSAGE_BUNDLES = Debug.DEBUG_MESSAGE_BUNDLES;
+	static final boolean DEBUG_MESSAGE_BUNDLES = Debug.DEBUG_MESSAGE_BUNDLES;
 
 	private static final String EXTENSION = ".properties"; //$NON-NLS-1$
 	private static String[] nlSuffixes;
@@ -157,6 +183,8 @@ public class MessageResourceBundle {
 		final Field[] fieldArray = clazz.getDeclaredFields();
 		ClassLoader loader = clazz.getClassLoader();
 
+		boolean isAccessible = (clazz.getModifiers() & Modifier.PUBLIC) != 0;
+
 		//build a map of field names to Field objects
 		final int len = fieldArray.length;
 		Map fields = new HashMap(len * 2);
@@ -172,7 +200,7 @@ public class MessageResourceBundle {
 			if (input == null)
 				continue;
 			try {
-				final MessagesProperties properties = new MessagesProperties(fields, bundleName);
+				final MessagesProperties properties = new MessagesProperties(fields, bundleName, isAccessible);
 				properties.load(input);
 			} catch (IOException e) {
 				// TODO log
