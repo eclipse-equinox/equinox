@@ -389,8 +389,6 @@ public class ResolverBundle implements VersionSupplier {
 		BundleSpecification[] newRequires = fragment.getBundle().getRequiredBundles();
 		ExportPackageDescription[] newExports = fragment.getBundle().getExportPackages();
 
-		if (isResolved() && (newImports.length > 0 || newRequires.length > 0))
-			return new ResolverExport[0]; // do not allow fragments to require new resources on an already resolved host
 		if (constraintsConflict(newImports, newRequires))
 			return new ResolverExport[0]; // do not allow fragments with conflicting constraints
 		if (isResolved() && newExports.length > 0)
@@ -435,13 +433,17 @@ public class ResolverBundle implements VersionSupplier {
 	private boolean constraintsConflict(ImportPackageSpecification[] newImports, BundleSpecification[] newRequires) {
 		for (int i = 0; i < newImports.length; i++) {
 			ResolverImport importPkg = getImport(newImports[i].getName());
+			if (importPkg == null && isResolved())
+				return true; // do not allow additional constraints when host is already resolved
 			if (importPkg != null && !newImports[i].getVersionRange().equals(importPkg.getImportPackageSpecification().getVersionRange()))
-				return true;
+				return true; // do not allow conflicting constraints from fragment 
 		}
 		for (int i = 0; i < newRequires.length; i++) {
 			BundleConstraint constraint = getRequire(newRequires[i].getName());
+			if (constraint == null && isResolved())
+				return true; // do not allow additional constraints when host is already resolved
 			if (constraint != null && !newRequires[i].getVersionRange().equals(constraint.getVersionConstraint().getVersionRange()))
-				return true;
+				return true; // do not allow conflictin constraints from fragment
 		}
 		return false;
 	}
