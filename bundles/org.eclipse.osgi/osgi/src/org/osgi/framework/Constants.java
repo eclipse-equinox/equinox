@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/Constants.java,v 1.14 2005/03/21 19:55:23 heavy Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/Constants.java,v 1.15 2005/03/29 15:55:48 hargrave Exp $
  *
  * Copyright (c) OSGi Alliance (2000, 2005).
  * All Rights Reserved.
@@ -38,7 +38,7 @@ import java.util.Dictionary;
  * The values associated with these keys are of type <code>java.lang.String</code>,
  * unless otherwise indicated.
  * 
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  * @since 1.1
  * @see Bundle#getHeaders()
  * @see BundleContext#getProperty
@@ -643,7 +643,7 @@ public interface Constants {
 
 	/**
 	 * Manifest header (named &quot;Bundle-Localization&quot;) identifying the
-	 * base name of the bundle's localization file.
+	 * base name of the bundle's localization entries.
 	 * <p>
 	 * The attribute value may be retrieved from the <code>Dictionary</code>
 	 * object returned by the <code>Bundle.getHeaders</code> method.
