@@ -76,9 +76,10 @@ public class MessageResourceBundle {
 			if (fieldObject == ASSIGNED)
 				return null;
 			if (fieldObject == null) {
+				final String msg = "NLS unused message: " + key + " in: " + bundleName;//$NON-NLS-1$ //$NON-NLS-2$
 				if (Debug.DEBUG_MESSAGE_BUNDLES)
-					System.out.println("Unused message: " + key + " in: " + bundleName); //$NON-NLS-1$ //$NON-NLS-2$
-				log(SEVERITY_WARNING, "Warning unused message: " + key + " in: " + bundleName, null); //$NON-NLS-1$ //$NON-NLS-2$
+					System.out.println(msg); 
+				log(SEVERITY_WARNING, msg, null);
 				return null;
 			}
 			final Field field = (Field) fieldObject;
@@ -165,7 +166,7 @@ public class MessageResourceBundle {
 				// we know we have a public static non-final field. If we do get an exception, silently
 				// log it and continue. This means that the field will (most likely) be un-initialized and
 				// will fail later in the code and if so then we will see both the NPE and this error.
-				String value = "Warning missing message: " + field.getName() + " in: " + bundleName; //$NON-NLS-1$ //$NON-NLS-2$
+				String value = "NLS missing message: " + field.getName() + " in: " + bundleName; //$NON-NLS-1$ //$NON-NLS-2$
 				if (Debug.DEBUG_MESSAGE_BUNDLES)
 					System.out.println(value);
 				log(SEVERITY_WARNING, value, null);
