@@ -13,6 +13,8 @@ package org.eclipse.core.runtime.adaptor;
 import java.io.*;
 import java.lang.reflect.Constructor;
 import java.net.*;
+import java.security.CodeSource;
+import java.security.ProtectionDomain;
 import java.util.*;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.internal.core.OSGi;
@@ -250,7 +252,6 @@ public class EclipseStarter {
 		LocationManager.initializeLocations();
 		log = createFrameworkLog();
 		loadConfigurationInfo();
-		loadDefaultProperties();
 		finalizeProperties();
 		if (Profile.PROFILE)
 			Profile.initProps(); // catch any Profile properties set in eclipse.properties...
@@ -807,9 +808,46 @@ public class EclipseStarter {
 		String result = System.getProperty(PROP_SYSPATH);
 		if (result != null)
 			return result;
+		result = getSysPathFromURL(System.getProperty(PROP_FRAMEWORK));
+		if (result == null)
+			result = getSysPathFromCodeSource();
+		if (result == null)
+			throw new IllegalStateException("Can not find the system path.");
+		if (Character.isUpperCase(result.charAt(0))) {
+			char[] chars = result.toCharArray();
+			chars[0] = Character.toLowerCase(chars[0]);
+			result = new String(chars);
+		}
+		System.getProperties().put(PROP_SYSPATH, result);
+		return result;
+	}
 
-		URL url = EclipseStarter.class.getProtectionDomain().getCodeSource().getLocation();
-		result = url.getFile();
+	private static String getSysPathFromURL(String urlSpec) {
+		if (urlSpec == null)
+			return null;
+		URL url = null;
+		try {
+			url = new URL(urlSpec);
+		} catch (MalformedURLException e) {
+			return null;
+		}
+        File fwkFile = new File(url.getFile());
+        fwkFile = new File(fwkFile.getAbsolutePath());
+        fwkFile = new File(fwkFile.getParent());
+	    return fwkFile.getAbsolutePath();
+	}
+
+	private static String getSysPathFromCodeSource() {
+		ProtectionDomain pd = EclipseStarter.class.getProtectionDomain();
+		if (pd == null)
+			return null;
+		CodeSource cs = pd.getCodeSource();
+		if (cs == null)
+			return null;
+		URL url = cs.getLocation();
+		if (url == null)
+			return null;
+		String result = url.getFile();
 		if (result.endsWith(".jar")) { //$NON-NLS-1$
 			result = result.substring(0, result.lastIndexOf('/'));
 			if ("folder".equals(System.getProperty(PROP_FRAMEWORK_SHAPE))) //$NON-NLS-1$
@@ -820,12 +858,6 @@ public class EclipseStarter {
 			result = result.substring(0, result.lastIndexOf('/'));
 			result = result.substring(0, result.lastIndexOf('/'));
 		}
-		if (Character.isUpperCase(result.charAt(0))) {
-			char[] chars = result.toCharArray();
-			chars[0] = Character.toLowerCase(chars[0]);
-			result = new String(chars);
-		}
-		System.getProperties().put(PROP_SYSPATH, result);
 		return result;
 	}
 
@@ -938,24 +970,6 @@ public class EclipseStarter {
 			// its ok.  Thie should never happen
 		}
 		mergeProperties(System.getProperties(), loadProperties(location));
-	}
-
-	private static void loadDefaultProperties() {
-		URL codeLocation = EclipseStarter.class.getProtectionDomain().getCodeSource().getLocation();
-		if (codeLocation == null)
-			return;
-		String location = codeLocation.getFile();
-		if (location.endsWith("/")) //$NON-NLS-1$
-			location = location.substring(0, location.length() - 1);
-		int i = location.lastIndexOf('/');
-		location = location.substring(0, i + 1) + LocationManager.ECLIPSE_PROPERTIES;
-		URL result = null;
-		try {
-			result = new File(location).toURL();
-		} catch (MalformedURLException e) {
-			// its ok.  Thie should never happen
-		}
-		mergeProperties(System.getProperties(), loadProperties(result));
 	}
 
 	private static Properties loadProperties(URL location) {
