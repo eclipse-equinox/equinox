@@ -50,23 +50,6 @@ public class MessageResourceBundle {
 			this.isAccessible = isAccessible;
 		}
 
-		/*
-		 * Change the accessibility of the specified field so we can set its value
-		 * to be the appropriate message string.
-		 */
-		private void makeAccessible(final Field field) {
-			if (System.getSecurityManager() == null) {
-				field.setAccessible(true);
-			} else {
-				AccessController.doPrivileged(new PrivilegedAction() {
-					public Object run() {
-						field.setAccessible(true);
-						return null;
-					}
-				});
-			}
-		}
-
 		/* (non-Javadoc)
 		 * @see java.util.Hashtable#put(java.lang.Object, java.lang.Object)
 		 */
@@ -149,7 +132,24 @@ public class MessageResourceBundle {
 		return variants;
 	}
 
-	private static void computeMissingMessages(String bundleName, Class clazz, Map fieldMap, Field[] fieldArray) {
+	/*
+	 * Change the accessibility of the specified field so we can set its value
+	 * to be the appropriate message string.
+	 */
+	static void makeAccessible(final Field field) {
+		if (System.getSecurityManager() == null) {
+			field.setAccessible(true);
+		} else {
+			AccessController.doPrivileged(new PrivilegedAction() {
+				public Object run() {
+					field.setAccessible(true);
+					return null;
+				}
+			});
+		}
+	}
+
+	private static void computeMissingMessages(String bundleName, Class clazz, Map fieldMap, Field[] fieldArray, boolean isAccessible) {
 		// iterate over the fields in the class to make sure that there aren't any empty ones
 		final int MOD_EXPECTED = Modifier.PUBLIC | Modifier.STATIC;
 		final int MOD_MASK = MOD_EXPECTED | Modifier.FINAL;
@@ -170,13 +170,11 @@ public class MessageResourceBundle {
 				if (Debug.DEBUG_MESSAGE_BUNDLES)
 					System.out.println(value);
 				log(SEVERITY_WARNING, value, null);
+				if (!isAccessible)
+					makeAccessible(field);
 				field.set(null, value);
-			} catch (IllegalArgumentException e) {
-				// TODO externalize message
-				log(SEVERITY_ERROR, "Error setting the missing message value.", e); //$NON-NLS-1$
-			} catch (IllegalAccessException e) {
-				// TODO externalize message
-				log(SEVERITY_ERROR, "Error setting the missing message value.", e); //$NON-NLS-1$
+			} catch (Exception e) {
+				log(SEVERITY_ERROR, "Error setting the missing message value for: " + field.getName(), e); //$NON-NLS-1$
 			}
 		}
 	}
@@ -219,7 +217,7 @@ public class MessageResourceBundle {
 					}
 			}
 		}
-		computeMissingMessages(bundleName, clazz, fields, fieldArray);
+		computeMissingMessages(bundleName, clazz, fields, fieldArray, isAccessible);
 		if (Debug.DEBUG_MESSAGE_BUNDLES)
 			System.out.println("Time to load message bundle: " + bundleName + " was " + (System.currentTimeMillis() - start) + "ms."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
