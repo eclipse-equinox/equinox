@@ -386,7 +386,11 @@ public class PluginConverterImpl implements PluginConverter {
 	}
 
 	private void generateEclipseHeaders() {
-		if (!pluginInfo.isFragment())
+		if (pluginInfo.isFragment())
+			return;
+		
+		String pluginClass = pluginInfo.getPluginClass();
+		if (pluginClass != null && !pluginClass.trim().equals(""))
 			generatedManifest.put(EclipseAdaptor.ECLIPSE_AUTOSTART, "true"); //$NON-NLS-1$
 	}
 
