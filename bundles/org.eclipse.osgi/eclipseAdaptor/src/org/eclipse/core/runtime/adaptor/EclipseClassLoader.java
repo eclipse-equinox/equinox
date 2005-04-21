@@ -15,6 +15,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.security.ProtectionDomain;
 import java.util.ArrayList;
+import java.util.StringTokenizer;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import org.eclipse.osgi.framework.adaptor.*;
@@ -34,6 +35,8 @@ import org.osgi.framework.*;
 public class EclipseClassLoader extends DefaultClassLoader {
 	private static String[] NL_JAR_VARIANTS = buildNLJarVariants(EnvironmentInfo.getDefault().getNL());
 	private static boolean DEFINE_PACKAGES;
+	private static final String VARIABLE_DELIM_STRING = "$"; //$NON-NLS-1$
+	private static final char VARIABLE_DELIM_CHAR = '$';
 	static {
 		try {
 			Class.forName("java.lang.Package"); //$NON-NLS-1$
@@ -239,10 +242,23 @@ public class EclipseClassLoader extends DefaultClassLoader {
 
 	protected void findClassPathEntry(ArrayList result, String entry, AbstractBundleData bundledata, ProtectionDomain domain) {
 		String var = hasPrefix(entry);
-		if (var == null) {
-			super.findClassPathEntry(result, entry, bundledata, domain);
+		if (var != null) {
+			// find internal library using eclipse predefined vars
+			findInternalClassPath(var, result, entry, bundledata, domain);
 			return;
 		}
+		if (entry.length() > 0 && entry.charAt(0) == VARIABLE_DELIM_CHAR) {
+			// find external library using system property substitution
+			ClasspathEntry cpEntry = getExternalClassPath(substituteVars(entry), bundledata, domain);
+			if (cpEntry != null)
+				result.add(cpEntry);
+			return;
+		}
+		// if we get here just do the default searching
+		super.findClassPathEntry(result, entry, bundledata, domain);
+	}
+
+	private void findInternalClassPath(String var, ArrayList result, String entry, AbstractBundleData bundledata, ProtectionDomain domain) {
 		if (var.equals("ws")) { //$NON-NLS-1$
 			super.findClassPathEntry(result, "ws/" + EnvironmentInfo.getDefault().getWS() + entry.substring(4), bundledata, domain); //$NON-NLS-1$
 			return;
@@ -260,7 +276,7 @@ public class EclipseClassLoader extends DefaultClassLoader {
 			// is we are not in development mode, post some framework errors.
 			if (!DevClassPathHelper.inDevelopmentMode()) {
 				//BundleException be = new BundleException(Msg.formatter.getString("BUNDLE_CLASSPATH_ENTRY_NOT_FOUND_EXCEPTION", entry, hostdata.getLocation())); //$NON-NLS-1$
-				BundleException be = new BundleException(NLS.bind(Msg.BUNDLE_CLASSPATH_ENTRY_NOT_FOUND_EXCEPTION,entry)); //$NON-NLS-1$
+				BundleException be = new BundleException(NLS.bind(Msg.BUNDLE_CLASSPATH_ENTRY_NOT_FOUND_EXCEPTION, entry)); //$NON-NLS-1$
 				bundledata.getAdaptor().getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, bundledata.getBundle(), be);
 			}
 		}
@@ -287,6 +303,45 @@ public class EclipseClassLoader extends DefaultClassLoader {
 		if (libPath.startsWith("$nl$")) //$NON-NLS-1$
 			return "nl"; //$NON-NLS-1$
 		return null;
+	}
+
+	private String substituteVars(String cp) {
+		StringBuffer buf = new StringBuffer(cp.length());
+		StringTokenizer st = new StringTokenizer(cp, VARIABLE_DELIM_STRING, true);
+		boolean varStarted = false; // indicates we are processing a var subtitute
+		String var = null; // the current var key
+		while (st.hasMoreElements()) {
+			String tok = st.nextToken();
+			if (VARIABLE_DELIM_STRING.equals(tok)) {
+				if (!varStarted) {
+					varStarted = true; // we found the start of a var
+					var = ""; //$NON-NLS-1$
+				} else {
+					// we have found the end of a var
+					String prop = null;
+					// get the value of the var from system properties
+					if (var != null && var.length() > 0)
+						prop = System.getProperty(var);
+					if (prop != null)
+						// found a value; use it
+						buf.append(prop);
+					else
+						// could not find a value append the var name w/o delims 
+						buf.append(var == null ? "" : var); //$NON-NLS-1$
+					varStarted = false;
+					var = null;
+				}
+			} else {
+				if (!varStarted)
+					buf.append(tok); // the token is not part of a var
+				else
+					var = tok; // the token is the var key; save the key to process when we find the end token
+			}
+		}
+		if (var != null)
+			// found a case of $var at the end of the cp with no trailing $; just append it as is.
+			buf.append(VARIABLE_DELIM_CHAR).append(var);
+		return buf.toString();
 	}
 
 	/**

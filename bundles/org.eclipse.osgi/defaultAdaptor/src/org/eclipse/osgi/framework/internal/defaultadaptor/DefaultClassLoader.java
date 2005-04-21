@@ -150,32 +150,39 @@ public class DefaultClassLoader extends AbstractClassLoader {
 	 */
 	protected ClasspathEntry getClasspath(String cp, AbstractBundleData bundledata, ProtectionDomain domain) {
 		BundleFile bundlefile = null;
-		File file = bundledata.getBaseBundleFile().getFile(cp);
-		if (file != null && file.exists()) {
-			try {
-				bundlefile = hostdata.getAdaptor().createBundleFile(file, bundledata);
-			} catch (IOException e) {
-				bundledata.getAdaptor().getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, bundledata.getBundle(), e);
-			}
-		} else if (bundledata.getBaseBundleFile().containsDir(cp)) {
-			// the classpath entry is a directory in the bundle jar file.
+		File file;
+		// check for internal library jars
+		if ((file = bundledata.getBaseBundleFile().getFile(cp)) != null)
+			bundlefile = createBundleFile(file, bundledata);
+		// check for intenral library directories in a bundle jar file
+		if (bundlefile == null && bundledata.getBaseBundleFile().containsDir(cp))
 			bundlefile = new BundleFile.NestedDirBundleFile(bundledata.getBaseBundleFile(), cp);
-		}
-
 		// if in dev mode, try using the cp as an absolute path
-		if (bundlefile == null && DevClassPathHelper.inDevelopmentMode()) {
-			file = new File(cp);
-			if (file.exists() && file.isAbsolute())
-				// if the file exists and is absolute then create BundleFile for it.
-				try {
-					bundlefile = hostdata.getAdaptor().createBundleFile(file, bundledata);
-				} catch (IOException e) {
-					bundledata.getAdaptor().getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, bundledata.getBundle(), e);
-				}
-		}
-
+		if (bundlefile == null && DevClassPathHelper.inDevelopmentMode())
+			return getExternalClassPath(cp, bundledata, domain);
 		if (bundlefile != null)
 			return createClassPathEntry(bundlefile, domain);
+		return null;
+	}
+
+	protected ClasspathEntry getExternalClassPath(String cp, AbstractBundleData bundledata, ProtectionDomain domain) {
+		File file = new File(cp);
+		if (!file.isAbsolute())
+			return null;
+		BundleFile bundlefile = createBundleFile(file, bundledata);
+		if (bundlefile != null)
+			return createClassPathEntry(bundlefile, domain);
+		return null;
+	}
+
+	protected BundleFile createBundleFile(File file, AbstractBundleData bundledata) {
+		if (file == null || !file.exists())
+			return null;
+		try {
+			return hostdata.getAdaptor().createBundleFile(file, bundledata);
+		} catch (IOException e) {
+			bundledata.getAdaptor().getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, bundledata.getBundle(), e);
+		}
 		return null;
 	}
 
