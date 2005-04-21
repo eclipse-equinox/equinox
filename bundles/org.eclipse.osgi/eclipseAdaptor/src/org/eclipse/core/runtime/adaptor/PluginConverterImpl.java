@@ -390,7 +390,7 @@ public class PluginConverterImpl implements PluginConverter {
 			return;
 		
 		String pluginClass = pluginInfo.getPluginClass();
-		if (pluginClass != null && !pluginClass.trim().equals(""))
+		if (pluginClass != null && !pluginClass.trim().equals("")) //$NON-NLS-1$
 			generatedManifest.put(EclipseAdaptor.ECLIPSE_AUTOSTART, "true"); //$NON-NLS-1$
 	}
 
