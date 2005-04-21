@@ -11,7 +11,11 @@
 package org.eclipse.osgi.tests.services.datalocation;
 
 import java.net.URL;
+
+import junit.framework.Test;
 import junit.framework.TestCase;
+import junit.framework.TestSuite;
+
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.adaptor.LocationManager;
 import org.eclipse.core.runtime.adaptor.testsupport.TestLocationManager;
@@ -28,6 +32,10 @@ public class BasicLocationTests extends TestCase {
 	
 	public BasicLocationTests(String name) {
 		super(name);
+	}
+
+	public static Test suite() {
+		return new TestSuite(BasicLocationTests.class);
 	}
 
 	protected void setUp() throws Exception {

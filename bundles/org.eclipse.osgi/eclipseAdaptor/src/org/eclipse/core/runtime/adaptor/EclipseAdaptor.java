@@ -27,8 +27,7 @@ import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.framework.stats.StatsManager;
 import org.eclipse.osgi.internal.resolver.StateImpl;
 import org.eclipse.osgi.internal.resolver.StateManager;
-import org.eclipse.osgi.service.datalocation.FileManager;
-import org.eclipse.osgi.service.datalocation.Location;
+import org.eclipse.osgi.service.datalocation.*;
 import org.eclipse.osgi.service.pluginconversion.PluginConverter;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.service.urlconversion.URLConverter;
@@ -439,32 +438,25 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 	private InputStream findBundleDataFile() {
 		if (reinitialize)
 			return null; // return null to indicate we are reinitializing
-		File metadata = null;
+		StreamManager streamManager = new StreamManager(fileManager);
+		InputStream bundleDataStream = null;
 		try {
-			metadata = fileManager.lookup(LocationManager.BUNDLE_DATA_FILE, false);
+			bundleDataStream = streamManager.getInputStream(LocationManager.BUNDLE_DATA_FILE, StreamManager.OPEN_BEST_AVAILABLE);
 		} catch (IOException ex) {
 			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 				Debug.println("Error reading framework metadata: " + ex.getMessage()); //$NON-NLS-1$
 				Debug.printStackTrace(ex);
 			}
 		}
-		InputStream bundleDataStream = null;
-		if (metadata != null && metadata.isFile()) {
-			try {
-				bundleDataStream = new FileInputStream(metadata);
-			} catch (FileNotFoundException e1) {
-				// this can not happen since it is tested before entering here.
-			}
-		} else {
+		if (bundleDataStream == null) {
 			Location currentConfiguration = LocationManager.getConfigurationLocation();
 			Location parentConfiguration = null;
 			if (currentConfiguration != null && (parentConfiguration = currentConfiguration.getParentLocation()) != null) {
 				try {
 					File bundledataLocationDir = new File(parentConfiguration.getURL().getFile(), FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME);
 					FileManager newFileManager = initFileManager(bundledataLocationDir, "none", true); //$NON-NLS-1$
-					File bundleData = newFileManager.lookup(LocationManager.BUNDLE_DATA_FILE, false);
-					if (bundleData != null)
-						bundleDataStream = new FileInputStream(bundleData);
+					bundleDataStream = streamManager.getInputStream(LocationManager.BUNDLE_DATA_FILE, StreamManager.OPEN_BEST_AVAILABLE);
+					newFileManager.close();
 				} catch (MalformedURLException e1) {
 					// This will not happen since all the URLs are derived by us
 					// and we are GODS!
@@ -651,10 +643,11 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 		// the cache and the state match
 		if (!canWrite() | timeStamp == stateManager.getSystemState().getTimeStamp())
 			return;
-		File metadata = null;
+		StreamManager streamManager = new StreamManager(fileManager);
 		try {
-			metadata = File.createTempFile(LocationManager.BUNDLE_DATA_FILE, ".new", LocationManager.getOSGiConfigurationDir());//$NON-NLS-1$
-			DataOutputStream out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(metadata)));
+			StreamManagerOutputStream fmos = streamManager.getOutputStream(LocationManager.BUNDLE_DATA_FILE);
+			DataOutputStream out = new DataOutputStream(new BufferedOutputStream(fmos));
+			boolean error = true;
 			try {
 				out.writeByte(BUNDLEDATA_VERSION);
 				out.writeLong(stateManager.getSystemState().getTimeStamp());
@@ -670,11 +663,18 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 						saveMetaDataFor(data, out);
 					}
 				}
-			} finally {
 				out.close();
+				error = false;
+			} finally {
+				// if something happens, don't close a corrupt file
+				if (error) {
+					fmos.abort();
+					try {
+						out.close();
+					} catch (IOException e) {/*ignore*/
+					}
+				}
 			}
-			fileManager.lookup(LocationManager.BUNDLE_DATA_FILE, true); //the BundleData file may not have been created at this point.  
-			fileManager.update(new String[] {LocationManager.BUNDLE_DATA_FILE}, new String[] {metadata.getName()});
 		} catch (IOException e) {
 			frameworkLog.log(new FrameworkEvent(FrameworkEvent.ERROR, context.getBundle(), e));
 			return;

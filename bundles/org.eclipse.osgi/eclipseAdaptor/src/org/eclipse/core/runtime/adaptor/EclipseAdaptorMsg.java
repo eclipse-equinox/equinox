@@ -26,10 +26,11 @@ public class EclipseAdaptorMsg extends NLS {
 	public static String ECLIPSE_BUNDLESTOPPER_ERROR_STOPPING_BUNDLE;
 	public static String ECLIPSE_CACHEDMANIFEST_UNEXPECTED_EXCEPTION;
 
-	//TODO - used to be "fileManager.cannotLock"
 	public static String fileManager_cannotLock;
 	public static String fileManager_couldNotSave;
+	public static String fileManager_updateFailed;
 	public static String fileManager_illegalInReadOnlyMode;
+	public static String fileManager_notOpen;
 
 	public static String ECLIPSE_ADAPTOR_ERROR_XML_SERVICE;
 	public static String ECLIPSE_ADAPTOR_RUNTIME_ERROR;

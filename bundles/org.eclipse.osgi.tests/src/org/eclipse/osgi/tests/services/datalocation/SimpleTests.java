@@ -11,7 +11,11 @@
 package org.eclipse.osgi.tests.services.datalocation;
 
 import java.io.*;
+
+import junit.framework.Test;
 import junit.framework.TestCase;
+import junit.framework.TestSuite;
+
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.osgi.service.datalocation.FileManager;
 
@@ -28,6 +32,10 @@ public class SimpleTests extends TestCase {
 		super(name);
 	}
 
+	public static Test suite() {
+		return new TestSuite(SimpleTests.class);
+	}
+
 	protected void setUp() throws Exception {
 		super.setUp();
 		base = new File(Platform.getConfigurationLocation().getURL().getPath());
@@ -40,6 +48,7 @@ public class SimpleTests extends TestCase {
 
 	public void testAddRemove() {
 		try {
+		manager1.open(true);
 		assertEquals(null, manager1.lookup(TEST1, false));
 		assertEquals(-1, manager1.getId(TEST1));
 
