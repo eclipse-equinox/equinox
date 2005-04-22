@@ -44,6 +44,9 @@ public class ManifestLocalization {
 		try {
 			bundle.checkValid();
 		} catch (IllegalStateException ex) {
+			// defaultLocaleHeaders should have been initialized on uninstall
+			if (defaultLocaleHeaders != null)
+				return defaultLocaleHeaders;
 			return (rawHeaders);
 		}
 		ResourceBundle localeProperties = getResourceBundle(localeString);
