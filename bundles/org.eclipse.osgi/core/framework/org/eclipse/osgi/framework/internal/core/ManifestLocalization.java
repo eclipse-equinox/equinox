@@ -33,13 +33,14 @@ public class ManifestLocalization {
 	}
 
 	protected Dictionary getHeaders(String localeString) {
-		boolean defaultLocale = false;
 		if (localeString.length() == 0)
 			return (rawHeaders);
-		if (localeString.equals(Locale.getDefault().toString())) {
+		boolean isDefaultLocale = false;
+		String defaultLocale = Locale.getDefault().toString();
+		if (localeString.equals(defaultLocale)) {
 			if (defaultLocaleHeaders != null)
 				return (defaultLocaleHeaders);
-			defaultLocale = true;
+			isDefaultLocale = true;
 		}
 		try {
 			bundle.checkValid();
@@ -50,6 +51,9 @@ public class ManifestLocalization {
 			return (rawHeaders);
 		}
 		ResourceBundle localeProperties = getResourceBundle(localeString);
+		if (localeProperties == null && !isDefaultLocale)
+			// could not find the requested locale use the default locale
+			localeProperties = getResourceBundle(defaultLocale);
 		Enumeration e = this.rawHeaders.keys();
 		Headers localeHeaders = new Headers(this.rawHeaders.size());
 		while (e.hasMoreElements()) {
@@ -65,7 +69,7 @@ public class ManifestLocalization {
 			}
 			localeHeaders.set(key, value);
 		}
-		if (defaultLocale) {
+		if (isDefaultLocale) {
 			defaultLocaleHeaders = localeHeaders;
 		}
 		return (localeHeaders);
