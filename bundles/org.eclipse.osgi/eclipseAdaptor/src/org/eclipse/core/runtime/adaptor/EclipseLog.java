@@ -101,11 +101,26 @@ public class EclipseLog implements FrameworkLog {
 		writeln();
 	}
 
+	/*
+	 * Main should have set the session start-up timestamp so return that. 
+	 * Return the "now" time if not available.
+	 */
+	protected String getSessionTimestamp() {
+		String ts = System.getProperty("eclipse.startTime"); //$NON-NLS-1$
+		if (ts != null) {
+			try {
+				return getDate(new Date(Long.parseLong(ts)));
+			} catch (NumberFormatException e) {
+				// fall through and use the timestamp from right now
+			}
+		}
+		return getDate(new Date());
+	}
+
 	protected void writeSession() throws IOException {
 		write(SESSION);
 		writeSpace();
-		//TODO "timestamp" is a more correct name
-		String date = getDate();
+		String date = getSessionTimestamp();
 		write(date);
 		writeSpace();
 		for (int i = SESSION.length() + date.length(); i < 78; i++) {
@@ -295,10 +310,10 @@ public class EclipseLog implements FrameworkLog {
 		}
 	}
 
-	protected String getDate() {
+	protected String getDate(Date date) {
 		try {
 			DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SS"); //$NON-NLS-1$
-			return formatter.format(new Date());
+			return formatter.format(date);
 		} catch (Exception e) {
 			// If there were problems writing out the date, ignore and
 			// continue since that shouldn't stop us from logging the rest
@@ -357,7 +372,7 @@ public class EclipseLog implements FrameworkLog {
 		writeSpace();
 		write(entry.getEntry());
 		writeSpace();
-		write(getDate());
+		write(getDate(new Date()));
 		writeln();
 	}
 
