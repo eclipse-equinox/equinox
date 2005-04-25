@@ -35,7 +35,9 @@ public class PluginConverterImpl implements PluginConverter {
 	private static final String SEMICOLON = "; "; //$NON-NLS-1$
 	private static final String UTF_8 = "UTF-8"; //$NON-NLS-1$
 	private static final String LIST_SEPARATOR = ",\n "; //$NON-NLS-1$
+	private static final String LINE_SEPARATOR = "\n "; //$NON-NLS-1$
 	private static final String DOT = "."; //$NON-NLS-1$
+	private static int MAXLINE = 511;
 	private BundleContext context;
 	private BufferedWriter out;
 	private IPluginInfo pluginInfo;
@@ -634,9 +636,22 @@ public class PluginConverterImpl implements PluginConverter {
 
 	private void writeEntry(String key, String value) throws IOException {
 		if (value != null && value.length() > 0) {
-			out.write(key + ": " + value); //$NON-NLS-1$
+			out.write(splitOnComma(key + ": " + value)); //$NON-NLS-1$
 			out.newLine();
 		}
+	}
+
+	private String splitOnComma(String value) {
+		if (value.length() < MAXLINE || value.indexOf(LINE_SEPARATOR) >= 0)
+			return value; // assume the line is already split
+		String[] values = ManifestElement.getArrayFromList(value);
+		if (values == null || values.length == 0)
+			return value;
+		StringBuffer sb = new StringBuffer(value.length() + ((values.length - 1) * LIST_SEPARATOR.length()));
+		for (int i = 0; i < values.length - 1; i++)
+			sb.append(values[i]).append(LIST_SEPARATOR);
+		sb.append(values[values.length -1]);
+		return sb.toString();
 	}
 
 	private String getStringFromArray(String[] values, String separator) {
