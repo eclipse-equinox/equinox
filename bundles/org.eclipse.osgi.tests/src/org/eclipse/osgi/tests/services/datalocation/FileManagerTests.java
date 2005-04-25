@@ -437,6 +437,9 @@ public class FileManagerTests extends TestCase {
 	 * This test will verify that a FM will fail if a lock is held
 	 */
 	public void testJavaIOLocking() {
+		if (!"win32".equalsIgnoreCase(System.getProperty("osgi.os")))
+			// this is a Windows-only test
+			return;
 		String fileName = "testJavaIOLocking";
 		File lockFile = new File(new File(base,".manager"),".fileTableLock");
 		assertTrue(lockFile.exists());
