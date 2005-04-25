@@ -500,7 +500,7 @@ public class DefaultClassLoader extends AbstractClassLoader {
 			String[] devCP = !DevClassPathHelper.inDevelopmentMode() ? null : DevClassPathHelper.getDevClassPath(bundledata.getSymbolicName());
 			if (devCP == null || devCP.length == 0) {
 				BundleException be = new BundleException(NLS.bind(AdaptorMsg.BUNDLE_CLASSPATH_ENTRY_NOT_FOUND_EXCEPTION, entry, bundledata.getLocation()));
-				bundledata.getAdaptor().getEventPublisher().publishFrameworkEvent(FrameworkEvent.WARNING, bundledata.getBundle(), be);
+				bundledata.getAdaptor().getEventPublisher().publishFrameworkEvent(FrameworkEvent.INFO, bundledata.getBundle(), be);
 			}
 		}
 	}
