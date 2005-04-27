@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/BundlePermission.java,v 1.5 2005/03/21 18:35:54 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/BundlePermission.java,v 1.6 2005/04/27 19:51:31 twatson Exp $
  *
  * Copyright (c) OSGi Alliance (2004, 2005). All Rights Reserved.
  * 
@@ -339,7 +339,7 @@ public final class BundlePermission extends BasicPermission {
 				sb.append(HOST);
 			}
 
-			if ((action_mask & ACTION_HOST) == ACTION_FRAGMENT) {
+			if ((action_mask & ACTION_FRAGMENT) == ACTION_FRAGMENT) {
 				if (comma)
 					sb.append(',');
 				sb.append(FRAGMENT);
