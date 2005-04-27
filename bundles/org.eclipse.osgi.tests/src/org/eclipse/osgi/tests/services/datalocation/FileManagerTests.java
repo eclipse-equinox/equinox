@@ -11,13 +11,14 @@
 package org.eclipse.osgi.tests.services.datalocation;
 
 import java.io.*;
+
 import junit.framework.Test;
-import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.osgi.service.datalocation.FileManager;
+import org.eclipse.osgi.tests.OSGiTest;
 
-public class FileManagerTests extends TestCase {
+public class FileManagerTests extends OSGiTest {
 	FileManager manager1;
 	FileManager manager2;
 	File base;
@@ -46,8 +47,20 @@ public class FileManagerTests extends TestCase {
 			manager1.close();
 		if (manager2 != null)
 			manager2.close();
+		rm(base);
 	}
 
+	private void rm(File file) {
+		if (file.isDirectory()) {
+			File[] list = file.listFiles();
+			if (list != null) {
+				for (int idx=0; idx<list.length; idx++) {
+					rm(list[idx]);
+				}
+			}
+		}
+		file.delete();
+	}
 	
 	
 	/**
@@ -64,8 +77,7 @@ public class FileManagerTests extends TestCase {
 		try {
 			manager1.open(true);
 		} catch(IOException e) {
-			e.printStackTrace();
-			fail(e.getMessage());
+			fail("unexpected exception", e);
 		}
 		files = testDir.list();
 		assertEquals(files.length, 0);
@@ -105,8 +117,7 @@ public class FileManagerTests extends TestCase {
 			manager2.close();
 			manager2 = null;
 		} catch(IOException e) {
-			e.printStackTrace();
-			fail(e.getMessage());
+			fail("unexpected exception", e);
 		}		
 	}
 	
@@ -199,7 +210,7 @@ public class FileManagerTests extends TestCase {
 			manager1.close();
 			manager1=null;
 		} catch(IOException e) {
-			fail(e.getMessage());
+			fail("unexpected exception", e);
 		}
 	}
 
@@ -221,7 +232,7 @@ public class FileManagerTests extends TestCase {
 			manager1.update(new String[] {permanentFile}, new String[] {tmpFile.getName()});
 			manager1.add(scratchFile);
 		} catch(IOException e) {
-			fail(e.getMessage());
+			fail("unexpected exception", e);
 		}
 		
 		// create a new manager, and try making calls
@@ -231,7 +242,7 @@ public class FileManagerTests extends TestCase {
 		try {
 			manager2.open(true);
 		} catch(IOException e) {
-			fail(e.getMessage());
+			fail("unexpected exception", e);
 		}
 		checkOpen(true, permanentFile, scratchFile);
 		// close manager, try again
@@ -252,7 +263,7 @@ public class FileManagerTests extends TestCase {
 			manager2.remove("failFile");
 		} catch(IOException e) {
 			if (open)
-				fail(e.getMessage());
+				fail("unexpected exception", e);
 		}
 		// check lookup()
 		try {
@@ -262,7 +273,7 @@ public class FileManagerTests extends TestCase {
 				fail("lookup did not fail.");
 		} catch(IOException e) {
 			if (open)
-				fail(e.getMessage());
+				fail("unexpected exception", e);
 		}
 		// check update, first create a real file to add
 		File tmpFile;
@@ -270,7 +281,7 @@ public class FileManagerTests extends TestCase {
 			tmpFile = manager2.createTempFile("openTest");
 			writeToFile(tmpFile, "contents irrelevant");
 		} catch (IOException e) {
-			fail(e.getMessage());
+			fail("unexpected exception", e);
 			tmpFile = null;
 		}	
 		if (tmpFile != null) {
@@ -280,7 +291,7 @@ public class FileManagerTests extends TestCase {
 					fail("update did not fail.");
 			} catch(IOException e) {
 				if (open)
-					fail(e.getMessage());
+					fail("unexpected exception", e);
 			}
 		}
 		// check remove()
@@ -292,7 +303,7 @@ public class FileManagerTests extends TestCase {
 				manager2.add(scratchFile);
 			} catch(IOException e) {
 			if (open)
-				fail(e.getMessage());
+				fail("unexpected exception", e);
 		}
 	}
 	
@@ -362,8 +373,7 @@ public class FileManagerTests extends TestCase {
 			manager2.close();
 			manager2 = null;
 		} catch(IOException e) {
-			e.printStackTrace();
-			fail(e.getMessage());
+			fail("unexpected exception", e);
 		}
 	}
 	
@@ -371,6 +381,12 @@ public class FileManagerTests extends TestCase {
 	 * Test multiple FM do not cleanup any old files as they may be in use.
 	 */
 	public void testMultipleFileManagers() {
+		// This test relies on a file lock to fail if the same process already
+		//  holds a file lock. This is true on Win32 but not on Linux. So run 
+		//  this test for windows only.
+		if (!"win32".equalsIgnoreCase(System.getProperty("osgi.os")))
+			// this is a Windows-only test
+			return;
 		String fileName = "testMultipleFileManagers.txt";
 		File file1 = new File(base, fileName+".1");
 		File file2 = new File(base, fileName+".2");
@@ -403,11 +419,13 @@ public class FileManagerTests extends TestCase {
 			writeToFile(file, "test contents #2");
 			manager1.update(new String[] {fileName}, new String[] {file.getName()});
 			//sanity check
-			assertTrue(file1.exists() && file2.exists());
+			assertTrue(file1.exists());
+			assertTrue(file2.exists());
 			manager1.close();
 			manager1 = null;
 			// both files better still exists
-			assertTrue(file1.exists() && file2.exists());
+			assertTrue(file1.exists());
+			assertTrue(file2.exists());
 			
 			// manager #2
 			// sanity check
@@ -417,7 +435,8 @@ public class FileManagerTests extends TestCase {
 			// close manager2, cleanup should occur
 			manager2.close();
 			manager2 = null;
-			assertTrue(!file1.exists() && file2.exists());
+			assertTrue(!file1.exists());
+			assertTrue(file2.exists());
 			
 			// new manager1, does it get version 1?
 			manager1 = new FileManager(base, null);
@@ -428,8 +447,7 @@ public class FileManagerTests extends TestCase {
 			manager1.close();		
 			manager1 = null;
 		} catch(IOException e) {
-			e.printStackTrace();
-			fail(e.getMessage());
+			fail("unexpected exception", e);
 		}
 	}
 	
@@ -437,11 +455,18 @@ public class FileManagerTests extends TestCase {
 	 * This test will verify that a FM will fail if a lock is held
 	 */
 	public void testJavaIOLocking() {
+		// This type of locking is only sure to work on Win32.
 		if (!"win32".equalsIgnoreCase(System.getProperty("osgi.os")))
 			// this is a Windows-only test
 			return;
 		String fileName = "testJavaIOLocking";
 		File lockFile = new File(new File(base,".manager"),".fileTableLock");
+		lockFile.getParentFile().mkdirs();
+		try {
+			new FileOutputStream(lockFile).close();
+		} catch(IOException e) {
+			fail("unexpected exception", e);
+		}
 		assertTrue(lockFile.exists());
 		FileOutputStream fos = null;
 		try {
@@ -467,14 +492,13 @@ public class FileManagerTests extends TestCase {
 			manager1.close();
 			manager1 = null;
 		} catch(IOException e) {
-			e.printStackTrace();
-			fail(e.getMessage());
+			fail("unexpected exception", e);
 		} finally {
 			try {
 				if (fos != null)
 					fos.close();
 			} catch(IOException e) {
-				e.printStackTrace();
+				fail("unexpected exception", e);
 			}
 		}
 	}

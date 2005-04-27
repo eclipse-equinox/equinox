@@ -400,11 +400,12 @@ public class FileManager {
 
 	private boolean move(String source, String target) {
 		File original = new File(source);
+		File targetFile = new File(target);
 		// its ok if the original does not exist. The table entry will capture
 		// that fact. There is no need to put something in the filesystem.
-		if (!original.exists())
+		if (!original.exists() || targetFile.exists())
 			return false;
-		return original.renameTo(new File(target));
+		return original.renameTo(targetFile);
 	}
 
 	/**

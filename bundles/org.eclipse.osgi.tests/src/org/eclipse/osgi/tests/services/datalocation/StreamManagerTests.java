@@ -13,13 +13,13 @@ package org.eclipse.osgi.tests.services.datalocation;
 import java.io.*;
 
 import junit.framework.Test;
-import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.osgi.service.datalocation.*;
+import org.eclipse.osgi.tests.OSGiTest;
 
-public class StreamManagerTests extends TestCase {
+public class StreamManagerTests extends OSGiTest {
 	FileManager manager1;
 	FileManager manager2;
 	File base;
@@ -48,8 +48,20 @@ public class StreamManagerTests extends TestCase {
 			manager1.close();
 		if (manager2 != null)
 			manager2.close();
+		rm(base);
 	}
-
+	
+	private void rm(File file) {
+		if (file.isDirectory()) {
+			File[] list = file.listFiles();
+			if (list != null) {
+				for (int idx=0; idx<list.length; idx++) {
+					rm(list[idx]);
+				}
+			}
+		}
+		file.delete();
+	}
 	
 	private String getInputStreamContents(InputStream is) throws IOException {
 		StringBuffer sb = new StringBuffer();
@@ -105,7 +117,9 @@ public class StreamManagerTests extends TestCase {
 			assertNotNull(fmos);
 			fmos.write(contents2.getBytes());
 			fmos.close();
-			assertTrue(file1.exists() && file2.exists() && !file3.exists());
+			assertTrue(file1.exists());
+			assertTrue(file2.exists());
+			assertTrue(!file3.exists());
 			manager1.close();
 			manager1 = null;
 			stream1 = null;
@@ -168,8 +182,7 @@ public class StreamManagerTests extends TestCase {
 			manager1 = null;
 			stream1 = null;
 		} catch(IOException e) {
-			e.printStackTrace();
-			fail(e.getMessage());
+			fail("unexepected exception", e);
 		}
 	}
 	
@@ -241,8 +254,7 @@ public class StreamManagerTests extends TestCase {
 			manager2=null;
 			
 		} catch(IOException e) {
-			e.printStackTrace();
-			fail(e.getMessage());
+			fail("unexepected exception", e);
 		}
 	}
 
@@ -311,8 +323,7 @@ public class StreamManagerTests extends TestCase {
 			assertFalse(file2.exists());
 			assertFalse(file3.exists());
 		} catch(IOException e) {
-			e.printStackTrace();
-			fail(e.getMessage());
+			fail("unexepected exception", e);
 		}
 	}
 
@@ -384,8 +395,7 @@ public class StreamManagerTests extends TestCase {
 			}
 		
 		} catch(IOException e) {
-			e.printStackTrace();
-			fail(e.getMessage());
+			fail("unexepected exception", e);
 		}
 	}
 	
@@ -461,8 +471,7 @@ public class StreamManagerTests extends TestCase {
 			stream2 = null;
 		
 		} catch(IOException e) {
-			e.printStackTrace();
-			fail(e.getMessage());
+			fail("unexepected exception", e);
 		}
 	}
 	
