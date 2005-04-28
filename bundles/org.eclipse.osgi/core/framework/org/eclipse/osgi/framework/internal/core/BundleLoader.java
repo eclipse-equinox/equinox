@@ -37,6 +37,12 @@ public class BundleLoader implements ClassLoaderDelegate {
 	public final static byte FLAG_HASDYNAMICIMPORTS = 0x02;
 	public final static byte FLAG_HASDYNAMICEIMPORTALL = 0x04;
 	public final static byte FLAG_CLOSED = 0x08;
+	public final static ClassContext CLASS_CONTEXT = (ClassContext) AccessController.doPrivileged(new PrivilegedAction() {
+		public Object run() {
+			return new ClassContext();
+		}
+	});
+	public final static ClassLoader FW_CLASSLOADER = getClassLoader(Framework.class);
 
 	/* the proxy */
 	BundleLoaderProxy proxy;
@@ -367,9 +373,43 @@ public class BundleLoader implements ClassLoaderDelegate {
 		source = findDynamicSource(pkgName);
 		if (source != null)
 			result = source.loadClass(name);
+		if (result == null && findParentResource(name))
+			return parent.loadClass(name);
 		if (result == null)
 			throw new ClassNotFoundException(name);
 		return result;
+	}
+
+	private boolean findParentResource(String name) {
+		if (bundle.framework.bootDelegateAll || !bundle.framework.contextBootDelegation)
+			return false;
+		// works around VM bugs that require all classloaders to have access to parent packages
+		Class[] context = CLASS_CONTEXT.getClassContext();
+		if (context == null || context.length < 2)
+			return false;
+		// skip the first class; it is the ClassContext class
+		for (int i = 1; i < context.length; i++)
+			// find the first class in the context which is not BundleLoader or instanceof ClassLoader
+			if (context[i] != BundleLoader.class && !ClassLoader.class.isAssignableFrom(context[i])) {
+				// only find in parent if the class is not "Class" (Class#forName case) or if the class is not loaded with a BundleClassLoader
+				ClassLoader cl = getClassLoader(context[i]);
+				if (cl != FW_CLASSLOADER) { // extra check incase an adaptor adds another class into the stack besides an instance of ClassLoader
+					if (Class.class != context[i] && !(cl instanceof BundleClassLoader))
+						return true;
+					break;
+				}
+			}
+		return false;
+	}
+
+	private static ClassLoader getClassLoader(final Class clazz) {
+		if (System.getSecurityManager() == null)
+			return clazz.getClassLoader();
+		return (ClassLoader) AccessController.doPrivileged(new PrivilegedAction() {
+			public Object run() {
+				return clazz.getClassLoader();
+			}
+		});
 	}
 
 	final boolean isClosed() {
@@ -422,6 +462,8 @@ public class BundleLoader implements ClassLoaderDelegate {
 		source = findDynamicSource(pkgName);
 		if (source != null)
 			result = source.getResource(name);
+		if (result == null && findParentResource(name))
+			return parent.getResource(name);
 		return result;
 	}
 
@@ -841,5 +883,12 @@ public class BundleLoader implements ClassLoaderDelegate {
 				return bcl.getParent();
 			}
 		});
+	}
+
+	private static final class ClassContext extends SecurityManager {
+		// need to make this method public
+		public Class[] getClassContext() {
+			return super.getClassContext();
+		}
 	}
 }

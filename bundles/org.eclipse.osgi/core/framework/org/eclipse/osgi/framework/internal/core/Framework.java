@@ -83,8 +83,9 @@ public class Framework implements EventDispatcher, EventPublisher {
 	protected Hashtable installLock;
 	/** System Bundle object */
 	protected SystemBundle systemBundle;
-	protected String[] bootDelegation;
-	protected boolean bootDelegateAll = false;
+	String[] bootDelegation;
+	boolean bootDelegateAll = false;
+	boolean contextBootDelegation = "true".equals(System.getProperty("osgi.context.bootdelegation", "true")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 	/**
 	 * The AliasMapper used to alias OS Names.
@@ -335,7 +336,6 @@ public class Framework implements EventDispatcher, EventPublisher {
 		}
 		properties.put(Constants.FRAMEWORK_EXECUTIONENVIRONMENT, ee.toString());
 	}
-
 
 	private void setBootDelegation() {
 		String bootDelegationProp = properties.getProperty(Constants.OSGI_BOOTDELEGATION);
