@@ -283,7 +283,9 @@ public class ManifestElement {
 	}
 
 	/*
-	 * 
+	 * Add the given key/value association to the specified table. If an entry already exists
+	 * for this key, then create an array list from the current value (if necessary) and
+	 * append the new value to the end of the list.
 	 */
 	protected Hashtable addTableValue(Hashtable table, String key, String value) {
 		if (table == null) {
@@ -420,7 +422,7 @@ public class ManifestElement {
 	}
 
 	/**
-	 * Returns the result of converting a list of comma-separated tokens into an array
+	 * Returns the result of converting a list of comma-separated tokens into an array.
 	 * 
 	 * @return the array of string tokens or <code>null</code> if there are none
 	 * @param stringList the initial comma-separated string
