@@ -89,9 +89,7 @@ public class EclipseClassLoader extends DefaultClassLoader {
 					long timeLeft = delay;
 					while (true) {
 						try {
-							synchronized (this) {
-								this.wait(100); // temporarily giveup the classloader lock
-							}
+							Thread.sleep(100); // do not release the classloader lock (bug 86713)
 							if (bundle.testStateChanging(null) || timeLeft <= 0)
 								break;
 						} catch (InterruptedException e) {
