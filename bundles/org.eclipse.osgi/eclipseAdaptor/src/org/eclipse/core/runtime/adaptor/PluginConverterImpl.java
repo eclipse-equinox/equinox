@@ -690,10 +690,6 @@ public class PluginConverterImpl implements PluginConverter {
 		return generatedManifest;
 	}
 
-	public synchronized Dictionary convertManifest(File pluginBaseLocation, boolean compatibility, String target, boolean analyseJars) throws PluginConversionException {
-		return convertManifest(pluginBaseLocation, compatibility, target, analyseJars, null);
-	}
-
 	public synchronized File convertManifest(File pluginBaseLocation, File bundleManifestLocation, boolean compatibilityManifest, String target, boolean analyseJars, Dictionary devProperties) throws PluginConversionException {
 		convertManifest(pluginBaseLocation, compatibilityManifest, target, analyseJars, devProperties);
 		if (bundleManifestLocation == null) {
@@ -704,10 +700,6 @@ public class PluginConverterImpl implements PluginConverter {
 			return bundleManifestLocation;
 		writeManifest(bundleManifestLocation, generatedManifest, compatibilityManifest);
 		return bundleManifestLocation;
-	}
-
-	public synchronized File convertManifest(File pluginBaseLocation, File bundleManifestLocation, boolean compatibilityManifest, String target, boolean analyseJars) throws PluginConversionException {
-		return convertManifest(pluginBaseLocation, bundleManifestLocation, compatibilityManifest, target, analyseJars, null);
 	}
 
 	private String getVersionRange(String reqVersion, String matchRule) {
