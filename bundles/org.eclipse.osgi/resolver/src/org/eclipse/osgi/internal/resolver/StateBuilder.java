@@ -193,7 +193,8 @@ class StateBuilder {
 			result.setDirective(Constants.USES_DIRECTIVE, ManifestElement.getArrayFromList(exportPackage.getDirective(Constants.USES_DIRECTIVE)));
 			result.setDirective(Constants.INCLUDE_DIRECTIVE, exportPackage.getDirective(Constants.INCLUDE_DIRECTIVE));
 			result.setDirective(Constants.EXCLUDE_DIRECTIVE, exportPackage.getDirective(Constants.EXCLUDE_DIRECTIVE));
-			result.setDirective(Constants.FRIENDS_DIRECTIVE, ManifestElement.getArrayFromList(exportPackage.getDirective(Constants.FRIENDS_DIRECTIVE)));
+			if (strict) // we only care about friends directive if we are in strict mode
+				result.setDirective(Constants.FRIENDS_DIRECTIVE, ManifestElement.getArrayFromList(exportPackage.getDirective(Constants.FRIENDS_DIRECTIVE)));
 			result.setDirective(Constants.MANDATORY_DIRECTIVE, ManifestElement.getArrayFromList(exportPackage.getDirective(Constants.MANDATORY_DIRECTIVE)));
 			result.setAttributes(getAttributes(exportPackage, DEFINED_MATCHING_ATTRS));
 			result.setRoot(!reexported);
