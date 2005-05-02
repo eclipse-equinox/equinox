@@ -39,6 +39,10 @@ public class AdaptorMsg extends NLS {
 	
 	public static String BUNDLE_CLASSPATH_PROPERTIES_ERROR;
 	public static String BUNDLE_CLASSPATH_ENTRY_NOT_FOUND_EXCEPTION;
+
+	public static String ADAPTOR_EXTESION_NATIVECODE_ERROR;
+	public static String ADAPTOR_EXTESION_REQUIRE_ERROR;
+	public static String ADAPTOR_EXTESION_IMPORT_ERROR;
 	
 	static {
 		// initialize resource bundles

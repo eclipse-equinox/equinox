@@ -542,10 +542,23 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 	}
 
 	protected void processExtension(BundleData bundleData, byte type) throws BundleException {
-		if ((bundleData.getType() & BundleData.TYPE_FRAMEWORK_EXTENSION) != 0)
+		if ((bundleData.getType() & BundleData.TYPE_FRAMEWORK_EXTENSION) != 0) {
+			validateExtension(bundleData);
 			processFrameworkExtension(bundleData, type);
-		else if ((bundleData.getType() & BundleData.TYPE_BOOTCLASSPATH_EXTENSION) != 0)
+		} else if ((bundleData.getType() & BundleData.TYPE_BOOTCLASSPATH_EXTENSION) != 0) {
+			validateExtension(bundleData);
 			processBootExtension(bundleData, type);
+		}
+	}
+
+	protected void validateExtension(BundleData bundleData) throws BundleException {
+		Dictionary extensionManifest = bundleData.getManifest();
+		if (extensionManifest.get(Constants.IMPORT_PACKAGE) != null)
+			throw new BundleException(NLS.bind(AdaptorMsg.ADAPTOR_EXTESION_IMPORT_ERROR, bundleData.getLocation()));
+		if (extensionManifest.get(Constants.REQUIRE_BUNDLE) != null)
+			throw new BundleException(NLS.bind(AdaptorMsg.ADAPTOR_EXTESION_REQUIRE_ERROR, bundleData.getLocation()));
+		if (extensionManifest.get(Constants.BUNDLE_NATIVECODE) != null)
+			throw new BundleException(NLS.bind(AdaptorMsg.ADAPTOR_EXTESION_NATIVECODE_ERROR, bundleData.getLocation()));
 	}
 
 	protected void processFrameworkExtension(BundleData bundleData, byte type) throws BundleException {
