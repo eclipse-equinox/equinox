@@ -15,7 +15,7 @@ import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.*;
-import java.security.ProtectionDomain;
+import java.security.cert.Certificate;
 import java.util.*;
 import org.eclipse.osgi.framework.adaptor.ClassLoaderDelegate;
 import org.eclipse.osgi.framework.adaptor.core.*;
@@ -616,7 +616,7 @@ public class DefaultClassLoader extends AbstractClassLoader {
 	 */
 	protected class ClasspathDomain extends ProtectionDomain {
 		public ClasspathDomain(URL codeLocation, PermissionCollection permissions) {
-			super(new CodeSource(codeLocation, null), permissions);
+			super(new CodeSource(codeLocation, (Certificate[]) null), permissions);
 		}
 	}
 }
