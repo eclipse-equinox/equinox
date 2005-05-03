@@ -69,17 +69,34 @@ class StateBuilder {
 		ManifestElement[] dynamicImports = ManifestElement.parseHeader(Constants.DYNAMICIMPORT_PACKAGE, (String) manifest.get(Constants.DYNAMICIMPORT_PACKAGE));
 		result.setImportPackages(createImportPackages(result.getExportPackages(), providedExports, imports, dynamicImports, manifestVersion));
 		ManifestElement[] requires = ManifestElement.parseHeader(Constants.REQUIRE_BUNDLE, (String) manifest.get(Constants.REQUIRE_BUNDLE));
-		result.setRequiredBundles(createRequiredBundles(requires));
+		// make sure osgi is required if: not a fragment, manifestVersion < 2, not the system bundle, and the system bundle is available
+		boolean forceRequireOSGi = state != null && host == null && manifestVersion < 2 && Constants.getInternalSymbolicName() != null && !Constants.getInternalSymbolicName().equals(result.getSymbolicName()) && state.getBundle(Constants.getInternalSymbolicName(), null) != null;
+		result.setRequiredBundles(createRequiredBundles(requires, forceRequireOSGi));
 		return result;
 	}
 
-	private static BundleSpecification[] createRequiredBundles(ManifestElement[] specs) {
-		if (specs == null)
+	private static BundleSpecification[] createRequiredBundles(ManifestElement[] specs, boolean forceRequireOSGi) {
+		if (specs == null) {
+			if (forceRequireOSGi)
+				return new BundleSpecification[] {createRequireSystemBundle()};
 			return null;
-		BundleSpecification[] result = new BundleSpecification[specs.length];
-		for (int i = 0; i < specs.length; i++)
-			result[i] = createRequiredBundle(specs[i]);
-		return result;
+		}
+		ArrayList result = new ArrayList(specs.length);
+		boolean osgiRequired = false;
+		for (int i = 0; i < specs.length; i++) {
+			if (Constants.getInternalSymbolicName().equals(specs[i].getValue()))
+				osgiRequired = true;
+			result.add(createRequiredBundle(specs[i]));
+		}
+		if (forceRequireOSGi && !osgiRequired)
+			result.add(0, createRequireSystemBundle());
+		return (BundleSpecification[]) result.toArray(new BundleSpecification[result.size()]);
+	}
+
+	private static BundleSpecification createRequireSystemBundle() {
+		BundleSpecificationImpl systemBundle = new BundleSpecificationImpl();
+		systemBundle.setName(Constants.getInternalSymbolicName());
+		return systemBundle;
 	}
 
 	private static BundleSpecification createRequiredBundle(ManifestElement spec) {
