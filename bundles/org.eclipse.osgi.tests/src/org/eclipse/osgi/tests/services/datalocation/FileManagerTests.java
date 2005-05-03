@@ -15,7 +15,7 @@ import java.io.*;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.osgi.service.datalocation.FileManager;
+import org.eclipse.core.runtime.adaptor.FileManager;
 import org.eclipse.osgi.tests.OSGiTest;
 
 public class FileManagerTests extends OSGiTest {

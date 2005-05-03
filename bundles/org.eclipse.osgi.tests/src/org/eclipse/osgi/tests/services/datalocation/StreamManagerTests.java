@@ -16,7 +16,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.osgi.service.datalocation.*;
+import org.eclipse.core.runtime.adaptor.*;
 import org.eclipse.osgi.tests.OSGiTest;
 
 public class StreamManagerTests extends OSGiTest {

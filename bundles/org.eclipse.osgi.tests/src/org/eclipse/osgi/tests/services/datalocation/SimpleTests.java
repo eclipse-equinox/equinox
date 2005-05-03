@@ -17,7 +17,7 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.osgi.service.datalocation.FileManager;
+import org.eclipse.core.runtime.adaptor.FileManager;
 
 public class SimpleTests extends TestCase {
 	FileManager manager1;

@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.osgi.service.datalocation;
+package org.eclipse.core.runtime.adaptor;
 
 import java.io.*;
 import org.eclipse.osgi.framework.internal.reliablefile.*;
