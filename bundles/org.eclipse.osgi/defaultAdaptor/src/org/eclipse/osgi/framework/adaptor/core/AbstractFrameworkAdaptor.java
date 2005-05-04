@@ -222,7 +222,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 		try {
 			return (new URL(location).openConnection());
 		} catch (IOException e) {
-			throw new BundleException(NLS.bind(AdaptorMsg.ADAPTOR_URL_CREATE_EXCEPTION, location), e); 
+			throw new BundleException(NLS.bind(AdaptorMsg.ADAPTOR_URL_CREATE_EXCEPTION, location), e);
 		}
 	}
 
@@ -1261,7 +1261,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 						Debug.println("Exists but not a directory: " + bundleStore.getPath()); //$NON-NLS-1$
 					}
 
-					throw new IOException(AdaptorMsg.ADAPTOR_STORAGE_EXCEPTION);
+					throw new IOException(NLS.bind(AdaptorMsg.ADAPTOR_DIRECTORY_EXCEPTION, bundleStore));
 				}
 			}
 		} else {
@@ -1273,7 +1273,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 					Debug.println("Unable to create directory: " + bundleStore.getPath()); //$NON-NLS-1$
 				}
 
-				throw new IOException(AdaptorMsg.ADAPTOR_STORAGE_EXCEPTION);
+				throw new IOException(NLS.bind(AdaptorMsg.ADAPTOR_DIRECTORY_CREATE_EXCEPTION, bundleStore));
 			}
 		}
 
@@ -1399,7 +1399,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 				break;
 		}
 	}
-	
+
 	/**
 	 * Whether the adaptor can make changes to the file system. Default is <code>true</code>.
 	 */

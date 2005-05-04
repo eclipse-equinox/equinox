@@ -17,6 +17,7 @@ import org.eclipse.osgi.framework.adaptor.PermissionStorage;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.internal.core.ConditionalPermissionInfoImpl;
 import org.eclipse.osgi.framework.internal.reliablefile.*;
+import org.eclipse.osgi.util.NLS;
 import org.osgi.service.condpermadmin.ConditionInfo;
 import org.osgi.service.condpermadmin.ConditionalPermissionInfo;
 import org.osgi.service.permissionadmin.PermissionInfo;
@@ -58,7 +59,7 @@ class DefaultPermissionStorage implements PermissionStorage {
 				Debug.println("Unable to create directory: " + permissionDir.getPath()); //$NON-NLS-1$
 			}
 
-			throw new IOException(AdaptorMsg.ADAPTOR_STORAGE_EXCEPTION); //$NON-NLS-1$
+			throw new IOException(NLS.bind(AdaptorMsg.ADAPTOR_DIRECTORY_CREATE_EXCEPTION, permissionDir)); //$NON-NLS-1$
 		}
 
 		defaultData = new File(permissionDir, ".default"); //$NON-NLS-1$
