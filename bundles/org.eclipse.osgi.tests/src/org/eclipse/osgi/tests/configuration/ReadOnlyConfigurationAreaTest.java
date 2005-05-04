@@ -23,7 +23,7 @@ import org.osgi.framework.BundleException;
 public class ReadOnlyConfigurationAreaTest extends ConfigurationSessionTest {
 
 	public static Test suite() {
-		// include configurator as it is required by compatibility, but do not allow it to run by setting start level too high
+		// include configurator as it is required by compatibility, but do not set it to start 
 		String[] ids = {"org.eclipse.core.runtime@2:start", "org.eclipse.core.runtime.compatibility", "org.eclipse.update.configurator", "org.eclipse.core.tests.harness", "org.eclipse.osgi.tests", "org.eclipse.jdt.junit.runtime", "org.eclipse.pde.junit.runtime", "org.junit", "org.eclipse.test.performance"};
 		ConfigurationSessionTestSuite suite = new ConfigurationSessionTestSuite(PI_OSGI_TESTS, ReadOnlyConfigurationAreaTest.class);
 		suite.setReadOnly(true);
@@ -75,7 +75,7 @@ public class ReadOnlyConfigurationAreaTest extends ConfigurationSessionTest {
 	 * is under the configuration area (which is read-only here)
 	 */
 	public void test2ndSession() throws BundleException, IOException {
-		// install plug-in
+		// try to install plug-in
 		// ensure it is not installed		
 		Bundle installed = null;
 		try {

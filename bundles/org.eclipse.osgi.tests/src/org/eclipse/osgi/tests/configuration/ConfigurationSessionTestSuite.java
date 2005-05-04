@@ -24,16 +24,18 @@ import org.eclipse.core.tests.session.SetupManager.SetupException;
 import org.osgi.framework.Bundle;
 
 public class ConfigurationSessionTestSuite extends SessionTestSuite {
-	private static final String PROP_SHARED_CONFIG_AREA = "osgi.sharedConfiguration.area";
 	private static final String PROP_CONFIG_AREA_READ_ONLY = InternalPlatform.PROP_CONFIG_AREA + ".readOnly";
 	private static final String PROP_CONFIG_CASCADED = "osgi.configuration.cascaded";
+	private static final String PROP_SHARED_CONFIG_AREA = "osgi.sharedConfiguration.area";
 	private Collection bundles = new ArrayList();
-
-	private IPath configurationLocation = FileSystemHelper.getRandomLocation(FileSystemHelper.getTempDir());
-
-	private boolean first = true;
-	private boolean readOnly;
 	private boolean cascaded;
+
+	// by default we clean-up after ourselves
+	private boolean cleanUp = true;
+
+	private IPath configurationPath = FileSystemHelper.getRandomLocation(FileSystemHelper.getTempDir());
+	private boolean prime = true;
+	private boolean readOnly;
 	// should the test cases be run in alphabetical order?
 	private boolean shouldSort;
 
@@ -78,7 +80,7 @@ public class ConfigurationSessionTestSuite extends SessionTestSuite {
 			contents.put(PROP_SHARED_CONFIG_AREA, Platform.getConfigurationLocation().getURL().toExternalForm());
 		contents.put(PROP_CONFIG_AREA_READ_ONLY, Boolean.toString(readOnly));
 		// save the properties
-		File configINI = configurationLocation.append("config.ini").toFile();
+		File configINI = configurationPath.append("config.ini").toFile();
 		OutputStream out = null;
 		try {
 			out = new BufferedOutputStream(new FileOutputStream(configINI));
@@ -91,10 +93,14 @@ public class ConfigurationSessionTestSuite extends SessionTestSuite {
 
 	protected void fillTestDescriptor(TestDescriptor test) throws SetupException {
 		super.fillTestDescriptor(test);
-		if (first) {
+		if (prime) {
 			test.getSetup().setSystemProperty(PROP_CONFIG_AREA_READ_ONLY, Boolean.FALSE.toString());
-			first = false;
+			prime = false;
 		}
+	}
+
+	public IPath getConfigurationPath() {
+		return configurationPath;
 	}
 
 	private String getURL(String id) {
@@ -107,23 +113,27 @@ public class ConfigurationSessionTestSuite extends SessionTestSuite {
 		Bundle bundle = Platform.getBundle(id);
 		Assert.assertNotNull("0.1 " + id, bundle);
 		URL url = bundle.getEntry("/");
-		Assert.assertNotNull("0.2 " + id, url);		
+		Assert.assertNotNull("0.2 " + id, url);
 		try {
 			url = Platform.resolve(url);
 		} catch (IOException e) {
 			CoreTest.fail("0.3 " + url, e);
 		}
-		String externalForm;		
+		String externalForm;
 		if (url.getProtocol().equals("jar")) {
 			// if it is a JAR'd plug-in, URL is jar:file:/path/file.jar!/ - see bug 86195
 			String path = url.getPath();
 			// change it to be file:/path/file.jar
 			externalForm = path.substring(0, path.length() - 2);
 		} else
-			externalForm  = url.toExternalForm();
+			externalForm = url.toExternalForm();
 		// workaround for bug 88070		
 		externalForm = "reference:" + externalForm;
 		return externalForm + suffix;
+	}
+
+	public boolean isCascaded() {
+		return cascaded;
 	}
 
 	public boolean isReadOnly() {
@@ -138,7 +148,7 @@ public class ConfigurationSessionTestSuite extends SessionTestSuite {
 		Setup base = super.newSetup();
 		// the base implementation will have set this to the host configuration
 		base.setEclipseArgument(Setup.CONFIGURATION, null);
-		base.setSystemProperty(InternalPlatform.PROP_CONFIG_AREA, configurationLocation.toOSString());
+		base.setSystemProperty(InternalPlatform.PROP_CONFIG_AREA, configurationPath.toOSString());
 		return base;
 	}
 
@@ -148,13 +158,14 @@ public class ConfigurationSessionTestSuite extends SessionTestSuite {
 	 * created by reifying a test case class.
 	 */
 	public void run(TestResult result) {
-		configurationLocation.toFile().mkdirs();
+		configurationPath.toFile().mkdirs();
 		try {
-			try {
-				createConfigINI();
-			} catch (IOException e) {
-				CoreTest.fail("0.1", e);
-			}
+			if (prime)
+				try {
+					createConfigINI();
+				} catch (IOException e) {
+					CoreTest.fail("0.1", e);
+				}
 			if (!shouldSort) {
 				super.run(result);
 				return;
@@ -165,21 +176,30 @@ public class ConfigurationSessionTestSuite extends SessionTestSuite {
 			for (int i = 0; i < allTests.length && !result.shouldStop(); i++)
 				runTest(allTests[i], result);
 		} finally {
-			FileSystemHelper.clear(configurationLocation.toFile());
+			if (cleanUp)
+				FileSystemHelper.clear(configurationPath.toFile());
 		};
 
 	}
 
-	public void setReadOnly(boolean readOnly) {
-		this.readOnly = readOnly;
-	}
-
-	public boolean isCascaded() {
-		return cascaded;
-	}
-
 	public void setCascaded(boolean cascaded) {
 		this.cascaded = cascaded;
+	}
+
+	public void setCleanup(boolean cleanUp) {
+		this.cleanUp = cleanUp;
+	}
+
+	public void setConfigurationPath(IPath configurationPath) {
+		this.configurationPath = configurationPath;
+	}
+
+	public void setPrime(boolean prime) {
+		this.prime = prime;
+	}
+
+	public void setReadOnly(boolean readOnly) {
+		this.readOnly = readOnly;
 	}
 
 }
