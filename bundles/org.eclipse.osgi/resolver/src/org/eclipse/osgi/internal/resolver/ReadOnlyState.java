@@ -135,6 +135,10 @@ public class ReadOnlyState implements State {
 		throw new UnsupportedOperationException();
 	}
 
+	public Dictionary[] getPlatformProperties() {
+		throw new UnsupportedOperationException();
+	}
+
 	public ExportPackageDescription linkDynamicImport(BundleDescription importingBundle, String requestedPackage) {
 		throw new UnsupportedOperationException();
 	}

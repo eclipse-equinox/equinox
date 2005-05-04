@@ -74,7 +74,7 @@ public interface State {
 	 * Returns the delta representing the changes from the time this state was
 	 * first captured until now.
 	 * 
-	 * @return
+	 * @return the state delta
 	 */
 	public StateDelta getChanges();
 
@@ -349,4 +349,10 @@ public interface State {
 	 * are changed as a result of calling this method then true is returned.
 	 */
 	public boolean setPlatformProperties(Dictionary[] platformProperties);
+
+	/**
+	 * Returns the list of platform properties currently set for this state.
+	 * @return the list of platform properties currently set for this state.
+	 */
+	public Dictionary[] getPlatformProperties();
 }

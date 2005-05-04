@@ -455,7 +455,7 @@ public abstract class StateImpl implements State {
 		return result;
 	}
 
-	Dictionary[] getPlatformProperties() {
+	public Dictionary[] getPlatformProperties() {
 		return platformProperties;
 	}
 
