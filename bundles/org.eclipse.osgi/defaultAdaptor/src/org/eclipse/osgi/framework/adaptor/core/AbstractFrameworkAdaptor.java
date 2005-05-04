@@ -125,7 +125,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 			bundleClassLoaderParent = new ParentClassLoader();
 	}
 
-	protected Method addURLMethod = findaddURLMethod(AbstractFrameworkAdaptor.class.getClassLoader().getClass());
+	protected Method addURLMethod;
 
 	protected String[] configuredExtensions;
 
@@ -150,6 +150,9 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 	 *
 	 */
 	public AbstractFrameworkAdaptor(String[] args) {
+		ClassLoader fwloader = AbstractFrameworkAdaptor.class.getClassLoader();
+		if (fwloader != null)
+			addURLMethod = findaddURLMethod(fwloader.getClass());
 		if (args != null) {
 			for (int i = 0; i < args.length; i++) {
 				String arg = args[i];
