@@ -354,14 +354,12 @@ public class PluginConverterImpl implements PluginConverter {
 
 	private void generateRequireBundle() {
 		ArrayList requiredBundles = pluginInfo.getRequires();
+		if (requiredBundles.size() == 0)
+			return;
 		StringBuffer bundleRequire = new StringBuffer();
-		boolean requireOSGi = false;
 		for (Iterator iter = requiredBundles.iterator(); iter.hasNext();) {
 			PluginParser.Prerequisite element = (PluginParser.Prerequisite) iter.next();
-			String name = element.getName();
-			if (name.equals(Constants.getInternalSymbolicName()))
-				requireOSGi = true;
-			StringBuffer modImport = new StringBuffer(name);
+			StringBuffer modImport = new StringBuffer(element.getName());
 			String versionRange = getVersionRange(element.getVersion(), element.getMatch());
 			if (versionRange != null)
 				modImport.append(versionRange);
@@ -381,14 +379,6 @@ public class PluginConverterImpl implements PluginConverter {
 			if (iter.hasNext())
 				bundleRequire.append(LIST_SEPARATOR);
 		}
-		// if the plugin did not require OSGi and it is not a fragment
-		if (!requireOSGi && !pluginInfo.isFragment()) {
-			// add osgi as a requirement.
-			if (bundleRequire.length() > 0)
-				bundleRequire.insert(0, LIST_SEPARATOR);
-			bundleRequire.insert(0, Constants.getInternalSymbolicName());
-		}
-		if (bundleRequire.length() > 0)
 			generatedManifest.put(Constants.REQUIRE_BUNDLE, bundleRequire.toString());
 	}
 

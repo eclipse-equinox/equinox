@@ -338,6 +338,8 @@ public class Framework implements EventDispatcher, EventPublisher {
 	}
 
 	private void setBootDelegation() {
+		// TODO see bug 87780.  for now always delegate to the boot loader.
+		bootDelegateAll = true;
 		String bootDelegationProp = properties.getProperty(Constants.OSGI_BOOTDELEGATION);
 		if (bootDelegationProp == null)
 			return;
