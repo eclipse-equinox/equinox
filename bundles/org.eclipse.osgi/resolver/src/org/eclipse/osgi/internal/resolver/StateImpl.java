@@ -554,4 +554,8 @@ public abstract class StateImpl implements State {
 	ExportPackageDescription[] getSystemExports() {
 		return systemExports;
 	}
+
+	boolean inStrictMode() {
+		return Constants.STRICT_MODE.equals(getPlatformProperties()[0].get(Constants.OSGI_RESOLVER_MODE));
+	}
 }

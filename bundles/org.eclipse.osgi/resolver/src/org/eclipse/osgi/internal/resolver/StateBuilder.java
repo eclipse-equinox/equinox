@@ -62,7 +62,7 @@ class StateBuilder {
 		ManifestElement[] exports = ManifestElement.parseHeader(Constants.EXPORT_PACKAGE, (String) manifest.get(Constants.EXPORT_PACKAGE));
 		ManifestElement[] reexports = ManifestElement.parseHeader(Constants.REEXPORT_PACKAGE, (String) manifest.get(Constants.REEXPORT_PACKAGE));
 		ManifestElement[] provides = ManifestElement.parseHeader(Constants.PROVIDE_PACKAGE, (String) manifest.get(Constants.PROVIDE_PACKAGE)); // TODO this is null for now until the framwork is updated to handle the new re-export semantics
-		boolean strict = state != null && Constants.STRICT_MODE.equals(state.getPlatformProperties()[0].get(Constants.OSGI_RESOLVER_MODE));
+		boolean strict = state != null && state.inStrictMode();
 		ArrayList providedExports = new ArrayList(provides == null ? 0 : provides.length);
 		result.setExportPackages(createExportPackages(exports, reexports, provides, providedExports, manifestVersion, strict));
 		ManifestElement[] imports = ManifestElement.parseHeader(Constants.IMPORT_PACKAGE, (String) manifest.get(Constants.IMPORT_PACKAGE));

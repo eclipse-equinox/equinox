@@ -70,7 +70,7 @@ public class ImportPackageSpecificationImpl extends VersionConstraintImpl implem
 		String[] friends = (String[]) pkgDes.getDirective(Constants.FRIENDS_DIRECTIVE);
 		Boolean internal = (Boolean) pkgDes.getDirective(Constants.INTERNAL_DIRECTIVE);
 		if (internal.booleanValue() || friends != null) {
-			boolean strict = Constants.STRICT_MODE.equals(((StateImpl) getBundle().getContainingState()).getPlatformProperties()[0].get(Constants.OSGI_RESOLVER_MODE));
+			boolean strict = ((StateImpl) getBundle().getContainingState()).inStrictMode();
 			if (strict) {
 				if (internal.booleanValue())
 					return false;

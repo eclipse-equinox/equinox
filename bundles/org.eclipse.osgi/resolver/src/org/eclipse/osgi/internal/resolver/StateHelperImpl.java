@@ -129,7 +129,7 @@ public class StateHelperImpl implements StateHelper {
 			}
 		} else {
 			// it is a host
-			buildReferences(description, ((BundleDescriptionImpl)description).getBundleDependencies(), references);
+			buildReferences(description, ((BundleDescriptionImpl) description).getBundleDependencies(), references);
 		}
 	}
 
@@ -147,6 +147,10 @@ public class StateHelperImpl implements StateHelper {
 	}
 
 	public ExportPackageDescription[] getVisiblePackages(BundleDescription bundle) {
+		StateImpl state = (StateImpl) bundle.getContainingState();
+		boolean strict = false;
+		if (state != null)
+			strict = state.inStrictMode();
 		ArrayList packageList = new ArrayList(); // list of all ExportPackageDescriptions that are visible
 		ArrayList importList = new ArrayList(); // list of package names which are directly imported
 		// get the list of directly importe packages first.
@@ -158,28 +162,29 @@ public class StateHelperImpl implements StateHelper {
 		// now find all the packages that are visible from required bundles
 		BundleDescription[] requiredBundles = bundle.getResolvedRequires();
 		for (int i = 0; i < requiredBundles.length; i++)
-			getPackages(requiredBundles[i], bundle.getSymbolicName(), importList, packageList, new ArrayList());
+			getPackages(requiredBundles[i], bundle.getSymbolicName(), importList, packageList, new ArrayList(), strict);
 		return (ExportPackageDescription[]) packageList.toArray(new ExportPackageDescription[packageList.size()]);
 	}
 
-	private void getPackages(BundleDescription requiredBundle, String symbolicName, List importList, List packageList, List visited) {
+	private void getPackages(BundleDescription requiredBundle, String symbolicName, List importList, List packageList, List visited, boolean strict) {
 		if (visited.contains(requiredBundle))
 			return; // prevent duplicate entries and infinate loops incase of cycles
 		visited.add(requiredBundle);
 		// add all the exported packages from the required bundle; take x-friends into account.
 		ExportPackageDescription[] exports = requiredBundle.getSelectedExports();
 		for (int i = 0; i < exports.length; i++)
-			if (isFriend(symbolicName, exports[i]) && !importList.contains(exports[i].getName()))
+			if (isFriend(symbolicName, exports[i], strict) && !importList.contains(exports[i].getName()))
 				packageList.add(exports[i]);
 		// now look for reexported bundles from the required bundle.
 		BundleSpecification[] requiredBundles = requiredBundle.getRequiredBundles();
 		for (int i = 0; i < requiredBundles.length; i++)
 			if (requiredBundles[i].isExported() && requiredBundles[i].getSupplier() != null)
-				getPackages((BundleDescription) requiredBundles[i].getSupplier(), symbolicName, importList, packageList, visited);
+				getPackages((BundleDescription) requiredBundles[i].getSupplier(), symbolicName, importList, packageList, visited, strict);
 	}
 
-
-	private boolean isFriend(String consumerBSN, ExportPackageDescription export) {
+	private boolean isFriend(String consumerBSN, ExportPackageDescription export, boolean strict) {
+		if (!strict)
+			return true; // ignore friends rules if not in strict mode
 		String[] friends = (String[]) export.getDirective(Constants.FRIENDS_DIRECTIVE);
 		if (friends == null)
 			return true; // no x-friends means it is wide open
@@ -187,6 +192,14 @@ public class StateHelperImpl implements StateHelper {
 			if (friends[i].equals(consumerBSN))
 				return true; // the consumer is a friend
 		return false;
+	}
+
+	public int getAccessCode(BundleDescription bundle, ExportPackageDescription export) {
+		if (((Boolean) export.getDirective(Constants.INTERNAL_DIRECTIVE)).booleanValue())
+			return ACCESS_DISCOURAGED;
+		if (!isFriend(bundle.getSymbolicName(), export, true)) // pass strict here so that x-friends is processed
+			return ACCESS_DISCOURAGED;
+		return ACCESS_ENCOURAGED;
 	}
 
 	static StateHelper getInstance() {
