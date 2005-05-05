@@ -125,6 +125,10 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 		fileManager = initFileManager(LocationManager.getOSGiConfigurationDir(), readOnlyConfiguration ? "none" : null, readOnlyConfiguration); //$NON-NLS-1$
 		readHeaders();
 		super.initialize(publisher);
+		// default the bootdelegation to all packages
+		if (System.getProperty(Constants.OSGI_BOOTDELEGATION) == null && !Constants.OSGI_BOOTDELEGATION_NONE.equals(System.getProperty(Constants.OSGI_JAVA_PROFILE_BOOTDELEGATION)))
+			System.getProperties().put(Constants.OSGI_BOOTDELEGATION, ""); //$NON-NLS-1$
+
 	}
 
 	public void initializeMetadata() {

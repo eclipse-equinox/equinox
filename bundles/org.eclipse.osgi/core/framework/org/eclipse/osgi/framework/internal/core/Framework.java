@@ -176,6 +176,8 @@ public class Framework implements EventDispatcher, EventPublisher {
 		installLock = new Hashtable(10);
 		/* create the system bundle */
 		createSystemBundle();
+		loadVMProfile(); // load VM profile after the system bundle has been created
+		setBootDelegation(); //set boot delegation property after system exports have been set
 		if (Profile.PROFILE && Profile.STARTUP)
 			Profile.logTime("Framework.initialze()", "done createSystemBundle"); //$NON-NLS-1$ //$NON-NLS-2$
 		/* install URLStreamHandlerFactory */
@@ -213,7 +215,6 @@ public class Framework implements EventDispatcher, EventPublisher {
 			e.printStackTrace();
 			throw new RuntimeException(NLS.bind(Msg.OSGI_SYSTEMBUNDLE_CREATE_EXCEPTION, e.getMessage()));
 		}
-		setSystemExports();
 	}
 
 	/**
@@ -294,7 +295,6 @@ public class Framework implements EventDispatcher, EventPublisher {
 			}
 		}
 		setExecutionEnvironment();
-		setBootDelegation();
 	}
 
 	private void setExecutionEnvironment() {
@@ -338,8 +338,6 @@ public class Framework implements EventDispatcher, EventPublisher {
 	}
 
 	private void setBootDelegation() {
-		// TODO see bug 87780.  for now always delegate to the boot loader.
-		bootDelegateAll = true;
 		String bootDelegationProp = properties.getProperty(Constants.OSGI_BOOTDELEGATION);
 		if (bootDelegationProp == null)
 			return;
@@ -352,28 +350,39 @@ public class Framework implements EventDispatcher, EventPublisher {
 				bootDelegateAll = true;
 	}
 
-	private void setSystemExports() {
-		String systemExports = properties.getProperty(Constants.OSGI_FRAMEWORK_SYSTEM_PACKAGES);
-		if (systemExports != null)
-			return;
+	private void loadVMProfile() {
 		InputStream in = findVMProfile();
-		if (in == null)
-			return;
-		Properties vmPackages = new Properties();
-		try {
-			vmPackages.load(new BufferedInputStream(in));
-		} catch (IOException e) {
-			// do nothing
-		} finally {
+		Properties profileProps = new Properties();
+		if (in != null) {
 			try {
-				in.close();
-			} catch (IOException ee) {
+				profileProps.load(new BufferedInputStream(in));
+			} catch (IOException e) {
 				// do nothing
+			} finally {
+				try {
+					in.close();
+				} catch (IOException ee) {
+					// do nothing
+				}
 			}
 		}
-		systemExports = vmPackages.getProperty(Constants.OSGI_FRAMEWORK_SYSTEM_PACKAGES);
-		if (systemExports != null)
-			properties.put(Constants.OSGI_FRAMEWORK_SYSTEM_PACKAGES, systemExports);
+		String systemExports = properties.getProperty(Constants.OSGI_FRAMEWORK_SYSTEM_PACKAGES);
+		// set the system exports property using the vm profile; only if the property is not already set
+		if (systemExports == null) {
+			systemExports = profileProps.getProperty(Constants.OSGI_FRAMEWORK_SYSTEM_PACKAGES);
+			if (systemExports != null)
+				properties.put(Constants.OSGI_FRAMEWORK_SYSTEM_PACKAGES, systemExports);
+		}
+		// set the org.osgi.framework.bootdelegation property according to the java profile
+		String type = properties.getProperty(Constants.OSGI_JAVA_PROFILE_BOOTDELEGATION); // a null value means ignore
+		String profileBootDelegation = profileProps.getProperty(Constants.OSGI_BOOTDELEGATION);
+		if (Constants.OSGI_BOOTDELEGATION_OVERRIDE.equals(type)) {
+			if (profileBootDelegation == null)
+				properties.remove(Constants.OSGI_BOOTDELEGATION); // override with a null value
+			else
+				properties.put(Constants.OSGI_BOOTDELEGATION, profileBootDelegation); // override with the profile value
+		} else if (Constants.OSGI_BOOTDELEGATION_NONE.equals(type))
+			properties.remove(Constants.OSGI_BOOTDELEGATION); // remove the bootdelegation property in case it was set
 	}
 
 	private InputStream findVMProfile() {
