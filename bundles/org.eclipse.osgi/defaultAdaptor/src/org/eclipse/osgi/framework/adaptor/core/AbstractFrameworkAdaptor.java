@@ -1314,7 +1314,8 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 	 *
 	 */
 	public void compactStorage() {
-		compact(getBundleStoreRootDir());
+		if (canWrite())
+			compact(getBundleStoreRootDir());
 	}
 
 	/**

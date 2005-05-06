@@ -390,7 +390,8 @@ public class EclipseBundleData extends AbstractBundleData {
 	 * @throws IOException if a write error occurs.
 	 */
 	public synchronized void save() throws IOException {
-		((EclipseAdaptor) adaptor).saveMetaDataFor(this);
+		if (adaptor.canWrite())		
+			((EclipseAdaptor) adaptor).saveMetaDataFor(this);
 	}
 
 	public String toString() {
