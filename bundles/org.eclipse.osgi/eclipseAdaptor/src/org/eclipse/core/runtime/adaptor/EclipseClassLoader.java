@@ -145,9 +145,7 @@ public class EclipseClassLoader extends DefaultClassLoader {
 			BundleStopper stopper = EclipseAdaptor.getDefault().getBundleStopper();
 			if (stopper != null && stopper.isStopped(hostdata.getBundle())) {
 				String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_CLASSLOADER_ALREADY_STOPPED, className, hostdata.getSymbolicName());
-				ClassNotFoundException exception = new ClassNotFoundException(message);
-				EclipseAdaptor.getDefault().getFrameworkLog().log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, message, 0, exception, null)); //$NON-NLS-1$
-				throw exception;
+				throw new ClassNotFoundException(message);
 			}
 		}
 		boolean autoStart = ((EclipseBundleData) hostdata).isAutoStart();
