@@ -33,6 +33,17 @@ public class EclipseLog implements FrameworkLog {
 
 	protected static final String LINE_SEPARATOR;
 	protected static final String TAB_STRING = "\t"; //$NON-NLS-1$
+
+	//Constants for rotating log file
+	public static final int DEFAULT_LOG_SIZE = 1000;
+	public static final int DEFAULT_LOG_FILES = 10;
+	public static final int LOG_SIZE_MIN = 10;
+
+	public static final String PROP_LOG_SIZE_MAX = "eclipse.log.size.max"; //$NON-NLS-1$
+	public static final String PROP_LOG_FILE_MAX = "eclipse.log.backup.max"; //$NON-NLS-1$
+	public static final String LOG_EXT = ".log"; //$NON-NLS-1$
+	public static final String BACKUP_MARK = ".bak_"; //$NON-NLS-1$
+
 	static {
 		String s = System.getProperty("line.separator"); //$NON-NLS-1$
 		LINE_SEPARATOR = s == null ? "\n" : s; //$NON-NLS-1$
@@ -51,9 +62,14 @@ public class EclipseLog implements FrameworkLog {
 	 */
 	protected Writer writer;
 
+	int maxLogSize = DEFAULT_LOG_SIZE; // The value is in KB.
+	int maxLogFiles = DEFAULT_LOG_FILES;
+	int backupIdx = 0;
+
 	public EclipseLog(File outFile) {
 		this.outFile = outFile;
 		this.writer = null;
+		readLogProperties();
 	}
 
 	public EclipseLog(Writer writer) {
@@ -132,7 +148,7 @@ public class EclipseLog implements FrameworkLog {
 			String key = "eclipse.buildId"; //$NON-NLS-1$
 			String value = System.getProperty(key, "unknown"); //$NON-NLS-1$
 			writeln(key + "=" + value); //$NON-NLS-1$
-			
+
 			key = "java.fullversion"; //$NON-NLS-1$
 			value = System.getProperty(key);
 			if (value == null) {
@@ -216,6 +232,7 @@ public class EclipseLog implements FrameworkLog {
 		if (logEntry == null)
 			return;
 		try {
+			checkLogFileSize();
 			openFile();
 			if (newSession) {
 				writeSession();
@@ -247,6 +264,11 @@ public class EclipseLog implements FrameworkLog {
 	}
 
 	public synchronized void setFile(File newFile, boolean append) throws IOException {
+		if (newFile != null && !newFile.equals(this.outFile)) {
+			// If it's a new file, then reset.
+			readLogProperties();
+			backupIdx = 0;
+		}
 		setOutput(newFile, null, append);
 		System.getProperties().put(EclipseStarter.PROP_LOGFILE, newFile.getAbsolutePath());
 	}
@@ -413,5 +435,82 @@ public class EclipseLog implements FrameworkLog {
 
 	protected void writeSpace() throws IOException {
 		write(" "); //$NON-NLS-1$
+	}
+
+	protected boolean checkLogFileSize() {
+		if (maxLogSize == 0)
+			return true; // no size limitation.
+
+		boolean isBackupOK = true;
+		if (outFile != null) {
+			if ((outFile.length() >> 10) > maxLogSize) { // Use KB as file size unit.
+				String logFilename = outFile.getAbsolutePath();
+
+				// Delete old backup file that will be replaced.
+				String backupFilename = ""; //$NON-NLS-1$
+				if (logFilename.toLowerCase().endsWith(LOG_EXT)) {
+					backupFilename = logFilename.substring(0, logFilename.length() - LOG_EXT.length()) + BACKUP_MARK + backupIdx + LOG_EXT;
+				} else {
+					backupFilename = logFilename + BACKUP_MARK + backupIdx; //$NON-NLS-1$
+				}
+				File backupFile = new File(backupFilename);
+				if (backupFile.exists()) {
+					if (!backupFile.delete()) {
+						System.err.println("Error when trying to delete old log file: " + backupFile.getName());//$NON-NLS-1$ 
+						if (backupFile.renameTo(new File(backupFile.getAbsolutePath() + System.currentTimeMillis()))) {
+							System.err.println("So we rename it to filename: " + backupFile.getName()); //$NON-NLS-1$
+						} else {
+							System.err.println("And we also cannot rename it!"); //$NON-NLS-1$
+							isBackupOK = false;
+						}
+					}
+				}
+
+				// Rename current log file to backup one.
+				boolean isRenameOK = outFile.renameTo(backupFile);
+				if (!isRenameOK) {
+					System.err.println("Error when trying to rename log file to backup one."); //$NON-NLS-1$
+					isBackupOK = false;
+				}
+				File newFile = new File(logFilename);
+				setOutput(newFile, null, false);
+
+				// Write a new SESSION header to new log file.
+				openFile();
+				try {
+					writeSession();
+					writeln();
+					writeln("This is a continuation of log file " + backupFile.getAbsolutePath());//$NON-NLS-1$
+					writeln("Created Time: " + getDate(new Date(System.currentTimeMillis()))); //$NON-NLS-1$
+					writer.flush();
+				} catch (IOException ioe) {
+					ioe.printStackTrace(System.err);
+				}
+				closeFile();
+				backupIdx = (++backupIdx) % maxLogFiles;
+			}
+		}
+		return isBackupOK;
+	}
+
+	protected void readLogProperties() {
+		String newMaxLogSize = (String) System.getProperties().get(PROP_LOG_SIZE_MAX);
+		if (newMaxLogSize != null) {
+			maxLogSize = Integer.parseInt(newMaxLogSize);
+			if (maxLogSize != 0 && maxLogSize < LOG_SIZE_MIN) {
+				// If the value is '0', then it means no size limitation.
+				// Also, make sure no inappropriate(too small) assigned value.
+				maxLogSize = LOG_SIZE_MIN;
+			}
+		}
+
+		String newMaxLogFiles = (String) System.getProperties().get(PROP_LOG_FILE_MAX);
+		if (newMaxLogFiles != null) {
+			maxLogFiles = Integer.parseInt(newMaxLogFiles);
+			if (maxLogFiles < 1) {
+				// Make sure no invalid assigned value. (at least >= 1)
+				maxLogFiles = DEFAULT_LOG_FILES;
+			}
+		}
 	}
 }
