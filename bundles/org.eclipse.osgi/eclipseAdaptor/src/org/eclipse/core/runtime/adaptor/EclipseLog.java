@@ -494,7 +494,7 @@ public class EclipseLog implements FrameworkLog {
 	}
 
 	protected void readLogProperties() {
-		String newMaxLogSize = (String) System.getProperties().get(PROP_LOG_SIZE_MAX);
+		String newMaxLogSize = secureAction.getProperty(PROP_LOG_SIZE_MAX);
 		if (newMaxLogSize != null) {
 			maxLogSize = Integer.parseInt(newMaxLogSize);
 			if (maxLogSize != 0 && maxLogSize < LOG_SIZE_MIN) {
@@ -504,7 +504,7 @@ public class EclipseLog implements FrameworkLog {
 			}
 		}
 
-		String newMaxLogFiles = (String) System.getProperties().get(PROP_LOG_FILE_MAX);
+		String newMaxLogFiles = secureAction.getProperty(PROP_LOG_FILE_MAX);
 		if (newMaxLogFiles != null) {
 			maxLogFiles = Integer.parseInt(newMaxLogFiles);
 			if (maxLogFiles < 1) {
