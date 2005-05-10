@@ -356,9 +356,13 @@ public class BundleLoader implements ClassLoaderDelegate {
 		Class result = null;
 		// 3) search the imported packages
 		PackageSource source = findImportedSource(pkgName);
-		if (source != null)
+		if (source != null) {
 			// 3) found import source terminate search at the source
-			return source.loadClass(name);
+			result = source.loadClass(name);
+			if (result != null)
+				return result;
+			throw new ClassNotFoundException(name);
+		}
 		// 4) search the required bundles
 		source = findRequiredSource(pkgName);
 		if (source != null)
