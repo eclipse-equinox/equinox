@@ -580,7 +580,6 @@ public abstract class AbstractBundleData implements BundleData, Cloneable {
 	}
 
 	protected String findNativePath(String libname) {
-		String path = null;
 		if (!libname.startsWith("/")) { //$NON-NLS-1$
 			libname = '/' + libname;
 		}
@@ -590,11 +589,11 @@ public abstract class AbstractBundleData implements BundleData, Cloneable {
 				if (nativepaths[i].endsWith(libname)) {
 					File nativeFile = baseBundleFile.getFile(nativepaths[i]);
 					if (nativeFile != null)
-						path = nativeFile.getAbsolutePath();
+						return nativeFile.getAbsolutePath();
 				}
 			}
 		}
-		return path;
+		return null;
 	}
 
 	/**
