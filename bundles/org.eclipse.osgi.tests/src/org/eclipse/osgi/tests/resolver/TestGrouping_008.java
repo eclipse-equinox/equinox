@@ -75,7 +75,7 @@ public class TestGrouping_008 extends AbstractStateTest {
 			assertNotNull("package name is null", exportPackageName);
 			if (exportPackageName.equals("p")) {
 				assertNotNull("Package [p] is not wired when it should be ", exp.getExporter());
-				assertEquals("Package [p] is wired incorrectly ", bundle_2, exp.getExporter());
+				assertEquals("Package [p] is wired incorrectly ", bundle_3, exp.getExporter());
 			}
 		} // end for
 	} // end method
