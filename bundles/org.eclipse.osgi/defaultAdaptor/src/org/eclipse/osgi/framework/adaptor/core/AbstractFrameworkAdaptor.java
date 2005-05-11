@@ -50,7 +50,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 
 	/** Name of the Adaptor manifest file */
 	protected final String ADAPTOR_MANIFEST = "ADAPTOR.MF"; //$NON-NLS-1$
-	protected final String DEFAULT_SIGNEDBUNDLE_SUPPORT = "org.eclipse.osgi.framework.pkcs7verify.SignedBundleImpl"; //$NON-NLS-1$
+	protected final String DEFAULT_SIGNEDBUNDLE_SUPPORT = "org.eclipse.osgi.framework.pkcs7verify.SignedBundleSupportImpl"; //$NON-NLS-1$
 
 	/**
 	 * The EventPublisher for the FrameworkAdaptor
@@ -130,7 +130,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 	protected String[] configuredExtensions;
 
 	protected boolean supportSignedBundles = true;
-	protected Class signedBundleSupport = null;
+	protected SignedBundleSupport signedBundleSupport = null;
 
 	/**
 	 * Constructor for DefaultAdaptor.  This constructor parses the arguments passed
@@ -660,14 +660,31 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 		BundleFile base = createBundleFile(basefile, bundledata);
 		if (System.getSecurityManager() == null || !supportSignedBundles)
 			return base;
+		SignedBundleSupport support = getSignedBundleSupport();
+		if (support == null)
+			return base;
+		SignedBundle signedBundle = support.createSignedBundle();
+		signedBundle.setBundleFile(base);
+		return signedBundle;
+	}
+
+	public boolean matchDNChain(String pattern, String[] dnChain) {
+		SignedBundleSupport support = getSignedBundleSupport();
+		if (support != null)
+			return support.matchDNChain(pattern, dnChain);
+		return false;
+	}
+
+	protected SignedBundleSupport getSignedBundleSupport() {
+		if (System.getSecurityManager() == null || !supportSignedBundles)
+			return null;
 		try {
 			if (signedBundleSupport == null) {
 				String clazzName = System.getProperty(PROP_SIGNINGSUPPORT, DEFAULT_SIGNEDBUNDLE_SUPPORT);
-				signedBundleSupport = Class.forName(clazzName);
+				Class clazz = Class.forName(clazzName);
+				signedBundleSupport = (SignedBundleSupport) clazz.newInstance();
 			}
-			SignedBundle signedBundle = (SignedBundle) signedBundleSupport.newInstance();
-			signedBundle.setBundleFile(base);
-			return signedBundle;
+			return signedBundleSupport;
 		} catch (ClassNotFoundException e) {
 			supportSignedBundles = false;
 		} catch (IllegalAccessException e) {
@@ -675,7 +692,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 		} catch (InstantiationException e) {
 			supportSignedBundles = false;
 		}
-		return base;
+		return null;
 	}
 
 	/**
