@@ -14,6 +14,7 @@ import java.util.Dictionary;
 import java.util.Enumeration;
 import org.eclipse.osgi.framework.adaptor.BundleData;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
+import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
@@ -74,6 +75,12 @@ public class CachedManifest extends Dictionary {
 			if ((bundledata.getType() & BundleData.TYPE_SINGLETON) == 0)
 				return bundledata.getSymbolicName();
 			return bundledata.getSymbolicName() + ';' + Constants.SINGLETON_DIRECTIVE + ":=true"; //$NON-NLS-1$
+		}
+		if (Constants.BUDDY_LOADER.equalsIgnoreCase(keyString)) {
+			return bundledata.buddyList == null ? null : bundledata.buddyList;
+		}
+		if (Constants.REGISTERED_POLICY.equalsIgnoreCase(keyString)) {
+			return bundledata.registeredBuddyList == null ? null : bundledata.registeredBuddyList;
 		}
 		Dictionary result = getManifest();
 		return result == null ? null : result.get(key);

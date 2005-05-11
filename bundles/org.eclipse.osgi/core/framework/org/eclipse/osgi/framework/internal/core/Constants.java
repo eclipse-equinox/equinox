@@ -227,4 +227,10 @@ public class Constants implements org.osgi.framework.Constants {
 	 */
 	public final static String REQUIRE_PACKAGES_ATTRIBUTE = "require-packages"; //$NON-NLS-1$
 
+	 /**
+	 * The key used to designate the buddy loader associated with a given bundle.
+	 */
+	 public final static String BUDDY_LOADER = "Eclipse-BuddyPolicy"; //$NON-NLS-1$
+
+	 public final static String REGISTERED_POLICY = "Eclipse-RegisterBuddy";  //$NON-NLS-1$
 }

@@ -11,7 +11,7 @@
 package org.eclipse.core.runtime.adaptor;
 
 import java.io.*;
-import java.lang.reflect.Constructor;
+import java.lang.reflect.*;
 import java.net.*;
 import java.security.CodeSource;
 import java.security.ProtectionDomain;
@@ -251,6 +251,7 @@ public class EclipseStarter {
 		processCommandLine(args);
 		LocationManager.initializeLocations();
 		log = createFrameworkLog();
+		initializeContextFinder();
 		loadConfigurationInfo();
 		finalizeProperties();
 		if (Profile.PROFILE)
@@ -293,6 +294,29 @@ public class EclipseStarter {
 		running = true;
 		if (Profile.PROFILE && Profile.STARTUP)
 			Profile.logExit("EclipseStarter.startup()"); //$NON-NLS-1$
+	}
+
+	private static void initializeContextFinder() {
+		Thread current = Thread.currentThread();
+		try {
+			Method getContextClassLoader = Thread.class.getMethod("getContextClassLoader", null); //$NON-NLS-1$
+			Method setContextClassLoader = Thread.class.getMethod("setContextClassLoader", new Class[] { ClassLoader.class }); //$NON-NLS-1$
+			Object[] params = new Object[] { new ContextFinder((ClassLoader) getContextClassLoader.invoke(current, null)) };
+			setContextClassLoader.invoke(current, params);
+			return;
+		} catch (SecurityException e) {
+			//Ignore
+		} catch (NoSuchMethodException e) {
+			//Ignore
+		} catch (IllegalArgumentException e) {
+			//Ignore
+		} catch (IllegalAccessException e) {
+			//Ignore
+		} catch (InvocationTargetException e) {
+			//Ignore
+		}
+		FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, NLS.bind(EclipseAdaptorMsg.ECLIPSE_CLASSLOADER_CANNOT_SET_CONTEXTFINDER, null), 0, null, null);
+		log.log(entry);
 	}
 
 	private static int getStartLevel() {

@@ -37,6 +37,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 	public final static byte FLAG_HASDYNAMICIMPORTS = 0x02;
 	public final static byte FLAG_HASDYNAMICEIMPORTALL = 0x04;
 	public final static byte FLAG_CLOSED = 0x08;
+
 	public final static ClassContext CLASS_CONTEXT = (ClassContext) AccessController.doPrivileged(new PrivilegedAction() {
 		public Object run() {
 			return new ClassContext();
@@ -68,6 +69,8 @@ public class BundleLoader implements ClassLoaderDelegate {
 	int[] reexportTable;
 	/* loader flags */
 	byte loaderFlags = 0;
+
+	private PolicyHandler policy;
 
 	/**
 	 * Returns the package name from the specified class name.
@@ -176,6 +179,15 @@ public class BundleLoader implements ClassLoaderDelegate {
 		for (int i = 0; i < fragments.length; i++)
 			if (fragments[i].isResolved() && fragments[i].hasDynamicImports())
 				addDynamicImportPackage(fragments[i].getImportPackages());
+
+		//Initialize the policy handler
+		try {
+			String buddyList = null;
+			if ((buddyList = (String) bundle.getBundleData().getManifest().get(Constants.BUDDY_LOADER)) != null)
+				policy = new PolicyHandler(this, buddyList);
+		} catch (BundleException e) {
+			//ignore
+		}
 	}
 
 	private synchronized void addImportedPackages(ExportPackageDescription[] packages) {
@@ -243,6 +255,10 @@ public class BundleLoader implements ClassLoaderDelegate {
 			return;
 		if (classloader != null)
 			classloader.close();
+		if (policy != null) {
+			policy.close();
+			policy = null;
+		}
 		loaderFlags |= FLAG_CLOSED; /* This indicates the BundleLoader is destroyed */
 	}
 
@@ -377,8 +393,12 @@ public class BundleLoader implements ClassLoaderDelegate {
 		source = findDynamicSource(pkgName);
 		if (source != null)
 			result = source.loadClass(name);
+		// do buddy policy loading
+		if (result == null && policy != null)
+			result = policy.doBuddyClassLoading(name);
+		// last resort; do class context trick to work around VM bugs
 		if (result == null && findParentResource(name))
-			return parent.loadClass(name);
+			result = parent.loadClass(name);
 		if (result == null)
 			throw new ClassNotFoundException(name);
 		return result;
@@ -466,8 +486,12 @@ public class BundleLoader implements ClassLoaderDelegate {
 		source = findDynamicSource(pkgName);
 		if (source != null)
 			result = source.getResource(name);
+		// do buddy policy loading
+		if (result == null && policy != null)
+			return policy.doBuddyResourceLoading(name);
+		// last resort; do class context trick to work around VM bugs
 		if (result == null && findParentResource(name))
-			return parent.getResource(name);
+			result = parent.getResource(name);
 		return result;
 	}
 
@@ -511,6 +535,8 @@ public class BundleLoader implements ClassLoaderDelegate {
 		source = findDynamicSource(pkgName);
 		if (source != null)
 			result = source.getResources(name);
+		if (result == null && policy != null)
+			result = policy.doBuddyResourcesLoading(name);
 		return result;
 	}
 
@@ -709,8 +735,8 @@ public class BundleLoader implements ClassLoaderDelegate {
 		if (packages == null)
 			return;
 
-		loaderFlags |= FLAG_HASDYNAMICIMPORTS;
 		// make sure importedPackages is not null;
+		loaderFlags |= FLAG_HASDYNAMICIMPORTS;
 		if (importedSources == null) {
 			importedSources = new KeyedHashSet(10, false);
 		}

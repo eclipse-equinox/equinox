@@ -52,6 +52,10 @@ public class EclipseBundleData extends AbstractBundleData {
 	// the Eclipse-AutoStart header	
 	private boolean autoStart;
 	private String[] autoStartExceptions;
+	// shortcut to know if a bundle has a buddy
+	protected String buddyList;
+	// shortcut to know if a bundle is a registrant to a registered policy
+	protected String registeredBuddyList;
 
 	private static String[] buildLibraryVariants() {
 		ArrayList result = new ArrayList();
@@ -308,6 +312,8 @@ public class EclipseBundleData extends AbstractBundleData {
 			throw new IllegalStateException();
 		pluginClass = (String) manifest.get(EclipseAdaptor.PLUGIN_CLASS);
 		parseAutoStart((String) manifest.get(EclipseAdaptor.ECLIPSE_AUTOSTART));
+		buddyList = (String) manifest.get(Constants.BUDDY_LOADER); 
+		registeredBuddyList = (String) manifest.get(Constants.REGISTERED_POLICY);
 	}
 
 	public String getPluginClass() {
