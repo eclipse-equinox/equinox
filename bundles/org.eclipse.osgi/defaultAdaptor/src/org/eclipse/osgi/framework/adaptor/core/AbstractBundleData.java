@@ -524,7 +524,7 @@ public abstract class AbstractBundleData implements BundleData, Cloneable {
 	protected File[] getClasspathFiles(String[] classpaths) {
 		File[] results = new File[classpaths.length];
 		for (int i = 0; i < classpaths.length; i++) {
-			if (".".equals(classpaths[i]))
+			if (".".equals(classpaths[i])) //$NON-NLS-1$
 				results[i] = getBaseFile();
 			else
 				results[i] = getBaseBundleFile().getFile(classpaths[i]);

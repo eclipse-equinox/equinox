@@ -205,7 +205,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 		if (Debug.DEBUG && Debug.DEBUG_GENERAL)
 			System.out.println("Initialize the framework: " + (System.currentTimeMillis() - start)); //$NON-NLS-1$
 		if (Profile.PROFILE && Profile.STARTUP)
-			Profile.logExit("Framework.initialze()");
+			Profile.logExit("Framework.initialize()"); //$NON-NLS-1$
 	}
 
 	private void createSystemBundle() {

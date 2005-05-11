@@ -157,7 +157,7 @@ public class EclipseBundleData extends AbstractBundleData {
 				if (org.eclipse.osgi.service.environment.Constants.OS_HPUX.equals(EnvironmentInfo.getDefault().getOS())) {
 					try {
 						// use the string array method in case there is a space in the path
-						Runtime.getRuntime().exec(new String[] {"chmod", "755", libFile.getAbsolutePath()}).waitFor();
+						Runtime.getRuntime().exec(new String[] {"chmod", "755", libFile.getAbsolutePath()}).waitFor(); //$NON-NLS-1$ //$NON-NLS-2$
 					} catch (Exception e) {
 						e.printStackTrace();
 					}

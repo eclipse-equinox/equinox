@@ -181,7 +181,7 @@ class StateBuilder {
 		String[] exportNames = exportPackage.getValueComponents();
 		for (int i = 0; i < exportNames.length; i++) {
 			// if we are in strict mode and the package is marked as internal, skip it.
-			if (strict && "true".equals(exportPackage.getDirective(Constants.INTERNAL_DIRECTIVE)))
+			if (strict && "true".equals(exportPackage.getDirective(Constants.INTERNAL_DIRECTIVE))) //$NON-NLS-1$
 				continue;
 			ExportPackageDescriptionImpl result = new ExportPackageDescriptionImpl();
 			result.setName(exportNames[i]);
@@ -250,7 +250,7 @@ class StateBuilder {
 		HostSpecificationImpl result = new HostSpecificationImpl();
 		result.setName(spec.getValue());
 		result.setVersionRange(getVersionRange(spec.getAttribute(Constants.BUNDLE_VERSION_ATTRIBUTE)));
-		result.setIsMultiHost("true".equals(spec.getDirective("multiple-hosts"))); //$NON-NLS-1$
+		result.setIsMultiHost("true".equals(spec.getDirective("multiple-hosts"))); //$NON-NLS-1$ //$NON-NLS-2$
 		return result;
 	}
 
