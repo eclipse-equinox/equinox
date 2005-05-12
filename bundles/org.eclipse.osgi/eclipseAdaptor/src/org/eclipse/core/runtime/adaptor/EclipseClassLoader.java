@@ -37,6 +37,7 @@ public class EclipseClassLoader extends DefaultClassLoader {
 	private static boolean DEFINE_PACKAGES;
 	private static final String VARIABLE_DELIM_STRING = "$"; //$NON-NLS-1$
 	private static final char VARIABLE_DELIM_CHAR = '$';
+	private static final String EXTERNAL_LIB_PREFIX = "external:"; //$NON-NLS-1$
 	static {
 		try {
 			Class.forName("java.lang.Package"); //$NON-NLS-1$
@@ -243,7 +244,8 @@ public class EclipseClassLoader extends DefaultClassLoader {
 			findInternalClassPath(var, result, entry, bundledata, domain);
 			return;
 		}
-		if (entry.length() > 0 && entry.charAt(0) == VARIABLE_DELIM_CHAR) {
+		if (entry.startsWith(EXTERNAL_LIB_PREFIX)) {
+			entry = entry.substring(EXTERNAL_LIB_PREFIX.length());
 			// find external library using system property substitution
 			ClasspathEntry cpEntry = getExternalClassPath(substituteVars(entry), bundledata, domain);
 			if (cpEntry != null)
