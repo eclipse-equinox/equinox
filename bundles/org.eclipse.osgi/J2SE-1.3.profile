@@ -50,7 +50,7 @@ org.osgi.framework.system.packages = \
  org.omg.SendingContext,\
  org.omg.stub.java.rmi
 org.osgi.framework.bootdelegation = \
- javax.,\
- org.omg.,\
- sun.,\
- com.sun
+ javax.*,\
+ org.omg.*,\
+ sun.*,\
+ com.sun.*

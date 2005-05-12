@@ -127,7 +127,7 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 		super.initialize(publisher);
 		// default the bootdelegation to all packages
 		if (System.getProperty(Constants.OSGI_BOOTDELEGATION) == null && !Constants.OSGI_BOOTDELEGATION_NONE.equals(System.getProperty(Constants.OSGI_JAVA_PROFILE_BOOTDELEGATION)))
-			System.getProperties().put(Constants.OSGI_BOOTDELEGATION, ""); //$NON-NLS-1$
+			System.getProperties().put(Constants.OSGI_BOOTDELEGATION, "*"); //$NON-NLS-1$
 		// we need to set the install path as soon as possible so we can determine
 		// the absolute location of install relative URLs
 		Location installLoc = LocationManager.getInstallLocation();

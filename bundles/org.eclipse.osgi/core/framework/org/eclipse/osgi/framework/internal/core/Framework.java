@@ -84,6 +84,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 	/** System Bundle object */
 	protected SystemBundle systemBundle;
 	String[] bootDelegation;
+	String[] bootDelegationStems;
 	boolean bootDelegateAll = false;
 	boolean contextBootDelegation = "true".equals(System.getProperty("osgi.context.bootdelegation", "true")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
@@ -342,12 +343,25 @@ public class Framework implements EventDispatcher, EventPublisher {
 		if (bootDelegationProp == null)
 			return;
 		if (bootDelegationProp.trim().length() == 0)
-			bootDelegation = new String[] {""}; //$NON-NLS-1$
-		else
-			bootDelegation = ManifestElement.getArrayFromList(bootDelegationProp);
-		for (int i = 0; i < bootDelegation.length; i++)
-			if (bootDelegation[i].length() == 0)
+			return;
+		String[] bootPackages = ManifestElement.getArrayFromList(bootDelegationProp);
+		ArrayList exactMatch = new ArrayList(bootPackages.length);
+		ArrayList stemMatch = new ArrayList(bootPackages.length);
+		for (int i = 0; i < bootPackages.length; i++) {
+			if (bootPackages[i].equals("*")) { //$NON-NLS-1$
 				bootDelegateAll = true;
+				return;
+			} else if (bootPackages[i].endsWith("*")) { //$NON-NLS-1$
+				if (bootPackages[i].length() > 2 && bootPackages[i].endsWith(".*")) //$NON-NLS-1$
+					stemMatch.add(bootPackages[i].substring(0, bootPackages[i].length() - 1));
+			} else {
+				exactMatch.add(bootPackages[i]);
+			}
+		}
+		if (exactMatch.size() > 0)
+			bootDelegation = (String[]) exactMatch.toArray(new String[exactMatch.size()]);
+		if (stemMatch.size() > 0)
+			bootDelegationStems = (String[]) stemMatch.toArray(new String[stemMatch.size()]);
 	}
 
 	private void loadVMProfile() {

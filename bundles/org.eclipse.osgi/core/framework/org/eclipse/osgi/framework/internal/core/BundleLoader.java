@@ -498,11 +498,14 @@ public class BundleLoader implements ClassLoaderDelegate {
 	private boolean isBootDelegationPackage(String name) {
 		if (bundle.framework.bootDelegateAll)
 			return true;
-		if (bundle.framework.bootDelegation == null)
-			return false;
-		for (int i = 0; i < bundle.framework.bootDelegation.length; i++)
-			if (name.startsWith(bundle.framework.bootDelegation[i]))
-				return true;
+		if (bundle.framework.bootDelegation != null)
+			for (int i = 0; i < bundle.framework.bootDelegation.length; i++)
+				if (name.equals(bundle.framework.bootDelegation[i]))
+					return true;
+		if (bundle.framework.bootDelegationStems != null)
+			for (int i = 0; i < bundle.framework.bootDelegationStems.length; i++)
+				if (name.startsWith(bundle.framework.bootDelegationStems[i]))
+					return true;
 		return false;
 	}
 
