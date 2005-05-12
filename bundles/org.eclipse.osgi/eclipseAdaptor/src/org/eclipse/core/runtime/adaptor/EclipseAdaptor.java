@@ -128,7 +128,14 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 		// default the bootdelegation to all packages
 		if (System.getProperty(Constants.OSGI_BOOTDELEGATION) == null && !Constants.OSGI_BOOTDELEGATION_NONE.equals(System.getProperty(Constants.OSGI_JAVA_PROFILE_BOOTDELEGATION)))
 			System.getProperties().put(Constants.OSGI_BOOTDELEGATION, ""); //$NON-NLS-1$
-
+		// we need to set the install path as soon as possible so we can determine
+		// the absolute location of install relative URLs
+		Location installLoc = LocationManager.getInstallLocation();
+		if (installLoc != null) {
+			URL installURL = installLoc.getURL();
+			// assume install URL is file: based
+			installPath = installURL.getPath();
+		}
 	}
 
 	public void initializeMetadata() {
@@ -333,9 +340,6 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 		if (location != null) {
 			locationProperties.put("type", LocationManager.PROP_INSTALL_AREA); //$NON-NLS-1$
 			aContext.registerService(Location.class.getName(), location, locationProperties);
-			URL installURL = location.getURL();
-			// assume install URL is file: based
-			installPath = installURL.getPath();
 		}
 
 		register(org.eclipse.osgi.service.environment.EnvironmentInfo.class.getName(), EnvironmentInfo.getDefault(), bundle);
