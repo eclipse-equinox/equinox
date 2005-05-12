@@ -66,7 +66,9 @@ public class EclipseStarter {
 	private static final String ARCH = "-arch"; //$NON-NLS-1$
 	private static final String NL = "-nl"; //$NON-NLS-1$	
 	private static final String CONFIGURATION = "-configuration"; //$NON-NLS-1$	
-	private static final String USER = "-user"; //$NON-NLS-1$	
+	private static final String USER = "-user"; //$NON-NLS-1$
+	private static final String NOEXIT = "-noExit";  //$NON-NLS-1$
+	
 	// this is more of an Eclipse argument but this OSGi implementation stores its 
 	// metadata alongside Eclipse's.
 	private static final String DATA = "-data"; //$NON-NLS-1$
@@ -710,6 +712,11 @@ public class EclipseStarter {
 				found = true;
 			}
 
+            if (args[i].equalsIgnoreCase(NOEXIT)) {
+            	System.getProperties().put(PROP_NOSHUTDOWN, "true"); //$NON-NLS-1$
+            	found = true;
+            }
+            
 			if (found) {
 				configArgs[configArgIndex++] = i;
 				continue;
