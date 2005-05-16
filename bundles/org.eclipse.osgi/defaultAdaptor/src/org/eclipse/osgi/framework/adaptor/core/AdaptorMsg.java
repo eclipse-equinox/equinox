@@ -18,6 +18,7 @@ public class AdaptorMsg extends NLS {
 	public static String ADAPTOR_DATA_AREA_NOT_SET;
 	public static String ADAPTOR_DIRECTORY_CREATE_EXCEPTION;
 	public static String ADAPTOR_DIRECTORY_EXCEPTION;
+	public static String ADAPTOR_DIRECTORY_REMOVE_EXCEPTION;
 	public static String ADAPTOR_ERROR_GETTING_MANIFEST;	
 	public static String ADAPTOR_EXTESION_IMPORT_ERROR;
 	public static String ADAPTOR_EXTESION_NATIVECODE_ERROR;

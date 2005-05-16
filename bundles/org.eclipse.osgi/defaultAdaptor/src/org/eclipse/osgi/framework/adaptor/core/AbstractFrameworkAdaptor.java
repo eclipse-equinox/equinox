@@ -882,7 +882,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 	 */
 	protected void shutdownStateManager() {
 		try {
-			if (canWrite())
+			if (canWrite() && (getBundleStoreRootDir().exists() || getBundleStoreRootDir().mkdirs()))
 				stateManager.shutdown(new File(getBundleStoreRootDir(), ".state"), new File(getBundleStoreRootDir(), ".lazy")); //$NON-NLS-1$//$NON-NLS-2$
 		} catch (IOException e) {
 			frameworkLog.log(new FrameworkEvent(FrameworkEvent.ERROR, context.getBundle(), e));
@@ -1206,8 +1206,8 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 	 * Init the directory to store the bundles in.  Bundledir can be set in 3 different ways.
 	 * Priority is:
 	 * 1 - OSGI Launcher command line -adaptor argument
-	 * 2 - System property org.eclipse.osgi.framework.defaultadaptor.bundledir - could be specified with -D when launching
-	 * 3 - osgi.properties - org.eclipse.osgi.framework.defaultadaptor.bundledir property
+	 * 2 - System property osgi.bundlestore - could be specified with -D when launching
+	 * 3 - osgi.properties - osgi.bundlestore property
 	 *
 	 * Bundledir will be stored back to adaptor properties which
 	 * the framework will copy into the System properties.
@@ -1256,7 +1256,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 	 * If a dir was specified in the -adaptor command line option, then it
 	 * is used.  If not,
 	 * if the property
-	 * <i>org.eclipse.osgi.framework.defaultadaptor.bundledir</i> is specifed, its value
+	 * <i>osgi.bundlestore</i> is specified, its value
 	 * will be used as the name of the bundle directory
 	 * instead of <tt>./bundles</tt>.
 	 * If reset was specified on the -adaptor command line option,
@@ -1265,35 +1265,16 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 	 * @throws IOException If an error occurs initializing the storage.
 	 */
 	public void initializeStorage() throws IOException {
-		boolean makedir = false;
-		File bundleStore = getBundleStoreRootDir();
-		if (bundleStore.exists()) {
-			if (reset) {
-				makedir = true;
-				if (!rm(bundleStore)) {
-					if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-						Debug.println("Could not remove directory: " + bundleStore.getPath()); //$NON-NLS-1$
-					}
-				}
-			} else {
-				if (!bundleStore.isDirectory()) {
-					if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-						Debug.println("Exists but not a directory: " + bundleStore.getPath()); //$NON-NLS-1$
-					}
-
-					throw new IOException(NLS.bind(AdaptorMsg.ADAPTOR_DIRECTORY_EXCEPTION, bundleStore));
-				}
-			}
-		} else {
-			makedir = true;
-		}
-		if (makedir) {
-			if (!bundleStore.mkdirs()) {
+		File bundleStore;
+		// only touch the file system if reset is specified
+		// we create the area on demand later if needed
+		if (reset && (bundleStore = getBundleStoreRootDir()).exists()) {
+			if (!canWrite() || !rm(bundleStore)) {
 				if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-					Debug.println("Unable to create directory: " + bundleStore.getPath()); //$NON-NLS-1$
+					Debug.println("Could not remove directory: " + bundleStore.getPath()); //$NON-NLS-1$
 				}
 
-				throw new IOException(NLS.bind(AdaptorMsg.ADAPTOR_DIRECTORY_CREATE_EXCEPTION, bundleStore));
+				throw new IOException(NLS.bind(AdaptorMsg.ADAPTOR_DIRECTORY_REMOVE_EXCEPTION, bundleStore));
 			}
 		}
 
