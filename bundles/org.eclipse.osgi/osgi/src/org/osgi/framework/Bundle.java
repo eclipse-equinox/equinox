@@ -1,28 +1,11 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/Bundle.java,v 1.22 2005/04/15 14:27:37 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/Bundle.java,v 1.24 2005/05/13 20:32:55 hargrave Exp $
  * 
  * Copyright (c) OSGi Alliance (2000, 2005). All Rights Reserved.
  * 
- * Implementation of certain elements of the OSGi Specification may be subject
- * to third party intellectual property rights, including without limitation,
- * patent rights (such a third party may or may not be a member of the OSGi
- * Alliance). The OSGi Alliance is not responsible and shall not be held
- * responsible in any manner for identifying or failing to identify any or all
- * such third party intellectual property rights.
- * 
- * This document and the information contained herein are provided on an "AS IS"
- * basis and THE OSGI ALLIANCE DISCLAIMS ALL WARRANTIES, EXPRESS OR IMPLIED,
- * INCLUDING BUT NOT LIMITED TO ANY WARRANTY THAT THE USE OF THE INFORMATION
- * HEREIN WILL NOT INFRINGE ANY RIGHTS AND ANY IMPLIED WARRANTIES OF
- * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE. IN NO EVENT WILL THE
- * OSGI ALLIANCE BE LIABLE FOR ANY LOSS OF PROFITS, LOSS OF BUSINESS, LOSS OF
- * USE OF DATA, INTERRUPTION OF BUSINESS, OR FOR DIRECT, INDIRECT, SPECIAL OR
- * EXEMPLARY, INCIDENTIAL, PUNITIVE OR CONSEQUENTIAL DAMAGES OF ANY KIND IN
- * CONNECTION WITH THIS DOCUMENT OR THE INFORMATION CONTAINED HEREIN, EVEN IF
- * ADVISED OF THE POSSIBILITY OF SUCH LOSS OR DAMAGE.
- * 
- * All Company, brand and product names may be trademarks that are the sole
- * property of their respective owners. All rights reserved.
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this 
+ * distribution, and is available at http://www.eclipse.org/legal/epl-v10.html.
  */
 
 package org.osgi.framework;
@@ -73,7 +56,7 @@ import java.util.Enumeration;
  * <code>Bundle</code> objects, and these objects are only valid within the
  * Framework that created them.
  * 
- * @version $Revision: 1.22 $
+ * @version $Revision: 1.24 $
  */
 public abstract interface Bundle {
 	/**
@@ -824,7 +807,7 @@ public abstract interface Bundle {
 	public Enumeration getResources(String name) throws IOException;
 
 	/**
-	 * Returns an Enumeration of all the paths (<code>String</code) objects) to 
+	 * Returns an Enumeration of all the paths (<code>String</code>) objects) to 
 	 * entries within the bundle whose longest sub-path matches the supplied path 
 	 * argument. The bundle's classloader is not used to search for entries. Only 
 	 * the contents of the bundle is searched.  A specified path of &quot;/&quot; 
@@ -896,11 +879,9 @@ public abstract interface Bundle {
 	 * bundle and its attatched fragments are searched for the specified
 	 * entries.
 	 * 
-	 * <p>
 	 * If this bundle's state is <code>INSTALLED</code>, this method must
-	 * attempt to resolve the bundle before attempting to find entries.
+	 * attempt to resolve the bundle before attempting to find entries.<p>
 	 * 
-	 * <p>
 	 * This method is intended to be used to obtain configuration, setup,
 	 * localization and other information from this bundle. This method takes
 	 * into account that the &quot;contents&quot; of this bundle can be extended
@@ -916,24 +897,16 @@ public abstract interface Bundle {
 	 * returned.
 	 * <p>
 	 * Examples:
-	 * <ul>
-	 * <li>List all XML files in the OSGI-INF directory and below</li>
-	 * 
 	 * <pre>
+	 * // List all XML files in the OSGI-INF directory and below
 	 * Enumeration	e	= b.findEntries(&quot;OSGI-INF&quot;, &quot;*.xml&quot;, true);
-	 * </pre>
 	 * 
-	 * <li>Find a specific localization file</li>
-	 * 
-	 * <pre>
+	 * // Find a specific localization file
 	 * Enumeration e = b.findEntries(&quot;OSGI-INF/l10n&quot;, 
-	 * 								 &quot;bundle_nl_DU.properties&quot;, 
-	 * 								 false);
+	 *    &quot;bundle_nl_DU.properties&quot;, false);
 	 * if (e.hasMoreElements())
 	 * 	return (URL) e.nextElement();
 	 * </pre>
-	 * 
-	 * </ul>
 	 * 
 	 * @param path The path name in which to look. A specified path of
 	 *        &quot;/&quot; indicates the root of the bundle. Path is relative
