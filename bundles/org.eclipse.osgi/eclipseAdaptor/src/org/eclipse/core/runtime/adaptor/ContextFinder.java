@@ -34,14 +34,12 @@ public class ContextFinder extends ClassLoader {
 		super(contextClassLoader);
 	}
 
-	// We go down the stack to find who uses the context classloader. 
-	// We skip the ContextFinder because we know we are at the top of the stack
-	// Then we skip ClassLoader because ContextFinder does not implements all the methods from ClassLoader 
-	// which means that we can have ClassLoader on the stack (for example load(String))
+	// Return the first classloader of the stack that is neither the ContextFinder classloader nor the boot classloader.
+	// We assume that the bootclassloader never uses the context classloader to find classes in itself
 	ClassLoader basicFindClassLoader() {
 		Class[] stack = contextFinder.getClassContext();
 		for (int i = 1; i < stack.length; i++) {
-			if (stack[i] != ContextFinder.class && stack[i] != ClassLoader.class)  
+			if (stack[i] != ContextFinder.class && stack[i].getClassLoader() == null)  
 				return stack[i].getClassLoader();
 		}
 		return null;
@@ -71,6 +69,8 @@ public class ContextFinder extends ClassLoader {
 			if (toConsult != null && toConsult != getParent())
 				result = findClassLoader().loadClass(arg0);
 		}
+		if (result == null)
+			throw new ClassNotFoundException(arg0);
 		return result;
 	}
 
