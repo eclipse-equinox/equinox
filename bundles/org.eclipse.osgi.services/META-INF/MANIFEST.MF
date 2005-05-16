@@ -1,23 +1,30 @@
 Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
 Bundle-Name: %osgiServices
 Bundle-SymbolicName: org.eclipse.osgi.services
-Bundle-Version: 3.0.0
+Bundle-Version: 3.1.0
 Bundle-Description: %osgiServicesDes
 Bundle-Localization: plugin
 Bundle-Vendor: %eclipse.org
 Bundle-DocUrl: http://www.eclipse.org
 Bundle-ContactAddress: www.eclipse.org
 Bundle-Copyright: %copyright
-Bundle-ManifestVersion: 2
-Export-Package: org.osgi.service.cm; specification-version=1.1,
- org.osgi.service.device; specification-version=1.1,
- org.osgi.service.http; specification-version=1.1,
- org.osgi.service.io; specification-version=1.0,
- org.osgi.service.jini; specification-version=1.0,
- org.osgi.service.log; specification-version=1.2,
- org.osgi.service.metatype; specification-version=1.0,
- org.osgi.service.provisioning; specification-version=1.0,
- org.osgi.service.upnp; specification-version=1.0,
- org.osgi.service.useradmin; specification-version=1.0,
- org.osgi.service.wireadmin; specification-version=1.0
-Import-Package: org.osgi.framework; specification-version=1.2
+Export-Package: org.osgi.meglet; version="1.0",
+ org.osgi.service.application; version="1.0",
+ org.osgi.service.application.meglet; version="1.0",
+ org.osgi.service.cm; version="1.2",
+ org.osgi.service.component; version="1.0",
+ org.osgi.service.deploymentadmin; version="1.0",
+ org.osgi.service.device; version="1.1",
+ org.osgi.service.dmt; version="1.0",
+ org.osgi.service.event; version="1.0",
+ org.osgi.service.http; version="1.2",
+ org.osgi.service.io; version="1.0",
+ org.osgi.service.log; version="1.2",
+ org.osgi.service.metatype; version="1.1",
+ org.osgi.service.monitor; version="1.0",
+ org.osgi.service.provisioning; version="1.0",
+ org.osgi.service.upnp; version="1.1",
+ org.osgi.service.useradmin; version="1.0",
+ org.osgi.service.wireadmin; version="1.0"
+Import-Package: org.osgi.framework; version=1.2

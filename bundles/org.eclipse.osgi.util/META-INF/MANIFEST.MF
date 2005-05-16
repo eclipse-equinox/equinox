@@ -1,15 +1,18 @@
 Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
 Bundle-Name: %osgiUtil
 Bundle-SymbolicName: org.eclipse.osgi.util
-Bundle-Version: 3.0.0
+Bundle-Version: 3.1.0
 Bundle-Description: %osgiUtilDes
 Bundle-Vendor: %eclipse.org
 Bundle-Localization: plugin
 Bundle-DocUrl: http://www.eclipse.org
 Bundle-ContactAddress: www.eclipse.org
 Bundle-Copyright: %copyright
-Bundle-ManifestVersion: 2
-Export-Package: org.osgi.util.measurement; specification-version=1.0, 
- org.osgi.util.position; specification-version=1.0,
- org.osgi.util.xml; specification-version=1.0
-Import-Package: org.osgi.framework; specification-version=1.1
+Export-Package: org.osgi.util.gsm; version="1.0",
+ org.osgi.util.measurement; version="1.1",
+ org.osgi.util.mobile; version="1.0",
+ org.osgi.util.position; version="1.0",
+ org.osgi.util.xml; version="1.0"
+Import-Package: org.osgi.framework; version=1.1,
+ org.osgi.service.condpermadmin
