@@ -35,13 +35,20 @@ public class ContextFinder extends ClassLoader {
 	}
 
 	// Return the first classloader of the stack that is neither the ContextFinder classloader nor the boot classloader.
-	// We assume that the bootclassloader never uses the context classloader to find classes in itself
+	// We assume that the bootclassloader never uses the context classloader to find classes in itself.
+	// If the classloader found is the parent then return null 
 	ClassLoader basicFindClassLoader() {
 		Class[] stack = contextFinder.getClassContext();
+		ClassLoader result = null;
 		for (int i = 1; i < stack.length; i++) {
-			if (stack[i] != ContextFinder.class && stack[i].getClassLoader() != null)  
-				return stack[i].getClassLoader();
+			ClassLoader tmp = stack[i].getClassLoader();
+			if (stack[i] != ContextFinder.class && tmp != null) {
+				result = tmp;
+				break;
+			}
 		}
+		if (result != getParent())
+			return result;
 		return null;
 	}
 	
@@ -66,8 +73,8 @@ public class ContextFinder extends ClassLoader {
 		}
 		if (result == null) {
 			ClassLoader toConsult = findClassLoader();
-			if (toConsult != null && toConsult != getParent())
-				result = findClassLoader().loadClass(arg0);
+			if (toConsult != null)
+				result = toConsult.loadClass(arg0);
 		}
 		if (result == null)
 			throw new ClassNotFoundException(arg0);
@@ -78,8 +85,8 @@ public class ContextFinder extends ClassLoader {
 		URL result = super.findResource(arg0);
 		if (result == null) {
 			ClassLoader toConsult = findClassLoader();
-			if (toConsult != null && toConsult != getParent())
-				result = findClassLoader().getResource(arg0);
+			if (toConsult != null)
+				result = toConsult.getResource(arg0);
 		}
 		return result;
 	}
@@ -89,7 +96,7 @@ public class ContextFinder extends ClassLoader {
 			Enumeration result = super.findResources(arg0);
 			if (result == null) {
 				ClassLoader toConsult = findClassLoader();
-				if (toConsult != null && toConsult != getParent())
+				if (toConsult != null)
 					result = toConsult.getResources(arg0);
 			}
 			return result;
