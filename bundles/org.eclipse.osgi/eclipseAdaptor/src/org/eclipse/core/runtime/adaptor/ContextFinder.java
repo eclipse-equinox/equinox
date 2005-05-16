@@ -39,7 +39,7 @@ public class ContextFinder extends ClassLoader {
 	ClassLoader basicFindClassLoader() {
 		Class[] stack = contextFinder.getClassContext();
 		for (int i = 1; i < stack.length; i++) {
-			if (stack[i] != ContextFinder.class && stack[i].getClassLoader() == null)  
+			if (stack[i] != ContextFinder.class && stack[i].getClassLoader() != null)  
 				return stack[i].getClassLoader();
 		}
 		return null;
