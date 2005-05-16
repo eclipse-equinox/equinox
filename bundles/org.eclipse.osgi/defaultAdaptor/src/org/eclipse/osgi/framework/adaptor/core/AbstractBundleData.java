@@ -171,6 +171,8 @@ public abstract class AbstractBundleData implements BundleData, Cloneable {
 		if (entry == null) {
 			return null;
 		}
+		if (path.length() == 0 || path.charAt(0) != '/')
+			path = path = '/' + path;
 		try {
 			//use the constant string for the protocol to prevent duplication
 			return new URL(Constants.OSGI_ENTRY_URL_PROTOCOL, Long.toString(id), 0, path, new Handler(entry));
