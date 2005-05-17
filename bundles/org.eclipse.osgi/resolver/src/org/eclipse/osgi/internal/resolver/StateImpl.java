@@ -551,7 +551,7 @@ public abstract class StateImpl implements State {
 		}
 	}
 
-	ExportPackageDescription[] getSystemExports() {
+	public ExportPackageDescription[] getSystemExports() {
 		return systemExports;
 	}
 

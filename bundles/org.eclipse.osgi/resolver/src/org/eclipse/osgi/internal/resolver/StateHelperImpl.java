@@ -153,7 +153,7 @@ public class StateHelperImpl implements StateHelper {
 			strict = state.inStrictMode();
 		ArrayList packageList = new ArrayList(); // list of all ExportPackageDescriptions that are visible
 		ArrayList importList = new ArrayList(); // list of package names which are directly imported
-		// get the list of directly importe packages first.
+		// get the list of directly imported packages first.
 		ExportPackageDescription[] resolvedImports = bundle.getResolvedImports();
 		for (int i = 0; i < resolvedImports.length; i++) {
 			packageList.add(resolvedImports[i]);
@@ -173,13 +173,24 @@ public class StateHelperImpl implements StateHelper {
 		// add all the exported packages from the required bundle; take x-friends into account.
 		ExportPackageDescription[] exports = requiredBundle.getSelectedExports();
 		for (int i = 0; i < exports.length; i++)
-			if (isFriend(symbolicName, exports[i], strict) && !importList.contains(exports[i].getName()))
+			if (!isSystemExport(exports[i]) && isFriend(symbolicName, exports[i], strict) && !importList.contains(exports[i].getName()))
 				packageList.add(exports[i]);
 		// now look for reexported bundles from the required bundle.
 		BundleSpecification[] requiredBundles = requiredBundle.getRequiredBundles();
 		for (int i = 0; i < requiredBundles.length; i++)
 			if (requiredBundles[i].isExported() && requiredBundles[i].getSupplier() != null)
 				getPackages((BundleDescription) requiredBundles[i].getSupplier(), symbolicName, importList, packageList, visited, strict);
+	}
+
+	private boolean isSystemExport(ExportPackageDescription export) {
+		StateImpl state = (StateImpl) export.getExporter().getContainingState();
+		if (state == null)
+			return false;
+		ExportPackageDescription[] systemExports = state.getSystemExports();
+		for (int i = 0; i < systemExports.length; i++)
+			if (systemExports[i] == export)
+				return true;
+		return false;
 	}
 
 	private boolean isFriend(String consumerBSN, ExportPackageDescription export, boolean strict) {
