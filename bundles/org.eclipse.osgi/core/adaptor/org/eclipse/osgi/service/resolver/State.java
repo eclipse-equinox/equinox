@@ -117,15 +117,21 @@ public interface State {
 	public BundleDescription getBundleByLocation(String location);
 
 	/**
-	 * Returns the id of the state on which this state is based. This
-	 * correlates this state to the system state. For example, if
-	 * Resolver.getState() returns state 4 but then some bundles are installed,
-	 * the system state id is updated. By comparing 4 to the current system
-	 * state id it is possible to detect if the the states are out of sync.
+	 * Returns the timestamp for this state. This
+	 * correlates this timestamp to the system state. For example, if
+	 * the system state timestamp is 4 but then some bundles are installed,
+	 * the system state timestamp is updated. By comparing 4 to the current system
+	 * state timestamp it is possible to detect if the states are out of sync.
 	 * 
-	 * @return the id of the state on which this state is based
+	 * @return the timestamp of this state
 	 */
 	public long getTimeStamp();
+
+	/**
+	 * Sets the timestamp for this state
+	 * @param newTimeStamp the new timestamp for this state
+	 */
+	public void setTimeStamp(long newTimeStamp);
 
 	/**
 	 * Returns true if there have been no modifications to this state since the

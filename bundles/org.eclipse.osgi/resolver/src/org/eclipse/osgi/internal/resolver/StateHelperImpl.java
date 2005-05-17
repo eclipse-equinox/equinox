@@ -213,7 +213,7 @@ public class StateHelperImpl implements StateHelper {
 		return ACCESS_ENCOURAGED;
 	}
 
-	static StateHelper getInstance() {
+	public static StateHelper getInstance() {
 		return instance;
 	}
 }

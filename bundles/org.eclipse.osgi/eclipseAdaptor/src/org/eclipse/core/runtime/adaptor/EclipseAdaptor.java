@@ -16,17 +16,16 @@ import java.net.URL;
 import java.util.*;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.SAXParserFactory;
+import org.eclipse.core.runtime.internal.adaptor.*;
+import org.eclipse.core.runtime.internal.stats.StatsManager;
 import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.adaptor.core.*;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.eclipse.osgi.framework.debug.Debug;
-import org.eclipse.osgi.framework.debug.DebugOptions;
+import org.eclipse.osgi.framework.debug.FrameworkDebugOptions;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
-import org.eclipse.osgi.framework.stats.StatsManager;
-import org.eclipse.osgi.internal.resolver.StateImpl;
-import org.eclipse.osgi.internal.resolver.StateManager;
 import org.eclipse.osgi.service.datalocation.*;
 import org.eclipse.osgi.service.pluginconversion.PluginConverter;
 import org.eclipse.osgi.service.resolver.*;
@@ -219,8 +218,8 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 		File lazyFile = stateFiles[1];
 
 		stateManager = new StateManager(stateFile, lazyFile, context, timeStamp);
-		stateManager.setInstaller(new EclipseBundleInstaller());
-		StateImpl systemState = null;
+		stateManager.setInstaller(new EclipseBundleInstaller(context));
+		State systemState = null;
 		if (!invalidState) {
 			systemState = stateManager.readSystemState();
 			if (systemState != null)
@@ -306,7 +305,7 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 
 	public void frameworkStart(BundleContext aContext) throws BundleException {
 		// EnvironmentInfo has to be initialized first to compute defaults for system context (see bug 88925)
-		EnvironmentInfo.getDefault();
+		EclipseEnvironmentInfo.getDefault();
 		// must register the xml parser and initialize the plugin converter
 		// instance first because we may need it when creating the statemanager
 		// in super.frameworkStart(context)
@@ -342,7 +341,7 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 			aContext.registerService(Location.class.getName(), location, locationProperties);
 		}
 
-		register(org.eclipse.osgi.service.environment.EnvironmentInfo.class.getName(), EnvironmentInfo.getDefault(), bundle);
+		register(org.eclipse.osgi.service.environment.EnvironmentInfo.class.getName(), EclipseEnvironmentInfo.getDefault(), bundle);
 		register(PlatformAdmin.class.getName(), stateManager, bundle);
 		register(PluginConverter.class.getName(), converter, bundle);
 		register(URLConverter.class.getName(), new URLConverterImpl(), bundle);
@@ -367,7 +366,7 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 	}
 
 	private void setDebugOptions() {
-		DebugOptions options = DebugOptions.getDefault();
+		FrameworkDebugOptions options = FrameworkDebugOptions.getDefault();
 		// may be null if debugging is not enabled
 		if (options == null)
 			return;
@@ -426,7 +425,7 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 	}
 
 	private void printStats() {
-		DebugOptions debugOptions = DebugOptions.getDefault();
+		FrameworkDebugOptions debugOptions = FrameworkDebugOptions.getDefault();
 		if (debugOptions == null)
 			return;
 		String registryParsing = debugOptions.getOption("org.eclipse.core.runtime/registry/parsing/timing/value"); //$NON-NLS-1$
@@ -700,7 +699,7 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 
 	public void frameworkStopping(BundleContext aContext) {
 		super.frameworkStopping(aContext);
-		stopper = new BundleStopper();
+		stopper = new BundleStopper(context);
 		stopper.stopBundles();
 	}
 
@@ -746,7 +745,7 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 		frameworkLog = log;
 	}
 
-	public BundleStopper getBundleStopper() {
+	BundleStopper getBundleStopper() {
 		return stopper;
 	}
 

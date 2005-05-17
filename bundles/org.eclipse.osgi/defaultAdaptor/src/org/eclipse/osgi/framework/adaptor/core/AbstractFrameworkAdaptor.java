@@ -19,11 +19,10 @@ import java.net.URLConnection;
 import java.util.*;
 import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.debug.Debug;
-import org.eclipse.osgi.framework.internal.core.BundleResourceHandler;
+import org.eclipse.osgi.framework.internal.core.*;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.util.Headers;
-import org.eclipse.osgi.internal.resolver.StateManager;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.osgi.util.NLS;
@@ -60,7 +59,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 	/**
 	 * The ServiceRegistry object for this FrameworkAdaptor.
 	 */
-	protected ServiceRegistryImpl serviceRegistry;
+	protected ServiceRegistry serviceRegistry;
 
 	/**
 	 * The Properties object for this FrameworkAdaptor
@@ -179,7 +178,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 	public void initialize(EventPublisher eventPublisher) {
 		this.eventPublisher = eventPublisher;
 		serviceRegistry = new ServiceRegistryImpl();
-		serviceRegistry.initialize();
+		((ServiceRegistryImpl) serviceRegistry).initialize();
 		loadProperties();
 		readAdaptorManifest();
 		initBundleStoreRootDir();
@@ -557,11 +556,11 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 	protected void validateExtension(BundleData bundleData) throws BundleException {
 		Dictionary extensionManifest = bundleData.getManifest();
 		if (extensionManifest.get(Constants.IMPORT_PACKAGE) != null)
-			throw new BundleException(NLS.bind(AdaptorMsg.ADAPTOR_EXTESION_IMPORT_ERROR, bundleData.getLocation()));
+			throw new BundleException(NLS.bind(AdaptorMsg.ADAPTOR_EXTENSION_IMPORT_ERROR, bundleData.getLocation()));
 		if (extensionManifest.get(Constants.REQUIRE_BUNDLE) != null)
-			throw new BundleException(NLS.bind(AdaptorMsg.ADAPTOR_EXTESION_REQUIRE_ERROR, bundleData.getLocation()));
+			throw new BundleException(NLS.bind(AdaptorMsg.ADAPTOR_EXTENSION_REQUIRE_ERROR, bundleData.getLocation()));
 		if (extensionManifest.get(Constants.BUNDLE_NATIVECODE) != null)
-			throw new BundleException(NLS.bind(AdaptorMsg.ADAPTOR_EXTESION_NATIVECODE_ERROR, bundleData.getLocation()));
+			throw new BundleException(NLS.bind(AdaptorMsg.ADAPTOR_EXTENSION_NATIVECODE_ERROR, bundleData.getLocation()));
 	}
 
 	protected void processFrameworkExtension(BundleData bundleData, byte type) throws BundleException {
@@ -902,7 +901,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 	/**
 	 * Dictionary containing permission data 
 	 */
-	protected DefaultPermissionStorage permissionStore;
+	protected PermissionStorage permissionStore;
 	protected boolean reset = false;
 	/**
 	 * directory containing data directories for installed bundles 
@@ -1270,13 +1269,13 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 		// we create the area on demand later if needed
 		if (reset && (bundleStore = getBundleStoreRootDir()).exists()) {
 			if (!canWrite() || !rm(bundleStore)) {
-				if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-					Debug.println("Could not remove directory: " + bundleStore.getPath()); //$NON-NLS-1$
-				}
+					if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+						Debug.println("Could not remove directory: " + bundleStore.getPath()); //$NON-NLS-1$
+					}
 
 				throw new IOException(NLS.bind(AdaptorMsg.ADAPTOR_DIRECTORY_REMOVE_EXCEPTION, bundleStore));
+				}
 			}
-		}
 
 		initializeMetadata();
 	}

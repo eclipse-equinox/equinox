@@ -12,6 +12,8 @@ package org.eclipse.core.runtime.adaptor;
 
 import java.io.*;
 import java.util.*;
+import org.eclipse.core.runtime.internal.adaptor.BasicLocation;
+import org.eclipse.core.runtime.internal.adaptor.Locker;
 import org.eclipse.osgi.framework.internal.reliablefile.*;
 
 /**

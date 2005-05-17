@@ -11,10 +11,10 @@
 package org.eclipse.osgi.tests.services.resolver;
 
 import java.util.*;
-import org.eclipse.core.runtime.adaptor.testsupport.SimplePlatformAdmin;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.tests.OSGiTest;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
+import org.eclipse.osgi.tests.adaptor.testsupport.SimplePlatformAdmin;
 import org.osgi.framework.BundleException;
 
 public abstract class AbstractStateTest extends OSGiTest {

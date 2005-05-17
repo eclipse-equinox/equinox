@@ -143,6 +143,10 @@ public class ReadOnlyState implements State {
 		throw new UnsupportedOperationException();
 	}
 
+	public void setTimeStamp(long timeStamp) {
+		throw new UnsupportedOperationException();
+	}
+
 	public ExportPackageDescription[] getSystemPackages() {
 		return target.getSystemPackages();
 	}

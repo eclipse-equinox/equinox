@@ -21,7 +21,7 @@ import org.eclipse.osgi.framework.internal.protocol.ContentHandlerFactory;
 import org.eclipse.osgi.framework.internal.protocol.StreamHandlerFactory;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.util.SecureAction;
-import org.eclipse.osgi.profile.Profile;
+import org.eclipse.osgi.internal.profile.Profile;
 import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;

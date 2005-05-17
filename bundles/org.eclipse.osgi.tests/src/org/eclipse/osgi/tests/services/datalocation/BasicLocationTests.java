@@ -18,8 +18,8 @@ import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.adaptor.LocationManager;
-import org.eclipse.core.runtime.adaptor.testsupport.TestLocationManager;
 import org.eclipse.osgi.service.datalocation.Location;
+import org.eclipse.osgi.tests.adaptor.testsupport.TestLocationManager;
 
 public class BasicLocationTests extends TestCase {
 

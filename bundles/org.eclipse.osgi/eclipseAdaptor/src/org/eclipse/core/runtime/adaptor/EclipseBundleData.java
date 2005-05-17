@@ -13,6 +13,7 @@ package org.eclipse.core.runtime.adaptor;
 import java.io.*;
 import java.net.URL;
 import java.util.*;
+import org.eclipse.core.runtime.internal.adaptor.*;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.adaptor.core.*;
 import org.eclipse.osgi.framework.internal.core.Constants;
@@ -30,11 +31,11 @@ import org.osgi.framework.Version;
  */
 //Maybe for consistency should it be overriden to do nothing. See also EclipseAdaptor.saveMetadataFor(BundleData)
 public class EclipseBundleData extends AbstractBundleData {
-	static final byte MANIFEST_TYPE_UNKNOWN = 0x00;
-	static final byte MANIFEST_TYPE_BUNDLE = 0x01;
-	static final byte MANIFEST_TYPE_PLUGIN = 0x02;
-	static final byte MANIFEST_TYPE_FRAGMENT = 0x04;
-	static final byte MANIFEST_TYPE_JAR = 0x08;
+	static public final byte MANIFEST_TYPE_UNKNOWN = 0x00;
+	static public final byte MANIFEST_TYPE_BUNDLE = 0x01;
+	static public final byte MANIFEST_TYPE_PLUGIN = 0x02;
+	static public final byte MANIFEST_TYPE_FRAGMENT = 0x04;
+	static public final byte MANIFEST_TYPE_JAR = 0x08;
 
 	private static String[] libraryVariants = null;
 
@@ -59,7 +60,7 @@ public class EclipseBundleData extends AbstractBundleData {
 
 	private static String[] buildLibraryVariants() {
 		ArrayList result = new ArrayList();
-		EnvironmentInfo info = EnvironmentInfo.getDefault();
+		EclipseEnvironmentInfo info = EclipseEnvironmentInfo.getDefault();
 		result.add("ws/" + info.getWS() + "/"); //$NON-NLS-1$ //$NON-NLS-2$
 		result.add("os/" + info.getOS() + "/" + info.getOSArch() + "/"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		result.add("os/" + info.getOS() + "/"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -160,7 +161,7 @@ public class EclipseBundleData extends AbstractBundleData {
 				if (libFile == null)
 					return null;
 				// see bug 88697 - HP requires libraries to have executable permissions
-				if (org.eclipse.osgi.service.environment.Constants.OS_HPUX.equals(EnvironmentInfo.getDefault().getOS())) {
+				if (org.eclipse.osgi.service.environment.Constants.OS_HPUX.equals(EclipseEnvironmentInfo.getDefault().getOS())) {
 					try {
 						// use the string array method in case there is a space in the path
 						Runtime.getRuntime().exec(new String[] {"chmod", "755", libFile.getAbsolutePath()}).waitFor(); //$NON-NLS-1$ //$NON-NLS-2$
@@ -318,6 +319,14 @@ public class EclipseBundleData extends AbstractBundleData {
 
 	public String getPluginClass() {
 		return pluginClass;
+	}
+
+	public String getBuddyList() {
+		return buddyList;
+	}
+
+	public String getRegisteredBuddyList() {
+		return registeredBuddyList;
 	}
 
 	public void setPluginClass(String value) {

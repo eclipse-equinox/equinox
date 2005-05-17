@@ -11,8 +11,8 @@
 package org.eclipse.osgi.tests.eclipseadaptor;
 
 import junit.framework.TestCase;
-import org.eclipse.core.runtime.adaptor.testsupport.TestHelper;
 import org.eclipse.osgi.service.environment.Constants;
+import org.eclipse.osgi.tests.adaptor.testsupport.TestHelper;
 
 public class EnvironmentInfoTest extends TestCase {
 

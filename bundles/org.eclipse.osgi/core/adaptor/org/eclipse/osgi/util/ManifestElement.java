@@ -14,7 +14,7 @@ package org.eclipse.osgi.util;
 import java.util.*;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.internal.core.Msg;
-import org.eclipse.osgi.framework.util.Tokenizer;
+import org.eclipse.osgi.framework.internal.core.Tokenizer;
 import org.osgi.framework.BundleException;
 
 /**

@@ -18,14 +18,14 @@ import java.util.ArrayList;
 import java.util.StringTokenizer;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
+import org.eclipse.core.runtime.internal.adaptor.BundleStopper;
+import org.eclipse.core.runtime.internal.adaptor.EclipseEnvironmentInfo;
+import org.eclipse.core.runtime.internal.stats.*;
 import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.adaptor.core.*;
 import org.eclipse.osgi.framework.internal.core.AbstractBundle;
 import org.eclipse.osgi.framework.internal.core.Msg;
-import org.eclipse.osgi.framework.internal.defaultadaptor.DefaultClassLoader;
-import org.eclipse.osgi.framework.internal.defaultadaptor.DevClassPathHelper;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
-import org.eclipse.osgi.framework.stats.*;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 
@@ -33,7 +33,7 @@ import org.osgi.framework.*;
  * Internal class.
  */
 public class EclipseClassLoader extends DefaultClassLoader {
-	private static String[] NL_JAR_VARIANTS = buildNLJarVariants(EnvironmentInfo.getDefault().getNL());
+	private static String[] NL_JAR_VARIANTS = buildNLJarVariants(EclipseEnvironmentInfo.getDefault().getNL());
 	private static boolean DEFINE_PACKAGES;
 	private static final String VARIABLE_DELIM_STRING = "$"; //$NON-NLS-1$
 	private static final char VARIABLE_DELIM_CHAR = '$';
@@ -258,11 +258,11 @@ public class EclipseClassLoader extends DefaultClassLoader {
 
 	private void findInternalClassPath(String var, ArrayList result, String entry, AbstractBundleData bundledata, ProtectionDomain domain) {
 		if (var.equals("ws")) { //$NON-NLS-1$
-			super.findClassPathEntry(result, "ws/" + EnvironmentInfo.getDefault().getWS() + entry.substring(4), bundledata, domain); //$NON-NLS-1$
+			super.findClassPathEntry(result, "ws/" + EclipseEnvironmentInfo.getDefault().getWS() + entry.substring(4), bundledata, domain); //$NON-NLS-1$
 			return;
 		}
 		if (var.equals("os")) { //$NON-NLS-1$
-			super.findClassPathEntry(result, "os/" + EnvironmentInfo.getDefault().getOS() + entry.substring(4), bundledata, domain); //$NON-NLS-1$ 
+			super.findClassPathEntry(result, "os/" + EclipseEnvironmentInfo.getDefault().getOS() + entry.substring(4), bundledata, domain); //$NON-NLS-1$ 
 			return;
 		}
 		if (var.equals("nl")) { //$NON-NLS-1$

@@ -16,12 +16,13 @@ import java.net.*;
 import java.security.CodeSource;
 import java.security.ProtectionDomain;
 import java.util.*;
+import org.eclipse.core.runtime.internal.adaptor.*;
+import org.eclipse.core.runtime.internal.stats.StatsManager;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.internal.core.OSGi;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
-import org.eclipse.osgi.framework.stats.StatsManager;
-import org.eclipse.osgi.profile.Profile;
+import org.eclipse.osgi.internal.profile.Profile;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.service.runnable.ParameterizedRunnable;
@@ -656,10 +657,10 @@ public class EclipseStarter {
 	}
 
 	private static String[] processCommandLine(String[] args) throws Exception {
-		EnvironmentInfo.allArgs = args;
+		EclipseEnvironmentInfo.setAllArgs(args);
 		if (args.length == 0) {
-			EnvironmentInfo.frameworkArgs = args;
-			EnvironmentInfo.appArgs = args;
+			EclipseEnvironmentInfo.setFrameworkArgs(args);
+			EclipseEnvironmentInfo.setAllArgs(args);
 			return args;
 		}
 		int[] configArgs = new int[args.length];
@@ -797,23 +798,25 @@ public class EclipseStarter {
 
 		// remove all the arguments consumed by this argument parsing
 		if (configArgIndex == 0) {
-			EnvironmentInfo.frameworkArgs = new String[0];
-			EnvironmentInfo.appArgs = args;
+			EclipseEnvironmentInfo.setFrameworkArgs(new String[0]);
+			EclipseEnvironmentInfo.setAppArgs(args);
 			return args;
 		}
-		EnvironmentInfo.appArgs = new String[args.length - configArgIndex];
-		EnvironmentInfo.frameworkArgs = new String[configArgIndex];
+		String[] appArgs = new String[args.length - configArgIndex];
+		String[] frameworkArgs = new String[configArgIndex];
 		configArgIndex = 0;
 		int j = 0;
 		int k = 0;
 		for (int i = 0; i < args.length; i++) {
 			if (i == configArgs[configArgIndex]) {
-				EnvironmentInfo.frameworkArgs[k++] = args[i];
+				frameworkArgs[k++] = args[i];
 				configArgIndex++;
 			} else
-				EnvironmentInfo.appArgs[j++] = args[i];
+				appArgs[j++] = args[i];
 		}
-		return EnvironmentInfo.appArgs;
+		EclipseEnvironmentInfo.setFrameworkArgs(frameworkArgs);
+		EclipseEnvironmentInfo.setAppArgs(appArgs);
+		return appArgs;
 	}
 
 	/**
