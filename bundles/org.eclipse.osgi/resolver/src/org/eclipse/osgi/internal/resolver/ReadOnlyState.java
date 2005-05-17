@@ -143,7 +143,7 @@ public class ReadOnlyState implements State {
 		throw new UnsupportedOperationException();
 	}
 
-	public ExportPackageDescription[] getSystemExports() {
-		return target.getSystemExports();
+	public ExportPackageDescription[] getSystemPackages() {
+		return target.getSystemPackages();
 	}
 }

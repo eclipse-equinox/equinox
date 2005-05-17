@@ -357,11 +357,11 @@ public interface State {
 	public Dictionary[] getPlatformProperties();
 
 	/**
-	 * Returns the list system packages which are exported by the system bundle.  
+	 * Returns the list of system packages which are exported by the system bundle.  
 	 * The list of system packages is set by the org.osgi.framework.system.packages
 	 * value in the platform properties for this state.
 	 * @see #setPlatformProperties(Dictionary)
 	 * @return the list of system packages
 	 */
-	public ExportPackageDescription[] getSystemExports();
+	public ExportPackageDescription[] getSystemPackages();
 }

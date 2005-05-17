@@ -186,7 +186,7 @@ public class StateHelperImpl implements StateHelper {
 		StateImpl state = (StateImpl) export.getExporter().getContainingState();
 		if (state == null)
 			return false;
-		ExportPackageDescription[] systemExports = state.getSystemExports();
+		ExportPackageDescription[] systemExports = state.getSystemPackages();
 		for (int i = 0; i < systemExports.length; i++)
 			if (systemExports[i] == export)
 				return true;
