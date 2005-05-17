@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.condpermadmin/src/org/osgi/service/condpermadmin/BundleSignerCondition.java,v 1.2 2005/05/13 20:33:31 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.service.condpermadmin/src/org/osgi/service/condpermadmin/BundleSignerCondition.java,v 1.3 2005/05/16 13:48:39 pkriens Exp $
  * 
  * Copyright (c) OSGi Alliance (2005). All Rights Reserved.
  * 
@@ -34,7 +34,7 @@ import org.osgi.framework.Bundle;
  * the corresponding type in that RDN.  If a wildcard is used for a RDN, it must be the
  * first RDN and will match any number of RDNs (including zero RDNs).   
  * 
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class BundleSignerCondition implements Condition {
 	boolean satisfied;
@@ -54,10 +54,10 @@ public class BundleSignerCondition implements Condition {
 	/**
 	 * Always returns true, since this condition is immutable.
 	 * @return always returns true;
-	 * @see org.osgi.service.condpermadmin.Condition#isEvaluated()
+	 * @see org.osgi.service.condpermadmin.Condition#isPostponed()
 	 */
-	public boolean isEvaluated() {
-		return true;
+	public boolean isPostponed() {
+		return false;
 	}
 
 	/**

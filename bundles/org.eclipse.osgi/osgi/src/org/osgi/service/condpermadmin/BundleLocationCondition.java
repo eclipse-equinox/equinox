@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.condpermadmin/src/org/osgi/service/condpermadmin/BundleLocationCondition.java,v 1.7 2005/05/13 20:33:31 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.service.condpermadmin/src/org/osgi/service/condpermadmin/BundleLocationCondition.java,v 1.8 2005/05/16 13:46:53 pkriens Exp $
  * 
  * Copyright (c) OSGi Alliance (2005). All Rights Reserved.
  * 
@@ -19,7 +19,7 @@ import org.osgi.service.condpermadmin.Condition;
  * Checks to see if a Bundle matches the given location pattern. Pattern matching
  * is done using FilePermission style patterns.
  * 
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class BundleLocationCondition implements Condition {
 	boolean	satisfied;
@@ -44,10 +44,10 @@ public class BundleLocationCondition implements Condition {
 	 * This method is always true since this is an immutable Condition.
 	 * 
 	 * @return always true.
-	 * @see org.osgi.service.condpermadmin.Condition#isEvaluated()
+	 * @see org.osgi.service.condpermadmin.Condition#isPostponed()
 	 */
-	public boolean isEvaluated() {
-		return true;
+	public boolean isPostponed() {
+		return false;
 	}
 
 	/**

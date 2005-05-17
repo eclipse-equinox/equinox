@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.condpermadmin/src/org/osgi/service/condpermadmin/Condition.java,v 1.7 2005/05/13 20:33:31 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.service.condpermadmin/src/org/osgi/service/condpermadmin/Condition.java,v 1.8 2005/05/16 13:49:37 pkriens Exp $
  *
  * Copyright (c) OSGi Alliance (2004, 2005). All Rights Reserved.
  * 
@@ -20,12 +20,15 @@ import java.util.Dictionary;
  */
 public interface Condition {
 	/**
-	 * This method returns true if the Condition has already been evaluated, and
-	 * its satisfiability can be determined from its internal state. In other
+	 * This method returns true if the evaluation of the Condition must be postponed
+	 * until the end of the permission check. If it returns false, it must be able
+	 * to directly answer the isSatisfied method. In other
 	 * words, isSatisfied() will return very quickly since no external sources,
-	 * such as users, need to be consulted.
+	 * such as for example users, need to be consulted.
+	 * 
+	 * @return false if evaluation is immediate, otherwise true to indicate the evaluation must be postponed.
 	 */
-	boolean isEvaluated();
+	boolean isPostponed();
 
 	/**
 	 * This method returns true if the Condition is satisfied.
