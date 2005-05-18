@@ -721,7 +721,7 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 			if (exitOnError && isFatalException(error))
 				message += ' ' + EclipseAdaptorMsg.ECLIPSE_ADAPTOR_EXITING;
 			FrameworkLogEntry logEntry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, message, 0, error, null);
-			frameworkLog.log(logEntry);
+			getFrameworkLog().log(logEntry);
 		} catch (Throwable t) {
 			// we may be in a currupted state and must be able to handle any
 			// errors (ie OutOfMemoryError)
