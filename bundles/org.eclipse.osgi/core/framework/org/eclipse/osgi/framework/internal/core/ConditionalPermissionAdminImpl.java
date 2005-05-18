@@ -51,6 +51,9 @@ public class ConditionalPermissionAdminImpl implements ConditionalPermissionAdmi
 	 * @see org.osgi.service.condpermadmin.ConditionalPermissionAdmin#addConditionalPermissionInfo(org.osgi.service.condpermadmin.ConditionInfo[], org.osgi.service.permissionadmin.PermissionInfo[])
 	 */
 	public ConditionalPermissionInfo addConditionalPermissionInfo(ConditionInfo[] conds, PermissionInfo[] perms) {
+		SecurityManager sm = System.getSecurityManager();
+		if (sm != null)
+			sm.checkPermission(new AllPermission());
 		ConditionalPermissionInfoImpl condPermInfo = new ConditionalPermissionInfoImpl(conds, perms);
 		synchronized (condPerms) {
 			condPerms.add(condPermInfo);
