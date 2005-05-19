@@ -364,7 +364,11 @@ public class EclipseClassLoader extends DefaultClassLoader {
 		public Manifest getManifest() {
 			if (initMF)
 				return mf;
-
+			if (!hasPackageInfo()) {
+				initMF = true;
+				mf = null;
+				return mf;
+			}
 			BundleEntry mfEntry = getBundleFile().getEntry(org.eclipse.osgi.framework.internal.core.Constants.OSGI_BUNDLE_MANIFEST);
 			if (mfEntry != null)
 				try {
@@ -376,6 +380,17 @@ public class EclipseClassLoader extends DefaultClassLoader {
 				}
 			initMF = true;
 			return mf;
+		}
+
+		private boolean hasPackageInfo() {
+			if (getBundleFile() == getHostData().getBaseBundleFile())
+				return ((EclipseBundleData)getHostData()).hasPackageInfo;
+			FragmentClasspath[] fragCPs = getFragClasspaths();
+			if (fragCPs != null)
+				for (int i = 0; i < fragCPs.length; i++)
+					if (getBundleFile() == fragCPs[i].getBundleData().getBaseBundleFile())
+						return ((EclipseBundleData)fragCPs[i].getBundleData()).hasPackageInfo;
+			return true;
 		}
 	}
 }

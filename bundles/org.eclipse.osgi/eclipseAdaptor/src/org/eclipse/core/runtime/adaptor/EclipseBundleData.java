@@ -57,6 +57,8 @@ public class EclipseBundleData extends AbstractBundleData {
 	protected String buddyList;
 	// shortcut to know if a bundle is a registrant to a registered policy
 	protected String registeredBuddyList;
+	// shortcut to know if the bundle manifest has package info
+	protected boolean hasPackageInfo;
 
 	private static String[] buildLibraryVariants() {
 		ArrayList result = new ArrayList();
@@ -313,8 +315,36 @@ public class EclipseBundleData extends AbstractBundleData {
 			throw new IllegalStateException();
 		pluginClass = (String) manifest.get(EclipseAdaptor.PLUGIN_CLASS);
 		parseAutoStart((String) manifest.get(EclipseAdaptor.ECLIPSE_AUTOSTART));
-		buddyList = (String) manifest.get(Constants.BUDDY_LOADER); 
+		buddyList = (String) manifest.get(Constants.BUDDY_LOADER);
 		registeredBuddyList = (String) manifest.get(Constants.REGISTERED_POLICY);
+		hasPackageInfo = hasPackageInfo(getEntry(Constants.OSGI_BUNDLE_MANIFEST));
+	}
+
+	// Used to check the bundle manifest file for any package information.
+	// This is used when '.' is on the Bundle-ClassPath to prevent reading
+	// the bundle manifest for pacakge information when loading classes.
+	private boolean hasPackageInfo(URL url) {
+		if (url == null)
+			return false;
+		BufferedReader br = null;
+		try {
+			br = new BufferedReader(new InputStreamReader(url.openStream()));
+			String line;
+			while ((line = br.readLine()) != null) {
+				if (line.startsWith("Specification-Title: ") || line.startsWith("Specification-Version: ") || line.startsWith("Specification-Vendor: ") || line.startsWith("Implementation-Title: ") || line.startsWith("Implementation-Version: ") || line.startsWith("Implementation-Vendor: ")) //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
+					return true;
+			}
+		} catch (IOException ioe) {
+			// do nothing
+		} finally {
+			if (br != null)
+				try {
+					br.close();
+				} catch (IOException e) {
+					// do nothing
+				}
+		}
+		return false;
 	}
 
 	public String getPluginClass() {
@@ -407,7 +437,7 @@ public class EclipseBundleData extends AbstractBundleData {
 	 * @throws IOException if a write error occurs.
 	 */
 	public synchronized void save() throws IOException {
-		if (adaptor.canWrite())		
+		if (adaptor.canWrite())
 			((EclipseAdaptor) adaptor).saveMetaDataFor(this);
 	}
 

@@ -68,7 +68,7 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 
 	private static final String OPTION_LOCATION = RUNTIME_ADAPTOR + "/debug/location"; //$NON-NLS-1$	
 
-	public static final byte BUNDLEDATA_VERSION = 15;
+	public static final byte BUNDLEDATA_VERSION = 16;
 
 	public static final byte NULL = 0;
 
@@ -548,6 +548,7 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 		for (int i = 0; i < exceptionsCount; i++)
 			autoStartExceptions[i] = in.readUTF();
 		data.setAutoStartExceptions(autoStartExceptions);
+		data.hasPackageInfo = in.readBoolean();
 		data.buddyList = readString(in, false);
 		data.registeredBuddyList = readString(in, false);
 		data.setPluginClass(readString(in, false));
@@ -614,6 +615,7 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 			for (int i = 0; i < autoStartExceptions.length; i++)
 				out.writeUTF(autoStartExceptions[i]);
 		}
+		out.writeBoolean(bundleData.hasPackageInfo);
 		writeStringOrNull(out, bundleData.buddyList);
 		writeStringOrNull(out, bundleData.registeredBuddyList);
 		writeStringOrNull(out, bundleData.getPluginClass());
