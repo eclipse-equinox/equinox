@@ -523,7 +523,7 @@ abstract public class BundleFile {
 			return null;
 		}
 
-		public void open() {
+		public void open() throws IOException{
 			// do nothing
 		}
 	}
