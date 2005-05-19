@@ -37,7 +37,7 @@ import org.osgi.util.tracker.ServiceTracker;
  * instantiated; all functionality is provided by static methods. 
  * <p>
  * The Eclipse Platform makes heavy use of Java class loaders for loading 
- * plug-ins. Even the Eclispe Runtime itself and the OSGi framework need
+ * plug-ins. Even the Eclipse Runtime itself and the OSGi framework need
  * to be loaded by special class loaders. The upshot is that a 
  * client program (such as a Java main program, a servlet) cannot  
  * reference any part of Eclipse directly. Instead, a client must use this 
