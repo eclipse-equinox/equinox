@@ -327,12 +327,13 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 				continue;
 			VersionSupplier[] sameName = resolverBundles.getArray(bundleDesc.getName());
 			if (sameName.length > 1) { // Need to make a selection based off of num dependents
+				int numDeps = bundleDesc.getDependents().length;
 				for (int j = 0; j < sameName.length; j++) {
 					BundleDescription sameNameDesc = sameName[j].getBundle();
 					if (sameName[j] == bundles[i] || !sameNameDesc.isSingleton() || !sameNameDesc.isResolved())
 						continue; // Ignore the bundle we are selecting, non-singletons, and non-resolved
 					result = true;
-					if (sameNameDesc.getVersion().compareTo(bundleDesc.getVersion()) > 0 && sameNameDesc.getDependents().length > 0) {
+					if (sameNameDesc.getVersion().compareTo(bundleDesc.getVersion()) > 0 && (sameNameDesc.getDependents().length > 0 || numDeps == 0)) {
 						// this bundle is not selected; unresolve it and break out to the next bundle to process
 						unresolveBundle(bundles[i], false);
 						break;
