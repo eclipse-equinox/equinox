@@ -247,11 +247,25 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 				if (rb != null)
 					unresolveBundle(rb, false);
 			}
+		// attempt to resolve all unresolved bundles
+		ResolverBundle[] bundles = (ResolverBundle[]) unresolvedBundles.toArray(new ResolverBundle[unresolvedBundles.size()]);
+		resolveBundles(bundles, platformProperties);
+		if (selectSingletons(bundles)) {
+			// a singleton was unresolved as a result of selecting a different version
+			// try to resolve unresolved bundles again; this will attempt to use the selected singleton
+			bundles = (ResolverBundle[]) unresolvedBundles.toArray(new ResolverBundle[unresolvedBundles.size()]);
+			resolveBundles(bundles, platformProperties);
+		}
+		if (DEBUG_WIRING)
+			printWirings();
+		if (DEBUG)
+			ResolverImpl.log("*** END RESOLUTION ***"); //$NON-NLS-1$
+	}
+
+	private void resolveBundles(ResolverBundle[] bundles, Dictionary[] platformProperties) {
 		// Initialize the resolving and resolved bundle lists
 		resolvingBundles = new ArrayList(unresolvedBundles.size());
 		resolvedBundles = new ArrayList(unresolvedBundles.size());
-
-		ResolverBundle[] bundles = (ResolverBundle[]) unresolvedBundles.toArray(new ResolverBundle[unresolvedBundles.size()]);
 		groupingChecker.addInitialGroupingConstraints(bundles);
 		// First check that all the meta-data is valid for each unresolved bundle
 		// This will reset the resolvable flag for each bundle
@@ -298,15 +312,37 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 				resolveFragment(bundles[i]);
 		}
 
-		if (DEBUG_WIRING)
-			printWirings();
 		stateResolveBundles();
 
 		// throw away the temporary resolving and resolved bundle lists
 		resolvingBundles = null;
 		resolvedBundles = null;
-		if (DEBUG)
-			ResolverImpl.log("*** END RESOLUTION ***"); //$NON-NLS-1$
+	}
+
+	private boolean selectSingletons(ResolverBundle[] bundles) {
+		boolean result = false;
+		for (int i = 0; i < bundles.length; i++) {
+			BundleDescription bundleDesc = bundles[i].getBundle();
+			if (!bundleDesc.isSingleton() || !bundleDesc.isResolved())
+				continue;
+			VersionSupplier[] sameName = resolverBundles.getArray(bundleDesc.getName());
+			if (sameName.length > 1) { // Need to make a selection based off of num dependents
+				for (int j = 0; j < sameName.length; j++) {
+					BundleDescription sameNameDesc = sameName[j].getBundle();
+					if (sameName[j] == bundles[i] || !sameNameDesc.isSingleton() || !sameNameDesc.isResolved())
+						continue; // Ignore the bundle we are selecting, non-singletons, and non-resolved
+					result = true;
+					if (sameNameDesc.getVersion().compareTo(bundleDesc.getVersion()) > 0 && sameNameDesc.getDependents().length > 0) {
+						// this bundle is not selected; unresolve it and break out to the next bundle to process
+						unresolveBundle(bundles[i], false);
+						break;
+					}
+					// we selected a lower version; unresolve the higher one.
+					unresolveBundle((ResolverBundle) sameName[j], false);
+				}
+			}
+		}
+		return result;
 	}
 
 	private void resolveFragment(ResolverBundle fragment) {
@@ -345,16 +381,10 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 				for (int i = 0; i < sameName.length; i++) {
 					if (sameName[i] == bundle || !sameName[i].getBundle().isSingleton())
 						continue; // Ignore the bundle we are resolving and non-singletons
-					if (((ResolverBundle) sameName[i]).isResolved()) {
+					if (((ResolverBundle) sameName[i]).getBundle().isResolved()) {
 						failed = true; // Must fail since there is already a resolved bundle
 						break;
 					}
-					if (sameName[i].getVersion().compareTo(bundle.getVersion()) > 0)
-						// Attempt to resolve higher version first
-						if (resolveBundle((ResolverBundle) sameName[i])) {
-							failed = true; // Must fail since we were able to resolve a higher version
-							break;
-						}
 				}
 		}
 
@@ -692,8 +722,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 				// Try to re-resolve the bundle
 				if (resolveBundle(importer))
 					return true;
-				else
-					return false;
+				return false;
 			}
 		}
 		return false;
@@ -958,7 +987,6 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		if (bundle == null)
 			return;
 		// check the removed list if unresolving then remove from the removed list
-		Long id = new Long(bundle.getBundle().getBundleId());
 		BundleDescription[] removedBundles = null;
 		if ((removedBundles = getRemovalPending(bundle.getBundle())) != null) {
 			for (int i = 0; i < removedBundles.length; i++) {
