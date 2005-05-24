@@ -109,6 +109,10 @@ public class LocationManager {
 	}
 
 	public static void initializeLocations() {
+		// do install location initialization first since others may depend on it
+		// assumes that the property is already set
+		installLocation = buildLocation(PROP_INSTALL_AREA, null, null, true);		
+		
 		Location temp = buildLocation(PROP_USER_AREA_DEFAULT, null, "", false); //$NON-NLS-1$
 		URL defaultLocation = temp == null ? null : temp.getURL();
 		if (defaultLocation == null)
@@ -137,9 +141,6 @@ public class LocationManager {
 			((BasicLocation) configurationLocation).setParent(parent);
 		}
 		initializeDerivedConfigurationLocations();
-
-		// assumes that the property is already set
-		installLocation = buildLocation(PROP_INSTALL_AREA, null, null, true);
 	}
 
 	private static Location buildLocation(String property, URL defaultLocation, String userDefaultAppendage, boolean readOnlyDefault) {
@@ -199,7 +200,16 @@ public class LocationManager {
 		if (property == null)
 			return null;
 		try {
-			return new URL(property);
+			URL sharedConfigurationURL = new URL(property);
+			if (sharedConfigurationURL.getPath().startsWith("/")) //$NON-NLS-1$
+				// absolute
+				return sharedConfigurationURL;
+			URL installURL = installLocation.getURL();
+			if (!sharedConfigurationURL.getProtocol().equals(installURL.getProtocol()))
+				// different protocol
+				return sharedConfigurationURL;
+			sharedConfigurationURL = new URL(installURL, sharedConfigurationURL.getPath());
+			System.getProperties().put(PROP_SHARED_CONFIG_AREA, sharedConfigurationURL.toExternalForm());
 		} catch (MalformedURLException e) {
 			// do nothing here since it is basically impossible to get a bogus url 
 		}
