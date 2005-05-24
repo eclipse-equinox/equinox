@@ -444,4 +444,12 @@ public class EclipseBundleData extends AbstractBundleData {
 	public String toString() {
 		return "BundleData for " + getSymbolicName() + " (" + id + ")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
+
+	public File getParentGenerationDir() {
+		Location parentConfiguration = null;
+		Location currentConfiguration = LocationManager.getConfigurationLocation();
+		if (currentConfiguration != null && (parentConfiguration = currentConfiguration.getParentLocation()) != null)
+			return new File(parentConfiguration.getURL().getFile(), FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME + '/' + LocationManager.BUNDLES_DIR + '/' + getBundleID() + '/' + getGeneration());
+		return null;
+	}
 }

@@ -203,18 +203,24 @@ abstract public class BundleFile {
 			if (!(bundledata instanceof AbstractBundleData)) {
 				return null;
 			}
+			String path = ".cp"; /* put all these entries in this subdir *///$NON-NLS-1$
+			String name = entryName.replace('/', File.separatorChar);
+			if ((name.length() > 1) && (name.charAt(0) == File.separatorChar)) /* if name has a leading slash */
+				path = path.concat(name);
+			else
+				path = path + File.separator + name;
+			File parentGenDir = ((AbstractBundleData) bundledata).getParentGenerationDir();
+			if (parentGenDir != null) {
+				// there is a parent generation check if the file exists
+				File parentPath = new File(parentGenDir, path);
+				if (parentPath.exists())
+					// only use the parent generation file if it exists; do not extract there
+					return parentPath;
+			}
 			File bundleGenerationDir = ((AbstractBundleData) bundledata).createGenerationDir();
 			/* if the generation dir exists, then we have place to cache */
-			if (bundleGenerationDir != null && bundleGenerationDir.exists()) {
-				String path = ".cp"; /* put all these entries in this subdir *///$NON-NLS-1$
-				String name = entryName.replace('/', File.separatorChar);
-				if ((name.length() > 1) && (name.charAt(0) == File.separatorChar)) /* if name has a leading slash */{
-					path = path.concat(name);
-				} else {
-					path = path + File.separator + name;
-				}
+			if (bundleGenerationDir != null && bundleGenerationDir.exists())
 				return new File(bundleGenerationDir, path);
-			}
 			return null;
 		}
 
