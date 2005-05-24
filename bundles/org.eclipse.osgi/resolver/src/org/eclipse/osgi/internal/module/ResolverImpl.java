@@ -93,6 +93,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 			}
 		}
 		rewireBundles(); // Reconstruct wirings
+		groupingChecker.addInitialGroupingConstraints((ResolverBundle[]) bundleMapping.values().toArray(new ResolverBundle[bundleMapping.size()]));
 		setDebugOptions();
 		initialized = true;
 	}
@@ -447,7 +448,6 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		}
 		if (!failed && fullyWired) {
 			groupingChecker.addReExportConstraints(bundle);
-			groupingChecker.addImportConstraints(bundle);
 			groupingChecker.addRequireConstraints(bundle.getExportPackages(), bundle);
 		}
 		// Check cyclic dependencies
@@ -947,17 +947,18 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 
 	public void bundleRemoved(BundleDescription bundle, boolean pending) {
 		// check if there are any dependants
-		if (pending) {
+		if (pending)
 			addRemovalPending(bundle);
-		}
 		if (!initialized)
 			return;
 		ResolverBundle rb = (ResolverBundle) bundleMapping.get(bundle);
 		if (rb == null)
 			return;
 
-		if (!pending)
+		if (!pending) {
 			bundleMapping.remove(bundle);
+			groupingChecker.removeAllExportConstraints(rb);
+		}
 		unresolvedBundles.remove(rb);
 		resolverExports.remove(rb.getExportPackages());
 		resolverBundles.remove(rb);
@@ -991,9 +992,11 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		BundleDescription[] removedBundles = null;
 		if ((removedBundles = getRemovalPending(bundle.getBundle())) != null) {
 			for (int i = 0; i < removedBundles.length; i++) {
-				unresolveBundle((ResolverBundle) bundleMapping.get(removedBundles[i]), true);
+				ResolverBundle re = (ResolverBundle) bundleMapping.get(removedBundles[i]);
+				unresolveBundle(re, true);
 				state.removeBundleComplete(removedBundles[i]);
 				bundleMapping.remove(removedBundles[i]);
+				groupingChecker.removeAllExportConstraints(re);
 				// the bundle is removed
 				if (removedBundles[i] == bundle.getBundle())
 					removed = true;
