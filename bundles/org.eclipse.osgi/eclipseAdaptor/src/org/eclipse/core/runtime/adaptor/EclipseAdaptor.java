@@ -494,32 +494,35 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 				int bundleCount = in.readInt();
 				ArrayList result = new ArrayList(bundleCount);
 				long id = -1;
-
+				boolean bundleDiscarded = false;
 				for (int i = 0; i < bundleCount; i++) {
 					try {
-						try {
-							id = in.readLong();
-							if (id != 0) {
-								EclipseBundleData data = (EclipseBundleData) getElementFactory().createBundleData(this, id);
-								loadMetaDataFor(data, in, version);
-								data.initializeExistingBundle();
-								if (Debug.DEBUG && Debug.DEBUG_GENERAL)
-									Debug.println("BundleData created: " + data); //$NON-NLS-1$
-								processExtension(data, EXTENSION_INITIALIZE);
-								result.add(data);
-							}
-						} catch (NumberFormatException e) {
-							// should never happen
-						} catch (BundleException e) {
-							// should never happen
+						id = in.readLong();
+						if (id != 0) {
+							EclipseBundleData data = (EclipseBundleData) getElementFactory().createBundleData(this, id);
+							loadMetaDataFor(data, in, version);
+							data.initializeExistingBundle();
+							if (Debug.DEBUG && Debug.DEBUG_GENERAL)
+								Debug.println("BundleData created: " + data); //$NON-NLS-1$
+							processExtension(data, EXTENSION_INITIALIZE);
+							result.add(data);
 						}
+					} catch (NumberFormatException e) {
+						// should never happen
+						bundleDiscarded = true;
+					} catch (BundleException e) {
+						// should never happen
+						bundleDiscarded = true;
 					} catch (IOException e) {
+						bundleDiscarded = true;
 						if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 							Debug.println("Error reading framework metadata: " + e.getMessage()); //$NON-NLS-1$ 
 							Debug.printStackTrace(e);
 						}
 					}
 				}
+				if (bundleDiscarded)
+					System.getProperties().put(EclipseStarter.PROP_REFRESH_BUNDLES, "true"); //$NON-NLS-1$
 				return (BundleData[]) result.toArray(new BundleData[result.size()]);
 			} finally {
 				in.close();

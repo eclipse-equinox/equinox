@@ -68,8 +68,8 @@ public class EclipseStarter {
 	private static final String NL = "-nl"; //$NON-NLS-1$	
 	private static final String CONFIGURATION = "-configuration"; //$NON-NLS-1$	
 	private static final String USER = "-user"; //$NON-NLS-1$
-	private static final String NOEXIT = "-noExit";  //$NON-NLS-1$
-	
+	private static final String NOEXIT = "-noExit"; //$NON-NLS-1$
+
 	// this is more of an Eclipse argument but this OSGi implementation stores its 
 	// metadata alongside Eclipse's.
 	private static final String DATA = "-data"; //$NON-NLS-1$
@@ -104,6 +104,7 @@ public class EclipseStarter {
 	private static final String PROP_VMARGS = "eclipse.vmargs"; //$NON-NLS-1$
 	private static final String PROP_COMMANDS = "eclipse.commands"; //$NON-NLS-1$
 	public static final String PROP_IGNOREAPP = "eclipse.ignoreApp"; //$NON-NLS-1$
+	public static final String PROP_REFRESH_BUNDLES = "eclipse.refreshBundles"; //$NON-NLS-1$
 
 	private static final String FILE_SCHEME = "file:"; //$NON-NLS-1$
 	private static final String FILE_PROTOCOL = "file"; //$NON-NLS-1$
@@ -287,6 +288,8 @@ public class EclipseStarter {
 		// set the framework start level to the ultimate value.  This will actually start things
 		// running if they are persistently active.
 		setStartLevel(getStartLevel());
+		if ("true".equals(System.getProperty(PROP_REFRESH_BUNDLES))) //$NON-NLS-1$
+			refreshPackages(getCurrentBundles(false));
 		if (Profile.PROFILE && Profile.STARTUP)
 			Profile.logTime("EclipseStarter.startup()", "StartLevel set"); //$NON-NLS-1$ //$NON-NLS-2$
 		// they should all be active by this time
@@ -303,8 +306,8 @@ public class EclipseStarter {
 		Thread current = Thread.currentThread();
 		try {
 			Method getContextClassLoader = Thread.class.getMethod("getContextClassLoader", null); //$NON-NLS-1$
-			Method setContextClassLoader = Thread.class.getMethod("setContextClassLoader", new Class[] { ClassLoader.class }); //$NON-NLS-1$
-			Object[] params = new Object[] { new ContextFinder((ClassLoader) getContextClassLoader.invoke(current, null)) };
+			Method setContextClassLoader = Thread.class.getMethod("setContextClassLoader", new Class[] {ClassLoader.class}); //$NON-NLS-1$
+			Object[] params = new Object[] {new ContextFinder((ClassLoader) getContextClassLoader.invoke(current, null))};
 			setContextClassLoader.invoke(current, params);
 			return;
 		} catch (SecurityException e) {
@@ -526,7 +529,7 @@ public class EclipseStarter {
 		// get the initial bundle list from the installEntries
 		InitialBundle[] initialBundles = getInitialBundles(installEntries);
 		// get the list of currently installed initial bundles from the framework
-		Bundle[] curInitBundles = getCurrentInitialBundles();
+		Bundle[] curInitBundles = getCurrentBundles(true);
 
 		// list of bundles to be refreshed
 		List toRefresh = new ArrayList(curInitBundles.length);
@@ -713,11 +716,11 @@ public class EclipseStarter {
 				found = true;
 			}
 
-            if (args[i].equalsIgnoreCase(NOEXIT)) {
-            	System.getProperties().put(PROP_NOSHUTDOWN, "true"); //$NON-NLS-1$
-            	found = true;
-            }
-            
+			if (args[i].equalsIgnoreCase(NOEXIT)) {
+				System.getProperties().put(PROP_NOSHUTDOWN, "true"); //$NON-NLS-1$
+				found = true;
+			}
+
 			if (found) {
 				configArgs[configArgIndex++] = i;
 				continue;
@@ -865,10 +868,10 @@ public class EclipseStarter {
 		} catch (MalformedURLException e) {
 			return null;
 		}
-        File fwkFile = new File(url.getFile());
-        fwkFile = new File(fwkFile.getAbsolutePath());
-        fwkFile = new File(fwkFile.getParent());
-	    return fwkFile.getAbsolutePath();
+		File fwkFile = new File(url.getFile());
+		fwkFile = new File(fwkFile.getAbsolutePath());
+		fwkFile = new File(fwkFile.getParent());
+		return fwkFile.getAbsolutePath();
 	}
 
 	private static String getSysPathFromCodeSource() {
@@ -895,12 +898,15 @@ public class EclipseStarter {
 		return result;
 	}
 
-	private static Bundle[] getCurrentInitialBundles() {
+	private static Bundle[] getCurrentBundles(boolean includeInitial) {
 		Bundle[] installed = context.getBundles();
 		ArrayList initial = new ArrayList();
 		for (int i = 0; i < installed.length; i++) {
 			Bundle bundle = installed[i];
-			if (bundle.getLocation().startsWith(INITIAL_LOCATION))
+			if (bundle.getLocation().startsWith(INITIAL_LOCATION)) {
+				if (includeInitial)
+					initial.add(bundle);
+			} else if (!includeInitial && bundle.getBundleId() != 0)
 				initial.add(bundle);
 		}
 		return (Bundle[]) initial.toArray(new Bundle[initial.size()]);
@@ -1037,7 +1043,7 @@ public class EclipseStarter {
 		if (reference)
 			nonReferenceLocation = new URL(location.getPath());
 		if (!"file".equals(base.getProtocol())) //$NON-NLS-1$
-			return location;		
+			return location;
 		// if some URL component does not match, return the original location
 		if (!base.getProtocol().equals(nonReferenceLocation.getProtocol()))
 			return location;
