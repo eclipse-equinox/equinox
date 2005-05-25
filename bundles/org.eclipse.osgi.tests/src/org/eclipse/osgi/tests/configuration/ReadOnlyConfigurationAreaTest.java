@@ -16,19 +16,21 @@ import java.net.MalformedURLException;
 import junit.framework.Test;
 import org.eclipse.core.tests.harness.BundleTestingHelper;
 import org.eclipse.core.tests.harness.FileSystemComparator;
+import org.eclipse.core.tests.session.ConfigurationSessionTestSuite;
+import org.eclipse.osgi.tests.OSGiTest;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 
-public class ReadOnlyConfigurationAreaTest extends ConfigurationSessionTest {
+public class ReadOnlyConfigurationAreaTest extends OSGiTest {
 
 	public static Test suite() {
-		// include configurator as it is required by compatibility, but do not set it to start 
-		String[] ids = {"org.eclipse.core.runtime@2:start", "org.eclipse.core.runtime.compatibility", "org.eclipse.update.configurator", "org.eclipse.core.tests.harness", "org.eclipse.osgi.tests", "org.eclipse.jdt.junit.runtime", "org.eclipse.pde.junit.runtime", "org.junit", "org.eclipse.test.performance"};
 		ConfigurationSessionTestSuite suite = new ConfigurationSessionTestSuite(PI_OSGI_TESTS, ReadOnlyConfigurationAreaTest.class);
 		suite.setReadOnly(true);
+		String[] ids = ConfigurationSessionTestSuite.MINIMAL_BUNDLE_SET;
 		for (int i = 0; i < ids.length; i++)
 			suite.addBundle(ids[i]);
+		suite.addBundle(PI_OSGI_TESTS);
 		return suite;
 	}
 
@@ -52,7 +54,7 @@ public class ReadOnlyConfigurationAreaTest extends ConfigurationSessionTest {
 	 */
 	public void test1stSession() {
 		// compute and save tree image
-		File configurationDir = getConfigurationDir();
+		File configurationDir = ConfigurationSessionTestSuite.getConfigurationDir();
 		FileSystemComparator comparator = new FileSystemComparator();
 		Object snapshot = comparator.takeSnapshot(configurationDir, true);
 		try {
@@ -64,7 +66,7 @@ public class ReadOnlyConfigurationAreaTest extends ConfigurationSessionTest {
 
 	public void test1stSessionFollowUp() throws IOException {
 		FileSystemComparator comparator = new FileSystemComparator();
-		File configurationDir = getConfigurationDir();
+		File configurationDir = ConfigurationSessionTestSuite.getConfigurationDir();
 		Object oldSnaphot = comparator.loadSnapshot(configurationDir);
 		Object newSnapshot = comparator.takeSnapshot(configurationDir, true);
 		comparator.compareSnapshots("1.0", oldSnaphot, newSnapshot);
@@ -93,7 +95,7 @@ public class ReadOnlyConfigurationAreaTest extends ConfigurationSessionTest {
 
 	public void test2ndSessionFollowUp() throws IOException {
 		FileSystemComparator comparator = new FileSystemComparator();
-		File configurationDir = getConfigurationDir();
+		File configurationDir = ConfigurationSessionTestSuite.getConfigurationDir();
 		Object oldSnaphot = comparator.loadSnapshot(configurationDir);
 		Object newSnapshot = comparator.takeSnapshot(configurationDir, true);
 		comparator.compareSnapshots("1.0", oldSnaphot, newSnapshot);
@@ -122,7 +124,7 @@ public class ReadOnlyConfigurationAreaTest extends ConfigurationSessionTest {
 
 	public void test3rdSessionFollowUp() throws IOException {
 		FileSystemComparator comparator = new FileSystemComparator();
-		File configurationDir = getConfigurationDir();
+		File configurationDir = ConfigurationSessionTestSuite.getConfigurationDir();
 		Object oldSnaphot = comparator.loadSnapshot(configurationDir);
 		Object newSnapshot = comparator.takeSnapshot(configurationDir, true);
 		comparator.compareSnapshots("1.0", oldSnaphot, newSnapshot);

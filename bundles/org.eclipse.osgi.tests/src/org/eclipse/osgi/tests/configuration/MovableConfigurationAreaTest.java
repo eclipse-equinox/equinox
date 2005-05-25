@@ -16,11 +16,13 @@ import java.net.MalformedURLException;
 import junit.framework.*;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.tests.harness.*;
+import org.eclipse.core.tests.session.ConfigurationSessionTestSuite;
+import org.eclipse.osgi.tests.OSGiTest;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 
-public class MovableConfigurationAreaTest extends ConfigurationSessionTest {
+public class MovableConfigurationAreaTest extends OSGiTest {
 
 	static void doMove(final IPath sourcePath, final IPath destinationPath) {
 		assertTrue("Failed moving " + sourcePath + " to " + destinationPath, sourcePath.toFile().renameTo(destinationPath.toFile()));
@@ -41,10 +43,11 @@ public class MovableConfigurationAreaTest extends ConfigurationSessionTest {
 	public static Test suite() {
 		TestSuite suite = new TestSuite(MovableConfigurationAreaTest.class.getName());
 
-		String[] ids = {"org.eclipse.core.runtime@2:start", "org.eclipse.core.runtime.compatibility", "org.eclipse.update.configurator", "org.eclipse.core.tests.harness", "org.eclipse.osgi.tests", "org.eclipse.jdt.junit.runtime", "org.eclipse.pde.junit.runtime", "org.junit", "org.eclipse.test.performance"};
 		ConfigurationSessionTestSuite initialization = new ConfigurationSessionTestSuite(PI_OSGI_TESTS, MovableConfigurationAreaTest.class.getName());
+		String[] ids = ConfigurationSessionTestSuite.MINIMAL_BUNDLE_SET;
 		for (int i = 0; i < ids.length; i++)
 			initialization.addBundle(ids[i]);
+		initialization.addBundle(PI_OSGI_TESTS);
 		initialization.setReadOnly(true);
 		// disable clean-up, we want to reuse the configuration
 		initialization.setCleanup(false);
@@ -116,7 +119,7 @@ public class MovableConfigurationAreaTest extends ConfigurationSessionTest {
 
 	public void testVerifySnapshot() throws IOException {
 		FileSystemComparator comparator = new FileSystemComparator();
-		File configurationDir = getConfigurationDir();
+		File configurationDir = ConfigurationSessionTestSuite.getConfigurationDir();
 		Object oldSnaphot = comparator.loadSnapshot(configurationDir);
 		Object newSnapshot = comparator.takeSnapshot(configurationDir, true);
 		comparator.compareSnapshots("1.0", oldSnaphot, newSnapshot);
