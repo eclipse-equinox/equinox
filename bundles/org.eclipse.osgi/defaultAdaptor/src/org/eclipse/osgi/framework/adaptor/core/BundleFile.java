@@ -200,15 +200,22 @@ abstract public class BundleFile {
 		}
 
 		private File getExtractFile(String entryName) {
-			if (!(bundledata instanceof AbstractBundleData)) {
+			if (!(bundledata instanceof AbstractBundleData))
 				return null;
-			}
 			String path = ".cp"; /* put all these entries in this subdir *///$NON-NLS-1$
 			String name = entryName.replace('/', File.separatorChar);
 			if ((name.length() > 1) && (name.charAt(0) == File.separatorChar)) /* if name has a leading slash */
 				path = path.concat(name);
 			else
 				path = path + File.separator + name;
+			// first check the child generation dir
+			File childGenDir = ((AbstractBundleData) bundledata).getGenerationDir();
+			if (childGenDir != null) {
+				File childPath = new File(childGenDir, path);
+				if (childPath.exists())
+					return childPath;
+			}
+			// now check the parent
 			File parentGenDir = ((AbstractBundleData) bundledata).getParentGenerationDir();
 			if (parentGenDir != null) {
 				// there is a parent generation check if the file exists
@@ -217,6 +224,7 @@ abstract public class BundleFile {
 					// only use the parent generation file if it exists; do not extract there
 					return parentPath;
 			}
+			// did not exist in both locations; create a file for extraction.
 			File bundleGenerationDir = ((AbstractBundleData) bundledata).createGenerationDir();
 			/* if the generation dir exists, then we have place to cache */
 			if (bundleGenerationDir != null && bundleGenerationDir.exists())
@@ -233,7 +241,6 @@ abstract public class BundleFile {
 			}
 
 			try {
-
 				File nested = getExtractFile(zipEntry.getName());
 				if (nested != null) {
 					if (nested.exists()) {
