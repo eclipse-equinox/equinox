@@ -161,7 +161,7 @@ public abstract class StateImpl implements State {
 	public BundleDescription getBundle(String name, Version version) {
 		BundleDescription[] allBundles = getBundles(name);
 		if (allBundles.length == 1)
-			return allBundles[0];
+			return version == null || allBundles[0].getVersion().equals(version) ? allBundles[0] : null;
 
 		if (allBundles.length == 0)
 			return null;
