@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.eclipse.osgi.service.environment;
 
+/**
+ * @since 3.0
+ */
 public interface Constants {
 	//TODO These constants need to be aligned with the OSGi ones. See page 64-588 of the spec
 
@@ -52,8 +55,6 @@ public interface Constants {
 	/**
 	 * Constant string (value "macosx") indicating the platform is running on a
 	 * Mac OS X operating system.
-	 * 
-	 * @since 2.0
 	 */
 	public static final String OS_MACOSX = "macosx";//$NON-NLS-1$
 
@@ -78,16 +79,12 @@ public interface Constants {
 	/**
 	 * Constant string (value "ppc") indicating the platform is running on an
 	 * PowerPC-based architecture.
-	 * 
-	 * @since 2.0
 	 */
 	public static final String ARCH_PPC = "ppc";//$NON-NLS-1$
 
 	/**
 	 * Constant string (value "sparc") indicating the platform is running on an
 	 * Sparc-based architecture.
-	 * 
-	 * @since 2.0
 	 */
 	public static final String ARCH_SPARC = "sparc";//$NON-NLS-1$
 
@@ -103,7 +100,6 @@ public interface Constants {
 	 * Constant string (value "amd64") indicating the platform is running on an
 	 * AMD64-based architecture.
 	 * 
-	 * @since 3.0
 	 * @deprecated use <code>ARCH_X86_64</code> instead. Note the values
 	 * has been changed to be the value of the <code>ARCH_X86_64</code> constant.
 	 */
@@ -112,8 +108,6 @@ public interface Constants {
 	/**
 	 * Constant string (value "ia64") indicating the platform is running on an
 	 * IA64-based architecture.
-	 * 
-	 * @since 3.0
 	 */
 	public static final String ARCH_IA64 = "ia64"; //$NON-NLS-1$
 
@@ -144,8 +138,6 @@ public interface Constants {
 	/**
 	 * Constant string (value "carbon") indicating the platform is running on a
 	 * machine using the Carbon windowing system (Mac OS X).
-	 * 
-	 * @since 2.0
 	 */
 	public static final String WS_CARBON = "carbon";//$NON-NLS-1$
 
@@ -154,5 +146,4 @@ public interface Constants {
 	 * machine running an unknown windowing system.
 	 */
 	public static final String WS_UNKNOWN = "unknown";//$NON-NLS-1$
-
 }
