@@ -66,7 +66,7 @@ public interface EnvironmentInfo {
 
 	/**
 	 * Returns the string name of the current operating system for use in finding
-	 * files whose path starts with <code>$os$</code>.  Return <code>OS_UNKNOWN</code> 
+	 * files whose path starts with <code>$os$</code>.  Return {@link Constants#OS_UNKNOWN} 
 	 * if the operating system cannot be determined.
 	 * <p>  
 	 * The value may indicate one of the operating systems known to the platform
