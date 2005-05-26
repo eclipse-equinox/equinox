@@ -9,20 +9,12 @@ Bundle-Vendor: %eclipse.org
 Bundle-DocUrl: http://www.eclipse.org
 Bundle-ContactAddress: www.eclipse.org
 Bundle-Copyright: %copyright
-Export-Package: org.osgi.meglet; version="1.0",
- org.osgi.service.application; version="1.0",
- org.osgi.service.application.meglet; version="1.0",
- org.osgi.service.cm; version="1.2",
- org.osgi.service.component; version="1.0",
- org.osgi.service.deploymentadmin; version="1.0",
+Export-Package: org.osgi.service.cm; version="1.2",
  org.osgi.service.device; version="1.1",
- org.osgi.service.dmt; version="1.0",
- org.osgi.service.event; version="1.0",
  org.osgi.service.http; version="1.2",
  org.osgi.service.io; version="1.0",
  org.osgi.service.log; version="1.2",
  org.osgi.service.metatype; version="1.1",
- org.osgi.service.monitor; version="1.0",
  org.osgi.service.provisioning; version="1.0",
  org.osgi.service.upnp; version="1.1",
  org.osgi.service.useradmin; version="1.0",

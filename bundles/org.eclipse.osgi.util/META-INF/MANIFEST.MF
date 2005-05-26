@@ -9,10 +9,7 @@ Bundle-Localization: plugin
 Bundle-DocUrl: http://www.eclipse.org
 Bundle-ContactAddress: www.eclipse.org
 Bundle-Copyright: %copyright
-Export-Package: org.osgi.util.gsm; version="1.0",
- org.osgi.util.measurement; version="1.1",
- org.osgi.util.mobile; version="1.0",
+Export-Package: org.osgi.util.measurement; version="1.1",
  org.osgi.util.position; version="1.0",
  org.osgi.util.xml; version="1.0"
-Import-Package: org.osgi.framework; version=1.1,
- org.osgi.service.condpermadmin
+Import-Package: org.osgi.framework; version=1.1
