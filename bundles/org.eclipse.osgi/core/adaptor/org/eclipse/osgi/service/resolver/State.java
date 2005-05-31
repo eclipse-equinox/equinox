@@ -20,6 +20,10 @@ import org.osgi.framework.Version;
  * The state of a system as reported by a resolver. This includes all bundles
  * presented to the resolver relative to this state (i.e., both resolved and
  * unresolved).
+ * <p>
+ * Clients may implement this interface.
+ * </p>
+ * @since 3.1
  */
 public interface State {
 	/**
