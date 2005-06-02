@@ -89,8 +89,14 @@ public class EclipseBundleData extends AbstractBundleData {
 			throw new IOException();
 
 		createBaseBundleFile();
-		if (!checkManifestTimeStamp())
+		if (!checkManifestTimeStamp()) {
+			if (getBundleStoreDir().exists()) {
+				/* create .delete */
+				FileOutputStream out = new FileOutputStream(delete);
+				out.close();
+			}
 			throw new IOException();
+		}
 	}
 
 	private boolean checkManifestTimeStamp() {
