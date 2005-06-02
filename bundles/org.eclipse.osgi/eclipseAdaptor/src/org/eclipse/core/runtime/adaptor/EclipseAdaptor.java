@@ -30,6 +30,7 @@ import org.eclipse.osgi.service.datalocation.*;
 import org.eclipse.osgi.service.pluginconversion.PluginConverter;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.service.urlconversion.URLConverter;
+import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 
 /**
@@ -763,6 +764,9 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 				Debug.println("Error reading framework metadata: " + ex.getMessage()); //$NON-NLS-1$
 				Debug.printStackTrace(ex);
 			}
+			String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_FILEMANAGER_OPEN_ERROR, ex.getMessage());
+			FrameworkLogEntry logEntry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, message, 0, ex, null);
+			getFrameworkLog().log(logEntry);
 		}
 		return fManager;
 	}
