@@ -82,17 +82,11 @@ public class EclipseBundleData extends AbstractBundleData {
 	}
 
 	public void initializeExistingBundle() throws IOException {
-		File delete = new File(getBundleStoreDir(), ".delete"); //$NON-NLS-1$
-
-		/* and the directory is not marked for delete */
-		if (delete.exists())
-			throw new IOException();
-
 		createBaseBundleFile();
 		if (!checkManifestTimeStamp()) {
 			if (getBundleStoreDir().exists()) {
 				/* create .delete */
-				FileOutputStream out = new FileOutputStream(delete);
+				FileOutputStream out = new FileOutputStream(new File(getBundleStoreDir(), ".delete"));
 				out.close();
 			}
 			throw new IOException();

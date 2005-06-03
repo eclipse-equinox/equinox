@@ -128,7 +128,6 @@ public class Framework implements EventDispatcher, EventPublisher {
 			Profile.logTime("Framework.initialze()", "adapter initialized"); //$NON-NLS-1$//$NON-NLS-2$
 		try {
 			adaptor.initializeStorage();
-			adaptor.compactStorage();
 		} catch (IOException e) /* fatal error */{
 			e.printStackTrace();
 			throw new RuntimeException(e.getMessage());
