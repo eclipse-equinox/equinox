@@ -14,7 +14,6 @@ import java.util.*;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.tests.OSGiTest;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
-import org.eclipse.osgi.tests.adaptor.testsupport.SimplePlatformAdmin;
 import org.osgi.framework.BundleException;
 
 public abstract class AbstractStateTest extends OSGiTest {

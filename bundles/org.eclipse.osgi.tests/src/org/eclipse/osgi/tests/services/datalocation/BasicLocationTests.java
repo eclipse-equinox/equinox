@@ -11,15 +11,10 @@
 package org.eclipse.osgi.tests.services.datalocation;
 
 import java.net.URL;
-
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-
+import junit.framework.*;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.adaptor.LocationManager;
 import org.eclipse.osgi.service.datalocation.Location;
-import org.eclipse.osgi.tests.adaptor.testsupport.TestLocationManager;
 
 public class BasicLocationTests extends TestCase {
 
@@ -29,7 +24,7 @@ public class BasicLocationTests extends TestCase {
 	String originalInstall = null;
 	String prefix = "";
 	boolean windows = Platform.getOS().equals(Platform.OS_WIN32);
-	
+
 	public BasicLocationTests(String name) {
 		super(name);
 	}
@@ -53,21 +48,21 @@ public class BasicLocationTests extends TestCase {
 		else
 			System.setProperty(key, value);
 	}
-	
+
 	protected void tearDown() throws Exception {
 		setProperty(LocationManager.PROP_USER_AREA, originalUser);
 		setProperty(LocationManager.PROP_INSTANCE_AREA, originalInstance);
 		setProperty(LocationManager.PROP_CONFIG_AREA, originalConfiguration);
 		setProperty(LocationManager.PROP_INSTALL_AREA, originalInstall);
-		TestLocationManager.initializeLocations();
+		LocationManager.initializeLocations();
 		super.tearDown();
 	}
 
 	private void checkSlashes() {
-		checkLocation(TestLocationManager.getUserLocation(), true, true, null);
-		checkLocation(TestLocationManager.getInstanceLocation(), true, true, null);
-		checkLocation(TestLocationManager.getConfigurationLocation(), true, true, null);
-		checkLocation(TestLocationManager.getInstallLocation(), true, true, null);
+		checkLocation(LocationManager.getUserLocation(), true, true, null);
+		checkLocation(LocationManager.getInstanceLocation(), true, true, null);
+		checkLocation(LocationManager.getConfigurationLocation(), true, true, null);
+		checkLocation(LocationManager.getInstallLocation(), true, true, null);
 	}
 
 	private void checkLocation(Location location, boolean leading, boolean trailing, String scheme) {
@@ -88,7 +83,7 @@ public class BasicLocationTests extends TestCase {
 		setProperty(LocationManager.PROP_INSTANCE_AREA, prefix + "/c/d");
 		setProperty(LocationManager.PROP_CONFIG_AREA, prefix + "/e/f");
 		setProperty(LocationManager.PROP_INSTALL_AREA, "file:" + prefix + "/g");
-		TestLocationManager.initializeLocations();
+		LocationManager.initializeLocations();
 		checkSlashes();
 	}
 
@@ -97,13 +92,13 @@ public class BasicLocationTests extends TestCase {
 		setProperty(LocationManager.PROP_INSTANCE_AREA, "ftp://example.com/c/d");
 		setProperty(LocationManager.PROP_CONFIG_AREA, "platform:/base/e/f");
 		setProperty(LocationManager.PROP_INSTALL_AREA, "file:" + prefix + "/g");
-		TestLocationManager.initializeLocations();
+		LocationManager.initializeLocations();
 		checkSlashes();
-		checkLocation(TestLocationManager.getUserLocation(), true, true, "http");
-		checkLocation(TestLocationManager.getInstanceLocation(), true, true, "ftp");
-		checkLocation(TestLocationManager.getConfigurationLocation(), true, true, "platform");
-		checkLocation(TestLocationManager.getInstallLocation(), true, true, "file");
-		
+		checkLocation(LocationManager.getUserLocation(), true, true, "http");
+		checkLocation(LocationManager.getInstanceLocation(), true, true, "ftp");
+		checkLocation(LocationManager.getConfigurationLocation(), true, true, "platform");
+		checkLocation(LocationManager.getInstallLocation(), true, true, "file");
+
 	}
 
 	public void testNone() {
@@ -111,10 +106,10 @@ public class BasicLocationTests extends TestCase {
 		setProperty(LocationManager.PROP_INSTANCE_AREA, "@none");
 		setProperty(LocationManager.PROP_CONFIG_AREA, "@none");
 		setProperty(LocationManager.PROP_INSTALL_AREA, "file:" + prefix + "/g");
-		TestLocationManager.initializeLocations();
-		assertNull("User location should be null", TestLocationManager.getUserLocation());
-		assertNull("Instance location should be null", TestLocationManager.getUserLocation());
-		assertNull("Configuration location should be null", TestLocationManager.getUserLocation());
+		LocationManager.initializeLocations();
+		assertNull("User location should be null", LocationManager.getUserLocation());
+		assertNull("Instance location should be null", LocationManager.getUserLocation());
+		assertNull("Configuration location should be null", LocationManager.getUserLocation());
 	}
 
 	public void testUserDir() {
@@ -122,11 +117,11 @@ public class BasicLocationTests extends TestCase {
 		setProperty(LocationManager.PROP_INSTANCE_AREA, "@user.dir");
 		setProperty(LocationManager.PROP_CONFIG_AREA, "@user.dir");
 		setProperty(LocationManager.PROP_INSTALL_AREA, "file:" + prefix + "/g");
-		TestLocationManager.initializeLocations();
-		checkLocation(TestLocationManager.getUserLocation(), true, true, "file");
-		checkLocation(TestLocationManager.getInstanceLocation(), true, true, "file");
-		checkLocation(TestLocationManager.getConfigurationLocation(), true, true, "file");
-		checkLocation(TestLocationManager.getInstallLocation(), true, true, "file");
+		LocationManager.initializeLocations();
+		checkLocation(LocationManager.getUserLocation(), true, true, "file");
+		checkLocation(LocationManager.getInstanceLocation(), true, true, "file");
+		checkLocation(LocationManager.getConfigurationLocation(), true, true, "file");
+		checkLocation(LocationManager.getInstallLocation(), true, true, "file");
 	}
 
 	public void testUserHome() {
@@ -134,11 +129,11 @@ public class BasicLocationTests extends TestCase {
 		setProperty(LocationManager.PROP_INSTANCE_AREA, "@user.home");
 		setProperty(LocationManager.PROP_CONFIG_AREA, "@user.home");
 		setProperty(LocationManager.PROP_INSTALL_AREA, "file:" + prefix + "/g");
-		TestLocationManager.initializeLocations();
-		checkLocation(TestLocationManager.getUserLocation(), true, true, "file");
-		checkLocation(TestLocationManager.getInstanceLocation(), true, true, "file");
-		checkLocation(TestLocationManager.getConfigurationLocation(), true, true, "file");
-		checkLocation(TestLocationManager.getInstallLocation(), true, true, "file");
+		LocationManager.initializeLocations();
+		checkLocation(LocationManager.getUserLocation(), true, true, "file");
+		checkLocation(LocationManager.getInstanceLocation(), true, true, "file");
+		checkLocation(LocationManager.getConfigurationLocation(), true, true, "file");
+		checkLocation(LocationManager.getInstallLocation(), true, true, "file");
 	}
 
 	public void testUNC() {
@@ -148,11 +143,11 @@ public class BasicLocationTests extends TestCase {
 		setProperty(LocationManager.PROP_INSTANCE_AREA, "//server/share/b");
 		setProperty(LocationManager.PROP_CONFIG_AREA, "//server/share/c");
 		setProperty(LocationManager.PROP_INSTALL_AREA, "file://server/share/g");
-		TestLocationManager.initializeLocations();
-		checkLocation(TestLocationManager.getUserLocation(), true, true, "file");
-		checkLocation(TestLocationManager.getInstanceLocation(), true, true, "file");
-		checkLocation(TestLocationManager.getConfigurationLocation(), true, true, "file");
-		checkLocation(TestLocationManager.getInstallLocation(), true, true, "file");
+		LocationManager.initializeLocations();
+		checkLocation(LocationManager.getUserLocation(), true, true, "file");
+		checkLocation(LocationManager.getInstanceLocation(), true, true, "file");
+		checkLocation(LocationManager.getConfigurationLocation(), true, true, "file");
+		checkLocation(LocationManager.getInstallLocation(), true, true, "file");
 	}
 
 }

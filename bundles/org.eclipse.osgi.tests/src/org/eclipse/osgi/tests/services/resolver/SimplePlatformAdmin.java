@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.osgi.tests.adaptor.testsupport;
+package org.eclipse.osgi.tests.services.resolver;
 
 import java.io.File;
 import org.eclipse.osgi.framework.adaptor.core.StateManager;

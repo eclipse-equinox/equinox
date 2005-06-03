@@ -11,7 +11,6 @@
 package org.eclipse.osgi.tests;
 
 import junit.framework.*;
-import org.eclipse.osgi.tests.eclipseadaptor.EnvironmentInfoTest;
 import org.eclipse.osgi.tests.internal.plugins.InstallTests;
 import org.eclipse.osgi.tests.listeners.ExceptionHandlerTests;
 
@@ -38,7 +37,7 @@ public class AutomatedTests extends TestCase {
 		TestSuite suite = new TestSuite(AutomatedTests.class.getName());
 		//		suite.addTest(new TestSuite(SimpleTests.class));
 		suite.addTest(new TestSuite(InstallTests.class));
-		suite.addTest(new TestSuite(EnvironmentInfoTest.class));
+		suite.addTest(org.eclipse.osgi.tests.eclipseadaptor.AllTests.suite());
 		suite.addTest(org.eclipse.osgi.tests.services.resolver.AllTests.suite());
 		suite.addTest(new TestSuite(ExceptionHandlerTests.class));
 		suite.addTest(org.eclipse.osgi.tests.configuration.AllTests.suite());
