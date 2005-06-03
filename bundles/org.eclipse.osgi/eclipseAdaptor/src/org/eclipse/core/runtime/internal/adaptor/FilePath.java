@@ -16,6 +16,9 @@ import java.io.File;
  * Helper class for manipulating absolute paths.
  */
 public class FilePath {
+	/** Constant value indicating if the current platform is Windows */
+	private static final boolean WINDOWS = java.io.File.separatorChar == '\\';
+
 	private final static String CURRENT_DIR = "."; //$NON-NLS-1$
 	/** 
 	 * Device separator character constant ":" used in paths.
@@ -102,30 +105,41 @@ public class FilePath {
 		return actualSegments;
 	}
 
-	private boolean hasTrailingSlash() {
+	public String getDevice() {
+		return device;
+	}
+
+	public String[] getSegments() {
+		return (String[]) segments.clone();
+	}
+
+	public boolean hasTrailingSlash() {
 		return (flags & HAS_TRAILING) != 0;
 	}
 
 	private void initialize(String original) {
 		original = original.indexOf('\\') == -1 ? original : original.replace('\\', SEPARATOR);
-		int deviceSeparatorPos = original.indexOf(DEVICE_SEPARATOR);
-		if (deviceSeparatorPos >= 0) {
-			//extract device if any				
-			//remove leading slash from device part to handle output of URL.getFile()
-			int start = original.charAt(0) == SEPARATOR ? 1 : 0;
-			device = original.substring(start, deviceSeparatorPos + 1);
-			original = original.substring(deviceSeparatorPos + 1, original.length());
-		} else if (original.startsWith(UNC_SLASHES)) {
-			// handle UNC paths
-			int uncPrefixEnd = original.indexOf(SEPARATOR, 2);
-			if (uncPrefixEnd >= 0)
-				uncPrefixEnd = original.indexOf(SEPARATOR, uncPrefixEnd + 1);
-			if (uncPrefixEnd >= 0) {
-				device = original.substring(0, uncPrefixEnd);
-				original = original.substring(uncPrefixEnd, original.length());
-			} else
-				// not a valid UNC
-				throw new IllegalArgumentException("Not a valid UNC: " + original); //TODO add message
+		if (WINDOWS) {
+			// only deal with devices/UNC paths on Windows
+			int deviceSeparatorPos = original.indexOf(DEVICE_SEPARATOR);
+			if (deviceSeparatorPos >= 0) {
+				//extract device if any				
+				//remove leading slash from device part to handle output of URL.getFile()
+				int start = original.charAt(0) == SEPARATOR ? 1 : 0;
+				device = original.substring(start, deviceSeparatorPos + 1);
+				original = original.substring(deviceSeparatorPos + 1, original.length());
+			} else if (original.startsWith(UNC_SLASHES)) {
+				// handle UNC paths
+				int uncPrefixEnd = original.indexOf(SEPARATOR, 2);
+				if (uncPrefixEnd >= 0)
+					uncPrefixEnd = original.indexOf(SEPARATOR, uncPrefixEnd + 1);
+				if (uncPrefixEnd >= 0) {
+					device = original.substring(0, uncPrefixEnd);
+					original = original.substring(uncPrefixEnd, original.length());
+				} else
+					// not a valid UNC
+					throw new IllegalArgumentException("Not a valid UNC: " + original); //TODO add message
+			}
 		}
 		// device names letters and UNCs properly stripped off
 		if (original.charAt(0) == SEPARATOR)
@@ -135,7 +149,7 @@ public class FilePath {
 		segments = computeSegments(original);
 	}
 
-	boolean isAbsolute() {
+	public boolean isAbsolute() {
 		return (flags & HAS_LEADING) != 0;
 	}
 
