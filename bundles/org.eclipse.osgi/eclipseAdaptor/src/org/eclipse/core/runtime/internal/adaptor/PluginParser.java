@@ -57,6 +57,7 @@ public class PluginParser extends DefaultHandler implements IModel {
 		private boolean singleton;
 		private boolean fragment;
 		private static final String TARGET21 = "2.1"; //$NON-NLS-1$
+		private boolean hasExtensionExtensionPoints = false;
 
 		public boolean isFragment() {
 			return fragment;
@@ -157,6 +158,10 @@ public class PluginParser extends DefaultHandler implements IModel {
 			return singleton;
 		}
 
+		public boolean hasExtensionExtensionPoints() {
+			return hasExtensionExtensionPoints;
+		}
+		
 		public String getRoot() {
 			return isFragment() ? FRAGMENT : PLUGIN;
 		}
@@ -299,11 +304,13 @@ public class PluginParser extends DefaultHandler implements IModel {
 	public void handleExtensionPointState(String elementName, Attributes attributes) {
 		// nothing to do for extension-points' children
 		stateStack.push(new Integer(IGNORED_ELEMENT_STATE));
+		manifestInfo.hasExtensionExtensionPoints = true;
 	}
 
 	public void handleExtensionState(String elementName, Attributes attributes) {
 		// nothing to do for extensions' children
 		stateStack.push(new Integer(IGNORED_ELEMENT_STATE));
+		manifestInfo.hasExtensionExtensionPoints = true;
 	}
 
 	public void handleInitialState(String elementName, Attributes attributes) {

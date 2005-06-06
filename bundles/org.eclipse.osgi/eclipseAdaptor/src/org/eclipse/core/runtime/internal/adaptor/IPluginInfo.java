@@ -46,5 +46,7 @@ public interface IPluginInfo {
 
 	public boolean isSingleton();
 	
+	public boolean hasExtensionExtensionPoints();
+	
 	String validateForm();
 }
