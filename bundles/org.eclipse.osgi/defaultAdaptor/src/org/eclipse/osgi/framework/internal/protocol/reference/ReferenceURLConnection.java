@@ -58,6 +58,7 @@ public class ReferenceURLConnection extends URLConnection {
 		if (!connected) {
 			connect();
 		}
+
 		return new ReferenceInputStream(reference);
 	}
 
@@ -74,7 +75,12 @@ public class ReferenceURLConnection extends URLConnection {
 	private static File makeAbsolute(File base, File relative) {
 		if (relative.isAbsolute())
 			return relative;
-		File absolute = new File(base, relative.getPath());
-		return absolute;
+		File result = new File(base, relative.getPath());
+		try {
+			return new File(result.getCanonicalPath());
+		} catch (IOException e) {
+			// just return the original path
+			return result;
+		}
 	}
 }

@@ -401,7 +401,7 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 		public void ungetService(Bundle bundle, ServiceRegistration registration, Object service) {
 			// Do nothing.
 		}
-	}
+			}
 
 	private class DomParsingService implements ServiceFactory {
 		public Object getService(Bundle bundle, ServiceRegistration registration) {
@@ -411,7 +411,7 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 		public void ungetService(Bundle bundle, ServiceRegistration registration, Object service) {
 			// Do nothing.
 		}
-	}
+			}
 
 	public boolean canWrite() {
 		return !fileManager.isReadOnly();
@@ -575,7 +575,13 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 			File storedPath = new File(data.getFileName());
 			if (!storedPath.isAbsolute())
 				storedPath = new File(installPath, data.getFileName());
-			data.setFileName(storedPath.getAbsolutePath());
+			String fileName;
+			try {
+				fileName = storedPath.getCanonicalPath();
+			} catch (IOException e) {
+				fileName = storedPath.getAbsolutePath();
+			}
+			data.setFileName(fileName);
 		}
 	}
 
