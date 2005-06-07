@@ -638,7 +638,7 @@ public class PluginConverterImpl implements PluginConverter {
 	private void writeEntry(String key, String value) throws IOException {
 		if (value != null && value.length() > 0) {
 			out.write(splitOnComma(key + ": " + value)); //$NON-NLS-1$
-			out.newLine();
+			out.write('\n');
 		}
 	}
 
