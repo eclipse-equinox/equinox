@@ -499,13 +499,136 @@ public class StateResolverTest extends AbstractStateTest {
 		assertFullyResolved("3.3", b111);
 	}
 
+	public void testSingletons() throws BundleException {
+		State state = buildEmptyState();
+		Hashtable manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "test.host; singleton:=true");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		BundleDescription testHost100 = state.getFactory().createBundleDescription(state, manifest, "test.host100", 0);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "test.host; singleton:=true");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.1");
+		BundleDescription testHost101 = state.getFactory().createBundleDescription(state, manifest, "test.host101", 1);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "test.frag; singleton:=true");
+		manifest.put(Constants.FRAGMENT_HOST, "test.host; version=[1.0.0,2.0.0)");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		BundleDescription testFrag100 = state.getFactory().createBundleDescription(state, manifest, "test.frag100", 2);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "test.frag; singleton:=true");
+		manifest.put(Constants.FRAGMENT_HOST, "test.host; version=[1.0.0,2.0.0)");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.1");
+		BundleDescription testFrag101 = state.getFactory().createBundleDescription(state, manifest, "test.frag101", 3);
+
+		state.addBundle(testHost100);
+		state.addBundle(testFrag100);
+		state.addBundle(testHost101);
+		state.addBundle(testFrag101);
+		state.resolve();
+		assertFalse("1.0", testHost100.isResolved());
+		assertTrue("1.1", testHost101.isResolved());
+		assertFalse("1.2", testFrag100.isResolved());
+		assertTrue("1.3", testFrag101.isResolved());
+	}
+
+	public void testSingletonsSameVersion() throws BundleException {
+		// this is a testcase to handle how PDE build is using the state
+		// with multiple singleton bundles installed with the same BSN and version
+		State state = buildEmptyState();
+		Hashtable manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "test.host; singleton:=true");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		BundleDescription testHost100 = state.getFactory().createBundleDescription(state, manifest, "test.host100", 0);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "test.host; singleton:=true");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		BundleDescription testHost101 = state.getFactory().createBundleDescription(state, manifest, "test.host101", 1);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "test.frag; singleton:=true");
+		manifest.put(Constants.FRAGMENT_HOST, "test.host; version=[1.0.0,2.0.0)");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		BundleDescription testFrag100 = state.getFactory().createBundleDescription(state, manifest, "test.frag100", 2);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "test.frag; singleton:=true");
+		manifest.put(Constants.FRAGMENT_HOST, "test.host; version=[1.0.0,2.0.0)");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		BundleDescription testFrag101 = state.getFactory().createBundleDescription(state, manifest, "test.frag101", 3);
+
+		state.addBundle(testHost100);
+		state.addBundle(testFrag100);
+		state.resolve();
+		state.addBundle(testHost101);
+		state.addBundle(testFrag101);
+		state.resolve();
+		assertTrue("1.0", testHost100.isResolved());
+		assertFalse("1.1", testHost101.isResolved());
+		assertTrue("1.2", testFrag100.isResolved());
+		assertFalse("1.3", testFrag101.isResolved());
+	}
+
+	public void testNonSingletonsSameVersion() throws BundleException {
+		// this is a testcase to handle how PDE build is using the state
+		// with multiple singleton bundles installed with the same BSN and version
+		State state = buildEmptyState();
+		Hashtable manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "test.host");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		BundleDescription testHost100 = state.getFactory().createBundleDescription(state, manifest, "test.host100", 0);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "test.host; singleton:=true");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		BundleDescription testHost101 = state.getFactory().createBundleDescription(state, manifest, "test.host101", 1);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "test.frag");
+		manifest.put(Constants.FRAGMENT_HOST, "test.host; version=[1.0.0,2.0.0)");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		BundleDescription testFrag100 = state.getFactory().createBundleDescription(state, manifest, "test.frag100", 2);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "test.frag; singleton:=true");
+		manifest.put(Constants.FRAGMENT_HOST, "test.host; version=[1.0.0,2.0.0)");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		BundleDescription testFrag101 = state.getFactory().createBundleDescription(state, manifest, "test.frag101", 3);
+
+		state.addBundle(testHost100);
+		state.addBundle(testFrag100);
+		state.resolve();
+		state.addBundle(testHost101);
+		state.addBundle(testFrag101);
+		state.resolve();
+		assertTrue("1.0", testHost100.isResolved());
+		assertTrue("1.1", testHost101.isResolved());
+		assertTrue("1.2", testFrag100.isResolved());
+		assertTrue("1.3", testFrag101.isResolved());
+	}
+
 	private boolean contains(Object[] array, Object element) {
 		for (int i = 0; i < array.length; i++)
 			if (array[i].equals(element))
 				return true;
 		return false;
 	}
-
+	
 }
 //testFragmentUpdateNoVersionChanged()
 //testFragmentUpdateVersionChanged()
