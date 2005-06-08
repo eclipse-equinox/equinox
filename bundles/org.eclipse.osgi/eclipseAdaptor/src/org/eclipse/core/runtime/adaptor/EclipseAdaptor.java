@@ -26,7 +26,7 @@ import org.eclipse.osgi.framework.debug.FrameworkDebugOptions;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
-import org.eclipse.osgi.service.datalocation.*;
+import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.service.pluginconversion.PluginConverter;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.service.urlconversion.URLConverter;
@@ -401,7 +401,7 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 		public void ungetService(Bundle bundle, ServiceRegistration registration, Object service) {
 			// Do nothing.
 		}
-			}
+	}
 
 	private class DomParsingService implements ServiceFactory {
 		public Object getService(Bundle bundle, ServiceRegistration registration) {
@@ -411,7 +411,7 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 		public void ungetService(Bundle bundle, ServiceRegistration registration, Object service) {
 			// Do nothing.
 		}
-			}
+	}
 
 	public boolean canWrite() {
 		return !fileManager.isReadOnly();
@@ -574,14 +574,8 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 			// fileName for bundles installed with reference URLs is stored relative to the install location
 			File storedPath = new File(data.getFileName());
 			if (!storedPath.isAbsolute())
-				storedPath = new File(installPath, data.getFileName());
-			String fileName;
-			try {
-				fileName = storedPath.getCanonicalPath();
-			} catch (IOException e) {
-				fileName = storedPath.getAbsolutePath();
-			}
-			data.setFileName(fileName);
+				// make sure it has the absolute location instead
+				data.setFileName(new FilePath(installPath + data.getFileName()).toString());
 		}
 	}
 

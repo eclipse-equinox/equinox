@@ -18,6 +18,7 @@ import java.security.ProtectionDomain;
 import java.util.*;
 import org.eclipse.core.runtime.internal.adaptor.*;
 import org.eclipse.core.runtime.internal.stats.StatsManager;
+import org.eclipse.osgi.framework.adaptor.FilePath;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.internal.core.OSGi;
 import org.eclipse.osgi.framework.log.FrameworkLog;

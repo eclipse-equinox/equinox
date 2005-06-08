@@ -14,6 +14,7 @@ package org.eclipse.osgi.framework.internal.protocol.reference;
 import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
+import org.eclipse.osgi.framework.adaptor.FilePath;
 import org.eclipse.osgi.framework.internal.core.ReferenceInputStream;
 
 /**
@@ -35,7 +36,7 @@ public class ReferenceURLConnection extends URLConnection {
 			File file = new File(url.getPath().substring(5));
 			URL ref;
 			if (!file.isAbsolute()) {
-				File installPath = getInstallPath();
+				String installPath = getInstallPath();
 				if (installPath != null)
 					file = makeAbsolute(installPath, file);
 			}
@@ -62,25 +63,19 @@ public class ReferenceURLConnection extends URLConnection {
 		return new ReferenceInputStream(reference);
 	}
 
-	private File getInstallPath() {
+	private String getInstallPath() {
 		String installURL = System.getProperty("osgi.install.area"); //$NON-NLS-1$
 		if (installURL == null)
 			return null;
 		if (!installURL.startsWith("file:")) //$NON-NLS-1$
 			return null;
 		// this is the safest way to create a File object off a file: URL
-		return new File(installURL.substring(5));
+		return installURL.substring(5);
 	}
 
-	private static File makeAbsolute(File base, File relative) {
+	private static File makeAbsolute(String base, File relative) {
 		if (relative.isAbsolute())
 			return relative;
-		File result = new File(base, relative.getPath());
-		try {
-			return new File(result.getCanonicalPath());
-		} catch (IOException e) {
-			// just return the original path
-			return result;
-		}
+		return new File(new FilePath(base + relative.getPath()).toString());
 	}
 }

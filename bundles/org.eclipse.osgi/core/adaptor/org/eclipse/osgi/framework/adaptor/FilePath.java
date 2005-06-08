@@ -8,25 +8,28 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.core.runtime.internal.adaptor;
+package org.eclipse.osgi.framework.adaptor;
 
 import java.io.File;
 
 /** 
- * Helper class for manipulating absolute paths.
+ * A utility class for manipulating file system paths.
+ * <p>
+ * This class is not intended to be subclassed by clients but
+ * may be instantiated.
+ * </p>
+ * 
+ * @since 3.1
  */
 public class FilePath {
-	/** Constant value indicating if the current platform is Windows */
+	// Constant value indicating if the current platform is Windows
 	private static final boolean WINDOWS = java.io.File.separatorChar == '\\';
-
 	private final static String CURRENT_DIR = "."; //$NON-NLS-1$
-	/** 
-	 * Device separator character constant ":" used in paths.
-	 */
-	public static final char DEVICE_SEPARATOR = ':';
+	// Device separator character constant ":" used in paths.
+	private static final char DEVICE_SEPARATOR = ':';
 	private static final byte HAS_LEADING = 1;
 	private static final byte HAS_TRAILING = 4;
-	/** Constant value indicating no segments */
+	// Constant value indicating no segments
 	private static final String[] NO_SEGMENTS = new String[0];
 	private final static String PARENT_DIR = ".."; //$NON-NLS-1$
 	private final static char SEPARATOR = '/';
@@ -36,6 +39,11 @@ public class FilePath {
 	private byte flags;
 	private String[] segments;
 
+	/**
+	 * Constructs a new file path from the given File object.
+	 * 
+	 * @param location
+	 */
 	public FilePath(File location) {
 		initialize(location.getPath());
 		if (location.isDirectory())
@@ -44,11 +52,16 @@ public class FilePath {
 			flags &= ~HAS_TRAILING;
 	}
 
+	/**
+	 * Constructs a new file path from the given string path.
+	 * 
+	 * @param original
+	 */
 	public FilePath(String original) {
 		initialize(original);
 	}
 
-	/**
+	/*
 	 * Returns the number of segments in the given path
 	 */
 	private int computeSegmentCount(String path) {
@@ -68,6 +81,9 @@ public class FilePath {
 		return count;
 	}
 
+	/*
+	 * Splits the given path string into an array of segments. 
+	 */
 	private String[] computeSegments(String path) {
 		int maxSegmentCount = computeSegmentCount(path);
 		if (maxSegmentCount == 0)
@@ -105,14 +121,30 @@ public class FilePath {
 		return actualSegments;
 	}
 
+	/**
+	 * Returns the device for this file system path, or <code>null</code> if 
+	 * none exists. The device string ends with a colon.
+	 * 
+	 * @return the device string or null 
+	 */
 	public String getDevice() {
 		return device;
 	}
 
+	/**
+	 * Returns the segments in this path. If this path has no segments, returns an empty array.
+	 * 
+	 * @return an array containing all segments for this path 
+	 */
 	public String[] getSegments() {
 		return (String[]) segments.clone();
 	}
 
+	/**
+	 * Returns whether this path ends with a slash.
+	 * 
+	 * @return <code>true</code> if the path ends with a slash, false otherwise
+	 */
 	public boolean hasTrailingSlash() {
 		return (flags & HAS_TRAILING) != 0;
 	}
@@ -149,30 +181,49 @@ public class FilePath {
 		segments = computeSegments(original);
 	}
 
+	/**
+	 * Returns whether this path is absolute (begins with a slash).
+	 * 
+	 * @return <code>true</code> if this path is absolute, <code>false</code> otherwise
+	 */
 	public boolean isAbsolute() {
 		return (flags & HAS_LEADING) != 0;
 	}
 
-	public String makeRelative(FilePath location) {
-		if (location.device != null && !location.device.equalsIgnoreCase(this.device))
-			return location.toString();
+	/**
+	 * Returns a string representing this path as a relative to the given base path.
+	 * <p>
+	 * If this path and the given path do not use the same device letter, this path's
+	 * string representation is returned as is. 
+	 * </p>
+	 * 
+	 * @param base the path this path should be made relative to
+	 * @return a string representation for this path as relative to the given base path 
+	 */
+	public String makeRelative(FilePath base) {
+		if (base.device != null && !base.device.equalsIgnoreCase(this.device))
+			return base.toString();
 		int baseCount = this.segments.length;
-		int count = this.matchingFirstSegments(location);
-		if (baseCount == count && count == location.segments.length)
-			return location.hasTrailingSlash() ? ("." + SEPARATOR) : "."; //$NON-NLS-1$ //$NON-NLS-2$
+		int count = this.matchingFirstSegments(base);
+		if (baseCount == count && count == base.segments.length)
+			return base.hasTrailingSlash() ? ("." + SEPARATOR) : "."; //$NON-NLS-1$ //$NON-NLS-2$
 		StringBuffer relative = new StringBuffer(); //$NON-NLS-1$	
 		for (int j = 0; j < baseCount - count; j++)
 			relative.append(PARENT_DIR + SEPARATOR); //$NON-NLS-1$
-		for (int i = 0; i < location.segments.length - count; i++) {
-			relative.append(location.segments[count + i]);
+		for (int i = 0; i < base.segments.length - count; i++) {
+			relative.append(base.segments[count + i]);
 			relative.append(SEPARATOR);
 		}
-		if (!location.hasTrailingSlash())
+		if (!base.hasTrailingSlash())
 			relative.deleteCharAt(relative.length() - 1);
 		return relative.toString();
 	}
 
-	public int matchingFirstSegments(FilePath anotherPath) {
+	/* 
+	 * Returns the number of segments in this matching the first segments of the
+	 * given path.
+	 */
+	private int matchingFirstSegments(FilePath anotherPath) {
 		int anotherPathLen = anotherPath.segments.length;
 		int max = Math.min(segments.length, anotherPathLen);
 		int count = 0;
@@ -184,6 +235,11 @@ public class FilePath {
 		return count;
 	}
 
+	/**
+	 * Returns a string representation of this path.
+	 * 
+	 * @return  a string representation of this path
+	 */
 	public String toString() {
 		StringBuffer result = new StringBuffer();
 		if (device != null)

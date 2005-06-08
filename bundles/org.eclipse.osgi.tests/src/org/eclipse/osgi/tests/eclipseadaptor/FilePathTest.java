@@ -13,7 +13,7 @@ package org.eclipse.osgi.tests.eclipseadaptor;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.internal.adaptor.FilePath;
+import org.eclipse.osgi.framework.adaptor.FilePath;
 import org.eclipse.osgi.tests.OSGiTest;
 
 public class FilePathTest extends OSGiTest {
