@@ -13,6 +13,7 @@ package org.eclipse.core.runtime.internal.adaptor;
 import java.util.Hashtable;
 import org.eclipse.core.runtime.adaptor.*;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
+import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.internal.core.AbstractBundle;
 import org.eclipse.osgi.framework.internal.core.BundleHost;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
@@ -42,6 +43,9 @@ public class BundleStopper {
 	}
 
 	private void logCycles(Object[][] cycles) {
+		if (! Debug.DEBUG)
+			return;
+		
 		// log cycles
 		if (cycles.length > 0) {
 			StringBuffer cycleText = new StringBuffer("["); //$NON-NLS-1$			
