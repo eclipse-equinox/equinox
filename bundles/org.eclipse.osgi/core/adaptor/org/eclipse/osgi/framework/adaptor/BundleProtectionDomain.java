@@ -18,7 +18,7 @@ import java.security.ProtectionDomain;
  * 
  * This is a specialized ProtectionDomain for a bundle.
  * <p>
- * This interface is not intended to be implemented by clients.
+ * This class is not intended to be extended by clients.
  * </p>
  * @since 3.1
  */
