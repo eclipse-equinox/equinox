@@ -1039,20 +1039,14 @@ public class EclipseStarter {
 	private static URL makeRelative(URL base, URL location) throws MalformedURLException {
 		if (base == null)
 			return location;
+		if (!"file".equals(base.getProtocol())) //$NON-NLS-1$
+			return location;
 		boolean reference = location.getProtocol().equals(REFERENCE_PROTOCOL);
 		URL nonReferenceLocation = location;
 		if (reference)
 			nonReferenceLocation = new URL(location.getPath());
-		if (!"file".equals(base.getProtocol())) //$NON-NLS-1$
-			return location;
 		// if some URL component does not match, return the original location
 		if (!base.getProtocol().equals(nonReferenceLocation.getProtocol()))
-			return location;
-		if (base.getHost() == null ^ nonReferenceLocation.getHost() == null)
-			return location;
-		if (base.getHost() != null && !base.getHost().equals(nonReferenceLocation.getHost()))
-			return location;
-		if (base.getPort() != nonReferenceLocation.getPort())
 			return location;
 		File locationPath = new File(nonReferenceLocation.getPath());
 		// if location is not absolute, return original location 
@@ -1065,6 +1059,7 @@ public class EclipseStarter {
 		if (nonReferenceLocation.getPath().endsWith("/")) //$NON-NLS-1$
 			// restore original trailing slash 
 			urlPath += '/';
+		// couldn't use File to create URL here because it prepends the path with user.dir 
 		URL relativeURL = new URL(base.getProtocol(), base.getHost(), base.getPort(), urlPath);
 		if (reference)
 			relativeURL = new URL(REFERENCE_SCHEME + relativeURL.toExternalForm());
