@@ -864,8 +864,8 @@ public class Framework implements EventDispatcher, EventPublisher {
 			} catch (BundleException ee) {
 				publishFrameworkEvent(FrameworkEvent.ERROR, systemBundle, ee);
 			}
-			if (t instanceof RuntimeException)
-				throw (RuntimeException) t;
+			if (t instanceof SecurityException)
+				throw (SecurityException) t;
 			if (t instanceof BundleException)
 				throw (BundleException) t;
 			throw new BundleException(t.getMessage(), t);
