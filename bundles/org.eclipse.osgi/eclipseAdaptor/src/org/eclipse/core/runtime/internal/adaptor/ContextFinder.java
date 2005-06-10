@@ -17,7 +17,7 @@ import java.security.PrivilegedAction;
 import java.util.Enumeration;
 
 public class ContextFinder extends ClassLoader {
-	 
+
 	private static final class Finder extends SecurityManager {
 		public Class[] getClassContext() {
 			return super.getClassContext();
@@ -26,7 +26,7 @@ public class ContextFinder extends ClassLoader {
 
 	static final Finder contextFinder = (Finder) AccessController.doPrivileged(new PrivilegedAction() {
 		public Object run() {
-			return new Finder();	
+			return new Finder();
 		}
 	});
 
@@ -47,16 +47,25 @@ public class ContextFinder extends ClassLoader {
 				break;
 			}
 		}
-		if (result != getParent())
+		if (checkClassLoader(result))
 			return result;
 		return null;
 	}
-	
+
+	private boolean checkClassLoader(ClassLoader classloader) {
+		if (classloader == null || classloader == getParent())
+			return false;
+		for (ClassLoader parent = classloader.getParent(); parent != null; parent = parent.getParent())
+			if (parent == this)
+				return false;
+		return true;
+	}
+
 	private ClassLoader findClassLoader() {
 		if (System.getSecurityManager() == null) {
 			return basicFindClassLoader();
 		}
-		
+
 		return (ClassLoader) AccessController.doPrivileged(new PrivilegedAction() {
 			public Object run() {
 				return basicFindClassLoader();
