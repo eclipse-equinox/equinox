@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component xmlns="http://eclipse.org/component"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="http://eclipse.org/component ../component.xsd "
+   name="Eclipse Platform Runtime">
+   <component-depends unrestricted="true"/>
+
+ <plugin id="org.eclipse.osgi" />
+ <plugin id="org.eclipse.osgi.services" />
+ <plugin id="org.eclipse.osgi.util" />
+
+ <package name="org.eclipse.osgi.util">
+   <type name="ManifestElement" subclass="false" />
+ </package>
+ <package name="org.eclipse.osgi.service.datalocation">
+   <type name="Location" implement="false" />
+ </package>
+
+ <package name="org.osgi.framework">
+   <type name="Bundle" implement="false"/>
+   <type name="BundleContext" implement="false"/>
+   <type name="BundleEvent" subclass="false"/>
+   <type name="Filter" implement="false"/>
+   <type name="FrameworkEvent" subclass="false"/>
+   <type name="ServiceEvent" subclass="false"/>
+   <type name="ServiceReference" implement="false"/>
+   <type name="ServiceRegistration" implement="false"/>
+   <type name="Version" subclass="false"/>
+ </package>
+ <package name="org.osgi.service.condpermadmin">
+   <type name="BundleLocationCondition" instantiate="false"/>
+   <type name="BundleSignerCondition" instantiate="false"/>
+   <type name="ConditionalPermissionAdmin" implement="false"/>
+   <type name="ConditionalPermissionInfo" implement="false"/>
+   <type name="ConditionInfo" subclass="false"/>
+ </package>
+ <package name="org.osgi.service.packageadmin">
+   <type name="ExportedPackage" implement="false"/>
+   <type name="PackageAdmin" implement="false"/>
+   <type name="RequiredBundle" implement="false"/>
+ </package>
+ <package name="org.osgi.service.permissionadmin">
+   <type name="PermissionAdmin" implement="false"/>
+   <type name="PermissionInfo" subclass="false"/>
+ </package>
+ <package name="org.osgi.service.startlevel">
+   <type name="StartLevel" implement="false"/>
+ </package>
+ <package name="org.osgi.service.url">
+   <type name="URLStreamHandlerService" implement="false"/>
+   <type name="URLStreamHandlerSetter" implement="false"/>
+ </package>
+ <package name="org.osgi.util.tracker"/>
+ 
+ <package name="org.osgi.service.cm"/>
+ <package name="org.osgi.service.device"/>
+ <package name="org.osgi.service.http"/>
+ <package name="org.osgi.service.io"/>
+ <package name="org.osgi.service.log"/>
+ <package name="org.osgi.service.metatype"/>
+ <package name="org.osgi.service.provisioning"/>
+ <package name="org.osgi.service.upnp"/>
+ <package name="org.osgi.service.useradmin"/>
+ <package name="org.osgi.service.wireadmin"/>
+
+ <package name="org.osgi.util.measurement"/>
+ <package name="org.osgi.util.position"/>
+ <package name="org.osgi.util.xml"/>
+
+</component>
