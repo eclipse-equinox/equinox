@@ -19,7 +19,11 @@ import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.service.datalocation.Location;
 
 /**
- * Internal class.
+ * This class is used to manage the various Locations for Eclipse.
+ * <p>
+ * Clients may not extend this class.
+ * </p>
+ * @since 3.1
  */
 public class LocationManager {
 	private static Location installLocation = null;
@@ -63,6 +67,12 @@ public class LocationManager {
 	private static final String USER_HOME = "@user.home"; //$NON-NLS-1$
 	private static final String USER_DIR = "@user.dir"; //$NON-NLS-1$
 
+	/**
+	 * Builds a URL with the given specification
+	 * @param spec the URL specification
+	 * @param trailingSlash flag to indicate a trailing slash on the spec
+	 * @return a URL
+	 */
 	public static URL buildURL(String spec, boolean trailingSlash) {
 		if (spec == null)
 			return null;
@@ -108,6 +118,9 @@ public class LocationManager {
 		}
 	}
 
+	/**
+	 * Initializes the Location objects for the LocationManager.
+	 */
 	public static void initializeLocations() {
 		// do install location initialization first since others may depend on it
 		// assumes that the property is already set
@@ -286,27 +299,52 @@ public class LocationManager {
 		return new File(userHome, appName + "/" + pathAppendage).getAbsolutePath(); //$NON-NLS-1$
 	}
 
+	/**
+	 * Returns the user Location object
+	 * @return the user Location object
+	 */
 	public static Location getUserLocation() {
 		return userLocation;
 	}
 
+	/**
+	 * Returns the configuration Location object
+	 * @return the configuration Location object
+	 */
 	public static Location getConfigurationLocation() {
 		return configurationLocation;
 	}
 
+	/**
+	 * Returns the install Location object
+	 * @return the install Location object
+	 */
 	public static Location getInstallLocation() {
 		return installLocation;
 	}
 
+	/**
+	 * Returns the instance Location object
+	 * @return the instance Location object
+	 */
 	public static Location getInstanceLocation() {
 		return instanceLocation;
 	}
 
+	/**
+	 * Returns the File object under the configuration location used for the OSGi configuration
+	 * @return the OSGi configuration directory
+	 */
 	public static File getOSGiConfigurationDir() {
 		// TODO assumes the URL is a file: url
 		return new File(configurationLocation.getURL().getFile(), FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME);
 	}
 
+	/**
+	 * Returns a file from the configuration area that can be used by the framework
+	 * @param filename the filename
+	 * @return a file from the configuration area
+	 */
 	public static File getConfigurationFile(String filename) {
 		File dir = getOSGiConfigurationDir();
 		if (!dir.exists())

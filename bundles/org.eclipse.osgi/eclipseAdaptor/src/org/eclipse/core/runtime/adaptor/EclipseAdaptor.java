@@ -34,25 +34,30 @@ import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 
 /**
- * Internal class.
+ * The FrameworkAdaptor implementation used to launch to OSGi framework for Eclipse.
+ * <p>
+ * Clients may extend this class.
+ * </p>
+ * @since 3.1
  */
 public class EclipseAdaptor extends AbstractFrameworkAdaptor {
+	/**	System property used to clean the osgi configuration area */
 	public static final String PROP_CLEAN = "osgi.clean"; //$NON-NLS-1$
-
+	/** System property used to prevent VM exit when unexpected errors occur */
 	public static final String PROP_EXITONERROR = "eclipse.exitOnError"; //$NON-NLS-1$
 
 	static final String F_LOG = ".log"; //$NON-NLS-1$
-
+	/** Manifest header used to specify the plugin class */
 	// TODO rename it to Eclipse-PluginClass
 	public static final String PLUGIN_CLASS = "Plugin-Class"; //$NON-NLS-1$
-
+	/** Manifest header used to specify the auto start properties of a bundle */
 	public static final String ECLIPSE_AUTOSTART = "Eclipse-AutoStart"; //$NON-NLS-1$
 
-	// TODO rename constant to ECLIPSE_AUTOSTART_EXCEPTIONS
+	/** An Eclipse-AutoStart attribute used to specify exception classes for auto start */
 	public static final String ECLIPSE_AUTOSTART_EXCEPTIONS = "exceptions"; //$NON-NLS-1$
-
+	/** The SAX factory name */
 	public static final String SAXFACTORYNAME = "javax.xml.parsers.SAXParserFactory"; //$NON-NLS-1$
-
+	/** The DOM factory name */
 	public static final String DOMFACTORYNAME = "javax.xml.parsers.DocumentBuilderFactory"; //$NON-NLS-1$
 
 	private static final String RUNTIME_ADAPTOR = FRAMEWORK_SYMBOLICNAME + "/eclipseadaptor"; //$NON-NLS-1$
@@ -69,10 +74,11 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 
 	private static final String OPTION_LOCATION = RUNTIME_ADAPTOR + "/debug/location"; //$NON-NLS-1$	
 
+	/** The current bundle data version */
 	public static final byte BUNDLEDATA_VERSION = 16;
-
+	/** The NULL tag used in bundle data */
 	public static final byte NULL = 0;
-
+	/** The OBJECT tag used in bundle data */
 	public static final byte OBJECT = 1;
 
 	private static EclipseAdaptor instance;
@@ -92,8 +98,9 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 
 	private boolean reinitialize = false;
 
-	/*
+	/**
 	 * Should be instantiated only by the framework (through reflection).
+	 * @param args the adaptor arguments
 	 */
 	public EclipseAdaptor(String[] args) {
 		super(args);
@@ -101,6 +108,10 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 		setDebugOptions();
 	}
 
+	/**
+	 * Gets the default instance
+	 * @return the default instance
+	 */
 	public static EclipseAdaptor getDefault() {
 		return instance;
 	}
@@ -118,6 +129,9 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 		return new EclipseLog(new PrintWriter(System.err));
 	}
 
+	/**
+	 * @see FrameworkAdaptor#initialize(EventPublisher)
+	 */
 	public void initialize(EventPublisher publisher) {
 		if (Boolean.getBoolean(EclipseAdaptor.PROP_CLEAN))
 			cleanOSGiCache();
@@ -138,6 +152,9 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 		}
 	}
 
+	/**
+	 * @see AbstractFrameworkAdaptor#initializeMetadata()
+	 */
 	public void initializeMetadata() {
 		// do nothing here; metadata is already initialized by readHeaders.
 	}
@@ -537,6 +554,13 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 		return null;
 	}
 
+	/**
+	 * Loads the meta data for the specified bundle data
+	 * @param data the bundle data to load meta data for
+	 * @param in the stream to read the meta data from
+	 * @param version the version of data being read
+	 * @throws IOException when an io error occurs reading the metadata
+	 */
 	protected void loadMetaDataFor(EclipseBundleData data, DataInputStream in, byte version) throws IOException {
 		byte flag = in.readByte();
 		if (flag == NULL)
@@ -579,6 +603,13 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 		}
 	}
 
+	/**
+	 * Saves the metadata for the specified bundle data.  This method only marks the bundle data
+	 * as dirty if the bundle is not auto started.  The bundle data is not persisted until the 
+	 * framework is shutdown.
+	 * @param data
+	 * @throws IOException
+	 */
 	public void saveMetaDataFor(EclipseBundleData data) throws IOException {
 		if (!data.isAutoStartable()) {
 			timeStamp--; // Change the value of the timeStamp, as a marker
@@ -586,6 +617,10 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 		}
 	}
 
+	/** 
+	 * Saves the initial bundle start level.  This method only marks the bundle data as 
+	 * dirty.  The bundle dat is not persisted until the framework is shutdown.
+	 */
 	public void persistInitialBundleStartLevel(int value) {
 		// Change the value of the timeStamp, as a marker that something
 		// changed.
@@ -597,6 +632,12 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 		// updated.
 	}
 
+	/**
+	 * Saves the metadata for the specified bundle data.
+	 * @param data the bundle data
+	 * @param out the stream to save the metadata to
+	 * @throws IOException when an io error occurs saving the metadata
+	 */
 	protected void saveMetaDataFor(BundleData data, DataOutputStream out) throws IOException {
 		if (data.getBundleID() == 0 || !(data instanceof AbstractBundleData)) {
 			out.writeByte(NULL);
@@ -653,6 +694,9 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 		}
 	}
 
+	/**
+	 * Persists the bundle data for all bundles installed in the framework.
+	 */
 	public void saveMetaData() {
 		// the cache and the state match
 		if (!canWrite() | timeStamp == stateManager.getSystemState().getTimeStamp())
@@ -699,6 +743,10 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 		return StatsManager.getDefault();
 	}
 
+	/**
+	 * Returns the system bundle context
+	 * @return the system bundle context
+	 */
 	protected BundleContext getContext() {
 		return context;
 	}

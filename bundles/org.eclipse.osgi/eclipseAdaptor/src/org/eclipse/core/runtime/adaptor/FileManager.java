@@ -35,6 +35,10 @@ import org.eclipse.osgi.framework.internal.reliablefile.*;
  * agree to the conventions and to calling the given API. There is no capacity
  * to enforce these conventions or prohibit corruption.
  * </p>
+ * <p>
+ * Clients may not extend this class.
+ * </p>
+ * @since 3.1
  */
 public class FileManager {
 	static final int FILETYPE_STANDARD = 0;

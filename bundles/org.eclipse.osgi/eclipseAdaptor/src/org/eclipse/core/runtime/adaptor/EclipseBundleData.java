@@ -27,14 +27,23 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.Version;
 
 /**
- * Internal class.
+ * The BundleData implementation used Eclipse.
+ * <p>
+ * Clients may extend this class.
+ * </p>
+ * @since 3.1
  */
 //Maybe for consistency should it be overriden to do nothing. See also EclipseAdaptor.saveMetadataFor(BundleData)
 public class EclipseBundleData extends AbstractBundleData {
+	/** bundle manifest type unknown */
 	static public final byte MANIFEST_TYPE_UNKNOWN = 0x00;
+	/** bundle manifest type bundle (META-INF/MANIFEST.MF) */
 	static public final byte MANIFEST_TYPE_BUNDLE = 0x01;
+	/** bundle manifest type plugin (plugin.xml) */
 	static public final byte MANIFEST_TYPE_PLUGIN = 0x02;
+	/** bundle manifest type fragment (fragment.xml) */
 	static public final byte MANIFEST_TYPE_FRAGMENT = 0x04;
+	/** bundle manifest type jared bundle */
 	static public final byte MANIFEST_TYPE_JAR = 0x08;
 
 	private static String[] libraryVariants = null;
@@ -44,20 +53,22 @@ public class EclipseBundleData extends AbstractBundleData {
 	private byte manifestType = MANIFEST_TYPE_UNKNOWN;
 
 	// URL protocol designations
+	/** The platform protocol */
 	public static final String PROTOCOL = "platform"; //$NON-NLS-1$
+	/** The file protocol */
 	public static final String FILE = "file"; //$NON-NLS-1$
 
 	private static final String PROP_CHECK_CONFIG = "osgi.checkConfiguration"; //$NON-NLS-1$
-	// the Plugin-Class header
+	/** the Plugin-Class header */
 	protected String pluginClass = null;
-	// the Eclipse-AutoStart header	
+	/**  Eclipse-AutoStart header */	
 	private boolean autoStart;
 	private String[] autoStartExceptions;
-	// shortcut to know if a bundle has a buddy
+	/** shortcut to know if a bundle has a buddy */
 	protected String buddyList;
-	// shortcut to know if a bundle is a registrant to a registered policy
+	/** shortcut to know if a bundle is a registrant to a registered policy */
 	protected String registeredBuddyList;
-	// shortcut to know if the bundle manifest has package info
+	/** shortcut to know if the bundle manifest has package info */
 	protected boolean hasPackageInfo;
 
 	private static String[] buildLibraryVariants() {
@@ -77,10 +88,19 @@ public class EclipseBundleData extends AbstractBundleData {
 		return (String[]) result.toArray(new String[result.size()]);
 	}
 
+	/**
+	 * Constructor for EclipseBundleData.
+	 * @param adaptor The adaptor for this bundle data
+	 * @param id The bundle id for this bundle data
+	 */
 	public EclipseBundleData(AbstractFrameworkAdaptor adaptor, long id) {
 		super(adaptor, id);
 	}
 
+	/**
+	 * Initialize an existing bundle
+	 * @throws IOException if any error occurs loading the existing bundle
+	 */
 	public void initializeExistingBundle() throws IOException {
 		createBaseBundleFile();
 		if (!checkManifestTimeStamp()) {
@@ -186,6 +206,15 @@ public class EclipseBundleData extends AbstractBundleData {
 		return getManifest(false);
 	}
 
+	/**
+	 * Gets the manifest for this bundle.  If this is the first time the manifest is
+	 * ever accessed then the manifest is loaded from the manifest file in the bundle;
+	 * otherwise the manifest is loaded from cached data.
+	 * @param first set to true if this is the first time the manifest is accessed 
+	 * for this bundle
+	 * @return the manifest for this bundle
+	 * @throws BundleException if any error occurs loading the manifest
+	 */
 	public synchronized Dictionary getManifest(boolean first) throws BundleException {
 		if (manifest == null)
 			manifest = first ? loadManifest() : new CachedManifest(this);
@@ -200,6 +229,11 @@ public class EclipseBundleData extends AbstractBundleData {
 		return getEntry(PluginConverterImpl.PLUGIN_MANIFEST) == null && getEntry(PluginConverterImpl.FRAGMENT_MANIFEST) == null;
 	}
 
+	/**
+	 * Loads the bundle manifest from the bundle.
+	 * @return the bundle manifest
+	 * @throws BundleException if an error occurs loading the bundle manifest
+	 */
 	public synchronized Dictionary loadManifest() throws BundleException {
 		URL url = getEntry(Constants.OSGI_BUNDLE_MANIFEST);
 		if (url != null) {
@@ -347,55 +381,109 @@ public class EclipseBundleData extends AbstractBundleData {
 		return false;
 	}
 
+	/**
+	 * Returns the plugin class
+	 * @return the plugin class
+	 */
 	public String getPluginClass() {
 		return pluginClass;
 	}
 
+	/**
+	 * Returns the buddy list for this bundle
+	 * @return the buddy list for this bundle
+	 */
 	public String getBuddyList() {
 		return buddyList;
 	}
 
+	/**
+	 * Returns the registered buddy list for this bundle
+	 * @return the registered buddy list for this bundle
+	 */
 	public String getRegisteredBuddyList() {
 		return registeredBuddyList;
 	}
 
+	/**
+	 * Sets the plugin class
+	 * @param value the plugin class
+	 */
 	public void setPluginClass(String value) {
 		pluginClass = value;
 	}
 
+	/**
+	 * Returns the timestamp for the manifest file
+	 * @return the timestamp for the manifest file
+	 */
 	public long getManifestTimeStamp() {
 		return manifestTimeStamp;
 	}
 
+	/**
+	 * Sets the manifest timestamp for this bundle
+	 * @param stamp the manifest timestamp
+	 */
 	public void setManifestTimeStamp(long stamp) {
 		manifestTimeStamp = stamp;
 	}
 
+	/**
+	 * Returns the manifest type
+	 * @return the manifest type
+	 */
 	public byte getManifestType() {
 		return manifestType;
 	}
 
+	/**
+	 * Sets the manifest type
+	 * @param manifestType the manifest type
+	 */
 	public void setManifestType(byte manifestType) {
 		this.manifestType = manifestType;
 	}
 
+	/**
+	 * Sets the auto start flag
+	 * @param value the auto start flag
+	 */
 	public void setAutoStart(boolean value) {
 		autoStart = value;
 	}
 
+	/**
+	 * Checks whether this bundle is auto started for all resource/class loads
+	 * @return true if the bundle is auto started; false otherwise
+	 */
 	public boolean isAutoStart() {
 		return autoStart;
 	}
 
+	/**
+	 * Returns the status of this bundle which is persisted on shutdown.  For bundles
+	 * which are auto started the started state is removed to prevent the bundle from
+	 * being started on the next startup.
+	 * @return the status of this bundle which is persisted on shutdown
+	 */
 	public int getPersistentStatus() {
 		// omit the active state if necessary  
 		return isAutoStartable() ? (~Constants.BUNDLE_STARTED) & getStatus() : getStatus();
 	}
 
+	/**
+	 * Sets the list of auto start exceptions for this bundle
+	 * @param autoStartExceptions the list of auto start exceptions
+	 */
 	public void setAutoStartExceptions(String[] autoStartExceptions) {
 		this.autoStartExceptions = autoStartExceptions;
 	}
 
+	/**
+	 * Returns the auto start exception packages
+	 * @return the auto start exception packages
+	 */
 	public String[] getAutoStartExceptions() {
 		return autoStartExceptions;
 	}
@@ -427,6 +515,11 @@ public class EclipseBundleData extends AbstractBundleData {
 			autoStartExceptions[i] = tokenizer.nextToken().trim();
 	}
 
+	/**
+	 * Checks whether this bundle is auto started for all resource/class loads or only for a
+	 * subset of resource/classloads 
+	 * @return true if the bundle is auto started; false otherwise
+	 */
 	public boolean isAutoStartable() {
 		return autoStart || (autoStartExceptions != null && autoStartExceptions.length > 0);
 	}

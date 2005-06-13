@@ -17,7 +17,11 @@ import org.eclipse.osgi.framework.adaptor.ClassLoaderDelegate;
 import org.eclipse.osgi.framework.adaptor.core.*;
 
 /**
- * Internal class.
+ * Creates EclipseBundleData and EclipseClassLoader objects for the framework adaptor
+ * <p>
+ * Clients may extend this class.
+ * </p>
+ * @since 3.1
  */
 public class EclipseElementFactory implements AdaptorElementFactory {
 

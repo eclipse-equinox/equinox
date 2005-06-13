@@ -30,7 +30,11 @@ import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 
 /**
- * Internal class.
+ * Implements the class loader for Eclipse
+ * <p>
+ * Clients may extend this class.
+ * </p>
+ * @since 3.1
  */
 public class EclipseClassLoader extends DefaultClassLoader {
 	private static String[] NL_JAR_VARIANTS = buildNLJarVariants(EclipseEnvironmentInfo.getDefault().getNL());

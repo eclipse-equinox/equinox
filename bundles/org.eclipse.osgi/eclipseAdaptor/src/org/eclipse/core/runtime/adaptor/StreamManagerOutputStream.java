@@ -14,7 +14,11 @@ import java.io.*;
 
 /**
  * Represents an <code>OutputStream</code> provided by FileManager
- * @see StreamManager#getOutputStream(String) 
+ * @see StreamManager#getOutputStream(String)
+ * <p>
+ * Clients may not extend this class.
+ * </p>
+ * @since 3.1
  */
 public class StreamManagerOutputStream extends FilterOutputStream {
 	private String target;

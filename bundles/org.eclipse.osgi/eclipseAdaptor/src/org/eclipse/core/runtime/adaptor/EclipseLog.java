@@ -22,27 +22,45 @@ import org.eclipse.osgi.framework.util.SecureAction;
 import org.osgi.framework.*;
 
 /**
- * Internal class.
+ * The FrameworkLog implementation for Eclipse.
+ * <p>
+ * Clients may extend this class.
+ * </p>
+ * @since 3.1
  */
 public class EclipseLog implements FrameworkLog {
 	private static final String PASSWORD = "-password"; //$NON-NLS-1$	
+	/** The session tag */
 	protected static final String SESSION = "!SESSION"; //$NON-NLS-1$
+	/** The entry tag */
 	protected static final String ENTRY = "!ENTRY"; //$NON-NLS-1$
+	/** The sub-entry tag */
 	protected static final String SUBENTRY = "!SUBENTRY"; //$NON-NLS-1$
+	/** The message tag */
 	protected static final String MESSAGE = "!MESSAGE"; //$NON-NLS-1$
+	/** The stacktrace tag */
 	protected static final String STACK = "!STACK"; //$NON-NLS-1$
 
+	/** The line separator used in the log output */
 	protected static final String LINE_SEPARATOR;
+	/** The tab character used in the log output */
 	protected static final String TAB_STRING = "\t"; //$NON-NLS-1$
 
 	//Constants for rotating log file
+	/** The default size a log file can grow before it is rotated */
 	public static final int DEFAULT_LOG_SIZE = 1000;
+	/** The default number of backup log files */ 
 	public static final int DEFAULT_LOG_FILES = 10;
+	/** The minimum size limit for log rotation */
 	public static final int LOG_SIZE_MIN = 10;
 
+	/** The system property used to specify size a log file can grow before it is rotated */
 	public static final String PROP_LOG_SIZE_MAX = "eclipse.log.size.max"; //$NON-NLS-1$
+	/** The system property used to specify the maximim number of backup log files to use */
 	public static final String PROP_LOG_FILE_MAX = "eclipse.log.backup.max"; //$NON-NLS-1$
+	/** The extension used for log files */
 	public static final String LOG_EXT = ".log"; //$NON-NLS-1$
+	/** The extension markup to use for backup log files*/
 	public static final String BACKUP_MARK = ".bak_"; //$NON-NLS-1$
 
 	static {
@@ -51,7 +69,9 @@ public class EclipseLog implements FrameworkLog {
 	}
 	private static final SecureAction secureAction = new SecureAction();
 
+	/** Indicates if the console messages should be printed to the console (System.out) */
 	protected boolean consoleLog = false;
+	/** Indicates if the next log message is part of a new session */
 	protected boolean newSession = true;
 	/**
 	 * The File object to store messages.  This value may be null.
@@ -67,12 +87,20 @@ public class EclipseLog implements FrameworkLog {
 	int maxLogFiles = DEFAULT_LOG_FILES;
 	int backupIdx = 0;
 
+	/**
+	 * Constructs an EclipseLog which uses the specified File to log messages to
+	 * @param outFile a file to log messages to
+	 */
 	public EclipseLog(File outFile) {
 		this.outFile = outFile;
 		this.writer = null;
 		readLogProperties();
 	}
 
+	/**
+	 * Constructs an EclipseLog which uses the specified Writer to log messages to
+	 * @param writer a writer to log messages to
+	 */
 	public EclipseLog(Writer writer) {
 		if (writer == null)
 			// log to System.err by default
@@ -81,6 +109,10 @@ public class EclipseLog implements FrameworkLog {
 			this.writer = writer;
 	}
 
+	/**
+	 * Constructs an EclipseLog which uses System.err to write log messages to
+	 *
+	 */
 	public EclipseLog() {
 		this((Writer) null);
 	}
@@ -103,6 +135,8 @@ public class EclipseLog implements FrameworkLog {
 
 	/**
 	 * Helper method for writing out argument arrays.
+	 * @param header the header
+	 * @args the list of arguments
 	 */
 	protected void writeArgs(String header, String[] args) throws IOException {
 		if (args == null || args.length == 0)
@@ -118,11 +152,13 @@ public class EclipseLog implements FrameworkLog {
 		writeln();
 	}
 
-	/*
-	 * Main should have set the session start-up timestamp so return that. 
-	 * Return the "now" time if not available.
+	/**
+	 * Returns the session timestamp.  This is the time the platform was started
+	 * @return the session timestamp
 	 */
 	protected String getSessionTimestamp() {
+		// Main should have set the session start-up timestamp so return that. 
+		// Return the "now" time if not available.
 		String ts = System.getProperty("eclipse.startTime"); //$NON-NLS-1$
 		if (ts != null) {
 			try {
@@ -134,6 +170,10 @@ public class EclipseLog implements FrameworkLog {
 		return getDate(new Date());
 	}
 
+	/**
+	 * Writes the session
+	 * @throws IOException if an error occurs writing to the log
+	 */
 	protected void writeSession() throws IOException {
 		write(SESSION);
 		writeSpace();
@@ -177,9 +217,6 @@ public class EclipseLog implements FrameworkLog {
 		writeArgs("Command-line arguments: ", EclipseEnvironmentInfo.getDefault().getCommandLineArgs()); //$NON-NLS-1$
 	}
 
-	/**
-	 * Closes the FrameworkLog.
-	 */
 	public void close() {
 		try {
 			if (writer != null) {
@@ -192,6 +229,10 @@ public class EclipseLog implements FrameworkLog {
 		}
 	}
 
+	/**
+	 * If a File is used to log messages to then the File opened and a Writer is created
+	 * to log messages to.
+	 */
 	protected void openFile() {
 		if (writer == null) {
 			if (outFile != null) {
@@ -206,6 +247,9 @@ public class EclipseLog implements FrameworkLog {
 		}
 	}
 
+	/**
+	 * If a File is used to log messages to then the writer is closed.
+	 */
 	protected void closeFile() {
 		if (outFile != null) {
 			if (writer != null) {
@@ -333,6 +377,11 @@ public class EclipseLog implements FrameworkLog {
 		}
 	}
 
+	/**
+	 * Returns a date string using the correct format for the log.
+	 * @param date the Date to format
+	 * @return a date string.
+	 */
 	protected String getDate(Date date) {
 		try {
 			DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SS"); //$NON-NLS-1$
@@ -345,6 +394,11 @@ public class EclipseLog implements FrameworkLog {
 		return Long.toString(System.currentTimeMillis());
 	}
 
+	/**
+	 * Returns a stacktrace string using the correct format for the log
+	 * @param t the Throwable to get the stacktrace for
+	 * @return a stacktrace string
+	 */
 	protected String getStackTrace(Throwable t) {
 		if (t == null)
 			return null;
@@ -362,6 +416,11 @@ public class EclipseLog implements FrameworkLog {
 		return sw.toString();
 	}
 
+	/**
+	 * Returns a Writer for the given OutputStream
+	 * @param output an OutputStream to use for the Writer
+	 * @return a Writer for the given OutputStream
+	 */
 	protected Writer logForStream(OutputStream output) {
 		try {
 			return new BufferedWriter(new OutputStreamWriter(output, "UTF-8")); //$NON-NLS-1$
@@ -370,6 +429,14 @@ public class EclipseLog implements FrameworkLog {
 		}
 	}
 
+	/**
+	 * Writes the log entry to the log using the specified depth.  A depth value of 0
+	 * idicates that the log entry is the root entry.  Any value greater than 0 indicates
+	 * a sub-entry.
+	 * @param depth the depth of th entry
+	 * @param entry the entry to log
+	 * @throws IOException if any error occurs writing to the log
+	 */
 	protected void writeLog(int depth, FrameworkLogEntry entry) throws IOException {
 		writeEntry(depth, entry);
 		writeMessage(entry);
@@ -383,6 +450,14 @@ public class EclipseLog implements FrameworkLog {
 		}
 	}
 
+	/**
+	 * Writes the ENTRY or SUBENTRY header for an entry.  A depth value of 0
+	 * idicates that the log entry is the root entry.  Any value greater than 0 indicates
+	 * a sub-entry.
+	 * @param depth the depth of th entry
+	 * @param entry the entry to write the header for
+	 * @throws IOException if any error occurs writing to the log
+	 */
 	protected void writeEntry(int depth, FrameworkLogEntry entry) throws IOException {
 		if (depth == 0) {
 			writeln(); // write a blank line before all !ENTRY tags bug #64406
@@ -399,12 +474,22 @@ public class EclipseLog implements FrameworkLog {
 		writeln();
 	}
 
+	/**
+	 * Writes the MESSAGE header to the log for the given entry.
+	 * @param entry the entry to write the message for
+	 * @throws IOException if any error occurs writing to the log
+	 */
 	protected void writeMessage(FrameworkLogEntry entry) throws IOException {
 		write(MESSAGE);
 		writeSpace();
 		writeln(entry.getMessage());
 	}
 
+	/**
+	 * Writes the STACK header to the log for the given entry.
+	 * @param entry the entry to write the stacktrace for
+	 * @throws IOException if any error occurs writing to the log
+	 */
 	protected void writeStack(FrameworkLogEntry entry) throws IOException {
 		Throwable t = entry.getThrowable();
 		if (t != null) {
@@ -417,6 +502,11 @@ public class EclipseLog implements FrameworkLog {
 		}
 	}
 
+	/**
+	 * Writes the given message to the log.
+	 * @param message the message
+	 * @throws IOException if any error occurs writing to the log
+	 */
 	protected void write(String message) throws IOException {
 		if (message != null) {
 			writer.write(message);
@@ -425,19 +515,37 @@ public class EclipseLog implements FrameworkLog {
 		}
 	}
 
+	/**
+	 * Writes the given message to the log and a newline.
+	 * @param s the message
+	 * @throws IOException if any error occurs writing to the log
+	 */
 	protected void writeln(String s) throws IOException {
 		write(s);
 		writeln();
 	}
 
+	/**
+	 * Writes a newline log.
+	 * @throws IOException if any error occurs writing to the log
+	 */
 	protected void writeln() throws IOException {
 		write(LINE_SEPARATOR);
 	}
 
+	/**
+	 * Writes a space to the log.
+	 * @throws IOException if any error occurs writing to the log
+	 */
 	protected void writeSpace() throws IOException {
 		write(" "); //$NON-NLS-1$
 	}
 
+	/**
+	 * Checks the log file size.  If the log file size reaches the limit then the log 
+	 * is rotated
+	 * @return false if an error occured trying to rotate the log
+	 */
 	protected boolean checkLogFileSize() {
 		if (maxLogSize == 0)
 			return true; // no size limitation.
@@ -494,6 +602,9 @@ public class EclipseLog implements FrameworkLog {
 		return isBackupOK;
 	}
 
+	/**
+	 * Reads the PROP_LOG_SIZE_MAX and PROP_LOG_FILE_MAX properties.
+	 */
 	protected void readLogProperties() {
 		String newMaxLogSize = secureAction.getProperty(PROP_LOG_SIZE_MAX);
 		if (newMaxLogSize != null) {
