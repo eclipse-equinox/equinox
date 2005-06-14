@@ -13,6 +13,13 @@ package org.eclipse.core.runtime.adaptor;
 import java.io.*;
 import org.eclipse.osgi.framework.internal.reliablefile.*;
 
+/**
+ * This class manages streams for a FileManager.
+ * <p>
+ * Clients may not extend this class.
+ * </p>
+ * @since 3.1
+ */
 public class StreamManager {
 	/**
 	 * Open mask. Obtain the best data stream available. If the primary data 
