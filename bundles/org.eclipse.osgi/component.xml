@@ -47,7 +47,6 @@
    <type name="StartLevel" implement="false"/>
  </package>
  <package name="org.osgi.service.url">
-   <type name="URLStreamHandlerService" implement="false"/>
    <type name="URLStreamHandlerSetter" implement="false"/>
  </package>
  <package name="org.osgi.util.tracker"/>
