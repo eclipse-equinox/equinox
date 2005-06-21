@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/Bundle.java,v 1.26 2005/06/21 16:22:12 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/Bundle.java,v 1.27 2005/06/21 16:37:35 hargrave Exp $
  * 
  * Copyright (c) OSGi Alliance (2000, 2005). All Rights Reserved.
  * 
@@ -56,7 +56,7 @@ import java.util.Enumeration;
  * <code>Bundle</code> objects, and these objects are only valid within the
  * Framework that created them.
  * 
- * @version $Revision: 1.26 $
+ * @version $Revision: 1.27 $
  */
 public abstract interface Bundle {
 	/**
@@ -873,7 +873,7 @@ public abstract interface Bundle {
 	/**
 	 * Returns entries in this bundle and its attached fragments. The bundle's
 	 * classloader is not used to search for entries. Only the contents of the
-	 * bundle and its attatched fragments are searched for the specified
+	 * bundle and its attached fragments are searched for the specified
 	 * entries.
 	 * 
 	 * If this bundle's state is <code>INSTALLED</code>, this method must
