@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/BundlePermission.java,v 1.9 2005/06/21 15:24:06 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/BundlePermission.java,v 1.10 2005/06/21 16:22:12 hargrave Exp $
  *
  * Copyright (c) OSGi Alliance (2004, 2005). All Rights Reserved.
  * 
@@ -40,10 +40,6 @@ import java.util.Hashtable;
 
 public final class BundlePermission extends BasicPermission {
 
-	/**
-	 * ### Comments are nonsense in this file. Comment for
-	 * <code>serialVersionUID</code>
-	 */
 	private static final long	serialVersionUID	= 3257846601685873716L;
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/BundleContext.java,v 1.12 2005/05/13 20:32:55 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/BundleContext.java,v 1.13 2005/06/21 16:22:12 hargrave Exp $
  * 
  * Copyright (c) OSGi Alliance (2000, 2005). All Rights Reserved.
  * 
@@ -60,7 +60,7 @@ import java.util.Dictionary;
  * The Framework is the only entity that can create <code>BundleContext</code>
  * objects and they are only valid within the Framework that created them.
  * 
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 
 public abstract interface BundleContext {
@@ -139,8 +139,6 @@ public abstract interface BundleContext {
 	 * resources minimally consist of a unique identifier and a persistent
 	 * storage area if the platform has file system support. If this step fails,
 	 * a <code>BundleException</code> is thrown.
-	 * ### We need to add some text about signing conditions, 
-	 * ## one of which is the absence of the OSGI-INF/permissions.perm file when it is signed
 	 * 
 	 * <li>If the bundle has declared an Bundle-RequiredExecutionEnvironment
 	 * header, then the listed execution environments must be verified against
