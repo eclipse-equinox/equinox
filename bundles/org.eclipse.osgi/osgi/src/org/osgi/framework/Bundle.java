@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/Bundle.java,v 1.24 2005/05/13 20:32:55 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/Bundle.java,v 1.25 2005/06/21 15:35:22 hargrave Exp $
  * 
  * Copyright (c) OSGi Alliance (2000, 2005). All Rights Reserved.
  * 
@@ -56,7 +56,7 @@ import java.util.Enumeration;
  * <code>Bundle</code> objects, and these objects are only valid within the
  * Framework that created them.
  * 
- * @version $Revision: 1.24 $
+ * @version $Revision: 1.25 $
  */
 public abstract interface Bundle {
 	/**
@@ -397,7 +397,8 @@ public abstract interface Bundle {
 	 * @exception java.lang.IllegalStateException If this bundle has been
 	 *            uninstalled or this bundle tries to change its own state.
 	 * @exception java.lang.SecurityException If the caller does not have the
-	 *            appropriate <code>AdminPermission[bundle, LIFECYCLE]</code>,
+	 *            appropriate <code>AdminPermission[bundle, LIFECYCLE]</code> for both
+	 *            the current bundle and the updated bundle,
 	 *            and the Java Runtime Environment supports permissions.
 	 * @see #stop()
 	 * @see #start()
@@ -422,7 +423,8 @@ public abstract interface Bundle {
 	 * @exception java.lang.IllegalStateException If this bundle has been
 	 *            uninstalled or this bundle tries to change its own state.
 	 * @exception java.lang.SecurityException If the caller does not have the
-	 *            appropriate <code>AdminPermission[bundle, LIFECYCLE]</code>,
+	 *            appropriate <code>AdminPermission[bundle, LIFECYCLE]</code> for both
+	 *            the current bundle and the updated bundle,
 	 *            and the Java Runtime Environment supports permissions.
 	 * @see #update()
 	 */

@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/BundlePermission.java,v 1.7 2005/05/13 20:32:55 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/BundlePermission.java,v 1.9 2005/06/21 15:24:06 hargrave Exp $
  *
  * Copyright (c) OSGi Alliance (2004, 2005). All Rights Reserved.
  * 
@@ -11,11 +11,9 @@
 package org.osgi.framework;
 
 import java.io.IOException;
-import java.util.Hashtable;
+import java.security.*;
 import java.util.Enumeration;
-import java.security.Permission;
-import java.security.BasicPermission;
-import java.security.PermissionCollection;
+import java.util.Hashtable;
 
 /**
  * A bundle's authority to require or provide a bundle or to receive or attach
@@ -34,8 +32,8 @@ import java.security.PermissionCollection;
  * 
  * <p>
  * <code>BundlePermission</code> has four actions: <code>PROVIDE</code>,
- * <code>REQUIRE</code>,<code>HOST</code>, and <code>FRAGMENT</code>. The
- * <code>PROVIDE</code> action implies the <code>REQUIRE</code> action.
+ * <code>REQUIRE</code>,<code>HOST</code>, and <code>FRAGMENT</code>.
+ * The <code>PROVIDE</code> action implies the <code>REQUIRE</code> action.
  * 
  * @since 1.3
  */
@@ -43,7 +41,8 @@ import java.security.PermissionCollection;
 public final class BundlePermission extends BasicPermission {
 
 	/**
-	 * Comment for <code>serialVersionUID</code>
+	 * ### Comments are nonsense in this file. Comment for
+	 * <code>serialVersionUID</code>
 	 */
 	private static final long	serialVersionUID	= 3257846601685873716L;
 
@@ -97,14 +96,14 @@ public final class BundlePermission extends BasicPermission {
 	 * Bundle Permissions are granted over all possible versions of a bundle.
 	 * 
 	 * A bundle that needs to provide a bundle must have the appropriate
-	 * <code>BundlePermission</code> for the symbolic name; a bundle that requires
-	 * a bundle must have the appropriate <code>BundlePermssion</code> for that
-	 * symbolic name; a bundle that specifies a fragment host must have the
-	 * appropriate <code>BundlePermission</code> for that symbolic name.
+	 * <code>BundlePermission</code> for the symbolic name; a bundle that
+	 * requires a bundle must have the appropriate <code>BundlePermssion</code>
+	 * for that symbolic name; a bundle that specifies a fragment host must have
+	 * the appropriate <code>BundlePermission</code> for that symbolic name.
 	 * 
 	 * @param symbolicName the bundle symbolic name.
-	 * @param actions <code>PROVIDE</code>,<code>REQUIRE</code>,<code>HOST</code>,
-	 *        <code>FRAGMENT</code> (canonical order).
+	 * @param actions <code>PROVIDE</code>,<code>REQUIRE</code>,
+	 *        <code>HOST</code>,<code>FRAGMENT</code> (canonical order).
 	 */
 
 	public BundlePermission(String symbolicName, String actions) {
@@ -260,21 +259,16 @@ public final class BundlePermission extends BasicPermission {
 	 * named symbolic name.
 	 * 
 	 * <pre>
-	 * 
-	 *  
-	 *   
-	 *    x.y.*,&quot;provide&quot; -&gt; x.y.z,&quot;provide&quot; is true
-	 *    *,&quot;require&quot; -&gt; x.y, &quot;require&quot;      is true
-	 *    *,&quot;provide&quot; -&gt; x.y, &quot;require&quot;      is true
-	 *    x.y,&quot;provide&quot; -&gt; x.y.z, &quot;provide&quot;  is false
-	 *    
-	 *   
-	 *  
+	 *      x.y.*,&quot;provide&quot; -&gt; x.y.z,&quot;provide&quot; is true
+	 *      *,&quot;require&quot; -&gt; x.y, &quot;require&quot;      is true
+	 *      *,&quot;provide&quot; -&gt; x.y, &quot;require&quot;      is true
+	 *      x.y,&quot;provide&quot; -&gt; x.y.z, &quot;provide&quot;  is false
 	 * </pre>
 	 * 
 	 * @param p The target permission to interrogate.
-	 * @return <code>true</code> if the specified <code>BundlePermission</code>
-	 *         action is implied by this object; <code>false</code> otherwise.
+	 * @return <code>true</code> if the specified
+	 *         <code>BundlePermission</code> action is implied by this object;
+	 *         <code>false</code> otherwise.
 	 */
 
 	public boolean implies(Permission p) {
@@ -294,8 +288,8 @@ public final class BundlePermission extends BasicPermission {
 	 * 
 	 * <p>
 	 * Always returns present <code>BundlePermission</code> actions in the
-	 * following order: <code>PROVIDE</code>,<code>REQUIRE</code>,<code>HOST</code>,
-	 * <code>FRAGMENT.
+	 * following order: <code>PROVIDE</code>,<code>REQUIRE</code>,
+	 * <code>HOST</code>,<code>FRAGMENT.
 	 * @return Canonical string representation of the <code>BundlePermission</code> actions.
 	 */
 
@@ -335,8 +329,8 @@ public final class BundlePermission extends BasicPermission {
 	}
 
 	/**
-	 * Returns a new <code>PermissionCollection</code> object suitable for storing
-	 * <code>BundlePermission</code> objects.
+	 * Returns a new <code>PermissionCollection</code> object suitable for
+	 * storing <code>BundlePermission</code> objects.
 	 * 
 	 * @return A new <code>PermissionCollection</code> object.
 	 */
@@ -353,9 +347,10 @@ public final class BundlePermission extends BasicPermission {
 	 * 
 	 * @param obj The object to test for equality with this
 	 *        <code>BundlePermission</code> object.
-	 * @return <code>true</code> if <code>obj</code> is a <code>BundlePermission</code>,
-	 *         and has the same bundle symbolic name and actions as this
-	 *         <code>BundlePermission</code> object; <code>false</code> otherwise.
+	 * @return <code>true</code> if <code>obj</code> is a
+	 *         <code>BundlePermission</code>, and has the same bundle
+	 *         symbolic name and actions as this <code>BundlePermission</code>
+	 *         object; <code>false</code> otherwise.
 	 */
 	public boolean equals(Object obj) {
 		if (obj == this) {
@@ -393,9 +388,9 @@ public final class BundlePermission extends BasicPermission {
 	}
 
 	/**
-	 * WriteObject is called to save the state of the <code>BundlePermission</code>
-	 * object to a stream. The actions are serialized, and the superclass takes
-	 * care of the name.
+	 * WriteObject is called to save the state of the
+	 * <code>BundlePermission</code> object to a stream. The actions are
+	 * serialized, and the superclass takes care of the name.
 	 */
 
 	private synchronized void writeObject(java.io.ObjectOutputStream s)
@@ -459,16 +454,17 @@ final class BundlePermissionCollection extends PermissionCollection {
 	}
 
 	/**
-	 * Adds a permission to the <code>BundlePermission</code> objects. The key for
-	 * the hash is the symbolic name.
+	 * Adds a permission to the <code>BundlePermission</code> objects. The key
+	 * for the hash is the symbolic name.
 	 * 
 	 * @param permission The <code>BundlePermission</code> object to add.
 	 * 
 	 * @exception IllegalArgumentException If the permission is not a
 	 *            <code>BundlePermission</code> instance.
 	 * 
-	 * @exception SecurityException If this <code>BundlePermissionCollection</code>
-	 *            object has been marked read-only.
+	 * @exception SecurityException If this
+	 *            <code>BundlePermissionCollection</code> object has been
+	 *            marked read-only.
 	 */
 
 	public void add(Permission permission) {
@@ -510,8 +506,9 @@ final class BundlePermissionCollection extends PermissionCollection {
 	 * @param permission The Permission object to compare with this
 	 *        <code>BundlePermission</code> object.
 	 * 
-	 * @return <code>true</code> if <code>permission</code> is a proper subset of a
-	 *         permission in the set; <code>false</code> otherwise.
+	 * @return <code>true</code> if <code>permission</code> is a proper
+	 *         subset of a permission in the set; <code>false</code>
+	 *         otherwise.
 	 */
 
 	public boolean implies(Permission permission) {
@@ -573,8 +570,8 @@ final class BundlePermissionCollection extends PermissionCollection {
 	}
 
 	/**
-	 * Returns an enumeration of all <code>BundlePermission</code> objects in the
-	 * container.
+	 * Returns an enumeration of all <code>BundlePermission</code> objects in
+	 * the container.
 	 * 
 	 * @return Enumeration of all <code>BundlePermission</code> objects.
 	 */
