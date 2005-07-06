@@ -207,7 +207,7 @@ public class TestPropagation_004 extends AbstractStateTest {
 		dictionary_3.put("Bundle-ManifestVersion", "2");
 		dictionary_3.put("Bundle-SymbolicName", "C");
 		dictionary_3.put("Export-Package", "r; uses:=q");
-		dictionary_3.put("Import-Package", "q; bundle-symbolic-name=E; uses:=r");
+		dictionary_3.put("Import-Package", "q; bundle-symbolic-name=E");
 		try {
 			bundle = sof.createBundleDescription(dictionary_3, "bundle_3", 3);
 		} catch (BundleException be) {
@@ -222,7 +222,7 @@ public class TestPropagation_004 extends AbstractStateTest {
 		dictionary_4.put("Bundle-ManifestVersion", "2");
 		dictionary_4.put("Bundle-SymbolicName", "D");
 		dictionary_4.put("Export-Package", "s; uses:=q");
-		dictionary_4.put("Import-Package", "q; bundle-symbolic-name=F; uses:=s");
+		dictionary_4.put("Import-Package", "q; bundle-symbolic-name=F");
 		try {
 			bundle = sof.createBundleDescription(dictionary_4, "bundle_4", 4);
 		} catch (BundleException be) {
