@@ -129,7 +129,7 @@ public class TestPropagation_003 extends AbstractStateTest {
 		dictionary_2.put("Bundle-ManifestVersion", "2");
 		dictionary_2.put("Bundle-SymbolicName", "B");
 		dictionary_2.put("Export-Package", "q; uses:=p");
-		dictionary_2.put("Import-Package", "p");
+		dictionary_2.put("Import-Package", "p; bundle-symbolic-name=D");
 		try {
 			bundle = sof.createBundleDescription(dictionary_2, "bundle_2", 2);
 		} catch (BundleException be) {
