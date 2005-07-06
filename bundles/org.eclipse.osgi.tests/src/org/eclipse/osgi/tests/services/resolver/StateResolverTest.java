@@ -516,26 +516,35 @@ public class StateResolverTest extends AbstractStateTest {
 		manifest = new Hashtable();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "test.frag; singleton:=true");
-		manifest.put(Constants.FRAGMENT_HOST, "test.host; version=[1.0.0,2.0.0)");
+		manifest.put(Constants.FRAGMENT_HOST, "test.host; bundle-version=\"[1.0.0,2.0.0)\"");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
 		BundleDescription testFrag100 = state.getFactory().createBundleDescription(state, manifest, "test.frag100", 2);
 
 		manifest = new Hashtable();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "test.frag; singleton:=true");
-		manifest.put(Constants.FRAGMENT_HOST, "test.host; version=[1.0.0,2.0.0)");
+		manifest.put(Constants.FRAGMENT_HOST, "test.host; bundle-version=\"[1.0.0,2.0.0)\"");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.1");
 		BundleDescription testFrag101 = state.getFactory().createBundleDescription(state, manifest, "test.frag101", 3);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "test.dependent; singleton:=true");
+		manifest.put(Constants.REQUIRE_BUNDLE, "test.host; bundle-version=\"[1.0.1,2.0.0)\"");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		BundleDescription testDependent = state.getFactory().createBundleDescription(state, manifest, "test.frag101", 4);
 
 		state.addBundle(testHost100);
 		state.addBundle(testFrag100);
 		state.addBundle(testHost101);
 		state.addBundle(testFrag101);
+		state.addBundle(testDependent);
 		state.resolve();
 		assertFalse("1.0", testHost100.isResolved());
 		assertTrue("1.1", testHost101.isResolved());
 		assertFalse("1.2", testFrag100.isResolved());
 		assertTrue("1.3", testFrag101.isResolved());
+		assertTrue("1.4", testDependent.isResolved());
 	}
 
 	public void testSingletonsSameVersion() throws BundleException {
@@ -557,14 +566,14 @@ public class StateResolverTest extends AbstractStateTest {
 		manifest = new Hashtable();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "test.frag; singleton:=true");
-		manifest.put(Constants.FRAGMENT_HOST, "test.host; version=[1.0.0,2.0.0)");
+		manifest.put(Constants.FRAGMENT_HOST, "test.host; bundle-version=\"[1.0.0,2.0.0)\"");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
 		BundleDescription testFrag100 = state.getFactory().createBundleDescription(state, manifest, "test.frag100", 2);
 
 		manifest = new Hashtable();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "test.frag; singleton:=true");
-		manifest.put(Constants.FRAGMENT_HOST, "test.host; version=[1.0.0,2.0.0)");
+		manifest.put(Constants.FRAGMENT_HOST, "test.host; bundle-version=\"[1.0.0,2.0.0)\"");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
 		BundleDescription testFrag101 = state.getFactory().createBundleDescription(state, manifest, "test.frag101", 3);
 
@@ -599,14 +608,14 @@ public class StateResolverTest extends AbstractStateTest {
 		manifest = new Hashtable();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "test.frag");
-		manifest.put(Constants.FRAGMENT_HOST, "test.host; version=[1.0.0,2.0.0)");
+		manifest.put(Constants.FRAGMENT_HOST, "test.host; bundle-version=\"[1.0.0,2.0.0)\"");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
 		BundleDescription testFrag100 = state.getFactory().createBundleDescription(state, manifest, "test.frag100", 2);
 
 		manifest = new Hashtable();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "test.frag; singleton:=true");
-		manifest.put(Constants.FRAGMENT_HOST, "test.host; version=[1.0.0,2.0.0)");
+		manifest.put(Constants.FRAGMENT_HOST, "test.host; bundle-version=\"[1.0.0,2.0.0)\"");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
 		BundleDescription testFrag101 = state.getFactory().createBundleDescription(state, manifest, "test.frag101", 3);
 
@@ -622,13 +631,486 @@ public class StateResolverTest extends AbstractStateTest {
 		assertTrue("1.3", testFrag101.isResolved());
 	}
 
+	public void testTransitiveUses() throws BundleException {
+		State state = buildEmptyState();
+		Hashtable manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "A1");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		manifest.put(Constants.EXPORT_PACKAGE, "a");
+		BundleDescription a1_100 = state.getFactory().createBundleDescription(state, manifest, "a1_100", 0);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "A2");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		manifest.put(Constants.EXPORT_PACKAGE, "a");
+		BundleDescription a2_100 = state.getFactory().createBundleDescription(state, manifest, "a2_100", 1);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "B1");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		manifest.put(Constants.EXPORT_PACKAGE, "b; uses:=a");
+		manifest.put(Constants.IMPORT_PACKAGE, "a;bundle-symbolic-name=A2");
+		BundleDescription b1_100 = state.getFactory().createBundleDescription(state, manifest, "b1_100", 2);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "C1");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		manifest.put(Constants.EXPORT_PACKAGE, "c; uses:=b");
+		manifest.put(Constants.IMPORT_PACKAGE, "b");
+		BundleDescription c1_100 = state.getFactory().createBundleDescription(state, manifest, "c1_100", 3);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "D1");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		manifest.put(Constants.IMPORT_PACKAGE, "a, c");
+		BundleDescription d1_100 = state.getFactory().createBundleDescription(state, manifest, "d1_100", 4);
+
+		state.addBundle(a1_100);
+		state.addBundle(a2_100);
+		state.addBundle(b1_100);
+		state.addBundle(c1_100);
+		state.addBundle(d1_100);
+		state.resolve();
+
+		ExportPackageDescription[] b1ResolvedImports = b1_100.getResolvedImports();
+		ExportPackageDescription[] d1ResolvedImports = d1_100.getResolvedImports();
+		ExportPackageDescription[] isConsistent = isConsistent(b1ResolvedImports, d1ResolvedImports);
+		assertNull("1.1 Packages are not consistent: " + isConsistent, isConsistent);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "B1");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		manifest.put(Constants.EXPORT_PACKAGE, "b; uses:=a");
+		manifest.put(Constants.IMPORT_PACKAGE, "a;bundle-symbolic-name=A1");
+		b1_100 = state.getFactory().createBundleDescription(state, manifest, "b1_100", 2);
+		state.updateBundle(b1_100);
+		state.resolve();
+
+		b1ResolvedImports = b1_100.getResolvedImports();
+		d1ResolvedImports = d1_100.getResolvedImports();
+		isConsistent = isConsistent(b1ResolvedImports, d1ResolvedImports);
+		assertNull("1.2 Packages are not consistent: " + isConsistent, isConsistent);
+	}
+
+	public void testCyclicTransitiveUses() throws BundleException {
+		State state = buildEmptyState();
+		Hashtable manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "A1");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		manifest.put(Constants.EXPORT_PACKAGE, "a; uses:=d");
+		manifest.put(Constants.IMPORT_PACKAGE, "d");
+		BundleDescription a1_100 = state.getFactory().createBundleDescription(state, manifest, "a1_100", 0);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "A2");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		manifest.put(Constants.EXPORT_PACKAGE, "a; uses:=d");
+		manifest.put(Constants.IMPORT_PACKAGE, "d");
+		BundleDescription a2_100 = state.getFactory().createBundleDescription(state, manifest, "a2_100", 1);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "B1");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		manifest.put(Constants.EXPORT_PACKAGE, "b; uses:=a");
+		manifest.put(Constants.IMPORT_PACKAGE, "a;bundle-symbolic-name=A2");
+		BundleDescription b1_100 = state.getFactory().createBundleDescription(state, manifest, "b1_100", 2);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "C1");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		manifest.put(Constants.EXPORT_PACKAGE, "c; uses:=b");
+		manifest.put(Constants.IMPORT_PACKAGE, "b");
+		BundleDescription c1_100 = state.getFactory().createBundleDescription(state, manifest, "c1_100", 3);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "D1");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		manifest.put(Constants.EXPORT_PACKAGE, "d; uses:=c");
+		manifest.put(Constants.IMPORT_PACKAGE, "a, c");
+		BundleDescription d1_100 = state.getFactory().createBundleDescription(state, manifest, "d1_100", 4);
+
+		state.addBundle(a1_100);
+		state.addBundle(a2_100);
+		state.addBundle(b1_100);
+		state.addBundle(c1_100);
+		state.addBundle(d1_100);
+		state.resolve();
+
+		assertFalse("0.1", a1_100.isResolved());
+		assertTrue("0.2", a2_100.isResolved());
+		assertTrue("0.3", b1_100.isResolved());
+		assertTrue("0.4", c1_100.isResolved());
+		assertTrue("0.5", d1_100.isResolved());
+
+		ExportPackageDescription[] b1ResolvedImports = b1_100.getResolvedImports();
+		ExportPackageDescription[] d1ResolvedImports = d1_100.getResolvedImports();
+		ExportPackageDescription[] isConsistent = isConsistent(b1ResolvedImports, d1ResolvedImports);
+		assertNull("1.1 Packages are not consistent: " + isConsistent, isConsistent);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "B1");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		manifest.put(Constants.EXPORT_PACKAGE, "b; uses:=a");
+		manifest.put(Constants.IMPORT_PACKAGE, "a;bundle-symbolic-name=A1");
+		b1_100 = state.getFactory().createBundleDescription(state, manifest, "b1_100", 2);
+		state.updateBundle(b1_100);
+		state.resolve();
+
+		assertTrue("2.1", a1_100.isResolved());
+		assertFalse("2.2", a2_100.isResolved());
+		assertTrue("2.3", b1_100.isResolved());
+		assertTrue("2.4", c1_100.isResolved());
+		assertTrue("2.5", d1_100.isResolved());
+		
+		b1ResolvedImports = b1_100.getResolvedImports();
+		d1ResolvedImports = d1_100.getResolvedImports();
+		isConsistent = isConsistent(b1ResolvedImports, d1ResolvedImports);
+		assertNull("3.1 Packages are not consistent: " + isConsistent, isConsistent);
+	}
+
+	public void testFragmentTransitiveUses() throws BundleException {
+		State state = buildEmptyState();
+		Hashtable manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "A1");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		manifest.put(Constants.EXPORT_PACKAGE, "a; uses:=d");
+		manifest.put(Constants.IMPORT_PACKAGE, "d");
+		BundleDescription a1_100 = state.getFactory().createBundleDescription(state, manifest, "a1_100", 0);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "A1.Frag");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		manifest.put(Constants.FRAGMENT_HOST, "A1");
+		manifest.put(Constants.EXPORT_PACKAGE, "a.frag; uses:=a");
+		BundleDescription a1frag_100 = state.getFactory().createBundleDescription(state, manifest, "a1frag_100", 1);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "A2");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		manifest.put(Constants.EXPORT_PACKAGE, "a; uses:=d, a.frag; uses:=a");
+		manifest.put(Constants.IMPORT_PACKAGE, "d");
+		BundleDescription a2_100 = state.getFactory().createBundleDescription(state, manifest, "a2_100", 2);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "B1");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		manifest.put(Constants.EXPORT_PACKAGE, "b; uses:=a");
+		manifest.put(Constants.IMPORT_PACKAGE, "a;bundle-symbolic-name=A2, a.frag");
+		BundleDescription b1_100 = state.getFactory().createBundleDescription(state, manifest, "b1_100", 3);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "C1");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		manifest.put(Constants.EXPORT_PACKAGE, "c; uses:=b");
+		manifest.put(Constants.IMPORT_PACKAGE, "b");
+		BundleDescription c1_100 = state.getFactory().createBundleDescription(state, manifest, "c1_100", 4);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "D1");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		manifest.put(Constants.EXPORT_PACKAGE, "d; uses:=c");
+		manifest.put(Constants.IMPORT_PACKAGE, "a.frag, c");
+		BundleDescription d1_100 = state.getFactory().createBundleDescription(state, manifest, "d1_100", 5);
+
+		state.addBundle(a1_100);
+		state.addBundle(a1frag_100);
+		state.addBundle(a2_100);
+		state.addBundle(b1_100);
+		state.addBundle(c1_100);
+		state.addBundle(d1_100);
+		state.resolve();
+
+		assertFalse("0.1", a1_100.isResolved());
+		assertTrue("0.2", a2_100.isResolved());
+		assertTrue("0.3", b1_100.isResolved());
+		assertTrue("0.4", c1_100.isResolved());
+		assertTrue("0.5", d1_100.isResolved());
+
+		ExportPackageDescription[] b1ResolvedImports = b1_100.getResolvedImports();
+		ExportPackageDescription[] d1ResolvedImports = d1_100.getResolvedImports();
+		ExportPackageDescription[] isConsistent = isConsistent(b1ResolvedImports, d1ResolvedImports);
+		assertNull("1.1 Packages are not consistent: " + isConsistent, isConsistent);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "B1");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		manifest.put(Constants.EXPORT_PACKAGE, "b; uses:=a");
+		manifest.put(Constants.IMPORT_PACKAGE, "a;bundle-symbolic-name=A1");
+		b1_100 = state.getFactory().createBundleDescription(state, manifest, "b1_100", 2);
+		state.updateBundle(b1_100);
+		state.resolve();
+
+		assertTrue("2.1", a1_100.isResolved());
+		assertFalse("2.2", a2_100.isResolved());
+		assertTrue("2.3", b1_100.isResolved());
+		assertTrue("2.4", c1_100.isResolved());
+		assertTrue("2.5", d1_100.isResolved());
+
+		b1ResolvedImports = b1_100.getResolvedImports();
+		d1ResolvedImports = d1_100.getResolvedImports();
+		isConsistent = isConsistent(b1ResolvedImports, d1ResolvedImports);
+		assertNull("3.1 Packages are not consistent: " + isConsistent, isConsistent);
+	}
+
+	public void testCyclicUsesExportDrop() throws BundleException {
+		State state = buildEmptyState();
+		Hashtable manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "W");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		manifest.put(Constants.EXPORT_PACKAGE, "a; b; version=1.0");
+		manifest.put(Constants.IMPORT_PACKAGE, "c, a, b");
+		BundleDescription w1_100 = state.getFactory().createBundleDescription(state, manifest, "w1_100", 0);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "X");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		manifest.put(Constants.EXPORT_PACKAGE, "c");
+		manifest.put(Constants.IMPORT_PACKAGE, "d");
+		BundleDescription x1_100 = state.getFactory().createBundleDescription(state, manifest, "x1_100", 1);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "Y");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		manifest.put(Constants.EXPORT_PACKAGE, "d");
+		manifest.put(Constants.IMPORT_PACKAGE, "a");
+		BundleDescription y1_100 = state.getFactory().createBundleDescription(state, manifest, "y1_100", 2);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "Z");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		manifest.put(Constants.EXPORT_PACKAGE, "a; version = 2.0");
+		BundleDescription z1_100 = state.getFactory().createBundleDescription(state, manifest, "z1_100", 3);
+
+		state.addBundle(w1_100);
+		state.addBundle(x1_100);
+		state.addBundle(y1_100);
+		state.addBundle(z1_100);
+		state.resolve();
+
+		assertTrue("0.1", w1_100.isResolved());
+		assertTrue("0.2", x1_100.isResolved());
+		assertTrue("0.3", y1_100.isResolved());
+		assertTrue("0.4", z1_100.isResolved());
+
+		assertEquals("1.1", 1, w1_100.getSelectedExports().length);
+		assertEquals("1.2", "b", w1_100.getSelectedExports()[0].getName());
+	}
+
+	public void testRemovalPending() throws BundleException {
+		State state = buildEmptyState();
+		Hashtable wManifest = new Hashtable();
+		wManifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		wManifest.put(Constants.BUNDLE_SYMBOLICNAME, "W");
+		wManifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		wManifest.put(Constants.EXPORT_PACKAGE, "a; b; version=1.0");
+		wManifest.put(Constants.IMPORT_PACKAGE, "a, b");
+		BundleDescription w1_100 = state.getFactory().createBundleDescription(state, wManifest, "w1_100", 0);
+
+		Hashtable manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "X");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		manifest.put(Constants.IMPORT_PACKAGE, "a");
+		BundleDescription x1_100 = state.getFactory().createBundleDescription(state, manifest, "x1_100", 1);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "Y");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		manifest.put(Constants.IMPORT_PACKAGE, "a");
+		BundleDescription y1_100 = state.getFactory().createBundleDescription(state, manifest, "y1_100", 2);
+
+		state.addBundle(w1_100);
+		state.addBundle(x1_100);
+		state.addBundle(y1_100);
+		
+		state.resolve();
+
+		assertTrue("0.1", w1_100.isResolved());
+		assertTrue("0.2", x1_100.isResolved());
+		assertTrue("0.3", y1_100.isResolved());
+
+		BundleDescription w1_100_prime = state.getFactory().createBundleDescription(state, wManifest, "w1_100", 0);
+		state.updateBundle(w1_100_prime);
+		state.resolve(new BundleDescription[0]);
+
+		assertTrue("1.1", w1_100_prime.isResolved());
+		assertTrue("1.2", x1_100.isResolved());
+		assertTrue("1.3", y1_100.isResolved());
+
+		ExportPackageDescription[] exports_w1_100 = w1_100.getSelectedExports();
+		ExportPackageDescription[] imports_w1_100_prime = w1_100_prime.getResolvedImports();
+		ExportPackageDescription[] isConsistent = isConsistent(exports_w1_100, imports_w1_100_prime);
+		assertNull("2.1 Packages are not consistent: " + isConsistent, isConsistent);
+
+		state.resolve(new BundleDescription[] {w1_100});
+		assertTrue("3.1", w1_100_prime.isResolved());
+		assertTrue("3.2", x1_100.isResolved());
+		assertTrue("3.3", y1_100.isResolved());
+
+		ExportPackageDescription[] exports_w1_100_prime = w1_100_prime.getSelectedExports();
+		imports_w1_100_prime = w1_100_prime.getResolvedImports();
+		isConsistent = isConsistent(exports_w1_100_prime, imports_w1_100_prime);
+		assertNull("4.1 Packages are not consistent: " + isConsistent, isConsistent);
+	}
+
+	public void testFragmentConstraints() throws BundleException {
+		State state = buildEmptyState();
+		Hashtable manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "A1");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		manifest.put(Constants.EXPORT_PACKAGE, "a; uses:=d");
+		manifest.put(Constants.IMPORT_PACKAGE, "b; version=2.0");
+		manifest.put(Constants.REQUIRE_BUNDLE, "C1; bundle-version=\"[2.0, 3.0)\"");
+		BundleDescription a1_100 = state.getFactory().createBundleDescription(state, manifest, "a1_100", 0);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "A1.Frag");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		manifest.put(Constants.FRAGMENT_HOST, "A1");
+		manifest.put(Constants.EXPORT_PACKAGE, "a.frag");
+		manifest.put(Constants.IMPORT_PACKAGE, "b; version=1.0");
+		manifest.put(Constants.REQUIRE_BUNDLE, "C1; bundle-version=\"[2.0, 3.0)\"");
+		BundleDescription a1frag_100 = state.getFactory().createBundleDescription(state, manifest, "a1frag_100", 1);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "B1");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		manifest.put(Constants.EXPORT_PACKAGE, "b; version=2.1");
+		BundleDescription b1_100 = state.getFactory().createBundleDescription(state, manifest, "b1_100", 3);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "C1");
+		manifest.put(Constants.BUNDLE_VERSION, "2.0.1");
+		manifest.put(Constants.EXPORT_PACKAGE, "c");
+		BundleDescription c1_100 = state.getFactory().createBundleDescription(state, manifest, "c1_100", 4);
+
+		state.addBundle(a1_100);
+		state.addBundle(a1frag_100);
+		state.addBundle(b1_100);
+		state.addBundle(c1_100);
+		state.resolve();
+
+		assertTrue("0.1", a1_100.isResolved());
+		assertTrue("0.2", a1frag_100.isResolved());
+		assertTrue("0.3", b1_100.isResolved());
+		assertTrue("0.4", c1_100.isResolved());
+
+		// now use a fragment that has conflicting imports/requires with the host
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "A1.Frag");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		manifest.put(Constants.FRAGMENT_HOST, "A1");
+		manifest.put(Constants.EXPORT_PACKAGE, "a.frag");
+		manifest.put(Constants.IMPORT_PACKAGE, "b; version=2.1");
+		manifest.put(Constants.REQUIRE_BUNDLE, "C1; bundle-version=\"[2.0, 2.5)\"");
+		a1frag_100 = state.getFactory().createBundleDescription(state, manifest, "a1frag_100", 1);
+		state.updateBundle(a1frag_100);
+		state.resolve(false);
+
+		assertTrue("1.1", a1_100.isResolved());
+		assertFalse("1.2", a1frag_100.isResolved());
+		assertTrue("1.3", b1_100.isResolved());
+		assertTrue("1.4", c1_100.isResolved());
+
+	}
+
+	public void testReexportPackage() throws BundleException {
+		State state = buildEmptyState();
+		Hashtable manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "A1");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		manifest.put(Constants.EXPORT_PACKAGE, "a");
+		manifest.put(Constants.REQUIRE_BUNDLE, "C1; visibility:=reexport");
+		BundleDescription a1_100 = state.getFactory().createBundleDescription(state, manifest, "a1_100", 0);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "B1");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		manifest.put(Constants.EXPORT_PACKAGE, "b");
+		manifest.put(Constants.IMPORT_PACKAGE, "a; bundle-symbolic-name=C1, c; d; bundle-symbolic-name=A1");
+		BundleDescription b1_100 = state.getFactory().createBundleDescription(state, manifest, "b1_100", 1);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "C1");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		manifest.put(Constants.EXPORT_PACKAGE, "c");
+		manifest.put(Constants.REQUIRE_BUNDLE, "A1; visibility:=reexport, D1; visibility:=reexport");
+		BundleDescription c1_100 = state.getFactory().createBundleDescription(state, manifest, "c1_100", 2);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "D1");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		manifest.put(Constants.EXPORT_PACKAGE, "d");
+		manifest.put(Constants.REQUIRE_BUNDLE, "A1; visibility:=reexport");
+		BundleDescription d1_100 = state.getFactory().createBundleDescription(state, manifest, "d1_100", 3);
+
+
+		state.addBundle(a1_100);
+		state.addBundle(b1_100);
+		state.addBundle(c1_100);
+		state.addBundle(d1_100);
+		state.resolve();
+
+		assertTrue("0.1", a1_100.isResolved());
+		assertTrue("0.2", b1_100.isResolved());
+		assertTrue("0.3", c1_100.isResolved());
+		assertTrue("0.4", d1_100.isResolved());
+
+		// this assumes getResolvedImports will return the imports in the same order they are specified in the Import-Package header
+		ExportPackageDescription[] b1ResolvedImports = b1_100.getResolvedImports();
+		assertEquals("1.1", 3, b1ResolvedImports.length);
+		assertEquals("1.2", b1ResolvedImports[0].getExporter(), c1_100);
+		assertEquals("1.3", b1ResolvedImports[1].getExporter(), a1_100);
+		assertEquals("1.4", b1ResolvedImports[2].getExporter(), a1_100);
+	}
+
+	private ExportPackageDescription[] isConsistent(ExportPackageDescription[] pkgs1, ExportPackageDescription[] pkgs2) {
+		for (int i = 0; i < pkgs1.length; i++)
+			for (int j = 0; j < pkgs2.length; j++)
+				if (pkgs1[i].getName().equals(pkgs2[j].getName()) && pkgs1[i] != pkgs2[j])
+					return new ExportPackageDescription[] {pkgs1[i], pkgs2[j]}; 
+		return null;
+	}
+
 	private boolean contains(Object[] array, Object element) {
 		for (int i = 0; i < array.length; i++)
 			if (array[i].equals(element))
 				return true;
 		return false;
 	}
-	
 }
 //testFragmentUpdateNoVersionChanged()
 //testFragmentUpdateVersionChanged()
