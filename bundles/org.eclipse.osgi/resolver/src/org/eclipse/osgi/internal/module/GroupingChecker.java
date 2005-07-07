@@ -21,18 +21,38 @@ public class GroupingChecker {
 	// Maps bundles to their exports; keyed by
 	//   ResolverBundle -> exports HashMap
 	//     the exports HashMap is keyed by
-	//       ResolverExport -> 'uses' constraint ArrayList 
+	//       ResolverExport -> Object[] {'uses' constraint ArrayList, transitive constraint cache} 
 	HashMap bundles = new HashMap();
 
 	// Gets all constraints for an exported package.
-	// this will perform transitive closure on the uses constraints
+	// this will perform transitive closure on the uses constraints.
+	// this method also will cache the transitive results if the bundle is resolved
 	private ResolverExport[] getConstraints(ResolverExport constrained) {
-		ArrayList results = getConstraintsList(constrained);
-		return (ResolverExport[]) results.toArray(new ResolverExport[results.size()]);
+		// check the cache first
+		Object[] cachedResults = getCachedConstraints(constrained);
+		if (cachedResults != null && cachedResults[1] != null)
+			// we have aready cached the results for this return the cached results
+			return (ResolverExport[]) cachedResults[1];
+		ArrayList resultlist = getConstraintsList(constrained);
+		ResolverExport[] results = (ResolverExport[]) resultlist.toArray(new ResolverExport[resultlist.size()]);
+		if (constrained.getExporter().isResolved()) {
+			// if the bundle is resolved then we can add the results to the cached results
+			if (cachedResults == null)
+				cachedResults = createConstraintsCache(constrained); // should have been created by getConstraintsList
+			cachedResults[1] = results;
+		}
+		return results;
+	}
+
+	private Object[] getCachedConstraints(ResolverExport constrained) {
+		// get the cached constraints for this export
+		HashMap exports = (HashMap) bundles.get(constrained.getExporter());
+		return exports == null ? null : (Object[]) exports.get(constrained);
 	}
 
 	// Gets all constraints for an exported package
-	// same as getConstraints only the raw ArrayList is returned
+	// same as getConstraints only the raw ArrayList is returned and
+	// the cache is not consulted.
 	private ArrayList getConstraintsList(ResolverExport constrained) {
 		ArrayList results = new ArrayList();
 		getTransitiveConstraints(constrained, results);
@@ -51,8 +71,8 @@ public class GroupingChecker {
 			if (constrainedRoots[i] != constrained)
 				getTransitiveConstraints(constrainedRoots[i], results);
 		// now get the constraints that are specified by this export
-		HashMap exports = (HashMap) bundles.get(constrained.getExporter());
-		ArrayList constraints = exports == null ? null : (ArrayList) exports.get(constrained);
+		Object[] cachedConstraints = getCachedConstraints(constrained);
+		ArrayList constraints = (ArrayList) (cachedConstraints != null ? cachedConstraints[0] : null);
 		if (constraints == null)
 			return;
 		for (Iterator iter = constraints.iterator(); iter.hasNext();) {
@@ -85,20 +105,29 @@ public class GroupingChecker {
 		}
 	}
 
-	// creates an empty list to hold constraints for the specified export
-	// if a list already exists then a new list is NOT created.
-	private ArrayList createConstraints(ResolverExport constrained) {
+	// creates the Object[] used to cache constraint definitions and transitive
+	// closure results.
+	private Object[] createConstraintsCache(ResolverExport constrained) {
 		HashMap exports = (HashMap) bundles.get(constrained.getExporter());
 		if (exports == null) {
 			exports = new HashMap();
 			bundles.put(constrained.getExporter(), exports);
 		}
-		ArrayList constraints = (ArrayList) exports.get(constrained);
+		Object[] constraints = (Object[]) exports.get(constrained);
 		if (constraints == null) {
-			constraints = new ArrayList();
+			constraints = new Object[2];
 			exports.put(constrained, constraints);
 		}
 		return constraints;
+	}
+
+	// creates an empty list to hold constraints for the specified export
+	// if a list already exists then a new list is NOT created.
+	private ArrayList createConstraints(ResolverExport constrained) {
+		Object[] constraints = createConstraintsCache(constrained);
+		if (constraints[0] == null)
+			constraints[0] = new ArrayList();
+		return (ArrayList) constraints[0];
 	}
 
 	// adds a 'uses' constraint to a ResolverExport.  A new 'uses' constraint list
@@ -233,17 +262,15 @@ public class GroupingChecker {
 	}
 
 	// Add initial 'uses' constraints for a list of bundles
-	void addInitialGroupingConstraints(ResolverBundle[] initBundles) {
-		for (int i = 0; i < initBundles.length; i++) {
-			if (bundles.containsKey(initBundles[i]))
-				continue; // already processed
-			// for each export; add it uses constraints
-			ResolverExport[] exports = initBundles[i].getExportPackages();
-			for (int j = 0; j < exports.length; j++)
-				addInitialGroupingConstraints(exports[j], null);
-			if (bundles.get(initBundles[i]) == null)
-				bundles.put(initBundles[i], null); // mark this bundle as processed
-		}
+	void addInitialGroupingConstraints(ResolverBundle initBundle) {
+		if (bundles.containsKey(initBundle))
+			return; // already processed
+		// for each export; add it uses constraints
+		ResolverExport[] exports = initBundle.getExportPackages();
+		for (int j = 0; j < exports.length; j++)
+			addInitialGroupingConstraints(exports[j], null);
+		if (bundles.get(initBundle) == null)
+			bundles.put(initBundle, null); // mark this bundle as processed
 	}
 
 	// Add constraints from other exports (due to 'uses' being transitive)

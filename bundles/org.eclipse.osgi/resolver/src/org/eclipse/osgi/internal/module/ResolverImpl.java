@@ -92,7 +92,12 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 			}
 		}
 		rewireBundles(); // Reconstruct wirings
-		groupingChecker.addInitialGroupingConstraints((ResolverBundle[]) bundleMapping.values().toArray(new ResolverBundle[bundleMapping.size()]));
+		ResolverBundle[] initBundles = (ResolverBundle[]) bundleMapping.values().toArray(new ResolverBundle[bundleMapping.size()]);
+		for (int i = 0; i < initBundles.length; i++)
+			// only initialize grouping constraint for resolved bundles; 
+			// we add the constraints for unresolved bundles before we start a resolve opertation
+			if (initBundles[i].isResolved())
+				groupingChecker.addInitialGroupingConstraints(initBundles[i]);
 		setDebugOptions();
 		initialized = true;
 	}
@@ -289,7 +294,8 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 			attachFragment(bundles[i], rejectedSingletons);
 
 		// add initial grouping constraints after fragments have been attached
-		groupingChecker.addInitialGroupingConstraints(bundles);
+		for (int i = 0; i < bundles.length; i++)
+			groupingChecker.addInitialGroupingConstraints(bundles[i]);
 		// Lists of cyclic dependencies recording during resolving
 		ArrayList cycle = new ArrayList(1); // start small
 		ArrayList resolvedBundles = new ArrayList(bundles.length);
