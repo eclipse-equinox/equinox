@@ -292,7 +292,7 @@ public class GroupingChecker {
 				}
 			}
 			ResolverImport constraintImport = export.getExporter().getImport(uses[i]);
-			if (constraintImport != null)
+			if (constraintImport != null && !constraintImport.isDynamic())
 				addConstraint(export, constraintImport);
 			if (constraintExports.length == 0 && constraintImport == null)
 				addConstraint(export, new UsesRequiredExport(constraint, uses[i]));
