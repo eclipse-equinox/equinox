@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.condpermadmin/src/org/osgi/service/condpermadmin/ConditionalPermissionInfo.java,v 1.6 2005/05/13 20:33:31 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.service.condpermadmin/src/org/osgi/service/condpermadmin/ConditionalPermissionInfo.java,v 1.7 2005/07/14 10:47:13 pkriens Exp $
  *
  * Copyright (c) OSGi Alliance (2004, 2005). All Rights Reserved.
  * 
@@ -36,4 +36,10 @@ public interface ConditionalPermissionInfo {
 	 * ConditionalPermissionAdmin.
 	 */
 	void delete();
+	
+	/**
+	 * Return the name of this Conditional Permission Info object.
+	 * 
+	 */
+	String getName();
 }
