@@ -16,7 +16,7 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Enumeration;
 
-public class ContextFinder extends ClassLoader {
+public class ContextFinder extends ClassLoader implements PrivilegedAction {
 
 	private static final class Finder extends SecurityManager {
 		public Class[] getClassContext() {
@@ -62,15 +62,13 @@ public class ContextFinder extends ClassLoader {
 	}
 
 	private ClassLoader findClassLoader() {
-		if (System.getSecurityManager() == null) {
+		if (System.getSecurityManager() == null)
 			return basicFindClassLoader();
-		}
+		return (ClassLoader) AccessController.doPrivileged(this);
+	}
 
-		return (ClassLoader) AccessController.doPrivileged(new PrivilegedAction() {
-			public Object run() {
-				return basicFindClassLoader();
-			}
-		});
+	public Object run() {
+		return basicFindClassLoader();
 	}
 
 	protected synchronized Class loadClass(String arg0, boolean arg1) throws ClassNotFoundException {
