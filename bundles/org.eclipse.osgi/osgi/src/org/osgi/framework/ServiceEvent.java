@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/ServiceEvent.java,v 1.9 2005/05/13 20:32:56 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/ServiceEvent.java,v 1.10 2005/07/30 02:22:40 hargrave Exp $
  * 
  * Copyright (c) OSGi Alliance (2000, 2005). All Rights Reserved.
  * 
@@ -16,14 +16,15 @@ import java.util.EventObject;
 /**
  * A service lifecycle change event.
  * <p>
- * <code>ServiceEvent</code> objects are delivered to a <code>ServiceListener</code>
- * objects when a change occurs in this service's lifecycle. A type code is used
- * to identify the event type for future extendability.
+ * <code>ServiceEvent</code> objects are delivered to a
+ * <code>ServiceListener</code> objects when a change occurs in this service's
+ * lifecycle. A type code is used to identify the event type for future
+ * extendability.
  * 
  * <p>
  * OSGi Alliance reserves the right to extend the set of types.
  * 
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  * @see ServiceListener
  */
 
@@ -90,8 +91,8 @@ public class ServiceEvent extends EventObject {
 	 * Creates a new service event object.
 	 * 
 	 * @param type The event type.
-	 * @param reference A <code>ServiceReference</code> object to the service that
-	 *        had a lifecycle change.
+	 * @param reference A <code>ServiceReference</code> object to the service
+	 *        that had a lifecycle change.
 	 */
 	public ServiceEvent(int type, ServiceReference reference) {
 		super(reference);
@@ -126,4 +127,3 @@ public class ServiceEvent extends EventObject {
 		return (type);
 	}
 }
-

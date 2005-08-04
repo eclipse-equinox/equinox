@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/FrameworkEvent.java,v 1.9 2005/05/13 20:32:56 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/FrameworkEvent.java,v 1.10 2005/07/30 02:22:40 hargrave Exp $
  * 
  * Copyright (c) OSGi Alliance (2004, 2005). All Rights Reserved.
  * 
@@ -16,14 +16,14 @@ import java.util.EventObject;
  * A general Framework event.
  * 
  * <p>
- * <code>FrameworkEvent</code> is the event class used when notifying listeners of
- * general events occuring within the OSGI environment. A type code is used to
- * identify the event type for future extendability.
+ * <code>FrameworkEvent</code> is the event class used when notifying
+ * listeners of general events occuring within the OSGI environment. A type code
+ * is used to identify the event type for future extendability.
  * 
  * <p>
  * OSGi Alliance reserves the right to extend the set of event types.
  * 
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 
 public class FrameworkEvent extends EventObject {

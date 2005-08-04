@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/FrameworkUtil.java,v 1.1 2005/07/14 20:32:46 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/FrameworkUtil.java,v 1.3 2005/07/30 02:22:41 hargrave Exp $
  * 
  * Copyright (c) OSGi Alliance (2005). All Rights Reserved.
  * 
@@ -10,7 +10,9 @@
 
 package org.osgi.framework;
 
-import org.eclipse.osgi.framework.internal.core.FilterImpl;
+import java.lang.reflect.*;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 
 /**
  * Framework Utility class.
@@ -19,10 +21,67 @@ import org.eclipse.osgi.framework.internal.core.FilterImpl;
  * This class contains utility methods which access Framework functions that may
  * be useful to bundles.
  * 
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.3 $
  * @since 1.3
  */
 public class FrameworkUtil {
+	/*
+	 * NOTE: A framework implementor may also choose to replace this class in
+	 * their distribution with a class that directly interfaces with the
+	 * framework implementation.
+	 */
+
+	/*
+	 * This class will load the FrameworkUtil class in the package named by the
+	 * org.osgi.vendor.framework package. For each instance of this class, an
+	 * instance of the vendor FrameworkUtil class will be created and this class
+	 * will delegate method calls to the vendor FrameworkUtil instance.
+	 */
+	private static final String	packageProperty	= "org.osgi.vendor.framework";
+
+	/*
+	 * This is the delegate method used by createFilter.
+	 */
+	private final static Method	createFilter;
+
+	static {
+		createFilter = (Method) AccessController
+				.doPrivileged(new PrivilegedAction() {
+					public Object run() {
+						String packageName = System
+								.getProperty(packageProperty);
+						if (packageName == null) {
+							throw new NoClassDefFoundError(packageProperty
+									+ " property not set");
+						}
+
+						Class delegateClass;
+						try {
+							delegateClass = Class.forName(packageName
+									+ ".FrameworkUtil");
+						}
+						catch (ClassNotFoundException e) {
+							throw new NoClassDefFoundError(e.toString());
+						}
+
+						Method result;
+						try {
+							result = delegateClass.getMethod("createFilter",
+									new Class[] {String.class});
+						}
+						catch (NoSuchMethodException e) {
+							throw new NoSuchMethodError(e.toString());
+						}
+
+						if (!Modifier.isStatic(result.getModifiers())) {
+							throw new NoSuchMethodError(
+									"createFilter method must be static");
+						}
+
+						return result;
+					}
+				});
+	}
 
 	/**
 	 * Creates a <code>Filter</code> object. This <code>Filter</code> object
@@ -36,13 +95,33 @@ public class FrameworkUtil {
 	 * @param filter The filter string.
 	 * @return A <code>Filter</code> object encapsulating the filter string.
 	 * @throws InvalidSyntaxException If <code>filter</code> contains an
-	 *            invalid filter string that cannot be parsed.
+	 *         invalid filter string that cannot be parsed.
 	 * @throws NullPointerException If <code>filter</code> is null.
 	 * 
 	 * @see Filter
 	 */
 	public static Filter createFilter(String filter)
 			throws InvalidSyntaxException {
-		return new FilterImpl(filter);
+		try {
+			try {
+				return (Filter) createFilter
+						.invoke(null, new Object[] {filter});
+			}
+			catch (InvocationTargetException e) {
+				throw e.getTargetException();
+			}
+		}
+		catch (InvalidSyntaxException e) {
+			throw e;
+		}
+		catch (Error e) {
+			throw e;
+		}
+		catch (RuntimeException e) {
+			throw e;
+		}
+		catch (Throwable e) {
+			throw new RuntimeException(e.toString());
+		}
 	}
 }

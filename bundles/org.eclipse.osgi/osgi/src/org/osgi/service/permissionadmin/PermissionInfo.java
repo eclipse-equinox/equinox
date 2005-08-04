@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.permissionadmin/src/org/osgi/service/permissionadmin/PermissionInfo.java,v 1.8 2005/06/21 15:41:57 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.service.permissionadmin/src/org/osgi/service/permissionadmin/PermissionInfo.java,v 1.13 2005/08/04 03:34:57 hargrave Exp $
  * 
  * Copyright (c) OSGi Alliance (2001, 2005). All Rights Reserved.
  * 
@@ -27,7 +27,7 @@ package org.osgi.service.permissionadmin;
  * <code>PermissionInfo</code> may be delayed until the package containing its
  * Permission class has been exported by a bundle.
  * 
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.13 $
  */
 public class PermissionInfo {
 	private String	type;
@@ -52,9 +52,9 @@ public class PermissionInfo {
 	 *        argument to the constructor of the <code>Permission</code> class
 	 *        identified by <code>type</code>.
 	 * 
-	 * @exception java.lang.NullPointerException if <code>type</code> is
+	 * @throws java.lang.NullPointerException if <code>type</code> is
 	 *            <code>null</code>.
-	 * @exception java.lang.IllegalArgumentException if <code>action</code> is not
+	 * @throws java.lang.IllegalArgumentException if <code>action</code> is not
 	 *            <code>null</code> and <code>name</code> is <code>null</code>.
 	 */
 	public PermissionInfo(String type, String name, String actions) {
@@ -71,11 +71,13 @@ public class PermissionInfo {
 
 	/**
 	 * Constructs a <code>PermissionInfo</code> object from the given encoded
-	 * <code>PermissionInfo</code> string.
+	 * <code>PermissionInfo</code> string. White space in the encoded
+	 * <code>PermissionInfo</code> string is ignored.
+	 * 
 	 * 
 	 * @param encodedPermission The encoded <code>PermissionInfo</code>.
 	 * @see #getEncoded
-	 * @exception java.lang.IllegalArgumentException if
+	 * @throws java.lang.IllegalArgumentException if
 	 *            <code>encodedPermission</code> is not properly formatted.
 	 */
 	public PermissionInfo(String encodedPermission) {
@@ -87,62 +89,89 @@ public class PermissionInfo {
 		}
 		try {
 			char[] encoded = encodedPermission.toCharArray();
+			int length = encoded.length;
+			int pos = 0;
+			
+			/* skip whitespace */
+			while (Character.isWhitespace(encoded[pos])) {
+				pos++;
+			}
+			
 			/* the first character must be '(' */
-			if (encoded[0] != '(') {
+			if (encoded[pos] != '(') {
 				throw new IllegalArgumentException(
-						"first character not open parenthesis");
+						"expecting open parenthesis");
 			}
+			pos++;
+
+			/* skip whitespace */
+			while (Character.isWhitespace(encoded[pos])) {
+				pos++;
+			}
+			
 			/* type is not quoted or encoded */
-			int end = 1;
-			int begin = end;
-			while ((encoded[end] != ' ') && (encoded[end] != ')')) {
-				end++;
+			int begin = pos;
+			while (!Character.isWhitespace(encoded[pos]) && (encoded[pos] != ')')) {
+				pos++;
 			}
-			if (end == begin) {
+			if (pos == begin || encoded[begin] == '"') {
 				throw new IllegalArgumentException("expecting type");
 			}
-			this.type = new String(encoded, begin, end - begin);
+			this.type = new String(encoded, begin, pos - begin);
+			
+			/* skip whitespace */
+			while (Character.isWhitespace(encoded[pos])) {
+				pos++;
+			}
+			
 			/* type may be followed by name which is quoted and encoded */
-			// TODO Need to support multiple spaces
-			if (encoded[end] == ' ') {
-				end++;
-				if (encoded[end] != '"') {
-					throw new IllegalArgumentException("expecting quoted name");
-				}
-				end++;
-				begin = end;
-				while (encoded[end] != '"') {
-					if (encoded[end] == '\\') {
-						end++;
+			if (encoded[pos] == '"') {
+				pos++;
+				begin = pos;
+				while (encoded[pos] != '"') {
+					if (encoded[pos] == '\\') {
+						pos++;
 					}
-					end++;
+					pos++;
 				}
-				this.name = decodeString(encoded, begin, end);
-				end++;
-				/* name may be followed by actions which is quoted and encoded */
-				// TODO Need to support multiple spaces
-				if (encoded[end] == ' ') {
-					end++;
-					if (encoded[end] != '"') {
-						throw new IllegalArgumentException(
-								"expecting quoted actions");
+				this.name = unescapeString(encoded, begin, pos);
+				pos++;
+
+				if (Character.isWhitespace(encoded[pos])) {
+					/* skip whitespace */
+					while (Character.isWhitespace(encoded[pos])) {
+						pos++;
 					}
-					end++;
-					begin = end;
-					while (encoded[end] != '"') {
-						if (encoded[end] == '\\') {
-							end++;
+					
+					/* name may be followed by actions which is quoted and encoded */
+					if (encoded[pos] == '"') {
+						pos++;
+						begin = pos;
+						while (encoded[pos] != '"') {
+							if (encoded[pos] == '\\') {
+								pos++;
+							}
+							pos++;
 						}
-						end++;
+						this.actions = unescapeString(encoded, begin, pos);
+						pos++;
+
+						/* skip whitespace */
+						while (Character.isWhitespace(encoded[pos])) {
+							pos++;
+						}
 					}
-					this.actions = decodeString(encoded, begin, end);
-					end++;
 				}
 			}
+			
 			/* the final character must be ')' */
-			if ((encoded[end] != ')') || (end + 1 != encoded.length)) {
-				throw new IllegalArgumentException("last character not "
-						+ "close parenthesis");
+			char c = encoded[pos];
+			pos++;
+			while ((pos < length) && Character.isWhitespace(encoded[pos])) {
+				pos++;
+			}
+			if ((c != ')') || (pos != length)) {
+				throw new IllegalArgumentException("expecting close parenthesis");
 			}
 		}
 		catch (ArrayIndexOutOfBoundsException e) {
@@ -179,8 +208,8 @@ public class PermissionInfo {
 	 * <code>\\</code>,<code>\r</code>, and <code>\n</code>, respectively.
 	 * 
 	 * <p>
-	 * The encoded string must contain no leading or trailing whitespace
-	 * characters. A single space character must be used between <i>type</i> and 
+	 * The encoded string contains no leading or trailing whitespace
+	 * characters. A single space character is used between <i>type</i> and 
 	 * &quot;<i>name</i>&quot; and between &quot;<i>name</i>&quot; and &quot;<i>actions</i>&quot;.
 	 * 
 	 * @return The string encoding of this <code>PermissionInfo</code>.
@@ -195,15 +224,15 @@ public class PermissionInfo {
 		output.append(type);
 		if (name != null) {
 			output.append(" \"");
-			encodeString(name, output);
+			escapeString(name, output);
 			if (actions != null) {
 				output.append("\" \"");
-				encodeString(actions, output);
+				escapeString(actions, output);
 			}
 			output.append('\"');
 		}
 		output.append(')');
-		return (output.toString());
+		return output.toString();
 	}
 
 	/**
@@ -214,7 +243,7 @@ public class PermissionInfo {
 	 * @return The string representation of this <code>PermissionInfo</code>.
 	 */
 	public String toString() {
-		return (getEncoded());
+		return getEncoded();
 	}
 
 	/**
@@ -225,7 +254,7 @@ public class PermissionInfo {
 	 *         this <code>PermissionInfo</code>.
 	 */
 	public final String getType() {
-		return (type);
+		return type;
 	}
 
 	/**
@@ -237,7 +266,7 @@ public class PermissionInfo {
 	 *         does not have a name.
 	 */
 	public final String getName() {
-		return (name);
+		return name;
 	}
 
 	/**
@@ -249,7 +278,7 @@ public class PermissionInfo {
 	 *         does not have any actions associated with it.
 	 */
 	public final String getActions() {
-		return (actions);
+		return actions;
 	}
 
 	/**
@@ -266,27 +295,27 @@ public class PermissionInfo {
 	 */
 	public boolean equals(Object obj) {
 		if (obj == this) {
-			return (true);
+			return true;
 		}
 		if (!(obj instanceof PermissionInfo)) {
-			return (false);
+			return false;
 		}
 		PermissionInfo other = (PermissionInfo) obj;
 		if (!type.equals(other.type) || ((name == null) ^ (other.name == null))
 				|| ((actions == null) ^ (other.actions == null))) {
-			return (false);
+			return false;
 		}
 		if (name != null) {
 			if (actions != null) {
-				return (name.equals(other.name) && actions
-						.equals(other.actions));
+				return name.equals(other.name) && actions
+						.equals(other.actions);
 			}
 			else {
-				return (name.equals(other.name));
+				return name.equals(other.name);
 			}
 		}
 		else {
-			return (true);
+			return true;
 		}
 	}
 
@@ -303,14 +332,14 @@ public class PermissionInfo {
 				hash ^= actions.hashCode();
 			}
 		}
-		return (hash);
+		return hash;
 	}
 
 	/**
 	 * This escapes the quotes, backslashes, \n, and \r in the string using a
 	 * backslash and appends the newly escaped string to a StringBuffer.
 	 */
-	private static void encodeString(String str, StringBuffer output) {
+	private static void escapeString(String str, StringBuffer output) {
 		int len = str.length();
 		for (int i = 0; i < len; i++) {
 			char c = str.charAt(i);
@@ -336,7 +365,7 @@ public class PermissionInfo {
 	/**
 	 * Takes an encoded character array and decodes it into a new String.
 	 */
-	private static String decodeString(char[] str, int begin, int end) {
+	private static String unescapeString(char[] str, int begin, int end) {
 		StringBuffer output = new StringBuffer(end - begin);
 		for (int i = begin; i < end; i++) {
 			char c = str[i];
@@ -344,17 +373,26 @@ public class PermissionInfo {
 				i++;
 				if (i < end) {
 					c = str[i];
-					if (c == 'n') {
-						c = '\n';
-					}
-					else
-						if (c == 'r') {
+					switch (c) {
+						case '"' :
+						case '\\' :
+							break;
+						case 'r' :
 							c = '\r';
-						}
+							break;
+						case 'n' :
+							c = '\n';
+							break;
+						default :
+							c = '\\';
+							i--;
+							break;
+					}
 				}
 			}
 			output.append(c);
 		}
-		return (output.toString());
+		
+		return output.toString();
 	}
 }

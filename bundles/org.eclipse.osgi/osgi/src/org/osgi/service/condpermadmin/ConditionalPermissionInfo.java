@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.condpermadmin/src/org/osgi/service/condpermadmin/ConditionalPermissionInfo.java,v 1.7 2005/07/14 10:47:13 pkriens Exp $
+ * $Header: /cvshome/build/org.osgi.service.condpermadmin/src/org/osgi/service/condpermadmin/ConditionalPermissionInfo.java,v 1.8 2005/08/02 20:42:21 twatson Exp $
  *
  * Copyright (c) OSGi Alliance (2004, 2005). All Rights Reserved.
  * 
@@ -34,6 +34,8 @@ public interface ConditionalPermissionInfo {
 	/**
 	 * Removes the ConditionalPermissionCollection from the
 	 * ConditionalPermissionAdmin.
+	 * @throws SecurityException if the caller does not have the
+	 *         <code>AllPermission</code>.
 	 */
 	void delete();
 	

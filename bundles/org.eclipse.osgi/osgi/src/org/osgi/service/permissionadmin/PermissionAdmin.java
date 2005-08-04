@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.permissionadmin/src/org/osgi/service/permissionadmin/PermissionAdmin.java,v 1.7 2005/05/13 20:33:46 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.service.permissionadmin/src/org/osgi/service/permissionadmin/PermissionAdmin.java,v 1.10 2005/08/04 03:34:57 hargrave Exp $
  * 
  * Copyright (c) OSGi Alliance (2001, 2005). All Rights Reserved.
  * 
@@ -48,7 +48,7 @@ package org.osgi.service.permissionadmin;
  * not reflected in the permissions returned by <code>getPermissions</code> and
  * <code>getDefaultPermissions</code>.
  * 
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.10 $
  */
 public interface PermissionAdmin {
 	/**
@@ -71,8 +71,8 @@ public interface PermissionAdmin {
 	 *        permissions.
 	 * @param permissions The permissions to be assigned, or <code>null</code> if
 	 *        the specified location is to be removed from the permission table.
-	 * @exception SecurityException if the caller does not have the
-	 *            <code>AdminPermission</code>.
+	 * @throws SecurityException If the caller does not have
+	 *            <code>AllPermission</code>.
 	 */
 	void setPermissions(String location, PermissionInfo[] permissions);
 
@@ -106,8 +106,8 @@ public interface PermissionAdmin {
 	 * 
 	 * @param permissions The default permissions, or <code>null</code> if the
 	 *        default permissions are to be removed from the permission table.
-	 * @exception SecurityException if the caller does not have the
-	 *            <code>AdminPermission</code>.
+	 * @throws SecurityException If the caller does not have
+	 *            <code>AllPermission</code>.
 	 */
 	void setDefaultPermissions(PermissionInfo[] permissions);
 }

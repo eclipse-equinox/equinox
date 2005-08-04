@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/BundleEvent.java,v 1.10 2005/05/13 20:32:54 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/BundleEvent.java,v 1.12 2005/08/04 04:03:38 hargrave Exp $
  * 
  * Copyright (c) OSGi Alliance (2000, 2005). All Rights Reserved.
  * 
@@ -15,14 +15,15 @@ import java.util.EventObject;
 /**
  * A Framework event describing a bundle lifecycle change.
  * <p>
- * <code>BundleEvent</code> objects are delivered to <code>BundleListener</code>
- * objects when a change occurs in a bundle's lifecycle. A type code is used to
- * identify the event type for future extendability.
+ * <code>BundleEvent</code> objects are delivered to
+ * <code>BundleListener</code> objects when a change occurs in a bundle's
+ * lifecycle. A type code is used to identify the event type for future
+ * extendability.
  * 
  * <p>
  * OSGi Alliance reserves the right to extend the set of types.
  * 
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.12 $
  */
 
 public class BundleEvent extends EventObject {
@@ -90,7 +91,7 @@ public class BundleEvent extends EventObject {
 	 * @see Bundle#RESOLVED
 	 * @since 1.3
 	 */
-	public final static int	RESOLVED	= 0x00000020;
+	public final static int	RESOLVED			= 0x00000020;
 
 	/**
 	 * The bundle has been unresolved.
@@ -100,7 +101,27 @@ public class BundleEvent extends EventObject {
 	 * @see Bundle#INSTALLED
 	 * @since 1.3
 	 */
-	public final static int	UNRESOLVED	= 0x00000040;
+	public final static int	UNRESOLVED			= 0x00000040;
+
+	/**
+	 * The bundle is about to start.
+	 * <p>
+	 * The value of <code>STARTING</code> is 0x00000080.
+	 * 
+	 * @see Bundle#start()
+	 * @since 1.3
+	 */
+	public final static int	STARTING			= 0x00000080;
+
+	/**
+	 * The bundle is about to stop.
+	 * <p>
+	 * The value of <code>STOPPING</code> is 0x00000100.
+	 * 
+	 * @see Bundle#stop()
+	 * @since 1.3
+	 */
+	public final static int	STOPPING			= 0x00000100;
 
 	/**
 	 * Creates a bundle event of the specified type.
@@ -135,6 +156,8 @@ public class BundleEvent extends EventObject {
 	 * <li>{@link #UNINSTALLED}
 	 * <li>{@link #RESOLVED}
 	 * <li>{@link #UNRESOLVED}
+	 * <li>{@link #STARTING}
+	 * <li>{@link #STOPPING}
 	 * </ul>
 	 * 
 	 * @return The type of lifecycle event.

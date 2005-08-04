@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.condpermadmin/src/org/osgi/service/condpermadmin/ConditionalPermissionAdmin.java,v 1.6 2005/07/14 10:47:13 pkriens Exp $
+ * $Header: /cvshome/build/org.osgi.service.condpermadmin/src/org/osgi/service/condpermadmin/ConditionalPermissionAdmin.java,v 1.7 2005/08/02 20:42:21 twatson Exp $
  * 
  * Copyright (c) OSGi Alliance (2005). All Rights Reserved.
  * 
@@ -18,7 +18,7 @@ import org.osgi.service.permissionadmin.PermissionInfo;
  * This is a framework service that allows ConditionalPermissionInfos to be
  * added to, retrieved from, and removed from the framework.
  * 
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public interface ConditionalPermissionAdmin {
 	/**
@@ -32,6 +32,8 @@ public interface ConditionalPermissionAdmin {
 	 *        Conditions are satisfied.
 	 * @return the ConditionalPermissionInfo that for the newly added Conditions
 	 *         and Permissions.
+	 * @throws SecurityException if the caller does not have the
+	 *         <code>AllPermission</code>.
 	 */
 	ConditionalPermissionInfo addConditionalPermissionInfo(
 			ConditionInfo conds[], PermissionInfo perms[]);
@@ -52,6 +54,8 @@ public interface ConditionalPermissionAdmin {
 	 *        Conditions are satisfied.
 	 * @return the ConditionalPermissionInfo that for the newly added Conditions
 	 *         and Permissions.
+	 * @throws SecurityException if the caller does not have the
+	 *         <code>AllPermission</code>.
 	 */
 	ConditionalPermissionInfo setConditionalPermissionInfo(String name,
 			ConditionInfo conds[], PermissionInfo perms[]);

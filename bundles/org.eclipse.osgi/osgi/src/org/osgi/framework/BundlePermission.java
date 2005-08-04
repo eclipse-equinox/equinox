@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/BundlePermission.java,v 1.10 2005/06/21 16:22:12 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/BundlePermission.java,v 1.13 2005/08/03 01:31:53 hargrave Exp $
  *
  * Copyright (c) OSGi Alliance (2004, 2005). All Rights Reserved.
  * 
@@ -71,8 +71,6 @@ public final class BundlePermission extends BasicPermission {
 															| ACTION_HOST
 															| ACTION_FRAGMENT;
 	private final static int	ACTION_NONE			= 0;
-	private final static int	ACTION_ERROR		= 0x80000000;
-
 	/**
 	 * The actions mask.
 	 */
@@ -255,10 +253,10 @@ public final class BundlePermission extends BasicPermission {
 	 * named symbolic name.
 	 * 
 	 * <pre>
-	 *      x.y.*,&quot;provide&quot; -&gt; x.y.z,&quot;provide&quot; is true
-	 *      *,&quot;require&quot; -&gt; x.y, &quot;require&quot;      is true
-	 *      *,&quot;provide&quot; -&gt; x.y, &quot;require&quot;      is true
-	 *      x.y,&quot;provide&quot; -&gt; x.y.z, &quot;provide&quot;  is false
+	 *       x.y.*,&quot;provide&quot; -&gt; x.y.z,&quot;provide&quot; is true
+	 *       *,&quot;require&quot; -&gt; x.y, &quot;require&quot;      is true
+	 *       *,&quot;provide&quot; -&gt; x.y, &quot;require&quot;      is true
+	 *       x.y,&quot;provide&quot; -&gt; x.y.z, &quot;provide&quot;  is false
 	 * </pre>
 	 * 
 	 * @param p The target permission to interrogate.
@@ -310,6 +308,7 @@ public final class BundlePermission extends BasicPermission {
 				if (comma)
 					sb.append(',');
 				sb.append(HOST);
+				comma = true;
 			}
 
 			if ((action_mask & ACTION_FRAGMENT) == ACTION_FRAGMENT) {
@@ -455,12 +454,10 @@ final class BundlePermissionCollection extends PermissionCollection {
 	 * 
 	 * @param permission The <code>BundlePermission</code> object to add.
 	 * 
-	 * @exception IllegalArgumentException If the permission is not a
-	 *            <code>BundlePermission</code> instance.
-	 * 
-	 * @exception SecurityException If this
-	 *            <code>BundlePermissionCollection</code> object has been
-	 *            marked read-only.
+	 * @throws IllegalArgumentException If the permission is not a
+	 *         <code>BundlePermission</code> instance.
+	 * @throws SecurityException If this <code>BundlePermissionCollection</code>
+	 *         object has been marked read-only.
 	 */
 
 	public void add(Permission permission) {

@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.condpermadmin/src/org/osgi/service/condpermadmin/ConditionInfo.java,v 1.6 2005/05/13 20:33:31 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.service.condpermadmin/src/org/osgi/service/condpermadmin/ConditionInfo.java,v 1.10 2005/07/30 02:21:48 hargrave Exp $
  *
  * Copyright (c) OSGi Alliance (2004, 2005). All Rights Reserved.
  * 
@@ -10,7 +10,7 @@
 
 package org.osgi.service.condpermadmin;
 
-import java.util.Vector;
+import java.util.ArrayList;
 
 /**
  * Condition representation used by the Conditional Permission Admin service.
@@ -47,12 +47,12 @@ public class ConditionInfo {
 	 *            The arguments that will be passed to the constructor of the
 	 *            <tt>Conditon</tt> class identified by <tt>type</tt>.
 	 * 
-	 * @exception java.lang.NullPointerException
+	 * @throws java.lang.NullPointerException
 	 *                if <tt>type</tt> is <tt>null</tt>.
 	 */
 	public ConditionInfo(String type, String args[]) {
 		this.type = type;
-		this.args = args;
+		this.args = args != null ? args : new String[0];
 		if (type == null) {
 			throw new NullPointerException("type is null");
 		}
@@ -65,70 +65,87 @@ public class ConditionInfo {
 	 * @param encodedCondition
 	 *            The encoded <tt>ConditionInfo</tt>.
 	 * @see #getEncoded
-	 * @exception java.lang.IllegalArgumentException
+	 * @throws java.lang.IllegalArgumentException
 	 *                if <tt>encodedCondition</tt> is not properly formatted.
 	 */
 	public ConditionInfo(String encodedCondition) {
 		if (encodedCondition == null) {
-			throw new NullPointerException("missing encoded permission");
+			throw new NullPointerException("missing encoded condition");
 		}
 		if (encodedCondition.length() == 0) {
-			throw new IllegalArgumentException("empty encoded permission");
+			throw new IllegalArgumentException("empty encoded condition");
 		}
-
 		try {
 			char[] encoded = encodedCondition.toCharArray();
-
+			int length = encoded.length;
+			int pos = 0;
+			
+			/* skip whitespace */
+			while (Character.isWhitespace(encoded[pos])) {
+				pos++;
+			}
+			
 			/* the first character must be '[' */
-			if (encoded[0] != '[') {
+			if (encoded[pos] != '[') {
 				throw new IllegalArgumentException(
-						"first character not open bracket");
+						"expecting open bracket");
 			}
+			pos++;
 
+			/* skip whitespace */
+			while (Character.isWhitespace(encoded[pos])) {
+				pos++;
+			}
+			
 			/* type is not quoted or encoded */
-			int end = 1;
-			int begin = end;
-
-			while ((encoded[end] != ' ') && (encoded[end] != ')')) {
-				end++;
+			int begin = pos;
+			while (!Character.isWhitespace(encoded[pos]) && (encoded[pos] != ']')) {
+				pos++;
 			}
-
-			if (end == begin) {
+			if (pos == begin || encoded[begin] == '"') {
 				throw new IllegalArgumentException("expecting type");
 			}
-
-			this.type = new String(encoded, begin, end - begin);
-
-			Vector args = new Vector();
-			/* type may be followed by name which is quoted and encoded */
-			while (encoded[end] == ' ') {
-				end++;
-
-				if (encoded[end] != '"') {
-					throw new IllegalArgumentException("expecting quoted name");
-				}
-
-				end++;
-				begin = end;
-
-				while (encoded[end] != '"') {
-					if (encoded[end] == '\\') {
-						end++;
+			this.type = new String(encoded, begin, pos - begin);
+			
+			/* skip whitespace */
+			while (Character.isWhitespace(encoded[pos])) {
+				pos++;
+			}
+			
+			/* type may be followed by args which are quoted and encoded */
+			ArrayList argsList = new ArrayList();
+			while (encoded[pos] == '"') {
+				pos++;
+				begin = pos;
+				while (encoded[pos] != '"') {
+					if (encoded[pos] == '\\') {
+						pos++;
 					}
-
-					end++;
+					pos++;
 				}
+				argsList.add(unescapeString(encoded, begin, pos));
+				pos++;
 
-				args.add(decodeString(encoded, begin, end));
-				end++;
+				if (Character.isWhitespace(encoded[pos])) {
+					/* skip whitespace */
+					while (Character.isWhitespace(encoded[pos])) {
+						pos++;
+					}
+				}
 			}
-			this.args = (String[]) args.toArray(new String[0]);
+			this.args = (String[]) argsList.toArray(new String[argsList.size()]);
+			
 			/* the final character must be ')' */
-			if ((encoded[end] != ']') || (end + 1 != encoded.length)) {
-				throw new IllegalArgumentException("last character not "
-						+ "close bracket");
+			char c = encoded[pos];
+			pos++;
+			while ((pos < length) && Character.isWhitespace(encoded[pos])) {
+				pos++;
 			}
-		} catch (ArrayIndexOutOfBoundsException e) {
+			if ((c != ']') || (pos != length)) {
+				throw new IllegalArgumentException("expecting close bracket");
+			}
+		}
+		catch (ArrayIndexOutOfBoundsException e) {
 			throw new IllegalArgumentException("parsing terminated abruptly");
 		}
 	}
@@ -165,7 +182,7 @@ public class ConditionInfo {
 
 		for (int i = 0; i < args.length; i++) {
 			output.append(" \"");
-			encodeString(args[i], output);
+			escapeString(args[i], output);
 			output.append('\"');
 		}
 
@@ -199,7 +216,8 @@ public class ConditionInfo {
 	/**
 	 * Returns arguments of this <tt>ConditionInfo</tt>.
 	 * 
-	 * @return The arguments of this <tt>ConditionInfo</tt>. have a name.
+	 * @return The arguments of this <tt>ConditionInfo</tt>.  An empty array
+	 * is returned if the <tt>ConditionInfo</tt> has no arguments.
 	 */
 	public final String[] getArgs() {
 		return (args);
@@ -258,27 +276,25 @@ public class ConditionInfo {
 	 * This escapes the quotes, backslashes, \n, and \r in the string using a
 	 * backslash and appends the newly escaped string to a StringBuffer.
 	 */
-	private static void encodeString(String str, StringBuffer output) {
+	private static void escapeString(String str, StringBuffer output) {
 		int len = str.length();
-
 		for (int i = 0; i < len; i++) {
 			char c = str.charAt(i);
-
 			switch (c) {
-			case '"':
-			case '\\':
-				output.append('\\');
-				output.append(c);
-				break;
-			case '\r':
-				output.append("\\r");
-				break;
-			case '\n':
-				output.append("\\n");
-				break;
-			default:
-				output.append(c);
-				break;
+				case '"' :
+				case '\\' :
+					output.append('\\');
+					output.append(c);
+					break;
+				case '\r' :
+					output.append("\\r");
+					break;
+				case '\n' :
+					output.append("\\n");
+					break;
+				default :
+					output.append(c);
+					break;
 			}
 		}
 	}
@@ -286,29 +302,34 @@ public class ConditionInfo {
 	/**
 	 * Takes an encoded character array and decodes it into a new String.
 	 */
-	private static String decodeString(char[] str, int begin, int end) {
+	private static String unescapeString(char[] str, int begin, int end) {
 		StringBuffer output = new StringBuffer(end - begin);
-
 		for (int i = begin; i < end; i++) {
 			char c = str[i];
-
 			if (c == '\\') {
 				i++;
-
 				if (i < end) {
 					c = str[i];
-
-					if (c == 'n') {
-						c = '\n';
-					} else if (c == 'r') {
-						c = '\r';
+					switch (c) {
+						case '"' :
+						case '\\' :
+							break;
+						case 'r' :
+							c = '\r';
+							break;
+						case 'n' :
+							c = '\n';
+							break;
+						default :
+							c = '\\';
+							i--;
+							break;
 					}
 				}
 			}
-
 			output.append(c);
 		}
-
-		return (output.toString());
+		
+		return output.toString();
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/Version.java,v 1.13 2005/05/13 20:32:55 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/Version.java,v 1.14 2005/07/30 02:22:40 hargrave Exp $
  * 
  * Copyright (c) OSGi Alliance (2004, 2005). All Rights Reserved.
  * 
@@ -29,7 +29,7 @@ import java.util.StringTokenizer;
  * <p>
  * <code>Version</code> objects are immutable.
  * 
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  * @since 1.3
  */
 
@@ -93,14 +93,15 @@ public class Version implements Comparable {
 	 * Here is the grammar for version strings.
 	 * 
 	 * <pre>
-	 *       version ::= major('.'minor('.'micro('.'qualifier)?)?)?
-	 *       major ::= digit+
-	 *       minor ::= digit+
-	 *       micro ::= digit+
-	 *       qualifier ::= (alpha|digit|'_'|'-')+
-	 *       digit ::= [0..9]
-	 *       alpha ::= [a..zA..Z]
+	 * version ::= major('.'minor('.'micro('.'qualifier)?)?)?
+	 * major ::= digit+
+	 * minor ::= digit+
+	 * micro ::= digit+
+	 * qualifier ::= (alpha|digit|'_'|'-')+
+	 * digit ::= [0..9]
+	 * alpha ::= [a..zA..Z]
 	 * </pre>
+	 * 
 	 * There must be no whitespace in version.
 	 * 
 	 * @param version String representation of the version identifier.

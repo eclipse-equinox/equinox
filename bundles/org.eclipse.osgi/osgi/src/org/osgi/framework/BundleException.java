@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/BundleException.java,v 1.10 2005/05/13 20:32:55 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/BundleException.java,v 1.11 2005/07/30 02:22:40 hargrave Exp $
  * 
  * Copyright (c) OSGi Alliance (2000, 2005). All Rights Reserved.
  * 
@@ -15,15 +15,15 @@ package org.osgi.framework;
  * occurred.
  * 
  * <p>
- * <code>BundleException</code> object is created by the Framework to denote an
- * exception condition in the lifecycle of a bundle. <code>BundleException</code>s
- * should not be created by bundle developers.
+ * <code>BundleException</code> object is created by the Framework to denote
+ * an exception condition in the lifecycle of a bundle.
+ * <code>BundleException</code>s should not be created by bundle developers.
  * 
  * <p>
  * This exception is updated to conform to the general purpose exception
  * chaining mechanism.
  * 
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 
 public class BundleException extends Exception {
@@ -45,7 +45,8 @@ public class BundleException extends Exception {
 	}
 
 	/**
-	 * Creates a <code>BundleException</code> object with the specified message.
+	 * Creates a <code>BundleException</code> object with the specified
+	 * message.
 	 * 
 	 * @param msg The message.
 	 */
@@ -70,11 +71,11 @@ public class BundleException extends Exception {
 	}
 
 	/**
-	 * Returns the cause of this exception or <code>null</code> if no cause was
-	 * specified when this exception was created.
+	 * Returns the cause of this exception or <code>null</code> if no cause
+	 * was specified when this exception was created.
 	 * 
-	 * @return The cause of this exception or <code>null</code> if no cause was
-	 *         specified.
+	 * @return The cause of this exception or <code>null</code> if no cause
+	 *         was specified.
 	 * @since 1.3
 	 */
 	public Throwable getCause() {
