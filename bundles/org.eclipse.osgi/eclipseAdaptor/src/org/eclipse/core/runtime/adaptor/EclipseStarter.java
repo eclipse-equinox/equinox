@@ -454,6 +454,19 @@ public class EclipseStarter {
 			}
 		};
 		context.registerService(Runnable.class.getName(), handler, properties);
+
+		// register the output stream to the launcher if it exists
+		try {
+			Method method = endSplashHandler.getClass().getMethod("getOutputStream", new Class[0]); //$NON-NLS-1$
+			Object outputStream = method.invoke(endSplashHandler, new Object[0]);
+			if (outputStream instanceof OutputStream) {
+				Dictionary osProperties = new Hashtable();
+				osProperties.put("name", "splashstream"); //$NON-NLS-1$//$NON-NLS-2$
+				context.registerService(OutputStream.class.getName(), outputStream, osProperties);
+			}
+		} catch (Exception ex) {
+			// ignore
+		} 
 	}
 
 	private static URL searchForBundle(String name, String parent) throws MalformedURLException {
