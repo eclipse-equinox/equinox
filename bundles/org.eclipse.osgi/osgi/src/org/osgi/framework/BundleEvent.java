@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/BundleEvent.java,v 1.12 2005/08/04 04:03:38 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/BundleEvent.java,v 1.13 2005/08/05 03:22:00 hargrave Exp $
  * 
  * Copyright (c) OSGi Alliance (2000, 2005). All Rights Reserved.
  * 
@@ -13,7 +13,7 @@ package org.osgi.framework;
 import java.util.EventObject;
 
 /**
- * A Framework event describing a bundle lifecycle change.
+ * An event from the Framework describing a bundle lifecycle change.
  * <p>
  * <code>BundleEvent</code> objects are delivered to
  * <code>BundleListener</code> objects when a change occurs in a bundle's
@@ -23,7 +23,7 @@ import java.util.EventObject;
  * <p>
  * OSGi Alliance reserves the right to extend the set of types.
  * 
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 
 public class BundleEvent extends EventObject {
@@ -150,14 +150,14 @@ public class BundleEvent extends EventObject {
 	 * Returns the type of lifecyle event. The type values are:
 	 * <ul>
 	 * <li>{@link #INSTALLED}
+	 * <li>{@link #RESOLVED}
+	 * <li>{@link #STARTING}
 	 * <li>{@link #STARTED}
+	 * <li>{@link #STOPPING}
 	 * <li>{@link #STOPPED}
 	 * <li>{@link #UPDATED}
-	 * <li>{@link #UNINSTALLED}
-	 * <li>{@link #RESOLVED}
 	 * <li>{@link #UNRESOLVED}
-	 * <li>{@link #STARTING}
-	 * <li>{@link #STOPPING}
+	 * <li>{@link #UNINSTALLED}
 	 * </ul>
 	 * 
 	 * @return The type of lifecycle event.

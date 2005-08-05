@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/ServiceRegistration.java,v 1.9 2005/07/30 02:22:41 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/ServiceRegistration.java,v 1.10 2005/08/05 03:22:00 hargrave Exp $
  * 
  * Copyright (c) OSGi Alliance (2000, 2005). All Rights Reserved.
  * 
@@ -24,7 +24,7 @@ import java.util.Dictionary;
  * The <code>ServiceRegistration</code> object may be used to update the
  * properties of the service or to unregister the service.
  * 
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  * @see BundleContext#registerService(String[],Object,Dictionary)
  */
 
@@ -56,7 +56,7 @@ public interface ServiceRegistration {
 	 * <ol>
 	 * <li>The service's properties are replaced with the provided properties.
 	 * <li>A service event of type {@link ServiceEvent#MODIFIED} is
-	 * synchronously sent.
+	 * fired.
 	 * </ol>
 	 * 
 	 * @param properties The properties for this service. See {@link Constants}
@@ -84,7 +84,7 @@ public interface ServiceRegistration {
 	 * it can no longer be used. <code>ServiceReference</code> objects for the
 	 * service may no longer be used to get a service object for the service.
 	 * <li>A service event of type {@link ServiceEvent#UNREGISTERING} is
-	 * synchronously sent so that bundles using this service can release their
+	 * fired so that bundles using this service can release their
 	 * use of it.
 	 * <li>For each bundle whose use count for this service is greater than
 	 * zero: <br>

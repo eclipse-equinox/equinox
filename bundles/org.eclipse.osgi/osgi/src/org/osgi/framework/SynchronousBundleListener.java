@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/SynchronousBundleListener.java,v 1.11 2005/08/04 04:03:38 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/SynchronousBundleListener.java,v 1.12 2005/08/05 03:22:00 hargrave Exp $
  * 
  * Copyright (c) OSGi Alliance (2001, 2005). All Rights Reserved.
  * 
@@ -11,7 +11,8 @@
 package org.osgi.framework;
 
 /**
- * A synchronous <code>BundleEvent</code> listener.
+ * A synchronous <code>BundleEvent</code> listener. When a <code>BundleEvent</code> is
+ * fired, it is synchronously delivered to a <code>BundleListener</code>.
  * 
  * <p>
  * <code>SynchronousBundleListener</code> is a listener interface that may be
@@ -33,7 +34,7 @@ package org.osgi.framework;
  * <code>AdminPermission[bundle,LISTENER]</code> is required to add or remove a
  * <code>SynchronousBundleListener</code> object.
  * 
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  * @since 1.1
  * @see BundleEvent
  */

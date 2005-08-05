@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.packageadmin/src/org/osgi/service/packageadmin/PackageAdmin.java,v 1.14 2005/08/04 03:33:55 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.service.packageadmin/src/org/osgi/service/packageadmin/PackageAdmin.java,v 1.15 2005/08/05 03:22:01 hargrave Exp $
  * 
  * Copyright (c) OSGi Alliance (2001, 2005). All Rights Reserved.
  * 
@@ -21,7 +21,7 @@ import org.osgi.framework.Bundle;
  * If present, there will only be a single instance of this service registered
  * with the Framework.
  * 
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  * @see org.osgi.service.packageadmin.ExportedPackage
  * @see org.osgi.service.packageadmin.RequiredBundle
  */
@@ -114,12 +114,12 @@ public interface PackageAdmin {
 	 * unresolvable until another bundle offering a compatible package for
 	 * export has been installed in the Framework.
 	 * <li>A framework event of type
-	 * <code>FrameworkEvent.PACKAGES_REFRESHED</code> is broadcast.
+	 * <code>FrameworkEvent.PACKAGES_REFRESHED</code> is fired.
 	 * </ol>
 	 * 
 	 * <p>
 	 * For any exceptions that are thrown during any of these steps, a
-	 * <code>FrameworkEvent</code> of type <code>ERROR</code> is broadcast,
+	 * <code>FrameworkEvent</code> of type <code>ERROR</code> is fired
 	 * containing the exception. The source bundle for these events should be
 	 * the specific bundle to which the exception is related. If no specific
 	 * bundle can be associated with the exception then the System Bundle must

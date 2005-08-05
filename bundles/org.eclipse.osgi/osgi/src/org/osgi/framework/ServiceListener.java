@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/ServiceListener.java,v 1.9 2005/07/30 02:22:40 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/ServiceListener.java,v 1.10 2005/08/05 03:22:00 hargrave Exp $
  * 
  * Copyright (c) OSGi Alliance (2000, 2005). All Rights Reserved.
  * 
@@ -13,7 +13,8 @@ package org.osgi.framework;
 import java.util.EventListener;
 
 /**
- * A <code>ServiceEvent</code> listener.
+ * A <code>ServiceEvent</code> listener. When a <code>ServiceEvent</code> is
+ * fired, it is synchronously delivered to a <code>BundleListener</code>.
  * 
  * <p>
  * <code>ServiceListener</code> is a listener interface that may be
@@ -39,7 +40,7 @@ import java.util.EventListener;
  * objects is further filtered according to package sources as defined in
  * {@link ServiceReference#isAssignableTo(Bundle, String)}.
  * 
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  * @see ServiceEvent
  * @see ServicePermission
  */

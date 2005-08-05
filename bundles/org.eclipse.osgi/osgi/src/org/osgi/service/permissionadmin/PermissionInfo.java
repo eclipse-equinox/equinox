@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.permissionadmin/src/org/osgi/service/permissionadmin/PermissionInfo.java,v 1.13 2005/08/04 03:34:57 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.service.permissionadmin/src/org/osgi/service/permissionadmin/PermissionInfo.java,v 1.14 2005/08/05 01:35:43 hargrave Exp $
  * 
  * Copyright (c) OSGi Alliance (2001, 2005). All Rights Reserved.
  * 
@@ -27,7 +27,7 @@ package org.osgi.service.permissionadmin;
  * <code>PermissionInfo</code> may be delayed until the package containing its
  * Permission class has been exported by a bundle.
  * 
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class PermissionInfo {
 	private String	type;
@@ -35,7 +35,7 @@ public class PermissionInfo {
 	private String	actions;
 
 	/**
-	 * Constructs a <code>PermissionInfo</code> from the given type, name, and
+	 * Constructs a <code>PermissionInfo</code> from the specified type, name, and
 	 * actions.
 	 * 
 	 * @param type The fully qualified class name of the permission represented
@@ -70,14 +70,14 @@ public class PermissionInfo {
 	}
 
 	/**
-	 * Constructs a <code>PermissionInfo</code> object from the given encoded
+	 * Constructs a <code>PermissionInfo</code> object from the specified encoded
 	 * <code>PermissionInfo</code> string. White space in the encoded
 	 * <code>PermissionInfo</code> string is ignored.
 	 * 
 	 * 
 	 * @param encodedPermission The encoded <code>PermissionInfo</code>.
 	 * @see #getEncoded
-	 * @throws java.lang.IllegalArgumentException if
+	 * @throws java.lang.IllegalArgumentException If the 
 	 *            <code>encodedPermission</code> is not properly formatted.
 	 */
 	public PermissionInfo(String encodedPermission) {

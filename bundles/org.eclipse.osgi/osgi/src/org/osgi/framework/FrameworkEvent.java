@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/FrameworkEvent.java,v 1.10 2005/07/30 02:22:40 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/FrameworkEvent.java,v 1.11 2005/08/05 03:22:00 hargrave Exp $
  * 
  * Copyright (c) OSGi Alliance (2004, 2005). All Rights Reserved.
  * 
@@ -13,7 +13,7 @@ package org.osgi.framework;
 import java.util.EventObject;
 
 /**
- * A general Framework event.
+ * A general event from the Framework.
  * 
  * <p>
  * <code>FrameworkEvent</code> is the event class used when notifying
@@ -23,7 +23,7 @@ import java.util.EventObject;
  * <p>
  * OSGi Alliance reserves the right to extend the set of event types.
  * 
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 
 public class FrameworkEvent extends EventObject {
@@ -47,7 +47,7 @@ public class FrameworkEvent extends EventObject {
 	 * The Framework has started.
 	 * 
 	 * <p>
-	 * This event is broadcast when the Framework has started after all
+	 * This event is fired when the Framework has started after all
 	 * installed bundles that are marked to be started have been started and the
 	 * Framework has reached the intitial start level.
 	 * 
@@ -73,7 +73,7 @@ public class FrameworkEvent extends EventObject {
 	 * A PackageAdmin.refreshPackage operation has completed.
 	 * 
 	 * <p>
-	 * This event is broadcast when the Framework has completed the refresh
+	 * This event is fired when the Framework has completed the refresh
 	 * packages operation initiated by a call to the
 	 * PackageAdmin.refreshPackages method.
 	 * 
@@ -89,7 +89,7 @@ public class FrameworkEvent extends EventObject {
 	 * A StartLevel.setStartLevel operation has completed.
 	 * 
 	 * <p>
-	 * This event is broadcast when the Framework has completed changing the
+	 * This event is fired when the Framework has completed changing the
 	 * active start level initiated by a call to the StartLevel.setStartLevel
 	 * method.
 	 * 

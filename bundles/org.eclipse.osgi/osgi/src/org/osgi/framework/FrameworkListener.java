@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/FrameworkListener.java,v 1.7 2005/07/30 02:22:40 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/FrameworkListener.java,v 1.8 2005/08/05 03:22:00 hargrave Exp $
  * 
  * Copyright (c) OSGi Alliance (2000, 2005). All Rights Reserved.
  * 
@@ -13,7 +13,8 @@ package org.osgi.framework;
 import java.util.EventListener;
 
 /**
- * A <code>FrameworkEvent</code> listener.
+ * A <code>FrameworkEvent</code> listener. When a <code>FrameworkEvent</code> is
+ * fired, it is asynchronously delivered to a <code>FrameworkListener</code>.
  * 
  * <p>
  * <code>FrameworkListener</code> is a listener interface that may be
@@ -24,7 +25,7 @@ import java.util.EventListener;
  * <code>FrameworkEvent</code> objects when the Framework starts and when
  * asynchronous errors occur.
  * 
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  * @see FrameworkEvent
  */
 

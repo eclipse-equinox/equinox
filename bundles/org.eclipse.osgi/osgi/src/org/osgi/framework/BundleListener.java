@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/BundleListener.java,v 1.8 2005/07/30 02:22:41 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/BundleListener.java,v 1.9 2005/08/05 03:22:00 hargrave Exp $
  * 
  * Copyright (c) OSGi Alliance (2000, 2005). All Rights Reserved.
  * 
@@ -13,7 +13,8 @@ package org.osgi.framework;
 import java.util.EventListener;
 
 /**
- * A <code>BundleEvent</code> listener.
+ * A <code>BundleEvent</code> listener. When a <code>BundleEvent</code> is
+ * fired, it is asynchronously delivered to a <code>BundleListener</code>.
  * 
  * <p>
  * <code>BundleListener</code> is a listener interface that may be implemented
@@ -25,7 +26,7 @@ import java.util.EventListener;
  * object when a bundle has been installed, resolved, started, stopped, updated,
  * unresolved, or uninstalled.
  * 
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  * @see BundleEvent
  */
 

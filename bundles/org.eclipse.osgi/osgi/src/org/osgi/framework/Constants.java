@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/Constants.java,v 1.19 2005/07/30 02:22:41 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/Constants.java,v 1.20 2005/08/05 14:43:17 hargrave Exp $
  *
  * Copyright (c) OSGi Alliance (2000, 2005). All Rights Reserved.
  *
@@ -10,8 +10,6 @@
 
 package org.osgi.framework;
 
-import java.util.Dictionary;
-
 /**
  * Defines standard names for the OSGi environment property, service property,
  * and Manifest header attribute keys.
@@ -20,11 +18,8 @@ import java.util.Dictionary;
  * The values associated with these keys are of type
  * <code>java.lang.String</code>, unless otherwise indicated.
  * 
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.20 $
  * @since 1.1
- * @see Bundle#getHeaders()
- * @see BundleContext#getProperty
- * @see BundleContext#registerService(String[],Object,Dictionary)
  */
 
 public interface Constants {

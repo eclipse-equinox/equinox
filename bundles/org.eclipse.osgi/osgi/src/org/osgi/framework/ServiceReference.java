@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/ServiceReference.java,v 1.12 2005/07/30 02:22:40 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/ServiceReference.java,v 1.13 2005/08/05 14:43:17 hargrave Exp $
  * 
  * Copyright (c) OSGi Alliance (2000, 2005). All Rights Reserved.
  * 
@@ -9,8 +9,6 @@
  */
 
 package org.osgi.framework;
-
-import java.util.Dictionary;
 
 /**
  * A reference to a service.
@@ -36,7 +34,7 @@ import java.util.Dictionary;
  * <code>ServiceReference</code> objects associated with different
  * <code>ServiceRegistration</code> objects are not equal.
  * 
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  * @see BundleContext#getServiceReference
  * @see BundleContext#getServiceReferences
  * @see BundleContext#getService
@@ -78,7 +76,7 @@ public interface ServiceReference {
 	 * This method is <i>case-preserving </i>; this means that every key in the
 	 * returned array must have the same case as the corresponding key in the
 	 * properties <code>Dictionary</code> that was passed to the
-	 * {@link BundleContext#registerService(String[],Object,Dictionary)} or
+	 * {@link BundleContext#registerService(String[],Object,java.util.Dictionary)} or
 	 * {@link ServiceRegistration#setProperties} methods.
 	 * 
 	 * @return An array of property keys.
@@ -97,7 +95,7 @@ public interface ServiceReference {
 	 * @return The bundle that registered the service referenced by this
 	 *         <code>ServiceReference</code> object; <code>null</code> if
 	 *         that service has already been unregistered.
-	 * @see BundleContext#registerService(String[],Object,Dictionary)
+	 * @see BundleContext#registerService(String[],Object,java.util.Dictionary)
 	 */
 	public Bundle getBundle();
 
