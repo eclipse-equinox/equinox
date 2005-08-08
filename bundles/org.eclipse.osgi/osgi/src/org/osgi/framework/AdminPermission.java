@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/AdminPermission.java,v 1.12 2005/05/13 20:32:54 hargrave Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/AdminPermission.java,v 1.17 2005/08/03 14:52:49 twatson Exp $
  * 
  * Copyright (c) OSGi Alliance (2000, 2005). All Rights Reserved.
  * 
@@ -63,7 +63,7 @@ import org.eclipse.osgi.framework.internal.core.FilterImpl;
  * <li>name - The symbolic name of a bundle.</li>
  * </ul>
  * 
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
 
 public final class AdminPermission extends Permission {
@@ -202,7 +202,7 @@ public final class AdminPermission extends Permission {
 	 * Null arguments are equivalent to "*".
 	 * 
 	 * @param filter A filter expression that can use signer, location, id, and
-	 *        name keys. A value of &quot;*&quot or <code>null</code> matches
+	 *        name keys. A value of &quot;*&quot; or <code>null</code> matches
 	 *        all bundle.
 	 * @param actions <code>class</code>, <code>execute</code>,
 	 *        <code>extensionLifecycle</code>, <code>lifecycle</code>,
