@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/BundleException.java,v 1.11 2005/07/30 02:22:40 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/BundleException.java,v 1.12 2005/08/11 03:07:30 hargrave Exp $
  * 
  * Copyright (c) OSGi Alliance (2000, 2005). All Rights Reserved.
  * 
@@ -23,7 +23,7 @@ package org.osgi.framework;
  * This exception is updated to conform to the general purpose exception
  * chaining mechanism.
  * 
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 
 public class BundleException extends Exception {
@@ -85,6 +85,8 @@ public class BundleException extends Exception {
 	/**
 	 * The cause of this exception can only be set when constructed.
 	 * 
+	 * @param cause Cause of the exception.
+	 * @return This object.
 	 * @throws java.lang.IllegalStateException This method will always throw an
 	 *         <code>IllegalStateException</code> since the cause of this
 	 *         exception can only be set when constructed.

@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/AllServiceListener.java,v 1.6 2005/07/30 02:22:41 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/AllServiceListener.java,v 1.7 2005/08/11 03:07:30 hargrave Exp $
  * 
  * Copyright (c) OSGi Alliance (2005). All Rights Reserved.
  * 
@@ -41,9 +41,10 @@ package org.osgi.framework;
  * that the listener may not be able to cast the service object to any of its
  * corresponding service interfaces if the service object is retrieved.
  * 
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  * @see ServiceEvent
  * @see ServicePermission
+ * @since 1.3
  */
 
 public interface AllServiceListener extends ServiceListener {

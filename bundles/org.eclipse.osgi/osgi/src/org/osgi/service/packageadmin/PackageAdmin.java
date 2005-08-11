@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.packageadmin/src/org/osgi/service/packageadmin/PackageAdmin.java,v 1.16 2005/08/05 20:32:55 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.service.packageadmin/src/org/osgi/service/packageadmin/PackageAdmin.java,v 1.17 2005/08/11 03:07:32 hargrave Exp $
  * 
  * Copyright (c) OSGi Alliance (2001, 2005). All Rights Reserved.
  * 
@@ -21,7 +21,7 @@ import org.osgi.framework.Bundle;
  * If present, there will only be a single instance of this service registered
  * with the Framework.
  * 
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  * @see org.osgi.service.packageadmin.ExportedPackage
  * @see org.osgi.service.packageadmin.RequiredBundle
  */
@@ -262,6 +262,7 @@ public interface PackageAdmin {
 	 * If a bundle is not one or more of the defined types then 0x00000000 is
 	 * returned.
 	 * 
+	 * @param bundle The bundle for which to return the special type.
 	 * @return The special type of the bundle.
 	 * @since 1.2
 	 */
