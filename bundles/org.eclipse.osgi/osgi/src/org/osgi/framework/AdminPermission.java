@@ -1,5 +1,5 @@
 /*
- * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/AdminPermission.java,v 1.17 2005/08/03 14:52:49 twatson Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/AdminPermission.java,v 1.18 2005/08/08 14:33:11 twatson Exp $
  * 
  * Copyright (c) OSGi Alliance (2000, 2005). All Rights Reserved.
  * 
@@ -63,47 +63,56 @@ import org.eclipse.osgi.framework.internal.core.FilterImpl;
  * <li>name - The symbolic name of a bundle.</li>
  * </ul>
  * 
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
 
-public final class AdminPermission extends Permission {
+public final class AdminPermission extends BasicPermission {
 	static final long	serialVersionUID	= 207051004521261705L;
 
 	/**
 	 * The action string <code>class</code> (Value is "class").
+	 * @since 1.3
 	 */
 	public final static String			CLASS				= "class";
 	/**
 	 * The action string <code>execute</code> (Value is "execute").
+	 * @since 1.3
 	 */
 	public final static String			EXECUTE				= "execute";
 	/**
 	 * The action string <code>extensionLifecycle</code> (Value is
 	 * "extensionLifecycle").
+	 * @since 1.3
 	 */
 	public final static String			EXTENSIONLIFECYCLE	= "extensionLifecycle";
 	/**
 	 * The action string <code>lifecycle</code> (Value is "lifecycle").
+	 * @since 1.3
 	 */
 	public final static String			LIFECYCLE			= "lifecycle";
 	/**
 	 * The action string <code>listener</code> (Value is "listener").
+	 * @since 1.3
 	 */
 	public final static String			LISTENER			= "listener";
 	/**
 	 * The action string <code>metadata</code> (Value is "metadata").
+	 * @since 1.3
 	 */
 	public final static String			METADATA			= "metadata";
 	/**
 	 * The action string <code>resolve</code> (Value is "resolve").
+	 * @since 1.3
 	 */
 	public final static String			RESOLVE				= "resolve";
 	/**
 	 * The action string <code>resource</code> (Value is "resource").
+	 * @since 1.3
 	 */
 	public final static String			RESOURCE			= "resource";
 	/**
 	 * The action string <code>startlevel</code> (Value is "startlevel").
+	 * @since 1.3
 	 */
 	public final static String			STARTLEVEL			= "startlevel";
 
@@ -230,6 +239,7 @@ public final class AdminPermission extends Permission {
 	 *        <code>listener</code>, <code>metadata</code>,
 	 *        <code>resolve</code>, <code>resource</code>,
 	 *        <code>startlevel</code>
+	 * @since 1.3
 	 */
 	public AdminPermission(Bundle bundle, String actions) {
 		super(createName(bundle));
