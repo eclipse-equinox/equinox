@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.util.tracker/src/org/osgi/util/tracker/ServiceTracker.java,v 1.13 2005/05/13 20:33:35 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.util.tracker/src/org/osgi/util/tracker/ServiceTracker.java,v 1.14 2005/08/11 03:08:56 hargrave Exp $
  * 
  * Copyright (c) OSGi Alliance (2000, 2005). All Rights Reserved.
  * 
@@ -33,7 +33,7 @@ import org.osgi.framework.*;
  * <code>getServices</code> methods can be called to get the service objects
  * for the tracked service.
  * 
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class ServiceTracker implements ServiceTrackerCustomizer {
 	/* set this to true to compile in debug messages */
@@ -429,6 +429,7 @@ public class ServiceTracker implements ServiceTrackerCustomizer {
 	 * @param timeout time interval in milliseconds to wait. If zero, the method
 	 *        will wait indefinately.
 	 * @return Returns the result of <code>getService()</code>.
+	 * @throws InterruptedException If another thread has interrupted the current thread.
 	 * @throws IllegalArgumentException If the value of timeout is negative.
 	 */
 	public Object waitForService(long timeout) throws InterruptedException {
@@ -735,6 +736,12 @@ public class ServiceTracker implements ServiceTrackerCustomizer {
 			System.out.println("ServiceTracker.modified: " + filter); //$NON-NLS-1$
 		}
 	}
+
+    /**
+	 * Finalize. This method no longer performs any function but it kept
+	 * to maintain binary compatibility with prior versions of this class.
+	 */
+    protected void finalize() throws Throwable { }
 
 	/**
 	 * Inner class to track services. If a <code>ServiceTracker</code> object
