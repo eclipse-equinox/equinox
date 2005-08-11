@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/Constants.java,v 1.20 2005/08/05 14:43:17 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/Constants.java,v 1.22 2005/08/11 18:26:02 hargrave Exp $
  *
  * Copyright (c) OSGi Alliance (2000, 2005). All Rights Reserved.
  *
@@ -18,7 +18,7 @@ package org.osgi.framework;
  * The values associated with these keys are of type
  * <code>java.lang.String</code>, unless otherwise indicated.
  * 
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.22 $
  * @since 1.1
  */
 
@@ -742,22 +742,6 @@ public interface Constants {
 	public final static String	FRAGMENT_HOST							= "Fragment-Host";
 
 	/**
-	 * Manifest header directive (named &quot;multiple-hosts&quot;) identifying
-	 * if the fragment should attach to each bundle selected by the
-	 * Fragment-Host manifest header. The default value is <code>false</code>.
-	 * 
-	 * <p>
-	 * The directive value is encoded in the Fragment-Host manifest header like:
-	 * 
-	 * <pre>
-	 *   Fragment-Host: com.acme.module.test; multiple-hosts:=&quot;false&quot;
-	 * </pre>
-	 * 
-	 * @since 1.3
-	 */
-	public final static String	MULTIPLE_HOSTS_DIRECTIVE				= "multiple-hosts";
-
-	/**
 	 * Manifest header attribute (named &quot;selection-filter&quot;) is used
 	 * for selection by filtering based upon system properties.
 	 * 
@@ -1009,4 +993,60 @@ public interface Constants {
 	 * @since 1.3
 	 */
 	public final static String	VISIBILITY_REEXPORT						= "reexport";
+	/**
+	 * Manifest header directive (named &quot;extension&quot;)
+	 * identifying the type of the extension fragment.
+	 * 
+	 * <p>
+	 * The directive value is encoded in the Fragment-Host manifest header
+	 * like:
+	 * 
+	 * <pre>
+	 *   Fragment-Host: system.bundle; extension:=&quot;framework&quot;
+	 * </pre>
+	 * 
+	 * @see Constants#EXTENSION_FRAMEWORK
+	 * @see Constants#EXTENSION_BOOTCLASSPATH
+	 * @since 1.3
+	 */
+	public final static String	EXTENSION_DIRECTIVE			= "extension";
+
+	/**
+	 * Manifest header directive value (named &quot;framework&quot;) identifying 
+	 * the type of extension fragment. An extension fragment type of framework
+	 * indicates that the extension fragment is to be loaded by
+	 * the framework's class loader.
+	 * 
+	 * <p>
+	 * The directive value is encoded in the Fragment-Host manifest header
+	 * like:
+	 * 
+	 * <pre>
+	 *   Fragment-Host: system.bundle; extension:=&quot;framework&quot;
+	 * </pre>
+	 * 
+	 * @see Constants#EXTENSION_DIRECTIVE
+	 * @since 1.3
+	 */
+	public final static String	EXTENSION_FRAMEWORK				= "framework";
+
+	/**
+	 * Manifest header directive value (named &quot;bootclasspath&quot;) identifying 
+	 * the type of extension fragment. An extension fragment type of bootclasspath
+	 * indicates that the extension fragment is to be loaded by
+	 * the boot class loader.
+	 * 
+	 * <p>
+	 * The directive value is encoded in the Fragment-Host manifest header
+	 * like:
+	 * 
+	 * <pre>
+	 *   Fragment-Host: system.bundle; extension:=&quot;bootclasspath&quot;
+	 * </pre>
+	 * 
+	 * @see Constants#EXTENSION_DIRECTIVE
+	 * @since 1.3
+	 */
+	public final static String	EXTENSION_BOOTCLASSPATH			= "bootclasspath";
+
 }
