@@ -1,7 +1,8 @@
 /*
- * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/AdminPermission.java,v 1.18 2005/08/08 14:33:11 twatson Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/AdminPermission.java,v 1.19 2005/08/11 20:31:55 hargrave Exp $
  * 
  * Copyright (c) OSGi Alliance (2000, 2005). All Rights Reserved.
+ * Copyright (c) 2005 IBM Corporation and others.
  * 
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this 
@@ -63,7 +64,7 @@ import org.eclipse.osgi.framework.internal.core.FilterImpl;
  * <li>name - The symbolic name of a bundle.</li>
  * </ul>
  * 
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  */
 
 public final class AdminPermission extends BasicPermission {

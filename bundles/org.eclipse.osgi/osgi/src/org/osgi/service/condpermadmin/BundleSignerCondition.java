@@ -1,7 +1,8 @@
 /*
- * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/service/condpermadmin/BundleSignerCondition.java,v 1.6 2005/05/25 18:55:17 twatson Exp $
+ * $Header: /home/eclipse/org.eclipse.osgi/osgi/src/org/osgi/service/condpermadmin/BundleSignerCondition.java,v 1.7 2005/08/05 15:23:44 twatson Exp $
  * 
  * Copyright (c) OSGi Alliance (2005). All Rights Reserved.
+ * Copyright (c) 2005 IBM Corporation and others.
  * 
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this 
@@ -36,7 +37,7 @@ import org.osgi.framework.Bundle;
  * must be the first RDN and will match any number of RDNs (including zero
  * RDNs).
  * 
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.7 $
  */
 public class BundleSignerCondition {
 	private static final String CONDITION_TYPE = "org.osgi.service.condpermadmin.BundleSignerCondition";
