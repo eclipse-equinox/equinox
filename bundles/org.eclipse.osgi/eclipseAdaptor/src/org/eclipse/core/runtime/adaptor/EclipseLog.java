@@ -384,7 +384,7 @@ public class EclipseLog implements FrameworkLog {
 	 */
 	protected String getDate(Date date) {
 		try {
-			DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SS"); //$NON-NLS-1$
+			DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS"); //$NON-NLS-1$
 			return formatter.format(date);
 		} catch (Exception e) {
 			// If there were problems writing out the date, ignore and
