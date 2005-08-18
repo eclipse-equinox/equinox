@@ -145,6 +145,8 @@ public class EclipseClassLoader extends DefaultClassLoader {
 	 * Determines if for loading the given class we should activate the bundle. 
 	 */
 	private boolean shouldActivateFor(String className) throws ClassNotFoundException {
+		if (!isAutoStartable(className))
+			return false;
 		//Don't reactivate on shut down
 		if (hostdata.getAdaptor().isStopping()) {
 			BundleStopper stopper = EclipseAdaptor.getDefault().getBundleStopper();
@@ -153,6 +155,10 @@ public class EclipseClassLoader extends DefaultClassLoader {
 				throw new ClassNotFoundException(message);
 			}
 		}
+		return true;
+	}
+
+	private boolean isAutoStartable(String className) {
 		boolean autoStart = ((EclipseBundleData) hostdata).isAutoStart();
 		String[] autoStartExceptions = ((EclipseBundleData) hostdata).getAutoStartExceptions();
 		// no exceptions, it is easy to figure it out
