@@ -41,8 +41,8 @@ import org.eclipse.osgi.framework.internal.reliablefile.*;
  * @since 3.1
  */
 public class FileManager {
-	static final int FILETYPE_STANDARD = 0;
-	static final int FILETYPE_RELIABLEFILE = 1;
+	protected static final int FILETYPE_STANDARD = 0;
+	protected static final int FILETYPE_RELIABLEFILE = 1;
 	private static boolean tempCleanup = Boolean.valueOf(System.getProperty("osgi.embedded.cleanTempFiles")).booleanValue(); //$NON-NLS-1$
 	private static boolean openCleanup = Boolean.valueOf(System.getProperty("osgi.embedded.cleanupOnOpen")).booleanValue(); //$NON-NLS-1$
 
@@ -167,7 +167,7 @@ public class FileManager {
 	 * @param fileType the file type. 
 	 * @throws IOException if there are any problems adding the given file to the manager
 	 * @see #FILETYPE_STANDARD
-	 * @see #FILETYPE_STANDARD
+	 * @see #FILETYPE_RELIABLEFILE
 	 */
 	protected void add(String file, int fileType) throws IOException {
 		if (!open)
@@ -505,7 +505,7 @@ public class FileManager {
 			Entry entry = (Entry) table.get(file);
 			String value;
 			if (entry.getFileType() != FILETYPE_STANDARD) {
-				value = Integer.toString(entry.getWriteId() - 1) + ',' + //In the table we save the write  number  - 1, because the read number can be totally different. //$NON-NLS-1$
+				value = Integer.toString(entry.getWriteId() - 1) + ',' + //In the table we save the write  number  - 1, because the read number can be totally different.
 						Integer.toString(entry.getFileType());
 			} else {
 				value = Integer.toString(entry.getWriteId() - 1); //In the table we save the write  number  - 1, because the read number can be totally different.
@@ -599,7 +599,7 @@ public class FileManager {
 				files = base.list();
 				if (files != null) {
 					for (int i = 0; i < files.length; i++) {
-						if (files[i].endsWith(ReliableFile.tmpExt)) { //$NON-NLS-1$
+						if (files[i].endsWith(ReliableFile.tmpExt)) {
 							new File(base, files[i]).delete();
 						}
 					}
@@ -620,7 +620,7 @@ public class FileManager {
 		if (files == null)
 			return;
 		for (int i = 0; i < files.length; i++) {
-			if (files[i].startsWith(fileName + '.') && !files[i].equals(notToDelete)) //$NON-NLS-1$
+			if (files[i].startsWith(fileName + '.') && !files[i].equals(notToDelete))
 				new File(base, files[i]).delete();
 		}
 	}

@@ -136,7 +136,7 @@ public class EclipseLog implements FrameworkLog {
 	/**
 	 * Helper method for writing out argument arrays.
 	 * @param header the header
-	 * @args the list of arguments
+	 * @param args the list of arguments
 	 */
 	protected void writeArgs(String header, String[] args) throws IOException {
 		if (args == null || args.length == 0)
