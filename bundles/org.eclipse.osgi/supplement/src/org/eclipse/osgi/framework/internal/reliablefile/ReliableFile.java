@@ -779,7 +779,12 @@ public class ReliableFile {
 					crc.update(data, 0, 16); // update crc w/ sig bytes
 					return FILETYPE_NOSIGNATURE;
 				}
-			long crccmp = Long.valueOf(new String(data, 4, 8), 16).longValue();
+			long crccmp;
+			try {
+				crccmp = Long.valueOf(new String(data, 4, 8, "UTF-8"), 16).longValue(); //$NON-NLS-1$
+			} catch (UnsupportedEncodingException e) {
+				crccmp = Long.valueOf(new String(data, 4, 8), 16).longValue();
+			}
 			if (crccmp == crc.getValue()) {
 				return FILETYPE_VALID;
 			}
