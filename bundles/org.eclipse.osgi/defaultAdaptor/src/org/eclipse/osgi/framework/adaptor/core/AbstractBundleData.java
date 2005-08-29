@@ -414,7 +414,7 @@ public abstract class AbstractBundleData implements BundleData, Cloneable {
 		try {
 			setVersion(Version.parseVersion((String) manifest.get(Constants.BUNDLE_VERSION)));
 		} catch (IllegalArgumentException e) {
-			setVersion(Version.emptyVersion);
+			setVersion(new InvalidVersion((String) manifest.get(Constants.BUNDLE_VERSION)));
 		}
 		ManifestElement[] bsnHeader = ManifestElement.parseHeader(Constants.BUNDLE_SYMBOLICNAME, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME));
 		int bundleType = 0;

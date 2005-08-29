@@ -568,7 +568,7 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 		data.setLocation(readString(in, false));
 		data.setFileName(readString(in, false));
 		data.setSymbolicName(readString(in, false));
-		data.setVersion(Version.parseVersion(readString(in, false)));
+		data.setVersion(loadVersion(in));
 		data.setActivator(readString(in, false));
 		data.setAutoStart(in.readBoolean());
 		int exceptionsCount = in.readInt();
@@ -600,6 +600,15 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 			if (!storedPath.isAbsolute())
 				// make sure it has the absolute location instead
 				data.setFileName(new FilePath(installPath + data.getFileName()).toString());
+		}
+	}
+
+	private Version loadVersion(DataInputStream in) throws IOException {
+		String versionString = readString(in, false);
+		try {
+			return Version.parseVersion(versionString);
+		} catch (IllegalArgumentException e) {
+			return new InvalidVersion(versionString);
 		}
 	}
 
