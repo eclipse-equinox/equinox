@@ -428,10 +428,22 @@ public class ManifestElement {
 	 * @param stringList the initial comma-separated string
 	 */
 	public static String[] getArrayFromList(String stringList) {
+		return getArrayFromList(stringList, ","); //$NON-NLS-1$
+	}
+
+	/**
+	 * Returns the result of converting a list of tokens into an array.  The tokens
+	 * are split using the specified separator.
+	 * 
+	 * @return the array of string tokens or <code>null</code> if there are none
+	 * @param stringList the initial string list
+	 * @param separator the separator to use to split the list into tokens.
+	 */
+	public static String[] getArrayFromList(String stringList, String separator) {
 		if (stringList == null || stringList.trim().equals("")) //$NON-NLS-1$
 			return null;
 		Vector list = new Vector();
-		StringTokenizer tokens = new StringTokenizer(stringList, ","); //$NON-NLS-1$
+		StringTokenizer tokens = new StringTokenizer(stringList, separator);
 		while (tokens.hasMoreTokens()) {
 			String token = tokens.nextToken().trim();
 			if (!token.equals("")) //$NON-NLS-1$
