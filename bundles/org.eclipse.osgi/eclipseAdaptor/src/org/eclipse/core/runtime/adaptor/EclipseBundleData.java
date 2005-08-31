@@ -70,6 +70,8 @@ public class EclipseBundleData extends AbstractBundleData {
 	protected String registeredBuddyList;
 	/** shortcut to know if the bundle manifest has package info */
 	protected boolean hasPackageInfo;
+	/** marks the data as dirty */
+	protected boolean dirty = false;
 
 	private static String[] buildLibraryVariants() {
 		ArrayList result = new ArrayList();
@@ -530,8 +532,10 @@ public class EclipseBundleData extends AbstractBundleData {
 	 * @throws IOException if a write error occurs.
 	 */
 	public synchronized void save() throws IOException {
-		if (adaptor.canWrite())
+		if (adaptor.canWrite() && isDirty()) {
 			((EclipseAdaptor) adaptor).saveMetaDataFor(this);
+			this.dirty = false;
+		}
 	}
 
 	public String toString() {
@@ -544,5 +548,24 @@ public class EclipseBundleData extends AbstractBundleData {
 		if (currentConfiguration != null && (parentConfiguration = currentConfiguration.getParentLocation()) != null)
 			return new File(parentConfiguration.getURL().getFile(), FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME + '/' + LocationManager.BUNDLES_DIR + '/' + getBundleID() + '/' + getGeneration());
 		return null;
+	}
+
+	public void setStartLevel(int startLevel) {
+		super.setStartLevel(startLevel);
+		dirty = true;
+	}
+
+	public void setStatus(int status) {
+		super.setStatus(status);
+		if (!isAutoStartable())
+			dirty = true;
+	}
+
+	public boolean isDirty() {
+		return dirty;
+	}
+
+	void setDirty (boolean dirty) {
+		this.dirty = dirty;
 	}
 }

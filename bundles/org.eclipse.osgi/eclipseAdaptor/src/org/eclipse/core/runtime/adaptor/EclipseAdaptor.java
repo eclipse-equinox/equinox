@@ -45,6 +45,8 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 	public static final String PROP_CLEAN = "osgi.clean"; //$NON-NLS-1$
 	/** System property used to prevent VM exit when unexpected errors occur */
 	public static final String PROP_EXITONERROR = "eclipse.exitOnError"; //$NON-NLS-1$
+	/** System property used to determine whether State saver needs to be enabled */
+	public static final String PROP_ENABLE_STATE_SAVER = "eclipse.enableStateSaver"; //$NON-NLS-1$
 
 	static final String F_LOG = ".log"; //$NON-NLS-1$
 	/** Manifest header used to specify the plugin class */
@@ -97,6 +99,8 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 	private FileManager fileManager;
 
 	private boolean reinitialize = false;
+
+	private StateSaver stateSaver = null;
 
 	/**
 	 * Should be instantiated only by the framework (through reflection).
@@ -269,12 +273,23 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 	}
 
 	public void shutdownStateManager() {
+		if (stateSaver != null)
+			stateSaver.shutdown();
+		saveStateToFile(true);
+	}
+	
+	void saveStateToFile(boolean shutdown) {
 		if (!canWrite() || stateManager.getCachedTimeStamp() == stateManager.getSystemState().getTimeStamp())
 			return;
 		try {
 			File stateTmpFile = File.createTempFile(LocationManager.STATE_FILE, ".new", LocationManager.getOSGiConfigurationDir()); //$NON-NLS-1$
 			File lazyTmpFile = File.createTempFile(LocationManager.LAZY_FILE, ".new", LocationManager.getOSGiConfigurationDir()); //$NON-NLS-1$
-			stateManager.shutdown(stateTmpFile, lazyTmpFile);
+			if (shutdown)
+				stateManager.shutdown(stateTmpFile, lazyTmpFile);
+			else
+				synchronized (stateManager) {
+					stateManager.update(stateTmpFile, lazyTmpFile);
+				}
 			fileManager.lookup(LocationManager.STATE_FILE, true);
 			fileManager.lookup(LocationManager.LAZY_FILE, true);
 			fileManager.update(new String[] {LocationManager.STATE_FILE, LocationManager.LAZY_FILE}, new String[] {stateTmpFile.getName(), lazyTmpFile.getName()});
@@ -332,6 +347,10 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 		super.frameworkStart(aContext);
 		Bundle bundle = aContext.getBundle();
 		Location location;
+
+		// System property can be set to enable state saver or not.
+		if (Boolean.valueOf(System.getProperty(PROP_ENABLE_STATE_SAVER, "true")).booleanValue()) //$NON-NLS-1$
+			stateSaver = new StateSaver();
 
 		// Less than optimal reference to EclipseStarter here. Not sure how we
 		// can make the location
@@ -601,6 +620,7 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 				// make sure it has the absolute location instead
 				data.setFileName(new FilePath(installPath + data.getFileName()).toString());
 		}
+		data.setDirty(false);
 	}
 
 	private Version loadVersion(DataInputStream in) throws IOException {
@@ -620,20 +640,17 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 	 * @throws IOException
 	 */
 	public void saveMetaDataFor(EclipseBundleData data) throws IOException {
-		if (!data.isAutoStartable()) {
-			timeStamp--; // Change the value of the timeStamp, as a marker
-			// that something changed.
+		if (data.isDirty()) {
+			timeStamp--; // Change the value of the timeStamp, as a marker that something changed.
+			requestSave();
 		}
 	}
 
-	/** 
-	 * Saves the initial bundle start level.  This method only marks the bundle data as 
-	 * dirty.  The bundle dat is not persisted until the framework is shutdown.
-	 */
-	public void persistInitialBundleStartLevel(int value) {
-		// Change the value of the timeStamp, as a marker that something
-		// changed.
+	public void setInitialBundleStartLevel(int value) {
+		super.setInitialBundleStartLevel(value);
+		// Change the value of the timeStamp, as a marker that something changed.
 		timeStamp--;
+		requestSave();
 	}
 
 	public void persistNextBundleID(long value) {
@@ -731,6 +748,8 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 					}
 				}
 				out.close();
+				// update the 'timeStamp' after the changed Meta data is saved.
+				timeStamp = stateManager.getSystemState().getTimeStamp();
 				error = false;
 			} finally {
 				// if something happens, don't close a corrupt file
@@ -826,5 +845,106 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 			getFrameworkLog().log(logEntry);
 		}
 		return fManager;
+	}
+
+	protected void updateState(BundleData bundleData, int type) throws BundleException {
+		super.updateState(bundleData, type);
+		requestSave();
+	}
+
+	private void requestSave() {
+		// Only when the State saver is enabled will the stateSaver be started.
+		if (stateSaver == null)
+			return;
+		if (stateManager != null)
+			stateSaver.requestSave();
+	}
+
+	private class StateSaver implements Runnable {
+		private long delay_interval				= 30000; // 30 seconds.
+		private long max_total_delay_interval	= 1800000; // 30 minutes.
+		private boolean shutdown = false;
+		private long lastSaveTime = 0;
+		private Thread runningThread = null;
+
+		StateSaver() {
+			String prop = System.getProperty("eclipse.stateSaveDelayInterval"); //$NON-NLS-1$
+			if (prop != null) {
+				try {
+					long val = Long.parseLong(prop);
+					if (val >= 1000 && val <= 1800000) {
+						delay_interval = val;
+						max_total_delay_interval = val * 60;
+					}
+				} catch (NumberFormatException e) {
+					// ignore
+				}
+			}
+		}
+
+		public void run() {
+			State systemState = getState();
+			synchronized (systemState) {
+				long firstSaveTime = lastSaveTime;
+				long curSaveTime = 0;
+				long delayTime;
+				do {
+					do {
+						if ((System.currentTimeMillis() - firstSaveTime) > max_total_delay_interval)
+							// Waiting time has been too long, so break to start saving State data to file.
+							break;
+						delayTime = Math.min(delay_interval, lastSaveTime - curSaveTime);
+						curSaveTime = lastSaveTime;
+						// wait for other save requests 
+						try {
+							if (!shutdown)
+								systemState.wait(delayTime);
+						} catch (InterruptedException ie) {
+							// force break from do/while loops
+							curSaveTime = lastSaveTime;
+							break;
+						}
+
+						// Continue the loop if 'lastSaveTime' is increased again during waiting.
+					} while (!shutdown && curSaveTime < lastSaveTime);
+					// Save State and Meta data.
+					saveStateToFile(false);
+					saveMetaData();
+					// Continue the loop if Saver is asked again during saving State data to file.
+				} while (!shutdown && curSaveTime < lastSaveTime);
+				runningThread = null; // clear runningThread
+			}
+		}
+
+		void shutdown() {
+			State systemState = getState();
+			Thread joinWith = null;
+			synchronized (systemState) {
+				shutdown = true;
+				joinWith = runningThread;
+				systemState.notifyAll();  // To wakeup sleeping thread.
+			}
+			try {
+				if (joinWith != null)
+					// There should be no deadlock when 'shutdown' is true.
+					joinWith.join();
+			} catch (InterruptedException ie){
+				if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+					Debug.println("Error shutdowning StateSaver: " + ie.getMessage()); //$NON-NLS-1$
+					Debug.printStackTrace(ie);
+				}
+			}
+		}
+
+		void requestSave() {
+			State systemState = getState();
+			synchronized (systemState) {
+				lastSaveTime = System.currentTimeMillis();
+				if (runningThread == null) {
+					runningThread = new Thread(this, "State Saver"); //$NON-NLS-1$
+					runningThread.start();
+				}
+			}
+		}
 	}
 }
