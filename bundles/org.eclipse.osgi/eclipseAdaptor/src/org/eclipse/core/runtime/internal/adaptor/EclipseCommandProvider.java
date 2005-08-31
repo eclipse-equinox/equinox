@@ -93,7 +93,7 @@ public class EclipseCommandProvider implements CommandProvider {
 							message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_CONSOLE_OTHER_VERSION, resolved.getLocation()); 
 					}
 					ci.print("  "); //$NON-NLS-1$
-					ci.println(message);//$NON-NLS-1$
+					ci.println(message);
 				}
 				for (int i = 0; i < unsatisfied.length; i++) {
 					ci.print("  "); //$NON-NLS-1$

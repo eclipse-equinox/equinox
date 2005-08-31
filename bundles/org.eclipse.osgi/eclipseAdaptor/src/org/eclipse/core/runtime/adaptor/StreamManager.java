@@ -39,7 +39,7 @@ public class StreamManager {
 	 */
 	public static final int OPEN_FAIL_ON_PRIMARY = ReliableFile.OPEN_FAIL_ON_PRIMARY;
 
-	private static boolean useReliableFilesDefault = Boolean.valueOf(System.getProperty("osgi.useReliableFiles")).booleanValue(); //$NON-NLS-1$ //$NON-NLS-2$
+	private static boolean useReliableFilesDefault = Boolean.valueOf(System.getProperty("osgi.useReliableFiles")).booleanValue(); //$NON-NLS-1$ 
 	private FileManager manager;
 	private boolean useReliableFiles;
 

@@ -591,7 +591,7 @@ public class PluginParser extends DefaultHandler implements IModel {
 		String plugin = attributes.getValue("", PLUGIN_REQUIRES_PLUGIN); //$NON-NLS-1$ 
 		if (plugin == null)
 			return;
-		if (plugin.equals(PluginConverterImpl.PI_BOOT)) //$NON-NLS-1$//$NON-NLS-2$
+		if (plugin.equals(PluginConverterImpl.PI_BOOT)) 
 			return;
 		if (plugin.equals(PluginConverterImpl.PI_RUNTIME_COMPATIBILITY))
 			manifestInfo.compatibilityFound = true;
@@ -663,7 +663,7 @@ public class PluginParser extends DefaultHandler implements IModel {
 
 	private void internalError(String elementName) {
 		FrameworkLogEntry error;
-		String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_CONVERTER_PARSE_UNKNOWNTOP_ELEMENT, elementName); //$NON-NLS-1$
+		String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_CONVERTER_PARSE_UNKNOWNTOP_ELEMENT, elementName); 
 		error = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, (manifestInfo.pluginId == null ? message : "Plug-in : " + manifestInfo.pluginId + ", " + message), 0, null, null); //$NON-NLS-1$ //$NON-NLS-2$
 		EclipseAdaptor.getDefault().getFrameworkLog().log(error);
 	}

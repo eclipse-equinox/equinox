@@ -257,7 +257,7 @@ public class PluginConverterImpl implements PluginConverter {
 			}
 			out.flush();
 		} catch (IOException e) {
-			String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_CONVERTER_ERROR_CREATING_BUNDLE_MANIFEST, this.pluginInfo.getUniqueId(), generationLocation); //$NON-NLS-1$
+			String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_CONVERTER_ERROR_CREATING_BUNDLE_MANIFEST, this.pluginInfo.getUniqueId(), generationLocation); 
 			throw new PluginConversionException(message, e);
 		} finally {
 			if (out != null)
@@ -274,7 +274,7 @@ public class PluginConverterImpl implements PluginConverter {
 	}
 
 	private void generateManifestVersion() {
-		generatedManifest.put(MANIFEST_VERSION, "1.0"); //$NON-NLS-1$ //$NON-NLS-2$
+		generatedManifest.put(MANIFEST_VERSION, "1.0"); //$NON-NLS-1$ 
 	}
 
 	private boolean requireRuntimeCompatibility() {
@@ -331,7 +331,7 @@ public class PluginConverterImpl implements PluginConverter {
 		if (!pluginInfo.isSingleton())
 			return pluginInfo.getUniqueId();
 		StringBuffer result = new StringBuffer(pluginInfo.getUniqueId());
-		result.append(SEMICOLON); //$NON-NLS-1$
+		result.append(SEMICOLON); 
 		result.append(Constants.SINGLETON_DIRECTIVE);
 		String assignment = TARGET31.equals(target) ? ":=" : "="; //$NON-NLS-1$ //$NON-NLS-2$
 		result.append(assignment).append("true"); //$NON-NLS-1$
@@ -433,7 +433,7 @@ public class PluginConverterImpl implements PluginConverter {
 				continue;
 			String libEntryText = ((String) element.getKey()).trim();
 			File libraryLocation;
-			if (libEntryText.equals(DOT)) //$NON-NLS-1$
+			if (libEntryText.equals(DOT)) 
 				libraryLocation = pluginManifestLocation;
 			else {
 				// in development time, libEntries may contain absolute locations (linked folders)				

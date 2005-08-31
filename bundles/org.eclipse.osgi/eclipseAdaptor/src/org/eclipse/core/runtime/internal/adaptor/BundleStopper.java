@@ -58,7 +58,7 @@ public class BundleStopper {
 				cycleText.insert(cycleText.length() - 1, ']');
 			}
 			cycleText.setCharAt(cycleText.length() - 1, ']');
-			String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_BUNDLESTOPPER_CYCLES_FOUND, cycleText); //$NON-NLS-1$
+			String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_BUNDLESTOPPER_CYCLES_FOUND, cycleText); 
 			FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, message, 0, null, null);
 			EclipseAdaptor.getDefault().getFrameworkLog().log(entry);
 		}

@@ -560,7 +560,7 @@ public class EclipseLog implements FrameworkLog {
 				if (logFilename.toLowerCase().endsWith(LOG_EXT)) {
 					backupFilename = logFilename.substring(0, logFilename.length() - LOG_EXT.length()) + BACKUP_MARK + backupIdx + LOG_EXT;
 				} else {
-					backupFilename = logFilename + BACKUP_MARK + backupIdx; //$NON-NLS-1$
+					backupFilename = logFilename + BACKUP_MARK + backupIdx; 
 				}
 				File backupFile = new File(backupFilename);
 				if (backupFile.exists()) {

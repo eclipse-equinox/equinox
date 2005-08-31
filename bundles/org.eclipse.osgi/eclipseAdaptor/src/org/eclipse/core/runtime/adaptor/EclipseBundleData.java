@@ -300,8 +300,8 @@ public class EclipseBundleData extends AbstractBundleData {
 		try {
 			generatedManifest = converter.convertManifest(getBaseFile(), true, null, true, null);
 		} catch (PluginConversionException pce) {
-			String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_CONVERTER_ERROR_CONVERTING, getBaseFile()); //$NON-NLS-1$
-			throw new BundleException(message, pce); //$NON-NLS-1$
+			String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_CONVERTER_ERROR_CONVERTING, getBaseFile()); 
+			throw new BundleException(message, pce); 
 		}
 
 		//Now we know the symbolicId and the version of the bundle, we check to see if don't have a manifest for it already

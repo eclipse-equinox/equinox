@@ -115,7 +115,7 @@ public class EclipseClassLoader extends DefaultClassLoader {
 			try {
 				hostdata.getBundle().start();
 			} catch (BundleException e) {
-				String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_CLASSLOADER_ACTIVATION, bundle.getSymbolicName(), Long.toString(bundle.getBundleId())); //$NON-NLS-1$
+				String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_CLASSLOADER_ACTIVATION, bundle.getSymbolicName(), Long.toString(bundle.getBundleId())); 
 				EclipseAdaptor.getDefault().getFrameworkLog().log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, message, 0, e, null));
 				throw new ClassNotFoundException(className, e);
 			}
@@ -278,13 +278,13 @@ public class EclipseClassLoader extends DefaultClassLoader {
 		if (var.equals("nl")) { //$NON-NLS-1$
 			entry = entry.substring(4);
 			for (int i = 0; i < NL_JAR_VARIANTS.length; i++) {
-				if (addClassPathEntry(result, "nl/" + NL_JAR_VARIANTS[i] + entry, bundledata, domain)) //$NON-NLS-1$ //$NON-NLS-2$
+				if (addClassPathEntry(result, "nl/" + NL_JAR_VARIANTS[i] + entry, bundledata, domain)) //$NON-NLS-1$ 
 					return;
 			}
 			// is we are not in development mode, post some framework errors.
 			if (!DevClassPathHelper.inDevelopmentMode()) {
 				//BundleException be = new BundleException(Msg.formatter.getString("BUNDLE_CLASSPATH_ENTRY_NOT_FOUND_EXCEPTION", entry, hostdata.getLocation())); //$NON-NLS-1$
-				BundleException be = new BundleException(NLS.bind(Msg.BUNDLE_CLASSPATH_ENTRY_NOT_FOUND_EXCEPTION, entry)); //$NON-NLS-1$
+				BundleException be = new BundleException(NLS.bind(Msg.BUNDLE_CLASSPATH_ENTRY_NOT_FOUND_EXCEPTION, entry)); 
 				bundledata.getAdaptor().getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, bundledata.getBundle(), be);
 			}
 		}
@@ -295,7 +295,7 @@ public class EclipseClassLoader extends DefaultClassLoader {
 		nl = nl.replace('_', '/');
 		while (nl.length() > 0) {
 			result.add("nl/" + nl + "/"); //$NON-NLS-1$ //$NON-NLS-2$
-			int i = nl.lastIndexOf('/'); //$NON-NLS-1$
+			int i = nl.lastIndexOf('/'); 
 			nl = (i < 0) ? "" : nl.substring(0, i); //$NON-NLS-1$
 		}
 		result.add(""); //$NON-NLS-1$
