@@ -27,6 +27,7 @@ import org.eclipse.osgi.internal.profile.Profile;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.service.runnable.ParameterizedRunnable;
+import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 import org.osgi.service.packageadmin.PackageAdmin;
@@ -843,16 +844,7 @@ public class EclipseStarter {
 	 * @param prop the initial comma-separated string
 	 */
 	private static String[] getArrayFromList(String prop, String separator) {
-		if (prop == null || prop.trim().equals("")) //$NON-NLS-1$
-			return new String[0];
-		Vector list = new Vector();
-		StringTokenizer tokens = new StringTokenizer(prop, separator); //$NON-NLS-1$
-		while (tokens.hasMoreTokens()) {
-			String token = tokens.nextToken().trim();
-			if (!token.equals("")) //$NON-NLS-1$
-				list.addElement(token);
-		}
-		return list.isEmpty() ? new String[0] : (String[]) list.toArray(new String[list.size()]);
+		return ManifestElement.getArrayFromList(prop, separator);
 	}
 
 	protected static String getSysPath() {

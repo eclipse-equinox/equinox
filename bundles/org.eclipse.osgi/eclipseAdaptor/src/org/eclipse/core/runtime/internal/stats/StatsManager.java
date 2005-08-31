@@ -15,6 +15,7 @@ import java.util.*;
 import org.eclipse.osgi.framework.adaptor.BundleWatcher;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.debug.FrameworkDebugOptions;
+import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.Bundle;
 
 public class StatsManager implements BundleWatcher {
@@ -85,16 +86,7 @@ public class StatsManager implements BundleWatcher {
 	 * @param prop the initial comma-separated string
 	 */
 	public static String[] getArrayFromList(String prop) {
-		if (prop == null || prop.trim().equals("")) //$NON-NLS-1$
-			return new String[0];
-		Vector list = new Vector();
-		StringTokenizer tokens = new StringTokenizer(prop, ","); //$NON-NLS-1$
-		while (tokens.hasMoreTokens()) {
-			String token = tokens.nextToken().trim();
-			if (!token.equals("")) //$NON-NLS-1$
-				list.addElement(token);
-		}
-		return list.isEmpty() ? new String[0] : (String[]) list.toArray(new String[list.size()]);
+		return ManifestElement.getArrayFromList(prop, ","); //$NON-NLS-1$
 	}
 
 	private void initialize() {
