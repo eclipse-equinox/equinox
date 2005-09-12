@@ -31,6 +31,7 @@ public abstract class StateImpl implements State {
 	private boolean resolved = true;
 	private long timeStamp = System.currentTimeMillis();
 	private KeyedHashSet bundleDescriptions = new KeyedHashSet(false);
+	private HashMap resolverErrors = new HashMap();
 	private StateObjectFactory factory;
 	private KeyedHashSet resolvedBundles = new KeyedHashSet();
 	boolean fullyLoaded = false;
@@ -77,6 +78,7 @@ public abstract class StateImpl implements State {
 				synchronized (this) {
 					try {
 						resolving = true;
+						resolverErrors.remove(existing);
 						resolveBundle(existing, false, null, null, null, null);
 					} finally {
 						resolving = false;
@@ -111,6 +113,7 @@ public abstract class StateImpl implements State {
 				synchronized (this) {
 					try {
 						resolving = true;
+						resolverErrors.remove(toRemove);
 						resolveBundle(toRemove, false, null, null, null, null);
 					} finally {
 						resolving = false;
@@ -210,7 +213,7 @@ public abstract class StateImpl implements State {
 		((VersionConstraintImpl) constraint).setSupplier(supplier);
 	}
 
-	public void resolveBundle(BundleDescription bundle, boolean status, BundleDescription[] hosts, ExportPackageDescription[] selectedExports, BundleDescription[] resolvedRequires, ExportPackageDescription[] resolvedImports) {
+	public synchronized void resolveBundle(BundleDescription bundle, boolean status, BundleDescription[] hosts, ExportPackageDescription[] selectedExports, BundleDescription[] resolvedRequires, ExportPackageDescription[] resolvedImports) {
 		if (!resolving)
 			throw new IllegalStateException(); // TODO need error message here!
 		BundleDescriptionImpl modifiable = (BundleDescriptionImpl) bundle;
@@ -221,6 +224,7 @@ public abstract class StateImpl implements State {
 		modifiable.setLazyLoaded(false);
 		modifiable.setStateBit(BundleDescriptionImpl.RESOLVED, status);
 		if (status) {
+			resolverErrors.remove(modifiable);
 			resolveConstraints(modifiable, hosts, selectedExports, resolvedRequires, resolvedImports);
 			resolvedBundles.add(modifiable);
 		} else {
@@ -231,7 +235,7 @@ public abstract class StateImpl implements State {
 		}
 	}
 
-	public void removeBundleComplete(BundleDescription bundle) {
+	public synchronized void removeBundleComplete(BundleDescription bundle) {
 		if (!resolving)
 			throw new IllegalStateException(); // TODO need error message here!
 		getDelta().recordBundleRemovalComplete((BundleDescriptionImpl) bundle);
@@ -339,6 +343,7 @@ public abstract class StateImpl implements State {
 	private void flush(BundleDescription[] bundles) {
 		resolver.flush();
 		resolved = false;
+		resolverErrors.clear();
 		if (resolvedBundles.isEmpty())
 			return;
 		for (int i = 0; i < bundles.length; i++) {
@@ -589,4 +594,30 @@ public abstract class StateImpl implements State {
 	boolean inStrictMode() {
 		return Constants.STRICT_MODE.equals(getPlatformProperties()[0].get(Constants.OSGI_RESOLVER_MODE));
 	}
+
+	public synchronized ResolverError[] getResolverErrors(BundleDescription bundle) {
+		if (bundle.isResolved())
+			return new ResolverError[0];
+		ArrayList result = (ArrayList) resolverErrors.get(bundle);
+		return result == null ? new ResolverError[0] : (ResolverError[]) result.toArray(new ResolverError[result.size()]);
+	}
+
+	public synchronized void addResolverError(BundleDescription bundle, int type, String data) {
+		if (!resolving)
+			throw new IllegalStateException(); // TODO need error message here!
+		ArrayList errors = (ArrayList) resolverErrors.get(bundle);
+		if (errors == null) {
+			errors = new ArrayList(1);
+			resolverErrors.put(bundle, errors);
+		}
+		errors.add(new ResolverErrorImpl((BundleDescriptionImpl) bundle, type, data));
+	}
+
+	public synchronized void removeResolverErrors(BundleDescription bundle) {
+		if (!resolving)
+			throw new IllegalStateException(); // TODO need error message here!
+		resolverErrors.remove(bundle);
+	}
+
+
 }

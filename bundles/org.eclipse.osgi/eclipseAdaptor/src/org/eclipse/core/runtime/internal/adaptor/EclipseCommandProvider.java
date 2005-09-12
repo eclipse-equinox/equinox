@@ -83,17 +83,16 @@ public class EclipseCommandProvider implements CommandProvider {
 				ci.println(bundle.getLocation() + " [" + bundle.getBundleId() + "]"); //$NON-NLS-1$ //$NON-NLS-2$
 				VersionConstraint[] unsatisfied = platformAdmin.getStateHelper().getUnsatisfiedConstraints(bundle);
 				if (unsatisfied.length == 0) {
-					// init default message
-					String message = EclipseAdaptorMsg.ECLIPSE_CONSOLE_NO_CONSTRAINTS; 
-					if (!bundle.isResolved()) {
-						// another version might have been picked					
-						String symbolicName = bundle.getSymbolicName();
-						BundleDescription resolved = symbolicName == null ? null : getResolvedBundle(systemState, symbolicName);
-						if (resolved != null)
-							message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_CONSOLE_OTHER_VERSION, resolved.getLocation()); 
+					ResolverError[] resolverErrors = platformAdmin.getState(false).getResolverErrors(bundle);
+					if (!bundle.isResolved() && resolverErrors.length > 0) {
+						for (int i = 0; i < resolverErrors.length; i++) {
+							ci.print("  "); //$NON-NLS-1$
+							ci.println(resolverErrors[i].toString());
+						}
+					} else {
+						ci.print("  "); //$NON-NLS-1$
+						ci.println(EclipseAdaptorMsg.ECLIPSE_CONSOLE_NO_CONSTRAINTS);
 					}
-					ci.print("  "); //$NON-NLS-1$
-					ci.println(message);
 				}
 				for (int i = 0; i < unsatisfied.length; i++) {
 					ci.print("  "); //$NON-NLS-1$
@@ -104,14 +103,6 @@ public class EclipseCommandProvider implements CommandProvider {
 		} finally {
 			context.ungetService(platformAdminRef);
 		}
-	}
-
-	private BundleDescription getResolvedBundle(State state, String symbolicName) {
-		BundleDescription[] homonyms = state.getBundles(symbolicName);
-		for (int i = 0; i < homonyms.length; i++)
-			if (homonyms[i].isResolved())
-				return homonyms[i];
-		return null;
 	}
 
 	public void _active(CommandInterpreter ci) throws Exception {

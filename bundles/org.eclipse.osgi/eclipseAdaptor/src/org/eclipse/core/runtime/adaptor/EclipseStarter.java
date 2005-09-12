@@ -431,13 +431,13 @@ public class EclipseStarter {
 					logChildren = new FrameworkLogEntry[unsatisfied.length];
 					for (int j = 0; j < unsatisfied.length; j++)
 						logChildren[j] = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, EclipseAdaptorMsg.getResolutionFailureMessage(unsatisfied[j]), 0, null, null);
-				} else if (description.getSymbolicName() != null) {
-					BundleDescription[] homonyms = state.getBundles(description.getSymbolicName());
-					for (int j = 0; j < homonyms.length; j++)
-						if (homonyms[j].isResolved()) {
-							logChildren = new FrameworkLogEntry[1];
-							logChildren[0] = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, NLS.bind(EclipseAdaptorMsg.ECLIPSE_CONSOLE_OTHER_VERSION, homonyms[j].getLocation()), 0, null, null); 
-						}
+				} else {
+					ResolverError[] resolverErrors = state.getResolverErrors(description);
+					if (resolverErrors.length > 0) {
+						logChildren = new FrameworkLogEntry[resolverErrors.length];
+						for (int j = 0; j < resolverErrors.length; j++)
+							logChildren[j] = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, resolverErrors[j].toString(), 0, null, null);
+					}
 				}
 
 				logService.log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, generalMessage, 0, null, logChildren));

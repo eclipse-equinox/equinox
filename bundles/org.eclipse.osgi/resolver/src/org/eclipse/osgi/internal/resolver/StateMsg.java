@@ -24,6 +24,14 @@ public class StateMsg extends NLS {
 	public static String HEADER_DIRECTIVE_DUPLICATES;
 	public static String HEADER_REEXPORT_USES;
 
+	public static String RES_ERROR_MISSING_PERMISSION;
+	public static String RES_ERROR_MISSING_CONSTRAINT;
+	public static String RES_ERROR_FRAGMENT_CONFLICT;
+	public static String RES_ERROR_USES_CONFLICT;
+	public static String RES_ERROR_SINGLETON_CONFLICT;
+	public static String RES_ERROR_PLATFORM_FILTER;
+	public static String RES_ERROR_UNKNOWN;
+
 	static {
 		// initialize resource bundles
 		NLS.initializeMessages(BUNDLE_NAME, StateMsg.class);

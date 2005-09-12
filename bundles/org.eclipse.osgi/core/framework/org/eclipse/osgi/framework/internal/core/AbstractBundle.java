@@ -41,15 +41,6 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	/** ProtectionDomain for the bundle */
 	protected BundleProtectionDomain domain;
 
-	/**
-	 * This String captures the dependencies that could not be resolved
-	 * as a result of a runtime error,  For example not having the proper 
-	 * permissions or a singlton conflict.
-	 * This information is collected by resolve, but an exception
-	 * cannot be thrown during the resolve phase. It is saved here to be thrown
-	 * later (by Bundle.start for example).
-	 */
-	protected String runtimeResolveError;
 	protected ManifestLocalization manifestLocalization = null;
 
 	/**
@@ -1348,48 +1339,27 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	 */
 	abstract protected BundleContextImpl getContext();
 
-	protected String getResolutionFailureMessage() {
-		String defaultMessage = Msg.BUNDLE_UNRESOLVED_EXCEPTION;
-		// don't spend time if debug info is not needed
-		if (!Debug.DEBUG) {
-			return defaultMessage;
-		}
-		if (runtimeResolveError != null) {
-			return runtimeResolveError; // do not null this field out until a successful resolve is done.
-		}
+	public String getResolutionFailureMessage() {
 		BundleDescription bundleDescription = getBundleDescription();
-		if (bundleDescription == null) {
-			return defaultMessage;
-		}
-		// just a sanity check - this would be an inconsistency between the
-		// framework and the state
-		if (bundleDescription.isResolved()) {
+		if (bundleDescription == null)
+			return Msg.BUNDLE_UNRESOLVED_EXCEPTION;
+		// just a sanity check - this would be an inconsistency between the framework and the state
+		if (bundleDescription.isResolved())
 			throw new IllegalStateException(Msg.BUNDLE_UNRESOLVED_STATE_CONFLICT);
-		}
-		VersionConstraint[] unsatisfied = framework.adaptor.getPlatformAdmin().getStateHelper().getUnsatisfiedConstraints(bundleDescription);
-		if (unsatisfied.length == 0) {
-			return Msg.BUNDLE_UNRESOLVED_NOT_CHOSEN_EXCEPTION;
-		}
-		StringBuffer missing = new StringBuffer();
-		for (int i = 0; i < unsatisfied.length; i++) {
-			if (unsatisfied[i] instanceof ImportPackageSpecification) {
-				missing.append(NLS.bind(Msg.BUNDLE_UNRESOLVED_PACKAGE, toString(unsatisfied[i])));
-			} else if (unsatisfied[i] instanceof HostSpecification) {
-				missing.append(NLS.bind(Msg.BUNDLE_UNRESOLVED_HOST, toString(unsatisfied[i])));
-			} else {
-				missing.append(NLS.bind(Msg.BUNDLE_UNRESOLVED_BUNDLE, toString(unsatisfied[i])));
-			}
-			missing.append(',');
-		}
-		missing.deleteCharAt(missing.length() - 1);
-		return NLS.bind(Msg.BUNDLE_UNRESOLVED_UNSATISFIED_CONSTRAINT_EXCEPTION, missing.toString());
+		return NLS.bind(Msg.BUNDLE_UNRESOLVED_UNSATISFIED_CONSTRAINT_EXCEPTION, getResolverError(bundleDescription));
 	}
 
-	private String toString(VersionConstraint constraint) {
-		org.eclipse.osgi.service.resolver.VersionRange versionRange = constraint.getVersionRange();
-		if (versionRange == null)
-			return constraint.getName();
-		return constraint.getName() + '_' + versionRange;
+	private String getResolverError(BundleDescription bundleDesc) {
+		ResolverError[] errors = framework.adaptor.getState().getResolverErrors(bundleDesc);
+		if (errors == null || errors.length == 0)
+			return Msg.BUNDLE_UNRESOLVED_EXCEPTION;
+		StringBuffer message = new StringBuffer();
+		for (int i = 0; i < errors.length; i++) {
+			message.append(errors[i].toString());
+			if (i < errors.length - 1)
+				message.append(", "); //$NON-NLS-1$
+		}
+		return message.toString();
 	}
 
 	public int getKeyHashCode() {

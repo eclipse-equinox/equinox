@@ -195,6 +195,39 @@ public interface State {
 	public void removeBundleComplete(BundleDescription bundle);
 
 	/**
+	 * Adds a new <code>ResolverError</code> for the specified bundle.
+	 * <p>
+	 * This method is intended to be used by resolvers in the process of
+	 * resolving.
+	 * </p>
+	 * 
+	 * @param bundle the bundle to add a new <code>ResolverError</code> for
+	 * @param type the type of <code>ResolverError</code> to add
+	 * @param data the data for the <code>ResolverError</code>
+	 * @throws IllegalStateException if this is not done during a call to <code>resolve</code>
+	 */
+	public void addResolverError(BundleDescription bundle, int type, String data);
+
+	/**
+	 * Removes all <code>ResolverError</code>s for the specified bundle.
+	 * <p>
+	 * This method is intended to be used by resolvers in the process of
+	 * resolving.
+	 * </p>
+	 * 
+	 * @param bundle the bundle to remove all <code>ResolverError</code>s for
+	 * @throws IllegalStateException if this is not done during a call to <code>resolve</code>
+	 */
+	public void removeResolverErrors(BundleDescription bundle);
+
+	/**
+	 * Returns all <code>ResolverError</code>s for the given bundle
+	 * @param bundle the bundle to get all <code>ResolverError</code>s for
+	 * @return all <code>ResolverError</code>s for the given bundle
+	 */
+	public ResolverError[] getResolverErrors(BundleDescription bundle);
+
+	/**
 	 * Returns the resolver associated with this state. A state can work with
 	 * at most one resolver at any given time. Similarly, a resolver can work
 	 * with at most one state at a time.

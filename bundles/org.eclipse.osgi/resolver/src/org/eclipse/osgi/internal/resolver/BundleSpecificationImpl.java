@@ -47,6 +47,6 @@ public class BundleSpecificationImpl extends VersionConstraintImpl implements Bu
 	}
 
 	public String toString() {
-		return "Require-Bundle: " + getName() + " - version: " + getVersionRange(); //$NON-NLS-1$ //$NON-NLS-2$
+		return "Require-Bundle: " + getName() + "; bundle-version=\"" + getVersionRange() + "\""; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 }

@@ -287,7 +287,7 @@ public class ResolverBundle extends VersionSupplier {
 		ExportPackageDescription[] newExports = fragment.getBundle().getExportPackages();
 
 		// if this is not during initialization then check if constraints conflict
-		if (dynamicAttach && constraintsConflict(newImports, newRequires))
+		if (dynamicAttach && constraintsConflict(fragment.getBundle(), newImports, newRequires))
 			return new ResolverExport[0]; // do not allow fragments with conflicting constraints
 		if (isResolved() && newExports.length > 0)
 			fragment.setNewFragmentExports(true);
@@ -328,20 +328,20 @@ public class ResolverBundle extends VersionSupplier {
 		return (ResolverExport[]) hostExports.toArray(new ResolverExport[hostExports.size()]);
 	}
 
-	private boolean constraintsConflict(ImportPackageSpecification[] newImports, BundleSpecification[] newRequires) {
+	private boolean constraintsConflict(BundleDescription fragment, ImportPackageSpecification[] newImports, BundleSpecification[] newRequires) {
 		for (int i = 0; i < newImports.length; i++) {
 			ResolverImport importPkg = getImport(newImports[i].getName());
-			if (importPkg == null && isResolved())
+			if ((importPkg == null && isResolved()) || (importPkg != null && !isIncluded(newImports[i].getVersionRange(), importPkg.getVersionConstraint().getVersionRange()))) {
+				resolver.getState().addResolverError(fragment, ResolverError.FRAGMENT_CONFLICT, newImports[i].toString());
 				return true; // do not allow additional constraints when host is already resolved
-			if (importPkg != null && !isIncluded(newImports[i].getVersionRange(), importPkg.getVersionConstraint().getVersionRange()))
-				return true; // do not allow conflicting constraints from fragment 
+			}
 		}
 		for (int i = 0; i < newRequires.length; i++) {
 			BundleConstraint constraint = getRequire(newRequires[i].getName());
-			if (constraint == null && isResolved())
+			if ((constraint == null && isResolved()) || (constraint != null && !isIncluded(newRequires[i].getVersionRange(), constraint.getVersionConstraint().getVersionRange()))) {
+				resolver.getState().addResolverError(fragment, ResolverError.FRAGMENT_CONFLICT, newRequires[i].toString());
 				return true; // do not allow additional constraints when host is already resolved
-			if (constraint != null && !isIncluded(newRequires[i].getVersionRange(), constraint.getVersionConstraint().getVersionRange()))
-				return true; // do not allow conflicting constraints from fragment
+			}
 		}
 		return false;
 	}

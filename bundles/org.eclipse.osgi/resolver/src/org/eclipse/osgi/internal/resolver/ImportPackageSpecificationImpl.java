@@ -148,6 +148,6 @@ public class ImportPackageSpecificationImpl extends VersionConstraintImpl implem
 	}
 
 	public String toString() {
-		return "Import-Package: " + getName() + " - version: " + getVersionRange(); //$NON-NLS-1$ //$NON-NLS-2$
+		return "Import-Package: " + getName() + "; version=\"" + getVersionRange() + "\""; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 }

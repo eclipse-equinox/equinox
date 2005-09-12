@@ -45,7 +45,7 @@ public class HostSpecificationImpl extends VersionConstraintImpl implements Host
 	}
 
 	public String toString() {
-		return "Fragment-Host: " + getName() + " - version: " + getVersionRange(); //$NON-NLS-1$ //$NON-NLS-2$
+		return "Fragment-Host: " + getName() + "; bundle-version=\"" + getVersionRange() + "\""; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 
 	public BaseDescription getSupplier() {

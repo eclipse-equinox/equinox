@@ -21,10 +21,6 @@ public class Msg extends NLS {
 	public static String BUNDLE_UNINSTALLED_EXCEPTION;
 	public static String BUNDLE_UNRESOLVED_EXCEPTION;
 	public static String BUNDLE_UNRESOLVED_STATE_CONFLICT;
-	public static String BUNDLE_UNRESOLVED_NOT_CHOSEN_EXCEPTION;
-	public static String BUNDLE_UNRESOLVED_PACKAGE;
-	public static String BUNDLE_UNRESOLVED_HOST;
-	public static String BUNDLE_UNRESOLVED_BUNDLE;
 	public static String BUNDLE_UNRESOLVED_UNSATISFIED_CONSTRAINT_EXCEPTION;
 	public static String BUNDLE_INVALID_ACTIVATOR_EXCEPTION;
 	public static String BUNDLE_EXTENSION_PERMISSION;

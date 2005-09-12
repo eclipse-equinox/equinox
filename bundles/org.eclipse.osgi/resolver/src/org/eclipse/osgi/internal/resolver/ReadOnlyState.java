@@ -150,4 +150,16 @@ public class ReadOnlyState implements State {
 	public ExportPackageDescription[] getSystemPackages() {
 		return target.getSystemPackages();
 	}
+
+	public void addResolverError(BundleDescription bundle, int type, String data) {
+		throw new UnsupportedOperationException();
+	}
+
+	public ResolverError[] getResolverErrors(BundleDescription bundle) {
+		return target.getResolverErrors(bundle);
+	}
+
+	public void removeResolverErrors(BundleDescription bundle) {
+		throw new UnsupportedOperationException();
+	}
 }
