@@ -103,6 +103,8 @@ public abstract class BundleResourceHandler extends URLStreamHandler {
 		}
 		if (path.endsWith("/..") && path.length() > 3) //$NON-NLS-1$
 			path = path.substring(0, path.length() - 2);
+		while ((dotIndex = path.indexOf("//")) >= 0) //$NON-NLS-1$
+			path = path.substring(0, dotIndex + 1) + path.substring(dotIndex + 2);
 
 		// Check the permission of the caller to see if they
 		// are allowed access to the resource.
