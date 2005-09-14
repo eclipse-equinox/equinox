@@ -19,6 +19,7 @@ import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Version;
 import org.osgi.util.tracker.ServiceTracker;
 import org.xml.sax.*;
 import org.xml.sax.helpers.DefaultHandler;
@@ -31,7 +32,8 @@ public class PluginParser extends DefaultHandler implements IModel {
 
 	private PluginInfo manifestInfo = new PluginInfo();
 	private BundleContext context;
-	private String target; // The targeted platform for the given manifest
+	private Version target; // The targeted platform for the given manifest
+	private static final Version TARGET21 = new Version(2, 1, 0);
 
 	public class PluginInfo implements IPluginInfo {
 		private String schemaVersion;
@@ -56,7 +58,7 @@ public class PluginParser extends DefaultHandler implements IModel {
 		private String pluginName;
 		private boolean singleton;
 		private boolean fragment;
-		private static final String TARGET21 = "2.1"; //$NON-NLS-1$
+		private final static String TARGET21_STRING = "2.1"; //$NON-NLS-1$
 		private boolean hasExtensionExtensionPoints = false;
 
 		public boolean isFragment() {
@@ -78,7 +80,7 @@ public class PluginParser extends DefaultHandler implements IModel {
 				requiresExpanded = true;
 				if (requires == null) {
 					requires = new ArrayList(1);
-					requires.add(new Prerequisite(PluginConverterImpl.PI_RUNTIME, TARGET21, false, false, IModel.PLUGIN_REQUIRES_MATCH_GREATER_OR_EQUAL));
+					requires.add(new Prerequisite(PluginConverterImpl.PI_RUNTIME, TARGET21_STRING, false, false, IModel.PLUGIN_REQUIRES_MATCH_GREATER_OR_EQUAL));
 					requires.add(new Prerequisite(PluginConverterImpl.PI_RUNTIME_COMPATIBILITY, null, false, false, null));
 				} else {
 					//Add elements on the requirement list of ui and help.
@@ -103,7 +105,7 @@ public class PluginParser extends DefaultHandler implements IModel {
 					//This is used to recognize the version for which the given plugin was initially targeted.
 					Prerequisite runtimePrereq = new Prerequisite(PluginConverterImpl.PI_RUNTIME, null, false, false, null);
 					requires.remove(runtimePrereq);
-					requires.add(new Prerequisite(PluginConverterImpl.PI_RUNTIME, TARGET21, false, false, IModel.PLUGIN_REQUIRES_MATCH_GREATER_OR_EQUAL));
+					requires.add(new Prerequisite(PluginConverterImpl.PI_RUNTIME, TARGET21_STRING, false, false, IModel.PLUGIN_REQUIRES_MATCH_GREATER_OR_EQUAL));
 				}
 			}
 			if (requires == null)
@@ -205,7 +207,7 @@ public class PluginParser extends DefaultHandler implements IModel {
 	private static final int PLUGIN_REQUIRES_IMPORT_STATE = 9;
 	private static final int FRAGMENT_STATE = 11;
 
-	public PluginParser(BundleContext context, String target) {
+	public PluginParser(BundleContext context, Version target) {
 		super();
 		this.context = context;
 		this.target = target;

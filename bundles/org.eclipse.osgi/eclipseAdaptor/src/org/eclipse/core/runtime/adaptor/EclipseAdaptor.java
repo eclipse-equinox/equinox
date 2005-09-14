@@ -52,11 +52,19 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 	/** Manifest header used to specify the plugin class */
 	// TODO rename it to Eclipse-PluginClass
 	public static final String PLUGIN_CLASS = "Plugin-Class"; //$NON-NLS-1$
-	/** Manifest header used to specify the auto start properties of a bundle */
+	/** Manifest header used to specify the lazy start properties of a bundle */
+	public static final String ECLIPSE_LAZYSTART = "Eclipse-LazyStart"; //$NON-NLS-1$
+	/** An Eclipse-LazyStart attribute used to specify exception classes for auto start */
+	public static final String ECLIPSE_LAZYSTART_EXCEPTIONS = "exceptions"; //$NON-NLS-1$
+	/** 
+	 * Manifest header used to specify the auto start properties of a bundle 
+	 * @deprecated use {@link #ECLIPSE_LAZYSTART}
+	 */
 	public static final String ECLIPSE_AUTOSTART = "Eclipse-AutoStart"; //$NON-NLS-1$
-
-	/** An Eclipse-AutoStart attribute used to specify exception classes for auto start */
-	public static final String ECLIPSE_AUTOSTART_EXCEPTIONS = "exceptions"; //$NON-NLS-1$
+	/**
+	 * @deprecated use {@link #ECLIPSE_LAZYSTART_EXCEPTIONS}
+	 */
+	public static final String ECLIPSE_AUTOSTART_EXCEPTIONS = ECLIPSE_LAZYSTART_EXCEPTIONS;
 	/** The SAX factory name */
 	public static final String SAXFACTORYNAME = "javax.xml.parsers.SAXParserFactory"; //$NON-NLS-1$
 	/** The DOM factory name */

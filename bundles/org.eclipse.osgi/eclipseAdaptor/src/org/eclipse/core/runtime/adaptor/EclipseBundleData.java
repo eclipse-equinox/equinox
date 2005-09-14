@@ -350,7 +350,10 @@ public class EclipseBundleData extends AbstractBundleData {
 		if (manifest instanceof CachedManifest)
 			throw new IllegalStateException();
 		pluginClass = (String) manifest.get(EclipseAdaptor.PLUGIN_CLASS);
-		parseAutoStart((String) manifest.get(EclipseAdaptor.ECLIPSE_AUTOSTART));
+		String lazyStart = (String) manifest.get(EclipseAdaptor.ECLIPSE_LAZYSTART);
+		if (lazyStart == null)
+			lazyStart = (String) manifest.get(EclipseAdaptor.ECLIPSE_AUTOSTART);
+		parseAutoStart(lazyStart);
 		buddyList = (String) manifest.get(Constants.BUDDY_LOADER);
 		registeredBuddyList = (String) manifest.get(Constants.REGISTERED_POLICY);
 		hasPackageInfo = hasPackageInfo(getEntry(Constants.OSGI_BUNDLE_MANIFEST));
@@ -495,7 +498,7 @@ public class EclipseBundleData extends AbstractBundleData {
 		autoStartExceptions = null;
 		ManifestElement[] allElements = null;
 		try {
-			allElements = ManifestElement.parseHeader(EclipseAdaptor.ECLIPSE_AUTOSTART, headerValue);
+			allElements = ManifestElement.parseHeader(EclipseAdaptor.ECLIPSE_LAZYSTART, headerValue);
 		} catch (BundleException e) {
 			// just use the default settings (no auto activation)
 			String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_CLASSLOADER_CANNOT_GET_HEADERS, getLocation());
@@ -507,7 +510,7 @@ public class EclipseBundleData extends AbstractBundleData {
 		// the single value for this element should be true|false
 		autoStart = "true".equalsIgnoreCase(allElements[0].getValue()); //$NON-NLS-1$
 		// look for any exceptions (the attribute) to the autoActivate setting
-		String exceptionsValue = allElements[0].getAttribute(EclipseAdaptor.ECLIPSE_AUTOSTART_EXCEPTIONS);
+		String exceptionsValue = allElements[0].getAttribute(EclipseAdaptor.ECLIPSE_LAZYSTART_EXCEPTIONS);
 		if (exceptionsValue == null)
 			return;
 		StringTokenizer tokenizer = new StringTokenizer(exceptionsValue, ","); //$NON-NLS-1$

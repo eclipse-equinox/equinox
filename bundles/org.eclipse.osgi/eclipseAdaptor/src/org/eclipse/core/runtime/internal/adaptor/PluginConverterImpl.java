@@ -45,9 +45,10 @@ public class PluginConverterImpl implements PluginConverter {
 	private File pluginManifestLocation;
 	private Dictionary generatedManifest;
 	private byte manifestType;
-	private String target;
+	private Version target;
 	private Dictionary devProperties;
-	static final String TARGET31 = "3.1"; //$NON-NLS-1$
+	static final Version TARGET31 = new Version(3, 1, 0);
+	static final Version TARGET32 = new Version(3, 2, 0);
 	private static final String MANIFEST_VERSION = "Manifest-Version"; //$NON-NLS-1$
 	private static final String PLUGIN_PROPERTIES_FILENAME = "plugin"; //$NON-NLS-1$
 	private static PluginConverterImpl instance;
@@ -235,7 +236,7 @@ public class PluginConverterImpl implements PluginConverter {
 			out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(generationLocation), UTF_8));
 			writeEntry(MANIFEST_VERSION, (String) manifestToWrite.remove(MANIFEST_VERSION));
 			writeEntry(GENERATED_FROM, (String) manifestToWrite.remove(GENERATED_FROM)); //Need to do this first uptoDate check expect the generated-from tag to be in the first line
-			if (TARGET31.equals(target))
+			if (TARGET31.compareTo(target) <= 0)
 				writeEntry(Constants.BUNDLE_MANIFESTVERSION, (String) manifestToWrite.remove(Constants.BUNDLE_MANIFESTVERSION));
 			writeEntry(Constants.BUNDLE_NAME, (String) manifestToWrite.remove(Constants.BUNDLE_NAME));
 			writeEntry(Constants.BUNDLE_SYMBOLICNAME, (String) manifestToWrite.remove(Constants.BUNDLE_SYMBOLICNAME));
@@ -245,7 +246,7 @@ public class PluginConverterImpl implements PluginConverter {
 			writeEntry(Constants.BUNDLE_VENDOR, (String) manifestToWrite.remove(Constants.BUNDLE_VENDOR));
 			writeEntry(Constants.FRAGMENT_HOST, (String) manifestToWrite.remove(Constants.FRAGMENT_HOST));
 			writeEntry(Constants.BUNDLE_LOCALIZATION, (String) manifestToWrite.remove(Constants.BUNDLE_LOCALIZATION));
-			if (TARGET31.equals(target))
+			if (TARGET31.compareTo(target) <= 0)
 				writeEntry(Constants.EXPORT_PACKAGE, (String) manifestToWrite.remove(Constants.EXPORT_PACKAGE));
 			else
 				writeEntry(Constants.PROVIDE_PACKAGE, (String) manifestToWrite.remove(Constants.PROVIDE_PACKAGE));
@@ -304,7 +305,7 @@ public class PluginConverterImpl implements PluginConverter {
 	}
 
 	private void generateHeaders() {
-		if (TARGET31.equals(target))
+		if (TARGET31.compareTo(target) <= 0)
 			generatedManifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
 		generatedManifest.put(Constants.BUNDLE_NAME, pluginInfo.getPluginName());
 		generatedManifest.put(Constants.BUNDLE_VERSION, pluginInfo.getVersion());
@@ -333,7 +334,7 @@ public class PluginConverterImpl implements PluginConverter {
 		StringBuffer result = new StringBuffer(pluginInfo.getUniqueId());
 		result.append(SEMICOLON); 
 		result.append(Constants.SINGLETON_DIRECTIVE);
-		String assignment = TARGET31.equals(target) ? ":=" : "="; //$NON-NLS-1$ //$NON-NLS-2$
+		String assignment = TARGET31.compareTo(target) <= 0 ? ":=" : "="; //$NON-NLS-1$ //$NON-NLS-2$
 		result.append(assignment).append("true"); //$NON-NLS-1$
 		return result.toString();
 	}
@@ -349,7 +350,7 @@ public class PluginConverterImpl implements PluginConverter {
 	private void generateProvidePackage() {
 		Set exports = getExports();
 		if (exports != null && exports.size() != 0) {
-			generatedManifest.put(TARGET31.equals(target) ? Constants.EXPORT_PACKAGE : Constants.PROVIDE_PACKAGE, getStringFromCollection(exports, LIST_SEPARATOR));
+			generatedManifest.put(TARGET31.compareTo(target) <= 0 ? Constants.EXPORT_PACKAGE : Constants.PROVIDE_PACKAGE, getStringFromCollection(exports, LIST_SEPARATOR));
 		}
 	}
 
@@ -365,13 +366,13 @@ public class PluginConverterImpl implements PluginConverter {
 			if (versionRange != null)
 				modImport.append(versionRange);
 			if (element.isExported()) {
-				if (TARGET31.equals(target))
+				if (TARGET31.compareTo(target) <= 0)
 					modImport.append(';').append(Constants.VISIBILITY_DIRECTIVE).append(":=").append(Constants.VISIBILITY_REEXPORT);//$NON-NLS-1$
 				else
 					modImport.append(';').append(Constants.REPROVIDE_ATTRIBUTE).append("=true");//$NON-NLS-1$
 			}
 			if (element.isOptional()) {
-				if (TARGET31.equals(target))
+				if (TARGET31.compareTo(target) <= 0)
 					modImport.append(';').append(Constants.RESOLUTION_DIRECTIVE).append(":=").append(Constants.RESOLUTION_OPTIONAL);//$NON-NLS-1$
 				else
 					modImport.append(';').append(Constants.OPTIONAL_ATTRIBUTE).append("=true");//$NON-NLS-1$
@@ -380,7 +381,7 @@ public class PluginConverterImpl implements PluginConverter {
 			if (iter.hasNext())
 				bundleRequire.append(LIST_SEPARATOR);
 		}
-			generatedManifest.put(Constants.REQUIRE_BUNDLE, bundleRequire.toString());
+		generatedManifest.put(Constants.REQUIRE_BUNDLE, bundleRequire.toString());
 	}
 
 	private void generateTimestamp() {
@@ -394,7 +395,7 @@ public class PluginConverterImpl implements PluginConverter {
 		
 		String pluginClass = pluginInfo.getPluginClass();
 		if (pluginInfo.hasExtensionExtensionPoints() || (pluginClass != null && !pluginClass.trim().equals(""))) //$NON-NLS-1$
-			generatedManifest.put(EclipseAdaptor.ECLIPSE_AUTOSTART, "true"); //$NON-NLS-1$
+			generatedManifest.put(TARGET32.compareTo(target) <= 0 ? EclipseAdaptor.ECLIPSE_LAZYSTART : EclipseAdaptor.ECLIPSE_AUTOSTART, "true"); //$NON-NLS-1$
 	}
 
 	private Set getExports() {
@@ -684,7 +685,7 @@ public class PluginConverterImpl implements PluginConverter {
 		if (DEBUG)
 			System.out.println("Convert " + pluginBaseLocation); //$NON-NLS-1$
 		init();
-		this.target = target == null ? TARGET31 : target;
+		this.target = target == null ? TARGET32 : new Version(target);
 		this.devProperties = devProperties;
 		fillPluginInfo(pluginBaseLocation);
 		fillManifest(compatibility, analyseJars);
