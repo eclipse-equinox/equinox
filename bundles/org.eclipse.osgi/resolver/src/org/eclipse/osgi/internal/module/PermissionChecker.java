@@ -52,25 +52,22 @@ public class PermissionChecker {
 		if (producer != null && (producer.getState() & Bundle.UNINSTALLED) == 0) {
 			success = producer.hasPermission(producerPermission);
 			if (!success) {
-				BundleDescription desc = null;
 				switch (errorType) {
 					case ResolverError.IMPORT_PACKAGE_PERMISSION:
 						errorType = ResolverError.EXPORT_PACKAGE_PERMISSION;
-						desc = ((ExportPackageDescription) bd).getExporter();
 						break;
 					case ResolverError.REQUIRE_BUNDLE_PERMISSION:
 					case ResolverError.FRAGMENT_BUNDLE_PERMISSION:
 						errorType = errorType == ResolverError.REQUIRE_BUNDLE_PERMISSION ? ResolverError.PROVIDE_BUNDLE_PERMISSION : ResolverError.HOST_BUNDLE_PERMISSION;
-						desc = (BundleDescription) bd;
 						break;
 				}
-				resolver.getState().addResolverError(vc.getBundle(), errorType, bd.toString());
+				resolver.getState().addResolverError(vc.getBundle(), errorType, producerPermission.toString());
 			}
 		}
 		if (success && consumer != null && (consumer.getState() & Bundle.UNINSTALLED) == 0) {
 			success = consumer.hasPermission(consumerPermission);
 			if (!success)
-				resolver.getState().addResolverError(vc.getBundle(), errorType, vc.toString());
+				resolver.getState().addResolverError(vc.getBundle(), errorType, consumerPermission.toString());
 		}
 
 		return success;
