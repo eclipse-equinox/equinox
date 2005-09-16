@@ -74,7 +74,7 @@ public class ImportPackageSpecificationImpl extends VersionConstraintImpl implem
 				if (internal.booleanValue())
 					return false;
 				boolean found = false;
-				if (friends != null)
+				if (friends != null && getBundle().getSymbolicName() != null)
 					for (int i = 0; i < friends.length; i++)
 						if (getBundle().getSymbolicName().equals(friends[i]))
 							found = true;
