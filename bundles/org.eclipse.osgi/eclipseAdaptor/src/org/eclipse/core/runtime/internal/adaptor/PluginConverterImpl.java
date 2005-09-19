@@ -236,8 +236,8 @@ public class PluginConverterImpl implements PluginConverter {
 			out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(generationLocation), UTF_8));
 			writeEntry(MANIFEST_VERSION, (String) manifestToWrite.remove(MANIFEST_VERSION));
 			writeEntry(GENERATED_FROM, (String) manifestToWrite.remove(GENERATED_FROM)); //Need to do this first uptoDate check expect the generated-from tag to be in the first line
-			if (TARGET31.compareTo(target) <= 0)
-				writeEntry(Constants.BUNDLE_MANIFESTVERSION, (String) manifestToWrite.remove(Constants.BUNDLE_MANIFESTVERSION));
+			// always attempt to write the Bundle-ManifestVersion header if it exists (bug 109863)
+			writeEntry(Constants.BUNDLE_MANIFESTVERSION, (String) manifestToWrite.remove(Constants.BUNDLE_MANIFESTVERSION));
 			writeEntry(Constants.BUNDLE_NAME, (String) manifestToWrite.remove(Constants.BUNDLE_NAME));
 			writeEntry(Constants.BUNDLE_SYMBOLICNAME, (String) manifestToWrite.remove(Constants.BUNDLE_SYMBOLICNAME));
 			writeEntry(Constants.BUNDLE_VERSION, (String) manifestToWrite.remove(Constants.BUNDLE_VERSION));
@@ -246,10 +246,10 @@ public class PluginConverterImpl implements PluginConverter {
 			writeEntry(Constants.BUNDLE_VENDOR, (String) manifestToWrite.remove(Constants.BUNDLE_VENDOR));
 			writeEntry(Constants.FRAGMENT_HOST, (String) manifestToWrite.remove(Constants.FRAGMENT_HOST));
 			writeEntry(Constants.BUNDLE_LOCALIZATION, (String) manifestToWrite.remove(Constants.BUNDLE_LOCALIZATION));
-			if (TARGET31.compareTo(target) <= 0)
-				writeEntry(Constants.EXPORT_PACKAGE, (String) manifestToWrite.remove(Constants.EXPORT_PACKAGE));
-			else
-				writeEntry(Constants.PROVIDE_PACKAGE, (String) manifestToWrite.remove(Constants.PROVIDE_PACKAGE));
+			// always attempt to write the Export-Package header if it exists (bug 109863)
+			writeEntry(Constants.EXPORT_PACKAGE, (String) manifestToWrite.remove(Constants.EXPORT_PACKAGE));
+			// always attempt to write the Provide-Package header if it exists (bug 109863)
+			writeEntry(Constants.PROVIDE_PACKAGE, (String) manifestToWrite.remove(Constants.PROVIDE_PACKAGE));
 			writeEntry(Constants.REQUIRE_BUNDLE, (String) manifestToWrite.remove(Constants.REQUIRE_BUNDLE));
 			Enumeration keys = manifestToWrite.keys();
 			while (keys.hasMoreElements()) {
