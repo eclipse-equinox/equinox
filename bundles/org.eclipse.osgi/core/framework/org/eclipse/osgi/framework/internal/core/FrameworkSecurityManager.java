@@ -35,6 +35,7 @@ public class FrameworkSecurityManager extends SecurityManager {
 	static class CheckContext {
 		// A non zero depth indicates that we are doing a recursive permission check.
 		ArrayList depthCondSets = new ArrayList(2);
+        ArrayList accs = new ArrayList(2);
 		ArrayList CondClassSet;
 
 		public int getDepth() {
@@ -88,6 +89,22 @@ public class FrameworkSecurityManager extends SecurityManager {
 		AccessController.doPrivileged(new CheckPermissionAction(this, perm, context));
 	}
 
+	/**
+     * Gets the AccessControlContext currently being evaluated by
+     * the SecurityManager.
+     * 
+	 * @return the AccessControlContext currently being evaluated by the SecurityManager, or
+     * null if no AccessControlContext is being evaluted. Note: this method will
+     * return null if the permission check is being done directly on the AccessControlContext
+     * rather than the SecurityManager.
+	 */
+	public AccessControlContext getContextToBeChecked() {
+        CheckContext cc = (CheckContext) localCheckContext.get();
+        if (cc != null && cc.accs != null && !cc.accs.isEmpty())
+            return (AccessControlContext) cc.accs.get(cc.accs.size()-1);
+        return null;
+    }
+    
 	public void internalCheckPermission(Permission perm, Object context) {
 		AccessControlContext acc = (AccessControlContext) context;
 		CheckContext cc = (CheckContext) localCheckContext.get();
@@ -96,6 +113,7 @@ public class FrameworkSecurityManager extends SecurityManager {
 			localCheckContext.set(cc);
 		}
 		cc.depthCondSets.add(null); // initialize postponed condition set to null
+        cc.accs.add(acc);
 		try {
 			acc.checkPermission(perm);
 			// We want to pop the first set of postponed conditions and process them
@@ -121,6 +139,7 @@ public class FrameworkSecurityManager extends SecurityManager {
 			}
 		} finally {
 			cc.depthCondSets.remove(cc.getDepth());
+            cc.accs.remove(cc.accs.size()-1);
 		}
 	}
 
