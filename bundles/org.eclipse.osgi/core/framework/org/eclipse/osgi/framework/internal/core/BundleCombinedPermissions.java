@@ -63,28 +63,15 @@ final class BundleCombinedPermissions extends BundlePermissionCollection {
 		}
 	}
 
-	/**
-	 * The Permission collection will unresolve the permissions in these packages.
-	 *
-	 * @param refreshedBundles A list of the bundles which have been refreshed
-	 * as a result of a packageRefresh
-	 */
-	void unresolvePermissions(AbstractBundle[] refreshedBundles) {
-		if (assigned != null) {
-			assigned.unresolvePermissions(refreshedBundles);
-		}
-
-		if (implied != null) {
-			implied.unresolvePermissions(refreshedBundles);
-		}
-
-		if (conditional != null) {
-			conditional.unresolvePermissions(refreshedBundles);
-		}
-
-		if (restrictedPermissions != null) {
-			restrictedPermissions.unresolvePermissions(refreshedBundles);
-		}
+	void unresolvePermissions() {
+		if (assigned != null)
+			assigned.unresolvePermissions();
+		if (implied != null)
+			implied.unresolvePermissions();
+		if (conditional != null)
+			conditional.unresolvePermissions();
+		if (restrictedPermissions != null)
+			restrictedPermissions.unresolvePermissions();
 	}
 
 	/**
@@ -107,55 +94,13 @@ final class BundleCombinedPermissions extends BundlePermissionCollection {
 	 *					the permissions in the receiver.
 	 */
 	public Enumeration elements() {
+		// TODO return an empty enumeration for now; 
+		// It does not seem possible to do this properly with multiple exports and conditional permissions.
 		return new Enumeration() {
-			private int i = 0;
-			private Enumeration[] enums;
-
-			{
-				enums = new Enumeration[] {(assigned == null) ? null : assigned.elements(), (implied == null) ? null : implied.elements()};
-			}
-
-			/**
-			 * Answers if this Enumeration has more elements.
-			 *
-			 * @return		true if there are more elements, false otherwise
-			 *
-			 * @see			#nextElement
-			 */
 			public boolean hasMoreElements() {
-				while (i < enums.length) {
-					Enumeration perms = enums[i];
-					if ((perms != null) && perms.hasMoreElements()) {
-						return true;
-					}
-
-					i++;
-				}
-
 				return false;
 			}
-
-			/**
-			 * Answers the next element in this Enumeration.
-			 *
-			 * @return		the next element in this Enumeration
-			 *
-			 * @exception	NoSuchElementException when there are no more elements
-			 *
-			 * @see			#hasMoreElements
-			 */
 			public Object nextElement() {
-				while (i < enums.length) {
-					try {
-						Enumeration perms = enums[i];
-						if (perms != null) {
-							return perms.nextElement();
-						}
-					} catch (NoSuchElementException e) {
-					}
-					i++;
-				}
-
 				throw new NoSuchElementException();
 			}
 		};

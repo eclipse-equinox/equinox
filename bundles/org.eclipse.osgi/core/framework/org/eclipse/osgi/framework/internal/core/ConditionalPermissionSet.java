@@ -12,8 +12,7 @@
 package org.eclipse.osgi.framework.internal.core;
 
 import java.security.*;
-import java.util.Enumeration;
-import java.util.HashMap;
+import java.util.*;
 import org.osgi.service.condpermadmin.Condition;
 import org.osgi.service.permissionadmin.PermissionInfo;
 
@@ -21,17 +20,18 @@ import org.osgi.service.permissionadmin.PermissionInfo;
  * This class represents a PermissionCollection tied to a set of Conditions.
  * Before the permissions are actually used, isNonEmpty should be called.
  */
-public class ConditionalPermissionSet extends PermissionCollection {
+public class ConditionalPermissionSet extends BundlePermissionCollection {
 	private static final long serialVersionUID = 3258411750729920566L;
-	ConditionalPermissionInfoImpl cpis[] = new ConditionalPermissionInfoImpl[0];
-	HashMap cachedPermissionCollections = new HashMap();
+	private ConditionalPermissionInfoImpl cpis[] = ConditionalPermissionAdminImpl.EMPTY_COND_PERM_INFO;
+	private HashMap cachedPermissionCollections = new HashMap();
 	private boolean hasAllPermission = false;
+	private AbstractBundle bundle;
 	/**
 	 * These are conditions that need to be satisfied in order to enable the
 	 * permissions. If the array is empty, no conditions need to be satisfied.
 	 * If <code>neededCondititions</code> is null,
 	 */
-	Condition neededConditions[];
+	private Condition neededConditions[];
 
 	/*
 	 * TODO: we need to validate the cpis[] to make sure they don't go away.
@@ -41,7 +41,8 @@ public class ConditionalPermissionSet extends PermissionCollection {
 	 * Construct a new ConditionalPermission set with an initial set of
 	 * permissions.
 	 */
-	public ConditionalPermissionSet(ConditionalPermissionInfoImpl cpis[], Condition neededConditions[]) {
+	public ConditionalPermissionSet(AbstractBundle bundle, ConditionalPermissionInfoImpl cpis[], Condition neededConditions[]) {
+		this.bundle = bundle;
 		this.cpis = cpis;
 		this.neededConditions = neededConditions;
 		checkForAllPermission();
@@ -58,26 +59,28 @@ public class ConditionalPermissionSet extends PermissionCollection {
 	 */
 	void addConditionalPermissionInfo(ConditionalPermissionInfoImpl cpi) {
 		if (neededConditions == null || neededConditions.length > 0)
-			throw new RuntimeException("Cannot add ConditionalPermissionInfoImpl to a non satisfied set");
-		// first look for a null slot
-		for (int i = 0; i < cpis.length; i++)
-			if (cpis[i] == null) { // found an empty slot; use it
-				cpis[i] = cpi;
-				cachedPermissionCollections.clear();
-				return;
-			}
-		ConditionalPermissionInfoImpl newcpis[] = new ConditionalPermissionInfoImpl[cpis.length + 1];
-		System.arraycopy(cpis, 0, newcpis, 0, cpis.length);
-		newcpis[cpis.length] = cpi;
-		cpis = newcpis;
-		/*
-		 * TODO: I couldn't decide wether it is better to run through the cached
-		 * PermissionCollections and add permissions from this cpi, or to just
-		 * clear out and let them get rebuilt ondemand. The ondemand route is
-		 * simpler and in the end may be more efficient.
-		 */
-		cachedPermissionCollections.clear();
-		checkForAllPermission();
+			throw new RuntimeException("Cannot add ConditionalPermissionInfoImpl to a non satisfied set"); //$NON-NLS-1$
+		synchronized (cachedPermissionCollections) {
+			// first look for a null slot
+			for (int i = 0; i < cpis.length; i++)
+				if (cpis[i] == null) { // found an empty slot; use it
+					cpis[i] = cpi;
+					cachedPermissionCollections.clear();
+					return;
+				}
+			ConditionalPermissionInfoImpl newcpis[] = new ConditionalPermissionInfoImpl[cpis.length + 1];
+			System.arraycopy(cpis, 0, newcpis, 0, cpis.length);
+			newcpis[cpis.length] = cpi;
+			cpis = newcpis;
+			/*
+			 * TODO: I couldn't decide wether it is better to run through the cached
+			 * PermissionCollections and add permissions from this cpi, or to just
+			 * clear out and let them get rebuilt ondemand. The ondemand route is
+			 * simpler and in the end may be more efficient.
+			 */
+			cachedPermissionCollections.clear();
+			checkForAllPermission();
+		}
 	}
 
 	/**
@@ -109,28 +112,30 @@ public class ConditionalPermissionSet extends PermissionCollection {
 	boolean isNonEmpty() {
 		boolean nonEmpty = false;
 		boolean forceAllPermCheck = false;
-		for (int i = 0; i < cpis.length; i++) {
-			if (cpis[i] != null) {
-				if (cpis[i].isDeleted()) {
-					cpis[i] = null;
-					forceAllPermCheck = true;
-					/*
-					 * We don't have a way to remove from a collection; we can
-					 * only add. Thus, we must clear out everything. TODO:
-					 * Investigate if it would be more efficient to only clear
-					 * the permission collections of the type stored by the cpi.
-					 */
-					cachedPermissionCollections.clear();
-				} else {
-					nonEmpty = true;
+		synchronized (cachedPermissionCollections) {
+			for (int i = 0; i < cpis.length; i++) {
+				if (cpis[i] != null) {
+					if (cpis[i].isDeleted()) {
+						cpis[i] = null;
+						forceAllPermCheck = true;
+						/*
+						 * We don't have a way to remove from a collection; we can
+						 * only add. Thus, we must clear out everything. TODO:
+						 * Investigate if it would be more efficient to only clear
+						 * the permission collections of the type stored by the cpi.
+						 */
+						cachedPermissionCollections.clear();
+					} else {
+						nonEmpty = true;
+					}
 				}
 			}
-		}
-		if (!nonEmpty)
-			cpis = new ConditionalPermissionInfoImpl[0];
-		if (forceAllPermCheck) {
-			hasAllPermission = false;
-			checkForAllPermission();
+			if (!nonEmpty)
+				cpis = ConditionalPermissionAdminImpl.EMPTY_COND_PERM_INFO;
+			if (forceAllPermCheck) {
+				hasAllPermission = false;
+				checkForAllPermission();
+			}
 		}
 		return nonEmpty;
 	}
@@ -169,7 +174,7 @@ public class ConditionalPermissionSet extends PermissionCollection {
 			}
 		}
 		if (neededConditions != null && !foundNonNullCondition)
-			neededConditions = new Condition[0];
+			neededConditions = ConditionalPermissionAdminImpl.EMPTY_COND;
 		return neededConditions;
 	}
 
@@ -196,22 +201,25 @@ public class ConditionalPermissionSet extends PermissionCollection {
 		if (hasAllPermission)
 			return true;
 		Class permClass = perm.getClass();
-		PermissionCollection collection = (PermissionCollection) cachedPermissionCollections.get(permClass);
-		if (collection == null) {
-			collection = perm.newPermissionCollection();
-			if (collection == null)
-				collection = new PermissionsHash();
-			for (int i = 0; i < cpis.length; i++) {
-				try {
-					ConditionalPermissionInfoImpl cpi = cpis[i];
-					if (cpi != null)
-						cpi.addPermissions(collection, permClass);
-				} catch (Exception e) {
-					// TODO: we should log this somewhere
-					e.printStackTrace();
+		PermissionCollection collection;
+		synchronized (cachedPermissionCollections) {
+			collection = (PermissionCollection) cachedPermissionCollections.get(permClass);
+			if (collection == null) {
+				collection = perm.newPermissionCollection();
+				if (collection == null)
+					collection = new PermissionsHash();
+				for (int i = 0; i < cpis.length; i++) {
+					try {
+						ConditionalPermissionInfoImpl cpi = cpis[i];
+						if (cpi != null)
+							cpi.addPermissions(bundle, collection, permClass);
+					} catch (Exception e) {
+						// TODO: we should log this somewhere
+						e.printStackTrace();
+					}
 				}
+				cachedPermissionCollections.put(permClass, collection);
 			}
-			cachedPermissionCollections.put(permClass, collection);
 		}
 		return collection.implies(perm);
 	}
@@ -230,21 +238,22 @@ public class ConditionalPermissionSet extends PermissionCollection {
 	 * This method simply clears the resolved permission table. I think in both the 
 	 * short-term and the amoritized case, this is more efficient than walking through 
 	 * and clearing specific entries.
-	 * 
-	 * @param refreshedBundles not used.
 	 */
-	void unresolvePermissions(AbstractBundle[] refreshedBundles) {
-		cachedPermissionCollections.clear();
-
+	void unresolvePermissions() {
+		synchronized (cachedPermissionCollections) {
+			cachedPermissionCollections.clear();
+		}
 	}
 
 	boolean remove(ConditionalPermissionInfoImpl cpi) {
-		for (int i = 0; i < cpis.length; i++)
-			if (cpis[i] == cpi) {
-				cpis[i] = null;
-				cachedPermissionCollections.clear();
-				return true;
-			}
+		synchronized (cachedPermissionCollections) {
+			for (int i = 0; i < cpis.length; i++)
+				if (cpis[i] == cpi) {
+					cpis[i] = null;
+					cachedPermissionCollections.clear();
+					return true;
+				}
+		}
 		return false;
 	}
 }

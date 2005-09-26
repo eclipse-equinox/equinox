@@ -19,10 +19,9 @@ import java.security.PermissionCollection;
  */
 abstract class BundlePermissionCollection extends PermissionCollection {
 	/**
-	 * The Permission collection will unresolve the permissions in these packages.
-	 *
-	 * @param refreshedBundles A list of the bundles which have been refreshed
-	 * as a result of a packageRefresh
+	 * Unresolves all permissions in this collection.  This should flush
+	 * any cached Permission and PermissionCollection objects which may 
+	 * have been created in this BundlePermissionCollection.
 	 */
-	abstract void unresolvePermissions(AbstractBundle[] refreshedBundles);
+	abstract void unresolvePermissions();
 }

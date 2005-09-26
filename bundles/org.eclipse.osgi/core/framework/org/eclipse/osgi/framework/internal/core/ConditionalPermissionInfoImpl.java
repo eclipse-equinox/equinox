@@ -11,6 +11,7 @@
 
 package org.eclipse.osgi.framework.internal.core;
 
+import java.io.File;
 import java.io.Serializable;
 import java.lang.reflect.*;
 import java.security.*;
@@ -39,13 +40,13 @@ public class ConditionalPermissionInfoImpl implements ConditionalPermissionInfo,
 	/**
 	 * The name of the ConditionalPermissionInfo
 	 */
-	String name;
+	private String name;
 
 	/**
 	 * When true, this object has been deleted and any information retrieved
 	 * from it should be discarded.
 	 */
-	boolean deleted = false;
+	private boolean deleted = false;
 
 	/**
 	 * When true, this object has been deleted and any information retrieved
@@ -96,7 +97,7 @@ public class ConditionalPermissionInfoImpl implements ConditionalPermissionInfo,
 	 * @throws InstantiationException
 	 * @throws IllegalArgumentException
 	 */
-	int addPermissions(PermissionCollection collection, Class permClass) throws SecurityException, NoSuchMethodException, IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException {
+	int addPermissions(AbstractBundle bundle, PermissionCollection collection, Class permClass) throws SecurityException, NoSuchMethodException, IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException {
 		String permClassName = permClass.getName();
 		Constructor constructor = permClass.getConstructor(twoStringClassArray);
 		int count = 0;
@@ -110,6 +111,20 @@ public class ConditionalPermissionInfoImpl implements ConditionalPermissionInfo,
 				String args[] = new String[2];
 				args[0] = perms[i].getName();
 				args[1] = perms[i].getActions();
+				if (perms[i].getType().equals("java.io.FilePermission")) { //$NON-NLS-1$
+					// map FilePermissions for relative names to the bundle's data area
+					if (!args[0].equals("<<ALL FILES>>")) { //$NON-NLS-1$
+						File file = new File(args[0]);
+						if (!file.isAbsolute()) { // relative name
+							if (bundle == null) // default permissions
+								continue; // no relative file permissions
+							File target = bundle.framework.getDataFile(bundle, args[0]);
+							if (target == null) // no bundle data file area
+								continue; // no relative file permissions
+							args[0] = target.getPath();
+						}
+					}
+				}
 				collection.add((Permission) constructor.newInstance(args));
 			}
 		}
@@ -193,7 +208,7 @@ public class ConditionalPermissionInfoImpl implements ConditionalPermissionInfo,
 		condAdmin.deleteConditionalPermissionInfo(this);
 	}
 
-	static ConditionalPermissionAdminImpl condAdmin;
+	private static ConditionalPermissionAdminImpl condAdmin;
 
 	static void setConditionalPermissionAdminImpl(ConditionalPermissionAdminImpl condAdmin) {
 		ConditionalPermissionInfoImpl.condAdmin = condAdmin;

@@ -26,24 +26,24 @@ import org.osgi.service.condpermadmin.ConditionalPermissionAdmin;
  */
 public class ConditionalPermissions extends PermissionCollection {
 	private static final long serialVersionUID = 3907215965749000496L;
-	AbstractBundle bundle;
+	private AbstractBundle bundle;
 	/**
 	 * This is the list of satisfiedCPIs that we are waiting to process in bulk
 	 * when evaluating the satisfied permissions. Elements are of type
 	 * ConditionalPermissionInfoImpl.
 	 */
-	Vector satisfiedCPIs = new Vector();
+	private Vector satisfiedCPIs = new Vector();
 	/**
 	 * This is set contains that ConditionalPermissionInfos that are satisfied
 	 * and immutable.
 	 */
-	ConditionalPermissionSet satisfiedCPS = new ConditionalPermissionSet(new ConditionalPermissionInfoImpl[0], new Condition[0]);
+	private ConditionalPermissionSet satisfiedCPS;
 	/**
 	 * These are the CPIs that may match this CodeSource. Elements are of type
 	 * ConditionalPermissionSet.
 	 */
-	Vector satisfiableCPSs = new Vector();
-	boolean empty;
+	private Vector satisfiableCPSs = new Vector();
+	private boolean empty;
 
 	/**
 	 * Constructs a ConditionalPermission for the given bundle.
@@ -52,6 +52,7 @@ public class ConditionalPermissions extends PermissionCollection {
 	 */
 	public ConditionalPermissions(AbstractBundle bundle, ConditionalPermissionAdmin cpa) {
 		this.bundle = bundle;
+		satisfiedCPS = new ConditionalPermissionSet(bundle, ConditionalPermissionAdminImpl.EMPTY_COND_PERM_INFO, ConditionalPermissionAdminImpl.EMPTY_COND);
 		Enumeration en = cpa.getConditionalPermissionInfos();
 		while (en.hasMoreElements()) {
 			ConditionalPermissionInfoImpl cpi = (ConditionalPermissionInfoImpl) en.nextElement();
@@ -86,7 +87,7 @@ public class ConditionalPermissions extends PermissionCollection {
 			if (satisfied) {
 				satisfiedCPIs.add(cpi);
 			} else {
-				satisfiableCPSs.add(new ConditionalPermissionSet(new ConditionalPermissionInfoImpl[] {cpi}, conds));
+				satisfiableCPSs.add(new ConditionalPermissionSet(bundle, new ConditionalPermissionInfoImpl[] {cpi}, conds));
 			}
 		} catch (Exception e) {
 			bundle.framework.publishFrameworkEvent(FrameworkEvent.ERROR, bundle, e);
@@ -123,9 +124,8 @@ public class ConditionalPermissions extends PermissionCollection {
 		Vector unevalCondsSets = null;
 		SecurityManager sm = System.getSecurityManager();
 		FrameworkSecurityManager fsm = null;
-		if (sm instanceof FrameworkSecurityManager) {
+		if (sm instanceof FrameworkSecurityManager)
 			fsm = (FrameworkSecurityManager) sm;
-		}
 		ConditionalPermissionSet cpsArray[] = (ConditionalPermissionSet[]) satisfiableCPSs.toArray(new ConditionalPermissionSet[0]);
 		cpsLoop: for (int i = 0; i < cpsArray.length; i++) {
 			if (cpsArray[i].isNonEmpty()) {
@@ -163,7 +163,7 @@ public class ConditionalPermissions extends PermissionCollection {
 					}
 					if (unevalCondsSets == null)
 						unevalCondsSets = new Vector(2);
-					unevalCondsSets.add(unevaluatedConds.toArray(new Condition[0]));
+					unevalCondsSets.add(unevaluatedConds.toArray(new Condition[unevaluatedConds.size()]));
 					satisfied = true;
 				}
 			} else {
@@ -175,7 +175,7 @@ public class ConditionalPermissions extends PermissionCollection {
 			// There must be at least one set of Conditions to evaluate since
 			// we didn't return right we we realized the permission was satisfied
 			// so unevalCondsSets must be non-null.
-			Condition[][] condArray = (Condition[][]) unevalCondsSets.toArray(new Condition[0][]);
+			Condition[][] condArray = (Condition[][]) unevalCondsSets.toArray(new Condition[unevalCondsSets.size()][]);
 			satisfied = fsm.addConditionsForDomain(condArray);
 		}
 		return satisfied;
@@ -221,16 +221,13 @@ public class ConditionalPermissions extends PermissionCollection {
 		return empty;
 	}
 
-	/**
-	 * @param refreshedBundles
-	 */
-	void unresolvePermissions(AbstractBundle[] refreshedBundles) {
-		satisfiedCPS.unresolvePermissions(refreshedBundles);
+	void unresolvePermissions() {
+		satisfiedCPS.unresolvePermissions();
 		synchronized (satisfiableCPSs) {
 			Enumeration en = satisfiableCPSs.elements();
 			while (en.hasMoreElements()) {
 				ConditionalPermissionSet cs = (ConditionalPermissionSet) en.nextElement();
-				cs.unresolvePermissions(refreshedBundles);
+				cs.unresolvePermissions();
 			}
 		}
 	}

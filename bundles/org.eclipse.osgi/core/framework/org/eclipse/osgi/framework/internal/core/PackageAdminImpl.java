@@ -192,7 +192,7 @@ public class PackageAdminImpl implements PackageAdmin {
 			if (refreshPackages) {
 				AbstractBundle[] allBundles = framework.getAllBundles();
 				for (int i = 0; i < allBundles.length; i++)
-					allBundles[i].unresolvePermissions(refreshedBundles);
+					allBundles[i].unresolvePermissions();
 				resumeBundles(refreshedBundles);
 			}
 		} catch (Throwable t) {

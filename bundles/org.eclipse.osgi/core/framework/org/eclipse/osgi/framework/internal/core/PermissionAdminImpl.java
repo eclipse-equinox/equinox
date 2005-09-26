@@ -14,14 +14,12 @@ package org.eclipse.osgi.framework.internal.core;
 import java.io.*;
 import java.net.URL;
 import java.security.*;
-import java.util.Vector;
+import java.util.ArrayList;
 import org.eclipse.osgi.framework.adaptor.BundleProtectionDomain;
 import org.eclipse.osgi.framework.adaptor.PermissionStorage;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.osgi.framework.AdminPermission;
 import org.osgi.framework.FrameworkEvent;
-import org.osgi.service.condpermadmin.Condition;
-import org.osgi.service.condpermadmin.ConditionInfo;
 import org.osgi.service.permissionadmin.PermissionAdmin;
 import org.osgi.service.permissionadmin.PermissionInfo;
 
@@ -91,22 +89,8 @@ public class PermissionAdminImpl implements PermissionAdmin {
 		this.framework = framework;
 		this.storage = storage;
 
-		defaultDefaultPermissionInfos = getPermissionInfos(Constants.OSGI_DEFAULT_DEFAULT_PERMISSIONS);
-		baseImpliedPermissionInfos = getPermissionInfos(Constants.OSGI_BASE_IMPLIED_PERMISSIONS);
-
-		//      if (Debug.DEBUG)
-		//      {
-		//          // This is necessary to allow File.getAbsolutePath() in debug statements.
-		//          int _length = baseImpliedPermissionInfos.length;
-		//
-		//          PermissionInfo[] debugBaseImpliedPermissionInfos = new PermissionInfo[_length + 1];
-		//
-		//          System.arraycopy(baseImpliedPermissionInfos, 0, debugBaseImpliedPermissionInfos, 0, _length);
-		//
-		//          debugBaseImpliedPermissionInfos[_length] = new PermissionInfo("(java.util.PropertyPermission \"user.dir\" \"read\")");
-		//
-		//          baseImpliedPermissionInfos = debugBaseImpliedPermissionInfos;
-		//      }
+		defaultDefaultPermissionInfos = getPermissionInfos(getClass().getResource(Constants.OSGI_DEFAULT_DEFAULT_PERMISSIONS));
+		baseImpliedPermissionInfos = getPermissionInfos(getClass().getResource(Constants.OSGI_BASE_IMPLIED_PERMISSIONS));
 
 		if (Debug.DEBUG && Debug.DEBUG_SECURITY) {
 			Debug.println("Default default assigned bundle permissions"); //$NON-NLS-1$
@@ -225,7 +209,7 @@ public class PermissionAdminImpl implements PermissionAdmin {
 				if (permissions == null) {
 					combined.setAssignedPermissions(defaultAssignedPermissions, true);
 				} else {
-					combined.setAssignedPermissions(createPermissions(permissions, bundle), false);
+					combined.setAssignedPermissions(createPermissions(permissions, bundle, false), false);
 				}
 			}
 		}
@@ -392,34 +376,12 @@ public class PermissionAdminImpl implements PermissionAdmin {
 
 		/* now process the permissions.perm file, if it exists, and build the
 		 * restrictedPermissions using it. */
-		URL u = bundle.getEntry("OSGI-INF/permissions.perm"); //$NON-NLS-1$
-		if (u != null) {
-			try {
-				DataInputStream dis = new DataInputStream(u.openStream());
-				String line;
-				Vector piList = new Vector();
-				while ((line = dis.readLine()) != null) {
-					line = line.trim();
-					if (line.startsWith("#") || line.startsWith("//") || line.length() == 0)  //$NON-NLS-1$//$NON-NLS-2$
-						continue;
-					try {
-						PermissionInfo pi = new PermissionInfo(line);
-						piList.add(pi);
-					} catch (Exception e) {
-						// Right now we just eat any exception that happens when
-						// parsing the PermissionInfo
-						framework.publishFrameworkEvent(FrameworkEvent.ERROR, bundle, e);
-					}
-				}
-				ConditionalPermissionInfoImpl cpiArray[] = new ConditionalPermissionInfoImpl[1];
-				cpiArray[0] = new ConditionalPermissionInfoImpl(null, new ConditionInfo[0], (PermissionInfo[]) piList.toArray(new PermissionInfo[0]));
-				ConditionalPermissionSet cps = new ConditionalPermissionSet(cpiArray, new Condition[0]);
-				combined.setRestrictedPermissions(cps);
-			} catch (IOException e) {
-				// TODO What do we do here? The fact that we got the URL indicates that
-				// the file exists, but now we can't read it for some reason...
-				framework.publishFrameworkEvent(FrameworkEvent.ERROR, bundle, e);
-			}
+		PermissionInfo[] permInfos = getPermissionInfos(bundle.getEntry("OSGI-INF/permissions.perm")); //$NON-NLS-1$
+		if (permInfos != null) {
+			ConditionalPermissionInfoImpl cpiArray[] = new ConditionalPermissionInfoImpl[1];
+			cpiArray[0] = new ConditionalPermissionInfoImpl(null, ConditionalPermissionAdminImpl.EMPTY_COND_INFO, permInfos);
+			ConditionalPermissionSet cps = new ConditionalPermissionSet(bundle, cpiArray, ConditionalPermissionAdminImpl.EMPTY_COND);
+			combined.setRestrictedPermissions(cps);
 		}
 
 		return new BundleProtectionDomainImpl(bundle, combined);
@@ -442,7 +404,7 @@ public class PermissionAdminImpl implements PermissionAdmin {
 			info = defaultDefaultPermissionInfos;
 		}
 
-		return createPermissions(info, null);
+		return createPermissions(info, null, false);
 	}
 
 	/**
@@ -466,7 +428,7 @@ public class PermissionAdminImpl implements PermissionAdmin {
 			Debug.println("Creating assigned permissions for " + bundle); //$NON-NLS-1$
 		}
 
-		return createPermissions(info, bundle);
+		return createPermissions(info, bundle, false);
 	}
 
 	/**
@@ -480,13 +442,7 @@ public class PermissionAdminImpl implements PermissionAdmin {
 		if (Debug.DEBUG && Debug.DEBUG_SECURITY)
 			Debug.println("Creating implied permissions for " + bundle); //$NON-NLS-1$
 
-		BundlePermissionCollection collection = createPermissions(baseImpliedPermissionInfos, bundle);
-		// create the implied AdminPermission actions for this bundle
-		Permission permission = new AdminPermission("(id=" + bundle.getBundleId() + ")", ADMIN_IMPLIED_ACTIONS); //$NON-NLS-1$ //$NON-NLS-2$
-		if (Debug.DEBUG && Debug.DEBUG_SECURITY)
-			Debug.println("Created permission: " + permission); //$NON-NLS-1$
-		collection.add(permission);
-		return collection;
+		return createPermissions(baseImpliedPermissionInfos, bundle, true);
 	}
 
 	/**
@@ -495,60 +451,49 @@ public class PermissionAdminImpl implements PermissionAdmin {
 	 * @return An array of PermissionInfo objects from the specified
 	 * resource.
 	 */
-	protected PermissionInfo[] getPermissionInfos(String resource) {
-		PermissionInfo[] info = null;
-
-		InputStream in = getClass().getResourceAsStream(resource);
-
-		if (in != null) {
+	protected PermissionInfo[] getPermissionInfos(URL resource) {
+		if (resource == null)
+			return null;
+		PermissionInfo[] info = ConditionalPermissionAdminImpl.EMPTY_PERM_INFO;
+		DataInputStream in = null;
+		try {
+			in = new DataInputStream(resource.openStream());
+			ArrayList permissions = new ArrayList();
+			BufferedReader reader;
 			try {
-				Vector permissions = new Vector();
+				reader = new BufferedReader(new InputStreamReader(in, "UTF8")); //$NON-NLS-1$
+			} catch (UnsupportedEncodingException e) {
+				reader = new BufferedReader(new InputStreamReader(in));
+			}
 
-				BufferedReader reader;
+			while (true) {
+				String line = reader.readLine();
+				if (line == null) /* EOF */
+					break;
+				line = line.trim();
+				if ((line.length() == 0) || line.startsWith("#") || line.startsWith("//")) /* comments */ //$NON-NLS-1$ //$NON-NLS-2$
+					continue;
+
 				try {
-					reader = new BufferedReader(new InputStreamReader(in, "UTF8")); //$NON-NLS-1$
-				} catch (UnsupportedEncodingException e) {
-					reader = new BufferedReader(new InputStreamReader(in));
-				}
-
-				while (true) {
-					String line = reader.readLine();
-
-					if (line == null) /* EOF */{
-						break;
-					}
-
-					line = line.trim();
-
-					if ((line.length() == 0) || line.startsWith("#") || line.startsWith("//")) /* comments */{ //$NON-NLS-1$ //$NON-NLS-2$
-						continue;
-					}
-
-					try {
-						permissions.addElement(new PermissionInfo(line));
-					} catch (IllegalArgumentException iae) {
-						/* incorrectly encoded permission */
-
-						framework.publishFrameworkEvent(FrameworkEvent.ERROR, framework.systemBundle, iae);
-					}
-				}
-
-				int size = permissions.size();
-
-				if (size > 0) {
-					info = new PermissionInfo[size];
-
-					permissions.copyInto(info);
-				}
-			} catch (IOException e) {
-			} finally {
-				try {
-					in.close();
-				} catch (IOException ee) {
+					permissions.add(new PermissionInfo(line));
+				} catch (IllegalArgumentException iae) {
+					/* incorrectly encoded permission */
+					framework.publishFrameworkEvent(FrameworkEvent.ERROR, framework.systemBundle, iae);
 				}
 			}
+			int size = permissions.size();
+			if (size > 0)
+				info = (PermissionInfo[]) permissions.toArray(new PermissionInfo[size]);
+		} catch (IOException e) {
+			// do nothing
+		} finally {
+			try {
+				if (in != null)
+					in.close();
+			} catch (IOException ee) {
+				// do nothing
+			}
 		}
-
 		return info;
 	}
 
@@ -559,88 +504,20 @@ public class PermissionAdminImpl implements PermissionAdmin {
 	 * @param bundle The target bundle for the permissions.
 	 * @return A PermissionCollection containing Permission objects.
 	 */
-	protected BundlePermissionCollection createPermissions(PermissionInfo[] info, final AbstractBundle bundle) {
-		BundlePermissionCollection collection = new BundlePermissions(framework.packageAdmin);
-
-		/* add the permissions */
-		int size = info.length;
-		for (int i = 0; i < size; i++) {
-			PermissionInfo perm = info[i];
-
-			String type = perm.getType();
-
-			if (type.equals("java.io.FilePermission")) { //$NON-NLS-1$
-				/* map FilePermissions for relative names to
-				 * the bundle's data area
-				 */
-				String name = perm.getName();
-
-				if (!name.equals("<<ALL FILES>>")) { //$NON-NLS-1$
-					File file = new File(name);
-
-					if (!file.isAbsolute()) /* relative name */{
-						if (bundle == null) /* default permissions */{
-							continue; /* no relative file permissions */
-						}
-
-						File target = framework.getDataFile(bundle, name);
-
-						if (target == null) /* no bundle data file area */{
-							continue; /* no relative file permissions */
-						}
-
-						perm = new PermissionInfo(type, target.getPath(), perm.getActions());
-					}
-				}
-			}
-
-			collection.add(createPermission(perm));
+	protected BundlePermissionCollection createPermissions(PermissionInfo[] info, final AbstractBundle bundle, boolean implied) {
+		if (implied) {
+			// create the implied AdminPermission actions for this bundle
+			PermissionInfo impliedInfo = new PermissionInfo(AdminPermission.class.getName(), "(id=" + bundle.getBundleId() + ")", ADMIN_IMPLIED_ACTIONS); //$NON-NLS-1$ //$NON-NLS-2$
+			if (Debug.DEBUG && Debug.DEBUG_SECURITY)
+				Debug.println("Created permission: " + impliedInfo); //$NON-NLS-1$
+			PermissionInfo[] impliedInfos = new PermissionInfo[info.length + 1];
+			System.arraycopy(info, 0, impliedInfos, 0, info.length);
+			impliedInfos[info.length] = impliedInfo;
+			info = impliedInfos;
 		}
-
-		return collection;
+		ConditionalPermissionInfoImpl cpiArray[] = new ConditionalPermissionInfoImpl[1];
+		cpiArray[0] = new ConditionalPermissionInfoImpl(null, ConditionalPermissionAdminImpl.EMPTY_COND_INFO, info);
+		return new ConditionalPermissionSet(bundle, cpiArray, ConditionalPermissionAdminImpl.EMPTY_COND);
 	}
 
-	/**
-	 * Create a Permission object from a PermissionInfo object.
-	 * If the type of the permission is not loadable from
-	 * this object's classloader (i.e. the system classloader)
-	 * then an UnresolvedPermission is returned.
-	 *
-	 * @param info Description of the desired permission.
-	 * @return A permission object.
-	 */
-	protected Permission createPermission(PermissionInfo info) {
-		String type = info.getType();
-		String name = info.getName();
-		String actions = info.getActions();
-
-		UnresolvedPermission permission = new UnresolvedPermission(type, name, actions);
-
-		try {
-			/* Only search the system classloader (ours) at this point.
-			 * Permission classes exported by bundles will be
-			 * resolved later.
-			 * This is done so that permission classes exported by bundles
-			 * may be easily unresolved during packageRefresh.
-			 */
-			Class clazz = Class.forName(type);
-
-			Permission resolved = permission.resolve(clazz);
-
-			if (resolved != null) {
-				if (Debug.DEBUG && Debug.DEBUG_SECURITY) {
-					Debug.println("Created permission: " + resolved); //$NON-NLS-1$
-				}
-
-				return resolved;
-			}
-		} catch (ClassNotFoundException e) {
-		}
-
-		if (Debug.DEBUG && Debug.DEBUG_SECURITY) {
-			Debug.println("Created permission: " + permission); //$NON-NLS-1$
-		}
-
-		return permission;
-	}
 }

@@ -1207,19 +1207,15 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	}
 
 	/**
-	 * The bundle must unresolve the permissions in these packages.
-	 * 
-	 * @param refreshedBundles
-	 *            A list of bundles which have been refreshed as a result
-	 *            of a packageRefresh
+	 * The bundle must unresolve the permissions.
 	 */
-	protected void unresolvePermissions(AbstractBundle[] refreshedBundles) {
+	protected void unresolvePermissions() {
 		if (domain != null) {
 			BundlePermissionCollection collection = (BundlePermissionCollection) domain.getPermissions();
 			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 				Debug.println("Unresolving permissions in bundle " + this); //$NON-NLS-1$
 			}
-			collection.unresolvePermissions(refreshedBundles);
+			collection.unresolvePermissions();
 		}
 	}
 

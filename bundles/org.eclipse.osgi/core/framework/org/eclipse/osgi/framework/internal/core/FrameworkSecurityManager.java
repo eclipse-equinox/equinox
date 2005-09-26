@@ -174,7 +174,7 @@ public class FrameworkSecurityManager extends SecurityManager {
 			Vector conds = (Vector) condDict.get(key);
 			if (conds.size() == 0)
 				continue; // This should never happen since we only add to the condDict if there is a condition
-			Condition condArray[] = (Condition[]) conds.toArray(new Condition[0]);
+			Condition condArray[] = (Condition[]) conds.toArray(new Condition[conds.size()]);
 			Dictionary context = (Dictionary) condContextDict.get(key);
 			if (context == null) {
 				context = new Hashtable(2);

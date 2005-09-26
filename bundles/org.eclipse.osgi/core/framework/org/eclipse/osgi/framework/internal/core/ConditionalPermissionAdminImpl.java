@@ -24,12 +24,17 @@ import org.osgi.service.permissionadmin.PermissionInfo;
  * Implements ConditionalPermissionAdmin.
  */
 public class ConditionalPermissionAdminImpl implements ConditionalPermissionAdmin {
+	public static final ConditionalPermissionInfoImpl[] EMPTY_COND_PERM_INFO = new ConditionalPermissionInfoImpl[0];
+	public static final Condition[] EMPTY_COND = new Condition[0];
+	public static final ConditionInfo[] EMPTY_COND_INFO = new ConditionInfo[0];
+	public static final PermissionInfo[] EMPTY_PERM_INFO = new PermissionInfo[0];
+
 	/**
 	 * The Vector of current ConditionalPermissionInfos.  
 	 */
-	Vector condPerms;
-	Framework framework;
-	PermissionStorage storage;
+	private Vector condPerms;
+	private Framework framework;
+	private PermissionStorage storage;
 	private long nextID = System.currentTimeMillis();
 
 	/**
@@ -158,7 +163,7 @@ public class ConditionalPermissionAdminImpl implements ConditionalPermissionAdmi
 				}
 			}
 		}
-		BundlePermissionCollection collection = framework.permissionAdmin.createPermissions((PermissionInfo[]) permissionInfos.toArray(new PermissionInfo[permissionInfos.size()]), null);
+		BundlePermissionCollection collection = framework.permissionAdmin.createPermissions((PermissionInfo[]) permissionInfos.toArray(new PermissionInfo[permissionInfos.size()]), null, false);
 		return new AccessControlContext(collection == null ? new ProtectionDomain[0] : new ProtectionDomain[] {new ProtectionDomain(null, collection)});
 	}
 }
