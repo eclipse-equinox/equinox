@@ -13,7 +13,6 @@ package org.eclipse.osgi.framework.internal.core;
 
 import java.io.IOException;
 import java.security.*;
-import java.util.Vector;
 import org.eclipse.osgi.framework.adaptor.PermissionStorage;
 
 /**
@@ -24,13 +23,13 @@ public class SecurePermissionStorage implements PermissionStorage, PrivilegedExc
 	private PermissionStorage storage;
 	private String location;
 	private String[] data;
-	private Vector v;
+	private String[] infos;
 	private int action;
 	private static final int GET = 1;
 	private static final int SET = 2;
 	private static final int LOCATION = 3;
-	private static final int DESERIALIZE = 4;
-	private static final int SERIALIZE = 5;
+	private static final int GET_INFOS = 4;
+	private static final int SAVE_INFOS = 5;
 
 	public SecurePermissionStorage(PermissionStorage storage) {
 		this.storage = storage;
@@ -45,11 +44,11 @@ public class SecurePermissionStorage implements PermissionStorage, PrivilegedExc
 				return null;
 			case LOCATION :
 				return storage.getLocations();
-			case SERIALIZE :
-				storage.serializeConditionalPermissionInfos(v);
+			case SAVE_INFOS :
+				storage.saveConditionalPermissionInfos(data);
 				return null;
-			case DESERIALIZE :
-				return storage.deserializeConditionalPermissionInfos();
+			case GET_INFOS :
+				return storage.getConditionalPermissionInfos();
 		}
 
 		throw new UnsupportedOperationException();
@@ -88,9 +87,9 @@ public class SecurePermissionStorage implements PermissionStorage, PrivilegedExc
 		}
 	}
 
-	public void serializeConditionalPermissionInfos(Vector v) throws IOException {
-		this.action = SERIALIZE;
-		this.v = v;
+	public void saveConditionalPermissionInfos(String[] infos) throws IOException {
+		this.action = SAVE_INFOS;
+		this.infos = infos;
 		try {
 			AccessController.doPrivileged(this);
 		} catch (PrivilegedActionException e) {
@@ -99,10 +98,10 @@ public class SecurePermissionStorage implements PermissionStorage, PrivilegedExc
 
 	}
 
-	public Vector deserializeConditionalPermissionInfos() throws IOException {
-		this.action = DESERIALIZE;
+	public String[] getConditionalPermissionInfos() throws IOException {
+		this.action = GET_INFOS;
 		try {
-			return (Vector) AccessController.doPrivileged(this);
+			return (String[]) AccessController.doPrivileged(this);
 		} catch (PrivilegedActionException e) {
 			throw (IOException) e.getException();
 		}

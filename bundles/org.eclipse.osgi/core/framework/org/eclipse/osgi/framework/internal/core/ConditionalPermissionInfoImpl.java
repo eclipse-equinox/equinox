@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.Serializable;
 import java.lang.reflect.*;
 import java.security.*;
+import java.util.ArrayList;
 import org.osgi.framework.Bundle;
 import org.osgi.service.condpermadmin.*;
 import org.osgi.service.permissionadmin.PermissionInfo;
@@ -56,10 +57,55 @@ public class ConditionalPermissionInfoImpl implements ConditionalPermissionInfo,
 		return deleted;
 	}
 
+	public ConditionalPermissionInfoImpl(String encoded) {
+		decode(encoded);
+	}
+
 	public ConditionalPermissionInfoImpl(String name, ConditionInfo conds[], PermissionInfo perms[]) {
 		this.name = name;
 		this.conds = conds;
 		this.perms = perms;
+	}
+
+	private void decode(String encoded) {
+		int start = encoded.indexOf('{');
+		int end = encoded.lastIndexOf('}');
+		if (start < 0 || end < start)
+			throw new IllegalArgumentException(encoded);
+		if (start != 0)
+			name = encoded.substring(0, start);
+		char[] chars = encoded.substring(start + 1, end).toCharArray();
+		ArrayList condList = new ArrayList();
+		ArrayList permList = new ArrayList();
+		int pos = 0;
+		while (pos < chars.length) {
+			while (pos < chars.length && chars[pos] != '[' && chars[pos] != '(')
+				pos++;
+			if (pos == chars.length)
+				break; // no perms or conds left
+			int startPos = pos;
+			char endChar = chars[startPos] == '[' ? ']' : ')';
+			while (chars[pos] != endChar) {
+				if (chars[pos] == '"') {
+					pos++;
+					while (chars[pos] != '"') {
+						if (chars[pos] == '\\')
+							pos++;
+						pos++;
+					}
+				}
+				pos++;
+			}
+			int endPos = pos;
+			String token = new String(chars, startPos, endPos - startPos + 1);
+			if (endChar == ']')
+				condList.add(new ConditionInfo(token));
+			else
+				permList.add(new PermissionInfo(token));
+			pos++;
+		}
+		conds = (ConditionInfo[]) condList.toArray(new ConditionInfo[condList.size()]);
+		perms = (PermissionInfo[]) permList.toArray(new PermissionInfo[permList.size()]);
 	}
 
 	public String getName() {
@@ -214,4 +260,20 @@ public class ConditionalPermissionInfoImpl implements ConditionalPermissionInfo,
 		ConditionalPermissionInfoImpl.condAdmin = condAdmin;
 	}
 
+	public String toString() {
+		StringBuffer result = new StringBuffer();
+		if (name != null)
+			result.append(name);
+		ConditionInfo[] curConds = getConditionInfos();
+		PermissionInfo[] curPerms = getPermissionInfos();
+		result.append('{').append(' ');
+		if (curConds != null)
+			for (int i = 0; i < curConds.length; i++)
+				result.append(curConds[i].getEncoded()).append(' ');
+		if (curPerms != null)
+			for (int i = 0; i < curPerms.length; i++)
+				result.append(curPerms[i].getEncoded()).append(' ');
+		result.append('}');
+		return result.toString();
+	}
 }

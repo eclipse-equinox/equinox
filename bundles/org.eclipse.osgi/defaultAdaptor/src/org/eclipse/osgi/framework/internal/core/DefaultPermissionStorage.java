@@ -17,12 +17,8 @@ import org.eclipse.osgi.framework.adaptor.PermissionStorage;
 import org.eclipse.osgi.framework.adaptor.core.AbstractFrameworkAdaptor;
 import org.eclipse.osgi.framework.adaptor.core.AdaptorMsg;
 import org.eclipse.osgi.framework.debug.Debug;
-import org.eclipse.osgi.framework.internal.core.ConditionalPermissionInfoImpl;
 import org.eclipse.osgi.framework.internal.reliablefile.*;
 import org.eclipse.osgi.util.NLS;
-import org.osgi.service.condpermadmin.ConditionInfo;
-import org.osgi.service.condpermadmin.ConditionalPermissionInfo;
-import org.osgi.service.permissionadmin.PermissionInfo;
 
 /**
  * Class to model permission data storage.
@@ -313,35 +309,14 @@ public class DefaultPermissionStorage implements PermissionStorage {
 		return file;
 	}
 
-	/**
-	 * Serializes the ConditionalPermissionInfos to CONDPERMS. Serialization is done
-	 * by writing out each ConditionalPermissionInfo as a set of ConditionInfos 
-	 * followed by PermissionInfos followed by a blank line.
-	 * 
-	 * @param v the Vector to be serialized that contains the ConditionalPermissionInfos.
-	 * @throws IOException
-	 * @see org.eclipse.osgi.framework.adaptor.PermissionStorage#serializeConditionalPermissionInfos(Vector)
-	 */
-	public void serializeConditionalPermissionInfos(Vector v) throws IOException {
+	public void saveConditionalPermissionInfos(String[] infos) throws IOException {
 		BufferedWriter writer = null;
 		try {
 			writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(permissionDir, CONDPERMS))));
-			Enumeration en = v.elements();
-			while (en.hasMoreElements()) {
-				ConditionalPermissionInfo cpi = (ConditionalPermissionInfo) en.nextElement();
-				ConditionInfo cis[] = cpi.getConditionInfos();
-				PermissionInfo pis[] = cpi.getPermissionInfos();
-				writer.write('#');
-				writer.write(((ConditionalPermissionInfoImpl) cpi).getName());
-				writer.newLine();
-				for (int i = 0; i < cis.length; i++) {
-					writer.write(cis[i].getEncoded());
-					writer.newLine();
-				}
-				for (int i = 0; i < pis.length; i++) {
-					writer.write(pis[i].getEncoded());
-					writer.newLine();
-				}
+			if (infos == null)
+				return;
+			for (int i = 0; i < infos.length; i++) {
+				writer.write(infos[i]);
 				writer.newLine();
 			}
 		} finally {
@@ -350,38 +325,15 @@ public class DefaultPermissionStorage implements PermissionStorage {
 		}
 	}
 
-	/**
-	 * Deserializes the ConditionalPermissionInfos from CONDPERMS and returns the object.
-	 * 
-	 * @return the deserialized object that was previously passed to serializeCondationalPermissionInfos.
-	 * @throws IOException
-	 * @see org.eclipse.osgi.framework.adaptor.PermissionStorage#deserializeConditionalPermissionInfos()
-	 */
-	public Vector deserializeConditionalPermissionInfos() throws IOException {
+	public String[] getConditionalPermissionInfos() throws IOException {
 		BufferedReader reader = null;
-		Vector v = new Vector(15);
+		ArrayList results = new ArrayList(10);
 		try {
 			reader = new BufferedReader(new InputStreamReader(new FileInputStream(new File(permissionDir, CONDPERMS))));
 			String line;
-			Vector c = new Vector(3);
-			Vector p = new Vector(3);
-			String id = null;
-			while ((line = reader.readLine()) != null) {
-				if (line.length() == 0) {
-					ConditionalPermissionInfoImpl cpi;
-					cpi = new ConditionalPermissionInfoImpl(id, (ConditionInfo[]) c.toArray(new ConditionInfo[0]), (PermissionInfo[]) p.toArray(new PermissionInfo[0]));
-					v.add(cpi);
-					c.clear();
-					p.clear();
-					id = null;
-				} else if (line.startsWith("(")) { //$NON-NLS-1$
-					p.add(new PermissionInfo(line));
-				} else if (line.startsWith("[")) { //$NON-NLS-1$
-					c.add(new ConditionInfo(line));
-				} else if (line.startsWith("#")) { //$NON-NLS-1$
-					id = line.substring(1);
-				}
-			}
+			while ((line = reader.readLine()) != null)
+				if (line.length() != 0)
+					results.add(line);
 		} catch (FileNotFoundException e) {
 			// do nothing return empty vector
 		} catch (IOException e) {
@@ -392,6 +344,6 @@ public class DefaultPermissionStorage implements PermissionStorage {
 			if (reader != null)
 				reader.close();
 		}
-		return v;
+		return results.size() == 0 ? null : (String[]) results.toArray(new String[results.size()]);
 	}
 }

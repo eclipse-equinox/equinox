@@ -46,7 +46,14 @@ public class ConditionalPermissionAdminImpl implements ConditionalPermissionAdmi
 		this.framework = framework;
 		this.storage = permissionStorage;
 		try {
-			condPerms = permissionStorage.deserializeConditionalPermissionInfos();
+			String[] encodedCondPerms = permissionStorage.getConditionalPermissionInfos();
+			if (encodedCondPerms != null && encodedCondPerms.length > 0) {
+				condPerms = new Vector(encodedCondPerms.length);
+				for (int i = 0; i < encodedCondPerms.length; i++)
+					condPerms.add(new ConditionalPermissionInfoImpl(encodedCondPerms[i]));
+			}
+			else
+				condPerms = new Vector(0);
 		} catch (IOException e) {
 			framework.publishFrameworkEvent(FrameworkEvent.ERROR, framework.systemBundle, e);
 			condPerms = new Vector();
@@ -125,7 +132,11 @@ public class ConditionalPermissionAdminImpl implements ConditionalPermissionAdmi
 
 	private void saveCondPermInfos() {
 		try {
-			storage.serializeConditionalPermissionInfos(condPerms);
+			String [] encodedCondPerms = new String[condPerms.size()];
+			int i = 0;
+			for (Enumeration eCondPerms = condPerms.elements(); eCondPerms.hasMoreElements(); i++)
+				encodedCondPerms[i] = eCondPerms.nextElement().toString();
+			storage.saveConditionalPermissionInfos(encodedCondPerms);
 		} catch (IOException e) {
 			e.printStackTrace();
 			framework.publishFrameworkEvent(FrameworkEvent.ERROR, framework.systemBundle, e);

@@ -12,7 +12,6 @@
 package org.eclipse.osgi.framework.adaptor;
 
 import java.io.IOException;
-import java.util.Vector;
 
 /**
  * Permission Storage interface for managing a persistent storage of
@@ -50,9 +49,9 @@ public interface PermissionStorage {
 	 * @return The locations that have permission data in
 	 * persistent storage, or <tt>null</tt> if there is no permission data
 	 * in persistent storage.
-	 * @throws IOException If a failure occurs accessing peristent storage.
+	 * @throws IOException If a failure occurs accessing persistent storage.
 	 */
-	public abstract String[] getLocations() throws IOException;
+	public String[] getLocations() throws IOException;
 
 	/**
 	 * Gets the permission data assigned to the specified
@@ -65,9 +64,9 @@ public interface PermissionStorage {
 	 * @return The permission data assigned to the specified
 	 * location, or <tt>null</tt> if that location has not been assigned any
 	 * permission data.
-	 * @throws IOException If a failure occurs accessing peristent storage.
+	 * @throws IOException If a failure occurs accessing persistent storage.
 	 */
-	public abstract String[] getPermissionData(String location) throws IOException;
+	public String[] getPermissionData(String location) throws IOException;
 
 	/**
 	 * Assigns the specified permission data to the specified
@@ -78,22 +77,22 @@ public interface PermissionStorage {
 	 * The location can be <tt>null</tt> for the default permission data.
 	 * @param data The permission data to be assigned, or <tt>null</tt>
 	 * if the specified location is to be removed from persistent storaqe.
-	 * @throws IOException If a failure occurs modifying peristent storage.
+	 * @throws IOException If a failure occurs modifying persistent storage.
 	 */
-	public abstract void setPermissionData(String location, String[] data) throws IOException;
+	public void setPermissionData(String location, String[] data) throws IOException;
 
 	/**
-	 * Serializes the object, which represents the ConditionalPermissionInfos, to a
-	 * persistent store.
-	 * 
-	 * @param o the Vector to be serialized.
+	 * Persists the array of encoded ConditionalPermissionInfo strings
+	 * @param infos an array of encoded ConditionalPermissionInfo strings
+	 * @throws IOException If a failure occurs modifying persistent storage.
 	 */
-	public abstract void serializeConditionalPermissionInfos(Vector o) throws IOException;
+	public void saveConditionalPermissionInfos(String[] infos) throws IOException;
 
 	/**
-	 * Returns the previously serialized object that represents the ConditionalPermissionInfos.
-	 * 
-	 * @return the deserialized object representing the ConditionalPermissionInfos.
+	 * Returns the persistent array of encoded ConditionalPermissionInfo strings
+	 * @return an array of encoded ConditionalPermissionInfo strings or null 
+	 * if none exist in persistent storage.
+	 * @throws IOException If a failure occurs accessing persistent storage.
 	 */
-	public abstract Vector deserializeConditionalPermissionInfos() throws IOException;
+	public String[] getConditionalPermissionInfos() throws IOException;
 }
