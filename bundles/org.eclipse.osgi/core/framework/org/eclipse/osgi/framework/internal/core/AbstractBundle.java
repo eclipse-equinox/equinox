@@ -130,20 +130,13 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 		String activatorClassName = bundledata.getActivator();
 		if (activatorClassName != null) {
 			try {
-				final Class activatorClass = loadClass(activatorClassName, false);
+				Class activatorClass = loadClass(activatorClassName, false);
 				/* Create the activator for the bundle */
-				if (System.getSecurityManager() == null)
-					return (BundleActivator) activatorClass.newInstance();
-				return (BundleActivator) AccessController.doPrivileged(new PrivilegedExceptionAction() {
-					public Object run() throws Exception {
-						return activatorClass.newInstance();
-					}
-				});
+				return (BundleActivator) (activatorClass.newInstance());
 			} catch (Throwable t) {
-				if (t instanceof PrivilegedActionException)
-					t = ((PrivilegedActionException)t).getException();
-				if (Debug.DEBUG && Debug.DEBUG_GENERAL)
+				if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 					Debug.printStackTrace(t);
+				}
 				throw new BundleException(NLS.bind(Msg.BUNDLE_INVALID_ACTIVATOR_EXCEPTION, activatorClassName, bundledata.getSymbolicName()), t);
 			}
 		}
