@@ -204,4 +204,12 @@ public interface BundleDescription extends BaseDescription{
 	 * @return true if this bundle allows fragments to attach dynamically
 	 */
 	public boolean dynamicFragments();
+
+	/**
+	 * Returns the list of execution environments that are required by 
+	 * this bundle.  Any one of the listed execution environments will 
+	 * allow this bundle to be resolved.
+	 * @return the list of execution environments that are required.
+	 */
+	public String[] getExecutionEnvironments();
 }

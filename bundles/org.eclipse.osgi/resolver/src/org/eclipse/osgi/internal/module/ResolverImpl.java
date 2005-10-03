@@ -15,6 +15,7 @@ import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.debug.FrameworkDebugOptions;
 import org.eclipse.osgi.service.resolver.*;
+import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.*;
 
 public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver {
@@ -32,6 +33,8 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 	public static boolean DEBUG_REQUIRES = false;
 	public static boolean DEBUG_GROUPING = false;
 	public static boolean DEBUG_CYCLES = false;
+
+	private static String[][] CURRENT_EES;
 
 	// The State associated with this resolver
 	private State state;
@@ -212,6 +215,28 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 					}
 				}
 		}
+		// check the required execution environment
+		String[] ees = bundle.getExecutionEnvironments();
+		boolean matchedEE = ees.length == 0;
+		if (!matchedEE)
+			for (int i = 0; i < CURRENT_EES.length && !matchedEE; i++)
+				for (int j = 0; j < CURRENT_EES[i].length && !matchedEE; j++)
+					for (int k = 0; k < ees.length && !matchedEE; k++)
+						if (CURRENT_EES[i][j].equals(ees[k]))
+							matchedEE = true;
+		if (!matchedEE) {
+			StringBuffer bundleEE = new StringBuffer(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT.length() + 20);
+			bundleEE.append(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT).append(": "); //$NON-NLS-1$
+			for (int i = 0; i < ees.length; i++) {
+				if (i > 0)
+					bundleEE.append(","); //$NON-NLS-1$
+				bundleEE.append(ees[i]);
+			}
+			state.addResolverError(bundle, ResolverError.MISSING_EXECUTION_ENVIRONMENT, bundleEE.toString());
+			return false;
+		}
+					
+		// check the platform filter
 		String platformFilter = bundle.getPlatformFilter();
 		if (platformFilter == null)
 			return true;
@@ -280,6 +305,8 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		// reorder exports and bundles after unresolving the bundles
 		resolverExports.reorder();
 		resolverBundles.reorder();
+		// always get the latest EEs
+		getCurrentEEs(platformProperties);
 		// keep a list of rejected singltons
 		ArrayList rejectedSingletons = new ArrayList();
 		// attempt to resolve all unresolved bundles
@@ -298,6 +325,14 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		}
 		if (DEBUG)
 			ResolverImpl.log("*** END RESOLUTION ***"); //$NON-NLS-1$
+	}
+
+	private void getCurrentEEs(Dictionary[] platformProperties) {
+		CURRENT_EES = new String[platformProperties.length][]; 
+		for (int i = 0; i < platformProperties.length; i++) {
+			String eeSpecs = (String) platformProperties[i].get(Constants.FRAMEWORK_EXECUTIONENVIRONMENT);
+			CURRENT_EES[i] = ManifestElement.getArrayFromList(eeSpecs, ","); //$NON-NLS-1$
+		}
 	}
 
 	private void resolveBundles(ResolverBundle[] bundles, Dictionary[] platformProperties, ArrayList rejectedSingletons) {

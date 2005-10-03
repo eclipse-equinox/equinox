@@ -17,6 +17,12 @@ import org.eclipse.osgi.framework.internal.core.KeyedElement;
 import org.eclipse.osgi.service.resolver.*;
 
 public class BundleDescriptionImpl extends BaseDescriptionImpl implements BundleDescription, KeyedElement {
+	private static final String[] EMPTY_STRING = new String[0];
+	private static final ImportPackageSpecification[] EMPTY_IMPORTS = new ImportPackageSpecification[0];
+	private static final BundleSpecification[] EMPTY_BUNDLESPECS = new BundleSpecification[0];
+	private static final ExportPackageDescription[] EMPTY_EXPORTS = new ExportPackageDescription[0];
+	private static final BundleDescription[] EMPTY_BUNDLEDESCS = new BundleDescription[0];
+
 	static final int RESOLVED = 0x01;
 	static final int SINGLETON = 0x02;
 	static final int REMOVAL_PENDING = 0x04;
@@ -66,17 +72,24 @@ public class BundleDescriptionImpl extends BaseDescriptionImpl implements Bundle
 		return lazyData.platformFilter;
 	}
 
+	public String[] getExecutionEnvironments() {
+		fullyLoad();
+		if (lazyData.executionEnvironments == null)
+			return EMPTY_STRING;
+		return lazyData.executionEnvironments;
+	}
+
 	public ImportPackageSpecification[] getImportPackages() {
 		fullyLoad();
 		if (lazyData.importPackages == null)
-			return new ImportPackageSpecification[0];
+			return EMPTY_IMPORTS;
 		return lazyData.importPackages;
 	}
 
 	public BundleSpecification[] getRequiredBundles() {
 		fullyLoad();
 		if (lazyData.requiredBundles == null)
-			return new BundleSpecification[0];
+			return EMPTY_BUNDLESPECS;
 		return lazyData.requiredBundles;
 	}
 
@@ -86,7 +99,7 @@ public class BundleDescriptionImpl extends BaseDescriptionImpl implements Bundle
 		if (Constants.getInternalSymbolicName().equals(getSymbolicName()))
 			result = mergeSystemExports(result);
 		if (result == null)
-			return new ExportPackageDescription[0];
+			return EMPTY_EXPORTS;
 		return result;
 	}
 
@@ -114,7 +127,7 @@ public class BundleDescriptionImpl extends BaseDescriptionImpl implements Bundle
 
 	public BundleDescription[] getFragments() {
 		if (host != null)
-			return new BundleDescription[0];
+			return EMPTY_BUNDLEDESCS;
 		return containingState.getFragments(this);
 	}
 
@@ -145,21 +158,21 @@ public class BundleDescriptionImpl extends BaseDescriptionImpl implements Bundle
 	public ExportPackageDescription[] getSelectedExports() {
 		fullyLoad();
 		if (lazyData.selectedExports == null)
-			return new ExportPackageDescription[0];
+			return EMPTY_EXPORTS;
 		return lazyData.selectedExports;
 	}
 
 	public BundleDescription[] getResolvedRequires() {
 		fullyLoad();
 		if (lazyData.resolvedRequires == null)
-			return new BundleDescription[0];
+			return EMPTY_BUNDLEDESCS;
 		return lazyData.resolvedRequires;
 	}
 
 	public ExportPackageDescription[] getResolvedImports() {
 		fullyLoad();
 		if (lazyData.resolvedImports == null)
-			return new ExportPackageDescription[0];
+			return EMPTY_EXPORTS;
 		return lazyData.resolvedImports;
 	}
 
@@ -179,6 +192,11 @@ public class BundleDescriptionImpl extends BaseDescriptionImpl implements Bundle
 	protected void setPlatformFilter(String platformFilter) {
 		checkLazyData();
 		lazyData.platformFilter = platformFilter;
+	}
+
+	protected void setExecutionEnvironments(String[] executionEnvironments) {
+		checkLazyData();
+		lazyData.executionEnvironments = executionEnvironments;
 	}
 
 	protected void setExportPackages(ExportPackageDescription[] exportPackages) {
@@ -376,7 +394,7 @@ public class BundleDescriptionImpl extends BaseDescriptionImpl implements Bundle
 
 	public synchronized BundleDescription[] getDependents() {
 		if (dependents == null)
-			return new BundleDescription[0];
+			return EMPTY_BUNDLEDESCS;
 		return (BundleDescription[]) dependents.toArray(new BundleDescription[dependents.size()]);
 	}
 
@@ -467,5 +485,7 @@ public class BundleDescriptionImpl extends BaseDescriptionImpl implements Bundle
 		ExportPackageDescription[] selectedExports;
 		BundleDescription[] resolvedRequires;
 		ExportPackageDescription[] resolvedImports;
+
+		String[] executionEnvironments;
 	}
 }

@@ -539,7 +539,6 @@ public class Framework implements EventDispatcher, EventPublisher {
 	 * @param bundledata the BundleData of the Bundle to create
 	 */
 	AbstractBundle createAndVerifyBundle(BundleData bundledata) throws BundleException {
-		// TODO Verify the manifest... for example that the same package is imported twice 
 		// Check for a bundle already installed with the same symbolic name and version.
 		if (bundledata.getSymbolicName() != null) {
 			AbstractBundle installedBundle = getBundleBySymbolicName(bundledata.getSymbolicName(), bundledata.getVersion());
@@ -564,6 +563,8 @@ public class Framework implements EventDispatcher, EventPublisher {
 	 *             Environment.
 	 */
 	protected boolean verifyExecutionEnvironment(Dictionary manifest) throws BundleException {
+		if (!Boolean.getBoolean(Constants.ECLIPSE_EE_INSTALL_VERIFY))
+			return true;
 		String headerValue = (String) manifest.get(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT);
 		/* If no required EE is in the manifest return true */
 		if (headerValue == null) {

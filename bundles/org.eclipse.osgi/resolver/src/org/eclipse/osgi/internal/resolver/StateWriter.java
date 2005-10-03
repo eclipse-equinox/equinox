@@ -258,6 +258,11 @@ class StateWriter {
 				writeBundleDescription(resolvedRequires[i], out, false);
 		}
 
+		String[] ees = bundle.getExecutionEnvironments();
+		out.writeInt(ees.length);
+		for (int i = 0; i < ees.length; i++)
+			writeStringOrNull(ees[i], out);
+
 		// save the size of the lazy data
 		((BundleDescriptionImpl) bundle).setLazyDataSize(out.size() - dataStart);
 	}

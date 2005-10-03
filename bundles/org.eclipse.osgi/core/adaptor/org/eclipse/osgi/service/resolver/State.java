@@ -371,6 +371,7 @@ public interface State {
 	 * osgi.ws - the platform windowing system<br>
 	 * org.osgi.framework.system.packages - the packages exported by the system bundle <br>
 	 * osgi.resolverMode - the resolver mode.  A value of "strict" will set the resolver mode to strict.<br>
+	 * org.osgi.framework.executionenvironment - the comma separated list of supported execution environments <br>
 	 * <p>
 	 * The values used for the supported properties can be <tt>String</tt> type
 	 * to specify a single value for the property or they can by <tt>String[]</tt>

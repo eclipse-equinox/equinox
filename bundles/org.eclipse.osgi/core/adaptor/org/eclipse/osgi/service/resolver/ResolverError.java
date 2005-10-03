@@ -107,6 +107,14 @@ public interface ResolverError {
 	public static final int PLATFORM_FILTER = 0x2000;
 
 	/**
+	 * Error type constant (bit mask) indicating that a bundle could not be
+	 * resolved because the required execution enviroment did not match the runtime
+	 * environment.
+	 * @see ResolverError#getType()
+	 */
+	public static final int MISSING_EXECUTION_ENVIRONMENT = 0x4000;
+
+	/**
 	 * Returns the bundle which this ResolverError is for
 	 * @return the bundle which this ResolverError is for
 	 */
