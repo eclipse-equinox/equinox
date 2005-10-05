@@ -369,7 +369,7 @@ public class StartLevelManager implements EventDispatcher, EventListener, Servic
 	 */
 	public void setBundleStartLevel(org.osgi.framework.Bundle bundle, int newSL) {
 
-		String exceptionText = ""; //$NON-NLS-1$
+		String exceptionText = null;
 		if (bundle.getBundleId() == 0) { // system bundle has id=0
 			exceptionText = Msg.STARTLEVEL_CANT_CHANGE_SYSTEMBUNDLE_STARTLEVEL; 
 		} else if (bundle.getState() == AbstractBundle.UNINSTALLED) {
@@ -377,9 +377,8 @@ public class StartLevelManager implements EventDispatcher, EventListener, Servic
 		} else if (newSL <= 0) {
 			exceptionText = NLS.bind(Msg.STARTLEVEL_EXCEPTION_INVALID_REQUESTED_STARTLEVEL, "" + newSL); //$NON-NLS-1$ 
 		}
-		if (exceptionText.length() > 0) {
+		if (exceptionText != null)
 			throw new IllegalArgumentException(exceptionText);
-		}
 		// first check the permission of the caller
 		framework.checkAdminPermission(bundle, AdminPermission.EXECUTE);
 		try {
