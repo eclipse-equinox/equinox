@@ -29,11 +29,12 @@ class StateBuilder {
 	static BundleDescription createBundleDescription(StateImpl state, Dictionary manifest, String location) throws BundleException {
 		BundleDescriptionImpl result = new BundleDescriptionImpl();
 		String manifestVersionHeader = (String) manifest.get(Constants.BUNDLE_MANIFESTVERSION);
+		boolean jreBundle = "true".equals(manifest.get(Constants.Eclipse_JREBUNDLE)); //$NON-NLS-1$
 		int manifestVersion = 1;
 		if (manifestVersionHeader != null)
 			manifestVersion = Integer.parseInt(manifestVersionHeader);
 		if (manifestVersion >= 2)
-			validateHeaders(manifest);
+			validateHeaders(manifest, jreBundle);
 
 		// retrieve the symbolic-name and the singleton status
 		String symbolicNameHeader = (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME);
@@ -87,7 +88,7 @@ class StateBuilder {
 		return result;
 	}
 
-	private static void validateHeaders(Dictionary manifest) throws BundleException {
+	private static void validateHeaders(Dictionary manifest, boolean jreBundle) throws BundleException {
 		for (int i = 0; i < DEFINED_OSGI_VALIDATE_HEADERS.length; i++) {
 			String header = (String) manifest.get(DEFINED_OSGI_VALIDATE_HEADERS[i]);
 			if (header != null) {
@@ -96,9 +97,9 @@ class StateBuilder {
 				if (DEFINED_OSGI_VALIDATE_HEADERS[i] == Constants.REEXPORT_PACKAGE)
 					checkForUsesDirective(elements);
 				if (DEFINED_OSGI_VALIDATE_HEADERS[i] == Constants.IMPORT_PACKAGE || DEFINED_OSGI_VALIDATE_HEADERS[i] == Constants.DYNAMICIMPORT_PACKAGE)
-					checkImportExportSyntax(elements, false);
+					checkImportExportSyntax(elements, false, jreBundle);
 				if (DEFINED_OSGI_VALIDATE_HEADERS[i] == Constants.EXPORT_PACKAGE)
-					checkImportExportSyntax(elements, true);
+					checkImportExportSyntax(elements, true, jreBundle);
 			} else if (DEFINED_OSGI_VALIDATE_HEADERS[i] == Constants.BUNDLE_SYMBOLICNAME) {
 				throw new BundleException(NLS.bind(StateMsg.HEADER_REQUIRED, Constants.BUNDLE_SYMBOLICNAME));
 			}
@@ -293,7 +294,7 @@ class StateBuilder {
 		return new VersionRange(versionRange);
 	}
 
-	private static void checkImportExportSyntax(ManifestElement[] elements, boolean export) throws BundleException {
+	private static void checkImportExportSyntax(ManifestElement[] elements, boolean export, boolean jreBundle) throws BundleException {
 		if (elements == null)
 			return;
 		int length = elements.length;
@@ -305,7 +306,7 @@ class StateBuilder {
 				if (!export && packages.contains(packageNames[j]))
 					throw new BundleException(StateMsg.HEADER_PACKAGE_DUPLICATES);
 				// check for java.*
-				if (packageNames[j].startsWith("java.")) //$NON-NLS-1$
+				if (!jreBundle && packageNames[j].startsWith("java.")) //$NON-NLS-1$
 					throw new BundleException(StateMsg.HEADER_PACKAGE_JAVA);
 				packages.add(packageNames[j]);
 			}

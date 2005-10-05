@@ -136,7 +136,7 @@ public class Constants implements org.osgi.framework.Constants {
 	/** Eclipse-SystemBundle header */
 	public static final String ECLIPSE_SYSTEMBUNDLE = "Eclipse-SystemBundle"; //$NON-NLS-1$
 	public static final String ECLIPSE_PLATFORMFILTER = "Eclipse-PlatformFilter"; //$NON-NLS-1$
-
+	public static final String Eclipse_JREBUNDLE = "Eclipse-JREBundle"; //$NON-NLS-1$
 	/**
 	 * Manifest Export-Package directive indicating that the exported package should only 
 	 * be made available when the resolver is not in strict mode.
