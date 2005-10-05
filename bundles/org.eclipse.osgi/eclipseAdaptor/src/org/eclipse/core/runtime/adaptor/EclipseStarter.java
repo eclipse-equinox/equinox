@@ -405,11 +405,25 @@ public class EclipseStarter {
 	}
 
 	private static void ensureBundlesActive(Bundle[] bundles) {
-		for (int i = 0; i < bundles.length; i++) {
-			if (bundles[i].getState() != Bundle.ACTIVE) {
-				String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_ERROR_BUNDLE_NOT_ACTIVE, bundles[i]);
-				throw new IllegalStateException(message);
+		ServiceTracker tracker = null;
+		try {
+			for (int i = 0; i < bundles.length; i++) {
+				if (bundles[i].getState() != Bundle.ACTIVE) {
+					// check that the startlevel allows the bundle to be active (111550)
+					if (tracker == null) {
+						tracker = new ServiceTracker(context, StartLevel.class.getName(), null);
+						tracker.open();
+					}
+					StartLevel sl = (StartLevel) tracker.getService();
+					if (sl != null && (sl.getBundleStartLevel(bundles[i]) <= sl.getStartLevel())) {
+						String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_ERROR_BUNDLE_NOT_ACTIVE, bundles[i]);
+						throw new IllegalStateException(message);
+					}
+				}
 			}
+		} finally {
+			if (tracker != null)
+				tracker.close();
 		}
 	}
 
@@ -959,9 +973,12 @@ public class EclipseStarter {
 				if (osgiBundle == null) {
 					InputStream in = initialBundles[i].location.openStream();
 					osgiBundle = context.installBundle(initialBundles[i].locationString, in);
-					if (initialBundles[i].level >= 0 && startService != null)
-						startService.setBundleStartLevel(osgiBundle, initialBundles[i].level);
 				}
+				// always set the startlevel incase it has changed (bug 111549)
+				// this is a no-op if the level is the same as previous launch.
+				if ((osgiBundle.getState() & Bundle.UNINSTALLED) == 0 && initialBundles[i].level >= 0 && startService != null)
+					startService.setBundleStartLevel(osgiBundle, initialBundles[i].level);
+				// if this bundle is supposed to be started then add it to the start list
 				if (initialBundles[i].start)
 					startBundles.add(osgiBundle);
 				// include basic bundles in case they were not resolved before
