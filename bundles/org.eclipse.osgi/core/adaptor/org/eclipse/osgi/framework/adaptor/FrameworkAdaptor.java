@@ -337,6 +337,7 @@ public interface FrameworkAdaptor {
 	 *        other words, "cn=m*,c=US;cn=you" represents the common name of
 	 *        "m*" not any common name starting with "m".</li>
 	 *        </ol>
+	 * @param dnChain a distinguished name (DN) chain
 	 * @return true if a dnChain matches the pattern. A value of false is returned
 	 * if bundle signing is not supported.
 	 * @throws IllegalArgumentException
