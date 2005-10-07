@@ -202,7 +202,7 @@ public class EclipseStarter {
 		}
 		// we only get here if an error happened
 		System.getProperties().put(PROP_EXITCODE, "13"); //$NON-NLS-1$
-		System.getProperties().put(PROP_EXITDATA, NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_ERROR_CHECK_LOG, log.getFile().getPath()));
+		System.getProperties().put(PROP_EXITDATA, NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_ERROR_CHECK_LOG, log == null ? null : log.getFile().getPath()));
 		return null;
 	}
 
@@ -256,8 +256,6 @@ public class EclipseStarter {
 			throw new IllegalStateException(EclipseAdaptorMsg.ECLIPSE_STARTUP_ALREADY_RUNNING);
 		processCommandLine(args);
 		LocationManager.initializeLocations();
-		log = createFrameworkLog();
-		initializeContextFinder();
 		loadConfigurationInfo();
 		finalizeProperties();
 		if (Profile.PROFILE)
@@ -265,11 +263,11 @@ public class EclipseStarter {
 		if (Profile.PROFILE && Profile.STARTUP)
 			Profile.logTime("EclipseStarter.startup()", "props inited"); //$NON-NLS-1$ //$NON-NLS-2$
 		adaptor = createAdaptor();
+		log = adaptor.getFrameworkLog();
+		// initialize context finder after the log has been created incase we need to log something.
+		initializeContextFinder();
 		if (Profile.PROFILE && Profile.STARTUP)
 			Profile.logTime("EclipseStarter.startup()", "adapter created"); //$NON-NLS-1$ //$NON-NLS-2$
-		((EclipseAdaptor) adaptor).setLog(log);
-		if (Profile.PROFILE && Profile.STARTUP)
-			Profile.logTime("EclipseStarter.startup()", "adapter log set"); //$NON-NLS-1$ //$NON-NLS-2$
 		OSGi osgi = new OSGi(adaptor);
 		if (Profile.PROFILE && Profile.STARTUP)
 			Profile.logTime("EclipseStarter.startup()", "OSGi created"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -1030,7 +1028,7 @@ public class EclipseStarter {
 		try {
 			location = new URL(configArea.getURL().toExternalForm() + LocationManager.CONFIG_FILE);
 		} catch (MalformedURLException e) {
-			// its ok.  Thie should never happen
+			// its ok.  This should never happen
 		}
 		mergeProperties(System.getProperties(), loadProperties(location));
 	}
