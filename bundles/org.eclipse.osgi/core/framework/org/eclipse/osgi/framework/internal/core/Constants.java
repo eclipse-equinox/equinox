@@ -246,4 +246,6 @@ public class Constants implements org.osgi.framework.Constants {
 	 * @deprecated
 	 */
 	 public final static String REEXPORT_PACKAGE = "Reexport-Package"; //$NON-NLS-1$
+
+	static public final String INTERNAL_HANDLER_PKGS = "equinox.interal.handler.pkgs"; //$NON-NLS-1$
 }

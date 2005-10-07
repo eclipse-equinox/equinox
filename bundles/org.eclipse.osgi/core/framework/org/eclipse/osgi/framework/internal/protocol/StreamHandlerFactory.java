@@ -15,6 +15,7 @@ import java.net.URLStreamHandler;
 import java.util.Hashtable;
 import java.util.StringTokenizer;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
+import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.util.SecureAction;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.url.URLConstants;
@@ -35,7 +36,7 @@ public class StreamHandlerFactory implements java.net.URLStreamHandlerFactory {
 
 	protected static final String URLSTREAMHANDLERCLASS = "org.osgi.service.url.URLStreamHandlerService"; //$NON-NLS-1$
 	protected static final String PROTOCOL_HANDLER_PKGS = "java.protocol.handler.pkgs"; //$NON-NLS-1$
-	protected static final String INTERNAL_PROTOCOL_HANDLER_PKG = "org.eclipse.osgi.framework.internal.protocol."; //$NON-NLS-1$
+	protected static final String INTERNAL_PROTOCOL_HANDLER_PKG = "org.eclipse.osgi.framework.internal.protocol"; //$NON-NLS-1$
 
 	private Hashtable proxies;
 
@@ -53,6 +54,28 @@ public class StreamHandlerFactory implements java.net.URLStreamHandlerFactory {
 		handlerTracker.open();
 	}
 
+	private Class getBuiltIn(String protocol, String builtInHandlers) {
+		if (builtInHandlers == null)
+			return null;
+		Class clazz;
+		StringTokenizer tok = new StringTokenizer(builtInHandlers, "|"); //$NON-NLS-1$
+		while (tok.hasMoreElements()) {
+			StringBuffer name = new StringBuffer();
+			name.append(tok.nextToken());
+			name.append("."); //$NON-NLS-1$
+			name.append(protocol);
+			name.append(".Handler"); //$NON-NLS-1$
+			try {
+				clazz = secureAction.forName(name.toString());
+				if (clazz != null)
+					return clazz; //this class exists, it is a built in handler	
+			} catch (ClassNotFoundException ex) {
+				// keep looking
+			}
+		}
+		return null;
+	}
+
 	/**
 	 * Creates a new URLStreamHandler instance for the specified
 	 * protocol.
@@ -60,68 +83,45 @@ public class StreamHandlerFactory implements java.net.URLStreamHandlerFactory {
 	 * @param protocol The desired protocol
 	 * @return a URLStreamHandler for the specific protocol.
 	 */
-	//TODO consider refactoring this method - it is too long
 	public URLStreamHandler createURLStreamHandler(String protocol) {
 
 		//first check for built in handlers
 		String builtInHandlers = secureAction.getProperty(PROTOCOL_HANDLER_PKGS);
-		Class clazz = null;
-		if (builtInHandlers != null) {
-			StringTokenizer tok = new StringTokenizer(builtInHandlers, "|"); //$NON-NLS-1$
-			while (tok.hasMoreElements()) {
-				StringBuffer name = new StringBuffer();
-				name.append(tok.nextToken());
-				name.append("."); //$NON-NLS-1$
-				name.append(protocol);
-				name.append(".Handler"); //$NON-NLS-1$
-				try {
-					clazz = secureAction.forName(name.toString());
-					if (clazz != null) {
-						return (null); //this class exists, it is a built in handler, let the JVM handle it	
-					}
-				} catch (ClassNotFoundException ex) {
-				} //keep looking 
-			}
-		}
+		Class clazz = getBuiltIn(protocol, builtInHandlers);
+		if (clazz != null)
+			return null; // let the VM handle it
 
 		//internal protocol handlers
-		String name = INTERNAL_PROTOCOL_HANDLER_PKG + protocol + ".Handler"; //$NON-NLS-1$
-
-		try {
-			clazz = secureAction.forName(name);
-		}
-		//Now we check the service registry
-		catch (Throwable t) {
-			//first check to see if the handler is in the cache
-			URLStreamHandlerProxy handler = (URLStreamHandlerProxy) proxies.get(protocol);
-			if (handler != null) {
-				return (handler);
-			}
-			//TODO avoid deep nesting of control structures - return early
-			//look through the service registry for a URLStramHandler registered for this protocol
-			org.osgi.framework.ServiceReference[] serviceReferences = handlerTracker.getServiceReferences();
-			if (serviceReferences != null) {
-				for (int i = 0; i < serviceReferences.length; i++) {
-					Object prop = serviceReferences[i].getProperty(URLConstants.URL_HANDLER_PROTOCOL);
-					if (prop != null && prop instanceof String[]) {
-						String[] protocols = (String[]) prop;
-						for (int j = 0; j < protocols.length; j++) {
-							if (protocols[j].equals(protocol)) {
-								handler = new URLStreamHandlerProxy(protocol, serviceReferences[i], context);
-								proxies.put(protocol, handler);
-								return (handler);
-							}
-						}
-					}
-				}
-			}
-			return (null);
-		}
+		String internalHandlerPkgs = secureAction.getProperty(Constants.INTERNAL_HANDLER_PKGS);
+		internalHandlerPkgs = internalHandlerPkgs == null ? INTERNAL_PROTOCOL_HANDLER_PKG : internalHandlerPkgs + '|' + INTERNAL_PROTOCOL_HANDLER_PKG;
+		clazz = getBuiltIn(protocol, internalHandlerPkgs);
 
 		if (clazz == null) {
+			//Now we check the service registry
+			//first check to see if the handler is in the cache
+			URLStreamHandlerProxy handler = (URLStreamHandlerProxy) proxies.get(protocol);
+			if (handler != null)
+				return (handler);
+			//look through the service registry for a URLStramHandler registered for this protocol
+			org.osgi.framework.ServiceReference[] serviceReferences = handlerTracker.getServiceReferences();
+			if (serviceReferences == null)
+				return null;
+			for (int i = 0; i < serviceReferences.length; i++) {
+				Object prop = serviceReferences[i].getProperty(URLConstants.URL_HANDLER_PROTOCOL);
+				if (!(prop instanceof String[]))
+					continue;
+				String[] protocols = (String[]) prop;
+				for (int j = 0; j < protocols.length; j++)
+					if (protocols[j].equals(protocol)) {
+						handler = new URLStreamHandlerProxy(protocol, serviceReferences[i], context);
+						proxies.put(protocol, handler);
+						return (handler);
+					}
+			}
 			return null;
 		}
 
+		// must be a built-in handler
 		try {
 			URLStreamHandler handler = (URLStreamHandler) clazz.newInstance();
 
