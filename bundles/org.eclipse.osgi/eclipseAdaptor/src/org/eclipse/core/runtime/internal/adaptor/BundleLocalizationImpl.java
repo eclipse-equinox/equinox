@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.core.runtime.internal.adaptor;
 
-import java.util.ArrayList;
 import java.util.ResourceBundle;
 import org.eclipse.osgi.service.localization.BundleLocalization;
 import org.osgi.framework.Bundle;
@@ -23,8 +22,6 @@ import org.osgi.framework.Bundle;
  */
 
 public class BundleLocalizationImpl implements BundleLocalization {
-	ArrayList encountered = new ArrayList();
-
 	/**
 	 * The getLocalization method gets a ResourceBundle object for the given
 	 * locale and bundle.
