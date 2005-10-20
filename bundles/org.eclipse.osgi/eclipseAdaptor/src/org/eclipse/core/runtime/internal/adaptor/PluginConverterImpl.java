@@ -143,7 +143,7 @@ public class PluginConverterImpl implements PluginConverter {
 		InputStream stream = null;
 		URL baseURL = null;
 		try {
-			if (baseLocation.getName().endsWith(".jar")) { //$NON-NLS-1$
+			if (!baseLocation.isDirectory()) {
 				baseURL = new URL("jar:file:" + baseLocation.toString() + "!/"); //$NON-NLS-1$ //$NON-NLS-2$
 				manifestType |= EclipseBundleData.MANIFEST_TYPE_JAR;
 			} else {
