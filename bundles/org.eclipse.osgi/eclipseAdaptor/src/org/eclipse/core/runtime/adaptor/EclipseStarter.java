@@ -131,8 +131,8 @@ public class EclipseStarter {
 	 */
 	public static void main(String[] args) throws Exception {
 		URL url = EclipseStarter.class.getProtectionDomain().getCodeSource().getLocation();
-		System.getProperties().put(PROP_FRAMEWORK, url.toExternalForm());
-		String filePart = url.getFile();
+		System.getProperties().put(PROP_FRAMEWORK, decode(url.toExternalForm()));
+		String filePart = decode(url.getFile());
 		System.getProperties().put(PROP_INSTALL_AREA, filePart.substring(0, filePart.lastIndexOf('/')));
 		System.getProperties().put(PROP_NOSHUTDOWN, "true"); //$NON-NLS-1$
 		run(args, null);
@@ -168,7 +168,7 @@ public class EclipseStarter {
 			if (endSplashHandler != null)
 				endSplashHandler.run();
 			// may use startupFailed to understand where the error happened
-			FrameworkLogEntry logEntry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, startupFailed ? EclipseAdaptorMsg.ECLIPSE_STARTUP_STARTUP_ERROR : EclipseAdaptorMsg.ECLIPSE_STARTUP_APP_ERROR, 1, e, null); 
+			FrameworkLogEntry logEntry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, startupFailed ? EclipseAdaptorMsg.ECLIPSE_STARTUP_STARTUP_ERROR : EclipseAdaptorMsg.ECLIPSE_STARTUP_APP_ERROR, 1, e, null);
 			if (log != null) {
 				log.log(logEntry);
 				logUnresolvedBundles(context.getBundles());
@@ -288,7 +288,7 @@ public class EclipseStarter {
 			// wait for the system bundle to stop
 			Bundle systemBundle = context.getBundle(0);
 			int i = 0;
-			while (i < 5000 && (systemBundle.getState() & (Bundle.ACTIVE | Bundle.STOPPING)) != 0 ) {
+			while (i < 5000 && (systemBundle.getState() & (Bundle.ACTIVE | Bundle.STOPPING)) != 0) {
 				i += 200;
 				Thread.sleep(200);
 			}
@@ -490,7 +490,7 @@ public class EclipseStarter {
 			}
 		} catch (Exception ex) {
 			// ignore
-		} 
+		}
 	}
 
 	private static URL searchForBundle(String name, String parent) throws MalformedURLException {
@@ -1292,6 +1292,102 @@ public class EclipseStarter {
 			this.location = location;
 			this.level = level;
 			this.start = start;
+		}
+	}
+
+	private static String decode(String urlString) {
+		//try to use Java 1.4 method if available
+		try {
+			Class clazz = URLDecoder.class;
+			Method method = clazz.getDeclaredMethod("decode", new Class[] {String.class, String.class}); //$NON-NLS-1$
+			//first encode '+' characters, because URLDecoder incorrectly converts 
+			//them to spaces on certain class library implementations.
+			if (urlString.indexOf('+') >= 0) {
+				int len = urlString.length();
+				StringBuffer buf = new StringBuffer(len);
+				for (int i = 0; i < len; i++) {
+					char c = urlString.charAt(i);
+					if (c == '+')
+						buf.append("%2B"); //$NON-NLS-1$
+					else
+						buf.append(c);
+				}
+				urlString = buf.toString();
+			}
+			Object result = method.invoke(null, new Object[] {urlString, "UTF-8"}); //$NON-NLS-1$
+			if (result != null)
+				return (String) result;
+		} catch (Exception e) {
+			//JDK 1.4 method not found -- fall through and decode by hand
+		}
+		//decode URL by hand
+		boolean replaced = false;
+		byte[] encodedBytes = urlString.getBytes();
+		int encodedLength = encodedBytes.length;
+		byte[] decodedBytes = new byte[encodedLength];
+		int decodedLength = 0;
+		for (int i = 0; i < encodedLength; i++) {
+			byte b = encodedBytes[i];
+			if (b == '%') {
+				byte enc1 = encodedBytes[++i];
+				byte enc2 = encodedBytes[++i];
+				b = (byte) ((hexToByte(enc1) << 4) + hexToByte(enc2));
+				replaced = true;
+			}
+			decodedBytes[decodedLength++] = b;
+		}
+		if (!replaced)
+			return urlString;
+		try {
+			return new String(decodedBytes, 0, decodedLength, "UTF-8"); //$NON-NLS-1$
+		} catch (UnsupportedEncodingException e) {
+			//use default encoding
+			return new String(decodedBytes, 0, decodedLength);
+		}
+	}
+
+	private static int hexToByte(byte b) {
+		switch (b) {
+			case '0' :
+				return 0;
+			case '1' :
+				return 1;
+			case '2' :
+				return 2;
+			case '3' :
+				return 3;
+			case '4' :
+				return 4;
+			case '5' :
+				return 5;
+			case '6' :
+				return 6;
+			case '7' :
+				return 7;
+			case '8' :
+				return 8;
+			case '9' :
+				return 9;
+			case 'A' :
+			case 'a' :
+				return 10;
+			case 'B' :
+			case 'b' :
+				return 11;
+			case 'C' :
+			case 'c' :
+				return 12;
+			case 'D' :
+			case 'd' :
+				return 13;
+			case 'E' :
+			case 'e' :
+				return 14;
+			case 'F' :
+			case 'f' :
+				return 15;
+			default :
+				throw new IllegalArgumentException("Switch error decoding URL"); //$NON-NLS-1$
 		}
 	}
 }
