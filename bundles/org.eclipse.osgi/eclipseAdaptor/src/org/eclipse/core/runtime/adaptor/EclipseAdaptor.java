@@ -286,6 +286,10 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 		if (stateSaver != null)
 			stateSaver.shutdown();
 		saveStateToFile(true);
+		// calling stateManager.shutdown from saveStateToFile will also stop the data manager
+		// but we may not call that method if the configuration is read-only or if the state has not changed, 
+		// so we call here also just in case.
+		stateManager.stopDataManager();
 	}
 	
 	void saveStateToFile(boolean shutdown) {

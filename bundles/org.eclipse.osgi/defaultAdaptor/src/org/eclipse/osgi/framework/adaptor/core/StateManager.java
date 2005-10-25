@@ -65,6 +65,7 @@ public class StateManager implements PlatformAdmin, Runnable {
 	private File lazyFile;
 	private long expectedTimeStamp;
 	private BundleContext context;
+	private Thread dataManagerThread;
 
 	/**
 	 * Constructs a StateManager using the specified files and context
@@ -104,6 +105,7 @@ public class StateManager implements PlatformAdmin, Runnable {
 		if (removalPendings.length > 0)
 			systemState.resolve(removalPendings);
 		writeState(systemState, stateFile, lazyFile);
+		stopDataManager();
 	}
 
 	/**
@@ -146,11 +148,8 @@ public class StateManager implements PlatformAdmin, Runnable {
 				// default to not expire
 				expireTime = 0;
 			}
-			if (lazyLoad && expireTime > 0) {
-				Thread t = new Thread(this, "State Data Manager"); //$NON-NLS-1$
-				t.setDaemon(true);
-				t.start();
-			}
+			if (lazyLoad && expireTime > 0)
+				startDataManager();
 		} catch (IOException ioe) {
 			// TODO: how do we log this?
 			ioe.printStackTrace();
@@ -158,6 +157,25 @@ public class StateManager implements PlatformAdmin, Runnable {
 			if (DEBUG_READER)
 				System.out.println("Time to read state: " + (System.currentTimeMillis() - readStartupTime)); //$NON-NLS-1$
 		}
+	}
+
+	private synchronized void startDataManager() {
+		if (dataManagerThread != null)
+			return;
+		dataManagerThread = new Thread(this, "State Data Manager"); //$NON-NLS-1$
+		dataManagerThread.setDaemon(true);
+		dataManagerThread.start();
+	}
+
+	/**
+	 * Stops the active data manager thread which is used to unload unused
+	 * state objects from memory.
+	 */
+	public synchronized void stopDataManager() {
+		if (dataManagerThread == null)
+			return;
+		dataManagerThread.interrupt();
+		dataManagerThread = null;
 	}
 
 	private void writeState(StateImpl state, File stateFile, File lazyFile) throws IOException {
