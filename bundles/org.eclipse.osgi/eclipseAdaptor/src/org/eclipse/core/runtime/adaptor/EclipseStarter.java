@@ -98,6 +98,7 @@ public class EclipseStarter {
 	public static final String PROP_INSTALL_AREA = "osgi.install.area"; //$NON-NLS-1$
 	public static final String PROP_FRAMEWORK_SHAPE = "osgi.framework.shape"; //$NON-NLS-1$ //the shape of the fwk (jar, or folder)
 	public static final String PROP_NOSHUTDOWN = "osgi.noShutdown"; //$NON-NLS-1$
+	private static final String PROP_FORCED_RESTART = "osgi.forcedRestart"; //$NON-NLS-1$
 
 	public static final String PROP_EXITCODE = "eclipse.exitcode"; //$NON-NLS-1$
 	public static final String PROP_EXITDATA = "eclipse.exitdata"; //$NON-NLS-1$
@@ -196,7 +197,7 @@ public class EclipseStarter {
 			}
 		}
 		// first check to see if the framework is forcing a restart
-		if (Boolean.getBoolean("osgi.forcedRestart")) { //$NON-NLS-1$
+		if (Boolean.getBoolean(PROP_FORCED_RESTART)) {
 			System.getProperties().put(PROP_EXITCODE, "23"); //$NON-NLS-1$
 			return null;
 		}
@@ -281,6 +282,18 @@ public class EclipseStarter {
 				Profile.logTime("EclipseStarter.startup()", "console started"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		context = osgi.getBundleContext();
+		if ("true".equals(System.getProperty(PROP_REFRESH_BUNDLES))) //$NON-NLS-1$
+			refreshPackages(getCurrentBundles(false));
+		if (Boolean.getBoolean(PROP_FORCED_RESTART)) {
+			// wait for the system bundle to stop
+			Bundle systemBundle = context.getBundle(0);
+			int i = 0;
+			while (i < 5000 && (systemBundle.getState() & (Bundle.ACTIVE | Bundle.STOPPING)) != 0 ) {
+				i += 200;
+				Thread.sleep(200);
+			}
+			return;
+		}
 		publishSplashScreen(endSplashHandler);
 		if (Profile.PROFILE && Profile.STARTUP)
 			Profile.logTime("EclipseStarter.startup()", "loading basic bundles"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -288,8 +301,6 @@ public class EclipseStarter {
 		// set the framework start level to the ultimate value.  This will actually start things
 		// running if they are persistently active.
 		setStartLevel(getStartLevel());
-		if ("true".equals(System.getProperty(PROP_REFRESH_BUNDLES))) //$NON-NLS-1$
-			refreshPackages(getCurrentBundles(false));
 		if (Profile.PROFILE && Profile.STARTUP)
 			Profile.logTime("EclipseStarter.startup()", "StartLevel set"); //$NON-NLS-1$ //$NON-NLS-2$
 		// they should all be active by this time

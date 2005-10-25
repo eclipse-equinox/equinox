@@ -331,6 +331,7 @@ public class PackageAdminImpl implements PackageAdmin {
 						restart = true;
 				}
 				if (restart) {
+					System.getProperties().put("osgi.forcedRestart", "true"); //$NON-NLS-1$ //$NON-NLS-2$
 					// must publish PACKAGE_REFRESHED event here because we are done.
 					if (refreshPackages)
 						framework.publishFrameworkEvent(FrameworkEvent.PACKAGES_REFRESHED, framework.systemBundle, null);
@@ -417,7 +418,6 @@ public class PackageAdminImpl implements PackageAdmin {
 	}
 
 	private void restartFramework() {
-		System.getProperties().put("osgi.forcedRestart", "true"); //$NON-NLS-1$ //$NON-NLS-2$
 		framework.shutdown();
 		System.exit(23);
 	}
