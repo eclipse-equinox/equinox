@@ -33,6 +33,16 @@ import org.osgi.framework.*;
  */
 public class PluginConverterImpl implements PluginConverter {
 	public static boolean DEBUG = false;
+	/** bundle manifest type unknown */
+	static public final byte MANIFEST_TYPE_UNKNOWN = 0x00;
+	/** bundle manifest type bundle (META-INF/MANIFEST.MF) */
+	static public final byte MANIFEST_TYPE_BUNDLE = 0x01;
+	/** bundle manifest type plugin (plugin.xml) */
+	static public final byte MANIFEST_TYPE_PLUGIN = 0x02;
+	/** bundle manifest type fragment (fragment.xml) */
+	static public final byte MANIFEST_TYPE_FRAGMENT = 0x04;
+	/** bundle manifest type jared bundle */
+	static public final byte MANIFEST_TYPE_JAR = 0x08;
 	private static final String SEMICOLON = "; "; //$NON-NLS-1$
 	private static final String UTF_8 = "UTF-8"; //$NON-NLS-1$
 	private static final String LIST_SEPARATOR = ",\n "; //$NON-NLS-1$
@@ -40,6 +50,7 @@ public class PluginConverterImpl implements PluginConverter {
 	private static final String DOT = "."; //$NON-NLS-1$
 	private static int MAXLINE = 511;
 	private BundleContext context;
+	private FrameworkAdaptor adaptor;
 	private BufferedWriter out;
 	private IPluginInfo pluginInfo;
 	private File pluginManifestLocation;
@@ -69,8 +80,9 @@ public class PluginConverterImpl implements PluginConverter {
 		return instance;
 	}
 
-	public PluginConverterImpl(BundleContext context) {
+	public PluginConverterImpl(FrameworkAdaptor adaptor, BundleContext context) {
 		this.context = context;
+		this.adaptor = adaptor;
 		instance = this;
 	}
 
@@ -80,7 +92,7 @@ public class PluginConverterImpl implements PluginConverter {
 		pluginInfo = null;
 		pluginManifestLocation = null;
 		generatedManifest = new Hashtable(10);
-		manifestType = EclipseBundleData.MANIFEST_TYPE_UNKNOWN;
+		manifestType = MANIFEST_TYPE_UNKNOWN;
 		target = null;
 		devProperties = null;
 	}
@@ -145,7 +157,7 @@ public class PluginConverterImpl implements PluginConverter {
 		try {
 			if (!baseLocation.isDirectory()) {
 				baseURL = new URL("jar:file:" + baseLocation.toString() + "!/"); //$NON-NLS-1$ //$NON-NLS-2$
-				manifestType |= EclipseBundleData.MANIFEST_TYPE_JAR;
+				manifestType |= MANIFEST_TYPE_JAR;
 			} else {
 				baseURL = baseLocation.toURL();
 			}
@@ -155,11 +167,11 @@ public class PluginConverterImpl implements PluginConverter {
 		try {
 			xmlFileLocation = new URL(baseURL, PLUGIN_MANIFEST);
 			stream = xmlFileLocation.openStream();
-			manifestType |= EclipseBundleData.MANIFEST_TYPE_PLUGIN;
+			manifestType |= MANIFEST_TYPE_PLUGIN;
 			return xmlFileLocation;
 		} catch (MalformedURLException e) {
 			FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, e.getMessage(), 0, e, null);
-			EclipseAdaptor.getDefault().getFrameworkLog().log(entry);
+			adaptor.getFrameworkLog().log(entry);
 			return null;
 		} catch (IOException ioe) {
 			//ignore
@@ -174,11 +186,11 @@ public class PluginConverterImpl implements PluginConverter {
 		try {
 			xmlFileLocation = new URL(baseURL, FRAGMENT_MANIFEST);
 			stream = xmlFileLocation.openStream();
-			manifestType |= EclipseBundleData.MANIFEST_TYPE_FRAGMENT;
+			manifestType |= MANIFEST_TYPE_FRAGMENT;
 			return xmlFileLocation;
 		} catch (MalformedURLException e) {
 			FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, e.getMessage(), 0, e, null);
-			EclipseAdaptor.getDefault().getFrameworkLog().log(entry);
+			adaptor.getFrameworkLog().log(entry);
 			return null;
 		} catch (IOException ioe) {
 			// Ignore
@@ -343,7 +355,7 @@ public class PluginConverterImpl implements PluginConverter {
 		if (requireRuntimeCompatibility()) {
 			String pluginClass = pluginInfo.getPluginClass();
 			if (pluginClass != null)
-				generatedManifest.put(EclipseAdaptor.PLUGIN_CLASS, pluginClass);
+				generatedManifest.put(Constants.PLUGIN_CLASS, pluginClass);
 		}
 	}
 
@@ -395,7 +407,7 @@ public class PluginConverterImpl implements PluginConverter {
 		
 		String pluginClass = pluginInfo.getPluginClass();
 		if (pluginInfo.hasExtensionExtensionPoints() || (pluginClass != null && !pluginClass.trim().equals(""))) //$NON-NLS-1$
-			generatedManifest.put(TARGET32.compareTo(target) <= 0 ? EclipseAdaptor.ECLIPSE_LAZYSTART : EclipseAdaptor.ECLIPSE_AUTOSTART, "true"); //$NON-NLS-1$
+			generatedManifest.put(TARGET32.compareTo(target) <= 0 ? Constants.ECLIPSE_LAZYSTART : Constants.ECLIPSE_AUTOSTART, "true"); //$NON-NLS-1$
 	}
 
 	private Set getExports() {
@@ -500,7 +512,7 @@ public class PluginConverterImpl implements PluginConverter {
 			file = new JarFile(jarFile);
 		} catch (IOException e) {
 			String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_CONVERTER_PLUGIN_LIBRARY_IGNORED, jarFile, pluginInfo.getUniqueId());
-			EclipseAdaptor.getDefault().getFrameworkLog().log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, message, 0, e, null));
+			adaptor.getFrameworkLog().log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, message, 0, e, null));
 			return names;
 		}
 		//Run through the entries
@@ -570,7 +582,7 @@ public class PluginConverterImpl implements PluginConverter {
 		InputStream input = null;
 		try {
 			input = new BufferedInputStream(pluginLocation.openStream());
-			return new PluginParser(context, target).parsePlugin(input);
+			return new PluginParser(adaptor, context, target).parsePlugin(input);
 		} catch (Exception e) {
 			String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_CONVERTER_ERROR_PARSING_PLUGIN_MANIFEST, pluginManifestLocation);
 			throw new PluginConversionException(message, e);
@@ -625,13 +637,13 @@ public class PluginConverterImpl implements PluginConverter {
 	}
 
 	public static long getTimeStamp(File pluginLocation, byte manifestType) {
-		if ((manifestType & EclipseBundleData.MANIFEST_TYPE_JAR) != 0)
+		if ((manifestType & MANIFEST_TYPE_JAR) != 0)
 			return pluginLocation.lastModified();
-		else if ((manifestType & EclipseBundleData.MANIFEST_TYPE_PLUGIN) != 0)
+		else if ((manifestType & MANIFEST_TYPE_PLUGIN) != 0)
 			return new File(pluginLocation, PLUGIN_MANIFEST).lastModified();
-		else if ((manifestType & EclipseBundleData.MANIFEST_TYPE_FRAGMENT) != 0)
+		else if ((manifestType & MANIFEST_TYPE_FRAGMENT) != 0)
 			return new File(pluginLocation, FRAGMENT_MANIFEST).lastModified();
-		else if ((manifestType & EclipseBundleData.MANIFEST_TYPE_BUNDLE) != 0)
+		else if ((manifestType & MANIFEST_TYPE_BUNDLE) != 0)
 			return new File(pluginLocation, Constants.OSGI_BUNDLE_MANIFEST).lastModified();
 		return -1;
 	}

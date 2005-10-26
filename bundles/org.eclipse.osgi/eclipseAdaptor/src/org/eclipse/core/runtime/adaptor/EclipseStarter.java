@@ -228,7 +228,7 @@ public class EclipseStarter {
 				configAreaDirectory = new File(location.getURL().getFile());
 
 			if (configAreaDirectory != null) {
-				String logFileName = Long.toString(System.currentTimeMillis()) + EclipseAdaptor.F_LOG;
+				String logFileName = Long.toString(System.currentTimeMillis()) + ".log"; //$NON-NLS-1$
 				File logFile = new File(configAreaDirectory, logFileName);
 				System.getProperties().put(EclipseStarter.PROP_LOGFILE, logFile.getAbsolutePath());
 				frameworkLog = new EclipseLog(logFile);

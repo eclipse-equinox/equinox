@@ -13,7 +13,6 @@ package org.eclipse.core.runtime.internal.adaptor;
 import java.io.InputStream;
 import java.util.*;
 import javax.xml.parsers.SAXParserFactory;
-import org.eclipse.core.runtime.adaptor.EclipseAdaptor;
 import org.eclipse.core.runtime.adaptor.EclipseAdaptorMsg;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
@@ -32,6 +31,7 @@ public class PluginParser extends DefaultHandler implements IModel {
 
 	private PluginInfo manifestInfo = new PluginInfo();
 	private BundleContext context;
+	private FrameworkAdaptor adaptor;
 	private Version target; // The targeted platform for the given manifest
 	private static final Version TARGET21 = new Version(2, 1, 0);
 
@@ -207,9 +207,10 @@ public class PluginParser extends DefaultHandler implements IModel {
 	private static final int PLUGIN_REQUIRES_IMPORT_STATE = 9;
 	private static final int FRAGMENT_STATE = 11;
 
-	public PluginParser(BundleContext context, Version target) {
+	public PluginParser(FrameworkAdaptor adaptor, BundleContext context, Version target) {
 		super();
 		this.context = context;
+		this.adaptor = adaptor;
 		this.target = target;
 	}
 
@@ -449,14 +450,14 @@ public class PluginParser extends DefaultHandler implements IModel {
 			msg = NLS.bind(EclipseAdaptorMsg.parse_errorNameLineColumn, new String[] {name, Integer.toString(ex.getLineNumber()), Integer.toString(ex.getColumnNumber()), ex.getMessage()});
 
 		FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, msg, 0, ex, null);
-		EclipseAdaptor.getDefault().getFrameworkLog().log(entry);
+		adaptor.getFrameworkLog().log(entry);
 	}
 
 	synchronized public PluginInfo parsePlugin(InputStream in) throws Exception {
 		SAXParserFactory factory = acquireXMLParsing(context);
 		if (factory == null) {
 			FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, EclipseAdaptorMsg.ECLIPSE_CONVERTER_NO_SAX_FACTORY, 0, null, null);
-			EclipseAdaptor.getDefault().getFrameworkLog().log(entry);
+			adaptor.getFrameworkLog().log(entry);
 			return null;
 		}
 
@@ -671,7 +672,7 @@ public class PluginParser extends DefaultHandler implements IModel {
 		FrameworkLogEntry error;
 		String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_CONVERTER_PARSE_UNKNOWNTOP_ELEMENT, elementName); 
 		error = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, (manifestInfo.pluginId == null ? message : "Plug-in : " + manifestInfo.pluginId + ", " + message), 0, null, null); //$NON-NLS-1$ //$NON-NLS-2$
-		EclipseAdaptor.getDefault().getFrameworkLog().log(error);
+		adaptor.getFrameworkLog().log(error);
 	}
 
 	public void processingInstruction(String target, String data) throws SAXException {

@@ -36,15 +36,15 @@ import org.osgi.framework.Version;
 //Maybe for consistency should it be overriden to do nothing. See also EclipseAdaptor.saveMetadataFor(BundleData)
 public class EclipseBundleData extends AbstractBundleData {
 	/** bundle manifest type unknown */
-	static public final byte MANIFEST_TYPE_UNKNOWN = 0x00;
+	static public final byte MANIFEST_TYPE_UNKNOWN = PluginConverterImpl.MANIFEST_TYPE_UNKNOWN;
 	/** bundle manifest type bundle (META-INF/MANIFEST.MF) */
-	static public final byte MANIFEST_TYPE_BUNDLE = 0x01;
+	static public final byte MANIFEST_TYPE_BUNDLE = PluginConverterImpl.MANIFEST_TYPE_BUNDLE;
 	/** bundle manifest type plugin (plugin.xml) */
-	static public final byte MANIFEST_TYPE_PLUGIN = 0x02;
+	static public final byte MANIFEST_TYPE_PLUGIN = PluginConverterImpl.MANIFEST_TYPE_PLUGIN;
 	/** bundle manifest type fragment (fragment.xml) */
-	static public final byte MANIFEST_TYPE_FRAGMENT = 0x04;
+	static public final byte MANIFEST_TYPE_FRAGMENT = PluginConverterImpl.MANIFEST_TYPE_FRAGMENT;
 	/** bundle manifest type jared bundle */
-	static public final byte MANIFEST_TYPE_JAR = 0x08;
+	static public final byte MANIFEST_TYPE_JAR = PluginConverterImpl.MANIFEST_TYPE_JAR;
 
 	private static String[] libraryVariants = null;
 

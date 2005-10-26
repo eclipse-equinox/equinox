@@ -248,4 +248,24 @@ public class Constants implements org.osgi.framework.Constants {
 	 public final static String REEXPORT_PACKAGE = "Reexport-Package"; //$NON-NLS-1$
 
 	static public final String INTERNAL_HANDLER_PKGS = "equinox.interal.handler.pkgs"; //$NON-NLS-1$
+
+	// TODO rename it to Eclipse-PluginClass
+	public static final String PLUGIN_CLASS = "Plugin-Class"; //$NON-NLS-1$
+
+	/** Manifest header used to specify the lazy start properties of a bundle */
+	public static final String ECLIPSE_LAZYSTART = "Eclipse-LazyStart"; //$NON-NLS-1$
+
+	/** An Eclipse-LazyStart attribute used to specify exception classes for auto start */
+	public static final String ECLIPSE_LAZYSTART_EXCEPTIONS = "exceptions"; //$NON-NLS-1$
+
+	/** 
+	 * Manifest header used to specify the auto start properties of a bundle 
+	 * @deprecated use {@link #ECLIPSE_LAZYSTART}
+	 */
+	public static final String ECLIPSE_AUTOSTART = "Eclipse-AutoStart"; //$NON-NLS-1$
+
+	/**
+	 * @deprecated use {@link #ECLIPSE_LAZYSTART_EXCEPTIONS}
+	 */
+	public static final String ECLIPSE_AUTOSTART_EXCEPTIONS = ECLIPSE_LAZYSTART_EXCEPTIONS;
 }

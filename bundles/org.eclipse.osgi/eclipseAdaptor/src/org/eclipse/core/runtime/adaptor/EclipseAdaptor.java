@@ -357,7 +357,7 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 		// instance first because we may need it when creating the statemanager
 		// in super.frameworkStart(context)
 		registerEndorsedXMLParser(aContext);
-		PluginConverter converter = new PluginConverterImpl(aContext);
+		PluginConverter converter = new PluginConverterImpl(this, aContext);
 		super.frameworkStart(aContext);
 		Bundle bundle = aContext.getBundle();
 		Location location;
