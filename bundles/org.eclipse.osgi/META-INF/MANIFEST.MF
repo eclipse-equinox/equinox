@@ -43,12 +43,12 @@ Export-Service: org.osgi.service.packageadmin.PackageAdmin,
  org.osgi.service.startlevel.StartLevel,
  org.eclipse.osgi.service.debug.DebugOptions
 Bundle-Name: %systemBundle
-Bundle-SymbolicName: org.eclipse.osgi; singleton:=true
+Bundle-SymbolicName: org.eclipse.osgi
 Bundle-Activator: org.eclipse.osgi.framework.internal.core.SystemBundleActivator
 Bundle-Description: %systemBundle
 Bundle-Copyright: %copyright
 Bundle-Vendor: %eclipse.org
-Bundle-Version: 3.2.0
+Bundle-Version: 3.2.0.qualifier
 Bundle-Localization: systembundle
 Bundle-DocUrl: http://www.eclipse.org
 Eclipse-ExtensibleAPI: true
