@@ -204,9 +204,11 @@ public interface State {
 	 * @param bundle the bundle to add a new <code>ResolverError</code> for
 	 * @param type the type of <code>ResolverError</code> to add
 	 * @param data the data for the <code>ResolverError</code>
+	 * @param unsatisfied the unsatisfied constraint or null if the resolver error was not caused
+	 * by an unsatisfied constraint.
 	 * @throws IllegalStateException if this is not done during a call to <code>resolve</code>
 	 */
-	public void addResolverError(BundleDescription bundle, int type, String data);
+	public void addResolverError(BundleDescription bundle, int type, String data, VersionConstraint unsatisfied);
 
 	/**
 	 * Removes all <code>ResolverError</code>s for the specified bundle.

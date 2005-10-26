@@ -133,4 +133,12 @@ public interface ResolverError {
 	 * @return non-translatable data associated with this ResolverError
 	 */
 	public String getData();
+
+	/**
+	 * Returns the unsatisfied constraint if this ResolverError occurred 
+	 * because of an unsatisfied constraint; otherwise <code>null</code> 
+	 * is returned.
+	 * @return the unsatisfied constraint or <code>null</code>.
+	 */
+	public VersionConstraint getUnsatisfiedConstraint();
 }

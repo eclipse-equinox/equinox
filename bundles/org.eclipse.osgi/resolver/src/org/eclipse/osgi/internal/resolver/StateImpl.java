@@ -602,7 +602,7 @@ public abstract class StateImpl implements State {
 		return result == null ? new ResolverError[0] : (ResolverError[]) result.toArray(new ResolverError[result.size()]);
 	}
 
-	public synchronized void addResolverError(BundleDescription bundle, int type, String data) {
+	public synchronized void addResolverError(BundleDescription bundle, int type, String data, VersionConstraint unsatisfied) {
 		if (!resolving)
 			throw new IllegalStateException(); // TODO need error message here!
 		ArrayList errors = (ArrayList) resolverErrors.get(bundle);
@@ -610,7 +610,7 @@ public abstract class StateImpl implements State {
 			errors = new ArrayList(1);
 			resolverErrors.put(bundle, errors);
 		}
-		errors.add(new ResolverErrorImpl((BundleDescriptionImpl) bundle, type, data));
+		errors.add(new ResolverErrorImpl((BundleDescriptionImpl) bundle, type, data, unsatisfied));
 	}
 
 	public synchronized void removeResolverErrors(BundleDescription bundle) {

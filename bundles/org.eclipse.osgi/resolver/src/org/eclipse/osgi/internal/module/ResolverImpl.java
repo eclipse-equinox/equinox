@@ -232,7 +232,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 					bundleEE.append(","); //$NON-NLS-1$
 				bundleEE.append(ees[i]);
 			}
-			state.addResolverError(bundle, ResolverError.MISSING_EXECUTION_ENVIRONMENT, bundleEE.toString());
+			state.addResolverError(bundle, ResolverError.MISSING_EXECUTION_ENVIRONMENT, bundleEE.toString(), null);
 			return false;
 		}
 					
@@ -250,7 +250,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		} catch (InvalidSyntaxException e) {
 			// return false below
 		}
-		state.addResolverError(bundle, ResolverError.PLATFORM_FILTER, platformFilter);
+		state.addResolverError(bundle, ResolverError.PLATFORM_FILTER, platformFilter, null);
 		return false;
 	}
 
@@ -321,7 +321,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		for (Iterator rejected = rejectedSingletons.iterator(); rejected.hasNext();) {
 			BundleDescription reject = (BundleDescription) rejected.next();
 			BundleDescription sameName = state.getBundle(reject.getSymbolicName(), null);
-			state.addResolverError(reject, ResolverError.SINGLETON_SELECTION, sameName.toString());
+			state.addResolverError(reject, ResolverError.SINGLETON_SELECTION, sameName.toString(), null);
 		}
 		if (DEBUG)
 			ResolverImpl.log("*** END RESOLUTION ***"); //$NON-NLS-1$
@@ -453,7 +453,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		if (fragment.getHost().foundMatchingBundles())
 			setBundleResolved(fragment);
 		else
-			state.addResolverError(fragment.getBundle(), ResolverError.MISSING_FRAGMENT_HOST, fragment.getHost().getVersionConstraint().toString());
+			state.addResolverError(fragment.getBundle(), ResolverError.MISSING_FRAGMENT_HOST, fragment.getHost().getVersionConstraint().toString(), fragment.getHost().getVersionConstraint());
 	}
 
 	// This method will attempt to resolve the supplied bundle and any bundles that it is dependent on
@@ -485,7 +485,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 				if (!resolveRequire(requires[i], cycle)) {
 					if (DEBUG || DEBUG_REQUIRES)
 						ResolverImpl.log("** REQUIRE " + requires[i].getVersionConstraint().getName() + "[" + requires[i].getBundleDescription() + "] failed to resolve"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-					state.addResolverError(requires[i].getVersionConstraint().getBundle(), ResolverError.MISSING_REQUIRE_BUNDLE, requires[i].getVersionConstraint().toString());
+					state.addResolverError(requires[i].getVersionConstraint().getBundle(), ResolverError.MISSING_REQUIRE_BUNDLE, requires[i].getVersionConstraint().toString(), requires[i].getVersionConstraint());
 					// If the require has failed to resolve and it is from a fragment, then remove the fragment from the host
 					if (requires[i].isFromFragment()) {
 						resolverExports.remove(bundle.detachFragment((ResolverBundle) bundleMapping.get(requires[i].getVersionConstraint().getBundle())));
@@ -506,7 +506,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 					if (DEBUG || DEBUG_IMPORTS)
 						ResolverImpl.log("** IMPORT " + imports[i].getName() + "[" + imports[i].getBundleDescription() + "] failed to resolve"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					// If the import has failed to resolve and it is from a fragment, then remove the fragment from the host
-					state.addResolverError(imports[i].getVersionConstraint().getBundle(), ResolverError.MISSING_IMPORT_PACKAGE, imports[i].getVersionConstraint().toString());
+					state.addResolverError(imports[i].getVersionConstraint().getBundle(), ResolverError.MISSING_IMPORT_PACKAGE, imports[i].getVersionConstraint().toString(), imports[i].getVersionConstraint());
 					if (imports[i].isFromFragment()) {
 						resolverExports.remove(bundle.detachFragment((ResolverBundle) bundleMapping.get(imports[i].getBundleDescription())));
 						continue;
@@ -582,7 +582,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 	private boolean checkRequiresConstraints(BundleConstraint req, ResolverBundle bundle) {
 		if (groupingChecker.isConsistent(req, bundle) != null) {
 			req.setMatchingBundle(null);
-			state.addResolverError(req.getBundleDescription(), ResolverError.REQUIRE_BUNDLE_USES_CONFLICT, bundle.getBundle().toString());
+			state.addResolverError(req.getBundleDescription(), ResolverError.REQUIRE_BUNDLE_USES_CONFLICT, bundle.getBundle().toString(), req.getVersionConstraint());
 			return req.isOptional();
 		}
 		return true;
@@ -753,7 +753,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		// Try to re-resolve the bundle
 		if (resolveBundle(importer, cycle))
 			return true;
-		state.addResolverError(imp.getVersionConstraint().getBundle(), ResolverError.IMPORT_PACKAGE_USES_CONFLICT, imp.getVersionConstraint().toString());
+		state.addResolverError(imp.getVersionConstraint().getBundle(), ResolverError.IMPORT_PACKAGE_USES_CONFLICT, imp.getVersionConstraint().toString(), imp.getVersionConstraint());
 		return false;
 	}
 

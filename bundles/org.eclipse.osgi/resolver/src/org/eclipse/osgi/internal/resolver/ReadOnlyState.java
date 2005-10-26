@@ -151,7 +151,7 @@ public class ReadOnlyState implements State {
 		return target.getSystemPackages();
 	}
 
-	public void addResolverError(BundleDescription bundle, int type, String data) {
+	public void addResolverError(BundleDescription bundle, int type, String data, VersionConstraint unsatisfied) {
 		throw new UnsupportedOperationException();
 	}
 

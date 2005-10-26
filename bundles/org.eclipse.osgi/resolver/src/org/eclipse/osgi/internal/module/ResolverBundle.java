@@ -332,14 +332,14 @@ public class ResolverBundle extends VersionSupplier {
 		for (int i = 0; i < newImports.length; i++) {
 			ResolverImport importPkg = getImport(newImports[i].getName());
 			if ((importPkg == null && isResolved()) || (importPkg != null && !isIncluded(newImports[i].getVersionRange(), importPkg.getVersionConstraint().getVersionRange()))) {
-				resolver.getState().addResolverError(fragment, ResolverError.FRAGMENT_CONFLICT, newImports[i].toString());
+				resolver.getState().addResolverError(fragment, ResolverError.FRAGMENT_CONFLICT, newImports[i].toString(), newImports[i]);
 				return true; // do not allow additional constraints when host is already resolved
 			}
 		}
 		for (int i = 0; i < newRequires.length; i++) {
 			BundleConstraint constraint = getRequire(newRequires[i].getName());
 			if ((constraint == null && isResolved()) || (constraint != null && !isIncluded(newRequires[i].getVersionRange(), constraint.getVersionConstraint().getVersionRange()))) {
-				resolver.getState().addResolverError(fragment, ResolverError.FRAGMENT_CONFLICT, newRequires[i].toString());
+				resolver.getState().addResolverError(fragment, ResolverError.FRAGMENT_CONFLICT, newRequires[i].toString(), newRequires[i]);
 				return true; // do not allow additional constraints when host is already resolved
 			}
 		}

@@ -1,17 +1,18 @@
 package org.eclipse.osgi.internal.resolver;
 
-import org.eclipse.osgi.service.resolver.BundleDescription;
-import org.eclipse.osgi.service.resolver.ResolverError;
+import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.util.NLS;
 
 public class ResolverErrorImpl implements ResolverError {
 	private BundleDescriptionImpl bundle;
 	private int type;
 	private String data;
-	public ResolverErrorImpl(BundleDescriptionImpl bundle, int type, String data) {
+	private VersionConstraint unsatisfied;
+	public ResolverErrorImpl(BundleDescriptionImpl bundle, int type, String data, VersionConstraint unsatisfied) {
 		this.bundle = bundle;
 		this.data = data;
 		this.type = type;
+		this.unsatisfied = unsatisfied;
 	}
 
 	public BundleDescription getBundle() {
@@ -24,6 +25,10 @@ public class ResolverErrorImpl implements ResolverError {
 
 	public String getData() {
 		return data;
+	}
+
+	public VersionConstraint getUnsatisfiedConstraint() {
+		return unsatisfied;
 	}
 
 	public String toString() {
