@@ -284,16 +284,6 @@ public class EclipseStarter {
 		context = osgi.getBundleContext();
 		if ("true".equals(System.getProperty(PROP_REFRESH_BUNDLES))) //$NON-NLS-1$
 			refreshPackages(getCurrentBundles(false));
-		if (Boolean.getBoolean(PROP_FORCED_RESTART)) {
-			// wait for the system bundle to stop
-			Bundle systemBundle = context.getBundle(0);
-			int i = 0;
-			while (i < 5000 && (systemBundle.getState() & (Bundle.ACTIVE | Bundle.STOPPING)) != 0) {
-				i += 200;
-				Thread.sleep(200);
-			}
-			return;
-		}
 		publishSplashScreen(endSplashHandler);
 		if (Profile.PROFILE && Profile.STARTUP)
 			Profile.logTime("EclipseStarter.startup()", "loading basic bundles"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -648,6 +638,19 @@ public class EclipseStarter {
 		semaphore.acquire();
 		context.removeFrameworkListener(listener);
 		context.ungetService(packageAdminRef);
+		if (Boolean.getBoolean(PROP_FORCED_RESTART)) {
+			// wait for the system bundle to stop
+			Bundle systemBundle = context.getBundle(0);
+			int i = 0;
+			while (i < 5000 && (systemBundle.getState() & (Bundle.ACTIVE | Bundle.STOPPING)) != 0) {
+				i += 200;
+				try {
+					Thread.sleep(200);
+				} catch (InterruptedException e) {
+					break;
+				}
+			}
+		}
 	}
 
 	/**
