@@ -8,15 +8,10 @@
 # Contributors:
 #     IBM Corporation - initial API and implementation
 ###############################################################################
-bin.includes = .options,\
-               plugin.properties,\
-               plugin.xml,\
-               .,\
-               about.html,\
-               eclipse.properties,\
-               META-INF/,\
-               systembundle.properties,\
-               *.profile,\
-               profile.list
-src.includes = about.html
-source.. = osgi/src, core/adaptor/, core/framework/, resolver/src/, defaultAdaptor/src/, eclipseAdaptor/src/, console/src/
+org.osgi.framework.system.packages = 
+org.osgi.framework.bootdelegation = \
+ sun.*,\
+ com.sun.*
+org.osgi.framework.executionenvironment = \
+ OSGi/Minimum-1.0
+osgi.java.profile.name = OSGi/Minimum-1.0
