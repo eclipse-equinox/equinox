@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.condpermadmin/src/org/osgi/service/condpermadmin/Condition.java,v 1.10 2005/08/05 01:36:21 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.service.condpermadmin/src/org/osgi/service/condpermadmin/Condition.java,v 1.11 2005/10/09 17:14:56 hargrave Exp $
  *
  * Copyright (c) OSGi Alliance (2004, 2005). All Rights Reserved.
  * 
@@ -17,7 +17,7 @@ import java.util.Dictionary;
  * using Conditional Permission Info. The Permissions of a ConditionalPermission
  * Info can only be used if the associated Conditions are satisfied.
  * 
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public interface Condition {
 	/**
@@ -50,9 +50,8 @@ public interface Condition {
 	/**
 	 * Returns whether the Condition is satisfied.
 	 * 
-	 * @return <code>true</code> to indicate the Conditions is satisfied. must
-	 *         be postponed. Otherwise, <code>false</code> if the Condition is
-	 *         not satisfied.
+	 * @return <code>true</code> to indicate the Conditions is satisfied. 
+	 *         Otherwise, <code>false</code> if the Condition is not satisfied.
 	 */
 	boolean isSatisfied();
 
