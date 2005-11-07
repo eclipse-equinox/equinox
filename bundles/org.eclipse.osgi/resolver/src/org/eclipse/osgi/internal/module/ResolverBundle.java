@@ -363,7 +363,7 @@ public class ResolverBundle extends VersionSupplier {
 		return newFragmentExports;
 	}
 
-	ResolverExport[] detachFragment(ResolverBundle fragment) {
+	ResolverExport[] detachFragment(ResolverBundle fragment, ResolverConstraint reason) {
 		if (isFragment())
 			return new ResolverExport[0];
 		initFragments();
@@ -372,10 +372,44 @@ public class ResolverBundle extends VersionSupplier {
 			return new ResolverExport[0];
 
 		fragment.getHost().removeMatchingBundle(this);
-		fragmentImports.remove(fragment.bundleID);
-		fragmentRequires.remove(fragment.bundleID);
+		ArrayList fragImports = (ArrayList) fragmentImports.remove(fragment.bundleID);
+		ArrayList fragRequires = (ArrayList) fragmentRequires.remove(fragment.bundleID);
 		ArrayList removedExports = (ArrayList) fragmentExports.remove(fragment.bundleID);
-
+		if (reason != null) {
+			ResolverBundle[] remainingFrags = (ResolverBundle[]) fragments.toArray(new ResolverBundle[fragments.size()]);
+			for (int i = 0; i < remainingFrags.length; i++) {
+				resolver.getResolverExports().remove(detachFragment(remainingFrags[i], null));
+				VersionConstraint[] constraints;
+				if (reason instanceof ResolverImport)
+					constraints = remainingFrags[i].getBundle().getImportPackages();
+				else
+					constraints = remainingFrags[i].getBundle().getRequiredBundles();
+				for (int j = 0; j < constraints.length; j++)
+					if (reason.getName().equals(constraints[j].getName()))
+						continue; // this fragment should remained unattached.
+				resolver.getResolverExports().put(attachFragment(remainingFrags[i], true));
+				ArrayList newImports = (ArrayList) fragmentImports.get(remainingFrags[i].bundleID);
+				if (newImports != null && fragImports != null)
+					for (Iterator iNewImports = newImports.iterator(); iNewImports.hasNext();) {
+						ResolverImport newImport = (ResolverImport) iNewImports.next();
+						for (Iterator iOldImports = fragImports.iterator(); iOldImports.hasNext();) {
+							ResolverImport oldImport = (ResolverImport) iOldImports.next();
+							if (newImport.getName().equals(oldImport.getName()))
+								newImport.setMatchingExport(oldImport.getMatchingExport());
+						}
+					}
+				ArrayList newRequires = (ArrayList) fragmentRequires.get(remainingFrags[i].bundleID);
+				if (newRequires != null && fragRequires != null)
+					for (Iterator iNewRequires = newRequires.iterator(); iNewRequires.hasNext();) {
+						BundleConstraint newRequire = (BundleConstraint) iNewRequires.next();
+						for (Iterator iOldRequires = fragRequires.iterator(); iOldRequires.hasNext();) {
+							BundleConstraint oldRequire = (BundleConstraint) iOldRequires.next();
+							if (newRequire.getName().equals(oldRequire.getName()))
+								newRequire.setMatchingBundle(oldRequire.getMatchingBundle());
+						}
+					}
+			}
+		}
 		return removedExports == null ? new ResolverExport[0] : (ResolverExport[]) removedExports.toArray(new ResolverExport[removedExports.size()]);
 	}
 
@@ -384,7 +418,7 @@ public class ResolverBundle extends VersionSupplier {
 			return;
 		ResolverBundle[] allFragments = (ResolverBundle[]) fragments.toArray(new ResolverBundle[fragments.size()]);
 		for (int i = 0; i < allFragments.length; i++)
-			detachFragment(allFragments[i]);
+			detachFragment(allFragments[i], null);
 	}
 
 	boolean isResolvable() {

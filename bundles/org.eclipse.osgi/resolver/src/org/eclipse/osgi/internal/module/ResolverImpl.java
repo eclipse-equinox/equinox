@@ -488,7 +488,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 					state.addResolverError(requires[i].getVersionConstraint().getBundle(), ResolverError.MISSING_REQUIRE_BUNDLE, requires[i].getVersionConstraint().toString(), requires[i].getVersionConstraint());
 					// If the require has failed to resolve and it is from a fragment, then remove the fragment from the host
 					if (requires[i].isFromFragment()) {
-						resolverExports.remove(bundle.detachFragment((ResolverBundle) bundleMapping.get(requires[i].getVersionConstraint().getBundle())));
+						resolverExports.remove(bundle.detachFragment((ResolverBundle) bundleMapping.get(requires[i].getVersionConstraint().getBundle()), requires[i]));
 						continue;
 					}
 					failed = true;
@@ -508,7 +508,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 					// If the import has failed to resolve and it is from a fragment, then remove the fragment from the host
 					state.addResolverError(imports[i].getVersionConstraint().getBundle(), ResolverError.MISSING_IMPORT_PACKAGE, imports[i].getVersionConstraint().toString(), imports[i].getVersionConstraint());
 					if (imports[i].isFromFragment()) {
-						resolverExports.remove(bundle.detachFragment((ResolverBundle) bundleMapping.get(imports[i].getBundleDescription())));
+						resolverExports.remove(bundle.detachFragment((ResolverBundle) bundleMapping.get(imports[i].getBundleDescription()), imports[i]));
 						continue;
 					}
 					failed = true;
@@ -1085,5 +1085,9 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 
 	static void log(String message) {
 		Debug.println(message);
+	}
+
+	VersionHashMap getResolverExports() {
+		return resolverExports;
 	}
 }
