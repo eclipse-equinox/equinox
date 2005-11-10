@@ -306,10 +306,10 @@ class StateBuilder {
 			String[] packageNames = elements[i].getValueComponents();
 			for (int j = 0; j < packageNames.length; j++) {
 				if (!export && packages.contains(packageNames[j]))
-					throw new BundleException(StateMsg.HEADER_PACKAGE_DUPLICATES);
+					throw new BundleException(NLS.bind(StateMsg.HEADER_PACKAGE_DUPLICATES, packageNames[j]));
 				// check for java.*
 				if (!jreBundle && packageNames[j].startsWith("java.")) //$NON-NLS-1$
-					throw new BundleException(StateMsg.HEADER_PACKAGE_JAVA);
+					throw new BundleException(NLS.bind(StateMsg.HEADER_PACKAGE_JAVA, packageNames[j]));
 				packages.add(packageNames[j]);
 			}
 			// check for version/specification version mismatch
@@ -339,7 +339,7 @@ class StateBuilder {
 					String key = (String) keys.nextElement();
 					String[] directives = elements[i].getDirectives(key);
 					if (directives.length > 1)
-						throw new BundleException(StateMsg.HEADER_DIRECTIVE_DUPLICATES);
+						throw new BundleException(NLS.bind(StateMsg.HEADER_DIRECTIVE_DUPLICATES, key));
 				}
 			}
 		}
