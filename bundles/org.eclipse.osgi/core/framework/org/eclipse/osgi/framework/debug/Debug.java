@@ -24,6 +24,12 @@ public class Debug {
 	 * DEBUG flag.  If set to false then the debug statements will be optimized out during compilation.
 	 */
 	public static final boolean DEBUG = true;
+
+	/**
+	 * Indicates if tracing is enabled
+	 */
+	public static boolean DEBUG_ENABLED = false;
+
 	/**
 	 * General debug flag.
 	 */
@@ -145,6 +151,7 @@ public class Debug {
 	static {
 		FrameworkDebugOptions dbgOptions = FrameworkDebugOptions.getDefault();
 		if (dbgOptions != null) {
+			DEBUG_ENABLED = true;
 			DEBUG_GENERAL = dbgOptions.getBooleanOption(OPTION_DEBUG_GENERAL, false);
 			DEBUG_BUNDLE_TIME = dbgOptions.getBooleanOption(OPTION_DEBUG_BUNDLE_TIME, false) || dbgOptions.getBooleanOption("org.eclipse.core.runtime/timing/startup", false); //$NON-NLS-1$
 			DEBUG_LOADER = dbgOptions.getBooleanOption(OPTION_DEBUG_LOADER, false);

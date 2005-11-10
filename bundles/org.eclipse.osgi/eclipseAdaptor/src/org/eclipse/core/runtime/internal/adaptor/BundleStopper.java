@@ -43,9 +43,8 @@ public class BundleStopper {
 	}
 
 	private void logCycles(Object[][] cycles) {
-		if (! Debug.DEBUG)
+		if (!Debug.DEBUG || !Debug.DEBUG_ENABLED)
 			return;
-		
 		// log cycles
 		if (cycles.length > 0) {
 			StringBuffer cycleText = new StringBuffer("["); //$NON-NLS-1$			
