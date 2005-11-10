@@ -66,13 +66,4 @@ public class SystemState extends StateImpl {
 			updateTimeStamp(); // resolver linkage has changed; update the timestamp
 		return delta;
 	}
-
-	synchronized public ExportPackageDescription linkDynamicImport(BundleDescription importingBundle, String requestedPackage) {
-		ExportPackageDescription result = super.linkDynamicImport(importingBundle, requestedPackage);
-		if (result == null)
-			return null;
-		// resolver linkage has changed; update the timestamp
-		updateTimeStamp();
-		return result;
-	}
 }

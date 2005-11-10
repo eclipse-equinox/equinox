@@ -469,6 +469,34 @@ public class BundleDescriptionImpl extends BaseDescriptionImpl implements Bundle
 			containingState.getReader().objectTable.remove(new Integer(((ExportPackageDescriptionImpl) tempData.selectedExports[i]).getTableIndex()));
 	}
 
+	void setDynamicStamps(HashMap dynamicStamps) {
+		lazyData.dynamicStamps = dynamicStamps;
+	}
+
+	void setDynamicStamp(String requestedPackage, Long timestamp) {
+		checkLazyData();
+		if (lazyData.dynamicStamps == null) {
+			if (timestamp == null)
+				return;
+			lazyData.dynamicStamps = new HashMap();
+		}
+		if (timestamp == null)
+			lazyData.dynamicStamps.remove(requestedPackage);
+		else
+			lazyData.dynamicStamps.put(requestedPackage, timestamp);
+	}
+
+	long getDynamicStamp(String requestedPackage) {
+		fullyLoad();
+		Long stamp = lazyData.dynamicStamps == null ? null : (Long) lazyData.dynamicStamps.get(requestedPackage);
+		return stamp == null ? 0 : stamp.longValue();
+	}
+
+	HashMap getDynamicStamps() {
+		fullyLoad();
+		return lazyData.dynamicStamps;
+	}
+
 	private void checkLazyData() {
 		if (lazyData == null)
 			lazyData = new LazyData();
@@ -487,5 +515,7 @@ public class BundleDescriptionImpl extends BaseDescriptionImpl implements Bundle
 		ExportPackageDescription[] resolvedImports;
 
 		String[] executionEnvironments;
+
+		HashMap dynamicStamps;
 	}
 }

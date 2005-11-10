@@ -34,7 +34,7 @@ class StateReader {
 	private boolean lazyLoad = true;
 	private int numBundles;
 
-	public static final byte STATE_CACHE_VERSION = 22;
+	public static final byte STATE_CACHE_VERSION = 23;
 	public static final byte NULL = 0;
 	public static final byte OBJECT = 1;
 	public static final byte INDEX = 2;
@@ -289,6 +289,17 @@ class StateReader {
 			for (int i = 0; i < ee.length; i++)
 				ee[i] = readString(in, false);
 			result.setExecutionEnvironments(ee);
+		}
+
+		int dynamicPkgCnt = in.readInt();
+		if (dynamicPkgCnt > 0) {
+			HashMap dynamicStamps = new HashMap(dynamicPkgCnt);
+			for (int i = 0; i < dynamicPkgCnt; i++) {
+				String pkg = readString(in, false);
+				Long stamp = new Long(in.readLong());
+				dynamicStamps.put(pkg, stamp);
+			}
+			result.setDynamicStamps(dynamicStamps);
 		}
 
 		result.setFullyLoaded(true); // set fully loaded before setting the dependencies

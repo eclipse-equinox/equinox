@@ -35,6 +35,7 @@ public abstract class StateImpl implements State {
 	private StateObjectFactory factory;
 	private KeyedHashSet resolvedBundles = new KeyedHashSet();
 	boolean fullyLoaded = false;
+	private boolean dynamicCacheChanged = false;
 	// only used for lazy loading of BundleDescriptions
 	private StateReader reader;
 	private Dictionary[] platformProperties = {new Hashtable(PROPS.length)}; // Dictionary here because of Filter API
@@ -538,13 +539,20 @@ public abstract class StateImpl implements State {
 	public synchronized ExportPackageDescription linkDynamicImport(BundleDescription importingBundle, String requestedPackage) {
 		if (resolver == null)
 			throw new IllegalStateException("no resolver set"); //$NON-NLS-1$
+		BundleDescriptionImpl importer = (BundleDescriptionImpl) importingBundle;
+		if (importer.getDynamicStamp(requestedPackage) == getTimeStamp())
+			return null;
 		fullyLoad();
 		// ask the resolver to resolve our dynamic import
 		ExportPackageDescriptionImpl result = (ExportPackageDescriptionImpl) resolver.resolveDynamicImport(importingBundle, requestedPackage);
 		if (result == null)
-			return null;
-		// need to add the result to the list of resolved imports
-		((BundleDescriptionImpl) importingBundle).addDynamicResolvedImport(result);
+			importer.setDynamicStamp(requestedPackage, new Long(getTimeStamp()));
+		else {
+			importer.setDynamicStamp(requestedPackage, null); // remove any cached timestamp
+			// need to add the result to the list of resolved imports
+			importer.addDynamicResolvedImport(result);
+		}
+		setDynamicCacheChanged(true);
 		return result;
 	}
 
@@ -619,5 +627,11 @@ public abstract class StateImpl implements State {
 		resolverErrors.remove(bundle);
 	}
 
+	public boolean dynamicCacheChanged() {
+		return dynamicCacheChanged;
+	}
 
+	void setDynamicCacheChanged(boolean dynamicCacheChanged) {
+		this.dynamicCacheChanged = dynamicCacheChanged;
+	}
 }

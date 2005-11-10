@@ -293,7 +293,7 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 	}
 	
 	void saveStateToFile(boolean shutdown) {
-		if (!canWrite() || stateManager.getCachedTimeStamp() == stateManager.getSystemState().getTimeStamp())
+		if (!canWrite() || !stateManager.saveNeeded())
 			return;
 		try {
 			File stateTmpFile = File.createTempFile(LocationManager.STATE_FILE, ".new", LocationManager.getOSGiConfigurationDir()); //$NON-NLS-1$
