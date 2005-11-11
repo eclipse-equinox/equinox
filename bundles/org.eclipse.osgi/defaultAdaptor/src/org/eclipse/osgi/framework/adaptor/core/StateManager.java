@@ -119,7 +119,7 @@ public class StateManager implements PlatformAdmin, Runnable {
 		StateImpl state = systemState;
 		if (removalPendings.length > 0) {
 			state = (StateImpl) state.getFactory().createState(systemState);
-			state.setResolver(getResolver());
+			state.setResolver(getResolver(System.getSecurityManager() != null));
 			state.setPlatformProperties(System.getProperties());
 			state.resolve(false);
 		}
