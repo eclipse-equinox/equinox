@@ -29,6 +29,7 @@ import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.service.pluginconversion.PluginConverter;
 import org.eclipse.osgi.service.resolver.*;
+import org.eclipse.osgi.service.runnable.ApplicationLauncher;
 import org.eclipse.osgi.service.urlconversion.URLConverter;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
@@ -795,6 +796,14 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 
 	public void frameworkStopping(BundleContext aContext) {
 		super.frameworkStopping(aContext);
+		// Shutdown the ApplicationLauncher service if it is available.
+		ServiceReference launcherRef = aContext.getServiceReference(ApplicationLauncher.class.getName());
+		if (launcherRef != null) {
+			ApplicationLauncher launcher = (ApplicationLauncher) aContext.getService(launcherRef);
+			// this will force a currently running application to stop.
+			launcher.shutdown();
+			aContext.ungetService(launcherRef);
+		}
 		stopper = new BundleStopper(context);
 		stopper.stopBundles();
 	}

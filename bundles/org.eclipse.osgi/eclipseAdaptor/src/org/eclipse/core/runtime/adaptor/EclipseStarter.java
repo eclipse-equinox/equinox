@@ -26,7 +26,7 @@ import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.internal.profile.Profile;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.service.resolver.*;
-import org.eclipse.osgi.service.runnable.ParameterizedRunnable;
+import org.eclipse.osgi.service.runnable.ApplicationLauncher;
 import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
@@ -52,10 +52,10 @@ import org.osgi.util.tracker.ServiceTracker;
 public class EclipseStarter {
 	private static FrameworkAdaptor adaptor;
 	private static BundleContext context;
-	private static ServiceTracker applicationTracker;
 	private static boolean initialize = false;
 	public static boolean debug = false;
 	private static boolean running = false;
+	private static OSGi osgi = null;
 
 	// command line arguments
 	private static final String CLEAN = "-clean"; //$NON-NLS-1$
@@ -108,6 +108,8 @@ public class EclipseStarter {
 	private static final String PROP_COMMANDS = "eclipse.commands"; //$NON-NLS-1$
 	public static final String PROP_IGNOREAPP = "eclipse.ignoreApp"; //$NON-NLS-1$
 	public static final String PROP_REFRESH_BUNDLES = "eclipse.refreshBundles"; //$NON-NLS-1$
+	public static final String PROP_ALLOW_APPRELAUNCH = "eclipse.allowAppRelaunch"; //$NON-NLS-1$
+	public static final String PROP_APPLICATION_NODEFAULT = "eclipse.application.noDefault"; //$NON-NLS-1$
 
 	private static final String FILE_SCHEME = "file:"; //$NON-NLS-1$
 	private static final String FILE_PROTOCOL = "file"; //$NON-NLS-1$
@@ -269,7 +271,7 @@ public class EclipseStarter {
 		initializeContextFinder();
 		if (Profile.PROFILE && Profile.STARTUP)
 			Profile.logTime("EclipseStarter.startup()", "adapter created"); //$NON-NLS-1$ //$NON-NLS-2$
-		OSGi osgi = new OSGi(adaptor);
+		osgi = new OSGi(adaptor);
 		if (Profile.PROFILE && Profile.STARTUP)
 			Profile.logTime("EclipseStarter.startup()", "OSGi created"); //$NON-NLS-1$ //$NON-NLS-2$
 		osgi.launch();
@@ -358,26 +360,13 @@ public class EclipseStarter {
 		// if we are just initializing, do not run the application just return.
 		if (initialize)
 			return new Integer(0);
-		initializeApplicationTracker();
-		if (Profile.PROFILE && Profile.STARTUP)
-			Profile.logTime("EclipseStarter.run(Object)()", "applicaton tracker initialized"); //$NON-NLS-1$ //$NON-NLS-2$
-		ParameterizedRunnable application = (ParameterizedRunnable) applicationTracker.getService();
-		applicationTracker.close();
-		if (application == null)
-			throw new IllegalStateException(EclipseAdaptorMsg.ECLIPSE_STARTUP_ERROR_NO_APPLICATION);
-		if (debug) {
-			String timeString = System.getProperty("eclipse.startTime"); //$NON-NLS-1$ 
-			long time = timeString == null ? 0L : Long.parseLong(timeString);
-			System.out.println("Starting application: " + (System.currentTimeMillis() - time)); //$NON-NLS-1$ 
-		}
-		if (Profile.PROFILE && (Profile.STARTUP || Profile.BENCHMARK))
-			Profile.logTime("EclipseStarter.run(Object)()", "framework initialized! starting application..."); //$NON-NLS-1$ //$NON-NLS-2$
-		try {
-			return application.run(argument);
-		} finally {
-			if (Profile.PROFILE && Profile.STARTUP)
-				Profile.logExit("EclipseStarter.run(Object)()"); //$NON-NLS-1$
-		}
+		// create the ApplicationLauncher and register it as a service
+		EclipseAppLauncher launcher = new EclipseAppLauncher(context, Boolean.getBoolean(PROP_ALLOW_APPRELAUNCH), !Boolean.getBoolean(PROP_APPLICATION_NODEFAULT));
+		context.registerService(ApplicationLauncher.class.getName(), launcher, null);
+		// must start the launcher AFTER service restration because this method 
+		// blocks and runs the application on the current thread.  This method 
+		// will return only after the application has stopped.
+		return launcher.start(argument);
 	}
 
 	/**
@@ -398,9 +387,12 @@ public class EclipseStarter {
 	 * @throws Exception if anything goes wrong
 	 */
 	public static void shutdown() throws Exception {
-		if (!running)
+		if (!running || osgi == null)
 			return;
-		stopSystemBundle();
+		osgi.close();
+		osgi = null;
+		context = null;
+		running = false;
 	}
 
 	private static void ensureBundlesActive(Bundle[] bundles) {
@@ -1021,17 +1013,6 @@ public class EclipseStarter {
 		}
 	}
 
-	private static void initializeApplicationTracker() {
-		Filter filter = null;
-		try {
-			String appClass = ParameterizedRunnable.class.getName();
-			filter = context.createFilter("(&(objectClass=" + appClass + ")(eclipse.application=*))"); //$NON-NLS-1$ //$NON-NLS-2$
-		} catch (InvalidSyntaxException e) {
-			// ignore this.  It should never happen as we have tested the above format.
-		}
-		applicationTracker = new ServiceTracker(context, filter, null);
-		applicationTracker.open();
-	}
 
 	private static void loadConfigurationInfo() {
 		Location configArea = LocationManager.getConfigurationLocation();
@@ -1114,29 +1095,6 @@ public class EclipseStarter {
 			if (destination.getProperty(key) == null)
 				destination.put(key, value);
 		}
-	}
-
-	private static void stopSystemBundle() throws BundleException {
-		if (context == null || !running)
-			return;
-		Bundle systemBundle = context.getBundle(0);
-		if (systemBundle.getState() == Bundle.ACTIVE) {
-			final Semaphore semaphore = new Semaphore(0);
-			FrameworkListener listener = new FrameworkListener() {
-				public void frameworkEvent(FrameworkEvent event) {
-					if (event.getType() == FrameworkEvent.STARTLEVEL_CHANGED)
-						semaphore.release();
-				}
-
-			};
-			context.addFrameworkListener(listener);
-			systemBundle.stop();
-			semaphore.acquire();
-			context.removeFrameworkListener(listener);
-		}
-		context = null;
-		applicationTracker = null;
-		running = false;
 	}
 
 	private static void setStartLevel(final int value) {
