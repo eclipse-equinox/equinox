@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.util.tracker/src/org/osgi/util/tracker/ServiceTracker.java,v 1.16 2005/11/15 19:01:44 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.util.tracker/src/org/osgi/util/tracker/ServiceTracker.java,v 1.17 2005/11/15 22:05:30 hargrave Exp $
  * 
  * Copyright (c) OSGi Alliance (2000, 2005). All Rights Reserved.
  * 
@@ -33,7 +33,7 @@ import org.osgi.framework.*;
  * <code>getServices</code> methods can be called to get the service objects
  * for the tracked service.
  * 
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
 public class ServiceTracker implements ServiceTrackerCustomizer {
 	/* set this to true to compile in debug messages */
@@ -836,10 +836,10 @@ public class ServiceTracker implements ServiceTrackerCustomizer {
 			while (true) {
 				ServiceReference reference;
 				synchronized (this) {
-					if (initial.size() == 0) { /*
-												 * if there are no more inital
-												 * services
-												 */
+					if (initial.size() == 0) {
+						/*
+						 * if there are no more inital services
+						 */
 						return; /* we are done */
 					}
 					/*
@@ -847,6 +847,25 @@ public class ServiceTracker implements ServiceTrackerCustomizer {
 					 * adding list within this synchronized block.
 					 */
 					reference = (ServiceReference) initial.removeFirst();
+					if (this.get(reference) != null) {
+						/* if we are already tracking this service */
+						if (DEBUG) {
+							System.out
+									.println("ServiceTracker.Tracked.trackInitialServices[already tracked]: " + reference); //$NON-NLS-1$
+						}
+						continue; /* skip this service */
+					}
+					if (adding.contains(reference)) {
+						/*
+						 * if this service is already in the process of being
+						 * added.
+						 */
+						if (DEBUG) {
+							System.out
+									.println("ServiceTracker.Tracked.trackInitialServices[already adding]: " + reference); //$NON-NLS-1$
+						}
+						continue; /* skip this service */
+					}
 					adding.add(reference);
 				}
 				if (DEBUG) {
@@ -893,10 +912,8 @@ public class ServiceTracker implements ServiceTrackerCustomizer {
 			switch (event.getType()) {
 				case ServiceEvent.REGISTERED :
 				case ServiceEvent.MODIFIED :
-					if (listenerFilter != null) { /*
-													 * constructor supplied
-													 * filter
-													 */
+					if (listenerFilter != null) { // constructor supplied
+													// filter
 						track(reference);
 						/*
 						 * If the customizer throws an unchecked exception, it
@@ -1007,7 +1024,10 @@ public class ServiceTracker implements ServiceTrackerCustomizer {
 						if (object != null) {
 							this.put(reference, object);
 							modified(); /* increment modification count */
-							notifyAll();
+							notifyAll(); /*
+											 * notify any waiters in
+											 * waitForService
+											 */
 						}
 					}
 					else {
