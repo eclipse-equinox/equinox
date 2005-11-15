@@ -17,6 +17,8 @@ import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.osgi.service.resolver.ExportPackageDescription;
 
 public class ExportPackageDescriptionImpl extends BaseDescriptionImpl implements ExportPackageDescription {
+	public static final String EQUINOX_EE = "x-equinox-ee"; //$NON-NLS-1$
+	private static final Integer EQUINOX_EE_DEFAULT = new Integer(-1);
 	private String[] uses;
 	private Map attributes;
 	private BundleDescription exporter;
@@ -25,6 +27,7 @@ public class ExportPackageDescriptionImpl extends BaseDescriptionImpl implements
 	private String[] friends;
 	private String[] mandatory;
 	private Boolean internal = Boolean.FALSE;
+	private int equinox_ee = -1;
 	private boolean root;
 	private int tableIndex;
 
@@ -41,6 +44,7 @@ public class ExportPackageDescriptionImpl extends BaseDescriptionImpl implements
 		if (friends != null)
 			result.put(Constants.FRIENDS_DIRECTIVE, friends);
 		result.put(Constants.INTERNAL_DIRECTIVE, internal);
+		result.put(EQUINOX_EE, equinox_ee == -1 ? EQUINOX_EE_DEFAULT : new Integer(equinox_ee));
 		return result;
 	}
 	
@@ -57,6 +61,8 @@ public class ExportPackageDescriptionImpl extends BaseDescriptionImpl implements
 			return friends;
 		if (key.equals(Constants.INTERNAL_DIRECTIVE))
 			return internal;
+		if (key.equals(EQUINOX_EE))
+			return equinox_ee == -1 ? EQUINOX_EE_DEFAULT : new Integer(equinox_ee);
 		return null;
 	}
 
@@ -73,6 +79,10 @@ public class ExportPackageDescriptionImpl extends BaseDescriptionImpl implements
 			return friends = (String[]) value;
 		if (key.equals(Constants.INTERNAL_DIRECTIVE))
 			return internal = (Boolean) value;
+		if (key.equals(EQUINOX_EE)) {
+			equinox_ee = ((Integer) value).intValue();
+			return value;
+		}
 		return null;
 	}
 
@@ -85,6 +95,7 @@ public class ExportPackageDescriptionImpl extends BaseDescriptionImpl implements
 		mandatory = (String[])directives.get(Constants.MANDATORY_DIRECTIVE);
 		friends = (String[])directives.get(Constants.FRIENDS_DIRECTIVE);
 		internal = (Boolean)directives.get(Constants.INTERNAL_DIRECTIVE);
+		equinox_ee = ((Integer)directives.get(EQUINOX_EE)).intValue();
 	}
 	
 	public Map getAttributes() {

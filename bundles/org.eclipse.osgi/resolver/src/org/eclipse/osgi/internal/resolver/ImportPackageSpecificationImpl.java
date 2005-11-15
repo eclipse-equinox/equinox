@@ -62,7 +62,7 @@ public class ImportPackageSpecificationImpl extends VersionConstraintImpl implem
 	public boolean isSatisfiedBy(BaseDescription supplier) {
 		if (!(supplier instanceof ExportPackageDescription))
 			return false;
-		ExportPackageDescription pkgDes = (ExportPackageDescription) supplier;
+		ExportPackageDescriptionImpl pkgDes = (ExportPackageDescriptionImpl) supplier;
 
 		// If we are in strict mode, check to see if the export specifies friends.
 		// If it does, are we one of the friends 
@@ -132,7 +132,11 @@ public class ImportPackageSpecificationImpl extends VersionConstraintImpl implem
 				}
 			}
 		}
-		return true;
+		// finally check the ee index
+		if (((BundleDescriptionImpl)getBundle()).getEquinoxEE() < 0)
+			return true;
+		int eeIndex = ((Integer) pkgDes.getDirective(ExportPackageDescriptionImpl.EQUINOX_EE)).intValue();
+		return eeIndex < 0 || eeIndex == ((BundleDescriptionImpl)getBundle()).getEquinoxEE();
 	}
 
 	protected void setBundleSymbolicName(String symbolicName) {

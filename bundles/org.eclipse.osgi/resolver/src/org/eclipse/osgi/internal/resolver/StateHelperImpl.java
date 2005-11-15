@@ -154,21 +154,30 @@ public class StateHelperImpl implements StateHelper {
 		ArrayList packageList = new ArrayList(); // list of all ExportPackageDescriptions that are visible
 		ArrayList importList = new ArrayList(); // list of package names which are directly imported
 		// get the list of directly imported packages first.
-		ExportPackageDescription[] resolvedImports = bundle.getResolvedImports();
-		for (int i = 0; i < resolvedImports.length; i++) {
-			packageList.add(resolvedImports[i]);
+		ImportPackageSpecification[] imports = bundle.getImportPackages();
+		for (int i = 0; i < imports.length; i++) {
+			ExportPackageDescription pkgSupplier = (ExportPackageDescription) imports[i].getSupplier();
+			if (pkgSupplier == null)
+				continue;
+			packageList.add(pkgSupplier);
 			// get the sources of the required bundles of the exporter
-			BundleDescription[] exporterRequires = resolvedImports[i].getExporter().getResolvedRequires();
+			BundleSpecification[] requires = pkgSupplier.getExporter().getRequiredBundles();
 			ArrayList visited = new ArrayList();
-			for (int j = 0; j < exporterRequires.length; j++)
-				getPackages(exporterRequires[j], bundle.getSymbolicName(), importList, packageList, visited, strict, resolvedImports[i].getName());
-			importList.add(resolvedImports[i].getName()); // besure to add to direct import list
+			for (int j = 0; j < requires.length; j++) {
+				BundleDescription bundleSupplier = (BundleDescription) requires[j].getSupplier();
+				if (bundleSupplier != null)
+					getPackages(bundleSupplier, bundle.getSymbolicName(), importList, packageList, visited, strict, imports[i].getName());
+			}
+			importList.add(imports[i].getName()); // besure to add to direct import list
 		}
 		// now find all the packages that are visible from required bundles
-		BundleDescription[] requiredBundles = bundle.getResolvedRequires();
-		ArrayList visited = new ArrayList(requiredBundles.length);
-		for (int i = 0; i < requiredBundles.length; i++)
-			getPackages(requiredBundles[i], bundle.getSymbolicName(), importList, packageList, visited, strict, null);
+		BundleSpecification[] requires = bundle.getRequiredBundles();
+		ArrayList visited = new ArrayList(requires.length);
+		for (int i = 0; i < requires.length; i++) {
+			BundleDescription bundleSupplier = (BundleDescription) requires[i].getSupplier();
+			if (bundleSupplier != null)
+				getPackages(bundleSupplier, bundle.getSymbolicName(), importList, packageList, visited, strict, null);
+		}
 		return (ExportPackageDescription[]) packageList.toArray(new ExportPackageDescription[packageList.size()]);
 	}
 
@@ -189,14 +198,7 @@ public class StateHelperImpl implements StateHelper {
 	}
 
 	private boolean isSystemExport(ExportPackageDescription export) {
-		StateImpl state = (StateImpl) export.getExporter().getContainingState();
-		if (state == null)
-			return false;
-		ExportPackageDescription[] systemExports = state.getSystemPackages();
-		for (int i = 0; i < systemExports.length; i++)
-			if (systemExports[i] == export)
-				return true;
-		return false;
+		return ((Integer) export.getDirective(ExportPackageDescriptionImpl.EQUINOX_EE)).intValue() >= 0;
 	}
 
 	private boolean isFriend(String consumerBSN, ExportPackageDescription export, boolean strict) {

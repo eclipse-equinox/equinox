@@ -17,11 +17,11 @@ import org.eclipse.osgi.framework.internal.core.KeyedElement;
 import org.eclipse.osgi.service.resolver.*;
 
 public class BundleDescriptionImpl extends BaseDescriptionImpl implements BundleDescription, KeyedElement {
-	private static final String[] EMPTY_STRING = new String[0];
-	private static final ImportPackageSpecification[] EMPTY_IMPORTS = new ImportPackageSpecification[0];
-	private static final BundleSpecification[] EMPTY_BUNDLESPECS = new BundleSpecification[0];
-	private static final ExportPackageDescription[] EMPTY_EXPORTS = new ExportPackageDescription[0];
-	private static final BundleDescription[] EMPTY_BUNDLEDESCS = new BundleDescription[0];
+	static final String[] EMPTY_STRING = new String[0];
+	static final ImportPackageSpecification[] EMPTY_IMPORTS = new ImportPackageSpecification[0];
+	static final BundleSpecification[] EMPTY_BUNDLESPECS = new BundleSpecification[0];
+	static final ExportPackageDescription[] EMPTY_EXPORTS = new ExportPackageDescription[0];
+	static final BundleDescription[] EMPTY_BUNDLEDESCS = new BundleDescription[0];
 
 	static final int RESOLVED = 0x01;
 	static final int SINGLETON = 0x02;
@@ -49,6 +49,7 @@ public class BundleDescriptionImpl extends BaseDescriptionImpl implements Bundle
 
 	private LazyData lazyData;
 	private long lazyTimeStamp;
+	private int equinox_ee = -1;
 
 	public BundleDescriptionImpl() {
 		// 
@@ -95,26 +96,7 @@ public class BundleDescriptionImpl extends BaseDescriptionImpl implements Bundle
 
 	public ExportPackageDescription[] getExportPackages() {
 		fullyLoad();
-		ExportPackageDescription[] result = lazyData.exportPackages;
-		if (Constants.getInternalSymbolicName().equals(getSymbolicName()))
-			result = mergeSystemExports(result);
-		if (result == null)
-			return EMPTY_EXPORTS;
-		return result;
-	}
-
-	private ExportPackageDescription[] mergeSystemExports(ExportPackageDescription[] existingExports) {
-		if (containingState == null)
-			return existingExports;
-		ExportPackageDescription[] systemExports = containingState.getSystemPackages();
-		if (systemExports == null || systemExports.length == 0)
-			return existingExports;
-		for (int i = 0; i < systemExports.length; i++)
-			((ExportPackageDescriptionImpl) systemExports[i]).setExporter(this);
-		ExportPackageDescription[] allExports = new ExportPackageDescription[existingExports.length + systemExports.length];
-		System.arraycopy(existingExports, 0, allExports, 0, existingExports.length);
-		System.arraycopy(systemExports, 0, allExports, existingExports.length, systemExports.length);
-		return allExports;
+		return lazyData.exportPackages == null ? EMPTY_EXPORTS : lazyData.exportPackages;
 	}
 
 	public boolean isResolved() {
@@ -495,6 +477,14 @@ public class BundleDescriptionImpl extends BaseDescriptionImpl implements Bundle
 	HashMap getDynamicStamps() {
 		fullyLoad();
 		return lazyData.dynamicStamps;
+	}
+
+	public void setEquinoxEE(int equinox_ee) {
+		this.equinox_ee = equinox_ee;
+	}
+
+	public int getEquinoxEE() {
+		return equinox_ee;
 	}
 
 	private void checkLazyData() {

@@ -14,6 +14,7 @@ import java.util.*;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.debug.FrameworkDebugOptions;
+import org.eclipse.osgi.internal.resolver.BundleDescriptionImpl;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.*;
@@ -222,8 +223,10 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 			for (int i = 0; i < CURRENT_EES.length && !matchedEE; i++)
 				for (int j = 0; j < CURRENT_EES[i].length && !matchedEE; j++)
 					for (int k = 0; k < ees.length && !matchedEE; k++)
-						if (CURRENT_EES[i][j].equals(ees[k]))
+						if (CURRENT_EES[i][j].equals(ees[k])) {
+							((BundleDescriptionImpl) bundle).setEquinoxEE(i);
 							matchedEE = true;
+						}
 		if (!matchedEE) {
 			StringBuffer bundleEE = new StringBuffer(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT.length() + 20);
 			bundleEE.append(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT).append(": "); //$NON-NLS-1$
@@ -450,9 +453,10 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 	private void resolveFragment(ResolverBundle fragment) {
 		if (!fragment.isFragment())
 			return;
-		if (fragment.getHost().foundMatchingBundles())
+		if (fragment.getHost().foundMatchingBundles()) {
+			stateResolveFragConstraints(fragment);
 			setBundleResolved(fragment);
-		else
+		} else
 			state.addResolverError(fragment.getBundle(), ResolverError.MISSING_FRAGMENT_HOST, fragment.getHost().getVersionConstraint().toString(), fragment.getHost().getVersionConstraint());
 	}
 
@@ -806,8 +810,26 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		BundleConstraint[] requires = rb.getRequires();
 		for (int i = 0; i < requires.length; i++) {
 			ResolverBundle bundle = requires[i].getMatchingBundle();
-			BundleDescription supplier = bundle == null ? null : bundle.getBundle();
+			BaseDescription supplier = bundle == null ? null : bundle.getBundle();
 			state.resolveConstraint(requires[i].getVersionConstraint(), supplier);
+		}
+	}
+
+	private void stateResolveFragConstraints(ResolverBundle rb) {
+		ResolverBundle host = rb.getHost().getMatchingBundle();
+		ImportPackageSpecification[] imports = rb.getBundle().getImportPackages();
+		for (int i = 0; i < imports.length; i++) {
+			ResolverImport hostImport = host.getImport(imports[i].getName());
+			ResolverExport export = hostImport == null ? null : hostImport.getMatchingExport();
+			BaseDescription supplier = export == null ? null : export.getExportPackageDescription();
+			state.resolveConstraint(imports[i], supplier);
+		}
+		BundleSpecification[] requires = rb.getBundle().getRequiredBundles();
+		for (int i = 0; i < requires.length; i++) {
+			BundleConstraint hostRequire = host.getRequire(requires[i].getName());
+			ResolverBundle bundle = hostRequire == null ? null : hostRequire.getMatchingBundle();
+			BaseDescription supplier = bundle == null ? null : bundle.getBundle();
+			state.resolveConstraint(requires[i], supplier);
 		}
 	}
 

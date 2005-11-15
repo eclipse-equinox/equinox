@@ -23,7 +23,6 @@ import org.osgi.framework.Version;
 
 public abstract class StateImpl implements State {
 	public static final String[] PROPS = {"osgi.os", "osgi.ws", "osgi.nl", "osgi.arch", Constants.OSGI_FRAMEWORK_SYSTEM_PACKAGES, Constants.OSGI_RESOLVER_MODE, Constants.FRAMEWORK_EXECUTIONENVIRONMENT}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ 
-
 	transient private Resolver resolver;
 	transient private StateDeltaImpl changes;
 	transient private boolean resolving = false;
@@ -39,7 +38,6 @@ public abstract class StateImpl implements State {
 	// only used for lazy loading of BundleDescriptions
 	private StateReader reader;
 	private Dictionary[] platformProperties = {new Hashtable(PROPS.length)}; // Dictionary here because of Filter API
-	private ExportPackageDescription[] systemExports = new ExportPackageDescription[0];
 
 	private static long cumulativeTime;
 
@@ -52,6 +50,8 @@ public abstract class StateImpl implements State {
 			return false;
 		resolved = false;
 		getDelta().recordBundleAdded((BundleDescriptionImpl) description);
+		if (Constants.getInternalSymbolicName().equals(description.getSymbolicName()))
+			resetSystemExports();
 		if (resolver != null)
 			resolver.bundleAdded(description);
 		return true;
@@ -68,6 +68,8 @@ public abstract class StateImpl implements State {
 			return false;
 		resolved = false;
 		getDelta().recordBundleUpdated((BundleDescriptionImpl) newDescription);
+		if (Constants.getInternalSymbolicName().equals(newDescription.getSymbolicName()))
+			resetSystemExports();
 		if (resolver != null) {
 			boolean pending = existing.getDependents().length > 0;
 			resolver.bundleUpdated(newDescription, existing, pending);
@@ -470,13 +472,15 @@ public abstract class StateImpl implements State {
 		resolver.setState(this);
 	}
 
-	public synchronized boolean setPlatformProperties(Dictionary platformProperties) {
-		if (this.platformProperties.length != 1)
-			this.platformProperties = new Dictionary[] {new Hashtable(PROPS.length)};
-		return setProps(this.platformProperties[0], platformProperties);
+	public boolean setPlatformProperties(Dictionary platformProperties) {
+		return setPlatformProperties(new Dictionary[] {platformProperties});
 	}
 
 	public boolean setPlatformProperties(Dictionary[] platformProperties) {
+		return setPlatformProperties(platformProperties, true);
+	}
+
+	synchronized boolean setPlatformProperties(Dictionary[] platformProperties, boolean resetSystemExports) {
 		if (platformProperties.length == 0)
 			throw new IllegalArgumentException();
 		if (this.platformProperties.length != platformProperties.length) {
@@ -486,8 +490,42 @@ public abstract class StateImpl implements State {
 		}
 		boolean result = false;
 		for (int i = 0; i < platformProperties.length; i++)
-			result |= setProps(this.platformProperties[i], platformProperties[0]);
+			result |= setProps(this.platformProperties[i], platformProperties[i]);
+		if (resetSystemExports && result)
+			resetSystemExports();
 		return result;
+	}
+
+	private void resetSystemExports() {
+		BundleDescription[] systemBundles = getBundles(Constants.getInternalSymbolicName());
+		if (systemBundles.length > 0) {
+			BundleDescriptionImpl systemBundle = (BundleDescriptionImpl) systemBundles[0];
+			ExportPackageDescription[] exports = systemBundle.getExportPackages();
+			ArrayList newExports = new ArrayList(exports.length);
+			for (int i = 0; i < exports.length; i++)
+				if (((Integer)exports[i].getDirective(ExportPackageDescriptionImpl.EQUINOX_EE)).intValue() < 0)
+					newExports.add(exports[i]);
+			addSystemExports(newExports);
+			systemBundle.setExportPackages((ExportPackageDescription[]) newExports.toArray(new ExportPackageDescription[newExports.size()]));
+		}
+	}
+
+	private void addSystemExports(ArrayList exports) {
+		for (int i = 0; i < platformProperties.length; i++)
+			try {
+				ManifestElement[] elements = ManifestElement.parseHeader(Constants.EXPORT_PACKAGE, (String) platformProperties[i].get(Constants.OSGI_FRAMEWORK_SYSTEM_PACKAGES));
+				if (elements == null)
+					continue;
+				// we can pass false for strict mode here because we never want to mark the system exports as internal.
+				ExportPackageDescription[] systemExports = StateBuilder.createExportPackages(elements, null, null, null, 2, false);
+				Integer profInx = new Integer(i);
+				for (int j = 0; j < systemExports.length; j++) {
+					((ExportPackageDescriptionImpl)systemExports[j]).setDirective(ExportPackageDescriptionImpl.EQUINOX_EE, profInx);
+					exports.add(systemExports[j]);
+				}
+			} catch (BundleException e) {
+				// TODO consider throwing this... 
+			}
 	}
 
 	public Dictionary[] getPlatformProperties() {
@@ -525,8 +563,6 @@ public abstract class StateImpl implements State {
 					origProps.remove(PROPS[i]);
 				else
 					origProps.put(PROPS[i], newProp);
-				if (PROPS[i].equals(Constants.OSGI_FRAMEWORK_SYSTEM_PACKAGES))
-					setSystemExports((String) newProp);
 			}
 		}
 		return changed;
@@ -582,21 +618,18 @@ public abstract class StateImpl implements State {
 		}
 	}
 
-	void setSystemExports(String exportSpec) {
-		try {
-			ManifestElement[] elements = ManifestElement.parseHeader(Constants.EXPORT_PACKAGE, exportSpec);
-			// we can pass false for strict mode here because we never want to mark the system
-			// exports as internal.
-			systemExports = StateBuilder.createExportPackages(elements, null, null, null, 2, false);
-		} catch (BundleException e) {
-			// TODO consider throwing this... 
-		}
-	}
 
 	public ExportPackageDescription[] getSystemPackages() {
-		if (systemExports == null)
-			return new ExportPackageDescription[0];
-		return systemExports;
+		ArrayList result = new ArrayList();
+		BundleDescription[] systemBundles = getBundles(Constants.getInternalSymbolicName());
+		if (systemBundles.length > 0) {
+			BundleDescriptionImpl systemBundle = (BundleDescriptionImpl) systemBundles[0];
+			ExportPackageDescription[] exports = systemBundle.getExportPackages();
+			for (int i = 0; i < exports.length; i++)
+				if (((Integer)exports[i].getDirective(ExportPackageDescriptionImpl.EQUINOX_EE)).intValue() >= 0)
+					result.add(exports[i]);
+		}
+		return (ExportPackageDescription[]) result.toArray(new ExportPackageDescription[result.size()]);
 	}
 
 	boolean inStrictMode() {

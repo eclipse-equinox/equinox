@@ -54,9 +54,6 @@ class StateWriter {
 	}
 
 	private void writeStateDeprecated(StateImpl state, DataOutputStream out) throws IOException {
-		// first clear the System exports because we don't want to persist them in the system
-		// bundles bundle description data
-		state.setSystemExports(null);
 		out.write(StateReader.STATE_CACHE_VERSION);
 		if (writePrefix(state, out))
 			return;
@@ -89,9 +86,6 @@ class StateWriter {
 		FileOutputStream fosLazy = null;
 		FileOutputStream fosState = null;
 		try {
-			// first clear the System exports because we don't want to persist them in the system
-			// bundles bundle description data
-			state.setSystemExports(null);
 			BundleDescription[] bundles = state.getBundles();
 			StateHelperImpl.getInstance().sortBundles(bundles);
 			// need to prime the object table with all bundles
@@ -315,6 +309,9 @@ class StateWriter {
 				} else if (value instanceof Boolean) {
 					out.writeByte(2);
 					out.writeBoolean(((Boolean) value).booleanValue());
+				} else if (value instanceof Integer) {
+					out.writeByte(3);
+					out.writeInt(((Integer) value).intValue());
 				}
 			}
 		}

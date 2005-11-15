@@ -34,7 +34,7 @@ class StateReader {
 	private boolean lazyLoad = true;
 	private int numBundles;
 
-	public static final byte STATE_CACHE_VERSION = 23;
+	public static final byte STATE_CACHE_VERSION = 24;
 	public static final byte NULL = 0;
 	public static final byte OBJECT = 1;
 	public static final byte INDEX = 2;
@@ -92,7 +92,7 @@ class StateReader {
 				}
 				platformProps[i] = props;
 			}
-			state.setPlatformProperties(platformProps);
+			state.setPlatformProperties(platformProps, false);
 			numBundles = in.readInt();
 			if (numBundles == 0)
 				return true;
@@ -349,6 +349,8 @@ class StateReader {
 				value = readList(in);
 			else if (type == 2)
 				value = in.readBoolean() ? Boolean.TRUE : Boolean.FALSE;
+			else if (type == 3)
+				value = new Integer(in.readInt());
 			result.put(key, value);
 		}
 		return result;
