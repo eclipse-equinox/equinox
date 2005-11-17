@@ -110,6 +110,7 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 	private boolean reinitialize = false;
 
 	private StateSaver stateSaver = null;
+	private boolean noXML = false;
 
 	/**
 	 * Should be instantiated only by the framework (through reflection).
@@ -439,8 +440,11 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 			bc.registerService(DOMFACTORYNAME, new DomParsingService(), new Hashtable());
 		} catch (ClassNotFoundException e) {
 			// In case the JAXP API is not on the boot classpath
-			String message = EclipseAdaptorMsg.ECLIPSE_ADAPTOR_ERROR_XML_SERVICE;
-			getFrameworkLog().log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, message, 0, e, null));
+			noXML  = true;
+			if (Debug.DEBUG && Debug.DEBUG_ENABLED) {
+				String message = EclipseAdaptorMsg.ECLIPSE_ADAPTOR_ERROR_XML_SERVICE;
+				getFrameworkLog().log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, message, 0, e, null));
+			}
 		}
 	}
 
@@ -472,7 +476,8 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 		saveMetaData();
 		super.frameworkStop(aContext);
 		printStats();
-		PluginParser.releaseXMLParsing();
+		if (!noXML)
+			PluginParser.releaseXMLParsing();
 		fileManager.close();
 	}
 
