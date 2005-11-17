@@ -365,13 +365,20 @@ public class Framework implements EventDispatcher, EventPublisher {
 				vmProfile = j2meConfig + '_' + j2meProfileList[j2meProfileList.length - 1];
 		} else {
 			// No J2ME properties; use J2SE properties
+			// Note that the CDC spec appears not to require VM implementations to set the
+			// javax.microedition properties!!  So we will try to fall back to the 
+			// java.specification.name property, but this is pretty ridiculous!!
 			String javaSpecVersion = properties.getProperty("java.specification.version"); //$NON-NLS-1$
 			// set the profile and EE based off of the java.specification.version
-			// TODO We assume J2SE here.  need to support other profiles J2EE ...
+			// TODO We assume J2ME Foundation and J2SE here.  need to support other profiles J2EE ...
 			if (javaSpecVersion != null) {
 				StringTokenizer st = new StringTokenizer(javaSpecVersion, " _-"); //$NON-NLS-1$
 				javaSpecVersion = st.nextToken();
-				vmProfile = "J2SE-" + javaSpecVersion; //$NON-NLS-1$
+				String javaSpecName = properties.getProperty("java.specification.name"); //$NON-NLS-1$
+				if ("J2ME Foundation Specification".equals(javaSpecName)) //$NON-NLS-1$
+					vmProfile = "CDC-" + javaSpecVersion + "_Foundation-" + javaSpecVersion; //$NON-NLS-1$ //$NON-NLS-2$
+				else
+					vmProfile = "J2SE-" + javaSpecVersion; //$NON-NLS-1$
 			}
 		}
 		URL url = null;
