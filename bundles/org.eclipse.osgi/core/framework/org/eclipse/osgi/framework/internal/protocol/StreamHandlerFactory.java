@@ -12,6 +12,7 @@
 package org.eclipse.osgi.framework.internal.protocol;
 
 import java.net.URLStreamHandler;
+import java.net.URLStreamHandlerFactory;
 import java.util.Hashtable;
 import java.util.StringTokenizer;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
@@ -24,7 +25,7 @@ import org.osgi.util.tracker.ServiceTracker;
 /**
  * This class contains the URL stream handler factory for the OSGi framework.
  */
-public class StreamHandlerFactory implements java.net.URLStreamHandlerFactory {
+public class StreamHandlerFactory implements URLStreamHandlerFactory {
 	static final SecureAction secureAction = new SecureAction();
 	/** BundleContext to system bundle */
 	protected BundleContext context;
@@ -39,6 +40,7 @@ public class StreamHandlerFactory implements java.net.URLStreamHandlerFactory {
 	protected static final String INTERNAL_PROTOCOL_HANDLER_PKG = "org.eclipse.osgi.framework.internal.protocol"; //$NON-NLS-1$
 
 	private Hashtable proxies;
+	private URLStreamHandlerFactory parentFactory;
 
 	/**
 	 * Create the factory.
@@ -52,6 +54,15 @@ public class StreamHandlerFactory implements java.net.URLStreamHandlerFactory {
 		proxies = new Hashtable(15);
 		handlerTracker = new ServiceTracker(context, URLSTREAMHANDLERCLASS, null);
 		handlerTracker.open();
+	}
+
+	public void setParentFactory(URLStreamHandlerFactory parentFactory) {
+		if (this.parentFactory == null) // only allow it to be set once
+			this.parentFactory = parentFactory;
+	}
+
+	public URLStreamHandlerFactory getParentFactory() {
+		return parentFactory;
 	}
 
 	private Class getBuiltIn(String protocol, String builtInHandlers) {
@@ -85,6 +96,14 @@ public class StreamHandlerFactory implements java.net.URLStreamHandlerFactory {
 	 */
 	public URLStreamHandler createURLStreamHandler(String protocol) {
 
+		// if parent is present do parent lookup
+		if (parentFactory != null) {
+			URLStreamHandler parentHandler = parentFactory.createURLStreamHandler(protocol);
+			if (parentHandler != null) {
+				return parentHandler;
+			}
+		}
+		
 		//first check for built in handlers
 		String builtInHandlers = secureAction.getProperty(PROTOCOL_HANDLER_PKGS);
 		Class clazz = getBuiltIn(protocol, builtInHandlers);

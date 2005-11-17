@@ -11,6 +11,8 @@
 package org.eclipse.osgi.framework.internal.core;
 
 import java.io.*;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.net.*;
 import java.security.*;
 import java.util.*;
@@ -182,9 +184,9 @@ public class Framework implements EventDispatcher, EventPublisher {
 		if (Profile.PROFILE && Profile.STARTUP)
 			Profile.logTime("Framework.initialze()", "done createSystemBundle"); //$NON-NLS-1$ //$NON-NLS-2$
 		/* install URLStreamHandlerFactory */
-		URL.setURLStreamHandlerFactory(new StreamHandlerFactory(systemBundle.context, adaptor));
+		installURLStreamHandlerFactory(systemBundle.context, adaptor);
 		/* install ContentHandlerFactory for OSGi URLStreamHandler support */
-		URLConnection.setContentHandlerFactory(new ContentHandlerFactory(systemBundle.context));
+		installContentHandlerFactory(systemBundle.context);
 		if (Profile.PROFILE && Profile.STARTUP)
 			Profile.logTime("Framework.initialze()", "done new URLStream/Content HandlerFactory"); //$NON-NLS-1$//$NON-NLS-2$
 		/* create bundle objects for all installed bundles. */
@@ -465,6 +467,8 @@ public class Framework implements EventDispatcher, EventPublisher {
 		condPermAdmin = null;
 		packageAdmin = null;
 		adaptor = null;
+		uninstallURLStreamHandlerFactory();
+		uninstallContentHandlerFactory();
 	}
 
 	/**
@@ -1565,5 +1569,160 @@ public class Framework implements EventDispatcher, EventPublisher {
 			return null;
 		}
 		throw new BundleException(Msg.BUNDLE_NATIVECODE_MATCH_EXCEPTION);
+	}
+
+	private static Field getStaticField(Class clazz, Class type) {
+		Field[] fields = clazz.getDeclaredFields();
+		for (int i = 0; i < fields.length; i++)
+			if (Modifier.isStatic(fields[i].getModifiers()) && fields[i].getType().equals(type)) {
+				fields[i].setAccessible(true);
+				return fields[i];
+			}
+		return null;
+	}
+
+	private void installContentHandlerFactory(BundleContext context) {
+		ContentHandlerFactory chf = new ContentHandlerFactory(context);
+		try {
+			// first try the standard way
+			URLConnection.setContentHandlerFactory(chf);
+		} catch (Error err) {
+			// ok we failed now use more drastic means to set the factory
+			try {
+				forceContentHandlerFactory(chf);
+			} catch (Exception ex) {
+				// this is unexpected, log the exception and throw the original error
+				adaptor.getFrameworkLog().log(new FrameworkEvent(FrameworkEvent.ERROR, context.getBundle(), ex));
+				throw err;
+			}
+		}
+	}
+
+	private static void forceContentHandlerFactory(ContentHandlerFactory chf) throws Exception{
+		Field factoryField = getStaticField(URLConnection.class, java.net.ContentHandlerFactory.class);
+		if (factoryField == null)
+			throw new Exception("Could not find ContentHandlerFactory field"); //$NON-NLS-1$
+		synchronized(URLConnection.class) {
+			java.net.ContentHandlerFactory orig = (java.net.ContentHandlerFactory) factoryField.get(null);
+			// doing a null check here just in case, but it would be really strange if it was null, 
+			// because we failed to set the factory normally!!
+			if (orig != null && orig.getClass().getName().equals(ContentHandlerFactory.class.getName()))
+				throw new Error("Multiple ContentHandlerFactories not supported."); //$NON-NLS-1$
+			chf.setParentFactory(orig);
+			// null out the field so that we can successfully call setContentHandlerFactory
+			factoryField.set(null, null);
+			/* 
+			 * TODO may consider clearing the factory cache here because setContentHandlerFactory
+			 * does not actually clear the cache for you like URL.setURLStreamHandlerFacotry does, go figure!!
+			 */
+			URLConnection.setContentHandlerFactory(chf);
+		}
+	}
+
+	private static void uninstallContentHandlerFactory() {
+		try {
+			Field factoryField = getStaticField(URLConnection.class, java.net.ContentHandlerFactory.class);
+			if (factoryField == null)
+				return;  // oh well, we tried.
+			synchronized(URLConnection.class) {
+				ContentHandlerFactory chf = (ContentHandlerFactory) factoryField.get(null);
+				factoryField.set(null, null);
+				// always attempt to clear the handlers cache
+				// Note that the call to setContentHandlerFactory below may clear this cache
+				// but we want to be sure to clear it here just incase the parent is null.
+				// In this case the call below would not occur.
+				// Also it appears most java libraries actually do not clear the cache
+				// when setContentHandlerFactory is called, go figure!!
+				Field handlersField = getStaticField(URLConnection.class, Hashtable.class);
+				if (handlersField != null) {
+					Hashtable handlers = (Hashtable) handlersField.get(null);
+					if (handlers != null)
+						handlers.clear();
+				}
+				if (chf != null && chf.getParentFactory() != null) 
+					URLConnection.setContentHandlerFactory(chf.getParentFactory());
+			}
+		} catch (Exception e) {
+			// ignore and continue closing the framework
+		}		
+	}
+
+	private void installURLStreamHandlerFactory(BundleContext context, FrameworkAdaptor frameworkAdaptor) {
+		StreamHandlerFactory shf = new StreamHandlerFactory(context, frameworkAdaptor);
+		try {
+			// first try the standard way
+			URL.setURLStreamHandlerFactory(shf);
+		} catch (Error err) {
+			try {
+				// ok we failed now use more drastic means to set the factory
+				forceURLStreamHandlerFactory(shf);
+			} catch (Exception ex) {
+				adaptor.getFrameworkLog().log(new FrameworkEvent(FrameworkEvent.ERROR, context.getBundle(), ex));
+				throw err;
+			}
+		}
+	}
+
+	private static void forceURLStreamHandlerFactory(StreamHandlerFactory shf) throws Exception{
+		Field factoryField = getStaticField(URL.class, URLStreamHandlerFactory.class);
+		if (factoryField == null)
+			throw new Exception("Could not find URLStreamHandlerFactory field"); //$NON-NLS-1$
+		// look for a lock to synchronize on
+		Object lock;
+		try {
+			Field streamHandlerLockField = URL.class.getDeclaredField("streamHandlerLock"); //$NON-NLS-1$
+			streamHandlerLockField.setAccessible(true);
+			lock = streamHandlerLockField.get(null);
+		} catch (NoSuchFieldException noField) {
+			// could not find the lock, lets sync on the class object
+			lock = URL.class;
+		}
+		synchronized(lock) {
+			URLStreamHandlerFactory orig = (URLStreamHandlerFactory) factoryField.get(null);
+			// doing a null check here just in case, but it would be really strange if it was null, 
+			// because we failed to set the factory normally!!
+			if (orig != null && orig.getClass().getName().equals(StreamHandlerFactory.class.getName()))
+				throw new Error("Multiple URLStreamHandlerFactories not supported."); //$NON-NLS-1$
+			// null out the field so that we can successfully call setURLStreamHandlerFactory
+			factoryField.set(null, null);
+			shf.setParentFactory(orig);
+			URL.setURLStreamHandlerFactory(shf);
+		}
+	}
+
+	private static void uninstallURLStreamHandlerFactory() {
+		try {
+			Field factoryField = getStaticField(URL.class, URLStreamHandlerFactory.class);
+			if (factoryField == null)
+				return; // oh well, we tried
+			// look for a lock to synchronize on
+			Object lock;
+			try {
+				Field streamHandlerLockField = URL.class.getDeclaredField("streamHandlerLock"); //$NON-NLS-1$
+				streamHandlerLockField.setAccessible(true);
+				lock = streamHandlerLockField.get(null);
+			} catch (NoSuchFieldException noField) {
+				// could not find the lock, lets sync on the class object
+				lock = URL.class;
+			}
+			synchronized (lock) {
+				StreamHandlerFactory shf = (StreamHandlerFactory) factoryField.get(null);
+				factoryField.set(null, null);
+				// always attempt to clear the handlers cache
+				// Note that the call to setURLStreamHandlerFactory below may clear this cache
+				// but we want to be sure to clear it here just incase the parent is null.
+				// In this case the call below would not occur.
+				Field handlersField = getStaticField(URL.class, Hashtable.class);
+				if (handlersField != null) {
+					Hashtable handlers = (Hashtable) handlersField.get(null);
+					if (handlers != null)
+						handlers.clear();
+				}
+				if (shf != null && shf.getParentFactory() != null) 
+					URL.setURLStreamHandlerFactory(shf.getParentFactory());
+			}
+		} catch (Exception e) {
+			// ignore and continue closing the framework
+		}
 	}
 }

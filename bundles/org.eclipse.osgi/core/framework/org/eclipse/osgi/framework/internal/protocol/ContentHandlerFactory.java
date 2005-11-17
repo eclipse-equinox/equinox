@@ -25,6 +25,7 @@ import org.osgi.util.tracker.ServiceTracker;
  * will search the service registry for a maching Content-Handler and, if found, return a 
  * proxy for that content handler.
  */
+// TODO rename this class!!!  its really confusing to name the impl the same as the interface
 public class ContentHandlerFactory implements java.net.ContentHandlerFactory {
 	private ServiceTracker contentHandlerTracker;
 	private BundleContext context;
@@ -34,6 +35,7 @@ public class ContentHandlerFactory implements java.net.ContentHandlerFactory {
 	private static final String DEFAULT_VM_CONTENT_HANDLERS = "sun.net.www.content"; //$NON-NLS-1$
 
 	private Hashtable proxies;
+	private java.net.ContentHandlerFactory parentFactory;
 
 	public ContentHandlerFactory(BundleContext context) {
 		this.context = context;
@@ -45,11 +47,29 @@ public class ContentHandlerFactory implements java.net.ContentHandlerFactory {
 		contentHandlerTracker.open();
 	}
 
+	public void setParentFactory(java.net.ContentHandlerFactory parentFactory) {
+		if (this.parentFactory == null) // only allow it to be set once
+			this.parentFactory = parentFactory;
+	}
+
+	public java.net.ContentHandlerFactory getParentFactory() {
+		return parentFactory;
+	}
+
 	/**
 	 * @see java.net.ContentHandlerFactory#createContentHandler(String)
 	 */
 	//TODO method is too long... consider reducing indentation (returning quickly) and moving complex steps to private methods
 	public ContentHandler createContentHandler(String contentType) {
+		
+		// if parent is present do parent lookup
+		if (parentFactory != null) {
+			ContentHandler parentHandler = parentFactory.createContentHandler(contentType);
+			if (parentHandler != null) {
+				return parentHandler;
+			}
+		}
+		
 		//first, we check to see if there exists a built in content handler for
 		//this content type.  we can not overwrite built in ContentHandlers
 		String builtInHandlers = StreamHandlerFactory.secureAction.getProperty(CONTENT_HANDLER_PKGS);
