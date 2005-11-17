@@ -267,7 +267,10 @@ public class BundleHost extends AbstractBundle {
 		loader = checkLoader();
 		if (loader == null)
 			return null;
-		return loader.getResources(name);
+		Enumeration result = loader.getResources(name);
+		if (result.hasMoreElements())
+			return result;
+		return null;
 	}
 
 	/**
