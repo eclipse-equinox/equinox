@@ -1,0 +1,28 @@
+/*******************************************************************************
+ * Copyright (c) 2000, 2004 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *******************************************************************************/
+package org.eclipse.core.runtime;
+
+/**
+ * <code>AssertionFailedException</code> is a runtime exception thrown
+ * by some of the methods in <code>Assert</code>.
+ */
+public class AssertionFailedException extends RuntimeException {
+	/**
+	 * All serializable objects should have a stable serialVersionUID
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/** Constructs a new exception with the given message.
+	 */
+	public AssertionFailedException(String detail) {
+		super(detail);
+	}
+}

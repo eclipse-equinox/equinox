@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<plugin>
+   <extension-point id="preferences" name="%preferencesName" schema="schema/preferences.exsd"/>
+   
+	<extension id="org.eclipse.core.runtime.platform-preferences" point="org.eclipse.equinox.preferences.preferences" name="%preferencesExtPtName">
+		<scope name="configuration" class="org.eclipse.core.internal.preferences.ConfigurationPreferences"/>
+		<scope name="instance" class="org.eclipse.core.internal.preferences.InstancePreferences"/>
+		<scope name="default" class="org.eclipse.core.internal.preferences.DefaultPreferences"/>
+	</extension>
+</plugin>

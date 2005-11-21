@@ -1,0 +1,134 @@
+/*******************************************************************************
+ * Copyright (c) 2005 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *******************************************************************************/
+package org.eclipse.core.runtime;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.Map;
+import org.eclipse.core.internal.runtime.FindSupport;
+import org.osgi.framework.Bundle;
+
+/**
+ * This class contains collection of helper methods aimed at finding files in bundles.
+ * This class can only be used if OSGi plugin is available.
+ * 
+ * The class is not intended to be subclassed or instantiated by clients.
+ * 
+ * @since org.eclipse.equinox.common 1.0
+ */
+public final class BundleFinder {
+
+	/**
+	 * Returns a URL for the given path in the given bundle.  Returns <code>null</code> if the URL
+	 * could not be computed or created.
+	 * 
+	 * @param bundle the bundle in which to search
+	 * @param path path relative to plug-in installation location 
+	 * @return a URL for the given path or <code>null</code>.  The actual form
+	 * of the returned URL is not specified.
+	 * @see #find(Bundle, IPath, Map)
+	 */
+	public static URL find(Bundle bundle, IPath path) {
+		return FindSupport.find(bundle, path, null);
+	}
+
+	/**
+	 * Returns a URL for the given path in the given bundle.  Returns <code>null</code> if the URL
+	 * could not be computed or created.
+	 * <p>
+	 * find looks for this path in given bundle and any attached fragments.  
+	 * <code>null</code> is returned if no such entry is found.  Note that
+	 * there is no specific order to the fragments.
+	 * </p><p>
+	 * The following arguments may also be used
+	 * <pre>
+	 *     $nl$ - for language specific information
+	 *     $os$ - for operating system specific information
+	 *     $ws$ - for windowing system specific information
+	 * </pre>
+	 * </p><p>
+	 * A path of $nl$/about.properties in an environment with a default 
+	 * locale of en_CA will return a URL corresponding to the first place
+	 * about.properties is found according to the following order:
+	 * <pre>
+	 *     plugin root/nl/en/CA/about.properties
+	 *     fragment1 root/nl/en/CA/about.properties
+	 *     fragment2 root/nl/en/CA/about.properties
+	 *     ...
+	 *     plugin root/nl/en/about.properties
+	 *     fragment1 root/nl/en/about.properties
+	 *     fragment2 root/nl/en/about.properties
+	 *     ...
+	 *     plugin root/about.properties
+	 *     fragment1 root/about.properties
+	 *     fragment2 root/about.properties
+	 *     ...
+	 * </pre>
+	 * </p><p>
+	 * The current environment variable values can be overridden using 
+	 * the override map argument.
+	 * </p>
+	 * 
+	 * @param bundle the bundle in which to search
+	 * @param path file path relative to plug-in installation location
+	 * @param override map of override substitution arguments to be used for
+	 * any $arg$ path elements. The map keys correspond to the substitution
+	 * arguments (eg. "$nl$" or "$os$"). The resulting
+	 * values must be of type java.lang.String. If the map is <code>null</code>,
+	 * or does not contain the required substitution argument, the default
+	 * is used.
+	 * @return a URL for the given path or <code>null</code>.  The actual form
+	 * of the returned URL is not specified.
+	 */
+	public static URL find(Bundle bundle, IPath path, Map override) {
+		return FindSupport.find(bundle, path, override);
+	}
+
+	/**
+	 * Returns an input stream for the specified file. The file path
+	 * must be specified relative to this plug-in's installation location.
+	 * Optionally, the platform searches for the correct localized version
+	 * of the specified file using the users current locale, and Java
+	 * naming convention for localized resource files (locale suffix appended 
+	 * to the specified file extension).
+	 * <p>
+	 * The caller must close the returned stream when done.
+	 * </p>
+	 *
+	 * @param bundle the bundle in which to search
+	 * @param file path relative to plug-in installation location
+	 * @param localized <code>true</code> for the localized version
+	 *   of the file, and <code>false</code> for the file exactly
+	 *   as specified
+	 * @return an input stream
+	 * @exception IOException if the given path cannot be found in this plug-in
+	 */
+	public static final InputStream openStream(Bundle bundle, IPath file, boolean localized) throws IOException {
+		return FindSupport.openStream(bundle, file, localized);
+	}
+
+	/**
+	 * Returns an input stream for the specified file. The file path
+	 * must be specified relative this the plug-in's installation location.
+	 *
+	 * @param bundle the bundle in which to search
+	 * @param file path relative to plug-in installation location
+	 * @return an input stream
+	 * @exception IOException if the given path cannot be found in this plug-in
+	 * 
+	 * @see #openStream(Bundle,IPath,boolean)
+	 */
+	public static final InputStream openStream(Bundle bundle, IPath file) throws IOException {
+		return FindSupport.openStream(bundle, file, false);
+	}
+
+}

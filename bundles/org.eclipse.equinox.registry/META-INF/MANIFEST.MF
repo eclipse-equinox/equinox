@@ -1,0 +1,18 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: %pluginName
+Bundle-SymbolicName: org.eclipse.equinox.registry; singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Localization: plugin
+Export-Package: org.eclipse.core.internal.registry;x-friends:="org.eclipse.core.runtime",
+ org.eclipse.core.internal.registry.osgi;x-friends:="org.eclipse.core.runtime",
+ org.eclipse.core.internal.registry.spi;x-internal:=true,
+ org.eclipse.equinox.registry.spi,
+ org.eclipse.core.runtime,
+ org.eclipse.equinox.registry,
+ org.eclipse.equinox.registry.tracker
+Require-Bundle: org.eclipse.equinox.common,
+ system.bundle;resolution:=optional
+Bundle-Vendor: %providerName
+Bundle-Activator: org.eclipse.core.internal.registry.osgi.Activator
+Import-Package: org.eclipse.core.runtime.jobs;resolution:=optional

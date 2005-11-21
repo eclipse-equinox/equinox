@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: %pluginName
+Bundle-SymbolicName: org.eclipse.equinox.common; singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Localization: plugin
+Export-Package: org.eclipse.core.internal.runtime;x-friends:="org.eclipse.core.contenttype,org.eclipse.core.jobs,org.eclipse.equinox.preferences,org.eclipse.equinox.registry,org.eclipse.core.runtime,org.eclipse.core.runtime.compatibility",
+ org.eclipse.core.runtime
+Bundle-Vendor: %providerName
+Bundle-Activator: org.eclipse.core.internal.runtime.Activator
+Require-Bundle: system.bundle;resolution:=optional,
+ org.eclipse.equinox.supplement;resolution:=optional
