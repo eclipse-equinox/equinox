@@ -728,13 +728,15 @@ public abstract class AbstractBundleData implements BundleData, Cloneable {
 	 * @return a matching native path or <code>null</code>. 
 	 */
 	protected String findNativePath(String libname) {
-		if (!libname.startsWith("/")) { //$NON-NLS-1$
-			libname = '/' + libname;
-		}
+		int slash = libname.lastIndexOf('/');
+		if (slash >= 0)
+			libname = libname.substring(slash + 1);
 		String[] nativepaths = getNativePaths();
 		if (nativepaths != null) {
 			for (int i = 0; i < nativepaths.length; i++) {
-				if (nativepaths[i].endsWith(libname)) {
+				slash = nativepaths[i].lastIndexOf('/');
+				String path = slash < 0 ? nativePaths[i] : nativePaths[i].substring(slash + 1);
+				if (path.equals(libname)) {
 					File nativeFile = baseBundleFile.getFile(nativepaths[i]);
 					if (nativeFile != null)
 						return nativeFile.getAbsolutePath();
