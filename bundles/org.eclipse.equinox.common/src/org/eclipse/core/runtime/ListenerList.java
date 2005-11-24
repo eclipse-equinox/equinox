@@ -166,4 +166,11 @@ public class ListenerList {
 	public int size() {
 		return listeners.length;
 	}
+	
+    /**
+     * Removes all listeners from this list.
+     */
+    public synchronized void clear() {
+            listeners = EmptyArray;
+    }
 }
