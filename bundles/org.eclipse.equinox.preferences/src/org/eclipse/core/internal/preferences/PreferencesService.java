@@ -95,8 +95,8 @@ public class PreferencesService implements IPreferencesService, IRegistryChangeL
 				if (ELEMENT_SCOPE.equalsIgnoreCase(elements[j].getName()))
 					scopeAdded(elements[j]);
 		}
-		PreferencesOSGiUtils.getDefault().getExtensionRegistry().addRegistryChangeListener(this, IPreferencesConstants.RUNTIME_NAME);
-		PreferencesOSGiUtils.getDefault().getExtensionRegistry().addRegistryChangeListener(this, IPreferencesConstants.PREFERS_NAME);
+		RegistryFactory.getRegistry().addRegistryChangeListener(this, IPreferencesConstants.RUNTIME_NAME);
+		RegistryFactory.getRegistry().addRegistryChangeListener(this, IPreferencesConstants.PREFERS_NAME);
 	}
 
 	private void initializeModifyListeners() {
@@ -108,8 +108,8 @@ public class PreferencesService implements IPreferencesService, IRegistryChangeL
 				if (ELEMENT_MODIFIER.equalsIgnoreCase(elements[j].getName()))
 					addModifyListener(elements[j]);
 		}
-		PreferencesOSGiUtils.getDefault().getExtensionRegistry().addRegistryChangeListener(this, IPreferencesConstants.RUNTIME_NAME);
-		PreferencesOSGiUtils.getDefault().getExtensionRegistry().addRegistryChangeListener(this, IPreferencesConstants.PREFERS_NAME);
+		RegistryFactory.getRegistry().addRegistryChangeListener(this, IPreferencesConstants.RUNTIME_NAME);
+		RegistryFactory.getRegistry().addRegistryChangeListener(this, IPreferencesConstants.PREFERS_NAME);
 	}
 
 	static void log(IStatus status) {
@@ -1127,7 +1127,7 @@ public class PreferencesService implements IPreferencesService, IRegistryChangeL
 	private final static IExtension[] emptyExtensionArray = new IExtension[0];
 
 	public static IExtension[] getPrefExtensions() {
-		IExtensionRegistry registry = PreferencesOSGiUtils.getDefault().getExtensionRegistry();
+		IExtensionRegistry registry = RegistryFactory.getRegistry();
 		IExtension[] extensionsOld = emptyExtensionArray;
 		IExtension[] extensionsNew = emptyExtensionArray;
 		// "old"

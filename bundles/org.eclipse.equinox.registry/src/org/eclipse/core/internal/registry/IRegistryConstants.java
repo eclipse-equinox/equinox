@@ -26,6 +26,7 @@ public interface IRegistryConstants {
 	public static final String PROP_NO_LAZY_CACHE_LOADING = "eclipse.noLazyRegistryCacheLoading"; //$NON-NLS-1$
 	public static final String PROP_CHECK_CONFIG = "osgi.checkConfiguration"; //$NON-NLS-1$
 	public static final String PROP_NO_REGISTRY_CACHE = "eclipse.noRegistryCache"; //$NON-NLS-1$
+	public static final String PROP_DEFAULT_REGISTRY = "eclipse.createRegistry"; //$NON-NLS-1$
 
 	// OSGI system properties
 	public static final String PROP_NL = "osgi.nl"; //$NON-NLS-1$

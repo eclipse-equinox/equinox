@@ -22,6 +22,8 @@ import org.eclipse.core.internal.runtime.ResourceTranslator;
 import org.eclipse.core.runtime.*;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.equinox.registry.IRegistryProvider;
+import org.eclipse.equinox.registry.RegistryFactory;
 import org.eclipse.equinox.registry.spi.RegistryStrategy;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.Bundle;
@@ -38,6 +40,10 @@ import org.osgi.util.tracker.ServiceTracker;
  *  - Uses bunlde-based class loading to create executable extensions
  *  - Performs registry validation based on the time stamps of the plugin.xml / fragment.xml files
  *  - XML parser is obtained via an OSGi service
+ *  
+ * XXX really?!!
+ *  Only one registry with OSGI strategy can be instantied in the running application.
+ *  @see RegistryFactory#setRegistryProvider(IRegistryProvider)
  *  
  * @since org.eclipse.equinox.registry 1.0
  * 
@@ -123,6 +129,7 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 			return RegistryStrategy.processChangeEvent(listenerInfos, deltas, registry);
 		}
 	}
+
 	/* (non-Javadoc)
 
 	 * @see org.eclipse.equinox.registry.spi.RegistryStrategy#scheduleChangeEvent(java.lang.Object[], java.util.Map, java.lang.Object)
@@ -142,8 +149,11 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 		Bundle contributingBundle = getContributingBundle(contributingBundleId);
 		if (contributingBundle == null) // When restored from disk the underlying bundle may have been uninstalled
 			throw new IllegalStateException("Internal error in extension registry. The bundle corresponding to this contribution has been uninstalled."); //$NON-NLS-1$
-		if (OSGIUtils.getDefault().isFragment(contributingBundle))
-			return OSGIUtils.getDefault().getHosts(contributingBundle)[0];
+		if (OSGIUtils.getDefault().isFragment(contributingBundle)) {
+			Bundle[] hosts = OSGIUtils.getDefault().getHosts(contributingBundle);
+			if (hosts != null)
+				return hosts[0];
+		}
 		return contributingBundle;
 	}
 

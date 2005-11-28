@@ -28,6 +28,7 @@ public class RegistryMessages extends NLS {
 	public static String meta_unableToCreateCache;
 	public static String meta_unableToReadCache;
 	public static String registry_no_default;
+	public static String registry_default_exists;
 
 	// parsing/resolve
 	public static String parse_error;

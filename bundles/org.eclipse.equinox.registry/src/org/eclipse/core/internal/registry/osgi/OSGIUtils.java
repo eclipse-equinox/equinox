@@ -27,6 +27,7 @@ import org.osgi.util.tracker.ServiceTracker;
 public class OSGIUtils {
 	private ServiceTracker debugTracker = null;
 	private ServiceTracker bundleTracker = null;
+	// XXX platfromTracker is misspelt.
 	private ServiceTracker platfromTracker = null;
 	private ServiceTracker configurationLocationTracker = null;
 
@@ -52,6 +53,8 @@ public class OSGIUtils {
 	 * Print a debug message to the console. 
 	 * Pre-pend the message with the current date and the name of the current thread.
 	 */
+	// XXX be careful using this method.  In general you should try to log first and then if 
+	//  debug is on print to system out.  
 	public static void message(String message) {
 		StringBuffer buffer = new StringBuffer();
 		buffer.append(new Date(System.currentTimeMillis()));
@@ -65,7 +68,7 @@ public class OSGIUtils {
 	private void initServices() {
 		BundleContext context = Activator.getContext();
 		if (context == null) {
-			message("PreferencesUtils called before plugin started"); //$NON-NLS-1$
+			message("Registry OSGIUtils called before plugin started"); //$NON-NLS-1$
 			return;
 		}
 

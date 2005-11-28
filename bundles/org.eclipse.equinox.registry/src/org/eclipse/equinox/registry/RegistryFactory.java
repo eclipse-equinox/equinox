@@ -11,18 +11,21 @@
 package org.eclipse.equinox.registry;
 
 import java.io.File;
-import org.eclipse.core.internal.registry.ExtensionRegistry;
+import org.eclipse.core.internal.registry.*;
 import org.eclipse.core.internal.registry.osgi.RegistryStrategyOSGI;
+import org.eclipse.core.runtime.*;
 import org.eclipse.equinox.registry.spi.RegistryStrategy;
 
 /**
- * Use this class to create an extension registry.
+ * Use this class to create or obtain an extension registry.
  * 
  * This class is not intended to be subclassed or instantiated.
  * 
  * @since org.eclipse.equinox.registry 1.0
  */
 public final class RegistryFactory {
+
+	private static IRegistryProvider defaultRegistryProvider;
 
 	/**
 	 * Creates an extension registry.
@@ -31,11 +34,27 @@ public final class RegistryFactory {
 	 * @param token - control token for the registry. Keep it to access controlled methods of the
 	 * registry
 	 * @return - new extension registry
+	 * @throws CoreException in case if registry start conditions are not met. The exception's status 
+	 * message provides additional details.
 	 */
-	public static IExtensionRegistry createExtensionRegistry(RegistryStrategy strategy, Object token) {
+	public static IExtensionRegistry createRegistry(RegistryStrategy strategy, Object token) {
 		return new ExtensionRegistry(strategy, token);
 	}
-	
+
+	/**
+	 * Returns the existing extension registry specified by the registry provider.
+	 * May return null is the provider has not been set or registry was not created.
+	 * 
+	 * @return existing extension registry or null
+	 */
+	// XXX the team style is to put test filters first then do the work.  So here the if would
+	//   be == null then return null.  Then the return of getRegistry().
+	public static IExtensionRegistry getRegistry() {
+		if (defaultRegistryProvider != null)
+			return defaultRegistryProvider.getRegistry();
+		return null;
+	}
+
 	/**
 	 * Creates registry strategy that can be used in OSGi world. It provides the following functionality:
 	 *  - Event scheduling is done using Eclipse job scheduling mechanism
@@ -53,4 +72,25 @@ public final class RegistryFactory {
 	public static RegistryStrategy createOSGiStrategy(File storageDir, boolean cacheReadOnly, Object token) {
 		return new RegistryStrategyOSGI(storageDir, cacheReadOnly, token);
 	}
+
+	/**
+	 * Use this method to specify the default registry provider. The default registry provider
+	 * is immutable in the sense that it can be set only once during the application runtime.
+	 * Attempts to change the default registry provider will cause CoreException.
+	 * 
+	 * @see #getRegistry()
+	 * 
+	 * <b>This is an experimental API. It might change in future.</b>
+	 * 
+	 * @param provider - extension registry provider
+	 * @throws CoreException - default registry provider was already set for this application
+	 */
+	public static void setRegistryProvider(IRegistryProvider provider) throws CoreException {
+		if (defaultRegistryProvider != null) {
+			Status status = new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, IRegistryConstants.PLUGIN_ERROR, RegistryMessages.registry_default_exists, null);
+			throw new CoreException(status);
+		}
+		defaultRegistryProvider = provider;
+	}
+
 }

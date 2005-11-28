@@ -1098,4 +1098,8 @@ public class ExtensionRegistry implements IExtensionRegistry {
 		currentConfigurationElement.setParentType(parent instanceof ConfigurationElement ? RegistryObjectManager.CONFIGURATION_ELEMENT : RegistryObjectManager.EXTENSION);
 	}
 
+	public void setCompatibilityStrategy(ICompatibilityStrategy strategy) {
+		compatibilityStrategy = strategy;
+	}
+
 }

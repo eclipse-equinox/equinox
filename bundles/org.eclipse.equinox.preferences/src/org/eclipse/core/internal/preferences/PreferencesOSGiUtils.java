@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.core.internal.preferences;
 
-import org.eclipse.equinox.registry.IExtensionRegistry;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.service.debug.DebugOptions;
@@ -25,7 +24,6 @@ import org.osgi.util.tracker.ServiceTracker;
  * @since org.eclipse.equinox.preferences 1.0
  */
 public class PreferencesOSGiUtils {
-	private ServiceTracker registryTracker = null;
 	private ServiceTracker logTracker = null;
 	private ServiceTracker initTracker = null;
 	private ServiceTracker debugTracker = null;
@@ -57,9 +55,6 @@ public class PreferencesOSGiUtils {
 			PrefsMessages.message("PreferencesOSGiUtils called before plugin started"); //$NON-NLS-1$
 			return;
 		}
-
-		registryTracker = new ServiceTracker(context, IExtensionRegistry.class.getName(), null);
-		registryTracker.open();
 
 		initTracker = new ServiceTracker(context, ILegacyPreferences.class.getName(), null);
 		initTracker.open(true);
@@ -95,10 +90,6 @@ public class PreferencesOSGiUtils {
 	}
 
 	void closeServices() {
-		if (registryTracker != null) {
-			registryTracker.close();
-			registryTracker = null;
-		}
 		if (initTracker != null) {
 			initTracker.close();
 			initTracker = null;
@@ -123,13 +114,6 @@ public class PreferencesOSGiUtils {
 			instanceLocationTracker.close();
 			instanceLocationTracker = null;
 		}
-	}
-
-	public IExtensionRegistry getExtensionRegistry() {
-		if (registryTracker != null)
-			return (IExtensionRegistry) registryTracker.getService();
-		PrefsMessages.message("Registry tracker is not set"); //$NON-NLS-1$
-		return null;
 	}
 
 	public ILegacyPreferences getLegacyPreferences() {
