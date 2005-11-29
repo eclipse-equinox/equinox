@@ -10,6 +10,10 @@
  *******************************************************************************/
 package org.eclipse.core.internal.registry.osgi;
 
+import org.eclipse.core.internal.registry.RegistryMessages;
+import org.eclipse.core.internal.runtime.RuntimeLog;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.equinox.registry.IExtensionRegistry;
 import org.eclipse.equinox.registry.IRegistryProvider;
 import org.osgi.framework.BundleContext;
@@ -26,8 +30,7 @@ public final class RegistryProviderOSGI implements IRegistryProvider {
 		if (registryTracker == null) {
 			BundleContext context = Activator.getContext();
 			if (context == null) {
-			// XXX should not print to system out.  Have to at least try and log.
-				OSGIUtils.message(this.getClass().getName() + ": plugin context is not set"); //$NON-NLS-1$
+				RuntimeLog.log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, 0, RegistryMessages.bundle_not_activated, null));
 				return null;
 			}
 			registryTracker = new ServiceTracker(context, IExtensionRegistry.class.getName(), null);

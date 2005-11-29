@@ -15,10 +15,11 @@ import java.util.ArrayList;
 import org.eclipse.core.runtime.*;
 
 /**
- * This log infrastructure was split from the InternalPlatform.
+ * NOT API!!!  This log infrastructure was split from the InternalPlatform.
  * 
  * @since org.eclipse.equinox.common 1.0
  */
+// XXX this must be removed and replaced with something more reasonable
 public final class RuntimeLog {
 
 	private static ArrayList logListeners = new ArrayList(5);

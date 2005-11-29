@@ -47,12 +47,10 @@ public final class RegistryFactory {
 	 * 
 	 * @return existing extension registry or null
 	 */
-	// XXX the team style is to put test filters first then do the work.  So here the if would
-	//   be == null then return null.  Then the return of getRegistry().
 	public static IExtensionRegistry getRegistry() {
-		if (defaultRegistryProvider != null)
-			return defaultRegistryProvider.getRegistry();
-		return null;
+		if (defaultRegistryProvider == null)
+			return null;
+		return defaultRegistryProvider.getRegistry();
 	}
 
 	/**

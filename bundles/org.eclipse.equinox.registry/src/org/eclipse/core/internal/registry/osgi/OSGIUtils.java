@@ -10,7 +10,10 @@
  *******************************************************************************/
 package org.eclipse.core.internal.registry.osgi;
 
-import java.util.Date;
+import org.eclipse.core.internal.registry.RegistryMessages;
+import org.eclipse.core.internal.runtime.RuntimeLog;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.service.debug.DebugOptions;
 import org.eclipse.osgi.service.resolver.PlatformAdmin;
@@ -27,8 +30,7 @@ import org.osgi.util.tracker.ServiceTracker;
 public class OSGIUtils {
 	private ServiceTracker debugTracker = null;
 	private ServiceTracker bundleTracker = null;
-	// XXX platfromTracker is misspelt.
-	private ServiceTracker platfromTracker = null;
+	private ServiceTracker platformTracker = null;
 	private ServiceTracker configurationLocationTracker = null;
 
 	// OSGI system properties.  Copied from EclipseStarter
@@ -49,26 +51,10 @@ public class OSGIUtils {
 		initServices();
 	}
 
-	/**
-	 * Print a debug message to the console. 
-	 * Pre-pend the message with the current date and the name of the current thread.
-	 */
-	// XXX be careful using this method.  In general you should try to log first and then if 
-	//  debug is on print to system out.  
-	public static void message(String message) {
-		StringBuffer buffer = new StringBuffer();
-		buffer.append(new Date(System.currentTimeMillis()));
-		buffer.append(" - ["); //$NON-NLS-1$
-		buffer.append(Thread.currentThread().getName());
-		buffer.append("] "); //$NON-NLS-1$
-		buffer.append(message);
-		System.out.println(buffer.toString());
-	}
-
 	private void initServices() {
 		BundleContext context = Activator.getContext();
 		if (context == null) {
-			message("Registry OSGIUtils called before plugin started"); //$NON-NLS-1$
+			RuntimeLog.log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, 0, RegistryMessages.bundle_not_activated, null));
 			return;
 		}
 
@@ -78,8 +64,8 @@ public class OSGIUtils {
 		bundleTracker = new ServiceTracker(context, PackageAdmin.class.getName(), null);
 		bundleTracker.open();
 
-		platfromTracker = new ServiceTracker(context, PlatformAdmin.class.getName(), null);
-		platfromTracker.open();
+		platformTracker = new ServiceTracker(context, PlatformAdmin.class.getName(), null);
+		platformTracker.open();
 
 		// locations
 
@@ -108,15 +94,15 @@ public class OSGIUtils {
 			configurationLocationTracker.close();
 			configurationLocationTracker = null;
 		}
-		if (platfromTracker != null) {
-			platfromTracker.close();
-			platfromTracker = null;
+		if (platformTracker != null) {
+			platformTracker.close();
+			platformTracker = null;
 		}
 	}
 
 	public boolean getBooleanDebugOption(String option, boolean defaultValue) {
 		if (debugTracker == null) {
-			message("Debug tracker is not set"); //$NON-NLS-1$
+			RuntimeLog.log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, 0, RegistryMessages.bundle_not_activated, null));
 			return defaultValue;
 		}
 		DebugOptions options = (DebugOptions) debugTracker.getService();
@@ -130,7 +116,7 @@ public class OSGIUtils {
 
 	public PackageAdmin getPackageAdmin() {
 		if (bundleTracker == null) {
-			message("Bundle tracker is not set"); //$NON-NLS-1$
+			RuntimeLog.log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, 0, RegistryMessages.bundle_not_activated, null));
 			return null;
 		}
 		return (PackageAdmin) bundleTracker.getService();
@@ -181,10 +167,9 @@ public class OSGIUtils {
 	}
 
 	public PlatformAdmin getPlatformAdmin() {
-		if (platfromTracker != null)
-			return (PlatformAdmin) platfromTracker.getService();
-		else
+		if (platformTracker == null)
 			return null;
+		return (PlatformAdmin) platformTracker.getService();
 	}
 
 }

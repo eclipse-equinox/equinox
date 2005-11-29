@@ -41,12 +41,8 @@ import org.osgi.util.tracker.ServiceTracker;
  *  - Performs registry validation based on the time stamps of the plugin.xml / fragment.xml files
  *  - XML parser is obtained via an OSGi service
  *  
- * XXX really?!!
- *  Only one registry with OSGI strategy can be instantied in the running application.
- *  @see RegistryFactory#setRegistryProvider(IRegistryProvider)
- *  
+ * @see RegistryFactory#setRegistryProvider(IRegistryProvider)
  * @since org.eclipse.equinox.registry 1.0
- * 
  */
 
 public class RegistryStrategyOSGI extends RegistryStrategy {
