@@ -39,6 +39,7 @@ public class ResolverBundle extends VersionSupplier {
 
 	private ResolverImpl resolver;
 	private boolean newFragmentExports;
+	private ArrayList refs;
 
 	ResolverBundle(BundleDescription bundle, ResolverImpl resolver) {
 		super(bundle);
@@ -48,6 +49,8 @@ public class ResolverBundle extends VersionSupplier {
 	}
 
 	void initialize(boolean useSelectedExports) {
+		if (getBundle().isSingleton())
+			refs = new ArrayList();
 		if (getBundle().getHost() != null) {
 			host = new BundleConstraint(this, getBundle().getHost());
 			exports = new ResolverExport[0];
@@ -439,5 +442,17 @@ public class ResolverBundle extends VersionSupplier {
 
 	ResolverImpl getResolver() {
 		return resolver;
+	}
+
+	void clearRefs() {
+		if (refs != null)
+			refs.clear();
+	}
+	void addRef(ResolverBundle ref) {
+		if (refs != null && !refs.contains(ref))
+			refs.add(ref);
+	}
+	int getRefs() {
+		return refs == null ? 0 : refs.size();
 	}
 }

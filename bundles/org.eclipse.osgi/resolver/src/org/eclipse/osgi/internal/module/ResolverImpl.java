@@ -344,6 +344,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		for (int i = 0; i < bundles.length; i++) {
 			state.removeResolverErrors(bundles[i].getBundle());
 			bundles[i].setResolvable(isResolvable(bundles[i].getBundle(), platformProperties, rejectedSingletons));
+			bundles[i].clearRefs();
 			groupingChecker.removeAllExportConstraints(bundles[i]);
 		}
 
@@ -426,13 +427,13 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 				continue;
 			Object[] sameName = resolverBundles.get(bundleDesc.getName());
 			if (sameName.length > 1) { // Need to make a selection based off of num dependents
-				int numDeps = bundleDesc.getDependents().length;
 				for (int j = 0; j < sameName.length; j++) {
 					BundleDescription sameNameDesc = ((VersionSupplier) sameName[j]).getBundle();
+					ResolverBundle sameNameBundle = (ResolverBundle) sameName[j];
 					if (sameName[j] == bundles[i] || !sameNameDesc.isSingleton() || !sameNameDesc.isResolved() || rejectedSingletons.contains(sameNameDesc))
 						continue; // Ignore the bundle we are selecting, non-singletons, and non-resolved
 					result = true;
-					if (sameNameDesc.getVersion().compareTo(bundleDesc.getVersion()) > 0 && (sameNameDesc.getDependents().length > 0 || numDeps == 0)) {
+					if (sameNameDesc.getVersion().compareTo(bundleDesc.getVersion()) > 0 && sameNameBundle.getRefs() >= bundles[i].getRefs()) {
 						// this bundle is not selected; add it to the rejected list
 						if (!rejectedSingletons.contains(bundles[i].getBundle()))
 							rejectedSingletons.add(bundles[i].getBundle());
@@ -554,15 +555,21 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 			return true; // Already wired (due to grouping dependencies) so just return
 		}
 		Object[] bundles = resolverBundles.get(req.getVersionConstraint().getName());
+		boolean result = false;
 		for (int i = 0; i < bundles.length; i++) {
 			ResolverBundle bundle = (ResolverBundle) bundles[i];
 			if (DEBUG_REQUIRES)
 				ResolverImpl.log("CHECKING: " + bundle.getBundle()); //$NON-NLS-1$
 			// Check if export matches
 			if (req.isSatisfiedBy(bundle)) {
+				bundle.addRef(req.getBundle());
+				if (result)
+					continue;
 				req.setMatchingBundle(bundle); // Wire to the bundle
-				if (req.getBundle() == bundle)
-					return true; // Wired to ourselves
+				if (req.getBundle() == bundle) {
+					result = true; // Wired to ourselves
+					continue;
+				}
 				if ((bundle.getState() != ResolverBundle.RESOLVED && !resolveBundle(bundle, cycle))) {
 					req.setMatchingBundle(null);
 					continue; // Bundle hasn't resolved
@@ -574,10 +581,10 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 						cycle.add(req.getBundle());
 				if (DEBUG_REQUIRES)
 					ResolverImpl.log("Found match: " + bundle.getBundle() + ". Wiring"); //$NON-NLS-1$ //$NON-NLS-2$
-				return checkRequiresConstraints(req, req.getMatchingBundle());
+				result = checkRequiresConstraints(req, req.getMatchingBundle());
 			}
 		}
-		if (req.isOptional())
+		if (result || req.isOptional())
 			return true; // If the req is optional then just return true
 
 		return false;
@@ -605,6 +612,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 				ResolverImpl.log("  - already wired"); //$NON-NLS-1$
 			return true; // Already wired (due to grouping dependencies) so just return
 		}
+		boolean result = false;
 		Object[] exports = resolverExports.get(imp.getName());
 		exportsloop: for (int i = 0; i < exports.length; i++) {
 			ResolverExport export = (ResolverExport) exports[i];
@@ -614,9 +622,12 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 			if (imp.isSatisfiedBy(export) && imp.isNotAnUnresolvableWiring(export)) {
 				int originalState = export.getExporter().getState();
 				if (imp.isDynamic() && originalState != ResolverBundle.RESOLVED)
-					return false; // Must not attempt to resolve an exporter when dynamic
+					continue; // Must not attempt to resolve an exporter when dynamic
 				if (imp.getBundle() == export.getExporter() && !export.getExportPackageDescription().isRoot())
 					continue; // Can't wire to our own re-export
+				export.getExporter().addRef(imp.getBundle());
+				if (result)
+					continue;
 				imp.setMatchingExport(export); // Wire the import to the export
 				if (imp.getBundle() != export.getExporter()) {
 					ResolverExport[] exps = imp.getBundle().getExports(imp.getName());
@@ -651,16 +662,18 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 						}
 					if (DEBUG_IMPORTS)
 						ResolverImpl.log("Found match: " + export.getExporter() + ". Wiring " + imp.getBundle() + ":" + imp.getName()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-					return true;
+					result = true;
 				} else if (!imp.getBundle().isResolvable()) {
 					// If grouping has caused recursive calls to resolveImport, and the grouping has failed
 					// then we need to catch that here, so we don't continue trying to wire here
 					return false;
 				}
-				if (imp.getMatchingExport() != null && imp.getMatchingExport() != export)
+				if (!result && imp.getMatchingExport() != null && imp.getMatchingExport() != export)
 					return true; // Grouping has changed the wiring, so return here
 			}
 		}
+		if (result)
+			return true;
 		if (checkReexportsFromRequires && resolveImportReprovide(imp, cycle))
 			return true; // A reprovide satisfies imp
 		if (imp.isOptional())

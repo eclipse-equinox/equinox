@@ -589,6 +589,455 @@ public class StateResolverTest extends AbstractStateTest {
 		assertFalse("1.3", testFrag101.isResolved());
 	}
 
+	public void testSingletonsSelection1() throws BundleException {
+		State state = buildEmptyState();
+
+		// test the selection algorithm of the resolver to pick the bundles which
+		// resolve the largest set of bundles
+		Hashtable manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "sdk; " + Constants.SINGLETON_DIRECTIVE + ":=true");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.REQUIRE_BUNDLE, "platform; bundle-version=\"[1.0,2.0]\"");
+		BundleDescription sdk10 = state.getFactory().createBundleDescription(state, manifest, "sdk10", 0);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "platform; " + Constants.SINGLETON_DIRECTIVE + ":=true");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.REQUIRE_BUNDLE, "rcp; bundle-version=\"[1.0,2.0]\"");
+		BundleDescription platform10 = state.getFactory().createBundleDescription(state, manifest, "platform10", 1);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "rcp; " + Constants.SINGLETON_DIRECTIVE + ":=true");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		BundleDescription rcp10 = state.getFactory().createBundleDescription(state, manifest, "rcp10", 2);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "gef; " + Constants.SINGLETON_DIRECTIVE + ":=true");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.REQUIRE_BUNDLE, "rcp; bundle-version=\"[1.0,1.0]\"");
+		BundleDescription gef10 = state.getFactory().createBundleDescription(state, manifest, "gef10", 3);
+
+		state.addBundle(sdk10);
+		state.addBundle(platform10);
+		state.addBundle(rcp10);
+		state.addBundle(gef10);
+		state.resolve();
+
+		assertTrue("1.0", sdk10.isResolved());
+		assertTrue("1.1", platform10.isResolved());
+		assertTrue("1.2", rcp10.isResolved());
+		assertTrue("1.3", gef10.isResolved());
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "sdk; " + Constants.SINGLETON_DIRECTIVE + ":=true");
+		manifest.put(Constants.BUNDLE_VERSION, "2.0");
+		manifest.put(Constants.REQUIRE_BUNDLE, "platform; bundle-version=\"[1.0,2.0]\"");
+		BundleDescription sdk20 = state.getFactory().createBundleDescription(state, manifest, "sdk20", 4);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "platform; " + Constants.SINGLETON_DIRECTIVE + ":=true");
+		manifest.put(Constants.BUNDLE_VERSION, "2.0");
+		manifest.put(Constants.REQUIRE_BUNDLE, "rcp; bundle-version=\"[1.0,2.0]\"");
+		BundleDescription platform20 = state.getFactory().createBundleDescription(state, manifest, "platform20", 5);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "rcp; " + Constants.SINGLETON_DIRECTIVE + ":=true");
+		manifest.put(Constants.BUNDLE_VERSION, "2.0");
+		BundleDescription rcp20 = state.getFactory().createBundleDescription(state, manifest, "rcp20", 6);
+
+		state.addBundle(sdk20);
+		state.addBundle(platform20);
+		state.addBundle(rcp20);
+		state.resolve(false);
+
+		assertTrue("2.0", sdk20.isResolved());
+		assertTrue("2.1", platform20.isResolved());
+		assertTrue("2.2", rcp10.isResolved());
+		assertTrue("2.3", gef10.isResolved());
+		assertFalse("2.4", sdk10.isResolved());
+		assertFalse("2.5", platform10.isResolved());
+		assertFalse("2.6", rcp20.isResolved());
+	}
+
+	public void testSingletonsSelection2() throws BundleException {
+		State state = buildEmptyState();
+
+		// test the selection algorithm of the resolver to pick the bundles which
+		// resolve the largest set of bundles; test with cycle added
+		Hashtable manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "sdk; " + Constants.SINGLETON_DIRECTIVE + ":=true");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.REQUIRE_BUNDLE, "platform; bundle-version=\"[1.0,2.0]\", cycle");
+		BundleDescription sdk10 = state.getFactory().createBundleDescription(state, manifest, "sdk10", 0);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "platform; " + Constants.SINGLETON_DIRECTIVE + ":=true");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.REQUIRE_BUNDLE, "rcp; bundle-version=\"[1.0,2.0]\"");
+		BundleDescription platform10 = state.getFactory().createBundleDescription(state, manifest, "platform10", 1);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "rcp; " + Constants.SINGLETON_DIRECTIVE + ":=true");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		BundleDescription rcp10 = state.getFactory().createBundleDescription(state, manifest, "rcp10", 2);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "gef; " + Constants.SINGLETON_DIRECTIVE + ":=true");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.REQUIRE_BUNDLE, "rcp; bundle-version=\"[1.0,1.0]\", sdk");
+		BundleDescription gef10 = state.getFactory().createBundleDescription(state, manifest, "gef10", 3);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "cycle; " + Constants.SINGLETON_DIRECTIVE + ":=true");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.REQUIRE_BUNDLE, "gef");
+		BundleDescription cycle10 = state.getFactory().createBundleDescription(state, manifest, "gef10", 4);
+
+
+		state.addBundle(sdk10);
+		state.addBundle(platform10);
+		state.addBundle(rcp10);
+		state.addBundle(gef10);
+		state.addBundle(cycle10);
+		state.resolve();
+
+		assertTrue("1.0", sdk10.isResolved());
+		assertTrue("1.1", platform10.isResolved());
+		assertTrue("1.2", rcp10.isResolved());
+		assertTrue("1.3", gef10.isResolved());
+		assertTrue("1.4", cycle10.isResolved());
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "sdk; " + Constants.SINGLETON_DIRECTIVE + ":=true");
+		manifest.put(Constants.BUNDLE_VERSION, "2.0");
+		manifest.put(Constants.REQUIRE_BUNDLE, "platform; bundle-version=\"[1.0,2.0]\"");
+		BundleDescription sdk20 = state.getFactory().createBundleDescription(state, manifest, "sdk20", 5);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "platform; " + Constants.SINGLETON_DIRECTIVE + ":=true");
+		manifest.put(Constants.BUNDLE_VERSION, "2.0");
+		manifest.put(Constants.REQUIRE_BUNDLE, "rcp; bundle-version=\"[1.0,2.0]\"");
+		BundleDescription platform20 = state.getFactory().createBundleDescription(state, manifest, "platform20", 6);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "rcp; " + Constants.SINGLETON_DIRECTIVE + ":=true");
+		manifest.put(Constants.BUNDLE_VERSION, "2.0");
+		BundleDescription rcp20 = state.getFactory().createBundleDescription(state, manifest, "rcp20", 7);
+
+		state.addBundle(sdk20);
+		state.addBundle(platform20);
+		state.addBundle(rcp20);
+		state.resolve(false);
+
+		assertTrue("2.0", sdk20.isResolved());
+		assertTrue("2.1", platform20.isResolved());
+		assertTrue("2.2", rcp10.isResolved());
+		assertTrue("2.3", gef10.isResolved());
+		assertTrue("2.4", cycle10.isResolved());
+		assertFalse("2.5", sdk10.isResolved());
+		assertFalse("2.6", platform10.isResolved());
+		assertFalse("2.7", rcp20.isResolved());
+	}
+
+	public void testSingletonsSelection3() throws BundleException {
+		State state = buildEmptyState();
+		int bundleID = 0;
+		// test the selection algorithm of the resolver to pick the bundles which
+		// resolve the largest set of bundles; with fragments
+		Hashtable manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "sdk; " + Constants.SINGLETON_DIRECTIVE + ":=true");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.REQUIRE_BUNDLE, "platform; bundle-version=\"[1.0,2.0]\"");
+		BundleDescription sdk10 = state.getFactory().createBundleDescription(state, manifest, "sdk10", bundleID++);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "sdk.frag; " + Constants.SINGLETON_DIRECTIVE + ":=true");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.FRAGMENT_HOST, "sdk");
+		BundleDescription sdk_frag10 = state.getFactory().createBundleDescription(state, manifest, "sdk.frag10", bundleID++);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "sdk.frag2; " + Constants.SINGLETON_DIRECTIVE + ":=true");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.FRAGMENT_HOST, "sdk; bundle-version=2.0");
+		BundleDescription sdk_frag210 = state.getFactory().createBundleDescription(state, manifest, "sdk.frag210", bundleID++);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "platform; " + Constants.SINGLETON_DIRECTIVE + ":=true");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.REQUIRE_BUNDLE, "rcp; bundle-version=\"[1.0,2.0]\"");
+		BundleDescription platform10 = state.getFactory().createBundleDescription(state, manifest, "platform10", bundleID++);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "platform.frag; " + Constants.SINGLETON_DIRECTIVE + ":=true");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.FRAGMENT_HOST, "platform");
+		BundleDescription platform_frag10 = state.getFactory().createBundleDescription(state, manifest, "platform.frag10", bundleID++);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "platform.frag2; " + Constants.SINGLETON_DIRECTIVE + ":=true");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.FRAGMENT_HOST, "platform; bundle-version=2.0");
+		BundleDescription platform_frag210 = state.getFactory().createBundleDescription(state, manifest, "platform.frag210", bundleID++);
+
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "rcp; " + Constants.SINGLETON_DIRECTIVE + ":=true");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		BundleDescription rcp10 = state.getFactory().createBundleDescription(state, manifest, "rcp10", bundleID++);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "rcp.frag; " + Constants.SINGLETON_DIRECTIVE + ":=true");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.FRAGMENT_HOST, "rcp");
+		BundleDescription rcp_frag10 = state.getFactory().createBundleDescription(state, manifest, "rcp.frag10", bundleID++);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "rcp.frag2; " + Constants.SINGLETON_DIRECTIVE + ":=true");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.FRAGMENT_HOST, "rcp; bundle-version=2.0");
+		BundleDescription rcp_frag210 = state.getFactory().createBundleDescription(state, manifest, "rcp.frag210", bundleID++);
+
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "gef; " + Constants.SINGLETON_DIRECTIVE + ":=true");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.REQUIRE_BUNDLE, "rcp; bundle-version=\"[1.0,1.0]\"");
+		BundleDescription gef10 = state.getFactory().createBundleDescription(state, manifest, "gef10", bundleID++);
+
+		state.addBundle(sdk10);
+		state.addBundle(sdk_frag10);
+		state.addBundle(sdk_frag210);
+		state.addBundle(platform10);
+		state.addBundle(platform_frag10);
+		state.addBundle(platform_frag210);
+		state.addBundle(rcp10);
+		state.addBundle(rcp_frag10);
+		state.addBundle(rcp_frag210);
+		state.addBundle(gef10);
+		state.resolve();
+
+		assertTrue("1.0", sdk10.isResolved());
+		assertTrue("1.0.1", sdk_frag10.isResolved());
+		assertFalse("1.0.2", sdk_frag210.isResolved());
+		assertTrue("1.1", platform10.isResolved());
+		assertTrue("1.1.1", platform_frag10.isResolved());
+		assertFalse("1.1.2", platform_frag210.isResolved());
+		assertTrue("1.2", rcp10.isResolved());
+		assertTrue("1.2.1", rcp_frag10.isResolved());
+		assertFalse("1.2.2", rcp_frag210.isResolved());
+		assertTrue("1.3", gef10.isResolved());
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "sdk; " + Constants.SINGLETON_DIRECTIVE + ":=true");
+		manifest.put(Constants.BUNDLE_VERSION, "2.0");
+		manifest.put(Constants.REQUIRE_BUNDLE, "platform; bundle-version=\"[1.0,2.0]\"");
+		BundleDescription sdk20 = state.getFactory().createBundleDescription(state, manifest, "sdk20", bundleID++);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "platform; " + Constants.SINGLETON_DIRECTIVE + ":=true");
+		manifest.put(Constants.BUNDLE_VERSION, "2.0");
+		manifest.put(Constants.REQUIRE_BUNDLE, "rcp; bundle-version=\"[1.0,2.0]\"");
+		BundleDescription platform20 = state.getFactory().createBundleDescription(state, manifest, "platform20", bundleID++);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "rcp; " + Constants.SINGLETON_DIRECTIVE + ":=true");
+		manifest.put(Constants.BUNDLE_VERSION, "2.0");
+		BundleDescription rcp20 = state.getFactory().createBundleDescription(state, manifest, "rcp20", bundleID++);
+
+		state.addBundle(sdk20);
+		state.addBundle(platform20);
+		state.addBundle(rcp20);
+		state.resolve(false);
+
+		assertTrue("2.0", sdk20.isResolved());
+		assertTrue("2.0.1", sdk_frag10.isResolved());
+		assertTrue("2.0.2", sdk_frag210.isResolved());
+		assertTrue("2.1", platform20.isResolved());
+		assertTrue("2.1.1", platform_frag10.isResolved());
+		assertTrue("2.1.2", platform_frag210.isResolved());
+		assertTrue("2.2", rcp10.isResolved());
+		assertTrue("2.2.1", rcp_frag10.isResolved());
+		assertTrue("2.3", gef10.isResolved());
+		assertFalse("2.4", sdk10.isResolved());
+		assertFalse("2.5", platform10.isResolved());
+		assertFalse("2.6", rcp20.isResolved());
+		assertFalse("2.2.2", rcp_frag210.isResolved());
+	}
+
+	public void testSingletonsSelection4() throws BundleException {
+		State state = buildEmptyState();
+		int bundleID = 0;
+		// test the selection algorithm of the resolver to pick the bundles which
+		// resolve the largest set of bundles; with fragments using Import-Package
+		Hashtable manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "sdk; " + Constants.SINGLETON_DIRECTIVE + ":=true");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.EXPORT_PACKAGE, "sdk; version=1.0");
+		manifest.put(Constants.IMPORT_PACKAGE, "platform; version=\"[1.0,2.0]\"");
+		BundleDescription sdk10 = state.getFactory().createBundleDescription(state, manifest, "sdk10", bundleID++);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "sdk.frag; " + Constants.SINGLETON_DIRECTIVE + ":=true");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.FRAGMENT_HOST, "sdk");
+		BundleDescription sdk_frag10 = state.getFactory().createBundleDescription(state, manifest, "sdk.frag10", bundleID++);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "sdk.frag2; " + Constants.SINGLETON_DIRECTIVE + ":=true");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.FRAGMENT_HOST, "sdk; bundle-version=2.0");
+		BundleDescription sdk_frag210 = state.getFactory().createBundleDescription(state, manifest, "sdk.frag210", bundleID++);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "platform; " + Constants.SINGLETON_DIRECTIVE + ":=true");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.EXPORT_PACKAGE, "platform; version=1.0");
+		manifest.put(Constants.IMPORT_PACKAGE, "rcp; version=\"[1.0,2.0]\"");
+		BundleDescription platform10 = state.getFactory().createBundleDescription(state, manifest, "platform10", bundleID++);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "platform.frag; " + Constants.SINGLETON_DIRECTIVE + ":=true");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.FRAGMENT_HOST, "platform");
+		BundleDescription platform_frag10 = state.getFactory().createBundleDescription(state, manifest, "platform.frag10", bundleID++);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "platform.frag2; " + Constants.SINGLETON_DIRECTIVE + ":=true");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.FRAGMENT_HOST, "platform; bundle-version=2.0");
+		BundleDescription platform_frag210 = state.getFactory().createBundleDescription(state, manifest, "platform.frag210", bundleID++);
+
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "rcp; " + Constants.SINGLETON_DIRECTIVE + ":=true");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.EXPORT_PACKAGE, "rcp; version=1.0");
+		BundleDescription rcp10 = state.getFactory().createBundleDescription(state, manifest, "rcp10", bundleID++);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "rcp.frag; " + Constants.SINGLETON_DIRECTIVE + ":=true");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.FRAGMENT_HOST, "rcp");
+		BundleDescription rcp_frag10 = state.getFactory().createBundleDescription(state, manifest, "rcp.frag10", bundleID++);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "rcp.frag2; " + Constants.SINGLETON_DIRECTIVE + ":=true");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.FRAGMENT_HOST, "rcp; bundle-version=2.0");
+		BundleDescription rcp_frag210 = state.getFactory().createBundleDescription(state, manifest, "rcp.frag210", bundleID++);
+
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "gef; " + Constants.SINGLETON_DIRECTIVE + ":=true");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.IMPORT_PACKAGE, "rcp; version=\"[1.0,1.0]\"");
+		BundleDescription gef10 = state.getFactory().createBundleDescription(state, manifest, "gef10", bundleID++);
+
+		state.addBundle(sdk10);
+		state.addBundle(sdk_frag10);
+		state.addBundle(sdk_frag210);
+		state.addBundle(platform10);
+		state.addBundle(platform_frag10);
+		state.addBundle(platform_frag210);
+		state.addBundle(rcp10);
+		state.addBundle(rcp_frag10);
+		state.addBundle(rcp_frag210);
+		state.addBundle(gef10);
+		state.resolve();
+
+		assertTrue("1.0", sdk10.isResolved());
+		assertTrue("1.0.1", sdk_frag10.isResolved());
+		assertFalse("1.0.2", sdk_frag210.isResolved());
+		assertTrue("1.1", platform10.isResolved());
+		assertTrue("1.1.1", platform_frag10.isResolved());
+		assertFalse("1.1.2", platform_frag210.isResolved());
+		assertTrue("1.2", rcp10.isResolved());
+		assertTrue("1.2.1", rcp_frag10.isResolved());
+		assertFalse("1.2.2", rcp_frag210.isResolved());
+		assertTrue("1.3", gef10.isResolved());
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "sdk; " + Constants.SINGLETON_DIRECTIVE + ":=true");
+		manifest.put(Constants.BUNDLE_VERSION, "2.0");
+		manifest.put(Constants.EXPORT_PACKAGE, "sdk; version=2.0");
+		manifest.put(Constants.IMPORT_PACKAGE, "platform; version=\"[1.0,2.0]\"");
+		BundleDescription sdk20 = state.getFactory().createBundleDescription(state, manifest, "sdk20", bundleID++);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "platform; " + Constants.SINGLETON_DIRECTIVE + ":=true");
+		manifest.put(Constants.BUNDLE_VERSION, "2.0");
+		manifest.put(Constants.EXPORT_PACKAGE, "platform; version=2.0");
+		manifest.put(Constants.IMPORT_PACKAGE, "rcp; version=\"[1.0,2.0]\"");
+		BundleDescription platform20 = state.getFactory().createBundleDescription(state, manifest, "platform20", bundleID++);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "rcp; " + Constants.SINGLETON_DIRECTIVE + ":=true");
+		manifest.put(Constants.EXPORT_PACKAGE, "rcp; version=2.0");
+		manifest.put(Constants.BUNDLE_VERSION, "2.0");
+		BundleDescription rcp20 = state.getFactory().createBundleDescription(state, manifest, "rcp20", bundleID++);
+
+		state.addBundle(sdk20);
+		state.addBundle(platform20);
+		state.addBundle(rcp20);
+		state.resolve(false);
+
+		assertTrue("2.0", sdk20.isResolved());
+		assertTrue("2.0.1", sdk_frag10.isResolved());
+		assertTrue("2.0.2", sdk_frag210.isResolved());
+		assertTrue("2.1", platform20.isResolved());
+		assertTrue("2.1.1", platform_frag10.isResolved());
+		assertTrue("2.1.2", platform_frag210.isResolved());
+		assertTrue("2.2", rcp10.isResolved());
+		assertTrue("2.2.1", rcp_frag10.isResolved());
+		assertTrue("2.3", gef10.isResolved());
+		assertFalse("2.4", sdk10.isResolved());
+		assertFalse("2.5", platform10.isResolved());
+		assertFalse("2.6", rcp20.isResolved());
+		assertFalse("2.2.2", rcp_frag210.isResolved());
+	}
+
 	public void testNonSingletonsSameVersion() throws BundleException {
 		// this is a testcase to handle how PDE build is using the state
 		// with multiple singleton bundles installed with the same BSN and version
