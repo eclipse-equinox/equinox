@@ -124,9 +124,12 @@ public class ConditionalPermissionInfoImpl implements ConditionalPermissionInfo,
 	}
 
 	/* Used to find permission constructors in addPermissions */
-	static private Class twoStringClassArray[] = new Class[] {String.class, String.class};
+	static private final Class twoStringClassArray[] = new Class[] {String.class, String.class};
+	static private final Class oneStringClassArray[] = new Class[] {String.class};
+	static private final Class noArgClassArray[] = new Class[] {};
+	static private final Class[][] permClassArrayArgs = new Class[][] {noArgClassArray, oneStringClassArray, twoStringClassArray};
 	/* Used to find condition constructors getConditions */
-	static private Class[] condClassArray = new Class[] {Bundle.class, ConditionInfo.class};
+	static private final Class[] condClassArray = new Class[] {Bundle.class, ConditionInfo.class};
 
 	/**
 	 * Adds the permissions of the given type (if any) that are part of this
@@ -145,18 +148,31 @@ public class ConditionalPermissionInfoImpl implements ConditionalPermissionInfo,
 	 */
 	int addPermissions(AbstractBundle bundle, PermissionCollection collection, Class permClass) throws SecurityException, NoSuchMethodException, IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException {
 		String permClassName = permClass.getName();
-		Constructor constructor = permClass.getConstructor(twoStringClassArray);
+		Constructor constructor = null;
+		int numArgs = -1;
+		for (int i = permClassArrayArgs.length - 1 ; i >= 0; i--) {
+			try {
+				constructor = permClass.getConstructor(permClassArrayArgs[i]);
+				numArgs = i;
+				break;
+			} catch (NoSuchMethodException e) {
+				// ignore
+			}
+		}
+		if (constructor == null)
+			throw new NoSuchMethodException(permClass.getName() + ".<init>()"); //$NON-NLS-1$
 		int count = 0;
 		/*
-		 * TODO: We need to cache the constructed permissions to enhance
-		 * performance.
+		 * TODO: We need to cache the permission constructors to enhance performance (see bug 118813).
 		 */
 		for (int i = 0; i < perms.length; i++) {
 			if (perms[i].getType().equals(permClassName)) {
 				count++;
-				String args[] = new String[2];
-				args[0] = perms[i].getName();
-				args[1] = perms[i].getActions();
+				String args[] = new String[numArgs];
+				if (numArgs > 0)
+					args[0] = perms[i].getName();
+				if (numArgs > 1)
+					args[1] = perms[i].getActions();
 				if (perms[i].getType().equals("java.io.FilePermission")) { //$NON-NLS-1$
 					// map FilePermissions for relative names to the bundle's data area
 					if (!args[0].equals("<<ALL FILES>>")) { //$NON-NLS-1$
