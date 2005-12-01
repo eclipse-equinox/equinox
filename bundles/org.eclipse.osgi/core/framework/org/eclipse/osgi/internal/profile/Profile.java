@@ -202,21 +202,31 @@ public class Profile {
 	 * @see #FLAG_NONE
 	 */
 	public static void logTime(int flag, String id, String msg, String description) {
-		if (profileLogger == null) {
-			if (profileLoggerClassName != null) {
-				Class profileImplClass = null;
-				try {
-					profileImplClass = Class.forName(profileLoggerClassName);
-					profileLogger = (ProfileLogger) profileImplClass.newInstance();
-				} catch (Exception e) {
-					// could not find the class
-					e.printStackTrace();
-				}
-			}
-			if (profileLogger == null)
-				profileLogger = new DefaultProfileLogger();
-		}
+		if (profileLogger == null)
+			profileLogger = createProfileLogger();
 		profileLogger.logTime(flag, id, msg, description);
+	}
+
+	/**
+	 * Use cumulative logging to record the entrance from this scope.
+	 * 
+	 * @param scope The entering scope
+	 */
+	public static void accumLogEnter(String scope) {
+		if (profileLogger == null)
+			profileLogger = createProfileLogger();
+		profileLogger.accumLogEnter(scope);
+	}
+
+	/**
+	 * Use cumulative logging to record the exit from this scope.
+	 * 
+	 * @param scope The exiting scope
+	 */
+	public static void accumLogExit(String scope) {
+		if (profileLogger == null)
+			profileLogger = createProfileLogger();
+		profileLogger.accumLogExit(scope);
 	}
 
 	/**
@@ -230,4 +240,28 @@ public class Profile {
 		return ""; //$NON-NLS-1$
 	}
 
+	/**
+	 *  Create an instance of the appropriate profile logger
+	 */
+	private static ProfileLogger createProfileLogger() {
+		ProfileLogger result = null;
+
+		// Try to create it by class name
+		if (profileLoggerClassName != null) {
+			Class profileImplClass = null;
+			try {
+				profileImplClass = Class.forName(profileLoggerClassName);
+				result = (ProfileLogger) profileImplClass.newInstance();
+			} catch (Exception e) {
+				// could not find the class
+				e.printStackTrace();
+			}
+		}
+
+		// Use the default
+		if (result == null)
+			result = new DefaultProfileLogger();
+
+		return (result);
+	}
 }

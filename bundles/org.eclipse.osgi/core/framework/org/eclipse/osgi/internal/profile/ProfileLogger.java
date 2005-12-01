@@ -25,6 +25,16 @@ public interface ProfileLogger {
 	public void logTime(int flag, String id, String msg, String description);
 
 	/**
+	 * @see Profile#accumLogEnter(String)
+	 */
+	public void accumLogEnter(String scope);
+
+	/**
+	 * @see Profile#accumLogExit(String)
+	 */
+	public void accumLogExit(String scope);
+
+	/**
 	 * 
 	 * @see Profile#getProfileLog()
 	 */

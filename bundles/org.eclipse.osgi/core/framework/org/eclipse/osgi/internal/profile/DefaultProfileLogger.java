@@ -12,6 +12,7 @@
 package org.eclipse.osgi.internal.profile;
 
 import java.io.*;
+import java.util.*;
 import org.eclipse.osgi.framework.debug.FrameworkDebugOptions;
 
 public class DefaultProfileLogger implements ProfileLogger {
@@ -41,6 +42,8 @@ public class DefaultProfileLogger implements ProfileLogger {
 	private StringBuffer padsb = new StringBuffer(16); // to prevent creating this over and over
 	protected int indent;
 	protected int timePaddingLength;
+	protected Stack scopeStack;
+	protected Map scopeToAccumPerfDataMap;
 
 	public DefaultProfileLogger() {
 		initProps();
@@ -161,6 +164,46 @@ public class DefaultProfileLogger implements ProfileLogger {
 		return log;
 	}
 
+	public synchronized void accumLogEnter(String scope) {
+		// Initialize our data structures
+		if (scopeStack == null)
+			scopeStack = new Stack();
+		if (scopeToAccumPerfDataMap == null)
+			scopeToAccumPerfDataMap = new TreeMap();
+
+		// We want getTime() to evaluate as late as possible
+		scopeStack.push(new AccumPerfScope(scope, getTime()));
+	}
+
+	public synchronized void accumLogExit(String scope) {
+		// What time is it?
+		long exit = getTime();
+
+		// Initialize our data structures
+		if (scopeStack == null)
+			scopeStack = new Stack();
+		if (scopeToAccumPerfDataMap == null)
+			scopeToAccumPerfDataMap = new TreeMap();
+
+		// Do our calculations
+		AccumPerfScope then = (AccumPerfScope) scopeStack.pop();
+		if (then == null)
+			System.err.println("ACCUM PERF ERROR: Scope stack empty: " + scope); //$NON-NLS-1$
+		else {
+			if (!then.scope.equals(scope))
+				System.err.println("ACCUM PERF ERROR: Scope mismatch: then='" + then.scope + "', now='" + scope + "'"); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+
+			AccumPerfData now = (AccumPerfData) scopeToAccumPerfDataMap.get(scope);
+			if (now == null) {
+				now = new AccumPerfData(scope);
+				scopeToAccumPerfDataMap.put(scope, now);
+			}
+
+			now.time += exit - then.enter;
+			now.enters++;
+		}
+	}
+
 	protected long getTime() {
 		return System.currentTimeMillis();
 	}
@@ -207,7 +250,14 @@ public class DefaultProfileLogger implements ProfileLogger {
 		diff = entry.time - compareWith.time;
 		entryReport.append(pad(Long.toString(diff), timePaddingLength));
 		entryReport.append(pad("", indent * 2)); // indent before displaying the entry.id //$NON-NLS-1$
-		entryReport.append(" - "); //$NON-NLS-1$
+
+		if (entry.flag == Profile.FLAG_ENTER)
+			entryReport.append(" >> "); //$NON-NLS-1$
+		else if (entry.flag == Profile.FLAG_EXIT)
+			entryReport.append(" << "); //$NON-NLS-1$
+		else if (entry.flag == Profile.FLAG_NONE)
+			entryReport.append(" -- "); //$NON-NLS-1$
+
 		entryReport.append(entry.id);
 		entryReport.append(" > "); //$NON-NLS-1$
 		entryReport.append(entry.msg);
@@ -222,6 +272,10 @@ public class DefaultProfileLogger implements ProfileLogger {
 		return entryReport.toString();
 	}
 
+	protected String accumEntryReport(AccumPerfData d) {
+		return ("     " + d.scope + ":enters=" + d.enters + ";time=" + d.time + ";\r\n"); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$
+	}
+
 	protected void makeLog() {
 		indent = 0;
 		timelog.append("\r\n"); //$NON-NLS-1$
@@ -231,6 +285,17 @@ public class DefaultProfileLogger implements ProfileLogger {
 			timelog.append(entryReport(entry, cmpEntry));
 		}
 		timeEntriesIndex = 0;
+
+		if (scopeToAccumPerfDataMap == null || scopeToAccumPerfDataMap.isEmpty())
+			return; // No data; nothing to do
+		timelog.append("\r\n"); //$NON-NLS-1$
+		timelog.append("Cumulative Log:\r\n"); //$NON-NLS-1$
+		Iterator iter = scopeToAccumPerfDataMap.values().iterator();
+		while (iter.hasNext()) {
+			AccumPerfData d = (AccumPerfData) iter.next();
+			timelog.append(accumEntryReport(d));
+		}
+		scopeToAccumPerfDataMap.clear();
 	}
 
 	protected String pad(String str, int size) {
@@ -303,5 +368,25 @@ public class DefaultProfileLogger implements ProfileLogger {
 		public String msg;
 		public String description;
 		public int flag;
+	}
+
+	protected static class AccumPerfData {
+		public AccumPerfData(String scope) {
+			this.scope = scope;
+		}
+
+		public String scope;
+		public long time;
+		public long enters;
+	}
+
+	protected static class AccumPerfScope {
+		public AccumPerfScope(String scope, long enter) {
+			this.scope = scope;
+			this.enter = enter;
+		}
+
+		public String scope;
+		public long enter;
 	}
 }
