@@ -395,8 +395,11 @@ public class Framework implements EventDispatcher, EventPublisher {
 			// look for a profile in the system bundle based on the vm profile
 			String javaProfile = vmProfile + ".profile"; //$NON-NLS-1$
 			url = systemBundle.getEntry(javaProfile);
-			if (url == null)
-				url = getClass().getResource(javaProfile);
+			if (url == null) {
+				// Check the ClassLoader in case we're launched off the Java boot classpath
+				ClassLoader loader=getClass().getClassLoader();
+				url = loader==null ? ClassLoader.getSystemResource(javaProfile) : loader.getResource(javaProfile);
+			}
 		}
 		if (url != null) {
 			InputStream in = null;

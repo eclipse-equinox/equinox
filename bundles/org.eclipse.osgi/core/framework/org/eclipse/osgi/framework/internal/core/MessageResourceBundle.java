@@ -200,7 +200,8 @@ public class MessageResourceBundle {
 		// to prevent them from being assigned twice
 		final String[] variants = buildVariants(bundleName);
 		for (int i = 0; i < variants.length; i++) {
-			final InputStream input = loader.getResourceAsStream(variants[i]);
+			// loader==null if we're launched off the Java boot classpath
+			final InputStream input = loader==null ? ClassLoader.getSystemResourceAsStream(variants[i]) : loader.getResourceAsStream(variants[i]);
 			if (input == null)
 				continue;
 			try {
