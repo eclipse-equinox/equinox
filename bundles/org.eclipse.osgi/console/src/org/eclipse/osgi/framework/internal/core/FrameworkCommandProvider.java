@@ -1582,26 +1582,58 @@ protected boolean isStartLevelSvcPresent(CommandInterpreter intp) {
 		return retval;
 	}
 	/**
-	 *  Given a number, retrieve the Bundle object with that id.
-	 *
+	 *  Given a number or a token representing a bundle symbolic name or bundle location,
+	 *  retrieve the Bundle object with that id.  The bundle symbolic name token is parsed as
+	 *  symbolicname[@version]
+	 *  
 	 *	@param intp The CommandInterpreter
 	 *  @param token A string containing a potential bundle it
 	 *  @param error A boolean indicating whether or not to output a message
 	 *  @return The requested Bundle object
 	 */
 	protected AbstractBundle getBundleFromToken(CommandInterpreter intp, String token, boolean error) {
-		AbstractBundle bundle;
+		AbstractBundle bundle = null;
 		try {
 			long id = Long.parseLong(token);
 			bundle = (AbstractBundle) context.getBundle(id);
 		} catch (NumberFormatException nfe) {
-			bundle = ((BundleContextImpl) context).getBundleByLocation(token);
-		}
 
+			// if not found, assume token is either symbolic name@version, or location
+			String symbolicName = token;
+			Version version = null;
+
+			// check for @ -- this may separate either the version string, or be part of the
+			// location
+			int ix = token.indexOf( "@" ); //$NON-NLS-1$
+			if (ix != -1) {
+				if ((ix + 1) != token.length()) {
+					try {
+						// if the version parses, then use the token prior to @ as a symbolic name
+						version = Version.parseVersion( token.substring( ix + 1, token.length() ));
+						symbolicName = token.substring( 0, ix );
+					} catch (IllegalArgumentException e) {
+						// version doesn't parse, assume token is symbolic name without version, or location
+					}
+				}
+			}
+
+			Bundle[] bundles = context.getBundles();
+			for (int i = 0, n = bundles.length; i < n; i++ ) {
+				AbstractBundle b = (AbstractBundle)bundles[i];
+				// if symbolicName matches, then matches if there is no version specific on command, or the version matches
+				// if there is no version specified on command, pick first matching bundle
+				if ((symbolicName.equals(b.getSymbolicName()) && (version == null || version.equals(b.getVersion())))
+						|| token.equals(b.getLocation())) {
+					bundle = b;
+					break;
+				}
+			}
+		}
+	
 		if ((bundle == null) && error) {
 			intp.println(NLS.bind(ConsoleMsg.CONSOLE_CANNOT_FIND_BUNDLE_ERROR, token)); 
 		}
-
+	
 		return (bundle);
 	}
 
