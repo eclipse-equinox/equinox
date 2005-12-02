@@ -20,6 +20,15 @@ import java.util.*;
  */
 final class BundleCombinedPermissions extends BundlePermissionCollection {
 	private static final long serialVersionUID = 4049357526208360496L;
+	// Note that this forces the Enumeration inner class to be loaded as soon as possible (see bug 119069)  
+    private static final Enumeration EMPTY_ENUMERATION = new Enumeration() {
+        public boolean hasMoreElements() {
+            return false;
+        }
+        public Object nextElement() {
+            throw new NoSuchElementException();
+        }
+    };	
 	private BundlePermissionCollection assigned;
 	private BundlePermissionCollection implied;
 	private ConditionalPermissions conditional;
@@ -96,14 +105,8 @@ final class BundleCombinedPermissions extends BundlePermissionCollection {
 	public Enumeration elements() {
 		// TODO return an empty enumeration for now; 
 		// It does not seem possible to do this properly with multiple exports and conditional permissions.
-		return new Enumeration() {
-			public boolean hasMoreElements() {
-				return false;
-			}
-			public Object nextElement() {
-				throw new NoSuchElementException();
-			}
-		};
+		// When looking to fix this be sure the Enumeration class is loaded as soon as possible (see bug 119069)
+		return EMPTY_ENUMERATION;
 	}
 
 	/**
