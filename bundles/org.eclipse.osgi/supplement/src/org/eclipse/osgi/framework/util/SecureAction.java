@@ -312,7 +312,7 @@ public class SecureAction {
 				public Object run() throws Exception {
 					return Class.forName(name);
 				}
-			});
+			}, controlContext);
 		} catch (PrivilegedActionException e) {
 			if (e.getException() instanceof ClassNotFoundException)
 				throw (ClassNotFoundException) e.getException();
