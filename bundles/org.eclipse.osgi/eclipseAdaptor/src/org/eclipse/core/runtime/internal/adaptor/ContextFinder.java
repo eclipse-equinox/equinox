@@ -89,26 +89,16 @@ public class ContextFinder extends ClassLoader implements PrivilegedAction {
 	}
 
 	protected URL findResource(String arg0) {
-		URL result = super.findResource(arg0);
-		if (result == null) {
-			ClassLoader toConsult = findClassLoader();
-			if (toConsult != null)
-				result = toConsult.getResource(arg0);
-		}
-		return result;
+		ClassLoader toConsult = findClassLoader();
+		if (toConsult != null)
+			return toConsult.getResource(arg0);
+		return super.findResource(arg0);
 	}
 
-	protected Enumeration findResources(String arg0) {
-		try {
-			Enumeration result = super.findResources(arg0);
-			if (result == null) {
-				ClassLoader toConsult = findClassLoader();
-				if (toConsult != null)
-					result = toConsult.getResources(arg0);
-			}
-			return result;
-		} catch (IOException e) {
-			return null;
-		}
+	protected Enumeration findResources(String arg0) throws IOException {
+		ClassLoader toConsult = findClassLoader();
+		if (toConsult != null)
+			return toConsult.getResources(arg0);
+		return super.findResources(arg0);
 	}
 }
