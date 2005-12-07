@@ -21,6 +21,8 @@ import org.osgi.util.tracker.ServiceTracker;
  */
 public class Activator implements BundleActivator {
 
+	private static final String OSGI_PREFERENCES_SERVICE = "org.osgi.service.prefs.PreferencesService"; //$NON-NLS-1$	
+
 	/**
 	 * The bundle associated this plug-in
 	 */
@@ -31,6 +33,11 @@ public class Activator implements BundleActivator {
 	 */
 	private ServiceRegistration preferencesService = null;
 
+	/**
+	 * This plugin provides the OSGi Preferences service.
+	 */
+	private ServiceRegistration osgiPreferencesService;
+	
 	/**
 	 * This method is called upon plug-in activation
 	 */
@@ -55,10 +62,13 @@ public class Activator implements BundleActivator {
 
 	private void registerServices() {
 		preferencesService = bundleContext.registerService(IPreferencesService.class.getName(), PreferencesService.getDefault(), new Hashtable());
+		osgiPreferencesService = bundleContext.registerService(OSGI_PREFERENCES_SERVICE, new OSGiPreferencesServiceManager(bundleContext), null);
 	}
 
 	private void unregisterServices() {
 		preferencesService.unregister();
+		osgiPreferencesService.unregister();
+		
 	}
 
 	/**
