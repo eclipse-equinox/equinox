@@ -15,8 +15,6 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.*;
-import org.osgi.framework.BundleException;
-import org.osgi.framework.Constants;
 
 public class StateResolverTest extends AbstractStateTest {
 	public static Test suite() {
@@ -175,6 +173,41 @@ public class StateResolverTest extends AbstractStateTest {
 		assertContains("2.2", dependent, state.getBundle(2));
 		assertContains("2.3", dependent, state.getBundle(4));
 		assertContains("2.4", dependent, state.getBundle(6));
+	}
+
+	public void testPrerequisiteBundle() throws BundleException {
+		State state = buildComplexState();
+		state.resolve();
+		BundleDescription[] prereqs;
+		prereqs = platformAdmin.getStateHelper().getPrerequisites(state.getResolvedBundles());
+		assertEquals("1.0", 6, prereqs.length);
+		prereqs = platformAdmin.getStateHelper().getPrerequisites(new BundleDescription[] {state.getBundle(1)});
+		assertEquals("2.0", 2, prereqs.length);
+		assertContains("2.1", prereqs, state.getBundle(1));
+		assertContains("2.2", prereqs, state.getBundle(3));
+		prereqs = platformAdmin.getStateHelper().getPrerequisites(new BundleDescription[] {state.getBundle(2)});
+		assertEquals("3.0", 3, prereqs.length);
+		assertContains("3.1", prereqs, state.getBundle(1));
+		assertContains("3.2", prereqs, state.getBundle(2));
+		assertContains("3.3", prereqs, state.getBundle(3));
+		prereqs = platformAdmin.getStateHelper().getPrerequisites(new BundleDescription[] {state.getBundle(3)});
+		assertEquals("4.0", 1, prereqs.length);
+		assertContains("4.1", prereqs, state.getBundle(3));
+		prereqs = platformAdmin.getStateHelper().getPrerequisites(new BundleDescription[] {state.getBundle(4)});
+		assertEquals("5.0", 3, prereqs.length);
+		assertContains("5.1", prereqs, state.getBundle(1));
+		assertContains("5.2", prereqs, state.getBundle(3));
+		assertContains("5.3", prereqs, state.getBundle(4));
+		prereqs = platformAdmin.getStateHelper().getPrerequisites(new BundleDescription[] {state.getBundle(5)});
+		assertEquals("6.0", 2, prereqs.length);
+		assertContains("6.1", prereqs, state.getBundle(3));
+		assertContains("6.2", prereqs, state.getBundle(5));
+		prereqs = platformAdmin.getStateHelper().getPrerequisites(new BundleDescription[] {state.getBundle(6)});
+		assertEquals("6.0", 4, prereqs.length);
+		assertContains("6.1", prereqs, state.getBundle(1));
+		assertContains("6.2", prereqs, state.getBundle(3));
+		assertContains("6.3", prereqs, state.getBundle(4));
+		assertContains("6.4", prereqs, state.getBundle(6));
 	}
 
 	// temporarily disabled

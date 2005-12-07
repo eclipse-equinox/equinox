@@ -34,11 +34,20 @@ public interface StateHelper {
 	 * Returns all bundles in the state depending on the given bundles. The given bundles
 	 * appear in the returned array.
 	 * 
-	 * @param roots the initial set bundles
+	 * @param roots the initial set of bundles
 	 * @return an array containing bundle descriptions for the given roots and all
 	 * bundles in the state that depend on them
 	 */
 	public BundleDescription[] getDependentBundles(BundleDescription[] roots);
+
+	/**
+	 * Returns all the prerequisite bundles in the state for the given bundles.  The given
+	 * bundles appear in the returned array.
+	 * @param leaves the inital set of bundles
+	 * @return an array containing bundle descriptions for the given leaves and their
+	 * prerequisite bundles in the state.
+	 */
+	public BundleDescription[] getPrerequisites(BundleDescription[] leaves);
 
 	/**
 	 * Returns all unsatisfied constraints in the given bundle. Returns an 

@@ -48,6 +48,25 @@ public class StateHelperImpl implements StateHelper {
 			addDependentBundles(dependents[i], reachable);
 	}
 
+	public BundleDescription[] getPrerequisites(BundleDescription[] leaves) {
+		if (leaves == null || leaves.length == 0)
+			return new BundleDescription[0];
+		Set reachable = new HashSet(leaves.length);
+		for (int i = 0; i < leaves.length; i++)
+			addPrerequisites(leaves[i], reachable);
+		return (BundleDescription[]) reachable.toArray(new BundleDescription[reachable.size()]);
+	}
+
+	private void addPrerequisites(BundleDescription leaf, Set reachable) {
+		if (reachable.contains(leaf))
+			return;
+		reachable.add(leaf);
+		List depList = ((BundleDescriptionImpl) leaf).getBundleDependencies();
+		BundleDescription[] dependencies = (BundleDescription[]) depList.toArray(new BundleDescription[depList.size()]);
+		for (int i = 0; i < dependencies.length; i++)
+			addPrerequisites(dependencies[i], reachable);
+	}
+
 	/**
 	 * @see StateHelper
 	 */
