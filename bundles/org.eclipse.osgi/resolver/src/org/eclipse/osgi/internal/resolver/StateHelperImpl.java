@@ -26,42 +26,42 @@ public class StateHelperImpl implements StateHelper {
 	/**
 	 * @see StateHelper
 	 */
-	public BundleDescription[] getDependentBundles(BundleDescription[] roots) {
-		if (roots == null || roots.length == 0)
+	public BundleDescription[] getDependentBundles(BundleDescription[] bundles) {
+		if (bundles == null || bundles.length == 0)
 			return new BundleDescription[0];
 
-		Set reachable = new HashSet(roots.length);
-		for (int i = 0; i < roots.length; i++) {
-			if (!roots[i].isResolved())
+		Set reachable = new HashSet(bundles.length);
+		for (int i = 0; i < bundles.length; i++) {
+			if (!bundles[i].isResolved())
 				continue;
-			addDependentBundles(roots[i], reachable);
+			addDependentBundles(bundles[i], reachable);
 		}
 		return (BundleDescription[]) reachable.toArray(new BundleDescription[reachable.size()]);
 	}
 
-	private void addDependentBundles(BundleDescription root, Set reachable) {
-		if (reachable.contains(root))
+	private void addDependentBundles(BundleDescription bundle, Set reachable) {
+		if (reachable.contains(bundle))
 			return;
-		reachable.add(root);
-		BundleDescription[] dependents = root.getDependents();
+		reachable.add(bundle);
+		BundleDescription[] dependents = bundle.getDependents();
 		for (int i = 0; i < dependents.length; i++)
 			addDependentBundles(dependents[i], reachable);
 	}
 
-	public BundleDescription[] getPrerequisites(BundleDescription[] leaves) {
-		if (leaves == null || leaves.length == 0)
+	public BundleDescription[] getPrerequisites(BundleDescription[] bundles) {
+		if (bundles == null || bundles.length == 0)
 			return new BundleDescription[0];
-		Set reachable = new HashSet(leaves.length);
-		for (int i = 0; i < leaves.length; i++)
-			addPrerequisites(leaves[i], reachable);
+		Set reachable = new HashSet(bundles.length);
+		for (int i = 0; i < bundles.length; i++)
+			addPrerequisites(bundles[i], reachable);
 		return (BundleDescription[]) reachable.toArray(new BundleDescription[reachable.size()]);
 	}
 
-	private void addPrerequisites(BundleDescription leaf, Set reachable) {
-		if (reachable.contains(leaf))
+	private void addPrerequisites(BundleDescription bundle, Set reachable) {
+		if (reachable.contains(bundle))
 			return;
-		reachable.add(leaf);
-		List depList = ((BundleDescriptionImpl) leaf).getBundleDependencies();
+		reachable.add(bundle);
+		List depList = ((BundleDescriptionImpl) bundle).getBundleDependencies();
 		BundleDescription[] dependencies = (BundleDescription[]) depList.toArray(new BundleDescription[depList.size()]);
 		for (int i = 0; i < dependencies.length; i++)
 			addPrerequisites(dependencies[i], reachable);
