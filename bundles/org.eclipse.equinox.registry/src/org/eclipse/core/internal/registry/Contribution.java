@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.core.internal.registry;
 
+import org.eclipse.core.runtime.Assert;
+
 // This object is used to keep track on a contributor basis of the extension and extension points being contributed.
 // It is mainly used on removal so we can quickly  find objects to remove.
 // Each contribution is made in the context of a namespace.  
@@ -28,6 +30,9 @@ public class Contribution implements KeyedElement {
 	// Id of the namespace owner (might be same or different from the contributorId).
 	protected long namespaceOwnerId = -1;
 
+	// indicates if this contribution needs to be saved in the registry cache
+	protected boolean isDynamic;
+
 	// This array stores the identifiers of both the extension points and the extensions.
 	// The array has always a minimum size of 2.
 	// The first element of the array is the number of extension points and the second the number of extensions. 
@@ -37,13 +42,44 @@ public class Contribution implements KeyedElement {
 	static final public byte EXTENSION_POINT = 0;
 	static final public byte EXTENSION = 1;
 
-	protected Contribution(long contributorId, ExtensionRegistry registry) {
+	protected Contribution(long contributorId, ExtensionRegistry registry, boolean dynamic) {
 		this.contributorId = contributorId;
 		this.registry = registry;
+		this.isDynamic = dynamic;
 
 		// resolve namespace owner and namespace
 		namespaceOwnerId = registry.getNamespaceOwnerId(contributorId);
 		namespace = registry.getNamespace(contributorId);
+	}
+
+	void mergeContribution(Contribution addContribution) {
+		Assert.isTrue(namespaceOwnerId == addContribution.namespaceOwnerId);
+		Assert.isTrue(registry == addContribution.registry);
+		
+		// isDynamic?
+		// Old New Result
+		// F   F   F
+		// F   T   F
+		// T   F   F	=> the only situation where isDynamic status needs to be adjusted 
+		// T   T   T
+		if (isDynamic() && !addContribution.isDynamic())
+			isDynamic = false;
+
+		int[] existing = getRawChildren();
+		int[] addition = addContribution.getRawChildren();
+
+		int extensionPoints = existing[EXTENSION_POINT] + addition[EXTENSION_POINT];
+		int extensions = existing[EXTENSION] + addition[EXTENSION];
+		int[] allChildren = new int[2 + extensionPoints + extensions];
+
+		allChildren[EXTENSION_POINT] = extensionPoints;
+		System.arraycopy(existing, 2, allChildren, 2, existing[EXTENSION_POINT]);
+		System.arraycopy(addition, 2, allChildren, 2 + existing[EXTENSION_POINT], addition[EXTENSION_POINT]);
+		allChildren[EXTENSION] = extensions;
+		System.arraycopy(existing, 2 + existing[EXTENSION_POINT], allChildren, 2 + extensionPoints, existing[EXTENSION]);
+		System.arraycopy(addition, 2 + addition[EXTENSION_POINT], allChildren, 2 + extensionPoints + existing[EXTENSION], addition[EXTENSION]);
+
+		children = allChildren;
 	}
 
 	void setRawChildren(int[] children) {
@@ -93,5 +129,9 @@ public class Contribution implements KeyedElement {
 
 	public boolean compare(KeyedElement other) {
 		return contributorId == ((Contribution) other).contributorId;
+	}
+
+	public boolean isDynamic() {
+		return isDynamic;
 	}
 }

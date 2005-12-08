@@ -260,16 +260,17 @@ public interface IExtensionRegistry {
 	 * @param is - stream open on the XML file. The XML file can contain an extension
 	 * poin(s) or/and extension(s) described in the format similar to plugin.xml 
 	 * @param contributorId - ID of the supplier of this contribution
-	 * @param type - name of the top tag in the XML file. At present it must be either
-	 * "plugin" or "fragment" 
-	 * @param name - name of the file containing this contribution for log purposes
-	 * @param xmlTranslationBundle - resource bundle used for translations; might be null 
-	 * @param token - control key for the registry (should be the same key as used in 
-	 * the RegistryManager#createExtensionRegistry() of this registry
+	 * @param name - optional name of the contribution. Used for error reporting; might be null
+	 * @param translationBundle - optional resource bundle used for translations; might be null 
+	 * @param token - the key used to check permissions. The registry had two keys specified in its
+	 * creation {@link RegistryFactory#createRegistry()}: master token and a user token. Use the
+	 * user token to specify that contribution has dynamic nature. If registry is created with
+	 * a registry strategy that specified isModifiable() as "true", null can be passed instead of
+	 * a token.
 	 * @return - true: the contribution was successfully processed; false - error in 
 	 * the processing of the contribution
 	 */
-	public boolean addXMLContribution(InputStream is, long contributorId, String type, String name, ResourceBundle xmlTranslationBundle, Object token);
+	public boolean addContribution(InputStream is, long contributorId, String name, ResourceBundle translationBundle, Object token);
 
 	/**
 	 * Call this method to properly stop the registry. It stops registry event processing
@@ -281,5 +282,6 @@ public interface IExtensionRegistry {
 	 * @param token - control key for the registry (should be the same key as used in 
 	 * the RegistryManager#createExtensionRegistry() of this registry
 	 */
+	// XXX which token should be supplied here.  Master or other?  
 	public void stop(Object token);
 }

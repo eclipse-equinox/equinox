@@ -38,10 +38,8 @@ public class Activator implements BundleActivator {
 	 */
 	private static final String STORAGE_DIR = "org.eclipse.core.runtime"; //$NON-NLS-1$
 
-	/**
-	 * Access key to the default registry
-	 */
-	private Object registryKey = new Object();
+	private Object masterRegistryKey = new Object();
+	private Object userRegistryKey = new Object();
 
 	private IExtensionRegistry defaultRegistry = null;
 	private ServiceRegistration registryRegistration;
@@ -97,13 +95,13 @@ public class Activator implements BundleActivator {
 	public void startRegistry() throws CoreException {
 		// see if the customer suppressed the creation of default registry
 		String property = bundleContext.getProperty(IRegistryConstants.PROP_DEFAULT_REGISTRY);
-		if (property != null && property.equalsIgnoreCase("false"))
+		if (property != null && property.equalsIgnoreCase("false")) //$NON-NLS-1$
 			return;
 
 		Location configuration = OSGIUtils.getDefault().getConfigurationLocation();
 		File theStorageDir = new File(configuration.getURL().getPath() + '/' + STORAGE_DIR);
-		EquinoxRegistryStrategy registryStrategy = new EquinoxRegistryStrategy(theStorageDir, configuration.isReadOnly(), registryKey);
-		defaultRegistry = RegistryFactory.createRegistry(registryStrategy, registryKey);
+		EquinoxRegistryStrategy registryStrategy = new EquinoxRegistryStrategy(theStorageDir, configuration.isReadOnly(), masterRegistryKey);
+		defaultRegistry = RegistryFactory.createRegistry(registryStrategy, masterRegistryKey, userRegistryKey);
 
 		registryRegistration = Activator.getContext().registerService(IExtensionRegistry.class.getName(), defaultRegistry, new Hashtable());
 		defaultProvider = new RegistryProviderOSGI();
@@ -115,7 +113,7 @@ public class Activator implements BundleActivator {
 		if (defaultRegistry != null) {
 			defaultProvider.release();
 			registryRegistration.unregister();
-			defaultRegistry.stop(registryKey);
+			defaultRegistry.stop(masterRegistryKey);
 		}
 	}
 

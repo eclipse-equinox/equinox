@@ -31,14 +31,16 @@ public final class RegistryFactory {
 	 * Creates an extension registry.
 	 *  
 	 * @param strategy - optional strategies that modify registry functionality; might be null
-	 * @param token - control token for the registry. Keep it to access controlled methods of the
-	 * registry
+	 * @param masterToken - master control token for the registry. Keep it to access controlled methods of the
+	 * registry. Contributions made with this token are marked as non-dynamic.
+	 * @param userToken - user access token for the registry. Contributions made with this token are marked 
+	 * as dynamic. 
 	 * @return - new extension registry
 	 * @throws CoreException in case if registry start conditions are not met. The exception's status 
 	 * message provides additional details.
 	 */
-	public static IExtensionRegistry createRegistry(RegistryStrategy strategy, Object token) {
-		return new ExtensionRegistry(strategy, token);
+	public static IExtensionRegistry createRegistry(RegistryStrategy strategy, Object masterToken, Object userToken) {
+		return new ExtensionRegistry(strategy, masterToken, userToken);
 	}
 
 	/**

@@ -30,17 +30,17 @@ public class Extension extends RegistryObject {
 	private static final byte XPT_NAME = 1; // The fully qualified name of the extension point to which this extension is attached to
 	private static final int EXTRA_SIZE = 2;
 
-	protected Extension(ExtensionRegistry registry) {
-		super(registry);
+	protected Extension(ExtensionRegistry registry, boolean isDynamic) {
+		super(registry, isDynamic);
 	}
 
-	protected Extension(int self, String simpleId, String namespace, int[] children, int extraData, ExtensionRegistry registry) {
-		super(registry);
+	protected Extension(int self, String simpleId, String namespace, int[] children, int extraData, ExtensionRegistry registry, boolean isDynamic) {
+		super(registry, isDynamic);
 
 		setObjectId(self);
 		this.simpleId = simpleId;
 		setRawChildren(children);
-		this.extraDataOffset = extraData;
+		setExtraDataOffset(extraData);
 		this.namespace = namespace;
 	}
 
@@ -67,7 +67,7 @@ public class Extension extends RegistryObject {
 
 	private String[] getExtraData() {
 		//The extension has been created by parsing, or does not have any extra data 
-		if (extraDataOffset == -1) {
+		if (noExtraData()) {
 			if (extraInformation != null)
 				return (String[]) extraInformation;
 			return null;
@@ -76,7 +76,7 @@ public class Extension extends RegistryObject {
 		//The extension has been loaded from the cache. 
 		String[] result = null;
 		if (extraInformation == null || (result = ((extraInformation instanceof SoftReference) ? (String[]) ((SoftReference) extraInformation).get() : (String[]) extraInformation)) == null) {
-			result = registry.getCleanTableReader().loadExtensionExtraData(extraDataOffset);
+			result = registry.getCleanTableReader().loadExtensionExtraData(getExtraDataOffset());
 			extraInformation = new SoftReference(result);
 		}
 		return result;

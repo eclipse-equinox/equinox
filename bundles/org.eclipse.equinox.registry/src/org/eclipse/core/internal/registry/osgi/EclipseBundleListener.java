@@ -115,14 +115,11 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 		}
 
 		InputStream is = null;
-		String manifestType = null;
 		String manifestName = isFragment ? FRAGMENT_MANIFEST : PLUGIN_MANIFEST;
 		try {
 			URL url = bundle.getEntry(manifestName);
-			if (url != null) {
+			if (url != null)
 				is = url.openStream();
-				manifestType = isFragment ? ExtensionsParser.FRAGMENT : ExtensionsParser.PLUGIN;
-			}
 		} catch (IOException ex) {
 			is = null;
 		}
@@ -137,7 +134,7 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 			//Ignore the exception
 		}
 
-		registry.addXMLContribution(is, contributorId, manifestType, manifestName, b, token);
+		registry.addContribution(is, contributorId, manifestName, b, token);
 
 		// bug 70941
 		// need to ensure we can find resource bundles from fragments

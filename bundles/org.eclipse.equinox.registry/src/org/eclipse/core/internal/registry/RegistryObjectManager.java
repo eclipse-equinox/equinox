@@ -39,7 +39,7 @@ public class RegistryObjectManager implements IObjectManager {
 	// key: object id, value: an object
 	private ReferenceMap cache; //Entries are added by getter. The structure is not thread safe.
 	//key: int, value: int
-	private HashtableOfInt fileOffsets; //This is read once on startup when loading from the cache. Entries are never added here. They are only removed to prevent "removed" objects to be reloaded. 
+	private HashtableOfInt fileOffsets; //This is read once on startup when loading from the cache. Entries are never added here. They are only removed to prevent "removed" objects to be reloaded.
 
 	private int nextId = 1; //This is only used to get the next number available.
 
@@ -104,7 +104,20 @@ public class RegistryObjectManager implements IObjectManager {
 
 	synchronized void addContribution(Contribution contribution) {
 		isDirty = true;
-		newContributions.add(contribution);
+		long id = contribution.getContributorId();
+		Long Id = new Long(id);
+
+		KeyedElement existingContribution = getFormerContributions().getByKey(Id);
+		if (existingContribution != null) { // move it from former to new contributions
+			removeContribution(id);
+			newContributions.add(existingContribution);
+		} else
+			existingContribution = newContributions.getByKey(Id);
+
+		if (existingContribution != null) // merge
+			((Contribution) existingContribution).mergeContribution(contribution);
+		else
+			newContributions.add(contribution);
 	}
 
 	synchronized int[] getExtensionPointsFrom(long id) {
@@ -195,6 +208,21 @@ public class RegistryObjectManager implements IObjectManager {
 			throw new InvalidRegistryObjectException();
 		cache.put(id, result);
 		return result;
+	}
+
+	// The current impementation of this method assumes that we don't cache dynamic 
+	// extension. In this case all extensions not yet loaded (i.e. not in the memory cache) 
+	// are "not dynamic" and we actually check memory objects to see if they are dynamic.
+	//
+	// If we decide to allow caching of dynamic objects, the implementation
+	// of this method would have to retrieved the object from disk and check
+	// its "dynamic" status. The problem is that id alone is not enough to get the object
+	// from the disk; object type is needed as well.
+	public boolean isDynamic(int id) {
+		Object result = cache.get(id);
+		if (result != null)
+			return ((RegistryObject) result).isDynamic();
+		return false;
 	}
 
 	public synchronized RegistryObject[] getObjects(int[] values, byte type) {
@@ -543,7 +571,7 @@ public class RegistryObjectManager implements IObjectManager {
 	}
 
 	private void collectChildren(RegistryObject ce, int level, Map collector) {
-		ConfigurationElement[] children = (ConfigurationElement[]) getObjects(ce.getRawChildren(), level == 0 || ce.extraDataOffset == -1 ? RegistryObjectManager.CONFIGURATION_ELEMENT : RegistryObjectManager.THIRDLEVEL_CONFIGURATION_ELEMENT);
+		ConfigurationElement[] children = (ConfigurationElement[]) getObjects(ce.getRawChildren(), level == 0 || ce.noExtraData() ? RegistryObjectManager.CONFIGURATION_ELEMENT : RegistryObjectManager.THIRDLEVEL_CONFIGURATION_ELEMENT);
 		for (int j = 0; j < children.length; j++) {
 			collector.put(new Integer(children[j].getObjectId()), children[j]);
 			collectChildren(children[j], level + 1, collector);

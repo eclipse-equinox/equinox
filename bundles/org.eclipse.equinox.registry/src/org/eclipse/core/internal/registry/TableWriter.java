@@ -54,6 +54,7 @@ public class TableWriter {
 	private HashtableOfInt offsets;
 
 	private ExtensionRegistry registry;
+	private RegistryObjectManager objectManager;
 
 	public TableWriter(ExtensionRegistry registry) {
 		this.registry = registry;
@@ -64,11 +65,12 @@ public class TableWriter {
 	}
 
 	public boolean saveCache(RegistryObjectManager objectManager, long timestamp) {
+		this.objectManager = objectManager;
 		try {
 			if (!openFiles())
 				return false;
 			try {
-				saveExtensionRegistry(objectManager, timestamp);
+				saveExtensionRegistry(timestamp);
 			} catch (IOException io) {
 				log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, fileError, RegistryMessages.meta_registryCacheWriteProblems, io));
 				return false;
@@ -126,16 +128,16 @@ public class TableWriter {
 		}
 	}
 
-	private void saveExtensionRegistry(RegistryObjectManager objectManager, long timestamp) throws IOException {
+	private void saveExtensionRegistry(long timestamp) throws IOException {
 		ExtensionPointHandle[] points = objectManager.getExtensionPointsHandles();
 		offsets = new HashtableOfInt(objectManager.getNextId());
 		for (int i = 0; i < points.length; i++) {
 			saveExtensionPoint(points[i]);
 		}
-		saveOrphans(objectManager);
+		saveOrphans();
 		saveNamespaces(objectManager.getContributions());
 		closeFiles(); //Close the files here so we can write the appropriate size information in the table file.
-		saveTables(objectManager, timestamp); //Write the table last so if that is something went wrong we can know
+		saveTables(timestamp); //Write the table last so if that is something went wrong we can know
 	}
 
 	private void saveNamespaces(KeyedHashSet[] contributions) throws IOException {
@@ -143,29 +145,45 @@ public class TableWriter {
 		DataOutputStream outputNamespace = new DataOutputStream(new BufferedOutputStream(fosNamespace));
 		KeyedElement[] newElements = contributions[0].elements();
 		KeyedElement[] formerElements = contributions[1].elements();
-		outputNamespace.writeInt(newElements.length + formerElements.length);
+
+		// get count of contributions that will be cached
+		int cacheSize = 0;
 		for (int i = 0; i < newElements.length; i++) {
-			Contribution elt = (Contribution) newElements[i];
-			outputNamespace.writeLong(elt.getContributorId());
-			saveArray(elt.getRawChildren(), outputNamespace);
+			if (shouldCache((Contribution)newElements[i]))
+				cacheSize++;
 		}
 		for (int i = 0; i < formerElements.length; i++) {
-			Contribution elt = (Contribution) formerElements[i];
-			outputNamespace.writeLong(elt.getContributorId());
-			saveArray(elt.getRawChildren(), outputNamespace);
+			if (shouldCache((Contribution)formerElements[i]))
+				cacheSize++;
+		}
+		outputNamespace.writeInt(cacheSize);
+
+		for (int i = 0; i < newElements.length; i++) {
+			Contribution element = (Contribution) newElements[i];
+			if (shouldCache(element)) {
+				outputNamespace.writeLong(element.getContributorId());
+				saveArray(element.getRawChildren(), outputNamespace);
+			}
+		}
+		for (int i = 0; i < formerElements.length; i++) {
+			Contribution element = (Contribution) formerElements[i];
+			if (shouldCache(element)) {
+				outputNamespace.writeLong(element.getContributorId());
+				saveArray(element.getRawChildren(), outputNamespace);
+			}
 		}
 		outputNamespace.flush();
 		fosNamespace.getFD().sync();
 		outputNamespace.close();
 	}
 
-	private void saveTables(RegistryObjectManager objectManager, long registryTimeStamp) throws IOException {
+	private void saveTables(long registryTimeStamp) throws IOException {
 		FileOutputStream fosTable = new FileOutputStream(tableFile);
 		DataOutputStream outputTable = new DataOutputStream(new BufferedOutputStream(fosTable));
 		writeCacheHeader(outputTable, registryTimeStamp);
 		outputTable.writeInt(objectManager.getNextId());
 		offsets.save(outputTable);
-		objectManager.getExtensionPoints().save(outputTable);
+		objectManager.getExtensionPoints().save(outputTable, this); // uses writer to filter contents
 		outputTable.flush();
 		fosTable.getFD().sync();
 		outputTable.close();
@@ -196,11 +214,13 @@ public class TableWriter {
 	}
 
 	private void saveExtensionPoint(ExtensionPointHandle xpt) throws IOException {
+		if (!shouldCache(xpt))
+			return;
 		//save the file position
 		offsets.put(xpt.getId(), mainOutput.size());
 		//save the extensionPoint
 		mainOutput.writeInt(xpt.getId());
-		saveArray(xpt.getObject().getRawChildren(), mainOutput);
+		saveArray(filter(xpt.getObject().getRawChildren()), mainOutput);
 		mainOutput.writeInt(getExtraDataPosition());
 		saveExtensionPointData(xpt);
 
@@ -208,11 +228,13 @@ public class TableWriter {
 	}
 
 	private void saveExtension(ExtensionHandle ext, DataOutputStream outputStream) throws IOException {
+		if (!shouldCache(ext))
+			return;
 		offsets.put(ext.getId(), outputStream.size());
 		outputStream.writeInt(ext.getId());
 		writeStringOrNull(ext.getSimpleIdentifier(), outputStream);
 		writeStringOrNull(ext.getNamespace(), outputStream);
-		saveArray(ext.getObject().getRawChildren(), outputStream);
+		saveArray(filter(ext.getObject().getRawChildren()), outputStream);
 		outputStream.writeInt(getExtraDataPosition());
 		saveExtensionData(ext);
 	}
@@ -226,6 +248,8 @@ public class TableWriter {
 
 	//Save Configuration elements depth first
 	private void saveConfigurationElement(ConfigurationElementHandle element, DataOutputStream outputStream, DataOutputStream extraOutputStream, int depth) throws IOException {
+		if (!shouldCache(element))
+			return;
 		DataOutputStream currentOutput = outputStream;
 		if (depth > 2)
 			currentOutput = extraOutputStream;
@@ -242,7 +266,7 @@ public class TableWriter {
 		currentOutput.writeInt(depth > 1 ? extraOutputStream.size() : -1);
 		writeStringArray(actualCe.getPropertiesAndValue(), currentOutput);
 		//save the children
-		saveArray(actualCe.getRawChildren(), currentOutput);
+		saveArray(filter(actualCe.getRawChildren()), currentOutput);
 
 		ConfigurationElementHandle[] childrenCEs = (ConfigurationElementHandle[]) element.getChildren();
 		for (int i = 0; i < childrenCEs.length; i++) {
@@ -258,9 +282,19 @@ public class TableWriter {
 
 		for (int i = 0; i < exts.length; i++) {
 			IConfigurationElement[] ces = exts[i].getConfigurationElements();
-			outputStream.writeInt(ces.length);
+			int countCElements = 0;
+			boolean[] save = new boolean[ces.length];
 			for (int j = 0; j < ces.length; j++) {
-				saveConfigurationElement((ConfigurationElementHandle) ces[j], outputStream, extraOutput, 1);
+				if (shouldCache((ConfigurationElementHandle) ces[j])) {
+					save[j] = true;
+					countCElements++;
+				} else
+					save[j] = false;
+			}
+			outputStream.writeInt(countCElements);
+			for (int j = 0; j < ces.length; j++) {
+				if (save[j])
+					saveConfigurationElement((ConfigurationElementHandle) ces[j], outputStream, extraOutput, 1);
 			}
 		}
 	}
@@ -287,12 +321,19 @@ public class TableWriter {
 		}
 	}
 
-	private void saveOrphans(RegistryObjectManager objectManager) throws IOException {
+	private void saveOrphans() throws IOException {
 		Map orphans = objectManager.getOrphanExtensions();
+		Map filteredOrphans = new HashMap();
+		for (Iterator iter = orphans.entrySet().iterator(); iter.hasNext();) {
+			Map.Entry entry = (Map.Entry) iter.next();
+			int[] filteredValue = filter((int[]) entry.getValue());
+			if (filteredValue.length != 0)
+				filteredOrphans.put(entry.getKey(), filteredValue);
+		}
 		FileOutputStream fosOrphan = new FileOutputStream(orphansFile);
 		DataOutputStream outputOrphan = new DataOutputStream(new BufferedOutputStream(fosOrphan));
-		outputOrphan.writeInt(orphans.size());
-		Set elements = orphans.entrySet();
+		outputOrphan.writeInt(filteredOrphans.size());
+		Set elements = filteredOrphans.entrySet();
 		for (Iterator iter = elements.iterator(); iter.hasNext();) {
 			Map.Entry entry = (Map.Entry) iter.next();
 			outputOrphan.writeUTF((String) entry.getKey());
@@ -310,5 +351,66 @@ public class TableWriter {
 
 	private void log(Status status) {
 		registry.log(status);
+	}
+
+	// XXX the args of the should cache methods should have semantic names (e.g., target)
+	// as it is the cut and paste process has left most of them with goofy names.  semantic
+	// names are less brittle.
+	private boolean shouldCache(ExtensionPointHandle xpt) {
+		if (xpt.isDynamic())
+			return saveDynamic();
+		return true;
+	}
+
+	private boolean shouldCache(ExtensionHandle xpt) {
+		if (xpt.isDynamic())
+			return saveDynamic();
+		return true;
+	}
+
+	private boolean shouldCache(ConfigurationElementHandle xpt) {
+		if (xpt.isDynamic())
+			return saveDynamic();
+		return true;
+	}
+	
+	private boolean shouldCache(Contribution contribution) {
+		if (contribution.isDynamic())
+			return saveDynamic();
+		return true;
+	}
+
+	public boolean shouldCache(int id) {
+		if (objectManager.isDynamic(id))
+			return saveDynamic();
+		return true;
+	}
+	
+	// Filters out registry objects that should not be cached
+	private int[] filter(int[] input) {
+		boolean[] save = new boolean[input.length];
+		int resultSize = 0;
+		for (int i = 0; i < input.length; i++) {
+			if (shouldCache(input[i])) {
+				save[i] = true;
+				resultSize++;
+			}
+			else
+				save[i] = false;
+		}
+		int[] result = new int[resultSize];
+		int pos = 0;
+		for (int i = 0; i < input.length; i++) {
+			if (save[i]) {
+				result[pos] = input[i];
+				pos++;
+			}
+		}
+		return result;
+	}
+
+	// Regulates if we are saving dynamic registry objects
+	public boolean saveDynamic() {
+		return false;
 	}
 }

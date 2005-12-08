@@ -28,6 +28,10 @@ public class ConfigurationElementHandle extends Handle implements IConfiguration
 		return (ConfigurationElement) objectManager.getObject(getId(), RegistryObjectManager.CONFIGURATION_ELEMENT);
 	}
 
+	public boolean isDynamic() {
+		return getConfigurationElement().isDynamic();
+	}
+
 	public String getAttribute(String propertyName) {
 		return getConfigurationElement().getAttribute(propertyName);
 	}
@@ -38,7 +42,7 @@ public class ConfigurationElementHandle extends Handle implements IConfiguration
 
 	public IConfigurationElement[] getChildren() {
 		ConfigurationElement actualCe = getConfigurationElement();
-		if (actualCe.extraDataOffset == -1) {
+		if (actualCe.noExtraData()) {
 			return (IConfigurationElement[]) objectManager.getHandles(actualCe.getRawChildren(), RegistryObjectManager.CONFIGURATION_ELEMENT);
 		}
 		return (IConfigurationElement[]) objectManager.getHandles(actualCe.getRawChildren(), RegistryObjectManager.THIRDLEVEL_CONFIGURATION_ELEMENT);
@@ -61,7 +65,7 @@ public class ConfigurationElementHandle extends Handle implements IConfiguration
 
 	public IConfigurationElement[] getChildren(String name) {
 		ConfigurationElement actualCE = getConfigurationElement();
-		ConfigurationElement[] children = (ConfigurationElement[]) objectManager.getObjects(actualCE.getRawChildren(), actualCE.extraDataOffset == -1 ? RegistryObjectManager.CONFIGURATION_ELEMENT : RegistryObjectManager.THIRDLEVEL_CONFIGURATION_ELEMENT);
+		ConfigurationElement[] children = (ConfigurationElement[]) objectManager.getObjects(actualCE.getRawChildren(), actualCE.noExtraData() ? RegistryObjectManager.CONFIGURATION_ELEMENT : RegistryObjectManager.THIRDLEVEL_CONFIGURATION_ELEMENT);
 		if (children.length == 0)
 			return ConfigurationElementHandle.EMPTY_ARRAY;
 
@@ -74,7 +78,7 @@ public class ConfigurationElementHandle extends Handle implements IConfiguration
 					System.arraycopy(result, 0, copy, 0, result.length);
 					result = copy;
 				}
-				result[idx++] = (IConfigurationElement) objectManager.getHandle(children[i].getObjectId(), actualCE.extraDataOffset == -1 ? RegistryObjectManager.CONFIGURATION_ELEMENT : RegistryObjectManager.THIRDLEVEL_CONFIGURATION_ELEMENT);
+				result[idx++] = (IConfigurationElement) objectManager.getHandle(children[i].getObjectId(), actualCE.noExtraData() ? RegistryObjectManager.CONFIGURATION_ELEMENT : RegistryObjectManager.THIRDLEVEL_CONFIGURATION_ELEMENT);
 			}
 		}
 		if (idx == 0)

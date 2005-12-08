@@ -213,7 +213,7 @@ public class TableReader {
 		int misc = is.readInt();//this is set in second level CEs, to indicate where in the extra data file the children ces are
 		String[] propertiesAndValue = readPropertiesAndValue(is);
 		int[] children = readArray(is);
-		return getObjectFactory().createConfigurationElement(self, contributorId, namespaceOwnerId, name, propertiesAndValue, children, misc, parentId, parentType);
+		return getObjectFactory().createConfigurationElement(self, contributorId, namespaceOwnerId, name, propertiesAndValue, children, misc, parentId, parentType, false);
 	}
 
 	public Object loadThirdLevelConfigurationElements(int offset, RegistryObjectManager objectManager) {
@@ -285,7 +285,7 @@ public class TableReader {
 		String namespace = readStringOrNull(mainInput, false);
 		int[] children = readArray(mainInput);
 		int extraData = mainInput.readInt();
-		return getObjectFactory().createExtension(self, simpleId, namespace, children, extraData);
+		return getObjectFactory().createExtension(self, simpleId, namespace, children, extraData, false);
 	}
 
 	public ExtensionPoint loadExtensionPointTree(int offset, RegistryObjectManager objects) {
@@ -334,7 +334,7 @@ public class TableReader {
 		int self = mainInput.readInt();
 		int[] children = readArray(mainInput);
 		int extraData = mainInput.readInt();
-		return getObjectFactory().createExtensionPoint(self, children, extraData);
+		return getObjectFactory().createExtensionPoint(self, children, extraData, false);
 	}
 
 	private int[] readArray(DataInputStream in) throws IOException {
@@ -418,7 +418,7 @@ public class TableReader {
 			int size = namespaceInput.readInt();
 			KeyedHashSet result = new KeyedHashSet(size);
 			for (int i = 0; i < size; i++) {
-				Contribution n = getObjectFactory().createContribution(namespaceInput.readLong());
+				Contribution n = getObjectFactory().createContribution(namespaceInput.readLong(), false);
 				n.setRawChildren(readArray(namespaceInput));
 				result.add(n);
 			}

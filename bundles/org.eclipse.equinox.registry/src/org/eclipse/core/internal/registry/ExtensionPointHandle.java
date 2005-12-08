@@ -33,6 +33,10 @@ public class ExtensionPointHandle extends Handle implements IExtensionPoint {
 		return getExtensionPoint().getNamespace();
 	}
 
+	public boolean isDynamic() {
+		return getExtensionPoint().isDynamic();
+	}
+
 	public IExtension getExtension(String extensionId) {
 		if (extensionId == null)
 			return null;
@@ -90,5 +94,4 @@ public class ExtensionPointHandle extends Handle implements IExtensionPoint {
 		}
 		return true;
 	}
-
 }

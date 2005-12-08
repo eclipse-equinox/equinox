@@ -67,8 +67,8 @@ public class ExtensionRegistry implements IExtensionRegistry {
 	// Table reader associated with this extension registry
 	protected TableReader theTableReader = new TableReader(this);
 
-	// The "key" to the object. 
-	private Object token;
+	private Object masterToken; // use to get full control of the registry; objects created as "static" 
+	private Object userToken; // use to add dynamic contributions
 
 	/////////////////////////////////////////////////////////////////////////////////////////
 	// Registry strategies
@@ -572,13 +572,7 @@ public class ExtensionRegistry implements IExtensionRegistry {
 		}
 	}
 
-	/**
-	 * @param strategy - optional strategy that modify the behaviour of the extension registry.
-	 * Might be null.
-	 * @param key - the key token supplied by the owner of the registry. The same token should be
-	 * passed to access-controlled methods of the registry. 
-	 */
-	public ExtensionRegistry(RegistryStrategy registryStrategy, Object key) {
+	public ExtensionRegistry(RegistryStrategy registryStrategy, Object masterToken, Object userToken) {
 		if (registryStrategy != null)
 			strategy = registryStrategy;
 		else
@@ -589,7 +583,8 @@ public class ExtensionRegistry implements IExtensionRegistry {
 		// create the file manager right away
 		setFileManager(strategy.getStorage(), strategy.isCacheReadOnly());
 
-		token = key;
+		this.masterToken = masterToken;
+		this.userToken = userToken;
 		registryObjects = new RegistryObjectManager(this);
 
 		if (strategy.cacheUse()) {
@@ -642,7 +637,7 @@ public class ExtensionRegistry implements IExtensionRegistry {
 	public void stop(Object key) {
 		// If the registry creator specified a key token, check that the key mathches it 
 		// (it is assumed that registry owner keeps the key to prevent unautorized accesss).
-		if (token != null && token != key) {
+		if (masterToken != null && masterToken != key) {
 			throw new IllegalArgumentException("Unauthorized access to the ExtensionRegistry.stop() method. Check if proper access token is supplied."); //$NON-NLS-1$  
 		}
 
@@ -907,23 +902,29 @@ public class ExtensionRegistry implements IExtensionRegistry {
 	//////////////////////////////////////////////////////////////////////////////////////
 	// Modifiable portion
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.equinox.registry.ISPIExtensionRegistry#addXMLContribution(java.io.InputStream, long, javax.xml.parsers.SAXParserFactory)
-	 */
-	public boolean addXMLContribution(InputStream is, long contributorId, String contributionType, String contributionName, ResourceBundle b, Object key) {
-		// If the registry is not modifiable, check that the proper key was passed in 
-		if (!strategy.isModifiable() && token != key) {
-			throw new IllegalArgumentException("Unauthorized access to the ExtensionRegistry.addXMLContribution() method. Check if proper access token is supplied."); //$NON-NLS-1$  
-		}
+	public boolean addContribution(InputStream is, long contributorId, String contributionName, ResourceBundle b, Object key) {
+		// check access
+		if (!strategy.isModifiable() && masterToken != key && userToken != key)
+			throw new IllegalArgumentException("Unauthorized access to the ExtensionRegistry.addXMLContribution() method. Check if proper access token is supplied."); //$NON-NLS-1$
+		//  determine contribution nature
+		boolean isDynamic;
+		if (masterToken == key)
+			isDynamic = false;
+		else if (userToken == key)
+			isDynamic = true;
+		else
+			isDynamic = false; // default: for modifiable registry contributions are static
 
+		if (contributionName == null)
+			contributionName = ""; //$NON-NLS-1$
 		String ownerName = getNamespace(contributorId);
 		String message = NLS.bind(RegistryMessages.parse_problems, ownerName);
 		MultiStatus problems = new MultiStatus(RegistryMessages.OWNER_NAME, ExtensionsParser.PARSE_PROBLEM, message, null);
 		ExtensionsParser parser = new ExtensionsParser(problems, this);
-		Contribution contribution = getElementFactory().createContribution(contributorId);
+		Contribution contribution = getElementFactory().createContribution(contributorId, isDynamic);
 
 		try {
-			parser.parseManifest(strategy.getXMLParser(), new InputSource(is), contributionType, contributionName, getObjectManager(), contribution, b);
+			parser.parseManifest(strategy.getXMLParser(), new InputSource(is), contributionName, getObjectManager(), contribution, b);
 			if (problems.getSeverity() != IStatus.OK) {
 				log(problems);
 				return false;
@@ -978,9 +979,9 @@ public class ExtensionRegistry implements IExtensionRegistry {
 		long namespaceOwnerId = getNamespaceOwnerId(contributorId);
 
 		// addition wraps in a contribution
-		Contribution contribution = getElementFactory().createContribution(contributorId);
+		Contribution contribution = getElementFactory().createContribution(contributorId, true);
 
-		ExtensionPoint currentExtPoint = getElementFactory().createExtensionPoint();
+		ExtensionPoint currentExtPoint = getElementFactory().createExtensionPoint(true);
 		String uniqueId = namespaceName + '.' + extensionPointId;
 		currentExtPoint.setUniqueIdentifier(uniqueId);
 		String labelNLS = translate(extensionPointLabel, null);
@@ -1023,9 +1024,9 @@ public class ExtensionRegistry implements IExtensionRegistry {
 		long namespaceOwnerId = getNamespaceOwnerId(contributorId);
 
 		// addition wraps in a contribution
-		Contribution contribution = getElementFactory().createContribution(contributorId);
+		Contribution contribution = getElementFactory().createContribution(contributorId, true);
 
-		Extension currentExtension = getElementFactory().createExtension();
+		Extension currentExtension = getElementFactory().createExtension(true);
 		currentExtension.setSimpleIdentifier(extensionId);
 		String extensionLabelNLS = translate(extensionLabel, null);
 		currentExtension.setLabel(extensionLabelNLS);
@@ -1055,7 +1056,7 @@ public class ExtensionRegistry implements IExtensionRegistry {
 
 	// Fill in the actual content of this extension
 	private void createExtensionData(long namespaceOwnerId, ExtensionDescription description, RegistryObject parent) {
-		ConfigurationElement currentConfigurationElement = getElementFactory().createConfigurationElement();
+		ConfigurationElement currentConfigurationElement = getElementFactory().createConfigurationElement(true);
 		currentConfigurationElement.setNamespaceOwnerId(namespaceOwnerId);
 		currentConfigurationElement.setName(description.getElementName());
 
@@ -1100,6 +1101,13 @@ public class ExtensionRegistry implements IExtensionRegistry {
 
 	public void setCompatibilityStrategy(ICompatibilityStrategy strategy) {
 		compatibilityStrategy = strategy;
+	}
+
+	/**
+	 * This is an experimental funciton. It <b>will</b> be modified in future.
+	 */
+	public Object getTemporaryUserToken() {
+		return userToken;
 	}
 
 }

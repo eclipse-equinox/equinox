@@ -42,19 +42,19 @@ public class ConfigurationElement extends RegistryObject {
 	//This happens when the configuration is obtained from a delta containing removed extension.
 	protected long namespaceOwnerId;
 
-	protected ConfigurationElement(ExtensionRegistry registry) {
-		super(registry);
+	protected ConfigurationElement(ExtensionRegistry registry, boolean isDynamic) {
+		super(registry, isDynamic);
 	}
 
-	protected ConfigurationElement(int self, long contributorId, long namespaceOwnerId, String name, String[] propertiesAndValue, int[] children, int extraDataOffset, int parent, byte parentType, ExtensionRegistry registry) {
-		super(registry);
+	protected ConfigurationElement(int self, long contributorId, long namespaceOwnerId, String name, String[] propertiesAndValue, int[] children, int extraDataOffset, int parent, byte parentType, ExtensionRegistry registry, boolean isDynamic) {
+		super(registry, isDynamic);
 
 		setObjectId(self);
 		this.namespaceOwnerId = namespaceOwnerId;
 		this.name = name;
 		this.propertiesAndValue = propertiesAndValue;
 		setRawChildren(children);
-		this.extraDataOffset = extraDataOffset;
+		setExtraDataOffset(extraDataOffset);
 		parentId = parent;
 		this.parentType = parentType;
 
@@ -143,7 +143,7 @@ public class ConfigurationElement extends RegistryObject {
 		int idx = 0;
 		RegistryObjectManager objectManager = registry.getObjectManager();
 		for (int i = 0; i < children.length; i++) {
-			ConfigurationElement toTest = (ConfigurationElement) objectManager.getObject(children[i], extraDataOffset == -1 ? RegistryObjectManager.CONFIGURATION_ELEMENT : RegistryObjectManager.THIRDLEVEL_CONFIGURATION_ELEMENT);
+			ConfigurationElement toTest = (ConfigurationElement) objectManager.getObject(children[i], noExtraData() ? RegistryObjectManager.CONFIGURATION_ELEMENT : RegistryObjectManager.THIRDLEVEL_CONFIGURATION_ELEMENT);
 			if (toTest.name.equals(childrenName)) {
 				if (idx != 0) {
 					ConfigurationElement[] copy = new ConfigurationElement[result.length + 1];

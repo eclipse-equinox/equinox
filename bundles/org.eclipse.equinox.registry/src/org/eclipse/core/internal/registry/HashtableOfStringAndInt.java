@@ -162,6 +162,18 @@ public final class HashtableOfStringAndInt implements Cloneable {
 			out.writeInt(valueTable[i]);
 		}
 	}
+	
+	/**
+	 * Filtered save: outputs only elements with values not in the excluded list.
+	 */
+	public void save(DataOutputStream out, TableWriter writer) throws IOException {
+		HashtableOfStringAndInt filteredHashtable = new HashtableOfStringAndInt((int) (elementSize * GROWTH_FACTOR));
+		String currentKey;
+		for (int i = keyTable.length; --i >= 0;)
+			if ((currentKey = keyTable[i]) != null && writer.shouldCache(valueTable[i]))
+				filteredHashtable.put(currentKey, valueTable[i]);
+		filteredHashtable.save(out);
+	}
 
 	public void load(DataInputStream in) throws IOException {
 		elementSize = in.readInt();

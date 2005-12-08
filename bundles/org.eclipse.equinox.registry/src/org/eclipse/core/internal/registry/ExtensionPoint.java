@@ -31,16 +31,16 @@ public class ExtensionPoint extends RegistryObject {
 	private static final byte CONTRIBUTOR_ID = 4; //The namespace owner contributing the extension point
 	private static final int EXTRA_SIZE = 5;
 
-	protected ExtensionPoint(ExtensionRegistry registry) {
-		super(registry);
+	protected ExtensionPoint(ExtensionRegistry registry, boolean isDynamic) {
+		super(registry, isDynamic);
 	}
 
-	protected ExtensionPoint(int self, int[] children, int dataOffset, ExtensionRegistry registry) {
-		super(registry);
+	protected ExtensionPoint(int self, int[] children, int dataOffset, ExtensionRegistry registry, boolean isDynamic) {
+		super(registry, isDynamic);
 
 		setObjectId(self);
 		setRawChildren(children);
-		extraDataOffset = dataOffset;
+		setExtraDataOffset(dataOffset);
 	}
 
 	protected String getSimpleIdentifier() {
@@ -49,7 +49,7 @@ public class ExtensionPoint extends RegistryObject {
 
 	private String[] getExtraData() {
 		//The extension point has been created by parsing, or does not have any extra data 
-		if (extraDataOffset == -1) { //When this is true, the extraInformation is always a String[]. This happens when the object is created by the parser.  
+		if (noExtraData()) { //When this is true, the extraInformation is always a String[]. This happens when the object is created by the parser.  
 			if (extraInformation != null)
 				return (String[]) extraInformation;
 			return new String[EXTRA_SIZE];
@@ -58,7 +58,7 @@ public class ExtensionPoint extends RegistryObject {
 		//The extension point has been loaded from the cache. 
 		String[] result = null;
 		if (extraInformation == null || (result = ((extraInformation instanceof SoftReference) ? (String[]) ((SoftReference) extraInformation).get() : (String[]) extraInformation)) == null) {
-			result = registry.getCleanTableReader().loadExtensionPointExtraData(extraDataOffset);
+			result = registry.getCleanTableReader().loadExtensionPointExtraData(getExtraDataOffset());
 			extraInformation = new SoftReference(result);
 		}
 		return result;

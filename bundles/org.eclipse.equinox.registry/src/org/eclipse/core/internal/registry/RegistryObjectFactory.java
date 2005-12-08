@@ -24,37 +24,37 @@ public class RegistryObjectFactory {
 
 	////////////////////////////////////////////////////////////////////////////
 	// Contribution
-	public Contribution createContribution(long contributorId) {
-		return new Contribution(contributorId, registry);
+	public Contribution createContribution(long contributorId, boolean isDynamic) {
+		return new Contribution(contributorId, registry, isDynamic);
 	}
 
 	////////////////////////////////////////////////////////////////////////////
 	// Extension point
-	public ExtensionPoint createExtensionPoint() {
-		return new ExtensionPoint(registry);
+	public ExtensionPoint createExtensionPoint(boolean isDynamic) {
+		return new ExtensionPoint(registry, isDynamic);
 	}
 
-	public ExtensionPoint createExtensionPoint(int self, int[] children, int dataOffset) {
-		return new ExtensionPoint(self, children, dataOffset, registry);
+	public ExtensionPoint createExtensionPoint(int self, int[] children, int dataOffset, boolean isDynamic) {
+		return new ExtensionPoint(self, children, dataOffset, registry, isDynamic);
 	}
 
 	////////////////////////////////////////////////////////////////////////////
 	// Extension
-	public Extension createExtension() {
-		return new Extension(registry);
+	public Extension createExtension(boolean isDynamic) {
+		return new Extension(registry, isDynamic);
 	}
 
-	public Extension createExtension(int self, String simpleId, String namespace, int[] children, int extraData) {
-		return new Extension(self, simpleId, namespace, children, extraData, registry);
+	public Extension createExtension(int self, String simpleId, String namespace, int[] children, int extraData, boolean isDynamic) {
+		return new Extension(self, simpleId, namespace, children, extraData, registry, isDynamic);
 	}
 
 	////////////////////////////////////////////////////////////////////////////
 	// Configuration element
-	public ConfigurationElement createConfigurationElement() {
-		return new ConfigurationElement(registry);
+	public ConfigurationElement createConfigurationElement(boolean isDynamic) {
+		return new ConfigurationElement(registry, isDynamic);
 	}
 
-	public ConfigurationElement createConfigurationElement(int self, long contributorId, long namespaceOwnerId, String name, String[] propertiesAndValue, int[] children, int extraDataOffset, int parent, byte parentType) {
-		return new ConfigurationElement(self, contributorId, namespaceOwnerId, name, propertiesAndValue, children, extraDataOffset, parent, parentType, registry);
+	public ConfigurationElement createConfigurationElement(int self, long contributorId, long namespaceOwnerId, String name, String[] propertiesAndValue, int[] children, int extraDataOffset, int parent, byte parentType, boolean isDynamic) {
+		return new ConfigurationElement(self, contributorId, namespaceOwnerId, name, propertiesAndValue, children, extraDataOffset, parent, parentType, registry, isDynamic);
 	}
 }

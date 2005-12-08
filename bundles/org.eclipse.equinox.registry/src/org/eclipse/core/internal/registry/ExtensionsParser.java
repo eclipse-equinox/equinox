@@ -132,8 +132,6 @@ public class ExtensionsParser extends DefaultHandler {
 
 	private ArrayList scratchVectors[] = new ArrayList[LAST_INDEX + 1];
 
-	private String manifestType;
-
 	private Locator locator = null;
 
 	public ExtensionsParser(MultiStatus status, ExtensionRegistry registry) {
@@ -184,33 +182,31 @@ public class ExtensionsParser extends DefaultHandler {
 				internalError(NLS.bind(RegistryMessages.parse_internalStack, elementName));
 				break;
 			case BUNDLE_STATE :
-				if (elementName.equals(manifestType)) {
-					stateStack.pop();
+				stateStack.pop();
 
-					ArrayList extensionPoints = scratchVectors[EXTENSION_POINT_INDEX];
-					ArrayList extensions = scratchVectors[EXTENSION_INDEX];
-					int[] namespaceChildren = new int[2 + extensionPoints.size() + extensions.size()];
-					int position = 2;
-					// Put the extension points into this namespace
-					if (extensionPoints.size() > 0) {
-						namespaceChildren[Contribution.EXTENSION_POINT] = extensionPoints.size();
-						for (Iterator iter = extensionPoints.iterator(); iter.hasNext();) {
-							namespaceChildren[position++] = ((RegistryObject) iter.next()).getObjectId();
-						}
-						extensionPoints.clear();
+				ArrayList extensionPoints = scratchVectors[EXTENSION_POINT_INDEX];
+				ArrayList extensions = scratchVectors[EXTENSION_INDEX];
+				int[] namespaceChildren = new int[2 + extensionPoints.size() + extensions.size()];
+				int position = 2;
+				// Put the extension points into this namespace
+				if (extensionPoints.size() > 0) {
+					namespaceChildren[Contribution.EXTENSION_POINT] = extensionPoints.size();
+					for (Iterator iter = extensionPoints.iterator(); iter.hasNext();) {
+						namespaceChildren[position++] = ((RegistryObject) iter.next()).getObjectId();
 					}
-
-					// Put the extensions into this namespace too
-					if (extensions.size() > 0) {
-						Extension[] renamedExtensions = fixRenamedExtensionPoints((Extension[]) extensions.toArray(new Extension[extensions.size()]));
-						namespaceChildren[Contribution.EXTENSION] = renamedExtensions.length;
-						for (int i = 0; i < renamedExtensions.length; i++) {
-							namespaceChildren[position++] = renamedExtensions[i].getObjectId();
-						}
-						extensions.clear();
-					}
-					namespace.setRawChildren(namespaceChildren);
+					extensionPoints.clear();
 				}
+
+				// Put the extensions into this namespace too
+				if (extensions.size() > 0) {
+					Extension[] renamedExtensions = fixRenamedExtensionPoints((Extension[]) extensions.toArray(new Extension[extensions.size()]));
+					namespaceChildren[Contribution.EXTENSION] = renamedExtensions.length;
+					for (int i = 0; i < renamedExtensions.length; i++) {
+						namespaceChildren[position++] = renamedExtensions[i].getObjectId();
+					}
+					extensions.clear();
+				}
+				namespace.setRawChildren(namespaceChildren);
 				break;
 			case BUNDLE_EXTENSION_POINT_STATE :
 				if (elementName.equals(EXTENSION_POINT)) {
@@ -282,7 +278,7 @@ public class ExtensionsParser extends DefaultHandler {
 		configurationElementValue = null;
 
 		// create a new Configuration Element and push it onto the object stack
-		ConfigurationElement currentConfigurationElement = registry.getElementFactory().createConfigurationElement();
+		ConfigurationElement currentConfigurationElement = registry.getElementFactory().createConfigurationElement(namespace.isDynamic());
 		currentConfigurationElement.setNamespaceOwnerId(namespace.getNamespaceOwnerId());
 		objectStack.push(currentConfigurationElement);
 		currentConfigurationElement.setName(elementName);
@@ -296,11 +292,6 @@ public class ExtensionsParser extends DefaultHandler {
 	}
 
 	private void handleInitialState(String elementName, Attributes attributes) {
-		if (!elementName.equals(manifestType)) {
-			stateStack.push(new Integer(IGNORED_ELEMENT_STATE));
-			internalError(NLS.bind(RegistryMessages.parse_unknownTopElement, elementName));
-			return;
-		}
 		// new manifests should have the plugin (or fragment) element empty
 		// in compatibility mode, any extraneous elements will be silently ignored
 		compatibilityMode = attributes.getLength() > 0;
@@ -324,7 +315,7 @@ public class ExtensionsParser extends DefaultHandler {
 		// Set the state to indicate that this element will be ignored
 		stateStack.push(new Integer(IGNORED_ELEMENT_STATE));
 		if (!compatibilityMode)
-			unknownElement(manifestType, elementName);
+			unknownElement(PLUGIN, elementName);
 	}
 
 	private void logStatus(SAXParseException ex) {
@@ -344,7 +335,7 @@ public class ExtensionsParser extends DefaultHandler {
 		error(new Status(IStatus.WARNING, RegistryMessages.OWNER_NAME, PARSE_PROBLEM, msg, ex));
 	}
 
-	public Contribution parseManifest(SAXParserFactory factory, InputSource in, String manifestKind, String manifestName, RegistryObjectManager registryObjects, Contribution currentNamespace, ResourceBundle bundle) throws ParserConfigurationException, SAXException, IOException {
+	public Contribution parseManifest(SAXParserFactory factory, InputSource in, String manifestName, RegistryObjectManager registryObjects, Contribution currentNamespace, ResourceBundle bundle) throws ParserConfigurationException, SAXException, IOException {
 		long start = 0;
 		this.resources = bundle;
 		this.objectManager = registryObjects;
@@ -357,11 +348,6 @@ public class ExtensionsParser extends DefaultHandler {
 			throw new SAXException(RegistryMessages.parse_xmlParserNotAvailable);
 
 		try {
-			if (manifestKind == null)
-				throw new NullPointerException();
-			if (!(manifestKind.equals(PLUGIN) || manifestKind.equals(FRAGMENT)))
-				throw new IllegalArgumentException("Invalid manifest type: " + manifestType); //$NON-NLS-1$
-			this.manifestType = manifestKind;
 			locationName = in.getSystemId();
 			if (locationName == null)
 				locationName = manifestName;
@@ -401,7 +387,7 @@ public class ExtensionsParser extends DefaultHandler {
 	}
 
 	private void parseExtensionAttributes(Attributes attributes) {
-		Extension currentExtension = registry.getElementFactory().createExtension();
+		Extension currentExtension = registry.getElementFactory().createExtension(namespace.isDynamic());
 		objectStack.push(currentExtension);
 
 		// Process Attributes
@@ -460,7 +446,7 @@ public class ExtensionsParser extends DefaultHandler {
 	}
 
 	private void parseExtensionPointAttributes(Attributes attributes) {
-		ExtensionPoint currentExtPoint = registry.getElementFactory().createExtensionPoint();
+		ExtensionPoint currentExtPoint = registry.getElementFactory().createExtensionPoint(namespace.isDynamic());
 
 		// Process Attributes
 		int len = (attributes != null) ? attributes.getLength() : 0;

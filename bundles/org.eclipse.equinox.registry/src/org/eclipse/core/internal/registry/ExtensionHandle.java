@@ -28,6 +28,10 @@ public class ExtensionHandle extends Handle implements IExtension {
 		return (Extension) objectManager.getObject(getId(), RegistryObjectManager.EXTENSION);
 	}
 
+	public boolean isDynamic() {
+		return getExtension().isDynamic();
+	}
+
 	public String getNamespace() {
 		return getExtension().getNamespace();
 	}
