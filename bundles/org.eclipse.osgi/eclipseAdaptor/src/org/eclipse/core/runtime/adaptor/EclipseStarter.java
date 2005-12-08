@@ -132,11 +132,21 @@ public class EclipseStarter {
 	 * It only works when the framework is being jared as a single jar
 	 */
 	public static void main(String[] args) throws Exception {
-		URL url = EclipseStarter.class.getProtectionDomain().getCodeSource().getLocation();
-		System.getProperties().put(PROP_FRAMEWORK, decode(url.toExternalForm()));
-		String filePart = decode(url.getFile());
-		System.getProperties().put(PROP_INSTALL_AREA, filePart.substring(0, filePart.lastIndexOf('/')));
-		System.getProperties().put(PROP_NOSHUTDOWN, "true"); //$NON-NLS-1$
+		if (System.getProperty("eclipse.startTime") == null) //$NON-NLS-1$
+			System.getProperties().put("eclipse.startTime", Long.toString(System.currentTimeMillis())); //$NON-NLS-1$
+        CodeSource cs = EclipseStarter.class.getProtectionDomain().getCodeSource();
+		if (cs != null) {
+			URL url = cs.getLocation();
+			if (System.getProperty(PROP_FRAMEWORK) == null)
+				System.getProperties().put(PROP_FRAMEWORK, decode(url.toExternalForm()));
+			// allow prop to be preset
+			if (System.getProperty(PROP_INSTALL_AREA) == null) {
+				String filePart = decode(url.getFile());
+				System.getProperties().put(PROP_INSTALL_AREA, filePart.substring(0, filePart.lastIndexOf('/')));
+			}			
+		}
+		if (System.getProperty(PROP_NOSHUTDOWN) == null)
+			System.getProperties().put(PROP_NOSHUTDOWN, "true"); //$NON-NLS-1$
 		run(args, null);
 	}
 
