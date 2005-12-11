@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/Bundle.java,v 1.31 2005/08/05 03:22:00 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/Bundle.java,v 1.33 2005/12/09 18:53:11 twatson Exp $
  * 
  * Copyright (c) OSGi Alliance (2000, 2005). All Rights Reserved.
  * 
@@ -56,7 +56,7 @@ import java.util.Enumeration;
  * <code>Bundle</code> objects, and these objects are only valid within the
  * Framework that created them.
  * 
- * @version $Revision: 1.31 $
+ * @version $Revision: 1.33 $
  */
 public interface Bundle {
 	/**
@@ -690,17 +690,30 @@ public interface Bundle {
 
 	/**
 	 * Returns this bundle's Manifest headers and values localized to the
-	 * specifed locale.
+	 * specified locale.
 	 * 
 	 * <p>
 	 * This method performs the same function as
 	 * <code>Bundle.getHeaders()</code> except the manifest header values are
 	 * localized to the specified locale.
 	 * 
-	 * If a Manifest header value starts with &quot;%&quot;, it must be
-	 * localized according to the specified locale. If the specified locale
+	 * <p>If a Manifest header value starts with &quot;%&quot;, it must be
+	 * localized according to the specified locale. If a locale is specified and
 	 * cannot be found, then the header values must be returned using the
-	 * default locale.
+	 * default locale. Localizations are searched for in the following order:
+	 * <pre>
+	 *   bn + "_" + Ls + "_" + Cs + "_" + Vs
+     *   bn + "_" + Ls + "_" + Cs
+     *   bn + "_" + Ls
+     *   bn + "_" + Ld + "_" + Cd + "_" + Vd
+     *   bn + "_" + Ld + "_" + Cd
+     *   bn + "_" + Ld
+     *   bn
+	 * </pre>
+	 * Where <code>bn</code> is the bundle localization basename, <code>Ls</code>,
+	 * <code>Cs</code> and <code>Vs</code> are the specified locale (language, 
+	 * country, variant) and <code>Ld</code>, <code>Cd</code> and <code>Vd</code>
+	 * are the default locale (language, country, variant).
 	 * 
 	 * If <code>null</code> is specified as the locale string, the header
 	 * values must be localized using the default locale. If the empty string
