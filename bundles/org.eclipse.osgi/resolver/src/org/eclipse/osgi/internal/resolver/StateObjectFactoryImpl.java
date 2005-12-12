@@ -70,6 +70,8 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		bundle.setStateBit(BundleDescriptionImpl.ATTACH_FRAGMENTS, original.attachFragments());
 		bundle.setStateBit(BundleDescriptionImpl.DYNAMIC_FRAGMENTS, original.dynamicFragments());
 		bundle.setStateBit(BundleDescriptionImpl.HAS_DYNAMICIMPORT, original.hasDynamicImports());
+		bundle.setPlatformFilter(original.getPlatformFilter());
+		bundle.setExecutionEnvironments(original.getExecutionEnvironments());
 		return bundle;
 	}
 
