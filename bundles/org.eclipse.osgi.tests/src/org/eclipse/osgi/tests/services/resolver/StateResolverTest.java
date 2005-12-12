@@ -1579,6 +1579,81 @@ public class StateResolverTest extends AbstractStateTest {
 		assertEquals("1.4", b1ResolvedImports[2].getExporter(), a1_100);
 	}
 
+	public void testPlatformProperties() throws BundleException {
+		State state = buildEmptyState();
+		int bundleID = 0;
+		// test the selection algorithm of the resolver to pick the bundles which
+		// resolve the largest set of bundles; with fragments using Import-Package
+		Hashtable manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "org.eclipse.osgi");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		BundleDescription systemBundle = state.getFactory().createBundleDescription(state, manifest, "org.eclipse.osgi", bundleID++);
+
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "A");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.IMPORT_PACKAGE, "pkg.b, pkg.system.b");
+		manifest.put(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT, "J2SE-1.4");
+		BundleDescription a = state.getFactory().createBundleDescription(state, manifest, "A", bundleID++);
+
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "B");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.EXPORT_PACKAGE, "pkg.b");
+		manifest.put(Constants.IMPORT_PACKAGE, "pkg.system.b");
+		manifest.put(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT, "J2SE-1.2");
+		BundleDescription b = state.getFactory().createBundleDescription(state, manifest, "B", bundleID++);
+
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "system.b");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.EXPORT_PACKAGE, "pkg.system.b");
+		manifest.put(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT, "J2SE-1.2");
+		BundleDescription systemB = state.getFactory().createBundleDescription(state, manifest, "system.b", bundleID++);
+
+		Dictionary[] props = new Dictionary[] {new Hashtable(), new Hashtable()};
+		props[0].put("org.osgi.framework.system.packages", "pkg.system.a, pkg.system.c");
+		props[0].put("org.osgi.framework.executionenvironment", "J2SE-1.2");
+		props[1].put("org.osgi.framework.system.packages", "pkg.system.a, pkg.system.b, pkg.system.c");
+		props[1].put("org.osgi.framework.executionenvironment", "J2SE-1.4");
+
+		state.setPlatformProperties(props);
+		state.addBundle(systemBundle);
+		state.addBundle(a);
+		state.addBundle(b);
+		state.addBundle(systemB);
+		state.resolve();
+
+		assertTrue("1.0", systemBundle.isResolved());
+		assertTrue("1.1", a.isResolved());
+		assertTrue("1.2", b.isResolved());
+		assertTrue("1.3", systemB.isResolved());
+
+		assertTrue("2.0", a.getResolvedImports()[1].getExporter() == systemBundle);
+		assertTrue("2.1", b.getResolvedImports()[0].getExporter() == systemB);
+
+		// now test the uses clause for pkg.b such that bundle 'A' will be forced to used
+		// pkg.system from bundle 'system.b'
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "B");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.EXPORT_PACKAGE, "pkg.b; uses:=\"pkg.system.b\"");
+		manifest.put(Constants.IMPORT_PACKAGE, "pkg.system.b");
+		manifest.put(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT, "J2SE-1.2");
+		BundleDescription b_updated = state.getFactory().createBundleDescription(state, manifest, "B", b.getBundleId());
+		state.updateBundle(b_updated);
+		state.resolve(new BundleDescription[] {b_updated});
+
+		assertTrue("3.0", systemBundle.isResolved());
+		assertTrue("3.1", a.isResolved());
+		assertTrue("3.2", b_updated.isResolved());
+		assertTrue("3.3", systemB.isResolved());
+
+		assertTrue("2.0", a.getResolvedImports()[1].getExporter() == systemB);
+		assertTrue("2.1", b_updated.getResolvedImports()[0].getExporter() == systemB);
+	}
+
 	private ExportPackageDescription[] isConsistent(ExportPackageDescription[] pkgs1, ExportPackageDescription[] pkgs2) {
 		for (int i = 0; i < pkgs1.length; i++)
 			for (int j = 0; j < pkgs2.length; j++)
