@@ -159,7 +159,7 @@ public class RegistryStrategy {
 	
 	/**
 	 * Returns name of the namespace that given contributor resides in.
-	 * @see getNamespaceOwnerId
+	 * @see #getNamespaceOwnerId(long)
 	 * 
 	 * @param contributorId - Id of the contributor in question
 	 * @return - namespace name
@@ -175,7 +175,7 @@ public class RegistryStrategy {
 	
 	/**
 	 * Returns Ids of all contributors residing in a given namespace
-	 * @see getNamespaceOwnerId
+	 * @see #getNamespaceOwnerId(long)
 	 * 
 	 * @param namespace - namespace name
 	 * @return - array of contributor Ids residing in the namespace
@@ -365,7 +365,9 @@ public class RegistryStrategy {
 	/**
 	 * The parser used by the registry to parse descriptions of extension points
 	 * and extensions from the XML input streams.
-	 * @see IExtensionRegistry.addXMLContribution
+	 * 
+	 * @see org.eclipse.equinox.registry.IExtensionRegistry#addContribution(java.io.InputStream, long, String, ResourceBundle, Object)
+	 * 
 	 * @return XML parser
 	 */
 	public SAXParserFactory getXMLParser() {

@@ -16,8 +16,15 @@ import org.eclipse.core.internal.registry.RegistryMessages;
 import org.eclipse.core.internal.registry.osgi.Activator;
 import org.eclipse.core.internal.runtime.ReferenceHashSet;
 import org.eclipse.core.internal.runtime.RuntimeLog;
-import org.eclipse.core.runtime.*;
-import org.eclipse.equinox.registry.*;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.ListenerList;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.equinox.registry.IExtension;
+import org.eclipse.equinox.registry.IExtensionDelta;
+import org.eclipse.equinox.registry.IExtensionPoint;
+import org.eclipse.equinox.registry.IExtensionRegistry;
+import org.eclipse.equinox.registry.IRegistryChangeEvent;
+import org.eclipse.equinox.registry.IRegistryChangeListener;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 

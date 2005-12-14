@@ -274,7 +274,6 @@ public interface IConfigurationElement {
 	 * 
 	 * @return the namespace for this configuration element
 	 * @throws InvalidRegistryObjectException if this configuration element is no longer valid
-	 * @see Platform#getBundle(String)
 	 * @see IExtensionRegistry
 	 * @since 3.1
 	 */

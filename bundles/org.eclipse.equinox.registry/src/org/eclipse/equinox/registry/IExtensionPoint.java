@@ -62,7 +62,6 @@ public interface IExtensionPoint {
 	 * 
 	 * @return the namespace for this extension point
 	 * @throws InvalidRegistryObjectException if this extension point is no longer valid
-	 * @see Platform#getBundle(String)
 	 * @see IExtensionRegistry
 	 * @since 3.0
 	 */

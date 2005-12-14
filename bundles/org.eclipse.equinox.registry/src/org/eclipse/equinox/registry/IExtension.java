@@ -61,7 +61,6 @@ public interface IExtension {
 	 * 
 	 * @return the namespace for this extension
 	 * @throws InvalidRegistryObjectException if this extension is no longer valid
-	 * @see Platform#getBundle(String)
 	 * @see IExtensionRegistry
 	 * @since 3.0
 	 */

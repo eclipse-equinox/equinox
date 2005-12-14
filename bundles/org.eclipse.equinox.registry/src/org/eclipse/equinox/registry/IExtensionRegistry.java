@@ -27,7 +27,7 @@ import java.util.ResourceBundle;
  * are intended for relatively short-term use. Clients that deal with these objects
  * must be aware that they may become invalid if the declaring plug-in is updated
  * or uninstalled. If this happens, all methods on these object except
- * <code>isValid()</code> will throw {@link InvalidRegistryObjectException}.
+ * <code>isValid()</code> will throw {@link org.eclipse.core.runtime.InvalidRegistryObjectException}.
  * Code in a plug-in that has declared that it is not dynamic aware (or not declared
  * anything) can safely ignore this issue, since the registry would not be
  * modified while it is active. However, code in a plug-in that declares that it
@@ -71,7 +71,7 @@ public interface IExtensionRegistry {
 	 * @param namespace the namespace in which to listen for changes
 	 * @see IRegistryChangeListener
 	 * @see IRegistryChangeEvent
-	 * @see #removeRegistryChangeListener(IRegistryChangeListener) 
+	 * @see #removeRegistryChangeListener(EventListener) 
 	 */
 	public void addRegistryChangeListener(EventListener listener, String namespace);
 
@@ -89,8 +89,8 @@ public interface IExtensionRegistry {
 	 * @param listener the listener
 	 * @see IRegistryChangeListener
 	 * @see IRegistryChangeEvent
-	 * @see #addRegistryChangeListener(IRegistryChangeListener, String)
-	 * @see #removeRegistryChangeListener(IRegistryChangeListener)
+	 * @see #addRegistryChangeListener(EventListener, String)
+	 * @see #removeRegistryChangeListener(EventListener)
 	 */
 	public void addRegistryChangeListener(EventListener listener);
 
@@ -243,8 +243,8 @@ public interface IExtensionRegistry {
 	 *
 	 * @param listener the listener
 	 * @see IRegistryChangeListener
-	 * @see #addRegistryChangeListener(IRegistryChangeListener)
-	 * @see #addRegistryChangeListener(IRegistryChangeListener, String)
+	 * @see #addRegistryChangeListener(EventListener)
+	 * @see #addRegistryChangeListener(EventListener, String)
 	 */
 	public void removeRegistryChangeListener(EventListener listener);
 
@@ -255,7 +255,7 @@ public interface IExtensionRegistry {
 	 * If registry is no modifiable, this method is an access controlled method. 
 	 * Proper token is required for non-modifiable registries.
 	 * 
-	 * @see RegistryStrategy.isModifiable
+	 * @see org.eclipse.equinox.registry.spi.RegistryStrategy#isModifiable()
 	 * 
 	 * @param is - stream open on the XML file. The XML file can contain an extension
 	 * poin(s) or/and extension(s) described in the format similar to plugin.xml 
@@ -263,10 +263,10 @@ public interface IExtensionRegistry {
 	 * @param name - optional name of the contribution. Used for error reporting; might be null
 	 * @param translationBundle - optional resource bundle used for translations; might be null 
 	 * @param token - the key used to check permissions. The registry had two keys specified in its
-	 * creation {@link RegistryFactory#createRegistry()}: master token and a user token. Use the
-	 * user token to specify that contribution has dynamic nature. If registry is created with
-	 * a registry strategy that specified isModifiable() as "true", null can be passed instead of
-	 * a token.
+	 * creation {@link RegistryFactory#createRegistry(org.eclipse.equinox.registry.spi.RegistryStrategy, Object, Object)}: 
+	 * master token and a user token. Use the user token to specify that contribution has dynamic 
+	 * nature. If registry is created with a registry strategy that specified isModifiable() as "true", 
+	 * null can be passed instead of a token.
 	 * @return - true: the contribution was successfully processed; false - error in 
 	 * the processing of the contribution
 	 */
@@ -274,14 +274,11 @@ public interface IExtensionRegistry {
 
 	/**
 	 * Call this method to properly stop the registry. It stops registry event processing
-	 * and writes out cache information to be used in the next run.
-	 * 
-	 * This is an access controlled method; proper token is required.
-	 * 
-	 * @param registry - the registry to be stopped
-	 * @param token - control key for the registry (should be the same key as used in 
-	 * the RegistryManager#createExtensionRegistry() of this registry
+	 * and writes out cache information to be used in the next run. This is an access controlled 
+	 * method; master token is required.
+	 *
+	 * @see RegistryFactory#createRegistry(org.eclipse.equinox.registry.spi.RegistryStrategy, Object, Object)
+	 * @param token - master token for the registry
 	 */
-	// XXX which token should be supplied here.  Master or other?  
 	public void stop(Object token);
 }
