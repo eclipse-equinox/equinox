@@ -16,7 +16,7 @@ import java.lang.reflect.Method;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.*;
-import org.eclipse.core.runtime.*;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.equinox.app.IContainer;
 import org.eclipse.equinox.registry.*;
 import org.eclipse.osgi.framework.log.FrameworkLog;
