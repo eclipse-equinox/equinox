@@ -22,13 +22,11 @@ public class Contribution implements KeyedElement {
 	protected ExtensionRegistry registry;
 
 	// The actual contributor of the contribution.
-	protected long contributorId;
+	final protected long contributorId;
 
-	// The namespace containing this contribution.
-	protected String namespace = null;
-
-	// Id of the namespace owner (might be same or different from the contributorId).
-	protected long namespaceOwnerId = -1;
+	// cached Id of the namespace owner (might be same or different from the contributorId)
+	// -1 if it is not cached yet or no namespace was found during previous cache attempt. 
+	private long namespaceOwnerId = -1;
 
 	// indicates if this contribution needs to be saved in the registry cache
 	protected boolean isDynamic;
@@ -46,14 +44,10 @@ public class Contribution implements KeyedElement {
 		this.contributorId = contributorId;
 		this.registry = registry;
 		this.isDynamic = dynamic;
-
-		// resolve namespace owner and namespace
-		namespaceOwnerId = registry.getNamespaceOwnerId(contributorId);
-		namespace = registry.getNamespace(contributorId);
 	}
 
 	void mergeContribution(Contribution addContribution) {
-		Assert.isTrue(namespaceOwnerId == addContribution.namespaceOwnerId);
+		Assert.isTrue(contributorId == addContribution.contributorId);
 		Assert.isTrue(registry == addContribution.registry);
 		
 		// isDynamic?
@@ -107,7 +101,7 @@ public class Contribution implements KeyedElement {
 	}
 
 	public String getNamespace() {
-		return namespace;
+		return registry.getNamespace(contributorId);
 	}
 
 	public String toString() {
@@ -115,6 +109,11 @@ public class Contribution implements KeyedElement {
 	}
 
 	protected long getNamespaceOwnerId() {
+		// Performance: this function is not called during warm Eclipse startup using cached 
+		// extension registry, but is called about 45 times per contribution during 
+		// the "clean" Eclipse start. Cache the result.
+		if (namespaceOwnerId == -1) 
+			namespaceOwnerId = registry.getNamespaceOwnerId(contributorId);
 		return namespaceOwnerId;
 	}
 

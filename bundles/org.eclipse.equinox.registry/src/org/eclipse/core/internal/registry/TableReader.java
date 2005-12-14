@@ -204,7 +204,7 @@ public class TableReader {
 		}
 	}
 
-	private ConfigurationElement basicLoadConfigurationElement(DataInputStream is, long namespaceOwnerId) throws IOException {
+	private ConfigurationElement basicLoadConfigurationElement(DataInputStream is, long actualContributorId) throws IOException {
 		int self = is.readInt();
 		long contributorId = is.readLong();
 		String name = readStringOrNull(is, false);
@@ -213,7 +213,9 @@ public class TableReader {
 		int misc = is.readInt();//this is set in second level CEs, to indicate where in the extra data file the children ces are
 		String[] propertiesAndValue = readPropertiesAndValue(is);
 		int[] children = readArray(is);
-		return getObjectFactory().createConfigurationElement(self, contributorId, namespaceOwnerId, name, propertiesAndValue, children, misc, parentId, parentType, false);
+		if (actualContributorId == -1)
+			actualContributorId = contributorId;
+		return getObjectFactory().createConfigurationElement(self, actualContributorId, name, propertiesAndValue, children, misc, parentId, parentType, false);
 	}
 
 	public Object loadThirdLevelConfigurationElements(int offset, RegistryObjectManager objectManager) {

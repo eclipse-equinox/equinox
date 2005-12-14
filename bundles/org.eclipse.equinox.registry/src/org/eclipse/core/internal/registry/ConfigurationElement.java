@@ -40,27 +40,23 @@ public class ConfigurationElement extends RegistryObject {
 	//The ID of the namespace owner. 
 	//This value can be null when the element is loaded from disk and the owner has been uninstalled.
 	//This happens when the configuration is obtained from a delta containing removed extension.
-	protected long namespaceOwnerId;
+	private long contributorId;
 
 	protected ConfigurationElement(ExtensionRegistry registry, boolean isDynamic) {
 		super(registry, isDynamic);
 	}
 
-	protected ConfigurationElement(int self, long contributorId, long namespaceOwnerId, String name, String[] propertiesAndValue, int[] children, int extraDataOffset, int parent, byte parentType, ExtensionRegistry registry, boolean isDynamic) {
+	protected ConfigurationElement(int self, long contributorId, String name, String[] propertiesAndValue, int[] children, int extraDataOffset, int parent, byte parentType, ExtensionRegistry registry, boolean isDynamic) {
 		super(registry, isDynamic);
 
 		setObjectId(self);
-		this.namespaceOwnerId = namespaceOwnerId;
+		this.contributorId = contributorId;
 		this.name = name;
 		this.propertiesAndValue = propertiesAndValue;
 		setRawChildren(children);
 		setExtraDataOffset(extraDataOffset);
 		parentId = parent;
 		this.parentType = parentType;
-
-		// resolve namespace owner
-		if (namespaceOwnerId == -1)
-			this.namespaceOwnerId = this.registry.getNamespaceOwnerId(contributorId);
 	}
 
 	void throwException(String message, Throwable exception) throws CoreException {
@@ -128,11 +124,11 @@ public class ConfigurationElement extends RegistryObject {
 	}
 
 	void setNamespaceOwnerId(long namespaceOwnerId) {
-		this.namespaceOwnerId = namespaceOwnerId;
+		this.contributorId = namespaceOwnerId;
 	}
 
 	protected long getNamespaceOwnerId() {
-		return namespaceOwnerId;
+		return contributorId;
 	}
 
 	public ConfigurationElement[] getChildren(String childrenName) {
@@ -175,7 +171,7 @@ public class ConfigurationElement extends RegistryObject {
 	}
 
 	protected String getNamespace() {
-		return registry.getNamespace(namespaceOwnerId);
+		return registry.getNamespace(contributorId);
 	}
 
 	protected Object createExecutableExtension(String attributeName) throws CoreException {
@@ -247,7 +243,7 @@ public class ConfigurationElement extends RegistryObject {
 		Object result = null;
 
 		// check if alternative processing strategy is present 
-		result = registry.processExecutableExtension(contributorName, namespaceOwnerId, getNamespace(), className, initData, attributeName, this);
+		result = registry.processExecutableExtension(contributorName, contributorId, getNamespace(), className, initData, attributeName, this);
 
 		// Check if we have extension adapter and initialize;
 		// Make the call even if the initialization string is null

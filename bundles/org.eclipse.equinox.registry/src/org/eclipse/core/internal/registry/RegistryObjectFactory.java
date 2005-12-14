@@ -54,7 +54,7 @@ public class RegistryObjectFactory {
 		return new ConfigurationElement(registry, isDynamic);
 	}
 
-	public ConfigurationElement createConfigurationElement(int self, long contributorId, long namespaceOwnerId, String name, String[] propertiesAndValue, int[] children, int extraDataOffset, int parent, byte parentType, boolean isDynamic) {
-		return new ConfigurationElement(self, contributorId, namespaceOwnerId, name, propertiesAndValue, children, extraDataOffset, parent, parentType, registry, isDynamic);
+	public ConfigurationElement createConfigurationElement(int self, long contributorId, String name, String[] propertiesAndValue, int[] children, int extraDataOffset, int parent, byte parentType, boolean isDynamic) {
+		return new ConfigurationElement(self, contributorId, name, propertiesAndValue, children, extraDataOffset, parent, parentType, registry, isDynamic);
 	}
 }
