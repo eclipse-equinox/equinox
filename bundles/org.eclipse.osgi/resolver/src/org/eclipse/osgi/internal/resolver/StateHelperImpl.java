@@ -178,7 +178,8 @@ public class StateHelperImpl implements StateHelper {
 			ExportPackageDescription pkgSupplier = (ExportPackageDescription) imports[i].getSupplier();
 			if (pkgSupplier == null)
 				continue;
-			packageList.add(pkgSupplier);
+			if (!isSystemExport(pkgSupplier))
+				packageList.add(pkgSupplier);
 			// get the sources of the required bundles of the exporter
 			BundleSpecification[] requires = pkgSupplier.getExporter().getRequiredBundles();
 			ArrayList visited = new ArrayList();
