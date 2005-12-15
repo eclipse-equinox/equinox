@@ -1,0 +1,178 @@
+/*******************************************************************************
+ * Copyright (c) 2002, 2005 IBM Corporation.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *******************************************************************************/
+package org.eclipse.equinox.wireadmin;
+
+import java.util.Vector;
+import org.eclipse.osgi.framework.eventmgr.*;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.log.LogService;
+import org.osgi.service.wireadmin.*;
+import org.osgi.service.wireadmin.Wire;
+import org.osgi.util.tracker.ServiceTracker;
+
+/*
+ *  WireAdminEventProducer is responsible for sending out WireAdminEvents
+ *  to all WireAdminListeners.
+ */
+
+public class WireAdminEventProducer extends ServiceTracker implements EventDispatcher {
+
+	protected ServiceReference ref;
+	static protected final String wireAdminListenerClass = "org.osgi.service.wireadmin.WireAdminListener"; //$NON-NLS-1$
+	protected Vector eventQueue;
+	protected LogService log;
+	protected BundleContext context;
+
+	protected WireAdmin wireAdmin;
+
+	/** List of WireAdminListeners */
+	protected EventListeners listeners;
+	/** EventManager for event delivery. */
+	protected EventManager eventManager;
+
+	protected WireAdminEventProducer(ServiceReference ref, BundleContext context, LogService log, WireAdmin wireAdmin) {
+		super(context, wireAdminListenerClass, null);
+		this.ref = ref;
+		this.context = context;
+		this.log = log;
+		this.wireAdmin = wireAdmin;
+		eventManager = new EventManager();
+		listeners = new EventListeners();
+
+		open();
+
+	}
+
+	public void close() {
+		super.close();
+		listeners.removeAllListeners();
+		eventManager.close();
+		wireAdmin = null;
+	}
+
+	protected void generateEvent(int type, Wire wire, Throwable t) {
+		if (wireAdmin != null) {
+			WireAdminEvent event = new WireAdminEvent(wireAdmin.reference, type, wire, t);
+
+			/* queue to hold set of listeners */
+			ListenerQueue queue = new ListenerQueue(eventManager);
+
+			/* add set of WireAdminListeners to queue */
+			queue.queueListeners(listeners, this);
+
+			/* dispatch event to set of listeners */
+			queue.dispatchEventAsynchronous(0, event);
+		}
+	}
+
+	/**
+	 * A service is being added to the <tt>ServiceTracker</tt> object.
+	 *
+	 * <p>This method is called before a service which matched
+	 * the search parameters of the <tt>ServiceTracker</tt> object is
+	 * added to it. This method should return the
+	 * service object to be tracked for this <tt>ServiceReference</tt> object.
+	 * The returned service object is stored in the <tt>ServiceTracker</tt> object
+	 * and is available from the <tt>getService</tt> and <tt>getServices</tt>
+	 * methods.
+	 *
+	 * @param reference Reference to service being added to the <tt>ServiceTracker</tt> object.
+	 * @return The service object to be tracked for the
+	 * <tt>ServiceReference</tt> object or <tt>null</tt> if the <tt>ServiceReference</tt> object should not
+	 * be tracked.
+	 */
+	public Object addingService(ServiceReference reference) {
+
+		Object service = super.addingService(reference);
+		setMask(reference, service);
+
+		return (service);
+	}
+
+	/**
+	 * A service tracked by the <tt>ServiceTracker</tt> object has been removed.
+	 *
+	 * <p>This method is called after a service is no longer being tracked
+	 * by the <tt>ServiceTracker</tt> object.
+	 *
+	 * @param reference Reference to service that has been removed.
+	 * @param service The service object for the removed service.
+	 */
+	public void removedService(ServiceReference reference, Object service) {
+		listeners.removeListener(service);
+
+		super.removedService(reference, service);
+	}
+
+	/**
+	 * This method is the call back that is called once for each listener.
+	 * This method must cast the EventListener object to the appropriate listener
+	 * class for the event type and call the appropriate listener method.
+	 *
+	 * @param listener This listener must be cast to the appropriate listener
+	 * class for the events created by this source and the appropriate listener method
+	 * must then be called.
+	 * @param listenerObject This is the optional object that was passed to
+	 * ListenerList.addListener when the listener was added to the ListenerList.
+	 * @param eventAction This value was passed to the EventQueue object via one of its
+	 * dispatchEvent* method calls. It can provide information (such
+	 * as which listener method to call) so that this method
+	 * can complete the delivery of the event to the listener.
+	 * @param eventObject This object was passed to the EventQueue object via one of its
+	 * dispatchEvent* method calls. This object was created by the event source and
+	 * is passed to this method. It should contain all the necessary information (such
+	 * as what event object to pass) so that this method
+	 * can complete the delivery of the event to the listener.
+	 */
+	public void dispatchEvent(Object listener, Object maskObject, int eventAction, Object eventObject) {
+		ServiceReference wireAdminRef = wireAdmin.reference;
+
+		WireAdminListener wal = (WireAdminListener) listener;
+
+		try {
+			WireAdminEvent event = (WireAdminEvent) eventObject;
+			{
+				int mask = ((Integer) maskObject).intValue();
+				int type = event.getType();
+				if ((type & mask) != type) {
+					return;
+				}
+			}
+			wal.wireAdminEvent(event);
+
+		} catch (Throwable t) {
+			log.log(wireAdminRef, log.LOG_WARNING, WireAdminMsg.WIREADMIN_EVENT_DISPATCH_ERROR, t);
+		}
+
+	}
+
+	/**
+	 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#modifiedService(ServiceReference, Object)
+	 */
+	public void modifiedService(ServiceReference reference, Object service) {
+		listeners.removeListener(service);
+		setMask(reference, service);
+		super.modifiedService(reference, service);
+	}
+
+	private void setMask(ServiceReference reference, Object service) {
+		Integer mask = null;
+		try {
+			mask = (Integer) reference.getProperty(WireConstants.WIREADMIN_EVENTS);
+		} catch (ClassCastException ex) {
+			return; //mask was not of type Integer	
+		}
+		listeners.addListener(service, mask);
+
+	}
+
+}
