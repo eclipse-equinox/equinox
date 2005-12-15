@@ -1,0 +1,15 @@
+Bundle-ManifestVersion: 2
+Bundle-Name: %bundleName
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: org.eclipse.equinox.device.Activator
+Bundle-SymbolicName: org.eclipse.equinox.device
+Bundle-Vendor: %bundleVendor
+Bundle-Copyright: %bundleCopyright
+Bundle-Localization: plugin
+Import-Service: org.osgi.service.log.LogService
+Import-Package: org.osgi.framework;version="1.2",
+ org.osgi.service.device,
+ org.osgi.service.log;version="1.2",
+ org.osgi.util.tracker
+Export-Package: org.eclipse.equinox.device; x-internal:=true
+Eclipse-LazyStart: true
