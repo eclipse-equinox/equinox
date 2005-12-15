@@ -69,7 +69,6 @@ public class ContainerManager implements IRegistryChangeListener, SynchronousBun
 		registryTracker.open();
 		getExtensionRegistry().addRegistryChangeListener(this);
 		registerAppDecriptors();
-		getContainers();
 		// need to load scheduled app data after app descriptors have been registered
 		AppManager.loadData(AppManager.FILE_APPSCHEDULED);
 		containers.put(APP_TYPE_MAIN_SINGLETON, new SingletonContainerMgr(new MainSingletonContainer(this), APP_TYPE_MAIN_SINGLETON, this));
@@ -92,10 +91,7 @@ public class ContainerManager implements IRegistryChangeListener, SynchronousBun
 	}
 
 	/*
-	 * Returns the ApplicationDescriptor for the given application ID.  An 
-	 * ApplicationDescriptor object will get created if it does not already 
-	 * exist in the cache and the create flag is true.  When an ApplicationDescriptor 
-	 * is created for the first time it is registered as an OSGi service.
+	 * Only used to find the default application
 	 */
 	private EclipseAppDescriptor getAppDescriptor(String applicationId) {
 		EclipseAppDescriptor result = null;
@@ -125,7 +121,13 @@ public class ContainerManager implements IRegistryChangeListener, SynchronousBun
 
 	private IContainer getContainer(String type) {
 		synchronized (containers) {
-			return (IContainer) containers.get(type);
+			IContainer container = (IContainer) containers.get(type);
+			if (container != null)
+				return container;
+			container = createContainer(type);
+			if (container != null)
+				containers.put(type, container);
+			return container;
 		}
 	}
 
@@ -207,46 +209,43 @@ public class ContainerManager implements IRegistryChangeListener, SynchronousBun
 	 * available in the extension registry.
 	 */
 	private void registerAppDecriptors() {
+		// look in the old core.runtime applications extension point
 		IExtension[] availableApps = getAvailableApps(getExtensionRegistry(), PI_RUNTIME);
 		for (int i = 0; i < availableApps.length; i++)
 			createAppDescriptor(availableApps[i]);
+		// look in the new equinox.app applications extinsion point
 		availableApps = getAvailableApps(getExtensionRegistry(), Activator.PI_APP);
 		for (int i = 0; i < availableApps.length; i++)
 			createAppDescriptor(availableApps[i]);
 	}
 
-	private void getContainers() {
+	private IContainer createContainer(String type) {
 		IExtensionPoint extPoint = getExtensionRegistry().getExtensionPoint(Activator.PI_APP, PT_CONTAINERS);
 		if (extPoint == null)
-			return;
+			return null;
 		IExtension[] availableContainers = extPoint.getExtensions();
-		for (int i = 0; i < availableContainers.length; i++)
-			createContainer(availableContainers[i]);
-	}
-
-	private IContainer createContainer(IExtension containerExt) {
-		synchronized (containers) {
-			IConfigurationElement[] configs = containerExt.getConfigurationElements();
+		for (int i = 0; i < availableContainers.length; i++) {
+			IConfigurationElement[] configs = availableContainers[i].getConfigurationElements();
 			if (configs.length == 0)
 				return null;
-			String type = configs[0].getAttribute(PT_APP_TYPE);
-			if (type == null)
-				return null; // ignore containers which do not spec a type
-			IContainer container = (IContainer) containers.get(type);
-			if (container != null)
-				return container;
-			try {
-				container = (IContainer) configs[0].createExecutableExtension(PT_RUN);
-				if (container.isSingletonContainer())
-					container = new SingletonContainerMgr(container, type, this);
-				containers.put(type, container);
-				return container;
-			} catch (CoreException e) {
-				// TODO should log this
-				e.printStackTrace();
-			}
-			return null;
+			String containerType = configs[0].getAttribute(PT_APP_TYPE);
+			if (type.equals(containerType))
+				return createContainer(configs[0], type);
 		}
+		return null;
+	}
+
+	private IContainer createContainer(IConfigurationElement config, String type) {
+		try {
+			IContainer container = (IContainer) config.createExecutableExtension(PT_RUN);
+			if (container.isSingletonContainer())
+				container = new SingletonContainerMgr(container, type, this);
+			return container;
+		} catch (CoreException e) {
+			// TODO should log this
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	private IContainer removeContainer(IExtension containerExt) {
@@ -407,7 +406,7 @@ public class ContainerManager implements IRegistryChangeListener, SynchronousBun
 		for (int i = 0; i < deltas.length; i++) {
 			switch (deltas[i].getKind()) {
 				case IExtensionDelta.ADDED :
-					createContainer(deltas[i].getExtension());
+					// don't create containers agressively
 					break;
 				case IExtensionDelta.REMOVED :
 					removeContainer(deltas[i].getExtension());
