@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<METADATA>
+	<ATTRIBUTEDEFINITION ID='log.size' TYPE='Integer' DEFAULTVALUE='100'>
+		<NAME>
+			<STRING KEY='LOG_SIZE' DEFAULT='Log Size'/>
+		</NAME>
+		<DESCRIPTION>
+			<STRING KEY='LOG_SIZE_DESC' DEFAULT='The size of the log, in number of entries'/>
+		</DESCRIPTION>
+		<CARDINALITY TYPE='SCALAR' SIZE='' />
+		<VALIDATE>
+			<RANGE MIN='10' MAX='2000' />
+		</VALIDATE>
+	</ATTRIBUTEDEFINITION>
+
+	<ATTRIBUTEDEFINITION ID='log.threshold' TYPE='Integer' DEFAULTVALUE='4'>
+		<NAME>
+			<STRING KEY='LOG_THRESHOLD' DEFAULT='The level of logging'/>
+		</NAME>
+		<DESCRIPTION>
+			<STRING KEY='LOG_THRESHOLD_DESC' DEFAULT='The minimum severity level of logged messages'/>
+		</DESCRIPTION>
+		<CARDINALITY TYPE='SCALAR' SIZE='' />
+		<VALIDATE>
+			<SET>
+				<OPTION VALUE='1'>
+					<LABEL>
+						<STRING KEY='ERROR' DEFAULT='Error'/>
+					</LABEL>
+				</OPTION>
+				<OPTION VALUE='2'>
+					<LABEL>
+						<STRING KEY='WARNING' DEFAULT='Warning'/>
+					</LABEL>
+				</OPTION>
+				<OPTION VALUE='3'>
+					<LABEL>
+						<STRING KEY='INFO' DEFAULT='Informational'/>
+					</LABEL>
+				</OPTION>
+				<OPTION VALUE='4'>
+					<LABEL>
+						<STRING KEY='DEBUG' DEFAULT='Debug'/>
+					</LABEL>
+				</OPTION>
+			</SET>
+		</VALIDATE>
+	</ATTRIBUTEDEFINITION>
+
+	<OBJECTCLASSDEFINITION 
+		ID='com.ibm.osg.service.log.Log' 
+		TYPE='PID'>
+		<NAME>
+			<STRING KEY='LOG_SETTINGS' DEFAULT='Log Service Settings'/>
+		</NAME>
+		<DESCRIPTION>
+			<STRING KEY='LOG_SETTINGS_DESC' DEFAULT='The Log Service settings that may be configured'/>
+		</DESCRIPTION>
+		<ATTRIBUTE ID='log.size' REQUIRED='yes'/>
+		<ATTRIBUTE ID='log.threshold' REQUIRED='yes'/>
+	</OBJECTCLASSDEFINITION>
+
+	<LOCALES>
+		<LOCALE NAME="en" /> 
+		<LOCALE NAME="de" />     
+		<LOCALE NAME="es" />   
+    	<LOCALE NAME="fr" /> 
+		<LOCALE NAME="it" /> 
+		<LOCALE NAME="ja" /> 
+		<LOCALE NAME="ko" /> 
+		<LOCALE NAME="pt_BR" /> 
+		<LOCALE NAME="zh_CN" /> 
+		<LOCALE NAME="zh_TW" />               		
+		<LOCALE NAME="ar" />     
+		<LOCALE NAME="cs" />     
+		<LOCALE NAME="da" />     
+		<LOCALE NAME="el" />     
+		<LOCALE NAME="fi" />     
+		<LOCALE NAME="hu" />     
+		<LOCALE NAME="nl" />     
+		<LOCALE NAME="pl" />     
+		<LOCALE NAME="pt" />     
+		<LOCALE NAME="nb" />   
+		<LOCALE NAME="no" />     
+		<LOCALE NAME="ru" />     
+		<LOCALE NAME="sv" />     
+		<LOCALE NAME="tr" />    
+	</LOCALES>
+</METADATA>

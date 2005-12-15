@@ -1,0 +1,17 @@
+Bundle-ManifestVersion: 2
+Bundle-Vendor: %bundleVendor
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: org.eclipse.equinox.log.Activator
+Bundle-Copyright: %bundleCopyright
+Bundle-SymbolicName: org.eclipse.equinox.log
+Bundle-Name: %bundleName
+Export-Service: org.osgi.service.log.LogReaderService,
+ org.osgi.service.log.LogService
+Import-Package: org.eclipse.osgi.framework.eventmgr,
+ org.osgi.framework;version="1.1",
+ org.osgi.service.cm;version="1.0",
+ org.osgi.service.log;version="1.2"
+Export-Package: org.eclipse.equinox.log;x-internal:=true
+Bundle-ClassPath: logservice.jar
+Bundle-Localization: plugin
+Eclipse-LazyStart: true
