@@ -33,6 +33,7 @@ class StateReader {
 
 	private boolean lazyLoad = true;
 	private int numBundles;
+	private boolean accessedFlag = false;
 
 	public static final byte STATE_CACHE_VERSION = 24;
 	public static final byte NULL = 0;
@@ -478,7 +479,16 @@ class StateReader {
 		return lazyLoad;
 	}
 
+	boolean getAccessedFlag() {
+		return accessedFlag;
+	}
+
+	void setAccessedFlag(boolean accessedFlag) {
+		this.accessedFlag = accessedFlag;
+	}
+
 	synchronized void fullyLoad() {
+		setAccessedFlag(true);
 		DataInputStream in = null;
 		try {
 			in = openLazyFile();
@@ -497,6 +507,7 @@ class StateReader {
 	}
 
 	synchronized void fullyLoad(BundleDescriptionImpl target) throws IOException {
+		setAccessedFlag(true);
 		DataInputStream in = null;
 		try {
 			in = openLazyFile();

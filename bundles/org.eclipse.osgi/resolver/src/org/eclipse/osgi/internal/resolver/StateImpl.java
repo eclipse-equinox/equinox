@@ -609,12 +609,15 @@ public abstract class StateImpl implements State {
 	}
 
 	public void unloadLazyData(long expireTime) {
-		long currentTime = System.currentTimeMillis();
-		BundleDescription[] bundles = getBundles();
 		// make sure no other thread is trying to unload or load
 		synchronized (reader) {
+			if (reader.getAccessedFlag()) {
+				reader.setAccessedFlag(false); // reset accessed flag
+				return;
+			}
+			BundleDescription[] bundles = getBundles();
 			for (int i = 0; i < bundles.length; i++)
-				((BundleDescriptionImpl) bundles[i]).unload(currentTime, expireTime);
+				((BundleDescriptionImpl) bundles[i]).unload();
 		}
 	}
 

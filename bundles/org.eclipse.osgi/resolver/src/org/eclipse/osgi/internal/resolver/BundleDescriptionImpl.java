@@ -48,7 +48,6 @@ public class BundleDescriptionImpl extends BaseDescriptionImpl implements Bundle
 	private ArrayList dependents;
 
 	private LazyData lazyData;
-	private long lazyTimeStamp;
 	private int equinox_ee = -1;
 
 	public BundleDescriptionImpl() {
@@ -383,7 +382,6 @@ public class BundleDescriptionImpl extends BaseDescriptionImpl implements Bundle
 	void setFullyLoaded(boolean fullyLoaded) {
 		if (fullyLoaded) {
 			stateBits |= FULLY_LOADED;
-			lazyTimeStamp = System.currentTimeMillis();
 		} else {
 			stateBits &= ~FULLY_LOADED;
 		}
@@ -412,8 +410,10 @@ public class BundleDescriptionImpl extends BaseDescriptionImpl implements Bundle
 	private void fullyLoad() {
 		if ((stateBits & LAZY_LOADED) == 0)
 			return;
-		if (isFullyLoaded())
+		if (isFullyLoaded()){
+			containingState.getReader().setAccessedFlag(true); // set reader accessed flag
 			return;
+		}
 		try {
 			containingState.getReader().fullyLoad(this);
 		} catch (IOException e) {
@@ -437,10 +437,10 @@ public class BundleDescriptionImpl extends BaseDescriptionImpl implements Bundle
 		setLazyLoaded(false);
 	}
 
-	void unload(long currentTime, long expireTime) {
+	void unload() {
 		if ((stateBits & LAZY_LOADED) == 0)
 			return;
-		if (!isFullyLoaded() || (currentTime - lazyTimeStamp - expireTime) <= 0)
+		if (!isFullyLoaded())
 			return;
 		setFullyLoaded(false);
 		LazyData tempData = lazyData;
