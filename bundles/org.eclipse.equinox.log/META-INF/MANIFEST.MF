@@ -10,7 +10,8 @@ Export-Service: org.osgi.service.log.LogReaderService,
 Import-Package: org.eclipse.osgi.framework.eventmgr,
  org.osgi.framework;version="1.1",
  org.osgi.service.cm;version="1.0",
- org.osgi.service.log;version="1.2"
+ org.osgi.service.log;version="1.2",
+ org.eclipse.osgi.util
 Export-Package: org.eclipse.equinox.log;x-internal:=true
 Bundle-ClassPath: logservice.jar
 Bundle-Localization: plugin

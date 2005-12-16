@@ -10,6 +10,7 @@ Import-Service: org.osgi.service.log.LogService
 Import-Package: org.osgi.framework;version="1.2",
  org.osgi.service.device,
  org.osgi.service.log;version="1.2",
- org.osgi.util.tracker
+ org.osgi.util.tracker,
+ org.eclipse.osgi.util
 Export-Package: org.eclipse.equinox.device; x-internal:=true
 Eclipse-LazyStart: true

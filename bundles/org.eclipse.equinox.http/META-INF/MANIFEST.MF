@@ -11,7 +11,8 @@ Import-Package: javax.servlet,
  org.osgi.service.cm;version="1.0",
  org.osgi.service.http;version="1.1",
  org.osgi.service.log;version="1.0",
- org.osgi.util.tracker;version="1.1"
+ org.osgi.util.tracker;version="1.1",
+ org.eclipse.osgi.util
 Export-Package: org.eclipse.equinox.http;x-internal:=true,
  org.eclipse.equinox.http.servlet;x-internal:=true,
  org.eclipse.equinox.socket;x-internal:=true,
