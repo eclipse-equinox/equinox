@@ -13,7 +13,6 @@ package org.eclipse.equinox.http;
 import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
-import java.security.*;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.*;

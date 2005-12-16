@@ -11,9 +11,6 @@
 
 package org.eclipse.equinox.device;
 
-import java.io.IOException;
-import java.net.URL;
-import java.net.URLConnection;
 import java.security.*;
 
 /**
