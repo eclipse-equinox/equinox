@@ -13,6 +13,5 @@ Import-Package: org.eclipse.osgi.framework.eventmgr,
  org.osgi.service.log;version="1.2",
  org.eclipse.osgi.util
 Export-Package: org.eclipse.equinox.log;x-internal:=true
-Bundle-ClassPath: logservice.jar
 Bundle-Localization: plugin
 Eclipse-LazyStart: true
