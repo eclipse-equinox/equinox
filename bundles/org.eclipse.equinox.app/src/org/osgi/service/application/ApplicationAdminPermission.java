@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.application/src/org/osgi/service/application/ApplicationAdminPermission.java,v 1.27 2005/11/30 20:17:37 ckarai Exp $
+ * $Header: /cvshome/build/org.osgi.service.application/src/org/osgi/service/application/ApplicationAdminPermission.java,v 1.29 2005/12/19 15:57:16 ckarai Exp $
  * 
  * Copyright (c) OSGi Alliance (2004, 2005). All Rights Reserved.
  * 
@@ -90,6 +90,9 @@ public class ApplicationAdminPermission extends Permission {
 	 */
 	public ApplicationAdminPermission(String filter, String actions) throws InvalidSyntaxException {
 		super(filter == null ? "*" : filter);
+		
+		if( filter == null )
+			filter = "*";
 		
 		if( actions == null )
 			throw new NullPointerException( "Action string cannot be null!" );
@@ -277,6 +280,10 @@ public class ApplicationAdminPermission extends Permission {
           String action = t.nextToken().trim();
           v.add(action.toLowerCase());
       }
+      
+      if( v.contains( SCHEDULE_ACTION ) && !v.contains( LIFECYCLE_ACTION ) )
+    	  v.add( LIFECYCLE_ACTION );
+      
       return v;
   }
   
