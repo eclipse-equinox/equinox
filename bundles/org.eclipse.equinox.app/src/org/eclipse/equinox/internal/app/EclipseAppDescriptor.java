@@ -21,7 +21,7 @@ import org.osgi.service.condpermadmin.BundleSignerCondition;
 import org.osgi.service.condpermadmin.ConditionInfo;
 
 /*
- * An ApplicationDescriptor for an eclispe application.
+ * An ApplicationDescriptor for an eclipse application.
  */
 public class EclipseAppDescriptor extends ApplicationDescriptor {
 	private ServiceRegistration sr;
