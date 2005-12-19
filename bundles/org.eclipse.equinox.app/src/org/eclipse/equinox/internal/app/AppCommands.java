@@ -76,7 +76,17 @@ public class AppCommands implements CommandProvider {
 	}
 
 	public String getHelp() {
-		return null;
+		StringBuffer sb = new StringBuffer();
+		sb.append("---Application Admin Commands---\n"); //$NON-NLS-1$
+		sb.append("\tactiveApps - lists all running application IDs\n"); //$NON-NLS-1$
+		sb.append("\tapps - lists all installed application IDs\n"); //$NON-NLS-1$
+		sb.append("\tlockApp <application id> - locks the specified application ID\n"); //$NON-NLS-1$
+		sb.append("\tschedApp <application id> <time filter> [true|false] - schedules the specified application id to launch at the specified time filter.  Can optionally make the schedule recurring.\n"); //$NON-NLS-1$
+		sb.append("\tstartApp <application id> - starts the specified application ID\n"); //$NON-NLS-1$
+		sb.append("\tstopApp <application id> - stops the specified running application ID\n"); //$NON-NLS-1$
+		sb.append("\tunlockApp <application id> - unlocks the specified application ID\n"); //$NON-NLS-1$
+		sb.append("\tunschedApp <application id> - unschedules all scheduled applications with the specified application ID\n"); //$NON-NLS-1$
+		return sb.toString();
 	}
 
 	private Dictionary getServiceProps(ServiceReference ref) {
