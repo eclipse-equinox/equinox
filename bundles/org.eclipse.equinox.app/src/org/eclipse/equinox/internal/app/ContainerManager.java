@@ -69,8 +69,6 @@ public class ContainerManager implements IRegistryChangeListener, SynchronousBun
 		registryTracker.open();
 		getExtensionRegistry().addRegistryChangeListener(this);
 		registerAppDecriptors();
-		// need to load scheduled app data after app descriptors have been registered
-		AppManager.loadData(AppManager.FILE_APPSCHEDULED);
 		containers.put(APP_TYPE_MAIN_SINGLETON, new SingletonContainerMgr(new MainSingletonContainer(this), APP_TYPE_MAIN_SINGLETON, this));
 		// need to listen for system bundle stopping
 		context.addBundleListener(this);

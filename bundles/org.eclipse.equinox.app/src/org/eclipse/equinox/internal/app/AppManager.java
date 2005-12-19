@@ -90,6 +90,7 @@ public class AppManager {
 		initPackageAdmin();
 		initConfiguration();
 		loadData(FILE_APPLOCKS);
+		loadData(FILE_APPSCHEDULED);
 	}
 
 	private static void shutdown() {
@@ -227,7 +228,7 @@ public class AppManager {
 		}
 	}
 
-	synchronized static boolean loadData(String fileName) {
+	private synchronized static boolean loadData(String fileName) {
 		try {
 			Location location = (Location) configuration.getService();
 			if (location == null)
