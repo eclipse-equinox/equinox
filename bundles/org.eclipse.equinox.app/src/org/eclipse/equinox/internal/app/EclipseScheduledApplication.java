@@ -44,7 +44,7 @@ public class EclipseScheduledApplication implements ScheduledApplication, EventH
 		this.eventFilter = eventFilter;
 		this.recurring = recurring;
 		appTracker = new ServiceTracker(context, context.createFilter(FILTER_PREFIX + appPid + FILTER_POSTFIX), null);
-		appTracker.open();
+		AppManager.openTracker(appTracker, false);
 	}
 
 	Integer getID() {
@@ -70,7 +70,7 @@ public class EclipseScheduledApplication implements ScheduledApplication, EventH
 	public synchronized ApplicationDescriptor getApplicationDescriptor() {
 		if (removed)
 			throw new IllegalStateException(Messages.EclipseScheduledApplication_7);
-		return (ApplicationDescriptor) appTracker.getService();
+		return (ApplicationDescriptor) AppManager.getService(appTracker);
 	}
 
 	public Map getArguments() {
@@ -101,7 +101,7 @@ public class EclipseScheduledApplication implements ScheduledApplication, EventH
 			desc.launch(getArguments(event));
 		} catch (Exception e) {
 			// TODO should log this
-			return; // return here to aviod removing non-recurring apps when an erorr occurs
+			return; // return here to avoid removing non-recurring apps when an error occurs
 		}
 		if (!isRecurring())
 			remove();

@@ -12,6 +12,8 @@
 package org.eclipse.equinox.internal.app;
 
 import java.io.*;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.*;
 import org.eclipse.core.runtime.adaptor.FileManager;
 import org.eclipse.osgi.service.datalocation.Location;
@@ -426,18 +428,16 @@ public class AppManager {
 	}
 
 	public static Bundle getBundle(String symbolicName) {
-		PackageAdmin packageAdmin = (PackageAdmin) pkgAdminTracker.getService();
+		PackageAdmin packageAdmin = (PackageAdmin) getService(pkgAdminTracker);
 		if (packageAdmin == null)
 			return null;
 		Bundle[] bundles = packageAdmin.getBundles(symbolicName, null);
 		if (bundles == null)
 			return null;
 		//Return the first bundle that is not installed or uninstalled
-		for (int i = 0; i < bundles.length; i++) {
-			if ((bundles[i].getState() & (Bundle.INSTALLED | Bundle.UNINSTALLED)) == 0) {
+		for (int i = 0; i < bundles.length; i++)
+			if ((bundles[i].getState() & (Bundle.INSTALLED | Bundle.UNINSTALLED)) == 0)
 				return bundles[i];
-			}
-		}
 		return null;
 	}
 
@@ -548,5 +548,36 @@ public class AppManager {
 				appArgs[j++] = args[i];
 		}
 		return appArgs;
+	}
+
+	static void openTracker(final ServiceTracker tracker, final boolean allServices) {
+		if (System.getSecurityManager() == null)
+			tracker.open(allServices);
+		else
+			AccessController.doPrivileged(new PrivilegedAction(){
+				public Object run() {
+					tracker.open(allServices);
+					return null;
+				}
+			});
+	}
+	static Object getService(final ServiceTracker tracker) {
+		if (System.getSecurityManager() == null)
+			return tracker.getService();
+		return AccessController.doPrivileged(new PrivilegedAction(){
+			public Object run() {
+				return tracker.getService();
+			}
+		});
+	}
+
+	static String getLocation(final Bundle bundle) {
+		if (System.getSecurityManager() == null)
+			return bundle.getLocation();
+		return (String) AccessController.doPrivileged(new PrivilegedAction() {
+			public Object run() {
+				return bundle.getLocation();
+			}
+		});
 	}
 }

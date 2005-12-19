@@ -13,6 +13,7 @@ package org.eclipse.equinox.internal.app;
 
 import java.security.AccessController;
 import java.util.*;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.application.ApplicationDescriptor;
 import org.osgi.service.application.ApplicationHandle;
@@ -109,11 +110,18 @@ public class EclipseAppDescriptor extends ApplicationDescriptor {
 		Hashtable props = new Hashtable(10);
 		props.put(ApplicationDescriptor.APPLICATION_PID, getApplicationId());
 		props.put(ApplicationDescriptor.APPLICATION_CONTAINER, Activator.PI_APP);
-		props.put(ApplicationDescriptor.APPLICATION_LOCATION, ""); // TODO what is this for !! //$NON-NLS-1$
+		props.put(ApplicationDescriptor.APPLICATION_LOCATION, getLocation());
 		props.put(ApplicationDescriptor.APPLICATION_LAUNCHABLE, singletonMgr == null ? Boolean.TRUE : singletonMgr.isLocked() ? Boolean.FALSE : Boolean.TRUE);
 		props.put(ApplicationDescriptor.APPLICATION_LOCKED, locked);
 		props.put(ApplicationDescriptor.APPLICATION_VISIBLE, Boolean.TRUE);
 		return props;
+	}
+
+	private String getLocation() {
+		final Bundle bundle = AppManager.getBundle(namespace);
+		if (bundle == null)
+			return ""; //$NON-NLS-1$
+		return AppManager.getLocation(bundle);
 	}
 
 	/*
@@ -140,7 +148,10 @@ public class EclipseAppDescriptor extends ApplicationDescriptor {
 	}
 
 	public boolean matchDNChain(String pattern) {
-		return BundleSignerCondition.getCondition(AppManager.getBundle(namespace), new ConditionInfo(BundleSignerCondition.class.getName(), new String[] {pattern})).isSatisfied();
+		Bundle bundle = AppManager.getBundle(namespace);
+		if (bundle == null)
+			return false;
+		return BundleSignerCondition.getCondition(bundle, new ConditionInfo(BundleSignerCondition.class.getName(), new String[] {pattern})).isSatisfied();
 	}
 
 	protected boolean isLaunchableSpecific() {

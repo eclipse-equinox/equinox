@@ -306,11 +306,11 @@ public class ContainerManager implements IRegistryChangeListener, SynchronousBun
 	}
 
 	private IExtensionRegistry getExtensionRegistry() {
-		return (IExtensionRegistry) registryTracker.getService();
+		return (IExtensionRegistry) AppManager.getService(registryTracker);
 	}
 
 	private FrameworkLog getFrameworkLog() {
-		return (FrameworkLog) frameworkLog.getService();
+		return (FrameworkLog) AppManager.getService(frameworkLog);
 	}
 
 	BundleContext getBundleContext() {
