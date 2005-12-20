@@ -52,21 +52,19 @@ public class ContainerManager implements IRegistryChangeListener, SynchronousBun
 	private HashMap apps = new HashMap();
 	// A map of containers keyed by application type
 	private HashMap containers = new HashMap();
-	// tracks the extension registry
-	private ServiceTracker registryTracker;
 	// tracks the FrameworkLog
 	private ServiceTracker frameworkLog;
 	private boolean missingProductReported;
+	private IExtensionRegistry extensionRegistry;
 
-	public ContainerManager(BundleContext context) {
+	public ContainerManager(BundleContext context, IExtensionRegistry extensionRegistry) {
 		this.context = context;
+		this.extensionRegistry = extensionRegistry;
 	}
 
 	void startContainer() {
 		frameworkLog = new ServiceTracker(context, FrameworkLog.class.getName(), null);
 		frameworkLog.open();
-		registryTracker = new ServiceTracker(context, IExtensionRegistry.class.getName(), null);
-		registryTracker.open();
 		getExtensionRegistry().addRegistryChangeListener(this);
 		registerAppDecriptors();
 		containers.put(APP_TYPE_MAIN_SINGLETON, new SingletonContainerMgr(new MainSingletonContainer(this), APP_TYPE_MAIN_SINGLETON, this));
@@ -79,8 +77,6 @@ public class ContainerManager implements IRegistryChangeListener, SynchronousBun
 		stopAllApplications();
 		context.removeBundleListener(this);
 		getExtensionRegistry().removeRegistryChangeListener(this);
-		registryTracker.close();
-		registryTracker = null;
 		frameworkLog.close();
 		frameworkLog = null;
 		// flush the apps and containers
@@ -304,7 +300,7 @@ public class ContainerManager implements IRegistryChangeListener, SynchronousBun
 	}
 
 	private IExtensionRegistry getExtensionRegistry() {
-		return (IExtensionRegistry) AppManager.getService(registryTracker);
+		return extensionRegistry;
 	}
 
 	private FrameworkLog getFrameworkLog() {
