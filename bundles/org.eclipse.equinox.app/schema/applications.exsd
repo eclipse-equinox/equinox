@@ -55,7 +55,7 @@ run multiple applications.
          <sequence>
             <element ref="run" minOccurs="0" maxOccurs="1"/>
          </sequence>
-         <attribute name="type" type="string" use="default" value="">
+         <attribute name="type" type="string">
             <annotation>
                <documentation>
                   
