@@ -142,5 +142,6 @@ org.osgi.framework.executionenvironment = \
  J2SE-1.4,\
  J2SE-1.5,\
  J2SE-1.6,\
- J2SE-6.0
-osgi.java.profile.name = J2SE-1.6
+ J2SE-6.0,\
+ JavaSE-6
+osgi.java.profile.name = JavaSE-6
