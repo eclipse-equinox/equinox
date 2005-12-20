@@ -1,5 +1,5 @@
 /*
- * $Header: /cvsroot/eclipse/equinox-incubator/runtime-split/org.eclipse.equinox.appcontainer/src/org/osgi/service/application/ApplicationDescriptor.java,v 1.3 2005/12/14 18:52:01 twatson Exp $
+ * $Header: /cvsroot/eclipse/org.eclipse.equinox.app/src/org/osgi/service/application/ApplicationDescriptor.java,v 1.1 2005/12/14 22:17:04 twatson Exp $
  * 
  * Copyright (c) OSGi Alliance (2004, 2005). All Rights Reserved.
  * 
@@ -10,9 +10,8 @@
 
 package org.osgi.service.application;
 
-import java.io.IOException;
+import java.util.Iterator;
 import java.util.Map;
-
 import org.eclipse.equinox.internal.app.AppManager;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
@@ -241,7 +240,8 @@ public abstract class ApplicationDescriptor {
 	 * <P>
 	 * The <code>Map</code> argument of the launch method contains startup 
 	 * arguments for the
-	 * application. The keys used in the Map can be standard or application
+	 * application. The keys used in the Map must be non-null, non-empty <code>String<code>
+	 * objects. They can be standard or application
 	 * specific. OSGi defines the <code>org.osgi.triggeringevent</code>
 	 * key to be used to
 	 * pass the triggering event to a scheduled application, however
@@ -270,23 +270,39 @@ public abstract class ApplicationDescriptor {
 	 * @throws SecurityException
 	 *             if the caller doesn't have "lifecycle"
 	 *             ApplicationAdminPermission for the application.
-	 * @throws Exception
+	 * @throws ApplicationException
 	 *             if starting the application failed
 	 * @throws IllegalStateException
 	 *             if the application descriptor is unregistered
+	 * @throws IllegalArgumentException 
+	 *             if the specified <code>Map</code> contains invalid keys
+	 *             (null objects, empty <code>String</code> or a key that is not
+	 *              <code>String</code>)
 	 */
 	public final ApplicationHandle launch(Map arguments)
-			throws Exception {
+			throws ApplicationException {
 		SecurityManager sm = System.getSecurityManager();
 		if (sm!= null)
 			sm.checkPermission(new ApplicationAdminPermission(this, ApplicationAdminPermission.LIFECYCLE_ACTION));
 		synchronized (locked) {
 			if (locked[0])
-				throw new Exception("Application is locked, can't launch!");
+				throw new ApplicationException(ApplicationException.APPLICATION_LOCKED, "Application is locked, can't launch!");
 		}
 		if( !isLaunchableSpecific() )
-			throw new Exception("Cannot launch the application!");
-		return launchSpecific(arguments);
+			throw new ApplicationException(ApplicationException.APPLICAITON_NOT_LAUNCHABLE,
+					 "Cannot launch the application!");
+		checkArgs(arguments);
+		try {
+			return launchSpecific(arguments);
+		} catch(IllegalStateException ise) {
+			throw ise;
+		} catch(SecurityException se) {
+			throw se;
+		} catch( ApplicationException ae) {
+			throw ae;
+		} catch(Exception t) {
+			throw new ApplicationException(ApplicationException.APPLICATION_INTERNAL_ERROR, t);
+		}
 	}
 
 	/**
@@ -333,6 +349,10 @@ public abstract class ApplicationDescriptor {
 	 * should be stored in a persistent storage. The method registers a
 	 * {@link ScheduledApplication} service in Service Registry, representing
 	 * the created scheduling.
+	 * <p>
+	 * The <code>Map</code> argument of the  method contains startup 
+	 * arguments for the application. The keys used in the Map must be non-null, 
+	 * non-empty <code>String<code> objects.
 	 * 
 	 * @param arguments
 	 *            the startup arguments for the scheduled application, may be
@@ -354,10 +374,6 @@ public abstract class ApplicationDescriptor {
 	 * 
 	 * @throws NullPointerException
 	 *             if the topic is <code>null</code>
-	 * @throws IOException
-	 *             may be thrown if writing the information about the scheduled
-	 *             application requires operation on the permanent storage and
-	 *             I/O problem occurred.
 	 * @throws InvalidSyntaxException 
 	 * 			   if the specified <code>eventFilter</code> is not syntactically correct
 	 * @throws SecurityException
@@ -365,9 +381,14 @@ public abstract class ApplicationDescriptor {
 	 *             ApplicationAdminPermission for the application.
 	 * @throws IllegalStateException
 	 *             if the application descriptor is unregistered
+	 * @throws IllegalArgumentException
+	 *             if the specified <code>Map</code> contains invalid keys
+	 *             (null objects, empty <code>String</code> or a key that is not
+	 *              <code>String</code>)
 	 */
 	public final ScheduledApplication schedule(Map arguments, String topic,
-		String eventFilter, boolean recurring) throws IOException,  InvalidSyntaxException {
+			String eventFilter, boolean recurring) throws InvalidSyntaxException {
+		checkArgs(arguments);
 		isLaunchableSpecific(); // checks if the ApplicationDescriptor was already unregistered
 		return AppManager.addScheduledApp(this, arguments, topic, eventFilter, recurring);
 	}
@@ -452,7 +473,7 @@ public abstract class ApplicationDescriptor {
 		ScheduledApplication schedule(Map args, String topic, String filter,
 				boolean recurs) throws InvalidSyntaxException;
 
-		void launch(Map arguments) throws Exception;
+		void launch(Map arguments) throws ApplicationException;
 	}
 
 	private void saveLock(boolean locked) {
@@ -461,6 +482,18 @@ public abstract class ApplicationDescriptor {
 
 	private boolean isLocked() {
 		return AppManager.isLocked(this);
+	}
+
+	private void checkArgs(Map arguments) {
+		if (arguments == null)
+			return;
+		for (Iterator keys = arguments.keySet().iterator(); keys.hasNext();) {
+			Object key = keys.next();
+			if (!(key instanceof String))
+				throw new IllegalArgumentException("Invalid key type: " + key == null ? "<null>" : key.getClass().getName());
+			if ("".equals(key))
+				throw new IllegalArgumentException("Empty string is an invalid key");
+		}
 	}
 
 	String							pid;

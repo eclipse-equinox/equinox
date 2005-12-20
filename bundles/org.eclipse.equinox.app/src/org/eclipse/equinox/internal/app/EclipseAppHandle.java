@@ -51,7 +51,7 @@ public class EclipseAppHandle extends ApplicationHandle implements IAppContext {
 	}
 
 	
-	protected void destroySpecific() throws Exception {
+	protected void destroySpecific() {
 		// when this method is called we must force the application to exit.
 		// first set the status to stopping
 		setAppStatus(IAppContext.STOPPING);

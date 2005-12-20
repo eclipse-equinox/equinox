@@ -1,5 +1,5 @@
 /*
- * $Header: /cvsroot/eclipse/equinox-incubator/runtime-split/org.eclipse.equinox.appcontainer/src/org/osgi/service/application/ApplicationHandle.java,v 1.2 2005/11/29 19:48:02 twatson Exp $
+ * $Header: /cvsroot/eclipse/org.eclipse.equinox.app/src/org/osgi/service/application/ApplicationHandle.java,v 1.1 2005/12/14 22:17:04 twatson Exp $
  * 
  * Copyright (c) OSGi Alliance (2004, 2005). All Rights Reserved.
  * 
@@ -140,13 +140,10 @@ public abstract class ApplicationHandle {
 	 *             if the caller doesn't have "lifecycle"
 	 *             <code>ApplicationAdminPermission</code> for the corresponding application.
 	 * 
-	 * @throws Exception
-	 *             is thrown if an exception or an error occurred during the
-	 *             method execution.
 	 * @throws IllegalStateException
 	 *             if the application handle is unregistered
 	 */
-	public final void destroy() throws Exception {
+	public final void destroy() {
 		if (STOPPING.equals(getState()))
 			return;
 		SecurityManager sm = System.getSecurityManager();
@@ -161,11 +158,8 @@ public abstract class ApplicationHandle {
 	 * 
 	 * @throws IllegalStateException
 	 *             if the application handle is unregistered
-	 * @throws Exception
-	 *             is thrown if an exception or an error occurred during the
-	 *             method execution.
 	 */
-	protected abstract void destroySpecific() throws Exception;
+	protected abstract void destroySpecific();
 	
 	ApplicationDescriptor		descriptor;
 
@@ -175,6 +169,6 @@ public abstract class ApplicationHandle {
 	 */
 	public interface Delegate {
 		void setApplicationHandle(ApplicationHandle d, ApplicationDescriptor.Delegate descriptor );
-		void destroy() throws Exception;
+		void destroy();
 	}
 }

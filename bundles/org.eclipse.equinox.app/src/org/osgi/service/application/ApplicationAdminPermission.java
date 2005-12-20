@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.application/src/org/osgi/service/application/ApplicationAdminPermission.java,v 1.29 2005/12/19 15:57:16 ckarai Exp $
+ * $Header: /cvshome/build/org.osgi.service.application/src/org/osgi/service/application/ApplicationAdminPermission.java,v 1.31 2005/12/20 11:23:39 ckarai Exp $
  * 
  * Copyright (c) OSGi Alliance (2004, 2005). All Rights Reserved.
  * 
@@ -101,7 +101,7 @@ public class ApplicationAdminPermission extends Permission {
 		this.filter = (filter == null ? "*" : filter);
 		this.actions = actions;
 
-		if( !filter.equals( "*" ) )
+		if( !filter.equals( "*" ) && !filter.equals( "<<SELF>>" ) )
 			FrameworkUtil.createFilter( this.filter ); // check if the filter is valid
 		init();
 	}
@@ -136,11 +136,17 @@ public class ApplicationAdminPermission extends Permission {
 	 * @return the permission updated with the ID of the current application
 	 */
 	public ApplicationAdminPermission setCurrentApplicationId(String applicationId) {
-		if( this.applicationDescriptor == null )
-			throw new NullPointerException("No application descriptor found!");
-			
-		ApplicationAdminPermission newPerm = new ApplicationAdminPermission( this.applicationDescriptor, 
-				this.actions );
+		ApplicationAdminPermission newPerm = null;
+		
+		if( this.applicationDescriptor == null ) {
+			try {
+				newPerm = new ApplicationAdminPermission( this.filter, this.actions );
+			}catch( InvalidSyntaxException e ) {
+				throw new RuntimeException( "Internal error" ); /* this can never happen */
+			}
+		}
+		else	
+		    newPerm = new ApplicationAdminPermission( this.applicationDescriptor, this.actions );
 		
 		newPerm.applicationID = applicationId;
 		
@@ -176,6 +182,9 @@ public class ApplicationAdminPermission extends Permission {
       ApplicationAdminPermission other = (ApplicationAdminPermission) otherPermission;
 
       if( !filter.equals("*") ) {
+       	if( other.applicationDescriptor == null )
+       		return false;
+       	
       	if( filter.equals( "<<SELF>>") ) {
             if( other.applicationID == null )
           		return false; /* it cannot be, this might be a bug */
@@ -185,8 +194,6 @@ public class ApplicationAdminPermission extends Permission {
       	}
       	else {
       		Hashtable props = new Hashtable();
-      		if( other.applicationDescriptor == null )
-      			return false;
       		props.put( "pid", other.applicationDescriptor.getApplicationId() );
       		props.put( "signer", new SignerWrapper( other.applicationDescriptor ) );
       		      		
@@ -195,7 +202,7 @@ public class ApplicationAdminPermission extends Permission {
       			return false;
       		
       		if( !flt.match( props ) )
-      			return false;      		
+      			return false;
       	}
       }
       
