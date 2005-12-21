@@ -16,5 +16,4 @@ Import-Package: org.eclipse.osgi.framework.eventmgr,
 Export-Package: org.eclipse.equinox.event; x-internal:=true,
  org.eclipse.equinox.event; x-internal:=true
 Bundle-Vendor: %bundleVendor
-Eclipse-LazyStart: true
 Export-Service: org.osgi.service.event.EventAdmin

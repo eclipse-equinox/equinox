@@ -14,4 +14,3 @@ Bundle-Vendor: %bundleVendor
 Bundle-Copyright: %bundleCopyright
 Bundle-Localization: plugin
 Export-Service: org.osgi.service.metatype.MetaTypeService
-Eclipse-LazyStart: true

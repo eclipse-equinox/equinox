@@ -6,7 +6,6 @@ Bundle-Vendor: %bundleVendor
 Bundle-Copyright: %bundleCopyright
 Bundle-Activator: org.eclipse.equinox.ds.Activator
 Bundle-Localization: plugin
-Eclipse-LazyStart: true
 Import-Package: org.eclipse.osgi.util,
  org.osgi.framework;version="1.3.0",
  org.osgi.service.cm,

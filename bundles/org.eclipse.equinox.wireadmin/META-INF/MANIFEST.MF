@@ -16,4 +16,3 @@ Import-Package: org.eclipse.osgi.framework.eventmgr,
 Export-Package: org.eclipse.equinox.wireadmin;x-internal=true
 Import-Service: org.osgi.service.log.LogService, org.osgi.service.prefs
 Export-Service: org.osgi.service.wireadmin.WireAdmin
-Eclipse-LazyStart: true

@@ -14,4 +14,3 @@ Import-Package: org.eclipse.osgi.framework.eventmgr,
  org.eclipse.osgi.util
 Export-Package: org.eclipse.equinox.log;x-internal:=true
 Bundle-Localization: plugin
-Eclipse-LazyStart: true

@@ -20,4 +20,3 @@ Export-Package: org.eclipse.equinox.http;x-internal:=true,
 Import-Service: org.osgi.service.log.LogService
 Export-Service: org.osgi.service.http.HttpService
 Bundle-Localization: plugin
-Eclipse-LazyStart: true
