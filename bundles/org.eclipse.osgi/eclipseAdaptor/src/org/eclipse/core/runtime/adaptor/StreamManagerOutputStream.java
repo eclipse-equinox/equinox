@@ -82,4 +82,14 @@ public class StreamManagerOutputStream extends FilterOutputStream {
 	StreamManagerOutputStream[] getStreamSet() {
 		return streamSet;
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see java.io.FilterOutputStream#write(byte[], int, int)
+	 * Override this method to prevent single byte writes to the output stream
+	 * which is done by the default implementation of FilteredOutputStream
+	 */
+	public void write(byte[] bytes, int off, int len) throws IOException {
+		out.write(bytes, off, len);
+	}
 }
