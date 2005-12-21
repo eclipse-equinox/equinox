@@ -94,12 +94,12 @@ class StateWriter {
 				addToObjectTable(bundles[i]);
 			// first write the lazy data to get the offsets and sizes to the lazy data
 			fosLazy = new FileOutputStream(lazyFile);
-			outLazy = new DataOutputStream(fosLazy);
+			outLazy = new DataOutputStream(new BufferedOutputStream(fosLazy));
 			for (int i = 0; i < bundles.length; i++)
 				writeBundleDescriptionLazyData(bundles[i], outLazy);
 			// now write the state data
 			fosState = new FileOutputStream(stateFile);
-			outState = new DataOutputStream(fosState);
+			outState = new DataOutputStream(new BufferedOutputStream(fosState));
 			outState.write(StateReader.STATE_CACHE_VERSION);
 			if (writePrefix(state, outState))
 				return;
