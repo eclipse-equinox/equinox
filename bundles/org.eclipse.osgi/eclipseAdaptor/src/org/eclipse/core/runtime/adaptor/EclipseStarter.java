@@ -126,6 +126,8 @@ public class EclipseStarter {
 	private static final String CONSOLE_NAME = "OSGi Console"; //$NON-NLS-1$
 
 	private static FrameworkLog log;
+	// directory of serch candidates keyed by directory abs path -> directory listing (bug 122024)
+	private static HashMap searchCandidates = new HashMap(4);
 
 	/**
 	 * This is the main to start osgi.
@@ -585,6 +587,7 @@ public class EclipseStarter {
 	}
 
 	private static InitialBundle[] getInitialBundles(String[] installEntries) throws MalformedURLException {
+		searchCandidates.clear();
 		ArrayList result = new ArrayList(installEntries.length);
 		int defaultStartLevel = Integer.parseInt(System.getProperty(PROP_BUNDLES_STARTLEVEL, DEFAULT_BUNDLES_STARTLEVEL));
 		String syspath = getSysPath();
@@ -1134,21 +1137,26 @@ public class EclipseStarter {
 	 * @param start the location to begin searching
 	 */
 	private static String searchFor(final String target, String start) {
-		String[] candidates = new File(start).list();
+		String[] candidates = (String[]) searchCandidates.get(start);
+		if (candidates == null) {
+			candidates = new File(start).list();
+			if (candidates != null)
+				searchCandidates.put(start, candidates);
+		}
 		if (candidates == null)
 			return null;
 		String result = null;
 		Object maxVersion = null;
 		for (int i = 0; i < candidates.length; i++) {
-			File candidate = new File(start, candidates[i]);
-			if (!candidate.getName().equals(target) && !candidate.getName().startsWith(target + "_")) //$NON-NLS-1$
+			String name = candidates[i];
+			if (!name.equals(target) && !name.startsWith(target + "_")) //$NON-NLS-1$
 				continue;
-			String name = candidate.getName();
 			String version = ""; //$NON-NLS-1$ // Note: directory with version suffix is always > than directory without version suffix
 			int index = name.indexOf('_');
 			if (index != -1)
 				version = name.substring(index + 1);
 			Object currentVersion = getVersionElements(version);
+			File candidate = new File(start, candidates[i]);
 			if (maxVersion == null) {
 				result = candidate.getAbsolutePath();
 				maxVersion = currentVersion;
