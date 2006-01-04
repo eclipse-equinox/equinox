@@ -434,8 +434,46 @@ public class EclipseStarter {
 		State state = adaptor.getState();
 		FrameworkLog logService = adaptor.getFrameworkLog();
 		StateHelper stateHelper = adaptor.getPlatformAdmin().getStateHelper();
+
+		// first lets look for missing leaf constraints (bug 114120)
+		VersionConstraint[] leafConstraints = stateHelper.getUnsatisfiedLeaves(state);
+		// hash the missing leaf constraints by the declaring bundles
+		Map missing = new HashMap();
+		for (int i = 0; i < leafConstraints.length; i++) {
+			// only include non-optional constraint leafs
+			if (leafConstraints[i] instanceof BundleSpecification && ((BundleSpecification) leafConstraints[i]).isOptional())
+				continue;
+			if (leafConstraints[i] instanceof ImportPackageSpecification && ImportPackageSpecification.RESOLUTION_OPTIONAL.equals(((ImportPackageSpecification) leafConstraints[i]).getDirective(Constants.RESOLUTION_DIRECTIVE)))
+				continue;
+			BundleDescription bundle = leafConstraints[i].getBundle();
+			ArrayList constraints = (ArrayList) missing.get(bundle);
+			if (constraints == null) {
+				constraints = new ArrayList();
+				missing.put(bundle, constraints);
+			}
+			constraints.add(leafConstraints[i]);
+		}
+
+		// found some bundles with missing leaf constraints; only log them
+		if (missing.size() > 0) {
+			for (Iterator iter = missing.keySet().iterator(); iter.hasNext();) {
+				BundleDescription description = (BundleDescription) iter.next();
+				String symbolicName = description.getSymbolicName() == null ? FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME : description.getSymbolicName();
+				String generalMessage = NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_ERROR_BUNDLE_NOT_RESOLVED, description.getLocation());
+				ArrayList constraints = (ArrayList) missing.get(description);
+				FrameworkLogEntry[] logChildren = new FrameworkLogEntry[constraints.size()];
+				for (int i = 0; i < logChildren.length; i++)
+					logChildren[i] = new FrameworkLogEntry(symbolicName, EclipseAdaptorMsg.getResolutionFailureMessage((VersionConstraint) constraints.get(i)), 0, null, null);
+				logService.log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, generalMessage, 0, null, logChildren));
+			}
+			return;
+		}
+
+		// ok there must be some bundles unresolved for other reasons, causing the system to be unresolved
+		// just log all unresolved constraints.
 		for (int i = 0; i < bundles.length; i++)
 			if (bundles[i].getState() == Bundle.INSTALLED) {
+				String symbolicName = bundles[i].getSymbolicName() == null ? FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME : bundles[i].getSymbolicName(); 
 				String generalMessage = NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_ERROR_BUNDLE_NOT_RESOLVED, bundles[i]);
 				BundleDescription description = state.getBundle(bundles[i].getBundleId());
 				// for some reason, the state does not know about that bundle
@@ -447,13 +485,13 @@ public class EclipseStarter {
 					// the bundle wasn't resolved due to some of its constraints were unsatisfiable
 					logChildren = new FrameworkLogEntry[unsatisfied.length];
 					for (int j = 0; j < unsatisfied.length; j++)
-						logChildren[j] = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, EclipseAdaptorMsg.getResolutionFailureMessage(unsatisfied[j]), 0, null, null);
+						logChildren[j] = new FrameworkLogEntry(symbolicName, EclipseAdaptorMsg.getResolutionFailureMessage(unsatisfied[j]), 0, null, null);
 				} else {
 					ResolverError[] resolverErrors = state.getResolverErrors(description);
 					if (resolverErrors.length > 0) {
 						logChildren = new FrameworkLogEntry[resolverErrors.length];
 						for (int j = 0; j < resolverErrors.length; j++)
-							logChildren[j] = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, resolverErrors[j].toString(), 0, null, null);
+							logChildren[j] = new FrameworkLogEntry(symbolicName, resolverErrors[j].toString(), 0, null, null);
 					}
 				}
 
