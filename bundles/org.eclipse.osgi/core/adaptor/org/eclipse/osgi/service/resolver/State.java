@@ -12,7 +12,6 @@ package org.eclipse.osgi.service.resolver;
 
 import java.util.Dictionary;
 
-import org.osgi.framework.*;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Version;
 
@@ -412,4 +411,17 @@ public interface State {
 	 * @return the list of system packages
 	 */
 	public ExportPackageDescription[] getSystemPackages();
+	
+	/**
+	 * Returns a state helper object. State helpers provide convenience methods 
+	 * for manipulating states. 
+	 * <p>
+	 * A possible implementation for this
+	 * method would provide the same single StateHelper instance to all clients.
+	 * </p>
+	 * 
+	 * @return a state helper
+	 * @see StateHelper
+	 */
+	public StateHelper getStateHelper();
 }

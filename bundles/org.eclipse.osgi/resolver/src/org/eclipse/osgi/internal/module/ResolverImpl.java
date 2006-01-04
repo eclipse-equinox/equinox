@@ -39,8 +39,6 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 
 	// The State associated with this resolver
 	private State state;
-	// The BundleContext of the system bundle
-	private BundleContext context;
 	// Used to check permissions for import/export, provide/require, host/fragment
 	private PermissionChecker permissionChecker;
 	// Set of bundles that are pending removal
@@ -59,7 +57,6 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 	private GroupingChecker groupingChecker;
 
 	public ResolverImpl(BundleContext context, boolean checkPermissions) {
-		this.context = context;
 		this.permissionChecker = new PermissionChecker(context, checkPermissions, this);
 	}
 
@@ -246,7 +243,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		if (platformProperties == null)
 			return false;
 		try {
-			Filter filter = context.createFilter(platformFilter);
+			Filter filter = FrameworkUtil.createFilter(platformFilter);
 			for (int i = 0; i < platformProperties.length; i++)
 				if (filter.match(platformProperties[i]))
 					return true;

@@ -670,4 +670,8 @@ public abstract class StateImpl implements State {
 	void setDynamicCacheChanged(boolean dynamicCacheChanged) {
 		this.dynamicCacheChanged = dynamicCacheChanged;
 	}
+
+	public StateHelper getStateHelper() {
+		return StateHelperImpl.getInstance();
+	}
 }

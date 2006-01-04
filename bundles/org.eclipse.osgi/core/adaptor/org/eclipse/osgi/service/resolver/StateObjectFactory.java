@@ -13,6 +13,7 @@ package org.eclipse.osgi.service.resolver;
 import java.io.*;
 import java.util.Dictionary;
 import java.util.Map;
+import org.eclipse.osgi.internal.resolver.StateObjectFactoryImpl;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Version;
 
@@ -24,12 +25,30 @@ import org.osgi.framework.Version;
  * @since 3.1
  */
 public interface StateObjectFactory {
+
 	/**
-	 * Creates an empty state. 
+	 * The default object factory that can be used to create, populate and resolve
+	 * states.  This is particularly useful when using the resolver outside the context
+	 * of a running Equinox framework.
+	 */
+	public static final StateObjectFactory defaultFactory = new StateObjectFactoryImpl();
+	
+	/**
+	 * Creates an empty state. The returned state does not have an 
+	 * attached resolver.
 	 * 
 	 * @return the created state
+	 * @deprecated see {@link #createState(boolean) }
 	 */
 	public State createState();
+
+	/**
+	 * Creates an empty state with or without a resolver.
+	 * 
+	 * @param createResolver true if the created state should be initialized with a resolver.
+	 * @return the created state
+	 */
+	public State createState(boolean resolver);
 
 	/**
 	 * Creates a new state that is a copy of the given state. The returned state 

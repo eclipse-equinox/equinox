@@ -21,7 +21,7 @@ public class PermissionChecker {
 
 	public PermissionChecker(BundleContext context, boolean checkPermissions, ResolverImpl resolver) {
 		this.context = context;
-		this.checkPermissions = checkPermissions;
+		this.checkPermissions = checkPermissions && context != null; // only can check permissions if context is not null
 		this.resolver = resolver;
 	}
 

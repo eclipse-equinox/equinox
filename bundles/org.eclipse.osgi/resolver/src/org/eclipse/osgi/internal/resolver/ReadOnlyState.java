@@ -162,4 +162,8 @@ public class ReadOnlyState implements State {
 	public void removeResolverErrors(BundleDescription bundle) {
 		throw new UnsupportedOperationException();
 	}
+	
+	public StateHelper getStateHelper() {
+		return StateHelperImpl.getInstance();
+	}
 }

@@ -13,6 +13,7 @@ package org.eclipse.osgi.internal.resolver;
 import java.io.*;
 import java.util.Dictionary;
 import java.util.Map;
+import org.eclipse.osgi.internal.module.ResolverImpl;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Version;
@@ -153,6 +154,13 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 
 	public State createState() {
 		return internalCreateState();
+	}
+
+	public State createState(boolean createResolver) {
+		State result = internalCreateState();
+		if (createResolver)
+			result.setResolver(new ResolverImpl(null, false));
+		return result;
 	}
 
 	public State createState(State original) {

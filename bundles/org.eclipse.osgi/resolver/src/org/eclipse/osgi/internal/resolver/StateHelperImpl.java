@@ -67,6 +67,51 @@ public class StateHelperImpl implements StateHelper {
 			addPrerequisites(dependencies[i], reachable);
 	}
 
+	private Map getExportedPackageMap(State state) {
+		Map result = new HashMap(11);
+		BundleDescription[] bundles = state.getBundles();
+		for (int i = 0; i < bundles.length; i++) {
+			ExportPackageDescription[] packages = bundles[i].getExportPackages();
+			for (int j = 0; j < packages.length; j++) {
+				ExportPackageDescription description = packages[j];
+				Set exports = (Set) result.get(description.getName());
+				if (exports == null) {
+					exports = new HashSet(1);
+					result.put(description.getName(), exports);
+				}
+				exports.add(description);
+			}
+		}
+		return result;
+	}
+	
+	public VersionConstraint[] getUnsatisfiedLeaves(State state) {
+		Map packages = getExportedPackageMap(state);
+		HashSet result = new HashSet(11);
+		BundleDescription[] bundles = state.getBundles();
+		for (int i = 0; i < bundles.length; i++) {
+			BundleDescription description = bundles[i];
+			VersionConstraint[] constraints = getUnsatisfiedConstraints(description);
+			for (int j = 0; j < constraints.length; j++) {
+				VersionConstraint constraint = constraints[j];
+				boolean satisfied = false;
+				if (constraint instanceof BundleSpecification || constraint instanceof HostSpecification) {
+					BundleDescription[] suppliers = state.getBundles(constraint.getName());
+					for (int k = 0; k < suppliers.length && !satisfied; k++) 
+						satisfied |= constraint.isSatisfiedBy(suppliers[k]);
+				} else if (constraint instanceof ImportPackageSpecification) {
+					Set exports = (Set) packages.get(constraint.getName());
+					if (exports != null) 
+						for (Iterator iter = exports.iterator(); iter.hasNext() && !satisfied;)
+							satisfied |= constraint.isSatisfiedBy((ExportPackageDescription) iter.next());
+				}
+				if (!satisfied)
+					result.add(constraint);
+			}
+		}
+		return (VersionConstraint[]) result.toArray(new VersionConstraint[result.size()]);
+	}
+
 	/**
 	 * @see StateHelper
 	 */
