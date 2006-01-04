@@ -45,7 +45,7 @@ public class WireAdminEventProducer extends ServiceTracker implements EventDispa
 		this.context = context;
 		this.log = log;
 		this.wireAdmin = wireAdmin;
-		eventManager = new EventManager();
+		eventManager = new EventManager("WireAdmin Event Dispatcher"); //$NON-NLS-1$
 		listeners = new EventListeners();
 
 		open();
