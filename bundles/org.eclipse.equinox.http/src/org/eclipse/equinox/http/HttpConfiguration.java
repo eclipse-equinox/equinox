@@ -48,8 +48,7 @@ public class HttpConfiguration implements ManagedService, ManagedServiceFactory 
 
 	protected final static String enviroKeyHttpPort = "org.osgi.service.http.port"; //$NON-NLS-1$
 	protected final static String enviroKeyHttpsPort = "org.osgi.service.http.port.secure"; //$NON-NLS-1$
-	protected final static String enviroKeyDefaultListeners = "com.ibm.osg.service.http.defaultports"; //$NON-NLS-1$
-	protected final static String enviroKeyHttpAddress = "com.ibm.osg.service.http.address"; //$NON-NLS-1$
+	protected final static String enviroKeyHttpAddress = "org.eclipse.equinox.http.address"; //$NON-NLS-1$
 
 	protected final static String HTTPSERVICEPID = "com.ibm.osg.service.http.Http"; //$NON-NLS-1$
 	protected ServiceRegistration managedService;
@@ -137,28 +136,15 @@ public class HttpConfiguration implements ManagedService, ManagedServiceFactory 
 	 * <p>
 	 */
 	protected void createDefaultListeners() {
-		BundleContext context = http.context;
-
-		if (context.getProperty(enviroKeyDefaultListeners) != null) {
-			if (context.getProperty(enviroKeyHttpsPort) != null) {
-				try {
-					defaultHttpsListener = new HttpListener(http, this, createProperties(DEFAULT_HTTP_ADDRESS, DEFAULT_HTTPS_PORT, "https", 30)); //$NON-NLS-1$
-				} catch (IOException e) {
-					http.logError(HttpMsg.HTTP_UNEXPECTED_IOEXCEPTION, e);
-				} catch (RuntimeException e) {
-					http.logError(HttpMsg.HTTP_UNEXPECTED_RUNTIMEEXCEPTION, e);
-				}
-			}
-
-			if ((defaultHttpsListener == null) || (context.getProperty(enviroKeyHttpsPort) != null)) {
-				try {
-					defaultHttpListener = new HttpListener(http, this, createProperties(DEFAULT_HTTP_ADDRESS, DEFAULT_HTTP_PORT, "http", 30)); //$NON-NLS-1$
-				} catch (IOException e) {
-					http.logError(HttpMsg.HTTP_UNEXPECTED_IOEXCEPTION, e);
-					http.logError(HttpMsg.HTTP_UNEXPECTED_RUNTIMEEXCEPTION, e);
-				}
+		if (DEFAULT_HTTP_PORT != -1) {
+			try {
+				defaultHttpListener = new HttpListener(http, this, createProperties(DEFAULT_HTTP_ADDRESS, DEFAULT_HTTP_PORT, "http", 30));//$NON-NLS-1$
+			} catch (IOException e) {
+				http.logError(HttpMsg.HTTP_UNEXPECTED_IOEXCEPTION, e);
+				http.logError(HttpMsg.HTTP_UNEXPECTED_RUNTIMEEXCEPTION, e);
 			}
 		}
+
 	}
 
 	/**
