@@ -27,7 +27,7 @@ import org.osgi.util.tracker.ServiceTracker;
  * Main class for the SCR. This class will start the SCR bundle and begin
  * processing other bundles.
  * 
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1 $
  */
 public class Activator implements BundleActivator, BundleTrackerCustomizer, WorkDispatcher {
 
@@ -67,6 +67,7 @@ public class Activator implements BundleActivator, BundleTrackerCustomizer, Work
 		bundleTracker = new BundleTracker(context, Bundle.ACTIVE, this);
 
 		workQueue = new WorkQueue("SCR Work Queue"); //$NON-NLS-1$
+		workQueue.setDaemon(true); // make sure the work queue is daemon
 		resolver = new Resolver(this);
 		workQueue.start();
 		bundleTracker.open();
