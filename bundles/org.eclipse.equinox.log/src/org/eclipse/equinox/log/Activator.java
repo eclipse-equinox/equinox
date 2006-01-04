@@ -68,7 +68,7 @@ public class Activator implements BundleActivator, EventDispatcher, BundleListen
 	public void start(BundleContext context) {
 		this.context = context;
 
-		eventManager = new EventManager();
+		eventManager = new EventManager("Log Event Dispatcher"); //$NON-NLS-1$
 		logEvent = new EventListeners();
 
 		logEntries = new LogEntry[logSize];
