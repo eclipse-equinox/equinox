@@ -37,7 +37,7 @@ public class UserAdminEventProducer extends ServiceTracker implements EventDispa
 		super(context, userAdminListenerClass, null);
 		this.userAdmin = userAdmin;
 		this.log = log;
-		eventManager = new EventManager();
+		eventManager = new EventManager("UserAdmin Event Dispatcher"); //$NON-NLS-1$
 		listeners = new EventListeners();
 
 		open();
