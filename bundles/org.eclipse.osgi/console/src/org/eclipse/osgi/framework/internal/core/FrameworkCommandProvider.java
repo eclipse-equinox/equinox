@@ -1356,6 +1356,8 @@ public void _threads(CommandInterpreter intp) throws Exception {
 			if (t != null) {
 				sb.setLength(0);
 				sb.append(Util.toString(simpleClassName(t), 18)).append(" ").append(Util.toString(t.getName(), 21)).append(" ").append(Util.toString(t.getThreadGroup().getName(), 16)).append(Util.toString(new Integer(t.getPriority()), 3)); //$NON-NLS-1$ //$NON-NLS-2$
+				if (t.isDaemon())
+					sb.append(" [daemon]"); //$NON-NLS-1$
 				intp.println(sb.toString());
 			}
 		}
