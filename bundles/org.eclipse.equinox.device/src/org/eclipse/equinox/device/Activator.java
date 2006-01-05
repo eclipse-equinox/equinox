@@ -120,7 +120,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 
 		updatewait = 5 * 1000L;
 
-		String prop = context.getProperty("com.ibm.osg.service.device.updatewait"); //$NON-NLS-1$
+		String prop = context.getProperty("org.eclipse.equinox.device.updatewait"); //$NON-NLS-1$
 
 		if (prop != null) {
 			try {

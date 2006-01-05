@@ -135,7 +135,7 @@ public class Http {
 	}
 
 	/**
-	 * @return com.ibm.osg.service.http.servlet.MIMETypes
+	 * @return MIMETypes
 	 */
 	public String getMimeType(String name) {
 		return (dataReader.computeMimeType(name));

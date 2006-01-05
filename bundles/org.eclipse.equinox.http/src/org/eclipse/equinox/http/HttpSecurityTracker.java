@@ -21,7 +21,7 @@ import org.osgi.util.tracker.ServiceTracker;
 public class HttpSecurityTracker extends ServiceTracker {
 
 	protected HttpSecurityTracker(BundleContext context) throws InvalidSyntaxException {
-		super(context, context.createFilter("(&(objectClass=org.osgi.service.http.HttpContext)(com.ibm.osg.service.http.default.handleSecurity=*))"), null); //$NON-NLS-1$
+		super(context, context.createFilter("(&(objectClass=org.osgi.service.http.HttpContext)(org.eclipse.equinox.http.default.handleSecurity=*))"), null); //$NON-NLS-1$
 
 		open();
 	}

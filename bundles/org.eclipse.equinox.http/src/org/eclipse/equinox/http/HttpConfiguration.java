@@ -50,9 +50,9 @@ public class HttpConfiguration implements ManagedService, ManagedServiceFactory 
 	protected final static String enviroKeyHttpsPort = "org.osgi.service.http.port.secure"; //$NON-NLS-1$
 	protected final static String enviroKeyHttpAddress = "org.eclipse.equinox.http.address"; //$NON-NLS-1$
 
-	protected final static String HTTPSERVICEPID = "com.ibm.osg.service.http.Http"; //$NON-NLS-1$
+	protected final static String HTTPSERVICEPID = "org.eclipse.equinox.http.Http"; //$NON-NLS-1$
 	protected ServiceRegistration managedService;
-	protected final static String HTTPSERVICEFACTORYPID = "com.ibm.osg.service.http.HttpFactory"; //$NON-NLS-1$
+	protected final static String HTTPSERVICEFACTORYPID = "org.eclipse.equinox.http.HttpFactory"; //$NON-NLS-1$
 	protected ServiceRegistration managedServiceFactory;
 
 	protected final static String keyHttpMinThreads = "http.minThreads"; //$NON-NLS-1$
@@ -199,7 +199,7 @@ public class HttpConfiguration implements ManagedService, ManagedServiceFactory 
 
 		properties.put(Constants.SERVICE_VENDOR, "IBM"); //$NON-NLS-1$
 		properties.put(Constants.SERVICE_DESCRIPTION, HttpMsg.OSGi_Http_Service_IBM_Implementation_16);
-		properties.put(Constants.SERVICE_PID, "com.ibm.osg.service.http.HttpService-" + scheme); //$NON-NLS-1$
+		properties.put(Constants.SERVICE_PID, "org.eclipse.equinox.http.HttpService-" + scheme); //$NON-NLS-1$
 		properties.put(keyHttpAddress, address);
 		properties.put(keyHttpPort, new Integer(port));
 		properties.put(keyHttpScheme, scheme);

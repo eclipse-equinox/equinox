@@ -103,7 +103,7 @@
 		<CARDINALITY TYPE='SCALAR' SIZE='' />
 	</ATTRIBUTEDEFINITION>
 
-	<OBJECTCLASSDEFINITION ID='com.ibm.osg.service.http.Http' TYPE="PID">
+	<OBJECTCLASSDEFINITION ID='org.eclipse.equinox.http.Http' TYPE="PID">
 		<NAME>
 			<STRING KEY="HTTP_GEN_SETTINGS" DEFAULT="Http Service General Settings" />
 		</NAME>
@@ -114,7 +114,7 @@
 		<ATTRIBUTE ID="http.maxThreads" REQUIRED="yes" />
 		<ATTRIBUTE ID="http.threadPriority" REQUIRED="yes" />
 	</OBJECTCLASSDEFINITION>
-	<OBJECTCLASSDEFINITION ID='com.ibm.osg.service.http.HttpFactory' TYPE="FACTORYPID">
+	<OBJECTCLASSDEFINITION ID='org.eclipse.equinox.http.HttpFactory' TYPE="FACTORYPID">
 		<NAME>
 			<STRING KEY="HTTP_SETTINGS" DEFAULT="Http Service Settings" />
 		</NAME>

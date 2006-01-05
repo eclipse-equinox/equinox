@@ -96,7 +96,7 @@ public class HttpSessionImpl implements HttpSession {
 	protected long maxInactive; /* milliseconds */
 	// BUGBUG cookie name MUST be "JSESSIONID"
 	// Servlet 2.2 Section 7.1.2
-	protected static final String sessionCookieName = "com.ibm.osg.service.http.session"; //$NON-NLS-1$
+	protected static final String sessionCookieName = "org.eclipse.equinox.http.session"; //$NON-NLS-1$
 
 	protected HttpSessionImpl(Http http) {
 		this.http = http;
