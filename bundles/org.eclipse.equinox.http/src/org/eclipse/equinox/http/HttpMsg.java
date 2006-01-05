@@ -14,7 +14,7 @@ package org.eclipse.equinox.http;
 import org.eclipse.osgi.util.NLS;
 
 public class HttpMsg extends NLS {
-	private static final String BUNDLE_NAME = "org.eclipse.equinox.log.ExternalMessages"; //$NON-NLS-1$
+	private static final String BUNDLE_NAME = "org.eclipse.equinox.http.ExternalMessages"; //$NON-NLS-1$
 
 	public static String HTTP_ALIAS_ALREADY_REGISTERED_EXCEPTION;
 	public static String HTTP_SERVLET_ALREADY_REGISTERED_EXCEPTION;

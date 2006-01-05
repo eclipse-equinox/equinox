@@ -13,7 +13,7 @@ package org.eclipse.equinox.http;
 import org.eclipse.osgi.util.NLS;
 
 public class LogTrackerMsg extends NLS {
-	private static final String BUNDLE_NAME = "org.eclipse.equinox.http.ExternalMessages"; //$NON-NLS-1$
+	private static final String BUNDLE_NAME = "org.eclipse.equinox.http.LogMessages"; //$NON-NLS-1$
 
 	public static String Unknown_Log_level;
 	public static String Info;
