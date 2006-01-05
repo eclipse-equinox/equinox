@@ -266,9 +266,9 @@ public class HttpSessionImpl implements HttpSession {
 
 			if (size > 0) {
 				int i = 0;
-				Enumeration enum = values.keys();
-				while (enum.hasMoreElements()) {
-					names[i] = (String) enum.nextElement();
+				Enumeration valueEnumeration = values.keys();
+				while (valueEnumeration.hasMoreElements()) {
+					names[i] = (String) valueEnumeration.nextElement();
 					i++;
 				}
 			}

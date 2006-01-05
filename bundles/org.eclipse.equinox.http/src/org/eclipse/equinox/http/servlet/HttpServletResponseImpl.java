@@ -101,10 +101,10 @@ public class HttpServletResponseImpl implements HttpServletResponse {
 			return (true);
 		}
 
-		Enumeration enum = headers.keys();
+		Enumeration headerEnumeration = headers.keys();
 
-		while (enum.hasMoreElements()) {
-			String key = (String) enum.nextElement();
+		while (headerEnumeration.hasMoreElements()) {
+			String key = (String) headerEnumeration.nextElement();
 
 			if (name.equalsIgnoreCase(key)) {
 				return (true);
@@ -742,9 +742,9 @@ public class HttpServletResponseImpl implements HttpServletResponse {
 
 		/* Write response headers */
 		if (headers != null) {
-			Enumeration enum = headers.keys();
-			while (enum.hasMoreElements()) {
-				String name = (String) enum.nextElement();
+			Enumeration headerEnumeration = headers.keys();
+			while (headerEnumeration.hasMoreElements()) {
+				String name = (String) headerEnumeration.nextElement();
 				String value = (String) headers.get(name);
 				servletOutputStream.print(name);
 				servletOutputStream.print(": "); //$NON-NLS-1$
