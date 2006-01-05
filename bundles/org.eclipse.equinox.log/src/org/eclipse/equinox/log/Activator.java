@@ -55,7 +55,7 @@ public class Activator implements BundleActivator, EventDispatcher, BundleListen
 	/** key into properties for log threshold value */
 	protected static final String keyLogThreshold = "log.threshold"; //$NON-NLS-1$
 	/** Pid that log service uses when it registers a CM Managed Service */
-	protected static final String LOGSERVICEPID = "com.ibm.osg.service.log.Log"; //$NON-NLS-1$
+	protected static final String LOGSERVICEPID = "org.eclipse.equinox.log.Log"; //$NON-NLS-1$
 
 	public Activator() {
 	}

@@ -48,7 +48,7 @@
 	</ATTRIBUTEDEFINITION>
 
 	<OBJECTCLASSDEFINITION 
-		ID='com.ibm.osg.service.log.Log' 
+		ID='org.eclipse.equinox.log.Log' 
 		TYPE='PID'>
 		<NAME>
 			<STRING KEY='LOG_SETTINGS' DEFAULT='Log Service Settings'/>
