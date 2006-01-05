@@ -454,9 +454,11 @@ public class EclipseStarter {
 			constraints.add(leafConstraints[i]);
 		}
 
-		// found some bundles with missing leaf constraints; only log them
+		// found some bundles with missing leaf constraints; log them first 
 		if (missing.size() > 0) {
-			for (Iterator iter = missing.keySet().iterator(); iter.hasNext();) {
+			FrameworkLogEntry[] rootChildren = new FrameworkLogEntry[missing.size()];
+			int rootIndex = 0;
+			for (Iterator iter = missing.keySet().iterator(); iter.hasNext(); rootIndex++) {
 				BundleDescription description = (BundleDescription) iter.next();
 				String symbolicName = description.getSymbolicName() == null ? FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME : description.getSymbolicName();
 				String generalMessage = NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_ERROR_BUNDLE_NOT_RESOLVED, description.getLocation());
@@ -464,13 +466,14 @@ public class EclipseStarter {
 				FrameworkLogEntry[] logChildren = new FrameworkLogEntry[constraints.size()];
 				for (int i = 0; i < logChildren.length; i++)
 					logChildren[i] = new FrameworkLogEntry(symbolicName, EclipseAdaptorMsg.getResolutionFailureMessage((VersionConstraint) constraints.get(i)), 0, null, null);
-				logService.log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, generalMessage, 0, null, logChildren));
+				rootChildren[rootIndex] = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, generalMessage, 0, null, logChildren);
 			}
-			return;
+			logService.log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, EclipseAdaptorMsg.ECLIPSE_STARTUP_ROOTS_NOT_RESOLVED, 0, null, rootChildren));
 		}
 
-		// ok there must be some bundles unresolved for other reasons, causing the system to be unresolved
-		// just log all unresolved constraints.
+		// There may be some bundles unresolved for other reasons, causing the system to be unresolved
+		// log all unresolved constraints now
+		ArrayList allChildren = new ArrayList();
 		for (int i = 0; i < bundles.length; i++)
 			if (bundles[i].getState() == Bundle.INSTALLED) {
 				String symbolicName = bundles[i].getSymbolicName() == null ? FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME : bundles[i].getSymbolicName(); 
@@ -495,8 +498,9 @@ public class EclipseStarter {
 					}
 				}
 
-				logService.log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, generalMessage, 0, null, logChildren));
+				allChildren.add(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, generalMessage, 0, null, logChildren));
 			}
+		logService.log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, EclipseAdaptorMsg.ECLIPSE_STARTUP_ALL_NOT_RESOLVED, 0, null, (FrameworkLogEntry[]) allChildren.toArray(new FrameworkLogEntry[allChildren.size()])));
 	}
 
 	private static void publishSplashScreen(final Runnable endSplashHandler) {

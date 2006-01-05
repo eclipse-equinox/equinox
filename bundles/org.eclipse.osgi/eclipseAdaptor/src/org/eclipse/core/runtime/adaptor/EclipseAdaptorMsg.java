@@ -64,6 +64,8 @@ public class EclipseAdaptorMsg extends NLS {
 	public static String ECLIPSE_STARTUP_ERROR_CHECK_LOG;
 	public static String ECLIPSE_STARTUP_NOT_RUNNING;
 	public static String ECLIPSE_STARTUP_ERROR_NO_APPLICATION;
+	public static String ECLIPSE_STARTUP_ROOTS_NOT_RESOLVED;
+	public static String ECLIPSE_STARTUP_ALL_NOT_RESOLVED;
 	public static String ECLIPSE_STARTUP_ERROR_BUNDLE_NOT_ACTIVE;
 	public static String ECLIPSE_STARTUP_ERROR_BUNDLE_NOT_RESOLVED;
 	public static String ECLIPSE_STARTUP_BUNDLE_NOT_FOUND;
