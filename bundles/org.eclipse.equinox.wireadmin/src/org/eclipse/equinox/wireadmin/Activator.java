@@ -38,8 +38,12 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 	 * @see BundleActivator#stop(BundleContext)
 	 */
 	public void stop(BundleContext context) throws Exception {
-		wireadminReg.unregister();
-		wireadmin.destroy();
+		if(wireadminReg != null)
+		{
+			wireadminReg.unregister();
+			wireadmin.destroy();
+		}
+
 	}
 
 	public Object addingService(ServiceReference reference) {
