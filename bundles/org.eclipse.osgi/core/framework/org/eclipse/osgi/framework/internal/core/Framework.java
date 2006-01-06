@@ -377,8 +377,19 @@ public class Framework implements EventDispatcher, EventPublisher {
 				String javaSpecName = properties.getProperty("java.specification.name"); //$NON-NLS-1$
 				if ("J2ME Foundation Specification".equals(javaSpecName)) //$NON-NLS-1$
 					vmProfile = "CDC-" + javaSpecVersion + "_Foundation-" + javaSpecVersion; //$NON-NLS-1$ //$NON-NLS-2$
-				else
-					vmProfile = "J2SE-" + javaSpecVersion; //$NON-NLS-1$
+				else {
+					// look for JavaSE if 1.6 or greater; otherwise look for J2SE
+					Version v16 = new Version("1.6"); //$NON-NLS-1$
+					String javaEdition = "J2SE-"; //$NON-NLS-1$
+					try {
+						Version vEdition = new Version(javaSpecVersion);
+						if (v16.compareTo(vEdition) <= 0)
+							javaEdition = "JavaSE-"; //$NON-NLS-1$
+					} catch (IllegalArgumentException e) {
+						// do nothing
+					}
+					vmProfile = javaEdition + javaSpecVersion;
+				}
 			}
 		}
 		URL url = null;
