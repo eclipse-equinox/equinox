@@ -53,9 +53,13 @@ public class Activator implements BundleActivator, ServiceFactory, ServiceTracke
 	 */
 	public void stop(BundleContext context) throws Exception {
 		prefsTracker.close();
-		registration.unregister();
-		userAdmin.destroy();
-		userAdmin = null;
+		if(registration != null)
+		{
+			registration.unregister();
+			registration = null;
+			userAdmin.destroy();
+			userAdmin = null;
+		}
 	}
 
 	/**

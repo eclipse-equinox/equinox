@@ -13,7 +13,7 @@ package org.eclipse.equinox.useradmin;
 import org.eclipse.osgi.util.NLS;
 
 public class LogTrackerMsg extends NLS {
-	private static final String BUNDLE_NAME = "org.eclipse.equinox.useradmin.ExternalMessages"; //$NON-NLS-1$
+	private static final String BUNDLE_NAME = "org.eclipse.equinox.useradmin.LogMessages"; //$NON-NLS-1$
 
 	public static String Unknown_Log_level;
 	public static String Info;
