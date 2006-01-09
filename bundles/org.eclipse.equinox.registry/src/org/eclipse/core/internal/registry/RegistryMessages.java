@@ -19,9 +19,9 @@ public class RegistryMessages extends NLS {
 	public static final String OWNER_NAME = "org.eclipse.equinox.registry"; //$NON-NLS-1$
 
 	private static final String BUNDLE_NAME = "org.eclipse.core.internal.registry.messages"; //$NON-NLS-1$
-	
+
 	// Bundle
-	public static String bundle_not_activated;	
+	public static String bundle_not_activated;
 
 	// Extension Registry
 	public static String meta_registryCacheWriteProblems;
@@ -32,6 +32,7 @@ public class RegistryMessages extends NLS {
 	public static String meta_unableToReadCache;
 	public static String registry_no_default;
 	public static String registry_default_exists;
+	public static String registry_bad_cache;
 
 	// parsing/resolve
 	public static String parse_error;

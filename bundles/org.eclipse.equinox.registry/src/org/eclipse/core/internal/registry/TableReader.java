@@ -26,15 +26,13 @@ public class TableReader {
 
 	//Informations representing the MAIN file
 	static final String MAIN = ".mainData"; //$NON-NLS-1$
-	File mainDataFile;
+	BufferedRandomInputStream mainDataFile = null;
 	DataInputStream mainInput = null;
-	//	int size;
 
 	//Informations representing the EXTRA file
 	static final String EXTRA = ".extraData"; //$NON-NLS-1$
-	File extraDataFile;
+	BufferedRandomInputStream extraDataFile = null;
 	DataInputStream extraInput = null;
-	//	int sizeExtra;
 
 	//The table file
 	static final String TABLE = ".table"; //$NON-NLS-1$
@@ -56,12 +54,14 @@ public class TableReader {
 
 	private ExtensionRegistry registry;
 
-	void setMainDataFile(File main) {
-		mainDataFile = main;
+	void setMainDataFile(File main) throws IOException {
+		mainDataFile = new BufferedRandomInputStream(main);
+		mainInput = new DataInputStream(mainDataFile);
 	}
 
-	void setExtraDataFile(File extra) {
-		extraDataFile = extra;
+	void setExtraDataFile(File extra) throws IOException {
+		extraDataFile = new BufferedRandomInputStream(extra);
+		extraInput = new DataInputStream(extraDataFile);
 	}
 
 	void setTableFile(File table) {
@@ -80,60 +80,7 @@ public class TableReader {
 		this.registry = registry;
 	}
 
-	private void openInputFile() {
-		try {
-			mainInput = new DataInputStream(new BufferedInputStream(new FileInputStream(mainDataFile)));
-		} catch (FileNotFoundException e) {
-			log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, fileError, RegistryMessages.meta_unableToReadCache, e));
-			registry.clearRegistryCache();
-			throw new IllegalStateException(RegistryMessages.meta_registryCacheReadProblems);
-		}
-	}
-
-	private void openExtraFile() {
-		try {
-			extraInput = new DataInputStream(new BufferedInputStream(new FileInputStream(extraDataFile)));
-		} catch (FileNotFoundException e) {
-			log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, fileError, RegistryMessages.meta_unableToReadCache, e));
-			registry.clearRegistryCache();
-			throw new IllegalStateException(RegistryMessages.meta_registryCacheReadProblems);
-		}
-	}
-
-	private void closeInputFile() {
-		try {
-			mainInput.close();
-		} catch (IOException e) {
-			log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, fileError, RegistryMessages.meta_registryCacheReadProblems, e));
-		}
-
-	}
-
-	private void closeExtraFile() {
-		try {
-			extraInput.close();
-		} catch (IOException e) {
-			log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, fileError, RegistryMessages.meta_registryCacheReadProblems, e));
-		}
-
-	}
-
-	/**
-	 * Resets position in the main input file and extra input files to the 
-	 * begining of the stream; sets holdObjects flag to a default value (false).
-	 */
-	public void reset() {
-		if (extraInput != null)
-			closeExtraFile();
-		if (mainInput != null)
-			closeInputFile();
-
-		holdObjects = false;
-
-		openInputFile();
-		openExtraFile();
-	}
-
+	// Don't need to synchronize - called only from a sychronized method
 	public Object[] loadTables(long expectedTimestamp) {
 		HashtableOfInt offsets;
 		HashtableOfStringAndInt extensionPoints;
@@ -190,24 +137,23 @@ public class TableReader {
 
 	public Object loadConfigurationElement(int offset) {
 		try {
-			goToInputFile(offset);
-			return basicLoadConfigurationElement(mainInput, -1);
+			synchronized (mainDataFile) {
+				goToInputFile(offset);
+				return basicLoadConfigurationElement(mainInput, -1);
+			}
 		} catch (IOException e) {
 			String message = NLS.bind(RegistryMessages.meta_regCacheIOExceptionReading, mainDataFile);
 			log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, fileError, message, e));
 			if (DEBUG)
 				log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, fileError, "Error reading a configuration element (" + offset + ") from the registry cache", e)); //$NON-NLS-1$//$NON-NLS-2$
 			return null;
-		} finally {
-			closeInputFile();
-			closeExtraFile();
 		}
 	}
 
 	private ConfigurationElement basicLoadConfigurationElement(DataInputStream is, long actualContributorId) throws IOException {
 		int self = is.readInt();
 		long contributorId = is.readLong();
-		String name = readStringOrNull(is, false);
+		String name = readStringOrNull(is);
 		int parentId = is.readInt();
 		byte parentType = is.readByte();
 		int misc = is.readInt();//this is set in second level CEs, to indicate where in the extra data file the children ces are
@@ -220,17 +166,16 @@ public class TableReader {
 
 	public Object loadThirdLevelConfigurationElements(int offset, RegistryObjectManager objectManager) {
 		try {
-			goToExtraFile(offset);
-			return loadConfigurationElementAndChildren(null, extraInput, 3, Integer.MAX_VALUE, objectManager, -1);
+			synchronized (extraDataFile) {
+				goToExtraFile(offset);
+				return loadConfigurationElementAndChildren(null, extraInput, 3, Integer.MAX_VALUE, objectManager, -1);
+			}
 		} catch (IOException e) {
 			String message = NLS.bind(RegistryMessages.meta_regCacheIOExceptionReading, extraDataFile);
 			log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, fileError, message, e));
 			if (DEBUG)
 				log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, fileError, "Error reading a third level configuration element (" + offset + ") from the registry cache", e)); //$NON-NLS-1$//$NON-NLS-2$
 			return null;
-		} finally {
-			closeInputFile();
-			closeExtraFile();
 		}
 	}
 
@@ -260,31 +205,30 @@ public class TableReader {
 			return RegistryObjectManager.EMPTY_STRING_ARRAY;
 		String[] properties = new String[numberOfProperties];
 		for (int i = 0; i < numberOfProperties; i++) {
-			properties[i] = readStringOrNull(inputStream, false);
+			properties[i] = readStringOrNull(inputStream);
 		}
 		return properties;
 	}
 
 	public Object loadExtension(int offset) {
 		try {
-			goToInputFile(offset);
-			return basicLoadExtension(mainInput);
+			synchronized (mainDataFile) {
+				goToInputFile(offset);
+				return basicLoadExtension(mainInput);
+			}
 		} catch (IOException e) {
 			String message = NLS.bind(RegistryMessages.meta_regCacheIOExceptionReading, mainDataFile);
 			log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, fileError, message, e));
 			if (DEBUG)
 				log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, fileError, "Error reading an extension (" + offset + ") from the registry cache", e)); //$NON-NLS-1$//$NON-NLS-2$
-		} finally {
-			closeExtraFile();
-			closeInputFile();
 		}
 		return null;
 	}
 
 	private Extension basicLoadExtension(DataInputStream inputStream) throws IOException {
 		int self = inputStream.readInt();
-		String simpleId = readStringOrNull(mainInput, false);
-		String namespace = readStringOrNull(mainInput, false);
+		String simpleId = readStringOrNull(mainInput);
+		String namespace = readStringOrNull(mainInput);
 		int[] children = readArray(mainInput);
 		int extraData = mainInput.readInt();
 		return getObjectFactory().createExtension(self, simpleId, namespace, children, extraData, false);
@@ -292,30 +236,31 @@ public class TableReader {
 
 	public ExtensionPoint loadExtensionPointTree(int offset, RegistryObjectManager objects) {
 		try {
-			ExtensionPoint xpt = (ExtensionPoint) loadExtensionPoint(offset);
-			int[] children = xpt.getRawChildren();
-			int nbrOfExtension = children.length;
-			for (int i = 0; i < nbrOfExtension; i++) {
-				Extension loaded = basicLoadExtension(mainInput);
-				objects.add(loaded, holdObjects);
-			}
-
-			for (int i = 0; i < nbrOfExtension; i++) {
-				int nbrOfCe = mainInput.readInt();
-				for (int j = 0; j < nbrOfCe; j++) {
-					objects.add(loadConfigurationElementAndChildren(mainInput, extraInput, 1, 2, objects, -1), holdObjects);
+			synchronized (mainDataFile) {
+				ExtensionPoint xpt = (ExtensionPoint) loadExtensionPoint(offset);
+				int[] children = xpt.getRawChildren();
+				int nbrOfExtension = children.length;
+				for (int i = 0; i < nbrOfExtension; i++) {
+					Extension loaded = basicLoadExtension(mainInput);
+					objects.add(loaded, holdObjects);
 				}
+
+				for (int i = 0; i < nbrOfExtension; i++) {
+					int nbrOfCe = mainInput.readInt();
+					for (int j = 0; j < nbrOfCe; j++) {
+						// note that max depth is set to 2 and extra input is never going to 
+						// be used in this call to the loadConfigurationElementAndChildren().
+						objects.add(loadConfigurationElementAndChildren(mainInput, null, 1, 2, objects, -1), holdObjects);
+					}
+				}
+				return xpt;
 			}
-			return xpt;
 		} catch (IOException e) {
 			String message = NLS.bind(RegistryMessages.meta_regCacheIOExceptionReading, mainDataFile);
 			log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, fileError, message, e));
 			if (DEBUG)
 				log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, fileError, "Error reading an extension point tree (" + offset + ") from the registry cache", e)); //$NON-NLS-1$//$NON-NLS-2$
 			return null;
-		} finally {
-			closeExtraFile();
-			closeInputFile();
 		}
 	}
 
@@ -351,64 +296,60 @@ public class TableReader {
 	}
 
 	private void goToInputFile(int offset) throws IOException {
-		mainInput.skipBytes(offset);
+		mainDataFile.seek(offset);
 	}
 
 	private void goToExtraFile(int offset) throws IOException {
-		extraInput.skipBytes(offset);
+		extraDataFile.seek(offset);
 	}
 
-	private String readStringOrNull(DataInputStream in, boolean intern) throws IOException {
+	private String readStringOrNull(DataInputStream in) throws IOException {
 		byte type = in.readByte();
 		if (type == NULL)
 			return null;
-		if (intern)
-			return in.readUTF().intern();
 		return in.readUTF();
 	}
 
 	public String[] loadExtensionExtraData(int dataPosition) {
 		try {
-			goToExtraFile(dataPosition);
-			return basicLoadExtensionExtraData();
+			synchronized (extraDataFile) {
+				goToExtraFile(dataPosition);
+				return basicLoadExtensionExtraData();
+			}
 		} catch (IOException e) {
 			String message = NLS.bind(RegistryMessages.meta_regCacheIOExceptionReading, extraDataFile);
 			log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, fileError, message, e));
 			if (DEBUG)
 				log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, fileError, "Error reading extension label (" + dataPosition + ") from the registry cache", e)); //$NON-NLS-1$ //$NON-NLS-2$
 			return null;
-		} finally {
-			closeExtraFile();
-			closeInputFile();
 		}
 	}
 
 	private String[] basicLoadExtensionExtraData() throws IOException {
-		return new String[] {readStringOrNull(extraInput, false), readStringOrNull(extraInput, false)};
+		return new String[] {readStringOrNull(extraInput), readStringOrNull(extraInput)};
 	}
 
 	public String[] loadExtensionPointExtraData(int offset) {
 		try {
-			goToExtraFile(offset);
-			return basicLoadExtensionPointExtraData();
+			synchronized (extraDataFile) {
+				goToExtraFile(offset);
+				return basicLoadExtensionPointExtraData();
+			}
 		} catch (IOException e) {
 			String message = NLS.bind(RegistryMessages.meta_regCacheIOExceptionReading, extraDataFile);
 			log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, fileError, message, e));
 			if (DEBUG)
 				log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, fileError, "Error reading extension point data (" + offset + ") from the resgistry cache", e)); //$NON-NLS-1$ //$NON-NLS-2$
 			return null;
-		} finally {
-			closeExtraFile();
-			closeInputFile();
 		}
 	}
 
 	private String[] basicLoadExtensionPointExtraData() throws IOException {
 		String[] result = new String[5];
-		result[0] = readStringOrNull(extraInput, false); //the label
-		result[1] = readStringOrNull(extraInput, false); //the schema
-		result[2] = readStringOrNull(extraInput, false); //the fully qualified name
-		result[3] = readStringOrNull(extraInput, false); //the namespace
+		result[0] = readStringOrNull(extraInput); //the label
+		result[1] = readStringOrNull(extraInput); //the schema
+		result[2] = readStringOrNull(extraInput); //the fully qualified name
+		result[3] = readStringOrNull(extraInput); //the namespace
 		result[4] = Long.toString(extraInput.readLong());
 		return result;
 	}
@@ -416,15 +357,17 @@ public class TableReader {
 	public KeyedHashSet loadNamespaces() {
 		DataInputStream namespaceInput = null;
 		try {
-			namespaceInput = new DataInputStream(new BufferedInputStream(new FileInputStream(contributionsFile)));
-			int size = namespaceInput.readInt();
-			KeyedHashSet result = new KeyedHashSet(size);
-			for (int i = 0; i < size; i++) {
-				Contribution n = getObjectFactory().createContribution(namespaceInput.readLong(), false);
-				n.setRawChildren(readArray(namespaceInput));
-				result.add(n);
+			synchronized (contributionsFile) {
+				namespaceInput = new DataInputStream(new BufferedInputStream(new FileInputStream(contributionsFile)));
+				int size = namespaceInput.readInt();
+				KeyedHashSet result = new KeyedHashSet(size);
+				for (int i = 0; i < size; i++) {
+					Contribution n = getObjectFactory().createContribution(namespaceInput.readLong(), false);
+					n.setRawChildren(readArray(namespaceInput));
+					result.add(n);
+				}
+				return result;
 			}
-			return result;
 		} catch (IOException e) {
 			String message = NLS.bind(RegistryMessages.meta_regCacheIOExceptionReading, contributionsFile);
 			log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, fileError, message, e));
@@ -456,6 +399,7 @@ public class TableReader {
 		}
 	}
 
+	// Do not need to synchronize - called only from a synchronized method
 	public boolean readAllCache(RegistryObjectManager objectManager) {
 		try {
 			int size = objectManager.getExtensionPoints().size();
@@ -467,14 +411,11 @@ public class TableReader {
 			String message = NLS.bind(RegistryMessages.meta_regCacheIOExceptionReading, mainDataFile);
 			log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, fileError, message, e));
 			return false;
-		} finally {
-			closeExtraFile();
-			closeInputFile();
 		}
 		return true;
 	}
 
-	public ExtensionPoint readAllExtensionPointTree(RegistryObjectManager objectManager) throws IOException {
+	private ExtensionPoint readAllExtensionPointTree(RegistryObjectManager objectManager) throws IOException {
 		ExtensionPoint xpt = loadFullExtensionPoint();
 		int[] children = xpt.getRawChildren();
 		int nbrOfExtension = children.length;
@@ -515,15 +456,17 @@ public class TableReader {
 	public HashMap loadOrphans() {
 		DataInputStream orphanInput = null;
 		try {
-			orphanInput = new DataInputStream(new BufferedInputStream(new FileInputStream(orphansFile)));
-			int size = orphanInput.readInt();
-			HashMap result = new HashMap(size);
-			for (int i = 0; i < size; i++) {
-				String key = orphanInput.readUTF();
-				int[] value = readArray(orphanInput);
-				result.put(key, value);
+			synchronized (orphansFile) {
+				orphanInput = new DataInputStream(new BufferedInputStream(new FileInputStream(orphansFile)));
+				int size = orphanInput.readInt();
+				HashMap result = new HashMap(size);
+				for (int i = 0; i < size; i++) {
+					String key = orphanInput.readUTF();
+					int[] value = readArray(orphanInput);
+					result.put(key, value);
+				}
+				return result;
 			}
-			return result;
 		} catch (IOException e) {
 			return null;
 		} finally {
@@ -536,6 +479,7 @@ public class TableReader {
 		}
 	}
 
+	// Don't need to synchronize - called only from a synchronized method
 	public void setHoldObjects(boolean holdObjects) {
 		this.holdObjects = holdObjects;
 	}
@@ -551,6 +495,17 @@ public class TableReader {
 	// Returns a file name used to test if cache is actually present at a given location
 	public static String getTestFileName() {
 		return TABLE;
+	}
+
+	public void close() {
+		try {
+			if (mainInput != null)
+				mainInput.close();
+			if (extraInput != null)
+				extraInput.close();
+		} catch (IOException e) {
+			log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, fileError, RegistryMessages.meta_registryCacheReadProblems, e));
+		}
 	}
 
 }

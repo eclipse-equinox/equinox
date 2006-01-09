@@ -603,7 +603,11 @@ public class ExtensionRegistry implements IExtensionRegistry {
 					theTableReader.setOrphansFile(cacheFileManager.lookup(TableReader.ORPHANS, false));
 					isRegistryFilledFromCache = registryObjects.init(computeTimeStamp());
 				} catch (IOException e) {
-					// Ignore the exception. The registry will be rebuilt from the xml files.
+					// The registry will be rebuilt from the xml files. Make sure to clear anything filled
+					// from cache so that we won't have partially filled items.
+					isRegistryFilledFromCache = false;
+					clearRegistryCache();
+					log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, 0, RegistryMessages.registry_bad_cache, e));
 				}
 			}
 
@@ -688,8 +692,8 @@ public class ExtensionRegistry implements IExtensionRegistry {
 		} catch (IOException e) {
 			//Ignore the exception since we can recompute the cache
 		}
-
 		cacheFileManager.close();
+		theTableReader.close();
 	}
 
 	/*
@@ -723,8 +727,7 @@ public class ExtensionRegistry implements IExtensionRegistry {
 		return theRegistryObjectFactory;
 	}
 
-	TableReader getCleanTableReader() {
-		theTableReader.reset();
+	TableReader getTableReader() {
 		return theTableReader;
 	}
 

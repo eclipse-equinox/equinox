@@ -82,7 +82,7 @@ public class RegistryObjectManager implements IObjectManager {
 	 * Initialize the object manager. Return true if the initialization succeeded, false otherwise
 	 */
 	synchronized boolean init(long timeStamp) {
-		TableReader reader = registry.getCleanTableReader();
+		TableReader reader = registry.getTableReader();
 		Object[] results = reader.loadTables(timeStamp);
 		if (results == null) {
 			return false;
@@ -155,8 +155,7 @@ public class RegistryObjectManager implements IObjectManager {
 			return new KeyedHashSet(0);
 
 		if (formerContributions == null || (result = ((KeyedHashSet) ((formerContributions instanceof SoftReference) ? ((SoftReference) formerContributions).get() : formerContributions))) == null) {
-			TableReader reader = registry.getCleanTableReader();
-			result = reader.loadNamespaces();
+			result = registry.getTableReader().loadNamespaces();
 			formerContributions = new SoftReference(result);
 		}
 		return result;
@@ -336,7 +335,7 @@ public class RegistryObjectManager implements IObjectManager {
 	}
 
 	private Object load(int id, byte type) {
-		TableReader reader = registry.getCleanTableReader();
+		TableReader reader = registry.getTableReader();
 		int offset = fileOffsets.get(id);
 		if (offset == Integer.MIN_VALUE)
 			return null;
@@ -402,8 +401,7 @@ public class RegistryObjectManager implements IObjectManager {
 			result = new HashMap();
 			orphanExtensions = result;
 		} else if (orphanExtensions == null || (result = ((HashMap) ((orphanExtensions instanceof SoftReference) ? ((SoftReference) orphanExtensions).get() : orphanExtensions))) == null) {
-			TableReader reader = registry.getCleanTableReader();
-			result = reader.loadOrphans();
+			result = registry.getTableReader().loadOrphans();
 			orphanExtensions = new SoftReference(result);
 		}
 		return (HashMap) result;

@@ -76,7 +76,7 @@ public class Extension extends RegistryObject {
 		//The extension has been loaded from the cache. 
 		String[] result = null;
 		if (extraInformation == null || (result = ((extraInformation instanceof SoftReference) ? (String[]) ((SoftReference) extraInformation).get() : (String[]) extraInformation)) == null) {
-			result = registry.getCleanTableReader().loadExtensionExtraData(getExtraDataOffset());
+			result = registry.getTableReader().loadExtensionExtraData(getExtraDataOffset());
 			extraInformation = new SoftReference(result);
 		}
 		return result;

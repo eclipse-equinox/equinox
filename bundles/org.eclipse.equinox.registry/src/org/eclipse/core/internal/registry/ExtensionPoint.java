@@ -58,7 +58,7 @@ public class ExtensionPoint extends RegistryObject {
 		//The extension point has been loaded from the cache. 
 		String[] result = null;
 		if (extraInformation == null || (result = ((extraInformation instanceof SoftReference) ? (String[]) ((SoftReference) extraInformation).get() : (String[]) extraInformation)) == null) {
-			result = registry.getCleanTableReader().loadExtensionPointExtraData(getExtraDataOffset());
+			result = registry.getTableReader().loadExtensionPointExtraData(getExtraDataOffset());
 			extraInformation = new SoftReference(result);
 		}
 		return result;
