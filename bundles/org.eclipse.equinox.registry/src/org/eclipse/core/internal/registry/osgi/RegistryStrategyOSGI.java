@@ -14,8 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.Map;
-import java.util.ResourceBundle;
+import java.util.*;
 import javax.xml.parsers.SAXParserFactory;
 import org.eclipse.core.internal.registry.*;
 import org.eclipse.core.internal.runtime.ResourceTranslator;
@@ -137,11 +136,22 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 	////////////////////////////////////////////////////////////////////////////////////////
 	// Use OSGi bundles for namespace resolution (contributors: plugins and fragments)
 
-	static private Bundle getContributingBundle(long contributingBundleId) {
-		return Activator.getContext().getBundle(contributingBundleId);
+	// We don't expect mapping to change during the runtime. (Or, in the OSGI terms,
+	// we don't expect bundle IDs to be resused during the Eclipse run.)
+	private Map bundleMap = new HashMap();
+
+	private Bundle getContributingBundle(long contributingBundleId) {
+		// see if we have it in the cache
+		Long objectId = new Long(contributingBundleId);
+		Bundle bundle = (Bundle) bundleMap.get(objectId);
+		if (bundle != null)
+			return bundle;
+		bundle = Activator.getContext().getBundle(contributingBundleId);
+		bundleMap.put(objectId, bundle);
+		return bundle;
 	}
 
-	static private Bundle getNamespaceBundle(long contributingBundleId) {
+	private Bundle getNamespaceBundle(long contributingBundleId) {
 		Bundle contributingBundle = getContributingBundle(contributingBundleId);
 		if (contributingBundle == null) // When restored from disk the underlying bundle may have been uninstalled
 			throw new IllegalStateException("Internal error in extension registry. The bundle corresponding to this contribution has been uninstalled."); //$NON-NLS-1$
