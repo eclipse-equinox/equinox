@@ -328,13 +328,14 @@ public class DataParser {
 			Enumeration designateHandlerKeys = _dp_designateHandlers.elements();
 			while (designateHandlerKeys.hasMoreElements()) {
 				DesignateHandler designateHandler = (DesignateHandler) designateHandlerKeys.nextElement();
+
 				ObjectClassDefinitionImpl ocd = (ObjectClassDefinitionImpl) _dp_OCDs.get(designateHandler._ocdref);
 				if (ocd != null) {
 					ocd.setID(designateHandler._pid_val);
-					if ((designateHandler._factoryPid_val == null) || ("".equals(designateHandler._factoryPid_val))) { //$NON-NLS-1$
-						ocd.setType(ObjectClassDefinitionImpl.PID);
-					} else {
+					if (designateHandler._factory_val == true) {
 						ocd.setType(ObjectClassDefinitionImpl.FPID);
+					} else {
+						ocd.setType(ObjectClassDefinitionImpl.PID);
 					}
 					_dp_OCDs_vector.addElement(ocd);
 				} else {
@@ -704,7 +705,7 @@ public class DataParser {
 	private class DesignateHandler extends AbstractHandler {
 
 		String _pid_val = null;
-		String _factoryPid_val = ""; //$NON-NLS-1$
+		boolean _factory_val = false;
 		String _bundle_val = null; // Only used by RFC94
 		boolean _optional_val = false; // Only used by RFC94
 		boolean _merge_val = false; // Only used by RFC94
@@ -727,7 +728,15 @@ public class DataParser {
 				return;
 			}
 
-			_factoryPid_val = atts.getValue(FACTORY);
+			String factory_str = atts.getValue(FACTORY);
+			if (factory_str == null) {
+				// Not a problem, because FACTORY is an optional attribute.
+				// And the default value is "false".
+				_factory_val = false;
+			} else {
+				_factory_val = Boolean.valueOf(factory_str).booleanValue();
+			}
+
 			_bundle_val = atts.getValue(BUNDLE);
 			if (_bundle_val == null) {
 				// Not a problem because BUNDLE is an optional attribute.
@@ -914,8 +923,8 @@ public class DataParser {
 			return localName;
 		} else {
 			int nameSpaceIndex = qName.indexOf(":");
-			return nameSpaceIndex == -1 ? qName : qName.substring(nameSpaceIndex + 1);
+			return nameSpaceIndex == -1 ? qName : qName.substring(nameSpaceIndex+1);
 		}
-
+		
 	}
 }
