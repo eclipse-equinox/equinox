@@ -440,11 +440,15 @@ public class EclipseStarter {
 		// hash the missing leaf constraints by the declaring bundles
 		Map missing = new HashMap();
 		for (int i = 0; i < leafConstraints.length; i++) {
-			// only include non-optional constraint leafs
+			// only include non-optional and non-dynamic constraint leafs
 			if (leafConstraints[i] instanceof BundleSpecification && ((BundleSpecification) leafConstraints[i]).isOptional())
 				continue;
-			if (leafConstraints[i] instanceof ImportPackageSpecification && ImportPackageSpecification.RESOLUTION_OPTIONAL.equals(((ImportPackageSpecification) leafConstraints[i]).getDirective(Constants.RESOLUTION_DIRECTIVE)))
-				continue;
+			if (leafConstraints[i] instanceof ImportPackageSpecification) {
+				if (ImportPackageSpecification.RESOLUTION_OPTIONAL.equals(((ImportPackageSpecification) leafConstraints[i]).getDirective(Constants.RESOLUTION_DIRECTIVE)))
+					continue;
+				if (ImportPackageSpecification.RESOLUTION_DYNAMIC.equals(((ImportPackageSpecification) leafConstraints[i]).getDirective(Constants.RESOLUTION_DIRECTIVE)))
+					continue;
+			}
 			BundleDescription bundle = leafConstraints[i].getBundle();
 			ArrayList constraints = (ArrayList) missing.get(bundle);
 			if (constraints == null) {
