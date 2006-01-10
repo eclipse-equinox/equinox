@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2005 IBM Corporation and others.
+ * Copyright (c) 2004, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -267,8 +267,8 @@ public class EclipseLog implements FrameworkLog {
 	public void log(FrameworkEvent frameworkEvent) {
 		Bundle b = frameworkEvent.getBundle();
 		Throwable t = frameworkEvent.getThrowable();
-
-		FrameworkLogEntry logEntry = new FrameworkLogEntry(b.getLocation() + " 0 0", "FrameworkEvent.ERROR", 0, t, null); //$NON-NLS-1$ //$NON-NLS-2$
+		String entry = b.getSymbolicName() == null ? b.getLocation() : b.getSymbolicName();
+		FrameworkLogEntry logEntry = new FrameworkLogEntry(entry, FrameworkLogEntry.ERROR, 0, "FrameworkEvent.ERROR", 0, t, null); //$NON-NLS-1$ //$NON-NLS-2$
 
 		log(logEntry);
 	}
@@ -469,6 +469,12 @@ public class EclipseLog implements FrameworkLog {
 		}
 		writeSpace();
 		write(entry.getEntry());
+		if (entry.getSeverity() != 0 || entry.getBundleCode() != 0) {
+			writeSpace();
+			write(Integer.toString(entry.getSeverity()));
+			writeSpace();
+			write(Integer.toString(entry.getBundleCode()));
+		}
 		writeSpace();
 		write(getDate(new Date()));
 		writeln();

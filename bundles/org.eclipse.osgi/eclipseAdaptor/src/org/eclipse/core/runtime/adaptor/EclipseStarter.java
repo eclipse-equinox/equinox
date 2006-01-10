@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2005 IBM Corporation and others.
+ * Copyright (c) 2003, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -182,7 +182,7 @@ public class EclipseStarter {
 			if (endSplashHandler != null)
 				endSplashHandler.run();
 			// may use startupFailed to understand where the error happened
-			FrameworkLogEntry logEntry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, startupFailed ? EclipseAdaptorMsg.ECLIPSE_STARTUP_STARTUP_ERROR : EclipseAdaptorMsg.ECLIPSE_STARTUP_APP_ERROR, 1, e, null);
+			FrameworkLogEntry logEntry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, startupFailed ? EclipseAdaptorMsg.ECLIPSE_STARTUP_STARTUP_ERROR : EclipseAdaptorMsg.ECLIPSE_STARTUP_APP_ERROR, 1, e, null);
 			if (log != null) {
 				log.log(logEntry);
 				logUnresolvedBundles(context.getBundles());
@@ -194,7 +194,7 @@ public class EclipseStarter {
 				if (!Boolean.getBoolean(PROP_NOSHUTDOWN))
 					shutdown();
 			} catch (Throwable e) {
-				FrameworkLogEntry logEntry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, EclipseAdaptorMsg.ECLIPSE_STARTUP_SHUTDOWN_ERROR, 1, e, null);
+				FrameworkLogEntry logEntry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, EclipseAdaptorMsg.ECLIPSE_STARTUP_SHUTDOWN_ERROR, 1, e, null);
 				if (log != null)
 					log.log(logEntry);
 				else
@@ -336,7 +336,7 @@ public class EclipseStarter {
 		} catch (InvocationTargetException e) {
 			//Ignore
 		}
-		FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, NLS.bind(EclipseAdaptorMsg.ECLIPSE_CLASSLOADER_CANNOT_SET_CONTEXTFINDER, null), 0, null, null);
+		FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, NLS.bind(EclipseAdaptorMsg.ECLIPSE_CLASSLOADER_CANNOT_SET_CONTEXTFINDER, null), 0, null, null);
 		log.log(entry);
 	}
 
@@ -465,10 +465,10 @@ public class EclipseStarter {
 				ArrayList constraints = (ArrayList) missing.get(description);
 				FrameworkLogEntry[] logChildren = new FrameworkLogEntry[constraints.size()];
 				for (int i = 0; i < logChildren.length; i++)
-					logChildren[i] = new FrameworkLogEntry(symbolicName, EclipseAdaptorMsg.getResolutionFailureMessage((VersionConstraint) constraints.get(i)), 0, null, null);
-				rootChildren[rootIndex] = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, generalMessage, 0, null, logChildren);
+					logChildren[i] = new FrameworkLogEntry(symbolicName, FrameworkLogEntry.WARNING, 0, EclipseAdaptorMsg.getResolutionFailureMessage((VersionConstraint) constraints.get(i)), 0, null, null);
+				rootChildren[rootIndex] = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.WARNING, 0, generalMessage, 0, null, logChildren);
 			}
-			logService.log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, EclipseAdaptorMsg.ECLIPSE_STARTUP_ROOTS_NOT_RESOLVED, 0, null, rootChildren));
+			logService.log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.WARNING, 0, EclipseAdaptorMsg.ECLIPSE_STARTUP_ROOTS_NOT_RESOLVED, 0, null, rootChildren));
 		}
 
 		// There may be some bundles unresolved for other reasons, causing the system to be unresolved
@@ -488,20 +488,20 @@ public class EclipseStarter {
 					// the bundle wasn't resolved due to some of its constraints were unsatisfiable
 					logChildren = new FrameworkLogEntry[unsatisfied.length];
 					for (int j = 0; j < unsatisfied.length; j++)
-						logChildren[j] = new FrameworkLogEntry(symbolicName, EclipseAdaptorMsg.getResolutionFailureMessage(unsatisfied[j]), 0, null, null);
+						logChildren[j] = new FrameworkLogEntry(symbolicName, FrameworkLogEntry.WARNING, 0, EclipseAdaptorMsg.getResolutionFailureMessage(unsatisfied[j]), 0, null, null);
 				} else {
 					ResolverError[] resolverErrors = state.getResolverErrors(description);
 					if (resolverErrors.length > 0) {
 						logChildren = new FrameworkLogEntry[resolverErrors.length];
 						for (int j = 0; j < resolverErrors.length; j++)
-							logChildren[j] = new FrameworkLogEntry(symbolicName, resolverErrors[j].toString(), 0, null, null);
+							logChildren[j] = new FrameworkLogEntry(symbolicName, FrameworkLogEntry.WARNING, 0, resolverErrors[j].toString(), 0, null, null);
 					}
 				}
 
-				allChildren.add(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, generalMessage, 0, null, logChildren));
+				allChildren.add(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.WARNING, 0, generalMessage, 0, null, logChildren));
 			}
 		if (allChildren.size() > 0)
-			logService.log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, EclipseAdaptorMsg.ECLIPSE_STARTUP_ALL_NOT_RESOLVED, 0, null, (FrameworkLogEntry[]) allChildren.toArray(new FrameworkLogEntry[allChildren.size()])));
+			logService.log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.WARNING, 0, EclipseAdaptorMsg.ECLIPSE_STARTUP_ALL_NOT_RESOLVED, 0, null, (FrameworkLogEntry[]) allChildren.toArray(new FrameworkLogEntry[allChildren.size()])));
 	}
 
 	private static void publishSplashScreen(final Runnable endSplashHandler) {
@@ -652,7 +652,7 @@ public class EclipseStarter {
 			}
 			URL location = searchForBundle(name, syspath);
 			if (location == null) {
-				FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_BUNDLE_NOT_FOUND, installEntries[i]), 0, null, null);
+				FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_BUNDLE_NOT_FOUND, installEntries[i]), 0, null, null);
 				log.log(entry);
 				// skip this entry
 				continue;
@@ -1015,7 +1015,7 @@ public class EclipseStarter {
 					curInitBundles[i].uninstall();
 					toRefresh.add(curInitBundles[i]);
 				} catch (BundleException e) {
-					FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_FAILED_UNINSTALL, curInitBundles[i].getLocation()), 0, e, null);
+					FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_FAILED_UNINSTALL, curInitBundles[i].getLocation()), 0, e, null);
 					log.log(entry);
 				}
 		}
@@ -1045,10 +1045,10 @@ public class EclipseStarter {
 				if ((osgiBundle.getState() & Bundle.INSTALLED) != 0)
 					toRefresh.add(osgiBundle);
 			} catch (BundleException e) {
-				FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_FAILED_INSTALL, initialBundles[i].location), 0, e, null);
+				FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_FAILED_INSTALL, initialBundles[i].location), 0, e, null);
 				log.log(entry);
 			} catch (IOException e) {
-				FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_FAILED_INSTALL, initialBundles[i].location), 0, e, null);
+				FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_FAILED_INSTALL, initialBundles[i].location), 0, e, null);
 				log.log(entry);
 			}
 		}
@@ -1063,7 +1063,7 @@ public class EclipseStarter {
 			try {
 				bundle.start();
 			} catch (BundleException e) {
-				FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_FAILED_START, bundle.getLocation()), 0, e, null);
+				FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_FAILED_START, bundle.getLocation()), 0, e, null);
 				log.log(entry);
 			}
 		}

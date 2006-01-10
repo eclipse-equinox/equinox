@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2005 IBM Corporation and others.
+ * Copyright (c) 2003, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -170,7 +170,7 @@ public class PluginConverterImpl implements PluginConverter {
 			manifestType |= MANIFEST_TYPE_PLUGIN;
 			return xmlFileLocation;
 		} catch (MalformedURLException e) {
-			FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, e.getMessage(), 0, e, null);
+			FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, e.getMessage(), 0, e, null);
 			adaptor.getFrameworkLog().log(entry);
 			return null;
 		} catch (IOException ioe) {
@@ -189,7 +189,7 @@ public class PluginConverterImpl implements PluginConverter {
 			manifestType |= MANIFEST_TYPE_FRAGMENT;
 			return xmlFileLocation;
 		} catch (MalformedURLException e) {
-			FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, e.getMessage(), 0, e, null);
+			FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, e.getMessage(), 0, e, null);
 			adaptor.getFrameworkLog().log(entry);
 			return null;
 		} catch (IOException ioe) {
@@ -512,7 +512,7 @@ public class PluginConverterImpl implements PluginConverter {
 			file = new JarFile(jarFile);
 		} catch (IOException e) {
 			String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_CONVERTER_PLUGIN_LIBRARY_IGNORED, jarFile, pluginInfo.getUniqueId());
-			adaptor.getFrameworkLog().log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, message, 0, e, null));
+			adaptor.getFrameworkLog().log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, message, 0, e, null));
 			return names;
 		}
 		//Run through the entries

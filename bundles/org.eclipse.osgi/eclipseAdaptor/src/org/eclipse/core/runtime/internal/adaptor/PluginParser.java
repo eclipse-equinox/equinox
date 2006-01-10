@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2004 IBM Corporation and others.
+ * Copyright (c) 2000, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -449,14 +449,14 @@ public class PluginParser extends DefaultHandler implements IModel {
 		else
 			msg = NLS.bind(EclipseAdaptorMsg.parse_errorNameLineColumn, new String[] {name, Integer.toString(ex.getLineNumber()), Integer.toString(ex.getColumnNumber()), ex.getMessage()});
 
-		FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, msg, 0, ex, null);
+		FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, msg, 0, ex, null);
 		adaptor.getFrameworkLog().log(entry);
 	}
 
 	synchronized public PluginInfo parsePlugin(InputStream in) throws Exception {
 		SAXParserFactory factory = acquireXMLParsing(context);
 		if (factory == null) {
-			FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, EclipseAdaptorMsg.ECLIPSE_CONVERTER_NO_SAX_FACTORY, 0, null, null);
+			FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, EclipseAdaptorMsg.ECLIPSE_CONVERTER_NO_SAX_FACTORY, 0, null, null);
 			adaptor.getFrameworkLog().log(entry);
 			return null;
 		}
@@ -671,7 +671,7 @@ public class PluginParser extends DefaultHandler implements IModel {
 	private void internalError(String elementName) {
 		FrameworkLogEntry error;
 		String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_CONVERTER_PARSE_UNKNOWNTOP_ELEMENT, elementName); 
-		error = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, (manifestInfo.pluginId == null ? message : "Plug-in : " + manifestInfo.pluginId + ", " + message), 0, null, null); //$NON-NLS-1$ //$NON-NLS-2$
+		error = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, (manifestInfo.pluginId == null ? message : "Plug-in : " + manifestInfo.pluginId + ", " + message), 0, null, null); //$NON-NLS-1$ //$NON-NLS-2$
 		adaptor.getFrameworkLog().log(error);
 	}
 

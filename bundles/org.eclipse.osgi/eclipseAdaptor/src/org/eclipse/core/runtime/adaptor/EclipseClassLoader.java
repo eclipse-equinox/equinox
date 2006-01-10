@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2005 IBM Corporation and others.
+ * Copyright (c) 2003, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -105,7 +105,7 @@ public class EclipseClassLoader extends DefaultClassLoader {
 					if (timeLeft <= 0 || bundle.getState() != Bundle.ACTIVE) {
 						String bundleName = bundle.getSymbolicName() == null ? Long.toString(bundle.getBundleId()) : bundle.getSymbolicName();
 						String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_CLASSLOADER_CONCURRENT_STARTUP, new Object[] {Thread.currentThread().getName(), className, threadChangingState.getName(), bundleName, Long.toString(delay)});
-						EclipseAdaptor.getDefault().getFrameworkLog().log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, message, 0, new Exception(EclipseAdaptorMsg.ECLIPSE_CLASSLOADER_GENERATED_EXCEPTION), null));
+						EclipseAdaptor.getDefault().getFrameworkLog().log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, message, 0, new Exception(EclipseAdaptorMsg.ECLIPSE_CLASSLOADER_GENERATED_EXCEPTION), null));
 					}
 					return basicFindLocalClass(className);
 				}
@@ -116,7 +116,7 @@ public class EclipseClassLoader extends DefaultClassLoader {
 				hostdata.getBundle().start();
 			} catch (BundleException e) {
 				String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_CLASSLOADER_ACTIVATION, bundle.getSymbolicName(), Long.toString(bundle.getBundleId())); 
-				EclipseAdaptor.getDefault().getFrameworkLog().log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, message, 0, e, null));
+				EclipseAdaptor.getDefault().getFrameworkLog().log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME,  FrameworkLogEntry.ERROR, 0, message, 0, e, null));
 				throw new ClassNotFoundException(className, e);
 			}
 			return basicFindLocalClass(className);

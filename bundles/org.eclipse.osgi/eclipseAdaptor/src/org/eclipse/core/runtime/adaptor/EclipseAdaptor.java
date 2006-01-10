@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2005 IBM Corporation and others.
+ * Copyright (c) 2003, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -443,7 +443,7 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 			noXML  = true;
 			if (Debug.DEBUG && Debug.DEBUG_ENABLED) {
 				String message = EclipseAdaptorMsg.ECLIPSE_ADAPTOR_ERROR_XML_SERVICE;
-				getFrameworkLog().log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, message, 0, e, null));
+				getFrameworkLog().log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, message, 0, e, null));
 			}
 		}
 	}
@@ -830,7 +830,7 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 			String message = EclipseAdaptorMsg.ECLIPSE_ADAPTOR_RUNTIME_ERROR;
 			if (exitOnError && isFatalException(error))
 				message += ' ' + EclipseAdaptorMsg.ECLIPSE_ADAPTOR_EXITING;
-			FrameworkLogEntry logEntry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, message, 0, error, null);
+			FrameworkLogEntry logEntry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, message, 0, error, null);
 			getFrameworkLog().log(logEntry);
 		} catch (Throwable t) {
 			// we may be in a currupted state and must be able to handle any
@@ -869,7 +869,7 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 				Debug.printStackTrace(ex);
 			}
 			String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_FILEMANAGER_OPEN_ERROR, ex.getMessage());
-			FrameworkLogEntry logEntry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, message, 0, ex, null);
+			FrameworkLogEntry logEntry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, message, 0, ex, null);
 			getFrameworkLog().log(logEntry);
 		}
 		return fManager;
