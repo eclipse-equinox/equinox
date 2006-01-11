@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2005 IBM Corporation and others.
+ * Copyright (c) 2004, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -693,8 +693,8 @@ public class PreferencesService implements IPreferencesService, IRegistryChangeL
 	}
 
 	public void registryChanged(IRegistryChangeEvent event) {
-		IExtensionDelta[] deltasOld = event.getExtensionDeltas(IPreferencesConstants.RUNTIME_NAME, org.eclipse.core.runtime.Preferences.PT_PREFERENCES);
-		IExtensionDelta[] deltasNew = event.getExtensionDeltas(IPreferencesConstants.PREFERS_NAME, org.eclipse.core.runtime.Preferences.PT_PREFERENCES);
+		IExtensionDelta[] deltasOld = event.getExtensionDeltas(IPreferencesConstants.RUNTIME_NAME, IPreferencesConstants.PT_PREFERENCES);
+		IExtensionDelta[] deltasNew = event.getExtensionDeltas(IPreferencesConstants.PREFERS_NAME, IPreferencesConstants.PT_PREFERENCES);
 		IExtensionDelta[] deltas = new IExtensionDelta[deltasOld.length + deltasNew.length];
 		System.arraycopy(deltasOld, 0, deltas, 0, deltasOld.length);
 		System.arraycopy(deltasNew, 0, deltas, deltasOld.length, deltasNew.length);
@@ -1131,11 +1131,11 @@ public class PreferencesService implements IPreferencesService, IRegistryChangeL
 		IExtension[] extensionsOld = emptyExtensionArray;
 		IExtension[] extensionsNew = emptyExtensionArray;
 		// "old"
-		IExtensionPoint pointOld = registry.getExtensionPoint(IPreferencesConstants.RUNTIME_NAME, org.eclipse.core.runtime.Preferences.PT_PREFERENCES);
+		IExtensionPoint pointOld = registry.getExtensionPoint(IPreferencesConstants.RUNTIME_NAME, IPreferencesConstants.PT_PREFERENCES);
 		if (pointOld != null)
 			extensionsOld = pointOld.getExtensions();
 		// "new"
-		IExtensionPoint pointNew = registry.getExtensionPoint(IPreferencesConstants.PREFERS_NAME, org.eclipse.core.runtime.Preferences.PT_PREFERENCES);
+		IExtensionPoint pointNew = registry.getExtensionPoint(IPreferencesConstants.PREFERS_NAME, IPreferencesConstants.PT_PREFERENCES);
 		if (pointNew != null)
 			extensionsNew = pointNew.getExtensions();
 		// combine

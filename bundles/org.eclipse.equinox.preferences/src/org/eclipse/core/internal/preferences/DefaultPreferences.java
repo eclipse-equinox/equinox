@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2005 IBM Corporation and others.
+ * Copyright (c) 2004, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -86,13 +86,13 @@ public class DefaultPreferences extends EclipsePreferences {
 		Bundle bundle = PreferencesOSGiUtils.getDefault().getBundle(name());
 		if (bundle == null)
 			return;
-		URL url = BundleFinder.find(bundle, new Path(Preferences.PREFERENCES_DEFAULT_OVERRIDE_FILE_NAME));
+		URL url = BundleFinder.find(bundle, new Path(IPreferencesConstants.PREFERENCES_DEFAULT_OVERRIDE_FILE_NAME));
 		if (url == null) {
 			if (EclipsePreferences.DEBUG_PREFERENCE_GENERAL)
 				PrefsMessages.message("Preference default override file not found for bundle: " + bundle.getSymbolicName()); //$NON-NLS-1$
 			return;
 		}
-		URL transURL = BundleFinder.find(bundle, NL_DIR.append(Preferences.PREFERENCES_DEFAULT_OVERRIDE_BASE_NAME).addFileExtension(PROPERTIES_FILE_EXTENSION));
+		URL transURL = BundleFinder.find(bundle, NL_DIR.append(IPreferencesConstants.PREFERENCES_DEFAULT_OVERRIDE_BASE_NAME).addFileExtension(PROPERTIES_FILE_EXTENSION));
 		if (transURL == null && EclipsePreferences.DEBUG_PREFERENCE_GENERAL)
 			PrefsMessages.message("Preference translation file not found for bundle: " + bundle.getSymbolicName()); //$NON-NLS-1$
 		applyDefaults(name(), loadProperties(url), loadProperties(transURL));
