@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005 IBM Corporation and others.
+ * Copyright (c) 2005, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,12 +17,13 @@ public class SingletonContainerMgr implements IContainer {
 	private String type;
 	private IContainer singletonContainer;
 	private ContainerManager containerManager;
-	
+
 	public SingletonContainerMgr(IContainer singletonContainer, String type, ContainerManager containerManager) {
 		this.singletonContainer = singletonContainer;
 		this.type = type;
 		this.containerManager = containerManager;
 	}
+
 	public synchronized IApplication launch(IAppContext context) throws Exception {
 		if (context != singletonHandle)
 			throw new IllegalStateException("Only one application of type \"" + type + "\" is allowed to run at a time");
@@ -43,6 +44,7 @@ public class SingletonContainerMgr implements IContainer {
 		singletonHandle = appHandle;
 		refreshAppDescriptors();
 	}
+
 	synchronized void unlock() {
 		singletonHandle = null;
 		refreshAppDescriptors();

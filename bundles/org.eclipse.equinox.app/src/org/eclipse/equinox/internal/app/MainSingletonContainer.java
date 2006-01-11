@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005 IBM Corporation and others.
+ * Copyright (c) 2005, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,6 +28,7 @@ public class MainSingletonContainer implements IContainer, ServiceTrackerCustomi
 		appLauncherTracker = new ServiceTracker(containerMgr.getBundleContext(), ApplicationLauncher.class.getName(), this);
 		appLauncherTracker.open();
 	}
+
 	public IApplication launch(IAppContext appContext) {
 		// use the ApplicationLauncher provided by the framework 
 		// to ensure it is launched on the main thread
@@ -37,6 +38,7 @@ public class MainSingletonContainer implements IContainer, ServiceTrackerCustomi
 		appLauncher.launch(app, appContext.getArguments() == null ? null : appContext.getArguments().get(ContainerManager.PROP_ECLIPSE_APPLICATION_ARGS));
 		return app.getApplication();
 	}
+
 	public Object addingService(ServiceReference reference) {
 		if (appLauncher != null)
 			return null;
@@ -53,9 +55,10 @@ public class MainSingletonContainer implements IContainer, ServiceTrackerCustomi
 		}
 		return appLauncher;
 	}
+
 	public void modifiedService(ServiceReference reference, Object service) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	public synchronized void removedService(ServiceReference reference, Object service) {
@@ -64,6 +67,7 @@ public class MainSingletonContainer implements IContainer, ServiceTrackerCustomi
 			containerMgr.getBundleContext().ungetService(reference);
 		}
 	}
+
 	public boolean isSingletonContainer() {
 		return true;
 	}

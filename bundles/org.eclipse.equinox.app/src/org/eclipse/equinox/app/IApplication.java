@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005 IBM Corporation and others.
+ * Copyright (c) 2005, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,7 @@
  *******************************************************************************/
 
 package org.eclipse.equinox.app;
+
 /**
  * Bootstrap type for an application.  An IApplication represent executable 
  * entry points into an application.  An IApplication can be configured into 
@@ -54,6 +55,7 @@ public interface IApplication {
 	 * @exception Exception if there is a problem running this application.
 	 */
 	public Object run(Object args) throws Exception;
+
 	/**
 	 * Forces a running application to exit.  This method must block until the 
 	 * running application has completely stopped.

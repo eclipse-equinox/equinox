@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005 IBM Corporation and others.
+ * Copyright (c) 2005, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -50,7 +50,6 @@ public class EclipseAppHandle extends ApplicationHandle implements IAppContext {
 		return state;
 	}
 
-	
 	protected void destroySpecific() {
 		// when this method is called we must force the application to exit.
 		// first set the status to stopping
@@ -101,7 +100,7 @@ public class EclipseAppHandle extends ApplicationHandle implements IAppContext {
 		// if the status is stopped then unregister the service
 		if ((status & IAppContext.STOPPED) != 0 && (this.status & IAppContext.STOPPED) == 0) {
 			sr.unregister();
-			((EclipseAppDescriptor)getApplicationDescriptor()).appHandleDestroyed();
+			((EclipseAppDescriptor) getApplicationDescriptor()).appHandleDestroyed();
 		}
 		this.status = status;
 	}
@@ -119,7 +118,7 @@ public class EclipseAppHandle extends ApplicationHandle implements IAppContext {
 	}
 
 	public IConfigurationElement getConfiguration() {
-		IExtension applicationExtension = ((EclipseAppDescriptor)getApplicationDescriptor()).getContainerManager().getAppExtension(getApplicationDescriptor().getApplicationId());
+		IExtension applicationExtension = ((EclipseAppDescriptor) getApplicationDescriptor()).getContainerManager().getAppExtension(getApplicationDescriptor().getApplicationId());
 		IConfigurationElement[] configs = applicationExtension.getConfigurationElements();
 		if (configs.length == 0)
 			throw new RuntimeException(NLS.bind(Messages.application_invalidExtension, getApplicationDescriptor().getApplicationId()));

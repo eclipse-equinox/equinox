@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005 IBM Corporation and others.
+ * Copyright (c) 2005, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -169,11 +169,13 @@ public class ContainerManager implements IRegistryChangeListener, SynchronousBun
 		String serviceClass;
 		Object serviceObject;
 		Dictionary serviceProps;
+
 		RegisterService(String serviceClass, Object serviceObject, Dictionary serviceProps) {
 			this.serviceClass = serviceClass;
 			this.serviceObject = serviceObject;
 			this.serviceProps = serviceProps;
 		}
+
 		public Object run() {
 			return context.registerService(serviceClass, serviceObject, serviceProps);
 		}
@@ -365,7 +367,7 @@ public class ContainerManager implements IRegistryChangeListener, SynchronousBun
 	}
 
 	void launch(EclipseAppHandle appHandle) throws Exception {
-		String type = ((EclipseAppDescriptor)appHandle.getApplicationDescriptor()).getType();
+		String type = ((EclipseAppDescriptor) appHandle.getApplicationDescriptor()).getType();
 		if (type == null)
 			type = APP_TYPE_MAIN_SINGLETON;
 		IContainer container = getContainer(type);
@@ -423,7 +425,7 @@ public class ContainerManager implements IRegistryChangeListener, SynchronousBun
 			ServiceReference[] runningRefs = context.getServiceReferences(ApplicationHandle.class.getName(), "(!(application.state=STOPPING))"); //$NON-NLS-1$
 			if (runningRefs == null)
 				return;
-			for (int i = 0; i <runningRefs.length; i++) {
+			for (int i = 0; i < runningRefs.length; i++) {
 				ApplicationHandle handle = (ApplicationHandle) context.getService(runningRefs[i]);
 				try {
 					handle.destroy();
@@ -434,6 +436,6 @@ public class ContainerManager implements IRegistryChangeListener, SynchronousBun
 		} catch (InvalidSyntaxException e) {
 			// do nothing; we already tested the filter string above
 		}
-		
+
 	}
 }

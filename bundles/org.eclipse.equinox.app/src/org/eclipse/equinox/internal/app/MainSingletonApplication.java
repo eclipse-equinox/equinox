@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005 IBM Corporation and others.
+ * Copyright (c) 2005, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,7 +29,7 @@ public class MainSingletonApplication implements ApplicationRunnable {
 				application = appContext.getConfiguration().createExecutableExtension("run"); //$NON-NLS-1$
 			} catch (Exception e) {
 				this.launchException = e;
-			} 
+			}
 	}
 
 	public Object run(Object context) throws Exception {
@@ -43,7 +43,7 @@ public class MainSingletonApplication implements ApplicationRunnable {
 				throw launchException;
 			if (application instanceof IApplication) {
 				result = ((IApplication) application).run(context);
-			} else 
+			} else
 				result = ContainerManager.execMethod(application, "run", Object.class, context); //$NON-NLS-1$
 		} finally {
 			application = null;
@@ -61,7 +61,7 @@ public class MainSingletonApplication implements ApplicationRunnable {
 	public void stop() {
 		// we can only handle forced stops if this application is an IApplication
 		if (application instanceof IApplication)
-			((IApplication)application).stop();
+			((IApplication) application).stop();
 	}
 
 	IApplication getApplication() {

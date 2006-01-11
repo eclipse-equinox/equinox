@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005 IBM Corporation and others.
+ * Copyright (c) 2005, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,6 +30,7 @@ public interface IContainer {
 	 * @throws Exception if any errors occur while launching the application
 	 */
 	IApplication launch(IAppContext context) throws Exception;
+
 	/**
 	 * returns true if this container only allows one running application
 	 * at a time.

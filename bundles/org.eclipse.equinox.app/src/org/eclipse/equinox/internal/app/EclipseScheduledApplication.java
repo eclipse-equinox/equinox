@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005 IBM Corporation and others.
+ * Copyright (c) 2005, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -86,7 +86,7 @@ public class EclipseScheduledApplication implements ScheduledApplication, EventH
 	public synchronized void remove() {
 		if (removed)
 			return;
-		removed  = true;
+		removed = true;
 		AppManager.removeScheduledApp(this);
 		if (sr != null)
 			sr.unregister();
@@ -115,6 +115,7 @@ public class EclipseScheduledApplication implements ScheduledApplication, EventH
 
 	public class TriggerGuard implements Guard {
 		String eventTopic;
+
 		public TriggerGuard(String topic) {
 			this.eventTopic = topic;
 		}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005 IBM Corporation and others.
+ * Copyright (c) 2005, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,13 +17,14 @@ import org.osgi.framework.*;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
-public class Activator implements BundleActivator, ServiceTrackerCustomizer{
+public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 	public static final String PI_APP = "org.eclipse.equinox.app"; //$NON-NLS-1$
 	public static boolean DEBUG = false;
 	private BundleContext bContext;
 	private ContainerManager containerMgr;
 	// tracks the extension registry
 	private ServiceTracker registryTracker;
+
 	public void start(BundleContext context) throws Exception {
 		this.bContext = context;
 		getDebugOptions(context);
@@ -34,7 +35,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer{
 		// start the app commands for the console
 		try {
 			AppCommands.create(context);
-		} catch(NoClassDefFoundError e) {
+		} catch (NoClassDefFoundError e) {
 			// catch incase CommandProvider is not available
 		}
 	}
@@ -43,7 +44,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer{
 		// stop the app commands for the console
 		try {
 			AppCommands.destroy(context);
-		} catch(NoClassDefFoundError e) {
+		} catch (NoClassDefFoundError e) {
 			// catch incase CommandProvider is not available
 		}
 		// close the registry tracker; this will stop the containerMgr if it was started

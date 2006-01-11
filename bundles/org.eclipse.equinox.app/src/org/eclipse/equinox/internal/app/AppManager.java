@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005 IBM Corporation and others.
+ * Copyright (c) 2005, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,13 +24,14 @@ import org.osgi.service.application.ScheduledApplication;
 import org.osgi.service.event.*;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.util.tracker.ServiceTracker;
+
 /**
  * Managers all persistent data for ApplicationDescriptors (lock status, 
  * scheduled applications etc.)
  */
 public class AppManager {
 	private static final String PROP_CONFIG_AREA = "osgi.configuration.area"; //$NON-NLS-1$
-	
+
 	private static final String FILTER_PREFIX = "(&(objectClass=org.eclipse.osgi.service.datalocation.Location)(type="; //$NON-NLS-1$
 	static final String FILE_APPLOCKS = ".locks"; //$NON-NLS-1$
 	static final String FILE_APPSCHEDULED = ".scheduled"; //$NON-NLS-1$
@@ -165,7 +166,7 @@ public class AppManager {
 		if (scheduledApps.remove(scheduledApp.getID()) != null) {
 			timerApps.remove(scheduledApp);
 			dirty = true;
-		}			
+		}
 	}
 
 	/**
@@ -198,7 +199,7 @@ public class AppManager {
 		scheduledApps.put(scheduledApp.getID(), scheduledApp);
 		Hashtable serviceProps = new Hashtable();
 		if (scheduledApp.getTopic() != null)
-			serviceProps.put(EventConstants.EVENT_TOPIC ,new String[] {scheduledApp.getTopic()});
+			serviceProps.put(EventConstants.EVENT_TOPIC, new String[] {scheduledApp.getTopic()});
 		if (scheduledApp.getEventFilter() != null)
 			serviceProps.put(EventConstants.EVENT_FILTER, scheduledApp.getEventFilter());
 		ServiceRegistration sr = context.registerService(new String[] {ScheduledApplication.class.getName(), EVENT_HANDLER}, scheduledApp, serviceProps);
@@ -501,7 +502,7 @@ public class AppManager {
 
 			// consume args not used by app container
 			if (args[i - 1].equalsIgnoreCase(KEYRING))
-				found = true;  
+				found = true;
 			if (args[i - 1].equalsIgnoreCase(PASSWORD))
 				found = true;
 
@@ -510,7 +511,6 @@ public class AppManager {
 				found = true; // ignore
 			if (args[i - 1].equalsIgnoreCase(BOOT))
 				found = true; // ignore
-
 
 			// look for the product to run
 			// treat -feature as a synonym for -product for compatibility.
@@ -555,17 +555,18 @@ public class AppManager {
 		if (System.getSecurityManager() == null)
 			tracker.open(allServices);
 		else
-			AccessController.doPrivileged(new PrivilegedAction(){
+			AccessController.doPrivileged(new PrivilegedAction() {
 				public Object run() {
 					tracker.open(allServices);
 					return null;
 				}
 			});
 	}
+
 	static Object getService(final ServiceTracker tracker) {
 		if (System.getSecurityManager() == null)
 			return tracker.getService();
-		return AccessController.doPrivileged(new PrivilegedAction(){
+		return AccessController.doPrivileged(new PrivilegedAction() {
 			public Object run() {
 				return tracker.getService();
 			}
