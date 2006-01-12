@@ -31,6 +31,8 @@ import org.eclipse.osgi.service.pluginconversion.PluginConverter;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.service.runnable.ApplicationLauncher;
 import org.eclipse.osgi.service.urlconversion.URLConverter;
+import org.eclipse.osgi.storagemanager.ManagedOutputStream;
+import org.eclipse.osgi.storagemanager.StorageManager;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 
@@ -105,7 +107,7 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 
 	private BundleStopper stopper;
 
-	private FileManager fileManager;
+	private StorageManager storageManager;
 
 	private boolean reinitialize = false;
 
@@ -150,7 +152,7 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 		if (Boolean.getBoolean(EclipseAdaptor.PROP_CLEAN))
 			cleanOSGiCache();
 		boolean readOnlyConfiguration = LocationManager.getConfigurationLocation().isReadOnly();
-		fileManager = initFileManager(LocationManager.getOSGiConfigurationDir(), readOnlyConfiguration ? "none" : null, readOnlyConfiguration); //$NON-NLS-1$
+		storageManager = initStorageManager(LocationManager.getOSGiConfigurationDir(), readOnlyConfiguration ? "none" : null, readOnlyConfiguration); //$NON-NLS-1$
 		readHeaders();
 		super.initialize(publisher);
 		// default the bootdelegation to all packages
@@ -202,8 +204,8 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 		File stateFile = null;
 		File lazyFile = null;
 		try {
-			stateFile = fileManager.lookup(LocationManager.STATE_FILE, false);
-			lazyFile = fileManager.lookup(LocationManager.LAZY_FILE, false);
+			stateFile = storageManager.lookup(LocationManager.STATE_FILE, false);
+			lazyFile = storageManager.lookup(LocationManager.LAZY_FILE, false);
 		} catch (IOException ex) {
 			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 				Debug.println("Error reading state file " + ex.getMessage()); //$NON-NLS-1$
@@ -219,9 +221,9 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 			if (currentConfiguration != null && (parentConfiguration = currentConfiguration.getParentLocation()) != null) {
 				try {
 					File stateLocationDir = new File(parentConfiguration.getURL().getFile(), FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME);
-					FileManager newFileManager = initFileManager(stateLocationDir, "none", true); //$NON-NLS-1$);
-					stateFile = newFileManager.lookup(LocationManager.STATE_FILE, false);
-					lazyFile = newFileManager.lookup(LocationManager.LAZY_FILE, false);
+					StorageManager newStorageManager = initStorageManager(stateLocationDir, "none", true); //$NON-NLS-1$);
+					stateFile = newStorageManager.lookup(LocationManager.STATE_FILE, false);
+					lazyFile = newStorageManager.lookup(LocationManager.LAZY_FILE, false);
 				} catch (IOException ex) {
 					if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 						Debug.println("Error reading state file " + ex.getMessage()); //$NON-NLS-1$
@@ -232,8 +234,8 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 				try {
 					//it did not exist in either place, so create it in the original location
 					if (canWrite()) {
-						stateFile = fileManager.lookup(LocationManager.STATE_FILE, true);
-						lazyFile = fileManager.lookup(LocationManager.LAZY_FILE, true);
+						stateFile = storageManager.lookup(LocationManager.STATE_FILE, true);
+						lazyFile = storageManager.lookup(LocationManager.LAZY_FILE, true);
 					}
 				} catch (IOException ex) {
 					if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
@@ -306,9 +308,9 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 				synchronized (stateManager) {
 					stateManager.update(stateTmpFile, lazyTmpFile);
 				}
-			fileManager.lookup(LocationManager.STATE_FILE, true);
-			fileManager.lookup(LocationManager.LAZY_FILE, true);
-			fileManager.update(new String[] {LocationManager.STATE_FILE, LocationManager.LAZY_FILE}, new String[] {stateTmpFile.getName(), lazyTmpFile.getName()});
+			storageManager.lookup(LocationManager.STATE_FILE, true);
+			storageManager.lookup(LocationManager.LAZY_FILE, true);
+			storageManager.update(new String[] {LocationManager.STATE_FILE, LocationManager.LAZY_FILE}, new String[] {stateTmpFile.getName(), lazyTmpFile.getName()});
 		} catch (IOException e) {
 			frameworkLog.log(new FrameworkEvent(FrameworkEvent.ERROR, context.getBundle(), e));
 		}
@@ -469,7 +471,7 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 	}
 
 	public boolean canWrite() {
-		return !fileManager.isReadOnly();
+		return !storageManager.isReadOnly();
 	}
 
 	public void frameworkStop(BundleContext aContext) throws BundleException {
@@ -478,7 +480,7 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 		printStats();
 		if (!noXML)
 			PluginParser.releaseXMLParsing();
-		fileManager.close();
+		storageManager.close();
 	}
 
 	private void printStats() {
@@ -499,10 +501,9 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 	private InputStream findBundleDataFile() {
 		if (reinitialize)
 			return null; // return null to indicate we are reinitializing
-		StreamManager streamManager = new StreamManager(fileManager);
 		InputStream bundleDataStream = null;
 		try {
-			bundleDataStream = streamManager.getInputStream(LocationManager.BUNDLE_DATA_FILE, StreamManager.OPEN_BEST_AVAILABLE);
+			bundleDataStream = storageManager.getInputStream(LocationManager.BUNDLE_DATA_FILE);
 		} catch (IOException ex) {
 			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 				Debug.println("Error reading framework metadata: " + ex.getMessage()); //$NON-NLS-1$
@@ -515,9 +516,9 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 			if (currentConfiguration != null && (parentConfiguration = currentConfiguration.getParentLocation()) != null) {
 				try {
 					File bundledataLocationDir = new File(parentConfiguration.getURL().getFile(), FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME);
-					FileManager newFileManager = initFileManager(bundledataLocationDir, "none", true); //$NON-NLS-1$
-					bundleDataStream = streamManager.getInputStream(LocationManager.BUNDLE_DATA_FILE, StreamManager.OPEN_BEST_AVAILABLE);
-					newFileManager.close();
+					StorageManager newStorageManager = initStorageManager(bundledataLocationDir, "none", true); //$NON-NLS-1$
+					bundleDataStream = newStorageManager.getInputStream(LocationManager.BUNDLE_DATA_FILE);
+					newStorageManager.close();
 				} catch (MalformedURLException e1) {
 					// This will not happen since all the URLs are derived by us
 					// and we are GODS!
@@ -747,9 +748,8 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 		// the cache and the state match
 		if (!canWrite() | timeStamp == stateManager.getSystemState().getTimeStamp())
 			return;
-		StreamManager streamManager = new StreamManager(fileManager);
 		try {
-			StreamManagerOutputStream fmos = streamManager.getOutputStream(LocationManager.BUNDLE_DATA_FILE);
+			ManagedOutputStream fmos = storageManager.getOutputStream(LocationManager.BUNDLE_DATA_FILE);
 			DataOutputStream out = new DataOutputStream(new BufferedOutputStream(fmos));
 			boolean error = true;
 			try {
@@ -859,10 +859,10 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 		return stopper;
 	}
 
-	private FileManager initFileManager(File baseDir, String lockMode, boolean readOnly) {
-		FileManager fManager = new FileManager(baseDir, lockMode, readOnly);
+	private StorageManager initStorageManager(File baseDir, String lockMode, boolean readOnly) {
+		StorageManager manager = new StorageManager(baseDir, lockMode, readOnly);
 		try {
-			fManager.open(!readOnly);
+			manager.open(!readOnly);
 		} catch (IOException ex) {
 			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 				Debug.println("Error reading framework metadata: " + ex.getMessage()); //$NON-NLS-1$
@@ -872,7 +872,7 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 			FrameworkLogEntry logEntry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, message, 0, ex, null);
 			getFrameworkLog().log(logEntry);
 		}
-		return fManager;
+		return manager;
 	}
 
 	protected void updateState(BundleData bundleData, int type) throws BundleException {

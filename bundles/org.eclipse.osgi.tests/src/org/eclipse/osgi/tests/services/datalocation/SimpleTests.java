@@ -17,11 +17,11 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.adaptor.FileManager;
+import org.eclipse.osgi.storagemanager.StorageManager;
 
 public class SimpleTests extends TestCase {
-	FileManager manager1;
-	FileManager manager2;
+	StorageManager manager1;
+	StorageManager manager2;
 	File base;
 	static String TEST1 = "test.txt";
 
@@ -39,7 +39,7 @@ public class SimpleTests extends TestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		base = new File(Platform.getConfigurationLocation().getURL().getPath());
-		manager1 = new FileManager(base, null);
+		manager1 = new StorageManager(base, null);
 	}
 
 	protected void tearDown() throws Exception {
@@ -109,7 +109,7 @@ public class SimpleTests extends TestCase {
 //		assertTrue(manager1.getTimeStamp(TEST1) != manager2.getTimeStamp(TEST1));
 //	}
 
-	private void update(FileManager manager, String filename) throws IOException {
+	private void update(StorageManager manager, String filename) throws IOException {
 		writeFile(new File(base, filename));
 		manager.update(new String[] {TEST1}, new String[] {filename});
 	}

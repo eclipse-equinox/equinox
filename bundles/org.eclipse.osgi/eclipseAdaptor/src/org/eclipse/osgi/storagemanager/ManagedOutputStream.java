@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005 IBM Corporation and others.
+ * Copyright (c) 2005, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,51 +8,52 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.core.runtime.adaptor;
+package org.eclipse.osgi.storagemanager;
 
 import java.io.*;
-import org.eclipse.osgi.storagemanager.ManagedOutputStream;
-import org.eclipse.osgi.storagemanager.StorageManager;
 
 /**
- * Represents an <code>OutputStream</code> provided by FileManager
- * @see StreamManager#getOutputStream(String)
+ * Represents a managed output stream for target managed by a storage manager.
+ * @see StorageManager#getOutputStream(String)
+ * @see StorageManager#getOutputStreamSet(String[])
  * <p>
  * Clients may not extend this class.
  * </p>
- * @since 3.1
- * @deprecated see {@link StorageManager} and see {@link ManagedOutputStream}
+ * @since 3.2
  */
-public class StreamManagerOutputStream extends FilterOutputStream {
+public class ManagedOutputStream extends FilterOutputStream {
+	static final int ST_OPEN = 0;
+	static final int ST_CLOSED = 1;
 	private String target;
-	private StreamManager manager;
+	private StorageManager manager;
 	private File outputFile;
 	private int state;
-	private StreamManagerOutputStream[] streamSet = null;
+	private ManagedOutputStream[] streamSet = null;
 
-	StreamManagerOutputStream(OutputStream out, StreamManager manager, String target, File outputFile, int state) {
+	ManagedOutputStream(OutputStream out, StorageManager manager, String target, File outputFile) {
 		super(out);
 		this.manager = manager;
 		this.target = target;
 		this.outputFile = outputFile;
-		this.state = state;
+		this.state = ST_OPEN;
 	}
 
 	/** 
-	 * Instructs this output stream to be closed and file manager to 
-	 * be updated as appropriate.
-	 * 
-	 * @see StreamManager#getOutputStream(String)
-	 * @see StreamManager#getOutputStreamSet(String[])
+	 * Instructs this output stream to be closed and storage manager to 
+	 * be updated as appropriate.  If this managed output stream is part of 
+	 * a set returned by {@link StorageManager#getOutputStreamSet(String[])} then
+	 * the storage manager will only be updated with the new content after all 
+	 * of the managed output streams in the set are closed successfully.
 	 */
 	public void close() throws IOException {
 		manager.closeOutputStream(this);
 	}
 
 	/**
-	 * Instructs this output stream to be closed and the contents removed.
-	 * @see StreamManager#getOutputStream(String)
-	 * @see StreamManager#getOutputStreamSet(String[])
+	 * Instructs this output stream to be closed and the contents discarded.
+	 * If this managed output stream is part of a set returned by 
+	 * {@link StorageManager#getOutputStreamSet(String[])} then the new 
+	 * content of all managed output streams in the set will be discarded.
 	 */
 	public void abort() {
 		manager.abortOutputStream(this);
@@ -78,11 +79,11 @@ public class StreamManagerOutputStream extends FilterOutputStream {
 		this.state = state;
 	}
 
-	void setStreamSet(StreamManagerOutputStream[] set) {
+	void setStreamSet(ManagedOutputStream[] set) {
 		streamSet = set;
 	}
 
-	StreamManagerOutputStream[] getStreamSet() {
+	ManagedOutputStream[] getStreamSet() {
 		return streamSet;
 	}
 

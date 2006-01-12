@@ -16,13 +16,15 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.adaptor.*;
+import org.eclipse.osgi.storagemanager.ManagedOutputStream;
+import org.eclipse.osgi.storagemanager.StorageManager;
 import org.eclipse.osgi.tests.OSGiTest;
 
 public class StreamManagerTests extends OSGiTest {
-	FileManager manager1;
-	FileManager manager2;
+	StorageManager manager1;
+	StorageManager manager2;
 	File base;
+	String reliableFile;
 
 	/**
 	 * Constructs a test case with the given name.
@@ -40,6 +42,7 @@ public class StreamManagerTests extends OSGiTest {
 		base = new File(Platform.getConfigurationLocation().getURL().getPath(), "StreamManagerTests");
 		manager1 = null;
 		manager2 = null;
+		reliableFile = System.getProperty("osgi.useReliableFiles");
 	}
 
 	protected void tearDown() throws Exception {
@@ -49,6 +52,10 @@ public class StreamManagerTests extends OSGiTest {
 		if (manager2 != null)
 			manager2.close();
 		rm(base);
+		if (reliableFile == null)
+			System.getProperties().remove("osgi.useReliableFiles");
+		else
+			System.setProperty("osgi.useReliableFiles", reliableFile);
 	}
 	
 	private void rm(File file) {
@@ -103,17 +110,16 @@ public class StreamManagerTests extends OSGiTest {
 		String contents1 = "test reliable file cOntents #1";
 		String contents2 = "test reliable file cOntents #2";
 		try {
-			manager1 = new FileManager(base, null);
-			StreamManager stream1 = new StreamManager(manager1);
-			stream1.setUseReliableFiles(true); // force reliable files
+			System.setProperty("osgi.useReliableFiles", "true"); // force reliable files
+			manager1 = new StorageManager(base, null);
 			manager1.open(true);
-			StreamManagerOutputStream fmos = stream1.getOutputStream(fileName);
+			ManagedOutputStream fmos = manager1.getOutputStream(fileName);
 			assertNotNull(fmos);
 			fmos.write(contents1.getBytes());
 			fmos.close();
 			
 			// Write verion2 of the file
-			fmos = stream1.getOutputStream(fileName);
+			fmos = manager1.getOutputStream(fileName);
 			assertNotNull(fmos);
 			fmos.write(contents2.getBytes());
 			fmos.close();
@@ -122,19 +128,16 @@ public class StreamManagerTests extends OSGiTest {
 			assertTrue(!file3.exists());
 			manager1.close();
 			manager1 = null;
-			stream1 = null;
 			
 			//now, open new manager, verify file contents are #2
-			manager2 = new FileManager(base, null);
-			StreamManager stream2 = new StreamManager(manager2);
-			stream2.setUseReliableFiles(true);
+			System.setProperty("osgi.useReliableFiles", "true"); // force reliable files
+			manager2 = new StorageManager(base, null);
 			manager2.open(true);
-			InputStream is = stream2.getInputStream(fileName);
+			InputStream is = manager2.getInputStream(fileName);
 			assertNotNull(is);
 			assertEquals(contents2, getInputStreamContents(is));
 			manager2.close();
 			manager2 = null;
-			stream2 = null;
 			
 			// need to sleep, FAT32 doesn't have too fine granularity in timestamps
 			try {
@@ -145,22 +148,24 @@ public class StreamManagerTests extends OSGiTest {
 			raf.seek(20);
 			raf.write('0'); // change 'O' to '0'
 			raf.close();
-			
-			manager1 = new FileManager(base, null);
-			stream1 = new StreamManager(manager1);
-			stream1.setUseReliableFiles(true);
+
+			System.setProperty("osgi.useReliableFiles", "true"); // force reliable files
+			manager1 = new StorageManager(base, null);
 			manager1.open(true);
 			
 			//request any valid stream available
-			is = stream1.getInputStream(fileName);
+			is = manager1.getInputStream(fileName);
 			assertNotNull(is);
 			assertEquals(contents1, getInputStreamContents(is));
 			
 			//now request only the primary file
 			try {
-				is = stream1.getInputStream(fileName, StreamManager.OPEN_FAIL_ON_PRIMARY);
-				is.close();
-				fail("getInputStream was successful");
+				InputStream[] isSet = manager1.getInputStreamSet(new String[] {fileName});
+				for (int i = 0; i < isSet.length; i++) {
+					if (isSet[i] != null)
+						isSet[i].close();
+				}
+				fail("getInputStreamSet was successful");
 			} catch(IOException e) {
 				//good
 			}
@@ -173,14 +178,13 @@ public class StreamManagerTests extends OSGiTest {
 			
 			// get input stream should fail
 			try {
-				is = stream1.getInputStream(fileName);
+				is = manager1.getInputStream(fileName);
 				fail("get input stream succedded");
 			} catch(IOException e) {
 				//good
 			}
 			manager1.close();
 			manager1 = null;
-			stream1 = null;
 		} catch(IOException e) {
 			fail("unexepected exception", e);
 		}
@@ -210,7 +214,7 @@ public class StreamManagerTests extends OSGiTest {
 			managerDir.mkdirs();
 			writeToFile(fileTable, "#safe table\n"+fileName+"=2\n");
 			writeToFile(file2, contents1);
-			manager1 = new FileManager(testDir, null);
+			manager1 = new StorageManager(testDir, null);
 			manager1.open(true);
 			File test = manager1.lookup(fileName, false);
 			assertNotNull(test);
@@ -244,7 +248,7 @@ public class StreamManagerTests extends OSGiTest {
 			assertEquals(2, files.length);
 			assertTrue(file5.exists());
 			
-			manager2 = new FileManager(testDir, null);
+			manager2 = new StorageManager(testDir, null);
 			manager2.open(true);
 			testFile = manager2.lookup(fileName, false);
 			assertNotNull(testFile);
@@ -279,17 +283,16 @@ public class StreamManagerTests extends OSGiTest {
 		String contents1 = "test reliable file contents #1";
 		String contents2 = "test reliable file contents #2";
 		try {
-			manager1 = new FileManager(base, null);
+			System.setProperty("osgi.useReliableFiles", "true"); // force reliable files
+			manager1 = new StorageManager(base, null);
 			manager1.open(true);
-			StreamManager stream1 = new StreamManager(manager1);
 			//create version 1
-			stream1.setUseReliableFiles(reliable); // force reliable files
-			StreamManagerOutputStream smos = stream1.getOutputStream(fileName);
+			ManagedOutputStream smos = manager1.getOutputStream(fileName);
 			smos.write(contents1.getBytes());
 			smos.close();
 			
 			//start creating version 2
-			smos = stream1.getOutputStream(fileName);
+			smos = manager1.getOutputStream(fileName);
 			smos.write(contents2.getBytes());
 			smos.abort();
 			smos.close(); // shouldn't cause exception, check!
@@ -297,28 +300,25 @@ public class StreamManagerTests extends OSGiTest {
 			// now see if we're still on version #1
 			assertEquals(1, manager1.getId(fileName));
 			// check contents also
-			InputStream is = stream1.getInputStream(fileName);
+			InputStream is = manager1.getInputStream(fileName);
 			assertNotNull(is);
 			assertEquals(contents1, getInputStreamContents(is));
 			manager1.close();
 			manager1=null;
-			stream1=null;
 			
 			// open a new manager & check the same thing to ensure the database is correct
-			manager2 = new FileManager(base, null);
+			System.setProperty("osgi.useReliableFiles", "true"); // force reliable files
+			manager2 = new StorageManager(base, null);
 			manager2.open(true);
-			StreamManager stream2 = new StreamManager(manager2);
 			//create version 1
-			stream2.setUseReliableFiles(reliable); // force reliable files
 			// now see if we're still on version #1
 			assertEquals(1, manager2.getId(fileName));
 			// check contents also
-			is = stream2.getInputStream(fileName);
+			is = manager2.getInputStream(fileName);
 			assertNotNull(is);
 			assertEquals(contents1, getInputStreamContents(is));
 			manager2.close();
 			manager2=null;
-			stream2=null;
 			assertTrue(file1.exists());
 			assertFalse(file2.exists());
 			assertFalse(file3.exists());
@@ -352,11 +352,10 @@ public class StreamManagerTests extends OSGiTest {
 		String contents1 = "test reliable file contents #1";
 		String contents2 = "test reliable file contents #2";
 		try {
-			manager1 = new FileManager(mgrDir, null);
-			StreamManager stream1 = new StreamManager(manager1);
-			stream1.setUseReliableFiles(reliable); // force reliable files
+			System.setProperty("osgi.useReliableFiles", reliable ? "true" : "false"); // force reliable files
+			manager1 = new StorageManager(mgrDir, null);
 			manager1.open(true);
-			StreamManagerOutputStream[] outs = stream1.getOutputStreamSet(new String[] {fileName1, fileName2});
+			ManagedOutputStream[] outs = manager1.getOutputStreamSet(new String[] {fileName1, fileName2});
 			assertNotNull(outs);
 			assertEquals(2, outs.length);
 			
@@ -369,7 +368,7 @@ public class StreamManagerTests extends OSGiTest {
 			assertTrue(file1_1.exists());
 			assertTrue(file2_1.exists());
 			
-			outs = stream1.getOutputStreamSet(new String[] {fileName1, fileName2});
+			outs = manager1.getOutputStreamSet(new String[] {fileName1, fileName2});
 			assertNotNull(outs);
 			
 			outs[0].write("new data #1".getBytes());
@@ -382,7 +381,6 @@ public class StreamManagerTests extends OSGiTest {
 			assertTrue(file2_2.exists());
 			manager1.close();
 			manager1 = null;
-			stream1 = null;
 			
 			if (reliable) {
 				// verify FM thinks they are reliable
@@ -424,11 +422,10 @@ public class StreamManagerTests extends OSGiTest {
 			mgrDir.mkdirs();
 			String[] list = mgrDir.list();
 			assertEquals(0, list.length);
-			manager1 = new FileManager(mgrDir, null);
-			StreamManager stream1 = new StreamManager(manager1);
-			stream1.setUseReliableFiles(reliable); // force reliable files
+			System.setProperty("osgi.useReliableFiles", reliable ? "true" : "false"); // force reliable files
+			manager1 = new StorageManager(mgrDir, null);
 			manager1.open(true);
-			StreamManagerOutputStream[] outs = stream1.getOutputStreamSet(new String[] {fileName1, fileName2, fileName3, fileName4});
+			ManagedOutputStream[] outs = manager1.getOutputStreamSet(new String[] {fileName1, fileName2, fileName3, fileName4});
 			assertNotNull(outs);
 			
 			outs[0].write(contents1.getBytes());
@@ -452,14 +449,12 @@ public class StreamManagerTests extends OSGiTest {
 			assertNull(manager1.lookup(fileName4, false));
 			manager1.close();
 			manager1 = null;
-			stream1 = null;
 			
 			// open a new manager & check the same thing to ensure the database is correct
-			manager2 = new FileManager(mgrDir, null);
+			System.setProperty("osgi.useReliableFiles", reliable ? "true" : "false"); // force reliable files
+			manager2 = new StorageManager(mgrDir, null);
 			manager2.open(true);
-			StreamManager stream2 = new StreamManager(manager2);
 			//create version 1
-			stream2.setUseReliableFiles(reliable); // force reliable files
 			assertNull(manager2.lookup(fileName1, false));
 			assertNull(manager2.lookup(fileName2, false));
 			assertNull(manager2.lookup(fileName3, false));
@@ -468,7 +463,6 @@ public class StreamManagerTests extends OSGiTest {
 			assertEquals(1, list.length);
 			manager2.close();
 			manager2 = null;
-			stream2 = null;
 		
 		} catch(IOException e) {
 			fail("unexepected exception", e);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2005 IBM Corporation and others.
+ * Copyright (c) 2004, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,29 +8,30 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.core.runtime.adaptor;
+package org.eclipse.osgi.storagemanager;
 
 import java.io.*;
 import java.util.*;
+import org.eclipse.core.runtime.adaptor.EclipseAdaptorMsg;
 import org.eclipse.core.runtime.internal.adaptor.BasicLocation;
 import org.eclipse.core.runtime.internal.adaptor.Locker;
 import org.eclipse.osgi.framework.internal.reliablefile.*;
-import org.eclipse.osgi.storagemanager.StorageManager;
+import org.eclipse.osgi.framework.util.SecureAction;
 
 /**
- * File managers provide a facility for tracking the state of files being used and updated by several
+ * Storage managers provide a facility for tracking the state of files being used and updated by several
  * systems at the same time. The typical usecase is in shared configuration data areas.
  * <p>
- * The general principle is to maintain a table which maps user-level file name
- * onto actual disk file. The filename is actually never used, and the file is always stored under the
- * given filename suffixed by an integer. If a file needs to be modified, it is written into a new file whose name suffix 
+ * The general principle is to maintain a table which maps a user-level target name
+ * onto an actual disk file. The target name is actually never used, and the file is always stored under the
+ * given target name suffixed by an integer. If a target needs to be modified, it is written into a new file whose name suffix 
  * is incremented.
  * Once the instance has been created, open() must be called before performing any other operation.
- * On open the fileManager starts by reading the current table and
+ * On open the storage manager starts by reading the current table and
  * thereby obtaining a snapshot of the current directory state. If another
- * entity updates the directory, the file manager is able to detect the change.
- * Given that the file is unique, if another entity used the file manager mechanism, the file manager can
- * still access the state of the file as it was when the file manager first started.
+ * entity updates the directory, the storage manager is able to detect the change.
+ * Given that the file is unique, if another entity used the storage manager mechanism, the storage manager can
+ * still access the state of the file as it was when the storage manager first started.
  * <p>
  * The facilities provided here are cooperative. That is, all participants must
  * agree to the conventions and to calling the given API. There is no capacity
@@ -39,14 +40,18 @@ import org.eclipse.osgi.storagemanager.StorageManager;
  * <p>
  * Clients may not extend this class.
  * </p>
- * @since 3.1
- * @deprecated see {@link StorageManager}
+ * @since 3.2
  */
-public class FileManager {
-	protected static final int FILETYPE_STANDARD = 0;
-	protected static final int FILETYPE_RELIABLEFILE = 1;
-	private static boolean tempCleanup = Boolean.valueOf(System.getProperty("osgi.embedded.cleanTempFiles")).booleanValue(); //$NON-NLS-1$
-	private static boolean openCleanup = Boolean.valueOf(System.getProperty("osgi.embedded.cleanupOnOpen")).booleanValue(); //$NON-NLS-1$
+public class StorageManager {
+	private static final int FILETYPE_STANDARD = 0;
+	private static final int FILETYPE_RELIABLEFILE = 1;
+	private static final SecureAction secure = new SecureAction();
+	private static boolean tempCleanup = Boolean.valueOf(secure.getProperty("osgi.embedded.cleanTempFiles")).booleanValue(); //$NON-NLS-1$
+	private static boolean openCleanup = Boolean.valueOf(secure.getProperty("osgi.embedded.cleanupOnOpen")).booleanValue(); //$NON-NLS-1$
+	private static final String MANAGER_FOLDER = ".manager"; //$NON-NLS-1$
+	private static final String TABLE_FILE = ".fileTable"; //$NON-NLS-1$
+	private static final String LOCK_FILE = ".fileTableLock"; //$NON-NLS-1$
+	private static final int MAX_LOCK_WAIT = 5000; // 5 seconds 
 
 	private class Entry {
 		int readId;
@@ -94,40 +99,36 @@ public class FileManager {
 
 	private File instanceFile = null; //The file reprensenting the running instance. It is created when the table file is read.
 	private Locker instanceLocker = null; //The locker for the instance file.
-	private boolean readOnly; // Whether this file manager is in read-only mode
-	private boolean open; // Whether this file manager is open for use
+	private boolean readOnly; // Whether this storage manager is in read-only mode
+	private boolean open; // Whether this storage manager is open for use
 
 	// locking related fields
 	private int tableStamp = -1;
 
 	private Properties table = new Properties();
-
-	private static final String MANAGER_FOLDER = ".manager"; //$NON-NLS-1$
-	private static final String TABLE_FILE = ".fileTable"; //$NON-NLS-1$
-	private static final String LOCK_FILE = ".fileTableLock"; //$NON-NLS-1$
-	private static final int MAX_LOCK_WAIT = 5000; // 5 seconds
+	private boolean useReliableFiles = Boolean.valueOf(secure.getProperty("osgi.useReliableFiles")).booleanValue(); //$NON-NLS-1$
 
 	/**
-	 * Returns a new file manager for the area identified by the given base
+	 * Returns a new storage manager for the area identified by the given base
 	 * directory.
 	 * 
 	 * @param base the directory holding the files to be managed
-	 * @param lockMode the lockMode to use for the given filemanager. It can have one the 3 values: none, java.io, java.nio 
+	 * @param lockMode the lockMode to use for the storage manager. It can have one the 3 values: none, java.io, java.nio 
 	 * and also supports null in which case the lock strategy will be the global one.  
 	 */
-	public FileManager(File base, String lockMode) {
+	public StorageManager(File base, String lockMode) {
 		this(base, lockMode, false);
 	}
 
 	/**
-	 * Returns a new file manager for the area identified by the given base
+	 * Returns a new storage manager for the area identified by the given base
 	 * directory.
 	 * 
 	 * @param base the directory holding the files to be managed
-	 * @param lockMode the lockMode to use for the given filemanager. It can have one the 3 values: none, java.io, java.nio 
+	 * @param lockMode the lockMode to use for the storage manager. It can have one the 3 values: none, java.io, java.nio 
 	 * and also supports null in which case the lock strategy will be the global one.  
 	 */
-	public FileManager(File base, String lockMode, boolean readOnly) {
+	public StorageManager(File base, String lockMode, boolean readOnly) {
 		this.base = base;
 		this.lockMode = lockMode;
 		this.managerRoot = new File(base, MANAGER_FOLDER);
@@ -153,25 +154,23 @@ public class FileManager {
 	}
 
 	/**
-	 * Add the given file name to the list of files managed by this location.
+	 * Add the given target name to the list of targets managed by this manager.
 	 * 
-	 * @param file path of the file to manage
-	 * @throws IOException if there are any problems adding the given file to the manager
+	 * @param target name of the target to manage
+	 * @throws IOException if there are any problems adding the given target to the manager
 	 */
-	public void add(String file) throws IOException {
-		add(file, FILETYPE_STANDARD);
+	public void add(String target) throws IOException {
+		add(target, FILETYPE_STANDARD);
 	}
 
-	/**
-	 * Add the given file name to the list of files managed by this location.
+	/* (non-Javadoc
+	 * Add the given target name to the list of targets managed by this manager.
 	 * 
-	 * @param file path of the file to manage.
+	 * @param target name of the target to manage.
 	 * @param fileType the file type. 
 	 * @throws IOException if there are any problems adding the given file to the manager
-	 * @see #FILETYPE_STANDARD
-	 * @see #FILETYPE_RELIABLEFILE
 	 */
-	protected void add(String file, int fileType) throws IOException {
+	private void add(String target, int fileType) throws IOException {
 		if (!open)
 			throw new IOException(EclipseAdaptorMsg.fileManager_notOpen);
 		if (readOnly)
@@ -180,14 +179,14 @@ public class FileManager {
 			throw new IOException(EclipseAdaptorMsg.fileManager_cannotLock);
 		try {
 			updateTable();
-			Entry entry = (Entry) table.get(file);
+			Entry entry = (Entry) table.get(target);
 			if (entry == null) {
 				entry = new Entry(0, 1, fileType);
-				table.put(file, entry);
-				// if this file existed before, ensure there is not an old
+				table.put(target, entry);
+				// if this target existed before, ensure there is not an old
 				//  version on the disk to avoid name collisions. If version found,
 				//  us the oldest generation+1 for the write ID.
-				int oldestGeneration = findOldestGeneration(file);
+				int oldestGeneration = findOldestGeneration(target);
 				if (oldestGeneration != 0)
 					entry.setWriteId(oldestGeneration + 1);
 				save();
@@ -203,17 +202,17 @@ public class FileManager {
 		}
 	}
 
-	/**
+	/* (non-Javadoc)
 	 * Find the oldest generation of a file still available on disk 
 	 * @param file the file from which to obtain the oldest generation.
 	 * @return the oldest generation of the file or 0 if the file does
 	 * not exist. 
 	 */
-	private int findOldestGeneration(String file) {
+	private int findOldestGeneration(String target) {
 		String[] files = base.list();
 		int oldestGeneration = 0;
 		if (files != null) {
-			String name = file + '.';
+			String name = target + '.';
 			int len = name.length();
 			for (int i = 0; i < files.length; i++) {
 				if (!files[i].startsWith(name))
@@ -231,14 +230,14 @@ public class FileManager {
 	}
 
 	/**
-	 * Update the given target files with the content in the given source files.
-	 * The targets are file paths which are currently managed. The sources are
-	 * absolute (or relative to the current working directory) file paths
-	 * containing the new content for the corresponding target.
+	 * Update the given targets with the content in the given source files.
+	 * The targets is a list of target names which are currently managed. 
+	 * The sources are absolute (or relative to the current working directory) 
+	 * file paths containing the new content for the corresponding target.
 	 * 
-	 * @param targets the target files to update
-	 * @param sources the new content for the target files
-	 * @throws IOException if there are any problems updating the given files
+	 * @param targets the targets to update
+	 * @param sources the new content for the targets
+	 * @throws IOException if there are any problems updating the given targets
 	 */
 	public void update(String[] targets, String[] sources) throws IOException {
 		if (!open)
@@ -271,11 +270,11 @@ public class FileManager {
 	}
 
 	/**
-	 * Returns a list of all the file paths currently being managed.
+	 * Returns a list of all the targets currently being managed.
 	 * 
-	 * @return the file paths being managed
+	 * @return the target names being managed
 	 */
-	public String[] getFiles() {
+	public String[] getTargets() {
 		if (!open)
 			return null;
 		Set set = table.keySet();
@@ -287,7 +286,7 @@ public class FileManager {
 	}
 
 	/**
-	 * Returns the directory containing the files being managed by this file
+	 * Returns the directory containing the files being managed by this storage
 	 * manager.
 	 * 
 	 * @return the directory containing the managed files
@@ -297,13 +296,12 @@ public class FileManager {
 	}
 
 	/**
-	 * Returns the current numeric id (appendage) of the given file.
-	 * <code>file + "." + getId(file)</code>. -1 is returned if the given
-	 * target file is not managed.
+	 * Returns the current numeric id (appendage) of the given target.
+	 * <code>target + "." + getId(target)</code>. A value of -1 is returned 
+	 * if the given target is not managed.
 	 * 
-	 * @param target
-	 *                   the managed file to access
-	 * @return the id of the file
+	 * @param target the name of the target
+	 * @return the id of the target
 	 */
 	public int getId(String target) {
 		if (!open)
@@ -315,32 +313,15 @@ public class FileManager {
 	}
 
 	/**
-	 * Returns the file type for the given file. If the file is not managed or
-	 * the file manager is not open, -1 will be returned.
+	 * Returns if readOnly state this storage manager is using.
 	 * 
-	 * @param target the managed file to access.
-	 * @return the current type this file is being managed as or -1 if an
-	 * error occurs.
-	 */
-	protected int getFileType(String target) {
-		if (open) {
-			Entry entry = (Entry) table.get(target);
-			if (entry != null)
-				return entry.getFileType();
-		}
-		return -1;
-	}
-
-	/**
-	 * Returns if readOnly state this file manager is using.
-	 * 
-	 * @return if this filemanage update state is read-only.
+	 * @return if this storage manager update state is read-only.
 	 */
 	public boolean isReadOnly() {
 		return readOnly;
 	}
 
-	/**
+	/* (non-Javadoc)
 	 * Attempts to lock the state of this manager and returns <code>true</code>
 	 * if the lock could be acquired.
 	 * <p>
@@ -381,13 +362,17 @@ public class FileManager {
 	}
 
 	/**
-	 * Returns the actual file location to use when reading the given managed file. 
-	 * <code>null</code> can be returned if the given target is not managed and add is set to false.
+	 * Returns the actual file location to use when reading the given managed target. 
+	 * A value of <code>null</code> can be returned if the given target is not managed and 
+	 * add is set to false.  
+	 * <p>
+	 * The returned file should be considered read-only.  Any updates to the content of this
+	 *  file should be done using {@link #update(String[], String[])}.
 	 * 
-	 * @param target the managed file to lookup
-	 * @param add indicate whether the file should be added to the manager if it is not managed.
-	 * @throws IOException if the add flag is set to true and the addition of the file failed
-	 * @return the absolute file location to use for the given file or
+	 * @param target the managed target to lookup
+	 * @param add indicate whether the target should be added to the manager if it is not managed.
+	 * @throws IOException if the add flag is set to true and the addition of the target failed
+	 * @return the absolute file location to use for the given target or
 	 *               <code>null</code> if the given target is not managed
 	 */
 	public File lookup(String target, boolean add) throws IOException {
@@ -416,7 +401,7 @@ public class FileManager {
 	}
 
 	/**
-	 * Saves the state of the file manager and releases any locks held.
+	 * Saves the state of the storage manager and releases any locks held.
 	 */
 	private void release() {
 		if (locker == null)
@@ -425,11 +410,11 @@ public class FileManager {
 	}
 
 	/**
-	 * Removes the given file from management by this file manager.
+	 * Removes the given target from management by this storage manager.
 	 * 
-	 * @param file the file to remove
+	 * @param target the target to remove
 	 */
-	public void remove(String file) throws IOException {
+	public void remove(String target) throws IOException {
 		if (!open)
 			throw new IOException(EclipseAdaptorMsg.fileManager_notOpen);
 		if (readOnly)
@@ -440,7 +425,7 @@ public class FileManager {
 			throw new IOException(EclipseAdaptorMsg.fileManager_cannotLock);
 		try {
 			updateTable();
-			table.remove(file);
+			table.remove(target);
 			save();
 		} finally {
 			release();
@@ -531,7 +516,7 @@ public class FileManager {
 		tableStamp = ReliableFile.lastModifiedVersion(tableFile);
 	}
 
-	protected boolean update(String target, String source) {
+	private boolean update(String target, String source) {
 		Entry entry = (Entry) table.get(target);
 		int newId = entry.getWriteId();
 		// attempt to rename the file to the next generation
@@ -552,8 +537,8 @@ public class FileManager {
 	}
 
 	/**
-	 * This methods remove all the temporary files that have been created by the fileManager.
-	 * This removal is only done if the instance of eclipse calling this method is the last instance using this fileManager.
+	 * This methods remove all the temporary files that have been created by the storage manager.
+	 * This removal is only done if the instance of eclipse calling this method is the last instance using this storage manager.
 	 * @throws IOException
 	 */
 	private void cleanup() throws IOException {
@@ -563,7 +548,7 @@ public class FileManager {
 		if (!lock(true))
 			throw new IOException(EclipseAdaptorMsg.fileManager_cannotLock);
 		try {
-			//Iterate through the temp files and delete them all, except the one representing this filemanager.
+			//Iterate through the temp files and delete them all, except the one representing this storage manager.
 			String[] files = managerRoot.list();
 			if (files != null) {
 				for (int i = 0; i < files.length; i++) {
@@ -628,8 +613,8 @@ public class FileManager {
 	}
 
 	/**
-	 * This methods declare the fileManager as closed. From thereon, the instance can no longer be used.
-	 * It is important to close the manager as it also cleanup old copies of the managed files.
+	 * This method declares the storage manager as closed. From thereon, the instance can no longer be used.
+	 * It is important to close the manager as it also cleans up old copies of the managed targets.
 	 */
 	public void close() {
 		if (!open)
@@ -650,7 +635,8 @@ public class FileManager {
 	}
 
 	/**
-	 * This methods opens the fileManager, which loads the table in memory. This method must be called before any operation on the filemanager.
+	 * This methods opens the storage manager, which loads the table in memory. 
+	 * This method must be called before any operation on the storage manager.
 	 * @param wait indicates if the open operation must wait in case of contention on the lock file.
 	 */
 	public void open(boolean wait) throws IOException {
@@ -672,8 +658,8 @@ public class FileManager {
 	}
 
 	/**
-	 * Creates a new unique empty temporary-file in the filemanager base direcotry. The file name
-	 * must be at least 3 characters. This file can later be used to update a managed file.
+	 * Creates a new unique empty temporary-file in the storage manager base directory. The file name
+	 * must be at least 3 characters. This file can later be used to update a managed target.
 	 * 
 	 * @param file the file name to create temporary file from.
 	 * @return the newly-created empty file.
@@ -688,4 +674,207 @@ public class FileManager {
 		return tmpFile;
 	}
 
+	/**
+	 * Returns a managed <code>InputStream</code> for a managed target. 
+	 * <code>null</code> can be returned if the given target is not managed. 
+	 * This call is equivalent to calling <code>getInputStream(target, OPEN_BEST_AVAILABLE).</code>
+	 * 
+	 * @param target the base name of the managed target to open.
+	 * @return an <code>InputStream</code> from the managed target or 
+	 * <code>null</code> if the given target is not managed.
+	 * @throws IOException if the content is missing, corrupt or an error occurs.
+	 * @see StreamManager#getInputStream(String, int)
+	 */
+	public InputStream getInputStream(String target) throws IOException {
+		return getInputStream(target, ReliableFile.OPEN_BEST_AVAILABLE);
+	}
+
+	/**
+	 * Returns a managed input stream set for the managed target names. 
+	 * Elements of the returned set may be <code>null</code> if the given target is not managed.
+	 * This method should be used for target sets which use the output streams returned by the
+	 * {@link #getOutputStreamSet(String[])} to save data.
+	 * 
+	 * @param targets the names of the managed targets to open.
+	 * @return a set from the managed target input streams.
+	 * @throws IOException if the content of one of the targets is missing, corrupt or an error occurs.
+	 */
+	public InputStream[] getInputStreamSet(String[] targets) throws IOException {
+		InputStream[] streams = new InputStream[targets.length];
+		for (int i = 0; i < streams.length; i++)
+			streams[i] = getInputStream(targets[i], ReliableFile.OPEN_FAIL_ON_PRIMARY);
+		return streams;
+	}
+
+	private InputStream getInputStream(String target, int openMask) throws IOException {
+		if (useReliableFiles) {
+			int id = getId(target);
+			if (id == -1)
+				return null;
+			return new ReliableFileInputStream(new File(getBase(), target), id, openMask);
+		}
+		File lookup = lookup(target, false);
+		if (lookup == null)
+			return null;
+		return new FileInputStream(lookup);
+	}
+
+	/**
+	 * Returns a <code>ManagedOutputStream</code> for a managed target.  
+	 * Closing the ouput stream will update the storage manager with the 
+	 * new content of the target.
+	 * 
+	 * @param target the target name to write.
+	 * @return a managed output stream for the target.
+	 * @throws IOException if an error occurs opening the target.
+	 */
+	public ManagedOutputStream getOutputStream(String target) throws IOException {
+		if (useReliableFiles) {
+			ReliableFileOutputStream out = new ReliableFileOutputStream(new File(getBase(), target));
+			return new ManagedOutputStream(out, this, target, null);
+		}
+		File tmpFile = createTempFile(target);
+		return new ManagedOutputStream(new FileOutputStream(tmpFile), this, target, tmpFile);
+	}
+
+	/**
+	 * Returns an array of <code>ManagedOutputStream</code> for a set of managed targets.
+	 * When all managed output streams in the set have been closed, the storage manager
+	 * will be updated with the new content of the targets. 
+	 * Aborting any one of the streams will cause the entire content of the set to abort 
+	 * and be discarded.
+	 * 
+	 * @param targets list of tergats to write.
+	 * @return an array of managed output streams respectively of targets.
+	 * @throws IOException if an error occurs opening the targets.
+	 */
+	public ManagedOutputStream[] getOutputStreamSet(String[] targets) throws IOException {
+		int count = targets.length;
+		ManagedOutputStream[] streams = new ManagedOutputStream[count];
+		int idx = 0;
+		try {
+			for (; idx < count; idx++) {
+				ManagedOutputStream newStream = getOutputStream(targets[idx]);
+				newStream.setStreamSet(streams);
+				streams[idx] = newStream;
+			}
+		} catch (IOException e) {
+			// cleanup
+			for (int jdx = 0; jdx < idx; jdx++)
+				streams[jdx].abort();
+			throw e;
+		}
+		return streams;
+	}
+
+	/* (non-Javadoc)
+	 * Instructs this manager to abort and discard a managed output stream.
+	 * This method should be used if any errors occur after opening a managed
+	 * output stream where the contents should not be saved.
+	 * If this output stream is part of a set, all other managed output streams in this set
+	 * will also be closed and aborted.
+	 * @param out the managed output stream
+	 * @see #getOutputStream(String)
+	 * @see #getOutputStreamSet(String[])
+	 */
+	void abortOutputStream(ManagedOutputStream out) {
+		ManagedOutputStream[] set = out.getStreamSet();
+		if (set == null) {
+			set = new ManagedOutputStream[] {out};
+		}
+		synchronized (set) {
+			for (int idx = 0; idx < set.length; idx++) {
+				out = set[idx];
+				if (out.getOutputFile() == null) {
+					// this is a ReliableFileOutpuStream
+					ReliableFileOutputStream rfos = (ReliableFileOutputStream) out.getOutputStream();
+					rfos.abort();
+				} else {
+					// plain FileOutputStream();
+					if (out.getState() == ManagedOutputStream.ST_OPEN) {
+						try {
+							out.getOutputStream().close();
+						} catch (IOException e) {/*do nothing*/
+						}
+					}
+					out.getOutputFile().delete();
+				}
+				out.setState(ManagedOutputStream.ST_CLOSED);
+			}
+		}
+	}
+
+	/* (non-Javadoc)
+	 * Close the managed output stream and update the new content to  
+	 * this manager. If this managed output stream is part of a set, only after closing
+	 * all managed output streams in the set will storage manager be updated.
+	 * 
+	 * @param smos the output stream.
+	 * @throws IOException if an errors occur.
+	 * @see #getOutputStream(String)
+	 * @see #getOutputStreamSet(String[])
+	 */
+	void closeOutputStream(ManagedOutputStream smos) throws IOException {
+		if (smos.getState() != ManagedOutputStream.ST_OPEN)
+			return;
+		ManagedOutputStream[] streamSet = smos.getStreamSet();
+		if (smos.getOutputFile() == null) {
+			// this is a ReliableFileOutputStream
+			ReliableFileOutputStream rfos = (ReliableFileOutputStream) smos.getOutputStream();
+			// manage file deletes
+			File file = rfos.closeIntermediateFile();
+			smos.setState(ManagedOutputStream.ST_CLOSED);
+			String target = smos.getTarget();
+			if (streamSet == null) {
+				add(target, StorageManager.FILETYPE_RELIABLEFILE);
+				update(new String[] {smos.getTarget()}, new String[] {file.getName()});
+				ReliableFile.fileUpdated(new File(getBase(), smos.getTarget()));
+			}
+		} else {
+			// this is a plain old file output steam
+			OutputStream out = smos.getOutputStream();
+			out.flush();
+			try {
+				((FileOutputStream) out).getFD().sync();
+			} catch (SyncFailedException e) {/*ignore*/
+			}
+			out.close();
+			smos.setState(ManagedOutputStream.ST_CLOSED);
+			String target = smos.getTarget();
+			if (streamSet == null) {
+				add(target, StorageManager.FILETYPE_STANDARD);
+				update(new String[] {target}, new String[] {smos.getOutputFile().getName()});
+			}
+		}
+
+		if (streamSet != null) {
+			synchronized (streamSet) {
+				//check all the streams to see if there are any left open....
+				for (int idx = 0; idx < streamSet.length; idx++) {
+					if (streamSet[idx].getState() == ManagedOutputStream.ST_OPEN)
+						return; //done
+				}
+				//all streams are closed, we need to update storage manager
+				String[] targets = new String[streamSet.length];
+				String[] sources = new String[streamSet.length];
+				for (int idx = 0; idx < streamSet.length; idx++) {
+					smos = streamSet[idx];
+					targets[idx] = smos.getTarget();
+					File outputFile = smos.getOutputFile();
+					if (outputFile == null) {
+						// this is a ReliableFile 
+						add(smos.getTarget(), StorageManager.FILETYPE_RELIABLEFILE);
+						ReliableFileOutputStream rfos = (ReliableFileOutputStream) smos.getOutputStream();
+						File file = rfos.closeIntermediateFile(); //multiple calls to close() ok
+						sources[idx] = file.getName();
+						ReliableFile.fileUpdated(new File(getBase(), smos.getTarget()));
+					} else {
+						add(smos.getTarget(), StorageManager.FILETYPE_STANDARD);
+						sources[idx] = outputFile.getName();
+					}
+				}
+				update(targets, sources);
+			}
+		}
+	}
 }

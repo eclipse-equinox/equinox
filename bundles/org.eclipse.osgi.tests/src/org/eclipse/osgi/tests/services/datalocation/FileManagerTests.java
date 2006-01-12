@@ -15,12 +15,12 @@ import java.io.*;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.adaptor.FileManager;
+import org.eclipse.osgi.storagemanager.StorageManager;
 import org.eclipse.osgi.tests.OSGiTest;
 
 public class FileManagerTests extends OSGiTest {
-	FileManager manager1;
-	FileManager manager2;
+	StorageManager manager1;
+	StorageManager manager2;
 	File base;
 
 	/**
@@ -73,7 +73,7 @@ public class FileManagerTests extends OSGiTest {
 		testDir.mkdirs();
 		String[] files = testDir.list();
 		assertEquals(files.length, 0);
-		manager1 = new FileManager(testDir, null, true);
+		manager1 = new StorageManager(testDir, null, true);
 		try {
 			manager1.open(true);
 		} catch(IOException e) {
@@ -108,7 +108,7 @@ public class FileManagerTests extends OSGiTest {
 
 		try {
 			// lets create a file in a writable file manager
-			manager2 = new FileManager(testDir, null, false);
+			manager2 = new StorageManager(testDir, null, false);
 			manager2.open(true);
 			manager2.lookup(fileName, true);
 			File tmpFile = manager2.createTempFile(fileName);
@@ -158,7 +158,7 @@ public class FileManagerTests extends OSGiTest {
 	 */
 	public void testExistingVersion() {
 		String testFile = "testExistingVersion.txt";
-		manager1 = new FileManager(base, null);
+		manager1 = new StorageManager(base, null);
 		try {
 			manager1.open(false);
 			File file1 = new File(base, testFile+".1");
@@ -192,7 +192,7 @@ public class FileManagerTests extends OSGiTest {
 			}
 			
 			// open a new manager, ensure a lookup results in file version (3)
-			manager2 = new FileManager(base, null);
+			manager2 = new StorageManager(base, null);
 			manager2.open(true);
 			file = manager2.lookup(testFile, false);
 			if (file == null) {
@@ -222,7 +222,7 @@ public class FileManagerTests extends OSGiTest {
 	public void testNotOpen() {
 		String permanentFile = "testNotOpen.txt";
 		String scratchFile = "testNotOpenScratch";
-		manager1 = new FileManager(base, null);
+		manager1 = new StorageManager(base, null);
 		// create a permanent file and a managed scratch file
 		try {
 			manager1.open(true);
@@ -236,7 +236,7 @@ public class FileManagerTests extends OSGiTest {
 		}
 		
 		// create a new manager, and try making calls
-		manager2 = new FileManager(base, null);
+		manager2 = new StorageManager(base, null);
 		checkOpen(false, permanentFile, scratchFile);
 		// open the manager, try again
 		try {
@@ -322,7 +322,7 @@ public class FileManagerTests extends OSGiTest {
 		File file1 = new File(base, fileName+".1");
 		File file2 = new File(base, fileName+".2");
 		File file3 = new File(base, fileName+".3");
-		manager1 = new FileManager(base, null);
+		manager1 = new StorageManager(base, null);
 		// create a permanent file
 		try {
 			manager1.open(true);
@@ -341,7 +341,7 @@ public class FileManagerTests extends OSGiTest {
 			if (file1.exists() || !file2.exists() || file3.exists())
 				fail("Failed creating a file revision");
 			
-			manager2 = new FileManager(base, null);
+			manager2 = new StorageManager(base, null);
 			manager2.open(true);
 			manager2.remove(fileName);
 			// check lookup & getInputStream
@@ -362,7 +362,7 @@ public class FileManagerTests extends OSGiTest {
 			
 			// open a new manager, ensure that the database was updated
 			// by checking version is also #3
-			manager1 = new FileManager(base, null);
+			manager1 = new StorageManager(base, null);
 			manager1.open(true);
 			testFile = manager1.lookup(fileName, false);
 			assertNotNull(testFile);
@@ -390,7 +390,7 @@ public class FileManagerTests extends OSGiTest {
 		String fileName = "testMultipleFileManagers.txt";
 		File file1 = new File(base, fileName+".1");
 		File file2 = new File(base, fileName+".2");
-		manager1 = new FileManager(base, null);
+		manager1 = new StorageManager(base, null);
 		try {
 			manager1.open(true);
 			File file = manager1.lookup(fileName, true);
@@ -406,7 +406,7 @@ public class FileManagerTests extends OSGiTest {
 			assertTrue(file1.exists());
 			
 			//new fileMangager using version #1
-			manager2 = new FileManager(base, null);
+			manager2 = new StorageManager(base, null);
 			manager2.open(true);
 			// sanity check
 			file = manager2.lookup(fileName, false);
@@ -439,7 +439,7 @@ public class FileManagerTests extends OSGiTest {
 			assertTrue(file2.exists());
 			
 			// new manager1, does it get version 1?
-			manager1 = new FileManager(base, null);
+			manager1 = new StorageManager(base, null);
 			manager1.open(true);
 			file = manager1.lookup(fileName, false);
 			assertNotNull(file);
@@ -472,7 +472,7 @@ public class FileManagerTests extends OSGiTest {
 		try {
 			fos = new FileOutputStream(lockFile);
 			// we hold the lock, lets open a FM
-			manager1 = new FileManager(base, "java.io");
+			manager1 = new StorageManager(base, "java.io");
 			try {
 				manager1.open(true); // wait for lock
 				fail("open with lock succedded");

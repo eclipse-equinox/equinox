@@ -12,6 +12,7 @@ package org.eclipse.core.runtime.adaptor;
 
 import java.io.*;
 import org.eclipse.osgi.framework.internal.reliablefile.*;
+import org.eclipse.osgi.storagemanager.StorageManager;
 
 /**
  * This class manages streams for a FileManager.
@@ -19,6 +20,7 @@ import org.eclipse.osgi.framework.internal.reliablefile.*;
  * Clients may not extend this class.
  * </p>
  * @since 3.1
+ * @deprecated see {@link StorageManager}
  */
 public class StreamManager {
 	/**
