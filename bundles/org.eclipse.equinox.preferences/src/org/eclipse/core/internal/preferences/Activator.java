@@ -11,18 +11,26 @@
 package org.eclipse.core.internal.preferences;
 
 import java.util.Hashtable;
+
 import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.eclipse.osgi.service.environment.EnvironmentInfo;
 import org.osgi.framework.*;
 import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 /**
  * The Jobs plugin class.
  */
-public class Activator implements BundleActivator {
+public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 
 	private static final String OSGI_PREFERENCES_SERVICE = "org.osgi.service.prefs.PreferencesService"; //$NON-NLS-1$	
 
+	/**
+	 * Track the registry service - only register preference service if the registry is 
+	 * available
+	 */
+	private ServiceTracker registryServiceTracker;
+	
 	/**
 	 * The bundle associated this plug-in
 	 */
@@ -44,14 +52,16 @@ public class Activator implements BundleActivator {
 	public void start(BundleContext context) throws Exception {
 		bundleContext = context;
 		processCommandLine();
-		registerServices();
+		registryServiceTracker = new ServiceTracker(context,"org.eclipse.equinox.registry.IExtensionRegistry",this);
+		registryServiceTracker.open();
 	}
 
 	/**
 	 * This method is called when the plug-in is stopped
 	 */
 	public void stop(BundleContext context) throws Exception {
-		unregisterServices();
+		registryServiceTracker.close(); //unregisters services
+		registryServiceTracker = null;
 		PreferencesOSGiUtils.getDefault().closeServices();
 		bundleContext = null;
 	}
@@ -65,10 +75,27 @@ public class Activator implements BundleActivator {
 		osgiPreferencesService = bundleContext.registerService(OSGI_PREFERENCES_SERVICE, new OSGiPreferencesServiceManager(bundleContext), null);
 	}
 
-	private void unregisterServices() {
-		preferencesService.unregister();
-		osgiPreferencesService.unregister();
-		
+	public synchronized Object addingService(ServiceReference reference) {
+		if (preferencesService == null) {
+			registerServices();
+			//return the registry service so we track it
+			return bundleContext.getService(reference); 
+		}
+		return null;
+	}
+
+	public void modifiedService(ServiceReference reference, Object service) {
+	}
+
+	public synchronized void removedService(ServiceReference reference, Object service) {
+		if (preferencesService != null) {
+			preferencesService.unregister();
+			preferencesService = null;
+		}
+		if (osgiPreferencesService != null) {
+			osgiPreferencesService.unregister();
+			osgiPreferencesService = null;		
+		}
 	}
 
 	/**
@@ -94,5 +121,4 @@ public class Activator implements BundleActivator {
 			}
 		}
 	}
-
 }
