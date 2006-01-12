@@ -33,7 +33,7 @@ public class ExtensionHandle extends Handle implements IExtension {
 	}
 
 	public String getNamespace() {
-		return getExtension().getNamespace();
+		return getExtension().getNamespaceName();
 	}
 
 	public String getExtensionPointUniqueIdentifier() {

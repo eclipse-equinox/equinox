@@ -22,7 +22,8 @@ public class TableReader {
 	static final int OBJECT = 1;
 
 	//The version of the cache
-	static final int CACHE_VERSION = 1;
+	static final int CACHE_VERSION = 2;
+	// Version 1 -> 2: the contributor Ids changed from "long" to "String"
 
 	//Informations representing the MAIN file
 	static final String MAIN = ".mainData"; //$NON-NLS-1$
@@ -139,7 +140,7 @@ public class TableReader {
 		try {
 			synchronized (mainDataFile) {
 				goToInputFile(offset);
-				return basicLoadConfigurationElement(mainInput, -1);
+				return basicLoadConfigurationElement(mainInput, null);
 			}
 		} catch (IOException e) {
 			String message = NLS.bind(RegistryMessages.meta_regCacheIOExceptionReading, mainDataFile);
@@ -150,16 +151,16 @@ public class TableReader {
 		}
 	}
 
-	private ConfigurationElement basicLoadConfigurationElement(DataInputStream is, long actualContributorId) throws IOException {
+	private ConfigurationElement basicLoadConfigurationElement(DataInputStream is, String actualContributorId) throws IOException {
 		int self = is.readInt();
-		long contributorId = is.readLong();
+		String contributorId = readStringOrNull(is);
 		String name = readStringOrNull(is);
 		int parentId = is.readInt();
 		byte parentType = is.readByte();
 		int misc = is.readInt();//this is set in second level CEs, to indicate where in the extra data file the children ces are
 		String[] propertiesAndValue = readPropertiesAndValue(is);
 		int[] children = readArray(is);
-		if (actualContributorId == -1)
+		if (actualContributorId == null)
 			actualContributorId = contributorId;
 		return getObjectFactory().createConfigurationElement(self, actualContributorId, name, propertiesAndValue, children, misc, parentId, parentType, false);
 	}
@@ -168,7 +169,7 @@ public class TableReader {
 		try {
 			synchronized (extraDataFile) {
 				goToExtraFile(offset);
-				return loadConfigurationElementAndChildren(null, extraInput, 3, Integer.MAX_VALUE, objectManager, -1);
+				return loadConfigurationElementAndChildren(null, extraInput, 3, Integer.MAX_VALUE, objectManager, null);
 			}
 		} catch (IOException e) {
 			String message = NLS.bind(RegistryMessages.meta_regCacheIOExceptionReading, extraDataFile);
@@ -180,13 +181,13 @@ public class TableReader {
 	}
 
 	//Read a whole configuration element subtree
-	private ConfigurationElement loadConfigurationElementAndChildren(DataInputStream is, DataInputStream extraIs, int depth, int maxDepth, RegistryObjectManager objectManager, long namespaceOwnerId) throws IOException {
+	private ConfigurationElement loadConfigurationElementAndChildren(DataInputStream is, DataInputStream extraIs, int depth, int maxDepth, RegistryObjectManager objectManager, String namespaceOwnerId) throws IOException {
 		DataInputStream currentStream = is;
 		if (depth > 2)
 			currentStream = extraIs;
 
 		ConfigurationElement ce = basicLoadConfigurationElement(currentStream, namespaceOwnerId);
-		if (namespaceOwnerId == -1)
+		if (namespaceOwnerId == null)
 			namespaceOwnerId = ce.getNamespaceOwnerId();
 		int[] children = ce.getRawChildren();
 		if (depth + 1 > maxDepth)
@@ -250,7 +251,7 @@ public class TableReader {
 					for (int j = 0; j < nbrOfCe; j++) {
 						// note that max depth is set to 2 and extra input is never going to 
 						// be used in this call to the loadConfigurationElementAndChildren().
-						objects.add(loadConfigurationElementAndChildren(mainInput, null, 1, 2, objects, -1), holdObjects);
+						objects.add(loadConfigurationElementAndChildren(mainInput, null, 1, 2, objects, null), holdObjects);
 					}
 				}
 				return xpt;
@@ -350,7 +351,7 @@ public class TableReader {
 		result[1] = readStringOrNull(extraInput); //the schema
 		result[2] = readStringOrNull(extraInput); //the fully qualified name
 		result[3] = readStringOrNull(extraInput); //the namespace
-		result[4] = Long.toString(extraInput.readLong());
+		result[4] = readStringOrNull(extraInput); //the contributor Id 
 		return result;
 	}
 
@@ -362,7 +363,8 @@ public class TableReader {
 				int size = namespaceInput.readInt();
 				KeyedHashSet result = new KeyedHashSet(size);
 				for (int i = 0; i < size; i++) {
-					Contribution n = getObjectFactory().createContribution(namespaceInput.readLong(), false);
+					String contributorId = readStringOrNull(namespaceInput);
+					Contribution n = getObjectFactory().createContribution(contributorId, false);
 					n.setRawChildren(readArray(namespaceInput));
 					result.add(n);
 				}
@@ -393,7 +395,7 @@ public class TableReader {
 			for (int i = 0; i < numberOfOrphanExtensions; i++) {
 				int nbrOfCe = mainInput.readInt();
 				for (int j = 0; j < nbrOfCe; j++) {
-					objectManager.add(loadConfigurationElementAndChildren(mainInput, extraInput, 1, Integer.MAX_VALUE, objectManager, -1), true);
+					objectManager.add(loadConfigurationElementAndChildren(mainInput, extraInput, 1, Integer.MAX_VALUE, objectManager, null), true);
 				}
 			}
 		}
@@ -426,7 +428,7 @@ public class TableReader {
 		for (int i = 0; i < nbrOfExtension; i++) {
 			int nbrOfCe = mainInput.readInt();
 			for (int j = 0; j < nbrOfCe; j++) {
-				objectManager.add(loadConfigurationElementAndChildren(mainInput, extraInput, 1, Integer.MAX_VALUE, objectManager, -1), true);
+				objectManager.add(loadConfigurationElementAndChildren(mainInput, extraInput, 1, Integer.MAX_VALUE, objectManager, null), true);
 			}
 		}
 		return xpt;
@@ -439,7 +441,7 @@ public class TableReader {
 		xpt.setSchema(tmp[1]);
 		xpt.setUniqueIdentifier(tmp[2]);
 		xpt.setNamespace(tmp[3]);
-		xpt.setNamespaceOwnerId(Long.parseLong(tmp[4]));
+		xpt.setNamespaceOwnerId(tmp[4]);
 		return xpt;
 	}
 

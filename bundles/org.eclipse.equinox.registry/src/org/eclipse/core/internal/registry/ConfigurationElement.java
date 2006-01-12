@@ -40,13 +40,13 @@ public class ConfigurationElement extends RegistryObject {
 	//The ID of the namespace owner. 
 	//This value can be null when the element is loaded from disk and the owner has been uninstalled.
 	//This happens when the configuration is obtained from a delta containing removed extension.
-	private long contributorId;
+	private String contributorId;
 
 	protected ConfigurationElement(ExtensionRegistry registry, boolean isDynamic) {
 		super(registry, isDynamic);
 	}
 
-	protected ConfigurationElement(int self, long contributorId, String name, String[] propertiesAndValue, int[] children, int extraDataOffset, int parent, byte parentType, ExtensionRegistry registry, boolean isDynamic) {
+	protected ConfigurationElement(int self, String contributorId, String name, String[] propertiesAndValue, int[] children, int extraDataOffset, int parent, byte parentType, ExtensionRegistry registry, boolean isDynamic) {
 		super(registry, isDynamic);
 
 		setObjectId(self);
@@ -123,11 +123,11 @@ public class ConfigurationElement extends RegistryObject {
 		propertiesAndValue = newPropertiesAndValue;
 	}
 
-	void setNamespaceOwnerId(long namespaceOwnerId) {
+	void setNamespaceOwnerId(String namespaceOwnerId) {
 		this.contributorId = namespaceOwnerId;
 	}
 
-	protected long getNamespaceOwnerId() {
+	protected String getNamespaceOwnerId() {
 		return contributorId;
 	}
 

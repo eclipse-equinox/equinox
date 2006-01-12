@@ -94,8 +94,8 @@ public class ExtensionPoint extends RegistryObject {
 		return getExtraData()[NAMESPACE];
 	}
 
-	protected long getNamespaceOwnerId() {
-		return Long.parseLong(getExtraData()[CONTRIBUTOR_ID]);
+	protected String getNamespaceOwnerId() {
+		return getExtraData()[CONTRIBUTOR_ID];
 	}
 
 	void setSchema(String value) {
@@ -118,9 +118,9 @@ public class ExtensionPoint extends RegistryObject {
 		((String[]) extraInformation)[NAMESPACE] = value;
 	}
 
-	void setNamespaceOwnerId(long id) {
+	void setNamespaceOwnerId(String id) {
 		ensureExtraInformationType();
-		((String[]) extraInformation)[CONTRIBUTOR_ID] = Long.toString(id);
+		((String[]) extraInformation)[CONTRIBUTOR_ID] = id;
 	}
 
 	public String toString() {

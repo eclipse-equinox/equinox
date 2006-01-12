@@ -21,7 +21,7 @@ public class Extension extends RegistryObject {
 	//Extension simple identifier
 	private String simpleId;
 	//The namespace for the extension. 
-	private String namespace;
+	private String namespaceName;
 
 	//	Place holder for the label and  the extension point. It contains either a String[] or a SoftReference to a String[].
 	//The array layout is [label, extension point name]
@@ -41,7 +41,7 @@ public class Extension extends RegistryObject {
 		this.simpleId = simpleId;
 		setRawChildren(children);
 		setExtraDataOffset(extraData);
-		this.namespace = namespace;
+		this.namespaceName = namespace;
 	}
 
 	protected String getExtensionPointIdentifier() {
@@ -53,7 +53,7 @@ public class Extension extends RegistryObject {
 	}
 
 	protected String getUniqueIdentifier() {
-		return simpleId == null ? null : this.getNamespace() + '.' + simpleId;
+		return simpleId == null ? null : this.getNamespaceName() + '.' + simpleId;
 	}
 
 	void setExtensionPointIdentifier(String value) {
@@ -94,12 +94,12 @@ public class Extension extends RegistryObject {
 		((String[]) extraInformation)[LABEL] = value;
 	}
 
-	public String getNamespace() {
-		return namespace;
+	public String getNamespaceName() {
+		return namespaceName;
 	}
 
-	void setNamespace(String value) {
-		namespace = value;
+	void setNamespaceName(String value) {
+		namespaceName = value;
 	}
 
 	public String toString() {

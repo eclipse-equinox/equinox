@@ -14,11 +14,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.*;
-import org.eclipse.core.internal.registry.*;
+import org.eclipse.core.internal.registry.ExtensionRegistry;
+import org.eclipse.core.internal.registry.RegistryMessages;
 import org.eclipse.core.internal.runtime.ResourceTranslator;
 import org.eclipse.core.internal.runtime.RuntimeLog;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.equinox.registry.RegistryUtils;
 import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
@@ -87,13 +89,14 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 	}
 
 	private void removeBundle(Bundle bundle) {
-		registry.remove(bundle.getBundleId());
+		registry.remove(RegistryUtils.getContributorId(bundle));
 	}
 
 	private void addBundle(Bundle bundle) {
+		String contributorId = RegistryUtils.getContributorId(bundle);
 		// if the given bundle already exists in the registry then return.
 		// note that this does not work for update cases.
-		if (registry.hasNamespace(bundle.getBundleId()))
+		if (registry.hasNamespace(contributorId))
 			return;
 		// bail out if system bundle
 		if (bundle.getBundleId() == 0)
@@ -126,7 +129,6 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 		if (is == null)
 			return;
 
-		long contributorId = bundle.getBundleId();
 		ResourceBundle b = null;
 		try {
 			b = ResourceTranslator.getResourceBundle(bundle);

@@ -217,7 +217,7 @@ public class ExtensionRegistry implements IExtensionRegistry {
 		}
 	}
 
-	private void basicRemove(long contributorId) {
+	private void basicRemove(String contributorId) {
 		// ignore anonymous namespaces
 		Set affectedNamespaces = removeExtensionsAndExtensionPoints(contributorId);
 		Map associatedObjects = registryObjects.getAssociatedObjects(contributorId);
@@ -314,7 +314,7 @@ public class ExtensionRegistry implements IExtensionRegistry {
 			return null;
 		String namespace = extensionId.substring(0, lastdot);
 
-		long[] contributorIds = getContributorIds(namespace);
+		String[] contributorIds = getContributorIds(namespace);
 		for (int i = 0; i < contributorIds.length; i++) {
 			int[] extensions = registryObjects.getExtensionsFrom(contributorIds[i]);
 			for (int j = 0; j < extensions.length; j++) {
@@ -393,7 +393,7 @@ public class ExtensionRegistry implements IExtensionRegistry {
 	public IExtensionPoint[] getExtensionPoints(String namespace) {
 		access.enterRead();
 		try {
-			long[] contributorIds = getContributorIds(namespace);
+			String[] contributorIds = getContributorIds(namespace);
 			IExtensionPoint[] result = ExtensionPointHandle.EMPTY_ARRAY;
 			for (int i = 0; i < contributorIds.length; i++) {
 				result = (IExtensionPoint[]) concatArrays(result, registryObjects.getHandles(registryObjects.getExtensionPointsFrom(contributorIds[i]), RegistryObjectManager.EXTENSION_POINT));
@@ -411,7 +411,7 @@ public class ExtensionRegistry implements IExtensionRegistry {
 	public IExtension[] getExtensions(String namespace) {
 		access.enterRead();
 		try {
-			long[] contributorIds = getContributorIds(namespace);
+			String[] contributorIds = getContributorIds(namespace);
 			List tmp = new ArrayList();
 			for (int i = 0; i < contributorIds.length; i++) {
 				Extension[] exts = (Extension[]) registryObjects.getObjects(registryObjects.getExtensionsFrom(contributorIds[i]), RegistryObjectManager.EXTENSION);
@@ -444,7 +444,7 @@ public class ExtensionRegistry implements IExtensionRegistry {
 		}
 	}
 
-	public boolean hasNamespace(long name) {
+	public boolean hasNamespace(String name) {
 		access.enterRead();
 		try {
 			return registryObjects.hasContribution(name);
@@ -500,7 +500,7 @@ public class ExtensionRegistry implements IExtensionRegistry {
 	 * interested on changes in the given plug-in.
 	 * </p>
 	 */
-	public void remove(long removedContributorId) {
+	public void remove(String removedContributorId) {
 		access.enterWrite();
 		try {
 			basicRemove(removedContributorId);
@@ -547,7 +547,7 @@ public class ExtensionRegistry implements IExtensionRegistry {
 		return recordChange(extensionPoint, existingExtensions, IExtensionDelta.REMOVED);
 	}
 
-	private Set removeExtensionsAndExtensionPoints(long contributorId) {
+	private Set removeExtensionsAndExtensionPoints(String contributorId) {
 		Set affectedNamespaces = new HashSet();
 		int[] extensions = registryObjects.getExtensionsFrom(contributorId);
 		for (int i = 0; i < extensions.length; i++) {
@@ -799,7 +799,7 @@ public class ExtensionRegistry implements IExtensionRegistry {
 		return isRegistryFilledFromCache;
 	}
 
-	public Object processExecutableExtension(String contributorName, long namespaceOwnerId, String namespaceName, String className, Object initData, String propertyName, ConfigurationElement confElement) throws CoreException {
+	public Object processExecutableExtension(String contributorName, String namespaceOwnerId, String namespaceName, String className, Object initData, String propertyName, ConfigurationElement confElement) throws CoreException {
 		ConfigurationElementHandle confElementHandle = new ConfigurationElementHandle(getObjectManager(), confElement.getObjectId());
 		return strategy.createExecutableExtension(contributorName, namespaceOwnerId, namespaceName, className, initData, propertyName, confElementHandle);
 	}
@@ -807,15 +807,15 @@ public class ExtensionRegistry implements IExtensionRegistry {
 	//////////////////////////////////////////////////////////////////////////////////////////
 	// Registry namespace resolution
 
-	public long getNamespaceOwnerId(long contributorId) {
+	public String getNamespaceOwnerId(String contributorId) {
 		return strategy.getNamespaceOwnerId(contributorId);
 	}
 
-	public String getNamespace(long contributorId) {
+	public String getNamespace(String contributorId) {
 		return strategy.getNamespace(contributorId);
 	}
 
-	public long[] getContributorIds(String namespace) {
+	public String[] getContributorIds(String namespace) {
 		return strategy.getNamespaceContributors(namespace);
 	}
 
@@ -905,7 +905,7 @@ public class ExtensionRegistry implements IExtensionRegistry {
 	//////////////////////////////////////////////////////////////////////////////////////
 	// Modifiable portion
 
-	public boolean addContribution(InputStream is, long contributorId, String contributionName, ResourceBundle b, Object key) {
+	public boolean addContribution(InputStream is, String contributorId, String contributionName, ResourceBundle b, Object key) {
 		// check access
 		if (!strategy.isModifiable() && masterToken != key && userToken != key)
 			throw new IllegalArgumentException("Unauthorized access to the ExtensionRegistry.addXMLContribution() method. Check if proper access token is supplied."); //$NON-NLS-1$
@@ -969,7 +969,7 @@ public class ExtensionRegistry implements IExtensionRegistry {
 	 * @param extensionPointLabel- display string for the extension point
 	 * @param schemaLocation - points to the location of the XML schema file
 	 */
-	public void createExtensionPoint(long contributorId, String extensionPointId, String extensionPointLabel, String schemaLocation) {
+	public void createExtensionPoint(String contributorId, String extensionPointId, String extensionPointLabel, String schemaLocation) {
 
 		// Extension point Id might not be null
 		if (extensionPointId == null) {
@@ -979,7 +979,7 @@ public class ExtensionRegistry implements IExtensionRegistry {
 
 		// prepare namespace information
 		String namespaceName = getNamespace(contributorId);
-		long namespaceOwnerId = getNamespaceOwnerId(contributorId);
+		String namespaceOwnerId = getNamespaceOwnerId(contributorId);
 
 		// addition wraps in a contribution
 		Contribution contribution = getElementFactory().createContribution(contributorId, true);
@@ -1021,10 +1021,10 @@ public class ExtensionRegistry implements IExtensionRegistry {
 	 * name is supplied, it is assumed to have the same contributorId as this extension
 	 * @param description - contents of the extension
 	 */
-	public void createExtension(long contributorId, String extensionId, String extensionLabel, String extensionPointId, ExtensionDescription description) {
+	public void createExtension(String contributorId, String extensionId, String extensionLabel, String extensionPointId, ExtensionDescription description) {
 		// prepare namespace information
 		String namespaceName = getNamespace(contributorId);
-		long namespaceOwnerId = getNamespaceOwnerId(contributorId);
+		String namespaceOwnerId = getNamespaceOwnerId(contributorId);
 
 		// addition wraps in a contribution
 		Contribution contribution = getElementFactory().createContribution(contributorId, true);
@@ -1045,7 +1045,7 @@ public class ExtensionRegistry implements IExtensionRegistry {
 
 		createExtensionData(namespaceOwnerId, description, currentExtension);
 
-		currentExtension.setNamespace(namespaceName);
+		currentExtension.setNamespaceName(namespaceName);
 
 		int[] contributionChildren = new int[3];
 
@@ -1058,7 +1058,7 @@ public class ExtensionRegistry implements IExtensionRegistry {
 	}
 
 	// Fill in the actual content of this extension
-	private void createExtensionData(long namespaceOwnerId, ExtensionDescription description, RegistryObject parent) {
+	private void createExtensionData(String namespaceOwnerId, ExtensionDescription description, RegistryObject parent) {
 		ConfigurationElement currentConfigurationElement = getElementFactory().createConfigurationElement(true);
 		currentConfigurationElement.setNamespaceOwnerId(namespaceOwnerId);
 		currentConfigurationElement.setName(description.getElementName());

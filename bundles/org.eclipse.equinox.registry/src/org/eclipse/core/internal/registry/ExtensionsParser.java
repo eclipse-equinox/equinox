@@ -218,7 +218,7 @@ public class ExtensionsParser extends DefaultHandler {
 					stateStack.pop();
 					// Finish up extension object
 					Extension currentExtension = (Extension) objectStack.pop();
-					currentExtension.setNamespace(namespace.getNamespace());
+					currentExtension.setNamespaceName(namespace.getNamespace());
 					scratchVectors[EXTENSION_INDEX].add(currentExtension);
 				}
 				break;

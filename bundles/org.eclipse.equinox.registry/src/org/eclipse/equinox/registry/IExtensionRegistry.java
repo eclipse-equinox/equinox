@@ -270,7 +270,7 @@ public interface IExtensionRegistry {
 	 * @return - true: the contribution was successfully processed; false - error in 
 	 * the processing of the contribution
 	 */
-	public boolean addContribution(InputStream is, long contributorId, String name, ResourceBundle translationBundle, Object token);
+	public boolean addContribution(InputStream is, String contributorId, String name, ResourceBundle translationBundle, Object token);
 
 	/**
 	 * Call this method to properly stop the registry. It stops registry event processing

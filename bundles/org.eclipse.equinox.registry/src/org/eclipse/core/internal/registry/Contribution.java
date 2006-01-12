@@ -22,11 +22,11 @@ public class Contribution implements KeyedElement {
 	protected ExtensionRegistry registry;
 
 	// The actual contributor of the contribution.
-	final protected long contributorId;
+	final protected String contributorId;
 
 	// cached Id of the namespace owner (might be same or different from the contributorId)
-	// -1 if it is not cached yet or no namespace was found during previous cache attempt. 
-	private long namespaceOwnerId = -1;
+	// null if it is not cached yet or no namespace was found during previous cache attempt. 
+	private String namespaceOwnerId = null;
 
 	// indicates if this contribution needs to be saved in the registry cache
 	protected boolean isDynamic;
@@ -40,16 +40,16 @@ public class Contribution implements KeyedElement {
 	static final public byte EXTENSION_POINT = 0;
 	static final public byte EXTENSION = 1;
 
-	protected Contribution(long contributorId, ExtensionRegistry registry, boolean dynamic) {
+	protected Contribution(String contributorId, ExtensionRegistry registry, boolean dynamic) {
 		this.contributorId = contributorId;
 		this.registry = registry;
 		this.isDynamic = dynamic;
 	}
 
 	void mergeContribution(Contribution addContribution) {
-		Assert.isTrue(contributorId == addContribution.contributorId);
+		Assert.isTrue(contributorId.equals(addContribution.contributorId));
 		Assert.isTrue(registry == addContribution.registry);
-		
+
 		// isDynamic?
 		// Old New Result
 		// F   F   F
@@ -80,7 +80,7 @@ public class Contribution implements KeyedElement {
 		this.children = children;
 	}
 
-	protected long getContributorId() {
+	protected String getContributorId() {
 		return contributorId;
 	}
 
@@ -108,11 +108,11 @@ public class Contribution implements KeyedElement {
 		return "Contribution: " + contributorId + " in namespace" + getNamespace(); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
-	protected long getNamespaceOwnerId() {
+	protected String getNamespaceOwnerId() {
 		// Performance: this function is not called during warm Eclipse startup using cached 
 		// extension registry, but is called about 45 times per contribution during 
 		// the "clean" Eclipse start. Cache the result.
-		if (namespaceOwnerId == -1) 
+		if (namespaceOwnerId == null)
 			namespaceOwnerId = registry.getNamespaceOwnerId(contributorId);
 		return namespaceOwnerId;
 	}
@@ -123,11 +123,11 @@ public class Contribution implements KeyedElement {
 	}
 
 	public Object getKey() {
-		return new Long(contributorId);
+		return contributorId;
 	}
 
 	public boolean compare(KeyedElement other) {
-		return contributorId == ((Contribution) other).contributorId;
+		return contributorId.equals(((Contribution) other).contributorId);
 	}
 
 	public boolean isDynamic() {

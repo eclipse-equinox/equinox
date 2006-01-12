@@ -14,7 +14,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.*;
+import java.util.Map;
+import java.util.ResourceBundle;
 import javax.xml.parsers.SAXParserFactory;
 import org.eclipse.core.internal.registry.*;
 import org.eclipse.core.internal.runtime.ResourceTranslator;
@@ -126,7 +127,6 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 	}
 
 	/* (non-Javadoc)
-
 	 * @see org.eclipse.equinox.registry.spi.RegistryStrategy#scheduleChangeEvent(java.lang.Object[], java.util.Map, java.lang.Object)
 	 */
 	public final void scheduleChangeEvent(Object[] listeners, Map deltas, Object registry) {
@@ -136,23 +136,58 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 	////////////////////////////////////////////////////////////////////////////////////////
 	// Use OSGi bundles for namespace resolution (contributors: plugins and fragments)
 
-	// We don't expect mapping to change during the runtime. (Or, in the OSGI terms,
-	// we don't expect bundle IDs to be resused during the Eclipse run.)
-	private Map bundleMap = new HashMap();
+	/**
+	 * The default load factor for the bundle cache. 
+	 */
+	private static float DEFAULT_BUNDLECACHE_LOADFACTOR = 0.75f;
 
-	private Bundle getContributingBundle(long contributingBundleId) {
-		// see if we have it in the cache
-		Long objectId = new Long(contributingBundleId);
-		Bundle bundle = (Bundle) bundleMap.get(objectId);
+	/**
+	 * The expected bundle cache size (calculated as a number of bundles divided 
+	 * by the DEFAULT_BUNDLECACHE_LOADFACTOR). The bundle cache will be resized 
+	 * automatically is this number is exceeded. 
+	 */
+	private static int DEFAULT_BUNDLECACHE_SIZE = 200;
+
+	/**
+	 * For performance, we cache mapping of IDs to Bundles.
+	 * 
+	 * We don't expect mapping to change during the runtime. (Or, in the OSGI terms,
+	 * we don't expect bundle IDs to be reused during the Eclipse run.)
+	 * The Bundle object is stored as a weak reference to facilitate GC
+	 * in case the bundle was uninstalled during the Eclipse run.
+	 */
+	private ReferenceMap bundleMap = new ReferenceMap(ReferenceMap.SOFT, DEFAULT_BUNDLECACHE_SIZE, DEFAULT_BUNDLECACHE_LOADFACTOR);
+
+	// String Id to OSGi Bundle conversion
+	public Bundle getBundle(String id) {
+		if (id == null)
+			return null;
+		long OSGiId;
+		try {
+			OSGiId = Long.parseLong(id);
+		} catch (NumberFormatException e) {
+			return null;
+		}
+		// We assume here that OSGI Id will fit into "int". As the number of 
+		// registry elements themselves are expected to fit into "int", this
+		// is a valid assumption for the time being.
+		Bundle bundle = (Bundle) bundleMap.get((int) OSGiId);
 		if (bundle != null)
 			return bundle;
-		bundle = Activator.getContext().getBundle(contributingBundleId);
-		bundleMap.put(objectId, bundle);
+		bundle = Activator.getContext().getBundle(OSGiId);
+		bundleMap.put((int) OSGiId, bundle);
 		return bundle;
 	}
 
-	private Bundle getNamespaceBundle(long contributingBundleId) {
-		Bundle contributingBundle = getContributingBundle(contributingBundleId);
+	// Getting String Id from an OSGi Bundle
+	static public String getId(Bundle bundle) {
+		if (bundle == null)
+			return null;
+		return Long.toString(bundle.getBundleId());
+	}
+
+	private Bundle getNamespaceBundle(String contributingBundleId) {
+		Bundle contributingBundle = getBundle(contributingBundleId);
 		if (contributingBundle == null) // When restored from disk the underlying bundle may have been uninstalled
 			throw new IllegalStateException("Internal error in extension registry. The bundle corresponding to this contribution has been uninstalled."); //$NON-NLS-1$
 		if (OSGIUtils.getDefault().isFragment(contributingBundle)) {
@@ -163,21 +198,15 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 		return contributingBundle;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.equinox.registry.spi.RegistryStrategy#getNamespaceOwnerId(long)
-	 */
-	public long getNamespaceOwnerId(long contributorId) {
+	public String getNamespaceOwnerId(String contributorId) {
+		if (contributorId == null)
+			return null;
 		Bundle namespaceBundle = getNamespaceBundle(contributorId);
-		if (namespaceBundle == null)
-			return -1;
-		return namespaceBundle.getBundleId();
+		return getId(namespaceBundle);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.equinox.registry.spi.RegistryStrategy#getNamespace(long)
-	 */
-	public String getNamespace(long contributorId) {
-		if (contributorId == -1)
+	public String getNamespace(String contributorId) {
+		if (contributorId == null)
 			return null;
 		Bundle namespaceBundle = getNamespaceBundle(contributorId);
 		if (namespaceBundle == null)
@@ -185,31 +214,25 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 		return namespaceBundle.getSymbolicName();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.equinox.registry.spi.RegistryStrategy#getContributorIds(java.lang.String)
-	 */
-	public long[] getNamespaceContributors(String namespace) {
+	public String[] getNamespaceContributors(String namespace) {
 		Bundle correspondingHost = OSGIUtils.getDefault().getBundle(namespace);
 		if (correspondingHost == null)
-			return new long[0];
+			return new String[0];
 		Bundle[] fragments = OSGIUtils.getDefault().getFragments(correspondingHost);
 		if (fragments == null)
-			return new long[] {correspondingHost.getBundleId()};
-		long[] result = new long[fragments.length + 1];
+			return new String[] {getId(correspondingHost)};
+		String[] result = new String[fragments.length + 1];
 		for (int i = 0; i < fragments.length; i++) {
-			result[i] = fragments[i].getBundleId();
+			result[i] = getId(fragments[i]);
 		}
-		result[fragments.length] = correspondingHost.getBundleId();
+		result[fragments.length] = getId(correspondingHost);
 		return result;
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////
 	// Executable extensions: bundle-based class loading
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.equinox.registry.spi.RegistryStrategy#createExecutableExtension(java.lang.String, long, java.lang.String, java.lang.String, java.lang.Object, java.lang.String, org.eclipse.equinox.registry.IConfigurationElement)
-	 */
-	public Object createExecutableExtension(String pluginName, long namespaceOwnerId, String namespaceName, String className, Object initData, String propertyName, org.eclipse.equinox.registry.IConfigurationElement confElement) throws CoreException {
+	public Object createExecutableExtension(String pluginName, String namespaceOwnerId, String namespaceName, String className, Object initData, String propertyName, org.eclipse.equinox.registry.IConfigurationElement confElement) throws CoreException {
 
 		if (pluginName != null && !pluginName.equals("") && !pluginName.equals(namespaceName)) { //$NON-NLS-1$
 			Bundle otherBundle = null;
@@ -217,7 +240,7 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 			return createExecutableExtension(otherBundle, className, initData, propertyName, confElement);
 		}
 
-		Bundle contributingBundle = Activator.getContext().getBundle(namespaceOwnerId);
+		Bundle contributingBundle = getBundle(namespaceOwnerId);
 		return createExecutableExtension(contributingBundle, className, initData, propertyName, confElement);
 	}
 

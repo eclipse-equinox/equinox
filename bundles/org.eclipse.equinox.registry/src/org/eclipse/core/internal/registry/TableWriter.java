@@ -149,11 +149,11 @@ public class TableWriter {
 		// get count of contributions that will be cached
 		int cacheSize = 0;
 		for (int i = 0; i < newElements.length; i++) {
-			if (shouldCache((Contribution)newElements[i]))
+			if (shouldCache((Contribution) newElements[i]))
 				cacheSize++;
 		}
 		for (int i = 0; i < formerElements.length; i++) {
-			if (shouldCache((Contribution)formerElements[i]))
+			if (shouldCache((Contribution) formerElements[i]))
 				cacheSize++;
 		}
 		outputNamespace.writeInt(cacheSize);
@@ -161,14 +161,14 @@ public class TableWriter {
 		for (int i = 0; i < newElements.length; i++) {
 			Contribution element = (Contribution) newElements[i];
 			if (shouldCache(element)) {
-				outputNamespace.writeLong(element.getContributorId());
+				writeStringOrNull(element.getContributorId(), outputNamespace);
 				saveArray(element.getRawChildren(), outputNamespace);
 			}
 		}
 		for (int i = 0; i < formerElements.length; i++) {
 			Contribution element = (Contribution) formerElements[i];
 			if (shouldCache(element)) {
-				outputNamespace.writeLong(element.getContributorId());
+				writeStringOrNull(element.getContributorId(), outputNamespace);
 				saveArray(element.getRawChildren(), outputNamespace);
 			}
 		}
@@ -259,7 +259,7 @@ public class TableWriter {
 		currentOutput.writeInt(element.getId());
 		ConfigurationElement actualCe = (ConfigurationElement) element.getObject();
 
-		currentOutput.writeLong(actualCe.getNamespaceOwnerId());
+		writeStringOrNull(actualCe.getNamespaceOwnerId(), currentOutput);
 		writeStringOrNull(actualCe.getName(), currentOutput);
 		currentOutput.writeInt(actualCe.parentId);
 		currentOutput.writeByte(actualCe.parentType);
@@ -304,7 +304,7 @@ public class TableWriter {
 		writeStringOrNull(xpt.getSchemaReference(), extraOutput);
 		writeStringOrNull(xpt.getUniqueIdentifier(), extraOutput);
 		writeStringOrNull(xpt.getNamespace(), extraOutput);
-		extraOutput.writeLong(((ExtensionPoint) xpt.getObject()).getNamespaceOwnerId());
+		writeStringOrNull(((ExtensionPoint) xpt.getObject()).getNamespaceOwnerId(), extraOutput);
 	}
 
 	private void saveExtensionData(ExtensionHandle extension) throws IOException {
@@ -353,39 +353,36 @@ public class TableWriter {
 		registry.log(status);
 	}
 
-	// XXX the args of the should cache methods should have semantic names (e.g., target)
-	// as it is the cut and paste process has left most of them with goofy names.  semantic
-	// names are less brittle.
-	private boolean shouldCache(ExtensionPointHandle xpt) {
-		if (xpt.isDynamic())
+	private boolean shouldCache(ExtensionPointHandle extensionPoint) {
+		if (extensionPoint.isDynamic())
 			return saveDynamic();
 		return true;
 	}
 
-	private boolean shouldCache(ExtensionHandle xpt) {
-		if (xpt.isDynamic())
+	private boolean shouldCache(ExtensionHandle extension) {
+		if (extension.isDynamic())
 			return saveDynamic();
 		return true;
 	}
 
-	private boolean shouldCache(ConfigurationElementHandle xpt) {
-		if (xpt.isDynamic())
+	private boolean shouldCache(ConfigurationElementHandle configElement) {
+		if (configElement.isDynamic())
 			return saveDynamic();
 		return true;
 	}
-	
+
 	private boolean shouldCache(Contribution contribution) {
 		if (contribution.isDynamic())
 			return saveDynamic();
 		return true;
 	}
 
-	public boolean shouldCache(int id) {
-		if (objectManager.isDynamic(id))
+	public boolean shouldCache(int registryObjectId) {
+		if (objectManager.isDynamic(registryObjectId))
 			return saveDynamic();
 		return true;
 	}
-	
+
 	// Filters out registry objects that should not be cached
 	private int[] filter(int[] input) {
 		boolean[] save = new boolean[input.length];
@@ -394,8 +391,7 @@ public class TableWriter {
 			if (shouldCache(input[i])) {
 				save[i] = true;
 				resultSize++;
-			}
-			else
+			} else
 				save[i] = false;
 		}
 		int[] result = new int[resultSize];

@@ -104,12 +104,11 @@ public class RegistryObjectManager implements IObjectManager {
 
 	synchronized void addContribution(Contribution contribution) {
 		isDirty = true;
-		long id = contribution.getContributorId();
-		Long Id = new Long(id);
+		Object Id = contribution.getKey();
 
 		KeyedElement existingContribution = getFormerContributions().getByKey(Id);
 		if (existingContribution != null) { // move it from former to new contributions
-			removeContribution(id);
+			removeContribution(Id);
 			newContributions.add(existingContribution);
 		} else
 			existingContribution = newContributions.getByKey(Id);
@@ -120,10 +119,10 @@ public class RegistryObjectManager implements IObjectManager {
 			newContributions.add(contribution);
 	}
 
-	synchronized int[] getExtensionPointsFrom(long id) {
-		KeyedElement tmp = newContributions.getByKey(new Long(id));
+	synchronized int[] getExtensionPointsFrom(String id) {
+		KeyedElement tmp = newContributions.getByKey(id);
 		if (tmp == null)
-			tmp = getFormerContributions().getByKey(new Long(id));
+			tmp = getFormerContributions().getByKey(id);
 		if (tmp == null)
 			return EMPTY_INT_ARRAY;
 		return ((Contribution) tmp).getExtensionPoints();
@@ -142,10 +141,10 @@ public class RegistryObjectManager implements IObjectManager {
 		return tmp;
 	}
 
-	synchronized boolean hasContribution(long id) {
-		Object result = newContributions.getByKey(new Long(id));
+	synchronized boolean hasContribution(String id) {
+		Object result = newContributions.getByKey(id);
 		if (result == null)
-			result = getFormerContributions().getByKey(new Long(id));
+			result = getFormerContributions().getByKey(id);
 		return result != null;
 	}
 
@@ -355,10 +354,10 @@ public class RegistryObjectManager implements IObjectManager {
 		}
 	}
 
-	synchronized int[] getExtensionsFrom(long contributorId) {
-		KeyedElement tmp = newContributions.getByKey(new Long(contributorId));
+	synchronized int[] getExtensionsFrom(String contributorId) {
+		KeyedElement tmp = newContributions.getByKey(contributorId);
 		if (tmp == null)
-			tmp = getFormerContributions().getByKey(new Long(contributorId));
+			tmp = getFormerContributions().getByKey(contributorId);
 		if (tmp == null)
 			return EMPTY_INT_ARRAY;
 		return ((Contribution) tmp).getExtensions();
@@ -380,10 +379,10 @@ public class RegistryObjectManager implements IObjectManager {
 		return isDirty;
 	}
 
-	synchronized void removeContribution(long contributorId) {
-		boolean removed = newContributions.removeByKey(new Long(contributorId));
+	synchronized void removeContribution(Object contributorId) {
+		boolean removed = newContributions.removeByKey(contributorId);
 		if (removed == false) {
-			removed = getFormerContributions().removeByKey(new Long(contributorId));
+			removed = getFormerContributions().removeByKey(contributorId);
 			if (removed)
 				formerContributions = getFormerContributions(); //This forces the removed namespace to stay around, so we do not forget about removed namespaces
 		}
@@ -502,7 +501,7 @@ public class RegistryObjectManager implements IObjectManager {
 	 * them in a IObjectManager so that they can be accessed from the appropriate
 	 * deltas but not from the registry.
 	 */
-	synchronized Map getAssociatedObjects(long contributionId) {
+	synchronized Map getAssociatedObjects(String contributionId) {
 		//Collect all the objects associated with this contribution
 		int[] xpts = getExtensionPointsFrom(contributionId);
 		int[] exts = getExtensionsFrom(contributionId);

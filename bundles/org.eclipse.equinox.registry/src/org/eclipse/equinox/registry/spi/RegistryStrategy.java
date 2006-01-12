@@ -17,7 +17,6 @@ import javax.xml.parsers.SAXParserFactory;
 import org.eclipse.core.internal.registry.*;
 import org.eclipse.core.runtime.*;
 import org.eclipse.equinox.registry.IConfigurationElement;
-import org.eclipse.equinox.registry.IExtensionRegistry;
 import org.eclipse.osgi.util.NLS;
 
 /**
@@ -126,11 +125,6 @@ public class RegistryStrategy {
 		// The default implementation
 	}
 
-	///////////////////////////////////////////////////////////////////////////
-	//	 XXX	The use of longs is strange here.  It is very OSGi specific.
-	// 			It is likey that they are going to be replaced with some
-	//			generic object in the near future.
-
 	/**
 	 * Returns Id of the namespace owner that given contributor resides in.
 	 * 
@@ -148,46 +142,30 @@ public class RegistryStrategy {
 	 * @param contributorId - Id of the contributor in question
 	 * @return - Id of the namespace owner
 	 */
-	public long getNamespaceOwnerId(long contributorId) {
+	public String getNamespaceOwnerId(String contributorId) {
 		return contributorId;
 	}
 
-	///////////////////////////////////////////////////////////////////////////
-	//	 XXX	The use of longs is strange here.  It is very OSGi specific.
-	// 			It is likey that they are going to be replaced with some
-	//			generic object in the near future.
-	
 	/**
 	 * Returns name of the namespace that given contributor resides in.
-	 * @see #getNamespaceOwnerId(long)
+	 * @see #getNamespaceOwnerId(String)
 	 * 
 	 * @param contributorId - Id of the contributor in question
 	 * @return - namespace name
 	 */
-	public String getNamespace(long contributorId) {
-		return String.valueOf(contributorId);
+	public String getNamespace(String contributorId) {
+		return contributorId;
 	}
 
-	///////////////////////////////////////////////////////////////////////////
-	//	 XXX	The use of longs is strange here.  It is very OSGi specific.
-	// 			It is likey that they are going to be replaced with some
-	//			generic object in the near future.
-	
 	/**
 	 * Returns Ids of all contributors residing in a given namespace
-	 * @see #getNamespaceOwnerId(long)
+	 * @see #getNamespaceOwnerId(String)
 	 * 
 	 * @param namespace - namespace name
 	 * @return - array of contributor Ids residing in the namespace
 	 */
-	public long[] getNamespaceContributors(String namespace) {
-		Long theContributorId;
-		try {
-			theContributorId = Long.decode(namespace);
-		} catch (NumberFormatException e) {
-			theContributorId = new Long(-1);
-		}
-		return new long[] {theContributorId.longValue()};
+	public String[] getNamespaceContributors(String namespace) {
+		return new String[] {namespace};
 	}
 
 	/**
@@ -209,7 +187,7 @@ public class RegistryStrategy {
 	 * @return - the object created; might be null
 	 * @throws CoreException
 	 */
-	public Object createExecutableExtension(String contributorName, long namespaceOwnerId, String namespaceName, String className, Object initData, String propertyName, IConfigurationElement theConfElement) throws CoreException {
+	public Object createExecutableExtension(String contributorName, String namespaceOwnerId, String namespaceName, String className, Object initData, String propertyName, IConfigurationElement theConfElement) throws CoreException {
 		Object result = null;
 		Class classInstance = null;
 		try {

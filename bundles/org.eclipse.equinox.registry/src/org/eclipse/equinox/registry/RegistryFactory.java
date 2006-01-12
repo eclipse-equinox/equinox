@@ -10,9 +10,7 @@
  *******************************************************************************/
 package org.eclipse.equinox.registry;
 
-import java.io.File;
 import org.eclipse.core.internal.registry.*;
-import org.eclipse.core.internal.registry.osgi.RegistryStrategyOSGI;
 import org.eclipse.core.runtime.*;
 import org.eclipse.equinox.registry.spi.RegistryStrategy;
 
@@ -24,9 +22,6 @@ import org.eclipse.equinox.registry.spi.RegistryStrategy;
  * @since org.eclipse.equinox.registry 1.0
  */
 public final class RegistryFactory {
-
-	private static IRegistryProvider defaultRegistryProvider;
-
 	/**
 	 * Creates an extension registry.
 	 *  
@@ -50,47 +45,6 @@ public final class RegistryFactory {
 	 * @return existing extension registry or null
 	 */
 	public static IExtensionRegistry getRegistry() {
-		if (defaultRegistryProvider == null)
-			return null;
-		return defaultRegistryProvider.getRegistry();
+		return RegistryUtils.getRegistryFromProvider();
 	}
-
-	/**
-	 * Creates registry strategy that can be used in OSGi world. It provides the following functionality:
-	 *  - Event scheduling is done using Eclipse job scheduling mechanism
-	 *  - Translation is done with Equinox ResourceTranslator
-	 *  - Uses OSGi bundle model for namespace resolution
-	 *  - Uses bunlde-based class loaders to create executable extensions
-	 *  - Registry is filled with information stored in plugin.xml / fragment.xml files of OSGi bundles
-	 *    with the XML parser is obtained via an OSGi service
-	 *  - Performs registry validation based on the time stamps of the plugin.xml / fragment.xml files
-	 * 
-	 * @param storageDir - file system directory to store cache files; might be null
-	 * @param cacheReadOnly - true: cache is read only; false: cache is read/write
-	 * @param token - control token for the registry
-	 */
-	public static RegistryStrategy createOSGiStrategy(File storageDir, boolean cacheReadOnly, Object token) {
-		return new RegistryStrategyOSGI(storageDir, cacheReadOnly, token);
-	}
-
-	/**
-	 * Use this method to specify the default registry provider. The default registry provider
-	 * is immutable in the sense that it can be set only once during the application runtime.
-	 * Attempts to change the default registry provider will cause CoreException.
-	 * 
-	 * @see #getRegistry()
-	 * 
-	 * <b>This is an experimental API. It might change in future.</b>
-	 * 
-	 * @param provider - extension registry provider
-	 * @throws CoreException - default registry provider was already set for this application
-	 */
-	public static void setRegistryProvider(IRegistryProvider provider) throws CoreException {
-		if (defaultRegistryProvider != null) {
-			Status status = new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, IRegistryConstants.PLUGIN_ERROR, RegistryMessages.registry_default_exists, null);
-			throw new CoreException(status);
-		}
-		defaultRegistryProvider = provider;
-	}
-
 }
