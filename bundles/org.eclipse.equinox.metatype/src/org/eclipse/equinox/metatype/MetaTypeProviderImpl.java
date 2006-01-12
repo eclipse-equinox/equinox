@@ -158,7 +158,7 @@ public class MetaTypeProviderImpl implements MetaTypeProvider {
 	public boolean isInvalidLocale(String locale) {
 
 		// Just a simple and quick check here.
-		if (locale == null)
+		if (locale == null || locale.length() == 0)
 			return false;
 
 		int idx_first = locale.indexOf(ObjectClassDefinitionImpl.LOCALE_SEP);
