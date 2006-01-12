@@ -14,7 +14,7 @@ org.osgi.framework.system.packages = \
  javax.swing.border,\
  javax.swing.colorchooser,\
  javax.swing.event,\
- javax.swing.filechooser,\ 
+ javax.swing.filechooser,\
  javax.swing.plaf,\
  javax.swing.plaf.basic,\
  javax.swing.plaf.metal,\
