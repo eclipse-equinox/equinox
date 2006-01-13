@@ -3,4 +3,20 @@
 <plugin>
    <extension-point id="applications" name="%applicationsName" schema="schema/applications.exsd"/>
    <extension-point id="containers" name="%containersName" schema="schema/containers.exsd"/>
+   <extension
+         id="main.thread"
+         point="org.eclipse.equinox.app.containers">
+      <container
+            singleton="true"
+            type="main.thread">
+         <run class="org.eclipse.equinox.internal.app.MainThreadContainer"/>
+      </container>
+   </extension>
+   <extension
+         id="error"
+         point="org.eclipse.equinox.app.applications">
+      <application visible="false">
+         <run class="org.eclipse.equinox.internal.app.ErrorApplication"/>
+      </application>
+   </extension>
 </plugin>

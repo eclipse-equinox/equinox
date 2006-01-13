@@ -26,23 +26,19 @@ import org.osgi.service.condpermadmin.ConditionInfo;
 public class EclipseAppDescriptor extends ApplicationDescriptor {
 	private ServiceRegistration sr;
 	private Boolean locked = Boolean.FALSE;
-	private SingletonContainerMgr singletonMgr;
+	private SingletonContainer singletonMgr;
 	private ContainerManager containerMgr;
 	private String namespace;
 	private String type;
-	private RuntimeException error;
+	private boolean visible;
 
-	protected EclipseAppDescriptor(String namespace, String pid, String type, ContainerManager containerMgr) {
+	protected EclipseAppDescriptor(String namespace, String pid, String type, boolean visible, ContainerManager containerMgr) {
 		super(pid);
-		this.type = type == null ? ContainerManager.APP_TYPE_MAIN_SINGLETON : type;
+		this.type = type == null ? ContainerManager.APP_TYPE_MAIN_THREAD : type;
 		this.namespace = namespace;
 		this.containerMgr = containerMgr;
 		this.locked = AppManager.isLocked(this) ? Boolean.TRUE : Boolean.FALSE;
-	}
-
-	protected EclipseAppDescriptor(String namespace, String pid, String type, ContainerManager containerMgr, RuntimeException error) {
-		this(namespace, pid, type, containerMgr);
-		this.error = error;
+		this.visible = visible;
 	}
 
 	protected Map getPropertiesSpecific(String locale) {
@@ -96,7 +92,7 @@ public class EclipseAppDescriptor extends ApplicationDescriptor {
 			sr.setProperties(getServiceProperties());
 	}
 
-	void setSingletonMgr(SingletonContainerMgr singletonMgr) {
+	void setSingletonMgr(SingletonContainer singletonMgr) {
 		this.singletonMgr = singletonMgr;
 	}
 
@@ -114,7 +110,7 @@ public class EclipseAppDescriptor extends ApplicationDescriptor {
 		props.put(ApplicationDescriptor.APPLICATION_LOCATION, getLocation());
 		props.put(ApplicationDescriptor.APPLICATION_LAUNCHABLE, singletonMgr == null ? Boolean.TRUE : singletonMgr.isLocked() ? Boolean.FALSE : Boolean.TRUE);
 		props.put(ApplicationDescriptor.APPLICATION_LOCKED, locked);
-		props.put(ApplicationDescriptor.APPLICATION_VISIBLE, Boolean.TRUE);
+		props.put(ApplicationDescriptor.APPLICATION_VISIBLE, visible ? Boolean.TRUE : Boolean.FALSE);
 		return props;
 	}
 
@@ -130,11 +126,7 @@ public class EclipseAppDescriptor extends ApplicationDescriptor {
 	 */
 	private synchronized EclipseAppHandle createAppHandle() {
 		// TODO not sure what instance pid should be used; for now just use the appDesciptor pid because apps are singletons anyway
-		EclipseAppHandle newAppHandle;
-		if (error == null)
-			newAppHandle = new EclipseAppHandle(getApplicationId(), this);
-		else
-			newAppHandle = new EclipseAppHandle(error, containerMgr);
+		EclipseAppHandle newAppHandle = new EclipseAppHandle(getApplicationId(), this);
 		ServiceRegistration appHandleReg = (ServiceRegistration) AccessController.doPrivileged(containerMgr.getRegServiceAction(ApplicationHandle.class.getName(), newAppHandle, newAppHandle.getServiceProperties()));
 		newAppHandle.setServiceRegistration(appHandleReg);
 		return newAppHandle;

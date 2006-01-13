@@ -32,10 +32,9 @@ public interface IContainer {
 	IApplication launch(IAppContext context) throws Exception;
 
 	/**
-	 * returns true if this container only allows one running application
-	 * at a time.
-	 * @return true if this container only allows one running application
-	 * at a time.
+	 * This method should shutdown the container and free any resources it may have
+	 * been using.  All applications currently active in this container will be 
+	 * asked to stop before this method is called.
 	 */
-	boolean isSingletonContainer();
+	void shutdown();
 }

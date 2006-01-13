@@ -51,6 +51,13 @@
                </documentation>
             </annotation>
          </attribute>
+         <attribute name="singleton" type="boolean" use="default" value="false">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+            </annotation>
+         </attribute>
       </complexType>
    </element>
 

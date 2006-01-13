@@ -33,7 +33,7 @@ run multiple applications.
                </documentation>
             </annotation>
          </attribute>
-         <attribute name="id" type="string">
+         <attribute name="id" type="string" use="required">
             <annotation>
                <documentation>
                   
@@ -56,6 +56,13 @@ run multiple applications.
             <element ref="run" minOccurs="0" maxOccurs="1"/>
          </sequence>
          <attribute name="type" type="string">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="visible" type="boolean" use="default" value="true">
             <annotation>
                <documentation>
                   

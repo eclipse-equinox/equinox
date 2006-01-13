@@ -31,16 +31,21 @@ import org.osgi.util.tracker.ServiceTracker;
  * A MEG application container that understands eclipse applications.  This 
  * container will discover installed eclipse applications and register the 
  * appropriate ApplicatoinDescriptor service with the service registry.
+ * It also manages container extensions which are uses to launch 
+ * different application types.
  */
 public class ContainerManager implements IRegistryChangeListener, SynchronousBundleListener {
 	private static final String PI_RUNTIME = "org.eclipse.core.runtime"; //$NON-NLS-1$
 	private static final String PT_APPLICATIONS = "applications"; //$NON-NLS-1$
 	private static final String PT_APP_TYPE = "type"; //$NON-NLS-1$
+	private static final String PT_APP_VISIBLE = "visible"; //$NON-NLS-1$
+	private static final String PT_APP_SINGLETON = "singleton"; //$NON-NLS-1$
 	private static final String PT_RUN = "run"; //$NON-NLS-1$
 	private static final String PT_PRODUCTS = "products"; //$NON-NLS-1$
 	private static final String PT_CONTAINERS = "containers"; //$NON-NLS-1$
 	private static final String ATTR_APPLICATION = "application"; //$NON-NLS-1$
-	static final String APP_TYPE_MAIN_SINGLETON = "main.singleton"; //$NON-NLS-1$
+	private static final String EXT_ERROR_APP = "org.eclipse.equinox.app.error"; //$NON-NLS-1$
+	static final String APP_TYPE_MAIN_THREAD = "main.thread"; //$NON-NLS-1$
 
 	public static final String PROP_PRODUCT = "eclipse.product"; //$NON-NLS-1$
 	public static final String PROP_ECLIPSE_APPLICATION = "eclipse.application"; //$NON-NLS-1$
@@ -62,19 +67,20 @@ public class ContainerManager implements IRegistryChangeListener, SynchronousBun
 		this.extensionRegistry = extensionRegistry;
 	}
 
-	void startContainer() {
+	void startManager() {
 		frameworkLog = new ServiceTracker(context, FrameworkLog.class.getName(), null);
 		frameworkLog.open();
 		getExtensionRegistry().addRegistryChangeListener(this);
 		registerAppDecriptors();
-		containers.put(APP_TYPE_MAIN_SINGLETON, new SingletonContainerMgr(new MainSingletonContainer(this), APP_TYPE_MAIN_SINGLETON, this));
 		// need to listen for system bundle stopping
 		context.addBundleListener(this);
+		// Start the default application
+		startDefaultApp();
 	}
 
-	void stopContainer() {
-		// stop all applications first
-		stopAllApplications();
+	void stopManager() {
+		// stop all applications and containers first
+		stopAll();
 		context.removeBundleListener(this);
 		getExtensionRegistry().removeRegistryChangeListener(this);
 		frameworkLog.close();
@@ -133,9 +139,13 @@ public class ContainerManager implements IRegistryChangeListener, SynchronousBun
 			// the appDescriptor does not exist for the app ID; create it
 			IConfigurationElement[] configs = appExtension.getConfigurationElements();
 			String type = null;
-			if (configs.length > 0)
+			boolean visible = true;
+			if (configs.length > 0) {
 				type = configs[0].getAttribute(PT_APP_TYPE);
-			appDescriptor = new EclipseAppDescriptor(appExtension.getNamespace(), appExtension.getUniqueIdentifier(), type, this);
+				String sVisible = configs[0].getAttribute(PT_APP_VISIBLE);
+				visible = sVisible == null ? true : Boolean.valueOf(sVisible).booleanValue();
+			}
+			appDescriptor = new EclipseAppDescriptor(appExtension.getNamespace(), appExtension.getUniqueIdentifier(), type, visible, this);
 			// register the appDescriptor as a service
 			ServiceRegistration sr = (ServiceRegistration) AccessController.doPrivileged(new RegisterService(ApplicationDescriptor.class.getName(), appDescriptor, appDescriptor.getServiceProperties()));
 			appDescriptor.setServiceRegistration(sr);
@@ -181,7 +191,26 @@ public class ContainerManager implements IRegistryChangeListener, SynchronousBun
 		}
 	}
 
-	EclipseAppDescriptor findDefaultApp() {
+	private void startDefaultApp() {
+		if (!Boolean.getBoolean(ContainerManager.PROP_ECLIPSE_APPLICATION_NODEFAULT)) {
+			// find the default application
+			EclipseAppDescriptor defaultDesc = findDefaultApp();
+			// if the default app is a main thread one then we have to just tell the
+			// main thread container about the default app so it can launch it when it is ready
+			if (APP_TYPE_MAIN_THREAD.equals(defaultDesc.getType())) {
+				MainThreadContainer container = (MainThreadContainer) ((SingletonContainer) getContainer(APP_TYPE_MAIN_THREAD)).getContainer();
+				container.setDefaultApp(defaultDesc);
+			} else
+				// just launch the default application
+				try {
+					defaultDesc.launch(null);
+				} catch (Exception e) {
+					// TODO should log this!!
+				}
+		}
+	}
+
+	private EclipseAppDescriptor findDefaultApp() {
 		String applicationId = System.getProperty(PROP_ECLIPSE_APPLICATION);
 		if (applicationId == null) {
 			//Derive the application from the product information
@@ -190,13 +219,19 @@ public class ContainerManager implements IRegistryChangeListener, SynchronousBun
 				// use the long way to set the property to compile against eeminimum
 				System.getProperties().setProperty(PROP_ECLIPSE_APPLICATION, applicationId);
 		}
-		if (applicationId == null)
+		if (applicationId == null) {
 			// the application id is not set; return a descriptor that will throw an exception
-			return new EclipseAppDescriptor(Activator.PI_APP, Activator.PI_APP + ".missingapp", null, this, new RuntimeException(Messages.application_noIdFound)); //$NON-NLS-1$
+			// return new EclipseAppDescriptor(Activator.PI_APP, Activator.PI_APP + ".missingapp", null, false, this, new RuntimeException(Messages.application_noIdFound)); //$NON-NLS-1$
+			ErrorApplication.setError(new RuntimeException(Messages.application_noIdFound));
+			return getAppDescriptor(EXT_ERROR_APP);
+		}
 		EclipseAppDescriptor defaultApp = getAppDescriptor(applicationId);
-		if (defaultApp == null)
+		if (defaultApp == null) {
 			// the application id is not available in the registry; return a descriptor that will throw an exception
-			return new EclipseAppDescriptor(applicationId, applicationId, null, this, new RuntimeException(NLS.bind(Messages.application_notFound, applicationId, getAvailableAppsMsg(getExtensionRegistry()))));
+			//return new EclipseAppDescriptor(applicationId, applicationId, null, false, this, new RuntimeException(NLS.bind(Messages.application_notFound, applicationId, getAvailableAppsMsg(getExtensionRegistry()))));
+			ErrorApplication.setError(new RuntimeException(NLS.bind(Messages.application_notFound, applicationId, getAvailableAppsMsg(getExtensionRegistry()))));
+			return getAppDescriptor(EXT_ERROR_APP);
+		}
 		return defaultApp;
 	}
 
@@ -225,17 +260,19 @@ public class ContainerManager implements IRegistryChangeListener, SynchronousBun
 			if (configs.length == 0)
 				return null;
 			String containerType = configs[0].getAttribute(PT_APP_TYPE);
-			if (type.equals(containerType))
-				return createContainer(configs[0], type);
+			if (type.equals(containerType)) {
+				boolean singleton = Boolean.valueOf(configs[0].getAttribute(PT_APP_SINGLETON)).booleanValue();
+				return createContainer(configs[0], type, singleton);
+			}
 		}
 		return null;
 	}
 
-	private IContainer createContainer(IConfigurationElement config, String type) {
+	private IContainer createContainer(IConfigurationElement config, String type, boolean singleton) {
 		try {
 			IContainer container = (IContainer) config.createExecutableExtension(PT_RUN);
-			if (container.isSingletonContainer())
-				container = new SingletonContainerMgr(container, type, this);
+			if (singleton)
+				container = new SingletonContainer(container, type, this);
 			return container;
 		} catch (CoreException e) {
 			// TODO should log this
@@ -309,10 +346,6 @@ public class ContainerManager implements IRegistryChangeListener, SynchronousBun
 		return (FrameworkLog) AppManager.getService(frameworkLog);
 	}
 
-	BundleContext getBundleContext() {
-		return context;
-	}
-
 	private String getProductAppId() {
 		String productId = System.getProperty(PROP_PRODUCT);
 		if (productId == null)
@@ -369,13 +402,11 @@ public class ContainerManager implements IRegistryChangeListener, SynchronousBun
 	void launch(EclipseAppHandle appHandle) throws Exception {
 		String type = ((EclipseAppDescriptor) appHandle.getApplicationDescriptor()).getType();
 		if (type == null)
-			type = APP_TYPE_MAIN_SINGLETON;
+			type = APP_TYPE_MAIN_THREAD;
 		IContainer container = getContainer(type);
-		if (container != null) {
-			if (container instanceof SingletonContainerMgr)
-				((SingletonContainerMgr) container).lock(appHandle);
+		if (container != null)
 			appHandle.setApplication(container.launch(appHandle));
-		} else
+		else
 			throw new UnsupportedOperationException(NLS.bind(Messages.container_notFound, appHandle.getApplicationDescriptor().getApplicationId(), type));
 	}
 
@@ -415,27 +446,30 @@ public class ContainerManager implements IRegistryChangeListener, SynchronousBun
 		// if this is not the system bundle stopping then ignore the event
 		if ((BundleEvent.STOPPING & event.getType()) == 0 || event.getBundle().getBundleId() != 0)
 			return;
-		// The system bundle is stopping; better stop all applications now
-		stopAllApplications();
+		// The system bundle is stopping; better stop all applications and containers now
+		stopAll();
 	}
 
-	private void stopAllApplications() {
+	private void stopAll() {
 		// get a stapshot of running applications
 		try {
 			ServiceReference[] runningRefs = context.getServiceReferences(ApplicationHandle.class.getName(), "(!(application.state=STOPPING))"); //$NON-NLS-1$
-			if (runningRefs == null)
-				return;
-			for (int i = 0; i < runningRefs.length; i++) {
-				ApplicationHandle handle = (ApplicationHandle) context.getService(runningRefs[i]);
-				try {
-					handle.destroy();
-				} catch (Throwable t) {
-					// TODO should log this
-				}
+			if (runningRefs != null)
+				for (int i = 0; i < runningRefs.length; i++) {
+					ApplicationHandle handle = (ApplicationHandle) context.getService(runningRefs[i]);
+					try {
+						handle.destroy();
+					} catch (Throwable t) {
+						// TODO should log this
+					}
 			}
 		} catch (InvalidSyntaxException e) {
 			// do nothing; we already tested the filter string above
 		}
-
+		// shutdown all containers
+		synchronized (containers) {
+			for (Iterator iContainers = containers.values().iterator(); iContainers.hasNext();)
+				((IContainer) iContainers.next()).shutdown();
+		}
 	}
 }

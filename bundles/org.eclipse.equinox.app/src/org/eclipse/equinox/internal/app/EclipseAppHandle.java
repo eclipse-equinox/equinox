@@ -28,16 +28,7 @@ public class EclipseAppHandle extends ApplicationHandle implements IAppContext {
 	private String state = ApplicationHandle.RUNNING;
 	private int status = IAppContext.ACTIVE;
 	private Object application;
-	private Exception appNotFound;
 	private Map arguments;
-
-	/*
-	 * Used to create a dummy handle to throw an exception when run by the ApplicationLauncher.
-	 */
-	EclipseAppHandle(Exception appNotFound, ContainerManager containerMgr) {
-		this("", new EclipseAppDescriptor("", "", null, containerMgr)); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		this.appNotFound = appNotFound;
-	}
 
 	/*
 	 * Constructs a handle for a single running instance of a eclipse application.
@@ -125,7 +116,4 @@ public class EclipseAppHandle extends ApplicationHandle implements IAppContext {
 		return configs[0];
 	}
 
-	public Exception getLaunchException() {
-		return appNotFound;
-	}
 }

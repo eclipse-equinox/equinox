@@ -70,7 +70,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 		// create and start the app containerMgr
 		IExtensionRegistry registry = (IExtensionRegistry) bContext.getService(reference);
 		containerMgr = new ContainerManager(bContext, registry);
-		containerMgr.startContainer();
+		containerMgr.startManager();
 		return registry;
 	}
 
@@ -82,7 +82,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 		if (containerMgr == null)
 			return;
 		// stop the app containerMgr
-		containerMgr.stopContainer();
+		containerMgr.stopManager();
 		containerMgr = null;
 	}
 }

@@ -33,8 +33,8 @@ public class AppManager {
 	private static final String PROP_CONFIG_AREA = "osgi.configuration.area"; //$NON-NLS-1$
 
 	private static final String FILTER_PREFIX = "(&(objectClass=org.eclipse.osgi.service.datalocation.Location)(type="; //$NON-NLS-1$
-	static final String FILE_APPLOCKS = ".locks"; //$NON-NLS-1$
-	static final String FILE_APPSCHEDULED = ".scheduled"; //$NON-NLS-1$
+	private static final String FILE_APPLOCKS = ".locks"; //$NON-NLS-1$
+	private static final String FILE_APPSCHEDULED = ".scheduled"; //$NON-NLS-1$
 	private static final String EVENT_HANDLER = "org.osgi.service.event.EventHandler"; //$NON-NLS-1$
 	private static final String EVENT_TIMER_TOPIC = "org/osgi/application/timer"; //$NON-NLS-1$
 
@@ -67,7 +67,7 @@ public class AppManager {
 	private static Collection locks = new ArrayList();
 	private static Map scheduledApps = new HashMap();
 	static ArrayList timerApps = new ArrayList();
-	private static StorageManager fileManager;
+	private static StorageManager storageManager;
 	private static boolean dirty;
 	private static boolean scheduling = false;
 	static boolean shutdown = false;
@@ -98,9 +98,9 @@ public class AppManager {
 		shutdown = true;
 		stopTimer();
 		saveData();
-		if (fileManager != null) {
-			fileManager.close();
-			fileManager = null;
+		if (storageManager != null) {
+			storageManager.close();
+			storageManager = null;
 		}
 		closeConfiguration();
 		closePackageAdmin();
@@ -236,9 +236,9 @@ public class AppManager {
 				return false;
 			File theStorageDir = new File(location.getURL().getPath() + '/' + Activator.PI_APP);
 			boolean readOnly = location.isReadOnly();
-			fileManager = new StorageManager(theStorageDir, readOnly ? "none" : null, readOnly); //$NON-NLS-1$
-			fileManager.open(!readOnly);
-			File dataFile = fileManager.lookup(fileName, false);
+			storageManager = new StorageManager(theStorageDir, readOnly ? "none" : null, readOnly); //$NON-NLS-1$
+			storageManager.open(!readOnly);
+			File dataFile = storageManager.lookup(fileName, false);
 			if (dataFile == null || !dataFile.isFile()) {
 				Location parent = location.getParentLocation();
 				if (parent != null) {
@@ -308,16 +308,16 @@ public class AppManager {
 	}
 
 	private synchronized static void saveData() {
-		if (!dirty || fileManager.isReadOnly())
+		if (!dirty || storageManager.isReadOnly())
 			return;
 		try {
-			File locksData = fileManager.createTempFile(FILE_APPLOCKS);
+			File locksData = storageManager.createTempFile(FILE_APPLOCKS);
 			saveLocks(locksData);
-			File schedulesData = fileManager.createTempFile(FILE_APPSCHEDULED);
+			File schedulesData = storageManager.createTempFile(FILE_APPSCHEDULED);
 			saveSchedules(schedulesData);
-			fileManager.lookup(FILE_APPLOCKS, true);
-			fileManager.lookup(FILE_APPSCHEDULED, true);
-			fileManager.update(new String[] {FILE_APPLOCKS, FILE_APPSCHEDULED}, new String[] {locksData.getName(), schedulesData.getName()});
+			storageManager.lookup(FILE_APPLOCKS, true);
+			storageManager.lookup(FILE_APPSCHEDULED, true);
+			storageManager.update(new String[] {FILE_APPLOCKS, FILE_APPSCHEDULED}, new String[] {locksData.getName(), schedulesData.getName()});
 		} catch (IOException e) {
 			// TODO should log this!!
 		}
@@ -581,5 +581,9 @@ public class AppManager {
 				return bundle.getLocation();
 			}
 		});
+	}
+
+	static BundleContext getContext() {
+		return context;
 	}
 }

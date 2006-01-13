@@ -12,21 +12,21 @@ package org.eclipse.equinox.internal.app;
 
 import org.eclipse.equinox.app.*;
 
-public class SingletonContainerMgr implements IContainer {
+public class SingletonContainer implements IContainer {
 	private EclipseAppHandle singletonHandle;
 	private String type;
 	private IContainer singletonContainer;
 	private ContainerManager containerManager;
 
-	public SingletonContainerMgr(IContainer singletonContainer, String type, ContainerManager containerManager) {
+	public SingletonContainer(IContainer singletonContainer, String type, ContainerManager containerManager) {
 		this.singletonContainer = singletonContainer;
 		this.type = type;
 		this.containerManager = containerManager;
 	}
 
 	public synchronized IApplication launch(IAppContext context) throws Exception {
-		if (context != singletonHandle)
-			throw new IllegalStateException("Only one application of type \"" + type + "\" is allowed to run at a time");
+		// attempt to lock this application type; an exception will be thrown if the type cannot be locked
+		lock((EclipseAppHandle) context);
 		return singletonContainer.launch(context);
 	}
 
@@ -56,5 +56,13 @@ public class SingletonContainerMgr implements IContainer {
 			singletonApps[i].setSingletonMgr(this);
 			singletonApps[i].refreshProperties();
 		}
+	}
+
+	public void shutdown() {
+		singletonContainer.shutdown();
+	}
+
+	IContainer getContainer() {
+		return singletonContainer;
 	}
 }

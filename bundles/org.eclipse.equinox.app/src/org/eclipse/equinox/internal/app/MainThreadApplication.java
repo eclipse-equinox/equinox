@@ -15,21 +15,21 @@ import org.eclipse.equinox.app.IApplication;
 import org.eclipse.osgi.service.runnable.ApplicationRunnable;
 import org.eclipse.osgi.util.NLS;
 
-public class MainSingletonApplication implements ApplicationRunnable {
+public class MainThreadApplication implements ApplicationRunnable {
 	private static final String PROP_ECLIPSE_EXITCODE = "eclipse.exitcode"; //$NON-NLS-1$
 	private Object application;
 	private EclipseAppHandle appContext;
 	private Exception launchException;
 
-	public MainSingletonApplication(EclipseAppHandle appContext) {
+	public MainThreadApplication(EclipseAppHandle appContext) {
 		this.appContext = appContext;
-		this.launchException = appContext.getLaunchException();
-		if (launchException == null)
-			try {
-				application = appContext.getConfiguration().createExecutableExtension("run"); //$NON-NLS-1$
-			} catch (Exception e) {
-				this.launchException = e;
-			}
+		try {
+			application = appContext.getConfiguration().createExecutableExtension("run"); //$NON-NLS-1$
+		} catch (Exception e) {
+			// had an error creating the executable extension
+			// save the exception to throw on the main thread (keeping legacy behavior)
+			this.launchException = e;
+		}
 	}
 
 	public Object run(Object context) throws Exception {
