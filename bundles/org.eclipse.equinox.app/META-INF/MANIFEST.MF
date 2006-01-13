@@ -21,6 +21,7 @@ Import-Package: org.osgi.framework;version="1.3",
  org.eclipse.osgi.service.datalocation,
  org.eclipse.osgi.service.environment,
  org.eclipse.osgi.service.runnable,
+ org.eclipse.osgi.storagemanager,
  org.eclipse.osgi.util,
  org.eclipse.osgi.framework.console; resolution:=optional
 Require-Bundle: org.eclipse.equinox.common

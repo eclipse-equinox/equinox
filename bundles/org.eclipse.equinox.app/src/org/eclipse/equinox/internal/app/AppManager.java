@@ -15,9 +15,9 @@ import java.io.*;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.*;
-import org.eclipse.core.runtime.adaptor.FileManager;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.service.environment.EnvironmentInfo;
+import org.eclipse.osgi.storagemanager.StorageManager;
 import org.osgi.framework.*;
 import org.osgi.service.application.ApplicationDescriptor;
 import org.osgi.service.application.ScheduledApplication;
@@ -67,7 +67,7 @@ public class AppManager {
 	private static Collection locks = new ArrayList();
 	private static Map scheduledApps = new HashMap();
 	static ArrayList timerApps = new ArrayList();
-	private static FileManager fileManager;
+	private static StorageManager fileManager;
 	private static boolean dirty;
 	private static boolean scheduling = false;
 	static boolean shutdown = false;
@@ -236,14 +236,14 @@ public class AppManager {
 				return false;
 			File theStorageDir = new File(location.getURL().getPath() + '/' + Activator.PI_APP);
 			boolean readOnly = location.isReadOnly();
-			fileManager = new FileManager(theStorageDir, readOnly ? "none" : null, readOnly); //$NON-NLS-1$
+			fileManager = new StorageManager(theStorageDir, readOnly ? "none" : null, readOnly); //$NON-NLS-1$
 			fileManager.open(!readOnly);
 			File dataFile = fileManager.lookup(fileName, false);
 			if (dataFile == null || !dataFile.isFile()) {
 				Location parent = location.getParentLocation();
 				if (parent != null) {
 					theStorageDir = new File(parent.getURL().getPath() + '/' + Activator.PI_APP);
-					FileManager tmp = new FileManager(theStorageDir, "none", true); //$NON-NLS-1$
+					StorageManager tmp = new StorageManager(theStorageDir, "none", true); //$NON-NLS-1$
 					tmp.open(false);
 					dataFile = tmp.lookup(fileName, false);
 					tmp.close();
