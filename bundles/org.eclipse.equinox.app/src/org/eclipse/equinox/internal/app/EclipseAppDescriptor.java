@@ -24,6 +24,7 @@ import org.osgi.service.condpermadmin.ConditionInfo;
  * An ApplicationDescriptor for an eclipse application.
  */
 public class EclipseAppDescriptor extends ApplicationDescriptor {
+	static final String APP_TYPE = "eclipse.application.type"; //$NON-NLS-1$
 	private ServiceRegistration sr;
 	private Boolean locked = Boolean.FALSE;
 	private SingletonContainer singletonMgr;
@@ -37,7 +38,7 @@ public class EclipseAppDescriptor extends ApplicationDescriptor {
 		this.type = type == null ? ContainerManager.APP_TYPE_MAIN_THREAD : type;
 		this.namespace = namespace;
 		this.containerMgr = containerMgr;
-		this.locked = AppManager.isLocked(this) ? Boolean.TRUE : Boolean.FALSE;
+		this.locked = AppPersistenceUtil.isLocked(this) ? Boolean.TRUE : Boolean.FALSE;
 		this.visible = visible;
 	}
 
@@ -111,14 +112,15 @@ public class EclipseAppDescriptor extends ApplicationDescriptor {
 		props.put(ApplicationDescriptor.APPLICATION_LAUNCHABLE, singletonMgr == null ? Boolean.TRUE : singletonMgr.isLocked() ? Boolean.FALSE : Boolean.TRUE);
 		props.put(ApplicationDescriptor.APPLICATION_LOCKED, locked);
 		props.put(ApplicationDescriptor.APPLICATION_VISIBLE, visible ? Boolean.TRUE : Boolean.FALSE);
+		props.put(EclipseAppDescriptor.APP_TYPE, getType());
 		return props;
 	}
 
 	private String getLocation() {
-		final Bundle bundle = AppManager.getBundle(namespace);
+		final Bundle bundle = AppPersistenceUtil.getBundle(namespace);
 		if (bundle == null)
 			return ""; //$NON-NLS-1$
-		return AppManager.getLocation(bundle);
+		return AppPersistenceUtil.getLocation(bundle);
 	}
 
 	/*
@@ -141,7 +143,7 @@ public class EclipseAppDescriptor extends ApplicationDescriptor {
 	}
 
 	public boolean matchDNChain(String pattern) {
-		Bundle bundle = AppManager.getBundle(namespace);
+		Bundle bundle = AppPersistenceUtil.getBundle(namespace);
 		if (bundle == null)
 			return false;
 		return BundleSignerCondition.getCondition(bundle, new ConditionInfo(BundleSignerCondition.class.getName(), new String[] {pattern})).isSatisfied();

@@ -288,9 +288,16 @@ public class ContainerManager implements IRegistryChangeListener, SynchronousBun
 		String type = configs[0].getAttribute(PT_APP_TYPE);
 		if (type == null)
 			return null;
+		// stop all applications for the container first
+		stopAllApplications(type);
+		IContainer result = null;
 		synchronized (containers) {
-			return (IContainer) containers.get(type);
+			result = (IContainer) containers.remove(type);
 		}
+		// shutdown the container
+		if (result != null)
+			result.shutdown();
+		return result;
 	}
 
 	/*
@@ -343,7 +350,7 @@ public class ContainerManager implements IRegistryChangeListener, SynchronousBun
 	}
 
 	private FrameworkLog getFrameworkLog() {
-		return (FrameworkLog) AppManager.getService(frameworkLog);
+		return (FrameworkLog) AppPersistenceUtil.getService(frameworkLog);
 	}
 
 	private String getProductAppId() {
@@ -448,6 +455,23 @@ public class ContainerManager implements IRegistryChangeListener, SynchronousBun
 			return;
 		// The system bundle is stopping; better stop all applications and containers now
 		stopAll();
+	}
+
+	private void stopAllApplications(String type) {
+		try {
+			ServiceReference[] runningRefs = context.getServiceReferences(ApplicationHandle.class.getName(), "(&(eclipse.application.type=" + type + ")(!(application.state=STOPPING)))"); //$NON-NLS-1$ //$NON-NLS-2$
+			if (runningRefs != null)
+				for (int i = 0; i < runningRefs.length; i++) {
+					ApplicationHandle handle = (ApplicationHandle) context.getService(runningRefs[i]);
+					try {
+						handle.destroy();
+					} catch (Throwable t) {
+						// just ignore; nothing we can really do and we need to continue
+					}
+			}
+		} catch (InvalidSyntaxException e) {
+			// do nothing; we already tested the filter string above
+		}
 	}
 
 	private void stopAll() {

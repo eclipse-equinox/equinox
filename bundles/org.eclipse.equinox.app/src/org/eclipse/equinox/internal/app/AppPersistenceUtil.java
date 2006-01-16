@@ -26,10 +26,10 @@ import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.util.tracker.ServiceTracker;
 
 /**
- * Managers all persistent data for ApplicationDescriptors (lock status, 
+ * Manages all persistent data for ApplicationDescriptors (lock status, 
  * scheduled applications etc.)
  */
-public class AppManager {
+public class AppPersistenceUtil {
 	private static final String PROP_CONFIG_AREA = "osgi.configuration.area"; //$NON-NLS-1$
 
 	private static final String FILTER_PREFIX = "(&(objectClass=org.eclipse.osgi.service.datalocation.Location)(type="; //$NON-NLS-1$
@@ -77,11 +77,11 @@ public class AppManager {
 
 	static synchronized void setBundleContext(BundleContext context) {
 		if (context != null) {
-			AppManager.context = context;
+			AppPersistenceUtil.context = context;
 			init();
 		} else {
 			shutdown();
-			AppManager.context = context;
+			AppPersistenceUtil.context = context;
 		}
 	}
 
@@ -190,7 +190,7 @@ public class AppManager {
 		return result;
 	}
 
-	static void addScheduledApp(EclipseScheduledApplication scheduledApp) {
+	private static void addScheduledApp(EclipseScheduledApplication scheduledApp) {
 		if (EVENT_TIMER_TOPIC.equals(scheduledApp.getTopic())) {
 			timerApps.add(scheduledApp);
 			if (timerThread == null)
@@ -389,7 +389,7 @@ public class AppManager {
 					props.put("hour_of_day", new Integer(cal.get(Calendar.HOUR_OF_DAY))); //$NON-NLS-1$
 					props.put("minute", new Integer(minute)); //$NON-NLS-1$
 					Event timerEvent = new Event(EVENT_TIMER_TOPIC, props);
-					synchronized (AppManager.class) {
+					synchronized (AppPersistenceUtil.class) {
 						// poor mans implementation of dispatching events; the spec will not allow us to use event admin to dispatch the virtual timer events; boo!!
 						if (timerApps.size() == 0)
 							continue;

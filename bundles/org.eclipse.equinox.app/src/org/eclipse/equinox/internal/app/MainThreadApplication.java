@@ -35,7 +35,7 @@ public class MainThreadApplication implements ApplicationRunnable {
 	public Object run(Object context) throws Exception {
 		// if the given arg is null then pass in the left over command line args.
 		if (context == null)
-			context = AppManager.getApplicationArgs();
+			context = AppPersistenceUtil.getApplicationArgs();
 		Object result;
 		try {
 			if (launchException != null)

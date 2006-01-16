@@ -29,7 +29,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 		this.bContext = context;
 		getDebugOptions(context);
 		// set the app manager context before starting the containerMgr
-		AppManager.setBundleContext(context);
+		AppPersistenceUtil.setBundleContext(context);
 		registryTracker = new ServiceTracker(context, IExtensionRegistry.class.getName(), this);
 		registryTracker.open();
 		// start the app commands for the console
@@ -51,7 +51,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 		registryTracker.close();
 		registryTracker = null;
 		// unset the app manager context after the containerMgr has been stopped
-		AppManager.setBundleContext(null);
+		AppPersistenceUtil.setBundleContext(null);
 		bContext = null;
 	}
 

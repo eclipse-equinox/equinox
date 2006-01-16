@@ -25,7 +25,7 @@ public class MainThreadContainer implements IContainer, ServiceTrackerCustomizer
 	private EclipseAppDescriptor defaultDesc;
 
 	public MainThreadContainer() {
-		appLauncherTracker = new ServiceTracker(AppManager.getContext(), ApplicationLauncher.class.getName(), this);
+		appLauncherTracker = new ServiceTracker(AppPersistenceUtil.getContext(), ApplicationLauncher.class.getName(), this);
 		appLauncherTracker.open();
 	}
 
@@ -42,7 +42,7 @@ public class MainThreadContainer implements IContainer, ServiceTrackerCustomizer
 	public Object addingService(ServiceReference reference) {
 		if (appLauncher != null)
 			return null;
-		appLauncher = (ApplicationLauncher) AppManager.getContext().getService(reference);
+		appLauncher = (ApplicationLauncher) AppPersistenceUtil.getContext().getService(reference);
 		if (defaultDesc != null)
 			// launch the default application
 			try {
@@ -61,7 +61,7 @@ public class MainThreadContainer implements IContainer, ServiceTrackerCustomizer
 	public synchronized void removedService(ServiceReference reference, Object service) {
 		if (service == appLauncher) {
 			appLauncher = null;
-			AppManager.getContext().ungetService(reference);
+			AppPersistenceUtil.getContext().ungetService(reference);
 		}
 	}
 

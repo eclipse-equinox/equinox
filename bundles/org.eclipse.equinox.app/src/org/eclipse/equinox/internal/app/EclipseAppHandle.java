@@ -68,6 +68,7 @@ public class EclipseAppHandle extends ApplicationHandle implements IAppContext {
 		props.put(ApplicationHandle.APPLICATION_PID, getInstanceId());
 		props.put(ApplicationHandle.APPLICATION_STATE, getState());
 		props.put(ApplicationHandle.APPLICATION_DESCRIPTOR, getApplicationDescriptor().getApplicationId());
+		props.put(EclipseAppDescriptor.APP_TYPE, ((EclipseAppDescriptor) getApplicationDescriptor()).getType());
 		return props;
 	}
 

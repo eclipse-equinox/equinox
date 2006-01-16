@@ -1,5 +1,5 @@
 /*
- * $Header: /cvsroot/eclipse/org.eclipse.equinox.app/src/org/osgi/service/application/ApplicationDescriptor.java,v 1.2 2005/12/20 21:26:05 twatson Exp $
+ * $Header: /cvsroot/eclipse/org.eclipse.equinox.app/src/org/osgi/service/application/ApplicationDescriptor.java,v 1.3 2006/01/16 19:45:25 twatson Exp $
  * 
  * Copyright (c) OSGi Alliance (2004, 2005). All Rights Reserved.
  * 
@@ -12,7 +12,7 @@ package org.osgi.service.application;
 
 import java.util.Iterator;
 import java.util.Map;
-import org.eclipse.equinox.internal.app.AppManager;
+import org.eclipse.equinox.internal.app.AppPersistenceUtil;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 
@@ -390,7 +390,7 @@ public abstract class ApplicationDescriptor {
 			String eventFilter, boolean recurring) throws InvalidSyntaxException {
 		checkArgs(arguments);
 		isLaunchableSpecific(); // checks if the ApplicationDescriptor was already unregistered
-		return AppManager.addScheduledApp(this, arguments, topic, eventFilter, recurring);
+		return AppPersistenceUtil.addScheduledApp(this, arguments, topic, eventFilter, recurring);
 	}
 
 	/**
@@ -477,11 +477,11 @@ public abstract class ApplicationDescriptor {
 	}
 
 	private void saveLock(boolean locked) {
-		AppManager.saveLock(this, locked);
+		AppPersistenceUtil.saveLock(this, locked);
 	}
 
 	private boolean isLocked() {
-		return AppManager.isLocked(this);
+		return AppPersistenceUtil.isLocked(this);
 	}
 
 	private void checkArgs(Map arguments) {

@@ -132,9 +132,17 @@ public class AppCommands implements CommandProvider {
 			for (int i = 0; i < apps.length; i++)
 				if (appId.equals(apps[i].getProperty(ApplicationDescriptor.APPLICATION_PID))) {
 					if (launchableApp.match(getServiceProps(apps[i]))) {
+						ArrayList argList = new ArrayList();
+						String arg = null;
+						while ((arg = intp.nextArgument()) != null)
+							argList.add(arg);
+						String[] args = argList.size() == 0 ? null : (String[]) argList.toArray(new String[argList.size()]);
 						ApplicationDescriptor appDesc = (ApplicationDescriptor) context.getService(apps[i]);
 						try {
-							appDesc.launch(new HashMap(0));
+							HashMap launchArgs = new HashMap(1);
+							if (args != null)
+								launchArgs.put(ContainerManager.PROP_ECLIPSE_APPLICATION_ARGS, args);
+							appDesc.launch(launchArgs);
 							intp.println("Launched application: " + appId); //$NON-NLS-1$
 						} finally {
 							context.ungetService(apps[i]);
