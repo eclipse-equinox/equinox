@@ -84,11 +84,10 @@ public class StateHelperImpl implements StateHelper {
 		}
 		return result;
 	}
-	
-	public VersionConstraint[] getUnsatisfiedLeaves(State state) {
+
+	private VersionConstraint[] getUnsatisfiedLeaves(State state, BundleDescription[] bundles) {
 		Map packages = getExportedPackageMap(state);
 		HashSet result = new HashSet(11);
-		BundleDescription[] bundles = state.getBundles();
 		for (int i = 0; i < bundles.length; i++) {
 			BundleDescription description = bundles[i];
 			VersionConstraint[] constraints = getUnsatisfiedConstraints(description);
@@ -110,6 +109,18 @@ public class StateHelperImpl implements StateHelper {
 			}
 		}
 		return (VersionConstraint[]) result.toArray(new VersionConstraint[result.size()]);
+
+	}
+
+	public VersionConstraint[] getUnsatisfiedLeaves(State state) {
+		return getUnsatisfiedLeaves(state, state.getBundles());
+	}
+
+	public VersionConstraint[] getUnsatisfiedLeaves(BundleDescription[] bundles) {
+		if (bundles.length == 0)
+			return new VersionConstraint[0];
+		State state = bundles[0].getContainingState();
+		return getUnsatisfiedLeaves(state, bundles);
 	}
 
 	/**

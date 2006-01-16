@@ -428,7 +428,7 @@ public class EclipseStarter {
 		StateHelper stateHelper = adaptor.getPlatformAdmin().getStateHelper();
 
 		// first lets look for missing leaf constraints (bug 114120)
-		VersionConstraint[] leafConstraints = stateHelper.getUnsatisfiedLeaves(state);
+		VersionConstraint[] leafConstraints = stateHelper.getUnsatisfiedLeaves(state.getBundles());
 		// hash the missing leaf constraints by the declaring bundles
 		Map missing = new HashMap();
 		for (int i = 0; i < leafConstraints.length; i++) {
