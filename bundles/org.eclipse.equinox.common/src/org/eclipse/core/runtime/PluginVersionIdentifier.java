@@ -221,7 +221,8 @@ public final class PluginVersionIdentifier {
 	public boolean equals(Object object) {
 		if (!(object instanceof PluginVersionIdentifier))
 			return false;
-		return version.equals(object);
+		PluginVersionIdentifier v = (PluginVersionIdentifier) object;
+		return version.equals(v.version);
 	}
 
 	/**
