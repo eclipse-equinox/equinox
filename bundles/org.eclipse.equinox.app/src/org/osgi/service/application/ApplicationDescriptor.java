@@ -1,5 +1,5 @@
 /*
- * $Header: /cvsroot/eclipse/org.eclipse.equinox.app/src/org/osgi/service/application/ApplicationDescriptor.java,v 1.1 2005/12/14 22:17:04 twatson Exp $
+ * $Header: /cvsroot/eclipse/org.eclipse.equinox.app/src/org/osgi/service/application/ApplicationDescriptor.java,v 1.2 2005/12/20 21:26:05 twatson Exp $
  * 
  * Copyright (c) OSGi Alliance (2004, 2005). All Rights Reserved.
  * 
@@ -289,7 +289,7 @@ public abstract class ApplicationDescriptor {
 				throw new ApplicationException(ApplicationException.APPLICATION_LOCKED, "Application is locked, can't launch!");
 		}
 		if( !isLaunchableSpecific() )
-			throw new ApplicationException(ApplicationException.APPLICAITON_NOT_LAUNCHABLE,
+			throw new ApplicationException(ApplicationException.APPLICATION_NOT_LAUNCHABLE,
 					 "Cannot launch the application!");
 		checkArgs(arguments);
 		try {
