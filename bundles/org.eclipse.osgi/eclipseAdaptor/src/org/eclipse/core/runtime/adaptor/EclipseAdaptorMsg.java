@@ -76,6 +76,7 @@ public class EclipseAdaptorMsg extends NLS {
 	public static String ECLIPSE_STARTUP_FAILED_START;
 	public static String ECLIPSE_STARTUP_APP_ERROR;
 	public static String ECLIPSE_STARTUP_FILEMANAGER_OPEN_ERROR;
+	public static String ECLIPSE_STARTUP_PROPS_NOT_SET;
 
 	public static String error_badNL;
 

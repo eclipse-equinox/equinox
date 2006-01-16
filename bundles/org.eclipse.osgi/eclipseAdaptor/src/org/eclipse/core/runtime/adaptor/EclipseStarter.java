@@ -136,17 +136,6 @@ public class EclipseStarter {
 	public static void main(String[] args) throws Exception {
 		if (System.getProperty("eclipse.startTime") == null) //$NON-NLS-1$
 			System.getProperties().put("eclipse.startTime", Long.toString(System.currentTimeMillis())); //$NON-NLS-1$
-        CodeSource cs = EclipseStarter.class.getProtectionDomain().getCodeSource();
-		if (cs != null) {
-			URL url = cs.getLocation();
-			if (System.getProperty(PROP_FRAMEWORK) == null)
-				System.getProperties().put(PROP_FRAMEWORK, decode(url.toExternalForm()));
-			// allow prop to be preset
-			if (System.getProperty(PROP_INSTALL_AREA) == null) {
-				String filePart = decode(url.getFile());
-				System.getProperties().put(PROP_INSTALL_AREA, filePart.substring(0, filePart.lastIndexOf('/')));
-			}			
-		}
 		if (System.getProperty(PROP_NOSHUTDOWN) == null)
 			System.getProperties().put(PROP_NOSHUTDOWN, "true"); //$NON-NLS-1$
 		run(args, null);
@@ -262,13 +251,15 @@ public class EclipseStarter {
 	 * The given runnable (if not <code>null</code>) is used to tear down the splash screen if required.
 	 * </p>
 	 * @param args the arguments passed to the application
+	 * @return BundleContext the context of the system bundle
 	 * @throws Exception if anything goes wrong
 	 */
-	public static void startup(String[] args, Runnable endSplashHandler) throws Exception {
+	public static BundleContext startup(String[] args, Runnable endSplashHandler) throws Exception {
 		if (Profile.PROFILE && Profile.STARTUP)
 			Profile.logEnter("EclipseStarter.startup()", null); //$NON-NLS-1$
 		if (running)
 			throw new IllegalStateException(EclipseAdaptorMsg.ECLIPSE_STARTUP_ALREADY_RUNNING);
+		initializeProperties();
 		processCommandLine(args);
 		LocationManager.initializeLocations();
 		loadConfigurationInfo();
@@ -315,6 +306,7 @@ public class EclipseStarter {
 		running = true;
 		if (Profile.PROFILE && Profile.STARTUP)
 			Profile.logExit("EclipseStarter.startup()"); //$NON-NLS-1$
+		return context;
 	}
 
 	private static void initializeContextFinder() {
@@ -445,7 +437,7 @@ public class EclipseStarter {
 				continue;
 			if (leafConstraints[i] instanceof ImportPackageSpecification) {
 				if (ImportPackageSpecification.RESOLUTION_OPTIONAL.equals(((ImportPackageSpecification) leafConstraints[i]).getDirective(Constants.RESOLUTION_DIRECTIVE)))
-					continue;
+				continue;
 				if (ImportPackageSpecification.RESOLUTION_DYNAMIC.equals(((ImportPackageSpecification) leafConstraints[i]).getDirective(Constants.RESOLUTION_DIRECTIVE)))
 					continue;
 			}
@@ -1299,6 +1291,26 @@ public class EclipseStarter {
 			commandLine = left + value + right;
 		}
 		return commandLine;
+	}
+
+	private static void initializeProperties() {
+		// initialize some framework properties that must always be set
+		if (System.getProperty(PROP_FRAMEWORK) == null || System.getProperty(PROP_INSTALL_AREA) == null) {
+			CodeSource cs = EclipseStarter.class.getProtectionDomain().getCodeSource();
+			if (cs == null)
+				throw new IllegalArgumentException(NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_PROPS_NOT_SET, PROP_FRAMEWORK + ", " + PROP_INSTALL_AREA)); //$NON-NLS-1$
+			URL url = cs.getLocation();
+			// allow props to be preset
+			if (System.getProperty(PROP_FRAMEWORK) == null)
+				System.getProperties().put(PROP_FRAMEWORK, url.toExternalForm());
+			if (System.getProperty(PROP_INSTALL_AREA) == null) {
+				String filePart = url.getFile();
+				System.getProperties().put(PROP_INSTALL_AREA, filePart.substring(0, filePart.lastIndexOf('/')));
+			}
+		}
+		// always decode these properties
+		System.getProperties().put(PROP_FRAMEWORK, decode(System.getProperty(PROP_FRAMEWORK)));
+		System.getProperties().put(PROP_INSTALL_AREA, decode(System.getProperty(PROP_INSTALL_AREA)));
 	}
 
 	private static void finalizeProperties() {
