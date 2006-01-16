@@ -15,6 +15,7 @@ import java.util.Vector;
 import org.eclipse.core.internal.runtime.CommonMessages;
 import org.eclipse.core.internal.runtime.IRuntimeConstants;
 import org.eclipse.osgi.util.NLS;
+import org.osgi.framework.Version;
 
 /**
  * <p>
@@ -57,13 +58,10 @@ import org.eclipse.osgi.util.NLS;
 // if deprecated then move this class to the compatibility plugin.
 public final class PluginVersionIdentifier {
 
-	private int major = 0;
-	private int minor = 0;
-	private int service = 0;
-	private String qualifier = ""; //$NON-NLS-1$
-
+	private Version version;
+	
 	private static final String SEPARATOR = "."; //$NON-NLS-1$
-
+	
 	/**
 	 * Creates a plug-in version identifier from its components.
 	 * 
@@ -85,7 +83,6 @@ public final class PluginVersionIdentifier {
 	 * Qualifier characters that are not a letter or a digit are replaced.
 	 */
 	public PluginVersionIdentifier(int major, int minor, int service, String qualifier) {
-
 		// Do the test outside of the assert so that they 'Policy.bind' 
 		// will not be evaluated each time (including cases when we would
 		// have passed by the assert).
@@ -96,13 +93,8 @@ public final class PluginVersionIdentifier {
 			Assert.isTrue(false, NLS.bind(CommonMessages.parse_postiveMinor, major + SEPARATOR + minor + SEPARATOR + service + SEPARATOR + qualifier));
 		if (service < 0)
 			Assert.isTrue(false, NLS.bind(CommonMessages.parse_postiveService, major + SEPARATOR + minor + SEPARATOR + service + SEPARATOR + qualifier));
-		if (qualifier == null)
-			qualifier = ""; //$NON-NLS-1$
 
-		this.major = major;
-		this.minor = minor;
-		this.service = service;
-		this.qualifier = verifyQualifier(qualifier);
+		this.version = new Version(major, minor, service, qualifier);
 	}
 
 	/**
@@ -125,10 +117,7 @@ public final class PluginVersionIdentifier {
 	 */
 	public PluginVersionIdentifier(String versionId) {
 		Object[] parts = parseVersion(versionId);
-		this.major = ((Integer) parts[0]).intValue();
-		this.minor = ((Integer) parts[1]).intValue();
-		this.service = ((Integer) parts[2]).intValue();
-		this.qualifier = (String) parts[3];
+		version = new Version(((Integer) parts[0]).intValue(), ((Integer) parts[1]).intValue(), ((Integer) parts[2]).intValue(), (String) parts[3]);
 	}
 
 	/**
@@ -216,7 +205,7 @@ public final class PluginVersionIdentifier {
 		result[1] = new Integer(numbers[1]);
 		result[2] = new Integer(numbers[2]);
 		if (elementSize >= 4)
-			result[3] = verifyQualifier((String) elements.elementAt(3));
+			result[3] = (String) elements.elementAt(3);
 		else
 			result[3] = ""; //$NON-NLS-1$
 		return result;
@@ -232,8 +221,7 @@ public final class PluginVersionIdentifier {
 	public boolean equals(Object object) {
 		if (!(object instanceof PluginVersionIdentifier))
 			return false;
-		PluginVersionIdentifier v = (PluginVersionIdentifier) object;
-		return v.getMajorComponent() == major && v.getMinorComponent() == minor && v.getServiceComponent() == service && v.getQualifierComponent().equals(qualifier);
+		return version.equals(object);
 	}
 
 	/**
@@ -242,11 +230,7 @@ public final class PluginVersionIdentifier {
 	 * @return an integer which is a hash code value for this object.
 	 */
 	public int hashCode() {
-		int code = major + minor + service; // R1.0 result
-		if (qualifier.equals("")) //$NON-NLS-1$
-			return code;
-		else
-			return code + qualifier.hashCode();
+		return version.hashCode();
 	}
 
 	/**
@@ -256,7 +240,7 @@ public final class PluginVersionIdentifier {
 	 * @return the major version
 	 */
 	public int getMajorComponent() {
-		return major;
+		return version.getMajor();
 	}
 
 	/**
@@ -266,7 +250,7 @@ public final class PluginVersionIdentifier {
 	 * @return the minor version
 	 */
 	public int getMinorComponent() {
-		return minor;
+		return version.getMinor();
 	}
 
 	/**
@@ -276,7 +260,7 @@ public final class PluginVersionIdentifier {
 	 * @return the service level
 	 */
 	public int getServiceComponent() {
-		return service;
+		return version.getMicro();
 	}
 
 	/**
@@ -286,7 +270,7 @@ public final class PluginVersionIdentifier {
 	 * @return the qualifier
 	 */
 	public String getQualifierComponent() {
-		return qualifier;
+		return version.getQualifier();
 	}
 
 	/**
@@ -313,13 +297,13 @@ public final class PluginVersionIdentifier {
 	public boolean isGreaterOrEqualTo(PluginVersionIdentifier id) {
 		if (id == null)
 			return false;
-		if (major > id.getMajorComponent())
+		if (getMajorComponent() > id.getMajorComponent())
 			return true;
-		if ((major == id.getMajorComponent()) && (minor > id.getMinorComponent()))
+		if ((getMajorComponent() == id.getMajorComponent()) && (getMinorComponent() > id.getMinorComponent()))
 			return true;
-		if ((major == id.getMajorComponent()) && (minor == id.getMinorComponent()) && (service > id.getServiceComponent()))
+		if ((getMajorComponent() == id.getMajorComponent()) && (getMinorComponent() == id.getMinorComponent()) && (getServiceComponent() > id.getServiceComponent()))
 			return true;
-		if ((major == id.getMajorComponent()) && (minor == id.getMinorComponent()) && (service == id.getServiceComponent()) && (qualifier.compareTo(id.getQualifierComponent()) >= 0))
+		if ((getMajorComponent() == id.getMajorComponent()) && (getMinorComponent() == id.getMinorComponent()) && (getServiceComponent() == id.getServiceComponent()) && (getQualifierComponent().compareTo(id.getQualifierComponent()) >= 0))
 			return true;
 		else
 			return false;
@@ -347,17 +331,17 @@ public final class PluginVersionIdentifier {
 	public boolean isCompatibleWith(PluginVersionIdentifier id) {
 		if (id == null)
 			return false;
-		if (major != id.getMajorComponent())
+		if (getMajorComponent() != id.getMajorComponent())
 			return false;
-		if (minor > id.getMinorComponent())
+		if (getMinorComponent() > id.getMinorComponent())
 			return true;
-		if (minor < id.getMinorComponent())
+		if (getMinorComponent() < id.getMinorComponent())
 			return false;
-		if (service > id.getServiceComponent())
+		if (getServiceComponent() > id.getServiceComponent())
 			return true;
-		if (service < id.getServiceComponent())
+		if (getServiceComponent() < id.getServiceComponent())
 			return false;
-		if (qualifier.compareTo(id.getQualifierComponent()) >= 0)
+		if (getQualifierComponent().compareTo(id.getQualifierComponent()) >= 0)
 			return true;
 		else
 			return false;
@@ -383,15 +367,15 @@ public final class PluginVersionIdentifier {
 	public boolean isEquivalentTo(PluginVersionIdentifier id) {
 		if (id == null)
 			return false;
-		if (major != id.getMajorComponent())
+		if (getMajorComponent() != id.getMajorComponent())
 			return false;
-		if (minor != id.getMinorComponent())
+		if (getMinorComponent() != id.getMinorComponent())
 			return false;
-		if (service > id.getServiceComponent())
+		if (getServiceComponent() > id.getServiceComponent())
 			return true;
-		if (service < id.getServiceComponent())
+		if (getServiceComponent() < id.getServiceComponent())
 			return false;
-		if (qualifier.compareTo(id.getQualifierComponent()) >= 0)
+		if (getQualifierComponent().compareTo(id.getQualifierComponent()) >= 0)
 			return true;
 		else
 			return false;
@@ -413,7 +397,7 @@ public final class PluginVersionIdentifier {
 	public boolean isPerfect(PluginVersionIdentifier id) {
 		if (id == null)
 			return false;
-		if ((major != id.getMajorComponent()) || (minor != id.getMinorComponent()) || (service != id.getServiceComponent()) || (!qualifier.equals(id.getQualifierComponent())))
+		if ((getMajorComponent() != id.getMajorComponent()) || (getMinorComponent() != id.getMinorComponent()) || (getServiceComponent() != id.getServiceComponent()) || (!getQualifierComponent().equals(id.getQualifierComponent())))
 			return false;
 		else
 			return true;
@@ -431,25 +415,25 @@ public final class PluginVersionIdentifier {
 	public boolean isGreaterThan(PluginVersionIdentifier id) {
 
 		if (id == null) {
-			if (major == 0 && minor == 0 && service == 0 && qualifier.equals("")) //$NON-NLS-1$
+			if (getMajorComponent() == 0 && getMinorComponent() == 0 && getServiceComponent() == 0 && getQualifierComponent().equals("")) //$NON-NLS-1$
 				return false;
 			else
 				return true;
 		}
 
-		if (major > id.getMajorComponent())
+		if (getMajorComponent() > id.getMajorComponent())
 			return true;
-		if (major < id.getMajorComponent())
+		if (getMajorComponent() < id.getMajorComponent())
 			return false;
-		if (minor > id.getMinorComponent())
+		if (getMinorComponent() > id.getMinorComponent())
 			return true;
-		if (minor < id.getMinorComponent())
+		if (getMinorComponent() < id.getMinorComponent())
 			return false;
-		if (service > id.getServiceComponent())
+		if (getServiceComponent() > id.getServiceComponent())
 			return true;
-		if (service < id.getServiceComponent())
+		if (getServiceComponent() < id.getServiceComponent())
 			return false;
-		if (qualifier.compareTo(id.getQualifierComponent()) > 0)
+		if (getQualifierComponent().compareTo(id.getQualifierComponent()) > 0)
 			return true;
 		else
 			return false;
@@ -464,22 +448,7 @@ public final class PluginVersionIdentifier {
 	 * @return the string representation of this plug-in version identifier
 	 */
 	public String toString() {
-		String base = major + SEPARATOR + minor + SEPARATOR + service; // R1.0 result
-		if (qualifier.equals("")) //$NON-NLS-1$
-			return base;
-		else
-			return base + SEPARATOR + qualifier;
+		return version.toString();
 	}
 
-	private static String verifyQualifier(String s) {
-		char[] chars = s.trim().toCharArray();
-		boolean whitespace = false;
-		for (int i = 0; i < chars.length; i++) {
-			if (!Character.isLetterOrDigit(chars[i])) {
-				chars[i] = '-';
-				whitespace = true;
-			}
-		}
-		return whitespace ? new String(chars) : s;
-	}
 }
