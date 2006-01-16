@@ -21,7 +21,9 @@ import java.io.*;
  * </p>
  * @since 3.2
  */
-public class ManagedOutputStream extends FilterOutputStream {
+// Note the implementation of this class originated from the following deprecated classes:
+// /org.eclipse.osgi/eclipseAdaptor/src/org/eclipse/core/runtime/adaptor/StreamManagerOutputStream.java
+public final class ManagedOutputStream extends FilterOutputStream {
 	static final int ST_OPEN = 0;
 	static final int ST_CLOSED = 1;
 	private String target;
