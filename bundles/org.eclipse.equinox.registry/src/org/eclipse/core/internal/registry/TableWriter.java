@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2005 IBM Corporation and others.
+ * Copyright (c) 2004, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -149,27 +149,27 @@ public class TableWriter {
 		// get count of contributions that will be cached
 		int cacheSize = 0;
 		for (int i = 0; i < newElements.length; i++) {
-			if (shouldCache((Contribution) newElements[i]))
+			if (((Contribution) newElements[i]).shouldPersist())
 				cacheSize++;
 		}
 		for (int i = 0; i < formerElements.length; i++) {
-			if (shouldCache((Contribution) formerElements[i]))
+			if (((Contribution) formerElements[i]).shouldPersist())
 				cacheSize++;
 		}
 		outputNamespace.writeInt(cacheSize);
 
 		for (int i = 0; i < newElements.length; i++) {
 			Contribution element = (Contribution) newElements[i];
-			if (shouldCache(element)) {
+			if (element.shouldPersist()) {
 				writeStringOrNull(element.getContributorId(), outputNamespace);
-				saveArray(element.getRawChildren(), outputNamespace);
+				saveArray(filter(element.getRawChildren()), outputNamespace);
 			}
 		}
 		for (int i = 0; i < formerElements.length; i++) {
 			Contribution element = (Contribution) formerElements[i];
-			if (shouldCache(element)) {
+			if (element.shouldPersist()) {
 				writeStringOrNull(element.getContributorId(), outputNamespace);
-				saveArray(element.getRawChildren(), outputNamespace);
+				saveArray(filter(element.getRawChildren()), outputNamespace);
 			}
 		}
 		outputNamespace.flush();
@@ -183,7 +183,7 @@ public class TableWriter {
 		writeCacheHeader(outputTable, registryTimeStamp);
 		outputTable.writeInt(objectManager.getNextId());
 		offsets.save(outputTable);
-		objectManager.getExtensionPoints().save(outputTable, this); // uses writer to filter contents
+		objectManager.getExtensionPoints().save(outputTable, objectManager); // uses writer to filter contents
 		outputTable.flush();
 		fosTable.getFD().sync();
 		outputTable.close();
@@ -214,7 +214,7 @@ public class TableWriter {
 	}
 
 	private void saveExtensionPoint(ExtensionPointHandle xpt) throws IOException {
-		if (!shouldCache(xpt))
+		if (!xpt.shouldPersist())
 			return;
 		//save the file position
 		offsets.put(xpt.getId(), mainOutput.size());
@@ -228,7 +228,7 @@ public class TableWriter {
 	}
 
 	private void saveExtension(ExtensionHandle ext, DataOutputStream outputStream) throws IOException {
-		if (!shouldCache(ext))
+		if (!ext.shouldPersist())
 			return;
 		offsets.put(ext.getId(), outputStream.size());
 		outputStream.writeInt(ext.getId());
@@ -248,7 +248,7 @@ public class TableWriter {
 
 	//Save Configuration elements depth first
 	private void saveConfigurationElement(ConfigurationElementHandle element, DataOutputStream outputStream, DataOutputStream extraOutputStream, int depth) throws IOException {
-		if (!shouldCache(element))
+		if (!element.shouldPersist())
 			return;
 		DataOutputStream currentOutput = outputStream;
 		if (depth > 2)
@@ -285,7 +285,7 @@ public class TableWriter {
 			int countCElements = 0;
 			boolean[] save = new boolean[ces.length];
 			for (int j = 0; j < ces.length; j++) {
-				if (shouldCache((ConfigurationElementHandle) ces[j])) {
+				if (((ConfigurationElementHandle) ces[j]).shouldPersist()) {
 					save[j] = true;
 					countCElements++;
 				} else
@@ -353,42 +353,12 @@ public class TableWriter {
 		registry.log(status);
 	}
 
-	private boolean shouldCache(ExtensionPointHandle extensionPoint) {
-		if (extensionPoint.isDynamic())
-			return saveDynamic();
-		return true;
-	}
-
-	private boolean shouldCache(ExtensionHandle extension) {
-		if (extension.isDynamic())
-			return saveDynamic();
-		return true;
-	}
-
-	private boolean shouldCache(ConfigurationElementHandle configElement) {
-		if (configElement.isDynamic())
-			return saveDynamic();
-		return true;
-	}
-
-	private boolean shouldCache(Contribution contribution) {
-		if (contribution.isDynamic())
-			return saveDynamic();
-		return true;
-	}
-
-	public boolean shouldCache(int registryObjectId) {
-		if (objectManager.isDynamic(registryObjectId))
-			return saveDynamic();
-		return true;
-	}
-
 	// Filters out registry objects that should not be cached
 	private int[] filter(int[] input) {
 		boolean[] save = new boolean[input.length];
 		int resultSize = 0;
 		for (int i = 0; i < input.length; i++) {
-			if (shouldCache(input[i])) {
+			if (objectManager.shouldPersist(input[i])) {
 				save[i] = true;
 				resultSize++;
 			} else
@@ -403,10 +373,5 @@ public class TableWriter {
 			}
 		}
 		return result;
-	}
-
-	// Regulates if we are saving dynamic registry objects
-	public boolean saveDynamic() {
-		return false;
 	}
 }

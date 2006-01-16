@@ -278,7 +278,7 @@ public class ExtensionsParser extends DefaultHandler {
 		configurationElementValue = null;
 
 		// create a new Configuration Element and push it onto the object stack
-		ConfigurationElement currentConfigurationElement = registry.getElementFactory().createConfigurationElement(namespace.isDynamic());
+		ConfigurationElement currentConfigurationElement = registry.getElementFactory().createConfigurationElement(namespace.shouldPersist());
 		currentConfigurationElement.setNamespaceOwnerId(namespace.getNamespaceOwnerId());
 		objectStack.push(currentConfigurationElement);
 		currentConfigurationElement.setName(elementName);
@@ -387,7 +387,7 @@ public class ExtensionsParser extends DefaultHandler {
 	}
 
 	private void parseExtensionAttributes(Attributes attributes) {
-		Extension currentExtension = registry.getElementFactory().createExtension(namespace.isDynamic());
+		Extension currentExtension = registry.getElementFactory().createExtension(namespace.shouldPersist());
 		objectStack.push(currentExtension);
 
 		// Process Attributes
@@ -446,7 +446,7 @@ public class ExtensionsParser extends DefaultHandler {
 	}
 
 	private void parseExtensionPointAttributes(Attributes attributes) {
-		ExtensionPoint currentExtPoint = registry.getElementFactory().createExtensionPoint(namespace.isDynamic());
+		ExtensionPoint currentExtPoint = registry.getElementFactory().createExtensionPoint(namespace.shouldPersist());
 
 		// Process Attributes
 		int len = (attributes != null) ? attributes.getLength() : 0;

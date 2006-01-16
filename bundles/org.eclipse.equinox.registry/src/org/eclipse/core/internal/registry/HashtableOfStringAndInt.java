@@ -166,11 +166,11 @@ public final class HashtableOfStringAndInt implements Cloneable {
 	/**
 	 * Filtered save: outputs only elements with values not in the excluded list.
 	 */
-	public void save(DataOutputStream out, TableWriter writer) throws IOException {
+	public void save(DataOutputStream out, RegistryObjectManager objectManager) throws IOException {
 		HashtableOfStringAndInt filteredHashtable = new HashtableOfStringAndInt((int) (elementSize * GROWTH_FACTOR));
 		String currentKey;
 		for (int i = keyTable.length; --i >= 0;)
-			if ((currentKey = keyTable[i]) != null && writer.shouldCache(valueTable[i]))
+			if ((currentKey = keyTable[i]) != null && objectManager.shouldPersist(valueTable[i]))
 				filteredHashtable.put(currentKey, valueTable[i]);
 		filteredHashtable.save(out);
 	}

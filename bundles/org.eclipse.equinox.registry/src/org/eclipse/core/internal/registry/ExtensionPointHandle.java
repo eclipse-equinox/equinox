@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004 IBM Corporation and others.
+ * Copyright (c) 2004, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -33,8 +33,8 @@ public class ExtensionPointHandle extends Handle implements IExtensionPoint {
 		return getExtensionPoint().getNamespace();
 	}
 
-	public boolean isDynamic() {
-		return getExtensionPoint().isDynamic();
+	protected boolean shouldPersist() {
+		return getExtensionPoint().shouldPersist();
 	}
 
 	public IExtension getExtension(String extensionId) {

@@ -279,7 +279,7 @@ public class RegistryStrategy {
 	}
 
 	/**
-	 * Specifies if lazy cahe loading is used. If cache startegy is not supplied,
+	 * Specifies if lazy cache loading is used. If cache startegy is not supplied,
 	 * lazy cache loading is used.
 	 * 
 	 * This basic implementation specifies that lazy cache loading is going to be used.

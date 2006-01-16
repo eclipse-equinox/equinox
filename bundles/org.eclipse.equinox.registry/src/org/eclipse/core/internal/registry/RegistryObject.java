@@ -20,24 +20,24 @@ public abstract class RegistryObject implements KeyedElement {
 	//The children of the element
 	protected int[] children = RegistryObjectManager.EMPTY_INT_ARRAY;
 
-	// The field combines offset, dynamic flag, and no offset flag
+	// The field combines offset, persistence flag, and no offset flag
 	private int extraDataOffset = EMPTY_MASK;
 
 	// it is assumed that int has 32 bits (bits #0 to #31);
 	// bits #0 - #29 are the offset (limited to about 1Gb)
-	// bit #30 - registry object is dynamic if set
+	// bit #30 - persistance flag
 	// bit #31 - registry object has no extra data offset
 	// the bit#31 is a sign bit; bit#30 is the highest mantissa bit
 	static final int EMPTY_MASK = 0x80000000; // only taking bit #31
-	static final int DYNAMIC_MASK = 0x40000000; // only taking bit #30
+	static final int PERSIST_MASK = 0x40000000; // only taking bit #30
 	static final int OFFSET_MASK = 0x3FFFFFFF; // all bits but #30, #31
 
 	//The registry that owns this object
 	protected ExtensionRegistry registry;
 
-	protected RegistryObject(ExtensionRegistry registry, boolean isDynamic) {
+	protected RegistryObject(ExtensionRegistry registry, boolean persist) {
 		this.registry = registry;
-		setDynamic(isDynamic);
+		setPersist(persist);
 	}
 
 	void setRawChildren(int[] values) {
@@ -70,15 +70,15 @@ public abstract class RegistryObject implements KeyedElement {
 		return objectId == ((RegistryObject) other).objectId;
 	}
 
-	protected boolean isDynamic() {
-		return (extraDataOffset & DYNAMIC_MASK) == DYNAMIC_MASK;
+	protected boolean shouldPersist() {
+		return (extraDataOffset & PERSIST_MASK) == PERSIST_MASK;
 	}
 
-	private void setDynamic(boolean dynamic) {
-		if (dynamic)
-			extraDataOffset |= DYNAMIC_MASK;
+	private void setPersist(boolean persist) {
+		if (persist)
+			extraDataOffset |= PERSIST_MASK;
 		else
-			extraDataOffset &= ~DYNAMIC_MASK;
+			extraDataOffset &= ~PERSIST_MASK;
 	}
 
 	protected boolean noExtraData() {

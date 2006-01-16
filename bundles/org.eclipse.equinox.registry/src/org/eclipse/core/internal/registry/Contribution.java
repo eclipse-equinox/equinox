@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004 IBM Corporation and others.
+ * Copyright (c) 2004, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,7 @@
 package org.eclipse.core.internal.registry;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.InvalidRegistryObjectException;
 
 // This object is used to keep track on a contributor basis of the extension and extension points being contributed.
 // It is mainly used on removal so we can quickly  find objects to remove.
@@ -29,7 +30,7 @@ public class Contribution implements KeyedElement {
 	private String namespaceOwnerId = null;
 
 	// indicates if this contribution needs to be saved in the registry cache
-	protected boolean isDynamic;
+	protected boolean persist;
 
 	// This array stores the identifiers of both the extension points and the extensions.
 	// The array has always a minimum size of 2.
@@ -40,24 +41,24 @@ public class Contribution implements KeyedElement {
 	static final public byte EXTENSION_POINT = 0;
 	static final public byte EXTENSION = 1;
 
-	protected Contribution(String contributorId, ExtensionRegistry registry, boolean dynamic) {
+	protected Contribution(String contributorId, ExtensionRegistry registry, boolean persist) {
 		this.contributorId = contributorId;
 		this.registry = registry;
-		this.isDynamic = dynamic;
+		this.persist = persist;
 	}
 
 	void mergeContribution(Contribution addContribution) {
 		Assert.isTrue(contributorId.equals(addContribution.contributorId));
 		Assert.isTrue(registry == addContribution.registry);
 
-		// isDynamic?
+		// persist?
 		// Old New Result
-		// F   F   F
-		// F   T   F
-		// T   F   F	=> the only situation where isDynamic status needs to be adjusted 
-		// T   T   T
-		if (isDynamic() && !addContribution.isDynamic())
-			isDynamic = false;
+		//  F   F   F
+		//  F   T   T	=> needs to be adjusted
+		//  T   F   T 
+		//  T   T   T
+		if (shouldPersist() != addContribution.shouldPersist())
+			persist = true;
 
 		int[] existing = getRawChildren();
 		int[] addition = addContribution.getRawChildren();
@@ -130,7 +131,53 @@ public class Contribution implements KeyedElement {
 		return contributorId.equals(((Contribution) other).contributorId);
 	}
 
-	public boolean isDynamic() {
-		return isDynamic;
+	public boolean shouldPersist() {
+		return persist;
+	}
+
+	public void unlinkChild(int id) {
+		// find index of the child being unlinked:
+		int index = -1;
+		for (int i = 2; i < children.length; i++) {
+			if (children[i] == id) {
+				index = i;
+				break;
+			}
+		}
+		if (index == -1)
+			throw new InvalidRegistryObjectException();
+
+		// copy all array except one element at index
+		int[] result = new int[children.length - 1];
+		System.arraycopy(children, 0, result, 0, index);
+		System.arraycopy(children, index + 1, result, index, children.length - index - 1);
+
+		// fix sizes
+		if (index < children[EXTENSION_POINT] + 2)
+			result[EXTENSION_POINT]--;
+		else
+			result[EXTENSION]--;
+
+		children = result;
+	}
+
+	/**
+	 * Contribution is empty if it has no children.
+	 */
+	public boolean isEmpty() {
+		return (children[EXTENSION_POINT] == 0 || children[EXTENSION] == 0);
+	}
+
+	/**
+	 * Find if this contribution has a children with ID = id.
+	 * @param id possible ID of the child
+	 * @return true: contribution has this child
+	 */
+	public boolean hasChild(int id) {
+		for (int i = 2; i < children.length; i++) {
+			if (children[i] == id)
+				return true;
+		}
+		return false;
 	}
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2004 IBM Corporation and others.
+ * Copyright (c) 2000, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,12 +31,12 @@ public class ExtensionPoint extends RegistryObject {
 	private static final byte CONTRIBUTOR_ID = 4; //The namespace owner contributing the extension point
 	private static final int EXTRA_SIZE = 5;
 
-	protected ExtensionPoint(ExtensionRegistry registry, boolean isDynamic) {
-		super(registry, isDynamic);
+	protected ExtensionPoint(ExtensionRegistry registry, boolean persist) {
+		super(registry, persist);
 	}
 
-	protected ExtensionPoint(int self, int[] children, int dataOffset, ExtensionRegistry registry, boolean isDynamic) {
-		super(registry, isDynamic);
+	protected ExtensionPoint(int self, int[] children, int dataOffset, ExtensionRegistry registry, boolean persist) {
+		super(registry, persist);
 
 		setObjectId(self);
 		setRawChildren(children);

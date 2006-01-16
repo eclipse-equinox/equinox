@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2005 IBM Corporation and others.
+ * Copyright (c) 2004, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -162,7 +162,7 @@ public class TableReader {
 		int[] children = readArray(is);
 		if (actualContributorId == null)
 			actualContributorId = contributorId;
-		return getObjectFactory().createConfigurationElement(self, actualContributorId, name, propertiesAndValue, children, misc, parentId, parentType, false);
+		return getObjectFactory().createConfigurationElement(self, actualContributorId, name, propertiesAndValue, children, misc, parentId, parentType, true);
 	}
 
 	public Object loadThirdLevelConfigurationElements(int offset, RegistryObjectManager objectManager) {
@@ -232,7 +232,7 @@ public class TableReader {
 		String namespace = readStringOrNull(mainInput);
 		int[] children = readArray(mainInput);
 		int extraData = mainInput.readInt();
-		return getObjectFactory().createExtension(self, simpleId, namespace, children, extraData, false);
+		return getObjectFactory().createExtension(self, simpleId, namespace, children, extraData, true);
 	}
 
 	public ExtensionPoint loadExtensionPointTree(int offset, RegistryObjectManager objects) {
@@ -282,7 +282,7 @@ public class TableReader {
 		int self = mainInput.readInt();
 		int[] children = readArray(mainInput);
 		int extraData = mainInput.readInt();
-		return getObjectFactory().createExtensionPoint(self, children, extraData, false);
+		return getObjectFactory().createExtensionPoint(self, children, extraData, true);
 	}
 
 	private int[] readArray(DataInputStream in) throws IOException {
@@ -364,7 +364,7 @@ public class TableReader {
 				KeyedHashSet result = new KeyedHashSet(size);
 				for (int i = 0; i < size; i++) {
 					String contributorId = readStringOrNull(namespaceInput);
-					Contribution n = getObjectFactory().createContribution(contributorId, false);
+					Contribution n = getObjectFactory().createContribution(contributorId, true);
 					n.setRawChildren(readArray(namespaceInput));
 					result.add(n);
 				}

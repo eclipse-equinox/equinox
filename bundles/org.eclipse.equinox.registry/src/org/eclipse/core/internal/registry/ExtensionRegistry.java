@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,8 +14,8 @@ import java.io.*;
 import java.lang.reflect.Array;
 import java.util.*;
 import javax.xml.parsers.ParserConfigurationException;
-import org.eclipse.core.internal.registry.spi.ExtensionDescription;
-import org.eclipse.core.internal.registry.spi.ExtensionProperty;
+import org.eclipse.core.internal.registry.spi.ConfigurationElementDescription;
+import org.eclipse.core.internal.registry.spi.ConfigurationElementAttribute;
 import org.eclipse.core.runtime.*;
 import org.eclipse.core.runtime.adaptor.FileManager;
 import org.eclipse.equinox.registry.*;
@@ -68,7 +68,7 @@ public class ExtensionRegistry implements IExtensionRegistry {
 	protected TableReader theTableReader = new TableReader(this);
 
 	private Object masterToken; // use to get full control of the registry; objects created as "static" 
-	private Object userToken; // use to add dynamic contributions
+	private Object userToken; // use to modify non-persisted registry elements
 
 	/////////////////////////////////////////////////////////////////////////////////////////
 	// Registry strategies
@@ -108,21 +108,10 @@ public class ExtensionRegistry implements IExtensionRegistry {
 	 * interested on changes in the given plug-in.
 	 * </p>
 	 */
-	public void add(Contribution element) {
+	private void add(Contribution element) {
 		access.enterWrite();
 		try {
 			basicAdd(element, true);
-			fireRegistryChangeEvent();
-		} finally {
-			access.exitWrite();
-		}
-	}
-
-	public void add(Contribution[] elements) {
-		access.enterWrite();
-		try {
-			for (int i = 0; i < elements.length; i++)
-				basicAdd(elements[i], true);
 			fireRegistryChangeEvent();
 		} finally {
 			access.exitWrite();
@@ -902,29 +891,36 @@ public class ExtensionRegistry implements IExtensionRegistry {
 		}
 	}
 
-	//////////////////////////////////////////////////////////////////////////////////////
-	// Modifiable portion
-
-	public boolean addContribution(InputStream is, String contributorId, String contributionName, ResourceBundle b, Object key) {
-		// check access
-		if (!strategy.isModifiable() && masterToken != key && userToken != key)
-			throw new IllegalArgumentException("Unauthorized access to the ExtensionRegistry.addXMLContribution() method. Check if proper access token is supplied."); //$NON-NLS-1$
-		//  determine contribution nature
-		boolean isDynamic;
+	/**
+	 * Access check for add/remove operations:
+	 * a) for modifiable registry key is not required (null is fine)
+	 * b) for non-modifiable registry master key allows all operations 
+	 * c) for non-modifiable registry user key allows modifications of non-persisted elements
+	 * 
+	 * @param key key to the registry supplied by the user
+	 * @param persist true if operation affects persisted elements 
+	 * @return true is the key grants read/write access to the registry
+	 */
+	private boolean checkReadWriteAccess(Object key, boolean persist) {
+		if (strategy.isModifiable())
+			return true;
 		if (masterToken == key)
-			isDynamic = false;
-		else if (userToken == key)
-			isDynamic = true;
-		else
-			isDynamic = false; // default: for modifiable registry contributions are static
+			return true;
+		if (userToken == key && !persist)
+			return true;
+		return false;
+	}
 
+	public boolean addContribution(InputStream is, String contributorId, boolean persist, String contributionName, ResourceBundle b, Object key) {
+		if (!checkReadWriteAccess(key, persist))
+			throw new IllegalArgumentException("Unauthorized access to the ExtensionRegistry.addXMLContribution() method. Check if proper access token is supplied."); //$NON-NLS-1$
 		if (contributionName == null)
 			contributionName = ""; //$NON-NLS-1$
 		String ownerName = getNamespace(contributorId);
 		String message = NLS.bind(RegistryMessages.parse_problems, ownerName);
 		MultiStatus problems = new MultiStatus(RegistryMessages.OWNER_NAME, ExtensionsParser.PARSE_PROBLEM, message, null);
 		ExtensionsParser parser = new ExtensionsParser(problems, this);
-		Contribution contribution = getElementFactory().createContribution(contributorId, isDynamic);
+		Contribution contribution = getElementFactory().createContribution(contributorId, persist);
 
 		try {
 			parser.parseManifest(strategy.getXMLParser(), new InputSource(is), contributionName, getObjectManager(), contribution, b);
@@ -948,10 +944,7 @@ public class ExtensionRegistry implements IExtensionRegistry {
 				// nothing to do
 			}
 		}
-
-		// Do not synchronize on registry here because the registry handles
-		// the synchronization for us in registry.add		
-		add(contribution);
+		add(contribution); // the add() method does synchronization
 		return true;
 	}
 
@@ -961,35 +954,51 @@ public class ExtensionRegistry implements IExtensionRegistry {
 	}
 
 	/**
-	 * Creates an extension point.
+	 * Adds an extension point to the extension registry.
+	 * <p>
+	 * If the registry is not modifiable, this method is an access controlled method. 
+	 * Proper token should be passed as an argument for non-modifiable registries.
+	 * </p>
+	 * @see org.eclipse.equinox.registry.spi.RegistryStrategy#isModifiable()
 	 * 
-	 * @param contributorId - Id of the supplier of this extension point
-	 * @param extensionPointId - Id of the extension point. If non-qualified names is supplied,
-	 * it will be converted internally into a fully qualified name.
-	 * @param extensionPointLabel- display string for the extension point
-	 * @param schemaLocation - points to the location of the XML schema file
+	 * @param identifier Id of the extension point. If non-qualified names is supplied,
+	 * it will be converted internally into a fully qualified name
+	 * @param contributorId ID of the supplier of this contribution
+	 * @param persist indicates if contribution should be stored in the registry cache. If false,
+	 * contribution is not persisted in the registry cache and is lost on Eclipse restart
+	 * @param label display string for the extension point
+	 * @param schemaReference reference to the extension point schema. The schema reference 
+	 * is a URL path relative to the plug-in installation URL. May be null
+	 * @param token the key used to check permissions. Two registry keys are set in the registry
+	 * constructor {@link RegistryFactory#createRegistry(org.eclipse.equinox.registry.spi.RegistryStrategy, Object, Object)}: 
+	 * master token and a user token. Master token allows all operations; user token 
+	 * allows non-persisted registry elements to be modified.
+	 * @throws IllegalArgumentException if incorrect token is passed in
 	 */
-	public void createExtensionPoint(String contributorId, String extensionPointId, String extensionPointLabel, String schemaLocation) {
-
+	public void addExtensionPoint(String identifier, String contributorId, boolean persist, String label, String schemaReference, Object token) throws IllegalArgumentException {
+		if (!checkReadWriteAccess(token, persist))
+			throw new IllegalArgumentException("Unauthorized access to the ExtensionRegistry.addExtensionPoint() method. Check if proper access token is supplied."); //$NON-NLS-1$
 		// Extension point Id might not be null
-		if (extensionPointId == null) {
-			String message = NLS.bind(RegistryMessages.create_failedExtensionPoint, extensionPointLabel);
+		if (identifier == null) {
+			String message = NLS.bind(RegistryMessages.create_failedExtensionPoint, label);
 			log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, 0, message, null));
 		}
+		if (schemaReference == null)
+			schemaReference = ""; //$NON-NLS-1$
 
 		// prepare namespace information
 		String namespaceName = getNamespace(contributorId);
 		String namespaceOwnerId = getNamespaceOwnerId(contributorId);
 
 		// addition wraps in a contribution
-		Contribution contribution = getElementFactory().createContribution(contributorId, true);
+		Contribution contribution = getElementFactory().createContribution(contributorId, persist);
 
-		ExtensionPoint currentExtPoint = getElementFactory().createExtensionPoint(true);
-		String uniqueId = namespaceName + '.' + extensionPointId;
+		ExtensionPoint currentExtPoint = getElementFactory().createExtensionPoint(persist);
+		String uniqueId = namespaceName + '.' + identifier;
 		currentExtPoint.setUniqueIdentifier(uniqueId);
-		String labelNLS = translate(extensionPointLabel, null);
+		String labelNLS = translate(label, null);
 		currentExtPoint.setLabel(labelNLS);
-		currentExtPoint.setSchema(schemaLocation);
+		currentExtPoint.setSchema(schemaReference);
 
 		getObjectManager().addExtensionPoint(currentExtPoint, true);
 
@@ -1009,29 +1018,42 @@ public class ExtensionRegistry implements IExtensionRegistry {
 	}
 
 	/**
-	 * Creates an extension.
+	 * Adds an extension to the extension registry.
+	 * <p>
+	 * If the registry is not modifiable, this method is an access controlled method. 
+	 * Proper token should be passed as an argument for non-modifiable registries.
+	 * </p>
+	 * @see org.eclipse.equinox.registry.spi.RegistryStrategy#isModifiable()
+	 * @see org.eclipse.core.internal.registry.spi.ConfigurationElementDescription
 	 * 
-	 * @see ExtensionDescription
-	 * 
-	 * @param contributorId - Id of the supplier of this extension
-	 * @param extensionId - Id of the extension. If non-qualified name is supplied,
+	 * @param identifier Id of the extension. If non-qualified name is supplied,
 	 * it will be converted internally into a fully qualified name
-	 * @param extensionLabel - display string for this extension
-	 * @param extensionPointId - Id of the point being extended. If non-qualified
+	 * @param contributorId ID of the supplier of this contribution
+	 * @param persist indicates if contribution should be stored in the registry cache. If false,
+	 * contribution is not persisted in the registry cache and is lost on Eclipse restart
+	 * @param label display string for this extension
+	 * @param extensionPointId Id of the point being extended. If non-qualified
 	 * name is supplied, it is assumed to have the same contributorId as this extension
-	 * @param description - contents of the extension
+	 * @param configurationElements contents of the extension
+	 * @param token the key used to check permissions. Two registry keys are set in the registry
+	 * constructor {@link RegistryFactory#createRegistry(org.eclipse.equinox.registry.spi.RegistryStrategy, Object, Object)}: 
+	 * master token and a user token. Master token allows all operations; user token 
+	 * allows non-persisted registry elements to be modified.
+	 * @throws IllegalArgumentException if incorrect token is passed in
 	 */
-	public void createExtension(String contributorId, String extensionId, String extensionLabel, String extensionPointId, ExtensionDescription description) {
+	public void addExtension(String identifier, String contributorId, boolean persist, String label, String extensionPointId, ConfigurationElementDescription configurationElements, Object token) throws IllegalArgumentException {
+		if (!checkReadWriteAccess(token, persist))
+			throw new IllegalArgumentException("Unauthorized access to the ExtensionRegistry.addExtensionPoint() method. Check if proper access token is supplied."); //$NON-NLS-1$
 		// prepare namespace information
 		String namespaceName = getNamespace(contributorId);
 		String namespaceOwnerId = getNamespaceOwnerId(contributorId);
 
 		// addition wraps in a contribution
-		Contribution contribution = getElementFactory().createContribution(contributorId, true);
+		Contribution contribution = getElementFactory().createContribution(contributorId, persist);
 
-		Extension currentExtension = getElementFactory().createExtension(true);
-		currentExtension.setSimpleIdentifier(extensionId);
-		String extensionLabelNLS = translate(extensionLabel, null);
+		Extension currentExtension = getElementFactory().createExtension(persist);
+		currentExtension.setSimpleIdentifier(identifier);
+		String extensionLabelNLS = translate(label, null);
 		currentExtension.setLabel(extensionLabelNLS);
 
 		String targetExtensionPointId;
@@ -1043,7 +1065,7 @@ public class ExtensionRegistry implements IExtensionRegistry {
 
 		getObjectManager().add(currentExtension, true);
 
-		createExtensionData(namespaceOwnerId, description, currentExtension);
+		createExtensionData(namespaceOwnerId, configurationElements, currentExtension, persist);
 
 		currentExtension.setNamespaceName(namespaceName);
 
@@ -1058,15 +1080,15 @@ public class ExtensionRegistry implements IExtensionRegistry {
 	}
 
 	// Fill in the actual content of this extension
-	private void createExtensionData(String namespaceOwnerId, ExtensionDescription description, RegistryObject parent) {
-		ConfigurationElement currentConfigurationElement = getElementFactory().createConfigurationElement(true);
+	private void createExtensionData(String namespaceOwnerId, ConfigurationElementDescription description, RegistryObject parent, boolean persist) {
+		ConfigurationElement currentConfigurationElement = getElementFactory().createConfigurationElement(persist);
 		currentConfigurationElement.setNamespaceOwnerId(namespaceOwnerId);
-		currentConfigurationElement.setName(description.getElementName());
+		currentConfigurationElement.setName(description.getName());
 
-		if (description.hasProperties()) {
-			ExtensionProperty[] descriptionProperties = description.getProperties();
+		ConfigurationElementAttribute[] descriptionProperties = description.getAttributes();
+
+		if (descriptionProperties != null && descriptionProperties.length != 0) {
 			int len = descriptionProperties.length;
-
 			String[] properties = new String[len * 2];
 			for (int i = 0; i < len; i++) {
 				properties[i * 2] = descriptionProperties[i].getName();
@@ -1083,10 +1105,10 @@ public class ExtensionRegistry implements IExtensionRegistry {
 		getObjectManager().add(currentConfigurationElement, true);
 
 		// process children
-		ExtensionDescription[] children = description.getChildren();
+		ConfigurationElementDescription[] children = description.getChildren();
 		if (children != null) {
 			for (int i = 0; i < children.length; i++) {
-				createExtensionData(namespaceOwnerId, children[i], currentConfigurationElement);
+				createExtensionData(namespaceOwnerId, children[i], currentConfigurationElement, persist);
 			}
 		}
 
@@ -1100,6 +1122,55 @@ public class ExtensionRegistry implements IExtensionRegistry {
 		parent.setRawChildren(newValues);
 		currentConfigurationElement.setParentId(parent.getObjectId());
 		currentConfigurationElement.setParentType(parent instanceof ConfigurationElement ? RegistryObjectManager.CONFIGURATION_ELEMENT : RegistryObjectManager.EXTENSION);
+	}
+
+	public boolean removeExtension(IExtension extension, Object token) throws IllegalArgumentException {
+		if (!(extension instanceof ExtensionHandle))
+			return false;
+		return removeObject(((ExtensionHandle) extension).getObject(), false, token);
+	}
+
+	public boolean removeExtensionPoint(IExtensionPoint extensionPoint, Object token) throws IllegalArgumentException {
+		if (!(extensionPoint instanceof ExtensionPointHandle))
+			return false;
+		return removeObject(((ExtensionPointHandle) extensionPoint).getObject(), true, token);
+	}
+
+	private boolean removeObject(RegistryObject registryObject, boolean isExtensionPoint, Object token) {
+		if (!checkReadWriteAccess(token, registryObject.shouldPersist()))
+			throw new IllegalArgumentException("Unauthorized access to the ExtensionRegistry.removeExtension() method. Check if proper access token is supplied."); //$NON-NLS-1$
+		int id = registryObject.getObjectId();
+
+		access.enterWrite();
+		try {
+			String namespace;
+			if (isExtensionPoint)
+				namespace = removeExtensionPoint(id);
+			else
+				namespace = removeExtension(id);
+
+			Map removed = new HashMap(1);
+			removed.put(new Integer(id), registryObject);
+			registryObjects.removeObjects(removed);
+			registryObjects.addNavigableObjects(removed);
+			getDelta(namespace).setObjectManager(registryObjects.createDelegatingObjectManager(removed));
+
+			String[] possibleContributors = strategy.getNamespaceContributors(namespace);
+			for (int i = 0; i < possibleContributors.length; i++) {
+				Contribution contribution = registryObjects.getContribution(possibleContributors[i]);
+				if (contribution.hasChild(id)) {
+					contribution.unlinkChild(id);
+					if (contribution.isEmpty())
+						registryObjects.removeContribution(possibleContributors[i]);
+					break;
+				}
+			}
+
+			fireRegistryChangeEvent();
+		} finally {
+			access.exitWrite();
+		}
+		return true;
 	}
 
 	public void setCompatibilityStrategy(ICompatibilityStrategy strategy) {

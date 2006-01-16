@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2005 IBM Corporation and others.
+ * Copyright (c) 2004, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -216,11 +216,11 @@ public class RegistryObjectManager implements IObjectManager {
 	// of this method would have to retrieved the object from disk and check
 	// its "dynamic" status. The problem is that id alone is not enough to get the object
 	// from the disk; object type is needed as well.
-	public boolean isDynamic(int id) {
+	public boolean shouldPersist(int id) {
 		Object result = cache.get(id);
 		if (result != null)
-			return ((RegistryObject) result).isDynamic();
-		return false;
+			return ((RegistryObject) result).shouldPersist();
+		return true;
 	}
 
 	public synchronized RegistryObject[] getObjects(int[] values, byte type) {
@@ -581,5 +581,12 @@ public class RegistryObjectManager implements IObjectManager {
 
 	public ExtensionRegistry getRegistry() {
 		return registry;
+	}
+
+	synchronized Contribution getContribution(String id) {
+		KeyedElement tmp = newContributions.getByKey(id);
+		if (tmp == null)
+			tmp = getFormerContributions().getByKey(id);
+		return (Contribution) tmp;
 	}
 }

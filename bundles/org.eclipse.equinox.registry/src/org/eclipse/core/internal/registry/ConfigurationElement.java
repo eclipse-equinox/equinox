@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -42,12 +42,12 @@ public class ConfigurationElement extends RegistryObject {
 	//This happens when the configuration is obtained from a delta containing removed extension.
 	private String contributorId;
 
-	protected ConfigurationElement(ExtensionRegistry registry, boolean isDynamic) {
-		super(registry, isDynamic);
+	protected ConfigurationElement(ExtensionRegistry registry, boolean persist) {
+		super(registry, persist);
 	}
 
-	protected ConfigurationElement(int self, String contributorId, String name, String[] propertiesAndValue, int[] children, int extraDataOffset, int parent, byte parentType, ExtensionRegistry registry, boolean isDynamic) {
-		super(registry, isDynamic);
+	protected ConfigurationElement(int self, String contributorId, String name, String[] propertiesAndValue, int[] children, int extraDataOffset, int parent, byte parentType, ExtensionRegistry registry, boolean persist) {
+		super(registry, persist);
 
 		setObjectId(self);
 		this.contributorId = contributorId;

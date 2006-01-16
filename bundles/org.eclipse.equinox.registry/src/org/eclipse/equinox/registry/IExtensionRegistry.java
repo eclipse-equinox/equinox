@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2005 IBM Corporation and others.
+ * Copyright (c) 2003, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -51,7 +51,6 @@ import java.util.ResourceBundle;
  * <p>
  * This interface is not intended to be implemented by clients.
  * </p>
- * @since 3.0
  */
 public interface IExtensionRegistry {
 	/**
@@ -232,7 +231,6 @@ public interface IExtensionRegistry {
 	 * empty array if there are no known extensions/extension points in this registry.
 	 * 
 	 * @return all namespaces known to this registry
-	 * @since 3.0 
 	 */
 	//TODO This needs to be clarified.
 	public String[] getNamespaces();
@@ -249,36 +247,77 @@ public interface IExtensionRegistry {
 	public void removeRegistryChangeListener(EventListener listener);
 
 	/**
-	 * Adds to the extension registry an extension point(s), extension(s), or 
-	 * a combination of those described by the XML file.
-	 * 
-	 * If registry is no modifiable, this method is an access controlled method. 
-	 * Proper token is required for non-modifiable registries.
-	 * 
-	 * @see org.eclipse.equinox.registry.spi.RegistryStrategy#isModifiable()
-	 * 
-	 * @param is - stream open on the XML file. The XML file can contain an extension
+	 * Adds to this extension registry an extension point(s), extension(s), or 
+	 * a combination of those described by the XML file. The information in 
+	 * the XML file should be supplied in the same format as the plugin.xml; in fact,
+	 * Plug-in Manifest editor can be used to prepare the XML file. The top token
+	 * of the contribution (normally, "plugin" or "fragment" in the Plug-in Manifest 
+	 * editor) is ignored by this method. 
+	 * <p>
+	 * This method is an access controlled method. Proper token (master token or user token) should 
+	 * be passed as an argument.
+	 * </p>
+	 * @param is stream open on the XML file. The XML file can contain an extension
 	 * poin(s) or/and extension(s) described in the format similar to plugin.xml 
-	 * @param contributorId - ID of the supplier of this contribution
-	 * @param name - optional name of the contribution. Used for error reporting; might be null
-	 * @param translationBundle - optional resource bundle used for translations; might be null 
-	 * @param token - the key used to check permissions. The registry had two keys specified in its
-	 * creation {@link RegistryFactory#createRegistry(org.eclipse.equinox.registry.spi.RegistryStrategy, Object, Object)}: 
-	 * master token and a user token. Use the user token to specify that contribution has dynamic 
-	 * nature. If registry is created with a registry strategy that specified isModifiable() as "true", 
-	 * null can be passed instead of a token.
+	 * @param contributorId ID of the supplier of this contribution
+	 * @param persist indicates if contribution should be stored in the registry cache. If false,
+	 * contribution is not persisted in the registry cache and is lost on Eclipse restart
+	 * @param name optional name of the contribution. Used for error reporting; might be null
+	 * @param translationBundle optional resource bundle used for translations; might be null 
+	 * @param token the key used to check permissions. Two registry keys are set in the registry
+	 * constructor {@link RegistryFactory#createRegistry(org.eclipse.equinox.registry.spi.RegistryStrategy, Object, Object)}: 
+	 * master token and a user token. Master token allows all operations; user token 
+	 * allows non-persisted registry elements to be modified.
 	 * @return - true: the contribution was successfully processed; false - error in 
 	 * the processing of the contribution
+	 * @throws IllegalArgumentException if incorrect token is passed
 	 */
-	public boolean addContribution(InputStream is, String contributorId, String name, ResourceBundle translationBundle, Object token);
+	public boolean addContribution(InputStream is, String contributorId, boolean persist, String name, ResourceBundle translationBundle, Object token) throws IllegalArgumentException;
 
 	/**
-	 * Call this method to properly stop the registry. It stops registry event processing
+	 * Removes extension.
+	 * 
+	 * @param extension extension to be removed
+	 * @param token the key used to check permissions. Two registry keys are set in the registry
+	 * constructor {@link RegistryFactory#createRegistry(org.eclipse.equinox.registry.spi.RegistryStrategy, Object, Object)}: 
+	 * master token and a user token. Master token allows all operations; user token only
+	 * allows non-persisted registry elements to be modified.
+	 * <p>
+	 * This method is an access controlled method. Proper token (master token or user token) should 
+	 * be passed as an argument.
+	 * </p>
+	 * @return true if the extension was successfully removed
+	 * @throws IllegalArgumentException if incorrect token is passed
+	 */
+	public boolean removeExtension(IExtension extension, Object token) throws IllegalArgumentException;
+
+	/**
+	 * Removes extension point.
+	 * 
+	 * @param extensionPoint extension point to be removed
+	 * @param token the key used to check permissions. Two registry keys are set in the registry
+	 * constructor {@link RegistryFactory#createRegistry(org.eclipse.equinox.registry.spi.RegistryStrategy, Object, Object)}: 
+	 * master token and a user token. Master token allows all operations; user token only
+	 * allows non-persisted registry elements to be modified.
+	 * <p>
+	 * This method is an access controlled method. Proper token (master token or user token) should 
+	 * be passed as an argument.
+	 * </p>
+	 * @return true if the extension point was successfully removed
+	 * @throws IllegalArgumentException if incorrect token is passed
+	 */
+	public boolean removeExtensionPoint(IExtensionPoint extensionPoint, Object token) throws IllegalArgumentException;
+
+	/**
+	 * Call this method to properly stop the registry. The method stops registry event processing
 	 * and writes out cache information to be used in the next run. This is an access controlled 
 	 * method; master token is required.
-	 *
+	 * <p>
+	 * This method is an access controlled method. Master token should be passed as an argument.
+	 * </p>
 	 * @see RegistryFactory#createRegistry(org.eclipse.equinox.registry.spi.RegistryStrategy, Object, Object)
-	 * @param token - master token for the registry
+	 * @param token master token for the registry
+	 * @throws IllegalArgumentException if incorrect token is passed
 	 */
-	public void stop(Object token);
+	public void stop(Object token) throws IllegalArgumentException;
 }

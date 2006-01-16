@@ -24,37 +24,37 @@ public class RegistryObjectFactory {
 
 	////////////////////////////////////////////////////////////////////////////
 	// Contribution
-	public Contribution createContribution(String contributorId, boolean isDynamic) {
-		return new Contribution(contributorId, registry, isDynamic);
+	public Contribution createContribution(String contributorId, boolean persist) {
+		return new Contribution(contributorId, registry, persist);
 	}
 
 	////////////////////////////////////////////////////////////////////////////
 	// Extension point
-	public ExtensionPoint createExtensionPoint(boolean isDynamic) {
-		return new ExtensionPoint(registry, isDynamic);
+	public ExtensionPoint createExtensionPoint(boolean persist) {
+		return new ExtensionPoint(registry, persist);
 	}
 
-	public ExtensionPoint createExtensionPoint(int self, int[] children, int dataOffset, boolean isDynamic) {
-		return new ExtensionPoint(self, children, dataOffset, registry, isDynamic);
+	public ExtensionPoint createExtensionPoint(int self, int[] children, int dataOffset, boolean persist) {
+		return new ExtensionPoint(self, children, dataOffset, registry, persist);
 	}
 
 	////////////////////////////////////////////////////////////////////////////
 	// Extension
-	public Extension createExtension(boolean isDynamic) {
-		return new Extension(registry, isDynamic);
+	public Extension createExtension(boolean persist) {
+		return new Extension(registry, persist);
 	}
 
-	public Extension createExtension(int self, String simpleId, String namespace, int[] children, int extraData, boolean isDynamic) {
-		return new Extension(self, simpleId, namespace, children, extraData, registry, isDynamic);
+	public Extension createExtension(int self, String simpleId, String namespace, int[] children, int extraData, boolean persist) {
+		return new Extension(self, simpleId, namespace, children, extraData, registry, persist);
 	}
 
 	////////////////////////////////////////////////////////////////////////////
 	// Configuration element
-	public ConfigurationElement createConfigurationElement(boolean isDynamic) {
-		return new ConfigurationElement(registry, isDynamic);
+	public ConfigurationElement createConfigurationElement(boolean persist) {
+		return new ConfigurationElement(registry, persist);
 	}
 
-	public ConfigurationElement createConfigurationElement(int self, String contributorId, String name, String[] propertiesAndValue, int[] children, int extraDataOffset, int parent, byte parentType, boolean isDynamic) {
-		return new ConfigurationElement(self, contributorId, name, propertiesAndValue, children, extraDataOffset, parent, parentType, registry, isDynamic);
+	public ConfigurationElement createConfigurationElement(int self, String contributorId, String name, String[] propertiesAndValue, int[] children, int extraDataOffset, int parent, byte parentType, boolean persist) {
+		return new ConfigurationElement(self, contributorId, name, propertiesAndValue, children, extraDataOffset, parent, parentType, registry, persist);
 	}
 }
