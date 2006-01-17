@@ -23,4 +23,6 @@ Import-Package: org.eclipse.core.runtime.jobs;resolution:=optional,
  org.eclipse.osgi.service.resolver,
  org.osgi.framework,
  org.osgi.service.packageadmin,
- org.osgi.util.tracker
+ org.osgi.util.tracker,
+ org.xml.sax,
+ javax.xml.parsers
