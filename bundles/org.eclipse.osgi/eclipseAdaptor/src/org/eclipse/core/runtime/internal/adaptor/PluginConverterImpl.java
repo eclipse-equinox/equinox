@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.adaptor.*;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.adaptor.core.DevClassPathHelper;
 import org.eclipse.osgi.framework.internal.core.Constants;
+import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.service.pluginconversion.PluginConversionException;
 import org.eclipse.osgi.service.pluginconversion.PluginConverter;
@@ -707,7 +708,7 @@ public class PluginConverterImpl implements PluginConverter {
 	public synchronized File convertManifest(File pluginBaseLocation, File bundleManifestLocation, boolean compatibilityManifest, String target, boolean analyseJars, Dictionary devProperties) throws PluginConversionException {
 		convertManifest(pluginBaseLocation, compatibilityManifest, target, analyseJars, devProperties);
 		if (bundleManifestLocation == null) {
-			String cacheLocation = (String) System.getProperties().get(LocationManager.PROP_MANIFEST_CACHE);
+			String cacheLocation = FrameworkProperties.getProperty(LocationManager.PROP_MANIFEST_CACHE);
 			bundleManifestLocation = new File(cacheLocation, pluginInfo.getUniqueId() + '_' + pluginInfo.getVersion() + ".MF"); //$NON-NLS-1$
 		}
 		if (upToDate(bundleManifestLocation, pluginManifestLocation, manifestType))

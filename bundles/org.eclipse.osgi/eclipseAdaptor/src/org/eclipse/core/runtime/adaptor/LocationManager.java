@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2005 IBM Corporation and others.
+ * Copyright (c) 2004, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,6 +16,7 @@ import java.net.URL;
 import java.util.Properties;
 import org.eclipse.core.runtime.internal.adaptor.BasicLocation;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
+import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.eclipse.osgi.service.datalocation.Location;
 
 /**
@@ -105,7 +106,7 @@ public class LocationManager {
 
 	private static void mungeConfigurationLocation() {
 		// if the config property was set, munge it for backwards compatibility.
-		String location = System.getProperty(PROP_CONFIG_AREA);
+		String location = FrameworkProperties.getProperty(PROP_CONFIG_AREA);
 		if (location != null) {
 			location = buildURL(location, false).toExternalForm();
 			if (location.endsWith(".cfg")) { //$NON-NLS-1$
@@ -114,7 +115,7 @@ public class LocationManager {
 			}
 			if (!location.endsWith("/")) //$NON-NLS-1$
 				location += "/"; //$NON-NLS-1$
-			System.getProperties().put(PROP_CONFIG_AREA, location);
+			FrameworkProperties.setProperty(PROP_CONFIG_AREA, location);
 		}
 	}
 
@@ -129,13 +130,13 @@ public class LocationManager {
 		Location temp = buildLocation(PROP_USER_AREA_DEFAULT, null, "", false); //$NON-NLS-1$
 		URL defaultLocation = temp == null ? null : temp.getURL();
 		if (defaultLocation == null)
-			defaultLocation = buildURL(new File(System.getProperty(PROP_USER_HOME), "user").getAbsolutePath(), true); //$NON-NLS-1$
+			defaultLocation = buildURL(new File(FrameworkProperties.getProperty(PROP_USER_HOME), "user").getAbsolutePath(), true); //$NON-NLS-1$
 		userLocation = buildLocation(PROP_USER_AREA, defaultLocation, "", false); //$NON-NLS-1$
 
 		temp = buildLocation(PROP_INSTANCE_AREA_DEFAULT, null, "", false); //$NON-NLS-1$
 		defaultLocation = temp == null ? null : temp.getURL();
 		if (defaultLocation == null)
-			defaultLocation = buildURL(new File(System.getProperty(PROP_USER_DIR), "workspace").getAbsolutePath(), true); //$NON-NLS-1$
+			defaultLocation = buildURL(new File(FrameworkProperties.getProperty(PROP_USER_DIR), "workspace").getAbsolutePath(), true); //$NON-NLS-1$
 		instanceLocation = buildLocation(PROP_INSTANCE_AREA, defaultLocation, "", false); //$NON-NLS-1$
 
 		mungeConfigurationLocation();
@@ -157,9 +158,9 @@ public class LocationManager {
 	}
 
 	private static Location buildLocation(String property, URL defaultLocation, String userDefaultAppendage, boolean readOnlyDefault) {
-		String location = (String) System.getProperties().remove(property);
+		String location = FrameworkProperties.clearProperty(property);
 		// the user/product may specify a non-default readOnly setting   
-		String userReadOnlySetting = System.getProperty(property + READ_ONLY_AREA_SUFFIX);
+		String userReadOnlySetting = FrameworkProperties.getProperty(property + READ_ONLY_AREA_SUFFIX);
 		boolean readOnly = (userReadOnlySetting == null ? readOnlyDefault : Boolean.valueOf(userReadOnlySetting).booleanValue());
 		// if the instance location is not set, predict where the workspace will be and 
 		// put the instance area inside the workspace meta area.
@@ -187,17 +188,17 @@ public class LocationManager {
 	}
 
 	private static String substituteVar(String source, String var, String prop) {
-		String value = System.getProperty(prop, ""); //$NON-NLS-1$
+		String value = FrameworkProperties.getProperty(prop, ""); //$NON-NLS-1$
 		return value + source.substring(var.length());
 	}
 
 	private static void initializeDerivedConfigurationLocations() {
-		if (System.getProperty(PROP_MANIFEST_CACHE) == null)
-			System.getProperties().put(PROP_MANIFEST_CACHE, getConfigurationFile(MANIFESTS_DIR).getAbsolutePath());
+		if (FrameworkProperties.getProperty(PROP_MANIFEST_CACHE) == null)
+			FrameworkProperties.setProperty(PROP_MANIFEST_CACHE, getConfigurationFile(MANIFESTS_DIR).getAbsolutePath());
 	}
 
 	private static URL computeInstallConfigurationLocation() {
-		String property = System.getProperty(PROP_INSTALL_AREA);
+		String property = FrameworkProperties.getProperty(PROP_INSTALL_AREA);
 		if (property != null) {
 			try {
 				return new URL(property);
@@ -209,7 +210,7 @@ public class LocationManager {
 	}
 
 	private static URL computeSharedConfigurationLocation() {
-		String property = System.getProperty(PROP_SHARED_CONFIG_AREA);
+		String property = FrameworkProperties.getProperty(PROP_SHARED_CONFIG_AREA);
 		if (property == null)
 			return null;
 		try {
@@ -222,7 +223,7 @@ public class LocationManager {
 				// different protocol
 				return sharedConfigurationURL;
 			sharedConfigurationURL = new URL(installURL, sharedConfigurationURL.getPath());
-			System.getProperties().put(PROP_SHARED_CONFIG_AREA, sharedConfigurationURL.toExternalForm());
+			FrameworkProperties.setProperty(PROP_SHARED_CONFIG_AREA, sharedConfigurationURL.toExternalForm());
 		} catch (MalformedURLException e) {
 			// do nothing here since it is basically impossible to get a bogus url 
 		}
@@ -272,7 +273,7 @@ public class LocationManager {
 		//    is unique for each local user, and <application-id> is the one 
 		//    defined in .eclipseproduct marker file. If .eclipseproduct does not
 		//    exist, use "eclipse" as the application-id.
-		String installProperty = System.getProperty(PROP_INSTALL_AREA);
+		String installProperty = FrameworkProperties.getProperty(PROP_INSTALL_AREA);
 		URL installURL = buildURL(installProperty, true);
 		if (installURL == null)
 			return null;
@@ -295,7 +296,7 @@ public class LocationManager {
 				// in the user's home dir.
 			}
 		}
-		String userHome = System.getProperty(PROP_USER_HOME);
+		String userHome = FrameworkProperties.getProperty(PROP_USER_HOME);
 		return new File(userHome, appName + "/" + pathAppendage).getAbsolutePath(); //$NON-NLS-1$
 	}
 

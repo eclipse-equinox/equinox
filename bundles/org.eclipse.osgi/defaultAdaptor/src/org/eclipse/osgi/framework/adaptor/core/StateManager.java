@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2005 IBM Corporation and others.
+ * Copyright (c) 2003, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,7 @@ package org.eclipse.osgi.framework.adaptor.core;
 
 import java.io.File;
 import java.io.IOException;
+import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.eclipse.osgi.internal.resolver.*;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.BundleContext;
@@ -120,7 +121,7 @@ public class StateManager implements PlatformAdmin, Runnable {
 		if (removalPendings.length > 0) {
 			state = (StateImpl) state.getFactory().createState(systemState);
 			state.setResolver(getResolver(System.getSecurityManager() != null));
-			state.setPlatformProperties(System.getProperties());
+			state.setPlatformProperties(FrameworkProperties.getProperties());
 			state.resolve(false);
 		}
 		writeState(state, stateFile, lazyFile);
@@ -134,7 +135,7 @@ public class StateManager implements PlatformAdmin, Runnable {
 		if (DEBUG_READER)
 			readStartupTime = System.currentTimeMillis();
 		try {
-			boolean lazyLoad = !Boolean.valueOf(System.getProperty(PROP_NO_LAZY_LOADING)).booleanValue();
+			boolean lazyLoad = !Boolean.valueOf(FrameworkProperties.getProperty(PROP_NO_LAZY_LOADING)).booleanValue();
 			systemState = factory.readSystemState(stateFile, lazyFile, lazyLoad, expectedTimeStamp);
 			// problems in the cache (corrupted/stale), don't create a state object
 			if (systemState == null || !initializeSystemState()) {
@@ -143,7 +144,7 @@ public class StateManager implements PlatformAdmin, Runnable {
 			}
 			cachedState = true;
 			try {
-				expireTime = Long.parseLong(System.getProperty(PROP_LAZY_UNLOADING_TIME, Long.toString(expireTime)));
+				expireTime = Long.parseLong(FrameworkProperties.getProperty(PROP_LAZY_UNLOADING_TIME, Long.toString(expireTime)));
 			} catch (NumberFormatException nfe) {
 				// default to not expire
 				expireTime = 0;
@@ -190,7 +191,7 @@ public class StateManager implements PlatformAdmin, Runnable {
 	private boolean initializeSystemState() {
 		systemState.setResolver(getResolver(System.getSecurityManager() != null));
 		lastTimeStamp = systemState.getTimeStamp();
-		return !systemState.setPlatformProperties(System.getProperties());
+		return !systemState.setPlatformProperties(FrameworkProperties.getProperties());
 	}
 
 	/**

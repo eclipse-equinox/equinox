@@ -24,6 +24,7 @@ import org.eclipse.core.runtime.internal.stats.*;
 import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.adaptor.core.*;
 import org.eclipse.osgi.framework.internal.core.AbstractBundle;
+import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.eclipse.osgi.framework.internal.core.Msg;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.util.NLS;
@@ -327,9 +328,9 @@ public class EclipseClassLoader extends DefaultClassLoader {
 				} else {
 					// we have found the end of a var
 					String prop = null;
-					// get the value of the var from system properties
+					// get the value of the var from FrameworkProperties
 					if (var != null && var.length() > 0)
-						prop = System.getProperty(var);
+						prop = FrameworkProperties.getProperty(var);
 					if (prop != null)
 						// found a value; use it
 						buf.append(prop);

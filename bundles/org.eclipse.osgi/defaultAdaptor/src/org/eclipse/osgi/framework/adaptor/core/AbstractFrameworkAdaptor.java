@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2005 IBM Corporation and others.
+ * Copyright (c) 2004, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -155,7 +155,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 
 	static {
 		// check property for specified parent
-		String type = System.getProperty(PROP_PARENT_CLASSLOADER, PARENT_CLASSLOADER_BOOT);
+		String type = FrameworkProperties.getProperty(PROP_PARENT_CLASSLOADER, PARENT_CLASSLOADER_BOOT);
 		if (PARENT_CLASSLOADER_FWK.equalsIgnoreCase(type))
 			bundleClassLoaderParent = FrameworkAdaptor.class.getClassLoader();
 		else if (PARENT_CLASSLOADER_APP.equalsIgnoreCase(type))
@@ -440,7 +440,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 	protected void loadProperties() {
 		properties = new Properties();
 
-		String resource = System.getProperty(Constants.OSGI_PROPERTIES, Constants.DEFAULT_OSGI_PROPERTIES);
+		String resource = FrameworkProperties.getProperty(Constants.OSGI_PROPERTIES, Constants.DEFAULT_OSGI_PROPERTIES);
 
 		try {
 			InputStream in = null;
@@ -717,7 +717,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 	protected String[] getConfiguredExtensions() {
 		if (configuredExtensions != null)
 			return configuredExtensions;
-		String prop = System.getProperty(PROP_FRAMEWORK_EXTENSIONS);
+		String prop = FrameworkProperties.getProperty(PROP_FRAMEWORK_EXTENSIONS);
 		if (prop == null || prop.trim().length() == 0)
 			configuredExtensions = new String[0];
 		else
@@ -745,7 +745,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 		try {
 			String[] paths = bundleData.getClassPath();
 			// TODO need to be smarter about dev path here
-			if (System.getProperty("osgi.dev") != null) { //$NON-NLS-1$
+			if (FrameworkProperties.getProperty("osgi.dev") != null) { //$NON-NLS-1$
 				String[] origPaths = paths;
 				paths = new String[origPaths.length + 1];
 				System.arraycopy(origPaths, 0, paths, 0, origPaths.length);
@@ -832,7 +832,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 			return null;
 		try {
 			if (signedBundleSupport == null) {
-				String clazzName = System.getProperty(PROP_SIGNINGSUPPORT, DEFAULT_SIGNEDBUNDLE_SUPPORT);
+				String clazzName = FrameworkProperties.getProperty(PROP_SIGNINGSUPPORT, DEFAULT_SIGNEDBUNDLE_SUPPORT);
 				Class clazz = Class.forName(clazzName);
 				signedBundleSupport = (SignedBundleSupport) clazz.newInstance();
 			}
@@ -1352,7 +1352,7 @@ public abstract class AbstractFrameworkAdaptor implements FrameworkAdaptor {
 		/* if bundleStore was not set by the constructor from the -adaptor cmd line arg */
 		if (bundleStore == null) {
 			/* check the system properties */
-			bundleStore = System.getProperty(BUNDLE_STORE);
+			bundleStore = FrameworkProperties.getProperty(BUNDLE_STORE);
 
 			if (bundleStore == null) {
 				/* check the osgi.properties file, but default to "bundles" */

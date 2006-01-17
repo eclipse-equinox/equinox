@@ -24,6 +24,7 @@ import org.eclipse.osgi.framework.console.CommandProvider;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.debug.FrameworkDebugOptions;
 import org.eclipse.osgi.framework.internal.core.Constants;
+import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.service.datalocation.Location;
@@ -133,7 +134,7 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 	}
 
 	private FrameworkLog createPerformanceLog() {
-		String logFileProp = System.getProperty(EclipseStarter.PROP_LOGFILE);
+		String logFileProp = FrameworkProperties.getProperty(EclipseStarter.PROP_LOGFILE);
 		if (logFileProp != null) {
 			int lastSlash = logFileProp.lastIndexOf(File.separatorChar);
 			if (lastSlash > 0) {
@@ -149,17 +150,17 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 	 * @see FrameworkAdaptor#initialize(EventPublisher)
 	 */
 	public void initialize(EventPublisher publisher) {
-		if (Boolean.getBoolean(EclipseAdaptor.PROP_CLEAN))
+		if (Boolean.valueOf(FrameworkProperties.getProperty(EclipseAdaptor.PROP_CLEAN)).booleanValue())
 			cleanOSGiCache();
 		boolean readOnlyConfiguration = LocationManager.getConfigurationLocation().isReadOnly();
 		storageManager = initStorageManager(LocationManager.getOSGiConfigurationDir(), readOnlyConfiguration ? "none" : null, readOnlyConfiguration); //$NON-NLS-1$
 		readHeaders();
 		super.initialize(publisher);
 		// default the bootdelegation to all packages
-		if (System.getProperty(Constants.OSGI_BOOTDELEGATION) == null && !Constants.OSGI_BOOTDELEGATION_NONE.equals(System.getProperty(Constants.OSGI_JAVA_PROFILE_BOOTDELEGATION)))
-			System.getProperties().put(Constants.OSGI_BOOTDELEGATION, "*"); //$NON-NLS-1$
-		if (System.getProperty(Constants.ECLIPSE_EE_INSTALL_VERIFY) == null)
-			System.getProperties().put(Constants.ECLIPSE_EE_INSTALL_VERIFY, "false"); //$NON-NLS-1$
+		if (FrameworkProperties.getProperty(Constants.OSGI_BOOTDELEGATION) == null && !Constants.OSGI_BOOTDELEGATION_NONE.equals(FrameworkProperties.getProperty(Constants.OSGI_JAVA_PROFILE_BOOTDELEGATION)))
+			FrameworkProperties.setProperty(Constants.OSGI_BOOTDELEGATION, "*"); //$NON-NLS-1$
+		if (FrameworkProperties.getProperty(Constants.ECLIPSE_EE_INSTALL_VERIFY) == null)
+			FrameworkProperties.setProperty(Constants.ECLIPSE_EE_INSTALL_VERIFY, "false"); //$NON-NLS-1$
 		// we need to set the install path as soon as possible so we can determine
 		// the absolute location of install relative URLs
 		Location installLoc = LocationManager.getInstallLocation();
@@ -367,7 +368,7 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 		Location location;
 
 		// System property can be set to enable state saver or not.
-		if (Boolean.valueOf(System.getProperty(PROP_ENABLE_STATE_SAVER, "true")).booleanValue()) //$NON-NLS-1$
+		if (Boolean.valueOf(FrameworkProperties.getProperty(PROP_ENABLE_STATE_SAVER, "true")).booleanValue()) //$NON-NLS-1$
 			stateSaver = new StateSaver();
 
 		// Less than optimal reference to EclipseStarter here. Not sure how we
@@ -580,7 +581,7 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 					}
 				}
 				if (bundleDiscarded)
-					System.getProperties().put(EclipseStarter.PROP_REFRESH_BUNDLES, "true"); //$NON-NLS-1$
+					FrameworkProperties.setProperty(EclipseStarter.PROP_REFRESH_BUNDLES, "true"); //$NON-NLS-1$
 				return (BundleData[]) result.toArray(new BundleData[result.size()]);
 			} finally {
 				in.close();
@@ -826,7 +827,7 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 	public void handleRuntimeError(Throwable error) {
 		try {
 			// check the prop each time this happens (should NEVER happen!)
-			exitOnError = Boolean.valueOf(System.getProperty(PROP_EXITONERROR, "true")).booleanValue(); //$NON-NLS-1$
+			exitOnError = Boolean.valueOf(FrameworkProperties.getProperty(PROP_EXITONERROR, "true")).booleanValue(); //$NON-NLS-1$
 			String message = EclipseAdaptorMsg.ECLIPSE_ADAPTOR_RUNTIME_ERROR;
 			if (exitOnError && isFatalException(error))
 				message += ' ' + EclipseAdaptorMsg.ECLIPSE_ADAPTOR_EXITING;
@@ -896,7 +897,7 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 		private Thread runningThread = null;
 
 		StateSaver() {
-			String prop = System.getProperty("eclipse.stateSaveDelayInterval"); //$NON-NLS-1$
+			String prop = FrameworkProperties.getProperty("eclipse.stateSaveDelayInterval"); //$NON-NLS-1$
 			if (prop != null) {
 				try {
 					long val = Long.parseLong(prop);

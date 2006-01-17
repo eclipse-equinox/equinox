@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2004 IBM Corporation and others.
+ * Copyright (c) 2003, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,6 +15,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.Properties;
+import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.eclipse.osgi.service.debug.DebugOptions;
 
 /**
@@ -126,7 +127,7 @@ public class FrameworkDebugOptions implements DebugOptions {
 		// if no debug option was specified, don't even bother to try.
 		// Must ensure that the options slot is null as this is the signal to the
 		// platform that debugging is not enabled.
-		String debugOptionsFilename = System.getProperty("osgi.debug"); //$NON-NLS-1$
+		String debugOptionsFilename = FrameworkProperties.getProperty("osgi.debug"); //$NON-NLS-1$
 		if (debugOptionsFilename == null)
 			return;
 		options = new Properties();
@@ -135,7 +136,7 @@ public class FrameworkDebugOptions implements DebugOptions {
 			// default options location is user.dir (install location may be r/o so
 			// is not a good candidate for a trace options that need to be updatable by
 			// by the user)
-			String userDir = System.getProperty("user.dir").replace(File.separatorChar, '/'); //$NON-NLS-1$
+			String userDir = FrameworkProperties.getProperty("user.dir").replace(File.separatorChar, '/'); //$NON-NLS-1$
 			if (!userDir.endsWith("/")) //$NON-NLS-1$
 				userDir += "/"; //$NON-NLS-1$
 			debugOptionsFilename = new File(userDir, OPTIONS).toString();

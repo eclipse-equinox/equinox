@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2005 IBM Corporation and others.
+ * Copyright (c) 2003, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -87,7 +87,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 	String[] bootDelegation;
 	String[] bootDelegationStems;
 	boolean bootDelegateAll = false;
-	boolean contextBootDelegation = "true".equals(System.getProperty("osgi.context.bootdelegation", "true")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	boolean contextBootDelegation = "true".equals(FrameworkProperties.getProperty("osgi.context.bootdelegation", "true")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 	/**
 	 * The AliasMapper used to alias OS Names.
@@ -226,7 +226,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 	 *  
 	 */
 	protected void initializeProperties(Properties adaptorProperties) {
-		properties = System.getProperties();
+		properties = FrameworkProperties.getProperties();
 		Enumeration enumKeys = adaptorProperties.propertyNames();
 		while (enumKeys.hasMoreElements()) {
 			String key = (String) enumKeys.nextElement();
@@ -394,7 +394,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 		}
 		URL url = null;
 		// check for the java profile property for a url
-		String propJavaProfile = System.getProperty(Constants.OSGI_JAVA_PROFILE);
+		String propJavaProfile = FrameworkProperties.getProperty(Constants.OSGI_JAVA_PROFILE);
 		if (propJavaProfile != null)
 			try {
 				// we assume a URL
@@ -589,7 +589,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 	 *             Environment.
 	 */
 	protected boolean verifyExecutionEnvironment(Dictionary manifest) throws BundleException {
-		if (!Boolean.getBoolean(Constants.ECLIPSE_EE_INSTALL_VERIFY))
+		if (!Boolean.valueOf(FrameworkProperties.getProperty(Constants.ECLIPSE_EE_INSTALL_VERIFY)).booleanValue())
 			return true;
 		String headerValue = (String) manifest.get(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT);
 		/* If no required EE is in the manifest return true */
@@ -600,7 +600,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 		if (bundleRequiredEE.length == 0) {
 			return true;
 		}
-		String systemEE = System.getProperty(Constants.FRAMEWORK_EXECUTIONENVIRONMENT);
+		String systemEE = FrameworkProperties.getProperty(Constants.FRAMEWORK_EXECUTIONENVIRONMENT);
 		if (systemEE != null && !systemEE.equals("")) { //$NON-NLS-1$
 			ManifestElement[] systemEEs = ManifestElement.parseHeader(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT, systemEE);
 			for (int i = 0; i < systemEEs.length; i++) {

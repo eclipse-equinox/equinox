@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2005 IBM Corporation and others.
+ * Copyright (c) 2003, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -44,7 +44,7 @@ public class FrameworkConsole implements Runnable {
 	/** Default code page which must be supported by all JVMs */
 	static String defaultEncoding = "iso8859-1"; //$NON-NLS-1$
 	/** The current setting for code page */
-	static String encoding = System.getProperty("file.encoding", defaultEncoding); //$NON-NLS-1$
+	static String encoding = FrameworkProperties.getProperty("file.encoding", defaultEncoding); //$NON-NLS-1$
 
 	/** set to true if accepting commands from port */
 	protected boolean useSocketStream = false;
@@ -251,7 +251,7 @@ public class FrameworkConsole implements Runnable {
 		BufferedReader br = (BufferedReader) in;
 		//cache the console prompt String
 		String consolePrompt = "\r\n" + ConsoleMsg.CONSOLE_PROMPT; //$NON-NLS-1$
-		boolean block = System.getProperty("osgi.dev") != null || System.getProperty("osgi.console.blockOnReady") != null; //$NON-NLS-1$ //$NON-NLS-2$
+		boolean block = FrameworkProperties.getProperty("osgi.dev") != null || FrameworkProperties.getProperty("osgi.console.blockOnReady") != null; //$NON-NLS-1$ //$NON-NLS-2$
 		while (!disconnect) {
 			out.print(consolePrompt);
 			out.flush();

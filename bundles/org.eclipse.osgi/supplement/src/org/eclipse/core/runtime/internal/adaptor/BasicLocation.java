@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004 IBM Corporation and others.
+ * Copyright (c) 2004, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import org.eclipse.core.runtime.adaptor.*;
+import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.eclipse.osgi.service.datalocation.Location;
 
 /**
@@ -54,7 +55,7 @@ public class BasicLocation implements Location {
 
 	public static Locker createLocker(File lock, String lockMode) {
 		if (lockMode == null)
-			lockMode = System.getProperties().getProperty(PROP_OSGI_LOCKING);
+			lockMode = FrameworkProperties.getProperty(PROP_OSGI_LOCKING);
 		
 		if ("none".equals(lockMode)) //$NON-NLS-1$
 			return new MockLocker();
@@ -137,7 +138,7 @@ public class BasicLocation implements Location {
 		lockFile = file;
 		location = LocationManager.buildURL(value.toExternalForm(), true);
 		if (property != null)
-			System.getProperties().put(property, location.toExternalForm());
+			FrameworkProperties.setProperty(property, location.toExternalForm());
 		return lock;
 	}
 
@@ -176,7 +177,7 @@ public class BasicLocation implements Location {
 	private void setLocker(File lock) {
 		if (locker != null)
 			return;
-		String lockMode = System.getProperties().getProperty(PROP_OSGI_LOCKING);
+		String lockMode = FrameworkProperties.getProperty(PROP_OSGI_LOCKING);
 		locker = createLocker(lock, lockMode);
 	}
 

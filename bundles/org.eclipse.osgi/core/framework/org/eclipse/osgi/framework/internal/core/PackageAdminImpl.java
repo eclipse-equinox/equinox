@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2005 IBM Corporation and others.
+ * Copyright (c) 2003, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -331,7 +331,7 @@ public class PackageAdminImpl implements PackageAdmin {
 						restart = true;
 				}
 				if (restart) {
-					System.getProperties().put("osgi.forcedRestart", "true"); //$NON-NLS-1$ //$NON-NLS-2$
+					FrameworkProperties.setProperty("osgi.forcedRestart", "true"); //$NON-NLS-1$ //$NON-NLS-2$
 					// must publish PACKAGE_REFRESHED event here because we are done.
 					if (refreshPackages)
 						framework.publishFrameworkEvent(FrameworkEvent.PACKAGES_REFRESHED, framework.systemBundle, null);
@@ -581,9 +581,9 @@ public class PackageAdminImpl implements PackageAdmin {
 		ExportPackageDescription[] packages = systemBundle.getExportPackages();
 		for (int i = 0; i < packages.length; i++)
 			if (packages[i].getName().equals(Constants.OSGI_FRAMEWORK_PACKAGE)) {
-				System.getProperties().put(Constants.FRAMEWORK_VERSION, packages[i].getVersion().toString());
+				FrameworkProperties.setProperty(Constants.FRAMEWORK_VERSION, packages[i].getVersion().toString());
 				break;
 			}
-		System.getProperties().put(Constants.OSGI_IMPL_VERSION_KEY, systemBundle.getVersion().toString());
+		FrameworkProperties.setProperty(Constants.OSGI_IMPL_VERSION_KEY, systemBundle.getVersion().toString());
 	}
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2004 IBM Corporation and others.
+ * Copyright (c) 2003, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,6 +15,7 @@ import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
 import org.eclipse.osgi.framework.adaptor.FilePath;
+import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.eclipse.osgi.framework.internal.core.ReferenceInputStream;
 
 /**
@@ -64,7 +65,7 @@ public class ReferenceURLConnection extends URLConnection {
 	}
 
 	private String getInstallPath() {
-		String installURL = System.getProperty("osgi.install.area"); //$NON-NLS-1$
+		String installURL = FrameworkProperties.getProperty("osgi.install.area"); //$NON-NLS-1$
 		if (installURL == null)
 			return null;
 		if (!installURL.startsWith("file:")) //$NON-NLS-1$

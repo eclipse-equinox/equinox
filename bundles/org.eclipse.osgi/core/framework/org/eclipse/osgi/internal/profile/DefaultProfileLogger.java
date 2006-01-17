@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005 IBM Corporation and others.
+ * Copyright (c) 2005, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,6 +14,7 @@ package org.eclipse.osgi.internal.profile;
 import java.io.*;
 import java.util.*;
 import org.eclipse.osgi.framework.debug.FrameworkDebugOptions;
+import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 
 public class DefaultProfileLogger implements ProfileLogger {
 	protected static final String DEFAULTPROFILE_PROP = "osgi.defaultprofile."; //$NON-NLS-1$
@@ -83,7 +84,7 @@ public class DefaultProfileLogger implements ProfileLogger {
 	}
 
 	protected long getLaunchTime() {
-		String launchTimeString = System.getProperty("launch.startMillis"); //$NON-NLS-1$
+		String launchTimeString = FrameworkProperties.getProperty("launch.startMillis"); //$NON-NLS-1$
 		if (launchTimeString != null) {
 			return Long.parseLong(launchTimeString);
 		}
@@ -91,7 +92,7 @@ public class DefaultProfileLogger implements ProfileLogger {
 	}
 
 	protected long getMainStartTime() {
-		String timeString = System.getProperty("eclipse.startTime"); //$NON-NLS-1$
+		String timeString = FrameworkProperties.getProperty("eclipse.startTime"); //$NON-NLS-1$
 		if (timeString != null)
 			return Long.parseLong(timeString);
 
@@ -104,7 +105,7 @@ public class DefaultProfileLogger implements ProfileLogger {
 		// if osgi.debug is not available, don't force DebugOptions
 		//  to init as this variable may be set later on where 
 		//  DebugOptions will succeed.
-		if (System.getProperty("osgi.debug") != null) { //$NON-NLS-1$
+		if (FrameworkProperties.getProperty("osgi.debug") != null) { //$NON-NLS-1$
 			dbgOptions = FrameworkDebugOptions.getDefault();
 			if (dbgOptions != null) {
 				logFileName = dbgOptions.getOption(OPTION_FILENAME);
@@ -115,17 +116,17 @@ public class DefaultProfileLogger implements ProfileLogger {
 			}
 		}
 
-		if ((prop = System.getProperty(PROP_FILENAME)) != null) {
+		if ((prop = FrameworkProperties.getProperty(PROP_FILENAME)) != null) {
 			logFileName = prop;
 			if (dbgOptions != null)
 				dbgOptions.setOption(OPTION_FILENAME, logFileName);
 		}
-		if ((prop = System.getProperty(PROP_LOGSYNCHRONOUSLY)) != null) {
+		if ((prop = FrameworkProperties.getProperty(PROP_LOGSYNCHRONOUSLY)) != null) {
 			logSynchronously = Boolean.valueOf(prop).booleanValue();
 			if (dbgOptions != null)
 				dbgOptions.setOption(OPTION_LOGSYNCHRONOUSLY, new Boolean(logSynchronously).toString());
 		}
-		if ((prop = System.getProperty(PROP_BUFFERSIZE)) != null) {
+		if ((prop = FrameworkProperties.getProperty(PROP_BUFFERSIZE)) != null) {
 			try {
 				int value = Integer.parseInt(prop);
 				if (value > 0) {

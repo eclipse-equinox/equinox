@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2004 IBM Corporation and others.
+ * Copyright (c) 2003, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,6 +16,7 @@ import java.net.*;
 import java.security.*;
 import java.util.Properties;
 import java.util.zip.ZipFile;
+import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
@@ -45,10 +46,10 @@ public class SecureAction {
 	 */
 	public String getProperty(final String property) {
 		if (System.getSecurityManager() == null)
-			return System.getProperty(property);
+			return FrameworkProperties.getProperty(property);
 		return (String) AccessController.doPrivileged(new PrivilegedAction() {
 			public Object run() {
-				return System.getProperty(property);
+				return FrameworkProperties.getProperty(property);
 			}
 		}, controlContext);
 	}
@@ -63,10 +64,10 @@ public class SecureAction {
 	 */
 	public String getProperty(final String property, final String def) {
 		if (System.getSecurityManager() == null)
-			return System.getProperty(property, def);
+			return FrameworkProperties.getProperty(property, def);
 		return (String) AccessController.doPrivileged(new PrivilegedAction() {
 			public Object run() {
-				return System.getProperty(property, def);
+				return FrameworkProperties.getProperty(property, def);
 			}
 		}, controlContext);
 	}
@@ -78,10 +79,10 @@ public class SecureAction {
 	 */
 	public Properties getProperties() {
 		if (System.getSecurityManager() == null)
-			return System.getProperties();
+			return FrameworkProperties.getProperties();
 		return (Properties) AccessController.doPrivileged(new PrivilegedAction() {
 			public Object run() {
-				return System.getProperties();
+				return FrameworkProperties.getProperties();
 			}
 		}, controlContext);
 	}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2005 IBM Corporation and others.
+ * Copyright (c) 2003, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,7 @@ package org.eclipse.core.runtime.internal.adaptor;
 
 import java.util.*;
 import org.eclipse.core.runtime.adaptor.EclipseAdaptorMsg;
+import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.eclipse.osgi.service.environment.Constants;
 import org.eclipse.osgi.service.environment.EnvironmentInfo;
 import org.eclipse.osgi.util.NLS;
@@ -57,11 +58,11 @@ public class EclipseEnvironmentInfo implements EnvironmentInfo {
 	}
 
 	public boolean inDevelopmentMode() {
-		return System.getProperty("osgi.dev") != null; //$NON-NLS-1$
+		return FrameworkProperties.getProperty("osgi.dev") != null; //$NON-NLS-1$
 	}
 
 	public boolean inDebugMode() {
-		return System.getProperty("osgi.debug") != null; //$NON-NLS-1$
+		return FrameworkProperties.getProperty("osgi.debug") != null; //$NON-NLS-1$
 	}
 
 	public String[] getCommandLineArgs() {
@@ -102,7 +103,7 @@ public class EclipseEnvironmentInfo implements EnvironmentInfo {
 	 */
 	private static void setupSystemContext() {
 		// if the user didn't set the locale with a command line argument then use the default.
-		nl = System.getProperty("osgi.nl"); //$NON-NLS-1$
+		nl = FrameworkProperties.getProperty("osgi.nl"); //$NON-NLS-1$
 		if (nl != null) {
 			StringTokenizer tokenizer = new StringTokenizer(nl, "_"); //$NON-NLS-1$
 			int segments = tokenizer.countTokens();
@@ -126,35 +127,35 @@ public class EclipseEnvironmentInfo implements EnvironmentInfo {
 						break;
 				}
 				Locale.setDefault(userLocale);
-				System.getProperties().put("osgi.nl.user", nl); //$NON-NLS-1$
+				FrameworkProperties.setProperty("osgi.nl.user", nl); //$NON-NLS-1$
 			} catch (NoSuchElementException e) {
 				// fall through and use the default
 			}
 		}
 		nl = Locale.getDefault().toString();
-		System.getProperties().put("osgi.nl", nl); //$NON-NLS-1$
+		FrameworkProperties.setProperty("osgi.nl", nl); //$NON-NLS-1$
 
 		// if the user didn't set the operating system with a command line 
 		// argument then use the default.
-		os = System.getProperty("osgi.os"); //$NON-NLS-1$
+		os = FrameworkProperties.getProperty("osgi.os"); //$NON-NLS-1$
 		if (os == null) {
-			os = guessOS(System.getProperty("os.name"));//$NON-NLS-1$);
-			System.getProperties().put("osgi.os", os); //$NON-NLS-1$
+			os = guessOS(FrameworkProperties.getProperty("os.name"));//$NON-NLS-1$);
+			FrameworkProperties.setProperty("osgi.os", os); //$NON-NLS-1$
 		}
 
 		// if the user didn't set the window system with a command line 
 		// argument then use the default.
-		ws = System.getProperty("osgi.ws"); //$NON-NLS-1$
+		ws = FrameworkProperties.getProperty("osgi.ws"); //$NON-NLS-1$
 		if (ws == null) {
 			ws = guessWS(os);
-			System.getProperties().put("osgi.ws", ws); //$NON-NLS-1$
+			FrameworkProperties.setProperty("osgi.ws", ws); //$NON-NLS-1$
 		}
 
 		// if the user didn't set the system architecture with a command line 
 		// argument then use the default.
-		arch = System.getProperty("osgi.arch"); //$NON-NLS-1$
+		arch = FrameworkProperties.getProperty("osgi.arch"); //$NON-NLS-1$
 		if (arch == null) {
-			String name = System.getProperty("os.arch");//$NON-NLS-1$
+			String name = FrameworkProperties.getProperty("os.arch");//$NON-NLS-1$
 			// Map i386 architecture to x86
 			if (name.equalsIgnoreCase(INTERNAL_ARCH_I386))
 				arch = Constants.ARCH_X86;
@@ -163,7 +164,7 @@ public class EclipseEnvironmentInfo implements EnvironmentInfo {
 				arch = Constants.ARCH_X86_64;
 			else
 				arch = name;
-			System.getProperties().put("osgi.arch", arch); //$NON-NLS-1$			
+			FrameworkProperties.setProperty("osgi.arch", arch); //$NON-NLS-1$			
 		}
 	}
 

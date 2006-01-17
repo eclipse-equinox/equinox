@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004 IBM Corporation and others.
+ * Copyright (c) 2004, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,6 +15,7 @@ import java.util.Properties;
 import org.eclipse.core.runtime.adaptor.EclipseAdaptorMsg;
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
+import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
@@ -118,7 +119,7 @@ public class EclipseCommandProvider implements CommandProvider {
 	}
 	
 	public void _getprop(CommandInterpreter ci) throws Exception {
-		Properties allProperties = System.getProperties();
+		Properties allProperties = FrameworkProperties.getProperties();
 		String filter = ci.nextArgument();
 		Enumeration propertyNames = allProperties.keys();
 		while(propertyNames.hasMoreElements()) {

@@ -16,6 +16,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import org.eclipse.core.runtime.internal.adaptor.EclipseEnvironmentInfo;
+import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.framework.util.SecureAction;
@@ -159,7 +160,7 @@ public class EclipseLog implements FrameworkLog {
 	protected String getSessionTimestamp() {
 		// Main should have set the session start-up timestamp so return that. 
 		// Return the "now" time if not available.
-		String ts = System.getProperty("eclipse.startTime"); //$NON-NLS-1$
+		String ts = FrameworkProperties.getProperty("eclipse.startTime"); //$NON-NLS-1$
 		if (ts != null) {
 			try {
 				return getDate(new Date(Long.parseLong(ts)));
@@ -187,7 +188,7 @@ public class EclipseLog implements FrameworkLog {
 		// Write out certain values found in System.getProperties()
 		try {
 			String key = "eclipse.buildId"; //$NON-NLS-1$
-			String value = System.getProperty(key, "unknown"); //$NON-NLS-1$
+			String value = FrameworkProperties.getProperty(key, "unknown"); //$NON-NLS-1$
 			writeln(key + "=" + value); //$NON-NLS-1$
 
 			key = "java.fullversion"; //$NON-NLS-1$
@@ -315,7 +316,7 @@ public class EclipseLog implements FrameworkLog {
 			backupIdx = 0;
 		}
 		setOutput(newFile, null, append);
-		System.getProperties().put(EclipseStarter.PROP_LOGFILE, newFile.getAbsolutePath());
+		FrameworkProperties.setProperty(EclipseStarter.PROP_LOGFILE, newFile.getAbsolutePath());
 	}
 
 	public synchronized File getFile() {

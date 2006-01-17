@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2005 IBM Corporation and others.
+ * Copyright (c) 2003, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1214,7 +1214,7 @@ public void _headers(CommandInterpreter intp) throws Exception {
 	 * @param intp A CommandInterpreter object containing the command and it's arguments.
 	 */
 public void _props(CommandInterpreter intp) throws Exception {
-		intp.printDictionary(System.getProperties(), ConsoleMsg.CONSOLE_SYSTEM_PROPERTIES_TITLE);
+		intp.printDictionary(FrameworkProperties.getProperties(), ConsoleMsg.CONSOLE_SYSTEM_PROPERTIES_TITLE);
 	}
 	/**
 	 * Handles the setprop command's abbreviation.  Invokes _setprop()
@@ -1238,7 +1238,7 @@ public void _setprop(CommandInterpreter intp) throws Exception {
 		} else {
 			InputStream in = new ByteArrayInputStream(argument.getBytes());
 			try {
-				Properties sysprops = System.getProperties();
+				Properties sysprops = FrameworkProperties.getProperties();
 				Properties newprops = new Properties();
 				newprops.load(in);
 				intp.println(ConsoleMsg.CONSOLE_SETTING_PROPERTIES_TITLE);

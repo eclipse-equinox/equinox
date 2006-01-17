@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2005 IBM Corporation and others.
+ * Copyright (c) 2004, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,7 +34,7 @@ public class SystemBundleData extends AbstractBundleData {
 	}
 
 	private File getOsgiBase() {
-		String frameworkLocation = System.getProperty(OSGI_FRAMEWORK);
+		String frameworkLocation = FrameworkProperties.getProperty(OSGI_FRAMEWORK);
 		if (frameworkLocation != null)
 			// TODO assumes the location is a file URL
 			return new File(frameworkLocation.substring(5));
@@ -45,7 +45,7 @@ public class SystemBundleData extends AbstractBundleData {
 		} catch (Throwable e) {
 			// do nothing
 		}
-		frameworkLocation = System.getProperty("user.dir"); //$NON-NLS-1$
+		frameworkLocation = FrameworkProperties.getProperty("user.dir"); //$NON-NLS-1$
 		if (frameworkLocation != null)
 			return new File(frameworkLocation);
 		return null;

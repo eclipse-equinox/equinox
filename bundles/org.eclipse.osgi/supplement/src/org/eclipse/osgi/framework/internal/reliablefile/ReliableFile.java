@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2005 IBM Corporation and others.
+ * Copyright (c) 2003, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,6 +15,7 @@ import java.io.*;
 import java.util.*;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
+import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 
 /**
  * ReliableFile class used by ReliableFileInputStream and ReliableOutputStream.
@@ -91,21 +92,21 @@ public class ReliableFile {
 	private static int[] lastGenerations = null;
 
 	static {
-		String prop = System.getProperty(PROP_MAX_BUFFER); 
+		String prop = FrameworkProperties.getProperty(PROP_MAX_BUFFER); 
 		if (prop != null) {
 			try {
 				maxInputStreamBuffer = Integer.parseInt(prop);
 			} catch (NumberFormatException e) {/*ignore*/
 			}
 		}
-		prop = System.getProperty(PROP_MAX_GENERATIONS); 
+		prop = FrameworkProperties.getProperty(PROP_MAX_GENERATIONS); 
 		if (prop != null) {
 			try {
 				defaultMaxGenerations = Integer.parseInt(prop);
 			} catch (NumberFormatException e) {/*ignore*/
 			}
 		}
-		prop = System.getProperty(PROP_OSGI_LOCKING);
+		prop = FrameworkProperties.getProperty(PROP_OSGI_LOCKING);
 		if (prop != null) {
 			if (prop.equals("none")) { //$NON-NLS-1$
 				fileSharing = false;

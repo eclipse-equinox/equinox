@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2005 IBM Corporation and others.
+ * Copyright (c) 2004, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,6 +14,7 @@ import java.io.*;
 import java.util.*;
 import org.eclipse.core.runtime.internal.adaptor.BasicLocation;
 import org.eclipse.core.runtime.internal.adaptor.Locker;
+import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.eclipse.osgi.framework.internal.reliablefile.*;
 import org.eclipse.osgi.storagemanager.StorageManager;
 
@@ -45,8 +46,8 @@ import org.eclipse.osgi.storagemanager.StorageManager;
 public class FileManager {
 	protected static final int FILETYPE_STANDARD = 0;
 	protected static final int FILETYPE_RELIABLEFILE = 1;
-	private static boolean tempCleanup = Boolean.valueOf(System.getProperty("osgi.embedded.cleanTempFiles")).booleanValue(); //$NON-NLS-1$
-	private static boolean openCleanup = Boolean.valueOf(System.getProperty("osgi.embedded.cleanupOnOpen")).booleanValue(); //$NON-NLS-1$
+	private static boolean tempCleanup = Boolean.valueOf(FrameworkProperties.getProperty("osgi.embedded.cleanTempFiles")).booleanValue(); //$NON-NLS-1$
+	private static boolean openCleanup = Boolean.valueOf(FrameworkProperties.getProperty("osgi.embedded.cleanupOnOpen")).booleanValue(); //$NON-NLS-1$
 
 	private class Entry {
 		int readId;

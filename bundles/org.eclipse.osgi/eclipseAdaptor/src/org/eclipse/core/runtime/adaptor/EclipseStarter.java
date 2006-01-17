@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.internal.adaptor.*;
 import org.eclipse.core.runtime.internal.stats.StatsManager;
 import org.eclipse.osgi.framework.adaptor.FilePath;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
+import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.eclipse.osgi.framework.internal.core.OSGi;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
@@ -134,10 +135,10 @@ public class EclipseStarter {
 	 * It only works when the framework is being jared as a single jar
 	 */
 	public static void main(String[] args) throws Exception {
-		if (System.getProperty("eclipse.startTime") == null) //$NON-NLS-1$
-			System.getProperties().put("eclipse.startTime", Long.toString(System.currentTimeMillis())); //$NON-NLS-1$
-		if (System.getProperty(PROP_NOSHUTDOWN) == null)
-			System.getProperties().put(PROP_NOSHUTDOWN, "true"); //$NON-NLS-1$
+		if (FrameworkProperties.getProperty("eclipse.startTime") == null) //$NON-NLS-1$
+			FrameworkProperties.setProperty("eclipse.startTime", Long.toString(System.currentTimeMillis())); //$NON-NLS-1$
+		if (FrameworkProperties.getProperty(PROP_NOSHUTDOWN) == null)
+			FrameworkProperties.setProperty(PROP_NOSHUTDOWN, "true"); //$NON-NLS-1$
 		run(args, null);
 	}
 
@@ -163,7 +164,7 @@ public class EclipseStarter {
 		try {
 			startup(args, endSplashHandler);
 			startupFailed = false;
-			if (Boolean.getBoolean(PROP_IGNOREAPP))
+			if (Boolean.valueOf(FrameworkProperties.getProperty(PROP_IGNOREAPP)).booleanValue())
 				return null;
 			return run(null);
 		} catch (Throwable e) {
@@ -180,7 +181,7 @@ public class EclipseStarter {
 				e.printStackTrace();
 		} finally {
 			try {
-				if (!Boolean.getBoolean(PROP_NOSHUTDOWN))
+				if (!Boolean.valueOf(FrameworkProperties.getProperty(PROP_NOSHUTDOWN)).booleanValue())
 					shutdown();
 			} catch (Throwable e) {
 				FrameworkLogEntry logEntry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, EclipseAdaptorMsg.ECLIPSE_STARTUP_SHUTDOWN_ERROR, 1, e, null);
@@ -200,13 +201,13 @@ public class EclipseStarter {
 			}
 		}
 		// first check to see if the framework is forcing a restart
-		if (Boolean.getBoolean(PROP_FORCED_RESTART)) {
-			System.getProperties().put(PROP_EXITCODE, "23"); //$NON-NLS-1$
+		if (Boolean.valueOf(FrameworkProperties.getProperty(PROP_FORCED_RESTART)).booleanValue()) {
+			FrameworkProperties.setProperty(PROP_EXITCODE, "23"); //$NON-NLS-1$
 			return null;
 		}
 		// we only get here if an error happened
-		System.getProperties().put(PROP_EXITCODE, "13"); //$NON-NLS-1$
-		System.getProperties().put(PROP_EXITDATA, NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_ERROR_CHECK_LOG, log == null ? null : log.getFile().getPath()));
+		FrameworkProperties.setProperty(PROP_EXITCODE, "13"); //$NON-NLS-1$
+		FrameworkProperties.setProperty(PROP_EXITDATA, NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_ERROR_CHECK_LOG, log == null ? null : log.getFile().getPath()));
 		return null;
 	}
 
@@ -220,7 +221,7 @@ public class EclipseStarter {
 
 	protected static FrameworkLog createFrameworkLog() {
 		FrameworkLog frameworkLog;
-		String logFileProp = System.getProperty(EclipseStarter.PROP_LOGFILE);
+		String logFileProp = FrameworkProperties.getProperty(EclipseStarter.PROP_LOGFILE);
 		if (logFileProp != null) {
 			frameworkLog = new EclipseLog(new File(logFileProp));
 		} else {
@@ -233,12 +234,12 @@ public class EclipseStarter {
 			if (configAreaDirectory != null) {
 				String logFileName = Long.toString(System.currentTimeMillis()) + ".log"; //$NON-NLS-1$
 				File logFile = new File(configAreaDirectory, logFileName);
-				System.getProperties().put(EclipseStarter.PROP_LOGFILE, logFile.getAbsolutePath());
+				FrameworkProperties.setProperty(EclipseStarter.PROP_LOGFILE, logFile.getAbsolutePath());
 				frameworkLog = new EclipseLog(logFile);
 			} else
 				frameworkLog = new EclipseLog();
 		}
-		if ("true".equals(System.getProperty(EclipseStarter.PROP_CONSOLE_LOG))) //$NON-NLS-1$
+		if ("true".equals(FrameworkProperties.getProperty(EclipseStarter.PROP_CONSOLE_LOG))) //$NON-NLS-1$
 			frameworkLog.setConsoleLog(true);
 		return frameworkLog;
 	}
@@ -280,14 +281,14 @@ public class EclipseStarter {
 		osgi.launch();
 		if (Profile.PROFILE && Profile.STARTUP)
 			Profile.logTime("EclipseStarter.startup()", "osgi launched"); //$NON-NLS-1$ //$NON-NLS-2$
-		String console = System.getProperty(PROP_CONSOLE);
+		String console = FrameworkProperties.getProperty(PROP_CONSOLE);
 		if (console != null) {
 			startConsole(osgi, new String[0], console);
 			if (Profile.PROFILE && Profile.STARTUP)
 				Profile.logTime("EclipseStarter.startup()", "console started"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		context = osgi.getBundleContext();
-		if ("true".equals(System.getProperty(PROP_REFRESH_BUNDLES))) //$NON-NLS-1$
+		if ("true".equals(FrameworkProperties.getProperty(PROP_REFRESH_BUNDLES))) //$NON-NLS-1$
 			refreshPackages(getCurrentBundles(false));
 		publishSplashScreen(endSplashHandler);
 		if (Profile.PROFILE && Profile.STARTUP)
@@ -300,7 +301,7 @@ public class EclipseStarter {
 			Profile.logTime("EclipseStarter.startup()", "StartLevel set"); //$NON-NLS-1$ //$NON-NLS-2$
 		// they should all be active by this time
 		ensureBundlesActive(startBundles);
-		if (debug || System.getProperty(PROP_DEV) != null)
+		if (debug || FrameworkProperties.getProperty(PROP_DEV) != null)
 			// only spend time showing unresolved bundles in dev/debug mode
 			logUnresolvedBundles(context.getBundles());
 		running = true;
@@ -333,7 +334,7 @@ public class EclipseStarter {
 	}
 
 	private static int getStartLevel() {
-		String level = System.getProperty(PROP_INITIAL_STARTLEVEL);
+		String level = FrameworkProperties.getProperty(PROP_INITIAL_STARTLEVEL);
 		if (level != null)
 			try {
 				return Integer.parseInt(level);
@@ -365,7 +366,7 @@ public class EclipseStarter {
 		if (initialize)
 			return new Integer(0);
 		// create the ApplicationLauncher and register it as a service
-		EclipseAppLauncher launcher = new EclipseAppLauncher(context, Boolean.getBoolean(PROP_ALLOW_APPRELAUNCH), !Boolean.getBoolean(PROP_APPLICATION_NODEFAULT));
+		EclipseAppLauncher launcher = new EclipseAppLauncher(context, Boolean.valueOf(FrameworkProperties.getProperty(PROP_ALLOW_APPRELAUNCH)).booleanValue(), !Boolean.valueOf(FrameworkProperties.getProperty(PROP_APPLICATION_NODEFAULT)).booleanValue());
 		context.registerService(ApplicationLauncher.class.getName(), launcher, null);
 		// must start the launcher AFTER service restration because this method 
 		// blocks and runs the application on the current thread.  This method 
@@ -590,11 +591,11 @@ public class EclipseStarter {
 	 */
 	private static Bundle[] loadBasicBundles() throws IOException {
 		long startTime = System.currentTimeMillis();
-		String osgiBundles = System.getProperty(PROP_BUNDLES);
-		String osgiExtensions = System.getProperty(PROP_EXTENSIONS);
+		String osgiBundles = FrameworkProperties.getProperty(PROP_BUNDLES);
+		String osgiExtensions = FrameworkProperties.getProperty(PROP_EXTENSIONS);
 		if (osgiExtensions != null && osgiExtensions.length() > 0) {
 			osgiBundles = osgiExtensions + ',' + osgiBundles;
-			System.getProperties().put(PROP_BUNDLES, osgiBundles);
+			FrameworkProperties.setProperty(PROP_BUNDLES, osgiBundles);
 		}
 		String[] installEntries = getArrayFromList(osgiBundles, ","); //$NON-NLS-1$
 		// get the initial bundle list from the installEntries
@@ -628,7 +629,7 @@ public class EclipseStarter {
 	private static InitialBundle[] getInitialBundles(String[] installEntries) throws MalformedURLException {
 		searchCandidates.clear();
 		ArrayList result = new ArrayList(installEntries.length);
-		int defaultStartLevel = Integer.parseInt(System.getProperty(PROP_BUNDLES_STARTLEVEL, DEFAULT_BUNDLES_STARTLEVEL));
+		int defaultStartLevel = Integer.parseInt(FrameworkProperties.getProperty(PROP_BUNDLES_STARTLEVEL, DEFAULT_BUNDLES_STARTLEVEL));
 		String syspath = getSysPath();
 		for (int i = 0; i < installEntries.length; i++) {
 			String name = installEntries[i];
@@ -682,7 +683,7 @@ public class EclipseStarter {
 		semaphore.acquire();
 		context.removeFrameworkListener(listener);
 		context.ungetService(packageAdminRef);
-		if (Boolean.getBoolean(PROP_FORCED_RESTART)) {
+		if (Boolean.valueOf(FrameworkProperties.getProperty(PROP_FORCED_RESTART)).booleanValue()) {
 			// wait for the system bundle to stop
 			Bundle systemBundle = context.getBundle(0);
 			int i = 0;
@@ -707,7 +708,7 @@ public class EclipseStarter {
 	 */
 	private static void startConsole(OSGi osgi, String[] consoleArgs, String consolePort) {
 		try {
-			String consoleClassName = System.getProperty(PROP_CONSOLE_CLASS, DEFAULT_CONSOLE_CLASS);
+			String consoleClassName = FrameworkProperties.getProperty(PROP_CONSOLE_CLASS, DEFAULT_CONSOLE_CLASS);
 			Class consoleClass = Class.forName(consoleClassName);
 			Class[] parameterTypes;
 			Object[] parameters;
@@ -737,7 +738,7 @@ public class EclipseStarter {
 	 *  @return a FrameworkAdaptor object
 	 */
 	private static FrameworkAdaptor createAdaptor() throws Exception {
-		String adaptorClassName = System.getProperty(PROP_ADAPTOR, DEFAULT_ADAPTOR_CLASS);
+		String adaptorClassName = FrameworkProperties.getProperty(PROP_ADAPTOR, DEFAULT_ADAPTOR_CLASS);
 		Class adaptorClass = Class.forName(adaptorClassName);
 		Class[] constructorArgs = new Class[] {String[].class};
 		Constructor constructor = adaptorClass.getConstructor(constructorArgs);
@@ -763,7 +764,7 @@ public class EclipseStarter {
 			// simply enable debug.  Otherwise, assume that that the following arg is
 			// actually the filename of an options file.  This will be processed below.
 			if (args[i].equalsIgnoreCase(DEBUG) && ((i + 1 == args.length) || ((i + 1 < args.length) && (args[i + 1].startsWith("-"))))) { //$NON-NLS-1$
-				System.getProperties().put(PROP_DEBUG, ""); //$NON-NLS-1$
+				FrameworkProperties.setProperty(PROP_DEBUG, ""); //$NON-NLS-1$
 				debug = true;
 				found = true;
 			}
@@ -773,7 +774,7 @@ public class EclipseStarter {
 			// simply enable development mode.  Otherwise, assume that that the following arg is
 			// actually some additional development time class path entries.  This will be processed below.
 			if (args[i].equalsIgnoreCase(DEV) && ((i + 1 == args.length) || ((i + 1 < args.length) && (args[i + 1].startsWith("-"))))) { //$NON-NLS-1$
-				System.getProperties().put(PROP_DEV, ""); //$NON-NLS-1$
+				FrameworkProperties.setProperty(PROP_DEV, ""); //$NON-NLS-1$
 				found = true;
 			}
 
@@ -785,24 +786,24 @@ public class EclipseStarter {
 
 			// look for the clean flag.
 			if (args[i].equalsIgnoreCase(CLEAN)) {
-				System.getProperties().put(PROP_CLEAN, "true"); //$NON-NLS-1$
+				FrameworkProperties.setProperty(PROP_CLEAN, "true"); //$NON-NLS-1$
 				found = true;
 			}
 
 			// look for the consoleLog flag
 			if (args[i].equalsIgnoreCase(CONSOLE_LOG)) {
-				System.getProperties().put(PROP_CONSOLE_LOG, "true"); //$NON-NLS-1$
+				FrameworkProperties.setProperty(PROP_CONSOLE_LOG, "true"); //$NON-NLS-1$
 				found = true;
 			}
 
 			// look for the console with no port.  
 			if (args[i].equalsIgnoreCase(CONSOLE) && ((i + 1 == args.length) || ((i + 1 < args.length) && (args[i + 1].startsWith("-"))))) { //$NON-NLS-1$
-				System.getProperties().put(PROP_CONSOLE, ""); //$NON-NLS-1$
+				FrameworkProperties.setProperty(PROP_CONSOLE, ""); //$NON-NLS-1$
 				found = true;
 			}
 
 			if (args[i].equalsIgnoreCase(NOEXIT)) {
-				System.getProperties().put(PROP_NOSHUTDOWN, "true"); //$NON-NLS-1$
+				FrameworkProperties.setProperty(PROP_NOSHUTDOWN, "true"); //$NON-NLS-1$
 				found = true;
 			}
 
@@ -819,62 +820,62 @@ public class EclipseStarter {
 
 			// look for the console and port.  
 			if (args[i - 1].equalsIgnoreCase(CONSOLE)) {
-				System.getProperties().put(PROP_CONSOLE, arg);
+				FrameworkProperties.setProperty(PROP_CONSOLE, arg);
 				found = true;
 			}
 
 			// look for the configuration location .  
 			if (args[i - 1].equalsIgnoreCase(CONFIGURATION)) {
-				System.getProperties().put(LocationManager.PROP_CONFIG_AREA, arg);
+				FrameworkProperties.setProperty(LocationManager.PROP_CONFIG_AREA, arg);
 				found = true;
 			}
 
 			// look for the data location for this instance.  
 			if (args[i - 1].equalsIgnoreCase(DATA)) {
-				System.getProperties().put(LocationManager.PROP_INSTANCE_AREA, arg);
+				FrameworkProperties.setProperty(LocationManager.PROP_INSTANCE_AREA, arg);
 				found = true;
 			}
 
 			// look for the user location for this instance.  
 			if (args[i - 1].equalsIgnoreCase(USER)) {
-				System.getProperties().put(LocationManager.PROP_USER_AREA, arg);
+				FrameworkProperties.setProperty(LocationManager.PROP_USER_AREA, arg);
 				found = true;
 			}
 
 			// look for the development mode and class path entries.  
 			if (args[i - 1].equalsIgnoreCase(DEV)) {
-				System.getProperties().put(PROP_DEV, arg);
+				FrameworkProperties.setProperty(PROP_DEV, arg);
 				found = true;
 			}
 
 			// look for the debug mode and option file location.  
 			if (args[i - 1].equalsIgnoreCase(DEBUG)) {
-				System.getProperties().put(PROP_DEBUG, arg);
+				FrameworkProperties.setProperty(PROP_DEBUG, arg);
 				debug = true;
 				found = true;
 			}
 
 			// look for the window system.  
 			if (args[i - 1].equalsIgnoreCase(WS)) {
-				System.getProperties().put(PROP_WS, arg);
+				FrameworkProperties.setProperty(PROP_WS, arg);
 				found = true;
 			}
 
 			// look for the operating system
 			if (args[i - 1].equalsIgnoreCase(OS)) {
-				System.getProperties().put(PROP_OS, arg);
+				FrameworkProperties.setProperty(PROP_OS, arg);
 				found = true;
 			}
 
 			// look for the system architecture
 			if (args[i - 1].equalsIgnoreCase(ARCH)) {
-				System.getProperties().put(PROP_ARCH, arg);
+				FrameworkProperties.setProperty(PROP_ARCH, arg);
 				found = true;
 			}
 
 			// look for the nationality/language
 			if (args[i - 1].equalsIgnoreCase(NL)) {
-				System.getProperties().put(PROP_NL, arg);
+				FrameworkProperties.setProperty(PROP_NL, arg);
 				found = true;
 			}
 			// done checking for args.  Remember where an arg was found 
@@ -918,10 +919,10 @@ public class EclipseStarter {
 	}
 
 	protected static String getSysPath() {
-		String result = System.getProperty(PROP_SYSPATH);
+		String result = FrameworkProperties.getProperty(PROP_SYSPATH);
 		if (result != null)
 			return result;
-		result = getSysPathFromURL(System.getProperty(PROP_FRAMEWORK));
+		result = getSysPathFromURL(FrameworkProperties.getProperty(PROP_FRAMEWORK));
 		if (result == null)
 			result = getSysPathFromCodeSource();
 		if (result == null)
@@ -931,7 +932,7 @@ public class EclipseStarter {
 			chars[0] = Character.toLowerCase(chars[0]);
 			result = new String(chars);
 		}
-		System.getProperties().put(PROP_SYSPATH, result);
+		FrameworkProperties.setProperty(PROP_SYSPATH, result);
 		return result;
 	}
 
@@ -963,7 +964,7 @@ public class EclipseStarter {
 		String result = url.getFile();
 		if (result.endsWith(".jar")) { //$NON-NLS-1$
 			result = result.substring(0, result.lastIndexOf('/'));
-			if ("folder".equals(System.getProperty(PROP_FRAMEWORK_SHAPE))) //$NON-NLS-1$
+			if ("folder".equals(FrameworkProperties.getProperty(PROP_FRAMEWORK_SHAPE))) //$NON-NLS-1$
 				result = result.substring(0, result.lastIndexOf('/'));
 		} else {
 			if (result.endsWith("/")) //$NON-NLS-1$
@@ -1077,7 +1078,7 @@ public class EclipseStarter {
 		} catch (MalformedURLException e) {
 			// its ok.  This should never happen
 		}
-		mergeProperties(System.getProperties(), loadProperties(location));
+		mergeProperties(FrameworkProperties.getProperties(), loadProperties(location));
 	}
 
 	private static Properties loadProperties(URL location) {
@@ -1267,16 +1268,16 @@ public class EclipseStarter {
 
 	private static String buildCommandLine(String arg, String value) {
 		StringBuffer result = new StringBuffer(300);
-		String entry = System.getProperty(PROP_VM);
+		String entry = FrameworkProperties.getProperty(PROP_VM);
 		if (entry == null)
 			return null;
 		result.append(entry);
 		result.append('\n');
 		// append the vmargs and commands.  Assume that these already end in \n
-		entry = System.getProperty(PROP_VMARGS);
+		entry = FrameworkProperties.getProperty(PROP_VMARGS);
 		if (entry != null)
 			result.append(entry);
-		entry = System.getProperty(PROP_COMMANDS);
+		entry = FrameworkProperties.getProperty(PROP_COMMANDS);
 		if (entry != null)
 			result.append(entry);
 		String commandLine = result.toString();
@@ -1295,28 +1296,28 @@ public class EclipseStarter {
 
 	private static void initializeProperties() {
 		// initialize some framework properties that must always be set
-		if (System.getProperty(PROP_FRAMEWORK) == null || System.getProperty(PROP_INSTALL_AREA) == null) {
+		if (FrameworkProperties.getProperty(PROP_FRAMEWORK) == null || FrameworkProperties.getProperty(PROP_INSTALL_AREA) == null) {
 			CodeSource cs = EclipseStarter.class.getProtectionDomain().getCodeSource();
 			if (cs == null)
 				throw new IllegalArgumentException(NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_PROPS_NOT_SET, PROP_FRAMEWORK + ", " + PROP_INSTALL_AREA)); //$NON-NLS-1$
 			URL url = cs.getLocation();
 			// allow props to be preset
-			if (System.getProperty(PROP_FRAMEWORK) == null)
-				System.getProperties().put(PROP_FRAMEWORK, url.toExternalForm());
-			if (System.getProperty(PROP_INSTALL_AREA) == null) {
+			if (FrameworkProperties.getProperty(PROP_FRAMEWORK) == null)
+				FrameworkProperties.setProperty(PROP_FRAMEWORK, url.toExternalForm());
+			if (FrameworkProperties.getProperty(PROP_INSTALL_AREA) == null) {
 				String filePart = url.getFile();
-				System.getProperties().put(PROP_INSTALL_AREA, filePart.substring(0, filePart.lastIndexOf('/')));
+				FrameworkProperties.setProperty(PROP_INSTALL_AREA, filePart.substring(0, filePart.lastIndexOf('/')));
 			}
 		}
 		// always decode these properties
-		System.getProperties().put(PROP_FRAMEWORK, decode(System.getProperty(PROP_FRAMEWORK)));
-		System.getProperties().put(PROP_INSTALL_AREA, decode(System.getProperty(PROP_INSTALL_AREA)));
+		FrameworkProperties.setProperty(PROP_FRAMEWORK, decode(FrameworkProperties.getProperty(PROP_FRAMEWORK)));
+		FrameworkProperties.setProperty(PROP_INSTALL_AREA, decode(FrameworkProperties.getProperty(PROP_INSTALL_AREA)));
 	}
 
 	private static void finalizeProperties() {
 		// if check config is unknown and we are in dev mode, 
-		if (System.getProperty(PROP_DEV) != null && System.getProperty(PROP_CHECK_CONFIG) == null)
-			System.getProperties().put(PROP_CHECK_CONFIG, "true"); //$NON-NLS-1$
+		if (FrameworkProperties.getProperty(PROP_DEV) != null && FrameworkProperties.getProperty(PROP_CHECK_CONFIG) == null)
+			FrameworkProperties.setProperty(PROP_CHECK_CONFIG, "true"); //$NON-NLS-1$
 	}
 
 	private static class InitialBundle {

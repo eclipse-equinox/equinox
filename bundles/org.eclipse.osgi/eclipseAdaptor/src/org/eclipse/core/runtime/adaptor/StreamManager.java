@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2005 IBM Corporation and others.
+ * Copyright (c) 2004, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,7 @@
 package org.eclipse.core.runtime.adaptor;
 
 import java.io.*;
+import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.eclipse.osgi.framework.internal.reliablefile.*;
 import org.eclipse.osgi.storagemanager.StorageManager;
 
@@ -41,7 +42,7 @@ public class StreamManager {
 	 */
 	public static final int OPEN_FAIL_ON_PRIMARY = ReliableFile.OPEN_FAIL_ON_PRIMARY;
 
-	private static boolean useReliableFilesDefault = Boolean.valueOf(System.getProperty("osgi.useReliableFiles")).booleanValue(); //$NON-NLS-1$ 
+	private static boolean useReliableFilesDefault = Boolean.valueOf(FrameworkProperties.getProperty("osgi.useReliableFiles")).booleanValue(); //$NON-NLS-1$ 
 	private FileManager manager;
 	private boolean useReliableFiles;
 

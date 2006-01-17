@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005 IBM Corporation and others.
+ * Copyright (c) 2005, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,7 @@ package org.eclipse.core.runtime.internal.adaptor;
 
 import org.eclipse.core.runtime.adaptor.EclipseAdaptorMsg;
 import org.eclipse.core.runtime.adaptor.EclipseStarter;
+import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.eclipse.osgi.internal.profile.Profile;
 import org.eclipse.osgi.service.runnable.*;
 import org.osgi.framework.*;
@@ -81,7 +82,7 @@ public class EclipseAppLauncher implements ApplicationLauncher {
 		// this must happen after we have acquired an application (by acquiring waitForAppLock above).
 		runningLock.acquire();
 		if (EclipseStarter.debug) {
-			String timeString = System.getProperty("eclipse.startTime"); //$NON-NLS-1$ 
+			String timeString = FrameworkProperties.getProperty("eclipse.startTime"); //$NON-NLS-1$ 
 			long time = timeString == null ? 0L : Long.parseLong(timeString);
 			System.out.println("Starting application: " + (System.currentTimeMillis() - time)); //$NON-NLS-1$ 
 		}

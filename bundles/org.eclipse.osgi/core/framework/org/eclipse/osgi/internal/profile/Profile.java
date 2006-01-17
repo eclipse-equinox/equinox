@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005 IBM Corporation and others.
+ * Copyright (c) 2005, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,7 @@
 package org.eclipse.osgi.internal.profile;
 
 import org.eclipse.osgi.framework.debug.FrameworkDebugOptions;
+import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 
 /**
  * This class is a development tool that provides a simple way to log 
@@ -91,7 +92,7 @@ public class Profile {
 		// if osgi.debug is not available, don't force DebugOptions
 		//  to init as this variable may be set later on where 
 		//  DebugOptions will succeed.
-		if (System.getProperty("osgi.debug") != null) { //$NON-NLS-1$
+		if (FrameworkProperties.getProperty("osgi.debug") != null) { //$NON-NLS-1$
 			dbgOptions = FrameworkDebugOptions.getDefault();
 			if (dbgOptions != null) {
 				STARTUP = dbgOptions.getBooleanOption(OPTION_STARTUP, false);
@@ -103,24 +104,24 @@ public class Profile {
 		}
 
 		// System properties will always override anything in .options file
-		if ((prop = System.getProperty(PROP_STARTUP)) != null) {
+		if ((prop = FrameworkProperties.getProperty(PROP_STARTUP)) != null) {
 			STARTUP = Boolean.valueOf(prop).booleanValue();
 			if (dbgOptions != null)
 				dbgOptions.setOption(OPTION_STARTUP, new Boolean(STARTUP).toString());
 		}
-		if ((prop = System.getProperty(PROP_BENCHMARK)) != null) {
+		if ((prop = FrameworkProperties.getProperty(PROP_BENCHMARK)) != null) {
 			BENCHMARK = Boolean.valueOf(prop).booleanValue();
 			if (dbgOptions != null)
 				dbgOptions.setOption(OPTION_BENCHMARK, new Boolean(BENCHMARK).toString());
 		}
-		if ((prop = System.getProperty(PROP_DEBUG)) != null) {
+		if ((prop = FrameworkProperties.getProperty(PROP_DEBUG)) != null) {
 			DEBUG = Boolean.valueOf(prop).booleanValue();
 			if (dbgOptions != null)
 				dbgOptions.setOption(OPTION_DEBUG, new Boolean(DEBUG).toString());
 		}
 
 		if (profileLogger == null) {
-			if ((prop = System.getProperty(PROP_IMPL)) != null) {
+			if ((prop = FrameworkProperties.getProperty(PROP_IMPL)) != null) {
 				profileLoggerClassName = prop;
 				if (dbgOptions != null)
 					dbgOptions.setOption(OPTION_IMPL, profileLoggerClassName);
