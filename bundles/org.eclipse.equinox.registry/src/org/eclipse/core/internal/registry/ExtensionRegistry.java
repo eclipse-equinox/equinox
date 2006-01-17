@@ -17,9 +17,9 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.eclipse.core.internal.registry.spi.ConfigurationElementDescription;
 import org.eclipse.core.internal.registry.spi.ConfigurationElementAttribute;
 import org.eclipse.core.runtime.*;
-import org.eclipse.core.runtime.adaptor.FileManager;
 import org.eclipse.equinox.registry.*;
 import org.eclipse.equinox.registry.spi.RegistryStrategy;
+import org.eclipse.osgi.storagemanager.StorageManager;
 import org.eclipse.osgi.util.NLS;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -52,8 +52,8 @@ public class ExtensionRegistry implements IExtensionRegistry {
 	// deltas not broadcasted yet. Deltas are kept organized by the namespace name (objects with the same namespace are grouped together)
 	private transient Map deltas = new HashMap(11);
 
-	//file manager associated with the registry cache
-	protected FileManager cacheFileManager;
+	//storage manager associated with the registry cache
+	protected StorageManager cacheStorageManager;
 
 	// all registry change listeners
 	private transient ListenerList listeners = new ListenerList();
@@ -87,13 +87,13 @@ public class ExtensionRegistry implements IExtensionRegistry {
 	 * @param registryOwnsManager - true: life cycle of the file manager is controlled by the registry
 	 */
 	protected void setFileManager(File cacheBase, boolean isCacheReadOnly) {
-		if (cacheFileManager != null)
-			cacheFileManager.close(); // close existing file manager first
+		if (cacheStorageManager != null)
+			cacheStorageManager.close(); // close existing file manager first
 
 		if (cacheBase != null) {
-			cacheFileManager = new FileManager(cacheBase, isCacheReadOnly ? "none" : null, isCacheReadOnly); //$NON-NLS-1$
+			cacheStorageManager = new StorageManager(cacheBase, isCacheReadOnly ? "none" : null, isCacheReadOnly); //$NON-NLS-1$
 			try {
-				cacheFileManager.open(!isCacheReadOnly);
+				cacheStorageManager.open(!isCacheReadOnly);
 			} catch (IOException e) {
 				// Ignore the exception. The registry will be rebuilt from source.
 			}
@@ -585,11 +585,11 @@ public class ExtensionRegistry implements IExtensionRegistry {
 			//The cache is made of several files, find the real names of these other files. If all files are found, try to initialize the objectManager
 			if (checkCache()) {
 				try {
-					theTableReader.setTableFile(cacheFileManager.lookup(TableReader.TABLE, false));
-					theTableReader.setExtraDataFile(cacheFileManager.lookup(TableReader.EXTRA, false));
-					theTableReader.setMainDataFile(cacheFileManager.lookup(TableReader.MAIN, false));
-					theTableReader.setContributionsFile(cacheFileManager.lookup(TableReader.CONTRIBUTIONS, false));
-					theTableReader.setOrphansFile(cacheFileManager.lookup(TableReader.ORPHANS, false));
+					theTableReader.setTableFile(cacheStorageManager.lookup(TableReader.TABLE, false));
+					theTableReader.setExtraDataFile(cacheStorageManager.lookup(TableReader.EXTRA, false));
+					theTableReader.setMainDataFile(cacheStorageManager.lookup(TableReader.MAIN, false));
+					theTableReader.setContributionsFile(cacheStorageManager.lookup(TableReader.CONTRIBUTIONS, false));
+					theTableReader.setOrphansFile(cacheStorageManager.lookup(TableReader.ORPHANS, false));
 					isRegistryFilledFromCache = registryObjects.init(computeTimeStamp());
 				} catch (IOException e) {
 					// The registry will be rebuilt from the xml files. Make sure to clear anything filled
@@ -639,11 +639,11 @@ public class ExtensionRegistry implements IExtensionRegistry {
 
 		stopChangeEventScheduler();
 
-		if (cacheFileManager == null)
+		if (cacheStorageManager == null)
 			return;
 
-		if (!registryObjects.isDirty() || cacheFileManager.isReadOnly()) {
-			cacheFileManager.close();
+		if (!registryObjects.isDirty() || cacheStorageManager.isReadOnly()) {
+			cacheStorageManager.close();
 			return;
 		}
 
@@ -656,32 +656,32 @@ public class ExtensionRegistry implements IExtensionRegistry {
 		TableWriter theTableWriter = new TableWriter(this);
 
 		try {
-			cacheFileManager.lookup(TableReader.TABLE, true);
-			cacheFileManager.lookup(TableReader.MAIN, true);
-			cacheFileManager.lookup(TableReader.EXTRA, true);
-			cacheFileManager.lookup(TableReader.CONTRIBUTIONS, true);
-			cacheFileManager.lookup(TableReader.ORPHANS, true);
-			tableFile = File.createTempFile(TableReader.TABLE, ".new", cacheFileManager.getBase()); //$NON-NLS-1$
-			mainFile = File.createTempFile(TableReader.MAIN, ".new", cacheFileManager.getBase()); //$NON-NLS-1$
-			extraFile = File.createTempFile(TableReader.EXTRA, ".new", cacheFileManager.getBase()); //$NON-NLS-1$
-			contributionsFile = File.createTempFile(TableReader.CONTRIBUTIONS, ".new", cacheFileManager.getBase()); //$NON-NLS-1$
-			orphansFile = File.createTempFile(TableReader.ORPHANS, ".new", cacheFileManager.getBase()); //$NON-NLS-1$
+			cacheStorageManager.lookup(TableReader.TABLE, true);
+			cacheStorageManager.lookup(TableReader.MAIN, true);
+			cacheStorageManager.lookup(TableReader.EXTRA, true);
+			cacheStorageManager.lookup(TableReader.CONTRIBUTIONS, true);
+			cacheStorageManager.lookup(TableReader.ORPHANS, true);
+			tableFile = File.createTempFile(TableReader.TABLE, ".new", cacheStorageManager.getBase()); //$NON-NLS-1$
+			mainFile = File.createTempFile(TableReader.MAIN, ".new", cacheStorageManager.getBase()); //$NON-NLS-1$
+			extraFile = File.createTempFile(TableReader.EXTRA, ".new", cacheStorageManager.getBase()); //$NON-NLS-1$
+			contributionsFile = File.createTempFile(TableReader.CONTRIBUTIONS, ".new", cacheStorageManager.getBase()); //$NON-NLS-1$
+			orphansFile = File.createTempFile(TableReader.ORPHANS, ".new", cacheStorageManager.getBase()); //$NON-NLS-1$
 			theTableWriter.setTableFile(tableFile);
 			theTableWriter.setExtraDataFile(extraFile);
 			theTableWriter.setMainDataFile(mainFile);
 			theTableWriter.setContributionsFile(contributionsFile);
 			theTableWriter.setOrphansFile(orphansFile);
 		} catch (IOException e) {
-			cacheFileManager.close();
+			cacheStorageManager.close();
 			return; //Ignore the exception since we can recompute the cache
 		}
 		try {
 			if (theTableWriter.saveCache(registryObjects, computeTimeStamp()))
-				cacheFileManager.update(new String[] {TableReader.TABLE, TableReader.MAIN, TableReader.EXTRA, TableReader.CONTRIBUTIONS, TableReader.ORPHANS}, new String[] {tableFile.getName(), mainFile.getName(), extraFile.getName(), contributionsFile.getName(), orphansFile.getName()});
+				cacheStorageManager.update(new String[] {TableReader.TABLE, TableReader.MAIN, TableReader.EXTRA, TableReader.CONTRIBUTIONS, TableReader.ORPHANS}, new String[] {tableFile.getName(), mainFile.getName(), extraFile.getName(), contributionsFile.getName(), orphansFile.getName()});
 		} catch (IOException e) {
 			//Ignore the exception since we can recompute the cache
 		}
-		cacheFileManager.close();
+		cacheStorageManager.close();
 		theTableReader.close();
 	}
 
@@ -692,7 +692,7 @@ public class ExtensionRegistry implements IExtensionRegistry {
 		String[] keys = new String[] {TableReader.TABLE, TableReader.MAIN, TableReader.EXTRA, TableReader.CONTRIBUTIONS, TableReader.ORPHANS};
 		for (int i = 0; i < keys.length; i++)
 			try {
-				cacheFileManager.remove(keys[i]);
+				cacheStorageManager.remove(keys[i]);
 			} catch (IOException e) {
 				log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, IStatus.ERROR, RegistryMessages.meta_registryCacheReadProblems, e));
 			}
@@ -756,9 +756,9 @@ public class ExtensionRegistry implements IExtensionRegistry {
 	// Check that cache is actually present in the specified location
 	protected boolean checkCache() {
 		File cacheFile = null;
-		if (cacheFileManager != null) {
+		if (cacheStorageManager != null) {
 			try {
-				cacheFile = cacheFileManager.lookup(TableReader.getTestFileName(), false);
+				cacheFile = cacheStorageManager.lookup(TableReader.getTestFileName(), false);
 			} catch (IOException e) {
 				//Ignore the exception. The registry will be rebuilt from the xml files.
 			}
@@ -770,11 +770,11 @@ public class ExtensionRegistry implements IExtensionRegistry {
 		File alternativeBase = strategy.cacheAlternativeLocation();
 		if (alternativeBase != null) {
 			setFileManager(alternativeBase, true);
-			if (cacheFileManager != null) {
+			if (cacheStorageManager != null) {
 				// check this new location:
 				cacheFile = null;
 				try {
-					cacheFile = cacheFileManager.lookup(TableReader.getTestFileName(), false);
+					cacheFile = cacheStorageManager.lookup(TableReader.getTestFileName(), false);
 				} catch (IOException e) {
 					//Ignore the exception. The registry will be rebuilt from the xml files.
 				}
