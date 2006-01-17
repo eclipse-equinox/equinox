@@ -23,27 +23,16 @@ import org.eclipse.osgi.framework.util.SecureAction;
  * relationship with each others and being updated by several entities at the same time. 
  * The typical usecase is in shared configuration data areas.
  * <p>
- * The general principle is to maintain a table which maps user-level file names
- * onto an actual disk files.  If a file needs to be modified, 
- * it is stored into a new file.  The old content is not removed from disk until all entities
- * have closed there instance of the storage manager.
- * Once the instance has been created, open() must be called before performing any other operation.
- * On open the storage manager obtains a snapshot of the current managed files contents. If an
- * entity updates a managed file, the storage manager will save the content for that instance of the 
- * storage manager, all other storage manager instances will still have access to that managed file's 
- * content as it was when the instance was first opened.
- * </p>
- * <p>
  * The facilities provided here are cooperative. That is, all participants must
  * agree to the conventions and to calling the given API. There is no capacity
  * to enforce these conventions or prohibit corruption.
  * </p>
- *
  * <p>
  * Clients can not extend this class
  * </p>
- * 
+ * <p>
  * Example
+ * <pre>
  * //Open the storage manager
  * org.eclipse.osgi.storagemanager.StorageManager cacheStorageManager = new StorageManager("d:/sharedFolder/bar/", false); //$NON-NLS-1$
  * try {
@@ -63,8 +52,8 @@ import org.eclipse.osgi.framework.util.SecureAction;
  * cacheStorageManager.add("fileD");
  *
  * // The file is never written directly into the file name, so we create some temporary file
- * java.io.File fileC = File.createTempFile("fileC", ".new", cacheStorageManager.getBase());
- * java.io.File fileD = File.createTempFile("fileD", ".new", cacheStorageManager.getBase());
+ * java.io.File fileC = cacheStorageManager.createTempFile("fileC");
+ * java.io.File fileD = cacheStorageManager.createTempFile("fileD");
  *
  * //Do the actual writing here...
  *
@@ -73,10 +62,25 @@ import org.eclipse.osgi.framework.util.SecureAction;
  *
  * //Close the file manager at the end
  * cacheStorageManager.close();
- * 
+ * </pre>
+ * </p>
+ * <p>
+ * Implementation details <br>
+ * The following implementation details are provided to help with understanding the 
+ * behavior of this class.
+ * The general principle is to maintain a table which maps user-level file names
+ * onto an actual disk files.  If a file needs to be modified, 
+ * it is stored into a new file.  The old content is not removed from disk until all entities
+ * have closed there instance of the storage manager.
+ * Once the instance has been created, open() must be called before performing any other operation.
+ * On open the storage manager obtains a snapshot of the current managed files contents. If an
+ * entity updates a managed file, the storage manager will save the content for that instance of the 
+ * storage manager, all other storage manager instances will still have access to that managed file's 
+ * content as it was when the instance was first opened.
+ * </p>
  * @since 3.2
  */
-// TODO need some code examples
+
 // Note the implementation of this class originated from the following deprecated classes: 
 // /org.eclipse.osgi/eclipseAdaptor/src/org/eclipse/core/runtime/adaptor/FileManager.java
 // /org.eclipse.osgi/eclipseAdaptor/src/org/eclipse/core/runtime/adaptor/StreamManager.java
