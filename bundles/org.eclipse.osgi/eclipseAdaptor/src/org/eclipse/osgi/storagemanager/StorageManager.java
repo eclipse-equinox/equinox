@@ -19,9 +19,9 @@ import org.eclipse.osgi.framework.internal.reliablefile.*;
 import org.eclipse.osgi.framework.util.SecureAction;
 
 /**
- * Storage managers provide a facility for tracking the state of files being used and 
- * updated by several entities at the same time. The typical usecase is in shared 
- * configuration data areas.
+ * Storage managers provide a facility for tracking the state of a group of files having 
+ * relationship with each others and being updated by several entities at the same time. 
+ * The typical usecase is in shared configuration data areas.
  * <p>
  * The general principle is to maintain a table which maps user-level file names
  * onto an actual disk files.  If a file needs to be modified, 
@@ -40,8 +40,40 @@ import org.eclipse.osgi.framework.util.SecureAction;
  * </p>
  *
  * <p>
- * Clients may not extend this class.
+ * Clients can not extend this class
  * </p>
+ * 
+ * Example
+ * //Open the storage manager
+ * org.eclipse.osgi.storagemanager.StorageManager cacheStorageManager = new StorageManager("d:/sharedFolder/bar/", false); //$NON-NLS-1$
+ * try {
+ *	 cacheStorageManager.open(true);
+ * } catch (IOException e) {
+ * // Ignore the exception. The registry will be rebuilt from source.
+ * }
+ *
+ * //To read from a file 
+ * java.io.File fileA = cacheStorageManager.lookup("fileA", false));
+ * java.io.File fileB = cacheStorageManager.lookup("fileB", false));
+ * //Do the reading code 
+ * new java.io.FileOutputStream(fileA);
+ *
+ * //To write in files 
+ * cacheStorageManager.add("fileC"); //add the file to the filemanager (in this case we assume it is not already here)
+ * cacheStorageManager.add("fileD");
+ *
+ * // The file is never written directly into the file name, so we create some temporary file
+ * java.io.File fileC = File.createTempFile("fileC", ".new", cacheStorageManager.getBase());
+ * java.io.File fileD = File.createTempFile("fileD", ".new", cacheStorageManager.getBase());
+ *
+ * //Do the actual writing here...
+ *
+ * //Finally update the storagemanager with the actual file to manage. 
+ * cacheStorageManager.update(new String[] {"fileC", "fileD"}, new String[] {fileC.getName(), fileD.getName()};
+ *
+ * //Close the file manager at the end
+ * cacheStorageManager.close();
+ * 
  * @since 3.2
  */
 // TODO need some code examples
