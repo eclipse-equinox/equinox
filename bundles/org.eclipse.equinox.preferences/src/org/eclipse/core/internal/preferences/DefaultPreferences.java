@@ -11,6 +11,7 @@
 package org.eclipse.core.internal.preferences;
 
 import java.io.*;
+import java.lang.ref.WeakReference;
 import java.net.URL;
 import java.util.*;
 import org.eclipse.core.internal.runtime.RuntimeLog;
@@ -44,7 +45,8 @@ public class DefaultPreferences extends EclipsePreferences {
 	// cached values
 	private String qualifier;
 	private int segmentCount;
-	private Object plugin;
+	private WeakReference pluginReference;
+
 
 	public static String pluginCustomizationFile = null;
 
@@ -57,14 +59,14 @@ public class DefaultPreferences extends EclipsePreferences {
 
 	private DefaultPreferences(EclipsePreferences parent, String name, Object context) {
 		this(parent, name);
-		this.plugin = context;
+		this.pluginReference = new WeakReference(context);
 	}
 
 	private DefaultPreferences(EclipsePreferences parent, String name) {
 		super(parent, name);
 
 		if (parent instanceof DefaultPreferences)
-			this.plugin = ((DefaultPreferences) parent).plugin;
+			this.pluginReference = ((DefaultPreferences) parent).pluginReference;
 
 		// cache the segment count
 		String path = absolutePath();
@@ -207,9 +209,11 @@ public class DefaultPreferences extends EclipsePreferences {
 			return;
 
 		// Do legacy plugin preference initialization
+		Object plugin = pluginReference.get();
 		ILegacyPreferences initService = PreferencesOSGiUtils.getDefault().getLegacyPreferences();
 		if (initService != null)
-			initService.init(plugin, name());
+			plugin = initService.init(plugin, name());
+			pluginReference = new WeakReference(plugin);
 	}
 
 	/*
