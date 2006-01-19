@@ -64,39 +64,6 @@ public interface StateHelper {
 	public VersionConstraint[] getUnsatisfiedConstraints(BundleDescription bundle);
 
 	/**
-	 * Returns all unsatisfied constraints in the given state that have no possible supplier. 
-	 * Returns an empty array if no unsatisfied constraints can be found.
-	 * <p>
-	 * The returned constraints include only the unsatisfied constraints in the given 
-	 * state that have no possible supplier (leaf constraints).  There may 
-	 * be additional unsatisfied constraints in the given state but these will have at 
-	 * least one possible supplier.  In this case the possible supplier of the constraint 
-	 * is not resolved for some reason.  For example, a given state only has Bundles X and Y
-	 * installed and Bundles X and Y have the following constraints:
-	 * </p>
-	 * <pre>
-	 * Bundle X requires Bundle Y
-	 * Bundle Y requires Bundle Z</pre>
-	 * <p>
-	 * In this case Bundle Y has an unsatisfied constraint leaf on Bundle Z.  This will 
-	 * cause Bundle X's constraint on Bundle Y to be unsatisfied as well because the 
-	 * bundles are involved in a dependency chain.  Bundle X's constraint on Bundle Y is 
-	 * not considered a leaf because there is a possible supplier Y in the given state.
-	 * </p>
-	 * <p>
-	 * Note that a bundle may have no unsatisfied constraints and still not be 
-	 * resolved.
-	 * </p>  
-	 * <p>
-	 * Same as calling getUnsatisfiedLeaves(state.getBundles())
-	 * </p>
-	 * @param state the state to examine
-	 * @return an array containing all unsatisfied constraints for the given state
-	 * @deprecated use {@link #getUnsatisfiedLeaves(BundleDescription[])}
-	 */
-	public VersionConstraint[] getUnsatisfiedLeaves(State state);
-
-	/**
 	 * Returns all unsatisfied constraints in the given bundles that have no possible supplier. 
 	 * Returns an empty array if no unsatisfied leaf constraints can be found.
 	 * <p>

@@ -112,10 +112,6 @@ public class StateHelperImpl implements StateHelper {
 
 	}
 
-	public VersionConstraint[] getUnsatisfiedLeaves(State state) {
-		return getUnsatisfiedLeaves(state, state.getBundles());
-	}
-
 	public VersionConstraint[] getUnsatisfiedLeaves(BundleDescription[] bundles) {
 		if (bundles.length == 0)
 			return new VersionConstraint[0];
