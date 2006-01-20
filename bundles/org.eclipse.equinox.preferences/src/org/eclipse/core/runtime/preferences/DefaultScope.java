@@ -38,7 +38,7 @@ import org.eclipse.core.runtime.IPath;
  * </p>
  * @since 3.0
  */
-public final class DefaultScope extends AbstractScope {
+public final class DefaultScope extends AbstractScope implements IScopeContext {
 
 	/**
 	 * String constant (value of <code>"default"</code>) used for the 
@@ -58,6 +58,13 @@ public final class DefaultScope extends AbstractScope {
 	 */
 	public String getName() {
 		return SCOPE;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.core.runtime.preferences.IScopeContext#getNode(java.lang.String)
+	 */
+	public IEclipsePreferences getNode(String qualifier) {
+		return super.getNode(qualifier);
 	}
 
 	/*

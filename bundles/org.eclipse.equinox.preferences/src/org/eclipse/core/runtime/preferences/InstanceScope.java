@@ -31,7 +31,7 @@ import org.eclipse.core.runtime.IPath;
  * @see org.eclipse.core.runtime.Platform#getInstanceLocation()
  * @since 3.0
  */
-public final class InstanceScope extends AbstractScope {
+public final class InstanceScope extends AbstractScope implements IScopeContext {
 
 	/**
 	 * String constant (value of <code>"instance"</code>) used for the 
@@ -60,5 +60,12 @@ public final class InstanceScope extends AbstractScope {
 	 */
 	public String getName() {
 		return SCOPE;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.core.runtime.preferences.IScopeContext#getNode(java.lang.String)
+	 */
+	public IEclipsePreferences getNode(String qualifier) {
+		return super.getNode(qualifier);
 	}
 }

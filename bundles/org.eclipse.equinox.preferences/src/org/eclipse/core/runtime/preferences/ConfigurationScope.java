@@ -38,7 +38,7 @@ import org.eclipse.osgi.service.datalocation.Location;
  * </p>
  * @since 3.0
  */
-public final class ConfigurationScope extends AbstractScope {
+public final class ConfigurationScope extends AbstractScope implements IScopeContext {
 
 	/**
 	 * String constant (value of <code>"configuration"</code>) used for the 
@@ -58,6 +58,13 @@ public final class ConfigurationScope extends AbstractScope {
 	 */
 	public String getName() {
 		return SCOPE;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.core.runtime.preferences.IScopeContext#getNode(java.lang.String)
+	 */
+	public IEclipsePreferences getNode(String qualifier) {
+		return super.getNode(qualifier);
 	}
 
 	/*
