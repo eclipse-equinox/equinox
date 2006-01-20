@@ -47,7 +47,7 @@ public class DataParser {
 	private static final String DEFAULT = "default"; //$NON-NLS-1$
 	private static final String ADREF = "adref"; //$NON-NLS-1$
 	private static final String CONTENT = "content"; //$NON-NLS-1$
-	private static final String FACTORY = "factory"; //$NON-NLS-1$
+	private static final String FACTORY = "factoryPid"; //$NON-NLS-1$
 	private static final String BUNDLE = "bundle"; //$NON-NLS-1$
 	private static final String OPTIONAL = "optional"; //$NON-NLS-1$
 	private static final String OBJECT = "Object"; //$NON-NLS-1$
@@ -331,11 +331,12 @@ public class DataParser {
 
 				ObjectClassDefinitionImpl ocd = (ObjectClassDefinitionImpl) _dp_OCDs.get(designateHandler._ocdref);
 				if (ocd != null) {
-					ocd.setID(designateHandler._pid_val);
-					if (designateHandler._factory_val == true) {
-						ocd.setType(ObjectClassDefinitionImpl.FPID);
-					} else {
+					if (designateHandler._factory_val == null) {
+						ocd.setID(designateHandler._pid_val);
 						ocd.setType(ObjectClassDefinitionImpl.PID);
+					} else {
+						ocd.setID(designateHandler._factory_val);
+						ocd.setType(ObjectClassDefinitionImpl.FPID);
 					}
 					_dp_OCDs_vector.addElement(ocd);
 				} else {
@@ -705,7 +706,7 @@ public class DataParser {
 	private class DesignateHandler extends AbstractHandler {
 
 		String _pid_val = null;
-		boolean _factory_val = false;
+		String _factory_val = null;
 		String _bundle_val = null; // Only used by RFC94
 		boolean _optional_val = false; // Only used by RFC94
 		boolean _merge_val = false; // Only used by RFC94
@@ -727,15 +728,7 @@ public class DataParser {
 						NLS.bind(MetaTypeMsg.MISSING_ATTRIBUTE, PID, name));
 				return;
 			}
-
-			String factory_str = atts.getValue(FACTORY);
-			if (factory_str == null) {
-				// Not a problem, because FACTORY is an optional attribute.
-				// And the default value is "false".
-				_factory_val = false;
-			} else {
-				_factory_val = Boolean.valueOf(factory_str).booleanValue();
-			}
+			_factory_val = atts.getValue(FACTORY);
 
 			_bundle_val = atts.getValue(BUNDLE);
 			if (_bundle_val == null) {
@@ -923,8 +916,8 @@ public class DataParser {
 			return localName;
 		} else {
 			int nameSpaceIndex = qName.indexOf(":");
-			return nameSpaceIndex == -1 ? qName : qName.substring(nameSpaceIndex+1);
+			return nameSpaceIndex == -1 ? qName : qName.substring(nameSpaceIndex + 1);
 		}
-		
+
 	}
 }
