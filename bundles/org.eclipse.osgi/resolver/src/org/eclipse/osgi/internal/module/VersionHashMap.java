@@ -13,6 +13,11 @@ package org.eclipse.osgi.internal.module;
 import java.util.*;
 
 public class VersionHashMap extends MappedList implements Comparator {
+	private ResolverImpl resolver;
+
+	public VersionHashMap(ResolverImpl resolver) {
+		this.resolver = resolver;
+	}
 
 	// sorts using the Comparator#compare method to sort
 	protected void sort(Object[] values) {
@@ -93,6 +98,9 @@ public class VersionHashMap extends MappedList implements Comparator {
 			throw new IllegalArgumentException();
 		VersionSupplier vs1 = (VersionSupplier) o1;
 		VersionSupplier vs2 = (VersionSupplier) o2;
+		// if the selection policy is set then use that
+		if (resolver.getSelectionPolicy() != null)
+			return resolver.getSelectionPolicy().compare(vs1.getBaseDescription(), vs2.getBaseDescription());
 		if (vs1.getBundle().isResolved() != vs2.getBundle().isResolved())
 			return vs1.getBundle().isResolved() ? -1 : 1;
 		int versionCompare = -(vs1.getVersion().compareTo(vs2.getVersion()));

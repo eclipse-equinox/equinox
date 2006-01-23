@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.osgi.service.resolver;
 
+import java.util.Comparator;
 import java.util.Dictionary;
 /**
  * An implementation of a resolver which resolves the constraints of the bundles
@@ -113,4 +114,32 @@ public interface Resolver {
 	 * a value of <code>null</code> is returned if none is available.
 	 */
 	public ExportPackageDescription resolveDynamicImport(BundleDescription importingBundle, String requestedPackage);
+
+	/**
+	 * Sets the selection policy for this resolver.  A selection policy is used to sort 
+	 * possible suppliers of a version constraint in descending order.  That is an order
+	 * which is from most desired to least desired.  The objects passed to the 
+	 * selection policy {@link Comparator#compare(Object, Object)} method 
+	 * will be of type {@link BaseDescription}.  The selection policy should return a 
+	 * negative number, zero, or a positive number depending on if the first object is 
+	 * more desired, equal amount of desire, or less desired than the second object respectively.
+	 * <p>
+	 * If no selection policy is set then a default policy will be used which sorts according
+	 * to the following rules: 
+	 * <ol>
+	 * <li> The resolution status of the bundle which supplies the base description.  Resolved bundles take priority over unresolved ones.
+	 * <li> The version of the base description.  Higher versions take priority over lower versions.
+	 * <li> The bundle ID which supplies the base description.  Lower IDs take priority over higher IDs. 
+	 * </ol>
+	 * @param selectionPolicy the selection policy for this resolver
+	 * @since 3.2
+	 */
+	public void setSelectionPolicy(Comparator selectionPolicy);
+
+	/**
+	 * Returns the selection policy for this resolver or null if it is not set 
+	 * @return the selection policy for this resolver or null if it is not set
+	 * @since 3.2 
+	 */
+	public Comparator getSelectionPolicy();
 }

@@ -55,6 +55,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 	// Keys are BundleDescriptions, values are ResolverBundles
 	private HashMap bundleMapping = null;
 	private GroupingChecker groupingChecker;
+	private Comparator selectionPolicy;
 
 	public ResolverImpl(BundleContext context, boolean checkPermissions) {
 		this.permissionChecker = new PermissionChecker(context, checkPermissions, this);
@@ -66,8 +67,8 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 
 	// Initializes the resolver
 	private void initialize() {
-		resolverExports = new VersionHashMap();
-		resolverBundles = new VersionHashMap();
+		resolverExports = new VersionHashMap(this);
+		resolverBundles = new VersionHashMap(this);
 		unresolvedBundles = new ArrayList();
 		bundleMapping = new HashMap();
 		BundleDescription[] bundles = state.getBundles();
@@ -268,8 +269,13 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 					BundleDescription sameNameDesc = ((ResolverBundle) sameName[j]).getBundle();
 					if (sameName[j] == bundle || !sameNameDesc.isSingleton() || rejectedSingletons.contains(sameNameDesc))
 						continue; // Ignore the bundle we are selecting, non-singletons and rejected singletons
-					// if the bundle sameNameDesc is resolved or has a greater version then reject the other bundle 
-					if (sameNameDesc.isResolved() || sameNameDesc.getVersion().compareTo(bundle.getBundle().getVersion()) > 0) {
+					boolean rejectedPolicy;
+					if (selectionPolicy == null)
+						// if the bundle sameNameDesc is resolved or has a greater version then reject the other bundle
+						rejectedPolicy = sameNameDesc.isResolved() || sameNameDesc.getVersion().compareTo(bundle.getBundle().getVersion()) > 0;
+					else
+						rejectedPolicy = selectionPolicy.compare(sameNameDesc, bundle.getBundle()) < 0;
+					if (rejectedPolicy) {
 						rejectedSingletons.add(bundle.getBundle());
 						return;
 					}
@@ -430,7 +436,8 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 					if (sameName[j] == bundles[i] || !sameNameDesc.isSingleton() || !sameNameDesc.isResolved() || rejectedSingletons.contains(sameNameDesc))
 						continue; // Ignore the bundle we are selecting, non-singletons, and non-resolved
 					result = true;
-					if (sameNameDesc.getVersion().compareTo(bundleDesc.getVersion()) > 0 && sameNameBundle.getRefs() >= bundles[i].getRefs()) {
+					boolean rejectedPolicy = selectionPolicy != null ? selectionPolicy.compare(sameNameDesc, bundleDesc) < 0 : sameNameDesc.getVersion().compareTo(bundleDesc.getVersion()) > 0;
+					if (rejectedPolicy && sameNameBundle.getRefs() >= bundles[i].getRefs()) {
 						// this bundle is not selected; add it to the rejected list
 						if (!rejectedSingletons.contains(bundles[i].getBundle()))
 							rejectedSingletons.add(bundles[i].getBundle());
@@ -1121,5 +1128,13 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 
 	VersionHashMap getResolverExports() {
 		return resolverExports;
+	}
+
+	public void setSelectionPolicy(Comparator selectionPolicy) {
+		this.selectionPolicy = selectionPolicy;
+	}
+
+	public Comparator getSelectionPolicy() {
+		return selectionPolicy;
 	}
 }
