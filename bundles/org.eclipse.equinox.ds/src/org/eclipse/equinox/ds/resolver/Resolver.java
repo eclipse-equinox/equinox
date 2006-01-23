@@ -34,7 +34,7 @@ import org.osgi.util.tracker.ServiceTracker;
  * The Resolver implements AllServiceListener so it can be informed about service
  * changes in the framework.
  * 
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1 $
  */
 public class Resolver implements AllServiceListener, WorkDispatcher {
 
@@ -455,9 +455,8 @@ public class Resolver implements AllServiceListener, WorkDispatcher {
 			newlySatisfiedCDPs.removeAll(satisfiedCDPs);
 
 			if (!newlySatisfiedCDPs.isEmpty()) {
+				satisfiedCDPs.addAll(newlySatisfiedCDPs); // add to satisfiedCDPs before dispatch
 				workQueue.enqueueWork(this, BUILD, newlySatisfiedCDPs);
-
-				satisfiedCDPs.addAll(newlySatisfiedCDPs);
 			}
 
 		}
@@ -474,9 +473,8 @@ public class Resolver implements AllServiceListener, WorkDispatcher {
 			List newlySatisfiedCDPs = resolveSatisfied();
 			newlySatisfiedCDPs.removeAll(satisfiedCDPs);
 			if (!newlySatisfiedCDPs.isEmpty()) {
+				satisfiedCDPs.addAll(newlySatisfiedCDPs); // add to satisfiedCDPs before dispatch
 				workQueue.enqueueWork(this, BUILD, newlySatisfiedCDPs);
-
-				satisfiedCDPs.addAll(newlySatisfiedCDPs);
 			}
 
 		}
@@ -510,9 +508,8 @@ public class Resolver implements AllServiceListener, WorkDispatcher {
 			List newlySatisfiedCDPs = resolveSatisfied();
 			newlySatisfiedCDPs.removeAll(satisfiedCDPs);
 			if (!newlySatisfiedCDPs.isEmpty()) {
+				satisfiedCDPs.addAll(newlySatisfiedCDPs); // add to satisfiedCDPs before dispatch
 				workQueue.enqueueWork(this, BUILD, newlySatisfiedCDPs);
-
-				satisfiedCDPs.addAll(newlySatisfiedCDPs);
 			}
 
 		}
@@ -781,7 +778,7 @@ public class Resolver implements AllServiceListener, WorkDispatcher {
 	 * Doubly-linked node used to traverse the dependency tree in order to
 	 * find cycles.
 	 *  
-	 * @version $Revision: 1.2 $
+	 * @version $Revision: 1.1 $
 	 */
 	static private class ReferenceCDP {
 		public Reference ref;
