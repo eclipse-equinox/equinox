@@ -75,7 +75,7 @@ public final class RegistryUtils {
 	 * is immutable in the sense that it can be set only once during the application runtime.
 	 * Attempts to change the default registry provider will cause CoreException.
 	 * 
-	 * @see #getRegistry()
+	 * @see RegistryFactory#getRegistry()
 	 * 
 	 * <b>This is an experimental API. It might change in future.</b>
 	 * 

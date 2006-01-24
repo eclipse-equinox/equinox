@@ -344,7 +344,7 @@ public class RegistryStrategy {
 	 * The parser used by the registry to parse descriptions of extension points
 	 * and extensions from the XML input streams.
 	 * 
-	 * @see org.eclipse.equinox.registry.IExtensionRegistry#addContribution(java.io.InputStream, long, String, ResourceBundle, Object)
+	 * @see org.eclipse.equinox.registry.IExtensionRegistry#addContribution(java.io.InputStream, String, boolean, String, ResourceBundle, Object)
 	 * 
 	 * @return XML parser
 	 */

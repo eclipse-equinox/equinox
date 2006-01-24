@@ -14,7 +14,7 @@ package org.eclipse.equinox.registry;
  * Implement this interface to specify the default extension registry.
  * 
  * @see RegistryFactory#getRegistry()
- * @see RegistryFactory#setRegistryProvider(IRegistryProvider)
+ * @see RegistryUtils#setRegistryProvider(IRegistryProvider)
  * 
  * <b>This is an experimental API. It might change in future.</b>
  * 
