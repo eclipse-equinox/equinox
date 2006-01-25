@@ -101,23 +101,6 @@ public class ResolverBundle extends VersionSupplier {
 		return (ResolverExport[]) results.toArray(new ResolverExport[results.size()]);
 	}
 
-	// Iterate thru the imports making sure they are wired
-	boolean isFullyWired() {
-		if (host != null && host.foundMatchingBundles())
-			return false;
-
-		ResolverImport[] allImports = getImportPackages();
-		for (int i = 0; i < allImports.length; i++)
-			if (allImports[i].getMatchingExport() == null && !allImports[i].isOptional() && !allImports[i].isDynamic())
-				return false;
-
-		BundleConstraint[] allRequires = getRequires();
-		for (int i = 0; i < allRequires.length; i++)
-			if (allRequires[i].getMatchingBundle() == null && !allRequires[i].isOptional())
-				return false;
-		return true;
-	}
-
 	void clearWires(boolean clearUnresolvable) {
 		ResolverImport[] allImports = getImportPackages();
 		for (int i = 0; i < allImports.length; i++) {

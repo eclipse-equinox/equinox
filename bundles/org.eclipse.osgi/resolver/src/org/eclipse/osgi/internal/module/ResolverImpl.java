@@ -123,30 +123,32 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 
 	// Re-wire previously resolved bundles
 	private void rewireBundles() {
+		ArrayList visited = new ArrayList(bundleMapping.size());
 		for (Iterator iter = bundleMapping.values().iterator(); iter.hasNext();) {
 			ResolverBundle rb = (ResolverBundle) iter.next();
 			if (!rb.getBundle().isResolved() || rb.isFragment())
 				continue;
-			rewireBundle(rb);
+			rewireBundle(rb, visited);
 		}
 	}
 
-	private void rewireBundle(ResolverBundle rb) {
-		if (rb.isFullyWired())
+	private void rewireBundle(ResolverBundle rb, ArrayList visited) {
+		if (visited.contains(rb))
 			return;
+		visited.add(rb);
 		// Wire requires to bundles
 		BundleConstraint[] requires = rb.getRequires();
 		for (int i = 0; i < requires.length; i++) {
-			rewireRequire(requires[i]);
+			rewireRequire(requires[i], visited);
 		}
 		// Wire imports to exports
 		ResolverImport[] imports = rb.getImportPackages();
 		for (int i = 0; i < imports.length; i++) {
-			rewireImport(imports[i]);
+			rewireImport(imports[i], visited);
 		}
 	}
 
-	private void rewireRequire(BundleConstraint req) {
+	private void rewireRequire(BundleConstraint req, ArrayList visited) {
 		if (req.getMatchingBundle() != null)
 			return;
 		ResolverBundle matchingBundle = (ResolverBundle) bundleMapping.get(req.getVersionConstraint().getSupplier());
@@ -156,11 +158,11 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 			// TODO log error!!
 		}
 		if (matchingBundle != null) {
-			rewireBundle(matchingBundle);
+			rewireBundle(matchingBundle, visited);
 		}
 	}
 
-	private void rewireImport(ResolverImport imp) {
+	private void rewireImport(ResolverImport imp, ArrayList visited) {
 		if (imp.isDynamic() || imp.getMatchingExport() != null)
 			return;
 		// Re-wire 'imp'
@@ -191,7 +193,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 			// TODO log error!!
 		}
 		if (imp.getMatchingExport() != null) {
-			rewireBundle(imp.getMatchingExport().getExporter());
+			rewireBundle(imp.getMatchingExport().getExporter(), visited);
 		}
 	}
 
@@ -315,6 +317,14 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		getCurrentEEs(platformProperties);
 		// keep a list of rejected singltons
 		ArrayList rejectedSingletons = new ArrayList();
+		boolean resolveOptional = platformProperties.length == 0 ? false : "true".equals(platformProperties[0].get("osgi.resolveOptional"));  //$NON-NLS-1$//$NON-NLS-2$
+		ResolverBundle[] currentlyResolved = null;
+		if (resolveOptional) {
+			BundleDescription[] resolvedBundles = state.getResolvedBundles();
+			currentlyResolved = new ResolverBundle[resolvedBundles.length];
+			for (int i = 0; i < resolvedBundles.length; i++)
+				currentlyResolved[i] = (ResolverBundle) bundleMapping.get(resolvedBundles[i]);
+		}
 		// attempt to resolve all unresolved bundles
 		ResolverBundle[] bundles = (ResolverBundle[]) unresolvedBundles.toArray(new ResolverBundle[unresolvedBundles.size()]);
 		resolveBundles(bundles, platformProperties, rejectedSingletons);
@@ -329,8 +339,43 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 			BundleDescription sameName = state.getBundle(reject.getSymbolicName(), null);
 			state.addResolverError(reject, ResolverError.SINGLETON_SELECTION, sameName.toString(), null);
 		}
+		if (resolveOptional)
+			resolveOptionalConstraints(currentlyResolved);
 		if (DEBUG)
 			ResolverImpl.log("*** END RESOLUTION ***"); //$NON-NLS-1$
+	}
+
+	private void resolveOptionalConstraints(ResolverBundle[] bundles) {
+		for (int i = 0; i < bundles.length; i++) {
+			if (bundles[i] != null)
+				resolveOptionalConstraints(bundles[i]);
+		}
+	}
+
+	private void resolveOptionalConstraints(ResolverBundle bundle) {
+		BundleConstraint[] requires = bundle.getRequires();
+		ArrayList cycle = new ArrayList();
+		boolean resolvedOptional = false;
+		for (int i = 0; i < requires.length; i++)
+			if (requires[i].isOptional() && requires[i].getMatchingBundle() == null) {
+				cycle.clear();
+				resolveRequire(requires[i], cycle);
+				if (requires[i].getMatchingBundle() != null)
+					resolvedOptional = true;
+			}
+		ResolverImport[] imports = bundle.getImportPackages();
+		for (int i = 0; i < imports.length; i++)
+			if (imports[i].isOptional() && imports[i].getMatchingExport() == null) {
+				cycle.clear();
+				resolveImport(imports[i], true, cycle);
+				if (imports[i].getMatchingExport() != null)
+					resolvedOptional = true;
+			}
+		if (resolvedOptional) {
+			state.resolveBundle(bundle.getBundle(), false, null, null, null, null);
+			stateResolveConstraints(bundle);
+			stateResolveBundle(bundle);
+		}
 	}
 
 	private void getCurrentEEs(Dictionary[] platformProperties) {
