@@ -98,6 +98,10 @@ public class Activator implements BundleActivator {
 		if (property != null && property.equalsIgnoreCase("false")) //$NON-NLS-1$
 			return;
 
+		// check to see if we need to use null as a userToken
+		if ("true".equals(bundleContext.getProperty(IRegistryConstants.PROP_REGISTRY_NULL_USER_TOKEN))) //$NON-NLS-1$
+			userRegistryKey = null;
+
 		Location configuration = OSGIUtils.getDefault().getConfigurationLocation();
 		File theStorageDir = new File(configuration.getURL().getPath() + '/' + STORAGE_DIR);
 		EquinoxRegistryStrategy registryStrategy = new EquinoxRegistryStrategy(theStorageDir, configuration.isReadOnly(), masterRegistryKey);

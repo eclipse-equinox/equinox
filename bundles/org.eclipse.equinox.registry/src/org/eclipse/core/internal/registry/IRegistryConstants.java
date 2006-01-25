@@ -27,12 +27,13 @@ public interface IRegistryConstants {
 	public static final String PROP_CHECK_CONFIG = "osgi.checkConfiguration"; //$NON-NLS-1$
 	public static final String PROP_NO_REGISTRY_CACHE = "eclipse.noRegistryCache"; //$NON-NLS-1$
 	public static final String PROP_DEFAULT_REGISTRY = "eclipse.createRegistry"; //$NON-NLS-1$
+	public static final String PROP_REGISTRY_NULL_USER_TOKEN = "eclipse.registry.nulltoken"; //$NON-NLS-1$
 
 	// OSGI system properties
 	public static final String PROP_NL = "osgi.nl"; //$NON-NLS-1$
 	public static final String PROP_OS = "osgi.os"; //$NON-NLS-1$
 	public static final String PROP_WS = "osgi.ws"; //$NON-NLS-1$
-	
+
 	/**
 	 * Specific error code supplied to the Status objects 
 	 */
