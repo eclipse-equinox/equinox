@@ -21,6 +21,8 @@ import java.net.URL;
  * </p>
  * 
  * @since 3.0
+ * XXX  adding constants for the ldap filters: install, config, instance, user.
+ * 
  */
 public interface Location {
 	/**

@@ -20,6 +20,8 @@ package org.eclipse.osgi.service.environment;
  * </p>
  * 
  * @since 3.0
+ * XXX Need to add a method that gets the real application args.
+ * We might also want to explain how the command line is organized: fwk / non fwk. Non-fwk is rt args and app args.
  */
 public interface EnvironmentInfo {
 
