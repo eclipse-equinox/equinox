@@ -397,10 +397,13 @@ public class EclipseAdaptor extends AbstractFrameworkAdaptor {
 			aContext.registerService(Location.class.getName(), location, locationProperties);
 		}
 
+		Dictionary urlProperties = new Hashtable();
+		urlProperties.put("protocol", new String[] {"bundleentry", "bundleresource"}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		aContext.registerService(URLConverter.class.getName(), new URLConverterImpl(), urlProperties);
+		
 		register(org.eclipse.osgi.service.environment.EnvironmentInfo.class.getName(), EclipseEnvironmentInfo.getDefault(), bundle);
 		register(PlatformAdmin.class.getName(), stateManager, bundle);
 		register(PluginConverter.class.getName(), converter, bundle);
-		register(URLConverter.class.getName(), new URLConverterImpl(), bundle);
 		register(CommandProvider.class.getName(), new EclipseCommandProvider(aContext), bundle);
 		register(FrameworkLog.class.getName(), getFrameworkLog(), bundle);
 		registerPerformanceLog(bundle);

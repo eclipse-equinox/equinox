@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2005 IBM Corporation and others.
+ * Copyright (c) 2004, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,34 +14,47 @@ import java.io.IOException;
 import java.net.URL;
 
 /**
- * The interface of the service that allows bundleresource or bundleentry
+ * The interface of the service that allows client-defined protocol
  * URLs to be converted to native file URLs on the local file system.
  * <p>
- * This interface is not intended to be implemented by clients.
+ * Clients may implement this interface.
  * </p>
+ * 
  * @since 3.1
  */
 public interface URLConverter {
-	/**
-	 * Converts a URL that uses a protocol of bundleentry or bundleresource into
-	 * a URL that uses the file protocol.  The contents of the URL may be extracted
-	 * into a cache on the file system in order to get a file URL.
-	 * 
-	 * @param url The bundleentry or bundleresource URL to convert into a file URL.
-	 * @return The converted file URL or the original URL passed in if it is not
-	 * 		a bundleentry or bundleresource URL.
-	 * @throws IOException if an error occurs during the conversion.
-	 */
-	public URL convertToFileURL(URL url) throws IOException;
 
 	/**
-	 * Converts a URL that uses a protocol of bundleentry or bundleresource into
-	 * a URL that uses a local java protocol (file, jar etc).
-	 * 
-	 * @param url The bundleentry or bundleresource URL to convert into a local URL.
-	 * @return The converted file URL or the original URL passed in if it is not
-	 * 		a bundleentry or bundleresource URL.
-	 * @throws IOException if an error occurs during the conversion.
+	 * Converts a URL that uses a user-defined protocol into a URL that uses the file
+	 * protocol. The contents of the URL may be extracted into a cache on the file-system
+	 * in order to get a file URL. 
+	 * <p>
+	 * If the protocol for the given URL is not recognized by this converter, the original
+	 * URL is returned as-is.
+	 * </p>
+	 * @param url the original URL
+	 * @return the converted file URL or the original URL passed in if it is 
+	 * 	not recognized by this converter
+	 * @throws IOException if an error occurs during the conversion
 	 */
-	public URL convertToLocalURL(URL url) throws IOException;
+	public URL toFileURL(URL url) throws IOException;
+
+	/**
+	 * Converts a URL that uses a client-defined protocol into a URL that uses a
+	 * protocol which is native to the Java class library (file, jar, http, etc).
+	 * <p>
+	 * Note however that users of this API should not assume too much about the
+	 * results of this method.  While it may consistently return a file: URL in certain
+	 * installation configurations, others may result in jar: or http: URLs.
+	 * </p>
+	 * <p>
+	 * If the protocol is not reconized by this converter, then the original URL is
+	 * returned as-is.
+	 * </p>
+	 * @param url the original URL
+	 * @return the resolved URL or the original if the protocol is unknown to this converter
+	 * @exception IOException if unable to resolve URL
+	 * @throws IOException if an error occurs during the resolution
+	 */
+	public URL resolve(URL url) throws IOException;
 }

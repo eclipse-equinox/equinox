@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004 IBM Corporation and others.
+ * Copyright (c) 2004, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,23 +24,23 @@ import org.eclipse.osgi.service.urlconversion.URLConverter;
  */
 public class URLConverterImpl implements URLConverter {
 
-	public URL convertToFileURL(URL url) throws IOException {
-		//TODO should close connection at all times 
+	/* (non-Javadoc)
+	 * @see org.eclipse.osgi.service.urlconversion.URLConverter#toFileURL(java.net.URL)
+	 */
+	public URL toFileURL(URL url) throws IOException {
 		URLConnection connection = url.openConnection();
-		if (connection instanceof BundleURLConnection) {
+		if (connection instanceof BundleURLConnection)
 			return ((BundleURLConnection) connection).getFileURL();
-		} else {
-			return url;
-		}
+		return url;
 	}
 
-	public URL convertToLocalURL(URL url) throws IOException {
-		//TODO should close connection at all times 		
+	/* (non-Javadoc)
+	 * @see org.eclipse.osgi.service.urlconversion.URLConverter#resolve(java.net.URL)
+	 */
+	public URL resolve(URL url) throws IOException {
 		URLConnection connection = url.openConnection();
-		if (connection instanceof BundleURLConnection) {
+		if (connection instanceof BundleURLConnection)
 			return ((BundleURLConnection) connection).getLocalURL();
-		} else {
-			return url;
-		}
+		return url;
 	}
 }
