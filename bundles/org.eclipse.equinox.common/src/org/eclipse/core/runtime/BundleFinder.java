@@ -24,6 +24,8 @@ import org.osgi.framework.Bundle;
  * The class is not intended to be subclassed or instantiated by clients.
  * 
  * @since org.eclipse.equinox.common 1.0
+ * XXX bundle finder renamed and it aggregates URLCOnverter.
+ * This is not a service! just statics.
  */
 public final class BundleFinder {
 
@@ -131,4 +133,41 @@ public final class BundleFinder {
 		return FindSupport.openStream(bundle, file, false);
 	}
 
+	/**
+	 * Converts a URL that uses a user-defined protocol into a URL that uses the file
+	 * protocol. The contents of the URL may be extracted into a cache on the file-system
+	 * in order to get a file URL. 
+	 * <p>
+	 * If the protocol for the given URL is not recognized by this converter, the original
+	 * URL is returned as-is.
+	 * </p>
+	 * @param url the original URL
+	 * @return the converted file URL or the original URL passed in if it is 
+	 * 	not recognized by this converter
+	 * @throws IOException if an error occurs during the conversion
+	 */
+	public static URL toFileURL(URL url) throws IOException {
+		return null; //TODO get the code from internalplatform
+	}
+
+	/**
+	 * Converts a URL that uses a client-defined protocol into a URL that uses a
+	 * protocol which is native to the Java class library (file, jar, http, etc).
+	 * <p>
+	 * Note however that users of this API should not assume too much about the
+	 * results of this method.  While it may consistently return a file: URL in certain
+	 * installation configurations, others may result in jar: or http: URLs.
+	 * </p>
+	 * <p>
+	 * If the protocol is not reconized by this converter, then the original URL is
+	 * returned as-is.
+	 * </p>
+	 * @param url the original URL
+	 * @return the resolved URL or the original if the protocol is unknown to this converter
+	 * @exception IOException if unable to resolve URL
+	 * @throws IOException if an error occurs during the resolution
+	 */
+	public static URL resolve(URL url) throws IOException {
+		return null; //TODO get the code from internalplatform
+	}
 }

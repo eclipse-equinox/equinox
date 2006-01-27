@@ -60,6 +60,7 @@ package org.eclipse.core.runtime;
  * 
  * @see IAdaptable
  * @see IAdapterFactory
+ * XXX Needs to put @since
  */
 public interface IAdapterManager {
 
