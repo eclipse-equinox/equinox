@@ -12,7 +12,6 @@ package org.eclipse.core.internal.registry;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import org.eclipse.core.runtime.InvalidRegistryObjectException;
 import org.eclipse.equinox.registry.*;
 
 /**

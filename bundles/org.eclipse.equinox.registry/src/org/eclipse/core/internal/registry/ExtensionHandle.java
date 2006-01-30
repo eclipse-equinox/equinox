@@ -10,9 +10,7 @@
  *******************************************************************************/
 package org.eclipse.core.internal.registry;
 
-import org.eclipse.core.runtime.InvalidRegistryObjectException;
-import org.eclipse.equinox.registry.IConfigurationElement;
-import org.eclipse.equinox.registry.IExtension;
+import org.eclipse.equinox.registry.*;
 
 /**
  * @since 3.1 

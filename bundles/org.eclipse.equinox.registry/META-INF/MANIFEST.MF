@@ -8,7 +8,6 @@ Export-Package: org.eclipse.core.internal.registry;x-friends:="org.eclipse.core.
  org.eclipse.core.internal.registry.osgi;x-friends:="org.eclipse.core.runtime",
  org.eclipse.core.internal.registry.spi;x-internal:=true,
  org.eclipse.equinox.registry.spi,
- org.eclipse.core.runtime,
  org.eclipse.equinox.registry,
  org.eclipse.equinox.registry.tracker
 Require-Bundle: org.eclipse.equinox.common

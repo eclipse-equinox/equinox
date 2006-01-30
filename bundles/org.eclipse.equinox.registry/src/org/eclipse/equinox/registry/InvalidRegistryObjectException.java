@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2005 IBM Corporation and others.
+ * Copyright (c) 2004, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.core.runtime;
+package org.eclipse.equinox.registry;
 
 /** 
  * An unchecked exception indicating that an attempt to access
@@ -18,11 +18,7 @@ package org.eclipse.core.runtime;
  * objects. It is not intended to be instantiated or
  * subclassed by clients.
  * </p>
- * 
- * @since 3.1
  */
-// XXX should this class be repackaged?  IExecutableExtension is in an Eqinox package.
-// But: it is a pre-existing class. It has to remain in the same package for backward compatibility.
 public class InvalidRegistryObjectException extends RuntimeException {
 	/*
 	 * Declare a stable serialVersionUID.

@@ -11,7 +11,7 @@
 package org.eclipse.core.internal.registry;
 
 import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.InvalidRegistryObjectException;
+import org.eclipse.equinox.registry.InvalidRegistryObjectException;
 
 // This object is used to keep track on a contributor basis of the extension and extension points being contributed.
 // It is mainly used on removal so we can quickly  find objects to remove.
