@@ -724,11 +724,6 @@ public class ExtensionRegistry implements IExtensionRegistry {
 		strategy.log(status);
 	}
 
-	public void setInitializationData(Object newClassInstance, IConfigurationElement confElement, String propertyName, Object initData) throws CoreException {
-		if (compatibilityStrategy != null)
-			compatibilityStrategy.setInitializationData(newClassInstance, confElement, propertyName, initData);
-	}
-
 	public String translate(String key, ResourceBundle resources) {
 		return strategy.translate(key, resources);
 	}

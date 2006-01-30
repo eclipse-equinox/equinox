@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2005 IBM Corporation and others.
+ * Copyright (c) 2004, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,7 +13,6 @@ package org.eclipse.equinox.registry.tracker;
 import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.core.internal.registry.RegistryMessages;
-import org.eclipse.core.internal.registry.osgi.Activator;
 import org.eclipse.core.internal.runtime.ReferenceHashSet;
 import org.eclipse.core.internal.runtime.RuntimeLog;
 import org.eclipse.core.runtime.IStatus;
@@ -25,8 +24,7 @@ import org.eclipse.equinox.registry.IExtensionPoint;
 import org.eclipse.equinox.registry.IExtensionRegistry;
 import org.eclipse.equinox.registry.IRegistryChangeEvent;
 import org.eclipse.equinox.registry.IRegistryChangeListener;
-import org.osgi.framework.BundleContext;
-import org.osgi.util.tracker.ServiceTracker;
+import org.eclipse.equinox.registry.RegistryFactory;
 
 /**
  * Implementation of the IExtensionTracker. 
@@ -39,7 +37,7 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 	private ListenerList handlers = new ListenerList();
 	private final Object lock = new Object();
 	private boolean closed = false;
-	IExtensionRegistry registry; // the registry that this tacker works with
+	private IExtensionRegistry registry; // the registry that this tacker works with
 
 	private static final Object[] EMPTY_ARRAY = new Object[0];
 
@@ -47,15 +45,7 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 	 * Construct a new instance of the extension tracker.
 	 */
 	public ExtensionTracker() {
-		BundleContext context = Activator.getContext();
-		ServiceTracker registryTracker = new ServiceTracker(context, IExtensionRegistry.class.getName(), null);
-		registryTracker.open(true); // TODO check if argument is necessary
-		if (registryTracker != null) {
-			registry = (IExtensionRegistry) registryTracker.getService();
-			registry.addRegistryChangeListener(this);
-			registryTracker.close();
-		} else
-			RuntimeLog.log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, 0, RegistryMessages.registry_no_default, null));
+		this(RegistryFactory.getRegistry());
 	}
 
 	/**
@@ -66,6 +56,8 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 		registry = theRegistry;
 		if (registry != null)
 			registry.addRegistryChangeListener(this);
+		else
+			RuntimeLog.log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, 0, RegistryMessages.registry_no_default, null));
 	}
 
 	/* (non-Javadoc)
