@@ -15,10 +15,11 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Enumeration;
-import org.eclipse.osgi.framework.adaptor.core.*;
-import org.eclipse.osgi.framework.adaptor.core.BundleEntry;
-import org.eclipse.osgi.framework.internal.core.*;
+import org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry;
+import org.eclipse.osgi.baseadaptor.loader.BaseClassLoader;
+import org.eclipse.osgi.baseadaptor.loader.ClasspathManager;
 import org.eclipse.osgi.framework.internal.core.AbstractBundle;
+import org.eclipse.osgi.framework.internal.core.BundleResourceHandler;
 
 /**
  * URLStreamHandler the bundleresource protocol.
@@ -38,16 +39,16 @@ public class Handler extends BundleResourceHandler {
 	}
 
 	protected BundleEntry findBundleEntry(URL url, AbstractBundle bundle) throws IOException {
-		AbstractClassLoader cl = (AbstractClassLoader) getBundleClassLoader(bundle);
-		if (cl== null)
+		BaseClassLoader classloader = getBundleClassLoader(bundle);
+		if (classloader == null)
 			throw new FileNotFoundException(url.getPath());
+		ClasspathManager cpManager = classloader.getClasspathManager();
 		int index = url.getPort();
 		BundleEntry entry = null;
 		if (index == 0) {
-			entry = (BundleEntry) cl.findLocalObject(url.getPath());
-		}
-		else {
-			Enumeration entries = cl.findLocalObjects(url.getPath());
+			entry = cpManager.findLocalEntry(url.getPath());
+		} else {
+			Enumeration entries = cpManager.findLocalEntries(url.getPath());
 			if (entries != null)
 				for (int i = 0; entries.hasMoreElements() && i <= index; i++)
 					entry = (BundleEntry) entries.nextElement();
@@ -58,4 +59,3 @@ public class Handler extends BundleResourceHandler {
 	}
 
 }
-

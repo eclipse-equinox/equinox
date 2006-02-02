@@ -501,6 +501,7 @@ public class ReliableFile {
 	 * Answers a boolean indicating whether or not the specified reliable file
 	 * exists on the underlying file system. This call only returns if a file 
 	 * exists and not if the file contents are valid.
+	 * @param file returns true if the specified reliable file exists; otherwise false is returned
 	 *
 	 * @return <code>true</code> if the specified reliable file exists,
 	 * <code>false</code> otherwise.
@@ -573,6 +574,7 @@ public class ReliableFile {
 
 	/**
 	 * Delete the specified reliable file on the underlying file system.
+	 * @param deleteFile the reliable file to delete
 	 *
 	 * @return <code>true</code> if the specified reliable file was deleted,
 	 * <code>false</code> otherwise.

@@ -12,10 +12,12 @@ package org.eclipse.osgi.internal.resolver;
 
 import java.util.*;
 
-import org.eclipse.osgi.framework.adaptor.core.StateManager;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.debug.FrameworkDebugOptions;
 import org.eclipse.osgi.framework.internal.core.*;
+import org.eclipse.osgi.framework.util.KeyedElement;
+import org.eclipse.osgi.framework.util.KeyedHashSet;
+import org.eclipse.osgi.internal.baseadaptor.StateManager;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.BundleException;
@@ -64,6 +66,7 @@ public abstract class StateImpl implements State {
 		if (!bundleDescriptions.remove(existing))
 			return false;
 		resolvedBundles.remove(existing);
+		existing.setStateBit(BundleDescriptionImpl.REMOVAL_PENDING, true);
 		if (!basicAddBundle(newDescription))
 			return false;
 		resolved = false;
@@ -105,6 +108,7 @@ public abstract class StateImpl implements State {
 		resolvedBundles.remove((KeyedElement) toRemove);
 		resolved = false;
 		getDelta().recordBundleRemoved((BundleDescriptionImpl) toRemove);
+		((BundleDescriptionImpl) toRemove).setStateBit(BundleDescriptionImpl.REMOVAL_PENDING, true);
 		if (resolver != null) {
 			boolean pending = toRemove.getDependents().length > 0;
 			resolver.bundleRemoved(toRemove, pending);
@@ -385,6 +389,7 @@ public abstract class StateImpl implements State {
 
 	boolean basicAddBundle(BundleDescription description) {
 		((BundleDescriptionImpl) description).setContainingState(this);
+		((BundleDescriptionImpl) description).setStateBit(BundleDescriptionImpl.REMOVAL_PENDING, false);
 		return bundleDescriptions.add((BundleDescriptionImpl) description);
 	}
 

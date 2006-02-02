@@ -18,6 +18,7 @@ import java.security.*;
 import java.util.*;
 import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.debug.Debug;
+import org.eclipse.osgi.framework.util.KeyedElement;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
@@ -853,6 +854,11 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	 * Uninstall worker. Assumes the caller has the state change lock.
 	 */
 	protected void uninstallWorkerPrivileged() throws BundleException {
+		if (Debug.DEBUG) {
+			BundleWatcher bundleStats = framework.adaptor.getBundleWatcher();
+			if (bundleStats != null)
+				bundleStats.watchBundle(this, BundleWatcher.START_UNINSTALLING);
+		}
 		boolean unloaded = false;
 		//cache the bundle's headers
 		getHeaders();
@@ -889,6 +895,12 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 				framework.publishFrameworkEvent(FrameworkEvent.ERROR, this, ee);
 			}
 			throw e;
+		} finally {
+			if (Debug.DEBUG) {
+				BundleWatcher bundleStats = framework.adaptor.getBundleWatcher();
+				if (bundleStats != null)
+					bundleStats.watchBundle(this, BundleWatcher.END_UNINSTALLING);
+			}
 		}
 	}
 

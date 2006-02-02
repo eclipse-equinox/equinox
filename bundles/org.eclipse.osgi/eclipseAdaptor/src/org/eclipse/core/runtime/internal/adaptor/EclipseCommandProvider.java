@@ -12,7 +12,6 @@ package org.eclipse.core.runtime.internal.adaptor;
 
 import java.util.Enumeration;
 import java.util.Properties;
-import org.eclipse.core.runtime.adaptor.EclipseAdaptorMsg;
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.eclipse.osgi.framework.internal.core.FrameworkProperties;

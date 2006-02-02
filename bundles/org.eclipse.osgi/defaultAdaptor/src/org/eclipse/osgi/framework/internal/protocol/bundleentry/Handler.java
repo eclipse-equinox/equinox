@@ -14,9 +14,9 @@ package org.eclipse.osgi.framework.internal.protocol.bundleentry;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
-import org.eclipse.osgi.framework.adaptor.core.*;
-import org.eclipse.osgi.framework.internal.core.AbstractBundle;
-import org.eclipse.osgi.framework.internal.core.BundleResourceHandler;
+import org.eclipse.osgi.baseadaptor.BaseData;
+import org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry;
+import org.eclipse.osgi.framework.internal.core.*;
 
 /**
  * URLStreamHandler the bundleentry protocol.
@@ -36,8 +36,8 @@ public class Handler extends BundleResourceHandler {
 	}
 
 	protected BundleEntry findBundleEntry(URL url, AbstractBundle bundle) throws IOException {
-		AbstractBundleData bundleData = (AbstractBundleData) bundle.getBundleData();
-		BundleEntry entry = bundleData.getBaseBundleFile().getEntry(url.getPath());
+		BaseData bundleData = (BaseData) bundle.getBundleData();
+		BundleEntry entry = bundleData.getBundleFile().getEntry(url.getPath());
 		if (entry == null)
 			throw new FileNotFoundException(url.getPath());
 		return entry;

@@ -12,6 +12,7 @@ package org.eclipse.osgi.framework.internal.core;
 
 import java.net.URL;
 import java.util.Enumeration;
+import org.eclipse.osgi.framework.util.KeyedHashSet;
 
 /**
  * This class is used to optimize finding provided-packages for a bundle.

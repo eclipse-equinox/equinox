@@ -11,7 +11,6 @@
 package org.eclipse.core.runtime.internal.adaptor;
 
 import java.util.*;
-import org.eclipse.core.runtime.adaptor.EclipseAdaptorMsg;
 import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.eclipse.osgi.service.environment.Constants;
 import org.eclipse.osgi.service.environment.EnvironmentInfo;

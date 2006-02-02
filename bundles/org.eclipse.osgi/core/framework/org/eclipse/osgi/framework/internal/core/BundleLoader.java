@@ -18,6 +18,7 @@ import java.security.PrivilegedAction;
 import java.util.*;
 import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.debug.Debug;
+import org.eclipse.osgi.framework.util.KeyedHashSet;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.BundleException;

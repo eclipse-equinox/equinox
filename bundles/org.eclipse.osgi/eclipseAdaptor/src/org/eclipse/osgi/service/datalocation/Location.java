@@ -128,6 +128,7 @@ public interface Location {
 	 * Locking a location is advisory only.  That is, it does not prevent other applications from 
 	 * modifying the same location
 	 * </p>
+	 * @return true if the lock could be acquired; otherwise false is returned
 	 * 
 	 * @exception IOException if there was an unexpected problem while acquiring the lock
 	 */

@@ -13,8 +13,9 @@ package org.eclipse.osgi.framework.internal.core;
 
 import java.io.IOException;
 import java.net.*;
-import org.eclipse.osgi.framework.adaptor.BundleClassLoader;
-import org.eclipse.osgi.framework.adaptor.core.*;
+import org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry;
+import org.eclipse.osgi.baseadaptor.loader.BaseClassLoader;
+import org.eclipse.osgi.internal.baseadaptor.AdaptorMsg;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 
@@ -133,14 +134,14 @@ public abstract class BundleResourceHandler extends URLStreamHandler {
 
 		String bidString = url.getHost();
 		if (bidString == null) {
-			throw new IOException(NLS.bind(AdaptorMsg.URL_NO_BUNDLE_ID, url.toExternalForm())); 
+			throw new IOException(NLS.bind(AdaptorMsg.URL_NO_BUNDLE_ID, url.toExternalForm()));
 		}
 		AbstractBundle bundle = null;
 		long bundleID;
 		try {
 			bundleID = Long.parseLong(bidString);
 		} catch (NumberFormatException nfe) {
-			throw new MalformedURLException(NLS.bind(AdaptorMsg.URL_INVALID_BUNDLE_ID, bidString)); 
+			throw new MalformedURLException(NLS.bind(AdaptorMsg.URL_INVALID_BUNDLE_ID, bidString));
 		}
 		bundle = (AbstractBundle) context.getBundle(bundleID);
 		// check to make sure that this URL was created using the
@@ -152,7 +153,7 @@ public abstract class BundleResourceHandler extends URLStreamHandler {
 		}
 
 		if (bundle == null) {
-			throw new IOException(NLS.bind(AdaptorMsg.URL_NO_BUNDLE_FOUND, url.toExternalForm())); 
+			throw new IOException(NLS.bind(AdaptorMsg.URL_NO_BUNDLE_FOUND, url.toExternalForm()));
 		}
 		return (new BundleURLConnection(url, findBundleEntry(url, bundle)));
 	}
@@ -266,10 +267,10 @@ public abstract class BundleResourceHandler extends URLStreamHandler {
 		}
 	}
 
-	protected static BundleClassLoader getBundleClassLoader(AbstractBundle bundle) {
+	protected static BaseClassLoader getBundleClassLoader(AbstractBundle bundle) {
 		BundleLoader loader = bundle.getBundleLoader();
 		if (loader == null)
 			return null;
-		return loader.createClassLoader();
+		return (BaseClassLoader) loader.createClassLoader();
 	}
 }

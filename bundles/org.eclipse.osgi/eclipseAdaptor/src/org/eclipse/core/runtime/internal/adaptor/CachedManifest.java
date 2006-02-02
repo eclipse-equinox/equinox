@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -12,7 +12,6 @@ package org.eclipse.core.runtime.internal.adaptor;
 
 import java.util.Dictionary;
 import java.util.Enumeration;
-import org.eclipse.core.runtime.adaptor.*;
 import org.eclipse.osgi.framework.adaptor.BundleData;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.internal.core.Constants;
@@ -25,21 +24,21 @@ import org.osgi.framework.*;
  */
 public class CachedManifest extends Dictionary {
 
-	Dictionary manifest = null;
-	EclipseBundleData bundledata;
+	private Dictionary manifest = null;
+	private EclipseStorageHook storageHook;
 
-	public CachedManifest(EclipseBundleData bundledata) {
-		this.bundledata = bundledata;
+	public CachedManifest(EclipseStorageHook storageHook) {
+		this.storageHook = storageHook;
 	}
 
 	public Dictionary getManifest() {
 		if (manifest == null)
 			try {
-				manifest = bundledata.loadManifest();
+				manifest = storageHook.createCachedManifest(true);
 			} catch (BundleException e) {
-				final String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_CACHEDMANIFEST_UNEXPECTED_EXCEPTION, bundledata.getLocation());
+				final String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_CACHEDMANIFEST_UNEXPECTED_EXCEPTION, storageHook.getBaseData().getLocation());
 				FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, message, 0, e, null);
-				EclipseAdaptor.getDefault().getFrameworkLog().log(entry);
+				storageHook.getAdaptor().getFrameworkLog().log(entry);
 				return null;
 			}
 		return manifest;
@@ -67,20 +66,20 @@ public class CachedManifest extends Dictionary {
 	public Object get(Object key) {
 		String keyString = (String) key;
 		if (Constants.BUNDLE_VERSION.equalsIgnoreCase(keyString)) {
-			Version result = bundledata.getVersion();
+			Version result = storageHook.getBaseData().getVersion();
 			return result == null ? null : result.toString();
 		}
-		if (EclipseAdaptor.PLUGIN_CLASS.equalsIgnoreCase(keyString))
-			return bundledata.getPluginClass();
+		if (Constants.PLUGIN_CLASS.equalsIgnoreCase(keyString))
+			return storageHook.getPluginClass();
 		if (Constants.BUNDLE_SYMBOLICNAME.equalsIgnoreCase(keyString)) {
-			if ((bundledata.getType() & BundleData.TYPE_SINGLETON) == 0)
-				return bundledata.getSymbolicName();
-			return bundledata.getSymbolicName() + ';' + Constants.SINGLETON_DIRECTIVE + ":=true"; //$NON-NLS-1$
+			if ((storageHook.getBaseData().getType() & BundleData.TYPE_SINGLETON) == 0)
+				return storageHook.getBaseData().getSymbolicName();
+			return storageHook.getBaseData().getSymbolicName() + ';' + Constants.SINGLETON_DIRECTIVE + ":=true"; //$NON-NLS-1$
 		}
 		if (Constants.BUDDY_LOADER.equalsIgnoreCase(keyString))
-			return bundledata.getBuddyList();
+			return storageHook.getBuddyList();
 		if (Constants.REGISTERED_POLICY.equalsIgnoreCase(keyString))
-			return bundledata.getRegisteredBuddyList();
+			return storageHook.getRegisteredBuddyList();
 		Dictionary result = getManifest();
 		return result == null ? null : result.get(key);
 	}

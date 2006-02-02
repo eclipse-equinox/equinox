@@ -11,7 +11,6 @@
 
 package org.eclipse.core.runtime.internal.adaptor;
 
-import org.eclipse.core.runtime.adaptor.EclipseAdaptorMsg;
 import org.eclipse.core.runtime.adaptor.EclipseStarter;
 import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.eclipse.osgi.internal.profile.Profile;

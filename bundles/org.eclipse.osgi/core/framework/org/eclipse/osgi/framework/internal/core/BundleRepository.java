@@ -12,6 +12,7 @@
 package org.eclipse.osgi.framework.internal.core;
 
 import java.util.*;
+import org.eclipse.osgi.framework.util.KeyedHashSet;
 import org.osgi.framework.Version;
 
 /**

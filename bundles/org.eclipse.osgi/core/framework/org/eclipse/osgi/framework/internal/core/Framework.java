@@ -589,7 +589,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 	 *             Environment.
 	 */
 	protected boolean verifyExecutionEnvironment(Dictionary manifest) throws BundleException {
-		if (!Boolean.valueOf(FrameworkProperties.getProperty(Constants.ECLIPSE_EE_INSTALL_VERIFY)).booleanValue())
+		if (!Boolean.valueOf(FrameworkProperties.getProperty(Constants.ECLIPSE_EE_INSTALL_VERIFY, Boolean.TRUE.toString())).booleanValue()) //$NON-NLS-1$
 			return true;
 		String headerValue = (String) manifest.get(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT);
 		/* If no required EE is in the manifest return true */
@@ -837,6 +837,11 @@ public class Framework implements EventDispatcher, EventPublisher {
 		try {
 			BundleData bundledata = storage.begin();
 			bundle = createAndVerifyBundle(bundledata);
+			if (Debug.DEBUG) {
+				BundleWatcher bundleStats = adaptor.getBundleWatcher();
+				if (bundleStats != null)
+					bundleStats.watchBundle(bundle, BundleWatcher.START_INSTALLING);
+			}
 			try {
 				// Select the native code paths for the bundle;
 				// this is not done by the adaptor because this
@@ -872,6 +877,12 @@ public class Framework implements EventDispatcher, EventPublisher {
 				}
 				bundle.close();
 				throw error;
+			} finally {
+				if (Debug.DEBUG) {
+					BundleWatcher bundleStats = adaptor.getBundleWatcher();
+					if (bundleStats != null)
+						bundleStats.watchBundle(bundle, BundleWatcher.END_INSTALLING);
+				}
 			}
 			/* bundle has been successfully installed */
 			bundles.add(bundle);

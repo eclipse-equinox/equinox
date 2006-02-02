@@ -13,7 +13,7 @@ package org.eclipse.osgi.internal.resolver;
 import java.io.IOException;
 import java.util.*;
 import org.eclipse.osgi.framework.internal.core.Constants;
-import org.eclipse.osgi.framework.internal.core.KeyedElement;
+import org.eclipse.osgi.framework.util.KeyedElement;
 import org.eclipse.osgi.service.resolver.*;
 
 public class BundleDescriptionImpl extends BaseDescriptionImpl implements BundleDescription, KeyedElement {
@@ -323,13 +323,15 @@ public class BundleDescriptionImpl extends BaseDescriptionImpl implements Bundle
 	}
 
 	protected synchronized void addDependency(BaseDescriptionImpl dependency) {
-		if (dependencies == null)
-			dependencies = new ArrayList(10);
 		BundleDescriptionImpl bundle;
 		if (dependency instanceof ExportPackageDescription)
 			bundle = (BundleDescriptionImpl) ((ExportPackageDescription) dependency).getExporter();
 		else
 			bundle = (BundleDescriptionImpl) dependency;
+		if (bundle == this)
+			return;
+		if (dependencies == null)
+			dependencies = new ArrayList(10);
 		if (!dependencies.contains(bundle)) {
 			bundle.addDependent(this);
 			dependencies.add(bundle);

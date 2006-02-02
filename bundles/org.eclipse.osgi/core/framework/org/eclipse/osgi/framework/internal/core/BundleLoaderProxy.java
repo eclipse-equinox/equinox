@@ -14,9 +14,9 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import org.eclipse.osgi.framework.util.KeyedHashSet;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.*;
-import org.osgi.framework.Bundle;
 import org.osgi.service.packageadmin.RequiredBundle;
 
 /*

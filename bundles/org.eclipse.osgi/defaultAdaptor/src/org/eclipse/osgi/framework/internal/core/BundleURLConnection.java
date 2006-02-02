@@ -1,10 +1,10 @@
 /*******************************************************************************
- * Copyright (c) 2004 IBM Corporation and others.
+ * Copyright (c) 2004, 2005 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -15,8 +15,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
-import org.eclipse.osgi.framework.adaptor.core.AdaptorMsg;
-import org.eclipse.osgi.framework.adaptor.core.BundleEntry;
+import org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry;
+import org.eclipse.osgi.internal.baseadaptor.AdaptorMsg;
 import org.eclipse.osgi.util.NLS;
 
 /**
@@ -53,7 +53,7 @@ public class BundleURLConnection extends URLConnection {
 				in = bundleEntry.getInputStream();
 				connected = true;
 			} else {
-				throw new IOException(NLS.bind(AdaptorMsg.RESOURCE_NOT_FOUND_EXCEPTION, url)); 
+				throw new IOException(NLS.bind(AdaptorMsg.RESOURCE_NOT_FOUND_EXCEPTION, url));
 			}
 		}
 	}
@@ -78,6 +78,7 @@ public class BundleURLConnection extends URLConnection {
 					if (in.markSupported())
 						contentType = guessContentTypeFromStream(in);
 				} catch (IOException e) {
+					// do nothing
 				}
 			}
 		}

@@ -85,7 +85,7 @@ public class Launcher {
 	protected boolean console = false;
 
 	/** string containing the classname of the adaptor to be used in this framework instance */
-	protected String adaptorClassName = "org.eclipse.osgi.framework.internal.defaultadaptor.DefaultAdaptor"; //$NON-NLS-1$
+	protected String adaptorClassName = "org.eclipse.osgi.baseadaptor.BaseAdaptor"; //$NON-NLS-1$
 
 	protected final String osgiConsoleClazz = "org.eclipse.osgi.framework.internal.core.FrameworkConsole"; //$NON-NLS-1$
 

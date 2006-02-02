@@ -118,7 +118,7 @@ public class EclipseStarter {
 	private static final String REFERENCE_PROTOCOL = "reference"; //$NON-NLS-1$
 	private static final String INITIAL_LOCATION = "initial@"; //$NON-NLS-1$
 	/** string containing the classname of the adaptor to be used in this framework instance */
-	protected static final String DEFAULT_ADAPTOR_CLASS = "org.eclipse.core.runtime.adaptor.EclipseAdaptor"; //$NON-NLS-1$
+	protected static final String DEFAULT_ADAPTOR_CLASS = "org.eclipse.osgi.baseadaptor.BaseAdaptor"; //$NON-NLS-1$
 
 	private static final int DEFAULT_INITIAL_STARTLEVEL = 6; // default value for legacy purposes
 	private static final String DEFAULT_BUNDLES_STARTLEVEL = "4"; //$NON-NLS-1$

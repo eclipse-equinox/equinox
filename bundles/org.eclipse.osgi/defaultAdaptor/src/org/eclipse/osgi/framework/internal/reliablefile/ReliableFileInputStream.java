@@ -120,6 +120,7 @@ public class ReliableFileInputStream extends FilterInputStream {
 
 	/**
 	 * Override default FilterInputStream method.
+	 * @see FilterInputStream#read(byte[], int, int)
 	 */
 	public synchronized int read(byte b[], int off, int len) throws IOException {
 		if (readPos >= length) {
@@ -138,6 +139,7 @@ public class ReliableFileInputStream extends FilterInputStream {
 
 	/**
 	 * Override default FilterInputStream method.
+	 * @see FilterInputStream#read(byte[])
 	 */
 	public synchronized int read(byte b[]) throws IOException {
 		return read(b, 0, b.length);
@@ -145,6 +147,7 @@ public class ReliableFileInputStream extends FilterInputStream {
 
 	/**
 	 * Override default FilterInputStream method.
+	 * @see FilterInputStream#read()
 	 */
 	public synchronized int read() throws IOException {
 		if (readPos >= length) {
@@ -160,6 +163,7 @@ public class ReliableFileInputStream extends FilterInputStream {
 
 	/**
 	 * Override default available method.
+	 * @see FilterInputStream#available()
 	 */
 	public synchronized int available() throws IOException {
 		if (readPos < length) // just in case
@@ -169,6 +173,7 @@ public class ReliableFileInputStream extends FilterInputStream {
 
 	/**
 	 * Override default skip method.
+	 * @see FilterInputStream#skip(long)
 	 */
 	public synchronized long skip(long n) throws IOException {
 		long len = super.skip(n);
@@ -180,6 +185,7 @@ public class ReliableFileInputStream extends FilterInputStream {
 
 	/**
 	 * Override default markSupported method.
+	 * @see FilterInputStream#markSupported()
 	 */
 	public boolean markSupported() {
 		return false;
@@ -187,6 +193,7 @@ public class ReliableFileInputStream extends FilterInputStream {
 
 	/**
 	 * Override default mark method.
+	 * @see FilterInputStream#mark(int)
 	 */
 	public void mark(int readlimit) {
 		//ignore
@@ -194,6 +201,7 @@ public class ReliableFileInputStream extends FilterInputStream {
 
 	/**
 	 * Override default reset method.
+	 * @see FilterInputStream#reset()
 	 */
 	public void reset() throws IOException {
 		throw new IOException("reset not supported."); //$NON-NLS-1$

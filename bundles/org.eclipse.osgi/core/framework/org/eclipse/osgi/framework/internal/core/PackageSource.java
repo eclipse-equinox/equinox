@@ -13,6 +13,7 @@ package org.eclipse.osgi.framework.internal.core;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Enumeration;
+import org.eclipse.osgi.framework.util.KeyedElement;
 
 public abstract class PackageSource implements KeyedElement {
 	protected String id;

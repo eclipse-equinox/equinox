@@ -12,7 +12,6 @@ package org.eclipse.core.runtime.internal.adaptor;
 
 import java.io.*;
 import java.nio.channels.FileLock;
-import org.eclipse.core.runtime.adaptor.EclipseAdaptorMsg;
 import org.eclipse.osgi.util.NLS;
 
 /**

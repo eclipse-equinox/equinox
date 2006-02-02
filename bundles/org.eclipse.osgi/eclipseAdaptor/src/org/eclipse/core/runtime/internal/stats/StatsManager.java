@@ -11,14 +11,22 @@
 package org.eclipse.core.runtime.internal.stats;
 
 import java.io.*;
+import java.net.URL;
 import java.util.*;
+import org.eclipse.osgi.baseadaptor.HookConfigurator;
+import org.eclipse.osgi.baseadaptor.HookRegistry;
+import org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry;
+import org.eclipse.osgi.baseadaptor.hooks.ClassLoadingStatsHook;
+import org.eclipse.osgi.baseadaptor.loader.ClasspathEntry;
+import org.eclipse.osgi.baseadaptor.loader.ClasspathManager;
 import org.eclipse.osgi.framework.adaptor.BundleWatcher;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
+import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.debug.FrameworkDebugOptions;
 import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.Bundle;
 
-public class StatsManager implements BundleWatcher {
+public class StatsManager implements BundleWatcher, HookConfigurator, ClassLoadingStatsHook {
 	// This connect bundles and their info, and so allows to access the info without running through
 	// the bundle registry. This map only contains activated bundles. The key is the bundle Id
 	private Hashtable bundles = new Hashtable(20);
@@ -95,6 +103,17 @@ public class StatsManager implements BundleWatcher {
 		bundle.setTimestamp(System.currentTimeMillis());
 		bundle.setActivationOrder(bundles.size());
 		bundle.setDuringStartup(booting);
+	}
+
+	public void watchBundle(Bundle bundle, int type) {
+		switch (type) {
+			case BundleWatcher.START_ACTIVATION :
+				startActivation(bundle);
+				break;
+			case BundleWatcher.END_ACTIVATION :
+				endActivation(bundle);
+				break;
+		}
 	}
 
 	public void startActivation(Bundle bundle) {
@@ -177,4 +196,39 @@ public class StatsManager implements BundleWatcher {
 		return (BundleStats) bundles.get(new Long(id));
 	}
 
+	public void preFindLocalClass(String name, ClasspathManager manager) throws ClassNotFoundException {
+		if (StatsManager.MONITOR_CLASSES) //Support for performance analysis
+			ClassloaderStats.startLoadingClass(getClassloaderId(manager), name);
+	}
+
+	public void postFindLocalClass(String name, Class clazz, ClasspathManager manager) {
+		if (StatsManager.MONITOR_CLASSES)
+			ClassloaderStats.endLoadingClass(getClassloaderId(manager), name, clazz != null);	
+	}
+
+	public void preFindLocalResource(String name, ClasspathManager manager) {
+		// do nothing
+	}
+
+	public void postFindLocalResource(String name, URL resource, ClasspathManager manager) {
+		if (StatsManager.MONITOR_RESOURCES)
+			if (resource != null && name.endsWith(".properties")) //$NON-NLS-1$
+				ClassloaderStats.loadedBundle(getClassloaderId(manager), new ResourceBundleStats(getClassloaderId(manager), name, resource));
+		return;
+	}
+
+	public void recordClassDefine(String name, Class clazz, byte[] classbytes, ClasspathEntry classpathEntry, BundleEntry entry, ClasspathManager manager) {
+		// do nothing
+	}
+
+	private String getClassloaderId(ClasspathManager loader) {
+		return loader.getBaseData().getSymbolicName();
+	}
+
+	public void addHooks(HookRegistry hookRegistry) {
+		if (Debug.MONITOR_ACTIVATION)
+			hookRegistry.addWatcher(StatsManager.getDefault());
+		if (StatsManager.MONITOR_CLASSES || StatsManager.MONITOR_RESOURCES)
+			hookRegistry.addClassLoadingStatsHook(StatsManager.getDefault());
+	}
 }

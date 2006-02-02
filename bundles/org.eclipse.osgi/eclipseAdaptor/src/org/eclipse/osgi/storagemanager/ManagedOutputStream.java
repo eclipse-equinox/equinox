@@ -46,6 +46,7 @@ public final class ManagedOutputStream extends FilterOutputStream {
 	 * a set returned by {@link StorageManager#getOutputStreamSet(String[])} then
 	 * the storage manager will only be updated with the new content after all 
 	 * of the managed output streams in the set are closed successfully.
+	 * @see FilterOutputStream#close()
 	 */
 	public void close() throws IOException {
 		manager.closeOutputStream(this);

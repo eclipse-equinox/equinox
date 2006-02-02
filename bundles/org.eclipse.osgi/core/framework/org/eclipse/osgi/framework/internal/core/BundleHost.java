@@ -284,7 +284,7 @@ public class BundleHost extends AbstractBundle {
 			if ((state & (STARTING | ACTIVE)) != 0) {
 				return;
 			}
-
+			boolean shouldStart = false;
 			try {
 				if (state == INSTALLED) {
 					if (!framework.packageAdmin.resolveBundles(new Bundle[] {this})) {
@@ -295,15 +295,13 @@ public class BundleHost extends AbstractBundle {
 				if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 					Debug.println("Bundle: Active sl = " + framework.startLevelManager.getStartLevel() + "; Bundle " + getBundleId() + " sl = " + getStartLevel()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				}
-
-				if (getStartLevel() <= framework.startLevelManager.getStartLevel()) {
+				shouldStart = getStartLevel() <= framework.startLevelManager.getStartLevel();
+				if (shouldStart) {
 					//STARTUP TIMING Start here					
 					if (Debug.DEBUG) {
-						if (Debug.MONITOR_ACTIVATION) {
-							BundleWatcher bundleStats = framework.adaptor.getBundleWatcher();
-							if (bundleStats != null)
-								bundleStats.startActivation(this);
-						}
+						BundleWatcher bundleStats = framework.adaptor.getBundleWatcher();
+						if (bundleStats != null)
+							bundleStats.watchBundle(this, BundleWatcher.START_ACTIVATION);
 						if (Debug.DEBUG_BUNDLE_TIME) {
 							start = System.currentTimeMillis();
 							System.out.println("Starting " + getSymbolicName()); //$NON-NLS-1$
@@ -341,12 +339,10 @@ public class BundleHost extends AbstractBundle {
 					}
 				}
 			} finally {
-				if (Debug.DEBUG && state == ACTIVE) {
-					if (Debug.MONITOR_ACTIVATION) {
-						BundleWatcher bundleStats = framework.adaptor.getBundleWatcher();
-						if (bundleStats != null)
-							bundleStats.endActivation(this);
-					}
+				if (Debug.DEBUG && shouldStart) {
+					BundleWatcher bundleStats = framework.adaptor.getBundleWatcher();
+					if (bundleStats != null)
+						bundleStats.watchBundle(this, BundleWatcher.END_ACTIVATION);
 					if (Debug.DEBUG_BUNDLE_TIME)
 						System.out.println("End starting " + getSymbolicName() + " " + (System.currentTimeMillis() - start)); //$NON-NLS-1$ //$NON-NLS-2$
 				}
@@ -390,7 +386,11 @@ public class BundleHost extends AbstractBundle {
 			if ((state & (STOPPING | RESOLVED | INSTALLED)) != 0) {
 				return;
 			}
-
+			if (Debug.DEBUG) {
+				BundleWatcher bundleStats = framework.adaptor.getBundleWatcher();
+				if (bundleStats != null)
+					bundleStats.watchBundle(this, BundleWatcher.START_DEACTIVATION);
+			}
 			state = STOPPING;
 			framework.publishBundleEvent(BundleEvent.STOPPING, this);
 			try {
@@ -408,6 +408,11 @@ public class BundleHost extends AbstractBundle {
 				}
 
 				framework.publishBundleEvent(BundleEvent.STOPPED, this);
+				if (Debug.DEBUG) {
+					BundleWatcher bundleStats = framework.adaptor.getBundleWatcher();
+					if (bundleStats != null)
+						bundleStats.watchBundle(this, BundleWatcher.END_DEACTIVATION);
+				}
 			}
 		}
 	}

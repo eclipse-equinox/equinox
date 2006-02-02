@@ -13,8 +13,17 @@ package org.eclipse.osgi.framework.adaptor;
 import org.osgi.framework.Bundle;
 
 /**
- * Contains information about activated bundles and acts as the main 
- * entry point for logging plugin activity.
+ * Watches bundle lifecyle processes.  This interface is different than that of
+ * a BundleLisener because it gets notified before and after all lifecycle 
+ * changes.  A bundle watcher acts as the main entry point for logging 
+ * bundle activity.
+ * <p>
+ * Note that a bundle watcher is always notified of when a lifecycle processes 
+ * has ended even in cases where the lifecycle process may have failed.  For 
+ * example, if activating a bundle fails the {@link #END_ACTIVATION} flag will
+ * still be sent to the bundle watcher to notify them that the activation 
+ * process has ended.
+ * </p>
  * <p>
  * Clients may implement this interface.
  * </p>
@@ -22,14 +31,51 @@ import org.osgi.framework.Bundle;
  */
 public interface BundleWatcher {
 	/**
-	 * Called when a bundle is being activated.
-	 * @param bundle the bundle being activated.
+	 * The install process is beginning for a bundle
 	 */
-	public void startActivation(Bundle bundle);
+	public static final int START_INSTALLING	= 0x0001;
+	/**
+	 * The install process has ended for a bundle
+	 */
+	public static final int END_INSTALLING		= 0x0002;
+	/**
+	 * The activation process is beginning for a bundle
+	 */
+	public static final int START_ACTIVATION	= 0x0004;
+	/**
+	 * The activation process has ended for a bundle
+	 */
+	public static final int END_ACTIVATION		= 0x0008;
+	/**
+	 * The deactivation process is beginning for a bundle
+	 */
+	public static final int START_DEACTIVATION	= 0x0010;
+	/**
+	 * The deactivation process has ended for a bundle
+	 */
+	public static final int END_DEACTIVATION	= 0x0020;
+	/**
+	 * The uninstallation process is beginning for a bundle
+	 */
+	public static final int START_UNINSTALLING	= 0x0040;
+	/**
+	 * The uninstallation process has ended for a bundle
+	 */
+	public static final int END_UNINSTALLING	= 0x0080;
 
 	/**
-	 * Called after a bundle has been activated.
-	 * @param bundle the bundle being activated.
+	 * Receives notification that a lifecycle change is going to start or has
+	 * ended.
+	 * @param bundle the bundle for which the lifecycle change is occurring on.
+	 * @param type the type of lifecycle change which is occurring.
+	 * @see #START_INSTALLING
+	 * @see #END_INSTALLING
+	 * @see #START_ACTIVATION
+	 * @see #END_ACTIVATION
+	 * @see #START_DEACTIVATION
+	 * @see #END_DEACTIVATION
+	 * @see #START_UNINSTALLING
+	 * @see #END_UNINSTALLING
 	 */
-	public void endActivation(Bundle bundle);
+	public void watchBundle(Bundle bundle, int type);
 }

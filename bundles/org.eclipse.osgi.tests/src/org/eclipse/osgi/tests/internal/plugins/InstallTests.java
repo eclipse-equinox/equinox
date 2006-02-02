@@ -68,7 +68,7 @@ public class InstallTests extends TestCase {
 		try {
 			assertEquals("1.0", "bundle02", installed.getSymbolicName());
 			assertEquals("1.1", Bundle.INSTALLED, installed.getState());
-			assertEquals("1.2", "2.0", installed.getHeaders().get(Constants.BUNDLE_VERSION));
+			assertEquals("1.2", new Version("2.0"), new Version((String) installed.getHeaders().get(Constants.BUNDLE_VERSION)));
 		} finally {
 			// clean-up
 			installed.uninstall();

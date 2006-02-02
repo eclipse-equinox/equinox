@@ -13,7 +13,6 @@ package org.eclipse.core.runtime.internal.adaptor;
 import java.io.InputStream;
 import java.util.*;
 import javax.xml.parsers.SAXParserFactory;
-import org.eclipse.core.runtime.adaptor.EclipseAdaptorMsg;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.util.NLS;
