@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2005 IBM Corporation and others.
+ * Copyright (c) 2004, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,10 +21,41 @@ import java.net.URL;
  * </p>
  * 
  * @since 3.0
- * XXX  adding constants for the ldap filters: install, config, instance, user.
- * 
  */
 public interface Location {
+
+	/**
+	 * Constant which defines the filter string for aquiring the service which
+	 * specifies the instance location.
+	 * 
+	 * @since 3.2
+	 */
+	public static final String INSTANCE_FILTER = "(&(objectClass=" + Location.class.getName() + ")(type=osgi.instance.area))"; //$NON-NLS-1$ //$NON-NLS-2$
+
+	/**
+	 * Constant which defines the filter string for aquiring the service which
+	 * specifies the install location.
+	 * 
+	 * @since 3.2
+	 */
+	public static final String INSTALL_FILTER = "(&(objectClass=" + Location.class.getName() + ")(type=osgi.install.area))"; //$NON-NLS-1$ //$NON-NLS-2$
+
+	/**
+	 * Constant which defines the filter string for aquiring the service which
+	 * specifies the configuration location.
+	 * 
+	 * @since 3.2
+	 */
+	public static final String CONFIGURATION_FILTER = "(&(objectClass=" + Location.class.getName() + ")(type=osgi.configuration.area))"; //$NON-NLS-1$ //$NON-NLS-2$
+
+	/**
+	 * Constant which defines the filter string for aquiring the service which
+	 * specifies the user location.
+	 * 
+	 * @since 3.2
+	 */
+	public static final String USER_FILTER = "(&(objectClass=" + Location.class.getName() + ")(type=osgi.user.area))"; //$NON-NLS-1$ //$NON-NLS-2$
+
 	/**
 	 * Returns <code>true</code> if this location allows a default value to be assigned
 	 * and <code>false</code> otherwise.
