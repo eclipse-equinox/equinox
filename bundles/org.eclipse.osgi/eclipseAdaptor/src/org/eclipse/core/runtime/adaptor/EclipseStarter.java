@@ -507,6 +507,11 @@ public class EclipseStarter {
 		properties.put("name", "splashscreen"); //$NON-NLS-1$ //$NON-NLS-2$
 		Runnable handler = new Runnable() {
 			public void run() {
+				if (EclipseStarter.debug) {
+					String timeString = FrameworkProperties.getProperty("eclipse.startTime"); //$NON-NLS-1$ 
+					long time = timeString == null ? 0L : Long.parseLong(timeString);
+					System.out.println("Application Started: " + (System.currentTimeMillis() - time)); //$NON-NLS-1$
+				}
 				StatsManager.doneBooting();
 				endSplashHandler.run();
 			}
