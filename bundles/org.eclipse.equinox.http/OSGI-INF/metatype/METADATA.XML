@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metatype:MetaData xmlns:metatype="http://www.osgi.org/xmlns/metatype/v1.0.0">
+  <OCD id="org.eclipse.equinox.http.Http" name="%HTTP_GEN_SETTINGS" description="%HTTP_GEN_SETTINGS_DESC">
+	<AD id="http.minThreads" type="Integer" default="4" name="%MIN_THREADS" description="%MIN_THREADS_DESC" cardinality="0" min="0" max="63" />
+	<AD id="http.maxThreads" type="Integer" default="20" name="%MAX_THREADS" description="%MAX_THREADS_DESC" cardinality="0" min="0" max="63" />
+	<AD id="http.threadPriority" type="Integer" default="5" name="%THREAD_PRIORITY" description="%THREAD_PRIORITY_DESC" cardinality="0" min="1" max="10" />
+  </OCD>	
+  <OCD id="org.eclipse.equinox.http.HttpFactory" name="%HTTP_SETTINGS" description="%HTTP_SETTINGS_DESC">
+	<AD id="http.address" type="String" default="ALL" name="%ADDRESS" description="%ADDRESS_DESC" cardinality="0" />
+	<AD id="http.port" type="Integer" default="80" name="%PORT_NUMBER" description="%PORT_NUMBER_DESC" cardinality="0" min="0" max="65535"/>
+	<AD id="http.timeout" type="Integer" default="30" name="%THREAD_TIMEOUT" description="%THREAD_TIMEOUT_DESC" cardinality="0" min="0" max="600" />
+	<AD id="service.ranking" type="Integer" default="0" name="%SERVICE_RANKING" description="%SERVICE_RANKING_DESC" cardinality="0"/>
+  </OCD>
+    <Designate pid="org.eclipse.equinox.http.Http">
+        <Object ocdref="org.eclipse.equinox.http.Http"/> 
+    </Designate> 
+    <Designate pid="org.eclipse.equinox.http.HttpFactory" factoryPid="org.eclipse.equinox.http.HttpFactory">
+        <Object ocdref="org.eclipse.equinox.http.HttpFactory"/> 
+    </Designate>
+</metatype:MetaData>
