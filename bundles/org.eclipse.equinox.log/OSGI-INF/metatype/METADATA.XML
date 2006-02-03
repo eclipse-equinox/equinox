@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metatype:MetaData xmlns:metatype="http://www.osgi.org/xmlns/metatype/v1.0.0">
+	<OCD id="org.eclipse.equinox.log.Log" name="%LOG_SETTINGS" description="%LOG_SETTINGS_DESC">
+	 <AD id="log.size" name="%LOG_SIZE" type="Integer" default="100" cardinality="0" min="10" max="2000" description="%LOG_SIZE_DESC" required="true"/>
+	 <AD id="log.threshold" name="%LOG_THRESHOLD" type="Integer" default="4" cardinality="0" min="1" max="4" description="%LOG_THRESHOLD_DESC" required="true">
+        <Option label= "%ERROR" value="1"/>
+        <Option label= "%WARNING" value="2"/>
+		<Option label= "%INFO" value="3"/>
+		<Option label= "%DEBUG" value="4"/>
+	 </AD>
+    </OCD>
+    <Designate pid="org.eclipse.equinox.log.Log">
+        <Object ocdref="org.eclipse.equinox.log.Log"/> 
+    </Designate> 
+</metatype:MetaData>
