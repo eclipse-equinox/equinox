@@ -8,10 +8,9 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.equinox.registry;
+package org.eclipse.core.runtime;
 
 import java.io.InputStream;
-import java.util.EventListener;
 import java.util.ResourceBundle;
 
 /**
@@ -51,6 +50,7 @@ import java.util.ResourceBundle;
  * <p>
  * This interface is not intended to be implemented by clients.
  * </p>
+ * @since 3.0
  */
 public interface IExtensionRegistry {
 	/**
@@ -70,9 +70,9 @@ public interface IExtensionRegistry {
 	 * @param namespace the namespace in which to listen for changes
 	 * @see IRegistryChangeListener
 	 * @see IRegistryChangeEvent
-	 * @see #removeRegistryChangeListener(EventListener) 
+	 * @see #removeRegistryChangeListener(IRegistryChangeListener) 
 	 */
-	public void addRegistryChangeListener(EventListener listener, String namespace);
+	public void addRegistryChangeListener(IRegistryChangeListener listener, String namespace);
 
 	/**
 	 * Adds the given listener for registry change events.
@@ -88,10 +88,10 @@ public interface IExtensionRegistry {
 	 * @param listener the listener
 	 * @see IRegistryChangeListener
 	 * @see IRegistryChangeEvent
-	 * @see #addRegistryChangeListener(EventListener, String)
-	 * @see #removeRegistryChangeListener(EventListener)
+	 * @see #addRegistryChangeListener(IRegistryChangeListener, String)
+	 * @see #removeRegistryChangeListener(IRegistryChangeListener)
 	 */
-	public void addRegistryChangeListener(EventListener listener);
+	public void addRegistryChangeListener(IRegistryChangeListener listener);
 
 	/**
 	 * Returns all configuration elements from all extensions configured
@@ -241,10 +241,10 @@ public interface IExtensionRegistry {
 	 *
 	 * @param listener the listener
 	 * @see IRegistryChangeListener
-	 * @see #addRegistryChangeListener(EventListener)
-	 * @see #addRegistryChangeListener(EventListener, String)
+	 * @see #addRegistryChangeListener(IRegistryChangeListener)
+	 * @see #addRegistryChangeListener(IRegistryChangeListener, String)
 	 */
-	public void removeRegistryChangeListener(EventListener listener);
+	public void removeRegistryChangeListener(IRegistryChangeListener listener);
 
 	/**
 	 * Adds to this extension registry an extension point(s), extension(s), or 
@@ -265,7 +265,7 @@ public interface IExtensionRegistry {
 	 * @param name optional name of the contribution. Used for error reporting; might be null
 	 * @param translationBundle optional resource bundle used for translations; might be null 
 	 * @param token the key used to check permissions. Two registry keys are set in the registry
-	 * constructor {@link RegistryFactory#createRegistry(org.eclipse.equinox.registry.spi.RegistryStrategy, Object, Object)}: 
+	 * constructor {@link RegistryFactory#createRegistry(org.eclipse.core.runtime.spi.RegistryStrategy, Object, Object)}: 
 	 * master token and a user token. Master token allows all operations; user token 
 	 * allows non-persisted registry elements to be modified.
 	 * @return - true: the contribution was successfully processed; false - error in 
@@ -279,7 +279,7 @@ public interface IExtensionRegistry {
 	 * 
 	 * @param extension extension to be removed
 	 * @param token the key used to check permissions. Two registry keys are set in the registry
-	 * constructor {@link RegistryFactory#createRegistry(org.eclipse.equinox.registry.spi.RegistryStrategy, Object, Object)}: 
+	 * constructor {@link RegistryFactory#createRegistry(org.eclipse.core.runtime.spi.RegistryStrategy, Object, Object)}: 
 	 * master token and a user token. Master token allows all operations; user token only
 	 * allows non-persisted registry elements to be modified.
 	 * <p>
@@ -296,7 +296,7 @@ public interface IExtensionRegistry {
 	 * 
 	 * @param extensionPoint extension point to be removed
 	 * @param token the key used to check permissions. Two registry keys are set in the registry
-	 * constructor {@link RegistryFactory#createRegistry(org.eclipse.equinox.registry.spi.RegistryStrategy, Object, Object)}: 
+	 * constructor {@link RegistryFactory#createRegistry(org.eclipse.core.runtime.spi.RegistryStrategy, Object, Object)}: 
 	 * master token and a user token. Master token allows all operations; user token only
 	 * allows non-persisted registry elements to be modified.
 	 * <p>
@@ -315,7 +315,7 @@ public interface IExtensionRegistry {
 	 * <p>
 	 * This method is an access controlled method. Master token should be passed as an argument.
 	 * </p>
-	 * @see RegistryFactory#createRegistry(org.eclipse.equinox.registry.spi.RegistryStrategy, Object, Object)
+	 * @see RegistryFactory#createRegistry(org.eclipse.core.runtime.spi.RegistryStrategy, Object, Object)
 	 * @param token master token for the registry
 	 * @throws IllegalArgumentException if incorrect token is passed
 	 */

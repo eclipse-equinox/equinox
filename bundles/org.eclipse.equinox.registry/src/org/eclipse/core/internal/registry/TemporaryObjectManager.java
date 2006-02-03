@@ -11,7 +11,7 @@
 package org.eclipse.core.internal.registry;
 
 import java.util.Map;
-import org.eclipse.equinox.registry.InvalidRegistryObjectException;
+import org.eclipse.core.runtime.InvalidRegistryObjectException;
 
 /**
  * @since 3.1

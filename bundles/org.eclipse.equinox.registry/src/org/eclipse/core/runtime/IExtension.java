@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.equinox.registry;
+package org.eclipse.core.runtime;
 
 /**
  * An extension declared in a plug-in.

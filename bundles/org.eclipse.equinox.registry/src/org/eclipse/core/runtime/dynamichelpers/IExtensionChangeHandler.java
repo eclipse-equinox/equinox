@@ -8,9 +8,9 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.equinox.registry.tracker;
+package org.eclipse.core.runtime.dynamichelpers;
 
-import org.eclipse.equinox.registry.IExtension;
+import org.eclipse.core.runtime.IExtension;
 
 /**
  * Extension change handlers are notified of changes for a given extension 

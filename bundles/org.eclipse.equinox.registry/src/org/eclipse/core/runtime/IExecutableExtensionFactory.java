@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.equinox.registry;
+package org.eclipse.core.runtime;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -33,7 +33,7 @@ import org.eclipse.core.runtime.CoreException;
  * Like any other executable extension, they can configured by implementing {@link org.eclipse.core.runtime.IExecutableExtension} interface.
  * </p>
  * 
- * @see org.eclipse.equinox.registry.IConfigurationElement
+ * @see org.eclipse.core.runtime.IConfigurationElement
  * @since org.eclipse.equinox.registry 1.0
  */
 public interface IExecutableExtensionFactory {

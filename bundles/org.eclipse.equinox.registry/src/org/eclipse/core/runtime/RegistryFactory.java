@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005 IBM Corporation and others.
+ * Copyright (c) 2005, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,11 +8,10 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.equinox.registry;
+package org.eclipse.core.runtime;
 
-import org.eclipse.core.internal.registry.*;
-import org.eclipse.core.runtime.*;
-import org.eclipse.equinox.registry.spi.RegistryStrategy;
+import org.eclipse.core.internal.registry.ExtensionRegistry;
+import org.eclipse.core.runtime.spi.RegistryStrategy;
 
 /**
  * Use this class to create or obtain an extension registry.

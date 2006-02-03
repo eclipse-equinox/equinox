@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.core.internal.registry;
 
-import org.eclipse.equinox.registry.*;
+import org.eclipse.core.runtime.*;
 
 public class ExtensionDelta implements IExtensionDelta {
 	private int kind;

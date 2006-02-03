@@ -8,9 +8,9 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.equinox.registry.tracker;
+package org.eclipse.core.runtime.dynamichelpers;
 
-import org.eclipse.equinox.registry.IExtensionPoint;
+import org.eclipse.core.runtime.IExtensionPoint;
 
 /**
  * A filter compares the given object to some pattern and returns true

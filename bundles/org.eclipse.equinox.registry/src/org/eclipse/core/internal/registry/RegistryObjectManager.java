@@ -12,7 +12,7 @@ package org.eclipse.core.internal.registry;
 
 import java.lang.ref.SoftReference;
 import java.util.*;
-import org.eclipse.equinox.registry.InvalidRegistryObjectException;
+import org.eclipse.core.runtime.InvalidRegistryObjectException;
 
 /**
  * This class manage all the object from the registry but does not deal with their dependencies.

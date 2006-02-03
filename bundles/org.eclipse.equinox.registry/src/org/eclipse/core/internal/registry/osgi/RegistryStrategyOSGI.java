@@ -22,9 +22,7 @@ import org.eclipse.core.internal.runtime.ResourceTranslator;
 import org.eclipse.core.runtime.*;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.equinox.registry.IRegistryProvider;
-import org.eclipse.equinox.registry.RegistryFactory;
-import org.eclipse.equinox.registry.spi.RegistryStrategy;
+import org.eclipse.core.runtime.spi.RegistryStrategy;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -78,16 +76,10 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 		token = key;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.equinox.registry.spi.RegistryStrategy#isModifiable()
-	 */
 	public boolean isModifiable() {
 		return false; // Clients are not allowed to add information into this registry
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.equinox.registry.spi.RegistryStrategy#translate(java.lang.String, java.util.ResourceBundle)
-	 */
 	public final String translate(String key, ResourceBundle resources) {
 		return ResourceTranslator.getResourceString(null, key, resources);
 	}
@@ -126,9 +118,6 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.equinox.registry.spi.RegistryStrategy#scheduleChangeEvent(java.lang.Object[], java.util.Map, java.lang.Object)
-	 */
 	public final void scheduleChangeEvent(Object[] listeners, Map deltas, Object registry) {
 		new ExtensionEventDispatcherJob(listeners, deltas, registry).schedule();
 	}
@@ -232,7 +221,7 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 	/////////////////////////////////////////////////////////////////////////////////////
 	// Executable extensions: bundle-based class loading
 
-	public Object createExecutableExtension(String pluginName, String namespaceOwnerId, String namespaceName, String className, Object initData, String propertyName, org.eclipse.equinox.registry.IConfigurationElement confElement) throws CoreException {
+	public Object createExecutableExtension(String pluginName, String namespaceOwnerId, String namespaceName, String className, Object initData, String propertyName, org.eclipse.core.runtime.IConfigurationElement confElement) throws CoreException {
 
 		if (pluginName != null && !pluginName.equals("") && !pluginName.equals(namespaceName)) { //$NON-NLS-1$
 			Bundle otherBundle = null;
@@ -244,7 +233,7 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 		return createExecutableExtension(contributingBundle, className, initData, propertyName, confElement);
 	}
 
-	private Object createExecutableExtension(Bundle bundle, String className, Object initData, String propertyName, org.eclipse.equinox.registry.IConfigurationElement confElement) throws CoreException {
+	private Object createExecutableExtension(Bundle bundle, String className, Object initData, String propertyName, org.eclipse.core.runtime.IConfigurationElement confElement) throws CoreException {
 		// load the requested class from this plugin
 		Class classInstance = null;
 		try {
@@ -278,9 +267,6 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 	 */
 	private EclipseBundleListener pluginBundleListener = null;
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.equinox.registry.spi.RegistryStrategy#start(java.lang.Object)
-	 */
 	public void onStart(Object registry) {
 		super.onStart(registry);
 		if (!(registry instanceof ExtensionRegistry))
@@ -301,9 +287,6 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 			pluginBundleListener.processBundles(Activator.getContext().getBundles());
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.equinox.registry.spi.RegistryStrategy#stop(java.lang.Object)
-	 */
 	public void onStop(Object registry) {
 		if (pluginBundleListener != null)
 			Activator.getContext().removeBundleListener(pluginBundleListener);
@@ -317,23 +300,14 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 	//////////////////////////////////////////////////////////////////////////////////////
 	// Cache strategy
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.equinox.registry.spi.RegistryStrategy#useCache()
-	 */
 	public boolean cacheUse() {
 		return !"true".equals(System.getProperty(IRegistryConstants.PROP_NO_REGISTRY_CACHE)); //$NON-NLS-1$
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.equinox.registry.spi.RegistryStrategy#lazyCacheLoading()
-	 */
 	public boolean cacheLazyLoading() {
 		return !("true".equalsIgnoreCase(System.getProperty(IRegistryConstants.PROP_NO_LAZY_CACHE_LOADING))); //$NON-NLS-1$
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.equinox.registry.spi.RegistryStrategy#computeTimeStamp()
-	 */
 	public long cacheComputeTimeStamp() {
 		// If the check config prop is false or not set then exit
 		if (!"true".equalsIgnoreCase(System.getProperty(IRegistryConstants.PROP_CHECK_CONFIG))) //$NON-NLS-1$  
@@ -359,9 +333,6 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 		return result;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.equinox.registry.spi.RegistryStrategy#getXMLParser()
-	 */
 	public SAXParserFactory getXMLParser() {
 		if (xmlTracker == null) {
 			xmlTracker = new ServiceTracker(Activator.getContext(), SAXParserFactory.class.getName(), null);

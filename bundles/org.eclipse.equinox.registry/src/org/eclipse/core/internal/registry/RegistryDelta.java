@@ -11,8 +11,8 @@
 package org.eclipse.core.internal.registry;
 
 import java.util.*;
-import org.eclipse.equinox.registry.IExtension;
-import org.eclipse.equinox.registry.IExtensionDelta;
+import org.eclipse.core.runtime.IExtension;
+import org.eclipse.core.runtime.IExtensionDelta;
 
 /**
  * The extension deltas are grouped by namespace. There is one registry delta by namespace.

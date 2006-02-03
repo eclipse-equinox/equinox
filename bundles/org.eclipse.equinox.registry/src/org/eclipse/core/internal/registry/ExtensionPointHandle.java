@@ -10,87 +10,18 @@
  *******************************************************************************/
 package org.eclipse.core.internal.registry;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import org.eclipse.equinox.registry.*;
-
 /**
+ * The code (minus the getDeclaringPluginDescriptor() was moved into 
+ * the  BaseExtensionPointHandle to avoid duplicating code in the 
+ * compatibility fragment.
+ * 
+ * Modifications to the code should be done in the BaseExtensionPointHandle.
+ * 
  * @since 3.1 
  */
-public class ExtensionPointHandle extends Handle implements IExtensionPoint {
-	static final ExtensionPointHandle[] EMPTY_ARRAY = new ExtensionPointHandle[0];
+public class ExtensionPointHandle extends BaseExtensionPointHandle {
 
 	public ExtensionPointHandle(IObjectManager objectManager, int id) {
 		super(objectManager, id);
-	}
-
-	public IExtension[] getExtensions() {
-		return (IExtension[]) objectManager.getHandles(getExtensionPoint().getRawChildren(), RegistryObjectManager.EXTENSION);
-	}
-
-	public String getNamespace() {
-		return getExtensionPoint().getNamespace();
-	}
-
-	protected boolean shouldPersist() {
-		return getExtensionPoint().shouldPersist();
-	}
-
-	public IExtension getExtension(String extensionId) {
-		if (extensionId == null)
-			return null;
-		int[] children = getExtensionPoint().getRawChildren();
-		for (int i = 0; i < children.length; i++) {
-			//	Here we directly get the object because it avoids the creation of garbage and because we'll need the object anyway to compare the value
-			if (extensionId.equals(((Extension) objectManager.getObject(children[i], RegistryObjectManager.EXTENSION)).getUniqueIdentifier()))
-				return (ExtensionHandle) objectManager.getHandle(children[i], RegistryObjectManager.EXTENSION);
-		}
-		return null;
-	}
-
-	public IConfigurationElement[] getConfigurationElements() {
-		//get the actual extension objects since we'll need to get the configuration elements information.
-		Extension[] tmpExtensions = (Extension[]) objectManager.getObjects(getExtensionPoint().getRawChildren(), RegistryObjectManager.EXTENSION);
-		if (tmpExtensions.length == 0)
-			return ConfigurationElementHandle.EMPTY_ARRAY;
-
-		ArrayList result = new ArrayList();
-		for (int i = 0; i < tmpExtensions.length; i++) {
-			result.addAll(Arrays.asList(objectManager.getHandles(tmpExtensions[i].getRawChildren(), RegistryObjectManager.CONFIGURATION_ELEMENT)));
-		}
-		return (IConfigurationElement[]) result.toArray(new IConfigurationElement[result.size()]);
-	}
-
-	public String getLabel() {
-		return getExtensionPoint().getLabel();
-	}
-
-	public String getSchemaReference() {
-		return getExtensionPoint().getSchemaReference();
-	}
-
-	public String getSimpleIdentifier() {
-		return getExtensionPoint().getSimpleIdentifier();
-	}
-
-	public String getUniqueIdentifier() {
-		return getExtensionPoint().getUniqueIdentifier();
-	}
-
-	RegistryObject getObject() {
-		return getExtensionPoint();
-	}
-
-	protected ExtensionPoint getExtensionPoint() {
-		return (ExtensionPoint) objectManager.getObject(getId(), RegistryObjectManager.EXTENSION_POINT);
-	}
-
-	public boolean isValid() {
-		try {
-			getExtensionPoint();
-		} catch (InvalidRegistryObjectException e) {
-			return false;
-		}
-		return true;
 	}
 }

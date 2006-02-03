@@ -52,7 +52,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 	public void start(BundleContext context) throws Exception {
 		bundleContext = context;
 		processCommandLine();
-		registryServiceTracker = new ServiceTracker(context,"org.eclipse.equinox.registry.IExtensionRegistry",this);
+		registryServiceTracker = new ServiceTracker(context,"org.eclipse.core.runtime.IExtensionRegistry",this);
 		registryServiceTracker.open();
 	}
 

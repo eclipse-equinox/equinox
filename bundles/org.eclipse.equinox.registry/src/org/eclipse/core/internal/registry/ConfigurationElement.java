@@ -12,8 +12,6 @@ package org.eclipse.core.internal.registry;
 
 import java.util.Hashtable;
 import org.eclipse.core.runtime.*;
-import org.eclipse.equinox.registry.IExecutableExtension;
-import org.eclipse.equinox.registry.IExecutableExtensionFactory;
 import org.eclipse.osgi.util.NLS;
 
 /**
@@ -250,11 +248,8 @@ public class ConfigurationElement extends RegistryObject {
 		try {
 			// We need to take into account both "old" and "new" style executable extensions 
 			ConfigurationElementHandle confElementHandle = new ConfigurationElementHandle(registry.getObjectManager(), getObjectId());
-			if (result instanceof IExecutableExtension) {
+			if (result instanceof IExecutableExtension)
 				((IExecutableExtension) result).setInitializationData(confElementHandle, attributeName, initData);
-			}
-			if (registry.compatibilityStrategy != null)
-				registry.compatibilityStrategy.setInitializationData(result, confElementHandle, attributeName, initData);
 		} catch (CoreException ce) {
 			// user code threw exception
 			throw ce;
@@ -264,11 +259,8 @@ public class ConfigurationElement extends RegistryObject {
 		}
 
 		// Deal with executable extension factories.
-		if (result instanceof IExecutableExtensionFactory) {
+		if (result instanceof IExecutableExtensionFactory)
 			result = ((IExecutableExtensionFactory) result).create();
-		}
-		if (registry.compatibilityStrategy != null)
-			result = registry.compatibilityStrategy.create(result);
 
 		return result;
 	}

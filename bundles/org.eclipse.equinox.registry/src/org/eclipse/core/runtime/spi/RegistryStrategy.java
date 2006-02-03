@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.equinox.registry.spi;
+package org.eclipse.core.runtime.spi;
 
 import java.io.File;
 import java.util.Map;
@@ -16,7 +16,6 @@ import java.util.ResourceBundle;
 import javax.xml.parsers.SAXParserFactory;
 import org.eclipse.core.internal.registry.*;
 import org.eclipse.core.runtime.*;
-import org.eclipse.equinox.registry.IConfigurationElement;
 import org.eclipse.osgi.util.NLS;
 
 /**
@@ -344,7 +343,7 @@ public class RegistryStrategy {
 	 * The parser used by the registry to parse descriptions of extension points
 	 * and extensions from the XML input streams.
 	 * 
-	 * @see org.eclipse.equinox.registry.IExtensionRegistry#addContribution(java.io.InputStream, String, boolean, String, ResourceBundle, Object)
+	 * @see org.eclipse.core.runtime.IExtensionRegistry#addContribution(java.io.InputStream, String, boolean, String, ResourceBundle, Object)
 	 * 
 	 * @return XML parser
 	 */

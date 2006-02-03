@@ -17,8 +17,6 @@ import java.util.*;
 import org.eclipse.core.internal.runtime.RuntimeLog;
 import org.eclipse.core.runtime.*;
 import org.eclipse.core.runtime.preferences.*;
-import org.eclipse.equinox.registry.IConfigurationElement;
-import org.eclipse.equinox.registry.IExtension;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;

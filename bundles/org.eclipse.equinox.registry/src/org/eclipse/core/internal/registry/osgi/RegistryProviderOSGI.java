@@ -12,10 +12,7 @@ package org.eclipse.core.internal.registry.osgi;
 
 import org.eclipse.core.internal.registry.RegistryMessages;
 import org.eclipse.core.internal.runtime.RuntimeLog;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.equinox.registry.IExtensionRegistry;
-import org.eclipse.equinox.registry.IRegistryProvider;
+import org.eclipse.core.runtime.*;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 

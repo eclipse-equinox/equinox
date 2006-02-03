@@ -17,8 +17,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.eclipse.core.internal.registry.spi.ConfigurationElementDescription;
 import org.eclipse.core.internal.registry.spi.ConfigurationElementAttribute;
 import org.eclipse.core.runtime.*;
-import org.eclipse.equinox.registry.*;
-import org.eclipse.equinox.registry.spi.RegistryStrategy;
+import org.eclipse.core.runtime.spi.RegistryStrategy;
 import org.eclipse.osgi.storagemanager.StorageManager;
 import org.eclipse.osgi.util.NLS;
 import org.xml.sax.InputSource;
@@ -31,9 +30,9 @@ public class ExtensionRegistry implements IExtensionRegistry {
 
 	protected class ListenerInfo {
 		public String filter;
-		public EventListener listener;
+		public IRegistryChangeListener listener;
 
-		public ListenerInfo(EventListener listener, String filter) {
+		public ListenerInfo(IRegistryChangeListener listener, String filter) {
 			this.listener = listener;
 			this.filter = filter;
 		}
@@ -70,10 +69,7 @@ public class ExtensionRegistry implements IExtensionRegistry {
 	private Object masterToken; // use to get full control of the registry; objects created as "static" 
 	private Object userToken; // use to modify non-persisted registry elements
 
-	/////////////////////////////////////////////////////////////////////////////////////////
-	// Registry strategies
-	protected RegistryStrategy strategy;
-	protected ICompatibilityStrategy compatibilityStrategy = null;
+	protected RegistryStrategy strategy; // overridable portions of the registry functionality
 
 	public RegistryObjectManager getObjectManager() {
 		return registryObjects;
@@ -176,12 +172,12 @@ public class ExtensionRegistry implements IExtensionRegistry {
 		return affectedNamespaces;
 	}
 
-	public void addRegistryChangeListener(EventListener listener) {
+	public void addRegistryChangeListener(IRegistryChangeListener listener) {
 		// this is just a convenience API - no need to do any sync'ing here		
 		addRegistryChangeListener(listener, null);
 	}
 
-	public void addRegistryChangeListener(EventListener listener, String filter) {
+	public void addRegistryChangeListener(IRegistryChangeListener listener, String filter) {
 		synchronized (listeners) {
 			listeners.add(new ListenerInfo(listener, filter));
 		}
@@ -555,7 +551,7 @@ public class ExtensionRegistry implements IExtensionRegistry {
 		return affectedNamespaces;
 	}
 
-	public void removeRegistryChangeListener(EventListener listener) {
+	public void removeRegistryChangeListener(IRegistryChangeListener listener) {
 		synchronized (listeners) {
 			listeners.remove(new ListenerInfo(listener, null));
 		}
@@ -566,9 +562,7 @@ public class ExtensionRegistry implements IExtensionRegistry {
 			strategy = registryStrategy;
 		else
 			strategy = new RegistryStrategy(null, true);
-		// split strategies - reduce number of "instanceof" calls
-		if (registryStrategy instanceof ICompatibilityStrategy)
-			compatibilityStrategy = (ICompatibilityStrategy) strategy;
+
 		// create the file manager right away
 		setFileManager(strategy.getStorage(), strategy.isCacheReadOnly());
 
@@ -681,8 +675,8 @@ public class ExtensionRegistry implements IExtensionRegistry {
 		} catch (IOException e) {
 			//Ignore the exception since we can recompute the cache
 		}
-		cacheStorageManager.close();
 		theTableReader.close();
+		cacheStorageManager.close();
 	}
 
 	/*
@@ -814,8 +808,6 @@ public class ExtensionRegistry implements IExtensionRegistry {
 				continue;
 			if (listenerInfo.listener instanceof IRegistryChangeListener)
 				((IRegistryChangeListener) listenerInfo.listener).registryChanged(new RegistryChangeEvent(deltas, listenerInfo.filter));
-			if (compatibilityStrategy != null)
-				compatibilityStrategy.invokeListener(listenerInfo.listener, deltas, listenerInfo.filter);
 		}
 		for (Iterator iter = deltas.values().iterator(); iter.hasNext();) {
 			((RegistryDelta) iter.next()).getObjectManager().close();
@@ -954,7 +946,7 @@ public class ExtensionRegistry implements IExtensionRegistry {
 	 * If the registry is not modifiable, this method is an access controlled method. 
 	 * Proper token should be passed as an argument for non-modifiable registries.
 	 * </p>
-	 * @see org.eclipse.equinox.registry.spi.RegistryStrategy#isModifiable()
+	 * @see org.eclipse.core.runtime.spi.RegistryStrategy#isModifiable()
 	 * 
 	 * @param identifier Id of the extension point. If non-qualified names is supplied,
 	 * it will be converted internally into a fully qualified name
@@ -965,7 +957,7 @@ public class ExtensionRegistry implements IExtensionRegistry {
 	 * @param schemaReference reference to the extension point schema. The schema reference 
 	 * is a URL path relative to the plug-in installation URL. May be null
 	 * @param token the key used to check permissions. Two registry keys are set in the registry
-	 * constructor {@link RegistryFactory#createRegistry(org.eclipse.equinox.registry.spi.RegistryStrategy, Object, Object)}: 
+	 * constructor {@link RegistryFactory#createRegistry(org.eclipse.core.runtime.spi.RegistryStrategy, Object, Object)}: 
 	 * master token and a user token. Master token allows all operations; user token 
 	 * allows non-persisted registry elements to be modified.
 	 * @throws IllegalArgumentException if incorrect token is passed in
@@ -1018,7 +1010,7 @@ public class ExtensionRegistry implements IExtensionRegistry {
 	 * If the registry is not modifiable, this method is an access controlled method. 
 	 * Proper token should be passed as an argument for non-modifiable registries.
 	 * </p>
-	 * @see org.eclipse.equinox.registry.spi.RegistryStrategy#isModifiable()
+	 * @see org.eclipse.core.runtime.spi.RegistryStrategy#isModifiable()
 	 * @see org.eclipse.core.internal.registry.spi.ConfigurationElementDescription
 	 * 
 	 * @param identifier Id of the extension. If non-qualified name is supplied,
@@ -1031,7 +1023,7 @@ public class ExtensionRegistry implements IExtensionRegistry {
 	 * name is supplied, it is assumed to have the same contributorId as this extension
 	 * @param configurationElements contents of the extension
 	 * @param token the key used to check permissions. Two registry keys are set in the registry
-	 * constructor {@link RegistryFactory#createRegistry(org.eclipse.equinox.registry.spi.RegistryStrategy, Object, Object)}: 
+	 * constructor {@link RegistryFactory#createRegistry(org.eclipse.core.runtime.spi.RegistryStrategy, Object, Object)}: 
 	 * master token and a user token. Master token allows all operations; user token 
 	 * allows non-persisted registry elements to be modified.
 	 * @throws IllegalArgumentException if incorrect token is passed in
@@ -1168,12 +1160,8 @@ public class ExtensionRegistry implements IExtensionRegistry {
 		return true;
 	}
 
-	public void setCompatibilityStrategy(ICompatibilityStrategy strategy) {
-		compatibilityStrategy = strategy;
-	}
-
 	/**
-	 * This is an experimental funciton. It <b>will</b> be modified in future.
+	 * This is an experimental function. It <b>will</b> be modified in future.
 	 */
 	public Object getTemporaryUserToken() {
 		return userToken;

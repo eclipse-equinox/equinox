@@ -12,10 +12,7 @@ package org.eclipse.core.internal.registry;
 
 import java.io.*;
 import java.util.*;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.equinox.registry.IConfigurationElement;
-import org.eclipse.equinox.registry.IExtension;
+import org.eclipse.core.runtime.*;
 
 public class TableWriter {
 	private static final byte fileError = 0;

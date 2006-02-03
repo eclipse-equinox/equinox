@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.core.internal.registry;
 
-import org.eclipse.equinox.registry.InvalidRegistryObjectException;
+import org.eclipse.core.runtime.InvalidRegistryObjectException;
 
 /**
  * A handle is the super class to all registry objects that are now served to users.

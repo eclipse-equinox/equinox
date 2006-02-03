@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.core.internal.registry.spi;
 
-import org.eclipse.equinox.registry.IConfigurationElement;
+import org.eclipse.core.runtime.IConfigurationElement;
 
 /**
  * Describes properties of configuration elements to be added to the registry. 

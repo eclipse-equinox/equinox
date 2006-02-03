@@ -8,10 +8,10 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.equinox.registry.tracker;
+package org.eclipse.core.runtime.dynamichelpers;
 
 import org.eclipse.core.internal.runtime.ReferenceHashSet;
-import org.eclipse.equinox.registry.IExtension;
+import org.eclipse.core.runtime.IExtension;
 
 /**
  * An extension tracker keeps associations between extensions and their derived objects on an extension basis.

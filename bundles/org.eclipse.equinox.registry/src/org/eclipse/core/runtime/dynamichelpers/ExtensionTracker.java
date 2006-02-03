@@ -8,27 +8,27 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.equinox.registry.tracker;
+package org.eclipse.core.runtime.dynamichelpers;
 
 import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.core.internal.registry.RegistryMessages;
 import org.eclipse.core.internal.runtime.ReferenceHashSet;
 import org.eclipse.core.internal.runtime.RuntimeLog;
+import org.eclipse.core.runtime.IExtension;
+import org.eclipse.core.runtime.IExtensionDelta;
+import org.eclipse.core.runtime.IExtensionPoint;
+import org.eclipse.core.runtime.IExtensionRegistry;
+import org.eclipse.core.runtime.IRegistryChangeEvent;
+import org.eclipse.core.runtime.IRegistryChangeListener;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.ListenerList;
+import org.eclipse.core.runtime.RegistryFactory;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.equinox.registry.IExtension;
-import org.eclipse.equinox.registry.IExtensionDelta;
-import org.eclipse.equinox.registry.IExtensionPoint;
-import org.eclipse.equinox.registry.IExtensionRegistry;
-import org.eclipse.equinox.registry.IRegistryChangeEvent;
-import org.eclipse.equinox.registry.IRegistryChangeListener;
-import org.eclipse.equinox.registry.RegistryFactory;
 
 /**
  * Implementation of the IExtensionTracker. 
- * @see org.eclipse.equinox.registry.tracker.IExtensionTracker 
+ * @see org.eclipse.core.runtime.dynamichelpers.IExtensionTracker 
  * @since 3.1
  */
 public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListener {

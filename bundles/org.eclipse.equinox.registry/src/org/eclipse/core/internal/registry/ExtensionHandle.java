@@ -10,60 +10,18 @@
  *******************************************************************************/
 package org.eclipse.core.internal.registry;
 
-import org.eclipse.equinox.registry.*;
-
 /**
+ * The code (minus the getDeclaringPluginDescriptor() was moved into 
+ * the  BaseExtensionPointHandle to avoid duplicating code in the 
+ * compatibility fragment.
+ * 
+ * Modifications to the code should be done in the BaseExtensionHandle.
+ * 
  * @since 3.1 
  */
-public class ExtensionHandle extends Handle implements IExtension {
-	static final ExtensionHandle[] EMPTY_ARRAY = new ExtensionHandle[0];
+public class ExtensionHandle extends BaseExtensionHandle {
 
 	public ExtensionHandle(IObjectManager objectManager, int id) {
 		super(objectManager, id);
-	}
-
-	protected Extension getExtension() {
-		return (Extension) objectManager.getObject(getId(), RegistryObjectManager.EXTENSION);
-	}
-
-	protected boolean shouldPersist() {
-		return getExtension().shouldPersist();
-	}
-
-	public String getNamespace() {
-		return getExtension().getNamespaceName();
-	}
-
-	public String getExtensionPointUniqueIdentifier() {
-		return getExtension().getExtensionPointIdentifier();
-	}
-
-	public String getLabel() {
-		return getExtension().getLabel();
-	}
-
-	public String getSimpleIdentifier() {
-		return getExtension().getSimpleIdentifier();
-	}
-
-	public String getUniqueIdentifier() {
-		return getExtension().getUniqueIdentifier();
-	}
-
-	public IConfigurationElement[] getConfigurationElements() {
-		return (IConfigurationElement[]) objectManager.getHandles(getExtension().getRawChildren(), RegistryObjectManager.CONFIGURATION_ELEMENT);
-	}
-
-	RegistryObject getObject() {
-		return getExtension();
-	}
-
-	public boolean isValid() {
-		try {
-			getExtension();
-		} catch (InvalidRegistryObjectException e) {
-			return false;
-		}
-		return true;
 	}
 }
