@@ -126,6 +126,7 @@ public class EclipseEnvironmentInfo implements EnvironmentInfo {
 						break;
 				}
 				Locale.setDefault(userLocale);
+				// TODO what the heck is this for?? why not just use osgi.nl
 				FrameworkProperties.setProperty("osgi.nl.user", nl); //$NON-NLS-1$
 			} catch (NoSuchElementException e) {
 				// fall through and use the default

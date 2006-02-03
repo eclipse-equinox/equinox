@@ -272,29 +272,9 @@ public class Framework implements EventDispatcher, EventPublisher {
 			}
 		}
 		value = properties.getProperty(Constants.FRAMEWORK_LANGUAGE);
-		if (value == null) {
-			value = properties.getProperty(Constants.JVM_USER_LANGUAGE);
-			// set default locale for VM
-			if (value != null) {
-				properties.put(Constants.FRAMEWORK_LANGUAGE, value);
-				StringTokenizer tokenizer = new StringTokenizer(value, "_"); //$NON-NLS-1$
-				int segments = tokenizer.countTokens();
-				try {
-					switch (segments) {
-						case 2 :
-							Locale userLocale = new Locale(tokenizer.nextToken(), tokenizer.nextToken());
-							Locale.setDefault(userLocale);
-							break;
-						case 3 :
-							userLocale = new Locale(tokenizer.nextToken(), tokenizer.nextToken(), tokenizer.nextToken());
-							Locale.setDefault(userLocale);
-							break;
-					}
-				} catch (NoSuchElementException e) {
-					// fall through and use the default
-				}
-			}
-		}
+		if (value == null)
+			// set the value of the framework property
+			properties.put(Constants.FRAMEWORK_LANGUAGE, Locale.getDefault().toString());
 	}
 
 	private void setBootDelegation() {
