@@ -12,20 +12,25 @@
 package org.eclipse.osgi.internal.baseadaptor;
 
 import java.io.*;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.Dictionary;
+import java.util.Properties;
 import org.eclipse.core.runtime.adaptor.LocationManager;
 import org.eclipse.osgi.baseadaptor.*;
+import org.eclipse.osgi.baseadaptor.hooks.AdaptorHook;
 import org.eclipse.osgi.baseadaptor.hooks.StorageHook;
 import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.debug.Debug;
-import org.eclipse.osgi.framework.internal.core.*;
+import org.eclipse.osgi.framework.internal.core.AbstractBundle;
+import org.eclipse.osgi.framework.internal.core.Constants;
+import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.util.KeyedElement;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.util.ManifestElement;
-import org.osgi.framework.BundleException;
-import org.osgi.framework.Version;
+import org.osgi.framework.*;
 
-public class BaseStorageHook implements StorageHook {
+public class BaseStorageHook implements StorageHook, AdaptorHook{
 	public static final String KEY = BaseStorageHook.class.getName();
 	public static final int HASHCODE = KEY.hashCode();
 	public static final int DEL_BUNDLE_STORE = 0x01;
@@ -298,5 +303,53 @@ public class BaseStorageHook implements StorageHook {
 	public boolean matchDNChain(String pattern) {
 		// do nothing
 		return false;
+	}
+
+	public void initialize(BaseAdaptor adaptor) {
+		// do nothing
+	}
+
+	public void frameworkStart(BundleContext context) throws BundleException {
+		// do nothing
+	}
+
+	public void frameworkStop(BundleContext context) throws BundleException {
+		// do nothing
+	}
+
+	public void frameworkStopping(BundleContext context) {
+		// do nothing
+	}
+
+	public void addProperties(Properties properties) {
+		// do nothing
+	}
+
+	public URLConnection mapLocationToURLConnection(String location) throws IOException {
+		// see if this is an existing location
+		Bundle[] bundles = storage.getAdaptor().getContext().getBundles();
+		AbstractBundle bundle = null;
+		for (int i = 0; i < bundles.length && bundle == null; i++)
+			if (location.equals(bundles[i].getLocation()))
+				bundle = (AbstractBundle) bundles[i];
+		if (bundle == null)
+			return null;
+		BaseData data = (BaseData) bundle.getBundleData();
+		BaseStorageHook hook = (BaseStorageHook) data.getStorageHook(BaseStorageHook.KEY);
+		return hook.isReference() ? new URL("reference:file:" + hook.getFileName()).openConnection() : null; //$NON-NLS-1$
+	}
+
+	public void handleRuntimeError(Throwable error) {
+		// do nothing
+	}
+
+	public boolean matchDNChain(String pattern, String[] dnChain) {
+		// do nothing
+		return false;
+	}
+
+	public FrameworkLog createFrameworkLog() {
+		// do nothing
+		return null;
 	}
 }

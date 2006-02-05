@@ -30,7 +30,6 @@ public class AdaptorMsg extends NLS {
 	public static String ADAPTOR_EXTENSION_IMPORT_ERROR;
 	public static String ADAPTOR_EXTENSION_NATIVECODE_ERROR;
 	public static String ADAPTOR_EXTENSION_REQUIRE_ERROR;
-	public static String ADAPTOR_SAME_REF_UPDATE;
 	public static String ADAPTOR_STORAGE_EXCEPTION;
 	public static String ADAPTOR_URL_CREATE_EXCEPTION;	
 	

@@ -55,8 +55,7 @@ public class BundleUpdate implements BundleOperation {
 				instanceHooks[i].copy(data.getStorageHook((String) instanceHooks[i].getKey()));
 			}
 			newData.setStorageHooks(instanceHooks);
-			// get the old and new eclipse storage hooks
-			BaseStorageHook oldStorageHook = (BaseStorageHook) data.getStorageHook(BaseStorageHook.KEY);
+			// get the new eclipse storage hooks
 			BaseStorageHook newStorageHook = (BaseStorageHook) newData.getStorageHook(BaseStorageHook.KEY);
 			InputStream in = source.getInputStream();
 			URL sourceURL = source.getURL();
@@ -69,8 +68,6 @@ public class BundleUpdate implements BundleOperation {
 					// check to make sure we are not just trying to update to the same
 					// directory reference.  This would be a no-op.
 					String path = reference.getPath();
-					if (path.equals(oldStorageHook.getFileName()))
-						throw new BundleException(NLS.bind(AdaptorMsg.ADAPTOR_SAME_REF_UPDATE, reference));
 					newStorageHook.setReference(true);
 					newStorageHook.setFileName(path);
 				} else {

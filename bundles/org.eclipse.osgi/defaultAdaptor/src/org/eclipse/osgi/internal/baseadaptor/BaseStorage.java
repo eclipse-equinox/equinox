@@ -220,6 +220,10 @@ public class BaseStorage {
 		return storageHook.getDataFile(path);
 	}
 
+	BaseAdaptor getAdaptor() {
+		return adaptor;
+	}
+
 	public void installNativeCode(BaseData data, String[] nativepaths) throws BundleException {
 		for (int i = 0; i < nativepaths.length; i++) {
 			// extract the native code

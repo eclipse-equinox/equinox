@@ -21,7 +21,9 @@ public class BaseHookConfigurator implements HookConfigurator {
 
 	public void addHooks(HookRegistry registry) {
 		// always add the BaseStorageHook and BaseClassLoadingHook; it is required for the storage implementation
-		registry.addStorageHook(new BaseStorageHook(BaseStorage.getInstance()));
+		BaseStorageHook hook = new BaseStorageHook(BaseStorage.getInstance());
+		registry.addStorageHook(hook);
+		registry.addAdaptorHook(hook);
 		registry.addClassLoadingHook(new BaseClassLoadingHook());
 	}
 
