@@ -12,6 +12,7 @@ package org.eclipse.osgi.framework.internal.core;
 
 import java.io.*;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.*;
 import java.security.*;
@@ -97,6 +98,10 @@ public class Framework implements EventDispatcher, EventPublisher {
 	SecureAction secureAction = new SecureAction();
 	// cache of AdminPermissions keyed by Bundle ID
 	private HashMap adminPermissions;
+	
+	// we need to hold these so that we can unregister them at shutdown
+	private StreamHandlerFactory streamHandlerFactory;
+	private ContentHandlerFactory contentHandlerFactory;
 
 	/**
 	 * Constructor for the Framework instance. This method initializes the
@@ -186,7 +191,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 		/* install URLStreamHandlerFactory */
 		installURLStreamHandlerFactory(systemBundle.context, adaptor);
 		/* install ContentHandlerFactory for OSGi URLStreamHandler support */
-		installContentHandlerFactory(systemBundle.context);
+		installContentHandlerFactory(systemBundle.context, adaptor);
 		if (Profile.PROFILE && Profile.STARTUP)
 			Profile.logTime("Framework.initialze()", "done new URLStream/Content HandlerFactory"); //$NON-NLS-1$//$NON-NLS-2$
 		/* create bundle objects for all installed bundles. */
@@ -1594,8 +1599,8 @@ public class Framework implements EventDispatcher, EventPublisher {
 		return null;
 	}
 
-	private void installContentHandlerFactory(BundleContext context) {
-		ContentHandlerFactory chf = new ContentHandlerFactory(context);
+	private void installContentHandlerFactory(BundleContext context, FrameworkAdaptor frameworkAdaptor) {
+		ContentHandlerFactory chf = new ContentHandlerFactory(context, frameworkAdaptor);
 		try {
 			// first try the standard way
 			URLConnection.setContentHandlerFactory(chf);
@@ -1609,6 +1614,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 				throw err;
 			}
 		}
+		contentHandlerFactory = chf;
 	}
 
 	private static void forceContentHandlerFactory(ContentHandlerFactory chf) throws Exception{
@@ -1616,48 +1622,69 @@ public class Framework implements EventDispatcher, EventPublisher {
 		if (factoryField == null)
 			throw new Exception("Could not find ContentHandlerFactory field"); //$NON-NLS-1$
 		synchronized(URLConnection.class) {
-			java.net.ContentHandlerFactory orig = (java.net.ContentHandlerFactory) factoryField.get(null);
+			java.net.ContentHandlerFactory factory = (java.net.ContentHandlerFactory) factoryField.get(null);
 			// doing a null check here just in case, but it would be really strange if it was null, 
 			// because we failed to set the factory normally!!
-			if (orig != null && orig.getClass().getName().equals(ContentHandlerFactory.class.getName()))
-				throw new Error("Multiple ContentHandlerFactories not supported."); //$NON-NLS-1$
-			chf.setParentFactory(orig);
-			// null out the field so that we can successfully call setContentHandlerFactory
+			
+			if (factory != null) {
+				try {
+					factory.getClass().getMethod("isMultiplexing", null); //$NON-NLS-1$
+					Method register = factory.getClass().getMethod("register", new Class[] {Object.class}); //$NON-NLS-1$
+					register.invoke(factory, new Object[] {chf});
+				} catch (NoSuchMethodException e) {
+					// current factory does not support multiplexing, ok we'll wrap it
+					chf.setParentFactory(factory);
+					factory = chf;
+				}
+			}
+			// null out the field so that we can successfully call setContentHandlerFactory			
 			factoryField.set(null, null);
-			/* 
-			 * TODO may consider clearing the factory cache here because setContentHandlerFactory
-			 * does not actually clear the cache for you like URL.setURLStreamHandlerFacotry does, go figure!!
-			 */
-			URLConnection.setContentHandlerFactory(chf);
+			// always attempt to clear the handlers cache
+			// This allows an optomization for the single framework use-case
+			resetContentHandlers();					
+			URLConnection.setContentHandlerFactory(factory);
 		}
 	}
 
-	private static void uninstallContentHandlerFactory() {
+	private void uninstallContentHandlerFactory() {
 		try {
 			Field factoryField = getStaticField(URLConnection.class, java.net.ContentHandlerFactory.class);
 			if (factoryField == null)
 				return;  // oh well, we tried.
 			synchronized(URLConnection.class) {
-				ContentHandlerFactory chf = (ContentHandlerFactory) factoryField.get(null);
+				java.net.ContentHandlerFactory factory = (java.net.ContentHandlerFactory) factoryField.get(null);
+				
+				if (factory == contentHandlerFactory) {
+					factory = (java.net.ContentHandlerFactory) contentHandlerFactory.designateSuccessor();
+				} else {
+					Method unregister = factory.getClass().getMethod("unregister", new Class[] {Object.class}); //$NON-NLS-1$
+					unregister.invoke(factory, new Object[] {contentHandlerFactory});
+				}
+				// null out the field so that we can successfully call setContentHandlerFactory									
 				factoryField.set(null, null);
 				// always attempt to clear the handlers cache
+				// This allows an optomization for the single framework use-case
 				// Note that the call to setContentHandlerFactory below may clear this cache
 				// but we want to be sure to clear it here just incase the parent is null.
 				// In this case the call below would not occur.
 				// Also it appears most java libraries actually do not clear the cache
 				// when setContentHandlerFactory is called, go figure!!
-				Field handlersField = getStaticField(URLConnection.class, Hashtable.class);
-				if (handlersField != null) {
-					Hashtable handlers = (Hashtable) handlersField.get(null);
-					if (handlers != null)
-						handlers.clear();
-				}
-				if (chf != null && chf.getParentFactory() != null) 
-					URLConnection.setContentHandlerFactory(chf.getParentFactory());
+				resetContentHandlers();
+				if (factory != null) 
+					URLConnection.setContentHandlerFactory(factory);
 			}
 		} catch (Exception e) {
 			// ignore and continue closing the framework
 		}		
+	}
+
+	private static void resetContentHandlers() throws IllegalAccessException {
+		Field handlersField = getStaticField(URLConnection.class, Hashtable.class);
+		if (handlersField != null) {
+			Hashtable handlers = (Hashtable) handlersField.get(null);
+			if (handlers != null)
+				handlers.clear();
+		}
 	}
 
 	private void installURLStreamHandlerFactory(BundleContext context, FrameworkAdaptor frameworkAdaptor) {
@@ -1674,6 +1701,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 				throw err;
 			}
 		}
+		streamHandlerFactory = shf;
 	}
 
 	private static void forceURLStreamHandlerFactory(StreamHandlerFactory shf) throws Exception{
@@ -1681,6 +1709,60 @@ public class Framework implements EventDispatcher, EventPublisher {
 		if (factoryField == null)
 			throw new Exception("Could not find URLStreamHandlerFactory field"); //$NON-NLS-1$
 		// look for a lock to synchronize on
+		Object lock = getURLStreamHandlerFactoryLock();
+		synchronized(lock) {
+			URLStreamHandlerFactory factory = (URLStreamHandlerFactory) factoryField.get(null);
+			// doing a null check here just in case, but it would be really strange if it was null, 
+			// because we failed to set the factory normally!!
+			if (factory != null) {
+				try {
+					factory.getClass().getMethod("isMultiplexing", null); //$NON-NLS-1$
+					Method register = factory.getClass().getMethod("register", new Class[] {Object.class}); //$NON-NLS-1$
+					register.invoke(factory, new Object[] {shf});
+				} catch (NoSuchMethodException e) {
+					// current factory does not support multiplexing, ok we'll wrap it
+					shf.setParentFactory(factory);
+					factory = shf;
+				}
+			}
+			factoryField.set(null, null);
+			// always attempt to clear the handlers cache
+			// This allows an optomization for the single framework use-case
+			resetURLStreamHandlers();
+			URL.setURLStreamHandlerFactory(factory);
+		}
+	}
+
+	private void uninstallURLStreamHandlerFactory() {
+		try {
+			Field factoryField = getStaticField(URL.class, URLStreamHandlerFactory.class);
+			if (factoryField == null)
+				return; // oh well, we tried
+			Object lock = getURLStreamHandlerFactoryLock();
+			synchronized (lock) {
+				URLStreamHandlerFactory factory = (URLStreamHandlerFactory) factoryField.get(null);
+				if (factory == streamHandlerFactory) {
+					factory = (URLStreamHandlerFactory) streamHandlerFactory.designateSuccessor();
+				} else {
+					Method unregister = factory.getClass().getMethod("unregister", new Class[] {Object.class}); //$NON-NLS-1$
+					unregister.invoke(factory, new Object[] {streamHandlerFactory});
+				}
+				factoryField.set(null, null);
+				// always attempt to clear the handlers cache
+				// This allows an optomization for the single framework use-case
+				// Note that the call to setURLStreamHandlerFactory below may clear this cache
+				// but we want to be sure to clear it here just in case the parent is null.
+				// In this case the call below would not occur.
+				resetURLStreamHandlers();
+				if (factory != null) 
+					URL.setURLStreamHandlerFactory(factory);
+			}
+		} catch (Exception e) {
+			// ignore and continue closing the framework
+		}
+	}
+
+	private static Object getURLStreamHandlerFactoryLock() throws IllegalAccessException {
 		Object lock;
 		try {
 			Field streamHandlerLockField = URL.class.getDeclaredField("streamHandlerLock"); //$NON-NLS-1$
@@ -1690,52 +1772,15 @@ public class Framework implements EventDispatcher, EventPublisher {
 			// could not find the lock, lets sync on the class object
 			lock = URL.class;
 		}
-		synchronized(lock) {
-			URLStreamHandlerFactory orig = (URLStreamHandlerFactory) factoryField.get(null);
-			// doing a null check here just in case, but it would be really strange if it was null, 
-			// because we failed to set the factory normally!!
-			if (orig != null && orig.getClass().getName().equals(StreamHandlerFactory.class.getName()))
-				throw new Error("Multiple URLStreamHandlerFactories not supported."); //$NON-NLS-1$
-			// null out the field so that we can successfully call setURLStreamHandlerFactory
-			factoryField.set(null, null);
-			shf.setParentFactory(orig);
-			URL.setURLStreamHandlerFactory(shf);
-		}
+		return lock;
 	}
-
-	private static void uninstallURLStreamHandlerFactory() {
-		try {
-			Field factoryField = getStaticField(URL.class, URLStreamHandlerFactory.class);
-			if (factoryField == null)
-				return; // oh well, we tried
-			// look for a lock to synchronize on
-			Object lock;
-			try {
-				Field streamHandlerLockField = URL.class.getDeclaredField("streamHandlerLock"); //$NON-NLS-1$
-				streamHandlerLockField.setAccessible(true);
-				lock = streamHandlerLockField.get(null);
-			} catch (NoSuchFieldException noField) {
-				// could not find the lock, lets sync on the class object
-				lock = URL.class;
-			}
-			synchronized (lock) {
-				StreamHandlerFactory shf = (StreamHandlerFactory) factoryField.get(null);
-				factoryField.set(null, null);
-				// always attempt to clear the handlers cache
-				// Note that the call to setURLStreamHandlerFactory below may clear this cache
-				// but we want to be sure to clear it here just incase the parent is null.
-				// In this case the call below would not occur.
-				Field handlersField = getStaticField(URL.class, Hashtable.class);
-				if (handlersField != null) {
-					Hashtable handlers = (Hashtable) handlersField.get(null);
-					if (handlers != null)
-						handlers.clear();
-				}
-				if (shf != null && shf.getParentFactory() != null) 
-					URL.setURLStreamHandlerFactory(shf.getParentFactory());
-			}
-		} catch (Exception e) {
-			// ignore and continue closing the framework
+	
+	private static void resetURLStreamHandlers() throws IllegalAccessException {
+		Field handlersField = getStaticField(URL.class, Hashtable.class);
+		if (handlersField != null) {
+			Hashtable handlers = (Hashtable) handlersField.get(null);
+			if (handlers != null)
+				handlers.clear();
 		}
 	}
 }

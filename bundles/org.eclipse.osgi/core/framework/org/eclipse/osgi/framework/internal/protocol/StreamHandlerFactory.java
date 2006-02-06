@@ -11,12 +11,12 @@
 
 package org.eclipse.osgi.framework.internal.protocol;
 
-import java.net.URLStreamHandler;
-import java.net.URLStreamHandlerFactory;
-import java.util.Hashtable;
-import java.util.StringTokenizer;
+import java.lang.reflect.Method;
+import java.net.*;
+import java.util.*;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.internal.core.Constants;
+import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.framework.util.SecureAction;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.url.URLConstants;
@@ -25,13 +25,8 @@ import org.osgi.util.tracker.ServiceTracker;
 /**
  * This class contains the URL stream handler factory for the OSGi framework.
  */
-public class StreamHandlerFactory implements URLStreamHandlerFactory {
+public class StreamHandlerFactory extends MultiplexingFactory implements URLStreamHandlerFactory {
 	static final SecureAction secureAction = new SecureAction();
-	/** BundleContext to system bundle */
-	protected BundleContext context;
-
-	/** internal adaptor object */
-	protected FrameworkAdaptor adaptor;
 
 	private ServiceTracker handlerTracker;
 
@@ -39,6 +34,7 @@ public class StreamHandlerFactory implements URLStreamHandlerFactory {
 	protected static final String PROTOCOL_HANDLER_PKGS = "java.protocol.handler.pkgs"; //$NON-NLS-1$
 	protected static final String INTERNAL_PROTOCOL_HANDLER_PKG = "org.eclipse.osgi.framework.internal.protocol"; //$NON-NLS-1$
 
+	private static final List ignoredClasses = Arrays.asList(new Class[] {MultiplexingURLStreamHandler.class, StreamHandlerFactory.class, URL.class});
 	private Hashtable proxies;
 	private URLStreamHandlerFactory parentFactory;
 
@@ -48,21 +44,11 @@ public class StreamHandlerFactory implements URLStreamHandlerFactory {
 	 * @param context BundleContext for the system bundle
 	 */
 	public StreamHandlerFactory(BundleContext context, FrameworkAdaptor adaptor) {
-		this.context = context;
-		this.adaptor = adaptor;
+		super(context, adaptor);
 
 		proxies = new Hashtable(15);
 		handlerTracker = new ServiceTracker(context, URLSTREAMHANDLERCLASS, null);
 		handlerTracker.open();
-	}
-
-	public void setParentFactory(URLStreamHandlerFactory parentFactory) {
-		if (this.parentFactory == null) // only allow it to be set once
-			this.parentFactory = parentFactory;
-	}
-
-	public URLStreamHandlerFactory getParentFactory() {
-		return parentFactory;
 	}
 
 	private Class getBuiltIn(String protocol, String builtInHandlers) {
@@ -95,25 +81,30 @@ public class StreamHandlerFactory implements URLStreamHandlerFactory {
 	 * @return a URLStreamHandler for the specific protocol.
 	 */
 	public URLStreamHandler createURLStreamHandler(String protocol) {
-
-		// if parent is present do parent lookup
-		if (parentFactory != null) {
-			URLStreamHandler parentHandler = parentFactory.createURLStreamHandler(protocol);
-			if (parentHandler != null) {
-				return parentHandler;
-			}
-		}
-		
 		//first check for built in handlers
 		String builtInHandlers = secureAction.getProperty(PROTOCOL_HANDLER_PKGS);
 		Class clazz = getBuiltIn(protocol, builtInHandlers);
 		if (clazz != null)
 			return null; // let the VM handle it
+		URLStreamHandler result = null;
+		if (isMultiplexing()) {
+			if (findAuthorizedURLStreamHandler(protocol) != null)
+				result = new MultiplexingURLStreamHandler(protocol, this);
+		} else {
+			result = createInternalURLStreamHandler(protocol);
+		}
+		// if parent is present do parent lookup
+		if (result == null && parentFactory != null)
+			result = parentFactory.createURLStreamHandler(protocol);
+		return result; //result may be null; let the VM handle it (consider sun.net.protocol.www.*)
+	}
+
+	public URLStreamHandler createInternalURLStreamHandler(String protocol) {
 
 		//internal protocol handlers
 		String internalHandlerPkgs = secureAction.getProperty(Constants.INTERNAL_HANDLER_PKGS);
 		internalHandlerPkgs = internalHandlerPkgs == null ? INTERNAL_PROTOCOL_HANDLER_PKG : internalHandlerPkgs + '|' + INTERNAL_PROTOCOL_HANDLER_PKG;
-		clazz = getBuiltIn(protocol, internalHandlerPkgs);
+		Class clazz = getBuiltIn(protocol, internalHandlerPkgs);
 
 		if (clazz == null) {
 			//Now we check the service registry
@@ -152,5 +143,31 @@ public class StreamHandlerFactory implements URLStreamHandlerFactory {
 		} catch (Exception e) {
 			return null;
 		}
+	}
+
+	protected URLStreamHandler findAuthorizedURLStreamHandler(String protocol) {
+		Object factory = findAuthorizedFactory(ignoredClasses);
+		if (factory == null)
+			return null;
+
+		if (factory == this)
+			return createInternalURLStreamHandler(protocol);
+
+		try {
+			Method createInternalURLStreamHandlerMethod = factory.getClass().getMethod("createInternalURLStreamHandler", new Class[] {String.class}); //$NON-NLS-1$
+			return (URLStreamHandler) createInternalURLStreamHandlerMethod.invoke(factory, new Object[] {protocol});
+		} catch (Exception e) {
+			adaptor.getFrameworkLog().log(new FrameworkLogEntry(StreamHandlerFactory.class.getName(), "findAuthorizedURLStreamHandler-loop", FrameworkLogEntry.ERROR, e, null)); //$NON-NLS-1$
+			throw new RuntimeException(e.getMessage());
+		}
+	}
+
+	public Object getParentFactory() {
+		return parentFactory;
+	}
+
+	public void setParentFactory(Object parentFactory) {
+		if (this.parentFactory == null) // only allow it to be set once
+			this.parentFactory = (URLStreamHandlerFactory) parentFactory;
 	}
 }
