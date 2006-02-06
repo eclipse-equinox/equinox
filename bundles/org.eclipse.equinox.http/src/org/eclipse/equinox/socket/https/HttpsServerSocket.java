@@ -137,6 +137,7 @@ public class HttpsServerSocket implements ServerSocketInterface, ServiceTrackerC
 	}
 
 	public void modifiedService(ServiceReference reference, Object service) {
+		// do nothing
 	}
 
 	public synchronized void removedService(ServiceReference reference, Object service) {
@@ -145,6 +146,7 @@ public class HttpsServerSocket implements ServerSocketInterface, ServiceTrackerC
 			try {
 				ss.close();
 			} catch (IOException e) {
+				// TODO: consider logging
 			}
 			ss = null;
 		}

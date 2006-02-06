@@ -25,12 +25,6 @@ public class Activator implements BundleActivator {
 
 	private Http http = null;
 
-	/** Need to have a public default constructor so that the BundleActivator
-	 * can be instantiated by Class.newInstance().
-	 */
-	public Activator() {
-	}
-
 	/**
 	 * Required by BundleActivator Interface.
 	 */

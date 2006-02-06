@@ -240,9 +240,8 @@ public class HttpDate {
 			time.set(year, month, day, hour, min, sec);
 			return;
 		} catch (NumberFormatException e) {
-		}
-
-		valid = false;
+			valid = false;
+		}		
 	}
 
 	protected void parseRFC1036(String str) {
@@ -299,11 +298,9 @@ public class HttpDate {
 			}
 
 			time.set(year, month, day, hour, min, sec);
-			return;
 		} catch (NumberFormatException e) {
+			valid = false;
 		}
-
-		valid = false;
 	}
 
 	protected void parseRFC1123(String str) {
@@ -356,11 +353,11 @@ public class HttpDate {
 			}
 
 			time.set(year, month, day, hour, min, sec);
-			return;
 		} catch (NumberFormatException e) {
+			valid = false;
 		}
 
-		valid = false;
+
 	}
 
 	/**

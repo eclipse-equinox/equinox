@@ -91,7 +91,7 @@ public class StaticDataReader {
 	 * @return Default MIME type Hashtable
 	 */
 	private Hashtable parseMimeTypes(InputStream in) {
-		Hashtable mimeTypes = new Hashtable();
+		Hashtable resultMimeTypes = new Hashtable();
 
 		if (in != null) {
 			try {
@@ -108,7 +108,7 @@ public class StaticDataReader {
 						String type = tokens.nextToken();
 						while (tokens.hasMoreTokens()) {
 							String ext = tokens.nextToken();
-							mimeTypes.put(ext.toLowerCase(), type);
+							resultMimeTypes.put(ext.toLowerCase(), type);
 						}
 					}
 				}
@@ -118,18 +118,19 @@ public class StaticDataReader {
 				try {
 					in.close();
 				} catch (IOException e) {
+					// TODO: consider logging
 				}
 			}
 		}
 
-		return (mimeTypes);
+		return (resultMimeTypes);
 	}
 
 	/**
 	 * This method was created in VisualAge.
 	 */
 	private Hashtable parseStatusCodes(InputStream in) {
-		Hashtable statusCodes = new Hashtable();
+		Hashtable resultStatusCodes = new Hashtable();
 
 		if (in != null) {
 			try {
@@ -145,7 +146,7 @@ public class StaticDataReader {
 						int space = line.indexOf(' ');
 						Integer status = new Integer(line.substring(0, space));
 						String statusPhrase = line.substring(space + 1);
-						statusCodes.put(status, statusPhrase);
+						resultStatusCodes.put(status, statusPhrase);
 					}
 				}
 			} catch (Exception e) {
@@ -154,11 +155,12 @@ public class StaticDataReader {
 				try {
 					in.close();
 				} catch (IOException e) {
+					// TODO: consider logging
 				}
 			}
 		}
 
-		return (statusCodes);
+		return (resultStatusCodes);
 	}
 
 	/**
@@ -213,6 +215,7 @@ public class StaticDataReader {
 				try {
 					in.close();
 				} catch (IOException ee) {
+					// TODO: consider logging
 				}
 			}
 		}

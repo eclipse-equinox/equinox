@@ -185,9 +185,8 @@ public class HttpSessionImpl implements HttpSession {
 
 		if (canExpire) {
 			return ((int) (maxInactive / 1000L));
-		} else {
-			return (-1);
 		}
+		return (-1);
 	}
 
 	/**
@@ -204,10 +203,9 @@ public class HttpSessionImpl implements HttpSession {
 			} else {
 				if (interval < 0) {
 					throw new IllegalArgumentException("negative value"); //$NON-NLS-1$
-				} else {
-					maxInactive = ((long) interval) * 1000L;
-					canExpire = true;
 				}
+				maxInactive = interval * 1000L;
+				canExpire = true;
 			}
 		}
 	}

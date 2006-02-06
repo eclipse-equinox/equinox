@@ -40,7 +40,7 @@ public class HttpConfiguration implements ManagedService, ManagedServiceFactory 
 	/** Hashtable of HttpListener object configured by the ConfigurationAdmin
 	 * Configuration PID (String) => HttpListener object
 	 */
-	private Hashtable configuredListeners;
+	Hashtable configuredListeners;
 
 	protected Http http;
 
@@ -558,7 +558,7 @@ public class HttpConfiguration implements ManagedService, ManagedServiceFactory 
 
 				priority = ((Integer) property).intValue();
 
-				if ((priority < HttpThread.MIN_PRIORITY) || (priority > HttpThread.MAX_PRIORITY)) {
+				if ((priority < Thread.MIN_PRIORITY) || (priority > Thread.MAX_PRIORITY)) {
 					throw new ConfigurationException(key, "must be one of the Thread defined priorities"); //$NON-NLS-1$
 				}
 			}

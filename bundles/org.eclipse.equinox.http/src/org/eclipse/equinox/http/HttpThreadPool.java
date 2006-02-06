@@ -33,7 +33,7 @@ public class HttpThreadPool extends ThreadGroup {
 	/** number of threads to be terminated when they are returned to the pool */
 	private int hitCount;
 	/** Thread allocation number */
-	private int number;
+	int number;
 	/** prevent new threads from readjusting */
 	private int adjusting = 0;
 
@@ -177,10 +177,10 @@ public class HttpThreadPool extends ThreadGroup {
 	 * @param priority Thread priority.
 	 */
 	public void setPriority(int priority) {
-		if ((HttpThread.MIN_PRIORITY <= priority) && (priority <= HttpThread.MAX_PRIORITY)) {
+		if ((Thread.MIN_PRIORITY <= priority) && (priority <= Thread.MAX_PRIORITY)) {
 			this.priority = priority;
 		} else {
-			throw new IllegalArgumentException(NLS.bind(HttpMsg.HTTP_INVALID_VALUE_RANGE_EXCEPTION, new Object[] {new Integer(HttpThread.MIN_PRIORITY), new Integer(HttpThread.MAX_PRIORITY)}));
+			throw new IllegalArgumentException(NLS.bind(HttpMsg.HTTP_INVALID_VALUE_RANGE_EXCEPTION, new Object[] {new Integer(Thread.MIN_PRIORITY), new Integer(Thread.MAX_PRIORITY)}));
 		}
 	}
 
@@ -240,11 +240,11 @@ public class HttpThreadPool extends ThreadGroup {
 				}
 
 				return (thread);
-			} else {
-				try {
-					wait();
-				} catch (InterruptedException e) {
-				}
+			}
+			try {
+				wait();
+			} catch (InterruptedException e) {
+				// ignore and check exit condition
 			}
 		}
 
@@ -267,6 +267,7 @@ public class HttpThreadPool extends ThreadGroup {
 			setDaemon(true);
 			destroy();
 		} catch (Exception e) {
+			// TODO: consider logging
 		}
 	}
 

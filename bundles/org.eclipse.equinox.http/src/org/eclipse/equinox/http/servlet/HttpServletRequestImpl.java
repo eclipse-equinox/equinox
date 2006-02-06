@@ -16,6 +16,7 @@ import java.util.*;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.*;
+
 import org.eclipse.equinox.http.*;
 import org.eclipse.equinox.socket.SocketInterface;
 import org.eclipse.osgi.util.NLS;
@@ -79,23 +80,21 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 	/**
 	 * Initialize additional request data.
 	 *
-	 * @param servletPath URI alias for this request
-	 * @param servletContext ServletContext for this request
+	 * @param servletPathParam URI alias for this request
+	 * @param servletContextParam ServletContext for this request
 	 */
-	public void init(String servletPath, ServletContextImpl servletContext) {
+	public void init(String servletPathParam, ServletContextImpl servletContextParam) {
 		// BUGBUG Need to deal with context path
 		// Servlet 2.2 Section 5.4
-		this.servletPath = servletPath;
-		this.servletContext = servletContext;
+		this.servletPath = servletPathParam;
+		this.servletContext = servletContextParam;
 
-		int len = servletPath.length();
-
-		String pathInfo = reqURI.substring(servletPath.length());
-		if ((pathInfo.length() == 0) || pathInfo.equals("/")) //$NON-NLS-1$
+		String tempPathInfo = reqURI.substring(servletPathParam.length());
+		if ((tempPathInfo.length() == 0) || tempPathInfo.equals("/")) //$NON-NLS-1$
 		{
 			/* leave as null */
 		} else {
-			this.pathInfo = pathInfo;
+			this.pathInfo = tempPathInfo;
 		}
 
 		if (authType == null) {
@@ -222,7 +221,8 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 				if (index >= 0) {
 					Tokenizer tokenizer = new Tokenizer(contentType);
 
-					String mime_type = tokenizer.getToken(";"); //$NON-NLS-1$
+					// TODO: verify next statement. It was String mimetype = tokenizer.getToken(";"); 
+					tokenizer.getToken(";"); //$NON-NLS-1$
 					tokenizer.getChar(); /* eat semicolon */
 
 					parseloop: while (true) {
@@ -341,9 +341,8 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 
 			if (d.isValid()) {
 				return (d.getAsLong()); // Parsed OK, so get the value as a Long
-			} else {
-				throw new IllegalArgumentException();
 			}
+			throw new IllegalArgumentException();
 		}
 
 		return (-1);
@@ -885,11 +884,11 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 	 * @see #getSession
 	 */
 	public boolean isRequestedSessionIdValid() {
-		HttpSession session = getSession(false); /* get current session, if any */
+		HttpSession currentSession = getSession(false); /* get current session, if any */
 
-		if (session != null) /* if there is a session, see if it the requested session */
+		if (currentSession != null) /* if there is a session, see if it the requested session */
 		{
-			return (session.getId().equals(getRequestedSessionId()));
+			return (currentSession.getId().equals(getRequestedSessionId()));
 		}
 
 		return (false);
@@ -1297,7 +1296,7 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 		}
 
 		try {
-			response.sendError(response.SC_REQUEST_ENTITY_TOO_LARGE);
+			response.sendError(HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE);
 		} finally {
 			response.close();
 		}
@@ -1410,7 +1409,7 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 	 * @see javax.servlet.ServletRequest#setCharacterEncoding(String)
 	 */
 	public void setCharacterEncoding(String env) throws UnsupportedEncodingException, UnsupportedOperationException {
-		throw new UnsupportedOperationException(HttpMsg.HTTP_ONLY_SUPPORTS_2_1); //$NON-NLS-1$
+		throw new UnsupportedOperationException(HttpMsg.HTTP_ONLY_SUPPORTS_2_1);
 	}
 
 	/* For compilation only.  Will not implement.
@@ -1418,7 +1417,7 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 	 */
 	public String getLocalAddr() {
 		//return(socket.getInetAddress().getLocalHost().getHostAddress());
-		throw new UnsupportedOperationException(HttpMsg.HTTP_ONLY_SUPPORTS_2_1); //$NON-NLS-1$
+		throw new UnsupportedOperationException(HttpMsg.HTTP_ONLY_SUPPORTS_2_1);
 	}
 
 	/* For compilation only.  Will not implement.
@@ -1426,20 +1425,20 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 	 */
 	public String getLocalName() {
 		//return(socket.getInetAddress().getLocalHost().getHostName());
-		throw new UnsupportedOperationException(HttpMsg.HTTP_ONLY_SUPPORTS_2_1); //$NON-NLS-1$
+		throw new UnsupportedOperationException(HttpMsg.HTTP_ONLY_SUPPORTS_2_1);
 	}
 
 	/* For compilation only.  Will not implement.
 	 * 
 	 */
 	public int getLocalPort() {
-		throw new UnsupportedOperationException(HttpMsg.HTTP_ONLY_SUPPORTS_2_1); //$NON-NLS-1$
+		throw new UnsupportedOperationException(HttpMsg.HTTP_ONLY_SUPPORTS_2_1);
 	}
 
 	/* For compilation only.  Will not implement.
 	 * 
 	 */
 	public int getRemotePort() {
-		throw new UnsupportedOperationException(HttpMsg.HTTP_ONLY_SUPPORTS_2_1); //$NON-NLS-1$
+		throw new UnsupportedOperationException(HttpMsg.HTTP_ONLY_SUPPORTS_2_1);
 	}
 }

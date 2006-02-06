@@ -225,6 +225,7 @@ public class HttpServletResponseImpl implements HttpServletResponse {
 			try {
 				servletOutputStream.close();
 			} catch (IOException e) {
+				// TODO: consider logging
 			}
 		}
 
@@ -233,6 +234,7 @@ public class HttpServletResponseImpl implements HttpServletResponse {
 			try {
 				socket.close();
 			} catch (IOException e) {
+				// TODO: consider logging
 			}
 		}
 	}
@@ -292,6 +294,7 @@ public class HttpServletResponseImpl implements HttpServletResponse {
 									try {
 										fileEncodingAlias = new OutputStreamWriter(dummy, fileEncoding).getEncoding();
 									} catch (UnsupportedEncodingException ee) {
+										// TODO: consider logging
 									}
 								}
 
@@ -381,20 +384,20 @@ public class HttpServletResponseImpl implements HttpServletResponse {
 						throw new IllegalStateException();
 					}
 
-					String charset = getCharacterEncoding();
+					String encoding = getCharacterEncoding();
 
-					writer = new ServletPrintWriter(servletOutputStream, charset);
+					writer = new ServletPrintWriter(servletOutputStream, encoding);
 
 					if (contentType == null) {
 						// BUGBUG Must not set a default content type.
 						// Servlet 2.3 Section 5.3
-						contentType = "text/plain; charset=" + charset; //$NON-NLS-1$
+						contentType = "text/plain; charset=" + encoding; //$NON-NLS-1$
 
 						setHeader("Content-Type", contentType); //$NON-NLS-1$
 					} else {
 						if (contentType.toLowerCase().indexOf("charset=") == -1) // 99372 //$NON-NLS-1$
 						{
-							contentType = contentType + "; charset=" + charset; //$NON-NLS-1$
+							contentType = contentType + "; charset=" + encoding; //$NON-NLS-1$
 
 							setHeader("Content-Type", contentType); //$NON-NLS-1$
 						}
@@ -516,7 +519,8 @@ public class HttpServletResponseImpl implements HttpServletResponse {
 					if (index >= 0) {
 						Tokenizer tokenizer = new Tokenizer(type);
 
-						String mime_type = tokenizer.getToken(";"); //$NON-NLS-1$
+						// TODO: verify next statement. It was String mimetype = tokenizer.getToken(";"); 
+						tokenizer.getToken(";"); //$NON-NLS-1$
 						tokenizer.getChar(); /* eat semicolon */
 
 						parseloop: while (true) {

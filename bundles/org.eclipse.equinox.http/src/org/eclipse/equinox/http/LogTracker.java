@@ -79,6 +79,7 @@ public class LogTracker extends ServiceTracker implements LogService {
 					try {
 						service.log(reference, level, message, exception);
 					} catch (Exception e) {
+						// TODO: consider printing to System Error
 					}
 				}
 			}

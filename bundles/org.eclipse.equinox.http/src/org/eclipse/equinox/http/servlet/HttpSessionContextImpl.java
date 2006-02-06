@@ -29,9 +29,6 @@ import javax.servlet.http.HttpSessionContext;
  */
 public class HttpSessionContextImpl implements HttpSessionContext {
 
-	public HttpSessionContextImpl() {
-	}
-
 	/**
 	 * Returns an enumeration of all of the session IDs in this context.
 	 *

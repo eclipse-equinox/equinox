@@ -70,6 +70,7 @@ public class HttpThread extends Thread {
 			try {
 				socket.close();
 			} catch (IOException e) {
+				// TODO: consider logging
 			}
 		}
 	}
@@ -91,20 +92,21 @@ public class HttpThread extends Thread {
 
 				socket.close();
 			} catch (IOException e) {
+				// TODO: consider logging
 			}
 		}
 
 		supportKeepAlive = false;
 	}
 
-	public synchronized void handleConnection(HttpListener listener, SocketInterface socket, int socketTimeout) {
+	public synchronized void handleConnection(HttpListener listenerParam, SocketInterface socketParam, int socketTimeout) {
 		if (running) {
-			this.listener = listener;
-			this.socket = socket;
+			this.listener = listenerParam;
+			this.socket = socketParam;
 
 			if (socketTimeout > 0) {
 				try {
-					socket.setSoTimeout(socketTimeout);
+					socketParam.setSoTimeout(socketTimeout);
 
 					supportKeepAlive = true;
 				} catch (SocketException e) {
@@ -139,6 +141,7 @@ public class HttpThread extends Thread {
 					try {
 						wait();
 					} catch (InterruptedException e) {
+						// ignore and check exit condition
 					}
 				}
 			}
@@ -207,6 +210,7 @@ public class HttpThread extends Thread {
 
 								socket.close();
 							} catch (IOException e) {
+								// TODO: consider logging
 							}
 						}
 

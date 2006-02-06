@@ -11,7 +11,5 @@
 package org.eclipse.equinox.http;
 
 public class ResourceUnavailableException extends RuntimeException {
-	public ResourceUnavailableException() {
-		super();
-	}
+	private static final long serialVersionUID = 4662869318092654517L;
 }

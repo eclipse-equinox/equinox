@@ -126,8 +126,7 @@ public class ServletContextImpl implements ServletContext {
 		String mimeType = httpContext.getMimeType(file);
 		if (mimeType != null)
 			return (mimeType);
-		else
-			return (http.getMimeType(file));
+		return (http.getMimeType(file));
 	}
 
 	/**
@@ -263,14 +262,12 @@ public class ServletContextImpl implements ServletContext {
 	public InputStream getResourceAsStream(String path) {
 		try {
 			URL url = httpContext.getResource(path);
-			if (url != null) {
+			if (url != null)
 				return url.openStream();
-			} else {
-				return null;
-			}
 		} catch (IOException ex) {
-			return null;
+			// TODO: consider logging
 		}
+		return null;
 	}
 
 	/**

@@ -19,6 +19,7 @@ import org.eclipse.equinox.socket.ServerSocketInterface;
 import org.eclipse.equinox.socket.https.HttpsServerSocket;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.BundleContext;
+import org.osgi.service.log.LogService;
 
 public class Http {
 	public static final boolean DEBUG = false;
@@ -153,7 +154,7 @@ public class Http {
 		if (Http.DEBUG) {
 			System.out.println(message);
 
-			log.log(log.LOG_DEBUG, message);
+			log.log(LogService.LOG_DEBUG, message);
 		}
 	}
 
@@ -162,7 +163,7 @@ public class Http {
 			System.out.println(message);
 			t.printStackTrace(System.out);
 
-			log.log(log.LOG_DEBUG, message, t);
+			log.log(LogService.LOG_DEBUG, message, t);
 		}
 	}
 
@@ -172,7 +173,7 @@ public class Http {
 			t.printStackTrace(System.out);
 		}
 
-		log.log(log.LOG_ERROR, message, t);
+		log.log(LogService.LOG_ERROR, message, t);
 	}
 
 	public void logInfo(String message) {
@@ -180,7 +181,7 @@ public class Http {
 			System.out.println(message);
 		}
 
-		log.log(log.LOG_INFO, message);
+		log.log(LogService.LOG_INFO, message);
 	}
 
 	public void logWarning(String message, Throwable t) {
@@ -189,7 +190,7 @@ public class Http {
 			t.printStackTrace(System.out);
 		}
 
-		log.log(log.LOG_WARNING, message, t);
+		log.log(LogService.LOG_WARNING, message, t);
 	}
 
 	protected ServerSocketInterface createSSLServerSocket(int port, int backlog, InetAddress address) throws IOException {

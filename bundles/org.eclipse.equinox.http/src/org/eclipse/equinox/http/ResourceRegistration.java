@@ -16,6 +16,7 @@ import java.net.URLConnection;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.*;
+
 import org.eclipse.equinox.http.servlet.HttpServletRequestImpl;
 import org.eclipse.equinox.http.servlet.HttpServletResponseImpl;
 import org.osgi.framework.Bundle;
@@ -26,6 +27,7 @@ import org.osgi.service.http.HttpContext;
  */
 public class ResourceRegistration extends HttpServlet implements Registration {
 
+	private static final long serialVersionUID = -8732464938673729607L;
 	protected Bundle bundle;
 	protected HttpContext httpContext;
 	protected String alias;
@@ -110,7 +112,7 @@ public class ResourceRegistration extends HttpServlet implements Registration {
 		if (modifiedSince >= 0) {
 			long modified = conn.getLastModified();
 			if ((modified > 0) && (modifiedSince >= modified)) {
-				response.setStatus(response.SC_NOT_MODIFIED);
+				response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
 				return;
 			}
 		}
@@ -119,7 +121,7 @@ public class ResourceRegistration extends HttpServlet implements Registration {
 		try {
 			in = conn.getInputStream();
 		} catch (IOException ex) {
-			response.sendError(response.SC_NOT_FOUND);
+			response.sendError(HttpServletResponse.SC_NOT_FOUND);
 			return;
 		}
 

@@ -54,17 +54,17 @@ public class SecureAction {
 		if (System.getSecurityManager() == null)
 		    return open(url);
 		try {	
-		return (URLConnection) AccessController.doPrivileged(new PrivilegedExceptionAction() {
-			public Object run() throws IOException{
-				return open(url);
-			}
-		}, controlContext);  
+			return (URLConnection) AccessController.doPrivileged(new PrivilegedExceptionAction() {
+				public Object run() throws IOException {
+					return open(url);
+				}
+			}, controlContext);  
 		} catch(PrivilegedActionException ex) {
 			throw (IOException) ex.getException();
 		}
 	}  
 	
-	private URLConnection open(final URL url)throws IOException
+	URLConnection open(final URL url)throws IOException
 	{
 		URLConnection connection = url.openConnection();
         connection.connect(); /* establish connection to check permissions */

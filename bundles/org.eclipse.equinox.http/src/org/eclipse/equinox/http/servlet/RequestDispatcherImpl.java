@@ -59,6 +59,7 @@ public class RequestDispatcherImpl implements RequestDispatcher {
 		}
 
 		public void sendRedirect(String url) {
+			// do nothing
 		}
 
 		public boolean containsHeader(String header) {
@@ -66,33 +67,43 @@ public class RequestDispatcherImpl implements RequestDispatcher {
 		}
 
 		public void addCookie(Cookie cookie) {
+			// do nothing
 		}
 
 		public void sendError(int errorCode) {
+			// do nothing
 		}
 
 		public void sendError(int errorCode, String error) {
+			// do nothing
 		}
 
 		public void setContentLength(int length) {
+			// do nothing
 		}
 
 		public void setContentType(String contentType) {
+			// do nothing
 		}
 
 		public void setStatus(int status) {
+			// do nothing
 		}
 
 		public void setStatus(int status, String statusPhrase) {
+			// do nothing
 		}
 
 		public void setHeader(String key, String value) {
+			// do nothing
 		}
 
 		public void setIntHeader(String key, int value) {
+			// do nothing
 		}
 
 		public void setDateHeader(String key, long date) {
+			// do nothing
 		}
 
 		/**

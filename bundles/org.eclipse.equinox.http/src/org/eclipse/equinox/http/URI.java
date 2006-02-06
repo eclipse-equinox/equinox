@@ -13,9 +13,6 @@ package org.eclipse.equinox.http;
 import java.io.UnsupportedEncodingException;
 
 public class URI {
-	private URI() {
-	}
-
 	/**
 	 * Takes an encoded string and decodes it
 	 * @param input encoded String

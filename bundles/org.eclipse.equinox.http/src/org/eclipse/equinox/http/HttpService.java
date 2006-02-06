@@ -32,42 +32,42 @@ public class HttpService implements org.osgi.service.http.HttpService {
 	}
 
 	public void registerResources(String alias, String name, HttpContext httpContext) throws NamespaceException {
-		HttpListener listener = this.listener;
+		HttpListener tempListener = this.listener;
 
-		if (listener != null) {
+		if (tempListener != null) {
 			if (httpContext == null) {
 				httpContext = createDefaultHttpContext();
 			}
 
-			listener.registerResources(bundle, alias, name, httpContext);
+			tempListener.registerResources(bundle, alias, name, httpContext);
 		}
 	}
 
 	public void registerServlet(String alias, Servlet servlet, java.util.Dictionary initparams, HttpContext httpContext) throws ServletException, NamespaceException, IllegalArgumentException {
-		HttpListener listener = this.listener;
+		HttpListener tempListener = this.listener;
 
-		if (listener != null) {
+		if (tempListener != null) {
 			if (httpContext == null) {
 				httpContext = createDefaultHttpContext();
 			}
 
-			listener.registerServlet(bundle, alias, servlet, initparams, httpContext);
+			tempListener.registerServlet(bundle, alias, servlet, initparams, httpContext);
 		}
 	}
 
 	public void unregister(String alias) throws IllegalArgumentException {
-		HttpListener listener = this.listener;
+		HttpListener tempListener = this.listener;
 
-		if (listener != null) {
-			listener.unregister(bundle, alias);
+		if (tempListener != null) {
+			tempListener.unregister(bundle, alias);
 		}
 	}
 
 	public HttpContext createDefaultHttpContext() {
-		HttpListener listener = this.listener;
+		HttpListener tempListener = this.listener;
 
-		if (listener != null) {
-			return (listener.createDefaultHttpContext(bundle));
+		if (tempListener != null) {
+			return (tempListener.createDefaultHttpContext(bundle));
 		}
 
 		return (null);
