@@ -27,13 +27,13 @@ public class LogServiceFactory implements ServiceFactory {
 	 * ServiceFactory.getService method.
 	 */
 	public Object getService(Bundle bundle, ServiceRegistration registration) {
-		return (new LogService(log, bundle));
+		return (new LogServiceImpl(log, bundle));
 	}
 
 	/**
 	 * ServiceFactory.ungetService method.
 	 */
 	public void ungetService(Bundle bundle, ServiceRegistration registration, Object service) {
-		((LogService) service).close();
+		((LogServiceImpl) service).close();
 	}
 }

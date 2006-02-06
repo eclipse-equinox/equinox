@@ -37,6 +37,8 @@ import java.lang.reflect.*;
 /* This class MUST be public for nested exception printing to work */
 public class LoggedException extends Throwable implements Cloneable {
 
+	private static final long serialVersionUID = -7432693545895678645L;
+
 	/** The fully qualified name of exception or error type. */
 	String exceptionClassName;
 
@@ -119,7 +121,9 @@ public class LoggedException extends Throwable implements Cloneable {
 						break;
 					}
 				} catch (IllegalAccessException e) {
+					// TODO: Consider wrapping and throwing a RuntimeException
 				} catch (InvocationTargetException e) {
+					// TODO: Consider wrapping and throwing a RuntimeException					
 				}
 			}
 		}
@@ -193,9 +197,8 @@ public class LoggedException extends Throwable implements Cloneable {
 	public String toString() {
 		if (message == null) {
 			return exceptionClassName;
-		} else {
-			int length = exceptionClassName.length() + message.length() + 2;
-			return new StringBuffer(length).append(exceptionClassName).append(": ").append(message).toString(); //$NON-NLS-1$
 		}
+		int length = exceptionClassName.length() + message.length() + 2;
+		return new StringBuffer(length).append(exceptionClassName).append(": ").append(message).toString(); //$NON-NLS-1$
 	}
 }

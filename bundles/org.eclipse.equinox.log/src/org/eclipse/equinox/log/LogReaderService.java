@@ -12,8 +12,8 @@ package org.eclipse.equinox.log;
 
 import java.util.Enumeration;
 import java.util.Vector;
-import org.eclipse.osgi.framework.eventmgr.EventListeners;
 import org.eclipse.osgi.framework.eventmgr.EventDispatcher;
+import org.eclipse.osgi.framework.eventmgr.EventListeners;
 import org.osgi.framework.Bundle;
 import org.osgi.service.log.LogListener;
 
@@ -33,21 +33,21 @@ public class LogReaderService implements org.osgi.service.log.LogReaderService, 
 	}
 
 	protected void close() {
-		Activator log = this.log;
+		Activator tempLog = this.log;
 		this.log = null;
 		this.bundle = null;
 
 		if (logEvent != null) {
-			log.logEvent.removeListener(this);
+			tempLog.logEvent.removeListener(this);
 			logEvent.removeAllListeners();
 			logEvent = null;
 		}
 	}
 
 	public void dispatchEvent(Object l, Object lo, int action, Object object) {
-		Activator log = this.log;
+		Activator tempLog = this.log;
 
-		if (log == null) {
+		if (tempLog == null) {
 			return;
 		}
 
@@ -66,16 +66,16 @@ public class LogReaderService implements org.osgi.service.log.LogReaderService, 
 	 *  time a message is logged.  The requester must have Admin permission.
 	 */
 	public void addLogListener(LogListener listener) {
-		Activator log = this.log;
+		Activator tempLog = this.log;
 
-		if (log == null) {
+		if (tempLog == null) {
 			return;
 		}
 
-		synchronized (log.logEvent) {
+		synchronized (tempLog.logEvent) {
 			if (logEvent == null) {
 				logEvent = new EventListeners();
-				log.logEvent.addListener(this, this);
+				tempLog.logEvent.addListener(this, this);
 			} else {
 				logEvent.removeListener(listener);
 			}
@@ -88,14 +88,14 @@ public class LogReaderService implements org.osgi.service.log.LogReaderService, 
 	 *  Unsubscribe to log events. The requester must have Admin permission.
 	 */
 	public void removeLogListener(LogListener listener) {
-		Activator log = this.log;
+		Activator tempLog = this.log;
 
-		if (log == null) {
+		if (tempLog == null) {
 			return;
 		}
 
 		if (logEvent != null) {
-			synchronized (log.logEvent) {
+			synchronized (tempLog.logEvent) {
 				logEvent.removeListener(listener);
 			}
 		}
@@ -109,13 +109,13 @@ public class LogReaderService implements org.osgi.service.log.LogReaderService, 
 	 *  is implementation specific.  The requester must have Admin permission.
 	 */
 	public Enumeration getLog() {
-		Activator log = this.log;
+		Activator tempLog = this.log;
 
-		if (log == null) {
+		if (tempLog == null) {
 			return (new Vector(0).elements());
 		}
 
-		return (log.logEntries());
+		return (tempLog.logEntries());
 	}
 
 }

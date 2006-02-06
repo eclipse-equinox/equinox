@@ -12,16 +12,17 @@ package org.eclipse.equinox.log;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.log.LogService;
 
 /**
- * LogService class.
+ * LogServiceImpl class.
  */
 
-public class LogService implements org.osgi.service.log.LogService {
+public class LogServiceImpl implements LogService {
 	protected Activator log;
 	protected Bundle bundle;
 
-	protected LogService(Activator log, Bundle bundle) {
+	protected LogServiceImpl(Activator log, Bundle bundle) {
 		this.log = log;
 		this.bundle = bundle;
 	}
@@ -46,13 +47,13 @@ public class LogService implements org.osgi.service.log.LogService {
 	 * @param String message - Human readable string describing the condition.
 	 */
 	public void log(int level, String message) {
-		Activator log = this.log;
+		Activator tempLog = this.log;
 
-		if (log == null) {
+		if (tempLog == null) {
 			return;
 		}
 
-		log.log(level, message, bundle, null, null);
+		tempLog.log(level, message, bundle, null, null);
 	}
 
 	/**
@@ -65,13 +66,13 @@ public class LogService implements org.osgi.service.log.LogService {
 	 * @param Throwable exception - The exception that reflects the condition.
 	 */
 	public void log(int level, String message, Throwable exception) {
-		Activator log = this.log;
+		Activator tempLog = this.log;
 
-		if (log == null) {
+		if (tempLog == null) {
 			return;
 		}
 
-		log.log(level, message, bundle, null, exception);
+		tempLog.log(level, message, bundle, null, exception);
 	}
 
 	/**
@@ -85,13 +86,13 @@ public class LogService implements org.osgi.service.log.LogService {
 	 * @param message Human readable string describing the condition.
 	 */
 	public void log(ServiceReference reference, int level, String message) {
-		Activator log = this.log;
+		Activator tempLog = this.log;
 
-		if (log == null) {
+		if (tempLog == null) {
 			return;
 		}
 
-		log.log(level, message, bundle, reference, null);
+		tempLog.log(level, message, bundle, reference, null);
 	}
 
 	/**
@@ -105,13 +106,13 @@ public class LogService implements org.osgi.service.log.LogService {
 	 * @param exception The exception that reflects the condition.
 	 */
 	public void log(ServiceReference reference, int level, String message, Throwable exception) {
-		Activator log = this.log;
+		Activator tempLog = this.log;
 
-		if (log == null) {
+		if (tempLog == null) {
 			return;
 		}
 
-		log.log(level, message, bundle, reference, exception);
+		tempLog.log(level, message, bundle, reference, exception);
 	}
 
 }

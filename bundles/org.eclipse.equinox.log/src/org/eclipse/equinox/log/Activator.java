@@ -16,6 +16,7 @@ import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
+import org.osgi.service.log.LogService;
 
 /**
  * An array of LogEntries which wraps when full.
@@ -57,16 +58,13 @@ public class Activator implements BundleActivator, EventDispatcher, BundleListen
 	/** Pid that log service uses when it registers a CM Managed Service */
 	protected static final String LOGSERVICEPID = "org.eclipse.equinox.log.Log"; //$NON-NLS-1$
 
-	public Activator() {
-	}
-
 	/**
 	 * BundleActivator.start method. We can now initialize the bundle
 	 * and register the services.
 	 *
 	 */
-	public void start(BundleContext context) {
-		this.context = context;
+	public void start(BundleContext bundleContext) {
+		this.context = bundleContext;
 
 		eventManager = new EventManager("Log Event Dispatcher"); //$NON-NLS-1$
 		logEvent = new EventListeners();
@@ -75,11 +73,11 @@ public class Activator implements BundleActivator, EventDispatcher, BundleListen
 		head = 0;
 		tail = 0;
 		String initmessage = NLS.bind(LogMsg.Log_created_Log_Size, String.valueOf(logSize), String.valueOf(logThreshold));
-		logEntries[0] = new LogEntry(LogService.LOG_INFO, initmessage, context.getBundle(), null, null);
+		logEntries[0] = new LogEntry(LogService.LOG_INFO, initmessage, bundleContext.getBundle(), null, null);
 
-		context.addBundleListener(this);
-		context.addServiceListener(this);
-		context.addFrameworkListener(this);
+		bundleContext.addBundleListener(this);
+		bundleContext.addServiceListener(this);
+		bundleContext.addFrameworkListener(this);
 
 		registerLogService();
 		registerLogReaderService();
@@ -92,7 +90,7 @@ public class Activator implements BundleActivator, EventDispatcher, BundleListen
 	 * execution.
 	 *
 	 */
-	public synchronized void stop(BundleContext context) {
+	public synchronized void stop(BundleContext bundleContext) {
 		if (logmanagedservice != null) {
 			logmanagedservice.unregister();
 			logmanagedservice = null;
@@ -203,10 +201,10 @@ public class Activator implements BundleActivator, EventDispatcher, BundleListen
 	}
 
 	protected synchronized Enumeration logEntries() {
-		final int head = this.head;
-		final int tail = this.tail;
-		final int logSize = this.logSize;
-		final LogEntry[] logEntries = this.logEntries;
+		final int tempHead = this.head;
+		final int tempTail = this.tail;
+		final int templogSize = this.logSize;
+		final LogEntry[] tempLogEntries = this.logEntries;
 
 		return (new Enumeration() {
 			private int item;
@@ -214,16 +212,16 @@ public class Activator implements BundleActivator, EventDispatcher, BundleListen
 
 			{
 				// The array is created in the log reader's memory space
-				if (head <= tail) {
-					item = tail - head + 1;
+				if (tempHead <= tempTail) {
+					item = tempTail - tempHead + 1;
 					enumentries = new LogEntry[item];
-					System.arraycopy(logEntries, head, enumentries, 0, item);
+					System.arraycopy(tempLogEntries, tempHead, enumentries, 0, item);
 				} else { // log is full
-					int firstcopy = logSize - head;
-					item = firstcopy + tail + 1;
+					int firstcopy = templogSize - tempHead;
+					item = firstcopy + tempTail + 1;
 					enumentries = new LogEntry[item];
-					System.arraycopy(logEntries, head, enumentries, 0, firstcopy);
-					System.arraycopy(logEntries, 0, enumentries, firstcopy, item - firstcopy);
+					System.arraycopy(tempLogEntries, tempHead, enumentries, 0, firstcopy);
+					System.arraycopy(tempLogEntries, 0, enumentries, firstcopy, item - firstcopy);
 				}
 			}
 
@@ -517,9 +515,9 @@ public class Activator implements BundleActivator, EventDispatcher, BundleListen
 
 		properties.put(Constants.SERVICE_VENDOR, "IBM"); //$NON-NLS-1$
 		properties.put(Constants.SERVICE_DESCRIPTION, LogMsg.OSGi_Log_Service_IBM_Implementation);
-		properties.put(Constants.SERVICE_PID, LogService.class.getName());
+		properties.put(Constants.SERVICE_PID, LogServiceImpl.class.getName());
 
-		logservice = context.registerService(org.osgi.service.log.LogService.class.getName(), new LogServiceFactory(this), properties);
+		logservice = context.registerService(LogService.class.getName(), new LogServiceFactory(this), properties);
 
 	}
 
