@@ -47,6 +47,8 @@ public class BaseData implements BundleData {
 	protected BundleFile bundleFile;
 	private boolean dirty = false;
 	protected Dictionary manifest;
+	// This field is only used by PDE source lookup, and is set by a hook (bug 126517).  It serves no purpose at runtime.
+	protected String fileName;
 
 	///////////////////// Begin values from Manifest     /////////////////////
 	private String symbolicName;
@@ -439,4 +441,13 @@ public class BaseData implements BundleData {
 		return adaptor.getStorage().getExtractFile(this, path);
 	}
 
+	/**
+	 * This is only used to support PDE source lookup.  The field named &quot;fileName&quot; 
+	 * must be set for PDE to access the absolute path string.
+	 * @param fileName an absolute path string to the base bundle file. 
+	 */
+	// This is only done for PDE source lookup (bug 126517)
+	public void setFileName(String fileName) {
+		this.fileName = fileName;
+	}
 }

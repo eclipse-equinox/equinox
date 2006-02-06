@@ -122,7 +122,7 @@ public class BaseStorageHook implements StorageHook, AdaptorHook{
 		storageHook.bundleData = target;
 		storageHook.generation = in.readInt();
 		storageHook.reference = in.readBoolean();
-		storageHook.fileName = getAbsolute(storageHook.reference, AdaptorUtil.readString(in, false));
+		storageHook.setFileName(getAbsolute(storageHook.reference, AdaptorUtil.readString(in, false)));
 		int nativePathCount = in.readInt();
 		storageHook.nativePaths = nativePathCount > 0 ? new String[nativePathCount] : null;
 		for (int i = 0; i < nativePathCount; i++)
@@ -269,6 +269,8 @@ public class BaseStorageHook implements StorageHook, AdaptorHook{
 
 	public void setFileName(String fileName) {
 		this.fileName = fileName;
+		// This is only done for PDE source lookup (bug 126517)
+		this.bundleData.setFileName(fileName);
 	}
 
 	public void copy(StorageHook storageHook) {
