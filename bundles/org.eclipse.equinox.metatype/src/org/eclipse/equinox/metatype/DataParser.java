@@ -104,8 +104,7 @@ public class DataParser {
 			_dp_xmlReader.setErrorHandler(new MyErrorHandler(System.err));
 			InputStream is = _dp_url.openStream();
 			InputSource isource = new InputSource(is);
-			Logging.log(Logging.DEBUG, "Starting to parse " //$NON-NLS-1$
-					+ _dp_url);
+			Logging.log(Logging.DEBUG, "Starting to parse " + _dp_url); //$NON-NLS-1$					
 			_dp_xmlReader.parse(isource);
 		} catch (ParserConfigurationException pce) {
 			pce.printStackTrace();
@@ -123,7 +122,7 @@ public class DataParser {
 	/*
 	 * Convert String for expected data type.
 	 */
-	private static Object convert(String value, int type) {
+	static Object convert(String value, int type) {
 
 		if (value == null) {
 			return null;
@@ -241,6 +240,7 @@ public class DataParser {
 		 * handled.
 		 */
 		protected void finished() throws SAXException {
+			// do nothing by default
 		}
 
 		public void endElement(String namespaceURI, String localName, String qName) throws SAXException {
@@ -273,6 +273,7 @@ public class DataParser {
 		}
 
 		public void setDocumentLocator(Locator locator) {
+			// do nothing
 		}
 	}
 
@@ -561,7 +562,6 @@ public class DataParser {
 			}
 
 			String ad_defaults_str = atts.getValue(DEFAULT);
-			Vector ad_default_vector = new Vector(7);
 			if (ad_defaults_str == null) {
 				// Not a problem, because DEFAULT is an optional attribute.
 				if (ad_cardinality_val == 0) {
@@ -914,10 +914,9 @@ public class DataParser {
 	public static String getName(String localName, String qName) {
 		if (localName != null && localName.length() > 0) {
 			return localName;
-		} else {
-			int nameSpaceIndex = qName.indexOf(":");
-			return nameSpaceIndex == -1 ? qName : qName.substring(nameSpaceIndex + 1);
 		}
 
+		int nameSpaceIndex = qName.indexOf(":"); //$NON-NLS-1$
+		return nameSpaceIndex == -1 ? qName : qName.substring(nameSpaceIndex + 1);
 	}
 }

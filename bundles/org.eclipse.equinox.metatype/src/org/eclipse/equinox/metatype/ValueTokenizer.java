@@ -14,8 +14,8 @@ import java.util.Vector;
 
 public class ValueTokenizer {
 
-	private static final char SEPARATE = ','; //$NON-NLS-1$
-	private static final char CONTROL = '\\'; //$NON-NLS-1$
+	private static final char SEPARATE = ',';
+	private static final char CONTROL = '\\';
 
 	Vector _value_vector = new Vector(7);
 
@@ -32,14 +32,13 @@ public class ValueTokenizer {
 					if (i + 1 < values_str.length()) {
 						buffer.append(values_str.charAt(++i));
 						continue;
-					} else {
-						// CONTROL char should not occur in last char.
-						Logging.log(Logging.ERROR, this, "ValueTokenizer(String)", //$NON-NLS-1$
-								MetaTypeMsg.TOKENIZER_GOT_INVALID_DATA);
-						// It's an invalid char, but since it's the last one,
-						// just ignore it.
-						continue;
 					}
+					// CONTROL char should not occur in last char.
+					Logging.log(Logging.ERROR, this, "ValueTokenizer(String)", //$NON-NLS-1$
+							MetaTypeMsg.TOKENIZER_GOT_INVALID_DATA);
+					// It's an invalid char, but since it's the last one,
+					// just ignore it.
+					continue;
 				}
 				if (values_str.charAt(i) == SEPARATE) {
 					_value_vector.addElement(buffer.toString().trim());

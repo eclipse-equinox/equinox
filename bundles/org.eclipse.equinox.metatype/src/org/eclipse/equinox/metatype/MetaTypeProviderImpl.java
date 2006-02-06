@@ -30,7 +30,7 @@ public class MetaTypeProviderImpl implements MetaTypeProvider {
 	public static final String META_FILE_EXT = ".XML"; //$NON-NLS-1$
 	public static final String RESOURCE_FILE_CONN = "_"; //$NON-NLS-1$
 	public static final String RESOURCE_FILE_EXT = ".properties"; //$NON-NLS-1$
-	public static final char DIRECTORY_SEP = '/'; //$NON-NLS-1$
+	public static final char DIRECTORY_SEP = '/';
 
 	Bundle _bundle;
 
@@ -142,11 +142,11 @@ public class MetaTypeProviderImpl implements MetaTypeProvider {
 		if (_allPidOCDs.containsKey(pid)) {
 			ocd = (ObjectClassDefinitionImpl) ((ObjectClassDefinitionImpl) _allPidOCDs.get(pid)).clone();
 			ocd.setResourceBundle(locale, _bundle);
-			return (ObjectClassDefinition) ocd;
+			return ocd;
 		} else if (_allFPidOCDs.containsKey(pid)) {
 			ocd = (ObjectClassDefinitionImpl) ((ObjectClassDefinitionImpl) _allFPidOCDs.get(pid)).clone();
 			ocd.setResourceBundle(locale, _bundle);
-			return (ObjectClassDefinition) ocd;
+			return ocd;
 		} else {
 			throw new IllegalArgumentException(NLS.bind(MetaTypeMsg.OCD_ID_NOT_FOUND, pid));
 		}

@@ -23,8 +23,8 @@ import org.osgi.service.metatype.MetaTypeService;
  */
 public class MetaTypeServiceImpl implements MetaTypeService, SynchronousBundleListener {
 
-	private BundleContext _context;
-	private SAXParserFactory _parserFactory;
+	BundleContext _context;
+	SAXParserFactory _parserFactory;
 	private Hashtable _mtps = new Hashtable(7);
 
 	/**
@@ -46,7 +46,7 @@ public class MetaTypeServiceImpl implements MetaTypeService, SynchronousBundleLi
 		try {
 			mti = getMetaTypeProvider(bundle);
 		} catch (IOException e) {
-			Logging.log(Logging.ERROR, "IOException in MetaTypeInformation:getMetaTypeInformation(Bundle bundle)");
+			Logging.log(Logging.ERROR, "IOException in MetaTypeInformation:getMetaTypeInformation(Bundle bundle)"); //$NON-NLS-1$
 			e.printStackTrace();
 			mti = null;
 		}
@@ -61,20 +61,19 @@ public class MetaTypeServiceImpl implements MetaTypeService, SynchronousBundleLi
 		try {
 			Long bID = new Long(b.getBundleId());
 			synchronized (_mtps) {
-				if (_mtps.containsKey(bID)) {
+				if (_mtps.containsKey(bID))
 					return (MetaTypeInformation) _mtps.get(bID);
-				} else {
-					MetaTypeInformation mti = (MetaTypeInformation) AccessController.doPrivileged(new PrivilegedExceptionAction() {
-						public Object run() throws IOException {
-							MetaTypeInformationImpl mti = new MetaTypeInformationImpl(b, _parserFactory);
-							if (!mti._isThereMeta)
-								return new MetaTypeProviderTracker(_context, b);
-							return mti;
-						}
-					});
-					_mtps.put(bID, mti);
-					return mti;
-				}
+
+				MetaTypeInformation mti = (MetaTypeInformation) AccessController.doPrivileged(new PrivilegedExceptionAction() {
+					public Object run() throws IOException {
+						MetaTypeInformationImpl impl = new MetaTypeInformationImpl(b, _parserFactory);
+						if (!impl._isThereMeta)
+							return new MetaTypeProviderTracker(_context, b);
+						return impl;
+					}
+				});
+				_mtps.put(bID, mti);
+				return mti;
 			}
 		} catch (PrivilegedActionException pae) {
 			throw (IOException) pae.getException();

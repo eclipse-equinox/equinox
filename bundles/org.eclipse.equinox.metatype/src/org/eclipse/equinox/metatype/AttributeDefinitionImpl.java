@@ -231,7 +231,7 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Attr
 			for (int index = 0; index < _labels.size(); index++) {
 				String reason = validate((String) _values.get(index));
 				if ((reason != null) && reason.length() > 0) {
-					Logging.log(Logging.WARN, NLS.bind(MetaTypeMsg.INVALID_OPTIONS, (String) _values.get(index), reason));
+					Logging.log(Logging.WARN, NLS.bind(MetaTypeMsg.INVALID_OPTIONS, _values.get(index), reason));
 					_labels.remove(index);
 					_values.remove(index);
 					index--; // Because this one has been removed.
@@ -297,11 +297,10 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Attr
 			if (_dataType != STRING) {
 				// No validation present
 				return null;
-			} else {
-				if (_values.size() < 1)
-					// No validation present
-					return null;
 			}
+			if (_values.size() < 1)
+				// No validation present
+				return null;
 		}
 
 		// Addtional validation for STRING.
@@ -326,11 +325,10 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Attr
 				}
 				// No problems detected
 				return ""; //$NON-NLS-1$
-			} else {
-				// Only when cardinality is '0', it comes here.
-				String return_msg = validateRange(value);
-				return return_msg;
 			}
+			// Only when cardinality is '0', it comes here.
+			String return_msg = validateRange(value);
+			return return_msg;
 		} catch (Throwable t) {
 			return NLS.bind(MetaTypeMsg.EXCEPTION_MESSAGE, t.getClass().getName(), t.getMessage());
 		}
@@ -409,7 +407,7 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Attr
 				break;
 			case BIGINTEGER :
 				try {
-					Class bigIntClazz = Class.forName("java.math.BigInteger");
+					Class bigIntClazz = Class.forName("java.math.BigInteger"); //$NON-NLS-1$
 					Constructor bigIntConstructor = bigIntClazz.getConstructor(new Class[] {String.class});
 					Comparable bigIntObject = (Comparable) bigIntConstructor.newInstance(new Object[] {value});
 					if (_minValue != null && bigIntObject.compareTo(_minValue) < 0) {
@@ -442,7 +440,7 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Attr
 				break;
 			case BIGDECIMAL :
 				try {
-					Class bigDecimalClazz = Class.forName("java.math.BigDecimal");
+					Class bigDecimalClazz = Class.forName("java.math.BigDecimal"); //$NON-NLS-1$
 					Constructor bigDecimalConstructor = bigDecimalClazz.getConstructor(new Class[] {String.class});
 					Comparable bigDecimalObject = (Comparable) bigDecimalConstructor.newInstance(new Object[] {value});
 					if (_minValue != null && bigDecimalObject.compareTo(_minValue) < 0) {
@@ -474,16 +472,15 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Attr
 				}
 				break;
 			case BOOLEAN :
-			// shouldn't ever get boolean - this is a range validation
+				// shouldn't ever get boolean - this is a range validation
 			default :
 				return null;
 		}
 
 		if (rangeError) {
 			return (NLS.bind(MetaTypeMsg.VALUE_OUT_OF_RANGE, value));
-		} else {
-			// No problems detected
-			return (""); //$NON-NLS-1$
 		}
+		// No problems detected
+		return (""); //$NON-NLS-1$
 	}
 }

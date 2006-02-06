@@ -17,9 +17,9 @@ import org.osgi.service.metatype.*;
 import org.osgi.util.tracker.ServiceTracker;
 
 public class MetaTypeProviderTracker implements MetaTypeInformation {
-	public static final String MANAGED_SERVICE = "org.osgi.service.cm.ManagedService";
-	public static final String MANAGED_SERVICE_FACTORY = "org.osgi.service.cm.ManagedServiceFactory";
-	public static final String FILTER_STRING = "(|(" + Constants.OBJECTCLASS + '=' + MANAGED_SERVICE + ")(" + Constants.OBJECTCLASS + '=' + MANAGED_SERVICE_FACTORY + "))";
+	public static final String MANAGED_SERVICE = "org.osgi.service.cm.ManagedService"; //$NON-NLS-1$
+	public static final String MANAGED_SERVICE_FACTORY = "org.osgi.service.cm.ManagedServiceFactory"; //$NON-NLS-1$
+	public static final String FILTER_STRING = "(|(" + Constants.OBJECTCLASS + '=' + MANAGED_SERVICE + ")(" + Constants.OBJECTCLASS + '=' + MANAGED_SERVICE_FACTORY + "))"; //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
 
 	Bundle _bundle;
 	BundleContext _context;

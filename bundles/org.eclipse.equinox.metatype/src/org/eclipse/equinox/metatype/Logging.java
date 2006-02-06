@@ -26,12 +26,6 @@ public class Logging {
 	private static PrintStream out = System.out;
 
 	/*
-	 * Constructor of class Logging.
-	 */
-	public Logging() {
-	}
-
-	/*
 	 * 
 	 */
 	public static void log(int type, String message) {
@@ -47,25 +41,25 @@ public class Logging {
 
 			switch (type) {
 				case TRACE :
-					out.println("[Trace log]");
+					out.println("[Trace log]"); //$NON-NLS-1$
 					break;
 				case DEBUG :
-					out.println("[Debug log]");
+					out.println("[Debug log]"); //$NON-NLS-1$
 					break;
 				case WARN :
-					out.println("[Warning log]");
+					out.println("[Warning log]"); //$NON-NLS-1$
 					break;
 				default :
-					out.println("[Error log]");
+					out.println("[Error log]"); //$NON-NLS-1$
 			}
 
 			if (obj != null) {
-				out.println("\tObject:  " + obj.getClass().getName());
+				out.println("\tObject:  " + obj.getClass().getName()); //$NON-NLS-1$
 			}
 			if (method != null) {
-				out.println("\tMethod:  " + method);
+				out.println("\tMethod:  " + method); //$NON-NLS-1$
 			}
-			out.println("\tMessage: " + message);
+			out.println("\tMessage: " + message); //$NON-NLS-1$
 		}
 	}
 

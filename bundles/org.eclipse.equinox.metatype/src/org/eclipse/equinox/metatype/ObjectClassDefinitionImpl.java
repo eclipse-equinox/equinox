@@ -26,7 +26,7 @@ public class ObjectClassDefinitionImpl extends LocalizationElement implements Ob
 
 	public static final int PID = 0;
 	public static final int FPID = 1;
-	public static final char LOCALE_SEP = '_'; //$NON-NLS-1$
+	public static final char LOCALE_SEP = '_';
 
 	String _name;
 	String _id;
@@ -187,9 +187,8 @@ public class ObjectClassDefinitionImpl extends LocalizationElement implements Ob
 		URL[] urls = FragmentUtils.findEntries(b, getLocalized(_icon.getIconName()));
 		if (urls != null && urls.length > 0) {
 			return urls[0].openStream();
-		} else {
-			return null;
 		}
+		return null;
 	}
 
 	/**
@@ -312,7 +311,7 @@ public class ObjectClassDefinitionImpl extends LocalizationElement implements Ob
 		URL[] urls = null;
 
 		for (int idx = 0; (idx < searchCandidates.length) && (resourceUrl == null); idx++) {
-			urls = (searchCandidates[idx] == null ? null : FragmentUtils.findEntries(bundle, resourceBase + searchCandidates[idx] + MetaTypeInformationImpl.RESOURCE_FILE_EXT));
+			urls = (searchCandidates[idx] == null ? null : FragmentUtils.findEntries(bundle, resourceBase + searchCandidates[idx] + MetaTypeProviderImpl.RESOURCE_FILE_EXT));
 			if (urls != null && urls.length > 0)
 				resourceUrl = urls[0];
 		}

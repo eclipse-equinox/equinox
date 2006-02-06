@@ -29,9 +29,9 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 	protected final static String saxFactoryClazz = "javax.xml.parsers.SAXParserFactory"; //$NON-NLS-1$
 
 	private ServiceTracker _parserTracker;
-	private BundleContext _context;
-	private ServiceRegistration _mtsReg;
-	private MetaTypeServiceImpl _mts = null;
+	BundleContext _context;
+	ServiceRegistration _mtsReg;
+	MetaTypeServiceImpl _mts = null;
 
 	/**
 	 * The current SaxParserFactory being used by the WebContainer
@@ -55,7 +55,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 		_parserTracker.open();
 		ServiceReference ref = context.getServiceReference(PackageAdmin.class.getName());
 		FragmentUtils.packageAdmin = ref == null ? null : (PackageAdmin) context.getService(ref);
-		Logging.debug("====== Meta Type Service starting ! =====");
+		Logging.debug("====== Meta Type Service starting ! ====="); //$NON-NLS-1$
 	}
 
 	/*
@@ -65,7 +65,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 	 */
 	public void stop(BundleContext context) throws Exception {
 
-		Logging.debug("====== Meta Type Service stoping ! =====");
+		Logging.debug("====== Meta Type Service stoping ! ====="); //$NON-NLS-1$
 		_parserTracker.close();
 		_parserTracker = null;
 		FragmentUtils.packageAdmin = null;
@@ -97,7 +97,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 	 *      java.lang.Object)
 	 */
 	public void modifiedService(ServiceReference ref, Object object) {
-
+		// do nothing
 	}
 
 	/*

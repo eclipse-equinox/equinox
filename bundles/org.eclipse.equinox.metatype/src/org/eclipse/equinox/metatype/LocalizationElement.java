@@ -15,7 +15,7 @@ import java.util.ResourceBundle;
 
 public class LocalizationElement {
 
-	public static final char KEY_SIGN = '%'; //$NON-NLS-1$
+	public static final char KEY_SIGN = '%';
 	String _localization = null;
 	ResourceBundle _rb;
 
