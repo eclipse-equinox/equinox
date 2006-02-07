@@ -199,13 +199,13 @@ public class ClasspathManager {
 	public ClasspathEntry getClasspath(String cp, BaseData sourcedata, ProtectionDomain sourcedomain) {
 		BundleFile bundlefile = null;
 		File file;
-		// check for internal library jars
-		if ((file = sourcedata.getBundleFile().getFile(cp, false)) != null)
-			bundlefile = createBundleFile(file, sourcedata);
+		BundleEntry cpEntry = sourcedata.getBundleFile().getEntry(cp);
 		// check for internal library directories in a bundle jar file
-		if (bundlefile == null && sourcedata.getBundleFile().containsDir(cp))
+		if (cpEntry != null && cpEntry.getName().endsWith("/")) //$NON-NLS-1$
 			bundlefile = new NestedDirBundleFile(sourcedata.getBundleFile(), cp);
-		// if in dev mode, try using the cp as an absolute path
+		// check for internal library jars
+		else if ((file = sourcedata.getBundleFile().getFile(cp, false)) != null)
+			bundlefile = createBundleFile(file, sourcedata);
 		if (bundlefile != null)
 			return createClassPathEntry(bundlefile, sourcedomain);
 		return null;
