@@ -1117,21 +1117,19 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 					throw new BundleException(NLS.bind(Msg.BUNDLE_STATE_CHANGE_EXCEPTION, getBundleData().getLocation(), stateChanging.getName()));
 				}
 				try {
+					long start = 0;
 					if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 						Debug.println(" Waiting for state to change in bundle " + this); //$NON-NLS-1$
-					}
-					long start = 0;
-					if (Debug.DEBUG)
 						start = System.currentTimeMillis();
+					}
 					statechangeLock.wait(5000); /*
 					 * wait for other thread to
 					 * finish changing state
 					 */
-					if (Debug.DEBUG) {
+					if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 						long end = System.currentTimeMillis();
-						if (end - start > 0) {
+						if (end - start > 0)
 							System.out.println("Waiting... : " + getSymbolicName() + ' ' + (end - start)); //$NON-NLS-1$
-						}
 					}
 				} catch (InterruptedException e) {
 					//Nothing to do
