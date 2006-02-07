@@ -22,6 +22,10 @@ import org.osgi.service.useradmin.UserAdminEvent;
 
 public class UserAdminHashtable extends Hashtable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -397030865421289240L;
 	protected Role role;
 	protected int propertyType;
 	protected UserAdmin userAdmin;
@@ -120,10 +124,10 @@ public class UserAdminHashtable extends Hashtable {
 	}
 
 	public synchronized void clear() {
-		Enumeration enum = keys();
+		Enumeration e = keys();
 
-		while (enum.hasMoreElements()) {
-			String name = (String) enum.nextElement();
+		while (e.hasMoreElements()) {
+			String name = (String) e.nextElement();
 
 			switch (propertyType) {
 				case PROPERTIES :

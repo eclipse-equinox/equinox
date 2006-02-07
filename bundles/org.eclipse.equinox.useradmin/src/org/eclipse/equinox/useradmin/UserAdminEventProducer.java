@@ -125,8 +125,6 @@ public class UserAdminEventProducer extends ServiceTracker implements EventDispa
 	 * can complete the delivery of the event to the listener.
 	 */
 	public void dispatchEvent(Object listener, Object listenerObject, int eventAction, Object eventObject) {
-		ServiceReference userAdmin = this.userAdmin;
-
 		if (userAdmin == null) {
 			return;
 		}
@@ -135,7 +133,7 @@ public class UserAdminEventProducer extends ServiceTracker implements EventDispa
 		try {
 			ual.roleChanged((UserAdminEvent) eventObject);
 		} catch (Throwable t) {
-			log.log(userAdmin, log.LOG_WARNING, UserAdminMsg.Event_Delivery_Exception, t);
+			log.log(userAdmin, LogService.LOG_WARNING, UserAdminMsg.Event_Delivery_Exception, t);
 		}
 	}
 }

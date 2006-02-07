@@ -99,10 +99,10 @@ public class Authorization implements org.osgi.service.useradmin.Authorization {
 	 * @return <code>true</code> if this Authorization context implies the
 	 * specified role, otherwise <code>false</code>.
 	 */
-	public boolean hasRole(String name) {
+	public boolean hasRole(String name_) {
 		useradmin.checkAlive();
 		synchronized (useradmin) {
-			Role checkRole = (org.eclipse.equinox.useradmin.Role) useradmin.getRole(name);
+			Role checkRole = (org.eclipse.equinox.useradmin.Role) useradmin.getRole(name_);
 			if (checkRole == null) {
 				return (false);
 			}
@@ -128,11 +128,11 @@ public class Authorization implements org.osgi.service.useradmin.Authorization {
 			for (int i = 0; i < length; i++) {
 				Role role = (Role) useradmin.roles.elementAt(i);
 				if (role.isImpliedBy(user, new Vector())) {
-					String name = role.getName();
+					String roleName = role.getName();
 					//exclude user.anyone from the list
-					if (!name.equals(Role.anyoneString))
+					if (!roleName.equals(Role.anyoneString))
 					{
-						result.addElement(name);
+						result.addElement(roleName);
 					}
 				}
 			}

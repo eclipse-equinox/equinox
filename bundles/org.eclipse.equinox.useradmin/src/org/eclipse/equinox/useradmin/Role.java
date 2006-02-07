@@ -72,7 +72,7 @@ public class Role implements org.osgi.service.useradmin.Role {
 	 */
 	public int getType() {
 		useradmin.checkAlive();
-		return (Role.ROLE);
+		return (org.osgi.service.useradmin.Role.ROLE);
 	}
 
 	/**

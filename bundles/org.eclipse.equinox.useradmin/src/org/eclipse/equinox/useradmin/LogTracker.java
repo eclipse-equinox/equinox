@@ -78,7 +78,7 @@ public class LogTracker extends ServiceTracker implements LogService {
 				if (service != null) {
 					try {
 						service.log(reference, level, message, exception);
-					} catch (Exception e) {
+					} catch (Exception e) { // do nothing
 					}
 				}
 			}

@@ -36,7 +36,6 @@ import java.util.Vector;
 public class User extends Role implements org.osgi.service.useradmin.User {
 
 	protected UserAdminHashtable credentials;
-	protected UserAdmin useradmin;
 
 	protected User(String name, UserAdmin useradmin) {
 		super(name, useradmin);
@@ -128,7 +127,7 @@ public class User extends Role implements org.osgi.service.useradmin.User {
 	 */
 	public int getType() {
 		useradmin.checkAlive();
-		return Role.USER;
+		return org.osgi.service.useradmin.Role.USER;
 	}
 
 	//A user always implies itself

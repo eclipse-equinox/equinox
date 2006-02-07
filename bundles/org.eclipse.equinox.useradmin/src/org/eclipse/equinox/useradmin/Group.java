@@ -86,7 +86,6 @@ public class Group extends User implements org.osgi.service.useradmin.Group {
 
 	protected Vector requiredMembers;
 	protected Vector basicMembers;
-	protected UserAdmin useradmin;
 
 	protected Group(String name, UserAdmin useradmin) {
 		super(name, useradmin);
@@ -256,7 +255,7 @@ public class Group extends User implements org.osgi.service.useradmin.Group {
 	 */
 	public int getType() {
 		useradmin.checkAlive();
-		return (Role.GROUP);
+		return (org.osgi.service.useradmin.Role.GROUP);
 	}
 
 	protected boolean isImpliedBy(Role role, Vector checkLoop) {

@@ -33,17 +33,15 @@ public class Activator implements BundleActivator, ServiceFactory, ServiceTracke
 	protected BundleContext context;
 	protected ServiceTracker prefsTracker;
 
-	/** Need to have a public default constructor so that the BundleActivator
-	 * can be instantiated by Class.newInstance().
-	 */
-	public Activator() {
-	}
-
+    public Activator() {
+    	//a public constructor is required for a BundleActivator
+    }
+	
 	/**
 	 * Required by BundleActivator Interface.
 	 */
-	public void start(BundleContext context) throws Exception {
-		this.context = context;
+	public void start(BundleContext context_) throws Exception {
+		this.context = context_;
 		prefsTracker = new ServiceTracker(context, PreferencesService.class.getName(), this);
 		prefsTracker.open();
 	}
@@ -51,7 +49,7 @@ public class Activator implements BundleActivator, ServiceFactory, ServiceTracke
 	/**
 	 * Required by BundleActivator Interface.
 	 */
-	public void stop(BundleContext context) throws Exception {
+	public void stop(BundleContext context_) throws Exception {
 		prefsTracker.close();
 		if(registration != null)
 		{
@@ -77,13 +75,13 @@ public class Activator implements BundleActivator, ServiceFactory, ServiceTracke
 		userAdmin.setServiceReference(registration.getReference());
 	}
 
-	public Object getService(Bundle bundle, ServiceRegistration registration) {
-		userAdmin.setServiceReference(registration.getReference());
-
+	public Object getService(Bundle bundle, ServiceRegistration registration_) {
+		userAdmin.setServiceReference(registration_.getReference());
 		return userAdmin;
 	}
 
-	public void ungetService(Bundle bundle, ServiceRegistration registration, Object service) {
+	public void ungetService(Bundle bundle, ServiceRegistration registration_, Object service) {
+	   //do nothing
 	}
 
 	public Object addingService(ServiceReference reference) {
@@ -100,7 +98,7 @@ public class Activator implements BundleActivator, ServiceFactory, ServiceTracke
 	}
 
 	public void modifiedService(ServiceReference reference, Object service) {
-
+            // do nothing
 	}
 
 	public void removedService(ServiceReference reference, Object service) {

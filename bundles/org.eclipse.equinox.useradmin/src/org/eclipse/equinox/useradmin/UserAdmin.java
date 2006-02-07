@@ -10,8 +10,15 @@
  *******************************************************************************/
 package org.eclipse.equinox.useradmin;
 
-import java.util.*;
-import org.osgi.framework.*;
+import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.Vector;
+
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Filter;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.log.LogService;
 import org.osgi.service.prefs.BackingStoreException;
 import org.osgi.service.prefs.PreferencesService;
 import org.osgi.service.useradmin.UserAdminEvent;
@@ -64,7 +71,7 @@ public class UserAdmin implements org.osgi.service.useradmin.UserAdmin {
 			userAdminStore = new UserAdminStore(preferencesService, this, log);
 			userAdminStore.init();
 		} catch (Exception e) {
-			log.log(log.LOG_ERROR, UserAdminMsg.Backing_Store_Read_Exception, e);
+			log.log(LogService.LOG_ERROR, UserAdminMsg.Backing_Store_Read_Exception, e);
 			throw e;
 		}
 	}
@@ -102,7 +109,7 @@ public class UserAdmin implements org.osgi.service.useradmin.UserAdmin {
 		if (name == null) {
 			throw (new IllegalArgumentException(UserAdminMsg.CREATE_NULL_ROLE_EXCEPTION));
 		}
-		if ((type != Role.GROUP) && (type != Role.USER)) {
+		if ((type != org.osgi.service.useradmin.Role.GROUP) && (type != org.osgi.service.useradmin.Role.USER)) {
 			throw (new IllegalArgumentException(UserAdminMsg.CREATE_INVALID_TYPE_ROLE_EXCEPTION));
 		}
 		//if the role already exists, return null
@@ -117,11 +124,11 @@ public class UserAdmin implements org.osgi.service.useradmin.UserAdmin {
 
 	protected org.osgi.service.useradmin.Role createRole(String name, int type, boolean store) {
 		Role newRole = null;
-		if (type == Role.ROLE) {
+		if (type == org.osgi.service.useradmin.Role.ROLE) {
 			newRole = new Role(name, this);
-		} else if (type == Role.USER) {
+		} else if (type == org.osgi.service.useradmin.Role.USER) {
 			newRole = new User(name, this);
-		} else if (type == Role.GROUP) {
+		} else if (type == org.osgi.service.useradmin.Role.GROUP) {
 			newRole = new Group(name, this);
 		} else //unknown type
 		{
@@ -137,7 +144,7 @@ public class UserAdmin implements org.osgi.service.useradmin.UserAdmin {
 				eventProducer.generateEvent(UserAdminEvent.ROLE_CREATED, newRole);
 			}
 		}
-		if (type == Role.GROUP || type == Role.USER) {
+		if (type == org.osgi.service.useradmin.Role.GROUP || type == org.osgi.service.useradmin.Role.USER) {
 			users.addElement(newRole);
 		}
 		roles.addElement(newRole);

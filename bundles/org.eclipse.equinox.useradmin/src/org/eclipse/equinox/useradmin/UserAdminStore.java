@@ -10,12 +10,17 @@
  *******************************************************************************/
 package org.eclipse.equinox.useradmin;
 
-import java.security.*;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
+
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.log.LogService;
-import org.osgi.service.prefs.*;
+import org.osgi.service.prefs.BackingStoreException;
+import org.osgi.service.prefs.Preferences;
+import org.osgi.service.prefs.PreferencesService;
 
 /*
  *  UserAdminStore is responsible for managing the persistence data of the useradmin
@@ -72,7 +77,7 @@ public class UserAdminStore {
 				}
 			});
 		} catch (PrivilegedActionException ex) {
-			log.log(log.LOG_ERROR, UserAdminMsg.Backing_Store_Write_Exception, ex);
+			log.log(LogService.LOG_ERROR, UserAdminMsg.Backing_Store_Write_Exception, ex);
 			throw ((BackingStoreException) ex.getException());
 		}
 	}
@@ -88,7 +93,7 @@ public class UserAdminStore {
 				}
 			});
 		} catch (PrivilegedActionException ex) {
-			log.log(log.LOG_ERROR, UserAdminMsg.Backing_Store_Write_Exception, ex);
+			log.log(LogService.LOG_ERROR, UserAdminMsg.Backing_Store_Write_Exception, ex);
 			throw ((BackingStoreException) ex.getException());
 		}
 	}
@@ -104,7 +109,7 @@ public class UserAdminStore {
 				}
 			});
 		} catch (PrivilegedActionException ex) {
-			log.log(log.LOG_ERROR, UserAdminMsg.Backing_Store_Write_Exception, ex);
+			log.log(LogService.LOG_ERROR, UserAdminMsg.Backing_Store_Write_Exception, ex);
 			throw ((BackingStoreException) ex.getException());
 		}
 	}
@@ -125,7 +130,7 @@ public class UserAdminStore {
 				}
 			});
 		} catch (PrivilegedActionException ex) {
-			log.log(log.LOG_ERROR, UserAdminMsg.Backing_Store_Write_Exception, ex);
+			log.log(LogService.LOG_ERROR, UserAdminMsg.Backing_Store_Write_Exception, ex);
 			throw ((BackingStoreException) ex.getException());
 		}
 	}
@@ -141,7 +146,7 @@ public class UserAdminStore {
 				}
 			});
 		} catch (PrivilegedActionException ex) {
-			log.log(log.LOG_ERROR, UserAdminMsg.Backing_Store_Write_Exception, ex);
+			log.log(LogService.LOG_ERROR, UserAdminMsg.Backing_Store_Write_Exception, ex);
 			throw ((BackingStoreException) ex.getException());
 		}
 	}
@@ -157,7 +162,7 @@ public class UserAdminStore {
 				}
 			});
 		} catch (PrivilegedActionException ex) {
-			log.log(log.LOG_ERROR, UserAdminMsg.Backing_Store_Write_Exception, ex);
+			log.log(LogService.LOG_ERROR, UserAdminMsg.Backing_Store_Write_Exception, ex);
 			throw ((BackingStoreException) ex.getException());
 		}
 	}
@@ -179,7 +184,7 @@ public class UserAdminStore {
 				}
 			});
 		} catch (PrivilegedActionException ex) {
-			log.log(log.LOG_ERROR, NLS.bind(UserAdminMsg.Backing_Store_Write_Exception, new Object[] {NLS.bind(UserAdminMsg.adding_Credential_to__15, role.getName())}), ex);
+			log.log(LogService.LOG_ERROR, NLS.bind(UserAdminMsg.Backing_Store_Write_Exception, new Object[] {NLS.bind(UserAdminMsg.adding_Credential_to__15, role.getName())}), ex);
 			throw ((BackingStoreException) ex.getException());
 		}
 
@@ -196,7 +201,7 @@ public class UserAdminStore {
 				}
 			});
 		} catch (PrivilegedActionException ex) {
-			log.log(log.LOG_ERROR, UserAdminMsg.Backing_Store_Write_Exception, ex);
+			log.log(LogService.LOG_ERROR, UserAdminMsg.Backing_Store_Write_Exception, ex);
 			throw ((BackingStoreException) ex.getException());
 		}
 	}
@@ -212,7 +217,7 @@ public class UserAdminStore {
 				}
 			});
 		} catch (PrivilegedActionException ex) {
-			log.log(log.LOG_ERROR, NLS.bind(UserAdminMsg.Backing_Store_Write_Exception, new Object[] {NLS.bind(UserAdminMsg.adding_member__18, role.getName(), group.getName())}), ex);
+			log.log(LogService.LOG_ERROR, NLS.bind(UserAdminMsg.Backing_Store_Write_Exception, new Object[] {NLS.bind(UserAdminMsg.adding_member__18, role.getName(), group.getName())}), ex);
 			throw ((BackingStoreException) ex.getException());
 		}
 	}
@@ -228,7 +233,7 @@ public class UserAdminStore {
 				}
 			});
 		} catch (PrivilegedActionException ex) {
-			log.log(log.LOG_ERROR, NLS.bind(UserAdminMsg.Backing_Store_Write_Exception, new Object[] {NLS.bind(UserAdminMsg.adding_required_member__21, role.getName(), group.getName())}), ex);
+			log.log(LogService.LOG_ERROR, NLS.bind(UserAdminMsg.Backing_Store_Write_Exception, new Object[] {NLS.bind(UserAdminMsg.adding_required_member__21, role.getName(), group.getName())}), ex);
 			throw ((BackingStoreException) ex.getException());
 		}
 	}
@@ -244,7 +249,7 @@ public class UserAdminStore {
 				}
 			});
 		} catch (PrivilegedActionException ex) {
-			log.log(log.LOG_ERROR, NLS.bind(UserAdminMsg.Backing_Store_Write_Exception, new Object[] {NLS.bind(UserAdminMsg.removing_member__24, role.getName(), group.getName())}), ex);
+			log.log(LogService.LOG_ERROR, NLS.bind(UserAdminMsg.Backing_Store_Write_Exception, new Object[] {NLS.bind(UserAdminMsg.removing_member__24, role.getName(), group.getName())}), ex);
 			throw ((BackingStoreException) ex.getException());
 		}
 	}
@@ -272,7 +277,7 @@ public class UserAdminStore {
 		if (type == Integer.MIN_VALUE) {
 			String errorString = NLS.bind(UserAdminMsg.Backing_Store_Read_Exception, new Object[] {NLS.bind(UserAdminMsg.Unable_to_load_role__27, node.name())});
 			BackingStoreException ex = new BackingStoreException(errorString);
-			log.log(log.LOG_ERROR, errorString, ex);
+			log.log(LogService.LOG_ERROR, errorString, ex);
 			throw (ex);
 		}
 		if (role == null) {
@@ -290,7 +295,7 @@ public class UserAdminStore {
 		}
 
 		//load credentials
-		if (type == Role.USER || type == Role.GROUP) {
+		if (type == org.osgi.service.useradmin.Role.USER || type == org.osgi.service.useradmin.Role.GROUP) {
 			Object credValue;
 			Preferences credNode = node.node(credentialsNode);
 			keys = credNode.keys();
@@ -302,7 +307,7 @@ public class UserAdminStore {
 		}
 
 		//load group members
-		if (type == Role.GROUP) {
+		if (type == org.osgi.service.useradmin.Role.GROUP) {
 			Preferences memberNode = node.node(membersNode);
 			keys = memberNode.keys();
 			for (int i = 0; i < keys.length; i++) {
@@ -328,7 +333,7 @@ public class UserAdminStore {
 			rootNode = null;
 			preferencesService = null;
 		} catch (BackingStoreException ex) {
-			log.log(log.LOG_ERROR, UserAdminMsg.Backing_Store_Write_Exception, ex);
+			log.log(LogService.LOG_ERROR, UserAdminMsg.Backing_Store_Write_Exception, ex);
 		}
 	}
 
@@ -336,7 +341,7 @@ public class UserAdminStore {
 		Role role = null;
 		if (!rootNode.nodeExists(Role.anyoneString)) {
 			//If the user.anyone role is not present, create it
-			role = (Role) useradmin.createRole(Role.anyoneString, Role.ROLE, true);
+			role = (Role) useradmin.createRole(Role.anyoneString, org.osgi.service.useradmin.Role.ROLE, true);
 		}
 		/* modified to solve defect 95982 */
 		if (role != null)
