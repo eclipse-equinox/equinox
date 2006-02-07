@@ -20,16 +20,16 @@ import org.eclipse.osgi.util.NLS;
 public class Locker_JavaNio implements Locker {
 	private File lockFile;
 	private FileLock fileLock;
-	private FileOutputStream fileStream;
+	private RandomAccessFile raFile;
 
 	public Locker_JavaNio(File lockFile) {
 		this.lockFile = lockFile;
 	}
 
 	public synchronized boolean lock() throws IOException {
-		fileStream = new FileOutputStream(lockFile, true);
+		raFile = new RandomAccessFile(lockFile, "rw"); //$NON-NLS-1$
 		try {
-			fileLock = fileStream.getChannel().tryLock();
+			fileLock = raFile.getChannel().tryLock();
 		} catch (IOException ioe) {
 			// print exception if debugging
 			if (BasicLocation.DEBUG)
@@ -40,8 +40,8 @@ public class Locker_JavaNio implements Locker {
 		}
 		if (fileLock != null)
 			return true;
-		fileStream.close();
-		fileStream = null;
+		raFile.close();
+		raFile = null;
 		return false;
 	}
 
@@ -54,13 +54,13 @@ public class Locker_JavaNio implements Locker {
 			}
 			fileLock = null;
 		}
-		if (fileStream != null) {
+		if (raFile != null) {
 			try {
-				fileStream.close();
+				raFile.close();
 			} catch (IOException e) {
 				//don't complain, we're making a best effort to clean up
 			}
-			fileStream = null;
+			raFile = null;
 		}
 	}
 }
