@@ -46,10 +46,9 @@ public class PreferencesOSGiUtils {
 	 */
 	private PreferencesOSGiUtils() {
 		super();
-		initServices();
 	}
 
-	private void initServices() {
+	void openServices() {
 		BundleContext context = Activator.getContext();
 		if (context == null) {
 			PrefsMessages.message("PreferencesOSGiUtils called before plugin started"); //$NON-NLS-1$
@@ -70,10 +69,9 @@ public class PreferencesOSGiUtils {
 
 		// locations
 
-		final String FILTER_PREFIX = "(&(objectClass=org.eclipse.osgi.service.datalocation.Location)(type="; //$NON-NLS-1$
 		Filter filter = null;
 		try {
-			filter = context.createFilter(FILTER_PREFIX + PROP_CONFIG_AREA + "))"); //$NON-NLS-1$
+			filter = context.createFilter(Location.CONFIGURATION_FILTER);
 		} catch (InvalidSyntaxException e) {
 			// ignore this.  It should never happen as we have tested the above format.
 		}
@@ -81,7 +79,7 @@ public class PreferencesOSGiUtils {
 		configurationLocationTracker.open();
 
 		try {
-			filter = context.createFilter(FILTER_PREFIX + PROP_INSTANCE_AREA + "))"); //$NON-NLS-1$
+			filter = context.createFilter(Location.INSTANCE_FILTER);
 		} catch (InvalidSyntaxException e) {
 			// ignore this.  It should never happen as we have tested the above format.
 		}

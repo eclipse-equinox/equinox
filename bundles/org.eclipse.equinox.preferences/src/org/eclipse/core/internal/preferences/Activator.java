@@ -12,6 +12,7 @@ package org.eclipse.core.internal.preferences;
 
 import java.util.Hashtable;
 
+import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.eclipse.osgi.service.environment.EnvironmentInfo;
 import org.osgi.framework.*;
@@ -30,7 +31,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 	 * available
 	 */
 	private ServiceTracker registryServiceTracker;
-	
+
 	/**
 	 * The bundle associated this plug-in
 	 */
@@ -45,14 +46,15 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 	 * This plugin provides the OSGi Preferences service.
 	 */
 	private ServiceRegistration osgiPreferencesService;
-	
+
 	/**
 	 * This method is called upon plug-in activation
 	 */
 	public void start(BundleContext context) throws Exception {
 		bundleContext = context;
 		processCommandLine();
-		registryServiceTracker = new ServiceTracker(context,"org.eclipse.core.runtime.IExtensionRegistry",this);
+		PreferencesOSGiUtils.getDefault().openServices();
+		registryServiceTracker = new ServiceTracker(context, IExtensionRegistry.class.getName(), this);
 		registryServiceTracker.open();
 	}
 
@@ -79,7 +81,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 		if (preferencesService == null) {
 			registerServices();
 			//return the registry service so we track it
-			return bundleContext.getService(reference); 
+			return bundleContext.getService(reference);
 		}
 		return null;
 	}
@@ -94,7 +96,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 		}
 		if (osgiPreferencesService != null) {
 			osgiPreferencesService.unregister();
-			osgiPreferencesService = null;		
+			osgiPreferencesService = null;
 		}
 	}
 
