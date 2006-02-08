@@ -14,6 +14,10 @@ import java.util.*;
 
 public class ReadOnlyDictionary extends Hashtable {
 
+	/**
+	 * Serial Version UID
+	 */
+	private static final long serialVersionUID = 2878360633574220743L;
 	private Dictionary dictionary;
 
 	public ReadOnlyDictionary(Dictionary dictionary) {

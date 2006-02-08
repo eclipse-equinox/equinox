@@ -42,8 +42,8 @@ public class WireAdminStore {
 		this.log = log;
 	}
 
-	protected void init(PreferencesService preferencesService) throws BackingStoreException {
-		this.preferencesService = preferencesService;
+	protected void init(PreferencesService preferencesService_) throws BackingStoreException {
+		this.preferencesService = preferencesService_;
 	}
 
 	protected void addWire(final Wire wire, final Dictionary properties) throws BackingStoreException {
@@ -149,7 +149,7 @@ public class WireAdminStore {
 		}
 	}
 
-	private void storeProperties(Dictionary properties, Preferences node) throws BackingStoreException {
+	protected void storeProperties(Dictionary properties, Preferences node) throws BackingStoreException {
 		Enumeration e = properties.keys();
 		while (e.hasMoreElements()) {
 			String key = (String) e.nextElement();

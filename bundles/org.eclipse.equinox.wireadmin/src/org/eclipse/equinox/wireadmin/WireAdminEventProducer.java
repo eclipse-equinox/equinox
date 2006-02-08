@@ -150,7 +150,7 @@ public class WireAdminEventProducer extends ServiceTracker implements EventDispa
 			wal.wireAdminEvent(event);
 
 		} catch (Throwable t) {
-			log.log(wireAdminRef, log.LOG_WARNING, WireAdminMsg.WIREADMIN_EVENT_DISPATCH_ERROR, t);
+			log.log(wireAdminRef, LogService.LOG_WARNING, WireAdminMsg.WIREADMIN_EVENT_DISPATCH_ERROR, t);
 		}
 
 	}

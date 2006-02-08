@@ -46,7 +46,7 @@ public class ConsumersCustomizer implements ServiceTrackerCustomizer {
 	 * @see ServiceTrackerCustomizer#modifiedService(ServiceReference, Object)
 	 */
 	public void modifiedService(ServiceReference reference, Object service) {
-
+		//do nothing
 	}
 
 	/**

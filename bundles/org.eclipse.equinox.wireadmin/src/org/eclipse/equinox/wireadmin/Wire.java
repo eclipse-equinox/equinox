@@ -379,7 +379,8 @@ public class Wire implements org.osgi.service.wireadmin.Wire {
 
 	protected void setProducerProperties(ServiceReference reference) {
 		producerFlavors = (Class[]) reference.getProperty(WireConstants.WIREADMIN_PRODUCER_FLAVORS);
-		String[] keys = reference.getPropertyKeys();
+		//TODO - this method need to be completed
+		//String[] keys = reference.getPropertyKeys();
 		//need to find out if WIREADMIN_PRODUCER_FILTERS key exists
 		if (reference.getProperty(WireConstants.WIREADMIN_PRODUCER_FILTERS) != null) {
 			producerFilterExists = true;

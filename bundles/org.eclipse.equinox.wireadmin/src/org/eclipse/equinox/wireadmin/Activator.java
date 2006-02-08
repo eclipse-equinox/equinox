@@ -17,7 +17,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 
-	private String wireadminString = "org.osgi.service.wireadmin.WireAdmin";
+	private String wireadminString = "org.osgi.service.wireadmin.WireAdmin"; //$NON-NLS-1$
 	private WireAdmin wireadmin;
 	private ServiceRegistration wireadminReg;
 	private PreferencesService preferencesService;
@@ -27,9 +27,9 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 	/**
 	 * @see BundleActivator#start(BundleContext)
 	 */
-	public void start(BundleContext context) throws Exception {
+	public void start(BundleContext context_) throws Exception {
 
-		this.context = context;
+		this.context = context_;
 		prefsTracker = new ServiceTracker(context, PreferencesService.class.getName(), this);
 		prefsTracker.open();
 	}
@@ -37,7 +37,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 	/**
 	 * @see BundleActivator#stop(BundleContext)
 	 */
-	public void stop(BundleContext context) throws Exception {
+	public void stop(BundleContext context_) throws Exception {
 		if(wireadminReg != null)
 		{
 			wireadminReg.unregister();
@@ -56,7 +56,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 		return null; //we don't want to track a service we are not using
 	}
 
-	public void modifiedService(ServiceReference reference, Object service) {
+	public void modifiedService(ServiceReference reference, Object service) { //do nothing
 
 	}
 
