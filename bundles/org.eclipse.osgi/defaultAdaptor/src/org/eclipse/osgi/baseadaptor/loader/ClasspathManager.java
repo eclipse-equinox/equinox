@@ -442,64 +442,17 @@ public class ClasspathManager {
 		if (entry == null)
 			return null;
 
-		InputStream in;
+		byte[] classbytes;
 		try {
-			in = entry.getInputStream();
+			classbytes = entry.getBytes();
 		} catch (IOException e) {
+			if (Debug.DEBUG && Debug.DEBUG_LOADER)
+				Debug.println("  IOException reading " + filename + " from " + data); //$NON-NLS-1$ //$NON-NLS-2$
 			return null;
 		}
 
-		int length = (int) entry.getSize();
-		byte[] classbytes;
-		int bytesread = 0;
-		int readcount;
-		if (Debug.DEBUG && Debug.DEBUG_LOADER)
-			Debug.println("  about to read " + length + " bytes from " + filename); //$NON-NLS-1$ //$NON-NLS-2$
-
-		try {
-			try {
-				if (length > 0) {
-					classbytes = new byte[length];
-					readloop: for (; bytesread < length; bytesread += readcount) {
-						readcount = in.read(classbytes, bytesread, length - bytesread);
-						if (readcount <= 0) /* if we didn't read anything */
-							break readloop; /* leave the loop */
-					}
-				} else /* BundleEntry does not know its own length! */{
-					length = BUF_SIZE;
-					classbytes = new byte[length];
-					readloop: while (true) {
-						for (; bytesread < length; bytesread += readcount) {
-							readcount = in.read(classbytes, bytesread, length - bytesread);
-							if (readcount <= 0) /* if we didn't read anything */
-								break readloop; /* leave the loop */
-						}
-						byte[] oldbytes = classbytes;
-						length += BUF_SIZE;
-						classbytes = new byte[length];
-						System.arraycopy(oldbytes, 0, classbytes, 0, bytesread);
-					}
-				}
-				if (classbytes.length > bytesread) {
-					byte[] oldbytes = classbytes;
-					classbytes = new byte[bytesread];
-					System.arraycopy(oldbytes, 0, classbytes, 0, bytesread);
-				}
-			} catch (IOException e) {
-				if (Debug.DEBUG && Debug.DEBUG_LOADER)
-					Debug.println("  IOException reading " + filename + " from " + data); //$NON-NLS-1$ //$NON-NLS-2$
-				return null;
-			}
-		} finally {
-			try {
-				in.close();
-			} catch (IOException ee) {
-				// nothing to do here
-			}
-		}
-
 		if (Debug.DEBUG && Debug.DEBUG_LOADER) {
-			Debug.println("  read " + bytesread + " bytes from " + filename); //$NON-NLS-1$ //$NON-NLS-2$
+			Debug.println("  read " + classbytes.length + " bytes from " + filename); //$NON-NLS-1$ //$NON-NLS-2$
 			Debug.println("  defining class " + name); //$NON-NLS-1$
 		}
 
