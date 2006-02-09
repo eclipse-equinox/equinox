@@ -18,6 +18,7 @@ import java.io.IOException;
  * track of open BundleFiles.  The MRU will use the file limit specified by the property
  * &quot;osgi.bundlefile.limit&quot; by default unless the MRU is constructed with a specific
  * file limit.
+ * @since 3.2
  */
 public class MRUBundleFileList {
 	private static final String PROP_FILE_LIMIT = "osgi.bundlefile.limit"; //$NON-NLS-1$

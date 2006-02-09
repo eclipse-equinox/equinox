@@ -21,6 +21,7 @@ import org.eclipse.osgi.framework.adaptor.BundleClassLoader;
  * The actual class loader object used to define classes for a classpath manager.
  * This interface provides public versions of a few methods on class loader.
  * @see ClasspathManager
+ * @since 3.2
  */
 public interface BaseClassLoader extends BundleClassLoader {
 	/**

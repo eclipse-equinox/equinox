@@ -206,6 +206,7 @@ public interface State {
 	 * @param unsatisfied the unsatisfied constraint or null if the resolver error was not caused
 	 * by an unsatisfied constraint.
 	 * @throws IllegalStateException if this is not done during a call to <code>resolve</code>
+	 * @since 3.2
 	 */
 	public void addResolverError(BundleDescription bundle, int type, String data, VersionConstraint unsatisfied);
 
@@ -218,6 +219,7 @@ public interface State {
 	 * 
 	 * @param bundle the bundle to remove all <code>ResolverError</code>s for
 	 * @throws IllegalStateException if this is not done during a call to <code>resolve</code>
+	 * @since 3.2
 	 */
 	public void removeResolverErrors(BundleDescription bundle);
 
@@ -225,6 +227,7 @@ public interface State {
 	 * Returns all <code>ResolverError</code>s for the given bundle
 	 * @param bundle the bundle to get all <code>ResolverError</code>s for
 	 * @return all <code>ResolverError</code>s for the given bundle
+	 * @since 3.2
 	 */
 	public ResolverError[] getResolverErrors(BundleDescription bundle);
 
@@ -422,6 +425,7 @@ public interface State {
 	 * 
 	 * @return a state helper
 	 * @see StateHelper
+	 * @since 3.2
 	 */
 	public StateHelper getStateHelper();
 }

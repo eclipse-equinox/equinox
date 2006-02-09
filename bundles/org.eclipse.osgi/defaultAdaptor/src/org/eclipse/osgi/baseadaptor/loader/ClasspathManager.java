@@ -35,6 +35,7 @@ import org.osgi.framework.FrameworkEvent;
  * @see BaseClassLoader
  * @see ClassLoadingHook
  * @see ClassLoadingStatsHook
+ * @since 3.2
  */
 public class ClasspathManager {
 	private static final FragmentClasspath[] emptyFragments = new FragmentClasspath[0];

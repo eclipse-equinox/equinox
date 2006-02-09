@@ -32,34 +32,42 @@ import org.osgi.framework.Bundle;
 public interface BundleWatcher {
 	/**
 	 * The install process is beginning for a bundle
+	 * @since 3.2
 	 */
 	public static final int START_INSTALLING	= 0x0001;
 	/**
 	 * The install process has ended for a bundle
+	 * @since 3.2
 	 */
 	public static final int END_INSTALLING		= 0x0002;
 	/**
 	 * The activation process is beginning for a bundle
+	 * @since 3.2
 	 */
 	public static final int START_ACTIVATION	= 0x0004;
 	/**
 	 * The activation process has ended for a bundle
+	 * @since 3.2
 	 */
 	public static final int END_ACTIVATION		= 0x0008;
 	/**
 	 * The deactivation process is beginning for a bundle
+	 * @since 3.2
 	 */
 	public static final int START_DEACTIVATION	= 0x0010;
 	/**
 	 * The deactivation process has ended for a bundle
+	 * @since 3.2
 	 */
 	public static final int END_DEACTIVATION	= 0x0020;
 	/**
 	 * The uninstallation process is beginning for a bundle
+	 * @since 3.2
 	 */
 	public static final int START_UNINSTALLING	= 0x0040;
 	/**
 	 * The uninstallation process has ended for a bundle
+	 * @since 3.2
 	 */
 	public static final int END_UNINSTALLING	= 0x0080;
 
@@ -76,6 +84,7 @@ public interface BundleWatcher {
 	 * @see #END_DEACTIVATION
 	 * @see #START_UNINSTALLING
 	 * @see #END_UNINSTALLING
+	 * @since 3.2
 	 */
 	public void watchBundle(Bundle bundle, int type);
 }

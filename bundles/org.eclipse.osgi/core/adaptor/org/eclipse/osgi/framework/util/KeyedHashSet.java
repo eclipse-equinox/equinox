@@ -17,7 +17,8 @@ import java.util.NoSuchElementException;
  * A set data structure which only accepts {@link KeyedElement} objects as elements of the set. 
  * Unlike typical set implementations this set requires each element to provide its own key.  This helps
  * reduce the overhead of storing the keys of each individual element<p>
- * This class in not thread safe, clients must ensure synchronization when modifying an object of this type. 
+ * This class in not thread safe, clients must ensure synchronization when modifying an object of this type.
+ * @since 3.2 
  */
 // This class was moved from  /org.eclipse.osgi/core/framework/org/eclipse/osgi/framework/internal/core/KeyedHashSet.java
 public class KeyedHashSet {

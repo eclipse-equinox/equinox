@@ -90,6 +90,7 @@ public class FrameworkLogEntry {
 	 * @param stackCode the stack code
 	 * @param throwable the throwable
 	 * @param children the children
+	 * @since 3.2
 	 */
 	public FrameworkLogEntry(String entry, int severity, int bundleCode, String message, int stackCode, Throwable throwable, FrameworkLogEntry[] children) {
 		this.entry = entry;
@@ -164,6 +165,7 @@ public class FrameworkLogEntry {
 	 * Returns the bundle-specific code describing the outcome.
 	 *
 	 * @return bundle-specific code
+	 * @since 3.2
 	 */
 	public int getBundleCode() {
 		return bundleCode;

@@ -10,6 +10,10 @@
  *******************************************************************************/
 package org.eclipse.osgi.service.runnable;
 
+/**
+ * A parameterized runnable that can be stopped.
+ * @since 3.2
+ */
 public interface ApplicationRunnable extends ParameterizedRunnable {
 	/**
 	 * Forces this runnable to stop.

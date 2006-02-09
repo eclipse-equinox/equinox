@@ -21,6 +21,7 @@ import org.eclipse.osgi.framework.util.KeyedHashSet;
  * a source to load classes and resources from, and a single 
  * <code>ProtectionDomain</code> which is used as the domain to define classes 
  * loaded from this ClasspathEntry.
+ * @since 3.2
  */
 public class ClasspathEntry {
 	private BundleFile bundlefile;

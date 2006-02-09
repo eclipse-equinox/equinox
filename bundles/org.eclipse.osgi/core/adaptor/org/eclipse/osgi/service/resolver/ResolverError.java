@@ -13,6 +13,7 @@ package org.eclipse.osgi.service.resolver;
 /**
  * ResolverErrors represent a single error that prevents a bundle from resolving
  * in a <code>State</code> object.
+ * @since 3.2
  */
 public interface ResolverError {
 	/**

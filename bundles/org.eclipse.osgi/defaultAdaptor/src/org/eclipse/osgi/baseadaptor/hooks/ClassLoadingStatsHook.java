@@ -23,6 +23,7 @@ import org.eclipse.osgi.baseadaptor.loader.ClasspathManager;
  * @see ClasspathManager
  * @see HookRegistry#getClassLoadingStatsHooks()
  * @see HookRegistry#addClassLoadingStatsHook(ClassLoadingStatsHook)
+ * @since 3.2
  */
 public interface ClassLoadingStatsHook {
 	/**

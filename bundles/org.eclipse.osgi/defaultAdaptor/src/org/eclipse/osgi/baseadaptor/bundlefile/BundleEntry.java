@@ -20,7 +20,7 @@ import org.eclipse.osgi.framework.debug.Debug;
  * <p>
  * Clients may extend this class.
  * </p>
- * @since 3.1
+ * @since 3.2
  */
 public abstract class BundleEntry {
 	protected static final int BUF_SIZE = 8 * 1024;

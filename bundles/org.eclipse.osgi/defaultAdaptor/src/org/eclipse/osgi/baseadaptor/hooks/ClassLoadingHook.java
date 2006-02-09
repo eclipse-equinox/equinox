@@ -24,6 +24,7 @@ import org.eclipse.osgi.framework.adaptor.*;
  * @see ClasspathManager
  * @see HookRegistry#getClassLoadingHooks()
  * @see HookRegistry#addClassLoadingHook(ClassLoadingHook)
+ * @since 3.2
  */
 public interface ClassLoadingHook {
 	/**

@@ -24,6 +24,7 @@ import org.osgi.framework.BundleException;
  * A StorageHook extends {@link KeyedElement}, the key used for the element must be the 
  * fully qualified string name of the StorageHook implementation class.
  * @see BaseData#getStorageHook(String)
+ * @since 3.2
  */
 public interface StorageHook extends KeyedElement {
 	/**

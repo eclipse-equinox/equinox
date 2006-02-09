@@ -20,6 +20,7 @@ import org.eclipse.osgi.util.NLS;
 
 /**
  * A BundleFile that uses a directory as its base file.
+ * @since 3.2
  */
 public class DirBundleFile extends BundleFile {
 

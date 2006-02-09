@@ -47,6 +47,7 @@ public interface StateObjectFactory {
 	 * 
 	 * @param createResolver true if the created state should be initialized with a resolver.
 	 * @return the created state
+	 * @since 3.2
 	 */
 	public State createState(boolean resolver);
 

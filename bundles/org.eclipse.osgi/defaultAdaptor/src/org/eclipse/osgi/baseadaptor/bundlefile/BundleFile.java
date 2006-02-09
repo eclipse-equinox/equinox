@@ -27,7 +27,7 @@ import org.eclipse.osgi.util.ManifestElement;
  * <p>
  * Clients may extend this class.
  * </p>
- * @since 3.1
+ * @since 3.2
  */
 abstract public class BundleFile {
 	protected static final String PROP_SETPERMS_CMD = "osgi.filepermissions.command"; //$NON-NLS-1$

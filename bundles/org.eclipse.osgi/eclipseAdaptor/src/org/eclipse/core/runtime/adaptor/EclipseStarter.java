@@ -109,8 +109,8 @@ public class EclipseStarter {
 	private static final String PROP_COMMANDS = "eclipse.commands"; //$NON-NLS-1$
 	public static final String PROP_IGNOREAPP = "eclipse.ignoreApp"; //$NON-NLS-1$
 	public static final String PROP_REFRESH_BUNDLES = "eclipse.refreshBundles"; //$NON-NLS-1$
-	public static final String PROP_ALLOW_APPRELAUNCH = "eclipse.allowAppRelaunch"; //$NON-NLS-1$
-	public static final String PROP_APPLICATION_NODEFAULT = "eclipse.application.noDefault"; //$NON-NLS-1$
+	private static final String PROP_ALLOW_APPRELAUNCH = "eclipse.allowAppRelaunch"; //$NON-NLS-1$
+	private static final String PROP_APPLICATION_NODEFAULT = "eclipse.application.noDefault"; //$NON-NLS-1$
 
 	private static final String FILE_SCHEME = "file:"; //$NON-NLS-1$
 	private static final String FILE_PROTOCOL = "file"; //$NON-NLS-1$

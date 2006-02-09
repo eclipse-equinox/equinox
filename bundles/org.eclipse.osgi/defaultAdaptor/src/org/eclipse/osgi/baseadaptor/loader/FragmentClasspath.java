@@ -19,6 +19,7 @@ import org.osgi.framework.FrameworkEvent;
 /**
  * A FragmentClasspath contains all the <code>ClasspathEntry</code> objects for a fragment
  * <code>BaseData</code>.
+ * @since 3.2
  */
 public class FragmentClasspath {
 	private BaseData bundledata;

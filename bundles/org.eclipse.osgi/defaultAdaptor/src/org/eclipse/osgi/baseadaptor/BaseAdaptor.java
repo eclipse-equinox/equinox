@@ -38,6 +38,7 @@ import org.osgi.framework.*;
  * @see HookConfigurator
  * @see HookRegistry
  * @see AdaptorHook
+ * @since 3.2
  */
 public class BaseAdaptor implements FrameworkAdaptor{
 	// System property used to set the parent classloader type (boot is the default)

@@ -27,6 +27,7 @@ import org.osgi.framework.BundleException;
  * @see BaseAdaptor
  * @see HookRegistry#getAdaptorHooks()
  * @see HookRegistry#addAdaptorHook(AdaptorHook)
+ * @since 3.2
  */
 public interface AdaptorHook {
 	/**

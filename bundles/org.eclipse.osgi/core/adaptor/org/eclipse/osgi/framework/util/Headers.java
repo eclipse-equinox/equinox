@@ -148,6 +148,7 @@ public class Headers extends Dictionary {
 	 *
 	 * @exception IllegalArgumentException If a case-variant of the key is
 	 * already present.
+	 * @since 3.2
 	 */
 	public synchronized Object set(Object key, Object value, boolean replace) {
 		if (key instanceof String)

@@ -34,6 +34,7 @@ import org.osgi.framework.*;
  * @see BundleData
  * @see StorageHook
  * @see ClassLoadingHook
+ * @since 3.2
  */
 public class BaseData implements BundleData {
 	private long id;

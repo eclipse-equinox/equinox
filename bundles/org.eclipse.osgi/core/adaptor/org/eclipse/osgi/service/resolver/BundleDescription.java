@@ -209,6 +209,7 @@ public interface BundleDescription extends BaseDescription{
 	 * Returns the list of execution environments that are required by 
 	 * this bundle.  Any one of the listed execution environments will 
 	 * allow this bundle to be resolved.
+	 * @since 3.2
 	 * @return the list of execution environments that are required.
 	 */
 	public String[] getExecutionEnvironments();

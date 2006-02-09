@@ -14,6 +14,7 @@ package org.eclipse.osgi.framework.util;
  * An element of an <code>KeyedHashSet</code>.  A KeyedElement privides the key which is used to hash 
  * the elements in an <code>KeyedHashSet</code>.
  * @see KeyedHashSet
+ * @since 3.2
  */
 // This class was moved from  /org.eclipse.osgi/core/framework/org/eclipse/osgi/framework/internal/core/KeyedElement.java
 public interface KeyedElement {

@@ -24,6 +24,7 @@ import org.osgi.framework.FrameworkEvent;
 
 /**
  * A BundleFile that uses a ZipFile as it base file.
+ * @since 3.2
  */
 public class ZipBundleFile extends BundleFile {
 	protected static MRUBundleFileList mruList = new MRUBundleFileList();

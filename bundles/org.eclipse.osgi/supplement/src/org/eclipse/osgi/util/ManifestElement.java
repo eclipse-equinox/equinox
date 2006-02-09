@@ -440,6 +440,7 @@ public class ManifestElement {
 	 * is returned.
 	 * @param stringList the initial string list
 	 * @param separator the separator to use to split the list into tokens.
+	 * @since 3.2
 	 */
 	public static String[] getArrayFromList(String stringList, String separator) {
 		if (stringList == null || stringList.trim().length() == 0)

@@ -18,6 +18,7 @@ import java.util.zip.ZipEntry;
 /**
  * A BundleEntry represented by a ZipEntry in a ZipFile.  The ZipBundleEntry
  * class is used for bundles that are installed as a ZipFile on a file system.
+ * @since 3.2
  */
 public class ZipBundleEntry extends BundleEntry {
 	/**

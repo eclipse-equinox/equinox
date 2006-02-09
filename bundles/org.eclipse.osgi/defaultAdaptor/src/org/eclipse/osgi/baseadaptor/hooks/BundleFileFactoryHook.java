@@ -19,6 +19,7 @@ import org.eclipse.osgi.baseadaptor.bundlefile.BundleFile;
 /**
  * A factory that creates bundle file objects.
  * @see BaseAdaptor#createBundleFile(Object, BaseData)
+ * @since 3.2
  */
 public interface BundleFileFactoryHook {
 	/**

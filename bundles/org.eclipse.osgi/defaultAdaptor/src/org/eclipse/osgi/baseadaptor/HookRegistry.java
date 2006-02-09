@@ -25,6 +25,7 @@ import org.eclipse.osgi.util.ManifestElement;
  * The hook registry is used to store all the hooks which are
  * configured by the hook configurators.
  * @see HookConfigurator
+ * @since 3.2
  */
 public final class HookRegistry {
 	/**

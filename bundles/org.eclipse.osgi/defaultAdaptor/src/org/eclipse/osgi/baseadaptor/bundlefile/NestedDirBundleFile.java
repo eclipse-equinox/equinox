@@ -25,6 +25,7 @@ import java.util.Enumeration;
  * <pre>
  * Bundle-ClassPath: nested.jar,nesteddir/
  * </pre>
+ * @since 3.2
  */
 public class NestedDirBundleFile extends BundleFile {
 	BundleFile baseBundleFile;

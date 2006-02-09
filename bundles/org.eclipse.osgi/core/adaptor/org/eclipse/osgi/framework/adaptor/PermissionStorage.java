@@ -85,6 +85,7 @@ public interface PermissionStorage {
 	 * Persists the array of encoded ConditionalPermissionInfo strings
 	 * @param infos an array of encoded ConditionalPermissionInfo strings
 	 * @throws IOException If a failure occurs modifying persistent storage.
+	 * @since 3.2
 	 */
 	public void saveConditionalPermissionInfos(String[] infos) throws IOException;
 
@@ -93,6 +94,7 @@ public interface PermissionStorage {
 	 * @return an array of encoded ConditionalPermissionInfo strings or null 
 	 * if none exist in persistent storage.
 	 * @throws IOException If a failure occurs accessing persistent storage.
+	 * @since 3.2
 	 */
 	public String[] getConditionalPermissionInfos() throws IOException;
 }
