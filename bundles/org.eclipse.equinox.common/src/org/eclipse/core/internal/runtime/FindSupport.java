@@ -29,7 +29,7 @@ public class FindSupport {
 	public static final String PROP_WS = "osgi.ws"; //$NON-NLS-1$
 	public static final String PROP_ARCH = "osgi.arch"; //$NON-NLS-1$
 
-	private static String[] NL_JAR_VARIANTS = buildNLVariants(System.getProperty(PROP_NL));
+	private static String[] NL_JAR_VARIANTS = buildNLVariants(Activator.getContext() == null ? System.getProperty(PROP_NL) : Activator.getContext().getProperty(PROP_NL));
 
 	private static String[] buildNLVariants(String nl) {
 		ArrayList result = new ArrayList();
@@ -108,7 +108,7 @@ public class FindSupport {
 			}
 		if (os == null)
 			// use default
-			os = System.getProperty(PROP_OS);
+			os = Activator.getContext().getProperty(PROP_OS);
 		if (os.length() == 0)
 			return null;
 
@@ -123,7 +123,7 @@ public class FindSupport {
 			}
 		if (osArch == null)
 			// use default
-			osArch = System.getProperty(PROP_ARCH);
+			osArch = Activator.getContext().getProperty(PROP_ARCH);
 		if (osArch.length() == 0)
 			return null;
 
@@ -159,7 +159,7 @@ public class FindSupport {
 			}
 		if (ws == null)
 			// use default
-			ws = System.getProperty(PROP_WS);
+			ws = Activator.getContext().getProperty(PROP_WS);
 		IPath filePath = new Path("ws").append(ws).append(path); //$NON-NLS-1$
 		// We know that there is only one segment to the ws path
 		// e.g. ws/win32	

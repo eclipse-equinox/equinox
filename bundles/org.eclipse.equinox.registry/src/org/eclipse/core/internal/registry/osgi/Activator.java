@@ -13,6 +13,7 @@ package org.eclipse.core.internal.registry.osgi;
 import java.io.File;
 import java.util.Hashtable;
 import org.eclipse.core.internal.registry.IRegistryConstants;
+import org.eclipse.core.internal.registry.RegistryProperties;
 import org.eclipse.core.runtime.*;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.service.environment.EnvironmentInfo;
@@ -85,9 +86,9 @@ public class Activator implements BundleActivator {
 
 		for (int i = 0; i < args.length; i++) {
 			if (args[i].equalsIgnoreCase(IRegistryConstants.NO_REGISTRY_CACHE))
-				System.getProperties().setProperty(IRegistryConstants.PROP_NO_REGISTRY_CACHE, "true"); //$NON-NLS-1$
+				RegistryProperties.setProperty(IRegistryConstants.PROP_NO_REGISTRY_CACHE, "true"); //$NON-NLS-1$
 			else if (args[i].equalsIgnoreCase(IRegistryConstants.NO_LAZY_REGISTRY_CACHE_LOADING))
-				System.getProperties().setProperty(IRegistryConstants.PROP_NO_LAZY_CACHE_LOADING, "true"); //$NON-NLS-1$
+				RegistryProperties.setProperty(IRegistryConstants.PROP_NO_LAZY_CACHE_LOADING, "true"); //$NON-NLS-1$
 		}
 	}
 

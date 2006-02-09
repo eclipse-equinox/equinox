@@ -129,7 +129,7 @@ public class TableReader {
 			String windowsStamp = in.readUTF();
 			String localeStamp = in.readUTF();
 			long timeStamp = registry.computeState();
-			return ((expectedTimestamp == 0 || expectedTimestamp == registryStamp) && (installStamp == timeStamp) && (osStamp.equals(System.getProperty(IRegistryConstants.PROP_OS))) && (windowsStamp.equals(System.getProperty(IRegistryConstants.PROP_WS))) && (localeStamp.equals(System.getProperty(IRegistryConstants.PROP_NL))) && mainDataFileSize == mainDataFile.length() && extraDataFileSize == extraDataFile.length() && contributionsFileSize == contributionsFile.length() && orphansFileSize == orphansFile.length());
+			return ((expectedTimestamp == 0 || expectedTimestamp == registryStamp) && (installStamp == timeStamp) && (osStamp.equals(RegistryProperties.getProperty(IRegistryConstants.PROP_OS))) && (windowsStamp.equals(RegistryProperties.getProperty(IRegistryConstants.PROP_WS))) && (localeStamp.equals(RegistryProperties.getProperty(IRegistryConstants.PROP_NL))) && mainDataFileSize == mainDataFile.length() && extraDataFileSize == extraDataFile.length() && contributionsFileSize == contributionsFile.length() && orphansFileSize == orphansFile.length());
 		} catch (IOException e) {
 			log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, fileError, RegistryMessages.meta_registryCacheInconsistent, e));
 			return false;

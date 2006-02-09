@@ -27,7 +27,7 @@ public class DevClassPathHelper {
 
 	static {
 		// Check the osgi.dev property to see if dev classpath entries have been defined.
-		String osgiDev = System.getProperty(PROP_DEV);
+		String osgiDev = Activator.getContext() == null ? System.getProperty(PROP_DEV) : Activator.getContext().getProperty(PROP_DEV);
 		if (osgiDev != null) {
 			try {
 				inDevelopmentMode = true;

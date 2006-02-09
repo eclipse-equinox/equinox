@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.util.*;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParserFactory;
+import org.eclipse.core.internal.registry.osgi.Activator;
 import org.eclipse.core.runtime.*;
 import org.eclipse.osgi.util.NLS;
 import org.xml.sax.*;
@@ -563,7 +564,7 @@ public class ExtensionsParser extends DefaultHandler {
 	 * for extension points that were renamed between release 2.1 and 3.0.
 	 */
 	private Extension[] fixRenamedExtensionPoints(Extension[] extensions) {
-		if (extensions == null || (schemaVersion != null && schemaVersion.equals("3.0")) || System.getProperties().get(NO_EXTENSION_MUNGING) != null) //$NON-NLS-1$
+		if (extensions == null || (schemaVersion != null && schemaVersion.equals("3.0")) || RegistryProperties.getProperty(NO_EXTENSION_MUNGING) != null) //$NON-NLS-1$
 			return extensions;
 		for (int i = 0; i < extensions.length; i++) {
 			Extension extension = extensions[i];

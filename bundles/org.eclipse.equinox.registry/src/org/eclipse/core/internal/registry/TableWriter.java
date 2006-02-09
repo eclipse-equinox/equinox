@@ -194,9 +194,9 @@ public class TableWriter {
 		output.writeLong(extraDataFile.length());
 		output.writeLong(contributionsFile.length());
 		output.writeLong(orphansFile.length());
-		output.writeUTF(System.getProperty(IRegistryConstants.PROP_OS));
-		output.writeUTF(System.getProperty(IRegistryConstants.PROP_WS));
-		output.writeUTF(System.getProperty(IRegistryConstants.PROP_NL));
+		output.writeUTF(RegistryProperties.getProperty(IRegistryConstants.PROP_OS));
+		output.writeUTF(RegistryProperties.getProperty(IRegistryConstants.PROP_WS));
+		output.writeUTF(RegistryProperties.getProperty(IRegistryConstants.PROP_NL));
 	}
 
 	private void saveArray(int[] array, DataOutputStream out) throws IOException {

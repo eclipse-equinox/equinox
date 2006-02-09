@@ -301,19 +301,19 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 	// Cache strategy
 
 	public boolean cacheUse() {
-		return !"true".equals(System.getProperty(IRegistryConstants.PROP_NO_REGISTRY_CACHE)); //$NON-NLS-1$
+		return !"true".equals(RegistryProperties.getProperty(IRegistryConstants.PROP_NO_REGISTRY_CACHE)); //$NON-NLS-1$
 	}
 
 	public boolean cacheLazyLoading() {
-		return !("true".equalsIgnoreCase(System.getProperty(IRegistryConstants.PROP_NO_LAZY_CACHE_LOADING))); //$NON-NLS-1$
+		return !("true".equalsIgnoreCase(RegistryProperties.getProperty(IRegistryConstants.PROP_NO_LAZY_CACHE_LOADING))); //$NON-NLS-1$
 	}
 
 	public long cacheComputeTimeStamp() {
-		// If the check config prop is false or not set then exit
-		if (!"true".equalsIgnoreCase(System.getProperty(IRegistryConstants.PROP_CHECK_CONFIG))) //$NON-NLS-1$  
-			return 0;
 		BundleContext context = Activator.getContext();
 		if (context == null)
+			return 0;
+		// If the check config prop is false or not set then exit
+		if (!"true".equalsIgnoreCase(context.getProperty(IRegistryConstants.PROP_CHECK_CONFIG))) //$NON-NLS-1$  
 			return 0;
 		Bundle[] allBundles = context.getBundles();
 		long result = 0;

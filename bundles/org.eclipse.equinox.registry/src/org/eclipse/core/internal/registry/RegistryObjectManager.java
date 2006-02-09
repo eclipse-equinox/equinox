@@ -67,7 +67,7 @@ public class RegistryObjectManager implements IObjectManager {
 
 	public RegistryObjectManager(ExtensionRegistry registry) {
 		extensionPoints = new HashtableOfStringAndInt();
-		if ("true".equalsIgnoreCase(System.getProperty(PROP_NO_REGISTRY_FLUSHING))) { //$NON-NLS-1$
+		if ("true".equalsIgnoreCase(RegistryProperties.getProperty(PROP_NO_REGISTRY_FLUSHING))) { //$NON-NLS-1$
 			cache = new ReferenceMap(ReferenceMap.HARD, CACHE_INITIAL_SIZE, DEFAULT_LOADFACTOR);
 		} else {
 			cache = new ReferenceMap(ReferenceMap.SOFT, CACHE_INITIAL_SIZE, DEFAULT_LOADFACTOR);
