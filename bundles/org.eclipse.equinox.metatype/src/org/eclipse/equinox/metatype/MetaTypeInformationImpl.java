@@ -50,7 +50,7 @@ public class MetaTypeInformationImpl extends MetaTypeProviderImpl implements Met
 		Enumeration e = _allPidOCDs.elements();
 		while (e.hasMoreElements()) {
 			ObjectClassDefinitionImpl ocd = (ObjectClassDefinitionImpl) e.nextElement();
-			pids.addElement(ocd.getID());
+			pids.addElement(ocd.getPID());
 		}
 
 		String[] retvalue = new String[pids.size()];
@@ -73,7 +73,7 @@ public class MetaTypeInformationImpl extends MetaTypeProviderImpl implements Met
 		Enumeration e = _allFPidOCDs.elements();
 		while (e.hasMoreElements()) {
 			ObjectClassDefinitionImpl ocd = (ObjectClassDefinitionImpl) e.nextElement();
-			fpids.addElement(ocd.getID());
+			fpids.addElement(ocd.getPID());
 		}
 
 		String[] retvalue = new String[fpids.size()];

@@ -333,10 +333,10 @@ public class DataParser {
 				ObjectClassDefinitionImpl ocd = (ObjectClassDefinitionImpl) _dp_OCDs.get(designateHandler._ocdref);
 				if (ocd != null) {
 					if (designateHandler._factory_val == null) {
-						ocd.setID(designateHandler._pid_val);
+						ocd.setPID(designateHandler._pid_val);
 						ocd.setType(ObjectClassDefinitionImpl.PID);
 					} else {
-						ocd.setID(designateHandler._factory_val);
+						ocd.setPID(designateHandler._factory_val);
 						ocd.setType(ObjectClassDefinitionImpl.FPID);
 					}
 					_dp_OCDs_vector.addElement(ocd);
@@ -390,7 +390,7 @@ public class DataParser {
 				return;
 			}
 
-			_ocd = new ObjectClassDefinitionImpl(ocd_name_val, ocd_description_val, _dp_localization);
+			_ocd = new ObjectClassDefinitionImpl(ocd_name_val, ocd_description_val, _refID, _dp_localization);
 		}
 
 		public void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {

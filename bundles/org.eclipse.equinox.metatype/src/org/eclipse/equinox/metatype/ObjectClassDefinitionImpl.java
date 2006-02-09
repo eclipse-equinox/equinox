@@ -31,6 +31,7 @@ public class ObjectClassDefinitionImpl extends LocalizationElement implements Ob
 	String _name;
 	String _id;
 	String _description;
+    String _pid;
 	int _type;
 	Vector _required = new Vector(7);
 	Vector _optional = new Vector(7);
@@ -39,17 +40,18 @@ public class ObjectClassDefinitionImpl extends LocalizationElement implements Ob
 	/*
 	 * Constructor of class ObjectClassDefinitionImpl.
 	 */
-	public ObjectClassDefinitionImpl(String name, String description, String localization) {
+	public ObjectClassDefinitionImpl(String name, String description, String id, String localization) {
 
 		this._name = name;
 		this._description = description;
+		this._id = id;
 		this._localization = localization;
 	}
 
 	/*
 	 * Constructor of class ObjectClassDefinitionImpl.
 	 */
-	public ObjectClassDefinitionImpl(String name, String id, String description, int type, String localization) {
+	public ObjectClassDefinitionImpl(String name, String description, String id, int type, String localization) {
 
 		this._name = name;
 		this._id = id;
@@ -63,7 +65,7 @@ public class ObjectClassDefinitionImpl extends LocalizationElement implements Ob
 	 */
 	public synchronized Object clone() {
 
-		ObjectClassDefinitionImpl ocd = new ObjectClassDefinitionImpl(_name, _id, _description, _type, _localization);
+		ObjectClassDefinitionImpl ocd = new ObjectClassDefinitionImpl(_name, _description, _id, _type, _localization);
 		for (int i = 0; i < _required.size(); i++) {
 			AttributeDefinitionImpl ad = (AttributeDefinitionImpl) _required.elementAt(i);
 			ocd.addAttributeDefinition((AttributeDefinitionImpl) ad.clone(), true);
@@ -106,8 +108,12 @@ public class ObjectClassDefinitionImpl extends LocalizationElement implements Ob
 	/*
 	 * Method to set the ID of ObjectClassDefinition.
 	 */
-	void setID(String id) {
-		this._id = id;
+	void setPID(String pid) {
+		this._pid = pid;
+	}
+	
+	String getPID() {
+		return _pid;	
 	}
 
 	/*
