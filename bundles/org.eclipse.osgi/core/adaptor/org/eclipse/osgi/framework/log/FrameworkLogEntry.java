@@ -19,35 +19,35 @@ public class FrameworkLogEntry {
 	/**
 	 * Severity constant (value 0) indicating this log entry represents the nominal case.
 	 * @see #getSeverity()
-	 * @sinse 3.2
+	 * @since 3.2
 	 */
 	public static final int OK = 0;
 
 	/** 
 	 * Severity constant (bit mask, value 1) indicating this log entry is informational only.
 	 * @see #getSeverity()
-	 * @sinse 3.2
+	 * @since 3.2
 	 */
 	public static final int INFO = 0x01;
 
 	/** 
 	 * Severity constant (bit mask, value 2) indicating this log entry represents a warning.
 	 * @see #getSeverity()
-	 * @sinse 3.2
+	 * @since 3.2
 	 */
 	public static final int WARNING = 0x02;
 
 	/** 
 	 * Severity constant (bit mask, value 4) indicating this log entry represents an error.
 	 * @see #getSeverity()
-	 * @sinse 3.2
+	 * @since 3.2
 	 */
 	public static final int ERROR = 0x04;
 
 	/**
 	 * Status type severity (bit mask, value 8) indicating this log entry represents a cancelation.
 	 * @see #getSeverity()
-	 * @sinse 3.2
+	 * @since 3.2
 	 */
 	public static final int CANCEL = 0x08;
 
@@ -155,7 +155,7 @@ public class FrameworkLogEntry {
 	 *
 	 * @return the severity: one of <code>OK</code>, <code>ERROR</code>, 
 	 * <code>INFO</code>, <code>WARNING</code>,  or <code>CANCEL</code>
-	 * @sinse 3.2
+	 * @since 3.2
 	 */
 	public int getSeverity() {
 		return severity;

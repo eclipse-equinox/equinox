@@ -36,6 +36,7 @@ public interface URLConverter {
 	 * @return the converted file URL or the original URL passed in if it is 
 	 * 	not recognized by this converter
 	 * @throws IOException if an error occurs during the conversion
+	 * @since 3.2
 	 */
 	public URL toFileURL(URL url) throws IOException;
 
@@ -55,6 +56,7 @@ public interface URLConverter {
 	 * @return the resolved URL or the original if the protocol is unknown to this converter
 	 * @exception IOException if unable to resolve URL
 	 * @throws IOException if an error occurs during the resolution
+	 * @since 3.2
 	 */
 	public URL resolve(URL url) throws IOException;
 }
