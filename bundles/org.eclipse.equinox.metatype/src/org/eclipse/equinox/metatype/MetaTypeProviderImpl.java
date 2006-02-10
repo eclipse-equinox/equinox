@@ -112,10 +112,10 @@ public class MetaTypeProviderImpl implements MetaTypeProvider {
 
 							if (ocd.getType() == ObjectClassDefinitionImpl.PID) {
 								isThereMetaHere = true;
-								_allPidOCDs.put(ocd.getID(), ocd);
+								_allPidOCDs.put(ocd.getPID(), ocd);
 							} else {
 								isThereMetaHere = true;
-								_allFPidOCDs.put(ocd.getID(), ocd);
+								_allFPidOCDs.put(ocd.getPID(), ocd);
 							}
 						} // End of for
 					}
