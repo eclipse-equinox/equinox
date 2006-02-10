@@ -47,10 +47,9 @@ public class MetaTypeInformationImpl extends MetaTypeProviderImpl implements Met
 		}
 
 		Vector pids = new Vector(7);
-		Enumeration e = _allPidOCDs.elements();
+		Enumeration e = _allPidOCDs.keys();
 		while (e.hasMoreElements()) {
-			ObjectClassDefinitionImpl ocd = (ObjectClassDefinitionImpl) e.nextElement();
-			pids.addElement(ocd.getPID());
+			pids.addElement(e.nextElement());
 		}
 
 		String[] retvalue = new String[pids.size()];
@@ -64,18 +63,14 @@ public class MetaTypeInformationImpl extends MetaTypeProviderImpl implements Met
 	 * @see org.osgi.service.metatype.MetaTypeInformation#getFactoryPids()
 	 */
 	public String[] getFactoryPids() {
-
 		if (_allFPidOCDs.size() == 0) {
 			return new String[0];
 		}
-
 		Vector fpids = new Vector(7);
-		Enumeration e = _allFPidOCDs.elements();
+		Enumeration e = _allFPidOCDs.keys();
 		while (e.hasMoreElements()) {
-			ObjectClassDefinitionImpl ocd = (ObjectClassDefinitionImpl) e.nextElement();
-			fpids.addElement(ocd.getPID());
+			fpids.addElement(e.nextElement());
 		}
-
 		String[] retvalue = new String[fpids.size()];
 		fpids.toArray(retvalue);
 		return retvalue;

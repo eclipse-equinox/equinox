@@ -31,7 +31,7 @@ public class ObjectClassDefinitionImpl extends LocalizationElement implements Ob
 	String _name;
 	String _id;
 	String _description;
-    String _pid;
+
 	int _type;
 	Vector _required = new Vector(7);
 	Vector _optional = new Vector(7);
@@ -103,17 +103,6 @@ public class ObjectClassDefinitionImpl extends LocalizationElement implements Ob
 	 */
 	public String getID() {
 		return _id;
-	}
-
-	/*
-	 * Method to set the ID of ObjectClassDefinition.
-	 */
-	void setPID(String pid) {
-		this._pid = pid;
-	}
-	
-	String getPID() {
-		return _pid;	
 	}
 
 	/*

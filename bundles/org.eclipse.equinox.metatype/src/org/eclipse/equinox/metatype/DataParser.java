@@ -76,8 +76,8 @@ public class DataParser {
 	Vector _dp_designateHandlers = new Vector(7);
 	// ObjectClassDefinitions in DataParser class w/ corresponding reference keys
 	Hashtable _dp_OCDs = new Hashtable(7);
-	// ObjectClassDefinitions in DataParser class as a Vector
-	Vector _dp_OCDs_vector = new Vector(7);
+	// pid to ObjectClassDefinitions in DataParser class as a Hashtable
+	Hashtable _dp_pid_to_OCDs_ = new Hashtable(7);
 	// Localization in DataParser class
 	String _dp_localization;
 
@@ -95,7 +95,7 @@ public class DataParser {
 	/*
 	 * Main method to parse specific MetaData file.
 	 */
-	public Vector doParse() {
+	public Hashtable doParse() {
 
 		try {
 			SAXParser saxParser = _dp_parserFactory.newSAXParser();
@@ -116,7 +116,7 @@ public class DataParser {
 			ioe.printStackTrace();
 			return null;
 		}
-		return _dp_OCDs_vector;
+		return _dp_pid_to_OCDs_;
 	}
 
 	/*
@@ -333,13 +333,12 @@ public class DataParser {
 				ObjectClassDefinitionImpl ocd = (ObjectClassDefinitionImpl) _dp_OCDs.get(designateHandler._ocdref);
 				if (ocd != null) {
 					if (designateHandler._factory_val == null) {
-						ocd.setPID(designateHandler._pid_val);
 						ocd.setType(ObjectClassDefinitionImpl.PID);
+						_dp_pid_to_OCDs_.put(designateHandler._pid_val,ocd);
 					} else {
-						ocd.setPID(designateHandler._factory_val);
 						ocd.setType(ObjectClassDefinitionImpl.FPID);
+						_dp_pid_to_OCDs_.put(designateHandler._factory_val,ocd);
 					}
-					_dp_OCDs_vector.addElement(ocd);
 				} else {
 					Logging.log(Logging.ERROR, this, "finished()", //$NON-NLS-1$
 							NLS.bind(MetaTypeMsg.OCD_ID_NOT_FOUND, designateHandler._ocdref));

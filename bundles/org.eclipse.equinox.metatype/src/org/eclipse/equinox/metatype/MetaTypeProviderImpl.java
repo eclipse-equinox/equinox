@@ -88,7 +88,7 @@ public class MetaTypeProviderImpl implements MetaTypeProvider {
 			boolean _isMetaDataFile;
 			String fileName = (String) allFileKeys.nextElement();
 
-			Vector allOCDsInFile = null;
+			Hashtable pidToOCD = null;
 			java.net.URL[] urls = FragmentUtils.findEntries(bundle, fileName);
 			if (urls != null) {
 				for (int i = 0; i < urls.length; i++) {
@@ -96,8 +96,8 @@ public class MetaTypeProviderImpl implements MetaTypeProvider {
 						// Assume all XML files are what we want by default.
 						_isMetaDataFile = true;
 						DataParser parser = new DataParser(bundle, urls[i], parserFactory);
-						allOCDsInFile = parser.doParse();
-						if (allOCDsInFile == null) {
+						pidToOCD = parser.doParse();
+						if (pidToOCD == null) {
 							_isMetaDataFile = false;
 						}
 					} catch (Exception e) {
@@ -105,17 +105,20 @@ public class MetaTypeProviderImpl implements MetaTypeProvider {
 						_isMetaDataFile = false;
 					}
 
-					if ((_isMetaDataFile) && (allOCDsInFile != null)) {
+					if ((_isMetaDataFile) && (pidToOCD != null)) {
+						
 						// We got some OCDs now.
-						for (int j = 0; j < allOCDsInFile.size(); j++) {
-							ObjectClassDefinitionImpl ocd = (ObjectClassDefinitionImpl) allOCDsInFile.elementAt(j);
+						Enumeration pids = pidToOCD.keys();
+						while (pids.hasMoreElements()) {
+							String pid = (String)pids.nextElement();
+							ObjectClassDefinitionImpl ocd = (ObjectClassDefinitionImpl) pidToOCD.get(pid);
 
 							if (ocd.getType() == ObjectClassDefinitionImpl.PID) {
 								isThereMetaHere = true;
-								_allPidOCDs.put(ocd.getPID(), ocd);
+								_allPidOCDs.put(pid, ocd);
 							} else {
 								isThereMetaHere = true;
-								_allFPidOCDs.put(ocd.getPID(), ocd);
+								_allFPidOCDs.put(pid, ocd);
 							}
 						} // End of for
 					}
