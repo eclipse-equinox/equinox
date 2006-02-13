@@ -1,6 +1,6 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials
+ * Copyright (c) 2006 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
@@ -14,37 +14,23 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Map;
+import org.eclipse.core.internal.runtime.*;
+import org.eclipse.osgi.service.urlconversion.URLConverter;
 import org.osgi.framework.Bundle;
 
 /**
  * This class contains collection of helper methods aimed at finding files in bundles.
  * This class can only be used if OSGi plugin is available.
- * 
+ * <p>
  * The class is not intended to be subclassed or instantiated by clients.
- * 
+ * </p>
  * @since 3.2
- * @deprecated clients should use {@link FileLocator} instead
  */
-public final class BundleFinder {
+public final class FileLocator {
 
 	/**
 	 * Returns a URL for the given path in the given bundle.  Returns <code>null</code> if the URL
-	 * could not be computed or created.
-	 * 
-	 * @param bundle the bundle in which to search
-	 * @param path path relative to plug-in installation location 
-	 * @return a URL for the given path or <code>null</code>.  The actual form
-	 * of the returned URL is not specified.
-	 * @see #find(Bundle, IPath, Map)
-	 * @deprecated use {@link FileLocator#find(Bundle, IPath)}
-	 */
-	public static URL find(Bundle bundle, IPath path) {
-		return FileLocator.find(bundle, path, null);
-	}
-
-	/**
-	 * Returns a URL for the given path in the given bundle.  Returns <code>null</code> if the URL
-	 * could not be computed or created.
+	 * could not be computed or created. 
 	 * <p>
 	 * find looks for this path in given bundle and any attached fragments.  
 	 * <code>null</code> is returned if no such entry is found.  Note that
@@ -90,10 +76,9 @@ public final class BundleFinder {
 	 * is used.
 	 * @return a URL for the given path or <code>null</code>.  The actual form
 	 * of the returned URL is not specified.
-	 * @deprecated use {@link FileLocator#find(Bundle, IPath, Map)}
 	 */
 	public static URL find(Bundle bundle, IPath path, Map override) {
-		return FileLocator.find(bundle, path, override);
+		return FindSupport.find(bundle, path, override);
 	}
 
 	/**
@@ -114,26 +99,9 @@ public final class BundleFinder {
 	 *   as specified
 	 * @return an input stream
 	 * @exception IOException if the given path cannot be found in this plug-in
-	 * @deprecated use {@link FileLocator#openStream(Bundle, IPath, boolean)}
 	 */
 	public static InputStream openStream(Bundle bundle, IPath file, boolean localized) throws IOException {
-		return FileLocator.openStream(bundle, file, localized);
-	}
-
-	/**
-	 * Returns an input stream for the specified file. The file path
-	 * must be specified relative this the plug-in's installation location.
-	 *
-	 * @param bundle the bundle in which to search
-	 * @param file path relative to plug-in installation location
-	 * @return an input stream
-	 * @exception IOException if the given path cannot be found in this plug-in
-	 * 
-	 * @see #openStream(Bundle,IPath,boolean)
-	 * @deprecated use {@link FileLocator#openStream(Bundle, IPath)}
-	 */
-	public static final InputStream openStream(Bundle bundle, IPath file) throws IOException {
-		return FileLocator.openStream(bundle, file, false);
+		return FindSupport.openStream(bundle, file, localized);
 	}
 
 	/**
@@ -148,10 +116,10 @@ public final class BundleFinder {
 	 * @return the converted file URL or the original URL passed in if it is 
 	 * 	not recognized by this converter
 	 * @throws IOException if an error occurs during the conversion
-	 * @deprecated use {@link FileLocator#toFileURL(URL)}
 	 */
 	public static URL toFileURL(URL url) throws IOException {
-		return FileLocator.toFileURL(url);
+		URLConverter converter = Activator.getURLConverter(url);
+		return converter == null ? url : converter.toFileURL(url);
 	}
 
 	/**
@@ -170,9 +138,10 @@ public final class BundleFinder {
 	 * @return the resolved URL or the original if the protocol is unknown to this converter
 	 * @exception IOException if unable to resolve URL
 	 * @throws IOException if an error occurs during the resolution
-	 * @deprecated use {@link FileLocator#resolve(URL)}
 	 */
 	public static URL resolve(URL url) throws IOException {
-		return FileLocator.resolve(url);
+		URLConverter converter = Activator.getURLConverter(url);
+		return converter == null ? url : converter.resolve(url);
 	}
+
 }

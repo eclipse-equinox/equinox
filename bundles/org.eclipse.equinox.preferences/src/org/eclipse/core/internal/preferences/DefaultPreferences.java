@@ -86,13 +86,13 @@ public class DefaultPreferences extends EclipsePreferences {
 		Bundle bundle = PreferencesOSGiUtils.getDefault().getBundle(name());
 		if (bundle == null)
 			return;
-		URL url = BundleFinder.find(bundle, new Path(IPreferencesConstants.PREFERENCES_DEFAULT_OVERRIDE_FILE_NAME));
+		URL url = FileLocator.find(bundle, new Path(IPreferencesConstants.PREFERENCES_DEFAULT_OVERRIDE_FILE_NAME), null);
 		if (url == null) {
 			if (EclipsePreferences.DEBUG_PREFERENCE_GENERAL)
 				PrefsMessages.message("Preference default override file not found for bundle: " + bundle.getSymbolicName()); //$NON-NLS-1$
 			return;
 		}
-		URL transURL = BundleFinder.find(bundle, NL_DIR.append(IPreferencesConstants.PREFERENCES_DEFAULT_OVERRIDE_BASE_NAME).addFileExtension(PROPERTIES_FILE_EXTENSION));
+		URL transURL = FileLocator.find(bundle, NL_DIR.append(IPreferencesConstants.PREFERENCES_DEFAULT_OVERRIDE_BASE_NAME).addFileExtension(PROPERTIES_FILE_EXTENSION), null);
 		if (transURL == null && EclipsePreferences.DEBUG_PREFERENCE_GENERAL)
 			PrefsMessages.message("Preference translation file not found for bundle: " + bundle.getSymbolicName()); //$NON-NLS-1$
 		applyDefaults(name(), loadProperties(url), loadProperties(transURL));
