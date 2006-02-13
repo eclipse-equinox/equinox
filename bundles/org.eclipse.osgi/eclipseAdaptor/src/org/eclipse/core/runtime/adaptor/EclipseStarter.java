@@ -1445,6 +1445,7 @@ public class EclipseStarter {
 	 * will be cleared from the properties of the platform.
 	 * </p>
 	 * @param initialProperties the initial properties to set for the platform.
+	 * @since 3.2
 	 */
 	public static void setInitialProperties(Map initialProperties) {
 		if (initialProperties == null || initialProperties.isEmpty())
