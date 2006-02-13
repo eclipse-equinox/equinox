@@ -1434,4 +1434,27 @@ public class EclipseStarter {
 				throw new IllegalArgumentException("Switch error decoding URL"); //$NON-NLS-1$
 		}
 	}
+
+	/**
+	 * Sets the initial properties for the platform.  
+	 * This method must be called before calling the {@link  #run(String[], Runnable)} or 
+	 * {@link #startup(String[], Runnable)} methods for the properties to be used in 
+	 * a launched instance of the platform.  
+	 * <p>
+	 * If the specified properties contains a null value then the key for that value 
+	 * will be cleared from the properties of the platform.
+	 * </p>
+	 * @param initialProperties the initial properties to set for the platform.
+	 */
+	public static void setInitialProperties(Map initialProperties) {
+		if (initialProperties == null || initialProperties.isEmpty())
+			return;
+		for (Iterator it = initialProperties.entrySet().iterator(); it.hasNext();) {
+			Map.Entry entry = (Map.Entry) it.next();
+			if (entry.getValue() != null)
+				FrameworkProperties.setProperty((String) entry.getKey(), (String) entry.getValue());
+			else
+				FrameworkProperties.clearProperty((String) entry.getKey());
+		}
+	}
 }
