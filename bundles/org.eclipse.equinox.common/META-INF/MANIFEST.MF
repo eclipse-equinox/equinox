@@ -8,5 +8,11 @@ Export-Package: org.eclipse.core.internal.runtime;x-friends:="org.eclipse.core.c
  org.eclipse.core.runtime
 Bundle-Vendor: %providerName
 Bundle-Activator: org.eclipse.core.internal.runtime.Activator
-Require-Bundle: system.bundle;resolution:=optional,
- org.eclipse.equinox.supplement;resolution:=optional
+Import-Package: org.eclipse.osgi.framework.log,
+ org.eclipse.osgi.service.datalocation,
+ org.eclipse.osgi.service.localization,
+ org.eclipse.osgi.service.urlconversion,
+ org.eclipse.osgi.util,
+ org.osgi.framework,
+ org.osgi.service.packageadmin,
+ org.osgi.util.tracker
