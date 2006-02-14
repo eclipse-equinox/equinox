@@ -51,29 +51,9 @@ public class Activator implements BundleActivator, ServiceFactory, ServiceTracke
 	 */
 	public void stop(BundleContext context_) throws Exception {
 		prefsTracker.close();
-		if(registration != null)
-		{
-			registration.unregister();
-			registration = null;
-			userAdmin.destroy();
-			userAdmin = null;
-		}
+        unregisterUserAdminService();
 	}
 
-	/**
-	 * Register the UserAdmin service.
-	 */
-	protected void registerUserAdminService() throws Exception {
-		Hashtable properties = new Hashtable(7);
-
-		properties.put(Constants.SERVICE_VENDOR, UserAdminMsg.Service_Vendor);
-		properties.put(Constants.SERVICE_DESCRIPTION, UserAdminMsg.OSGi_User_Admin_service_IBM_Implementation_3);
-		properties.put(Constants.SERVICE_PID, getClass().getName());
-
-		userAdmin = new UserAdmin(prefs, context);
-		registration = context.registerService(userAdminClazz, this, properties);
-		userAdmin.setServiceReference(registration.getReference());
-	}
 
 	public Object getService(Bundle bundle, ServiceRegistration registration_) {
 		userAdmin.setServiceReference(registration_.getReference());
@@ -105,7 +85,32 @@ public class Activator implements BundleActivator, ServiceFactory, ServiceTracke
 		if (service == prefs) {
 			prefs = null;
 		}
-		registration.unregister();
+		unregisterUserAdminService();
 	}
 
+
+	/**
+	 * Register the UserAdmin service.
+	 */
+	protected void registerUserAdminService() throws Exception {
+		Hashtable properties = new Hashtable(7);
+
+		properties.put(Constants.SERVICE_VENDOR, UserAdminMsg.Service_Vendor);
+		properties.put(Constants.SERVICE_DESCRIPTION, UserAdminMsg.OSGi_User_Admin_service_IBM_Implementation_3);
+		properties.put(Constants.SERVICE_PID, getClass().getName());
+
+		userAdmin = new UserAdmin(prefs, context);
+		registration = context.registerService(userAdminClazz, this, properties);
+		userAdmin.setServiceReference(registration.getReference());
+	}
+	
+	protected void unregisterUserAdminService() {
+		if(registration != null)
+		{
+			registration.unregister();
+			registration = null;
+			userAdmin.destroy();
+			userAdmin = null;
+		}
+	}
 }
