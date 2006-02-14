@@ -278,8 +278,8 @@ public class Framework implements EventDispatcher, EventPublisher {
 		}
 		value = properties.getProperty(Constants.FRAMEWORK_LANGUAGE);
 		if (value == null)
-			// set the value of the framework property
-			properties.put(Constants.FRAMEWORK_LANGUAGE, Locale.getDefault().toString());
+			// set the value of the framework language property
+			properties.put(Constants.FRAMEWORK_LANGUAGE, Locale.getDefault().getLanguage());
 	}
 
 	private void setBootDelegation() {
