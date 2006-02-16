@@ -276,7 +276,7 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 	public static IFilter createNamespaceFilter(final String id) {
 		return new IFilter() {
 			public boolean matches(IExtensionPoint target) {
-				return id.equals(target.getNamespace());
+				return id.equals(target.getNamespaceIdentifier());
 			}
 		};
 	}

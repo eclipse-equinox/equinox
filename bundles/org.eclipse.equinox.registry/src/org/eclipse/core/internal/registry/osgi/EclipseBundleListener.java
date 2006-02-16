@@ -87,14 +87,14 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 	}
 
 	private void removeBundle(Bundle bundle) {
-		registry.remove(RegistryUtils.getContributorId(bundle));
+		registry.remove(Long.toString(bundle.getBundleId()));
 	}
 
 	private void addBundle(Bundle bundle) {
-		String contributorId = RegistryUtils.getContributorId(bundle);
+		String contributorId = Long.toString(bundle.getBundleId());
 		// if the given bundle already exists in the registry then return.
 		// note that this does not work for update cases.
-		if (registry.hasNamespace(contributorId))
+		if (registry.hasContribution(contributorId))
 			return;
 		// bail out if system bundle
 		if (bundle.getBundleId() == 0)
@@ -127,14 +127,15 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 		if (is == null)
 			return;
 
-		ResourceBundle b = null;
+		ResourceBundle translationBundle = null;
 		try {
-			b = ResourceTranslator.getResourceBundle(bundle);
+			translationBundle = ResourceTranslator.getResourceBundle(bundle);
 		} catch (MissingResourceException e) {
 			//Ignore the exception
 		}
-
-		registry.addContribution(is, contributorId, true, manifestName, b, token);
+		
+		IContributor contributor = ContributorFactoryOSGi.createContributor(bundle);
+		registry.addContribution(is, contributor, true, manifestName, translationBundle, token);
 
 		// bug 70941
 		// need to ensure we can find resource bundles from fragments

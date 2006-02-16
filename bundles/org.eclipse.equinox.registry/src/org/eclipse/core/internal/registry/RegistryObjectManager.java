@@ -13,6 +13,7 @@ package org.eclipse.core.internal.registry;
 import java.lang.ref.SoftReference;
 import java.util.*;
 import org.eclipse.core.runtime.InvalidRegistryObjectException;
+import org.eclipse.core.runtime.spi.RegistryContributor;
 
 /**
  * This class manage all the object from the registry but does not deal with their dependencies.
@@ -47,6 +48,10 @@ public class RegistryObjectManager implements IObjectManager {
 	//They are used to keep track on a contributor basis of the extension being added or removed
 	private KeyedHashSet newContributions; //represents the contributers added during this session.
 	private Object formerContributions; //represents the contributers encountered in previous sessions. This is loaded lazily.
+
+	private HashMap contributors; // key: contributor ID; value: contributor name
+	private HashMap removedContributors; // key: contributor ID; value: contributor name
+	private KeyedHashSet namespacesIndex; // registry elements (extension & extensionpoints) indexed by namespaces
 
 	// Map key: extensionPointFullyQualifiedName, value int[] of orphan extensions. 
 	// The orphan access does not need to be synchronized because the it is protected by the lock in extension registry.
@@ -117,6 +122,79 @@ public class RegistryObjectManager implements IObjectManager {
 			((Contribution) existingContribution).mergeContribution(contribution);
 		else
 			newContributions.add(contribution);
+
+		updateNamespaceIndex(contribution, true);
+	}
+
+	// TODO make ExtensionPoint, Extension provide namespace in a same way (move it to the RegistryObject?)
+	// See if all the registryObjects have the same namespace. If not, return null.
+	// Also can return null if empty array is passed in or objects are of an unexpected type
+	private String findCommonNamespaceIdentifier(RegistryObject[] registryObjects) {
+		String namespaceName = null;
+		for (int i = 0; i < registryObjects.length; i++) {
+			RegistryObject currentObject = registryObjects[i];
+			String tmp = null;
+			if (currentObject instanceof ExtensionPoint)
+				tmp = ((ExtensionPoint) currentObject).getNamespace();
+			else if (currentObject instanceof Extension)
+				tmp = ((Extension) currentObject).getNamespaceIdentifier();
+
+			if (namespaceName == null) {
+				namespaceName = tmp;
+				continue;
+			}
+			if (!namespaceName.equals(tmp)) {
+				return null;
+			}
+		}
+		return namespaceName;
+	}
+
+	synchronized void removeExtensionPointFromNamespaceIndex(int extensionPoint, String namespaceName) {
+		RegistryIndexElement indexElement = getNamespaceIndex(namespaceName);
+		indexElement.updateExtensionPoint(extensionPoint, false);
+	}
+
+	synchronized void removeExtensionFromNamespaceIndex(int extensions, String namespaceName) {
+		RegistryIndexElement indexElement = getNamespaceIndex(namespaceName);
+		indexElement.updateExtension(extensions, false);
+	}
+
+	// Called from a synchronized method
+	private void updateNamespaceIndex(Contribution contribution, boolean added) {
+		// if all extension points are from the same namespace combine them in one block and add them all together
+		int[] contribExtensionPoints = contribution.getExtensionPoints();
+		RegistryObject[] extensionPointObjects = getObjects(contribExtensionPoints, EXTENSION_POINT);
+		String commonExptsNamespace = null;
+		if (contribExtensionPoints.length > 1)
+			commonExptsNamespace = findCommonNamespaceIdentifier(extensionPointObjects);
+		if (commonExptsNamespace != null) {
+			RegistryIndexElement indexElement = getNamespaceIndex(commonExptsNamespace);
+			indexElement.updateExtensionPoints(contribExtensionPoints, added);
+		} else {
+			for (int i = 0; i < contribExtensionPoints.length; i++) {
+				String namespaceName = ((ExtensionPoint) extensionPointObjects[i]).getNamespace();
+				RegistryIndexElement indexElement = getNamespaceIndex(namespaceName);
+				indexElement.updateExtensionPoint(contribExtensionPoints[i], added);
+			}
+		}
+
+		// if all extensions are from the same namespace combine them in one block and add them all together
+		int[] contrExtensions = contribution.getExtensions();
+		RegistryObject[] extensionObjects = getObjects(contrExtensions, EXTENSION);
+		String commonExtNamespace = null;
+		if (contrExtensions.length > 1)
+			commonExtNamespace = findCommonNamespaceIdentifier(extensionObjects);
+		if (commonExtNamespace != null) {
+			RegistryIndexElement indexElement = getNamespaceIndex(commonExtNamespace);
+			indexElement.updateExtensions(contrExtensions, added);
+		} else {
+			for (int i = 0; i < contrExtensions.length; i++) {
+				String namespaceName = ((Extension) extensionObjects[i]).getNamespaceIdentifier();
+				RegistryIndexElement indexElement = getNamespaceIndex(namespaceName);
+				indexElement.updateExtension(contrExtensions[i], added);
+			}
+		}
 	}
 
 	synchronized int[] getExtensionPointsFrom(String id) {
@@ -126,19 +204,6 @@ public class RegistryObjectManager implements IObjectManager {
 		if (tmp == null)
 			return EMPTY_INT_ARRAY;
 		return ((Contribution) tmp).getExtensionPoints();
-	}
-
-	synchronized Set getNamespaces() {
-		KeyedElement[] formerElts = getFormerContributions().elements();
-		KeyedElement[] newElts = newContributions.elements();
-		Set tmp = new HashSet(formerElts.length + newElts.length);
-		for (int i = 0; i < formerElts.length; i++) {
-			tmp.add(((Contribution) formerElts[i]).getNamespace());
-		}
-		for (int i = 0; i < newElts.length; i++) {
-			tmp.add(((Contribution) newElts[i]).getNamespace());
-		}
-		return tmp;
 	}
 
 	synchronized boolean hasContribution(String id) {
@@ -154,7 +219,7 @@ public class RegistryObjectManager implements IObjectManager {
 			return new KeyedHashSet(0);
 
 		if (formerContributions == null || (result = ((KeyedHashSet) ((formerContributions instanceof SoftReference) ? ((SoftReference) formerContributions).get() : formerContributions))) == null) {
-			result = registry.getTableReader().loadNamespaces();
+			result = registry.getTableReader().loadContributions();
 			formerContributions = new SoftReference(result);
 		}
 		return result;
@@ -496,6 +561,71 @@ public class RegistryObjectManager implements IObjectManager {
 		return new KeyedHashSet[] {newContributions, getFormerContributions()};
 	}
 
+	// This method is used internally and by the writer to reach in. Notice that it doesn't
+	// return contributors marked as removed.
+	HashMap getContributors() {
+		if (contributors == null) {
+			if (fromCache == false)
+				contributors = new HashMap();
+			else
+				contributors = registry.getTableReader().loadContributors();
+		}
+		return contributors;
+	}
+
+	synchronized RegistryContributor getContributor(String id) {
+		RegistryContributor contributor = (RegistryContributor) getContributors().get(id);
+		if (contributor != null)
+			return contributor;
+		// check if we have it among removed contributors - potentially
+		// notification of removals might be processed after the contributor
+		// marked as removed: 
+		if (removedContributors != null)
+			return (RegistryContributor) removedContributors.get(id);
+		return null;
+	}
+
+	// only adds a contributor if it is not already present in the table
+	synchronized void addContributor(RegistryContributor newContributor) {
+		String key = newContributor.getActualId();
+		if (!getContributors().containsKey(key)) {
+			isDirty = true;
+			if (removedContributors != null)
+				removedContributors.remove(key);
+			getContributors().put(key, newContributor);
+		}
+	}
+
+	synchronized void removeContributor(String id) {
+		isDirty = true;
+		RegistryContributor removed = (RegistryContributor) getContributors().remove(id);
+		if (removed != null) {
+			if (removedContributors == null)
+				removedContributors = new HashMap();
+			removedContributors.put(id, removed);
+		}
+	}
+
+	KeyedHashSet getNamespacesIndex() {
+		if (namespacesIndex == null) {
+			if (fromCache == false)
+				namespacesIndex = new KeyedHashSet(0);
+			else
+				namespacesIndex = registry.getTableReader().loadNamespaces();
+		}
+		return namespacesIndex;
+	}
+
+	// Find or create required index element
+	private RegistryIndexElement getNamespaceIndex(String namespaceName) {
+		RegistryIndexElement indexElement = (RegistryIndexElement) getNamespacesIndex().getByKey(namespaceName);
+		if (indexElement == null) {
+			indexElement = new RegistryIndexElement(namespaceName);
+			namespacesIndex.add(indexElement);
+		}
+		return indexElement;
+	}
+
 	/**
 	 * Collect all the objects that are removed by this operation and store
 	 * them in a IObjectManager so that they can be accessed from the appropriate
@@ -583,10 +713,51 @@ public class RegistryObjectManager implements IObjectManager {
 		return registry;
 	}
 
-	synchronized Contribution getContribution(String id) {
-		KeyedElement tmp = newContributions.getByKey(id);
-		if (tmp == null)
-			tmp = getFormerContributions().getByKey(id);
-		return (Contribution) tmp;
+	// Called from a synchronized method only
+	private boolean unlinkChildFromContributions(KeyedElement[] contributions, int id) {
+		for (int i = 0; i < contributions.length; i++) {
+			Contribution candidate = (Contribution) contributions[i];
+			if (candidate == null)
+				continue;
+			if (candidate.hasChild(id)) {
+				candidate.unlinkChild(id);
+				if (candidate.isEmpty())
+					removeContribution(candidate.getContributorId());
+				return true;
+			}
+		}
+		return false;
+	}
+
+	synchronized boolean unlinkChildFromContributions(int id) {
+		if (unlinkChildFromContributions(newContributions.elements, id))
+			return true;
+		return unlinkChildFromContributions(getFormerContributions().elements, id);
+	}
+
+	synchronized public ExtensionPointHandle[] getExtensionPointsFromNamespace(String namespaceName) {
+		RegistryIndexElement indexElement = getNamespaceIndex(namespaceName);
+		int[] namespaceExtensionPoints = indexElement.getExtensionPoints();
+		return (ExtensionPointHandle[]) getHandles(namespaceExtensionPoints, EXTENSION_POINT);
+	}
+
+	static final ExtensionHandle[] EMPTY_EXTENSIONS_ARRAY = new ExtensionHandle[0];
+
+	// This method filters out extensions with no extension point
+	synchronized public ExtensionHandle[] getExtensionsFromNamespace(String namespaceName) {
+		RegistryIndexElement indexElement = getNamespaceIndex(namespaceName);
+		int[] namespaceExtensions = indexElement.getExtensions();
+
+		// filter extensions with no extension point (orphan extensions)
+		List tmp = new ArrayList();
+		Extension[] exts = (Extension[]) getObjects(namespaceExtensions, EXTENSION);
+		for (int i = 0; i < exts.length; i++) {
+			if (getExtensionPointObject(exts[i].getExtensionPointIdentifier()) != null)
+				tmp.add(getHandle(exts[i].getObjectId(), EXTENSION));
+		}
+		if (tmp.size() == 0)
+			return EMPTY_EXTENSIONS_ARRAY;
+		ExtensionHandle[] result = new ExtensionHandle[tmp.size()];
+		return (ExtensionHandle[]) tmp.toArray(result);
 	}
 }

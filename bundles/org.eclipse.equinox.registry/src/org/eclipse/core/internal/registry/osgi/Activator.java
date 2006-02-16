@@ -110,7 +110,7 @@ public class Activator implements BundleActivator {
 		registryRegistration = Activator.getContext().registerService(IExtensionRegistry.class.getName(), defaultRegistry, new Hashtable());
 		defaultProvider = new RegistryProviderOSGI();
 		// Set the registry provider and specify this as a default registry:
-		RegistryUtils.setRegistryProvider(defaultProvider);
+		RegistryFactory.setDefaultRegistryProvider(defaultProvider);
 	}
 
 	private void stopRegistry() {

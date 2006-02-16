@@ -12,6 +12,7 @@ package org.eclipse.core.internal.registry;
 
 import java.io.File;
 import java.lang.ref.SoftReference;
+import org.eclipse.core.runtime.IContributor;
 
 /**
  * An object which represents the user-defined extension point in a 
@@ -27,8 +28,8 @@ public class ExtensionPoint extends RegistryObject {
 	private static final byte LABEL = 0; //The human readable name for the extension point
 	private static final byte SCHEMA = 1; //The schema of the extension point
 	private static final byte QUALIFIED_NAME = 2; //The fully qualified name of the extension point
-	private static final byte NAMESPACE = 3; //The name of the namespace contributing the extension point
-	private static final byte CONTRIBUTOR_ID = 4; //The namespace owner contributing the extension point
+	private static final byte NAMESPACE = 3; //The name of the namespace of the extension point
+	private static final byte CONTRIBUTOR_ID = 4; //The ID of the actual contributor of the extension point
 	private static final int EXTRA_SIZE = 5;
 
 	protected ExtensionPoint(ExtensionRegistry registry, boolean persist) {
@@ -94,8 +95,12 @@ public class ExtensionPoint extends RegistryObject {
 		return getExtraData()[NAMESPACE];
 	}
 
-	protected String getNamespaceOwnerId() {
+	protected String getContributorId() {
 		return getExtraData()[CONTRIBUTOR_ID];
+	}
+
+	public IContributor getContributor() {
+		return registry.getObjectManager().getContributor(getContributorId());
 	}
 
 	void setSchema(String value) {
@@ -118,7 +123,7 @@ public class ExtensionPoint extends RegistryObject {
 		((String[]) extraInformation)[NAMESPACE] = value;
 	}
 
-	void setNamespaceOwnerId(String id) {
+	void setContributorId(String id) {
 		ensureExtraInformationType();
 		((String[]) extraInformation)[CONTRIBUTOR_ID] = id;
 	}

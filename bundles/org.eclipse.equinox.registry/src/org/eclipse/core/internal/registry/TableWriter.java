@@ -13,6 +13,7 @@ package org.eclipse.core.internal.registry;
 import java.io.*;
 import java.util.*;
 import org.eclipse.core.runtime.*;
+import org.eclipse.core.runtime.spi.RegistryContributor;
 
 public class TableWriter {
 	private static final byte fileError = 0;
@@ -21,6 +22,8 @@ public class TableWriter {
 	File extraDataFile;
 	File tableFile;
 	File contributionsFile;
+	File contributorsFile;
+	File namespacesFile;
 	File orphansFile;
 
 	void setMainDataFile(File main) {
@@ -37,6 +40,14 @@ public class TableWriter {
 
 	void setContributionsFile(File fileName) {
 		contributionsFile = fileName;
+	}
+
+	void setContributorsFile(File fileName) {
+		contributorsFile = fileName;
+	}
+
+	void setNamespacesFile(File fileName) {
+		namespacesFile = fileName;
 	}
 
 	void setOrphansFile(File orphan) {
@@ -132,12 +143,14 @@ public class TableWriter {
 			saveExtensionPoint(points[i]);
 		}
 		saveOrphans();
-		saveNamespaces(objectManager.getContributions());
+		saveContributions(objectManager.getContributions());
+		saveContributors(objectManager.getContributors());
+		saveNamespaces(objectManager.getNamespacesIndex());
 		closeFiles(); //Close the files here so we can write the appropriate size information in the table file.
 		saveTables(timestamp); //Write the table last so if that is something went wrong we can know
 	}
 
-	private void saveNamespaces(KeyedHashSet[] contributions) throws IOException {
+	private void saveContributions(KeyedHashSet[] contributions) throws IOException {
 		FileOutputStream fosNamespace = new FileOutputStream(contributionsFile);
 		DataOutputStream outputNamespace = new DataOutputStream(new BufferedOutputStream(fosNamespace));
 		KeyedElement[] newElements = contributions[0].elements();
@@ -174,6 +187,56 @@ public class TableWriter {
 		outputNamespace.close();
 	}
 
+	private void saveNamespaces(KeyedHashSet namespacesIndex) throws IOException {
+		FileOutputStream fosNamespace = new FileOutputStream(namespacesFile);
+		DataOutputStream outputNamespace = new DataOutputStream(new BufferedOutputStream(fosNamespace));
+		KeyedElement[] elements = namespacesIndex.elements();
+
+		KeyedElement[] cachedElements = new KeyedElement[elements.length];
+		int cacheSize = 0;
+		for (int i = 0; i < elements.length; i++) {
+			RegistryIndexElement element = (RegistryIndexElement) elements[i];
+			int[] extensionPoints = filter(element.getExtensionPoints());
+			int[] extensions = filter(element.getExtensions());
+			if (extensionPoints.length == 0 && extensions.length == 0)
+				continue;
+			RegistryIndexElement cachedElement = new RegistryIndexElement((String) element.getKey(), extensionPoints, extensions);
+			cachedElements[cacheSize] = cachedElement;
+			cacheSize++;
+		}
+
+		outputNamespace.writeInt(cacheSize);
+		for (int i = 0; i < cacheSize; i++) {
+			RegistryIndexElement element = (RegistryIndexElement) cachedElements[i];
+			writeStringOrNull((String) element.getKey(), outputNamespace);
+			saveArray(element.getExtensionPoints(), outputNamespace); // it was pre-filtered as we counted the number of elements
+			saveArray(element.getExtensions(), outputNamespace); // it was pre-filtered as we counted the number of elements
+		}
+		outputNamespace.flush();
+		fosNamespace.getFD().sync();
+		outputNamespace.close();
+	}
+
+	private void saveContributors(HashMap contributors) throws IOException {
+		FileOutputStream fosContributors = new FileOutputStream(contributorsFile);
+		DataOutputStream outputContributors = new DataOutputStream(new BufferedOutputStream(fosContributors));
+
+		Collection entries = contributors.values();
+		outputContributors.writeInt(entries.size());
+
+		for (Iterator i = entries.iterator(); i.hasNext();) {
+			RegistryContributor contributor = (RegistryContributor) i.next();
+			writeStringOrNull(contributor.getActualId(), outputContributors);
+			writeStringOrNull(contributor.getActualName(), outputContributors);
+			writeStringOrNull(contributor.getId(), outputContributors);
+			writeStringOrNull(contributor.getName(), outputContributors);
+		}
+
+		outputContributors.flush();
+		fosContributors.getFD().sync();
+		outputContributors.close();
+	}
+
 	private void saveTables(long registryTimeStamp) throws IOException {
 		FileOutputStream fosTable = new FileOutputStream(tableFile);
 		DataOutputStream outputTable = new DataOutputStream(new BufferedOutputStream(fosTable));
@@ -193,6 +256,8 @@ public class TableWriter {
 		output.writeLong(mainDataFile.length());
 		output.writeLong(extraDataFile.length());
 		output.writeLong(contributionsFile.length());
+		output.writeLong(contributorsFile.length());
+		output.writeLong(namespacesFile.length());
 		output.writeLong(orphansFile.length());
 		output.writeUTF(RegistryProperties.getProperty(IRegistryConstants.PROP_OS));
 		output.writeUTF(RegistryProperties.getProperty(IRegistryConstants.PROP_WS));
@@ -230,7 +295,7 @@ public class TableWriter {
 		offsets.put(ext.getId(), outputStream.size());
 		outputStream.writeInt(ext.getId());
 		writeStringOrNull(ext.getSimpleIdentifier(), outputStream);
-		writeStringOrNull(ext.getNamespace(), outputStream);
+		writeStringOrNull(ext.getNamespaceIdentifier(), outputStream);
 		saveArray(filter(ext.getObject().getRawChildren()), outputStream);
 		outputStream.writeInt(getExtraDataPosition());
 		saveExtensionData(ext);
@@ -256,7 +321,7 @@ public class TableWriter {
 		currentOutput.writeInt(element.getId());
 		ConfigurationElement actualCe = (ConfigurationElement) element.getObject();
 
-		writeStringOrNull(actualCe.getNamespaceOwnerId(), currentOutput);
+		writeStringOrNull(actualCe.getContributorId(), currentOutput);
 		writeStringOrNull(actualCe.getName(), currentOutput);
 		currentOutput.writeInt(actualCe.parentId);
 		currentOutput.writeByte(actualCe.parentType);
@@ -300,13 +365,14 @@ public class TableWriter {
 		writeStringOrNull(xpt.getLabel(), extraOutput);
 		writeStringOrNull(xpt.getSchemaReference(), extraOutput);
 		writeStringOrNull(xpt.getUniqueIdentifier(), extraOutput);
-		writeStringOrNull(xpt.getNamespace(), extraOutput);
-		writeStringOrNull(((ExtensionPoint) xpt.getObject()).getNamespaceOwnerId(), extraOutput);
+		writeStringOrNull(xpt.getNamespaceIdentifier(), extraOutput);
+		writeStringOrNull(((ExtensionPoint) xpt.getObject()).getContributorId(), extraOutput);
 	}
 
 	private void saveExtensionData(ExtensionHandle extension) throws IOException {
 		writeStringOrNull(extension.getLabel(), extraOutput);
 		writeStringOrNull(extension.getExtensionPointUniqueIdentifier(), extraOutput);
+		writeStringOrNull(extension.getContributorId(), extraOutput);
 	}
 
 	private void writeStringOrNull(String string, DataOutputStream out) throws IOException {

@@ -21,7 +21,6 @@ import org.eclipse.core.runtime.*;
  * @since org.eclipse.equinox.registry 3.2 
  */
 public class BaseExtensionHandle extends Handle implements IExtension {
-	static final BaseExtensionHandle[] EMPTY_ARRAY = new BaseExtensionHandle[0];
 
 	public BaseExtensionHandle(IObjectManager objectManager, int id) {
 		super(objectManager, id);
@@ -35,8 +34,21 @@ public class BaseExtensionHandle extends Handle implements IExtension {
 		return getExtension().shouldPersist();
 	}
 
+	// Method left for backward compatiblity only
 	public String getNamespace() {
-		return getExtension().getNamespaceName();
+		return getContributor().getName();
+	}
+
+	public String getNamespaceIdentifier() {
+		return getExtension().getNamespaceIdentifier();
+	}
+
+	public IContributor getContributor() {
+		return getExtension().getContributor();
+	}
+	
+	String getContributorId() {
+		return getExtension().getContributorId();
 	}
 
 	public String getExtensionPointUniqueIdentifier() {

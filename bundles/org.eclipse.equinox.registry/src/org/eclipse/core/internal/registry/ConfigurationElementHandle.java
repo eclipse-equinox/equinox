@@ -112,11 +112,18 @@ public class ConfigurationElementHandle extends Handle implements IConfiguration
 		return getConfigurationElement();
 	}
 
+	// Method left for backward compatibility only
 	public String getNamespace() {
-		String result = getConfigurationElement().getNamespace();
-		if (result == null)
-			return getDeclaringExtension().getNamespace();
-		return result;
+		return getContributor().getName();
+	}
+
+	public String getNamespaceIdentifier() {
+		// namespace name is determined by the contributing extension
+		return getDeclaringExtension().getNamespaceIdentifier();
+	}
+
+	public IContributor getContributor() {
+		return getConfigurationElement().getContributor();
 	}
 
 	public boolean isValid() {

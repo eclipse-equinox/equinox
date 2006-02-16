@@ -23,7 +23,6 @@ import org.eclipse.core.runtime.*;
  * @since org.eclipse.equinox.registry 3.2 
  */
 public class BaseExtensionPointHandle extends Handle implements IExtensionPoint {
-	static final BaseExtensionPointHandle[] EMPTY_ARRAY = new BaseExtensionPointHandle[0];
 
 	public BaseExtensionPointHandle(IObjectManager objectManager, int id) {
 		super(objectManager, id);
@@ -33,8 +32,17 @@ public class BaseExtensionPointHandle extends Handle implements IExtensionPoint 
 		return (IExtension[]) objectManager.getHandles(getExtensionPoint().getRawChildren(), RegistryObjectManager.EXTENSION);
 	}
 
+	// This method is left for backward compatibility only
 	public String getNamespace() {
+		return getContributor().getName();
+	}
+	
+	public String getNamespaceIdentifier() {
 		return getExtensionPoint().getNamespace();
+	}
+	
+	public IContributor getContributor() {
+		return getExtensionPoint().getContributor();
 	}
 
 	protected boolean shouldPersist() {

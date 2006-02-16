@@ -17,6 +17,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.eclipse.core.internal.registry.spi.ConfigurationElementDescription;
 import org.eclipse.core.internal.registry.spi.ConfigurationElementAttribute;
 import org.eclipse.core.runtime.*;
+import org.eclipse.core.runtime.spi.RegistryContributor;
 import org.eclipse.core.runtime.spi.RegistryStrategy;
 import org.eclipse.osgi.storagemanager.StorageManager;
 import org.eclipse.osgi.util.NLS;
@@ -184,14 +185,9 @@ public class ExtensionRegistry implements IExtensionRegistry {
 	}
 
 	private void basicAdd(Contribution element, boolean link) {
-		// ignore anonymous namespaces
-		if (element.getNamespace() == null)
-			return;
-
 		registryObjects.addContribution(element);
 		if (!link)
 			return;
-
 		Set affectedNamespaces = addExtensionsAndExtensionPoints(element);
 		setObjectManagers(affectedNamespaces, registryObjects.createDelegatingObjectManager(registryObjects.getAssociatedObjects(element.getContributorId())));
 	}
@@ -211,6 +207,7 @@ public class ExtensionRegistry implements IExtensionRegistry {
 		setObjectManagers(affectedNamespaces, registryObjects.createDelegatingObjectManager(associatedObjects));
 
 		registryObjects.removeContribution(contributorId);
+		registryObjects.removeContributor(contributorId);
 	}
 
 	// allow other objects in the registry to use the same lock
@@ -299,16 +296,11 @@ public class ExtensionRegistry implements IExtensionRegistry {
 			return null;
 		String namespace = extensionId.substring(0, lastdot);
 
-		String[] contributorIds = getContributorIds(namespace);
-		for (int i = 0; i < contributorIds.length; i++) {
-			int[] extensions = registryObjects.getExtensionsFrom(contributorIds[i]);
-			for (int j = 0; j < extensions.length; j++) {
-				Extension ext = (Extension) registryObjects.getObject(extensions[j], RegistryObjectManager.EXTENSION);
-				if (extensionId.equals(ext.getUniqueIdentifier()) && registryObjects.getExtensionPointObject(ext.getExtensionPointIdentifier()) != null) {
-					return (IExtension) registryObjects.getHandle(extensions[j], RegistryObjectManager.EXTENSION);
-				}
-			}
-
+		ExtensionHandle[] extensions = registryObjects.getExtensionsFromNamespace(namespace);
+		for (int i = 0; i < extensions.length; i++) {
+			ExtensionHandle suspect = extensions[i];
+			if (extensionId.equals(suspect.getUniqueIdentifier()))
+				return suspect;
 		}
 		return null;
 	}
@@ -375,15 +367,10 @@ public class ExtensionRegistry implements IExtensionRegistry {
 	 *  (non-Javadoc)
 	 * @see org.eclipse.core.runtime.IExtensionRegistry#getExtensionPoints(java.lang.String)
 	 */
-	public IExtensionPoint[] getExtensionPoints(String namespace) {
+	public IExtensionPoint[] getExtensionPoints(String namespaceName) {
 		access.enterRead();
 		try {
-			String[] contributorIds = getContributorIds(namespace);
-			IExtensionPoint[] result = ExtensionPointHandle.EMPTY_ARRAY;
-			for (int i = 0; i < contributorIds.length; i++) {
-				result = (IExtensionPoint[]) concatArrays(result, registryObjects.getHandles(registryObjects.getExtensionPointsFrom(contributorIds[i]), RegistryObjectManager.EXTENSION_POINT));
-			}
-			return result;
+			return registryObjects.getExtensionPointsFromNamespace(namespaceName);
 		} finally {
 			access.exitRead();
 		}
@@ -393,22 +380,10 @@ public class ExtensionRegistry implements IExtensionRegistry {
 	 *  (non-Javadoc)
 	 * @see org.eclipse.core.runtime.IExtensionRegistry#getExtensions(java.lang.String)
 	 */
-	public IExtension[] getExtensions(String namespace) {
+	public IExtension[] getExtensions(String namespaceName) {
 		access.enterRead();
 		try {
-			String[] contributorIds = getContributorIds(namespace);
-			List tmp = new ArrayList();
-			for (int i = 0; i < contributorIds.length; i++) {
-				Extension[] exts = (Extension[]) registryObjects.getObjects(registryObjects.getExtensionsFrom(contributorIds[i]), RegistryObjectManager.EXTENSION);
-				for (int j = 0; j < exts.length; j++) {
-					if (registryObjects.getExtensionPointObject(exts[j].getExtensionPointIdentifier()) != null)
-						tmp.add(registryObjects.getHandle(exts[j].getObjectId(), RegistryObjectManager.EXTENSION));
-				}
-			}
-			if (tmp.size() == 0)
-				return ExtensionHandle.EMPTY_ARRAY;
-			IExtension[] result = new IExtension[tmp.size()];
-			return (IExtension[]) tmp.toArray(result);
+			return registryObjects.getExtensionsFromNamespace(namespaceName);
 		} finally {
 			access.exitRead();
 		}
@@ -421,15 +396,18 @@ public class ExtensionRegistry implements IExtensionRegistry {
 	public String[] getNamespaces() {
 		access.enterRead();
 		try {
-			Set namespaces = registryObjects.getNamespaces();
-			String[] result = new String[namespaces.size()];
-			return (String[]) namespaces.toArray(result);
+			KeyedElement[] namespaceElements = registryObjects.getNamespacesIndex().elements();
+			String[] namespaceNames = new String[namespaceElements.length];
+			for (int i = 0; i < namespaceElements.length; i++) {
+				namespaceNames[i] = (String) ((RegistryIndexElement) namespaceElements[i]).getKey();
+			}
+			return namespaceNames;
 		} finally {
 			access.exitRead();
 		}
 	}
 
-	public boolean hasNamespace(String name) {
+	public boolean hasContribution(String name) {
 		access.enterRead();
 		try {
 			return registryObjects.hasContribution(name);
@@ -498,6 +476,7 @@ public class ExtensionRegistry implements IExtensionRegistry {
 	//Return the affected namespace
 	private String removeExtension(int extensionId) {
 		Extension extension = (Extension) registryObjects.getObject(extensionId, RegistryObjectManager.EXTENSION);
+		registryObjects.removeExtensionFromNamespaceIndex(extensionId, extension.getNamespaceIdentifier());
 		String xptName = extension.getExtensionPointIdentifier();
 		ExtensionPoint extPoint = registryObjects.getExtensionPointObject(xptName);
 		if (extPoint == null) {
@@ -522,6 +501,7 @@ public class ExtensionRegistry implements IExtensionRegistry {
 
 	private String removeExtensionPoint(int extPoint) {
 		ExtensionPoint extensionPoint = (ExtensionPoint) registryObjects.getObject(extPoint, RegistryObjectManager.EXTENSION_POINT);
+		registryObjects.removeExtensionPointFromNamespaceIndex(extPoint, extensionPoint.getNamespace());
 		int[] existingExtensions = extensionPoint.getRawChildren();
 		if (existingExtensions == null || existingExtensions.length == 0) {
 			return null;
@@ -583,6 +563,8 @@ public class ExtensionRegistry implements IExtensionRegistry {
 					theTableReader.setExtraDataFile(cacheStorageManager.lookup(TableReader.EXTRA, false));
 					theTableReader.setMainDataFile(cacheStorageManager.lookup(TableReader.MAIN, false));
 					theTableReader.setContributionsFile(cacheStorageManager.lookup(TableReader.CONTRIBUTIONS, false));
+					theTableReader.setContributorsFile(cacheStorageManager.lookup(TableReader.CONTRIBUTORS, false));
+					theTableReader.setNamespacesFile(cacheStorageManager.lookup(TableReader.NAMESPACES, false));
 					theTableReader.setOrphansFile(cacheStorageManager.lookup(TableReader.ORPHANS, false));
 					isRegistryFilledFromCache = registryObjects.init(computeTimeStamp());
 				} catch (IOException e) {
@@ -645,6 +627,8 @@ public class ExtensionRegistry implements IExtensionRegistry {
 		File mainFile = null;
 		File extraFile = null;
 		File contributionsFile = null;
+		File contributorsFile = null;
+		File namespacesFile = null;
 		File orphansFile = null;
 
 		TableWriter theTableWriter = new TableWriter(this);
@@ -654,16 +638,22 @@ public class ExtensionRegistry implements IExtensionRegistry {
 			cacheStorageManager.lookup(TableReader.MAIN, true);
 			cacheStorageManager.lookup(TableReader.EXTRA, true);
 			cacheStorageManager.lookup(TableReader.CONTRIBUTIONS, true);
+			cacheStorageManager.lookup(TableReader.CONTRIBUTORS, true);
+			cacheStorageManager.lookup(TableReader.NAMESPACES, true);
 			cacheStorageManager.lookup(TableReader.ORPHANS, true);
 			tableFile = File.createTempFile(TableReader.TABLE, ".new", cacheStorageManager.getBase()); //$NON-NLS-1$
 			mainFile = File.createTempFile(TableReader.MAIN, ".new", cacheStorageManager.getBase()); //$NON-NLS-1$
 			extraFile = File.createTempFile(TableReader.EXTRA, ".new", cacheStorageManager.getBase()); //$NON-NLS-1$
 			contributionsFile = File.createTempFile(TableReader.CONTRIBUTIONS, ".new", cacheStorageManager.getBase()); //$NON-NLS-1$
+			contributorsFile = File.createTempFile(TableReader.CONTRIBUTORS, ".new", cacheStorageManager.getBase()); //$NON-NLS-1$
+			namespacesFile = File.createTempFile(TableReader.NAMESPACES, ".new", cacheStorageManager.getBase()); //$NON-NLS-1$
 			orphansFile = File.createTempFile(TableReader.ORPHANS, ".new", cacheStorageManager.getBase()); //$NON-NLS-1$
 			theTableWriter.setTableFile(tableFile);
 			theTableWriter.setExtraDataFile(extraFile);
 			theTableWriter.setMainDataFile(mainFile);
 			theTableWriter.setContributionsFile(contributionsFile);
+			theTableWriter.setContributorsFile(contributorsFile);
+			theTableWriter.setNamespacesFile(namespacesFile);
 			theTableWriter.setOrphansFile(orphansFile);
 		} catch (IOException e) {
 			cacheStorageManager.close();
@@ -671,7 +661,7 @@ public class ExtensionRegistry implements IExtensionRegistry {
 		}
 		try {
 			if (theTableWriter.saveCache(registryObjects, computeTimeStamp()))
-				cacheStorageManager.update(new String[] {TableReader.TABLE, TableReader.MAIN, TableReader.EXTRA, TableReader.CONTRIBUTIONS, TableReader.ORPHANS}, new String[] {tableFile.getName(), mainFile.getName(), extraFile.getName(), contributionsFile.getName(), orphansFile.getName()});
+				cacheStorageManager.update(new String[] {TableReader.TABLE, TableReader.MAIN, TableReader.EXTRA, TableReader.CONTRIBUTIONS, TableReader.CONTRIBUTORS, TableReader.NAMESPACES, TableReader.ORPHANS}, new String[] {tableFile.getName(), mainFile.getName(), extraFile.getName(), contributionsFile.getName(), contributorsFile.getName(), namespacesFile.getName(), orphansFile.getName()});
 		} catch (IOException e) {
 			//Ignore the exception since we can recompute the cache
 		}
@@ -777,24 +767,8 @@ public class ExtensionRegistry implements IExtensionRegistry {
 		return isRegistryFilledFromCache;
 	}
 
-	public Object processExecutableExtension(String contributorName, String namespaceOwnerId, String namespaceName, String className, Object initData, String propertyName, ConfigurationElement confElement) throws CoreException {
-		ConfigurationElementHandle confElementHandle = new ConfigurationElementHandle(getObjectManager(), confElement.getObjectId());
-		return strategy.createExecutableExtension(contributorName, namespaceOwnerId, namespaceName, className, initData, propertyName, confElementHandle);
-	}
-
-	//////////////////////////////////////////////////////////////////////////////////////////
-	// Registry namespace resolution
-
-	public String getNamespaceOwnerId(String contributorId) {
-		return strategy.getNamespaceOwnerId(contributorId);
-	}
-
-	public String getNamespace(String contributorId) {
-		return strategy.getNamespace(contributorId);
-	}
-
-	public String[] getContributorIds(String namespace) {
-		return strategy.getNamespaceContributors(namespace);
+	public Object createExecutableExtension(RegistryContributor defaultContributor, String className, String requestedContributorName) throws CoreException {
+		return strategy.createExecutableExtension(defaultContributor, className, requestedContributorName);
 	}
 
 	//////////////////////////////////////////////////////////////////////////////////////////
@@ -898,19 +872,23 @@ public class ExtensionRegistry implements IExtensionRegistry {
 		return false;
 	}
 
-	public boolean addContribution(InputStream is, String contributorId, boolean persist, String contributionName, ResourceBundle b, Object key) {
+	public boolean addContribution(InputStream is, IContributor contributor, boolean persist, String contributionName, ResourceBundle translationBundle, Object key) {
 		if (!checkReadWriteAccess(key, persist))
 			throw new IllegalArgumentException("Unauthorized access to the ExtensionRegistry.addXMLContribution() method. Check if proper access token is supplied."); //$NON-NLS-1$
 		if (contributionName == null)
 			contributionName = ""; //$NON-NLS-1$
-		String ownerName = getNamespace(contributorId);
+
+		RegistryContributor internalContributor = (RegistryContributor) contributor;
+		registryObjects.addContributor(internalContributor); // only adds a contributor if it is not already present
+		
+		String ownerName = internalContributor.getActualName();
 		String message = NLS.bind(RegistryMessages.parse_problems, ownerName);
 		MultiStatus problems = new MultiStatus(RegistryMessages.OWNER_NAME, ExtensionsParser.PARSE_PROBLEM, message, null);
 		ExtensionsParser parser = new ExtensionsParser(problems, this);
-		Contribution contribution = getElementFactory().createContribution(contributorId, persist);
+		Contribution contribution = getElementFactory().createContribution(internalContributor.getActualId(), persist);
 
 		try {
-			parser.parseManifest(strategy.getXMLParser(), new InputSource(is), contributionName, getObjectManager(), contribution, b);
+			parser.parseManifest(strategy.getXMLParser(), new InputSource(is), contributionName, getObjectManager(), contribution, translationBundle);
 			if (problems.getSeverity() != IStatus.OK) {
 				log(problems);
 				return false;
@@ -950,7 +928,7 @@ public class ExtensionRegistry implements IExtensionRegistry {
 	 * 
 	 * @param identifier Id of the extension point. If non-qualified names is supplied,
 	 * it will be converted internally into a fully qualified name
-	 * @param contributorId ID of the supplier of this contribution
+	 * @param contributor the contributor of this extension point
 	 * @param persist indicates if contribution should be stored in the registry cache. If false,
 	 * contribution is not persisted in the registry cache and is lost on Eclipse restart
 	 * @param label display string for the extension point
@@ -962,9 +940,14 @@ public class ExtensionRegistry implements IExtensionRegistry {
 	 * allows non-persisted registry elements to be modified.
 	 * @throws IllegalArgumentException if incorrect token is passed in
 	 */
-	public void addExtensionPoint(String identifier, String contributorId, boolean persist, String label, String schemaReference, Object token) throws IllegalArgumentException {
+	public void addExtensionPoint(String identifier, IContributor contributor, boolean persist, String label, String schemaReference, Object token) throws IllegalArgumentException {
 		if (!checkReadWriteAccess(token, persist))
 			throw new IllegalArgumentException("Unauthorized access to the ExtensionRegistry.addExtensionPoint() method. Check if proper access token is supplied."); //$NON-NLS-1$
+
+		RegistryContributor internalContributor = (RegistryContributor) contributor;
+		registryObjects.addContributor(internalContributor); // only adds a contributor if it is not already present
+		String contributorId = internalContributor.getActualId();
+
 		// Extension point Id might not be null
 		if (identifier == null) {
 			String message = NLS.bind(RegistryMessages.create_failedExtensionPoint, label);
@@ -973,24 +956,29 @@ public class ExtensionRegistry implements IExtensionRegistry {
 		if (schemaReference == null)
 			schemaReference = ""; //$NON-NLS-1$
 
-		// prepare namespace information
-		String namespaceName = getNamespace(contributorId);
-		String namespaceOwnerId = getNamespaceOwnerId(contributorId);
-
 		// addition wraps in a contribution
 		Contribution contribution = getElementFactory().createContribution(contributorId, persist);
-
 		ExtensionPoint currentExtPoint = getElementFactory().createExtensionPoint(persist);
-		String uniqueId = namespaceName + '.' + identifier;
+
+		String uniqueId;
+		String namespaceName;
+		int simpleIdStart = identifier.lastIndexOf('.');
+		if (simpleIdStart == -1) {
+			namespaceName = contribution.getDefaultNamespace();
+			uniqueId = namespaceName + '.' + identifier;
+		} else {
+			namespaceName = identifier.substring(0, simpleIdStart);
+			uniqueId = identifier;
+		}
 		currentExtPoint.setUniqueIdentifier(uniqueId);
+		currentExtPoint.setNamespace(namespaceName);
 		String labelNLS = translate(label, null);
 		currentExtPoint.setLabel(labelNLS);
 		currentExtPoint.setSchema(schemaReference);
 
 		getObjectManager().addExtensionPoint(currentExtPoint, true);
 
-		currentExtPoint.setNamespace(namespaceName);
-		currentExtPoint.setNamespaceOwnerId(namespaceOwnerId);
+		currentExtPoint.setContributorId(contributorId);
 
 		// array format: {Number of extension points, Number of extensions, Extension Id}
 		int[] contributionChildren = new int[3];
@@ -1015,7 +1003,7 @@ public class ExtensionRegistry implements IExtensionRegistry {
 	 * 
 	 * @param identifier Id of the extension. If non-qualified name is supplied,
 	 * it will be converted internally into a fully qualified name
-	 * @param contributorId ID of the supplier of this contribution
+	 * @param contributor the contributor of this extension
 	 * @param persist indicates if contribution should be stored in the registry cache. If false,
 	 * contribution is not persisted in the registry cache and is lost on Eclipse restart
 	 * @param label display string for this extension
@@ -1028,33 +1016,46 @@ public class ExtensionRegistry implements IExtensionRegistry {
 	 * allows non-persisted registry elements to be modified.
 	 * @throws IllegalArgumentException if incorrect token is passed in
 	 */
-	public void addExtension(String identifier, String contributorId, boolean persist, String label, String extensionPointId, ConfigurationElementDescription configurationElements, Object token) throws IllegalArgumentException {
+	public void addExtension(String identifier, IContributor contributor, boolean persist, String label, String extensionPointId, ConfigurationElementDescription configurationElements, Object token) throws IllegalArgumentException {
 		if (!checkReadWriteAccess(token, persist))
 			throw new IllegalArgumentException("Unauthorized access to the ExtensionRegistry.addExtensionPoint() method. Check if proper access token is supplied."); //$NON-NLS-1$
 		// prepare namespace information
-		String namespaceName = getNamespace(contributorId);
-		String namespaceOwnerId = getNamespaceOwnerId(contributorId);
+		RegistryContributor internalContributor = (RegistryContributor) contributor;
+		registryObjects.addContributor(internalContributor); // only adds a contributor if it is not already present
+		String contributorId = internalContributor.getActualId();
 
 		// addition wraps in a contribution
 		Contribution contribution = getElementFactory().createContribution(contributorId, persist);
-
 		Extension currentExtension = getElementFactory().createExtension(persist);
-		currentExtension.setSimpleIdentifier(identifier);
+
+		String simpleId;
+		String namespaceName;
+		int simpleIdStart = identifier.lastIndexOf('.');
+		if (simpleIdStart != -1) {
+			simpleId = identifier.substring(simpleIdStart + 1);
+			namespaceName = identifier.substring(0, simpleIdStart);
+		} else {
+			simpleId = identifier;
+			namespaceName = contribution.getDefaultNamespace();
+		}
+		currentExtension.setSimpleIdentifier(simpleId);
+		currentExtension.setNamespaceIdentifier(namespaceName);
+
 		String extensionLabelNLS = translate(label, null);
 		currentExtension.setLabel(extensionLabelNLS);
 
 		String targetExtensionPointId;
 		if (extensionPointId.indexOf('.') == -1) // No dots -> namespace name added at the start
-			targetExtensionPointId = namespaceName + '.' + extensionPointId;
+			targetExtensionPointId = contribution.getDefaultNamespace() + '.' + extensionPointId;
 		else
 			targetExtensionPointId = extensionPointId;
 		currentExtension.setExtensionPointIdentifier(targetExtensionPointId);
 
 		getObjectManager().add(currentExtension, true);
 
-		createExtensionData(namespaceOwnerId, configurationElements, currentExtension, persist);
+		createExtensionData(contributorId, configurationElements, currentExtension, persist);
 
-		currentExtension.setNamespaceName(namespaceName);
+		currentExtension.setContributorId(contributorId);
 
 		int[] contributionChildren = new int[3];
 
@@ -1067,9 +1068,9 @@ public class ExtensionRegistry implements IExtensionRegistry {
 	}
 
 	// Fill in the actual content of this extension
-	private void createExtensionData(String namespaceOwnerId, ConfigurationElementDescription description, RegistryObject parent, boolean persist) {
+	private void createExtensionData(String contributorId, ConfigurationElementDescription description, RegistryObject parent, boolean persist) {
 		ConfigurationElement currentConfigurationElement = getElementFactory().createConfigurationElement(persist);
-		currentConfigurationElement.setNamespaceOwnerId(namespaceOwnerId);
+		currentConfigurationElement.setContributorId(contributorId);
 		currentConfigurationElement.setName(description.getName());
 
 		ConfigurationElementAttribute[] descriptionProperties = description.getAttributes();
@@ -1095,7 +1096,7 @@ public class ExtensionRegistry implements IExtensionRegistry {
 		ConfigurationElementDescription[] children = description.getChildren();
 		if (children != null) {
 			for (int i = 0; i < children.length; i++) {
-				createExtensionData(namespaceOwnerId, children[i], currentConfigurationElement, persist);
+				createExtensionData(contributorId, children[i], currentConfigurationElement, persist);
 			}
 		}
 
@@ -1142,17 +1143,7 @@ public class ExtensionRegistry implements IExtensionRegistry {
 			registryObjects.addNavigableObjects(removed);
 			getDelta(namespace).setObjectManager(registryObjects.createDelegatingObjectManager(removed));
 
-			String[] possibleContributors = strategy.getNamespaceContributors(namespace);
-			for (int i = 0; i < possibleContributors.length; i++) {
-				Contribution contribution = registryObjects.getContribution(possibleContributors[i]);
-				if (contribution.hasChild(id)) {
-					contribution.unlinkChild(id);
-					if (contribution.isEmpty())
-						registryObjects.removeContribution(possibleContributors[i]);
-					break;
-				}
-			}
-
+			registryObjects.unlinkChildFromContributions(id);
 			fireRegistryChangeEvent();
 		} finally {
 			access.exitWrite();
@@ -1161,7 +1152,9 @@ public class ExtensionRegistry implements IExtensionRegistry {
 	}
 
 	/**
-	 * This is an experimental function. It <b>will</b> be modified in future.
+	 * <strong>EXPERIMENTAL</strong>. This method has been added as part of a work in progress. 
+	 * There is a guarantee neither that this API will work nor that it will remain the same. 
+	 * Please do not use this method without consulting with the Equinox team.
 	 */
 	public Object getTemporaryUserToken() {
 		return userToken;

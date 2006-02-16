@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.util.*;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParserFactory;
-import org.eclipse.core.internal.registry.osgi.Activator;
 import org.eclipse.core.runtime.*;
 import org.eclipse.osgi.util.NLS;
 import org.xml.sax.*;
@@ -81,7 +80,7 @@ public class ExtensionsParser extends DefaultHandler {
 	// Keep track of the object encountered.
 	private RegistryObjectManager objectManager;
 
-	private Contribution namespace;
+	private Contribution contribution;
 
 	//This keeps tracks of the value of the configuration element in case the value comes in several pieces (see characters()). See as well bug 75592. 
 	private String configurationElementValue;
@@ -207,7 +206,7 @@ public class ExtensionsParser extends DefaultHandler {
 					}
 					extensions.clear();
 				}
-				namespace.setRawChildren(namespaceChildren);
+				contribution.setRawChildren(namespaceChildren);
 				break;
 			case BUNDLE_EXTENSION_POINT_STATE :
 				if (elementName.equals(EXTENSION_POINT)) {
@@ -219,7 +218,9 @@ public class ExtensionsParser extends DefaultHandler {
 					stateStack.pop();
 					// Finish up extension object
 					Extension currentExtension = (Extension) objectStack.pop();
-					currentExtension.setNamespaceName(namespace.getNamespace());
+					if (currentExtension.getNamespaceIdentifier() == null)
+						currentExtension.setNamespaceIdentifier(contribution.getDefaultNamespace());
+					currentExtension.setContributorId(contribution.getContributorId());
 					scratchVectors[EXTENSION_INDEX].add(currentExtension);
 				}
 				break;
@@ -279,8 +280,8 @@ public class ExtensionsParser extends DefaultHandler {
 		configurationElementValue = null;
 
 		// create a new Configuration Element and push it onto the object stack
-		ConfigurationElement currentConfigurationElement = registry.getElementFactory().createConfigurationElement(namespace.shouldPersist());
-		currentConfigurationElement.setNamespaceOwnerId(namespace.getNamespaceOwnerId());
+		ConfigurationElement currentConfigurationElement = registry.getElementFactory().createConfigurationElement(contribution.shouldPersist());
+		currentConfigurationElement.setContributorId(contribution.getContributorId());
 		objectStack.push(currentConfigurationElement);
 		currentConfigurationElement.setName(elementName);
 
@@ -297,7 +298,7 @@ public class ExtensionsParser extends DefaultHandler {
 		// in compatibility mode, any extraneous elements will be silently ignored
 		compatibilityMode = attributes.getLength() > 0;
 		stateStack.push(new Integer(BUNDLE_STATE));
-		objectStack.push(namespace);
+		objectStack.push(contribution);
 	}
 
 	private void handleBundleState(String elementName, Attributes attributes) {
@@ -341,7 +342,7 @@ public class ExtensionsParser extends DefaultHandler {
 		this.resources = bundle;
 		this.objectManager = registryObjects;
 		//initialize the parser with this object
-		this.namespace = currentNamespace;
+		this.contribution = currentNamespace;
 		if (registry.debug())
 			start = System.currentTimeMillis();
 
@@ -388,7 +389,7 @@ public class ExtensionsParser extends DefaultHandler {
 	}
 
 	private void parseExtensionAttributes(Attributes attributes) {
-		Extension currentExtension = registry.getElementFactory().createExtension(namespace.shouldPersist());
+		Extension currentExtension = registry.getElementFactory().createExtension(contribution.shouldPersist());
 		objectStack.push(currentExtension);
 
 		// Process Attributes
@@ -399,13 +400,24 @@ public class ExtensionsParser extends DefaultHandler {
 
 			if (attrName.equals(EXTENSION_NAME))
 				currentExtension.setLabel(translate(attrValue));
-			else if (attrName.equals(EXTENSION_ID))
-				currentExtension.setSimpleIdentifier(attrValue);
-			else if (attrName.equals(EXTENSION_TARGET)) {
+			else if (attrName.equals(EXTENSION_ID)) {
+				String simpleId;
+				String namespaceName;
+				int simpleIdStart = attrValue.lastIndexOf('.');
+				if (simpleIdStart != -1) {
+					simpleId = attrValue.substring(simpleIdStart + 1);
+					namespaceName = attrValue.substring(0, simpleIdStart);
+				} else {
+					simpleId = attrValue;
+					namespaceName = contribution.getDefaultNamespace();
+				}
+				currentExtension.setSimpleIdentifier(simpleId);
+				currentExtension.setNamespaceIdentifier(namespaceName);
+			} else if (attrName.equals(EXTENSION_TARGET)) {
 				// check if point is specified as a simple or qualified name
 				String targetName;
 				if (attrValue.lastIndexOf('.') == -1) {
-					String baseId = namespace.getNamespace();
+					String baseId = contribution.getDefaultNamespace();
 					targetName = baseId + '.' + attrValue;
 				} else
 					targetName = attrValue;
@@ -447,7 +459,7 @@ public class ExtensionsParser extends DefaultHandler {
 	}
 
 	private void parseExtensionPointAttributes(Attributes attributes) {
-		ExtensionPoint currentExtPoint = registry.getElementFactory().createExtensionPoint(namespace.shouldPersist());
+		ExtensionPoint currentExtPoint = registry.getElementFactory().createExtensionPoint(contribution.shouldPersist());
 
 		// Process Attributes
 		int len = (attributes != null) ? attributes.getLength() : 0;
@@ -458,7 +470,19 @@ public class ExtensionsParser extends DefaultHandler {
 			if (attrName.equals(EXTENSION_POINT_NAME))
 				currentExtPoint.setLabel(translate(attrValue));
 			else if (attrName.equals(EXTENSION_POINT_ID)) {
-				currentExtPoint.setUniqueIdentifier(namespace.getNamespace() + '.' + attrValue);
+				String uniqueId;
+				String namespaceName;
+				int simpleIdStart = attrValue.lastIndexOf('.');
+				if (simpleIdStart == -1) {
+					namespaceName = contribution.getDefaultNamespace();
+					uniqueId = namespaceName + '.' + attrValue;
+				} else {
+					namespaceName = attrValue.substring(0, simpleIdStart);
+					uniqueId = attrValue;
+				}
+				currentExtPoint.setUniqueIdentifier(uniqueId);
+				currentExtPoint.setNamespace(namespaceName);
+
 			} else if (attrName.equals(EXTENSION_POINT_SCHEMA))
 				currentExtPoint.setSchema(attrValue);
 			else
@@ -473,8 +497,9 @@ public class ExtensionsParser extends DefaultHandler {
 		}
 
 		objectManager.addExtensionPoint(currentExtPoint, true);
-		currentExtPoint.setNamespace(namespace.getNamespace());
-		currentExtPoint.setNamespaceOwnerId(namespace.getNamespaceOwnerId());
+		if (currentExtPoint.getNamespace() == null)
+			currentExtPoint.setNamespace(contribution.getDefaultNamespace());
+		currentExtPoint.setContributorId(contribution.getContributorId());
 
 		// Now populate the the vector just below us on the objectStack with this extension point
 		scratchVectors[EXTENSION_POINT_INDEX].add(currentExtPoint);

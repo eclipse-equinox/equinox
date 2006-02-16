@@ -24,7 +24,7 @@ import org.eclipse.osgi.service.resolver.PlatformAdmin;
  * - Use Eclipse platform state for cache validation
  * - Supplied alternative cache location (primarily used with shared installs)
  * 
- * @since org.eclipse.equinox.registry 1.0
+ * @since org.eclipse.equinox.registry 3.2
  */
 public class EquinoxRegistryStrategy extends RegistryStrategyOSGI {
 

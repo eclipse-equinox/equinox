@@ -14,6 +14,7 @@ import java.io.*;
 import java.util.HashMap;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.spi.RegistryContributor;
 import org.eclipse.osgi.util.NLS;
 
 public class TableReader {
@@ -22,8 +23,9 @@ public class TableReader {
 	static final int OBJECT = 1;
 
 	//The version of the cache
-	static final int CACHE_VERSION = 2;
+	static final int CACHE_VERSION = 3;
 	// Version 1 -> 2: the contributor Ids changed from "long" to "String"
+	// Version 2 -> 3: added namespace index and the table of contributors
 
 	//Informations representing the MAIN file
 	static final String MAIN = ".mainData"; //$NON-NLS-1$
@@ -39,9 +41,17 @@ public class TableReader {
 	static final String TABLE = ".table"; //$NON-NLS-1$
 	File tableFile;
 
-	//The namespace file
+	//The contributions file
 	static final String CONTRIBUTIONS = ".contributions"; //$NON-NLS-1$
 	File contributionsFile;
+
+	//The contributor file
+	static final String CONTRIBUTORS = ".contributors"; //$NON-NLS-1$
+	File contributorsFile;
+
+	//The namespace file
+	static final String NAMESPACES = ".namespaces"; //$NON-NLS-1$
+	File namespacesFile;
 
 	//The orphan file
 	static final String ORPHANS = ".orphans"; //$NON-NLS-1$
@@ -71,6 +81,14 @@ public class TableReader {
 
 	void setContributionsFile(File namespace) {
 		contributionsFile = namespace;
+	}
+
+	void setContributorsFile(File file) {
+		contributorsFile = file;
+	}
+
+	void setNamespacesFile(File file) {
+		namespacesFile = file;
 	}
 
 	void setOrphansFile(File orphan) {
@@ -124,12 +142,30 @@ public class TableReader {
 			long mainDataFileSize = in.readLong();
 			long extraDataFileSize = in.readLong();
 			long contributionsFileSize = in.readLong();
+			long contributorsFileSize = in.readLong();
+			long namespacesFileSize = in.readLong();
 			long orphansFileSize = in.readLong();
 			String osStamp = in.readUTF();
 			String windowsStamp = in.readUTF();
 			String localeStamp = in.readUTF();
-			long timeStamp = registry.computeState();
-			return ((expectedTimestamp == 0 || expectedTimestamp == registryStamp) && (installStamp == timeStamp) && (osStamp.equals(RegistryProperties.getProperty(IRegistryConstants.PROP_OS))) && (windowsStamp.equals(RegistryProperties.getProperty(IRegistryConstants.PROP_WS))) && (localeStamp.equals(RegistryProperties.getProperty(IRegistryConstants.PROP_NL))) && mainDataFileSize == mainDataFile.length() && extraDataFileSize == extraDataFile.length() && contributionsFileSize == contributionsFile.length() && orphansFileSize == orphansFile.length());
+
+			boolean validTime = (expectedTimestamp == 0 || expectedTimestamp == registryStamp);
+			boolean validInstall = (installStamp == registry.computeState());
+			boolean validOS = (osStamp.equals(RegistryProperties.getProperty(IRegistryConstants.PROP_OS)));
+			boolean validWS = (windowsStamp.equals(RegistryProperties.getProperty(IRegistryConstants.PROP_WS)));
+			boolean validNL = (localeStamp.equals(RegistryProperties.getProperty(IRegistryConstants.PROP_NL)));
+
+			if (!validTime || !validInstall || !validOS || !validWS || !validNL)
+				return false;
+
+			boolean validMain = (mainDataFileSize == mainDataFile.length());
+			boolean validExtra = (extraDataFileSize == extraDataFile.length());
+			boolean validContrib = (contributionsFileSize == contributionsFile.length());
+			boolean validContributors = (contributorsFileSize == contributorsFile.length());
+			boolean validNamespace = (namespacesFileSize == namespacesFile.length());
+			boolean validOrphan = (orphansFileSize == orphansFile.length());
+
+			return (validMain && validExtra && validContrib && validContributors && validNamespace && validOrphan);
 		} catch (IOException e) {
 			log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, fileError, RegistryMessages.meta_registryCacheInconsistent, e));
 			return false;
@@ -188,7 +224,7 @@ public class TableReader {
 
 		ConfigurationElement ce = basicLoadConfigurationElement(currentStream, namespaceOwnerId);
 		if (namespaceOwnerId == null)
-			namespaceOwnerId = ce.getNamespaceOwnerId();
+			namespaceOwnerId = ce.getContributorId();
 		int[] children = ce.getRawChildren();
 		if (depth + 1 > maxDepth)
 			return ce;
@@ -327,7 +363,7 @@ public class TableReader {
 	}
 
 	private String[] basicLoadExtensionExtraData() throws IOException {
-		return new String[] {readStringOrNull(extraInput), readStringOrNull(extraInput)};
+		return new String[] {readStringOrNull(extraInput), readStringOrNull(extraInput), readStringOrNull(extraInput)};
 	}
 
 	public String[] loadExtensionPointExtraData(int offset) {
@@ -355,7 +391,7 @@ public class TableReader {
 		return result;
 	}
 
-	public KeyedHashSet loadNamespaces() {
+	public KeyedHashSet loadContributions() {
 		DataInputStream namespaceInput = null;
 		try {
 			synchronized (contributionsFile) {
@@ -372,6 +408,69 @@ public class TableReader {
 			}
 		} catch (IOException e) {
 			String message = NLS.bind(RegistryMessages.meta_regCacheIOExceptionReading, contributionsFile);
+			log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, fileError, message, e));
+			return null;
+		} finally {
+			if (namespaceInput != null)
+				try {
+					namespaceInput.close();
+				} catch (IOException e1) {
+					//Ignore
+				}
+		}
+	}
+
+	final static float contributorsLoadFactor = 1.2f; // allocate more memory to avoid resizing
+
+	public HashMap loadContributors() {
+		HashMap result = null;
+		DataInputStream contributorsInput = null;
+		try {
+			synchronized (contributorsFile) {
+				contributorsInput = new DataInputStream(new BufferedInputStream(new FileInputStream(contributorsFile)));
+				int size = contributorsInput.readInt();
+				result = new HashMap((int) (size * contributorsLoadFactor));
+				for (int i = 0; i < size; i++) {
+					String id = readStringOrNull(contributorsInput);
+					String name = readStringOrNull(contributorsInput);
+					String hostId = readStringOrNull(contributorsInput);
+					String hostName = readStringOrNull(contributorsInput);
+					result.put(id, new RegistryContributor(id, name, hostId, hostName));
+				}
+			}
+			return result;
+		} catch (IOException e) {
+			String message = NLS.bind(RegistryMessages.meta_regCacheIOExceptionReading, contributorsFile);
+			log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, fileError, message, e));
+			return null;
+		} finally {
+			if (contributorsInput != null)
+				try {
+					contributorsInput.close();
+				} catch (IOException e1) {
+					//Ignore
+				}
+		}
+	}
+
+	public KeyedHashSet loadNamespaces() {
+		DataInputStream namespaceInput = null;
+		try {
+			synchronized (namespacesFile) {
+				namespaceInput = new DataInputStream(new BufferedInputStream(new FileInputStream(namespacesFile)));
+				int size = namespaceInput.readInt();
+				KeyedHashSet result = new KeyedHashSet(size);
+				for (int i = 0; i < size; i++) {
+					String key = readStringOrNull(namespaceInput);
+					RegistryIndexElement indexElement = new RegistryIndexElement(key);
+					indexElement.updateExtensionPoints(readArray(namespaceInput), true);
+					indexElement.updateExtensions(readArray(namespaceInput), true);
+					result.add(indexElement);
+				}
+				return result;
+			}
+		} catch (IOException e) {
+			String message = NLS.bind(RegistryMessages.meta_regCacheIOExceptionReading, namespacesFile);
 			log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, fileError, message, e));
 			return null;
 		} finally {
@@ -441,7 +540,7 @@ public class TableReader {
 		xpt.setSchema(tmp[1]);
 		xpt.setUniqueIdentifier(tmp[2]);
 		xpt.setNamespace(tmp[3]);
-		xpt.setNamespaceOwnerId(tmp[4]);
+		xpt.setContributorId(tmp[4]);
 		return xpt;
 	}
 
@@ -451,6 +550,7 @@ public class TableReader {
 		tmp = basicLoadExtensionExtraData();
 		loaded.setLabel(tmp[0]);
 		loaded.setExtensionPointIdentifier(tmp[1]);
+		loaded.setContributorId(tmp[2]);
 		objectManager.add(loaded, holdObjects);
 		return loaded;
 	}

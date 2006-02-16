@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005 IBM Corporation and others.
+ * Copyright (c) 2005, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,9 +32,7 @@ import org.eclipse.core.runtime.CoreException;
  * Given that factories are instantiated as executable extensions, they must provide a 0-argument public constructor.
  * Like any other executable extension, they can configured by implementing {@link org.eclipse.core.runtime.IExecutableExtension} interface.
  * </p>
- * 
  * @see org.eclipse.core.runtime.IConfigurationElement
- * @since org.eclipse.equinox.registry 1.0
  */
 public interface IExecutableExtensionFactory {
 	/**

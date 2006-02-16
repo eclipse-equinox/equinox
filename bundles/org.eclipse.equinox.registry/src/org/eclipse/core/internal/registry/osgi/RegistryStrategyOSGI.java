@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005 IBM Corporation and others.
+ * Copyright (c) 2005, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,6 +22,7 @@ import org.eclipse.core.internal.runtime.ResourceTranslator;
 import org.eclipse.core.runtime.*;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.spi.RegistryContributor;
 import org.eclipse.core.runtime.spi.RegistryStrategy;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.Bundle;
@@ -40,7 +41,7 @@ import org.osgi.util.tracker.ServiceTracker;
  *  - XML parser is obtained via an OSGi service
  *  
  * @see RegistryFactory#setRegistryProvider(IRegistryProvider)
- * @since org.eclipse.equinox.registry 1.0
+ * @since org.eclipse.equinox.registry 3.2
  */
 
 public class RegistryStrategyOSGI extends RegistryStrategy {
@@ -80,7 +81,7 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 		return false; // Clients are not allowed to add information into this registry
 	}
 
-	public final String translate(String key, ResourceBundle resources) {
+	public String translate(String key, ResourceBundle resources) {
 		return ResourceTranslator.getResourceString(null, key, resources);
 	}
 
@@ -118,7 +119,7 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 		}
 	}
 
-	public final void scheduleChangeEvent(Object[] listeners, Map deltas, Object registry) {
+	public void scheduleChangeEvent(Object[] listeners, Map deltas, Object registry) {
 		new ExtensionEventDispatcherJob(listeners, deltas, registry).schedule();
 	}
 
@@ -148,7 +149,7 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 	private ReferenceMap bundleMap = new ReferenceMap(ReferenceMap.SOFT, DEFAULT_BUNDLECACHE_SIZE, DEFAULT_BUNDLECACHE_LOADFACTOR);
 
 	// String Id to OSGi Bundle conversion
-	public Bundle getBundle(String id) {
+	private Bundle getBundle(String id) {
 		if (id == null)
 			return null;
 		long OSGiId;
@@ -168,80 +169,24 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 		return bundle;
 	}
 
-	// Getting String Id from an OSGi Bundle
-	static public String getId(Bundle bundle) {
-		if (bundle == null)
-			return null;
-		return Long.toString(bundle.getBundleId());
-	}
-
-	private Bundle getNamespaceBundle(String contributingBundleId) {
-		Bundle contributingBundle = getBundle(contributingBundleId);
-		if (contributingBundle == null) // When restored from disk the underlying bundle may have been uninstalled
-			throw new IllegalStateException("Internal error in extension registry. The bundle corresponding to this contribution has been uninstalled."); //$NON-NLS-1$
-		if (OSGIUtils.getDefault().isFragment(contributingBundle)) {
-			Bundle[] hosts = OSGIUtils.getDefault().getHosts(contributingBundle);
-			if (hosts != null)
-				return hosts[0];
-		}
-		return contributingBundle;
-	}
-
-	public String getNamespaceOwnerId(String contributorId) {
-		if (contributorId == null)
-			return null;
-		Bundle namespaceBundle = getNamespaceBundle(contributorId);
-		return getId(namespaceBundle);
-	}
-
-	public String getNamespace(String contributorId) {
-		if (contributorId == null)
-			return null;
-		Bundle namespaceBundle = getNamespaceBundle(contributorId);
-		if (namespaceBundle == null)
-			return null;
-		return namespaceBundle.getSymbolicName();
-	}
-
-	public String[] getNamespaceContributors(String namespace) {
-		Bundle correspondingHost = OSGIUtils.getDefault().getBundle(namespace);
-		if (correspondingHost == null)
-			return new String[0];
-		Bundle[] fragments = OSGIUtils.getDefault().getFragments(correspondingHost);
-		if (fragments == null)
-			return new String[] {getId(correspondingHost)};
-		String[] result = new String[fragments.length + 1];
-		for (int i = 0; i < fragments.length; i++) {
-			result[i] = getId(fragments[i]);
-		}
-		result[fragments.length] = getId(correspondingHost);
-		return result;
-	}
-
 	/////////////////////////////////////////////////////////////////////////////////////
 	// Executable extensions: bundle-based class loading
 
-	public Object createExecutableExtension(String pluginName, String namespaceOwnerId, String namespaceName, String className, Object initData, String propertyName, org.eclipse.core.runtime.IConfigurationElement confElement) throws CoreException {
+	public Object createExecutableExtension(RegistryContributor contributor, String className, String overridenContributorName) throws CoreException {
+		Bundle contributingBundle;
+		if (overridenContributorName != null && !overridenContributorName.equals("")) //$NON-NLS-1$
+			contributingBundle = OSGIUtils.getDefault().getBundle(overridenContributorName);
+		else
+			contributingBundle = getBundle(contributor.getId());
 
-		if (pluginName != null && !pluginName.equals("") && !pluginName.equals(namespaceName)) { //$NON-NLS-1$
-			Bundle otherBundle = null;
-			otherBundle = OSGIUtils.getDefault().getBundle(pluginName);
-			return createExecutableExtension(otherBundle, className, initData, propertyName, confElement);
-		}
-
-		Bundle contributingBundle = getBundle(namespaceOwnerId);
-		return createExecutableExtension(contributingBundle, className, initData, propertyName, confElement);
-	}
-
-	private Object createExecutableExtension(Bundle bundle, String className, Object initData, String propertyName, org.eclipse.core.runtime.IConfigurationElement confElement) throws CoreException {
-		// load the requested class from this plugin
+		// load the requested class from this bundle
 		Class classInstance = null;
 		try {
-			classInstance = bundle.loadClass(className);
+			classInstance = contributingBundle.loadClass(className);
 		} catch (Exception e1) {
-			throwException(NLS.bind(RegistryMessages.plugin_loadClassError, bundle.getSymbolicName(), className), e1);
+			throwException(NLS.bind(RegistryMessages.plugin_loadClassError, contributingBundle.getSymbolicName(), className), e1);
 		} catch (LinkageError e) {
-			throwException(NLS.bind(RegistryMessages.plugin_loadClassError, bundle.getSymbolicName(), className), e);
+			throwException(NLS.bind(RegistryMessages.plugin_loadClassError, contributingBundle.getSymbolicName(), className), e);
 		}
 
 		// create a new instance
@@ -249,9 +194,8 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 		try {
 			result = classInstance.newInstance();
 		} catch (Exception e) {
-			throwException(NLS.bind(RegistryMessages.plugin_instantiateClassError, bundle.getSymbolicName(), className), e);
+			throwException(NLS.bind(RegistryMessages.plugin_instantiateClassError, contributingBundle.getSymbolicName(), className), e);
 		}
-
 		return result;
 	}
 
@@ -340,5 +284,4 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 		}
 		return (SAXParserFactory) xmlTracker.getService();
 	}
-
 }

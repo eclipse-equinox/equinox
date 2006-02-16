@@ -11,6 +11,7 @@
 package org.eclipse.core.internal.registry;
 
 import java.lang.ref.SoftReference;
+import org.eclipse.core.runtime.IContributor;
 
 /**
  * An object which represents the user-defined extension in a plug-in manifest.  
@@ -21,14 +22,15 @@ public class Extension extends RegistryObject {
 	//Extension simple identifier
 	private String simpleId;
 	//The namespace for the extension. 
-	private String namespaceName;
+	private String namespaceIdentifier;
 
 	//	Place holder for the label and  the extension point. It contains either a String[] or a SoftReference to a String[].
 	//The array layout is [label, extension point name]
 	private Object extraInformation;
 	private static final byte LABEL = 0; //The human readable name of the extension
 	private static final byte XPT_NAME = 1; // The fully qualified name of the extension point to which this extension is attached to
-	private static final int EXTRA_SIZE = 2;
+	private static final byte CONTRIBUTOR_ID = 2; // ID of the actual contributor of this extension
+	private static final int EXTRA_SIZE = 3;
 
 	protected Extension(ExtensionRegistry registry, boolean persist) {
 		super(registry, persist);
@@ -41,7 +43,7 @@ public class Extension extends RegistryObject {
 		this.simpleId = simpleId;
 		setRawChildren(children);
 		setExtraDataOffset(extraData);
-		this.namespaceName = namespace;
+		this.namespaceIdentifier = namespace;
 	}
 
 	protected String getExtensionPointIdentifier() {
@@ -53,7 +55,7 @@ public class Extension extends RegistryObject {
 	}
 
 	protected String getUniqueIdentifier() {
-		return simpleId == null ? null : this.getNamespaceName() + '.' + simpleId;
+		return simpleId == null ? null : this.getNamespaceIdentifier() + '.' + simpleId;
 	}
 
 	void setExtensionPointIdentifier(String value) {
@@ -94,12 +96,28 @@ public class Extension extends RegistryObject {
 		((String[]) extraInformation)[LABEL] = value;
 	}
 
-	public String getNamespaceName() {
-		return namespaceName;
+	String getContributorId() {
+		String s = getExtraData()[CONTRIBUTOR_ID];
+		if (s == null)
+			return ""; //$NON-NLS-1$
+		return s;
 	}
 
-	void setNamespaceName(String value) {
-		namespaceName = value;
+	public IContributor getContributor() {
+		return registry.getObjectManager().getContributor(getContributorId());
+	}
+
+	void setContributorId(String value) {
+		ensureExtraInformationType();
+		((String[]) extraInformation)[CONTRIBUTOR_ID] = value;
+	}
+
+	public String getNamespaceIdentifier() {
+		return namespaceIdentifier;
+	}
+
+	void setNamespaceIdentifier(String value) {
+		namespaceIdentifier = value;
 	}
 
 	public String toString() {

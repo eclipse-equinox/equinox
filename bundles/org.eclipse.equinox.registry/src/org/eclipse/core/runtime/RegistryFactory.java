@@ -10,17 +10,22 @@
  *******************************************************************************/
 package org.eclipse.core.runtime;
 
-import org.eclipse.core.internal.registry.ExtensionRegistry;
-import org.eclipse.core.runtime.spi.RegistryStrategy;
+import java.io.File;
+import org.eclipse.core.internal.registry.*;
+import org.eclipse.core.internal.registry.osgi.RegistryStrategyOSGI;
+import org.eclipse.core.runtime.spi.*;
 
 /**
  * Use this class to create or obtain an extension registry.
- * 
+ * <p>
  * This class is not intended to be subclassed or instantiated.
- * 
- * @since org.eclipse.equinox.registry 1.0
+ * </p>
+ * @since org.eclipse.equinox.registry 3.2
  */
 public final class RegistryFactory {
+
+	private static IRegistryProvider defaultRegistryProvider;
+
 	/**
 	 * Creates an extension registry.
 	 *  
@@ -44,6 +49,50 @@ public final class RegistryFactory {
 	 * @return existing extension registry or null
 	 */
 	public static IExtensionRegistry getRegistry() {
-		return RegistryUtils.getRegistryFromProvider();
+		if (defaultRegistryProvider == null)
+			return null;
+		return defaultRegistryProvider.getRegistry();
+	}
+
+	/**
+	 * Creates registry strategy that can be used in an OSGi container. It uses OSGi contributions and contributors
+	 * for the registry processing and takes advantage of additional mechanisms available through
+	 * the OSGi library.  
+	 * <p>
+	 * <b>Note:</b> This class/interface is part of an interim API that is still under 
+	 * development and expected to change significantly before reaching stability. 
+	 * It is being made available at this early stage to solicit feedback from pioneering 
+	 * adopters on the understanding that any code that uses this API will almost certainly 
+	 * be broken (repeatedly) as the API evolves.
+	 * </p>
+	 * @param storageDir - file system directory to store cache files; might be null
+	 * @param cacheReadOnly - true: cache is read only; false: cache is read/write
+	 * @param token - control token for the registry
+	 */
+	public static RegistryStrategy createOSGiStrategy(File storageDir, boolean cacheReadOnly, Object token) {
+		return new RegistryStrategyOSGI(storageDir, cacheReadOnly, token);
+	}
+
+	/**
+	 * Use this method to specify the default registry provider. The default registry provider
+	 * is immutable in the sense that it can be set only once during the application runtime.
+	 * Attempts to change the default registry provider will cause CoreException.
+	 * <p>
+	 * <b>Note:</b> This class/interface is part of an interim API that is still under 
+	 * development and expected to change significantly before reaching stability. 
+	 * It is being made available at this early stage to solicit feedback from pioneering 
+	 * adopters on the understanding that any code that uses this API will almost certainly 
+	 * be broken (repeatedly) as the API evolves.
+	 * </p>
+	 * @see RegistryFactory#getRegistry()
+	 * @param provider - extension registry provider
+	 * @throws CoreException - default registry provider was already set for this application
+	 */
+	public static void setDefaultRegistryProvider(IRegistryProvider provider) throws CoreException {
+		if (defaultRegistryProvider != null) {
+			Status status = new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, IRegistryConstants.PLUGIN_ERROR, RegistryMessages.registry_default_exists, null);
+			throw new CoreException(status);
+		}
+		defaultRegistryProvider = provider;
 	}
 }

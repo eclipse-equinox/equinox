@@ -22,12 +22,11 @@ public class Contribution implements KeyedElement {
 	//The registry that owns this object
 	protected ExtensionRegistry registry;
 
-	// The actual contributor of the contribution.
+	// The actual contributor of the contribution
 	final protected String contributorId;
 
-	// cached Id of the namespace owner (might be same or different from the contributorId)
-	// null if it is not cached yet or no namespace was found during previous cache attempt. 
-	private String namespaceOwnerId = null;
+	// Value is derived from the contributorId and cached for performance
+	private String defaultNamespace = null;
 
 	// indicates if this contribution needs to be saved in the registry cache
 	protected boolean persist;
@@ -101,21 +100,14 @@ public class Contribution implements KeyedElement {
 		return results;
 	}
 
-	public String getNamespace() {
-		return registry.getNamespace(contributorId);
+	public String getDefaultNamespace() {
+		if (defaultNamespace == null)
+			defaultNamespace = registry.getObjectManager().getContributor(contributorId).getName();
+		return defaultNamespace;
 	}
 
 	public String toString() {
-		return "Contribution: " + contributorId + " in namespace" + getNamespace(); //$NON-NLS-1$ //$NON-NLS-2$
-	}
-
-	protected String getNamespaceOwnerId() {
-		// Performance: this function is not called during warm Eclipse startup using cached 
-		// extension registry, but is called about 45 times per contribution during 
-		// the "clean" Eclipse start. Cache the result.
-		if (namespaceOwnerId == null)
-			namespaceOwnerId = registry.getNamespaceOwnerId(contributorId);
-		return namespaceOwnerId;
+		return "Contribution: " + contributorId + " in namespace" + getDefaultNamespace(); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	//Implements the KeyedElement interface

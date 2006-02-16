@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005 IBM Corporation and others.
+ * Copyright (c) 2005, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,17 +22,24 @@ import org.eclipse.osgi.util.NLS;
  * This is the basic registry strategy. It describes how registry does logging,
  * message translation, namespace resolution, extra start/stop processing, event scheduling,
  * caching, and debugging.
- * 
+ * <p>
  * In this strategy:
- * - Clients can add information into the registry
- * - Caching is enabled and doesn't use state or time stamp validation; no alternative cache location is supplied
- * - Logging is done onto System.out
- * - All registry contributors are assumed to reside in separate namespaces
- * - Standard Java class loading is used to create executable extensions
- * 
- *  This class can be overridden and/or instantiated. 
- * 
- * @since org.eclipse.equinox.registry 1.0
+ * </p><p><ul>
+ * <li>Clients can add information into the registry</li>
+ * <li>Caching is enabled and doesn't use state or time stamp validation; no alternative cache location is supplied</li>
+ * <li>Logging is done onto System.out</li>
+ * <li>Registry contributors properties are determined by the toString() value of the defining objects</li>
+ * <li>Standard Java class loading is used to create executable extensions</li>
+ * </ul></p><p>
+ * This class can be overridden and/or instantiated by clients. 
+ * </p><p>
+ * <b>Note:</b> This class/interface is part of an interim API that is still under 
+ * development and expected to change significantly before reaching stability. 
+ * It is being made available at this early stage to solicit feedback from pioneering 
+ * adopters on the understanding that any code that uses this API will almost certainly 
+ * be broken (repeatedly) as the API evolves.
+ * </p>
+ * @since org.eclipse.equinox.registry 3.2
  */
 public class RegistryStrategy {
 
@@ -125,81 +132,39 @@ public class RegistryStrategy {
 	}
 
 	/**
-	 * Returns Id of the namespace owner that given contributor resides in.
-	 * 
-	 * Override this method to supply namespace resolution capabilities to
-	 * the extension registry. If this interface is not overridden, each contributor 
-	 * is assumed to be in its own namespace (namespaceOwnerId is the same as contributorId);
-	 * namespace name is assumed to be a String form of the contributorId.
-	 * 
-	 * It is assumed that namespaces organize contributors into groups. Or, more formally:
-	 * 
-	 * 1) each contributor resides in a namespace
-	 * 2) each namespace is owned by some contributor
-	 * 3) many contributors can reside in a single namespace
-	 * 
-	 * @param contributorId - Id of the contributor in question
-	 * @return - Id of the namespace owner
-	 */
-	public String getNamespaceOwnerId(String contributorId) {
-		return contributorId;
-	}
-
-	/**
-	 * Returns name of the namespace that given contributor resides in.
-	 * @see #getNamespaceOwnerId(String)
-	 * 
-	 * @param contributorId - Id of the contributor in question
-	 * @return - namespace name
-	 */
-	public String getNamespace(String contributorId) {
-		return contributorId;
-	}
-
-	/**
-	 * Returns Ids of all contributors residing in a given namespace
-	 * @see #getNamespaceOwnerId(String)
-	 * 
-	 * @param namespace - namespace name
-	 * @return - array of contributor Ids residing in the namespace
-	 */
-	public String[] getNamespaceContributors(String namespace) {
-		return new String[] {namespace};
-	}
-
-	/**
 	 * Creates an executable extension. Override this method to supply an alternative processing 
 	 * for the creation of executable extensions. 
-	 * 
+	 * <p>
+	 * This method recieves the contributor of the executable extension and, possibly,
+	 * an optional contributor name (if specified by the executable extension).  
+	 * </p><p>
 	 * In this implementation registry attempts to instantiate the class specified using 
 	 * standard Java reflection mechanism; it assumes that constructor of such class has no arguments.
-	 * 
+	 * </p>
 	 * @see IConfigurationElement#createExecutableExtension(String)
 	 * 
-	 * @param contributorName - name of the extension supplier
-	 * @param namespaceOwnerId - Id of the namespace owner
-	 * @param namespaceName - name of the extension point namespace
+	 * @param contributor - contributor of this executable extension
 	 * @param className - name of the class to be instantiated
-	 * @param initData - initializer data (@see IExecutableExtension); might be null
-	 * @param propertyName - name of the configuration element containing class information
-	 * @param theConfElement - the configuration element containing executable extension
+	 * @param overridenContributorName - optionally executable extension can request a specific contributor
+	 * to be used; might be null
 	 * @return - the object created; might be null
 	 * @throws CoreException
+	 * @see IExecutableExtension
 	 */
-	public Object createExecutableExtension(String contributorName, String namespaceOwnerId, String namespaceName, String className, Object initData, String propertyName, IConfigurationElement theConfElement) throws CoreException {
+	public Object createExecutableExtension(RegistryContributor contributor, String className, String overridenContributorName) throws CoreException {
 		Object result = null;
 		Class classInstance = null;
 		try {
 			classInstance = Class.forName(className);
 		} catch (ClassNotFoundException e1) {
-			String message = NLS.bind(RegistryMessages.exExt_findClassError, getNamespace(namespaceOwnerId), className);
+			String message = NLS.bind(RegistryMessages.exExt_findClassError, contributor.getActualName(), className);
 			throw new CoreException(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, IRegistryConstants.PLUGIN_ERROR, message, e1));
 		}
 
 		try {
 			result = classInstance.newInstance();
 		} catch (Exception e) {
-			String message = NLS.bind(RegistryMessages.exExt_instantiateClassError, getNamespace(namespaceOwnerId), className);
+			String message = NLS.bind(RegistryMessages.exExt_instantiateClassError, contributor.getActualName(), className);
 			throw new CoreException(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, IRegistryConstants.PLUGIN_ERROR, message, e));
 		}
 		return result;
@@ -352,5 +317,4 @@ public class RegistryStrategy {
 			theXMLParserFactory = SAXParserFactory.newInstance();
 		return theXMLParserFactory;
 	}
-
 }

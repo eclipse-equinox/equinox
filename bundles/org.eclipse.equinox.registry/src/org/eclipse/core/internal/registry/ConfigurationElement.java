@@ -12,6 +12,7 @@ package org.eclipse.core.internal.registry;
 
 import java.util.Hashtable;
 import org.eclipse.core.runtime.*;
+import org.eclipse.core.runtime.spi.RegistryContributor;
 import org.eclipse.osgi.util.NLS;
 
 /**
@@ -35,7 +36,7 @@ public class ConfigurationElement extends RegistryObject {
 	//The name of the configuration element
 	private String name;
 
-	//The ID of the namespace owner. 
+	//ID of the actual contributor of this element 
 	//This value can be null when the element is loaded from disk and the owner has been uninstalled.
 	//This happens when the configuration is obtained from a delta containing removed extension.
 	private String contributorId;
@@ -121,11 +122,11 @@ public class ConfigurationElement extends RegistryObject {
 		propertiesAndValue = newPropertiesAndValue;
 	}
 
-	void setNamespaceOwnerId(String namespaceOwnerId) {
-		this.contributorId = namespaceOwnerId;
+	void setContributorId(String id) {
+		this.contributorId = id;
 	}
 
-	protected String getNamespaceOwnerId() {
+	protected String getContributorId() {
 		return contributorId;
 	}
 
@@ -168,8 +169,8 @@ public class ConfigurationElement extends RegistryObject {
 		parentType = type;
 	}
 
-	protected String getNamespace() {
-		return registry.getNamespace(contributorId);
+	public IContributor getContributor() {
+		return registry.getObjectManager().getContributor(contributorId);
 	}
 
 	protected Object createExecutableExtension(String attributeName) throws CoreException {
@@ -238,10 +239,8 @@ public class ConfigurationElement extends RegistryObject {
 		}
 
 		// create a new instance
-		Object result = null;
-
-		// check if alternative processing strategy is present 
-		result = registry.processExecutableExtension(contributorName, contributorId, getNamespace(), className, initData, attributeName, this);
+		RegistryContributor defaultContributor = registry.getObjectManager().getContributor(contributorId); 
+		Object result = registry.createExecutableExtension(defaultContributor, className, contributorName);
 
 		// Check if we have extension adapter and initialize;
 		// Make the call even if the initialization string is null
@@ -255,7 +254,7 @@ public class ConfigurationElement extends RegistryObject {
 			throw ce;
 		} catch (Exception te) {
 			// user code caused exception
-			throwException(NLS.bind(RegistryMessages.plugin_initObjectError, getNamespace(), className), te);
+			throwException(NLS.bind(RegistryMessages.plugin_initObjectError, getContributor().getName(), className), te);
 		}
 
 		// Deal with executable extension factories.

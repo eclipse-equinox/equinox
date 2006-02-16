@@ -185,10 +185,10 @@ public class DefaultPreferences extends EclipsePreferences {
 			IConfigurationElement[] elements = extensions[i].getConfigurationElements();
 			for (int j = 0; j < elements.length; j++)
 				if (ELEMENT_INITIALIZER.equals(elements[j].getName())) {
-					if (name().equals(elements[j].getNamespace())) {
+					if (name().equals(elements[j].getContributor().getName())) {
 						if (EclipsePreferences.DEBUG_PREFERENCE_GENERAL) {
 							IExtension theExtension = elements[j].getDeclaringExtension();
-							String extensionNamespace = theExtension.getNamespace();
+							String extensionNamespace = theExtension.getContributor().getName();
 							Bundle underlyingBundle = PreferencesOSGiUtils.getDefault().getBundle(extensionNamespace);
 							String ownerName;
 							if (underlyingBundle != null)
