@@ -46,38 +46,65 @@ public class RegistryStrategy {
 	/**
 	 * File system directory to store cache files; might be null
 	 */
-	private final File theStorageDir;
+	private final File[] theStorageDir;
 
 	/**
 	 * Specifies if the registry file cache is read only
 	 */
-	private final boolean cacheReadOnly;
+	private final boolean[] cacheReadOnly;
 
 	/**
-	 * Public constructor.
-	 * 
-	 * @param theStorageDir - file system directory to store cache files; might be null
-	 * @param cacheReadOnly - true: cache is read only; false: cache is read/write
+	 * Public constructor; accepts list of the possible cache locations.
+	 * <p>
+	 * Locations in the list will be checked sequentially (starting with index 0)
+	 * until cache files are found. The first location containing cache files will
+	 * be used. It will be assigned the "read only" attribute specified in the 
+	 * corresponding slot of the cacheReadOnly array.
+	 * </p>
+	 * <p>
+	 * The arrays of the storage files (theStorageDir) and read only flags (cacheReadOnly)
+	 * must be same size.
+	 * </p>
+	 * @param theStorageDir - array of file system directories to store cache files; might be null
+	 * @param cacheReadOnly - array of read only attributes. True: cache at this location is read 
+	 * only; false: cache is read/write
 	 */
-	public RegistryStrategy(File theStorageDir, boolean cacheReadOnly) {
+	public RegistryStrategy(File[] theStorageDir, boolean[] cacheReadOnly) {
 		this.theStorageDir = theStorageDir;
 		this.cacheReadOnly = cacheReadOnly;
 	}
 
-	public final File getStorage() {
-		return theStorageDir;
-	}
-
-	public final boolean isCacheReadOnly() {
-		return cacheReadOnly;
+	/**
+	 * Returns number of possible cache locations for this registry 
+	 * @return number of possible cache locations for this registry
+	 */
+	public final int getLocationsLength() {
+		if (theStorageDir == null)
+			return 0;
+		return theStorageDir.length;
 	}
 
 	/**
-	 * Specifies if registry clients can add information into the registry. 
-	 * @return true: clients can add information; false: proper token should be supplied
-	 * in order to add information into the registry. 
+	 * Returns the possible registry cache location identified by the index.
+	 * Locations with lower index have higher priority and are considered first.
+	 * 
+	 * @param index index of the possible registry location
+	 * @return potential registry cache location
 	 */
-	public boolean isModifiable() {
+	public final File getStorage(int index) {
+		if (theStorageDir != null)
+			return theStorageDir[index];
+		return null;
+	}
+
+	/**
+	 * Returns read only status of the registry cache location.
+	 * @param index index of the possible registry location
+	 * @return true: location is read only; false: location is read/write
+	 */
+	public final boolean isCacheReadOnly(int index) {
+		if (cacheReadOnly != null)
+			return cacheReadOnly[index];
 		return true;
 	}
 
@@ -184,8 +211,7 @@ public class RegistryStrategy {
 	 * @param registry - the extension registry (NOT thread safe)
 	 */
 	public void scheduleChangeEvent(Object[] listeners, Map deltas, Object registry) {
-		if (registry instanceof ExtensionRegistry)
-			((ExtensionRegistry) registry).scheduleChangeEvent(listeners, deltas);
+		((ExtensionRegistry) registry).scheduleChangeEvent(listeners, deltas);
 	}
 
 	/**
@@ -256,50 +282,56 @@ public class RegistryStrategy {
 
 	/**
 	 * This method is called as a part of the registry cache validation. The cache is valid
-	 * on the registry startup if the pair {state, time stamp} supplied by the application 
-	 * is the same as the {state, time stamp} saved in the registry cache.
-	 * 
-	 * This method produces a number that corresponds to the current state of the data stored 
-	 * in the registry. Increment the state if registry content changed and the registry cache 
-	 * is no longer valid. 
-	 * 
+	 * on the registry startup if the pair {container time stamp, contributors time stamp} 
+	 * supplied by the registry strategy is the same as the {container time stamp, contributors time stamp}
+	 * stored in the registry cache. The goal of this method is to be able to catch modifications
+	 * made to the original data contributed into the registry and not reflected in the registry cache. 
+	 * <p>
+	 * The method produces a number that corresponds to the current state of the data stored 
+	 * by the container. Increment the stamp if the data stored in the container has been updated
+	 * so that the data cached by the registry is no longer valid.
+	 * </p><p>
+	 * For instance, in Eclipse addition or removal of a bundle results in the number returned by 
+	 * this method being incremented. As a result, if a bundle that contributed plugin.xml into 
+	 * the extension registry  was modified, the state doesn't match the state stored in the registry 
+	 * cache. In this case the cache content becomes invalid and registry needs to be re-created from 
+	 * the original data. 
+	 * </p><p>
+	 * Generally, treat this number as a hash code for the data stored in the registry. 
+	 * It stays the same as long as the registry content is not changing. It becomes a different 
+	 * number as the registry content gets modified.
+	 * </p><p>
 	 * Return 0 to indicate that state verification is not required.
 	 * 
 	 * @return number indicating state of the application data
 	 */
-	public long cacheComputeState() {
+	public long getContainerTimestamp() {
 		return 0;
 	}
 
 	/**
 	 * This method is called as a part of the registry cache validation. The cache is valid
-	 * on the registry startup if the pair {state, time stamp} supplied by the application 
-	 * is the same as the {state, time stamp} saved in the registry cache.
-	 * 
-	 * This method calculates current time stamp for the elements stored in the extension 
-	 * registry. Treat this number as a hash code for the data stored in the registry. 
-	 * It stays the same as long as the registry content is not changing. It becomes a different 
-	 * number as the registry content gets modified.
-	 * 
+	 * on the registry startup if the pair {container time stamp, contributors time stamp} 
+	 * supplied by the registry strategy is the same as the {container time stamp, contributors time stamp}
+	 * stored in the registry cache. The goal of this method is to be able to catch modifications
+	 * made to the original data contributed into the registry and not reflected in the registry cache. 
+	 * <p>
+	 * The method calculates a number describing time when the contributions cached by
+	 * the registry were last modified. For instance, in the Eclipse registry this number is calculated 
+	 * as a function of the time when plugin.xml files have been modified. If the number is not the same 
+	 * as the number stored in the cache, it means that plugin.xml file(s) have been updated and 
+	 * the cached information is no longer valid. 
+	 * </p><p>
+	 * Generally, treat this number as a hash code for the time of modifications of contributions stored 
+	 * in the registry. It stays the same as long as the contributions aren't changing. It becomes 
+	 * a different number when contributions are modified.
+	 * </p><p>
 	 * Return 0 to indicate that no time stamp verification is required. 
 	 * 
 	 * @return the time stamp calculated with the application data
 	 */
-	public long cacheComputeTimeStamp() {
+	public long getContributionsTimestamp() {
 		return 0;
-	}
-
-	/**
-	 * In case if the primary cache location has no data in it, the registry
-	 * attemps to get cached information from this alternative location. The cache
-	 * at alternative location is always considered read-only.
-	 * 
-	 * Return null if alternative cache location is not supported.
-	 * 
-	 * @return - directory containing the alternative cache location
-	 */
-	public File cacheAlternativeLocation() {
-		return null;
 	}
 
 	private SAXParserFactory theXMLParserFactory = null;

@@ -102,9 +102,28 @@ public class Activator implements BundleActivator {
 		if ("true".equals(bundleContext.getProperty(IRegistryConstants.PROP_REGISTRY_NULL_USER_TOKEN))) //$NON-NLS-1$
 			userRegistryKey = null;
 
+		// Determine primary and alternative registry locations. Eclipse extension registry cache 
+		// can be found in one of the two locations:
+		// a) in the local configuration area (standard location passed in by the platform) -> priority
+		// b) in the shared configuration area (typically, shared install is used) 
+		File[] registryLocations;
+		boolean[] readOnlyLocations;
+
 		Location configuration = OSGIUtils.getDefault().getConfigurationLocation();
-		File theStorageDir = new File(configuration.getURL().getPath() + '/' + STORAGE_DIR);
-		EquinoxRegistryStrategy registryStrategy = new EquinoxRegistryStrategy(theStorageDir, configuration.isReadOnly(), masterRegistryKey);
+		File primaryDir = new File(configuration.getURL().getPath() + '/' + STORAGE_DIR);
+		boolean primaryReadOnly = configuration.isReadOnly();
+
+		Location parentLocation = configuration.getParentLocation();
+		if (parentLocation != null) {
+			File secondaryDir = new File(parentLocation.getURL().getFile() + '/' + IRegistryConstants.RUNTIME_NAME);
+			registryLocations = new File[] {primaryDir, secondaryDir};
+			readOnlyLocations = new boolean[] {primaryReadOnly, true}; // secondary Eclipse location is always read only
+		} else {
+			registryLocations = new File[] {primaryDir};
+			readOnlyLocations = new boolean[] {primaryReadOnly};
+		}
+
+		EquinoxRegistryStrategy registryStrategy = new EquinoxRegistryStrategy(registryLocations, readOnlyLocations, masterRegistryKey);
 		defaultRegistry = RegistryFactory.createRegistry(registryStrategy, masterRegistryKey, userRegistryKey);
 
 		registryRegistration = Activator.getContext().registerService(IExtensionRegistry.class.getName(), defaultRegistry, new Hashtable());

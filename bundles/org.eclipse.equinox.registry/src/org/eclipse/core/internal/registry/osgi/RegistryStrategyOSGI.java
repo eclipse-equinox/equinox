@@ -14,16 +14,12 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.Map;
 import java.util.ResourceBundle;
 import javax.xml.parsers.SAXParserFactory;
 import org.eclipse.core.internal.registry.*;
 import org.eclipse.core.internal.runtime.ResourceTranslator;
 import org.eclipse.core.runtime.*;
-import org.eclipse.core.runtime.jobs.ISchedulingRule;
-import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.core.runtime.spi.RegistryContributor;
-import org.eclipse.core.runtime.spi.RegistryStrategy;
+import org.eclipse.core.runtime.spi.*;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -31,15 +27,13 @@ import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * The registry strategy that can be used in OSGi world. It provides the following functionality:
- * 
- *  - Event scheduling is done using Eclipse job scheduling mechanism
- *  - Translation is done with Equinox ResourceTranslator
- *  - Uses OSGi bundles for namespace resolution (contributors: plugins and fragments)
- *  - Registry is filled with information stored in plugin.xml / fragment.xml of OSGi bundles
- *  - Uses bunlde-based class loading to create executable extensions
- *  - Performs registry validation based on the time stamps of the plugin.xml / fragment.xml files
- *  - XML parser is obtained via an OSGi service
- *  
+ * <p><ul>
+ * <li>Translation is done with ResourceTranslator</li>
+ * <li>Registry is filled with information stored in plugin.xml / fragment.xml of OSGi bundles</li>
+ * <li>Uses bunlde-based class loading to create executable extensions</li>
+ * <li>Performs registry validation based on the time stamps of the plugin.xml / fragment.xml files</li>
+ * <li>XML parser is obtained via an OSGi service</li>
+ *  </ul></p>
  * @see RegistryFactory#setRegistryProvider(IRegistryProvider)
  * @since org.eclipse.equinox.registry 3.2
  */
@@ -67,60 +61,19 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 	private ServiceTracker xmlTracker = null;
 
 	/**
-	 * @param theStorageDir - file system directory to store cache files; might be null
-	 * @param cacheReadOnly - true: cache is read only; false: cache is read/write
+	 * @param theStorageDir - array of file system directories to store cache files; might be null
+	 * @param cacheReadOnly - array of read only attributes. True: cache at this location is read 
+	 * only; false: cache is read/write
 	 * @param key - control key for the registry (should be the same key as used in 
 	 * the RegistryManager#createExtensionRegistry() of this registry
 	 */
-	public RegistryStrategyOSGI(File theStorageDir, boolean cacheReadOnly, Object key) {
+	public RegistryStrategyOSGI(File[] theStorageDir, boolean[] cacheReadOnly, Object key) {
 		super(theStorageDir, cacheReadOnly);
 		token = key;
 	}
 
-	public boolean isModifiable() {
-		return false; // Clients are not allowed to add information into this registry
-	}
-
-	public String translate(String key, ResourceBundle resources) {
+	public final String translate(String key, ResourceBundle resources) {
 		return ResourceTranslator.getResourceString(null, key, resources);
-	}
-
-	//////////////////////////////////////////////////////////////////////////////////////////
-	// Use Eclipse job scheduling mechanism
-
-	private final static class ExtensionEventDispatcherJob extends Job {
-		// an "identy rule" that forces extension events to be queued		
-		private final static ISchedulingRule EXTENSION_EVENT_RULE = new ISchedulingRule() {
-			public boolean contains(ISchedulingRule rule) {
-				return rule == this;
-			}
-
-			public boolean isConflicting(ISchedulingRule rule) {
-				return rule == this;
-			}
-		};
-		private Map deltas;
-		private Object[] listenerInfos;
-		private Object registry;
-
-		public ExtensionEventDispatcherJob(Object[] listenerInfos, Map deltas, Object registry) {
-			// name not NL'd since it is a system job
-			super("Registry event dispatcher"); //$NON-NLS-1$
-			setSystem(true);
-			this.listenerInfos = listenerInfos;
-			this.deltas = deltas;
-			this.registry = registry;
-			// all extension event dispatching jobs use this rule
-			setRule(EXTENSION_EVENT_RULE);
-		}
-
-		public IStatus run(IProgressMonitor monitor) {
-			return RegistryStrategy.processChangeEvent(listenerInfos, deltas, registry);
-		}
-	}
-
-	public void scheduleChangeEvent(Object[] listeners, Map deltas, Object registry) {
-		new ExtensionEventDispatcherJob(listeners, deltas, registry).schedule();
 	}
 
 	////////////////////////////////////////////////////////////////////////////////////////
@@ -252,7 +205,7 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 		return !("true".equalsIgnoreCase(RegistryProperties.getProperty(IRegistryConstants.PROP_NO_LAZY_CACHE_LOADING))); //$NON-NLS-1$
 	}
 
-	public long cacheComputeTimeStamp() {
+	public long getContributionsTimestamp() {
 		BundleContext context = Activator.getContext();
 		if (context == null)
 			return 0;

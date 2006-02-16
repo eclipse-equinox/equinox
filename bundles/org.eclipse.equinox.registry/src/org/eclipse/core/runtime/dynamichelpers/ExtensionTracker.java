@@ -61,7 +61,7 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 	}
 
 	/* (non-Javadoc)
-	 * @see IExtensionTracker@registerHandler(IExtensionChangeHandler, IFilter)
+	 * @see org.eclipse.core.runtime.dynamichelpers.IExtensionTracker#registerHandler(org.eclipse.core.runtime.dynamichelpers.IExtensionChangeHandler, org.eclipse.core.runtime.dynamichelpers.IFilter)
 	 */
 	public void registerHandler(IExtensionChangeHandler handler, IFilter filter) {
 		synchronized (lock) {

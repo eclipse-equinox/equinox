@@ -541,10 +541,7 @@ public class ExtensionRegistry implements IExtensionRegistry {
 		if (registryStrategy != null)
 			strategy = registryStrategy;
 		else
-			strategy = new RegistryStrategy(null, true);
-
-		// create the file manager right away
-		setFileManager(strategy.getStorage(), strategy.isCacheReadOnly());
+			strategy = new RegistryStrategy(null, null);
 
 		this.masterToken = masterToken;
 		this.userToken = userToken;
@@ -725,39 +722,30 @@ public class ExtensionRegistry implements IExtensionRegistry {
 	}
 
 	public long computeState() {
-		return strategy.cacheComputeState();
+		return strategy.getContainerTimestamp();
 	}
 
 	public long computeTimeStamp() {
-		return strategy.cacheComputeTimeStamp();
+		return strategy.getContributionsTimestamp();
 	}
 
-	// Check that cache is actually present in the specified location
+	// Find the first location that contains a cache table file and set file manager to it.
 	protected boolean checkCache() {
-		File cacheFile = null;
-		if (cacheStorageManager != null) {
-			try {
-				cacheFile = cacheStorageManager.lookup(TableReader.getTestFileName(), false);
-			} catch (IOException e) {
-				//Ignore the exception. The registry will be rebuilt from the xml files.
-			}
-		}
-		if (cacheFile != null && cacheFile.isFile())
-			return true; // primary location is fine
-
-		// check alternative cache location if available
-		File alternativeBase = strategy.cacheAlternativeLocation();
-		if (alternativeBase != null) {
-			setFileManager(alternativeBase, true);
+		for (int index = 0; index < strategy.getLocationsLength(); index++) {
+			File possibleCacheLocation = strategy.getStorage(index);
+			if (possibleCacheLocation == null)
+				break; // bail out on the first null
+			setFileManager(possibleCacheLocation, strategy.isCacheReadOnly(index));
 			if (cacheStorageManager != null) {
 				// check this new location:
-				cacheFile = null;
+				File cacheFile = null;
 				try {
 					cacheFile = cacheStorageManager.lookup(TableReader.getTestFileName(), false);
 				} catch (IOException e) {
 					//Ignore the exception. The registry will be rebuilt from the xml files.
 				}
-				return (cacheFile != null && cacheFile.isFile());
+				if (cacheFile != null && cacheFile.isFile())
+					return true; // found the appropriate location
 			}
 		}
 		return false;
@@ -854,17 +842,14 @@ public class ExtensionRegistry implements IExtensionRegistry {
 
 	/**
 	 * Access check for add/remove operations:
-	 * a) for modifiable registry key is not required (null is fine)
-	 * b) for non-modifiable registry master key allows all operations 
-	 * c) for non-modifiable registry user key allows modifications of non-persisted elements
+	 * - Master key allows all operations 
+	 * - User key allows modifications of non-persisted elements
 	 * 
 	 * @param key key to the registry supplied by the user
 	 * @param persist true if operation affects persisted elements 
 	 * @return true is the key grants read/write access to the registry
 	 */
 	private boolean checkReadWriteAccess(Object key, boolean persist) {
-		if (strategy.isModifiable())
-			return true;
 		if (masterToken == key)
 			return true;
 		if (userToken == key && !persist)
@@ -880,7 +865,7 @@ public class ExtensionRegistry implements IExtensionRegistry {
 
 		RegistryContributor internalContributor = (RegistryContributor) contributor;
 		registryObjects.addContributor(internalContributor); // only adds a contributor if it is not already present
-		
+
 		String ownerName = internalContributor.getActualName();
 		String message = NLS.bind(RegistryMessages.parse_problems, ownerName);
 		MultiStatus problems = new MultiStatus(RegistryMessages.OWNER_NAME, ExtensionsParser.PARSE_PROBLEM, message, null);
@@ -924,8 +909,6 @@ public class ExtensionRegistry implements IExtensionRegistry {
 	 * If the registry is not modifiable, this method is an access controlled method. 
 	 * Proper token should be passed as an argument for non-modifiable registries.
 	 * </p>
-	 * @see org.eclipse.core.runtime.spi.RegistryStrategy#isModifiable()
-	 * 
 	 * @param identifier Id of the extension point. If non-qualified names is supplied,
 	 * it will be converted internally into a fully qualified name
 	 * @param contributor the contributor of this extension point
@@ -998,7 +981,6 @@ public class ExtensionRegistry implements IExtensionRegistry {
 	 * If the registry is not modifiable, this method is an access controlled method. 
 	 * Proper token should be passed as an argument for non-modifiable registries.
 	 * </p>
-	 * @see org.eclipse.core.runtime.spi.RegistryStrategy#isModifiable()
 	 * @see org.eclipse.core.internal.registry.spi.ConfigurationElementDescription
 	 * 
 	 * @param identifier Id of the extension. If non-qualified name is supplied,

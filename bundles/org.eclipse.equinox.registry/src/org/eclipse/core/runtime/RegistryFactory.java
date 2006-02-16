@@ -65,11 +65,12 @@ public final class RegistryFactory {
 	 * adopters on the understanding that any code that uses this API will almost certainly 
 	 * be broken (repeatedly) as the API evolves.
 	 * </p>
-	 * @param storageDir - file system directory to store cache files; might be null
-	 * @param cacheReadOnly - true: cache is read only; false: cache is read/write
+	 * @param theStorageDir - array of file system directories to store cache files; might be null
+	 * @param cacheReadOnly - array of read only attributes. True: cache at this location is read 
+	 * only; false: cache is read/write
 	 * @param token - control token for the registry
 	 */
-	public static RegistryStrategy createOSGiStrategy(File storageDir, boolean cacheReadOnly, Object token) {
+	public static RegistryStrategy createOSGiStrategy(File[] storageDir, boolean[] cacheReadOnly, Object token) {
 		return new RegistryStrategyOSGI(storageDir, cacheReadOnly, token);
 	}
 
