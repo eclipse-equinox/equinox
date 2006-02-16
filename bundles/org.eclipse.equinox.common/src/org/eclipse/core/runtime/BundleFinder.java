@@ -36,7 +36,7 @@ public final class BundleFinder {
 	 * @return a URL for the given path or <code>null</code>.  The actual form
 	 * of the returned URL is not specified.
 	 * @see #find(Bundle, IPath, Map)
-	 * @deprecated use {@link FileLocator#find(Bundle, IPath)}
+	 * @deprecated use {@link FileLocator#find(Bundle, IPath, Map)}
 	 */
 	public static URL find(Bundle bundle, IPath path) {
 		return FileLocator.find(bundle, path, null);
@@ -130,7 +130,7 @@ public final class BundleFinder {
 	 * @exception IOException if the given path cannot be found in this plug-in
 	 * 
 	 * @see #openStream(Bundle,IPath,boolean)
-	 * @deprecated use {@link FileLocator#openStream(Bundle, IPath)}
+	 * @deprecated use {@link FileLocator#openStream(Bundle, IPath, boolean)}
 	 */
 	public static final InputStream openStream(Bundle bundle, IPath file) throws IOException {
 		return FileLocator.openStream(bundle, file, false);
