@@ -19,11 +19,12 @@ import org.osgi.framework.Bundle;
 /**
  * This class contains collection of helper methods aimed at finding files in bundles.
  * This class can only be used if OSGi plugin is available.
- * 
+ * <p>
  * The class is not intended to be subclassed or instantiated by clients.
- * 
+ * </p>
  * @since 3.2
- * @deprecated clients should use {@link FileLocator} instead
+ * @deprecated clients should use {@link FileLocator} instead. This class will
+ * 	be removed before the 3.2 release (in the next week!).
  */
 public final class BundleFinder {
 
