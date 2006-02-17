@@ -35,8 +35,6 @@ public final class RegistryFactory {
 	 * @param userToken - user access token for the registry. Contributions made with this token are marked 
 	 * as dynamic. 
 	 * @return - new extension registry
-	 * @throws CoreException in case if registry start conditions are not met. The exception's status 
-	 * message provides additional details.
 	 */
 	public static IExtensionRegistry createRegistry(RegistryStrategy strategy, Object masterToken, Object userToken) {
 		return new ExtensionRegistry(strategy, masterToken, userToken);
@@ -65,7 +63,7 @@ public final class RegistryFactory {
 	 * adopters on the understanding that any code that uses this API will almost certainly 
 	 * be broken (repeatedly) as the API evolves.
 	 * </p>
-	 * @param theStorageDir - array of file system directories to store cache files; might be null
+	 * @param storageDir - array of file system directories to store cache files; might be null
 	 * @param cacheReadOnly - array of read only attributes. True: cache at this location is read 
 	 * only; false: cache is read/write
 	 * @param token - control token for the registry
