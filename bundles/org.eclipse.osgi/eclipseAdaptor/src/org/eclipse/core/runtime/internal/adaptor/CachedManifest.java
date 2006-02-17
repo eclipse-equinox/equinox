@@ -64,6 +64,8 @@ public class CachedManifest extends Dictionary {
 	}
 
 	public Object get(Object key) {
+		if (manifest != null)
+			return manifest.get(key);
 		String keyString = (String) key;
 		if (Constants.BUNDLE_VERSION.equalsIgnoreCase(keyString)) {
 			Version result = storageHook.getBaseData().getVersion();
