@@ -71,6 +71,7 @@ public final class HookRegistry {
 	private ClassLoadingStatsHook[] classLoadingStatsHooks = new ClassLoadingStatsHook[0];
 	private StorageHook[] storageHooks = new StorageHook[0];
 	private BundleFileFactoryHook[] bundleFileFactoryHooks = new BundleFileFactoryHook[0];
+	private SignedBundleFileFactoryHook signedBundleFileFactoryHook;
 
 	public HookRegistry(BaseAdaptor adaptor) {
 		this.adaptor = adaptor;
@@ -217,6 +218,14 @@ public final class HookRegistry {
 	}
 
 	/**
+	 * Returns the configured signed bundle file factory
+	 * @return the configured signed bundle file factory
+	 */
+	public SignedBundleFileFactoryHook getSignedBundleFileFactoryHook() {
+		return signedBundleFileFactoryHook;
+	}
+
+	/**
 	 * Adds a adaptor hook to this hook registry.
 	 * @param adaptorHook an adaptor hook object.
 	 */
@@ -258,10 +267,19 @@ public final class HookRegistry {
 
 	/**
 	 * Adds a bundle file factory to this hook registry.
-	 * @param factory an bundle file factory object.
+	 * @param factory a bundle file factory object.
 	 */
 	public void addBundleFileFactoryHook(BundleFileFactoryHook factory) {
 		bundleFileFactoryHooks = (BundleFileFactoryHook[]) add(factory, bundleFileFactoryHooks, new BundleFileFactoryHook[bundleFileFactoryHooks.length + 1]);
+	}
+
+	/**
+	 * Sets the signed bundle file factory for this hook registry
+	 * @param factory a signed bundle file factory object.
+	 */
+	public void setSignedBundleFileFactoryHook(SignedBundleFileFactoryHook factory) {
+		if (signedBundleFileFactoryHook == null)
+			signedBundleFileFactoryHook = factory;
 	}
 
 	private Object[] add(Object newValue, Object[] oldValues, Object[] newValues) {

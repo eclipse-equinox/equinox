@@ -22,8 +22,7 @@ import org.eclipse.core.runtime.internal.adaptor.EclipseAdaptorMsg;
 import org.eclipse.osgi.baseadaptor.BaseAdaptor;
 import org.eclipse.osgi.baseadaptor.BaseData;
 import org.eclipse.osgi.baseadaptor.bundlefile.*;
-import org.eclipse.osgi.baseadaptor.hooks.BundleFileFactoryHook;
-import org.eclipse.osgi.baseadaptor.hooks.StorageHook;
+import org.eclipse.osgi.baseadaptor.hooks.*;
 import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.debug.FrameworkDebugOptions;
@@ -592,22 +591,28 @@ public class BaseStorage {
 			// get the content of this bundle
 			content = getBundleContent(data);
 		}
+		BundleFile result = null;
 		// Ask factories before doing the default behavior
 		BundleFileFactoryHook[] factories = adaptor.getHookRegistry().getBundleFileFactoryHooks();
-		for (int i = 0; i < factories.length; i++) {
-			BundleFile result = factories[i].createBundleFile(content, data, base);
-			if (result != null)
-				return result;
-		}
+		for (int i = 0; i < factories.length && result == null; i++)
+			result = factories[i].createBundleFile(content, data, base);
+
 		// No factories configured or they declined to create the bundle file; do default
-		if (content instanceof File) {
+		if (result == null && content instanceof File) {
 			File file = (File) content;
 			if (file.isDirectory())
-				return new DirBundleFile(file);
-			return new ZipBundleFile(file, data);
+				result =  new DirBundleFile(file);
+			else 
+				result = new ZipBundleFile(file, data);
 		}
-		// nothing we can do; must throw exception for the content
-		throw new IOException("Cannot create bundle file for content of type: " + content.getClass().getName());
+		if (result == null)
+			// nothing we can do; must throw exception for the content
+			throw new IOException("Cannot create bundle file for content of type: " + content.getClass().getName()); //$NON-NLS-1$
+
+		// try creating a signed bundlefile out of it.
+		SignedBundleFileFactoryHook signedFactory = adaptor.getHookRegistry().getSignedBundleFileFactoryHook();
+		BundleFile signedBundle = signedFactory == null ? null : signedFactory.createBundleFile(result, content, data, base);
+		return signedBundle == null ? result : signedBundle;
 	}
 
 	public synchronized StateManager getStateManager() {

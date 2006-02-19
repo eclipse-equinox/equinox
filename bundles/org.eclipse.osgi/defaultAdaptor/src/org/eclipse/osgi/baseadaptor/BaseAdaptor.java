@@ -469,9 +469,15 @@ public class BaseAdaptor implements FrameworkAdaptor{
 	 * This method must delegate to each configured bundle file factory 
 	 * {@link BundleFileFactoryHook#createBundleFile(Object, BaseData, boolean)} method until one 
 	 * factory returns a non-null value.  If no bundle file factory returns a non-null value 
-	 * then the the default behavior will be performed. <p>
+	 * then the the default behavior will be performed.
+	 * <p>
 	 * If the specified content is <code>null</code> then the base content of the specified 
 	 * bundledata must be found before calling any bundle file factories.
+	 * </p>
+	 * <p>
+	 * If a {@link SignedBundleFileFactoryHook} is configured then it will get called to 
+	 * create a signed bundle file if the content is signed.
+	 * </p>
 	 * @param content The object which contains the content of a bundle file. A value of 
 	 * <code>null</code> indicates that the storage must find the base content for the 
 	 * specified BaseData.
