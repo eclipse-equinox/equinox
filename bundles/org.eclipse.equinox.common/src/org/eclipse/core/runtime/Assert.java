@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2004 IBM Corporation and others.
+ * Copyright (c) 2000, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,8 +12,7 @@ package org.eclipse.core.runtime;
 
 /**
  * <code>Assert</code> is useful for for embedding runtime sanity checks
- * in code.
- * The predicate methods all test a condition and throw some
+ * in code. The predicate methods all test a condition and throw some
  * type of unchecked exception if the condition does not hold.
  * <p>
  * Assertion failure exceptions, like most runtime exceptions, are
@@ -21,7 +20,10 @@ package org.eclipse.core.runtime;
  * unspecified behavior; consequently, clients should never rely on
  * these being thrown (and certainly should not being catching them
  * specifically).
+ * </p><p>
+ * This class is not intended to be instantiated or sub-classed by clients.
  * </p>
+ * @since org.eclipse.equinox.common 3.2
  */
 public final class Assert {
 	/* This class is not intended to be instantiated. */

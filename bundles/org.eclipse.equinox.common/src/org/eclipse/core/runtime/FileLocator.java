@@ -14,7 +14,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Map;
-import org.eclipse.core.internal.runtime.*;
+import org.eclipse.core.internal.runtime.Activator;
+import org.eclipse.core.internal.runtime.FindSupport;
 import org.eclipse.osgi.service.urlconversion.URLConverter;
 import org.osgi.framework.Bundle;
 
@@ -24,9 +25,13 @@ import org.osgi.framework.Bundle;
  * <p>
  * The class is not intended to be subclassed or instantiated by clients.
  * </p>
- * @since 3.2
+ * @since org.eclipse.equinox.common 3.2
  */
 public final class FileLocator {
+
+	private FileLocator() {
+		// prevent instantiation
+	}
 
 	/**
 	 * Returns a URL for the given path in the given bundle.  Returns <code>null</code> if the URL
@@ -69,13 +74,13 @@ public final class FileLocator {
 	 * @param bundle the bundle in which to search
 	 * @param path file path relative to plug-in installation location
 	 * @param override map of override substitution arguments to be used for
-	 * any $arg$ path elements. The map keys correspond to the substitution
-	 * arguments (eg. "$nl$" or "$os$"). The resulting
-	 * values must be of type java.lang.String. If the map is <code>null</code>,
-	 * or does not contain the required substitution argument, the default
-	 * is used.
+	 * 	any $arg$ path elements. The map keys correspond to the substitution
+	 * 	arguments (eg. "$nl$" or "$os$"). The resulting
+	 * 	values must be of type java.lang.String. If the map is <code>null</code>,
+	 * 	or does not contain the required substitution argument, the default
+	 * 	is used.
 	 * @return a URL for the given path or <code>null</code>.  The actual form
-	 * of the returned URL is not specified.
+	 * 	of the returned URL is not specified.
 	 */
 	public static URL find(Bundle bundle, IPath path, Map override) {
 		return FindSupport.find(bundle, path, override);
@@ -131,7 +136,7 @@ public final class FileLocator {
 	 * installation configurations, others may result in jar: or http: URLs.
 	 * </p>
 	 * <p>
-	 * If the protocol is not reconized by this converter, then the original URL is
+	 * If the protocol is not recognized by this converter, then the original URL is
 	 * returned as-is.
 	 * </p>
 	 * @param url the original URL

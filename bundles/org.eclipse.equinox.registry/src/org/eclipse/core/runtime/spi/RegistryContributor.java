@@ -13,7 +13,7 @@ package org.eclipse.core.runtime.spi;
 import org.eclipse.core.runtime.IContributor;
 
 /**
- * This class describes a registry contributor - an entity that supplies information
+ * This class describes a registry contributor which is an entity that supplies information
  * to the extension registry. Depending on the registry strategy, contributor might delegate 
  * some of its functionality to a "host" contributor. For instance, OSGi registry strategy
  * uses "host" contributor to delegate some functionality from fragments to plugins. 
@@ -56,14 +56,27 @@ public final class RegistryContributor implements IContributor {
 	private String hostName;
 
 	/**
-	 * Public constructor.
+	 * Constructor for the contributor.
+	 * <p>
+	 * The actual id is a string identifier for the contributor (e.g., "12") and is expected 
+	 * to be unique within the workspace.
+	 * </p><p>
+	 * The actual name is the name associated with the contributor. 
+	 * (e.g., "org.eclipse.core.runtime.fragment")
+	 * </p><p>
+	 * The host id is the identifier associated with the entity "in charge" of the contributor
+	 * (e.g., "1"). IDs are expected to be unique in the workspace. If contributor does not 
+	 * rely on a host, then <code>null</code> is an acceptable host id.
+	 * </p><p>
+	 * The host name is the name of the entity "in charge" of the contributor 
+	 * (e.g., "org.eclipse.core.runtime"). If contributor does not rely on a host, then
+	 * <code>null</code> can be used.
+	 * </p>
 	 * 
-	 * @param actualId actual ID of the contributor (e.g., "12"). IDs are expected to be unique in the workspace.
-	 * @param actualName actual name of the contributor (e.g., "org.eclipse.core.runtime.fragment")
-	 * @param hostId id associated with the entity "in charge" of the contributor (e.g., "1"). IDs are expected 
-	 * to be unique in the workspace. If contributor does not rely on a host, pass null. 
-	 * @param hostName name of the entity "in charge" of the contributor (e.g., "org.eclipse.core.runtime").
-	 * If contributor does not rely on a host, pass null.
+	 * @param actualId contributor identifier
+	 * @param actualName name of the contributor
+	 * @param hostId id associated with the host, or <code>null</code>
+	 * @param hostName name of the host, or <code>null</code>
 	 */
 	public RegistryContributor(String actualId, String actualName, String hostId, String hostName) {
 		this.actualContributorId = actualId;

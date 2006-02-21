@@ -14,7 +14,7 @@ package org.eclipse.core.runtime;
  * This interface describes a registry contributor - an entity that supplies information
  * to the extension registry. 
  * <p>
- * A registry contributor objects can be obtained by calling {@link IExtensionPoint#getContributor()}, 
+ * Registry contributor objects can be obtained by calling {@link IExtensionPoint#getContributor()}, 
  * {@link IExtension#getContributor()}, and {@link IConfigurationElement#getContributor()}.
  * Alternatively, a contributor factory appropriate for the registry in use can be called to directly
  * obtain an IContributor object.
@@ -30,6 +30,7 @@ public interface IContributor {
 
 	/**
 	 * Provides name of the contributor (e.g., "org.eclipse.core.runtime").
+	 * 
 	 * @return name of the registry contributor 
 	 */
 	public String getName();

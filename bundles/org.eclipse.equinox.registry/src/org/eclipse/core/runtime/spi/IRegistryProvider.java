@@ -13,8 +13,10 @@ package org.eclipse.core.runtime.spi;
 import org.eclipse.core.runtime.IExtensionRegistry;
 
 /**
- * Implement this interface to specify the default extension registry.
+ * Implement this interface to specify a contributed extension registry.
  * <p>
+ * This interface is intended to be implemented by clients.
+ * </p><p>
  * <b>Note:</b> This class/interface is part of an interim API that is still under 
  * development and expected to change significantly before reaching stability. 
  * It is being made available at this early stage to solicit feedback from pioneering 
@@ -22,13 +24,13 @@ import org.eclipse.core.runtime.IExtensionRegistry;
  * be broken (repeatedly) as the API evolves.
  * </p>
  * @see org.eclipse.core.runtime.RegistryFactory#getRegistry()
- * @see org.eclipse.core.runtime.RegistryFactory#setRegistryProvider(IRegistryProvider)
+ * @see org.eclipse.core.runtime.RegistryFactory#setDefaultRegistryProvider(IRegistryProvider)
  * @since org.eclipse.equinox.registry 3.2
  */
 public interface IRegistryProvider {
 
 	/**
-	 * Returns the "default" extension registry.
+	 * Returns the extension registry contributed by this provider.
 	 * 
 	 * @return an extension registry 
 	 */

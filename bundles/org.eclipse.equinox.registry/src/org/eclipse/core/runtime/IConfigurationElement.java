@@ -269,21 +269,20 @@ public interface IConfigurationElement {
 	/**
 	 * Returns the namespace for this configuration element. This value can be used
 	 * in various global facilities to discover this configuration element's contributor.
-	 * <p>
 	 * 
 	 * @return the namespace for this configuration element
 	 * @throws InvalidRegistryObjectException if this configuration element is no longer valid
 	 * @see IExtensionRegistry
 	 * @since 3.1
-	 * 
 	 * @deprecated As namespace is no longer restricted to the contributor name, 
-	 * use {@link #getNamespaceIdentifier()} to obtain namespace name or {@link #getContributor()}
-	 * to get the name of the contributor of this registry element
+	 * 	use {@link #getNamespaceIdentifier()} to obtain namespace name or {@link #getContributor()}
+	 * 	to get the name of the contributor of this registry element
 	 */
 	public String getNamespace() throws InvalidRegistryObjectException;
 
 	/**
 	 * Returns the namespace name for this configuration element.
+	 * 
 	 * @return the namespace name for this configuration element
 	 * @throws InvalidRegistryObjectException if this configuration element is no longer valid
 	 * @since org.eclipse.equinox.registry 3.2	 
@@ -291,7 +290,8 @@ public interface IConfigurationElement {
 	public String getNamespaceIdentifier() throws InvalidRegistryObjectException;
 
 	/**
-	 * Returns the contributor of the configuration element.
+	 * Returns the contributor of this configuration element.
+	 * 
 	 * @return the contributor for this configuration element
 	 * @throws InvalidRegistryObjectException if this configuration element is no longer valid
 	 * @since org.eclipse.equinox.registry 3.2	 

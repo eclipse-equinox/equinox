@@ -13,19 +13,23 @@ package org.eclipse.core.runtime.dynamichelpers;
 import org.eclipse.core.runtime.IExtensionPoint;
 
 /**
- * A filter compares the given object to some pattern and returns true
- * if the two match and false otherwise..
+ * A filter compares the given object to some pattern and returns 
+ * <code>true</code> if the two match and <code>false</code> otherwise.
  *<p>
  * This interface may be implemented by clients, however factory methods are 
  * available on IExtensionTracker.
  * </p>
+ * 
  * @since 3.1
  */
 public interface IFilter {
 	/**
-	 * Return true if the given object matches the criteria for this filter
+	 * Return <code>true</code> if the given object matches the criteria 
+	 * for this filter.
+	 * 
 	 * @param target the object to match
-	 * @return true if the target matches this filter, false otherwise
+	 * @return <code>true</code> if the target matches this filter 
+	 * 	and <code>false</code> otherwise
 	 */
 	public boolean matches(IExtensionPoint target);
 }

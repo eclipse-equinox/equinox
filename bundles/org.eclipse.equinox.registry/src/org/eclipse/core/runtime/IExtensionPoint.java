@@ -62,15 +62,15 @@ public interface IExtensionPoint {
 	 * @throws InvalidRegistryObjectException if this extension point is no longer valid
 	 * @see IExtensionRegistry
 	 * @since 3.0
-	 * 
 	 * @deprecated As namespace is no longer restricted to the contributor name, 
-	 * use {@link #getNamespaceIdentifier()} to obtain namespace name or {@link #getContributor()}
-	 * to get the name of the contributor of this registry element  
+	 * 	use {@link #getNamespaceIdentifier()} to obtain namespace name or {@link #getContributor()}
+	 * 	to get the name of the contributor of this registry element  
 	 */
 	public String getNamespace() throws InvalidRegistryObjectException;
 
 	/**
 	 * Returns the namespace name for this extension point.
+	 * 
 	 * @return the namespace name for this extension point
 	 * @throws InvalidRegistryObjectException if this extension point is no longer valid
 	 * @since org.eclipse.equinox.registry 3.2	 
@@ -78,7 +78,8 @@ public interface IExtensionPoint {
 	public String getNamespaceIdentifier() throws InvalidRegistryObjectException;
 
 	/**
-	 * Returns the contributor of the extension point.
+	 * Returns the contributor of this extension point.
+	 * 
 	 * @return the contributor for this extension point
 	 * @throws InvalidRegistryObjectException if this extension point is no longer valid
 	 * @since org.eclipse.equinox.registry 3.2	 

@@ -255,7 +255,10 @@ public interface IExtensionRegistry {
 	 * editor) is ignored by this method. 
 	 * <p>
 	 * This method is an access controlled method. Proper token (master token or user token) should 
-	 * be passed as an argument.
+	 * be passed as an argument. Two registry keys are set in the registry constructor 
+	 * {@link RegistryFactory#createRegistry(org.eclipse.core.runtime.spi.RegistryStrategy, Object, Object)}: 
+	 * master token and a user token. Master token allows all operations; user token allows 
+	 * non-persisted registry elements to be modified.
 	 * </p><p>
 	 * <b>Note:</b> This class/interface is part of an interim API that is still under 
 	 * development and expected to change significantly before reaching stability. 
@@ -264,19 +267,16 @@ public interface IExtensionRegistry {
 	 * be broken (repeatedly) as the API evolves.
 	 * </p>
 	 * @param is stream open on the XML file. The XML file can contain an extension
-	 * poin(s) or/and extension(s) described in the format similar to plugin.xml 
+	 * 	point(s) or/and extension(s) described in the format similar to plugin.xml 
 	 * @param contributor the contributor making this contribution.
-	 * @param persist indicates if contribution should be stored in the registry cache. If false,
-	 * contribution is not persisted in the registry cache and is lost on Eclipse restart
-	 * @param name optional name of the contribution. Used for error reporting; might be null
-	 * @param translationBundle optional resource bundle used for translations; might be null 
-	 * @param token the key used to check permissions. Two registry keys are set in the registry
-	 * constructor {@link RegistryFactory#createRegistry(org.eclipse.core.runtime.spi.RegistryStrategy, Object, Object)}: 
-	 * master token and a user token. Master token allows all operations; user token 
-	 * allows non-persisted registry elements to be modified.
-	 * @return - true: the contribution was successfully processed; false - error in 
-	 * the processing of the contribution
-	 * @throws IllegalArgumentException if incorrect token is passed
+	 * @param persist indicates if the contribution(s) should be stored in the registry cache. If <code>false</code>,
+	 * 	contribution is not persisted in the registry cache and is lost on Eclipse restart
+	 * @param name optional name of the contribution. Used for error reporting; might be <code>null</code>
+	 * @param translationBundle optional resource bundle used for translations; might be <code>null</code>
+	 * @param token the key used to check permissions
+	 * @return <code>true</code> if the contribution was successfully processed and <code>false</code>
+	 * 	otherwise
+	 * @throws IllegalArgumentException if an incorrect token is passed
 	 * 
 	 * @see IContributor
 	 * @since org.eclipse.equinox.registry 3.2	 
@@ -284,10 +284,13 @@ public interface IExtensionRegistry {
 	public boolean addContribution(InputStream is, IContributor contributor, boolean persist, String name, ResourceBundle translationBundle, Object token) throws IllegalArgumentException;
 
 	/**
-	 * Removes extension.
+	 * Removes the given extension from this registry.
 	 * <p>
 	 * This method is an access controlled method. Proper token (master token or user token) should 
-	 * be passed as an argument.
+	 * be passed as an argument. Two registry keys are set in the registry constructor 
+	 * {@link RegistryFactory#createRegistry(org.eclipse.core.runtime.spi.RegistryStrategy, Object, Object)}: 
+	 * master token and a user token. Master token allows all operations; user token only
+	 * allows non-persisted registry elements to be modified.
 	 * </p><p>
 	 * <b>Note:</b> This class/interface is part of an interim API that is still under 
 	 * development and expected to change significantly before reaching stability. 
@@ -296,22 +299,22 @@ public interface IExtensionRegistry {
 	 * be broken (repeatedly) as the API evolves.
 	 * </p>
 	 * @param extension extension to be removed
-	 * @param token the key used to check permissions. Two registry keys are set in the registry
-	 * constructor {@link RegistryFactory#createRegistry(org.eclipse.core.runtime.spi.RegistryStrategy, Object, Object)}: 
-	 * master token and a user token. Master token allows all operations; user token only
-	 * allows non-persisted registry elements to be modified.
-	 * @return true if the extension was successfully removed
-	 * @throws IllegalArgumentException if incorrect token is passed
+	 * @param token the key used to check permissions
+	 * @return <code>true</code> if the extension was successfully removed, and <code>false</code> otherwise
+	 * @throws IllegalArgumentException if an incorrect token is passed
 	 * 
 	 * @since org.eclipse.equinox.registry 3.2	 
 	 */
 	public boolean removeExtension(IExtension extension, Object token) throws IllegalArgumentException;
 
 	/**
-	 * Removes extension point.
+	 * Removes the specified extension point from this registry.
 	 * <p>
 	 * This method is an access controlled method. Proper token (master token or user token) should 
-	 * be passed as an argument.
+	 * be passed as an argument. Two registry keys are set in the registry constructor 
+	 * {@link RegistryFactory#createRegistry(org.eclipse.core.runtime.spi.RegistryStrategy, Object, Object)}: 
+	 * master token and a user token. Master token allows all operations; user token only
+	 * allows non-persisted registry elements to be modified.
 	 * </p><p>
 	 * <b>Note:</b> This class/interface is part of an interim API that is still under 
 	 * development and expected to change significantly before reaching stability. 
@@ -320,11 +323,9 @@ public interface IExtensionRegistry {
 	 * be broken (repeatedly) as the API evolves.
 	 * </p>
 	 * @param extensionPoint extension point to be removed
-	 * @param token the key used to check permissions. Two registry keys are set in the registry
-	 * constructor {@link RegistryFactory#createRegistry(org.eclipse.core.runtime.spi.RegistryStrategy, Object, Object)}: 
-	 * master token and a user token. Master token allows all operations; user token only
-	 * allows non-persisted registry elements to be modified.
-	 * @return true if the extension point was successfully removed
+	 * @param token the key used to check permissions
+	 * @return <code>true</code> if the extension point was successfully removed, and 
+	 * 	<code>false</code> otherwise
 	 * @throws IllegalArgumentException if incorrect token is passed
 	 * 
 	 * @since org.eclipse.equinox.registry 3.2	 

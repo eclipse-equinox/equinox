@@ -19,17 +19,19 @@ import org.eclipse.core.runtime.*;
 import org.eclipse.osgi.util.NLS;
 
 /**
- * This is the basic registry strategy. It describes how registry does logging,
+ * This is the basic registry strategy. It describes how the registry does logging,
  * message translation, namespace resolution, extra start/stop processing, event scheduling,
  * caching, and debugging.
  * <p>
  * In this strategy:
  * </p><p><ul>
- * <li>Clients can add information into the registry</li>
- * <li>Caching is enabled and doesn't use state or time stamp validation; no alternative cache location is supplied</li>
- * <li>Logging is done onto System.out</li>
- * <li>Registry contributors properties are determined by the toString() value of the defining objects</li>
- * <li>Standard Java class loading is used to create executable extensions</li>
+ * <li>Clients can add information into the registry.</li>
+ * <li>Caching is enabled and doesn't use state or time stamp validation; no 
+ * 	alternative cache location is supplied.</li>
+ * <li>Logging is done onto <code>System.out</code>.</li>
+ * <li>Registry contributors properties are determined by the <code>#toString()</code>
+ * 	value of the defining objects.</li>
+ * <li>Standard Java class loading is used to create executable extensions.</li>
  * </ul></p><p>
  * This class can be overridden and/or instantiated by clients. 
  * </p><p>
@@ -43,6 +45,8 @@ import org.eclipse.osgi.util.NLS;
  */
 public class RegistryStrategy {
 
+	private SAXParserFactory theXMLParserFactory = null;
+
 	/**
 	 * File system directory to store cache files; might be null
 	 */
@@ -54,20 +58,19 @@ public class RegistryStrategy {
 	private final boolean[] cacheReadOnly;
 
 	/**
-	 * Public constructor; accepts list of the possible cache locations.
+	 * Constructor for this default registry strategy. It accepts a list of 
+	 * the possible cache locations or <code>null</code> if cache use 
+	 * is not desired.
 	 * <p>
-	 * Locations in the list will be checked sequentially (starting with index 0)
-	 * until cache files are found. The first location containing cache files will
-	 * be used. It will be assigned the "read only" attribute specified in the 
-	 * corresponding slot of the cacheReadOnly array.
+	 * The arrays of the storage files (theStorageDir) and read-only flags (cacheReadOnly)
+	 * must be same size. (or both <code>null</code>) When checking cache 
+	 * file locations, the corresponding index in the read-only flags array is
+	 * checked to determine whether that location is considered read-only or
+	 * read-write.
 	 * </p>
-	 * <p>
-	 * The arrays of the storage files (theStorageDir) and read only flags (cacheReadOnly)
-	 * must be same size.
-	 * </p>
-	 * @param theStorageDir - array of file system directories to store cache files; might be null
-	 * @param cacheReadOnly - array of read only attributes. True: cache at this location is read 
-	 * only; false: cache is read/write
+	 * 
+	 * @param theStorageDir array of file system directories, or <code>null</code>
+	 * @param cacheReadOnly array of read only attributes
 	 */
 	public RegistryStrategy(File[] theStorageDir, boolean[] cacheReadOnly) {
 		this.theStorageDir = theStorageDir;
@@ -75,7 +78,8 @@ public class RegistryStrategy {
 	}
 
 	/**
-	 * Returns number of possible cache locations for this registry 
+	 * Returns number of possible cache locations for this registry.
+	 * 
 	 * @return number of possible cache locations for this registry
 	 */
 	public final int getLocationsLength() {
@@ -99,8 +103,10 @@ public class RegistryStrategy {
 
 	/**
 	 * Returns read only status of the registry cache location.
+	 * 
 	 * @param index index of the possible registry location
-	 * @return true: location is read only; false: location is read/write
+	 * @return <code>true</code> if the location is read only and 
+	 * 	<code>false</code> if the location is read/write
 	 */
 	public final boolean isCacheReadOnly(int index) {
 		if (cacheReadOnly != null)
@@ -110,14 +116,16 @@ public class RegistryStrategy {
 
 	/**
 	 * Adds a log entry based on the supplied status.
-	 * This method writes a message to the System.out in the following format:
-	 * 
+	 * This method writes a message to <code>System.out</code> 
+	 * in the following format:
+	 * <pre>
 	 * [Error|Warning|Log]: Main error message
 	 * [Error|Warning|Log]: Child error message 1
 	 * 	...
 	 * [Error|Warning|Log]: Child error message N
+	 * </pre>
 	 * 
-	 * @param status - the status to log
+	 * @param status the status to log
 	 */
 	public void log(IStatus status) {
 		RegistrySupport.log(status, null);
@@ -125,14 +133,16 @@ public class RegistryStrategy {
 
 	/**
 	 * Translates key using the supplied resource bundle. The resource bundle is 
-	 * optional and might be null.
+	 * optional and might be <code>null</code>.
+	 * <p>
 	 * The default translation routine assumes that keys are prefixed with '%'. If 
 	 * no resource bundle is present, the key itself (without leading '%') is returned. 
 	 * There is no decoding for the leading '%%'.
+	 * </p>
 	 * 
-	 * @param key - message key to be translated
-	 * @param resources - resource bundle, might be null
-	 * @return - translated string
+	 * @param key message key to be translated
+	 * @param resources resource bundle, or <code>null</code>
+	 * @return the translated string
 	 */
 	public String translate(String key, ResourceBundle resources) {
 		return RegistrySupport.translate(key, resources);
@@ -140,9 +150,9 @@ public class RegistryStrategy {
 
 	/**
 	 * Override this method to provide additional processing performed 
-	 * at the end of the registry's constructor.
+	 * when the registry is created and started.
 	 * 
-	 * @param registry - the extension registry being created
+	 * @param registry the extension registry being created
 	 */
 	public void onStart(Object registry) {
 		// The default implementation
@@ -150,9 +160,9 @@ public class RegistryStrategy {
 
 	/**
 	 * Override this method to provide additional processing before 
-	 * the extension registry's stop() method is executed.
+	 * the extension registry's <code>#stop()</code> method is executed.
 	 * 
-	 * @param registry - the extension registry being stopped
+	 * @param registry the extension registry being stopped
 	 */
 	public void onStop(Object registry) {
 		// The default implementation
@@ -162,20 +172,20 @@ public class RegistryStrategy {
 	 * Creates an executable extension. Override this method to supply an alternative processing 
 	 * for the creation of executable extensions. 
 	 * <p>
-	 * This method recieves the contributor of the executable extension and, possibly,
+	 * This method receives the contributor of the executable extension and, possibly,
 	 * an optional contributor name (if specified by the executable extension).  
 	 * </p><p>
-	 * In this implementation registry attempts to instantiate the class specified using 
+	 * In this implementation the registry attempts to instantiate the class specified using 
 	 * standard Java reflection mechanism; it assumes that constructor of such class has no arguments.
 	 * </p>
-	 * @see IConfigurationElement#createExecutableExtension(String)
 	 * 
-	 * @param contributor - contributor of this executable extension
-	 * @param className - name of the class to be instantiated
-	 * @param overridenContributorName - optionally executable extension can request a specific contributor
-	 * to be used; might be null
-	 * @return - the object created; might be null
-	 * @throws CoreException
+	 * @param contributor the contributor of this executable extension
+	 * @param className the name of the class to be instantiated
+	 * @param overridenContributorName the contributor to be used, or 
+	 * 	<code>null</code> to use the default
+	 * @return the object created, or <code>null</code>
+	 * @throws CoreException if there was a problem creating the executable extension
+	 * @see IConfigurationElement#createExecutableExtension(String)
 	 * @see IExecutableExtension
 	 */
 	public Object createExecutableExtension(RegistryContributor contributor, String className, String overridenContributorName) throws CoreException {
@@ -200,15 +210,16 @@ public class RegistryStrategy {
 	/**
 	 * Override this method to customize scheduling of an extension registry event. Note that this method 
 	 * must make the following call to actually process the event:
-	 * 
+	 * <p><pre><code>
 	 * 	RegistryStrategy.processChangeEvent(listeners, deltas, registry);
-	 * 
-	 * In this implementation of the method registry events are executed in a queue 
+	 * </code></pre></p><p>
+	 * In the default implementation, the method registry events are executed in a queue 
 	 * on a separate thread (i.e. asynchronously, sequentially).
+	 * </p>
 	 * 
-	 * @param listeners - list of active listeners (thread safe)
-	 * @param deltas - registry deltas (thread safe)
-	 * @param registry - the extension registry (NOT thread safe)
+	 * @param listeners the list of active listeners (thread safe)
+	 * @param deltas the registry deltas (thread safe)
+	 * @param registry the the extension registry (NOT thread safe)
 	 */
 	public void scheduleChangeEvent(Object[] listeners, Map deltas, Object registry) {
 		((ExtensionRegistry) registry).scheduleChangeEvent(listeners, deltas);
@@ -216,13 +227,13 @@ public class RegistryStrategy {
 
 	/**
 	 * This method performs actual processing of the registry change event. It should 
-	 * only be used by overrides of the RegistryStrategy.scheduleChangeEvent.
+	 * only be used by overrides of the RegistryStrategy.scheduleChangeEvent. It will
+	 * return <code>null</code> if an unexpected registry type was encountered.
 	 * 
-	 * @param listeners - the list of active listeners
-	 * @param deltas - the extension registry deltas
-	 * @param registry - the extension registry
-	 * @return - status of the operation; null if unexpected type of the registry 
-	 * was encountered
+	 * @param listeners the list of active listeners
+	 * @param deltas the extension registry deltas
+	 * @param registry the extension registry
+	 * @return status of the operation or <code>null</code>
 	 */
 	public final static IStatus processChangeEvent(Object[] listeners, Map deltas, Object registry) {
 		if (registry instanceof ExtensionRegistry)
@@ -231,13 +242,15 @@ public class RegistryStrategy {
 	}
 
 	/**
-	 * Override this method to specify debug requirements to the registry. In this
-	 * default implementation debug functionality is turned off.
+	 * Override this method to specify debug requirements to the registry. In the
+	 * default implementation, the debug functionality is turned off. (returns <code>false</code>)
+	 * <p>
+	 * Note that in the general case, the extension registry plug-in doesn't depend on OSGI and
+	 * therefore cannot use Eclipse .options files to discover debug options.
+	 * </p>
 	 * 
-	 * Note that, in general case, the extension registry plugin doesn't depend on OSGI and,
-	 * therefore, can't use Eclipse .options files to discover debug options.
-	 * 
-	 * @return true - perform debug logging and validation
+	 * @return <code>true</code> if debug logging and validation should be performed and
+	 * 	<code>false</code> otherwise
 	 */
 	public boolean debug() {
 		return false;
@@ -245,36 +258,44 @@ public class RegistryStrategy {
 
 	/**
 	 * Override this method to specify debug requirements for the registry event processing. 
-	 * In this default implementation debug functionality is turned off.
+	 * In the default implementation debug functionality is turned off. (returns <code>false</code>)
+	 * <p>
+	 * Note that in the general case, the extension registry plugin doesn't depend on OSGI and
+	 * therefore can't use Eclipse .options files to discover debug options.
+	 * </p>
 	 * 
-	 * Note that, in general case, the extension registry plugin doesn't depend on OSGI and,
-	 * therefore, can't use Eclipse .options files to discover debug options.
-	 * 
-	 * @return true - perform debug logging and validation of the registry events
+	 * @return <code>true</code> if debug logging and validation of the registry events
+	 * 	should be performed and <code>false</code> otherwise
 	 */
 	public boolean debugRegistryEvents() {
 		return false;
 	}
 
 	/**
-	 * Specifies if the extension registry should use cache to store
+	 * Specifies if the extension registry should use the cache to store
 	 * registry data between invocations.
-	 * 
-	 * This basic implementation specifies that registry caching is going to tbe enabled.
+	 * <p>
+	 * The default implementation specifies that registry caching is going to be enabled.
+	 * (returns <code>true</code>)
+	 * </p>
 	 *  
-	 * @return - true - should use cache; false - don't
+	 * @return <code>true</code> if the cache should be used 
+	 * 	and <code>false</code> otherwise
 	 */
 	public boolean cacheUse() {
 		return true;
 	}
 
 	/**
-	 * Specifies if lazy cache loading is used. If cache startegy is not supplied,
+	 * Specifies if lazy cache loading is used. If cache strategy is not supplied,
 	 * lazy cache loading is used.
+	 * <p>
+	 * The default implementation specifies that lazy cache loading is going to be used
+	 * and therefore returns <code>true</code>.
+	 * </p>
 	 * 
-	 * This basic implementation specifies that lazy cache loading is going to be used.
-	 * 
-	 * @return - true - use lazy extension registry cache loading
+	 * @return <code>true</code> if lazy cache loading is used 
+	 * 	and <code>false</code> otherwise
 	 */
 	public boolean cacheLazyLoading() {
 		return true;
@@ -293,7 +314,7 @@ public class RegistryStrategy {
 	 * </p><p>
 	 * For instance, in Eclipse addition or removal of a bundle results in the number returned by 
 	 * this method being incremented. As a result, if a bundle that contributed plugin.xml into 
-	 * the extension registry  was modified, the state doesn't match the state stored in the registry 
+	 * the extension registry was modified, the state doesn't match the state stored in the registry 
 	 * cache. In this case the cache content becomes invalid and registry needs to be re-created from 
 	 * the original data. 
 	 * </p><p>
@@ -302,6 +323,7 @@ public class RegistryStrategy {
 	 * number as the registry content gets modified.
 	 * </p><p>
 	 * Return 0 to indicate that state verification is not required.
+	 * </p>
 	 * 
 	 * @return number indicating state of the application data
 	 */
@@ -327,6 +349,7 @@ public class RegistryStrategy {
 	 * a different number when contributions are modified.
 	 * </p><p>
 	 * Return 0 to indicate that no time stamp verification is required. 
+	 * </p>
 	 * 
 	 * @return the time stamp calculated with the application data
 	 */
@@ -334,15 +357,12 @@ public class RegistryStrategy {
 		return 0;
 	}
 
-	private SAXParserFactory theXMLParserFactory = null;
-
 	/**
-	 * The parser used by the registry to parse descriptions of extension points
-	 * and extensions from the XML input streams.
+	 * Returns the parser used by the registry to parse descriptions of 
+	 * extension points and extensions.
 	 * 
-	 * @see org.eclipse.core.runtime.IExtensionRegistry#addContribution(java.io.InputStream, String, boolean, String, ResourceBundle, Object)
-	 * 
-	 * @return XML parser
+	 * @return this strategy's parser
+	 * @see org.eclipse.core.runtime.IExtensionRegistry#addContribution(java.io.InputStream, IContributor, boolean, String, ResourceBundle, Object)
 	 */
 	public SAXParserFactory getXMLParser() {
 		if (theXMLParserFactory == null)

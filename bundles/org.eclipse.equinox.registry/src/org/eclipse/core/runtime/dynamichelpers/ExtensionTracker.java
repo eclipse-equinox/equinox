@@ -27,7 +27,8 @@ import org.eclipse.core.runtime.RegistryFactory;
 import org.eclipse.core.runtime.Status;
 
 /**
- * Implementation of the IExtensionTracker. 
+ * Implementation of the IExtensionTracker.
+ * 
  * @see org.eclipse.core.runtime.dynamichelpers.IExtensionTracker 
  * @since 3.1
  */
@@ -49,8 +50,11 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 	}
 
 	/**
-	 * Construct a new instance of the extension tracker.
-	 * @param theRegistry - the extension registry containing tracked extensions and extension points. 
+	 * Construct a new instance of the extension tracker using the given registry
+	 * containing tracked extensions and extension points.
+	 * 
+	 * @param theRegistry the extension registry to track 
+	 * @since org.eclipse.equinox.registry 3.2
 	 */
 	public ExtensionTracker(IExtensionRegistry theRegistry) {
 		registry = theRegistry;
@@ -104,8 +108,10 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 	}
 
 	/**
-	 * Implementation of IRegistryChangeListener interface.  This method must not
-	 * be called by clients.
+	 * Implementation of IRegistryChangeListener interface.
+	 * <p>
+	 * <em>This method must not be called by clients.</em>
+	 * </p>
 	 */
 	public void registryChanged(IRegistryChangeEvent event) {
 		IExtensionDelta delta[] = event.getExtensionDeltas();
@@ -124,10 +130,11 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 	}
 
 	/**
-	 * Notify all handlers whose filter matches that the given delta occured
-	 * If the list of objects is not null then this is a removal and the handlers
-	 * will be given a chance to process the list.  If it is null then the notification is 
-	 * an addition.
+	 * Notify all handlers whose filter matches that the given delta occurred.
+	 * If the list of objects is not <code>null</code> then this is a removal and 
+	 * the handlers will be given a chance to process the list.  If it is <code>null</code>
+	 * then the notification is an addition.
+	 * 
 	 * @param delta the change to broadcast
 	 * @param objects the objects to pass to the handlers on removals
 	 */
@@ -241,6 +248,7 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 
 	/**
 	 * Return an instance of filter matching all changes for the given extension point.
+	 * 
 	 * @param xpt the extension point 
 	 * @return a filter
 	 */
@@ -254,6 +262,7 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 
 	/**
 	 * Return an instance of filter matching all changes for the given extension points.
+	 * 
 	 * @param xpts the extension points used to filter
 	 * @return a filter
 	 */
@@ -270,6 +279,7 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 
 	/**
 	 * Return an instance of filter matching all changes from a given plugin.
+	 * 
 	 * @param id the plugin id 
 	 * @return a filter
 	 */

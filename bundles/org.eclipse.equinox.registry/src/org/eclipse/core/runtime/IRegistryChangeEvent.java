@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2004 IBM Corporation and others.
+ * Copyright (c) 2003, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -43,7 +43,7 @@ public interface IRegistryChangeEvent {
 	 *  
 	 * @param namespace the namespace for the extension point
 	 * @param extensionPoint the simple identifier of the 
-	 * extension point (e.g. <code>"builders"</code>)
+	 * 	extension point (e.g. <code>"builders"</code>)
 	 * @return all extension deltas for the given extension point
 	 */
 	public IExtensionDelta[] getExtensionDeltas(String namespace, String extensionPoint);
@@ -54,7 +54,7 @@ public interface IRegistryChangeEvent {
 	 * 
 	 * @param namespace the namespace for the extension point
 	 * @param extensionPoint the simple identifier of the 
-	 * extension point (e.g. <code>"builders"</code>)
+	 * 	extension point (e.g. <code>"builders"</code>)
 	 * @param extension the unique identifier of the extension
 	 * @return the extension delta, or <code>null</code>
 	 */

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2005 IBM Corporation and others.
+ * Copyright (c) 2004, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,7 @@ package org.eclipse.core.runtime.preferences;
 
 import org.eclipse.core.internal.preferences.AbstractScope;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.osgi.service.datalocation.Location;
 
 /**
  * Object representing the instance scope in the Eclipse preferences
@@ -20,7 +21,8 @@ import org.eclipse.core.runtime.IPath;
  * correct preference node to set values in the store.
  * <p>
  * Instance preferences are stored on a per instance basis in the
- * platform's instance area as specified by {@link org.eclipse.core.runtime.Platform#getInstanceLocation}.
+ * platform's instance area as specified by the {@link Location} class
+ * and the {@link Location#INSTANCE_FILTER} filter.
  * </p><p>
  * The path for preferences defined in the instance scope hierarchy
  * is as follows: <code>/instance/&lt;qualifier&gt;</code>
@@ -28,7 +30,7 @@ import org.eclipse.core.runtime.IPath;
  * <p>
  * This class is not intended to be subclassed. This class may be instantiated.
  * </p>
- * @see org.eclipse.core.runtime.Platform#getInstanceLocation()
+ * @see Location#INSTANCE_FILTER
  * @since 3.0
  */
 public final class InstanceScope extends AbstractScope implements IScopeContext {

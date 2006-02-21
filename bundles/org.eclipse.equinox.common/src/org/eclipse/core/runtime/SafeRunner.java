@@ -20,7 +20,7 @@ import org.eclipse.osgi.util.NLS;
  * 
  * Note that this class requires presence of OSGi.
  * 
- * @since org.eclipse.equinox.common 1.0
+ * @since org.eclipse.equinox.common 3.2
  */
 public final class SafeRunner {
 

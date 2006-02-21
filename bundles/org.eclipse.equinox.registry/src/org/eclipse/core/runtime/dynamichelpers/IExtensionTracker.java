@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2005 IBM Corporation and others.
+ * Copyright (c) 2004, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -47,14 +47,16 @@ public interface IExtensionTracker {
 	public static final int REF_WEAK = ReferenceHashSet.WEAK;
 
 	/**
-	 * Register an extension change handler with this tracker using the given filter
+	 * Register an extension change handler with this tracker using the given filter.
+	 * 
 	 * @param handler the handler to be registered
 	 * @param filter the filter to use to choose interesting changes
 	 */
 	public void registerHandler(IExtensionChangeHandler handler, IFilter filter);
 
 	/**
-	 * Unregister the given extension change handler previously registered with this tracker
+	 * Unregister the given extension change handler previously registered with this tracker.
+	 * 
 	 * @param handler the handler to be unregistered 
 	 */
 	public void unregisterHandler(IExtensionChangeHandler handler);
@@ -62,33 +64,42 @@ public interface IExtensionTracker {
 	/**
 	 * Create an association between the given extension and the given object.
 	 * The referenceType indicates how strongly the object is being kept in memory.
-	 * There is 3 possible values: strong, soft, weak. 
-	 * @param extension : an extension 
-	 * @param object : the object to associate with the extension
-	 * @param referenceType : one of REF_STRONG, REF_SOFT, REF_WEAK 
+	 * There is 3 possible values: {@link #REF_STRONG}, {@link #REF_SOFT}, {@link #REF_WEAK}.
+	 * 
+	 * @param extension the extension 
+	 * @param object the object to associate with the extension
+	 * @param referenceType one of REF_STRONG, REF_SOFT, REF_WEAK
+	 * @see #REF_STRONG
+	 * @see #REF_SOFT
+	 * @see #REF_WEAK
 	 */
 	public void registerObject(IExtension extension, Object object, int referenceType);
 
 	/**
 	 * Remove an association between the given extension and the given object.
-	 * @param extension : the extension under which the object has been registered
-	 * @param object : the object to unregister
+	 * 
+	 * @param extension the extension under which the object has been registered
+	 * @param object the object to unregister
 	 */
 	public void unregisterObject(IExtension extension, Object object);
 
 	/**
-	 * Remove all the objects associated with the given extension and return them.
-	 * @param extension : the extension for which the objects are removed
-	 * @return the objects that were associated with the extension.
+	 * Remove all the objects associated with the given extension. Return
+	 * the removed objects.
+	 * 
+	 * @param extension the extension for which the objects are removed
+	 * @return the objects that were associated with the extension
 	 */
 	public Object[] unregisterObject(IExtension extension);
 
 	/**
-	 * Get all the objects that have been associated with the given extension.
+	 * Return all the objects that have been associated with the given extension.
 	 * All objects registered strongly will be return unless they have been unregistered.
 	 * The objects registered softly or weakly may not be returned if they have been garbage collected. 
+	 * Return an empty array if no associations exist.
+	 * 
 	 * @param extension the extension for which the object must be returned 
-	 * @return an array of objects associated with this extension, or an empty array if no association exists 
+	 * @return the array of associated objects
 	 */
 	public Object[] getObjects(IExtension extension);
 

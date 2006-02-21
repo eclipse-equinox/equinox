@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2005 IBM Corporation and others.
+ * Copyright (c) 2004, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,7 +24,7 @@ package org.eclipse.core.runtime;
  * using either equality or identity, as specified in the list constructor.
  * </p>
  * 
- * @since org.eclipse.equinox.common 1.0
+ * @since org.eclipse.equinox.common 3.2
  */
 public class ListenerList {
 
