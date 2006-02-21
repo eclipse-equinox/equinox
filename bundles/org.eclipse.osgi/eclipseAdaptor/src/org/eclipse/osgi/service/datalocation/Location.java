@@ -25,7 +25,7 @@ import java.net.URL;
 public interface Location {
 
 	/**
-	 * Constant which defines the filter string for aquiring the service which
+	 * Constant which defines the filter string for acquiring the service which
 	 * specifies the instance location.
 	 * 
 	 * @since 3.2
@@ -33,7 +33,7 @@ public interface Location {
 	public static final String INSTANCE_FILTER = "(&(objectClass=" + Location.class.getName() + ")(type=osgi.instance.area))"; //$NON-NLS-1$ //$NON-NLS-2$
 
 	/**
-	 * Constant which defines the filter string for aquiring the service which
+	 * Constant which defines the filter string for acquiring the service which
 	 * specifies the install location.
 	 * 
 	 * @since 3.2
@@ -41,7 +41,7 @@ public interface Location {
 	public static final String INSTALL_FILTER = "(&(objectClass=" + Location.class.getName() + ")(type=osgi.install.area))"; //$NON-NLS-1$ //$NON-NLS-2$
 
 	/**
-	 * Constant which defines the filter string for aquiring the service which
+	 * Constant which defines the filter string for acquiring the service which
 	 * specifies the configuration location.
 	 * 
 	 * @since 3.2
@@ -49,7 +49,7 @@ public interface Location {
 	public static final String CONFIGURATION_FILTER = "(&(objectClass=" + Location.class.getName() + ")(type=osgi.configuration.area))"; //$NON-NLS-1$ //$NON-NLS-2$
 
 	/**
-	 * Constant which defines the filter string for aquiring the service which
+	 * Constant which defines the filter string for acquiring the service which
 	 * specifies the user location.
 	 * 
 	 * @since 3.2
