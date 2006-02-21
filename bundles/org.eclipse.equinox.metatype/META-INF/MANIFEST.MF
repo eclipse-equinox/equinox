@@ -8,7 +8,10 @@ Import-Package: org.eclipse.osgi.util,
  org.osgi.service.cm,
  org.osgi.service.metatype,
  org.osgi.service.packageadmin,
- org.osgi.util.tracker
+ org.osgi.util.tracker,
+ javax.xml.parsers,
+ org.xml.sax,
+ org.xml.sax.helpers
 Export-Package: org.eclipse.equinox.metatype;x-internal:=true
 Bundle-Vendor: %bundleVendor
 Bundle-Copyright: %bundleCopyright
