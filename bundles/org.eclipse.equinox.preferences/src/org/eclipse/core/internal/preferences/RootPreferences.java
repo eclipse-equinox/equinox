@@ -40,7 +40,7 @@ public class RootPreferences extends EclipsePreferences {
 			} catch (BackingStoreException e) {
 				// store the first exception we get and still try and flush
 				// the rest of the children.
-				if (exception != null)
+				if (exception == null)
 					exception = e;
 			}
 		}
@@ -119,7 +119,7 @@ public class RootPreferences extends EclipsePreferences {
 			} catch (BackingStoreException e) {
 				// store the first exception we get and still try and sync
 				// the rest of the children.
-				if (exception != null)
+				if (exception == null)
 					exception = e;
 			}
 		}
