@@ -64,8 +64,8 @@ public class ZipBundleFile extends BundleFile {
 		try {
 			return getZipFile() != null;
 		} catch (IOException e) {
-
-			bundledata.getAdaptor().getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, bundledata.getBundle(), e);
+			if (bundledata != null)
+				bundledata.getAdaptor().getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, bundledata.getBundle(), e);
 			return false;
 		}
 	}
@@ -129,6 +129,8 @@ public class ZipBundleFile extends BundleFile {
 	}
 
 	protected File getExtractFile(String entryName) {
+		if (bundledata == null)
+			return null;
 		String path = ".cp"; /* put all these entries in this subdir *///$NON-NLS-1$
 		String name = entryName.replace('/', File.separatorChar);
 		if ((name.length() > 1) && (name.charAt(0) == File.separatorChar)) /* if name has a leading slash */
