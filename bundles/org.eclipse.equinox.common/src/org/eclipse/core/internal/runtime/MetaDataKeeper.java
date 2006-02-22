@@ -17,7 +17,7 @@ import org.eclipse.core.internal.runtime.DataArea;
  * This class can only be used if OSGi plugin is available.
  * 
  * Copied from InternalPlatform as of August 30, 2005.
- * @since org.eclipse.equinox.common 1.0
+ * @since org.eclipse.equinox.common 3.2
  */
 public class MetaDataKeeper {
 
