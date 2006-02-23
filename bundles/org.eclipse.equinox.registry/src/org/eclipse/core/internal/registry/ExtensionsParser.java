@@ -23,6 +23,8 @@ import org.xml.sax.helpers.DefaultHandler;
 public class ExtensionsParser extends DefaultHandler {
 	// Introduced for backward compatibility
 	private final static String NO_EXTENSION_MUNGING = "eclipse.noExtensionMunging"; //$NON-NLS-1$ //System property
+	private static final String VERSION_3_0 = "3.0"; //$NON-NLS-1$
+	private static final String VERSION_3_2 = "3.2"; //$NON-NLS-1$
 	private static Map extensionPointMap;
 
 	static {
@@ -134,19 +136,25 @@ public class ExtensionsParser extends DefaultHandler {
 
 	private Locator locator = null;
 
+	// Cache the behavior toggle (true: attempt to extract namespace from qualified IDs)
+	private boolean extractNamespaces = false;
+
 	public ExtensionsParser(MultiStatus status, ExtensionRegistry registry) {
 		super();
 		this.status = status;
 		this.registry = registry;
 	}
 
-	/**
-	 * @see ContentHandler#setDocumentLocator
+	/* (non-Javadoc)
+	 * @see org.xml.sax.helpers.DefaultHandler#setDocumentLocator(org.xml.sax.Locator)
 	 */
 	public void setDocumentLocator(Locator locator) {
 		this.locator = locator;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.xml.sax.helpers.DefaultHandler#characters(char[], int, int)
+	 */
 	public void characters(char[] ch, int start, int length) {
 		int state = ((Integer) stateStack.peek()).intValue();
 		if (state != CONFIGURATION_ELEMENT_STATE)
@@ -168,10 +176,16 @@ public class ExtensionsParser extends DefaultHandler {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see org.xml.sax.helpers.DefaultHandler#endDocument()
+	 */
 	public void endDocument() {
 		// do nothing
 	}
 
+	/* (non-Javadoc)
+	 * @see org.xml.sax.helpers.DefaultHandler#endElement(java.lang.String, java.lang.String, java.lang.String)
+	 */
 	public void endElement(String uri, String elementName, String qName) {
 		switch (((Integer) stateStack.peek()).intValue()) {
 			case IGNORED_ELEMENT_STATE :
@@ -252,10 +266,16 @@ public class ExtensionsParser extends DefaultHandler {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see org.xml.sax.helpers.DefaultHandler#error(org.xml.sax.SAXParseException)
+	 */
 	public void error(SAXParseException ex) {
 		logStatus(ex);
 	}
 
+	/* (non-Javadoc)
+	 * @see org.xml.sax.helpers.DefaultHandler#fatalError(org.xml.sax.SAXParseException)
+	 */
 	public void fatalError(SAXParseException ex) throws SAXException {
 		logStatus(ex);
 		throw ex;
@@ -404,7 +424,7 @@ public class ExtensionsParser extends DefaultHandler {
 				String simpleId;
 				String namespaceName;
 				int simpleIdStart = attrValue.lastIndexOf('.');
-				if (simpleIdStart != -1) {
+				if ((simpleIdStart != -1) && extractNamespaces) {
 					simpleId = attrValue.substring(simpleIdStart + 1);
 					namespaceName = attrValue.substring(0, simpleIdStart);
 				} else {
@@ -473,12 +493,12 @@ public class ExtensionsParser extends DefaultHandler {
 				String uniqueId;
 				String namespaceName;
 				int simpleIdStart = attrValue.lastIndexOf('.');
-				if (simpleIdStart == -1) {
-					namespaceName = contribution.getDefaultNamespace();
-					uniqueId = namespaceName + '.' + attrValue;
-				} else {
+				if (simpleIdStart != -1 && extractNamespaces) {
 					namespaceName = attrValue.substring(0, simpleIdStart);
 					uniqueId = attrValue;
+				} else {
+					namespaceName = contribution.getDefaultNamespace();
+					uniqueId = namespaceName + '.' + attrValue;
 				}
 				currentExtPoint.setUniqueIdentifier(uniqueId);
 				currentExtPoint.setNamespace(namespaceName);
@@ -505,6 +525,9 @@ public class ExtensionsParser extends DefaultHandler {
 		scratchVectors[EXTENSION_POINT_INDEX].add(currentExtPoint);
 	}
 
+	/* (non-Javadoc)
+	 * @see org.xml.sax.helpers.DefaultHandler#startDocument()
+	 */
 	public void startDocument() {
 		stateStack.push(new Integer(INITIAL_STATE));
 		for (int i = 0; i <= LAST_INDEX; i++) {
@@ -512,6 +535,9 @@ public class ExtensionsParser extends DefaultHandler {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see org.xml.sax.helpers.DefaultHandler#startElement(java.lang.String, java.lang.String, java.lang.String, org.xml.sax.Attributes)
+	 */
 	public void startElement(String uri, String elementName, String qName, Attributes attributes) {
 		switch (((Integer) stateStack.peek()).intValue()) {
 			case INITIAL_STATE :
@@ -534,6 +560,9 @@ public class ExtensionsParser extends DefaultHandler {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see org.xml.sax.helpers.DefaultHandler#warning(org.xml.sax.SAXParseException)
+	 */
 	public void warning(SAXParseException ex) {
 		logStatus(ex);
 	}
@@ -551,11 +580,11 @@ public class ExtensionsParser extends DefaultHandler {
 		// the start of the manifest file is used to indicate the plug-in manifest
 		// schema version in effect. Pre-3.0 (i.e., 2.1) plug-in manifest files do not
 		// have one of these, and this is how we can distinguish the manifest of a
-		// pre-3.0 plug-in from a post-3.0 one (for compatibility tranformations).
+		// pre-3.0 plug-in from a post-3.0 one (for compatibility transformations).
 		if (target.equalsIgnoreCase("eclipse")) { //$NON-NLS-1$
 			// just the presence of this processing instruction indicates that this
 			// plug-in is at least 3.0
-			schemaVersion = "3.0"; //$NON-NLS-1$
+			schemaVersion = VERSION_3_0;
 			StringTokenizer tokenizer = new StringTokenizer(data, "=\""); //$NON-NLS-1$
 			while (tokenizer.hasMoreTokens()) {
 				String token = tokenizer.nextToken();
@@ -567,6 +596,7 @@ public class ExtensionsParser extends DefaultHandler {
 					break;
 				}
 			}
+			initializeExtractNamespace();
 		}
 	}
 
@@ -589,7 +619,7 @@ public class ExtensionsParser extends DefaultHandler {
 	 * for extension points that were renamed between release 2.1 and 3.0.
 	 */
 	private Extension[] fixRenamedExtensionPoints(Extension[] extensions) {
-		if (extensions == null || (schemaVersion != null && schemaVersion.equals("3.0")) || RegistryProperties.getProperty(NO_EXTENSION_MUNGING) != null) //$NON-NLS-1$
+		if (extensions == null || versionAtLeast(VERSION_3_0) || RegistryProperties.getProperty(NO_EXTENSION_MUNGING) != null)
 			return extensions;
 		for (int i = 0; i < extensions.length; i++) {
 			Extension extension = extensions[i];
@@ -600,5 +630,37 @@ public class ExtensionsParser extends DefaultHandler {
 			}
 		}
 		return extensions;
+	}
+
+	/**
+	 * To preserve backward compatibility, we will only attempt to extract namespace form the name 
+	 * if Eclipse version specified in the plugin.xml (<?eclipse version="3.2"?>) is at least 3.2.
+	 */
+	private void initializeExtractNamespace() {
+		extractNamespaces = new Boolean(versionAtLeast(VERSION_3_2)).booleanValue();
+	}
+
+	/**
+	 * Makes sense only for plugin.xml versions >= 3.0 (Eclipse version was introduced in 3.0).
+	 * Assumes that version is stored as "X1.X2.....XN" where X1 is a major version; X2 is a minor version
+	 * and so on.
+	 */
+	private boolean versionAtLeast(String testVersion) {
+		if (schemaVersion == null)
+			return false;
+
+		String[] testVersions = testVersion.split("\\."); // '.' is a special character in the regular expressions //$NON-NLS-1$
+		String[] schemaVersions = schemaVersion.split("\\."); //$NON-NLS-1$
+		int maxCount = Math.min(testVersions.length, schemaVersions.length);
+
+		for (int i = 0; i < maxCount; i++) {
+			try {
+				if (Integer.parseInt(schemaVersions[i]) < Integer.parseInt(testVersions[i]))
+					return false;
+			} catch (NumberFormatException e) {
+				return false;
+			}
+		}
+		return true;
 	}
 }
