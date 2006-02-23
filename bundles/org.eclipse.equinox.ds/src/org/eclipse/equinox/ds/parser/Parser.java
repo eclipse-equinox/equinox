@@ -13,26 +13,47 @@ package org.eclipse.equinox.ds.parser;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.*;
-import javax.xml.parsers.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.List;
+
+import javax.xml.parsers.FactoryConfigurationError;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+
 import org.eclipse.equinox.ds.Activator;
 import org.eclipse.equinox.ds.Log;
 import org.eclipse.osgi.util.ManifestElement;
-import org.osgi.framework.*;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentConstants;
 import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.xml.sax.SAXException;
 
 /**
  * 
  * Parse the component description xml
  * 
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1 $
  */
-public class Parser {
+public class Parser implements ServiceTrackerCustomizer {
+
+	private Activator main;
 
 	/* ServiceTracker for parser */
 	private ServiceTracker parserTracker;
+
+	/**
+	 * If an XML Parser is needed but not available, wait until one becomes available
+	 */
+	private List delayedParseBundles = new ArrayList();
 
 	/**
 	 * Create and open a ServiceTracker which will track registered XML parsers
@@ -40,7 +61,8 @@ public class Parser {
 	 * @param main Main object.
 	 */
 	public Parser(Activator main) {
-		parserTracker = new ServiceTracker(main.context, ParserConstants.SAX_FACTORY_CLASS, null);
+		this.main = main;
+		parserTracker = new ServiceTracker(main.context, ParserConstants.SAX_FACTORY_CLASS, this);
 		parserTracker.open();
 	}
 
@@ -48,7 +70,7 @@ public class Parser {
 		parserTracker.close();
 	}
 
-	public List getComponentDescriptions(BundleContext bundleContext) {
+	public List getComponentDescriptions(BundleContext bundleContext) throws XMLParserNotAvailableException {
 		ManifestElement[] xml = parseManifestHeader(bundleContext.getBundle());
 
 		List result;
@@ -86,12 +108,27 @@ public class Parser {
 	}
 
 	/**
-	 * Given the bundle and the xml filename, parset it!
+	 * Given the bundle and the xml filename, parse it!
 	 * 
 	 * @param bundle Bundle
 	 * @param xml String
 	 */
-	private List parseComponentDescription(BundleContext bundleContext, String xml) {
+	private List parseComponentDescription(BundleContext bundleContext, String xml) throws XMLParserNotAvailableException {
+
+		SAXParserFactory parserFactory = (SAXParserFactory) parserTracker.getService();
+		if (parserFactory == null) {
+			// backup to using jaxp to create a new instance
+			try {
+				parserFactory = SAXParserFactory.newInstance();
+			} catch (FactoryConfigurationError err) {
+				/* whoops - we need an XML parser but we don't have one - put bundle on
+				 * "delayed parse list" and raise an exception
+				 */
+				delayedParseBundles.add(bundleContext.getBundle());
+				throw new XMLParserNotAvailableException();
+			}
+		}
+
 		List result = new ArrayList();
 		int fileIndex = xml.lastIndexOf('/');
 		String path = fileIndex != -1 ? xml.substring(0, fileIndex) : "/";
@@ -102,7 +139,6 @@ public class Parser {
 			}
 			URL url = (URL) urls.nextElement();
 			InputStream is = url.openStream();
-			SAXParserFactory parserFactory = (SAXParserFactory) parserTracker.getService();
 			parserFactory.setNamespaceAware(true);
 			parserFactory.setValidating(false);
 			SAXParser saxParser = parserFactory.newSAXParser();
@@ -118,5 +154,33 @@ public class Parser {
 		}
 
 		return result;
+	}
+
+	/**
+	 * If we are waiting for the XML parser to appear, kick the main bundle loop to 
+	 * process
+	 */
+	public Object addingService(ServiceReference reference) {
+
+		Object xmlParser = parserTracker.getService(reference);
+
+		Iterator delayedParseBundlesItr = delayedParseBundles.iterator();
+		while (delayedParseBundlesItr.hasNext()) {
+			Bundle bundle = (Bundle) delayedParseBundlesItr.next();
+			delayedParseBundlesItr.remove();
+			if (bundle.getState() == Bundle.ACTIVE) {
+				main.addingBundle(bundle);
+			}
+		}
+
+		return xmlParser;
+	}
+
+	public void modifiedService(ServiceReference reference, Object object) {
+		//nothing
+	}
+
+	public void removedService(ServiceReference reference, Object object) {
+		//nothing
 	}
 }

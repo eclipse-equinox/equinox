@@ -10,15 +10,23 @@
  *******************************************************************************/
 package org.eclipse.equinox.ds;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
+
 import org.eclipse.equinox.ds.model.ComponentDescription;
 import org.eclipse.equinox.ds.model.ComponentDescriptionCache;
+import org.eclipse.equinox.ds.parser.XMLParserNotAvailableException;
 import org.eclipse.equinox.ds.resolver.Resolver;
 import org.eclipse.equinox.ds.tracker.BundleTracker;
 import org.eclipse.equinox.ds.tracker.BundleTrackerCustomizer;
 import org.eclipse.equinox.ds.workqueue.WorkDispatcher;
 import org.eclipse.equinox.ds.workqueue.WorkQueue;
-import org.osgi.framework.*;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.service.log.LogService;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -27,7 +35,7 @@ import org.osgi.util.tracker.ServiceTracker;
  * Main class for the SCR. This class will start the SCR bundle and begin
  * processing other bundles.
  * 
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class Activator implements BundleActivator, BundleTrackerCustomizer, WorkDispatcher {
 
@@ -132,38 +140,48 @@ public class Activator implements BundleActivator, BundleTrackerCustomizer, Work
 		// get the last saved value for the bundle's last modified date
 		Long bundleOldLastModified = (Long) bundleToLastModified.get(bundleID);
 
-		// compare the two and if changed ( or if first time ) update the maps
-		if ((!bundleLastModified.equals(bundleOldLastModified)) || (bundleOldLastModified == null)) {
+		try {
+			// compare the two and if changed ( or if first time ) update the maps
+			if ((!bundleLastModified.equals(bundleOldLastModified)) || (bundleOldLastModified == null)) {
 
-			// get the BundleContext for this bundle (framework impl dependent)
-			BundleContext bundleContext = framework.getBundleContext(bundle);
+				// get the BundleContext for this bundle (framework impl dependent)
+				BundleContext bundleContext = framework.getBundleContext(bundle);
 
-			// get all ComponentDescriptions for this bundle
-			List componentDescriptions = cache.getComponentDescriptions(bundleContext);
+				// get all ComponentDescriptions for this bundle
+				// throws XMLParserNotAvailableException if no XML parser
+				List componentDescriptions = cache.getComponentDescriptions(bundleContext);
 
-			// update map of bundle to ComponentDescriptions
-			bundleToComponentDescriptions.put(bundleID, componentDescriptions);
+				// update map of bundle to ComponentDescriptions
+				bundleToComponentDescriptions.put(bundleID, componentDescriptions);
 
-			// update bundle:lastModifiedDate map
-			bundleToLastModified.put(bundleID, bundleLastModified);
+				// update bundle:lastModifiedDate map
+				bundleToLastModified.put(bundleID, bundleLastModified);
 
-			// for each CD in bundle set enable flag based on autoenable
+				// for each CD in bundle set enable flag based on autoenable
 
-			Iterator it = componentDescriptions.iterator();
-			while (it.hasNext()) {
-				ComponentDescription componentDescription = (ComponentDescription) it.next();
-				validate(componentDescription);
-				if (componentDescription.isAutoenable() && componentDescription.isValid()) {
-					componentDescription.setEnabled(true);
-					enableComponentDescriptions.add(componentDescription);
+				Iterator it = componentDescriptions.iterator();
+				while (it.hasNext()) {
+					ComponentDescription componentDescription = (ComponentDescription) it.next();
+					validate(componentDescription);
+					if (componentDescription.isAutoenable() && componentDescription.isValid()) {
+						componentDescription.setEnabled(true);
+						enableComponentDescriptions.add(componentDescription);
+					}
 				}
 			}
-		}
 
-		// publish all CDs to be enabled, to resolver (add to the workqueue and
-		// publish event)
-		if (!enableComponentDescriptions.isEmpty()) {
-			workQueue.enqueueWork(this, ADD, enableComponentDescriptions);
+			// publish all CDs to be enabled, to resolver (add to the workqueue and
+			// publish event)
+			if (!enableComponentDescriptions.isEmpty()) {
+				workQueue.enqueueWork(this, ADD, enableComponentDescriptions);
+			}
+
+		} catch (XMLParserNotAvailableException e) {
+			//cache.getComponentDescriptions(bundleContext); threw this exception
+			//because we needed an XML parser and we didn't have one
+			//when an XML parser becomes available this method will be called again
+			//log a message but still return the bundleId so this bundle will be tracked
+			Log.log(LogService.LOG_INFO, "Declarative Services waiting for XML parser for bundle " + bundleID);
 		}
 		return bundleID;
 	}

@@ -15,6 +15,7 @@ import java.util.*;
 import org.eclipse.equinox.ds.Activator;
 import org.eclipse.equinox.ds.Log;
 import org.eclipse.equinox.ds.parser.Parser;
+import org.eclipse.equinox.ds.parser.XMLParserNotAvailableException;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.log.LogService;
@@ -23,7 +24,7 @@ import org.osgi.service.log.LogService;
  * 
  * Cache of component descriptions.
  * 
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1 $
  */
 public class ComponentDescriptionCache {
 
@@ -91,8 +92,9 @@ public class ComponentDescriptionCache {
 	 * @param bundle Bundle for which component description are to be returns
 	 * @return An array list of the component descriptions for the specified
 	 *         bundle.
+	 * @throws XMLParserNotAvailableException 
 	 */
-	public List getComponentDescriptions(BundleContext bundleContext) {
+	public List getComponentDescriptions(BundleContext bundleContext) throws XMLParserNotAvailableException {
 		//check to see if we already have the cds for this bundle up-to-date in cache
 		Bundle bundle = bundleContext.getBundle();
 		Long bundleId = new Long(bundle.getBundleId());
