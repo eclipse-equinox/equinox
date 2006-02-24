@@ -99,7 +99,7 @@ public class TableReader {
 		this.registry = registry;
 	}
 
-	// Don't need to synchronize - called only from a sychronized method
+	// Don't need to synchronize - called only from a synchronized method
 	public Object[] loadTables(long expectedTimestamp) {
 		HashtableOfInt offsets;
 		HashtableOfStringAndInt extensionPoints;
@@ -193,7 +193,7 @@ public class TableReader {
 		String name = readStringOrNull(is);
 		int parentId = is.readInt();
 		byte parentType = is.readByte();
-		int misc = is.readInt();//this is set in second level CEs, to indicate where in the extra data file the children ces are
+		int misc = is.readInt();//this is set in second level CEs, to indicate where in the extra data file the children CEs are
 		String[] propertiesAndValue = readPropertiesAndValue(is);
 		int[] children = readArray(is);
 		if (actualContributorId == null)
@@ -376,7 +376,7 @@ public class TableReader {
 			String message = NLS.bind(RegistryMessages.meta_regCacheIOExceptionReading, extraDataFile);
 			log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, fileError, message, e));
 			if (DEBUG)
-				log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, fileError, "Error reading extension point data (" + offset + ") from the resgistry cache", e)); //$NON-NLS-1$ //$NON-NLS-2$
+				log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, fileError, "Error reading extension point data (" + offset + ") from the registry cache", e)); //$NON-NLS-1$ //$NON-NLS-2$
 			return null;
 		}
 	}
