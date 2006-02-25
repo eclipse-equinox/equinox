@@ -150,21 +150,22 @@ public class RegistryStrategy {
 
 	/**
 	 * Override this method to provide additional processing performed 
-	 * when the registry is created and started.
+	 * when the registry is created and started. Overrides should call
+	 * <code>super.onStart()</code> at the beginning of the processing. 
 	 * 
-	 * @param registry the extension registry being created
+	 * @param registry the extension registry being started
 	 */
-	public void onStart(Object registry) {
+	public void onStart(IExtensionRegistry registry) {
 		// The default implementation
 	}
 
 	/**
-	 * Override this method to provide additional processing before 
-	 * the extension registry's <code>#stop()</code> method is executed.
-	 * 
+	 * Override this method to provide additional processing to be performed
+	 * just before the registry is stopped. Overrides should call 
+	 * <code>super.onStop()</code> at the end of the processing. 
 	 * @param registry the extension registry being stopped
 	 */
-	public void onStop(Object registry) {
+	public void onStop(IExtensionRegistry registry) {
 		// The default implementation
 	}
 

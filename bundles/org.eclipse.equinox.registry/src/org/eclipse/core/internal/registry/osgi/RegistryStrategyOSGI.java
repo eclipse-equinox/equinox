@@ -34,7 +34,7 @@ import org.osgi.util.tracker.ServiceTracker;
  * <li>Performs registry validation based on the time stamps of the plugin.xml / fragment.xml files</li>
  * <li>XML parser is obtained via an OSGi service</li>
  *  </ul></p>
- * @see RegistryFactory#setRegistryProvider(IRegistryProvider)
+ * @see RegistryFactory#setDefaultRegistryProvider(IRegistryProvider)
  * @since org.eclipse.equinox.registry 3.2
  */
 
@@ -72,6 +72,9 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 		token = key;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.eclipse.core.runtime.spi.RegistryStrategy#translate(java.lang.String, java.util.ResourceBundle)
+	 */
 	public final String translate(String key, ResourceBundle resources) {
 		return ResourceTranslator.getResourceString(null, key, resources);
 	}
@@ -125,6 +128,9 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 	/////////////////////////////////////////////////////////////////////////////////////
 	// Executable extensions: bundle-based class loading
 
+	/* (non-Javadoc)
+	 * @see org.eclipse.core.runtime.spi.RegistryStrategy#createExecutableExtension(org.eclipse.core.runtime.spi.RegistryContributor, java.lang.String, java.lang.String)
+	 */
 	public Object createExecutableExtension(RegistryContributor contributor, String className, String overridenContributorName) throws CoreException {
 		Bundle contributingBundle;
 		if (overridenContributorName != null && !overridenContributorName.equals("")) //$NON-NLS-1$
@@ -160,11 +166,14 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 	// Start / stop extra processing: adding bundle listener; fill registry if not filled from cache
 
 	/**
-	 * Listening to the bunlde events.
+	 * Listening to the bundle events.
 	 */
 	private EclipseBundleListener pluginBundleListener = null;
 
-	public void onStart(Object registry) {
+	/* (non-Javadoc)
+	 * @see org.eclipse.core.runtime.spi.RegistryStrategy#onStart(org.eclipse.core.runtime.IExtensionRegistry)
+	 */
+	public void onStart(IExtensionRegistry registry) {
 		super.onStart(registry);
 		if (!(registry instanceof ExtensionRegistry))
 			return;
@@ -184,7 +193,10 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 			pluginBundleListener.processBundles(Activator.getContext().getBundles());
 	}
 
-	public void onStop(Object registry) {
+	/* (non-Javadoc)
+	 * @see org.eclipse.core.runtime.spi.RegistryStrategy#onStop(org.eclipse.core.runtime.IExtensionRegistry)
+	 */
+	public void onStop(IExtensionRegistry registry) {
 		if (pluginBundleListener != null)
 			Activator.getContext().removeBundleListener(pluginBundleListener);
 		if (xmlTracker != null) {
@@ -197,14 +209,23 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 	//////////////////////////////////////////////////////////////////////////////////////
 	// Cache strategy
 
+	/* (non-Javadoc)
+	 * @see org.eclipse.core.runtime.spi.RegistryStrategy#cacheUse()
+	 */
 	public boolean cacheUse() {
 		return !"true".equals(RegistryProperties.getProperty(IRegistryConstants.PROP_NO_REGISTRY_CACHE)); //$NON-NLS-1$
 	}
 
+	/* (non-Javadoc)
+	 * @see org.eclipse.core.runtime.spi.RegistryStrategy#cacheLazyLoading()
+	 */
 	public boolean cacheLazyLoading() {
 		return !("true".equalsIgnoreCase(RegistryProperties.getProperty(IRegistryConstants.PROP_NO_LAZY_CACHE_LOADING))); //$NON-NLS-1$
 	}
 
+	/* (non-Javadoc)
+	 * @see org.eclipse.core.runtime.spi.RegistryStrategy#getContributionsTimestamp()
+	 */
 	public long getContributionsTimestamp() {
 		BundleContext context = Activator.getContext();
 		if (context == null)
@@ -230,6 +251,9 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 		return result;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.eclipse.core.runtime.spi.RegistryStrategy#getXMLParser()
+	 */
 	public SAXParserFactory getXMLParser() {
 		if (xmlTracker == null) {
 			xmlTracker = new ServiceTracker(Activator.getContext(), SAXParserFactory.class.getName(), null);
