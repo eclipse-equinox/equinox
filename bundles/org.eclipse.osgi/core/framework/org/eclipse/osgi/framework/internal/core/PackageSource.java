@@ -53,6 +53,8 @@ public abstract class PackageSource implements KeyedElement {
 	public abstract Enumeration getResources(String name) throws IOException;
 
 	//TODO See how this relates with FilteredSourcePackage. Overwriting or doing a double dispatch might be good.
+	// This is intentionally lenient; we don't force all suppliers to match (only one)
+	// it is better to get class cast exceptions in split package cases than miss an event
 	public boolean hasCommonSource(PackageSource other) {
 		if (other == null)
 			return false;
@@ -62,18 +64,12 @@ public abstract class PackageSource implements KeyedElement {
 		SingleSourcePackage[] suppliers2 = other.getSuppliers();
 		if (suppliers1 == null || suppliers2 == null)
 			return false;
-		// This will return true if the specified source has at least all
+		// This will return true if the specified source has at least one
 		// of the suppliers of this source.
-		for (int i = 0; i < suppliers1.length; i++) {
-			boolean found = false;
+		for (int i = 0; i < suppliers1.length; i++)
 			for (int j = 0; j < suppliers2.length; j++)
-				if (suppliers2[j].equals(suppliers1[i])) {
-					found = true;
-					break;
-				}
-			if (!found)
-				return false;
-		}
-		return true;
+				if (suppliers2[j].equals(suppliers1[i]))
+					return true;
+		return false;
 	}
 }
