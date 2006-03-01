@@ -15,7 +15,7 @@ import org.eclipse.core.runtime.IExtensionRegistry;
 /**
  * Implement this interface to specify a contributed extension registry.
  * <p>
- * This interface is intended to be implemented by clients.
+ * This interface may be implemented by clients.
  * </p><p>
  * <b>Note:</b> This class/interface is part of an interim API that is still under 
  * development and expected to change significantly before reaching stability. 
@@ -30,7 +30,8 @@ import org.eclipse.core.runtime.IExtensionRegistry;
 public interface IRegistryProvider {
 
 	/**
-	 * Returns the extension registry contributed by this provider.
+	 * Returns the extension registry contributed by this provider; must not 
+	 * be <code>null</code>.
 	 * 
 	 * @return an extension registry 
 	 */

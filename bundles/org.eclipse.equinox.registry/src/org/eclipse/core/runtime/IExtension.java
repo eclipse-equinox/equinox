@@ -113,7 +113,7 @@ public interface IExtension {
 	 * if this extension does not have an identifier.
 	 * This identifier is specified in the plug-in manifest (<code>plugin.xml</code>) 
 	 * file as a non-empty string containing no period characters 
-	 * (<code>'.'</code>) and must be unique within the defining plug-in.
+	 * (<code>'.'</code>) and must be unique within the namespace.
 	 *
 	 * @return the simple identifier of the extension (e.g. <code>"main"</code>)
 	 *  or <code>null</code>

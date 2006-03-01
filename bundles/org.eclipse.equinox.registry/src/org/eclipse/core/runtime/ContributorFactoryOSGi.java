@@ -31,7 +31,9 @@ import org.osgi.framework.Bundle;
 public final class ContributorFactoryOSGi {
 
 	/**
-	 * Creates registry contributor object based on a Bundle.
+	 * Creates registry contributor object based on a Bundle. The bundle must not 
+	 * be <code>null</code>.
+	 * 
 	 * @param contributor bundle associated with the contribution
 	 * @return new registry contributor based on the Bundle
 	 */

@@ -29,7 +29,9 @@ import org.eclipse.core.runtime.spi.RegistryContributor;
 public final class ContributorFactorySimple {
 	
 	/**
-	 * Creates registry contributor object based on a determining object.
+	 * Creates registry contributor object based on a determining object.The determining 
+	 * object must not be <code>null</code>.
+	 * 
 	 * @param determiningObject object associated with the contribution
 	 * @return new registry contributor based on the determining object
 	 */

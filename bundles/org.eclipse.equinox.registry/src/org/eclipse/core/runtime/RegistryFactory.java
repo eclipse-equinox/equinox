@@ -29,20 +29,22 @@ public final class RegistryFactory {
 	/**
 	 * Creates a new extension registry based on the given set of parameters.
 	 * <p>
-	 * The strategy is an optional strategy that modify registry functionality. Users
-	 * may pass in <code>null</code> for the strategy if default behavior is desired.
+	 * The strategy is an optional collection of methods that supply additional registry 
+	 * functionality. Users may pass in <code>null</code> for the strategy if default 
+	 * behavior is sufficient.
 	 * </p><p>
-	 * The master token is used for master control for the registry. Clients may hold
-	 * onto it to access controlled methods of the registry. Contributions made with 
-	 * this token are marked as non-dynamic.
+	 * The master token is stored by the registry and later used as an identifier of callers 
+	 * who are allowed full control over the registry functionality. Users may pass in 
+	 * <code>null</code> as a master token.
 	 * </p><p>
-	 * The user token is used for user access for the registry. Contributions made with 
-	 * this token are marked as dynamic. 
+	 * The user token is stored by the registry and later used as an identifier of callers
+	 * who are allowed to control registry at the user level. For instance, users attempting to 
+	 * modify dynamic contributions to the registry have to use the user token. Users may pass 
+	 * in <code>null</code> as a user token.
 	 * </p>
-	 *  
-	 * @param strategy optional registry strategy or <code>null</code>
-	 * @param masterToken the token used for master control of the registry
-	 * @param userToken the token used for user control of the registry
+	 * @param strategy registry strategy or <code>null</code>
+	 * @param masterToken the token used for master control of the registry or <code>null</code>
+	 * @param userToken the token used for user control of the registry or <code>null</code>
 	 * @return the new extension registry
 	 */
 	public static IExtensionRegistry createRegistry(RegistryStrategy strategy, Object masterToken, Object userToken) {
@@ -50,9 +52,9 @@ public final class RegistryFactory {
 	}
 
 	/**
-	 * Returns the existing extension registry specified by the registry provider.
+	 * Returns the default extension registry specified by the registry provider.
 	 * May return <code>null</code> if the provider has not been set or if the 
-	 * registry has not yet been created.
+	 * registry has not been created.
 	 * 
 	 * @return existing extension registry or <code>null</code>
 	 */
@@ -63,20 +65,24 @@ public final class RegistryFactory {
 	}
 
 	/**
-	 * Creates a registry strategy that can be used in an OSGi container. It uses OSGi contributions and contributors
-	 * for the registry processing and takes advantage of additional mechanisms available through
-	 * the OSGi library.  
+	 * Creates a registry strategy that can be used in an OSGi container. The strategy uses 
+	 * OSGi contributions and contributors for the registry processing and takes advantage of 
+	 * additional mechanisms available through the OSGi library.
 	 * <p>
-	 * The storage directory array is a list of file system directories to store cache files. 
-	 * TODO: If this value is <code>null</code> then ___ .
+	 * The OSGi registry strategy sequentially checks the array of storage directories to 
+	 * discover the location of the registry cache formed by previous invocations of the extension
+	 * registry. Once found, the location is used to store registry cache. If this value 
+	 * is <code>null</code> then caching of the registry content is disabled.
 	 * </p><p>
-	 * The cache read-only array is an array the same length as the storage directory array and it contains
-	 * boolean values indicating whether or not each storage directory is read-only. If the value at
-	 * an index is <code>true</code> then the location at the corresponding index in the storage
-	 * array is read-only. If <code>false</code> then the cache location is read-write. The array
-	 * can be <code>null</code> if the <code>storageDir</code> parameter is <code>null</code>.
+	 * The cache read-only array is an array the same length as the storage directory array. 
+	 * It contains boolean values indicating whether or not each storage directory is read-only. 
+	 * If the value at an index is <code>true</code> then the location at the corresponding index 
+	 * in the storage directories array is read-only; if <code>false</code> then the cache location 
+	 * is read-write. The array can be <code>null</code> if the <code>storageDirs</code> parameter 
+	 * is <code>null</code>.
 	 * </p><p>
-	 * TODO describe the token here
+	 * The master token should be passed to the OSGi registry strategy to permit it to perform 
+	 * contributions to the registry.
 	 * </p><p>
 	 * <b>Note:</b> This class/interface is part of an interim API that is still under 
 	 * development and expected to change significantly before reaching stability. 
@@ -84,12 +90,14 @@ public final class RegistryFactory {
 	 * adopters on the understanding that any code that uses this API will almost certainly 
 	 * be broken (repeatedly) as the API evolves.
 	 * </p>
-	 * @param storageDir array of file system directories or <code>null</code>
-	 * @param cacheReadOnly array of read only attributes
+	 * @param storageDirs array of file system directories or <code>null</code>
+	 * @param cacheReadOnly array of read only attributes or <code>null</code>
 	 * @param token control token for the registry
+	 * @return registry strategy that can be used in an OSGi container
+	 * @see #createRegistry(RegistryStrategy, Object, Object)
 	 */
-	public static RegistryStrategy createOSGiStrategy(File[] storageDir, boolean[] cacheReadOnly, Object token) {
-		return new RegistryStrategyOSGI(storageDir, cacheReadOnly, token);
+	public static RegistryStrategy createOSGiStrategy(File[] storageDirs, boolean[] cacheReadOnly, Object token) {
+		return new RegistryStrategyOSGI(storageDirs, cacheReadOnly, token);
 	}
 
 	/**
@@ -97,6 +105,8 @@ public final class RegistryFactory {
 	 * is immutable in the sense that it can be set only once during the application runtime.
 	 * Attempts to change the default registry provider will cause an exception to be thrown.
 	 * <p>
+	 * The given registry provider must not be <code>null</code>.
+	 * </p><p>
 	 * <b>Note:</b> This class/interface is part of an interim API that is still under 
 	 * development and expected to change significantly before reaching stability. 
 	 * It is being made available at this early stage to solicit feedback from pioneering 

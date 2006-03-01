@@ -138,7 +138,7 @@ public interface IExtensionPoint {
 	 * Returns the simple identifier of this extension point.
 	 * This identifier is a non-empty string containing no
 	 * period characters (<code>'.'</code>) and is guaranteed
-	 * to be unique within the defining plug-in.
+	 * to be unique within the namespace.
 	 *
 	 * @return the simple identifier of the extension point (e.g. <code>"builders"</code>)
 	 * @throws InvalidRegistryObjectException if this extension point is no longer valid

@@ -227,12 +227,17 @@ public interface IExtensionRegistry {
 	public IExtension[] getExtensions(String namespace);
 
 	/**
-	 * Returns all namespaces where extensions and/or extension points. Returns an 
-	 * empty array if there are no known extensions/extension points in this registry.
-	 * 
+	 * Returns all namespaces currently used by extensions and extension points in this 
+	 * registry. Returns an empty array if there are no known extensions/extension points
+	 * in this registry.
+	 * <p>
+	 * The fully-qualified name of an extension point or an extension consist of 
+	 * a namespace and a simple name (much like a qualified Java class name consist
+	 * of a package name and a class name). The simple names are presumed to be unique
+	 * in the namespace.
+	 * </p> 
 	 * @return all namespaces known to this registry
 	 */
-	//TODO This needs to be clarified.
 	public String[] getNamespaces();
 
 	/** 
@@ -266,8 +271,9 @@ public interface IExtensionRegistry {
 	 * adopters on the understanding that any code that uses this API will almost certainly 
 	 * be broken (repeatedly) as the API evolves.
 	 * </p>
-	 * @param is stream open on the XML file. The XML file can contain an extension
-	 * 	point(s) or/and extension(s) described in the format similar to plugin.xml 
+	 * @param is stream open on the XML file. The XML file can contain an extension 
+	 * point(s) or/and extension(s) described in the format similar to plugin.xml. The method
+	 * closes  the stream before returning
 	 * @param contributor the contributor making this contribution.
 	 * @param persist indicates if the contribution(s) should be stored in the registry cache. If <code>false</code>,
 	 * 	contribution is not persisted in the registry cache and is lost on Eclipse restart
