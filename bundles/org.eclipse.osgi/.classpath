@@ -7,6 +7,7 @@
 	<classpathentry kind="src" path="defaultAdaptor/src"/>
 	<classpathentry kind="src" path="eclipseAdaptor/src"/>
 	<classpathentry kind="src" path="resolver/src"/>
+	<classpathentry kind="src" path="jarverifier"/>
 	<classpathentry kind="lib" path="osgi/exceptions.jar"/>
 	<classpathentry kind="lib" path="osgi/collx.jar"/>
 	<classpathentry kind="lib" path="osgi/xmlParserAPIs.jar"/>
