@@ -609,10 +609,14 @@ public class BaseStorage {
 			// nothing we can do; must throw exception for the content
 			throw new IOException("Cannot create bundle file for content of type: " + content.getClass().getName()); //$NON-NLS-1$
 
-		// try creating a signed bundlefile out of it.
-		SignedBundleFileFactoryHook signedFactory = adaptor.getHookRegistry().getSignedBundleFileFactoryHook();
-		BundleFile signedBundle = signedFactory == null ? null : signedFactory.createBundleFile(result, content, data, base);
-		return signedBundle == null ? result : signedBundle;
+		// try creating a wrapper bundlefile out of it.
+		BundleFileWrapperFactoryHook[] wrapperFactories = adaptor.getHookRegistry().getBundleFileWrapperFactoryHooks();
+		for (int i = 0; i < wrapperFactories.length; i++) {
+			BundleFile wrapperBundle = wrapperFactories[i].wrapBundleFile(result, content, data, base);
+			if (wrapperBundle != null)
+				result = wrapperBundle;
+		}
+		return result;
 	}
 
 	public synchronized StateManager getStateManager() {

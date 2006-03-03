@@ -17,7 +17,7 @@ import java.util.Properties;
 import org.eclipse.osgi.baseadaptor.*;
 import org.eclipse.osgi.baseadaptor.bundlefile.*;
 import org.eclipse.osgi.baseadaptor.hooks.AdaptorHook;
-import org.eclipse.osgi.baseadaptor.hooks.SignedBundleFileFactoryHook;
+import org.eclipse.osgi.baseadaptor.hooks.BundleFileWrapperFactoryHook;
 import org.eclipse.osgi.framework.adaptor.BundleData;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.internal.core.AbstractBundle;
@@ -31,7 +31,7 @@ import org.osgi.framework.*;
 /**
  * Implements signed bundle hook support for the framework
  */
-public class SignedBundleHook implements AdaptorHook, SignedBundleFileFactoryHook, HookConfigurator, CertificateVerifierFactory {
+public class SignedBundleHook implements AdaptorHook, BundleFileWrapperFactoryHook, HookConfigurator, CertificateVerifierFactory {
 	private static BaseAdaptor ADAPTOR;
 	private static String SIGNED_BUNDLE_SUPPORT = "osgi.support.signiture.verify"; //$NON-NLS-1$
 	private static boolean supportSignedBundles = false;
@@ -84,7 +84,7 @@ public class SignedBundleHook implements AdaptorHook, SignedBundleFileFactoryHoo
 		return null;
 	}
 
-	public BundleFile createBundleFile(BundleFile bundleFile, Object content, BaseData data, boolean base) {
+	public BundleFile wrapBundleFile(BundleFile bundleFile, Object content, BaseData data, boolean base) {
 		try {
 			if (bundleFile != null) {
 				SignedStorageHook hook = (SignedStorageHook) data.getStorageHook(SignedStorageHook.KEY);
@@ -109,7 +109,7 @@ public class SignedBundleHook implements AdaptorHook, SignedBundleFileFactoryHoo
 		hookRegistry.addAdaptorHook(this);
 		if (supportSignedBundles) {
 			hookRegistry.addStorageHook(new SignedStorageHook());
-			hookRegistry.setSignedBundleFileFactoryHook(this);
+			hookRegistry.addBundleFileWrapperFactoryHook(this);
 		}
 	}
 

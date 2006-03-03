@@ -475,8 +475,9 @@ public class BaseAdaptor implements FrameworkAdaptor{
 	 * bundledata must be found before calling any bundle file factories.
 	 * </p>
 	 * <p>
-	 * If a {@link SignedBundleFileFactoryHook} is configured then it will get called to 
-	 * create a signed bundle file if the content is signed.
+	 * After the bundle file has been created each configured bundle file wrapper factory
+	 * {@link BundleFileWrapperFactoryHook#wrapBundleFile(BundleFile, Object, BaseData, boolean)}
+	 * method is called to wrap the bundle file.
 	 * </p>
 	 * @param content The object which contains the content of a bundle file. A value of 
 	 * <code>null</code> indicates that the storage must find the base content for the 

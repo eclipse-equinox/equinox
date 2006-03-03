@@ -71,7 +71,7 @@ public final class HookRegistry {
 	private ClassLoadingStatsHook[] classLoadingStatsHooks = new ClassLoadingStatsHook[0];
 	private StorageHook[] storageHooks = new StorageHook[0];
 	private BundleFileFactoryHook[] bundleFileFactoryHooks = new BundleFileFactoryHook[0];
-	private SignedBundleFileFactoryHook signedBundleFileFactoryHook;
+	private BundleFileWrapperFactoryHook[] bundleFileWrapperFactoryHooks = new BundleFileWrapperFactoryHook[0];
 
 	public HookRegistry(BaseAdaptor adaptor) {
 		this.adaptor = adaptor;
@@ -218,11 +218,11 @@ public final class HookRegistry {
 	}
 
 	/**
-	 * Returns the configured signed bundle file factory
-	 * @return the configured signed bundle file factory
+	 * Returns the configured bundle file wrapper factories
+	 * @return the configured bundle file wrapper factories
 	 */
-	public SignedBundleFileFactoryHook getSignedBundleFileFactoryHook() {
-		return signedBundleFileFactoryHook;
+	public BundleFileWrapperFactoryHook[] getBundleFileWrapperFactoryHooks() {
+		return bundleFileWrapperFactoryHooks;
 	}
 
 	/**
@@ -274,17 +274,16 @@ public final class HookRegistry {
 	}
 
 	/**
-	 * Sets the signed bundle file factory for this hook registry
-	 * @param factory a signed bundle file factory object.
+	 * Adds a bundle file wrapper factory for this hook registry
+	 * @param factory a bundle file wrapper factory object.
 	 */
-	public void setSignedBundleFileFactoryHook(SignedBundleFileFactoryHook factory) {
-		if (signedBundleFileFactoryHook == null)
-			signedBundleFileFactoryHook = factory;
+	public void addBundleFileWrapperFactoryHook(BundleFileWrapperFactoryHook factory) {
+		bundleFileWrapperFactoryHooks = (BundleFileWrapperFactoryHook[]) add(factory, bundleFileWrapperFactoryHooks, new BundleFileWrapperFactoryHook[bundleFileWrapperFactoryHooks.length + 1]);
 	}
 
 	private Object[] add(Object newValue, Object[] oldValues, Object[] newValues) {
 		if (readonly)
-			throw new IllegalStateException("Cannot add hooks dynamically.");
+			throw new IllegalStateException("Cannot add hooks dynamically."); //$NON-NLS-1$
 		if (oldValues.length > 0)
 			System.arraycopy(oldValues, 0, newValues, 0, oldValues.length);
 		newValues[oldValues.length] = newValue;
