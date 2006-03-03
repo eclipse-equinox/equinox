@@ -24,7 +24,7 @@ import org.osgi.service.log.LogService;
  * 
  * Cache of component descriptions.
  * 
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class ComponentDescriptionCache {
 
@@ -122,6 +122,20 @@ public class ComponentDescriptionCache {
 		}
 
 		return cds;
+	}
+	
+	/**
+	 * Check the cache for CDs for the given bundle.  If CDs are not already cached
+	 * return Collections.EMPTY_LIST.  Note cds may be returned that are not up-to-date
+	 * @param bundle
+	 * @return
+	 */
+	public List getCachedComponentDescriptions(Bundle bundle) {
+		//check to see if we already have the cds for this bundle
+		Long bundleId = new Long(bundle.getBundleId());
+		List cds = (List) cdCache.get(bundleId);
+
+		return cds != null ? cds : Collections.EMPTY_LIST;
 	}
 
 	public void dispose() {

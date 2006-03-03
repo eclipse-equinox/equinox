@@ -26,6 +26,8 @@ import org.eclipse.equinox.ds.workqueue.WorkQueue;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleEvent;
+import org.osgi.framework.SynchronousBundleListener;
 import org.osgi.service.log.LogService;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.util.tracker.ServiceTracker;
@@ -35,9 +37,9 @@ import org.osgi.util.tracker.ServiceTracker;
  * Main class for the SCR. This class will start the SCR bundle and begin
  * processing other bundles.
  * 
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
-public class Activator implements BundleActivator, BundleTrackerCustomizer, WorkDispatcher {
+public class Activator implements BundleActivator, BundleTrackerCustomizer, WorkDispatcher, SynchronousBundleListener {
 
 	public BundleContext context;
 	private FrameworkHook framework;
@@ -78,6 +80,7 @@ public class Activator implements BundleActivator, BundleTrackerCustomizer, Work
 		workQueue.setDaemon(true); // make sure the work queue is daemon
 		resolver = new Resolver(this);
 		workQueue.start();
+		bundleContext.addBundleListener(this); //track UNRESOLVED events
 		bundleTracker.open();
 	}
 
@@ -403,6 +406,25 @@ public class Activator implements BundleActivator, BundleTrackerCustomizer, Work
 			componentDescription.setValid(true);
 		}
 
+	}
+
+	/**
+	 * SynchronousBundleListener - when a bundle we are tracking is UNRESOLVED, 
+	 * clear it's reflection cache.
+	 */
+	public void bundleChanged(BundleEvent event) {
+		if (event.getType() == BundleEvent.UNRESOLVED) {
+
+			// get cached ComponentDescriptions for this bundle, if any
+			List componentDescriptions = cache.getCachedComponentDescriptions(event.getBundle());
+
+			Iterator itr = componentDescriptions.iterator();
+			while(itr.hasNext()) {
+				ComponentDescription componentDescription = (ComponentDescription)itr.next();
+
+				componentDescription.clearReflectionMethods();
+			}
+		} //end if event type == UNRESOLVED
 	}
 
 }

@@ -24,7 +24,7 @@ import org.osgi.service.log.LogService;
  * 
  * Memory model of the Service Component xml
  * 
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1 $
  */
 public class ComponentDescription implements Serializable {
 	/**
@@ -340,6 +340,20 @@ public class ComponentDescription implements Serializable {
 		componentDescriptionProps.clear();
 		cdpsByPID.clear();
 	}
+    
+    public void clearReflectionMethods() {
+        activateMethodInitialized = false;
+        activateMethod = null;
+        deactivateMethodInitialized = false;
+        deactivateMethod = null;
+        
+        Iterator iter = referenceDescriptions.iterator();
+        while (iter.hasNext()) {
+            ReferenceDescription rd = (ReferenceDescription) iter.next();
+            rd.setBindMethod(null);
+            rd.setUnbindMethod(null);
+        }
+    }
 
 	public void removeComponentDescriptionProp(ComponentDescriptionProp cdp) {
 		componentDescriptionProps.remove(cdp);
