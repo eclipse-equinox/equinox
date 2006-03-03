@@ -106,8 +106,8 @@ public class ImportPackageSpecificationImpl extends VersionConstraintImpl implem
 				return false;
 			for (Iterator i = importAttrs.keySet().iterator(); i.hasNext();) {
 				String importKey = (String) i.next();
-				String importValue = (String) importAttrs.get(importKey);
-				String exportValue = (String) exportAttrs.get(importKey);
+				Object importValue = importAttrs.get(importKey);
+				Object exportValue = exportAttrs.get(importKey);
 				if (exportValue == null || !importValue.equals(exportValue))
 					return false;
 			}
