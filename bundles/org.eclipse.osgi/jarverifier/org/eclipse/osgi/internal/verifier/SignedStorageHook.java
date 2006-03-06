@@ -12,8 +12,7 @@ package org.eclipse.osgi.internal.verifier;
 
 import java.io.*;
 import java.security.MessageDigest;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.CertificateException;
+import java.security.cert.*;
 import java.util.*;
 import org.eclipse.osgi.baseadaptor.BaseData;
 import org.eclipse.osgi.baseadaptor.bundlefile.BundleFile;
@@ -25,6 +24,7 @@ import org.osgi.framework.BundleException;
 public class SignedStorageHook implements StorageHook {
 	static final String KEY = SignedStorageHook.class.getName();
 	static final int HASHCODE = KEY.hashCode();
+	private static final int STORAGE_VERSION = 1;
 	private static ArrayList saveChainCache = new ArrayList(5);
 	private static long lastIDSaved;
 	private static ArrayList loadChainCache = new ArrayList(5);
@@ -33,7 +33,7 @@ public class SignedStorageHook implements StorageHook {
 	private BaseData bundledata;
 	SignedBundleFile signedBundleFile;
 	public int getStorageVersion() {
-		return 0;
+		return STORAGE_VERSION;
 	}
 
 	public StorageHook create(BaseData bundledata) throws BundleException {
@@ -66,15 +66,17 @@ public class SignedStorageHook implements StorageHook {
 				continue;
 			}
 			String chain = is.readUTF();
+
 			boolean trusted = is.readBoolean();
-			int numBytes = is.readInt();
-			byte[] signerBytes = new byte[numBytes];
-			is.read(signerBytes);
-			numBytes = is.readInt();
-			byte[] rootBytes = new byte[numBytes];
-			is.read(rootBytes);
+			int numCerts = is.readInt();
+			byte[][] certsBytes = new byte[numCerts][];
+			for (int j = 0; j < certsBytes.length; j++) {
+				int numBytes = is.readInt();
+				certsBytes[j] = new byte[numBytes];
+				is.readFully(certsBytes[j]);
+			}
 			try {
-				chains[i] = new PKCS7Processor(chain, trusted, signerBytes, rootBytes);
+				chains[i] = new PKCS7Processor(chain, trusted, certsBytes);
 			} catch (CertificateException e) {
 				throw new IOException(e.getMessage());
 			}
@@ -94,7 +96,7 @@ public class SignedStorageHook implements StorageHook {
 				else
 					mds[j] = SignedBundleFile.sha1;
 				result[j] = new byte[is.readInt()];
-				is.read(result[j]);
+				is.readFully(result[j]);
 				digests.put(entry, mds);
 				results.put(entry, result);
 			}
@@ -139,21 +141,19 @@ public class SignedStorageHook implements StorageHook {
 			saveChainCache.add(chains[i]);
 			os.writeUTF(chains[i].getChain());
 			os.writeBoolean(chains[i].isTrusted());
-			byte[] certBytes;
-			try {
-				certBytes = chains[i].getSigner().getEncoded();
-			} catch (CertificateEncodingException e) {
-				throw new IOException(e.getMessage());
-			}
-			os.writeInt(certBytes.length);
-			os.write(certBytes);
-			try {
-				certBytes = chains[i].getRoot().getEncoded();
-			} catch (CertificateEncodingException e) {
-				throw new IOException(e.getMessage());
-			}
-			os.writeInt(certBytes.length);
-			os.write(certBytes);
+			Certificate[] certs = chains[i].getCertificates();
+			os.writeInt(certs == null ? 0 : certs.length);
+			if (certs != null)
+				for (int j = 0; j < certs.length; j++) {
+					byte[] certBytes;
+					try {
+						certBytes = certs[j].getEncoded();
+					} catch (CertificateEncodingException e) {
+						throw new IOException(e.getMessage());
+					}
+					os.writeInt(certBytes.length);
+					os.write(certBytes);
+				}
 		}
 		os.writeInt(digests.size());
 		for (Enumeration entries = digests.keys(); entries.hasMoreElements();) {

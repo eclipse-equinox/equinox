@@ -43,8 +43,7 @@ public class PKCS7Processor implements CertificateChain {
 	}
 
 	private String certChain;
-	private Certificate signerCert;
-	private Certificate rootCert;
+	private Certificate[] certificates;
 	private boolean trusted;
 
 	String oid2String(int oid[]) {
@@ -94,11 +93,12 @@ public class PKCS7Processor implements CertificateChain {
 	 * (i % 16 == 15) System.out.println(); } System.out.println(); }
 	 */
 
-	public PKCS7Processor(String certChain, boolean trusted, byte[] signerCert, byte[] rootCert) throws CertificateException {
+	public PKCS7Processor(String certChain, boolean trusted, byte[][] certificates) throws CertificateException {
 		this.certChain = certChain;
 		this.trusted = trusted;
-		this.signerCert = certFact.generateCertificate(new ByteArrayInputStream(signerCert));
-		this.rootCert = certFact.generateCertificate(new ByteArrayInputStream(rootCert));
+		this.certificates = new Certificate[certificates.length];
+		for (int i = 0; i < certificates.length; i++)
+			this.certificates[i] = certFact.generateCertificate(new ByteArrayInputStream(certificates[i]));
 	}
 
 	public PKCS7Processor(byte pkcs7[], int pkcs7Offset, int pkcs7Length, byte data[], int dataOffset, int dataLength) throws IOException, InvalidKeyException, CertificateException, NoSuchAlgorithmException, NoSuchProviderException, SignatureException {
@@ -157,7 +157,8 @@ public class PKCS7Processor implements CertificateChain {
 		if (!sig.verify(signature)) {
 			throw new SignatureException("Signature doesn't verify"); //$NON-NLS-1$
 		}
-		this.signerCert = newSignerCert;
+		ArrayList certList = new ArrayList(1);
+		certList.add(newSignerCert);
 		StringBuffer sb = new StringBuffer();
 		X509Certificate xcert = (X509Certificate) newSignerCert;
 		// We save off the previous certificate so that we can
@@ -173,6 +174,7 @@ public class PKCS7Processor implements CertificateChain {
 			}
 			if (prevCert != null) {
 				prevCert.verify(xcert.getPublicKey());
+				certList.add(xcert);
 			}
 			prevCert = xcert;
 
@@ -194,7 +196,7 @@ public class PKCS7Processor implements CertificateChain {
 			if (xcert == null)
 				throw new CertificateException(subject + " missing from chain"); //$NON-NLS-1$
 		}
-		rootCert = xcert;
+		certificates = (Certificate[]) certList.toArray(new Certificate[certList.size()]);
 		// Now we have to make sure that the CA certificate (xcert) is in the KeyStore
 		trusted = valid && keyStores.isTrusted(xcert);
 		certChain = sb.toString();
@@ -204,11 +206,19 @@ public class PKCS7Processor implements CertificateChain {
 	 * Returns the Certificate of the signer of this PKCS7Block
 	 */
 	public Certificate getSigner() {
-		return signerCert;
+		if (certificates == null || certificates.length == 0)
+			return null;
+		return certificates[0];
 	}
 
 	public Certificate getRoot() {
-		return rootCert;
+		if (certificates == null || certificates.length == 0)
+			return null;
+		return certificates[certificates.length - 1];
+	}
+
+	public Certificate[] getCertificates() {
+		return certificates;
 	}
 
 	/**
@@ -230,10 +240,18 @@ public class PKCS7Processor implements CertificateChain {
 	public boolean equals(Object obj) {
 		if (!(obj instanceof CertificateChain))
 			return false;
-		if (rootCert == null || signerCert == null)
+		if (certificates == null)
 			return false;
 		CertificateChain chain = (CertificateChain) obj;
-		return trusted == chain.isTrusted() && rootCert.equals(chain.getRoot()) && signerCert.equals(chain.getSigner()) && (certChain == null ? chain.getChain() == null : certChain.equals(chain.getChain()));
+		if (trusted != chain.isTrusted() || (certChain == null ? chain.getChain() != null : !certChain.equals(chain.getChain())))
+			return false;
+		Certificate[] otherCerts = chain.getCertificates();
+		if (otherCerts == null || certificates.length != otherCerts.length)
+			return false;
+		for (int i = 0; i < certificates.length; i++)
+			if (!certificates[i].equals(otherCerts[i]))
+				return false;
+		return true;
 	}
 	/*
 	 public static void main(String[] args) throws InvalidKeyException, CertificateException, NoSuchAlgorithmException, SignatureException, KeyStoreException, IOException {

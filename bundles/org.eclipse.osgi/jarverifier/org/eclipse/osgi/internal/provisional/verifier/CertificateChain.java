@@ -31,6 +31,12 @@ public interface CertificateChain {
 	public String getChain();
 
 	/**
+	 * Retruns all certificates in this certificate chain
+	 * @return all certificates in this certificate chain
+	 */
+	public Certificate[] getCertificates();
+
+	/**
 	 * Returns the first certificate of the certificate chain
 	 * @return the first certificate of the certificate chain
 	 */
