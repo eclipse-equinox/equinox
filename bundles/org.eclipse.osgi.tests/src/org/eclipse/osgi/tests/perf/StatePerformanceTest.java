@@ -97,29 +97,29 @@ public class StatePerformanceTest extends AbstractStateTest {
 		}.run(this, 10, 10);
 	}
 
-	private void testResolution(int stateSize, int repetitions) {
+	private void testResolution(int stateSize, int repetitions, String localName) {
 		final State originalState = buildRandomState(stateSize);
 		new PerformanceTestRunner() {
 			protected void test() {
 				originalState.resolve(false);
 			}
-		}.run(this, 10, repetitions);
+		}.run(this, localName, 10, repetitions);
 	}
 
 	public void testResolution100() throws IOException {
-		testResolution(100, 500);
+		testResolution(100, 500, null);
 	}
 
 	public void testResolution1000() throws IOException {
-		testResolution(1000, 15);
+		testResolution(1000, 15, "State Resolution");
 	}
 
 	public void testResolution500() throws IOException {
-		testResolution(500, 50);
+		testResolution(500, 50, null);
 	}
 
 	public void testResolution5000() throws IOException {
-		testResolution(5000, 1);
+		testResolution(5000, 1, null);
 	}
 
 	public void testStoreAndRetrieve() {
