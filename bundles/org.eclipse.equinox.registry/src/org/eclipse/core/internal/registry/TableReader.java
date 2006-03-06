@@ -23,9 +23,10 @@ public class TableReader {
 	static final int OBJECT = 1;
 
 	//The version of the cache
-	static final int CACHE_VERSION = 3;
+	static final int CACHE_VERSION = 4;
 	// Version 1 -> 2: the contributor Ids changed from "long" to "String"
 	// Version 2 -> 3: added namespace index and the table of contributors
+	// Version 3 -> 4: offset table saved in a binary form (performance)
 
 	//Informations representing the MAIN file
 	static final String MAIN = ".mainData"; //$NON-NLS-1$
