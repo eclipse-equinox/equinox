@@ -12,10 +12,11 @@ package org.eclipse.core.internal.runtime;
 
 import java.net.URL;
 import java.util.*;
-import org.eclipse.core.internal.boot.PlatformURLBaseConnection;
-import org.eclipse.core.internal.boot.PlatformURLHandler;
+import org.eclipse.core.internal.boot.*;
+import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.service.debug.DebugOptions;
+import org.eclipse.osgi.service.localization.BundleLocalization;
 import org.eclipse.osgi.service.urlconversion.URLConverter;
 import org.osgi.framework.*;
 import org.osgi.service.packageadmin.PackageAdmin;
@@ -34,36 +35,53 @@ public class Activator implements BundleActivator {
 	 * Table to keep track of all the URL converter services.
 	 */
 	private static Map urlTrackers = new HashMap();
-	private static Activator bundle = null;
+	private static BundleContext bundleContext;
+	private static Activator singleton;
 	private ServiceRegistration platformURLConverterService = null;
 	private ServiceTracker installLocationTracker = null;
+	private ServiceTracker instanceLocationTracker = null;
 	private ServiceTracker configLocationTracker = null;
 	private ServiceTracker bundleTracker = null;
 	private ServiceTracker debugTracker = null;
+	private ServiceTracker logTracker = null;
+	private ServiceTracker localizationTracker = null;
 
-	/**
-	 * The bundle context associated this plug-in
+	/*
+	 * Returns the singleton for this Activator. Callers should be aware that
+	 * this will return null if the bundle is not active.
 	 */
-	private static BundleContext bundleContext;
-
 	public static Activator getDefault() {
-		return bundle;
+		return singleton;
+	}
+	/**
+	 * Print a debug message to the console. 
+	 * Pre-pend the message with the current date and the name of the current thread.
+	 */
+	public static void message(String message) {
+		StringBuffer buffer = new StringBuffer();
+		buffer.append(new Date(System.currentTimeMillis()));
+		buffer.append(" - ["); //$NON-NLS-1$
+		buffer.append(Thread.currentThread().getName());
+		buffer.append("] "); //$NON-NLS-1$
+		buffer.append(message);
+		System.out.println(buffer.toString());
 	}
 
-	/**
-	 * This method is called upon plug-in activation
+	/* (non-Javadoc)
+	 * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
 	 */
 	public void start(BundleContext context) throws Exception {
 		bundleContext = context;
-		bundle = this;
-
+		singleton = this;
 		Dictionary urlProperties = new Hashtable();
 		urlProperties.put("protocol", "platform"); //$NON-NLS-1$ //$NON-NLS-2$
 		platformURLConverterService = context.registerService(URLConverter.class.getName(), new PlatformURLConverter(), urlProperties);
-
 		installPlatformURLSupport();
 	}
 
+	/*
+	 * Return the configuration location service, if available.
+	 */
 	public Location getConfigurationLocation() {
 		if (configLocationTracker == null) {
 			Filter filter = null;
@@ -78,6 +96,9 @@ public class Activator implements BundleActivator {
 		return (Location) configLocationTracker.getService();
 	}
 
+	/*
+	 * Return the debug options service, if available.
+	 */
 	public DebugOptions getDebugOptions() {
 		if (debugTracker == null) {
 			debugTracker = new ServiceTracker(bundleContext, DebugOptions.class.getName(), null);
@@ -85,6 +106,35 @@ public class Activator implements BundleActivator {
 		}
 		return (DebugOptions) debugTracker.getService();
 	}
+
+	/*
+	 * Return the framework log service, if available.
+	 */
+	public FrameworkLog getFrameworkLog() {
+		if (logTracker == null) {
+			logTracker = new ServiceTracker(bundleContext, FrameworkLog.class.getName(), null);
+			logTracker.open();
+		}
+		return (FrameworkLog) logTracker.getService();
+	}
+
+	/*
+	 * Return the instance location service, if available.
+	 */
+	public Location getInstanceLocation() {
+		if (instanceLocationTracker == null) {
+			Filter filter = null;
+			try {
+				filter = bundleContext.createFilter(Location.INSTANCE_FILTER);
+			} catch (InvalidSyntaxException e) {
+				// ignore this.  It should never happen as we have tested the above format.
+			}
+			instanceLocationTracker = new ServiceTracker(bundleContext, filter, null);
+			instanceLocationTracker.open();
+		}
+		return (Location) instanceLocationTracker.getService();
+	}
+
 	/**
 	 * Return the resolved bundle with the specified symbolic name.
 	 * 
@@ -106,6 +156,9 @@ public class Activator implements BundleActivator {
 		return null;
 	}
 
+	/*
+	 * Return the package admin service, if available.
+	 */
 	private PackageAdmin getBundleAdmin() {
 		if (bundleTracker == null) {
 			bundleTracker = new ServiceTracker(getContext(), PackageAdmin.class.getName(), null);
@@ -114,6 +167,9 @@ public class Activator implements BundleActivator {
 		return (PackageAdmin) bundleTracker.getService();
 	}
 
+	/*
+	 * Return an array of fragments for the given bundle host.
+	 */
 	public Bundle[] getFragments(Bundle host) {
 		PackageAdmin admin = getBundleAdmin();
 		if (admin == null)
@@ -121,7 +177,10 @@ public class Activator implements BundleActivator {
 		return admin.getFragments(host);
 	}
 
-	public URL getInstallLocation() {
+	/*
+	 * Return the install location service if available.
+	 */
+	public Location getInstallLocation() {
 		if (installLocationTracker == null) {
 			Filter filter = null;
 			try {
@@ -132,14 +191,51 @@ public class Activator implements BundleActivator {
 			installLocationTracker = new ServiceTracker(bundleContext, filter, null);
 			installLocationTracker.open();
 		}
-		return ((Location) installLocationTracker.getService()).getURL();
+		return (Location) installLocationTracker.getService();
 	}
 
 	/**
-	 * This method is called when the plug-in is stopped
+	 * Returns the bundle id of the bundle that contains the provided object, or
+	 * <code>null</code> if the bundle could not be determined.
+	 */
+	public String getBundleId(Object object) {
+		if (object == null)
+			return null;
+		if (bundleTracker == null) {
+			message("Bundle tracker is not set"); //$NON-NLS-1$
+			return null;
+		}
+		PackageAdmin packageAdmin = (PackageAdmin) bundleTracker.getService();
+		if (packageAdmin == null)
+			return null;
+
+		Bundle source = packageAdmin.getBundle(object.getClass());
+		if (source != null && source.getSymbolicName() != null)
+			return source.getSymbolicName();
+		return null;
+	}
+
+	public ResourceBundle getLocalization(Bundle bundle, String locale) {
+		if (localizationTracker == null) {
+			BundleContext context = Activator.getContext();
+			if (context == null) {
+				message("ResourceTranslator called before plugin is started"); //$NON-NLS-1$
+				return null;
+			}
+			localizationTracker = new ServiceTracker(context, BundleLocalization.class.getName(), null);
+			localizationTracker.open();
+		}
+		BundleLocalization location = (BundleLocalization) localizationTracker.getService();
+		if (location != null)
+			return location.getLocalization(bundle, locale);
+
+		return null;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
 	 */
 	public void stop(BundleContext context) throws Exception {
-		CommonOSGiUtils.getDefault().closeServices();
 		closeURLTrackerServices();
 		if (platformURLConverterService != null) {
 			platformURLConverterService.unregister();
@@ -161,9 +257,25 @@ public class Activator implements BundleActivator {
 			debugTracker.close();
 			debugTracker = null;
 		}
+		if (logTracker != null) {
+			logTracker.close();
+			logTracker = null;
+		}
+		if (instanceLocationTracker != null) {
+			instanceLocationTracker.close();
+			instanceLocationTracker = null;
+		}
+		if (localizationTracker != null) {
+			localizationTracker.close();
+			localizationTracker = null;
+		}
 		bundleContext = null;
+		singleton = null;
 	}
 
+	/*
+	 * Return this bundle's context.
+	 */
 	static BundleContext getContext() {
 		return bundleContext;
 	}
@@ -220,7 +332,9 @@ public class Activator implements BundleActivator {
 		PlatformURLMetaConnection.startup();
 		PlatformURLConfigConnection.startup();
 
-		PlatformURLBaseConnection.startup(getInstallLocation());
+		Location service = getInstallLocation();
+		if (service != null)
+			PlatformURLBaseConnection.startup(service.getURL());
 
 		Hashtable properties = new Hashtable(1);
 		properties.put(URLConstants.URL_HANDLER_PROTOCOL, new String[] {PlatformURLHandler.PROTOCOL});

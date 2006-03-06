@@ -56,6 +56,8 @@ public class CommonMessages extends NLS {
 	public static String fileManager_illegalInReadOnlyMode;
 	public static String fileManager_notOpen;
 
+	public static String activator_not_available;
+	
 	static {
 		// load message values from bundle file
 		reloadMessages();

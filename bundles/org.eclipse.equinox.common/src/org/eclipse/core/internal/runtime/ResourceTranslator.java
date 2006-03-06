@@ -60,7 +60,7 @@ public class ResourceTranslator {
 	public static ResourceBundle getResourceBundle(Bundle bundle) throws MissingResourceException {
 		if (hasRuntime21(bundle))
 			return ResourceBundle.getBundle("plugin", Locale.getDefault(), createTempClassloader(bundle)); //$NON-NLS-1$
-		return CommonOSGiUtils.getDefault().getLocalization(bundle, null);
+		return Activator.getDefault().getLocalization(bundle, null);
 	}
 
 	private static boolean hasRuntime21(Bundle b) {
@@ -90,7 +90,10 @@ public class ResourceTranslator {
 	}
 
 	private static void addFragments(Bundle host, ArrayList classpath) {
-		Bundle[] fragments = CommonOSGiUtils.getDefault().getFragments(host);
+		Activator activator = Activator.getDefault();
+		if (activator == null)
+			return;
+		Bundle[] fragments = activator.getFragments(host);
 		if (fragments == null)
 			return;
 

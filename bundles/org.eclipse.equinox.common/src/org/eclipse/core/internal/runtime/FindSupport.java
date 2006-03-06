@@ -214,7 +214,10 @@ public class FindSupport {
 	}
 
 	private static URL findInFragments(Bundle b, IPath filePath) {
-		Bundle[] fragments = CommonOSGiUtils.getDefault().getFragments(b);
+		Activator activator = Activator.getDefault();
+		if (activator == null)
+			return null;
+		Bundle[] fragments = activator.getFragments(b);
 		if (fragments == null)
 			return null;
 

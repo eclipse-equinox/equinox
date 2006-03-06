@@ -53,7 +53,10 @@ public class PlatformURLFragmentConnection extends PlatformURLConnection {
 		int ix = spec.indexOf("/", FRAGMENT.length() + 1); //$NON-NLS-1$
 		String ref = ix == -1 ? spec.substring(FRAGMENT.length() + 1) : spec.substring(FRAGMENT.length() + 1, ix);
 		String id = getId(ref);
-		target = Activator.getDefault().getBundle(id);
+		Activator activator = Activator.getDefault();
+		if (activator == null)
+			throw new IOException(CommonMessages.activator_not_available);
+		target = activator.getBundle(id);
 		if (target == null)
 			throw new IOException(NLS.bind(CommonMessages.url_resolveFragment, url));
 		URL result = target.getEntry("/"); //$NON-NLS-1$

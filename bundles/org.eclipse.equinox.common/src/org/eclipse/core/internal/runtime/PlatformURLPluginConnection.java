@@ -53,7 +53,10 @@ public class PlatformURLPluginConnection extends PlatformURLConnection {
 		int ix = spec.indexOf("/", PLUGIN.length() + 1); //$NON-NLS-1$
 		String ref = ix == -1 ? spec.substring(PLUGIN.length() + 1) : spec.substring(PLUGIN.length() + 1, ix);
 		String id = getId(ref);
-		target = Activator.getDefault().getBundle(id);
+		Activator activator = Activator.getDefault();
+		if (activator == null)
+			throw new IOException(CommonMessages.activator_not_available);
+		target = activator.getBundle(id);
 		if (target == null)
 			throw new IOException(NLS.bind(CommonMessages.url_resolvePlugin, url));
 		if (ix == -1 || (ix + 1) >= spec.length())
@@ -87,7 +90,10 @@ public class PlatformURLPluginConnection extends PlatformURLConnection {
 			int ix = spec.indexOf("/", PLUGIN.length() + 1); //$NON-NLS-1$
 			String ref = ix == -1 ? spec.substring(PLUGIN.length() + 1) : spec.substring(PLUGIN.length() + 1, ix);
 			String id = getId(ref);
-			target = Activator.getDefault().getBundle(id);
+			Activator activator = Activator.getDefault();
+			if (activator == null)
+				throw new IOException(CommonMessages.activator_not_available);
+			target = activator.getBundle(id);
 			if (target == null)
 				throw new IOException(NLS.bind(CommonMessages.url_resolvePlugin, url));
 		}

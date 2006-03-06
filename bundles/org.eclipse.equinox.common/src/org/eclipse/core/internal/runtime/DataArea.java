@@ -36,7 +36,10 @@ public class DataArea {
 	protected void assertLocationInitialized() throws IllegalStateException {
 		if (location != null && initialized)
 			return;
-		Location service = CommonOSGiUtils.getDefault().getInstanceLocation();
+		Activator activator = Activator.getDefault();
+		if (activator == null)
+			throw new IllegalStateException(CommonMessages.activator_not_available);
+		Location service = activator.getInstanceLocation();
 		if (service == null)
 			throw new IllegalStateException(CommonMessages.meta_noDataModeSpecified);
 		try {
@@ -64,7 +67,7 @@ public class DataArea {
 	}
 
 	public IPath getLogLocation() throws IllegalStateException {
-		return new Path(CommonOSGiUtils.getDefault().getFrameworkLog().getFile().getAbsolutePath());
+		return new Path(Activator.getDefault().getFrameworkLog().getFile().getAbsolutePath());
 	}
 
 	/**
@@ -118,7 +121,9 @@ public class DataArea {
 		// set the log file location now that we created the data area
 		IPath path = location.append(F_META_AREA).append(F_LOG);
 		try {
-			CommonOSGiUtils.getDefault().getFrameworkLog().setFile(path.toFile(), true);
+			Activator activator = Activator.getDefault();
+			if (activator != null)
+				activator.getFrameworkLog().setFile(path.toFile(), true);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

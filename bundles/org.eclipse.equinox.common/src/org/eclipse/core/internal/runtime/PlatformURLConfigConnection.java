@@ -43,7 +43,10 @@ public class PlatformURLConfigConnection extends PlatformURLConnection {
 			throw new IOException(NLS.bind(CommonMessages.url_badVariant, url.toString()));
 		String path = spec.substring(CONFIG.length() + 1);
 		// resolution takes parent configuration into account (if it exists)
-		Location localConfig = Activator.getDefault().getConfigurationLocation();
+		Activator activator = Activator.getDefault();
+		if (activator == null)
+			throw new IOException(CommonMessages.activator_not_available);
+		Location localConfig = activator.getConfigurationLocation();
 		Location parentConfig = localConfig.getParentLocation();
 		// assume we will find the file locally
 		URL localURL = new URL(localConfig.getURL(), path);
@@ -80,7 +83,7 @@ public class PlatformURLConfigConnection extends PlatformURLConnection {
 	 * @see java.net.URLConnection#getOutputStream()
 	 */
 	public OutputStream getOutputStream() throws IOException {
-		if (parentConfiguration || Activator.getDefault().getConfigurationLocation().isReadOnly())
+		if (parentConfiguration || Activator.getDefault() == null || Activator.getDefault().getConfigurationLocation().isReadOnly())
 			throw new UnknownServiceException(NLS.bind(CommonMessages.url_noOutput, url));
 		//This is not optimal but connection is a private instance variable in the super-class.
 		URL resolved = getResolvedURL();

@@ -63,14 +63,19 @@ public abstract class PlatformURLConnection extends URLConnection {
 	public final static boolean DEBUG_CACHE_COPY;
 
 	static {
-		DebugOptions debugOptions = Activator.getDefault().getDebugOptions();
-		if (debugOptions != null) {
-			DEBUG = debugOptions.getBooleanOption(OPTION_DEBUG, false);
-			DEBUG_CONNECT = debugOptions.getBooleanOption(OPTION_DEBUG_CONNECT, true);
-			DEBUG_CACHE_LOOKUP = debugOptions.getBooleanOption(OPTION_DEBUG_CACHE_LOOKUP, true);
-			DEBUG_CACHE_COPY = debugOptions.getBooleanOption(OPTION_DEBUG_CACHE_COPY, true);
-		} else
+		Activator activator = Activator.getDefault();
+		if (activator == null) {
 			DEBUG = DEBUG_CONNECT = DEBUG_CACHE_LOOKUP = DEBUG_CACHE_COPY = false;
+		} else {
+			DebugOptions debugOptions = activator.getDebugOptions();
+			if (debugOptions != null) {
+				DEBUG = debugOptions.getBooleanOption(OPTION_DEBUG, false);
+				DEBUG_CONNECT = debugOptions.getBooleanOption(OPTION_DEBUG_CONNECT, true);
+				DEBUG_CACHE_LOOKUP = debugOptions.getBooleanOption(OPTION_DEBUG_CACHE_LOOKUP, true);
+				DEBUG_CACHE_COPY = debugOptions.getBooleanOption(OPTION_DEBUG_CACHE_COPY, true);
+			} else
+				DEBUG = DEBUG_CONNECT = DEBUG_CACHE_LOOKUP = DEBUG_CACHE_COPY = false;
+		}
 	}
 
 	protected PlatformURLConnection(URL url) {

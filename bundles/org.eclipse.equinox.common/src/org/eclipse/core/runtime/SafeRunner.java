@@ -45,7 +45,10 @@ public final class SafeRunner {
 	private static void handleException(ISafeRunnable code, Throwable e) {
 		if (!(e instanceof OperationCanceledException)) {
 			// try to obtain the correct plug-in id for the bundle providing the safe runnable 
-			String pluginId = CommonOSGiUtils.getDefault().getBundleId(code);
+			Activator activator = Activator.getDefault();
+			String pluginId = null;
+			if (activator != null)
+				pluginId = activator.getBundleId(code);
 			if (pluginId == null)
 				pluginId = IRuntimeConstants.NAME;
 			String message = NLS.bind(CommonMessages.meta_pluginProblems, pluginId);
