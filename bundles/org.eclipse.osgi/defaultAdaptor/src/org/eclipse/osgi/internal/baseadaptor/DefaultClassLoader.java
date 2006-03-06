@@ -24,6 +24,8 @@ import org.eclipse.osgi.baseadaptor.loader.*;
 import org.eclipse.osgi.framework.adaptor.BundleData;
 import org.eclipse.osgi.framework.adaptor.ClassLoaderDelegate;
 import org.eclipse.osgi.framework.debug.Debug;
+import org.eclipse.osgi.internal.provisional.verifier.CertificateChain;
+import org.eclipse.osgi.internal.provisional.verifier.CertificateVerifier;
 
 /**
  * The default implemention of <code>BaseClassLoader</code>.  This implementation extends
@@ -215,19 +217,15 @@ public class DefaultClassLoader extends ClassLoader implements BaseClassLoader {
 				// no domain specified.  Better use a collection that has all permissions
 				// this is done just incase someone sets the security manager later
 				permissions = ALLPERMISSIONS;
-			return new ClasspathDomain(bundlefile.getBaseFile().toURL(), permissions);
+			Certificate[] certs = null;
+			if (bundlefile instanceof CertificateVerifier) {
+				CertificateChain[] chains = ((CertificateVerifier) bundlefile).getChains();
+				certs = chains == null || chains.length == 0 ? null : chains[0].getCertificates();
+			}
+			return new ProtectionDomain(new CodeSource(bundlefile.getBaseFile().toURL(), certs), permissions);
 		} catch (MalformedURLException e) {
 			// Failed to create our own domain; just return the baseDomain
 			return baseDomain;
-		}
-	}
-
-	/**
-	 * Very simple protection domain that uses a URL to create a CodeSource for a ProtectionDomain
-	 */
-	protected static class ClasspathDomain extends ProtectionDomain {
-		public ClasspathDomain(URL codeLocation, PermissionCollection permissions) {
-			super(new CodeSource(codeLocation, (Certificate[]) null), permissions);
 		}
 	}
 
