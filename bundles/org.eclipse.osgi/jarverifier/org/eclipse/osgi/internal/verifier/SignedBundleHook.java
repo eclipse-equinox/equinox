@@ -33,7 +33,7 @@ import org.osgi.framework.*;
  */
 public class SignedBundleHook implements AdaptorHook, BundleFileWrapperFactoryHook, HookConfigurator, CertificateVerifierFactory {
 	private static BaseAdaptor ADAPTOR;
-	private static String SIGNED_BUNDLE_SUPPORT = "osgi.support.signiture.verify"; //$NON-NLS-1$
+	private static String SIGNED_BUNDLE_SUPPORT = "osgi.support.signature.verify"; //$NON-NLS-1$
 	private static boolean supportSignedBundles = false;
 	private ServiceRegistration reg;
 
