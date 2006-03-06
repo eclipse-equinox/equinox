@@ -149,6 +149,10 @@ public class Activator implements BundleActivator {
 			installLocationTracker.close();
 			installLocationTracker = null;
 		}
+		if (configLocationTracker != null) {
+			configLocationTracker.close();
+			configLocationTracker = null;
+		}
 		if (bundleTracker != null) {
 			bundleTracker.close();
 			bundleTracker = null;
