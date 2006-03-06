@@ -125,14 +125,6 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 	 */
 	public synchronized void removedService(ServiceReference reference, Object service) {
 		PreferencesService.getDefault().setRegistryHelper(null);
-		if (preferencesService != null) {
-			preferencesService.unregister();
-			preferencesService = null;
-		}
-		if (osgiPreferencesService != null) {
-			osgiPreferencesService.unregister();
-			osgiPreferencesService = null;
-		}
 	}
 
 	/**
