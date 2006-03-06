@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005 IBM Corporation and others.
+ * Copyright (c) 2005, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,7 +21,7 @@ import org.osgi.util.tracker.ServiceTracker;
  * This class contains a set of helper OSGI methods for the Preferences plugin.
  * The closeServices() method should be called before the plugin is stopped. 
  * 
- * @since org.eclipse.equinox.preferences 1.0
+ * @since org.eclipse.equinox.preferences 3.2
  */
 public class PreferencesOSGiUtils {
 	private ServiceTracker logTracker = null;
@@ -165,14 +165,12 @@ public class PreferencesOSGiUtils {
 	public Location getConfigurationLocation() {
 		if (configurationLocationTracker != null)
 			return (Location) configurationLocationTracker.getService();
-		else
-			return null;
+		return null;
 	}
 
 	public Location getInstanceLocation() {
 		if (instanceLocationTracker != null)
 			return (Location) instanceLocationTracker.getService();
-		else
-			return null;
+		return null;
 	}
 }

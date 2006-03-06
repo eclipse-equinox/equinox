@@ -11,6 +11,7 @@
 package org.eclipse.core.internal.preferences;
 
 import java.io.*;
+import java.lang.ref.WeakReference;
 import java.util.*;
 import org.eclipse.core.internal.runtime.RuntimeLog;
 import org.eclipse.core.runtime.*;
@@ -24,8 +25,7 @@ import org.osgi.service.prefs.Preferences;
 /**
  * @since 3.0
  */
-public class PreferencesService implements IPreferencesService, IRegistryChangeListener {
-
+public class PreferencesService implements IPreferencesService {
 	/**
 	 * The interval between passes over the preference tree to canonicalize
 	 * strings.
@@ -33,7 +33,7 @@ public class PreferencesService implements IPreferencesService, IRegistryChangeL
 	private static final long STRING_SHARING_INTERVAL = 300000;
 
 	// cheat here and add "project" even though we really shouldn't know about it
-	// because of plug-in dependancies and it being defined in the resources plug-in
+	// because of plug-in dependencies and it being defined in the resources plug-in
 	private static final String[] DEFAULT_DEFAULT_LOOKUP_ORDER = new String[] {"project", //$NON-NLS-1$ 
 			InstanceScope.SCOPE, //
 			ConfigurationScope.SCOPE, //
@@ -42,17 +42,14 @@ public class PreferencesService implements IPreferencesService, IRegistryChangeL
 	private static final char BUNDLE_VERSION_PREFIX = '@';
 	private static final float EXPORT_VERSION = 3;
 	private static final String VERSION_KEY = "file_export_version"; //$NON-NLS-1$
-	private static final String ATTRIBUTE_NAME = "name"; //$NON-NLS-1$
-	private static final String ATTRIBUTE_CLASS = "class"; //$NON-NLS-1$
-	private static final String ELEMENT_SCOPE = "scope"; //$NON-NLS-1$
-	private static final String ELEMENT_MODIFIER = "modifier"; //$NON-NLS-1$
 	private static final String EMPTY_STRING = ""; //$NON-NLS-1$
 
 	private static PreferencesService instance;
 	static final RootPreferences root = new RootPreferences();
 	private static final Map defaultsRegistry = Collections.synchronizedMap(new HashMap());
-	private static final Map scopeRegistry = Collections.synchronizedMap(new HashMap());
-	private ListenerList modifyListeners;
+	private Object registryHelper = null;
+	private Map defaultScopes = new HashMap();
+
 	/**
 	 * The last time analysis was done to remove duplicate strings
 	 */
@@ -67,14 +64,6 @@ public class PreferencesService implements IPreferencesService, IRegistryChangeL
 	}
 
 	/*
-	 * Create and return an IStatus object with WARNING severity and the
-	 * given message and exception.
-	 */
-	private static IStatus createStatusWarning(String message, Exception e) {
-		return new Status(IStatus.WARNING, PrefsMessages.OWNER_NAME, IStatus.WARNING, message, e);
-	}
-
-	/*
 	 * Return the instance.
 	 */
 	public static PreferencesService getDefault() {
@@ -83,90 +72,29 @@ public class PreferencesService implements IPreferencesService, IRegistryChangeL
 		return instance;
 	}
 
-	/**
-	 * See who is plugged into the extension point.
-	 */
-	private void initializeScopes() {
-		IExtension[] extensions = getPrefExtensions();
-		for (int i = 0; i < extensions.length; i++) {
-			IConfigurationElement[] elements = extensions[i].getConfigurationElements();
-			for (int j = 0; j < elements.length; j++)
-				if (ELEMENT_SCOPE.equalsIgnoreCase(elements[j].getName()))
-					scopeAdded(elements[j]);
-		}
-		RegistryFactory.getRegistry().addRegistryChangeListener(this, IPreferencesConstants.RUNTIME_NAME);
-		RegistryFactory.getRegistry().addRegistryChangeListener(this, IPreferencesConstants.PREFERS_NAME);
-	}
-
-	private void initializeModifyListeners() {
-		modifyListeners = new ListenerList();
-		IExtension[] extensions = getPrefExtensions();
-		for (int i = 0; i < extensions.length; i++) {
-			IConfigurationElement[] elements = extensions[i].getConfigurationElements();
-			for (int j = 0; j < elements.length; j++)
-				if (ELEMENT_MODIFIER.equalsIgnoreCase(elements[j].getName()))
-					addModifyListener(elements[j]);
-		}
-		RegistryFactory.getRegistry().addRegistryChangeListener(this, IPreferencesConstants.RUNTIME_NAME);
-		RegistryFactory.getRegistry().addRegistryChangeListener(this, IPreferencesConstants.PREFERS_NAME);
-	}
-
 	static void log(IStatus status) {
 		RuntimeLog.log(status);
 	}
 
-	/*
-	 * Abstracted into a separate method to prepare for dynamic awareness.
-	 */
-	static void scopeAdded(IConfigurationElement element) {
-		String key = element.getAttribute(ATTRIBUTE_NAME);
-		if (key == null) {
-			String message = NLS.bind(PrefsMessages.preferences_missingScopeAttribute, element.getDeclaringExtension().getUniqueIdentifier());
-			log(createStatusWarning(message, null));
-			return;
-		}
-		scopeRegistry.put(key, element);
-		root.addChild(key, null);
-	}
-
-	/*
-	 * Abstracted into a separate method to prepare for dynamic awareness.
-	 */
-	private void addModifyListener(IConfigurationElement element) {
-		String key = element.getAttribute(ATTRIBUTE_CLASS);
-		if (key == null) {
-			String message = NLS.bind(PrefsMessages.preferences_missingClassAttribute, element.getDeclaringExtension().getUniqueIdentifier());
-			log(new Status(IStatus.ERROR, PrefsMessages.OWNER_NAME, IStatus.ERROR, message, null));
-			return;
-		}
-		try {
-			Object listener = element.createExecutableExtension(ATTRIBUTE_CLASS);
-			if (!(listener instanceof PreferenceModifyListener)) {
-				log(new Status(IStatus.ERROR, PrefsMessages.OWNER_NAME, IStatus.ERROR, PrefsMessages.preferences_classCastListener, null));
-				return;
-			}
-			modifyListeners.add(listener);
-		} catch (CoreException e) {
-			log(e.getStatus());
-			return;
-		}
-	}
-
-	/*
-	 * Abstracted into a separate method to prepare for dynamic awareness.
-	 */
-	static void scopeRemoved(String key) {
-		IEclipsePreferences node = (IEclipsePreferences) root.getNode(key, false);
-		if (node != null)
-			root.removeNode(node);
-		else
-			root.removeNode(key);
-		scopeRegistry.remove(key);
-	}
-
-	private PreferencesService() {
+	PreferencesService() {
 		super();
-		initializeScopes();
+		initializeDefaultScopes();
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.core.runtime.preferences.IPreferencesService#applyPreferences(org.eclipse.core.runtime.preferences.IEclipsePreferences, org.eclipse.core.runtime.preferences.IPreferenceFilter[])
+	 */
+	public void applyPreferences(IEclipsePreferences tree, IPreferenceFilter[] filters) throws CoreException {
+		if (filters == null || filters.length == 0)
+			return;
+		try {
+			internalApply(tree, filters);
+			//this typically causes a major change to the preference tree, so force string sharing
+			lastStringSharing = 0;
+			shareStrings();
+		} catch (BackingStoreException e) {
+			throw new CoreException(createStatusError(PrefsMessages.preferences_applyProblems, e));
+		}
 	}
 
 	/*
@@ -239,7 +167,7 @@ public class PreferencesService implements IPreferencesService, IRegistryChangeL
 			throw new CoreException(createStatusError(PrefsMessages.preferences_applyProblems, e));
 		}
 
-		// save the prefs
+		// save the preferences
 		try {
 			getRootNode().node(modifiedNode.absolutePath()).flush();
 		} catch (BackingStoreException e) {
@@ -252,6 +180,19 @@ public class PreferencesService implements IPreferencesService, IRegistryChangeL
 		lastStringSharing = 0;
 		shareStrings();
 		return result;
+	}
+
+	private boolean containsKeys(IEclipsePreferences aRoot) throws BackingStoreException {
+		final boolean result[] = new boolean[] {false};
+		IPreferenceNodeVisitor visitor = new IPreferenceNodeVisitor() {
+			public boolean visit(IEclipsePreferences node) throws BackingStoreException {
+				if (node.keys().length != 0)
+					result[0] = true;
+				return !result[0];
+			}
+		};
+		aRoot.accept(visitor);
+		return result[0];
 	}
 
 	/*
@@ -310,25 +251,7 @@ public class PreferencesService implements IPreferencesService, IRegistryChangeL
 	}
 
 	/*
-	 * Return the string which is the scope for the given path.
-	 * Return the empty string if it cannot be determined.
-	 */
-	String getScope(String path) {
-		if (path == null || path.length() == 0)
-			return EMPTY_STRING;
-		int startIndex = path.indexOf(IPath.SEPARATOR);
-		if (startIndex == -1)
-			return path;
-		if (path.length() == 1)
-			return EMPTY_STRING;
-		int endIndex = path.indexOf(IPath.SEPARATOR, startIndex + 1);
-		if (endIndex == -1)
-			endIndex = path.length();
-		return path.substring(startIndex + 1, endIndex);
-	}
-
-	/*
-	 * excludesList is guarenteed not to be null
+	 * excludesList is guaranteed not to be null
 	 */
 	private Properties convertToProperties(IEclipsePreferences preferences, final String[] excludesList) throws BackingStoreException {
 		final Properties result = new Properties();
@@ -385,23 +308,65 @@ public class PreferencesService implements IPreferencesService, IRegistryChangeL
 		return result;
 	}
 
-	protected IEclipsePreferences createNode(String name) {
-		IScope scope = null;
-		Object value = scopeRegistry.get(name);
-		if (value instanceof IConfigurationElement) {
-			try {
-				scope = (IScope) ((IConfigurationElement) value).createExecutableExtension(ATTRIBUTE_CLASS);
-				scopeRegistry.put(name, scope);
-			} catch (ClassCastException e) {
-				log(createStatusError(PrefsMessages.preferences_classCastScope, e));
-				return new EclipsePreferences(root, name);
-			} catch (CoreException e) {
-				log(e.getStatus());
-				return new EclipsePreferences(root, name);
-			}
-		} else
-			scope = (IScope) value;
-		return scope.create(root, name);
+	/**
+	 * Copy key/value pairs from the source to the destination. If the key list is null
+	 * then copy all associations. 
+	 * 
+	 * If the depth is 0, then this operation is performed only on the source node. Otherwise
+	 * it is performed on the source node's subtree.
+	 * 
+	 * @param depth one of 0 or -1
+	 */
+	void copyFromTo(Preferences source, Preferences destination, String[] keys, int depth) throws BackingStoreException {
+		String[] keysToCopy = keys == null ? source.keys() : keys;
+		for (int i = 0; i < keysToCopy.length; i++) {
+			String value = source.get(keysToCopy[i], null);
+			if (value != null)
+				destination.put(keysToCopy[i], value);
+		}
+		if (depth == 0)
+			return;
+		String[] children = source.childrenNames();
+		for (int i = 0; i < children.length; i++)
+			copyFromTo(source.node(children[i]), destination.node(children[i]), keys, depth);
+	}
+
+	public WeakReference applyRuntimeDefaults(String name, WeakReference pluginReference) {
+		if (registryHelper == null)
+			return null;
+		return ((PreferenceServiceRegistryHelper) registryHelper).applyRuntimeDefaults(name, pluginReference);
+	}
+
+	private void initializeDefaultScopes() {
+		defaultScopes.put(DefaultScope.SCOPE, new DefaultPreferences());
+		root.addChild(DefaultScope.SCOPE, null);
+		defaultScopes.put(InstanceScope.SCOPE, new InstancePreferences());
+		root.addChild(InstanceScope.SCOPE, null);
+		defaultScopes.put(ConfigurationScope.SCOPE, new ConfigurationPreferences());
+		root.addChild(ConfigurationScope.SCOPE, null);
+	}
+
+	public IEclipsePreferences createNode(String key) {
+		IScope scope = (IScope) defaultScopes.get(key);
+		if (scope == null) {
+			if (registryHelper == null)
+				return new EclipsePreferences(root, key);
+			return ((PreferenceServiceRegistryHelper) registryHelper).createNode(root, key);
+		}
+		return scope.create(root, key);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.core.runtime.preferences.IPreferencesService#exportPreferences(IEclipsePreferences, IPreferenceFilter[], OutputStream)
+	 */
+	public void exportPreferences(IEclipsePreferences node, IPreferenceFilter[] filters, OutputStream stream) throws CoreException {
+		if (filters == null || filters.length == 0)
+			return;
+		try {
+			internalExport(node, filters, stream);
+		} catch (BackingStoreException e) {
+			throw new CoreException(createStatusError(PrefsMessages.preferences_exportProblems, e));
+		}
 	}
 
 	/*
@@ -432,6 +397,30 @@ public class PreferencesService implements IPreferencesService, IRegistryChangeL
 	}
 
 	/*
+	 * Give clients a chance to modify the tree before it is applied globally 
+	 */
+	private IEclipsePreferences firePreApplyEvent(IEclipsePreferences tree) {
+		if (registryHelper == null)
+			return tree;
+		final IEclipsePreferences[] result = new IEclipsePreferences[] {tree};
+		PreferenceModifyListener[] listeners = ((PreferenceServiceRegistryHelper) registryHelper).getModifyListeners();
+		for (int i = 0; i < listeners.length; i++) {
+			final PreferenceModifyListener listener = listeners[i];
+			ISafeRunnable job = new ISafeRunnable() {
+				public void handleException(Throwable exception) {
+					// already logged in Platform#run()
+				}
+
+				public void run() throws Exception {
+					result[0] = listener.preApply(result[0]);
+				}
+			};
+			SafeRunner.run(job);
+		}
+		return result[0];
+	}
+
+	/*
 	 * @see org.eclipse.core.runtime.preferences.IPreferencesService#get(java.lang.String, java.lang.String, org.osgi.service.prefs.Preferences[])
 	 */
 	public String get(String key, String defaultValue, Preferences[] nodes) {
@@ -457,20 +446,6 @@ public class PreferencesService implements IPreferencesService, IRegistryChangeL
 	}
 
 	/*
-	 * Return the version for the bundle with the given name. Return null if it
-	 * is not known or there is a problem.
-	 */
-	String getBundleVersion(String bundleName) {
-		Bundle bundle = PreferencesOSGiUtils.getDefault().getBundle(bundleName);
-		if (bundle != null) {
-			Object version = bundle.getHeaders(EMPTY_STRING).get(Constants.BUNDLE_VERSION);
-			if (version != null && version instanceof String)
-				return (String) version;
-		}
-		return null;
-	}
-
-	/*
 	 * Return the name of the bundle from the given path.
 	 * It is assumed that that path is:
 	 * - absolute
@@ -484,6 +459,20 @@ public class PreferencesService implements IPreferencesService, IRegistryChangeL
 			return null;
 		int second = path.indexOf(IPath.SEPARATOR, first + 1);
 		return second == -1 ? path.substring(first + 1) : path.substring(first + 1, second);
+	}
+
+	/*
+	 * Return the version for the bundle with the given name. Return null if it
+	 * is not known or there is a problem.
+	 */
+	String getBundleVersion(String bundleName) {
+		Bundle bundle = PreferencesOSGiUtils.getDefault().getBundle(bundleName);
+		if (bundle != null) {
+			Object version = bundle.getHeaders(EMPTY_STRING).get(Constants.BUNDLE_VERSION);
+			if (version != null && version instanceof String)
+				return (String) version;
+		}
+		return null;
 	}
 
 	/*
@@ -543,6 +532,10 @@ public class PreferencesService implements IPreferencesService, IRegistryChangeL
 			return defaultValue;
 		}
 	}
+
+	/*
+	 * @see org.eclipse.core.runtime.preferences.IPreferencesService#getRootNode()
+	 */
 
 	/*
 	 * @see org.eclipse.core.runtime.preferences.IPreferencesService#getLong(java.lang.String, java.lang.String, long, org.eclipse.core.runtime.preferences.IScope[])
@@ -613,12 +606,26 @@ public class PreferencesService implements IPreferencesService, IRegistryChangeL
 		return qualifier + '/' + key;
 	}
 
-	/*
-	 * @see org.eclipse.core.runtime.preferences.IPreferencesService#getRootNode()
-	 */
-
 	public IEclipsePreferences getRootNode() {
 		return root;
+	}
+
+	/*
+	 * Return the string which is the scope for the given path.
+	 * Return the empty string if it cannot be determined.
+	 */
+	String getScope(String path) {
+		if (path == null || path.length() == 0)
+			return EMPTY_STRING;
+		int startIndex = path.indexOf(IPath.SEPARATOR);
+		if (startIndex == -1)
+			return path;
+		if (path.length() == 1)
+			return EMPTY_STRING;
+		int endIndex = path.indexOf(IPath.SEPARATOR, startIndex + 1);
+		if (endIndex == -1)
+			endIndex = path.length();
+		return path.substring(startIndex + 1, endIndex);
 	}
 
 	/*
@@ -637,6 +644,114 @@ public class PreferencesService implements IPreferencesService, IRegistryChangeL
 		return applyPreferences(readPreferences(input));
 	}
 
+	/**
+	 * Filter the given tree so it only contains values which apply to the specified filters
+	 * then apply the resulting tree to the main preference tree.
+	 */
+	private void internalApply(IEclipsePreferences tree, IPreferenceFilter[] filters) throws BackingStoreException {
+		ArrayList trees = new ArrayList();
+		for (int i = 0; i < filters.length; i++)
+			trees.add(trimTree(tree, filters[i]));
+		// merge the union of the matching filters
+		IEclipsePreferences toApply = mergeTrees((IEclipsePreferences[]) trees.toArray(new IEclipsePreferences[trees.size()]));
+
+		// fire an event to give people a chance to modify the tree
+		toApply = firePreApplyEvent(toApply);
+
+		// actually apply the settings
+		IPreferenceNodeVisitor visitor = new IPreferenceNodeVisitor() {
+			public boolean visit(IEclipsePreferences node) throws BackingStoreException {
+				String[] keys = node.keys();
+				if (keys.length == 0)
+					return true;
+				copyFromTo(node, getRootNode().node(node.absolutePath()), keys, 0);
+				return true;
+			}
+		};
+		toApply.accept(visitor);
+	}
+
+	/**
+	 * Take the preference tree and trim it so it only holds values applying to the given filters.
+	 * Then export the resulting tree to the given output stream.
+	 */
+	private void internalExport(IEclipsePreferences node, IPreferenceFilter filters[], OutputStream output) throws BackingStoreException, CoreException {
+		ArrayList trees = new ArrayList();
+		for (int i = 0; i < filters.length; i++)
+			trees.add(trimTree(node, filters[i]));
+		IEclipsePreferences toExport = mergeTrees((IEclipsePreferences[]) trees.toArray(new IEclipsePreferences[trees.size()]));
+		exportPreferences(toExport, output, (String[]) null);
+	}
+
+	/*
+	 * Return true if the given tree contains information that the specified filter is interested
+	 * in, and false otherwise.
+	 */
+	private boolean internalMatches(IEclipsePreferences tree, IPreferenceFilter filter) throws BackingStoreException {
+		String[] scopes = filter.getScopes();
+		if (scopes == null)
+			throw new IllegalArgumentException();
+		String treePath = tree.absolutePath();
+		// see if this node is applicable by going over all our scopes
+		for (int i = 0; i < scopes.length; i++) {
+			String scope = scopes[i];
+			Map mapping = filter.getMapping(scope);
+			// if the mapping is null then we match everything
+			if (mapping == null) {
+				// if we are the root check to see if the scope exists
+				if (tree.parent() == null && tree.nodeExists(scope))
+					return containsKeys((IEclipsePreferences) tree.node(scope));
+				// otherwise check to see if we are in the right scope
+				if (scopeMatches(scope, tree) && containsKeys(tree))
+					return true;
+				continue;
+			}
+			// iterate over the list of declared nodes
+			for (Iterator iter = mapping.keySet().iterator(); iter.hasNext();) {
+				String nodePath = (String) iter.next();
+				String nodeFullPath = '/' + scope + '/' + nodePath;
+				// if this subtree isn't in a hierarchy we are interested in, then go to the next one
+				if (!nodeFullPath.startsWith(treePath))
+					continue;
+				// get the child node
+				String childPath = nodeFullPath.substring(treePath.length());
+				childPath = EclipsePreferences.makeRelative(childPath);
+				if (tree.nodeExists(childPath)) {
+					PreferenceFilterEntry[] entries;
+					// protect against wrong classes since this is user-code
+					try {
+						entries = (PreferenceFilterEntry[]) mapping.get(nodePath);
+					} catch (ClassCastException e) {
+						log(createStatusError(PrefsMessages.preferences_classCastFilterEntry, e));
+						continue;
+					}
+					// if there are no entries defined then we return false even if we
+					// are supposed to match on the existence of the node as a whole (bug 88820)
+					Preferences child = tree.node(childPath);
+					if (entries == null)
+						return child.keys().length != 0 || child.childrenNames().length != 0;
+					// otherwise check to see if we have any applicable keys
+					for (int j = 0; j < entries.length; j++) {
+						if (entries[j] != null && child.get(entries[j].getKey(), null) != null)
+							return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
+
+	/*
+	 * Internal method that collects the matching filters for the given tree and returns them.
+	 */
+	private IPreferenceFilter[] internalMatches(IEclipsePreferences tree, IPreferenceFilter[] filters) throws BackingStoreException {
+		ArrayList result = new ArrayList();
+		for (int i = 0; i < filters.length; i++)
+			if (internalMatches(tree, filters[i]))
+				result.add(filters[i]);
+		return (IPreferenceFilter[]) result.toArray(new IPreferenceFilter[result.size()]);
+	}
+
 	/*
 	 * Returns a boolean value indicating whether or not the given Properties
 	 * object is the result of a preference export previous to Eclipse 3.0.
@@ -646,6 +761,37 @@ public class PreferencesService implements IPreferencesService, IRegistryChangeL
 	 */
 	private boolean isLegacy(Properties properties) {
 		return properties.getProperty(VERSION_KEY) == null;
+	}
+
+	/* (non-Javadoc)
+	 * @see IPreferencesService#matches(IEclipsePreferences, IPreferenceFilter[])
+	 */
+	public IPreferenceFilter[] matches(IEclipsePreferences tree, IPreferenceFilter[] filters) throws CoreException {
+		if (filters == null || filters.length == 0)
+			return new IPreferenceFilter[0];
+		try {
+			return internalMatches(tree, filters);
+		} catch (BackingStoreException e) {
+			throw new CoreException(createStatusError(PrefsMessages.preferences_matching, e));
+		}
+	}
+
+	private IEclipsePreferences mergeTrees(IEclipsePreferences[] trees) throws BackingStoreException {
+		if (trees.length == 1)
+			return trees[0];
+		final IEclipsePreferences result = ExportedPreferences.newRoot();
+		if (trees.length == 0)
+			return result;
+		IPreferenceNodeVisitor visitor = new IPreferenceNodeVisitor() {
+			public boolean visit(IEclipsePreferences node) throws BackingStoreException {
+				Preferences destination = result.node(node.absolutePath());
+				copyFromTo(node, destination, null, 0);
+				return true;
+			}
+		};
+		for (int i = 0; i < trees.length; i++)
+			trees[i].accept(visitor);
+		return result;
 	}
 
 	/*
@@ -691,34 +837,18 @@ public class PreferencesService implements IPreferencesService, IRegistryChangeL
 		return convertFromProperties(properties);
 	}
 
-	public void registryChanged(IRegistryChangeEvent event) {
-		IExtensionDelta[] deltasOld = event.getExtensionDeltas(IPreferencesConstants.RUNTIME_NAME, IPreferencesConstants.PT_PREFERENCES);
-		IExtensionDelta[] deltasNew = event.getExtensionDeltas(IPreferencesConstants.PREFERS_NAME, IPreferencesConstants.PT_PREFERENCES);
-		IExtensionDelta[] deltas = new IExtensionDelta[deltasOld.length + deltasNew.length];
-		System.arraycopy(deltasOld, 0, deltas, 0, deltasOld.length);
-		System.arraycopy(deltasNew, 0, deltas, deltasOld.length, deltasNew.length);
-
-		if (deltas.length == 0)
-			return;
-		// dynamically adjust the registered scopes
-		for (int i = 0; i < deltas.length; i++) {
-			IConfigurationElement[] elements = deltas[i].getExtension().getConfigurationElements();
-			for (int j = 0; j < elements.length; j++) {
-				switch (deltas[i].getKind()) {
-					case IExtensionDelta.ADDED :
-						if (ELEMENT_SCOPE.equalsIgnoreCase(elements[j].getName()))
-							scopeAdded(elements[j]);
-						break;
-					case IExtensionDelta.REMOVED :
-						String scope = elements[j].getAttribute(ATTRIBUTE_NAME);
-						if (scope != null)
-							scopeRemoved(scope);
-						break;
-				}
-			}
-		}
-		// initialize the preference modify listeners
-		modifyListeners = null;
+	/**
+	 * Return true if the given node is in the specified scope and false otherwise.
+	 */
+	private boolean scopeMatches(String scope, IEclipsePreferences tree) {
+		// the root isn't in any scope
+		if (tree.parent() == null)
+			return false;
+		// fancy math to get the first segment of the path
+		String path = tree.absolutePath();
+		int index = path.indexOf('/', 1);
+		String sub = path.substring(1, index == -1 ? path.length() : index);
+		return scope.equals(sub);
 	}
 
 	/*
@@ -734,6 +864,10 @@ public class PreferencesService implements IPreferencesService, IRegistryChangeL
 		}
 	}
 
+	public void setRegistryHelper(Object registryHelper) {
+		this.registryHelper = registryHelper;
+	}
+
 	/**
 	 * Shares all duplicate equal strings referenced by the preference service.
 	 */
@@ -746,97 +880,6 @@ public class PreferencesService implements IPreferencesService, IRegistryChangeL
 		if (EclipsePreferences.DEBUG_PREFERENCE_GENERAL)
 			System.out.println("Preference string sharing saved: " + pool.getSavedStringCount()); //$NON-NLS-1$
 		lastStringSharing = now;
-	}
-
-	public IStatus validateVersions(IPath path) {
-		final MultiStatus result = new MultiStatus(PrefsMessages.OWNER_NAME, IStatus.INFO, PrefsMessages.preferences_validate, null);
-		IPreferenceNodeVisitor visitor = new IPreferenceNodeVisitor() {
-			public boolean visit(IEclipsePreferences node) {
-				if (!(node instanceof ExportedPreferences))
-					return false;
-
-				// calculate the version in the file
-				ExportedPreferences realNode = (ExportedPreferences) node;
-				String version = realNode.getVersion();
-				if (version == null || !PluginVersionIdentifier.validateVersion(version).isOK())
-					return true;
-				PluginVersionIdentifier versionInFile = new PluginVersionIdentifier(version);
-
-				// calculate the version of the installed bundle
-				String bundleName = getBundleName(node.absolutePath());
-				if (bundleName == null)
-					return true;
-				String stringVersion = getBundleVersion(bundleName);
-				if (stringVersion == null || !PluginVersionIdentifier.validateVersion(stringVersion).isOK())
-					return true;
-				PluginVersionIdentifier versionInMemory = new PluginVersionIdentifier(stringVersion);
-
-				// verify the versions based on the matching rules
-				IStatus verification = validatePluginVersions(bundleName, versionInFile, versionInMemory);
-				if (verification != null)
-					result.add(verification);
-
-				return true;
-			}
-		};
-
-		InputStream input = null;
-		try {
-			input = new BufferedInputStream(new FileInputStream(path.toFile()));
-			IExportedPreferences prefs = readPreferences(input);
-			prefs.accept(visitor);
-		} catch (FileNotFoundException e) {
-			// ignore...if the file does not exist then all is OK
-		} catch (CoreException e) {
-			result.add(createStatusError(PrefsMessages.preferences_validationException, e));
-		} catch (BackingStoreException e) {
-			result.add(createStatusError(PrefsMessages.preferences_validationException, e));
-		}
-		return result;
-	}
-
-	/**
-	 * Compares two plugin version identifiers to see if their preferences
-	 * are compatible.  If they are not compatible, a warning message is 
-	 * added to the given multistatus, according to the following rules:
-	 * 
-	 * - plugins that differ in service number: no status
-	 * - plugins that differ in minor version: WARNING status
-	 * - plugins that differ in major version:
-	 * 	- where installed plugin is newer: WARNING status
-	 * 	- where installed plugin is older: ERROR status
-	 * @param bundle the name of the bundle
-	 * @param pref The version identifer of the preferences to be loaded
-	 * @param installed The version identifier of the installed plugin
-	 */
-	IStatus validatePluginVersions(String bundle, PluginVersionIdentifier pref, PluginVersionIdentifier installed) {
-		if (installed.getMajorComponent() == pref.getMajorComponent() && installed.getMinorComponent() == pref.getMinorComponent())
-			return null;
-		int severity;
-		if (installed.getMajorComponent() < pref.getMajorComponent())
-			severity = IStatus.ERROR;
-		else
-			severity = IStatus.WARNING;
-		String msg = NLS.bind(PrefsMessages.preferences_incompatible, (new Object[] {pref, bundle, installed}));
-		return new Status(severity, PrefsMessages.OWNER_NAME, 1, msg, null);
-	}
-
-	private IEclipsePreferences mergeTrees(IEclipsePreferences[] trees) throws BackingStoreException {
-		if (trees.length == 1)
-			return trees[0];
-		final IEclipsePreferences result = ExportedPreferences.newRoot();
-		if (trees.length == 0)
-			return result;
-		IPreferenceNodeVisitor visitor = new IPreferenceNodeVisitor() {
-			public boolean visit(IEclipsePreferences node) throws BackingStoreException {
-				Preferences destination = result.node(node.absolutePath());
-				copyFromTo(node, destination, null, 0);
-				return true;
-			}
-		};
-		for (int i = 0; i < trees.length; i++)
-			trees[i].accept(visitor);
-		return result;
 	}
 
 	/*
@@ -899,255 +942,76 @@ public class PreferencesService implements IPreferencesService, IRegistryChangeL
 	}
 
 	/**
-	 * Return true if the given node is in the specified scope and false othewise.
-	 */
-	private boolean scopeMatches(String scope, IEclipsePreferences tree) {
-		// the root isn't in any scope
-		if (tree.parent() == null)
-			return false;
-		// fancy math to get the first segment of the path
-		String path = tree.absolutePath();
-		int index = path.indexOf('/', 1);
-		String sub = path.substring(1, index == -1 ? path.length() : index);
-		return scope.equals(sub);
-	}
-
-	/**
-	 * Copy key/value pairs from the source to the destination. If the key list is null
-	 * then copy all associations. 
+	 * Compares two plugin version identifiers to see if their preferences
+	 * are compatible.  If they are not compatible, a warning message is 
+	 * added to the given multi-status, according to the following rules:
 	 * 
-	 * If the depth is 0, then this operation is performed only on the source node. Otherwise
-	 * it is performed on the source node's subtree.
-	 * 
-	 * @param depth one of 0 or -1
+	 * - plugins that differ in service number: no status
+	 * - plugins that differ in minor version: WARNING status
+	 * - plugins that differ in major version:
+	 * 	- where installed plugin is newer: WARNING status
+	 * 	- where installed plugin is older: ERROR status
+	 * @param bundle the name of the bundle
+	 * @param pref The version identifier of the preferences to be loaded
+	 * @param installed The version identifier of the installed plugin
 	 */
-	void copyFromTo(Preferences source, Preferences destination, String[] keys, int depth) throws BackingStoreException {
-		String[] keysToCopy = keys == null ? source.keys() : keys;
-		for (int i = 0; i < keysToCopy.length; i++) {
-			String value = source.get(keysToCopy[i], null);
-			if (value != null)
-				destination.put(keysToCopy[i], value);
-		}
-		if (depth == 0)
-			return;
-		String[] children = source.childrenNames();
-		for (int i = 0; i < children.length; i++)
-			copyFromTo(source.node(children[i]), destination.node(children[i]), keys, depth);
+	IStatus validatePluginVersions(String bundle, PluginVersionIdentifier pref, PluginVersionIdentifier installed) {
+		if (installed.getMajorComponent() == pref.getMajorComponent() && installed.getMinorComponent() == pref.getMinorComponent())
+			return null;
+		int severity;
+		if (installed.getMajorComponent() < pref.getMajorComponent())
+			severity = IStatus.ERROR;
+		else
+			severity = IStatus.WARNING;
+		String msg = NLS.bind(PrefsMessages.preferences_incompatible, (new Object[] {pref, bundle, installed}));
+		return new Status(severity, PrefsMessages.OWNER_NAME, 1, msg, null);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.core.runtime.preferences.IPreferencesService#exportPreferences(IEclipsePreferences, IPreferenceFilter[], OutputStream)
-	 */
-	public void exportPreferences(IEclipsePreferences node, IPreferenceFilter[] filters, OutputStream stream) throws CoreException {
-		if (filters == null || filters.length == 0)
-			return;
-		try {
-			internalExport(node, filters, stream);
-		} catch (BackingStoreException e) {
-			throw new CoreException(createStatusError(PrefsMessages.preferences_exportProblems, e));
-		}
-	}
-
-	/**
-	 * Take the preference tree and trim it so it only holds values applying to the given filters.
-	 * Then export the resulting tree to the given output stream.
-	 */
-	private void internalExport(IEclipsePreferences node, IPreferenceFilter filters[], OutputStream output) throws BackingStoreException, CoreException {
-		ArrayList trees = new ArrayList();
-		for (int i = 0; i < filters.length; i++)
-			trees.add(trimTree(node, filters[i]));
-		IEclipsePreferences toExport = mergeTrees((IEclipsePreferences[]) trees.toArray(new IEclipsePreferences[trees.size()]));
-		exportPreferences(toExport, output, (String[]) null);
-	}
-
-	/* (non-Javadoc)
-	 * @see IPreferencesService#matches(IEclipsePreferences, IPreferenceFilter[])
-	 */
-	public IPreferenceFilter[] matches(IEclipsePreferences tree, IPreferenceFilter[] filters) throws CoreException {
-		if (filters == null || filters.length == 0)
-			return new IPreferenceFilter[0];
-		try {
-			return internalMatches(tree, filters);
-		} catch (BackingStoreException e) {
-			throw new CoreException(createStatusError(PrefsMessages.preferences_matching, e));
-		}
-	}
-
-	/*
-	 * Internal method that collects the matching filters for the given tree and returns them.
-	 */
-	private IPreferenceFilter[] internalMatches(IEclipsePreferences tree, IPreferenceFilter[] filters) throws BackingStoreException {
-		ArrayList result = new ArrayList();
-		for (int i = 0; i < filters.length; i++)
-			if (internalMatches(tree, filters[i]))
-				result.add(filters[i]);
-		return (IPreferenceFilter[]) result.toArray(new IPreferenceFilter[result.size()]);
-	}
-
-	private boolean containsKeys(IEclipsePreferences aRoot) throws BackingStoreException {
-		final boolean result[] = new boolean[] {false};
+	public IStatus validateVersions(IPath path) {
+		final MultiStatus result = new MultiStatus(PrefsMessages.OWNER_NAME, IStatus.INFO, PrefsMessages.preferences_validate, null);
 		IPreferenceNodeVisitor visitor = new IPreferenceNodeVisitor() {
-			public boolean visit(IEclipsePreferences node) throws BackingStoreException {
-				if (node.keys().length != 0)
-					result[0] = true;
-				return !result[0];
-			}
-		};
-		aRoot.accept(visitor);
-		return result[0];
-	}
+			public boolean visit(IEclipsePreferences node) {
+				if (!(node instanceof ExportedPreferences))
+					return false;
 
-	/*
-	 * Return true if the given tree contains information that the specified filter is interested
-	 * in, and false otherwise.
-	 */
-	private boolean internalMatches(IEclipsePreferences tree, IPreferenceFilter filter) throws BackingStoreException {
-		String[] scopes = filter.getScopes();
-		if (scopes == null)
-			throw new IllegalArgumentException();
-		String treePath = tree.absolutePath();
-		// see if this node is applicable by going over all our scopes
-		for (int i = 0; i < scopes.length; i++) {
-			String scope = scopes[i];
-			Map mapping = filter.getMapping(scope);
-			// if the mapping is null then we match everything
-			if (mapping == null) {
-				// if we are the root check to see if the scope exists
-				if (tree.parent() == null && tree.nodeExists(scope))
-					return containsKeys((IEclipsePreferences) tree.node(scope));
-				// otherwise check to see if we are in the right scope
-				if (scopeMatches(scope, tree) && containsKeys(tree))
+				// calculate the version in the file
+				ExportedPreferences realNode = (ExportedPreferences) node;
+				String version = realNode.getVersion();
+				if (version == null || !PluginVersionIdentifier.validateVersion(version).isOK())
 					return true;
-				continue;
-			}
-			// iterate over the list of declared nodes
-			for (Iterator iter = mapping.keySet().iterator(); iter.hasNext();) {
-				String nodePath = (String) iter.next();
-				String nodeFullPath = '/' + scope + '/' + nodePath;
-				// if this subtree isn't in a hierarchy we are interested in, then go to the next one
-				if (!nodeFullPath.startsWith(treePath))
-					continue;
-				// get the child node
-				String childPath = nodeFullPath.substring(treePath.length());
-				childPath = EclipsePreferences.makeRelative(childPath);
-				if (tree.nodeExists(childPath)) {
-					PreferenceFilterEntry[] entries;
-					// protect against wrong classes since this is user-code
-					try {
-						entries = (PreferenceFilterEntry[]) mapping.get(nodePath);
-					} catch (ClassCastException e) {
-						log(createStatusError(PrefsMessages.preferences_classCastFilterEntry, e));
-						continue;
-					}
-					// if there are no entries defined then we return false even if we
-					// are supposed to match on the existance of the node as a whole (bug 88820)
-					Preferences child = tree.node(childPath);
-					if (entries == null)
-						return child.keys().length != 0 || child.childrenNames().length != 0;
-					// otherwise check to see if we have any applicable keys
-					for (int j = 0; j < entries.length; j++) {
-						if (entries[j] != null && child.get(entries[j].getKey(), null) != null)
-							return true;
-					}
-				}
-			}
-		}
-		return false;
-	}
+				PluginVersionIdentifier versionInFile = new PluginVersionIdentifier(version);
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.core.runtime.preferences.IPreferencesService#applyPreferences(org.eclipse.core.runtime.preferences.IEclipsePreferences, org.eclipse.core.runtime.preferences.IPreferenceFilter[])
-	 */
-	public void applyPreferences(IEclipsePreferences tree, IPreferenceFilter[] filters) throws CoreException {
-		if (filters == null || filters.length == 0)
-			return;
-		try {
-			internalApply(tree, filters);
-			//this typically causes a major change to the preference tree, so force string sharing
-			lastStringSharing = 0;
-			shareStrings();
-		} catch (BackingStoreException e) {
-			throw new CoreException(createStatusError(PrefsMessages.preferences_applyProblems, e));
-		}
-	}
-
-	/**
-	 * Filter the given tree so it only contains values which apply to the specified filters
-	 * then apply the resulting tree to the main preference tree.
-	 */
-	private void internalApply(IEclipsePreferences tree, IPreferenceFilter[] filters) throws BackingStoreException {
-		ArrayList trees = new ArrayList();
-		for (int i = 0; i < filters.length; i++)
-			trees.add(trimTree(tree, filters[i]));
-		// merge the union of the matching filters
-		IEclipsePreferences toApply = mergeTrees((IEclipsePreferences[]) trees.toArray(new IEclipsePreferences[trees.size()]));
-
-		// fire an event to give people a chance to modify the tree
-		toApply = firePreApplyEvent(toApply);
-
-		// actually apply the settings
-		IPreferenceNodeVisitor visitor = new IPreferenceNodeVisitor() {
-			public boolean visit(IEclipsePreferences node) throws BackingStoreException {
-				String[] keys = node.keys();
-				if (keys.length == 0)
+				// calculate the version of the installed bundle
+				String bundleName = getBundleName(node.absolutePath());
+				if (bundleName == null)
 					return true;
-				copyFromTo(node, getRootNode().node(node.absolutePath()), keys, 0);
+				String stringVersion = getBundleVersion(bundleName);
+				if (stringVersion == null || !PluginVersionIdentifier.validateVersion(stringVersion).isOK())
+					return true;
+				PluginVersionIdentifier versionInMemory = new PluginVersionIdentifier(stringVersion);
+
+				// verify the versions based on the matching rules
+				IStatus verification = validatePluginVersions(bundleName, versionInFile, versionInMemory);
+				if (verification != null)
+					result.add(verification);
+
 				return true;
 			}
 		};
-		toApply.accept(visitor);
-	}
 
-	/*
-	 * Give clients a chance to modify the tree before it is applied globally 
-	 */
-	private IEclipsePreferences firePreApplyEvent(IEclipsePreferences tree) {
-		final IEclipsePreferences[] result = new IEclipsePreferences[] {tree};
-		if (modifyListeners == null)
-			initializeModifyListeners();
-		Object[] listeners = modifyListeners.getListeners();
-		for (int i = 0; i < listeners.length; i++) {
-			final PreferenceModifyListener listener = (PreferenceModifyListener) listeners[i];
-			ISafeRunnable job = new ISafeRunnable() {
-				public void handleException(Throwable exception) {
-					// already logged in Platform#run()
-				}
-
-				public void run() throws Exception {
-					result[0] = listener.preApply(result[0]);
-				}
-			};
-			SafeRunner.run(job);
+		InputStream input = null;
+		try {
+			input = new BufferedInputStream(new FileInputStream(path.toFile()));
+			IExportedPreferences prefs = readPreferences(input);
+			prefs.accept(visitor);
+		} catch (FileNotFoundException e) {
+			// ignore...if the file does not exist then all is OK
+		} catch (CoreException e) {
+			result.add(createStatusError(PrefsMessages.preferences_validationException, e));
+		} catch (BackingStoreException e) {
+			result.add(createStatusError(PrefsMessages.preferences_validationException, e));
 		}
-		return result[0];
-	}
-
-	// Store this around for performance
-	private final static IExtension[] emptyExtensionArray = new IExtension[0];
-
-	public static IExtension[] getPrefExtensions() {
-		IExtensionRegistry registry = RegistryFactory.getRegistry();
-		IExtension[] extensionsOld = emptyExtensionArray;
-		IExtension[] extensionsNew = emptyExtensionArray;
-		// "old"
-		IExtensionPoint pointOld = registry.getExtensionPoint(IPreferencesConstants.RUNTIME_NAME, IPreferencesConstants.PT_PREFERENCES);
-		if (pointOld != null)
-			extensionsOld = pointOld.getExtensions();
-		// "new"
-		IExtensionPoint pointNew = registry.getExtensionPoint(IPreferencesConstants.PREFERS_NAME, IPreferencesConstants.PT_PREFERENCES);
-		if (pointNew != null)
-			extensionsNew = pointNew.getExtensions();
-		// combine
-		IExtension[] extensions = new IExtension[extensionsOld.length + extensionsNew.length];
-		System.arraycopy(extensionsOld, 0, extensions, 0, extensionsOld.length);
-		System.arraycopy(extensionsNew, 0, extensions, extensionsOld.length, extensionsNew.length);
-
-		if (extensions.length == 0) {
-			if (EclipsePreferences.DEBUG_PREFERENCE_GENERAL)
-				PrefsMessages.message("No extensions for org.eclipse.core.contenttype."); //$NON-NLS-1$
-		}
-
-		return extensions;
+		return result;
 	}
 
 }

@@ -28,8 +28,6 @@ import org.osgi.util.tracker.ServiceTracker;
 public class DefaultPreferences extends EclipsePreferences {
 	// cache which nodes have been loaded from disk
 	private static Set loadedNodes = new HashSet();
-	private static final String ELEMENT_INITIALIZER = "initializer"; //$NON-NLS-1$
-	private static final String ATTRIBUTE_CLASS = "class"; //$NON-NLS-1$
 	private static final String KEY_PREFIX = "%"; //$NON-NLS-1$
 	private static final String KEY_DOUBLE_PREFIX = "%%"; //$NON-NLS-1$
 	private static final IPath NL_DIR = new Path("$nl$"); //$NON-NLS-1$
@@ -44,7 +42,6 @@ public class DefaultPreferences extends EclipsePreferences {
 	private String qualifier;
 	private int segmentCount;
 	private WeakReference pluginReference;
-
 
 	public static String pluginCustomizationFile = null;
 
@@ -147,19 +144,6 @@ public class DefaultPreferences extends EclipsePreferences {
 		}
 	}
 
-	private void runInitializer(IConfigurationElement element) {
-		AbstractPreferenceInitializer initializer = null;
-		try {
-			initializer = (AbstractPreferenceInitializer) element.createExecutableExtension(ATTRIBUTE_CLASS);
-			initializer.initializeDefaultPreferences();
-		} catch (ClassCastException e) {
-			IStatus status = new Status(IStatus.ERROR, PrefsMessages.OWNER_NAME, IStatus.ERROR, PrefsMessages.preferences_invalidExtensionSuperclass, e);
-			log(status);
-		} catch (CoreException e) {
-			log(e.getStatus());
-		}
-	}
-
 	public IEclipsePreferences node(String childName, Object context) {
 		return internalNode(childName, true, context);
 	}
@@ -174,44 +158,9 @@ public class DefaultPreferences extends EclipsePreferences {
 	 * extension to the plug-in default customizer extension point.
 	 */
 	private void applyRuntimeDefaults() {
-		IExtension[] extensions = PreferencesService.getPrefExtensions();
-		if (extensions.length == 0) {
-			if (EclipsePreferences.DEBUG_PREFERENCE_GENERAL)
-				PrefsMessages.message("Skipping runtime default preference customization."); //$NON-NLS-1$
-			return;
-		}
-		boolean foundInitializer = false;
-		for (int i = 0; i < extensions.length; i++) {
-			IConfigurationElement[] elements = extensions[i].getConfigurationElements();
-			for (int j = 0; j < elements.length; j++)
-				if (ELEMENT_INITIALIZER.equals(elements[j].getName())) {
-					if (name().equals(elements[j].getContributor().getName())) {
-						if (EclipsePreferences.DEBUG_PREFERENCE_GENERAL) {
-							IExtension theExtension = elements[j].getDeclaringExtension();
-							String extensionNamespace = theExtension.getContributor().getName();
-							Bundle underlyingBundle = PreferencesOSGiUtils.getDefault().getBundle(extensionNamespace);
-							String ownerName;
-							if (underlyingBundle != null)
-								ownerName = underlyingBundle.getSymbolicName();
-							else
-								ownerName = extensionNamespace;
-							PrefsMessages.message("Running default preference customization as defined by: " + ownerName); //$NON-NLS-1$
-						}
-						runInitializer(elements[j]);
-						// don't return yet in case we have multiple initializers registered
-						foundInitializer = true;
-					}
-				}
-		}
-		if (foundInitializer)
-			return;
-
-		// Do legacy plugin preference initialization
-		Object plugin = pluginReference.get();
-		ILegacyPreferences initService = PreferencesOSGiUtils.getDefault().getLegacyPreferences();
-		if (initService != null)
-			plugin = initService.init(plugin, name());
-			pluginReference = new WeakReference(plugin);
+		WeakReference ref = PreferencesService.getDefault().applyRuntimeDefaults(name(), pluginReference);
+		if (ref != null)
+			pluginReference = ref;
 	}
 
 	/*

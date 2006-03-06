@@ -38,6 +38,7 @@ public class PrefsMessages extends NLS {
 	public static String preferences_matching;
 	public static String preferences_missingClassAttribute;
 	public static String preferences_missingScopeAttribute;
+	public static String noRegistry;
 	public static String preferences_removedNode;
 	public static String preferences_saveException;
 	public static String preferences_saveProblems;
