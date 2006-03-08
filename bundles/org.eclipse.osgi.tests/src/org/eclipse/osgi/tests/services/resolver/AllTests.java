@@ -30,6 +30,7 @@ public class AllTests extends TestCase {
 		suite.addTest(StateComparisonTest.suite());
 		suite.addTest(VersionRangeTests.suite());
 		suite.addTest(R4ResolverTest.suite());
+		suite.addTest(XFriendsInternalResolverTest.suite());
 		return suite;
 	}
 }
