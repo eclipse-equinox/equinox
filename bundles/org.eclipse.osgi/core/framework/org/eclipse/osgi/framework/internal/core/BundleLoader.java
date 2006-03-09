@@ -880,6 +880,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 				return result.isNullSource() ? null : result;
 		}
 		KeyedHashSet visited = new KeyedHashSet(false);
+		visited.add(bundle); // always add ourselves so we do not recurse back to ourselves
 		ArrayList result = new ArrayList(3);
 		for (int i = 0; i < requiredBundles.length; i++) {
 			BundleLoader requiredLoader = requiredBundles[i].getBundleLoader();
