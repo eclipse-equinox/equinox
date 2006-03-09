@@ -1413,6 +1413,10 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 			return null;
 		}
 		checkValid();
+		// check to see if the bundle is resolved
+		if (!isResolved())
+			framework.packageAdmin.resolveBundles(new Bundle[] {this});
+
 		// a list used to store the results of the search
 		List pathList = new ArrayList();
 		Filter patternFilter = null;
