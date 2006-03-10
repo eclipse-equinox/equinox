@@ -94,10 +94,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 		Object service = registryServiceTracker.getService();
 		if (service != null) {
 			try {
-				// see if the helper class is available for use
-				Class clazz = Class.forName("org.eclipse.core.internal.preferences.PreferenceServiceRegistryHelper"); //$NON-NLS-1$
-				Constructor constructor = clazz.getConstructor(new Class[] {PreferencesService.class});
-				Object helper = constructor.newInstance(new Object[] {PreferencesService.getDefault()});
+				Object helper = new PreferenceServiceRegistryHelper(PreferencesService.getDefault());
 				PreferencesService.getDefault().setRegistryHelper(helper);
 			} catch (Exception e) {
 				RuntimeLog.log(new Status(IStatus.ERROR, PI_PREFERENCES, 0, PrefsMessages.noRegistry, e));
