@@ -24,8 +24,6 @@ import org.eclipse.core.runtime.spi.*;
  */
 public final class RegistryFactory {
 
-	private static IRegistryProvider defaultRegistryProvider;
-
 	/**
 	 * Creates a new extension registry based on the given set of parameters.
 	 * <p>
@@ -59,6 +57,7 @@ public final class RegistryFactory {
 	 * @return existing extension registry or <code>null</code>
 	 */
 	public static IExtensionRegistry getRegistry() {
+		IRegistryProvider defaultRegistryProvider = RegistryProviderFactory.getDefault();
 		if (defaultRegistryProvider == null)
 			return null;
 		return defaultRegistryProvider.getRegistry();
@@ -118,10 +117,6 @@ public final class RegistryFactory {
 	 * @throws CoreException if a default registry provider was already set for this application
 	 */
 	public static void setDefaultRegistryProvider(IRegistryProvider provider) throws CoreException {
-		if (defaultRegistryProvider != null) {
-			Status status = new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, IRegistryConstants.PLUGIN_ERROR, RegistryMessages.registry_default_exists, null);
-			throw new CoreException(status);
-		}
-		defaultRegistryProvider = provider;
+		RegistryProviderFactory.setDefault(provider);
 	}
 }

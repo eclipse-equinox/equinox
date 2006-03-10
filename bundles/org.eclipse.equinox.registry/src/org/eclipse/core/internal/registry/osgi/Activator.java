@@ -12,8 +12,7 @@ package org.eclipse.core.internal.registry.osgi;
 
 import java.io.File;
 import java.util.Hashtable;
-import org.eclipse.core.internal.registry.IRegistryConstants;
-import org.eclipse.core.internal.registry.RegistryProperties;
+import org.eclipse.core.internal.registry.*;
 import org.eclipse.core.runtime.*;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.service.environment.EnvironmentInfo;
@@ -129,11 +128,12 @@ public class Activator implements BundleActivator {
 		registryRegistration = Activator.getContext().registerService(IExtensionRegistry.class.getName(), defaultRegistry, new Hashtable());
 		defaultProvider = new RegistryProviderOSGI();
 		// Set the registry provider and specify this as a default registry:
-		RegistryFactory.setDefaultRegistryProvider(defaultProvider);
+		RegistryProviderFactory.setDefault(defaultProvider);
 	}
 
 	private void stopRegistry() {
 		if (defaultRegistry != null) {
+			RegistryProviderFactory.releaseDefault();
 			defaultProvider.release();
 			registryRegistration.unregister();
 			defaultRegistry.stop(masterRegistryKey);
