@@ -119,50 +119,35 @@ public final class HashtableOfInt {
 		int tableSize = keyTable.length;
 		out.writeInt(tableSize);
 		out.writeInt(threshold);
-
-		out.write(IntToByte(keyTable));
-		out.write(IntToByte(valueTable));
+		for (int i = 0; i < tableSize; i++) {
+			out.writeInt(keyTable[i]);
+			out.writeInt(valueTable[i]);
+		}
 	}
 
 	public void load(DataInputStream in) throws IOException {
 		elementSize = in.readInt();
 		int tableSize = in.readInt();
 		threshold = in.readInt();
-
-		byte[] inBuffer = new byte[tableSize * 4];
-		in.readFully(inBuffer);
-		keyTable = ByteToInt(inBuffer);
-		in.readFully(inBuffer);
-		valueTable = ByteToInt(inBuffer);
-	}
-
-	private byte[] IntToByte(int[] intArray) {
-		int intSize = intArray.length;
-		byte[] byteArray = new byte[4 * intSize];
-		int bytePos = 0;
-		for (int i = 0; i < intSize; i++) {
-			int intValue = intArray[i];
-			byteArray[bytePos] = (byte) (intValue & 0xFF);
-			byteArray[bytePos + 1] = (byte) ((intValue >>> 8) & 0xFF);
-			byteArray[bytePos + 2] = (byte) ((intValue >>> 16) & 0xFF);
-			byteArray[bytePos + 3] = (byte) ((intValue >>> 24) & 0xFF);
-			bytePos += 4;
+		boolean fastMode = true;
+		if (((double) tableSize / elementSize) < GROWTH_FACTOR) {
+			keyTable = new int[(int) (elementSize * GROWTH_FACTOR)];
+			valueTable = new int[(int) (elementSize * GROWTH_FACTOR)];
+			elementSize = 0;
+			fastMode = false;
+		} else {
+			keyTable = new int[tableSize];
+			valueTable = new int[tableSize];
 		}
-		return byteArray;
-	}
-
-	private int[] ByteToInt(byte[] byteArray) {
-		int intSize = byteArray.length / 4;
-		int[] intArray = new int[intSize];
-		int bytePos = 0;
-		for (int intPos = 0; intPos < intSize; intPos++) {
-			int result = (byteArray[bytePos] & 0xFF);
-			result |= ((byteArray[bytePos + 1] & 0xFF) << 8);
-			result |= ((byteArray[bytePos + 2] & 0xFF) << 16);
-			result |= ((byteArray[bytePos + 3] & 0xFF) << 24);
-			intArray[intPos] = result;
-			bytePos += 4;
+		for (int i = 0; i < tableSize; i++) {
+			int key = in.readInt();
+			int value = in.readInt();
+			if (fastMode) {
+				keyTable[i] = key;
+				valueTable[i] = value;
+			} else {
+				put(key, value);
+			}
 		}
-		return intArray;
 	}
 }
