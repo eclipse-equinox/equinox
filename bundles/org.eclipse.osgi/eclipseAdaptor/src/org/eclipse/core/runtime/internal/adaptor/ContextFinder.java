@@ -14,44 +14,55 @@ import java.io.IOException;
 import java.net.URL;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.util.Enumeration;
+import java.util.*;
+import org.eclipse.osgi.framework.adaptor.BundleClassLoader;
 
 public class ContextFinder extends ClassLoader implements PrivilegedAction {
-
 	private static final class Finder extends SecurityManager {
 		public Class[] getClassContext() {
 			return super.getClassContext();
 		}
 	}
 
-	static final Finder contextFinder = (Finder) AccessController.doPrivileged(new PrivilegedAction() {
-		public Object run() {
-			return new Finder();
-		}
-	});
+	static ClassLoader finderClassLoader;
+	static Finder contextFinder;
+	static {
+		AccessController.doPrivileged(new PrivilegedAction() {
+			public Object run() {
+				finderClassLoader = ContextFinder.class.getClassLoader();
+				contextFinder = new Finder();
+				return null;
+			}
+		});
+	}
 
 	public ContextFinder(ClassLoader contextClassLoader) {
 		super(contextClassLoader);
 	}
 
-	// Return the first classloader of the stack that is neither the ContextFinder classloader nor the boot classloader.
+	// Return a list of all classloaders on the stack that are neither the 
+	// ContextFinder classloader nor the boot classloader.  The last classloader
+	// in the list is either a bundle classloader or the framework's classloader
 	// We assume that the bootclassloader never uses the context classloader to find classes in itself.
-	// If the classloader found is the parent then return null 
-	ClassLoader basicFindClassLoader() {
+	ArrayList basicFindClassLoaders() {
 		Class[] stack = contextFinder.getClassContext();
-		ClassLoader result = null;
+		ArrayList result = new ArrayList(1);
 		for (int i = 1; i < stack.length; i++) {
 			ClassLoader tmp = stack[i].getClassLoader();
 			if (stack[i] != ContextFinder.class && tmp != null && tmp != this) {
-				result = tmp;
-				break;
+				if (checkClassLoader(tmp))
+					result.add(tmp);
+				// stop at the framework classloader or the first bundle classloader
+				if (tmp == finderClassLoader || tmp instanceof BundleClassLoader)
+					break;
 			}
 		}
-		if (checkClassLoader(result))
-			return result;
-		return null;
+		return result;
 	}
 
+	// ensures that a classloader does not have the ContextFinder as part of the 
+	// parent hierachy.  A classloader which has the ContextFinder as a parent must
+	// not be used as a delegate, otherwise we endup in endless recursion.
 	private boolean checkClassLoader(ClassLoader classloader) {
 		if (classloader == null || classloader == getParent())
 			return false;
@@ -61,14 +72,14 @@ public class ContextFinder extends ClassLoader implements PrivilegedAction {
 		return true;
 	}
 
-	private ClassLoader findClassLoader() {
+	private ArrayList findClassLoaders() {
 		if (System.getSecurityManager() == null)
-			return basicFindClassLoader();
-		return (ClassLoader) AccessController.doPrivileged(this);
+			return basicFindClassLoaders();
+		return (ArrayList) AccessController.doPrivileged(this);
 	}
 
 	public Object run() {
-		return basicFindClassLoader();
+		return basicFindClassLoaders();
 	}
 
 	protected synchronized Class loadClass(String arg0, boolean arg1) throws ClassNotFoundException {
@@ -79,9 +90,13 @@ public class ContextFinder extends ClassLoader implements PrivilegedAction {
 			//Ignore
 		}
 		if (result == null) {
-			ClassLoader toConsult = findClassLoader();
-			if (toConsult != null)
-				result = toConsult.loadClass(arg0);
+			ArrayList toConsult = findClassLoaders();
+			for (Iterator loaders = toConsult.iterator(); loaders.hasNext();)
+				try {
+					result = ((ClassLoader) loaders.next()).loadClass(arg0);
+				} catch (ClassNotFoundException e) {
+					// go to the next class loader
+				}
 		}
 		if (result == null)
 			throw new ClassNotFoundException(arg0);
@@ -89,16 +104,24 @@ public class ContextFinder extends ClassLoader implements PrivilegedAction {
 	}
 
 	protected URL findResource(String arg0) {
-		ClassLoader toConsult = findClassLoader();
-		if (toConsult != null)
-			return toConsult.getResource(arg0);
+		ArrayList toConsult = findClassLoaders();
+		for (Iterator loaders = toConsult.iterator(); loaders.hasNext();) {
+			URL result = ((ClassLoader) loaders.next()).getResource(arg0);
+			if (result != null)
+				return result;
+			// go to the next class loader
+		}
 		return super.findResource(arg0);
 	}
 
 	protected Enumeration findResources(String arg0) throws IOException {
-		ClassLoader toConsult = findClassLoader();
-		if (toConsult != null)
-			return toConsult.getResources(arg0);
+		ArrayList toConsult = findClassLoaders();
+		for (Iterator loaders = toConsult.iterator(); loaders.hasNext();) {
+			Enumeration result = ((ClassLoader) loaders.next()).getResources(arg0);
+			if (result != null && result.hasMoreElements())
+				return result;
+			// go to the next class loader
+		}
 		return super.findResources(arg0);
 	}
 }
