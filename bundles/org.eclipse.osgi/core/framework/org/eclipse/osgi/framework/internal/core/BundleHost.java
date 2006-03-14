@@ -279,6 +279,9 @@ public class BundleHost extends AbstractBundle {
 	 * @param persistent if true persistently record the bundle was started.
 	 */
 	protected void startWorker(boolean persistent) throws BundleException {
+		if (persistent) {
+			setStatus(Constants.BUNDLE_STARTED, true);
+		}
 		long start = 0;
 		if (framework.active) {
 			if ((state & (STARTING | ACTIVE)) != 0) {
@@ -347,10 +350,6 @@ public class BundleHost extends AbstractBundle {
 						System.out.println("End starting " + getSymbolicName() + " " + (System.currentTimeMillis() - start)); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 			}
-		}
-
-		if (persistent) {
-			setStatus(Constants.BUNDLE_STARTED, true);
 		}
 	}
 
