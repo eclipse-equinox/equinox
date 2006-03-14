@@ -293,6 +293,7 @@ public class EclipseStarter {
 		publishSplashScreen(endSplashHandler);
 		if (Profile.PROFILE && Profile.STARTUP)
 			Profile.logTime("EclipseStarter.startup()", "loading basic bundles"); //$NON-NLS-1$ //$NON-NLS-2$
+		long stateStamp = adaptor.getState().getTimeStamp();
 		Bundle[] startBundles = loadBasicBundles();
 		// set the framework start level to the ultimate value.  This will actually start things
 		// running if they are persistently active.
@@ -302,8 +303,9 @@ public class EclipseStarter {
 		// they should all be active by this time
 		ensureBundlesActive(startBundles);
 		if (debug || FrameworkProperties.getProperty(PROP_DEV) != null)
-			// only spend time showing unresolved bundles in dev/debug mode
-			logUnresolvedBundles(context.getBundles());
+			// only spend time showing unresolved bundles in dev/debug mode and the state has changed
+			if (stateStamp != adaptor.getState().getTimeStamp())
+				logUnresolvedBundles(context.getBundles());
 		running = true;
 		if (Profile.PROFILE && Profile.STARTUP)
 			Profile.logExit("EclipseStarter.startup()"); //$NON-NLS-1$
