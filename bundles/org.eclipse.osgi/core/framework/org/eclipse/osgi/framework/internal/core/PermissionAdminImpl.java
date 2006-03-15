@@ -505,6 +505,8 @@ public class PermissionAdminImpl implements PermissionAdmin {
 	 * @return A PermissionCollection containing Permission objects.
 	 */
 	protected BundlePermissionCollection createPermissions(PermissionInfo[] info, final AbstractBundle bundle, boolean implied) {
+		if (info == null)
+			info = new PermissionInfo[0];
 		if (implied) {
 			// create the implied AdminPermission actions for this bundle
 			PermissionInfo impliedInfo = new PermissionInfo(AdminPermission.class.getName(), "(id=" + bundle.getBundleId() + ")", ADMIN_IMPLIED_ACTIONS); //$NON-NLS-1$ //$NON-NLS-2$
