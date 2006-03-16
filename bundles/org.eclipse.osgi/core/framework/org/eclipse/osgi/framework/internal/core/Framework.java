@@ -97,7 +97,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 	protected ConditionalPermissionAdminImpl condPermAdmin;
 	SecureAction secureAction = new SecureAction();
 	// cache of AdminPermissions keyed by Bundle ID
-	private HashMap adminPermissions;
+	private HashMap adminPermissions = new HashMap();
 	
 	// we need to hold these so that we can unregister them at shutdown
 	private StreamHandlerFactory streamHandlerFactory;
@@ -1268,21 +1268,21 @@ public class Framework implements EventDispatcher, EventPublisher {
 
 	// gets AdminPermission objects from a cache to reduce the number of AdminPermission
 	// objects that are created.
-	private synchronized AdminPermission getAdminPermission(Bundle bundle, String action) {
-		if (adminPermissions == null)
-			adminPermissions = new HashMap();
-		Long ID = new Long(bundle.getBundleId());
-		HashMap bundlePermissions = (HashMap) adminPermissions.get(ID);
-		if (bundlePermissions == null) {
-			bundlePermissions = new HashMap();
-			adminPermissions.put(ID, bundlePermissions);
+	private AdminPermission getAdminPermission(Bundle bundle, String action) {
+		synchronized(adminPermissions) {
+			Long ID = new Long(bundle.getBundleId());
+			HashMap bundlePermissions = (HashMap) adminPermissions.get(ID);
+			if (bundlePermissions == null) {
+				bundlePermissions = new HashMap();
+				adminPermissions.put(ID, bundlePermissions);
+			}
+			AdminPermission result = (AdminPermission) bundlePermissions.get(action);
+			if (result == null) {
+				result = new AdminPermission(bundle, action);
+				bundlePermissions.put(action, result);
+			}
+			return result;
 		}
-		AdminPermission result = (AdminPermission) bundlePermissions.get(action);
-		if (result == null) {
-			result = new AdminPermission(bundle, action);
-			bundlePermissions.put(action, result);
-		}
-		return result;
 	}
 
 	/**
