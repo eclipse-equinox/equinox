@@ -407,8 +407,11 @@ public class EclipseStarter {
 		try {
 			for (int i = 0; i < bundles.length; i++) {
 				if (bundles[i].getState() != Bundle.ACTIVE) {
-					if (bundles[i].getState() == Bundle.INSTALLED)
-						throw new IllegalStateException(NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_ERROR_BUNDLE_NOT_RESOLVED, bundles[i].getLocation()));
+					if (bundles[i].getState() == Bundle.INSTALLED) {
+						// Log that the bundle is not resolved
+						log.log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_ERROR_BUNDLE_NOT_RESOLVED, bundles[i].getLocation()), 0, null, null));
+						continue;
+					}
 					// check that the startlevel allows the bundle to be active (111550)
 					if (tracker == null) {
 						tracker = new ServiceTracker(context, StartLevel.class.getName(), null);
@@ -416,8 +419,7 @@ public class EclipseStarter {
 					}
 					StartLevel sl = (StartLevel) tracker.getService();
 					if (sl != null && (sl.getBundleStartLevel(bundles[i]) <= sl.getStartLevel())) {
-						String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_ERROR_BUNDLE_NOT_ACTIVE, bundles[i]);
-						throw new IllegalStateException(message);
+						log.log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_ERROR_BUNDLE_NOT_ACTIVE, bundles[i]), 0, null, null));
 					}
 				}
 			}
