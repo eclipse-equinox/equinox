@@ -526,54 +526,42 @@ public class PackageAdminImpl implements PackageAdmin {
 		try {
 			// first check that the system bundle has not changed since last saved state.
 			State state = framework.adaptor.getState();
+			BundleDescription oldSystemBundle = state.getBundle(0);
+			boolean different = false;
+			if (oldSystemBundle == null || !systemBundle.getBundleData().getVersion().equals(oldSystemBundle.getVersion()))
+				different = true;
+			if (!different && FrameworkProperties.getProperty("osgi.dev") == null) //$NON-NLS-1$
+				return; // return quick if not in dev mode; system bundle version changes with each build
 			BundleDescription newSystemBundle = state.getFactory().createBundleDescription(state, systemBundle.getHeaders(""), systemBundle.getLocation(), 0); //$NON-NLS-1$
 			if (newSystemBundle == null)
-				throw new BundleException(Msg.OSGI_SYSTEMBUNDLE_DESCRIPTION_ERROR); 
-			BundleDescription oldSystemBundle = state.getBundle(0);
-			if (oldSystemBundle != null) {
-				boolean different = false;
-				if (newSystemBundle.getVersion() != null && !newSystemBundle.getVersion().equals(oldSystemBundle.getVersion()))
-					different = true;
-				// need to check to make sure the system bundle description
-				// is up to date in the state.
+				throw new BundleException(Msg.OSGI_SYSTEMBUNDLE_DESCRIPTION_ERROR);
+			if (!different) {
+				// need to check to make sure the system bundle description is up to date in the state.
 				ExportPackageDescription[] oldPackages = oldSystemBundle.getExportPackages();
 				ExportPackageDescription[] newPackages = newSystemBundle.getExportPackages();
 				if (oldPackages.length >= newPackages.length) {
-					for (int i = 0; i < newPackages.length; i++) {
+					for (int i = 0; i < newPackages.length && !different; i++) {
 						if (oldPackages[i].getName().equals(newPackages[i].getName())) {
 							Object oldVersion = oldPackages[i].getVersion();
 							Object newVersion = newPackages[i].getVersion();
-							if (oldVersion == null) {
-								if (newVersion != null) {
-									different = true;
-									break;
-								}
-							} else if (!oldVersion.equals(newVersion)) {
-								different = true;
-								break;
-							}
+							different = oldVersion == null ? newVersion != null : !oldVersion.equals(newVersion);
 						} else {
 							different = true;
-							break;
 						}
 					}
 				} else {
 					different = true;
 				}
-				if (different) {
-					state.removeBundle(0);
-					state.addBundle(newSystemBundle);
-					// force resolution so packages are properly linked
-					state.resolve(false);
-				}
-			} else {
+			}
+			if (different) {
+				state.removeBundle(0);
 				state.addBundle(newSystemBundle);
 				// force resolution so packages are properly linked
 				state.resolve(false);
 			}
 		} catch (BundleException e) /* fatal error */{
 			e.printStackTrace();
-			throw new RuntimeException(NLS.bind(Msg.OSGI_SYSTEMBUNDLE_CREATE_EXCEPTION, e.getMessage())); 
+			throw new RuntimeException(NLS.bind(Msg.OSGI_SYSTEMBUNDLE_CREATE_EXCEPTION, e.getMessage()));
 		}
 	}
 
