@@ -28,3 +28,4 @@ Import-Package: org.eclipse.core.runtime.jobs;resolution:=optional,
  javax.xml.parsers
 Eclipse-ExtensibleAPI: true
 Bundle-ClassPath: runtime_registry_compatibility.jar, .
+Eclipse-LazyStart: true
