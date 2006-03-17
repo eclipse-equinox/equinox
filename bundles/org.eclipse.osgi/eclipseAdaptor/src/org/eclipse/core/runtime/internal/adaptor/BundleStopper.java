@@ -14,8 +14,7 @@ import java.util.Hashtable;
 import org.eclipse.osgi.baseadaptor.BaseData;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.debug.Debug;
-import org.eclipse.osgi.framework.internal.core.AbstractBundle;
-import org.eclipse.osgi.framework.internal.core.BundleHost;
+import org.eclipse.osgi.framework.internal.core.*;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.osgi.service.resolver.StateHelper;
@@ -36,6 +35,7 @@ public class BundleStopper {
 	private BundleDescription[] allToStop = null;
 	private BundleContext context;
 	private FrameworkAdaptor adaptor;
+	private boolean stopping;
 
 	public BundleStopper(BundleContext context, FrameworkAdaptor adaptor) {
 		this.context = context;
@@ -74,6 +74,7 @@ public class BundleStopper {
 	}
 
 	private void basicStopBundles() {
+		stopping = true;
 		// stop all active bundles in the reverse order of Require-Bundle
 		for (int stoppingIndex = allToStop.length - 1; stoppingIndex >= 0; stoppingIndex--) {
 			AbstractBundle toStop = (AbstractBundle) context.getBundle(allToStop[stoppingIndex].getBundleId());
@@ -81,8 +82,13 @@ public class BundleStopper {
 			EclipseStorageHook storageHook = (EclipseStorageHook) bundledata.getStorageHook(EclipseStorageHook.KEY);
 			if (toStop.getBundleId() != 0 && storageHook != null && storageHook.isAutoStartable()) {
 				try {
-					if ((toStop.getState() == Bundle.ACTIVE) && (toStop instanceof BundleHost))
+					if ((toStop.getState() == Bundle.ACTIVE) && (toStop instanceof BundleHost)) {
 						toStop.stop();
+						// if a lazy started bundle was explicitly started, 
+						// then make sure it keeps the persistenly started bit
+						if (!storageHook.isActivatedOnClassLoad())
+							bundledata.setStatus(Constants.BUNDLE_STARTED);
+					}
 				} catch (Exception e) {
 					String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_BUNDLESTOPPER_ERROR_STOPPING_BUNDLE, allToStop[stoppingIndex].toString());
 					FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, message, 0, e, null);
@@ -92,11 +98,16 @@ public class BundleStopper {
 				}
 			}
 		}
+		stopping = false;
 	}
 
 	public boolean isStopped(Bundle bundle) {
 		if (stoppedBundles == null)
 			return false;
 		return stoppedBundles.get(bundle) != null;
+	}
+
+	public boolean isStopping() {
+		return stopping;
 	}
 }

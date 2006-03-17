@@ -15,7 +15,6 @@ import java.net.URL;
 import org.eclipse.core.runtime.internal.stats.StatsManager;
 import org.eclipse.osgi.baseadaptor.*;
 import org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry;
-import org.eclipse.osgi.baseadaptor.hooks.AdaptorHook;
 import org.eclipse.osgi.baseadaptor.hooks.ClassLoadingStatsHook;
 import org.eclipse.osgi.baseadaptor.loader.ClasspathEntry;
 import org.eclipse.osgi.baseadaptor.loader.ClasspathManager;
@@ -35,8 +34,9 @@ public class EclipseLazyStarter implements ClassLoadingStatsHook, HookConfigurat
 		if ((bundle.getState() & (Bundle.ACTIVE | Bundle.UNINSTALLED | Bundle.STOPPING)) != 0)
 			return;
 
+		EclipseStorageHook storageHook = (EclipseStorageHook) manager.getBaseData().getStorageHook(EclipseStorageHook.KEY);
 		// The bundle is not active and does not require activation, just return the class
-		if (!shouldActivateFor(name, manager.getBaseData()))
+		if (!shouldActivateFor(name, manager.getBaseData(), storageHook))
 			return;
 
 		// The bundle is starting.  Note that if the state changed between the tests 
@@ -80,6 +80,9 @@ public class EclipseLazyStarter implements ClassLoadingStatsHook, HookConfigurat
 
 		//The bundle must be started.
 		try {
+			// mark this bundle as lazy activated by class load
+			if (storageHook != null)
+				storageHook.setActivatedOnClassLoad(true);
 			bundle.start();
 		} catch (BundleException e) {
 			String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_CLASSLOADER_ACTIVATION, bundle.getSymbolicName(), Long.toString(bundle.getBundleId()));
@@ -105,12 +108,12 @@ public class EclipseLazyStarter implements ClassLoadingStatsHook, HookConfigurat
 		// do nothing
 	}
 
-	private boolean shouldActivateFor(String className, BaseData bundledata) throws ClassNotFoundException {
-		if (!isAutoStartable(className, bundledata))
+	private boolean shouldActivateFor(String className, BaseData bundledata, EclipseStorageHook storageHook) throws ClassNotFoundException {
+		if (!isAutoStartable(className, bundledata, storageHook))
 			return false;
 		//Don't reactivate on shut down
 		if (bundledata.getAdaptor().isStopping()) {
-			BundleStopper stopper = getBundleStopper(bundledata);
+			BundleStopper stopper = EclipseStorageHook.getBundleStopper(bundledata);
 			if (stopper != null && stopper.isStopped(bundledata.getBundle())) {
 				String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_CLASSLOADER_ALREADY_STOPPED, className, bundledata.getSymbolicName());
 				throw new ClassNotFoundException(message);
@@ -119,8 +122,7 @@ public class EclipseLazyStarter implements ClassLoadingStatsHook, HookConfigurat
 		return true;
 	}
 
-	private boolean isAutoStartable(String className, BaseData bundledata) {
-		EclipseStorageHook storageHook = (EclipseStorageHook) bundledata.getStorageHook(EclipseStorageHook.KEY);
+	private boolean isAutoStartable(String className, BaseData bundledata, EclipseStorageHook storageHook) {
 		if (storageHook == null)
 			return false;
 		boolean autoStart = storageHook.isAutoStart();
@@ -143,14 +145,6 @@ public class EclipseLazyStarter implements ClassLoadingStatsHook, HookConfigurat
 			if (array[i].equals(element))
 				return true;
 		return false;
-	}
-
-	private BundleStopper getBundleStopper(BaseData bundledata) {
-		AdaptorHook[] adaptorhooks = bundledata.getAdaptor().getHookRegistry().getAdaptorHooks();
-		for (int i = 0; i < adaptorhooks.length; i++)
-			if (adaptorhooks[i] instanceof EclipseAdaptorHook)
-				return ((EclipseAdaptorHook) adaptorhooks[i]).getBundleStopper();
-		return null;
 	}
 
 	public void addHooks(HookRegistry hookRegistry) {
