@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2005 IBM Corporation and others.
+ * Copyright (c) 2004, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,12 +26,14 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 	private static final String OPTION_WIRING = RESOLVER + "/wiring"; //$NON-NLS-1$
 	private static final String OPTION_IMPORTS = RESOLVER + "/imports"; //$NON-NLS-1$
 	private static final String OPTION_REQUIRES = RESOLVER + "/requires"; //$NON-NLS-1$
+	private static final String OPTION_GENERICS = RESOLVER + "/generics"; //$NON-NLS-1$
 	private static final String OPTION_GROUPING = RESOLVER + "/grouping"; //$NON-NLS-1$
 	private static final String OPTION_CYCLES = RESOLVER + "/cycles"; //$NON-NLS-1$
 	public static boolean DEBUG = false;
 	public static boolean DEBUG_WIRING = false;
 	public static boolean DEBUG_IMPORTS = false;
 	public static boolean DEBUG_REQUIRES = false;
+	public static boolean DEBUG_GENERICS = false;
 	public static boolean DEBUG_GROUPING = false;
 	public static boolean DEBUG_CYCLES = false;
 
@@ -50,6 +52,8 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 	private VersionHashMap resolverExports = null;
 	// Repository for bundles
 	private VersionHashMap resolverBundles = null;
+	// Repository for generics
+	private VersionHashMap resolverGenerics = null;
 	// List of unresolved bundles
 	private ArrayList unresolvedBundles = null;
 	// Keys are BundleDescriptions, values are ResolverBundles
@@ -69,6 +73,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 	private void initialize() {
 		resolverExports = new VersionHashMap(this);
 		resolverBundles = new VersionHashMap(this);
+		resolverGenerics = new VersionHashMap(this);
 		unresolvedBundles = new ArrayList();
 		bundleMapping = new HashMap();
 		BundleDescription[] bundles = state.getBundles();
@@ -110,6 +115,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		if (!pending || bundleDesc.isResolved()) {
 			resolverExports.put(bundle.getExportPackages());
 			resolverBundles.put(bundle.getName(), bundle);
+			resolverGenerics.put(bundle.getGenericCapabilities());
 		}
 		if (bundleDesc.isResolved()) {
 			bundle.setState(ResolverBundle.RESOLVED);
@@ -146,6 +152,29 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		for (int i = 0; i < imports.length; i++) {
 			rewireImport(imports[i], visited);
 		}
+		// Wire generics
+		GenericConstraint[] genericRequires = rb.getGenericRequires();
+		for (int i = 0; i < genericRequires.length; i++)
+			rewireGeneric(genericRequires[i], visited);
+	}
+
+	private void rewireGeneric(GenericConstraint constraint, ArrayList visited) {
+		if (constraint.getMatchingCapabilities() != null)
+			return;
+		GenericDescription[] suppliers = ((GenericSpecification) constraint.getVersionConstraint()).getSuppliers();
+		if (suppliers == null)
+			return;
+		Object[] matches = resolverGenerics.get(constraint.getName());
+		for (int i = 0; i < matches.length; i++) {
+			GenericCapability match = (GenericCapability) matches[i];
+			for (int j = 0; j < suppliers.length; j++)
+				if (match.getBaseDescription() == suppliers[j])
+					constraint.setMatchingCapability(match);
+		}
+		GenericCapability[] matchingCapabilities = constraint.getMatchingCapabilities();
+		if (matchingCapabilities != null)
+			for (int i = 0; i < matchingCapabilities.length; i++)
+				rewireBundle(matchingCapabilities[i].getResolverBundle(), visited);
 	}
 
 	private void rewireRequire(BundleConstraint req, ArrayList visited) {
@@ -238,7 +267,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 			state.addResolverError(bundle, ResolverError.MISSING_EXECUTION_ENVIRONMENT, bundleEE.toString(), null);
 			return false;
 		}
-					
+
 		// check the platform filter
 		String platformFilter = bundle.getPlatformFilter();
 		if (platformFilter == null)
@@ -313,11 +342,12 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		// reorder exports and bundles after unresolving the bundles
 		resolverExports.reorder();
 		resolverBundles.reorder();
+		resolverGenerics.reorder();
 		// always get the latest EEs
 		getCurrentEEs(platformProperties);
 		// keep a list of rejected singltons
 		ArrayList rejectedSingletons = new ArrayList();
-		boolean resolveOptional = platformProperties.length == 0 ? false : "true".equals(platformProperties[0].get("osgi.resolveOptional"));  //$NON-NLS-1$//$NON-NLS-2$
+		boolean resolveOptional = platformProperties.length == 0 ? false : "true".equals(platformProperties[0].get("osgi.resolveOptional")); //$NON-NLS-1$//$NON-NLS-2$
 		ResolverBundle[] currentlyResolved = null;
 		if (resolveOptional) {
 			BundleDescription[] resolvedBundles = state.getResolvedBundles();
@@ -379,7 +409,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 	}
 
 	private void getCurrentEEs(Dictionary[] platformProperties) {
-		CURRENT_EES = new String[platformProperties.length][]; 
+		CURRENT_EES = new String[platformProperties.length][];
 		for (int i = 0; i < platformProperties.length; i++) {
 			String eeSpecs = (String) platformProperties[i].get(Constants.FRAMEWORK_EXECUTIONENVIRONMENT);
 			CURRENT_EES[i] = ManifestElement.getArrayFromList(eeSpecs, ","); //$NON-NLS-1$
@@ -533,6 +563,23 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		boolean failed = false;
 
 		if (!failed) {
+			GenericConstraint[] genericRequires = bundle.getGenericRequires();
+			for (int i = 0; i < genericRequires.length; i++) {
+				if (!resolveGenericReq(genericRequires[i], cycle)) {
+					if (DEBUG || DEBUG_GENERICS)
+						ResolverImpl.log("** GENERICS " + genericRequires[i].getVersionConstraint().getName() + "[" + genericRequires[i].getBundleDescription() + "] failed to resolve"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					state.addResolverError(genericRequires[i].getVersionConstraint().getBundle(), ResolverError.MISSING_GENERIC_CAPABILITY, genericRequires[i].getVersionConstraint().toString(), genericRequires[i].getVersionConstraint());
+					if (genericRequires[i].isFromFragment()) {
+						resolverExports.remove(bundle.detachFragment((ResolverBundle) bundleMapping.get(genericRequires[i].getVersionConstraint().getBundle()), null));
+						continue;
+					}
+					failed = true;
+					break;
+				}
+			}
+		}
+
+		if (!failed) {
 			// Iterate thru required bundles of 'bundle' trying to find matching bundles.
 			BundleConstraint[] requires = bundle.getRequires();
 			for (int i = 0; i < requires.length; i++) {
@@ -588,6 +635,58 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		// tell the state what we resolved the constraints to
 		stateResolveConstraints(bundle);
 		return bundle.getState() != ResolverBundle.UNRESOLVED;
+	}
+
+	private boolean resolveGenericReq(GenericConstraint constraint, ArrayList cycle) {
+		if (DEBUG_REQUIRES)
+			ResolverImpl.log("Trying to resolve: " + constraint.getBundle() + ", " + constraint.getVersionConstraint()); //$NON-NLS-1$ //$NON-NLS-2$
+		GenericCapability[] matchingCapabilities = constraint.getMatchingCapabilities();
+		if (matchingCapabilities != null) {
+			// Check for unrecorded cyclic dependency
+			for (int i = 0; i < matchingCapabilities.length; i++)
+				if (matchingCapabilities[i].getResolverBundle().getState() == ResolverBundle.RESOLVING)
+					if (!cycle.contains(constraint.getBundle()))
+						cycle.add(constraint.getBundle());
+			if (DEBUG_REQUIRES)
+				ResolverImpl.log("  - already wired"); //$NON-NLS-1$
+			return true; // Already wired (due to grouping dependencies) so just return
+		}
+		Object[] capabilities = resolverGenerics.get(constraint.getVersionConstraint().getName());
+		boolean result = false;
+		for (int i = 0; i < capabilities.length; i++) {
+			GenericCapability capability = (GenericCapability) capabilities[i];
+			if (DEBUG_GENERICS)
+				ResolverImpl.log("CHECKING GENERICS: " + capability.getBaseDescription()); //$NON-NLS-1$
+			// Check if capability matches
+			if (constraint.isSatisfiedBy(capability)) {
+				capability.getResolverBundle().addRef(constraint.getBundle());
+				if (result && (((GenericSpecification) constraint.getVersionConstraint()).getResolution() & GenericSpecification.RESOLUTION_MULTIPLE) == 0)
+					continue; // found a match already and this is not a multiple constraint
+				constraint.setMatchingCapability(capability); // Wire to the capability
+				if (constraint.getBundle() == capability.getResolverBundle()) {
+					result = true; // Wired to ourselves
+					continue;
+				}
+				ResolverBundle[] capabilityHosts = capability.isFromFragment() ? capability.getResolverBundle().getHost().getMatchingBundles() : new ResolverBundle[] {capability.getResolverBundle()};
+				boolean foundResolvedMatch = false;
+				for (int j = 0; capabilityHosts != null && j < capabilityHosts.length; j++)
+					if (capabilityHosts[j].getState() == ResolverBundle.RESOLVED || resolveBundle(capabilityHosts[j], cycle)) {
+						foundResolvedMatch |= !capability.isFromFragment() ? true : capability.getResolverBundle().getHost().getMatchingBundles() != null;
+						// Check cyclic dependencies
+						if (capabilityHosts[j].getState() == ResolverBundle.RESOLVING)
+							if (!cycle.contains(capabilityHosts[j]))
+								cycle.add(capabilityHosts[j]);
+					}
+				if (!foundResolvedMatch) {
+					constraint.removeMatchingCapability(capability);
+					continue; // constraint hasn't resolved
+				}
+				if (DEBUG_GENERICS)
+					ResolverImpl.log("Found match: " + capability.getBaseDescription() + ". Wiring"); //$NON-NLS-1$ //$NON-NLS-2$
+				result = true;
+			}
+		}
+		return result ? true : (((GenericSpecification) constraint.getVersionConstraint()).getResolution() & GenericSpecification.RESOLUTION_OPTIONAL) != 0;
 	}
 
 	// Resolve the supplied import. Returns true if the import can be resolved, false otherwise
@@ -875,6 +974,15 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 			BaseDescription supplier = bundle == null ? null : bundle.getBundle();
 			state.resolveConstraint(requires[i].getVersionConstraint(), supplier);
 		}
+		GenericConstraint[] genericRequires = rb.getGenericRequires();
+		for (int i = 0; i < genericRequires.length; i++) {
+			GenericCapability[] matchingCapabilities = genericRequires[i].getMatchingCapabilities();
+			if (matchingCapabilities == null)
+				state.resolveConstraint(genericRequires[i].getVersionConstraint(), null);
+			else
+				for (int j = 0; j < matchingCapabilities.length; j++)
+					state.resolveConstraint(genericRequires[i].getVersionConstraint(), matchingCapabilities[j].getBaseDescription());
+		}
 	}
 
 	private void stateResolveFragConstraints(ResolverBundle rb) {
@@ -1021,6 +1129,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 			unresolvedBundles.add(rb);
 			resolverExports.put(rb.getExportPackages());
 			resolverBundles.put(rb.getName(), rb);
+			resolverGenerics.put(rb.getGenericCapabilities());
 		}
 	}
 
@@ -1041,6 +1150,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		if (!pending || !bundle.isResolved()) {
 			resolverExports.remove(rb.getExportPackages());
 			resolverBundles.remove(rb);
+			resolverGenerics.remove(rb.getGenericCapabilities());
 		}
 		unresolvedBundles.remove(rb);
 	}
@@ -1056,6 +1166,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 			state.removeBundleComplete((BundleDescription) removedBundles[i]);
 			resolverExports.remove(re.getExportPackages());
 			resolverBundles.remove(re);
+			resolverGenerics.remove(re.getGenericCapabilities());
 			bundleMapping.remove(removedBundles[i]);
 			groupingChecker.removeAllExportConstraints(re);
 			// the bundle is removed
@@ -1083,6 +1194,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 	public void flush() {
 		resolverExports = null;
 		resolverBundles = null;
+		resolverGenerics = null;
 		unresolvedBundles = null;
 		bundleMapping = null;
 		Object[] removed = removalPending.getAllValues();
@@ -1110,6 +1222,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		DEBUG_WIRING = options.getBooleanOption(OPTION_WIRING, false);
 		DEBUG_IMPORTS = options.getBooleanOption(OPTION_IMPORTS, false);
 		DEBUG_REQUIRES = options.getBooleanOption(OPTION_REQUIRES, false);
+		DEBUG_GENERICS = options.getBooleanOption(OPTION_GENERICS, false);
 		DEBUG_GROUPING = options.getBooleanOption(OPTION_GROUPING, false);
 		DEBUG_CYCLES = options.getBooleanOption(OPTION_CYCLES, false);
 	}

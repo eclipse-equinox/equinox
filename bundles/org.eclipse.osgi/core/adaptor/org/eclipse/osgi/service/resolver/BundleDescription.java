@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2005 IBM Corporation and others.
+ * Copyright (c) 2003, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,7 +17,7 @@ package org.eclipse.osgi.service.resolver;
  * </p>
  * @since 3.1
  */
-public interface BundleDescription extends BaseDescription{
+public interface BundleDescription extends BaseDescription {
 
 	/**
 	 * Gets the Bundle-SymbolicName of this BundleDescription.
@@ -56,6 +56,20 @@ public interface BundleDescription extends BaseDescription{
 	 * @return an array of import package specifications
 	 */
 	public ImportPackageSpecification[] getImportPackages();
+
+	/**
+	 * Returns an array of generic specifications constraints required by this bundle.
+	 * @return an array of generic specifications
+	 * @since 3.2
+	 */
+	public GenericSpecification[] getGenericRequires();
+
+	/**
+	 * Returns an array of generic descriptions for the capabilities of this bundle.
+	 * @return an array of generic descriptions
+	 * @since 3.2
+	 */
+	public GenericDescription[] getGenericCapabilities();
 
 	/**
 	 * Returns true if this bundle has one or more dynamically imported packages.

@@ -63,6 +63,7 @@ org.eclipse.osgi/resolver/imports = false
 org.eclipse.osgi/resolver/requires = false
 org.eclipse.osgi/resolver/grouping = false
 org.eclipse.osgi/resolver/cycles = false
+org.eclipse.osgi/resolver/generics = false
 
 #### Profile settings
 org.eclipse.osgi/profile/startup = false

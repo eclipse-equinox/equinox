@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2005 IBM Corporation and others.
+ * Copyright (c) 2003, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,21 +10,32 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
 
+import java.lang.reflect.Constructor;
 import java.util.*;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.osgi.util.NLS;
-import org.osgi.framework.BundleException;
-import org.osgi.framework.Version;
+import org.osgi.framework.*;
 
 /**
  * This class builds bundle description objects from manifests
  */
 class StateBuilder {
-	static String[] DEFINED_MATCHING_ATTRS = {Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE, Constants.BUNDLE_VERSION_ATTRIBUTE, Constants.PACKAGE_SPECIFICATION_VERSION, Constants.VERSION_ATTRIBUTE};
+	static final String[] DEFINED_MATCHING_ATTRS = {Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE, Constants.BUNDLE_VERSION_ATTRIBUTE, Constants.PACKAGE_SPECIFICATION_VERSION, Constants.VERSION_ATTRIBUTE};
+	static final String[] DEFINED_OSGI_VALIDATE_HEADERS = {Constants.IMPORT_PACKAGE, Constants.DYNAMICIMPORT_PACKAGE, Constants.EXPORT_PACKAGE, Constants.FRAGMENT_HOST, Constants.BUNDLE_SYMBOLICNAME, Constants.REEXPORT_PACKAGE, Constants.REQUIRE_BUNDLE};
+	static final String GENERIC_REQUIRE = "Eclipse-GenericRequire"; //$NON-NLS-1$
+	static final String GENERIC_CAPABILITY = "Eclipse-GenericCapability"; //$NON-NLS-1$
 
-	static String[] DEFINED_OSGI_VALIDATE_HEADERS = {Constants.IMPORT_PACKAGE, Constants.DYNAMICIMPORT_PACKAGE, Constants.EXPORT_PACKAGE, Constants.FRAGMENT_HOST, Constants.BUNDLE_SYMBOLICNAME, Constants.REEXPORT_PACKAGE, Constants.REQUIRE_BUNDLE};
+	private static final String ATTR_TYPE_STRING = "string"; //$NON-NLS-1$
+	private static final String ATTR_TYPE_VERSION = "version"; //$NON-NLS-1$
+	private static final String ATTR_TYPE_URI = "uri"; //$NON-NLS-1$
+	private static final String ATTR_TYPE_LONG = "long"; //$NON-NLS-1$
+	private static final String ATTR_TYPE_DOUBLE = "double"; //$NON-NLS-1$
+	private static final String ATTR_TYPE_SET = "set"; //$NON-NLS-1$
+	private static final String OPTIONAL_ATTR = "optional"; //$NON-NLS-1$
+	private static final String MULTIPLE_ATTR = "multiple"; //$NON-NLS-1$
+	private static final String TRUE = "true"; //$NON-NLS-1$
 
 	static BundleDescription createBundleDescription(StateImpl state, Dictionary manifest, String location) throws BundleException {
 		BundleDescriptionImpl result = new BundleDescriptionImpl();
@@ -85,6 +96,80 @@ class StateBuilder {
 		result.setImportPackages(createImportPackages(result.getExportPackages(), providedExports, imports, dynamicImports, manifestVersion));
 		ManifestElement[] requires = ManifestElement.parseHeader(Constants.REQUIRE_BUNDLE, (String) manifest.get(Constants.REQUIRE_BUNDLE));
 		result.setRequiredBundles(createRequiredBundles(requires));
+		String[][] genericAliases = getGenericAliases(state);
+		ManifestElement[] genericRequires = getGenericRequires(manifest, genericAliases);
+		result.setGenericRequires(createGenericRequires(genericRequires));
+		ManifestElement[] genericCapabilities = getGenericCapabilities(manifest, genericAliases);
+		result.setGenericCapabilities(createGenericCapabilities(genericCapabilities));
+		return result;
+	}
+
+	private static ManifestElement[] getGenericRequires(Dictionary manifest, String[][] genericAliases) throws BundleException {
+		ManifestElement[] genericRequires = ManifestElement.parseHeader(GENERIC_REQUIRE, (String) manifest.get(GENERIC_REQUIRE));
+		ArrayList aliasList = null;
+		if (genericAliases.length > 0) {
+			aliasList = new ArrayList(genericRequires == null ? 0 : genericRequires.length);
+			for (int i = 0; i < genericAliases.length; i++) {
+				ManifestElement[] aliasReqs = ManifestElement.parseHeader(genericAliases[i][1], (String) manifest.get(genericAliases[i][1]));
+				if (aliasReqs == null)
+					continue;
+				for (int j = 0; j < aliasReqs.length; j++) {
+					StringBuffer strBuf = new StringBuffer();
+					strBuf.append(aliasReqs[j].getValue()).append(':').append(genericAliases[i][2]);
+					String filter = aliasReqs[j].getAttribute(Constants.SELECTION_FILTER_ATTRIBUTE);
+					if (filter != null)
+						strBuf.append("; ").append(Constants.SELECTION_FILTER_ATTRIBUTE).append(filter).append("=\"").append(filter).append("\""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					ManifestElement[] withType = ManifestElement.parseHeader(genericAliases[i][1], strBuf.toString());
+					aliasList.add(withType[0]);
+				}
+			}
+		}
+		if (aliasList == null || aliasList.size() == 0)
+			return genericRequires;
+		if (genericRequires != null)
+			for (int i = 0; i < genericRequires.length; i++)
+				aliasList.add(genericRequires[i]);
+		return (ManifestElement[]) aliasList.toArray(new ManifestElement[aliasList.size()]);
+	}
+
+	private static ManifestElement[] getGenericCapabilities(Dictionary manifest, String[][] genericAliases) throws BundleException {
+		ManifestElement[] genericCapabilities = ManifestElement.parseHeader(GENERIC_CAPABILITY, (String) manifest.get(GENERIC_CAPABILITY));
+		ArrayList aliasList = null;
+		if (genericAliases.length > 0) {
+			aliasList = new ArrayList(genericCapabilities == null ? 0 : genericCapabilities.length);
+			for (int i = 0; i < genericAliases.length; i++) {
+				ManifestElement[] aliasCapabilities = ManifestElement.parseHeader(genericAliases[i][0], (String) manifest.get(genericAliases[i][0]));
+				if (aliasCapabilities == null)
+					continue;
+				for (int j = 0; j < aliasCapabilities.length; j++) {
+					StringBuffer strBuf = new StringBuffer();
+					strBuf.append(aliasCapabilities[j].getValue()).append(':').append(genericAliases[i][2]);
+					for (Enumeration keys = aliasCapabilities[j].getKeys(); keys != null && keys.hasMoreElements();) {
+						String key = (String) keys.nextElement();
+						strBuf.append("; ").append(key).append("=\"").append(aliasCapabilities[j].getAttribute(key)).append("\""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					}
+					ManifestElement[] withTypes = ManifestElement.parseHeader(genericAliases[i][0], strBuf.toString());
+					aliasList.add(withTypes[0]);
+				}
+			}
+		}
+		if (aliasList == null || aliasList.size() == 0)
+			return genericCapabilities;
+		if (genericCapabilities != null)
+			for (int i = 0; i < genericCapabilities.length; i++)
+				aliasList.add(genericCapabilities[i]);
+		return (ManifestElement[]) aliasList.toArray(new ManifestElement[aliasList.size()]);
+	}
+
+	private static String[][] getGenericAliases(StateImpl state) {
+		Dictionary[] platformProps = state == null ? null : state.getPlatformProperties();
+		String genericAliasesProp = platformProps == null || platformProps.length == 0 ? null : (String) platformProps[0].get("osgi.genericAliases"); //$NON-NLS-1$
+		if (genericAliasesProp == null)
+			return new String[0][0];
+		String[] aliases = ManifestElement.getArrayFromList(genericAliasesProp, ","); //$NON-NLS-1$
+		String[][] result = new String[aliases.length][];
+		for (int i = 0; i < aliases.length; i++)
+			result[i] = ManifestElement.getArrayFromList(aliases[i], ":"); //$NON-NLS-1$
 		return result;
 	}
 
@@ -271,10 +356,41 @@ class StateBuilder {
 					break;
 				}
 			}
+			String value = exportPackage.getAttribute(key);
+			int colonIndex = key.indexOf(':');
+			String type = ATTR_TYPE_STRING;
+			if (colonIndex > 0) {
+				type = key.substring(colonIndex + 1);
+				key = key.substring(0, colonIndex);
+			}
 			if (!definedAttr) {
 				if (arbitraryAttrs == null)
 					arbitraryAttrs = new HashMap();
-				arbitraryAttrs.put(key, exportPackage.getAttribute(key));
+				Object putValue = value;
+				if (ATTR_TYPE_STRING.equals(type))
+					putValue = value;
+				else if (ATTR_TYPE_DOUBLE.equals(type))
+					putValue = new Double(value);
+				else if (ATTR_TYPE_LONG.equals(type))
+					putValue = new Long(value);
+				else if (ATTR_TYPE_URI.equals(type))
+					try {
+						Class uriClazz = Class.forName("java.net.URI"); //$NON-NLS-1$
+						Constructor constructor = uriClazz.getConstructor(new Class[] {String.class});
+						putValue = constructor.newInstance(new Object[] {value});
+					} catch (ClassNotFoundException e) {
+						// oh well cannot support; just use string
+						putValue = value;
+					} catch (Exception e) { // got some reflection exception
+						if (e instanceof RuntimeException)
+							throw (RuntimeException) e;
+						throw new RuntimeException(e.getMessage());
+					}
+				else if (ATTR_TYPE_VERSION.equals(type))
+					putValue = new Version(value);
+				else if (ATTR_TYPE_SET.equals(type))
+					putValue = ManifestElement.getArrayFromList(value, ","); //$NON-NLS-1$
+				arbitraryAttrs.put(key, putValue);
 			}
 		}
 		return arbitraryAttrs;
@@ -288,6 +404,74 @@ class StateBuilder {
 		result.setVersionRange(getVersionRange(spec.getAttribute(Constants.BUNDLE_VERSION_ATTRIBUTE)));
 		result.setIsMultiHost("true".equals(spec.getDirective("multiple-hosts"))); //$NON-NLS-1$ //$NON-NLS-2$
 		return result;
+	}
+
+	private static GenericSpecification[] createGenericRequires(ManifestElement[] genericRequires) throws BundleException {
+		if (genericRequires == null)
+			return null;
+		ArrayList results = new ArrayList(genericRequires.length);
+		for (int i = 0; i < genericRequires.length; i++) {
+			String[] genericNames = genericRequires[i].getValueComponents();
+			for (int j = 0; j < genericNames.length; j++) {
+				GenericSpecificationImpl spec = new GenericSpecificationImpl();
+				int colonIdx = genericNames[j].indexOf(':');
+				if (colonIdx > 0) {
+					spec.setName(genericNames[j].substring(0, colonIdx));
+					spec.setType(genericNames[j].substring(colonIdx + 1));
+				} else
+					spec.setName(genericNames[j]);
+				try {
+					spec.setMatchingFilter(genericRequires[i].getAttribute(Constants.SELECTION_FILTER_ATTRIBUTE));
+				} catch (InvalidSyntaxException e) {
+					throw new BundleException(Constants.SELECTION_FILTER_ATTRIBUTE, e);
+				}
+				String optional = genericRequires[i].getAttribute(OPTIONAL_ATTR);
+				String multiple = genericRequires[i].getAttribute(MULTIPLE_ATTR);
+				int resolution = 0;
+				if (TRUE.equals(optional))
+					resolution |= GenericSpecification.RESOLUTION_OPTIONAL;
+				if (TRUE.equals(multiple))
+					resolution |= GenericSpecification.RESOLUTION_MULTIPLE;
+				spec.setResolution(resolution);
+				results.add(spec);
+			}
+		}
+		return (GenericSpecification[]) results.toArray(new GenericSpecification[results.size()]);
+	}
+
+	private static GenericDescription[] createGenericCapabilities(ManifestElement[] genericCapabilities) {
+		if (genericCapabilities == null)
+			return null;
+		ArrayList results = new ArrayList(genericCapabilities.length);
+		for (int i = 0; i < genericCapabilities.length; i++) {
+			String[] genericNames = genericCapabilities[i].getValueComponents();
+			for (int j = 0; j < genericNames.length; j++) {
+				GenericDescriptionImpl desc = new GenericDescriptionImpl();
+				int colonIdx = genericNames[j].indexOf(':');
+				if (colonIdx > 0) {
+					desc.setName(genericNames[j].substring(0, colonIdx));
+					desc.setType(genericNames[j].substring(colonIdx + 1));
+				} else
+					desc.setName(genericNames[j]);
+				String versionString = genericCapabilities[i].getAttribute(Constants.VERSION_ATTRIBUTE);
+				if (versionString != null)
+					desc.setVersion(Version.parseVersion(versionString));
+				Map mapAttrs = getAttributes(genericCapabilities[i], new String[] {Constants.VERSION_ATTRIBUTE});
+				Object version = mapAttrs == null ? null : mapAttrs.remove(Constants.VERSION_ATTRIBUTE);
+				if (version instanceof Version) // this is just incase someone uses version:version as a key
+					desc.setVersion((Version) version);
+				Dictionary attrs = new Hashtable();
+				if (mapAttrs != null) {
+					for (Iterator keys = mapAttrs.keySet().iterator(); keys.hasNext();) {
+						Object key = keys.next();
+						attrs.put(key, mapAttrs.get(key));
+					}
+				}
+				desc.setAttributes(attrs);
+				results.add(desc);
+			}
+		}
+		return (GenericDescription[]) results.toArray(new GenericDescription[results.size()]);
 	}
 
 	private static VersionRange getVersionRange(String versionRange) {
@@ -350,7 +534,6 @@ class StateBuilder {
 			if (elements[i].getDirective(Constants.USES_DIRECTIVE) != null)
 				throw new BundleException(NLS.bind(StateMsg.HEADER_REEXPORT_USES, Constants.USES_DIRECTIVE, Constants.REEXPORT_PACKAGE));
 	}
-
 
 	private static void checkExtensionBundle(ManifestElement[] elements) throws BundleException {
 		if (elements.length == 0 || elements[0].getDirective(Constants.EXTENSION_DIRECTIVE) == null)

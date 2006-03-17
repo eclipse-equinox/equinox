@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2005 IBM Corporation and others.
+ * Copyright (c) 2003, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,7 @@ package org.eclipse.osgi.internal.resolver;
 import java.io.*;
 import java.util.*;
 import org.eclipse.osgi.service.resolver.*;
+import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
 
 class StateWriter {
@@ -60,7 +61,7 @@ class StateWriter {
 		out.writeLong(state.getTimeStamp());
 		Dictionary[] propSet = state.getPlatformProperties();
 		out.writeInt(propSet.length);
-		for (int i = 0; i < propSet.length; i++){
+		for (int i = 0; i < propSet.length; i++) {
 			Dictionary props = propSet[i];
 			out.writeInt(StateImpl.PROPS.length);
 			for (int j = 0; j < StateImpl.PROPS.length; j++)
@@ -106,7 +107,7 @@ class StateWriter {
 			outState.writeLong(state.getTimeStamp());
 			Dictionary[] propSet = state.getPlatformProperties();
 			outState.writeInt(propSet.length);
-			for (int i = 0; i < propSet.length; i++){
+			for (int i = 0; i < propSet.length; i++) {
 				Dictionary props = propSet[i];
 				outState.writeInt(StateImpl.PROPS.length);
 				for (int j = 0; j < StateImpl.PROPS.length; j++)
@@ -129,11 +130,11 @@ class StateWriter {
 				} catch (IOException e) {
 					// do nothing, we tried
 				}
-				try {
-					outLazy.close();
-				} catch (IOException e) {
-					// do nothing
-				}
+			try {
+				outLazy.close();
+			} catch (IOException e) {
+				// do nothing
+			}
 			if (outState != null)
 				try {
 					outState.flush();
@@ -141,11 +142,11 @@ class StateWriter {
 				} catch (IOException e) {
 					// do nothing, we tried
 				}
-				try {
-					outState.close();
-				} catch (IOException e) {
-					// do nothing
-				}
+			try {
+				outState.close();
+			} catch (IOException e) {
+				// do nothing
+			}
 		}
 	}
 
@@ -258,7 +259,7 @@ class StateWriter {
 		for (int i = 0; i < ees.length; i++)
 			writeStringOrNull(ees[i], out);
 
-		HashMap dynamicStamps = ((BundleDescriptionImpl)bundle).getDynamicStamps();
+		HashMap dynamicStamps = ((BundleDescriptionImpl) bundle).getDynamicStamps();
 		if (dynamicStamps == null)
 			out.writeInt(0);
 		else {
@@ -266,8 +267,26 @@ class StateWriter {
 			for (Iterator pkgs = dynamicStamps.keySet().iterator(); pkgs.hasNext();) {
 				String pkg = (String) pkgs.next();
 				writeStringOrNull(pkg, out);
-				out.writeLong(((Long)dynamicStamps.get(pkg)).longValue());
+				out.writeLong(((Long) dynamicStamps.get(pkg)).longValue());
 			}
+		}
+
+		GenericDescription[] genericCapabilities = bundle.getGenericCapabilities();
+		if (genericCapabilities == null)
+			out.writeInt(0);
+		else {
+			out.writeInt(genericCapabilities.length);
+			for (int i = 0; i < genericCapabilities.length; i++)
+				writeGenericDescription(genericCapabilities[i], out);
+		}
+
+		GenericSpecification[] genericRequires = bundle.getGenericRequires();
+		if (genericRequires == null)
+			out.writeInt(0);
+		else {
+			out.writeInt(genericRequires.length);
+			for (int i = 0; i < genericRequires.length; i++)
+				writeGenericSpecification(genericRequires[i], out);
 		}
 
 		// save the size of the lazy data
@@ -288,6 +307,33 @@ class StateWriter {
 		out.writeBoolean(exportPackageDesc.isRoot());
 		writeMap(out, exportPackageDesc.getAttributes());
 		writeMap(out, exportPackageDesc.getDirectives());
+	}
+
+	private void writeGenericDescription(GenericDescription description, DataOutputStream out) throws IOException {
+		if (writePrefix(description, out))
+			return;
+		writeBaseDescription(description, out);
+		writeStringOrNull(description.getType() == GenericDescription.DEFAULT_TYPE ? null : description.getType(), out);
+		Dictionary attrs = description.getAttributes();
+		Map mapAttrs = new HashMap(attrs.size());
+		for (Enumeration keys = attrs.keys(); keys.hasMoreElements();) {
+			Object key = keys.nextElement();
+			if (!Constants.VERSION_ATTRIBUTE.equals(key))
+				mapAttrs.put(key, attrs.get(key));
+		}
+		writeMap(out, mapAttrs);
+	}
+
+	private void writeGenericSpecification(GenericSpecification specification, DataOutputStream out) throws IOException {
+		writeVersionConstraint(specification, out);
+		writeStringOrNull(specification.getType() == GenericDescription.DEFAULT_TYPE ? null : specification.getType(), out);
+		GenericDescription[] suppliers = specification.getSuppliers();
+		out.writeInt(suppliers == null ? 0 : suppliers.length);
+		if (suppliers != null)
+			for (int i = 0; i < suppliers.length; i++)
+				writeGenericDescription(suppliers[i], out);
+		out.writeInt(specification.getResolution());
+		writeStringOrNull(specification.getMatchingFilter(), out);
 	}
 
 	private void writeMap(DataOutputStream out, Map source) throws IOException {
@@ -312,6 +358,18 @@ class StateWriter {
 				} else if (value instanceof Integer) {
 					out.writeByte(3);
 					out.writeInt(((Integer) value).intValue());
+				} else if (value instanceof Long) {
+					out.writeByte(4);
+					out.writeLong(((Long) value).longValue());
+				} else if (value instanceof Double) {
+					out.writeByte(5);
+					out.writeDouble(((Double) value).doubleValue());
+				} else if (value instanceof Version) {
+					out.writeByte(6);
+					writeVersion((Version) value, out);
+				} else if ("java.net.URI".equals(value.getClass().getName())) { //$NON-NLS-1$
+					out.writeByte(7);
+					writeStringOrNull(value.toString(), out);
 				}
 			}
 		}

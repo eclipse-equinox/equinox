@@ -54,6 +54,7 @@ public class ResolverErrorImpl implements ResolverError {
 			case ResolverError.MISSING_REQUIRE_BUNDLE :
 			case ResolverError.MISSING_FRAGMENT_HOST :
 			case ResolverError.MISSING_EXECUTION_ENVIRONMENT :
+			case ResolverError.MISSING_GENERIC_CAPABILITY :
 				return NLS.bind(StateMsg.RES_ERROR_MISSING_CONSTRAINT, getData());
 			case ResolverError.FRAGMENT_CONFLICT :
 				return NLS.bind(StateMsg.RES_ERROR_FRAGMENT_CONFLICT, getData());

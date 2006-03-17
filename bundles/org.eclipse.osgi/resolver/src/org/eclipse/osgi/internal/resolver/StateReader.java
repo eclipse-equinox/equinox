@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2005 IBM Corporation and others.
+ * Copyright (c) 2003, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,9 +12,11 @@ package org.eclipse.osgi.internal.resolver;
 
 import java.io.*;
 import java.lang.ref.WeakReference;
+import java.lang.reflect.Constructor;
 import java.util.*;
 import org.eclipse.osgi.framework.util.SecureAction;
 import org.eclipse.osgi.service.resolver.*;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.Version;
 
 class StateReader {
@@ -35,7 +37,7 @@ class StateReader {
 	private int numBundles;
 	private boolean accessedFlag = false;
 
-	public static final byte STATE_CACHE_VERSION = 24;
+	public static final byte STATE_CACHE_VERSION = 25;
 	public static final byte NULL = 0;
 	public static final byte OBJECT = 1;
 	public static final byte INDEX = 2;
@@ -303,6 +305,22 @@ class StateReader {
 			result.setDynamicStamps(dynamicStamps);
 		}
 
+		int genericCapCnt = in.readInt();
+		if (genericCapCnt > 0) {
+			GenericDescription[] capabilities = new GenericDescription[genericCapCnt];
+			for (int i = 0; i < capabilities.length; i++)
+				capabilities[i] = readGenericDescription(in);
+			result.setGenericCapabilities(capabilities);
+		}
+
+		int genericReqCnt = in.readInt();
+		if (genericReqCnt > 0) {
+			GenericSpecification[] reqs = new GenericSpecification[genericReqCnt];
+			for (int i = 0; i < reqs.length; i++)
+				reqs[i] = readGenericSpecification(in);
+			result.setGenericRequires(reqs);
+		}
+
 		result.setFullyLoaded(true); // set fully loaded before setting the dependencies
 		// No need to add bundle dependencies for hosts, imports or requires;
 		// This is done by readBundleDescription
@@ -345,13 +363,33 @@ class StateReader {
 			Object value = null;
 			byte type = in.readByte();
 			if (type == 0)
-				 value = readString(in, false);
+				value = readString(in, false);
 			else if (type == 1)
 				value = readList(in);
 			else if (type == 2)
 				value = in.readBoolean() ? Boolean.TRUE : Boolean.FALSE;
 			else if (type == 3)
 				value = new Integer(in.readInt());
+			else if (type == 4)
+				value = new Long(in.readLong());
+			else if (type == 5)
+				value = new Double(in.readDouble());
+			else if (type == 6)
+				value = readVersion(in);
+			else if (type == 7) {
+				value = readString(in, false);
+				try {
+					Class uriClazz = Class.forName("java.net.URI"); //$NON-NLS-1$
+					Constructor constructor = uriClazz.getConstructor(new Class[] {String.class});
+					value = constructor.newInstance(new Object[] {value});
+				} catch (ClassNotFoundException e) {
+					// oh well cannot support; just use the string
+				} catch (Exception e) { // got some reflection exception
+					if (e instanceof RuntimeException)
+						throw (RuntimeException) e;
+					throw new RuntimeException(e.getMessage());
+				}
+			}
 			result.put(key, value);
 		}
 		return result;
@@ -395,6 +433,47 @@ class StateReader {
 			for (int i = 0; i < hosts.length; i++)
 				hosts[i] = readBundleDescription(in);
 			result.setHosts(hosts);
+		}
+		return result;
+	}
+
+	private GenericDescription readGenericDescription(DataInputStream in) throws IOException {
+		byte tag = readTag(in);
+		if (tag == NULL)
+			return null;
+		if (tag == INDEX)
+			return (GenericDescription) getFromObjectTable(in.readInt());
+		int tableIndex = in.readInt();
+		GenericDescriptionImpl result = new GenericDescriptionImpl();
+		addToObjectTable(result, tableIndex);
+		readBaseDescription(result, in);
+		result.setType(readString(in, false));
+		Map mapAttrs = readMap(in);
+		Dictionary attrs = new Hashtable();
+		if (mapAttrs != null) {
+			for (Iterator keys = mapAttrs.keySet().iterator(); keys.hasNext();) {
+				Object key = keys.next();
+				attrs.put(key, mapAttrs.get(key));
+			}
+		}
+		result.setAttributes(attrs);
+		return result;
+	}
+
+	private GenericSpecification readGenericSpecification(DataInputStream in) throws IOException {
+		GenericSpecificationImpl result = new GenericSpecificationImpl();
+		readVersionConstraint(result, in);
+		result.setType(readString(in, false));
+		int num = in.readInt();
+		GenericDescription[] suppliers = num == 0 ? null : new GenericDescription[num];
+		for (int i = 0; i < num; i++)
+			suppliers[i] = readGenericDescription(in);
+		result.setSupplers(suppliers);
+		result.setResolution(in.readInt());
+		try {
+			result.setMatchingFilter(readString(in, false));
+		} catch (InvalidSyntaxException e) {
+			// do nothing this filter was tested before
 		}
 		return result;
 	}

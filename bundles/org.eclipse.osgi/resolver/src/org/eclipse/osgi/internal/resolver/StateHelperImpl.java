@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2005 IBM Corporation and others.
+ * Copyright (c) 2004, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -85,8 +85,29 @@ public class StateHelperImpl implements StateHelper {
 		return result;
 	}
 
+	private Map getGenericsMap(State state, boolean resolved) {
+		Map result = new HashMap(11);
+		BundleDescription[] bundles = state.getBundles();
+		for (int i = 0; i < bundles.length; i++) {
+			if (resolved && !bundles[i].isResolved())
+				continue;  // discard unresolved bundles
+			GenericDescription[] generics = bundles[i].getGenericCapabilities();
+			for (int j = 0; j < generics.length; j++) {
+				GenericDescription description = generics[j];
+				Set genericSet = (Set) result.get(description.getName());
+				if (genericSet == null) {
+					genericSet = new HashSet(1);
+					result.put(description.getName(), genericSet);
+				}
+				genericSet.add(description);
+			}
+		}
+		return result;
+	}
+
 	private VersionConstraint[] getUnsatisfiedLeaves(State state, BundleDescription[] bundles) {
 		Map packages = getExportedPackageMap(state);
+		Map generics = getGenericsMap(state, false);
 		HashSet result = new HashSet(11);
 		for (int i = 0; i < bundles.length; i++) {
 			BundleDescription description = bundles[i];
@@ -103,6 +124,11 @@ public class StateHelperImpl implements StateHelper {
 					if (exports != null) 
 						for (Iterator iter = exports.iterator(); iter.hasNext() && !satisfied;)
 							satisfied |= constraint.isSatisfiedBy((ExportPackageDescription) iter.next());
+				} else if (constraint instanceof GenericSpecification) {
+					Set genericSet = (Set) generics.get(constraint.getName());
+					if (genericSet != null) 
+						for (Iterator iter = genericSet.iterator(); iter.hasNext() && !satisfied;)
+							satisfied |= constraint.isSatisfiedBy((GenericDescription) iter.next());
 				}
 				if (!satisfied)
 					result.add(constraint);
@@ -140,6 +166,10 @@ public class StateHelperImpl implements StateHelper {
 		for (int i = 0; i < packages.length; i++)
 			if (!packages[i].isResolved() && !isResolvable(packages[i]))
 				unsatisfied.add(packages[i]);
+		GenericSpecification[] generics = bundle.getGenericRequires();
+		for (int i = 0; i < generics.length; i++)
+			if (!generics[i].isResolved() && !isResolvable(generics[i]))
+				unsatisfied.add(generics[i]);
 		return (VersionConstraint[]) unsatisfied.toArray(new VersionConstraint[unsatisfied.size()]);
 	}
 
@@ -150,6 +180,17 @@ public class StateHelperImpl implements StateHelper {
 		ExportPackageDescription[] exports = constraint.getBundle().getContainingState().getExportedPackages();
 		for (int i = 0; i < exports.length; i++)
 			if (constraint.isSatisfiedBy(exports[i]))
+				return true;
+		return false;
+	}
+
+	private boolean isResolvable(GenericSpecification constraint) {
+		Map genericCapabilities = getGenericsMap(constraint.getBundle().getContainingState(), true);
+		Set genericSet = (Set) genericCapabilities.get(constraint.getName());
+		if (genericSet == null)
+			return false;
+		for (Iterator iter = genericSet.iterator(); iter.hasNext();)
+			if (constraint.isSatisfiedBy((GenericDescription) iter.next()))
 				return true;
 		return false;
 	}

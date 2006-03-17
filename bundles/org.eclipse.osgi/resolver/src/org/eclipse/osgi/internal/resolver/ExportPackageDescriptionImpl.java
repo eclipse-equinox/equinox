@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2005 IBM Corporation and others.
+ * Copyright (c) 2004, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,7 +32,7 @@ public class ExportPackageDescriptionImpl extends BaseDescriptionImpl implements
 	private int tableIndex;
 
 	public Map getDirectives() {
-		Map result =  new HashMap (5);
+		Map result = new HashMap(5);
 		if (uses != null)
 			result.put(Constants.USES_DIRECTIVE, uses);
 		if (exclude != null)
@@ -47,7 +47,7 @@ public class ExportPackageDescriptionImpl extends BaseDescriptionImpl implements
 		result.put(EQUINOX_EE, equinox_ee == -1 ? EQUINOX_EE_DEFAULT : new Integer(equinox_ee));
 		return result;
 	}
-	
+
 	public Object getDirective(String key) {
 		if (key.equals(Constants.USES_DIRECTIVE))
 			return uses;
@@ -68,7 +68,7 @@ public class ExportPackageDescriptionImpl extends BaseDescriptionImpl implements
 
 	public Object setDirective(String key, Object value) {
 		if (key.equals(Constants.USES_DIRECTIVE))
-			return uses = (String[])value;
+			return uses = (String[]) value;
 		if (key.equals(Constants.EXCLUDE_DIRECTIVE))
 			return exclude = (String) value;
 		if (key.equals(Constants.INCLUDE_DIRECTIVE))
@@ -89,17 +89,21 @@ public class ExportPackageDescriptionImpl extends BaseDescriptionImpl implements
 	public void setDirectives(Map directives) {
 		if (directives == null)
 			return;
-		uses = (String[])directives.get(Constants.USES_DIRECTIVE);
-		exclude = (String)directives.get(Constants.EXCLUDE_DIRECTIVE);
-		include = (String)directives.get(Constants.INCLUDE_DIRECTIVE);
-		mandatory = (String[])directives.get(Constants.MANDATORY_DIRECTIVE);
-		friends = (String[])directives.get(Constants.FRIENDS_DIRECTIVE);
-		internal = (Boolean)directives.get(Constants.INTERNAL_DIRECTIVE);
-		equinox_ee = ((Integer)directives.get(EQUINOX_EE)).intValue();
+		uses = (String[]) directives.get(Constants.USES_DIRECTIVE);
+		exclude = (String) directives.get(Constants.EXCLUDE_DIRECTIVE);
+		include = (String) directives.get(Constants.INCLUDE_DIRECTIVE);
+		mandatory = (String[]) directives.get(Constants.MANDATORY_DIRECTIVE);
+		friends = (String[]) directives.get(Constants.FRIENDS_DIRECTIVE);
+		internal = (Boolean) directives.get(Constants.INTERNAL_DIRECTIVE);
+		equinox_ee = ((Integer) directives.get(EQUINOX_EE)).intValue();
 	}
-	
+
 	public Map getAttributes() {
 		return attributes;
+	}
+
+	public BundleDescription getSupplier() {
+		return getExporter();
 	}
 
 	public BundleDescription getExporter() {
@@ -123,7 +127,7 @@ public class ExportPackageDescriptionImpl extends BaseDescriptionImpl implements
 	}
 
 	public String toString() {
-		return "Export-Package: " + getName() + "; version=\"" + getVersion() + "\"";  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+		return "Export-Package: " + getName() + "; version=\"" + getVersion() + "\""; //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 	}
 
 	int getTableIndex() {

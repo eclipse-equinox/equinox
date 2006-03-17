@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2005 IBM Corporation and others.
+ * Copyright (c) 2003, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,6 +22,8 @@ public class BundleDescriptionImpl extends BaseDescriptionImpl implements Bundle
 	static final BundleSpecification[] EMPTY_BUNDLESPECS = new BundleSpecification[0];
 	static final ExportPackageDescription[] EMPTY_EXPORTS = new ExportPackageDescription[0];
 	static final BundleDescription[] EMPTY_BUNDLEDESCS = new BundleDescription[0];
+	static final GenericSpecification[] EMPTY_GENERICSPECS = new GenericSpecification[0];
+	static final GenericDescription[] EMPTY_GENERICDESCS = new GenericDescription[0];
 
 	static final int RESOLVED = 0x01;
 	static final int SINGLETON = 0x02;
@@ -62,6 +64,10 @@ public class BundleDescriptionImpl extends BaseDescriptionImpl implements Bundle
 		return getName();
 	}
 
+	public BundleDescription getSupplier() {
+		return this;
+	}
+
 	public String getLocation() {
 		fullyLoad();
 		return lazyData.location;
@@ -91,6 +97,20 @@ public class BundleDescriptionImpl extends BaseDescriptionImpl implements Bundle
 		if (lazyData.requiredBundles == null)
 			return EMPTY_BUNDLESPECS;
 		return lazyData.requiredBundles;
+	}
+
+	public GenericSpecification[] getGenericRequires() {
+		fullyLoad();
+		if (lazyData.genericRequires == null)
+			return EMPTY_GENERICSPECS;
+		return lazyData.genericRequires;
+	}
+
+	public GenericDescription[] getGenericCapabilities() {
+		fullyLoad();
+		if (lazyData.genericCapabilities == null)
+			return EMPTY_GENERICDESCS;
+		return lazyData.genericCapabilities;
 	}
 
 	public ExportPackageDescription[] getExportPackages() {
@@ -215,6 +235,22 @@ public class BundleDescriptionImpl extends BaseDescriptionImpl implements Bundle
 			}
 	}
 
+	protected void setGenericCapabilities(GenericDescription[] genericCapabilities) {
+		checkLazyData();
+		lazyData.genericCapabilities = genericCapabilities;
+		if (genericCapabilities != null)
+			for (int i = 0; i < genericCapabilities.length; i++)
+				((GenericDescriptionImpl) genericCapabilities[i]).setSupplier(this);
+	}
+
+	protected void setGenericRequires(GenericSpecification[] genericRequires) {
+		checkLazyData();
+		lazyData.genericRequires = genericRequires;
+		if (genericRequires != null)
+			for (int i = 0; i < genericRequires.length; i++)
+				((VersionConstraintImpl) genericRequires[i]).setBundle(this);
+	}
+
 	protected int getStateBits() {
 		return stateBits;
 	}
@@ -323,11 +359,7 @@ public class BundleDescriptionImpl extends BaseDescriptionImpl implements Bundle
 	}
 
 	protected synchronized void addDependency(BaseDescriptionImpl dependency) {
-		BundleDescriptionImpl bundle;
-		if (dependency instanceof ExportPackageDescription)
-			bundle = (BundleDescriptionImpl) ((ExportPackageDescription) dependency).getExporter();
-		else
-			bundle = (BundleDescriptionImpl) dependency;
+		BundleDescriptionImpl bundle = (BundleDescriptionImpl) dependency.getSupplier();
 		if (bundle == this)
 			return;
 		if (dependencies == null)
@@ -412,7 +444,7 @@ public class BundleDescriptionImpl extends BaseDescriptionImpl implements Bundle
 	private void fullyLoad() {
 		if ((stateBits & LAZY_LOADED) == 0)
 			return;
-		if (isFullyLoaded()){
+		if (isFullyLoaded()) {
 			containingState.getReader().setAccessedFlag(true); // set reader accessed flag
 			return;
 		}
@@ -501,6 +533,8 @@ public class BundleDescriptionImpl extends BaseDescriptionImpl implements Bundle
 		BundleSpecification[] requiredBundles;
 		ExportPackageDescription[] exportPackages;
 		ImportPackageSpecification[] importPackages;
+		GenericDescription[] genericCapabilities;
+		GenericSpecification[] genericRequires;
 
 		ExportPackageDescription[] selectedExports;
 		BundleDescription[] resolvedRequires;

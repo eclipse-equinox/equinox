@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2005 IBM Corporation and others.
+ * Copyright (c) 2003, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,12 +11,11 @@
 package org.eclipse.osgi.internal.resolver;
 
 import java.io.*;
-import java.util.Dictionary;
-import java.util.Map;
+import java.util.*;
+import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.internal.module.ResolverImpl;
 import org.eclipse.osgi.service.resolver.*;
-import org.osgi.framework.BundleException;
-import org.osgi.framework.Version;
+import org.osgi.framework.*;
 
 public class StateObjectFactoryImpl implements StateObjectFactory {
 
@@ -25,12 +24,16 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 	}
 
 	public BundleDescription createBundleDescription(State state, Dictionary manifest, String location, long id) throws BundleException {
-		BundleDescriptionImpl result = (BundleDescriptionImpl) StateBuilder.createBundleDescription((StateImpl)state, manifest, location);
+		BundleDescriptionImpl result = (BundleDescriptionImpl) StateBuilder.createBundleDescription((StateImpl) state, manifest, location);
 		result.setBundleId(id);
 		return result;
 	}
 
 	public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location, BundleSpecification[] required, HostSpecification host, ImportPackageSpecification[] imports, ExportPackageDescription[] exports, String[] providedPackages, boolean singleton) {
+		return createBundleDescription(id, symbolicName, version, location, required, host, imports, exports, providedPackages, singleton, true, true, null, null, null, null);
+	}
+
+	public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location, BundleSpecification[] required, HostSpecification host, ImportPackageSpecification[] imports, ExportPackageDescription[] exports, String[] providedPackages, boolean singleton, boolean attachFragments, boolean dynamicFragments, String platformFilter, String executionEnvironment, GenericSpecification[] genericRequires, GenericDescription[] genericCapabilities) {
 		BundleDescriptionImpl bundle = new BundleDescriptionImpl();
 		bundle.setBundleId(id);
 		bundle.setSymbolicName(symbolicName);
@@ -41,6 +44,11 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		bundle.setImportPackages(imports);
 		bundle.setExportPackages(exports);
 		bundle.setStateBit(BundleDescriptionImpl.SINGLETON, singleton);
+		bundle.setStateBit(BundleDescriptionImpl.ATTACH_FRAGMENTS, attachFragments);
+		bundle.setStateBit(BundleDescriptionImpl.DYNAMIC_FRAGMENTS, dynamicFragments);
+		bundle.setPlatformFilter(platformFilter);
+		bundle.setGenericRequires(genericRequires);
+		bundle.setGenericCapabilities(genericCapabilities);
 		return bundle;
 	}
 
@@ -73,7 +81,40 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		bundle.setStateBit(BundleDescriptionImpl.HAS_DYNAMICIMPORT, original.hasDynamicImports());
 		bundle.setPlatformFilter(original.getPlatformFilter());
 		bundle.setExecutionEnvironments(original.getExecutionEnvironments());
+		bundle.setGenericCapabilities(createGenericCapabilities(original.getGenericCapabilities()));
+		bundle.setGenericRequires(createGenericRequires(original.getGenericRequires()));
 		return bundle;
+	}
+
+	private GenericDescription[] createGenericCapabilities(GenericDescription[] genericCapabilities) {
+		if (genericCapabilities == null || genericCapabilities.length == 0)
+			return null;
+		GenericDescription[] result = new GenericDescription[genericCapabilities.length];
+		for (int i = 0; i < genericCapabilities.length; i++) {
+			GenericDescriptionImpl cap = new GenericDescriptionImpl();
+			cap.setName(genericCapabilities[i].getName());
+			cap.setVersion(genericCapabilities[i].getVersion());
+			cap.setAttributes(genericCapabilities[i].getAttributes());
+			result[i] = cap;
+		}
+		return result;
+	}
+
+	private GenericSpecification[] createGenericRequires(GenericSpecification[] genericRequires) {
+		if (genericRequires == null || genericRequires.length == 0)
+			return null;
+		GenericSpecification[] result = new GenericSpecification[genericRequires.length];
+		for (int i = 0; i < genericRequires.length; i++) {
+			GenericSpecificationImpl req = new GenericSpecificationImpl();
+			req.setName(genericRequires[i].getName());
+			try {
+				req.setMatchingFilter(genericRequires[i].getMatchingFilter());
+			} catch (InvalidSyntaxException e) {
+				// do nothing; this filter should aready have been tested
+			}
+			result[i] = req;
+		}
+		return result;
 	}
 
 	public BundleSpecification createBundleSpecification(String requiredSymbolicName, VersionRange requiredVersionRange, boolean export, boolean optional) {
@@ -144,6 +185,38 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		exportPackage.setRoot(root);
 		exportPackage.setExporter(exporter);
 		return exportPackage;
+	}
+
+	public GenericDescription createGenericDescription(String name, String type, Version version, Map attributes) {
+		GenericDescriptionImpl result = new GenericDescriptionImpl();
+		result.setName(name);
+		result.setType(type);
+		result.setVersion(version);
+		Object versionObj = attributes == null ? null : attributes.remove(Constants.VERSION_ATTRIBUTE);
+		if (versionObj instanceof Version) // this is just incase someone uses version:version as a key
+			result.setVersion((Version) versionObj);
+		Dictionary attrs = new Hashtable();
+		if (attributes != null)
+			for (Iterator keys = attributes.keySet().iterator(); keys.hasNext();) {
+				Object key = keys.next();
+				attrs.put(key, attributes.get(key));
+			}
+		result.setAttributes(attrs);
+		return result;
+	}
+
+	public GenericSpecification createGenericSpecification(String name, String type, String matchingFilter, boolean optional, boolean multiple) throws InvalidSyntaxException {
+		GenericSpecificationImpl result = new GenericSpecificationImpl();
+		result.setName(name);
+		result.setType(type);
+		result.setMatchingFilter(matchingFilter);
+		int resolution = 0;
+		if (optional)
+			resolution |= GenericSpecification.RESOLUTION_OPTIONAL;
+		if (multiple)
+			resolution |= GenericSpecification.RESOLUTION_MULTIPLE;
+		result.setResolution(resolution);
+		return result;
 	}
 
 	public SystemState createSystemState() {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2005 IBM Corporation and others.
+ * Copyright (c) 2003, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,7 +24,7 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.Version;
 
 public abstract class StateImpl implements State {
-	public static final String[] PROPS = {"osgi.os", "osgi.ws", "osgi.nl", "osgi.arch", Constants.OSGI_FRAMEWORK_SYSTEM_PACKAGES, Constants.OSGI_RESOLVER_MODE, Constants.FRAMEWORK_EXECUTIONENVIRONMENT, "osgi.resolveOptional"}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+	public static final String[] PROPS = {"osgi.os", "osgi.ws", "osgi.nl", "osgi.arch", Constants.OSGI_FRAMEWORK_SYSTEM_PACKAGES, Constants.OSGI_RESOLVER_MODE, Constants.FRAMEWORK_EXECUTIONENVIRONMENT, "osgi.resolveOptional", "osgi.genericAliases"}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
 	transient private Resolver resolver;
 	transient private StateDeltaImpl changes;
 	transient private boolean resolving = false;
@@ -266,6 +266,15 @@ public abstract class StateImpl implements State {
 		bundle.addDependencies(hosts);
 		bundle.addDependencies(resolvedRequires);
 		bundle.addDependencies(resolvedImports);
+		// add dependecies for generics
+		GenericSpecification[] genericRequires = bundle.getGenericRequires();
+		if (genericRequires.length > 0) {
+			ArrayList genericSuppliers = new ArrayList(genericRequires.length);
+			for (int i = 0; i < genericRequires.length; i++)
+				if (genericRequires[i].getSupplier() != null)
+					genericSuppliers.add(genericRequires[i].getSupplier());
+			bundle.addDependencies((BaseDescription[]) genericSuppliers.toArray(new BaseDescription[genericSuppliers.size()]));
+		}
 	}
 
 	private void unresolveConstraints(BundleDescriptionImpl bundle) {
@@ -508,7 +517,7 @@ public abstract class StateImpl implements State {
 			ExportPackageDescription[] exports = systemBundle.getExportPackages();
 			ArrayList newExports = new ArrayList(exports.length);
 			for (int i = 0; i < exports.length; i++)
-				if (((Integer)exports[i].getDirective(ExportPackageDescriptionImpl.EQUINOX_EE)).intValue() < 0)
+				if (((Integer) exports[i].getDirective(ExportPackageDescriptionImpl.EQUINOX_EE)).intValue() < 0)
 					newExports.add(exports[i]);
 			addSystemExports(newExports);
 			systemBundle.setExportPackages((ExportPackageDescription[]) newExports.toArray(new ExportPackageDescription[newExports.size()]));
@@ -525,7 +534,7 @@ public abstract class StateImpl implements State {
 				ExportPackageDescription[] systemExports = StateBuilder.createExportPackages(elements, null, null, null, 2, false);
 				Integer profInx = new Integer(i);
 				for (int j = 0; j < systemExports.length; j++) {
-					((ExportPackageDescriptionImpl)systemExports[j]).setDirective(ExportPackageDescriptionImpl.EQUINOX_EE, profInx);
+					((ExportPackageDescriptionImpl) systemExports[j]).setDirective(ExportPackageDescriptionImpl.EQUINOX_EE, profInx);
 					exports.add(systemExports[j]);
 				}
 			} catch (BundleException e) {
@@ -626,7 +635,6 @@ public abstract class StateImpl implements State {
 		}
 	}
 
-
 	public ExportPackageDescription[] getSystemPackages() {
 		ArrayList result = new ArrayList();
 		BundleDescription[] systemBundles = getBundles(Constants.getInternalSymbolicName());
@@ -634,7 +642,7 @@ public abstract class StateImpl implements State {
 			BundleDescriptionImpl systemBundle = (BundleDescriptionImpl) systemBundles[0];
 			ExportPackageDescription[] exports = systemBundle.getExportPackages();
 			for (int i = 0; i < exports.length; i++)
-				if (((Integer)exports[i].getDirective(ExportPackageDescriptionImpl.EQUINOX_EE)).intValue() >= 0)
+				if (((Integer) exports[i].getDirective(ExportPackageDescriptionImpl.EQUINOX_EE)).intValue() >= 0)
 					result.add(exports[i]);
 		}
 		return (ExportPackageDescription[]) result.toArray(new ExportPackageDescription[result.size()]);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2005 IBM Corporation and others.
+ * Copyright (c) 2003, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,8 +14,7 @@ import java.io.*;
 import java.util.Dictionary;
 import java.util.Map;
 import org.eclipse.osgi.internal.resolver.StateObjectFactoryImpl;
-import org.osgi.framework.BundleException;
-import org.osgi.framework.Version;
+import org.osgi.framework.*;
 
 /**
  * A factory for states and their component objects.  
@@ -32,7 +31,7 @@ public interface StateObjectFactory {
 	 * of a running Equinox framework.
 	 */
 	public static final StateObjectFactory defaultFactory = new StateObjectFactoryImpl();
-	
+
 	/**
 	 * Creates an empty state. The returned state does not have an 
 	 * attached resolver.
@@ -82,6 +81,34 @@ public interface StateObjectFactory {
 	 * @return the created bundle description
 	 */
 	public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location, BundleSpecification[] required, HostSpecification host, ImportPackageSpecification[] imports, ExportPackageDescription[] exports, String[] providedPackages, boolean singleton);
+
+	/**
+	 * Creates a bundle description from the given parameters.
+	 * 
+	 * @param id id for the bundle 
+	 * @param symbolicName symbolic name for the bundle (may be 
+	 * <code>null</code>) 
+	 * @param version version for the bundle (may be <code>null</code>)
+	 * @param location location for the bundle (may be <code>null</code>)
+	 * @param required version constraints for all required bundles (may be 
+	 * <code>null</code>)
+	 * @param host version constraint specifying the host for the bundle to be  
+	 * created. Should be <code>null</code> if the bundle is not a fragment
+	 * @param imports version constraints for all packages imported 
+	 * (may be <code>null</code>)
+	 * @param exports package descriptions of all the exported packages
+	 * (may be <code>null</code>)
+	 * @param providedPackages the list of provided packages (may be <code>null</code>) 
+	 * @param singleton whether the bundle created should be a singleton
+	 * @param attachFragments whether the bundle allows fragments to attach
+	 * @param dynamicFragments whether the bundle allows fragments to dynamically attach
+	 * @param platformFilter the platform filter (may be <code>null</code>)
+	 * @param executionEnvironment the execution environment (may be <code>null</code>)
+	 * @param genericRequires the version constraints for all required capabilities (may be <code>null</code>)
+	 * @param genericCapabilities the specifications of all the capabilities of the bundle (may be <code>null</code>)
+	 * @return the created bundle description
+	 */
+	public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location, BundleSpecification[] required, HostSpecification host, ImportPackageSpecification[] imports, ExportPackageDescription[] exports, String[] providedPackages, boolean singleton, boolean attachFragments, boolean dynamicFragments, String platformFilter, String executionEnvironment, GenericSpecification[] genericRequires, GenericDescription[] genericCapabilities);
 
 	/**
 	 * Returns a bundle description based on the information in the supplied manifest dictionary.
@@ -164,9 +191,9 @@ public interface StateObjectFactory {
 	 * @param versionRange the package versionRange (may be <code>null</code>).
 	 * @param bundleSymbolicName the Bundle-SymbolicName of the bundle that must export the package (may be <code>null</code>)
 	 * @param bundleVersionRange the bundle versionRange (may be <code>null</code>).
-	 * @param directives the directives for this package
+	 * @param directives the directives for this package (may be <code>null</code>)
 	 * @param attributes the arbitrary attributes for the package import (may be <code>null</code>)
-	 * @param importer the importing bundle
+	 * @param importer the importing bundle (may be <code>null</code>)
 	 * @return the created package specification
 	 */
 	public ImportPackageSpecification createImportPackageSpecification(String packageName, VersionRange versionRange, String bundleSymbolicName, VersionRange bundleVersionRange, Map directives, Map attributes, BundleDescription importer);
@@ -183,15 +210,37 @@ public interface StateObjectFactory {
 	 * The Resolver needs to create ExportPackageDescriptions dynamally for a host when a fragment.
 	 * exports a package<p>
 	 * 
-	 * @param packageName
-	 * @param version
-	 * @param directives
-	 * @param attributes
-	 * @param root
-	 * @param exporter
+	 * @param packageName the package name
+	 * @param version the version of the package (may be <code>null</code>)
+	 * @param directives the directives for the package (may be <code>null</code>)
+	 * @param attributes the attributes for the package (may be <code>null</code>)
+	 * @param root whether the package is a root package
+	 * @param exporter the exporter of the package (may be <code>null</code>)
 	 * @return the created package
 	 */
 	public ExportPackageDescription createExportPackageDescription(String packageName, Version version, Map directives, Map attributes, boolean root, BundleDescription exporter);
+
+	/**
+	 * Creates a generic description from the given parameters
+	 * @param name the name of the generic description
+	 * @param type the type of the generic description (may be <code>null</code>)
+	 * @param version the version of the generic description (may be <code>null</code>)
+	 * @param attributes the attributes for the generic description (may be <code>null</code>)
+	 * @return the created generic description
+	 */
+	public GenericDescription createGenericDescription(String name, String type, Version version, Map attributes);
+
+	/**
+	 * Creates a generic specification from the given parameters
+	 * @param name the name of the generic specification
+	 * @param type the type of the generic specification (may be <code>null</code>)
+	 * @param matchingFilter the matching filter (may be <code>null</code>)
+	 * @param optional whether the specification is optional
+	 * @param multiple whether the specification allows for multiple suppliers
+	 * @return the created generic specification
+	 * @throws InvalidSyntaxException if the matching filter is invalid
+	 */
+	public GenericSpecification createGenericSpecification(String name, String type, String matchingFilter, boolean optional, boolean multiple) throws InvalidSyntaxException;
 
 	/**
 	 * Creates an import package specification that is a copy of the given constraint

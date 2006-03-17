@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2005 IBM Corporation and others.
+ * Copyright (c) 2003, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -322,60 +322,70 @@ public class ManifestElement {
 	 * @throws BundleException if the header value is invalid
 	 */
 	public static ManifestElement[] parseHeader(String header, String value) throws BundleException {
-		if (value == null) {
+		if (value == null)
 			return (null);
-		}
-		Vector headerElements = new Vector(10, 10);
+		ArrayList headerElements = new ArrayList(10);
 		Tokenizer tokenizer = new Tokenizer(value);
 		parseloop: while (true) {
 			String next = tokenizer.getToken(";,"); //$NON-NLS-1$
-			if (next == null) {
+			if (next == null)
 				throw new BundleException(NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, header, value));
-			}
 			ArrayList headerValues = new ArrayList();
 			StringBuffer headerValue = new StringBuffer(next);
 			headerValues.add(next);
 
-			if (Debug.DEBUG && Debug.DEBUG_MANIFEST) {
+			if (Debug.DEBUG && Debug.DEBUG_MANIFEST)
 				Debug.print("paserHeader: " + next); //$NON-NLS-1$
-			}
+			boolean directive = false;
 			char c = tokenizer.getChar();
 			// Header values may be a list of ';' separated values.  Just append them all into one value until the first '=' or ','
 			while (c == ';') {
 				next = tokenizer.getToken(";,=:"); //$NON-NLS-1$
-				if (next == null) {
+				if (next == null)
 					throw new BundleException(NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, header, value));
-				}
 				c = tokenizer.getChar();
+				while (c == ':') { // may not really be a :=
+					c = tokenizer.getChar();
+					if (c != '=') {
+						String restOfNext = tokenizer.getToken(";,=:"); //$NON-NLS-1$
+						if (restOfNext == null)
+							throw new BundleException(NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, header, value));
+						next += ":" + c + restOfNext; //$NON-NLS-1$
+						c = tokenizer.getChar();
+					} else
+						directive = true;
+				}
 				if (c == ';' || c == '\0') /* more */{
 					headerValues.add(next);
 					headerValue.append(";").append(next); //$NON-NLS-1$
-					if (Debug.DEBUG && Debug.DEBUG_MANIFEST) {
+					if (Debug.DEBUG && Debug.DEBUG_MANIFEST)
 						Debug.print(";" + next); //$NON-NLS-1$
-					}
 				}
 			}
 			// found the header value create a manifestElement for it.
 			ManifestElement manifestElement = new ManifestElement();
 			manifestElement.value = headerValue.toString();
 			manifestElement.valueComponents = (String[]) headerValues.toArray(new String[headerValues.size()]);
-			boolean directive = false;
-			if (c == ':') {
-				c = tokenizer.getChar();
-				if (c != '=')
-					throw new BundleException(NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, header, value));
-				directive = true;
-			}
-			// now add any attributes for the manifestElement.
-			while (c == '=') {
-				String val = tokenizer.getString(";,"); //$NON-NLS-1$
-				if (val == null) {
-					throw new BundleException(NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, header, value));
-				}
 
-				if (Debug.DEBUG && Debug.DEBUG_MANIFEST) {
-					Debug.print(";" + next + "=" + val); //$NON-NLS-1$ //$NON-NLS-2$
+			// now add any attributes/directives for the manifestElement.
+			while (c == '=' || c == ':') {
+				while (c == ':') { // may not really be a :=
+					c = tokenizer.getChar();
+					if (c != '=') {
+						String restOfNext = tokenizer.getToken("=:"); //$NON-NLS-1$
+						if (restOfNext == null)
+							throw new BundleException(NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, header, value));
+						next += ":" + c + restOfNext; //$NON-NLS-1$
+						c = tokenizer.getChar();
+					} else
+						directive = true;
 				}
+				String val = tokenizer.getString(";,"); //$NON-NLS-1$
+				if (val == null)
+					throw new BundleException(NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, header, value));
+
+				if (Debug.DEBUG && Debug.DEBUG_MANIFEST)
+					Debug.print(";" + next + "=" + val); //$NON-NLS-1$ //$NON-NLS-2$
 				try {
 					if (directive)
 						manifestElement.addDirective(next, val);
@@ -383,41 +393,30 @@ public class ManifestElement {
 						manifestElement.addAttribute(next, val);
 					directive = false;
 				} catch (Exception e) {
-					throw new BundleException(NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, header, value)); 
+					throw new BundleException(NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, header, value));
 				}
 				c = tokenizer.getChar();
 				if (c == ';') /* more */{
 					next = tokenizer.getToken("=:"); //$NON-NLS-1$
-					if (next == null) {
-						throw new BundleException(NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, header, value)); 
-					}
+					if (next == null)
+						throw new BundleException(NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, header, value));
 					c = tokenizer.getChar();
-					if (c == ':') {
-						c = tokenizer.getChar();
-						if (c != '=')
-							throw new BundleException(NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, header, value)); 
-						directive = true;
-					}
 				}
 			}
-			headerElements.addElement(manifestElement);
-			if (Debug.DEBUG && Debug.DEBUG_MANIFEST) {
+			headerElements.add(manifestElement);
+			if (Debug.DEBUG && Debug.DEBUG_MANIFEST)
 				Debug.println(""); //$NON-NLS-1$
-			}
-			if (c == ',') /* another manifest element */{
+			if (c == ',') /* another manifest element */
 				continue parseloop;
-			}
-			if (c == '\0') /* end of value */{
+			if (c == '\0') /* end of value */
 				break parseloop;
-			}
-			throw new BundleException(NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, header, value)); 
+			throw new BundleException(NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, header, value));
 		}
 		int size = headerElements.size();
-		if (size == 0) {
+		if (size == 0)
 			return (null);
-		}
-		ManifestElement[] result = new ManifestElement[size];
-		headerElements.copyInto(result);
+
+		ManifestElement[] result = (ManifestElement[]) headerElements.toArray(new ManifestElement[size]);
 		return (result);
 	}
 
