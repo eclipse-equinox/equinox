@@ -172,19 +172,32 @@ public class TableWriter {
 			Contribution element = (Contribution) newElements[i];
 			if (element.shouldPersist()) {
 				writeStringOrNull(element.getContributorId(), outputNamespace);
-				saveArray(filter(element.getRawChildren()), outputNamespace);
+				saveArray(filterContributionChildren(element), outputNamespace);
 			}
 		}
 		for (int i = 0; i < formerElements.length; i++) {
 			Contribution element = (Contribution) formerElements[i];
 			if (element.shouldPersist()) {
 				writeStringOrNull(element.getContributorId(), outputNamespace);
-				saveArray(filter(element.getRawChildren()), outputNamespace);
+				saveArray(filterContributionChildren(element), outputNamespace);
 			}
 		}
 		outputNamespace.flush();
 		fosNamespace.getFD().sync();
 		outputNamespace.close();
+	}
+
+	// Contribution has raw children in a unique format that combines extensions and extension points.
+	// To filter, need to dis-assmeble, filter, and then re-assemble its raw children
+	private int[] filterContributionChildren(Contribution element) {
+		int[] extensionPoints = filter(element.getExtensionPoints());
+		int[] extensions = filter(element.getExtensions());
+		int[] filteredRawChildren = new int[2 + extensionPoints.length + extensions.length];
+		System.arraycopy(extensionPoints, 0, filteredRawChildren, 2, extensionPoints.length);
+		System.arraycopy(extensions, 0, filteredRawChildren, 2 + extensionPoints.length, extensions.length);
+		filteredRawChildren[Contribution.EXTENSION_POINT] = extensionPoints.length;
+		filteredRawChildren[Contribution.EXTENSION] = extensions.length;
+		return filteredRawChildren;
 	}
 
 	private void saveNamespaces(KeyedHashSet namespacesIndex) throws IOException {
@@ -343,6 +356,8 @@ public class TableWriter {
 		}
 
 		for (int i = 0; i < exts.length; i++) {
+			if (!((ExtensionHandle)exts[i]).shouldPersist())
+				continue;
 			IConfigurationElement[] ces = exts[i].getConfigurationElements();
 			int countCElements = 0;
 			boolean[] save = new boolean[ces.length];
