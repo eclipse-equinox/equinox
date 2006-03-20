@@ -35,6 +35,7 @@ public class PreferenceServiceRegistryHelper implements IRegistryChangeListener 
 	private static final Map scopeRegistry = Collections.synchronizedMap(new HashMap());
 	private ListenerList modifyListeners;
 	private PreferencesService service;
+	private IExtensionRegistry registry;
 
 	/*
 	 * Create and return an IStatus object with ERROR severity and the
@@ -62,11 +63,16 @@ public class PreferenceServiceRegistryHelper implements IRegistryChangeListener 
 	/*
 	 * Constructor for the class.
 	 */
-	public PreferenceServiceRegistryHelper(PreferencesService service) {
+	public PreferenceServiceRegistryHelper(PreferencesService service, Object registryObject) {
 		super();
 		this.service = service;
+		this.registry = (IExtensionRegistry) registryObject;
 		initializeScopes();
-		RegistryFactory.getRegistry().addRegistryChangeListener(this);
+		registry.addRegistryChangeListener(this);
+	}
+	
+	void stop() {
+		registry.removeRegistryChangeListener(this);
 	}
 
 	/*
@@ -178,8 +184,6 @@ public class PreferenceServiceRegistryHelper implements IRegistryChangeListener 
 					if (ELEMENT_MODIFIER.equalsIgnoreCase(elements[j].getName()))
 						addModifyListener(elements[j]);
 			}
-			RegistryFactory.getRegistry().addRegistryChangeListener(this, IPreferencesConstants.RUNTIME_NAME);
-			RegistryFactory.getRegistry().addRegistryChangeListener(this, IPreferencesConstants.PREFERS_NAME);
 		}
 		Object[] source = modifyListeners.getListeners();
 		PreferenceModifyListener[] result = new PreferenceModifyListener[source.length];
@@ -192,7 +196,6 @@ public class PreferenceServiceRegistryHelper implements IRegistryChangeListener 
 	 * extension point.
 	 */
 	private IExtension[] getPrefExtensions() {
-		IExtensionRegistry registry = RegistryFactory.getRegistry();
 		IExtension[] extensionsOld = EMPTY_EXTENSION_ARRAY;
 		IExtension[] extensionsNew = EMPTY_EXTENSION_ARRAY;
 		// "old"
@@ -227,8 +230,6 @@ public class PreferenceServiceRegistryHelper implements IRegistryChangeListener 
 				if (ELEMENT_SCOPE.equalsIgnoreCase(elements[j].getName()))
 					scopeAdded(elements[j]);
 		}
-		RegistryFactory.getRegistry().addRegistryChangeListener(this, IPreferencesConstants.RUNTIME_NAME);
-		RegistryFactory.getRegistry().addRegistryChangeListener(this, IPreferencesConstants.PREFERS_NAME);
 	}
 
 	/* (non-Javadoc)

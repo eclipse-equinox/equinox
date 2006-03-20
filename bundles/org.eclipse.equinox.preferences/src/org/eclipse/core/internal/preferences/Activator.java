@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.core.internal.preferences;
 
-import java.lang.reflect.Constructor;
 import java.util.Hashtable;
 import org.eclipse.core.internal.runtime.RuntimeLog;
 import org.eclipse.core.runtime.IStatus;
@@ -94,10 +93,14 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 		Object service = registryServiceTracker.getService();
 		if (service != null) {
 			try {
-				Object helper = new PreferenceServiceRegistryHelper(PreferencesService.getDefault());
+				Object helper = new PreferenceServiceRegistryHelper(PreferencesService.getDefault(), service);
 				PreferencesService.getDefault().setRegistryHelper(helper);
 			} catch (Exception e) {
 				RuntimeLog.log(new Status(IStatus.ERROR, PI_PREFERENCES, 0, PrefsMessages.noRegistry, e));
+			} catch (NoClassDefFoundError error) {
+				// TODO: Verify behaviour. I think this catch should not be needed since we should never see the
+				// IExtensionRegistry service without resolving against registry.
+				RuntimeLog.log(new Status(IStatus.ERROR, PI_PREFERENCES, 0, PrefsMessages.noRegistry, error));
 			}
 		}
 	}
