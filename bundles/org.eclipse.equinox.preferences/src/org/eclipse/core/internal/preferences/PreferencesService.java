@@ -866,7 +866,7 @@ public class PreferencesService implements IPreferencesService {
 
 	public void setRegistryHelper(Object registryHelper) {
 		if (this.registryHelper != null && this.registryHelper != registryHelper)
-			((PreferenceServiceRegistryHelper) registryHelper).stop();
+			((PreferenceServiceRegistryHelper) this.registryHelper).stop();
 		this.registryHelper = registryHelper;
 	}
 

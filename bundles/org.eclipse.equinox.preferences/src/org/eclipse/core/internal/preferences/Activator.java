@@ -57,7 +57,9 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 		PreferencesOSGiUtils.getDefault().openServices();
 		preferencesService = bundleContext.registerService(IPreferencesService.class.getName(), PreferencesService.getDefault(), new Hashtable());
 		osgiPreferencesService = bundleContext.registerService(org.osgi.service.prefs.PreferencesService.class.getName(), new OSGiPreferencesServiceManager(bundleContext), null);
-		registerServices();
+		// use the string for the class name here in case the registry isn't around
+		registryServiceTracker = new ServiceTracker(bundleContext, "org.eclipse.core.runtime.IExtensionRegistry", this); //$NON-NLS-1$
+		registryServiceTracker.open();
 	}
 
 	/* (non-Javadoc)
@@ -84,13 +86,13 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 		return bundleContext;
 	}
 
-	private void registerServices() {
-		if (registryServiceTracker == null) {
-			// use the string for the class name here in case the registry isn't around
-			registryServiceTracker = new ServiceTracker(bundleContext, "org.eclipse.core.runtime.IExtensionRegistry", this); //$NON-NLS-1$
-			registryServiceTracker.open();
-		}
-		Object service = registryServiceTracker.getService();
+	/* (non-Javadoc)
+	 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
+	 */
+	public synchronized Object addingService(ServiceReference reference) {
+		Object service = bundleContext.getService(reference);
+		// this check is important as it avoids early loading of PreferenceServiceRegistryHelper and allows
+		// this bundle to operate with out necessarily resolving against the registry
 		if (service != null) {
 			try {
 				Object helper = new PreferenceServiceRegistryHelper(PreferencesService.getDefault(), service);
@@ -98,20 +100,17 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 			} catch (Exception e) {
 				RuntimeLog.log(new Status(IStatus.ERROR, PI_PREFERENCES, 0, PrefsMessages.noRegistry, e));
 			} catch (NoClassDefFoundError error) {
-				// TODO: Verify behaviour. I think this catch should not be needed since we should never see the
+				// Normally this catch would not be needed since we should never see the
 				// IExtensionRegistry service without resolving against registry.
-				RuntimeLog.log(new Status(IStatus.ERROR, PI_PREFERENCES, 0, PrefsMessages.noRegistry, error));
+				// However, the check is very lenient with split packages and this can happen when
+				// the preferences bundle is already resolved at the time the registry bundle is installed.
+				// For this case we ignore the error. When refreshed the bundle will be rewired correctly.
+				// null is returned because we don't want to track this particular service reference.
+				return null;
 			}
 		}
-	}
-
-	/* (non-Javadoc)
-	 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
-	 */
-	public synchronized Object addingService(ServiceReference reference) {
-		registerServices();
 		//return the registry service so we track it
-		return bundleContext.getService(reference);
+		return service;
 	}
 
 	/* (non-Javadoc)
