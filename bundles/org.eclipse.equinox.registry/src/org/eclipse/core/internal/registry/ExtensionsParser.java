@@ -649,13 +649,11 @@ public class ExtensionsParser extends DefaultHandler {
 		if (schemaVersion == null)
 			return false;
 
-		String[] testVersions = testVersion.split("\\."); // '.' is a special character in the regular expressions //$NON-NLS-1$
-		String[] schemaVersions = schemaVersion.split("\\."); //$NON-NLS-1$
-		int maxCount = Math.min(testVersions.length, schemaVersions.length);
-
-		for (int i = 0; i < maxCount; i++) {
+		StringTokenizer testVersionTokenizer = new StringTokenizer(testVersion, "."); //$NON-NLS-1$
+		StringTokenizer schemaVersionTokenizer = new StringTokenizer(schemaVersion, "."); //$NON-NLS-1$
+		while(testVersionTokenizer.hasMoreTokens() && schemaVersionTokenizer.hasMoreTokens()) {
 			try {
-				if (Integer.parseInt(schemaVersions[i]) < Integer.parseInt(testVersions[i]))
+				if (Integer.parseInt(schemaVersionTokenizer.nextToken()) < Integer.parseInt(testVersionTokenizer.nextToken()))
 					return false;
 			} catch (NumberFormatException e) {
 				return false;
