@@ -651,7 +651,7 @@ public class ExtensionsParser extends DefaultHandler {
 
 		StringTokenizer testVersionTokenizer = new StringTokenizer(testVersion, "."); //$NON-NLS-1$
 		StringTokenizer schemaVersionTokenizer = new StringTokenizer(schemaVersion, "."); //$NON-NLS-1$
-		while(testVersionTokenizer.hasMoreTokens() && schemaVersionTokenizer.hasMoreTokens()) {
+		while (testVersionTokenizer.hasMoreTokens() && schemaVersionTokenizer.hasMoreTokens()) {
 			try {
 				if (Integer.parseInt(schemaVersionTokenizer.nextToken()) < Integer.parseInt(testVersionTokenizer.nextToken()))
 					return false;
