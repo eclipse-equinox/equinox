@@ -70,11 +70,11 @@ public class CoreException extends Exception {
 	 */
 	public void printStackTrace(PrintStream output) {
 		synchronized (output) {
+			super.printStackTrace(output);
 			if (status.getException() != null) {
 				output.print(getClass().getName() + "[" + status.getCode() + "]: "); //$NON-NLS-1$ //$NON-NLS-2$
 				status.getException().printStackTrace(output);
-			} else
-				super.printStackTrace(output);
+			}
 		}
 	}
 
@@ -87,11 +87,11 @@ public class CoreException extends Exception {
 	 */
 	public void printStackTrace(PrintWriter output) {
 		synchronized (output) {
+			super.printStackTrace(output);
 			if (status.getException() != null) {
 				output.print(getClass().getName() + "[" + status.getCode() + "]: "); //$NON-NLS-1$ //$NON-NLS-2$
 				status.getException().printStackTrace(output);
-			} else
-				super.printStackTrace(output);
+			}
 		}
 	}
 
