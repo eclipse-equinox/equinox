@@ -235,6 +235,7 @@ public class PluginConverterImpl implements PluginConverter {
 	}
 
 	public void writeManifest(File generationLocation, Dictionary manifestToWrite, boolean compatibilityManifest) throws PluginConversionException {
+		long start = System.currentTimeMillis();
 		try {
 			File parentFile = new File(generationLocation.getParent());
 			parentFile.mkdirs();
@@ -281,6 +282,8 @@ public class PluginConverterImpl implements PluginConverter {
 					// only report problems writing to/flushing the file
 				}
 		}
+		if (DEBUG)
+			System.out.println("Time to write out converted manifest to: " + generationLocation + ": "+ (System.currentTimeMillis() - start) + "ms.");  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 
 	private void generateLocalizationEntry() {
@@ -695,6 +698,7 @@ public class PluginConverterImpl implements PluginConverter {
 	}
 
 	public synchronized Dictionary convertManifest(File pluginBaseLocation, boolean compatibility, String target, boolean analyseJars, Dictionary devProperties) throws PluginConversionException {
+		long start = System.currentTimeMillis();
 		if (DEBUG)
 			System.out.println("Convert " + pluginBaseLocation); //$NON-NLS-1$
 		init();
@@ -702,6 +706,8 @@ public class PluginConverterImpl implements PluginConverter {
 		this.devProperties = devProperties;
 		fillPluginInfo(pluginBaseLocation);
 		fillManifest(compatibility, analyseJars);
+		if (DEBUG)
+			System.out.println("Time to convert manifest for: " + pluginBaseLocation + ": " + (System.currentTimeMillis() - start) + "ms."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		return generatedManifest;
 	}
 
