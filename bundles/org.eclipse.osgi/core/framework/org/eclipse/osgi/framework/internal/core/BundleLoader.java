@@ -123,7 +123,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 		try {
 			bundle.getBundleData().open(); /* make sure the BundleData is open */
 		} catch (IOException e) {
-			throw new BundleException(Msg.BUNDLE_READ_EXCEPTION, e); 
+			throw new BundleException(Msg.BUNDLE_READ_EXCEPTION, e);
 		}
 		initialize(proxy.getBundleDescription());
 	}
@@ -316,7 +316,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 					parent = getParentPrivileged(bcl);
 					classloader = bcl;
 				} else {
-					bundle.framework.publishFrameworkEvent(FrameworkEvent.ERROR, bundle, new BundleException(Msg.BUNDLE_NO_CLASSPATH_MATCH)); 
+					bundle.framework.publishFrameworkEvent(FrameworkEvent.ERROR, bundle, new BundleException(Msg.BUNDLE_NO_CLASSPATH_MATCH));
 				}
 			} catch (BundleException e) {
 				bundle.framework.publishFrameworkEvent(FrameworkEvent.ERROR, bundle, e);
@@ -534,11 +534,12 @@ public class BundleLoader implements ClassLoaderDelegate {
 		if (source != null)
 			// 4) attempt to load from source but continue on failure
 			result = source.getResources(name);
+
 		// 5) search the local bundle
 		if (result == null)
 			result = findLocalResources(name);
 		else {
-			//compound the required source results with the local ones
+			// compound the required source results with the local ones
 			Enumeration localResults = findLocalResources(name);
 			if (localResults != null) {
 				Vector compoundResults = new Vector();
@@ -549,16 +550,29 @@ public class BundleLoader implements ClassLoaderDelegate {
 				result = compoundResults.elements();
 			}
 		}
-		if (result != null)
-			return result;
+
 		// 6) attempt to find a dynamic import source; only do this if a required source was not found
-		if (source == null) {
+		if (result == null && source == null) {
 			source = findDynamicSource(pkgName);
 			if (source != null)
-				result = source.getResources(name);
+				return source.getResources(name);
 		}
-		if (result == null && policy != null)
-			result = policy.doBuddyResourcesLoading(name);
+		if (policy != null) {
+			Enumeration buddyResult = policy.doBuddyResourcesLoading(name);
+			if (buddyResult == null)
+				return result;
+			if (result == null)
+				return buddyResult;
+			Vector compoundResults = new Vector();
+			while (result.hasMoreElements())
+				compoundResults.add(result.nextElement());
+			while (buddyResult.hasMoreElements()) {
+				Object url = buddyResult.nextElement();
+				if (!compoundResults.contains(url)) //don't add duplicates
+					compoundResults.add(url);
+			}
+			result = compoundResults.elements();
+		}
 		return result;
 	}
 

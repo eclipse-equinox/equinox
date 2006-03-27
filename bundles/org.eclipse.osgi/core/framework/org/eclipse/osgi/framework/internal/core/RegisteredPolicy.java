@@ -13,6 +13,7 @@ package org.eclipse.osgi.framework.internal.core;
 import java.io.IOException;
 import java.net.URL;
 import java.util.*;
+
 import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.BundleException;
@@ -23,7 +24,7 @@ import org.osgi.framework.BundleException;
  * Note that the registrants must have a direct dependency on the bundle needing buddy.
  */
 public class RegisteredPolicy extends DependentPolicy {
-
+    
 	public RegisteredPolicy(BundleLoader requester) {
 		super(requester);
 
@@ -59,13 +60,14 @@ public class RegisteredPolicy extends DependentPolicy {
 		if (allDependents.size() == 0)
 			allDependents = null;
 	}
-
+    
 	public Class loadClass(String name) {
 		if (allDependents == null)
 			return null;
 
 		Class result = null;
-		for (int i = 0; i < allDependents.size() && result == null; i++) {
+        int size = allDependents.size();
+		for (int i = 0; i < size && result == null; i++) {
 			try {
 				BundleLoaderProxy proxy = buddyRequester.getLoaderProxy((BundleDescription) allDependents.get(i));
 				if (proxy == null)
@@ -84,7 +86,8 @@ public class RegisteredPolicy extends DependentPolicy {
 			return null;
 
 		URL result = null;
-		for (int i = 0; i < allDependents.size() && result == null; i++) {
+        int size = allDependents.size();
+		for (int i = 0; i < size && result == null; i++) {
 			BundleLoaderProxy proxy = buddyRequester.getLoaderProxy((BundleDescription) allDependents.get(i));
 			if (proxy == null)
 				continue;
@@ -97,17 +100,27 @@ public class RegisteredPolicy extends DependentPolicy {
 		if (allDependents == null)
 			return null;
 
-		Enumeration result = null;
-		for (int i = 0; i < allDependents.size() && result == null; i++) {
+		Vector resources = null; //use a Vector to maintain order
+        int size = allDependents.size();
+		for (int i = 0; i < size; i++) {
 			try {
 				BundleLoaderProxy proxy = buddyRequester.getLoaderProxy((BundleDescription) allDependents.get(i));
 				if (proxy == null)
 					continue;
-				result = proxy.getBundleLoader().findResources(name);
+				Enumeration result = proxy.getBundleLoader().findResources(name);
+                if (result != null) {
+                    if (resources == null)
+                        resources = new Vector();
+                    while (result.hasMoreElements()) {
+                        Object url = result.nextElement();
+                        if (!resources.contains(url)) //only add if not already added 
+                            resources.add(url);
+                    }
+                }
 			} catch (IOException e) {
 				//Ignore and keep looking
 			}
 		}
-		return result;
+        return (resources == null) ? null : resources.elements();
 	}
 }

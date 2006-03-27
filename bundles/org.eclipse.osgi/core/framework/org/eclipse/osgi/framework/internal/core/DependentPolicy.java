@@ -42,6 +42,7 @@ public class DependentPolicy implements IBuddyPolicy {
 			return null;
 
 		Class result = null;
+        //size may change, so we must check it every time
 		for (int i = 0; i < allDependents.size() && result == null; i++) {
 			BundleDescription searchedBundle = (BundleDescription) allDependents.get(i);
 			try {
@@ -69,6 +70,7 @@ public class DependentPolicy implements IBuddyPolicy {
 			return null;
 		
 		URL result = null;
+        //size may change, so we must check it every time
 		for (int i = 0; i < allDependents.size() && result == null; i++) {
 			BundleDescription searchedBundle = (BundleDescription) allDependents.get(i);
 			BundleLoaderProxy proxy = buddyRequester.getLoaderProxy(searchedBundle);
@@ -86,23 +88,30 @@ public class DependentPolicy implements IBuddyPolicy {
 		if (allDependents == null)
 			return null;
 		
-		Enumeration result = null;
-		for (int i = 0; i < allDependents.size() && result == null; i++) {
+		Vector resources = null;
+        //size may change, so we must check it every time
+		for (int i = 0; i < allDependents.size(); i++) {
 			BundleDescription searchedBundle = (BundleDescription) allDependents.get(i);
 			try {
 				BundleLoaderProxy proxy = buddyRequester.getLoaderProxy(searchedBundle);
 				if (proxy == null)
 					continue;
-				result = proxy.getBundleLoader().findResources(name);
+				Enumeration result = proxy.getBundleLoader().findResources(name);
+                if (result != null) {
+                    if (resources == null)
+                        resources = new Vector();
+                    while (result.hasMoreElements()) {
+                        Object url = result.nextElement();
+                        if (!resources.contains(url)) //ignore exact duplicates
+                            resources.add(url);
+                    }
+                }
+                addDependent(i, searchedBundle);
 			} catch (IOException e) {
 				//Ignore and keep looking
-				continue;
-			}
-			if (result == null) {
-				addDependent(i, searchedBundle);
 			}
 		}
-		return result;
+        return (resources == null) ? null : resources.elements();
 	}
 
 	private void basicAddImmediateDependents(BundleDescription root) {

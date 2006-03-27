@@ -161,12 +161,21 @@ public class PolicyHandler {
 
 		if (policies == null)
 			return null;
-		Enumeration result = null;
-		for (int i = 0; i < policies.length && result == null; i++) {
-			result = getPolicyImplementation(i).loadResources(name);
+		Vector results = null;
+		for (int i = 0; i < policies.length; i++) {
+			Enumeration result = getPolicyImplementation(i).loadResources(name);
+            if (result != null) {
+            	if (results == null)
+            		results = new Vector(policies.length);
+                while (result.hasMoreElements()) {
+                    Object url = result.nextElement();
+                    if (!results.contains(url)) //only add if not already added 
+                        results.add(url);
+                }
+            }
 		}
 		stopLoading(name);
-		return result;
+		return results == null || results.isEmpty() ? null : results.elements();
 	}
 
 	private boolean startLoading(String name) {
