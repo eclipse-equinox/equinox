@@ -98,6 +98,7 @@ public class BaseAdaptor implements FrameworkAdaptor{
 		if (errors.length > 0)
 			for (int i = 0; i < errors.length; i++)
 				getFrameworkLog().log(errors[i]);
+		// get the storage after the registry has been initialized
 		storage = getStorage();
 		// TODO consider passing args to BaseAdaptorHooks
 	}
@@ -504,8 +505,14 @@ public class BaseAdaptor implements FrameworkAdaptor{
 	 * @return a base storage object.
 	 */
 	protected BaseStorage getStorage() {
-		if (storage == null)
-			storage = BaseStorage.getInstance();
+		if (storage != null)
+			return storage;
+		// this bit of code assumes the registry is initialized with a BaseStorageHook
+		// we want to make sure we are using the same BaseStorage instance as the BaseStorageHook
+		StorageHook[] hooks = hookRegistry.getStorageHooks();
+		for (int i = 0; i < hooks.length && storage == null; i++)
+			if (hooks[i] instanceof BaseStorageHook)
+				storage = ((BaseStorageHook)hooks[i]).getStorage();
 		return storage;
 	}
 }

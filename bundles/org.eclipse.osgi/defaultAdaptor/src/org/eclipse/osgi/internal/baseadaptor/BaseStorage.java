@@ -19,8 +19,7 @@ import java.util.*;
 import org.eclipse.core.runtime.adaptor.EclipseStarter;
 import org.eclipse.core.runtime.adaptor.LocationManager;
 import org.eclipse.core.runtime.internal.adaptor.EclipseAdaptorMsg;
-import org.eclipse.osgi.baseadaptor.BaseAdaptor;
-import org.eclipse.osgi.baseadaptor.BaseData;
+import org.eclipse.osgi.baseadaptor.*;
 import org.eclipse.osgi.baseadaptor.bundlefile.*;
 import org.eclipse.osgi.baseadaptor.hooks.*;
 import org.eclipse.osgi.framework.adaptor.*;
@@ -75,8 +74,6 @@ public class BaseStorage {
 	private static final String PERM_DATA_FILE = ".permdata"; //$NON-NLS-1$
 	private static final byte PERMDATA_VERSION = 1;
 
-	private static final BaseStorage INSTANCE = new BaseStorage();
-
 	private BaseAdaptor adaptor;
 	// assume a file: installURL
 	private String installPath;
@@ -106,8 +103,8 @@ public class BaseStorage {
 	private StateSaver stateSaver;
 	private boolean invalidState;
 
-	private BaseStorage() {
-		// make constructor private
+	BaseStorage() {
+		// make constructor package private
 	}
 
 	public void initialize(BaseAdaptor adaptor) throws IOException {
@@ -1118,7 +1115,4 @@ public class BaseStorage {
 		return nextId++;
 	}
 
-	public static BaseStorage getInstance() {
-		return INSTANCE;
-	}
 }

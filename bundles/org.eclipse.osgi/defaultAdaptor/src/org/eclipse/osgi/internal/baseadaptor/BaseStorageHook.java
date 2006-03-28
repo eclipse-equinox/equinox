@@ -354,4 +354,8 @@ public class BaseStorageHook implements StorageHook, AdaptorHook{
 		// do nothing
 		return null;
 	}
+
+	public BaseStorage getStorage() {
+		return storage;
+	}
 }
