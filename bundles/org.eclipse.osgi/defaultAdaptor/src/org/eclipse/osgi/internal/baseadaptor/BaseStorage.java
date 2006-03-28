@@ -671,8 +671,8 @@ public class BaseStorage {
 				// just ignore bundle datas with invalid manifests
 			}
 		}
+		// we do not set the cached timestamp here because we want a new one to be used from the new system state object (bug 132978)
 		// we need the state resolved
-		systemState.setTimeStamp(timeStamp);
 		systemState.resolve();
 		invalidState = false;
 		return stateManager;
