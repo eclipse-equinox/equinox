@@ -358,7 +358,7 @@ public interface IPath extends Cloneable {
 	 * trailing separator, the result will not have a trailing
 	 * separator.
 	 * If the number equals or exceeds the number
-	 * of segments in this path, an empty path is returned.
+	 * of segments in this path, a path with no segments is returned.
 	 * </p>
 	 *
 	 * @param count the number of segments to remove
