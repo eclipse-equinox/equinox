@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import org.eclipse.osgi.framework.adaptor.BundleClassLoader;
 import org.eclipse.osgi.framework.adaptor.BundleData;
 import org.eclipse.osgi.framework.debug.Debug;
+import org.eclipse.osgi.internal.profile.Profile;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
@@ -157,6 +158,8 @@ public class PackageAdminImpl implements PackageAdmin {
 
 	synchronized void doResolveBundles(AbstractBundle[] bundles, boolean refreshPackages) {
 		try {
+			if (Profile.PROFILE && Profile.STARTUP)
+				Profile.logEnter("resolve bundles"); //$NON-NLS-1$
 			framework.publishBundleEvent(Framework.BATCHEVENT_BEGIN, framework.systemBundle);
 			AbstractBundle[] refreshedBundles = null;
 			BundleDescription[] descriptions = null;
@@ -205,6 +208,8 @@ public class PackageAdminImpl implements PackageAdmin {
 			if (t instanceof Error)
 				throw (Error) t;
 		} finally {
+			if (Profile.PROFILE && Profile.STARTUP)
+				Profile.logExit("resolve bundles"); //$NON-NLS-1$
 			framework.publishBundleEvent(Framework.BATCHEVENT_END, framework.systemBundle);
 			if (refreshPackages)
 				framework.publishFrameworkEvent(FrameworkEvent.PACKAGES_REFRESHED, framework.systemBundle, null);

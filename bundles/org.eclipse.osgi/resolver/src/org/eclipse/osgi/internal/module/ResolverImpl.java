@@ -466,11 +466,16 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		int cycleSize = cycle.size();
 		if (cycleSize == 0)
 			return;
-		for (int i = cycleSize - 1; i >= 0; i--)
-			if (!((ResolverBundle) cycle.get(i)).isResolvable())
+		for (int i = cycleSize - 1; i >= 0; i--) {
+			ResolverBundle cycleBundle = (ResolverBundle) cycle.get(i);
+			// clear grouping (uses) constraints so we can do proper constaint checking now that the cycle is resolved
+			groupingChecker.removeAllExportConstraints(cycleBundle);
+			groupingChecker.addInitialGroupingConstraints(cycleBundle);
+			if (!cycleBundle.isResolvable())
 				cycle.remove(i); // remove this from the list of bundles that need reresolved
-		boolean reresolveCycle = cycle.size() != cycleSize; //we removed an unresolvable bundle; must reresolve remaining cycle
-		for (int i = 0; !reresolveCycle && i < cycle.size(); i++) {
+		}
+		boolean reresolveCycle = cycle.size() != cycleSize || !isCycleConsistent(cycle); //we removed an unresolvable bundle; must reresolve remaining cycle
+		for (int i = 0; i < cycle.size(); i++) {
 			ResolverBundle rb = (ResolverBundle) cycle.get(0);
 			// Check that we haven't wired to any dropped exports
 			ResolverImport[] imports = rb.getImportPackages();
@@ -482,11 +487,18 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 				}
 		}
 		if (reresolveCycle) {
-			for (int i = 0; i < cycle.size(); i++)
-				((ResolverBundle) cycle.get(i)).clearWires(false);
+			for (int i = 0; i < cycle.size(); i++) {
+				ResolverBundle cycleBundle = (ResolverBundle) cycle.get(i);
+				groupingChecker.removeAllExportConstraints(cycleBundle);
+				groupingChecker.addInitialGroupingConstraints(cycleBundle);
+				cycleBundle.clearWires(false);
+				cycleBundle.clearRefs();
+			}
+			groupingChecker.setCheckCycles(true); // need to do the expensive cycle checks now
 			ArrayList innerCycle = new ArrayList(cycle.size());
 			for (int i = 0; i < cycle.size(); i++)
 				resolveBundle((ResolverBundle) cycle.get(i), innerCycle);
+			groupingChecker.setCheckCycles(false); // disable the expensive cycle checks
 			checkCycle(innerCycle);
 		} else {
 			for (int i = 0; i < cycle.size(); i++) {
@@ -495,6 +507,23 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 				setBundleResolved((ResolverBundle) cycle.get(i));
 			}
 		}
+	}
+
+	// checks all the uses constraints of a cycle to make sure they 
+	// are consistent now that the cycle has been resolved.
+	private boolean isCycleConsistent(ArrayList cycle) {
+		for (Iterator iter = cycle.iterator(); iter.hasNext();) {
+			ResolverBundle bundle = (ResolverBundle) iter.next();
+			BundleConstraint[] requires = bundle.getRequires();
+			for (int i = 0; i < requires.length; i++)
+				if (requires[i].getMatchingBundle() != null && groupingChecker.isConsistent(requires[i], requires[i].getMatchingBundle()) != null)
+					return false;
+			ResolverImport[] imports = bundle.getImportPackages();
+			for (int i = 0; i < imports.length; i++)
+				if (imports[i].getMatchingExport() != null && groupingChecker.isConsistent(imports[i], imports[i].getMatchingExport()) != null)
+					return false;
+		}
+		return true;
 	}
 
 	private boolean selectSingletons(ResolverBundle[] bundles, ArrayList rejectedSingletons) {
@@ -619,14 +648,14 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		}
 		// Need to check that all mandatory imports are wired. If they are then
 		// set the bundle RESOLVED, otherwise set it back to UNRESOLVED
-		if (!failed && !cycle.contains(bundle)) {
-			setBundleResolved(bundle);
-			if (DEBUG)
-				ResolverImpl.log(bundle + " RESOLVED"); //$NON-NLS-1$
-		} else if (failed) {
+		if (failed) {
 			setBundleUnresolved(bundle, false);
 			if (DEBUG)
 				ResolverImpl.log(bundle + " NOT RESOLVED"); //$NON-NLS-1$
+		} else if (!cycle.contains(bundle)) {
+			setBundleResolved(bundle);
+			if (DEBUG)
+				ResolverImpl.log(bundle + " RESOLVED"); //$NON-NLS-1$
 		}
 
 		if (bundle.getState() == ResolverBundle.UNRESOLVED)
@@ -696,8 +725,11 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		if (req.getMatchingBundle() != null) {
 			// Check for unrecorded cyclic dependency
 			if (req.getMatchingBundle().getState() == ResolverBundle.RESOLVING)
-				if (!cycle.contains(req.getBundle()))
+				if (!cycle.contains(req.getBundle())) {
 					cycle.add(req.getBundle());
+					if (DEBUG_CYCLES)
+						ResolverImpl.log("require-bundle cycle: " + req.getBundle() + " -> " + req.getMatchingBundle()); //$NON-NLS-1$ //$NON-NLS-2$
+				}
 			if (DEBUG_REQUIRES)
 				ResolverImpl.log("  - already wired"); //$NON-NLS-1$
 			return true; // Already wired (due to grouping dependencies) so just return
@@ -725,8 +757,11 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 				// Check cyclic dependencies
 				if (bundle.getState() == ResolverBundle.RESOLVING)
 					// If the bundle is RESOLVING, we have a cyclic dependency
-					if (!cycle.contains(req.getBundle()))
+					if (!cycle.contains(req.getBundle())) {
 						cycle.add(req.getBundle());
+						if (DEBUG_CYCLES)
+							ResolverImpl.log("require-bundle cycle: " + req.getBundle() + " -> " + req.getMatchingBundle()); //$NON-NLS-1$ //$NON-NLS-2$
+					}
 				if (DEBUG_REQUIRES)
 					ResolverImpl.log("Found match: " + bundle.getBundle() + ". Wiring"); //$NON-NLS-1$ //$NON-NLS-2$
 				result = checkRequiresConstraints(req, req.getMatchingBundle());
@@ -754,8 +789,11 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		if (imp.getMatchingExport() != null) {
 			// Check for unrecorded cyclic dependency
 			if (imp.getMatchingExport().getExporter().getState() == ResolverBundle.RESOLVING)
-				if (!cycle.contains(imp.getBundle()))
+				if (!cycle.contains(imp.getBundle())) {
 					cycle.add(imp.getBundle());
+					if (DEBUG_CYCLES)
+						ResolverImpl.log("import-package cycle: " + imp.getBundle() + " -> " + imp.getMatchingExport() + " from " + imp.getMatchingExport().getBundle()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				}
 			if (DEBUG_IMPORTS)
 				ResolverImpl.log("  - already wired"); //$NON-NLS-1$
 			return true; // Already wired (due to grouping dependencies) so just return
@@ -805,8 +843,11 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 					if (imp.getBundle() != export.getExporter())
 						if (export.getExporter().getState() == ResolverBundle.RESOLVING) {
 							// If the exporter is RESOLVING, we have a cyclic dependency
-							if (!cycle.contains(imp.getBundle()))
+							if (!cycle.contains(imp.getBundle())) {
 								cycle.add(imp.getBundle());
+								if (DEBUG_CYCLES)
+									ResolverImpl.log("import-package cycle: " + imp.getBundle() + " -> " + imp.getMatchingExport() + " from " + imp.getMatchingExport().getBundle()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+							}
 						}
 					if (DEBUG_IMPORTS)
 						ResolverImpl.log("Found match: " + export.getExporter() + ". Wiring " + imp.getBundle() + ":" + imp.getName()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$

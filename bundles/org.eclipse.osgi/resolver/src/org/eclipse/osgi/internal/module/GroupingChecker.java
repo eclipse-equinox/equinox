@@ -23,6 +23,7 @@ public class GroupingChecker {
 	//     the exports HashMap is keyed by
 	//       ResolverExport -> Object[] {'uses' constraint ArrayList, transitive constraint cache} 
 	HashMap bundles = new HashMap();
+	private boolean checkCycles = false;
 
 	// Gets all constraints for an exported package.
 	// this will perform transitive closure on the uses constraints.
@@ -35,8 +36,8 @@ public class GroupingChecker {
 			return (ResolverExport[]) cachedResults[1];
 		ArrayList resultlist = getConstraintsList(constrained);
 		ResolverExport[] results = (ResolverExport[]) resultlist.toArray(new ResolverExport[resultlist.size()]);
-		if (constrained.getExporter().isResolved()) {
-			// if the bundle is resolved then we can add the results to the cached results
+		if (!checkCycles || constrained.getExporter().isResolved()) {
+			// if the bundle is resolved or we are not checking cycles then we can add the results to the cached results
 			if (cachedResults == null)
 				cachedResults = createConstraintsCache(constrained); // should have been created by getConstraintsList
 			cachedResults[1] = results;
@@ -333,5 +334,9 @@ public class GroupingChecker {
 				return false;
 			return ((UsesRequiredExport) o).export.getExporter() == export.getExporter() && usesName.equals(((UsesRequiredExport) o).usesName);
 		}
+	}
+
+	public void setCheckCycles(boolean checkCycles) {
+		this.checkCycles = checkCycles;
 	}
 }

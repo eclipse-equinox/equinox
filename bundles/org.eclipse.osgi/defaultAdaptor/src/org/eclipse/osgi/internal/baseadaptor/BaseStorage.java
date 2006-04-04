@@ -417,7 +417,7 @@ public class BaseStorage {
 	}
 
 	private void savePermissionStorage() {
-		if (permissionStorage == null || !permissionStorage.isDirty())
+		if (permissionStorage == null || isReadOnly() || !permissionStorage.isDirty())
 			return;
 		try {
 			ManagedOutputStream fmos = storageManager.getOutputStream(PERM_DATA_FILE);
@@ -468,7 +468,7 @@ public class BaseStorage {
 
 	private void saveBundleDatas() {
 		// the cache and the state match
-		if (stateManager == null || isReadOnly() || timeStamp == stateManager.getSystemState().getTimeStamp())
+		if (stateManager == null || isReadOnly() || (timeStamp == stateManager.getSystemState().getTimeStamp() && !stateManager.saveNeeded()))
 			return;
 		try {
 			ManagedOutputStream fmos = storageManager.getOutputStream(LocationManager.BUNDLE_DATA_FILE);
