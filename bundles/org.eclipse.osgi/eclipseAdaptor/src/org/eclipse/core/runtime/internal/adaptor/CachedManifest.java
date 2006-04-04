@@ -82,6 +82,24 @@ public class CachedManifest extends Dictionary {
 			return storageHook.getBuddyList();
 		if (Constants.REGISTERED_POLICY.equalsIgnoreCase(keyString))
 			return storageHook.getRegisteredBuddyList();
+		if (Constants.BUNDLE_ACTIVATOR.equalsIgnoreCase(keyString))
+			return storageHook.getBaseData().getActivator();
+		if (Constants.ECLIPSE_LAZYSTART.equals(keyString) || Constants.ECLIPSE_AUTOSTART.equals(keyString)) {
+			if (!storageHook.isAutoStartable())
+				return null;
+			if (storageHook.getAutoStartExceptions() == null)
+				return Boolean.TRUE.toString();
+			StringBuffer result = new StringBuffer(Boolean.TRUE.toString());
+			result.append(";").append(Constants.ECLIPSE_LAZYSTART_EXCEPTIONS).append("=\""); //$NON-NLS-1$ //$NON-NLS-2$
+			String[] exceptions = storageHook.getAutoStartExceptions();
+			for (int i = 0; i < exceptions.length; i++) {
+				if (i > 0)
+					result.append(","); //$NON-NLS-1$
+				result.append(exceptions[i]);
+			}
+			result.append("\""); //$NON-NLS-1$
+			return result.toString();
+		}
 		Dictionary result = getManifest();
 		return result == null ? null : result.get(key);
 	}
