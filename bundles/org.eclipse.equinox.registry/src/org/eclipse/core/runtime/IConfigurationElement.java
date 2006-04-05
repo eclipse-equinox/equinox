@@ -76,6 +76,7 @@ public interface IConfigurationElement {
 	 *   could not be created for any reason
 	 * @see IExecutableExtension#setInitializationData(IConfigurationElement, String, Object)
 	 * @see IExecutableExtensionFactory
+	 * @throws InvalidRegistryObjectException if this configuration element is no longer valid
 	 */
 	public Object createExecutableExtension(String propertyName) throws CoreException;
 
