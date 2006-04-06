@@ -303,6 +303,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 	}
 
 	final BundleClassLoader createClassLoader() {
+		// TODO double-check lock (bug 50178)!!
 		if (classloader != null)
 			return classloader;
 		synchronized (this) {

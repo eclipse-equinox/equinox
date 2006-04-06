@@ -46,6 +46,7 @@ public class BundleLoaderProxy implements RequiredBundle {
 	}
 
 	BundleLoader getBundleLoader() {
+		// TODO double-check lock (bug 50178)!!
 		if (loader == null && bundle.isResolved()) {
 			synchronized (this) {
 				if (loader == null)

@@ -863,6 +863,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	public Object getService(org.osgi.framework.ServiceReference reference) {
 		checkValid();
 
+		// TODO double-check lock (bug 50178)!!
 		if (servicesInUse == null) {
 			synchronized (contextLock) {
 				if (servicesInUse == null) {

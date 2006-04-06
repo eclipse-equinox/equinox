@@ -527,6 +527,7 @@ public class BundleHost extends AbstractBundle {
 	}
 
 	protected BundleLoaderProxy getLoaderProxy() {
+		// TODO double-check lock (bug 50178)!!
 		if (proxy == null) {
 			synchronized (this) {
 				if (proxy == null) {
