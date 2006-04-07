@@ -19,6 +19,7 @@ import org.eclipse.osgi.baseadaptor.bundlefile.BundleFile;
 import org.eclipse.osgi.baseadaptor.hooks.StorageHook;
 import org.eclipse.osgi.framework.util.KeyedElement;
 import org.eclipse.osgi.internal.provisional.verifier.CertificateChain;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 
 public class SignedStorageHook implements StorageHook {
@@ -26,7 +27,8 @@ public class SignedStorageHook implements StorageHook {
 	static final int HASHCODE = KEY.hashCode();
 	private static final int STORAGE_VERSION = 1;
 	private static ArrayList saveChainCache = new ArrayList(5);
-	private static long lastIDSaved;
+	private static long firstIDSaved = -1;
+	private static long lastIDSaved = -1;
 	private static ArrayList loadChainCache = new ArrayList(5);
 	private static long lastIDLoaded;
 
@@ -112,9 +114,11 @@ public class SignedStorageHook implements StorageHook {
 	}
 
 	public void save(DataOutputStream os) throws IOException {
-		if (lastIDSaved > bundledata.getBundleID())
+		getFirstLastID();
+		if (firstIDSaved == bundledata.getBundleID())
 			saveChainCache.clear();
-		lastIDSaved = bundledata.getBundleID();
+		if (lastIDSaved == bundledata.getBundleID())
+			firstIDSaved = lastIDSaved = -1;
 		BundleFile bundleFile = bundledata.getBundleFile();
 		CertificateChain[] chains = null;
 		String md5Result = null;
@@ -177,6 +181,16 @@ public class SignedStorageHook implements StorageHook {
 		os.writeBoolean(shaResult != null);
 		if (shaResult != null)
 			os.writeUTF(shaResult);
+	}
+
+	private void getFirstLastID() {
+		if (firstIDSaved >= 0)
+			return;
+		Bundle[] bundles = bundledata.getAdaptor().getContext().getBundles();
+		if (bundles.length > 1) {
+			firstIDSaved = bundles[1].getBundleId();
+			lastIDSaved = bundles[bundles.length - 1].getBundleId();
+		}
 	}
 
 	public void copy(StorageHook storageHook) {
