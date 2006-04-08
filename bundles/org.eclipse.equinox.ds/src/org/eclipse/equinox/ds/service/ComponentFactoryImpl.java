@@ -21,7 +21,7 @@ import org.osgi.service.component.*;
  * register a ComponentFactory service to allow new component configurations 
  * to be created and activated.
  * 
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class ComponentFactoryImpl implements ComponentFactory {
 
@@ -57,11 +57,14 @@ public class ComponentFactoryImpl implements ComponentFactory {
 	public ComponentInstance newInstance(Dictionary newProperties) {
 
 		// merge properties
-		Hashtable properties = (Hashtable) cdp.getProperties().clone();
-		Enumeration propsEnum = newProperties.keys();
-		while (propsEnum.hasMoreElements()) {
-			Object key = propsEnum.nextElement();
-			properties.put(key, newProperties.get(key));
+		Hashtable properties = cdp.getProperties();
+		if (newProperties != null) {
+			properties = (Hashtable) properties.clone();
+			Enumeration propsEnum = newProperties.keys();
+			while (propsEnum.hasMoreElements()) {
+				Object key = propsEnum.nextElement();
+				properties.put(key, newProperties.get(key));
+			}
 		}
 
 		// create a new cdp (adds to resolver enabledCDPs list)
