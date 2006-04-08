@@ -21,7 +21,7 @@ import org.osgi.service.component.*;
  * register a ComponentFactory service to allow new component configurations 
  * to be created and activated.
  * 
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1 $
  */
 public class ComponentFactoryImpl implements ComponentFactory {
 
@@ -79,13 +79,8 @@ public class ComponentFactoryImpl implements ComponentFactory {
 		// if it has one)
 		main.resolver.instanceProcess.registerComponentConfigs(Collections.singletonList(newCDP));
 
-		// get instance of new cdp to return
-
-		if (newCDP.getComponentDescription().isImmediate()) {
-			// if cdp is immediate then instanceProcess created one
-			return (ComponentInstance) newCDP.getInstances().get(0);
-		}
-
-		return main.resolver.instanceProcess.buildDispose.buildComponentConfigInstance(null, newCDP);
+		// Instance process will have created an instance
+		
+		return (ComponentInstance) newCDP.getInstances().get(0);
 	}
 }

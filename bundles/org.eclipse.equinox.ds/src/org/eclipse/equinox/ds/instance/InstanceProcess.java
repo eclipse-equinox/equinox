@@ -106,14 +106,6 @@ public class InstanceProcess implements ConfigurationListener {
 			if (DEBUG)
 				System.out.println("InstanceProcess: buildInstances: component name = " + cd.getName());
 
-			// if component is immediate - create instance immediately
-			if (cd.isImmediate()) {
-				try {
-					buildDispose.buildComponentConfigInstance(null, cdp);
-				} catch (ComponentException e) {
-					Log.log(1, "[SCR] Error attempting to build Component.", e);
-				}
-			}
 
 			// ComponentFactory
 			if (cdp.isComponentFactory()) {
@@ -143,9 +135,21 @@ public class InstanceProcess implements ConfigurationListener {
 				// for the Service Component on behalf of the Service
 				// Component.
 				cdp.setServiceRegistration(cd.getBundleContext().registerService(ComponentFactory.class.getName(), new ComponentFactoryImpl(cdp, main), cdp.getProperties()));
-
-				// if ServiceFactory or Service
-			} else if (cd.getService() != null) {
+				continue; // break so we do not create an instance
+			} 
+			
+			// if component is immediate or a factory instance - create instance
+			// if it is a factory instance, we need to create it before we register its service
+			if (cd.isImmediate() || (cd.getFactory() != null)) {
+				try {
+					buildDispose.buildComponentConfigInstance(null, cdp);
+				} catch (ComponentException e) {
+					Log.log(1, "[SCR] Error attempting to build Component.", e);
+				}
+			}
+			
+			// if Service
+			if (cd.getService() != null) {
 				RegisterComponentService.registerService(this, cdp);
 			}
 
