@@ -13,10 +13,8 @@ package org.eclipse.equinox.ds.parser;
 import org.eclipse.equinox.ds.model.ProvideDescription;
 import org.eclipse.equinox.ds.model.ServiceDescription;
 import org.xml.sax.Attributes;
-import org.xml.sax.helpers.DefaultHandler;
 
-class ProvideElement extends DefaultHandler {
-	private ParserHandler root;
+class ProvideElement extends ElementHandler {
 	private ServiceElement parent;
 	private ProvideDescription provide;
 
@@ -25,34 +23,19 @@ class ProvideElement extends DefaultHandler {
 		this.parent = parent;
 		provide = new ProvideDescription();
 
-		int size = attributes.getLength();
-		for (int i = 0; i < size; i++) {
-			String key = attributes.getQName(i);
-			String value = attributes.getValue(i);
-
-			if (key.equals(ParserConstants.INTERFACE_ATTRIBUTE)) {
-				provide.setInterfacename(value);
-				continue;
-			}
-			root.logError("unrecognized provide element attribute: " + key);
-		}
+		processAttributes(attributes);
 
 		if (provide.getInterfacename() == null) {
 			root.logError("provide interface not specified");
 		}
 	}
 
-	public void startElement(String uri, String localName, String qName, Attributes attributes) {
-		root.logError("provide does not support nested elements");
-	}
-
-	public void characters(char[] ch, int start, int length) {
-		int end = start + length;
-		for (int i = start; i < end; i++) {
-			if (!Character.isWhitespace(ch[i])) {
-				root.logError("element body must be empty");
-			}
+	protected void handleAttribute(String name, String value) {
+		if (name.equals(ParserConstants.INTERFACE_ATTRIBUTE)) {
+			provide.setInterfacename(value);
+			return;
 		}
+		root.logError("unrecognized provide element attribute: " + name);
 	}
 
 	public void endElement(String uri, String localName, String qName) {
@@ -60,5 +43,9 @@ class ProvideElement extends DefaultHandler {
 
 		service.addProvide(provide);
 		root.setHandler(parent);
+	}
+
+	protected String getElementName() {
+		return "provide";
 	}
 }

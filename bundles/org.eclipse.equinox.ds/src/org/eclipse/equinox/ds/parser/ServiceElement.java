@@ -13,10 +13,9 @@ package org.eclipse.equinox.ds.parser;
 import org.eclipse.equinox.ds.model.ComponentDescription;
 import org.eclipse.equinox.ds.model.ServiceDescription;
 import org.xml.sax.Attributes;
-import org.xml.sax.helpers.DefaultHandler;
+import org.xml.sax.SAXException;
 
-class ServiceElement extends DefaultHandler {
-	private ParserHandler root;
+class ServiceElement extends ElementHandler {
 	private ComponentElement parent;
 	private ServiceDescription service;
 
@@ -25,38 +24,30 @@ class ServiceElement extends DefaultHandler {
 		this.parent = parent;
 		service = new ServiceDescription();
 
-		int size = attributes.getLength();
-		for (int i = 0; i < size; i++) {
-			String key = attributes.getQName(i);
-			String value = attributes.getValue(i);
+		processAttributes(attributes);
+	}
 
-			if (key.equals(ParserConstants.SERVICEFACTORY_ATTRIBUTE)) {
-				service.setServicefactory(value.equalsIgnoreCase("true"));
-				continue;
-			}
-			root.logError("unrecognized service element attribute: " + key);
+	protected void handleAttribute(String name, String value) {
+		if (name.equals(ParserConstants.SERVICEFACTORY_ATTRIBUTE)) {
+			service.setServicefactory(value.equalsIgnoreCase("true"));
+			return;
 		}
+		root.logError("unrecognized service element attribute: " + name);
 	}
 
 	ServiceDescription getServiceDescription() {
 		return service;
 	}
 
-	public void startElement(String uri, String localName, String qName, Attributes attributes) {
-		if (localName.equals(ParserConstants.PROVIDE_ELEMENT)) {
-			root.setHandler(new ProvideElement(root, this, attributes));
-			return;
-		}
-		root.logError("unrecognized element of service: " + localName);
-	}
-
-	public void characters(char[] ch, int start, int length) {
-		int end = start + length;
-		for (int i = start; i < end; i++) {
-			if (!Character.isWhitespace(ch[i])) {
-				root.logError("element body must be empty");
+	public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
+		if (isSCRNamespace(uri)) {
+			if (localName.equals(ParserConstants.PROVIDE_ELEMENT)) {
+				root.setHandler(new ProvideElement(root, this, attributes));
+				return;
 			}
 		}
+		
+		super.startElement(uri, localName, qName, attributes);
 	}
 
 	public void endElement(String uri, String localName, String qName) {
@@ -75,5 +66,9 @@ class ServiceElement extends DefaultHandler {
 
 		component.setService(service);
 		root.setHandler(parent);
+	}
+
+	protected String getElementName() {
+		return "service";
 	}
 }

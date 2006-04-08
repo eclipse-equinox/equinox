@@ -13,10 +13,8 @@ package org.eclipse.equinox.ds.parser;
 import org.eclipse.equinox.ds.model.ComponentDescription;
 import org.eclipse.equinox.ds.model.ImplementationDescription;
 import org.xml.sax.Attributes;
-import org.xml.sax.helpers.DefaultHandler;
 
-class ImplementationElement extends DefaultHandler {
-	private ParserHandler root;
+class ImplementationElement extends ElementHandler {
 	private ComponentElement parent;
 	private ImplementationDescription implementation;
 
@@ -25,34 +23,19 @@ class ImplementationElement extends DefaultHandler {
 		this.parent = parent;
 		implementation = new ImplementationDescription();
 
-		int size = attributes.getLength();
-		for (int i = 0; i < size; i++) {
-			String key = attributes.getQName(i);
-			String value = attributes.getValue(i);
-
-			if (key.equals(ParserConstants.CLASS_ATTRIBUTE)) {
-				implementation.setClassname(value);
-				continue;
-			}
-			root.logError("unrecognized implementation element attribute: " + key);
-		}
-
+		processAttributes(attributes);
+		
 		if (implementation.getClassname() == null) {
 			root.logError("implementation class not specified");
 		}
 	}
 
-	public void startElement(String uri, String localName, String qName, Attributes attributes) {
-		root.logError("implementation does not support nested elements");
-	}
-
-	public void characters(char[] ch, int start, int length) {
-		int end = start + length;
-		for (int i = start; i < end; i++) {
-			if (!Character.isWhitespace(ch[i])) {
-				root.logError("element body must be empty");
-			}
+	protected void handleAttribute(String name, String value) {
+		if (name.equals(ParserConstants.CLASS_ATTRIBUTE)) {
+			implementation.setClassname(value);
+			return;
 		}
+		root.logError("unrecognized implementation element attribute: " + name);
 	}
 
 	public void endElement(String uri, String localName, String qName) {
@@ -63,5 +46,9 @@ class ImplementationElement extends DefaultHandler {
 
 		component.setImplementation(implementation);
 		root.setHandler(parent);
+	}
+
+	protected String getElementName() {
+		return "implementation";
 	}
 }

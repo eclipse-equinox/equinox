@@ -14,10 +14,8 @@ import java.util.*;
 import org.eclipse.equinox.ds.model.ComponentDescription;
 import org.eclipse.equinox.ds.model.PropertyValueDescription;
 import org.xml.sax.Attributes;
-import org.xml.sax.helpers.DefaultHandler;
 
-class PropertyElement extends DefaultHandler {
-	private ParserHandler root;
+class PropertyElement extends ElementHandler {
 	private ComponentElement parent;
 	private PropertyValueDescription property;
 	private List values;
@@ -28,35 +26,29 @@ class PropertyElement extends DefaultHandler {
 		property = new PropertyValueDescription();
 		values = new ArrayList();
 
-		int size = attributes.getLength();
-		for (int i = 0; i < size; i++) {
-			String key = attributes.getQName(i);
-			String value = attributes.getValue(i);
-
-			if (key.equals(ParserConstants.NAME_ATTRIBUTE)) {
-				property.setName(value);
-				continue;
-			}
-
-			if (key.equals(ParserConstants.VALUE_ATTRIBUTE)) {
-				property.setValue(value);
-				continue;
-			}
-
-			if (key.equals(ParserConstants.TYPE_ATTRIBUTE)) {
-				property.setType(value);
-				continue;
-			}
-			root.logError("unrecognized properties element attribute: " + key);
-		}
-
+		processAttributes(attributes);
+		
 		if (property.getName() == null) {
 			root.logError("property name not specified");
 		}
 	}
 
-	public void startElement(String uri, String localName, String qName, Attributes attributes) {
-		root.logError("property does not support nested elements");
+	protected void handleAttribute(String name, String value) {
+		if (name.equals(ParserConstants.NAME_ATTRIBUTE)) {
+			property.setName(value);
+			return;
+		}
+
+		if (name.equals(ParserConstants.VALUE_ATTRIBUTE)) {
+			property.setValue(value);
+			return;
+		}
+
+		if (name.equals(ParserConstants.TYPE_ATTRIBUTE)) {
+			property.setType(value);
+			return;
+		}
+		root.logError("unrecognized properties element attribute: " + name);
 	}
 
 	public void characters(char[] ch, int start, int length) {
@@ -218,5 +210,9 @@ class PropertyElement extends DefaultHandler {
 		ComponentDescription component = parent.getComponentDescription();
 		component.addPropertyDescription(property);
 		root.setHandler(parent);
+	}
+
+	protected String getElementName() {
+		return "property";
 	}
 }

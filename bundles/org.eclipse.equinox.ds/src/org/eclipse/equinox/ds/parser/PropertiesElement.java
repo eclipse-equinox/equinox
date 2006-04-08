@@ -13,10 +13,8 @@ package org.eclipse.equinox.ds.parser;
 import org.eclipse.equinox.ds.model.ComponentDescription;
 import org.eclipse.equinox.ds.model.PropertyResourceDescription;
 import org.xml.sax.Attributes;
-import org.xml.sax.helpers.DefaultHandler;
 
-class PropertiesElement extends DefaultHandler {
-	private ParserHandler root;
+class PropertiesElement extends ElementHandler {
 	private ComponentElement parent;
 	private PropertyResourceDescription properties;
 
@@ -25,39 +23,28 @@ class PropertiesElement extends DefaultHandler {
 		this.parent = parent;
 		properties = new PropertyResourceDescription();
 
-		int size = attributes.getLength();
-		for (int i = 0; i < size; i++) {
-			String key = attributes.getQName(i);
-			String value = attributes.getValue(i);
-
-			if (key.equals(ParserConstants.ENTRY_ATTRIBUTE)) {
-				properties.setEntry(value);
-				continue;
-			}
-			root.logError("unrecognized properties element attribute: " + key);
-		}
-
+		processAttributes(attributes);
+		
 		if (properties.getEntry() == null) {
 			root.logError("properties entry not specified");
 		}
 	}
 
-	public void startElement(String uri, String localName, String qName, Attributes attributes) {
-		root.logError("properties does not support nested elements");
-	}
-
-	public void characters(char[] ch, int start, int length) {
-		int end = start + length;
-		for (int i = start; i < end; i++) {
-			if (!Character.isWhitespace(ch[i])) {
-				root.logError("element body must be empty");
-			}
+	protected void handleAttribute(String name, String value) {
+		if (name.equals(ParserConstants.ENTRY_ATTRIBUTE)) {
+			properties.setEntry(value);
+			return;
 		}
+		root.logError("unrecognized properties element attribute: " + name);
 	}
 
 	public void endElement(String uri, String localName, String qName) {
 		ComponentDescription component = parent.getComponentDescription();
 		component.addPropertyDescription(properties);
 		root.setHandler(parent);
+	}
+
+	protected String getElementName() {
+		return "properties";
 	}
 }

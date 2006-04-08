@@ -15,10 +15,8 @@ import org.eclipse.equinox.ds.model.PropertyValueDescription;
 import org.osgi.service.component.ComponentConstants;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
-import org.xml.sax.helpers.DefaultHandler;
 
-class ComponentElement extends DefaultHandler {
-	private ParserHandler root;
+class ComponentElement extends ElementHandler {
 	private ParserHandler parent;
 	private ComponentDescription component;
 	private boolean immediateSet;
@@ -29,79 +27,74 @@ class ComponentElement extends DefaultHandler {
 		component = new ComponentDescription(root.bundleContext);
 		immediateSet = false;
 
-		int size = attributes.getLength();
-		for (int i = 0; i < size; i++) {
-			String key = attributes.getQName(i);
-			String value = attributes.getValue(i);
-
-			if (key.equals(ParserConstants.NAME_ATTRIBUTE)) {
-				component.setName(value);
-				PropertyValueDescription nameProperty = new PropertyValueDescription();
-				nameProperty.setName(ComponentConstants.COMPONENT_NAME);
-				nameProperty.setValue(value);
-				component.addPropertyDescription(nameProperty);
-				continue;
-			}
-			if (key.equals(ParserConstants.ENABLED_ATTRIBUTE)) {
-				component.setAutoenable(value.equalsIgnoreCase("true"));
-				continue;
-			}
-			if (key.equals(ParserConstants.FACTORY_ATTRIBUTE)) {
-				component.setFactory(value);
-				continue;
-			}
-			if (key.equals(ParserConstants.IMMEDIATE_ATTRIBUTE)) {
-				component.setImmediate(value.equalsIgnoreCase("true"));
-				immediateSet = true;
-				continue;
-			}
-			root.logError("unrecognized component element attribute: " + key);
-		}
+		processAttributes(attributes);
 
 		if (component.getName() == null) {
 			root.logError("component name not specified");
 		}
 	}
+	
+	protected void handleAttribute(String name, String value) {
+		if (name.equals(ParserConstants.NAME_ATTRIBUTE)) {
+			component.setName(value);
+			PropertyValueDescription nameProperty = new PropertyValueDescription();
+			nameProperty.setName(ComponentConstants.COMPONENT_NAME);
+			nameProperty.setValue(value);
+			component.addPropertyDescription(nameProperty);
+			return;
+		}
+		if (name.equals(ParserConstants.ENABLED_ATTRIBUTE)) {
+			component.setAutoenable(value.equalsIgnoreCase("true"));
+			return;
+		}
+		if (name.equals(ParserConstants.FACTORY_ATTRIBUTE)) {
+			component.setFactory(value);
+			return;
+		}
+		if (name.equals(ParserConstants.IMMEDIATE_ATTRIBUTE)) {
+			component.setImmediate(value.equalsIgnoreCase("true"));
+			immediateSet = true;
+			return;
+		}
+		
+		root.logError("unrecognized component element attribute: " + name);
+	}
+
+
 
 	ComponentDescription getComponentDescription() {
 		return component;
 	}
 
 	public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-		if (localName.equals(ParserConstants.IMPLEMENTATION_ELEMENT)) {
-			root.setHandler(new ImplementationElement(root, this, attributes));
-			return;
-		}
-
-		if (localName.equals(ParserConstants.PROPERTY_ELEMENT)) {
-			root.setHandler(new PropertyElement(root, this, attributes));
-			return;
-		}
-
-		if (localName.equals(ParserConstants.PROPERTIES_ELEMENT)) {
-			root.setHandler(new PropertiesElement(root, this, attributes));
-			return;
-		}
-
-		if (localName.equals(ParserConstants.SERVICE_ELEMENT)) {
-			root.setHandler(new ServiceElement(root, this, attributes));
-			return;
-		}
-
-		if (localName.equals(ParserConstants.REFERENCE_ELEMENT)) {
-			root.setHandler(new ReferenceElement(root, this, attributes));
-			return;
-		}
-		root.logError("unrecognized element of component: " + localName);
-	}
-
-	public void characters(char[] ch, int start, int length) {
-		int end = start + length;
-		for (int i = start; i < end; i++) {
-			if (!Character.isWhitespace(ch[i])) {
-				root.logError("element body must be empty");
+		if (isSCRNamespace(uri)) {
+			if (localName.equals(ParserConstants.IMPLEMENTATION_ELEMENT)) {
+				root.setHandler(new ImplementationElement(root, this, attributes));
+				return;
+			}
+			
+			if (localName.equals(ParserConstants.PROPERTY_ELEMENT)) {
+				root.setHandler(new PropertyElement(root, this, attributes));
+				return;
+			}
+			
+			if (localName.equals(ParserConstants.PROPERTIES_ELEMENT)) {
+				root.setHandler(new PropertiesElement(root, this, attributes));
+				return;
+			}
+			
+			if (localName.equals(ParserConstants.SERVICE_ELEMENT)) {
+				root.setHandler(new ServiceElement(root, this, attributes));
+				return;
+			}
+			
+			if (localName.equals(ParserConstants.REFERENCE_ELEMENT)) {
+				root.setHandler(new ReferenceElement(root, this, attributes));
+				return;
 			}
 		}
+		
+		super.startElement(uri, localName, qName, attributes);
 	}
 
 	public void endElement(String uri, String localName, String qName) {
@@ -124,5 +117,9 @@ class ComponentElement extends DefaultHandler {
 		}
 
 		root.setHandler(parent);
+	}
+
+	protected String getElementName() {
+		return "component";
 	}
 }

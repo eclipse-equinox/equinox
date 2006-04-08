@@ -22,7 +22,7 @@ import org.xml.sax.helpers.DefaultHandler;
  * parser. Each Service Component bundle contains a set of xml files which are
  * parsed.
  * 
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1 $
  */
 
 class ParserHandler extends DefaultHandler {
@@ -125,9 +125,11 @@ class ParserHandler extends DefaultHandler {
 	public void endElement(String uri, String localName, String qName) throws SAXException {
 
 		if (DEBUG) {
-			System.out.println("[endElement:uri]" + uri);
-			System.out.println("[endElement:localName]" + localName);
-			System.out.println("[endElement:qName]" + qName);
+			System.out.println("[endElement:begin]");
+			System.out.println(" [uri]" + uri);
+			System.out.println(" [localName]" + localName);
+			System.out.println(" [qName]" + qName);
+			System.out.println("[endElement:end]");
 		}
 
 		if (handler != this) {
