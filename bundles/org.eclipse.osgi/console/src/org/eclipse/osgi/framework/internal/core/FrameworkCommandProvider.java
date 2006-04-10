@@ -24,7 +24,10 @@ import org.eclipse.osgi.service.resolver.ExportPackageDescription;
 import org.eclipse.osgi.service.resolver.PlatformAdmin;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
+import org.osgi.service.condpermadmin.ConditionalPermissionAdmin;
+import org.osgi.service.condpermadmin.ConditionalPermissionInfo;
 import org.osgi.service.packageadmin.RequiredBundle;
+import org.osgi.service.permissionadmin.PermissionAdmin;
 
 /**
  * This class provides methods to execute commands from the command line.  It registers
@@ -81,6 +84,8 @@ public class FrameworkCommandProvider implements CommandProvider {
 	private org.osgi.framework.BundleContext context;
 	/** The start level implementation */
 	private StartLevelManager slImpl;
+	private ConditionalPermissionAdmin condPermAdmin;
+	private PermissionAdmin permAdmin;
 
 	/** Strings used to format other strings */
 	private String tab = "\t"; //$NON-NLS-1$
@@ -97,6 +102,8 @@ public class FrameworkCommandProvider implements CommandProvider {
 		this.osgi = osgi;
 		context = osgi.getBundleContext();
 		slImpl = osgi.framework.startLevelManager;
+		condPermAdmin = osgi.framework.condPermAdmin;
+		permAdmin = osgi.framework.permissionAdmin;
 		Dictionary props = new Hashtable();
 		props.put(Constants.SERVICE_RANKING, new Integer(Integer.MAX_VALUE));
 		context.registerService(CommandProvider.class.getName(), this, props);
@@ -1066,6 +1073,18 @@ public class FrameworkCommandProvider implements CommandProvider {
 		} else {
 			intp.println(ConsoleMsg.CONSOLE_NO_INSTALLED_BUNDLES_ERROR);
 		}
+		if (permAdmin != null) {
+			// clear the permissions from permission admin
+			permAdmin.setDefaultPermissions(null);
+			String[] permLocations = permAdmin.getLocations();
+			if (permLocations != null)
+				for (int i = 0; i < permLocations.length; i++)
+					permAdmin.setPermissions(permLocations[i], null);
+		}
+		// clear the permissions from conditional permission admin
+		if (condPermAdmin != null)
+			for (Enumeration infos = condPermAdmin.getConditionalPermissionInfos(); infos.hasMoreElements();)
+				((ConditionalPermissionInfo) infos.nextElement()).delete();
 	}
 
 	/**

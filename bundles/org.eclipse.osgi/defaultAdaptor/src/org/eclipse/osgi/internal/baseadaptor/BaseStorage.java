@@ -102,6 +102,7 @@ public class BaseStorage {
 	private BasePermissionStorage permissionStorage;
 	private StateSaver stateSaver;
 	private boolean invalidState;
+	private boolean storageManagerClosed;
 
 	BaseStorage() {
 		// make constructor package private
@@ -126,6 +127,7 @@ public class BaseStorage {
 		}
 		boolean readOnlyConfiguration = LocationManager.getConfigurationLocation().isReadOnly();
 		storageManager = initFileManager(LocationManager.getOSGiConfigurationDir(), readOnlyConfiguration ? "none" : null, readOnlyConfiguration); //$NON-NLS-1$
+		storageManagerClosed = false;
 		// initialize the storageHooks
 		StorageHook[] hooks = adaptor.getHookRegistry().getStorageHooks();
 		for (int i = 0; i < hooks.length; i++)
@@ -364,6 +366,15 @@ public class BaseStorage {
 	}
 
 	private void saveAllData(boolean shutdown) {
+		if (storageManagerClosed)
+			try {
+				storageManager.open(!LocationManager.getConfigurationLocation().isReadOnly());
+				storageManagerClosed = false;
+			} catch (IOException e) {
+				String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_FILEMANAGER_OPEN_ERROR, e.getMessage());
+				FrameworkLogEntry logEntry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, message, 0, e, null);
+				adaptor.getFrameworkLog().log(logEntry);
+			}
 		saveBundleDatas();
 		saveStateData(shutdown);
 		savePermissionStorage();
@@ -743,6 +754,7 @@ public class BaseStorage {
 			stateSaver.shutdown();
 		saveAllData(true);
 		storageManager.close();
+		storageManagerClosed = true;
 	}
 
 	public void frameworkStopping(BundleContext fwContext) {
