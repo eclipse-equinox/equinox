@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005 IBM Corporation and others.
+ * Copyright (c) 2005, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,7 +21,7 @@ public interface IRuntimeConstants {
 	/**
 	 * Name of this bundle.
 	 */
-	public static final String NAME = "org.eclipse.runtime.common"; //$NON-NLS-1$
+	public static final String PI_COMMON = "org.eclipse.equinox.common"; //$NON-NLS-1$
 
 	/**
 	 * Status code constant (value 2) indicating an error occurred while running a plug-in.

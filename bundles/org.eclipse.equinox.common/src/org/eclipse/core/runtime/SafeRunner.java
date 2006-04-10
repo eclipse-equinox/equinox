@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005 IBM Corporation and others.
+ * Copyright (c) 2005, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -50,7 +50,7 @@ public final class SafeRunner {
 			if (activator != null)
 				pluginId = activator.getBundleId(code);
 			if (pluginId == null)
-				pluginId = IRuntimeConstants.NAME;
+				pluginId = IRuntimeConstants.PI_COMMON;
 			String message = NLS.bind(CommonMessages.meta_pluginProblems, pluginId);
 			IStatus status;
 			if (e instanceof CoreException) {
