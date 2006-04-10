@@ -138,6 +138,9 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 		else
 			contributingBundle = getBundle(contributor.getId());
 
+		if (contributingBundle == null)
+			throwException(NLS.bind(RegistryMessages.plugin_loadClassError, "UNKNOWN BUNDLE", className), new InvalidRegistryObjectException()); //$NON-NLS-1$ 
+
 		// load the requested class from this bundle
 		Class classInstance = null;
 		try {
