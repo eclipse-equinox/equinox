@@ -44,7 +44,7 @@ public class FrameworkConsole implements Runnable {
 	/** Default code page which must be supported by all JVMs */
 	static String defaultEncoding = "iso8859-1"; //$NON-NLS-1$
 	/** The current setting for code page */
-	static String encoding = FrameworkProperties.getProperty("file.encoding", defaultEncoding); //$NON-NLS-1$
+	static String encoding = FrameworkProperties.getProperty("osgi.console.encoding", FrameworkProperties.getProperty("file.encoding", defaultEncoding)); //$NON-NLS-1$ //$NON-NLS-2$
 
 	/** set to true if accepting commands from port */
 	protected boolean useSocketStream = false;
