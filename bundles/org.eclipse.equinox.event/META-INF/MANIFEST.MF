@@ -17,3 +17,4 @@ Export-Package: org.eclipse.equinox.event; x-internal:=true,
  org.eclipse.equinox.event; x-internal:=true
 Bundle-Vendor: %bundleVendor
 Export-Service: org.osgi.service.event.EventAdmin
+Bundle-Localization: plugin
