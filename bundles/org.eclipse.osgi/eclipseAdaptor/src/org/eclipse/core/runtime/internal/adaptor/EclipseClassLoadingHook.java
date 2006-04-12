@@ -25,6 +25,7 @@ import org.eclipse.osgi.baseadaptor.loader.*;
 import org.eclipse.osgi.framework.adaptor.BundleProtectionDomain;
 import org.eclipse.osgi.framework.adaptor.ClassLoaderDelegate;
 import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
+import org.eclipse.osgi.internal.baseadaptor.BaseClassLoadingHook;
 
 public class EclipseClassLoadingHook implements ClassLoadingHook, HookConfigurator {
 	private static String[] NL_JAR_VARIANTS = buildNLJarVariants(EclipseEnvironmentInfo.getDefault().getNL());
@@ -217,8 +218,14 @@ public class EclipseClassLoadingHook implements ClassLoadingHook, HookConfigurat
 			return null;
 		if (libName.charAt(0) == '/' || libName.charAt(0) == '\\')
 			libName = libName.substring(1);
-		libName = System.mapLibraryName(libName);
-		return searchVariants(data, libName);
+		String mappedLibName = System.mapLibraryName(libName);
+		String result = searchVariants(data, mappedLibName);
+		if (result != null)
+			return result;
+		String[] mappedLibNames = BaseClassLoadingHook.mapLibraryNames(mappedLibName);
+		for (int i = 0; i < mappedLibNames.length && result == null; i++)
+			result = searchVariants(data, mappedLibNames[i]);
+		return result;
 	}
 
 	private String searchVariants(BaseData bundledata, String path) {

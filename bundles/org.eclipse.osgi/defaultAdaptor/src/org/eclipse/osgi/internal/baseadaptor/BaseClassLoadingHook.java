@@ -21,8 +21,28 @@ import org.eclipse.osgi.baseadaptor.loader.*;
 import org.eclipse.osgi.framework.adaptor.BundleProtectionDomain;
 import org.eclipse.osgi.framework.adaptor.ClassLoaderDelegate;
 import org.eclipse.osgi.framework.debug.Debug;
+import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
+import org.eclipse.osgi.util.ManifestElement;
 
 public class BaseClassLoadingHook implements ClassLoadingHook {
+	private static final String[] LIB_EXTENSIONS = ManifestElement.getArrayFromList(FrameworkProperties.getProperty("osgi.framework.library.extensions"), ","); //$NON-NLS-1$ //$NON-NLS-2$
+	private static final String[] EMPTY_STRINGS = new String[0];
+
+	/*
+	 * Maps an already mapped library name to additional library file extensions.
+	 * This is needed on platforms like AIX where .a and .so can be used as library file
+	 * extensions, but System.mapLibraryName only returns a single string.
+	 */
+	public static String[] mapLibraryNames(String mappedLibName) {
+		int extIndex = mappedLibName.lastIndexOf('.');
+		if (LIB_EXTENSIONS.length == 0 || extIndex < 0)
+			return EMPTY_STRINGS;
+		String libNameBase = mappedLibName.substring(0, extIndex);
+		String[] results = new String[LIB_EXTENSIONS.length];
+		for (int i = 0; i < results.length; i++)
+			results[i] = libNameBase + LIB_EXTENSIONS[i];
+		return results;
+	}
 
 	public String findLibrary(BaseData data, String libName) {
 		String mappedName = System.mapLibraryName(libName);
@@ -30,6 +50,11 @@ public class BaseClassLoadingHook implements ClassLoadingHook {
 		if (Debug.DEBUG && Debug.DEBUG_LOADER)
 			Debug.println("  mapped library name: " + mappedName); //$NON-NLS-1$
 		path = findNativePath(data, mappedName);
+		if (path == null) {
+			String[] mappedNames = mapLibraryNames(mappedName);
+			for (int i = 0; i < mappedNames.length && path == null; i++)
+				path = findNativePath(data, mappedNames[i]);
+		}
 		if (path == null) {
 			if (Debug.DEBUG && Debug.DEBUG_LOADER)
 				Debug.println("  library does not exist: " + mappedName); //$NON-NLS-1$
