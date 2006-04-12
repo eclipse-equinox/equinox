@@ -43,7 +43,7 @@ public class DriverSelectorTracker extends ServiceTracker {
 		log = manager.log;
 
 		if (Activator.DEBUG) {
-			log.log(log.LOG_DEBUG, "DriverSelectorTracker constructor"); //$NON-NLS-1$
+			log.log(LogService.LOG_DEBUG, "DriverSelectorTracker constructor"); //$NON-NLS-1$
 		}
 
 		open();
@@ -58,7 +58,7 @@ public class DriverSelectorTracker extends ServiceTracker {
 	 */
 	public ServiceReference select(ServiceReference device, Match[] matches) {
 		if (Activator.DEBUG) {
-			log.log(device, log.LOG_DEBUG, "DriverSelector select called"); //$NON-NLS-1$
+			log.log(device, LogService.LOG_DEBUG, "DriverSelector select called"); //$NON-NLS-1$
 		}
 
 		//This should give us the highest ranking DriverSelector (if available)
@@ -76,7 +76,7 @@ public class DriverSelectorTracker extends ServiceTracker {
 
 				return matches[index].getDriver();
 			} catch (Throwable t) {
-				log.log(selector, log.LOG_ERROR, DeviceMsg.DriverSelector_error_during_match, t);
+				log.log(selector, LogService.LOG_ERROR, DeviceMsg.DriverSelector_error_during_match, t);
 			}
 		}
 

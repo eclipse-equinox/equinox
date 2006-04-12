@@ -55,7 +55,7 @@ public class DeviceTracker extends ServiceTracker {
 		log = manager.log;
 
 		if (Activator.DEBUG) {
-			log.log(device, log.LOG_DEBUG, this + " constructor"); //$NON-NLS-1$
+			log.log(device, LogService.LOG_DEBUG, this + " constructor"); //$NON-NLS-1$
 		}
 
 		open();
@@ -68,7 +68,7 @@ public class DeviceTracker extends ServiceTracker {
 	public void close() {
 		if (device != null) {
 			if (Activator.DEBUG) {
-				log.log(device, log.LOG_DEBUG, this + " closing"); //$NON-NLS-1$
+				log.log(device, LogService.LOG_DEBUG, this + " closing"); //$NON-NLS-1$
 			}
 
 			running = false; /* request thread to stop */
@@ -97,7 +97,7 @@ public class DeviceTracker extends ServiceTracker {
 	 */
 	public Object addingService(ServiceReference reference) {
 		if (Activator.DEBUG) {
-			log.log(reference, log.LOG_DEBUG, this + " adding Device service"); //$NON-NLS-1$
+			log.log(reference, LogService.LOG_DEBUG, this + " adding Device service"); //$NON-NLS-1$
 		}
 
 		device = reference;
@@ -133,11 +133,11 @@ public class DeviceTracker extends ServiceTracker {
 	 */
 	public void removedService(ServiceReference reference, Object service) {
 		if (running) {
-			log.log(reference, log.LOG_WARNING, DeviceMsg.Device_service_unregistered);
+			log.log(reference, LogService.LOG_WARNING, DeviceMsg.Device_service_unregistered);
 			running = false; /* request algorithm to stop */
 		} else {
 			if (Activator.DEBUG) {
-				log.log(reference, log.LOG_DEBUG, this + " removing Device service"); //$NON-NLS-1$
+				log.log(reference, LogService.LOG_DEBUG, this + " removing Device service"); //$NON-NLS-1$
 			}
 		}
 	}
@@ -148,7 +148,7 @@ public class DeviceTracker extends ServiceTracker {
 	 */
 	public void refine() {
 		if (Activator.DEBUG) {
-			log.log(device, log.LOG_DEBUG, this + " refining " + device); //$NON-NLS-1$
+			log.log(device, LogService.LOG_DEBUG, this + " refining " + device); //$NON-NLS-1$
 		}
 
 		if (running && isIdle()) {
@@ -194,10 +194,10 @@ public class DeviceTracker extends ServiceTracker {
 	 */
 	public boolean isIdle() {
 		if (Activator.DEBUG) {
-			log.log(device, log.LOG_DEBUG, "Check device service idle: " + device); //$NON-NLS-1$
+			log.log(device, LogService.LOG_DEBUG, "Check device service idle: " + device); //$NON-NLS-1$
 		}
 
-		Filter filter = manager.driverFilter;
+		Filter filter_ = manager.driverFilter;
 		Bundle[] users = device.getUsingBundles();
 
 		int userCount = (users == null) ? 0 : users.length;
@@ -208,9 +208,9 @@ public class DeviceTracker extends ServiceTracker {
 			int servicesCount = (services == null) ? 0 : services.length;
 
 			for (int j = 0; j < servicesCount; j++) {
-				if (filter.match(services[j])) {
+				if (filter_.match(services[j])) {
 					if (Activator.DEBUG) {
-						log.log(log.LOG_DEBUG, "Device " + device + " already in use by bundle " + users[i]); //$NON-NLS-1$ //$NON-NLS-2$
+						log.log(LogService.LOG_DEBUG, "Device " + device + " already in use by bundle " + users[i]); //$NON-NLS-1$ //$NON-NLS-2$
 					}
 
 					return (false);
@@ -231,24 +231,24 @@ public class DeviceTracker extends ServiceTracker {
 	 */
 
 	public void noDriverFound() {
-		BundleContext context = manager.context;
+		BundleContext contxt = manager.context;
 
-		Object service = context.getService(device);
+		Object service = contxt.getService(device);
 
 		try {
 			//It is possible that this is a Free Format Device that does not
 			//implement Device
 			if (service instanceof Device) {
-				log.log(device, log.LOG_INFO, DeviceMsg.Device_noDriverFound_called);
+				log.log(device, LogService.LOG_INFO, DeviceMsg.Device_noDriverFound_called);
 
 				try {
 					((Device) service).noDriverFound();
 				} catch (Throwable t) {
-					log.log(device, log.LOG_ERROR, NLS.bind(DeviceMsg.Device_noDriverFound_error, t));
+					log.log(device, LogService.LOG_ERROR, NLS.bind(DeviceMsg.Device_noDriverFound_error, t));
 				}
 			}
 		} finally {
-			context.ungetService(device);
+			contxt.ungetService(device);
 		}
 
 	}
@@ -262,6 +262,7 @@ public class DeviceTracker extends ServiceTracker {
 	 *
 	 */
 	static class Properties extends Hashtable {
+		private static final long serialVersionUID = -8489170394007899809L;
 		/**
 		 * keys in original case.
 		 */

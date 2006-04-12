@@ -414,9 +414,9 @@ public class DriverTracker extends ServiceTracker {
 	}
 
 	public class DriverUpdate implements Runnable, ServiceListener, BundleListener {
-		private Activator manager;
+		private Activator manager_;
 		private Bundle bundle;
-		private BundleContext context;
+		private BundleContext contxt;
 
 		/** if false the thread must terminate */
 		private volatile boolean running;
@@ -424,16 +424,16 @@ public class DriverTracker extends ServiceTracker {
 		private long updatewait;
 
 		DriverUpdate(Bundle bundle, Activator manager) {
-			this.manager = manager;
+			this.manager_ = manager;
 			this.bundle = bundle;
 
-			context = manager.context;
-			updatewait = manager.updatewait;
+			contxt = manager_.context;
+			updatewait = manager_.updatewait;
 			running = true;
 
-			context.addBundleListener(this);
+			contxt.addBundleListener(this);
 			try {
-				context.addServiceListener(this, manager.driverFilter.toString());
+				contxt.addServiceListener(this, manager_.driverFilter.toString());
 			} catch (InvalidSyntaxException e) {
 				/* this should not happen */
 			}
@@ -452,10 +452,11 @@ public class DriverTracker extends ServiceTracker {
 					}
 				}
 			} catch (InterruptedException e) {
+				//do nothing
 			}
 
-			context.removeServiceListener(this);
-			context.removeBundleListener(this);
+			contxt.removeServiceListener(this);
+			contxt.removeBundleListener(this);
 
 			if (running) {
 				manager.refineIdleDevices();
@@ -464,7 +465,7 @@ public class DriverTracker extends ServiceTracker {
 
 		public void serviceChanged(ServiceEvent event) {
 			if ((event.getType() == ServiceEvent.REGISTERED) && bundle.equals(event.getServiceReference().getBundle())) {
-				context.removeServiceListener(this);
+				contxt.removeServiceListener(this);
 
 				running = false; /* cancel */
 
@@ -474,7 +475,7 @@ public class DriverTracker extends ServiceTracker {
 
 		public void bundleChanged(BundleEvent event) {
 			if ((event.getType() == Bundle.UNINSTALLED) && bundle.equals(event.getBundle())) {
-				context.removeBundleListener(this);
+				contxt.removeBundleListener(this);
 
 				updatewait = 0; /* avoid wait */
 

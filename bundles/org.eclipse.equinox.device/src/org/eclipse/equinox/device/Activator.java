@@ -12,6 +12,7 @@ package org.eclipse.equinox.device;
 
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
+import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
@@ -102,8 +103,8 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 	 * @param context The device manager's bundle context
 	 */
 
-	public void start(BundleContext context) throws Exception {
-		this.context = context;
+	public void start(BundleContext contxt) throws Exception {
+		this.context = contxt;
 		running = false;
 
 		log = new LogTracker(context, System.err);
@@ -114,7 +115,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 
 			driverFilter = context.createFilter("(" + org.osgi.framework.Constants.OBJECTCLASS + "=" + DriverTracker.clazz + ")"); ////-1$ ////-2$ ////-3$ //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		} catch (InvalidSyntaxException e) {
-			log.log(log.LOG_ERROR, NLS.bind(DeviceMsg.Unable_to_create_Filter_for_DeviceManager, e)); ////-1$
+			log.log(LogService.LOG_ERROR, NLS.bind(DeviceMsg.Unable_to_create_Filter_for_DeviceManager, e)); ////-1$
 			throw e;
 		}
 
@@ -126,18 +127,19 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 			try {
 				updatewait = Long.parseLong(prop) * 1000L;
 			} catch (NumberFormatException e) {
+				//do nothing
 			}
 		}
 
 		Bundle systemBundle = context.getBundle(0);
 
-		if ((systemBundle != null) && ((systemBundle.getState() & systemBundle.STARTING) != 0)) { /* if the system bundle is starting */
+		if ((systemBundle != null) && ((systemBundle.getState() & Bundle.STARTING) != 0)) { /* if the system bundle is starting */
 			context.addFrameworkListener(this);
 		} else {
 			startDeviceManager();
 		}
 
-		log.log(log.LOG_INFO, DeviceMsg.DeviceManager_started);
+		log.log(LogService.LOG_INFO, DeviceMsg.DeviceManager_started);
 	}
 
 	/**
@@ -153,7 +155,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 				try {
 					startDeviceManager();
 				} catch (Throwable t) {
-					log.log(log.LOG_ERROR, NLS.bind(DeviceMsg.DeviceManager_has_thrown_an_error, t)); ////-1$
+					log.log(LogService.LOG_ERROR, NLS.bind(DeviceMsg.DeviceManager_has_thrown_an_error, t)); ////-1$
 				}
 
 				break;
@@ -193,7 +195,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 	 * @param context The device manager's bundle context
 	 */
 
-	public void stop(BundleContext context) throws Exception {
+	public void stop(BundleContext contxt) throws Exception {
 		context.removeFrameworkListener(this);
 
 		if (running) {
@@ -210,6 +212,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 						try {
 							t.wait(0);
 						} catch (InterruptedException e) {
+							//	do nothing
 						}
 					}
 				}
@@ -262,7 +265,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 	 */
 	public Object addingService(ServiceReference reference) {
 		if (Activator.DEBUG) {
-			log.log(reference, log.LOG_DEBUG, "DeviceManager device service registered"); //$NON-NLS-1$
+			this.log.log(reference, LogService.LOG_DEBUG, "DeviceManager device service registered"); //$NON-NLS-1$
 		}
 
 		enqueue(new DeviceTracker(this, reference));
@@ -280,6 +283,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 	 * @param service The service object for the modified service.
 	 */
 	public void modifiedService(ServiceReference reference, Object service) {
+		// do nothing
 	}
 
 	/**
@@ -293,7 +297,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 	 */
 	public void removedService(ServiceReference reference, Object object) {
 		if (Activator.DEBUG) {
-			log.log(reference, log.LOG_DEBUG, "DeviceManager device service unregistered"); //$NON-NLS-1$
+			log.log(reference, LogService.LOG_DEBUG, "DeviceManager device service unregistered"); //$NON-NLS-1$
 		}
 
 		/* We do not implement optional driver reclamation.
@@ -303,7 +307,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 
 	public void refineIdleDevices() {
 		if (Activator.DEBUG) {
-			log.log(log.LOG_DEBUG, "DeviceManager refining idle device services"); //$NON-NLS-1$
+			log.log(LogService.LOG_DEBUG, "DeviceManager refining idle device services"); //$NON-NLS-1$
 		}
 
 		ServiceReference[] references = devices.getServiceReferences();
@@ -338,7 +342,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 			try {
 				device.refine();
 			} catch (Throwable t) {
-				log.log(log.LOG_ERROR, NLS.bind(DeviceMsg.DeviceManager_has_thrown_an_error, t)); ////-1$
+				log.log(LogService.LOG_ERROR, NLS.bind(DeviceMsg.DeviceManager_has_thrown_an_error, t)); ////-1$
 			}
 		}
 	}
@@ -352,7 +356,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 	public synchronized void enqueue(DeviceTracker device) {
 		if (device != null) {
 			if (Activator.DEBUG) {
-				log.log(log.LOG_DEBUG, "DeviceManager queuing DeviceTracker"); //$NON-NLS-1$
+				log.log(LogService.LOG_DEBUG, "DeviceManager queuing DeviceTracker"); //$NON-NLS-1$
 			}
 
 			DeviceService item = new DeviceService(device);
@@ -395,11 +399,12 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 
 				try {
 					if (Activator.DEBUG) {
-						log.log(log.LOG_DEBUG, "DeviceManager waiting on queue"); //$NON-NLS-1$
+						log.log(LogService.LOG_DEBUG, "DeviceManager waiting on queue"); //$NON-NLS-1$
 					}
 
 					wait();
 				} catch (InterruptedException e) {
+					// do nothing
 				}
 			}
 		}

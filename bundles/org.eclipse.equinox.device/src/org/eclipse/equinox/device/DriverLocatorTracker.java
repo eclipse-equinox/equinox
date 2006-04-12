@@ -89,6 +89,7 @@ public class DriverLocatorTracker extends ServiceTracker {
 	 * @param service The service object for the modified service.
 	 */
 	public void modifiedService(ServiceReference reference, Object service) {
+		//do nothing
 	}
 
 	/**
