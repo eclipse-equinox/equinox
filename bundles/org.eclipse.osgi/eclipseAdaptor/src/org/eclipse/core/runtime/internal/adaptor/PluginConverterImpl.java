@@ -513,7 +513,7 @@ public class PluginConverterImpl implements PluginConverter {
 		Set names = new HashSet();
 		JarFile file = null;
 		try {
-			file = new JarFile(jarFile);
+			file = new JarFile(jarFile, false);
 		} catch (IOException e) {
 			String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_CONVERTER_PLUGIN_LIBRARY_IGNORED, jarFile, pluginInfo.getUniqueId());
 			adaptor.getFrameworkLog().log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, message, 0, e, null));
