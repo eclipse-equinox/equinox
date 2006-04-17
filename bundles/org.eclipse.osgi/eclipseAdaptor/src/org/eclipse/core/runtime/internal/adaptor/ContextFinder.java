@@ -83,24 +83,19 @@ public class ContextFinder extends ClassLoader implements PrivilegedAction {
 	}
 
 	protected synchronized Class loadClass(String arg0, boolean arg1) throws ClassNotFoundException {
-		Class result = null;
 		try {
-			result = super.loadClass(arg0, arg1);
+			return super.loadClass(arg0, arg1);
 		} catch (ClassNotFoundException e) {
-			//Ignore
+			// Ignore; find a bundle classloader to use.
 		}
-		if (result == null) {
-			ArrayList toConsult = findClassLoaders();
-			for (Iterator loaders = toConsult.iterator(); loaders.hasNext();)
-				try {
-					result = ((ClassLoader) loaders.next()).loadClass(arg0);
-				} catch (ClassNotFoundException e) {
-					// go to the next class loader
-				}
-		}
-		if (result == null)
-			throw new ClassNotFoundException(arg0);
-		return result;
+		ArrayList toConsult = findClassLoaders();
+		for (Iterator loaders = toConsult.iterator(); loaders.hasNext();)
+			try {
+				return ((ClassLoader) loaders.next()).loadClass(arg0);
+			} catch (ClassNotFoundException e) {
+				// go to the next class loader
+			}
+		throw new ClassNotFoundException(arg0);
 	}
 
 	protected URL findResource(String arg0) {
