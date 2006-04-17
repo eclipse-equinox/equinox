@@ -249,11 +249,11 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		String[] ees = bundle.getExecutionEnvironments();
 		boolean matchedEE = ees.length == 0;
 		if (!matchedEE)
-			for (int i = 0; i < CURRENT_EES.length && !matchedEE; i++)
-				for (int j = 0; j < CURRENT_EES[i].length && !matchedEE; j++)
-					for (int k = 0; k < ees.length && !matchedEE; k++)
-						if (CURRENT_EES[i][j].equals(ees[k])) {
-							((BundleDescriptionImpl) bundle).setEquinoxEE(i);
+			for (int i = 0; i < ees.length && !matchedEE; i++)
+				for (int j = 0; j < CURRENT_EES.length && !matchedEE; j++)
+					for (int k = 0; k < CURRENT_EES[j].length && !matchedEE; k++)
+						if (CURRENT_EES[j][k].equals(ees[i])) {
+							((BundleDescriptionImpl) bundle).setEquinoxEE(j);
 							matchedEE = true;
 						}
 		if (!matchedEE) {
