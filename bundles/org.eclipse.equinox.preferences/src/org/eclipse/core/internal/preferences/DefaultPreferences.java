@@ -14,6 +14,7 @@ import java.io.*;
 import java.lang.ref.WeakReference;
 import java.net.URL;
 import java.util.*;
+import org.eclipse.core.internal.preferences.exchange.IProductPreferencesService;
 import org.eclipse.core.internal.runtime.RuntimeLog;
 import org.eclipse.core.runtime.*;
 import org.eclipse.core.runtime.preferences.*;

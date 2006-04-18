@@ -8,10 +8,11 @@ Bundle-Vendor: %providerName
 Bundle-Localization: plugin
 Require-Bundle: org.eclipse.equinox.common,
  org.eclipse.equinox.registry;resolution:=optional
-Export-Package: org.eclipse.core.internal.preferences;x-friends:="org.eclipse.core.resources,org.eclipse.core.runtime"; preferences="split"; mandatory:="preferences",
+Export-Package: org.eclipse.core.internal.preferences;x-friends:="org.eclipse.core.resources,org.eclipse.core.runtime",
+ org.eclipse.core.internal.preferences.exchange;x-friends:="org.eclipse.core.runtime",
  org.eclipse.core.runtime.preferences,
  org.osgi.service.prefs;version="1.1"
-Eclipse-LazyStart: true
+Eclipse-LazyStart: true; exceptions="org.eclipse.core.internal.preferences.exchange"
 Import-Package: org.eclipse.osgi.framework.log,
  org.eclipse.osgi.service.datalocation,
  org.eclipse.osgi.service.debug,

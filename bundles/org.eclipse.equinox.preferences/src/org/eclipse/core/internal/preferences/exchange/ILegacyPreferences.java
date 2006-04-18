@@ -8,13 +8,13 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.core.internal.preferences;
+package org.eclipse.core.internal.preferences.exchange;
 
 /**
  * Provides initialization of the legacy preferences as described in
  * the Plugin class.
  * 
- * @deprecated
+ * @depreceated
  */
 public interface ILegacyPreferences {
 	/**

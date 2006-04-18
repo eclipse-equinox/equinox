@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.core.internal.preferences;
 
+import org.eclipse.core.internal.preferences.exchange.ILegacyPreferences;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.service.debug.DebugOptions;

@@ -12,6 +12,7 @@ package org.eclipse.core.internal.preferences;
 
 import java.lang.ref.WeakReference;
 import java.util.*;
+import org.eclipse.core.internal.preferences.exchange.ILegacyPreferences;
 import org.eclipse.core.internal.runtime.RuntimeLog;
 import org.eclipse.core.runtime.*;
 import org.eclipse.core.runtime.preferences.*;

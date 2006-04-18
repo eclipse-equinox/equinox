@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -56,6 +56,8 @@ public final class AdapterManager implements IAdapterManager {
 	 */
 	protected final HashMap factories;
 
+	private ArrayList lazyFactoryProviders;
+
 	private static final AdapterManager singleton = new AdapterManager();
 
 	public static AdapterManager getDefault() {
@@ -67,6 +69,7 @@ public final class AdapterManager implements IAdapterManager {
 	 */
 	private AdapterManager() {
 		factories = new HashMap(5);
+		lazyFactoryProviders = new ArrayList(1);
 		adapterLookup = null;
 	}
 
@@ -76,7 +79,7 @@ public final class AdapterManager implements IAdapterManager {
 	 * IAdapterFactory.getAdapterList).
 	 */
 	private void addFactoriesFor(String typeName, Map table) {
-		List factoryList = (List) factories.get(typeName);
+		List factoryList = (List) getFactories().get(typeName);
 		if (factoryList == null)
 			return;
 		for (int i = 0, imax = factoryList.size(); i < imax; i++) {
@@ -347,7 +350,29 @@ public final class AdapterManager implements IAdapterManager {
 		flushLookup();
 	}
 
+	public void registerLazyFactoryProvider(IAdapterManagerProvider factoryProvider) {
+		synchronized (lazyFactoryProviders) {
+			lazyFactoryProviders.add(factoryProvider);
+		}
+	}
+
+	public boolean unregisterLazyFactoryProvider(IAdapterManagerProvider factoryProvider) {
+		synchronized (lazyFactoryProviders) {
+			return lazyFactoryProviders.remove(factoryProvider);
+		}
+	}
+
 	public HashMap getFactories() {
+		// avoid the synchronize if we don't have to call it
+		if (lazyFactoryProviders.size() == 0)
+			return factories;
+		synchronized (lazyFactoryProviders) {
+			while (lazyFactoryProviders.size() > 0) {
+				IAdapterManagerProvider provider = (IAdapterManagerProvider) lazyFactoryProviders.remove(0);
+				if (provider.addFactories(this))
+					flushLookup();
+			}
+		}
 		return factories;
 	}
 }

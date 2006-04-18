@@ -28,6 +28,12 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 	public static final String PI_PREFERENCES = "org.eclipse.equinox.preferences"; //$NON-NLS-1$
 
 	/**
+	 * Eclipse property. Set to <code>false</code> to avoid registering JobManager
+	 * as an OSGi service.
+	 */
+	private static final String PROP_REGISTER_PERF_SERVICE = "eclipse.service.pref"; //$NON-NLS-1$
+	
+	/**
 	 * Track the registry service - only register preference service if the registry is 
 	 * available
 	 */
@@ -46,7 +52,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 	/**
 	 * This plugin provides the OSGi Preferences service.
 	 */
-	private ServiceRegistration osgiPreferencesService;
+	private ServiceRegistration osgiPreferencesService = null;
 
 	/* (non-Javadoc)
 	 * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
@@ -55,8 +61,12 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 		bundleContext = context;
 		processCommandLine();
 		PreferencesOSGiUtils.getDefault().openServices();
-		preferencesService = bundleContext.registerService(IPreferencesService.class.getName(), PreferencesService.getDefault(), new Hashtable());
-		osgiPreferencesService = bundleContext.registerService(org.osgi.service.prefs.PreferencesService.class.getName(), new OSGiPreferencesServiceManager(bundleContext), null);
+		
+		boolean shouldRegister = !"false".equalsIgnoreCase(context.getProperty(PROP_REGISTER_PERF_SERVICE)); //$NON-NLS-1$
+		if (shouldRegister) {
+			preferencesService = bundleContext.registerService(IPreferencesService.class.getName(), PreferencesService.getDefault(), new Hashtable());
+			osgiPreferencesService = bundleContext.registerService(org.osgi.service.prefs.PreferencesService.class.getName(), new OSGiPreferencesServiceManager(bundleContext), null);
+		}
 		// use the string for the class name here in case the registry isn't around
 		registryServiceTracker = new ServiceTracker(bundleContext, "org.eclipse.core.runtime.IExtensionRegistry", this); //$NON-NLS-1$
 		registryServiceTracker.open();
