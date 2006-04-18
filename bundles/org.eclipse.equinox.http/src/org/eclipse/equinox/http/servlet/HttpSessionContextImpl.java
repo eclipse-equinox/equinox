@@ -25,7 +25,7 @@ import javax.servlet.http.HttpSessionContext;
  * method of HttpSession.
  *
  * @see HttpSession
- * @depracated
+ * @deprecated
  */
 public class HttpSessionContextImpl implements HttpSessionContext {
 
@@ -45,7 +45,7 @@ public class HttpSessionContextImpl implements HttpSessionContext {
 	 * @param sessionID the ID of a particular session object
 	 * @return the session name. Returns null if the session ID does not refer
 	 * to a valid session.
-	 * @depracated
+	 * @deprecated
 	 */
 	public HttpSession getSession(String sessionId) {
 		return (null);

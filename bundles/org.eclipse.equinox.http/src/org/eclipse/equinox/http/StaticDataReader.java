@@ -163,13 +163,14 @@ public class StaticDataReader {
 		return (resultStatusCodes);
 	}
 
-	/**
+	/* TODO: Consider Removing this method
 	 * Read alias data and populate a Hashtable.
 	 * The inputstream is always closed.
 	 *
 	 * @param in InputStream from which to read alias data.
 	 * @return Hashtable of aliases.
 	 */
+	/*
 	private static Hashtable parseAliases(InputStream in) {
 		Hashtable aliases = new Hashtable(37);
 
@@ -181,9 +182,9 @@ public class StaticDataReader {
 					while (true) {
 						String line = br.readLine();
 
-						if (line == null) /* EOF */
+						if (line == null) // EOF
 						{
-							break; /* done */
+							break; // done
 						}
 
 						Tokenizer tokenizer = new Tokenizer(line);
@@ -222,5 +223,6 @@ public class StaticDataReader {
 
 		return (aliases);
 	}
+	*/
 
 }
