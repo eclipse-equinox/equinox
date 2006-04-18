@@ -427,8 +427,10 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
 
 				if (use != null) {
 					use.releaseService();
-
-					contextsUsing.remove(user);
+					// contextsUsing may have been nulled out by use.releaseService() if the registrant bundle
+					// is listening for events and unregisters the service
+					if (contextsUsing != null)
+						contextsUsing.remove(user);
 				}
 			}
 		}
