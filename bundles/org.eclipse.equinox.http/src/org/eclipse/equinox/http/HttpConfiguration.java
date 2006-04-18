@@ -96,14 +96,11 @@ public class HttpConfiguration implements ManagedService, ManagedServiceFactory 
 	 */
 	protected void initialize() {
 		setDefaultPorts();
-		/* Create configured listeners before thread pool
-		 * in case we exceed the number of threads */
+		pool = new HttpThreadPool(http, minThreads, maxThreads, threadPriority);
 		configuredListeners = new Hashtable(7);
 		synchronized (configuredListeners) {
 			createDefaultListeners();
 		}
-
-		pool = new HttpThreadPool(http, minThreads, maxThreads, threadPriority);
 
 		registerManagedService();
 		registerManagedServiceFactory();
@@ -271,7 +268,6 @@ public class HttpConfiguration implements ManagedService, ManagedServiceFactory 
 		}
 
 		pool.close();
-		pool = null;
 	}
 
 	/**
