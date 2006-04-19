@@ -112,6 +112,14 @@ public class EclipseStarter {
 	private static final String PROP_ALLOW_APPRELAUNCH = "eclipse.allowAppRelaunch"; //$NON-NLS-1$
 	private static final String PROP_APPLICATION_NODEFAULT = "eclipse.application.noDefault"; //$NON-NLS-1$
 
+	// System property used to set the context classloader parent classloader type (ccl is the default)
+	private static final String PROP_CONTEXTCLASSLOADER_PARENT = "osgi.contextClassLoaderParent"; //$NON-NLS-1$
+	private static final String CONTEXTCLASSLOADER_PARENT_APP = "app"; //$NON-NLS-1$
+	private static final String CONTEXTCLASSLOADER_PARENT_EXT = "ext"; //$NON-NLS-1$
+	private static final String CONTEXTCLASSLOADER_PARENT_BOOT = "boot"; //$NON-NLS-1$
+	private static final String CONTEXTCLASSLOADER_PARENT_FWK = "fwk"; //$NON-NLS-1$
+	private static final String CONTEXTCLASSLOADER_PARENT_CCL = "ccl"; //$NON-NLS-1$
+
 	private static final String FILE_SCHEME = "file:"; //$NON-NLS-1$
 	private static final String FILE_PROTOCOL = "file"; //$NON-NLS-1$
 	private static final String REFERENCE_SCHEME = "reference:"; //$NON-NLS-1$
@@ -315,9 +323,25 @@ public class EclipseStarter {
 	private static void initializeContextFinder() {
 		Thread current = Thread.currentThread();
 		try {
-			Method getContextClassLoader = Thread.class.getMethod("getContextClassLoader", null); //$NON-NLS-1$
+			ClassLoader parent = null;
+			// check property for specified parent
+			String type = FrameworkProperties.getProperty(PROP_CONTEXTCLASSLOADER_PARENT);
+			if (CONTEXTCLASSLOADER_PARENT_APP.equals(type))
+				parent = ClassLoader.getSystemClassLoader();
+			else if (CONTEXTCLASSLOADER_PARENT_BOOT.equals(type))
+				parent = null;
+			else if (CONTEXTCLASSLOADER_PARENT_FWK.equals(type))
+				parent = EclipseStarter.class.getClassLoader();
+			else if (CONTEXTCLASSLOADER_PARENT_EXT.equals(type)) {
+				ClassLoader appCL = ClassLoader.getSystemClassLoader();
+				if (appCL != null)
+					parent = appCL.getParent();
+			} else { // default is ccl (null or any other value will use ccl)
+				Method getContextClassLoader = Thread.class.getMethod("getContextClassLoader", null); //$NON-NLS-1$
+				parent = (ClassLoader) getContextClassLoader.invoke(current, null);
+			}
 			Method setContextClassLoader = Thread.class.getMethod("setContextClassLoader", new Class[] {ClassLoader.class}); //$NON-NLS-1$
-			Object[] params = new Object[] {new ContextFinder((ClassLoader) getContextClassLoader.invoke(current, null))};
+			Object[] params = new Object[] {new ContextFinder(parent)};
 			setContextClassLoader.invoke(current, params);
 			return;
 		} catch (SecurityException e) {
