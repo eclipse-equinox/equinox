@@ -315,7 +315,7 @@ public abstract class StateImpl implements State {
 				reResolve = mergeBundles(reResolve, removed);
 			}
 			resolver.resolve(reResolve, platformProperties);
-			resolved = true;
+			resolved = removalPendings.size() == 0;
 
 			StateDelta savedChanges = changes == null ? new StateDeltaImpl(this) : changes;
 			changes = new StateDeltaImpl(this);
