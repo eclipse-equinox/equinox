@@ -89,24 +89,23 @@ public final class FileLocator {
 	/**
 	 * Returns an input stream for the specified file. The file path
 	 * must be specified relative to this plug-in's installation location.
-	 * Optionally, the platform searches for the correct localized version
-	 * of the specified file using the users current locale, and Java
-	 * naming convention for localized resource files (locale suffix appended 
-	 * to the specified file extension).
+	 * Optionally, the path specified may contain $arg$ path elements that can 
+	 * be used as substitution arguments.  If this option is used then the $arg$ 
+	 * path elements are processed in the same way as {@link #find(Bundle, IPath, Map)}.
 	 * <p>
 	 * The caller must close the returned stream when done.
 	 * </p>
 	 *
 	 * @param bundle the bundle in which to search
 	 * @param file path relative to plug-in installation location
-	 * @param localized <code>true</code> for the localized version
-	 *   of the file, and <code>false</code> for the file exactly
-	 *   as specified
+	 * @param substituteArgs <code>true</code> to process substitution arguments, 
+	 * and <code>false</code> for the file exactly as specified without processing any
+	 * substitution arguments.
 	 * @return an input stream
 	 * @exception IOException if the given path cannot be found in this plug-in
 	 */
-	public static InputStream openStream(Bundle bundle, IPath file, boolean localized) throws IOException {
-		return FindSupport.openStream(bundle, file, localized);
+	public static InputStream openStream(Bundle bundle, IPath file, boolean substituteArgs) throws IOException {
+		return FindSupport.openStream(bundle, file, substituteArgs);
 	}
 
 	/**

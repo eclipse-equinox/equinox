@@ -233,9 +233,9 @@ public class FindSupport {
 	/**
 	 * See doc on @link Platform#openStream(Bundle, IPath, boolean) Platform#Platform#openStream(Bundle, IPath, boolean) 
 	 */
-	public static final InputStream openStream(Bundle bundle, IPath file, boolean localized) throws IOException {
+	public static final InputStream openStream(Bundle bundle, IPath file, boolean substituteArgs) throws IOException {
 		URL url = null;
-		if (!localized) {
+		if (!substituteArgs) {
 			url = findInPlugin(bundle, file);
 			if (url == null)
 				url = findInFragments(bundle, file);
