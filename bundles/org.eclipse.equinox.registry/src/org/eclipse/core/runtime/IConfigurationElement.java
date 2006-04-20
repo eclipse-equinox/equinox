@@ -126,6 +126,8 @@ public interface IConfigurationElement {
 	 * @param name the name of the attribute
 	 * @return attribute value, or <code>null</code> if none
 	 * @throws InvalidRegistryObjectException if this configuration element is no longer valid
+	 * @deprecated The method is equivalent to the {@link #getAttribute(String)}. Contrary to its description,
+	 * this method returns a translated value. Use the {@link #getAttribute(String)} method instead.
 	 */
 	public String getAttributeAsIs(String name) throws InvalidRegistryObjectException;
 
@@ -264,6 +266,8 @@ public interface IConfigurationElement {
 	 *
 	 * @return the untranslated text value of this configuration element or <code>null</code>
 	 * @throws InvalidRegistryObjectException if this configuration element is no longer valid
+	 * @deprecated The method is equivalent to the {@link #getValue()}. Contrary to its description,
+	 * this method returns a translated value. Use the {@link #getValue()} method instead.
 	 */
 	public String getValueAsIs() throws InvalidRegistryObjectException;
 
