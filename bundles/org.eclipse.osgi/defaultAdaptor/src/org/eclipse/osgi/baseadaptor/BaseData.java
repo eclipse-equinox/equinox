@@ -451,4 +451,20 @@ public class BaseData implements BundleData {
 	public void setFileName(String fileName) {
 		this.fileName = fileName;
 	}
+
+	
+	/**
+	 * Return a string representation of the bundle that can be used in debug messages.
+	 * 
+	 * @return String representation of the bundle
+	 */
+	public String toString() {
+		String name = getSymbolicName();
+		if (name == null)
+			return getLocation(); 
+		Version ver = getVersion();
+		if (ver == null)
+			return name;
+		return name+"_"+ver; //$NON-NLS-1$
+	}
 }
