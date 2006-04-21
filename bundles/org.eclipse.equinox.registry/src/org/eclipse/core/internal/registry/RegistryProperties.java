@@ -9,9 +9,9 @@
 package org.eclipse.core.internal.registry;
 
 import java.util.Properties;
-
-import org.eclipse.core.internal.registry.osgi.Activator;
-import org.osgi.framework.BundleContext;
+import org.eclipse.core.internal.runtime.RuntimeLog;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 
 /**
  * Simple Property mechanism to chain property lookup from local registry properties,
@@ -20,17 +20,51 @@ import org.osgi.framework.BundleContext;
 public class RegistryProperties {
 
 	private static Properties registryProperties = new Properties();
+	private static Object context = null; // BundleContext, but specified as Object to avoid class loading 
+
+	public static void setContext(Object object) {
+		context = object;
+	}
 
 	public static String getProperty(String propertyName) {
 		String propertyValue = registryProperties.getProperty(propertyName);
 		if (propertyValue != null)
 			return propertyValue;
 
-		BundleContext bc = Activator.getContext();
-		return (bc == null) ? System.getProperty(propertyName) : bc.getProperty(propertyName);
+		return getContextProperty(propertyName);
 	}
 
 	public static void setProperty(String propertyName, String propertyValue) {
 		registryProperties.setProperty(propertyName, propertyValue);
+	}
+
+	// The registry could be used as a stand-alone utility without OSGi.
+	// Try to obtain the property from the OSGi context, but only use bundleContext if
+	// it was already set by Activator indicating that OSGi layer is present. 
+	private static String getContextProperty(final String propertyName) {
+		if (context == null)
+			return System.getProperty(propertyName);
+
+		final String[] result = new String[1];
+		try {
+			// Wrap BundleContext into an inner class to make sure it will only get loaded 
+			// if OSGi layer is present.
+			Runnable innerClass = new Runnable() {
+				public void run() {
+					org.osgi.framework.BundleContext bundleContext = (org.osgi.framework.BundleContext) context;
+					result[0] = bundleContext.getProperty(propertyName);
+				}
+			};
+			innerClass.run();
+		} catch (Exception e) {
+			// If we are here, it is likely means that context was set, but OSGi layer
+			// is not present or non-standard. This should not happen, but let's give
+			// the program a chance to continue - properties should have reasonable 
+			// default values.
+			IStatus status = new Status(Status.ERROR, IRegistryConstants.RUNTIME_NAME, 0, e.getMessage(), e);
+			RuntimeLog.log(status);
+			return null;
+		}
+		return result[0];
 	}
 }

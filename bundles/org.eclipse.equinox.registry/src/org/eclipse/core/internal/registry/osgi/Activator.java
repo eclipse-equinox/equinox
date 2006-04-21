@@ -49,6 +49,7 @@ public class Activator implements BundleActivator {
 	 */
 	public void start(BundleContext context) throws Exception {
 		bundleContext = context;
+		RegistryProperties.setContext(bundleContext);
 		processCommandLine();
 		startRegistry();
 	}
@@ -58,6 +59,7 @@ public class Activator implements BundleActivator {
 	 */
 	public void stop(BundleContext context) throws Exception {
 		stopRegistry();
+		RegistryProperties.setContext(null);		
 		bundleContext = null;
 	}
 
