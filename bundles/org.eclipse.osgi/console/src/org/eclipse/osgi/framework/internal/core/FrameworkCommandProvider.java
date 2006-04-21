@@ -681,6 +681,7 @@ public class FrameworkCommandProvider implements CommandProvider {
 					String root = (dataRoot == null) ? null : dataRoot.getAbsolutePath();
 
 					intp.print(NLS.bind(ConsoleMsg.CONSOLE_DATA_ROOT_MESSAGE, root));
+					intp.println();
 				} else {
 					intp.println();
 				}
