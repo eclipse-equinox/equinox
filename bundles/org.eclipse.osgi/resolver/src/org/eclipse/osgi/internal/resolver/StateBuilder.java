@@ -181,10 +181,12 @@ class StateBuilder {
 				checkForDuplicateDirectives(elements);
 				if (DEFINED_OSGI_VALIDATE_HEADERS[i] == Constants.REEXPORT_PACKAGE)
 					checkForUsesDirective(elements);
-				if (DEFINED_OSGI_VALIDATE_HEADERS[i] == Constants.IMPORT_PACKAGE || DEFINED_OSGI_VALIDATE_HEADERS[i] == Constants.DYNAMICIMPORT_PACKAGE)
-					checkImportExportSyntax(elements, false, jreBundle);
+				if (DEFINED_OSGI_VALIDATE_HEADERS[i] == Constants.IMPORT_PACKAGE)
+					checkImportExportSyntax(elements, false, false, jreBundle);
+				if (DEFINED_OSGI_VALIDATE_HEADERS[i] == Constants.DYNAMICIMPORT_PACKAGE)
+					checkImportExportSyntax(elements, false, true, jreBundle);
 				if (DEFINED_OSGI_VALIDATE_HEADERS[i] == Constants.EXPORT_PACKAGE)
-					checkImportExportSyntax(elements, true, jreBundle);
+					checkImportExportSyntax(elements, true, false, jreBundle);
 				if (DEFINED_OSGI_VALIDATE_HEADERS[i] == Constants.FRAGMENT_HOST)
 					checkExtensionBundle(elements);
 			} else if (DEFINED_OSGI_VALIDATE_HEADERS[i] == Constants.BUNDLE_SYMBOLICNAME) {
@@ -480,7 +482,7 @@ class StateBuilder {
 		return new VersionRange(versionRange);
 	}
 
-	private static void checkImportExportSyntax(ManifestElement[] elements, boolean export, boolean jreBundle) throws BundleException {
+	private static void checkImportExportSyntax(ManifestElement[] elements, boolean export, boolean dynamic, boolean jreBundle) throws BundleException {
 		if (elements == null)
 			return;
 		int length = elements.length;
@@ -489,7 +491,7 @@ class StateBuilder {
 			// check for duplicate imports
 			String[] packageNames = elements[i].getValueComponents();
 			for (int j = 0; j < packageNames.length; j++) {
-				if (!export && packages.contains(packageNames[j]))
+				if (!export && !dynamic && packages.contains(packageNames[j]))
 					throw new BundleException(NLS.bind(StateMsg.HEADER_PACKAGE_DUPLICATES, packageNames[j]));
 				// check for java.*
 				if (!jreBundle && packageNames[j].startsWith("java.")) //$NON-NLS-1$
