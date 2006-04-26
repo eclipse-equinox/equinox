@@ -63,7 +63,35 @@ public interface IExtension {
 	 * @since 3.0
 	 * @deprecated As namespace is no longer restricted to the contributor name, 
 	 * 	use {@link #getNamespaceIdentifier()} to obtain namespace name or {@link #getContributor()}
-	 * 	to get the name of the contributor of this registry element  
+	 * 	to get the name of the contributor of this registry element.  
+	 * <p>
+	 * In the past namespace was dictated by the name of the bundle. If bundle <code>org.abc</code> 
+	 * contributed registry element with Id of <code>MyId</code>, the namespace of 
+	 * the element was always set to <code>org.abc</code>, producing the qualified name of 
+	 * <code>org.abc.MyId</code>.
+	 * </p><p>
+	 * The namespace used to be the same as the bundle name. As a result, the {@link #getNamespace()} 
+	 * method was used both to obtain the name of the bundle and to obtain the namespace of a registry 
+	 * element.
+	 * </p><p>
+	 * Since 3.2, the extension registry allows elements to specify qualified name. The extension point 
+	 * of the plug-in <code>org.abc</code> could specify <code>org.zzz.MyExtPoint</code> as 
+	 * an Id. In this case, namespace name is <code>org.zzz</code>, but the contributor 
+	 * name is <code>org.abc</code>.  
+	 * </p><p>
+	 * (The use of a simple Id is still a preferred way. Whenever possible, specify only the simple 
+	 * Id and let runtime take care of the rest.)
+	 * </p><p>
+	 * If your code used the {@link #getNamespace()} to obtain the name of the contributing bundle, 
+	 * use {@link #getContributor()}. The typical usage pattern here is to find a bundle name to obtain 
+	 * some information from the corresponding OSGi bundle. For example, deducing the file location 
+	 * specified as a relative path to the bundle install location would fall into this group.
+	 * </p><p>
+	 * If your code used the {@link #getNamespace()} to obtain the namespace of the registry element, 
+	 * use {@link #getNamespaceIdentifier()}. Typically, this is the case when code is trying to process 
+	 * registry elements belonging to some logical group. For example, processing notifications for all 
+	 * elements belonging to the <code>org.abc</code> namespace would fall into this category.
+	 * </p>
 	 */
 	public String getNamespace() throws InvalidRegistryObjectException;
 
