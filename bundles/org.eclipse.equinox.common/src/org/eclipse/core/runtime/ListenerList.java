@@ -23,7 +23,19 @@ package org.eclipse.core.runtime;
  * listeners in the list.  For this purpose, listeners can be compared with each other 
  * using either equality or identity, as specified in the list constructor.
  * </p>
+ * <p>
+ * Use the <code>getListeners</code> method when notifying listeners. The recommended
+ * code sequence for notifying all registered listeners of say,
+ * <code>FooListener.eventHappened</code>, is:
  * 
+ * <pre>
+ * Object[] listeners = myListenerList.getListeners();
+ * for (int i = 0; i &lt; listeners.length; ++i) {
+ * 	((FooListener) listeners[i]).eventHappened(event);
+ * }
+ * </pre>
+ * 
+ * </p>
  * @since org.eclipse.equinox.common 3.2
  */
 public class ListenerList {
