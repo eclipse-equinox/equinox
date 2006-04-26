@@ -65,7 +65,6 @@ public final class Assert {
 	 * is not the case, some kind of unchecked exception is thrown.
 	 * 
 	 * @param object the value to test
-	 * @exception IllegalArgumentException if the object is <code>null</code>
 	 */
 	public static void isNotNull(Object object) {
 		isNotNull(object, ""); //$NON-NLS-1$
@@ -77,7 +76,6 @@ public final class Assert {
 	 *
 	 * @param object the value to test
 	 * @param message the message to include in the exception
-	 * @exception IllegalArgumentException if the object is <code>null</code>
 	 */
 	public static void isNotNull(Object object, String message) {
 		if (object == null)
