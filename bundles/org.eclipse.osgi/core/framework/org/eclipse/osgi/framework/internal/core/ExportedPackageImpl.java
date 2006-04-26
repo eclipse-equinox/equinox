@@ -81,7 +81,7 @@ public class ExportedPackageImpl implements ExportedPackage {
 	public String toString() {
 		StringBuffer result = new StringBuffer(getName());
 		if (specVersion != null) {
-			result.append("; ").append(Constants.PACKAGE_SPECIFICATION_VERSION); //$NON-NLS-1$
+			result.append("; ").append(Constants.VERSION_ATTRIBUTE); //$NON-NLS-1$
 			result.append("=\"").append(specVersion).append("\"");  //$NON-NLS-1$//$NON-NLS-2$
 		}
 		return result.toString();
