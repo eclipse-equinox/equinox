@@ -619,13 +619,24 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
 			for (int i = 0; i < size; i++) {
 				String key = keys[i];
 				if (!key.equals(Constants.OBJECTCLASS)) {
-					if (n > 0) {
+					if (n > 0)
 						sb.append(", "); //$NON-NLS-1$
-					}
 
 					sb.append(key);
 					sb.append('=');
-					sb.append(get(key));
+					Object value = get(key);
+					if (value.getClass().isArray()) {
+						sb.append('[');
+						int length = Array.getLength(value);
+						for (int j = 0; j < length; j++) {
+							if (j > 0)
+								sb.append(',');
+							sb.append(Array.get(value, j));
+						}
+						sb.append(']');
+					} else {
+						sb.append(value);
+					}
 					n++;
 				}
 			}
