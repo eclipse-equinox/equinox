@@ -53,6 +53,7 @@ public class Debug {
 	/**
 	 * Packages debug flag.
 	 */
+	// TODO remove this or use it somewhere
 	public static boolean DEBUG_PACKAGES = false; // "debug.packages"
 	/**
 	 * Manifest debug flag.
@@ -77,6 +78,7 @@ public class Debug {
 	/**
 	 * PackageAdmin timing debug flag.
 	 */
+	// TODO remove this or use it somewhere
 	public static boolean DEBUG_PACKAGEADMIN_TIMING = false; //"debug.packageadmin/timing"
 	/**
 	 * Message debug flag.
@@ -98,6 +100,7 @@ public class Debug {
 	/**
 	 * Bundle time Debug option key.
 	 */
+	// TODO remove this or use it somewhere
 	public static final String OPTION_DEBUG_BUNDLE_TIME = ECLIPSE_OSGI + "/debug/bundleTime"; //$NON-NLS-1$
 	/**
 	 * Loader Debug option key.
