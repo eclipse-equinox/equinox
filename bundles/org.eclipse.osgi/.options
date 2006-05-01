@@ -18,6 +18,8 @@ org.eclipse.osgi/debug/security=false
 org.eclipse.osgi/debug/startlevel=false
 # Prints out package admin service debug information
 org.eclipse.osgi/debug/packageadmin=false
+# Prints out timing information for bundle activation
+org.eclipse.osgi/debug/bundleTime=false
 # Debug the loading of message bundles
 org.eclipse.osgi/debug/messageBundles=false
 
