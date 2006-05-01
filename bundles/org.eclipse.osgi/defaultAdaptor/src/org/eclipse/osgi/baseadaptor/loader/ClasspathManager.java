@@ -62,9 +62,16 @@ public class ClasspathManager {
 	/**
 	 * initializes this classpath manager.  This must be called after all existing fragments have been
 	 * attached and before any resources/classes are loaded using this classpath manager.
+	 * <p>
+	 * After the classpath manager is initialized all configured class loading hooks 
+	 * {@link ClassLoadingHook#initializedClassLoader(BaseClassLoader, BaseData)} methods are called.
+	 * </p>
 	 */
 	public void initialize() {
 		entries = buildClasspath(classpath, this, data, classloader.getDomain());
+		ClassLoadingHook[] hooks = data.getAdaptor().getHookRegistry().getClassLoadingHooks();
+		for (int i = 0; i < hooks.length; i++)
+			hooks[i].initializedClassLoader(classloader, data);
 	}
 
 	/**

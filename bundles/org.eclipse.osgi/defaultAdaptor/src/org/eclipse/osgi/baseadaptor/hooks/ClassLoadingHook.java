@@ -87,10 +87,10 @@ public interface ClassLoadingHook {
 	BaseClassLoader createClassLoader(ClassLoader parent, ClassLoaderDelegate delegate, BundleProtectionDomain domain, BaseData data, String[] bundleclasspath);
 
 	/**
-	 * Gets called by a base data during
-	 * {@link BundleData#createClassLoader(ClassLoaderDelegate, BundleProtectionDomain, String[])}.
-	 * The BaseData will call this method for each configured class loading hook after a 
-	 * BundleClassLoader has been created.
+	 * Gets called by a classpath manager at the end of 
+	 * {@link ClasspathManager#initialize()}.
+	 * The classpath manager will call this method for each configured class loading hook after it 
+	 * has been initialized.
 	 * @param baseClassLoader the newly created bundle classloader
 	 * @param data the BundleData associated with the bundle classloader
 	 */

@@ -75,9 +75,7 @@ public class BaseData implements BundleData {
 	/**
 	 * This method calls all the configured class loading hooks {@link ClassLoadingHook#createClassLoader(ClassLoader, ClassLoaderDelegate, BundleProtectionDomain, BaseData, String[])} 
 	 * methods until on returns a non-null value.  If none of the class loading hooks returns a non-null value 
-	 * then the default classloader implementation is used. <p>
-	 * After the classloader is created all configured class loading hooks 
-	 * {@link ClassLoadingHook#initializedClassLoader(BaseClassLoader, BaseData)} methods are called.
+	 * then the default classloader implementation is used.
 	 * @see BundleData#createClassLoader(ClassLoaderDelegate, BundleProtectionDomain, String[])
 	 */
 	public BundleClassLoader createClassLoader(ClassLoaderDelegate delegate, BundleProtectionDomain domain, String[] bundleclasspath) {
@@ -88,8 +86,6 @@ public class BaseData implements BundleData {
 			cl = hooks[i].createClassLoader(parent, delegate, domain, this, bundleclasspath);
 		if (cl == null)
 			cl = new DefaultClassLoader(parent, delegate, domain, this, bundleclasspath);
-		for (int i = 0; i < hooks.length; i++)
-			hooks[i].initializedClassLoader(cl, this);
 		return cl;
 	}
 
