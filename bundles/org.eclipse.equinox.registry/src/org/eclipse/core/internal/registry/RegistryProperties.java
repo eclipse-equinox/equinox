@@ -18,6 +18,8 @@ import org.eclipse.core.runtime.Status;
  * to BundleContext properties (if available) or System properties otherwise.
  */
 public class RegistryProperties {
+	
+	public static final String empty = ""; //$NON-NLS-1$
 
 	private static Properties registryProperties = new Properties();
 	private static Object context = null; // BundleContext, but specified as Object to avoid class loading 
@@ -32,6 +34,11 @@ public class RegistryProperties {
 			return propertyValue;
 
 		return getContextProperty(propertyName);
+	}
+
+	public static String getProperty(String property, String defaultValue) {
+		String result = RegistryProperties.getProperty(property);
+		return result == null ? defaultValue : result;
 	}
 
 	public static void setProperty(String propertyName, String propertyValue) {

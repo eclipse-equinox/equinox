@@ -28,7 +28,7 @@ public class TableReader {
 	// Version 2 -> 3: added namespace index and the table of contributors
 	// Version 3 -> 4: offset table saved in a binary form (performance)
 	// Version 4 -> 5: remove support added in version 4 to save offset table in a binary form (performance)
-	
+
 	//Informations representing the MAIN file
 	static final String MAIN = ".mainData"; //$NON-NLS-1$
 	BufferedRandomInputStream mainDataFile = null;
@@ -153,9 +153,9 @@ public class TableReader {
 
 			boolean validTime = (expectedTimestamp == 0 || expectedTimestamp == registryStamp);
 			boolean validInstall = (installStamp == registry.computeState());
-			boolean validOS = (osStamp.equals(RegistryProperties.getProperty(IRegistryConstants.PROP_OS)));
-			boolean validWS = (windowsStamp.equals(RegistryProperties.getProperty(IRegistryConstants.PROP_WS)));
-			boolean validNL = (localeStamp.equals(RegistryProperties.getProperty(IRegistryConstants.PROP_NL)));
+			boolean validOS = (osStamp.equals(RegistryProperties.getProperty(IRegistryConstants.PROP_OS, RegistryProperties.empty)));
+			boolean validWS = (windowsStamp.equals(RegistryProperties.getProperty(IRegistryConstants.PROP_WS, RegistryProperties.empty)));
+			boolean validNL = (localeStamp.equals(RegistryProperties.getProperty(IRegistryConstants.PROP_NL, RegistryProperties.empty)));
 
 			if (!validTime || !validInstall || !validOS || !validWS || !validNL)
 				return false;

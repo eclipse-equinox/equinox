@@ -272,9 +272,9 @@ public class TableWriter {
 		output.writeLong(contributorsFile.length());
 		output.writeLong(namespacesFile.length());
 		output.writeLong(orphansFile.length());
-		output.writeUTF(RegistryProperties.getProperty(IRegistryConstants.PROP_OS));
-		output.writeUTF(RegistryProperties.getProperty(IRegistryConstants.PROP_WS));
-		output.writeUTF(RegistryProperties.getProperty(IRegistryConstants.PROP_NL));
+		output.writeUTF(RegistryProperties.getProperty(IRegistryConstants.PROP_OS, RegistryProperties.empty));
+		output.writeUTF(RegistryProperties.getProperty(IRegistryConstants.PROP_WS, RegistryProperties.empty));
+		output.writeUTF(RegistryProperties.getProperty(IRegistryConstants.PROP_NL, RegistryProperties.empty));
 	}
 
 	private void saveArray(int[] array, DataOutputStream out) throws IOException {
@@ -356,7 +356,7 @@ public class TableWriter {
 		}
 
 		for (int i = 0; i < exts.length; i++) {
-			if (!((ExtensionHandle)exts[i]).shouldPersist())
+			if (!((ExtensionHandle) exts[i]).shouldPersist())
 				continue;
 			IConfigurationElement[] ces = exts[i].getConfigurationElements();
 			int countCElements = 0;
