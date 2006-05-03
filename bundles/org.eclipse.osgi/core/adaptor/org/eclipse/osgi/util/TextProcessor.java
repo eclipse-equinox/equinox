@@ -124,12 +124,13 @@ public class TextProcessor {
 	 *    resulting string will not return the same values as would be returned 
 	 *     for the original string. 
 	 * </p>
-	 * @param str the text to process
-	 * @param delimiter delimiters by which the string will be segmented
+	 * @param str the text to process, if <code>null</code> return the string as it was passed in
+	 * @param delimiter delimiters by which the string will be segmented, if <code>null</code> 
+	 * 			the default delimiters are used
 	 * @return the processed string
 	 */
 	public static String process(String str, String delimiter) {
-		if (!isBidi)
+		if (!isBidi || str == null)
 			return str;
 
 		delimiter = delimiter == null ? getDefaultDelimiters() : delimiter;
@@ -140,6 +141,7 @@ public class TextProcessor {
 		// no delimiters found so revert to default behaviour
 		if (tokenizer.countTokens() == 1)
 			return str;
+
 		StringBuffer buf = new StringBuffer(); // the string to build
 		while (tokenizer.hasMoreTokens()) {
 			String token = tokenizer.nextToken();
@@ -153,9 +155,33 @@ public class TextProcessor {
 			} else {
 				// (non-delimiter) text has basic RTL orientation
 				// see (#4) of algorithm
-				buf.append(LRE);
-				buf.append(token);
-				buf.append(PDF);
+				// do not double process an already processed string
+				boolean skipToken = false;
+				char firstChar = token.charAt(0);
+				if (firstChar == LRM) {
+					// the token is an LRM character
+					if (token.length() == 1) {
+						if (lastToken == null) {
+							// LRM is the first token, add to buffer
+							buf.append(token);
+						}
+						skipToken = true; // don't process this token
+					} else {
+						// remove the LRM and process the rest of the token
+						token = token.substring(1, token.length());
+						firstChar = token.charAt(0);
+					}
+				}
+				// don't process the token if it consists solely of a directional character
+				if (!skipToken) {
+					if (firstChar == LRE) {
+						buf.append(token);
+					} else {
+						buf.append(LRE);
+						buf.append(token);
+						buf.append(PDF);
+					}
+				}
 			}
 			lastToken = token;
 		}
