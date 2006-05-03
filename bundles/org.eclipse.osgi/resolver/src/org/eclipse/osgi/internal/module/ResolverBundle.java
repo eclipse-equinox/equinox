@@ -11,6 +11,7 @@
 package org.eclipse.osgi.internal.module;
 
 import java.util.*;
+import org.eclipse.osgi.internal.resolver.ExportPackageDescriptionImpl;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.Constants;
 
@@ -293,7 +294,11 @@ public class ResolverBundle extends VersionSupplier {
 	}
 
 	private boolean isExported(String packageName) {
-		return getExport(packageName) != null;
+		ResolverExport export = getExport(packageName);
+		if (export == null)
+			return false;
+		// let exports from a bundle manifest be exported in addition to the ones from the vm profile
+		return 0 > ((Integer) export.getExportPackageDescription().getDirective(ExportPackageDescriptionImpl.EQUINOX_EE)).intValue();
 	}
 
 	private boolean isRequired(String bundleName) {
