@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004 IBM Corporation and others.
+ * Copyright (c) 2004, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,11 +10,12 @@
  *******************************************************************************/
 package org.eclipse.core.internal.preferences;
 
-import java.io.File;
 import java.util.Set;
 import java.util.TreeSet;
-
+import org.eclipse.core.runtime.preferences.ConfigurationScope;
 import org.osgi.framework.*;
+import org.osgi.service.prefs.BackingStoreException;
+import org.osgi.service.prefs.Preferences;
 
 /**
  * <p>
@@ -25,84 +26,80 @@ import org.osgi.framework.*;
  * <p>
  * Also deletes saved preferences for bundles which are uninstalled.
  * </p>
- * <p>
- * Preferences are saved in the Bundle Data area under the directory "OSGiPreferences".
- * </p>
  */
 public class OSGiPreferencesServiceManager implements ServiceFactory, BundleListener {
 
-	private static final String OSGI_PREFS_DIR = "OSGiPreferences"; //$NON-NLS-1$
+	private static final String ORG_ECLIPSE_CORE_INTERNAL_PREFERENCES_OSGI = "org.eclipse.core.internal.preferences.osgi"; //$NON-NLS-1$
 
-	private File prefsDir;
+	//keys are bundles that use OSGi prefs
+	private Preferences prefBundles;
 
 	public OSGiPreferencesServiceManager(BundleContext context) {
 
-		prefsDir = context.getDataFile(OSGI_PREFS_DIR);
-
 		context.addBundleListener(this);
 
+		//prefBundles = new InstanceScope().getNode(ORG_ECLIPSE_CORE_INTERNAL_PREFERENCES_OSGI);
+		prefBundles = new ConfigurationScope().getNode(ORG_ECLIPSE_CORE_INTERNAL_PREFERENCES_OSGI);
+
 		//clean up prefs for bundles that have been uninstalled
-		Bundle[] allBundles = context.getBundles();
-		Set bundleDirNames = new TreeSet();
-		for (int i = 0; i < allBundles.length; i++) {
-			bundleDirNames.add(getBundleDirName(allBundles[i]));
-		}
-		File[] prefsNodeDirs = prefsDir.listFiles();
-		prefsNodeDirs = prefsNodeDirs == null ? new File[0] : prefsNodeDirs;
+		try {
 
-		for (int i = 0; i < prefsNodeDirs.length; i++) {
-			if (!bundleDirNames.contains(prefsNodeDirs[i].getName())) {
-				rmdir(prefsNodeDirs[i]);
+			//get list of currently installed bundles
+			Bundle[] allBundles = context.getBundles();
+			Set bundleQualifiers = new TreeSet();
+			for (int i = 0; i < allBundles.length; i++) {
+				bundleQualifiers.add(getQualifier(allBundles[i]));
 			}
 
-		}
-	}
+			//get list of bundles we created prefs for
+			String[] prefsBundles = prefBundles.keys();
 
-	/**
-	 * Recursively remove a file or a directory and all of it's children.
-	 */
-	private void rmdir(File file) {
-		if (!file.exists()) {
-			return;
-		}
-		if (file.isDirectory()) {
-			File[] children = file.listFiles();
-
-			for (int i = 0; i < children.length; i++) {
-				rmdir(children[i]);
+			//remove prefs nodes for bundles that are no longer installed
+			for (int i = 0; i < prefsBundles.length; i++) {
+				if (!bundleQualifiers.contains(prefsBundles[i])) {
+					removePrefs(prefsBundles[i]);
+				}
 			}
+
+		} catch (BackingStoreException e) {
+			//best effort
 		}
-		file.delete();
 	}
 
-	/**
-	 * Bundle Preferences are saves in a directory with the same name as the bundle's 
-	 * symbolic id.  For backwards compatibility, preferences for bundles that do not 
-	 * have a symbolic id are saved in a directory named 
-	 * 'org.eclipse.core.internal.preferences.OSGiPreferences.bundleid.&lt;bundle id&gt;'.
-	 */
-	private String getBundleDirName(Bundle bundle) {
-		String bundleDirName = bundle.getSymbolicName();
-
-		//backwards compatibility - if bundle does not have symbolic name
-		if (bundleDirName == null) {
-			bundleDirName = "org.eclipse.core.internal.preferences.OSGiPreferences.bundleid." + bundle.getBundleId(); //$NON-NLS-1$
-		}
-		return bundleDirName;
-	}
-	
 	/**
 	 * Creates a new OSGiPreferencesServiceImpl for each bundle.
 	 */
 	public Object getService(Bundle bundle, ServiceRegistration registration) {
-		return new OSGiPreferencesServiceImpl(new File(prefsDir, getBundleDirName(bundle)));
+		String qualifier = getQualifier(bundle);
+		//remember we created prefs for this bundle
+		prefBundles.put(qualifier, ""); //$NON-NLS-1$
+		try {
+			prefBundles.flush();
+		} catch (BackingStoreException e) {
+			//best effort
+		}
+		//return new OSGiPreferencesServiceImpl(new InstanceScope().getNode(getQualifier(bundle)));
+		return new OSGiPreferencesServiceImpl(new ConfigurationScope().getNode(getQualifier(bundle)));
 	}
 
 	/**
-	 * Flush the bundle's preferences to disk.
+	 * Store preferences per bundle id
+	 */
+	private String getQualifier(Bundle bundle) {
+		String qualifier = "org.eclipse.core.runtime.preferences.OSGiPreferences." + bundle.getBundleId(); //$NON-NLS-1$		
+		return qualifier;
+	}
+
+	/**
+	 * Flush the bundle's preferences.
 	 */
 	public void ungetService(Bundle bundle, ServiceRegistration registration, Object service) {
-		((OSGiPreferencesServiceImpl) service).destroy();
+		try {
+			//new InstanceScope().getNode(getQualifier(bundle)).flush();
+			new ConfigurationScope().getNode(getQualifier(bundle)).flush();
+		} catch (BackingStoreException e) {
+			//best effort
+		}
 	}
 
 	/**
@@ -110,10 +107,22 @@ public class OSGiPreferencesServiceManager implements ServiceFactory, BundleList
 	 */
 	public void bundleChanged(BundleEvent event) {
 		if (event.getType() == BundleEvent.UNINSTALLED) {
-			File bundlePrefs = new File(prefsDir, getBundleDirName(event.getBundle()));
-			rmdir(bundlePrefs);
+			try {
+				removePrefs(getQualifier(event.getBundle()));
+			} catch (BackingStoreException e) {
+				//best effort
+			}
 		}
 
 	}
 
+	protected void removePrefs(String qualifier) throws BackingStoreException {
+		//remove bundle's prefs
+		//new InstanceScope().getNode(qualifier).removeNode();
+		new ConfigurationScope().getNode(qualifier).removeNode();
+
+		//remove from our list of bundles with prefs
+		prefBundles.remove(qualifier);
+		prefBundles.flush();
+	}
 }
