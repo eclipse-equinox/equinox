@@ -270,9 +270,12 @@ public abstract class StateImpl implements State {
 		GenericSpecification[] genericRequires = bundle.getGenericRequires();
 		if (genericRequires.length > 0) {
 			ArrayList genericSuppliers = new ArrayList(genericRequires.length);
-			for (int i = 0; i < genericRequires.length; i++)
-				if (genericRequires[i].getSupplier() != null)
-					genericSuppliers.add(genericRequires[i].getSupplier());
+			for (int i = 0; i < genericRequires.length; i++) {
+				GenericDescription[] suppliers = genericRequires[i].getSuppliers();
+				if (suppliers != null)
+					for (int j = 0; j < suppliers.length; j++)
+						genericSuppliers.add(suppliers[j]);
+			}
 			bundle.addDependencies((BaseDescription[]) genericSuppliers.toArray(new BaseDescription[genericSuppliers.size()]));
 		}
 	}
@@ -286,6 +289,11 @@ public abstract class StateImpl implements State {
 		bundle.setResolvedImports(null);
 		bundle.setResolvedRequires(null);
 
+		// remove suppliers for generics
+		GenericSpecification[] genericRequires = bundle.getGenericRequires();
+		if (genericRequires.length > 0)
+			for (int i = 0; i < genericRequires.length; i++)
+				((GenericSpecificationImpl) genericRequires[i]).setSupplers(null);
 		bundle.removeDependencies();
 	}
 
