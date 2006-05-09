@@ -17,6 +17,8 @@ package org.eclipse.core.runtime;
  * This exception is thrown by methods on extension registry
  * objects. It is not intended to be instantiated or
  * subclassed by clients.
+ * </p><p>
+ * This class can be used without the OSGi bundle present.
  * </p>
  */
 public class InvalidRegistryObjectException extends RuntimeException {

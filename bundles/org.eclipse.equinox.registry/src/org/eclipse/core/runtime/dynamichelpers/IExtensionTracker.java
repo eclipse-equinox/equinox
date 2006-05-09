@@ -18,6 +18,8 @@ import org.eclipse.core.runtime.IExtension;
  * All extensions being added in a tracker will automatically be removed when the extension is uninstalled from the registry.
  * Users interested in extension removal can register a handler that will let them know when an object is being removed.
  * <p>
+ * This interface can be used without the OSGi bundle present.
+ * </p><p>
  * This interface is not intended to be implemented by clients.
  * </p>
  * 

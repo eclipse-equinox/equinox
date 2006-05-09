@@ -18,6 +18,17 @@ import org.eclipse.core.runtime.spi.*;
 /**
  * Use this class to create or obtain an extension registry.
  * <p>
+ * The following methods can be used without the OSGi bundle present:
+ * </p><p><ul>
+ * <li>{@link #createRegistry(RegistryStrategy, Object, Object)}</li>
+ * <li>{@link #getRegistry()}</li>
+ * <li>{@link #setDefaultRegistryProvider(IRegistryProvider)}</li>
+ * </ul></p><p>
+ * The following methods utilize functionality provided by the OSGi bundle and can't be used 
+ * without OSGi present:
+ * </p><p><ul>
+ * <li>{@link #createOSGiStrategy(File[], boolean[], Object)}</li>
+ * </ul></p><p>
  * This class is not intended to be subclassed or instantiated.
  * </p>
  * @since org.eclipse.equinox.registry 3.2

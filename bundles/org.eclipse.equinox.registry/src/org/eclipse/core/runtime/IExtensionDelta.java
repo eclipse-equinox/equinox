@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2004 IBM Corporation and others.
+ * Copyright (c) 2003, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,9 +13,10 @@ package org.eclipse.core.runtime;
 /**
  * An extension delta represents changes to the extension registry.
  * <p>
+ * This interface can be used without the OSGi bundle present.
+ * </p><p>
  * This interface is not intended to be implemented by clients.
  * </p>
- 
  * @since 3.0
  */
 public interface IExtensionDelta {

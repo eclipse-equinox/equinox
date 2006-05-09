@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,6 +16,9 @@ import org.eclipse.core.internal.runtime.IRuntimeConstants;
 /**
  * A concrete status implementation, suitable either for 
  * instantiating or subclassing.
+ * <p>
+ * This class can be used without the OSGi bundle present.
+ * </p>
  */
 public class Status implements IStatus {
 

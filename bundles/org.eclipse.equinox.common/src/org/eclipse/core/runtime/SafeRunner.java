@@ -17,9 +17,10 @@ import org.eclipse.osgi.util.NLS;
  * Runs the given ISafeRunnable in a protected mode: exceptions
  * thrown in the runnable are logged and passed to the runnable's
  * exception handler.  Such exceptions are not rethrown by this method.
- * 
- * Note that this class requires presence of OSGi.
- * 
+ * <p>
+ * This class needs NLS functionality provided either by org.eclipse.osgi or 
+ * by the org.eclipse.equinox.supplement.
+ * </p>
  * @since org.eclipse.equinox.common 3.2
  */
 public final class SafeRunner {

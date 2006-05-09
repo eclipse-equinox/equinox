@@ -18,8 +18,9 @@ import java.io.PrintWriter;
  * <p>
  * Core exceptions contain a status object describing the 
  * cause of the exception.
+ * </p><p>
+ * This class can be used without the OSGi bundle present.
  * </p>
- *
  * @see IStatus
  */
 public class CoreException extends Exception {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2004 IBM Corporation and others.
+ * Copyright (c) 2000, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -38,8 +38,9 @@ package org.eclipse.core.runtime;
  * involve blocking operations, or operations which might throw uncaught exceptions, 
  * the notifications should be queued, and the actual processing deferred (or perhaps
  * delegated to a separate thread).
- * </p>
- * <p>
+ * </p><p>
+ * This interface can be used without the OSGi bundle present.
+ * </p><p>
  * Clients may implement this interface.
  * </p>
  */

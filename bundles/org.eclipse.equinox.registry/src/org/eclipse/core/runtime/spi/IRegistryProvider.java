@@ -15,6 +15,8 @@ import org.eclipse.core.runtime.IExtensionRegistry;
 /**
  * Implement this interface to specify a contributed extension registry.
  * <p>
+ * This interface can be used without the OSGi bundle present.
+ * </p><p>
  * This interface may be implemented by clients.
  * </p><p>
  * <b>Note:</b> This class/interface is part of an interim API that is still under 

@@ -23,6 +23,8 @@ import org.osgi.framework.Bundle;
  * This class contains collection of helper methods aimed at finding files in bundles.
  * This class can only be used if OSGi plugin is available.
  * <p>
+ * This class utilizes functionality provided by the OSGi bundle and can't be used without OSGi present.
+ * </p><p>
  * The class is not intended to be subclassed or instantiated by clients.
  * </p>
  * @since org.eclipse.equinox.common 3.2

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2004 IBM Corporation and others.
+ * Copyright (c) 2000, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,8 +23,9 @@ import org.eclipse.core.runtime.CoreException;
  * interface, and the actual extension implementation. In general, adapters
  * are used when attempting to plug-in existing Java implementations, or
  * non-Java implementations (e.g., external executables).
- * </p>
- * <p>
+ * </p><p>
+ * This interface can be used without the OSGi bundle present.
+ * </p><p>
  * Clients may implement this interface.
  * </p>
  * 

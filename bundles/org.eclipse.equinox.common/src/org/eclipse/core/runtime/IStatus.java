@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2004 IBM Corporation and others.
+ * Copyright (c) 2000, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,6 +32,8 @@ package org.eclipse.core.runtime;
  * The class <code>Status</code> is the standard public implementation
  * of status objects; the subclass <code>MultiStatus</code> is the
  * implements multi-status objects.
+ * </p><p>
+ * This interface can be used without the OSGi bundle present.
  * </p>
  * @see MultiStatus
  * @see Status

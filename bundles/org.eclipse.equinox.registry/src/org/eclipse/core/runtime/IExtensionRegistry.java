@@ -46,8 +46,9 @@ import java.util.ResourceBundle;
  * <cite>namespaces</cite>. The only fact known about namespaces is that they 
  * have unique string-based identifiers. One example of a namespace 
  * is a plug-in, for which the namespace id is the plug-in id.
- * </p>
- * <p>
+ * </p><p>
+ * This interface can be used without the OSGi bundle present.
+ * </p><p>
  * This interface is not intended to be implemented by clients.
  * </p>
  * @since 3.0

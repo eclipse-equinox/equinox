@@ -16,6 +16,8 @@ import org.eclipse.core.runtime.IExtension;
  * Extension change handlers are notified of changes for a given extension 
  * point in the context of an extension tracker.
  * <p>
+ * This interface can be used without the OSGi bundle present.
+ * </p><p>
  * This interface is intended to be implemented by clients.
  * </p>
  * 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -47,8 +47,9 @@ import org.osgi.framework.Version;
  * <p>
  * Version identifiers can be matched as perfectly equal, equivalent,
  * compatible or greaterOrEqual.
- * </p>
- * <p>
+ * </p><p>
+ * This class utilizes functionality provided by the OSGi bundle and can't be used without OSGi present.
+ * </p><p>
  * Clients may instantiate; not intended to be subclassed by clients.
  * </p>
  * @see java.lang.String#compareTo(java.lang.String) 

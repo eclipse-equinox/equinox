@@ -15,11 +15,12 @@ import org.eclipse.core.runtime.IExtensionPoint;
 /**
  * A filter compares the given object to some pattern and returns 
  * <code>true</code> if the two match and <code>false</code> otherwise.
- *<p>
+ * <p>
  * This interface may be implemented by clients, however factory methods are 
  * available on IExtensionTracker.
+ * </p><p>
+ * This interface can be used without the OSGi bundle present.
  * </p>
- * 
  * @since 3.1
  */
 public interface IFilter {

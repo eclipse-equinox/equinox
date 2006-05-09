@@ -13,7 +13,11 @@ package org.eclipse.core.runtime;
 /**
  * <code>AssertionFailedException</code> is a runtime exception thrown
  * by some of the methods in <code>Assert</code>.
- * 
+ * <p>
+ * This class can be used without the OSGi bundle present.
+ * </p><p>
+ * This class is not intended to be instantiated or sub-classed by clients.
+ * </p>
  * @see Assert
  * @since org.eclipse.equinox.common 3.2
  */

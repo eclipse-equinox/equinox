@@ -28,6 +28,9 @@ import org.eclipse.core.runtime.Status;
 
 /**
  * Implementation of the IExtensionTracker.
+ * <p>
+ * This class can be used without the OSGi bundle present.
+ * </p>
  * 
  * @see org.eclipse.core.runtime.dynamichelpers.IExtensionTracker 
  * @since 3.1

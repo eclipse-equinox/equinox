@@ -53,14 +53,13 @@ package org.eclipse.core.runtime;
  *  Platform.getAdapterManager().registerAdapters(pr, IResource.class);
  *   </pre>
  * 
- * </p>
- * <p>
+ * </p><p>
+ * This interface can be used without the OSGi bundle present.
+ * </p><p>
  * This interface is not intended to be implemented by clients.
  * </p>
- * 
  * @see IAdaptable
  * @see IAdapterFactory
- * XXX Needs to put @since
  */
 public interface IAdapterManager {
 

@@ -34,8 +34,9 @@ package org.eclipse.core.runtime;
  * <code>InvalidRegistryObjectException</code> as if it were a checked exception.
  * Also, such clients should probably register a listener with the extension registry
  * so that they receive notification of any changes to the registry.
- * </p>
- * <p>
+ * </p><p>
+ * This interface can be used without the OSGi bundle present.
+ * </p><p>
  * This interface is not intended to be implemented by clients.
  * </p>
  */

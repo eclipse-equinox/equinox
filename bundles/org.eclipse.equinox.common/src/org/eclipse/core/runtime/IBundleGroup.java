@@ -27,6 +27,8 @@ import org.osgi.framework.Bundle;
  * The Eclipse UI is the typical consumer of bundle groups and defines various 
  * property keys that it will use, for example, to display About information.  See
  * <code>org.eclipse.ui.branding.IBundleGroupConstants</code>.
+ * </p><p>
+ * This interface utilizes functionality provided by the OSGi bundle and can't be used without OSGi present.
  * </p>
  * @see IBundleGroupProvider
  * @since 3.0
