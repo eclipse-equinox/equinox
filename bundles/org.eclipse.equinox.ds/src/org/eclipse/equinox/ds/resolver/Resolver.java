@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005 IBM Corporation.
+ * Copyright (c) 2005, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,7 +34,7 @@ import org.osgi.util.tracker.ServiceTracker;
  * The Resolver implements AllServiceListener so it can be informed about service
  * changes in the framework.
  * 
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class Resolver implements AllServiceListener, WorkDispatcher {
 
@@ -778,7 +778,7 @@ public class Resolver implements AllServiceListener, WorkDispatcher {
 	 * Doubly-linked node used to traverse the dependency tree in order to
 	 * find cycles.
 	 *  
-	 * @version $Revision: 1.1 $
+	 * @version $Revision: 1.2 $
 	 */
 	static private class ReferenceCDP {
 		public Reference ref;
