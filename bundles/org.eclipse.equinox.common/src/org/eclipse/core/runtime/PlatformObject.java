@@ -28,7 +28,7 @@ import org.eclipse.core.internal.runtime.AdapterManager;
  *     }
  * </pre>
  * </p><p>
- * This class can be used without the OSGi bundle present.
+ * This class can be used without OSGi running.
  * </p><p>
  * Clients may subclass.
  * </p>

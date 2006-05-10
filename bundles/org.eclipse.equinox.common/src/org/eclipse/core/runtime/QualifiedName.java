@@ -17,7 +17,7 @@ package org.eclipse.core.runtime;
  * the default name space is being used.  The empty string is not 
  * a valid local name.
  * <p>
- * This class can be used without the OSGi bundle present.
+ * This class can be used without OSGi running.
  * </p><p>
  * This class is not intended to be subclassed by clients.
  * </p>

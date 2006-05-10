@@ -21,7 +21,7 @@ package org.eclipse.core.runtime;
  * these being thrown (and certainly should not being catching them
  * specifically).
  * </p><p>
- * This class can be used without the OSGi bundle present.
+ * This class can be used without OSGi running.
  * </p><p>
  * This class is not intended to be instantiated or sub-classed by clients.
  * </p>

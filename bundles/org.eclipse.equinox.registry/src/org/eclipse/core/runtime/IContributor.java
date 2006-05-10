@@ -19,7 +19,7 @@ package org.eclipse.core.runtime;
  * Alternatively, a contributor factory appropriate for the registry in use can be called to directly
  * obtain an IContributor object.
  * </p><p>
- * This interface can be used without the OSGi bundle present.
+ * This interface can be used without OSGi running.
  * </p><p>
  * This interface is not intended to be implemented or extended by clients.
  * </p>

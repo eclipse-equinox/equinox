@@ -20,7 +20,7 @@ import org.eclipse.core.runtime.IContributor;
  * <p>
  * This class can be instantiated by the registry Service Providers.
  * </p><p>
- * This class can be used without the OSGi bundle present.
+ * This class can be used without OSGi running.
  * </p><p>
  * This class can not be extended. 
  * </p><p>

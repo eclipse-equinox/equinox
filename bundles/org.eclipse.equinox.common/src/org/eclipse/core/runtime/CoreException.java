@@ -19,7 +19,7 @@ import java.io.PrintWriter;
  * Core exceptions contain a status object describing the 
  * cause of the exception.
  * </p><p>
- * This class can be used without the OSGi bundle present.
+ * This class can be used without OSGi running.
  * </p>
  * @see IStatus
  */

@@ -25,7 +25,7 @@ package org.eclipse.core.runtime;
  *         [do IFoo things with x]
  * </pre>
  * <p>
- * This interface can be used without the OSGi bundle present.
+ * This interface can be used without OSGi running.
  * </p><p>
  * Clients may implement this interface, or obtain a default implementation
  * of this interface by subclassing <code>PlatformObject</code>.

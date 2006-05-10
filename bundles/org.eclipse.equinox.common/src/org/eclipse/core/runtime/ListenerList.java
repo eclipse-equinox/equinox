@@ -36,7 +36,7 @@ package org.eclipse.core.runtime;
  * </pre>
  * 
  * </p><p>
- * This class can be used without the OSGi bundle present.
+ * This class can be used without OSGi running.
  * </p>
  * @since org.eclipse.equinox.common 3.2
  */

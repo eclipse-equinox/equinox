@@ -22,7 +22,7 @@ package org.eclipse.core.runtime;
  * blocked. When the operation is no longer blocked, it must call <code>clearBlocked</code>
  * to clear the blocked state.
  * <p>
- * This interface can be used without the OSGi bundle present.
+ * This interface can be used without OSGi running.
  * </p><p>
  * Clients may implement this interface.
  * </p>

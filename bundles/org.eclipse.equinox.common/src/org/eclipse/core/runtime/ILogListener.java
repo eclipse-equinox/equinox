@@ -15,7 +15,7 @@ import java.util.EventListener;
 /**
  * A log listener is notified of entries added to a plug-in's log.
  * <p>
- * This interface can be used without the OSGi bundle present.
+ * This interface can be used without OSGi running.
  * </p><p>
  * Clients may implement this interface.
  * </p>

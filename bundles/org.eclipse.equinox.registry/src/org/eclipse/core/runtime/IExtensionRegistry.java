@@ -47,7 +47,7 @@ import java.util.ResourceBundle;
  * have unique string-based identifiers. One example of a namespace 
  * is a plug-in, for which the namespace id is the plug-in id.
  * </p><p>
- * This interface can be used without the OSGi bundle present.
+ * This interface can be used without OSGi running.
  * </p><p>
  * This interface is not intended to be implemented by clients.
  * </p>

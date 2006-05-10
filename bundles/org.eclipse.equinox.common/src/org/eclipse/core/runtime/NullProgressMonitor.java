@@ -17,7 +17,7 @@ package org.eclipse.core.runtime;
  * This implementation supports cancelation. The default
  * implementations of the other methods do nothing.
  * </p><p>
- * This class can be used without the OSGi bundle present.
+ * This class can be used without OSGi running.
  * </p>
  */
 public class NullProgressMonitor implements IProgressMonitor {

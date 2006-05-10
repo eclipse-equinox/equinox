@@ -24,7 +24,7 @@ import org.eclipse.core.runtime.CoreException;
  * are used when attempting to plug-in existing Java implementations, or
  * non-Java implementations (e.g., external executables).
  * </p><p>
- * This interface can be used without the OSGi bundle present.
+ * This interface can be used without OSGi running.
  * </p><p>
  * Clients may implement this interface.
  * </p>

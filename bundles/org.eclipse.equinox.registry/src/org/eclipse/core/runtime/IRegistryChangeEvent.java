@@ -13,7 +13,7 @@ package org.eclipse.core.runtime;
 /**
  * Registry change events describe changes to the extension registry. 
  * <p>
- * This interface can be used without the OSGi bundle present.
+ * This interface can be used without OSGi running.
  * </p><p>
  * This interface is not intended to be implemented by clients.
  * </p>

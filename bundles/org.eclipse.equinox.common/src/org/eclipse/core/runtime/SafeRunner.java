@@ -18,8 +18,7 @@ import org.eclipse.osgi.util.NLS;
  * thrown in the runnable are logged and passed to the runnable's
  * exception handler.  Such exceptions are not rethrown by this method.
  * <p>
- * This class needs NLS functionality provided either by org.eclipse.osgi or 
- * by the org.eclipse.equinox.supplement.
+ * This class can be used without OSGi running.
  * </p>
  * @since org.eclipse.equinox.common 3.2
  */

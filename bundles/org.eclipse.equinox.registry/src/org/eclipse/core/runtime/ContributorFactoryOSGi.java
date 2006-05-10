@@ -18,8 +18,6 @@ import org.osgi.framework.Bundle;
  * The contributor factory creates new registry contributors for use in OSGi-based 
  * registries. 
  * <p>
- * This class utilizes functionality provided by the OSGi bundle and can't be used without OSGi present.
- * </p><p>
  * This class can not be extended or instantiated by clients.
  * </p><p>
  * <b>Note:</b> This class/interface is part of an interim API that is still under 

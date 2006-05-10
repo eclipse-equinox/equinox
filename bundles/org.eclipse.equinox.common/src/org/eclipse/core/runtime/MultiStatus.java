@@ -14,7 +14,7 @@ package org.eclipse.core.runtime;
  * A concrete multi-status implementation, 
  * suitable either for instantiating or subclassing.
  * <p>
- * This class can be used without the OSGi bundle present.
+ * This class can be used without OSGi running.
  * </p>
  */
 public class MultiStatus extends Status {

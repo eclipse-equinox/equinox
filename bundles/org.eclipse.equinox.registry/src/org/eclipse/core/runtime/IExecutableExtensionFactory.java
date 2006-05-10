@@ -32,7 +32,7 @@ import org.eclipse.core.runtime.CoreException;
  * Given that factories are instantiated as executable extensions, they must provide a 0-argument public constructor.
  * Like any other executable extension, they can configured by implementing {@link org.eclipse.core.runtime.IExecutableExtension} interface.
  * </p><p>
- * This interface can be used without the OSGi bundle present.
+ * This interface can be used without OSGi running.
  * </p>
  * @see org.eclipse.core.runtime.IConfigurationElement
  */

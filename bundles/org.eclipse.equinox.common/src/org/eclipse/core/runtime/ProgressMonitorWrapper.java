@@ -15,7 +15,7 @@ package org.eclipse.core.runtime;
  * unless overridden, forwards <code>IProgressMonitor</code>
  * and <code>IProgressMonitorWithBlocking</code> methods to the wrapped progress monitor.
  * <p>
- * This class can be used without the OSGi bundle present.
+ * This class can be used without OSGi running.
  * </p><p>
  * Clients may subclass.
  * </p>

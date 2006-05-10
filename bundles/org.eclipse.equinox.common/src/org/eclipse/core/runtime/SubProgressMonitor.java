@@ -30,7 +30,7 @@ package org.eclipse.core.runtime;
  *     }
  * </pre>
  * <p>
- * This class can be used without the OSGi bundle present.
+ * This class can be used without OSGi running.
  * </p><p>
  * This class may be instantiated or subclassed by clients.
  * </p>

@@ -48,7 +48,7 @@ import org.osgi.framework.Version;
  * Version identifiers can be matched as perfectly equal, equivalent,
  * compatible or greaterOrEqual.
  * </p><p>
- * This class utilizes functionality provided by the OSGi bundle and can't be used without OSGi present.
+ * This class can be used without OSGi running.
  * </p><p>
  * Clients may instantiate; not intended to be subclassed by clients.
  * </p>

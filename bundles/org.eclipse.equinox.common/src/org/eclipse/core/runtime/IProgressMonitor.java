@@ -39,7 +39,7 @@ package org.eclipse.core.runtime;
  * the notifications should be queued, and the actual processing deferred (or perhaps
  * delegated to a separate thread).
  * </p><p>
- * This interface can be used without the OSGi bundle present.
+ * This interface can be used without OSGi running.
  * </p><p>
  * Clients may implement this interface.
  * </p>

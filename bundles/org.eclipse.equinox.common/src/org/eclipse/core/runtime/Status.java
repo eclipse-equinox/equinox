@@ -17,7 +17,7 @@ import org.eclipse.core.internal.runtime.IRuntimeConstants;
  * A concrete status implementation, suitable either for 
  * instantiating or subclassing.
  * <p>
- * This class can be used without the OSGi bundle present.
+ * This class can be used without OSGi running.
  * </p>
  */
 public class Status implements IStatus {

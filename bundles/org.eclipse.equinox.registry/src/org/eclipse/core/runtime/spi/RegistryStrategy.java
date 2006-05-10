@@ -30,7 +30,7 @@ import org.eclipse.osgi.util.NLS;
  * <li>Caching is enabled and doesn't use state or time stamp validation;</li>
  * <li>Standard Java class loading is used to create executable extensions.</li>
  * </ul></p><p>
- * This class can be used without the OSGi bundle present.
+ * This class can be used without OSGi running.
  * </p><p>
  * This class can be overridden and/or instantiated by clients. 
  * </p><p>

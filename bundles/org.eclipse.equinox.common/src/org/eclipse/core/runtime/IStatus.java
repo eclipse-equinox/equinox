@@ -33,7 +33,7 @@ package org.eclipse.core.runtime;
  * of status objects; the subclass <code>MultiStatus</code> is the
  * implements multi-status objects.
  * </p><p>
- * This interface can be used without the OSGi bundle present.
+ * This interface can be used without OSGi running.
  * </p>
  * @see MultiStatus
  * @see Status

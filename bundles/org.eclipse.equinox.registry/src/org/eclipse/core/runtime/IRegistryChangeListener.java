@@ -17,7 +17,7 @@ import java.util.EventListener;
  * registry.  These changes arise from subsequent manipulation of the registry after 
  * it was initially created.
  * <p>
- * This interface can be used without the OSGi bundle present.
+ * This interface can be used without OSGi running.
  * </p><p>
  * Clients may implement this interface.
  * </p>

@@ -54,7 +54,7 @@ package org.eclipse.core.runtime;
  *   </pre>
  * 
  * </p><p>
- * This interface can be used without the OSGi bundle present.
+ * This interface can be used without OSGi running.
  * </p><p>
  * This interface is not intended to be implemented by clients.
  * </p>

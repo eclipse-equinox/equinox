@@ -21,7 +21,7 @@ import java.io.File;
  * will yield the path
  * <pre>     /a/foo/bar</pre>
  * <p>
- * This class can be used without the OSGi bundle present.
+ * This class can be used without OSGi running.
  * </p><p>
  * This class is not intended to be subclassed by clients but
  * may be instantiated.

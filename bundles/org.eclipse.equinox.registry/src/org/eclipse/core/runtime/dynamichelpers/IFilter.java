@@ -19,7 +19,7 @@ import org.eclipse.core.runtime.IExtensionPoint;
  * This interface may be implemented by clients, however factory methods are 
  * available on IExtensionTracker.
  * </p><p>
- * This interface can be used without the OSGi bundle present.
+ * This interface can be used without OSGi running.
  * </p>
  * @since 3.1
  */

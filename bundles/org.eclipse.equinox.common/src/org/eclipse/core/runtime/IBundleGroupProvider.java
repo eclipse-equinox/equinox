@@ -15,9 +15,6 @@ package org.eclipse.core.runtime;
  * the current system.  Typically, a configuration agent (i.e., plug-in installer) will 
  * define a bundle group provider so that it can report to the system the list 
  * of plug-ins it has installed.
- * <p>
- * This interface utilizes functionality provided by the OSGi bundle and can't be used without OSGi present.
- * </p>
  * @see IBundleGroup
  * @since 3.0
  */

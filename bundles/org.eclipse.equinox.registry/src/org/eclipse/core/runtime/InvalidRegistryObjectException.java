@@ -18,7 +18,7 @@ package org.eclipse.core.runtime;
  * objects. It is not intended to be instantiated or
  * subclassed by clients.
  * </p><p>
- * This class can be used without the OSGi bundle present.
+ * This class can be used without OSGi running.
  * </p>
  */
 public class InvalidRegistryObjectException extends RuntimeException {

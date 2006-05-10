@@ -16,7 +16,7 @@ import org.eclipse.core.runtime.spi.RegistryContributor;
  * The contributor factory creates new registry contributors for use in a simple
  * registry based on the String representation of the determining object.
  * <p>
- * This class can be used without the OSGi bundle present.
+ * This class can be used without OSGi running.
  * </p><p>
  * This class can not be extended or instantiated by clients.
  * </p><p>
