@@ -53,7 +53,7 @@ import org.osgi.framework.Version;
  * Clients may instantiate; not intended to be subclassed by clients.
  * </p>
  * @see java.lang.String#compareTo(java.lang.String)
- * @deprecated clients should use {@link: org.osgi.framework.Version} instead
+ * @deprecated clients should use {@link org.osgi.framework.Version} instead
  */
 public final class PluginVersionIdentifier {
 
