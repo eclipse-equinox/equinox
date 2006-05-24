@@ -41,7 +41,7 @@ import org.xml.sax.SAXException;
  * 
  * Parse the component description xml
  * 
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class Parser implements ServiceTrackerCustomizer {
 
@@ -162,7 +162,7 @@ public class Parser implements ServiceTrackerCustomizer {
 	 */
 	public Object addingService(ServiceReference reference) {
 
-		Object xmlParser = parserTracker.getService(reference);
+		Object xmlParser = main.context.getService(reference);
 
 		Iterator delayedParseBundlesItr = delayedParseBundles.iterator();
 		while (delayedParseBundlesItr.hasNext()) {
@@ -181,6 +181,6 @@ public class Parser implements ServiceTrackerCustomizer {
 	}
 
 	public void removedService(ServiceReference reference, Object object) {
-		//nothing
+		main.context.ungetService(reference);
 	}
 }
