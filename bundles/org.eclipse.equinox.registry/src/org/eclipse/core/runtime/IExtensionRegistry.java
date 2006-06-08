@@ -194,7 +194,7 @@ public interface IExtensionRegistry {
 	 * @param namespace the namespace for the given extension point 
 	 *		(e.g. <code>"org.eclipse.core.resources"</code>)
 	 * @param extensionPointName the simple identifier of the 
-	 *		extension point (e.g. <code>" builders"</code>)
+	 *		extension point (e.g. <code>"builders"</code>)
 	 * @return the extension point, or <code>null</code>
 	 */
 	public IExtensionPoint getExtensionPoint(String namespace, String extensionPointName);
