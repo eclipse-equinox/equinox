@@ -312,8 +312,11 @@ public class PackageAdminImpl implements PackageAdmin {
 		ArrayList bundlesList = new ArrayList(bundleDeltas.length);
 		// get all the bundles that are going to be refreshed
 		for (int i = 0; i < bundleDeltas.length; i++) {
+			if ((bundleDeltas[i].getType() & BundleDelta.REMOVAL_COMPLETE) != 0 && (bundleDeltas[i].getType() & BundleDelta.REMOVED) == 0)
+				// this means the bundle was previously pending removal; do not add to list because it was already removed from before.
+				continue;
 			AbstractBundle changedBundle = framework.getBundle(bundleDeltas[i].getBundle().getBundleId());
-			if (changedBundle != null)
+			if (changedBundle != null && !bundlesList.contains(changedBundle))
 				bundlesList.add(changedBundle);
 		}
 		AbstractBundle[] refresh = (AbstractBundle[]) bundlesList.toArray(new AbstractBundle[bundlesList.size()]);
