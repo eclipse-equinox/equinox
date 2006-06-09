@@ -31,9 +31,21 @@ public class GroupingChecker {
 	private ResolverExport[] getConstraints(ResolverExport constrained) {
 		// check the cache first
 		Object[] cachedResults = getCachedConstraints(constrained);
-		if (cachedResults != null && cachedResults[1] != null)
-			// we have aready cached the results for this return the cached results
-			return (ResolverExport[]) cachedResults[1];
+		if (cachedResults != null && cachedResults[1] != null) {
+			if (!constrained.getExporter().isResolved()) {
+				// need to make sure none of the current constraints are dropped
+				ResolverExport[] constraints = (ResolverExport[]) cachedResults[1];
+				boolean dropped = false;
+				for (int i = 0; !dropped && i < constraints.length; i++)
+					dropped = constraints[i].isDropped();
+				if (!dropped)
+					return constraints;
+				// otherwise recompute the transitive constraints below
+			} else {
+				// we have aready cached the results for this return the cached results
+				return (ResolverExport[]) cachedResults[1];
+			}
+		}
 		ArrayList resultlist = getConstraintsList(constrained);
 		ResolverExport[] results = (ResolverExport[]) resultlist.toArray(new ResolverExport[resultlist.size()]);
 		if (!checkCycles || constrained.getExporter().isResolved()) {
