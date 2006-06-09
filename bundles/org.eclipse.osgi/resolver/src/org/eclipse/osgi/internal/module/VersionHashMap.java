@@ -106,6 +106,6 @@ public class VersionHashMap extends MappedList implements Comparator {
 		int versionCompare = -(vs1.getVersion().compareTo(vs2.getVersion()));
 		if (versionCompare != 0)
 			return versionCompare;
-		return vs1.getBundle().getBundleId() < vs2.getBundle().getBundleId() ? -1 : 1;
+		return vs1.getBundle().getBundleId() <= vs2.getBundle().getBundleId() ? -1 : 1;
 	}
 }
