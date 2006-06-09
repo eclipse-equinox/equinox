@@ -123,29 +123,31 @@ class StateWriter {
 			outState.writeBoolean(state.isResolved());
 			state.setDynamicCacheChanged(false);
 		} finally {
-			if (outLazy != null)
+			if (outLazy != null) {
 				try {
 					outLazy.flush();
 					fosLazy.getFD().sync();
 				} catch (IOException e) {
 					// do nothing, we tried
 				}
-			try {
-				outLazy.close();
-			} catch (IOException e) {
-				// do nothing
+				try {
+					outLazy.close();
+				} catch (IOException e) {
+					// do nothing
+				}
 			}
-			if (outState != null)
+			if (outState != null) {
 				try {
 					outState.flush();
 					fosState.getFD().sync();
 				} catch (IOException e) {
 					// do nothing, we tried
 				}
-			try {
-				outState.close();
-			} catch (IOException e) {
-				// do nothing
+				try {
+					outState.close();
+				} catch (IOException e) {
+					// do nothing
+				}
 			}
 		}
 	}
