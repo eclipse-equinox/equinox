@@ -102,18 +102,17 @@ public class ResolverBundle extends VersionSupplier {
 	}
 
 	ResolverExport getExport(String name) {
-		ResolverExport[] allExports = getExportPackages();
-		for (int i = 0; i < allExports.length; i++)
-			if (name.equals(allExports[i].getName()))
-				return allExports[i];
-		return null;
+		ResolverExport[] allExports = getExports(name);
+		return allExports.length == 0 ? null : allExports[0];
 	}
 
 	ResolverExport[] getExports(String name) {
 		ArrayList results = new ArrayList(1); // rare to have more than one
-		for (int i = 0; i < exports.length; i++)
-			if (name.equals(exports[i].getName()))
-				results.add(exports[i]);
+		// it is faster to ask the VersionHashMap for this package name and then compare the exporter to this
+		Object[] resolverExports = resolver.getResolverExports().get(name);
+		for (int i = 0; i < resolverExports.length; i++)
+			if (((ResolverExport)resolverExports[i]).getExporter() == this)
+				results.add(resolverExports[i]);
 		return (ResolverExport[]) results.toArray(new ResolverExport[results.size()]);
 	}
 

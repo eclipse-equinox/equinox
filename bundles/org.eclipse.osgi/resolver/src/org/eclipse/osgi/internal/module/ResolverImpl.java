@@ -815,19 +815,22 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 				if (result)
 					continue;
 				imp.setMatchingExport(export); // Wire the import to the export
+				ResolverExport[] importerExps = null;
 				if (imp.getBundle() != export.getExporter()) {
-					ResolverExport[] exps = imp.getBundle().getExports(imp.getName());
-					for (int j = 0; j < exps.length; j++) {
-						if (exps[j].getExportPackageDescription().isRoot() && !export.getExportPackageDescription().isRoot())
+					// Save the exports of this package from the importer in case we need to add them back
+					importerExps = imp.getBundle().getExports(imp.getName());
+					for (int j = 0; j < importerExps.length; j++) {
+						if (importerExps[j].getExportPackageDescription().isRoot() && !export.getExportPackageDescription().isRoot())
 							continue exportsloop; // to prevent imports from getting wired to re-exports if we offer a root export
-						if (exps[j].getExportPackageDescription().isRoot()) // do not drop reexports when import wins
-							resolverExports.remove(exps[j]); // Import wins, remove export
+						if (importerExps[j].getExportPackageDescription().isRoot()) // do not drop reexports when import wins
+							resolverExports.remove(importerExps[j]); // Import wins, remove export
 					}
 					if ((originalState != ResolverBundle.RESOLVED && !resolveBundle(export.getExporter(), cycle)) || export.isDropped()) {
 						if (imp.getMatchingExport() != null && imp.getMatchingExport() != export) // has been resolved to some other export recursively
 							return true;
-						for (int j = 0; j < exps.length; j++)
-							resolverExports.put(exps[j].getName(), exps[j]);
+						// add back the exports of this package from the importer
+						for (int j = 0; j < importerExps.length; j++)
+							resolverExports.put(importerExps[j].getName(), importerExps[j]);
 						imp.setMatchingExport(null);
 						continue; // Bundle hasn't resolved || export has not been selected and is unavailable
 					}
@@ -836,7 +839,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 				if (!imp.getBundle().isResolvable())
 					return false;
 				// Check grouping dependencies
-				if (checkImportConstraints(imp, imp.getMatchingExport(), cycle) && imp.getMatchingExport() != null) {
+				if (checkImportConstraints(imp, imp.getMatchingExport(), cycle, importerExps) && imp.getMatchingExport() != null) {
 					// Record any cyclic dependencies
 					if (export != imp.getMatchingExport())
 						export = imp.getMatchingExport();
@@ -926,7 +929,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 
 	// This method checks and resolves (if possible) grouping dependencies
 	// Returns true, if the dependencies can be resolved, false otherwise
-	private boolean checkImportConstraints(ResolverImport imp, ResolverExport exp, ArrayList cycle) {
+	private boolean checkImportConstraints(ResolverImport imp, ResolverExport exp, ArrayList cycle, ResolverExport[] importerExps) {
 		if (DEBUG_GROUPING)
 			ResolverImpl.log("  Checking grouping for " + imp.getBundle() + ":" + imp.getName() + " -> " + exp.getExporter() + ":" + exp.getName()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		ResolverBundle importer = imp.getBundle();
@@ -952,8 +955,8 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 				imports[i].setMatchingExport(null); // clear the conflicting wire
 				// If the clashing import package was also exported then
 				// we need to put the export back into resolverExports
-				ResolverExport removed[] = importer.getExports(imports[i].getName());
-				resolverExports.put(removed);
+				if (importerExps != null)
+					resolverExports.put(importerExps);
 			}
 		}
 		// Try to re-resolve the bundle

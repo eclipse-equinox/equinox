@@ -151,6 +151,11 @@ public class GroupingChecker {
 			list.add(constraint);
 	}
 
+	private void addConstraint(ArrayList export, Object constraint) {
+		for (Iterator iExport = export.iterator(); iExport.hasNext();)
+			addConstraint((ResolverExport) iExport.next(), constraint);
+	}
+
 	// removes all constraints specified by this bundles exports
 	void removeAllExportConstraints(ResolverBundle bundle) {
 		bundles.remove(bundle);
@@ -215,11 +220,20 @@ public class GroupingChecker {
 		// Check existing wirings against constraints from candidate wiring
 		for (int i = 0; i < candConstraints.length; i++) {
 			// check if we export this package
-			ResolverExport[] importerExp = imp != null ? imp.getBundle().getExports(candConstraints[i].getName()) : new ResolverExport[0];
-			for (int j = 0; j < importerExp.length; j++)
-				if (!importerExp[j].isDropped() && !isOnRoot(importerExp[j].getRoots(), candConstraints[i]))
-					// if we export the package and it is not the same one then we have a clash
-					return existing;
+			if (imp.getBundle() != candConstraints[i].getExporter()) {
+				// there is no need to do this check if the candidate constaint is from ourselves
+				ResolverExport[] importerExp = imp.getBundle().getExports(candConstraints[i].getName());
+				if (importerExp.length > 0) {
+					ResolverImport alsoImported = imp.getBundle().getImport(candConstraints[i].getName());
+					// only do the extra check if we do not import the package or if we do and the import is resolved
+					if (alsoImported == null || alsoImported.getMatchingExport() != null)
+						for (int j = 0; j < importerExp.length; j++)
+							if (!importerExp[j].isDropped() && !isOnRoot(importerExp[j].getRoots(), candConstraints[i]))
+								// if we export the package and it is not the same one then we have a clash
+								return existing;
+				}
+			}
+			// check the existing resolved import against the candidate constraint
 			if (isConflict(existing, candConstraints[i]))
 				return existing;
 		}
@@ -280,36 +294,55 @@ public class GroupingChecker {
 			return; // already processed
 		// for each export; add it uses constraints
 		ResolverExport[] exports = initBundle.getExportPackages();
-		for (int j = 0; j < exports.length; j++)
-			addInitialGroupingConstraints(exports[j], null);
+		for (int j = 0; j < exports.length; j++) {
+			ArrayList export = new ArrayList();
+			export.add(exports[j]);
+			addInitialGroupingConstraints(export, null);
+		}
 		if (bundles.get(initBundle) == null)
 			bundles.put(initBundle, null); // mark this bundle as processed
 	}
 
 	// Add constraints from other exports (due to 'uses' being transitive)
-	private void addInitialGroupingConstraints(ResolverExport export, ResolverExport constraint) {
-		if (export == constraint)
+	private void addInitialGroupingConstraints(ArrayList exports, ResolverExport constraint) {
+		// pop the intitial export off as the current export we are checking
+		ResolverExport cur = (ResolverExport) exports.get(0);
+		if (cur == constraint)
 			return;
-		if (constraint == null)
-			constraint = export;
+		if (constraint == null) {
+			if (getCachedConstraints(cur) != null)
+				// we have already processed the current export; just return
+				return;
+			constraint = cur;
+		}
 		String[] uses = (String[]) constraint.getExportPackageDescription().getDirective(Constants.USES_DIRECTIVE);
 		if (uses == null)
 			return;
+		boolean constraintAdded = false;
+		if (!exports.contains(constraint) && getCachedConstraints(constraint) == null) {
+			// the constraints have not been evaluated for this export add it to the list to process 
+			exports.add(constraint);
+			constraintAdded = true;
+		}
+		ResolverBundle exporter = cur.getExporter();
 		for (int i = 0; i < uses.length; i++) {
-			ResolverExport[] constraintExports = export.getExporter().getExports(uses[i]);
+			ResolverExport[] constraintExports = exporter.getExports(uses[i]);
 			for (int j = 0; j < constraintExports.length; j++) {
 				// Check if the constraint has already been added so we don't recurse infinitely
-				if (!getConstraintsList(export).contains(constraintExports[j])) {
-					addConstraint(export, constraintExports[j]);
-					addInitialGroupingConstraints(export, constraintExports[j]);
+				if (!createConstraints(cur).contains(constraintExports[j])) {
+					addConstraint(exports, constraintExports[j]);
+					addInitialGroupingConstraints(exports, constraintExports[j]);
 				}
 			}
-			ResolverImport constraintImport = export.getExporter().getImport(uses[i]);
+			ResolverImport constraintImport = exporter.getImport(uses[i]);
 			if (constraintImport != null && !constraintImport.isDynamic())
-				addConstraint(export, constraintImport);
+				addConstraint(exports, constraintImport);
 			if (constraintExports.length == 0 && (constraintImport == null || constraintImport.isDynamic()))
-				addConstraint(export, new UsesRequiredExport(constraint, uses[i]));
+				addConstraint(exports, new UsesRequiredExport(constraint, uses[i]));
 		}
+		if (constraintAdded)
+			// we have finished processing all the uses for the constraint; remove it from the list to process
+			exports.remove(constraint);
 	}
 
 	// Used to hold a 'uses' constraint on a package that is accessed through a required bundle
