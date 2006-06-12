@@ -50,7 +50,7 @@ public class EclipseLog implements FrameworkLog {
 	//Constants for rotating log file
 	/** The default size a log file can grow before it is rotated */
 	public static final int DEFAULT_LOG_SIZE = 1000;
-	/** The default number of backup log files */ 
+	/** The default number of backup log files */
 	public static final int DEFAULT_LOG_FILES = 10;
 	/** The minimum size limit for log rotation */
 	public static final int LOG_SIZE_MIN = 10;
@@ -269,8 +269,21 @@ public class EclipseLog implements FrameworkLog {
 		Bundle b = frameworkEvent.getBundle();
 		Throwable t = frameworkEvent.getThrowable();
 		String entry = b.getSymbolicName() == null ? b.getLocation() : b.getSymbolicName();
-		FrameworkLogEntry logEntry = new FrameworkLogEntry(entry, FrameworkLogEntry.ERROR, 0, "FrameworkEvent.ERROR", 0, t, null); //$NON-NLS-1$ //$NON-NLS-2$
-
+		int severity;
+		switch (frameworkEvent.getType()) {
+			case FrameworkEvent.INFO :
+				severity = FrameworkLogEntry.INFO;
+				break;
+			case FrameworkEvent.ERROR :
+				severity = FrameworkLogEntry.ERROR;
+				break;
+			case FrameworkEvent.WARNING :
+				severity = FrameworkLogEntry.WARNING;
+				break;
+			default :
+				severity = FrameworkLogEntry.OK;
+		}
+		FrameworkLogEntry logEntry = new FrameworkLogEntry(entry, severity, 0, "", 0, t, null); //$NON-NLS-1$
 		log(logEntry);
 	}
 
@@ -567,7 +580,7 @@ public class EclipseLog implements FrameworkLog {
 				if (logFilename.toLowerCase().endsWith(LOG_EXT)) {
 					backupFilename = logFilename.substring(0, logFilename.length() - LOG_EXT.length()) + BACKUP_MARK + backupIdx + LOG_EXT;
 				} else {
-					backupFilename = logFilename + BACKUP_MARK + backupIdx; 
+					backupFilename = logFilename + BACKUP_MARK + backupIdx;
 				}
 				File backupFile = new File(backupFilename);
 				if (backupFile.exists()) {
