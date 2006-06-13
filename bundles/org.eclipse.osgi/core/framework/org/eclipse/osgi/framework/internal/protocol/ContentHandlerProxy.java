@@ -132,9 +132,8 @@ public class ContentHandlerProxy extends ContentHandler implements ServiceTracke
 				ranking = -1;
 				realHandler = new DefaultContentHandler();
 			}
-
 		}
-
+		context.ungetService(reference);
 	}
 
 	/**

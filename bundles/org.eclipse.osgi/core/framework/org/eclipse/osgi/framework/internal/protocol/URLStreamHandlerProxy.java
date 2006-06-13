@@ -223,7 +223,7 @@ public class URLStreamHandlerProxy extends URLStreamHandler implements ServiceTr
 			}
 
 		}
-
+		context.ungetService(reference);
 	}
 
 	private int getRank(ServiceReference reference) {
