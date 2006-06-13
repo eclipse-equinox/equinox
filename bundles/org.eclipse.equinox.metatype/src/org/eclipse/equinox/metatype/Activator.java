@@ -108,9 +108,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 	 */
 	public void removedService(ServiceReference ref, Object object) {
 
-		SAXParserFactory parserFactory = (SAXParserFactory) _context.getService(ref);
-
-		if (parserFactory == _currentParserFactory) {
+		if (object == _currentParserFactory) {
 			// This means that this SAXParserFactory was used to start the
 			// MetaType Service.
 			synchronized (lock) {
@@ -121,7 +119,6 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 					_mtsReg = null;
 					_context.removeBundleListener(_mts);
 					_mts = null;
-					parserFactory = null;
 				}
 				// See if another factory is available
 				Object[] parsers = _parserTracker.getServices();
@@ -133,6 +130,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 				}
 			}
 		}
+		_context.ungetService(ref);
 	}
 
 	/**

@@ -134,6 +134,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 	 */
 	public synchronized void removedService(ServiceReference reference, Object service) {
 		PreferencesService.getDefault().setRegistryHelper(null);
+		bundleContext.ungetService(reference);
 	}
 
 	/**

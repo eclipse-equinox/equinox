@@ -65,6 +65,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 			preferencesService = null;
 			wireadminReg.unregister();
 		}
+		context.ungetService(reference);
 	}
 
 	public void registerWireAdminService() {

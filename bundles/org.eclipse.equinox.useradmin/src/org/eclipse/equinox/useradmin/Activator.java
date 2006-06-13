@@ -84,8 +84,9 @@ public class Activator implements BundleActivator, ServiceFactory, ServiceTracke
 	public void removedService(ServiceReference reference, Object service) {
 		if (service == prefs) {
 			prefs = null;
+			unregisterUserAdminService();
 		}
-		unregisterUserAdminService();
+		context.ungetService(reference);
 	}
 
 
