@@ -150,6 +150,7 @@ public class HttpsServerSocket implements ServerSocketInterface, ServiceTrackerC
 			}
 			ss = null;
 		}
+		context.ungetService(reference);
 	}
 
 }
