@@ -140,6 +140,7 @@ public class DeviceTracker extends ServiceTracker {
 				log.log(reference, LogService.LOG_DEBUG, this + " removing Device service"); //$NON-NLS-1$
 			}
 		}
+		super.removedService(reference, service);
 	}
 
 	/**
