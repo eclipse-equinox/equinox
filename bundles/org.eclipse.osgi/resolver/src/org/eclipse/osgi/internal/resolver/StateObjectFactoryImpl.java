@@ -15,6 +15,7 @@ import java.util.*;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.internal.module.ResolverImpl;
 import org.eclipse.osgi.service.resolver.*;
+import org.eclipse.osgi.storagemanager.StorageManager;
 import org.osgi.framework.*;
 
 public class StateObjectFactoryImpl implements StateObjectFactory {
@@ -284,6 +285,22 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 	private State internalReadState(StateImpl toRestore, File stateDirectory, long expectedTimestamp) throws IOException {
 		File stateFile = new File(stateDirectory, StateReader.STATE_FILE);
 		File lazyFile = new File(stateDirectory, StateReader.LAZY_FILE);
+		if (!stateFile.exists() || !lazyFile.exists()) {
+			StorageManager storageManager = new StorageManager(stateDirectory, "none", true); //$NON-NLS-1$
+			try {
+				// if the directory is pointing at the configuration directory then the base files will not exist
+				storageManager.open(true);
+				// try using the storage manager to find the managed state files (bug 143255)
+				File managedState = storageManager.lookup(StateReader.STATE_FILE, false);
+				File managedLazy = storageManager.lookup(StateReader.LAZY_FILE, false);
+				if (managedState != null && managedLazy != null) {
+					stateFile = managedState;
+					lazyFile = managedLazy;
+				}
+			} finally {
+				storageManager.close();
+			}
+		}
 		StateReader reader = new StateReader(stateFile, lazyFile, false);
 		if (!reader.loadState(toRestore, expectedTimestamp))
 			return null;
