@@ -115,7 +115,7 @@ public abstract class BundleResourceHandler extends URLStreamHandler {
 		// ensures that this URL was created by using this parseURL
 		// method.  The openConnection method will only open URLs
 		// that have the authority set to this.
-		setURL(url, url.getProtocol(), bundleId, resIndex, SECURITY_AUTHORIZED, null, path, null, null);
+		setURL(url, url.getProtocol(), bundleId, resIndex, SECURITY_AUTHORIZED, null, path, null, url.getRef());
 	}
 
 	/**
@@ -194,6 +194,9 @@ public abstract class BundleResourceHandler extends URLStreamHandler {
 
 			result.append(path);
 		}
+		String ref = url.getRef();
+		if (ref != null && ref.length() > 0)
+			result.append('#').append(ref);
 
 		return (result.toString());
 	}
