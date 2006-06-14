@@ -229,10 +229,11 @@ public class Path implements IPath, Cloneable {
 		//optimize some easy cases
 		if (tail == null || tail.segmentCount() == 0)
 			return this;
+		//these call chains look expensive, but in most cases they are no-ops
 		if (this.isEmpty())
-			return tail.setDevice(device).makeRelative();
+			return tail.setDevice(device).makeRelative().makeUNC(isUNC());
 		if (this.isRoot())
-			return tail.setDevice(device).makeAbsolute();
+			return tail.setDevice(device).makeAbsolute().makeUNC(isUNC());
 
 		//concatenate the two segment arrays
 		int myLen = segments.length;
