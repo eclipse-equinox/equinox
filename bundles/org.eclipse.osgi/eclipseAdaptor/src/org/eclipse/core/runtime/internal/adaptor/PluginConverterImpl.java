@@ -14,8 +14,8 @@ import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 import org.eclipse.core.runtime.adaptor.*;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.internal.core.Constants;
@@ -511,9 +511,9 @@ public class PluginConverterImpl implements PluginConverter {
 
 	private Set getExportsFromJAR(File jarFile) {
 		Set names = new HashSet();
-		JarFile file = null;
+		ZipFile file = null;
 		try {
-			file = new JarFile(jarFile, false);
+			file = new ZipFile(jarFile);
 		} catch (IOException e) {
 			String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_CONVERTER_PLUGIN_LIBRARY_IGNORED, jarFile, pluginInfo.getUniqueId());
 			adaptor.getFrameworkLog().log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, message, 0, e, null));
@@ -521,7 +521,7 @@ public class PluginConverterImpl implements PluginConverter {
 		}
 		//Run through the entries
 		for (Enumeration entriesEnum = file.entries(); entriesEnum.hasMoreElements();) {
-			JarEntry entry = (JarEntry) entriesEnum.nextElement();
+			ZipEntry entry = (ZipEntry) entriesEnum.nextElement();
 			String name = entry.getName();
 			if (!isValidPackageName(name))
 				continue;
