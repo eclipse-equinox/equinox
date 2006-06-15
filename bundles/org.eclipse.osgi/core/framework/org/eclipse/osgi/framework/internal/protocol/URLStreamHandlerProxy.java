@@ -37,18 +37,14 @@ public class URLStreamHandlerProxy extends URLStreamHandler implements ServiceTr
 
 	protected ServiceTracker urlStreamHandlerServiceTracker;
 
-	protected boolean handlerRegistered;
-
 	protected BundleContext context;
 	protected ServiceReference urlStreamServiceReference;
 
 	protected String protocol;
 
-	protected int ranking = -1;
+	protected int ranking = Integer.MIN_VALUE;
 
 	public URLStreamHandlerProxy(String protocol, ServiceReference reference, BundleContext context) {
-		handlerRegistered = true;
-
 		this.context = context;
 		this.protocol = protocol;
 
@@ -62,9 +58,16 @@ public class URLStreamHandlerProxy extends URLStreamHandler implements ServiceTr
 	}
 
 	private void setNewHandler(ServiceReference reference, int rank) {
-		this.urlStreamServiceReference = reference;
-		this.ranking = rank;
-		this.realHandlerService = (URLStreamHandlerService) StreamHandlerFactory.secureAction.getService(reference, context);
+		if (urlStreamServiceReference != null)
+			context.ungetService(urlStreamServiceReference);
+
+		urlStreamServiceReference = reference;
+		ranking = rank;
+
+		if (reference == null)
+			realHandlerService = new NullURLStreamHandlerService();
+		else
+			realHandlerService = (URLStreamHandlerService) StreamHandlerFactory.secureAction.getService(reference, context);
 	}
 
 	/**
@@ -156,21 +159,10 @@ public class URLStreamHandlerProxy extends URLStreamHandler implements ServiceTr
 		String[] protocols = (String[]) prop;
 		for (int i = 0; i < protocols.length; i++) {
 			if (protocols[i].equals(protocol)) {
-				//If our protocol is registered by another service, check the service ranking and switch 
-				//URLStreamHandlers if nessecary.
-
-				Object property = reference.getProperty(Constants.SERVICE_RANKING);
-
-				int newServiceRanking = (property instanceof Integer) ? ((Integer) property).intValue() : 0;
-
-				if (!handlerRegistered) {
+				//If our protocol is registered by another service, check the service ranking and switch URLStreamHandlers if nessecary.
+				int newServiceRanking = getRank(reference);
+				if (newServiceRanking > ranking)
 					setNewHandler(reference, newServiceRanking);
-					handlerRegistered = true;
-				}
-
-				if (newServiceRanking > ranking) {
-					setNewHandler(reference, newServiceRanking);
-				}
 				return (reference);
 			}
 		}
@@ -182,25 +174,22 @@ public class URLStreamHandlerProxy extends URLStreamHandler implements ServiceTr
 	/**
 	 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#modifiedService(ServiceReference, Object)
 	 */
-	//TODO return earlier, avoid nesting of ifs
 	// check to see if the ranking has changed.  If so, re-select a new URLHandler
 	public void modifiedService(ServiceReference reference, Object service) {
 		int newRank = getRank(reference);
-
 		if (reference == urlStreamServiceReference) {
-			if (newRank < ranking) //The URLHandler we are currently
-			//using has dropped it's ranking below a URLHandler registered for the same protocol.  
-			//We need to swap out URLHandlers.
-			//this should get us the highest ranked service, if available
-			{
+			if (newRank < ranking) { 
+				// The URLHandler we are currently using has dropped it's ranking below a URLHandler registered 
+				// for the same protocol. We need to swap out URLHandlers.
+				// this should get us the highest ranked service, if available
 				ServiceReference newReference = urlStreamHandlerServiceTracker.getServiceReference();
 				if (newReference != urlStreamServiceReference && newReference != null) {
 					setNewHandler(newReference, ((Integer) newReference.getProperty(Constants.SERVICE_RANKING)).intValue());
 				}
 			}
-		} else if (newRank > ranking) //the service changed is another URLHandler that we are not currently using
-		//If it's ranking is higher, we must swap it in.
-		{
+		} else if (newRank > ranking) { 
+			// the service changed is another URLHandler that we are not currently using
+			// If it's ranking is higher, we must swap it in.
 			setNewHandler(reference, newRank);
 		}
 	}
@@ -209,24 +198,19 @@ public class URLStreamHandlerProxy extends URLStreamHandler implements ServiceTr
 	 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(ServiceReference, Object)
 	 */
 	public void removedService(ServiceReference reference, Object service) {
-		//check to see if our URLStreamHandler was unregistered.  If so, look 
-		//for a lower ranking URLHandler
-		if (reference == urlStreamServiceReference) {
-			//this should get us the highest ranking service left, if available
-			ServiceReference newReference = urlStreamHandlerServiceTracker.getServiceReference();
-			if (newReference != null) {
-				setNewHandler(newReference, getRank(newReference));
-			} else {
-				handlerRegistered = false;
-				realHandlerService = new NullURLStreamHandlerService();
-				ranking = -1;
-			}
-
-		}
-		context.ungetService(reference);
+		// check to see if our URLStreamHandler was unregistered.
+		if (reference != urlStreamServiceReference)
+			return;
+		// If so, look for a lower ranking URLHandler
+		// this should get us the highest ranking service left, if available
+		ServiceReference newReference = urlStreamHandlerServiceTracker.getServiceReference();
+		// if newReference == null then we will use the NullURLStreamHandlerService here
+		setNewHandler(newReference, getRank(newReference));
 	}
 
 	private int getRank(ServiceReference reference) {
+		if (reference == null)
+			return Integer.MIN_VALUE;
 		Object property = reference.getProperty(Constants.SERVICE_RANKING);
 		return (property instanceof Integer) ? ((Integer) property).intValue() : 0;
 	}

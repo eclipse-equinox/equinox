@@ -38,28 +38,31 @@ public class ContentHandlerProxy extends ContentHandler implements ServiceTracke
 
 	protected String contentType;
 
-	protected int ranking = -1;
+	protected int ranking = Integer.MIN_VALUE;
 
 	public ContentHandlerProxy(String contentType, ServiceReference reference, BundleContext context) {
 		this.context = context;
 		this.contentType = contentType;
 
-		if (reference != null) {
-			setNewHandler(reference, getRank(reference));
-		}
-		//In this case, the proxy is constructed for a Content Handler that is not currently registered. 
-		//Use the DefaultContentHandler until a ContentHandler for this mime-type is registered
-		else {
-			realHandler = new DefaultContentHandler();
-		}
+		// In case the reference == null, the proxy is constructed with DefaultContentHandler for a Content Handler 
+		// until a real ContentHandler for this mime-type is registered
+		setNewHandler(reference, getRank(reference));
+
 		contentHandlerServiceTracker = new ServiceTracker(context, ContentHandler.class.getName(), this);
 		StreamHandlerFactory.secureAction.open(contentHandlerServiceTracker);
 	}
 
 	private void setNewHandler(ServiceReference reference, int rank) {
-		this.contentHandlerServiceReference = reference;
-		this.ranking = rank;
-		this.realHandler = (ContentHandler) StreamHandlerFactory.secureAction.getService(reference, context);
+		if (contentHandlerServiceReference != null)
+			context.ungetService(contentHandlerServiceReference);
+
+		contentHandlerServiceReference = reference;
+		ranking = rank;
+
+		if (reference == null)
+			realHandler = new DefaultContentHandler();
+		else
+			realHandler = (ContentHandler) StreamHandlerFactory.secureAction.getService(reference, context);		
 	}
 
 	/**
@@ -73,15 +76,10 @@ public class ContentHandlerProxy extends ContentHandler implements ServiceTracke
 		String[] contentTypes = (String[]) prop;
 		for (int i = 0; i < contentTypes.length; i++) {
 			if (contentTypes[i].equals(contentType)) {
-				//If our contentType is registered by another service, check the service ranking and switch 
-				//URLStreamHandlers if nessecary.
-
+				//If our contentType is registered by another service, check the service ranking and switch URLStreamHandlers if nessecary.
 				int newServiceRanking = getRank(reference);
-
-				//int newServiceRanking = ((Integer)reference.getProperty(Constants.SERVICE_RANKING)).intValue();
-				if (newServiceRanking > ranking) {
+				if (newServiceRanking > ranking)
 					setNewHandler(reference, newServiceRanking);
-				}
 				return (reference);
 			}
 		}
@@ -96,44 +94,35 @@ public class ContentHandlerProxy extends ContentHandler implements ServiceTracke
 
 	public void modifiedService(ServiceReference reference, Object service) {
 		int newrank = getRank(reference);
-
 		if (reference == contentHandlerServiceReference) {
-			if (newrank < ranking) //The ContentHandler we are currently
-			//using has dropped it's ranking below a ContentHandler registered for the same protocol.  
-			//We need to swap out ContentHandlers.
-			//this should get us the highest ranked service, if available
-			{
+			if (newrank < ranking) {
+				// The ContentHandler we are currently using has dropped it's ranking below a ContentHandler 
+				// registered for the same protocol.  We need to swap out ContentHandlers.
+				// this should get us the highest ranked service, if available
 				ServiceReference newReference = contentHandlerServiceTracker.getServiceReference();
 				if (newReference != contentHandlerServiceReference && newReference != null) {
 					setNewHandler(newReference, ((Integer) newReference.getProperty(Constants.SERVICE_RANKING)).intValue());
 				}
 			}
-		} else if (newrank > ranking) //the service changed is another URLHandler that we are not currently using
-		//If it's ranking is higher, we must swap it in.
-		{
+		} else if (newrank > ranking) {
+			// the service changed is another URLHandler that we are not currently using
+			// If it's ranking is higher, we must swap it in.
 			setNewHandler(reference, newrank);
 		}
-
 	}
 
 	/**
 	 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(ServiceReference, Object)
 	 */
 	public void removedService(ServiceReference reference, Object service) {
-		//check to see if our URLStreamHandler was unregistered.  If so, look 
-		//for a lower ranking URLHandler
-		//TODO invert test and return quickly, to reduce indentation
-		if (reference == contentHandlerServiceReference) {
-			//this should get us the highest ranking service left, if available
-			ServiceReference newReference = contentHandlerServiceTracker.getServiceReference();
-			if (newReference != null) {
-				setNewHandler(newReference, getRank(newReference));
-			} else {
-				ranking = -1;
-				realHandler = new DefaultContentHandler();
-			}
-		}
-		context.ungetService(reference);
+		//check to see if our URLStreamHandler was unregistered.
+		if (reference != contentHandlerServiceReference)
+			return;
+		// If so, look for a lower ranking URLHandler
+		// this should get us the highest ranking service left, if available
+		ServiceReference newReference = contentHandlerServiceTracker.getServiceReference();
+		// if newReference == null then we will use the DefaultContentHandler here
+		setNewHandler(newReference, getRank(newReference));
 	}
 
 	/**
@@ -145,6 +134,8 @@ public class ContentHandlerProxy extends ContentHandler implements ServiceTracke
 	}
 
 	private int getRank(ServiceReference reference) {
+		if (reference == null)
+			return Integer.MIN_VALUE;
 		Object property = reference.getProperty(Constants.SERVICE_RANKING);
 		return (property instanceof Integer) ? ((Integer) property).intValue() : 0;
 	}
