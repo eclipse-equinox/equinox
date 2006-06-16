@@ -78,7 +78,7 @@ public class ContentHandlerProxy extends ContentHandler implements ServiceTracke
 			if (contentTypes[i].equals(contentType)) {
 				//If our contentType is registered by another service, check the service ranking and switch URLStreamHandlers if nessecary.
 				int newServiceRanking = getRank(reference);
-				if (newServiceRanking > ranking)
+				if (newServiceRanking > ranking || contentHandlerServiceReference == null)
 					setNewHandler(reference, newServiceRanking);
 				return (reference);
 			}

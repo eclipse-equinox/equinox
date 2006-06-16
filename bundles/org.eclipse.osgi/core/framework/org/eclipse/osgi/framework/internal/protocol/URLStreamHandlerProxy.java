@@ -161,7 +161,7 @@ public class URLStreamHandlerProxy extends URLStreamHandler implements ServiceTr
 			if (protocols[i].equals(protocol)) {
 				//If our protocol is registered by another service, check the service ranking and switch URLStreamHandlers if nessecary.
 				int newServiceRanking = getRank(reference);
-				if (newServiceRanking > ranking)
+				if (newServiceRanking > ranking || urlStreamServiceReference == null)
 					setNewHandler(reference, newServiceRanking);
 				return (reference);
 			}
