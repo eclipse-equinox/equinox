@@ -581,7 +581,13 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
 				return null;
 			if (value instanceof String) /* shortcut String */
 				return (value);
-
+			if (value instanceof Number) /* shortcut Number */
+				return value;
+			if (value instanceof Character) /* shortcut Character */
+				return value;
+			if (value instanceof Boolean) /* shortcut Boolean */
+				return value;
+			
 			Class clazz = value.getClass();
 			if (clazz.isArray()) {
 				// Do an array copy
