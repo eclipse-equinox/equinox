@@ -14,10 +14,9 @@ import java.io.File;
 import java.util.Hashtable;
 import org.eclipse.core.internal.registry.*;
 import org.eclipse.core.runtime.*;
+import org.eclipse.core.runtime.spi.RegistryStrategy;
 import org.eclipse.osgi.service.datalocation.Location;
-import org.eclipse.osgi.service.environment.EnvironmentInfo;
 import org.osgi.framework.*;
-import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * The extension registry bundle. This activator will create the default OSGi registry 
@@ -59,7 +58,7 @@ public class Activator implements BundleActivator {
 	 */
 	public void stop(BundleContext context) throws Exception {
 		stopRegistry();
-		RegistryProperties.setContext(null);		
+		RegistryProperties.setContext(null);
 		bundleContext = null;
 	}
 
@@ -75,16 +74,13 @@ public class Activator implements BundleActivator {
 	 * @param args - command line arguments
 	 */
 	private void processCommandLine() {
-		ServiceTracker environmentTracker = new ServiceTracker(bundleContext, EnvironmentInfo.class.getName(), null);
-		environmentTracker.open();
-		EnvironmentInfo environmentInfo = (EnvironmentInfo) environmentTracker.getService();
-		environmentTracker.close();
-		if (environmentInfo == null)
+		// use a string here instead of the class to prevent class loading.
+		ServiceReference ref = getContext().getServiceReference("org.eclipse.osgi.service.environment.EnvironmentInfo"); //$NON-NLS-1$
+		if (ref == null)
 			return;
-		String[] args = environmentInfo.getNonFrameworkArgs();
+		String[] args = EquinoxUtils.getCommandLine(bundleContext, ref);
 		if (args == null || args.length == 0)
 			return;
-
 		for (int i = 0; i < args.length; i++) {
 			if (args[i].equalsIgnoreCase(IRegistryConstants.NO_REGISTRY_CACHE))
 				RegistryProperties.setProperty(IRegistryConstants.PROP_NO_REGISTRY_CACHE, "true"); //$NON-NLS-1$
@@ -110,22 +106,29 @@ public class Activator implements BundleActivator {
 		File[] registryLocations;
 		boolean[] readOnlyLocations;
 
+		RegistryStrategy strategy = null;
 		Location configuration = OSGIUtils.getDefault().getConfigurationLocation();
-		File primaryDir = new File(configuration.getURL().getPath() + '/' + STORAGE_DIR);
-		boolean primaryReadOnly = configuration.isReadOnly();
-
-		Location parentLocation = configuration.getParentLocation();
-		if (parentLocation != null) {
-			File secondaryDir = new File(parentLocation.getURL().getFile() + '/' + IRegistryConstants.RUNTIME_NAME);
-			registryLocations = new File[] {primaryDir, secondaryDir};
-			readOnlyLocations = new boolean[] {primaryReadOnly, true}; // secondary Eclipse location is always read only
+		if (configuration == null) {
+			RegistryProperties.setProperty(IRegistryConstants.PROP_NO_REGISTRY_CACHE, "true"); //$NON-NLS-1$
+			RegistryProperties.setProperty(IRegistryConstants.PROP_NO_LAZY_CACHE_LOADING, "true"); //$NON-NLS-1$
+			strategy = new RegistryStrategyOSGI(null, null, masterRegistryKey);
 		} else {
-			registryLocations = new File[] {primaryDir};
-			readOnlyLocations = new boolean[] {primaryReadOnly};
+			File primaryDir = new File(configuration.getURL().getPath() + '/' + STORAGE_DIR);
+			boolean primaryReadOnly = configuration.isReadOnly();
+
+			Location parentLocation = configuration.getParentLocation();
+			if (parentLocation != null) {
+				File secondaryDir = new File(parentLocation.getURL().getFile() + '/' + IRegistryConstants.RUNTIME_NAME);
+				registryLocations = new File[] {primaryDir, secondaryDir};
+				readOnlyLocations = new boolean[] {primaryReadOnly, true}; // secondary Eclipse location is always read only
+			} else {
+				registryLocations = new File[] {primaryDir};
+				readOnlyLocations = new boolean[] {primaryReadOnly};
+			}
+			strategy = new EquinoxRegistryStrategy(registryLocations, readOnlyLocations, masterRegistryKey);
 		}
 
-		EquinoxRegistryStrategy registryStrategy = new EquinoxRegistryStrategy(registryLocations, readOnlyLocations, masterRegistryKey);
-		defaultRegistry = RegistryFactory.createRegistry(registryStrategy, masterRegistryKey, userRegistryKey);
+		defaultRegistry = RegistryFactory.createRegistry(strategy, masterRegistryKey, userRegistryKey);
 
 		registryRegistration = Activator.getContext().registerService(IExtensionRegistry.class.getName(), defaultRegistry, new Hashtable());
 		defaultProvider = new RegistryProviderOSGI();

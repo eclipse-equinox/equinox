@@ -12,13 +12,14 @@ package org.eclipse.core.internal.registry.osgi;
 
 import java.io.File;
 import java.util.Map;
+import org.eclipse.core.internal.registry.RegistryMessages;
 import org.eclipse.core.internal.runtime.RuntimeLog;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.*;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.spi.RegistryStrategy;
-import org.eclipse.osgi.service.resolver.PlatformAdmin;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 
 /**
  * The registry strategy used by the Equinox extension registry. Adds to the
@@ -57,10 +58,18 @@ public class EquinoxRegistryStrategy extends RegistryStrategyOSGI {
 	}
 
 	public long getContainerTimestamp() {
-		PlatformAdmin admin = OSGIUtils.getDefault().getPlatformAdmin();
-		return admin == null ? -1 : admin.getState(false).getTimeStamp();
+		BundleContext context = Activator.getContext();
+		if (context == null) {
+			RuntimeLog.log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, 0, RegistryMessages.bundle_not_activated, null));
+			return -1;
+		}
+		// use a string here instead of the class to prevent class loading.
+		ServiceReference ref = context.getServiceReference("org.eclipse.osgi.service.resolver.PlatformAdmin"); //$NON-NLS-1$
+		if (ref == null)
+			return -1;
+		return EquinoxUtils.getContainerTimestamp(context, ref);
 	}
-	
+
 	//////////////////////////////////////////////////////////////////////////////////////////
 	// Use Eclipse job scheduling mechanism
 

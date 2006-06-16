@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.equinox.registry; singleton:=true
-Bundle-Version: 3.2.0.qualifier
+Bundle-Version: 3.2.100.qualifier
 Bundle-Localization: plugin
 Export-Package: org.eclipse.core.internal.registry;x-friends:="org.eclipse.core.runtime",
  org.eclipse.core.internal.registry.osgi;x-friends:="org.eclipse.core.runtime",
@@ -13,19 +13,19 @@ Export-Package: org.eclipse.core.internal.registry;x-friends:="org.eclipse.core.
 Require-Bundle: org.eclipse.equinox.common;bundle-version="[3.2.0,4.0.0)"
 Bundle-Vendor: %providerName
 Bundle-Activator: org.eclipse.core.internal.registry.osgi.Activator
-Import-Package: org.eclipse.core.runtime.jobs;resolution:=optional,
- org.eclipse.osgi.storagemanager,
- org.eclipse.osgi.util,
+Import-Package: javax.xml.parsers,
+ org.eclipse.core.runtime.jobs;resolution:=optional,
  org.eclipse.osgi.service.datalocation,
  org.eclipse.osgi.service.debug,
- org.eclipse.osgi.service.environment,
- org.eclipse.osgi.service.resolver,
+ org.eclipse.osgi.service.environment;resolution:=optional,
+ org.eclipse.osgi.service.resolver;resolution:=optional,
+ org.eclipse.osgi.storagemanager,
+ org.eclipse.osgi.util,
  org.osgi.framework,
  org.osgi.service.packageadmin,
  org.osgi.util.tracker,
  org.xml.sax,
- org.xml.sax.helpers,
- javax.xml.parsers
+ org.xml.sax.helpers
 Eclipse-ExtensibleAPI: true
 Bundle-ClassPath: runtime_registry_compatibility.jar, .
 Eclipse-LazyStart: true

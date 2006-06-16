@@ -16,7 +16,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.service.debug.DebugOptions;
-import org.eclipse.osgi.service.resolver.PlatformAdmin;
 import org.osgi.framework.*;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.util.tracker.ServiceTracker;
@@ -30,7 +29,6 @@ import org.osgi.util.tracker.ServiceTracker;
 public class OSGIUtils {
 	private ServiceTracker debugTracker = null;
 	private ServiceTracker bundleTracker = null;
-	private ServiceTracker platformTracker = null;
 	private ServiceTracker configurationLocationTracker = null;
 
 	// OSGI system properties.  Copied from EclipseStarter
@@ -64,11 +62,7 @@ public class OSGIUtils {
 		bundleTracker = new ServiceTracker(context, PackageAdmin.class.getName(), null);
 		bundleTracker.open();
 
-		platformTracker = new ServiceTracker(context, PlatformAdmin.class.getName(), null);
-		platformTracker.open();
-
 		// locations
-
 		final String FILTER_PREFIX = "(&(objectClass=org.eclipse.osgi.service.datalocation.Location)(type="; //$NON-NLS-1$
 		Filter filter = null;
 		try {
@@ -93,10 +87,6 @@ public class OSGIUtils {
 		if (configurationLocationTracker != null) {
 			configurationLocationTracker.close();
 			configurationLocationTracker = null;
-		}
-		if (platformTracker != null) {
-			platformTracker.close();
-			platformTracker = null;
 		}
 	}
 
@@ -164,11 +154,4 @@ public class OSGIUtils {
 			return null;
 		return (Location) configurationLocationTracker.getService();
 	}
-
-	public PlatformAdmin getPlatformAdmin() {
-		if (platformTracker == null)
-			return null;
-		return (PlatformAdmin) platformTracker.getService();
-	}
-
 }
