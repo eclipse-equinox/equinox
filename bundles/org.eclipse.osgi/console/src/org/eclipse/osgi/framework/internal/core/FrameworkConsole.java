@@ -39,7 +39,7 @@ public class FrameworkConsole implements Runnable {
 	/** The OSGi Command Provider */
 	protected CommandProvider osgicp;
 	/** A tracker containing the service object of all registered command providers */
-	protected CommandProviderTracker cptracker;
+	protected ServiceTracker cptracker;
 
 	/** Default code page which must be supported by all JVMs */
 	static String defaultEncoding = "iso8859-1"; //$NON-NLS-1$
@@ -62,12 +62,10 @@ public class FrameworkConsole implements Runnable {
 	 @param args - any arguments passed on the command line when Launcher is started.
 	 */
 	public FrameworkConsole(OSGi osgi, String[] args) {
-
 		this.args = args;
 		this.osgi = osgi;
 
 		initialize();
-
 	}
 
 	/**
@@ -78,7 +76,6 @@ public class FrameworkConsole implements Runnable {
 	 @param args - any arguments passed on the command line when Launcher is started.
 	 */
 	public FrameworkConsole(OSGi osgi, int port, String[] args) {
-
 		this.useSocketStream = true;
 		this.port = port;
 		this.args = args;
@@ -189,7 +186,7 @@ public class FrameworkConsole implements Runnable {
 		context = osgi.getBundleContext();
 
 		// set up a service tracker to track CommandProvider registrations
-		cptracker = new CommandProviderTracker(context, CommandProvider.class.getName(), this);
+		cptracker = new ServiceTracker(context, CommandProvider.class.getName(), null);
 		cptracker.open();
 
 		// register the OSGi command provider
@@ -287,7 +284,7 @@ public class FrameworkConsole implements Runnable {
 	 */
 	protected void docommand(String cmdline) {
 		if (cmdline != null && cmdline.length() > 0) {
-			CommandInterpreter intcp = new FrameworkCommandInterpreter(cmdline, cptracker.getServices(), this);
+			CommandInterpreter intcp = new FrameworkCommandInterpreter(cmdline, getServices(), this);
 			String command = intcp.nextArgument();
 			if (command != null) {
 				intcp.execute(command);
@@ -322,6 +319,26 @@ public class FrameworkConsole implements Runnable {
 			input = ""; //$NON-NLS-1$
 		}
 		return input;
+	}
+
+	/**
+	 * Return an array of service objects for all services
+	 * being tracked by this <tt>ServiceTracker</tt> object.
+	 *
+	 * The array is sorted primarily by descending Service Ranking and
+	 * secondarily by ascending Service ID.
+	 *
+	 * @return Array of service objects or <tt>null</tt> if no service
+	 * are being tracked.
+	 */
+	public Object[] getServices() {
+		ServiceReference[] serviceRefs = cptracker.getServiceReferences();
+		Util.dsort(serviceRefs, 0, serviceRefs.length);
+
+		Object[] serviceObjects = new Object[serviceRefs.length];
+		for (int i = 0; i < serviceRefs.length; i++)
+			serviceObjects[i] = FrameworkConsole.this.context.getService(serviceRefs[i]);
+		return serviceObjects;
 	}
 
 	/**
@@ -400,63 +417,6 @@ public class FrameworkConsole implements Runnable {
 		public void setAcceptConnections(boolean acceptConnections) {
 			this.acceptConnections = acceptConnections;
 		}
-	}
-
-	class CommandProviderTracker extends ServiceTracker {
-
-		FrameworkConsole con;
-
-		CommandProviderTracker(org.osgi.framework.BundleContext context, String clazz, FrameworkConsole con) {
-			super(context, clazz, null);
-			this.con = con;
-		}
-
-		/**
-		 * Default implementation of the <tt>ServiceTrackerCustomizer.addingService</tt> method.
-		 *
-		 * <p>This method is only called when this <tt>ServiceTracker</tt> object
-		 * has been constructed with a <tt>null</tt> <tt>ServiceTrackerCustomizer</tt> argument.
-		 *
-		 * The default implementation returns the result of
-		 * calling <tt>getService</tt>, on the
-		 * <tt>BundleContext</tt> object with which this <tt>ServiceTracker</tt> object was created,
-		 * passing the specified <tt>ServiceReference</tt> object.
-		 *
-		 * <p>This method can be overridden to customize
-		 * the service object to be tracked for the service
-		 * being added.
-		 *
-		 * @param reference Reference to service being added to this
-		 * <tt>ServiceTracker</tt> object.
-		 * @return The service object to be tracked for the service
-		 * added to this <tt>ServiceTracker</tt> object.
-		 */
-		public Object addingService(ServiceReference reference) {
-			CommandProvider cp = (CommandProvider) super.addingService(reference);
-			return cp;
-		}
-
-		/**
-		 * Return an array of service objects for all services
-		 * being tracked by this <tt>ServiceTracker</tt> object.
-		 *
-		 * The array is sorted primarily by descending Service Ranking and
-		 * secondarily by ascending Service ID.
-		 *
-		 * @return Array of service objects or <tt>null</tt> if no service
-		 * are being tracked.
-		 */
-		public Object[] getServices() {
-			ServiceReference[] serviceRefs = (ServiceReference[]) super.getServiceReferences();
-			Util.dsort(serviceRefs, 0, serviceRefs.length);
-
-			Object[] serviceObjects = new Object[serviceRefs.length];
-			for (int i = 0; i < serviceRefs.length; i++) {
-				serviceObjects[i] = FrameworkConsole.this.context.getService(serviceRefs[i]);
-			}
-			return serviceObjects;
-		}
-
 	}
 
 }
