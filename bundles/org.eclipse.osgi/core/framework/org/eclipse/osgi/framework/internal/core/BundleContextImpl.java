@@ -580,9 +580,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 
 		/* copy the array so that changes to the original will not affect us. */
 		String[] copy = new String[clazzes.length];
-		for (int i = 0; i < clazzes.length; i++) {
-			copy[i] = new String(clazzes[i].getBytes());
-		}
+		System.arraycopy(clazzes, 0, copy, 0, clazzes.length);
 		clazzes = copy;
 
 		/* check for ServicePermissions. */
