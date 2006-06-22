@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,12 +12,13 @@
 package org.eclipse.core.internal.runtime;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import org.eclipse.core.runtime.*;
 
 /**
  * NOT API!!!  This log infrastructure was split from the InternalPlatform.
  * 
- * @since org.eclipse.equinox.common 1.0
+ * @since org.eclipse.equinox.common 3.2
  */
 // XXX this must be removed and replaced with something more reasonable
 public final class RuntimeLog {
@@ -25,14 +26,36 @@ public final class RuntimeLog {
 	private static ArrayList logListeners = new ArrayList(5);
 
 	/**
+	 * Keep the messages until the first log listener is registered.
+	 * Once first log listeners is registred, it is going to receive
+	 * all status messages accumulated during the period when no log
+	 * listener was available.
+	 */
+	private static ArrayList queuedMessages = new ArrayList(5);
+
+	/**
 	 * @see Platform#addLogListener(ILogListener)
 	 */
 	public static void addLogListener(ILogListener listener) {
 		synchronized (logListeners) {
+			boolean firstListener = (logListeners.size() == 0);
 			// replace if already exists (Set behaviour but we use an array
 			// since we want to retain order)
 			logListeners.remove(listener);
 			logListeners.add(listener);
+			if (firstListener) {
+				for (Iterator i = queuedMessages.iterator(); i.hasNext();) {
+					try {
+						IStatus recordedMessage = (IStatus) i.next();
+						listener.logging(recordedMessage, IRuntimeConstants.PI_RUNTIME);
+					} catch (Exception e) {
+						handleException(e);
+					} catch (LinkageError e) {
+						handleException(e);
+					}
+				}
+				queuedMessages.clear();
+			}
 		}
 	}
 
@@ -62,6 +85,10 @@ public final class RuntimeLog {
 		ILogListener[] listeners;
 		synchronized (logListeners) {
 			listeners = (ILogListener[]) logListeners.toArray(new ILogListener[logListeners.size()]);
+			if (listeners.length == 0) {
+				queuedMessages.add(status);
+				return;
+			}
 		}
 		for (int i = 0; i < listeners.length; i++) {
 			try {

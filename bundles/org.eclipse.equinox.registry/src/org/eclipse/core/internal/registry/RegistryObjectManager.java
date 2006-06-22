@@ -428,9 +428,13 @@ public class RegistryObjectManager implements IObjectManager {
 		return ((Contribution) tmp).getExtensions();
 	}
 
-	synchronized void addExtensionPoint(ExtensionPoint currentExtPoint, boolean hold) {
+	synchronized boolean addExtensionPoint(ExtensionPoint currentExtPoint, boolean hold) {
+		String uniqueId = currentExtPoint.getUniqueIdentifier();
+		if (extensionPoints.get(uniqueId) != HashtableOfStringAndInt.MISSING_ELEMENT)
+			return false;
 		add(currentExtPoint, hold);
-		extensionPoints.put(currentExtPoint.getUniqueIdentifier(), currentExtPoint.getObjectId());
+		extensionPoints.put(uniqueId, currentExtPoint.getObjectId());
+		return true;
 	}
 
 	synchronized void removeExtensionPoint(String extensionPointId) {

@@ -921,9 +921,10 @@ public class ExtensionRegistry implements IExtensionRegistry {
 	 * constructor {@link RegistryFactory#createRegistry(org.eclipse.core.runtime.spi.RegistryStrategy, Object, Object)}: 
 	 * master token and a user token. Master token allows all operations; user token 
 	 * allows non-persisted registry elements to be modified.
+	 * @return <code>true</code> if successful, <code>false</code> if a problem was encountered 
 	 * @throws IllegalArgumentException if incorrect token is passed in
 	 */
-	public void addExtensionPoint(String identifier, IContributor contributor, boolean persist, String label, String schemaReference, Object token) throws IllegalArgumentException {
+	public boolean addExtensionPoint(String identifier, IContributor contributor, boolean persist, String label, String schemaReference, Object token) throws IllegalArgumentException {
 		if (!checkReadWriteAccess(token, persist))
 			throw new IllegalArgumentException("Unauthorized access to the ExtensionRegistry.addExtensionPoint() method. Check if proper access token is supplied."); //$NON-NLS-1$
 
@@ -959,7 +960,13 @@ public class ExtensionRegistry implements IExtensionRegistry {
 		currentExtPoint.setLabel(labelNLS);
 		currentExtPoint.setSchema(schemaReference);
 
-		getObjectManager().addExtensionPoint(currentExtPoint, true);
+		if (!getObjectManager().addExtensionPoint(currentExtPoint, true)) {
+			if (debug()) {
+				String msg = NLS.bind(RegistryMessages.parse_duplicateExtensionPoint, uniqueId, contribution.getDefaultNamespace());
+				log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, 0, msg, null));
+			}
+			return false;
+		}
 
 		currentExtPoint.setContributorId(contributorId);
 
@@ -973,6 +980,7 @@ public class ExtensionRegistry implements IExtensionRegistry {
 		contribution.setRawChildren(contributionChildren);
 
 		add(contribution);
+		return true;
 	}
 
 	/**
@@ -996,9 +1004,10 @@ public class ExtensionRegistry implements IExtensionRegistry {
 	 * constructor {@link RegistryFactory#createRegistry(org.eclipse.core.runtime.spi.RegistryStrategy, Object, Object)}: 
 	 * master token and a user token. Master token allows all operations; user token 
 	 * allows non-persisted registry elements to be modified.
+	 * @return <code>true</code> if successful, <code>false</code> if a problem was encountered 
 	 * @throws IllegalArgumentException if incorrect token is passed in
 	 */
-	public void addExtension(String identifier, IContributor contributor, boolean persist, String label, String extensionPointId, ConfigurationElementDescription configurationElements, Object token) throws IllegalArgumentException {
+	public boolean addExtension(String identifier, IContributor contributor, boolean persist, String label, String extensionPointId, ConfigurationElementDescription configurationElements, Object token) throws IllegalArgumentException {
 		if (!checkReadWriteAccess(token, persist))
 			throw new IllegalArgumentException("Unauthorized access to the ExtensionRegistry.addExtensionPoint() method. Check if proper access token is supplied."); //$NON-NLS-1$
 		// prepare namespace information
@@ -1033,6 +1042,20 @@ public class ExtensionRegistry implements IExtensionRegistry {
 			targetExtensionPointId = extensionPointId;
 		currentExtension.setExtensionPointIdentifier(targetExtensionPointId);
 
+		// if we have an Id specified, check for duplicates. Only issue warning if duplicate found
+		// as it might still work fine - depending on the access pattern.
+		if (simpleId != null && debug()) {
+			String uniqueId = namespaceName + '.' + simpleId;
+			IExtension existingExtension = getExtension(uniqueId);
+			if (existingExtension != null) {
+				String currentSupplier = contribution.getDefaultNamespace();
+				String existingSupplier = existingExtension.getContributor().getName();
+				String msg = NLS.bind(RegistryMessages.parse_duplicateExtension, new String[] {currentSupplier, existingSupplier, uniqueId});
+				log(new Status(IStatus.WARNING, RegistryMessages.OWNER_NAME, 0, msg, null));
+				return false;
+			}
+		}
+
 		getObjectManager().add(currentExtension, true);
 
 		createExtensionData(contributorId, configurationElements, currentExtension, persist);
@@ -1047,6 +1070,7 @@ public class ExtensionRegistry implements IExtensionRegistry {
 		contribution.setRawChildren(contributionChildren);
 
 		add(contribution);
+		return true;
 	}
 
 	// Fill in the actual content of this extension

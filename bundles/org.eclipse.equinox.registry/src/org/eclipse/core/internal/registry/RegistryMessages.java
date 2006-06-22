@@ -51,6 +51,8 @@ public class RegistryMessages extends NLS {
 	public static String parse_failedParsingManifest;
 	public static String parse_nonSingleton;
 	public static String parse_problems;
+	public static String parse_duplicateExtension;
+	public static String parse_duplicateExtensionPoint;
 
 	// direct creation
 	public static String create_failedExtensionPoint;

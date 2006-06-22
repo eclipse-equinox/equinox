@@ -139,6 +139,8 @@ public class ExtensionsParser extends DefaultHandler {
 	// Cache the behavior toggle (true: attempt to extract namespace from qualified IDs)
 	private boolean extractNamespaces = false;
 
+	private ArrayList processedExtensionIds = null;
+
 	public ExtensionsParser(MultiStatus status, ExtensionRegistry registry) {
 		super();
 		this.status = status;
@@ -412,6 +414,8 @@ public class ExtensionsParser extends DefaultHandler {
 		Extension currentExtension = registry.getElementFactory().createExtension(contribution.shouldPersist());
 		objectStack.push(currentExtension);
 
+		String simpleId = null;
+		String namespaceName = null;
 		// Process Attributes
 		int len = (attributes != null) ? attributes.getLength() : 0;
 		for (int i = 0; i < len; i++) {
@@ -421,8 +425,6 @@ public class ExtensionsParser extends DefaultHandler {
 			if (attrName.equals(EXTENSION_NAME))
 				currentExtension.setLabel(translate(attrValue));
 			else if (attrName.equals(EXTENSION_ID)) {
-				String simpleId;
-				String namespaceName;
 				int simpleIdStart = attrValue.lastIndexOf('.');
 				if ((simpleIdStart != -1) && extractNamespaces) {
 					simpleId = attrValue.substring(simpleIdStart + 1);
@@ -451,6 +453,31 @@ public class ExtensionsParser extends DefaultHandler {
 			stateStack.push(new Integer(IGNORED_ELEMENT_STATE));
 			objectStack.pop();
 			return;
+		}
+		// if we have an Id specified, check for duplicates. Only issue warning (not error) if duplicate found
+		// as it might still work fine - depending on the access pattern.
+		if (simpleId != null && registry.debug()) {
+			String uniqueId = namespaceName + '.' + simpleId;
+			IExtension existingExtension = registry.getExtension(uniqueId);
+			if (existingExtension != null) {
+				String currentSupplier = contribution.getDefaultNamespace();
+				String existingSupplier = existingExtension.getContributor().getName();
+				String msg = NLS.bind(RegistryMessages.parse_duplicateExtension, new String[] {currentSupplier, existingSupplier, uniqueId});
+				registry.log(new Status(IStatus.WARNING, RegistryMessages.OWNER_NAME, 0, msg, null));
+			} else if (processedExtensionIds != null) { // check elements in this contribution 
+				for (Iterator i = processedExtensionIds.iterator(); i.hasNext();) {
+					if (uniqueId.equals(i.next())) {
+						String currentSupplier = contribution.getDefaultNamespace();
+						String existingSupplier = currentSupplier;
+						String msg = NLS.bind(RegistryMessages.parse_duplicateExtension, new String[] {currentSupplier, existingSupplier, uniqueId});
+						registry.log(new Status(IStatus.WARNING, RegistryMessages.OWNER_NAME, 0, msg, null));
+						break;
+					}
+				}
+			}
+			if (processedExtensionIds == null)
+				processedExtensionIds = new ArrayList(10);
+			processedExtensionIds.add(uniqueId);
 		}
 
 		objectManager.add(currentExtension, true);
@@ -515,8 +542,18 @@ public class ExtensionsParser extends DefaultHandler {
 			stateStack.push(new Integer(IGNORED_ELEMENT_STATE));
 			return;
 		}
-
-		objectManager.addExtensionPoint(currentExtPoint, true);
+		if (!objectManager.addExtensionPoint(currentExtPoint, true)) {
+			// avoid adding extension point second time as it might cause 
+			// extensions associated with the existing extension point to 
+			// become inaccessible.
+			if (registry.debug()) {
+				String msg = NLS.bind(RegistryMessages.parse_duplicateExtensionPoint, currentExtPoint.getUniqueIdentifier(), contribution.getDefaultNamespace());
+				registry.log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, 0, msg, null));
+			}
+			stateStack.pop();
+			stateStack.push(new Integer(IGNORED_ELEMENT_STATE));
+			return;
+		}
 		if (currentExtPoint.getNamespace() == null)
 			currentExtPoint.setNamespace(contribution.getDefaultNamespace());
 		currentExtPoint.setContributorId(contribution.getContributorId());
