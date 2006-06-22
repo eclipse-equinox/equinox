@@ -12,8 +12,7 @@ package org.eclipse.core.internal.registry.osgi;
 
 import org.eclipse.osgi.service.environment.EnvironmentInfo;
 import org.eclipse.osgi.service.resolver.PlatformAdmin;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
+import org.osgi.framework.*;
 
 /**
  * The class contains a set of Equinox-specific helper methods. The methods were isolated
@@ -52,5 +51,18 @@ public class EquinoxUtils {
 		} finally {
 			context.ungetService(ref);
 		}
+	}
+
+	public static ServiceRegistration registerCommandProvider(BundleContext context) {
+		// try to register the registry command provider
+		try {
+			// refer to the CommandProvider by name here so that even if VM
+			// decides to pre-fetch all referred classes the expection will occur
+			// inside the exception holder
+			return context.registerService("org.eclipse.osgi.framework.console.CommandProvider", new RegistryCommandProvider(), null); //$NON-NLS-1$
+		} catch (NoClassDefFoundError noClass) {
+			// expected if CommandProvider is not available
+		}
+		return null;
 	}
 }

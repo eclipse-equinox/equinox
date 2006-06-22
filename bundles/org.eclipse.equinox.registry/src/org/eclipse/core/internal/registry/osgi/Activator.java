@@ -41,6 +41,7 @@ public class Activator implements BundleActivator {
 
 	private IExtensionRegistry defaultRegistry = null;
 	private ServiceRegistration registryRegistration;
+	private ServiceRegistration commandRegistration;
 	private RegistryProviderOSGI defaultProvider;
 
 	/**
@@ -134,6 +135,7 @@ public class Activator implements BundleActivator {
 		defaultProvider = new RegistryProviderOSGI();
 		// Set the registry provider and specify this as a default registry:
 		RegistryProviderFactory.setDefault(defaultProvider);
+		commandRegistration = EquinoxUtils.registerCommandProvider(Activator.getContext());
 	}
 
 	private void stopRegistry() {
@@ -143,6 +145,8 @@ public class Activator implements BundleActivator {
 			registryRegistration.unregister();
 			defaultRegistry.stop(masterRegistryKey);
 		}
+		if (commandRegistration != null)
+			commandRegistration.unregister();
 	}
 
 }

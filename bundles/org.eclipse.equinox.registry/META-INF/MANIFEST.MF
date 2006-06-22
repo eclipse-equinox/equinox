@@ -15,6 +15,7 @@ Bundle-Vendor: %providerName
 Bundle-Activator: org.eclipse.core.internal.registry.osgi.Activator
 Import-Package: javax.xml.parsers,
  org.eclipse.core.runtime.jobs;resolution:=optional,
+ org.eclipse.osgi.framework.console;resolution:=optional,
  org.eclipse.osgi.service.datalocation,
  org.eclipse.osgi.service.debug,
  org.eclipse.osgi.service.environment;resolution:=optional,
