@@ -573,6 +573,16 @@ public class ExtensionRegistry implements IExtensionRegistry {
 				}
 			}
 
+			if (!isRegistryFilledFromCache) {
+				// set cache storage manager to a first writable location
+				for (int index = 0; index < strategy.getLocationsLength(); index++) {
+					if (!strategy.isCacheReadOnly(index)) {
+						setFileManager(strategy.getStorage(index), false);
+						break;
+					}
+				}
+			}
+
 			if (debug() && isRegistryFilledFromCache)
 				System.out.println("Reading registry cache: " + (System.currentTimeMillis() - start)); //$NON-NLS-1$
 
