@@ -12,6 +12,7 @@
 package org.eclipse.osgi.internal.baseadaptor;
 
 import java.io.*;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.*;
@@ -392,6 +393,17 @@ public class BaseStorageHook implements StorageHook, AdaptorHook{
 					// get the value of the var from system properties
 					if (var != null && var.length() > 0)
 						prop = FrameworkProperties.getProperty(var);
+					if (prop == null) {
+						try {
+							// try using the System.getenv method if it exists (bug 126921)
+							Method getenv = System.class.getMethod("getenv", new Class[] {String.class}); //$NON-NLS-1$
+							prop = (String) getenv.invoke(null, new Object[] {var});
+						} catch (Throwable t) {
+							// do nothing; 
+							// on 1.4 VMs this throws an error
+							// on J2ME this method does not exist
+						}
+					}
 					if (prop != null)
 						// found a value; use it
 						buf.append(prop);
