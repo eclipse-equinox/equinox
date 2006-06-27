@@ -76,6 +76,13 @@ public class BaseClassLoadingHook implements ClassLoadingHook {
 			slash = nativepaths[i].lastIndexOf('/');
 			String path = slash < 0 ? nativepaths[i] : nativepaths[i].substring(slash + 1);
 			if (path.equals(libname)) {
+				if (nativepaths[i].startsWith(BaseStorageHook.EXTERNAL_LIB_PREFIX)) {
+					// references an external library; do variable substitution
+					String externalPath = BaseStorageHook.substituteVars(nativepaths[i].substring(BaseStorageHook.EXTERNAL_LIB_PREFIX.length()));
+					File nativeFile = new File(externalPath);
+					return nativeFile.getAbsolutePath();
+				}
+				// this is a normal library contained within the bundle
 				File nativeFile = bundledata.getBundleFile().getFile(nativepaths[i], true);
 				if (nativeFile != null)
 					return nativeFile.getAbsolutePath();

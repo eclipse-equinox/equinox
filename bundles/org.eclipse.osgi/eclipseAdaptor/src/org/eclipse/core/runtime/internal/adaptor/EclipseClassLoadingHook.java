@@ -14,7 +14,6 @@ package org.eclipse.core.runtime.internal.adaptor;
 import java.io.File;
 import java.security.ProtectionDomain;
 import java.util.ArrayList;
-import java.util.StringTokenizer;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import org.eclipse.osgi.baseadaptor.*;
@@ -24,15 +23,12 @@ import org.eclipse.osgi.baseadaptor.hooks.ClassLoadingHook;
 import org.eclipse.osgi.baseadaptor.loader.*;
 import org.eclipse.osgi.framework.adaptor.BundleProtectionDomain;
 import org.eclipse.osgi.framework.adaptor.ClassLoaderDelegate;
-import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.eclipse.osgi.internal.baseadaptor.BaseClassLoadingHook;
+import org.eclipse.osgi.internal.baseadaptor.BaseStorageHook;
 
 public class EclipseClassLoadingHook implements ClassLoadingHook, HookConfigurator {
 	private static String[] NL_JAR_VARIANTS = buildNLJarVariants(EclipseEnvironmentInfo.getDefault().getNL());
 	private static boolean DEFINE_PACKAGES;
-	private static final String VARIABLE_DELIM_STRING = "$"; //$NON-NLS-1$
-	private static final char VARIABLE_DELIM_CHAR = '$';
-	private static final String EXTERNAL_LIB_PREFIX = "external:"; //$NON-NLS-1$
 	private static String[] LIB_VARIANTS = buildLibraryVariants();
 
 	static {
@@ -121,10 +117,10 @@ public class EclipseClassLoadingHook implements ClassLoadingHook, HookConfigurat
 		if (var != null)
 			// find internal library using eclipse predefined vars
 			return addInternalClassPath(var, cpEntries, cp, hostmanager, sourcedata, sourcedomain);
-		if (cp.startsWith(EXTERNAL_LIB_PREFIX)) {
-			cp = cp.substring(EXTERNAL_LIB_PREFIX.length());
+		if (cp.startsWith(BaseStorageHook.EXTERNAL_LIB_PREFIX)) {
+			cp = cp.substring(BaseStorageHook.EXTERNAL_LIB_PREFIX.length());
 			// find external library using system property substitution
-			ClasspathEntry cpEntry = hostmanager.getExternalClassPath(substituteVars(cp), sourcedata, sourcedomain);
+			ClasspathEntry cpEntry = hostmanager.getExternalClassPath(BaseStorageHook.substituteVars(cp), sourcedata, sourcedomain);
 			if (cpEntry != null) {
 				cpEntries.add(cpEntry);
 				return true;
@@ -156,45 +152,6 @@ public class EclipseClassLoadingHook implements ClassLoadingHook, HookConfigurat
 		if (libPath.startsWith("$nl$")) //$NON-NLS-1$
 			return "nl"; //$NON-NLS-1$
 		return null;
-	}
-
-	private static String substituteVars(String cp) {
-		StringBuffer buf = new StringBuffer(cp.length());
-		StringTokenizer st = new StringTokenizer(cp, VARIABLE_DELIM_STRING, true);
-		boolean varStarted = false; // indicates we are processing a var subtitute
-		String var = null; // the current var key
-		while (st.hasMoreElements()) {
-			String tok = st.nextToken();
-			if (VARIABLE_DELIM_STRING.equals(tok)) {
-				if (!varStarted) {
-					varStarted = true; // we found the start of a var
-					var = ""; //$NON-NLS-1$
-				} else {
-					// we have found the end of a var
-					String prop = null;
-					// get the value of the var from system properties
-					if (var != null && var.length() > 0)
-						prop = FrameworkProperties.getProperty(var);
-					if (prop != null)
-						// found a value; use it
-						buf.append(prop);
-					else
-						// could not find a value append the var name w/o delims 
-						buf.append(var == null ? "" : var); //$NON-NLS-1$
-					varStarted = false;
-					var = null;
-				}
-			} else {
-				if (!varStarted)
-					buf.append(tok); // the token is not part of a var
-				else
-					var = tok; // the token is the var key; save the key to process when we find the end token
-			}
-		}
-		if (var != null)
-			// found a case of $var at the end of the cp with no trailing $; just append it as is.
-			buf.append(VARIABLE_DELIM_CHAR).append(var);
-		return buf.toString();
 	}
 
 	private static String[] buildNLJarVariants(String nl) {

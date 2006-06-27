@@ -223,16 +223,10 @@ public class BaseStorage {
 	}
 
 	public void installNativeCode(BaseData data, String[] nativepaths) throws BundleException {
-		for (int i = 0; i < nativepaths.length; i++) {
-			// extract the native code
-			File nativeFile = data.getBundleFile().getFile(nativepaths[i], true);
-			if (nativeFile == null)
-				throw new BundleException(NLS.bind(AdaptorMsg.BUNDLE_NATIVECODE_EXCEPTION, nativepaths[i]));
-		}
 		if (nativepaths.length > 0) {
 			BaseStorageHook storageHook = (BaseStorageHook) data.getStorageHook(BaseStorageHook.KEY);
 			if (storageHook != null)
-				storageHook.setNativePaths(nativepaths);
+				storageHook.installNativePaths(nativepaths);
 		}
 	}
 

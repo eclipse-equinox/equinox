@@ -14,20 +14,20 @@ package org.eclipse.osgi.internal.baseadaptor;
 import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.Dictionary;
-import java.util.Properties;
+import java.util.*;
 import org.eclipse.core.runtime.adaptor.LocationManager;
 import org.eclipse.osgi.baseadaptor.*;
 import org.eclipse.osgi.baseadaptor.hooks.AdaptorHook;
 import org.eclipse.osgi.baseadaptor.hooks.StorageHook;
 import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.debug.Debug;
-import org.eclipse.osgi.framework.internal.core.AbstractBundle;
+import org.eclipse.osgi.framework.internal.core.*;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.util.KeyedElement;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.util.ManifestElement;
+import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 
 public class BaseStorageHook implements StorageHook, AdaptorHook{
@@ -36,6 +36,9 @@ public class BaseStorageHook implements StorageHook, AdaptorHook{
 	public static final int DEL_BUNDLE_STORE = 0x01;
 	public static final int DEL_GENERATION = 0x02;
 	private static final int STORAGE_VERSION = 1;
+	public static final String EXTERNAL_LIB_PREFIX = "external:"; //$NON-NLS-1$
+	public static final String VARIABLE_DELIM_STRING = "$"; //$NON-NLS-1$
+	public static final char VARIABLE_DELIM_CHAR = '$';
 
 	/** bundle's file name */
 	private String fileName;
@@ -202,8 +205,21 @@ public class BaseStorageHook implements StorageHook, AdaptorHook{
 		return nativePaths;
 	}
 
-	public void setNativePaths(String[] nativePaths) {
-		this.nativePaths = nativePaths;
+	public void installNativePaths(String[] installPaths) throws BundleException {
+		this.nativePaths = installPaths;
+		for (int i = 0; i < installPaths.length; i++) {
+			if (installPaths[i].startsWith(EXTERNAL_LIB_PREFIX)) {
+				String path = substituteVars(installPaths[i].substring(EXTERNAL_LIB_PREFIX.length()));
+				File nativeFile = new File(path);
+				if (!nativeFile.exists())
+					throw new BundleException(NLS.bind(AdaptorMsg.BUNDLE_NATIVECODE_EXCEPTION, nativeFile.getAbsolutePath()));
+				continue; // continue to next path
+			}
+			// extract the native code
+			File nativeFile = bundleData.getBundleFile().getFile(installPaths[i], true);
+			if (nativeFile == null)
+				throw new BundleException(NLS.bind(AdaptorMsg.BUNDLE_NATIVECODE_EXCEPTION, installPaths[i]));
+		}
 	}
 
 	public boolean isReference() {
@@ -357,5 +373,44 @@ public class BaseStorageHook implements StorageHook, AdaptorHook{
 
 	public BaseStorage getStorage() {
 		return storage;
+	}
+
+	public static String substituteVars(String path) {
+		StringBuffer buf = new StringBuffer(path.length());
+		StringTokenizer st = new StringTokenizer(path, VARIABLE_DELIM_STRING, true);
+		boolean varStarted = false; // indicates we are processing a var subtitute
+		String var = null; // the current var key
+		while (st.hasMoreElements()) {
+			String tok = st.nextToken();
+			if (VARIABLE_DELIM_STRING.equals(tok)) {
+				if (!varStarted) {
+					varStarted = true; // we found the start of a var
+					var = ""; //$NON-NLS-1$
+				} else {
+					// we have found the end of a var
+					String prop = null;
+					// get the value of the var from system properties
+					if (var != null && var.length() > 0)
+						prop = FrameworkProperties.getProperty(var);
+					if (prop != null)
+						// found a value; use it
+						buf.append(prop);
+					else
+						// could not find a value append the var name w/o delims 
+						buf.append(var == null ? "" : var); //$NON-NLS-1$
+					varStarted = false;
+					var = null;
+				}
+			} else {
+				if (!varStarted)
+					buf.append(tok); // the token is not part of a var
+				else
+					var = tok; // the token is the var key; save the key to process when we find the end token
+			}
+		}
+		if (var != null)
+			// found a case of $var at the end of the path with no trailing $; just append it as is.
+			buf.append(VARIABLE_DELIM_CHAR).append(var);
+		return buf.toString();
 	}
 }
