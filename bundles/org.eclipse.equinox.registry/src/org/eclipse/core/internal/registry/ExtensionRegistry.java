@@ -884,9 +884,11 @@ public class ExtensionRegistry implements IExtensionRegistry {
 
 		try {
 			parser.parseManifest(strategy.getXMLParser(), new InputSource(is), contributionName, getObjectManager(), contribution, translationBundle);
-			if (problems.getSeverity() != IStatus.OK) {
+			int status = problems.getSeverity();
+			if (status != IStatus.OK) {
 				log(problems);
-				return false;
+				if (status == IStatus.ERROR || status == IStatus.CANCEL)
+					return false;
 			}
 		} catch (ParserConfigurationException e) {
 			logError(ownerName, contributionName, e);

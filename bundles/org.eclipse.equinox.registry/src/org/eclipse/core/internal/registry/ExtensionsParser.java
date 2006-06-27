@@ -498,11 +498,11 @@ public class ExtensionsParser extends DefaultHandler {
 			internalError(NLS.bind(RegistryMessages.parse_unknownAttributeLine, (new String[] {attribute, element, Integer.toString(locator.getLineNumber())})));
 	}
 
-	private void unknownElement(String element, String parent) {
+	private void unknownElement(String parent, String element) {
 		if (locator == null)
-			internalError(NLS.bind(RegistryMessages.parse_unknownElement, parent, element));
+			internalError(NLS.bind(RegistryMessages.parse_unknownElement, element, parent));
 		else
-			internalError(NLS.bind(RegistryMessages.parse_unknownElementLine, (new String[] {parent, element, Integer.toString(locator.getLineNumber())})));
+			internalError(NLS.bind(RegistryMessages.parse_unknownElementLine, (new String[] {element, parent, Integer.toString(locator.getLineNumber())})));
 	}
 
 	private void parseExtensionPointAttributes(Attributes attributes) {
