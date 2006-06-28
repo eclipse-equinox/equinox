@@ -14,7 +14,9 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import org.eclipse.core.runtime.*;
+import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.service.datalocation.Location;
+import org.eclipse.osgi.service.debug.DebugOptions;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.Bundle;
 
@@ -22,6 +24,8 @@ import org.osgi.framework.Bundle;
  * This class can only be used if OSGi plugin is available
  */
 public class DataArea {
+	private static final String OPTION_DEBUG = "org.eclipse.equinox.common/debug"; //$NON-NLS-1$;
+
 	/* package */static final String F_META_AREA = ".metadata"; //$NON-NLS-1$
 	/* package */static final String F_PLUGIN_DATA = ".plugins"; //$NON-NLS-1$
 	/* package */static final String F_LOG = ".log"; //$NON-NLS-1$
@@ -67,7 +71,10 @@ public class DataArea {
 	}
 
 	public IPath getLogLocation() throws IllegalStateException {
-		return new Path(Activator.getDefault().getFrameworkLog().getFile().getAbsolutePath());
+		FrameworkLog log = Activator.getDefault().getFrameworkLog();
+		if (log == null)
+			return null;
+		return new Path(log.getFile().getAbsolutePath());
 	}
 
 	/**
@@ -122,10 +129,25 @@ public class DataArea {
 		IPath path = location.append(F_META_AREA).append(F_LOG);
 		try {
 			Activator activator = Activator.getDefault();
-			if (activator != null)
-				activator.getFrameworkLog().setFile(path.toFile(), true);
+			if (activator != null) {
+				FrameworkLog log = activator.getFrameworkLog();
+				if (log != null)
+					log.setFile(path.toFile(), true);
+				else if (debug())
+					System.out.println("ERROR: Unable to acquire log service. Application will proceed, but logging will be disabled.");
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	private boolean debug() {
+		Activator activator = Activator.getDefault();
+		if (activator == null)
+			return false;
+		DebugOptions debugOptions = activator.getDebugOptions();
+		if (debugOptions == null)
+			return false;
+		return debugOptions.getBooleanOption(OPTION_DEBUG, false);
 	}
 }

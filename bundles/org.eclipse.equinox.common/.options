@@ -1,0 +1,4 @@
+# Debugging options for the org.eclipse.equinox.common plugin
+
+# Turn on general debugging for the org.eclipse.equinox.common plugin.
+org.eclipse.equinox.common/debug=false
