@@ -497,7 +497,7 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
 		 * @param props The properties for this service.
 		 */
 		private Properties(int size, Dictionary props) {
-			super((size << 1) + 1);
+			super(size);
 
 			if (props != null) {
 				synchronized (props) {
@@ -522,7 +522,7 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
 		 * @param props The properties for this service.
 		 */
 		protected Properties(Dictionary props) {
-			this((props == null) ? 2 : Math.max(2, props.size()), props);
+			this((props == null) ? 2 : props.size()+2, props);
 		}
 
 		/**
