@@ -87,6 +87,44 @@ public final class FileLocator {
 	}
 
 	/**
+	 * Same as {@link #findEntries(Bundle, IPath, Map)} except multiple entries
+	 * can be returned if more than one entry matches the path in the host and 
+	 * any of its fragments.
+	 * 
+	 * @param bundle the bundle in which to search
+	 * @param path file path relative to plug-in installation location
+	 * @param override map of override substitution arguments to be used for
+	 * 	any $arg$ path elements. The map keys correspond to the substitution
+	 * 	arguments (eg. "$nl$" or "$os$"). The resulting
+	 * 	values must be of type java.lang.String. If the map is <code>null</code>,
+	 * 	or does not contain the required substitution argument, the default
+	 * 	is used.
+	 * @return an array of entries which match the given path.  An empty 
+	 * array is returned if no matches are found.
+	 * 
+	 * @since org.eclipse.equinox.common 3.3
+	 */
+	public static URL[] findEntries(Bundle bundle, IPath path, Map override) {
+		return FindSupport.findEntries(bundle, path, override);
+	}
+
+	/**
+	 * Same as {@link #findEntries(Bundle, IPath)} except multiple entries 
+	 * can be returned if more than one entry matches the path in the host 
+	 * any of its fragments.
+	 * 
+	 * @param bundle the bundle in which to search
+	 * @param path file path relative to plug-in installation location
+	 * @return an array of entries which match the given path.  An empty 
+	 * array is returned if no matches are found.
+	 * 
+	 * @since org.eclipse.equinox.common 3.3
+	 */
+	public static URL[] findEntries(Bundle bundle, IPath path) {
+		return FindSupport.findEntries(bundle, path);
+	}
+
+	/**
 	 * Returns an input stream for the specified file. The file path
 	 * must be specified relative to this plug-in's installation location.
 	 * Optionally, the path specified may contain $arg$ path elements that can 

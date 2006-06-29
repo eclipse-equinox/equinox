@@ -15,8 +15,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Map;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.*;
 import org.osgi.framework.Bundle;
 
 // This class provides implements the find* methods exposed on Platform.
@@ -48,16 +47,36 @@ public class FindSupport {
 	}
 
 	/**
-	 * See doc on @link Platform#find(Bundle, IPath) Platform#find(Bundle, IPath) 
+	 * See doc on {@link FileLocator#find(Bundle, IPath, Map)} 
 	 */
 	public static URL find(Bundle bundle, IPath path) {
 		return find(bundle, path, null);
 	}
 
 	/**
-	 * See doc on @link Platform#find(Bundle, IPath, Map) Platform#find(Bundle, IPath, Map) 
+	 * See doc on {@link FileLocator#find(Bundle, IPath, Map)} 
 	 */
 	public static URL find(Bundle b, IPath path, Map override) {
+		return find(b, path, override, null);
+	}
+
+	/**
+	 * See doc on {@link FileLocator#findEntries(Bundle, IPath)}
+	 */
+	public static URL[] findEntries(Bundle bundle, IPath path) {
+		return findEntries(bundle, path, null);
+	}
+
+	/**
+	 * See doc on {@link FileLocator#findEntries(Bundle, IPath, Map)}
+	 */
+	public static URL[] findEntries(Bundle bundle, IPath path, Map override) {
+		ArrayList results = new ArrayList(1);
+		find(bundle, path, override, results);
+		return (URL[]) results.toArray(new URL[results.size()]);
+	}
+
+	private static URL find(Bundle b, IPath path, Map override, ArrayList multiple) {
 		if (path == null)
 			return null;
 
@@ -68,36 +87,36 @@ public class FindSupport {
 			// Watch for the root case.  It will produce a new
 			// URL which is only the root directory (and not the
 			// root of this plugin).	
-			result = findInPlugin(b, Path.EMPTY);
-			if (result == null)
-				result = findInFragments(b, Path.EMPTY);
+			result = findInPlugin(b, Path.EMPTY, multiple);
+			if (result == null || multiple != null)
+				result = findInFragments(b, Path.EMPTY, multiple);
 			return result;
 		}
 
 		// Now check for paths without variable substitution
 		String first = path.segment(0);
 		if (first.charAt(0) != '$') {
-			result = findInPlugin(b, path);
-			if (result == null)
-				result = findInFragments(b, path);
+			result = findInPlugin(b, path, multiple);
+			if (result == null || multiple != null)
+				result = findInFragments(b, path, multiple);
 			return result;
 		}
 
 		// Worry about variable substitution
 		IPath rest = path.removeFirstSegments(1);
 		if (first.equalsIgnoreCase("$nl$")) //$NON-NLS-1$
-			return findNL(b, rest, override);
+			return findNL(b, rest, override, multiple);
 		if (first.equalsIgnoreCase("$os$")) //$NON-NLS-1$
-			return findOS(b, rest, override);
+			return findOS(b, rest, override, multiple);
 		if (first.equalsIgnoreCase("$ws$")) //$NON-NLS-1$
-			return findWS(b, rest, override);
+			return findWS(b, rest, override, multiple);
 		if (first.equalsIgnoreCase("$files$")) //$NON-NLS-1$
 			return null;
 
 		return null;
 	}
 
-	private static URL findOS(Bundle b, IPath path, Map override) {
+	private static URL findOS(Bundle b, IPath path, Map override, ArrayList multiple) {
 		String os = null;
 		if (override != null)
 			try {
@@ -132,23 +151,23 @@ public class FindSupport {
 		// Keep doing this until all you have left is "os" as a path
 		while (base.segmentCount() != 1) {
 			IPath filePath = base.append(path);
-			result = findInPlugin(b, filePath);
-			if (result != null)
+			result = findInPlugin(b, filePath, multiple);
+			if (result != null && multiple == null)
 				return result;
-			result = findInFragments(b, filePath);
-			if (result != null)
+			result = findInFragments(b, filePath, multiple);
+			if (result != null && multiple == null)
 				return result;
 			base = base.removeLastSegments(1);
 		}
 		// If we get to this point, we haven't found it yet.
 		// Look in the plugin and fragment root directories
-		result = findInPlugin(b, path);
-		if (result != null)
+		result = findInPlugin(b, path, multiple);
+		if (result != null && multiple == null)
 			return result;
-		return findInFragments(b, path);
+		return findInFragments(b, path, multiple);
 	}
 
-	private static URL findWS(Bundle b, IPath path, Map override) {
+	private static URL findWS(Bundle b, IPath path, Map override, ArrayList multiple) {
 		String ws = null;
 		if (override != null)
 			try {
@@ -163,21 +182,21 @@ public class FindSupport {
 		IPath filePath = new Path("ws").append(ws).append(path); //$NON-NLS-1$
 		// We know that there is only one segment to the ws path
 		// e.g. ws/win32	
-		URL result = findInPlugin(b, filePath);
-		if (result != null)
+		URL result = findInPlugin(b, filePath, multiple);
+		if (result != null && multiple == null)
 			return result;
-		result = findInFragments(b, filePath);
-		if (result != null)
+		result = findInFragments(b, filePath, multiple);
+		if (result != null && multiple == null)
 			return result;
 		// If we get to this point, we haven't found it yet.
 		// Look in the plugin and fragment root directories
-		result = findInPlugin(b, path);
-		if (result != null)
+		result = findInPlugin(b, path, multiple);
+		if (result != null && multiple == null)
 			return result;
-		return findInFragments(b, path);
+		return findInFragments(b, path, multiple);
 	}
 
-	private static URL findNL(Bundle b, IPath path, Map override) {
+	private static URL findNL(Bundle b, IPath path, Map override, ArrayList multiple) {
 		String nl = null;
 		String[] nlVariants = null;
 		if (override != null)
@@ -194,26 +213,29 @@ public class FindSupport {
 		URL result = null;
 		for (int i = 0; i < nlVariants.length; i++) {
 			IPath filePath = new Path(nlVariants[i]).append(path);
-			result = findInPlugin(b, filePath);
-			if (result != null)
+			result = findInPlugin(b, filePath, multiple);
+			if (result != null && multiple == null)
 				return result;
-			result = findInFragments(b, filePath);
-			if (result != null)
+			result = findInFragments(b, filePath, multiple);
+			if (result != null && multiple == null)
 				return result;
 		}
 		// If we get to this point, we haven't found it yet.
 		// Look in the plugin and fragment root directories
-		result = findInPlugin(b, path);
-		if (result != null)
+		result = findInPlugin(b, path, multiple);
+		if (result != null && multiple == null)
 			return result;
-		return findInFragments(b, path);
+		return findInFragments(b, path, multiple);
 	}
 
-	private static URL findInPlugin(Bundle b, IPath filePath) {
-		return b.getEntry(filePath.toString());
+	private static URL findInPlugin(Bundle b, IPath filePath, ArrayList multiple) {
+		URL result = b.getEntry(filePath.toString());
+		if (result != null && multiple != null)
+			multiple.add(result);
+		return result;
 	}
 
-	private static URL findInFragments(Bundle b, IPath filePath) {
+	private static URL findInFragments(Bundle b, IPath filePath, ArrayList multiple) {
 		Activator activator = Activator.getDefault();
 		if (activator == null)
 			return null;
@@ -221,24 +243,29 @@ public class FindSupport {
 		if (fragments == null)
 			return null;
 
-		URL fileURL = null;
-		int i = 0;
-		while (i < fragments.length && fileURL == null) {
-			fileURL = fragments[i].getEntry(filePath.toString());
-			i++;
+		if (multiple != null)
+			multiple.ensureCapacity(fragments.length + 1);
+
+		for (int i = 0; i < fragments.length; i++) {
+			URL fileURL = fragments[i].getEntry(filePath.toString());
+			if (fileURL != null) {
+				if (multiple == null)
+					return fileURL;
+				multiple.add(fileURL);
+			}
 		}
-		return fileURL;
+		return null;
 	}
 
 	/**
-	 * See doc on @link Platform#openStream(Bundle, IPath, boolean) Platform#Platform#openStream(Bundle, IPath, boolean) 
+	 * See doc on {@link FileLocator#openStream(Bundle, IPath, boolean)} 
 	 */
 	public static final InputStream openStream(Bundle bundle, IPath file, boolean substituteArgs) throws IOException {
 		URL url = null;
 		if (!substituteArgs) {
-			url = findInPlugin(bundle, file);
+			url = findInPlugin(bundle, file, null);
 			if (url == null)
-				url = findInFragments(bundle, file);
+				url = findInFragments(bundle, file, null);
 		} else {
 			url = FindSupport.find(bundle, file);
 		}
