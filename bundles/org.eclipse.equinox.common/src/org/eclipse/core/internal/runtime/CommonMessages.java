@@ -49,13 +49,6 @@ public class CommonMessages extends NLS {
 	public static String parse_separatorEndVersion;
 	public static String parse_separatorStartVersion;
 
-	// FileMananger messages
-	public static String fileManager_cannotLock;
-	public static String fileManager_couldNotSave;
-	public static String fileManager_updateFailed;
-	public static String fileManager_illegalInReadOnlyMode;
-	public static String fileManager_notOpen;
-
 	public static String activator_not_available;
 	
 	static {
