@@ -18,7 +18,7 @@ import java.util.*;
 import org.eclipse.osgi.framework.adaptor.BundleClassLoader;
 
 public class ContextFinder extends ClassLoader implements PrivilegedAction {
-	private static final class Finder extends SecurityManager {
+	static final class Finder extends SecurityManager {
 		public Class[] getClassContext() {
 			return super.getClassContext();
 		}
