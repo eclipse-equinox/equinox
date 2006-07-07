@@ -400,7 +400,7 @@ public class EclipseLog implements FrameworkLog {
 		try {
 			DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS"); //$NON-NLS-1$
 			return formatter.format(date);
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			// If there were problems writing out the date, ignore and
 			// continue since that shouldn't stop us from logging the rest
 			// of the information
