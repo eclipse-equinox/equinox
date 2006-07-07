@@ -23,7 +23,9 @@ public class ContextFinder extends ClassLoader implements PrivilegedAction {
 			return super.getClassContext();
 		}
 	}
-
+	//This is used to detect cycle that could be caused while delegating the loading to other classloaders
+	//It keeps track on a thread basis of the set of requested classes and resources
+	private static ThreadLocal cycleDetector = new ThreadLocal();
 	static ClassLoader finderClassLoader;
 	static Finder contextFinder;
 	static {
@@ -82,41 +84,82 @@ public class ContextFinder extends ClassLoader implements PrivilegedAction {
 		return basicFindClassLoaders();
 	}
 
-	protected synchronized Class loadClass(String arg0, boolean arg1) throws ClassNotFoundException {
-		try {
-			return super.loadClass(arg0, arg1);
-		} catch (ClassNotFoundException e) {
-			// Ignore; find a bundle classloader to use.
+	//Return whether the request for loading "name" should proceed.
+	//False is returned when a cycle is being detected 
+	private boolean startLoading(String name) {
+		Set classesAndResources = (Set) cycleDetector.get();
+		if (classesAndResources != null && classesAndResources.contains(name))
+			return false;
+
+		if (classesAndResources == null) {
+			classesAndResources = new HashSet(3);
+			cycleDetector.set(classesAndResources);
 		}
-		ArrayList toConsult = findClassLoaders();
-		for (Iterator loaders = toConsult.iterator(); loaders.hasNext();)
+		classesAndResources.add(name);
+		return true;
+	}
+
+	private void stopLoading(String name) {
+		((Set) cycleDetector.get()).remove(name);
+	}
+
+	protected synchronized Class loadClass(String arg0, boolean arg1) throws ClassNotFoundException {
+		//Shortcut cycle
+		if (startLoading(arg0) == false)
+			throw new ClassNotFoundException(arg0);
+
+		try {
 			try {
-				return ((ClassLoader) loaders.next()).loadClass(arg0);
+				return super.loadClass(arg0, arg1);
 			} catch (ClassNotFoundException e) {
-				// go to the next class loader
+				// Ignore; find a bundle classloader to use.
 			}
-		throw new ClassNotFoundException(arg0);
+			ArrayList toConsult = findClassLoaders();
+			for (Iterator loaders = toConsult.iterator(); loaders.hasNext();)
+				try {
+					return ((ClassLoader) loaders.next()).loadClass(arg0);
+				} catch (ClassNotFoundException e) {
+					// go to the next class loader
+				}
+			throw new ClassNotFoundException(arg0);
+		} finally {
+			stopLoading(arg0);
+		}
 	}
 
 	protected URL findResource(String arg0) {
-		ArrayList toConsult = findClassLoaders();
-		for (Iterator loaders = toConsult.iterator(); loaders.hasNext();) {
-			URL result = ((ClassLoader) loaders.next()).getResource(arg0);
-			if (result != null)
-				return result;
-			// go to the next class loader
+		//Shortcut cycle
+		if (startLoading(arg0) == false)
+			return null;
+		try {
+			ArrayList toConsult = findClassLoaders();
+			for (Iterator loaders = toConsult.iterator(); loaders.hasNext();) {
+				URL result = ((ClassLoader) loaders.next()).getResource(arg0);
+				if (result != null)
+					return result;
+				// go to the next class loader
+			}
+			return super.findResource(arg0);
+		} finally {
+			stopLoading(arg0);
 		}
-		return super.findResource(arg0);
 	}
 
 	protected Enumeration findResources(String arg0) throws IOException {
-		ArrayList toConsult = findClassLoaders();
-		for (Iterator loaders = toConsult.iterator(); loaders.hasNext();) {
-			Enumeration result = ((ClassLoader) loaders.next()).getResources(arg0);
-			if (result != null && result.hasMoreElements())
-				return result;
-			// go to the next class loader
+		//Shortcut cycle
+		if (startLoading(arg0) == false)
+			return null;
+		try {
+			ArrayList toConsult = findClassLoaders();
+			for (Iterator loaders = toConsult.iterator(); loaders.hasNext();) {
+				Enumeration result = ((ClassLoader) loaders.next()).getResources(arg0);
+				if (result != null && result.hasMoreElements())
+					return result;
+				// go to the next class loader
+			}
+			return super.findResources(arg0);
+		} finally {
+			stopLoading(arg0);
 		}
-		return super.findResources(arg0);
 	}
 }
