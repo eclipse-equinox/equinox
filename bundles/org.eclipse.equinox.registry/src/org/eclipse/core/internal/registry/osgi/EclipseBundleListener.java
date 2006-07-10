@@ -37,11 +37,13 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 	private static final String FRAGMENT_MANIFEST = "fragment.xml"; //$NON-NLS-1$	
 
 	private ExtensionRegistry registry;
+	private RegistryStrategyOSGI strategy;
 	private Object token;
 
-	public EclipseBundleListener(ExtensionRegistry registry, Object key) {
+	public EclipseBundleListener(ExtensionRegistry registry, Object key, RegistryStrategyOSGI strategy) {
 		this.registry = registry;
 		this.token = key;
+		this.strategy = strategy;
 	}
 
 	public void bundleChanged(BundleEvent event) {
@@ -87,7 +89,53 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 	}
 
 	private void removeBundle(Bundle bundle) {
-		registry.remove(Long.toString(bundle.getBundleId()));
+		long timestamp = 0;
+		if (strategy.checkContributionsTimestamp()) {
+			URL pluginManifest = getExtensionURL(bundle, false);
+			if (pluginManifest != null)
+				timestamp = strategy.getExtendedTimestamp(bundle, pluginManifest);
+		}
+		registry.remove(Long.toString(bundle.getBundleId()), timestamp);
+	}
+
+	static public URL getExtensionURL(Bundle bundle, boolean report) {
+		// bail out if system bundle
+		if (bundle.getBundleId() == 0)
+			return null;
+		// bail out if the bundle does not have a symbolic name
+		if (bundle.getSymbolicName() == null)
+			return null;
+
+		boolean isFragment = OSGIUtils.getDefault().isFragment(bundle);
+		String manifestName = isFragment ? FRAGMENT_MANIFEST : PLUGIN_MANIFEST;
+		URL extensionURL = bundle.getEntry(manifestName);
+		if (extensionURL == null)
+			return null;
+
+		// If the bundle is not a singleton, then it is not added
+		if (!isSingleton(bundle)) {
+			if (report) {
+				String message = NLS.bind(RegistryMessages.parse_nonSingleton, bundle.getLocation());
+				RuntimeLog.log(new Status(IStatus.INFO, RegistryMessages.OWNER_NAME, 0, message, null));
+			}
+			return null;
+		}
+		if (!isFragment)
+			return extensionURL;
+
+		// If the bundle is a fragment being added to a non singleton host, then it is not added
+		Bundle[] hosts = OSGIUtils.getDefault().getHosts(bundle);
+		if (hosts == null)
+			return null; // should never happen?
+
+		if (isSingleton(hosts[0]))
+			return extensionURL;
+
+		if (report) {
+			String message = NLS.bind(RegistryMessages.parse_nonSingleton, hosts[0].getLocation());
+			RuntimeLog.log(new Status(IStatus.INFO, RegistryMessages.OWNER_NAME, 0, message, null));
+		}
+		return null;
 	}
 
 	private void addBundle(Bundle bundle) {
@@ -96,31 +144,12 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 		// note that this does not work for update cases.
 		if (registry.hasContribution(contributorId))
 			return;
-		// bail out if system bundle
-		if (bundle.getBundleId() == 0)
+		URL pluginManifest = getExtensionURL(bundle, registry.debug());
+		if (pluginManifest == null)
 			return;
-		// bail out if the bundle does not have a symbolic name
-		if (bundle.getSymbolicName() == null)
-			return;
-		//If the bundle is not a singleton, then it is not added
-		if (!isSingleton(bundle))
-			return;
-
-		boolean isFragment = OSGIUtils.getDefault().isFragment(bundle);
-
-		//If the bundle is a fragment being added to a non singleton host, then it is not added
-		if (isFragment) {
-			Bundle[] hosts = OSGIUtils.getDefault().getHosts(bundle);
-			if (hosts != null && isSingleton(hosts[0]) == false)
-				return;
-		}
-
-		InputStream is = null;
-		String manifestName = isFragment ? FRAGMENT_MANIFEST : PLUGIN_MANIFEST;
+		InputStream is;
 		try {
-			URL url = bundle.getEntry(manifestName);
-			if (url != null)
-				is = url.openStream();
+			is = pluginManifest.openStream();
 		} catch (IOException ex) {
 			is = null;
 		}
@@ -133,9 +162,11 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 		} catch (MissingResourceException e) {
 			//Ignore the exception
 		}
-		
+		long timestamp = 0;
+		if (strategy.checkContributionsTimestamp())
+			timestamp = strategy.getExtendedTimestamp(bundle, pluginManifest);
 		IContributor contributor = ContributorFactoryOSGi.createContributor(bundle);
-		registry.addContribution(is, contributor, true, manifestName, translationBundle, token);
+		registry.addContribution(is, contributor, true, pluginManifest.getPath(), translationBundle, token, timestamp);
 
 		// bug 70941
 		// need to ensure we can find resource bundles from fragments
@@ -145,7 +176,7 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 		//			Messages.reloadMessages();
 	}
 
-	private boolean isSingleton(Bundle bundle) {
+	private static boolean isSingleton(Bundle bundle) {
 		Dictionary allHeaders = bundle.getHeaders(""); //$NON-NLS-1$
 		String symbolicNameHeader = (String) allHeaders.get(Constants.BUNDLE_SYMBOLICNAME);
 		try {
@@ -157,18 +188,11 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 						singleton = symbolicNameElements[0].getAttribute(Constants.SINGLETON_DIRECTIVE);
 
 					if (!"true".equalsIgnoreCase(singleton)) { //$NON-NLS-1$
-						int status = IStatus.INFO;
 						String manifestVersion = (String) allHeaders.get(org.osgi.framework.Constants.BUNDLE_MANIFESTVERSION);
 						if (manifestVersion == null) {//the header was not defined for previous versions of the bundle
 							//3.0 bundles without a singleton attributes are still being accepted
-							if (OSGIUtils.getDefault().getBundle(symbolicNameElements[0].getValue()) == bundle) {
+							if (OSGIUtils.getDefault().getBundle(symbolicNameElements[0].getValue()) == bundle)
 								return true;
-							}
-							status = IStatus.ERROR;
-						}
-						if (registry.debug() || status == IStatus.ERROR) {
-							String message = NLS.bind(RegistryMessages.parse_nonSingleton, bundle.getLocation());
-							RuntimeLog.log(new Status(status, RegistryMessages.OWNER_NAME, 0, message, null));
 						}
 						return false;
 					}

@@ -13,7 +13,6 @@ package org.eclipse.core.internal.registry.osgi;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.ResourceBundle;
 import javax.xml.parsers.SAXParserFactory;
 import org.eclipse.core.internal.registry.*;
@@ -61,6 +60,12 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 	private ServiceTracker xmlTracker = null;
 
 	/**
+	 * Value of the query "should we track contributions timestamps" is cached
+	 * in this variable
+	 */
+	private boolean trackTimestamp;
+
+	/**
 	 * @param theStorageDir - array of file system directories to store cache files; might be null
 	 * @param cacheReadOnly - array of read only attributes. True: cache at this location is read 
 	 * only; false: cache is read/write
@@ -70,6 +75,14 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 	public RegistryStrategyOSGI(File[] theStorageDir, boolean[] cacheReadOnly, Object key) {
 		super(theStorageDir, cacheReadOnly);
 		token = key;
+
+		// Only do timestamp calculations if osgi.checkConfiguration is set to "true" (typically, 
+		// this implies -dev mode)
+		BundleContext context = Activator.getContext();
+		if (context != null)
+			trackTimestamp = "true".equalsIgnoreCase(context.getProperty(IRegistryConstants.PROP_CHECK_CONFIG));
+		else
+			trackTimestamp = false;
 	}
 
 	/* (non-Javadoc)
@@ -183,7 +196,7 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 		ExtensionRegistry theRegistry = (ExtensionRegistry) registry;
 
 		// register a listener to catch new bundle installations/resolutions.
-		pluginBundleListener = new EclipseBundleListener(theRegistry, token);
+		pluginBundleListener = new EclipseBundleListener(theRegistry, token, this);
 		Activator.getContext().addBundleListener(pluginBundleListener);
 
 		// populate the registry with all the currently installed bundles.
@@ -230,28 +243,37 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 	 * @see org.eclipse.core.runtime.spi.RegistryStrategy#getContributionsTimestamp()
 	 */
 	public long getContributionsTimestamp() {
+		if (!checkContributionsTimestamp())
+			return 0;
+		RegistryTimestamp expectedTimestamp = new RegistryTimestamp();
 		BundleContext context = Activator.getContext();
-		if (context == null)
-			return 0;
-		// If the check config prop is false or not set then exit
-		if (!"true".equalsIgnoreCase(context.getProperty(IRegistryConstants.PROP_CHECK_CONFIG))) //$NON-NLS-1$  
-			return 0;
 		Bundle[] allBundles = context.getBundles();
-		long result = 0;
 		for (int i = 0; i < allBundles.length; i++) {
-			URL pluginManifest = allBundles[i].getEntry("plugin.xml"); //$NON-NLS-1$
-			if (pluginManifest == null)
-				pluginManifest = allBundles[i].getEntry("fragment.xml"); //$NON-NLS-1$
+			URL pluginManifest = EclipseBundleListener.getExtensionURL(allBundles[i], false);
 			if (pluginManifest == null)
 				continue;
-			try {
-				URLConnection connection = pluginManifest.openConnection();
-				result ^= connection.getLastModified() + allBundles[i].getBundleId();
-			} catch (IOException e) {
-				return 0;
-			}
+			long timestamp = getExtendedTimestamp(allBundles[i], pluginManifest);
+			expectedTimestamp.add(timestamp);
 		}
-		return result;
+		return expectedTimestamp.getContentsTimestamp();
+	}
+
+	public boolean checkContributionsTimestamp() {
+		return trackTimestamp;
+	}
+
+	public long getExtendedTimestamp(Bundle bundle, URL pluginManifest) {
+		if (pluginManifest == null)
+			return 0;
+		try {
+			 return pluginManifest.openConnection().getLastModified() + bundle.getBundleId();
+		} catch (IOException e) {
+			if (debug()) {
+				System.out.println("Unable to obtain timestamp for the bundle " + bundle.getSymbolicName());
+				e.printStackTrace();
+			}
+			return 0;
+		}
 	}
 
 	/* (non-Javadoc)

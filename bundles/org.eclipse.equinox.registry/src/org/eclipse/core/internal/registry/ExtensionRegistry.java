@@ -17,8 +17,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.eclipse.core.internal.registry.spi.ConfigurationElementDescription;
 import org.eclipse.core.internal.registry.spi.ConfigurationElementAttribute;
 import org.eclipse.core.runtime.*;
-import org.eclipse.core.runtime.spi.RegistryContributor;
-import org.eclipse.core.runtime.spi.RegistryStrategy;
+import org.eclipse.core.runtime.spi.*;
 import org.eclipse.osgi.storagemanager.StorageManager;
 import org.eclipse.osgi.util.NLS;
 import org.xml.sax.InputSource;
@@ -71,6 +70,8 @@ public class ExtensionRegistry implements IExtensionRegistry {
 	private Object userToken; // use to modify non-persisted registry elements
 
 	protected RegistryStrategy strategy; // overridable portions of the registry functionality
+
+	private RegistryTimestamp aggregatedTimestamp = new RegistryTimestamp(); // tracks current contents of the registry
 
 	public RegistryObjectManager getObjectManager() {
 		return registryObjects;
@@ -455,6 +456,12 @@ public class ExtensionRegistry implements IExtensionRegistry {
 		return extPoint.getNamespace();
 	}
 
+	public void remove(String removedContributorId, long timestamp) {
+		remove(removedContributorId);
+		if (timestamp != 0)
+			aggregatedTimestamp.remove(timestamp);
+	}
+
 	/**
 	 * Unresolves and removes all extensions and extension points provided by
 	 * the plug-in.
@@ -563,7 +570,10 @@ public class ExtensionRegistry implements IExtensionRegistry {
 					theTableReader.setContributorsFile(cacheStorageManager.lookup(TableReader.CONTRIBUTORS, false));
 					theTableReader.setNamespacesFile(cacheStorageManager.lookup(TableReader.NAMESPACES, false));
 					theTableReader.setOrphansFile(cacheStorageManager.lookup(TableReader.ORPHANS, false));
-					isRegistryFilledFromCache = registryObjects.init(computeTimeStamp());
+					long timestamp = strategy.getContributionsTimestamp();
+					isRegistryFilledFromCache = registryObjects.init(timestamp);
+					if (isRegistryFilledFromCache)
+						aggregatedTimestamp.set(timestamp);
 				} catch (IOException e) {
 					// The registry will be rebuilt from the xml files. Make sure to clear anything filled
 					// from cache so that we won't have partially filled items.
@@ -667,7 +677,18 @@ public class ExtensionRegistry implements IExtensionRegistry {
 			return; //Ignore the exception since we can recompute the cache
 		}
 		try {
-			if (theTableWriter.saveCache(registryObjects, computeTimeStamp()))
+			long timestamp;
+			// A bit of backward compatibility: if registry was modified, but timestamp was not,
+			// it means that the new timestamp tracking mechanism was not used. In this case
+			// explicitly obtain timestamps for all contributions. Note that this logic
+			// maintains a problem described in the bug 104267 for contributions that 
+			// don't use the timestamp tracking mechanism.
+			if (aggregatedTimestamp.isModifed())
+				timestamp = aggregatedTimestamp.getContentsTimestamp(); // use timestamp tracking  
+			else
+				timestamp = strategy.getContributionsTimestamp(); // use legacy approach
+
+			if (theTableWriter.saveCache(registryObjects, timestamp))
 				cacheStorageManager.update(new String[] {TableReader.TABLE, TableReader.MAIN, TableReader.EXTRA, TableReader.CONTRIBUTIONS, TableReader.CONTRIBUTORS, TableReader.NAMESPACES, TableReader.ORPHANS}, new String[] {tableFile.getName(), mainFile.getName(), extraFile.getName(), contributionsFile.getName(), contributorsFile.getName(), namespacesFile.getName(), orphansFile.getName()});
 		} catch (IOException e) {
 			//Ignore the exception since we can recompute the cache
@@ -687,6 +708,7 @@ public class ExtensionRegistry implements IExtensionRegistry {
 			} catch (IOException e) {
 				log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, IStatus.ERROR, RegistryMessages.meta_registryCacheReadProblems, e));
 			}
+		aggregatedTimestamp.reset();
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////
@@ -733,10 +755,6 @@ public class ExtensionRegistry implements IExtensionRegistry {
 
 	public long computeState() {
 		return strategy.getContainerTimestamp();
-	}
-
-	public long computeTimeStamp() {
-		return strategy.getContributionsTimestamp();
 	}
 
 	// Find the first location that contains a cache table file and set file manager to it.
@@ -865,6 +883,13 @@ public class ExtensionRegistry implements IExtensionRegistry {
 		if (userToken == key && !persist)
 			return true;
 		return false;
+	}
+
+	public boolean addContribution(InputStream is, IContributor contributor, boolean persist, String contributionName, ResourceBundle translationBundle, Object key, long timestamp) {
+		boolean result = addContribution(is, contributor, persist, contributionName, translationBundle, key);
+		if (timestamp != 0)
+			aggregatedTimestamp.add(timestamp);
+		return result;
 	}
 
 	public boolean addContribution(InputStream is, IContributor contributor, boolean persist, String contributionName, ResourceBundle translationBundle, Object key) {

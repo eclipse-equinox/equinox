@@ -55,7 +55,7 @@ public class RegistryStrategy {
 	 * Specifies if the registry file cache is read only; might be <code>null</code>
 	 */
 	private final boolean[] cacheReadOnly;
-
+	
 	/**
 	 * Constructor for this default registry strategy. 
 	 * <p>
@@ -334,26 +334,23 @@ public class RegistryStrategy {
 	}
 
 	/**
-	 * This method is called as a part of the registry cache validation. The cache is valid
-	 * on the registry startup if the pair {container time stamp, contributors time stamp} 
-	 * supplied by the registry strategy is the same as the {container time stamp, contributors time stamp}
-	 * stored in the registry cache. The goal of the validation is to be able to catch modifications
-	 * made to the original data contributed into the registry and not reflected in the registry cache. 
+	 * This method is called as a part of the registry cache validation. The method calculates 
+	 * a number describing the time when the originating contributions (i.e., plugin.xml files 
+	 * in case of the Eclipse registry) were last modified. 
 	 * <p>
-	 * The method calculates a number describing time when the contributions cached by the registry 
-	 * were last modified. For instance, in the Eclipse registry this number is calculated 
-	 * as a function of the time when plugin.xml files have been modified. If the number is not the same 
-	 * as the number stored in the cache, it means that plugin.xml file(s) have been updated and 
-	 * the cached information is no longer valid. 
+	 * The value returned by the method is compared with the timestamp tracked by the registry. 
+	 * If contributions changed since they have been added to the registry (i.e., plugin.xml
+	 * file was modified since the last run), the value of the {@link #getContributionsTimestamp()}
+	 * will change and no longer will be the same as the value tracked by the registry. In this case 
+	 * the cache is considered to be invalid and the registry is going to be re-populated form scratch.
 	 * </p><p>
-	 * Generally, treat this number as a hash code for the time of modifications of contributions stored 
-	 * in the registry. It stays the same as long as the contributions aren't changing. It becomes 
-	 * a different number when contributions are modified.
+	 * (The word "timestamp" is used very loosely here. In this context, "timestamp" is more likely
+	 * to be a hash value aggregating a number of actual timestamps from the contributions.) 
 	 * </p><p>
-	 * Return 0 to indicate that no time stamp verification is required. 
+	 * This method may return 0 to indicate that no time stamp verification is required. 
 	 * </p>
-	 *
-	 * @return the time stamp calculated with the application data
+	 * @return a value corresponding to the last mofification time of contributions contained
+	 * in the registry 
 	 */
 	public long getContributionsTimestamp() {
 		return 0;
