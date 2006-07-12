@@ -12,8 +12,7 @@ package org.eclipse.core.runtime.adaptor;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import org.eclipse.core.runtime.internal.adaptor.EclipseEnvironmentInfo;
 import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
@@ -397,15 +396,32 @@ public class EclipseLog implements FrameworkLog {
 	 * @return a date string.
 	 */
 	protected String getDate(Date date) {
-		try {
-			DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS"); //$NON-NLS-1$
-			return formatter.format(date);
-		} catch (Throwable e) {
-			// If there were problems writing out the date, ignore and
-			// continue since that shouldn't stop us from logging the rest
-			// of the information
+			Calendar c = Calendar.getInstance();
+			c.setTime(date);
+			StringBuffer sb = new StringBuffer();
+			appendPaddedInt(c.get(Calendar.YEAR), 4, sb).append('-');
+			appendPaddedInt(c.get(Calendar.MONTH) + 1, 2, sb).append('-');
+			appendPaddedInt(c.get(Calendar.DAY_OF_MONTH), 2, sb).append(' ');
+			appendPaddedInt(c.get(Calendar.HOUR_OF_DAY), 2, sb).append(':');
+			appendPaddedInt(c.get(Calendar.MINUTE), 2, sb).append(':');
+			appendPaddedInt(c.get(Calendar.SECOND), 2, sb).append('.');
+			appendPaddedInt(c.get(Calendar.MILLISECOND), 3, sb);
+			return sb.toString();
+	}
+
+	private StringBuffer appendPaddedInt(int value, int pad, StringBuffer buffer) {
+		pad = pad - 1;
+		if (pad == 0)
+			return buffer.append(Integer.toString(value));
+		int padding = (int) Math.pow(10, pad);
+		if (value >= padding)
+			return buffer.append(Integer.toString(value));
+		while (padding > value && padding > 1) {
+			buffer.append('0');
+			padding = padding / 10;
 		}
-		return Long.toString(System.currentTimeMillis());
+		buffer.append(value);
+		return buffer;
 	}
 
 	/**
