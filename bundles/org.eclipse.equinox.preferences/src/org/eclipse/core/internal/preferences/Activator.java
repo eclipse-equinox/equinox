@@ -59,6 +59,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 	 */
 	public void start(BundleContext context) throws Exception {
 		bundleContext = context;
+		// Open the services first before processing the command-line args, order is important! (Bug 150288)
 		PreferencesOSGiUtils.getDefault().openServices();
 		processCommandLine();
 		
