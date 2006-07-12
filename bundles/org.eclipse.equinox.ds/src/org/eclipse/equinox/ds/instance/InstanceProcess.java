@@ -15,7 +15,7 @@ import java.util.*;
 import org.eclipse.equinox.ds.Activator;
 import org.eclipse.equinox.ds.Log;
 import org.eclipse.equinox.ds.model.ComponentDescription;
-import org.eclipse.equinox.ds.model.ComponentDescriptionProp;
+import org.eclipse.equinox.ds.model.ComponentConfiguration;
 import org.eclipse.equinox.ds.resolver.Reference;
 import org.eclipse.equinox.ds.service.ComponentFactoryImpl;
 import org.eclipse.equinox.ds.service.ComponentInstanceImpl;
@@ -89,26 +89,26 @@ public class InstanceProcess implements ConfigurationListener {
 	 * If Service Component has the factory attribute set, register a 
 	 * {@link org.osgi.service.component.ComponentFactory}.
 	 * 
-	 * @param componentDescriptionProps - List of satisfied Component Configurations
+	 * @param componentConfigurations - List of satisfied Component Configurations
 	 */
-	public void registerComponentConfigs(List componentDescriptionProps) {
+	public void registerComponentConfigurations(List componentConfigurations) {
 
-		ComponentDescriptionProp cdp;
+		ComponentConfiguration componentConfiguration;
 		ComponentDescription cd;
 		String factoryPid = null;
 
 		// loop through CD+P list
 
-		Iterator it = componentDescriptionProps.iterator();
+		Iterator it = componentConfigurations.iterator();
 		while (it.hasNext()) {
-			cdp = (ComponentDescriptionProp) it.next();
-			cd = cdp.getComponentDescription();
+			componentConfiguration = (ComponentConfiguration) it.next();
+			cd = componentConfiguration.getComponentDescription();
 			if (DEBUG)
 				System.out.println("InstanceProcess: buildInstances: component name = " + cd.getName());
 
 
 			// ComponentFactory
-			if (cdp.isComponentFactory()) {
+			if (componentConfiguration.isComponentFactory()) {
 				if (DEBUG)
 					System.out.println("InstanceProcess: buildInstances: ComponentFactory");
 				// check if MSF
@@ -134,7 +134,7 @@ public class InstanceProcess implements ConfigurationListener {
 				// then register a component factory service
 				// for the Service Component on behalf of the Service
 				// Component.
-				cdp.setServiceRegistration(cd.getBundleContext().registerService(ComponentFactory.class.getName(), new ComponentFactoryImpl(cdp, main), cdp.getProperties()));
+				componentConfiguration.setServiceRegistration(cd.getBundleContext().registerService(ComponentFactory.class.getName(), new ComponentFactoryImpl(componentConfiguration, main), componentConfiguration.getProperties()));
 				continue; // break so we do not create an instance
 			} 
 			
@@ -142,7 +142,7 @@ public class InstanceProcess implements ConfigurationListener {
 			// if it is a factory instance, we need to create it before we register its service
 			if (cd.isImmediate() || (cd.getFactory() != null)) {
 				try {
-					buildDispose.buildComponentConfigInstance(null, cdp);
+					buildDispose.buildComponentConfigInstance(null, componentConfiguration);
 				} catch (ComponentException e) {
 					Log.log(1, "[SCR] Error attempting to build Component.", e);
 				}
@@ -150,29 +150,29 @@ public class InstanceProcess implements ConfigurationListener {
 			
 			// if Service
 			if (cd.getService() != null) {
-				RegisterComponentService.registerService(this, cdp);
+				RegisterComponentService.registerService(this, componentConfiguration);
 			}
 
-		}// end while(more componentDescriptionProps)
+		}// end while(more componentConfigurations)
 	}
 
 	/**
 	 * 
 	 * Dispose of Component Configurations
 	 * 
-	 * @param componentDescriptionProps - list of Component Configurations to be
+	 * @param componentConfigurations - list of Component Configurations to be
 	 *         disposed
 	 */
 
-	public void disposeComponentConfigs(List componentDescriptionProps) {
+	public void disposeComponentConfigurations(List componentConfigurations) {
 
 		// loop through CD+P list to be disposed
-		Iterator it = componentDescriptionProps.iterator();
+		Iterator it = componentConfigurations.iterator();
 		while (it.hasNext()) {
-			ComponentDescriptionProp cdp = (ComponentDescriptionProp) it.next();
+			ComponentConfiguration componentConfiguration = (ComponentConfiguration) it.next();
 
 			// dispose component
-			buildDispose.disposeComponentConfig(cdp);
+			buildDispose.disposeComponentConfig(componentConfiguration);
 		}
 	}
 
@@ -185,7 +185,7 @@ public class InstanceProcess implements ConfigurationListener {
 		Iterator it = references.iterator();
 		while (it.hasNext()) {
 			Reference reference = (Reference) it.next();
-			List instances = reference.getComponentDescriptionProp().getInstances();
+			List instances = reference.getComponentConfiguration().getInstances();
 			Iterator it2 = instances.iterator();
 			while (it2.hasNext()) {
 				ComponentInstanceImpl compInstance = (ComponentInstanceImpl) it2.next();
@@ -206,11 +206,11 @@ public class InstanceProcess implements ConfigurationListener {
 		while (itr.hasNext()) {
 			Map.Entry unbindJob = (Map.Entry) itr.next();
 			Reference reference = (Reference) unbindJob.getKey();
-			ComponentDescriptionProp cdp = reference.getComponentDescriptionProp();
+			ComponentConfiguration componentConfiguration = reference.getComponentConfiguration();
 			ServiceReference serviceReference = (ServiceReference) unbindJob.getValue();
 
 			// get the list of instances created
-			List instances = cdp.getInstances();
+			List instances = componentConfiguration.getInstances();
 			Iterator it = instances.iterator();
 			while (it.hasNext()) {
 				ComponentInstanceImpl compInstance = (ComponentInstanceImpl) it.next();
@@ -285,7 +285,7 @@ public class InstanceProcess implements ConfigurationListener {
 				// if NOT a factory
 				if (fpid == null) {
 
-					// there is only one CDP for this CD, so we can disable the
+					// there is only one component configuration for this CD, so we can disable the
 					// CD
 					main.resolver.disableComponents(Collections.singletonList(cd));
 
@@ -294,28 +294,28 @@ public class InstanceProcess implements ConfigurationListener {
 					workQueue.enqueueWork(main, Activator.ADD, Collections.singletonList(cd));
 
 					// If a MSF
-					// create a new CDP or update an existing one
+					// create a new component configuration or update an existing one
 				} else {
 
-					// get cdp with this PID
-					ComponentDescriptionProp cdp = cd.getComponentDescriptionPropByPID(pid);
+					// get component configuration with this PID
+					ComponentConfiguration componentConfiguration = cd.getComponentConfigurationByPID(pid);
 
-					// if only the no-props cdp exists, replace it
-					if (cdp == null && cd.getComponentDescriptionProps().size() == 1 && ((ComponentDescriptionProp) cd.getComponentDescriptionProps().get(0)).getProperties().get(Constants.SERVICE_PID) == null) {
-						cdp = (ComponentDescriptionProp) cd.getComponentDescriptionProps().get(0);
+					// if only the no-props component configuration exists, replace it
+					if (componentConfiguration == null && cd.getComponentConfigurations().size() == 1 && ((ComponentConfiguration) cd.getComponentConfigurations().get(0)).getProperties().get(Constants.SERVICE_PID) == null) {
+						componentConfiguration = (ComponentConfiguration) cd.getComponentConfigurations().get(0);
 					}
 
-					// if old cdp exists, dispose of it
-					if (cdp != null) {
+					// if old component configuration exists, dispose of it
+					if (componentConfiguration != null) {
 						// config already exists - dispose of it
-						cd.removeComponentDescriptionProp(cdp);
-						main.resolver.disposeComponentConfigs(Collections.singletonList(cdp));
+						cd.removeComponentConfiguration(componentConfiguration);
+						main.resolver.disposeComponentConfigurations(Collections.singletonList(componentConfiguration));
 					}
 
-					// create a new cdp (adds to resolver enabledCDPs list)
+					// create a new component configuration (adds to resolver enabledComponentConfigurations list)
 					main.resolver.map(cd, config[0].getProperties());
 
-					// kick the resolver to figure out if CDP is satisfied, etc
+					// kick the resolver to figure out if component configuration is satisfied, etc
 					workQueue.enqueueWork(main, Activator.ADD, Collections.EMPTY_LIST);
 
 				}
@@ -326,39 +326,39 @@ public class InstanceProcess implements ConfigurationListener {
 				// if not a factory
 				if (fpid == null) {
 
-					// there is only one CDP for this CD, so we can disable the
+					// there is only one component configuration for this CD, so we can disable the
 					// CD
 					main.resolver.disableComponents(Collections.singletonList(cd));
 
-					// now re-enable the CD - the resolver will create CDP with
+					// now re-enable the CD - the resolver will create component configuration with
 					// no
 					// configAdmin properties
 					workQueue.enqueueWork(main, Activator.ADD, Collections.singletonList(cd));
 				} else {
 					// config is a factory
 
-					// get CDP created for this config (with this PID)
-					ComponentDescriptionProp cdp = cd.getComponentDescriptionPropByPID(pid);
+					// get component configuration created for this config (with this PID)
+					ComponentConfiguration componentConfiguration = cd.getComponentConfigurationByPID(pid);
 
-					// if this was the last CDP created for this factory
-					if (cd.getComponentDescriptionProps().size() == 1) {
+					// if this was the last component configuration created for this factory
+					if (cd.getComponentConfigurations().size() == 1) {
 
-						// there is only one CDP for this CD, so we can disable
+						// there is only one component configuration for this CD, so we can disable
 						// the CD
 						main.resolver.disableComponents(Collections.singletonList(cd));
 
-						// now re-enable the CD - the resolver will create CDP
+						// now re-enable the CD - the resolver will create component configuration
 						// with no
 						// configAdmin properties
 						workQueue.enqueueWork(main, Activator.ADD, Collections.singletonList(cd));
 
 					} else {
 
-						// we can just dispose this CDP
-						cd.removeComponentDescriptionProp(cdp);
-						disposeComponentConfigs(Collections.singletonList(cdp));
-						main.resolver.satisfiedCDPs.remove(cdp);
-						main.resolver.enabledCDPs.remove(cdp);
+						// we can just dispose this component configuration
+						cd.removeComponentConfiguration(componentConfiguration);
+						disposeComponentConfigurations(Collections.singletonList(componentConfiguration));
+						main.resolver.satisfiedComponentConfigurations.remove(componentConfiguration);
+						main.resolver.enabledComponentConfigurations.remove(componentConfiguration);
 
 					}
 				}

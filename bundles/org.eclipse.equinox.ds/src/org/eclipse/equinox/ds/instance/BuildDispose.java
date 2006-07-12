@@ -36,14 +36,14 @@ public class BuildDispose {
 
 	/**
 	 * Counts re-entry in to the
-	 * {@link BuildDispose#buildComponentConfigInstance(Bundle, ComponentDescriptionProp)} method. This
+	 * {@link BuildDispose#buildComponentConfigInstance(Bundle, ComponentConfiguration)} method. This
 	 * is used to handle circular dependencies.
 	 */
 	private int stackCount;
 
 	/**
 	 * Used with stackCount to handle circular dependencies in the
-	 * {@link BuildDispose#buildComponentConfigInstance(Bundle, ComponentDescriptionProp)} method.
+	 * {@link BuildDispose#buildComponentConfigInstance(Bundle, ComponentConfiguration)} method.
 	 */
 	private List delayedBindList;
 
@@ -71,11 +71,11 @@ public class BuildDispose {
 	}
 
 	/**
-	 * Create an instance of a Component Configuration ({@link ComponentDescriptionProp}).
+	 * Create an instance of a Component Configuration ({@link ComponentConfiguration}).
 	 * Instantiate the Service Component implementation class and create a
 	 * {@link ComponentInstanceImpl} to track it. Create a
 	 * {@link ComponentContext},
-	 * {@link BuildDispose#bind(ComponentDescriptionProp, ComponentInstanceImpl) bind}
+	 * {@link BuildDispose#bind(ComponentConfiguration, ComponentInstanceImpl) bind}
 	 * the Service Component's references and call the implementation class'
 	 * "activate" method.
 	 * 
@@ -91,7 +91,7 @@ public class BuildDispose {
 	 *        return from a BundleContext.getService() call, this is the bundle
 	 *        which is "using" this instance. Otherwise null.
 	 * 
-	 * @param cdp - Component Configuration to create an instance of
+	 * @param componentConfiguration - Component Configuration to create an instance of
 	 * 
 	 * @throws ComponentException
 	 * 
@@ -99,7 +99,7 @@ public class BuildDispose {
 	 * 
 	 */
 
-	public ComponentInstance buildComponentConfigInstance(Bundle usingBundle, ComponentDescriptionProp cdp) throws ComponentException {
+	public ComponentInstance buildComponentConfigInstance(Bundle usingBundle, ComponentConfiguration componentConfiguration) throws ComponentException {
 
 		synchronized (this) {
 
@@ -109,11 +109,11 @@ public class BuildDispose {
 			ComponentInstanceImpl componentInstance = null;
 
 			try {
-				ComponentDescription componentDescription = cdp.getComponentDescription();
+				ComponentDescription componentDescription = componentConfiguration.getComponentDescription();
 
 				Object instance = createInstance(componentDescription);
 
-				componentInstance = instantiate(cdp, instance);
+				componentInstance = instantiate(componentConfiguration, instance);
 
 				createComponentContext(usingBundle, componentInstance);
 
@@ -121,7 +121,7 @@ public class BuildDispose {
 
 				activate(componentInstance);
 
-				cdp.addInstance(componentInstance);
+				componentConfiguration.addInstance(componentInstance);
 
 			} catch (ComponentException e) {
 				Log.log(1, "[SCR] Error attempting to build component ", e);
@@ -154,21 +154,21 @@ public class BuildDispose {
 	 * Unregister this Component Configuration's service, if it has one.
 	 * 
 	 * Call
-	 * {@link BuildDispose#disposeComponentInstance(ComponentDescriptionProp, ComponentInstance)}
+	 * {@link BuildDispose#disposeComponentInstance(ComponentConfiguration, ComponentInstance)}
 	 * for each instance of this Component Configuration. * Dispose of the
-	 * {@link ComponentDescriptionProp} object.
+	 * {@link ComponentConfiguration} object.
 	 * 
 	 * Synchronously dispose of this Component Configuration. This method will
 	 * not return until all instances of this Component Configuration are
 	 * disposed.
 	 * 
-	 * @param cdp Component Configuration to dispose
+	 * @param componentConfiguration Component Configuration to dispose
 	 */
-	void disposeComponentConfig(ComponentDescriptionProp cdp) {
+	void disposeComponentConfig(ComponentConfiguration componentConfiguration) {
 
 		synchronized (this) {
-			// unregister this cdp's service
-			ServiceRegistration serviceRegistration = cdp.getServiceRegistration();
+			// unregister this component configuration's service
+			ServiceRegistration serviceRegistration = componentConfiguration.getServiceRegistration();
 			if (serviceRegistration != null) {
 				try {
 					serviceRegistration.unregister();
@@ -178,20 +178,20 @@ public class BuildDispose {
 			}
 
 			// get all instances for this component
-			Iterator it = cdp.getInstances().iterator();
+			Iterator it = componentConfiguration.getInstances().iterator();
 			while (it.hasNext()) {
 				disposeComponentInstance((ComponentInstanceImpl) it.next());
 			}
-			cdp.removeAllInstances();
+			componentConfiguration.removeAllInstances();
 
-			// clean up this CDP object
-			it = cdp.getReferences().iterator();
+			// clean up this component configuration object
+			it = componentConfiguration.getReferences().iterator();
 			while (it.hasNext()) {
 				Reference reference = (Reference) it.next();
 
 				reference.clearServiceReferences();
 			}
-			cdp.clearDelayActivateCDPNames();
+			componentConfiguration.clearDelayActivateComponentConfigurationNames();
 		}
 	}
 
@@ -205,7 +205,7 @@ public class BuildDispose {
 	 * does not return until the instance has been deactivated and unbound, and
 	 * any services used by the instance have been released.
 	 * 
-	 * @param ci instance of cdp to dispose
+	 * @param ci instance of component configuration to dispose
 	 */
 	public void disposeComponentInstance(ComponentInstance ci) {
 
@@ -214,12 +214,12 @@ public class BuildDispose {
 			deactivate(componentInstance);
 			unbind(componentInstance);
 
-			// if this was the last instance of the CDP, make sure we unget
+			// if this was the last instance of the component configuration, make sure we unget
 			// any lingering references, just in case
-			ComponentDescriptionProp cdp = componentInstance.getComponentDescriptionProp();
-			if (cdp.getInstances().isEmpty()) {
-				BundleContext context = cdp.getComponentDescription().getBundleContext();
-				Iterator referenceItr = cdp.getReferences().iterator();
+			ComponentConfiguration componentConfiguration = componentInstance.getComponentConfiguration();
+			if (componentConfiguration.getInstances().isEmpty()) {
+				BundleContext context = componentConfiguration.getComponentDescription().getBundleContext();
+				Iterator referenceItr = componentConfiguration.getReferences().iterator();
 				while (referenceItr.hasNext()) {
 					Reference reference = (Reference) referenceItr.next();
 
@@ -271,7 +271,7 @@ public class BuildDispose {
 	 * Create a ComponentInstanceImpl object to track an instance of a Component
 	 * Configuration's implementation class.
 	 * 
-	 * @param cdp Component Configuration
+	 * @param componentConfiguration Component Configuration
 	 * 
 	 * @param instance instance of Component Configuration's implementation
 	 *        class to track
@@ -279,8 +279,8 @@ public class BuildDispose {
 	 * @return ComponentInstanceImpl
 	 * 
 	 */
-	private ComponentInstanceImpl instantiate(ComponentDescriptionProp cdp, Object instance) {
-		return new ComponentInstanceImpl(main, cdp, instance);
+	private ComponentInstanceImpl instantiate(ComponentConfiguration componentConfiguration, Object instance) {
+		return new ComponentInstanceImpl(main, componentConfiguration, instance);
 	}
 
 	/**
@@ -297,7 +297,7 @@ public class BuildDispose {
 		// Get all the required service Reference Descriptions for this Service
 		// Component
 		// bind them in order
-		List references = componentInstance.getComponentDescriptionProp().getReferences();
+		List references = componentInstance.getComponentConfiguration().getReferences();
 		// call the Bind method if the Reference Description includes one
 		Iterator itr = references.iterator();
 		while (itr.hasNext()) {
@@ -433,7 +433,7 @@ public class BuildDispose {
 	 * This method checks if "getting" the service could cause a cycle. If so,
 	 * it breaks the cycle and returns null.
 	 * 
-	 * @param consumerCDP Component Configuration which wants to acquire the
+	 * @param consumercomponent configuration Component Configuration which wants to acquire the
 	 *        service
 	 * @param reference
 	 * @param serviceReference
@@ -447,12 +447,12 @@ public class BuildDispose {
 		}
 
 		// getting this service will not cause a circularity
-		return reference.getComponentDescriptionProp().getComponentDescription().getBundleContext().getService(serviceReference);
+		return reference.getComponentConfiguration().getComponentDescription().getBundleContext().getService(serviceReference);
 
 	}
 
 	/**
-	 * Check the "cycle list" put in the cdp by the resolver to see if getting
+	 * Check the "cycle list" put in the component configuration by the resolver to see if getting
 	 * this reference would cause a circularity.
 	 * 
 	 * A circularity is only possible if the "producer" of the service is also a
@@ -461,16 +461,16 @@ public class BuildDispose {
 	 * If getting the service could cause a circularity and the reference's
 	 * policy is "dynamic", add an entry to the "delayed bind table" which is
 	 * processed farther up the call stack by the
-	 * {@link BuildDispose#buildComponentConfigInstance(Bundle, ComponentDescriptionProp)} method.
+	 * {@link BuildDispose#buildComponentConfigInstance(Bundle, ComponentConfiguration)} method.
 	 * 
-	 * @param consumerCDP
+	 * @param consumercomponent configuration
 	 * @param reference
 	 * @param serviceReference
 	 * @return if getting the service could cause a circularity
 	 */
 	private boolean couldCauseCycle(Reference reference, ServiceReference serviceReference) {
 
-		ComponentDescriptionProp consumerCDP = reference.getComponentDescriptionProp();
+		ComponentConfiguration consumerComponentConfiguration = reference.getComponentConfiguration();
 		// if we are not building a component, no cycles possible
 		if (stackCount == 0) {
 			return false;
@@ -484,27 +484,27 @@ public class BuildDispose {
 		}
 
 		// check if producer is on our "do not activate" list
-		if (!consumerCDP.getDelayActivateCDPNames().contains(producerComponentName)) {
+		if (!consumerComponentConfiguration.getDelayActivateComponentConfigurationNames().contains(producerComponentName)) {
 			return false;
 		}
 
-		// find producer cdp
-		ComponentDescriptionProp producerCDP = null;
-		Iterator it = main.resolver.satisfiedCDPs.iterator();
+		// find producer component configuration
+		ComponentConfiguration producerComponentConfiguration = null;
+		Iterator it = main.resolver.satisfiedComponentConfigurations.iterator();
 		while (it.hasNext()) {
-			ComponentDescriptionProp cdp = (ComponentDescriptionProp) it.next();
-			if (producerComponentName.equals(cdp.getComponentDescription().getName())) {
-				// found the producer cdp
-				producerCDP = cdp;
+			ComponentConfiguration componentConfiguration = (ComponentConfiguration) it.next();
+			if (producerComponentName.equals(componentConfiguration.getComponentDescription().getName())) {
+				// found the producer component configuration
+				producerComponentConfiguration = componentConfiguration;
 				break;
 			}
 		}
 
-		if (producerCDP.getComponentDescription().getService().isServicefactory()) {
+		if (producerComponentConfiguration.getComponentDescription().getService().isServicefactory()) {
 			// producer is a service factory - there is a new instance for every
 			// bundle, so see if one of the instances is used by this bundle
-			it = producerCDP.getInstances().iterator();
-			Bundle bundle = consumerCDP.getComponentDescription().getBundleContext().getBundle();
+			it = producerComponentConfiguration.getInstances().iterator();
+			Bundle bundle = consumerComponentConfiguration.getComponentDescription().getBundleContext().getBundle();
 			while (it.hasNext()) {
 				ComponentInstanceImpl producerComponentInstance = (ComponentInstanceImpl) it.next();
 				if (producerComponentInstance.getComponentContext().getUsingBundle().equals(bundle)) {
@@ -515,12 +515,12 @@ public class BuildDispose {
 		} else {
 			// producer is not a service factory - there will only ever be one
 			// instance - if it exists then no cycle possible
-			if (!producerCDP.getInstances().isEmpty()) {
+			if (!producerComponentConfiguration.getInstances().isEmpty()) {
 				return false;
 			}
 		}
 
-		// producer cdp is not active - do not activate it because that could
+		// producer component configuration is not active - do not activate it because that could
 		// cause circularity
 
 		// if reference has bind method and policy=dynamic, activate later and
@@ -544,7 +544,7 @@ public class BuildDispose {
 	private void unbind(ComponentInstanceImpl componentInstance) {
 		// Get all the required service reference descriptions for this Service
 		// Component
-		List references = componentInstance.getComponentDescriptionProp().getReferences();
+		List references = componentInstance.getComponentConfiguration().getReferences();
 		// call the unBind method if the Reference Description includes one
 		// unbind in reverse order
 		ListIterator itr = references.listIterator(references.size());

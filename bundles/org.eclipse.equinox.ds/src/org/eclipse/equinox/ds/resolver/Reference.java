@@ -11,7 +11,7 @@
 package org.eclipse.equinox.ds.resolver;
 
 import java.util.*;
-import org.eclipse.equinox.ds.model.ComponentDescriptionProp;
+import org.eclipse.equinox.ds.model.ComponentConfiguration;
 import org.eclipse.equinox.ds.model.ReferenceDescription;
 import org.osgi.framework.*;
 
@@ -21,13 +21,13 @@ import org.osgi.framework.*;
  * a different target filter set by ConfigAdmin or ComponentFactory.newInstance()
  * 
  * @see org.eclipse.equinox.ds.model.ReferenceDescription
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1 $
  */
 public class Reference {
 
 	private static final String TARGET = ".target";
 	private ReferenceDescription referenceDescription;
-	private ComponentDescriptionProp cdp;
+	private ComponentConfiguration componentConfiguration;
 	private String target;
 
 	/**
@@ -68,15 +68,15 @@ public class Reference {
 	/**
 	 * Set the Component Configuration that this reference belongs to
 	 */
-	void setComponentDescriptionProp(ComponentDescriptionProp parent) {
-		cdp = parent;
+	void setComponentConfiguration(ComponentConfiguration parent) {
+		componentConfiguration = parent;
 	}
 
 	/**
 	 * Get the Component Configuration that this reference belongs to
 	 */
-	public ComponentDescriptionProp getComponentDescriptionProp() {
-		return cdp;
+	public ComponentConfiguration getComponentConfiguration() {
+		return componentConfiguration;
 	}
 
 	/**
@@ -212,11 +212,11 @@ public class Reference {
 	 * Check if this reference can be satisfied by the service provided by one
 	 * of a list of Component Configurations
 	 * 
-	 * @param cdps a List of {@link ComponentDescriptionProp}s to search for providers
+	 * @param componentConfigurations a List of {@link ComponentConfiguration}s to search for providers
 	 * for this reference
-	 * @return the providing CDP or null if none
+	 * @return the providing component configuration or null if none
 	 */
-	ComponentDescriptionProp findProviderCDP(List cdps) {
+	ComponentConfiguration findProviderComponentConfiguration(List componentConfigurations) {
 
 		Filter filter;
 		try {
@@ -227,16 +227,16 @@ public class Reference {
 			return null;
 		}
 
-		// loop thru cdps to search for provider of service
-		Iterator it = cdps.iterator();
+		// loop thru component configurations to search for provider of service
+		Iterator it = componentConfigurations.iterator();
 		while (it.hasNext()) {
-			ComponentDescriptionProp providerCDP = (ComponentDescriptionProp) it.next();
-			List provideList = providerCDP.getComponentDescription().getServicesProvided();
+			ComponentConfiguration providerComponentConfiguration = (ComponentConfiguration) it.next();
+			List provideList = providerComponentConfiguration.getComponentDescription().getServicesProvided();
 
 			if (provideList.contains(this.getReferenceDescription().getInterfacename())) {
 				// check the target field
-				if (filter.match(providerCDP.getProperties())) {
-					return providerCDP;
+				if (filter.match(providerComponentConfiguration.getProperties())) {
+					return providerComponentConfiguration;
 				}
 			}
 		}

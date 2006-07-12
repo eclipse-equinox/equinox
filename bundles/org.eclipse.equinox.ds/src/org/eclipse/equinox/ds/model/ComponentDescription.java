@@ -24,7 +24,7 @@ import org.osgi.service.log.LogService;
  * 
  * Memory model of the Service Component xml
  * 
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class ComponentDescription implements Serializable {
 	/**
@@ -47,7 +47,7 @@ public class ComponentDescription implements Serializable {
 
 	private List referenceDescriptions;
 
-	transient private List componentDescriptionProps;
+	transient private List componentConfigurations;
 
 	transient private boolean activateMethodInitialized;
 	transient private Method activateMethod;
@@ -61,7 +61,7 @@ public class ComponentDescription implements Serializable {
 	 * Map of Component Configurations created for this Service Component keyed
 	 * by ConfigurationAdmin PID
 	 */
-	transient private Map cdpsByPID;
+	transient private Map componentConfigurationsByPID;
 
 	/**
 	 * Constructor
@@ -74,8 +74,8 @@ public class ComponentDescription implements Serializable {
 		immediate = false;
 		propertyDescriptions = new ArrayList();
 		referenceDescriptions = new ArrayList();
-		componentDescriptionProps = new ArrayList();
-		cdpsByPID = new Hashtable();
+		componentConfigurations = new ArrayList();
+		componentConfigurationsByPID = new Hashtable();
 		servicesProvided = Collections.EMPTY_LIST;
 	}
 
@@ -320,25 +320,25 @@ public class ComponentDescription implements Serializable {
 		this.valid = valid;
 	}
 
-	public void addComponentDescriptionProp(ComponentDescriptionProp cdp) {
-		componentDescriptionProps.add(cdp);
-		String pid = (String) cdp.getProperties().get(Constants.SERVICE_PID);
+	public void addComponentConfiguration(ComponentConfiguration componentConfiguration) {
+		componentConfigurations.add(componentConfiguration);
+		String pid = (String) componentConfiguration.getProperties().get(Constants.SERVICE_PID);
 		if (pid != null) {
-			cdpsByPID.put(pid, cdp);
+			componentConfigurationsByPID.put(pid, componentConfiguration);
 		}
 	}
 
-	public List getComponentDescriptionProps() {
-		return componentDescriptionProps;
+	public List getComponentConfigurations() {
+		return componentConfigurations;
 	}
 
-	public ComponentDescriptionProp getComponentDescriptionPropByPID(String pid) {
-		return (ComponentDescriptionProp) cdpsByPID.get(pid);
+	public ComponentConfiguration getComponentConfigurationByPID(String pid) {
+		return (ComponentConfiguration) componentConfigurationsByPID.get(pid);
 	}
 
-	public void clearComponentDescriptionProps() {
-		componentDescriptionProps.clear();
-		cdpsByPID.clear();
+	public void clearComponentConfigurations() {
+		componentConfigurations.clear();
+		componentConfigurationsByPID.clear();
 	}
     
     public void clearReflectionMethods() {
@@ -355,8 +355,8 @@ public class ComponentDescription implements Serializable {
         }
     }
 
-	public void removeComponentDescriptionProp(ComponentDescriptionProp cdp) {
-		componentDescriptionProps.remove(cdp);
+	public void removeComponentConfiguration(ComponentConfiguration componentConfiguration) {
+		componentConfigurations.remove(componentConfiguration);
 	}
 
 	/**
@@ -370,8 +370,8 @@ public class ComponentDescription implements Serializable {
 		in.defaultReadObject();
 
 		//initialize transient collections
-		this.componentDescriptionProps = new ArrayList();
-		this.cdpsByPID = new Hashtable();
+		this.componentConfigurations = new ArrayList();
+		this.componentConfigurationsByPID = new Hashtable();
 	}
 
 	public Method getActivateMethod() {

@@ -15,7 +15,7 @@ import java.security.PrivilegedAction;
 import java.util.*;
 import org.eclipse.equinox.ds.Activator;
 import org.eclipse.equinox.ds.model.ComponentDescription;
-import org.eclipse.equinox.ds.model.ComponentDescriptionProp;
+import org.eclipse.equinox.ds.model.ComponentConfiguration;
 import org.eclipse.equinox.ds.resolver.Reference;
 import org.osgi.framework.*;
 import org.osgi.service.component.*;
@@ -55,7 +55,7 @@ import org.osgi.service.component.*;
  * method. If the method is declared protected or public, the method will
  * called.
  * 
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1 $
  */
 public class ComponentContextImpl implements ComponentContext {
 
@@ -71,7 +71,7 @@ public class ComponentContextImpl implements ComponentContext {
 	/**
 	 * Component Configuration
 	 */
-	private ComponentDescriptionProp cdp;
+	private ComponentConfiguration componentConfiguration;
 
 	Activator main;
 
@@ -91,9 +91,9 @@ public class ComponentContextImpl implements ComponentContext {
 	 * @param componentInstance
 	 */
 	public ComponentContextImpl(Activator main, Bundle usingBundle, ComponentInstanceImpl componentInstance) {
-		this.cdp = componentInstance.getComponentDescriptionProp();
+		this.componentConfiguration = componentInstance.getComponentConfiguration();
 		this.componentInstance = componentInstance;
-		this.bundleContext = cdp.getComponentDescription().getBundleContext();
+		this.bundleContext = componentConfiguration.getComponentDescription().getBundleContext();
 		this.usingBundle = usingBundle;
 		this.main = main;
 	}
@@ -105,7 +105,7 @@ public class ComponentContextImpl implements ComponentContext {
 	 *         only and cannot be modified.
 	 */
 	public Dictionary getProperties() {
-		return (Dictionary) cdp.getProperties().clone();
+		return (Dictionary) componentConfiguration.getProperties().clone();
 	}
 
 	/**
@@ -123,7 +123,7 @@ public class ComponentContextImpl implements ComponentContext {
 
 		try {
 			// find the Reference Description with the specified name
-			Iterator references = cdp.getReferences().iterator();
+			Iterator references = componentConfiguration.getReferences().iterator();
 			Reference thisReference = null;
 			while (references.hasNext()) {
 				Reference reference = (Reference) references.next();
@@ -184,7 +184,7 @@ public class ComponentContextImpl implements ComponentContext {
 	public Object locateService(String name, ServiceReference serviceReference) throws ComponentException {
 		try {
 			// find the Reference Description with the specified name
-			Iterator references = cdp.getReferences().iterator();
+			Iterator references = componentConfiguration.getReferences().iterator();
 			Reference thisReference = null;
 			while (references.hasNext()) {
 				Reference reference = (Reference) references.next();
@@ -222,7 +222,7 @@ public class ComponentContextImpl implements ComponentContext {
 	public Object[] locateServices(String name) throws ComponentException {
 		try {
 			// find the Reference Description with the specified name
-			Iterator references = cdp.getReferences().iterator();
+			Iterator references = componentConfiguration.getReferences().iterator();
 			Reference thisReference = null;
 			while (references.hasNext()) {
 				Reference reference = (Reference) references.next();
@@ -286,7 +286,7 @@ public class ComponentContextImpl implements ComponentContext {
 	 */
 
 	public Bundle getUsingBundle() {
-		ComponentDescription cd = cdp.getComponentDescription();
+		ComponentDescription cd = componentConfiguration.getComponentDescription();
 		if ((cd.getService() == null) || (!cd.getService().isServicefactory())) {
 			return null;
 		}
@@ -296,7 +296,7 @@ public class ComponentContextImpl implements ComponentContext {
 	/**
 	 * Returns this Component Configuration instance.
 	 * 
-	 * @return The ComponentInstance object for this ComponentDescriptionProp.
+	 * @return The ComponentInstance object for this ComponentConfiguration.
 	 */
 	public ComponentInstance getComponentInstance() {
 		return componentInstance;
@@ -353,8 +353,8 @@ public class ComponentContextImpl implements ComponentContext {
 	 */
 	public ServiceReference getServiceReference() {
 		ServiceReference serviceReference = null;
-		if (cdp.getComponentDescription().getService() != null) {
-			ServiceRegistration serviceRegistration = cdp.getServiceRegistration();
+		if (componentConfiguration.getComponentDescription().getService() != null) {
+			ServiceRegistration serviceRegistration = componentConfiguration.getServiceRegistration();
 			if (serviceRegistration != null) {
 				serviceReference = serviceRegistration.getReference();
 			}

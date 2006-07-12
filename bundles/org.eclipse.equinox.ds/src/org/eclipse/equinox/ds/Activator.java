@@ -37,7 +37,7 @@ import org.osgi.util.tracker.ServiceTracker;
  * Main class for the SCR. This class will start the SCR bundle and begin
  * processing other bundles.
  * 
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class Activator implements BundleActivator, BundleTrackerCustomizer, WorkDispatcher, SynchronousBundleListener {
 
@@ -318,7 +318,7 @@ public class Activator implements BundleActivator, BundleTrackerCustomizer, Work
 	 * Disable a Service Component - The specified component name must be in the 
 	 * bundle as this component. Called by Service Component via ComponentContext.
 	 * 
-	 * Synchronously disable the component.  All component configurations (CDPs)
+	 * Synchronously disable the component.  All component configurations (component configurations)
 	 * are disposed before this method returns.
 	 * 
 	 * @param name The name of a component to disable

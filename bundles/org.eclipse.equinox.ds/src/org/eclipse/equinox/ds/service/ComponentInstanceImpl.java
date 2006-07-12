@@ -12,7 +12,7 @@ package org.eclipse.equinox.ds.service;
 
 import java.util.Collections;
 import org.eclipse.equinox.ds.Activator;
-import org.eclipse.equinox.ds.model.ComponentDescriptionProp;
+import org.eclipse.equinox.ds.model.ComponentConfiguration;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentInstance;
 
@@ -21,13 +21,13 @@ import org.osgi.service.component.ComponentInstance;
  * ComponentInstances are created whenever an instance of a component is
  * created.
  * 
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1 $
  */
 public class ComponentInstanceImpl implements ComponentInstance {
 
 	private Object instance;
 	private Activator main;
-	private ComponentDescriptionProp cdp;
+	private ComponentConfiguration componentConfiguration;
 	private ComponentContext componentContext;
 
 	/**
@@ -36,10 +36,10 @@ public class ComponentInstanceImpl implements ComponentInstance {
 	 * @param Object instance
 	 * 
 	 */
-	public ComponentInstanceImpl(Activator main, ComponentDescriptionProp cdp, Object instance) {
+	public ComponentInstanceImpl(Activator main, ComponentConfiguration componentConfiguration, Object instance) {
 		this.main = main;
 		this.instance = instance;
-		this.cdp = cdp;
+		this.componentConfiguration = componentConfiguration;
 
 	}
 
@@ -57,14 +57,14 @@ public class ComponentInstanceImpl implements ComponentInstance {
 	 */
 	public void dispose() {
 		// deactivate
-		if (!cdp.isComponentFactory() && cdp.getComponentDescription().getFactory() != null) {
-			// this is a factory instance, so dispose of CDP
-			cdp.getComponentDescription().removeComponentDescriptionProp(cdp);
-			main.resolver.disposeComponentConfigs(Collections.singletonList(cdp));
-			cdp = null;
+		if (!componentConfiguration.isComponentFactory() && componentConfiguration.getComponentDescription().getFactory() != null) {
+			// this is a factory instance, so dispose of component configuration
+			componentConfiguration.getComponentDescription().removeComponentConfiguration(componentConfiguration);
+			main.resolver.disposeComponentConfigurations(Collections.singletonList(componentConfiguration));
+			componentConfiguration = null;
 		} else {
 			main.resolver.instanceProcess.buildDispose.disposeComponentInstance(this);
-			cdp.removeInstance(this);
+			componentConfiguration.removeInstance(this);
 		}
 		instance = null;
 	}
@@ -79,8 +79,8 @@ public class ComponentInstanceImpl implements ComponentInstance {
 		return instance;
 	}
 
-	public ComponentDescriptionProp getComponentDescriptionProp() {
-		return cdp;
+	public ComponentConfiguration getComponentConfiguration() {
+		return componentConfiguration;
 	}
 
 }

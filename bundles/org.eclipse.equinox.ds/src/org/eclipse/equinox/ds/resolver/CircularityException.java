@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.equinox.ds.resolver;
 
-import org.eclipse.equinox.ds.model.ComponentDescriptionProp;
+import org.eclipse.equinox.ds.model.ComponentConfiguration;
 
 /**
  * 
@@ -22,14 +22,14 @@ class CircularityException extends Exception {
 	 */
 	private static final long serialVersionUID = 8249461007142713618L;
 
-	private ComponentDescriptionProp cdp;
+	private ComponentConfiguration componentConfiguration;
 
-	CircularityException(ComponentDescriptionProp cdp) {
-		this.cdp = cdp;
+	CircularityException(ComponentConfiguration componentConfiguration) {
+		this.componentConfiguration = componentConfiguration;
 	}
 
-	ComponentDescriptionProp getCircularDependency() {
-		return cdp;
+	ComponentConfiguration getCircularDependency() {
+		return componentConfiguration;
 	}
 
 }

@@ -13,7 +13,7 @@ package org.eclipse.equinox.ds.instance;
 import java.lang.reflect.*;
 import org.eclipse.equinox.ds.Log;
 import org.eclipse.equinox.ds.model.ComponentDescription;
-import org.eclipse.equinox.ds.model.ComponentDescriptionProp;
+import org.eclipse.equinox.ds.model.ComponentConfiguration;
 import org.eclipse.equinox.ds.resolver.Reference;
 import org.eclipse.equinox.ds.service.ComponentInstanceImpl;
 import org.osgi.framework.ServiceReference;
@@ -24,7 +24,7 @@ import org.osgi.service.log.LogService;
  * Invoke a method on a Service Component implementation class instance:
  * activate, deactivate, bind or unbind
  * 
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1 $
  */
 
 class InvokeMethod {
@@ -44,7 +44,7 @@ class InvokeMethod {
 	void activateComponent(Object instance, ComponentContext context) throws IllegalAccessException, InvocationTargetException {
 
 		//cache activate method
-		ComponentDescription cd = ((ComponentInstanceImpl) context.getComponentInstance()).getComponentDescriptionProp().getComponentDescription();
+		ComponentDescription cd = ((ComponentInstanceImpl) context.getComponentInstance()).getComponentConfiguration().getComponentDescription();
 		Method method = cd.getActivateMethod();
 		if (method == null && !cd.isActivateMethodInitialized()) {
 			method = findActivateOrDeactivateMethod("activate", instance.getClass());
@@ -70,7 +70,7 @@ class InvokeMethod {
 	void deactivateComponent(Object instance, ComponentContext context) throws IllegalAccessException, InvocationTargetException {
 
 		//cache deactivate method
-		ComponentDescription cd = ((ComponentInstanceImpl) context.getComponentInstance()).getComponentDescriptionProp().getComponentDescription();
+		ComponentDescription cd = ((ComponentInstanceImpl) context.getComponentInstance()).getComponentConfiguration().getComponentDescription();
 		Method method = cd.getDeactivateMethod();
 		if (method == null && !cd.isDeactivateMethodInitialized()) {
 			method = findActivateOrDeactivateMethod("deactivate", instance.getClass());
@@ -197,7 +197,7 @@ class InvokeMethod {
 	 * 
 	 * Searching for the bind or unbind method may require a service object.  If
 	 * the object has not already been acquired, this method may call 
-	 * {@link BuildDispose#getService(ComponentDescriptionProp, Reference, ServiceReference)} 
+	 * {@link BuildDispose#getService(ComponentConfiguration, Reference, ServiceReference)} 
 	 * to get it.
 	 * 
 	 * If method can not be found we log an error and return null.

@@ -14,7 +14,7 @@ import java.util.Hashtable;
 import java.util.List;
 import org.eclipse.equinox.ds.Log;
 import org.eclipse.equinox.ds.model.ComponentDescription;
-import org.eclipse.equinox.ds.model.ComponentDescriptionProp;
+import org.eclipse.equinox.ds.model.ComponentConfiguration;
 import org.osgi.framework.*;
 import org.osgi.service.component.ComponentException;
 import org.osgi.service.component.ComponentInstance;
@@ -23,7 +23,7 @@ import org.osgi.service.component.ComponentInstance;
  * Static utility class to register a Component Configuration's provided service.
  * A ServiceFactory is used to enable lazy activation
  * 
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1 $
  */
 abstract class RegisterComponentService {
 
@@ -38,15 +38,15 @@ abstract class RegisterComponentService {
 	 * Register the Component Configuration's service
 	 * 
 	 * @param ip - InstanceProcess
-	 * @param cdp - ComponentDescription plus Properties
+	 * @param componentConfiguration - ComponentDescription plus Properties
 	 */
-	static void registerService(InstanceProcess instanceProcess, ComponentDescriptionProp cdp) {
+	static void registerService(InstanceProcess instanceProcess, ComponentConfiguration componentConfiguration) {
 
-		ComponentDescription cd = cdp.getComponentDescription();
+		ComponentDescription cd = componentConfiguration.getComponentDescription();
 
 		//make final references for use by anonymous inner class
 		final InstanceProcess finalInstanceProcess = instanceProcess;
-		final ComponentDescriptionProp finalCDP = cdp;
+		final ComponentConfiguration finalComponentConfiguration = componentConfiguration;
 
 		List servicesProvided = cd.getServicesProvided();
 		String[] servicesProvidedArray = (String[]) servicesProvided.toArray(new String[servicesProvided.size()]);
@@ -66,7 +66,7 @@ abstract class RegisterComponentService {
 
 					ComponentInstance componentInstance = null;
 					try {
-						componentInstance = finalInstanceProcess.buildDispose.buildComponentConfigInstance(bundle, finalCDP);
+						componentInstance = finalInstanceProcess.buildDispose.buildComponentConfigInstance(bundle, finalComponentConfiguration);
 					} catch (ComponentException e) {
 						Log.log(1, "[SCR] Error attempting to register a Service Factory.", e);
 					}
@@ -95,7 +95,7 @@ abstract class RegisterComponentService {
 						}
 					}
 				}
-			}, cdp.getProperties());
+			}, componentConfiguration.getProperties());
 		} else {
 			// servicefactory=false
 			// always return the same instance
@@ -116,11 +116,11 @@ abstract class RegisterComponentService {
 
 					synchronized (this) {
 
-						if (finalCDP.getInstances().isEmpty()) {
+						if (finalComponentConfiguration.getInstances().isEmpty()) {
 							try {
 								//track that we created this instance
 								//so we know to dispose of it later
-								finalInstanceProcess.buildDispose.buildComponentConfigInstance(null, finalCDP);
+								finalInstanceProcess.buildDispose.buildComponentConfigInstance(null, finalComponentConfiguration);
 								disposeComponentInstance = true;
 							} catch (ComponentException e) {
 								Log.log(1, "[SCR] Error attempting to register Service.", e);
@@ -129,7 +129,7 @@ abstract class RegisterComponentService {
 						}
 						references++;
 					}
-					return ((ComponentInstance) finalCDP.getInstances().get(0)).getInstance();
+					return ((ComponentInstance) finalComponentConfiguration.getInstances().get(0)).getInstance();
 				}
 
 				// ServiceFactory.ungetService method.
@@ -143,18 +143,18 @@ abstract class RegisterComponentService {
 							// if disposeComponentInstance then we 
 							// created it in getService so we should
 							// dispose of it now
-							((ComponentInstance) finalCDP.getInstances().get(0)).dispose();
+							((ComponentInstance) finalComponentConfiguration.getInstances().get(0)).dispose();
 							disposeComponentInstance = false;
 						}
 					}
 				}
-			}, cdp.getProperties());
+			}, componentConfiguration.getProperties());
 		}
 
 		if (DEBUG)
 			System.out.println("RegisterComponentService: register: " + serviceRegistration);
 
-		cdp.setServiceRegistration(serviceRegistration);
+		componentConfiguration.setServiceRegistration(serviceRegistration);
 	}
 
 }

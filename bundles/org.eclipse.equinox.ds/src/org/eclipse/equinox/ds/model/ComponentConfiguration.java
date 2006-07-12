@@ -21,9 +21,9 @@ import org.osgi.service.component.ComponentInstance;
  * Component Configuration – A component configuration represents a component
  * description parameterized by component properties.
  * 
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1 $
  */
-public class ComponentDescriptionProp {
+public class ComponentConfiguration {
 
 	private ComponentDescription cd;
 	private Hashtable properties;
@@ -45,7 +45,7 @@ public class ComponentDescriptionProp {
 	 * populated by the {@link org.eclipse.equinox.ds.resolver.Resolver Resolver}
 	 * and used by {@link org.eclipse.equinox.ds.instance.BuildDispose BuildDispose}.
 	 */
-	protected List delayActivateCDPNames;
+	protected List delayActivateComponentConfigurationNames;
 
 	/**
 	 * Flag to indicate that this Component Configuration registers 
@@ -73,15 +73,15 @@ public class ComponentDescriptionProp {
 	 * @param properties Properties associated with this Component Configuration
 	 * 
 	 * @param componentFactory "Component Factory" flag - see 
-	 *        {@link ComponentDescriptionProp#componentFactory}
+	 *        {@link ComponentConfiguration#componentFactory}
 	 */
-	public ComponentDescriptionProp(ComponentDescription cd, List references, Hashtable properties, boolean componentFactory) {
+	public ComponentConfiguration(ComponentDescription cd, List references, Hashtable properties, boolean componentFactory) {
 
 		this.cd = cd;
 		this.references = references;
 		this.properties = properties;
 
-		delayActivateCDPNames = new ArrayList();
+		delayActivateComponentConfigurationNames = new ArrayList();
 		instances = new ArrayList();
 
 		this.componentFactory = componentFactory;
@@ -102,11 +102,11 @@ public class ComponentDescriptionProp {
 	 * Add a new Component Configuration name we should beware of activating to
 	 * prevent a cycle.
 	 * 
-	 * @see ComponentDescriptionProp#delayActivateCDPNames
+	 * @see ComponentConfiguration#delayActivateComponentConfigurationNames
 	 */
-	public void setDelayActivateCDPName(String cdpName) {
-		if (!delayActivateCDPNames.contains(cdpName))
-			delayActivateCDPNames.add(cdpName);
+	public void setDelayActivateComponentConfigurationName(String componentConfigurationName) {
+		if (!delayActivateComponentConfigurationNames.contains(componentConfigurationName))
+			delayActivateComponentConfigurationNames.add(componentConfigurationName);
 	}
 
 	public ServiceRegistration getServiceRegistration() {
@@ -117,12 +117,12 @@ public class ComponentDescriptionProp {
 		this.serviceRegistration = serviceRegistration;
 	}
 
-	public List getDelayActivateCDPNames() {
-		return delayActivateCDPNames;
+	public List getDelayActivateComponentConfigurationNames() {
+		return delayActivateComponentConfigurationNames;
 	}
 
-	public void clearDelayActivateCDPNames() {
-		delayActivateCDPNames.clear();
+	public void clearDelayActivateComponentConfigurationNames() {
+		delayActivateComponentConfigurationNames.clear();
 	}
 
 	public List getReferences() {

@@ -12,7 +12,7 @@ package org.eclipse.equinox.ds.service;
 
 import java.util.*;
 import org.eclipse.equinox.ds.Activator;
-import org.eclipse.equinox.ds.model.ComponentDescriptionProp;
+import org.eclipse.equinox.ds.model.ComponentConfiguration;
 import org.osgi.service.component.*;
 
 /**
@@ -21,11 +21,11 @@ import org.osgi.service.component.*;
  * register a ComponentFactory service to allow new component configurations 
  * to be created and activated.
  * 
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class ComponentFactoryImpl implements ComponentFactory {
 
-	private ComponentDescriptionProp cdp;
+	private ComponentConfiguration componentConfiguration;
 	private Activator main;
 
 	/**
@@ -36,8 +36,8 @@ public class ComponentFactoryImpl implements ComponentFactory {
 	 *        Properties
 	 * @param buildDispose
 	 */
-	public ComponentFactoryImpl(ComponentDescriptionProp cdp, Activator main) {
-		this.cdp = cdp;
+	public ComponentFactoryImpl(ComponentConfiguration componentConfiguration, Activator main) {
+		this.componentConfiguration = componentConfiguration;
 		this.main = main;
 	}
 
@@ -57,7 +57,7 @@ public class ComponentFactoryImpl implements ComponentFactory {
 	public ComponentInstance newInstance(Dictionary newProperties) {
 
 		// merge properties
-		Hashtable properties = cdp.getProperties();
+		Hashtable properties = componentConfiguration.getProperties();
 		if (newProperties != null) {
 			properties = (Hashtable) properties.clone();
 			Enumeration propsEnum = newProperties.keys();
@@ -67,23 +67,23 @@ public class ComponentFactoryImpl implements ComponentFactory {
 			}
 		}
 
-		// create a new cdp (adds to resolver enabledCDPs list)
-		ComponentDescriptionProp newCDP = main.resolver.mapFactoryInstance(cdp.getComponentDescription(), properties);
+		// create a new componentConfiguration (adds to resolver enabledComponentConfigurations list)
+		ComponentConfiguration newComponentConfiguration = main.resolver.mapFactoryInstance(componentConfiguration.getComponentDescription(), properties);
 
-		// try to resolve new cdp - adds to resolver's satisfied list
-		if (!main.resolver.justResolve(newCDP)) {
-			main.resolver.enabledCDPs.remove(newCDP); // was added by
+		// try to resolve new componentConfiguration - adds to resolver's satisfied list
+		if (!main.resolver.justResolve(newComponentConfiguration)) {
+			main.resolver.enabledComponentConfigurations.remove(newComponentConfiguration); // was added by
 			// mapFactoryInstance
-			throw new ComponentException("Could not resolve instance of " + cdp + " with properties " + properties);
+			throw new ComponentException("Could not resolve instance of " + componentConfiguration + " with properties " + properties);
 		}
 
-		// if new cdp resolves, send it to instance process (will register
+		// if new componentConfiguration resolves, send it to instance process (will register
 		// service
 		// if it has one)
-		main.resolver.instanceProcess.registerComponentConfigs(Collections.singletonList(newCDP));
+		main.resolver.instanceProcess.registerComponentConfigurations(Collections.singletonList(newComponentConfiguration));
 
 		// Instance process will have created an instance
 		
-		return (ComponentInstance) newCDP.getInstances().get(0);
+		return (ComponentInstance) newComponentConfiguration.getInstances().get(0);
 	}
 }
