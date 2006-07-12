@@ -52,7 +52,8 @@ public class PreferencesOSGiUtils {
 	void openServices() {
 		BundleContext context = Activator.getContext();
 		if (context == null) {
-			PrefsMessages.message("PreferencesOSGiUtils called before plugin started"); //$NON-NLS-1$
+			if (EclipsePreferences.DEBUG_PREFERENCE_GENERAL)
+				PrefsMessages.message("PreferencesOSGiUtils called before plugin started"); //$NON-NLS-1$
 			return;
 		}
 
@@ -118,20 +119,23 @@ public class PreferencesOSGiUtils {
 	public ILegacyPreferences getLegacyPreferences() {
 		if (initTracker != null)
 			return (ILegacyPreferences) initTracker.getService();
-		PrefsMessages.message("Legacy preference tracker is not set"); //$NON-NLS-1$
+		if (EclipsePreferences.DEBUG_PREFERENCE_GENERAL)
+			PrefsMessages.message("Legacy preference tracker is not set"); //$NON-NLS-1$
 		return null;
 	}
 
 	public FrameworkLog getFrameworkLog() {
 		if (logTracker != null)
 			return (FrameworkLog) logTracker.getService();
-		PrefsMessages.message("Log tracker is not set"); //$NON-NLS-1$
+		if (EclipsePreferences.DEBUG_PREFERENCE_GENERAL)
+			PrefsMessages.message("Log tracker is not set"); //$NON-NLS-1$
 		return null;
 	}
 
 	public boolean getBooleanDebugOption(String option, boolean defaultValue) {
 		if (debugTracker == null) {
-			PrefsMessages.message("Debug tracker is not set"); //$NON-NLS-1$
+			if (EclipsePreferences.DEBUG_PREFERENCE_GENERAL)
+				PrefsMessages.message("Debug tracker is not set"); //$NON-NLS-1$
 			return defaultValue;
 		}
 		DebugOptions options = (DebugOptions) debugTracker.getService();
@@ -145,7 +149,8 @@ public class PreferencesOSGiUtils {
 
 	public Bundle getBundle(String bundleName) {
 		if (bundleTracker == null) {
-			PrefsMessages.message("Bundle tracker is not set"); //$NON-NLS-1$
+			if (EclipsePreferences.DEBUG_PREFERENCE_GENERAL)
+				PrefsMessages.message("Bundle tracker is not set"); //$NON-NLS-1$
 			return null;
 		}
 		PackageAdmin packageAdmin = (PackageAdmin) bundleTracker.getService();

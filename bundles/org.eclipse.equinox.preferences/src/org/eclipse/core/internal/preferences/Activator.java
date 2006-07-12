@@ -59,8 +59,8 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 	 */
 	public void start(BundleContext context) throws Exception {
 		bundleContext = context;
-		processCommandLine();
 		PreferencesOSGiUtils.getDefault().openServices();
+		processCommandLine();
 		
 		boolean shouldRegister = !"false".equalsIgnoreCase(context.getProperty(PROP_REGISTER_PERF_SERVICE)); //$NON-NLS-1$
 		if (shouldRegister) {
