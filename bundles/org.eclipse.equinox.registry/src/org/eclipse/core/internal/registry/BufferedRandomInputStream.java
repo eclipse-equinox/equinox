@@ -34,7 +34,7 @@ public class BufferedRandomInputStream extends InputStream {
 		resetBuffer();
 	}
 
-	private void resetBuffer() throws IOException {
+	private void resetBuffer() {
 		buffer_pos = 0;
 		buffer_size = 0;
 	}
@@ -55,17 +55,20 @@ public class BufferedRandomInputStream extends InputStream {
 
 	public int read(byte b[], int off, int len) throws IOException {
 		int available = buffer_size - buffer_pos;
+		if (available < 0)
+			return -1;
+		//the buffer contains all the bytes we need, so copy over and return
 		if (len <= available) {
 			System.arraycopy(buffer, buffer_pos, b, off, len);
 			buffer_pos += len;
 			return len;
 		}
-
-		// Use portion remaining in the buffer and read the rest from file
+		// Use portion remaining in the buffer
 		System.arraycopy(buffer, buffer_pos, b, off, available);
-		int read = inputFile.read(b, off + available, len - available);
-		fillBuffer(); // nothing left in the buffer, fill it with the next chunk
-		return available + read;
+		if (fillBuffer() <= 0)
+			return available;
+		//recursive call to read again until we have the bytes we need
+		return available + read(b, off + available, len - available);
 	}
 
 	public long skip(long n) throws IOException {
@@ -76,10 +79,9 @@ public class BufferedRandomInputStream extends InputStream {
 		if (n <= available) {
 			buffer_pos += n;
 			return n;
-		} else {
-			resetBuffer();
-			return available + inputFile.skipBytes((int) (n - available));
 		}
+		resetBuffer();
+		return available + inputFile.skipBytes((int) (n - available));
 	}
 
 	public int available() throws IOException {
