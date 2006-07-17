@@ -11,7 +11,6 @@
 package org.eclipse.core.internal.preferences;
 
 import org.eclipse.core.internal.preferences.exchange.ILegacyPreferences;
-import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.service.debug.DebugOptions;
 import org.osgi.framework.*;
@@ -25,16 +24,11 @@ import org.osgi.util.tracker.ServiceTracker;
  * @since org.eclipse.equinox.preferences 3.2
  */
 public class PreferencesOSGiUtils {
-	private ServiceTracker logTracker = null;
 	private ServiceTracker initTracker = null;
 	private ServiceTracker debugTracker = null;
 	private ServiceTracker bundleTracker = null;
 	private ServiceTracker configurationLocationTracker = null;
 	private ServiceTracker instanceLocationTracker = null;
-
-	// OSGI system properties.  Copied from EclipseStarter
-	public static final String PROP_CONFIG_AREA = "osgi.configuration.area"; //$NON-NLS-1$
-	public static final String PROP_INSTANCE_AREA = "osgi.instance.area"; //$NON-NLS-1$
 
 	private static final PreferencesOSGiUtils singleton = new PreferencesOSGiUtils();
 
@@ -59,9 +53,6 @@ public class PreferencesOSGiUtils {
 
 		initTracker = new ServiceTracker(context, ILegacyPreferences.class.getName(), null);
 		initTracker.open(true);
-
-		logTracker = new ServiceTracker(context, FrameworkLog.class.getName(), null);
-		logTracker.open();
 
 		debugTracker = new ServiceTracker(context, DebugOptions.class.getName(), null);
 		debugTracker.open();
@@ -94,10 +85,6 @@ public class PreferencesOSGiUtils {
 			initTracker.close();
 			initTracker = null;
 		}
-		if (logTracker != null) {
-			logTracker.close();
-			logTracker = null;
-		}
 		if (debugTracker != null) {
 			debugTracker.close();
 			debugTracker = null;
@@ -121,14 +108,6 @@ public class PreferencesOSGiUtils {
 			return (ILegacyPreferences) initTracker.getService();
 		if (EclipsePreferences.DEBUG_PREFERENCE_GENERAL)
 			PrefsMessages.message("Legacy preference tracker is not set"); //$NON-NLS-1$
-		return null;
-	}
-
-	public FrameworkLog getFrameworkLog() {
-		if (logTracker != null)
-			return (FrameworkLog) logTracker.getService();
-		if (EclipsePreferences.DEBUG_PREFERENCE_GENERAL)
-			PrefsMessages.message("Log tracker is not set"); //$NON-NLS-1$
 		return null;
 	}
 
