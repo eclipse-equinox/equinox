@@ -22,6 +22,8 @@ import org.osgi.framework.Version;
 class StateReader {
 	public static final String STATE_FILE = ".state"; //$NON-NLS-1$
 	public static final String LAZY_FILE = ".lazy"; //$NON-NLS-1$
+	private static final int BUFFER_SIZE_LAZY = 4096;
+	private static final int BUFFER_SIZE_FULLYREAD = 16384;
 	private static final SecureAction secureAction = new SecureAction();
 
 	// objectTable will be a hashmap of objects. The objects will be things
@@ -70,7 +72,7 @@ class StateReader {
 	}
 
 	private boolean readState(StateImpl state, long expectedTimestamp) throws IOException {
-		DataInputStream in = new DataInputStream(new BufferedInputStream(secureAction.getFileInputStream(stateFile), 65536));
+		DataInputStream in = new DataInputStream(new BufferedInputStream(secureAction.getFileInputStream(stateFile), BUFFER_SIZE_FULLYREAD));
 		DataInputStream lazyIn = null;
 		try {
 			if (in.readByte() != STATE_CACHE_VERSION)
@@ -109,8 +111,8 @@ class StateReader {
 			state.setResolved(in.readBoolean());
 			if (lazyLoad)
 				return true;
-			//read in from lazy data file
-			lazyIn = new DataInputStream(new BufferedInputStream(secureAction.getFileInputStream(lazyFile), 65536));
+			//read in from lazy data file; using the fully read buffer size because we are reading the complete file in.
+			lazyIn = new DataInputStream(new BufferedInputStream(secureAction.getFileInputStream(lazyFile), BUFFER_SIZE_FULLYREAD));
 			for (int i = 0; i < numBundles; i++)
 				readBundleDescriptionLazyData(lazyIn, 0);
 		} finally {
@@ -551,7 +553,7 @@ class StateReader {
 	private DataInputStream openLazyFile() throws IOException {
 		if (lazyFile == null)
 			throw new IOException(); // TODO error message here!
-		return new DataInputStream(new BufferedInputStream(secureAction.getFileInputStream(lazyFile), 65536));
+		return new DataInputStream(new BufferedInputStream(secureAction.getFileInputStream(lazyFile), BUFFER_SIZE_LAZY));
 	}
 
 	boolean isLazyLoaded() {
