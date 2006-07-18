@@ -19,9 +19,9 @@ import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.service.environment.EnvironmentInfo;
 import org.eclipse.osgi.storagemanager.StorageManager;
 import org.osgi.framework.*;
-import org.osgi.service.application.ApplicationDescriptor;
-import org.osgi.service.application.ScheduledApplication;
-import org.osgi.service.event.*;
+import org.osgi.service.application.*;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventConstants;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -36,9 +36,8 @@ public class AppPersistenceUtil {
 	private static final String FILE_APPLOCKS = ".locks"; //$NON-NLS-1$
 	private static final String FILE_APPSCHEDULED = ".scheduled"; //$NON-NLS-1$
 	private static final String EVENT_HANDLER = "org.osgi.service.event.EventHandler"; //$NON-NLS-1$
-	private static final String EVENT_TIMER_TOPIC = "org/osgi/application/timer"; //$NON-NLS-1$
 
-	private static final int DATA_VERSION = 1;
+	private static final int DATA_VERSION = 2;
 	private static final byte NULL = 0;
 	private static final int OBJECT = 1;
 
@@ -74,6 +73,7 @@ public class AppPersistenceUtil {
 	private static int nextScheduledID = 1;
 	private static Thread timerThread;
 	private static String[] appArgs;
+	private static Properties commandLineProperties = new Properties();
 
 	static synchronized void setBundleContext(BundleContext context) {
 		if (context != null) {
@@ -163,7 +163,7 @@ public class AppPersistenceUtil {
 	}
 
 	synchronized static void removeScheduledApp(EclipseScheduledApplication scheduledApp) {
-		if (scheduledApps.remove(scheduledApp.getID()) != null) {
+		if (scheduledApps.remove(scheduledApp.getScheduleId()) != null) {
 			timerApps.remove(scheduledApp);
 			dirty = true;
 		}
@@ -178,42 +178,50 @@ public class AppPersistenceUtil {
 	 * @param recurring
 	 * @return the scheduled application
 	 * @throws InvalidSyntaxException
+	 * @throws ApplicationException 
 	 */
-	public synchronized static ScheduledApplication addScheduledApp(ApplicationDescriptor descriptor, Map arguments, String topic, String eventFilter, boolean recurring) throws InvalidSyntaxException {
+	public synchronized static ScheduledApplication addScheduledApp(ApplicationDescriptor descriptor, String scheduleId, Map arguments, String topic, String eventFilter, boolean recurring) throws InvalidSyntaxException, ApplicationException {
 		if (!scheduling && !checkSchedulingSupport())
-			throw new UnsupportedOperationException("Cannot support scheduling without org.osgi.service.event package"); //$NON-NLS-1$
+			throw new ApplicationException(ApplicationException.APPLICATION_SCHEDULING_FAILED, "Cannot support scheduling without org.osgi.service.event package"); //$NON-NLS-1$
 		// check the event filter for correct syntax
 		context.createFilter(eventFilter);
-		EclipseScheduledApplication result = new EclipseScheduledApplication(context, getNextScheduledID(), descriptor.getApplicationId(), arguments, topic, eventFilter, recurring);
+		EclipseScheduledApplication result = new EclipseScheduledApplication(context, getNextScheduledID(scheduleId), descriptor.getApplicationId(), arguments, topic, eventFilter, recurring);
 		addScheduledApp(result);
 		dirty = true;
 		return result;
 	}
 
 	private static void addScheduledApp(EclipseScheduledApplication scheduledApp) {
-		if (EVENT_TIMER_TOPIC.equals(scheduledApp.getTopic())) {
+		if (ScheduledApplication.TIMER_TOPIC.equals(scheduledApp.getTopic())) {
 			timerApps.add(scheduledApp);
 			if (timerThread == null)
 				startTimer();
 		}
-		scheduledApps.put(scheduledApp.getID(), scheduledApp);
+		scheduledApps.put(scheduledApp.getScheduleId(), scheduledApp);
 		Hashtable serviceProps = new Hashtable();
 		if (scheduledApp.getTopic() != null)
 			serviceProps.put(EventConstants.EVENT_TOPIC, new String[] {scheduledApp.getTopic()});
 		if (scheduledApp.getEventFilter() != null)
 			serviceProps.put(EventConstants.EVENT_FILTER, scheduledApp.getEventFilter());
+		serviceProps.put(ScheduledApplication.SCHEDULE_ID, scheduledApp.getScheduleId());
+		serviceProps.put(ScheduledApplication.APPLICATION_PID, scheduledApp.getAppPid());
 		ServiceRegistration sr = context.registerService(new String[] {ScheduledApplication.class.getName(), EVENT_HANDLER}, scheduledApp, serviceProps);
 		scheduledApp.setServiceRegistration(sr);
 	}
 
-	private static Integer getNextScheduledID() {
+	private static String getNextScheduledID(String scheduledId) throws ApplicationException {
+		if (scheduledId != null) {
+			if (scheduledApps.get(scheduledId) != null)
+				throw new ApplicationException(ApplicationException.APPLICATION_DUPLICATE_SCHEDULE_ID, "Duplicate scheduled ID: " + scheduledId); //$NON-NLS-1$
+			return scheduledId;
+		}
 		if (nextScheduledID == Integer.MAX_VALUE)
 			nextScheduledID = 0;
-		Integer result = new Integer(nextScheduledID++);
+		String result = new Integer(nextScheduledID++).toString();
 		while (scheduledApps.get(result) != null && nextScheduledID < Integer.MAX_VALUE)
-			result = new Integer(nextScheduledID++);
+			result = new Integer(nextScheduledID++).toString();
 		if (nextScheduledID == Integer.MAX_VALUE)
-			throw new IllegalStateException("Maximum number of scheduled applications reached"); //$NON-NLS-1$
+			throw new ApplicationException(ApplicationException.APPLICATION_DUPLICATE_SCHEDULE_ID, "Maximum number of scheduled applications reached"); //$NON-NLS-1$
 		return result;
 	}
 
@@ -286,7 +294,7 @@ public class AppPersistenceUtil {
 				return;
 			int numScheds = in.readInt();
 			for (int i = 0; i < numScheds; i++) {
-				Integer id = new Integer(in.readInt());
+				String id = readString(in, false);
 				String appPid = readString(in, false);
 				String topic = readString(in, false);
 				String eventFilter = readString(in, false);
@@ -346,7 +354,7 @@ public class AppPersistenceUtil {
 			out.writeInt(scheduledApps.size());
 			for (Iterator apps = scheduledApps.values().iterator(); apps.hasNext();) {
 				EclipseScheduledApplication app = (EclipseScheduledApplication) apps.next();
-				out.writeInt(app.getID().intValue());
+				writeStringOrNull(out, app.getScheduleId());
 				writeStringOrNull(out, app.getAppPid());
 				writeStringOrNull(out, app.getTopic());
 				writeStringOrNull(out, app.getEventFilter());
@@ -370,7 +378,7 @@ public class AppPersistenceUtil {
 		timerThread = null;
 	}
 
-	private static class AppTimer implements Runnable {
+	static class AppTimer implements Runnable {
 		public void run() {
 			int lastMin = -1;
 			while (!shutdown) {
@@ -382,13 +390,13 @@ public class AppPersistenceUtil {
 						continue;
 					lastMin = minute;
 					Hashtable props = new Hashtable();
-					props.put("year", new Integer(cal.get(Calendar.YEAR))); //$NON-NLS-1$
-					props.put("month", new Integer(cal.get(Calendar.MONTH))); //$NON-NLS-1$
-					props.put("day_of_month", new Integer(cal.get(Calendar.DAY_OF_MONTH))); //$NON-NLS-1$
-					props.put("day_of_week", new Integer(cal.get(Calendar.DAY_OF_WEEK))); //$NON-NLS-1$
-					props.put("hour_of_day", new Integer(cal.get(Calendar.HOUR_OF_DAY))); //$NON-NLS-1$
-					props.put("minute", new Integer(minute)); //$NON-NLS-1$
-					Event timerEvent = new Event(EVENT_TIMER_TOPIC, props);
+					props.put(ScheduledApplication.YEAR, new Integer(cal.get(Calendar.YEAR)));
+					props.put(ScheduledApplication.MONTH, new Integer(cal.get(Calendar.MONTH)));
+					props.put(ScheduledApplication.DAY_OF_MONTH, new Integer(cal.get(Calendar.DAY_OF_MONTH)));
+					props.put(ScheduledApplication.DAY_OF_WEEK, new Integer(cal.get(Calendar.DAY_OF_WEEK)));
+					props.put(ScheduledApplication.HOUR_OF_DAY, new Integer(cal.get(Calendar.HOUR_OF_DAY)));
+					props.put(ScheduledApplication.MINUTE, new Integer(minute));
+					Event timerEvent = new Event(ScheduledApplication.TIMER_TOPIC, props);
 					synchronized (AppPersistenceUtil.class) {
 						// poor mans implementation of dispatching events; the spec will not allow us to use event admin to dispatch the virtual timer events; boo!!
 						if (timerApps.size() == 0)
@@ -453,6 +461,7 @@ public class AppPersistenceUtil {
 	}
 
 	private static String[] processCommandLine() {
+		commandLineProperties.clear();
 		ServiceReference infoRef = context.getServiceReference(EnvironmentInfo.class.getName());
 		if (infoRef == null)
 			return null;
@@ -516,14 +525,14 @@ public class AppPersistenceUtil {
 			// treat -feature as a synonym for -product for compatibility.
 			if (args[i - 1].equalsIgnoreCase(PRODUCT) || args[i - 1].equalsIgnoreCase(FEATURE)) {
 				// use the long way to set the property to compile against eeminimum
-				System.getProperties().setProperty(ContainerManager.PROP_PRODUCT, arg);
+				commandLineProperties.setProperty(ContainerManager.PROP_PRODUCT, arg);
 				found = true;
 			}
 
 			// look for the application to run.  
 			if (args[i - 1].equalsIgnoreCase(APPLICATION)) {
 				// use the long way to set the property to compile against eeminimum
-				System.getProperties().setProperty(ContainerManager.PROP_ECLIPSE_APPLICATION, arg);
+				commandLineProperties.setProperty(ContainerManager.PROP_ECLIPSE_APPLICATION, arg);
 				found = true;
 			}
 
@@ -585,5 +594,9 @@ public class AppPersistenceUtil {
 
 	static BundleContext getContext() {
 		return context;
+	}
+
+	static String getCommandLineProperty(String key) {
+		return commandLineProperties.getProperty(key);
 	}
 }

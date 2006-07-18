@@ -223,7 +223,7 @@ public class AppCommands implements CommandProvider {
 						ApplicationDescriptor appDesc = (ApplicationDescriptor) context.getService(apps[i]);
 						String filter = intp.nextArgument();
 						boolean recure = Boolean.valueOf(intp.nextArgument()).booleanValue();
-						appDesc.schedule(null, "org/osgi/application/timer", filter, recure); //$NON-NLS-1$
+						appDesc.schedule(null, null, "org/osgi/application/timer", filter, recure); //$NON-NLS-1$
 						intp.println("scheduled application: " + appId); //$NON-NLS-1$
 					} finally {
 						context.ungetService(apps[i]);

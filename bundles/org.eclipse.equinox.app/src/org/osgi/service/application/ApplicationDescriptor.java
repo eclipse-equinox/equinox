@@ -1,5 +1,5 @@
 /*
- * $Header: /cvsroot/eclipse/org.eclipse.equinox.app/src/org/osgi/service/application/ApplicationDescriptor.java,v 1.3 2006/01/16 19:45:25 twatson Exp $
+ * $Header: /cvsroot/eclipse/org.eclipse.equinox.app/src/org/osgi/service/application/ApplicationDescriptor.java,v 1.4 2006/01/16 20:31:43 twatson Exp $
  * 
  * Copyright (c) OSGi Alliance (2004, 2005). All Rights Reserved.
  * 
@@ -23,6 +23,12 @@ import org.osgi.framework.InvalidSyntaxException;
  */
 
 public abstract class ApplicationDescriptor {
+	/*
+	 * NOTE: An implementor may also choose to replace this class in
+	 * their distribution with a class that directly interfaces with the
+	 * org.osgi.service.application implementation. This replacement class MUST NOT alter the
+	 * public/protected signature of this class.
+	 */
 
 	/**
 	 * The property key for the localized name of the application.
@@ -96,6 +102,10 @@ public abstract class ApplicationDescriptor {
 	public static final String APPLICATION_LOCATION = "application.location";
 
 	
+	private final String	pid;
+
+	private boolean[]				locked = {false};
+
 	/**
 	 * Constructs the <code>ApplicationDescriptor</code>.
 	 *
@@ -140,6 +150,8 @@ public abstract class ApplicationDescriptor {
 	 * @return <code>true</code> if the specified pattern matches at least
 	 *   one of the certificate chains used to authenticate this application 
 	 * @throws NullPointerException if the specified <code>pattern</code> is null.
+     * @throws IllegalStateException if the application descriptor was
+     *   unregistered
 	 */	
 	public abstract boolean matchDNChain( String pattern );
 	
@@ -348,12 +360,20 @@ public abstract class ApplicationDescriptor {
 	 * should not get lost even if the framework or the device restarts so it
 	 * should be stored in a persistent storage. The method registers a
 	 * {@link ScheduledApplication} service in Service Registry, representing
-	 * the created scheduling.
+	 * the created schedule.
 	 * <p>
 	 * The <code>Map</code> argument of the  method contains startup 
 	 * arguments for the application. The keys used in the Map must be non-null, 
 	 * non-empty <code>String<code> objects.
-	 * 
+     * <p>
+     * The created schedules have a unique identifier within the scope of this
+     * <code>ApplicationDescriptor</code>. This identifier can be specified
+     * in the <code>scheduleId</code> argument. If this argument is <code>null</code>,
+     * the identifier is automatically generated.
+     * 
+	 * @param scheduleId 
+	 *             the identifier of the created schedule. It can be <code>null</code>,
+     *             in this case the identifier is automatically generated.
 	 * @param arguments
 	 *            the startup arguments for the scheduled application, may be
 	 *            null
@@ -376,6 +396,17 @@ public abstract class ApplicationDescriptor {
 	 *             if the topic is <code>null</code>
 	 * @throws InvalidSyntaxException 
 	 * 			   if the specified <code>eventFilter</code> is not syntactically correct
+	 * @throws ApplicationException
+     *              if the schedule couldn't be created. The possible error
+     *              codes are 
+     *              <ul>
+     *               <li> {@link ApplicationException#APPLICATION_DUPLICATE_SCHEDULE_ID}
+     *                 if the specified <code>scheduleId</code> is already used
+     *                 for this <code>ApplicationDescriptor</code>
+     *               <li> {@link ApplicationException#APPLICATION_SCHEDULING_FAILED}
+     *                 if the scheduling failed due to some internal reason
+     *                 (e.g. persistent storage error).
+     *              </ul>
 	 * @throws SecurityException
 	 *             if the caller doesn't have "schedule"
 	 *             ApplicationAdminPermission for the application.
@@ -386,11 +417,15 @@ public abstract class ApplicationDescriptor {
 	 *             (null objects, empty <code>String</code> or a key that is not
 	 *              <code>String</code>)
 	 */
-	public final ScheduledApplication schedule(Map arguments, String topic,
-			String eventFilter, boolean recurring) throws InvalidSyntaxException {
+	public final ScheduledApplication schedule(String scheduleId, Map arguments, String topic,
+			String eventFilter, boolean recurring) throws InvalidSyntaxException, 
+            ApplicationException {
+		SecurityManager sm = System.getSecurityManager();
+		if (sm != null)
+			sm.checkPermission(new ApplicationAdminPermission(this, ApplicationAdminPermission.SCHEDULE_ACTION));
 		checkArgs(arguments);
 		isLaunchableSpecific(); // checks if the ApplicationDescriptor was already unregistered
-		return AppPersistenceUtil.addScheduledApp(this, arguments, topic, eventFilter, recurring);
+		return AppPersistenceUtil.addScheduledApp(this, scheduleId, arguments, topic, eventFilter, recurring);
 	}
 
 	/**
@@ -458,24 +493,6 @@ public abstract class ApplicationDescriptor {
 	 */
 	protected abstract void unlockSpecific();
 
-		/**
-		 * @skip
-		 */
-	public interface Delegate {
-		void setApplicationDescriptor(ApplicationDescriptor d, String pid );
-
-		boolean isLocked();
-
-		void lock();
-
-		void unlock();
-
-		ScheduledApplication schedule(Map args, String topic, String filter,
-				boolean recurs) throws InvalidSyntaxException;
-
-		void launch(Map arguments) throws ApplicationException;
-	}
-
 	private void saveLock(boolean locked) {
 		AppPersistenceUtil.saveLock(this, locked);
 	}
@@ -491,11 +508,10 @@ public abstract class ApplicationDescriptor {
 			Object key = keys.next();
 			if (!(key instanceof String))
 				throw new IllegalArgumentException("Invalid key type: " + key == null ? "<null>" : key.getClass().getName());
-			if ("".equals(key))
+			if ("".equals(key)) //$NON-NLS-1$
 				throw new IllegalArgumentException("Empty string is an invalid key");
 		}
 	}
 
-	String							pid;
-	private boolean[]				locked = {false};
+
 }

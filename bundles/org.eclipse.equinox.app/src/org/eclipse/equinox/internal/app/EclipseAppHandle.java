@@ -12,10 +12,10 @@
 package org.eclipse.equinox.internal.app;
 
 import java.util.*;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IExtension;
 import org.eclipse.equinox.app.IAppContext;
 import org.eclipse.equinox.app.IApplication;
-import org.eclipse.equinox.registry.IConfigurationElement;
-import org.eclipse.equinox.registry.IExtension;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.application.ApplicationHandle;

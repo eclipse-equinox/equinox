@@ -16,9 +16,8 @@ import java.lang.reflect.Method;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.*;
-import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.*;
 import org.eclipse.equinox.app.IContainer;
-import org.eclipse.equinox.registry.*;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.util.NLS;
@@ -59,7 +58,6 @@ public class ContainerManager implements IRegistryChangeListener, SynchronousBun
 	private HashMap containers = new HashMap();
 	// tracks the FrameworkLog
 	private ServiceTracker frameworkLog;
-	private boolean missingProductReported;
 	private IExtensionRegistry extensionRegistry;
 
 	public ContainerManager(BundleContext context, IExtensionRegistry extensionRegistry) {
@@ -211,14 +209,7 @@ public class ContainerManager implements IRegistryChangeListener, SynchronousBun
 	}
 
 	private EclipseAppDescriptor findDefaultApp() {
-		String applicationId = System.getProperty(PROP_ECLIPSE_APPLICATION);
-		if (applicationId == null) {
-			//Derive the application from the product information
-			applicationId = getProductAppId();
-			if (applicationId != null)
-				// use the long way to set the property to compile against eeminimum
-				System.getProperties().setProperty(PROP_ECLIPSE_APPLICATION, applicationId);
-		}
+		String applicationId = getApplicationId();
 		if (applicationId == null) {
 			// the application id is not set; return a descriptor that will throw an exception
 			// return new EclipseAppDescriptor(Activator.PI_APP, Activator.PI_APP + ".missingapp", null, false, this, new RuntimeException(Messages.application_noIdFound)); //$NON-NLS-1$
@@ -353,44 +344,6 @@ public class ContainerManager implements IRegistryChangeListener, SynchronousBun
 		return (FrameworkLog) AppPersistenceUtil.getService(frameworkLog);
 	}
 
-	private String getProductAppId() {
-		String productId = System.getProperty(PROP_PRODUCT);
-		if (productId == null)
-			return null;
-		IConfigurationElement[] entries = getExtensionRegistry().getConfigurationElementsFor(PI_RUNTIME, PT_PRODUCTS, productId);
-		if (entries.length > 0)
-			// There should only be one product with the given id so just take the first element
-			return entries[0].getAttribute(ATTR_APPLICATION);
-		IConfigurationElement[] elements = getExtensionRegistry().getConfigurationElementsFor(PI_RUNTIME, PT_PRODUCTS);
-		List logEntries = null;
-		for (int i = 0; i < elements.length; i++) {
-			IConfigurationElement element = elements[i];
-			if (element.getName().equalsIgnoreCase("provider")) { //$NON-NLS-1$
-				try {
-					Object provider = element.createExecutableExtension(PT_RUN);
-					Object[] products = (Object[]) ContainerManager.execMethod(provider, "getProducts", null, null); //$NON-NLS-1$
-					for (int j = 0; j < products.length; j++) {
-						Object provided = products[j];
-						if (productId.equalsIgnoreCase((String) ContainerManager.execMethod(provided, "getId", null, null))) //$NON-NLS-1$
-							return (String) ContainerManager.execMethod(provided, "getApplication", null, null); //$NON-NLS-1$
-					}
-				} catch (CoreException e) {
-					if (logEntries == null)
-						logEntries = new ArrayList(3);
-					logEntries.add(new FrameworkLogEntry(Activator.PI_APP, NLS.bind(Messages.provider_invalid, element.getParent().toString()), 0, e, null));
-				}
-			}
-		}
-		if (logEntries != null)
-			getFrameworkLog().log(new FrameworkLogEntry(Activator.PI_APP, Messages.provider_invalid_general, 0, null, (FrameworkLogEntry[]) logEntries.toArray()));
-
-		if (!missingProductReported) {
-			getFrameworkLog().log(new FrameworkLogEntry(Activator.PI_APP, NLS.bind(Messages.product_notFound, productId), 0, null, null));
-			missingProductReported = true;
-		}
-		return null;
-	}
-
 	public static Object execMethod(Object obj, String methodName, Class argType, Object arg) {
 		try {
 			Method method = obj.getClass().getMethod(methodName, argType == null ? null : new Class[] {argType});
@@ -495,5 +448,58 @@ public class ContainerManager implements IRegistryChangeListener, SynchronousBun
 			for (Iterator iContainers = containers.values().iterator(); iContainers.hasNext();)
 				((IContainer) iContainers.next()).shutdown();
 		}
+	}
+
+	String getApplicationId() {
+		// try commandLineProperties
+		String applicationId = AppPersistenceUtil.getCommandLineProperty(ContainerManager.PROP_ECLIPSE_APPLICATION);
+		if (applicationId != null)
+			return applicationId;
+
+		// try bundleContext properties
+		applicationId = context.getProperty(ContainerManager.PROP_ECLIPSE_APPLICATION);
+		if (applicationId != null)
+			return applicationId;
+
+		//Derive the application from the product information
+		return getProductAppId();
+	}
+
+	private String getProductAppId() {
+		String productId = AppPersistenceUtil.getCommandLineProperty(ContainerManager.PROP_PRODUCT);
+		if (productId == null)
+			productId = context.getProperty(ContainerManager.PROP_PRODUCT);
+		if (productId == null)
+			return null;
+		IConfigurationElement[] entries = getExtensionRegistry().getConfigurationElementsFor(ContainerManager.PI_RUNTIME, ContainerManager.PT_PRODUCTS, productId);
+		if (entries.length > 0)
+			// There should only be one product with the given id so just take the first element
+			return entries[0].getAttribute(ContainerManager.ATTR_APPLICATION);
+		IConfigurationElement[] elements = getExtensionRegistry().getConfigurationElementsFor(ContainerManager.PI_RUNTIME, ContainerManager.PT_PRODUCTS);
+		List logEntries = null;
+		for (int i = 0; i < elements.length; i++) {
+			IConfigurationElement element = elements[i];
+			if (element.getName().equalsIgnoreCase("provider")) { //$NON-NLS-1$
+				try {
+					Object provider = element.createExecutableExtension(ContainerManager.PT_RUN);
+					Object[] products = (Object[]) ContainerManager.execMethod(provider, "getProducts", null, null); //$NON-NLS-1$
+					for (int j = 0; j < products.length; j++) {
+						Object provided = products[j];
+						if (productId.equalsIgnoreCase((String) ContainerManager.execMethod(provided, "getId", null, null))) //$NON-NLS-1$
+							return (String) ContainerManager.execMethod(provided, "getApplication", null, null); //$NON-NLS-1$
+					}
+				} catch (CoreException e) {
+					if (logEntries == null)
+						logEntries = new ArrayList(3);
+					logEntries.add(new FrameworkLogEntry(Activator.PI_APP, NLS.bind(Messages.provider_invalid, element.getParent().toString()), 0, e, null));
+				}
+			}
+		}
+		if (logEntries != null)
+			getFrameworkLog().log(new FrameworkLogEntry(Activator.PI_APP, Messages.provider_invalid_general, 0, null, (FrameworkLogEntry[]) logEntries.toArray()));
+
+		getFrameworkLog().log(new FrameworkLogEntry(Activator.PI_APP, NLS.bind(Messages.product_notFound, productId), 0, null, null));
+
+		return null;
 	}
 }

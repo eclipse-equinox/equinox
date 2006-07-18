@@ -11,7 +11,7 @@
 
 package org.eclipse.equinox.internal.app;
 
-import org.eclipse.equinox.registry.IExtensionRegistry;
+import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.osgi.service.debug.DebugOptions;
 import org.osgi.framework.*;
 import org.osgi.util.tracker.ServiceTracker;

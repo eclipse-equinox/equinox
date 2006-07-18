@@ -12,7 +12,7 @@
 package org.eclipse.equinox.app;
 
 import java.util.Map;
-import org.eclipse.equinox.registry.IConfigurationElement;
+import org.eclipse.core.runtime.IConfigurationElement;
 import org.osgi.service.application.ApplicationDescriptor;
 
 /**

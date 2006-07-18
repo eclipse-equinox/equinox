@@ -1,5 +1,5 @@
 /*
- * $Header: /cvsroot/eclipse/org.eclipse.equinox.app/src/org/osgi/service/application/ApplicationHandle.java,v 1.1 2005/12/14 22:17:04 twatson Exp $
+ * $Header: /cvsroot/eclipse/org.eclipse.equinox.app/src/org/osgi/service/application/ApplicationHandle.java,v 1.2 2005/12/20 21:26:05 twatson Exp $
  * 
  * Copyright (c) OSGi Alliance (2004, 2005). All Rights Reserved.
  * 
@@ -19,6 +19,12 @@ import org.osgi.framework.Constants;
  * for the lifecycle states.
  */
 public abstract class ApplicationHandle {
+	/*
+	 * NOTE: An implementor may also choose to replace this class in
+	 * their distribution with a class that directly interfaces with the
+	 * org.osgi.service.application implementation. This replacement class MUST NOT alter the
+	 * public/protected signature of this class.
+	 */
 
 	/**
 	 * The property key for the unique identifier (PID) of the application
@@ -51,6 +57,8 @@ public abstract class ApplicationHandle {
 
 	private final String instanceId;
 	
+	private final ApplicationDescriptor	descriptor;
+
 	/**
 	 * Application instance identifier is specified by the container when the
 	 * instance is created. The instance identifier must remain static for the 
@@ -161,14 +169,5 @@ public abstract class ApplicationHandle {
 	 */
 	protected abstract void destroySpecific();
 	
-	ApplicationDescriptor		descriptor;
 
-	/**
-	 * @skip
-	 *
-	 */
-	public interface Delegate {
-		void setApplicationHandle(ApplicationHandle d, ApplicationDescriptor.Delegate descriptor );
-		void destroy();
-	}
 }

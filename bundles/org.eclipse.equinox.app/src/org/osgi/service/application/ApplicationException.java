@@ -12,9 +12,11 @@ package org.osgi.service.application;
  * describes the type of problem reported in this exception. The possible codes are:
  * <ul>
  * <li> {@link #APPLICATION_LOCKED} - The application couldn't be launched because it is locked.</li>
- * <li> {@link #APPLICAITON_NOT_LAUNCHABLE} - The application is not in launchable state.</li>
+ * <li> {@link #APPLICATION_NOT_LAUNCHABLE} - The application is not in launchable state.</li>
  * <li> {@link #APPLICATION_INTERNAL_ERROR} - An exception was thrown by the application or its
  *       container during launch.</li>
+ * <li> {@link #APPLICATION_SCHEDULING_FAILED} - The scheduling of an application
+ *       failed.
  * </ul>
  * 
  */
@@ -40,6 +42,18 @@ public class ApplicationException extends Exception {
 	 * container during launch. The exception is available in {@link #getCause()}.
 	 */
 	public static final int APPLICATION_INTERNAL_ERROR = 0x03;
+    
+    /**
+     * The application schedule could not be created due to some internal error
+     * (for example, the schedule information couldn't be saved).
+     */
+    public static final int APPLICATION_SCHEDULING_FAILED = 0x04;
+    
+    /**
+     * The application scheduling failed because the specified identifier
+     * is already in use.
+     */
+    public static final int APPLICATION_DUPLICATE_SCHEDULE_ID = 0x05;
 
 	/**
 	 * Creates an <code>ApplicationException</code> with the specified error code.

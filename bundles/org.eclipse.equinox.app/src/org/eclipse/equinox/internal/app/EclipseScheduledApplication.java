@@ -24,19 +24,18 @@ import org.osgi.util.tracker.ServiceTracker;
 public class EclipseScheduledApplication implements ScheduledApplication, EventHandler {
 	private static final String FILTER_PREFIX = "(&(objectclass=" + ApplicationDescriptor.class.getName() + ")(" + ApplicationDescriptor.APPLICATION_PID + "="; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	private static final String FILTER_POSTFIX = "))"; //$NON-NLS-1$
-	private static final String TRIGGERING_EVENT = "org.osgi.triggeringevent"; //$NON-NLS-1$
 
 	private boolean recurring;
 	private String topic;
 	private String eventFilter;
 	private Map args;
 	private String appPid;
-	private Integer id;
+	private String id;
 	private ServiceRegistration sr;
 	private ServiceTracker appTracker;
 	private boolean removed = false;
 
-	EclipseScheduledApplication(BundleContext context, Integer id, String appPid, Map args, String topic, String eventFilter, boolean recurring) throws InvalidSyntaxException {
+	EclipseScheduledApplication(BundleContext context, String id, String appPid, Map args, String topic, String eventFilter, boolean recurring) throws InvalidSyntaxException {
 		this.id = id;
 		this.appPid = appPid;
 		this.args = args;
@@ -47,7 +46,7 @@ public class EclipseScheduledApplication implements ScheduledApplication, EventH
 		AppPersistenceUtil.openTracker(appTracker, false);
 	}
 
-	Integer getID() {
+	public String getScheduleId() {
 		return id;
 	}
 
