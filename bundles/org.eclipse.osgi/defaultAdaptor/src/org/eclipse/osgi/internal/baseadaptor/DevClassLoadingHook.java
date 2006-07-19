@@ -19,8 +19,11 @@ import org.eclipse.osgi.baseadaptor.hooks.ClassLoadingHook;
 import org.eclipse.osgi.baseadaptor.loader.*;
 import org.eclipse.osgi.framework.adaptor.BundleProtectionDomain;
 import org.eclipse.osgi.framework.adaptor.ClassLoaderDelegate;
+import org.eclipse.osgi.framework.util.KeyedElement;
 
-public class DevClassLoadingHook implements ClassLoadingHook, HookConfigurator {
+public class DevClassLoadingHook implements ClassLoadingHook, HookConfigurator, KeyedElement {
+	public static final String KEY = DevClassLoadingHook.class.getName();
+	public static final int HASHCODE = KEY.hashCode();
 
 	public byte[] processClass(String name, byte[] classbytes, ClasspathEntry classpathEntry, BundleEntry entry, ClasspathManager manager) {
 		// Do nothing
@@ -28,9 +31,13 @@ public class DevClassLoadingHook implements ClassLoadingHook, HookConfigurator {
 	}
 
 	public boolean addClassPathEntry(ArrayList cpEntries, String cp, ClasspathManager hostmanager, BaseData sourcedata, ProtectionDomain sourcedomain) {
+		// first check that we are in devmode for this sourcedata
 		String[] devClassPath = !DevClassPathHelper.inDevelopmentMode() ? null : DevClassPathHelper.getDevClassPath(sourcedata.getSymbolicName());
 		if (devClassPath == null || devClassPath.length == 0)
 			return false; // not in dev mode return
+		// check that dev classpath entries have not already been added; we mark this in the first entry below
+		if (cpEntries.size() > 0 && ((ClasspathEntry) cpEntries.get(0)).getUserObject(KEY) != null)
+			return false; // this source has already had its dev classpath entries added.
 		boolean result = false;
 		for (int i = 0; i < devClassPath.length; i++) {
 			if (ClasspathManager.addClassPathEntry(cpEntries, devClassPath[i], hostmanager, sourcedata, sourcedomain))
@@ -38,13 +45,16 @@ public class DevClassLoadingHook implements ClassLoadingHook, HookConfigurator {
 			else {
 				// if in dev mode, try using the cp as an absolute path
 				ClasspathEntry entry = hostmanager.getExternalClassPath(devClassPath[i], sourcedata, sourcedomain);
-				if (entry != null){
+				if (entry != null) {
 					cpEntries.add(entry);
 					result = true;
 				}
 			}
 		}
-
+		// mark the first entry of the list.  
+		// This way we can quickly tell that dev classpath entries have been added to the list
+		if (result && cpEntries.size() > 0)
+			((ClasspathEntry) cpEntries.get(0)).addUserObject(this);
 		return result;
 	}
 
@@ -72,5 +82,17 @@ public class DevClassLoadingHook implements ClassLoadingHook, HookConfigurator {
 			// only add dev classpath manager if in dev mode
 			hookRegistry.addClassLoadingHook(new DevClassLoadingHook());
 
+	}
+
+	public boolean compare(KeyedElement other) {
+		return other.getKey() == KEY;
+	}
+
+	public Object getKey() {
+		return KEY;
+	}
+
+	public int getKeyHashCode() {
+		return HASHCODE;
 	}
 }
