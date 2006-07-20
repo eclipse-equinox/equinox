@@ -410,7 +410,7 @@ public class PackageAdminImpl implements PackageAdmin {
 		} catch (BundleException e) {
 			if (Debug.DEBUG && Debug.DEBUG_PACKAGEADMIN) {
 				Debug.println("refreshPackages exception: " + e.getMessage()); //$NON-NLS-1$
-				Debug.printStackTrace(e.getNestedException());
+				Debug.printStackTrace(e.getNestedException() == null ? e : e.getNestedException());
 			}
 			framework.publishFrameworkEvent(FrameworkEvent.ERROR, framework.systemBundle, new BundleException(Msg.BUNDLE_REFRESH_FAILURE, e)); 
 		}

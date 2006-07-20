@@ -550,7 +550,7 @@ public class StartLevelManager implements EventDispatcher, EventListener, Servic
 			} catch (BundleException be) {
 				if (Debug.DEBUG && Debug.DEBUG_STARTLEVEL) {
 					Debug.println("SLL: Bundle resume exception: " + be.getMessage()); //$NON-NLS-1$
-					Debug.printStackTrace(be.getNestedException());
+					Debug.printStackTrace(be.getNestedException() == null ? be : be.getNestedException());
 				}
 
 				framework.publishFrameworkEvent(FrameworkEvent.ERROR, framework.systemBundle, be);
@@ -651,7 +651,7 @@ public class StartLevelManager implements EventDispatcher, EventListener, Servic
 		} catch (BundleException sbe) {
 			if (Debug.DEBUG && Debug.DEBUG_STARTLEVEL) {
 				Debug.println("SLL: Bundle suspend exception: " + sbe.getMessage()); //$NON-NLS-1$
-				Debug.printStackTrace(sbe.getNestedException());
+				Debug.printStackTrace(sbe.getNestedException() == null ? sbe : sbe.getNestedException());
 			}
 
 			framework.publishFrameworkEvent(FrameworkEvent.ERROR, framework.systemBundle, sbe);

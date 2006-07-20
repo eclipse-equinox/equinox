@@ -326,6 +326,8 @@ public class Debug {
 	 * @param t
 	 */
 	public static void printStackTrace(Throwable t) {
+		if (t == null)
+			return;
 		t.printStackTrace(out);
 
 		Method[] methods = t.getClass().getMethods();

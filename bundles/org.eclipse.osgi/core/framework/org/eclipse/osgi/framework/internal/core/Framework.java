@@ -1038,7 +1038,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 		} catch (BundleException be) {
 			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 				Debug.println("Bundle resume exception: " + be.getMessage()); //$NON-NLS-1$
-				Debug.printStackTrace(be.getNestedException());
+				Debug.printStackTrace(be.getNestedException() == null ? be : be.getNestedException());
 			}
 			publishFrameworkEvent(FrameworkEvent.ERROR, bundle, be);
 		}
@@ -1068,7 +1068,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 		} catch (BundleException be) {
 			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 				Debug.println("Bundle suspend exception: " + be.getMessage()); //$NON-NLS-1$
-				Debug.printStackTrace(be.getNestedException());
+				Debug.printStackTrace(be.getNestedException() == null ? be : be.getNestedException());
 			}
 			publishFrameworkEvent(FrameworkEvent.ERROR, bundle, be);
 		}
