@@ -281,7 +281,7 @@ public class ServletContextImpl implements ServletContext {
 	 * </tt>.
 	 */
 	public String getServerInfo() {
-		return ("IBM Service Management Framework HttpService/1.0"); //$NON-NLS-1$
+		return ("Equinox HttpService/1.0"); //$NON-NLS-1$
 	}
 
 	/**
