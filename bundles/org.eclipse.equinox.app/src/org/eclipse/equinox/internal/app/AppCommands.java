@@ -11,6 +11,7 @@
 package org.eclipse.equinox.internal.app;
 
 import java.util.*;
+import org.eclipse.equinox.app.IApplicationContext;
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.osgi.framework.*;
@@ -77,7 +78,7 @@ public class AppCommands implements CommandProvider {
 
 	public String getHelp() {
 		StringBuffer sb = new StringBuffer();
-		sb.append("---Application Admin Commands---\n"); //$NON-NLS-1$
+		sb.append("\n---Application Admin Commands---\n"); //$NON-NLS-1$
 		sb.append("\tactiveApps - lists all running application IDs\n"); //$NON-NLS-1$
 		sb.append("\tapps - lists all installed application IDs\n"); //$NON-NLS-1$
 		sb.append("\tlockApp <application id> - locks the specified application ID\n"); //$NON-NLS-1$
@@ -131,24 +132,20 @@ public class AppCommands implements CommandProvider {
 		if (apps != null)
 			for (int i = 0; i < apps.length; i++)
 				if (appId.equals(apps[i].getProperty(ApplicationDescriptor.APPLICATION_PID))) {
-					if (launchableApp.match(getServiceProps(apps[i]))) {
-						ArrayList argList = new ArrayList();
-						String arg = null;
-						while ((arg = intp.nextArgument()) != null)
-							argList.add(arg);
-						String[] args = argList.size() == 0 ? null : (String[]) argList.toArray(new String[argList.size()]);
-						ApplicationDescriptor appDesc = (ApplicationDescriptor) context.getService(apps[i]);
-						try {
-							HashMap launchArgs = new HashMap(1);
-							if (args != null)
-								launchArgs.put(ContainerManager.PROP_ECLIPSE_APPLICATION_ARGS, args);
-							appDesc.launch(launchArgs);
-							intp.println("Launched application: " + appId); //$NON-NLS-1$
-						} finally {
-							context.ungetService(apps[i]);
-						}
-					} else {
-						intp.println("Application is not enabled: " + appId); //$NON-NLS-1$
+					ArrayList argList = new ArrayList();
+					String arg = null;
+					while ((arg = intp.nextArgument()) != null)
+						argList.add(arg);
+					String[] args = argList.size() == 0 ? null : (String[]) argList.toArray(new String[argList.size()]);
+					ApplicationDescriptor appDesc = (ApplicationDescriptor) context.getService(apps[i]);
+					try {
+						HashMap launchArgs = new HashMap(1);
+						if (args != null)
+							launchArgs.put(IApplicationContext.APPLICATION_ARGS, args);
+						appDesc.launch(launchArgs);
+						intp.println("Launched application: " + appId); //$NON-NLS-1$
+					} finally {
+						context.ungetService(apps[i]);
 					}
 					return;
 				}
@@ -246,6 +243,5 @@ public class AppCommands implements CommandProvider {
 					context.ungetService(scheds[i]);
 				}
 			}
-
 	}
 }

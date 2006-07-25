@@ -12,24 +12,20 @@
 package org.eclipse.equinox.internal.app;
 
 import java.io.*;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.*;
 import org.eclipse.osgi.service.datalocation.Location;
-import org.eclipse.osgi.service.environment.EnvironmentInfo;
 import org.eclipse.osgi.storagemanager.StorageManager;
 import org.osgi.framework.*;
 import org.osgi.service.application.*;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
-import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * Manages all persistent data for ApplicationDescriptors (lock status, 
  * scheduled applications etc.)
  */
-public class AppPersistenceUtil {
+public class AppPersistence {
 	private static final String PROP_CONFIG_AREA = "osgi.configuration.area"; //$NON-NLS-1$
 
 	private static final String FILTER_PREFIX = "(&(objectClass=org.eclipse.osgi.service.datalocation.Location)(type="; //$NON-NLS-1$
@@ -41,28 +37,8 @@ public class AppPersistenceUtil {
 	private static final byte NULL = 0;
 	private static final int OBJECT = 1;
 
-	// obsolete command line args
-	private static final String NO_PACKAGE_PREFIXES = "-noPackagePrefixes"; //$NON-NLS-1$
-	private static final String CLASSLOADER_PROPERTIES = "-classloaderProperties"; //$NON-NLS-1$	
-	private static final String PLUGINS = "-plugins"; //$NON-NLS-1$
-	private static final String FIRST_USE = "-firstUse"; //$NON-NLS-1$
-	private static final String NO_UPDATE = "-noUpdate"; //$NON-NLS-1$
-	private static final String NEW_UPDATES = "-newUpdates"; //$NON-NLS-1$
-	private static final String UPDATE = "-update"; //$NON-NLS-1$
-	private static final String BOOT = "-boot"; //$NON-NLS-1$
-
-	// command line args not used by app container
-	private static final String KEYRING = "-keyring"; //$NON-NLS-1$
-	private static final String PASSWORD = "-password"; //$NON-NLS-1$
-
-	// command line args used by app container
-	private static final String PRODUCT = "-product"; //$NON-NLS-1$
-	private static final String FEATURE = "-feature"; //$NON-NLS-1$
-	private static final String APPLICATION = "-application"; //$NON-NLS-1$	
-
 	private static BundleContext context;
 	private static ServiceTracker configuration;
-	private static ServiceTracker pkgAdminTracker;
 	private static Collection locks = new ArrayList();
 	private static Map scheduledApps = new HashMap();
 	static ArrayList timerApps = new ArrayList();
@@ -72,29 +48,16 @@ public class AppPersistenceUtil {
 	static boolean shutdown = false;
 	private static int nextScheduledID = 1;
 	private static Thread timerThread;
-	private static String[] appArgs;
-	private static Properties commandLineProperties = new Properties();
 
-	static synchronized void setBundleContext(BundleContext context) {
-		if (context != null) {
-			AppPersistenceUtil.context = context;
-			init();
-		} else {
-			shutdown();
-			AppPersistenceUtil.context = context;
-		}
-	}
-
-	private static void init() {
+	static void start(BundleContext bc) {
+		context = bc;
 		shutdown = false;
-		appArgs = processCommandLine();
-		initPackageAdmin();
 		initConfiguration();
 		loadData(FILE_APPLOCKS);
 		loadData(FILE_APPSCHEDULED);
 	}
 
-	private static void shutdown() {
+	static void stop() {
 		shutdown = true;
 		stopTimer();
 		saveData();
@@ -103,20 +66,7 @@ public class AppPersistenceUtil {
 			storageManager = null;
 		}
 		closeConfiguration();
-		closePackageAdmin();
-		appArgs = null;
-	}
-
-	private static void initPackageAdmin() {
-		closePackageAdmin(); // just incase
-		pkgAdminTracker = new ServiceTracker(context, PackageAdmin.class.getName(), null);
-		pkgAdminTracker.open();
-	}
-
-	private static void closePackageAdmin() {
-		if (pkgAdminTracker != null)
-			pkgAdminTracker.close();
-		pkgAdminTracker = null;
+		context = null;
 	}
 
 	private static void initConfiguration() {
@@ -397,7 +347,7 @@ public class AppPersistenceUtil {
 					props.put(ScheduledApplication.HOUR_OF_DAY, new Integer(cal.get(Calendar.HOUR_OF_DAY)));
 					props.put(ScheduledApplication.MINUTE, new Integer(minute));
 					Event timerEvent = new Event(ScheduledApplication.TIMER_TOPIC, props);
-					synchronized (AppPersistenceUtil.class) {
+					synchronized (AppPersistence.class) {
 						// poor mans implementation of dispatching events; the spec will not allow us to use event admin to dispatch the virtual timer events; boo!!
 						if (timerApps.size() == 0)
 							continue;
@@ -435,168 +385,5 @@ public class AppPersistenceUtil {
 			out.writeByte(OBJECT);
 			out.writeUTF(string);
 		}
-	}
-
-	public static Bundle getBundle(String symbolicName) {
-		PackageAdmin packageAdmin = (PackageAdmin) getService(pkgAdminTracker);
-		if (packageAdmin == null)
-			return null;
-		Bundle[] bundles = packageAdmin.getBundles(symbolicName, null);
-		if (bundles == null)
-			return null;
-		//Return the first bundle that is not installed or uninstalled
-		for (int i = 0; i < bundles.length; i++)
-			if ((bundles[i].getState() & (Bundle.INSTALLED | Bundle.UNINSTALLED)) == 0)
-				return bundles[i];
-		return null;
-	}
-
-	/**
-	 * Returns the default application args that should be used to launch an application 
-	 * when args are not supplied.
-	 * @return the default application args.
-	 */
-	public static String[] getApplicationArgs() {
-		return appArgs;
-	}
-
-	private static String[] processCommandLine() {
-		commandLineProperties.clear();
-		ServiceReference infoRef = context.getServiceReference(EnvironmentInfo.class.getName());
-		if (infoRef == null)
-			return null;
-		EnvironmentInfo envInfo = (EnvironmentInfo) context.getService(infoRef);
-		if (envInfo == null)
-			return null;
-		String[] args = envInfo.getNonFrameworkArgs();
-		context.ungetService(infoRef);
-		if (args == null)
-			return args;
-		if (args.length == 0)
-			return args;
-
-		int[] configArgs = new int[args.length];
-		//need to initialize the first element to something that could not be an index.
-		configArgs[0] = -1;
-		int configArgIndex = 0;
-		for (int i = 0; i < args.length; i++) {
-			boolean found = false;
-			// check for args without parameters (i.e., a flag arg)
-
-			// consume obsolete args
-			if (args[i].equalsIgnoreCase(CLASSLOADER_PROPERTIES))
-				found = true; // ignored
-			if (args[i].equalsIgnoreCase(NO_PACKAGE_PREFIXES))
-				found = true; // ignored
-			if (args[i].equalsIgnoreCase(PLUGINS))
-				found = true; // ignored
-			if (args[i].equalsIgnoreCase(FIRST_USE))
-				found = true; // ignored
-			if (args[i].equalsIgnoreCase(NO_UPDATE))
-				found = true; // ignored
-			if (args[i].equalsIgnoreCase(NEW_UPDATES))
-				found = true; // ignored
-			if (args[i].equalsIgnoreCase(UPDATE))
-				found = true; // ignored
-
-			// done checking for args.  Remember where an arg was found 
-			if (found) {
-				configArgs[configArgIndex++] = i;
-				continue;
-			}
-			// check for args with parameters
-			if (i == args.length - 1 || args[i + 1].startsWith("-")) //$NON-NLS-1$
-				continue;
-			String arg = args[++i];
-
-			// consume args not used by app container
-			if (args[i - 1].equalsIgnoreCase(KEYRING))
-				found = true;
-			if (args[i - 1].equalsIgnoreCase(PASSWORD))
-				found = true;
-
-			// consume obsolete args for compatibilty
-			if (args[i - 1].equalsIgnoreCase(CLASSLOADER_PROPERTIES))
-				found = true; // ignore
-			if (args[i - 1].equalsIgnoreCase(BOOT))
-				found = true; // ignore
-
-			// look for the product to run
-			// treat -feature as a synonym for -product for compatibility.
-			if (args[i - 1].equalsIgnoreCase(PRODUCT) || args[i - 1].equalsIgnoreCase(FEATURE)) {
-				// use the long way to set the property to compile against eeminimum
-				commandLineProperties.setProperty(ContainerManager.PROP_PRODUCT, arg);
-				found = true;
-			}
-
-			// look for the application to run.  
-			if (args[i - 1].equalsIgnoreCase(APPLICATION)) {
-				// use the long way to set the property to compile against eeminimum
-				commandLineProperties.setProperty(ContainerManager.PROP_ECLIPSE_APPLICATION, arg);
-				found = true;
-			}
-
-			// done checking for args.  Remember where an arg was found 
-			if (found) {
-				configArgs[configArgIndex++] = i - 1;
-				configArgs[configArgIndex++] = i;
-			}
-		}
-
-		// remove all the arguments consumed by this argument parsing
-		if (configArgIndex == 0) {
-			appArgs = args;
-			return args;
-		}
-		appArgs = new String[args.length - configArgIndex];
-		configArgIndex = 0;
-		int j = 0;
-		for (int i = 0; i < args.length; i++) {
-			if (i == configArgs[configArgIndex])
-				configArgIndex++;
-			else
-				appArgs[j++] = args[i];
-		}
-		return appArgs;
-	}
-
-	static void openTracker(final ServiceTracker tracker, final boolean allServices) {
-		if (System.getSecurityManager() == null)
-			tracker.open(allServices);
-		else
-			AccessController.doPrivileged(new PrivilegedAction() {
-				public Object run() {
-					tracker.open(allServices);
-					return null;
-				}
-			});
-	}
-
-	static Object getService(final ServiceTracker tracker) {
-		if (System.getSecurityManager() == null)
-			return tracker.getService();
-		return AccessController.doPrivileged(new PrivilegedAction() {
-			public Object run() {
-				return tracker.getService();
-			}
-		});
-	}
-
-	static String getLocation(final Bundle bundle) {
-		if (System.getSecurityManager() == null)
-			return bundle.getLocation();
-		return (String) AccessController.doPrivileged(new PrivilegedAction() {
-			public Object run() {
-				return bundle.getLocation();
-			}
-		});
-	}
-
-	static BundleContext getContext() {
-		return context;
-	}
-
-	static String getCommandLineProperty(String key) {
-		return commandLineProperties.getProperty(key);
 	}
 }

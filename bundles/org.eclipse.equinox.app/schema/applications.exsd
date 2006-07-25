@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!-- Schema file written by PDE -->
-<schema targetNamespace="org.eclipse.equinox.app">
+<schema targetNamespace="org.eclipse.core.runtime">
 <annotation>
       <appInfo>
-         <meta.schema plugin="org.eclipse.equinox.app" id="applications" name="Applications"/>
+         <meta.schema plugin="org.eclipse.core.runtime" id="applications" name="Applications"/>
       </appInfo>
       <documentation>
          Platform runtime supports plug-ins which would like to 
@@ -45,6 +45,9 @@ run multiple applications.
                <documentation>
                   
                </documentation>
+               <appInfo>
+                  <meta.attribute translatable="true"/>
+               </appInfo>
             </annotation>
          </attribute>
       </complexType>
@@ -55,13 +58,6 @@ run multiple applications.
          <sequence>
             <element ref="run" minOccurs="0" maxOccurs="1"/>
          </sequence>
-         <attribute name="type" type="string">
-            <annotation>
-               <documentation>
-                  
-               </documentation>
-            </annotation>
-         </attribute>
          <attribute name="visible" type="boolean" use="default" value="true">
             <annotation>
                <documentation>
@@ -81,10 +77,10 @@ run multiple applications.
             <annotation>
                <documentation>
                   the fully-qualified name of a class which implements 
-&lt;samp&gt;org.eclipse.equinox.application.IApplication&lt;/samp&gt;.
+&lt;samp&gt;org.eclipse.core.runtime.IPlatformRunnable&lt;/samp&gt; or &lt;samp&gt;org.eclipse.equinox.application.IApplication&lt;/samp&gt;.
                </documentation>
                <appInfo>
-                  <meta.attribute kind="java" basedOn="org.eclipse.equinox.app.IApplication"/>
+                  <meta.attribute kind="java" basedOn="org.eclipse.core.runtime.IPlatformRunnable"/>
                </appInfo>
             </annotation>
          </attribute>
@@ -123,7 +119,7 @@ run multiple applications.
          Following is an example of an application declaration: 
 &lt;p&gt;
 &lt;pre&gt;
-   &lt;extension id=&quot;coolApplication&quot; point=&quot;org.eclipse.equinox.applications&quot;&gt; 
+   &lt;extension id=&quot;coolApplication&quot; point=&quot;org.eclipse.core.runtime.applications&quot;&gt; 
       &lt;application&gt; 
          &lt;run class=&quot;com.xyz.applications.Cool&quot;&gt; 
             &lt;parameter name=&quot;optimize&quot; value=&quot;true&quot;/&gt; 
@@ -142,7 +138,7 @@ run multiple applications.
       <documentation>
          The value of the class attribute must represent an 
 implementor of 
-&lt;samp&gt;org.eclipse.equinox.IPlatformRunnable&lt;/samp&gt;.
+&lt;samp&gt;org.eclipse.core.runtime.IPlatformRunnable&lt;/samp&gt;.
       </documentation>
    </annotation>
 

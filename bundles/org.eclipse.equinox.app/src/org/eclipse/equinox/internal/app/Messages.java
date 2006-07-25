@@ -26,8 +26,8 @@ public class Messages extends NLS {
 	public static String provider_invalid_general;
 	public static String product_notFound;
 
-	// container
-	public static String container_notFound;
+	// scheduled
+	public static String scheduled_app_removed;
 
 	static {
 		// load message values from bundle file
@@ -38,5 +38,4 @@ public class Messages extends NLS {
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);
 	}
 
-	public static String EclipseScheduledApplication_7;
 }

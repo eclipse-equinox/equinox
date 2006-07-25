@@ -14,7 +14,6 @@ package org.eclipse.equinox.internal.app;
 import java.util.*;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
-import org.eclipse.equinox.app.IAppContext;
 import org.eclipse.equinox.app.IApplication;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.ServiceRegistration;
@@ -23,11 +22,24 @@ import org.osgi.service.application.ApplicationHandle;
 /*
  * An ApplicationHandle that represents a single instance of a running eclipse application.
  */
-public class EclipseAppHandle extends ApplicationHandle implements IAppContext {
+public class EclipseAppHandle extends ApplicationHandle {
+	/**
+	 * Indicates the application is active
+	 */
+	public static final int ACTIVE = 0x01;
+	/**
+	 * Indicates the application is stopping
+	 */
+	public static final int STOPPING = 0x02;
+	/**
+	 * Indicates the application is stopped
+	 */
+	public static final int STOPPED = 0x04;
+
 	private ServiceRegistration sr;
 	private String state = ApplicationHandle.RUNNING;
-	private int status = IAppContext.ACTIVE;
-	private Object application;
+	private int status = EclipseAppHandle.ACTIVE;
+	private MainThreadRunnable appRunnable;
 	private Map arguments;
 
 	/*
@@ -44,20 +56,21 @@ public class EclipseAppHandle extends ApplicationHandle implements IAppContext {
 	protected void destroySpecific() {
 		// when this method is called we must force the application to exit.
 		// first set the status to stopping
-		setAppStatus(IAppContext.STOPPING);
+		setAppStatus(EclipseAppHandle.STOPPING);
 		// now force the appliction to stop
-		if (application instanceof IApplication)
-			((IApplication) application).stop();
+		IApplication application = appRunnable == null ? null : appRunnable.getApplication();
+		if (application != null)
+			application.stop();
 		// make sure the app status is stopped
-		setAppStatus(IAppContext.STOPPED);
+		setAppStatus(EclipseAppHandle.STOPPED);
 	}
 
 	void setServiceRegistration(ServiceRegistration sr) {
 		this.sr = sr;
 	}
 
-	void setApplication(Object application) {
-		this.application = application;
+	void setAppRunnable(MainThreadRunnable appRunnable) {
+		this.appRunnable = appRunnable;
 	}
 
 	/*
@@ -68,7 +81,7 @@ public class EclipseAppHandle extends ApplicationHandle implements IAppContext {
 		props.put(ApplicationHandle.APPLICATION_PID, getInstanceId());
 		props.put(ApplicationHandle.APPLICATION_STATE, getState());
 		props.put(ApplicationHandle.APPLICATION_DESCRIPTOR, getApplicationDescriptor().getApplicationId());
-		props.put(EclipseAppDescriptor.APP_TYPE, ((EclipseAppDescriptor) getApplicationDescriptor()).getType());
+		props.put(EclipseAppDescriptor.APP_TYPE, EclipseAppDescriptor.APP_TYPE_MAIN_TREAD);
 		return props;
 	}
 
@@ -76,32 +89,32 @@ public class EclipseAppHandle extends ApplicationHandle implements IAppContext {
 	 * Changes the state of this handle to STOPPING.  
 	 * Finally the handle is unregistered if the status is STOPPED
 	 */
-	public synchronized void setAppStatus(int status) {
-		if ((status & IAppContext.ACTIVE) != 0)
+	synchronized void setAppStatus(int status) {
+		if ((status & EclipseAppHandle.ACTIVE) != 0)
 			throw new IllegalArgumentException("Cannot set app status to ACTIVE"); //$NON-NLS-1$
 		// if status is stopping and the context is already stopping the return
-		if ((status & IAppContext.STOPPING) != 0)
-			if (ApplicationHandle.STOPPING.equals(state))
+		if ((status & EclipseAppHandle.STOPPING) != 0)
+			if (ApplicationHandle.STOPPING == state)
 				return;
-		// in both cases if the the context is not stopping then set it and
+		// in both cases if the handle is not stopping then set it and
 		// change the service properties to reflect the state change.
 		if (state != ApplicationHandle.STOPPING) {
 			state = ApplicationHandle.STOPPING;
 			sr.setProperties(getServiceProperties());
 		}
 		// if the status is stopped then unregister the service
-		if ((status & IAppContext.STOPPED) != 0 && (this.status & IAppContext.STOPPED) == 0) {
+		if ((status & EclipseAppHandle.STOPPED) != 0 && (this.status & EclipseAppHandle.STOPPED) == 0) {
 			sr.unregister();
-			((EclipseAppDescriptor) getApplicationDescriptor()).appHandleDestroyed();
+			((EclipseAppDescriptor) getApplicationDescriptor()).getContainerManager().unlock();
 		}
 		this.status = status;
 	}
 
-	public int getAppStatus() {
+	int getAppStatus() {
 		return status;
 	}
 
-	public Map getArguments() {
+	Map getArguments() {
 		return arguments;
 	}
 
@@ -109,7 +122,7 @@ public class EclipseAppHandle extends ApplicationHandle implements IAppContext {
 		this.arguments = arguments;
 	}
 
-	public IConfigurationElement getConfiguration() {
+	IConfigurationElement getConfiguration() {
 		IExtension applicationExtension = ((EclipseAppDescriptor) getApplicationDescriptor()).getContainerManager().getAppExtension(getApplicationDescriptor().getApplicationId());
 		IConfigurationElement[] configs = applicationExtension.getConfigurationElements();
 		if (configs.length == 0)

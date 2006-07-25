@@ -1,5 +1,5 @@
 /*
- * $Header: /cvsroot/eclipse/org.eclipse.equinox.app/src/org/osgi/service/application/ApplicationDescriptor.java,v 1.4 2006/01/16 20:31:43 twatson Exp $
+ * $Header: /cvsroot/eclipse/org.eclipse.equinox.app/src/org/osgi/service/application/ApplicationDescriptor.java,v 1.5 2006/07/18 20:16:33 twatson Exp $
  * 
  * Copyright (c) OSGi Alliance (2004, 2005). All Rights Reserved.
  * 
@@ -12,7 +12,7 @@ package org.osgi.service.application;
 
 import java.util.Iterator;
 import java.util.Map;
-import org.eclipse.equinox.internal.app.AppPersistenceUtil;
+import org.eclipse.equinox.internal.app.AppPersistence;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 
@@ -425,7 +425,7 @@ public abstract class ApplicationDescriptor {
 			sm.checkPermission(new ApplicationAdminPermission(this, ApplicationAdminPermission.SCHEDULE_ACTION));
 		checkArgs(arguments);
 		isLaunchableSpecific(); // checks if the ApplicationDescriptor was already unregistered
-		return AppPersistenceUtil.addScheduledApp(this, scheduleId, arguments, topic, eventFilter, recurring);
+		return AppPersistence.addScheduledApp(this, scheduleId, arguments, topic, eventFilter, recurring);
 	}
 
 	/**
@@ -494,11 +494,11 @@ public abstract class ApplicationDescriptor {
 	protected abstract void unlockSpecific();
 
 	private void saveLock(boolean locked) {
-		AppPersistenceUtil.saveLock(this, locked);
+		AppPersistence.saveLock(this, locked);
 	}
 
 	private boolean isLocked() {
-		return AppPersistenceUtil.isLocked(this);
+		return AppPersistence.isLocked(this);
 	}
 
 	private void checkArgs(Map arguments) {

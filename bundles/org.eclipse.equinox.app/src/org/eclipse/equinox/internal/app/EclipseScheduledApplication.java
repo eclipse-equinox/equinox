@@ -43,7 +43,7 @@ public class EclipseScheduledApplication implements ScheduledApplication, EventH
 		this.eventFilter = eventFilter;
 		this.recurring = recurring;
 		appTracker = new ServiceTracker(context, context.createFilter(FILTER_PREFIX + appPid + FILTER_POSTFIX), null);
-		AppPersistenceUtil.openTracker(appTracker, false);
+		Activator.openTracker(appTracker, false);
 	}
 
 	public String getScheduleId() {
@@ -68,8 +68,8 @@ public class EclipseScheduledApplication implements ScheduledApplication, EventH
 
 	public synchronized ApplicationDescriptor getApplicationDescriptor() {
 		if (removed)
-			throw new IllegalStateException(Messages.EclipseScheduledApplication_7);
-		return (ApplicationDescriptor) AppPersistenceUtil.getService(appTracker);
+			throw new IllegalStateException(Messages.scheduled_app_removed);
+		return (ApplicationDescriptor) Activator.getService(appTracker);
 	}
 
 	public Map getArguments() {
@@ -86,7 +86,7 @@ public class EclipseScheduledApplication implements ScheduledApplication, EventH
 		if (removed)
 			return;
 		removed = true;
-		AppPersistenceUtil.removeScheduledApp(this);
+		AppPersistence.removeScheduledApp(this);
 		if (sr != null)
 			sr.unregister();
 		appTracker.close();

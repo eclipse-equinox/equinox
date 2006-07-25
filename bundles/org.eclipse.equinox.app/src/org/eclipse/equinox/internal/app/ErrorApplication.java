@@ -12,6 +12,7 @@
 package org.eclipse.equinox.internal.app;
 
 import org.eclipse.equinox.app.IApplication;
+import org.eclipse.equinox.app.IApplicationContext;
 
 /*
  * Special case class only used to throw exceptions when an application
@@ -21,7 +22,7 @@ public class ErrorApplication implements IApplication {
 
 	static private Exception ERROR;
 
-	public Object run(Object args) throws Exception {
+	public Object start(IApplicationContext context) throws Exception {
 		if (ERROR != null)
 			throw ERROR;
 		throw new IllegalStateException();

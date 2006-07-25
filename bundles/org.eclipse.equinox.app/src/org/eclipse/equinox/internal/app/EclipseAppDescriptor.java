@@ -25,20 +25,18 @@ import org.osgi.service.condpermadmin.ConditionInfo;
  */
 public class EclipseAppDescriptor extends ApplicationDescriptor {
 	static final String APP_TYPE = "eclipse.application.type"; //$NON-NLS-1$
+	static final String APP_TYPE_MAIN_TREAD = "main.thread"; //$NON-NLS-1$
 	private ServiceRegistration sr;
 	private Boolean locked = Boolean.FALSE;
-	private SingletonContainer singletonMgr;
-	private ContainerManager containerMgr;
-	private String namespace;
-	private String type;
+	private EclipseAppContainer appContainer;
+	private String contributor;
 	private boolean visible;
 
-	protected EclipseAppDescriptor(String namespace, String pid, String type, boolean visible, ContainerManager containerMgr) {
+	protected EclipseAppDescriptor(String contributor, String pid, boolean visible, EclipseAppContainer appContainer) {
 		super(pid);
-		this.type = type == null ? ContainerManager.APP_TYPE_MAIN_THREAD : type;
-		this.namespace = namespace;
-		this.containerMgr = containerMgr;
-		this.locked = AppPersistenceUtil.isLocked(this) ? Boolean.TRUE : Boolean.FALSE;
+		this.contributor = contributor;
+		this.appContainer = appContainer;
+		this.locked = AppPersistence.isLocked(this) ? Boolean.TRUE : Boolean.FALSE;
 		this.visible = visible;
 	}
 
@@ -56,8 +54,8 @@ public class EclipseAppDescriptor extends ApplicationDescriptor {
 		EclipseAppHandle appHandle = createAppHandle();
 		appHandle.setArguments(arguments);
 		try {
-			// use the containerMgr to launch the application on the main thread.
-			containerMgr.launch(appHandle);
+			// use the appContainer to launch the application on the main thread.
+			appContainer.launch(appHandle);
 		} catch (Throwable t) {
 			// be sure to destroy the appHandle if an error occurs
 			appHandle.destroy();
@@ -80,21 +78,9 @@ public class EclipseAppDescriptor extends ApplicationDescriptor {
 		refreshProperties();
 	}
 
-	/*
-	 * Indicates to this descriptor that the appHandle was destroyed
-	 */
-	synchronized void appHandleDestroyed() {
-		if (singletonMgr != null)
-			singletonMgr.unlock();
-	}
-
 	void refreshProperties() {
 		if (sr != null)
 			sr.setProperties(getServiceProperties());
-	}
-
-	void setSingletonMgr(SingletonContainer singletonMgr) {
-		this.singletonMgr = singletonMgr;
 	}
 
 	void setServiceRegistration(ServiceRegistration sr) {
@@ -109,18 +95,18 @@ public class EclipseAppDescriptor extends ApplicationDescriptor {
 		props.put(ApplicationDescriptor.APPLICATION_PID, getApplicationId());
 		props.put(ApplicationDescriptor.APPLICATION_CONTAINER, Activator.PI_APP);
 		props.put(ApplicationDescriptor.APPLICATION_LOCATION, getLocation());
-		props.put(ApplicationDescriptor.APPLICATION_LAUNCHABLE, singletonMgr == null ? Boolean.TRUE : singletonMgr.isLocked() ? Boolean.FALSE : Boolean.TRUE);
+		props.put(ApplicationDescriptor.APPLICATION_LAUNCHABLE, appContainer.isLocked() ? Boolean.FALSE : Boolean.TRUE);
 		props.put(ApplicationDescriptor.APPLICATION_LOCKED, locked);
 		props.put(ApplicationDescriptor.APPLICATION_VISIBLE, visible ? Boolean.TRUE : Boolean.FALSE);
-		props.put(EclipseAppDescriptor.APP_TYPE, getType());
+		props.put(APP_TYPE, APP_TYPE_MAIN_TREAD);
 		return props;
 	}
 
 	private String getLocation() {
-		final Bundle bundle = AppPersistenceUtil.getBundle(namespace);
+		final Bundle bundle = Activator.getBundle(contributor);
 		if (bundle == null)
 			return ""; //$NON-NLS-1$
-		return AppPersistenceUtil.getLocation(bundle);
+		return Activator.getLocation(bundle);
 	}
 
 	/*
@@ -129,33 +115,31 @@ public class EclipseAppDescriptor extends ApplicationDescriptor {
 	private synchronized EclipseAppHandle createAppHandle() {
 		// TODO not sure what instance pid should be used; for now just use the appDesciptor pid because apps are singletons anyway
 		EclipseAppHandle newAppHandle = new EclipseAppHandle(getApplicationId(), this);
-		ServiceRegistration appHandleReg = (ServiceRegistration) AccessController.doPrivileged(containerMgr.getRegServiceAction(ApplicationHandle.class.getName(), newAppHandle, newAppHandle.getServiceProperties()));
+		ServiceRegistration appHandleReg = (ServiceRegistration) AccessController.doPrivileged(appContainer.getRegServiceAction(ApplicationHandle.class.getName(), newAppHandle, newAppHandle.getServiceProperties()));
 		newAppHandle.setServiceRegistration(appHandleReg);
 		return newAppHandle;
 	}
 
-	ContainerManager getContainerManager() {
-		return containerMgr;
-	}
-
-	String getType() {
-		return type;
+	EclipseAppContainer getContainerManager() {
+		return appContainer;
 	}
 
 	public boolean matchDNChain(String pattern) {
-		Bundle bundle = AppPersistenceUtil.getBundle(namespace);
+		Bundle bundle = Activator.getBundle(contributor);
 		if (bundle == null)
 			return false;
 		return BundleSignerCondition.getCondition(bundle, new ConditionInfo(BundleSignerCondition.class.getName(), new String[] {pattern})).isSatisfied();
 	}
 
 	protected boolean isLaunchableSpecific() {
-		// TODO Auto-generated method stub
 		return true;
 	}
 
 	public void unregister() {
-		if (sr != null)
-			sr.unregister();
+		ServiceRegistration temp = sr;
+		if (temp != null) {
+			sr = null;
+			temp.unregister();
+		}
 	}
 }
