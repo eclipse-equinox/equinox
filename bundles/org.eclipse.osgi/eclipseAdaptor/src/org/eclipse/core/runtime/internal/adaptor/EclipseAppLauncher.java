@@ -12,7 +12,10 @@
 package org.eclipse.core.runtime.internal.adaptor;
 
 import org.eclipse.core.runtime.adaptor.EclipseStarter;
+import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
+import org.eclipse.osgi.framework.log.FrameworkLog;
+import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.internal.profile.Profile;
 import org.eclipse.osgi.service.runnable.*;
 import org.osgi.framework.*;
@@ -25,10 +28,12 @@ public class EclipseAppLauncher implements ApplicationLauncher {
 	private BundleContext context;
 	private boolean relaunch = false;
 	private boolean failOnNoDefault = false;
-	public EclipseAppLauncher(BundleContext context, boolean relaunch, boolean failOnNoDefault) {
+	private FrameworkLog log;
+	public EclipseAppLauncher(BundleContext context, boolean relaunch, boolean failOnNoDefault, FrameworkLog log) {
 		this.context = context;
 		this.relaunch = relaunch;
 		this.failOnNoDefault = failOnNoDefault;
+		this.log = log;
 		findRunnableService();
 	}
 
@@ -40,7 +45,7 @@ public class EclipseAppLauncher implements ApplicationLauncher {
 		String appClass = ParameterizedRunnable.class.getName();
 		ServiceReference[] runRefs = null;
 		try {
-			runRefs = context.getServiceReferences(ParameterizedRunnable.class.getName(), "(&(objectClass=" + appClass + ")(eclipse.application=*))");
+			runRefs = context.getServiceReferences(ParameterizedRunnable.class.getName(), "(&(objectClass=" + appClass + ")(eclipse.application=*))");  //$NON-NLS-1$//$NON-NLS-2$
 		} catch (InvalidSyntaxException e) {
 			// ignore this.  It should never happen as we have tested the above format.
 		}
@@ -65,7 +70,14 @@ public class EclipseAppLauncher implements ApplicationLauncher {
 			throw new IllegalStateException(EclipseAdaptorMsg.ECLIPSE_STARTUP_ERROR_NO_APPLICATION);
 		Object result = null;
 		do {
-			result = runApplication(defaultContext);
+			try {
+				result = runApplication(defaultContext);
+			} catch (Exception e) {
+				if (!relaunch || (context.getBundle().getState() & Bundle.ACTIVE) == 0)
+					throw e;
+				if (log != null)
+					log.log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, EclipseAdaptorMsg.ECLIPSE_STARTUP_APP_ERROR, 1, e, null));
+			}
 		} while (relaunch && (context.getBundle().getState() & Bundle.ACTIVE) != 0);
 		return result;
 	}

@@ -392,7 +392,7 @@ public class EclipseStarter {
 		if (initialize)
 			return new Integer(0);
 		// create the ApplicationLauncher and register it as a service
-		EclipseAppLauncher launcher = new EclipseAppLauncher(context, Boolean.valueOf(FrameworkProperties.getProperty(PROP_ALLOW_APPRELAUNCH)).booleanValue(), !Boolean.valueOf(FrameworkProperties.getProperty(PROP_APPLICATION_NODEFAULT)).booleanValue());
+		EclipseAppLauncher launcher = new EclipseAppLauncher(context, Boolean.valueOf(FrameworkProperties.getProperty(PROP_ALLOW_APPRELAUNCH)).booleanValue(), !Boolean.valueOf(FrameworkProperties.getProperty(PROP_APPLICATION_NODEFAULT)).booleanValue(), log);
 		context.registerService(ApplicationLauncher.class.getName(), launcher, null);
 		// must start the launcher AFTER service restration because this method 
 		// blocks and runs the application on the current thread.  This method 
