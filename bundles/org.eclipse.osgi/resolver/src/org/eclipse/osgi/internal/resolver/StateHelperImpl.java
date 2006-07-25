@@ -300,14 +300,24 @@ public class StateHelperImpl implements StateHelper {
 		visited.add(requiredBundle);
 		// add all the exported packages from the required bundle; take x-friends into account.
 		ExportPackageDescription[] exports = requiredBundle.getSelectedExports();
+		ArrayList exportNames = new ArrayList(exports.length);
 		for (int i = 0; i < exports.length; i++)
-			if ((pkgName == null || exports[i].getName().equals(pkgName)) && !isSystemExport(exports[i]) && isFriend(symbolicName, exports[i], strict) && !importList.contains(exports[i].getName()))
+			if ((pkgName == null || exports[i].getName().equals(pkgName)) && !isSystemExport(exports[i]) && isFriend(symbolicName, exports[i], strict) && !importList.contains(exports[i].getName())) {
 				packageList.add(exports[i]);
-		// now look for reexported bundles from the required bundle.
+				exportNames.add(exports[i].getName());
+			}
+		// now look for exports from the required bundle.
 		BundleSpecification[] requiredBundles = requiredBundle.getRequiredBundles();
 		for (int i = 0; i < requiredBundles.length; i++)
-			if ((pkgName != null || requiredBundles[i].isExported()) && requiredBundles[i].getSupplier() != null)
-				getPackages((BundleDescription) requiredBundles[i].getSupplier(), symbolicName, importList, packageList, visited, strict, pkgName);
+			if (requiredBundles[i].getSupplier() != null)
+				if ((pkgName != null && exportNames.size() > 0) || requiredBundles[i].isExported()) {
+					// looking for a specific package and that package is exported by this bundle or adding all packages from a reexported bundle
+					getPackages((BundleDescription) requiredBundles[i].getSupplier(), symbolicName, importList, packageList, visited, strict, pkgName);
+				} else {
+					// adding any exports from required bundles which we also export
+					for (Iterator names = exportNames.iterator(); names.hasNext();)
+						getPackages((BundleDescription) requiredBundles[i].getSupplier(), symbolicName, importList, packageList, visited, strict, (String) names.next());
+				}
 	}
 
 	private boolean isSystemExport(ExportPackageDescription export) {
