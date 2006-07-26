@@ -137,7 +137,7 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
 		synchronized (registrationLock) {
 			if (state != REGISTERED) /* in the process of unregisterING */
 			{
-				throw new IllegalStateException(Msg.SERVICE_ALREADY_UNREGISTERED_EXCEPTION); 
+				throw new IllegalStateException(Msg.SERVICE_ALREADY_UNREGISTERED_EXCEPTION);
 			}
 
 			/* remove this object from the service registry */
@@ -205,7 +205,7 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
 		 * but makes more sense.
 		 */
 		if (reference == null) {
-			throw new IllegalStateException(Msg.SERVICE_ALREADY_UNREGISTERED_EXCEPTION); 
+			throw new IllegalStateException(Msg.SERVICE_ALREADY_UNREGISTERED_EXCEPTION);
 		}
 
 		return (reference);
@@ -237,7 +237,7 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
 		synchronized (registrationLock) {
 			if (state != REGISTERED) /* in the process of unregistering */
 			{
-				throw new IllegalStateException(Msg.SERVICE_ALREADY_UNREGISTERED_EXCEPTION); 
+				throw new IllegalStateException(Msg.SERVICE_ALREADY_UNREGISTERED_EXCEPTION);
 			}
 
 			this.properties = createProperties(props);
@@ -257,11 +257,8 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
 	protected Properties createProperties(Dictionary props) {
 		Properties properties = new Properties(props);
 
-		properties.setProperty(Constants.OBJECTCLASS, null); /* remove user provided key if any */
-		properties.setProperty(Constants.OBJECTCLASS, clazzes);
-
-		properties.setProperty(Constants.SERVICE_ID, null); /* remove user provided key if any */
-		properties.setProperty(Constants.SERVICE_ID, new Long(serviceid));
+		properties.set(Constants.OBJECTCLASS, clazzes, true);
+		properties.set(Constants.SERVICE_ID, new Long(serviceid), true);
 
 		Object ranking = properties.getProperty(Constants.SERVICE_RANKING);
 
@@ -522,7 +519,7 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
 		 * @param props The properties for this service.
 		 */
 		protected Properties(Dictionary props) {
-			this((props == null) ? 2 : props.size()+2, props);
+			this((props == null) ? 2 : props.size() + 2, props);
 		}
 
 		/**
@@ -587,7 +584,7 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
 				return value;
 			if (value instanceof Boolean) /* shortcut Boolean */
 				return value;
-			
+
 			Class clazz = value.getClass();
 			if (clazz.isArray()) {
 				// Do an array copy
