@@ -17,6 +17,7 @@ import java.util.Enumeration;
 import org.eclipse.osgi.baseadaptor.*;
 import org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry;
 import org.eclipse.osgi.baseadaptor.bundlefile.BundleFile;
+import org.eclipse.osgi.baseadaptor.hooks.StorageHook;
 import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.internal.core.Constants;
@@ -34,6 +35,11 @@ public class SystemBundleData extends BaseData {
 		manifest = createManifest(osgiBase);
 		setMetaData();
 		setLastModified(System.currentTimeMillis()); // just set the lastModified to the current time
+		StorageHook[] hooks = adaptor.getHookRegistry().getStorageHooks();
+		StorageHook[] instanceHooks = new StorageHook[hooks.length];
+		for (int i = 0; i < hooks.length; i++)
+			instanceHooks[i] = hooks[i].create(this);
+		setStorageHooks(instanceHooks);
 	}
 
 	private File getOsgiBase() {
