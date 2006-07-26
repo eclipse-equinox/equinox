@@ -9,13 +9,13 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipsei.equinox.event.mapper;
+package org.eclipse.equinox.event.mapper;
 
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.log.LogReaderService;
 
 /**
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.1 $
  */
 public interface LogReaderServiceListener {
 	public void logReaderServiceAdding(ServiceReference reference,

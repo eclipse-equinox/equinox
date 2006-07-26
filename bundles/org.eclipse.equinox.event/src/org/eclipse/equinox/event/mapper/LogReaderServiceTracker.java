@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipsei.equinox.event.mapper;
+package org.eclipse.equinox.event.mapper;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -17,7 +17,7 @@ import org.osgi.service.log.LogReaderService;
 import org.osgi.util.tracker.ServiceTracker;
 
 /**
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.1 $
  */
 public class LogReaderServiceTracker extends ServiceTracker {
 	private final LogReaderServiceListener	listener;

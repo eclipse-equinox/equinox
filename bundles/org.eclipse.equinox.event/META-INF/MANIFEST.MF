@@ -1,6 +1,6 @@
 Bundle-ManifestVersion: 2
 Bundle-Name: %bundleName
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 1.0.100.qualifier
 Bundle-SymbolicName: org.eclipse.equinox.event
 Bundle-Activator: org.eclipse.equinox.event.Activator
 Bundle-Copyright: %bundleCopyright
@@ -14,7 +14,7 @@ Import-Package: org.eclipse.osgi.framework.eventmgr,
  org.osgi.service.wireadmin,
  org.osgi.util.tracker
 Export-Package: org.eclipse.equinox.event; x-internal:=true,
- org.eclipse.equinox.event; x-internal:=true
+ org.eclipse.equinox.event.mapper; x-internal:=true
 Bundle-Vendor: %bundleVendor
 Export-Service: org.osgi.service.event.EventAdmin
 Bundle-Localization: plugin

@@ -11,7 +11,7 @@
 
 package org.eclipse.equinox.event;
 
-import org.eclipsei.equinox.event.mapper.EventRedeliverer;
+import org.eclipse.equinox.event.mapper.EventRedeliverer;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;

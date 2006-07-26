@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipsei.equinox.event.mapper;
+package org.eclipse.equinox.event.mapper;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -34,7 +34,7 @@ import org.osgi.util.tracker.ServiceTracker;
  * Main class for redeliver special events like FrameworkEvents via EventAdmin.
  * 
  * 
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.1 $
  */
 public class EventRedeliverer implements FrameworkListener, BundleListener,
 		ServiceListener, LogListener, LogReaderServiceListener,

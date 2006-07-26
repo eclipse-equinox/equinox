@@ -9,33 +9,29 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipsei.equinox.event.mapper;
+package org.eclipse.equinox.event.mapper;
 
 import java.util.Hashtable;
-import org.osgi.framework.ServiceEvent;
-import org.osgi.framework.ServiceReference;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.FrameworkEvent;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 
 /**
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.1 $
  */
-public class ServiceEventAdapter extends EventAdapter {
+public class FrameworkEventAdapter extends EventAdapter {
 	// constants for Event topic substring
-	public static final String	HEADER			= "org/osgi/framework/ServiceEvent";
-	public static final String	UNREGISTERING	= "UNREGISTERING";
-	public static final String	MODIFIED		= "MODIFIED";
-	public static final String	REGISTERED		= "REGISTERED";
-	private ServiceEvent		event;
+	public static final String	HEADER				= "org/osgi/framework/FrameworkEvent";
+	public static final String	STARTLEVEL_CHANGED	= "STARTLEVEL_CHANGED";
+	public static final String	STARTED				= "STARTED";
+	public static final String	PACKAGES_REFRESHED	= "PACKAGES_REFRESHED";
+	public static final String	ERROR				= "ERROR";
+	protected FrameworkEvent	event;
 
-	public ServiceEventAdapter(ServiceEvent event, EventAdmin eventAdmin) {
+	public FrameworkEventAdapter(FrameworkEvent event, EventAdmin eventAdmin) {
 		super(eventAdmin);
 		this.event = event;
-	}
-
-	// override super's method to force syncronous event delivery
-	protected void redeliverInternal(Event converted) {
-		eventAdmin.sendEvent(converted);
 	}
 
 	/**
@@ -45,23 +41,30 @@ public class ServiceEventAdapter extends EventAdapter {
 	public Event convert() {
 		String typename = null;
 		switch (event.getType()) {
-			case ServiceEvent.REGISTERED :
-				typename = REGISTERED;
+			case FrameworkEvent.ERROR :
+				typename = ERROR;
 				break;
-			case ServiceEvent.MODIFIED :
-				typename = MODIFIED;
+			case FrameworkEvent.PACKAGES_REFRESHED :
+				typename = PACKAGES_REFRESHED;
 				break;
-			case ServiceEvent.UNREGISTERING :
-				typename = UNREGISTERING;
+			case FrameworkEvent.STARTED :
+				typename = STARTED;
+				break;
+			case FrameworkEvent.STARTLEVEL_CHANGED :
+				typename = STARTLEVEL_CHANGED;
 				break;
 			default :
 				return null;
 		}
 		String topic = HEADER + Constants.TOPIC_SEPARATOR + typename;
 		Hashtable properties = new Hashtable();
-		ServiceReference ref = event.getServiceReference();
-		if (ref != null) {
-			putServiceReferenceProperties(properties, ref);
+		Bundle bundle = event.getBundle();
+		if (bundle != null) {
+			putBundleProperties(properties, bundle);
+		}
+		Throwable t = event.getThrowable();
+		if (t != null) {
+			putExceptionProperties(properties, t);
 		}
 		properties.put(Constants.EVENT, event);
 		Event converted = new Event(topic, properties);

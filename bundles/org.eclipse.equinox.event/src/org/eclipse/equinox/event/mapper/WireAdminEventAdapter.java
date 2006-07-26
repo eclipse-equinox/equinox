@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipsei.equinox.event.mapper;
+package org.eclipse.equinox.event.mapper;
 
 import java.util.Hashtable;
 import org.osgi.framework.ServiceReference;
@@ -18,7 +18,7 @@ import org.osgi.service.wireadmin.Wire;
 import org.osgi.service.wireadmin.WireAdminEvent;
 
 /**
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.1 $
  */
 public class WireAdminEventAdapter extends EventAdapter {
 	// constants for Event topic substring
