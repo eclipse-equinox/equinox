@@ -12,8 +12,7 @@
 package org.eclipse.osgi.internal.verifier;
 
 import java.io.*;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.*;
 import java.security.*;
 import java.security.cert.Certificate;
 import java.util.*;
@@ -49,6 +48,7 @@ public class KeyStores {
 	private void processKeyStore(String urlSpec, String type, URL rootURL) {
 		if (type == null)
 			type = KeyStore.getDefaultType();
+		InputStream in = null;
 		try {
 			URL url;
 			try {
@@ -57,10 +57,24 @@ public class KeyStores {
 				url = new URL(rootURL, urlSpec);
 			}
 			KeyStore ks = KeyStore.getInstance(type);
-			ks.load(url.openStream(), null);
-			keyStores.add(ks);
+			try {
+				in = url.openStream();
+			} catch (IOException ioe) {
+				// ignore this; the file probably does not exist
+			}
+			if (in != null) {
+				ks.load(in, null);
+				keyStores.add(ks);
+			}
 		} catch (Exception e) {
 			SignedBundleHook.log(e.getMessage(), FrameworkLogEntry.WARNING, e);
+		} finally {
+			if (in != null)
+				try {
+					in.close();
+				} catch (IOException e){
+					// do nothing
+				}
 		}
 	}
 
