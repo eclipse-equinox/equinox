@@ -385,18 +385,17 @@ public class Framework implements EventDispatcher, EventPublisher {
 				// we assume a URL
 				url = new URL(propJavaProfile);
 			} catch (MalformedURLException e1) {
-				// TODO consider logging ...
+				// try using a relative path in the system bundle
+				url = findInSystemBundle(propJavaProfile);
 			}
 		if (url == null && vmProfile != null) {
 			// look for a profile in the system bundle based on the vm profile
 			String javaProfile = vmProfile + ".profile"; //$NON-NLS-1$
-			url = systemBundle.getEntry(javaProfile);
-			if (url == null) {
-				// Check the ClassLoader in case we're launched off the Java boot classpath
-				ClassLoader loader=getClass().getClassLoader();
-				url = loader==null ? ClassLoader.getSystemResource(javaProfile) : loader.getResource(javaProfile);
-			}
+			url = findInSystemBundle(javaProfile);
 		}
+		if (url == null)
+			// the profile url is still null then use the osgi min profile in OSGi by default
+			url = findInSystemBundle("OSGi_Minimum-1.0.profile"); //$NON-NLS-1$
 		if (url != null) {
 			InputStream in = null;
 			try {
@@ -420,6 +419,16 @@ public class Framework implements EventDispatcher, EventPublisher {
 			else
 				// last resort; default to the absolute minimum profile name
 				result.put(Constants.OSGI_JAVA_PROFILE_NAME, "OSGi/Minimum-1.0"); //$NON-NLS-1$
+		return result;
+	}
+
+	private URL findInSystemBundle(String entry) {
+		URL result = systemBundle.getEntry(entry);
+		if (result == null) {
+			// Check the ClassLoader in case we're launched off the Java boot classpath
+			ClassLoader loader=getClass().getClassLoader();
+			result = loader==null ? ClassLoader.getSystemResource(entry) : loader.getResource(entry);
+		}
 		return result;
 	}
 
