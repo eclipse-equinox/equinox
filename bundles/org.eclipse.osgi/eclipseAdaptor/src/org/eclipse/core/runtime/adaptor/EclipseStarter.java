@@ -183,7 +183,8 @@ public class EclipseStarter {
 			FrameworkLogEntry logEntry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, startupFailed ? EclipseAdaptorMsg.ECLIPSE_STARTUP_STARTUP_ERROR : EclipseAdaptorMsg.ECLIPSE_STARTUP_APP_ERROR, 1, e, null);
 			if (log != null) {
 				log.log(logEntry);
-				logUnresolvedBundles(context.getBundles());
+				if (context != null) // this can be null if OSGi failed to launch (bug 151413)
+					logUnresolvedBundles(context.getBundles());
 			} else
 				// TODO desperate measure - ideally, we should write this to disk (a la Main.log)
 				e.printStackTrace();

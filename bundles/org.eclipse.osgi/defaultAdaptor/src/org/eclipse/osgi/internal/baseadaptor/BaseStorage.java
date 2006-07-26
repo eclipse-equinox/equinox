@@ -643,9 +643,17 @@ public class BaseStorage {
 		if (removedBundle)
 			state.resolve(false); // do a full resolve
 		BundleDescription systemBundle = state.getBundle(0);
-		if (systemBundle == null || !systemBundle.isResolved())
+		if (systemBundle == null || !systemBundle.isResolved()) {
+			ResolverError[] errors = systemBundle == null ? new ResolverError[0] : state.getResolverErrors(systemBundle);
+			StringBuffer sb = new StringBuffer();
+			for (int i = 0; i < errors.length; i++) {
+				sb.append(errors[i].toString());
+				if (i < errors.length - 1)
+					sb.append(", "); //$NON-NLS-1$
+			}
 			// this would be a bug in the framework
-			throw new IllegalStateException();
+			throw new IllegalStateException(NLS.bind(AdaptorMsg.SYSTEMBUNDLE_NOTRESOLVED, sb.toString()));
+		}
 	}
 
 	private StateManager readStateData() {

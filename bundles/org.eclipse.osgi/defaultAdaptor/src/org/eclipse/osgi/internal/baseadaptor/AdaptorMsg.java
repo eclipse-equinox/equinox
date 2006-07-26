@@ -43,7 +43,8 @@ public class AdaptorMsg extends NLS {
 	public static String RESOURCE_NOT_FOUND_EXCEPTION;
 	
 	public static String SYSTEMBUNDLE_MISSING_MANIFEST;
-	
+	public static String SYSTEMBUNDLE_NOTRESOLVED;
+
 	public static String URL_INVALID_BUNDLE_ID;
 	public static String URL_NO_BUNDLE_FOUND;	
 	public static String URL_NO_BUNDLE_ID;
