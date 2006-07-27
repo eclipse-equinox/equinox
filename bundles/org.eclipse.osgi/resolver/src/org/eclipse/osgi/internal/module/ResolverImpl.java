@@ -290,31 +290,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 	private void attachFragment(ResolverBundle bundle, ArrayList rejectedSingletons) {
 		if (!bundle.isFragment() || !bundle.isResolvable() || rejectedSingletons.contains(bundle.getBundle()))
 			return;
-		// select singleton fragments
-		if (bundle.getBundle().isSingleton()) {
-			BundleDescription bundleDesc = bundle.getBundle();
-			Object[] sameName = resolverBundles.get(bundleDesc.getName());
-			if (sameName.length > 1) {
-				// we found some other bundles with the same BSN
-				for (int j = 0; j < sameName.length; j++) {
-					BundleDescription sameNameDesc = ((ResolverBundle) sameName[j]).getBundle();
-					if (sameName[j] == bundle || !sameNameDesc.isSingleton() || rejectedSingletons.contains(sameNameDesc))
-						continue; // Ignore the bundle we are selecting, non-singletons and rejected singletons
-					boolean rejectedPolicy;
-					if (selectionPolicy == null)
-						// if the bundle sameNameDesc is resolved or has a greater version then reject the other bundle
-						rejectedPolicy = sameNameDesc.isResolved() || sameNameDesc.getVersion().compareTo(bundle.getBundle().getVersion()) > 0;
-					else
-						rejectedPolicy = selectionPolicy.compare(sameNameDesc, bundle.getBundle()) < 0;
-					if (rejectedPolicy) {
-						rejectedSingletons.add(bundle.getBundle());
-						return;
-					}
-					// reject the bundle sameNameDesc
-					rejectedSingletons.add(sameNameDesc);
-				}
-			}
-		}
+		// no need to select singletons now; it will be done when we select the rest of the singleton bundles (bug 152042)
 		// find all available hosts to attach to.
 		BundleConstraint hostConstraint = bundle.getHost();
 		Object[] hosts = resolverBundles.get(hostConstraint.getVersionConstraint().getName());

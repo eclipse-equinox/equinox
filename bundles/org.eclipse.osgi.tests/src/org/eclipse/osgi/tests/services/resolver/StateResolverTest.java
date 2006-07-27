@@ -1071,6 +1071,105 @@ public class StateResolverTest extends AbstractStateTest {
 		assertFalse("2.2.2", rcp_frag210.isResolved());
 	}
 
+	public void testSingletonsSelection5() throws BundleException {
+		State state = buildEmptyState();
+
+		long id = 0;
+		Hashtable manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "base; " + Constants.SINGLETON_DIRECTIVE + ":=true");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		BundleDescription base10 = state.getFactory().createBundleDescription(state, manifest, "base10", id++);
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "base; " + Constants.SINGLETON_DIRECTIVE + ":=true");
+		manifest.put(Constants.BUNDLE_VERSION, "1.1");
+		manifest.put(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT, "J2SE-1.6");
+		BundleDescription base11 = state.getFactory().createBundleDescription(state, manifest, "base11", id++);
+	
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "requires; " + Constants.SINGLETON_DIRECTIVE + ":=true");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.REQUIRE_BUNDLE, "base; bundle-version=\"[1.0,1.1)\"");
+		BundleDescription requires10 = state.getFactory().createBundleDescription(state, manifest, "requires10", id++);
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "requires; " + Constants.SINGLETON_DIRECTIVE + ":=true");
+		manifest.put(Constants.BUNDLE_VERSION, "1.1");
+		manifest.put(Constants.REQUIRE_BUNDLE, "base; bundle-version=\"[1.1,1.2)\"");
+		BundleDescription requires11 = state.getFactory().createBundleDescription(state, manifest, "requires11", id++);
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "frag; " + Constants.SINGLETON_DIRECTIVE + ":=true");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.FRAGMENT_HOST, "requires; bundle-version=\"[1.0,1.1)\"");
+		BundleDescription frag10 = state.getFactory().createBundleDescription(state, manifest, "frag10", id++);
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "frag; " + Constants.SINGLETON_DIRECTIVE + ":=true");
+		manifest.put(Constants.BUNDLE_VERSION, "1.1");
+		manifest.put(Constants.FRAGMENT_HOST, "requires; bundle-version=\"[1.1,1.2)\"");
+		BundleDescription frag11 = state.getFactory().createBundleDescription(state, manifest, "frag11", id++);
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "fragb; " + Constants.SINGLETON_DIRECTIVE + ":=true");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.FRAGMENT_HOST, "requires; bundle-version=\"[1.0,1.1)\"");
+		manifest.put(Constants.EXPORT_PACKAGE, "fragb; version=1.0");
+		BundleDescription fragb10 = state.getFactory().createBundleDescription(state, manifest, "frag10", id++);
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "fragb; " + Constants.SINGLETON_DIRECTIVE + ":=true");
+		manifest.put(Constants.BUNDLE_VERSION, "1.1");
+		manifest.put(Constants.FRAGMENT_HOST, "requires; bundle-version=\"[1.0,1.1)\"");
+		manifest.put(Constants.EXPORT_PACKAGE, "fragb; version=1.1");
+		BundleDescription fragb11 = state.getFactory().createBundleDescription(state, manifest, "frag11", id++);
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "import");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.IMPORT_PACKAGE, "fragb; version=\"[1.0,1.0]\"");
+		BundleDescription import10 = state.getFactory().createBundleDescription(state, manifest, "import10", id++);
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "import");
+		manifest.put(Constants.BUNDLE_VERSION, "1.1");
+		manifest.put(Constants.IMPORT_PACKAGE, "fragb; version=\"[1.1,1.1]\"");
+		BundleDescription import11 = state.getFactory().createBundleDescription(state, manifest, "import11", id++);
+
+		state.addBundle(base10);
+		state.addBundle(base11);
+		state.addBundle(requires10);
+		state.addBundle(requires11);
+		state.addBundle(frag10);
+		state.addBundle(frag11);
+		state.addBundle(fragb10);
+		state.addBundle(fragb11);
+		state.addBundle(import10);
+		state.addBundle(import11);
+		state.resolve();
+
+		assertTrue("1.0", base10.isResolved());
+		assertTrue("1.1", requires10.isResolved());
+		assertTrue("1.2", frag10.isResolved());
+		assertTrue("1.3", fragb11.isResolved());
+		assertTrue("1.4", import11.isResolved());
+		assertFalse("1.5", base11.isResolved());
+		assertFalse("1.6", requires11.isResolved());
+		assertFalse("1.7", frag11.isResolved());
+		assertFalse("1.8", fragb10.isResolved());
+		assertFalse("1.9", import10.isResolved());
+	}
+
 	public void testNonSingletonsSameVersion() throws BundleException {
 		// this is a testcase to handle how PDE build is using the state
 		// with multiple singleton bundles installed with the same BSN and version
