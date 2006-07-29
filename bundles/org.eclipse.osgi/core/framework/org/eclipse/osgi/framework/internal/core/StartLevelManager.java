@@ -317,7 +317,7 @@ public class StartLevelManager implements EventDispatcher, EventListener, Servic
 	public boolean isBundlePersistentlyStarted(org.osgi.framework.Bundle bundle) {
 
 		if (bundle.getState() == AbstractBundle.UNINSTALLED) {
-			throw new IllegalArgumentException(Msg.BUNDLE_UNINSTALLED_EXCEPTION); 
+			throw new IllegalArgumentException(NLS.bind(Msg.BUNDLE_UNINSTALLED_EXCEPTION, ((AbstractBundle) bundle).getBundleData().getLocation())); 
 		}
 		AbstractBundle b = (AbstractBundle) bundle;
 		int status = b.getBundleData().getStatus();
@@ -334,7 +334,7 @@ public class StartLevelManager implements EventDispatcher, EventListener, Servic
 	public int getBundleStartLevel(org.osgi.framework.Bundle bundle) {
 
 		if (bundle.getState() == AbstractBundle.UNINSTALLED) {
-			throw new IllegalArgumentException(Msg.BUNDLE_UNINSTALLED_EXCEPTION); 
+			throw new IllegalArgumentException(NLS.bind(Msg.BUNDLE_UNINSTALLED_EXCEPTION, ((AbstractBundle) bundle).getBundleData().getLocation())); 
 		}
 		return ((AbstractBundle) bundle).getStartLevel();
 	}
@@ -373,7 +373,7 @@ public class StartLevelManager implements EventDispatcher, EventListener, Servic
 		if (bundle.getBundleId() == 0) { // system bundle has id=0
 			exceptionText = Msg.STARTLEVEL_CANT_CHANGE_SYSTEMBUNDLE_STARTLEVEL; 
 		} else if (bundle.getState() == AbstractBundle.UNINSTALLED) {
-			exceptionText = Msg.BUNDLE_UNINSTALLED_EXCEPTION; 
+			exceptionText = NLS.bind(Msg.BUNDLE_UNINSTALLED_EXCEPTION, ((AbstractBundle) bundle).getBundleData().getLocation()); 
 		} else if (newSL <= 0) {
 			exceptionText = NLS.bind(Msg.STARTLEVEL_EXCEPTION_INVALID_REQUESTED_STARTLEVEL, "" + newSL); //$NON-NLS-1$ 
 		}
