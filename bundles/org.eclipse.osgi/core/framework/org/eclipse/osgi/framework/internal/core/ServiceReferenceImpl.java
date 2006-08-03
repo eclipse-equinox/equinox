@@ -264,8 +264,9 @@ public class ServiceReferenceImpl implements ServiceReference, Comparable {
 			return producerSource;
 		// try the interfaces
 		Class[] interfaces = serviceClass.getInterfaces();
+		// note that getInterfaces never returns null
 		for (int i = 0; i < interfaces.length; i++) {
-			producerSource = getPackageSource(serviceClass.getSuperclass(), pkgName);
+			producerSource = getPackageSource(interfaces[i], pkgName);
 			if (producerSource != null)
 				return producerSource;
 		}
