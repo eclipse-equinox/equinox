@@ -37,7 +37,7 @@ import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 
-public class BaseStorage {
+public class BaseStorage implements SynchronousBundleListener {
 	private static final String RUNTIME_ADAPTOR = FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME + "/eclipseadaptor"; //$NON-NLS-1$
 	private static final String OPTION_PLATFORM_ADMIN = RUNTIME_ADAPTOR + "/debug/platformadmin"; //$NON-NLS-1$
 	private static final String OPTION_PLATFORM_ADMIN_RESOLVER = RUNTIME_ADAPTOR + "/debug/platformadmin/resolver"; //$NON-NLS-1$
@@ -82,6 +82,8 @@ public class BaseStorage {
 	// no need to synchronize on storageHooks because the elements are statically set in initialize
 	private KeyedHashSet storageHooks = new KeyedHashSet(5, false);
 	private BundleContext context;
+	private SynchronousBundleListener extensionListener;
+
 	/**
 	 * The add URL method used to support framework extensions
 	 */
@@ -757,6 +759,8 @@ public class BaseStorage {
 		saveAllData(true);
 		storageManager.close();
 		storageManagerClosed = true;
+		if (extensionListener != null)
+			context.removeBundleListener(extensionListener);
 	}
 
 	public void frameworkStopping(BundleContext fwContext) {
@@ -891,6 +895,14 @@ public class BaseStorage {
 		for (int i = 0; i < extensions.length; i++)
 			if (extensions[i].equals(bundleData.getSymbolicName()))
 				return;
+		if ((type & EXTENSION_INSTALLED) != 0) {
+			if (extensionListener == null) {
+				// add bundle listener to wait for extension to be resolved
+				extensionListener = this;
+				context.addBundleListener(extensionListener);
+			}
+			return;
+		}
 		File[] files = getExtensionFiles(bundleData);
 		if (files == null)
 			return;
@@ -1127,6 +1139,20 @@ public class BaseStorage {
 
 	public long getNextBundleId() {
 		return nextId++;
+	}
+
+	public void bundleChanged(BundleEvent event) {
+		if (event.getType() != BundleEvent.RESOLVED)
+			return;
+		BaseData data = (BaseData) ((AbstractBundle) event.getBundle()).getBundleData();
+		try {
+		if ((data.getType() & BundleData.TYPE_FRAMEWORK_EXTENSION) != 0)
+			processFrameworkExtension(data, EXTENSION_INITIALIZE);
+		else if ((data.getType() & BundleData.TYPE_BOOTCLASSPATH_EXTENSION) != 0)
+			processBootExtension(data, EXTENSION_INITIALIZE);
+		} catch (BundleException e) {
+			// do nothing;
+		}
 	}
 
 }
