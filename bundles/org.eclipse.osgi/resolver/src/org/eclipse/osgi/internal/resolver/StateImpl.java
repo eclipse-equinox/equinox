@@ -255,7 +255,7 @@ public abstract class StateImpl implements State {
 			if (hosts != null) {
 				hostSpec.setHosts(hosts);
 				for (int i = 0; i < hosts.length; i++)
-					((BundleDescriptionImpl) hosts[i]).addDependency(bundle);
+					((BundleDescriptionImpl) hosts[i]).addDependency(bundle, true);
 			}
 		}
 
@@ -263,9 +263,9 @@ public abstract class StateImpl implements State {
 		bundle.setResolvedRequires(resolvedRequires);
 		bundle.setResolvedImports(resolvedImports);
 
-		bundle.addDependencies(hosts);
-		bundle.addDependencies(resolvedRequires);
-		bundle.addDependencies(resolvedImports);
+		bundle.addDependencies(hosts, true);
+		bundle.addDependencies(resolvedRequires, true);
+		bundle.addDependencies(resolvedImports, true);
 		// add dependecies for generics
 		GenericSpecification[] genericRequires = bundle.getGenericRequires();
 		if (genericRequires.length > 0) {
@@ -276,7 +276,7 @@ public abstract class StateImpl implements State {
 					for (int j = 0; j < suppliers.length; j++)
 						genericSuppliers.add(suppliers[j]);
 			}
-			bundle.addDependencies((BaseDescription[]) genericSuppliers.toArray(new BaseDescription[genericSuppliers.size()]));
+			bundle.addDependencies((BaseDescription[]) genericSuppliers.toArray(new BaseDescription[genericSuppliers.size()]), true);
 		}
 	}
 

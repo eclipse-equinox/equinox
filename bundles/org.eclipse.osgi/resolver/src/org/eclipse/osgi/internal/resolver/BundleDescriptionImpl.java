@@ -350,21 +350,23 @@ public class BundleDescriptionImpl extends BaseDescriptionImpl implements Bundle
 		dependencies = null;
 	}
 
-	protected void addDependencies(BaseDescription[] newDependencies) {
+	protected void addDependencies(BaseDescription[] newDependencies, boolean checkDups) {
 		if (newDependencies == null)
 			return;
+		if (!checkDups && dependencies == null)
+			dependencies = new ArrayList(newDependencies.length);
 		for (int i = 0; i < newDependencies.length; i++) {
-			addDependency((BaseDescriptionImpl) newDependencies[i]);
+			addDependency((BaseDescriptionImpl) newDependencies[i], checkDups);
 		}
 	}
 
-	protected synchronized void addDependency(BaseDescriptionImpl dependency) {
+	protected synchronized void addDependency(BaseDescriptionImpl dependency, boolean checkDups) {
 		BundleDescriptionImpl bundle = (BundleDescriptionImpl) dependency.getSupplier();
 		if (bundle == this)
 			return;
 		if (dependencies == null)
 			dependencies = new ArrayList(10);
-		if (!dependencies.contains(bundle)) {
+		if (!checkDups || !dependencies.contains(bundle)) {
 			bundle.addDependent(this);
 			dependencies.add(bundle);
 		}
@@ -397,8 +399,8 @@ public class BundleDescriptionImpl extends BaseDescriptionImpl implements Bundle
 	protected synchronized void addDependent(BundleDescription dependent) {
 		if (dependents == null)
 			dependents = new ArrayList(10);
-		if (!dependents.contains(dependent))
-			dependents.add(dependent);
+		// no need to check for duplicates here; this is only called in addDepenency which already checks for dups.
+		dependents.add(dependent);
 	}
 
 	protected synchronized void removeDependent(BundleDescription dependent) {
@@ -457,7 +459,7 @@ public class BundleDescriptionImpl extends BaseDescriptionImpl implements Bundle
 
 	synchronized void addDynamicResolvedImport(ExportPackageDescriptionImpl result) {
 		// mark the dependency
-		addDependency(result);
+		addDependency(result, true);
 		// add the export to the list of the resolvedImports
 		checkLazyData();
 		if (lazyData.resolvedImports == null) {

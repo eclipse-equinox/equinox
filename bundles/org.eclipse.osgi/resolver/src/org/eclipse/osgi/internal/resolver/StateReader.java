@@ -204,24 +204,16 @@ class StateReader {
 		result.setStateBit(BundleDescriptionImpl.DYNAMIC_FRAGMENTS, in.readBoolean());
 		result.setHost(readHostSpec(in));
 
-		// set the bundle dependencies from imports and requires.
+		// set the bundle dependencies from imports and requires and hosts.
 		int numDeps = in.readInt();
 		if (numDeps > 0) {
 			BundleDescription[] deps = new BundleDescription[numDeps];
 			for (int i = 0; i < numDeps; i++)
 				deps[i] = readBundleDescription(in);
-			result.addDependencies(deps);
+			result.addDependencies(deps, false); // no need to check dups; we already know there are none when we resolved (bug 152900)
 		}
-		// set the dependencies between fragment and hosts.
-		HostSpecificationImpl hostSpec = (HostSpecificationImpl) result.getHost();
-		if (hostSpec != null) {
-			BundleDescription[] hosts = hostSpec.getHosts();
-			if (hosts != null) {
-				for (int i = 0; i < hosts.length; i++)
-					((BundleDescriptionImpl) hosts[i]).addDependency(result);
-				result.addDependencies(hosts);
-			}
-		}
+		// No need to set the dependencies between fragment and hosts; that was already done in the above loop (bug 152900)
+
 		// the rest is lazy loaded data
 		result.setFullyLoaded(false);
 		return result;
