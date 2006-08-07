@@ -163,7 +163,7 @@ public class BundleLoaderProxy implements RequiredBundle {
 		PackageSource pkgSource = (PackageSource) pkgSources.getByKey(pkgName);
 		if (pkgSource == null) {
 			pkgSource = new SingleSourcePackage(pkgName, -1, this);
-			synchronized (pkgSource) {
+			synchronized (pkgSources) {
 				pkgSources.add(pkgSource);
 			}
 		}
@@ -174,6 +174,12 @@ public class BundleLoaderProxy implements RequiredBundle {
 		return description.getDependents().length > 0;
 	}
 
+	boolean forceSourceCreation(ExportPackageDescription export) {
+		if (!export.isRoot())
+			return true;
+		boolean strict = Constants.STRICT_MODE.equals(bundle.framework.adaptor.getState().getPlatformProperties()[0].get(Constants.OSGI_RESOLVER_MODE));
+		return (export.getDirective(Constants.INCLUDE_DIRECTIVE) != null) || (export.getDirective(Constants.EXCLUDE_DIRECTIVE) != null) || (strict && export.getDirective(Constants.FRIENDS_DIRECTIVE) != null);
+	}
 	// creates a PackageSource from an ExportPackageDescription.  This is called when initializing
 	// a BundleLoader to ensure that the proper PackageSource gets created and used for
 	// filtered and reexport packages.  The storeSource flag is used by initialize to indicate
@@ -217,7 +223,7 @@ public class BundleLoaderProxy implements RequiredBundle {
 			// care too much of duplicates getting created.  Only the first one will
 			// successfully get stored into pkgSources
 			if (pkgSource != null && pkgSources.getByKey(export.getName()) == null)
-				synchronized (pkgSource) {
+				synchronized (pkgSources) {
 					pkgSources.add(pkgSource);
 				}
 		} else {

@@ -63,7 +63,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 	/* If not null, list of package names to import dynamically. */
 	String[] dynamicImportPackages;
 	/* List of package names that are exported by this BundleLoader */
-	ArrayList exportedPackages;
+	Collection exportedPackages;
 	/* List of required bundle BundleLoaderProxy objects */
 	BundleLoaderProxy[] requiredBundles;
 	/* List of indexes into the requiredBundles list of reexported bundles */
@@ -157,15 +157,17 @@ public class BundleLoader implements ClassLoaderDelegate {
 		// init the provided packages set
 		ExportPackageDescription[] exports = description.getSelectedExports();
 		if (exports != null && exports.length > 0) {
-			exportedPackages = new ArrayList(exports.length);
+			exportedPackages = exports.length > 10 ? (Collection) new HashSet(exports.length) : new ArrayList(exports.length);
 			for (int i = 0; i < exports.length; i++) {
-				if (!exportedPackages.contains(exports[i].getName())) {
-					exportedPackages.add(exports[i].getName());
-					// must force filtered and reexport sources to be created early
-					// to prevent lazy normal package source creation.
-					// We only do this for the first export of a package name. 
-					proxy.createPackageSource(exports[i], true);
+				if (proxy.forceSourceCreation(exports[i])) {
+					if (!exportedPackages.contains(exports[i].getName())) {
+						// must force filtered and reexport sources to be created early
+						// to prevent lazy normal package source creation.
+						// We only do this for the first export of a package name. 
+						proxy.createPackageSource(exports[i], true);
+					}
 				}
+				exportedPackages.add(exports[i].getName());
 			}
 		}
 		//This is the fastest way to access to the description for fragments since the hostdescription.getFragments() is slow
