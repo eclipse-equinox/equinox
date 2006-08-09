@@ -667,6 +667,12 @@ public class EclipseStarter {
 		ArrayList result = new ArrayList(installEntries.length);
 		int defaultStartLevel = Integer.parseInt(FrameworkProperties.getProperty(PROP_BUNDLES_STARTLEVEL, DEFAULT_BUNDLES_STARTLEVEL));
 		String syspath = getSysPath();
+		// should canonicalize the syspath.
+		try {
+			syspath = new File(syspath).getCanonicalPath();
+		} catch (IOException ioe) {
+			// do nothing
+		}
 		for (int i = 0; i < installEntries.length; i++) {
 			String name = installEntries[i];
 			int level = defaultStartLevel;
