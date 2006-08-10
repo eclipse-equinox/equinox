@@ -125,7 +125,7 @@ public class LocationManager {
 	public static void initializeLocations() {
 		// do install location initialization first since others may depend on it
 		// assumes that the property is already set
-		installLocation = buildLocation(PROP_INSTALL_AREA, null, null, true);		
+		installLocation = buildLocation(PROP_INSTALL_AREA, null, "", true); //$NON-NLS-1$
 		
 		Location temp = buildLocation(PROP_USER_AREA_DEFAULT, null, "", false); //$NON-NLS-1$
 		URL defaultLocation = temp == null ? null : temp.getURL();
