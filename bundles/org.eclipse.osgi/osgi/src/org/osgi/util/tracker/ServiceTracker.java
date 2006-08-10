@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.util.tracker/src/org/osgi/util/tracker/ServiceTracker.java,v 1.17 2005/11/15 22:05:30 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.util.tracker/src/org/osgi/util/tracker/ServiceTracker.java,v 1.19 2006/06/15 20:44:05 hargrave Exp $
  * 
  * Copyright (c) OSGi Alliance (2000, 2005). All Rights Reserved.
  * 
@@ -33,7 +33,7 @@ import org.osgi.framework.*;
  * <code>getServices</code> methods can be called to get the service objects
  * for the tracked service.
  * 
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.19 $
  */
 public class ServiceTracker implements ServiceTrackerCustomizer {
 	/* set this to true to compile in debug messages */
@@ -962,6 +962,9 @@ public class ServiceTracker implements ServiceTrackerCustomizer {
 				if (DEBUG) {
 					System.out
 							.println("ServiceTracker.Tracked.track[modified]: " + reference); //$NON-NLS-1$
+				}
+				synchronized (this) {
+					modified(); /* increment modification count */
 				}
 				/* Call customizer outside of synchronized region */
 				customizer.modifiedService(reference, object);
