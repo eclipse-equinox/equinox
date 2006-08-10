@@ -238,6 +238,12 @@ public class ServiceReferenceImpl implements ServiceReference, Comparable {
 		PackageSource consumerSource = consumerBL.getPackageSource(pkgName);
 		if (consumerSource == null)
 			return true;
+		// work around the issue when the package is in the EE and we delegate to boot for that package
+		if (producerBL.isBootDelegationPackage(pkgName)) {
+			SystemBundleLoader systemLoader = (SystemBundleLoader) registration.framework.systemBundle.getBundleLoader();
+			if (systemLoader.isEEPackage(pkgName))
+				return true;  // in this case we have a common source from the EE
+		}
 		// 4) For the registrant bundle, find the wiring for the package.
 		PackageSource producerSource = producerBL.getPackageSource(pkgName);
 		if (producerSource == null) {

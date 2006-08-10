@@ -13,7 +13,8 @@ package org.eclipse.osgi.framework.internal.core;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.Enumeration;
+import java.util.*;
+import org.eclipse.osgi.service.resolver.ExportPackageDescription;
 import org.osgi.framework.BundleException;
 
 /**
@@ -21,7 +22,9 @@ import org.osgi.framework.BundleException;
  * to load a resource that is exported by the System Bundle.
  */
 public class SystemBundleLoader extends BundleLoader {
+	public static final String EQUINOX_EE = "x-equinox-ee"; //$NON-NLS-1$
 	ClassLoader classLoader;
+	private HashSet eePackages;
 
 	/**
 	 * @param bundle The system bundle.
@@ -30,6 +33,13 @@ public class SystemBundleLoader extends BundleLoader {
 	 */
 	protected SystemBundleLoader(BundleHost bundle, BundleLoaderProxy proxy) throws BundleException {
 		super(bundle, proxy);
+		ExportPackageDescription[] exports = proxy.getBundleDescription().getSelectedExports();
+		if (exports != null && exports.length > 0) {
+			eePackages = new HashSet(exports.length);
+			for (int i = 0; i < exports.length; i++)
+				if (((Integer) exports[i].getDirective(EQUINOX_EE)).intValue() >= 0)
+					eePackages.add(exports[i].getName());
+		}
 		this.classLoader = getClass().getClassLoader();
 	}
 
@@ -99,4 +109,7 @@ public class SystemBundleLoader extends BundleLoader {
 		// Do nothing.
 	}
 
+	public boolean isEEPackage(String pkgName) {
+		return eePackages.contains(pkgName);
+	}
 }

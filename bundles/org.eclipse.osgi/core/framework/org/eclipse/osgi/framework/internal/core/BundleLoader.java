@@ -503,7 +503,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 		return result;
 	}
 
-	private boolean isBootDelegationPackage(String name) {
+	boolean isBootDelegationPackage(String name) {
 		if (bundle.framework.bootDelegateAll)
 			return true;
 		if (bundle.framework.bootDelegation != null)
