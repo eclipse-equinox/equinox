@@ -271,6 +271,8 @@ public class HttpListener extends Thread implements ServiceFactory {
 			checkAlias(alias);
 
 			//check to see if name is valid
+			if (name == null)
+				throw new IllegalArgumentException(NLS.bind(HttpMsg.HTTP_RESOURCE_NAME_INVALID_EXCEPTION, name));
 			int length = name.length();
 			if (length > 1) { //we need to allow "/" and ""
 				if (name.endsWith("/")) //$NON-NLS-1$
@@ -290,6 +292,8 @@ public class HttpListener extends Thread implements ServiceFactory {
 	}
 
 	private void checkAlias(String alias) {
+		if (alias == null)
+			throw new IllegalArgumentException(NLS.bind(HttpMsg.HTTP_ALIAS_INVALID_EXCEPTION, alias));
 		//check to see if the alias is valid
 		if (!alias.equals("/")) //$NON-NLS-1$
 		{ //so one can register at "/"
@@ -311,7 +315,7 @@ public class HttpListener extends Thread implements ServiceFactory {
 			checkNamespace(alias);
 
 			if (servlet == null) {
-				throw new NullPointerException(HttpMsg.HTTP_SERVLET_NULL_EXCEPTION);
+				throw new IllegalArgumentException(HttpMsg.HTTP_SERVLET_NULL_EXCEPTION);
 			}
 
 			if (http.servlets.contains(servlet)) {
@@ -407,6 +411,8 @@ public class HttpListener extends Thread implements ServiceFactory {
 	}
 
 	private void checkNamespace(String uri) throws NamespaceException {
+		if (uri == null)
+			throw new IllegalArgumentException(NLS.bind(HttpMsg.HTTP_ALIAS_INVALID_EXCEPTION, uri));
 		// If alias already exists in master resource table,
 		// throw NamespaceException
 		if (registrations.get(uri) != null) {
