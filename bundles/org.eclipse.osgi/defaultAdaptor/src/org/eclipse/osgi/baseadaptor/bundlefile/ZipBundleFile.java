@@ -86,7 +86,7 @@ public class ZipBundleFile extends BundleFile {
 	 * @return an open ZipFile for this bundle
 	 * @throws IOException
 	 */
-	protected ZipFile getZipFile() throws IOException {
+	protected synchronized ZipFile getZipFile() throws IOException {
 		if (closed) {
 			mruList.add(this);
 			zipFile = basicOpen();
@@ -273,7 +273,7 @@ public class ZipBundleFile extends BundleFile {
 		return vEntries.size() == 0 ? null : vEntries.elements();
 	}
 
-	public void close() throws IOException {
+	public synchronized void close() throws IOException {
 		if (!closed) {
 			closed = true;
 			zipFile.close();
