@@ -96,6 +96,13 @@ public class ZipBundleFile extends BundleFile {
 		return zipFile;
 	}
 
+	/**
+	* Returns a ZipEntry for the bundle file. Must be called while synchronizing on this object.
+	* This method does not ensure that the ZipFile is opened. Callers may need to call getZipfile() prior to calling this 
+	* method.
+	* @param path the path to an entry
+	* @return a ZipEntry or null if the entry does not exist
+	*/
 	protected ZipEntry getZipEntry(String path) {
 		if (path.length() > 0 && path.charAt(0) == '/')
 			path = path.substring(1);
@@ -116,7 +123,7 @@ public class ZipBundleFile extends BundleFile {
 	 * of <code>null</code> is returned if the directory to extract does 
 	 * not exist or if content extraction is not supported.
 	 */
-	protected File extractDirectory(String dirName) {
+	protected synchronized File extractDirectory(String dirName) {
 		if (!checkedOpen())
 			return null;
 		Enumeration entries = zipFile.entries();
@@ -140,7 +147,7 @@ public class ZipBundleFile extends BundleFile {
 		return bundledata.getExtractFile(path);
 	}
 
-	public File getFile(String entry, boolean nativeCode) {
+	public synchronized File getFile(String entry, boolean nativeCode) {
 		if (!checkedOpen())
 			return null;
 		ZipEntry zipEntry = getZipEntry(entry);
@@ -192,7 +199,7 @@ public class ZipBundleFile extends BundleFile {
 		return null;
 	}
 
-	public boolean containsDir(String dir) {
+	public synchronized boolean containsDir(String dir) {
 		if (!checkedOpen())
 			return false;
 		if (dir == null)
@@ -223,7 +230,7 @@ public class ZipBundleFile extends BundleFile {
 		return false;
 	}
 
-	public BundleEntry getEntry(String path) {
+	public synchronized BundleEntry getEntry(String path) {
 		if (!checkedOpen())
 			return null;
 		ZipEntry zipEntry = getZipEntry(path);
@@ -240,7 +247,7 @@ public class ZipBundleFile extends BundleFile {
 
 	}
 
-	public Enumeration getEntryPaths(String path) {
+	public synchronized Enumeration getEntryPaths(String path) {
 		if (!checkedOpen())
 			return null;
 		if (path == null)
