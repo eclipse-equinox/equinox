@@ -11,32 +11,26 @@
 package org.eclipse.equinox.http;
 
 import java.io.IOException;
-import java.io.InterruptedIOException;
-import java.net.SocketException;
-import javax.servlet.ServletException;
-import org.eclipse.equinox.socket.SocketInterface;
 
 /**
  * The class provide a thread for processing HTTP requests.
  */
+/* @ThreadSafe */
 public class HttpThread extends Thread {
 	/** Master HTTP object */
-	protected Http http;
+	private final Http http;
 
 	/** if true this thread must terminate */
-	protected volatile boolean running;
+	private volatile boolean running;
 
 	/** Pool to which this thread belongs. */
-	protected HttpThreadPool pool;
+	private final HttpThreadPool pool;
 
-	/** socket that this thread is operating */
-	private SocketInterface socket;
+	/** connection that this thread is operating */
+	private volatile HttpConnection conn;
 
-	/** Listener this thread is working for */
-	private HttpListener listener;
-
-	/** if true, we support Keep-Alive for the socket */
-	private boolean supportKeepAlive;
+	/** lock object to wait for work */
+	private final Object waitLock = new Object();
 
 	/**
 	 * HttpThread constructor.
@@ -61,14 +55,14 @@ public class HttpThread extends Thread {
 	/**
 	 * Close this thread.
 	 */
-	public synchronized void close() {
+	public void close() {
 		running = false;
 
-		if (socket == null) {
+		if (conn == null) {
 			interrupt();
 		} else {
 			try {
-				socket.close();
+				conn.close();
 			} catch (IOException e) {
 				// TODO: consider logging
 			}
@@ -78,45 +72,37 @@ public class HttpThread extends Thread {
 	/**
 	 * recall this thread.
 	 */
-	public synchronized void recall() {
+	public void recall() {
 		if (Http.DEBUG) {
-			http.logDebug(getName() + ": recall on socket: " + socket); //$NON-NLS-1$
-
+			http.logDebug(getName() + ": recall on socket: " + conn); //$NON-NLS-1$
 		}
 
-		if ((socket != null) && !socket.isActive()) {
-			try {
-				if (Http.DEBUG) {
-					http.logDebug(getName() + ": Closing socket: " + socket); //$NON-NLS-1$
+		if (conn != null) {
+			conn.setKeepAlive(false);	/* disable keep alive in case the connection is currently processing a request */
+			if (!conn.isActive()) {		/* if the connection is not processing a request, close it */
+				try {
+					if (Http.DEBUG) {
+						http.logDebug(getName() + ": Closing socket: " + conn); //$NON-NLS-1$
+					}
+					conn.close();
+				} catch (IOException e) {
+					// TODO: consider logging
 				}
-
-				socket.close();
-			} catch (IOException e) {
-				// TODO: consider logging
 			}
 		}
-
-		supportKeepAlive = false;
 	}
 
-	public synchronized void handleConnection(HttpListener listenerParam, SocketInterface socketParam, int socketTimeout) {
+	/**
+	 * Set the connection for this thread to process. The thread must have just been 
+	 * retreived from the thread pool.
+	 * @param connParam The HttpConnection to process.
+	 */
+	public void handleConnection(HttpConnection connParam) {
 		if (running) {
-			this.listener = listenerParam;
-			this.socket = socketParam;
-
-			if (socketTimeout > 0) {
-				try {
-					socketParam.setSoTimeout(socketTimeout);
-
-					supportKeepAlive = true;
-				} catch (SocketException e) {
-					supportKeepAlive = false;
-				}
-			} else {
-				supportKeepAlive = false;
+			this.conn = connParam;
+			synchronized (waitLock) {
+				waitLock.notify();
 			}
-
-			notify();
 		}
 	}
 
@@ -124,100 +110,24 @@ public class HttpThread extends Thread {
 		running = true;
 
 		while (running) {
-			if (socket == null) {
-				/*
-				 synchronized (this)
-				 {
-				 pool.putThread(this);
+			if (conn == null) {			/* if we have no work to do, wait in the pool */
+				synchronized (waitLock) {
+					pool.putThread(this);
 
-				 * Synchronizing on this before putThread
-				 * causes deadlock when security manager causes
-				 * Thread.isAlive() calls
-				 */
-
-				pool.putThread(this);
-
-				synchronized (this) {
 					try {
-						wait();
+						waitLock.wait();
 					} catch (InterruptedException e) {
 						// ignore and check exit condition
 					}
 				}
 			}
 
-			if (running && (socket != null)) {
-				boolean keepAlive = false;
+			if (running && (conn != null)) {
+				conn.run();		/* execute the connection */
 
-				try {
-					if (Http.DEBUG) {
-						http.logDebug(getName() + ": Processing request on socket: " + socket); //$NON-NLS-1$
-					}
-
-					socket.markInactive();
-
-					listener.handleConnection(socket);
-
-					keepAlive = supportKeepAlive && !socket.isClosed();
-				} catch (InterruptedIOException e) {
-					/* A read on the socket did not complete within the timeout period.
-					 */
-					keepAlive = false;
-
-					if (Http.DEBUG) {
-						http.logDebug(getName() + ": Read Timeout while processing connection on socket: " + socket, e); //$NON-NLS-1$
-					}
-				} catch (SocketException e) {
-					/* Most likely the user agent closed the socket.
-					 */
-					keepAlive = false;
-
-					if (Http.DEBUG) {
-						http.logDebug(getName() + ": Socket Exception while processing connection on socket: " + socket, e); //$NON-NLS-1$
-					}
-				}
-				// BUGBUG Need to handle UnavailableException
-				// Servlet 2.2 Section 3.3.3.2
-				// BUGBUG An unhandled exception should result in flushing the response
-				// buff and returning status code 500.
-				// Servlet 2.3 Section 9.9.2
-				catch (ServletException e) {
-					/* The Servlet threw a ServletException.
-					 */
-					keepAlive = false;
-
-					http.logWarning(HttpMsg.HTTP_SERVLET_EXCEPTION, e);
-				} catch (IOException e) {
-					/* The Servlet threw an IOException.
-					 */
-					keepAlive = false;
-
-					http.logWarning(HttpMsg.HTTP_CONNECTION_EXCEPTION, e);
-				} catch (Throwable t) {
-					/* Some exception has occurred. Log it and keep
-					 * the thread working.
-					 */
-					keepAlive = false;
-
-					http.logError(HttpMsg.HTTP_CONNECTION_EXCEPTION, t);
-				} finally {
-					if (!keepAlive) {
-						if (!socket.isClosed()) {
-							try {
-								if (Http.DEBUG) {
-									http.logDebug(getName() + ": Closing socket: " + socket); //$NON-NLS-1$
-								}
-
-								socket.close();
-							} catch (IOException e) {
-								// TODO: consider logging
-							}
-						}
-
-						socket = null;
-						listener = null;
-					}
-				}
+				if (conn.isClosed()) {	/* if connection is closed */
+			    	conn = null;		/* go back to the pool and wait */
+			    }
 			}
 		}
 	}

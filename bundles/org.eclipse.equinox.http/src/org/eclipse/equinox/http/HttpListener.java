@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.*;
+
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
@@ -201,7 +202,7 @@ public class HttpListener extends Thread implements ServiceFactory {
 				HttpThread thread = configuration.pool.getThread();
 
 				if (thread != null) {
-					thread.handleConnection(this, socket, socketTimeout);
+					thread.handleConnection(new HttpConnection(http, this, socket, socketTimeout));
 				} else {
 					try {
 						socket.close();

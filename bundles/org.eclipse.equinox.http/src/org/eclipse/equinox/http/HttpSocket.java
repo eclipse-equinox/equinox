@@ -13,18 +13,19 @@ package org.eclipse.equinox.http;
 import java.io.*;
 import org.eclipse.equinox.socket.SocketInterface;
 
+/* @ThreadSafe */
 public class HttpSocket extends java.net.Socket implements SocketInterface {
 	private InputStream in = null;
 	private boolean closed = false;
 	private boolean active = false;
-	private String scheme;
+	private final String scheme;
 
 	public HttpSocket(String sheme) {
 		super();
 		this.scheme = sheme;
 	}
 
-	public void close() throws IOException {
+	public synchronized void close() throws IOException {
 		super.close();
 		//must set closed to try after calling super.close() otherwise
 		//jdk1.4 will not close the socket
@@ -37,13 +38,9 @@ public class HttpSocket extends java.net.Socket implements SocketInterface {
 	 * @return a buffered InputStream which wraps the real input stream.
 	 * @throws IOException
 	 */
-	public InputStream getInputStream() throws IOException {
+	public synchronized InputStream getInputStream() throws IOException {
 		if (in == null) {
-			synchronized (this) {
-				if (in == null) {
-					in = new BufferedInputStream(super.getInputStream());
-				}
-			}
+			in = new BufferedInputStream(super.getInputStream());
 		}
 
 		return in;
@@ -63,7 +60,7 @@ public class HttpSocket extends java.net.Socket implements SocketInterface {
 	 *
 	 * @return true if close has been called on this socket.
 	 */
-	public boolean isClosed() {
+	public synchronized boolean isClosed() {
 		return closed;
 	}
 
@@ -72,7 +69,7 @@ public class HttpSocket extends java.net.Socket implements SocketInterface {
 	 *
 	 * @return true if markActive has been called.
 	 */
-	public boolean isActive() {
+	public synchronized boolean isActive() {
 		return active;
 	}
 
@@ -80,7 +77,7 @@ public class HttpSocket extends java.net.Socket implements SocketInterface {
 	 * Mark the socket active.
 	 *
 	 */
-	public void markActive() {
+	public synchronized void markActive() {
 		active = true;
 	}
 
@@ -88,7 +85,7 @@ public class HttpSocket extends java.net.Socket implements SocketInterface {
 	 * Mark the socket inactive.
 	 *
 	 */
-	public void markInactive() {
+	public synchronized void markInactive() {
 		active = false;
 	}
 }

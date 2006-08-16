@@ -15,27 +15,27 @@ import java.security.PrivilegedAction;
 import java.util.Vector;
 import org.eclipse.osgi.util.NLS;
 
+/* @ThreadSafe */
 public class HttpThreadPool extends ThreadGroup {
 	/** Master HTTP object */
-	protected Http http;
+	final Http http;
 
 	/** container to threads waiting for work */
-	private Vector idleThreads;
-
+	private final Vector idleThreads;		/* @GuardedBy("this") */
 	/** container to threads which are working */
-	private Vector activeThreads;
+	private final Vector activeThreads;	/* @GuardedBy("this") */
 	/** Upper bound on size of thread pool */
-	private int upper;
+	private int upper;		/* @GuardedBy("this") */
 	/** Lower bound on size of thread pool */
-	private int lower;
+	private int lower;		/* @GuardedBy("this") */
 	/** Priority of thread pool */
-	private int priority;
+	private volatile int priority;
 	/** number of threads to be terminated when they are returned to the pool */
-	private int hitCount;
+	private int hitCount;	/* @GuardedBy("this") */
 	/** Thread allocation number */
-	int number;
+	private int number;		/* @GuardedBy("this") */
 	/** prevent new threads from readjusting */
-	private int adjusting = 0;
+	private int adjusting = 0;	/* @GuardedBy("this") */
 
 	/**
 	 * Constructs and populates a new thread pool with the specified thread group
@@ -56,15 +56,15 @@ public class HttpThreadPool extends ThreadGroup {
 	/**
 	 * Returns the lower bound on size of thread pool.
 	 */
-	public int getLowerSizeLimit() {
-		return (lower);
+	public synchronized int getLowerSizeLimit() {
+		return lower;
 	}
 
 	/**
 	 * Returns the upper bound on size of thread pool.
 	 */
-	public int getUpperSizeLimit() {
-		return (upper);
+	public synchronized int getUpperSizeLimit() {
+		return upper;
 	}
 
 	/**
@@ -80,10 +80,11 @@ public class HttpThreadPool extends ThreadGroup {
 	}
 
 	/**
-	 * Must be called while synchronized.
+	 * Must be called while synchronized on this object.
 	 *
 	 */
-	protected void adjustThreadCount() {
+	/* @GuardedBy("this") */
+	private void adjustThreadCount() {
 		if (adjusting > 0) {
 			adjusting--;
 			return;
@@ -144,10 +145,11 @@ public class HttpThreadPool extends ThreadGroup {
 					idleThreads.ensureCapacity(count);
 					for (int i = 0; i < delta; i++) {
 						number++;
+						final String threadName = "HttpThread_" + number;  //$NON-NLS-1$
 						try {
 							AccessController.doPrivileged(new PrivilegedAction() {
 								public Object run() {
-									HttpThread thread = new HttpThread(http, HttpThreadPool.this, "HttpThread_" + number); //$NON-NLS-1$
+									HttpThread thread = new HttpThread(http, HttpThreadPool.this, threadName);
 									thread.start(); /* thread will add itself to the pool */
 									return null;
 								}
@@ -191,21 +193,19 @@ public class HttpThreadPool extends ThreadGroup {
 	 * @param availableThread the thread being added/returned to the pool
 	 */
 	public synchronized void putThread(HttpThread thread) {
-		synchronized (thread) {
-			if (Http.DEBUG) {
-				http.logDebug(thread.getName() + ": becoming idle"); //$NON-NLS-1$
-			}
-
-			activeThreads.removeElement(thread);
-
-			if (hitCount > 0) {
-				hitCount--;
-				thread.close();
-			} else {
-				if (!idleThreads.contains(thread)) {
-					idleThreads.addElement(thread);
-					notify();
-				}
+		if (Http.DEBUG) {
+			http.logDebug(thread.getName() + ": becoming idle"); //$NON-NLS-1$
+		}
+		
+		activeThreads.removeElement(thread);
+		
+		if (hitCount > 0) {
+			hitCount--;
+			thread.close();
+		} else {
+			if (!idleThreads.contains(thread)) {
+				idleThreads.addElement(thread);
+				notify();
 			}
 		}
 
@@ -239,7 +239,7 @@ public class HttpThreadPool extends ThreadGroup {
 					http.logDebug(thread.getName() + ": becoming active"); //$NON-NLS-1$
 				}
 
-				return (thread);
+				return thread;
 			}
 			try {
 				wait();
@@ -248,7 +248,7 @@ public class HttpThreadPool extends ThreadGroup {
 			}
 		}
 
-		return (null);
+		return null;
 	}
 
 	/**
