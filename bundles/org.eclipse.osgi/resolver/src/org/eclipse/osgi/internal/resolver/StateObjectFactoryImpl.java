@@ -16,6 +16,7 @@ import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.internal.module.ResolverImpl;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.storagemanager.StorageManager;
+import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.*;
 
 public class StateObjectFactoryImpl implements StateObjectFactory {
@@ -35,6 +36,11 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 	}
 
 	public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location, BundleSpecification[] required, HostSpecification host, ImportPackageSpecification[] imports, ExportPackageDescription[] exports, String[] providedPackages, boolean singleton, boolean attachFragments, boolean dynamicFragments, String platformFilter, String executionEnvironment, GenericSpecification[] genericRequires, GenericDescription[] genericCapabilities) {
+		// bug 154137 we need to parse the executionEnvironment param; no need to check for null, ManifestElement does that for us.
+		return createBundleDescription(id, symbolicName, version, location, required, host, imports, exports, singleton, attachFragments, dynamicFragments, platformFilter, ManifestElement.getArrayFromList(executionEnvironment), genericRequires, genericCapabilities);
+	}
+
+	public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location, BundleSpecification[] required, HostSpecification host, ImportPackageSpecification[] imports, ExportPackageDescription[] exports, boolean singleton, boolean attachFragments, boolean dynamicFragments, String platformFilter, String[] executionEnvironments, GenericSpecification[] genericRequires, GenericDescription[] genericCapabilities) {
 		BundleDescriptionImpl bundle = new BundleDescriptionImpl();
 		bundle.setBundleId(id);
 		bundle.setSymbolicName(symbolicName);
@@ -48,6 +54,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		bundle.setStateBit(BundleDescriptionImpl.ATTACH_FRAGMENTS, attachFragments);
 		bundle.setStateBit(BundleDescriptionImpl.DYNAMIC_FRAGMENTS, dynamicFragments);
 		bundle.setPlatformFilter(platformFilter);
+		bundle.setExecutionEnvironments(executionEnvironments);
 		bundle.setGenericRequires(genericRequires);
 		bundle.setGenericCapabilities(genericCapabilities);
 		return bundle;
