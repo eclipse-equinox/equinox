@@ -92,21 +92,29 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	protected void close() {
 		valid = false; /* invalidate context */
 
-		if (serviceEvent != null) {
-			framework.serviceEvent.removeListener(this);
-			serviceEvent = null;
+		synchronized (framework.serviceEvent) {
+			if (serviceEvent != null) {
+				framework.serviceEvent.removeListener(this);
+				serviceEvent = null;
+			}
 		}
-		if (frameworkEvent != null) {
-			framework.frameworkEvent.removeListener(this);
-			frameworkEvent = null;
+		synchronized (framework.frameworkEvent) {
+			if (frameworkEvent != null) {
+				framework.frameworkEvent.removeListener(this);
+				frameworkEvent = null;
+			}
 		}
-		if (bundleEvent != null) {
-			framework.bundleEvent.removeListener(this);
-			bundleEvent = null;
+		synchronized (framework.bundleEvent) {
+			if (bundleEvent != null) {
+				framework.bundleEvent.removeListener(this);
+				bundleEvent = null;
+			}
 		}
-		if (bundleEventSync != null) {
-			framework.bundleEventSync.removeListener(this);
-			bundleEventSync = null;
+		synchronized (framework.bundleEventSync) {
+			if (bundleEventSync != null) {
+				framework.bundleEventSync.removeListener(this);
+				bundleEventSync = null;
+			}
 		}
 
 		/* service's registered by the bundle, if any, are unregistered. */
@@ -348,8 +356,8 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 			Debug.println("removeServiceListener[" + bundle + "](" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 
-		if (serviceEvent != null) {
-			synchronized (framework.serviceEvent) {
+		synchronized (framework.serviceEvent) {
+			if (serviceEvent != null) {
 				serviceEvent.removeListener(listener);
 			}
 		}
@@ -423,14 +431,14 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 		if (listener instanceof SynchronousBundleListener) {
 			framework.checkAdminPermission(getBundle(), AdminPermission.LISTENER);
 
-			if (bundleEventSync != null) {
-				synchronized (framework.bundleEventSync) {
+			synchronized (framework.bundleEventSync) {
+				if (bundleEventSync != null) {
 					bundleEventSync.removeListener(listener);
 				}
 			}
 		} else {
-			if (bundleEvent != null) {
-				synchronized (framework.bundleEvent) {
+			synchronized (framework.bundleEvent) {
+				if (bundleEvent != null) {
 					bundleEvent.removeListener(listener);
 				}
 			}
@@ -489,8 +497,8 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 			Debug.println("removeFrameworkListener[" + bundle + "](" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 
-		if (frameworkEvent != null) {
-			synchronized (framework.frameworkEvent) {
+		synchronized (framework.frameworkEvent) {
+			if (frameworkEvent != null) {
 				frameworkEvent.removeListener(listener);
 			}
 		}
