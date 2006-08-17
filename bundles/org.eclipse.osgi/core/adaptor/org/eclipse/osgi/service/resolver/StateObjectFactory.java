@@ -37,7 +37,7 @@ public interface StateObjectFactory {
 	 * attached resolver.
 	 * 
 	 * @return the created state
-	 * @deprecated see {@link #createState(boolean) }
+	 * @deprecated use {@link #createState(boolean) }
 	 */
 	public State createState();
 
@@ -79,6 +79,7 @@ public interface StateObjectFactory {
 	 * @param providedPackages the list of provided packages (may be <code>null</code>) 
 	 * @param singleton whether the bundle created should be a singleton
 	 * @return the created bundle description
+	 * @deprecated use {@link #createBundleDescription(long, String, Version, String, BundleSpecification[], HostSpecification, ImportPackageSpecification[], ExportPackageDescription[], boolean, boolean, boolean, String, String[], GenericSpecification[], GenericDescription[])}
 	 */
 	public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location, BundleSpecification[] required, HostSpecification host, ImportPackageSpecification[] imports, ExportPackageDescription[] exports, String[] providedPackages, boolean singleton);
 
@@ -107,8 +108,32 @@ public interface StateObjectFactory {
 	 * @param genericRequires the version constraints for all required capabilities (may be <code>null</code>)
 	 * @param genericCapabilities the specifications of all the capabilities of the bundle (may be <code>null</code>)
 	 * @return the created bundle description
+	 * @deprecated use {@link #createBundleDescription(long, String, Version, String, BundleSpecification[], HostSpecification, ImportPackageSpecification[], ExportPackageDescription[], boolean, boolean, boolean, String, String[], GenericSpecification[], GenericDescription[])}
 	 */
 	public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location, BundleSpecification[] required, HostSpecification host, ImportPackageSpecification[] imports, ExportPackageDescription[] exports, String[] providedPackages, boolean singleton, boolean attachFragments, boolean dynamicFragments, String platformFilter, String executionEnvironment, GenericSpecification[] genericRequires, GenericDescription[] genericCapabilities);
+
+	/**
+	 * Creates a bundle description from the given parameters.
+	 * 
+	 * @param id id for the bundle 
+	 * @param symbolicName symbolic name for the bundle (may be  <code>null</code>) 
+	 * @param version version for the bundle (may be <code>null</code>)
+	 * @param location location for the bundle (may be <code>null</code>)
+	 * @param required version constraints for all required bundles (may be  <code>null</code>)
+	 * @param host version constraint specifying the host for the bundle to be created. Should be <code>null</code> if the bundle is not a fragment
+	 * @param imports version constraints for all packages imported  (may be <code>null</code>)
+	 * @param exports package descriptions of all the exported packages (may be <code>null</code>)
+	 * @param singleton whether the bundle created should be a singleton
+	 * @param attachFragments whether the bundle allows fragments to attach
+	 * @param dynamicFragments whether the bundle allows fragments to dynamically attach
+	 * @param platformFilter the platform filter (may be <code>null</code>)
+	 * @param executionEnvironments the execution environment (may be <code>null</code>)
+	 * @param genericRequires the version constraints for all required capabilities (may be <code>null</code>)
+	 * @param genericCapabilities the specifications of all the capabilities of the bundle (may be <code>null</code>)
+	 * @return the created bundle description
+	 */
+	public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location, BundleSpecification[] required, HostSpecification host, ImportPackageSpecification[] imports, ExportPackageDescription[] exports, boolean singleton, boolean attachFragments, boolean dynamicFragments, String platformFilter, String[] executionEnvironments, GenericSpecification[] genericRequires, GenericDescription[] genericCapabilities);
+
 
 	/**
 	 * Returns a bundle description based on the information in the supplied manifest dictionary.
@@ -134,7 +159,7 @@ public interface StateObjectFactory {
 	 * @param id the id of the bundle
 	 * @return a bundle description derived from the given information
 	 * @throws BundleException if an error occurs while reading the manifest 
-	 * @deprecated use createBundleDescription(state, manifest, location, id)
+	 * @deprecated use {@link #createBundleDescription(State, Dictionary, String, long)}
 	 */
 	public BundleDescription createBundleDescription(Dictionary manifest, String location, long id) throws BundleException;
 
@@ -258,7 +283,7 @@ public interface StateObjectFactory {
 	 * the stream
 	 * @throws IllegalArgumentException if the state provided was not created by 
 	 * this factory
-	 * @deprecated use #writeState(State, File) instead
+	 * @deprecated use {@link #writeState(State, File)} instead
 	 * @since 3.1
 	 */
 	public void writeState(State state, OutputStream stream) throws IOException;
@@ -272,7 +297,7 @@ public interface StateObjectFactory {
 	 * the stream
 	 * @throws IllegalArgumentException if the state provided was not created by 
 	 * this factory
-	 * @deprecated use #writeState(State, File) instead
+	 * @deprecated use {@link #writeState(State, File)} instead
 	 * @see #writeState(State, OutputStream)
 	 */
 	public void writeState(State state, DataOutputStream stream) throws IOException;
@@ -296,7 +321,7 @@ public interface StateObjectFactory {
 	 * @return the state read
 	 * @throws IOException if an IOException happens while reading the state from 
 	 * the stream
-	 * @deprecated use #readState(File) instead
+	 * @deprecated use {@link #readState(File)} instead
 	 * @since 3.1
 	 */
 	public State readState(InputStream stream) throws IOException;
@@ -308,7 +333,7 @@ public interface StateObjectFactory {
 	 * @return the state read
 	 * @throws IOException if an IOException happens while reading the state from 
 	 * the stream
-	 * @deprecated use #readState(File) instead
+	 * @deprecated use {@link #readState(File)} instead
 	 * @see #readState(InputStream)
 	 */
 	public State readState(DataInputStream stream) throws IOException;
