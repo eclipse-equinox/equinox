@@ -213,7 +213,15 @@ class StateReader {
 			result.addDependencies(deps, false); // no need to check dups; we already know there are none when we resolved (bug 152900)
 		}
 		// No need to set the dependencies between fragment and hosts; that was already done in the above loop (bug 152900)
-
+		// but we do need to set the dependencies between hosts and fragment.
+		HostSpecificationImpl hostSpec = (HostSpecificationImpl) result.getHost();
+		if (hostSpec != null) {
+			BundleDescription[] hosts = hostSpec.getHosts();
+			if (hosts != null) {
+				for (int i = 0; i < hosts.length; i++)
+					((BundleDescriptionImpl) hosts[i]).addDependency(result, false);
+			}
+		}
 		// the rest is lazy loaded data
 		result.setFullyLoaded(false);
 		return result;
