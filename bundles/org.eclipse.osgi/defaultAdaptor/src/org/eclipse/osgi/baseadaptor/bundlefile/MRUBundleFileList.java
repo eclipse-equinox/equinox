@@ -23,37 +23,42 @@ import java.io.IOException;
 public class MRUBundleFileList {
 	private static final String PROP_FILE_LIMIT = "osgi.bundlefile.limit"; //$NON-NLS-1$
 	private static final int MIN = 10;
-	// list of open bundle files
-	private BundleFile[] bundleFileList;
-	// list of open bundle files use stamps
-	private long[] useStampList;
-	// the current use stamp
-	private long curUseStamp = 0;
-	// the limit of open files to allow before least used bundle file is closed
-	private int fileLimit = 0; // value < MIN will disable MRU
-	// the current number of open bundle files
-	private int numOpen = 0;
-
-	public MRUBundleFileList() {
+	private static final int PROP_FILE_LIMIT_VALUE;
+	static {
+		int propValue = 0;
 		try {
 			String prop = BundleFile.secureAction.getProperty(PROP_FILE_LIMIT);
 			if (prop != null)
-				init(Integer.parseInt(prop));
+				propValue = Integer.parseInt(prop);
 		} catch (NumberFormatException e) {
 			//MRU will be disabled
 		}
+		PROP_FILE_LIMIT_VALUE = propValue;
+	}
+	// list of open bundle files
+	final private BundleFile[] bundleFileList;
+	// list of open bundle files use stamps
+	final private long[] useStampList;
+	// the limit of open files to allow before least used bundle file is closed
+	final private int fileLimit; // value < MIN will disable MRU
+	// the current number of open bundle files
+	private int numOpen = 0;
+	// the current use stamp
+	private long curUseStamp = 0;
+
+	public MRUBundleFileList() {
+		this(PROP_FILE_LIMIT_VALUE);
 	}
 
 	public MRUBundleFileList(int fileLimit) {
-		init(fileLimit);
-	}
-
-	private void init(int initFileLimit) {
 		// only enable the MRU if the initFileLimit is > MIN
-		if (initFileLimit >= MIN) {
-			this.fileLimit = initFileLimit;
-			this.bundleFileList = new BundleFile[initFileLimit];
-			this.useStampList = new long[initFileLimit];
+		this.fileLimit = fileLimit;
+		if (fileLimit >= MIN) {
+			this.bundleFileList = new BundleFile[fileLimit];
+			this.useStampList = new long[fileLimit];
+		} else {
+			this.bundleFileList = null;
+			this.useStampList = null;
 		}
 	}
 
@@ -67,7 +72,9 @@ public class MRUBundleFileList {
 	public void add(BundleFile bundleFile) throws IOException {
 		if (fileLimit < MIN)
 			return; // MRU is disabled
-		synchronized (bundleFileList) {
+		synchronized (this) {
+			if (bundleFile.getMruIndex() >= 0)
+				return;  // do nothing; someone is trying add a bundleFile that is already in an MRU list
 			int index = 0; // default to the first slot
 			if (numOpen < fileLimit) {
 				// numOpen does not exceed the fileLimit
@@ -86,7 +93,9 @@ public class MRUBundleFileList {
 					if (useStampList[i] < useStampList[index])
 						index = i;
 				BundleFile toRemove = bundleFileList[index];
-				remove(toRemove);
+				if (toRemove.getMruIndex() != index)
+					throw new IllegalStateException("The BundleFile has the incorrect mru index: " + index  + " != " + toRemove.getMruIndex());  //$NON-NLS-1$//$NON-NLS-2$
+				removeInternal(toRemove);
 				toRemove.close();
 			}
 			// found an index to place to bundleFile to be opened
@@ -105,16 +114,23 @@ public class MRUBundleFileList {
 	public boolean remove(BundleFile bundleFile) {
 		if (fileLimit < MIN)
 			return false; // MRU is disabled
-		synchronized (bundleFileList) {
+		synchronized (this) {
 			int index = bundleFile.getMruIndex();
-			if ((index >= 0 || index < fileLimit) && bundleFileList[index] == bundleFile) {
-				bundleFileList[index] = null;
-				useStampList[index] = -1;
-				numOpen--;
+			if ((index >= 0 && index < fileLimit) && bundleFileList[index] == bundleFile) {
+				removeInternal(bundleFile);
 				return true;
 			}
 		}
 		return false;
+	}
+
+	// must be called while synchronizing "this"
+	private void removeInternal(BundleFile bundleFile) {
+		int index = bundleFile.getMruIndex();
+		bundleFile.setMruIndex(-1);
+		bundleFileList[index] = null;
+		useStampList[index] = -1;
+		numOpen--;
 	}
 
 	/**
@@ -124,13 +140,14 @@ public class MRUBundleFileList {
 	public void use(BundleFile bundleFile) {
 		if (fileLimit < MIN)
 			return; // MRU is disabled
-		synchronized (bundleFileList) {
+		synchronized (this) {
 			int index = bundleFile.getMruIndex();
-			if ((index >= 0 || index < fileLimit) && bundleFileList[index] == bundleFile)
+			if ((index >= 0 && index < fileLimit) && bundleFileList[index] == bundleFile)
 				incUseStamp(index);
 		}
 	}
 
+	// must be called while synchronizing "this"
 	private void incUseStamp(int index) {
 		if (curUseStamp == Long.MAX_VALUE) {
 			// we hit the curUseStamp max better reset all the stamps
