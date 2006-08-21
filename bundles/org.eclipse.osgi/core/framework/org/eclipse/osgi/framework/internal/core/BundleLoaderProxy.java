@@ -45,20 +45,18 @@ public class BundleLoaderProxy implements RequiredBundle {
 		this.pkgSources = new KeyedHashSet(false);
 	}
 
-	BundleLoader getBundleLoader() {
-		// TODO double-check lock (bug 50178)!!
-		if (loader == null && bundle.isResolved()) {
-			synchronized (this) {
-				if (loader == null)
-					try {
-						if (bundle.getBundleId() == 0) // this is the system bundle
-							loader = new SystemBundleLoader(bundle, this);
-						else
-							loader = new BundleLoader(bundle, this);
-					} catch (BundleException e) {
-						bundle.framework.publishFrameworkEvent(FrameworkEvent.ERROR, bundle, e);
-						return null;
-					}
+	synchronized BundleLoader getBundleLoader() {
+		if (loader != null)
+			return loader;
+		if (bundle.isResolved()) {
+			try {
+				if (bundle.getBundleId() == 0) // this is the system bundle
+					loader = new SystemBundleLoader(bundle, this);
+				else
+					loader = new BundleLoader(bundle, this);
+			} catch (BundleException e) {
+				bundle.framework.publishFrameworkEvent(FrameworkEvent.ERROR, bundle, e);
+				return null;
 			}
 		}
 		return loader;

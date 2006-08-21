@@ -304,27 +304,20 @@ public class BundleLoader implements ClassLoaderDelegate {
 		return createClassLoader().getResources(name);
 	}
 
-	final BundleClassLoader createClassLoader() {
-		// TODO double-check lock (bug 50178)!!
+	final synchronized BundleClassLoader createClassLoader() {
 		if (classloader != null)
 			return classloader;
-		synchronized (this) {
-			if (classloader != null)
-				return classloader;
-
-			try {
-				String[] classpath = bundle.getBundleData().getClassPath();
-				if (classpath != null) {
-					BundleClassLoader bcl = createBCLPrevileged(bundle.getProtectionDomain(), classpath);
-					parent = getParentPrivileged(bcl);
-					classloader = bcl;
-				} else {
-					bundle.framework.publishFrameworkEvent(FrameworkEvent.ERROR, bundle, new BundleException(Msg.BUNDLE_NO_CLASSPATH_MATCH));
-				}
-			} catch (BundleException e) {
-				bundle.framework.publishFrameworkEvent(FrameworkEvent.ERROR, bundle, e);
+		try {
+			String[] classpath = bundle.getBundleData().getClassPath();
+			if (classpath != null) {
+				BundleClassLoader bcl = createBCLPrevileged(bundle.getProtectionDomain(), classpath);
+				parent = getParentPrivileged(bcl);
+				classloader = bcl;
+			} else {
+				bundle.framework.publishFrameworkEvent(FrameworkEvent.ERROR, bundle, new BundleException(Msg.BUNDLE_NO_CLASSPATH_MATCH));
 			}
-
+		} catch (BundleException e) {
+			bundle.framework.publishFrameworkEvent(FrameworkEvent.ERROR, bundle, e);
 		}
 		return classloader;
 	}

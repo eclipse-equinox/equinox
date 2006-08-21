@@ -869,14 +869,10 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	public Object getService(org.osgi.framework.ServiceReference reference) {
 		checkValid();
 
-		// TODO double-check lock (bug 50178)!!
-		if (servicesInUse == null) {
-			synchronized (contextLock) {
-				if (servicesInUse == null) {
-					// Cannot predict how many services a bundle will use, start with a small table.
-					servicesInUse = new Hashtable(10);
-				}
-			}
+		synchronized (contextLock) {
+			if (servicesInUse == null)
+				// Cannot predict how many services a bundle will use, start with a small table.
+				servicesInUse = new Hashtable(10);
 		}
 
 		ServiceRegistrationImpl registration = ((ServiceReferenceImpl) reference).registration;

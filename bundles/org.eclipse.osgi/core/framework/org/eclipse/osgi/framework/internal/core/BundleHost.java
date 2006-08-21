@@ -526,17 +526,12 @@ public class BundleHost extends AbstractBundle {
 		return getLoaderProxy().getBundleLoader();
 	}
 
-	protected BundleLoaderProxy getLoaderProxy() {
-		// TODO double-check lock (bug 50178)!!
-		if (proxy == null) {
-			synchronized (this) {
-				if (proxy == null) {
-					BundleDescription bundleDescription = getBundleDescription();
-					proxy = new BundleLoaderProxy(this, bundleDescription);
-					bundleDescription.setUserObject(proxy);
-				}
-			}
-		}
+	protected synchronized BundleLoaderProxy getLoaderProxy() {
+		if (proxy != null)
+			return proxy;
+		BundleDescription bundleDescription = getBundleDescription();
+		proxy = new BundleLoaderProxy(this, bundleDescription);
+		bundleDescription.setUserObject(proxy);
 		return proxy;
 	}
 
