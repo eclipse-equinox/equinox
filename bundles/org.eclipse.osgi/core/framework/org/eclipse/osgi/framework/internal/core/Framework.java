@@ -23,6 +23,7 @@ import org.eclipse.osgi.framework.eventmgr.*;
 import org.eclipse.osgi.framework.internal.protocol.ContentHandlerFactory;
 import org.eclipse.osgi.framework.internal.protocol.StreamHandlerFactory;
 import org.eclipse.osgi.framework.log.FrameworkLog;
+import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.framework.util.SecureAction;
 import org.eclipse.osgi.internal.profile.Profile;
 import org.eclipse.osgi.util.ManifestElement;
@@ -128,8 +129,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 			Debug.println("SecurityManager: " + System.getSecurityManager()); //$NON-NLS-1$
 			Debug.println("ProtectionDomain of Framework.class: \n" + this.getClass().getProtectionDomain()); //$NON-NLS-1$
 		}
-		// set the adaptor of MessageResourceBundle so it can log warnings/errors
-		MessageResourceBundle.setAdaptor(adaptor);
+		setNLSFrameworkLog();
 		/* initialize the adaptor */
 		adaptor.initialize(this);
 		if (Profile.PROFILE && Profile.STARTUP)
@@ -214,6 +214,16 @@ public class Framework implements EventDispatcher, EventPublisher {
 			System.out.println("Initialize the framework: " + (System.currentTimeMillis() - start)); //$NON-NLS-1$
 		if (Profile.PROFILE && Profile.STARTUP)
 			Profile.logExit("Framework.initialize()"); //$NON-NLS-1$
+	}
+
+	private void setNLSFrameworkLog() {
+		try {
+			Field frameworkLogField = NLS.class.getDeclaredField("frameworkLog"); //$NON-NLS-1$
+			frameworkLogField.setAccessible(true);
+			frameworkLogField.set(null, adaptor.getFrameworkLog());
+		} catch (Exception e) {
+			adaptor.getFrameworkLog().log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, e.getMessage(), 0, e, null));
+		}
 	}
 
 	private void createSystemBundle() {
