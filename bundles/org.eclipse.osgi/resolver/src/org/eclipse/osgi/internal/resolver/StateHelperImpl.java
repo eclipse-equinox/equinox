@@ -263,51 +263,74 @@ public class StateHelperImpl implements StateHelper {
 		boolean strict = false;
 		if (state != null)
 			strict = state.inStrictMode();
-		ArrayList packageList = new ArrayList(); // list of all ExportPackageDescriptions that are visible
-		ArrayList importList = new ArrayList(); // list of package names which are directly imported
+		ArrayList orderedPkgList = new ArrayList(); // list of all ExportPackageDescriptions that are visible (ArrayList is used to keep order)
+		Set pkgSet = new HashSet();
+		Set importList = new HashSet(); // list of package names which are directly imported
 		// get the list of directly imported packages first.
 		ImportPackageSpecification[] imports = bundle.getImportPackages();
 		for (int i = 0; i < imports.length; i++) {
 			ExportPackageDescription pkgSupplier = (ExportPackageDescription) imports[i].getSupplier();
 			if (pkgSupplier == null)
 				continue;
-			if (!isSystemExport(pkgSupplier))
-				packageList.add(pkgSupplier);
+			if (!isSystemExport(pkgSupplier) && !pkgSet.contains(pkgSupplier)) {
+				orderedPkgList.add(pkgSupplier);
+				pkgSet.add(pkgSupplier);
+			}
 			// get the sources of the required bundles of the exporter
 			BundleSpecification[] requires = pkgSupplier.getExporter().getRequiredBundles();
-			ArrayList visited = new ArrayList();
+			Set visited = new HashSet();
+			visited.add(bundle); // always add self to prevent recursing into self
+			Set importNames = new HashSet(1);
+			importNames.add(imports[i].getName());
 			for (int j = 0; j < requires.length; j++) {
 				BundleDescription bundleSupplier = (BundleDescription) requires[j].getSupplier();
 				if (bundleSupplier != null)
-					getPackages(bundleSupplier, bundle.getSymbolicName(), importList, packageList, visited, strict, imports[i].getName());
+					getPackages(bundleSupplier, bundle.getSymbolicName(), importList, orderedPkgList, pkgSet, visited, strict, importNames);
 			}
 			importList.add(imports[i].getName()); // besure to add to direct import list
 		}
 		// now find all the packages that are visible from required bundles
 		BundleSpecification[] requires = bundle.getRequiredBundles();
-		ArrayList visited = new ArrayList(requires.length);
+		Set visited = new HashSet(requires.length);
+		visited.add(bundle); // always add self to prevent recursing into self
 		for (int i = 0; i < requires.length; i++) {
 			BundleDescription bundleSupplier = (BundleDescription) requires[i].getSupplier();
 			if (bundleSupplier != null)
-				getPackages(bundleSupplier, bundle.getSymbolicName(), importList, packageList, visited, strict, null);
+				getPackages(bundleSupplier, bundle.getSymbolicName(), importList, orderedPkgList, pkgSet, visited, strict, null);
 		}
-		return (ExportPackageDescription[]) packageList.toArray(new ExportPackageDescription[packageList.size()]);
+		return (ExportPackageDescription[]) orderedPkgList.toArray(new ExportPackageDescription[orderedPkgList.size()]);
 	}
 
-	private void getPackages(BundleDescription requiredBundle, String symbolicName, List importList, List packageList, List visited, boolean strict, String pkgName) {
+	private void getPackages(BundleDescription requiredBundle, String symbolicName, Set importList, ArrayList orderedPkgList, Set pkgSet, Set visited, boolean strict, Set pkgNames) {
 		if (visited.contains(requiredBundle))
 			return; // prevent duplicate entries and infinate loops incase of cycles
 		visited.add(requiredBundle);
 		// add all the exported packages from the required bundle; take x-friends into account.
 		ExportPackageDescription[] exports = requiredBundle.getSelectedExports();
+		HashSet exportNames = new HashSet(exports.length); // set is used to improve performance of duplicate check.
 		for (int i = 0; i < exports.length; i++)
-			if ((pkgName == null || exports[i].getName().equals(pkgName)) && !isSystemExport(exports[i]) && isFriend(symbolicName, exports[i], strict) && !importList.contains(exports[i].getName()))
-				packageList.add(exports[i]);
-		// now look for reexported bundles from the required bundle.
+			if ((pkgNames == null || pkgNames.contains(exports[i].getName())) && !isSystemExport(exports[i]) && isFriend(symbolicName, exports[i], strict) && !importList.contains(exports[i].getName()) && !pkgSet.contains(exports[i])) {
+				if (!exportNames.contains(exports[i].getName())) { 
+					// only add the first export
+					orderedPkgList.add(exports[i]);
+					pkgSet.add(exports[i]);
+					exportNames.add(exports[i].getName());
+				}
+			}
+		// now look for exports from the required bundle.
 		BundleSpecification[] requiredBundles = requiredBundle.getRequiredBundles();
-		for (int i = 0; i < requiredBundles.length; i++)
-			if ((pkgName != null || requiredBundles[i].isExported()) && requiredBundles[i].getSupplier() != null)
-				getPackages((BundleDescription) requiredBundles[i].getSupplier(), symbolicName, importList, packageList, visited, strict, pkgName);
+		for (int i = 0; i < requiredBundles.length; i++) {
+			if (requiredBundles[i].getSupplier() == null)
+				continue;
+			if (requiredBundles[i].isExported()) {
+				// looking for a specific package and that package is exported by this bundle or adding all packages from a reexported bundle
+				getPackages((BundleDescription) requiredBundles[i].getSupplier(), symbolicName, importList, orderedPkgList, pkgSet, visited, strict, pkgNames);
+			} else if (exportNames.size() > 0) {
+				// adding any exports from required bundles which we also export
+				Set tmpVisited = new HashSet();
+				getPackages((BundleDescription) requiredBundles[i].getSupplier(), symbolicName, importList, orderedPkgList, pkgSet, tmpVisited, strict, exportNames);
+			}
+		}
 	}
 
 	private boolean isSystemExport(ExportPackageDescription export) {
