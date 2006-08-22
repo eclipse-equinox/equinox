@@ -20,12 +20,12 @@ import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.eclipse.osgi.framework.launcher.Launcher;
 import org.eclipse.osgi.internal.profile.Profile;
-import org.eclipse.osgi.service.resolver.ExportPackageDescription;
-import org.eclipse.osgi.service.resolver.PlatformAdmin;
+import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 import org.osgi.service.condpermadmin.ConditionalPermissionAdmin;
 import org.osgi.service.condpermadmin.ConditionalPermissionInfo;
+import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.packageadmin.RequiredBundle;
 import org.osgi.service.permissionadmin.PermissionAdmin;
 
@@ -714,12 +714,11 @@ public class FrameworkCommandProvider implements CommandProvider {
 
 				org.osgi.framework.ServiceReference packageAdminRef = context.getServiceReference("org.osgi.service.packageadmin.PackageAdmin"); //$NON-NLS-1$
 				if (packageAdminRef != null) {
-					org.osgi.service.packageadmin.PackageAdmin packageAdmin = (org.osgi.service.packageadmin.PackageAdmin) context.getService(packageAdminRef);
-					if (packageAdmin != null) {
+					BundleDescription desc = bundle.getBundleDescription();
+					if (desc != null) {
 						try {
-							org.osgi.service.packageadmin.ExportedPackage exportedpkgs[] = packageAdmin.getExportedPackages((org.osgi.framework.Bundle) null);
-
-							if (exportedpkgs == null) {
+							ExportPackageDescription[] exports = desc.getExportPackages();
+							if (exports == null || exports.length == 0) {
 								intp.print("  "); //$NON-NLS-1$
 								intp.println(ConsoleMsg.CONSOLE_NO_EXPORTED_PACKAGES_MESSAGE);
 								intp.print("  "); //$NON-NLS-1$
@@ -727,22 +726,21 @@ public class FrameworkCommandProvider implements CommandProvider {
 							} else {
 								boolean title = true;
 
-								for (int i = 0; i < exportedpkgs.length; i++) {
-									org.osgi.service.packageadmin.ExportedPackage exportedpkg = exportedpkgs[i];
-
-									if (exportedpkg.getExportingBundle() == bundle) {
-										if (title) {
-											intp.print("  "); //$NON-NLS-1$
-											intp.println(ConsoleMsg.CONSOLE_EXPORTED_PACKAGES_MESSAGE);
-											title = false;
-										}
-										intp.print("    "); //$NON-NLS-1$
-										intp.print(exportedpkg);
-										if (exportedpkg.isRemovalPending()) {
-											intp.println(ConsoleMsg.CONSOLE_EXPORTED_REMOVAL_PENDING_MESSAGE);
-										} else {
-											intp.println(ConsoleMsg.CONSOLE_EXPORTED_MESSAGE);
-										}
+								for (int i = 0; i < exports.length; i++) {
+									if (title) {
+										intp.print("  "); //$NON-NLS-1$
+										intp.println(ConsoleMsg.CONSOLE_EXPORTED_PACKAGES_MESSAGE);
+										title = false;
+									}
+									intp.print("    "); //$NON-NLS-1$
+									intp.print(exports[i].getName());
+									intp.print("; version=\""); //$NON-NLS-1$
+									intp.print(exports[i].getVersion());
+									intp.print("\""); //$NON-NLS-1$
+									if (desc.isRemovalPending()) {
+										intp.println(ConsoleMsg.CONSOLE_EXPORTED_REMOVAL_PENDING_MESSAGE);
+									} else {
+										intp.println(ConsoleMsg.CONSOLE_EXPORTED_MESSAGE);
 									}
 								}
 
@@ -752,41 +750,19 @@ public class FrameworkCommandProvider implements CommandProvider {
 								}
 
 								title = true;
-
-								for (int i = 0; i < exportedpkgs.length; i++) {
-									org.osgi.service.packageadmin.ExportedPackage exportedpkg = exportedpkgs[i];
-
-									org.osgi.framework.Bundle[] importers = exportedpkg.getImportingBundles();
-									for (int j = 0; j < importers.length; j++) {
-										if (importers[j] == bundle) {
-											if (title) {
-												intp.print("  "); //$NON-NLS-1$
-												intp.println(ConsoleMsg.CONSOLE_IMPORTED_PACKAGES_MESSAGE);
-												title = false;
-											}
-											intp.print("    "); //$NON-NLS-1$
-											intp.print(exportedpkg);
-											org.osgi.framework.Bundle exporter = exportedpkg.getExportingBundle();
-											if (exporter != null) {
-												intp.print("<"); //$NON-NLS-1$
-												intp.print(exporter);
-												intp.println(">"); //$NON-NLS-1$
-											} else {
-												intp.print("<"); //$NON-NLS-1$
-												intp.print(ConsoleMsg.CONSOLE_STALE_MESSAGE);
-												intp.println(">"); //$NON-NLS-1$
-											}
-
-											break;
-										}
-									}
+								if (desc != null) {
+									title = printImportedPackages(exports, intp, title);
+									ExportPackageDescription[] imports = desc.getContainingState().getStateHelper().getVisiblePackages(desc);
+									title = printImportedPackages(imports, intp, title);
 								}
 
 								if (title) {
 									intp.print("  "); //$NON-NLS-1$
 									intp.println(ConsoleMsg.CONSOLE_NO_IMPORTED_PACKAGES_MESSAGE);
 								}
-
+							}
+							PackageAdmin packageAdmin = (PackageAdmin) context.getService(packageAdminRef);
+							if (packageAdmin != null) {
 								intp.print("  "); //$NON-NLS-1$
 								if ((packageAdmin.getBundleType(bundle) & PackageAdminImpl.BUNDLE_TYPE_FRAGMENT) > 0) {
 									org.osgi.framework.Bundle[] hosts = packageAdmin.getHosts(bundle);
@@ -838,7 +814,7 @@ public class FrameworkCommandProvider implements CommandProvider {
 									}
 								}
 
-								title = true;
+								boolean title = true;
 								for (int i = 0; i < requiredBundles.length; i++) {
 									if (requiredBundles[i] == requiredBundle)
 										continue;
@@ -888,6 +864,32 @@ public class FrameworkCommandProvider implements CommandProvider {
 			}
 			nextArg = intp.nextArgument();
 		}
+	}
+
+	private boolean printImportedPackages(ExportPackageDescription[] importedPkgs, CommandInterpreter intp, boolean title) {
+		for (int i = 0; i < importedPkgs.length; i++) {
+			if (title) {
+				intp.print("  "); //$NON-NLS-1$
+				intp.println(ConsoleMsg.CONSOLE_IMPORTED_PACKAGES_MESSAGE);
+				title = false;
+			}
+			intp.print("    "); //$NON-NLS-1$
+			intp.print(importedPkgs[i].getName());
+			intp.print("; version=\""); //$NON-NLS-1$
+			intp.print(importedPkgs[i].getVersion());
+			intp.print("\""); //$NON-NLS-1$
+			Bundle exporter = context.getBundle(importedPkgs[i].getSupplier().getBundleId());
+			if (exporter != null) {
+				intp.print("<"); //$NON-NLS-1$
+				intp.print(exporter);
+				intp.println(">"); //$NON-NLS-1$
+			} else {
+				intp.print("<"); //$NON-NLS-1$
+				intp.print(ConsoleMsg.CONSOLE_STALE_MESSAGE);
+				intp.println(">"); //$NON-NLS-1$
+			}
+		}
+		return title;
 	}
 
 	/**
