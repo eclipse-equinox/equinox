@@ -17,5 +17,6 @@ package org.eclipse.equinox.ds.parser;
  * @author rpatersn
  */
 public class XMLParserNotAvailableException extends Exception {
+	private static final long serialVersionUID = 7347111510184149410L;
 
 }
