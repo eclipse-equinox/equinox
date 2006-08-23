@@ -45,7 +45,7 @@ public class SecurePermissionStorage implements PermissionStorage, PrivilegedExc
 			case LOCATION :
 				return storage.getLocations();
 			case SAVE_INFOS :
-				storage.saveConditionalPermissionInfos(data);
+				storage.saveConditionalPermissionInfos(infos);
 				return null;
 			case GET_INFOS :
 				return storage.getConditionalPermissionInfos();

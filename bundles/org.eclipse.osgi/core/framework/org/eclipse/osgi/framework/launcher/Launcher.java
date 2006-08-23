@@ -112,6 +112,7 @@ public class Launcher {
 	 *  Default constructor.  Nothing at all to do here.
 	 */
 	public Launcher() {
+		// do nothing;
 	}
 
 	/**
@@ -239,7 +240,7 @@ public class Launcher {
 		console = true;
 		StringTokenizer tok = new StringTokenizer(command, ":"); //$NON-NLS-1$
 		// first token is always "-console"
-		String cmd = tok.nextToken();
+		tok.nextToken();
 		if (tok.hasMoreTokens()) {
 			consolePort = tok.nextToken();
 		}
@@ -255,7 +256,7 @@ public class Launcher {
 	protected void _adaptor(String command) {
 		Tokenizer tok = new Tokenizer(command);
 		// first token is always "-adaptor"
-		String cmd = tok.getToken(":"); //$NON-NLS-1$
+		tok.getToken(":"); //$NON-NLS-1$
 		tok.getChar(); // advance to next token
 		// and next token is either adaptor class name or ":" if we should use the default adaptor
 		String adp = tok.getToken(":"); //$NON-NLS-1$
@@ -270,11 +271,9 @@ public class Launcher {
 		parseloop: while (true) {
 			tok.getChar(); // advance to next token
 			String arg = tok.getString(":"); //$NON-NLS-1$
-			if (arg == null) {
+			if (arg == null)
 				break parseloop;
-			} else {
-				v.addElement(arg);
-			}
+			v.addElement(arg);
 		}
 		// now that we know how many args there are, move args from vector to String[]
 		if (v != null) {

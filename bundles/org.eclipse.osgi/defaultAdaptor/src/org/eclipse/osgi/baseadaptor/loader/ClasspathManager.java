@@ -39,7 +39,6 @@ import org.osgi.framework.FrameworkEvent;
  */
 public class ClasspathManager {
 	private static final FragmentClasspath[] emptyFragments = new FragmentClasspath[0];
-	private static final int BUF_SIZE = 8 * 1024;
 
 	private BaseData data;
 	private String[] classpath;

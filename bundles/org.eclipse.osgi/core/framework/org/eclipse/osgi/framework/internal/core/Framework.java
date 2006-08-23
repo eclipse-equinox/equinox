@@ -196,7 +196,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 			Profile.logTime("Framework.initialze()", "done new URLStream/Content HandlerFactory"); //$NON-NLS-1$//$NON-NLS-2$
 		/* create bundle objects for all installed bundles. */
 		BundleData[] bundleDatas = adaptor.getInstalledBundles();
-		bundles = new BundleRepository(bundleDatas == null ? 10 : bundleDatas.length + 1, packageAdmin);
+		bundles = new BundleRepository(bundleDatas == null ? 10 : bundleDatas.length + 1);
 		/* add the system bundle to the Bundle Repository */
 		bundles.add(systemBundle);
 		if (bundleDatas != null) {

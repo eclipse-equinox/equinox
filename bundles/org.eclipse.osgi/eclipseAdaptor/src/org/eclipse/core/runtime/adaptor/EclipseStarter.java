@@ -104,9 +104,6 @@ public class EclipseStarter {
 	public static final String PROP_EXITCODE = "eclipse.exitcode"; //$NON-NLS-1$
 	public static final String PROP_EXITDATA = "eclipse.exitdata"; //$NON-NLS-1$
 	public static final String PROP_CONSOLE_LOG = "eclipse.consoleLog"; //$NON-NLS-1$
-	private static final String PROP_VM = "eclipse.vm"; //$NON-NLS-1$
-	private static final String PROP_VMARGS = "eclipse.vmargs"; //$NON-NLS-1$
-	private static final String PROP_COMMANDS = "eclipse.commands"; //$NON-NLS-1$
 	public static final String PROP_IGNOREAPP = "eclipse.ignoreApp"; //$NON-NLS-1$
 	public static final String PROP_REFRESH_BUNDLES = "eclipse.refreshBundles"; //$NON-NLS-1$
 	private static final String PROP_ALLOW_APPRELAUNCH = "eclipse.allowAppRelaunch"; //$NON-NLS-1$
@@ -118,10 +115,8 @@ public class EclipseStarter {
 	private static final String CONTEXTCLASSLOADER_PARENT_EXT = "ext"; //$NON-NLS-1$
 	private static final String CONTEXTCLASSLOADER_PARENT_BOOT = "boot"; //$NON-NLS-1$
 	private static final String CONTEXTCLASSLOADER_PARENT_FWK = "fwk"; //$NON-NLS-1$
-	private static final String CONTEXTCLASSLOADER_PARENT_CCL = "ccl"; //$NON-NLS-1$
 
 	private static final String FILE_SCHEME = "file:"; //$NON-NLS-1$
-	private static final String FILE_PROTOCOL = "file"; //$NON-NLS-1$
 	private static final String REFERENCE_SCHEME = "reference:"; //$NON-NLS-1$
 	private static final String REFERENCE_PROTOCOL = "reference"; //$NON-NLS-1$
 	private static final String INITIAL_LOCATION = "initial@"; //$NON-NLS-1$
@@ -568,7 +563,7 @@ public class EclipseStarter {
 		File fileLocation = null;
 		boolean reference = false;
 		try {
-			URL child = new URL(name);
+			new URL(name); // quick check to see if the name is a valid URL
 			url = new URL(new File(parent).toURL(), name);
 		} catch (MalformedURLException e) {
 			// TODO this is legacy support for non-URL names.  It should be removed eventually.
@@ -743,12 +738,12 @@ public class EclipseStarter {
 	/**
 	 *  Invokes the OSGi Console on another thread
 	 *
-	 * @param osgi The current OSGi instance for the console to attach to
+	 * @param equinox The current OSGi instance for the console to attach to
 	 * @param consoleArgs An String array containing commands from the command line
 	 * for the console to execute
 	 * @param consolePort the port on which to run the console.  Empty string implies the default port.
 	 */
-	private static void startConsole(OSGi osgi, String[] consoleArgs, String consolePort) {
+	private static void startConsole(OSGi equinox, String[] consoleArgs, String consolePort) {
 		try {
 			String consoleClassName = FrameworkProperties.getProperty(PROP_CONSOLE_CLASS, DEFAULT_CONSOLE_CLASS);
 			Class consoleClass = Class.forName(consoleClassName);
@@ -756,10 +751,10 @@ public class EclipseStarter {
 			Object[] parameters;
 			if (consolePort.length() == 0) {
 				parameterTypes = new Class[] {OSGi.class, String[].class};
-				parameters = new Object[] {osgi, consoleArgs};
+				parameters = new Object[] {equinox, consoleArgs};
 			} else {
 				parameterTypes = new Class[] {OSGi.class, int.class, String[].class};
-				parameters = new Object[] {osgi, new Integer(consolePort), consoleArgs};
+				parameters = new Object[] {equinox, new Integer(consolePort), consoleArgs};
 			}
 			Constructor constructor = consoleClass.getConstructor(parameterTypes);
 			Object console = constructor.newInstance(parameters);
@@ -968,7 +963,7 @@ public class EclipseStarter {
 		if (result == null)
 			result = getSysPathFromCodeSource();
 		if (result == null)
-			throw new IllegalStateException("Can not find the system path.");
+			throw new IllegalStateException("Can not find the system path."); //$NON-NLS-1$
 		if (Character.isUpperCase(result.charAt(0))) {
 			char[] chars = result.toCharArray();
 			chars[0] = Character.toLowerCase(chars[0]);
@@ -1307,34 +1302,6 @@ public class EclipseStarter {
 			return result;
 
 		return ((String) left[3]).compareTo((String) right[3]); // compare qualifier
-	}
-
-	private static String buildCommandLine(String arg, String value) {
-		StringBuffer result = new StringBuffer(300);
-		String entry = FrameworkProperties.getProperty(PROP_VM);
-		if (entry == null)
-			return null;
-		result.append(entry);
-		result.append('\n');
-		// append the vmargs and commands.  Assume that these already end in \n
-		entry = FrameworkProperties.getProperty(PROP_VMARGS);
-		if (entry != null)
-			result.append(entry);
-		entry = FrameworkProperties.getProperty(PROP_COMMANDS);
-		if (entry != null)
-			result.append(entry);
-		String commandLine = result.toString();
-		int i = commandLine.indexOf(arg + "\n"); //$NON-NLS-1$
-		if (i == 0)
-			commandLine += arg + "\n" + value + "\n"; //$NON-NLS-1$ //$NON-NLS-2$
-		else {
-			i += arg.length() + 1;
-			String left = commandLine.substring(0, i);
-			int j = commandLine.indexOf('\n', i);
-			String right = commandLine.substring(j);
-			commandLine = left + value + right;
-		}
-		return commandLine;
 	}
 
 	private static void initializeProperties() {

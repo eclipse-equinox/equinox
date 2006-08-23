@@ -1446,7 +1446,6 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 			int curIndex = 0;
 			int curFragment = -1;
 			URL nextElement = null;
-			boolean noMoreElements = false;
 
 			public boolean hasMoreElements() {
 				if (nextElement != null)

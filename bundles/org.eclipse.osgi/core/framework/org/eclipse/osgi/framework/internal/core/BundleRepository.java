@@ -34,14 +34,10 @@ public class BundleRepository {
 	/** bundles keyed by SymbolicName */
 	private HashMap bundlesBySymbolicName;
 
-	/** PackageAdmin */
-	private PackageAdminImpl packageAdmin;
-
-	public BundleRepository(int initialCapacity, PackageAdminImpl packageAdmin) {
+	public BundleRepository(int initialCapacity) {
 		bundlesByInstallOrder = new ArrayList(initialCapacity);
 		bundlesById = new KeyedHashSet(initialCapacity, true);
 		bundlesBySymbolicName = new HashMap(initialCapacity);
-		this.packageAdmin = packageAdmin;
 	}
 
 	/**
@@ -55,7 +51,7 @@ public class BundleRepository {
 	/**
 	 * Gets a bundle by its bundle Id.
 	 * @param bundleId
-	 * @return
+	 * @return a bundle with the specified id or null if one does not exist
 	 */
 	public AbstractBundle getBundle(long bundleId) {
 		Long key = new Long(bundleId);
