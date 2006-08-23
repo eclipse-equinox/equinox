@@ -53,7 +53,7 @@ public class TestCycle_002 extends AbstractStateTest {
 
 	
 	public void checkWiringState_1() {
-		BundleDescription[] requires = requires = bundle_1.getResolvedRequires();
+		BundleDescription[] requires = bundle_1.getResolvedRequires();
 		assertNotNull("requires array is unexpectedly null", requires);
 		assertTrue("requires array is unexpectedly empty", requires.length > 0);
 		for (int i = 0; i<requires.length; i++) {
@@ -70,7 +70,7 @@ public class TestCycle_002 extends AbstractStateTest {
 	} // end method
 
 	public void checkWiringState_2() {
-		BundleDescription[] requires = requires = bundle_2.getResolvedRequires();
+		BundleDescription[] requires = bundle_2.getResolvedRequires();
 		assertNotNull("requires array is unexpectedly null", requires);
 		assertTrue("requires array is unexpectedly empty", requires.length > 0);
 		for (int i = 0; i<requires.length; i++) {
@@ -87,7 +87,7 @@ public class TestCycle_002 extends AbstractStateTest {
 	} // end method
 
 	public void checkWiringState_3() {
-		BundleDescription[] requires = requires = bundle_3.getResolvedRequires();
+		BundleDescription[] requires = bundle_3.getResolvedRequires();
 		assertNotNull("requires array is unexpectedly null", requires);
 		assertTrue("requires array is unexpectedly empty", requires.length > 0);
 		for (int i = 0; i<requires.length; i++) {

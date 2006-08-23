@@ -27,7 +27,7 @@ public class NewResolverTest extends AbstractStateTest {
 	
 	public void testSkeleton() throws BundleException {
 		State state = buildEmptyState();
-		StateDelta delta = state.resolve();
+		state.resolve();
 	}
 	
 	public void testBasicScenario1() throws BundleException {
@@ -45,7 +45,7 @@ public class NewResolverTest extends AbstractStateTest {
 													"org.eclipse.basic1B", 1);
 		state.addBundle(bB);
 
-		StateDelta delta = state.resolve();
+		state.resolve();
 		
 		BundleDescription b0 = state.getBundle(0);
 		assertNotNull("0.1", b0);

@@ -81,7 +81,7 @@ public class TestPropagation_004 extends AbstractStateTest {
 	} // end method
 
 	public void checkWiringState_2() {
-		BundleDescription[] requires = requires = bundle_2.getResolvedRequires();
+		BundleDescription[] requires = bundle_2.getResolvedRequires();
 		assertNotNull("requires array is unexpectedly null", requires);
 		assertTrue("requires array is unexpectedly empty", requires.length > 0);
 		for (int i = 0; i<requires.length; i++) {

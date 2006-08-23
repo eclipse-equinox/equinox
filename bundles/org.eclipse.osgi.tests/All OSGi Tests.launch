@@ -1,32 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <launchConfiguration type="org.eclipse.pde.ui.JunitLaunchConfig">
+<stringAttribute key="org.eclipse.jdt.junit.TEST_KIND" value="org.eclipse.jdt.junit.loader.junit3"/>
+<stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="org.eclipse.osgi.tests.AutomatedTests"/>
+<stringAttribute key="org.eclipse.jdt.junit.CONTAINER" value=""/>
+<stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="org.eclipse.osgi.tests"/>
+<booleanAttribute key="automaticAdd" value="true"/>
+<stringAttribute key="location" value="c:\temp\test-workspaces"/>
+<booleanAttribute key="askclear" value="false"/>
+<listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
+<listEntry value="4"/>
+</listAttribute>
+<booleanAttribute key="clearConfig" value="true"/>
 <stringAttribute key="product" value="org.eclipse.platform.ide"/>
 <stringAttribute key="bootstrap" value=""/>
-<booleanAttribute key="useProduct" value="false"/>
-<booleanAttribute key="tracing" value="false"/>
-<stringAttribute key="location2" value="d:\work\workspaces\runtime-test-workspace"/>
-<stringAttribute key="org.eclipse.jdt.junit.CONTAINER" value=""/>
-<booleanAttribute key="org.eclipse.jdt.junit.KEEPRUNNING_ATTR" value="false"/>
-<booleanAttribute key="automaticAdd" value="true"/>
-<stringAttribute key="checked" value="[NONE]"/>
-<booleanAttribute key="includeFragments" value="false"/>
-<stringAttribute key="application" value="org.eclipse.pde.junit.runtime.coretestapplication"/>
-<stringAttribute key="configLocation" value=""/>
-<booleanAttribute key="clearws" value="true"/>
-<stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="org.eclipse.osgi.tests.AutomatedTests"/>
-<stringAttribute key="location1" value="c:\temp\test-workspaces"/>
-<stringAttribute key="templateConfig" value=""/>
-<booleanAttribute key="default" value="true"/>
-<stringAttribute key="vmargs" value=""/>
-<booleanAttribute key="clearConfig" value="true"/>
-<booleanAttribute key="org.eclipse.debug.core.appendEnvironmentVariables" value="true"/>
-<booleanAttribute key="useDefaultConfigArea" value="true"/>
 <stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.pde.ui.workbenchClasspathProvider"/>
-<stringAttribute key="progargs" value=""/>
-<booleanAttribute key="useDefaultConfig" value="true"/>
-<stringAttribute key="org.eclipse.jdt.junit.TESTNAME" value=""/>
-<stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="org.eclipse.osgi.tests"/>
-<booleanAttribute key="askclear" value="false"/>
+<booleanAttribute key="clearws" value="true"/>
 <booleanAttribute key="includeOptional" value="true"/>
-<stringAttribute key="location0" value="c:\temp\test-workspaces"/>
+<booleanAttribute key="useProduct" value="false"/>
+<stringAttribute key="checked" value="[NONE]"/>
+<listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
+<listEntry value="/org.eclipse.osgi.tests"/>
+</listAttribute>
+<stringAttribute key="org.eclipse.jdt.junit.TESTNAME" value=""/>
+<booleanAttribute key="automaticValidate" value="false"/>
+<stringAttribute key="location2" value="d:\work\workspaces\runtime-test-workspace"/>
+<booleanAttribute key="useDefaultConfig" value="true"/>
+<stringAttribute key="templateConfig" value=""/>
+<stringAttribute key="location1" value="c:\temp\test-workspaces"/>
+<booleanAttribute key="org.eclipse.jdt.junit.KEEPRUNNING_ATTR" value="false"/>
+<booleanAttribute key="includeFragments" value="false"/>
+<stringAttribute key="pde.version" value="3.2a"/>
+<stringAttribute key="configLocation" value=""/>
+<stringAttribute key="application" value="org.eclipse.pde.junit.runtime.coretestapplication"/>
+<booleanAttribute key="useDefaultConfigArea" value="true"/>
+<booleanAttribute key="tracing" value="false"/>
+<booleanAttribute key="org.eclipse.debug.core.appendEnvironmentVariables" value="true"/>
+<booleanAttribute key="default" value="true"/>
 </launchConfiguration>

@@ -108,18 +108,18 @@ public class SimpleTests extends TestCase {
 //		assertTrue(manager1.getTimeStamp(TEST1) != 0);
 //		assertTrue(manager1.getTimeStamp(TEST1) != manager2.getTimeStamp(TEST1));
 //	}
-
-	private void update(StorageManager manager, String filename) throws IOException {
-		writeFile(new File(base, filename));
-		manager.update(new String[] {TEST1}, new String[] {filename});
-	}
-
-	private void writeFile(File filename) {
-		try {
-			FileOutputStream out = new FileOutputStream(filename);
-			out.write(("test - " + System.currentTimeMillis()).getBytes());
-			out.close();
-		} catch (IOException e) {
-		}
-	}
+//
+//	private void update(StorageManager manager, String filename) throws IOException {
+//		writeFile(new File(base, filename));
+//		manager.update(new String[] {TEST1}, new String[] {filename});
+//	}
+//
+//	private void writeFile(File filename) {
+//		try {
+//			FileOutputStream out = new FileOutputStream(filename);
+//			out.write(("test - " + System.currentTimeMillis()).getBytes());
+//			out.close();
+//		} catch (IOException e) {
+//		}
+//	}
 }
