@@ -86,6 +86,48 @@ public class Status implements IStatus {
 		setException(exception);
 	}
 
+	/**
+	 * Simplified constructor of a new status object; assumes that code is <code>OK</code>.
+	 * The created status has no children.
+	 *
+	 * @param severity the severity; one of <code>OK</code>, <code>ERROR</code>, 
+	 * <code>INFO</code>, <code>WARNING</code>,  or <code>CANCEL</code>
+	 * @param pluginId the unique identifier of the relevant plug-in
+	 * @param message a human-readable message, localized to the
+	 *    current locale
+	 * @param exception a low-level exception, or <code>null</code> if not
+	 *    applicable
+	 *     
+	 * @since org.eclipse.equinox.common 3.3
+	 */
+	public Status(int severity, String pluginId, String message, Throwable exception) {
+		setSeverity(severity);
+		setPlugin(pluginId);
+		setMessage(message);
+		setException(exception);
+		setCode(OK);
+	}
+
+	/**
+	 * Simplified constructor of a new status object; assumes that code is <code>OK</code> and
+	 * exception is <code>null</code>. The created status has no children.
+	 *
+	 * @param severity the severity; one of <code>OK</code>, <code>ERROR</code>, 
+	 * <code>INFO</code>, <code>WARNING</code>,  or <code>CANCEL</code>
+	 * @param pluginId the unique identifier of the relevant plug-in
+	 * @param message a human-readable message, localized to the
+	 *    current locale
+	 *    
+	 * @since org.eclipse.equinox.common 3.3
+	 */
+	public Status(int severity, String pluginId, String message) {
+		setSeverity(severity);
+		setPlugin(pluginId);
+		setMessage(message);
+		setCode(OK);
+		setException(null);
+	}
+
 	/* (Intentionally not javadoc'd)
 	 * Implements the corresponding method on <code>IStatus</code>.
 	 */
@@ -169,14 +211,17 @@ public class Status implements IStatus {
 	}
 
 	/**
-	 * Sets the message.
+	 * Sets the message. If null is passed, message is set to an empty
+	 * string.
 	 *
 	 * @param message a human-readable message, localized to the
 	 *    current locale
 	 */
 	protected void setMessage(String message) {
-		Assert.isLegal(message != null);
-		this.message = message;
+		if (message == null)
+			this.message = ""; //$NON-NLS-1$
+		else
+			this.message = message;
 	}
 
 	/**
