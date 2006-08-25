@@ -34,6 +34,9 @@ import org.osgi.framework.*;
  * Core OSGi Framework class.
  */
 public class Framework implements EventDispatcher, EventPublisher {
+	private static String J2SE = "J2SE-"; //$NON-NLS-1$
+	private static String JAVASE = "JavaSE-"; //$NON-NLS-1$
+	private static String PROFILE_EXT = ".profile"; //$NON-NLS-1$
 	/** FrameworkAdaptor specific functions. */
 	protected FrameworkAdaptor adaptor;
 	/** Framework properties object.  A reference to the 
@@ -352,6 +355,8 @@ public class Framework implements EventDispatcher, EventPublisher {
 		String j2meConfig = properties.getProperty(Constants.J2ME_MICROEDITION_CONFIGURATION);
 		String j2meProfiles = properties.getProperty(Constants.J2ME_MICROEDITION_PROFILES);
 		String vmProfile = null;
+		String javaEdition = null;
+		Version javaVersion = null;
 		if (j2meConfig != null && j2meConfig.length() > 0 && j2meProfiles != null && j2meProfiles.length() > 0) {
 			// save the vmProfile based off of the config and profile
 			// use the last profile; assuming that is the highest one
@@ -375,11 +380,11 @@ public class Framework implements EventDispatcher, EventPublisher {
 				else {
 					// look for JavaSE if 1.6 or greater; otherwise look for J2SE
 					Version v16 = new Version("1.6"); //$NON-NLS-1$
-					String javaEdition = "J2SE-"; //$NON-NLS-1$
+					 javaEdition = J2SE;
 					try {
-						Version vEdition = new Version(javaSpecVersion);
-						if (v16.compareTo(vEdition) <= 0)
-							javaEdition = "JavaSE-"; //$NON-NLS-1$
+						javaVersion = new Version(javaSpecVersion);
+						if (v16.compareTo(javaVersion) <= 0)
+							javaEdition = JAVASE;
 					} catch (IllegalArgumentException e) {
 						// do nothing
 					}
@@ -400,8 +405,10 @@ public class Framework implements EventDispatcher, EventPublisher {
 			}
 		if (url == null && vmProfile != null) {
 			// look for a profile in the system bundle based on the vm profile
-			String javaProfile = vmProfile + ".profile"; //$NON-NLS-1$
+			String javaProfile = vmProfile + PROFILE_EXT;
 			url = findInSystemBundle(javaProfile);
+			if (url == null)
+				url = getNextBestProfile(javaEdition, javaVersion);
 		}
 		if (url == null)
 			// the profile url is still null then use the osgi min profile in OSGi by default
@@ -429,6 +436,26 @@ public class Framework implements EventDispatcher, EventPublisher {
 			else
 				// last resort; default to the absolute minimum profile name
 				result.put(Constants.OSGI_JAVA_PROFILE_NAME, "OSGi/Minimum-1.0"); //$NON-NLS-1$
+		return result;
+	}
+
+	private URL getNextBestProfile(String javaEdition, Version javaVersion) {
+		if (javaVersion == null || (javaEdition != J2SE && javaEdition != JAVASE))
+			return null; // we cannot automatically choose the next best profile unless this is a J2SE or JavaSE vm
+		URL bestProfile = findNextBestProfile(javaEdition, javaVersion);
+		if (bestProfile == null && javaEdition == JAVASE)
+			// if this is a JavaSE VM then search for a lower J2SE profile
+			bestProfile = findNextBestProfile(J2SE, javaVersion);
+		return bestProfile;
+	}
+
+	private URL findNextBestProfile(String javaEdition, Version javaVersion) {
+		URL result = null;
+		int minor = javaVersion.getMinor();
+		do {
+			result = findInSystemBundle(javaEdition + javaVersion.getMajor() + "." + minor + PROFILE_EXT); //$NON-NLS-1$
+			minor = minor - 1;
+		} while (result == null && minor > 0);
 		return result;
 	}
 
