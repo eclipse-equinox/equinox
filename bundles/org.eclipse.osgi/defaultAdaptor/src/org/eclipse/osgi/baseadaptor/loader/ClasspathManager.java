@@ -209,7 +209,7 @@ public class ClasspathManager {
 		BundleEntry cpEntry = sourcedata.getBundleFile().getEntry(cp);
 		// check for internal library directories in a bundle jar file
 		if (cpEntry != null && cpEntry.getName().endsWith("/")) //$NON-NLS-1$
-			bundlefile = new NestedDirBundleFile(sourcedata.getBundleFile(), cp);
+			bundlefile = createBundleFile(cp, sourcedata);
 		// check for internal library jars
 		else if ((file = sourcedata.getBundleFile().getFile(cp, false)) != null)
 			bundlefile = createBundleFile(file, sourcedata);
@@ -235,11 +235,11 @@ public class ClasspathManager {
 		return null;
 	}
 
-	private static BundleFile createBundleFile(File file, BaseData sourcedata) {
-		if (file == null || !file.exists())
+	private static BundleFile createBundleFile(Object content, BaseData sourcedata) {
+		if (content == null || (content instanceof File && !((File) content).exists()))
 			return null;
 		try {
-			return sourcedata.getAdaptor().createBundleFile(file, sourcedata);
+			return sourcedata.getAdaptor().createBundleFile(content, sourcedata);
 		} catch (IOException e) {
 			sourcedata.getAdaptor().getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, sourcedata.getBundle(), e);
 		}

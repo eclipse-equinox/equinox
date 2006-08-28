@@ -609,6 +609,11 @@ public class BaseStorage implements SynchronousBundleListener {
 			else 
 				result = new ZipBundleFile(file, data);
 		}
+
+		if (result == null && content instanceof String) {
+			// here we assume the content is a path offset into the base bundle file;  create a NestedDirBundleFile
+			result = new NestedDirBundleFile(data.getBundleFile(), (String) content);
+		}
 		if (result == null)
 			// nothing we can do; must throw exception for the content
 			throw new IOException("Cannot create bundle file for content of type: " + content.getClass().getName()); //$NON-NLS-1$
