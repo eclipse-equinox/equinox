@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.core.runtime;
 
-import org.eclipse.core.internal.runtime.CommonMessages;
 import org.eclipse.core.internal.runtime.IRuntimeConstants;
 
 /**
@@ -27,7 +26,7 @@ public class Status implements IStatus {
 	 *
 	 * @since 3.0
 	 */
-	public static final IStatus OK_STATUS = new Status(OK, IRuntimeConstants.PI_RUNTIME, OK, CommonMessages.ok, null);
+	public static final IStatus OK_STATUS = new Status(OK, IRuntimeConstants.PI_RUNTIME, OK, "OK", null); //$NON-NLS-1$
 	/**
 	 * A standard CANCEL status with no message.
 	 * 
