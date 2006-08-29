@@ -91,6 +91,8 @@ public class Msg extends NLS {
 	public static String MANIFEST_INVALID_LINE_NOCOLON;
 	public static String MANIFEST_IOEXCEPTION;
 
+	public static String CANNOT_SET_CONTEXTFINDER;
+
 	static {
 		// initialize resource bundles
 		NLS.initializeMessages(BUNDLE_NAME, Msg.class);

@@ -11,12 +11,11 @@
 package org.eclipse.osgi.framework.internal.core;
 
 import java.io.*;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
+import java.lang.reflect.*;
 import java.net.*;
 import java.security.*;
 import java.util.*;
+import org.eclipse.core.runtime.internal.adaptor.ContextFinder;
 import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.eventmgr.*;
@@ -34,6 +33,13 @@ import org.osgi.framework.*;
  * Core OSGi Framework class.
  */
 public class Framework implements EventDispatcher, EventPublisher {
+	// System property used to set the context classloader parent classloader type (ccl is the default)
+	private static final String PROP_CONTEXTCLASSLOADER_PARENT = "osgi.contextClassLoaderParent"; //$NON-NLS-1$
+	private static final String CONTEXTCLASSLOADER_PARENT_APP = "app"; //$NON-NLS-1$
+	private static final String CONTEXTCLASSLOADER_PARENT_EXT = "ext"; //$NON-NLS-1$
+	private static final String CONTEXTCLASSLOADER_PARENT_BOOT = "boot"; //$NON-NLS-1$
+	private static final String CONTEXTCLASSLOADER_PARENT_FWK = "fwk"; //$NON-NLS-1$
+
 	private static String J2SE = "J2SE-"; //$NON-NLS-1$
 	private static String JAVASE = "JavaSE-"; //$NON-NLS-1$
 	private static String PROFILE_EXT = ".profile"; //$NON-NLS-1$
@@ -133,6 +139,8 @@ public class Framework implements EventDispatcher, EventPublisher {
 			Debug.println("ProtectionDomain of Framework.class: \n" + this.getClass().getProtectionDomain()); //$NON-NLS-1$
 		}
 		setNLSFrameworkLog();
+		// initialize ContextFinder
+		initializeContextFinder();
 		/* initialize the adaptor */
 		adaptor.initialize(this);
 		if (Profile.PROFILE && Profile.STARTUP)
@@ -1633,6 +1641,51 @@ public class Framework implements EventDispatcher, EventPublisher {
 			return null;
 		}
 		throw new BundleException(Msg.BUNDLE_NATIVECODE_MATCH_EXCEPTION);
+	}
+
+	private void initializeContextFinder() {
+		Thread current = Thread.currentThread();
+		Throwable error = null;
+		try {
+			ClassLoader parent = null;
+			// check property for specified parent
+			String type = FrameworkProperties.getProperty(PROP_CONTEXTCLASSLOADER_PARENT);
+			if (CONTEXTCLASSLOADER_PARENT_APP.equals(type))
+				parent = ClassLoader.getSystemClassLoader();
+			else if (CONTEXTCLASSLOADER_PARENT_BOOT.equals(type))
+				parent = null;
+			else if (CONTEXTCLASSLOADER_PARENT_FWK.equals(type))
+				parent = Framework.class.getClassLoader();
+			else if (CONTEXTCLASSLOADER_PARENT_EXT.equals(type)) {
+				ClassLoader appCL = ClassLoader.getSystemClassLoader();
+				if (appCL != null)
+					parent = appCL.getParent();
+			} else { // default is ccl (null or any other value will use ccl)
+				Method getContextClassLoader = Thread.class.getMethod("getContextClassLoader", null); //$NON-NLS-1$
+				parent = (ClassLoader) getContextClassLoader.invoke(current, null);
+			}
+			Method setContextClassLoader = Thread.class.getMethod("setContextClassLoader", new Class[] {ClassLoader.class}); //$NON-NLS-1$
+			Object[] params = new Object[] {new ContextFinder(parent)};
+			setContextClassLoader.invoke(current, params);
+			return;
+		} catch (SecurityException e) {
+			// log the error
+			error = e;
+		} catch (NoSuchMethodException e) {
+			// Ignore; must be running on a class library that does not support context class loaders.
+			return; // we really do not want to log this
+		} catch (IllegalArgumentException e) {
+			// log the error
+			error = e;
+		} catch (IllegalAccessException e) {
+			// log the error
+			error = e;
+		} catch (InvocationTargetException e) {
+			// log the error; get the target exception
+			error = e.getTargetException();
+		}
+		FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.INFO, 0, NLS.bind(Msg.CANNOT_SET_CONTEXTFINDER, null), 0, error, null);
+		adaptor.getFrameworkLog().log(entry);
 	}
 
 	private static Field getStaticField(Class clazz, Class type) {

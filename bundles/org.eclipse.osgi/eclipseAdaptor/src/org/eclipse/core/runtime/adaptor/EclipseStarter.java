@@ -109,13 +109,6 @@ public class EclipseStarter {
 	private static final String PROP_ALLOW_APPRELAUNCH = "eclipse.allowAppRelaunch"; //$NON-NLS-1$
 	private static final String PROP_APPLICATION_NODEFAULT = "eclipse.application.noDefault"; //$NON-NLS-1$
 
-	// System property used to set the context classloader parent classloader type (ccl is the default)
-	private static final String PROP_CONTEXTCLASSLOADER_PARENT = "osgi.contextClassLoaderParent"; //$NON-NLS-1$
-	private static final String CONTEXTCLASSLOADER_PARENT_APP = "app"; //$NON-NLS-1$
-	private static final String CONTEXTCLASSLOADER_PARENT_EXT = "ext"; //$NON-NLS-1$
-	private static final String CONTEXTCLASSLOADER_PARENT_BOOT = "boot"; //$NON-NLS-1$
-	private static final String CONTEXTCLASSLOADER_PARENT_FWK = "fwk"; //$NON-NLS-1$
-
 	private static final String FILE_SCHEME = "file:"; //$NON-NLS-1$
 	private static final String REFERENCE_SCHEME = "reference:"; //$NON-NLS-1$
 	private static final String REFERENCE_PROTOCOL = "reference"; //$NON-NLS-1$
@@ -275,8 +268,6 @@ public class EclipseStarter {
 			Profile.logTime("EclipseStarter.startup()", "props inited"); //$NON-NLS-1$ //$NON-NLS-2$
 		adaptor = createAdaptor();
 		log = adaptor.getFrameworkLog();
-		// initialize context finder after the log has been created incase we need to log something.
-		initializeContextFinder();
 		if (Profile.PROFILE && Profile.STARTUP)
 			Profile.logTime("EclipseStarter.startup()", "adapter created"); //$NON-NLS-1$ //$NON-NLS-2$
 		osgi = new OSGi(adaptor);
@@ -314,45 +305,6 @@ public class EclipseStarter {
 		if (Profile.PROFILE && Profile.STARTUP)
 			Profile.logExit("EclipseStarter.startup()"); //$NON-NLS-1$
 		return context;
-	}
-
-	private static void initializeContextFinder() {
-		Thread current = Thread.currentThread();
-		try {
-			ClassLoader parent = null;
-			// check property for specified parent
-			String type = FrameworkProperties.getProperty(PROP_CONTEXTCLASSLOADER_PARENT);
-			if (CONTEXTCLASSLOADER_PARENT_APP.equals(type))
-				parent = ClassLoader.getSystemClassLoader();
-			else if (CONTEXTCLASSLOADER_PARENT_BOOT.equals(type))
-				parent = null;
-			else if (CONTEXTCLASSLOADER_PARENT_FWK.equals(type))
-				parent = EclipseStarter.class.getClassLoader();
-			else if (CONTEXTCLASSLOADER_PARENT_EXT.equals(type)) {
-				ClassLoader appCL = ClassLoader.getSystemClassLoader();
-				if (appCL != null)
-					parent = appCL.getParent();
-			} else { // default is ccl (null or any other value will use ccl)
-				Method getContextClassLoader = Thread.class.getMethod("getContextClassLoader", null); //$NON-NLS-1$
-				parent = (ClassLoader) getContextClassLoader.invoke(current, null);
-			}
-			Method setContextClassLoader = Thread.class.getMethod("setContextClassLoader", new Class[] {ClassLoader.class}); //$NON-NLS-1$
-			Object[] params = new Object[] {new ContextFinder(parent)};
-			setContextClassLoader.invoke(current, params);
-			return;
-		} catch (SecurityException e) {
-			//Ignore
-		} catch (NoSuchMethodException e) {
-			//Ignore
-		} catch (IllegalArgumentException e) {
-			//Ignore
-		} catch (IllegalAccessException e) {
-			//Ignore
-		} catch (InvocationTargetException e) {
-			//Ignore
-		}
-		FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, NLS.bind(EclipseAdaptorMsg.ECLIPSE_CLASSLOADER_CANNOT_SET_CONTEXTFINDER, null), 0, null, null);
-		log.log(entry);
 	}
 
 	private static int getStartLevel() {
