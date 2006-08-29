@@ -15,6 +15,8 @@ import org.eclipse.osgi.util.NLS;
 public class CommonMessages extends NLS {
 	private static final String BUNDLE_NAME = "org.eclipse.core.internal.runtime.commonMessages"; //$NON-NLS-1$
 
+	public static String ok;
+
 	// metadata
 	public static String meta_couldNotCreate;
 	public static String meta_instanceDataUnspecified;

@@ -11,6 +11,7 @@
 package org.eclipse.core.runtime;
 
 import org.eclipse.core.internal.runtime.IRuntimeConstants;
+import org.eclipse.core.internal.runtime.LocalizationUtils;
 
 /**
  * A concrete status implementation, suitable either for 
@@ -26,7 +27,7 @@ public class Status implements IStatus {
 	 *
 	 * @since 3.0
 	 */
-	public static final IStatus OK_STATUS = new Status(OK, IRuntimeConstants.PI_RUNTIME, OK, "OK", null); //$NON-NLS-1$
+	public static final IStatus OK_STATUS = new Status(OK, IRuntimeConstants.PI_RUNTIME, OK, LocalizationUtils.safeLocalize("ok"), null); //$NON-NLS-1$
 	/**
 	 * A standard CANCEL status with no message.
 	 * 
