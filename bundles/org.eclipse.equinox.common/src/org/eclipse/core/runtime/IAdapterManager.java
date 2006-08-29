@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.core.runtime;
 
-
 /**
  * An adapter manager maintains a registry of adapter factories. Clients
  * directly invoke methods on an adapter manager to register and unregister
@@ -64,6 +63,26 @@ package org.eclipse.core.runtime;
 public interface IAdapterManager {
 
 	/**
+	 * This value can be returned to indicate that no applicable adapter factory 
+	 * was found. 
+	 * @since org.eclipse.equinox.common 3.3
+	 */
+	public static final int NONE = 0;
+
+	/**
+	 * This value can be returned to indicate that an adapter factory was found, 
+	 * but has not been loaded.
+	 * @since org.eclipse.equinox.common 3.3
+	 */
+	public static final int NOT_LOADED = 1;
+
+	/**
+	 * This value can be returned to indicate that an adapter factory is loaded.
+	 * @since org.eclipse.equinox.common 3.3
+	 */
+	public static final int LOADED = 2;
+
+	/**
 	 * Returns the types that can be obtained by converting <code>adaptableClass</code> 
 	 * via this manager. Converting means that subsequent calls to <code>getAdapter()</code>
 	 * or <code>loadAdapter()</code> could result in an adapted object.
@@ -81,7 +100,7 @@ public interface IAdapterManager {
 	 * @since 3.1
 	 */
 	public String[] computeAdapterTypes(Class adaptableClass);
-	
+
 	/**
 	 * Returns the class search order for a given class. The search order from a 
 	 * class with the definition <br>
@@ -101,6 +120,7 @@ public interface IAdapterManager {
 	 * @since 3.1
 	 */
 	public Class[] computeClassOrder(Class clazz);
+
 	/**
 	 * Returns an object which is an instance of the given class associated
 	 * with the given object. Returns <code>null</code> if no such object can
@@ -158,7 +178,25 @@ public interface IAdapterManager {
 	 * @since 3.0
 	 */
 	public boolean hasAdapter(Object adaptable, String adapterTypeName);
-	
+
+	/**
+	 * Returns a status of an adapter factory registered that may be able
+	 * to convert <code>adaptable</code> to an object of type <code>adapterTypeName</code>.
+	 * <p>
+	 * One of the following values can be returned:<ul>
+	 * <li>{@link #NONE} if no applicable adapter factory was found;</li>
+	 * <li>{@value #NOT_LOADED} if an adapter factory was found, but has not been loaded;</li>
+	 * <li>{@value #LOADED} if an adapter factory was found, and it is loaded.</li>
+	 * </ul></p>
+	 * @param adaptable the adaptable object being queried (usually an instance
+	 * of <code>IAdaptable</code>)
+	 * @param adapterTypeName the fully qualified class name of an adapter to
+	 * look up
+	 * @return a status of the adapter 
+	 * @since org.eclipse.equinox.common 3.3
+	 */
+	public int queryAdapter(Object adaptable, String adapterTypeName);
+
 	/**
 	 * Returns an object that is an instance of the given class name associated
 	 * with the given object. Returns <code>null</code> if no such object can

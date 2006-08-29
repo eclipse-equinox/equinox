@@ -294,6 +294,21 @@ public final class AdapterManager implements IAdapterManager {
 	}
 
 	/* (non-Javadoc)
+	 * @see org.eclipse.core.runtime.IAdapterManager#queryAdapter(java.lang.Object, java.lang.String)
+	 */
+	public int queryAdapter(Object adaptable, String adapterTypeName) {
+		IAdapterFactory factory = (IAdapterFactory) getFactories(adaptable.getClass()).get(adapterTypeName);
+		if (factory == null)
+			return NONE;
+		if (factory instanceof IAdapterFactoryExt) {
+			factory = ((IAdapterFactoryExt) factory).loadFactory(false); // don't force loading
+			if (factory == null)
+				return NOT_LOADED;
+		}
+		return LOADED;
+	}
+
+	/* (non-Javadoc)
 	 * @see org.eclipse.core.runtime.IAdapterManager#loadAdapter(java.lang.Object, java.lang.String)
 	 */
 	public Object loadAdapter(Object adaptable, String adapterTypeName) {
