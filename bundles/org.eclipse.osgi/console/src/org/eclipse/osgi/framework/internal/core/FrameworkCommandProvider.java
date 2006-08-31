@@ -533,15 +533,10 @@ public class FrameworkCommandProvider implements CommandProvider {
 				try {
 					org.osgi.service.packageadmin.ExportedPackage[] packages = null;
 
-					if ((token != null) && (bundle == null)) {
-						org.osgi.service.packageadmin.ExportedPackage pkg = packageAdmin.getExportedPackage(token);
-
-						if (pkg != null) {
-							packages = new org.osgi.service.packageadmin.ExportedPackage[] {pkg};
-						}
-					} else {
+					if (token != null)
+						packages = packageAdmin.getExportedPackages(token);
+					if (packages == null)
 						packages = packageAdmin.getExportedPackages(bundle);
-					}
 
 					if (packages == null) {
 						intp.println(ConsoleMsg.CONSOLE_NO_EXPORTED_PACKAGES_MESSAGE);
