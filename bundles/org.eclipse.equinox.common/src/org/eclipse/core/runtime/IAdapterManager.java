@@ -184,9 +184,9 @@ public interface IAdapterManager {
 	 * to convert <code>adaptable</code> to an object of type <code>adapterTypeName</code>.
 	 * <p>
 	 * One of the following values can be returned:<ul>
-	 * <li>{@link #NONE} if no applicable adapter factory was found;</li>
-	 * <li>{@value #NOT_LOADED} if an adapter factory was found, but has not been loaded;</li>
-	 * <li>{@value #LOADED} if an adapter factory was found, and it is loaded.</li>
+	 * <li>{@link org.eclipse.core.runtime.IAdapterManager#NONE} if no applicable adapter factory was found;</li>
+	 * <li>{@link org.eclipse.core.runtime.IAdapterManager#NOT_LOADED} if an adapter factory was found, but has not been loaded;</li>
+	 * <li>{@link org.eclipse.core.runtime.IAdapterManager#LOADED} if an adapter factory was found, and it is loaded.</li>
 	 * </ul></p>
 	 * @param adaptable the adaptable object being queried (usually an instance
 	 * of <code>IAdaptable</code>)
