@@ -16,6 +16,7 @@ import java.security.PrivilegedAction;
 import java.util.*;
 import org.eclipse.core.runtime.*;
 import org.eclipse.equinox.app.IApplicationContext;
+import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.service.runnable.ApplicationLauncher;
 import org.eclipse.osgi.util.NLS;
@@ -36,7 +37,8 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 
 	private static final String PROP_PRODUCT = "eclipse.product"; //$NON-NLS-1$
 	private static final String PROP_ECLIPSE_APPLICATION = "eclipse.application"; //$NON-NLS-1$
-	private static final String PROP_ECLIPSE_APPLICATION_NODEFAULT = "eclipse.application.noDefault"; //$NON-NLS-1$
+	private static final String PROP_ECLIPSE_APPLICATION_LAUNCH_DEFAULT = "eclipse.application.launchDefault"; //$NON-NLS-1$
+	private static final String PROP_ECLIPSE_REGISTER_APP_DESC = "eclipse.application.registerDescriptors"; //$NON-NLS-1$
 
 	BundleContext context;
 	// A map of ApplicationDescriptors keyed by eclipse application ID
@@ -58,15 +60,15 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 
 	void start() {
 		getExtensionRegistry().addRegistryChangeListener(this);
-		// registerAppDecriptors(null);
 		// need to listen for system bundle stopping
 		context.addBundleListener(this);
 		// Start the default application
 		try {
 			startDefaultApp();
 		} catch (ApplicationException e) {
-			// TODO Log this
-			e.printStackTrace();
+			FrameworkLog log = Activator.getFrameworkLog();
+			if (log != null)
+				log.log(new FrameworkLogEntry(Activator.PI_APP, FrameworkLogEntry.ERROR, 0, Messages.application_errorStartDefault, 0, e, null));
 		}
 	}
 
@@ -157,10 +159,15 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 	}
 
 	private void startDefaultApp() throws ApplicationException {
-		if (Boolean.getBoolean(EclipseAppContainer.PROP_ECLIPSE_APPLICATION_NODEFAULT)) {
+		boolean noDefault = "false".equalsIgnoreCase(context.getProperty(EclipseAppContainer.PROP_ECLIPSE_APPLICATION_LAUNCH_DEFAULT)); //$NON-NLS-1$
+		boolean registerDescs = "true".equalsIgnoreCase(context.getProperty(EclipseAppContainer.PROP_ECLIPSE_REGISTER_APP_DESC)); //$NON-NLS-1$
+		if (noDefault) {
 			// we are not running the default application; we should register all applications
 			registerAppDecriptors(null);
 		} else {
+			// register all the descriptors if requested to
+			if (registerDescs)
+				registerAppDecriptors(null);
 			// find the default application
 			EclipseAppDescriptor defaultDesc = findDefaultApp();
 			if (defaultDesc != null)

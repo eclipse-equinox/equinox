@@ -20,6 +20,7 @@ public class Messages extends NLS {
 	public static String application_noIdFound;
 	public static String application_notFound;
 	public static String application_returned;
+	public static String application_errorStartDefault;
 
 	// product
 	public static String provider_invalid;

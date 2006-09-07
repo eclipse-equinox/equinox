@@ -41,9 +41,9 @@ public interface IApplication {
 	public static final Integer EXIT_RELAUNCH = new Integer(24);
 
 	/**
-	 * Starts this application with the given args and returns a result.
-	 * The content of the args is unchecked and should conform to the expectations of
-	 * the runnable being invoked.  Typically this is a <code>String</code> array. <p>
+	 * Starts this application with the given context and returns a result.
+	 * The content of the context is unchecked and should conform to the expectations of
+	 * the runnable being invoked.<p>
 	 * 
 	 * Applications can return any object they like.  If an <code>Integer</code> is returned
 	 * it is treated as the program exit code if Eclipse is exiting.

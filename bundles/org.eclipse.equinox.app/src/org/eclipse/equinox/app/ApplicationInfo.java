@@ -15,6 +15,10 @@ import org.eclipse.core.runtime.IProduct;
 import org.eclipse.equinox.internal.app.*;
 import org.eclipse.osgi.service.environment.EnvironmentInfo;
 
+/**
+ * This class provides methods to get application information such as
+ * command line arguments, application arguments and product information.
+ */
 public class ApplicationInfo {
 	/**
 	 * Returns the command line args provided to the Eclipse runtime layer when it was first run.
