@@ -51,7 +51,7 @@ public class StreamHandlerFactory extends MultiplexingFactory implements URLStre
 		handlerTracker.open();
 	}
 
-	private Class getBuiltIn(String protocol, String builtInHandlers) {
+	private Class getBuiltIn(String protocol, String builtInHandlers, boolean fromFramework) {
 		if (builtInHandlers == null)
 			return null;
 		Class clazz;
@@ -63,7 +63,10 @@ public class StreamHandlerFactory extends MultiplexingFactory implements URLStre
 			name.append(protocol);
 			name.append(".Handler"); //$NON-NLS-1$
 			try {
-				clazz = secureAction.forName(name.toString());
+				if (fromFramework)
+					clazz = secureAction.forName(name.toString());
+				else
+					clazz = secureAction.loadSystemClass(name.toString());
 				if (clazz != null)
 					return clazz; //this class exists, it is a built in handler	
 			} catch (ClassNotFoundException ex) {
@@ -83,7 +86,7 @@ public class StreamHandlerFactory extends MultiplexingFactory implements URLStre
 	public URLStreamHandler createURLStreamHandler(String protocol) {
 		//first check for built in handlers
 		String builtInHandlers = secureAction.getProperty(PROTOCOL_HANDLER_PKGS);
-		Class clazz = getBuiltIn(protocol, builtInHandlers);
+		Class clazz = getBuiltIn(protocol, builtInHandlers, false);
 		if (clazz != null)
 			return null; // let the VM handle it
 		URLStreamHandler result = null;
@@ -104,7 +107,7 @@ public class StreamHandlerFactory extends MultiplexingFactory implements URLStre
 		//internal protocol handlers
 		String internalHandlerPkgs = secureAction.getProperty(Constants.INTERNAL_HANDLER_PKGS);
 		internalHandlerPkgs = internalHandlerPkgs == null ? INTERNAL_PROTOCOL_HANDLER_PKG : internalHandlerPkgs + '|' + INTERNAL_PROTOCOL_HANDLER_PKG;
-		Class clazz = getBuiltIn(protocol, internalHandlerPkgs);
+		Class clazz = getBuiltIn(protocol, internalHandlerPkgs, true);
 
 		if (clazz == null) {
 			//Now we check the service registry

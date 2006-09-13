@@ -76,7 +76,7 @@ public class ContentHandlerFactory extends MultiplexingFactory implements java.n
 				name.append("."); //$NON-NLS-1$
 				name.append(convertedContentType);
 				try {
-					clazz = StreamHandlerFactory.secureAction.forName(name.toString());
+					clazz = StreamHandlerFactory.secureAction.loadSystemClass(name.toString());
 					if (clazz != null) {
 						return (null); //this class exists, it is a built in handler, let the JVM handle it	
 					}
