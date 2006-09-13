@@ -43,7 +43,8 @@ public class BundleStopper {
 	}
 
 	private void logCycles(Object[][] cycles) {
-		if (!Debug.DEBUG || !Debug.DEBUG_ENABLED)
+		// if no debugging then don't log
+		if (!(Debug.DEBUG && Debug.DEBUG_ENABLED))
 			return;
 
 		// log cycles
