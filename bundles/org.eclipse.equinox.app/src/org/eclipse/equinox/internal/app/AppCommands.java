@@ -129,7 +129,7 @@ public class AppCommands implements CommandProvider {
 	public void _startApp(CommandInterpreter intp) throws Exception {
 		String appId = intp.nextArgument();
 		ServiceReference[] apps = appDescTracker.getServiceReferences();
-		if (apps != null)
+		if (apps != null && appId != null)
 			for (int i = 0; i < apps.length; i++)
 				if (appId.equals(apps[i].getProperty(ApplicationDescriptor.APPLICATION_PID))) {
 					ArrayList argList = new ArrayList();
@@ -155,7 +155,7 @@ public class AppCommands implements CommandProvider {
 	public void _stopApp(CommandInterpreter intp) throws Exception {
 		String runningId = intp.nextArgument();
 		ServiceReference[] runningApps = appHandleTracker.getServiceReferences();
-		if (runningApps != null)
+		if (runningApps != null && runningId != null)
 			for (int i = 0; i < runningApps.length; i++)
 				if (runningId.equals(runningApps[i].getProperty(ApplicationHandle.APPLICATION_PID))) {
 					if (activeApp.match(getServiceProps(runningApps[i]))) {
@@ -177,7 +177,7 @@ public class AppCommands implements CommandProvider {
 	public void _lockApp(CommandInterpreter intp) throws Exception {
 		String appId = intp.nextArgument();
 		ServiceReference[] apps = appDescTracker.getServiceReferences();
-		if (apps != null)
+		if (apps != null && appId != null)
 			for (int i = 0; i < apps.length; i++)
 				if (appId.equals(apps[i].getProperty(ApplicationDescriptor.APPLICATION_PID))) {
 					try {
@@ -195,7 +195,7 @@ public class AppCommands implements CommandProvider {
 	public void _unlockApp(CommandInterpreter intp) throws Exception {
 		String appId = intp.nextArgument();
 		ServiceReference[] apps = appDescTracker.getServiceReferences();
-		if (apps != null)
+		if (apps != null && appId != null)
 			for (int i = 0; i < apps.length; i++)
 				if (appId.equals(apps[i].getProperty(ApplicationDescriptor.APPLICATION_PID))) {
 					try {
@@ -213,7 +213,7 @@ public class AppCommands implements CommandProvider {
 	public void _schedApp(CommandInterpreter intp) throws Exception {
 		String appId = intp.nextArgument();
 		ServiceReference[] apps = appDescTracker.getServiceReferences();
-		if (apps != null)
+		if (apps != null && appId != null)
 			for (int i = 0; i < apps.length; i++)
 				if (appId.equals(apps[i].getProperty(ApplicationDescriptor.APPLICATION_PID))) {
 					try {
