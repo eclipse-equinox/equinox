@@ -1,11 +1,19 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/Configurable.java,v 1.8 2005/07/30 02:22:41 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/Configurable.java,v 1.11 2006/06/16 16:31:18 hargrave Exp $
  * 
- * Copyright (c) OSGi Alliance (2000, 2005). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2000, 2006). All Rights Reserved.
  * 
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 which accompanies this 
- * distribution, and is available at http://www.eclipse.org/legal/epl-v10.html.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package org.osgi.framework;
@@ -19,8 +27,8 @@ package org.osgi.framework;
  * configure a service may test to determine if the service object is an
  * <code>instanceof Configurable</code>.
  * 
- * @version $Revision: 1.8 $
- * @deprecated Since 1.2. Please use Configuration Admin service.
+ * @version $Revision: 1.11 $
+ * @deprecated As of 1.2. Please use Configuration Admin service.
  */
 public interface Configurable {
 	/**
@@ -39,7 +47,7 @@ public interface Configurable {
 	 * @throws java.lang.SecurityException If the caller does not have an
 	 *         appropriate permission and the Java Runtime Environment supports
 	 *         permissions.
-	 * @deprecated Since 1.2. Please use Configuration Admin service.
+	 * @deprecated As of 1.2. Please use Configuration Admin service.
 	 */
 	public Object getConfigurationObject();
 }

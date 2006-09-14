@@ -1,25 +1,33 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.url/src/org/osgi/service/url/URLConstants.java,v 1.6 2005/05/13 20:32:35 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.service.url/src/org/osgi/service/url/URLConstants.java,v 1.9 2006/07/11 00:53:59 hargrave Exp $
  * 
- * Copyright (c) OSGi Alliance (2002, 2005). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2002, 2006). All Rights Reserved.
  * 
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 which accompanies this 
- * distribution, and is available at http://www.eclipse.org/legal/epl-v10.html.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package org.osgi.service.url;
 
 /**
  * Defines standard names for property keys associated with
- * {@link URLStreamHandlerService}and <code>java.net.ContentHandler</code>
+ * {@link URLStreamHandlerService} and <code>java.net.ContentHandler</code>
  * services.
  * 
  * <p>
  * The values associated with these keys are of type <code>java.lang.String[]</code>,
  * unless otherwise indicated.
  * 
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.9 $
  */
 public interface URLConstants {
 	/**
