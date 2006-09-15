@@ -15,6 +15,9 @@ import java.security.Guard;
 import java.security.GuardedObject;
 import java.util.HashMap;
 import java.util.Map;
+import org.eclipse.osgi.framework.log.FrameworkLog;
+import org.eclipse.osgi.framework.log.FrameworkLogEntry;
+import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 import org.osgi.service.application.ApplicationDescriptor;
 import org.osgi.service.application.ScheduledApplication;
@@ -54,15 +57,21 @@ public class EclipseScheduledApplication implements ScheduledApplication, EventH
 		return appPid;
 	}
 
-	public String getTopic() {
+	public synchronized String getTopic() {
+		if (removed)
+			throw new IllegalStateException(Messages.scheduled_app_removed);
 		return topic;
 	}
 
-	public String getEventFilter() {
+	public synchronized String getEventFilter() {
+		if (removed)
+			throw new IllegalStateException(Messages.scheduled_app_removed);
 		return eventFilter;
 	}
 
-	public boolean isRecurring() {
+	public synchronized boolean isRecurring() {
+		if (removed)
+			throw new IllegalStateException(Messages.scheduled_app_removed);
 		return recurring;
 	}
 
@@ -72,7 +81,9 @@ public class EclipseScheduledApplication implements ScheduledApplication, EventH
 		return (ApplicationDescriptor) Activator.getService(appTracker);
 	}
 
-	public Map getArguments() {
+	public synchronized Map getArguments() {
+		if (removed)
+			throw new IllegalStateException(Messages.scheduled_app_removed);
 		return args == null ? null : new HashMap(args);
 	}
 
@@ -89,29 +100,42 @@ public class EclipseScheduledApplication implements ScheduledApplication, EventH
 		AppPersistence.removeScheduledApp(this);
 		if (sr != null)
 			sr.unregister();
+		sr = null;
 		appTracker.close();
 	}
 
 	public synchronized void handleEvent(Event event) {
 		try {
+			if (removed)
+				return;
 			ApplicationDescriptor desc = getApplicationDescriptor();
 			if (desc == null)
+				// in this case the application descriptor was removed;
+				// we must return and keep the scheduled app incase the application comes back
 				return;
 			desc.launch(getArguments(event));
 		} catch (Exception e) {
-			// TODO should log this
+			FrameworkLog log = Activator.getFrameworkLog();
+			if (log != null) {
+				String message = NLS.bind(Messages.scheduled_app_launch_error, sr);
+				log.log(new FrameworkLogEntry(Activator.PI_APP, FrameworkLogEntry.WARNING, 0, message, 0, e, null));
+			}
 			return; // return here to avoid removing non-recurring apps when an error occurs
 		}
 		if (!isRecurring())
 			remove();
 	}
 
-	void setServiceRegistration(ServiceRegistration sr) {
+	synchronized void setServiceRegistration(ServiceRegistration sr) {
 		this.sr = sr;
 		if (removed) // just incase we were removed before the sr was set
 			sr.unregister();
 	}
 
+	/*
+	 * This is used to guard the event topic argument which is passed to an application
+	 * when we are launching it from a scheduling. 
+	 */
 	public class TriggerGuard implements Guard {
 		String eventTopic;
 
@@ -119,6 +143,9 @@ public class EclipseScheduledApplication implements ScheduledApplication, EventH
 			this.eventTopic = topic;
 		}
 
+		/*
+		 * does the proper TopicPermission check for the event topic
+		 */
 		public void checkGuard(Object object) throws SecurityException {
 			SecurityManager sm = System.getSecurityManager();
 			if (sm != null)

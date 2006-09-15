@@ -29,6 +29,7 @@ public class Messages extends NLS {
 
 	// scheduled
 	public static String scheduled_app_removed;
+	public static String scheduled_app_launch_error;
 
 	static {
 		// load message values from bundle file

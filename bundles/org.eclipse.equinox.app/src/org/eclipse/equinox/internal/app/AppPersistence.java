@@ -20,12 +20,13 @@ import org.osgi.service.application.*;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
 import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 /**
  * Manages all persistent data for ApplicationDescriptors (lock status, 
  * scheduled applications etc.)
  */
-public class AppPersistence {
+public class AppPersistence implements ServiceTrackerCustomizer {
 	private static final String PROP_CONFIG_AREA = "osgi.configuration.area"; //$NON-NLS-1$
 
 	private static final String FILTER_PREFIX = "(&(objectClass=org.eclipse.osgi.service.datalocation.Location)(type="; //$NON-NLS-1$
@@ -38,12 +39,12 @@ public class AppPersistence {
 	private static final int OBJECT = 1;
 
 	private static BundleContext context;
-	private static ServiceTracker configuration;
+	private static ServiceTracker configTracker;
+	private static Location configLocation;
 	private static Collection locks = new ArrayList();
 	private static Map scheduledApps = new HashMap();
 	static ArrayList timerApps = new ArrayList();
 	private static StorageManager storageManager;
-	private static boolean dirty;
 	private static boolean scheduling = false;
 	static boolean shutdown = false;
 	private static int nextScheduledID = 1;
@@ -53,14 +54,11 @@ public class AppPersistence {
 		context = bc;
 		shutdown = false;
 		initConfiguration();
-		loadData(FILE_APPLOCKS);
-		loadData(FILE_APPSCHEDULED);
 	}
 
 	static void stop() {
 		shutdown = true;
 		stopTimer();
-		saveData();
 		if (storageManager != null) {
 			storageManager.close();
 			storageManager = null;
@@ -77,14 +75,14 @@ public class AppPersistence {
 		} catch (InvalidSyntaxException e) {
 			// ignore this.  It should never happen as we have tested the above format.
 		}
-		configuration = new ServiceTracker(context, filter, null);
-		configuration.open();
+		configTracker = new ServiceTracker(context, filter, new AppPersistence());
+		configTracker.open();
 	}
 
 	private static void closeConfiguration() {
-		if (configuration != null)
-			configuration.close();
-		configuration = null;
+		if (configTracker != null)
+			configTracker.close();
+		configTracker = null;
 	}
 
 	/**
@@ -92,8 +90,10 @@ public class AppPersistence {
 	 * @param desc the application descriptor
 	 * @return true if the application is persistently locked.
 	 */
-	public synchronized static boolean isLocked(ApplicationDescriptor desc) {
-		return locks.contains(desc.getApplicationId());
+	public static boolean isLocked(ApplicationDescriptor desc) {
+		synchronized (locks) {
+			return locks.contains(desc.getApplicationId());
+		}
 	}
 
 	/**
@@ -101,22 +101,31 @@ public class AppPersistence {
 	 * @param desc the application descriptor
 	 * @param locked the locked flag
 	 */
-	public synchronized static void saveLock(ApplicationDescriptor desc, boolean locked) {
-		if (locked) {
-			if (!locks.contains(desc.getApplicationId())) {
-				dirty = true;
-				locks.add(desc.getApplicationId());
+	public static void saveLock(ApplicationDescriptor desc, boolean locked) {
+		synchronized (locks) {
+			if (locked) {
+				if (!locks.contains(desc.getApplicationId())) {
+					locks.add(desc.getApplicationId());
+					saveData(FILE_APPLOCKS);
+				}
+			} else if (locks.remove(desc.getApplicationId())) {
+				saveData(FILE_APPLOCKS);
 			}
-		} else if (locks.remove(desc.getApplicationId())) {
-			dirty = true;
 		}
 	}
 
-	synchronized static void removeScheduledApp(EclipseScheduledApplication scheduledApp) {
-		if (scheduledApps.remove(scheduledApp.getScheduleId()) != null) {
-			timerApps.remove(scheduledApp);
-			dirty = true;
+	static void removeScheduledApp(EclipseScheduledApplication scheduledApp) {
+		boolean removed;
+		synchronized (scheduledApps) {
+			removed = scheduledApps.remove(scheduledApp.getScheduleId()) != null;
+			if (removed) {
+				saveData(FILE_APPSCHEDULED);
+			}
 		}
+		if (removed)
+			synchronized (timerApps) {
+				timerApps.remove(scheduledApp);
+			}
 	}
 
 	/**
@@ -130,22 +139,28 @@ public class AppPersistence {
 	 * @throws InvalidSyntaxException
 	 * @throws ApplicationException 
 	 */
-	public synchronized static ScheduledApplication addScheduledApp(ApplicationDescriptor descriptor, String scheduleId, Map arguments, String topic, String eventFilter, boolean recurring) throws InvalidSyntaxException, ApplicationException {
+	public static ScheduledApplication addScheduledApp(ApplicationDescriptor descriptor, String scheduleId, Map arguments, String topic, String eventFilter, boolean recurring) throws InvalidSyntaxException, ApplicationException {
 		if (!scheduling && !checkSchedulingSupport())
 			throw new ApplicationException(ApplicationException.APPLICATION_SCHEDULING_FAILED, "Cannot support scheduling without org.osgi.service.event package"); //$NON-NLS-1$
 		// check the event filter for correct syntax
-		context.createFilter(eventFilter);
-		EclipseScheduledApplication result = new EclipseScheduledApplication(context, getNextScheduledID(scheduleId), descriptor.getApplicationId(), arguments, topic, eventFilter, recurring);
-		addScheduledApp(result);
-		dirty = true;
+		context.createFilter(eventFilter);	
+		EclipseScheduledApplication result;
+		synchronized (scheduledApps) {
+			result = new EclipseScheduledApplication(context, getNextScheduledID(scheduleId), descriptor.getApplicationId(), arguments, topic, eventFilter, recurring);
+			addScheduledApp(result);
+			saveData(FILE_APPSCHEDULED);
+		}
 		return result;
 	}
 
+	// must call this method while holding the scheduledApps lock
 	private static void addScheduledApp(EclipseScheduledApplication scheduledApp) {
 		if (ScheduledApplication.TIMER_TOPIC.equals(scheduledApp.getTopic())) {
-			timerApps.add(scheduledApp);
-			if (timerThread == null)
-				startTimer();
+			synchronized (timerApps) {
+				timerApps.add(scheduledApp);
+				if (timerThread == null)
+					startTimer();
+			}
 		}
 		scheduledApps.put(scheduledApp.getScheduleId(), scheduledApp);
 		Hashtable serviceProps = new Hashtable();
@@ -189,13 +204,15 @@ public class AppPersistence {
 
 	private synchronized static boolean loadData(String fileName) {
 		try {
-			Location location = (Location) configuration.getService();
+			Location location = configLocation;
 			if (location == null)
 				return false;
 			File theStorageDir = new File(location.getURL().getPath() + '/' + Activator.PI_APP);
-			boolean readOnly = location.isReadOnly();
-			storageManager = new StorageManager(theStorageDir, readOnly ? "none" : null, readOnly); //$NON-NLS-1$
-			storageManager.open(!readOnly);
+			if (storageManager == null) {
+				boolean readOnly = location.isReadOnly();
+				storageManager = new StorageManager(theStorageDir, readOnly ? "none" : null, readOnly); //$NON-NLS-1$
+				storageManager.open(!readOnly);
+			}
 			File dataFile = storageManager.lookup(fileName, false);
 			if (dataFile == null || !dataFile.isFile()) {
 				Location parent = location.getParentLocation();
@@ -209,9 +226,9 @@ public class AppPersistence {
 			}
 			if (dataFile == null || !dataFile.isFile())
 				return true;
-			if (fileName.equals(FILE_APPLOCKS))
+			if (FILE_APPLOCKS.equals(fileName))
 				loadLocks(dataFile);
-			else if (fileName.equals(FILE_APPSCHEDULED))
+			else if (FILE_APPSCHEDULED.equals(fileName))
 				loadSchedules(dataFile);
 		} catch (IOException e) {
 			return false;
@@ -227,8 +244,10 @@ public class AppPersistence {
 			if (dataVersion != DATA_VERSION)
 				return;
 			int numLocks = in.readInt();
-			for (int i = 0; i < numLocks; i++)
-				locks.add(in.readUTF());
+			synchronized (locks) {
+				for (int i = 0; i < numLocks; i++)
+					locks.add(in.readUTF());
+			}
 		} finally {
 			if (in != null)
 				in.close();
@@ -265,23 +284,23 @@ public class AppPersistence {
 		}
 	}
 
-	private synchronized static void saveData() {
-		if (!dirty || storageManager.isReadOnly())
+	private synchronized static void saveData(String fileName) {
+		if (storageManager == null || storageManager.isReadOnly())
 			return;
 		try {
-			File locksData = storageManager.createTempFile(FILE_APPLOCKS);
-			saveLocks(locksData);
-			File schedulesData = storageManager.createTempFile(FILE_APPSCHEDULED);
-			saveSchedules(schedulesData);
-			storageManager.lookup(FILE_APPLOCKS, true);
-			storageManager.lookup(FILE_APPSCHEDULED, true);
-			storageManager.update(new String[] {FILE_APPLOCKS, FILE_APPSCHEDULED}, new String[] {locksData.getName(), schedulesData.getName()});
+			File data = storageManager.createTempFile(fileName);
+			if (FILE_APPLOCKS.equals(fileName))
+				saveLocks(data);
+			else if (FILE_APPSCHEDULED.equals(fileName))
+				saveSchedules(data);
+			storageManager.lookup(fileName, true);
+			storageManager.update(new String[] {fileName}, new String[] {data.getName()});
 		} catch (IOException e) {
 			// TODO should log this!!
 		}
-		dirty = false;
 	}
 
+	// must call this while holding the locks lock
 	private static void saveLocks(File locksData) throws IOException {
 		ObjectOutputStream out = null;
 		try {
@@ -296,6 +315,7 @@ public class AppPersistence {
 		}
 	}
 
+	// must call this while holding the scheduledApps lock
 	private static void saveSchedules(File schedulesData) throws IOException {
 		ObjectOutputStream out = null;
 		try {
@@ -347,21 +367,22 @@ public class AppPersistence {
 					props.put(ScheduledApplication.HOUR_OF_DAY, new Integer(cal.get(Calendar.HOUR_OF_DAY)));
 					props.put(ScheduledApplication.MINUTE, new Integer(minute));
 					Event timerEvent = new Event(ScheduledApplication.TIMER_TOPIC, props);
-					synchronized (AppPersistence.class) {
-						// poor mans implementation of dispatching events; the spec will not allow us to use event admin to dispatch the virtual timer events; boo!!
+					EclipseScheduledApplication[] apps = null;
+					// poor mans implementation of dispatching events; the spec will not allow us to use event admin to dispatch the virtual timer events; boo!!
+					synchronized (timerApps) {
 						if (timerApps.size() == 0)
 							continue;
-						EclipseScheduledApplication[] apps = (EclipseScheduledApplication[]) timerApps.toArray(new EclipseScheduledApplication[timerApps.size()]);
-						for (int i = 0; i < apps.length; i++) {
-							try {
-								String filterString = apps[i].getEventFilter();
-								Filter filter = filterString == null ? null : FrameworkUtil.createFilter(filterString);
-								if (filter == null || filter.match(props))
-									apps[i].handleEvent(timerEvent);
-							} catch (Throwable t) {
-								t.printStackTrace();
-								// TODO should log this
-							}
+						apps = (EclipseScheduledApplication[]) timerApps.toArray(new EclipseScheduledApplication[timerApps.size()]);
+					}
+					for (int i = 0; i < apps.length; i++) {
+						try {
+							String filterString = apps[i].getEventFilter();
+							Filter filter = filterString == null ? null : FrameworkUtil.createFilter(filterString);
+							if (filter == null || filter.match(props))
+								apps[i].handleEvent(timerEvent);
+						} catch (Throwable t) {
+							t.printStackTrace();
+							// TODO should log this
 						}
 					}
 				} catch (InterruptedException e) {
@@ -385,5 +406,23 @@ public class AppPersistence {
 			out.writeByte(OBJECT);
 			out.writeUTF(string);
 		}
+	}
+
+	public Object addingService(ServiceReference reference) {
+		if (configLocation != null)
+			return null; // only care about one configuration
+		configLocation = (Location) context.getService(reference);
+		loadData(FILE_APPLOCKS);
+		loadData(FILE_APPSCHEDULED);
+		return configLocation;
+	}
+
+	public void modifiedService(ServiceReference reference, Object service) {
+		// don't care
+	}
+
+	public void removedService(ServiceReference reference, Object service) {
+		if (service == configLocation)
+			configLocation = null;
 	}
 }
