@@ -88,4 +88,8 @@ public abstract class TextProcessorTestCase extends TestCase {
 		super(name);
 	}
 
+	protected void verifyResult(String testName, String expected, String result){
+		assertTrue(testName + " result string is not the same as string passed in.", result.equals(expected));		
+	}
+	
 }

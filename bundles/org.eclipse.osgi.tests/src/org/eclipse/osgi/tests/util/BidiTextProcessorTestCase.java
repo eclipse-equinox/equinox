@@ -96,7 +96,18 @@ public class BidiTextProcessorTestCase extends TextProcessorTestCase {
 	
 	private static String[] RESULT_EQUALS_PATHS_ND = { OTHER_STRING_3_ND_RESULT };
 
-	protected String defaultDelimiters = TextProcessor.getDefaultDelimiters();
+	// whether or not the current platform supports directional characters
+	private static boolean isSupportedPlatform = false;
+	static{
+		String osName = System.getProperty("os.name").toLowerCase(); //$NON-NLS-1$
+		if (osName.startsWith("windows") || osName.startsWith("linux")) { //$NON-NLS-1$	//$NON-NLS-2$
+																			
+			// Only consider platforms that can support control characters
+			isSupportedPlatform = true;
+		}
+	}
+	
+	protected static String defaultDelimiters = TextProcessor.getDefaultDelimiters();
 
 	/**
 	 * Constructor.
@@ -113,7 +124,10 @@ public class BidiTextProcessorTestCase extends TextProcessorTestCase {
 	public void testBidiPaths() {
 		for (int i = 0; i < TEST_DEFAULT_PATHS.length; i++) {
 			String result = TextProcessor.process(TEST_DEFAULT_PATHS[i]);
-			verifyBidiResult("Process path " + (i + 1), result, RESULT_DEFAULT_PATHS[i]);
+			if (isSupportedPlatform)
+				verifyBidiResult("Process path " + (i + 1), result, RESULT_DEFAULT_PATHS[i]);
+			else
+				verifyResult("Process path " + (i + 1), result, TEST_DEFAULT_PATHS[i]);
 		}
 	}
 
@@ -129,7 +143,10 @@ public class BidiTextProcessorTestCase extends TextProcessorTestCase {
 		// should use default delimiters
 		for (int i = 0; i < TEST_DEFAULT_PATHS.length; i++) {
 			String result = TextProcessor.process(TEST_DEFAULT_PATHS[i], null);
-			verifyBidiResult("Process path " + (i + 1), result, RESULT_DEFAULT_PATHS[i]);
+			if (isSupportedPlatform)
+				verifyBidiResult("Process path " + (i + 1), result, RESULT_DEFAULT_PATHS[i]);
+			else
+				verifyResult("Process path " + (i + 1), result, TEST_DEFAULT_PATHS[i]);
 		}
 	}
 	
@@ -146,13 +163,19 @@ public class BidiTextProcessorTestCase extends TextProcessorTestCase {
 		int testNum = 1;
 		for (int i = 0; i < TEST_STAR_PATHS.length; i++) {
 			String result = TextProcessor.process(TEST_STAR_PATHS[i], "*.");
-			verifyBidiResult("Other (star) string" + testNum, result, RESULT_STAR_PATHS[i]);
+			if (isSupportedPlatform)
+				verifyBidiResult("Other (star) string" + testNum, result, RESULT_STAR_PATHS[i]);
+			else
+				verifyResult("Other (star) string" + testNum, result, TEST_STAR_PATHS[i]);
 			testNum++;
 		}
 
 		for (int i = 0; i < TEST_EQUALS_PATHS.length; i++) {
 			String result = TextProcessor.process(TEST_EQUALS_PATHS[i], "=");
-			verifyBidiResult("Other (equals) string" + testNum, result, RESULT_EQUALS_PATHS[i]);
+			if (isSupportedPlatform)
+				verifyBidiResult("Other (equals) string" + testNum, result, RESULT_EQUALS_PATHS[i]);
+			else
+				verifyResult("Other (equals) string" + testNum, result, TEST_EQUALS_PATHS[i]);
 			testNum++;
 		}
 	}
@@ -178,13 +201,20 @@ public class BidiTextProcessorTestCase extends TextProcessorTestCase {
 		int testNum = 1;
 		for (int i = 0; i < TEST_STAR_PATHS.length; i++) {
 			String result = TextProcessor.process(TEST_STAR_PATHS[i], null);
-			verifyBidiResult("Other (star) string" + testNum, result, RESULT_STAR_PATHS_ND[i]);
+			if (isSupportedPlatform)
+				verifyBidiResult("Other (star) string" + testNum, result, RESULT_STAR_PATHS_ND[i]);
+			else
+				verifyResult("Other (star) string" + testNum, result, TEST_STAR_PATHS[i]);
 			testNum++;
 		}
 		
 		for (int i = 0; i < TEST_EQUALS_PATHS.length; i++) {
 			String result = TextProcessor.process(TEST_EQUALS_PATHS[i], null);
-			verifyBidiResult("Other (equals) string" + testNum, result, RESULT_EQUALS_PATHS_ND[i]);
+			if (isSupportedPlatform)
+				verifyBidiResult("Other (equals) string" + testNum, result, RESULT_EQUALS_PATHS_ND[i]);
+			else{
+				verifyResult("Other (equals) string" + testNum, result, TEST_EQUALS_PATHS[i]);
+			}
 			testNum++;
 		}
 	}
@@ -197,7 +227,10 @@ public class BidiTextProcessorTestCase extends TextProcessorTestCase {
 		for (int i = 0; i < TEST_DEFAULT_PATHS.length; i++) {
 			String result = TextProcessor.process(TEST_DEFAULT_PATHS[i]);
 			result = TextProcessor.process(result);
-			verifyBidiResult("Path " + (i + 1), result, RESULT_DEFAULT_PATHS[i]);
+			if (isSupportedPlatform)
+				verifyBidiResult("Path " + (i + 1), result, RESULT_DEFAULT_PATHS[i]);
+			else
+				verifyResult("Path " + (i + 1), result, TEST_DEFAULT_PATHS[i]);
 		}
 	}
 
@@ -210,14 +243,20 @@ public class BidiTextProcessorTestCase extends TextProcessorTestCase {
 		for (int i = 0; i < TEST_STAR_PATHS.length; i++) {
 			String result = TextProcessor.process(TEST_STAR_PATHS[i], "*.");
 			result = TextProcessor.process(result, "*.");
-			verifyBidiResult("Other (star) string " + testNum, result, RESULT_STAR_PATHS[i]);
+			if (isSupportedPlatform)
+				verifyBidiResult("Other (star) string " + testNum, result, RESULT_STAR_PATHS[i]);
+			else
+				verifyResult("Other (star) string " + testNum, result, TEST_STAR_PATHS[i]);
 			testNum++;
 		}
 
 		for (int i = 0; i < TEST_EQUALS_PATHS.length; i++) {
 			String result = TextProcessor.process(TEST_EQUALS_PATHS[i], "=");
 			result = TextProcessor.process(result, "=");
-			verifyBidiResult("Other (equals) string" + testNum, result, RESULT_EQUALS_PATHS[i]);
+			if (isSupportedPlatform)
+				verifyBidiResult("Other (equals) string" + testNum, result, RESULT_EQUALS_PATHS[i]);
+			else
+				verifyResult("Other (equals) string" + testNum, result, TEST_EQUALS_PATHS[i]);
 			testNum++;
 		}
 	}
@@ -225,7 +264,10 @@ public class BidiTextProcessorTestCase extends TextProcessorTestCase {
 	public void testAdditionalStrings(){
 		for (int i = 0; i < TEST_ADDITIONAL_STRINGS.length; i++) {
 			String result = TextProcessor.process(TEST_ADDITIONAL_STRINGS[i]);
-			verifyBidiResult("Additional string " + (i + 1), result, RESULT_ADDITIONAL_STRINGS[i]);
+			if (isSupportedPlatform)
+				verifyBidiResult("Additional string " + (i + 1), result, RESULT_ADDITIONAL_STRINGS[i]);
+			else
+				verifyResult("Additional string " + (i + 1), result, TEST_ADDITIONAL_STRINGS[i]);
 		}
 	}
 	
