@@ -298,7 +298,7 @@ public class StateManager implements PlatformAdmin, Runnable {
 			} catch (InterruptedException e) {
 				return;
 			}
-			if (systemState != null && timeStamp == systemState.getTimeStamp())
+			if (systemState != null && timeStamp == systemState.getTimeStamp() && !systemState.dynamicCacheChanged())
 				systemState.unloadLazyData(expireTime);
 		}
 	}
