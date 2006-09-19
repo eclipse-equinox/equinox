@@ -623,11 +623,15 @@ public abstract class StateImpl implements State {
 	}
 
 	public void fullyLoad() {
-		if (fullyLoaded == true)
+		if (reader == null)
 			return;
-		if (reader != null && reader.isLazyLoaded())
-			reader.fullyLoad();
-		fullyLoaded = true;
+		synchronized (reader) {
+			if (fullyLoaded == true)
+				return;
+			if (reader.isLazyLoaded())
+				reader.fullyLoad();
+			fullyLoaded = true;
+		}
 	}
 
 	public void unloadLazyData(long expireTime) {
@@ -637,6 +641,7 @@ public abstract class StateImpl implements State {
 				reader.setAccessedFlag(false); // reset accessed flag
 				return;
 			}
+			fullyLoaded = false;
 			BundleDescription[] bundles = getBundles();
 			for (int i = 0; i < bundles.length; i++)
 				((BundleDescriptionImpl) bundles[i]).unload();
