@@ -12,17 +12,18 @@
 package org.eclipse.equinox.internal.app;
 
 import java.util.*;
-import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.IExtension;
+import org.eclipse.core.runtime.*;
 import org.eclipse.equinox.app.IApplication;
+import org.eclipse.equinox.app.IApplicationContext;
+import org.eclipse.osgi.service.runnable.ApplicationRunnable;
 import org.eclipse.osgi.util.NLS;
-import org.osgi.framework.ServiceRegistration;
+import org.osgi.framework.*;
 import org.osgi.service.application.ApplicationHandle;
 
 /*
  * An ApplicationHandle that represents a single instance of a running eclipse application.
  */
-public class EclipseAppHandle extends ApplicationHandle {
+public class EclipseAppHandle extends ApplicationHandle implements ApplicationRunnable, IApplicationContext {
 	/**
 	 * Indicates the application is active
 	 */
@@ -35,18 +36,23 @@ public class EclipseAppHandle extends ApplicationHandle {
 	 * Indicates the application is stopped
 	 */
 	public static final int STOPPED = 0x04;
+	private static final String PROP_ECLIPSE_EXITCODE = "eclipse.exitcode"; //$NON-NLS-1$
 
 	private ServiceRegistration sr;
 	private String state = ApplicationHandle.RUNNING;
 	private int status = EclipseAppHandle.ACTIVE;
-	private MainThreadRunnable appRunnable;
 	private Map arguments;
+	private Object application;
 
 	/*
 	 * Constructs a handle for a single running instance of a eclipse application.
 	 */
-	EclipseAppHandle(String instanceId, EclipseAppDescriptor descriptor) {
+	EclipseAppHandle(String instanceId, Map arguments, EclipseAppDescriptor descriptor) {
 		super(instanceId, descriptor);
+		if (arguments == null)
+			this.arguments = new HashMap(2);
+		else
+			this.arguments = new HashMap(arguments);
 	}
 
 	synchronized public String getState() {
@@ -58,19 +64,15 @@ public class EclipseAppHandle extends ApplicationHandle {
 		// first set the status to stopping
 		setAppStatus(EclipseAppHandle.STOPPING);
 		// now force the appliction to stop
-		IApplication application = appRunnable == null ? null : appRunnable.getApplication();
-		if (application != null)
-			application.stop();
+		IApplication app = getApplication();
+		if (app != null)
+			app.stop();
 		// make sure the app status is stopped
 		setAppStatus(EclipseAppHandle.STOPPED);
 	}
 
 	void setServiceRegistration(ServiceRegistration sr) {
 		this.sr = sr;
-	}
-
-	void setAppRunnable(MainThreadRunnable appRunnable) {
-		this.appRunnable = appRunnable;
 	}
 
 	/*
@@ -81,7 +83,7 @@ public class EclipseAppHandle extends ApplicationHandle {
 		props.put(ApplicationHandle.APPLICATION_PID, getInstanceId());
 		props.put(ApplicationHandle.APPLICATION_STATE, getState());
 		props.put(ApplicationHandle.APPLICATION_DESCRIPTOR, getApplicationDescriptor().getApplicationId());
-		props.put(EclipseAppDescriptor.APP_TYPE, EclipseAppDescriptor.APP_TYPE_MAIN_TREAD);
+		props.put(EclipseAppDescriptor.APP_TYPE, ((EclipseAppDescriptor) getApplicationDescriptor()).getTypeString());
 		return props;
 	}
 
@@ -105,29 +107,113 @@ public class EclipseAppHandle extends ApplicationHandle {
 		// if the status is stopped then unregister the service
 		if ((status & EclipseAppHandle.STOPPED) != 0 && (this.status & EclipseAppHandle.STOPPED) == 0) {
 			sr.unregister();
-			((EclipseAppDescriptor) getApplicationDescriptor()).getContainerManager().unlock();
+			((EclipseAppDescriptor) getApplicationDescriptor()).getContainerManager().unlock(this);
 		}
 		this.status = status;
 	}
 
-	int getAppStatus() {
-		return status;
-	}
-
-	Map getArguments() {
+	public Map getArguments() {
 		return arguments;
 	}
 
-	void setArguments(Map arguments) {
-		this.arguments = arguments;
+	public String[] getApplicationArgs() {
+		Object result = arguments.get(IApplicationContext.APPLICATION_ARGS);
+		if (!(result instanceof String[]))
+			return new String[0];
+		return (String[]) result;
 	}
 
-	IConfigurationElement getConfiguration() {
+	public IProduct getProduct() {
+		return ((EclipseAppDescriptor) getApplicationDescriptor()).getContainerManager().getProduct();
+	}
+
+	public Object run(Object context) throws Exception {
+		if (context != null) {
+			// always force the use of the context if it is not null
+			arguments.put(IApplicationContext.APPLICATION_ARGS, context);
+		} else {
+			// get the context from the arguments
+			context = arguments.get(IApplicationContext.APPLICATION_ARGS);
+			if (context == null) {
+				// if context is null then use the args from CommandLineArgs
+				context = CommandLineArgs.getApplicationArgs();
+				arguments.put(IApplicationContext.APPLICATION_ARGS, context);
+			}
+		}
+		Object result;
+		try {
+			Object app;
+			synchronized (this) {
+				application = getConfiguration().createExecutableExtension("run"); //$NON-NLS-1$
+				app = application;
+			}
+			if (app instanceof IApplication)
+				result = ((IApplication) app).start(this);
+			else
+				result = ((IPlatformRunnable) app).run(context);
+		} finally {
+			synchronized (this) {
+				application = null;
+			}
+			// The application exited itself; notify the app context
+			setAppStatus(EclipseAppHandle.STOPPED);
+		}
+		int exitCode = result instanceof Integer ? ((Integer) result).intValue() : 0;
+		// use the long way to set the property to compile against eeminimum
+		System.getProperties().setProperty(PROP_ECLIPSE_EXITCODE, Integer.toString(exitCode));
+		if (Activator.DEBUG)
+			System.out.println(NLS.bind(Messages.application_returned, (new String[] {getApplicationDescriptor().getApplicationId(), result == null ? "null" : result.toString()}))); //$NON-NLS-1$
+		return result;
+	}
+
+	public void stop() {
+		destroy();
+	}
+
+	public void endSplashScreen() {
+		final Runnable handler = getSplashHandler();
+		if (handler == null)
+			return;
+		SafeRunner.run(new ISafeRunnable() {
+			public void handleException(Throwable e) {
+				// just continue ... the exception has already been logged by
+				// handleException(ISafeRunnable)
+			}
+
+			public void run() throws Exception {
+				handler.run();
+			}
+		});
+	}
+
+	private Runnable getSplashHandler() {
+		ServiceReference[] ref;
+		try {
+			ref = Activator.getContext().getServiceReferences(Runnable.class.getName(), "(name=splashscreen)"); //$NON-NLS-1$
+		} catch (InvalidSyntaxException e) {
+			return null;
+		}
+		if (ref == null)
+			return null;
+		// assumes the endInitializationHandler is available as a service
+		// see EclipseStarter.publishSplashScreen
+		for (int i = 0; i < ref.length; i++) {
+			Runnable result = (Runnable) Activator.getContext().getService(ref[i]);
+			Activator.getContext().ungetService(ref[i]); // immediately unget the service because we are not using it long
+			return result;
+		}
+		return null;
+	}
+
+	private IApplication getApplication() {
+		return (IApplication) ((application instanceof IApplication) ? application : null);
+	}
+
+	private IConfigurationElement getConfiguration() {
 		IExtension applicationExtension = ((EclipseAppDescriptor) getApplicationDescriptor()).getContainerManager().getAppExtension(getApplicationDescriptor().getApplicationId());
 		IConfigurationElement[] configs = applicationExtension.getConfigurationElements();
 		if (configs.length == 0)
 			throw new RuntimeException(NLS.bind(Messages.application_invalidExtension, getApplicationDescriptor().getApplicationId()));
 		return configs[0];
 	}
-
 }

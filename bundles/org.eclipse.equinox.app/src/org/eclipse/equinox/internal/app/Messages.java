@@ -21,6 +21,7 @@ public class Messages extends NLS {
 	public static String application_notFound;
 	public static String application_returned;
 	public static String application_errorStartDefault;
+	public static String application_error_stopping;
 
 	// product
 	public static String provider_invalid;
@@ -30,6 +31,9 @@ public class Messages extends NLS {
 	// scheduled
 	public static String scheduled_app_removed;
 	public static String scheduled_app_launch_error;
+
+	// persistence
+	public static String persistence_error_saving;
 
 	static {
 		// load message values from bundle file

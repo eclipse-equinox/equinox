@@ -13,8 +13,8 @@ package org.eclipse.equinox.internal.app;
 
 import java.security.AccessController;
 import java.util.*;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.ServiceRegistration;
+import org.eclipse.equinox.app.IApplicationContext;
+import org.osgi.framework.*;
 import org.osgi.service.application.ApplicationDescriptor;
 import org.osgi.service.application.ApplicationHandle;
 import org.osgi.service.condpermadmin.BundleSignerCondition;
@@ -25,19 +25,24 @@ import org.osgi.service.condpermadmin.ConditionInfo;
  */
 public class EclipseAppDescriptor extends ApplicationDescriptor {
 	static final String APP_TYPE = "eclipse.application.type"; //$NON-NLS-1$
-	static final String APP_TYPE_MAIN_TREAD = "main.thread"; //$NON-NLS-1$
+	static final String APP_TYPE_MAIN_THREAD = "main.thread"; //$NON-NLS-1$
+	static final String APP_TYPE_ANY_THREAD = "any.thread"; //$NON-NLS-1$
+	static final int FLAG_VISIBLE = 0x01;
+	static final int FLAG_SINGLETON = 0x02;
+	static final int FLAG_TYPE_MAIN_THREAD = 0x04;
+	static final int FLAG_TYPE_ANY_THREAD = 0x08;
 	private ServiceRegistration sr;
 	private Boolean locked = Boolean.FALSE;
 	private EclipseAppContainer appContainer;
 	private String contributor;
-	private boolean visible;
+	private int flags;
 
-	protected EclipseAppDescriptor(String contributor, String pid, boolean visible, EclipseAppContainer appContainer) {
+	protected EclipseAppDescriptor(String contributor, String pid, int flags, EclipseAppContainer appContainer) {
 		super(pid);
 		this.contributor = contributor;
 		this.appContainer = appContainer;
 		this.locked = AppPersistence.isLocked(this) ? Boolean.TRUE : Boolean.FALSE;
-		this.visible = visible;
+		this.flags = flags;
 	}
 
 	protected Map getPropertiesSpecific(String locale) {
@@ -45,14 +50,12 @@ public class EclipseAppDescriptor extends ApplicationDescriptor {
 		return getServiceProperties();
 	}
 
-	protected synchronized ApplicationHandle launchSpecific(Map arguments) throws Exception {
-		// we only allow one application to run at a time; do not launch an application
-		// if one is already launched or if this application is locked.
-		if (locked.booleanValue())
+	protected ApplicationHandle launchSpecific(Map arguments) throws Exception {
+		// if this application is locked throw an exception.
+		if (getLocked().booleanValue())
 			throw new IllegalStateException("Cannot launch a locked application."); //$NON-NLS-1$
 		// initialize the appHandle
-		EclipseAppHandle appHandle = createAppHandle();
-		appHandle.setArguments(arguments);
+		EclipseAppHandle appHandle = createAppHandle(arguments);
 		try {
 			// use the appContainer to launch the application on the main thread.
 			appContainer.launch(appHandle);
@@ -79,12 +82,27 @@ public class EclipseAppDescriptor extends ApplicationDescriptor {
 	}
 
 	void refreshProperties() {
-		if (sr != null)
-			sr.setProperties(getServiceProperties());
+		ServiceRegistration reg = getServiceRegistration();
+		if (reg != null)
+			try {
+				reg.setProperties(getServiceProperties());
+			} catch (IllegalStateException e) {
+				// this must mean the service was unregistered
+				// just ignore
+			}
+		
 	}
 
-	void setServiceRegistration(ServiceRegistration sr) {
+	synchronized void setServiceRegistration(ServiceRegistration sr) {
 		this.sr = sr;
+	}
+
+	private synchronized ServiceRegistration getServiceRegistration() {
+		return sr;
+	}
+
+	private synchronized Boolean getLocked() {
+		return locked;
 	}
 
 	/*
@@ -95,10 +113,12 @@ public class EclipseAppDescriptor extends ApplicationDescriptor {
 		props.put(ApplicationDescriptor.APPLICATION_PID, getApplicationId());
 		props.put(ApplicationDescriptor.APPLICATION_CONTAINER, Activator.PI_APP);
 		props.put(ApplicationDescriptor.APPLICATION_LOCATION, getLocation());
-		props.put(ApplicationDescriptor.APPLICATION_LAUNCHABLE, appContainer.isLocked() ? Boolean.FALSE : Boolean.TRUE);
-		props.put(ApplicationDescriptor.APPLICATION_LOCKED, locked);
-		props.put(ApplicationDescriptor.APPLICATION_VISIBLE, visible ? Boolean.TRUE : Boolean.FALSE);
-		props.put(APP_TYPE, APP_TYPE_MAIN_TREAD);
+		Boolean launchable = appContainer.isLocked(this) ? Boolean.FALSE : Boolean.TRUE;
+		props.put(ApplicationDescriptor.APPLICATION_LAUNCHABLE, launchable);
+		props.put(ApplicationDescriptor.APPLICATION_LOCKED, getLocked());
+		Boolean visible = (flags & FLAG_VISIBLE) != 0 ? Boolean.TRUE : Boolean.FALSE;
+		props.put(ApplicationDescriptor.APPLICATION_VISIBLE, visible);
+		props.put(APP_TYPE, getTypeString());
 		return props;
 	}
 
@@ -112,10 +132,10 @@ public class EclipseAppDescriptor extends ApplicationDescriptor {
 	/*
 	 * Returns the appHandle.  If it does not exist then one is created.
 	 */
-	private synchronized EclipseAppHandle createAppHandle() {
+	private EclipseAppHandle createAppHandle(Map arguments) {
 		// TODO not sure what instance pid should be used; for now just use the appDesciptor pid because apps are singletons anyway
-		EclipseAppHandle newAppHandle = new EclipseAppHandle(getApplicationId(), this);
-		ServiceRegistration appHandleReg = (ServiceRegistration) AccessController.doPrivileged(appContainer.getRegServiceAction(ApplicationHandle.class.getName(), newAppHandle, newAppHandle.getServiceProperties()));
+		EclipseAppHandle newAppHandle = new EclipseAppHandle(getApplicationId(), arguments, this);
+		ServiceRegistration appHandleReg = (ServiceRegistration) AccessController.doPrivileged(appContainer.getRegServiceAction(new String[] {ApplicationHandle.class.getName(), IApplicationContext.class.getName()}, newAppHandle, newAppHandle.getServiceProperties()));
 		newAppHandle.setServiceRegistration(appHandleReg);
 		return newAppHandle;
 	}
@@ -135,11 +155,25 @@ public class EclipseAppDescriptor extends ApplicationDescriptor {
 		return true;
 	}
 
-	public void unregister() {
+	public synchronized void unregister() {
 		ServiceRegistration temp = sr;
 		if (temp != null) {
 			sr = null;
 			temp.unregister();
 		}
+	}
+
+	String getTypeString() {
+		if ((flags & FLAG_TYPE_ANY_THREAD) != 0)
+			return APP_TYPE_ANY_THREAD;
+		return APP_TYPE_MAIN_THREAD;
+	}
+
+	public int getType() {
+		return flags & (FLAG_TYPE_ANY_THREAD | FLAG_TYPE_MAIN_THREAD);
+	}
+
+	public boolean isSingleton() {
+		return (flags & FLAG_SINGLETON) != 0;
 	}
 }

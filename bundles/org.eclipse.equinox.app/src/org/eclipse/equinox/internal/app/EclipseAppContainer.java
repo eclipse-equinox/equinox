@@ -32,6 +32,10 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 	private static final String PI_RUNTIME = "org.eclipse.core.runtime"; //$NON-NLS-1$
 	private static final String PT_APPLICATIONS = "applications"; //$NON-NLS-1$
 	private static final String PT_APP_VISIBLE = "visible"; //$NON-NLS-1$
+	private static final String PT_APP_THREAD = "thread"; //$NON-NLS-1$
+	private static final String PT_APP_THREAD_MAIN = "main"; //$NON-NLS-1$
+	private static final String PT_APP_THREAD_ANY = "any"; //$NON-NLS-1$
+	private static final String PT_APP_SINGLETON = "singleton"; //$NON-NLS-1$
 	private static final String PT_PRODUCTS = "products"; //$NON-NLS-1$
 	private static final String EXT_ERROR_APP = "org.eclipse.equinox.app.error"; //$NON-NLS-1$
 
@@ -49,8 +53,10 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 	private IProduct product;
 	private boolean missingProductReported;
 
-	// the currently lauched application handle
-	private EclipseAppHandle curHandle;
+	// the currently lauched application handles
+	private Collection curHandles = new ArrayList();
+	private EclipseAppHandle curMain;
+	private EclipseAppHandle curSingleton;
 	
 	public EclipseAppContainer(BundleContext context, IExtensionRegistry extensionRegistry, ApplicationLauncher appLauncher) {
 		this.context = context;
@@ -107,14 +113,23 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 				return appDescriptor;
 			// the appDescriptor does not exist for the app ID; create it
 			IConfigurationElement[] configs = appExtension.getConfigurationElements();
-			boolean visible = true;
+			int flags = EclipseAppDescriptor.FLAG_SINGLETON | EclipseAppDescriptor.FLAG_VISIBLE | EclipseAppDescriptor.FLAG_TYPE_MAIN_THREAD;
 			if (configs.length > 0) {
 				String sVisible = configs[0].getAttribute(PT_APP_VISIBLE);
-				visible = sVisible == null ? true : Boolean.valueOf(sVisible).booleanValue();
+				if (sVisible != null && !Boolean.valueOf(sVisible).booleanValue())
+					flags &= ~(EclipseAppDescriptor.FLAG_VISIBLE);
+				String sThread = configs[0].getAttribute(PT_APP_THREAD);
+				if (PT_APP_THREAD_ANY.equals(sThread)) {
+					flags |= EclipseAppDescriptor.FLAG_TYPE_ANY_THREAD;
+					flags &= ~(EclipseAppDescriptor.FLAG_TYPE_MAIN_THREAD);
+				}
+				String sSingleton = configs[0].getAttribute(PT_APP_SINGLETON);
+				if (sSingleton != null && !Boolean.valueOf(sSingleton).booleanValue())
+					flags &= ~(EclipseAppDescriptor.FLAG_SINGLETON);
 			}
-			appDescriptor = new EclipseAppDescriptor(appExtension.getContributor().getName(), appExtension.getUniqueIdentifier(), visible, this);
+			appDescriptor = new EclipseAppDescriptor(appExtension.getContributor().getName(), appExtension.getUniqueIdentifier(), flags, this);
 			// register the appDescriptor as a service
-			ServiceRegistration sr = (ServiceRegistration) AccessController.doPrivileged(new RegisterService(ApplicationDescriptor.class.getName(), appDescriptor, appDescriptor.getServiceProperties()));
+			ServiceRegistration sr = (ServiceRegistration) AccessController.doPrivileged(new RegisterService(new String[] {ApplicationDescriptor.class.getName()}, appDescriptor, appDescriptor.getServiceProperties()));
 			appDescriptor.setServiceRegistration(sr);
 			// save the app descriptor in the cache
 			apps.put(appExtension.getUniqueIdentifier(), appDescriptor);
@@ -135,26 +150,26 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 	/*
 	 * Gives access to the RegisterService privileged action.
 	 */
-	PrivilegedAction getRegServiceAction(String serviceClass, Object serviceObject, Dictionary serviceProps) {
-		return new RegisterService(serviceClass, serviceObject, serviceProps);
+	PrivilegedAction getRegServiceAction(String[] serviceClasses, Object serviceObject, Dictionary serviceProps) {
+		return new RegisterService(serviceClasses, serviceObject, serviceProps);
 	}
 
 	/*
 	 * PrivilegedAction used to register ApplicationDescriptor and ApplicationHandle services
 	 */
 	private class RegisterService implements PrivilegedAction {
-		String serviceClass;
+		String[] serviceClasses;
 		Object serviceObject;
 		Dictionary serviceProps;
 
-		RegisterService(String serviceClass, Object serviceObject, Dictionary serviceProps) {
-			this.serviceClass = serviceClass;
+		RegisterService(String[] serviceClasses, Object serviceObject, Dictionary serviceProps) {
+			this.serviceClasses = serviceClasses;
 			this.serviceObject = serviceObject;
 			this.serviceProps = serviceProps;
 		}
 
 		public Object run() {
-			return context.registerService(serviceClass, serviceObject, serviceProps);
+			return context.registerService(serviceClasses, serviceObject, serviceProps);
 		}
 	}
 
@@ -249,13 +264,16 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 
 	void launch(EclipseAppHandle appHandle) throws Exception {
 		lock(appHandle);
-		// use the ApplicationLauncher provided by the framework 
-		// to ensure it is launched on the main thread
-		if (appLauncher == null)
-			throw new IllegalStateException();
-		MainThreadRunnable app = new MainThreadRunnable(appHandle);
-		appLauncher.launch(app, appHandle.getArguments() == null ? null : appHandle.getArguments().get(IApplicationContext.APPLICATION_ARGS));
-		appHandle.setAppRunnable(app);
+		if (((EclipseAppDescriptor) appHandle.getApplicationDescriptor()).getType() == EclipseAppDescriptor.FLAG_TYPE_MAIN_THREAD) {
+			// use the ApplicationLauncher provided by the framework 
+			// to ensure it is launched on the main thread
+			if (appLauncher == null)
+				throw new IllegalStateException();
+			appLauncher.launch(appHandle, appHandle.getArguments().get(IApplicationContext.APPLICATION_ARGS));
+		}
+		else {
+			AnyThreadAppLauncher.launchEclipseApplication(appHandle);
+		}
 	}
 
 	public void registryChanged(IRegistryChangeEvent event) {
@@ -294,7 +312,11 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 					try {
 						handle.destroy();
 					} catch (Throwable t) {
-						// TODO should log this
+						FrameworkLog log = Activator.getFrameworkLog();
+						if (log != null) {
+							String message = NLS.bind(Messages.application_error_stopping, handle.getInstanceId());
+							log.log(new FrameworkLogEntry(Activator.PI_APP, FrameworkLogEntry.WARNING, 0, message, 0, t, null));
+						}
 					}
 			}
 		} catch (InvalidSyntaxException e) {
@@ -376,18 +398,42 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 	}
 
 	synchronized void lock(EclipseAppHandle appHandle) {
-		if (curHandle != null)
-			throw new IllegalStateException("Only one application of is allowed to run at a time");
-		curHandle = appHandle;
+		if (curSingleton != null)
+			throw new IllegalStateException("A singleton application instance is already running: " + curSingleton.getInstanceId());
+		EclipseAppDescriptor eclipseApp = (EclipseAppDescriptor) appHandle.getApplicationDescriptor();
+		if (eclipseApp.isSingleton()) {
+			if (curHandles.size() > 0)
+				throw new IllegalStateException("One or more applications are already running");
+		}
+		if (eclipseApp.getType() == EclipseAppDescriptor.FLAG_TYPE_MAIN_THREAD) {
+			if (curMain != null)
+				throw new IllegalStateException("A application instance is already running on the main thread: " + curSingleton.getInstanceId());
+		}
+		// ok we can now successfully lock the container
+		if (eclipseApp.isSingleton())
+			curSingleton = appHandle;
+		if (eclipseApp.getType() == EclipseAppDescriptor.FLAG_TYPE_MAIN_THREAD)
+			curMain = appHandle;
+		curHandles.add(appHandle);
 		refreshAppDescriptors();
 	}
 
-	synchronized void unlock() {
-		curHandle = null;
+	synchronized void unlock(EclipseAppHandle appHandle) {
+		if (curSingleton == appHandle)
+			curSingleton = null;
+		if (appHandle == curMain)
+			curMain = null;
+		curHandles.remove(appHandle);
 		refreshAppDescriptors();
 	}
 
-	synchronized boolean isLocked() {
-		return curHandle != null;
+	synchronized boolean isLocked(EclipseAppDescriptor eclipseApp) {
+		if (curSingleton != null)
+			return true;
+		if (eclipseApp.isSingleton() && curHandles.size() > 0)
+			return true;
+		if (eclipseApp.getType() == EclipseAppDescriptor.FLAG_TYPE_MAIN_THREAD && curMain != null)
+			return true;
+		return false;
 	}
 }

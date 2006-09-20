@@ -65,6 +65,28 @@ run multiple applications.
                </documentation>
             </annotation>
          </attribute>
+         <attribute name="singleton" type="boolean" use="default" value="true">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="thread" use="default" value="main">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+            </annotation>
+            <simpleType>
+               <restriction base="string">
+                  <enumeration value="main">
+                  </enumeration>
+                  <enumeration value="any">
+                  </enumeration>
+               </restriction>
+            </simpleType>
+         </attribute>
       </complexType>
    </element>
 
