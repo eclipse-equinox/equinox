@@ -1099,10 +1099,9 @@ public class EclipseStarter {
 			return location;
 		if (!"file".equals(base.getProtocol())) //$NON-NLS-1$
 			return location;
-		boolean reference = location.getProtocol().equals(REFERENCE_PROTOCOL);
-		URL nonReferenceLocation = location;
-		if (reference)
-			nonReferenceLocation = new URL(location.getPath());
+		if (!location.getProtocol().equals(REFERENCE_PROTOCOL))
+			return location; // we can only make reference urls relative
+		URL nonReferenceLocation = new URL(location.getPath());
 		// if some URL component does not match, return the original location
 		if (!base.getProtocol().equals(nonReferenceLocation.getProtocol()))
 			return location;
@@ -1119,8 +1118,8 @@ public class EclipseStarter {
 			urlPath += '/';
 		// couldn't use File to create URL here because it prepends the path with user.dir 
 		URL relativeURL = new URL(base.getProtocol(), base.getHost(), base.getPort(), urlPath);
-		if (reference)
-			relativeURL = new URL(REFERENCE_SCHEME + relativeURL.toExternalForm());
+		// now make it back to a reference URL
+		relativeURL = new URL(REFERENCE_SCHEME + relativeURL.toExternalForm());
 		return relativeURL;
 	}
 
