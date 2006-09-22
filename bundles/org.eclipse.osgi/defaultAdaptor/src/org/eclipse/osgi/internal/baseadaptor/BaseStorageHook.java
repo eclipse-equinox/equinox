@@ -255,7 +255,7 @@ public class BaseStorageHook implements StorageHook, AdaptorHook{
 		}
 		if (delete != null && delete.exists() && (postpone || !AdaptorUtil.rm(delete))) {
 			/* create .delete */
-			FileOutputStream out = new FileOutputStream(new File(delete, ".delete")); //$NON-NLS-1$
+			FileOutputStream out = new FileOutputStream(new File(delete, BaseStorage.DELETE_FLAG));
 			out.close();
 		}
 	}

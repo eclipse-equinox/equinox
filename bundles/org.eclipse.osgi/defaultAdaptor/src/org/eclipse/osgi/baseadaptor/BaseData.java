@@ -24,6 +24,7 @@ import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.internal.protocol.bundleentry.Handler;
+import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.internal.baseadaptor.DefaultClassLoader;
 import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.*;
@@ -50,6 +51,8 @@ public class BaseData implements BundleData {
 	protected Dictionary manifest;
 	// This field is only used by PDE source lookup, and is set by a hook (bug 126517).  It serves no purpose at runtime.
 	protected String fileName;
+	// This is only used to keep track of when the same native library is loaded more than once
+	protected Collection loadedNativeCode;
 
 	///////////////////// Begin values from Manifest     /////////////////////
 	private String symbolicName;
@@ -118,9 +121,32 @@ public class BaseData implements BundleData {
 		for (int i = 0; i < hooks.length; i++) {
 			result = hooks[i].findLibrary(this, libname);
 			if (result != null)
-				return result;
+				break;
 		}
+		// check to see if this library has been loaded by another class loader
+		if (result != null)
+			synchronized (this) {
+				if (loadedNativeCode == null)
+					loadedNativeCode = new ArrayList(1);
+				if (loadedNativeCode.contains(result)) {
+					// we must copy the library to a temp space to allow another class loader to load the library
+					String temp = copyToTempLibrary(result);
+					if (temp != null)
+						result = temp;
+				} else {
+					loadedNativeCode.add(result);
+				}
+			}
 		return result;
+	}
+
+	private String copyToTempLibrary(String result) {
+		try {
+			return adaptor.getStorage().copyToTempLibrary(this, result);
+		} catch (IOException e) {
+			adaptor.getFrameworkLog().log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, e.getMessage(), 0, e, null));
+		}
+		return null;
 	}
 
 	public void installNativeCode(String[] nativepaths) throws BundleException {

@@ -145,7 +145,8 @@ public class DefaultClassLoader extends ClassLoader implements BaseClassLoader {
 	 * @return The URL of the resource or null if it does not exist.
 	 */
 	protected String findLibrary(String libname) {
-		return delegate.findLibrary(libname);
+		// let the manager find the library for us
+		return manager.findLibrary(libname);
 	}
 
 	public ProtectionDomain getDomain() {

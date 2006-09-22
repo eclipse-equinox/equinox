@@ -157,7 +157,11 @@ abstract public class BundleFile {
 		return mruIndex;
 	}
 
-	protected static void setPermissions(File nested) {
+	/**
+	 * Attempts to set the permissions of the file in a system dependant way.
+	 * @param file the file to set the permissions on
+	 */
+	public static void setPermissions(File file) {
 		String commandProp = FrameworkProperties.getProperty(PROP_SETPERMS_CMD);
 		if (commandProp == null)
 			return;
@@ -166,14 +170,14 @@ abstract public class BundleFile {
 		boolean foundFullPath = false;
 		for (int i = 0; i < temp.length; i++) {
 			if ("[fullpath]".equals(temp[i])) { //$NON-NLS-1$
-				command.add(nested.getAbsolutePath());
+				command.add(file.getAbsolutePath());
 				foundFullPath = true;
 			}
 			else 
 				command.add(temp[i]);
 		}
 		if (!foundFullPath)
-			command.add(nested.getAbsolutePath());
+			command.add(file.getAbsolutePath());
 		try {
 			Runtime.getRuntime().exec((String[]) command.toArray(new String[command.size()])).waitFor();
 		} catch (Exception e) {

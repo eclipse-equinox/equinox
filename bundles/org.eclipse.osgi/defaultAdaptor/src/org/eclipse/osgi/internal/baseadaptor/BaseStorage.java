@@ -47,6 +47,7 @@ public class BaseStorage implements SynchronousBundleListener {
 	private static final String PROP_BUNDLE_STORE = "osgi.bundlestore"; //$NON-NLS-1$
 	// The name of the bundle data directory
 	static final String DATA_DIR_NAME = "data"; //$NON-NLS-1$
+	static final String LIB_TEMP = "libtemp"; //$NON-NLS-1$
 	// System property used to determine whether State saver needs to be enabled
 	private static final String PROP_ENABLE_STATE_SAVER = "eclipse.enableStateSaver"; //$NON-NLS-1$
 	static final String BUNDLEFILE_NAME = "bundlefile"; //$NON-NLS-1$
@@ -71,6 +72,13 @@ public class BaseStorage implements SynchronousBundleListener {
 	 * flag to indicate a framework extension is being updated
 	 */
 	public static final byte EXTENSION_UPDATED = 0x08;
+
+	/**
+	 * the file name for the delete flag.  If this file exists in one a directory 
+	 * under the bundle store area then it will be removed during the 
+	 * compact operation.
+	 */
+	public static final String DELETE_FLAG = ".delete"; //$NON-NLS-1$
 	private static final String PERM_DATA_FILE = ".permdata"; //$NON-NLS-1$
 	private static final byte PERMDATA_VERSION = 1;
 
@@ -188,7 +196,7 @@ public class BaseStorage implements SynchronousBundleListener {
 			// if the file is a directory
 			if (!target.isDirectory())
 				continue;
-			File delete = new File(target, ".delete"); //$NON-NLS-1$
+			File delete = new File(target, BaseStorage.DELETE_FLAG);
 			// and the directory is marked for delete
 			if (delete.exists()) {
 				// if rm fails to delete the directory and .delete was removed
@@ -1158,6 +1166,60 @@ public class BaseStorage implements SynchronousBundleListener {
 		} catch (BundleException e) {
 			// do nothing;
 		}
+	}
+
+	public String copyToTempLibrary(BaseData data, String absolutePath) throws IOException {
+		File storageRoot = getBundleStoreRoot();
+		File libTempDir = new File(storageRoot, LIB_TEMP);
+		// we assume the absolutePath is a File path
+		File realLib = new File(absolutePath);
+		String libName = realLib.getName();
+		// find a temp dir for the bundle data and the library;
+		File bundleTempDir = null;
+		File libTempFile = null;
+		// We need a somewhat predictable temp dir for the libraries of a given bundle;
+		// This is not strictly necessary but it does help scenarios where one native library loads another native library without using java.
+		// On some OSes this causes issues because the second library is cannot be found.
+		// This has been worked around by the bundles loading the libraries in a particular order (and setting some LIB_PATH env).
+		// The one catch is that the libraries need to be in the same directory and they must use their original lib names.
+		//
+		// This bit of code attempts to do that by using the bundle ID as an ID for the temp dir along with an incrementing ID 
+		// in cases where the temp dir may already exist.
+		Long bundleID = new Long(data.getBundleID());
+		for (int i = 0; i < Integer.MAX_VALUE; i++) {
+			bundleTempDir = new File(libTempDir, bundleID.toString() + "_" + new Integer(i).toString()); //$NON-NLS-1$
+			libTempFile = new File(bundleTempDir, libName);
+			if (bundleTempDir.exists()) {
+				if (libTempFile.exists())
+					continue; // to to next temp file
+				break;
+			}
+			break;
+		}
+		if (!bundleTempDir.exists()) {
+			bundleTempDir.mkdirs();
+			bundleTempDir.deleteOnExit();
+			// This is just a safeguard incase the VM is terminated unexpectantly, it also looks like deleteOnExit cannot really work because
+			// the VM likely will still have a lock on the lib file at the time of VM exit.
+			File deleteFlag = new File(libTempDir, BaseStorage.DELETE_FLAG);
+			if (!deleteFlag.exists()) {
+				// need to create a delete flag to force removal the temp libraries
+				try {
+					FileOutputStream out = new FileOutputStream(deleteFlag);
+					out.close();
+				} catch (IOException e) {
+					// do nothing; that would mean we did not make the temp dir successfully
+				}
+			}
+		}
+		// copy the library file
+		InputStream in = new FileInputStream(realLib);
+		AdaptorUtil.readFile(in, libTempFile);
+		// set permissions if needed
+		BundleFile.setPermissions(libTempFile);
+		libTempFile.deleteOnExit(); // this probably will not work because the VM will probably have the lib locked at exit
+		// return the temporary path
+		return libTempFile.getAbsolutePath();
 	}
 
 }

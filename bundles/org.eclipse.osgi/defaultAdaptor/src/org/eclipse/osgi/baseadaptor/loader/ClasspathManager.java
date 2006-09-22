@@ -45,6 +45,8 @@ public class ClasspathManager {
 	private ClasspathEntry[] entries;
 	private BaseClassLoader classloader;
 	private FragmentClasspath[] fragments = emptyFragments;
+	// a colloction of String[2], each element is {"libname", "libpath"}
+	private Collection loadedLibraries = null;
 
 	/**
 	 * Constructs a classpath manager for the given host base data, classpath and base class loader
@@ -527,6 +529,28 @@ public class ClasspathManager {
 	 */
 	public BaseClassLoader getBaseClassLoader() {
 		return classloader;
+	}
+
+	public String findLibrary(String libname) {
+		synchronized (this) {
+			if (loadedLibraries == null)
+				loadedLibraries = new ArrayList(1);
+		}
+		synchronized (loadedLibraries) {
+			// we assume that each classloader will load a small number of of libraries
+			// instead of wasting space with a map we iterate over our collection of found libraries
+			// each element is a String[2], each array is {"libname", "libpath"}
+			for (Iterator libs = loadedLibraries.iterator(); libs.hasNext();) {
+				String[] libNameResult = (String[]) libs.next();
+				if (libNameResult[0].equals(libname))
+					return libNameResult[1];
+			}
+
+			String result = classloader.getDelegate().findLibrary(libname);
+			if (result != null)
+				loadedLibraries.add(new String[] {libname, result});
+			return result;
+		}
 	}
 
 }
