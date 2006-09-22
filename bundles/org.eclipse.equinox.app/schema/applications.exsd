@@ -65,12 +65,32 @@ run multiple applications.
                </documentation>
             </annotation>
          </attribute>
-         <attribute name="singleton" type="boolean" use="default" value="true">
+         <attribute name="cardinality" use="default" value="singleton-global">
             <annotation>
                <documentation>
                   
                </documentation>
             </annotation>
+            <simpleType>
+               <restriction base="string">
+                  <enumeration value="singleton-global">
+                  </enumeration>
+                  <enumeration value="singleton-scoped">
+                  </enumeration>
+                  <enumeration value="1">
+                  </enumeration>
+                  <enumeration value="2">
+                  </enumeration>
+                  <enumeration value="3">
+                  </enumeration>
+                  <enumeration value="4">
+                  </enumeration>
+                  <enumeration value="5">
+                  </enumeration>
+                  <enumeration value="*">
+                  </enumeration>
+               </restriction>
+            </simpleType>
          </attribute>
          <attribute name="thread" use="default" value="main">
             <annotation>

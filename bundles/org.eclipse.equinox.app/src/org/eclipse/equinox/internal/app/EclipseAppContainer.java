@@ -35,7 +35,10 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 	private static final String PT_APP_THREAD = "thread"; //$NON-NLS-1$
 	private static final String PT_APP_THREAD_MAIN = "main"; //$NON-NLS-1$
 	private static final String PT_APP_THREAD_ANY = "any"; //$NON-NLS-1$
-	private static final String PT_APP_SINGLETON = "singleton"; //$NON-NLS-1$
+	private static final String PT_APP_CARDINALITY = "cardinality"; //$NON-NLS-1$
+	private static final String PT_APP_CARDINALITY_SINGLETON_GLOBAL = "singleton-global"; //$NON-NLS-1$
+	private static final String PT_APP_CARDINALITY_SINGLETON_SCOPED = "singleton-scoped"; //$NON-NLS-1$
+	private static final String PT_APP_CARDINALITY_UNLIMITED = "*"; //$NON-NLS-1$
 	private static final String PT_PRODUCTS = "products"; //$NON-NLS-1$
 	private static final String EXT_ERROR_APP = "org.eclipse.equinox.app.error"; //$NON-NLS-1$
 
@@ -43,6 +46,13 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 	private static final String PROP_ECLIPSE_APPLICATION = "eclipse.application"; //$NON-NLS-1$
 	private static final String PROP_ECLIPSE_APPLICATION_LAUNCH_DEFAULT = "eclipse.application.launchDefault"; //$NON-NLS-1$
 	private static final String PROP_ECLIPSE_REGISTER_APP_DESC = "eclipse.application.registerDescriptors"; //$NON-NLS-1$
+
+	static final int NOT_LOCKED = 0;
+	static final int LOCKED_SINGLETON_GLOBAL_RUNNING = 1;
+	static final int LOCKED_SINGLETON_GLOBAL_APPS_RUNNING = 2;
+	static final int LOCKED_SINGLETON_SCOPED_RUNNING = 3;
+	static final int LOCKED_SINGLETON_LIMITED_RUNNING = 4;
+	static final int LOCKED_MAIN_THREAD_RUNNING = 5;
 
 	BundleContext context;
 	// A map of ApplicationDescriptors keyed by eclipse application ID
@@ -56,8 +66,10 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 	// the currently lauched application handles
 	private Collection curHandles = new ArrayList();
 	private EclipseAppHandle curMain;
-	private EclipseAppHandle curSingleton;
-	
+	private EclipseAppHandle curGlobalSingleton;
+	private EclipseAppHandle curScopedSingleton;
+	private HashMap curLimited;
+
 	public EclipseAppContainer(BundleContext context, IExtensionRegistry extensionRegistry, ApplicationLauncher appLauncher) {
 		this.context = context;
 		this.extensionRegistry = extensionRegistry;
@@ -113,7 +125,8 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 				return appDescriptor;
 			// the appDescriptor does not exist for the app ID; create it
 			IConfigurationElement[] configs = appExtension.getConfigurationElements();
-			int flags = EclipseAppDescriptor.FLAG_SINGLETON | EclipseAppDescriptor.FLAG_VISIBLE | EclipseAppDescriptor.FLAG_TYPE_MAIN_THREAD;
+			int flags = EclipseAppDescriptor.FLAG_CARD_SINGLETON_GLOGAL | EclipseAppDescriptor.FLAG_VISIBLE | EclipseAppDescriptor.FLAG_TYPE_MAIN_THREAD;
+			int cardinality = 0;
 			if (configs.length > 0) {
 				String sVisible = configs[0].getAttribute(PT_APP_VISIBLE);
 				if (sVisible != null && !Boolean.valueOf(sVisible).booleanValue())
@@ -123,11 +136,28 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 					flags |= EclipseAppDescriptor.FLAG_TYPE_ANY_THREAD;
 					flags &= ~(EclipseAppDescriptor.FLAG_TYPE_MAIN_THREAD);
 				}
-				String sSingleton = configs[0].getAttribute(PT_APP_SINGLETON);
-				if (sSingleton != null && !Boolean.valueOf(sSingleton).booleanValue())
-					flags &= ~(EclipseAppDescriptor.FLAG_SINGLETON);
+				String sCardinality = configs[0].getAttribute(PT_APP_CARDINALITY);
+				if (sCardinality != null) {
+					flags &= ~(EclipseAppDescriptor.FLAG_CARD_SINGLETON_GLOGAL); // clear the global bit
+					if (PT_APP_CARDINALITY_SINGLETON_SCOPED.equals(sCardinality))
+						flags |= EclipseAppDescriptor.FLAG_CARD_SINGLETON_SCOPED;
+					else if (PT_APP_CARDINALITY_UNLIMITED.equals(sCardinality))
+						flags |= EclipseAppDescriptor.FLAG_CARD_UNLIMITED;
+					else if (PT_APP_CARDINALITY_SINGLETON_GLOBAL.equals(sCardinality))
+						flags |= EclipseAppDescriptor.FLAG_CARD_SINGLETON_GLOGAL;
+					else {
+						try {
+							cardinality = Integer.parseInt(sCardinality);
+							flags |= EclipseAppDescriptor.FLAG_CARD_LIMITED;
+						} catch (NumberFormatException e) {
+							// TODO should we log this?
+							// just fall back to the default
+							flags |= EclipseAppDescriptor.FLAG_CARD_SINGLETON_GLOGAL;
+						}
+					}
+				}
 			}
-			appDescriptor = new EclipseAppDescriptor(appExtension.getContributor().getName(), appExtension.getUniqueIdentifier(), flags, this);
+			appDescriptor = new EclipseAppDescriptor(appExtension.getContributor().getName(), appExtension.getUniqueIdentifier(), flags, cardinality, this);
 			// register the appDescriptor as a service
 			ServiceRegistration sr = (ServiceRegistration) AccessController.doPrivileged(new RegisterService(new String[] {ApplicationDescriptor.class.getName()}, appDescriptor, appDescriptor.getServiceProperties()));
 			appDescriptor.setServiceRegistration(sr);
@@ -264,14 +294,13 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 
 	void launch(EclipseAppHandle appHandle) throws Exception {
 		lock(appHandle);
-		if (((EclipseAppDescriptor) appHandle.getApplicationDescriptor()).getType() == EclipseAppDescriptor.FLAG_TYPE_MAIN_THREAD) {
+		if (((EclipseAppDescriptor) appHandle.getApplicationDescriptor()).getThreadType() == EclipseAppDescriptor.FLAG_TYPE_MAIN_THREAD) {
 			// use the ApplicationLauncher provided by the framework 
 			// to ensure it is launched on the main thread
 			if (appLauncher == null)
 				throw new IllegalStateException();
 			appLauncher.launch(appHandle, appHandle.getArguments().get(IApplicationContext.APPLICATION_ARGS));
-		}
-		else {
+		} else {
 			AnyThreadAppLauncher.launchEclipseApplication(appHandle);
 		}
 	}
@@ -318,7 +347,7 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 							log.log(new FrameworkLogEntry(Activator.PI_APP, FrameworkLogEntry.WARNING, 0, message, 0, t, null));
 						}
 					}
-			}
+				}
 		} catch (InvalidSyntaxException e) {
 			// do nothing; we already tested the filter string above
 		}
@@ -397,43 +426,102 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 		}
 	}
 
-	synchronized void lock(EclipseAppHandle appHandle) {
-		if (curSingleton != null)
-			throw new IllegalStateException("A singleton application instance is already running: " + curSingleton.getInstanceId());
+	synchronized void lock(EclipseAppHandle appHandle) throws ApplicationException {
 		EclipseAppDescriptor eclipseApp = (EclipseAppDescriptor) appHandle.getApplicationDescriptor();
-		if (eclipseApp.isSingleton()) {
-			if (curHandles.size() > 0)
-				throw new IllegalStateException("One or more applications are already running");
+		switch (isLocked(eclipseApp)) {
+			case NOT_LOCKED : 
+				break;
+			case LOCKED_SINGLETON_GLOBAL_RUNNING :
+				throw new ApplicationException(ApplicationException.APPLICATION_INTERNAL_ERROR, NLS.bind(Messages.singleton_running, curGlobalSingleton.getInstanceId()));
+			case LOCKED_SINGLETON_GLOBAL_APPS_RUNNING :
+				throw new ApplicationException(ApplicationException.APPLICATION_INTERNAL_ERROR, Messages.apps_running);
+			case LOCKED_SINGLETON_SCOPED_RUNNING :
+				throw new ApplicationException(ApplicationException.APPLICATION_INTERNAL_ERROR, NLS.bind(Messages.singleton_running, curScopedSingleton.getInstanceId()));
+			case LOCKED_SINGLETON_LIMITED_RUNNING : 
+				throw new ApplicationException(ApplicationException.APPLICATION_INTERNAL_ERROR, NLS.bind(Messages.max_running, eclipseApp.getApplicationId()));
+			case LOCKED_MAIN_THREAD_RUNNING :
+				throw new ApplicationException(ApplicationException.APPLICATION_INTERNAL_ERROR, NLS.bind(Messages.main_running, curMain.getInstanceId()));
+			default :
+				break;
 		}
-		if (eclipseApp.getType() == EclipseAppDescriptor.FLAG_TYPE_MAIN_THREAD) {
+
+		if (eclipseApp.getThreadType() == EclipseAppDescriptor.FLAG_TYPE_MAIN_THREAD) {
 			if (curMain != null)
-				throw new IllegalStateException("A application instance is already running on the main thread: " + curSingleton.getInstanceId());
+				throw new IllegalStateException(Messages.main_running + curMain.getInstanceId());
 		}
 		// ok we can now successfully lock the container
-		if (eclipseApp.isSingleton())
-			curSingleton = appHandle;
-		if (eclipseApp.getType() == EclipseAppDescriptor.FLAG_TYPE_MAIN_THREAD)
+		switch (eclipseApp.getCardinalityType()) {
+			case EclipseAppDescriptor.FLAG_CARD_SINGLETON_GLOGAL :
+				curGlobalSingleton = appHandle;
+				break;
+			case EclipseAppDescriptor.FLAG_CARD_SINGLETON_SCOPED :
+				curScopedSingleton = appHandle;
+				break;
+			case EclipseAppDescriptor.FLAG_CARD_LIMITED :
+				if (curLimited == null)
+					curLimited = new HashMap(3);
+				ArrayList limited = (ArrayList) curLimited.get(eclipseApp.getApplicationId());
+				if (limited == null) {
+					limited = new ArrayList(eclipseApp.getCardinality());
+					curLimited.put(eclipseApp.getApplicationId(), limited);
+				}
+				limited.add(appHandle);
+				break;
+			case EclipseAppDescriptor.FLAG_CARD_UNLIMITED :
+				break;
+			default :
+				break;
+		}
+		if (eclipseApp.getThreadType() == EclipseAppDescriptor.FLAG_TYPE_MAIN_THREAD)
 			curMain = appHandle;
 		curHandles.add(appHandle);
 		refreshAppDescriptors();
 	}
 
 	synchronized void unlock(EclipseAppHandle appHandle) {
-		if (curSingleton == appHandle)
-			curSingleton = null;
-		if (appHandle == curMain)
+		if (curGlobalSingleton == appHandle)
+			curGlobalSingleton = null;
+		else if (curScopedSingleton == appHandle)
+			curScopedSingleton = null;
+		else if (((EclipseAppDescriptor)appHandle.getApplicationDescriptor()).getCardinalityType() == EclipseAppDescriptor.FLAG_CARD_LIMITED) {
+			if (curLimited != null) {
+				ArrayList limited = (ArrayList) curLimited.get(((EclipseAppDescriptor)appHandle.getApplicationDescriptor()).getApplicationId());
+				if (limited != null)
+					limited.remove(appHandle);
+			}
+		}
+		if (curMain == appHandle)
 			curMain = null;
-		curHandles.remove(appHandle);
-		refreshAppDescriptors();
+		if (curHandles.remove(appHandle))
+			refreshAppDescriptors(); // only refresh descriptors if we really unlocked something
 	}
 
-	synchronized boolean isLocked(EclipseAppDescriptor eclipseApp) {
-		if (curSingleton != null)
-			return true;
-		if (eclipseApp.isSingleton() && curHandles.size() > 0)
-			return true;
-		if (eclipseApp.getType() == EclipseAppDescriptor.FLAG_TYPE_MAIN_THREAD && curMain != null)
-			return true;
-		return false;
+	synchronized int isLocked(EclipseAppDescriptor eclipseApp) {
+		if (curGlobalSingleton != null)
+			return LOCKED_SINGLETON_GLOBAL_RUNNING;
+		switch (eclipseApp.getCardinalityType()) {
+			case EclipseAppDescriptor.FLAG_CARD_SINGLETON_GLOGAL :
+				if (curHandles.size() > 0)
+					return LOCKED_SINGLETON_GLOBAL_APPS_RUNNING;
+				break;
+			case EclipseAppDescriptor.FLAG_CARD_SINGLETON_SCOPED :
+				if (curScopedSingleton != null)
+					return LOCKED_SINGLETON_SCOPED_RUNNING;
+				break;
+			case EclipseAppDescriptor.FLAG_CARD_LIMITED :
+				if (curLimited != null) {
+					ArrayList limited = (ArrayList) curLimited.get(eclipseApp.getApplicationId());
+					if (limited != null && limited.size() >= eclipseApp.getCardinality())
+						return LOCKED_SINGLETON_LIMITED_RUNNING;
+				}
+				break;
+			case EclipseAppDescriptor.FLAG_CARD_UNLIMITED :
+				break;
+			default :
+				break;
+		}
+		if (eclipseApp.getThreadType() == EclipseAppDescriptor.FLAG_TYPE_MAIN_THREAD && curMain != null)
+			return LOCKED_MAIN_THREAD_RUNNING;
+		return NOT_LOCKED;
 	}
 }

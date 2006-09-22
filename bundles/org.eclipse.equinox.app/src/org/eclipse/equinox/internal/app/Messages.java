@@ -35,6 +35,12 @@ public class Messages extends NLS {
 	// persistence
 	public static String persistence_error_saving;
 
+	// singletons
+	public static String singleton_running;
+	public static String apps_running;
+	public static String main_running;
+	public static String max_running;
+
 	static {
 		// load message values from bundle file
 		reloadMessages();

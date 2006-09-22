@@ -83,7 +83,7 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 		props.put(ApplicationHandle.APPLICATION_PID, getInstanceId());
 		props.put(ApplicationHandle.APPLICATION_STATE, getState());
 		props.put(ApplicationHandle.APPLICATION_DESCRIPTOR, getApplicationDescriptor().getApplicationId());
-		props.put(EclipseAppDescriptor.APP_TYPE, ((EclipseAppDescriptor) getApplicationDescriptor()).getTypeString());
+		props.put(EclipseAppDescriptor.APP_TYPE, ((EclipseAppDescriptor) getApplicationDescriptor()).getThreadTypeString());
 		return props;
 	}
 
