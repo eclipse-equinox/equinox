@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Servletbridge
+Bundle-SymbolicName: org.eclipse.equinox.servletbridge
+Bundle-Version: 1.0.0.qualifier
+Bundle-Localization: plugin
+Import-Package: javax.servlet;version="2.3.0",
+ javax.servlet.http;version="2.3.0"
+Export-Package: org.eclipse.equinox.servletbridge
+Bundle-ClassPath: servletbridge.jar
+Bundle-RequiredExecutionEnvironment: CDC-1.0/Foundation-1.0,
+ J2SE-1.3

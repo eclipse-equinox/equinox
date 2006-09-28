@@ -1,0 +1,125 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!-- Schema file written by PDE -->
+<schema targetNamespace="org.eclipse.equinox.http.registry">
+<annotation>
+      <appInfo>
+         <meta.schema plugin="org.eclipse.equinox.http.registry" id="httpcontexts" name="Http Service Httpcontexts"/>
+      </appInfo>
+      <documentation>
+         Provides an OSGi Http Service HttpContext identified by a name. Any httpcontext extension declared with the same name will share the same single instance of the Httpcontext.
+      </documentation>
+   </annotation>
+
+   <element name="extension">
+      <complexType>
+         <sequence>
+            <element ref="httpcontext"/>
+         </sequence>
+         <attribute name="point" type="string" use="required">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="id" type="string">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="name" type="string">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+               <appInfo>
+                  <meta.attribute translatable="true"/>
+               </appInfo>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <element name="httpcontext">
+      <complexType>
+         <attribute name="name" type="string">
+            <annotation>
+               <documentation>
+                  The name of the Httpcontext instance. Httpcontexts extensions that share the same name will share the same instance and availability of resources.
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="path" type="string">
+            <annotation>
+               <documentation>
+                  The bundle path where resources can be loaded from.
+               </documentation>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <annotation>
+      <appInfo>
+         <meta.section type="since"/>
+      </appInfo>
+      <documentation>
+         3.2
+      </documentation>
+   </annotation>
+
+   <annotation>
+      <appInfo>
+         <meta.section type="examples"/>
+      </appInfo>
+      <documentation>
+         The following is an example of the &lt;code&gt;httpcontexts&lt;/code&gt; extension:
+&lt;pre&gt;
+     &lt;extension
+           id=&quot;testHttpcontext&quot;
+           point=&quot;org.eclipse.equinox.http.registry.httpcontexts&quot;&gt;
+        &lt;httpcontext
+              name=&quot;testintest&quot;
+              path=&quot;/test&quot;/&gt;
+     &lt;/extension&gt;
+&lt;/pre&gt;
+
+This httpcontexts extension will make resources in &quot;/test&quot; accessible via the OSGi Http Service&apos;s HttpContext getResource method.
+      </documentation>
+   </annotation>
+
+   <annotation>
+      <appInfo>
+         <meta.section type="apiInfo"/>
+      </appInfo>
+      <documentation>
+         No Java code is requied for this extension point.
+      </documentation>
+   </annotation>
+
+   <annotation>
+      <appInfo>
+         <meta.section type="implementation"/>
+      </appInfo>
+      <documentation>
+         
+      </documentation>
+   </annotation>
+
+   <annotation>
+      <appInfo>
+         <meta.section type="copyright"/>
+      </appInfo>
+      <documentation>
+         Copyright (c) 2006 Cognos Incorporated and others.
+&lt;br&gt;
+All rights reserved. This program and the accompanying materials are made 
+available under the terms of the Eclipse Public License v1.0 which 
+accompanies this distribution, and is available at 
+&lt;a href=&quot;http://www.eclipse.org/legal/epl-v10.html&quot;&gt;http://www.eclipse.org/legal/epl-v10.html&lt;/a&gt;.
+      </documentation>
+   </annotation>
+
+</schema>

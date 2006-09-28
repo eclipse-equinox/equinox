@@ -1,0 +1,174 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!-- Schema file written by PDE -->
+<schema targetNamespace="org.eclipse.equinox.http.registry">
+<annotation>
+      <appInfo>
+         <meta.schema plugin="org.eclipse.equinox.http.registry" id="servlets" name="Http Service Servlets"/>
+      </appInfo>
+      <documentation>
+         This extension mimics and borrows the semantics of the OSGi HttpService registerServlet method.
+      </documentation>
+   </annotation>
+
+   <element name="extension">
+      <complexType>
+         <sequence>
+            <element ref="servlet"/>
+         </sequence>
+         <attribute name="point" type="string" use="required">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="id" type="string">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="name" type="string">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+               <appInfo>
+                  <meta.attribute translatable="true"/>
+               </appInfo>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <element name="servlet">
+      <complexType>
+         <sequence>
+            <element ref="init-param" minOccurs="0" maxOccurs="unbounded"/>
+         </sequence>
+         <attribute name="class" type="string" use="required">
+            <annotation>
+               <documentation>
+                  The equivalent of the OSGi Http Services &quot;servlet&quot; in registerServlet. The Servlet is instantiated by the Extension Point provider and must be an instance of javax.servlet.Servlet
+               </documentation>
+               <appInfo>
+                  <meta.attribute kind="java" basedOn="javax.servlet.Servlet"/>
+               </appInfo>
+            </annotation>
+         </attribute>
+         <attribute name="alias" type="string" use="required">
+            <annotation>
+               <documentation>
+                  The equivalent of the OSGi Http Services &quot;alias&quot; in registerServlet.
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="httpcontext-name" type="string">
+            <annotation>
+               <documentation>
+                  The equivalent of the OSGi Http Services httpcontext in registerServlet. The httpcontext-name is matched against the &quot;httpcontexts&quot; extension for a matching name. If this attribute is not provided the OSGi Http Service&apos;s DefaultHttpContext semantics are used.
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="load-on-startup" type="boolean">
+            <annotation>
+               <documentation>
+                  Determines if the Servlet should be initialized immediately.
+               </documentation>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <element name="init-param">
+      <annotation>
+         <documentation>
+            Similar to the Servlet Specification and its deployment descriptor&apos;s init-param elements.
+         </documentation>
+      </annotation>
+      <complexType>
+         <attribute name="name" type="string" use="required">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="value" type="string" use="required">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <annotation>
+      <appInfo>
+         <meta.section type="since"/>
+      </appInfo>
+      <documentation>
+         3.2
+      </documentation>
+   </annotation>
+
+   <annotation>
+      <appInfo>
+         <meta.section type="examples"/>
+      </appInfo>
+      <documentation>
+         The following is an example of the &lt;code&gt;servlets&lt;/code&gt; extension:
+&lt;pre&gt;
+     &lt;extension
+           id=&quot;testServlet&quot;
+           point=&quot;org.eclipse.equinox.http.registry.servlets&quot;&gt;
+        &lt;servlet
+              alias=&quot;/sp_test&quot;
+              class=&quot;org.eclipse.equinox.http.registry.internal.TestServlet&quot;&gt;
+           &lt;init-param
+                 name=&quot;testParam&quot;
+                 value=&quot;test param value&quot;&gt;
+           &lt;/init-param&gt;
+        &lt;/servlet&gt;
+     &lt;/extension&gt;
+&lt;/pre&gt;
+
+This equivalent to the OSGi Http Service&apos;s registerServlet method.
+      </documentation>
+   </annotation>
+
+   <annotation>
+      <appInfo>
+         <meta.section type="apiInfo"/>
+      </appInfo>
+      <documentation>
+         Servlets must be an instance of javax.servlet.Servlet
+      </documentation>
+   </annotation>
+
+   <annotation>
+      <appInfo>
+         <meta.section type="implementation"/>
+      </appInfo>
+      <documentation>
+         [Enter information about supplied implementation of this extension point.]
+      </documentation>
+   </annotation>
+
+   <annotation>
+      <appInfo>
+         <meta.section type="copyright"/>
+      </appInfo>
+      <documentation>
+         Copyright (c) 2006 Cognos Incorporated and others.
+&lt;br&gt;
+All rights reserved. This program and the accompanying materials are made 
+available under the terms of the Eclipse Public License v1.0 which 
+accompanies this distribution, and is available at 
+&lt;a href=&quot;http://www.eclipse.org/legal/epl-v10.html&quot;&gt;http://www.eclipse.org/legal/epl-v10.html&lt;/a&gt;.
+      </documentation>
+   </annotation>
+
+</schema>

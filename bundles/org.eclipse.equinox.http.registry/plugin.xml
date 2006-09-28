@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<plugin>
+     <extension-point id="servlets" name="HttpService servlets" schema="schema/servlets.exsd"/>
+     <extension-point id="resources" name="HttpService resources" schema="schema/resources.exsd"/>
+     <extension-point id="httpcontexts" name="HttpService httpcontexts" schema="schema/httpcontexts.exsd"/>
+</plugin>
