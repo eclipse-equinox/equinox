@@ -4,6 +4,6 @@ Bundle-Name: Servletbridge Extension Bundle
 Bundle-SymbolicName: org.eclipse.equinox.servletbridge.extensionbundle
 Fragment-Host: system.bundle; extension:=framework
 Bundle-Version: 1.0.0
-Export-Package: org.eclipse.equinox.servletbridge, 
+Export-Package: org.eclipse.equinox.servletbridge; version=1.0, 
  javax.servlet; version=2.3,
  javax.servlet.http; version=2.3
