@@ -134,7 +134,9 @@ public class FrameworkLauncher {
 		String packageExports = 
 			"org.eclipse.equinox.servletbridge; version=1.0" + //$NON-NLS-1$
 			", javax.servlet; version=" + servletVersion + //$NON-NLS-1$
-			", javax.servlet.http; version=" + servletVersion; //$NON-NLS-1$
+			", javax.servlet.http; version=" + servletVersion + //$NON-NLS-1$
+			", javax.servlet.resources; version=" + servletVersion; //$NON-NLS-1$
+
 
 		String extendedExports = config.getInitParameter(CONFIG_EXTENDED_FRAMEWORK_EXPORTS);
 		if (extendedExports != null && extendedExports.trim().length()!=0)
