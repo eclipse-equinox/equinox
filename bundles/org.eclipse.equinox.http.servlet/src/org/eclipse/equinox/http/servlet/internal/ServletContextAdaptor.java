@@ -184,4 +184,15 @@ public class ServletContextAdaptor implements ServletContext {
 	public void log(String arg0) {
 		servletContext.log(arg0);
 	}
+
+	// Added in Servlet 2.5
+	public String getContextPath() {
+		try {
+			Method getContextPathMethod = servletContext.getClass().getMethod("getContextPath", null); //$NON-NLS-1$
+			return (String) getContextPathMethod.invoke(servletContext, null) + proxyContext.getServletPath();
+		} catch (Exception e) {
+			// ignore
+		}
+		return null;
+	}
 }
