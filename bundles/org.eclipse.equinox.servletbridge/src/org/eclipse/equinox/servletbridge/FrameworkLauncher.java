@@ -208,7 +208,7 @@ public class FrameworkLauncher {
 			Method setInitialProperties = clazz.getMethod("setInitialProperties", new Class[] {Map.class}); //$NON-NLS-1$
 			setInitialProperties.invoke(null, new Object[] {initalPropertyMap});
 
-			Method runMethod = clazz.getMethod("run", new Class[] {String[].class, Runnable.class}); //$NON-NLS-1$
+			Method runMethod = clazz.getMethod("startup", new Class[] {String[].class, Runnable.class}); //$NON-NLS-1$
 			runMethod.invoke(null, new Object[] {args, null});
 			frameworkContextClassLoader = Thread.currentThread().getContextClassLoader();
 		} catch (Exception e) {
@@ -286,9 +286,8 @@ public class FrameworkLauncher {
 	 */
 	protected String[] buildCommandLineArguments() {
 		List args = new ArrayList();
-		args.add("-nosplash"); //$NON-NLS-1$
-		String commandLine = config.getInitParameter(CONFIG_COMMANDLINE);
 
+		String commandLine = config.getInitParameter(CONFIG_COMMANDLINE);
 		if (commandLine != null) {
 			StringTokenizer tokenizer = new StringTokenizer(commandLine, WS_DELIM);
 			while (tokenizer.hasMoreTokens()) {
