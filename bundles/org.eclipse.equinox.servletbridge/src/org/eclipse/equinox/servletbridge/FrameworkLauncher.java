@@ -15,6 +15,7 @@ import java.io.*;
 import java.lang.reflect.Method;
 import java.net.*;
 import java.util.*;
+import java.util.jar.*;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 
@@ -45,6 +46,17 @@ public class FrameworkLauncher {
 	protected static final String RESOURCE_BASE = "/WEB-INF/eclipse/"; //$NON-NLS-1$
 	protected static final String LAUNCH_INI = "launch.ini"; //$NON-NLS-1$
 
+	private static final String MANIFEST_VERSION = "Manifest-Version"; //$NON-NLS-1$
+	private static final String BUNDLE_MANIFEST_VERSION = "Bundle-ManifestVersion"; //$NON-NLS-1$
+	private static final String BUNDLE_NAME = "Bundle-Name"; //$NON-NLS-1$
+	private static final String BUNDLE_SYMBOLIC_NAME = "Bundle-SymbolicName"; //$NON-NLS-1$
+	private static final String BUNDLE_VERSION = "Bundle-Version"; //$NON-NLS-1$
+	private static final String FRAGMENT_HOST = "Fragment-Host"; //$NON-NLS-1$
+	private static final String EXPORT_PACKAGE = "Export-Package"; //$NON-NLS-1$
+
+	private static final String CONFIG_COMMANDLINE = "commandline"; //$NON-NLS-1$
+	private static final String CONFIG_EXTENDED_FRAMEWORK_EXPORTS = "extendedFrameworkExports"; //$NON-NLS-1$
+	
 	protected ServletConfig config;
 	protected ServletContext context;
 	private File platformDirectory;
@@ -92,8 +104,56 @@ public class FrameworkLauncher {
 
 		copyResource(RESOURCE_BASE + "configuration/", new File(platformDirectory, "configuration")); //$NON-NLS-1$ //$NON-NLS-2$
 		copyResource(RESOURCE_BASE + "features/", new File(platformDirectory, "features")); //$NON-NLS-1$ //$NON-NLS-2$
-		copyResource(RESOURCE_BASE + "plugins/", new File(platformDirectory, "plugins")); //$NON-NLS-1$ //$NON-NLS-2$
+		File plugins = new File(platformDirectory, "plugins"); //$NON-NLS-1$
+		copyResource(RESOURCE_BASE + "plugins/", plugins); //$NON-NLS-1$
+		deployExtensionBundle(plugins);		
 		copyResource(RESOURCE_BASE + ".eclipseproduct", new File(platformDirectory, ".eclipseproduct")); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+	/**
+	 * deployExtensionBundle will generate the Servletbridge extensionbundle if it is not already present in the platform's
+	 * plugin directory. By default it exports "org.eclipse.equinox.servletbridge" and a versioned export of the Servlet API.
+	 * Additional exports can be added by using the "extendedFrameworkExports" initial-param in the ServletConfig
+	 */
+	private void deployExtensionBundle(File plugins) {
+		File extensionBundle = new File(plugins, "org.eclipse.equinox.servletbridge.extensionbundle_1.0.0.jar"); //$NON-NLS-1$
+		File extensionBundleDir = new File(plugins, "org.eclipse.equinox.servletbridge.extensionbundle_1.0.0"); //$NON-NLS-1$
+		if (extensionBundle.exists() || (extensionBundleDir.exists() && extensionBundleDir.isDirectory()))
+			return;
+		
+		Manifest mf = new Manifest();
+		Attributes attribs = mf.getMainAttributes();
+		attribs.putValue(MANIFEST_VERSION,"1.0"); //$NON-NLS-1$
+		attribs.putValue(BUNDLE_MANIFEST_VERSION,"2"); //$NON-NLS-1$
+		attribs.putValue(BUNDLE_NAME,"Servletbridge Extension Bundle"); //$NON-NLS-1$
+		attribs.putValue(BUNDLE_SYMBOLIC_NAME,"org.eclipse.equinox.servletbridge.extensionbundle"); //$NON-NLS-1$
+		attribs.putValue(BUNDLE_VERSION,"1.0.0"); //$NON-NLS-1$
+		attribs.putValue(FRAGMENT_HOST,"system.bundle; extension:=framework"); //$NON-NLS-1$
+
+		String servletVersion = context.getMajorVersion() + "." + context.getMinorVersion(); //$NON-NLS-1$
+		String packageExports = 
+			"org.eclipse.equinox.servletbridge; version=1.0" + //$NON-NLS-1$
+			", javax.servlet; version=" + servletVersion + //$NON-NLS-1$
+			", javax.servlet.http; version=" + servletVersion; //$NON-NLS-1$
+
+		String extendedExports = config.getInitParameter(CONFIG_EXTENDED_FRAMEWORK_EXPORTS);
+		if (extendedExports != null && extendedExports.trim().length()!=0)
+			packageExports += ", " + extendedExports; //$NON-NLS-1$
+		
+		attribs.putValue(EXPORT_PACKAGE, packageExports);
+		
+		try {
+			JarOutputStream jos = null;
+			try {
+				jos = new JarOutputStream(new FileOutputStream(extensionBundle), mf);
+				jos.finish();
+			} finally {
+				if (jos != null)
+					jos.close();
+			}
+		} catch (IOException e) {
+			context.log("Error generating extension bundle", e); //$NON-NLS-1$
+		}		
 	}
 
 	/** undeploy is the reverse operation of deploy and removes the OSGi framework libraries from their
@@ -227,7 +287,7 @@ public class FrameworkLauncher {
 	protected String[] buildCommandLineArguments() {
 		List args = new ArrayList();
 		args.add("-nosplash"); //$NON-NLS-1$
-		String commandLine = config.getInitParameter("commandline"); //$NON-NLS-1$
+		String commandLine = config.getInitParameter(CONFIG_COMMANDLINE);
 
 		if (commandLine != null) {
 			StringTokenizer tokenizer = new StringTokenizer(commandLine, WS_DELIM);
