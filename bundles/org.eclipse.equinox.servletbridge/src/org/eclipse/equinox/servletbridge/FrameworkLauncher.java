@@ -402,7 +402,7 @@ public class FrameworkLauncher {
 	}
 
 	/**
-	 * deleteDirectory is a cocnvenience method to recursively delete a directory
+	 * deleteDirectory is a convenience method to recursively delete a directory
 	 * @param directory - the directory to delete.
 	 * @return was the delete succesful
 	 */
