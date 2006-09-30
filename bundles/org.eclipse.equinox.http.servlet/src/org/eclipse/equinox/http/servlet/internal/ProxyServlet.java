@@ -36,12 +36,13 @@ public class ProxyServlet extends HttpServlet {
 
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
-		proxyContext = new ProxyContext();
+		proxyContext = new ProxyContext(config.getServletContext());
 		Activator.addProxyServlet(this);
 	}
 
 	public void destroy() {
 		Activator.removeProxyServlet(this);
+		proxyContext.destroy();
 		proxyContext = null;
 		super.destroy();
 	}
@@ -131,7 +132,7 @@ public class ProxyServlet extends HttpServlet {
 		if (servlet == null)
 			throw new IllegalArgumentException("Servlet cannot be null"); //$NON-NLS-1$
 
-		ServletRegistration registration = new ServletRegistration(servlet, context, bundle, servlets);
+		ServletRegistration registration = new ServletRegistration(servlet, proxyContext, context, bundle, servlets);
 		registration.checkServletRegistration();
 
 		ServletContext wrappedServletContext = new ServletContextAdaptor(proxyContext, getServletContext(), context, AccessController.getContext());

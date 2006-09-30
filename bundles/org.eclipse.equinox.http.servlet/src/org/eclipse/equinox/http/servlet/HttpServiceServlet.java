@@ -8,5 +8,6 @@ import org.eclipse.equinox.http.servlet.internal.ProxyServlet;
  * This class is not meant for extending or even using directly and is purely meant for registering
  * in a servlet container.
  */
-public class HttpServiceServlet extends ProxyServlet { 
+public class HttpServiceServlet extends ProxyServlet {
+	private static final long serialVersionUID = -3647550992964861187L; 
 }

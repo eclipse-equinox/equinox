@@ -21,7 +21,6 @@ import org.osgi.service.http.HttpContext;
 
 public class ServletContextAdaptor implements ServletContext {
 
-	private static final String JAVAX_SERVLET_CONTEXT_TEMPDIR = "javax.servlet.context.tempdir"; //$NON-NLS-1$
 	private ServletContext servletContext;
 	HttpContext httpContext;
 	private AccessControlContext acc;
@@ -32,17 +31,6 @@ public class ServletContextAdaptor implements ServletContext {
 		this.httpContext = httpContext;
 		this.acc = acc;
 		this.proxyContext = proxyContext;
-		proxyContext.createContextAttributes(httpContext);
-
-		if (proxyContext.getContextAttributes(httpContext).get(JAVAX_SERVLET_CONTEXT_TEMPDIR) == null) {
-			File tempDir = (File) servletContext.getAttribute(JAVAX_SERVLET_CONTEXT_TEMPDIR);
-			if (tempDir != null) {
-				File contextTempDir = new File(tempDir, "HttpContext" + httpContext.hashCode()); //$NON-NLS-1$
-				contextTempDir.mkdirs();
-				contextTempDir.deleteOnExit();
-				proxyContext.getContextAttributes(httpContext).put(JAVAX_SERVLET_CONTEXT_TEMPDIR, contextTempDir);
-			}
-		}
 	}
 
 	/**

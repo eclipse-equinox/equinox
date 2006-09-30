@@ -28,11 +28,13 @@ public class ServletRegistration extends Registration {
 	private HttpContext httpContext; //The context used during the registration of the servlet
 	private Set servlets; //All the servlets registered against the instance of the proxy servlet that "ownes" self.
 	private ClassLoader registeredContextClassLoader;
+	private ProxyContext proxyContext;
 
-	public ServletRegistration(Servlet servlet, HttpContext context, Bundle bundle, Set servlets) {
+	public ServletRegistration(Servlet servlet, ProxyContext proxyContext, HttpContext context, Bundle bundle, Set servlets) {
 		this.servlet = servlet;
 		this.servlets = servlets;
 		this.httpContext = context;
+		this.proxyContext = proxyContext;
 		registeredContextClassLoader = Thread.currentThread().getContextClassLoader();
 	}
 
@@ -41,26 +43,35 @@ public class ServletRegistration extends Registration {
 		try {
 			Thread.currentThread().setContextClassLoader(registeredContextClassLoader);
 			super.destroy();
+			servlet.destroy();
 		} finally {
 			Thread.currentThread().setContextClassLoader(original);
-		}
-		servlet.destroy();
+		}		
 	}
 
-	public void close() {
+	public void close() {		
 		servlets.remove(servlet);
+		proxyContext.destroyContextAttributes(httpContext);
 	}
 
 	//Delegate the init call to the actual servlet
 	public void init(ServletConfig servletConfig) throws ServletException {
-		ClassLoader original = Thread.currentThread().getContextClassLoader();
+		boolean initialized = false;
+		proxyContext.createContextAttributes(httpContext);
 		try {
-			Thread.currentThread().setContextClassLoader(registeredContextClassLoader);
-			servlet.init(servletConfig);
+			ClassLoader original = Thread.currentThread().getContextClassLoader();
+			try {
+				Thread.currentThread().setContextClassLoader(registeredContextClassLoader);
+				servlet.init(servletConfig);
+			} finally {
+				Thread.currentThread().setContextClassLoader(original);
+			}
+			servlets.add(servlet);
+			initialized = true;
 		} finally {
-			Thread.currentThread().setContextClassLoader(original);
+			if (! initialized)
+				proxyContext.destroyContextAttributes(httpContext);
 		}
-		servlets.add(servlet);
 	}
 
 	public void checkServletRegistration() throws ServletException {
