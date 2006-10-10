@@ -13,7 +13,6 @@ package org.eclipse.equinox.internal.app;
 
 import java.io.*;
 import java.util.*;
-import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.storagemanager.StorageManager;
@@ -299,9 +298,7 @@ public class AppPersistence implements ServiceTrackerCustomizer {
 			storageManager.lookup(fileName, true);
 			storageManager.update(new String[] {fileName}, new String[] {data.getName()});
 		} catch (IOException e) {
-			FrameworkLog log = Activator.getFrameworkLog();
-			if (log != null)
-				log.log(new FrameworkLogEntry(Activator.PI_APP, FrameworkLogEntry.ERROR, 0, NLS.bind(Messages.persistence_error_saving, fileName), 0, e, null));
+			Activator.log(new FrameworkLogEntry(Activator.PI_APP, FrameworkLogEntry.ERROR, 0, NLS.bind(Messages.persistence_error_saving, fileName), 0, e, null));
 		}
 	}
 
@@ -386,11 +383,8 @@ public class AppPersistence implements ServiceTrackerCustomizer {
 							if (filter == null || filter.match(props))
 								apps[i].handleEvent(timerEvent);
 						} catch (Throwable t) {
-							FrameworkLog log = Activator.getFrameworkLog();
-							if (log != null) {
-								String message = NLS.bind(Messages.scheduled_app_launch_error, apps[i].getAppPid());
-								log.log(new FrameworkLogEntry(Activator.PI_APP, FrameworkLogEntry.WARNING, 0, message, 0, t, null));
-							}
+							String message = NLS.bind(Messages.scheduled_app_launch_error, apps[i].getAppPid());
+							Activator.log(new FrameworkLogEntry(Activator.PI_APP, FrameworkLogEntry.WARNING, 0, message, 0, t, null));
 						}
 					}
 				} catch (InterruptedException e) {

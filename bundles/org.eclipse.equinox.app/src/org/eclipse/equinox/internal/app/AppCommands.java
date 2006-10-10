@@ -24,12 +24,12 @@ public class AppCommands implements CommandProvider {
 
 	private static AppCommands instance;
 	private BundleContext context;
-	private ServiceTracker appDescTracker;
-	private ServiceTracker appHandleTracker;
-	private ServiceTracker schedAppTracker;
+	private ServiceTracker applicationDescriptors;
+	private ServiceTracker applicationHandles;
+	private ServiceTracker scheduledApplications;
 	private Filter launchableApp;
 	private Filter activeApp;
-	private ServiceRegistration sr;
+	private ServiceRegistration providerRegistration;
 
 	static synchronized void create(BundleContext context) {
 		if (instance != null)
@@ -52,28 +52,28 @@ public class AppCommands implements CommandProvider {
 	public void start(BundleContext ctx) {
 		this.context = ctx;
 		try {
-			appDescTracker = new ServiceTracker(ctx, ApplicationDescriptor.class.getName(), null);
-			appDescTracker.open();
-			appHandleTracker = new ServiceTracker(ctx, ApplicationHandle.class.getName(), null);
-			appHandleTracker.open();
-			schedAppTracker = new ServiceTracker(ctx, ScheduledApplication.class.getName(), null);
-			schedAppTracker.open();
+			applicationDescriptors = new ServiceTracker(ctx, ApplicationDescriptor.class.getName(), null);
+			applicationDescriptors.open();
+			applicationHandles = new ServiceTracker(ctx, ApplicationHandle.class.getName(), null);
+			applicationHandles.open();
+			scheduledApplications = new ServiceTracker(ctx, ScheduledApplication.class.getName(), null);
+			scheduledApplications.open();
 			launchableApp = ctx.createFilter(LAUNCHABLE_APP_FILTER);
 			activeApp = ctx.createFilter(ACTIVE_APP_FILTER);
-			sr = ctx.registerService(CommandProvider.class.getName(), this, null);
+			providerRegistration = ctx.registerService(CommandProvider.class.getName(), this, null);
 		} catch (InvalidSyntaxException e) {
 			// should not happen.
 		}
 	}
 
 	public void stop(BundleContext ctx) {
-		sr.unregister();
-		if (appDescTracker != null)
-			appDescTracker.close();
-		if (appHandleTracker != null)
-			appHandleTracker.close();
-		if (schedAppTracker != null)
-			schedAppTracker.close();
+		providerRegistration.unregister();
+		if (applicationDescriptors != null)
+			applicationDescriptors.close();
+		if (applicationHandles != null)
+			applicationHandles.close();
+		if (scheduledApplications != null)
+			scheduledApplications.close();
 	}
 
 	public String getHelp() {
@@ -99,7 +99,7 @@ public class AppCommands implements CommandProvider {
 	}
 
 	public void _apps(CommandInterpreter intp) {
-		ServiceReference[] apps = appDescTracker.getServiceReferences();
+		ServiceReference[] apps = applicationDescriptors.getServiceReferences();
 		if (apps == null) {
 			intp.println("No applications found."); //$NON-NLS-1$
 			return;
@@ -113,7 +113,7 @@ public class AppCommands implements CommandProvider {
 	}
 
 	public void _activeApps(CommandInterpreter intp) {
-		ServiceReference[] active = appHandleTracker.getServiceReferences();
+		ServiceReference[] active = applicationHandles.getServiceReferences();
 		if (active == null) {
 			intp.println("No active applications found"); //$NON-NLS-1$
 			return;
@@ -128,7 +128,7 @@ public class AppCommands implements CommandProvider {
 
 	public void _startApp(CommandInterpreter intp) throws Exception {
 		String appId = intp.nextArgument();
-		ServiceReference[] apps = appDescTracker.getServiceReferences();
+		ServiceReference[] apps = applicationDescriptors.getServiceReferences();
 		if (apps != null && appId != null)
 			for (int i = 0; i < apps.length; i++)
 				if (appId.equals(apps[i].getProperty(ApplicationDescriptor.APPLICATION_PID))) {
@@ -154,7 +154,7 @@ public class AppCommands implements CommandProvider {
 
 	public void _stopApp(CommandInterpreter intp) throws Exception {
 		String runningId = intp.nextArgument();
-		ServiceReference[] runningApps = appHandleTracker.getServiceReferences();
+		ServiceReference[] runningApps = applicationHandles.getServiceReferences();
 		if (runningApps != null && runningId != null)
 			for (int i = 0; i < runningApps.length; i++)
 				if (runningId.equals(runningApps[i].getProperty(ApplicationHandle.APPLICATION_PID))) {
@@ -176,7 +176,7 @@ public class AppCommands implements CommandProvider {
 
 	public void _lockApp(CommandInterpreter intp) throws Exception {
 		String appId = intp.nextArgument();
-		ServiceReference[] apps = appDescTracker.getServiceReferences();
+		ServiceReference[] apps = applicationDescriptors.getServiceReferences();
 		if (apps != null && appId != null)
 			for (int i = 0; i < apps.length; i++)
 				if (appId.equals(apps[i].getProperty(ApplicationDescriptor.APPLICATION_PID))) {
@@ -194,7 +194,7 @@ public class AppCommands implements CommandProvider {
 
 	public void _unlockApp(CommandInterpreter intp) throws Exception {
 		String appId = intp.nextArgument();
-		ServiceReference[] apps = appDescTracker.getServiceReferences();
+		ServiceReference[] apps = applicationDescriptors.getServiceReferences();
 		if (apps != null && appId != null)
 			for (int i = 0; i < apps.length; i++)
 				if (appId.equals(apps[i].getProperty(ApplicationDescriptor.APPLICATION_PID))) {
@@ -212,7 +212,7 @@ public class AppCommands implements CommandProvider {
 
 	public void _schedApp(CommandInterpreter intp) throws Exception {
 		String appId = intp.nextArgument();
-		ServiceReference[] apps = appDescTracker.getServiceReferences();
+		ServiceReference[] apps = applicationDescriptors.getServiceReferences();
 		if (apps != null && appId != null)
 			for (int i = 0; i < apps.length; i++)
 				if (appId.equals(apps[i].getProperty(ApplicationDescriptor.APPLICATION_PID))) {
@@ -232,7 +232,7 @@ public class AppCommands implements CommandProvider {
 
 	public void _unschedApp(CommandInterpreter intp) throws Exception {
 		String schedId = intp.nextArgument();
-		ServiceReference[] scheds = schedAppTracker.getServiceReferences();
+		ServiceReference[] scheds = scheduledApplications.getServiceReferences();
 		if (scheds != null)
 			for (int i = 0; i < scheds.length; i++) {
 				ScheduledApplication schedApp = (ScheduledApplication) context.getService(scheds[i]);

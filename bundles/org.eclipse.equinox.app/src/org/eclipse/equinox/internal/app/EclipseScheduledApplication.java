@@ -15,7 +15,6 @@ import java.security.Guard;
 import java.security.GuardedObject;
 import java.util.HashMap;
 import java.util.Map;
-import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
@@ -115,11 +114,8 @@ public class EclipseScheduledApplication implements ScheduledApplication, EventH
 				return;
 			desc.launch(getArguments(event));
 		} catch (Exception e) {
-			FrameworkLog log = Activator.getFrameworkLog();
-			if (log != null) {
-				String message = NLS.bind(Messages.scheduled_app_launch_error, sr);
-				log.log(new FrameworkLogEntry(Activator.PI_APP, FrameworkLogEntry.WARNING, 0, message, 0, e, null));
-			}
+			String message = NLS.bind(Messages.scheduled_app_launch_error, sr);
+			Activator.log(new FrameworkLogEntry(Activator.PI_APP, FrameworkLogEntry.WARNING, 0, message, 0, e, null));
 			return; // return here to avoid removing non-recurring apps when an error occurs
 		}
 		if (!isRecurring())

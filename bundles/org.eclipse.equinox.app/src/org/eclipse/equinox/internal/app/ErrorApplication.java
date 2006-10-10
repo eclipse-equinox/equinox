@@ -19,20 +19,16 @@ import org.eclipse.equinox.app.IApplicationContext;
  * cannot be found.
  */
 public class ErrorApplication implements IApplication {
-
-	static private Exception ERROR;
+	static final String ERROR_EXCEPTION = "error.exception"; //$NON-NLS-1$
 
 	public Object start(IApplicationContext context) throws Exception {
-		if (ERROR != null)
-			throw ERROR;
+		Exception error = (Exception) context.getArguments().get(ERROR_EXCEPTION);
+		if (error != null)
+			throw error;
 		throw new IllegalStateException();
 	}
 
 	public void stop() {
 		// do nothing
-	}
-
-	static void setError(Exception error) {
-		ERROR = error;
 	}
 }

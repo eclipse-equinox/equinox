@@ -24,23 +24,20 @@ import org.osgi.service.application.ApplicationHandle;
  * An ApplicationHandle that represents a single instance of a running eclipse application.
  */
 public class EclipseAppHandle extends ApplicationHandle implements ApplicationRunnable, IApplicationContext {
-	/**
-	 * Indicates the application is active
-	 */
-	public static final int ACTIVE = 0x01;
-	/**
-	 * Indicates the application is stopping
-	 */
-	public static final int STOPPING = 0x02;
-	/**
-	 * Indicates the application is stopped
-	 */
-	public static final int STOPPED = 0x04;
+	// Indicates the application is starting
+	private static final int FLAG_STARTING = 0x01;
+	// Indicates the application is active
+	private static final int FLAG_ACTIVE = 0x02;
+	// Indicates the application is stopping
+	private static final int FLAG_STOPPING = 0x04;
+	// Indicates the application is stopped
+	private static final int FLAG_STOPPED = 0x08;
+	private static final String STARTING = "starting"; //$NON-NLS-1$
+	private static final String STOPPED = "stopped"; //$NON-NLS-1$
 	private static final String PROP_ECLIPSE_EXITCODE = "eclipse.exitcode"; //$NON-NLS-1$
 
-	private ServiceRegistration sr;
-	private String state = ApplicationHandle.RUNNING;
-	private int status = EclipseAppHandle.ACTIVE;
+	private ServiceRegistration handleRegistration;
+	private int status = EclipseAppHandle.FLAG_STARTING;
 	private Map arguments;
 	private Object application;
 
@@ -56,23 +53,33 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 	}
 
 	synchronized public String getState() {
-		return state;
+		switch (status) {
+			case FLAG_STARTING :
+				return STARTING;
+			case FLAG_ACTIVE :
+				return ApplicationHandle.RUNNING;
+			case FLAG_STOPPING :
+				return ApplicationHandle.STOPPING;
+			case FLAG_STOPPED :
+			default :
+				return STOPPED;
+		}
 	}
 
 	protected void destroySpecific() {
 		// when this method is called we must force the application to exit.
 		// first set the status to stopping
-		setAppStatus(EclipseAppHandle.STOPPING);
+		setAppStatus(EclipseAppHandle.FLAG_STOPPING);
 		// now force the appliction to stop
 		IApplication app = getApplication();
 		if (app != null)
 			app.stop();
 		// make sure the app status is stopped
-		setAppStatus(EclipseAppHandle.STOPPED);
+		setAppStatus(EclipseAppHandle.FLAG_STOPPED);
 	}
 
 	void setServiceRegistration(ServiceRegistration sr) {
-		this.sr = sr;
+		this.handleRegistration = sr;
 	}
 
 	/*
@@ -88,39 +95,30 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 	}
 
 	/*
-	 * Changes the state of this handle to STOPPING.  
-	 * Finally the handle is unregistered if the status is STOPPED
+	 * Changes the status of this handle.  This method will properly transition
+	 * the state of this handle and will update the service registration accordingly.
 	 */
-	synchronized void setAppStatus(int status) {
-		if ((status & EclipseAppHandle.ACTIVE) != 0)
+	private synchronized void setAppStatus(int status) {
+		if (this.status == status)
+			return;
+		if ((status & EclipseAppHandle.FLAG_STARTING) != 0)
 			throw new IllegalArgumentException("Cannot set app status to ACTIVE"); //$NON-NLS-1$
-		// if status is stopping and the context is already stopping the return
-		if ((status & EclipseAppHandle.STOPPING) != 0)
-			if (ApplicationHandle.STOPPING == state)
+		// if status is stopping and the context is already stopping then return
+		if ((status & EclipseAppHandle.FLAG_STOPPING) != 0)
+			if ((this.status & (EclipseAppHandle.FLAG_STOPPING | EclipseAppHandle.FLAG_STOPPED)) != 0)
 				return;
-		// in both cases if the handle is not stopping then set it and
 		// change the service properties to reflect the state change.
-		if (state != ApplicationHandle.STOPPING) {
-			state = ApplicationHandle.STOPPING;
-			sr.setProperties(getServiceProperties());
-		}
+		this.status = status; 
+		handleRegistration.setProperties(getServiceProperties());
 		// if the status is stopped then unregister the service
-		if ((status & EclipseAppHandle.STOPPED) != 0 && (this.status & EclipseAppHandle.STOPPED) == 0) {
-			sr.unregister();
+		if ((this.status & EclipseAppHandle.FLAG_STOPPED) != 0) {
+			handleRegistration.unregister();
 			((EclipseAppDescriptor) getApplicationDescriptor()).getContainerManager().unlock(this);
 		}
-		this.status = status;
 	}
 
 	public Map getArguments() {
 		return arguments;
-	}
-
-	public String[] getApplicationArgs() {
-		Object result = arguments.get(IApplicationContext.APPLICATION_ARGS);
-		if (!(result instanceof String[]))
-			return new String[0];
-		return (String[]) result;
 	}
 
 	public IProduct getProduct() {
@@ -156,7 +154,7 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 				application = null;
 			}
 			// The application exited itself; notify the app context
-			setAppStatus(EclipseAppHandle.STOPPED);
+			setAppStatus(EclipseAppHandle.FLAG_STOPPED);
 		}
 		int exitCode = result instanceof Integer ? ((Integer) result).intValue() : 0;
 		// use the long way to set the property to compile against eeminimum
@@ -170,7 +168,10 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 		destroy();
 	}
 
-	public void endSplashScreen() {
+	public void applicationRunning() {
+		// first set the application handle status to running
+		setAppStatus(EclipseAppHandle.FLAG_ACTIVE);
+		// now run the splash handler
 		final Runnable handler = getSplashHandler();
 		if (handler == null)
 			return;
@@ -199,8 +200,10 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 		// see EclipseStarter.publishSplashScreen
 		for (int i = 0; i < ref.length; i++) {
 			Runnable result = (Runnable) Activator.getContext().getService(ref[i]);
-			Activator.getContext().ungetService(ref[i]); // immediately unget the service because we are not using it long
-			return result;
+			if (result != null) {
+				Activator.getContext().ungetService(ref[i]); // immediately unget the service because we are not using it long
+				return result;
+			}
 		}
 		return null;
 	}
@@ -211,6 +214,8 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 
 	private IConfigurationElement getConfiguration() {
 		IExtension applicationExtension = ((EclipseAppDescriptor) getApplicationDescriptor()).getContainerManager().getAppExtension(getApplicationDescriptor().getApplicationId());
+		if (applicationExtension == null)
+			throw new RuntimeException(NLS.bind(Messages.application_notFound, getApplicationDescriptor().getApplicationId(), ((EclipseAppDescriptor) getApplicationDescriptor()).getContainerManager().getAvailableAppsMsg()));
 		IConfigurationElement[] configs = applicationExtension.getConfigurationElements();
 		if (configs.length == 0)
 			throw new RuntimeException(NLS.bind(Messages.application_invalidExtension, getApplicationDescriptor().getApplicationId()));

@@ -11,7 +11,6 @@
 
 package org.eclipse.equinox.internal.app;
 
-import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 
 public class AnyThreadAppLauncher implements Runnable{
@@ -26,15 +25,7 @@ public class AnyThreadAppLauncher implements Runnable{
 			// pasing null will cause EclipseAppHandle to get the correct arguments
 			appHandle.run(null);
 		} catch (Throwable e) {
-			FrameworkLog log = Activator.getFrameworkLog();
-			if (log == null) {
-				if (e instanceof RuntimeException)
-					throw (RuntimeException) e;
-				if (e instanceof Error)
-					throw (Error) e;
-				throw new RuntimeException(e.getMessage());
-			}
-			log.log(new FrameworkLogEntry(Activator.PI_APP, FrameworkLogEntry.ERROR, 0, e.getMessage(), 0, e, null));
+			Activator.log(new FrameworkLogEntry(Activator.PI_APP, FrameworkLogEntry.ERROR, 0, e.getMessage(), 0, e, null));
 		}
 	}
 

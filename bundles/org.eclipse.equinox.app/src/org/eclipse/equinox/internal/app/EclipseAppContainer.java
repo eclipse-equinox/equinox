@@ -16,7 +16,6 @@ import java.security.PrivilegedAction;
 import java.util.*;
 import org.eclipse.core.runtime.*;
 import org.eclipse.equinox.app.IApplicationContext;
-import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.service.runnable.ApplicationLauncher;
 import org.eclipse.osgi.util.NLS;
@@ -63,12 +62,12 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 	private IProduct product;
 	private boolean missingProductReported;
 
-	// the currently lauched application handles
-	private Collection curHandles = new ArrayList();
-	private EclipseAppHandle curMain;
-	private EclipseAppHandle curGlobalSingleton;
-	private EclipseAppHandle curScopedSingleton;
-	private HashMap curLimited;
+	// the currently active application handles
+	private Collection activeHandles = new ArrayList();
+	private EclipseAppHandle activeMain;
+	private EclipseAppHandle activeGlobalSingleton;
+	private EclipseAppHandle activeScopedSingleton;
+	private HashMap activeLimited;
 
 	public EclipseAppContainer(BundleContext context, IExtensionRegistry extensionRegistry, ApplicationLauncher appLauncher) {
 		this.context = context;
@@ -77,16 +76,27 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 	}
 
 	void start() {
-		getExtensionRegistry().addRegistryChangeListener(this);
+		extensionRegistry.addRegistryChangeListener(this);
 		// need to listen for system bundle stopping
 		context.addBundleListener(this);
-		// Start the default application
-		try {
-			startDefaultApp();
-		} catch (ApplicationException e) {
-			FrameworkLog log = Activator.getFrameworkLog();
-			if (log != null)
-				log.log(new FrameworkLogEntry(Activator.PI_APP, FrameworkLogEntry.ERROR, 0, Messages.application_errorStartDefault, 0, e, null));
+		String startDefaultProp = context.getProperty(EclipseAppContainer.PROP_ECLIPSE_APPLICATION_LAUNCH_DEFAULT);
+		if (startDefaultProp == null || "true".equalsIgnoreCase(context.getProperty(EclipseAppContainer.PROP_ECLIPSE_APPLICATION_LAUNCH_DEFAULT))) { //$NON-NLS-1$
+			boolean registerDescs = "true".equalsIgnoreCase(context.getProperty(EclipseAppContainer.PROP_ECLIPSE_REGISTER_APP_DESC)); //$NON-NLS-1$
+			// register all the descriptors if requested to
+			if (registerDescs)
+				registerAppDescriptors();
+			// Start the default application
+			try {
+				startDefaultApp();
+			} catch (ApplicationException e) {
+				Activator.log(new FrameworkLogEntry(Activator.PI_APP, FrameworkLogEntry.ERROR, 0, Messages.application_errorStartDefault, 0, e, null));
+				if (!registerDescs)
+					// if an error occurred then register all desciptors if they were not registered already.
+					registerAppDescriptors();
+			}
+		} else {
+			// we are not running the default application; we should register all applications
+			registerAppDescriptors();
 		}
 	}
 
@@ -94,7 +104,7 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 		// stop all applications
 		stopAllApps();
 		context.removeBundleListener(this);
-		getExtensionRegistry().removeRegistryChangeListener(this);
+		extensionRegistry.removeRegistryChangeListener(this);
 		// flush the apps
 		apps.clear();
 		product = null;
@@ -110,7 +120,7 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 			result = (EclipseAppDescriptor) apps.get(applicationId);
 		}
 		if (result == null) {
-			registerAppDecriptors(applicationId); // try again just in case we are waiting for an event
+			registerAppDescriptor(applicationId); // try again just in case we are waiting for an event
 			synchronized (apps) {
 				result = (EclipseAppDescriptor) apps.get(applicationId);
 			}
@@ -157,7 +167,7 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 					}
 				}
 			}
-			appDescriptor = new EclipseAppDescriptor(appExtension.getContributor().getName(), appExtension.getUniqueIdentifier(), flags, cardinality, this);
+			appDescriptor = new EclipseAppDescriptor(Activator.getBundle(appExtension.getContributor()), appExtension.getUniqueIdentifier(), flags, cardinality, this);
 			// register the appDescriptor as a service
 			ServiceRegistration sr = (ServiceRegistration) AccessController.doPrivileged(new RegisterService(new String[] {ApplicationDescriptor.class.getName()}, appDescriptor, appDescriptor.getServiceProperties()));
 			appDescriptor.setServiceRegistration(sr);
@@ -204,68 +214,59 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 	}
 
 	private void startDefaultApp() throws ApplicationException {
-		boolean noDefault = "false".equalsIgnoreCase(context.getProperty(EclipseAppContainer.PROP_ECLIPSE_APPLICATION_LAUNCH_DEFAULT)); //$NON-NLS-1$
-		boolean registerDescs = "true".equalsIgnoreCase(context.getProperty(EclipseAppContainer.PROP_ECLIPSE_REGISTER_APP_DESC)); //$NON-NLS-1$
-		if (noDefault) {
-			// we are not running the default application; we should register all applications
-			registerAppDecriptors(null);
-		} else {
-			// register all the descriptors if requested to
-			if (registerDescs)
-				registerAppDecriptors(null);
-			// find the default application
-			EclipseAppDescriptor defaultDesc = findDefaultApp();
-			if (defaultDesc != null)
-				defaultDesc.launch(null);
-		}
-	}
-
-	private EclipseAppDescriptor findDefaultApp() {
+		// find the default application
 		String applicationId = getApplicationId();
+		EclipseAppDescriptor defaultDesc = null;
+		Map args = null;
 		if (applicationId == null) {
-			// the application id is not set; return a descriptor that will throw an exception
-			// return new EclipseAppDescriptor(Activator.PI_APP, Activator.PI_APP + ".missingapp", null, false, this, new RuntimeException(Messages.application_noIdFound)); //$NON-NLS-1$
-			ErrorApplication.setError(new RuntimeException(Messages.application_noIdFound));
-			return getAppDescriptor(EXT_ERROR_APP);
+			// the application id is not set; use a descriptor that will throw an exception
+			args = new HashMap(2);
+			args.put(ErrorApplication.ERROR_EXCEPTION, new RuntimeException(Messages.application_noIdFound));
+			defaultDesc = getAppDescriptor(EXT_ERROR_APP);
+		} else {
+			defaultDesc = getAppDescriptor(applicationId);
+			if (defaultDesc == null) {
+				// the application id is not available in the registry; use a descriptor that will throw an exception
+				args = new HashMap(2);
+				args.put(ErrorApplication.ERROR_EXCEPTION, new RuntimeException(NLS.bind(Messages.application_notFound, applicationId, getAvailableAppsMsg())));
+				defaultDesc = getAppDescriptor(EXT_ERROR_APP);
+			}
 		}
-		EclipseAppDescriptor defaultApp = getAppDescriptor(applicationId);
-		if (defaultApp == null) {
-			// the application id is not available in the registry; return a descriptor that will throw an exception
-			//return new EclipseAppDescriptor(applicationId, applicationId, null, false, this, new RuntimeException(NLS.bind(Messages.application_notFound, applicationId, getAvailableAppsMsg(getExtensionRegistry()))));
-			ErrorApplication.setError(new RuntimeException(NLS.bind(Messages.application_notFound, applicationId, getAvailableAppsMsg(getExtensionRegistry()))));
-			return getAppDescriptor(EXT_ERROR_APP);
-		}
-		return defaultApp;
+		if (defaultDesc != null)
+			defaultDesc.launch(args);
+		else
+			throw new ApplicationException(ApplicationException.APPLICATION_INTERNAL_ERROR, Messages.application_noIdFound);
 	}
 
 	/*
 	 * Registers an ApplicationDescriptor service for each eclipse application
 	 * available in the extension registry.
 	 */
-	private void registerAppDecriptors(String applicationId) {
-		// look in the old core.runtime applications extension point
-		IExtension[] availableApps = getAvailableApps(getExtensionRegistry(), PI_RUNTIME, applicationId);
+	private void registerAppDescriptors() {
+		IExtension[] availableApps = getAvailableAppExtensions();
 		for (int i = 0; i < availableApps.length; i++)
 			createAppDescriptor(availableApps[i]);
+	}
+
+	private void registerAppDescriptor(String applicationId) {
+		IExtension appExtension = getAppExtension(applicationId);
+		if (appExtension != null)
+			createAppDescriptor(appExtension);
 	}
 
 	/*
 	 * Returns a list of all the available application IDs which are available 
 	 * in the extension registry.
 	 */
-	private IExtension[] getAvailableApps(IExtensionRegistry registry, String pi, String applicationId) {
-		if (applicationId != null) {
-			IExtension appExt = registry.getExtension(pi + '.' + PT_APPLICATIONS, applicationId);
-			return appExt == null ? new IExtension[0] : new IExtension[] {appExt};
-		}
-		IExtensionPoint point = registry.getExtensionPoint(pi + '.' + PT_APPLICATIONS);
+	private IExtension[] getAvailableAppExtensions() {
+		IExtensionPoint point = extensionRegistry.getExtensionPoint(PI_RUNTIME + '.' + PT_APPLICATIONS);
 		if (point == null)
 			return new IExtension[0];
 		return point.getExtensions();
 	}
 
-	private String getAvailableAppsMsg(IExtensionRegistry registry) {
-		IExtension[] availableApps = getAvailableApps(registry, PI_RUNTIME, null);
+	String getAvailableAppsMsg() {
+		IExtension[] availableApps = getAvailableAppExtensions();
 		String availableAppsMsg = "<NONE>"; //$NON-NLS-1$
 		if (availableApps.length != 0) {
 			availableAppsMsg = availableApps[0].getUniqueIdentifier();
@@ -281,15 +282,7 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 	 * given application ID.
 	 */
 	IExtension getAppExtension(String applicationId) {
-		IExtensionRegistry registry = getExtensionRegistry();
-		IExtension applicationExtension = registry.getExtension(PI_RUNTIME, PT_APPLICATIONS, applicationId);
-		if (applicationExtension == null)
-			throw new RuntimeException(NLS.bind(Messages.application_notFound, applicationId, getAvailableAppsMsg(registry)));
-		return applicationExtension;
-	}
-
-	private IExtensionRegistry getExtensionRegistry() {
-		return extensionRegistry;
+		return extensionRegistry.getExtension(PI_RUNTIME, PT_APPLICATIONS, applicationId);
 	}
 
 	void launch(EclipseAppHandle appHandle) throws Exception {
@@ -341,11 +334,8 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 					try {
 						handle.destroy();
 					} catch (Throwable t) {
-						FrameworkLog log = Activator.getFrameworkLog();
-						if (log != null) {
-							String message = NLS.bind(Messages.application_error_stopping, handle.getInstanceId());
-							log.log(new FrameworkLogEntry(Activator.PI_APP, FrameworkLogEntry.WARNING, 0, message, 0, t, null));
-						}
+						String message = NLS.bind(Messages.application_error_stopping, handle.getInstanceId());
+						Activator.log(new FrameworkLogEntry(Activator.PI_APP, FrameworkLogEntry.WARNING, 0, message, 0, t, null));
 					}
 				}
 		} catch (InvalidSyntaxException e) {
@@ -381,13 +371,13 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 			if (productId == null)
 				return null;
 		}
-		IConfigurationElement[] entries = getExtensionRegistry().getConfigurationElementsFor(PI_RUNTIME, PT_PRODUCTS, productId);
+		IConfigurationElement[] entries = extensionRegistry.getConfigurationElementsFor(PI_RUNTIME, PT_PRODUCTS, productId);
 		if (entries.length > 0) {
 			// There should only be one product with the given id so just take the first element
 			product = new Product(productId, entries[0]);
 			return product;
 		}
-		IConfigurationElement[] elements = getExtensionRegistry().getConfigurationElementsFor(PI_RUNTIME, PT_PRODUCTS);
+		IConfigurationElement[] elements = extensionRegistry.getConfigurationElementsFor(PI_RUNTIME, PT_PRODUCTS);
 		List logEntries = null;
 		for (int i = 0; i < elements.length; i++) {
 			IConfigurationElement element = elements[i];
@@ -409,11 +399,11 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 				}
 			}
 		}
-		if (logEntries != null && Activator.getFrameworkLog() != null)
-			Activator.getFrameworkLog().log(new FrameworkLogEntry(Activator.PI_APP, Messages.provider_invalid_general, 0, null, (FrameworkLogEntry[]) logEntries.toArray(new FrameworkLogEntry[logEntries.size()])));
+		if (logEntries != null)
+			Activator.log(new FrameworkLogEntry(Activator.PI_APP, Messages.provider_invalid_general, 0, null, (FrameworkLogEntry[]) logEntries.toArray(new FrameworkLogEntry[logEntries.size()])));
 
-		if (!missingProductReported && Activator.getFrameworkLog() != null) {
-			Activator.getFrameworkLog().log(new FrameworkLogEntry(Activator.PI_APP, NLS.bind(Messages.product_notFound, productId), 0, null, null));
+		if (!missingProductReported) {
+			Activator.log(new FrameworkLogEntry(Activator.PI_APP, NLS.bind(Messages.product_notFound, productId), 0, null, null));
 			missingProductReported = true;
 		}
 		return null;
@@ -429,41 +419,41 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 	synchronized void lock(EclipseAppHandle appHandle) throws ApplicationException {
 		EclipseAppDescriptor eclipseApp = (EclipseAppDescriptor) appHandle.getApplicationDescriptor();
 		switch (isLocked(eclipseApp)) {
-			case NOT_LOCKED : 
+			case NOT_LOCKED :
 				break;
 			case LOCKED_SINGLETON_GLOBAL_RUNNING :
-				throw new ApplicationException(ApplicationException.APPLICATION_INTERNAL_ERROR, NLS.bind(Messages.singleton_running, curGlobalSingleton.getInstanceId()));
+				throw new ApplicationException(ApplicationException.APPLICATION_INTERNAL_ERROR, NLS.bind(Messages.singleton_running, activeGlobalSingleton.getInstanceId()));
 			case LOCKED_SINGLETON_GLOBAL_APPS_RUNNING :
 				throw new ApplicationException(ApplicationException.APPLICATION_INTERNAL_ERROR, Messages.apps_running);
 			case LOCKED_SINGLETON_SCOPED_RUNNING :
-				throw new ApplicationException(ApplicationException.APPLICATION_INTERNAL_ERROR, NLS.bind(Messages.singleton_running, curScopedSingleton.getInstanceId()));
-			case LOCKED_SINGLETON_LIMITED_RUNNING : 
+				throw new ApplicationException(ApplicationException.APPLICATION_INTERNAL_ERROR, NLS.bind(Messages.singleton_running, activeScopedSingleton.getInstanceId()));
+			case LOCKED_SINGLETON_LIMITED_RUNNING :
 				throw new ApplicationException(ApplicationException.APPLICATION_INTERNAL_ERROR, NLS.bind(Messages.max_running, eclipseApp.getApplicationId()));
 			case LOCKED_MAIN_THREAD_RUNNING :
-				throw new ApplicationException(ApplicationException.APPLICATION_INTERNAL_ERROR, NLS.bind(Messages.main_running, curMain.getInstanceId()));
+				throw new ApplicationException(ApplicationException.APPLICATION_INTERNAL_ERROR, NLS.bind(Messages.main_running, activeMain.getInstanceId()));
 			default :
 				break;
 		}
 
 		if (eclipseApp.getThreadType() == EclipseAppDescriptor.FLAG_TYPE_MAIN_THREAD) {
-			if (curMain != null)
-				throw new IllegalStateException(Messages.main_running + curMain.getInstanceId());
+			if (activeMain != null)
+				throw new IllegalStateException(Messages.main_running + activeMain.getInstanceId());
 		}
 		// ok we can now successfully lock the container
 		switch (eclipseApp.getCardinalityType()) {
 			case EclipseAppDescriptor.FLAG_CARD_SINGLETON_GLOGAL :
-				curGlobalSingleton = appHandle;
+				activeGlobalSingleton = appHandle;
 				break;
 			case EclipseAppDescriptor.FLAG_CARD_SINGLETON_SCOPED :
-				curScopedSingleton = appHandle;
+				activeScopedSingleton = appHandle;
 				break;
 			case EclipseAppDescriptor.FLAG_CARD_LIMITED :
-				if (curLimited == null)
-					curLimited = new HashMap(3);
-				ArrayList limited = (ArrayList) curLimited.get(eclipseApp.getApplicationId());
+				if (activeLimited == null)
+					activeLimited = new HashMap(3);
+				ArrayList limited = (ArrayList) activeLimited.get(eclipseApp.getApplicationId());
 				if (limited == null) {
 					limited = new ArrayList(eclipseApp.getCardinality());
-					curLimited.put(eclipseApp.getApplicationId(), limited);
+					activeLimited.put(eclipseApp.getApplicationId(), limited);
 				}
 				limited.add(appHandle);
 				break;
@@ -473,44 +463,44 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 				break;
 		}
 		if (eclipseApp.getThreadType() == EclipseAppDescriptor.FLAG_TYPE_MAIN_THREAD)
-			curMain = appHandle;
-		curHandles.add(appHandle);
+			activeMain = appHandle;
+		activeHandles.add(appHandle);
 		refreshAppDescriptors();
 	}
 
 	synchronized void unlock(EclipseAppHandle appHandle) {
-		if (curGlobalSingleton == appHandle)
-			curGlobalSingleton = null;
-		else if (curScopedSingleton == appHandle)
-			curScopedSingleton = null;
-		else if (((EclipseAppDescriptor)appHandle.getApplicationDescriptor()).getCardinalityType() == EclipseAppDescriptor.FLAG_CARD_LIMITED) {
-			if (curLimited != null) {
-				ArrayList limited = (ArrayList) curLimited.get(((EclipseAppDescriptor)appHandle.getApplicationDescriptor()).getApplicationId());
+		if (activeGlobalSingleton == appHandle)
+			activeGlobalSingleton = null;
+		else if (activeScopedSingleton == appHandle)
+			activeScopedSingleton = null;
+		else if (((EclipseAppDescriptor) appHandle.getApplicationDescriptor()).getCardinalityType() == EclipseAppDescriptor.FLAG_CARD_LIMITED) {
+			if (activeLimited != null) {
+				ArrayList limited = (ArrayList) activeLimited.get(((EclipseAppDescriptor) appHandle.getApplicationDescriptor()).getApplicationId());
 				if (limited != null)
 					limited.remove(appHandle);
 			}
 		}
-		if (curMain == appHandle)
-			curMain = null;
-		if (curHandles.remove(appHandle))
+		if (activeMain == appHandle)
+			activeMain = null;
+		if (activeHandles.remove(appHandle))
 			refreshAppDescriptors(); // only refresh descriptors if we really unlocked something
 	}
 
 	synchronized int isLocked(EclipseAppDescriptor eclipseApp) {
-		if (curGlobalSingleton != null)
+		if (activeGlobalSingleton != null)
 			return LOCKED_SINGLETON_GLOBAL_RUNNING;
 		switch (eclipseApp.getCardinalityType()) {
 			case EclipseAppDescriptor.FLAG_CARD_SINGLETON_GLOGAL :
-				if (curHandles.size() > 0)
+				if (activeHandles.size() > 0)
 					return LOCKED_SINGLETON_GLOBAL_APPS_RUNNING;
 				break;
 			case EclipseAppDescriptor.FLAG_CARD_SINGLETON_SCOPED :
-				if (curScopedSingleton != null)
+				if (activeScopedSingleton != null)
 					return LOCKED_SINGLETON_SCOPED_RUNNING;
 				break;
 			case EclipseAppDescriptor.FLAG_CARD_LIMITED :
-				if (curLimited != null) {
-					ArrayList limited = (ArrayList) curLimited.get(eclipseApp.getApplicationId());
+				if (activeLimited != null) {
+					ArrayList limited = (ArrayList) activeLimited.get(eclipseApp.getApplicationId());
 					if (limited != null && limited.size() >= eclipseApp.getCardinality())
 						return LOCKED_SINGLETON_LIMITED_RUNNING;
 				}
@@ -520,7 +510,7 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 			default :
 				break;
 		}
-		if (eclipseApp.getThreadType() == EclipseAppDescriptor.FLAG_TYPE_MAIN_THREAD && curMain != null)
+		if (eclipseApp.getThreadType() == EclipseAppDescriptor.FLAG_TYPE_MAIN_THREAD && activeMain != null)
 			return LOCKED_MAIN_THREAD_RUNNING;
 		return NOT_LOCKED;
 	}

@@ -47,7 +47,7 @@ public class Product implements IProduct {
 			if (key != null && value != null)
 				properties.put(key, value);
 		}
-		definingBundle = Activator.getBundle(element.getContributor().getName());
+		definingBundle = Activator.getBundle(element.getContributor());
 	}
 
 	public Bundle getDefiningBundle() {

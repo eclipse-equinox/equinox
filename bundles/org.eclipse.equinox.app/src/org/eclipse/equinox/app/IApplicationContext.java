@@ -41,19 +41,10 @@ public interface IApplicationContext {
 	public Map getArguments();
 
 	/**
-	 * Returns the list of application arguments for the key {@link #APPLICATION_ARGS}.
-	 * If the value of {@link #APPLICATION_ARGS} does not exist or is not a string array
-	 * then an empty string array is returned.
-	 * 
-	 * @return the array of application arguments.
-	 */
-	public String[] getApplicationArgs();
-
-	/**
 	 * Will end the splash screen for the application.  This method should be 
 	 * called after the application is ready.
 	 */
-	public void endSplashScreen();
+	public void applicationRunning();
 
 	/**
 	 * Returns the product which was selected when running this Eclipse instance

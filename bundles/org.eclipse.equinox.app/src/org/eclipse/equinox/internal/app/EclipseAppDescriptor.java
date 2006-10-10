@@ -38,11 +38,11 @@ public class EclipseAppDescriptor extends ApplicationDescriptor {
 	private ServiceRegistration sr;
 	private Boolean locked = Boolean.FALSE;
 	private EclipseAppContainer appContainer;
-	private String contributor;
+	private Bundle contributor;
 	private int flags;
 	private int cardinality;
 
-	protected EclipseAppDescriptor(String contributor, String pid, int flags, int cardinality, EclipseAppContainer appContainer) {
+	protected EclipseAppDescriptor(Bundle contributor, String pid, int flags, int cardinality, EclipseAppContainer appContainer) {
 		super(pid);
 		this.contributor = contributor;
 		this.appContainer = appContainer;
@@ -129,10 +129,9 @@ public class EclipseAppDescriptor extends ApplicationDescriptor {
 	}
 
 	private String getLocation() {
-		final Bundle bundle = Activator.getBundle(contributor);
-		if (bundle == null)
+		if (contributor == null)
 			return ""; //$NON-NLS-1$
-		return Activator.getLocation(bundle);
+		return Activator.getLocation(contributor);
 	}
 
 	/*
@@ -150,10 +149,9 @@ public class EclipseAppDescriptor extends ApplicationDescriptor {
 	}
 
 	public boolean matchDNChain(String pattern) {
-		Bundle bundle = Activator.getBundle(contributor);
-		if (bundle == null)
+		if (contributor == null)
 			return false;
-		return BundleSignerCondition.getCondition(bundle, new ConditionInfo(BundleSignerCondition.class.getName(), new String[] {pattern})).isSatisfied();
+		return BundleSignerCondition.getCondition(contributor, new ConditionInfo(BundleSignerCondition.class.getName(), new String[] {pattern})).isSatisfied();
 	}
 
 	protected boolean isLaunchableSpecific() {

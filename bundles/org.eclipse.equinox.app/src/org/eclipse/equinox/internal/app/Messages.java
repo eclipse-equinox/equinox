@@ -13,7 +13,7 @@ package org.eclipse.equinox.internal.app;
 import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
-	private static final String BUNDLE_NAME = "org.eclipse.equinox.internal.app.messages"; //$NON-NLS-1$
+	private static final String MESSAGES_NAME = "org.eclipse.equinox.internal.app.messages"; //$NON-NLS-1$
 
 	// application
 	public static String application_invalidExtension;
@@ -47,7 +47,7 @@ public class Messages extends NLS {
 	}
 
 	public static void reloadMessages() {
-		NLS.initializeMessages(BUNDLE_NAME, Messages.class);
+		NLS.initializeMessages(MESSAGES_NAME, Messages.class);
 	}
 
 }
