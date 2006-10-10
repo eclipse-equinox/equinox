@@ -194,16 +194,14 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 		} catch (InvalidSyntaxException e) {
 			return null;
 		}
-		if (ref == null)
+		if (ref == null || ref.length == 0)
 			return null;
 		// assumes the endInitializationHandler is available as a service
 		// see EclipseStarter.publishSplashScreen
-		for (int i = 0; i < ref.length; i++) {
-			Runnable result = (Runnable) Activator.getContext().getService(ref[i]);
-			if (result != null) {
-				Activator.getContext().ungetService(ref[i]); // immediately unget the service because we are not using it long
-				return result;
-			}
+		Runnable result = (Runnable) Activator.getContext().getService(ref[0]);
+		if (result != null) {
+			Activator.getContext().ungetService(ref[0]); // immediately unget the service because we are not using it long
+			return result;
 		}
 		return null;
 	}
