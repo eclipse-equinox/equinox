@@ -44,7 +44,7 @@
 
    <element name="httpcontext">
       <complexType>
-         <attribute name="name" type="string">
+         <attribute name="name" type="string" use="required">
             <annotation>
                <documentation>
                   The name of the Httpcontext instance. Httpcontexts extensions that share the same name will share the same instance and availability of resources.
@@ -54,8 +54,19 @@
          <attribute name="path" type="string">
             <annotation>
                <documentation>
-                  The bundle path where resources can be loaded from.
+                  The bundle path where resources can be loaded from. 
+This attribute is used by the default httpcontext implementation when the class atribute is empty.
                </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="class" type="string">
+            <annotation>
+               <documentation>
+                  The equivalent of the OSGi Http Services &quot;httpcontext&quot; in registerServlet and registerResource. The HttpContext is instantiated by the Extension Point provider and must be an instance of org.osgi.service.http.HttpContext.
+               </documentation>
+               <appInfo>
+                  <meta.attribute kind="java" basedOn="org.osgi.service.http.HttpContext"/>
+               </appInfo>
             </annotation>
          </attribute>
       </complexType>
@@ -95,7 +106,7 @@ This httpcontexts extension will make resources in &quot;/test&quot; accessible 
          <meta.section type="apiInfo"/>
       </appInfo>
       <documentation>
-         No Java code is requied for this extension point.
+         The httpcontext class must be an instance of org.osgi.service.http.HttpContext.
       </documentation>
    </annotation>
 
