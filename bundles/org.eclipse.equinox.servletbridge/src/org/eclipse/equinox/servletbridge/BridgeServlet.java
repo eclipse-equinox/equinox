@@ -137,6 +137,12 @@ public class BridgeServlet extends HttpServlet {
 			framework.start();
 			resp.getWriter().write("Platform Redeployed"); //$NON-NLS-1$
 			return true;
+		} else if (pathInfo.equals("/sp_test")) { //$NON-NLS-1$
+			if (delegate == null)
+				resp.getWriter().write("Servlet delegate not registered."); //$NON-NLS-1$
+			else
+				resp.getWriter().write("Servlet delegate registered - " + delegate.getClass().getName()); //$NON-NLS-1$
+			return true;
 		}
 		return false;
 	}
