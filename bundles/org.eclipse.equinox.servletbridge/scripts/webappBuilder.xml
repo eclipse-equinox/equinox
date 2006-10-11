@@ -9,11 +9,19 @@
          ================================= -->
 	<target name="init">
     	<property name="proj.dir" value="${basedir}/.."/>
-		<!-- on windows be cautious about long file names for ${build.dir}-->
+		<!-- 
+		On windows be cautious about long file names for ${build.dir}
+		These long path problems were resolved in JRE 1.5.0_08
+		-->
     	<property name="build.dir" value="${proj.dir}/build"/>
     	<property name="templates.dir" value="${proj.dir}/templates"/>
 		<property name="webapp.name" value="bridge"/>
-		<property name="features" value="org.eclipse.equinox.servlet.bridge.feature"/>
+		<!-- 
+		the servletbridge feature can be found in the eclipse depot 
+		Repository Path: /cvsroot/eclipse
+		Module: equinox-incubator/org.eclipse.equinox.servletbridge.feature
+		--> 
+		<property name="features" value="org.eclipse.equinox.servletbridge.feature"/>
 		<available file="${proj.dir}/servletbridge.jar" property="servletbridge.jar-present"/>
 		<!--
 		If you are using this script in a head-less build define the following properties:
