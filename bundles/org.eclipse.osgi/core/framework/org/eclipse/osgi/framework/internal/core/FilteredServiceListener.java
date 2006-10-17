@@ -16,13 +16,15 @@ import org.osgi.framework.*;
 
 public class FilteredServiceListener implements ServiceListener {
 	/** Filter for listener. */
-	protected FilterImpl filter;
+	private final FilterImpl filter;
 	/** Real listener. */
-	protected ServiceListener listener;
+	private final ServiceListener listener;
 	// The bundle context
-	protected BundleContextImpl context;
+	private final BundleContextImpl context;
 	// is this an AllServiceListener
-	protected boolean allservices = false;
+	private final boolean allservices;
+	// an objectClass required by the filter
+	private final String objectClass;
 
 	/**
 	 * Constructor.
@@ -32,8 +34,23 @@ public class FilteredServiceListener implements ServiceListener {
 	 * @exception InvalidSyntaxException if the filter is invalid.
 	 */
 	protected FilteredServiceListener(String filterstring, ServiceListener listener, BundleContextImpl context) throws InvalidSyntaxException {
-		if (filterstring != null)
-			filter = new FilterImpl(filterstring);
+		if (filterstring == null) {
+			this.filter = null;
+			this.objectClass = null;
+		}
+		else {
+			FilterImpl filterImpl = new FilterImpl(filterstring);
+			String clazz = filterImpl.getRequiredObjectClass();
+			if (clazz == null) {
+				this.objectClass = null;
+				this.filter = filterImpl;
+			}
+			else {
+				this.objectClass = clazz.intern(); /*intern the name for future identity comparison */
+				String objectClassFilter = FilterImpl.getObjectClassFilterString(this.objectClass);
+				this.filter = (objectClassFilter.equals(filterstring)) ? null : filterImpl;
+			}	
+		}
 		this.listener = listener;
 		this.context = context;
 		this.allservices = (listener instanceof AllServiceListener);
@@ -46,25 +63,31 @@ public class FilteredServiceListener implements ServiceListener {
 	 * @param event The ServiceEvent.
 	 */
 	public void serviceChanged(ServiceEvent event) {
+		ServiceReferenceImpl reference = (ServiceReferenceImpl) event.getServiceReference();
+
+		// first check if we can short circuit the filter match if the required objectClass does not match the event
+		objectClassCheck:
+		if (objectClass != null) {
+			String[] classes = reference.getClasses();
+			int size = classes.length;
+			for (int i = 0; i < size; i++) {	
+				if (classes[i] == objectClass)  // objectClass strings have previously been interned for identity comparison 
+					break objectClassCheck;
+			}
+			return; // no class in this event matches a required part of the filter; we do not need to deliver this event
+		}
+
 		if (!context.hasListenServicePermission(event))
 			return;
 
-		//TODO Merge this condition and the one in the bottom
-		if (filter == null) {
-			if (allservices || context.isAssignableTo((ServiceReferenceImpl) event.getServiceReference()))
-				listener.serviceChanged(event);
-			return;
-		}
-		ServiceReferenceImpl reference = (ServiceReferenceImpl) event.getServiceReference();
-
 		if (Debug.DEBUG && Debug.DEBUG_EVENTS) {
-			String listenerName = this.getClass().getName() + "@" + Integer.toHexString(this.hashCode()); //$NON-NLS-1$
+			String listenerName = this.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(this)); //$NON-NLS-1$
 			Debug.println("filterServiceEvent(" + listenerName + ", \"" + filter + "\", " + reference.registration.properties + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		}
-
-		if (filter.match(reference) && (allservices || context.isAssignableTo((ServiceReferenceImpl) event.getServiceReference()))) {
+		
+		if ((filter == null || filter.match(reference)) && (allservices || context.isAssignableTo(reference))) {
 			if (Debug.DEBUG && Debug.DEBUG_EVENTS) {
-				String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(listener.hashCode()); //$NON-NLS-1$
+				String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(listener)); //$NON-NLS-1$
 				Debug.println("dispatchFilteredServiceEvent(" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 

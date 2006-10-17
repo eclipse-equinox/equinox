@@ -15,8 +15,10 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Vector;
+
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.util.Headers;
 import org.eclipse.osgi.util.NLS;
@@ -1329,6 +1331,47 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 
 		return changed ? new String(output, 0, cursor) : input;
 	}
+	
+	/**
+	 * Returns the leftmost required objectClass value for the filter to evaluate to true.
+	 * 
+	 * @return The leftmost required objectClass value or null if none could be determined.
+	 */
+	public String getRequiredObjectClass() {
+		// just checking for simple filters here where objectClass is the only attr or it is one attr of a base '&' clause
+		// (objectClass=org.acme.BrickService) OK
+		// (&(objectClass=org.acme.BrickService)(|(vendor=IBM)(vendor=SUN))) OK
+		// (objectClass=org.acme.*) NOT OK
+		// (|(objectClass=org.acme.BrickService)(objectClass=org.acme.CementService)) NOT OK
+		// (&(objectClass=org.acme.BrickService)(objectClass=org.acme.CementService)) OK but only the first objectClass is returned
+		switch (operation) {
+			case EQUAL :
+				if (attr.equalsIgnoreCase(org.osgi.framework.Constants.OBJECTCLASS) && (value instanceof String))
+					return (String) value;
+				break;
+			case AND :
+				FilterImpl[] clauses = (FilterImpl[]) value;
+				for (int i = 0; i < clauses.length; i++)
+					if (clauses[i].operation == EQUAL) {
+						String result = clauses[i].getRequiredObjectClass();
+						if (result != null)
+							return result;
+					}
+				break;
+		}
+		return null;
+	}
+
+	/**
+	 * Returns a objectClass filter string for the specified objectClass.
+	 * @return A filter string for the specified objectClass or null if the specified objectClass is null.
+	 */
+	public static String getObjectClassFilterString(String objectClass) {
+		if (objectClass == null)
+			return null;
+		return "(" + org.osgi.framework.Constants.OBJECTCLASS + "=" + objectClass + ")";  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+	}
+
 
 	/**
 	 * Parser class for OSGi filter strings. This class parses
@@ -1419,19 +1462,19 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 				throw new InvalidSyntaxException(NLS.bind(Msg.FILTER_MISSING_LEFTPAREN, String.valueOf(pos)), filterstring); 
 			}
 
-			Vector operands = new Vector(10, 10);
+			ArrayList operands = new ArrayList(10);
 
 			while (filter[pos] == '(') {
 				FilterImpl child = new FilterImpl();
 				parse_filter(child);
-				operands.addElement(child);
+				operands.add(child);
 			}
 
 			int size = operands.size();
 
 			FilterImpl[] children = new FilterImpl[size];
 
-			operands.copyInto(children);
+			operands.toArray(children);
 
 			parent.setFilter(FilterImpl.AND, null, children);
 		}
@@ -1443,19 +1486,19 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 				throw new InvalidSyntaxException(NLS.bind(Msg.FILTER_MISSING_LEFTPAREN, String.valueOf(pos)), filterstring); 
 			}
 
-			Vector operands = new Vector(10, 10);
+			ArrayList operands = new ArrayList(10);
 
 			while (filter[pos] == '(') {
 				FilterImpl child = new FilterImpl();
 				parse_filter(child);
-				operands.addElement(child);
+				operands.add(child);
 			}
 
 			int size = operands.size();
 
 			FilterImpl[] children = new FilterImpl[size];
 
-			operands.copyInto(children);
+			operands.toArray(children);
 
 			parent.setFilter(FilterImpl.OR, null, children);
 		}
@@ -1605,7 +1648,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 		protected Object parse_substring() throws InvalidSyntaxException {
 			StringBuffer sb = new StringBuffer(filter.length - pos);
 
-			Vector operands = new Vector(10, 10);
+			ArrayList operands = new ArrayList(10);
 
 			parseloop: while (true) {
 				char c = filter[pos];
@@ -1614,7 +1657,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 					case ')' :
 						{
 							if (sb.length() > 0) {
-								operands.addElement(sb.toString());
+								operands.add(sb.toString());
 							}
 
 							break parseloop;
@@ -1628,12 +1671,12 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 					case '*' :
 						{
 							if (sb.length() > 0) {
-								operands.addElement(sb.toString());
+								operands.add(sb.toString());
 							}
 
 							sb.setLength(0);
 
-							operands.addElement(null);
+							operands.add(null);
 							pos++;
 
 							break;
@@ -1662,7 +1705,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 			}
 
 			if (size == 1) {
-				Object single = operands.elementAt(0);
+				Object single = operands.get(0);
 
 				if (single != null) {
 					return single;
@@ -1671,7 +1714,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 
 			String[] strings = new String[size];
 
-			operands.copyInto(strings);
+			operands.toArray(strings);
 
 			return strings;
 		}

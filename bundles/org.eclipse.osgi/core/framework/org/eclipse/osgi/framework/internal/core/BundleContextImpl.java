@@ -299,7 +299,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 		checkValid();
 
 		if (Debug.DEBUG && Debug.DEBUG_EVENTS) {
-			String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(listener.hashCode()); //$NON-NLS-1$
+			String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(listener)); //$NON-NLS-1$
 			Debug.println("addServiceListener[" + bundle + "](" + listenerName + ", \"" + filter + "\")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		}
 
@@ -352,7 +352,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 		checkValid();
 
 		if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
-			String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(listener.hashCode()); //$NON-NLS-1$
+			String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(listener)); //$NON-NLS-1$
 			Debug.println("removeServiceListener[" + bundle + "](" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 
@@ -381,7 +381,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 		checkValid();
 
 		if (Debug.DEBUG && Debug.DEBUG_EVENTS) {
-			String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(listener.hashCode()); //$NON-NLS-1$
+			String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(listener)); //$NON-NLS-1$
 			Debug.println("addBundleListener[" + bundle + "](" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 
@@ -424,7 +424,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 		checkValid();
 
 		if (Debug.DEBUG && Debug.DEBUG_EVENTS) {
-			String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(listener.hashCode()); //$NON-NLS-1$
+			String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(listener)); //$NON-NLS-1$
 			Debug.println("removeBundleListener[" + bundle + "](" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 
@@ -462,7 +462,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 		checkValid();
 
 		if (Debug.DEBUG && Debug.DEBUG_EVENTS) {
-			String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(listener.hashCode()); //$NON-NLS-1$
+			String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(listener)); //$NON-NLS-1$
 			Debug.println("addFrameworkListener[" + bundle + "](" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 
@@ -493,7 +493,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 		checkValid();
 
 		if (Debug.DEBUG && Debug.DEBUG_EVENTS) {
-			String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(listener.hashCode()); //$NON-NLS-1$
+			String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(listener)); //$NON-NLS-1$
 			Debug.println("removeFrameworkListener[" + bundle + "](" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 
@@ -588,7 +588,9 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 
 		/* copy the array so that changes to the original will not affect us. */
 		String[] copy = new String[clazzes.length];
-		System.arraycopy(clazzes, 0, copy, 0, clazzes.length);
+		// doing this the hard way so we can intern the strings
+		for (int i = clazzes.length - 1; i >= 0; i--)
+			copy[i] = clazzes[i].intern();
 		clazzes = copy;
 
 		/* check for ServicePermissions. */
@@ -1188,7 +1190,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 						BundleListener listener = (BundleListener) l;
 
 						if (Debug.DEBUG && Debug.DEBUG_EVENTS) {
-							String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(listener.hashCode()); //$NON-NLS-1$
+							String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(listener)); //$NON-NLS-1$
 							Debug.println("dispatchBundleEvent[" + tmpBundle + "](" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 						}
 
@@ -1216,7 +1218,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 
 						ServiceListener listener = (ServiceListener) l;
 						if (Debug.DEBUG && Debug.DEBUG_EVENTS) {
-							String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(listener.hashCode()); //$NON-NLS-1$
+							String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(listener)); //$NON-NLS-1$
 							Debug.println("dispatchServiceEvent[" + tmpBundle + "](" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 						}
 						listener.serviceChanged(event);
@@ -1228,7 +1230,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 						FrameworkListener listener = (FrameworkListener) l;
 
 						if (Debug.DEBUG && Debug.DEBUG_EVENTS) {
-							String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(listener.hashCode()); //$NON-NLS-1$
+							String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(listener)); //$NON-NLS-1$
 							Debug.println("dispatchFrameworkEvent[" + tmpBundle + "](" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 						}
 
@@ -1266,7 +1268,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 		if (domain != null) {
 			ServiceReferenceImpl reference = (ServiceReferenceImpl) event.getServiceReference();
 
-			String[] names = reference.registration.clazzes;
+			String[] names = reference.getClasses();
 
 			int len = names.length;
 

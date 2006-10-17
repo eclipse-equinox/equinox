@@ -18,9 +18,20 @@
 
 package org.osgi.util.tracker;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.LinkedList;
 
-import org.osgi.framework.*;
+import org.eclipse.osgi.framework.internal.core.FilterImpl;
+import org.osgi.framework.AllServiceListener;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.framework.Filter;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceEvent;
+import org.osgi.framework.ServiceListener;
+import org.osgi.framework.ServiceReference;
 
 /**
  * The <code>ServiceTracker</code> class simplifies using services from the
@@ -43,6 +54,13 @@ import org.osgi.framework.*;
  * 
  * @version $Revision: 1.21 $
  */
+
+/*
+ * This implementation has been customized to only work with the Equinox OSGi framework.
+ * In all cases a filter string containing objectClass is passed to BundleContext.addServiceListener
+ * to take advantage of the ServiceEvent delivery optimizations.
+ */
+
 public class ServiceTracker implements ServiceTrackerCustomizer {
 	/* set this to true to compile in debug messages */
 	static final boolean				DEBUG			= false;
@@ -61,11 +79,9 @@ public class ServiceTracker implements ServiceTrackerCustomizer {
 	 */
 	final ServiceTrackerCustomizer		customizer;
 	/**
-	 * Filter string for use when adding the ServiceListener. If this field is
-	 * set, then certain optimizations can be taken since we don't have a user
-	 * supplied filter.
+	 * Filter string for use when adding the ServiceListener.
 	 */
-	final String						listenerFilter;
+	private final String				listenerFilter;
 	/**
 	 * Class name to be tracked. If this field is set, then we are tracking by
 	 * class name.
@@ -76,6 +92,11 @@ public class ServiceTracker implements ServiceTrackerCustomizer {
 	 * single ServiceReference.
 	 */
 	private final ServiceReference		trackReference;
+	/**
+	 * True if no Filter object was supplied in a constructor or we are not
+	 * using the supplied filter.
+	 */
+	final boolean 						noUserFilter;
 	/**
 	 * Tracked services: <code>ServiceReference</code> object -> customized
 	 * Object and <code>ServiceListener</code> object
@@ -127,7 +148,9 @@ public class ServiceTracker implements ServiceTrackerCustomizer {
 		this.trackReference = reference;
 		this.trackClass = null;
 		this.customizer = (customizer == null) ? this : customizer;
-		this.listenerFilter = "(" + Constants.SERVICE_ID + "=" + reference.getProperty(Constants.SERVICE_ID).toString() + ")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		this.listenerFilter = "(&(" + Constants.OBJECTCLASS + "=" + ((String[]) reference.getProperty(Constants.OBJECTCLASS))[0] //$NON-NLS-1$ //$NON-NLS-2$
+				+ ")(" + Constants.SERVICE_ID + "=" + reference.getProperty(Constants.SERVICE_ID).toString() + "))" ; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		this.noUserFilter = true;
 		try {
 			this.filter = context.createFilter(listenerFilter);
 		}
@@ -165,6 +188,7 @@ public class ServiceTracker implements ServiceTrackerCustomizer {
 		this.trackClass = clazz;
 		this.customizer = (customizer == null) ? this : customizer;
 		this.listenerFilter = "(" + Constants.OBJECTCLASS + "=" + clazz.toString() + ")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		this.noUserFilter = true;
 		try {
 			this.filter = context.createFilter(listenerFilter);
 		}
@@ -200,8 +224,23 @@ public class ServiceTracker implements ServiceTrackerCustomizer {
 			ServiceTrackerCustomizer customizer) {
 		this.context = context;
 		this.trackReference = null;
-		this.trackClass = null;
-		this.listenerFilter = null;
+
+		// obtain a required objectClass from the user supplied filter
+		if (filter instanceof FilterImpl) {
+			this.trackClass = ((FilterImpl)filter).getRequiredObjectClass();
+		} else {
+			this.trackClass = null;
+		}
+		
+		if (this.trackClass != null) {
+			this.listenerFilter = FilterImpl.getObjectClassFilterString(this.trackClass);
+			//convert to track by class instead of filter if the user filter is in the form (objectClass=some.Clazz) 
+			this.noUserFilter = this.listenerFilter.equals(filter.toString()); 
+		} else {
+			this.listenerFilter = null;
+			this.noUserFilter = false;
+		}
+
 		this.filter = filter;
 		this.customizer = (customizer == null) ? this : customizer;
 		if ((context == null) || (filter == null)) { // we throw a NPE here
@@ -262,18 +301,13 @@ public class ServiceTracker implements ServiceTrackerCustomizer {
 			try {
 				context.addServiceListener(tracked, listenerFilter);
 				ServiceReference[] references;
-				if (listenerFilter == null) { // user supplied filter
-					references = getInitialReferences(trackAllServices, null,
-							filter.toString());
+				
+				if (trackReference != null) { // tracking a single reference 
+					references = new ServiceReference[] {trackReference};
 				}
-				else { // constructor supplied filter
-					if (trackClass == null) {
-						references = new ServiceReference[] {trackReference};
-					}
-					else {
-						references = getInitialReferences(trackAllServices,
-								trackClass, null);
-					}
+				else { // tracking a set of references
+					references = getInitialReferences(trackAllServices, trackClass,
+							noUserFilter ? null: filter.toString());
 				}
 
 				tracked.setInitialServices(references); // set tracked with
@@ -919,15 +953,14 @@ public class ServiceTracker implements ServiceTrackerCustomizer {
 			switch (event.getType()) {
 				case ServiceEvent.REGISTERED :
 				case ServiceEvent.MODIFIED :
-					if (listenerFilter != null) { // constructor supplied
-													// filter
+					if (noUserFilter) { // no user supplied filter to be checked
 						track(reference);
 						/*
 						 * If the customizer throws an unchecked exception, it
 						 * is safe to let it propagate
 						 */
 					}
-					else { // user supplied filter
+					else { // filter supplied by user must be checked
 						if (filter.match(reference)) {
 							track(reference);
 							/*
