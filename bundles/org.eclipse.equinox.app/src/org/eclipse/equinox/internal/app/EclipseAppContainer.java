@@ -11,6 +11,8 @@
 
 package org.eclipse.equinox.internal.app;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.*;
@@ -59,7 +61,7 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 
 	private IExtensionRegistry extensionRegistry;
 	private ApplicationLauncher appLauncher;
-	private IProduct product;
+	private IBranding branding;
 	private boolean missingProductReported;
 
 	// the currently active application handles
@@ -107,7 +109,7 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 		extensionRegistry.removeRegistryChangeListener(this);
 		// flush the apps
 		apps.clear();
-		product = null;
+		branding = null;
 		missingProductReported = false;
 	}
 
@@ -355,12 +357,12 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 			return applicationId;
 
 		//Derive the application from the product information
-		return getProduct() == null ? null : getProduct().getApplication();
+		return getBranding() == null ? null : getBranding().getApplication();
 	}
 
-	public IProduct getProduct() {
-		if (product != null)
-			return product;
+	public IBranding getBranding() {
+		if (branding != null)
+			return branding;
 		// try commandLineProperties
 		String productId = CommandLineArgs.getProduct();
 		if (productId == null) {
@@ -374,8 +376,8 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 		IConfigurationElement[] entries = extensionRegistry.getConfigurationElementsFor(PI_RUNTIME, PT_PRODUCTS, productId);
 		if (entries.length > 0) {
 			// There should only be one product with the given id so just take the first element
-			product = new Product(productId, entries[0]);
-			return product;
+			branding = new ProductExtensionBranding(productId, entries[0]);
+			return branding;
 		}
 		IConfigurationElement[] elements = extensionRegistry.getConfigurationElementsFor(PI_RUNTIME, PT_PRODUCTS);
 		List logEntries = null;
@@ -383,13 +385,12 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 			IConfigurationElement element = elements[i];
 			if (element.getName().equalsIgnoreCase("provider")) { //$NON-NLS-1$
 				try {
-					IProductProvider provider = (IProductProvider) element.createExecutableExtension("run"); //$NON-NLS-1$
-					IProduct[] products = provider.getProducts();
+					Object provider = element.createExecutableExtension("run"); //$NON-NLS-1$
+					Object[] products = (Object[]) EclipseAppContainer.callMethod(provider, "getProducts", null, null); //$NON-NLS-1$
 					for (int j = 0; j < products.length; j++) {
-						IProduct provided = products[j];
-						if (productId.equalsIgnoreCase(provided.getId())) {
-							product = provided;
-							return product;
+						if (productId.equalsIgnoreCase((String) EclipseAppContainer.callMethod(products[j], "getId", null, null))) {
+							branding = new ProviderExtensionBranding(products[j]);
+							return branding;
 						}
 					}
 				} catch (CoreException e) {
@@ -513,5 +514,27 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 		if (eclipseApp.getThreadType() == EclipseAppDescriptor.FLAG_TYPE_MAIN_THREAD && activeMain != null)
 			return LOCKED_MAIN_THREAD_RUNNING;
 		return NOT_LOCKED;
+	}
+
+	static Object callMethod(Object obj, String methodName, Class[] argTypes, Object[] args) {
+		Throwable error = null;
+		try {
+			Method method = obj.getClass().getMethod(methodName, argTypes);
+			return method.invoke(obj, args);
+		} catch (SecurityException e) {
+			error = e;
+		} catch (NoSuchMethodException e) {
+			error = e;
+		} catch (IllegalArgumentException e) {
+			error = e;
+		} catch (IllegalAccessException e) {
+			error = e;
+		} catch (InvocationTargetException e) {
+			error = e.getCause();
+		}
+		if (error != null) {
+			Activator.log(new FrameworkLogEntry(Activator.PI_APP, FrameworkLogEntry.ERROR, 0, "Error in invoking method.", 0, error, null));
+		}
+		return null;
 	}
 }

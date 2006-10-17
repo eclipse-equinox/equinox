@@ -12,7 +12,7 @@
 package org.eclipse.equinox.app;
 
 import java.util.Map;
-import org.eclipse.core.runtime.IProduct;
+import org.osgi.framework.Bundle;
 import org.osgi.service.application.ApplicationDescriptor;
 
 /**
@@ -47,9 +47,49 @@ public interface IApplicationContext {
 	public void applicationRunning();
 
 	/**
-	 * Returns the product which was selected when running this Eclipse instance
-	 * or <code>null</code> if none
-	 * @return the current product or <code>null</code> if none
+	 * Returns the application associated with this product.  This information is used 
+	 * to guide the runtime as to what application extension to create and execute.
+	 * 
+	 * @return this product's application or <code>null</code> if none
 	 */
-	public IProduct getProduct();
+	public String getBrandingApplication();
+
+	/**
+	 * Returns the name of this product.  The name is typically used in the title
+	 * bar of UI windows.
+	 * 
+	 * @return the name of this product or <code>null</code> if none
+	 */
+	public String getBrandingName();
+
+	/**
+	 * Returns the text description of this product
+	 * 
+	 * @return the description of this product or <code>null</code> if none
+	 */
+	public String getBrandingDescription();
+
+	/** Returns the unique product id of this product.
+	 * 
+	 * @return the id of this product
+	 */
+	public String getBrandingId();
+
+	/**
+	 * Returns the property of this product with the given key.
+	 * <code>null</code> is returned if there is no such key/value pair.
+	 * 
+	 * @param key the name of the property to return
+	 * @return the value associated with the given key or <code>null</code> if none
+	 */
+	public String getBrandingProperty(String key);
+	
+	/**
+	 * Returns the bundle which is responsible for the definition of this product.
+	 * Typically this is used as a base for searching for images and other files 
+	 * that are needed in presenting the product.
+	 * 
+	 * @return the bundle which defines this product or <code>null</code> if none
+	 */
+	public Bundle getBrandingBundle();
 }

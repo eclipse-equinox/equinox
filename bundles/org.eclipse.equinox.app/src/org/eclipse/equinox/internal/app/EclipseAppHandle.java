@@ -121,10 +121,6 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 		return arguments;
 	}
 
-	public IProduct getProduct() {
-		return ((EclipseAppDescriptor) getApplicationDescriptor()).getContainerManager().getProduct();
-	}
-
 	public Object run(Object context) throws Exception {
 		if (context != null) {
 			// always force the use of the context if it is not null
@@ -148,7 +144,7 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 			if (app instanceof IApplication)
 				result = ((IApplication) app).start(this);
 			else
-				result = ((IPlatformRunnable) app).run(context);
+				result = EclipseAppContainer.callMethod(app, "run", new Class[] {Object.class}, new Object[] {context}); //$NON-NLS-1$
 		} finally {
 			synchronized (this) {
 				application = null;
@@ -218,5 +214,38 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 		if (configs.length == 0)
 			throw new RuntimeException(NLS.bind(Messages.application_invalidExtension, getApplicationDescriptor().getApplicationId()));
 		return configs[0];
+	}
+
+	public String getBrandingApplication() {
+		IBranding branding = ((EclipseAppDescriptor) getApplicationDescriptor()).getContainerManager().getBranding();
+		return branding == null ? null : branding.getApplication();
+	}
+
+	public Bundle getBrandingBundle() {
+		IBranding branding = ((EclipseAppDescriptor) getApplicationDescriptor()).getContainerManager().getBranding();
+		return branding == null ? null : branding.getDefiningBundle();
+
+	}
+
+	public String getBrandingDescription() {
+		IBranding branding = ((EclipseAppDescriptor) getApplicationDescriptor()).getContainerManager().getBranding();
+		return branding == null ? null : branding.getDescription();
+
+	}
+
+	public String getBrandingId() {
+		IBranding branding = ((EclipseAppDescriptor) getApplicationDescriptor()).getContainerManager().getBranding();
+		return branding == null ? null : branding.getId();
+	}
+
+	public String getBrandingName() {
+		IBranding branding = ((EclipseAppDescriptor) getApplicationDescriptor()).getContainerManager().getBranding();
+		return branding == null ? null : branding.getName();
+
+	}
+
+	public String getBrandingProperty(String key) {
+		IBranding branding = ((EclipseAppDescriptor) getApplicationDescriptor()).getContainerManager().getBranding();
+		return branding == null ? null : branding.getProperty(key);
 	}
 }

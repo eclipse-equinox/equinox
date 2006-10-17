@@ -14,7 +14,7 @@ import java.util.HashMap;
 import org.eclipse.core.runtime.*;
 import org.osgi.framework.Bundle;
 
-public class Product implements IProduct {
+public class ProductExtensionBranding implements IBranding{
 	private static final String ATTR_DESCRIPTION = "description"; //$NON-NLS-1$
 	private static final String ATTR_NAME = "name"; //$NON-NLS-1$
 	private static final String ATTR_APPLICATION = "application"; //$NON-NLS-1$
@@ -27,7 +27,7 @@ public class Product implements IProduct {
 	HashMap properties;
 	Bundle definingBundle = null;
 
-	public Product(String id, IConfigurationElement element) {
+	public ProductExtensionBranding(String id, IConfigurationElement element) {
 		this.id = id;
 		if (element == null)
 			return;
@@ -72,5 +72,9 @@ public class Product implements IProduct {
 
 	public String getProperty(String key) {
 		return (String) properties.get(key);
+	}
+
+	public Object getProduct() {
+		return null;
 	}
 }
