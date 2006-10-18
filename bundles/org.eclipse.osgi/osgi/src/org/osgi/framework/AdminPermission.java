@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/AdminPermission.java,v 1.29 2006/06/16 16:31:18 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/AdminPermission.java,v 1.31 2006/09/28 21:32:40 hargrave Exp $
  * 
  * Copyright (c) OSGi Alliance (2000, 2006). All Rights Reserved.
  * 
@@ -55,6 +55,8 @@ import org.eclipse.osgi.framework.internal.core.FilterImpl;
  *                       Bundle resource/entry URL creation
  *  startlevel           StartLevel.setStartLevel
  *                       StartLevel.setInitialBundleStartLevel 
+ *  context              Bundle.getBundleContext                     
+ *                       
  * </pre>
  * 
  * <p>
@@ -71,7 +73,7 @@ import org.eclipse.osgi.framework.internal.core.FilterImpl;
  * <li>name - The symbolic name of a bundle.</li>
  * </ul>
  * 
- * @version $Revision: 1.29 $
+ * @version $Revision: 1.31 $
  */
 
 public final class AdminPermission extends BasicPermission {
@@ -124,6 +126,12 @@ public final class AdminPermission extends BasicPermission {
 	 */
 	public final static String			STARTLEVEL			= "startlevel";
 
+	/**
+	 * The action string <code>context</code> (Value is "context").
+	 * @since 1.4
+	 */
+	public final static String			CONTEXT				= "context";
+
     private final static int ACTION_CLASS				= 0x00000001;
     private final static int ACTION_EXECUTE				= 0x00000002;
     private final static int ACTION_LIFECYCLE			= 0x00000004;
@@ -133,6 +141,7 @@ public final class AdminPermission extends BasicPermission {
     private final static int ACTION_RESOURCE			= 0x00000080;
     private final static int ACTION_STARTLEVEL			= 0x00000100;
 	private final static int ACTION_EXTENSIONLIFECYCLE	= 0x00000200;
+	private final static int ACTION_CONTEXT = 0x00000400;
     private final static int ACTION_ALL = 
 		ACTION_CLASS 				|
 		ACTION_EXECUTE 				|
@@ -142,7 +151,8 @@ public final class AdminPermission extends BasicPermission {
 		ACTION_RESOLVE 				|
 		ACTION_RESOURCE 			|
 		ACTION_STARTLEVEL			|
-		ACTION_EXTENSIONLIFECYCLE;
+		ACTION_EXTENSIONLIFECYCLE |
+		ACTION_CONTEXT;
     private final static int ACTION_NONE = 0;
 	
 	/**
@@ -224,8 +234,8 @@ public final class AdminPermission extends BasicPermission {
 	 * @param actions <code>class</code>, <code>execute</code>,
 	 *        <code>extensionLifecycle</code>, <code>lifecycle</code>,
 	 *        <code>listener</code>, <code>metadata</code>,
-	 *        <code>resolve</code>, <code>resource</code>, or
-	 *        <code>startlevel</code>. A value of "*" or <code>null</code>
+	 *        <code>resolve</code>, <code>resource</code>, 
+	 *        <code>startlevel</code> or <code>context</code>. A value of "*" or <code>null</code>
 	 *        indicates all actions
 	 */
 	public AdminPermission(String filter, String actions) {
@@ -246,7 +256,7 @@ public final class AdminPermission extends BasicPermission {
 	 *        <code>extensionLifecycle</code>, <code>lifecycle</code>,
 	 *        <code>listener</code>, <code>metadata</code>,
 	 *        <code>resolve</code>, <code>resource</code>,
-	 *        <code>startlevel</code>
+	 *        <code>startlevel</code>, <code>context</code>.
 	 * @since 1.3
 	 */
 	public AdminPermission(Bundle bundle, String actions) {
@@ -313,7 +323,7 @@ public final class AdminPermission extends BasicPermission {
 	 * following order: <code>class</code>, <code>execute</code>,
 	 * <code>extensionLifecycle</code>, <code>lifecycle</code>,
 	 * <code>listener</code>, <code>metadata</code>, <code>resolve</code>,
-	 * <code>resource</code>, <code>startlevel</code>.
+	 * <code>resource</code>, <code>startlevel</code>, <code>context</code>.
 	 * 
 	 * @return Canonical string representation of the
 	 *         <code>AdminPermission</code> actions.
@@ -364,6 +374,11 @@ public final class AdminPermission extends BasicPermission {
 
 			if ((action_mask & ACTION_STARTLEVEL) == ACTION_STARTLEVEL) {
 				sb.append(STARTLEVEL);
+				sb.append(',');
+			}
+
+			if ((action_mask & ACTION_CONTEXT) == ACTION_CONTEXT) {
+				sb.append(CONTEXT);
 				sb.append(',');
 			}
 
@@ -626,7 +641,20 @@ public final class AdminPermission extends BasicPermission {
     			matchlen = 10;
     			mask |= ACTION_STARTLEVEL;
 
+    		} else if (i >= 6 && 
+					(a[i-6] == 'c' || a[i-6] == 'C') &&
+					(a[i-5] == 'o' || a[i-5] == 'O') &&
+					(a[i-4] == 'n' || a[i-4] == 'N') &&
+					(a[i-3] == 't' || a[i-3] == 'T') &&
+					(a[i-2] == 'e' || a[i-2] == 'E') &&
+					(a[i-1] == 'x' || a[i-1] == 'X') &&
+					  (a[i] == 't' ||   a[i] == 'T'))
+    		{
+    			matchlen = 7;
+    			mask |= ACTION_CONTEXT;
+
     		} else if (i >= 0 && 
+
 					(a[i] == '*'))
     		{
     			matchlen = 1;

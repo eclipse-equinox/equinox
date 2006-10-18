@@ -1331,6 +1331,11 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 		}
 	}
 
+	public BundleContext getBundleContext() {
+		framework.checkAdminPermission(this, AdminPermission.CONTEXT);
+		return getContext();
+	}
+
 	/**
 	 * Return the current context for this bundle.
 	 * 

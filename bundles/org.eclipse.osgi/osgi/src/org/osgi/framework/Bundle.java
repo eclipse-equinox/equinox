@@ -953,4 +953,11 @@ public interface Bundle {
 	 */
 	public Enumeration findEntries(String path, String filePattern,
 			boolean recurse);
+
+	/**
+	 * EXPERIMENTAL OSGi R4.1 method
+	 * @return the bundle context for this bundle
+	 * @since 1.4
+	 */
+	public BundleContext getBundleContext();
 }

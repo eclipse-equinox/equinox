@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/FrameworkUtil.java,v 1.6 2006/06/16 16:31:18 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/FrameworkUtil.java,v 1.7 2006/07/26 20:37:49 hargrave Exp $
  * 
  * Copyright (c) OSGi Alliance (2005, 2006). All Rights Reserved.
  * 
@@ -27,10 +27,15 @@ import org.eclipse.osgi.framework.internal.core.FilterImpl;
  * This class contains utility methods which access Framework functions that may
  * be useful to bundles.
  * 
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  * @since 1.3
  */
 public class FrameworkUtil {
+	/*
+	 * NOTE: A framework implementor may also choose to replace this class in
+	 * their distribution with a class that directly interfaces with the
+	 * framework implementation.
+	 */
 
 	/**
 	 * FrameworkUtil objects may not be constructed. 
