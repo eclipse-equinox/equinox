@@ -9,10 +9,14 @@
 #     IBM Corporation - initial API and implementation
 ########################################################################
 
+# This file must be UTF8 encoded.
+
 #OS Aliases                             Description
 
 AIX                                      # IBM
 DigitalUnix                              # Compaq
+embos                                    # Segger Embedded Software Solutions
+Epoc32 SymbianOS                         # Symbian OS
 FreeBSD                                  # Free BSD
 HPUX                                     # Hewlett Packard
 IRIX                                     # Sillicon Graphics
