@@ -10,8 +10,7 @@
  *******************************************************************************/
 package org.eclipse.core.internal.registry.osgi;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URL;
 import java.util.*;
 import org.eclipse.core.internal.registry.ExtensionRegistry;
@@ -149,7 +148,7 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 			return;
 		InputStream is;
 		try {
-			is = pluginManifest.openStream();
+			is = new BufferedInputStream(pluginManifest.openStream());
 		} catch (IOException ex) {
 			is = null;
 		}
