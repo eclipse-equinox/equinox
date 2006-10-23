@@ -37,26 +37,43 @@ public final class AdapterManager implements IAdapterManager {
 	/** 
 	 * Cache of adapters for a given adaptable class. Maps String  -> Map
 	 * (adaptable class name -> (adapter class name -> factory instance))
+	 * Thread safety note: The outer map is synchronized using a synchronized
+	 * map wrapper class.  The inner map is not synchronized, but it is immutable
+	 * so synchronization is not necessary.
 	 */
-	protected HashMap adapterLookup;
+	private Map adapterLookup;
+
 	/**
 	 * Cache of classes for a given type name. Avoids too many loadClass calls.
-	 * (factory -> (type name -> clazz))
+	 * (factory -> (type name -> Class)).
+	 * Thread safety note: Since this structure is a nested hash map, and both
+	 * the inner and outer maps are mutable, access to this entire structure is
+	 * controlled by the classLookupLock field.  Note the field can still be
+	 * nulled concurrently without holding the lock.
 	 */
-	protected HashMap classLookup;
+	private Map classLookup;
+
 	/**
-	 * Cache of class lookup order. This avoids having to compute often, and
-	 * provides clients with quick lookup for instanceOf checks based on type name.
+	 * The lock object controlling access to the classLookup data structure.
 	 */
-	protected HashMap classSearchOrderLookup;
+	private final Object classLookupLock = new Object();
+
+	/**
+	 * Cache of class lookup order (Class -> Class[]). This avoids having to compute often, and
+	 * provides clients with quick lookup for instanceOf checks based on type name.
+	 * Thread safety note: The map is synchronized using a synchronized
+	 * map wrapper class.  The arrays within the map are immutable.
+	 */
+	private Map classSearchOrderLookup;
+
 	/**
 	 * Map of factories, keyed by <code>String</code>, fully qualified class name of
 	 * the adaptable class that the factory provides adapters for. Value is a <code>List</code>
 	 * of <code>IAdapterFactory</code>.
 	 */
-	protected final HashMap factories;
+	private final HashMap factories;
 
-	private ArrayList lazyFactoryProviders;
+	private final ArrayList lazyFactoryProviders;
 
 	private static final AdapterManager singleton = new AdapterManager();
 
@@ -70,7 +87,6 @@ public final class AdapterManager implements IAdapterManager {
 	private AdapterManager() {
 		factories = new HashMap(5);
 		lazyFactoryProviders = new ArrayList(1);
-		adapterLookup = null;
 	}
 
 	/**
@@ -102,29 +118,33 @@ public final class AdapterManager implements IAdapterManager {
 	}
 
 	private void cacheClassLookup(IAdapterFactory factory, Class clazz) {
-		//cache reference to lookup to protect against concurrent flush
-		HashMap lookup = classLookup;
-		if (lookup == null)
-			classLookup = lookup = new HashMap(4);
-		HashMap classes = (HashMap) lookup.get(factory);
-		if (classes == null) {
-			classes = new HashMap(4);
-			lookup.put(factory, classes);
+		synchronized (classLookupLock) {
+			//cache reference to lookup to protect against concurrent flush
+			Map lookup = classLookup;
+			if (lookup == null)
+				classLookup = lookup = new HashMap(4);
+			HashMap classes = (HashMap) lookup.get(factory);
+			if (classes == null) {
+				classes = new HashMap(4);
+				lookup.put(factory, classes);
+			}
+			classes.put(clazz.getName(), clazz);
 		}
-		classes.put(clazz.getName(), clazz);
 	}
 
 	private Class cachedClassForName(IAdapterFactory factory, String typeName) {
-		Class clazz = null;
-		//cache reference to lookup to protect against concurrent flush
-		HashMap lookup = classLookup;
-		if (lookup != null) {
-			HashMap classes = (HashMap) lookup.get(factory);
-			if (classes != null) {
-				clazz = (Class) classes.get(typeName);
+		synchronized (classLookupLock) {
+			Class clazz = null;
+			//cache reference to lookup to protect against concurrent flush
+			Map lookup = classLookup;
+			if (lookup != null) {
+				HashMap classes = (HashMap) lookup.get(factory);
+				if (classes != null) {
+					clazz = (Class) classes.get(typeName);
+				}
 			}
+			return clazz;
 		}
-		return clazz;
 	}
 
 	/**
@@ -165,9 +185,9 @@ public final class AdapterManager implements IAdapterManager {
 	 */
 	private Map getFactories(Class adaptable) {
 		//cache reference to lookup to protect against concurrent flush
-		HashMap lookup = adapterLookup;
+		Map lookup = adapterLookup;
 		if (lookup == null)
-			adapterLookup = lookup = new HashMap(30);
+			adapterLookup = lookup = Collections.synchronizedMap(new HashMap(30));
 		Map table = (Map) lookup.get(adaptable.getName());
 		if (table == null) {
 			// calculate adapters for the class
@@ -182,20 +202,21 @@ public final class AdapterManager implements IAdapterManager {
 	}
 
 	public Class[] computeClassOrder(Class adaptable) {
-		List classes = null;
+		Class[] classes = null;
 		//cache reference to lookup to protect against concurrent flush
-		HashMap lookup = classSearchOrderLookup;
-		if (lookup != null)
-			classes = (List) lookup.get(adaptable);
+		Map lookup = classSearchOrderLookup;
+		if (lookup == null)
+			classSearchOrderLookup = lookup = Collections.synchronizedMap(new HashMap());
+		else
+			classes = (Class[]) lookup.get(adaptable);
 		// compute class order only if it hasn't been cached before
 		if (classes == null) {
-			classes = new ArrayList();
-			computeClassOrder(adaptable, classes);
-			if (lookup == null)
-				classSearchOrderLookup = lookup = new HashMap();
+			ArrayList classList = new ArrayList();
+			computeClassOrder(adaptable, classList);
+			classes = (Class[]) classList.toArray(new Class[classList.size()]);
 			lookup.put(adaptable, classes);
 		}
-		return (Class[]) classes.toArray(new Class[classes.size()]);
+		return classes;
 	}
 
 	/**
