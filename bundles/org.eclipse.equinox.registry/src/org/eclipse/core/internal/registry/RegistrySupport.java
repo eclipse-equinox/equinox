@@ -30,12 +30,16 @@ import org.eclipse.core.runtime.IStatus;
 public class RegistrySupport {
 
 	static public String translate(String key, ResourceBundle resources) {
-		String value = key.trim();
-		if (value.charAt(0) != '%')
-			return value;
+		if (key == null)
+			return null;
 		if (resources == null)
 			return key;
-		return resources.getString(key.substring(1));
+		String trimmedKey = key.trim();
+		if (trimmedKey.length() == 0)
+			return key;
+		if (trimmedKey.charAt(0) != '%')
+			return key;
+		return resources.getString(trimmedKey.substring(1));
 	}
 
 	static public void log(IStatus status, String prefix) {
