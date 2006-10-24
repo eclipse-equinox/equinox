@@ -711,15 +711,14 @@ public class FrameworkCommandProvider implements CommandProvider {
 				if (packageAdminRef != null) {
 					BundleDescription desc = bundle.getBundleDescription();
 					if (desc != null) {
+						boolean title = true;
 						try {
 							ExportPackageDescription[] exports = desc.getExportPackages();
 							if (exports == null || exports.length == 0) {
 								intp.print("  "); //$NON-NLS-1$
 								intp.println(ConsoleMsg.CONSOLE_NO_EXPORTED_PACKAGES_MESSAGE);
-								intp.print("  "); //$NON-NLS-1$
-								intp.println(ConsoleMsg.CONSOLE_NO_IMPORTED_PACKAGES_MESSAGE);
 							} else {
-								boolean title = true;
+								title = true;
 
 								for (int i = 0; i < exports.length; i++) {
 									if (title) {
@@ -743,19 +742,19 @@ public class FrameworkCommandProvider implements CommandProvider {
 									intp.print("  "); //$NON-NLS-1$
 									intp.println(ConsoleMsg.CONSOLE_NO_EXPORTED_PACKAGES_MESSAGE);
 								}
-
-								title = true;
-								if (desc != null) {
-									title = printImportedPackages(exports, intp, title);
-									ExportPackageDescription[] imports = desc.getContainingState().getStateHelper().getVisiblePackages(desc);
-									title = printImportedPackages(imports, intp, title);
-								}
-
-								if (title) {
-									intp.print("  "); //$NON-NLS-1$
-									intp.println(ConsoleMsg.CONSOLE_NO_IMPORTED_PACKAGES_MESSAGE);
-								}
 							}
+							title = true;
+							if (desc != null) {
+								title = printImportedPackages(exports, intp, title);
+								ExportPackageDescription[] imports = desc.getContainingState().getStateHelper().getVisiblePackages(desc);
+								title = printImportedPackages(imports, intp, title);
+							}
+
+							if (title) {
+								intp.print("  "); //$NON-NLS-1$
+								intp.println(ConsoleMsg.CONSOLE_NO_IMPORTED_PACKAGES_MESSAGE);
+							}
+
 							PackageAdmin packageAdmin = (PackageAdmin) context.getService(packageAdminRef);
 							if (packageAdmin != null) {
 								intp.print("  "); //$NON-NLS-1$
@@ -808,8 +807,7 @@ public class FrameworkCommandProvider implements CommandProvider {
 										intp.println(ConsoleMsg.CONSOLE_PROVIDED_MESSAGE);
 									}
 								}
-
-								boolean title = true;
+								title = true;
 								for (int i = 0; i < requiredBundles.length; i++) {
 									if (requiredBundles[i] == requiredBundle)
 										continue;
