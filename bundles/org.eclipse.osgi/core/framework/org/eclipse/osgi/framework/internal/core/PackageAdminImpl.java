@@ -51,6 +51,29 @@ public class PackageAdminImpl implements PackageAdmin {
 	/** framework object */
 	protected Framework framework;
 
+	/* 
+	 * We need to make sure that the GetBundleAction class loads early to prevent a ClassCircularityError when checking permissions.
+	 * See bug 161561
+	 */
+	static {
+		Class c;
+		c = GetBundleAction.class;
+	}
+
+	static class GetBundleAction implements PrivilegedAction {
+		private Class clazz;
+		private PackageAdminImpl impl;
+
+		public GetBundleAction(PackageAdminImpl impl, Class clazz) {
+			this.impl = impl;
+			this.clazz = clazz;
+		}
+
+		public Object run() {
+			return impl.getBundlePriv(clazz);
+		}
+	}
+
 	/**
 	 * Constructor.
 	 *
@@ -503,11 +526,7 @@ public class PackageAdminImpl implements PackageAdmin {
 	public Bundle getBundle(final Class clazz) {
 		if (System.getSecurityManager() == null)
 			return getBundlePriv(clazz);
-		return (Bundle) AccessController.doPrivileged(new PrivilegedAction() {
-			public Object run() {
-				return getBundlePriv(clazz);
-			}
-		});
+		return (Bundle) AccessController.doPrivileged(new GetBundleAction(this, clazz));
 	}
 
 	public int getBundleType(Bundle bundle) {

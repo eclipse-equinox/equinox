@@ -113,6 +113,29 @@ public class Framework implements EventDispatcher, EventPublisher {
 	private StreamHandlerFactory streamHandlerFactory;
 	private ContentHandlerFactory contentHandlerFactory;
 
+	/* 
+	 * We need to make sure that the GetDataFileAction class loads early to prevent a ClassCircularityError when checking permissions.
+	 * see bug 161561
+	 */
+	static {
+		Class c;
+		c = GetDataFileAction.class;
+	}
+
+	static class GetDataFileAction implements PrivilegedAction {
+		private AbstractBundle bundle;
+		private String filename;
+
+		public GetDataFileAction(AbstractBundle bundle, String filename) {
+			this.bundle = bundle;
+			this.filename= filename;
+		}
+
+		public Object run() {
+			return bundle.getBundleData().getDataFile(filename);
+		}
+	}
+	
 	/**
 	 * Constructor for the Framework instance. This method initializes the
 	 * framework to an unlaunched state.
@@ -1304,11 +1327,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 	 * parameter.
 	 */
 	protected File getDataFile(final AbstractBundle bundle, final String filename) {
-		return (File) AccessController.doPrivileged(new PrivilegedAction() {
-			public Object run() {
-				return bundle.getBundleData().getDataFile(filename);
-			}
-		});
+		return (File) AccessController.doPrivileged(new GetDataFileAction(bundle, filename));
 	}
 
 	/**
