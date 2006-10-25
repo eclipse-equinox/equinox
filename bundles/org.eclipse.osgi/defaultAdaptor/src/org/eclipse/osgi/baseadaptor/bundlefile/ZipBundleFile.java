@@ -292,4 +292,10 @@ public class ZipBundleFile extends BundleFile {
 		//do nothing
 	}
 
+	/**
+	 * Shutsdown the bundle file closer thread for zip bundle files
+	 */
+	public static void shutdown() {
+		mruList.shutdown();
+	}
 }

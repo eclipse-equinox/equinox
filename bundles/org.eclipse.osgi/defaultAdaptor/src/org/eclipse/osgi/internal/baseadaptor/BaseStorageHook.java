@@ -18,6 +18,7 @@ import java.net.URLConnection;
 import java.util.*;
 import org.eclipse.core.runtime.adaptor.LocationManager;
 import org.eclipse.osgi.baseadaptor.*;
+import org.eclipse.osgi.baseadaptor.bundlefile.ZipBundleFile;
 import org.eclipse.osgi.baseadaptor.hooks.AdaptorHook;
 import org.eclipse.osgi.baseadaptor.hooks.StorageHook;
 import org.eclipse.osgi.framework.adaptor.*;
@@ -333,7 +334,8 @@ public class BaseStorageHook implements StorageHook, AdaptorHook{
 	}
 
 	public void frameworkStop(BundleContext context) throws BundleException {
-		// do nothing
+		// shutdown the bundle file closer thread if it exists
+		ZipBundleFile.shutdown();
 	}
 
 	public void frameworkStopping(BundleContext context) {

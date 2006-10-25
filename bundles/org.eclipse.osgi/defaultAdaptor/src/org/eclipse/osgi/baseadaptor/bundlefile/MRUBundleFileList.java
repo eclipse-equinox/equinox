@@ -12,6 +12,7 @@
 package org.eclipse.osgi.baseadaptor.bundlefile;
 
 import java.io.IOException;
+import org.eclipse.osgi.framework.eventmgr.*;
 
 /**
  * A simple/quick/small implementation of an MRU (Most Recently Used) list to keep
@@ -20,7 +21,7 @@ import java.io.IOException;
  * file limit.
  * @since 3.2
  */
-public class MRUBundleFileList {
+public class MRUBundleFileList implements EventDispatcher{
 	private static final String PROP_FILE_LIMIT = "osgi.bundlefile.limit"; //$NON-NLS-1$
 	private static final int MIN = 10;
 	private static final int PROP_FILE_LIMIT_VALUE;
@@ -41,6 +42,8 @@ public class MRUBundleFileList {
 	final private long[] useStampList;
 	// the limit of open files to allow before least used bundle file is closed
 	final private int fileLimit; // value < MIN will disable MRU
+	final private EventManager bundleFileCloserManager;
+	final private EventListeners bundleFileCloser;
 	// the current number of open bundle files
 	private int numOpen = 0;
 	// the current use stamp
@@ -56,9 +59,14 @@ public class MRUBundleFileList {
 		if (fileLimit >= MIN) {
 			this.bundleFileList = new BundleFile[fileLimit];
 			this.useStampList = new long[fileLimit];
+			this.bundleFileCloserManager = new EventManager("Bundle File Closer"); //$NON-NLS-1$
+			this.bundleFileCloser = new EventListeners();
+			this.bundleFileCloser.addListener(this, this);
 		} else {
 			this.bundleFileList = null;
 			this.useStampList = null;
+			this.bundleFileCloserManager = null;
+			this.bundleFileCloser = null;
 		}
 	}
 
@@ -67,11 +75,11 @@ public class MRUBundleFileList {
 	 * the number of open BundleFiles == the fileLimit then the least 
 	 * recently used BundleFile is closed.
 	 * @param bundleFile the bundle file about to be opened.
-	 * @throws IOException if an error occurs while closing the least recently used BundleFile
 	 */
-	public void add(BundleFile bundleFile) throws IOException {
+	public void add(BundleFile bundleFile) {
 		if (fileLimit < MIN)
 			return; // MRU is disabled
+		BundleFile toRemove = null;
 		synchronized (this) {
 			if (bundleFile.getMruIndex() >= 0)
 				return;  // do nothing; someone is trying add a bundleFile that is already in an MRU list
@@ -92,11 +100,10 @@ public class MRUBundleFileList {
 				for (int i = 1; i < fileLimit; i++)
 					if (useStampList[i] < useStampList[index])
 						index = i;
-				BundleFile toRemove = bundleFileList[index];
+				toRemove = bundleFileList[index];
 				if (toRemove.getMruIndex() != index)
 					throw new IllegalStateException("The BundleFile has the incorrect mru index: " + index  + " != " + toRemove.getMruIndex());  //$NON-NLS-1$//$NON-NLS-2$
 				removeInternal(toRemove);
-				toRemove.close();
 			}
 			// found an index to place to bundleFile to be opened
 			bundleFileList[index] = bundleFile;
@@ -104,6 +111,9 @@ public class MRUBundleFileList {
 			incUseStamp(index);
 			numOpen++;
 		}
+		// must not close the toRemove bundle file while holding the lock of another bundle file (bug 161976)
+		// This queue the bundle file for close asynchronously.
+		closeBundleFile(toRemove);
 	}
 
 	/**
@@ -156,5 +166,32 @@ public class MRUBundleFileList {
 			curUseStamp = 0;
 		}
 		useStampList[index] = ++curUseStamp;
+	}
+
+	public final void dispatchEvent(Object eventListener, Object listenerObject, int eventAction, Object eventObject) {
+		try {
+			((BundleFile) eventObject).close();
+		} catch (IOException e) {
+			// TODO should log ??
+		}
+	}
+
+	private void closeBundleFile(BundleFile toRemove) {
+		if (toRemove == null)
+			return;
+		/* queue to hold set of listeners */
+		ListenerQueue queue = new ListenerQueue(bundleFileCloserManager);
+		/* add bundle file closer to the queue */
+		queue.queueListeners(bundleFileCloser, this);
+		/* dispatch event to set of listeners */
+		queue.dispatchEventAsynchronous(0, toRemove);
+	}
+
+	/**
+	 * Closes the bundle file closer thread for the MRU list
+	 */
+	public void shutdown() {
+		if (bundleFileCloserManager != null)
+			bundleFileCloserManager.close();
 	}
 }
