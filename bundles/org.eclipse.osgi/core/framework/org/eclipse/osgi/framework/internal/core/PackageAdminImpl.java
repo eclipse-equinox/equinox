@@ -58,6 +58,7 @@ public class PackageAdminImpl implements PackageAdmin {
 	static {
 		Class c;
 		c = GetBundleAction.class;
+		c.getName(); // to prevent compiler warnings
 	}
 
 	static class GetBundleAction implements PrivilegedAction {

@@ -120,6 +120,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 	static {
 		Class c;
 		c = GetDataFileAction.class;
+		c.getName(); // to prevent compiler warnings
 	}
 
 	static class GetDataFileAction implements PrivilegedAction {

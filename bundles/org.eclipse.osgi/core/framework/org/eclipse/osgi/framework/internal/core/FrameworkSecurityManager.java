@@ -30,7 +30,7 @@ public class FrameworkSecurityManager extends SecurityManager {
 		Class c;
 		c = CheckPermissionAction.class;
 		c = CheckContext.class;
-		c.getName();
+		c.getName(); // to prevent compiler warnings
 	}
 
 	static class CheckContext {
