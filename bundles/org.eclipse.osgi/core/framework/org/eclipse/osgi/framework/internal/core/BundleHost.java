@@ -310,9 +310,9 @@ public class BundleHost extends AbstractBundle {
 							System.out.println("Starting " + getSymbolicName()); //$NON-NLS-1$
 						}
 					}
+					context = createContext();
 					state = STARTING;
 					framework.publishBundleEvent(BundleEvent.STARTING, this);
-					context = createContext();
 					try {
 						context.start();
 
