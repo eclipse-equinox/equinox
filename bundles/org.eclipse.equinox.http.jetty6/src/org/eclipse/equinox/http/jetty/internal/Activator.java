@@ -46,6 +46,7 @@ public class Activator implements BundleActivator {
 
 	public void stop(BundleContext context) throws Exception {
 		server.stop();
+		server = null;
 	}
 
 	private SocketListener createHttpListener(BundleContext context) {

@@ -38,7 +38,10 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 
 	public void stop(BundleContext context) throws Exception {
 		packageAdminTracker.close();
+		packageAdminTracker = null;
 		registryTracker.close();
+		registryTracker = null;
+		this.context = null;
 	}
 
 	public Object addingService(ServiceReference reference) {
