@@ -948,6 +948,8 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 			return;
 		if (bundle.getBundle().isResolved()) {
 			resolverExports.remove(bundle.getExportPackages());
+			if (removed)
+				resolverGenerics.remove(bundle.getGenericCapabilities());
 			bundle.initialize(false);
 			if (!removed)
 				resolverExports.put(bundle.getExportPackages());
