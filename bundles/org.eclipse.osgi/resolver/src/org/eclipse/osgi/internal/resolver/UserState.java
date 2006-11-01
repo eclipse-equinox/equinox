@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.BundleException;
 
@@ -19,21 +19,14 @@ import org.osgi.framework.BundleException;
  * This implementation of State does a bookkeeping of all added/removed 
  */
 public class UserState extends StateImpl {
-	private List added = new ArrayList();
-	private List removed = new ArrayList();
-	private List updated = new ArrayList();
-
-	public synchronized boolean addBundle(BundleDescription description) {
-		if (!super.addBundle(description))
-			return false;
-		added.add(description.getLocation());
-		return true;
-	}
+	// TODO this is not an accurate way to record updates
+	private Set updated = new HashSet();
 
 	public synchronized boolean removeBundle(BundleDescription description) {
+		if (description.getLocation() != null)
+			updated.remove(description.getLocation());
 		if (!super.removeBundle(description))
 			return false;
-		removed.add(description.getLocation());
 		return true;
 	}
 
@@ -42,18 +35,6 @@ public class UserState extends StateImpl {
 			return false;
 		updated.add(newDescription.getLocation());
 		return true;
-	}
-
-	public String[] getAllAdded() {
-		return (String[]) added.toArray(new String[added.size()]);
-	}
-
-	public String[] getAllRemoved() {
-		return (String[]) removed.toArray(new String[removed.size()]);
-	}
-
-	public String[] getAllUpdated() {
-		return (String[]) updated.toArray(new String[updated.size()]);
 	}
 
 	public StateDelta compare(State baseState) throws BundleException {
