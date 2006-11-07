@@ -16,7 +16,6 @@ import java.net.URL;
 import java.util.*;
 import org.eclipse.core.runtime.adaptor.LocationManager;
 import org.eclipse.osgi.baseadaptor.*;
-import org.eclipse.osgi.baseadaptor.hooks.AdaptorHook;
 import org.eclipse.osgi.baseadaptor.hooks.StorageHook;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.internal.core.Constants;
@@ -40,9 +39,12 @@ public final class EclipseStorageHook implements StorageHook, HookConfigurator {
 	public static final String KEY = EclipseStorageHook.class.getName();
 	public static final int HASHCODE = KEY.hashCode();
 
-	private static final byte FLAG_AUTO_START = 0x01;
+	private static final byte FLAG_LAZY_START = 0x01;
 	private static final byte FLAG_HAS_PACKAGE_INFO = 0x02;
-	private static final byte FLAG_ACTIVATE_ON_CLASSLOAD = 0x04;
+	// Note that the 0x04 was used in previous versions, if a new flag is needed then do not reuse this one
+	//private static final byte FLAG_ACTIVATE_ON_CLASSLOAD = 0x04;
+	// Flag to indicate that an include directive is present on the lazy activation policy
+	private static final byte FLAG_HAS_LAZY_INCLUDE = 0x08;
 
 	/** data to detect modification made in the manifest */
 	private long manifestTimeStamp = 0;
@@ -53,7 +55,8 @@ public final class EclipseStorageHook implements StorageHook, HookConfigurator {
 	/** the Plugin-Class header */
 	private String pluginClass = null;
 	/**  Eclipse-LazyStart header */
-	private String[] autoStartExceptions;
+	private String[] lazyStartExcludes;
+	private String[] lazyStartIncludes;
 	/** shortcut to know if a bundle has a buddy */
 	private String buddyList;
 	/** shortcut to know if a bundle is a registrant to a registered policy */
@@ -71,10 +74,15 @@ public final class EclipseStorageHook implements StorageHook, HookConfigurator {
 	}
 
 	public void initialize(Dictionary manifest) throws BundleException {
-		String lazyStart = (String) manifest.get(Constants.ECLIPSE_LAZYSTART);
-		if (lazyStart == null)
-			lazyStart = (String) manifest.get(Constants.ECLIPSE_AUTOSTART);
-		parseLazyStart(this, lazyStart);
+		String activationPolicy = (String) manifest.get(Constants.BUNDLE_ACTIVATIONPOLICY);
+		if (activationPolicy != null) {
+			parseActivationPolicy(this, activationPolicy);
+		} else {
+			String lazyStart = (String) manifest.get(Constants.ECLIPSE_LAZYSTART);
+			if (lazyStart == null)
+				lazyStart = (String) manifest.get(Constants.ECLIPSE_AUTOSTART);
+			parseLazyStart(this, lazyStart);
+		}
 		pluginClass = (String) manifest.get(Constants.PLUGIN_CLASS);
 		buddyList = (String) manifest.get(Constants.BUDDY_LOADER);
 		registeredBuddyList = (String) manifest.get(Constants.REGISTERED_POLICY);
@@ -88,36 +96,58 @@ public final class EclipseStorageHook implements StorageHook, HookConfigurator {
 				manifestType = Byte.parseByte(generatedFrom.getAttribute(PluginConverterImpl.MANIFEST_TYPE_ATTRIBUTE));
 			}
 		}
+		if (isAutoStartable())
+			bundledata.setStatus(bundledata.getStatus() | Constants.BUNDLE_LAZY_START);
 	}
 
 	public StorageHook load(BaseData target, DataInputStream in) throws IOException {
 		EclipseStorageHook storageHook = new EclipseStorageHook();
 		storageHook.bundledata = target;
 		storageHook.flags = in.readByte();
-		int exceptionsCount = in.readInt();
-		storageHook.autoStartExceptions = exceptionsCount > 0 ? new String[exceptionsCount] : null;
-		for (int i = 0; i < exceptionsCount; i++)
-			storageHook.autoStartExceptions[i] = in.readUTF();
+		int pkgCount = in.readInt();
+		String[] packageList = pkgCount > 0 ? new String[pkgCount] : null;
+		for (int i = 0; i < pkgCount; i++)
+			packageList[i] = in.readUTF();
+		storageHook.lazyStartExcludes = packageList;		
+		if ((storageHook.flags & FLAG_HAS_LAZY_INCLUDE) != 0) {
+			pkgCount = in.readInt();
+			packageList = pkgCount > 0 ? new String[pkgCount] : null;
+			for (int i = 0; i < pkgCount; i++)
+				packageList[i] = in.readUTF();
+			storageHook.lazyStartIncludes = packageList;
+		}
 		storageHook.buddyList = AdaptorUtil.readString(in, false);
 		storageHook.registeredBuddyList = AdaptorUtil.readString(in, false);
 		storageHook.pluginClass = AdaptorUtil.readString(in, false);
 		storageHook.manifestTimeStamp = in.readLong();
 		storageHook.manifestType = in.readByte();
+		if (storageHook.isAutoStartable() && (target.getStatus() & Constants.BUNDLE_LAZY_START) == 0)
+			target.setStatus(target.getStatus() | Constants.BUNDLE_LAZY_START);
 		return storageHook;
 	}
 
 	public void save(DataOutputStream out) throws IOException {
 		if (bundledata == null)
 			throw new IllegalStateException();
-		// do not write the activate on classload bit; this should be reset each startup
-		out.writeByte(flags & ~FLAG_ACTIVATE_ON_CLASSLOAD);
-		String[] autoStartExceptions = getAutoStartExceptions();
-		if (autoStartExceptions == null)
+		// when this is stored back we always use the has include/exclude flag
+		out.writeByte(flags);
+		String[] excludes = getLazyStartExcludes();
+		if (excludes == null)
 			out.writeInt(0);
 		else {
-			out.writeInt(autoStartExceptions.length);
-			for (int i = 0; i < autoStartExceptions.length; i++)
-				out.writeUTF(autoStartExceptions[i]);
+			out.writeInt(excludes.length);
+			for (int i = 0; i < excludes.length; i++)
+				out.writeUTF(excludes[i]);
+		}
+		if ((flags & FLAG_HAS_LAZY_INCLUDE) != 0) {
+			String[] includes = getLazyStartIncludes();
+			if (includes == null)
+				out.writeInt(0);
+			else {
+				out.writeInt(includes.length);
+				for (int i = 0; i < includes.length; i++)
+					out.writeUTF(includes[i]);
+			}
 		}
 		AdaptorUtil.writeStringOrNull(out, getBuddyList());
 		AdaptorUtil.writeStringOrNull(out, getRegisteredBuddyList());
@@ -138,12 +168,16 @@ public final class EclipseStorageHook implements StorageHook, HookConfigurator {
 		return KEY;
 	}
 
-	public boolean isAutoStart() {
-		return (flags & FLAG_AUTO_START) == FLAG_AUTO_START;
+	public boolean isLazyStart() {
+		return (flags & FLAG_LAZY_START) == FLAG_LAZY_START;
 	}
 
-	public String[] getAutoStartExceptions() {
-		return autoStartExceptions;
+	public String[] getLazyStartExcludes() {
+		return lazyStartExcludes;
+	}
+
+	public String[] getLazyStartIncludes() {
+		return lazyStartIncludes;
 	}
 
 	public String getBuddyList() {
@@ -176,11 +210,11 @@ public final class EclipseStorageHook implements StorageHook, HookConfigurator {
 	 * @return true if the bundle is auto started; false otherwise
 	 */
 	public boolean isAutoStartable() {
-		return isAutoStart() || (autoStartExceptions != null && autoStartExceptions.length > 0);
+		return isLazyStart() || (lazyStartExcludes != null && lazyStartExcludes.length > 0);
 	}
 
 	private void parseLazyStart(EclipseStorageHook storageHook, String headerValue) {
-		storageHook.autoStartExceptions = null;
+		storageHook.lazyStartExcludes = null;
 		ManifestElement[] allElements = null;
 		try {
 			allElements = ManifestElement.parseHeader(Constants.ECLIPSE_LAZYSTART, headerValue);
@@ -194,16 +228,34 @@ public final class EclipseStorageHook implements StorageHook, HookConfigurator {
 			return;
 		// the single value for this element should be true|false
 		if ("true".equalsIgnoreCase(allElements[0].getValue())) //$NON-NLS-1$
-			flags |= FLAG_AUTO_START;
+			storageHook.flags |= FLAG_LAZY_START;
 		// look for any exceptions (the attribute) to the autoActivate setting
-		String exceptionsValue = allElements[0].getAttribute(Constants.ECLIPSE_LAZYSTART_EXCEPTIONS);
-		if (exceptionsValue == null)
+		String[] exceptions = ManifestElement.getArrayFromList(allElements[0].getAttribute(Constants.ECLIPSE_LAZYSTART_EXCEPTIONS));
+		storageHook.lazyStartExcludes = exceptions;
+	}
+
+	private void parseActivationPolicy(EclipseStorageHook storageHook, String headerValue) {
+		storageHook.lazyStartExcludes = null;
+		ManifestElement[] allElements = null;
+		try {
+			allElements = ManifestElement.parseHeader(Constants.BUNDLE_ACTIVATIONPOLICY, headerValue);
+		} catch (BundleException e) {
+			// just use the default settings (no auto activation)
+			String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_CLASSLOADER_CANNOT_GET_HEADERS, storageHook.bundledata.getLocation());
+			bundledata.getAdaptor().getFrameworkLog().log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, message, 0, e, null));
+		}
+		//Bundle-ActivationPolicy not found. 
+		if (allElements == null)
 			return;
-		StringTokenizer tokenizer = new StringTokenizer(exceptionsValue, ","); //$NON-NLS-1$
-		int numberOfTokens = tokenizer.countTokens();
-		storageHook.autoStartExceptions = new String[numberOfTokens];
-		for (int i = 0; i < numberOfTokens; i++)
-			storageHook.autoStartExceptions[i] = tokenizer.nextToken().trim();
+		// the single value for this type is lazy
+		if (!Constants.ACTIVATION_LAZY.equalsIgnoreCase(allElements[0].getValue())) //$NON-NLS-1$
+			return;
+		storageHook.flags |= FLAG_LAZY_START;
+		// look for any include or exclude attrs
+		storageHook.lazyStartExcludes = ManifestElement.getArrayFromList(allElements[0].getDirective(Constants.EXCLUDE_DIRECTIVE));
+		storageHook.lazyStartIncludes = ManifestElement.getArrayFromList(allElements[0].getDirective(Constants.INCLUDE_DIRECTIVE));
+		if (storageHook.lazyStartIncludes != null)
+			storageHook.flags |= FLAG_HAS_LAZY_INCLUDE;
 	}
 
 	// Used to check the bundle manifest file for any package information.
@@ -396,15 +448,7 @@ public final class EclipseStorageHook implements StorageHook, HookConfigurator {
 	}
 
 	public boolean forgetStatusChange(int status) {
-		if (!isAutoStartable())
-			return false;
-		if (!isActivatedOnClassLoad()) {
-			// want to persistenly start/stop lazy started bundles which were explicitely started/stopped
-			// we only want to do this if the framework is not in the process of being stopped
-			BundleStopper stopper = getBundleStopper(bundledata);
-			return stopper == null ? false : stopper.isStopping();
-		}
-		return true;
+		return false;
 	}
 
 	public boolean forgetStartLevelChange(int startlevel) {
@@ -413,24 +457,5 @@ public final class EclipseStorageHook implements StorageHook, HookConfigurator {
 
 	public boolean matchDNChain(String pattern) {
 		return false;
-	}
-
-	void setActivatedOnClassLoad(boolean classLoadActivate) {
-		if (classLoadActivate)
-			flags |= FLAG_ACTIVATE_ON_CLASSLOAD;
-		else
-			flags &= ~FLAG_ACTIVATE_ON_CLASSLOAD;
-	}
-
-	boolean isActivatedOnClassLoad() {
-		return (flags & FLAG_ACTIVATE_ON_CLASSLOAD) == FLAG_ACTIVATE_ON_CLASSLOAD; 
-	}
-
-	static BundleStopper getBundleStopper(BaseData bundledata) {
-		AdaptorHook[] adaptorhooks = bundledata.getAdaptor().getHookRegistry().getAdaptorHooks();
-		for (int i = 0; i < adaptorhooks.length; i++)
-			if (adaptorhooks[i] instanceof EclipseAdaptorHook)
-				return ((EclipseAdaptorHook) adaptorhooks[i]).getBundleStopper();
-		return null;
 	}
 }

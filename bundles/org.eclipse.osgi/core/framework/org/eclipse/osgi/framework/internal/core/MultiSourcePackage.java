@@ -26,7 +26,7 @@ public class MultiSourcePackage extends PackageSource {
 		return suppliers;
 	}
 
-	public Class loadClass(String name) {
+	public Class loadClass(String name) throws ClassNotFoundException {
 		Class result = null;
 		for (int i = 0; i < suppliers.length; i++) {
 			result = suppliers[i].loadClass(name);

@@ -218,18 +218,18 @@ public class BundleFragment extends AbstractBundle {
 	/**
 	 * Internal worker to start a bundle.
 	 *
-	 * @param persistent if true persistently record the bundle was started.
+	 * @param options
 	 */
-	protected void startWorker(boolean persistent) throws BundleException {
+	protected void startWorker(int options) throws BundleException {
 		throw new BundleException(NLS.bind(Msg.BUNDLE_FRAGMENT_START, this)); 
 	}
 
 	/**
 	 * Internal worker to stop a bundle.
 	 *
-	 * @param persistent if true persistently record the bundle was stopped.
+	 * @param options
 	 */
-	protected void stopWorker(boolean persistent) throws BundleException {
+	protected void stopWorker(int options) throws BundleException {
 		throw new BundleException(NLS.bind(Msg.BUNDLE_FRAGMENT_STOP, this)); 
 	}
 

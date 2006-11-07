@@ -326,8 +326,9 @@ public class BundleLoader implements ClassLoaderDelegate {
 	 * Finds a class local to this bundle.  Only the classloader for this bundle is searched.
 	 * @param name The name of the class to find.
 	 * @return The loaded Class or null if the class is not found.
+	 * @throws ClassNotFoundException 
 	 */
-	Class findLocalClass(String name) {
+	Class findLocalClass(String name) throws ClassNotFoundException {
 		if (Debug.DEBUG && Debug.DEBUG_LOADER)
 			Debug.println("BundleLoader[" + this + "].findLocalClass(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		try {
@@ -336,6 +337,10 @@ public class BundleLoader implements ClassLoaderDelegate {
 				Debug.println("BundleLoader[" + this + "] found local class " + name); //$NON-NLS-1$ //$NON-NLS-2$
 			return clazz;
 		} catch (ClassNotFoundException e) {
+			if (e instanceof StatusException) {
+				if ((((StatusException) e).getStatusCode() & StatusException.CODE_ERROR) != 0)
+					throw e;
+			}
 			return null;
 		}
 	}
@@ -396,14 +401,14 @@ public class BundleLoader implements ClassLoaderDelegate {
 		if (result == null && policy != null)
 			result = policy.doBuddyClassLoading(name);
 		// last resort; do class context trick to work around VM bugs
-		if (result == null && findParentResource(name))
+		if (result == null && isRequestFromVM())
 			result = parent.loadClass(name);
 		if (result == null)
 			throw new ClassNotFoundException(name);
 		return result;
 	}
 
-	private boolean findParentResource(String name) {
+	private boolean isRequestFromVM() {
 		if (bundle.framework.bootDelegateAll || !bundle.framework.contextBootDelegation)
 			return false;
 		// works around VM bugs that require all classloaders to have access to parent packages
@@ -491,7 +496,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 		if (result == null && policy != null)
 			return policy.doBuddyResourceLoading(name);
 		// last resort; do class context trick to work around VM bugs
-		if (result == null && findParentResource(name))
+		if (result == null && isRequestFromVM())
 			result = parent.getResource(name);
 		return result;
 	}

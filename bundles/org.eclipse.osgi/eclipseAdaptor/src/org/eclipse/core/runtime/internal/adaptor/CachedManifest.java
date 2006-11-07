@@ -87,11 +87,11 @@ public class CachedManifest extends Dictionary {
 		if (Constants.ECLIPSE_LAZYSTART.equals(keyString) || Constants.ECLIPSE_AUTOSTART.equals(keyString)) {
 			if (!storageHook.isAutoStartable())
 				return null;
-			if (storageHook.getAutoStartExceptions() == null)
+			if (storageHook.getLazyStartExcludes() == null)
 				return Boolean.TRUE.toString();
 			StringBuffer result = new StringBuffer(Boolean.TRUE.toString());
 			result.append(";").append(Constants.ECLIPSE_LAZYSTART_EXCEPTIONS).append("=\""); //$NON-NLS-1$ //$NON-NLS-2$
-			String[] exceptions = storageHook.getAutoStartExceptions();
+			String[] exceptions = storageHook.getLazyStartExcludes();
 			for (int i = 0; i < exceptions.length; i++) {
 				if (i > 0)
 					result.append(","); //$NON-NLS-1$

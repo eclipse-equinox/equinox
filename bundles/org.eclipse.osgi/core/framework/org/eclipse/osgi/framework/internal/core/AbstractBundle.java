@@ -249,11 +249,15 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	 *                permissions.
 	 */
 	public void start() throws BundleException {
+		start(0);
+	}
+
+	public void start(int options) throws BundleException {
 		framework.checkAdminPermission(this, AdminPermission.EXECUTE);
 		checkValid();
 		beginStateChange();
 		try {
-			startWorker(true);
+			startWorker(options);
 		} finally {
 			completeStateChange();
 		}
@@ -262,10 +266,26 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	/**
 	 * Internal worker to start a bundle.
 	 * 
-	 * @param persistent
-	 *            if true persistently record the bundle was started.
+	 * @param options
 	 */
-	protected abstract void startWorker(boolean persistent) throws BundleException;
+	protected abstract void startWorker(int options) throws BundleException;
+
+	/**
+	 * This method does the following
+	 * <ol>
+	 * <li> Return false if the bundle is a fragment
+	 * <li> Return false if the bundle is not at the correct start-level
+	 * <li> Return true if the bundle is persistently marked for start
+	 * <li> Return false if the bundle is not a lazy-start bundle
+	 * <li> Return false if the bunlde is not resolved
+	 * <li> Transition to STARTING state and Fire LAZY_ACTIVATION event
+	 * <li> Return false
+	 * </ol>
+	 * @return true if the bundle should be resumed
+	 */
+	protected boolean readyToResume() {
+		return false;
+	}
 
 	/**
 	 * Start this bundle w/o marking is persistently started.
@@ -326,7 +346,8 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 		}
 		beginStateChange();
 		try {
-			startWorker(false);
+			if (readyToResume())
+				startWorker(START_TRANSIENT);
 		} finally {
 			completeStateChange();
 		}
@@ -393,23 +414,26 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	 *                permissions.
 	 */
 	public void stop() throws BundleException {
+		stop(0);
+	}
+
+	public void stop(int options) throws BundleException {
 		framework.checkAdminPermission(this, AdminPermission.EXECUTE);
 		checkValid();
 		beginStateChange();
 		try {
-			stopWorker(true);
+			stopWorker(options);
 		} finally {
 			completeStateChange();
 		}
 	}
-
+	
 	/**
 	 * Internal worker to stop a bundle.
 	 * 
-	 * @param persistent
-	 *            if true persistently record the bundle was stopped.
+	 * @param options
 	 */
-	protected abstract void stopWorker(boolean persistent) throws BundleException;
+	protected abstract void stopWorker(int options) throws BundleException;
 
 	/**
 	 * Set the persistent status bit for the bundle.
@@ -499,7 +523,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 		}
 		beginStateChange();
 		try {
-			stopWorker(false);
+			stopWorker(STOP_TRANSIENT);
 		} finally {
 			if (!lock) {
 				completeStateChange();
@@ -649,13 +673,13 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	protected void updateWorker(PrivilegedExceptionAction action) throws BundleException {
 		boolean bundleActive = false;
 		if (!isFragment())
-			bundleActive = (state == ACTIVE);
+			bundleActive = (state & (ACTIVE | STARTING)) != 0;
 		if (bundleActive) {
 			try {
-				stopWorker(false);
+				stopWorker(STOP_TRANSIENT);
 			} catch (BundleException e) {
 				framework.publishFrameworkEvent(FrameworkEvent.ERROR, this, e);
-				if (state == ACTIVE) /* if the bundle is still active */{
+				if ((state & (ACTIVE | STARTING)) != 0) /* if the bundle is still active */{
 					throw e;
 				}
 			}
@@ -670,7 +694,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 		} finally {
 			if (bundleActive) {
 				try {
-					startWorker(false);
+					startWorker(START_TRANSIENT);
 				} catch (BundleException e) {
 					framework.publishFrameworkEvent(FrameworkEvent.ERROR, this, e);
 				}
@@ -823,10 +847,10 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	protected void uninstallWorker(PrivilegedExceptionAction action) throws BundleException {
 		boolean bundleActive = false;
 		if (!isFragment())
-			bundleActive = (state == ACTIVE);
+			bundleActive = (state & (ACTIVE | STARTING)) != 0;
 		if (bundleActive) {
 			try {
-				stopWorker(true);
+				stopWorker(STOP_TRANSIENT);
 			} catch (BundleException e) {
 				framework.publishFrameworkEvent(FrameworkEvent.ERROR, this, e);
 			}
@@ -836,7 +860,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 		} catch (PrivilegedActionException pae) {
 			if (bundleActive) /* if we stopped the bundle */{
 				try {
-					startWorker(false);
+					startWorker(START_TRANSIENT);
 				} catch (BundleException e) {
 					/*
 					 * if we fail to start the original bundle then we are in
@@ -1114,7 +1138,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 					return;
 				}
 				if (doubleFault || (stateChanging == Thread.currentThread())) {
-					throw new BundleException(NLS.bind(Msg.BUNDLE_STATE_CHANGE_EXCEPTION, getBundleData().getLocation(), stateChanging.getName()));
+					throw new BundleException(NLS.bind(Msg.BUNDLE_STATE_CHANGE_EXCEPTION, getBundleData().getLocation(), stateChanging.getName()), new BundleStatusException(null, StatusException.CODE_WARNING, stateChanging));
 				}
 				try {
 					long start = 0;
@@ -1530,5 +1554,23 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 				findLocalEntryPaths(entry, patternFilter, patternProps, recurse, pathList);
 		}
 		return;
+	}
+
+	class BundleStatusException extends Throwable implements StatusException {
+		private static final long serialVersionUID = 7201911791818929100L;
+		private int code;
+		private Object status;
+		BundleStatusException(String message, int code, Object status) {
+			super(message);
+			this.code = code;
+			this.status = status;
+		}
+		public Object getStatus() {
+			return status;
+		}
+		public int getStatusCode() {
+			return code;
+		}
+		
 	}
 }

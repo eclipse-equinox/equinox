@@ -16,9 +16,9 @@ import java.net.*;
 import java.security.*;
 import java.util.Properties;
 import java.util.zip.ZipFile;
+import org.eclipse.osgi.framework.internal.core.AbstractBundle;
 import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
+import org.osgi.framework.*;
 import org.osgi.util.tracker.ServiceTracker;
 
 /**
@@ -372,5 +372,31 @@ public class SecureAction {
 				return null;
 			}
 		}, controlContext);
+	}
+
+	/**
+	 * Starts a bundle.
+	 * @param bundle the bundle to start
+	 * @param options the start options
+	 * @throws BundleException
+	 */
+	public void start(final AbstractBundle bundle, final int options) throws BundleException {
+		if (System.getSecurityManager() == null) {
+			bundle.start(options);
+			return;
+		}
+		try {
+			AccessController.doPrivileged(new PrivilegedExceptionAction() {
+				public Object run() throws BundleException {
+					bundle.start(options);
+					return null;
+				}
+			}, controlContext);
+			return;
+		} catch (PrivilegedActionException e) {
+			if (e.getException() instanceof BundleException)
+				throw (BundleException) e.getException();
+			throw (RuntimeException) e.getException();
+		}
 	}
 }

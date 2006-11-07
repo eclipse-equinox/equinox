@@ -11,21 +11,41 @@
 
 package org.eclipse.core.runtime.internal.adaptor;
 
+import java.io.IOException;
 import java.net.URL;
-import org.eclipse.core.runtime.internal.stats.StatsManager;
+import java.net.URLConnection;
+import java.util.*;
 import org.eclipse.osgi.baseadaptor.*;
 import org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry;
+import org.eclipse.osgi.baseadaptor.hooks.AdaptorHook;
 import org.eclipse.osgi.baseadaptor.hooks.ClassLoadingStatsHook;
 import org.eclipse.osgi.baseadaptor.loader.ClasspathEntry;
 import org.eclipse.osgi.baseadaptor.loader.ClasspathManager;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
-import org.eclipse.osgi.framework.internal.core.AbstractBundle;
+import org.eclipse.osgi.framework.adaptor.StatusException;
+import org.eclipse.osgi.framework.debug.Debug;
+import org.eclipse.osgi.framework.internal.core.*;
+import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
+import org.eclipse.osgi.framework.util.SecureAction;
+import org.eclipse.osgi.service.resolver.BundleDescription;
+import org.eclipse.osgi.service.resolver.StateHelper;
 import org.eclipse.osgi.util.NLS;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleException;
+import org.osgi.framework.*;
+import org.osgi.service.startlevel.StartLevel;
 
-public class EclipseLazyStarter implements ClassLoadingStatsHook, HookConfigurator {
+public class EclipseLazyStarter implements ClassLoadingStatsHook, AdaptorHook, HookConfigurator {
+	private static final boolean throwErrorOnFailedStart = "true".equals(FrameworkProperties.getProperty("osgi.compatibility.errorOnFailedStart", "true"));  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+	private static final SecureAction secureAction = new SecureAction();
+	private StartLevelImpl startLevelService;
+	private ServiceReference slRef;
+	private BaseAdaptor adaptor;
+	// holds the current activation trigger class and the ClasspathManagers that need to be activated
+	private ThreadLocal activationStack = new ThreadLocal();
+	// used to store exceptions that occurred while activating a bundle
+	// keyed by ClasspathManager->Exception
+	// WeakHashMap is used to prevent pinning the ClasspathManager objects.
+	private final Map errors = Collections.synchronizedMap(new WeakHashMap());
 
 	public void preFindLocalClass(String name, ClasspathManager manager) throws ClassNotFoundException {
 		AbstractBundle bundle = (AbstractBundle) manager.getBaseData().getBundle();
@@ -33,67 +53,83 @@ public class EclipseLazyStarter implements ClassLoadingStatsHook, HookConfigurat
 		// been initialized (though it may have been destroyed) so just return the class.
 		if ((bundle.getState() & (Bundle.ACTIVE | Bundle.UNINSTALLED | Bundle.STOPPING)) != 0)
 			return;
-
 		EclipseStorageHook storageHook = (EclipseStorageHook) manager.getBaseData().getStorageHook(EclipseStorageHook.KEY);
 		// The bundle is not active and does not require activation, just return the class
-		if (!shouldActivateFor(name, manager.getBaseData(), storageHook))
+		if (!shouldActivateFor(name, manager.getBaseData(), storageHook, manager))
 			return;
-
-		// The bundle is starting.  Note that if the state changed between the tests 
-		// above and this test (e.g., it was not ACTIVE but now is), that's ok, we will 
-		// just try to start it again (else case).
-		// TODO need an explanation here of why we duplicated the mechanism 
-		// from the framework rather than just calling start() and letting it sort it out.
-		if (bundle.getState() == Bundle.STARTING) {
-			// If the thread trying to load the class is the one trying to activate the bundle, then return the class 
-			if (bundle.testStateChanging(Thread.currentThread()) || bundle.testStateChanging(null))
-				return;
-
-			// If it's another thread, we wait and try again. In any case the class is returned. 
-			// The difference is that an exception can be logged.
-			// TODO do we really need this test?  We just did it on the previous line?
-			if (!bundle.testStateChanging(Thread.currentThread())) {
-				Thread threadChangingState = bundle.getStateChanging();
-				if (StatsManager.TRACE_BUNDLES && threadChangingState != null)
-					System.out.println("Concurrent startup of bundle " + bundle.getSymbolicName() + " by " + Thread.currentThread() + " and " + threadChangingState.getName() + ". Waiting up to 5000ms for " + threadChangingState + " to finish the initialization."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
-				long start = System.currentTimeMillis();
-				long delay = 5000;
-				long timeLeft = delay;
-				while (true) {
-					try {
-						Thread.sleep(100); // do not release the classloader lock (bug 86713)
-						if (bundle.testStateChanging(null) || timeLeft <= 0)
-							break;
-					} catch (InterruptedException e) {
-						//Ignore and keep waiting
-					}
-					timeLeft = start + delay - System.currentTimeMillis();
-				}
-				if (timeLeft <= 0 || bundle.getState() != Bundle.ACTIVE) {
-					String bundleName = bundle.getSymbolicName() == null ? Long.toString(bundle.getBundleId()) : bundle.getSymbolicName();
-					String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_CLASSLOADER_CONCURRENT_STARTUP, new Object[] {Thread.currentThread().getName(), name, threadChangingState.getName(), bundleName, Long.toString(delay)});
-					manager.getBaseData().getAdaptor().getFrameworkLog().log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, message, 0, new Exception(EclipseAdaptorMsg.ECLIPSE_CLASSLOADER_GENERATED_EXCEPTION), null));
-				}
-				return;
-			}
+		ArrayList stack = (ArrayList) activationStack.get();
+		if (stack == null) {
+			stack = new ArrayList(6);
+			activationStack.set(stack);
 		}
-
-		//The bundle must be started.
-		try {
-			// mark this bundle as lazy activated by class load
-			if (storageHook != null)
-				storageHook.setActivatedOnClassLoad(true);
-			bundle.start();
-		} catch (BundleException e) {
-			String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_CLASSLOADER_ACTIVATION, bundle.getSymbolicName(), Long.toString(bundle.getBundleId()));
-			manager.getBaseData().getAdaptor().getFrameworkLog().log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, message, 0, e, null));
-			throw new ClassNotFoundException(name, e);
+		// the first element in the stack is the name of the trigger class, 
+		// each element after the trigger class is a classpath manager 
+		// that must be activated after the trigger class has been defined (see postFindLocalClass)
+		int size = stack.size();
+		if (size > 1) {
+			for (int i = size -1; i >= 1; i--)
+				if (manager == stack.get(i))
+					// the manager is already on the stack in which case we are already in the process of loading the trigger class
+					return;
 		}
-		return;
+		Thread threadChangingState = bundle.getStateChanging();
+		if (bundle.getState() == Bundle.STARTING && threadChangingState == Thread.currentThread())
+			return; // this thread is starting the bundle already
+		if (size == 0)
+			stack.add(name);
+		stack.add(manager);
 	}
 
-	public void postFindLocalClass(String name, Class clazz, ClasspathManager manager) {
-		// do nothing
+	public void postFindLocalClass(String name, Class clazz, ClasspathManager manager) throws ClassNotFoundException {
+		ArrayList stack = (ArrayList) activationStack.get();
+		if (stack == null)
+			return;
+		int size = stack.size();
+		if (size <= 1 || stack.get(0) != name)
+			return;
+		// if we have a stack we must clear it even if (clazz == null)
+		ClasspathManager[] managers = null;
+		managers = new ClasspathManager[size - 1];
+		for (int i = 1; i < size; i++)
+			managers[i - 1] = (ClasspathManager) stack.get(i);
+		stack.clear();
+		if (clazz == null)
+			return;
+		for (int i = managers.length - 1; i >= 0; i--) {
+			if (errors.get(managers[i]) != null) {
+				if (throwErrorOnFailedStart)
+					throw (TerminatingClassNotFoundException) errors.get(managers[i]);
+				continue;
+			}
+			AbstractBundle bundle = (AbstractBundle) managers[i].getBaseData().getBundle();
+			// The bundle must be started.
+			// Note that another thread may already be starting this bundle;
+			// In this case we will timeout after 5 seconds and record the BundleException
+			try {
+				// do not persist the start of this bundle
+				secureAction.start(bundle, Bundle.START_TRANSIENT);
+			} catch (BundleException e) {
+				Throwable cause = e.getCause();
+				if (cause != null && cause instanceof StatusException) {
+					StatusException status = (StatusException) cause;
+					if ((status.getStatusCode() & StatusException.CODE_ERROR) == 0) {
+						if (status.getStatus() instanceof Thread) {
+							String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_CLASSLOADER_CONCURRENT_STARTUP, new Object[] {Thread.currentThread(), name, status.getStatus(), bundle, new Integer(5000)});
+							adaptor.getFrameworkLog().log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.WARNING, 0, message, 0, e, null));
+						}			
+						continue;
+					}
+				}
+				String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_CLASSLOADER_ACTIVATION, bundle.getSymbolicName(), Long.toString(bundle.getBundleId()));
+				TerminatingClassNotFoundException error = new TerminatingClassNotFoundException(message, e);
+				errors.put(managers[i], error);
+				if (throwErrorOnFailedStart) {
+					adaptor.getFrameworkLog().log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, message, 0, e, null));
+					throw error;
+				}
+				adaptor.getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, bundle, new BundleException(message, e));
+			}
+		}
 	}
 
 	public void preFindLocalResource(String name, ClasspathManager manager) {
@@ -108,36 +144,40 @@ public class EclipseLazyStarter implements ClassLoadingStatsHook, HookConfigurat
 		// do nothing
 	}
 
-	private boolean shouldActivateFor(String className, BaseData bundledata, EclipseStorageHook storageHook) throws ClassNotFoundException {
-		if (!isAutoStartable(className, bundledata, storageHook))
+	private boolean shouldActivateFor(String className, BaseData bundledata, EclipseStorageHook storageHook, ClasspathManager manager) throws ClassNotFoundException {
+		if (!isLazyStartable(className, bundledata, storageHook))
 			return false;
-		//Don't reactivate on shut down
-		if (bundledata.getAdaptor().isStopping()) {
-			BundleStopper stopper = EclipseStorageHook.getBundleStopper(bundledata);
-			if (stopper != null && stopper.isStopped(bundledata.getBundle())) {
-				String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_CLASSLOADER_ALREADY_STOPPED, className, bundledata.getSymbolicName());
-				throw new ClassNotFoundException(message);
+		// Don't activate non-starting bundles
+		if (bundledata.getBundle().getState() == Bundle.RESOLVED) {
+			if (throwErrorOnFailedStart) {
+				TerminatingClassNotFoundException error = (TerminatingClassNotFoundException) errors.get(manager);
+				if (error != null)
+					throw error;
 			}
+			StartLevelImpl sl = startLevelService;
+			return sl != null && ((sl.getStartLevel() == bundledata.getStartLevel() && sl.isSettingStartLevel()));
 		}
 		return true;
 	}
 
-	private boolean isAutoStartable(String className, BaseData bundledata, EclipseStorageHook storageHook) {
+	private boolean isLazyStartable(String className, BaseData bundledata, EclipseStorageHook storageHook) {
 		if (storageHook == null)
 			return false;
-		boolean autoStart = storageHook.isAutoStart();
-		String[] autoStartExceptions = storageHook.getAutoStartExceptions();
+		boolean lazyStart = storageHook.isLazyStart();
+		String[] excludes = storageHook.getLazyStartExcludes();
+		String[] includes = storageHook.getLazyStartIncludes();
 		// no exceptions, it is easy to figure it out
-		if (autoStartExceptions == null)
-			return autoStart;
+		if (excludes == null && includes == null)
+			return lazyStart;
 		// otherwise, we need to check if the package is in the exceptions list
 		int dotPosition = className.lastIndexOf('.');
 		// the class has no package name... no exceptions apply
 		if (dotPosition == -1)
-			return autoStart;
+			return lazyStart;
 		String packageName = className.substring(0, dotPosition);
-		// should activate if autoStart and package is not an exception, or if !autoStart and package is exception
-		return autoStart ^ contains(autoStartExceptions, packageName);
+		if (lazyStart)
+			return ((includes == null || contains(includes, packageName)) && (excludes == null || !contains(excludes, packageName)));
+		return (excludes != null && contains(excludes, packageName));
 	}
 
 	private boolean contains(String[] array, String element) {
@@ -149,5 +189,94 @@ public class EclipseLazyStarter implements ClassLoadingStatsHook, HookConfigurat
 
 	public void addHooks(HookRegistry hookRegistry) {
 		hookRegistry.addClassLoadingStatsHook(this);
+		hookRegistry.addAdaptorHook(this);
+	}
+
+	public void addProperties(Properties properties) {
+		// do nothing
+	}
+
+	public FrameworkLog createFrameworkLog() {
+		// do nothing
+		return null;
+	}
+
+	public void frameworkStart(BundleContext context) throws BundleException {
+		slRef = context.getServiceReference(StartLevel.class.getName());
+		if (slRef != null)
+			startLevelService = (StartLevelImpl) context.getService(slRef);
+	}
+
+	public void frameworkStop(BundleContext context) throws BundleException {
+		if (slRef != null) {
+			context.ungetService(slRef);
+			startLevelService = null;
+		}
+	}
+
+	public void frameworkStopping(BundleContext context) {
+		if (!Debug.DEBUG || !Debug.DEBUG_ENABLED)
+			return;
+
+		BundleDescription[] allBundles = adaptor.getState().getResolvedBundles();
+		StateHelper stateHelper = adaptor.getPlatformAdmin().getStateHelper();
+		Object[][] cycles = stateHelper.sortBundles(allBundles);
+		logCycles(cycles);
+	}
+
+	public void handleRuntimeError(Throwable error) {
+		// do nothing
+
+	}
+
+	public void initialize(BaseAdaptor baseAdaptor) {
+		this.adaptor = baseAdaptor;
+	}
+
+	public URLConnection mapLocationToURLConnection(String location) throws IOException {
+		// do nothing
+		return null;
+	}
+
+	public boolean matchDNChain(String pattern, String[] dnChain) {
+		// do nothing
+		return false;
+	}
+
+	private void logCycles(Object[][] cycles) {
+		// log cycles
+		if (cycles.length > 0) {
+			StringBuffer cycleText = new StringBuffer("["); //$NON-NLS-1$			
+			for (int i = 0; i < cycles.length; i++) {
+				cycleText.append('[');
+				for (int j = 0; j < cycles[i].length; j++) {
+					cycleText.append(((BundleDescription) cycles[i][j]).getSymbolicName());
+					cycleText.append(',');
+				}
+				cycleText.insert(cycleText.length() - 1, ']');
+			}
+			cycleText.setCharAt(cycleText.length() - 1, ']');
+			String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_BUNDLESTOPPER_CYCLES_FOUND, cycleText);
+			FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.WARNING, 0, message, 0, null, null);
+			adaptor.getFrameworkLog().log(entry);
+		}
+	}
+
+	private static class TerminatingClassNotFoundException extends ClassNotFoundException implements StatusException {
+		private static final long serialVersionUID = -6730732895632169173L;
+		private Object cause;
+		public TerminatingClassNotFoundException(String message, Throwable cause) {
+			super(message, cause);
+			this.cause = cause;
+		}
+
+		public Object getStatus() {
+			return cause;
+		}
+
+		public int getStatusCode() {
+			return StatusException.CODE_ERROR;
+		}
+		
 	}
 }

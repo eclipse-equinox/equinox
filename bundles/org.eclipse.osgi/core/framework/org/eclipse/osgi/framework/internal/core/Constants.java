@@ -85,8 +85,10 @@ public class Constants implements org.osgi.framework.Constants {
 	/** J2ME profile property name */
 	public static final String J2ME_MICROEDITION_PROFILES = "microedition.profiles"; //$NON-NLS-1$
 
-	/** Persistent bundle status */
+	/** Persistent start bundle status */
 	public static final int BUNDLE_STARTED = 0x00000001;
+	/** Lazy start flag bundle status */
+	public static final int BUNDLE_LAZY_START = 0x00000002;
 
 	/** Property file locations and default names. */
 	public static final String OSGI_PROPERTIES = "osgi.framework.properties"; //$NON-NLS-1$

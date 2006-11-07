@@ -1105,12 +1105,8 @@ public class Framework implements EventDispatcher, EventPublisher {
 			return;
 		}
 		try {
-			int status = bundle.getBundleData().getStatus();
-			if ((status & Constants.BUNDLE_STARTED) == 0) {
-				return;
-			}
 			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-				Debug.println("Trying to start bundle " + bundle); //$NON-NLS-1$
+				Debug.println("Trying to resume bundle " + bundle); //$NON-NLS-1$
 			}
 			bundle.resume();
 		} catch (BundleException be) {
@@ -1329,7 +1325,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 	 */
 	protected File getDataFile(final AbstractBundle bundle, final String filename) {
 		return (File) AccessController.doPrivileged(new GetDataFileAction(bundle, filename));
-	}
+			}
 
 	/**
 	 * Check for specific AdminPermission (RFC 73)
@@ -1535,9 +1531,9 @@ public class Framework implements EventDispatcher, EventPublisher {
 				contexts.dispatchEventSynchronous(BUNDLEEVENTSYNC, listenersSync);
 			}
 		}
-		/* Collect snapshot of BundleListeners; only if the event is NOT STARTING or STOPPING */
+		/* Collect snapshot of BundleListeners; only if the event is NOT STARTING or STOPPING or LAZY_ACTIVATION */
 		ListenerQueue listenersAsync = null;
-		if (bundleEvent != null && (event.getType() & (BundleEvent.STARTING | BundleEvent.STOPPING)) == 0)  {
+		if (bundleEvent != null && (event.getType() & (BundleEvent.STARTING | BundleEvent.STOPPING | BundleEvent.LAZY_ACTIVATION)) == 0)  {
 			/* queue to hold set of listeners */
 			listenersAsync = new ListenerQueue(eventManager);
 			/* queue to hold set of BundleContexts w/ listeners */

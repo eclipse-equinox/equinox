@@ -44,11 +44,9 @@ public class EclipseAdaptorHook implements AdaptorHook, HookConfigurator {
 	private static final String OPTION_LOCATION = RUNTIME_ADAPTOR + "/debug/location"; //$NON-NLS-1$
 
 	private BaseAdaptor adaptor;
-	private BundleStopper stopper;
 	private boolean noXML = false;
 
 	public void frameworkStart(BundleContext context) throws BundleException {
-		stopper = null;
 		registerEndorsedXMLParser(context);
 		Location location = LocationManager.getUserLocation();
 		Hashtable locationProperties = new Hashtable(1);
@@ -152,8 +150,6 @@ public class EclipseAdaptorHook implements AdaptorHook, HookConfigurator {
 			launcher.shutdown();
 			context.ungetService(launcherRef);
 		}
-		stopper = new BundleStopper(context, adaptor);
-		stopper.stopBundles();
 	}
 
 	public void addProperties(Properties properties) {
@@ -197,10 +193,6 @@ public class EclipseAdaptorHook implements AdaptorHook, HookConfigurator {
 			return;
 		PluginConverterImpl.DEBUG = options.getBooleanOption(OPTION_CONVERTER, false);
 		BasicLocation.DEBUG = options.getBooleanOption(OPTION_LOCATION, false);
-	}
-
-	public BundleStopper getBundleStopper() {
-		return stopper;
 	}
 
 	public void addHooks(HookRegistry hookRegistry) {

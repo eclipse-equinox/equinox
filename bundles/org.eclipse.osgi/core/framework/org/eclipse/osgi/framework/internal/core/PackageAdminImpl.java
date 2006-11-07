@@ -220,8 +220,9 @@ public class PackageAdminImpl implements PackageAdmin {
 				AbstractBundle[] allBundles = framework.getAllBundles();
 				for (int i = 0; i < allBundles.length; i++)
 					allBundles[i].unresolvePermissions();
-				resumeBundles(refreshedBundles);
 			}
+			// always resume bundles incase we have lazy-start bundles
+			resumeBundles(refreshedBundles, refreshPackages);
 		} catch (Throwable t) {
 			if (Debug.DEBUG && Debug.DEBUG_PACKAGEADMIN) {
 				Debug.println("PackageAdminImpl.doResolveBundles: Error occured :"); //$NON-NLS-1$
@@ -240,15 +241,18 @@ public class PackageAdminImpl implements PackageAdmin {
 		}
 	}
 
-	private void resumeBundles(AbstractBundle[] bundles) {
+	private void resumeBundles(AbstractBundle[] bundles, boolean refreshPackages) {
 		if (Debug.DEBUG && Debug.DEBUG_PACKAGEADMIN) {
 			Debug.println("PackageAdminImpl: restart the bundles"); //$NON-NLS-1$
 		}
 		if (bundles == null)
 			return;
 		for (int i = 0; i < bundles.length; i++) {
-			if (bundles[i].isResolved())
-				framework.resumeBundle(bundles[i]);
+			if (!bundles[i].isResolved() || (!refreshPackages && (bundles[i].getBundleData().getStatus() & Constants.BUNDLE_LAZY_START) == 0))
+				// skip bundles that are not resolved or
+				// if we are doing resolveBundles then skip non-lazy start bundles
+				continue;
+			framework.resumeBundle(bundles[i]);
 		}
 	}
 
@@ -528,7 +532,7 @@ public class PackageAdminImpl implements PackageAdmin {
 		if (System.getSecurityManager() == null)
 			return getBundlePriv(clazz);
 		return (Bundle) AccessController.doPrivileged(new GetBundleAction(this, clazz));
-	}
+			}
 
 	public int getBundleType(Bundle bundle) {
 		return ((AbstractBundle) bundle).isFragment() ? PackageAdmin.BUNDLE_TYPE_FRAGMENT : 0;

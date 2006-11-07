@@ -213,4 +213,7 @@ public class StartLevelImpl implements StartLevel {
 
 	}
 
+	public boolean isSettingStartLevel() {
+		return manager.isSettingStartLevel();
+	}
 }

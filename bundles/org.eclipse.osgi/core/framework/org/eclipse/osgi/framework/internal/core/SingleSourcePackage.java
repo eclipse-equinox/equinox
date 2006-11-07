@@ -33,7 +33,7 @@ public class SingleSourcePackage extends PackageSource {
 		return id + " -> " + supplier; //$NON-NLS-1$
 	}
 
-	public Class loadClass(String name) {
+	public Class loadClass(String name) throws ClassNotFoundException {
 		return supplier.getBundleLoader().findLocalClass(name);
 	}
 

@@ -44,7 +44,7 @@ public interface ClassLoadingStatsHook {
 	 * @param clazz the loaded class or null if not found
 	 * @param manager the classpath manager used to find and load the requested class
 	 */
-	void postFindLocalClass(String name, Class clazz, ClasspathManager manager);
+	void postFindLocalClass(String name, Class clazz, ClasspathManager manager) throws ClassNotFoundException;
 
 	/**
 	 * Gets called by a classpath manager during {@link ClasspathManager#findLocalResource(String)} before

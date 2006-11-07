@@ -48,7 +48,7 @@ public class FilteredSourcePackage extends SingleSourcePackage {
 			return null;
 		return super.getResources(name);
 	}
-	public Class loadClass(String name) {
+	public Class loadClass(String name) throws ClassNotFoundException {
 		if (isFiltered(name, getId()))
 			return null;
 		return super.loadClass(name);

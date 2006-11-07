@@ -14,15 +14,14 @@ package org.eclipse.osgi.framework.internal.core;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Enumeration;
-import org.eclipse.osgi.framework.adaptor.BundleData;
-import org.eclipse.osgi.framework.adaptor.BundleWatcher;
+import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.debug.Debug;
+import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 
 public class BundleHost extends AbstractBundle {
-
 	/** 
 	 * The BundleLoader proxy; a lightweight object that acts as a proxy
 	 * to the BundleLoader and allows lazy creation of the BundleLoader object
@@ -168,7 +167,7 @@ public class BundleHost extends AbstractBundle {
 				domain = null;
 			}
 		}
-		if (!exporting){
+		if (!exporting) {
 			try {
 				this.bundledata.close();
 			} catch (IOException e) { // Do Nothing.
@@ -223,8 +222,21 @@ public class BundleHost extends AbstractBundle {
 		}
 		BundleLoader loader = checkLoader();
 		if (loader == null)
-			throw new ClassNotFoundException(NLS.bind(Msg.BUNDLE_CNFE_NOT_RESOLVED, getBundleData().getLocation(), name)); 
-		return (loader.loadClass(name));
+			throw new ClassNotFoundException(NLS.bind(Msg.BUNDLE_CNFE_NOT_RESOLVED, name, getBundleData().getLocation()));
+		try {
+			return (loader.loadClass(name));
+		} catch (ClassNotFoundException e) {
+			// this is to support backward compatibility in eclipse
+			// we always attempted to start a bundle even if the class was not found
+			if (!(e instanceof StatusException) && (bundledata.getStatus() & Constants.BUNDLE_LAZY_START) != 0)
+				try {
+					// only start the bundle if this is a simple CNFE
+					framework.secureAction.start(this, START_TRANSIENT);
+				} catch (BundleException be) {
+					framework.adaptor.getFrameworkLog().log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.WARNING, 0, be.getMessage(), 0, be, null ));
+				}
+			throw e;
+		}
 	}
 
 	/**
@@ -276,81 +288,109 @@ public class BundleHost extends AbstractBundle {
 	/**
 	 * Internal worker to start a bundle.
 	 *
-	 * @param persistent if true persistently record the bundle was started.
+	 * @param options the start options
 	 */
-	protected void startWorker(boolean persistent) throws BundleException {
-		if (persistent) {
+	protected void startWorker(int options) throws BundleException {
+		if ((options & START_TRANSIENT) == 0) {
 			setStatus(Constants.BUNDLE_STARTED, true);
 		}
-		long start = 0;
-		if (framework.active) {
-			if ((state & (STARTING | ACTIVE)) != 0) {
-				return;
+		if (!framework.active || (state & ACTIVE) != 0)
+			return;
+
+		if (state == INSTALLED) {
+			if (!framework.packageAdmin.resolveBundles(new Bundle[] {this}))
+				throw new BundleException(getResolutionFailureMessage());
+		}
+
+		if (getStartLevel() > framework.startLevelManager.getStartLevel()) {
+			if ((options & START_TRANSIENT) != 0) {
+				// throw exception if this is a transient start
+				String msg = NLS.bind(Msg.BUNDLE_TRANSIENT_START_ERROR, this);
+				// Use a StatusException to indicate to the lazy starter that this should result in a warning
+				throw new BundleException(msg, new BundleStatusException(msg, StatusException.CODE_WARNING, this));
 			}
-			boolean shouldStart = false;
-			try {
-				if (state == INSTALLED) {
-					if (!framework.packageAdmin.resolveBundles(new Bundle[] {this})) {
-						throw new BundleException(getResolutionFailureMessage());
-					}
-				}
+			return;
+		}
 
-				if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-					Debug.println("Bundle: Active sl = " + framework.startLevelManager.getStartLevel() + "; Bundle " + getBundleId() + " sl = " + getStartLevel()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				}
-				shouldStart = getStartLevel() <= framework.startLevelManager.getStartLevel();
-				if (shouldStart) {
-					//STARTUP TIMING Start here					
-					if (Debug.DEBUG) {
-						BundleWatcher bundleStats = framework.adaptor.getBundleWatcher();
-						if (bundleStats != null)
-							bundleStats.watchBundle(this, BundleWatcher.START_ACTIVATION);
-						if (Debug.DEBUG_BUNDLE_TIME) {
-							start = System.currentTimeMillis();
-							System.out.println("Starting " + getSymbolicName()); //$NON-NLS-1$
-						}
-					}
-					context = createContext();
-					state = STARTING;
-					framework.publishBundleEvent(BundleEvent.STARTING, this);
-					try {
-						context.start();
+		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+			Debug.println("Bundle: Active sl = " + framework.startLevelManager.getStartLevel() + "; Bundle " + getBundleId() + " sl = " + getStartLevel()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		}
 
-						if (framework.active) {
-							state = ACTIVE;
-
-							if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-								Debug.println("->started " + this); //$NON-NLS-1$
-							}
-
-							framework.publishBundleEvent(BundleEvent.STARTED, this);
-						}
-
-					} catch (BundleException e) {
-						context.close();
-						context = null;
-
-						state = RESOLVED;
-
-						throw e;
-					}
-
-					if (state == UNINSTALLED) {
-						context.close();
-						context = null;
-						throw new BundleException(NLS.bind(Msg.BUNDLE_UNINSTALLED_EXCEPTION, getBundleData().getLocation())); 
-					}
-				}
-			} finally {
-				if (Debug.DEBUG && shouldStart) {
-					BundleWatcher bundleStats = framework.adaptor.getBundleWatcher();
-					if (bundleStats != null)
-						bundleStats.watchBundle(this, BundleWatcher.END_ACTIVATION);
-					if (Debug.DEBUG_BUNDLE_TIME)
-						System.out.println("End starting " + getSymbolicName() + " " + (System.currentTimeMillis() - start)); //$NON-NLS-1$ //$NON-NLS-2$
-				}
+		state = STARTING;
+		framework.publishBundleEvent(BundleEvent.STARTING, this);
+		context = getContext();
+		//STARTUP TIMING Start here		
+		long start = 0;
+		if (Debug.DEBUG) {
+			BundleWatcher bundleStats = framework.adaptor.getBundleWatcher();
+			if (bundleStats != null)
+				bundleStats.watchBundle(this, BundleWatcher.START_ACTIVATION);
+			if (Debug.DEBUG_BUNDLE_TIME) {
+				start = System.currentTimeMillis();
+				System.out.println("Starting " + getSymbolicName()); //$NON-NLS-1$
 			}
 		}
+		try {
+			context.start();
+
+			if (framework.active) {
+				state = ACTIVE;
+
+				if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+					Debug.println("->started " + this); //$NON-NLS-1$
+				}
+
+				framework.publishBundleEvent(BundleEvent.STARTED, this);
+			}
+
+		} catch (BundleException e) {
+			// we must fire the stopping event
+			state = STOPPING;
+			framework.publishBundleEvent(BundleEvent.STOPPING, this);
+
+			context.close();
+			context = null;
+
+			state = RESOLVED;
+			// if this is a lazy start bundle that fails to start then
+			// we must fire the stopped event
+			framework.publishBundleEvent(BundleEvent.STOPPED, this);
+			throw e;
+		} finally {
+			if (Debug.DEBUG) {
+				BundleWatcher bundleStats = framework.adaptor.getBundleWatcher();
+				if (bundleStats != null)
+					bundleStats.watchBundle(this, BundleWatcher.END_ACTIVATION);
+				if (Debug.DEBUG_BUNDLE_TIME)
+					System.out.println("End starting " + getSymbolicName() + " " + (System.currentTimeMillis() - start)); //$NON-NLS-1$ //$NON-NLS-2$
+			}
+		}
+
+		if (state == UNINSTALLED) {
+			context.close();
+			context = null;
+			throw new BundleException(NLS.bind(Msg.BUNDLE_UNINSTALLED_EXCEPTION, getBundleData().getLocation()));
+		}
+	}
+
+	protected boolean readyToResume() {
+		// Return false if the bundle is not at the correct start-level
+		if (getStartLevel() > framework.startLevelManager.getStartLevel())
+			return false;
+		int status = bundledata.getStatus();
+		// Return true if the bundle is persistently marked for start
+		if ((status & Constants.BUNDLE_STARTED) != 0)
+			return true;
+		// if not lazy-start return false
+		if ((status & Constants.BUNDLE_LAZY_START) == 0)
+			return false;
+		if (!isResolved())
+			// should never transition from UNRESOLVED -> STARTING
+			return false;
+		// now we can publish the LAZY_ACTIVATION event
+		state = STARTING;
+		framework.publishBundleEvent(BundleEvent.LAZY_ACTIVATION, this);
+		return false;
 	}
 
 	/**
@@ -367,20 +407,25 @@ public class BundleHost extends AbstractBundle {
 	 *
 	 * @return BundleContext for this bundle.
 	 */
-	protected BundleContextImpl getContext() {
+	protected synchronized BundleContextImpl getContext() {
+		if (context == null) {
+			// only create the context if we are starting, active or stopping
+			// this is so that SCR can get the context for lazy-start bundles
+			if ((state & (STARTING | ACTIVE | STOPPING)) != 0)
+				context = createContext();
+		}
 		return (context);
 	}
 
 	/**
 	 * Internal worker to stop a bundle.
 	 *
-	 * @param persistent if true persistently record the bundle was stopped.
+	 * @param options the stop options
 	 */
-	protected void stopWorker(boolean persistent) throws BundleException {
-		if (persistent) {
+	protected void stopWorker(int options) throws BundleException {
+		if ((options & STOP_TRANSIENT) == 0) {
 			setStatus(Constants.BUNDLE_STARTED, false);
 		}
-
 		if (framework.active) {
 			if ((state & (STOPPING | RESOLVED | INSTALLED)) != 0) {
 				return;
@@ -393,10 +438,14 @@ public class BundleHost extends AbstractBundle {
 			state = STOPPING;
 			framework.publishBundleEvent(BundleEvent.STOPPING, this);
 			try {
-				context.stop();
+				// context may be null if a lazy-start bundle is STARTING
+				if (context != null)
+					context.stop();
 			} finally {
-				context.close();
-				context = null;
+				if (context != null) {
+					context.close();
+					context = null;
+				}
 
 				checkValid();
 
@@ -509,7 +558,7 @@ public class BundleHost extends AbstractBundle {
 					// then we cannot attach a fragment into the middle
 					// of the fragment chain.
 					if (loader != null) {
-						throw new BundleException(NLS.bind(Msg.BUNDLE_LOADER_ATTACHMENT_ERROR, fragments[i].getSymbolicName(), getSymbolicName())); 
+						throw new BundleException(NLS.bind(Msg.BUNDLE_LOADER_ATTACHMENT_ERROR, fragments[i].getSymbolicName(), getSymbolicName()));
 					}
 					newFragments[i] = fragment;
 					inserted = true;

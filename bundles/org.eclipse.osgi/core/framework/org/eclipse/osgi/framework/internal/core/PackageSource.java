@@ -48,7 +48,7 @@ public abstract class PackageSource implements KeyedElement {
 		return true;
 	}
 
-	public abstract Class loadClass(String name);
+	public abstract Class loadClass(String name) throws ClassNotFoundException;
 	public abstract URL getResource(String name);
 	public abstract Enumeration getResources(String name) throws IOException;
 

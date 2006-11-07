@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/BundleActivator.java,v 1.11 2006/06/16 16:31:18 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/BundleActivator.java,v 1.12 2006/10/27 18:22:41 hargrave Exp $
  * 
  * Copyright (c) OSGi Alliance (2000, 2006). All Rights Reserved.
  * 
@@ -35,17 +35,17 @@ package org.osgi.framework;
  * must not have a <code>BundleActivator</code>. The form of the Manifest
  * header is:
  * 
- * <pre>
- *   Bundle-Activator: &lt;i&gt;class-name&lt;/i&gt;
- * </pre>
+ * <p>
+ * <code>Bundle-Activator: <i>class-name</i></code>
  * 
- * where <code>class-name</code> is a fully qualified Java classname.
+ * <p>
+ * where <code><i>class-name</i></code> is a fully qualified Java classname.
  * <p>
  * The specified <code>BundleActivator</code> class must have a public
  * constructor that takes no parameters so that a <code>BundleActivator</code>
  * object can be created by <code>Class.newInstance()</code>.
  * 
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 
 public interface BundleActivator {
@@ -63,7 +63,6 @@ public interface BundleActivator {
 	 *         bundle is marked as stopped and the Framework will remove this
 	 *         bundle's listeners, unregister all services registered by this
 	 *         bundle, and release all services used by this bundle.
-	 * @see Bundle#start
 	 */
 	public void start(BundleContext context) throws Exception;
 
@@ -83,7 +82,6 @@ public interface BundleActivator {
 	 *         bundle is still marked as stopped, and the Framework will remove
 	 *         the bundle's listeners, unregister all services registered by the
 	 *         bundle, and release all services used by the bundle.
-	 * @see Bundle#stop
 	 */
 	public void stop(BundleContext context) throws Exception;
 }

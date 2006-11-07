@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/Bundle.java,v 1.37 2006/06/27 13:13:30 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/Bundle.java,v 1.42 2006/11/06 14:34:41 hargrave Exp $
  * 
  * Copyright (c) OSGi Alliance (2000, 2006). All Rights Reserved.
  * 
@@ -64,7 +64,7 @@ import java.util.Enumeration;
  * <code>Bundle</code> objects, and these objects are only valid within the
  * Framework that created them.
  * 
- * @version $Revision: 1.37 $
+ * @version $Revision: 1.42 $
  */
 public interface Bundle {
 	/**
@@ -127,7 +127,7 @@ public interface Bundle {
 	 * This bundle is in the process of starting.
 	 * 
 	 * <p>
-	 * A bundle is in the <code>STARTING</code> state when the {@link #start}
+	 * A bundle is in the <code>STARTING</code> state when the <code>start</code>
 	 * method is active. A bundle must be in this state when the bundle's
 	 * {@link BundleActivator#start} is called. If this method completes without
 	 * exception, then the bundle has successfully started and must move to the
@@ -141,7 +141,7 @@ public interface Bundle {
 	 * This bundle is in the process of stopping.
 	 * 
 	 * <p>
-	 * A bundle is in the <code>STOPPING</code> state when the {@link #stop}
+	 * A bundle is in the <code>STOPPING</code> state when the <code>stop</code>
 	 * method is active. A bundle must be in this state when the bundle's
 	 * {@link BundleActivator#stop} method is called. When this method completes
 	 * the bundle is stopped and must move to the <code>RESOLVED</code> state.
@@ -160,6 +160,30 @@ public interface Bundle {
 	 * The value of <code>ACTIVE</code> is 0x00000020.
 	 */
 	public static final int	ACTIVE		= 0x00000020;
+	
+	/**
+	 * The bundle start is transient and is not persistently marked.
+	 * 
+	 * <p> This bit may be set when calling {@link #start(int)}
+	 * to notify the framework that the starting of the bundle is not to 
+	 * be persistently marked. If this bit is not set, then the starting 
+	 * of the bundle is persistently marked.
+	 * 
+	 * @since 1.4
+	 */
+	public static final int START_TRANSIENT = 0x00000001;
+
+	/**
+	 * The bundle stop is transient and is not persistently marked.
+	 * 
+	 * <p> This bit may be set when calling {@link #stop(int)}
+	 * to notify the framework that the stopping of the bundle is not to 
+	 * be persistently marked. If this bit is not set, then the stopping 
+	 * of the bundle is persistently marked.
+	 * 
+	 * @since 1.4
+	 */
+	public static final int STOP_TRANSIENT = 0x00000001;
 
 	/**
 	 * Returns this bundle's current state.
@@ -177,28 +201,37 @@ public interface Bundle {
 	 * Starts this bundle.
 	 * 
 	 * <p>
-	 * If the Framework implements the optional Start Level service and the
-	 * current start level is less than this bundle's start level, then the
-	 * Framework must persistently mark this bundle as started and delay the
-	 * starting of this bundle until the Framework's current start level becomes
-	 * equal or more than the bundle's start level.
-	 * <p>
-	 * Otherwise, the following steps are required to start a bundle:
-	 * <ol>
-	 * <li>If this bundle's state is <code>UNINSTALLED</code> then an
+	 * If this bundle's state is <code>UNINSTALLED</code> then an
 	 * <code>IllegalStateException</code> is thrown.
+	 * <p>
+	 * If the Framework implements the optional Start Level service and the
+	 * current start level is less than this bundle's start level:
+	 * <ul> 
+	 * <li>If the {@link #START_TRANSIENT} option is set,
+	 * then a <code>BundleException</code> is thrown indicating this bundle
+	 * cannot be started due to the Framework's current start level. 
 	 * 
-	 * <li>If this bundle's state is <code>STARTING</code> or
-	 * <code>STOPPING</code> then this method must wait for this bundle to
-	 * change state before continuing. If this does not occur in a reasonable
+	 * <li>Otherwise, the Framework must persistently mark this bundle as started.
+	 * When the Framework's current 
+	 * start level becomes equal to or more than this bundle's start level, this 
+	 * bundle will be started. 
+	 * </ul>
+	 * <p>
+	 * Otherwise, the following steps are required to start this bundle:
+	 * <ol>
+	 * <li>If this bundle is in the process of being activated or deactivated 
+	 * then this method must wait for activation or deactivation to 
+	 * complete before continuing. If this does not occur in a reasonable
 	 * time, a <code>BundleException</code> is thrown to indicate this bundle
 	 * was unable to be started.
 	 * 
 	 * <li>If this bundle's state is <code>ACTIVE</code> then this method
 	 * returns immediately.
 	 * 
-	 * <li>Persistently record that this bundle has been started. When the
-	 * Framework is restarted, this bundle must be automatically started.
+	 * <li>Persistently record that this bundle has been started unless the 
+	 * {@link #START_TRANSIENT} option is set. When the
+	 * Framework is restarted and the bundle is persistently marked started,
+	 * this bundle must be automatically started.
 	 * 
 	 * <li>If this bundle's state is not <code>RESOLVED</code>, an attempt
 	 * is made to resolve this bundle's package dependencies. If the Framework
@@ -206,16 +239,18 @@ public interface Bundle {
 	 * 
 	 * <li>This bundle's state is set to <code>STARTING</code>.
 	 * 
-	 * <li>A bundle event of type {@link BundleEvent#STARTING} is fired. This event is only delivered to
-	 * <code>SynchronousBundleListener</code>s. It is not delivered to <code>BundleListener</code>s.
+	 * <li>A bundle event of type {@link BundleEvent#STARTING} is fired.
 	 * 
 	 * <li>The {@link BundleActivator#start} method of this bundle's
 	 * <code>BundleActivator</code>, if one is specified, is called. If the
 	 * <code>BundleActivator</code> is invalid or throws an exception, this
-	 * bundle's state is set back to <code>RESOLVED</code>.<br>
+	 * bundle's state is set to <code>STOPPING</code>.<br>
+	 * A bundle event of type {@link BundleEvent#STOPPING} is fired. <br>
 	 * Any services registered by the bundle must be unregistered. <br>
 	 * Any services used by the bundle must be released. <br>
 	 * Any listeners registered by the bundle must be removed. <br>
+	 * This bundle's state is set to <code>RESOLVED</code>.<br>
+	 * A bundle event of type {@link BundleEvent#STOPPED} is fired. <br>
 	 * A <code>BundleException</code> is then thrown.
 	 * 
 	 * <li>If this bundle's state is <code>UNINSTALLED</code>, because the
@@ -229,12 +264,15 @@ public interface Bundle {
 	 * 
 	 * <b>Preconditions </b>
 	 * <ul>
-	 * <li><code>getState()</code> in {<code>INSTALLED</code>}, {
-	 * <code>RESOLVED</code>}.
+	 * <li><code>getState()</code> in {<code>INSTALLED</code>,
+	 * <code>RESOLVED</code>} or {<code>INSTALLED</code>,
+	 * <code>RESOLVED</code>, <code>STARTING</code>} if the bundle
+	 * has a lazy activation policy.
 	 * </ul>
 	 * <b>Postconditions, no exceptions thrown </b>
 	 * <ul>
-	 * <li>Bundle persistent state is marked as active.
+	 * <li>Bundle persistent state is marked as active unless the 
+	 * {@link #START_TRANSIENT} option was set.
 	 * <li><code>getState()</code> in {<code>ACTIVE</code>}.
 	 * <li><code>BundleActivator.start()</code> has been called and did not
 	 * throw an exception.
@@ -242,10 +280,32 @@ public interface Bundle {
 	 * <b>Postconditions, when an exception is thrown </b>
 	 * <ul>
 	 * <li>Depending on when the exception occurred, bundle persistent state is
-	 * marked as active.
-	 * <li><code>getState()</code> not in {<code>STARTING</code>}, {
+	 * marked as active unless the {@link #START_TRANSIENT} option was set.
+	 * <li><code>getState()</code> not in {<code>STARTING</code>,
 	 * <code>ACTIVE</code>}.
 	 * </ul>
+	 * 
+	 * @param options The options for starting this bundle. See
+	 *         {@link #START_TRANSIENT}. The Framework must ignore unrecognized
+	 *         options.
+	 * @throws BundleException If this bundle could not be started. This could
+	 *         be because a code dependency could not be resolved or the
+	 *         specified <code>BundleActivator</code> could not be loaded or
+	 *         threw an exception.
+	 * @throws java.lang.IllegalStateException If this bundle has been
+	 *         uninstalled or this bundle tries to change its own state.
+	 * @throws java.lang.SecurityException If the caller does not have the
+	 *         appropriate <code>AdminPermission[this,EXECUTE]</code>, and the
+	 *         Java Runtime Environment supports permissions.
+	 * @since 1.4         
+	 */
+	public void start(int options) throws BundleException;
+	
+	/**
+	 * Starts this bundle with no options.
+	 * 
+	 * <p>
+	 * This method calls <code>start(0)</code>.
 	 * 
 	 * @throws BundleException If this bundle could not be started. This could
 	 *         be because a code dependency could not be resolved or the
@@ -256,6 +316,7 @@ public interface Bundle {
 	 * @throws java.lang.SecurityException If the caller does not have the
 	 *         appropriate <code>AdminPermission[this,EXECUTE]</code>, and the
 	 *         Java Runtime Environment supports permissions.
+	 * @see #start(int)
 	 */
 	public void start() throws BundleException;
 
@@ -268,22 +329,23 @@ public interface Bundle {
 	 * <li>If this bundle's state is <code>UNINSTALLED</code> then an
 	 * <code>IllegalStateException</code> is thrown.
 	 * 
-	 * <li>If this bundle's state is <code>STARTING</code> or
-	 * <code>STOPPING</code> then this method must wait for this bundle to
-	 * change state before continuing. If this does not occur in a reasonable
+	 * <li>If this bundle is in the process of being activated or deactivated 
+	 * then this method must wait for activation or deactivation to 
+	 * complete before continuing. If this does not occur in a reasonable
 	 * time, a <code>BundleException</code> is thrown to indicate this bundle
 	 * was unable to be stopped.
 	 * 
-	 * <li>Persistently record that this bundle has been stopped. When the
-	 * Framework is restarted, this bundle must not be automatically started.
+	 * <li>Persistently record that this bundle has been stopped unless the 
+	 * {@link #STOP_TRANSIENT} option is set. When the
+	 * Framework is restarted and the bundle is persistently marked stopped,
+	 * this bundle must not be automatically started.
 	 * 
 	 * <li>If this bundle's state is not <code>ACTIVE</code> then this method
 	 * returns immediately.
 	 * 
 	 * <li>This bundle's state is set to <code>STOPPING</code>.
 	 * 
-	 * <li>A bundle event of type {@link BundleEvent#STOPPING} is fired. This event is only delivered to
-	 * <code>SynchronousBundleListener</code>s. It is not delivered to <code>BundleListener</code>s.
+	 * <li>A bundle event of type {@link BundleEvent#STOPPING} is fired.
 	 * 
 	 * <li>The {@link BundleActivator#stop} method of this bundle's
 	 * <code>BundleActivator</code>, if one is specified, is called. If that
@@ -310,7 +372,8 @@ public interface Bundle {
 	 * </ul>
 	 * <b>Postconditions, no exceptions thrown </b>
 	 * <ul>
-	 * <li>Bundle persistent state is marked as stopped.
+	 * <li>Bundle persistent state is marked as stopped unless the 
+	 * {@link #STOP_TRANSIENT} option was set.
 	 * <li><code>getState()</code> not in {<code>ACTIVE</code>,
 	 * <code>STOPPING</code>}.
 	 * <li><code>BundleActivator.stop</code> has been called and did not
@@ -318,16 +381,38 @@ public interface Bundle {
 	 * </ul>
 	 * <b>Postconditions, when an exception is thrown </b>
 	 * <ul>
-	 * <li>Bundle persistent state is marked as stopped.
+	 * <li>Bundle persistent state is marked as stopped unless the 
+	 * {@link #STOP_TRANSIENT} option was set.
 	 * </ul>
 	 * 
+	 * @param options The options for stoping this bundle. See
+	 *         {@link #STOP_TRANSIENT}. The Framework must ignore unrecognized
+	 *         options.
 	 * @throws BundleException If this bundle's <code>BundleActivator</code>
-	 *         could not be loaded or threw an exception.
+	 *         threw an exception.
 	 * @throws java.lang.IllegalStateException If this bundle has been
 	 *         uninstalled or this bundle tries to change its own state.
 	 * @throws java.lang.SecurityException If the caller does not have the
 	 *         appropriate <code>AdminPermission[this,EXECUTE]</code>, and the
 	 *         Java Runtime Environment supports permissions.
+	 * @since 1.4         
+	 */
+	public void stop(int options) throws BundleException;
+	
+	/**
+	 * Stops this bundle with no options.
+	 * 
+	 * <p>
+	 * This method calls <code>stop(0)</code>.
+	 * 
+	 * @throws BundleException If this bundle's <code>BundleActivator</code>
+	 *         threw an exception.
+	 * @throws java.lang.IllegalStateException If this bundle has been
+	 *         uninstalled or this bundle tries to change its own state.
+	 * @throws java.lang.SecurityException If the caller does not have the
+	 *         appropriate <code>AdminPermission[this,EXECUTE]</code>, and the
+	 *         Java Runtime Environment supports permissions.
+	 * @see #start(int)
 	 */
 	public void stop() throws BundleException;
 
@@ -953,10 +1038,22 @@ public interface Bundle {
 	 */
 	public Enumeration findEntries(String path, String filePattern,
 			boolean recurse);
-
+	
 	/**
-	 * EXPERIMENTAL OSGi R4.1 method
-	 * @return the bundle context for this bundle
+	 * Returns this bundle's {@link BundleContext}. The returned <code>BundleContext</code>
+	 * can be used by the caller to act on behalf of this bundle.
+	 * 
+	 * <p>
+	 * If this bundle is not in the {@link #STARTING}, {@link #ACTIVE}, 
+	 * or {@link #STOPPING} states, then this bundle has no valid 
+	 * <code>BundleContext</code>. This method will return <code>null</code>
+	 * if this bundle has no valid <code>BundleContext</code>.
+	 * 
+	 * @return A <code>BundleContext</code> for this bundle or <code>null</code> if this bundle
+	 *         has no valid <code>BundleContext</code>.
+	 * @throws java.lang.SecurityException If the caller does not have the
+	 *         appropriate <code>AdminPermission[this,CONTEXT]</code>, and the
+	 *         Java Runtime Environment supports permissions.
 	 * @since 1.4
 	 */
 	public BundleContext getBundleContext();
