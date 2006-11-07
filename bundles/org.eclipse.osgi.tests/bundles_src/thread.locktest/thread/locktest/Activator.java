@@ -1,0 +1,42 @@
+/*******************************************************************************
+ * Copyright (c) 2006 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *******************************************************************************/
+package thread.locktest;
+
+import org.eclipse.osgi.tests.bundles.AbstractBundleTests;
+import org.osgi.framework.*;
+
+public class Activator implements BundleActivator, Runnable {
+
+	public void start(BundleContext context) throws Exception {
+		Thread thread = new Thread(this, "thread.locktest");
+		System.out.println("about to start thread");
+		thread.start();
+		System.out.println("about to join the thread");
+		thread.join(10000);
+		System.out.println("after joining thread");
+		AbstractBundleTests.simpleResults.addEvent(new BundleEvent(BundleEvent.STARTED, context.getBundle()));
+	}
+
+	public void stop(BundleContext context) throws Exception {
+		AbstractBundleTests.simpleResults.addEvent(new BundleEvent(BundleEvent.STOPPED, context.getBundle()));
+	}
+
+	public void run() {
+		long startTime = System.currentTimeMillis();
+		System.out.println("about to load Class1");
+		new Class1();
+		long totalTime = System.currentTimeMillis() - startTime;
+		System.out.println("loaded Class1 " + totalTime);
+		if (totalTime < 10000)
+			AbstractBundleTests.simpleResults.addEvent(new Long(5000));
+	}
+
+}

@@ -1,16 +1,17 @@
 /*******************************************************************************
- * Copyright (c) 2004 IBM Corporation and others.
+ * Copyright (c) 2004, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.osgi.tests;
 
 import junit.framework.*;
+import org.eclipse.osgi.tests.bundles.BundleTests;
 import org.eclipse.osgi.tests.internal.plugins.InstallTests;
 import org.eclipse.osgi.tests.listeners.ExceptionHandlerTests;
 
@@ -43,6 +44,7 @@ public class AutomatedTests extends TestCase {
 		suite.addTest(org.eclipse.osgi.tests.configuration.AllTests.suite());
 		suite.addTest(org.eclipse.osgi.tests.services.datalocation.AllTests.suite());
 		suite.addTest(org.eclipse.osgi.tests.util.AllTests.suite());
+		suite.addTest(BundleTests.suite());
 		return suite;
 	}
 }

@@ -1,6 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" output="bundle_tests/test" path="bundles_src/test"/>
+	<classpathentry kind="src" output="bundle_tests/chain.test" path="bundles_src/chain.test"/>
+	<classpathentry kind="src" output="bundle_tests/chain.test.a" path="bundles_src/chain.test.a"/>
+	<classpathentry kind="src" output="bundle_tests/chain.test.b" path="bundles_src/chain.test.b"/>
+	<classpathentry kind="src" output="bundle_tests/chain.test.c" path="bundles_src/chain.test.c"/>
+	<classpathentry kind="src" output="bundle_tests/chain.test.d" path="bundles_src/chain.test.d"/>
+	<classpathentry kind="src" output="bundle_tests/circularity.test" path="bundles_src/circularity.test"/>
+	<classpathentry kind="src" output="bundle_tests/circularity.test.a" path="bundles_src/circularity.test.a"/>
+	<classpathentry kind="src" output="bundle_tests/fragment.test.attach.host.a" path="bundles_src/fragment.test.attach.host.a"/>
+	<classpathentry kind="src" output="bundle_tests/fragment.test.attach.frag.a" path="bundles_src/fragment.test.attach.frag.a"/>
+	<classpathentry kind="src" output="bundle_tests/legacy.lazystart" path="bundles_src/legacy.lazystart"/>
+	<classpathentry kind="src" output="bundle_tests/legacy.lazystart.a" path="bundles_src/legacy.lazystart.a"/>
+	<classpathentry kind="src" output="bundle_tests/legacy.lazystart.b" path="bundles_src/legacy.lazystart.b"/>
+	<classpathentry kind="src" output="bundle_tests/legacy.lazystart.c" path="bundles_src/legacy.lazystart.c"/>
+	<classpathentry kind="src" output="bundle_tests/osgi.lazystart" path="bundles_src/osgi.lazystart"/>
+	<classpathentry kind="src" output="bundle_tests/osgi.lazystart.a" path="bundles_src/osgi.lazystart.a"/>
+	<classpathentry kind="src" output="bundle_tests/osgi.lazystart.b" path="bundles_src/osgi.lazystart.b"/>
+	<classpathentry kind="src" output="bundle_tests/osgi.lazystart.c" path="bundles_src/osgi.lazystart.c"/>
+	<classpathentry kind="src" output="bundle_tests/thread.locktest" path="bundles_src/thread.locktest"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="output" path="bin"/>
