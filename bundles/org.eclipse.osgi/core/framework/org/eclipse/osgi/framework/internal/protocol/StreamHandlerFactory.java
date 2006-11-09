@@ -16,8 +16,10 @@ import java.net.*;
 import java.util.*;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.internal.core.Constants;
+import org.eclipse.osgi.framework.internal.core.Msg;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.framework.util.SecureAction;
+import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.url.URLConstants;
 import org.osgi.util.tracker.ServiceTracker;
@@ -121,8 +123,13 @@ public class StreamHandlerFactory extends MultiplexingFactory implements URLStre
 				return null;
 			for (int i = 0; i < serviceReferences.length; i++) {
 				Object prop = serviceReferences[i].getProperty(URLConstants.URL_HANDLER_PROTOCOL);
-				if (!(prop instanceof String[]))
+				if (prop instanceof String)
+					prop = new String[] {(String) prop}; // TODO should this be a warning?
+				if (!(prop instanceof String[])) {
+					String message = NLS.bind(Msg.URL_HANDLER_INCORRECT_TYPE, new Object[] {URLConstants.URL_HANDLER_PROTOCOL, URLSTREAMHANDLERCLASS, serviceReferences[i].getBundle()});
+					adaptor.getFrameworkLog().log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.WARNING, 0, message, 0, null, null));
 					continue;
+				}
 				String[] protocols = (String[]) prop;
 				for (int j = 0; j < protocols.length; j++)
 					if (protocols[j].equals(protocol)) {

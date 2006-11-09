@@ -94,6 +94,8 @@ public class Msg extends NLS {
 
 	public static String CANNOT_SET_CONTEXTFINDER;
 
+	public static String URL_HANDLER_INCORRECT_TYPE;
+
 	static {
 		// initialize resource bundles
 		NLS.initializeMessages(BUNDLE_NAME, Msg.class);

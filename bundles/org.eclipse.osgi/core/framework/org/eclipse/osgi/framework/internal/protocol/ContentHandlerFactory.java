@@ -16,7 +16,9 @@ import java.net.ContentHandler;
 import java.net.URLConnection;
 import java.util.*;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
+import org.eclipse.osgi.framework.internal.core.Msg;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
+import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.url.URLConstants;
 import org.osgi.util.tracker.ServiceTracker;
@@ -101,15 +103,20 @@ public class ContentHandlerFactory extends MultiplexingFactory implements java.n
 		org.osgi.framework.ServiceReference[] serviceReferences = contentHandlerTracker.getServiceReferences();
 		if (serviceReferences != null) {
 			for (int i = 0; i < serviceReferences.length; i++) {
-				Object obj = serviceReferences[i].getProperty(URLConstants.URL_CONTENT_MIMETYPE);
-				if (obj != null && obj instanceof String[]) {
-					String[] contentHandler = (String[]) obj;
-					for (int j = 0; j < contentHandler.length; j++) {
-						if (contentHandler[j].equals(contentType)) {
-							proxy = new ContentHandlerProxy(contentType, serviceReferences[i], context);
-							proxies.put(contentType, proxy);
-							return (proxy);
-						}
+				Object prop = serviceReferences[i].getProperty(URLConstants.URL_CONTENT_MIMETYPE);
+				if (prop instanceof String)
+					prop = new String[] {(String) prop}; // TODO should this be a warning?
+				if (!(prop instanceof String[])) {
+					String message = NLS.bind(Msg.URL_HANDLER_INCORRECT_TYPE, new Object[] {URLConstants.URL_CONTENT_MIMETYPE, contentHandlerClazz, serviceReferences[i].getBundle()});
+					adaptor.getFrameworkLog().log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.WARNING, 0, message, 0, null, null));
+					continue;
+				}
+				String[] contentHandler = (String[]) prop;
+				for (int j = 0; j < contentHandler.length; j++) {
+					if (contentHandler[j].equals(contentType)) {
+						proxy = new ContentHandlerProxy(contentType, serviceReferences[i], context);
+						proxies.put(contentType, proxy);
+						return (proxy);
 					}
 				}
 			}
