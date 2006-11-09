@@ -296,7 +296,7 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		// now call start(START_TRANSIENT) before the start-level is met.  This should result in no events
 		try {
 			osgiA.start(Bundle.START_TRANSIENT);
-			fail("Should not be able to transient start: " + osgiA);
+			assertFalse("Bundle is started!!", osgiA.getState() == Bundle.ACTIVE);
 		} catch (BundleException e) {
 			// expected
 		}
