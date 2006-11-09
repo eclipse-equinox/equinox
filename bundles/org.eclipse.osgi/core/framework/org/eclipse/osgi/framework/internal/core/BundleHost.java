@@ -302,15 +302,8 @@ public class BundleHost extends AbstractBundle {
 				throw new BundleException(getResolutionFailureMessage());
 		}
 
-		if (getStartLevel() > framework.startLevelManager.getStartLevel()) {
-			if ((options & START_TRANSIENT) != 0) {
-				// throw exception if this is a transient start
-				String msg = NLS.bind(Msg.BUNDLE_TRANSIENT_START_ERROR, this);
-				// Use a StatusException to indicate to the lazy starter that this should result in a warning
-				throw new BundleException(msg, new BundleStatusException(msg, StatusException.CODE_WARNING, this));
-			}
+		if (getStartLevel() > framework.startLevelManager.getStartLevel())
 			return;
-		}
 
 		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 			Debug.println("Bundle: Active sl = " + framework.startLevelManager.getStartLevel() + "; Bundle " + getBundleId() + " sl = " + getStartLevel()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$

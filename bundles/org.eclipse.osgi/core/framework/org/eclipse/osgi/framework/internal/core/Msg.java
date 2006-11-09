@@ -35,7 +35,6 @@ public class Msg extends NLS {
 	public static String BUNDLE_FRAGMENT_CNFE;
 	public static String BUNDLE_FRAGMENT_START;
 	public static String BUNDLE_FRAGMENT_STOP;
-	public static String BUNDLE_TRANSIENT_START_ERROR;
 	
 	public static String BUNDLE_CNFE_NOT_RESOLVED;
 	public static String BUNDLE_LOADER_ATTACHMENT_ERROR;
