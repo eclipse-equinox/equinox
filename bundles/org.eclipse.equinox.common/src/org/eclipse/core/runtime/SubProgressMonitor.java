@@ -11,6 +11,8 @@
 package org.eclipse.core.runtime;
 
 /**
+ * For new implementations consider using {@link SubMonitor}.
+ * 
  * A progress monitor that uses a given amount of work ticks
  * from a parent monitor. It can be used as follows:
  * <pre>
@@ -34,6 +36,8 @@ package org.eclipse.core.runtime;
  * </p><p>
  * This class may be instantiated or subclassed by clients.
  * </p>
+ * 
+ * @see SubMonitor
  */
 public class SubProgressMonitor extends ProgressMonitorWrapper {
 
