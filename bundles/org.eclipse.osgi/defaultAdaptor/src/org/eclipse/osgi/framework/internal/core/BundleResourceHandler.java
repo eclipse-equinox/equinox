@@ -91,19 +91,19 @@ public abstract class BundleResourceHandler extends URLStreamHandler {
 		if (path == null)
 			path = ""; //$NON-NLS-1$
 		//modify path if there's any relative references
+		// see RFC2396 Section 5.2
+		// Note: For ".." references above the root the approach taken is removing them from the resolved path
+		if (path.endsWith("/.") || path.endsWith("/..")) //$NON-NLS-1$ //$NON-NLS-2$
+			path = path + '/';
 		int dotIndex;
 		while ((dotIndex = path.indexOf("/./")) >= 0) //$NON-NLS-1$
 			path = path.substring(0, dotIndex + 1) + path.substring(dotIndex + 3);
-		if (path.endsWith("/.")) //$NON-NLS-1$
-			path = path.substring(0, path.length() - 1);
 		while ((dotIndex = path.indexOf("/../")) >= 0) { //$NON-NLS-1$
 			if (dotIndex != 0)
 				path = path.substring(0, path.lastIndexOf('/', dotIndex - 1)) + path.substring(dotIndex + 3);
 			else
 				path = path.substring(dotIndex + 3);
 		}
-		if (path.endsWith("/..") && path.length() > 3) //$NON-NLS-1$
-			path = path.substring(0, path.length() - 2);
 		while ((dotIndex = path.indexOf("//")) >= 0) //$NON-NLS-1$
 			path = path.substring(0, dotIndex + 1) + path.substring(dotIndex + 2);
 
