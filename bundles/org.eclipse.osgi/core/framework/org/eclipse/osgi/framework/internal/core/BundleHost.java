@@ -228,7 +228,7 @@ public class BundleHost extends AbstractBundle {
 		} catch (ClassNotFoundException e) {
 			// this is to support backward compatibility in eclipse
 			// we always attempted to start a bundle even if the class was not found
-			if (!(e instanceof StatusException) && (bundledata.getStatus() & Constants.BUNDLE_LAZY_START) != 0)
+			if (!(e instanceof StatusException) && (bundledata.getStatus() & Constants.BUNDLE_LAZY_START) != 0 && !testStateChanging(Thread.currentThread()))
 				try {
 					// only start the bundle if this is a simple CNFE
 					framework.secureAction.start(this, START_TRANSIENT);
