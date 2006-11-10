@@ -153,11 +153,12 @@ public class EclipseAdaptorHook implements AdaptorHook, HookConfigurator {
 	}
 
 	public void addProperties(Properties properties) {
-		// default the bootdelegation to all packages
-		if (properties.getProperty(Constants.OSGI_BOOTDELEGATION) == null && !Constants.OSGI_BOOTDELEGATION_NONE.equals(properties.getProperty(Constants.OSGI_JAVA_PROFILE_BOOTDELEGATION)))
-			properties.put(Constants.OSGI_BOOTDELEGATION, "*"); //$NON-NLS-1$
+		// default to not verify EE at install time
 		if (properties.getProperty(Constants.ECLIPSE_EE_INSTALL_VERIFY) == null)
 			properties.put(Constants.ECLIPSE_EE_INSTALL_VERIFY, "false"); //$NON-NLS-1$
+		// default to enable compatibility boot delegation
+		if (properties.getProperty(Constants.OSGI_COMPATIBILITY_BOOTDELEGATION) == null)
+			properties.put(Constants.OSGI_COMPATIBILITY_BOOTDELEGATION, "true"); //$NON-NLS-1$
 	}
 
 	public URLConnection mapLocationToURLConnection(String location) throws IOException {

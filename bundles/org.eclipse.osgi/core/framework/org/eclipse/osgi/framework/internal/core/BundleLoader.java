@@ -356,6 +356,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 		if (Debug.DEBUG && Debug.DEBUG_LOADER)
 			Debug.println("BundleLoader[" + this + "].loadBundleClass(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		String pkgName = getPackageName(name);
+		boolean bootDelegation = false;
 		// follow the OSGi delegation model
 		if (checkParent && parent != null) {
 			if (name.startsWith(JAVA_PACKAGE))
@@ -368,6 +369,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 					return parent.loadClass(name);
 				} catch (ClassNotFoundException cnfe) {
 					// we want to continue
+					bootDelegation = true;
 				}
 		}
 
@@ -394,14 +396,24 @@ public class BundleLoader implements ClassLoaderDelegate {
 		// 6) attempt to find a dynamic import source; only do this if a required source was not found
 		if (source == null) {
 			source = findDynamicSource(pkgName);
-			if (source != null)
+			if (source != null) {
 				result = source.loadClass(name);
+				if (result != null)
+					return result;
+				// must throw CNFE if dynamic import source does not have the class
+				throw new ClassNotFoundException(name);
+			}
 		}
+
 		// do buddy policy loading
 		if (result == null && policy != null)
 			result = policy.doBuddyClassLoading(name);
+		// hack to support backwards compatibiility for bootdelegation
+		if (checkParent && !bootDelegation && bundle.framework.compatibiltyBootDelegation && result == null && source == null && !isExportedPackage(pkgName))
+			// we don't need to continue if a CNFE is thrown here.
+			return parent.loadClass(name);
 		// last resort; do class context trick to work around VM bugs
-		if (result == null && isRequestFromVM())
+		if (result == null && !bootDelegation && isRequestFromVM())
 			result = parent.loadClass(name);
 		if (result == null)
 			throw new ClassNotFoundException(name);
@@ -455,6 +467,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 		if ((name.length() > 1) && (name.charAt(0) == '/')) /* if name has a leading slash */
 			name = name.substring(1); /* remove leading slash before search */
 		String pkgName = getResourcePackageName(name);
+		boolean bootDelegation = false;
 		// follow the OSGi delegation model
 		// First check the parent classloader for system resources, if it is a java resource.
 		if (checkParent && parent != null) {
@@ -467,6 +480,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 				URL result = parent.getResource(name);
 				if (result != null)
 					return result;
+				bootDelegation = true;
 			}
 		}
 
@@ -490,13 +504,19 @@ public class BundleLoader implements ClassLoaderDelegate {
 		if (source == null) {
 			source = findDynamicSource(pkgName);
 			if (source != null)
-				result = source.getResource(name);
+				// must return the result of the dynamic import and do not continue
+				return source.getResource(name);
 		}
+
 		// do buddy policy loading
 		if (result == null && policy != null)
-			return policy.doBuddyResourceLoading(name);
+			result = policy.doBuddyResourceLoading(name);
+		// hack to support backwards compatibiility for bootdelegation
+		if (checkParent && !bootDelegation && bundle.framework.compatibiltyBootDelegation && result == null && source == null && !isExportedPackage(pkgName))
+			// we don't need to continue if the resource is not found here
+			return parent.getResource(name);
 		// last resort; do class context trick to work around VM bugs
-		if (result == null && isRequestFromVM())
+		if (result == null && !bootDelegation && isRequestFromVM())
 			result = parent.getResource(name);
 		return result;
 	}
@@ -954,7 +974,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 		});
 	}
 
-	private static final class ClassContext extends SecurityManager {
+	static final class ClassContext extends SecurityManager {
 		// need to make this method public
 		public Class[] getClassContext() {
 			return super.getClassContext();

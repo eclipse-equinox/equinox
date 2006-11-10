@@ -99,6 +99,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 	String[] bootDelegationStems;
 	boolean bootDelegateAll = false;
 	boolean contextBootDelegation = "true".equals(FrameworkProperties.getProperty("osgi.context.bootdelegation", "true")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	boolean compatibiltyBootDelegation = false;
 
 	/**
 	 * The AliasMapper used to alias OS Names.
@@ -328,6 +329,9 @@ public class Framework implements EventDispatcher, EventPublisher {
 	}
 
 	private void setBootDelegation() {
+		// set the compatibility boot delegation flag
+		compatibiltyBootDelegation = "true".equals(FrameworkProperties.getProperty(Constants.OSGI_COMPATIBILITY_BOOTDELEGATION));  //$NON-NLS-1$
+		// set the boot delegation according to the osgi boot delegation property
 		String bootDelegationProp = properties.getProperty(Constants.OSGI_BOOTDELEGATION);
 		if (bootDelegationProp == null)
 			return;
