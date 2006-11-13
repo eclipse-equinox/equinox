@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project default="build_eclipse" basedir=".">
+
+<target name="build_eclipse">
+	<exec dir="." executable="sh">
+		<arg line="${basedir}/build.sh"/>
+		<arg line="install"/>
+	</exec>
+	<eclipse.refreshLocal resource="platform-launcher" depth="infinite" />		
+</target>
+
+<target name="clean">
+	<tstamp/>
+	<exec dir="." executable="sh">
+		<arg line="${basedir}/build.sh"/>
+		<arg line="clean"/>
+	</exec>
+</target>
+
+</project>
