@@ -1175,25 +1175,31 @@ public class EclipseStarter {
 		if (candidates == null)
 			return null;
 		String result = null;
-		Object maxVersion = null;
+		Object[] maxVersion = null;
 		for (int i = 0; i < candidates.length; i++) {
 			String name = candidates[i];
-			if (!name.equals(target) && !name.startsWith(target + "_")) //$NON-NLS-1$
+			if (!name.startsWith(target))
 				continue;
+			boolean simpleJar = false;
+			if (name.length() > target.length() && name.charAt(target.length()) != '_') {
+				// make sure this is not just a jar with no _version tacked on the end
+				if (name.length() == 4 + target.length() && name.endsWith(".jar")) //$NON-NLS-1$
+					simpleJar = true;
+				else
+					// name does not match the target properly with an _version at the end
+					continue;
+			}
 			String version = ""; //$NON-NLS-1$ // Note: directory with version suffix is always > than directory without version suffix
 			int index = name.indexOf('_');
 			if (index != -1)
 				version = name.substring(index + 1);
-			Object currentVersion = getVersionElements(version);
+			Object[] currentVersion = getVersionElements(version);
 			File candidate = new File(start, candidates[i]);
-			if (maxVersion == null) {
+			if (compareVersion(maxVersion, currentVersion) < 0) {
 				result = candidate.getAbsolutePath();
-				maxVersion = currentVersion;
-			} else {
-				if (compareVersion((Object[]) maxVersion, (Object[]) currentVersion) < 0) {
-					result = candidate.getAbsolutePath();
+				// if simple jar; make sure it is really a file before accepting it
+				if (!simpleJar || candidate.isFile())
 					maxVersion = currentVersion;
-				}
 			}
 		}
 		if (result == null)
@@ -1240,6 +1246,8 @@ public class EclipseStarter {
 	 * <code>>0</code> if left > right;
 	 */
 	private static int compareVersion(Object[] left, Object[] right) {
+		if (left == null)
+			return -1;
 		int result = ((Integer) left[0]).compareTo((Integer) right[0]); // compare major
 		if (result != 0)
 			return result;
