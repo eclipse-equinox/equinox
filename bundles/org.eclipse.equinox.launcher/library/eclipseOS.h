@@ -29,6 +29,10 @@
 #define findCommand findCommandW
 #define getProgramDir getProgramDirW
 #define officialName officialNameW
+#define exitData exitDataW
+#define loadLibrary loadLibraryW
+#define unloadLibrary unloadLibraryW
+#define findSymbol findSymbolW
 #endif
 
 /* Operating System Dependent Information */
@@ -43,6 +47,7 @@ extern _TCHAR*  consoleVM;   			/* name of VM to use for debugging */
 extern _TCHAR*  defaultVM;   			/* name of VM to use normally      */
 extern _TCHAR*  shippedVMDir;			/* VM bin directory with separator */
 extern _TCHAR*  officialName;			/* Program official name           */
+extern _TCHAR*  exitData;		  		/* exit data set from Java */
 
 /* OS Specific Functions */
 
@@ -106,6 +111,19 @@ extern _TCHAR** getArgVM( _TCHAR *vm );
  * the termination was not normal.
  */
 extern int startJavaVM( _TCHAR* args[] );
+
+
+/* Load the specified shared library
+ */
+extern void * loadLibrary( _TCHAR * library );
+
+/* Unload the shared library
+ */
+extern void unloadLibrary( void * handle );
+ 
+/* Find the given symbol in the shared library
+ */
+extern void * findSymbol( void * handle, char * symbol );
 
 #endif /* ECLIPSE_OS_H */
 

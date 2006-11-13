@@ -21,6 +21,11 @@
 # DEFAULT_OS_ARCH - the default value of the "-arch" switch
 # DEFAULT_WS      - the default value of the "-ws" switch
 
+#if PROGRAM_OUTPUT is not set, assume eclipse.exe
+ifeq ($(PROGRAM_OUTPUT),)
+  PROGRAM_OUTPUT=eclipse.exe
+endif
+
 # Allow for cross-compiling under linux
 OSTYPE	?= $(shell if uname -s | grep -iq cygwin ; then echo cygwin; else echo linux; fi)
 ifeq ($(OSTYPE),cygwin)
@@ -40,15 +45,15 @@ $(error Unable to find $(CCVER)-pc-cygwin-gcc)
 endif
 
 # Define the object modules to be compiled and flags.
-OBJS	= eclipse.o eclipseWin.o eclipseShm.o eclipseConfig.o eclipseUtil.o \
-	  aeclipse.o aeclipseWin.o aeclipseShm.o aeclipseConfig.o aeclipseUtil.o
+OBJS	= eclipse.o eclipseWin.o eclipseConfig.o eclipseUtil.o eclipseJNI.o\
+	  aeclipse.o aeclipseWin.o aeclipseConfig.o aeclipseUtil.o aeclipseJNI.o
 LIBS	= -lkernel32 -luser32 -lgdi32 -lcomctl32 -lmsvcrt
 LDFLAGS = -mwindows -mno-cygwin
 RES	= eclipse.res
 EXEC	= $(PROGRAM_OUTPUT)
 DEBUG	= $(CDEBUG)
 CFLAGS	= -O -s -Wall \
-	  -I. $(SYSINC) \
+	  -I. -I$(JAVA_JNI) $(SYSINC) \
 	  -D_WIN32 \
 	  -DWIN32_LEAN_AND_MEAN \
 	  -mno-cygwin
@@ -60,14 +65,11 @@ WCFLAGS	= -DUNICODE $(ACFLAGS)
 
 all: $(EXEC)
 
-eclipse.o: ../eclipseOS.h ../eclipseUnicode.h ../eclipse.c ../eclipseShm.h
+eclipse.o: ../eclipseOS.h ../eclipseUnicode.h ../eclipse.c
 	$(CC) $(DEBUG) $(WCFLAGS) -c -o $@ ../eclipse.c
 
 eclipseUtil.o: ../eclipseUtil.h ../eclipseUnicode.h ../eclipseUtil.c
 	$(CC) $(DEBUG) $(WCFLAGS) -c -o $@ ../eclipseUtil.c
-
-eclipseShm.o: ../eclipseShm.h ../eclipseUnicode.h ../eclipseShm.c
-	$(CC) $(DEBUG) $(WCFLAGS) -c -o $@ ../eclipseShm.c
 
 eclipseConfig.o: ../eclipseConfig.h ../eclipseUnicode.h ../eclipseConfig.c
 	$(CC) $(DEBUG) $(WCFLAGS) -c -o $@ ../eclipseConfig.c
@@ -75,14 +77,14 @@ eclipseConfig.o: ../eclipseConfig.h ../eclipseUnicode.h ../eclipseConfig.c
 eclipseWin.o: ../eclipseOS.h ../eclipseUnicode.h eclipseWin.c
 	$(CC) $(DEBUG) $(WCFLAGS) -c -o $@ eclipseWin.c
 
-aeclipse.o: ../eclipseOS.h ../eclipseUnicode.h ../eclipse.c ../eclipseShm.h
+eclipseJNI.o: ../eclipseUnicode.h ../eclipseJNI.c
+	$(CC) $(DEBUG) $(WCFLAGS) -c -o $@ ../eclipseJNI.c
+	
+aeclipse.o: ../eclipseOS.h ../eclipseUnicode.h ../eclipse.c
 	$(CC) $(DEBUG) $(ACFLAGS) -c -o $@ ../eclipse.c
 
 aeclipseUtil.o: ../eclipseUtil.h ../eclipseUnicode.h ../eclipseUtil.c
 	$(CC) $(DEBUG) $(ACFLAGS) -c -o $@ ../eclipseUtil.c
-
-aeclipseShm.o: ../eclipseShm.h ../eclipseUnicode.h ../eclipseShm.c
-	$(CC) $(DEBUG) $(ACFLAGS) -c -o $@ ../eclipseShm.c
 
 aeclipseConfig.o: ../eclipseConfig.h ../eclipseUnicode.h ../eclipseConfig.c
 	$(CC) $(DEBUG) $(ACFLAGS) -c -o $@ ../eclipseConfig.c
@@ -90,6 +92,9 @@ aeclipseConfig.o: ../eclipseConfig.h ../eclipseUnicode.h ../eclipseConfig.c
 aeclipseWin.o: ../eclipseOS.h ../eclipseUnicode.h eclipseWin.c
 	$(CC) $(DEBUG) $(ACFLAGS) -c -o $@ eclipseWin.c
 
+aeclipseJNI.o: ../eclipseUnicode.h ../eclipseJNI.c
+	$(CC) $(DEBUG) $(ACFLAGS) -c -o $@ ../eclipseJNI.c
+	
 $(RES): eclipse.rc
 	$(RC) --output-format=coff --include-dir=.. -o $@ $<
 

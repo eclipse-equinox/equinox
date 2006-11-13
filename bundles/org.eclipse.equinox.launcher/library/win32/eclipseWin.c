@@ -46,16 +46,10 @@ static int     jvmExitTimeout = 100;
 static int     jvmExitTimerId = 99;
 
 /* Define local variables for handling the splash window and its image. */
-static int      splashTimerId = 88, inputTimerId = 89;
-
-static HWND label = NULL, progress = NULL;
-static COLORREF foreground = 0;
-static RECT progressRect = {0, 0, 0, 0}, messageRect = {0, 0, 0, 0};
-static int value = 0, maximum = 100;
+static int      splashTimerId = 88;
 
 /* Local functions */
 static void CALLBACK  detectJvmExit( HWND hwnd, UINT uMsg, UINT id, DWORD dwTime );
-static HBITMAP        loadSplashImage(_TCHAR *baseDir, _TCHAR *fileName);
 static void CALLBACK  splashTimeout( HWND hwnd, UINT uMsg, UINT id, DWORD dwTime );
 static LRESULT WINAPI WndProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
@@ -94,128 +88,6 @@ void initWindowSystem( int* pArgc, _TCHAR* argv[], int showSplash )
     SetWindowLong (topWindow, GWL_WNDPROC, (LONG) WndProc);
 }
 
-
-static void readRect(_TCHAR *str, RECT *rect) {
-	int x, y, width, height;
-	_TCHAR *temp = str, *comma;
-	comma = _tcschr(temp, _T(','));
-	if (comma == NULL) return;
-	comma[0] = 0;
-	x = _ttoi(temp);
-	temp = comma + 1;
-	comma = _tcschr(temp, _T(','));
-	if (comma == NULL) return;
-	comma[0] = 0;
-	y = _ttoi(temp);
-	temp = comma + 1;
-	comma = _tcschr(temp, _T(','));
-	if (comma == NULL) return;
-	comma[0] = 0;
-	width = _ttoi(temp);
-	temp = comma + 1;
-	height = _ttoi(temp);
-	rect->left = x;
-	rect->top = y;
-	rect->right = x + width;
-	rect->bottom = y + height;
-}
-
-static void readColor(_TCHAR *str, COLORREF *color) {
-	int value = _ttoi(str);
-	*color = ((value & 0xFF0000) >> 16) | (value & 0xFF00) | ((value & 0xFF) << 16);
-}
-
-static void readInput() {
-	int available;
-	FILE *fd = stdin;
-#ifdef _UNICODE
-	WCHAR *buffer1 = NULL;
-#endif
-	char *buffer = NULL;
-	_TCHAR *equals = NULL, *end, *line;
-	HANDLE hStdin = GetStdHandle(STD_INPUT_HANDLE);
-	available = GetFileSize (hStdin, NULL) - SetFilePointer (hStdin, 0, NULL, FILE_CURRENT);
-	if (available <= 0) return;
-	buffer = malloc(available + 1);
-	if (!ReadFile(hStdin, buffer, available, &available, NULL)) {
-		return;
-	}
-	if (available <= 0) {
-		free(buffer);
-		return;
-	}
-	buffer[available] = 0;
-#ifdef _UNICODE
-	{
-	buffer1 = malloc((available + 1) * sizeof(TCHAR));
-	available = MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, (LPCSTR)buffer, available, (LPWSTR)buffer1, available);
-	buffer1[available] = 0;
-	line = buffer1;
-	}
-#else
-	line = buffer;
-#endif
-	while (line != NULL) {
-		end = _tcschr(line, _T('\n'));
-		equals = _tcschr(line, _T('='));
-		if (end != NULL) end[0] = 0;
-		if (equals != NULL) {
-			_TCHAR *str = (_TCHAR *)equals + 1;
-			equals[0] = 0;
-			if (_tcscmp(line, _T("maximum")) == 0) {
-				maximum = _ttoi(str);
-				if (progress) {
-					SendMessage (progress, PBM_SETRANGE32, 0, maximum);
-				}
-			} else if (_tcscmp(line, _T("value")) == 0) {
-				value = _ttoi(str);
-				if (progress) {
-					SendMessage (progress, PBM_SETPOS, value, 0);
-				}
-			} else if (_tcscmp(line, _T("progressRect")) == 0) {
-				readRect(str, &progressRect);
-				if (progress) {
-					int flags = SWP_NOZORDER | SWP_DRAWFRAME | SWP_NOACTIVATE;
-					SetWindowPos (progress, 0, progressRect.left, progressRect.top, progressRect.right - progressRect.left, progressRect.bottom - progressRect.top, flags);
-				}
-			} else if (_tcscmp(line, _T("messageRect")) == 0) {
-				readRect(str, &messageRect);
-				if (label) {
-					int flags = SWP_NOZORDER | SWP_DRAWFRAME | SWP_NOACTIVATE;
-					SetWindowPos (label, 0, messageRect.left, messageRect.top, messageRect.right - messageRect.left, messageRect.bottom - messageRect.top, flags);
-				}
-			} else if (_tcscmp(line, _T("foreground")) == 0) {
-				readColor(str, &foreground);
-				if (label) {
-					RECT rect;
-					GetWindowRect (label, &rect);
-					MapWindowPoints (0, topWindow, (POINT *)&rect, 2);
-					InvalidateRect (topWindow, &rect, 1);
-				}
-			} else if (_tcscmp(line, _T("message")) == 0) {
-				if (label) {
-					RECT rect;
-					SetWindowText (label, str);
-					GetWindowRect (label, &rect);
-					MapWindowPoints (0, topWindow, (POINT *)&rect, 2);
-					InvalidateRect (topWindow, &rect, 1);
-				}
-			}
-			
-		}
-		if (end != NULL) line = end + 1;
-		else line = NULL;
-	}
-	free(buffer);
-#ifdef _UNICODE
-	if (buffer1 != NULL) free(buffer1);
-#endif
-}
-
-static void CALLBACK timerProc( HWND hwnd, UINT uMsg, UINT id, DWORD dwTime ) {
-	readInput();
-}
-
 /* Show the Splash Window
  *
  * Open the bitmap, insert into the splash window and display it.
@@ -251,33 +123,6 @@ int showSplash( _TCHAR* timeoutString, _TCHAR* featureImage )
 
 	/* Load the bitmap into the splash popup window. */
     SendMessage( topWindow, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM) hBitmap );
-
-	progress = CreateWindowEx (0, _T("msctls_progress32"),
-		_T(""),
-		WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS,
-		0,
-		0,
-		0,
-		0,
-		topWindow,
-		NULL,
-		GetModuleHandle (NULL),
-		NULL);
-	label = CreateWindowEx (0, _T("STATIC"),
-		_T(""),
-		WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS,
-		0,
-		0,
-		0,
-		0,
-		topWindow,
-		NULL,
-		GetModuleHandle (NULL),
-		NULL);		
- 	SendMessage (label, WM_SETFONT, (WPARAM)GetStockObject (DEFAULT_GUI_FONT), (LPARAM)1);		
-		
-	readInput();
-    SetTimer( topWindow, inputTimerId, 50, timerProc );
 
     /* Centre the splash window and display it. */
     GetWindowRect (topWindow, &rect);
@@ -437,14 +282,24 @@ static LRESULT WINAPI WndProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 		case WM_CLOSE:
 	    	PostQuitMessage(  0 );
 	    	break;
-		case WM_CTLCOLORSTATIC:
-			if ((HWND)lParam == label) {
-				SetTextColor((HDC)wParam, foreground);
-				SetBkMode((HDC)wParam, TRANSPARENT);
-				return (LRESULT)GetStockObject (NULL_BRUSH);
-			}
-			break;
 	}
 	return CallWindowProc (oldProc, hwnd, uMsg, wParam, lParam);
 }
 
+/* Load the specified shared library
+ */
+void * loadLibrary( _TCHAR * library ){
+	return LoadLibrary(library);
+}
+
+/* Unload the shared library
+ */
+void unloadLibrary( void * handle ){
+	FreeLibrary(handle);
+}
+ 
+/* Find the given symbol in the shared library
+ */
+void * findSymbol( void * handle, char * symbol ){
+	return GetProcAddress(handle, symbol);
+}

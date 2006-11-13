@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at 
@@ -179,7 +179,6 @@
  */
 
 #include "eclipseOS.h"
-#include "eclipseShm.h"
 #include "eclipseConfig.h"
 
 #ifdef _WIN32
@@ -209,8 +208,7 @@ static _TCHAR*  program     = NULL;       /* full pathname of the program */
 static _TCHAR*  programDir  = NULL;       /* directory where program resides */
 static _TCHAR*  javaVM      = NULL;       /* full pathname of the Java VM to run */
 static _TCHAR*  jarFile     = NULL;		  /* full pathname of the startup jar file to run */
-static _TCHAR*  sharedID    = NULL;       /* ID for the shared memory */
-
+static _TCHAR*  exitData    = NULL;		  /* exit data set from Java */
 /* Define the special exit codes returned from Eclipse. */
 #define RESTART_LAST_EC    23
 #define RESTART_NEW_EC     24
@@ -223,7 +221,7 @@ static _TCHAR* exitMsg = _T_ECLIPSE("JVM terminated. Exit code=%d\n%s");
 static _TCHAR* goVMMsg = _T_ECLIPSE("Start VM: %s\n");
 static _TCHAR* pathMsg = _T_ECLIPSE("%s\n'%s' in your current PATH");
 static _TCHAR* showMsg = _T_ECLIPSE("Could not load splash bitmap:\n%s");
-static _TCHAR* shareMsg = _T_ECLIPSE("No shared data available.");
+static _TCHAR* shareMsg = _T_ECLIPSE("No exit data available.");
 static _TCHAR* noVMMsg =
 _T_ECLIPSE("A Java Runtime Environment (JRE) or Java Development Kit (JDK)\n\
 must be available in order to run %s. No Java virtual machine\n\
@@ -245,7 +243,6 @@ companion startup.jar file (in the same directory as the executable).");
 #define NOSPLASH     _T_ECLIPSE("-nosplash")
 #define LAUNCHER     _T_ECLIPSE("-launcher")
 #define SHOWSPLASH   _T_ECLIPSE("-showsplash")
-#define EXITDATA     _T_ECLIPSE("-exitdata")
 #define STARTUP      _T_ECLIPSE("-startup")
 #define VM           _T_ECLIPSE("-vm")
 #define WS           _T_ECLIPSE("-ws")
@@ -259,7 +256,6 @@ static int     noSplash      = 0;				/* True: do not show splash win	*/
 static _TCHAR*  osArg         = _T_ECLIPSE(DEFAULT_OS);
 static _TCHAR*  osArchArg     = _T_ECLIPSE(DEFAULT_OS_ARCH);
 static _TCHAR*  showSplashArg = NULL;			/* showsplash data (main launcher window) */
-static _TCHAR*  exitDataArg   = NULL;
 static _TCHAR * startupArg    = DEFAULT_STARTUP; /* path of the startup.jar the user wants to run relative to the program path */
 static _TCHAR*  vmName        = NULL;     		/* Java VM that the user wants to run */
 static _TCHAR*  wsArg         = _T_ECLIPSE(DEFAULT_WS);	/* the SWT supported GUI to be used */
@@ -283,7 +279,6 @@ static Option options[] = {
     { OS,			&osArg,			NULL,			2 },
     { OSARCH,		&osArchArg,		NULL,			2 },
     { SHOWSPLASH,   &showSplashArg,	NULL,			2 },
-    { EXITDATA,		&exitDataArg,	NULL,			2 },
     { STARTUP,		&startupArg,	NULL,			2 },
     { VM,           &vmName,		NULL,			2 },
     { NAME,         &name,			NULL,			2 },
@@ -307,7 +302,6 @@ static _TCHAR** getVMCommand( int argc, _TCHAR* argv[] );
 static _TCHAR*  formatVmCommandMsg( _TCHAR* args[] );
        _TCHAR*  getProgramDir();
 static _TCHAR* getDefaultOfficialName();
-static int isMainEclipse( int argc, _TCHAR **argv );
 
 #ifdef _WIN32
 #ifdef UNICODE
@@ -349,7 +343,6 @@ int main( int argc, _TCHAR* argv[] )
 {
 	_TCHAR*   splashBitmap;
     _TCHAR*   ch;
-    _TCHAR*   data;
     _TCHAR*   shippedVM    = NULL;
     _TCHAR*   vmSearchPath = NULL;
     _TCHAR**  vmCommand = NULL;
@@ -388,7 +381,7 @@ int main( int argc, _TCHAR* argv[] )
     }
 	
 	/* Parse configuration file arguments */
-	if (isMainEclipse(argc, argv) && readConfigFile(program, argv[0], &configArgc, &configArgv) == 0)
+	if (readConfigFile(program, argv[0], &configArgc, &configArgv) == 0)
 	{
 		parseArgs (&configArgc, configArgv);
 	}
@@ -420,22 +413,6 @@ int main( int argc, _TCHAR* argv[] )
         displayMessage( officialName, errorMsg );
         free( errorMsg );
     	exit( 1 );
-    }
-
-    /* If the exit data option was given, set exit data */
-    if (exitDataArg != NULL)
-    {
-       	/* If an extra argument was given, use it as the exit data, otherwise clear exit data */
-       	data = argc > 1 ? argv[1] : NULL;
-       	if (data != NULL && _tcslen( data ) > MAX_SHARED_LENGTH - 1)
-       	{
-       		exitCode = EINVAL;       		
-       	}
-       	else {
-	        exitCode = setSharedData( exitDataArg, data );
-    	}
-   	    if (exitCode != 0 && debug) displayMessage( officialName, shareMsg );
-		exit( exitCode );
     }
 
     /* If the showsplash option was given */
@@ -490,12 +467,6 @@ int main( int argc, _TCHAR* argv[] )
 		}
 	}
 
-    if (createSharedData( &sharedID, MAX_SHARED_LENGTH )) {
-        if (debug) {
-   			if (debug) displayMessage( officialName, shareMsg );
-        }
-    }
-
 	/* Construct the absolute name of the startup jar */
 	jarFile = malloc( (_tcslen( programDir ) + _tcslen( startupArg ) + 1) * sizeof( _TCHAR ) );
 	jarFile = _tcscpy( jarFile, programDir );
@@ -526,9 +497,9 @@ int main( int argc, _TCHAR* argv[] )
             case RESTART_LAST_EC:
             	break;
             case RESTART_NEW_EC:
-                if (getSharedData( sharedID, &data ) == 0) {
+                if (exitData != 0) {
 			    	if (vmCommandList != NULL) freeArgList( vmCommandList );
-                    vmCommand = vmCommandList = parseArgList( data );
+                    vmCommand = vmCommandList = parseArgList( exitData );
                 } else {
                 	vmCommand = NULL;
                     if (debug) displayMessage( officialName, shareMsg );
@@ -538,7 +509,8 @@ int main( int argc, _TCHAR* argv[] )
 				_TCHAR *title = _tcsdup(officialName);
                 vmCommand = NULL;
                 errorMsg = NULL;
-                if (getSharedData( sharedID, &errorMsg ) == 0) {
+                if (exitData != 0) {
+                	errorMsg = exitData;
                     if (_tcslen( errorMsg ) == 0) {
                 	    free( errorMsg );
                 	    errorMsg = NULL;
@@ -581,26 +553,8 @@ int main( int argc, _TCHAR* argv[] )
     if ( configArgv != NULL ) freeConfig( configArgv );
     if (configArgc > 1) free( argv );
     free( officialName );
-    if ( sharedID != NULL ) {
-        if (destroySharedData( sharedID ) != 0) {
-           if (debug) displayMessage( officialName, shareMsg );
-        }
-        free( sharedID );
-    }
 
     return 0;
-}
-
-/* Return 1 if the current Eclipse is the process that starts the java IDE
- * Return 0 if it is an Eclipse used to display a splash screen or to write
- * data to a shared memory segment.
- * The main Eclipse is the only one that reads the eclipse.ini file.
- */
-static int isMainEclipse( int argc, _TCHAR **argv )
-{
-	/* It is the main eclipse if the argument 3 is neither SHOWSPLASH nor EXITDATA */
-	if (argc < 4) return 1;
-	return (_tcsicmp( argv[3], SHOWSPLASH ) != 0 && _tcsicmp( argv[3], EXITDATA ) != 0);
 }
 
 /*
@@ -902,10 +856,10 @@ static _TCHAR** getVMCommand( int argc, _TCHAR* argv[] )
 
     /* Allocate the arg list for the exec call.
      *  (VM + userVMargs + defaultVMargs + requiredVMargs + OS <os> + WS <ws> + ARCH <arch> + LAUNCHER <launcher> + NAME <officialName> +
-     *      + SHOWSPLASH <cmd> + EXITDATA <cmd> + argv[] + VM + <vm> + VMARGS + userVMargs + defaultVMargs + requiredVMargs
+     *      + SHOWSPLASH <cmd> + argv[] + VM + <vm> + VMARGS + userVMargs + defaultVMargs + requiredVMargs
      *      + NULL)
      */
-    totalArgs  = 1 + nUserVMarg + nDefVMarg + nReqVMarg + 2 + 2 + 2 + 2 + 2 + 2 + 2 + argc + 2 + 1 + nUserVMarg + nDefVMarg + nReqVMarg + 1;
+    totalArgs  = 1 + nUserVMarg + nDefVMarg + nReqVMarg + 2 + 2 + 2 + 2 + 2 + 2 + argc + 2 + 1 + nUserVMarg + nDefVMarg + nReqVMarg + 1;
 	execArg = malloc( totalArgs * sizeof( _TCHAR* ) );
     dst = 0;
     execArg[ dst++ ] = javaVM;
@@ -950,12 +904,6 @@ static _TCHAR** getVMCommand( int argc, _TCHAR* argv[] )
         execArg[ dst++ ] = SHOWSPLASH;
         execArg[ dst++ ] = splashTimeout;
     }
-
-	/* Append the exit data command. */
-	if (sharedID) {
-	    execArg[ dst++ ] = EXITDATA;
-	    execArg[ dst++ ] = sharedID;
-	}
 
 	/* Append the remaining user defined arguments. */
     for (src = 1; src < argc; src++)
