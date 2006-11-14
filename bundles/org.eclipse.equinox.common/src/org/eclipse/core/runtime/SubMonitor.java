@@ -329,9 +329,9 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 	/**
 	 * Creates a new SubMonitor that will report its progress via
 	 * the given RootInfo.
-	 * 
-	 * @param toAdapt IProgressMonitor where progress should be reported
+	 * @param rootInfo the root of this progress monitor tree
 	 * @param totalWork total work to perform on the given progress monitor
+	 * @param availableToChildren number of ticks allocated for this instance's children
 	 */
 	private SubMonitor(RootInfo rootInfo, int totalWork, int availableToChildren) {
 		root = rootInfo;
@@ -420,8 +420,8 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 	 * Consumes the given number of child ticks, given as a double. Must only 
 	 * be called if the monitor is in floating-point mode.
 	 *  
-	 * @param ticks
-	 * @return
+	 * @param ticks the number of ticks to consume
+	 * @return ticks the number of ticks to be consumed from parent
 	 */
 	private int consume(double ticks) {
 		if (totalParent == 0 || totalForChildren == 0) // this monitor has no available work to report
