@@ -13,6 +13,9 @@
 #include "eclipseOS.h"
 #include <stdlib.h>
   
+  
+_TCHAR * exitData = NULL;
+
 static JNINativeMethod natives[] = {{"_update_splash", "()V", &update_splash},
 									{"_get_splash_handle", "()I", &get_splash_handle},
 									{"_set_exit_data", "(Ljava/lang/String;)V", &set_exit_data}};
@@ -36,18 +39,23 @@ JNIEXPORT jint JNICALL get_splash_handle(JNIEnv * env, jobject obj){
 #endif
 
 void setExitData(JNIEnv *env, jstring s){ 
-	_TCHAR * copy = malloc((*env)->GetStringLength(env, s) * sizeof(_TCHAR*));
+	int length = (*env)->GetStringLength(env, s);
+	_TCHAR * copy = malloc(length * sizeof(_TCHAR*));
 	const _TCHAR * data;
+	
 #ifdef UNICODE
+	/* TODO need to figure out how to get a unicode version called */
 	data = (*env)->GetStringChars(env, s, 0);
-	_tcscpy( copy, data );
+	_tcsncpy( copy, data, length);
 	(*env)->ReleaseStringChars(env, s, data);
-#else
+#else 
 	data = (*env)->GetStringUTFChars(env, s, 0);
 	_tcscpy( copy, data );
 	(*env)->ReleaseStringUTFChars(env, s, data);
 #endif	
+	exitData = copy;
 }
+
 static jstring newJavaString(JNIEnv *env, _TCHAR * str)
 {
 	jstring newString = 0;
@@ -102,8 +110,10 @@ static char *toNarrow(_TCHAR* src)
 #endif
 }
  							 
-int launchJavaVM(_TCHAR *dllPath, _TCHAR* progArgs[], int vmArgc, _TCHAR* vmArgv[] ) {
+int startJavaVM( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[] )
+{
 	int i;
+	int numVMArgs = -1;
 	int jvmExitCode = 0;
 	void * jniLibrary;
 	JNI_createJavaVM createJavaVM;
@@ -112,7 +122,7 @@ int launchJavaVM(_TCHAR *dllPath, _TCHAR* progArgs[], int vmArgc, _TCHAR* vmArgv
 	JavaVM * jvm;
 	JNIEnv *env;
 	
-	jniLibrary = loadLibrary(dllPath);
+	jniLibrary = loadLibrary(libPath);
 	if(jniLibrary == NULL) {
 		return -1; /*error*/
 	}
@@ -122,23 +132,26 @@ int launchJavaVM(_TCHAR *dllPath, _TCHAR* progArgs[], int vmArgc, _TCHAR* vmArgv
 		return -1; /*error*/
 	}
 	
-	options = malloc(vmArgc * sizeof(JavaVMOption));
-	for(i = 0; i < vmArgc; i++){
-		options[i].optionString = toNarrow(vmArgv[i]);
+	/* count the vm args */
+	while(vmArgs[++numVMArgs] != NULL) {}
+	
+	options = malloc(numVMArgs * sizeof(JavaVMOption));
+	for(i = 0; i < numVMArgs; i++){
+		options[i].optionString = toNarrow(vmArgs[i]);
 		options[i].extraInfo = 0;
 	}
 		
 	init_args.version = JNI_VERSION_1_2;
 	init_args.options = options;
-	init_args.nOptions = vmArgc;
+	init_args.nOptions = numVMArgs;
 	init_args.ignoreUnrecognized = JNI_TRUE;
 	
 	if( createJavaVM(&jvm, &env, &init_args) == 0 ) {
-		jclass mainClass = (*env)->FindClass(env, "org/eclipse/core/launcher/Main");
-		
+		jclass bridge = (*env)->FindClass(env, "org/eclipse/core/launcher/JNIBridge");
 		int numNatives = sizeof(natives) / sizeof(natives[0]);
-		(*env)->RegisterNatives(env, mainClass, natives, numNatives);
+		(*env)->RegisterNatives(env, bridge, natives, numNatives);
 		
+		jclass mainClass = (*env)->FindClass(env, "org/eclipse/core/launcher/Main");
 		jmethodID mainConstructor = (*env)->GetMethodID(env, mainClass, "<init>", "()V");
 		jobject mainObject = (*env)->NewObject(env, mainClass, mainConstructor);
 		jmethodID runMethod = (*env)->GetMethodID(env, mainClass, "run", "([Ljava/lang/String;)I");
@@ -152,7 +165,7 @@ int launchJavaVM(_TCHAR *dllPath, _TCHAR* progArgs[], int vmArgc, _TCHAR* vmArgv
 	free(progArgs);
 
 	/* toNarrow allocated new strings, free them */
-	for(i = 0; i < vmArgc; i++){
+	for(i = 0; i < numVMArgs; i++){
 		free( options[i].optionString );
 	}
 	

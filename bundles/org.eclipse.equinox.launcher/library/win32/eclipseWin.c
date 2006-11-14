@@ -18,6 +18,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+#include <sys/stat.h>
 
 #ifdef __MINGW32__
 #include <stdlib.h>
@@ -30,6 +31,7 @@ _TCHAR   dirSeparator  = _T('\\');
 _TCHAR   pathSeparator = _T(';');
 _TCHAR*  consoleVM     = _T("java.exe");
 _TCHAR*  defaultVM     = _T("javaw.exe");
+_TCHAR*  vmLibrary 	   = _T("jvm.dll");
 _TCHAR*  shippedVMDir  = _T("jre\\bin\\");
 
 /* Define the window system arguments for the Java VM. */
@@ -39,20 +41,22 @@ static _TCHAR*  argVM[] = { NULL };
 static HWND    topWindow  = 0;
 static WNDPROC oldProc;
 
-/* Define local variables for running the JVM and detecting its exit. */
-static int     jvmProcess     = 0;
-static int     jvmExitCode    = 0;
-static int     jvmExitTimeout = 100;
-static int     jvmExitTimerId = 99;
+/* define default locations in which to find the jvm shared library
+ * these are paths relative to the java exe, the shared library is
+ * for example jvmLocations[0] + dirSeparator + vmLibrary */
+#define MAX_LOCATION_LENGTH 10 /* none of the jvmLocations strings should be longer than this */ 
+static const _TCHAR* jvmLocations [] = { _T("j9vm"),
+										 _T("client"), 
+										 _T("server"), 
+										 _T("classic"), 
+								 		 NULL };
 
 /* Define local variables for handling the splash window and its image. */
 static int      splashTimerId = 88;
 
 /* Local functions */
-static void CALLBACK  detectJvmExit( HWND hwnd, UINT uMsg, UINT id, DWORD dwTime );
 static void CALLBACK  splashTimeout( HWND hwnd, UINT uMsg, UINT id, DWORD dwTime );
 static LRESULT WINAPI WndProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-
 
 /* Display a Message */
 void displayMessage( _TCHAR* title, _TCHAR* message )
@@ -158,108 +162,7 @@ _TCHAR** getArgVM( _TCHAR *vm )
 	return argVM;
 }
 
-
-/* Start the Java VM
- *
- * This method is called to start the Java virtual machine and to wait until it
- * terminates. The function returns the exit code from the JVM.
- */
-int startJavaVM( _TCHAR* args[] )
-{
-    MSG   msg;
-	int   index, length;
-	_TCHAR *commandLine, *ch, *space;
-
-	/*
-	* Build the command line. Any argument with spaces must be in
-	* double quotes in the command line. 
-	*/
-	length = 0;
-	for (index = 0; args[index] != NULL; index++)
-	{
-		/* String length plus space character */
-		length += _tcslen( args[ index ] ) + 1;
-		/* Quotes */
-		if (_tcschr( args[ index ], _T(' ') ) != NULL) length += 2;
-	}
-	commandLine = ch = malloc ( (length + 1) * sizeof(_TCHAR) );
-	for (index = 0; args[index] != NULL; index++)
-	{
-		space = _tcschr( args[ index ], _T(' '));
-		if (space != NULL) *ch++ = _T('\"');
-		_tcscpy( ch, args[index] );
-		ch += _tcslen( args[index] );
-		if (space != NULL) *ch++ = _T('\"');
-		*ch++ = _T(' ');
-	}
-	*ch = _T('\0');
-
-	/*
-	* Start the Java virtual machine. Use CreateProcess() instead of spawnv()
-	* otherwise the arguments cannot be freed since spawnv() segments fault.
-	*/
-	{
-	STARTUPINFO    si;
-    PROCESS_INFORMATION  pi;
-    GetStartupInfo(&si);
-    if (CreateProcess(NULL, commandLine, NULL, NULL, TRUE, 0, NULL, NULL, &si, &pi)) {
-    	CloseHandle( pi.hThread );
-    	jvmProcess = (int)pi.hProcess;
-    }    
-	}
-
-	free( commandLine );
-
-	/* If the child process (JVM) would not start */
-	if (jvmProcess == -1)
-	{
-		/* Return the error number. */
-		jvmExitCode = errno;
-		jvmProcess  = 0;
-	}
-
-	/* else */
-	else
-	{
-        /* Set a timer to detect JVM process termination. */
-        SetTimer( topWindow, jvmExitTimerId, jvmExitTimeout, detectJvmExit );
-
-    	/* Process messages until the JVM terminates.
-    	   This launcher process must continue to process events until the JVM exits
-    	   or else Windows 2K will hang if the desktop properties (e.g., background) are
-    	   changed by the user. Windows does a SendMessage() to every top level window
-    	   process, which blocks the caller until the process responds. */
-   		while (jvmProcess != 0)
-   		{
-   			GetMessage( &msg, NULL, 0, 0 );
-			TranslateMessage( &msg );
-			DispatchMessage( &msg );
-		}
-
-		/* Kill the timer. */
-        KillTimer( topWindow, jvmExitTimerId );
-	}
-
-	/* Return the exit code from the JVM. */
-	return jvmExitCode;
-}
-
 /* Local functions */
-
-/* Detect JVM Process Termination */
-static void CALLBACK detectJvmExit( HWND hwnd, UINT uMsg, UINT id, DWORD dwTime )
-{
-    DWORD   exitCode;
-
-    /* If the JVM process has terminated */
-    if (!GetExitCodeProcess( (HANDLE)jvmProcess, &exitCode ) ||
-    		 exitCode != STILL_ACTIVE)
-    {
-    	/* Save the JVM exit code. This should cause the loop in startJavaVM() to exit. */
-        jvmExitCode = exitCode;
-        jvmProcess = 0;
-    }
-}
 
 /* Splash Timeout */
 static void CALLBACK splashTimeout( HWND hwnd, UINT uMsg, UINT id, DWORD dwTime )
@@ -302,4 +205,84 @@ void unloadLibrary( void * handle ){
  */
 void * findSymbol( void * handle, char * symbol ){
 	return GetProcAddress(handle, symbol);
+}
+
+/*
+ * Find the VM shared library starting from the java executable 
+ */
+_TCHAR* findVMLibrary( _TCHAR* command ) {
+	int i;
+	int pathLength;	
+	struct _stat stats;
+	_TCHAR * path;				/* path to resulting jvm shared library */
+	_TCHAR * location;			/* points to begining of jvmLocations section of path */
+	
+	if (command != NULL) {
+		location = _tcsrchr( command, dirSeparator ) + 1;
+		
+		/*check first to see if command already points to the library */
+		if (_tcscmp(location, vmLibrary) == 0) {
+			return command;
+		}
+		
+		pathLength = location - command;
+		path = malloc((pathLength + MAX_LOCATION_LENGTH + 1 + _tcslen(vmLibrary)) * sizeof(_TCHAR *));
+		_tcsncpy(path, command, pathLength);
+		location = &path[pathLength];
+		 
+		/* 
+		 * We are trying base/jvmLocations[*]/vmLibrary
+		 * where base is the directory containing the given java command, normally jre/bin
+		 */
+		i = -1;
+		while(jvmLocations[++i] != NULL) {
+			int length = _tcslen(jvmLocations[i]);			
+			_tcscpy(location, jvmLocations[i]);
+			location[length] = dirSeparator;
+			location[length + 1] = _T('\0');
+			_tcscat(location, vmLibrary);
+			if (_tstat( path, &stats ) == 0 && (stats.st_mode & S_IFREG) != 0)
+			{	/* found it */
+				return path;
+			}
+		}
+	}
+	
+	/* Not found yet, try the registry, we will use the first 1.4 or 1.5 vm we can find*/
+	HKEY keys[2] = { HKEY_CURRENT_USER, HKEY_LOCAL_MACHINE };
+	_TCHAR * jreKeyName = _T("Software\\JavaSoft\\Java Runtime Environment");
+	for (i = 0; i < 2; i++) {
+		HKEY jreKey = NULL;
+		if (RegOpenKeyEx(keys[i], jreKeyName, 0, KEY_READ, &jreKey) == ERROR_SUCCESS) {
+			int j = 0;
+			_TCHAR keyName[MAX_PATH];
+			DWORD length = MAX_PATH;
+			while (RegEnumKeyEx(jreKey, j++, keyName, &length, 0, 0, 0, 0) == ERROR_SUCCESS) {  
+				/*look for a 1.4 or 1.5 vm*/ 
+				if( _tcsncmp(_T("1.4"), keyName, 3) == 0 || _tcsncmp(_T("1.5"), keyName, 3) == 0) {
+					HKEY subKey = NULL;
+					if(RegOpenKeyEx(jreKey, keyName, 0, KEY_READ, &subKey) == ERROR_SUCCESS) {
+						length = MAX_PATH;
+						_TCHAR lib[MAX_PATH];
+						/*The RuntimeLib value should point to the library we want*/
+						if(RegQueryValueEx(subKey, _T("RuntimeLib"), NULL, NULL, (void*)&lib, &length) == ERROR_SUCCESS) {
+							if (_tstat( lib, &stats ) == 0 && (stats.st_mode & S_IFREG) != 0)
+							{	/*library exists*/
+								path = malloc( length * sizeof(TCHAR*));
+								path[0] = _T('\0');
+								_tcscat(path, lib);
+								
+								RegCloseKey(subKey);
+								RegCloseKey(jreKey);
+								return path;
+							}
+						}
+						RegCloseKey(subKey);
+					}
+				}
+			}
+			RegCloseKey(jreKey);
+		}
+	}
+	return NULL;
 }

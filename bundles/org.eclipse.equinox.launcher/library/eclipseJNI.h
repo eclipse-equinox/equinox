@@ -20,7 +20,10 @@
 #define getInvocationFunction getInvocationFunctionW
 #define launchJavaVM launchJavaVMW
 #define setExitData setExitDataW
+#define startJavaVM startJavaVMW
 #endif
+
+extern _TCHAR * exitData;
 
 typedef jint (JNICALL *JNI_createJavaVM)(JavaVM **pvm, JNIEnv **env, void *args);
 
@@ -50,4 +53,13 @@ extern JNIEXPORT void JNICALL update_splash(JNIEnv *, jobject);
  */
 extern JNIEXPORT jint JNICALL get_splash_handle(JNIEnv *, jobject);
 
+
+/* Start the Java VM and Wait For It to Terminate
+ *
+ * This method is responsible for starting the Java VM and for
+ * detecting its termination. The resulting JVM exit code should
+ * be returned to the main launcher, which will display a message if
+ * the termination was not normal.
+ */
+extern int startJavaVM( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[] );
 #endif

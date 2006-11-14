@@ -52,7 +52,7 @@ LDFLAGS = -mwindows -mno-cygwin
 RES	= eclipse.res
 EXEC	= $(PROGRAM_OUTPUT)
 DEBUG	= $(CDEBUG)
-CFLAGS	= -O -s -Wall \
+CFLAGS	= -g -s -Wall \
 	  -I. -I$(JAVA_JNI) $(SYSINC) \
 	  -D_WIN32 \
 	  -DWIN32_LEAN_AND_MEAN \
@@ -65,7 +65,7 @@ WCFLAGS	= -DUNICODE $(ACFLAGS)
 
 all: $(EXEC)
 
-eclipse.o: ../eclipseOS.h ../eclipseUnicode.h ../eclipse.c
+eclipse.o: ../eclipseOS.h ../eclipseUnicode.h ../eclipseJNI.h ../eclipse.c
 	$(CC) $(DEBUG) $(WCFLAGS) -c -o $@ ../eclipse.c
 
 eclipseUtil.o: ../eclipseUtil.h ../eclipseUnicode.h ../eclipseUtil.c

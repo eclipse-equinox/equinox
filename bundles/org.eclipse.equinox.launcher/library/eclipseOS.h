@@ -25,14 +25,15 @@
 #define initWindowSystem initWindowSystemW
 #define showSplash showSplashW
 #define getArgVM getArgVMW
-#define startJavaVM startJavaVMW
 #define findCommand findCommandW
 #define getProgramDir getProgramDirW
 #define officialName officialNameW
 #define exitData exitDataW
+#define vmLibrary vmLibraryW
 #define loadLibrary loadLibraryW
 #define unloadLibrary unloadLibraryW
 #define findSymbol findSymbolW
+#define findVMLibrary findVMLibraryW
 #endif
 
 /* Operating System Dependent Information */
@@ -48,6 +49,7 @@ extern _TCHAR*  defaultVM;   			/* name of VM to use normally      */
 extern _TCHAR*  shippedVMDir;			/* VM bin directory with separator */
 extern _TCHAR*  officialName;			/* Program official name           */
 extern _TCHAR*  exitData;		  		/* exit data set from Java */
+extern _TCHAR*  vmLibrary;				/* name of the VM shared library */
 
 /* OS Specific Functions */
 
@@ -102,17 +104,6 @@ extern int showSplash( _TCHAR* splashId, _TCHAR* featureImage );
  */
 extern _TCHAR** getArgVM( _TCHAR *vm );
 
-
-/* Start the Java VM and Wait For It to Terminate
- *
- * This method is responsible for starting the Java VM and for
- * detecting its termination. The resulting JVM exit code should
- * be returned to the main launcher, which will display a message if
- * the termination was not normal.
- */
-extern int startJavaVM( _TCHAR* args[] );
-
-
 /* Load the specified shared library
  */
 extern void * loadLibrary( _TCHAR * library );
@@ -124,6 +115,9 @@ extern void unloadLibrary( void * handle );
 /* Find the given symbol in the shared library
  */
 extern void * findSymbol( void * handle, char * symbol );
+
+/* Find the vm shared library associated with the given java executable */
+extern _TCHAR * findVMLibrary( _TCHAR * command );
 
 #endif /* ECLIPSE_OS_H */
 

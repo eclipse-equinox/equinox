@@ -179,6 +179,7 @@
  */
 
 #include "eclipseOS.h"
+#include "eclipseJNI.h"
 #include "eclipseConfig.h"
 
 #ifdef _WIN32
@@ -196,6 +197,7 @@
 #include <sys/stat.h>
 #include <errno.h>
 #include <ctype.h>
+#include <dirent.h>
 
 #define MAX_PATH_LENGTH   2000
 #define MAX_SHARED_LENGTH   (16 * 1024)
@@ -232,7 +234,10 @@ static _TCHAR* homeMsg =
 _T_ECLIPSE("The %s executable launcher was unable to locate its \n\
 companion startup.jar file (in the same directory as the executable).");
 
-#define DEFAULT_STARTUP _T_ECLIPSE("startup.jar")
+#define DEFAULT_EQUINOX_STARTUP _T_ECLIPSE("org.eclipse.equinox.startup")
+#define DEFAULT_STARTUP 		_T_ECLIPSE("startup.jar")
+#define CLASSPATH_PREFIX        _T_ECLIPSE("-Djava.class.path=")
+
 
 /* Define constants for the options recognized by the launcher. */
 #define CONSOLE      _T_ECLIPSE("-console")
@@ -256,7 +261,7 @@ static int     noSplash      = 0;				/* True: do not show splash win	*/
 static _TCHAR*  osArg         = _T_ECLIPSE(DEFAULT_OS);
 static _TCHAR*  osArchArg     = _T_ECLIPSE(DEFAULT_OS_ARCH);
 static _TCHAR*  showSplashArg = NULL;			/* showsplash data (main launcher window) */
-static _TCHAR * startupArg    = DEFAULT_STARTUP; /* path of the startup.jar the user wants to run relative to the program path */
+static _TCHAR * startupArg    = NULL;			/* path of the startup.jar the user wants to run relative to the program path */
 static _TCHAR*  vmName        = NULL;     		/* Java VM that the user wants to run */
 static _TCHAR*  wsArg         = _T_ECLIPSE(DEFAULT_WS);	/* the SWT supported GUI to be used */
 static _TCHAR*  name          = NULL;			/* program name */		
@@ -289,19 +294,22 @@ static int configArgc = 0;
 static _TCHAR** configArgv = NULL;
 
 /* Define the required VM arguments (all platforms). */
-static _TCHAR* jar = _T_ECLIPSE("-jar");
-static _TCHAR**  reqVMarg[] = { &jar, &jarFile, NULL };
+static _TCHAR* cp = NULL;
+static _TCHAR**  reqVMarg[] = { &cp, NULL };
 
 /* Local methods */
 static int createUserArgs(int configArgc, _TCHAR **configArgv, int *argc, _TCHAR ***argv);
 static void   parseArgs( int* argc, _TCHAR* argv[] );
 static _TCHAR** parseArgList( _TCHAR *data );
 static void   freeArgList( _TCHAR** data );
-static _TCHAR** getVMCommand( int argc, _TCHAR* argv[] );
+static void getVMCommand( int argc, _TCHAR* argv[], _TCHAR **vmArgv[], _TCHAR **progArgv[] );
        _TCHAR*  findCommand( _TCHAR* command );
 static _TCHAR*  formatVmCommandMsg( _TCHAR* args[] );
        _TCHAR*  getProgramDir();
 static _TCHAR* getDefaultOfficialName();
+
+static _TCHAR* findStartupJar();
+static char* findFile(char* path, char* prefix);
 
 #ifdef _WIN32
 #ifdef UNICODE
@@ -348,10 +356,10 @@ int main( int argc, _TCHAR* argv[] )
     _TCHAR**  vmCommand = NULL;
     _TCHAR**  vmCommandList = NULL;
     _TCHAR**  vmCommandArgs = NULL;
+    _TCHAR**  progCommandArgs = NULL;
     _TCHAR*   vmCommandMsg = NULL;
     _TCHAR*   errorMsg;
     int       exitCode;
-    struct _stat stats;
     
 	setlocale(LC_ALL, "");
 
@@ -454,6 +462,7 @@ int main( int argc, _TCHAR* argv[] )
 		/* Either verify the VM specified by the user or
 		   attempt to find the VM in the user's PATH. */
 		javaVM = findCommand( vmName );
+		javaVM = findVMLibrary( javaVM );
 
 		/* If the VM was not found, display a message and exit. */
 		if (javaVM == NULL)
@@ -467,29 +476,21 @@ int main( int argc, _TCHAR* argv[] )
 		}
 	}
 
-	/* Construct the absolute name of the startup jar */
-	jarFile = malloc( (_tcslen( programDir ) + _tcslen( startupArg ) + 1) * sizeof( _TCHAR ) );
-	jarFile = _tcscpy( jarFile, programDir );
-  	jarFile = _tcscat( jarFile, startupArg );
-
-	/* If the file does not exist, treat the argument as an absolute path */
-	if (_tstat( jarFile, &stats ) != 0)
-	{
-		free( jarFile );
-		jarFile = malloc( (_tcslen( startupArg ) + 1) * sizeof( _TCHAR ) );
-		jarFile = _tcscpy( jarFile, startupArg );
-	}
-
+	jarFile = findStartupJar();
+	cp = malloc((_tcslen(CLASSPATH_PREFIX) + _tcslen(jarFile)) * sizeof(_TCHAR));
+	cp = _tcscpy(cp, CLASSPATH_PREFIX);
+	_tcscat(cp, jarFile);
+	
     /* Get the command to start the Java VM. */
-    vmCommandArgs = getVMCommand( argc, argv );
-
+    getVMCommand( argc, argv, &vmCommandArgs, &progCommandArgs );
+	
     /* While the Java VM should be restarted */
     vmCommand = vmCommandArgs;
     while (vmCommand != NULL)
     {
     	vmCommandMsg = formatVmCommandMsg( vmCommand );
     	if (debug) _tprintf( goVMMsg, vmCommandMsg );
-    	exitCode = startJavaVM( vmCommand );
+    	exitCode = startJavaVM(javaVM, vmCommandArgs, progCommandArgs );
         switch( exitCode ) {
             case 0:
                 vmCommand = NULL;
@@ -557,6 +558,96 @@ int main( int argc, _TCHAR* argv[] )
     return 0;
 }
 
+static _TCHAR* findStartupJar(){
+	_TCHAR * file;
+	struct _stat stats;
+	
+	if( startupArg != NULL ) {
+		/* startup jar was specified on the command line */
+		
+		/* Construct the absolute name of the startup jar */
+		file = malloc( (_tcslen( programDir ) + _tcslen( startupArg ) + 1) * sizeof( _TCHAR ) );
+		file = _tcscpy( file, programDir );
+	  	file = _tcscat( file, startupArg );
+	
+	
+		/* If the file does not exist, treat the argument as an absolute path */
+		if (_tstat( file, &stats ) != 0)
+		{
+			free( file );
+			file = malloc( (_tcslen( startupArg ) + 1) * sizeof( _TCHAR ) );
+			file = _tcscpy( file, startupArg );
+		}
+		return file;
+	}
+
+	/* TODO Need to resolve _TCHAR vs char and programDir vs workingDir */
+	char * plugins = "plugins";
+	char * path = getcwd(NULL, 0);
+	int pathLength = strlen(path);
+	char * fullPath = malloc( (pathLength + 1 + strlen(plugins)) * sizeof(char));
+	strcpy(fullPath, path);
+	fullPath[pathLength] = dirSeparator;
+	fullPath[pathLength + 1] = 0;
+	strcat(fullPath, plugins);
+	
+	/* equinox startup jar? */	
+	file = findFile(fullPath, "org.eclipse.equinox.startup");
+	if(file != NULL)
+		return file;
+		
+	file = malloc( (_tcslen( DEFAULT_STARTUP ) + 1) * sizeof( _TCHAR ) );
+	file = _tcscpy( file, DEFAULT_STARTUP );
+	return file;
+}
+
+/* 
+ * Looks for files of the form /path/prefix_version.<extension> and returns the full path to
+ * the file with the largest version number
+ */ 
+static char* findFile( char* path, char* prefix) {
+	struct stat stats;
+	struct dirent *file;
+	DIR *dir;
+	int prefixLength;
+	char * candidate = NULL;
+	
+	/* does path exist? */
+	if( stat(path, &stats) != 0 )
+		return NULL;
+	
+	dir = opendir(path);
+	if(dir == NULL)
+		return NULL;  /* can't open dir */
+		
+	prefixLength = strlen(prefix);
+	while((file = readdir(dir)) != NULL) {
+		if(strncmp( file->d_name, prefix, prefixLength) == 0) {
+			if(candidate == NULL)
+				candidate = strdup(file->d_name);
+			else {
+				/* compare, take the highest version */
+				if( strcmp(candidate, file->d_name) < 0) {
+					free(candidate);
+					candidate = strdup(file->d_name);
+				}
+			}
+		}
+	}
+	closedir(dir);
+
+	if(candidate != NULL) {
+		int pathLength = strlen(path);
+		char * result = malloc((pathLength + 1 + strlen(candidate)) * sizeof(char));
+		strcpy(result, path);
+		result[pathLength] = dirSeparator;
+		result[pathLength + 1] = 0;
+		strcat(result, candidate);
+		free(candidate);
+		return result;
+	}
+	return NULL;
+}
 /*
  * Parse arguments of the command.
  */
@@ -826,113 +917,104 @@ _TCHAR* findCommand( _TCHAR* command )
  * Some of the arguments returned by this function were
  * passed directly from the main( argv ) array so they
  * should not be deallocated.
+ * 
+ * Arguments are split into 2: vm arguments and program arguments
  */
-static _TCHAR** getVMCommand( int argc, _TCHAR* argv[] )
+static void getVMCommand( int argc, _TCHAR* argv[], _TCHAR **vmArgv[], _TCHAR **progArgv[] )
 {
-	_TCHAR** defVMarg;
-    int     nDefVMarg = 0;
+	_TCHAR** vmArg;
     int     nReqVMarg = 0;
-    int     nUserVMarg = 0;
-    int     totalArgs;
-    _TCHAR** execArg;
+    int     nVMarg = 0;
+    int     totalVMArgs;
+    int		totalProgArgs;
     int     src;
     int     dst;
 
- 	/* Calculate the number of user VM arguments. */
- 	if (userVMarg != NULL)
- 	{
-	 	while (userVMarg[ nUserVMarg ] != NULL)
- 			nUserVMarg++;
- 	}
-
- 	/* Calculate the number of default VM arguments. */
- 	defVMarg = getArgVM( javaVM );
- 	while (defVMarg[ nDefVMarg ] != NULL)
- 		nDefVMarg++;
+	/* If the user specified "-vmargs", add them instead of the default VM args. */
+	vmArg = (userVMarg != NULL) ? userVMarg : getArgVM( javaVM ); 
+ 	
+ 	/* Calculate the number of VM arguments. */
+ 	while (vmArg[ nVMarg ] != NULL)
+ 		nVMarg++;
 
  	/* Calculate the number of required VM arguments. */
  	while (reqVMarg[ nReqVMarg ] != NULL)
  		nReqVMarg++;
 
-    /* Allocate the arg list for the exec call.
-     *  (VM + userVMargs + defaultVMargs + requiredVMargs + OS <os> + WS <ws> + ARCH <arch> + LAUNCHER <launcher> + NAME <officialName> +
-     *      + SHOWSPLASH <cmd> + argv[] + VM + <vm> + VMARGS + userVMargs + defaultVMargs + requiredVMargs
-     *      + NULL)
-     */
-    totalArgs  = 1 + nUserVMarg + nDefVMarg + nReqVMarg + 2 + 2 + 2 + 2 + 2 + 2 + argc + 2 + 1 + nUserVMarg + nDefVMarg + nReqVMarg + 1;
-	execArg = malloc( totalArgs * sizeof( _TCHAR* ) );
-    dst = 0;
-    execArg[ dst++ ] = javaVM;
-
-    /* If the user specified "-vmargs", add them instead of the default VM args. */
-    if (userVMarg != NULL)
-    {
-    	for (src = 0; src < nUserVMarg; src++)
-	    	execArg[ dst++ ] = userVMarg[ src ];
+	/* VM argument list */
+	totalVMArgs = nVMarg + nReqVMarg + 1;
+	*vmArgv = malloc( totalVMArgs * sizeof(_TCHAR*) );
+	
+	dst = 0;
+	for (src = 0; src < nVMarg; src++){
+		/*if the user specified a classpath, skip it */
+		if(_tcscmp(vmArg[src], cp) == 0){
+			src++;
+			continue;
+		}
+    	(*vmArgv)[ dst++ ] = vmArg[ src ];
 	}
-	else
-	{
-    	for (src = 0; src < nDefVMarg; src++)
-	    	execArg[ dst++ ] = defVMarg[ src ];
-	}
-
-    /* For each required VM arg */
+		
+	/* For each required VM arg */
 	for (src = 0; src < nReqVMarg; src++)
-    	execArg[ dst++ ] = *(reqVMarg[ src ]);
-
-	/* Append the required options. */
-    execArg[ dst++ ] = OS;
-    execArg[ dst++ ] = osArg;
-    execArg[ dst++ ] = WS;
-    execArg[ dst++ ] = wsArg;
+    	(*vmArgv)[ dst++ ] = *(reqVMarg[ src ]);
+	
+	(*vmArgv)[dst] = NULL;
+	
+	/* Program arguments */
+    /*  OS <os> + WS <ws> + ARCH <arch> + LAUNCHER <launcher> + NAME <officialName> +
+     *  + SHOWSPLASH <cmd> + argv[] + VM + <vm> + VMARGS + vmArg + requiredVMargs
+     *  + NULL)
+     */
+    totalProgArgs  = 2 + 2 + 2 + 2 + 2 + 2 + argc + 2 + 1 + nVMarg + nReqVMarg + 1;
+	*progArgv = malloc( totalProgArgs * sizeof( _TCHAR* ) );
+    dst = 0;
+    
+    /* Append the required options. */
+    (*progArgv)[ dst++ ] = OS;
+    (*progArgv)[ dst++ ] = osArg;
+    (*progArgv)[ dst++ ] = WS;
+    (*progArgv)[ dst++ ] = wsArg;
     if (_tcslen(osArchArg) > 0) {
-        execArg[ dst++ ] = OSARCH;
-        execArg[ dst++ ] = osArchArg;
+        (*progArgv)[ dst++ ] = OSARCH;
+        (*progArgv)[ dst++ ] = osArchArg;
     }
 
 	/* Append the launcher command */
-	execArg[ dst++ ] = LAUNCHER;
-	execArg[ dst++ ] = program;
+	(*progArgv)[ dst++ ] = LAUNCHER;
+	(*progArgv)[ dst++ ] = program;
 
 	/* Append the name command */
-	execArg[ dst++ ] = NAME;
-	execArg[ dst++ ] = 	officialName;
+	(*progArgv)[ dst++ ] = NAME;
+	(*progArgv)[ dst++ ] = 	officialName;
 	
 	/* Append the show splash window command, if defined. */
     if (!noSplash)
     {
-        execArg[ dst++ ] = SHOWSPLASH;
-        execArg[ dst++ ] = splashTimeout;
+        (*progArgv)[ dst++ ] = SHOWSPLASH;
+        (*progArgv)[ dst++ ] = splashTimeout;
     }
 
 	/* Append the remaining user defined arguments. */
     for (src = 1; src < argc; src++)
     {
-        execArg[ dst++ ] = argv[ src ];
+        (*progArgv)[ dst++ ] = argv[ src ];
     }
 
     /* Append VM and VMARGS to be able to relaunch using exit data. */
-	execArg[ dst++ ] = VM;
-	execArg[ dst++ ] = javaVM;
-    execArg[ dst++ ] = VMARGS;
-    /* If the user specified "-vmargs", add them instead of the default VM args. */
-    if (userVMarg != NULL)
-    {
-    	for (src = 0; src < nUserVMarg; src++)
-	    	execArg[ dst++ ] = userVMarg[ src ];
-	}
-	else
-	{
-    	for (src = 0; src < nDefVMarg; src++)
-	    	execArg[ dst++ ] = defVMarg[ src ];
-	}
+	(*progArgv)[ dst++ ] = VM;
+	(*progArgv)[ dst++ ] = javaVM;
+    (*progArgv)[ dst++ ] = VMARGS;
+    
+	for (src = 0; src < nVMarg; src++)
+    	(*progArgv)[ dst++ ] = vmArg[ src ];
+	
     /* For each required VM arg */
     for (src = 0; src < nReqVMarg; src++)
-        execArg[ dst++ ] = *(reqVMarg[ src ]);
+        (*progArgv)[ dst++ ] = *(reqVMarg[ src ]);
 
-    execArg[ dst++ ] = NULL;
+    (*progArgv)[ dst++ ] = NULL;
 
-	return execArg;
  }
 
  /* Format the JVM start command for error messages
