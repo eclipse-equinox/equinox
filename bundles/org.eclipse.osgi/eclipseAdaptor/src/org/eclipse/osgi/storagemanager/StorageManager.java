@@ -11,6 +11,7 @@
 package org.eclipse.osgi.storagemanager;
 
 import java.io.*;
+import java.security.AccessController;
 import java.util.*;
 import org.eclipse.core.runtime.internal.adaptor.*;
 import org.eclipse.osgi.framework.internal.reliablefile.*;
@@ -85,7 +86,7 @@ import org.eclipse.osgi.framework.util.SecureAction;
 public final class StorageManager {
 	private static final int FILETYPE_STANDARD = 0;
 	private static final int FILETYPE_RELIABLEFILE = 1;
-	private static final SecureAction secure = new SecureAction();
+	private static final SecureAction secure = (SecureAction) AccessController.doPrivileged(SecureAction.createSecureAction());
 	private static boolean tempCleanup = Boolean.valueOf(secure.getProperty("osgi.embedded.cleanTempFiles")).booleanValue(); //$NON-NLS-1$
 	private static boolean openCleanup = Boolean.valueOf(secure.getProperty("osgi.embedded.cleanupOnOpen")).booleanValue(); //$NON-NLS-1$
 	private static final String MANAGER_FOLDER = ".manager"; //$NON-NLS-1$

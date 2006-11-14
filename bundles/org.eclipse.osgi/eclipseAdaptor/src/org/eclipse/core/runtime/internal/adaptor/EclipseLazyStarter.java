@@ -14,6 +14,7 @@ package org.eclipse.core.runtime.internal.adaptor;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.security.AccessController;
 import java.util.*;
 import org.eclipse.osgi.baseadaptor.*;
 import org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry;
@@ -36,7 +37,7 @@ import org.osgi.service.startlevel.StartLevel;
 
 public class EclipseLazyStarter implements ClassLoadingStatsHook, AdaptorHook, HookConfigurator {
 	private static final boolean throwErrorOnFailedStart = "true".equals(FrameworkProperties.getProperty("osgi.compatibility.errorOnFailedStart", "true"));  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
-	private static final SecureAction secureAction = new SecureAction();
+	private static final SecureAction secureAction = (SecureAction) AccessController.doPrivileged(SecureAction.createSecureAction());
 	private StartLevelImpl startLevelService;
 	private ServiceReference slRef;
 	private BaseAdaptor adaptor;

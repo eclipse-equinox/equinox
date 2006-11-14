@@ -13,6 +13,7 @@ package org.eclipse.osgi.internal.resolver;
 import java.io.*;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Constructor;
+import java.security.AccessController;
 import java.util.*;
 import org.eclipse.osgi.framework.util.SecureAction;
 import org.eclipse.osgi.service.resolver.*;
@@ -24,7 +25,7 @@ class StateReader {
 	public static final String LAZY_FILE = ".lazy"; //$NON-NLS-1$
 	private static final int BUFFER_SIZE_LAZY = 4096;
 	private static final int BUFFER_SIZE_FULLYREAD = 16384;
-	private static final SecureAction secureAction = new SecureAction();
+	private static final SecureAction secureAction = (SecureAction) AccessController.doPrivileged(SecureAction.createSecureAction());
 
 	// objectTable will be a hashmap of objects. The objects will be things
 	// like BundleDescription, ExportPackageDescription, Version etc.. The integer

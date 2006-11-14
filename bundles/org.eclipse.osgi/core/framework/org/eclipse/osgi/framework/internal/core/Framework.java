@@ -106,7 +106,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 	 */
 	protected static AliasMapper aliasMapper = new AliasMapper();
 	protected ConditionalPermissionAdminImpl condPermAdmin;
-	SecureAction secureAction = new SecureAction();
+	SecureAction secureAction = (SecureAction) AccessController.doPrivileged(SecureAction.createSecureAction());
 	// cache of AdminPermissions keyed by Bundle ID
 	private HashMap adminPermissions = new HashMap();
 	

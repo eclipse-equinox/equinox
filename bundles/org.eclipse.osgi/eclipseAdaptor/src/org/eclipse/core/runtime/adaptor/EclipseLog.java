@@ -12,6 +12,7 @@ package org.eclipse.core.runtime.adaptor;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
+import java.security.AccessController;
 import java.util.Calendar;
 import java.util.Date;
 import org.eclipse.core.runtime.internal.adaptor.EclipseEnvironmentInfo;
@@ -67,7 +68,7 @@ public class EclipseLog implements FrameworkLog {
 		String s = System.getProperty("line.separator"); //$NON-NLS-1$
 		LINE_SEPARATOR = s == null ? "\n" : s; //$NON-NLS-1$
 	}
-	private static final SecureAction secureAction = new SecureAction();
+	private static final SecureAction secureAction = (SecureAction) AccessController.doPrivileged(SecureAction.createSecureAction());;
 
 	/** Indicates if the console messages should be printed to the console (System.out) */
 	protected boolean consoleLog = false;

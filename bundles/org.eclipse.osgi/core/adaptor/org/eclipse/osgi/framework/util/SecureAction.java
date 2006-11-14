@@ -36,16 +36,32 @@ public class SecureAction {
 				// parentless ClassLoader
 			};
 		}
-	}) ;
+	});
 
-
-	/**
-	 * Constructs a new SecureAction object.  The constructed SecureAction object 
-	 * uses the caller's AccessControlContext to perform security checks 
+	/*
+	 * Package privaet constructor a new SecureAction object.  
+	 * The constructed SecureAction object uses the caller's AccessControlContext 
+	 * to perform security checks 
 	 */
-	public SecureAction() {
+	SecureAction() {
 		// save the control context to be used.
 		this.controlContext = AccessController.getContext();
+	}
+
+	/**
+	 * Creates a privileged action that can be used to construct a SecureAction object.
+	 * The recommended way to construct a SecureAction object is the following: <p>
+	 * <pre>
+	 * SecureAction secureAction = (SecureAction) AccessController.doPrivileged(SecureAction.createSecureAction());
+	 * </pre>
+	 * @return a privileged action object that can be used to construct a SecureAction object.
+	 */
+	public static PrivilegedAction createSecureAction() {
+		return new PrivilegedAction() {
+			public Object run() {
+				return new SecureAction();
+			}
+		};
 	}
 
 	/**

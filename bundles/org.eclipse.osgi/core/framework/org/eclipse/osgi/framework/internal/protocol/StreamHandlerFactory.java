@@ -13,6 +13,7 @@ package org.eclipse.osgi.framework.internal.protocol;
 
 import java.lang.reflect.Method;
 import java.net.*;
+import java.security.AccessController;
 import java.util.*;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.internal.core.Constants;
@@ -28,7 +29,7 @@ import org.osgi.util.tracker.ServiceTracker;
  * This class contains the URL stream handler factory for the OSGi framework.
  */
 public class StreamHandlerFactory extends MultiplexingFactory implements URLStreamHandlerFactory {
-	static final SecureAction secureAction = new SecureAction();
+	static final SecureAction secureAction = (SecureAction) AccessController.doPrivileged(SecureAction.createSecureAction());
 
 	private ServiceTracker handlerTracker;
 

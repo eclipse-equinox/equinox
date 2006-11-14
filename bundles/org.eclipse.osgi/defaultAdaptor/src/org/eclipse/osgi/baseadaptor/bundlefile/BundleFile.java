@@ -14,6 +14,7 @@ package org.eclipse.osgi.baseadaptor.bundlefile;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.AccessController;
 import java.util.*;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
@@ -31,7 +32,7 @@ import org.eclipse.osgi.util.ManifestElement;
  */
 abstract public class BundleFile {
 	protected static final String PROP_SETPERMS_CMD = "osgi.filepermissions.command"; //$NON-NLS-1$
-	static final SecureAction secureAction = new SecureAction();
+	static final SecureAction secureAction = (SecureAction) AccessController.doPrivileged(SecureAction.createSecureAction());
 	/**
 	 * The File object for this BundleFile.
 	 */
