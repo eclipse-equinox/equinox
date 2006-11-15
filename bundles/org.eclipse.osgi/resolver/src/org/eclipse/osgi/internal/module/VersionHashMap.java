@@ -11,8 +11,10 @@
 package org.eclipse.osgi.internal.module;
 
 import java.util.*;
+import org.eclipse.osgi.framework.internal.core.Constants;
 
 public class VersionHashMap extends MappedList implements Comparator {
+	private final String systemBundle = Constants.getInternalSymbolicName();
 	private ResolverImpl resolver;
 
 	public VersionHashMap(ResolverImpl resolver) {
@@ -101,6 +103,10 @@ public class VersionHashMap extends MappedList implements Comparator {
 		// if the selection policy is set then use that
 		if (resolver.getSelectionPolicy() != null)
 			return resolver.getSelectionPolicy().compare(vs1.getBaseDescription(), vs2.getBaseDescription());
+		if (systemBundle.equals(vs1.getBundle().getSymbolicName()) && !systemBundle.equals(vs2.getBundle().getSymbolicName()))
+			return -1;
+		else if (!systemBundle.equals(vs1.getBundle().getSymbolicName()) && systemBundle.equals(vs2.getBundle().getSymbolicName()))
+			return 1;
 		if (vs1.getBundle().isResolved() != vs2.getBundle().isResolved())
 			return vs1.getBundle().isResolved() ? -1 : 1;
 		int versionCompare = -(vs1.getVersion().compareTo(vs2.getVersion()));
