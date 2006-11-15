@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.bundles;
 
+import java.net.URL;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
@@ -436,5 +437,55 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		Object[] actualEvents = simpleResults.getResults(2);
 		compareResults(expectedEvents, actualEvents);
 		
+	}
+
+	public void testURLsBug164077() throws Exception {
+		Bundle test = installer.installBundle("test");
+		installer.resolveBundles(new Bundle[] {test});
+		URL[] urls = new URL[2];
+		urls[0] = test.getResource("a/b/c/d");
+		urls[1] = test.getEntry("a/b/c/d");
+		assertNotNull("resource", urls[0]);
+		assertNotNull("entry", urls[1]);
+		for (int i = 0; i < urls.length; i++) {
+			URL testURL = new URL(urls[i], "g");
+			assertEquals("g", "/a/b/c/g", testURL.getPath());
+			testURL = new URL(urls[i], "./g");
+			assertEquals("./g", "/a/b/c/g", testURL.getPath());
+			testURL = new URL(urls[i], "g/");
+			assertEquals("g/", "/a/b/c/g/", testURL.getPath());
+			testURL = new URL(urls[i], "/g");
+			assertEquals("/g", "/g", testURL.getPath());
+			testURL = new URL(urls[i], "?y");
+			assertEquals("?y", "/a/b/c/?y", testURL.getPath());
+			testURL = new URL(urls[i], "g?y");
+			assertEquals("g?y", "/a/b/c/g?y", testURL.getPath());
+			testURL = new URL(urls[i], "g#s");
+			assertEquals("g#s", "/a/b/c/g#s", testURL.getPath() + "#s");
+			testURL = new URL(urls[i], "g?y#s");
+			assertEquals("g?y#s", "/a/b/c/g?y#s", testURL.getPath() + "#s");
+			testURL = new URL(urls[i], ";x");
+			assertEquals(";x", "/a/b/c/;x", testURL.getPath());
+			testURL = new URL(urls[i], "g;x");
+			assertEquals("g;x", "/a/b/c/g;x", testURL.getPath());
+			testURL = new URL(urls[i], "g;x?y#s");
+			assertEquals("g;x?y#s", "/a/b/c/g;x?y#s", testURL.getPath() + "#s");
+			testURL = new URL(urls[i], ".");
+			assertEquals(".", "/a/b/c/", testURL.getPath());
+			testURL = new URL(urls[i], "./");
+			assertEquals("./", "/a/b/c/", testURL.getPath());
+			testURL = new URL(urls[i], "..");
+			assertEquals("..", "/a/b/", testURL.getPath());
+			testURL = new URL(urls[i], "../");
+			assertEquals("../", "/a/b/", testURL.getPath());
+			testURL = new URL(urls[i], "../g");
+			assertEquals("../g", "/a/b/g", testURL.getPath());
+			testURL = new URL(urls[i], "../..");
+			assertEquals("../..", "/a/", testURL.getPath());
+			testURL = new URL(urls[i], "../../");
+			assertEquals("../../", "/a/", testURL.getPath());
+			testURL = new URL(urls[i], "../../g");
+			assertEquals("../../g", "/a/g", testURL.getPath());
+		}
 	}
 }
