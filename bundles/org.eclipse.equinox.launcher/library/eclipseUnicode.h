@@ -33,6 +33,18 @@
 #  ifndef _tstat
 #   define _tstat _wstat
 #  endif /* _tstat */
+#  ifndef _topendir
+#   define _topendir _wopendir
+#  endif /* _topendir */
+#  ifndef _treaddir
+#   define _treaddir _wreaddir
+#  endif /* _treaddir */
+#  ifndef _tclosedir
+#   define _tclosedir _wclosedir
+#  endif /* _tclosedir */
+#  ifndef _tDIR
+#   define _tDIR _WDIR
+#  endif /* _tDIR */
 # else /* UNICODE */
 #  ifndef _TCHAR
 #   define _TCHAR char
@@ -43,6 +55,19 @@
 #  ifndef _tstat
 #   define _tstat _stat
 #  endif /* _tstat */
+#  ifndef _topendir
+#error message!
+#   define _topendir opendir
+#  endif /* _topendir */
+#  ifndef _treaddir
+#   define _treaddir readdir
+#  endif /* _treaddir */
+#  ifndef _tclosedir
+#   define _tclosedir closedir
+#  endif /* _tclosedir */
+#  ifndef _tDIR
+#   define _tDIR DIR
+#  endif /* _tDIR */
 # endif /* UNICODE */
 #endif /* __MINGW32__ */
 
@@ -75,7 +100,10 @@
 #define _tstat stat
 #define _tcsncmp strncmp
 #define _tcsstr strstr 
-
+#define _topendir opendir
+#define _treaddir readdir
+#define _tclosedir closedir
+#define _tDIR DIR
 #endif /* _WIN32 */
 
 #endif /* ECLIPSE_UNICODE_H */

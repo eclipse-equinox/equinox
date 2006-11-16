@@ -181,6 +181,7 @@
 #include "eclipseOS.h"
 #include "eclipseJNI.h"
 #include "eclipseConfig.h"
+#include "eclipseCommon.h"
 
 #ifdef _WIN32
 #include <direct.h>
@@ -201,9 +202,6 @@
 
 #define MAX_PATH_LENGTH   2000
 #define MAX_SHARED_LENGTH   (16 * 1024)
-
-/* Global Variables */
-_TCHAR* officialName = NULL;
 
 /* Global Data */
 static _TCHAR*  program     = NULL;       /* full pathname of the program */
@@ -267,15 +265,6 @@ static _TCHAR*  wsArg         = _T_ECLIPSE(DEFAULT_WS);	/* the SWT supported GUI
 static _TCHAR*  name          = NULL;			/* program name */		
 static _TCHAR** userVMarg     = NULL;     		/* user specific args for the Java VM  */
 
-/* Define a table for processing command line options. */
-typedef struct
-{
-	_TCHAR*  name;		/* the option recognized by the launcher */
-	_TCHAR** value;		/* the variable where the option value is saved */
-	int*   flag;		/* the variable that is set if the option is defined */
-	int    remove;		/* the number of argments to remove from the list */
-} Option;
-
 static Option options[] = {
     { CONSOLE,		NULL,			&needConsole,	0 },
     { CONSOLELOG,	NULL,			&needConsole,	0 },
@@ -303,51 +292,12 @@ static void   parseArgs( int* argc, _TCHAR* argv[] );
 static _TCHAR** parseArgList( _TCHAR *data );
 static void   freeArgList( _TCHAR** data );
 static void getVMCommand( int argc, _TCHAR* argv[], _TCHAR **vmArgv[], _TCHAR **progArgv[] );
-       _TCHAR*  findCommand( _TCHAR* command );
 static _TCHAR*  formatVmCommandMsg( _TCHAR* args[] );
        _TCHAR*  getProgramDir();
 static _TCHAR* getDefaultOfficialName();
 
-static _TCHAR* findStartupJar();
-static char* findFile(char* path, char* prefix);
-
-#ifdef _WIN32
-#ifdef UNICODE
-extern int main(int, char**);
-int mainW(int, wchar_t**);
-int wmain( int argc, wchar_t** argv ) {
-	OSVERSIONINFOW info;
-	info.dwOSVersionInfoSize = sizeof(OSVERSIONINFOW);
-	/*
-	* If the OS supports UNICODE functions, run the UNICODE version
-	* of the main function. Otherwise, convert the arguments to
-	* MBCS and run the ANSI version of the main function.
-	*/
-	if (!GetVersionExW (&info)) {
-		int i, result;
-		char **newArgv = malloc(argc * sizeof(char *));
-		for (i=0; i<argc; i++) {
-			wchar_t *oldArg = argv[i];
-			int byteCount = WideCharToMultiByte (CP_ACP, 0, oldArg, -1, NULL, 0, NULL, NULL);
-			char *newArg  = malloc(byteCount+1);
-			newArg[byteCount] = 0;
-			WideCharToMultiByte (CP_ACP, 0, oldArg, -1, newArg, byteCount, NULL, NULL);
-			newArgv[i] = newArg;
-		}
-		result = main(argc, newArgv);
-		for (i=0; i<argc; i++) {
-			free(newArgv[i]);
-		}
-		free(newArgv);
-		return result;
-	}
-	return mainW(argc, argv);
-}
-#define main mainW
-#endif /* UNICODE */
-#endif /* _WIN32 */
-
-int main( int argc, _TCHAR* argv[] )
+/*int main( int argc, _TCHAR* argv[] )*/
+__declspec(dllexport) int run(int argc, _TCHAR* argv[])
 {
 	_TCHAR*   splashBitmap;
     _TCHAR*   ch;
@@ -476,8 +426,7 @@ int main( int argc, _TCHAR* argv[] )
 		}
 	}
 
-	jarFile = findStartupJar();
-	cp = malloc((_tcslen(CLASSPATH_PREFIX) + _tcslen(jarFile)) * sizeof(_TCHAR));
+	cp = malloc((_tcslen(CLASSPATH_PREFIX) + _tcslen(startupArg)) * sizeof(_TCHAR));
 	cp = _tcscpy(cp, CLASSPATH_PREFIX);
 	_tcscat(cp, jarFile);
 	
@@ -558,96 +507,6 @@ int main( int argc, _TCHAR* argv[] )
     return 0;
 }
 
-static _TCHAR* findStartupJar(){
-	_TCHAR * file;
-	struct _stat stats;
-	
-	if( startupArg != NULL ) {
-		/* startup jar was specified on the command line */
-		
-		/* Construct the absolute name of the startup jar */
-		file = malloc( (_tcslen( programDir ) + _tcslen( startupArg ) + 1) * sizeof( _TCHAR ) );
-		file = _tcscpy( file, programDir );
-	  	file = _tcscat( file, startupArg );
-	
-	
-		/* If the file does not exist, treat the argument as an absolute path */
-		if (_tstat( file, &stats ) != 0)
-		{
-			free( file );
-			file = malloc( (_tcslen( startupArg ) + 1) * sizeof( _TCHAR ) );
-			file = _tcscpy( file, startupArg );
-		}
-		return file;
-	}
-
-	/* TODO Need to resolve _TCHAR vs char and programDir vs workingDir */
-	char * plugins = "plugins";
-	char * path = getcwd(NULL, 0);
-	int pathLength = strlen(path);
-	char * fullPath = malloc( (pathLength + 1 + strlen(plugins)) * sizeof(char));
-	strcpy(fullPath, path);
-	fullPath[pathLength] = dirSeparator;
-	fullPath[pathLength + 1] = 0;
-	strcat(fullPath, plugins);
-	
-	/* equinox startup jar? */	
-	file = findFile(fullPath, "org.eclipse.equinox.startup");
-	if(file != NULL)
-		return file;
-		
-	file = malloc( (_tcslen( DEFAULT_STARTUP ) + 1) * sizeof( _TCHAR ) );
-	file = _tcscpy( file, DEFAULT_STARTUP );
-	return file;
-}
-
-/* 
- * Looks for files of the form /path/prefix_version.<extension> and returns the full path to
- * the file with the largest version number
- */ 
-static char* findFile( char* path, char* prefix) {
-	struct stat stats;
-	struct dirent *file;
-	DIR *dir;
-	int prefixLength;
-	char * candidate = NULL;
-	
-	/* does path exist? */
-	if( stat(path, &stats) != 0 )
-		return NULL;
-	
-	dir = opendir(path);
-	if(dir == NULL)
-		return NULL;  /* can't open dir */
-		
-	prefixLength = strlen(prefix);
-	while((file = readdir(dir)) != NULL) {
-		if(strncmp( file->d_name, prefix, prefixLength) == 0) {
-			if(candidate == NULL)
-				candidate = strdup(file->d_name);
-			else {
-				/* compare, take the highest version */
-				if( strcmp(candidate, file->d_name) < 0) {
-					free(candidate);
-					candidate = strdup(file->d_name);
-				}
-			}
-		}
-	}
-	closedir(dir);
-
-	if(candidate != NULL) {
-		int pathLength = strlen(path);
-		char * result = malloc((pathLength + 1 + strlen(candidate)) * sizeof(char));
-		strcpy(result, path);
-		result[pathLength] = dirSeparator;
-		result[pathLength + 1] = 0;
-		strcat(result, candidate);
-		free(candidate);
-		return result;
-	}
-	return NULL;
-}
 /*
  * Parse arguments of the command.
  */
@@ -771,141 +630,6 @@ static _TCHAR** parseArgList( _TCHAR* data ) {
     if (ch1 != data + length) execArg[ dst++ ] = ch1;
     execArg[ dst++ ] = NULL;
     return execArg;
-}
-
-/*
- * Find the absolute pathname to where a command resides.
- *
- * The string returned by the function must be freed.
- */
-#define EXTRA 20
-_TCHAR* findCommand( _TCHAR* command )
-{
-    _TCHAR*  cmdPath;
-    int    length;
-    _TCHAR*  ch;
-    _TCHAR*  dir;
-    _TCHAR*  path;
-    struct _stat stats;
-
-    /* If the command was an abolute pathname, use it as is. */
-    if (command[0] == dirSeparator ||
-       (_tcslen( command ) > 2 && command[1] == _T_ECLIPSE(':')))
-    {
-        length = _tcslen( command );
-        cmdPath = malloc( (length + EXTRA) * sizeof(_TCHAR) ); /* add extra space for a possible ".exe" extension */
-        _tcscpy( cmdPath, command );
-    }
-
-    else
-    {
-        /* If the command string contains a path separator */
-        if (_tcschr( command, dirSeparator ) != NULL)
-        {
-            /* It must be relative to the current directory. */
-            length = MAX_PATH_LENGTH + EXTRA + _tcslen( command );
-            cmdPath = malloc( length * sizeof (_TCHAR));
-            _tgetcwd( cmdPath, length );
-            if (cmdPath[ _tcslen( cmdPath ) - 1 ] != dirSeparator)
-            {
-                length = _tcslen( cmdPath );
-                cmdPath[ length ] = dirSeparator;
-                cmdPath[ length+1 ] = _T_ECLIPSE('\0');
-            }
-            _tcscat( cmdPath, command );
-        }
-
-        /* else the command must be in the PATH somewhere */
-        else
-        {
-            /* Get the directory PATH where executables reside. */
-            path = _tgetenv( _T_ECLIPSE("PATH") );
-            if (!path)
-            {
-	            return NULL;
-            }
-            else
-            {
-	            length = _tcslen( path ) + _tcslen( command ) + MAX_PATH_LENGTH;
-	            cmdPath = malloc( length * sizeof(_TCHAR));
-	
-	            /* Foreach directory in the PATH */
-	            dir = path;
-	            while (dir != NULL && *dir != _T_ECLIPSE('\0'))
-	            {
-	                ch = _tcschr( dir, pathSeparator );
-	                if (ch == NULL)
-	                {
-	                    _tcscpy( cmdPath, dir );
-	                }
-	                else
-	                {
-	                    length = ch - dir;
-	                    _tcsncpy( cmdPath, dir, length );
-	                    cmdPath[ length ] = _T_ECLIPSE('\0');
-	                    ch++;
-	                }
-	                dir = ch; /* advance for the next iteration */
-
-#ifdef _WIN32
-                    /* Remove quotes */
-	                if (_tcschr( cmdPath, _T_ECLIPSE('"') ) != NULL)
-	                {
-	                    int i = 0, j = 0, c;
-	                    length = _tcslen( cmdPath );
-	                    while (i < length) {
-	                        c = cmdPath[ i++ ];
-	                        if (c == _T_ECLIPSE('"')) continue;
-	                        cmdPath[ j++ ] = c;
-	                    }
-	                    cmdPath[ j ] = _T_ECLIPSE('\0');
-	                }
-#endif
-	                /* Determine if the executable resides in this directory. */
-	                if (cmdPath[0] == _T_ECLIPSE('.') &&
-	                   (_tcslen(cmdPath) == 1 || (_tcslen(cmdPath) == 2 && cmdPath[1] == dirSeparator)))
-	                {
-	                	_tgetcwd( cmdPath, MAX_PATH_LENGTH );
-	                }
-	                if (cmdPath[ _tcslen( cmdPath ) - 1 ] != dirSeparator)
-	                {
-	                    length = _tcslen( cmdPath );
-	                    cmdPath[ length ] = dirSeparator;
-	                    cmdPath[ length+1 ] = _T_ECLIPSE('\0');
-	                }
-	                _tcscat( cmdPath, command );
-	
-	                /* If the file is not a directory and can be executed */
-	                if (_tstat( cmdPath, &stats ) == 0 && (stats.st_mode & S_IFREG) != 0)
-	                {
-	                    /* Stop searching */
-	                    dir = NULL;
-	                }
-	            }
-	        }
-        }
-    }
-
-#ifdef _WIN32
-	/* If the command does not exist */
-    if (_tstat( cmdPath, &stats ) != 0 || (stats.st_mode & S_IFREG) == 0)
-    {
-    	/* If the command does not end with .exe, append it an try again. */
-    	length = _tcslen( cmdPath );
-    	if (length > 4 && _tcsicmp( &cmdPath[ length - 4 ], _T_ECLIPSE(".exe") ) != 0)
-    	    _tcscat( cmdPath, _T_ECLIPSE(".exe") );
-    }
-#endif
-
-    /* Verify the resulting command actually exists. */
-    if (_tstat( cmdPath, &stats ) != 0 || (stats.st_mode & S_IFREG) == 0)
-    {
-        free( cmdPath );
-        cmdPath = NULL;
-    }
-
-    /* Return the absolute command pathname. */
-    return cmdPath;
 }
 
 /*

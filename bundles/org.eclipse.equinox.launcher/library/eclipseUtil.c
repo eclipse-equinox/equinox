@@ -13,6 +13,7 @@
 /* Eclipse Launcher Utility Methods */
 
 #include "eclipseOS.h"
+#include "eclipseCommon.h"
 #include "eclipseUtil.h"
 
 #include <string.h>

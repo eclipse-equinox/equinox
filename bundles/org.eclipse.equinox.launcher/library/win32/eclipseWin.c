@@ -11,6 +11,7 @@
  *******************************************************************************/
 
 #include "eclipseOS.h"
+#include "eclipseCommon.h"
 
 #include <windows.h>
 #include <commctrl.h>
@@ -24,11 +25,7 @@
 #include <stdlib.h>
 #endif
 
-#define ECLIPSE_ICON  401
-
 /* Global Variables */
-_TCHAR   dirSeparator  = _T('\\');
-_TCHAR   pathSeparator = _T(';');
 _TCHAR*  consoleVM     = _T("java.exe");
 _TCHAR*  defaultVM     = _T("javaw.exe");
 _TCHAR*  vmLibrary 	   = _T("jvm.dll");
@@ -36,10 +33,6 @@ _TCHAR*  shippedVMDir  = _T("jre\\bin\\");
 
 /* Define the window system arguments for the Java VM. */
 static _TCHAR*  argVM[] = { NULL };
-
-/* Define local variables for the main window. */
-static HWND    topWindow  = 0;
-static WNDPROC oldProc;
 
 /* define default locations in which to find the jvm shared library
  * these are paths relative to the java exe, the shared library is
@@ -50,48 +43,6 @@ static const _TCHAR* jvmLocations [] = { _T("j9vm"),
 										 _T("server"), 
 										 _T("classic"), 
 								 		 NULL };
-
-/* Define local variables for handling the splash window and its image. */
-static int      splashTimerId = 88;
-
-/* Local functions */
-static void CALLBACK  splashTimeout( HWND hwnd, UINT uMsg, UINT id, DWORD dwTime );
-static LRESULT WINAPI WndProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-
-/* Display a Message */
-void displayMessage( _TCHAR* title, _TCHAR* message )
-{
-	MessageBox( topWindow, message, title, MB_OK );
-}
-
-/* Initialize Window System
- *
- * Create a pop window to display the bitmap image.
- *
- * Return the window handle as the data for the splash command.
- *
- */
-void initWindowSystem( int* pArgc, _TCHAR* argv[], int showSplash )
-{
-    /* Create a window that has no decorations. */
-	InitCommonControls();
-    topWindow = CreateWindowEx (0,
-		_T("STATIC"),
-		officialName,
-		SS_BITMAP | WS_POPUP,
-		0,
-		0,
-		0,
-		0,
-		NULL,
-		NULL,
-		GetModuleHandle (NULL),
-		NULL);
-	SetClassLong(topWindow, GCL_HICON, (LONG)LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(ECLIPSE_ICON)));
-    oldProc = (WNDPROC) GetWindowLong (topWindow, GWL_WNDPROC);
-    SetWindowLong (topWindow, GWL_WNDPROC, (LONG) WndProc);
-}
-
 /* Show the Splash Window
  *
  * Open the bitmap, insert into the splash window and display it.
@@ -99,7 +50,6 @@ void initWindowSystem( int* pArgc, _TCHAR* argv[], int showSplash )
  */
 int showSplash( _TCHAR* timeoutString, _TCHAR* featureImage )
 {
-	int     timeout = 0;
     RECT    rect;
     HBITMAP hBitmap = 0;
     HDC     hDC;
@@ -107,12 +57,7 @@ int showSplash( _TCHAR* timeoutString, _TCHAR* featureImage )
     int     x, y;
     int     width, height;
     MSG     msg;
-
-	/* Determine the splash timeout value (in seconds). */
-	if (timeoutString != NULL && _tcslen( timeoutString ) > 0)
-	{
-	    _stscanf( timeoutString, _T("%d"), &timeout );
-	}
+    HWND    topWindow;
 
     /* Load the bitmap for the feature. */
     hDC = GetDC( NULL);
@@ -138,13 +83,6 @@ int showSplash( _TCHAR* timeoutString, _TCHAR* featureImage )
     ShowWindow( topWindow, SW_SHOW );
     BringWindowToTop( topWindow );
 
-	/* If a timeout for the splash window was given */
-	if (timeout != 0)
-	{
-		/* Add a timeout (in milliseconds) to bring down the splash screen. */
-        SetTimer( topWindow, splashTimerId, (timeout * 1000), splashTimeout );
-	}
-
     /* Process messages until the splash window is closed or process is terminated. */
    	while (GetMessage( &msg, NULL, 0, 0 ))
    	{
@@ -163,49 +101,6 @@ _TCHAR** getArgVM( _TCHAR *vm )
 }
 
 /* Local functions */
-
-/* Splash Timeout */
-static void CALLBACK splashTimeout( HWND hwnd, UINT uMsg, UINT id, DWORD dwTime )
-{
-	/* Kill the timer. */
-    KillTimer( topWindow, id );
-	PostMessage( topWindow, WM_QUIT, 0, 0 );
-}
-
-/* Window Procedure for the Spash window.
- *
- * A special WndProc is needed to return the proper vlaue for WM_NCHITTEST.
- * It must also detect the message from the splash window process.
- */
-static LRESULT WINAPI WndProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
-{
-	switch (uMsg)
-	{
-		case WM_NCHITTEST: return HTCLIENT;
-		case WM_CLOSE:
-	    	PostQuitMessage(  0 );
-	    	break;
-	}
-	return CallWindowProc (oldProc, hwnd, uMsg, wParam, lParam);
-}
-
-/* Load the specified shared library
- */
-void * loadLibrary( _TCHAR * library ){
-	return LoadLibrary(library);
-}
-
-/* Unload the shared library
- */
-void unloadLibrary( void * handle ){
-	FreeLibrary(handle);
-}
- 
-/* Find the given symbol in the shared library
- */
-void * findSymbol( void * handle, char * symbol ){
-	return GetProcAddress(handle, symbol);
-}
 
 /*
  * Find the VM shared library starting from the java executable 

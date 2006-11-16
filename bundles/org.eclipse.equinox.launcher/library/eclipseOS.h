@@ -19,20 +19,12 @@
 #define shippedVMDir shippedVMDirW
 #define defaultVM defaultVMW
 #define consoleVM consoleVMW
-#define pathSeparator pathSeparatorW
-#define dirSeparator dirSeparatorW
-#define displayMessage displayMessageW
 #define initWindowSystem initWindowSystemW
 #define showSplash showSplashW
 #define getArgVM getArgVMW
 #define findCommand findCommandW
-#define getProgramDir getProgramDirW
-#define officialName officialNameW
 #define exitData exitDataW
 #define vmLibrary vmLibraryW
-#define loadLibrary loadLibraryW
-#define unloadLibrary unloadLibraryW
-#define findSymbol findSymbolW
 #define findVMLibrary findVMLibraryW
 #endif
 
@@ -41,13 +33,9 @@
 /*** See eclipse.c for information on the launcher runtime architecture ***/
 
 /* Global Variables */
-
-extern _TCHAR   dirSeparator;         /* '/' or '\\' */
-extern _TCHAR   pathSeparator;        /* separator used in PATH variable */
 extern _TCHAR*  consoleVM;   			/* name of VM to use for debugging */
 extern _TCHAR*  defaultVM;   			/* name of VM to use normally      */
 extern _TCHAR*  shippedVMDir;			/* VM bin directory with separator */
-extern _TCHAR*  officialName;			/* Program official name           */
 extern _TCHAR*  exitData;		  		/* exit data set from Java */
 extern _TCHAR*  vmLibrary;				/* name of the VM shared library */
 
@@ -95,7 +83,6 @@ extern void initWindowSystem( int* argc, _TCHAR* argv[], int showSplash );
  */
 extern int showSplash( _TCHAR* splashId, _TCHAR* featureImage );
 
-
 /** Get List of Java VM Arguments
  *
  * A given Java VM might require a special set of arguments in order to
@@ -103,18 +90,6 @@ extern int showSplash( _TCHAR* splashId, _TCHAR* featureImage );
  * of strings, where each string is a separate VM argument.
  */
 extern _TCHAR** getArgVM( _TCHAR *vm );
-
-/* Load the specified shared library
- */
-extern void * loadLibrary( _TCHAR * library );
-
-/* Unload the shared library
- */
-extern void unloadLibrary( void * handle );
- 
-/* Find the given symbol in the shared library
- */
-extern void * findSymbol( void * handle, char * symbol );
 
 /* Find the vm shared library associated with the given java executable */
 extern _TCHAR * findVMLibrary( _TCHAR * command );

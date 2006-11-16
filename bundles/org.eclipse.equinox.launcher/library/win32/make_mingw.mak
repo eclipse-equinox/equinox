@@ -17,6 +17,7 @@
 # This makefile expects the following environment variables set:
 #
 # PROGRAM_OUTPUT  - the filename of the output executable
+# PROGRAM_LIBRARY - the file of the output shared library
 # DEFAULT_OS      - the default value of the "-os" switch
 # DEFAULT_OS_ARCH - the default value of the "-arch" switch
 # DEFAULT_WS      - the default value of the "-ws" switch
@@ -24,13 +25,15 @@
 #if PROGRAM_OUTPUT is not set, assume eclipse.exe
 ifeq ($(PROGRAM_OUTPUT),)
   PROGRAM_OUTPUT=eclipse.exe
+  PROGRAM_LIBRARY=eclipse_1.dll
 endif
 
 # Allow for cross-compiling under linux
 OSTYPE	?= $(shell if uname -s | grep -iq cygwin ; then echo cygwin; else echo linux; fi)
+
 ifeq ($(OSTYPE),cygwin)
 CCVER   = i686
-CC      = i686-pc-cygwin-gcc
+CC      = /usr/bin/mingw/gcc #i686-pc-cygwin-gcc
 RC      = windres
 else
 CCVER   = i586
@@ -45,12 +48,18 @@ $(error Unable to find $(CCVER)-pc-cygwin-gcc)
 endif
 
 # Define the object modules to be compiled and flags.
-OBJS	= eclipse.o eclipseWin.o eclipseConfig.o eclipseUtil.o eclipseJNI.o\
-	  aeclipse.o aeclipseWin.o aeclipseConfig.o aeclipseUtil.o aeclipseJNI.o
+MAIN_OBJS = eclipseMain.o  aeclipseMain.o  
+COMMON_OBJS = eclipseConfig.o eclipseCommon.o   eclipseWinCommon.o\
+			  aeclipseConfig.o aeclipseCommon.o  aeclipseWinCommon.o
+DLL_OBJS	= eclipse.o  eclipseWin.o  eclipseUtil.o  eclipseJNI.o\
+	  		  aeclipse.o aeclipseWin.o aeclipseUtil.o aeclipseJNI.o
+	  		  
 LIBS	= -lkernel32 -luser32 -lgdi32 -lcomctl32 -lmsvcrt
 LDFLAGS = -mwindows -mno-cygwin
+DLL_LDFLAGS = -mnocygwin -shared -Wl,--export-all-symbols -Wl,-export-dynamic
 RES	= eclipse.res
 EXEC	= $(PROGRAM_OUTPUT)
+DLL     = $(PROGRAM_LIBRARY)
 DEBUG	= $(CDEBUG)
 CFLAGS	= -g -s -Wall \
 	  -I. -I$(JAVA_JNI) $(SYSINC) \
@@ -63,9 +72,27 @@ ACFLAGS = -I.. -DDEFAULT_OS="\"$(DEFAULT_OS)\"" \
 	  $(DEBUG) $(CFLAGS)
 WCFLAGS	= -DUNICODE $(ACFLAGS)
 
-all: $(EXEC)
+all: $(EXEC) $(DLL)
 
-eclipse.o: ../eclipseOS.h ../eclipseUnicode.h ../eclipseJNI.h ../eclipse.c
+eclipseMain.o: ../eclipseUnicode.h ../eclipseCommon.h ../eclipseMain.c 
+	$(CC) $(DEBUG) $(WCFLAGS) -c -o $@ ../eclipseMain.c
+	
+aeclipseMain.o: ../eclipseUnicode.h ../eclipseCommon.h ../eclipseMain.c
+	$(CC) $(DEBUG) $(ACFLAGS) -c -o $@ ../eclipseMain.c
+	
+eclipseCommon.o: ../eclipseCommon.h ../eclipseUnicode.h ../eclipseCommon.c
+	$(CC) $(DEBUG) $(WCFLAGS) -c -o $@ ../eclipseCommon.c
+	
+aeclipseCommon.o: ../eclipseCommon.h ../eclipseUnicode.h ../eclipseCommon.c
+	$(CC) $(DEBUG) $(ACFLAGS) -c -o $@ ../eclipseCommon.c
+	
+eclipseWinCommon.o: ../eclipseCommon.h eclipseWinCommon.c
+	$(CC) $(DEBUG) $(WCFLAGS) -c -o $@ eclipseWinCommon.c
+
+aeclipseWinCommon.o: ../eclipseCommon.h eclipseWinCommon.c
+	$(CC) $(DEBUG) $(ACFLAGS) -c -o $@ eclipseWinCommon.c
+	
+eclipse.o: ../eclipseOS.h ../eclipseUnicode.h ../eclipseJNI.h ../eclipseCommon.h ../eclipse.c
 	$(CC) $(DEBUG) $(WCFLAGS) -c -o $@ ../eclipse.c
 
 eclipseUtil.o: ../eclipseUtil.h ../eclipseUnicode.h ../eclipseUtil.c
@@ -80,7 +107,7 @@ eclipseWin.o: ../eclipseOS.h ../eclipseUnicode.h eclipseWin.c
 eclipseJNI.o: ../eclipseUnicode.h ../eclipseJNI.c
 	$(CC) $(DEBUG) $(WCFLAGS) -c -o $@ ../eclipseJNI.c
 	
-aeclipse.o: ../eclipseOS.h ../eclipseUnicode.h ../eclipse.c
+aeclipse.o: ../eclipseOS.h ../eclipseUnicode.h ../eclipseCommon.h ../eclipse.c
 	$(CC) $(DEBUG) $(ACFLAGS) -c -o $@ ../eclipse.c
 
 aeclipseUtil.o: ../eclipseUtil.h ../eclipseUnicode.h ../eclipseUtil.c
@@ -98,12 +125,15 @@ aeclipseJNI.o: ../eclipseUnicode.h ../eclipseJNI.c
 $(RES): eclipse.rc
 	$(RC) --output-format=coff --include-dir=.. -o $@ $<
 
-$(EXEC): $(OBJS) $(RES)
-	$(CC) $(LDFLAGS) -o $(EXEC) $(OBJS) $(RES) $(LIBS)
+$(EXEC): $(MAIN_OBJS) $(COMMON_OBJS) $(RES)
+	$(CC) $(LDFLAGS) -v -o $(EXEC) $(MAIN_OBJS) $(COMMON_OBJS) $(RES) $(LIBS)
 
+$(DLL): $(DLL_OBJS) $(COMMON_OBJS)
+	$(CC) $(DLL_LDFLAGS) -v -o $(DLL) $(DLL_OBJS) $(COMMON_OBJS) $(LIBS)
+	
 install: all
-	cp $(EXEC) $(OUTPUT_DIR)
-	rm -f $(EXEC) $(OBJS) $(RES)
+	cp $(EXEC) $(DLL) $(OUTPUT_DIR)
+	rm -f $(EXEC) $(DLL_OBJS) $(COMMON_OBJS) $(MAIN_OBJS) $(RES)
 
 clean:
-	$(RM) $(EXEC) $(OBJS) $(RES)
+	$(RM) $(EXEC) $(DLL) $(DLL_OBJS) $(COMMON_OBJS) $(MAIN_OBJS) $(RES)

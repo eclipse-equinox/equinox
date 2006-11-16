@@ -10,6 +10,7 @@
  *******************************************************************************/
  
 #include "eclipseJNI.h"
+#include "eclipseCommon.h"
 #include "eclipseOS.h"
 #include <stdlib.h>
   
