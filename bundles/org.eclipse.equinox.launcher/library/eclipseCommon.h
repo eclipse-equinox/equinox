@@ -34,7 +34,7 @@
 #define run runW
 #endif
 
-#define RUN_METHOD STR(run)
+#define RUN_METHOD _T_ECLIPSE(STR(run))
 
 extern _TCHAR   dirSeparator;         /* '/' or '\\' */
 extern _TCHAR   pathSeparator;        /* separator used in PATH variable */

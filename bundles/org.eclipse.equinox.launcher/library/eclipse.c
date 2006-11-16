@@ -297,7 +297,7 @@ static _TCHAR*  formatVmCommandMsg( _TCHAR* args[] );
 static _TCHAR* getDefaultOfficialName();
 
 /*int main( int argc, _TCHAR* argv[] )*/
-__declspec(dllexport) int run(int argc, _TCHAR* argv[])
+JNIEXPORT run(int argc, _TCHAR* argv[])
 {
 	_TCHAR*   splashBitmap;
     _TCHAR*   ch;

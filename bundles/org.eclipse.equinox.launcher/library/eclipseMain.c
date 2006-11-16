@@ -175,7 +175,7 @@ int main( int argc, _TCHAR* argv[] )
 	}
 	
 	void * handle = loadLibrary(library);
-	runMethod = findSymbol(library, RUN_METHOD);
+	runMethod = findSymbol(handle, "run");
 	exitCode = runMethod(argc, argv);
 	unloadLibrary(handle);
 	
