@@ -259,6 +259,10 @@ public class StateHelperImpl implements StateHelper {
 	}
 
 	public ExportPackageDescription[] getVisiblePackages(BundleDescription bundle) {
+		return getVisiblePackages(bundle, 0);
+	}
+
+	public ExportPackageDescription[] getVisiblePackages(BundleDescription bundle, int options) {
 		StateImpl state = (StateImpl) bundle.getContainingState();
 		boolean strict = false;
 		if (state != null)
@@ -272,7 +276,7 @@ public class StateHelperImpl implements StateHelper {
 			ExportPackageDescription pkgSupplier = (ExportPackageDescription) imports[i].getSupplier();
 			if (pkgSupplier == null)
 				continue;
-			if (!isSystemExport(pkgSupplier) && !pkgSet.contains(pkgSupplier)) {
+			if (!isSystemExport(pkgSupplier, options) && !pkgSet.contains(pkgSupplier)) {
 				orderedPkgList.add(pkgSupplier);
 				pkgSet.add(pkgSupplier);
 			}
@@ -285,7 +289,7 @@ public class StateHelperImpl implements StateHelper {
 			for (int j = 0; j < requires.length; j++) {
 				BundleDescription bundleSupplier = (BundleDescription) requires[j].getSupplier();
 				if (bundleSupplier != null)
-					getPackages(bundleSupplier, bundle.getSymbolicName(), importList, orderedPkgList, pkgSet, visited, strict, importNames);
+					getPackages(bundleSupplier, bundle.getSymbolicName(), importList, orderedPkgList, pkgSet, visited, strict, importNames, options);
 			}
 			importList.add(imports[i].getName()); // besure to add to direct import list
 		}
@@ -296,12 +300,12 @@ public class StateHelperImpl implements StateHelper {
 		for (int i = 0; i < requires.length; i++) {
 			BundleDescription bundleSupplier = (BundleDescription) requires[i].getSupplier();
 			if (bundleSupplier != null)
-				getPackages(bundleSupplier, bundle.getSymbolicName(), importList, orderedPkgList, pkgSet, visited, strict, null);
+				getPackages(bundleSupplier, bundle.getSymbolicName(), importList, orderedPkgList, pkgSet, visited, strict, null, options);
 		}
 		return (ExportPackageDescription[]) orderedPkgList.toArray(new ExportPackageDescription[orderedPkgList.size()]);
 	}
 
-	private void getPackages(BundleDescription requiredBundle, String symbolicName, Set importList, ArrayList orderedPkgList, Set pkgSet, Set visited, boolean strict, Set pkgNames) {
+	private void getPackages(BundleDescription requiredBundle, String symbolicName, Set importList, ArrayList orderedPkgList, Set pkgSet, Set visited, boolean strict, Set pkgNames, int options) {
 		if (visited.contains(requiredBundle))
 			return; // prevent duplicate entries and infinate loops incase of cycles
 		visited.add(requiredBundle);
@@ -309,7 +313,7 @@ public class StateHelperImpl implements StateHelper {
 		ExportPackageDescription[] exports = requiredBundle.getSelectedExports();
 		HashSet exportNames = new HashSet(exports.length); // set is used to improve performance of duplicate check.
 		for (int i = 0; i < exports.length; i++)
-			if ((pkgNames == null || pkgNames.contains(exports[i].getName())) && !isSystemExport(exports[i]) && isFriend(symbolicName, exports[i], strict) && !importList.contains(exports[i].getName()) && !pkgSet.contains(exports[i])) {
+			if ((pkgNames == null || pkgNames.contains(exports[i].getName())) && !isSystemExport(exports[i], options) && isFriend(symbolicName, exports[i], strict) && !importList.contains(exports[i].getName()) && !pkgSet.contains(exports[i])) {
 				if (!exportNames.contains(exports[i].getName())) { 
 					// only add the first export
 					orderedPkgList.add(exports[i]);
@@ -324,16 +328,18 @@ public class StateHelperImpl implements StateHelper {
 				continue;
 			if (requiredBundles[i].isExported()) {
 				// looking for a specific package and that package is exported by this bundle or adding all packages from a reexported bundle
-				getPackages((BundleDescription) requiredBundles[i].getSupplier(), symbolicName, importList, orderedPkgList, pkgSet, visited, strict, pkgNames);
+				getPackages((BundleDescription) requiredBundles[i].getSupplier(), symbolicName, importList, orderedPkgList, pkgSet, visited, strict, pkgNames, options);
 			} else if (exportNames.size() > 0) {
 				// adding any exports from required bundles which we also export
 				Set tmpVisited = new HashSet();
-				getPackages((BundleDescription) requiredBundles[i].getSupplier(), symbolicName, importList, orderedPkgList, pkgSet, tmpVisited, strict, exportNames);
+				getPackages((BundleDescription) requiredBundles[i].getSupplier(), symbolicName, importList, orderedPkgList, pkgSet, tmpVisited, strict, exportNames, options);
 			}
 		}
 	}
 
-	private boolean isSystemExport(ExportPackageDescription export) {
+	private boolean isSystemExport(ExportPackageDescription export, int options) {
+		if ((options & VISIBLE_INCLUDE_EE_PACKAGES) != 0)
+			return false;
 		return ((Integer) export.getDirective(ExportPackageDescriptionImpl.EQUINOX_EE)).intValue() >= 0;
 	}
 

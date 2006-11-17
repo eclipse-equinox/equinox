@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.osgi.service.resolver;
 
+
 /**
  * A helper class that provides convenience methods for manipulating 
  * state objects. <code>PlatformAdmin</code> provides an access point
@@ -29,6 +30,14 @@ public interface StateHelper {
 	 * Indicates that access is discouraged to an <code>ExportPackageDescription</code>.
 	 */
 	public static int ACCESS_DISCOURAGED = 0x02;
+
+	/**
+	 * EXPERIMENTAL <p>
+	 * An option to include packages available from the execution environment when 
+	 * getting the visible packages of a bundle.
+	 * @see StateHelper#getVisiblePackages(BundleDescription, int)
+	 */
+	public static int VISIBLE_INCLUDE_EE_PACKAGES = 0x01;
 
 	/**
 	 * Returns all bundles in the state depending on the given bundles. The given bundles
@@ -155,15 +164,36 @@ public interface StateHelper {
 	 * search is done for all packages which are available through the required bundles and 
 	 * any bundles which are reexported.  This method also takes into account all directives
 	 * which may be specified on the constraint specifications (e.g. uses, x-friends etc.) <p>
+	 * 
 	 * The returned list will not include any packages which are exported by the system bundle 
 	 * on the behave of the running execution environment.  For example, when running on a 
 	 * 1.4.2 JRE the system bundle will export the javax.xml.parsers package.  These types of 
 	 * system packages will are not included in the returned list.
+	 * <p>
+	 * Same as calling getVisiblePackages(bundle, 0)
 	 * @param bundle a bundle to get the list of packages for.
 	 * @return a list of all packages that the specified bundle has access to which are
 	 * exported by other bundles.
 	 */
 	public ExportPackageDescription[] getVisiblePackages(BundleDescription bundle);
+
+	/**
+	 * EXPERIMENTAL API <p>
+	 * 
+	 * Returns a list of all packages that the specified bundle has access to which are
+	 * exported by other bundles.  This takes into account all constraint specifications
+	 * from the specified bundle (Import-Package, Require-Bundle etc).  A deep dependancy
+	 * search is done for all packages which are available through the required bundles and 
+	 * any bundles which are reexported.  This method also takes into account all directives
+	 * which may be specified on the constraint specifications (e.g. uses, x-friends etc.) 
+	 * @param bundle a bundle to get the list of packages for.
+	 * @param options the options for selecting the visible packages
+	 * @return a list of all packages that the specified bundle has access to which are
+	 * exported by other bundles.
+	 * @see StateHelper#VISIBLE_INCLUDE_EE_PACKAGES
+	 * @since 3.3
+	 */
+	public ExportPackageDescription[] getVisiblePackages(BundleDescription bundle, int options);
 
 	/**
 	 * Returns the access code that the specified <code>BundleDescription</code> has to the 

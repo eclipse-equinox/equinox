@@ -745,8 +745,7 @@ public class FrameworkCommandProvider implements CommandProvider {
 							}
 							title = true;
 							if (desc != null) {
-								title = printImportedPackages(exports, intp, title);
-								ExportPackageDescription[] imports = desc.getContainingState().getStateHelper().getVisiblePackages(desc);
+								ExportPackageDescription[] imports = desc.getContainingState().getStateHelper().getVisiblePackages(desc, StateHelper.VISIBLE_INCLUDE_EE_PACKAGES);
 								title = printImportedPackages(imports, intp, title);
 							}
 
@@ -1582,7 +1581,7 @@ public class FrameworkCommandProvider implements CommandProvider {
 			return;
 		PlatformAdmin platformAdmin = (PlatformAdmin) context.getService(ref);
 		try {
-			ExportPackageDescription[] exports = platformAdmin.getStateHelper().getVisiblePackages(bundle.getBundleDescription());
+			ExportPackageDescription[] exports = platformAdmin.getStateHelper().getVisiblePackages(bundle.getBundleDescription(), StateHelper.VISIBLE_INCLUDE_EE_PACKAGES);
 			for (int i = 0; i < exports.length; i++) {
 				intp.println(exports[i] + ": " + platformAdmin.getStateHelper().getAccessCode(bundle.getBundleDescription(), exports[i])); //$NON-NLS-1$
 			}
