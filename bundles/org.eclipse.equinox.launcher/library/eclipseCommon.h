@@ -28,6 +28,7 @@
 #define displayMessage displayMessageW
 #define getProgramDir getProgramDirW
 #define findCommand findCommandW
+#define findFile findFileW
 #define loadLibrary loadLibraryW
 #define unloadLibrary unloadLibraryW
 #define findSymbol findSymbolW
@@ -38,16 +39,7 @@
 
 extern _TCHAR   dirSeparator;         /* '/' or '\\' */
 extern _TCHAR   pathSeparator;        /* separator used in PATH variable */
-extern _TCHAR*  officialName;			/* Program official name           */
-
-/* Define a table for processing command line options. */
-typedef struct
-{
-	_TCHAR*  name;		/* the option recognized by the launcher */
-	_TCHAR** value;		/* the variable where the option value is saved */
-	int*   flag;		/* the variable that is set if the option is defined */
-	int    remove;		/* the number of argments to remove from the list */
-} Option;
+extern _TCHAR*  officialName;		  /* Program official name           */
 
  /*
  * Find the absolute pathname to where a command resides.
@@ -55,6 +47,8 @@ typedef struct
  * The string returned by the function must be freed.
  */
 extern _TCHAR* findCommand( _TCHAR* command );
+
+extern _TCHAR* findFile( _TCHAR* path, _TCHAR* prefix);
 
 /** Display a Message
  *
@@ -75,6 +69,6 @@ extern void unloadLibrary( void * handle );
  
 /* Find the given symbol in the shared library
  */
-extern void * findSymbol( void * handle, char * symbol );
+extern void * findSymbol( void * handle, _TCHAR * symbol );
 
 #endif

@@ -208,7 +208,7 @@ static _TCHAR*  program     = NULL;       /* full pathname of the program */
 static _TCHAR*  programDir  = NULL;       /* directory where program resides */
 static _TCHAR*  javaVM      = NULL;       /* full pathname of the Java VM to run */
 static _TCHAR*  jarFile     = NULL;		  /* full pathname of the startup jar file to run */
-static _TCHAR*  exitData    = NULL;		  /* exit data set from Java */
+	   _TCHAR*  exitData    = NULL;		  /* exit data set from Java */
 /* Define the special exit codes returned from Eclipse. */
 #define RESTART_LAST_EC    23
 #define RESTART_NEW_EC     24
@@ -227,6 +227,9 @@ _T_ECLIPSE("A Java Runtime Environment (JRE) or Java Development Kit (JDK)\n\
 must be available in order to run %s. No Java virtual machine\n\
 was found after searching the following locations:\n\
 %s");
+static _TCHAR* startupMsg =
+_T_ECLIPSE("The %s executable launcher was unable to locate its \n\
+companion startup jar file.");
 
 static _TCHAR* homeMsg =
 _T_ECLIPSE("The %s executable launcher was unable to locate its \n\
@@ -235,7 +238,6 @@ companion startup.jar file (in the same directory as the executable).");
 #define DEFAULT_EQUINOX_STARTUP _T_ECLIPSE("org.eclipse.equinox.startup")
 #define DEFAULT_STARTUP 		_T_ECLIPSE("startup.jar")
 #define CLASSPATH_PREFIX        _T_ECLIPSE("-Djava.class.path=")
-
 
 /* Define constants for the options recognized by the launcher. */
 #define CONSOLE      _T_ECLIPSE("-console")
@@ -251,6 +253,8 @@ companion startup.jar file (in the same directory as the executable).");
 #define WS           _T_ECLIPSE("-ws")
 #define NAME         _T_ECLIPSE("-name")
 #define VMARGS       _T_ECLIPSE("-vmargs")					/* special option processing required */
+#define CP			 _T_ECLIPSE("-cp")
+#define CLASSPATH    _T_ECLIPSE("-classpath")
 
 /* Define the variables to receive the option values. */
 static int     needConsole   = 0;				/* True: user wants a console	*/
@@ -263,8 +267,15 @@ static _TCHAR * startupArg    = NULL;			/* path of the startup.jar the user want
 static _TCHAR*  vmName        = NULL;     		/* Java VM that the user wants to run */
 static _TCHAR*  wsArg         = _T_ECLIPSE(DEFAULT_WS);	/* the SWT supported GUI to be used */
 static _TCHAR*  name          = NULL;			/* program name */		
-static _TCHAR** userVMarg     = NULL;     		/* user specific args for the Java VM  */
 
+/* Define a table for processing command line options. */
+typedef struct
+{
+	_TCHAR*  name;		/* the option recognized by the launcher */
+	_TCHAR** value;		/* the variable where the option value is saved */
+	int*   flag;		/* the variable that is set if the option is defined */
+	int    remove;		/* the number of argments to remove from the list */
+} Option;
 static Option options[] = {
     { CONSOLE,		NULL,			&needConsole,	0 },
     { CONSOLELOG,	NULL,			&needConsole,	0 },
@@ -279,15 +290,12 @@ static Option options[] = {
     { WS,			&wsArg,			NULL,			2 } };
 static int optionsSize = (sizeof(options) / sizeof(options[0]));
 
-static int configArgc = 0;
-static _TCHAR** configArgv = NULL;
-
 /* Define the required VM arguments (all platforms). */
 static _TCHAR* cp = NULL;
-static _TCHAR**  reqVMarg[] = { &cp, NULL };
+static _TCHAR** reqVMarg[] = { &cp, NULL };		/* required VM args */
+static _TCHAR** userVMarg     = NULL;     		/* user specific args for the Java VM  */
 
 /* Local methods */
-static int createUserArgs(int configArgc, _TCHAR **configArgv, int *argc, _TCHAR ***argv);
 static void   parseArgs( int* argc, _TCHAR* argv[] );
 static _TCHAR** parseArgList( _TCHAR *data );
 static void   freeArgList( _TCHAR** data );
@@ -295,12 +303,12 @@ static void getVMCommand( int argc, _TCHAR* argv[], _TCHAR **vmArgv[], _TCHAR **
 static _TCHAR*  formatVmCommandMsg( _TCHAR* args[] );
        _TCHAR*  getProgramDir();
 static _TCHAR* getDefaultOfficialName();
+static _TCHAR*  findStartupJar();
 
-/*int main( int argc, _TCHAR* argv[] )*/
-JNIEXPORT run(int argc, _TCHAR* argv[])
+/* this method must match the RunMethod typedef in eclipseMain.c */
+/* vmArgs must be NULL terminated                                */
+int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
 {
-	_TCHAR*   splashBitmap;
-    _TCHAR*   ch;
     _TCHAR*   shippedVM    = NULL;
     _TCHAR*   vmSearchPath = NULL;
     _TCHAR**  vmCommand = NULL;
@@ -310,58 +318,26 @@ JNIEXPORT run(int argc, _TCHAR* argv[])
     _TCHAR*   vmCommandMsg = NULL;
     _TCHAR*   errorMsg;
     int       exitCode;
-    
-	setlocale(LC_ALL, "");
-
-	/* 
-	 * Strip off any extroneous <CR> from the last argument. If a shell script
-	 * on Linux is created in DOS format (lines end with <CR><LF>), the C-shell
-	 * does not strip off the <CR> and hence the argument is bogus and may 
-	 * not be recognized by the launcher or eclipse itself.
-	 */
-	 ch = _tcschr( argv[ argc - 1 ], _T_ECLIPSE('\r') );
-	 if (ch != NULL)
-	 {
-	     *ch = _T_ECLIPSE('\0');
-	 }
 	 
-	/* Determine the full pathname of this program. */
-    program = findCommand( argv[0] );
-    if (program == NULL)
-    {
-#ifdef _WIN32
-    	program = malloc( MAX_PATH_LENGTH + 1 );
-    	GetModuleFileName( NULL, program, MAX_PATH_LENGTH );
-#else
-    	program = malloc( strlen( argv[0] ) + 1 );
-    	strcpy( program, argv[0] );
-#endif
-    }
-	
-	/* Parse configuration file arguments */
-	if (readConfigFile(program, argv[0], &configArgc, &configArgv) == 0)
-	{
-		parseArgs (&configArgc, configArgv);
-	}
+	/* arg[0] should be the full pathname of this program. */
+    program = _tcsdup( argv[0] );
 	
     /* Parse command line arguments (looking for the VM to use). */
     /* Override configuration file arguments */
     parseArgs( &argc, argv );
 
-	/* Special case - user arguments specified in the config file
-	 * are appended to the user arguments passed from the command line.
-	 */
-	if (configArgc > 1)
-	{	
-		createUserArgs(configArgc, configArgv, &argc, &argv);
-	}
-
 	/* Initialize official program name */
 	officialName = name != NULL ? _tcsdup( name ) : getDefaultOfficialName();
 
     /* Initialize the window system. */
-    initWindowSystem( &argc, argv, (showSplashArg != NULL) );
+    initWindowSystem( &argc, argv, !noSplash );
 
+    /* If the showsplash option was given */
+    if (!noSplash && showSplashArg)
+    {
+    	showSplash(showSplashArg);
+    }
+    
     /* Find the directory where the Eclipse program is installed. */
     programDir = getProgramDir();
     if (programDir == NULL)
@@ -371,21 +347,6 @@ JNIEXPORT run(int argc, _TCHAR* argv[])
         displayMessage( officialName, errorMsg );
         free( errorMsg );
     	exit( 1 );
-    }
-
-    /* If the showsplash option was given */
-    if (showSplashArg != NULL && argc > 1)
-    {
-    	splashBitmap = argv[1];
-    	exitCode = showSplash( showSplashArg, splashBitmap );
-    	if (exitCode && debug)
-    	{
-        	errorMsg = malloc( (_tcslen(showMsg) + _tcslen(splashBitmap) + 10) * sizeof(_TCHAR) );
-        	_stprintf( errorMsg, showMsg, splashBitmap );
-        	displayMessage( officialName, errorMsg );
-        	free( errorMsg );
-     	}
-    	exit( exitCode );
     }
 
     /* If the user did not specify a VM to be used */
@@ -426,11 +387,23 @@ JNIEXPORT run(int argc, _TCHAR* argv[])
 		}
 	}
 
-	cp = malloc((_tcslen(CLASSPATH_PREFIX) + _tcslen(startupArg)) * sizeof(_TCHAR));
+	/* Find the startup.jar */
+	jarFile = findStartupJar();
+	if(jarFile == NULL) {
+		errorMsg = malloc( (_tcslen(startupMsg) + _tcslen(officialName) + 10) * sizeof(_TCHAR) );
+        _stprintf( errorMsg, startupMsg, officialName );
+        displayMessage( officialName, errorMsg );
+        free( errorMsg );
+    	exit( 1 );
+	}
+	
+	/* the startup jarFile goes on the classpath */
+	cp = malloc((_tcslen(CLASSPATH_PREFIX) + _tcslen(jarFile)) * sizeof(_TCHAR));
 	cp = _tcscpy(cp, CLASSPATH_PREFIX);
 	_tcscat(cp, jarFile);
 	
     /* Get the command to start the Java VM. */
+    userVMarg = vmArgs;
     getVMCommand( argc, argv, &vmCommandArgs, &progCommandArgs );
 	
     /* While the Java VM should be restarted */
@@ -495,14 +468,17 @@ JNIEXPORT run(int argc, _TCHAR* argv[])
     }
 
     /* Cleanup time. */
+/*  TODO We are having HEAP problems freeing some of this, figure out what should stay and 
+ *  what should go
+ */
+/*
     free( jarFile );
     free( programDir );
     free( program );
     if ( vmSearchPath != NULL ) free( vmSearchPath );
     if ( vmCommandList != NULL ) freeArgList( vmCommandList );
-    if ( configArgv != NULL ) freeConfig( configArgv );
-    if (configArgc > 1) free( argv );
     free( officialName );
+*/
 
     return 0;
 }
@@ -518,7 +494,7 @@ static void parseArgs( int* pArgc, _TCHAR* argv[] )
     int     i;
 
     /* Ensure the list of user argument is NULL terminated. */
-    argv[ *pArgc ] = NULL;
+    /*argv[ *pArgc ] = NULL;*/
 
 	/* For each user defined argument (excluding the program) */
     for (index = 1; index < *pArgc; index++){
@@ -545,14 +521,6 @@ static void parseArgs( int* pArgc, _TCHAR* argv[] )
        		remArgs = option->remove;
        	}
 
-        /* All of the remaining arguments are user VM args. */
-        else if (_tcsicmp( argv[ index ], VMARGS ) == 0)
-        {
-            userVMarg = &argv[ index+1 ];
-            argv[ index ] = NULL;
-            *pArgc = index;
-        }
-
 		/* Remove any matched arguments from the list. */
         if (remArgs > 0)
         {
@@ -567,35 +535,6 @@ static void parseArgs( int* pArgc, _TCHAR* argv[] )
 }
 
 /*
- * Create a new array containing user arguments from the config file first and
- * from the command line second.
- * Allocate an array large enough to host all the strings passed in from
- * the argument configArgv and argv. That array is passed back to the
- * argv argument. That array must be freed with the regular free().
- * Note that both arg lists are expected to contain the argument 0 from the C
- * main method. That argument contains the path/executable name. It is
- * only copied once in the resulting list.
- *
- * Returns 0 if success.
- */
-static int createUserArgs(int configArgc, _TCHAR **configArgv, int *argc, _TCHAR ***argv)
-{
-	 _TCHAR** newArray = (_TCHAR **)malloc((configArgc + *argc) * sizeof(_TCHAR *));
-
-	memcpy(newArray, configArgv, configArgc * sizeof(_TCHAR *));	
-	
-	/* Skip the argument zero (program path and name) */
-	memcpy(newArray + configArgc, *argv + 1, (*argc - 1) * sizeof(_TCHAR *));
-
-	/* Null terminate the new list of arguments and return it. */	 
-	*argv = newArray;
-	*argc += configArgc - 1;
-	(*argv)[*argc] = NULL;
-	
-	return 0;
-}
-
-/*
  * Free the memory allocated by parseArgList().
  */
 static void freeArgList( _TCHAR** data ) {
@@ -605,7 +544,7 @@ static void freeArgList( _TCHAR** data ) {
 }
 
 /*
- * Parse the data into a list of arguments separarted by \n.
+ * Parse the data into a list of arguments separated by \n.
  *
  * The list of strings returned by this function must be freed with
  * freeArgList().
@@ -848,3 +787,47 @@ _TCHAR* getProgramDir( )
     return NULL;
 }
 
+static _TCHAR* findStartupJar(){
+	_TCHAR * file;
+	_TCHAR * pluginsPath;
+	struct _stat stats;
+	
+	if( startupArg != NULL ) {
+		/* startup jar was specified on the command line */
+		
+		/* Construct the absolute name of the startup jar */
+		file = malloc( (_tcslen( programDir ) + _tcslen( startupArg ) + 1) * sizeof( _TCHAR ) );
+		file = _tcscpy( file, programDir );
+	  	file = _tcscat( file, startupArg );
+	
+		/* If the file does not exist, treat the argument as an absolute path */
+		if (_tstat( file, &stats ) != 0)
+		{
+			free( file );
+			file = malloc( (_tcslen( startupArg ) + 1) * sizeof( _TCHAR ) );
+			file = _tcscpy( file, startupArg );
+			
+			/* still doesn't exit? */
+			if (_tstat( file, &stats ) != 0) {
+				file = NULL;
+			}
+		}
+		return file;
+	}
+
+	int pathLength = _tcslen(programDir);
+	pluginsPath = malloc( (pathLength + 1 + 7) * sizeof(char));
+	_tcscpy(pluginsPath, programDir);
+	pluginsPath[pathLength] = dirSeparator;
+	pluginsPath[pathLength + 1] = 0;
+	_tcscat(pluginsPath, _T_ECLIPSE("plugins"));
+	
+	/* equinox startup jar? */	
+	file = findFile(pluginsPath, _T_ECLIPSE("org.eclipse.equinox.startup"));
+	if(file != NULL)
+		return file;
+		
+	file = malloc( (_tcslen( DEFAULT_STARTUP ) + 1) * sizeof( _TCHAR ) );
+	file = _tcscpy( file, DEFAULT_STARTUP );
+	return file;
+}

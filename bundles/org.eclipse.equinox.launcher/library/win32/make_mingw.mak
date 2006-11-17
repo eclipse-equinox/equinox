@@ -33,7 +33,7 @@ OSTYPE	?= $(shell if uname -s | grep -iq cygwin ; then echo cygwin; else echo li
 
 ifeq ($(OSTYPE),cygwin)
 CCVER   = i686
-CC      = /usr/bin/mingw/gcc #i686-pc-cygwin-gcc
+CC      = i686-pc-cygwin-gcc
 RC      = windres
 else
 CCVER   = i586
@@ -56,7 +56,7 @@ DLL_OBJS	= eclipse.o  eclipseWin.o  eclipseUtil.o  eclipseJNI.o\
 	  		  
 LIBS	= -lkernel32 -luser32 -lgdi32 -lcomctl32 -lmsvcrt
 LDFLAGS = -mwindows -mno-cygwin
-DLL_LDFLAGS = -mnocygwin -shared -Wl,--export-all-symbols -Wl,-export-dynamic
+DLL_LDFLAGS = -mno-cygwin -shared -Wl,--export-all-symbols
 RES	= eclipse.res
 EXEC	= $(PROGRAM_OUTPUT)
 DLL     = $(PROGRAM_LIBRARY)
@@ -126,10 +126,10 @@ $(RES): eclipse.rc
 	$(RC) --output-format=coff --include-dir=.. -o $@ $<
 
 $(EXEC): $(MAIN_OBJS) $(COMMON_OBJS) $(RES)
-	$(CC) $(LDFLAGS) -v -o $(EXEC) $(MAIN_OBJS) $(COMMON_OBJS) $(RES) $(LIBS)
+	$(CC) $(LDFLAGS) -o $(EXEC) $(MAIN_OBJS) $(COMMON_OBJS) $(RES) $(LIBS)
 
 $(DLL): $(DLL_OBJS) $(COMMON_OBJS)
-	$(CC) $(DLL_LDFLAGS) -v -o $(DLL) $(DLL_OBJS) $(COMMON_OBJS) $(LIBS)
+	$(CC) $(DLL_LDFLAGS) -o $(DLL) $(DLL_OBJS) $(COMMON_OBJS) $(LIBS)
 	
 install: all
 	cp $(EXEC) $(DLL) $(OUTPUT_DIR)

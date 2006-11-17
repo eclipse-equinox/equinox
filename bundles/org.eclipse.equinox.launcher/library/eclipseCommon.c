@@ -20,6 +20,7 @@
 #include <strings.h>
 #endif
 #include <stdlib.h>
+#include <dirent.h>
 #include <sys/stat.h>
 
 /* Global Variables */
@@ -158,4 +159,57 @@ _TCHAR* findCommand( _TCHAR* command )
 
     /* Return the absolute command pathname. */
     return cmdPath;
+}
+
+ /* 
+ * Looks for files of the form /path/prefix_version.<extension> and returns the full path to
+ * the file with the largest version number
+ */ 
+_TCHAR* findFile( _TCHAR* path, _TCHAR* prefix)
+{
+	struct _stat stats;
+	struct dirent *file;
+	_tDIR *dir;
+	int prefixLength;
+	int pathLength;
+	_TCHAR* candidate = NULL;
+	_TCHAR* result = NULL;
+	_TCHAR* fileName = NULL;
+	
+	/* does path exist? */
+	if( _tstat(path, &stats) != 0 )
+		return NULL;
+	
+	dir = _topendir(path);
+	if(dir == NULL)
+		return NULL;  /* can't open dir */
+		
+	prefixLength = _tcslen(prefix);
+	while((file = _treaddir(dir)) != NULL) {
+		fileName = file->d_name;
+		if(_tcsncmp(fileName, prefix, prefixLength) == 0 && fileName[prefixLength] == _T_ECLIPSE('_')) {
+			if(candidate == NULL)
+				candidate = _tcsdup(fileName);
+			else {
+				/* compare, take the highest version */
+				if( _tcscmp(candidate, fileName) < 0) {
+					free(candidate);
+					candidate = _tcsdup(fileName);
+				}
+			}
+		}
+	}
+	_tclosedir(dir);
+
+	if(candidate != NULL) {
+		pathLength = _tcslen(path);
+		result = malloc((pathLength + 1 + _tcslen(candidate)) * sizeof(_TCHAR));
+		_tcscpy(result, path);
+		result[pathLength] = dirSeparator;
+		result[pathLength + 1] = 0;
+		_tcscat(result, candidate);
+		free(candidate);
+		return result;
+	}
+	return NULL;
 }

@@ -25,6 +25,8 @@
 #include <stdlib.h>
 #endif
 
+extern HWND topWindow;
+
 /* Global Variables */
 _TCHAR*  consoleVM     = _T("java.exe");
 _TCHAR*  defaultVM     = _T("javaw.exe");
@@ -48,7 +50,7 @@ static const _TCHAR* jvmLocations [] = { _T("j9vm"),
  * Open the bitmap, insert into the splash window and display it.
  *
  */
-int showSplash( _TCHAR* timeoutString, _TCHAR* featureImage )
+int showSplash( const _TCHAR* featureImage )
 {
     RECT    rect;
     HBITMAP hBitmap = 0;
@@ -56,8 +58,6 @@ int showSplash( _TCHAR* timeoutString, _TCHAR* featureImage )
     int     depth;
     int     x, y;
     int     width, height;
-    MSG     msg;
-    HWND    topWindow;
 
     /* Load the bitmap for the feature. */
     hDC = GetDC( NULL);
@@ -83,16 +83,26 @@ int showSplash( _TCHAR* timeoutString, _TCHAR* featureImage )
     ShowWindow( topWindow, SW_SHOW );
     BringWindowToTop( topWindow );
 
-    /* Process messages until the splash window is closed or process is terminated. */
-   	while (GetMessage( &msg, NULL, 0, 0 ))
+    /* Process messages */
+	dispatchMessages();
+	return 0;
+}
+
+void dispatchMessages() {
+	MSG     msg;
+	
+	if(topWindow == 0)
+		return;
+	while (PeekMessage( &msg, NULL, 0, 0, PM_REMOVE))
    	{
 		TranslateMessage( &msg );
 		DispatchMessage( &msg );
 	}
-
-	return 0;
 }
 
+int getSplashHandle() {
+	return (int)topWindow;
+}
 
 /* Get the window system specific VM args */
 _TCHAR** getArgVM( _TCHAR *vm )
@@ -181,3 +191,4 @@ _TCHAR* findVMLibrary( _TCHAR* command ) {
 	}
 	return NULL;
 }
+

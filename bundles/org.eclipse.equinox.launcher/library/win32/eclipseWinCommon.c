@@ -54,6 +54,7 @@ void displayMessage( _TCHAR* title, _TCHAR* message )
 void initWindowSystem( int* pArgc, _TCHAR* argv[], int showSplash )
 {
     /* Create a window that has no decorations. */
+    
 	InitCommonControls();
     topWindow = CreateWindowEx (0,
 		_T("STATIC"),
@@ -104,7 +105,7 @@ void unloadLibrary( void * handle ){
  
 /* Find the given symbol in the shared library
  */
-void * findSymbol( void * handle, char * symbol ){
+void * findSymbol( void * handle, _TCHAR * symbol ){
 	return GetProcAddress(handle, symbol);
 }
 

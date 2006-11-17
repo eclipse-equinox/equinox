@@ -19,40 +19,56 @@
 #define unloadVMLibrary unloadVMLibraryW
 #define getInvocationFunction getInvocationFunctionW
 #define launchJavaVM launchJavaVMW
-#define setExitData setExitDataW
 #define startJavaVM startJavaVMW
 #endif
 
-extern _TCHAR * exitData;
+#ifdef UNICODE
+#define JNI_GetStringChars(env, s) 			 (*env)->GetStringChars(env, s, 0)
+#define JNI_ReleaseStringChars(env, s, data) (*env)->ReleaseStringChars(env, s, data)
+#else
+#define JNI_GetStringChars(env, s) 			 (*env)->GetStringUTFChars(env, s, 0)
+#define JNI_ReleaseStringChars(env, s, data) (*env)->ReleaseStringUTFChars(env, s, data)
+#endif
 
 typedef jint (JNICALL *JNI_createJavaVM)(JavaVM **pvm, JNIEnv **env, void *args);
-
-void setExitData(JNIEnv *env, jstring s);
 
 /* JNI Callback methods */
 /* Use name mangling since we may be linking these from java with System.LoadLibrary */
 #define set_exit_data 		Java_org_eclipse_core_launcher_JNIBridge__1set_1exit_1data
 #define update_splash 		Java_org_eclipse_core_launcher_JNIBridge__1update_1splash
+#define show_splash			Java_org_eclipse_core_launcher_JNIBridge__1show_1splash
 #define get_splash_handle 	Java_org_eclipse_core_launcher_JNIBridge__1get_1splash_1handle
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 /*
  * org_eclipse_core_launcher_JNIBridge#_set_exit_data
  * Signature: (Ljava/lang/String;)V
  */
-extern JNIEXPORT void JNICALL set_exit_data(JNIEnv *, jobject, jstring);
+JNIEXPORT void JNICALL set_exit_data(JNIEnv *, jobject, jstring);
 
 /*
  * org_eclipse_core_launcher_JNIBridge#_update_splash
  * Signature: ()V
  */
-extern JNIEXPORT void JNICALL update_splash(JNIEnv *, jobject);
+JNIEXPORT void JNICALL update_splash(JNIEnv *, jobject);
 
 /*
  * org_eclipse_core_launcher_JNIBridge#_get_splash_handle
  * Signature: ()I
  */
-extern JNIEXPORT jint JNICALL get_splash_handle(JNIEnv *, jobject);
+JNIEXPORT jint JNICALL get_splash_handle(JNIEnv *, jobject);
 
+/*
+ * org_eclipse_core_launcher_JNIBridge#_show_splash
+ * Signature: (Ljava/lang/String;)V
+ */
+JNIEXPORT void JNICALL show_splash(JNIEnv *, jobject, jstring);
+
+#ifdef __cplusplus
+}
+#endif
 
 /* Start the Java VM and Wait For It to Terminate
  *

@@ -7,54 +7,105 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ * 	   Andrew Niefer
  *******************************************************************************/
  
 #include "eclipseJNI.h"
 #include "eclipseCommon.h"
 #include "eclipseOS.h"
 #include <stdlib.h>
-  
-  
-_TCHAR * exitData = NULL;
 
 static JNINativeMethod natives[] = {{"_update_splash", "()V", &update_splash},
 									{"_get_splash_handle", "()I", &get_splash_handle},
-									{"_set_exit_data", "(Ljava/lang/String;)V", &set_exit_data}};
+									{"_set_exit_data", "(Ljava/lang/String;)V", &set_exit_data},
+									{"_show_splash", "(Ljava/lang/String;)V", &show_splash}};
   
 /* local methods */
 static jstring newJavaString(JNIEnv *env, _TCHAR * str);
+static void setExitData(JNIEnv *env, jstring s);
+static void splash(JNIEnv *env, jstring s);
+static void registerNatives(JNIEnv *env);
 
-#ifndef UNICODE /* we only want one version of these functions */
+/* JNI Methods                                 
+ * we only want one version of these functions 
+ * Because there are potentially ANSI and UNICODE versions of everything, we need to be
+ * able to call out to either
+ */
+#ifndef UNICODE
+void (* exitDataHook)(JNIEnv *env, jstring s);
+void (* dispatchHook)();
+int (* splashHandleHook)();
+void (* showSplashHook)(JNIEnv *env, jstring s);
+#else
+extern void (* exitDataHook)(JNIEnv *env, jstring s);
+extern void (* dispatchHook)();
+extern int (* splashHandleHook)();
+extern void (* showSplashHook)(JNIEnv *env, jstring s);
+#endif
+
+#ifndef UNICODE 
 /* JNI Callback methods */
 JNIEXPORT void JNICALL set_exit_data(JNIEnv * env, jobject obj, jstring s){
-	setExitData(env, s);
+	if(exitDataHook != NULL)
+		exitDataHook(env, s);
+	else /* hook was not set, just call the ANSI version */
+		setExitData(env, s);
 }
 
 JNIEXPORT void JNICALL update_splash(JNIEnv * env, jobject obj){
-	
+	if(dispatchHook != NULL)
+		dispatchHook();
+	else
+		dispatchMessages();
 }
 
 JNIEXPORT jint JNICALL get_splash_handle(JNIEnv * env, jobject obj){
-	return 0;
+	if(splashHandleHook != NULL)
+		return splashHandleHook();
+	else
+		return getSplashHandle();
+}
+
+JNIEXPORT void JNICALL show_splash(JNIEnv * env, jobject obj, jstring s){
+	if(showSplashHook != NULL)
+		return showSplashHook(env, s);
+	else
+		return splash(env, s);	
 }
 #endif
 
-void setExitData(JNIEnv *env, jstring s){ 
-	int length = (*env)->GetStringLength(env, s);
-	_TCHAR * copy = malloc(length * sizeof(_TCHAR*));
-	const _TCHAR * data;
+static void registerNatives(JNIEnv *env) {
+	jclass bridge = (*env)->FindClass(env, "org/eclipse/core/launcher/JNIBridge");
+	if(bridge != NULL) {
+		int numNatives = sizeof(natives) / sizeof(natives[0]);
+		(*env)->RegisterNatives(env, bridge, natives, numNatives);
+	}
+	/*set hooks*/
+	splashHandleHook = &getSplashHandle;
+	exitDataHook = &setExitData;
+	dispatchHook = &dispatchMessages;
+	showSplashHook = &splash;
+}
+
+static void splash(JNIEnv *env, jstring s) {
+	const _TCHAR* data;
 	
-#ifdef UNICODE
-	/* TODO need to figure out how to get a unicode version called */
-	data = (*env)->GetStringChars(env, s, 0);
-	_tcsncpy( copy, data, length);
-	(*env)->ReleaseStringChars(env, s, data);
-#else 
-	data = (*env)->GetStringUTFChars(env, s, 0);
-	_tcscpy( copy, data );
-	(*env)->ReleaseStringUTFChars(env, s, data);
-#endif	
-	exitData = copy;
+	data = JNI_GetStringChars(env, s);
+	showSplash(data);
+	JNI_ReleaseStringChars(env, s, data);
+}
+
+static void setExitData(JNIEnv *env, jstring s){
+	const _TCHAR* data;
+	int length;
+	 
+	length = (*env)->GetStringLength(env, s);
+	data = JNI_GetStringChars(env, s);
+	
+	exitData = malloc(length * sizeof(_TCHAR*));
+	_tcsncpy( exitData, data, length);
+	
+	JNI_ReleaseStringChars(env, s, data);
 }
 
 static jstring newJavaString(JNIEnv *env, _TCHAR * str)
@@ -110,7 +161,8 @@ static char *toNarrow(_TCHAR* src)
 	return _tcsdup(src);
 #endif
 }
- 							 
+ 	
+					 
 int startJavaVM( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[] )
 {
 	int i;
@@ -128,7 +180,7 @@ int startJavaVM( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[] )
 		return -1; /*error*/
 	}
 	
-	createJavaVM = findSymbol(jniLibrary, "JNI_CreateJavaVM");
+	createJavaVM = findSymbol(jniLibrary, _T_ECLIPSE("JNI_CreateJavaVM"));
 	if(createJavaVM == NULL) {
 		return -1; /*error*/
 	}
@@ -148,9 +200,7 @@ int startJavaVM( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[] )
 	init_args.ignoreUnrecognized = JNI_TRUE;
 	
 	if( createJavaVM(&jvm, &env, &init_args) == 0 ) {
-		jclass bridge = (*env)->FindClass(env, "org/eclipse/core/launcher/JNIBridge");
-		int numNatives = sizeof(natives) / sizeof(natives[0]);
-		(*env)->RegisterNatives(env, bridge, natives, numNatives);
+		registerNatives(env);
 		
 		jclass mainClass = (*env)->FindClass(env, "org/eclipse/core/launcher/Main");
 		jmethodID mainConstructor = (*env)->GetMethodID(env, mainClass, "<init>", "()V");

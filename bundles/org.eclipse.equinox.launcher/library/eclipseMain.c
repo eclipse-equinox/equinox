@@ -16,46 +16,31 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <dirent.h>
 #include <locale.h>
 #include <sys/stat.h>
-
-static _TCHAR* startupMsg =
-_T_ECLIPSE("The %s executable launcher was unable to locate its \n\
-companion startup jar file.");
 
 static _TCHAR* libraryMsg =
 _T_ECLIPSE("The %s executable launcher was unable to locate its \n\
 companion shared library.");
 
-#define DEFAULT_EQUINOX_STARTUP _T_ECLIPSE("org.eclipse.equinox.startup")
-#define DEFAULT_STARTUP 		_T_ECLIPSE("startup.jar")
-
-#define STARTUP      _T_ECLIPSE("-startup")
 #define NAME         _T_ECLIPSE("-name")
+#define LIBRARY		 _T_ECLIPSE("-library")
 #define VMARGS       _T_ECLIPSE("-vmargs")		/* special option processing required */
 
-typedef int (*RunMethod)(int argc, _TCHAR* argv[]);
+/* this typedef must match the run method in eclipse.c */
+typedef int (*RunMethod)(int argc, _TCHAR* argv[], _TCHAR* vmArgs[]);
 
-static _TCHAR*	startupArg    = NULL;			/* path of the startup.jar the user wants to run relative to the program path */
 static _TCHAR*  name          = NULL;			/* program name */
 static _TCHAR** userVMarg     = NULL;     		/* user specific args for the Java VM  */
 static _TCHAR*  jarFile       = NULL;			/* full pathname of the startup jar file to run */
 static _TCHAR*  programDir	  = NULL;			/* directory where program resides */
 static _TCHAR*  library		  = NULL;			/* pathname of the eclipse shared library */
 
-static Option options[] = {
-    { STARTUP,		&startupArg,	NULL,	0 },
-    { NAME,         &name,			NULL,	0 }};
-static int optionsSize = (sizeof(options) / sizeof(options[0]));
-
 static int 	 	createUserArgs(int configArgc, _TCHAR **configArgv, int *argc, _TCHAR ***argv);
 static void  	parseArgs( int* argc, _TCHAR* argv[] );
 static _TCHAR*  getProgramDir();
 static _TCHAR* 	getDefaultOfficialName(_TCHAR* program);
-static _TCHAR*  findStartupJar();
 static _TCHAR*  findLibrary(_TCHAR* program);
-static _TCHAR*  findFile( _TCHAR* path, _TCHAR* prefix);
  
 #ifdef _WIN32
 #ifdef UNICODE
@@ -101,6 +86,7 @@ int main( int argc, _TCHAR* argv[] )
 	_TCHAR** configArgv = NULL;
 	int 	 configArgc = 0;
 	int      exitCode = 0;
+	void *	 handle = 0;
 	RunMethod runMethod;
 	
 	setlocale(LC_ALL, "");
@@ -153,30 +139,23 @@ int main( int argc, _TCHAR* argv[] )
 	
 	/* Find the directory where the Eclipse program is installed. */
     programDir = getProgramDir(program);
-    
-	/* Find the startup.jar */
-	jarFile = findStartupJar();
-	if(jarFile == NULL) {
-		errorMsg = malloc( (_tcslen(startupMsg) + _tcslen(officialName) + 10) * sizeof(_TCHAR) );
-        _stprintf( errorMsg, startupMsg, officialName );
-        displayMessage( officialName, errorMsg );
-        free( errorMsg );
-    	exit( 1 );
-	}
 
 	/* Find the eclipse library */
-	library = findLibrary(program); 
 	if(library == NULL) {
+		library = findLibrary(program);
+	}
+	if(library != NULL)
+		handle = loadLibrary(library);
+	if(handle == NULL) {
 		errorMsg = malloc( (_tcslen(libraryMsg) + _tcslen(officialName) + 10) * sizeof(_TCHAR) );
         _stprintf( errorMsg, libraryMsg, officialName );
         displayMessage( officialName, errorMsg );
         free( errorMsg );
     	exit( 1 );
 	}
-	
-	void * handle = loadLibrary(library);
-	runMethod = findSymbol(handle, "run");
-	exitCode = runMethod(argc, argv);
+
+	runMethod = findSymbol(handle, RUN_METHOD);
+	exitCode = runMethod(argc, argv, userVMarg);
 	unloadLibrary(handle);
 	
 	free( jarFile );
@@ -191,57 +170,22 @@ int main( int argc, _TCHAR* argv[] )
  */
 static void parseArgs( int* pArgc, _TCHAR* argv[] )
 {
-	Option* option;
-    int     remArgs;
     int     index;
-    int     i;
 
     /* Ensure the list of user argument is NULL terminated. */
     argv[ *pArgc ] = NULL;
 
 	/* For each user defined argument (excluding the program) */
     for (index = 1; index < *pArgc; index++){
-        remArgs = 0;
-
-        /* Find the corresponding argument is a option supported by the launcher */
-        option = NULL;
-        for (i = 0; option == NULL && i < optionsSize; i++)
-        {
-        	if (_tcsicmp( argv[ index ], options[ i ].name ) == 0)
-        	    option = &options[ i ];
-       	}
-
-       	/* If the option is recognized by the launcher */
-       	if (option != NULL)
-       	{
-       		/* If the option requires a value and there is one, extract the value. */
-       		if (option->value != NULL && (index+1) < *pArgc)
-       			*option->value = argv[ index+1 ];
-
-       		/* If the option requires a flag to be set, set it. */
-       		if (option->flag != NULL)
-       			*option->flag = 1;
-       		remArgs = option->remove;
-       	}
-
-        /* All of the remaining arguments are user VM args. */
-        else if (_tcsicmp( argv[ index ], VMARGS ) == 0)
-        {
-            userVMarg = &argv[ index+1 ];
+        if(_tcsicmp(argv[index], VMARGS) == 0) {
+        	userVMarg = &argv[ index+1 ];
             argv[ index ] = NULL;
             *pArgc = index;
-        }
-
-		/* Remove any matched arguments from the list. */
-        if (remArgs > 0)
-        {
-            for (i = (index + remArgs); i <= *pArgc; i++)
-            {
-                argv[ i - remArgs ] = argv[ i ];
-            }
-            index--;
-            *pArgc -= remArgs;
-        }
+        } else if(_tcsicmp(argv[index], NAME) == 0) {
+        	name = argv[++index];
+        } else if(_tcsicmp(argv[index], LIBRARY) == 0) {
+        	library = argv[++index];
+        } 
     }
 }
 
@@ -346,51 +290,6 @@ static _TCHAR* getDefaultOfficialName(_TCHAR* program)
 	return ch;
 }
 
-static _TCHAR* findStartupJar(){
-	_TCHAR * file;
-	_TCHAR * pluginsPath;
-	struct _stat stats;
-	
-	if( startupArg != NULL ) {
-		/* startup jar was specified on the command line */
-		
-		/* Construct the absolute name of the startup jar */
-		file = malloc( (_tcslen( programDir ) + _tcslen( startupArg ) + 1) * sizeof( _TCHAR ) );
-		file = _tcscpy( file, programDir );
-	  	file = _tcscat( file, startupArg );
-	
-		/* If the file does not exist, treat the argument as an absolute path */
-		if (_tstat( file, &stats ) != 0)
-		{
-			free( file );
-			file = malloc( (_tcslen( startupArg ) + 1) * sizeof( _TCHAR ) );
-			file = _tcscpy( file, startupArg );
-			
-			/* still doesn't exit? */
-			if (_tstat( file, &stats ) != 0) {
-				file = NULL;
-			}
-		}
-		return file;
-	}
-
-	int pathLength = _tcslen(programDir);
-	pluginsPath = malloc( (pathLength + 1 + 7) * sizeof(char));
-	_tcscpy(pluginsPath, programDir);
-	pluginsPath[pathLength] = dirSeparator;
-	pluginsPath[pathLength + 1] = 0;
-	_tcscat(pluginsPath, _T_ECLIPSE("plugins"));
-	
-	/* equinox startup jar? */	
-	file = findFile(pluginsPath, _T_ECLIPSE("org.eclipse.equinox.startup"));
-	if(file != NULL)
-		return file;
-		
-	file = malloc( (_tcslen( DEFAULT_STARTUP ) + 1) * sizeof( _TCHAR ) );
-	file = _tcscpy( file, DEFAULT_STARTUP );
-	return file;
-}
-
 static _TCHAR* findLibrary(_TCHAR* program) 
 {
 	_TCHAR* c;
@@ -433,57 +332,4 @@ static _TCHAR* findLibrary(_TCHAR* program)
 		free(path);
 	
 	return result; 
-}
-
- /* 
- * Looks for files of the form /path/prefix_version.<extension> and returns the full path to
- * the file with the largest version number
- */ 
-static _TCHAR* findFile( _TCHAR* path, _TCHAR* prefix)
-{
-	struct _stat stats;
-	struct dirent *file;
-	_tDIR *dir;
-	int prefixLength;
-	int pathLength;
-	_TCHAR* candidate = NULL;
-	_TCHAR* result = NULL;
-	_TCHAR* fileName = NULL;
-	
-	/* does path exist? */
-	if( _tstat(path, &stats) != 0 )
-		return NULL;
-	
-	dir = _topendir(path);
-	if(dir == NULL)
-		return NULL;  /* can't open dir */
-		
-	prefixLength = _tcslen(prefix);
-	while((file = _treaddir(dir)) != NULL) {
-		fileName = file->d_name;
-		if(_tcsncmp(fileName, prefix, prefixLength) == 0 && fileName[prefixLength] == _T_ECLIPSE('_')) {
-			if(candidate == NULL)
-				candidate = _tcsdup(fileName);
-			else {
-				/* compare, take the highest version */
-				if( _tcscmp(candidate, fileName) < 0) {
-					free(candidate);
-					candidate = _tcsdup(fileName);
-				}
-			}
-		}
-	}
-	_tclosedir(dir);
-
-	if(candidate != NULL) {
-		pathLength = _tcslen(path);
-		result = malloc((pathLength + 1 + _tcslen(candidate)) * sizeof(_TCHAR));
-		_tcscpy(result, path);
-		result[pathLength] = dirSeparator;
-		result[pathLength + 1] = 0;
-		_tcscat(result, candidate);
-		free(candidate);
-		return result;
-	}
-	return NULL;
 }

@@ -26,6 +26,8 @@
 #define exitData exitDataW
 #define vmLibrary vmLibraryW
 #define findVMLibrary findVMLibraryW
+#define dispatchMessages dispatchMessagesW
+#define getSplashHandle getSplashHandleW
 #endif
 
 /* Operating System Dependent Information */
@@ -81,7 +83,7 @@ extern void initWindowSystem( int* argc, _TCHAR* argv[], int showSplash );
  * 0        - success
  * non-zero - could not find a splash image to display
  */
-extern int showSplash( _TCHAR* splashId, _TCHAR* featureImage );
+extern int showSplash( const _TCHAR* featureImage );
 
 /** Get List of Java VM Arguments
  *
@@ -93,6 +95,10 @@ extern _TCHAR** getArgVM( _TCHAR *vm );
 
 /* Find the vm shared library associated with the given java executable */
 extern _TCHAR * findVMLibrary( _TCHAR * command );
+
+extern void dispatchMessages();
+
+extern int getSplashHandle();
 
 #endif /* ECLIPSE_OS_H */
 
