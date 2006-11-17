@@ -127,6 +127,7 @@ public class Constants implements org.osgi.framework.Constants {
 	/** OSGi strict delegation **/
 	public static final String OSGI_RESOLVER_MODE = "osgi.resolverMode"; //$NON-NLS-1$
 	public static final String STRICT_MODE = "strict"; //$NON-NLS-1$
+	public static final String DEVELOPMENT_MODE = "development"; //$NON-NLS-1$
 
 	public static final String OSGI_FRAMEWORKBEGINNINGSTARTLEVEL = "osgi.framework.beginningstartlevel"; //$NON-NLS-1$
 

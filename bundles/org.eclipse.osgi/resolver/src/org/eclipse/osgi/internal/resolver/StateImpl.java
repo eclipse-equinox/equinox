@@ -232,14 +232,18 @@ public abstract class StateImpl implements State {
 		modifiable.setStateBit(BundleDescriptionImpl.RESOLVED, status);
 		if (status) {
 			resolverErrors.remove(modifiable);
-			resolveConstraints(modifiable, hosts, selectedExports, resolvedRequires, resolvedImports);
 			resolvedBundles.add(modifiable);
 		} else {
-			// ensures no links are left 
-			unresolveConstraints(modifiable);
 			// remove the bundle from the resolved pool
 			resolvedBundles.remove(modifiable);
+			modifiable.removeDependencies();
 		}
+		// to support develoment mode we will resolveConstraints even if the resolve status == false
+		// we only do this if the resolved constraints are not null
+		if (selectedExports == null || resolvedRequires == null || resolvedImports == null)
+			unresolveConstraints(modifiable);			
+		else
+			resolveConstraints(modifiable, hosts, selectedExports, resolvedRequires, resolvedImports);
 	}
 
 	public synchronized void removeBundleComplete(BundleDescription bundle) {

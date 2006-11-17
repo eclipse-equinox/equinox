@@ -60,6 +60,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 	private HashMap bundleMapping = null;
 	private GroupingChecker groupingChecker;
 	private Comparator selectionPolicy;
+	private boolean developmentMode = false;
 
 	public ResolverImpl(BundleContext context, boolean checkPermissions) {
 		this.permissionChecker = new PermissionChecker(context, checkPermissions, this);
@@ -324,6 +325,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		// keep a list of rejected singltons
 		ArrayList rejectedSingletons = new ArrayList();
 		boolean resolveOptional = platformProperties.length == 0 ? false : "true".equals(platformProperties[0].get("osgi.resolveOptional")); //$NON-NLS-1$//$NON-NLS-2$
+		developmentMode = platformProperties.length == 0 ? false : org.eclipse.osgi.framework.internal.core.Constants.DEVELOPMENT_MODE.equals(platformProperties[0].get(org.eclipse.osgi.framework.internal.core.Constants.OSGI_RESOLVER_MODE));
 		ResolverBundle[] currentlyResolved = null;
 		if (resolveOptional) {
 			BundleDescription[] resolvedBundles = state.getResolvedBundles();
@@ -397,7 +399,9 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		// This will reset the resolvable flag for each bundle
 		for (int i = 0; i < bundles.length; i++) {
 			state.removeResolverErrors(bundles[i].getBundle());
-			bundles[i].setResolvable(isResolvable(bundles[i].getBundle(), platformProperties, rejectedSingletons));
+			// if in development mode then make all bundles resolvable
+			// we still want to call isResolvable here to populate any possible ResolverErrors for the bundle
+			bundles[i].setResolvable(isResolvable(bundles[i].getBundle(), platformProperties, rejectedSingletons) || developmentMode);
 			bundles[i].clearRefs();
 			groupingChecker.removeAllExportConstraints(bundles[i]);
 		}
@@ -503,6 +507,8 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 	}
 
 	private boolean selectSingletons(ResolverBundle[] bundles, ArrayList rejectedSingletons) {
+		if (developmentMode)
+			return false; // do no want to unresolve singletons in development mode
 		boolean result = false;
 		for (int i = 0; i < bundles.length; i++) {
 			BundleDescription bundleDesc = bundles[i].getBundle();
@@ -575,11 +581,13 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 						ResolverImpl.log("** GENERICS " + genericRequires[i].getVersionConstraint().getName() + "[" + genericRequires[i].getBundleDescription() + "] failed to resolve"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					state.addResolverError(genericRequires[i].getVersionConstraint().getBundle(), ResolverError.MISSING_GENERIC_CAPABILITY, genericRequires[i].getVersionConstraint().toString(), genericRequires[i].getVersionConstraint());
 					if (genericRequires[i].isFromFragment()) {
-						resolverExports.remove(bundle.detachFragment((ResolverBundle) bundleMapping.get(genericRequires[i].getVersionConstraint().getBundle()), null));
+						if (!developmentMode) // only detach fragments when not in devmode
+							resolverExports.remove(bundle.detachFragment((ResolverBundle) bundleMapping.get(genericRequires[i].getVersionConstraint().getBundle()), null));
 						continue;
 					}
 					failed = true;
-					break;
+					if (!developmentMode)
+						break;
 				}
 			}
 		}
@@ -594,11 +602,13 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 					state.addResolverError(requires[i].getVersionConstraint().getBundle(), ResolverError.MISSING_REQUIRE_BUNDLE, requires[i].getVersionConstraint().toString(), requires[i].getVersionConstraint());
 					// If the require has failed to resolve and it is from a fragment, then remove the fragment from the host
 					if (requires[i].isFromFragment()) {
-						resolverExports.remove(bundle.detachFragment((ResolverBundle) bundleMapping.get(requires[i].getVersionConstraint().getBundle()), requires[i]));
+						if (!developmentMode) // only detach fragments when not in devmode
+							resolverExports.remove(bundle.detachFragment((ResolverBundle) bundleMapping.get(requires[i].getVersionConstraint().getBundle()), requires[i]));
 						continue;
 					}
 					failed = true;
-					break;
+					if (!developmentMode) // in dev mode continue to next constraint
+						break;
 				}
 			}
 		}
@@ -614,18 +624,24 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 					// If the import has failed to resolve and it is from a fragment, then remove the fragment from the host
 					state.addResolverError(imports[i].getVersionConstraint().getBundle(), ResolverError.MISSING_IMPORT_PACKAGE, imports[i].getVersionConstraint().toString(), imports[i].getVersionConstraint());
 					if (imports[i].isFromFragment()) {
-						resolverExports.remove(bundle.detachFragment((ResolverBundle) bundleMapping.get(imports[i].getBundleDescription()), imports[i]));
+						if (!developmentMode) // only detach fragments when not in devmode
+							resolverExports.remove(bundle.detachFragment((ResolverBundle) bundleMapping.get(imports[i].getBundleDescription()), imports[i]));
 						continue;
 					}
 					failed = true;
-					break;
+					if (!developmentMode) // in dev mode continue to next constraint
+						break;
 				}
 			}
 		}
+		// do some extra checking when in development mode to see if other resolver error occurred
+		if (developmentMode && !failed && state.getResolverErrors(bundle.getBundle()).length > 0)
+			failed = true;
+
 		// Need to check that all mandatory imports are wired. If they are then
 		// set the bundle RESOLVED, otherwise set it back to UNRESOLVED
 		if (failed) {
-			setBundleUnresolved(bundle, false);
+			setBundleUnresolved(bundle, false, developmentMode);
 			if (DEBUG)
 				ResolverImpl.log(bundle + " NOT RESOLVED"); //$NON-NLS-1$
 		} else if (!cycle.contains(bundle)) {
@@ -675,7 +691,8 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 				ResolverBundle[] capabilityHosts = capability.isFromFragment() ? capability.getResolverBundle().getHost().getMatchingBundles() : new ResolverBundle[] {capability.getResolverBundle()};
 				boolean foundResolvedMatch = false;
 				for (int j = 0; capabilityHosts != null && j < capabilityHosts.length; j++)
-					if (capabilityHosts[j].getState() == ResolverBundle.RESOLVED || resolveBundle(capabilityHosts[j], cycle)) {
+					// if in dev mode then allow a constraint to resolve to an unresolved bundle
+					if (capabilityHosts[j].getState() == ResolverBundle.RESOLVED || (resolveBundle(capabilityHosts[j], cycle) || developmentMode)) {
 						foundResolvedMatch |= !capability.isFromFragment() ? true : capability.getResolverBundle().getHost().getMatchingBundles() != null;
 						// Check cyclic dependencies
 						if (capabilityHosts[j].getState() == ResolverBundle.RESOLVING)
@@ -726,7 +743,8 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 					result = true; // Wired to ourselves
 					continue;
 				}
-				if ((bundle.getState() != ResolverBundle.RESOLVED && !resolveBundle(bundle, cycle))) {
+				// if in dev mode then allow a constraint to resolve to an unresolved bundle
+				if (bundle.getState() != ResolverBundle.RESOLVED && !resolveBundle(bundle, cycle) && !developmentMode) {
 					req.setMatchingBundle(null);
 					continue; // Bundle hasn't resolved
 				}
@@ -801,7 +819,8 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 						if (importerExps[j].getExportPackageDescription().isRoot()) // do not drop reexports when import wins
 							resolverExports.remove(importerExps[j]); // Import wins, remove export
 					}
-					if ((originalState != ResolverBundle.RESOLVED && !resolveBundle(export.getExporter(), cycle)) || export.isDropped()) {
+					// if in dev mode then allow a constraint to resolve to an unresolved bundle
+					if ((originalState != ResolverBundle.RESOLVED && !resolveBundle(export.getExporter(), cycle) && !developmentMode) || export.isDropped()) {
 						if (imp.getMatchingExport() != null && imp.getMatchingExport() != export) // has been resolved to some other export recursively
 							return true;
 						// add back the exports of this package from the importer
@@ -943,7 +962,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 	}
 
 	// Move a bundle to UNRESOLVED
-	private void setBundleUnresolved(ResolverBundle bundle, boolean removed) {
+	private void setBundleUnresolved(ResolverBundle bundle, boolean removed, boolean isDevMode) {
 		if (bundle.getState() == ResolverBundle.UNRESOLVED)
 			return;
 		if (bundle.getBundle().isResolved()) {
@@ -956,7 +975,8 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		}
 		if (!removed)
 			unresolvedBundles.add(bundle);
-		bundle.detachAllFragments();
+		if (!isDevMode)
+			bundle.detachAllFragments();
 		bundle.setState(ResolverBundle.UNRESOLVED);
 	}
 
@@ -979,7 +999,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 	// Resolves the bundles in the State
 	private void stateResolveBundles(ResolverBundle[] resolvedBundles) {
 		for (int i = 0; i < resolvedBundles.length; i++)
-			if (resolvedBundles[i].isResolved() && !resolvedBundles[i].getBundle().isResolved())
+			if (!resolvedBundles[i].getBundle().isResolved())
 				stateResolveBundle(resolvedBundles[i]);
 	}
 
@@ -1026,6 +1046,9 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 	}
 
 	private void stateResolveBundle(ResolverBundle rb) {
+		// if in dev mode then we want to tell the state about the constraints we were able to resolve
+		if (!rb.isResolved() && !developmentMode)
+			return;
 		// Gather selected exports
 		ResolverExport[] exports = rb.getSelectedExports();
 		ArrayList selectedExports = new ArrayList(exports.length);
@@ -1072,7 +1095,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		}
 
 		// Resolve the bundle in the state
-		state.resolveBundle(rb.getBundle(), true, hostBundles, selectedExportsArray, bundlesWiredToArray, exportsWiredToArray);
+		state.resolveBundle(rb.getBundle(), rb.isResolved(), hostBundles, selectedExportsArray, bundlesWiredToArray, exportsWiredToArray);
 	}
 
 	// Resolve dynamic import
@@ -1196,11 +1219,12 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 				removed = true;
 		}
 
-		if (!bundle.getBundle().isResolved())
+		if (!bundle.getBundle().isResolved() && !developmentMode)
 			return;
-		// if not removed then add to the list of unresolvedBundles
-		setBundleUnresolved(bundle, removed);
-		// Get bundles dependent on 'bundle' and selected exports of 'bundle'
+		// if not removed then add to the list of unresolvedBundles,
+		// passing false for devmode because we need all fragments detached
+		setBundleUnresolved(bundle, removed, false);
+		// Get bundles dependent on 'bundle'
 		BundleDescription[] dependents = bundle.getBundle().getDependents();
 		state.resolveBundle(bundle.getBundle(), false, null, null, null, null);
 		// Unresolve dependents of 'bundle'
