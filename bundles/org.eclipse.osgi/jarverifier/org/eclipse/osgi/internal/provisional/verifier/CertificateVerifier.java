@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.provisional.verifier;
 
+import java.security.SignatureException;
+import java.security.cert.*;
+
 /**
  * A certificate verifier is used to verify the authenticity of a signed 
  * repository.  A certificate verifier is created using a 
@@ -22,6 +25,16 @@ package org.eclipse.osgi.internal.provisional.verifier;
  * </p>
  */
 public interface CertificateVerifier {
+	/**
+	 * Verify the content of the repository.
+	 * 
+	 * @throws CertificateException			
+	 * @throws CertificateExpiredException
+	 * @throws CertificateParsingException
+	 * @throws SignatureException
+	 */
+	public void checkContent() throws CertificateException, CertificateExpiredException, SignatureException;
+
 	/**
 	 * Verifies the content of the repository.  An array is returned with the entry names 
 	 * which are corrupt.  If no entries are currupt then an empty array is returned.

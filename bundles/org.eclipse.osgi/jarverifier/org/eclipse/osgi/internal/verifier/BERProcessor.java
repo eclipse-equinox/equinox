@@ -107,7 +107,7 @@ public class BERProcessor {
 		constructed = (buffer[offset] & 0x20) != 0;
 		// section 8.1.2.3
 		byte tagNumber = (byte) (buffer[offset] & 0x1f);
-		if (tagNumber < 31) {
+		if (tagNumber < 32) {
 			tag = tagNumber;
 			endOffset = offset + 1;
 		} else {

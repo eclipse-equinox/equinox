@@ -20,8 +20,8 @@ import java.security.MessageDigest;
  * if the calculated digest do not match the expected digests.
  */
 class DigestedInputStream extends FilterInputStream {
-	MessageDigest digest[];
-	byte result[][];
+	MessageDigest digest;
+	byte result[];
 	long remaining;
 
 	/**
@@ -33,18 +33,16 @@ class DigestedInputStream extends FilterInputStream {
 	 * @param digest the MessageDigest used to compute the digest.
 	 * @param result the expected digest.
 	 */
-	DigestedInputStream(InputStream in, MessageDigest digest[], byte result[][], long size) {
+	DigestedInputStream(InputStream in, MessageDigest digest, byte result[], long size) {
 		super(in);
 		this.remaining = size;
-		this.digest = new MessageDigest[digest.length];
-		for (int i = 0; i < digest.length; i++) {
-			try {
-				this.digest[i] = (MessageDigest) digest[i].clone();
-			} catch (CloneNotSupportedException e) {
-				// This shouldn't happen since MessageDigest supports clone!
-				throw new RuntimeException("MessageDigest must support clone"); //$NON-NLS-1$
-			}
+		try {
+			this.digest = (MessageDigest) digest.clone();
+		} catch (CloneNotSupportedException e) {
+			// This shouldn't happen since MessageDigest supports clone!
+			throw new RuntimeException("MessageDigest must support clone"); //$NON-NLS-1$
 		}
+
 		this.result = result;
 	}
 
@@ -77,8 +75,7 @@ class DigestedInputStream extends FilterInputStream {
 			return -1;
 		int c = super.read();
 		if (c != -1) {
-			for (int i = 0; i < digest.length; i++)
-				digest[i].update((byte) c);
+			digest.update((byte) c);
 			remaining--;
 		} else {
 			// We hit eof so set remaining to zero
@@ -91,11 +88,9 @@ class DigestedInputStream extends FilterInputStream {
 
 	private void verifyDigests() throws IOException {
 		// Check the digest at end of file
-		for (int i = 0; i < digest.length; i++) {
-			byte rc[] = digest[i].digest();
-			if (!MessageDigest.isEqual(result[i], rc))
-				throw new IOException("Corrupted file: the digest is valid for " + digest[i].getAlgorithm()); //$NON-NLS-1$
-		}
+		byte rc[] = digest.digest();
+		if (!MessageDigest.isEqual(result, rc))
+			throw new IOException("Corrupted file: the digest is valid for " + digest.getAlgorithm()); //$NON-NLS-1$
 	}
 
 	/**
@@ -113,8 +108,7 @@ class DigestedInputStream extends FilterInputStream {
 			return -1;
 		int rc = super.read(b, off, len);
 		if (rc != -1) {
-			for (int i = 0; i < digest.length; i++)
-				digest[i].update(b, off, rc);
+			digest.update(b, off, rc);
 			remaining -= rc;
 		} else {
 			// We hit eof so set remaining to zero

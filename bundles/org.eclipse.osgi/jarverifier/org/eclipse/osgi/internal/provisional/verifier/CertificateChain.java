@@ -11,6 +11,7 @@
 package org.eclipse.osgi.internal.provisional.verifier;
 
 import java.security.cert.Certificate;
+import java.util.Date;
 
 /**
  * This class represents a chain of certificates.
@@ -53,4 +54,11 @@ public interface CertificateChain {
 	 * @return true if this certificate chain is trusted
 	 */
 	boolean isTrusted();
+
+	/**
+	 * Return the signing time for this signer.
+	 * 
+	 * @return	null if there is a signing time for this signer null otherwise
+	 */
+	public Date getSigningTime();
 }

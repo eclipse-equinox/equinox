@@ -18,33 +18,43 @@ import java.security.cert.*;
 import java.security.cert.Certificate;
 import java.util.*;
 import javax.security.auth.x500.X500Principal;
+import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.internal.provisional.verifier.CertificateChain;
+import org.eclipse.osgi.internal.provisional.verifier.CertificateTrustAuthority;
+import org.eclipse.osgi.util.NLS;
 
 /**
  * This class processes a PKCS7 file. See RFC 2315 for specifics.
  */
-public class PKCS7Processor implements CertificateChain {
-	private static final int SIGNEDDATA_OID[] = {1, 2, 840, 113549, 1, 7, 2};
-	private static final int MD5_OID[] = {1, 2, 840, 113549, 2, 5};
-	private static final int MD2_OID[] = {1, 2, 840, 113549, 2, 2};
-	private static final int SHA1_OID[] = {1, 3, 14, 3, 2, 26};
-	private static final int DSA_OID[] = {1, 2, 840, 10040, 4, 1};
-	private static final int RSA_OID[] = {1, 2, 840, 113549, 1, 1, 1};
+public class PKCS7Processor implements CertificateChain, JarVerifierConstant {
 
 	private static CertificateFactory certFact;
-	private static KeyStores keyStores = new KeyStores();
+
 	static {
 		try {
 			certFact = CertificateFactory.getInstance("X.509"); //$NON-NLS-1$
 		} catch (CertificateException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			SignedBundleHook.log(e.getMessage(), FrameworkLogEntry.ERROR, e);
 		}
 	}
 
 	private String certChain;
 	private Certificate[] certificates;
 	private boolean trusted;
+
+	// key(object id) = value(structure)
+	private Map signedAttrs;
+
+	//	key(object id) = value(structure)
+	private Map unsignedAttrs;
+
+	// store the signature of a signerinfo
+	private byte signature[];
+	private String digestAlgorithm;
+	private String signatureAlgorithm;
+
+	private Certificate signerCert;
+	private Date sigingTime;
 
 	String oid2String(int oid[]) {
 		StringBuffer sb = new StringBuffer();
@@ -68,13 +78,13 @@ public class PKCS7Processor implements CertificateChain {
 
 	String findDigest(int digestOid[]) throws NoSuchAlgorithmException {
 		if (Arrays.equals(SHA1_OID, digestOid)) {
-			return "SHA1"; //$NON-NLS-1$
+			return SHA1_STR;
 		}
 		if (Arrays.equals(MD5_OID, digestOid)) {
-			return "MD5"; //$NON-NLS-1$
+			return MD5_STR;
 		}
 		if (Arrays.equals(MD2_OID, digestOid)) {
-			return "MD2"; //$NON-NLS-1$
+			return MD2_STR;
 		}
 		throw new NoSuchAlgorithmException("No algorithm found for " + oid2String(digestOid)); //$NON-NLS-1$
 	}
@@ -101,36 +111,132 @@ public class PKCS7Processor implements CertificateChain {
 			this.certificates[i] = certFact.generateCertificate(new ByteArrayInputStream(certificates[i]));
 	}
 
-	public PKCS7Processor(byte pkcs7[], int pkcs7Offset, int pkcs7Length, byte data[], int dataOffset, int dataLength) throws IOException, InvalidKeyException, CertificateException, NoSuchAlgorithmException, NoSuchProviderException, SignatureException {
+	public PKCS7Processor(byte pkcs7[], int pkcs7Offset, int pkcs7Length) throws IOException, CertificateException, NoSuchAlgorithmException {
+
 		// First grab the certificates
-		Collection certs = certFact.generateCertificates(new ByteArrayInputStream(pkcs7, pkcs7Offset, pkcs7Length));
+		List certs = null;
+
 		BERProcessor bp = new BERProcessor(pkcs7, pkcs7Offset, pkcs7Length);
+
 		// Just do a sanity check and make sure we are actually doing a PKCS7
 		// stream
+		// PKCS7: Step into the ContentType
 		bp = bp.stepInto();
 		if (!Arrays.equals(bp.getObjId(), SIGNEDDATA_OID)) {
 			throw new IOException("Not a valid PKCS#7 file"); //$NON-NLS-1$
 		}
-		bp.stepOver(); // skip over the oid
+
+		// PKCS7: Process the SignedData structure
+		bp.stepOver(); // (**wrong comments**) skip over the oid
 		bp = bp.stepInto(); // go into the Signed data
 		bp = bp.stepInto(); // It is a structure;
 		bp.stepOver(); // Yeah, yeah version = 1
-		bp.stepOver(); // We'll see the digest stuff again;
+		bp.stepOver(); // We'll see the digest stuff again; digestAlgorithms
 		bp.stepOver(); // We'll see the contentInfo in signerinfo
+
+		// PKCS7: check if the class tag is 0
+		if (bp.classOfTag == BERProcessor.CONTEXTSPECIFIC_TAGCLASS && bp.tag == 0) {
+			// process the certificate elements inside the signeddata strcuture
+			certs = processCertificates(bp);
+		}
+
+		if (certs == null || certs.size() < 1)
+			throw new SecurityException("There are no certificates in the .RSA/.DSA file!");
+
 		// Okay, here are our certificates.
 		bp.stepOver();
 		if (bp.classOfTag == BERProcessor.UNIVERSAL_TAGCLASS && bp.tag == 1) {
 			bp.stepOver(); // Don't use the CRLs if present
 		}
+
+		processSignerInfos(bp, certs);
+
+		// set the cert chain variable
+		StringBuffer sb = new StringBuffer();
+		for (int i = 0; i < certs.size(); i++) {
+			X509Certificate x509Cert = ((X509Certificate) certs.get(i));
+			sb.append(x509Cert.getSubjectDN().getName());
+			sb.append("; ");
+		}
+		certChain = sb.toString();
+
+		// initialize the certificates
+		certificates = (Certificate[]) certs.toArray(new Certificate[certs.size()]);
+
+		// determine the signing if there is
+		sigingTime = PKCS7DateParser.parseDate(this);
+	}
+
+	public void validateCerts() throws CertificateExpiredException, CertificateNotYetValidException, InvalidKeyException, SignatureException {
+		if (certificates == null) {
+			throw new SecurityException("There are no certificates in the signature block file!");
+		}
+
+		int len = certificates.length;
+
+		if (len == 1) {
+			X509Certificate currentX509Cert = (X509Certificate) certificates[0];
+			if (sigingTime == null)
+				currentX509Cert.checkValidity();
+			else
+				currentX509Cert.checkValidity(sigingTime);
+		} else {
+
+			// there are more than one certs
+			for (int i = 0; i < len - 1; i++) {
+				X509Certificate currentX509Cert = (X509Certificate) certificates[i];
+				// check if the cert is still valid
+				if (sigingTime != null)
+					currentX509Cert.checkValidity(sigingTime);
+				else
+					currentX509Cert.checkValidity();
+
+				X509Certificate nextX509Cert = (X509Certificate) certificates[i + 1];
+				// verify the current cert is signed by the private key that corresponds to the public key in the next cert
+				try {
+					currentX509Cert.verify(nextX509Cert.getPublicKey());
+				} catch (NoSuchAlgorithmException e) {
+					SignedBundleHook.log(e.getMessage(), FrameworkLogEntry.ERROR, e);
+					throw new SecurityException(NLS.bind(JarVerifierMessages.No_Such_Algorithm_Excep, new String[] {e.getMessage()}));
+				} catch (NoSuchProviderException e) {
+					SignedBundleHook.log(e.getMessage(), FrameworkLogEntry.ERROR, e);
+					throw new SecurityException(NLS.bind(JarVerifierMessages.No_Such_Provider_Excep, new String[] {e.getMessage()}));
+				} catch (CertificateException e) {
+					SignedBundleHook.log(e.getMessage(), FrameworkLogEntry.ERROR, e);
+					throw new SecurityException(NLS.bind(JarVerifierMessages.Validate_Certs_Certificate_Exception, new String[] {e.getMessage()}));
+				}
+			}
+		}
+	}
+
+	private Certificate processSignerInfos(BERProcessor bp, List certs) throws CertificateException, NoSuchAlgorithmException {
+		// We assume there is only one SingerInfo element 
+
+		// PKCS7: SignerINFOS processing
 		bp = bp.stepInto(); // Step into the set of signerinfos
 		bp = bp.stepInto(); // Step into the signerinfo sequence
+
+		// make sure the version is 1
+		BigInteger signerInfoVersion = bp.getIntValue();
+		if (signerInfoVersion.intValue() != 1) {
+			throw new CertificateException(JarVerifierMessages.PKCS7_SignerInfo_Version_Not_Supported);
+		}
+
+		// PKCS7: version CMSVersion 
 		bp.stepOver(); // Skip the version
+
+		// PKCS7: sid [SignerIdentifier : issuerAndSerialNumber or subjectKeyIdentifer]
 		BERProcessor issuerAndSN = bp.stepInto();
 		X500Principal signerIssuer = new X500Principal(new ByteArrayInputStream(issuerAndSN.buffer, issuerAndSN.offset, issuerAndSN.endOffset - issuerAndSN.offset));
 		issuerAndSN.stepOver();
 		BigInteger sn = issuerAndSN.getIntValue();
+
+		// initilize the newSignerCert to the issuer cert of leaf cert
 		Certificate newSignerCert = null;
+
 		Iterator itr = certs.iterator();
+		// PKCS7: compuare the issuers in the issuerAndSN BER equals to the issuers in Certs generated at the beginning of this method
+		// it seems like there is no neeed, cause both ways use the same set of bytes
 		while (itr.hasNext()) {
 			X509Certificate cert = (X509Certificate) itr.next();
 			if (cert.getIssuerX500Principal().equals(signerIssuer) && cert.getSerialNumber().equals(sn)) {
@@ -140,66 +246,92 @@ public class PKCS7Processor implements CertificateChain {
 		}
 		if (newSignerCert == null)
 			throw new CertificateException("Signer certificate not in pkcs7block"); //$NON-NLS-1$
-		bp.stepOver(); // skip the issuer name and serial number
-		BERProcessor digestAlg = bp.stepInto();
-		String digest = findDigest(digestAlg.getObjId());
-		bp.stepOver(); // skip the digest alg
-		if (bp.classOfTag == BERProcessor.CONTEXTSPECIFIC_TAGCLASS) {
-			bp.stepOver(); // This would be the authenticated attributes
-		}
-		BERProcessor encryptionAlg = bp.stepInto();
-		String enc = findEncryption(encryptionAlg.getObjId());
-		bp.stepOver(); // skip the encryption alg
-		byte signature[] = bp.getBytes();
-		Signature sig = Signature.getInstance(digest + "with" + enc); //$NON-NLS-1$
-		sig.initVerify(newSignerCert.getPublicKey());
-		sig.update(data, dataOffset, dataLength);
-		if (!sig.verify(signature)) {
-			throw new SignatureException("Signature doesn't verify"); //$NON-NLS-1$
-		}
-		ArrayList certList = new ArrayList(1);
-		certList.add(newSignerCert);
-		StringBuffer sb = new StringBuffer();
-		X509Certificate xcert = (X509Certificate) newSignerCert;
-		// We save off the previous certificate so that we can
-		// verify with the next certificate in the chain
-		Certificate prevCert = null;
-		boolean valid = true;
-		while (true) {
-			// TODO The CertificateFactory may do this check, but better safe than sorry
-			try {
-				xcert.checkValidity();
-			} catch (CertificateException e) {
-				valid = false;
-			}
-			if (prevCert != null) {
-				prevCert.verify(xcert.getPublicKey());
-				certList.add(xcert);
-			}
-			prevCert = xcert;
 
-			X500Principal subject = xcert.getSubjectX500Principal();
-			X500Principal issuer = xcert.getIssuerX500Principal();
-			if (sb.length() > 0)
-				sb.append("; "); //$NON-NLS-1$
-			sb.append(subject);
-			if (subject.equals(issuer))
-				break;
-			xcert = null;
-			itr = certs.iterator();
-			while (itr.hasNext()) {
-				X509Certificate cert = (X509Certificate) itr.next();
-				if (cert.getSubjectX500Principal().equals(issuer)) {
-					xcert = cert;
-				}
-			}
-			if (xcert == null)
-				throw new CertificateException(subject + " missing from chain"); //$NON-NLS-1$
+		// set the signer cert
+		signerCert = newSignerCert;
+
+		// PKCS7: skip over the sid [SignerIdentifier : issuerAndSerialNumber or subjectKeyIdentifer]
+		bp.stepOver(); // skip the issuer name and serial number
+
+		// PKCS7: digestAlgorithm DigestAlgorithmIdentifier
+		BERProcessor digestAlg = bp.stepInto();
+		digestAlgorithm = findDigest(digestAlg.getObjId());
+
+		// PKCS7: check if the next one if context class for signedAttrs
+		bp.stepOver(); // skip the digest alg
+
+		// process the signed attributes if there is any
+		processSignedAttributes(bp);
+
+		// PKCS7: signatureAlgorithm for this SignerInfo
+		BERProcessor encryptionAlg = bp.stepInto();
+		signatureAlgorithm = findEncryption(encryptionAlg.getObjId());
+		bp.stepOver(); // skip the encryption alg
+
+		// PKCS7: signature
+		signature = bp.getBytes();
+
+		// PKCS7: Step into the unsignedAttrs, 
+		bp.stepOver();
+
+		// process the unsigned attributes if there is any
+		processUnsignedAttributes(bp);
+
+		return newSignerCert;
+	}
+
+	private void processUnsignedAttributes(BERProcessor bp) {
+
+		if (bp.classOfTag == BERProcessor.CONTEXTSPECIFIC_TAGCLASS && bp.tag == 1) {
+
+			// there are some unsignedAttrs are found!!
+			unsignedAttrs = new HashMap();
+
+			// step into a set of unsigned attributes, I believe, when steps 
+			// into here, the 'poiter' is pointing to the first element
+			BERProcessor unsignedAttrsBERS = bp.stepInto();
+			do {
+				// process the unsignedAttrsBER by getting the attr type first,
+				// then the strcuture for the type
+				BERProcessor unsignedAttrBER = unsignedAttrsBERS.stepInto();
+
+				// check if it is timestamp attribute type
+				int objID[] = unsignedAttrBER.getObjId();
+				// if(Arrays.equals(TIMESTAMP_OID, objID)) {
+				// System.out.println("This is a timestamp type, to continue");
+				// }
+
+				// get the structure for the attribute type
+				unsignedAttrBER.stepOver();
+				byte structure[] = unsignedAttrBER.getBytes();
+				unsignedAttrs.put(objID, structure);
+				unsignedAttrsBERS.stepOver();
+			} while (!unsignedAttrsBERS.endOfSequence());
 		}
-		certificates = (Certificate[]) certList.toArray(new Certificate[certList.size()]);
-		// Now we have to make sure that the CA certificate (xcert) is in the KeyStore
-		trusted = valid && keyStores.isTrusted(xcert);
-		certChain = sb.toString();
+	}
+
+	private void processSignedAttributes(BERProcessor bp) {
+		if (bp.classOfTag == BERProcessor.CONTEXTSPECIFIC_TAGCLASS) {
+
+			// process the signed attributes
+			signedAttrs = new HashMap();
+
+			BERProcessor signedAttrsBERS = bp.stepInto();
+			do {
+				BERProcessor signedAttrBER = signedAttrsBERS.stepInto();
+				int[] signedAttrObjID = signedAttrBER.getObjId();
+
+				// step over to the attribute value
+				signedAttrBER.stepOver();
+
+				byte[] signedAttrStructure = signedAttrBER.getBytes();
+
+				signedAttrs.put(signedAttrObjID, signedAttrStructure);
+
+				signedAttrsBERS.stepOver();
+			} while (!signedAttrsBERS.endOfSequence());
+			bp.stepOver();
+		}
 	}
 
 	/**
@@ -253,6 +385,75 @@ public class PKCS7Processor implements CertificateChain {
 				return false;
 		return true;
 	}
+
+	public void verifySFSignature(byte data[], int dataOffset, int dataLength) throws InvalidKeyException, NoSuchAlgorithmException, SignatureException {
+		Signature sig = Signature.getInstance(digestAlgorithm + "with" + signatureAlgorithm); //$NON-NLS-1$
+		sig.initVerify(signerCert.getPublicKey());
+		sig.update(data, dataOffset, dataLength);
+		if (!sig.verify(signature)) {
+			throw new SignatureException(JarVerifierMessages.Signature_Not_Verify);
+		}
+	}
+
+	/**
+	 * Return a map of signed attributes, the key(objid) = value(PKCSBlock in bytes for the key)
+	 * 
+	 * @return  map if there is any signed attributes, null otherwise
+	 */
+	public Map getUnsignedAttrs() {
+		return unsignedAttrs;
+	}
+
+	/**
+	 * Return a map of signed attributes, the key(objid) = value(PKCSBlock in bytes for the key)
+	 * 
+	 * @return  map if there is any signed attributes, null otherwise
+	 */
+	public Map getSignedAttrs() {
+		return signedAttrs;
+	}
+
+	/**
+	 * 
+	 * @param bp
+	 * @return		a List of certificates from target cert to root cert in order
+	 * 
+	 * @throws CertificateException
+	 */
+	private List processCertificates(BERProcessor bp) throws CertificateException {
+		List rtvList = new ArrayList(3);
+
+		// Step into the first certificate-element
+		BERProcessor certsBERS = bp.stepInto();
+
+		do {
+			X509Certificate x509Cert = (X509Certificate) certFact.generateCertificate(new ByteArrayInputStream(certsBERS.buffer, certsBERS.offset, certsBERS.endOffset - certsBERS.offset));
+
+			if (x509Cert != null) {
+				rtvList.add(x509Cert);
+			}
+
+			// go to the next cert element
+			certsBERS.stepOver();
+		} while (!certsBERS.endOfSequence());
+
+		Collections.reverse(rtvList);
+		return rtvList;
+	}
+
+	void determineTrust(CertificateTrustAuthority certsTrust) {
+		try {
+			certsTrust.checkTrust(certificates);
+			trusted = true;
+		} catch (CertificateException e) {
+			trusted = false;
+		}
+	}
+
+	public Date getSigningTime() {
+		return sigingTime;
+	}
+
 	/*
 	 public static void main(String[] args) throws InvalidKeyException, CertificateException, NoSuchAlgorithmException, SignatureException, KeyStoreException, IOException {
 	 byte buffer[] = new byte[65536];

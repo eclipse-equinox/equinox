@@ -13,6 +13,8 @@ package org.eclipse.osgi.internal.verifier;
 import java.io.File;
 import java.io.IOException;
 import java.net.URLConnection;
+import java.security.Security;
+import java.util.Hashtable;
 import java.util.Properties;
 import org.eclipse.osgi.baseadaptor.*;
 import org.eclipse.osgi.baseadaptor.bundlefile.*;
@@ -24,18 +26,31 @@ import org.eclipse.osgi.framework.internal.core.AbstractBundle;
 import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
-import org.eclipse.osgi.internal.provisional.verifier.CertificateVerifier;
-import org.eclipse.osgi.internal.provisional.verifier.CertificateVerifierFactory;
+import org.eclipse.osgi.internal.provisional.verifier.*;
+import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.*;
+import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * Implements signed bundle hook support for the framework
  */
 public class SignedBundleHook implements AdaptorHook, BundleFileWrapperFactoryHook, HookConfigurator, CertificateVerifierFactory {
+	static final int VERIFY_CERTIFICATE = 0x01;
+	static final int VERIFY_TRUST = 0x02;
+	static final int VERIFY_RUNTIME = 0x04;
+	static final int VERIFY_ALL = VERIFY_CERTIFICATE | VERIFY_TRUST | VERIFY_RUNTIME;
+	private static String SUPPORT_CERTIFICATE = "certificate"; //$NON-NLS-1$
+	private static String SUPPORT_TRUST = "trust"; //$NON-NLS-1$
+	private static String SUPPORT_RUNTIME = "runtime"; //$NON-NLS-1$
+	private static String SUPPORT_ALL = "all"; //$NON-NLS-1$
+	private static String SUPPORT_TRUE = "true"; //$NON-NLS-1$
+	private static ServiceTracker trustAuthorityTracker;
 	private static BaseAdaptor ADAPTOR;
 	private static String SIGNED_BUNDLE_SUPPORT = "osgi.support.signature.verify"; //$NON-NLS-1$
-	private static boolean supportSignedBundles = false;
-	private ServiceRegistration reg;
+	private static int supportSignedBundles;
+	private ServiceRegistration certVerifierReg;
+	private ServiceRegistration trustAuthorityReg;
+	private CertificateTrustAuthority trustAuthority = new DefaultTrustAuthority(VERIFY_ALL);
 
 	public boolean matchDNChain(String pattern, String dnChain[]) {
 		boolean satisfied = false;
@@ -54,14 +69,26 @@ public class SignedBundleHook implements AdaptorHook, BundleFileWrapperFactoryHo
 	}
 
 	public void frameworkStart(BundleContext context) throws BundleException {
-		reg = context.registerService(CertificateVerifierFactory.class.getName(), this, null);
+		certVerifierReg = context.registerService(CertificateVerifierFactory.class.getName(), this, null);
+		Hashtable properties = new Hashtable(7);
+		properties.put(Constants.SERVICE_RANKING, new Integer(Integer.MIN_VALUE));
+		properties.put(JarVerifierConstant.TRUST_AUTHORITY, JarVerifierConstant.DEFAULT_TRUST_AUTHORITY);
+		trustAuthorityReg = context.registerService(CertificateTrustAuthority.class.getName(), trustAuthority, properties);
 	}
 
 	public void frameworkStop(BundleContext context) throws BundleException {
-		if (reg != null) {
-			reg.unregister();
-			reg = null;
+		if (certVerifierReg != null) {
+			certVerifierReg.unregister();
+			certVerifierReg = null;
 		}
+		if (trustAuthorityReg != null) {
+			trustAuthorityReg.unregister();
+			trustAuthorityReg = null;
+		}
+		if (trustAuthorityTracker != null) {
+			trustAuthorityTracker.close();
+			trustAuthorityTracker = null;
+		}	
 	}
 
 	public void frameworkStopping(BundleContext context) {
@@ -93,7 +120,7 @@ public class SignedBundleHook implements AdaptorHook, BundleFileWrapperFactoryHo
 					signedBaseFile = hook.signedBundleFile;
 				else
 					signedBaseFile = new SignedBundleFile();
-				signedBaseFile.setBundleFile(bundleFile);
+				signedBaseFile.setBundleFile(bundleFile, supportSignedBundles);
 				if (signedBaseFile.isSigned()) // only use the signed file if there are certs
 					bundleFile = signedBaseFile;
 			}
@@ -103,11 +130,20 @@ public class SignedBundleHook implements AdaptorHook, BundleFileWrapperFactoryHo
 		return bundleFile;
 	}
 
-
 	public void addHooks(HookRegistry hookRegistry) {
-		supportSignedBundles = "true".equals(FrameworkProperties.getProperty(SIGNED_BUNDLE_SUPPORT)); //$NON-NLS-1$
 		hookRegistry.addAdaptorHook(this);
-		if (supportSignedBundles) {
+		String[] support = ManifestElement.getArrayFromList(FrameworkProperties.getProperty(SIGNED_BUNDLE_SUPPORT), ","); //$NON-NLS-1$
+		for (int i = 0; i < support.length; i++) {
+			if (SUPPORT_CERTIFICATE.equals(support[i]))
+				supportSignedBundles |= VERIFY_CERTIFICATE;
+			else if (SUPPORT_TRUST.equals(support[i]))
+				supportSignedBundles |= VERIFY_CERTIFICATE | VERIFY_TRUST;
+			else if (SUPPORT_RUNTIME.equals(support[i]))
+				supportSignedBundles |= VERIFY_CERTIFICATE | VERIFY_RUNTIME;
+			else if (SUPPORT_TRUE.equals(support[i]) || SUPPORT_ALL.equals(support[i]))
+				supportSignedBundles |= VERIFY_ALL;
+		}
+		if ((supportSignedBundles & VERIFY_CERTIFICATE) != 0) {
 			hookRegistry.addStorageHook(new SignedStorageHook());
 			hookRegistry.addBundleFileWrapperFactoryHook(this);
 		}
@@ -122,7 +158,7 @@ public class SignedBundleHook implements AdaptorHook, BundleFileWrapperFactoryHo
 		else
 			contentBundleFile = new ZipBundleFile(content, null);
 		SignedBundleFile result = new SignedBundleFile();
-		result.setBundleFile(contentBundleFile);
+		result.setBundleFile(contentBundleFile, VERIFY_ALL);
 		return result;
 	}
 
@@ -144,5 +180,34 @@ public class SignedBundleHook implements AdaptorHook, BundleFileWrapperFactoryHo
 		}
 		FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, severity, 0, msg, 0, t, null);
 		SignedBundleHook.ADAPTOR.getFrameworkLog().log(entry);
+	}
+
+	static BundleContext getContext() {
+		if (ADAPTOR == null)
+			return null;
+		return ADAPTOR.getContext();
+	}
+
+	static CertificateTrustAuthority getTrustAuthority() {
+		// read the certs chain security property and open the service tracker if not null
+		if (trustAuthorityTracker == null) {
+			// read the trust provider security property
+			String trustAuthority = Security.getProperty(JarVerifierConstant.TRUST_AUTHORITY);
+			Filter filter = null;
+			if (trustAuthority != null)
+				try {
+					filter = FrameworkUtil.createFilter("(&(" + Constants.OBJECTCLASS + "=" + CertificateTrustAuthority.class.getName() + ")(" + JarVerifierConstant.TRUST_AUTHORITY + "=" + trustAuthority + "))");  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$//$NON-NLS-5$
+				} catch (InvalidSyntaxException e) {
+					e.printStackTrace();
+					// do nothing just use no filter TODO we may want to log something
+				}
+			if (filter != null) {
+				trustAuthorityTracker = new ServiceTracker(SignedBundleHook.getContext(), filter, null);
+			}
+			else
+				trustAuthorityTracker = new ServiceTracker(SignedBundleHook.getContext(), CertificateTrustAuthority.class.getName(), null);
+			trustAuthorityTracker.open();
+		}
+		return (CertificateTrustAuthority) trustAuthorityTracker.getService();
 	}
 }

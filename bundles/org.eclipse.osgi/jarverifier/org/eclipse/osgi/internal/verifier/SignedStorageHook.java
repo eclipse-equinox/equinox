@@ -34,6 +34,7 @@ public class SignedStorageHook implements StorageHook {
 
 	private BaseData bundledata;
 	SignedBundleFile signedBundleFile;
+
 	public int getStorageVersion() {
 		return STORAGE_VERSION;
 	}
@@ -85,21 +86,22 @@ public class SignedStorageHook implements StorageHook {
 			loadChainCache.add(chains[i]);
 		}
 		int numEntries = is.readInt();
-		Hashtable digests = new Hashtable(numEntries);
-		Hashtable results = new Hashtable(numEntries);
-		for (int i = 0; i < numEntries; i++) {
-			String entry = is.readUTF();
-			int numMDs = is.readInt();
-			MessageDigest[] mds = new MessageDigest[numMDs];
-			byte[][] result = new byte[numMDs][];
-			for (int j = 0; j < numMDs; j++) {
+		Hashtable digests = null;
+		Hashtable results = null;
+		if (numEntries >= 0) {
+			digests = new Hashtable(numEntries);
+			results = new Hashtable(numEntries);
+			for (int i = 0; i < numEntries; i++) {
+				String entry = is.readUTF();
+				MessageDigest md;
+				byte[] result;
 				if (is.readInt() == 0)
-					mds[j] = SignedBundleFile.md5;
+					md = SignedBundleFile.getMD5();
 				else
-					mds[j] = SignedBundleFile.sha1;
-				result[j] = new byte[is.readInt()];
-				is.readFully(result[j]);
-				digests.put(entry, mds);
+					md = SignedBundleFile.getSHA1();
+				result = new byte[is.readInt()];
+				is.readFully(result);
+				digests.put(entry, md);
 				results.put(entry, result);
 			}
 		}
@@ -159,20 +161,21 @@ public class SignedStorageHook implements StorageHook {
 					os.write(certBytes);
 				}
 		}
-		os.writeInt(digests.size());
-		for (Enumeration entries = digests.keys(); entries.hasMoreElements();) {
-			String entry = (String) entries.nextElement();
-			MessageDigest[] mds = (MessageDigest[]) digests.get(entry);
-			byte[][] result = (byte[][]) results.get(entry);
-			os.writeUTF(entry);
-			os.writeInt(mds.length);
-			for (int i = 0; i < mds.length; i++) {
-				if (mds[i] == SignedBundleFile.md5)
+		if (digests == null)
+			os.writeInt(-1);
+		else {
+			os.writeInt(digests.size());
+			for (Enumeration entries = digests.keys(); entries.hasMoreElements();) {
+				String entry = (String) entries.nextElement();
+				MessageDigest md = (MessageDigest) digests.get(entry);
+				byte[] result = (byte[]) results.get(entry);
+				os.writeUTF(entry);
+				if (md == SignedBundleFile.getMD5())
 					os.writeInt(0);
 				else
 					os.writeInt(1);
-				os.writeInt(result[i].length);
-				os.write(result[i]);
+				os.writeInt(result.length);
+				os.write(result);
 			}
 		}
 		os.writeBoolean(md5Result != null);
@@ -234,6 +237,5 @@ public class SignedStorageHook implements StorageHook {
 	public Object getKey() {
 		return KEY;
 	}
-
 
 }
