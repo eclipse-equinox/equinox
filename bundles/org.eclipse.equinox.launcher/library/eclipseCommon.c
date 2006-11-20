@@ -203,7 +203,7 @@ _TCHAR* findFile( _TCHAR* path, _TCHAR* prefix)
 
 	if(candidate != NULL) {
 		pathLength = _tcslen(path);
-		result = malloc((pathLength + 1 + _tcslen(candidate)) * sizeof(_TCHAR));
+		result = malloc((pathLength + 1 + _tcslen(candidate) + 1) * sizeof(_TCHAR));
 		_tcscpy(result, path);
 		result[pathLength] = dirSeparator;
 		result[pathLength + 1] = 0;

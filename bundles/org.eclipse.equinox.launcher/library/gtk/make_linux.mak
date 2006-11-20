@@ -27,14 +27,14 @@ ifeq ($(PROGRAM_OUTPUT),)
   PROGRAM_OUTPUT=eclipse
 endif
 ifeq ($(PROGRAM_LIBRARY),)
-  PROGRAM_LIBRARY=$(PROGRAM_OUTPUT)_1.so
+  PROGRAM_LIBRARY=$(PROGRAM_OUTPUT)_001.so
 endif
 
 # Define the object modules to be compiled and flags.
 CC=gcc
 MAIN_OBJS = eclipseMain.o
 COMMON_OBJS = eclipseConfig.o eclipseCommon.o eclipseGtkCommon.o
-DLL_OBJS	= eclipse.o  eclipseGtk.o  eclipseUtil.o  eclipseJNI.o
+DLL_OBJS	= eclipse.o eclipseGtk.o eclipseUtil.o eclipseJNI.o eclipseMozilla.o
 
 EXEC = $(PROGRAM_OUTPUT)
 DLL = $(PROGRAM_LIBRARY)
@@ -54,22 +54,22 @@ CFLAGS = -g \
 
 all: $(EXEC) $(DLL)
 
-eclipse.o: ../eclipse.c ../eclipseOS.h ../eclipseCommon.h
+eclipse.o: ../eclipse.c ../eclipseOS.h ../eclipseCommon.h ../eclipseJNI.h
 	$(CC) $(CFLAGS) -c ../eclipse.c -o eclipse.o
 
 eclipseMain.o: ../eclipseUnicode.h ../eclipseCommon.h ../eclipseMain.c 
-	$(CC) $(CFLAGS) -c ../eclipseMain.c
+	$(CC) $(CFLAGS) -c ../eclipseMain.c -o eclipseMain.o
 	
 eclipseCommon.o: ../eclipseCommon.h ../eclipseUnicode.h ../eclipseCommon.c
 	$(CC) $(CFLAGS) -c ../eclipseCommon.c
 
-eclipseGtkCommon.o: ../eclipseCommon.h eclipseGtkCommon.c
-	$(CC) $(CFLAGS) -c eclipseGtkCommon.c
+eclipseGtkCommon.o: ../eclipseCommon.h ../eclipseOS.h eclipseGtkCommon.c
+	$(CC) $(CFLAGS) -c eclipseGtkCommon.c -o eclipseGtkCommon.o
 	
 eclipseUtil.o: ../eclipseUtil.c ../eclipseUtil.h ../eclipseOS.h
 	$(CC) $(CFLAGS) -c ../eclipseUtil.c -o eclipseUtil.o
 
-eclipseJNI.o: ../eclipseJNI.c ../eclipseJNI.h
+eclipseJNI.o: ../eclipseJNI.c ../eclipseCommon.h ../eclipseOS.h ../eclipseJNI.h
 	$(CC) $(CFLAGS) -c ../eclipseJNI.c -o eclipseJNI.o
 	
 eclipseConfig.o: ../eclipseConfig.c ../eclipseConfig.h ../eclipseOS.h

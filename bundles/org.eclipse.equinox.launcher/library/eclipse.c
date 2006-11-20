@@ -208,7 +208,12 @@ static _TCHAR*  program     = NULL;       /* full pathname of the program */
 static _TCHAR*  programDir  = NULL;       /* directory where program resides */
 static _TCHAR*  javaVM      = NULL;       /* full pathname of the Java VM to run */
 static _TCHAR*  jarFile     = NULL;		  /* full pathname of the startup jar file to run */
-	   _TCHAR*  exitData    = NULL;		  /* exit data set from Java */
+
+_TCHAR*  exitData    = NULL;		  /* exit data set from Java */
+int		 initialArgc;
+_TCHAR** initialArgv;
+
+ 	
 /* Define the special exit codes returned from Eclipse. */
 #define RESTART_LAST_EC    23
 #define RESTART_NEW_EC     24
@@ -305,6 +310,13 @@ static _TCHAR*  formatVmCommandMsg( _TCHAR* args[] );
 static _TCHAR* getDefaultOfficialName();
 static _TCHAR*  findStartupJar();
 
+
+/* Record the arguments that were used to start the original executable */
+void setInitialArgs(int argc, _TCHAR** argv) {
+	initialArgc = argc;
+	initialArgv = argv;
+}
+
 /* this method must match the RunMethod typedef in eclipseMain.c */
 /* vmArgs must be NULL terminated                                */
 int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
@@ -398,7 +410,7 @@ int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
 	}
 	
 	/* the startup jarFile goes on the classpath */
-	cp = malloc((_tcslen(CLASSPATH_PREFIX) + _tcslen(jarFile)) * sizeof(_TCHAR));
+	cp = malloc((_tcslen(CLASSPATH_PREFIX) + _tcslen(jarFile) + 1) * sizeof(_TCHAR));
 	cp = _tcscpy(cp, CLASSPATH_PREFIX);
 	_tcscat(cp, jarFile);
 	

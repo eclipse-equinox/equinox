@@ -33,9 +33,11 @@
 #define unloadLibrary unloadLibraryW
 #define findSymbol findSymbolW
 #define run runW
+#define setInitialArgs setInitialArgsW
 #endif
 
-#define RUN_METHOD _T_ECLIPSE(STR(run))
+#define RUN_METHOD 		 _T_ECLIPSE(STR(run))
+#define SET_INITIAL_ARGS _T_ECLIPSE(STR(setInitialArgs))
 
 extern _TCHAR   dirSeparator;         /* '/' or '\\' */
 extern _TCHAR   pathSeparator;        /* separator used in PATH variable */

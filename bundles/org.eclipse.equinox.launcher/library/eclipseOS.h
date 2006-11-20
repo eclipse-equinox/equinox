@@ -40,6 +40,8 @@ extern _TCHAR*  defaultVM;   			/* name of VM to use normally      */
 extern _TCHAR*  shippedVMDir;			/* VM bin directory with separator */
 extern _TCHAR*  exitData;		  		/* exit data set from Java */
 extern _TCHAR*  vmLibrary;				/* name of the VM shared library */
+extern int		initialArgc;			/* argc originally used to start launcher */
+extern _TCHAR**	initialArgv;			/* argv originally used to start launcher */
 
 /* OS Specific Functions */
 

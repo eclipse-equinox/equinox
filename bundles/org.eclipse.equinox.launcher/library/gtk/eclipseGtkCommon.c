@@ -77,7 +77,7 @@ void initWindowSystem(int* pArgc, char* argv[], int showSplash)
 
 /* Load the specified shared library
  */
-void * loadLibrary( _TCHAR * library ){
+void * loadLibrary( char * library ){
 	void * result= dlopen(library, RTLD_NOW);
 	if(result == 0) 
 		printf("%s\n",dlerror());

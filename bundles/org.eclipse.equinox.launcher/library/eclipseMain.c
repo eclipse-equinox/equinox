@@ -29,10 +29,10 @@ companion shared library.");
 
 /* this typedef must match the run method in eclipse.c */
 typedef int (*RunMethod)(int argc, _TCHAR* argv[], _TCHAR* vmArgs[]);
+typedef void (*SetInitialArgs)(int argc, _TCHAR*argv[]);
 
 static _TCHAR*  name          = NULL;			/* program name */
 static _TCHAR** userVMarg     = NULL;     		/* user specific args for the Java VM  */
-static _TCHAR*  jarFile       = NULL;			/* full pathname of the startup jar file to run */
 static _TCHAR*  programDir	  = NULL;			/* directory where program resides */
 static _TCHAR*  library		  = NULL;			/* pathname of the eclipse shared library */
 
@@ -42,6 +42,9 @@ static _TCHAR*  getProgramDir();
 static _TCHAR* 	getDefaultOfficialName(_TCHAR* program);
 static _TCHAR*  findLibrary(_TCHAR* program);
  
+static int initialArgc;
+static _TCHAR** initialArgv;
+
 #ifdef _WIN32
 #ifdef UNICODE
 extern int main(int, char**);
@@ -87,9 +90,13 @@ int main( int argc, _TCHAR* argv[] )
 	int 	 configArgc = 0;
 	int      exitCode = 0;
 	void *	 handle = 0;
-	RunMethod runMethod;
+	RunMethod 		runMethod;
+	SetInitialArgs  setArgs;
 	
 	setlocale(LC_ALL, "");
+	
+	initialArgc = argc;
+	initialArgv = argv;
 	
 	/* 
 	 * Strip off any extroneous <CR> from the last argument. If a shell script
@@ -154,11 +161,14 @@ int main( int argc, _TCHAR* argv[] )
     	exit( 1 );
 	}
 
+	setArgs = findSymbol(handle, SET_INITIAL_ARGS);
+	setArgs(initialArgc, initialArgv);
+	
 	runMethod = findSymbol(handle, RUN_METHOD);
 	exitCode = runMethod(argc, argv, userVMarg);
 	unloadLibrary(handle);
 	
-	free( jarFile );
+	free( library );
     free( programDir );
     free( officialName );
     
