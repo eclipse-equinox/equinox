@@ -80,7 +80,7 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 		// this implies -dev mode)
 		BundleContext context = Activator.getContext();
 		if (context != null)
-			trackTimestamp = "true".equalsIgnoreCase(context.getProperty(IRegistryConstants.PROP_CHECK_CONFIG));
+			trackTimestamp = "true".equalsIgnoreCase(context.getProperty(IRegistryConstants.PROP_CHECK_CONFIG)); //$NON-NLS-1$
 		else
 			trackTimestamp = false;
 	}
@@ -170,6 +170,8 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 			result = classInstance.newInstance();
 		} catch (Exception e) {
 			throwException(NLS.bind(RegistryMessages.plugin_instantiateClassError, contributingBundle.getSymbolicName(), className), e);
+		} catch (LinkageError e1) {
+			throwException(NLS.bind(RegistryMessages.plugin_instantiateClassError, contributingBundle.getSymbolicName(), className), e1);
 		}
 		return result;
 	}
@@ -269,7 +271,7 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 			 return pluginManifest.openConnection().getLastModified() + bundle.getBundleId();
 		} catch (IOException e) {
 			if (debug()) {
-				System.out.println("Unable to obtain timestamp for the bundle " + bundle.getSymbolicName());
+				System.out.println("Unable to obtain timestamp for the bundle " + bundle.getSymbolicName()); //$NON-NLS-1$
 				e.printStackTrace();
 			}
 			return 0;
