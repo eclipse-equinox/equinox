@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="console/src"/>
+	<classpathentry kind="src" path="supplement/src"/>
 	<classpathentry kind="src" path="osgi/src"/>
 	<classpathentry kind="src" path="core/adaptor"/>
 	<classpathentry kind="src" path="core/framework"/>
