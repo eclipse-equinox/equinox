@@ -53,7 +53,7 @@ static char*  argVM_J9[]          = { "-jit", "-mca:1024", "-mco:1024", "-mn:256
 #define JAVA_ARCH "ppc"
 #endif
 
-#define MAX_LOCATION_LENGTH 10 /* none of the jvmLocations strings should be longer than this */ 
+#define MAX_LOCATION_LENGTH 20 /* none of the jvmLocations strings should be longer than this */ 
 static const char* jvmLocations [] = { "j9vm",
 									   "classic",
 									   "../lib/" JAVA_ARCH "/client",  
@@ -158,7 +158,7 @@ static char * findLib(char * command) {
 		}
 		
 		pathLength = location - command;
-		path = malloc((pathLength + MAX_LOCATION_LENGTH + 1 + strlen(vmLibrary) + 1) * sizeof(_TCHAR *));
+		path = malloc((pathLength + MAX_LOCATION_LENGTH + 1 + strlen(vmLibrary) + 1) * sizeof(char));
 		strncpy(path, command, pathLength);
 		location = &path[pathLength];
 		 
@@ -213,7 +213,9 @@ static void adjustLibraryPath( char * vmLibrary ) {
 	ldPath = (char*)getenv("LD_LIBRARY_PATH");
 	if(!ldPath)
 		ldPath = "";
-	buffer = strdup(ldPath);
+	buffer = malloc((strlen(ldPath) + 2) * sizeof(char));
+	strcpy(buffer, ldPath);
+	strcat(buffer, ":"); 
 	path = buffer;
 	while( (c = strchr(path, pathSeparator)) != NULL ) {
 		*c++ = 0;

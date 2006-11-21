@@ -96,7 +96,8 @@ int main( int argc, _TCHAR* argv[] )
 	setlocale(LC_ALL, "");
 	
 	initialArgc = argc;
-	initialArgv = argv;
+	initialArgv = malloc((argc + 1) * sizeof(_TCHAR*));
+	memcpy(initialArgv, argv, (argc + 1) * sizeof(_TCHAR*));
 	
 	/* 
 	 * Strip off any extroneous <CR> from the last argument. If a shell script

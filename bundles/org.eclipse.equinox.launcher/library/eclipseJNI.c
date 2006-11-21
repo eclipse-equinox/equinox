@@ -79,6 +79,11 @@ static void registerNatives(JNIEnv *env) {
 	if(bridge != NULL) {
 		int numNatives = sizeof(natives) / sizeof(natives[0]);
 		(*env)->RegisterNatives(env, bridge, natives, numNatives);
+		
+		if( (*env)->ExceptionOccurred(env) != 0 ){
+			(*env)->ExceptionDescribe(env);
+			(*env)->ExceptionClear(env);
+		}
 	}
 	/*set hooks*/
 	splashHandleHook = &getSplashHandle;
@@ -203,12 +208,14 @@ int startJavaVM( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[] )
 		registerNatives(env);
 		
 		jclass mainClass = (*env)->FindClass(env, "org/eclipse/core/launcher/Main");
-		jmethodID mainConstructor = (*env)->GetMethodID(env, mainClass, "<init>", "()V");
-		jobject mainObject = (*env)->NewObject(env, mainClass, mainConstructor);
-		jmethodID runMethod = (*env)->GetMethodID(env, mainClass, "run", "([Ljava/lang/String;)I");
-		if(runMethod != NULL) {
-			jobjectArray methodArgs = createRunArgs(env, progArgs);
-			jvmExitCode = (*env)->CallIntMethod(env, mainObject, runMethod, methodArgs);
+		if(mainClass != NULL) {
+			jmethodID mainConstructor = (*env)->GetMethodID(env, mainClass, "<init>", "()V");
+			jobject mainObject = (*env)->NewObject(env, mainClass, mainConstructor);
+			jmethodID runMethod = (*env)->GetMethodID(env, mainClass, "run", "([Ljava/lang/String;)I");
+			if(runMethod != NULL) {
+				jobjectArray methodArgs = createRunArgs(env, progArgs);
+				jvmExitCode = (*env)->CallIntMethod(env, mainObject, runMethod, methodArgs);
+			}
 		}
 		/*(*jvm)->DestroyJavaVM(jvm);*/ 
 	}
@@ -219,7 +226,7 @@ int startJavaVM( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[] )
 	for(i = 0; i < numVMArgs; i++){
 		free( options[i].optionString );
 	}
-	
+	free(options);
 	return jvmExitCode;
 }
 

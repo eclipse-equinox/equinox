@@ -480,17 +480,13 @@ int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
     }
 
     /* Cleanup time. */
-/*  TODO We are having HEAP problems freeing some of this, figure out what should stay and 
- *  what should go
- */
-/*
     free( jarFile );
+    free( cp );
     free( programDir );
     free( program );
     if ( vmSearchPath != NULL ) free( vmSearchPath );
     if ( vmCommandList != NULL ) freeArgList( vmCommandList );
     free( officialName );
-*/
 
     return 0;
 }
@@ -828,10 +824,9 @@ static _TCHAR* findStartupJar(){
 	}
 
 	int pathLength = _tcslen(programDir);
-	pluginsPath = malloc( (pathLength + 1 + 7) * sizeof(char));
+	pluginsPath = malloc( (pathLength + 7 + 1) * sizeof(char));
 	_tcscpy(pluginsPath, programDir);
-	pluginsPath[pathLength] = dirSeparator;
-	pluginsPath[pathLength + 1] = 0;
+	pluginsPath[pathLength] = 0;
 	_tcscat(pluginsPath, _T_ECLIPSE("plugins"));
 	
 	/* equinox startup jar? */	
