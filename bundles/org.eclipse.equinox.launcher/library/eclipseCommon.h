@@ -52,6 +52,8 @@ extern _TCHAR* findCommand( _TCHAR* command );
 
 extern _TCHAR* findFile( _TCHAR* path, _TCHAR* prefix);
 
+extern _TCHAR* getProgramDir();
+
 /** Display a Message
  *
  * This method is called to display an error message to the user before exiting.

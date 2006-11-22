@@ -820,13 +820,23 @@ static _TCHAR* findStartupJar(){
 				file = NULL;
 			}
 		}
-		return file;
+		/* TODO What should the policy here be, if we didn't find what they
+		 * specified?  (Its harder to specify equinox.startup on the mac.) */
+		if(file != NULL)
+			return file;
 	}
 
 	int pathLength = _tcslen(programDir);
-	pluginsPath = malloc( (pathLength + 7 + 1) * sizeof(char));
+#ifdef MACOSX
+	pathLength += 9;
+#endif
+	pluginsPath = malloc( (pathLength + 1 + 7) * sizeof(char));
 	_tcscpy(pluginsPath, programDir);
-	pluginsPath[pathLength] = 0;
+	pluginsPath[pathLength] = dirSeparator;
+	pluginsPath[pathLength + 1] = 0;
+#ifdef MACOSX
+	_tcscat(pluginsPath, _T_ECLIPSE("../../../"));
+#endif
 	_tcscat(pluginsPath, _T_ECLIPSE("plugins"));
 	
 	/* equinox startup jar? */	

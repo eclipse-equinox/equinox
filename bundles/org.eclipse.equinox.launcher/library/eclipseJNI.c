@@ -13,7 +13,9 @@
 #include "eclipseJNI.h"
 #include "eclipseCommon.h"
 #include "eclipseOS.h"
+
 #include <stdlib.h>
+#include <string.h>
 
 static JNINativeMethod natives[] = {{"_update_splash", "()V", &update_splash},
 									{"_get_splash_handle", "()I", &get_splash_handle},
@@ -220,6 +222,11 @@ int startJavaVM( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[] )
 			if(runMethod != NULL) {
 				jobjectArray methodArgs = createRunArgs(env, progArgs);
 				jvmExitCode = (*env)->CallIntMethod(env, mainObject, runMethod, methodArgs);
+			}
+		} else {
+			if((*env)->ExceptionOccurred(env)){
+				(*env)->ExceptionDescribe(env);
+				(*env)->ExceptionClear(env);
 			}
 		}
 		/*(*jvm)->DestroyJavaVM(jvm);*/ 

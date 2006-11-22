@@ -16,6 +16,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <locale.h>
 #include <sys/stat.h>
 
@@ -38,7 +39,6 @@ static _TCHAR*  library		  = NULL;			/* pathname of the eclipse shared library *
 
 static int 	 	createUserArgs(int configArgc, _TCHAR **configArgv, int *argc, _TCHAR ***argv);
 static void  	parseArgs( int* argc, _TCHAR* argv[] );
-static _TCHAR*  getProgramDir();
 static _TCHAR* 	getDefaultOfficialName(_TCHAR* program);
 static _TCHAR*  findLibrary(_TCHAR* program);
  
@@ -163,7 +163,8 @@ int main( int argc, _TCHAR* argv[] )
 	}
 
 	setArgs = findSymbol(handle, SET_INITIAL_ARGS);
-	setArgs(initialArgc, initialArgv);
+	if(setArgs != NULL)
+		setArgs(initialArgc, initialArgv);
 	
 	runMethod = findSymbol(handle, RUN_METHOD);
 	exitCode = runMethod(argc, argv, userVMarg);

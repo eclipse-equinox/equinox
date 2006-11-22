@@ -12,4 +12,4 @@
  
 #define main original_main
 
-#include "../eclipse.c"
+#include "../eclipseMain.c"

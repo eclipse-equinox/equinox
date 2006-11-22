@@ -18,33 +18,56 @@
 # DEFAULT_OS_ARCH - the default value of the "-arch" switch
 # DEFAULT_WS      - the default value of the "-ws" switch
 
+#default value for PROGRAM_OUTPUT
+ifeq ($(PROGRAM_OUTPUT),)
+  PROGRAM_OUTPUT=eclipse
+endif
+ifeq ($(PROGRAM_LIBRARY),)
+  PROGRAM_LIBRARY=$(PROGRAM_OUTPUT)_001.so
+endif
+
 # Define the object modules to be compiled and flags.
-OBJS = eclipse.o eclipseUtil.o eclipseShm.o eclipseConfig.o eclipseCarbon.o NgImageData.o NgWinBMPFileFormat.o NgCommon.o
+#OBJS = eclipse.o eclipseUtil.o eclipseShm.o eclipseConfig.o eclipseCarbon.o NgImageData.o NgWinBMPFileFormat.o NgCommon.o
+MAIN_OBJS = eclipseMain.o eclipseCarbonMain.o
+COMMON_OBJS = eclipseConfig.o eclipseCommon.o eclipseCarbonCommon.o
+DLL_OBJS	= eclipse.o eclipseCarbon.o eclipseUtil.o eclipseJNI.o NgImageData.o NgWinBMPFileFormat.o NgCommon.o
+
 EXEC = $(PROGRAM_OUTPUT)
+DLL = $(PROGRAM_OUTPUT)_001.so
 LIBS = -framework Carbon
-ARCHS = -arch i386 -arch ppc
-CFLAGS = -O -s \
+ARCHS = #-arch i386 -arch ppc
+CFLAGS = -g -s \
 	-Wall \
 	$(ARCHS) \
+	-DMACOSX \
 	-DDEFAULT_OS="\"$(DEFAULT_OS)\"" \
 	-DDEFAULT_OS_ARCH="\"$(DEFAULT_OS_ARCH)\"" \
 	-DDEFAULT_WS="\"$(DEFAULT_WS)\"" \
-	-I.. -I../motif
+	-I.. -I../motif -I/System/Library/Frameworks/JavaVM.framework/Headers
 
-all: $(EXEC)
+all: $(EXEC) $(DLL)
 
-.c.o: ../eclipseOS.h
-	$(CC) $(CFLAGS) -c $< -o $@
+eclipse.o: ../eclipse.c ../eclipseOS.h ../eclipseCommon.h ../eclipseJNI.h
+	$(CC) $(CFLAGS) -c ../eclipse.c -o $@
+
+eclipseCarbonMain.o : eclipseCarbonMain.c
+	$(CC) $(CFLAGS) -c eclipseCarbonMain.c -o $@
+
+eclipseMain.o: ../eclipseUnicode.h ../eclipseCommon.h eclipseMain.c ../eclipseMain.c 
+	$(CC) $(CFLAGS) -c eclipseMain.c -o $@
+	
+eclipseJNI.o: ../eclipseJNI.c ../eclipseCommon.h ../eclipseOS.h ../eclipseJNI.h
+	$(CC) $(CFLAGS) -c ../eclipseJNI.c -o $@
 
 eclipseUtil.o: ../eclipseUtil.c ../eclipseUtil.h ../eclipseOS.h
 	$(CC) $(CFLAGS) -c ../eclipseUtil.c -o $@
-
-eclipseShm.o: ../eclipseShm.c ../eclipseShm.h ../eclipseOS.h
-	$(CC) $(CFLAGS) -c ../eclipseShm.c -o $@
 	
 eclipseConfig.o: ../eclipseConfig.c ../eclipseConfig.h ../eclipseOS.h
 	$(CC) $(CFLAGS) -c ../eclipseConfig.c -o $@
 
+eclipseCommon.o: ../eclipseCommon.h ../eclipseUnicode.h ../eclipseCommon.c
+	$(CC) $(CFLAGS) -c ../eclipseCommon.c -o $@
+	
 NgCommon.o: ../motif/NgCommon.c
 	$(CC) $(CFLAGS) -c ../motif/NgCommon.c -o $@
 
@@ -54,8 +77,11 @@ NgWinBMPFileFormat.o: ../motif/NgWinBMPFileFormat.c
 NgImageData.o: ../motif/NgImageData.c
 	$(CC) $(CFLAGS) -c ../motif/NgImageData.c -o $@
 
-$(EXEC): $(OBJS)
-	$(CC) -o $(EXEC) $(ARCHS) $(OBJS) $(LIBS)
+$(EXEC): $(MAIN_OBJS) $(COMMON_OBJS)
+	$(CC) -o $(EXEC) $(ARCHS) $(MAIN_OBJS) $(COMMON_OBJS) $(LIBS)
+
+$(DLL): $(DLL_OBJS) $(COMMON_OBJS)
+	$(CC) -bundle -o $(DLL) $(ARCHS) $(DLL_OBJS) $(COMMON_OBJS) $(LIBS)
 
 install: all
 	cp $(EXEC) $(PPC_OUTPUT_DIR)
@@ -63,4 +89,4 @@ install: all
 	rm -f $(EXEC) $(OBJS)
 
 clean:
-	rm -f $(EXEC) $(OBJS)
+	rm -f $(EXEC) $(MAIN_OBJS) $(COMMON_OBJS) $(DLL_OBJS)
