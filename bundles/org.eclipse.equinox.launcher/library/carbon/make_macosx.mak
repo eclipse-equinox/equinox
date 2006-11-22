@@ -35,7 +35,7 @@ DLL_OBJS	= eclipse.o eclipseCarbon.o eclipseUtil.o eclipseJNI.o NgImageData.o Ng
 EXEC = $(PROGRAM_OUTPUT)
 DLL = $(PROGRAM_OUTPUT)_001.so
 LIBS = -framework Carbon
-ARCHS = #-arch i386 -arch ppc
+ARCHS = -arch i386 -arch ppc
 CFLAGS = -g -s \
 	-Wall \
 	$(ARCHS) \

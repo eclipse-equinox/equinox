@@ -60,7 +60,7 @@ int main( int argc, char* argv[] ) {
 
 	dumpArgs("start", argc, argv);
 	
-	/*if (argc > 1 && strncmp(argv[1], "-psn_", 5) == 0) {*/
+	if (argc > 1 && strncmp(argv[1], "-psn_", 5) == 0) {
 	
 		/* find path to application bundle (ignoring case) */
 		char *pos= my_strcasestr(argv[0], APP_PACKAGE_PATTERN);
@@ -110,7 +110,7 @@ int main( int argc, char* argv[] ) {
 		} else {
 			fprintf(fgConsoleLog, "no bundle found\n");
 		}
-	/*}*/
+	}
 	int exitcode= original_main(argc, argv);
 	debug("<<<< exit(%d)\n", exitcode);
 	fclose(fgConsoleLog);

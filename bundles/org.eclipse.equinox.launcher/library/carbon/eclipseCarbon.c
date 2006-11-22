@@ -41,36 +41,11 @@ char*  shippedVMDir  = "jre/bin/";
 /* Define the window system arguments for the various Java VMs. */
 static char*  argVM_JAVA[] = { "-XstartOnFirstThread", NULL };
 
-static int jvmPid, jvmExitCode = 0;
-
 static WindowRef window;
-static ControlRef progress = NULL, pane = NULL;
-static RGBColor foreground = {0xFFFF, 0xFFFF, 0xFFFF};
-static CFStringRef string = NULL;
-static Rect messageRect = {0, 0, 0, 0}, progressRect = {0, 0, 0, 0};
-static int value = 0, maximum = 0;
+static ControlRef pane = NULL;
 static int splashHandle = 0;
 
 int main() {
-}
-static void detectExitTimerProc(EventLoopTimerRef inTimer, void *inUserData) {
-	int exitCode = 0;
-	if (waitpid(jvmPid, &exitCode, WNOHANG) != 0) {
-		jvmExitCode = exitCode;
-		QuitApplicationEventLoop();
-	}
-}
-
-static void invalidateWindow () {
-	Rect rect;
-	RgnHandle rgn;
-	ControlRef root;
-	rgn = NewRgn();
-	GetRootControl(window, &root);
-	GetControlBounds(root, &rect);
-	SetRectRgn(rgn, rect.left, rect.top, rect.right, rect.bottom);
-	InvalWindowRgn (window, rgn);
-	DisposeRgn(rgn);
 }
 
 static OSStatus drawProc (EventHandlerCallRef eventHandlerCallRef, EventRef eventRef, PixMap * pixmap) {
@@ -80,10 +55,6 @@ static OSStatus drawProc (EventHandlerCallRef eventHandlerCallRef, EventRef even
 	SetPort(port);
 	GetControlBounds(pane, &rect);
 	CopyBits((BitMap*)pixmap, GetPortBitMapForCopyBits(port), &rect, &rect, srcCopy, NULL);
-	if (string != NULL) {
-		RGBForeColor(&foreground);
-		DrawThemeTextBox(string, kThemeSmallSystemFont, kThemeStateActive, 1, &messageRect, teFlushLeft, NULL);
-	}
 	return result;
 }
 
@@ -122,26 +93,18 @@ int showSplash( const _TCHAR* featureImage )
 	wRect.right= wRect.left + w;
 	wRect.bottom= wRect.top + h;
 
-	CreateNewWindow(kModalWindowClass, kWindowStandardHandlerAttribute, &wRect, &window);
+	CreateNewWindow(kSheetWindowClass, kWindowStandardHandlerAttribute | kWindowCompositingAttribute, &wRect, &window);
 	if (window != NULL) {
 		ControlRef root = NULL;
 		CreateRootControl(window, &root);
 		GetRootControl(window, &root);
 		SetRect(&wRect, 0, 0, w, h);
-		CreateUserPaneControl(window, &wRect, 0, &pane);
+		CreateUserPaneControl(window, &wRect, kControlSupportsEmbedding | kControlSupportsFocus | kControlGetsFocusOnClick, &pane);
 		EmbedControl(pane, root);
-		CreateProgressBarControl(window, &progressRect, value, 0, maximum, 0, &progress);
-		EmbedControl(progress, pane);
 		InstallEventHandler(GetControlEventTarget(pane), (EventHandlerUPP)drawProc, 1, &draw, pm, NULL);
-		/*readInput();
-		InstallEventLoopTimer (GetCurrentEventLoop (), 50 / 1000.0, 50 / 1000.0, NewEventLoopTimerUPP(timerProc), NULL, NULL);*/
 		ShowWindow(window);
 		splashHandle = (int)window;
-/*		RunApplicationEventLoop();
-		DisposeWindow(window);
-		if (string != NULL) CFRelease(string);
-		string = NULL;
-		progress = pane = NULL;*/
+		dispatchMessages();
 	}
 
 	return 0;
