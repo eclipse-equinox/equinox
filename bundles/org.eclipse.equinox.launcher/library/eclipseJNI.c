@@ -95,9 +95,14 @@ static void registerNatives(JNIEnv *env) {
 static void splash(JNIEnv *env, jstring s) {
 	const _TCHAR* data;
 	
-	data = JNI_GetStringChars(env, s);
-	showSplash(data);
-	JNI_ReleaseStringChars(env, s, data);
+	/* Don't show the splash if there is already one up.
+	 * TODO Do we want to support changing the image here?
+	 */
+	if(getSplashHandle() == 0) {
+		data = JNI_GetStringChars(env, s);
+		showSplash(data);
+		JNI_ReleaseStringChars(env, s, data);
+	}
 }
 
 static void setExitData(JNIEnv *env, jstring s){
