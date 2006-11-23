@@ -9,6 +9,8 @@
 package org.eclipse.equinox.http.jetty.internal;
 
 import java.io.File;
+import java.io.IOException;
+import javax.servlet.*;
 import org.eclipse.equinox.http.servlet.HttpServiceServlet;
 import org.mortbay.http.*;
 import org.mortbay.jetty.servlet.ServletHandler;
@@ -17,6 +19,8 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
 public class Activator implements BundleActivator {
+	
+	private static final String CONTEXT_CLASSLOADER = "org.eclipse.equinox.http.jetty.ContextClassLoader"; //$NON-NLS-1$
 	private HttpServer server;
 
 	public void start(BundleContext context) throws Exception {
@@ -34,7 +38,7 @@ public class Activator implements BundleActivator {
 		ServletHandler servlets = new ServletHandler();
 		servlets.setAutoInitializeServlets(true);
 
-		ServletHolder holder = servlets.addServlet("/*", HttpServiceServlet.class.getName()); //$NON-NLS-1$
+		ServletHolder holder = servlets.addServlet("/*", InternalHttpServiceServlet.class.getName()); //$NON-NLS-1$
 		holder.setInitOrder(0);
 
 		HttpContext httpContext = createHttpContext(context);
@@ -129,6 +133,7 @@ public class Activator implements BundleActivator {
 		if (contextPathProperty == null)
 			contextPathProperty = "/"; //$NON-NLS-1$
 		HttpContext httpContext = new HttpContext();
+		httpContext.setAttribute(CONTEXT_CLASSLOADER, Thread.currentThread().getContextClassLoader());
 		httpContext.setClassLoader(this.getClass().getClassLoader());
 		httpContext.setContextPath(contextPathProperty);
 		File jettyWorkDir = new File(context.getDataFile(""), "jettywork"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -136,5 +141,56 @@ public class Activator implements BundleActivator {
 		httpContext.setTempDirectory(jettyWorkDir);
 
 		return httpContext;
+	}
+	
+	public static class InternalHttpServiceServlet implements Servlet {
+		private static final long serialVersionUID = 7477982882399972088L;
+		private Servlet httpServiceServlet = new HttpServiceServlet();
+		private ClassLoader contextLoader;
+
+		public void init(ServletConfig config) throws ServletException {
+			ServletContext context = config.getServletContext();
+			contextLoader = (ClassLoader) context.getAttribute(CONTEXT_CLASSLOADER);
+			
+	        Thread thread = Thread.currentThread();
+	        ClassLoader current = thread.getContextClassLoader();
+			thread.setContextClassLoader(contextLoader);
+			try {
+				httpServiceServlet.init(config);
+			} finally {
+				thread.setContextClassLoader(current);
+			}
+		}
+
+		public void destroy() {
+	        Thread thread = Thread.currentThread();
+	        ClassLoader current = thread.getContextClassLoader();
+			thread.setContextClassLoader(contextLoader);
+			try {
+				httpServiceServlet.destroy();
+			} finally {
+				thread.setContextClassLoader(current);
+			}			
+			contextLoader = null;
+		}
+
+		public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException {
+	        Thread thread = Thread.currentThread();
+	        ClassLoader current = thread.getContextClassLoader();
+			thread.setContextClassLoader(contextLoader);
+			try {
+				httpServiceServlet.service(req, res);
+			} finally {
+				thread.setContextClassLoader(current);
+			}
+		}
+
+		public ServletConfig getServletConfig() {
+			return httpServiceServlet.getServletConfig();
+		}
+
+		public String getServletInfo() {
+			return httpServiceServlet.getServletInfo();
+		}
 	}
 }
