@@ -43,7 +43,7 @@ static char*  argVM_JAVA[] = { "-XstartOnFirstThread", NULL };
 
 static WindowRef window;
 static ControlRef pane = NULL;
-static int splashHandle = 0;
+static long splashHandle = 0;
 
 int main() {
 }
@@ -103,14 +103,14 @@ int showSplash( const _TCHAR* featureImage )
 		EmbedControl(pane, root);
 		InstallEventHandler(GetControlEventTarget(pane), (EventHandlerUPP)drawProc, 1, &draw, pm, NULL);
 		ShowWindow(window);
-		splashHandle = (int)window;
+		splashHandle = (long)window;
 		dispatchMessages();
 	}
 
 	return 0;
 }
 
-int getSplashHandle() {
+long getSplashHandle() {
 	return splashHandle;
 }
 

@@ -53,6 +53,8 @@ void displayMessage( _TCHAR* title, _TCHAR* message )
  */
 void initWindowSystem( int* pArgc, _TCHAR* argv[], int showSplash )
 {
+	if(initialized)
+		return;
     /* Create a window that has no decorations. */
     
 	InitCommonControls();

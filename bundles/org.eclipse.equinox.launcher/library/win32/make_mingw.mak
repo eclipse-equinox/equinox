@@ -56,7 +56,7 @@ DLL_OBJS	= eclipse.o  eclipseWin.o  eclipseUtil.o  eclipseJNI.o\
 	  		  
 LIBS	= -lkernel32 -luser32 -lgdi32 -lcomctl32 -lmsvcrt
 LDFLAGS = -mwindows -mno-cygwin
-DLL_LDFLAGS = -mno-cygwin -shared -Wl,--export-all-symbols
+DLL_LDFLAGS = -mno-cygwin -shared -Wl,--export-all-symbols -Wl,--kill-at
 RES	= eclipse.res
 EXEC	= $(PROGRAM_OUTPUT)
 DLL     = $(PROGRAM_LIBRARY)

@@ -63,7 +63,7 @@ static const char* jvmLocations [] = { "j9vm",
 /* Define local variables . */
 static int          saveArgc   = 0;
 static char**       saveArgv   = 0;
-static int 			splashHandle = 0;
+static long			splashHandle = 0;
 
 /* Local functions */
 static void adjustLibraryPath( char * vmLibrary );
@@ -117,7 +117,7 @@ void dispatchMessages() {
 	while(g_main_context_iteration(0,0) != 0) {}
 }
 
-int getSplashHandle() {
+long getSplashHandle() {
 	return splashHandle;
 }
 

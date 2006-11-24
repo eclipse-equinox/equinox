@@ -38,6 +38,7 @@ typedef jint (JNICALL *JNI_createJavaVM)(JavaVM **pvm, JNIEnv **env, void *args)
 #define update_splash 		Java_org_eclipse_core_launcher_JNIBridge__1update_1splash
 #define show_splash			Java_org_eclipse_core_launcher_JNIBridge__1show_1splash
 #define get_splash_handle 	Java_org_eclipse_core_launcher_JNIBridge__1get_1splash_1handle
+#define takedown_splash 	Java_org_eclipse_core_launcher_JNIBridge__1takedown_1splash
 
 #ifdef __cplusplus
 extern "C" {
@@ -56,15 +57,21 @@ JNIEXPORT void JNICALL update_splash(JNIEnv *, jobject);
 
 /*
  * org_eclipse_core_launcher_JNIBridge#_get_splash_handle
- * Signature: ()I
+ * Signature: ()J
  */
-JNIEXPORT jint JNICALL get_splash_handle(JNIEnv *, jobject);
+JNIEXPORT jlong JNICALL get_splash_handle(JNIEnv *, jobject);
 
 /*
  * org_eclipse_core_launcher_JNIBridge#_show_splash
  * Signature: (Ljava/lang/String;)V
  */
 JNIEXPORT void JNICALL show_splash(JNIEnv *, jobject, jstring);
+
+/*
+ * org_eclipse_core_launcher_JNIBridge#_takedown_splash
+ * Signature: ()V
+ */
+JNIEXPORT void JNICALL takedown_splash(JNIEnv *, jobject);
 
 #ifdef __cplusplus
 }

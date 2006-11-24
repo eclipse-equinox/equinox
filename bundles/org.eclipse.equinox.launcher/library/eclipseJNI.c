@@ -18,9 +18,10 @@
 #include <string.h>
 
 static JNINativeMethod natives[] = {{"_update_splash", "()V", &update_splash},
-									{"_get_splash_handle", "()I", &get_splash_handle},
+									{"_get_splash_handle", "()J", &get_splash_handle},
 									{"_set_exit_data", "(Ljava/lang/String;)V", &set_exit_data},
-									{"_show_splash", "(Ljava/lang/String;)V", &show_splash}};
+									{"_show_splash", "(Ljava/lang/String;)V", &show_splash},
+									{"_takedown_splash", "()V", &takedown_splash}};
   
 /* local methods */
 static jstring newJavaString(JNIEnv *env, _TCHAR * str);
@@ -29,20 +30,23 @@ static void splash(JNIEnv *env, jstring s);
 static void registerNatives(JNIEnv *env);
 
 /* JNI Methods                                 
- * we only want one version of these functions 
+ * we only want one version of the JNI functions 
  * Because there are potentially ANSI and UNICODE versions of everything, we need to be
- * able to call out to either
+ * able to call out to either, so we will set hooks depending on which version of 
+ * registerNatives gets called.
  */
 #ifndef UNICODE
 void (* exitDataHook)(JNIEnv *env, jstring s);
 void (* dispatchHook)();
-int (* splashHandleHook)();
+long (* splashHandleHook)();
 void (* showSplashHook)(JNIEnv *env, jstring s);
+void (* takeDownHook)();
 #else
 extern void (* exitDataHook)(JNIEnv *env, jstring s);
 extern void (* dispatchHook)();
-extern int (* splashHandleHook)();
+extern long (* splashHandleHook)();
 extern void (* showSplashHook)(JNIEnv *env, jstring s);
+extern void (* takeDownHook)();
 #endif
 
 #ifndef UNICODE 
@@ -61,7 +65,7 @@ JNIEXPORT void JNICALL update_splash(JNIEnv * env, jobject obj){
 		dispatchMessages();
 }
 
-JNIEXPORT jint JNICALL get_splash_handle(JNIEnv * env, jobject obj){
+JNIEXPORT jlong JNICALL get_splash_handle(JNIEnv * env, jobject obj){
 	if(splashHandleHook != NULL)
 		return splashHandleHook();
 	else
@@ -73,6 +77,13 @@ JNIEXPORT void JNICALL show_splash(JNIEnv * env, jobject obj, jstring s){
 		return showSplashHook(env, s);
 	else
 		return splash(env, s);	
+}
+
+JNIEXPORT void JNICALL takedown_splash(JNIEnv * env, jobject obj){
+	if(takeDownHook != NULL)
+		takeDownHook();
+	else
+		takeDownSplash();
 }
 #endif
 
@@ -92,19 +103,14 @@ static void registerNatives(JNIEnv *env) {
 	exitDataHook = &setExitData;
 	dispatchHook = &dispatchMessages;
 	showSplashHook = &splash;
+	takeDownHook = &takeDownSplash;
 }
 
 static void splash(JNIEnv *env, jstring s) {
 	const _TCHAR* data;
-	
-	/* Don't show the splash if there is already one up.
-	 * TODO Do we want to support changing the image here?
-	 */
-	if(getSplashHandle() == 0) {
-		data = JNI_GetStringChars(env, s);
-		showSplash(data);
-		JNI_ReleaseStringChars(env, s, data);
-	}
+	data = JNI_GetStringChars(env, s);
+	showSplash(data);
+	JNI_ReleaseStringChars(env, s, data);
 }
 
 static void setExitData(JNIEnv *env, jstring s){

@@ -28,6 +28,7 @@
 #define findVMLibrary findVMLibraryW
 #define dispatchMessages dispatchMessagesW
 #define getSplashHandle getSplashHandleW
+#define takeDownSplash takeDownSplashW
 #endif
 
 /* Operating System Dependent Information */
@@ -100,7 +101,9 @@ extern _TCHAR * findVMLibrary( _TCHAR * command );
 
 extern void dispatchMessages();
 
-extern int getSplashHandle();
+extern long getSplashHandle();
+
+extern void takeDownSplash();
 
 #endif /* ECLIPSE_OS_H */
 

@@ -52,6 +52,7 @@ static const _TCHAR* jvmLocations [] = { _T("j9vm"),
  */
 int showSplash( const _TCHAR* featureImage )
 {
+	static int splashing = 0;
     RECT    rect;
     HBITMAP hBitmap = 0;
     HDC     hDC;
@@ -59,6 +60,16 @@ int showSplash( const _TCHAR* featureImage )
     int     x, y;
     int     width, height;
 
+	if(splashing) {
+		/*splash screen is already showing, do nothing */
+		return 0;
+	}
+	
+	/* if Java was started first and is calling back to show the splash, we might not
+	 * have initialized the window system yet
+	 */
+	initWindowSystem(0, NULL, 1);
+	
     /* Load the bitmap for the feature. */
     hDC = GetDC( NULL);
     depth = GetDeviceCaps( hDC, BITSPIXEL ) * GetDeviceCaps( hDC, PLANES);
@@ -82,7 +93,8 @@ int showSplash( const _TCHAR* featureImage )
     SetWindowPos (topWindow, 0, x, y, 0, 0, SWP_NOZORDER | SWP_NOSIZE | SWP_NOACTIVATE);
     ShowWindow( topWindow, SW_SHOW );
     BringWindowToTop( topWindow );
-
+	splashing = 1;
+	
     /* Process messages */
 	dispatchMessages();
 	return 0;
@@ -100,8 +112,15 @@ void dispatchMessages() {
 	}
 }
 
-int getSplashHandle() {
-	return (int)topWindow;
+long getSplashHandle() {
+	return (long)topWindow;
+}
+
+void takeDownSplash() {
+	if(topWindow != NULL) {
+		DestroyWindow(topWindow);
+		dispatchMessages();
+	}
 }
 
 /* Get the window system specific VM args */
