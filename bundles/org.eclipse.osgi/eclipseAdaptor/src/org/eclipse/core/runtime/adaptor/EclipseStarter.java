@@ -440,7 +440,7 @@ public class EclipseStarter {
 				ArrayList constraints = (ArrayList) missing.get(description);
 				FrameworkLogEntry[] logChildren = new FrameworkLogEntry[constraints.size()];
 				for (int i = 0; i < logChildren.length; i++)
-					logChildren[i] = new FrameworkLogEntry(symbolicName, FrameworkLogEntry.WARNING, 0, EclipseAdaptorMsg.getResolutionFailureMessage((VersionConstraint) constraints.get(i)), 0, null, null);
+					logChildren[i] = new FrameworkLogEntry(symbolicName, FrameworkLogEntry.WARNING, 0, MessageHelper.getResolutionFailureMessage((VersionConstraint) constraints.get(i)), 0, null, null);
 				rootChildren[rootIndex] = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.WARNING, 0, generalMessage, 0, null, logChildren);
 			}
 			logService.log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.WARNING, 0, EclipseAdaptorMsg.ECLIPSE_STARTUP_ROOTS_NOT_RESOLVED, 0, null, rootChildren));
@@ -463,7 +463,7 @@ public class EclipseStarter {
 					// the bundle wasn't resolved due to some of its constraints were unsatisfiable
 					logChildren = new FrameworkLogEntry[unsatisfied.length];
 					for (int j = 0; j < unsatisfied.length; j++)
-						logChildren[j] = new FrameworkLogEntry(symbolicName, FrameworkLogEntry.WARNING, 0, EclipseAdaptorMsg.getResolutionFailureMessage(unsatisfied[j]), 0, null, null);
+						logChildren[j] = new FrameworkLogEntry(symbolicName, FrameworkLogEntry.WARNING, 0, MessageHelper.getResolutionFailureMessage(unsatisfied[j]), 0, null, null);
 				} else {
 					ResolverError[] resolverErrors = state.getResolverErrors(description);
 					if (resolverErrors.length > 0) {

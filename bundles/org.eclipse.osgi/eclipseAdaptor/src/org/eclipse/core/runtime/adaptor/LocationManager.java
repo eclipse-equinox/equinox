@@ -15,6 +15,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Properties;
 import org.eclipse.core.runtime.internal.adaptor.BasicLocation;
+import org.eclipse.core.runtime.internal.adaptor.LocationHelper;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.eclipse.osgi.service.datalocation.Location;
@@ -75,33 +76,7 @@ public class LocationManager {
 	 * @return a URL
 	 */
 	public static URL buildURL(String spec, boolean trailingSlash) {
-		if (spec == null)
-			return null;
-		boolean isFile = spec.startsWith("file:"); //$NON-NLS-1$
-		try {
-			if (isFile)
-				return adjustTrailingSlash(new File(spec.substring(5)).toURL(), trailingSlash);
-			else
-				return new URL(spec);
-		} catch (MalformedURLException e) {
-			// if we failed and it is a file spec, there is nothing more we can do
-			// otherwise, try to make the spec into a file URL.
-			if (isFile)
-				return null;
-			try {
-				return adjustTrailingSlash(new File(spec).toURL(), trailingSlash);
-			} catch (MalformedURLException e1) {
-				return null;
-			}
-		}
-	}
-
-	private static URL adjustTrailingSlash(URL url, boolean trailingSlash) throws MalformedURLException {
-		String file = url.getFile();
-		if (trailingSlash == (file.endsWith("/"))) //$NON-NLS-1$
-			return url;
-		file = trailingSlash ? file + "/" : file.substring(0, file.length() - 1); //$NON-NLS-1$
-		return new URL(url.getProtocol(), url.getHost(), file);
+		return LocationHelper.buildURL(spec, trailingSlash);
 	}
 
 	private static void mungeConfigurationLocation() {

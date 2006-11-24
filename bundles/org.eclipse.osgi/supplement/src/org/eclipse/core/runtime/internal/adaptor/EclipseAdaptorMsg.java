@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.core.runtime.internal.adaptor;
 
-import java.util.Date;
-import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.util.NLS;
 
 public class EclipseAdaptorMsg extends NLS {
@@ -101,38 +99,4 @@ public class EclipseAdaptorMsg extends NLS {
 		NLS.initializeMessages(BUNDLE_NAME, EclipseAdaptorMsg.class);
 	}
 
-	public static String getResolutionFailureMessage(VersionConstraint unsatisfied) {
-		if (unsatisfied.isResolved())
-			throw new IllegalArgumentException();
-		if (unsatisfied instanceof ImportPackageSpecification)
-			return NLS.bind(ECLIPSE_MISSING_IMPORTED_PACKAGE, toString(unsatisfied));
-		else if (unsatisfied instanceof BundleSpecification)
-			if (((BundleSpecification) unsatisfied).isOptional())
-				return NLS.bind(ECLIPSE_MISSING_OPTIONAL_REQUIRED_BUNDLE, toString(unsatisfied));
-			else
-				return NLS.bind(ECLIPSE_MISSING_REQUIRED_BUNDLE, toString(unsatisfied));
-		else
-			return NLS.bind(ECLIPSE_MISSING_HOST, toString(unsatisfied));
-	}
-
-	/**
-	 * Print a debug message to the console. 
-	 * Pre-pend the message with the current date and the name of the current thread.
-	 */
-	public static void debug(String message) {
-		StringBuffer buffer = new StringBuffer();
-		buffer.append(new Date(System.currentTimeMillis()));
-		buffer.append(" - ["); //$NON-NLS-1$
-		buffer.append(Thread.currentThread().getName());
-		buffer.append("] "); //$NON-NLS-1$
-		buffer.append(message);
-		System.out.println(buffer.toString());
-	}
-
-	private static String toString(VersionConstraint constraint) {
-		org.eclipse.osgi.service.resolver.VersionRange versionRange = constraint.getVersionRange();
-		if (versionRange == null)
-			return constraint.getName();
-		return constraint.getName() + '_' + versionRange;
-	}
 }

@@ -132,7 +132,7 @@ public class EclipseAdaptorHook implements AdaptorHook, HookConfigurator {
 			return;
 		String registryParsing = debugOptions.getOption("org.eclipse.core.runtime/registry/parsing/timing/value"); //$NON-NLS-1$
 		if (registryParsing != null)
-			EclipseAdaptorMsg.debug("Time spent in registry parsing: " + registryParsing); //$NON-NLS-1$
+			MessageHelper.debug("Time spent in registry parsing: " + registryParsing); //$NON-NLS-1$
 		String packageAdminResolution = debugOptions.getOption("debug.packageadmin/timing/value"); //$NON-NLS-1$
 		if (packageAdminResolution != null)
 			System.out.println("Time spent in package admin resolve: " + packageAdminResolution); //$NON-NLS-1$			

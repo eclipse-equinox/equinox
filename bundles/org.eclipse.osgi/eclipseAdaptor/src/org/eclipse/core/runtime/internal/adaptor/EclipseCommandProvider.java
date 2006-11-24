@@ -96,7 +96,7 @@ public class EclipseCommandProvider implements CommandProvider {
 				}
 				for (int i = 0; i < unsatisfied.length; i++) {
 					ci.print("  "); //$NON-NLS-1$
-					ci.println(EclipseAdaptorMsg.getResolutionFailureMessage(unsatisfied[i]));
+					ci.println(MessageHelper.getResolutionFailureMessage(unsatisfied[i]));
 				}
 				nextArg = ci.nextArgument();
 			}

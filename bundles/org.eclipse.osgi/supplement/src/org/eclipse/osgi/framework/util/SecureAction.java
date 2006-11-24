@@ -16,7 +16,6 @@ import java.net.*;
 import java.security.*;
 import java.util.Properties;
 import java.util.zip.ZipFile;
-import org.eclipse.osgi.framework.internal.core.AbstractBundle;
 import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.osgi.framework.*;
 import org.osgi.util.tracker.ServiceTracker;
@@ -396,7 +395,7 @@ public class SecureAction {
 	 * @param options the start options
 	 * @throws BundleException
 	 */
-	public void start(final AbstractBundle bundle, final int options) throws BundleException {
+	public void start(final Bundle bundle, final int options) throws BundleException {
 		if (System.getSecurityManager() == null) {
 			bundle.start(options);
 			return;

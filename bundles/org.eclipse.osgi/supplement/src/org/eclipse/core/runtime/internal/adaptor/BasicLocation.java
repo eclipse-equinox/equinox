@@ -13,7 +13,6 @@ package org.eclipse.core.runtime.internal.adaptor;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import org.eclipse.core.runtime.adaptor.*;
 import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.eclipse.osgi.service.datalocation.Location;
 
@@ -136,7 +135,7 @@ public class BasicLocation implements Location {
 			}
 		}
 		lockFile = file;
-		location = LocationManager.buildURL(value.toExternalForm(), true);
+		location = LocationHelper.buildURL(value.toExternalForm(), true);
 		if (property != null)
 			FrameworkProperties.setProperty(property, location.toExternalForm());
 		return lock;
