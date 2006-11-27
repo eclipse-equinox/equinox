@@ -72,6 +72,8 @@ static char * findLib(char * command);
 /* Create and Display the Splash Window */
 int showSplash( const char* featureImage )
 {
+	initWindowSystem( &initialArgc, initialArgv, 1);
+	
 	GdkPixbuf* imageData = NULL;
 	GtkWidget* image, *fixed;
   	GtkWindow* main;
@@ -119,6 +121,14 @@ void dispatchMessages() {
 
 long getSplashHandle() {
 	return splashHandle;
+}
+
+void takeDownSplash() {
+	if(splashHandle != 0) {
+		gtk_widget_destroy((GtkWidget*)splashHandle);
+		dispatchMessages();
+		splashHandle = 0;
+	}
 }
 
 /* Get the window system specific VM arguments */

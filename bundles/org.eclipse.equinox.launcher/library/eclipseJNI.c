@@ -206,6 +206,11 @@ int startJavaVM( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[] )
 	/* count the vm args */
 	while(vmArgs[++numVMArgs] != NULL) {}
 	
+	if(numVMArgs <= 0) {
+		/*error, we expect at least the required vm arg */
+		return -1;
+	}
+	
 	options = malloc(numVMArgs * sizeof(JavaVMOption));
 	for(i = 0; i < numVMArgs; i++){
 		options[i].optionString = toNarrow(vmArgs[i]);

@@ -832,8 +832,10 @@ static _TCHAR* findStartupJar(){
 #endif
 	pluginsPath = malloc( (pathLength + 1 + 7) * sizeof(char));
 	_tcscpy(pluginsPath, programDir);
-	pluginsPath[pathLength] = dirSeparator;
-	pluginsPath[pathLength + 1] = 0;
+	if(pluginsPath[pathLength - 1] != dirSeparator) {
+		pluginsPath[pathLength] = dirSeparator;
+		pluginsPath[pathLength + 1] = 0;
+	}
 #ifdef MACOSX
 	_tcscat(pluginsPath, _T_ECLIPSE("../../../"));
 #endif
