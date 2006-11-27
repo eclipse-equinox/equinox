@@ -38,7 +38,7 @@ DLL_OBJS	= eclipse.o eclipseGtk.o eclipseUtil.o eclipseJNI.o eclipseMozilla.o
 
 EXEC = $(PROGRAM_OUTPUT)
 DLL = $(PROGRAM_LIBRARY)
-LIBS = `pkg-config --libs-only-L gtk+-2.0` -lgtk-x11-2.0 -lgdk_pixbuf-2.0 -lgobject-2.0 -lgdk-x11-2.0
+LIBS = `pkg-config --libs-only-L gtk+-2.0` -lgtk-x11-2.0 -lgdk_pixbuf-2.0 -lgobject-2.0 -lgdk-x11-2.0 -lpthread
 LFLAGS = -shared -fpic -Wl,--export-dynamic 
 CFLAGS = -g \
 	-fpic \
