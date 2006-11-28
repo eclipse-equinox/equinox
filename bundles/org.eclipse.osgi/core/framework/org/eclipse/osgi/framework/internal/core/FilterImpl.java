@@ -16,8 +16,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Dictionary;
-import java.util.Vector;
+import java.util.Iterator;
 
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.util.Headers;
@@ -534,8 +535,8 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 			}
 		}
 
-		if (value1 instanceof Vector) {
-			return compare_Vector(operation, (Vector) value1, value2);
+		if (value1 instanceof Collection) {
+			return compare_Collection(operation, (Collection) value1, value2);
 		}
 
 		if (value1 instanceof Integer) {
@@ -577,11 +578,11 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 		return compare_Unknown(operation, value1, value2);	// RFC 59
 	}
 
-	protected boolean compare_Vector(int operation, Vector vector, Object value2) {
-		int size = vector.size();
+	protected boolean compare_Collection(int operation, Collection collection, Object value2) {
+		Iterator iterator = collection.iterator();
 
-		for (int i = 0; i < size; i++) {
-			if (compare(operation, vector.elementAt(i), value2)) {
+		while (iterator.hasNext()) {
+			if (compare(operation, iterator.next(), value2)) {
 				return true;
 			}
 		}
