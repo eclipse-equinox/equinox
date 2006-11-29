@@ -21,11 +21,16 @@
 # DEFAULT_OS      - the default value of the "-os" switch
 # DEFAULT_OS_ARCH - the default value of the "-arch" switch
 # DEFAULT_WS      - the default value of the "-ws" switch
-
+# JAVA_JNI        - the directory containing the Java JNI headers
 # Define the object modules to be compiled and flags.
-OBJS = eclipse.o eclipseUtil.o eclipseShm.o eclipseConfig.o eclipseGtk.o
+MAIN_OBJS = eclipseMain.o
+COMMON_OBJS = eclipseConfig.o eclipseCommon.o eclipseGtkCommon.o
+DLL_OBJS	= eclipse.o eclipseGtk.o eclipseUtil.o eclipseJNI.o
+
 EXEC = $(PROGRAM_OUTPUT)
-LIBS = `pkg-config --libs-only-L gtk+-2.0` -lgtk-x11-2.0 -lgdk_pixbuf-2.0 -lgobject-2.0 -lgdk-x11-2.0 -lglib-2.0
+DLL = $(PROGRAM_LIBRARY)
+LIBS = `pkg-config --libs-only-L gtk+-2.0` -lgtk-x11-2.0 -lgdk_pixbuf-2.0 -lgobject-2.0 -lgdk-x11-2.0 -lglib-2.0 -lpthread
+LFLAGS = -shared -Wl--export-dynamic
 CFLAGS = -O -s \
 	-DSOLARIS \
 	-K PIC \
@@ -34,28 +39,41 @@ CFLAGS = -O -s \
 	-DDEFAULT_WS="\"$(DEFAULT_WS)\"" \
 	-I. \
 	-I.. \
+	-I$(JAVA_JNI) \
 	`pkg-config --cflags gtk+-2.0`
 
 all: $(EXEC)
 
-eclipse.o: ../eclipse.c ../eclipseOS.h
+eclipse.o: ../eclipse.c ../eclipseOS.h ../eclipseCommon.h ../eclipseJNI.h
 	$(CC) $(CFLAGS) -c ../eclipse.c -o eclipse.o
+
+eclipseMain.o: ../eclipseUnicode.h ../eclipseCommon.h ../eclipseMain.c 
+	$(CC) $(CFLAGS) -c ../eclipseMain.c -o eclipseMain.o
+	
+eclipseCommon.o: ../eclipseCommon.h ../eclipseUnicode.h ../eclipseCommon.c
+	$(CC) $(CFLAGS) -c ../eclipseCommon.c
+
+eclipseGtkCommon.o: ../eclipseCommon.h ../eclipseOS.h eclipseGtkCommon.c
+	$(CC) $(CFLAGS) -c eclipseGtkCommon.c -o eclipseGtkCommon.o
 
 eclipseUtil.o: ../eclipseUtil.c ../eclipseUtil.h ../eclipseOS.h
 	$(CC) $(CFLAGS) -c ../eclipseUtil.c -o eclipseUtil.o
 
-eclipseShm.o: ../eclipseShm.c ../eclipseShm.h ../eclipseOS.h
-	$(CC) $(CFLAGS) -c ../eclipseShm.c -o eclipseShm.o
-	
+eclipseJNI.o: ../eclipseJNI.c ../eclipseCommon.h ../eclipseOS.h ../eclipseJNI.h
+	$(CC) $(CFLAGS) -c ../eclipseJNI.c -o eclipseJNI.o
+
 eclipseConfig.o: ../eclipseConfig.c ../eclipseConfig.h ../eclipseOS.h
 	$(CC) $(CFLAGS) -c ../eclipseConfig.c -o eclipseConfig.o
 
-$(EXEC): $(OBJS)
-	$(CC) -o $(EXEC) $(OBJS) $(LIBS)
+$(EXEC): $(MAIN_OBJS) $(COMMON_OBJS)
+	$(CC) -o $(EXEC) $(MAIN_OBJS) $(COMMON_OBJS) $(LIBS)
+
+$(DLL): $(DLL_OBJS) $(COMMON_OBJS)
+	$(CC) $(LFLAGS) -o $(DLL) $(DLL_OBJS) $(COMMON_OBJS) $(LIBS)
 
 install: all
-	cp $(EXEC) $(OUTPUT_DIR)
-	rm -f $(EXEC) $(OBJS)
+	cp $(EXEC) $(DLL) $(OUTPUT_DIR)
+	rm -f $(EXEC) $(DLL) $(MAIN_OBJS) $(COMMON_OBJS) $(DLL_OBJS)
 
 clean:
-	rm -f $(EXEC) $(OBJS)
+	rm -f $(EXEC) $(DLL) $(MAIN_OBJS) $(COMMON_OBJS) $(DLL_OBJS)
