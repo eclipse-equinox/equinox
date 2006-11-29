@@ -89,4 +89,4 @@ install: all
 	rm -f $(EXEC) $(OBJS)
 
 clean:
-	rm -f $(EXEC) $(MAIN_OBJS) $(COMMON_OBJS) $(DLL_OBJS)
+	rm -f $(EXEC) $(DLL) $(MAIN_OBJS) $(COMMON_OBJS) $(DLL_OBJS)

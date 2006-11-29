@@ -114,6 +114,14 @@ long getSplashHandle() {
 	return splashHandle;
 }
 
+void takeDownSplash() {
+	if( splashHandle != 0) {
+		HideWindow(window);
+		DisposeWindow(window);
+		dispatchMessages();
+		splashHandle = 0;
+	}
+}	
 void dispatchMessages() {
 	EventRef event;
 	EventTargetRef target;
