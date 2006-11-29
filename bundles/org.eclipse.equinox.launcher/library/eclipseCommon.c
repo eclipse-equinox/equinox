@@ -158,7 +158,7 @@ _TCHAR* findCommand( _TCHAR* command )
         cmdPath = NULL;
     }
 
-#ifndef _WIN32
+#if !defined(_WIN32) && !defined(MACOSX)
 	/* resolve symlinks */
 	buffer = cmdPath;
     cmdPath = canonicalize_file_name(cmdPath);
