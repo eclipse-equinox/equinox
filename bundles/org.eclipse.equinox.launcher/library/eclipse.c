@@ -385,20 +385,20 @@ int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
 		/* Either verify the VM specified by the user or
 		   attempt to find the VM in the user's PATH. */
 		javaVM = findCommand( vmName );
-		javaVM = findVMLibrary( javaVM );
-
-		/* If the VM was not found, display a message and exit. */
-		if (javaVM == NULL)
-		{
-			if (vmSearchPath != NULL) vmName = vmSearchPath; /* used default VM searching */
-        	errorMsg = malloc( (_tcslen(noVMMsg) + _tcslen(officialName) + _tcslen(vmName) + 10) * sizeof(_TCHAR) );
-        	_stprintf( errorMsg, noVMMsg, officialName, vmName );
-        	displayMessage( officialName, errorMsg );
-        	free( errorMsg );
-        	exit(1);
-		}
 	}
 
+	javaVM = findVMLibrary( javaVM );
+	/* If the VM was not found, display a message and exit. */
+	if (javaVM == NULL)
+	{
+		if (vmSearchPath != NULL) vmName = vmSearchPath; /* used default VM searching */
+    	errorMsg = malloc( (_tcslen(noVMMsg) + _tcslen(officialName) + _tcslen(vmName) + 10) * sizeof(_TCHAR) );
+    	_stprintf( errorMsg, noVMMsg, officialName, vmName );
+    	displayMessage( officialName, errorMsg );
+    	free( errorMsg );
+    	exit(1);
+	}	
+	
 	/* Find the startup.jar */
 	jarFile = findStartupJar();
 	if(jarFile == NULL) {
