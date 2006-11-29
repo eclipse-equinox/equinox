@@ -35,6 +35,7 @@ _TCHAR* officialName = NULL;
 _TCHAR* findCommand( _TCHAR* command )
 {
     _TCHAR*  cmdPath;
+    _TCHAR*  buffer;
     int    length;
     _TCHAR*  ch;
     _TCHAR*  dir;
@@ -156,6 +157,13 @@ _TCHAR* findCommand( _TCHAR* command )
         free( cmdPath );
         cmdPath = NULL;
     }
+
+#ifndef _WIN32
+	/* resolve symlinks */
+	buffer = cmdPath;
+    cmdPath = canonicalize_file_name(cmdPath);
+    free(buffer);
+#endif
 
     /* Return the absolute command pathname. */
     return cmdPath;
