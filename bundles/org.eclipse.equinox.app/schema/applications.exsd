@@ -61,14 +61,26 @@ run multiple applications.
          <attribute name="visible" type="boolean" use="default" value="true">
             <annotation>
                <documentation>
-                  
+                  Specifies whether the application should be visible for the user.  For example, some applications may provide features to other applications but nothing directly to the user. In this case the application shouldnot be revealed to the user to start it individually. The default value is set to true.
                </documentation>
             </annotation>
          </attribute>
          <attribute name="cardinality" use="default" value="singleton-global">
             <annotation>
                <documentation>
-                  
+                  Specifies the cardinality of the application.  The cardinality controls the number of applications that may be running at the same time in the Platform.  The following cardinality types are allowed
+&lt;dl&gt;
+&lt;dt&gt;singleton-global&lt;/dt&gt;
+&lt;dd&gt;This application must be the only application running.  No other types of
+ applications can start while this application is active&lt;/dd&gt;
+&lt;dt&gt;singleton-scoped&lt;/dt&gt;
+&lt;dd&gt;This application must be the only scoped application running.  No other applications that use the singleton-scoped cardinality can start while this application is active&lt;/dd&gt;
+&lt;dt&gt;integer&lt;/dt&gt;
+&lt;dd&gt;An integer indicates the maximum number of active instances allowed for this application.  Other applications are allowed to start while this application is active, except for singleton-global applicaitons&lt;/dd&gt;
+&lt;dt&gt;*&lt;/dt&gt;
+&lt;dd&gt;A value of &quot;*&quot; indicates there is no maximum on the number of active instances allowed for this application.  Other applications are allowed to start while this application is active, except for singleton-global applications&lt;/dd&gt;
+&lt;/dl&gt;
+The default value is &quot;singleton-global&quot;.
                </documentation>
             </annotation>
             <simpleType>
@@ -95,7 +107,14 @@ run multiple applications.
          <attribute name="thread" use="default" value="main">
             <annotation>
                <documentation>
-                  
+                  Specifies the thread the application must run on.  The following thread types are allowed.
+&lt;dl&gt;
+&lt;dt&gt;main&lt;/dt&gt;
+&lt;dd&gt;This application must run on the main thread.&lt;/dd&gt;
+&lt;dt&gt;any&lt;/dt&gt;
+&lt;dd&gt;This application may run on any thread.&lt;/dd&gt;
+&lt;/dl&gt;
+The default value is &quot;main&quot;.
                </documentation>
             </annotation>
             <simpleType>
@@ -122,7 +141,7 @@ run multiple applications.
 &lt;samp&gt;org.eclipse.core.runtime.IPlatformRunnable&lt;/samp&gt; or &lt;samp&gt;org.eclipse.equinox.application.IApplication&lt;/samp&gt;.
                </documentation>
                <appInfo>
-                  <meta.attribute kind="java" basedOn="org.eclipse.core.runtime.IPlatformRunnable"/>
+                  <meta.attribute kind="java" basedOn="org.eclipse.equinox.app.IApplication"/>
                </appInfo>
             </annotation>
          </attribute>
@@ -180,7 +199,7 @@ run multiple applications.
       <documentation>
          The value of the class attribute must represent an 
 implementor of 
-&lt;samp&gt;org.eclipse.core.runtime.IPlatformRunnable&lt;/samp&gt;.
+&lt;samp&gt;org.eclipse.core.runtime.IPlatformRunnable&lt;/samp&gt; or &lt;samp&gt;org.eclipse.equinox.application.IApplication&lt;/samp&gt;.
       </documentation>
    </annotation>
 
@@ -198,7 +217,7 @@ implementor of
          <meta.section type="copyright"/>
       </appInfo>
       <documentation>
-         Copyright (c) 2004, 2005 IBM Corporation and others.&lt;br&gt;
+         Copyright (c) 2004, 2006 IBM Corporation and others.&lt;br&gt;
 All rights reserved. This program and the accompanying materials are made 
 available under the terms of the Eclipse Public License v1.0 which 
 accompanies 
