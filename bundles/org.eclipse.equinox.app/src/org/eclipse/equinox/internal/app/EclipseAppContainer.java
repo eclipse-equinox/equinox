@@ -34,7 +34,6 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 	private static final String PT_APPLICATIONS = "applications"; //$NON-NLS-1$
 	private static final String PT_APP_VISIBLE = "visible"; //$NON-NLS-1$
 	private static final String PT_APP_THREAD = "thread"; //$NON-NLS-1$
-	private static final String PT_APP_THREAD_MAIN = "main"; //$NON-NLS-1$
 	private static final String PT_APP_THREAD_ANY = "any"; //$NON-NLS-1$
 	private static final String PT_APP_CARDINALITY = "cardinality"; //$NON-NLS-1$
 	private static final String PT_APP_CARDINALITY_SINGLETON_GLOBAL = "singleton-global"; //$NON-NLS-1$
