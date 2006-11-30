@@ -15,6 +15,7 @@
 
 #ifdef _WIN32
 #include <direct.h>
+#include <windows.h>
 #else
 #include <unistd.h>
 #include <strings.h>
@@ -26,6 +27,10 @@
 /* Global Variables */
 _TCHAR* officialName = NULL;
 
+/* Local Variables */
+static _TCHAR* filterPrefix = NULL;  /* prefix for the find files filter */
+static int     prefixLength = 0;
+
  /*
  * Find the absolute pathname to where a command resides.
  *
@@ -35,7 +40,6 @@ _TCHAR* officialName = NULL;
 _TCHAR* findCommand( _TCHAR* command )
 {
     _TCHAR*  cmdPath;
-    _TCHAR*  buffer;
     int    length;
     _TCHAR*  ch;
     _TCHAR*  dir;
@@ -160,15 +164,27 @@ _TCHAR* findCommand( _TCHAR* command )
 
 #if !defined(_WIN32) && !defined(MACOSX)
 	/* resolve symlinks */
-	buffer = cmdPath;
+	ch = cmdPath;
     cmdPath = canonicalize_file_name(cmdPath);
-    free(buffer);
+    free(ch);
 #endif
 
     /* Return the absolute command pathname. */
     return cmdPath;
 }
 
+#ifndef _WIN32
+#ifdef MACOSX
+static int filter(struct dirent *dir) {
+#else
+static int filter(const struct dirent *dir) {
+#endif
+	if(_tcslen(dir->d_name) <= prefixLength)
+		return 0;
+	return (_tcsncmp(dir->d_name, filterPrefix, prefixLength) == 0 && 
+	        dir->d_name[prefixLength] == _T_ECLIPSE('_'));
+}
+#endif
  /* 
  * Looks for files of the form /path/prefix_version.<extension> and returns the full path to
  * the file with the largest version number
@@ -176,38 +192,51 @@ _TCHAR* findCommand( _TCHAR* command )
 _TCHAR* findFile( _TCHAR* path, _TCHAR* prefix)
 {
 	struct _stat stats;
-	struct dirent *file;
-	_tDIR *dir;
-	int prefixLength;
 	int pathLength;
 	_TCHAR* candidate = NULL;
 	_TCHAR* result = NULL;
+	
+#ifdef _WIN32
 	_TCHAR* fileName = NULL;
+	WIN32_FIND_DATA data;
+	HANDLE handle;
+#else	
+	struct dirent **files;
+	int count;
+#endif
 	
 	/* does path exist? */
 	if( _tstat(path, &stats) != 0 )
 		return NULL;
+
+#ifdef _WIN32
+	fileName = malloc( (_tcslen(prefix) + 3) * sizeof(_TCHAR));
+	fileName = _tcscpy(fileName, prefix);
+	_tcscat(fileName, _T_ECLIPSE("_*")); 
+	prefix = fileName;
 	
-	dir = _topendir(path);
-	if(dir == NULL)
-		return NULL;  /* can't open dir */
-		
-	prefixLength = _tcslen(prefix);
-	while((file = _treaddir(dir)) != NULL) {
-		fileName = file->d_name;
-		if(_tcsncmp(fileName, prefix, prefixLength) == 0 && fileName[prefixLength] == _T_ECLIPSE('_')) {
-			if(candidate == NULL)
+	handle = FindFirstFile(prefix, &data);
+	if(handle != INVALID_HANDLE_VALUE) {
+		candidate = _tcsdup(data.cFileName);
+		while(FindNextFile(handle, &data) != 0) {
+			fileName = data.cFileName;
+			/* compare, take the highest version */
+			if( _tcscmp(candidate, fileName) < 0) {
+				free(candidate);
 				candidate = _tcsdup(fileName);
-			else {
-				/* compare, take the highest version */
-				if( _tcscmp(candidate, fileName) < 0) {
-					free(candidate);
-					candidate = _tcsdup(fileName);
-				}
 			}
 		}
+		FindClose(handle);
 	}
-	_tclosedir(dir);
+#else
+	filterPrefix = prefix;
+	prefixLength = _tcslen(prefix);
+	/* TODO should write out own comparator to better handle OSGi versions */
+	count = scandir(path, &files, &filter, alphasort);
+	if(count > 0) {
+		candidate = _tcsdup(files[count - 1]->d_name);
+	}
+#endif
 
 	if(candidate != NULL) {
 		pathLength = _tcslen(path);
