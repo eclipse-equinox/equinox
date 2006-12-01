@@ -409,6 +409,7 @@ public class ResolverBundle extends VersionSupplier {
 		if (!fragments.remove(fragment))
 			return new ResolverExport[0];
 
+		fragment.setNewFragmentExports(false);
 		fragment.getHost().removeMatchingBundle(this);
 		ArrayList fragImports = (ArrayList) fragmentImports.remove(fragment.bundleID);
 		ArrayList fragRequires = (ArrayList) fragmentRequires.remove(fragment.bundleID);
