@@ -120,9 +120,9 @@ static void setExitData(JNIEnv *env, jstring s){
 	length = (*env)->GetStringLength(env, s);
 	data = JNI_GetStringChars(env, s);
 	
-	exitData = malloc(length * sizeof(_TCHAR*));
+	exitData = malloc((length + 1) * sizeof(_TCHAR*));
 	_tcsncpy( exitData, data, length);
-	
+	exitData[length] = 0;
 	JNI_ReleaseStringChars(env, s, data);
 }
 

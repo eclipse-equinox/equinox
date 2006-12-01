@@ -247,7 +247,7 @@ static void adjustLibraryPath( char * vmLibrary ) {
 	
 	/* set the value for LD_LIBRARY_PATH */
 	ldPathLength = strlen(ldPath);
-	/* ldPath + separator + vmParth + separator + vmParent + NULL */
+	/* ldPath + separator + vmPath + separator + vmParent + NULL */
 	newPath = malloc((ldPathLength + 1 + strlen(vmPath) + 1 + strlen(vmParent) + 1) * sizeof(char));
 	strcpy(newPath, vmPath);
 	strncat(newPath, &pathSeparator, 1);
@@ -263,3 +263,10 @@ static void adjustLibraryPath( char * vmLibrary ) {
 	/* TODO what args do we restart with? */
 	execv(initialArgv[0], initialArgv);
 }
+
+void restartLauncher( char* program, char* args[] ) 
+{
+	/* just restart in-place */
+	execv(program, args);
+}
+

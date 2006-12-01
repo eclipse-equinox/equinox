@@ -211,3 +211,45 @@ _TCHAR* findVMLibrary( _TCHAR* command ) {
 	return NULL;
 }
 
+void restartLauncher( _TCHAR* program, _TCHAR* args[] )
+{
+	int   index, length;
+	_TCHAR *commandLine, *ch, *space;
+
+	/*
+	* Build the command line. Any argument with spaces must be in
+	* double quotes in the command line. 
+	*/
+	length = _tcslen(program) + 1;
+	for (index = 0; args[index] != NULL; index++)
+	{
+		/* String length plus space character */
+		length += _tcslen( args[ index ] ) + 1;
+		/* Quotes */
+		if (_tcschr( args[ index ], _T(' ') ) != NULL) length += 2;
+	}
+	commandLine = ch = malloc ( (length + 1) * sizeof(_TCHAR) );
+	_tcscpy(ch, program);
+	ch += _tcslen(program);
+	*ch++ = _T(' ');
+	for (index = 0; args[index] != NULL; index++)
+	{
+		space = _tcschr( args[ index ], _T(' '));
+		if (space != NULL) *ch++ = _T('\"');
+		_tcscpy( ch, args[index] );
+		ch += _tcslen( args[index] );
+		if (space != NULL) *ch++ = _T('\"');
+		*ch++ = _T(' ');
+	}
+	*ch = _T('\0');
+	
+	{
+	STARTUPINFO    si;
+    PROCESS_INFORMATION  pi;
+    GetStartupInfo(&si);
+    if (CreateProcess(NULL, commandLine, NULL, NULL, TRUE, 0, NULL, NULL, &si, &pi)) {
+    	CloseHandle( pi.hThread );
+    }   
+	}
+	free(commandLine);
+}

@@ -209,9 +209,14 @@ _TCHAR* findFile( _TCHAR* path, _TCHAR* prefix)
 	if( _tstat(path, &stats) != 0 )
 		return NULL;
 
+	pathLength = _tcslen(path);
+	
 #ifdef _WIN32
-	fileName = malloc( (_tcslen(prefix) + 3) * sizeof(_TCHAR));
-	fileName = _tcscpy(fileName, prefix);
+	fileName = malloc( (_tcslen(path) + 1 + _tcslen(prefix) + 3) * sizeof(_TCHAR));
+	fileName = _tcscpy(fileName, path);
+	fileName[pathLength] = dirSeparator;
+	fileName[pathLength + 1] = 0;
+	_tcscat(fileName, prefix);
 	_tcscat(fileName, _T_ECLIPSE("_*")); 
 	prefix = fileName;
 	
@@ -239,7 +244,6 @@ _TCHAR* findFile( _TCHAR* path, _TCHAR* prefix)
 #endif
 
 	if(candidate != NULL) {
-		pathLength = _tcslen(path);
 		result = malloc((pathLength + 1 + _tcslen(candidate) + 1) * sizeof(_TCHAR));
 		_tcscpy(result, path);
 		result[pathLength] = dirSeparator;

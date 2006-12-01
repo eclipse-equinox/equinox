@@ -29,6 +29,7 @@
 #define dispatchMessages dispatchMessagesW
 #define getSplashHandle getSplashHandleW
 #define takeDownSplash takeDownSplashW
+#define restartLauncher restartLauncherW
 #endif
 
 /* Operating System Dependent Information */
@@ -104,6 +105,8 @@ extern void dispatchMessages();
 extern long getSplashHandle();
 
 extern void takeDownSplash();
+
+extern void restartLauncher( _TCHAR* program, _TCHAR* args[] );
 
 #endif /* ECLIPSE_OS_H */
 

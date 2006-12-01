@@ -218,14 +218,10 @@ _TCHAR** initialArgv;
 #define RESTART_LAST_EC    23
 #define RESTART_NEW_EC     24
 
-/* Define the maximum time (in seconds) for the splash window to remain visible. */
-static _TCHAR*  splashTimeout = _T_ECLIPSE("600");   /* 10 minutes */
-
 /* Define error messages. (non-NLS) */
 static _TCHAR* exitMsg = _T_ECLIPSE("JVM terminated. Exit code=%d\n%s");
 static _TCHAR* goVMMsg = _T_ECLIPSE("Start VM: %s\n");
 static _TCHAR* pathMsg = _T_ECLIPSE("%s\n'%s' in your current PATH");
-static _TCHAR* showMsg = _T_ECLIPSE("Could not load splash bitmap:\n%s");
 static _TCHAR* shareMsg = _T_ECLIPSE("No exit data available.");
 static _TCHAR* noVMMsg =
 _T_ECLIPSE("A Java Runtime Environment (JRE) or Java Development Kit (JDK)\n\
@@ -260,6 +256,8 @@ companion startup.jar file (in the same directory as the executable).");
 #define VMARGS       _T_ECLIPSE("-vmargs")					/* special option processing required */
 #define CP			 _T_ECLIPSE("-cp")
 #define CLASSPATH    _T_ECLIPSE("-classpath")
+
+#define JAR 		 _T_ECLIPSE("-jar")
 
 /* Define the variables to receive the option values. */
 static int     needConsole   = 0;				/* True: user wants a console	*/
@@ -309,6 +307,7 @@ static _TCHAR*  formatVmCommandMsg( _TCHAR* args[] );
        _TCHAR*  getProgramDir();
 static _TCHAR* getDefaultOfficialName();
 static _TCHAR*  findStartupJar();
+static _TCHAR ** getRelaunchCommand( _TCHAR **vmCommand );
 
 
 /* Record the arguments that were used to start the original executable */
@@ -328,6 +327,7 @@ int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
     _TCHAR**  vmCommandArgs = NULL;
     _TCHAR**  progCommandArgs = NULL;
     _TCHAR*   vmCommandMsg = NULL;
+    _TCHAR**  relaunchCommand = NULL;
     _TCHAR*   errorMsg;
     int       exitCode;
 	 
@@ -420,66 +420,66 @@ int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
 	
     /* While the Java VM should be restarted */
     vmCommand = vmCommandArgs;
-    while (vmCommand != NULL)
-    {
-    	vmCommandMsg = formatVmCommandMsg( vmCommand );
-    	if (debug) _tprintf( goVMMsg, vmCommandMsg );
-    	exitCode = startJavaVM(javaVM, vmCommandArgs, progCommandArgs );
-        switch( exitCode ) {
-            case 0:
-                vmCommand = NULL;
-            	break;
-            case RESTART_LAST_EC:
-            	break;
-            case RESTART_NEW_EC:
-                if (exitData != 0) {
-			    	if (vmCommandList != NULL) freeArgList( vmCommandList );
-                    vmCommand = vmCommandList = parseArgList( exitData );
-                } else {
-                	vmCommand = NULL;
-                    if (debug) displayMessage( officialName, shareMsg );
-                }
-                break;
-			default: {
-				_TCHAR *title = _tcsdup(officialName);
-                vmCommand = NULL;
-                errorMsg = NULL;
-                if (exitData != 0) {
-                	errorMsg = exitData;
-                    if (_tcslen( errorMsg ) == 0) {
-                	    free( errorMsg );
-                	    errorMsg = NULL;
-                    } else {
-	                    _TCHAR *str;
-                    	if (_tcsncmp(errorMsg, _T_ECLIPSE("<title>"), _tcslen(_T_ECLIPSE("<title>"))) == 0) {
-							str = _tcsstr(errorMsg, _T_ECLIPSE("</title>"));
-							if (str != NULL) {
-								free( title );
-								str[0] = _T_ECLIPSE('\0');
-								title = _tcsdup( errorMsg + _tcslen(_T_ECLIPSE("<title>")) );
-								str = _tcsdup( str + _tcslen(_T_ECLIPSE("</title>")) );
-								free( errorMsg );
-								errorMsg = str;
-							}
-                    	}
-                    }
-                } else {
-                    if (debug) displayMessage( title, shareMsg );
-                }
-                if (errorMsg == NULL) {
-	                errorMsg = malloc( (_tcslen(exitMsg) + _tcslen(vmCommandMsg) + 10) * sizeof(_TCHAR) );
-	                _stprintf( errorMsg, exitMsg, exitCode, vmCommandMsg );
-                }
-	            displayMessage( title, errorMsg );
-	            free( title );
-	            free( errorMsg );
-                break;
+	vmCommandMsg = formatVmCommandMsg( vmCommand );
+	if (debug) _tprintf( goVMMsg, vmCommandMsg );
+	exitCode = startJavaVM(javaVM, vmCommandArgs, progCommandArgs );
+    switch( exitCode ) {
+        case 0: /* normal exit */
+            break;
+        case RESTART_LAST_EC:
+        	relaunchCommand = getRelaunchCommand(initialArgv);
+        	break;
+        case RESTART_NEW_EC:
+            if (exitData != 0) {
+		    	if (vmCommandList != NULL) freeArgList( vmCommandList );
+                vmCommandList = parseArgList( exitData );
+                relaunchCommand = getRelaunchCommand(vmCommandList);
+            } else {
+                if (debug) displayMessage( officialName, shareMsg );
             }
+            break;
+		default: {
+			_TCHAR *title = _tcsdup(officialName);
+            vmCommand = NULL;
+            errorMsg = NULL;
+            if (exitData != 0) {
+            	errorMsg = exitData;
+                if (_tcslen( errorMsg ) == 0) {
+            	    free( errorMsg );
+            	    errorMsg = NULL;
+                } else {
+                    _TCHAR *str;
+                	if (_tcsncmp(errorMsg, _T_ECLIPSE("<title>"), _tcslen(_T_ECLIPSE("<title>"))) == 0) {
+						str = _tcsstr(errorMsg, _T_ECLIPSE("</title>"));
+						if (str != NULL) {
+							free( title );
+							str[0] = _T_ECLIPSE('\0');
+							title = _tcsdup( errorMsg + _tcslen(_T_ECLIPSE("<title>")) );
+							str = _tcsdup( str + _tcslen(_T_ECLIPSE("</title>")) );
+							free( errorMsg );
+							errorMsg = str;
+						}
+                	}
+                }
+            } else {
+                if (debug) displayMessage( title, shareMsg );
+            }
+            if (errorMsg == NULL) {
+                errorMsg = malloc( (_tcslen(exitMsg) + _tcslen(vmCommandMsg) + 10) * sizeof(_TCHAR) );
+                _stprintf( errorMsg, exitMsg, exitCode, vmCommandMsg );
+            }
+            displayMessage( title, errorMsg );
+            free( title );
+            free( errorMsg );
+            break;
         }
-        free( vmCommandMsg );
     }
-
+    
+    if(relaunchCommand != NULL)
+    	restartLauncher(program, relaunchCommand);
+    	
     /* Cleanup time. */
+    free( vmCommandMsg );
     free( jarFile );
     free( cp );
     free( programDir );
@@ -663,7 +663,6 @@ static void getVMCommand( int argc, _TCHAR* argv[], _TCHAR **vmArgv[], _TCHAR **
     if (!noSplash)
     {
         (*progArgv)[ dst++ ] = SHOWSPLASH;
-        (*progArgv)[ dst++ ] = splashTimeout;
     }
 
 	/* Append the remaining user defined arguments. */
@@ -849,4 +848,42 @@ static _TCHAR* findStartupJar(){
 	file = malloc( (_tcslen( DEFAULT_STARTUP ) + 1) * sizeof( _TCHAR ) );
 	file = _tcscpy( file, DEFAULT_STARTUP );
 	return file;
+}
+
+/* 
+ * Return the portion of the vmCommand that should be used for relaunching
+ * 
+ * The memory allocated for the command array must be freed
+ */
+static _TCHAR ** getRelaunchCommand( _TCHAR **vmCommand  )
+{
+	if (vmCommand == NULL) return NULL;
+	int i = -1, req = 0, begin = -1;
+	while(vmCommand[++i] != NULL){
+		if ( begin == -1 && _tcsicmp( vmCommand[i], *reqVMarg[req] ) == 0) {
+			if(reqVMarg[++req] == NULL){
+				begin = i + 1;
+			}
+		}
+	}
+	
+	_TCHAR ** relaunch = malloc((i + 1) * sizeof(_TCHAR *));
+	int idx = 0;
+	for (i = begin; vmCommand[i] != NULL; i++){
+		
+		if (_tcsicmp(vmCommand[i], SHOWSPLASH) == 0) {
+			/* remove if the next argument is not the bitmap to show */
+			if(vmCommand[i + 1] != NULL && vmCommand[i + 1][0] == _T_ECLIPSE('-')) {
+				i++;
+				continue;
+			}
+		} else if(_tcsicmp(vmCommand[i], JAR) == 0 ) {
+			/* skip -jar */
+			i++;
+			continue;
+		}
+		relaunch[idx++] = vmCommand[i];
+	}
+	relaunch[idx] = NULL;
+	return relaunch;
 }
