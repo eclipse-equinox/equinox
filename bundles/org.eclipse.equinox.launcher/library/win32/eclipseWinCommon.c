@@ -22,7 +22,7 @@ _TCHAR   dirSeparator  = _T('\\');
 _TCHAR   pathSeparator = _T(';');
 
 void initWindowSystem( int* pArgc, _TCHAR* argv[], int showSplash );
-static LRESULT WINAPI WndProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+/*static LRESULT WINAPI WndProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);*/
 
 /* Global Main Window*/
 #ifdef UNICODE
@@ -32,7 +32,7 @@ HWND    topWindow = 0;
 #endif
 
 /* Define local variables for the main window. */
-static WNDPROC oldProc;
+/*static WNDPROC oldProc;*/
 
 static int initialized = 0;
 
@@ -62,18 +62,20 @@ void initWindowSystem( int* pArgc, _TCHAR* argv[], int showSplash )
 		_T("STATIC"),
 		officialName,
 		SS_BITMAP | WS_POPUP,
+		CW_USEDEFAULT,
 		0,
-		0,
-		0,
+		CW_USEDEFAULT,
 		0,
 		NULL,
 		NULL,
 		GetModuleHandle (NULL),
 		NULL);
 	SetClassLong(topWindow, GCL_HICON, (LONG)LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(ECLIPSE_ICON)));
+/*    
     oldProc = (WNDPROC) GetWindowLong (topWindow, GWL_WNDPROC);
     SetWindowLong (topWindow, GWL_WNDPROC, (LONG) WndProc);
-    initialized = 1;
+*/  
+	initialized = 1;
 }
 
 /* Window Procedure for the Spash window.
@@ -81,7 +83,7 @@ void initWindowSystem( int* pArgc, _TCHAR* argv[], int showSplash )
  * A special WndProc is needed to return the proper vlaue for WM_NCHITTEST.
  * It must also detect the message from the splash window process.
  */
-static LRESULT WINAPI WndProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+/*static LRESULT WINAPI WndProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch (uMsg)
 	{
@@ -91,7 +93,7 @@ static LRESULT WINAPI WndProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 	    	break;
 	}
 	return CallWindowProc (oldProc, hwnd, uMsg, wParam, lParam);
-}
+}*/
 
 /* Load the specified shared library
  */

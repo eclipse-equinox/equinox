@@ -53,8 +53,8 @@ static const _TCHAR* jvmLocations [] = { _T("j9vm"),
 int showSplash( const _TCHAR* featureImage )
 {
 	static int splashing = 0;
-    RECT    rect;
     HBITMAP hBitmap = 0;
+    BITMAP  bmp;
     HDC     hDC;
     int     depth;
     int     x, y;
@@ -80,17 +80,18 @@ int showSplash( const _TCHAR* featureImage )
     /* If the bitmap could not be found, return an error. */
     if (hBitmap == 0)
     	return ERROR_FILE_NOT_FOUND;
+    
+	GetObject(hBitmap, sizeof(BITMAP), &bmp);
 
-	/* Load the bitmap into the splash popup window. */
-    SendMessage( topWindow, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM) hBitmap );
-
-    /* Centre the splash window and display it. */
-    GetWindowRect (topWindow, &rect);
+    /* figure out position */
     width = GetSystemMetrics (SM_CXSCREEN);
     height = GetSystemMetrics (SM_CYSCREEN);
-    x = (width - (rect.right - rect.left)) / 2;
-    y = (height - (rect.bottom - rect.top)) / 2;
-    SetWindowPos (topWindow, 0, x, y, 0, 0, SWP_NOZORDER | SWP_NOSIZE | SWP_NOACTIVATE);
+    x = (width - bmp.bmWidth) / 2;
+    y = (height - bmp.bmHeight) / 2;
+
+	/* Centre the splash window and display it. */
+    SetWindowPos (topWindow, 0, x, y, bmp.bmWidth, bmp.bmHeight, SWP_NOZORDER | SWP_NOSIZE | SWP_NOACTIVATE);
+    SendMessage( topWindow, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM) hBitmap );
     ShowWindow( topWindow, SW_SHOW );
     BringWindowToTop( topWindow );
 	splashing = 1;
