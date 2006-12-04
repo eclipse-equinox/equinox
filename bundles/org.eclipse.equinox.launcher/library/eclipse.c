@@ -343,12 +343,6 @@ int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
 
     /* Initialize the window system. */
     initWindowSystem( &argc, argv, !noSplash );
-
-    /* If the showsplash option was given */
-    if (!noSplash && showSplashArg)
-    {
-    	showSplash(showSplashArg);
-    }
     
     /* Find the directory where the Eclipse program is installed. */
     programDir = getProgramDir();
@@ -408,7 +402,13 @@ int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
         free( errorMsg );
     	exit( 1 );
 	}
-	
+
+    /* If the showsplash option was given */
+    if (!noSplash && showSplashArg)
+    {
+    	showSplash(showSplashArg);
+    }
+    
 	/* the startup jarFile goes on the classpath */
 	cp = malloc((_tcslen(CLASSPATH_PREFIX) + _tcslen(jarFile) + 1) * sizeof(_TCHAR));
 	cp = _tcscpy(cp, CLASSPATH_PREFIX);

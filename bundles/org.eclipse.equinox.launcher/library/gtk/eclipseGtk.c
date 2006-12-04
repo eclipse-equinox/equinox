@@ -72,47 +72,55 @@ static char * findLib(char * command);
 /* Create and Display the Splash Window */
 int showSplash( const char* featureImage )
 {
-	initWindowSystem( &initialArgc, initialArgv, 1);
+	GtkAdjustment* vadj, *hadj;
+	int width, height;
+	GdkPixbuf * pixbuf;
+	GtkWidget * image;
+	GtkWidget * shellHandle, * vboxHandle, * scrolledHandle, * handle;
 	
-	GdkPixbuf* imageData = NULL;
-	GtkWidget* image, *fixed;
-  	GtkWindow* main;
-
-    /* Load the feature specific splash image data if defined. */
-    if (featureImage != NULL)
-    {
-    	imageData = gdk_pixbuf_new_from_file(featureImage, NULL);
-    }
-   
-    /* If the splash image data could not be loaded, return an error. */
-    if (imageData == NULL)
-    	return ENOENT;
-    
-    /* Create the image from its data. */
-    fixed = gtk_fixed_new();
-    image = gtk_image_new_from_pixbuf(imageData);
-
-	/* Create a top level window for the image. */
- 	main = GTK_WINDOW(gtk_window_new(GTK_WINDOW_TOPLEVEL));
-	gtk_window_set_title(main, officialName);
-
-  	gtk_container_add(GTK_CONTAINER(main), GTK_WIDGET(fixed));
-  	gtk_container_add(GTK_CONTAINER(fixed), GTK_WIDGET(image));
-
-  	/* Remove window decorations and centre the window on the display. */
-  	gtk_window_set_decorated(main, FALSE);
-  	gtk_window_set_position(main, GTK_WIN_POS_CENTER);
-    gtk_window_set_resizable(main, FALSE);
-
-    /* Set the background pixmap to NULL to avoid a gray flash when the image appears. */
-    gtk_widget_realize(GTK_WIDGET(main));
-    gdk_window_set_back_pixmap(GTK_WIDGET(main)->window, NULL, FALSE);
-
-	splashHandle = (long)G_OBJECT(fixed);
-	/* Show the window and wait for the timeout (or until the process is terminated). */
-	gtk_widget_show_all(GTK_WIDGET (main));
+	initWindowSystem(&initialArgc, initialArgv, 1);
+	
+	shellHandle = gtk_window_new(GTK_WINDOW_POPUP);
+	vboxHandle = gtk_vbox_new(FALSE, 0);
+	if(vboxHandle == 0)
+		return -1;
+		
+	vadj = GTK_ADJUSTMENT(gtk_adjustment_new(0, 0, 100, 1, 10, 10));
+	hadj = GTK_ADJUSTMENT(gtk_adjustment_new(0, 0, 100, 1, 10, 10));
+	if (vadj == 0 || hadj == 0) 
+		return -1;
+		
+	scrolledHandle = gtk_scrolled_window_new(hadj, vadj);
+	
+	gtk_container_add(GTK_CONTAINER(vboxHandle), scrolledHandle);
+	gtk_box_set_child_packing(GTK_BOX(vboxHandle), scrolledHandle, TRUE, TRUE, 0, GTK_PACK_END);
+	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolledHandle), GTK_POLICY_NEVER, GTK_POLICY_NEVER);
+	gtk_widget_show(scrolledHandle);
+	
+	handle = gtk_fixed_new();
+	gtk_fixed_set_has_window(GTK_FIXED(handle), TRUE);
+	GTK_WIDGET_SET_FLAGS(handle, GTK_CAN_FOCUS);
+	
+	/* TODO Avoid Warnings */
+	gtk_container_add(GTK_CONTAINER(scrolledHandle), handle);
+	gtk_widget_show(handle);
+	
+	gtk_container_add(GTK_CONTAINER(shellHandle), vboxHandle);
+	
+	pixbuf = gdk_pixbuf_new_from_file(featureImage, NULL);
+	image = gtk_image_new_from_pixbuf(pixbuf);
+	gtk_container_add(GTK_CONTAINER(handle), image);
+	gtk_widget_show(image);
+	
+	width  = gdk_pixbuf_get_width(pixbuf);
+	height = gdk_pixbuf_get_height(pixbuf);
+	gtk_window_resize(GTK_WINDOW(shellHandle), width, height);
+	gtk_window_set_position(GTK_WINDOW(shellHandle), GTK_WIN_POS_CENTER);
+	gtk_widget_show(shellHandle);
+	gtk_widget_show_all(GTK_WIDGET(shellHandle));
+	splashHandle = (long)G_OBJECT(shellHandle);
 	dispatchMessages();
-  	return 0;
+	return 0;
 }
 
 void dispatchMessages() {

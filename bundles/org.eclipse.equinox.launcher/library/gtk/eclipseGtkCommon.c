@@ -70,7 +70,7 @@ void initWindowSystem(int* pArgc, char* argv[], int showSplash)
 
 	/* Initialize GTK. */
 	gtk_set_locale();
-	gtk_init(pArgc, &argv);
+	gtk_init_check(pArgc, &argv);
 	gdk_set_program_class(officialName);
 	gtkInitialized = TRUE;
 }
