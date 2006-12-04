@@ -28,6 +28,7 @@ import org.eclipse.osgi.internal.profile.Profile;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.service.runnable.ApplicationLauncher;
+import org.eclipse.osgi.service.runnable.StartupMonitor;
 import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
@@ -57,6 +58,10 @@ public class EclipseStarter {
 	public static boolean debug = false;
 	private static boolean running = false;
 	private static OSGi osgi = null;
+	private static ServiceRegistration defaultMonitorRegistration = null;
+	private static ServiceRegistration appLauncherRegistration = null;
+	private static ServiceRegistration endSplashRegistration = null;
+	private static ServiceRegistration splashStreamRegistration = null;
 
 	// command line arguments
 	private static final String CLEAN = "-clean"; //$NON-NLS-1$
@@ -341,7 +346,7 @@ public class EclipseStarter {
 			return new Integer(0);
 		// create the ApplicationLauncher and register it as a service
 		EclipseAppLauncher launcher = new EclipseAppLauncher(context, Boolean.valueOf(FrameworkProperties.getProperty(PROP_ALLOW_APPRELAUNCH)).booleanValue(), !Boolean.valueOf(FrameworkProperties.getProperty(PROP_APPLICATION_NODEFAULT)).booleanValue(), log);
-		context.registerService(ApplicationLauncher.class.getName(), launcher, null);
+		appLauncherRegistration = context.registerService(ApplicationLauncher.class.getName(), launcher, null);
 		// must start the launcher AFTER service restration because this method 
 		// blocks and runs the application on the current thread.  This method 
 		// will return only after the application has stopped.
@@ -368,6 +373,18 @@ public class EclipseStarter {
 	public static void shutdown() throws Exception {
 		if (!running || osgi == null)
 			return;
+		if (appLauncherRegistration != null)
+			appLauncherRegistration.unregister();
+		if (endSplashRegistration != null)
+			endSplashRegistration.unregister();
+		if (splashStreamRegistration != null)
+			splashStreamRegistration.unregister();
+		if (defaultMonitorRegistration != null)
+			defaultMonitorRegistration.unregister();
+		appLauncherRegistration = null;
+		endSplashRegistration = null;
+		splashStreamRegistration = null;
+		defaultMonitorRegistration = null;
 		osgi.close();
 		osgi = null;
 		context = null;
@@ -494,7 +511,7 @@ public class EclipseStarter {
 				endSplashHandler.run();
 			}
 		};
-		context.registerService(Runnable.class.getName(), handler, properties);
+		endSplashRegistration = context.registerService(Runnable.class.getName(), handler, properties);
 
 		// register the output stream to the launcher if it exists
 		try {
@@ -503,10 +520,18 @@ public class EclipseStarter {
 			if (outputStream instanceof OutputStream) {
 				Dictionary osProperties = new Hashtable();
 				osProperties.put("name", "splashstream"); //$NON-NLS-1$//$NON-NLS-2$
-				context.registerService(OutputStream.class.getName(), outputStream, osProperties);
+				splashStreamRegistration = context.registerService(OutputStream.class.getName(), outputStream, osProperties);
 			}
 		} catch (Exception ex) {
 			// ignore
+		}
+		// keep this splash handler as the default startup monitor
+		try {
+			Dictionary monitorProps = new Hashtable();
+			monitorProps.put(Constants.SERVICE_RANKING, new Integer(Integer.MIN_VALUE));
+			defaultMonitorRegistration = context.registerService(StartupMonitor.class.getName(), new DefaultStartupMonitor(endSplashHandler), monitorProps);
+		} catch (IllegalStateException e) {
+			//splash handler did not provide the necessary methods, ignore it
 		}
 	}
 
@@ -669,9 +694,8 @@ public class EclipseStarter {
 		};
 		context.addFrameworkListener(listener);
 		packageAdmin.refreshPackages(bundles);
-		semaphore.acquire();
-		context.removeFrameworkListener(listener);
 		context.ungetService(packageAdminRef);
+		updateSplash(semaphore, listener);
 		if (Boolean.valueOf(FrameworkProperties.getProperty(PROP_FORCED_RESTART)).booleanValue()) {
 			// wait for the system bundle to stop
 			Bundle systemBundle = context.getBundle(0);
@@ -1140,9 +1164,10 @@ public class EclipseStarter {
 	}
 
 	private static void setStartLevel(final int value) {
-		ServiceTracker tracker = new ServiceTracker(context, StartLevel.class.getName(), null);
-		tracker.open();
-		final StartLevel startLevel = (StartLevel) tracker.getService();
+		ServiceReference reference = context.getServiceReference(StartLevel.class.getName());
+		final StartLevel startLevel = reference != null ? (StartLevel) context.getService(reference) : null;
+		if (startLevel == null)
+			return;
 		final Semaphore semaphore = new Semaphore(0);
 		FrameworkListener listener = new FrameworkListener() {
 			public void frameworkEvent(FrameworkEvent event) {
@@ -1152,9 +1177,33 @@ public class EclipseStarter {
 		};
 		context.addFrameworkListener(listener);
 		startLevel.setStartLevel(value);
-		semaphore.acquire();
-		context.removeFrameworkListener(listener);
-		tracker.close();
+		context.ungetService(reference);
+		updateSplash(semaphore, listener);
+	}
+
+	private static void updateSplash(Semaphore semaphore, FrameworkListener listener) {
+		ServiceTracker monitorTracker = new ServiceTracker(context, StartupMonitor.class.getName(), null);
+		monitorTracker.open();
+		try {
+			while (true) {
+				StartupMonitor monitor = (StartupMonitor) monitorTracker.getService();
+				if (monitor != null ) {
+					try {
+						monitor.update();
+					} catch (Throwable e) {
+						// ignore exceptions thrown by the monitor
+					}
+				}
+				//is the start level up yet?
+				if (semaphore.acquire(50))
+					break; //done
+				//else still working, spin another update
+			}
+		} finally {
+			if (listener != null)
+				context.removeFrameworkListener(listener);
+			monitorTracker.close();
+		}
 	}
 
 	/**

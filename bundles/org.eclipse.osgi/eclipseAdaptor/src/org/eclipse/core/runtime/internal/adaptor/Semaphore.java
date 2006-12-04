@@ -49,7 +49,7 @@ public class Semaphore {
 				notifications--;
 				return true;
 			}
-			if (timeLeft < 0)
+			if (timeLeft <= 0)
 				return false;
 			try {
 				wait(timeLeft);
