@@ -497,6 +497,8 @@ public class EclipseStarter {
 	}
 
 	private static void publishSplashScreen(final Runnable endSplashHandler) {
+		if (endSplashHandler == null)
+			return;
 		// InternalPlatform now how to retrieve this later
 		Dictionary properties = new Hashtable();
 		properties.put("name", "splashscreen"); //$NON-NLS-1$ //$NON-NLS-2$
