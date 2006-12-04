@@ -288,9 +288,9 @@ public class EclipseStarter {
 				Profile.logTime("EclipseStarter.startup()", "console started"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		context = osgi.getBundleContext();
+		publishSplashScreen(endSplashHandler);
 		if ("true".equals(FrameworkProperties.getProperty(PROP_REFRESH_BUNDLES))) //$NON-NLS-1$
 			refreshPackages(getCurrentBundles(false));
-		publishSplashScreen(endSplashHandler);
 		if (Profile.PROFILE && Profile.STARTUP)
 			Profile.logTime("EclipseStarter.startup()", "loading basic bundles"); //$NON-NLS-1$ //$NON-NLS-2$
 		long stateStamp = adaptor.getState().getTimeStamp();
@@ -1196,7 +1196,7 @@ public class EclipseStarter {
 						// ignore exceptions thrown by the monitor
 					}
 				}
-				//is the start level up yet?
+				// can we acquire the semaphore yet?
 				if (semaphore.acquire(50))
 					break; //done
 				//else still working, spin another update
