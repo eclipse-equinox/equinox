@@ -96,7 +96,7 @@ public class PolicyHandler {
 				return (IBuddyPolicy) policies[policyOrder];
 			}
 			if (PARENT_POLICY.equals(buddyName)) {
-				policies[policyOrder] = new SystemPolicy(policedLoader.parent);
+				policies[policyOrder] = new SystemPolicy(policedLoader.getParentClassLoader());
 				return (IBuddyPolicy) policies[policyOrder];
 			}
 			

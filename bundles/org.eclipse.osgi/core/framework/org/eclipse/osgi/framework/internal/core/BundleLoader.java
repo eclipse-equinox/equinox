@@ -47,32 +47,31 @@ public class BundleLoader implements ClassLoaderDelegate {
 	public final static ClassLoader FW_CLASSLOADER = getClassLoader(Framework.class);
 
 	/* the proxy */
-	BundleLoaderProxy proxy;
+	final private BundleLoaderProxy proxy;
 	/* Bundle object */
-	BundleHost bundle;
-	/* The is the BundleClassLoader for the bundle */
-	BundleClassLoader classloader;
-	ClassLoader parent;
-
-	/* cache of imported packages. Key is packagename, Value is PackageSource */
-	KeyedHashSet importedSources;
-	/* cache of required package sources. Key is packagename, value is PackageSource */
-	KeyedHashSet requiredSources;
-	/* If not null, list of package stems to import dynamically. */
-	String[] dynamicImportPackageStems;
-	/* If not null, list of package names to import dynamically. */
-	String[] dynamicImportPackages;
+	final BundleHost bundle;
+	final private PolicyHandler policy;
 	/* List of package names that are exported by this BundleLoader */
-	Collection exportedPackages;
+	final private Collection exportedPackages;
 	/* List of required bundle BundleLoaderProxy objects */
-	BundleLoaderProxy[] requiredBundles;
+	final BundleLoaderProxy[] requiredBundles;
 	/* List of indexes into the requiredBundles list of reexported bundles */
-	int[] reexportTable;
+	final int[] reexportTable;
+	/* cache of required package sources. Key is packagename, value is PackageSource */
+	final private KeyedHashSet requiredSources;
+
+	// note that the following non-final must be access using synchronization
+	/* cache of imported packages. Key is packagename, Value is PackageSource */
+	private KeyedHashSet importedSources;
+	/* If not null, list of package stems to import dynamically. */
+	private String[] dynamicImportPackageStems;
+	/* If not null, list of package names to import dynamically. */
+	private String[] dynamicImportPackages;
 	/* loader flags */
-	byte loaderFlags = 0;
-
-	private PolicyHandler policy;
-
+	private byte loaderFlags = 0;
+	/* The is the BundleClassLoader for the bundle */
+	private BundleClassLoader classloader;
+	private ClassLoader parent;
 	/**
 	 * Returns the package name from the specified class name.
 	 * The returned package is dot seperated.
@@ -125,10 +124,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 		} catch (IOException e) {
 			throw new BundleException(Msg.BUNDLE_READ_EXCEPTION, e);
 		}
-		initialize(proxy.getBundleDescription());
-	}
-
-	final void initialize(BundleDescription description) {
+		BundleDescription description = proxy.getBundleDescription();
 		// init the require bundles list.
 		BundleDescription[] required = description.getResolvedRequires();
 		if (required.length > 0) {
@@ -151,7 +147,14 @@ public class BundleLoader implements ClassLoaderDelegate {
 			if (reexportIndex > 0) {
 				reexportTable = new int[reexportIndex];
 				System.arraycopy(reexported, 0, reexportTable, 0, reexportIndex);
+			} else {
+				reexportTable = null;
 			}
+			requiredSources = new KeyedHashSet(10, false);
+		} else {
+			requiredBundles = null;
+			reexportTable = null;
+			requiredSources = null;
 		}
 
 		// init the provided packages set
@@ -169,6 +172,8 @@ public class BundleLoader implements ClassLoaderDelegate {
 				}
 				exportedPackages.add(exports[i].getName());
 			}
+		} else {
+			exportedPackages = null;
 		}
 		//This is the fastest way to access to the description for fragments since the hostdescription.getFragments() is slow
 		org.osgi.framework.Bundle[] fragmentObjects = bundle.getFragments();
@@ -184,18 +189,19 @@ public class BundleLoader implements ClassLoaderDelegate {
 				addDynamicImportPackage(fragments[i].getImportPackages());
 
 		//Initialize the policy handler
+		String buddyList = null;
 		try {
-			String buddyList = null;
-			if ((buddyList = (String) bundle.getBundleData().getManifest().get(Constants.BUDDY_LOADER)) != null)
-				policy = new PolicyHandler(this, buddyList);
+			buddyList = (String) bundle.getBundleData().getManifest().get(Constants.BUDDY_LOADER);
 		} catch (BundleException e) {
-			//ignore
+			// do nothing; buddyList == null
 		}
+		policy = buddyList != null ? new PolicyHandler(this, buddyList) : null;
 	}
 
-	private synchronized void addImportedPackages(ExportPackageDescription[] packages) {
+	private synchronized KeyedHashSet getImportedSources() {
 		if ((loaderFlags & FLAG_IMPORTSINIT) != 0)
-			return;
+			return importedSources;
+		ExportPackageDescription[] packages = proxy.getBundleDescription().getResolvedImports();
 		if (packages != null && packages.length > 0) {
 			if (importedSources == null)
 				importedSources = new KeyedHashSet(packages.length, false);
@@ -206,6 +212,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 			}
 		}
 		loaderFlags |= FLAG_IMPORTSINIT;
+		return importedSources;
 	}
 
 	final PackageSource createExportPackageSource(ExportPackageDescription export) {
@@ -253,15 +260,13 @@ public class BundleLoader implements ClassLoaderDelegate {
 	 * Close the the BundleLoader.
 	 *
 	 */
-	void close() {
+	synchronized void close() {
 		if ((loaderFlags & FLAG_CLOSED) != 0)
 			return;
 		if (classloader != null)
 			classloader.close();
-		if (policy != null) {
+		if (policy != null)
 			policy.close();
-			policy = null;
-		}
 		loaderFlags |= FLAG_CLOSED; /* This indicates the BundleLoader is destroyed */
 	}
 
@@ -302,6 +307,10 @@ public class BundleLoader implements ClassLoaderDelegate {
 	 */
 	final Enumeration getResources(String name) throws IOException {
 		return createClassLoader().getResources(name);
+	}
+
+	final synchronized ClassLoader getParentClassLoader() {
+		return parent;
 	}
 
 	final synchronized BundleClassLoader createClassLoader() {
@@ -357,16 +366,17 @@ public class BundleLoader implements ClassLoaderDelegate {
 			Debug.println("BundleLoader[" + this + "].loadBundleClass(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		String pkgName = getPackageName(name);
 		boolean bootDelegation = false;
+		ClassLoader parentCL = getParentClassLoader();
 		// follow the OSGi delegation model
-		if (checkParent && parent != null) {
+		if (checkParent && parentCL != null) {
 			if (name.startsWith(JAVA_PACKAGE))
 				// 1) if startsWith "java." delegate to parent and terminate search
 				// we want to throw ClassNotFoundExceptions if a java.* class cannot be loaded from the parent.
-				return parent.loadClass(name);
+				return parentCL.loadClass(name);
 			else if (isBootDelegationPackage(pkgName))
 				// 2) if part of the bootdelegation list then delegate to parent and continue of failure
 				try {
-					return parent.loadClass(name);
+					return parentCL.loadClass(name);
 				} catch (ClassNotFoundException cnfe) {
 					// we want to continue
 					bootDelegation = true;
@@ -409,12 +419,12 @@ public class BundleLoader implements ClassLoaderDelegate {
 		if (result == null && policy != null)
 			result = policy.doBuddyClassLoading(name);
 		// hack to support backwards compatibiility for bootdelegation
-		if (checkParent && !bootDelegation && bundle.framework.compatibiltyBootDelegation && result == null && source == null && !isExportedPackage(pkgName))
+		if (parentCL != null && checkParent && !bootDelegation && bundle.framework.compatibiltyBootDelegation && result == null && source == null && !isExportedPackage(pkgName))
 			// we don't need to continue if a CNFE is thrown here.
-			return parent.loadClass(name);
+			return parentCL.loadClass(name);
 		// last resort; do class context trick to work around VM bugs
-		if (result == null && !bootDelegation && isRequestFromVM())
-			result = parent.loadClass(name);
+		if (parentCL != null && result == null && !bootDelegation && isRequestFromVM())
+			result = parentCL.loadClass(name);
 		if (result == null)
 			throw new ClassNotFoundException(name);
 		return result;
@@ -452,10 +462,6 @@ public class BundleLoader implements ClassLoaderDelegate {
 		});
 	}
 
-	final boolean isClosed() {
-		return (loaderFlags & FLAG_CLOSED) != 0;
-	}
-
 	/**
 	 * Finds the resource for a bundle.  This method is used for delegation by the bundle's classloader.
 	 */
@@ -468,16 +474,17 @@ public class BundleLoader implements ClassLoaderDelegate {
 			name = name.substring(1); /* remove leading slash before search */
 		String pkgName = getResourcePackageName(name);
 		boolean bootDelegation = false;
+		ClassLoader parentCL = getParentClassLoader();
 		// follow the OSGi delegation model
 		// First check the parent classloader for system resources, if it is a java resource.
-		if (checkParent && parent != null) {
+		if (checkParent && parentCL != null) {
 			if (pkgName.startsWith(JAVA_PACKAGE))
 				// 1) if startsWith "java." delegate to parent and terminate search
 				// we never delegate java resource requests past the parent
-				return parent.getResource(name);
+				return parentCL.getResource(name);
 			else if (isBootDelegationPackage(pkgName)) {
 				// 2) if part of the bootdelegation list then delegate to parent and continue of failure
-				URL result = parent.getResource(name);
+				URL result = parentCL.getResource(name);
 				if (result != null)
 					return result;
 				bootDelegation = true;
@@ -512,12 +519,12 @@ public class BundleLoader implements ClassLoaderDelegate {
 		if (result == null && policy != null)
 			result = policy.doBuddyResourceLoading(name);
 		// hack to support backwards compatibiility for bootdelegation
-		if (checkParent && !bootDelegation && bundle.framework.compatibiltyBootDelegation && result == null && source == null && !isExportedPackage(pkgName))
+		if (parentCL != null && checkParent && !bootDelegation && bundle.framework.compatibiltyBootDelegation && result == null && source == null && !isExportedPackage(pkgName))
 			// we don't need to continue if the resource is not found here
-			return parent.getResource(name);
+			return parentCL.getResource(name);
 		// last resort; do class context trick to work around VM bugs
-		if (result == null && !bootDelegation && isRequestFromVM())
-			result = parent.getResource(name);
+		if (parentCL != null && result == null && !bootDelegation && isRequestFromVM())
+			result = parentCL.getResource(name);
 		return result;
 	}
 
@@ -706,7 +713,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 	 * @param pkgname The name of the requested class' package.
 	 * @return true if the package should be imported.
 	 */
-	final boolean isDynamicallyImported(String pkgname) {
+	private final synchronized boolean isDynamicallyImported(String pkgname) {
 		if (this instanceof SystemBundleLoader)
 			return false; // system bundle cannot dynamically import
 		// must check for startsWith("java.") to satisfy R3 section 4.7.2
@@ -795,15 +802,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 		if (packages == null)
 			return;
 
-		// make sure importedPackages is not null;
 		loaderFlags |= FLAG_HASDYNAMICIMPORTS;
-		if (importedSources == null) {
-			importedSources = new KeyedHashSet(10, false);
-		}
-
-		if (packages == null)
-			return;
-
 		int size = packages.length;
 		ArrayList stems;
 		if (dynamicImportPackageStems == null) {
@@ -852,11 +851,10 @@ public class BundleLoader implements ClassLoaderDelegate {
 	/**
 	 * Adds a list of DynamicImport-Package manifest elements to the dynamic
 	 * import tables of this BundleLoader.  Duplicate packages are checked and
-	 * not added again.  This method is not thread safe.  Callers should ensure
-	 * synchronization when calling this method.
+	 * not added again.
 	 * @param packages the DynamicImport-Package elements to add.
 	 */
-	public final void addDynamicImportPackage(ManifestElement[] packages) {
+	public final synchronized void addDynamicImportPackage(ManifestElement[] packages) {
 		if (packages == null)
 			return;
 		ArrayList dynamicImports = new ArrayList(packages.length);
@@ -866,7 +864,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 			addDynamicImportPackage((String[]) dynamicImports.toArray(new String[dynamicImports.size()]));
 	}
 
-	final void attachFragment(BundleFragment fragment) throws BundleException {
+	final synchronized void attachFragment(BundleFragment fragment) throws BundleException {
 		if (classloader == null)
 			return;
 		String[] classpath = fragment.getBundleData().getClassPath();
@@ -889,9 +887,12 @@ public class BundleLoader implements ClassLoaderDelegate {
 	}
 
 	private PackageSource findImportedSource(String pkgName) {
-		if ((loaderFlags & FLAG_IMPORTSINIT) == 0)
-			addImportedPackages(proxy.getBundleDescription().getResolvedImports());
-		return importedSources == null ? null : (PackageSource) importedSources.getByKey(pkgName);
+		KeyedHashSet imports = getImportedSources();
+		if (imports == null)
+			return null;
+		synchronized (imports) {
+			return (PackageSource) imports.getByKey(pkgName);
+		}
 	}
 
 	private PackageSource findDynamicSource(String pkgName) {
@@ -899,7 +900,13 @@ public class BundleLoader implements ClassLoaderDelegate {
 			ExportPackageDescription exportPackage = bundle.framework.adaptor.getState().linkDynamicImport(proxy.getBundleDescription(), pkgName);
 			if (exportPackage != null) {
 				PackageSource source = createExportPackageSource(exportPackage);
-				importedSources.add(source);
+				synchronized (this) {
+					if (importedSources == null)
+						importedSources = new KeyedHashSet(false);
+				}
+				synchronized (importedSources) {
+					importedSources.add(source);
+				}
 				return source;
 			}
 		}
@@ -909,7 +916,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 	private PackageSource findRequiredSource(String pkgName) {
 		if (requiredBundles == null)
 			return null;
-		if (requiredSources != null) {
+		synchronized (requiredSources) {
 			PackageSource result = (PackageSource) requiredSources.getByKey(pkgName);
 			if (result != null)
 				return result.isNullSource() ? null : result;
@@ -921,26 +928,24 @@ public class BundleLoader implements ClassLoaderDelegate {
 			BundleLoader requiredLoader = requiredBundles[i].getBundleLoader();
 			requiredLoader.addExportedProvidersFor(proxy.getSymbolicName(), pkgName, result, visited);
 		}
-		if (requiredSources == null)
-			requiredSources = new KeyedHashSet(10, false);
 		// found some so cache the result for next time and return
+		PackageSource source;
 		if (result.size() == 0) {
 			// did not find it in our required bundles lets record the failure
 			// so we do not have to do the search again for this package.
-			requiredSources.add(NullPackageSource.getNullPackageSource(pkgName));
-			return null;
+			source = NullPackageSource.getNullPackageSource(pkgName);
 		} else if (result.size() == 1) {
 			// if there is just one source, remember just the single source 
-			PackageSource source = (PackageSource) result.get(0);
-			requiredSources.add(source);
-			return source;
+			source = (PackageSource) result.get(0);
 		} else {
 			// if there was more than one source, build a multisource and cache that.
 			PackageSource[] srcs = (PackageSource[]) result.toArray(new PackageSource[result.size()]);
-			PackageSource source = createMultiSource(pkgName, srcs);
-			requiredSources.add(source);
-			return source;
+			source = createMultiSource(pkgName, srcs);
 		}
+		synchronized (requiredSources) {
+			requiredSources.add(source);
+		}
+		return source.isNullSource() ? null : source;
 	}
 
 	/*
