@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Startup Plug-in
+Bundle-SymbolicName: org.eclipse.equinox.launcher
+Bundle-Version: 1.0.0.qualifier
+Main-Class: org.eclipse.core.launcher.Main
+Bundle-RequiredExecutionEnvironment: J2SE-1.4,
+ CDC-1.0/Foundation-1.0,
+ J2SE-1.3
