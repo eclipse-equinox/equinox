@@ -237,9 +237,10 @@ static int createUserArgs(int configArgc, _TCHAR **configArgv, int *argc, _TCHAR
  */
 _TCHAR* getProgramDir(_TCHAR* program)
 {
+	_TCHAR*  ch;
+	
 	if(programDir != NULL)
 		return programDir;
-	_TCHAR*  ch;
 
     programDir = malloc( (_tcslen( program ) + 1) * sizeof(_TCHAR) );
     _tcscpy( programDir, program );

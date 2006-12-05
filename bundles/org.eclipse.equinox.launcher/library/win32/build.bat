@@ -14,9 +14,11 @@
 @rem 
 @rem    where the optional switches are:
 @rem        -output <PROGRAM_OUTPUT>  - executable filename ("eclipse")
+@rem        -library <PROGRAM_LIBRARY>- dll filename (eclipse.dll)
 @rem        -os     <DEFAULT_OS>      - default Eclipse "-os" value (qnx) 
 @rem        -arch   <DEFAULT_OS_ARCH> - default Eclipse "-arch" value (x86) 
-@rem        -ws     <DEFAULT_WS>      - default Eclipse "-ws" value (photon) 
+@rem        -ws     <DEFAULT_WS>      - default Eclipse "-ws" value (photon)
+@rem		-java   <JAVA_HOME>       - location of a Java SDK for JNI headers 
 @rem 
 @rem 
 @rem     This script can also be invoked with the "clean" argument.
@@ -30,6 +32,15 @@
 @rem 
 @rem ******
 @echo off
+
+IF NOT "%JAVA_HOME%"=="" GOTO MSVC
+rem *****
+rem Javah
+rem *****
+set JAVA_HOME=j:\teamswt\swt-builddir\ibm-jdk1.4.1
+set path=%JAVA_HOME%;%path%
+
+:MSVC
 if not "%MSVC_HOME%" == "" goto MAKE
 set MSVC_HOME=k:\dev\products\msvc60\vc98
 call %MSVC_HOME%\bin\vcvars32.bat
@@ -43,6 +54,7 @@ rem --------------------------
 rem Define default values for environment variables used in the makefiles.
 rem --------------------------
 set programOutput=eclipse.exe
+set programLibrary=eclipse.dll
 set defaultOS=win32
 set defaultOSArch=x86
 set defaultWS=win32
@@ -73,7 +85,14 @@ if "%1" == "" goto WHILE_END
 		set programOutput=%2
 		shift
 		goto NEXT )
-
+	if "%1" == "-library" (
+		set programLibrary=%2
+		shift
+		goto NEXT )
+	if "%1" == "-java" (
+		set javaHome=%2
+		shift
+		goto NEXT )
 :LAST_ARG
         set extraArgs=%extraArgs% %1
 
@@ -86,10 +105,12 @@ rem --------------------------
 rem Set up environment variables needed by the makefile.
 rem --------------------------
 set PROGRAM_OUTPUT=%programOutput%
+set PROGRAM_LIBRARY=%programLibrary%
 set DEFAULT_OS=%defaultOS%
 set DEFAULT_OS_ARCH=%defaultOSArch%
 set DEFAULT_WS=%defaultWS%
 set OUTPUT_DIR=..\..\bin\%defaultWS%\%defaultOS%\%defaultOSArch%
+set JAVA_HOME=%javaHome%
 
 rem --------------------------
 rem Run nmake to build the executable.

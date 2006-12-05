@@ -74,9 +74,9 @@ JNIEXPORT jlong JNICALL get_splash_handle(JNIEnv * env, jobject obj){
 
 JNIEXPORT void JNICALL show_splash(JNIEnv * env, jobject obj, jstring s){
 	if(showSplashHook != NULL)
-		return showSplashHook(env, s);
+		showSplashHook(env, s);
 	else
-		return splash(env, s);	
+		splash(env, s);	
 }
 
 JNIEXPORT void JNICALL takedown_splash(JNIEnv * env, jobject obj){
@@ -149,37 +149,22 @@ static jstring newJavaString(JNIEnv *env, _TCHAR * str)
 
 static jobjectArray createRunArgs( JNIEnv *env, _TCHAR * args[] ) {
 	int index = 0, length = -1;
+	jclass stringClass;
+	jobjectArray stringArray;
+	jstring string;
 	
 	/*count the number of elements first*/
 	while(args[++length] != NULL);
 	
-	jclass stringClass = (*env)->FindClass(env, "java/lang/String");
-	jobjectArray stringArray = (*env)->NewObjectArray(env, length, stringClass, 0);
+	stringClass = (*env)->FindClass(env, "java/lang/String");
+	stringArray = (*env)->NewObjectArray(env, length, stringClass, 0);
 	for( index = 0; index < length; index++) {
-		jstring string = newJavaString(env, args[index]);
+		string = newJavaString(env, args[index]);
 		(*env)->SetObjectArrayElement(env, stringArray, index, string); 
 		(*env)->DeleteLocalRef(env, string);
 	}
 	return stringArray;
 }
-
-/**
- * Convert a wide string to a narrow one suitable for use in JNI.
- * Caller must free the null terminated string returned.
- */
-static char *toNarrow(_TCHAR* src)
-{
-#ifdef UNICODE
-	int byteCount = WideCharToMultiByte (CP_ACP, 0, (wchar_t *)src, -1, NULL, 0, NULL, NULL);
-	char *dest = malloc(byteCount+1);
-	dest[byteCount] = 0;
-	WideCharToMultiByte (CP_ACP, 0, (wchar_t *)src, -1, dest, byteCount, NULL, NULL);
-	return dest;
-#else
-	return _tcsdup(src);
-#endif
-}
- 	
 					 
 int startJavaVM( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[] )
 {
@@ -192,6 +177,13 @@ int startJavaVM( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[] )
 	JavaVMOption * options;
 	JavaVM * jvm;
 	JNIEnv *env;
+	
+	/* JNI reflection */
+	jclass mainClass = NULL;			/* The Main class to load */
+	jmethodID mainConstructor = NULL;	/* Main's default constructor Main() */
+	jobject mainObject = NULL;			/* An instantiation of the main class */
+	jmethodID runMethod = NULL;			/* Main.run(String[]) */
+	jobjectArray methodArgs = NULL;		/* Arguments to pass to run */
 	
 	jniLibrary = loadLibrary(libPath);
 	if(jniLibrary == NULL) {
@@ -225,13 +217,13 @@ int startJavaVM( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[] )
 	if( createJavaVM(&jvm, &env, &init_args) == 0 ) {
 		registerNatives(env);
 		
-		jclass mainClass = (*env)->FindClass(env, "org/eclipse/core/launcher/Main");
+		mainClass = (*env)->FindClass(env, "org/eclipse/core/launcher/Main");
 		if(mainClass != NULL) {
-			jmethodID mainConstructor = (*env)->GetMethodID(env, mainClass, "<init>", "()V");
-			jobject mainObject = (*env)->NewObject(env, mainClass, mainConstructor);
-			jmethodID runMethod = (*env)->GetMethodID(env, mainClass, "run", "([Ljava/lang/String;)I");
+			mainConstructor = (*env)->GetMethodID(env, mainClass, "<init>", "()V");
+			mainObject = (*env)->NewObject(env, mainClass, mainConstructor);
+			runMethod = (*env)->GetMethodID(env, mainClass, "run", "([Ljava/lang/String;)I");
 			if(runMethod != NULL) {
-				jobjectArray methodArgs = createRunArgs(env, progArgs);
+				methodArgs = createRunArgs(env, progArgs);
 				jvmExitCode = (*env)->CallIntMethod(env, mainObject, runMethod, methodArgs);
 			}
 		} else {

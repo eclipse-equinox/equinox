@@ -18,7 +18,6 @@
 /* Variables and Methods that will be needed by both the executable and the library */
 
 #define MAX_PATH_LENGTH   2000
-#define STR(s) # s
 
 #ifdef UNICODE
 #define pathSeparator pathSeparatorW
@@ -34,14 +33,23 @@
 #define findSymbol findSymbolW
 #define run runW
 #define setInitialArgs setInitialArgsW
+#define toNarrow toNarrowW
 #endif
 
-#define RUN_METHOD 		 _T_ECLIPSE(STR(run))
-#define SET_INITIAL_ARGS _T_ECLIPSE(STR(setInitialArgs))
+#ifdef UNICODE
+#define RUN_METHOD		 _T_ECLIPSE("runW")
+#define SET_INITIAL_ARGS _T_ECLIPSE("setInitialArgsW")
+#else
+#define RUN_METHOD 		 _T_ECLIPSE("run")
+#define SET_INITIAL_ARGS _T_ECLIPSE("setInitialArgs")
+#endif
 
 extern _TCHAR   dirSeparator;         /* '/' or '\\' */
 extern _TCHAR   pathSeparator;        /* separator used in PATH variable */
 extern _TCHAR*  officialName;		  /* Program official name           */
+
+
+extern char *toNarrow(_TCHAR* src);
 
  /*
  * Find the absolute pathname to where a command resides.

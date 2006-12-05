@@ -198,7 +198,6 @@
 #include <sys/stat.h>
 #include <errno.h>
 #include <ctype.h>
-#include <dirent.h>
 
 #define MAX_PATH_LENGTH   2000
 #define MAX_SHARED_LENGTH   (16 * 1024)
@@ -311,14 +310,14 @@ static _TCHAR ** getRelaunchCommand( _TCHAR **vmCommand );
 
 
 /* Record the arguments that were used to start the original executable */
-void setInitialArgs(int argc, _TCHAR** argv) {
+JNIEXPORT void setInitialArgs(int argc, _TCHAR** argv) {
 	initialArgc = argc;
 	initialArgv = argv;
 }
 
 /* this method must match the RunMethod typedef in eclipseMain.c */
 /* vmArgs must be NULL terminated                                */
-int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
+JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
 {
     _TCHAR*   shippedVM    = NULL;
     _TCHAR*   vmSearchPath = NULL;
@@ -798,6 +797,7 @@ static _TCHAR* findStartupJar(){
 	_TCHAR * file;
 	_TCHAR * pluginsPath;
 	struct _stat stats;
+	int pathLength;
 	
 	if( startupArg != NULL ) {
 		/* startup jar was specified on the command line */
@@ -825,7 +825,7 @@ static _TCHAR* findStartupJar(){
 			return file;
 	}
 
-	int pathLength = _tcslen(programDir);
+	pathLength = _tcslen(programDir);
 #ifdef MACOSX
 	pathLength += 9;
 #endif
@@ -857,8 +857,11 @@ static _TCHAR* findStartupJar(){
  */
 static _TCHAR ** getRelaunchCommand( _TCHAR **vmCommand  )
 {
-	if (vmCommand == NULL) return NULL;
 	int i = -1, req = 0, begin = -1;
+	int idx = 0;
+	_TCHAR ** relaunch;
+	
+	if (vmCommand == NULL) return NULL;
 	while(vmCommand[++i] != NULL){
 		if ( begin == -1 && _tcsicmp( vmCommand[i], *reqVMarg[req] ) == 0) {
 			if(reqVMarg[++req] == NULL){
@@ -867,10 +870,8 @@ static _TCHAR ** getRelaunchCommand( _TCHAR **vmCommand  )
 		}
 	}
 	
-	_TCHAR ** relaunch = malloc((i + 1) * sizeof(_TCHAR *));
-	int idx = 0;
+	relaunch = malloc((i + 1) * sizeof(_TCHAR *));
 	for (i = begin; vmCommand[i] != NULL; i++){
-		
 		if (_tcsicmp(vmCommand[i], SHOWSPLASH) == 0) {
 			/* remove if the next argument is not the bitmap to show */
 			if(vmCommand[i + 1] != NULL && vmCommand[i + 1][0] == _T_ECLIPSE('-')) {

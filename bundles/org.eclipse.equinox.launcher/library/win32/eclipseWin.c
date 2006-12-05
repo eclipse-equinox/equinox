@@ -136,11 +136,18 @@ _TCHAR** getArgVM( _TCHAR *vm )
  * Find the VM shared library starting from the java executable 
  */
 _TCHAR* findVMLibrary( _TCHAR* command ) {
-	int i;
+	int i, j;
 	int pathLength;	
 	struct _stat stats;
 	_TCHAR * path;				/* path to resulting jvm shared library */
 	_TCHAR * location;			/* points to begining of jvmLocations section of path */
+	
+	/* for looking in the registry */
+	HKEY keys[2] = { HKEY_CURRENT_USER, HKEY_LOCAL_MACHINE };
+	HKEY jreKey = NULL, subKey = NULL;
+	DWORD length = MAX_PATH;
+	_TCHAR keyName[MAX_PATH], lib[MAX_PATH];
+	_TCHAR * jreKeyName;		
 	
 	if (command != NULL) {
 		location = _tcsrchr( command, dirSeparator ) + 1;
@@ -174,21 +181,17 @@ _TCHAR* findVMLibrary( _TCHAR* command ) {
 	}
 	
 	/* Not found yet, try the registry, we will use the first 1.4 or 1.5 vm we can find*/
-	HKEY keys[2] = { HKEY_CURRENT_USER, HKEY_LOCAL_MACHINE };
-	_TCHAR * jreKeyName = _T("Software\\JavaSoft\\Java Runtime Environment");
+	jreKeyName = _T("Software\\JavaSoft\\Java Runtime Environment");
 	for (i = 0; i < 2; i++) {
-		HKEY jreKey = NULL;
+		jreKey = NULL;
 		if (RegOpenKeyEx(keys[i], jreKeyName, 0, KEY_READ, &jreKey) == ERROR_SUCCESS) {
-			int j = 0;
-			_TCHAR keyName[MAX_PATH];
-			DWORD length = MAX_PATH;
+			j = 0;
 			while (RegEnumKeyEx(jreKey, j++, keyName, &length, 0, 0, 0, 0) == ERROR_SUCCESS) {  
 				/*look for a 1.4 or 1.5 vm*/ 
 				if( _tcsncmp(_T("1.4"), keyName, 3) == 0 || _tcsncmp(_T("1.5"), keyName, 3) == 0) {
-					HKEY subKey = NULL;
+					subKey = NULL;
 					if(RegOpenKeyEx(jreKey, keyName, 0, KEY_READ, &subKey) == ERROR_SUCCESS) {
-						length = MAX_PATH;
-						_TCHAR lib[MAX_PATH];
+						length = MAX_PATH;					
 						/*The RuntimeLib value should point to the library we want*/
 						if(RegQueryValueEx(subKey, _T("RuntimeLib"), NULL, NULL, (void*)&lib, &length) == ERROR_SUCCESS) {
 							if (_tstat( lib, &stats ) == 0 && (stats.st_mode & S_IFREG) != 0)

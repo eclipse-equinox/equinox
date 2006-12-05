@@ -19,18 +19,39 @@
 #else
 #include <unistd.h>
 #include <strings.h>
+#include <dirent.h>
 #endif
 #include <stdlib.h>
-#include <dirent.h>
 #include <sys/stat.h>
 
 /* Global Variables */
 _TCHAR* officialName = NULL;
 
 /* Local Variables */
+#ifndef _WIN32
 static _TCHAR* filterPrefix = NULL;  /* prefix for the find files filter */
 static int     prefixLength = 0;
+#endif
 
+
+/**
+ * Convert a wide string to a narrow one
+ * Caller must free the null terminated string returned.
+ */
+char *toNarrow(_TCHAR* src)
+{
+#ifdef UNICODE
+	int byteCount = WideCharToMultiByte (CP_ACP, 0, (wchar_t *)src, -1, NULL, 0, NULL, NULL);
+	char *dest = malloc(byteCount+1);
+	dest[byteCount] = 0;
+	WideCharToMultiByte (CP_UTF8, 0, (wchar_t *)src, -1, dest, byteCount, NULL, NULL);
+	return dest;
+#else
+	return _tcsdup(src);
+#endif
+}
+ 	
+ 	
  /*
  * Find the absolute pathname to where a command resides.
  *

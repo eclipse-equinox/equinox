@@ -14,6 +14,7 @@
 #include "eclipseOS.h"
 
 #include <windows.h>
+#include <stdlib.h>
 #include <commctrl.h>
 
 #define ECLIPSE_ICON  401
@@ -110,6 +111,12 @@ void unloadLibrary( void * handle ){
 /* Find the given symbol in the shared library
  */
 void * findSymbol( void * handle, _TCHAR * symbol ){
-	return GetProcAddress(handle, symbol);
+	char * str = NULL;
+	void * result;
+	
+	str = toNarrow(symbol);
+	result = GetProcAddress(handle, str);
+	free(str);
+	return result;
 }
 
