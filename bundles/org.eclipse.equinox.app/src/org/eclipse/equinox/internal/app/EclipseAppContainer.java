@@ -529,7 +529,7 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 		} catch (IllegalAccessException e) {
 			error = e;
 		} catch (InvocationTargetException e) {
-			error = e.getCause();
+			error = e.getTargetException();
 		}
 		if (error != null) {
 			Activator.log(new FrameworkLogEntry(Activator.PI_APP, FrameworkLogEntry.ERROR, 0, "Error in invoking method.", 0, error, null));
