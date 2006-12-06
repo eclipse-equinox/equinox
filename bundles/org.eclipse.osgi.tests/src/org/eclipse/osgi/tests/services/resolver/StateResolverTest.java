@@ -1559,15 +1559,24 @@ public class StateResolverTest extends AbstractStateTest {
 	}
 
 	public void testFragmentConstraints() throws BundleException {
+		int id = 0;
 		State state = buildEmptyState();
 		Hashtable manifest = new Hashtable();
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "D1");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		manifest.put(Constants.IMPORT_PACKAGE, "a.frag");
+		BundleDescription d1_100 = state.getFactory().createBundleDescription(state, manifest, "c1_100", id++);
+
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "A1");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
 		manifest.put(Constants.EXPORT_PACKAGE, "a; uses:=d");
 		manifest.put(Constants.IMPORT_PACKAGE, "b; version=2.0");
 		manifest.put(Constants.REQUIRE_BUNDLE, "C1; bundle-version=\"[2.0, 3.0)\"");
-		BundleDescription a1_100 = state.getFactory().createBundleDescription(state, manifest, "a1_100", 0);
+		BundleDescription a1_100 = state.getFactory().createBundleDescription(state, manifest, "a1_100", id++);
 
 		manifest = new Hashtable();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
@@ -1577,22 +1586,23 @@ public class StateResolverTest extends AbstractStateTest {
 		manifest.put(Constants.EXPORT_PACKAGE, "a.frag");
 		manifest.put(Constants.IMPORT_PACKAGE, "b; version=1.0");
 		manifest.put(Constants.REQUIRE_BUNDLE, "C1; bundle-version=\"[2.0, 3.0)\"");
-		BundleDescription a1frag_100 = state.getFactory().createBundleDescription(state, manifest, "a1frag_100", 1);
+		BundleDescription a1frag_100 = state.getFactory().createBundleDescription(state, manifest, "a1frag_100", id++);
 
 		manifest = new Hashtable();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "B1");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
 		manifest.put(Constants.EXPORT_PACKAGE, "b; version=2.1");
-		BundleDescription b1_100 = state.getFactory().createBundleDescription(state, manifest, "b1_100", 3);
+		BundleDescription b1_100 = state.getFactory().createBundleDescription(state, manifest, "b1_100", id++);
 
 		manifest = new Hashtable();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "C1");
 		manifest.put(Constants.BUNDLE_VERSION, "2.0.1");
 		manifest.put(Constants.EXPORT_PACKAGE, "c");
-		BundleDescription c1_100 = state.getFactory().createBundleDescription(state, manifest, "c1_100", 4);
+		BundleDescription c1_100 = state.getFactory().createBundleDescription(state, manifest, "c1_100", id++);
 
+		state.addBundle(d1_100);
 		state.addBundle(a1_100);
 		state.addBundle(a1frag_100);
 		state.addBundle(b1_100);
@@ -1603,6 +1613,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertTrue("0.2", a1frag_100.isResolved());
 		assertTrue("0.3", b1_100.isResolved());
 		assertTrue("0.4", c1_100.isResolved());
+		assertTrue("0.5", d1_100.isResolved());
 
 		// now use a fragment that has conflicting imports/requires with the host
 		manifest = new Hashtable();
@@ -1612,16 +1623,51 @@ public class StateResolverTest extends AbstractStateTest {
 		manifest.put(Constants.FRAGMENT_HOST, "A1");
 		manifest.put(Constants.EXPORT_PACKAGE, "a.frag");
 		manifest.put(Constants.IMPORT_PACKAGE, "b; version=2.1");
-		manifest.put(Constants.REQUIRE_BUNDLE, "C1; bundle-version=\"[2.0, 2.5)\"");
-		a1frag_100 = state.getFactory().createBundleDescription(state, manifest, "a1frag_100", 1);
+		manifest.put(Constants.REQUIRE_BUNDLE, "C1; bundle-version=\"[2.5, 4.0)\"");
+		a1frag_100 = state.getFactory().createBundleDescription(state, manifest, "a1frag_100", a1frag_100.getBundleId());
 		state.updateBundle(a1frag_100);
-		state.resolve(false);
+		state.resolve(new BundleDescription[] {a1frag_100});
 
 		assertTrue("1.1", a1_100.isResolved());
 		assertFalse("1.2", a1frag_100.isResolved());
 		assertTrue("1.3", b1_100.isResolved());
 		assertTrue("1.4", c1_100.isResolved());
+		assertFalse("1.5", d1_100.isResolved());
+		
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "A1.Frag");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		manifest.put(Constants.FRAGMENT_HOST, "A1");
+		manifest.put(Constants.EXPORT_PACKAGE, "a.frag");
+		manifest.put(Constants.IMPORT_PACKAGE, "b; version=\"[1.0,2.0)\"");
+		a1frag_100 = state.getFactory().createBundleDescription(state, manifest, "a1frag_100", a1frag_100.getBundleId());
+		state.updateBundle(a1frag_100);
+		state.resolve(new BundleDescription[] {a1frag_100});
 
+		assertTrue("2.1", a1_100.isResolved());
+		assertFalse("2.2", a1frag_100.isResolved());
+		assertTrue("2.3", b1_100.isResolved());
+		assertTrue("2.4", c1_100.isResolved());
+		assertFalse("2.5", d1_100.isResolved());
+
+		// now use a fragment that has conflicting imports/requires with the host
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "A1.Frag");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		manifest.put(Constants.FRAGMENT_HOST, "A1");
+		manifest.put(Constants.EXPORT_PACKAGE, "a.frag");
+		manifest.put(Constants.REQUIRE_BUNDLE, "C1; bundle-version=\"[1.0, 1.5)\"");
+		a1frag_100 = state.getFactory().createBundleDescription(state, manifest, "a1frag_100", a1frag_100.getBundleId());
+		state.updateBundle(a1frag_100);
+		state.resolve(new BundleDescription[] {a1frag_100});
+
+		assertTrue("3.1", a1_100.isResolved());
+		assertFalse("3.2", a1frag_100.isResolved());
+		assertTrue("3.3", b1_100.isResolved());
+		assertTrue("3.4", c1_100.isResolved());
+		assertFalse("3.5", d1_100.isResolved());
 	}
 
 	public void testReexportPackage() throws BundleException {

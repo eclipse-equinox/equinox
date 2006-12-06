@@ -665,6 +665,10 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 				}
 			}
 		}
+
+		// check that fragment constraints are met by the constraints that got resolved to the host
+		checkFragmentConstraints(bundle);
+
 		// do some extra checking when in development mode to see if other resolver error occurred
 		if (developmentMode && !failed && state.getResolverErrors(bundle.getBundle()).length > 0)
 			failed = true;
@@ -687,6 +691,18 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		// tell the state what we resolved the constraints to
 		stateResolveConstraints(bundle);
 		return bundle.getState() != ResolverBundle.UNRESOLVED;
+	}
+
+	private void checkFragmentConstraints(ResolverBundle bundle) {
+		// get all currently attached fragments and ensure that any constraints
+		// they have do not conflict with the constraints resolved to by the host
+		ResolverBundle[] fragments = bundle.getFragments();
+		for (int i = 0; i < fragments.length; i++) {
+			BundleDescription fragment = fragments[i].getBundle();
+			if (bundle.constraintsConflict(fragment, fragment.getImportPackages(), fragment.getRequiredBundles(), fragment.getGenericRequires()) && !developmentMode)
+				// found some conflicts; detach the fragment
+				resolverExports.remove(bundle.detachFragment(fragments[i], null));
+		}
 	}
 
 	private boolean resolveGenericReq(GenericConstraint constraint, ArrayList cycle) {

@@ -366,31 +366,32 @@ public class ResolverBundle extends VersionSupplier {
 		return (ResolverExport[]) hostExports.toArray(new ResolverExport[hostExports.size()]);
 	}
 
-	private boolean constraintsConflict(BundleDescription fragment, ImportPackageSpecification[] newImports, BundleSpecification[] newRequires, GenericSpecification[] newGenericRequires) {
+	boolean constraintsConflict(BundleDescription fragment, ImportPackageSpecification[] newImports, BundleSpecification[] newRequires, GenericSpecification[] newGenericRequires) {
+		// this method iterates over all additional constraints from a fragment
+		// if the host is resolved then the fragment is not allowed to add new constraints;
+		// if the host is resolved and it already has a constraint of the same name then ensure the supplier satisfies the fragment's constraint
+		boolean result = false;
 		for (int i = 0; i < newImports.length; i++) {
-			ResolverImport importPkg = getImport(newImports[i].getName());
-			if ((importPkg == null && isResolved()) || (importPkg != null && !isIncluded(newImports[i].getVersionRange(), importPkg.getVersionConstraint().getVersionRange()))) {
+			ResolverImport hostImport = getImport(newImports[i].getName());
+			ResolverExport resolvedExport = hostImport == null ? null : hostImport.getMatchingExport();
+			if ((resolvedExport == null && isResolved()) || (resolvedExport != null && !newImports[i].isSatisfiedBy(resolvedExport.getExportPackageDescription()))) {
+				result = true;
 				resolver.getState().addResolverError(fragment, ResolverError.FRAGMENT_CONFLICT, newImports[i].toString(), newImports[i]);
-				return true; // do not allow additional constraints when host is already resolved
 			}
 		}
 		for (int i = 0; i < newRequires.length; i++) {
-			BundleConstraint constraint = getRequire(newRequires[i].getName());
-			if ((constraint == null && isResolved()) || (constraint != null && !isIncluded(newRequires[i].getVersionRange(), constraint.getVersionConstraint().getVersionRange()))) {
+			BundleConstraint hostRequire = getRequire(newRequires[i].getName());
+			ResolverBundle resolvedRequire = hostRequire == null ? null : hostRequire.getMatchingBundle();
+			if ((resolvedRequire == null && isResolved()) || (resolvedRequire != null && !newRequires[i].isSatisfiedBy(resolvedRequire.getBundle()))) {
+				result = true;
 				resolver.getState().addResolverError(fragment, ResolverError.FRAGMENT_CONFLICT, newRequires[i].toString(), newRequires[i]);
-				return true; // do not allow additional constraints when host is already resolved
 			}
 		}
-		return !isResolved() ? false : newGenericRequires != null && newGenericRequires.length > 0;
-	}
-
-	// checks that the inner VersionRange is included in the outer VersionRange
-	private static boolean isIncluded(VersionRange outer, VersionRange inner) {
-		if (!outer.isIncluded(inner.getMinimum()) && (!inner.getMinimum().equals(outer.getMinimum()) || inner.getIncludeMinimum() != outer.getIncludeMinimum()))
-			return false;
-		if (!outer.isIncluded(inner.getMaximum()) && (!inner.getMaximum().equals(outer.getMaximum()) || inner.getIncludeMaximum() != outer.getIncludeMaximum()))
-			return false;
-		return true;
+		// generic constraints cannot conflict; 
+		// only check that a fragment does not add generics constraints to an already resolved host
+		if (isResolved() && newGenericRequires != null && newGenericRequires.length > 0)
+			result = true;
+		return result;
 	}
 
 	private void setNewFragmentExports(boolean newFragmentExports) {
@@ -493,5 +494,9 @@ public class ResolverBundle extends VersionSupplier {
 
 	int getRefs() {
 		return refs == null ? 0 : refs.size();
+	}
+
+	ResolverBundle[] getFragments() {
+		return  fragments == null ? new ResolverBundle[0] : (ResolverBundle[]) fragments.toArray(new ResolverBundle[fragments.size()]);
 	}
 }
