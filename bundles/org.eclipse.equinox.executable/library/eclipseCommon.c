@@ -50,7 +50,7 @@ char *toNarrow(_TCHAR* src)
 	WideCharToMultiByte (CP_UTF8, 0, (wchar_t *)src, -1, dest, byteCount, NULL, NULL);
 	return dest;
 #else
-	return _tcsdup(src);
+	return (char*)_tcsdup(src);
 #endif
 }
  	
