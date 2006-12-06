@@ -306,31 +306,25 @@ static _TCHAR* getDefaultOfficialName(_TCHAR* program)
 static _TCHAR* findLibrary(_TCHAR* program) 
 {
 	_TCHAR* c;
-	_TCHAR* libraryPrefix;
 	_TCHAR* path;
+	_TCHAR* fragment;
 	_TCHAR* result;
+	_TCHAR* dot = _T_ECLIPSE(".");
 	int length;
+	int fragmentLength;
 	
-	/* find the last segment */
-	c = _tcsrchr(program, dirSeparator);
-	if(c == NULL)
-		libraryPrefix = _tcsdup(program);
-	else
-		libraryPrefix = _tcsdup(++c); /* next character is start of prefix */
-
-#ifdef _WIN32
-	{
-		/* Search for the extension .exe and remove it */
-		_TCHAR *extension = _tcsrchr(libraryPrefix, _T_ECLIPSE('.'));
-		if (extension == NULL || _tcslen(extension) < 4)
-		{
-			free(libraryPrefix);
-			return NULL;
-		}
-		extension[0] = 0;
-	}
-#endif
+	/* build the equinox.launcher fragment name */
+	fragmentLength = _tcslen(DEFAULT_EQUINOX_STARTUP) + 1 + _tcslen(wsArg) + 1 + _tcslen(osArg) + 1 + _tcslen(osArchArg) + 1;
+	fragment = malloc(fragmentLength * sizeof(_TCHAR));
+	_tcscpy(fragment, DEFAULT_EQUINOX_STARTUP);
+	_tcscat(fragment, dot);
+	_tcscat(fragment, wsArg);
+	_tcscat(fragment, dot);
+	_tcscat(fragment, osArg);
+	_tcscat(fragment, dot);
+	_tcscat(fragment, osArchArg);
 	
+	/* get the plugins path */
 	length = _tcslen(programDir);
 	if(programDir[length - 1] == dirSeparator){
 		path = _tcsdup(programDir);
@@ -338,9 +332,29 @@ static _TCHAR* findLibrary(_TCHAR* program)
 	}  else {
 		path = programDir;
 	}
-	result = findFile(path, libraryPrefix);
 	
-	free(libraryPrefix);
+	length = _tcslen(programDir);
+#ifdef MACOSX
+	length += 9;
+#endif
+	path = malloc( (length + 1 + 7) * sizeof(char));
+	_tcscpy(path, programDir);
+	if(path[length - 1] != dirSeparator) {
+		path[length] = dirSeparator;
+		path[length + 1] = 0;
+	}
+#ifdef MACOSX
+	_tcscat(path, _T_ECLIPSE("../../../"));
+#endif
+	_tcscat(path, _T_ECLIPSE("plugins"));
+	
+	c = findFile(path, fragment);
+	free(fragment);
+	fragment = c;
+	
+	result = findFile(fragment, _T_ECLIPSE("eclipse"));
+	
+	free(fragment);
 	if(path != programDir)
 		free(path);
 	

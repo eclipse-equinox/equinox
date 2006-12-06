@@ -34,6 +34,9 @@
 #define run runW
 #define setInitialArgs setInitialArgsW
 #define toNarrow toNarrowW
+#define osArg osArgW
+#define wsArg wsArgW
+#define osArchArg osArchArgW
 #endif
 
 #ifdef UNICODE
@@ -43,6 +46,12 @@
 #define RUN_METHOD 		 _T_ECLIPSE("run")
 #define SET_INITIAL_ARGS _T_ECLIPSE("setInitialArgs")
 #endif
+
+#define DEFAULT_EQUINOX_STARTUP _T_ECLIPSE("org.eclipse.equinox.launcher")
+
+extern _TCHAR*  osArg;
+extern _TCHAR*  osArchArg;
+extern _TCHAR*  wsArg;
 
 extern _TCHAR   dirSeparator;         /* '/' or '\\' */
 extern _TCHAR   pathSeparator;        /* separator used in PATH variable */

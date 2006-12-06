@@ -26,6 +26,9 @@
 
 /* Global Variables */
 _TCHAR* officialName = NULL;
+_TCHAR* osArg        = _T_ECLIPSE(DEFAULT_OS);
+_TCHAR* osArchArg    = _T_ECLIPSE(DEFAULT_OS_ARCH);
+_TCHAR* wsArg        = _T_ECLIPSE(DEFAULT_WS);	/* the SWT supported GUI to be used */
 
 /* Local Variables */
 #ifndef _WIN32

@@ -88,7 +88,7 @@ JNIEXPORT void JNICALL takedown_splash(JNIEnv * env, jobject obj){
 #endif
 
 static void registerNatives(JNIEnv *env) {
-	jclass bridge = (*env)->FindClass(env, "org/eclipse/core/launcher/JNIBridge");
+	jclass bridge = (*env)->FindClass(env, "org/eclipse/equinox/launcher/JNIBridge");
 	if(bridge != NULL) {
 		int numNatives = sizeof(natives) / sizeof(natives[0]);
 		(*env)->RegisterNatives(env, bridge, natives, numNatives);
@@ -217,7 +217,7 @@ int startJavaVM( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[] )
 	if( createJavaVM(&jvm, &env, &init_args) == 0 ) {
 		registerNatives(env);
 		
-		mainClass = (*env)->FindClass(env, "org/eclipse/core/launcher/Main");
+		mainClass = (*env)->FindClass(env, "org/eclipse/equinox/launcher/Main");
 		if(mainClass != NULL) {
 			mainConstructor = (*env)->GetMethodID(env, mainClass, "<init>", "()V");
 			mainObject = (*env)->NewObject(env, mainClass, mainConstructor);

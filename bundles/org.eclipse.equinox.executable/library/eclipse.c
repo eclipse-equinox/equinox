@@ -235,7 +235,6 @@ static _TCHAR* homeMsg =
 _T_ECLIPSE("The %s executable launcher was unable to locate its \n\
 companion startup.jar file (in the same directory as the executable).");
 
-#define DEFAULT_EQUINOX_STARTUP _T_ECLIPSE("org.eclipse.equinox.startup")
 #define DEFAULT_STARTUP 		_T_ECLIPSE("startup.jar")
 #define CLASSPATH_PREFIX        _T_ECLIPSE("-Djava.class.path=")
 
@@ -255,19 +254,16 @@ companion startup.jar file (in the same directory as the executable).");
 #define VMARGS       _T_ECLIPSE("-vmargs")					/* special option processing required */
 #define CP			 _T_ECLIPSE("-cp")
 #define CLASSPATH    _T_ECLIPSE("-classpath")
-
 #define JAR 		 _T_ECLIPSE("-jar")
 
 /* Define the variables to receive the option values. */
 static int     needConsole   = 0;				/* True: user wants a console	*/
 static int     debug         = 0;				/* True: output debugging info	*/
 static int     noSplash      = 0;				/* True: do not show splash win	*/
-static _TCHAR*  osArg         = _T_ECLIPSE(DEFAULT_OS);
-static _TCHAR*  osArchArg     = _T_ECLIPSE(DEFAULT_OS_ARCH);
+
 static _TCHAR*  showSplashArg = NULL;			/* showsplash data (main launcher window) */
 static _TCHAR * startupArg    = NULL;			/* path of the startup.jar the user wants to run relative to the program path */
 static _TCHAR*  vmName        = NULL;     		/* Java VM that the user wants to run */
-static _TCHAR*  wsArg         = _T_ECLIPSE(DEFAULT_WS);	/* the SWT supported GUI to be used */
 static _TCHAR*  name          = NULL;			/* program name */		
 
 /* Define a table for processing command line options. */
@@ -841,7 +837,7 @@ static _TCHAR* findStartupJar(){
 	_tcscat(pluginsPath, _T_ECLIPSE("plugins"));
 	
 	/* equinox startup jar? */	
-	file = findFile(pluginsPath, _T_ECLIPSE("org.eclipse.equinox.startup"));
+	file = findFile(pluginsPath, DEFAULT_EQUINOX_STARTUP);
 	if(file != NULL)
 		return file;
 		
