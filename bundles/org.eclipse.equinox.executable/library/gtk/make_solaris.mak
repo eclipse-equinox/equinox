@@ -10,7 +10,7 @@
 #     Kevin Cornell (Rational Software Corporation)
 #     Tom Tromey (Red Hat, Inc.)
 #*******************************************************************************
-
+include ../make_version.mak
 # Makefile for creating the GTK eclipse launcher program.
 #
 # This makefile expects the utility "pkg-config" to be in the PATH.
@@ -22,6 +22,13 @@
 # DEFAULT_OS_ARCH - the default value of the "-arch" switch
 # DEFAULT_WS      - the default value of the "-ws" switch
 # JAVA_JNI        - the directory containing the Java JNI headers
+
+ifeq ($(PROGRAM_OUTPUT),)
+  PROGRAM_OUTPUT=eclipse
+endif
+
+PROGRAM_LIBRARY=$(PROGRAM_OUTPUT)_$(LIB_VERSION).so
+
 # Define the object modules to be compiled and flags.
 MAIN_OBJS = eclipseMain.o
 COMMON_OBJS = eclipseConfig.o eclipseCommon.o eclipseGtkCommon.o

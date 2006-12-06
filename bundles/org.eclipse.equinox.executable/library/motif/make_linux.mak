@@ -9,7 +9,7 @@
 #     IBM Corporation - initial API and implementation
 #     Kevin Cornell (Rational Software Corporation)
 #*******************************************************************************
- 
+include ../make_version.mak
 # Makefile for creating the Linux/Motif eclipse launcher program.
 
 # This makefile expects the following environment variables set:
@@ -26,13 +26,10 @@
 ifeq ($(PROGRAM_OUTPUT),)
   PROGRAM_OUTPUT=eclipse
 endif
-ifeq ($(PROGRAM_LIBRARY),)
-  PROGRAM_LIBRARY=eclipse_001.so
-endif
+
+PROGRAM_LIBRARY=eclipse_$(LIB_VERSION).so
 
 # Define the object modules to be compiled and flags.
-#OBJS = eclipse.o eclipseUtil.o eclipseJNI.o eclipseConfig.o eclipseMozilla.o eclipseMotif.o NgCommon.o NgImage.o NgImageData.o NgWinBMPFileFormat.o
-
 MAIN_OBJS = eclipseMain.o
 COMMON_OBJS = eclipseConfig.o eclipseCommon.o eclipseMotifCommon.o
 DLL_OBJS	= eclipse.o eclipseMotif.o eclipseUtil.o eclipseJNI.o eclipseMozilla.o NgCommon.o NgImage.o NgImageData.o NgWinBMPFileFormat.o
@@ -40,7 +37,7 @@ DLL_OBJS	= eclipse.o eclipseMotif.o eclipseUtil.o eclipseJNI.o eclipseMozilla.o 
 
 EXEC = $(PROGRAM_OUTPUT)
 DLL = $(PROGRAM_LIBRARY)
-LIBS = -Xlinker -rpath -Xlinker . -L$(MOTIF_HOME)/lib -L$(X11_HOME)/lib -lXm -lXt -lX11 -lXinerama
+LIBS = -Xlinker -rpath -Xlinker . -L$(MOTIF_HOME)/lib -L$(X11_HOME)/lib -lXm -lXt -lX11 -lXinerama -lpthread
 LFLAGS = -shared -fpic -Wl,--export-dynamic 
 CFLAGS = -g -s -Wall \
 	-DLINUX \

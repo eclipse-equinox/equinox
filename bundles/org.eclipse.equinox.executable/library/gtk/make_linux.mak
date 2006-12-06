@@ -10,7 +10,7 @@
 #     Kevin Cornell (Rational Software Corporation)
 #     Tom Tromey (Red Hat, Inc.)
 #*******************************************************************************
-
+include ../make_version.mak
 # Makefile for creating the GTK eclipse launcher program.
 #
 # This makefile expects the utility "pkg-config" to be in the PATH.
@@ -26,9 +26,8 @@
 ifeq ($(PROGRAM_OUTPUT),)
   PROGRAM_OUTPUT=eclipse
 endif
-ifeq ($(PROGRAM_LIBRARY),)
-  PROGRAM_LIBRARY=$(PROGRAM_OUTPUT)_001.so
-endif
+
+PROGRAM_LIBRARY=$(PROGRAM_OUTPUT)_$(LIB_VERSION).so
 
 # Define the object modules to be compiled and flags.
 CC=gcc

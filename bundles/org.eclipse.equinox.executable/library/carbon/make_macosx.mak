@@ -8,7 +8,7 @@
 # Contributors: 
 #     Kevin Cornell (Rational Software Corporation)
 #********************************************************************** 
-
+include ../make_version.mak
 # Makefile for creating the Carbon eclipse launcher program.
 
 # This makefile expects the following environment variables set:
@@ -22,18 +22,15 @@
 ifeq ($(PROGRAM_OUTPUT),)
   PROGRAM_OUTPUT=eclipse
 endif
-ifeq ($(PROGRAM_LIBRARY),)
-  PROGRAM_LIBRARY=$(PROGRAM_OUTPUT)_001.so
-endif
+PROGRAM_LIBRARY=eclipse_$(LIB_VERSION).so
 
 # Define the object modules to be compiled and flags.
-#OBJS = eclipse.o eclipseUtil.o eclipseShm.o eclipseConfig.o eclipseCarbon.o NgImageData.o NgWinBMPFileFormat.o NgCommon.o
 MAIN_OBJS = eclipseMain.o eclipseCarbonMain.o
 COMMON_OBJS = eclipseConfig.o eclipseCommon.o eclipseCarbonCommon.o
 DLL_OBJS	= eclipse.o eclipseCarbon.o eclipseUtil.o eclipseJNI.o NgImageData.o NgWinBMPFileFormat.o NgCommon.o
 
 EXEC = $(PROGRAM_OUTPUT)
-DLL = $(PROGRAM_OUTPUT)_001.so
+DLL = $(PROGRAM_LIBRARY)
 LIBS = -framework Carbon
 ARCHS = -arch i386 -arch ppc
 CFLAGS = -g -s \

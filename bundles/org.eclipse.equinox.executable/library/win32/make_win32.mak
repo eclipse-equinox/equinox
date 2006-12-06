@@ -22,6 +22,9 @@
 # JAVA_HOME       - the location of the Java for JNI includes
 
 !include <ntwin32.mak>
+!include <..\make_version.mak>
+
+PROGRAM_LIBRARY = eclipse_$(LIB_VERSION).dll
 
 # Define the object modules to be compiled and flags.
 MAIN_OBJS = eclipseMain.obj  aeclipseMain.obj  
@@ -36,7 +39,7 @@ LFLAGS = /INCREMENTAL:NO /DEBUG /NOLOGO -subsystem:windows,4.0 -entry:wmainCRTSt
 DLL_LFLAGS = /INCREMENTAL:NO /PDB:NONE /DEBUG /NOLOGO -entry:_DllMainCRTStartup@12 -dll /BASE:0x10000000 /DLL
 RES    = eclipse.res
 EXEC   = eclipse.exe
-DLL    = eclipse_1.exe
+DLL    = $(PROGRAM_LIBRARY)
 DEBUG  = #$(cdebug)
 acflags = -I.. -DDEFAULT_OS="\"$(DEFAULT_OS)\"" \
 	-DDEFAULT_OS_ARCH="\"$(DEFAULT_OS_ARCH)\"" \

@@ -11,7 +11,7 @@
 #     Silenio Quarti (IBM)
 #     Sam Robb (TimeSys Corporation)
 #*******************************************************************************
- 
+include ../make_version.mak
 # Makefile for creating the eclipse launcher program.
 
 # This makefile expects the following environment variables set:
@@ -25,8 +25,8 @@
 #if PROGRAM_OUTPUT is not set, assume eclipse.exe
 ifeq ($(PROGRAM_OUTPUT),)
   PROGRAM_OUTPUT=eclipse.exe
-  PROGRAM_LIBRARY=eclipse_1.dll
 endif
+PROGRAM_LIBRARY=eclipse_$(LIB_VERSION).dll
 
 # Allow for cross-compiling under linux
 OSTYPE	?= $(shell if uname -s | grep -iq cygwin ; then echo cygwin; else echo linux; fi)
