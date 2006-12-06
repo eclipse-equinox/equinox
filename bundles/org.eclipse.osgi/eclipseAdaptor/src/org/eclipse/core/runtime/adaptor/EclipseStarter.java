@@ -112,7 +112,7 @@ public class EclipseStarter {
 	public static final String PROP_IGNOREAPP = "eclipse.ignoreApp"; //$NON-NLS-1$
 	public static final String PROP_REFRESH_BUNDLES = "eclipse.refreshBundles"; //$NON-NLS-1$
 	private static final String PROP_ALLOW_APPRELAUNCH = "eclipse.allowAppRelaunch"; //$NON-NLS-1$
-	private static final String PROP_APPLICATION_NODEFAULT = "eclipse.application.noDefault"; //$NON-NLS-1$
+	private static final String PROP_APPLICATION_LAUNCHDEFAULT = "eclipse.application.launchDefault"; //$NON-NLS-1$
 
 	private static final String FILE_SCHEME = "file:"; //$NON-NLS-1$
 	private static final String REFERENCE_SCHEME = "reference:"; //$NON-NLS-1$
@@ -344,9 +344,10 @@ public class EclipseStarter {
 		// if we are just initializing, do not run the application just return.
 		if (initialize)
 			return new Integer(0);
+		boolean launchDefault = Boolean.valueOf(FrameworkProperties.getProperty(PROP_APPLICATION_LAUNCHDEFAULT, "true")).booleanValue(); //$NON-NLS-1$
 		// create the ApplicationLauncher and register it as a service
-		EclipseAppLauncher launcher = new EclipseAppLauncher(context, Boolean.valueOf(FrameworkProperties.getProperty(PROP_ALLOW_APPRELAUNCH)).booleanValue(), !Boolean.valueOf(FrameworkProperties.getProperty(PROP_APPLICATION_NODEFAULT)).booleanValue(), log);
-		appLauncherRegistration = context.registerService(ApplicationLauncher.class.getName(), launcher, null);
+		EclipseAppLauncher launcher = new EclipseAppLauncher(context, Boolean.valueOf(FrameworkProperties.getProperty(PROP_ALLOW_APPRELAUNCH)).booleanValue(), launchDefault, log);
+		context.registerService(ApplicationLauncher.class.getName(), launcher, null);
 		// must start the launcher AFTER service restration because this method 
 		// blocks and runs the application on the current thread.  This method 
 		// will return only after the application has stopped.
@@ -433,7 +434,7 @@ public class EclipseStarter {
 				continue;
 			if (leafConstraints[i] instanceof ImportPackageSpecification) {
 				if (ImportPackageSpecification.RESOLUTION_OPTIONAL.equals(((ImportPackageSpecification) leafConstraints[i]).getDirective(Constants.RESOLUTION_DIRECTIVE)))
-				continue;
+					continue;
 				if (ImportPackageSpecification.RESOLUTION_DYNAMIC.equals(((ImportPackageSpecification) leafConstraints[i]).getDirective(Constants.RESOLUTION_DIRECTIVE)))
 					continue;
 			}
@@ -468,7 +469,7 @@ public class EclipseStarter {
 		ArrayList allChildren = new ArrayList();
 		for (int i = 0; i < bundles.length; i++)
 			if (bundles[i].getState() == Bundle.INSTALLED) {
-				String symbolicName = bundles[i].getSymbolicName() == null ? FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME : bundles[i].getSymbolicName(); 
+				String symbolicName = bundles[i].getSymbolicName() == null ? FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME : bundles[i].getSymbolicName();
 				String generalMessage = NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_ERROR_BUNDLE_NOT_RESOLVED, bundles[i]);
 				BundleDescription description = state.getBundle(bundles[i].getBundleId());
 				// for some reason, the state does not know about that bundle
@@ -1082,7 +1083,6 @@ public class EclipseStarter {
 		}
 	}
 
-
 	private static void loadConfigurationInfo() {
 		Location configArea = LocationManager.getConfigurationLocation();
 		if (configArea == null)
@@ -1189,7 +1189,7 @@ public class EclipseStarter {
 		try {
 			while (true) {
 				StartupMonitor monitor = (StartupMonitor) monitorTracker.getService();
-				if (monitor != null ) {
+				if (monitor != null) {
 					try {
 						monitor.update();
 					} catch (Throwable e) {
