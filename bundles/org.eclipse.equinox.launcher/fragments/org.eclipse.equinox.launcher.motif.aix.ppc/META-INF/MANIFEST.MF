@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Ppc Fragment
+Bundle-SymbolicName: org.eclipse.equinox.launcher.motif.aix.ppc
+Bundle-Version: 1.0.0
+Fragment-Host: org.eclipse.equinox.launcher;bundle-version="1.0.0"
+Eclipse-PlatformFilter: (& (osgi.ws=motif) (osgi.os=aix) (osgi.arch=ppc))
