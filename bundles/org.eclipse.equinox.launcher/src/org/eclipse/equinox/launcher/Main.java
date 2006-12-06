@@ -18,6 +18,7 @@ import java.security.*;
 import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import org.eclipse.equinox.internal.launcher.Constants;
 
 /**
  * The launcher for Eclipse.
@@ -72,6 +73,8 @@ public class Main {
      * Indicates which OS was passed in with -os
      */
     protected String os = null;
+    protected String ws = null;
+    protected String arch = null;
 
     private String name = null; // The name to brand the launcher
     private String launcher = null; // The full path to the launcher
@@ -119,6 +122,8 @@ public class Main {
 	private static final String CLEAN = "-clean"; //$NON-NLS-1$
 	private static final String NOEXIT = "-noExit";  //$NON-NLS-1$
 	private static final String OS = "-os";  //$NON-NLS-1$
+	private static final String WS = "-ws"; //$NON-NLS-1$
+	private static final String ARCH = "-arch"; //$NON-NLS-1$
 	
     private static final String OSGI = "org.eclipse.osgi"; //$NON-NLS-1$
     private static final String STARTER = "org.eclipse.core.runtime.adaptor.EclipseStarter"; //$NON-NLS-1$
@@ -255,32 +260,82 @@ public class Main {
         }
     }   
 
-    /**
-     *  Sets up the JNI bridge to native calls
-     */
-    protected void setupJNI() {
-    	URL install = getInstallLocation();
-    	String location = install.getFile();
-    	
-    	//Guess a library suffix
-    	String suffix = null;
-    	String osName = os;
-    	if(osName == null) {
-	    	osName = System.getProperty("os.name"); //$NON-NLS-1$
-    	}
-    	//windows is dll, others are so
-    	if(osName.regionMatches(true, 0, "win", 0, 3)) //$NON-NLS-1$
-    		suffix = ".dll"; //$NON-NLS-1$
-    	else if(osName.regionMatches(true, 0, "mac", 0, 3)) {
-    		location += name + ".app/Contents/MacOS";
-    		suffix = ".so";
-    		
-    	} else
-    		suffix = ".so"; //$NON-NLS-1$
-    	
-    	String library = searchFor("eclipse", suffix, location); //$NON-NLS-1$
-    	bridge = new JNIBridge(library);
+    private String getWS() {
+    	if(ws != null)
+    		return ws;
+		if (os.equals(Constants.OS_WIN32))
+			return Constants.WS_WIN32;
+		if (os.equals(Constants.OS_LINUX))
+			return Constants.WS_GTK;
+		if (os.equals(Constants.OS_MACOSX))
+			return Constants.WS_CARBON;
+		if (os.equals(Constants.OS_HPUX))
+			return Constants.WS_MOTIF;
+		if (os.equals(Constants.OS_AIX))
+			return Constants.WS_MOTIF;
+		if (os.equals(Constants.OS_SOLARIS))
+			return Constants.WS_MOTIF;
+		if (os.equals(Constants.OS_QNX))
+			return Constants.WS_PHOTON;
+		return Constants.WS_UNKNOWN;
     }
+    private String getOS() {
+    	if(os != null)
+    		return os;
+    	String osName = System.getProperties().getProperty("os.name");
+    	if (osName.regionMatches(true, 0, Constants.OS_WIN32, 0, 3))
+			return Constants.OS_WIN32;
+		// EXCEPTION: All mappings of SunOS convert to Solaris
+		if (osName.equalsIgnoreCase(Constants.INTERNAL_OS_SUNOS))
+			return Constants.OS_SOLARIS;
+		if (osName.equalsIgnoreCase(Constants.INTERNAL_OS_LINUX))
+			return Constants.OS_LINUX;
+		if (osName.equalsIgnoreCase(Constants.INTERNAL_OS_QNX))
+			return Constants.OS_QNX;
+		if (osName.equalsIgnoreCase(Constants.INTERNAL_OS_AIX))
+			return Constants.OS_AIX;
+		if (osName.equalsIgnoreCase(Constants.INTERNAL_OS_HPUX))
+			return Constants.OS_HPUX;
+		// os.name on Mac OS can be either Mac OS or Mac OS X
+		if (osName.regionMatches(true, 0, Constants.INTERNAL_OS_MACOSX, 0, Constants.INTERNAL_OS_MACOSX.length()))
+			return Constants.OS_MACOSX;
+		return Constants.OS_UNKNOWN;
+    }
+    private String getArch() {
+		if (arch != null)
+			return arch;
+		String name = System.getProperties().getProperty("os.arch");//$NON-NLS-1$
+		// Map i386 architecture to x86
+		if (name.equalsIgnoreCase(Constants.INTERNAL_ARCH_I386))
+			return Constants.ARCH_X86;
+		// Map amd64 architecture to x86_64
+		else if (name.equalsIgnoreCase(Constants.INTERNAL_AMD64))
+			return Constants.ARCH_X86_64;
+
+		return name;
+	}
+    
+    /**
+	 *  Sets up the JNI bridge to native calls
+	 */
+	private void setupJNI() {
+		URL install = getInstallLocation();
+		String location = install.getFile();
+		location += "/plugins/";
+
+		//find our fragment
+		StringBuffer buffer = new StringBuffer(PLUGIN_ID);
+		buffer.append('.');
+		buffer.append(getWS());
+		buffer.append('.');
+		buffer.append(getOS());
+		buffer.append('.');
+		buffer.append(getArch());
+
+		String fragment = searchFor(buffer.toString(), location);
+		String library = searchFor("eclipse", fragment);
+		bridge = new JNIBridge(library);
+	}
     
     /**
      * Executes the launch.
@@ -1172,6 +1227,16 @@ public class Main {
                 os = arg;
                 // passed thru this arg 
                 continue;
+            }
+            
+            if (args[i - 1].equalsIgnoreCase(WS)) {
+            	ws = arg;
+            	continue;
+            }
+            
+            if (args[i - 1].equalsIgnoreCase(ARCH)) {
+            	arch = arg;
+            	continue;
             }
             
             // look for explicitly set install root
