@@ -99,27 +99,16 @@ void * loadLibrary( char * library ){
 	if(result == 0) 
 		printf("%s\n",dlerror());
 	return result;
-/*	NSObjectFileImage *fileImage;
-	NSModule handle;
-	if(NSCreateObjectFileImageFromFile(library, &fileImage) == NSObjectFileImageSuccess) {
-		handle = NSLinkModule(fileImage,filename, NSLINKMODULE_OPTION_RETURN_ON_ERROR | NSLINKMODULE_OPTION_PRIVATE);
-		NSDestroyObjectFileImage(fileImage);
-	}
-	
-	return handle;
-*/}
+}
 
 /* Unload the shared library
  */
 void unloadLibrary( void * handle ){
 	dlclose(handle);
-/*	NSUnlinkModule(handle, 0);*/
 }
  
 /* Find the given symbol in the shared library
  */
 void * findSymbol( void * handle, char * symbol ){
 	return dlsym(handle, symbol);
-	/*NSSymbol sym = NSLookupSymbolInModule(handle, symbol);
-	return NSAddressOfSymbol(sym);*/
 }

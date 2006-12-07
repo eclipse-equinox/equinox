@@ -15,13 +15,10 @@
 #include "eclipseOS.h"
 #include "eclipseCommon.h"
 
+#include <unistd.h>
 #include <CoreServices/CoreServices.h>
 #include <Carbon/Carbon.h>
 #include <mach-o/dyld.h>
-
-#include "NgCommon.h"
-#include "NgImageData.h"
-#include "NgWinBMPFileFormat.h"
 
 #define startupJarName "startup.jar"
 #define LAUNCHER "-launcher"
@@ -30,8 +27,6 @@
 #define DEBUG 0
 
 char *findCommand(char *command);
-
-static PixMapHandle loadBMPImage(const char *image);
 
 /* Global Variables */
 char*  consoleVM     = "java";
@@ -43,19 +38,24 @@ static char*  argVM_JAVA[] = { "-XstartOnFirstThread", NULL };
 
 static WindowRef window;
 static ControlRef pane = NULL;
+static CGImageRef image = NULL;
 static long splashHandle = 0;
 
 int main() {
+	return -1;
 }
 
-static OSStatus drawProc (EventHandlerCallRef eventHandlerCallRef, EventRef eventRef, PixMap * pixmap) {
-	Rect rect;
-	int result = CallNextEventHandler(eventHandlerCallRef, eventRef);
-	GrafPtr port = GetWindowPort(window);
-	SetPort(port);
-	GetControlBounds(pane, &rect);
-	CopyBits((BitMap*)pixmap, GetPortBitMapForCopyBits(port), &rect, &rect, srcCopy, NULL);
-	return result;
+static OSStatus drawProc (EventHandlerCallRef eventHandlerCallRef, EventRef eventRef, HIViewRef viewRef) {
+	ControlRef control;
+	CGContextRef context;
+	
+	GetEventParameter(eventRef, kEventParamDirectObject, typeControlRef, NULL, 4, NULL, &control);
+	GetEventParameter(eventRef, kEventParamCGContextRef, typeCGContextRef, NULL, 4, NULL, &context);
+	
+	HIRect rect;
+	HIViewGetBounds(viewRef, &rect);
+	HIViewDrawCGImage(context, &rect, image);
+	return eventNotHandledErr;
 }
 
 /* Show the Splash Window
@@ -66,22 +66,30 @@ int showSplash( const _TCHAR* featureImage )
 {
 	Rect wRect;
 	int w, h, deviceWidth, deviceHeight;
-	PixMap *pm;
-	PixMapHandle pixmap;
-	EventTypeSpec draw = {kEventClassControl, 	kEventControlDraw};
-
+	int attributes;
+	EventTypeSpec draw = {kEventClassControl, kEventControlDraw};
+	ControlRef root;
+	
 	/*debug("featureImage: %s\n", featureImage);*/
 
 	/*init();*/
 
-	pixmap= loadBMPImage(featureImage);
+	CFStringRef imageString = CFStringCreateWithCString(kCFAllocatorDefault, featureImage, kCFStringEncodingASCII);
+	if(imageString != NULL) {
+		CFURLRef url = CFURLCreateWithFileSystemPath(kCFAllocatorDefault, imageString, kCFURLPOSIXPathStyle, false);
+		if(url != NULL) {
+			CGImageSourceRef imageSource = CGImageSourceCreateWithURL(url, NULL);
+			if(imageSource != NULL) {
+				image = CGImageSourceCreateImageAtIndex(imageSource, 0, NULL);
+			}
+		}
+	}
 	/* If the splash image data could not be loaded, return an error. */
-	if (pixmap == NULL)
+	if (image == NULL)
 		return ENOENT;
 		
-	pm= *pixmap;
-	w= pm->bounds.right;
-	h= pm->bounds.bottom;
+	w = CGImageGetWidth(image);
+	h = CGImageGetHeight(image);
 
 	GetAvailableWindowPositioningBounds(GetMainDevice(), &wRect);
 
@@ -92,16 +100,19 @@ int showSplash( const _TCHAR* featureImage )
 	wRect.top+= (deviceHeight-h)/3;
 	wRect.right= wRect.left + w;
 	wRect.bottom= wRect.top + h;
-
-	CreateNewWindow(kSheetWindowClass, kWindowStandardHandlerAttribute | kWindowCompositingAttribute, &wRect, &window);
+	
+	attributes = kWindowStandardHandlerAttribute | kWindowCompositingAttribute;
+	attributes &= GetAvailableWindowAttributes(kSheetWindowClass);
+	CreateNewWindow(kSheetWindowClass, attributes, &wRect, &window);
 	if (window != NULL) {
-		ControlRef root = NULL;
-		CreateRootControl(window, &root);
 		GetRootControl(window, &root);
-		SetRect(&wRect, 0, 0, w, h);
+		wRect.left = wRect.top = 0;	
+		wRect.right = w;
+		wRect.bottom = h;
 		CreateUserPaneControl(window, &wRect, kControlSupportsEmbedding | kControlSupportsFocus | kControlGetsFocusOnClick, &pane);
-		EmbedControl(pane, root);
-		InstallEventHandler(GetControlEventTarget(pane), (EventHandlerUPP)drawProc, 1, &draw, pm, NULL);
+		HIViewAddSubview(root, pane);	
+
+		InstallEventHandler(GetControlEventTarget(pane), (EventHandlerUPP)drawProc, 1, &draw, pane, NULL);
 		ShowWindow(window);
 		splashHandle = (long)window;
 		dispatchMessages();
@@ -144,76 +155,13 @@ char** getArgVM( char* vm )
 	return result;
 }
 
-/**
- * loadBMPImage
- * Create a QuickDraw PixMap representing the given BMP file.
- *
- * bmpPathname: absolute path and name to the bmp file
- *
- * returned value: the PixMapHandle newly created if successful. 0 otherwise.
- */
-static PixMapHandle loadBMPImage (const char *bmpPathname) { 
-	ng_stream_t in;
-	ng_bitmap_image_t image;
-	ng_err_t err= ERR_OK;
-	PixMapHandle pixmap;
-	PixMap *pm;
-
-	NgInit();
-
-	if (NgStreamInit(&in, (char*) bmpPathname) != ERR_OK) {
-		NgError(ERR_NG, "Error can't open BMP file");
-		return 0;
-	}
-
-	NgBitmapImageInit(&image);
-	err= NgBmpDecoderReadImage (&in, &image);
-	NgStreamClose(&in);
-
-	if (err != ERR_OK) {
-		NgBitmapImageFree(&image);
-		return 0;
-	}
-
-	UBYTE4 srcDepth= NgBitmapImageBitCount(&image);
-	if (srcDepth != 24) {	/* We only support image depth of 24 bits */
-		NgBitmapImageFree(&image);
-		NgError (ERR_NG, "Error unsupported depth - only support 24 bit");
-		return 0;
-	}
-
-	pixmap= NewPixMap();	
-	if (pixmap == 0) {
-		NgBitmapImageFree(&image);
-		NgError(ERR_NG, "Error XCreatePixmap failed");
-		return 0;
-	}
-
-	pm= *pixmap;
-
-	int width= (int)NgBitmapImageWidth(&image);
-	int height= (int)NgBitmapImageHeight(&image);
-	int rowBytes= width * 4;
-	
-	pm->bounds.right= width;
-	pm->bounds.bottom= height;
-	pm->rowBytes= rowBytes + 0x8000; 
-	pm->baseAddr= NewPtr(rowBytes * height);
-	pm->pixelType= RGBDirect;
-	pm->pixelSize= 32;
-	pm->cmpCount= 3;
-	pm->cmpSize= 8;
-
-	/* 24 bit source to direct screen destination */
-	NgBitmapImageBlitDirectToDirect(NgBitmapImageImageData(&image), NgBitmapImageBytesPerRow(&image), width, height,
-		(UBYTE1*)pm->baseAddr, pm->pixelSize, rowBytes, NgIsMSB(),
-			0xff0000, 0x00ff00, 0x0000ff);
-
-	NgBitmapImageFree(&image);
-
-	return pixmap;
-}
-
 char * findVMLibrary( char* command ) {
 	return "/System/Library/Frameworks/JavaVM.framework/Versions/Current/JavaVM";
+}
+
+
+void restartLauncher( char* program, char* args[] ) 
+{
+	/* just restart in-place */
+	execv(program, args);
 }

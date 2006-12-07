@@ -321,9 +321,11 @@ static _TCHAR* findLibrary(_TCHAR* program)
 	_tcscat(fragment, wsArg);
 	_tcscat(fragment, dot);
 	_tcscat(fragment, osArg);
+#ifndef MACOSX
+	/* The Mac fragment covers both archs and does have that last segment */
 	_tcscat(fragment, dot);
 	_tcscat(fragment, osArchArg);
-	
+#endif
 	/* get the plugins path */
 	length = _tcslen(programDir);
 	if(programDir[length - 1] == dirSeparator){
