@@ -258,7 +258,7 @@ public class PackageAdminImpl implements PackageAdmin {
 
 	private void suspendBundle(AbstractBundle bundle) {
 		// attempt to suspend the bundle or obtain the state change lock
-		// Note that this may fail bug we should not we cannot quit the
+		// Note that this may fail but we cannot quit the
 		// refreshPackages operation because of it. (bug 84169)
 		if (bundle.isActive() && !bundle.isFragment()) {
 			framework.suspendBundle(bundle, true);
