@@ -17,6 +17,9 @@ import org.osgi.service.application.ApplicationDescriptor;
 
 /**
  * The context used to start an application.
+ * <p>
+ * This interface is not intended to be implemented by clients.
+ * </p>
  */
 public interface IApplicationContext {
 	/**

@@ -41,12 +41,17 @@ public interface IApplication {
 	public static final Integer EXIT_RELAUNCH = new Integer(24);
 
 	/**
-	 * Starts this application with the given context and returns a result.
+	 * Starts this application with the given context and returns a result.  This 
+	 * method must not exit until the application is finished and is ready to exit.
 	 * The content of the context is unchecked and should conform to the expectations of
-	 * the runnable being invoked.<p>
+	 * the application being invoked.<p>
 	 * 
 	 * Applications can return any object they like.  If an <code>Integer</code> is returned
 	 * it is treated as the program exit code if Eclipse is exiting.
+	 * <p>
+	 * Note: This method is called by the platform; it is not intended
+	 * to be called directly by clients.
+	 * </p>
 	 * @return the return value of the application
 	 * @see #EXIT_OK
 	 * @see #EXIT_RESTART
@@ -57,8 +62,17 @@ public interface IApplication {
 	public Object start(IApplicationContext context) throws Exception;
 
 	/**
-	 * Forces a running application to exit.  This method must block until the 
-	 * running application has completely stopped.
+	 * Forces this running application to exit.  This method should wait until the 
+	 * running application is ready to exit.  The {@link #start(IApplicationContext)} 
+	 * should already have exited or should exit very soon after this method exits<p>
+	 * 
+	 * This method is only called to force an application to exit.
+	 * This method will not be called if an application exits normally from 
+	 * the {@link #start(IApplicationContext)} method.
+	 * <p>
+	 * Note: This method is called by the platform; it is not intended
+	 * to be called directly by clients.
+	 * </p>
 	 */
 	public void stop();
 }
