@@ -324,13 +324,16 @@ public class Main {
 		location += "/plugins/";
 
 		//find our fragment
+		String fragmentOS = getOS();
 		StringBuffer buffer = new StringBuffer(PLUGIN_ID);
 		buffer.append('.');
 		buffer.append(getWS());
 		buffer.append('.');
-		buffer.append(getOS());
-		buffer.append('.');
-		buffer.append(getArch());
+		buffer.append(fragmentOS);
+		if(!fragmentOS.equals("macosx")){ //$NON-NLS-1$
+			buffer.append('.');
+			buffer.append(getArch());
+		}
 
 		String fragment = searchFor(buffer.toString(), location);
 		String library = searchFor("eclipse", fragment);
