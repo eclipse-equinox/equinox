@@ -209,7 +209,11 @@ int startJavaVM( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[] )
 		options[i].extraInfo = 0;
 	}
 		
+#ifdef MACOSX
+	init_args.version = JNI_VERSION_1_4;
+#else		
 	init_args.version = JNI_VERSION_1_2;
+#endif
 	init_args.options = options;
 	init_args.nOptions = numVMArgs;
 	init_args.ignoreUnrecognized = JNI_TRUE;

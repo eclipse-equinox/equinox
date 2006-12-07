@@ -37,6 +37,7 @@
 #define osArg osArgW
 #define wsArg wsArgW
 #define osArchArg osArchArgW
+#define resolveSymlinks resolveSymlinksW
 #endif
 
 #ifdef UNICODE
@@ -70,6 +71,9 @@ extern _TCHAR* findCommand( _TCHAR* command );
 extern _TCHAR* findFile( _TCHAR* path, _TCHAR* prefix);
 
 extern _TCHAR* getProgramDir();
+
+
+extern _TCHAR* resolveSymlinks( _TCHAR* path );
 
 /** Display a Message
  *

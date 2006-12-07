@@ -186,16 +186,20 @@ _TCHAR* findCommand( _TCHAR* command )
         cmdPath = NULL;
     }
 
+	return resolveSymlinks(cmdPath);
+}
+
 #if !defined(_WIN32) && !defined(MACOSX)
+char * resolveSymlinks( char * path ) {
+	if(path == NULL)
+		return path;
 	/* resolve symlinks */
-	ch = cmdPath;
+	char * ch = cmdPath;
     cmdPath = canonicalize_file_name(cmdPath);
     free(ch);
-#endif
-
-    /* Return the absolute command pathname. */
     return cmdPath;
 }
+#endif
 
 #ifndef _WIN32
 #ifdef MACOSX

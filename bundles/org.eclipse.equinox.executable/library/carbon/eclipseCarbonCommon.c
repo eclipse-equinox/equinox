@@ -112,3 +112,38 @@ void unloadLibrary( void * handle ){
 void * findSymbol( void * handle, char * symbol ){
 	return dlsym(handle, symbol);
 }
+
+char * resolveSymlinks( char * path ) {
+	CFURLRef url, resolved;
+	CFStringRef string;
+	FSRef fsRef;
+	Boolean isFolder, wasAliased;
+	
+	if(path == NULL)
+		return path;
+		
+	string = CFStringCreateWithCString(kCFAllocatorDefault, path, kCFStringEncodingASCII);
+	url = CFURLCreateWithFileSystemPath(kCFAllocatorDefault, string, kCFURLPOSIXPathStyle, false);
+	CFRelease(string);
+	if(url == NULL)
+		return path;
+	
+	if(CFURLGetFSRef(url, &fsRef)) {
+		if( FSResolveAliasFile(&fsRef, true, &isFolder, &wasAliased) == noErr) {
+			resolved = CFURLCreateFromFSRef(kCFAllocatorDefault, &fsRef);
+			if(resolved != NULL) {
+				string = CFURLCopyFileSystemPath(resolved, kCFURLPOSIXPathStyle);
+				CFIndex length = CFStringGetMaximumSizeForEncoding(CFStringGetLength(string), kCFStringEncodingUTF8);
+				char *s = malloc(length);
+				if (CFStringGetCString(string, s, length, kCFStringEncodingUTF8)) {
+					free(path);
+					path = s;
+				}
+				CFRelease(string);
+				CFRelease(resolved);
+			}
+		}
+	}	
+	CFRelease(url); 
+	return path;
+}

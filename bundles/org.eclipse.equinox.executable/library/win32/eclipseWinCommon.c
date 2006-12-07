@@ -120,3 +120,7 @@ void * findSymbol( void * handle, _TCHAR * symbol ){
 	return result;
 }
 
+_TCHAR* resolveSymlinks( _TCHAR* path ) {
+	/* no symlinks on windows */
+	return path;
+}

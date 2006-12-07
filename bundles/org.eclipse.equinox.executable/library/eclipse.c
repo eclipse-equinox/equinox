@@ -866,7 +866,8 @@ static _TCHAR ** getRelaunchCommand( _TCHAR **vmCommand  )
 		}
 	}
 	
-	relaunch = malloc((i + 1) * sizeof(_TCHAR *));
+	relaunch = malloc((1 + i + 1) * sizeof(_TCHAR *));
+	relaunch[idx++] = program;
 	for (i = begin; vmCommand[i] != NULL; i++){
 		if (_tcsicmp(vmCommand[i], SHOWSPLASH) == 0) {
 			/* remove if the next argument is not the bitmap to show */

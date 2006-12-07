@@ -82,8 +82,10 @@ int showSplash( const _TCHAR* featureImage )
 			if(imageSource != NULL) {
 				image = CGImageSourceCreateImageAtIndex(imageSource, 0, NULL);
 			}
+			CFRelease(url);
 		}
 	}
+	CFRelease(imageString);
 	/* If the splash image data could not be loaded, return an error. */
 	if (image == NULL)
 		return ENOENT;
@@ -156,12 +158,42 @@ char** getArgVM( char* vm )
 }
 
 char * findVMLibrary( char* command ) {
+	char *start, *end;
+	char *version;
+	int length;
+	
+	/*check first to see if command already points to the library */
+	start = strrchr( command, dirSeparator ) + 1;
+	if (strcmp(start, "JavaVM") == 0) {
+		return command;
+	}
+		
+	/* select a version to use based on the command */	
+	start = strstr(command, "/Versions/");
+	if (start != NULL){
+		start += 10;
+		end = strchr( start, dirSeparator);
+		if (end != NULL) {
+			length = end - start;
+			version = malloc(length);
+			strncpy(version, start, length);
+			version[length] = 0;
+			
+			setenv("JAVA_JVM_VERSION", version, 1);
+		} 
+	}
 	return "/System/Library/Frameworks/JavaVM.framework/Versions/Current/JavaVM";
 }
 
 
 void restartLauncher( char* program, char* args[] ) 
 {
-	/* just restart in-place */
-	execv(program, args);
+	pid_t pid= fork();
+	if (pid == 0) {
+		/* Child process ... start the JVM */
+		execv(program, args);
+
+		/* The JVM would not start ... return error code to parent process. */
+		_exit(errno);
+	}
 }
