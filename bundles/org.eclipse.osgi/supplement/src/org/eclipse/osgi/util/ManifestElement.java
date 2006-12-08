@@ -327,7 +327,7 @@ public class ManifestElement {
 		ArrayList headerElements = new ArrayList(10);
 		Tokenizer tokenizer = new Tokenizer(value);
 		parseloop: while (true) {
-			String next = tokenizer.getToken(";,"); //$NON-NLS-1$
+			String next = tokenizer.getString(";,"); //$NON-NLS-1$
 			if (next == null)
 				throw new BundleException(NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, header, value));
 			ArrayList headerValues = new ArrayList();
@@ -340,7 +340,7 @@ public class ManifestElement {
 			char c = tokenizer.getChar();
 			// Header values may be a list of ';' separated values.  Just append them all into one value until the first '=' or ','
 			while (c == ';') {
-				next = tokenizer.getToken(";,=:"); //$NON-NLS-1$
+				next = tokenizer.getString(";,=:"); //$NON-NLS-1$
 				if (next == null)
 					throw new BundleException(NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, header, value));
 				c = tokenizer.getChar();

@@ -70,14 +70,22 @@ public class Tokenizer {
 		if (cur < max) {
 			if (val[cur] == '\"') /* if a quoted string */
 			{
+				StringBuffer sb = new StringBuffer();
 				cur++; /* skip quote */
 				char c = '\0';
 				int begin = cur;
 				for (; cur < max; cur++) {
 					c = val[cur];
-					if (c == '\"') {
+					// this is an escaped char
+					if (c == '\\') {
+						cur++; // skip the escape char
+						if (cur == max)
+							break;
+						c = val[cur]; // include the escaped char
+					} else if (c == '\"') {
 						break;
 					}
+					sb.append(c);
 				}
 				int count = cur - begin;
 				if (c == '\"') {
@@ -86,52 +94,14 @@ public class Tokenizer {
 				cursor = cur;
 				if (count > 0) {
 					skipWhiteSpace();
-					return (new String(val, begin, count));
+					return sb.toString();
 				}
 			} else /* not a quoted string; same as token */
 			{
-				int begin = cur;
-				for (; cur < max; cur++) {
-					char c = val[cur];
-					if (c == '\"') {
-						// but there could be a quoted string in the middle of the string
-						cur = cur + skipQuotedString(val, cur);
-					} else if ((terminals.indexOf(c) != -1)) {
-						break;
-					}
-				}
-				cursor = cur;
-				int count = cur - begin;
-				if (count > 0) {
-					skipWhiteSpace();
-					while (count > 0 && (val[begin + count - 1] == ' ' || val[begin + count - 1] == '\t'))
-						count--;
-					return (new String(val, begin, count));
-				}
+				return getToken(terminals);
 			}
 		}
 		return (null);
-	}
-
-	private int skipQuotedString(char[] val, int cur) {
-		cur++; /* skip quote */
-		char c = '\0';
-		int begin = cur;
-		for (; cur < max; cur++) {
-			c = val[cur];
-			if (c == '\"') {
-				break;
-			}
-		}
-		int count = cur - begin;
-		if (c == '\"') {
-			cur++;
-		}
-		cursor = cur;
-		if (count > 0) {
-			skipWhiteSpace();
-		}
-		return count;
 	}
 
 	public char getChar() {
