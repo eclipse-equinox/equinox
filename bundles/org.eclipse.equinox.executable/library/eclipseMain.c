@@ -118,6 +118,7 @@ int main( int argc, _TCHAR* argv[] )
 #ifdef _WIN32
     	program = malloc( MAX_PATH_LENGTH + 1 );
     	GetModuleFileName( NULL, program, MAX_PATH_LENGTH );
+    	argv[0] = program;
 #else
     	program = malloc( strlen( argv[0] ) + 1 );
     	strcpy( program, argv[0] );
@@ -322,24 +323,15 @@ static _TCHAR* findLibrary(_TCHAR* program)
 	_tcscat(fragment, dot);
 	_tcscat(fragment, osArg);
 #ifndef MACOSX
-	/* The Mac fragment covers both archs and does have that last segment */
+	/* The Mac fragment covers both archs and does not have that last segment */
 	_tcscat(fragment, dot);
 	_tcscat(fragment, osArchArg);
-#endif
-	/* get the plugins path */
-	length = _tcslen(programDir);
-	if(programDir[length - 1] == dirSeparator){
-		path = _tcsdup(programDir);
-		path[length - 1] = 0;
-	}  else {
-		path = programDir;
-	}
-	
+#endif	
 	length = _tcslen(programDir);
 #ifdef MACOSX
 	length += 9;
 #endif
-	path = malloc( (length + 1 + 7) * sizeof(char));
+	path = malloc( (length + 1 + 7 + 1) * sizeof(_TCHAR));
 	_tcscpy(path, programDir);
 	if(path[length - 1] != dirSeparator) {
 		path[length] = dirSeparator;
