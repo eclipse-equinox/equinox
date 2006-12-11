@@ -46,6 +46,11 @@ public class BundleLoader implements ClassLoaderDelegate {
 	});
 	public final static ClassLoader FW_CLASSLOADER = getClassLoader(Framework.class);
 
+	private static final boolean USE_GLOBAL_DEADLOCK_AVOIDANCE_LOCK = "true".equals(FrameworkProperties.getProperty("osgi.classloader.singleThreadLoads")); //$NON-NLS-1$//$NON-NLS-2$
+	private static final List waitingList = USE_GLOBAL_DEADLOCK_AVOIDANCE_LOCK ? new ArrayList(0) : null;
+	private static Object lockThread;
+	private static int lockCount = 0;
+
 	/* the proxy */
 	final private BundleLoaderProxy proxy;
 	/* Bundle object */
@@ -72,6 +77,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 	/* The is the BundleClassLoader for the bundle */
 	private BundleClassLoader classloader;
 	private ClassLoader parent;
+
 	/**
 	 * Returns the package name from the specified class name.
 	 * The returned package is dot seperated.
@@ -362,26 +368,35 @@ public class BundleLoader implements ClassLoaderDelegate {
 	}
 
 	Class findClass(String name, boolean checkParent) throws ClassNotFoundException {
+		ClassLoader parentCL = getParentClassLoader();
+		if (checkParent && parentCL != null && name.startsWith(JAVA_PACKAGE))
+			// 1) if startsWith "java." delegate to parent and terminate search
+			// we want to throw ClassNotFoundExceptions if a java.* class cannot be loaded from the parent.
+			return parentCL.loadClass(name);
+		try {
+			if (USE_GLOBAL_DEADLOCK_AVOIDANCE_LOCK)
+				lock(createClassLoader());
+			return findClassInternal(name, checkParent, parentCL);
+		} finally {
+			if (USE_GLOBAL_DEADLOCK_AVOIDANCE_LOCK)
+				unlock();
+		}
+	}
+
+	private Class findClassInternal(String name, boolean checkParent, ClassLoader parentCL) throws ClassNotFoundException {
 		if (Debug.DEBUG && Debug.DEBUG_LOADER)
 			Debug.println("BundleLoader[" + this + "].loadBundleClass(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		String pkgName = getPackageName(name);
 		boolean bootDelegation = false;
-		ClassLoader parentCL = getParentClassLoader();
 		// follow the OSGi delegation model
-		if (checkParent && parentCL != null) {
-			if (name.startsWith(JAVA_PACKAGE))
-				// 1) if startsWith "java." delegate to parent and terminate search
-				// we want to throw ClassNotFoundExceptions if a java.* class cannot be loaded from the parent.
+		if (checkParent && parentCL != null && isBootDelegationPackage(pkgName))
+			// 2) if part of the bootdelegation list then delegate to parent and continue of failure
+			try {
 				return parentCL.loadClass(name);
-			else if (isBootDelegationPackage(pkgName))
-				// 2) if part of the bootdelegation list then delegate to parent and continue of failure
-				try {
-					return parentCL.loadClass(name);
-				} catch (ClassNotFoundException cnfe) {
-					// we want to continue
-					bootDelegation = true;
-				}
-		}
+			} catch (ClassNotFoundException cnfe) {
+				// we want to continue
+				bootDelegation = true;
+			}
 
 		Class result = null;
 		// 3) search the imported packages
@@ -985,4 +1000,92 @@ public class BundleLoader implements ClassLoaderDelegate {
 			return super.getClassContext();
 		}
 	}
+
+	/* 
+	 * see bug 121737
+	 * To ensure that we do not enter a deadly embrace between classloader cycles
+	 * we attempt to obtain a global lock before do normal osgi delegation.
+	 * This approach ensures that only one thread has a classloader locked at a time
+	 */
+	private static void lock(Object loader) {
+		Thread currentThread = Thread.currentThread();
+		boolean interrupted = false;
+		synchronized (loader) {
+			if (tryLock(currentThread, loader))
+				return; // this thread has the lock
+
+			do {
+				try {
+					// we wait on the loader object here to release its lock incase we have it.
+					// we do not way to wait while holding this lock because that will cause deadlock
+					loader.wait();
+				} catch (InterruptedException e) {
+					interrupted = true;
+					// we still want to try again
+				}
+			} while (!tryLock(currentThread));
+		}
+		if (interrupted)
+			currentThread.interrupt();
+	}
+
+	/*
+	 * returns true if this thread can obtain the global lock or already has the lock;
+	 * otherwise this loader and thread are added to the waitingList
+	 */
+	private synchronized static boolean tryLock(Thread currentThread, Object loader) {
+		if (lockThread == currentThread) {
+			lockCount++;
+			return true;
+		}
+		if (lockThread == null) {
+			lockCount++;
+			lockThread = currentThread;
+			return true;
+		}
+		waitingList.add(new Object[] {currentThread, loader});
+		return false;
+	}
+
+	/*
+	 * returns true if this thread already has the global lock
+	 */
+	private synchronized static boolean tryLock(Thread currentThread) {
+		if (lockThread == currentThread) {
+			lockCount++;
+			return true;
+		}
+		return false;
+	}
+
+	/*
+	 * unlocks the global lock and notifies the first waiting thread that they
+	 * now have the lock
+	 */
+	private static void unlock() {
+		Thread waitingThread = null;
+		Object loader = null;
+		synchronized (BundleLoader.class) {
+			lockCount--;
+			if (lockCount != 0)
+				return;
+
+			if (waitingList.isEmpty()) {
+				lockThread = null;
+				return;
+			}
+
+			Object[] waiting = (Object[]) waitingList.get(0);
+			waitingThread = (Thread) waiting[0];
+			loader = waiting[1];
+		}
+		synchronized (loader) {
+			synchronized (BundleLoader.class) {
+				lockThread = waitingThread;
+				waitingList.remove(0);
+				loader.notifyAll();
+			}
+		}
+	}
+
 }
