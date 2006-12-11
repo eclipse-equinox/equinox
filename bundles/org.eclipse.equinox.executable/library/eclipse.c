@@ -185,6 +185,8 @@
 
 #ifdef _WIN32
 #include <direct.h>
+#include <io.h>
+#include <fcntl.h>
 #else
 #include <unistd.h>
 #include <strings.h>
@@ -289,21 +291,23 @@ static Option options[] = {
 static int optionsSize = (sizeof(options) / sizeof(options[0]));
 
 /* Define the required VM arguments (all platforms). */
-static _TCHAR* cp = NULL;
+static _TCHAR*  cp = NULL;
 static _TCHAR** reqVMarg[] = { &cp, NULL };		/* required VM args */
 static _TCHAR** userVMarg     = NULL;     		/* user specific args for the Java VM  */
 
 /* Local methods */
-static void   parseArgs( int* argc, _TCHAR* argv[] );
+static void     parseArgs( int* argc, _TCHAR* argv[] );
+static void     freeArgList( _TCHAR** data );
+static void     getVMCommand( int argc, _TCHAR* argv[], _TCHAR **vmArgv[], _TCHAR **progArgv[] );
 static _TCHAR** parseArgList( _TCHAR *data );
-static void   freeArgList( _TCHAR** data );
-static void getVMCommand( int argc, _TCHAR* argv[], _TCHAR **vmArgv[], _TCHAR **progArgv[] );
 static _TCHAR*  formatVmCommandMsg( _TCHAR* args[] );
-       _TCHAR*  getProgramDir();
-static _TCHAR* getDefaultOfficialName();
+static _TCHAR*  getDefaultOfficialName();
 static _TCHAR*  findStartupJar();
-static _TCHAR ** getRelaunchCommand( _TCHAR **vmCommand );
+static _TCHAR** getRelaunchCommand( _TCHAR **vmCommand );
 
+#ifdef _WIN32
+static void     createConsole();
+#endif
 
 /* Record the arguments that were used to start the original executable */
 JNIEXPORT void setInitialArgs(int argc, _TCHAR** argv) {
@@ -354,7 +358,7 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
     if (vmName == NULL)
     {
     	/* Determine which type of VM should be used. */
-    	vmName = ((debug || needConsole) ? consoleVM : defaultVM);
+    	vmName = defaultVM;
 
         /* Try to find the VM shipped with eclipse. */
         shippedVM = malloc( (_tcslen( programDir ) + _tcslen( shippedVMDir ) + _tcslen( vmName ) + 10) * sizeof(_TCHAR) );
@@ -397,6 +401,12 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
         free( errorMsg );
     	exit( 1 );
 	}
+
+#ifdef _WIN32
+	if(debug || needConsole) {
+		createConsole();
+	}
+#endif
 
     /* If the showsplash option was given */
     if (!noSplash && showSplashArg)
@@ -885,3 +895,31 @@ static _TCHAR ** getRelaunchCommand( _TCHAR **vmCommand  )
 	relaunch[idx] = NULL;
 	return relaunch;
 }
+
+#ifdef _WIN32
+static void createConsole() {
+	long stdHandle;
+	int conHandle;
+	FILE *fp;
+	
+	AllocConsole();
+	
+	/* redirect stdout */
+	stdHandle = (long)GetStdHandle(STD_OUTPUT_HANDLE);
+	conHandle = _open_osfhandle(stdHandle, _O_TEXT);
+	fp = _fdopen(conHandle, "w");
+	*stdout = *fp;
+	
+	/* redirect stdin */
+	stdHandle = (long)GetStdHandle(STD_INPUT_HANDLE);
+	conHandle = _open_osfhandle(stdHandle, _O_TEXT);
+	fp = _fdopen(conHandle, "r");
+	*stdin = *fp;
+	
+	/* stderr */
+	stdHandle = (long)GetStdHandle(STD_ERROR_HANDLE);
+	conHandle = _open_osfhandle(stdHandle, _O_TEXT);
+	fp = _fdopen(conHandle, "r");
+	*stderr = *fp;	
+}
+#endif

@@ -238,7 +238,6 @@ int startJavaVM( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[] )
 		}
 		/*(*jvm)->DestroyJavaVM(jvm);*/ 
 	}
-	unloadLibrary(jniLibrary);
 	free(progArgs);
 
 	/* toNarrow allocated new strings, free them */
@@ -246,6 +245,8 @@ int startJavaVM( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[] )
 		free( options[i].optionString );
 	}
 	free(options);
+	
+	unloadLibrary(jniLibrary);
 	return jvmExitCode;
 }
 

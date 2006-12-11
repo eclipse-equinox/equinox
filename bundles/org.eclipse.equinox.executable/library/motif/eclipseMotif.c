@@ -41,7 +41,6 @@
 #include <stdlib.h>
 
 /* Global Variables */
-char*  consoleVM     = "java";
 char*  defaultVM     = "java";
 char*  shippedVMDir  = "jre/bin/";
 

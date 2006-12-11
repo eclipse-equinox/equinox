@@ -34,11 +34,9 @@
 char   dirSeparator  = '/';
 char   pathSeparator = ':';
 #ifndef J9VM
-char*  consoleVM     = "java";
 char*  defaultVM     = "java";
 char*  shippedVMDir  = "jre/bin/";
 #else
-char*  consoleVM     = "j9";
 char*  defaultVM     = "j9";
 char*  shippedVMDir  = "ive/bin/";
 #endif

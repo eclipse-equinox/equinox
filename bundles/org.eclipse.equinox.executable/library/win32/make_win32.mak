@@ -47,7 +47,7 @@ acflags = -I.. -DDEFAULT_OS="\"$(DEFAULT_OS)\"" \
 	/I$(JAVA_HOME)\include /I$(JAVA_HOME)\include\win32 \
 	$(cflags)
 wcflags = -DUNICODE $(acflags)
-cvars = /Zi #/O1	
+cvars = -MD -D_MT -D_DLL -DWIN32 -D_WIN32
 all: $(EXEC) $(DLL)
 
 eclipseMain.obj: ../eclipseUnicode.h ../eclipseCommon.h ../eclipseMain.c 

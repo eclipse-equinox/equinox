@@ -18,7 +18,6 @@
 #ifdef UNICODE
 #define shippedVMDir shippedVMDirW
 #define defaultVM defaultVMW
-#define consoleVM consoleVMW
 #define initWindowSystem initWindowSystemW
 #define showSplash showSplashW
 #define getArgVM getArgVMW
@@ -37,7 +36,6 @@
 /*** See eclipse.c for information on the launcher runtime architecture ***/
 
 /* Global Variables */
-extern _TCHAR*  consoleVM;   			/* name of VM to use for debugging */
 extern _TCHAR*  defaultVM;   			/* name of VM to use normally      */
 extern _TCHAR*  shippedVMDir;			/* VM bin directory with separator */
 extern _TCHAR*  exitData;		  		/* exit data set from Java */

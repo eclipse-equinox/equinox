@@ -36,7 +36,6 @@
 #include <gdk-pixbuf/gdk-pixbuf.h>
 
 /* Global Variables */
-char*  consoleVM     = "java";
 char*  defaultVM     = "java";
 char*  vmLibrary 	 = "libjvm.so";
 char*  shippedVMDir  = "jre/bin/";
