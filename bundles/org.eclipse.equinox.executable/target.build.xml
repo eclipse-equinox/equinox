@@ -39,7 +39,6 @@
 		<mkdir dir="${feature.base}/win32.win32.x86/${collectingFolder}"/>
 		<copy todir="${feature.base}/win32.win32.x86/${collectingFolder}" failonerror="true" overwrite="true">
 			<fileset dir="${basedir}/bin/win32/win32/x86" includes="**"			/>
-			<fileset dir="${basedir}/bin" includes="startup.jar"			/>
 		</copy>
 		<chmod perm="755" dir="${feature.base}/win32.win32.x86/${collectingFolder}" includes="${launcherName}" /> 
 	</target>
@@ -47,7 +46,6 @@
 		<mkdir dir="${feature.base}/macosx.carbon.ppc/${collectingFolder}"/>
 		<copy todir="${feature.base}/macosx.carbon.ppc/${collectingFolder}" failonerror="true" overwrite="true">
 			<fileset dir="${basedir}/bin/carbon/macosx/ppc" includes="**"			/>
-			<fileset dir="${basedir}/bin" includes="startup.jar"			/>
 		</copy>
 		<chmod perm="755" dir="${feature.base}/macosx.carbon.ppc/${collectingFolder}" includes="${launcherName}" /> 
 		<chmod perm="755" dir="${feature.base}/macosx.carbon.ppc/${collectingFolder}" includes="${launcherName}.app/Contents/MacOS/${launcherName}" /> 
@@ -57,7 +55,6 @@
 		<mkdir dir="${feature.base}/macosx.carbon.x86/${collectingFolder}"/>
 		<copy todir="${feature.base}/macosx.carbon.x86/${collectingFolder}" failonerror="true" overwrite="true">
 			<fileset dir="${basedir}/bin/carbon/macosx/x86" includes="**"			/>
-			<fileset dir="${basedir}/bin" includes="startup.jar"			/>
 		</copy>
 		<chmod perm="755" dir="${feature.base}/macosx.carbon.x86/${collectingFolder}" includes="${launcherName}" /> 
 		<chmod perm="755" dir="${feature.base}/macosx.carbon.x86/${collectingFolder}" includes="${launcherName}.app/Contents/MacOS/${launcherName}" /> 
@@ -68,7 +65,6 @@
 		<copy todir="${feature.base}/linux.gtk.x86/${collectingFolder}" failonerror="true" overwrite="true">
 			<fileset dir="${basedir}/bin/gtk/linux/x86" includes="**"			/>
 			<fileset dir="${basedir}/gtk_root" includes="**"			/>
-			<fileset dir="${basedir}/bin" includes="startup.jar"			/>
 		</copy>
 		<chmod perm="755" dir="${feature.base}/linux.gtk.x86/${collectingFolder}" includes="${launcherName}" /> 
 		<chmod perm="755" dir="${feature.base}/linux.gtk.x86/${collectingFolder}" includes="libcairo-swt.so" /> 
@@ -76,14 +72,12 @@
 	<target name="rootFileslinux_gtk_ppc">
 		<mkdir dir="${feature.base}/linux.gtk.ppc/${collectingFolder}"/>
 		<copy todir="${feature.base}/linux.gtk.ppc/${collectingFolder}" failonerror="true" overwrite="true">
-			<fileset dir="${basedir}/bin" includes="startup.jar"			/>
 		</copy>
 		<chmod perm="755" dir="${feature.base}/linux.gtk.ppc/${collectingFolder}" includes="${launcherName}" /> 
 	</target>
 	<target name="rootFileslinux_gtk_ppc64">
 		<mkdir dir="${feature.base}/linux.gtk.ppc64/${collectingFolder}"/>
 		<copy todir="${feature.base}/linux.gtk.ppc64/${collectingFolder}" failonerror="true" overwrite="true">
-			<fileset dir="${basedir}/bin" includes="startup.jar"			/>
 		</copy>
 		<chmod perm="755" dir="${feature.base}/linux.gtk.ppc64/${collectingFolder}" includes="${launcherName}" /> 
 	</target>
@@ -92,7 +86,6 @@
 		<copy todir="${feature.base}/linux.gtk.x86_64/${collectingFolder}" failonerror="true" overwrite="true">
 			<fileset dir="${basedir}/bin/gtk/linux/x86_64" includes="**"			/>
 			<fileset dir="${basedir}/gtk_root" includes="**"			/>
-			<fileset dir="${basedir}/bin" includes="startup.jar"			/>
 		</copy>
 		<chmod perm="755" dir="${feature.base}/linux.gtk.x86_64/${collectingFolder}" includes="${launcherName}" /> 
 		<chmod perm="755" dir="${feature.base}/linux.gtk.x86_64/${collectingFolder}" includes="libcairo-swt.so" /> 
@@ -100,7 +93,6 @@
 	<target name="rootFileslinux_gtk_ia64">
 		<mkdir dir="${feature.base}/linux.gtk.ia64/${collectingFolder}"/>
 		<copy todir="${feature.base}/linux.gtk.ia64/${collectingFolder}" failonerror="true" overwrite="true">
-			<fileset dir="${basedir}/bin" includes="startup.jar"			/>
 		</copy>
 		<chmod perm="755" dir="${feature.base}/linux.gtk.ia64/${collectingFolder}" includes="${launcherName}" /> 
 	</target>
@@ -109,7 +101,6 @@
 		<copy todir="${feature.base}/linux.motif.x86/${collectingFolder}" failonerror="true" overwrite="true">
 			<fileset dir="${basedir}/bin/motif/linux/x86" includes="**"			/>
 			<fileset dir="${basedir}/motif_root" includes="**"			/>
-			<fileset dir="${basedir}/bin" includes="startup.jar"			/>
 		</copy>
 		<chmod perm="755" dir="${feature.base}/linux.motif.x86/${collectingFolder}" includes="libXm.so.2,libcairo-swt.so" /> 
 		<chmod perm="755" dir="${feature.base}/linux.motif.x86/${collectingFolder}" includes="${launcherName}" /> 
@@ -118,7 +109,6 @@
 		<mkdir dir="${feature.base}/solaris.gtk.sparc/${collectingFolder}"/>
 		<copy todir="${feature.base}/solaris.gtk.sparc/${collectingFolder}" failonerror="true" overwrite="true">
 			<fileset dir="${basedir}/bin/gtk/solaris/sparc" includes="**"			/>
-			<fileset dir="${basedir}/bin" includes="startup.jar"			/>
 		</copy>
 		<chmod perm="755" dir="${feature.base}/solaris.gtk.sparc/${collectingFolder}" includes="${launcherName}" /> 
 	</target>
@@ -126,7 +116,6 @@
 		<mkdir dir="${feature.base}/aix.motif.ppc/${collectingFolder}"/>
 		<copy todir="${feature.base}/aix.motif.ppc/${collectingFolder}" failonerror="true" overwrite="true">
 			<fileset dir="${basedir}/bin/motif/aix/ppc" includes="**"			/>
-			<fileset dir="${basedir}/bin" includes="startup.jar"			/>
 		</copy>
 		<chmod perm="755" dir="${feature.base}/aix.motif.ppc/${collectingFolder}" includes="${launcherName}" /> 
 	</target>
@@ -134,21 +123,18 @@
 		<mkdir dir="${feature.base}/hpux.motif.PA_RISC/${collectingFolder}"/>
 		<copy todir="${feature.base}/hpux.motif.PA_RISC/${collectingFolder}" failonerror="true" overwrite="true">
 			<fileset dir="${basedir}/bin/motif/hpux/PA_RISC" includes="**"			/>
-			<fileset dir="${basedir}/bin" includes="startup.jar"			/>
 		</copy>
 		<chmod perm="755" dir="${feature.base}/hpux.motif.PA_RISC/${collectingFolder}" includes="${launcherName}" /> 
 	</target>
 	<target name="rootFileshpux_motif_ia64">
 		<mkdir dir="${feature.base}/hpux.motif.ia64/${collectingFolder}"/>
 		<copy todir="${feature.base}/hpux.motif.ia64/${collectingFolder}" failonerror="true" overwrite="true">
-			<fileset dir="${basedir}/bin" includes="startup.jar"			/>
 		</copy>
 		<chmod perm="755" dir="${feature.base}/hpux.motif.ia64/${collectingFolder}" includes="${launcherName}" /> 
 	</target>
 	<target name="rootFileshpux_motif_ia64_32">
 		<mkdir dir="${feature.base}/hpux.motif.ia64_32/${collectingFolder}"/>
 		<copy todir="${feature.base}/hpux.motif.ia64_32/${collectingFolder}" failonerror="true" overwrite="true">
-			<fileset dir="${basedir}/bin" includes="startup.jar"			/>
 		</copy>
 		<chmod perm="755" dir="${feature.base}/hpux.motif.ia64_32/${collectingFolder}" includes="${launcherName}" /> 
 	</target>
@@ -156,7 +142,6 @@
 		<mkdir dir="${feature.base}/qnx.photon.x86/${collectingFolder}"/>
 		<copy todir="${feature.base}/qnx.photon.x86/${collectingFolder}" failonerror="true" overwrite="true">
 			<fileset dir="${basedir}/bin/photon/qnx/x86" includes="**"			/>
-			<fileset dir="${basedir}/bin" includes="startup.jar"			/>
 		</copy>
 		<chmod perm="755" dir="${feature.base}/qnx.photon.x86/${collectingFolder}" includes="${launcherName}" /> 
 	</target>
