@@ -263,6 +263,7 @@ public class Main {
     private String getWS() {
     	if(ws != null)
     		return ws;
+    	String os = getOS();
 		if (os.equals(Constants.OS_WIN32))
 			return Constants.WS_WIN32;
 		if (os.equals(Constants.OS_LINUX))
