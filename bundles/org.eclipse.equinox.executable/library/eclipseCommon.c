@@ -18,7 +18,7 @@
 #include <windows.h>
 #else
 #include <unistd.h>
-#include <strings.h>
+#include <string.h>
 #include <dirent.h>
 #endif
 #include <stdlib.h>
@@ -194,10 +194,10 @@ char * resolveSymlinks( char * path ) {
 	if(path == NULL)
 		return path;
 	/* resolve symlinks */
-	char * ch = cmdPath;
-    cmdPath = canonicalize_file_name(cmdPath);
+	char * ch = path;
+    path = canonicalize_file_name(path);
     free(ch);
-    return cmdPath;
+    return path;
 }
 #endif
 

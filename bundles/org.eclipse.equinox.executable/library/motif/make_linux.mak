@@ -30,10 +30,10 @@ endif
 PROGRAM_LIBRARY=eclipse_$(LIB_VERSION).so
 
 # Define the object modules to be compiled and flags.
+CC=gcc
 MAIN_OBJS = eclipseMain.o
 COMMON_OBJS = eclipseConfig.o eclipseCommon.o eclipseMotifCommon.o
 DLL_OBJS	= eclipse.o eclipseMotif.o eclipseUtil.o eclipseJNI.o eclipseMozilla.o NgCommon.o NgImage.o NgImageData.o NgWinBMPFileFormat.o
-
 
 EXEC = $(PROGRAM_OUTPUT)
 DLL = $(PROGRAM_LIBRARY)
