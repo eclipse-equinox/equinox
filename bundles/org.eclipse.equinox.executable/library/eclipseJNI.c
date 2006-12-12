@@ -189,8 +189,8 @@ int startJavaVM( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[] )
 	if(jniLibrary == NULL) {
 		return -1; /*error*/
 	}
-	
-	createJavaVM = findSymbol(jniLibrary, _T_ECLIPSE("JNI_CreateJavaVM"));
+
+	createJavaVM = (JNI_createJavaVM)findSymbol(jniLibrary, _T_ECLIPSE("JNI_CreateJavaVM"));
 	if(createJavaVM == NULL) {
 		return -1; /*error*/
 	}

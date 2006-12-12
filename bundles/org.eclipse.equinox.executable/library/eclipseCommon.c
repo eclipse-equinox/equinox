@@ -20,6 +20,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <dirent.h>
+#include <limits.h>
 #endif
 #include <stdlib.h>
 #include <sys/stat.h>
@@ -195,7 +196,8 @@ char * resolveSymlinks( char * path ) {
 		return path;
 	/* resolve symlinks */
 	char * ch = path;
-    path = canonicalize_file_name(path);
+	char * buffer = malloc(PATH_MAX);
+    path = realpath(path, buffer);
     free(ch);
     return path;
 }
