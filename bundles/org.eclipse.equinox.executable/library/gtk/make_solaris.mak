@@ -23,9 +23,9 @@ include ../make_version.mak
 # DEFAULT_WS      - the default value of the "-ws" switch
 # JAVA_JNI        - the directory containing the Java JNI headers
 
-ifeq ($(PROGRAM_OUTPUT),)
+#ifeq ($(PROGRAM_OUTPUT),)
   PROGRAM_OUTPUT=eclipse
-endif
+#endif
 
 PROGRAM_LIBRARY=$(PROGRAM_OUTPUT)_$(LIB_VERSION).so
 
@@ -36,8 +36,8 @@ DLL_OBJS	= eclipse.o eclipseGtk.o eclipseUtil.o eclipseJNI.o
 
 EXEC = $(PROGRAM_OUTPUT)
 DLL = $(PROGRAM_LIBRARY)
-LIBS = `pkg-config --libs-only-L gtk+-2.0` -lgtk-x11-2.0 -lgdk_pixbuf-2.0 -lgobject-2.0 -lgdk-x11-2.0 -lglib-2.0 -lpthread
-LFLAGS = -shared -Wl--export-dynamic
+LIBS = `pkg-config --libs-only-L gtk+-2.0` -lgtk-x11-2.0 -lgdk_pixbuf-2.0 -lgobject-2.0 -lgdk-x11-2.0 -lglib-2.0 -lthread -ldl -lc
+LFLAGS = -shared 
 CFLAGS = -O -s \
 	-DSOLARIS \
 	-K PIC \
@@ -46,10 +46,10 @@ CFLAGS = -O -s \
 	-DDEFAULT_WS="\"$(DEFAULT_WS)\"" \
 	-I. \
 	-I.. \
-	-I$(JAVA_JNI) \
+	-I$(JAVA_JNI) -I$(JAVA_JNI)/solaris \
 	`pkg-config --cflags gtk+-2.0`
 
-all: $(EXEC)
+all: $(EXEC) $(DLL)
 
 eclipse.o: ../eclipse.c ../eclipseOS.h ../eclipseCommon.h ../eclipseJNI.h
 	$(CC) $(CFLAGS) -c ../eclipse.c -o eclipse.o
@@ -76,7 +76,7 @@ $(EXEC): $(MAIN_OBJS) $(COMMON_OBJS)
 	$(CC) -o $(EXEC) $(MAIN_OBJS) $(COMMON_OBJS) $(LIBS)
 
 $(DLL): $(DLL_OBJS) $(COMMON_OBJS)
-	$(CC) $(LFLAGS) -o $(DLL) $(DLL_OBJS) $(COMMON_OBJS) $(LIBS)
+	cc -G -o $(DLL) $(DLL_OBJS) $(COMMON_OBJS) $(LIBS)
 
 install: all
 	cp $(EXEC) $(DLL) $(OUTPUT_DIR)

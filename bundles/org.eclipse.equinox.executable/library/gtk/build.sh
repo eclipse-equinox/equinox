@@ -37,7 +37,7 @@ if [ "$MODEL" = "" ];  then
     MODEL=`uname -m`
 fi
 if [ "${CC}" = "" ]; then
-	CC=gcc
+	CC=cc
 	export CC
 fi
 
@@ -75,7 +75,7 @@ case $OS in
 		makefile="make_solaris.mak"
 		defaultOS="solaris"
 		OUTPUT_DIR="../../bin/$defaultWS/$defaultOS/$defaultOSArch"
-		PATH=/usr/ccs/bin:/usr/local/bin:$PATH
+		PATH=/usr/ccs/bin:/opt/SUNWspro/bin:$PATH
 		export PATH
 		if [ "$PROC" = "" ];  then
 		    PROC=`uname -p`
@@ -123,8 +123,9 @@ PROGRAM_OUTPUT="$programOutput"
 DEFAULT_OS="$defaultOS"
 DEFAULT_OS_ARCH="$defaultOSArch"
 DEFAULT_WS="$defaultWS"
+JAVA_JNI=/usr/jdk/instances/jdk1.5.0/include
 
-export OUTPUT_DIR PROGRAM_OUTPUT DEFAULT_OS DEFAULT_OS_ARCH DEFAULT_WS
+export OUTPUT_DIR PROGRAM_OUTPUT DEFAULT_OS DEFAULT_OS_ARCH DEFAULT_WS JAVA_JNI
 
 # If the OS is supported (a makefile exists)
 if [ "$makefile" != "" ]; then
@@ -136,5 +137,5 @@ if [ "$makefile" != "" ]; then
 		make -f $makefile all
 	fi
 else
-	echo "Unknown OS ($OS) -- build aborted"
+	echo "Unknown OS $OS -- build aborted"
 fi
