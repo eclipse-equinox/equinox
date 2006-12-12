@@ -78,6 +78,7 @@ public class Main {
 
     private String name = null; // The name to brand the launcher
     private String launcher = null; // The full path to the launcher
+    private String library = null;
 
     private String vm = null;
     private String[] vmargs = null;
@@ -116,6 +117,7 @@ public class Main {
     private static final String SHOWSPLASH = "-showsplash"; //$NON-NLS-1$
     private static final String NAME = "-name"; //$NON-NLS-1$
     private static final String LAUNCHER = "-launcher"; //$NON-NLS-1$
+    private static final String LIBRARY = "-library"; //$NON-NLS-1$
 	private static final String NL = "-nl";  //$NON-NLS-1$
     private static final String ENDSPLASH = "-endsplash"; //$NON-NLS-1$
     private static final String SPLASH_IMAGE = "splash.bmp"; //$NON-NLS-1$
@@ -261,9 +263,9 @@ public class Main {
     }   
 
     private String getWS() {
-    	if(ws != null)
-    		return ws;
-    	String os = getOS();
+		if (ws != null)
+			return ws;
+		String os = getOS();
 		if (os.equals(Constants.OS_WIN32))
 			return Constants.WS_WIN32;
 		if (os.equals(Constants.OS_LINUX))
@@ -279,12 +281,12 @@ public class Main {
 		if (os.equals(Constants.OS_QNX))
 			return Constants.WS_PHOTON;
 		return Constants.WS_UNKNOWN;
-    }
+	}
     private String getOS() {
-    	if(os != null)
-    		return os;
-    	String osName = System.getProperties().getProperty("os.name");
-    	if (osName.regionMatches(true, 0, Constants.OS_WIN32, 0, 3))
+		if (os != null)
+			return os;
+		String osName = System.getProperties().getProperty("os.name");
+		if (osName.regionMatches(true, 0, Constants.OS_WIN32, 0, 3))
 			return Constants.OS_WIN32;
 		// EXCEPTION: All mappings of SunOS convert to Solaris
 		if (osName.equalsIgnoreCase(Constants.INTERNAL_OS_SUNOS))
@@ -301,7 +303,7 @@ public class Main {
 		if (osName.regionMatches(true, 0, Constants.INTERNAL_OS_MACOSX, 0, Constants.INTERNAL_OS_MACOSX.length()))
 			return Constants.OS_MACOSX;
 		return Constants.OS_UNKNOWN;
-    }
+	}
     private String getArch() {
 		if (arch != null)
 			return arch;
@@ -319,25 +321,59 @@ public class Main {
     /**
 	 *  Sets up the JNI bridge to native calls
 	 */
-	private void setupJNI() {
-		URL install = getInstallLocation();
-		String location = install.getFile();
-		location += "/plugins/";
-
-		//find our fragment
-		String fragmentOS = getOS();
-		StringBuffer buffer = new StringBuffer(PLUGIN_ID);
-		buffer.append('.');
-		buffer.append(getWS());
-		buffer.append('.');
-		buffer.append(fragmentOS);
-		if(!fragmentOS.equals("macosx")){ //$NON-NLS-1$
+	private void setupJNI(URL[] defaultPath) {
+		String libPath = null;
+		
+		if (library != null) {
+			File lib = new File(library);
+			if(lib.isDirectory()) {
+				libPath = searchFor("eclipse", lib.getAbsolutePath());
+			} else if(lib.exists()){
+				libPath = lib.getAbsolutePath();
+			}
+		} 
+		if(libPath == null) {
+			//find our fragment name
+			String fragmentOS = getOS();
+			StringBuffer buffer = new StringBuffer(PLUGIN_ID);
 			buffer.append('.');
-			buffer.append(getArch());
+			buffer.append(getWS());
+			buffer.append('.');
+			buffer.append(fragmentOS);
+			if(!fragmentOS.equals("macosx")){ //$NON-NLS-1$
+				buffer.append('.');
+				buffer.append(getArch());
+			}
+			String fragmentName = buffer.toString();
+			String fragment = null;
+			if(bootLocation != null) {
+				try {
+					URL [] urls = getBootPath(bootLocation);
+					if(urls != null && urls.length > 0) {
+						//the last one is most interesting
+						File entryFile = new File(urls[urls.length - 1].getFile());
+						String dir = entryFile.getParent();
+						if( inDevelopmentMode ) {
+							String devDir = dir + "/" + PLUGIN_ID + "/fragments";
+							fragment = searchFor(fragmentName, devDir);
+						}
+						if(fragment == null)
+							fragment = searchFor(fragmentName, dir);
+					}
+				} catch (IOException e) {
+					// ignore
+				}
+			}
+			if(fragment == null) {
+				URL install = getInstallLocation();
+				String location = install.getFile();
+				location += "/plugins/";
+				fragment = searchFor(fragmentName, location);
+			}
+			if(fragment != null)
+				libPath = searchFor("eclipse", fragment);
 		}
-
-		String fragment = searchFor(buffer.toString(), location);
-		String library = searchFor("eclipse", fragment);
+		library = libPath;
 		bridge = new JNIBridge(library);
 	}
     
@@ -367,11 +403,12 @@ public class Main {
         // the install location.  
         getInstallLocation();
 
-        //Set up the JNI bridge.  We need to know the install location to find the shared library
-        setupJNI();
-        
         // locate boot plugin (may return -dev mode variations)
         URL[] bootPath = getBootPath(bootLocation);
+        
+        //Set up the JNI bridge.  We need to know the install location to find the shared library
+        setupJNI(bootPath);
+        
         setSecurityPolicy(bootPath);
         // splash handling is done here, because the default case needs to know
         // the location of the boot plugin we are going to use
@@ -1269,6 +1306,11 @@ public class Main {
             if (args[i - 1].equalsIgnoreCase(LAUNCHER)) {
                 launcher = arg;
                 found = true;
+            }
+            
+            if (args[i - 1].equalsIgnoreCase(LIBRARY)) {
+            	library = arg;
+            	found = true;
             }
             
             // look for the command to use to end the splash screen
