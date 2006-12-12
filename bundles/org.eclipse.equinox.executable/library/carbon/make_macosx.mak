@@ -32,8 +32,8 @@ DLL_OBJS	= eclipse.o eclipseCarbon.o eclipseUtil.o eclipseJNI.o
 EXEC = $(PROGRAM_OUTPUT)
 DLL = $(PROGRAM_LIBRARY)
 LIBS = -framework Carbon
-ARCHS = #-arch i386 -arch ppc
-CFLAGS = -g -s \
+ARCHS = -arch i386 -arch ppc
+CFLAGS = -O -s \
 	-Wall \
 	$(ARCHS) \
 	-DMACOSX \
