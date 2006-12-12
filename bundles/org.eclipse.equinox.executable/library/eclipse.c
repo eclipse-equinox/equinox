@@ -250,6 +250,7 @@ companion startup.jar file (in the same directory as the executable).");
 #define LAUNCHER     _T_ECLIPSE("-launcher")
 #define SHOWSPLASH   _T_ECLIPSE("-showsplash")
 #define STARTUP      _T_ECLIPSE("-startup")
+#define LIBRARY		 _T_ECLIPSE("-library")
 #define VM           _T_ECLIPSE("-vm")
 #define WS           _T_ECLIPSE("-ws")
 #define NAME         _T_ECLIPSE("-name")
@@ -266,7 +267,8 @@ static int     noSplash      = 0;				/* True: do not show splash win	*/
 static _TCHAR*  showSplashArg = NULL;			/* showsplash data (main launcher window) */
 static _TCHAR * startupArg    = NULL;			/* path of the startup.jar the user wants to run relative to the program path */
 static _TCHAR*  vmName        = NULL;     		/* Java VM that the user wants to run */
-static _TCHAR*  name          = NULL;			/* program name */		
+static _TCHAR*  name          = NULL;			/* program name */	
+static _TCHAR*  library       = NULL;			/* the shared library */
 
 /* Define a table for processing command line options. */
 typedef struct
@@ -281,6 +283,7 @@ static Option options[] = {
     { CONSOLELOG,	NULL,			&needConsole,	0 },
     { DEBUG,		NULL,			&debug,			0 },
     { NOSPLASH,     NULL,           &noSplash,		1 },
+    { LIBRARY,		NULL,			NULL,			2 }, /* library was parsed by exe, just remove it */
     { OS,			&osArg,			NULL,			2 },
     { OSARCH,		&osArchArg,		NULL,			2 },
     { SHOWSPLASH,   &showSplashArg,	NULL,			2 },
@@ -310,9 +313,10 @@ static void     createConsole();
 #endif
 
 /* Record the arguments that were used to start the original executable */
-JNIEXPORT void setInitialArgs(int argc, _TCHAR** argv) {
+JNIEXPORT void setInitialArgs(int argc, _TCHAR** argv, _TCHAR* lib) {
 	initialArgc = argc;
 	initialArgv = argv;
+	library = lib;
 }
 
 /* this method must match the RunMethod typedef in eclipseMain.c */
@@ -517,8 +521,10 @@ static void parseArgs( int* pArgc, _TCHAR* argv[] )
         option = NULL;
         for (i = 0; option == NULL && i < optionsSize; i++)
         {
-        	if (_tcsicmp( argv[ index ], options[ i ].name ) == 0)
+        	if (_tcsicmp( argv[ index ], options[ i ].name ) == 0) {
         	    option = &options[ i ];
+        	    break;
+        	}
        	}
 
        	/* If the option is recognized by the launcher */
@@ -639,10 +645,10 @@ static void getVMCommand( int argc, _TCHAR* argv[], _TCHAR **vmArgv[], _TCHAR **
 	
 	/* Program arguments */
     /*  OS <os> + WS <ws> + ARCH <arch> + LAUNCHER <launcher> + NAME <officialName> +
-     *  + SHOWSPLASH <cmd> + argv[] + VM + <vm> + VMARGS + vmArg + requiredVMargs
+     *  + LIBRARY <library> + SHOWSPLASH <cmd> + argv[] + VM + <vm> + VMARGS + vmArg + requiredVMargs
      *  + NULL)
      */
-    totalProgArgs  = 2 + 2 + 2 + 2 + 2 + 2 + argc + 2 + 1 + nVMarg + nReqVMarg + 1;
+    totalProgArgs  = 2 + 2 + 2 + 2 + 2 + 2 + 2 + argc + 2 + 1 + nVMarg + nReqVMarg + 1;
 	*progArgv = malloc( totalProgArgs * sizeof( _TCHAR* ) );
     dst = 0;
     
@@ -663,6 +669,12 @@ static void getVMCommand( int argc, _TCHAR* argv[], _TCHAR **vmArgv[], _TCHAR **
 	/* Append the name command */
 	(*progArgv)[ dst++ ] = NAME;
 	(*progArgv)[ dst++ ] = 	officialName;
+	
+	/* And the shared library */
+	if (library != NULL) {
+		(*progArgv)[ dst++ ] = LIBRARY;
+		(*progArgv)[ dst++ ] = library;
+	}
 	
 	/* Append the show splash window command, if defined. */
     if (!noSplash)

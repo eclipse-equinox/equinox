@@ -24,13 +24,17 @@ static _TCHAR* libraryMsg =
 _T_ECLIPSE("The %s executable launcher was unable to locate its \n\
 companion shared library.");
 
+static _TCHAR* entryMsg =
+_T_ECLIPSE("There was a problem loading the shared library and \n\
+finding the entry point.");
+
 #define NAME         _T_ECLIPSE("-name")
 #define LIBRARY		 _T_ECLIPSE("-library")
 #define VMARGS       _T_ECLIPSE("-vmargs")		/* special option processing required */
 
 /* this typedef must match the run method in eclipse.c */
 typedef int (*RunMethod)(int argc, _TCHAR* argv[], _TCHAR* vmArgs[]);
-typedef void (*SetInitialArgs)(int argc, _TCHAR*argv[]);
+typedef void (*SetInitialArgs)(int argc, _TCHAR*argv[], _TCHAR* library);
 
 static _TCHAR*  name          = NULL;			/* program name */
 static _TCHAR** userVMarg     = NULL;     		/* user specific args for the Java VM  */
@@ -40,7 +44,7 @@ static _TCHAR*  library		  = NULL;			/* pathname of the eclipse shared library *
 static int 	 	createUserArgs(int configArgc, _TCHAR **configArgv, int *argc, _TCHAR ***argv);
 static void  	parseArgs( int* argc, _TCHAR* argv[] );
 static _TCHAR* 	getDefaultOfficialName(_TCHAR* program);
-static _TCHAR*  findLibrary(_TCHAR* program);
+static _TCHAR*  findLibrary(_TCHAR* library, _TCHAR* program);
  
 static int initialArgc;
 static _TCHAR** initialArgv;
@@ -150,9 +154,8 @@ int main( int argc, _TCHAR* argv[] )
     programDir = getProgramDir(program);
 
 	/* Find the eclipse library */
-	if(library == NULL) {
-		library = findLibrary(program);
-	}
+	library = findLibrary(library, program);
+		
 	if(library != NULL)
 		handle = loadLibrary(library);
 	if(handle == NULL) {
@@ -165,10 +168,19 @@ int main( int argc, _TCHAR* argv[] )
 
 	setArgs = findSymbol(handle, SET_INITIAL_ARGS);
 	if(setArgs != NULL)
-		setArgs(initialArgc, initialArgv);
+		setArgs(initialArgc, initialArgv, library);
+	else {
+		displayMessage(officialName, entryMsg);
+		exit(1);
+	}
 	
 	runMethod = findSymbol(handle, RUN_METHOD);
-	exitCode = runMethod(argc, argv, userVMarg);
+	if(runMethod != NULL)
+		exitCode = runMethod(argc, argv, userVMarg);
+	else { 
+		displayMessage(officialName, entryMsg);
+		exit(1);
+	}
 	unloadLibrary(handle);
 	
 	free( library );
@@ -304,7 +316,7 @@ static _TCHAR* getDefaultOfficialName(_TCHAR* program)
 	return ch;
 }
 
-static _TCHAR* findLibrary(_TCHAR* program) 
+static _TCHAR* findLibrary(_TCHAR* library, _TCHAR* program) 
 {
 	_TCHAR* c;
 	_TCHAR* path;
@@ -313,6 +325,18 @@ static _TCHAR* findLibrary(_TCHAR* program)
 	_TCHAR* dot = _T_ECLIPSE(".");
 	int length;
 	int fragmentLength;
+	struct _stat stats;
+	
+	if (library != NULL) {
+		if (_tstat(library, &stats) == 0 && (stats.st_mode & S_IFDIR) != 0)
+        {
+            /* directory */
+            return findFile(library, _T_ECLIPSE("eclipse"));
+        } else {
+        	/* file, return it */
+        	return library;
+        }
+	}
 	
 	/* build the equinox.launcher fragment name */
 	fragmentLength = _tcslen(DEFAULT_EQUINOX_STARTUP) + 1 + _tcslen(wsArg) + 1 + _tcslen(osArg) + 1 + _tcslen(osArchArg) + 1;
