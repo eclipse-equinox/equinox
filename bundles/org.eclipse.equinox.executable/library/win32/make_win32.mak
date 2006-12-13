@@ -35,8 +35,8 @@ DLL_OBJS	= eclipse.obj  eclipseWin.obj  eclipseUtil.obj  eclipseJNI.obj\
 
 LIBS   = kernel32.lib user32.lib comctl32.lib
 DLL_LIBS = kernel32.lib user32.lib comctl32.lib gdi32.lib Advapi32.lib
-LFLAGS = /INCREMENTAL:NO /DEBUG /NOLOGO -subsystem:windows,4.0 -entry:wmainCRTStartup
-DLL_LFLAGS = /INCREMENTAL:NO /PDB:NONE /DEBUG /NOLOGO -entry:_DllMainCRTStartup@12 -dll /BASE:0x10000000 /DLL
+LFLAGS = /INCREMENTAL:NO /RELEASE /NOLOGO -subsystem:windows,4.0 -entry:wmainCRTStartup
+DLL_LFLAGS = /INCREMENTAL:NO /PDB:NONE /RELEASE /NOLOGO -entry:_DllMainCRTStartup@12 -dll /BASE:0x10000000 /DLL
 RES    = eclipse.res
 EXEC   = eclipse.exe
 DLL    = $(PROGRAM_LIBRARY)

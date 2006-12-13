@@ -46,7 +46,7 @@ set MSVC_HOME=k:\dev\products\msvc60\vc98
 call %MSVC_HOME%\bin\vcvars32.bat
 if not "%mssdk%" == "" goto MAKE
 set mssdk=K:\dev\PRODUCTS\PLATSDK\feb2003
-call %mssdk%\setenv.bat
+call %mssdk%\setenv.bat /XP32 /RETAIL
 
 :MAKE
 
