@@ -52,6 +52,8 @@ static char*  argVM_J9[]          = { "-jit", "-mca:1024", "-mco:1024", "-mn:256
 #define JAVA_ARCH "ppc"
 #elif defined(SOLARIS)
 #define JAVA_ARCH "sparc"
+#elif defined(__amd64__) || defined(__x86_64__) || defined(__powerpc64__)
+#define JAVA_ARCH "amd64"
 #endif
 
 #define MAX_LOCATION_LENGTH 30 /* none of the jvmLocations strings should be longer than this */ 
