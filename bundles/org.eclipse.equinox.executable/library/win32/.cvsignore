@@ -1,3 +1,6 @@
 *.obj
 eclipse.exe
 eclipse.res
+*.pdb
+*.exp
+*.lib
