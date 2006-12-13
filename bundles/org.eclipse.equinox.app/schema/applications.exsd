@@ -61,7 +61,7 @@ run multiple applications.
          <attribute name="visible" type="boolean" use="default" value="true">
             <annotation>
                <documentation>
-                  Specifies whether the application should be visible for the user.  For example, some applications may provide features to other applications but nothing directly to the user. In this case the application shouldnot be revealed to the user to start it individually. The default value is set to true.
+                  Specifies whether the application should be visible for the user.  For example, some applications may provide features to other applications but nothing directly to the user. In this case the application should not be revealed to the user to start it individually. The default value is set to true.
                </documentation>
             </annotation>
          </attribute>
@@ -76,7 +76,7 @@ run multiple applications.
 &lt;dt&gt;singleton-scoped&lt;/dt&gt;
 &lt;dd&gt;This application must be the only scoped application running.  No other applications that use the singleton-scoped cardinality can start while this application is active&lt;/dd&gt;
 &lt;dt&gt;integer&lt;/dt&gt;
-&lt;dd&gt;An integer indicates the maximum number of active instances allowed for this application.  Other applications are allowed to start while this application is active, except for singleton-global applicaitons&lt;/dd&gt;
+&lt;dd&gt;An integer indicates the maximum number of active instances allowed for this application.  Other applications are allowed to start while this application is active, except for singleton-global applications&lt;/dd&gt;
 &lt;dt&gt;*&lt;/dt&gt;
 &lt;dd&gt;A value of &quot;*&quot; indicates there is no maximum on the number of active instances allowed for this application.  Other applications are allowed to start while this application is active, except for singleton-global applications&lt;/dd&gt;
 &lt;/dl&gt;
