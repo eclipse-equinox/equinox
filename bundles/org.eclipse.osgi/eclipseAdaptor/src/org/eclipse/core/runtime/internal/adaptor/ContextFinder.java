@@ -109,11 +109,6 @@ public class ContextFinder extends ClassLoader implements PrivilegedAction {
 			throw new ClassNotFoundException(arg0);
 
 		try {
-			try {
-				return super.loadClass(arg0, arg1);
-			} catch (ClassNotFoundException e) {
-				// Ignore; find a bundle classloader to use.
-			}
 			ArrayList toConsult = findClassLoaders();
 			for (Iterator loaders = toConsult.iterator(); loaders.hasNext();)
 				try {
@@ -121,13 +116,13 @@ public class ContextFinder extends ClassLoader implements PrivilegedAction {
 				} catch (ClassNotFoundException e) {
 					// go to the next class loader
 				}
-			throw new ClassNotFoundException(arg0);
+			return super.loadClass(arg0, arg1);
 		} finally {
 			stopLoading(arg0);
 		}
 	}
 
-	protected URL findResource(String arg0) {
+	public URL getResource(String arg0) {
 		//Shortcut cycle
 		if (startLoading(arg0) == false)
 			return null;
@@ -139,7 +134,7 @@ public class ContextFinder extends ClassLoader implements PrivilegedAction {
 					return result;
 				// go to the next class loader
 			}
-			return super.findResource(arg0);
+			return super.getResource(arg0);
 		} finally {
 			stopLoading(arg0);
 		}
