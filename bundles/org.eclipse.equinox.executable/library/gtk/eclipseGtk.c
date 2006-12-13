@@ -54,11 +54,13 @@ static char*  argVM_J9[]          = { "-jit", "-mca:1024", "-mco:1024", "-mn:256
 #define JAVA_ARCH "sparc"
 #endif
 
-#define MAX_LOCATION_LENGTH 20 /* none of the jvmLocations strings should be longer than this */ 
+#define MAX_LOCATION_LENGTH 30 /* none of the jvmLocations strings should be longer than this */ 
 static const char* jvmLocations [] = { "j9vm",
 									   "classic",
 									   "../lib/" JAVA_ARCH "/client",  
 									   "../lib/" JAVA_ARCH "/server",
+									   "../jre/lib/" JAVA_ARCH "/client",
+									   "../jre/lib/" JAVA_ARCH "/server",
 								 	   NULL };
 
 /* Define local variables . */
