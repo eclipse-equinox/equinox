@@ -254,7 +254,14 @@ public class StateHelperImpl implements StateHelper {
 		// build the reference from the description
 		if (description == reference || reference == null)
 			return;
-
+		BundleDescription[] fragments = reference.getFragments();
+		for (int i = 0; i < fragments.length; i++) {
+			if (fragments[i].isResolved()) {
+				ExportPackageDescription[] exports = fragments[i].getExportPackages();
+				if (exports.length > 0)
+					references.add(new Object[] {description, fragments[i]});
+			}
+		}
 		references.add(new Object[] {description, reference});
 	}
 
