@@ -50,36 +50,36 @@ public interface IApplicationContext {
 	public void applicationRunning();
 
 	/**
-	 * Returns the application associated with this product.  This information is used 
-	 * to guide the runtime as to what application extension to create and execute.
+	 * Returns the application associated with this application context.  This information 
+	 * is used to guide the runtime as to what application extension to create and execute.
 	 * 
 	 * @return this product's application or <code>null</code> if none
 	 */
 	public String getBrandingApplication();
 
 	/**
-	 * Returns the name of this product.  The name is typically used in the title
-	 * bar of UI windows.
+	 * Returns the name of the product associated with this application context.  
+	 * The name is typically used in the title bar of UI windows.
 	 * 
-	 * @return the name of this product or <code>null</code> if none
+	 * @return the name of the product or <code>null</code> if none
 	 */
 	public String getBrandingName();
 
 	/**
-	 * Returns the text description of this product
+	 * Returns the text description of the product associated with this application context.
 	 * 
-	 * @return the description of this product or <code>null</code> if none
+	 * @return the description of the product or <code>null</code> if none
 	 */
 	public String getBrandingDescription();
 
-	/** Returns the unique product id of this product.
+	/** Returns the unique product id of the product associated with this application context.
 	 * 
-	 * @return the id of this product
+	 * @return the id of the product
 	 */
 	public String getBrandingId();
 
 	/**
-	 * Returns the property of this product with the given key.
+	 * Returns the property with the given key of the product associated with this application context.
 	 * <code>null</code> is returned if there is no such key/value pair.
 	 * 
 	 * @param key the name of the property to return
@@ -88,11 +88,12 @@ public interface IApplicationContext {
 	public String getBrandingProperty(String key);
 	
 	/**
-	 * Returns the bundle which is responsible for the definition of this product.
+	 * Returns the bundle which is responsible for the definition of the product associated with 
+	 * this application context.
 	 * Typically this is used as a base for searching for images and other files 
 	 * that are needed in presenting the product.
 	 * 
-	 * @return the bundle which defines this product or <code>null</code> if none
+	 * @return the bundle which defines the product or <code>null</code> if none
 	 */
 	public Bundle getBrandingBundle();
 }
