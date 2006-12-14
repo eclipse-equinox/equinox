@@ -396,7 +396,9 @@ public class ClasspathManager {
 	 * {@link ClassLoadingStatsHook#preFindLocalClass(String, ClasspathManager)} methods.  Then it 
 	 * will search for the class.  If a class is found then all configured class loading hooks
 	 * {@link ClassLoadingHook#processClass(String, byte[], ClasspathEntry, BundleEntry, ClasspathManager)}
-	 * methods will be called.  Finally all the configured class loading stats hooks
+	 * methods will be called.  The class is then defined; if successfully then all configured class loading 
+	 * stats hooks {@link ClassLoadingStatsHook#recordClassDefine(String, Class, byte[], ClasspathEntry, BundleEntry, ClasspathManager)}
+	 * methods are called.  Finally all the configured class loading stats hooks
 	 * {@link ClassLoadingStatsHook#postFindLocalClass(String, Class, ClasspathManager)} methods are called.
 	 * @param classname the requested class name.
 	 * @return the requested class
@@ -466,10 +468,7 @@ public class ClasspathManager {
 		}
 
 		try {
-			Class result = defineClass(name, classbytes, classpathEntry, entry);
-			for (int i = 0; i < hooks.length; i++)
-				hooks[i].recordClassDefine(name, result, classbytes, classpathEntry, entry, this);
-			return result;
+			return defineClass(name, classbytes, classpathEntry, entry, hooks);
 		} catch (Error e) {
 			if (Debug.DEBUG && Debug.DEBUG_LOADER)
 				Debug.println("  error defining class " + name); //$NON-NLS-1$
@@ -481,14 +480,16 @@ public class ClasspathManager {
 	 * Defines the specified class.  This method will first call all the configured class loading hooks 
 	 * {@link ClassLoadingHook#processClass(String, byte[], ClasspathEntry, BundleEntry, ClasspathManager)} 
 	 * methods.  Then it will call the {@link BaseClassLoader#defineClass(String, byte[], ClasspathEntry, BundleEntry)}
-	 * method to define the class.
+	 * method to define the class. After that, the class loading stat hooks are called to announce the class
+	 * definition.
 	 * @param name the name of the class to define
 	 * @param classbytes the class bytes
 	 * @param classpathEntry the classpath entry used to load the class bytes
 	 * @param entry the BundleEntry used to load the class bytes
+	 * @param statsHooks the class loading stat hooks
 	 * @return the defined class
 	 */
-	private Class defineClass(String name, byte[] classbytes, ClasspathEntry classpathEntry, BundleEntry entry) {
+	private Class defineClass(String name, byte[] classbytes, ClasspathEntry classpathEntry, BundleEntry entry, ClassLoadingStatsHook[] statsHooks) {
 		ClassLoadingHook[] hooks = data.getAdaptor().getHookRegistry().getClassLoadingHooks();
 		byte[] modifiedBytes = classbytes;
 		for (int i = 0; i < hooks.length; i++) {
@@ -496,7 +497,12 @@ public class ClasspathManager {
 			if (modifiedBytes != null)
 				classbytes = modifiedBytes;
 		}
-		return classloader.defineClass(name, classbytes, classpathEntry, entry);
+
+		Class result = classloader.defineClass(name, classbytes, classpathEntry, entry);
+
+		for (int i = 0; i < statsHooks.length; i++)
+			statsHooks[i].recordClassDefine(name, result, classbytes, classpathEntry, entry, this);
+		return result;
 	}
 
 	/**
