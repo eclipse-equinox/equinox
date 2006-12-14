@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.core.launcher;
+package org.eclipse.equinox.launcher;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
