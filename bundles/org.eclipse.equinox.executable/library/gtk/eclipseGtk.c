@@ -48,12 +48,14 @@ static char*  argVM_J9[]          = { "-jit", "-mca:1024", "-mco:1024", "-mn:256
 /* TODO need a better way of doing this*/
 #ifdef i386
 #define JAVA_ARCH "i386"
-#elif defined(__ppc__)
-#define JAVA_ARCH "ppc"
+#elif defined(__ppc__) || defined(__powerpc64__)
+#define JAVA_ARCH "ppc" 
 #elif defined(SOLARIS)
 #define JAVA_ARCH "sparc"
-#elif defined(__amd64__) || defined(__x86_64__) || defined(__powerpc64__)
+#elif defined(__amd64__) || defined(__x86_64__) 
 #define JAVA_ARCH "amd64"
+#else
+#define JAVA_ARCH DEFAULT_OS_ARCH
 #endif
 
 #define MAX_LOCATION_LENGTH 30 /* none of the jvmLocations strings should be longer than this */ 
@@ -138,7 +140,7 @@ long getSplashHandle() {
 
 void takeDownSplash() {
 	if(splashHandle != 0) {
-		gtk_widget_destroy((GtkWidget*)splashHandle);
+		gtk_widget_hide((GtkWidget*)splashHandle);
 		dispatchMessages();
 		splashHandle = 0;
 	}
