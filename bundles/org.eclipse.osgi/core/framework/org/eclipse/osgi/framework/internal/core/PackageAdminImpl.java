@@ -214,12 +214,17 @@ public class PackageAdminImpl implements PackageAdmin {
 					descriptions = (BundleDescription[]) (results.size() == 0 ? null : results.toArray(new BundleDescription[results.size()]));
 				}
 			}
-			StateDelta stateDelta = framework.adaptor.getState().resolve(descriptions);
-			refreshedBundles = processDelta(stateDelta.getChanges(), refreshPackages);
+			State systemState = framework.adaptor.getState();
+			BundleDelta[] delta = systemState.resolve(descriptions).getChanges();
+			refreshedBundles = processDelta(delta, refreshPackages);
 			if (refreshPackages) {
 				AbstractBundle[] allBundles = framework.getAllBundles();
 				for (int i = 0; i < allBundles.length; i++)
 					allBundles[i].unresolvePermissions();
+				// increment the system state timestamp if we are refreshing packages.
+				// this is needed incase we suspended a bundle from processing the delta (bug 167483)
+				if (delta.length > 0)
+					systemState.setTimeStamp(systemState.getTimeStamp() == Long.MAX_VALUE ? 0 : systemState.getTimeStamp() + 1);
 			}
 			// always resume bundles incase we have lazy-start bundles
 			resumeBundles(refreshedBundles, refreshPackages);
