@@ -345,7 +345,6 @@ public class PackageAdminImpl implements PackageAdmin {
 	}
 
 	private AbstractBundle[] processDelta(BundleDelta[] bundleDeltas, boolean refreshPackages) {
-		Util.sort(bundleDeltas, 0, bundleDeltas.length);
 		ArrayList bundlesList = new ArrayList(bundleDeltas.length);
 		// get all the bundles that are going to be refreshed
 		for (int i = 0; i < bundleDeltas.length; i++) {
@@ -357,6 +356,7 @@ public class PackageAdminImpl implements PackageAdmin {
 				bundlesList.add(changedBundle);
 		}
 		AbstractBundle[] refresh = (AbstractBundle[]) bundlesList.toArray(new AbstractBundle[bundlesList.size()]);
+		StartLevelManager.sortByDependency(refresh);
 		boolean[] previouslyResolved = new boolean[refresh.length];
 		AbstractBundle[] resolved = null;
 		try {
