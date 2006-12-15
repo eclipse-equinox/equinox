@@ -51,8 +51,8 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		Object[] expectedEvents = new Object[6];
 		expectedEvents[0] = new BundleEvent(BundleEvent.STARTED, chainTestB);
 		expectedEvents[1] = new BundleEvent(BundleEvent.STARTED, chainTestA);
-		expectedEvents[2] = new BundleEvent(BundleEvent.STOPPED, chainTestB);
-		expectedEvents[3] = new BundleEvent(BundleEvent.STOPPED, chainTestA);
+		expectedEvents[2] = new BundleEvent(BundleEvent.STOPPED, chainTestA);
+		expectedEvents[3] = new BundleEvent(BundleEvent.STOPPED, chainTestB);
 		expectedEvents[4] = new BundleEvent(BundleEvent.STARTED, chainTestB);
 		expectedEvents[5] = new BundleEvent(BundleEvent.STARTED, chainTestA);
 
@@ -78,10 +78,10 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		expectedEvents[1] = new BundleEvent(BundleEvent.STARTED, chainTestB);
 		expectedEvents[2] = new BundleEvent(BundleEvent.STARTED, chainTestC);
 		expectedEvents[3] = new BundleEvent(BundleEvent.STARTED, chainTestA);
-		expectedEvents[4] = new BundleEvent(BundleEvent.STOPPED, chainTestD);
-		expectedEvents[5] = new BundleEvent(BundleEvent.STOPPED, chainTestC);
-		expectedEvents[6] = new BundleEvent(BundleEvent.STOPPED, chainTestB);
-		expectedEvents[7] = new BundleEvent(BundleEvent.STOPPED, chainTestA);
+		expectedEvents[4] = new BundleEvent(BundleEvent.STOPPED, chainTestA);
+		expectedEvents[5] = new BundleEvent(BundleEvent.STOPPED, chainTestB);
+		expectedEvents[6] = new BundleEvent(BundleEvent.STOPPED, chainTestC);
+		expectedEvents[7] = new BundleEvent(BundleEvent.STOPPED, chainTestD);
 
 		installer.refreshPackages(new Bundle[] {chainTestC, chainTestD});
 
