@@ -192,11 +192,12 @@ _TCHAR* findCommand( _TCHAR* command )
 
 #if !defined(_WIN32) && !defined(MACOSX)
 char * resolveSymlinks( char * path ) {
+	char * ch, *buffer;
 	if(path == NULL)
 		return path;
 	/* resolve symlinks */
-	char * ch = path;
-	char * buffer = malloc(PATH_MAX);
+	ch = path;
+	buffer = malloc(PATH_MAX);
     path = realpath(path, buffer);
     free(ch);
     return path;

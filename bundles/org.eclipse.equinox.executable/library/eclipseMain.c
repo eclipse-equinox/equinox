@@ -166,7 +166,7 @@ int main( int argc, _TCHAR* argv[] )
     	exit( 1 );
 	}
 
-	setArgs = findSymbol(handle, SET_INITIAL_ARGS);
+	setArgs = (SetInitialArgs)findSymbol(handle, SET_INITIAL_ARGS);
 	if(setArgs != NULL)
 		setArgs(initialArgc, initialArgv, library);
 	else {
@@ -174,7 +174,7 @@ int main( int argc, _TCHAR* argv[] )
 		exit(1);
 	}
 	
-	runMethod = findSymbol(handle, RUN_METHOD);
+	runMethod = (RunMethod)findSymbol(handle, RUN_METHOD);
 	if(runMethod != NULL)
 		exitCode = runMethod(argc, argv, userVMarg);
 	else { 

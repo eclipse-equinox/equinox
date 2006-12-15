@@ -59,9 +59,11 @@ static char*  argVM_J9[]          = { "-jit", "-mca:1024", "-mco:1024", "-mn:256
 #define JAVA_ARCH "ppc"
 #elif defined(SOLARIS)
 #define JAVA_ARCH "sparc"
+#else 
+#define JAVA_ARCH DEFAULT_OS_ARCH
 #endif
 
-#define MAX_LOCATION_LENGTH 20 /* none of the jvmLocations strings should be longer than this */ 
+#define MAX_LOCATION_LENGTH 3330 /* none of the jvmLocations strings should be longer than this */ 
 static const char* jvmLocations [] = { "j9vm",
 									   "classic",
 									   "../lib/" JAVA_ARCH "/client",  
@@ -137,7 +139,7 @@ int showSplash( const char* featureImage )
 	nArgs = 0;
 	XtSetArg(args[nArgs], XmNancestorSensitive, 1);			nArgs++;
     XtSetArg(args[nArgs], XmNborderWidth, 0);				nArgs++;
-    XtSetArg(args[nArgs], XmNbackground, 0xFF00FF);			nArgs++;
+    /*XtSetArg(args[nArgs], XmNbackground, 0xFF00FF);			nArgs++; */
     XtSetArg(args[nArgs], XmNmarginWidth, 0);				nArgs++;
     XtSetArg(args[nArgs], XmNmarginHeight, 0);				nArgs++;
     XtSetArg(args[nArgs], XmNresizePolicy, XmRESIZE_NONE);	nArgs++;
