@@ -23,12 +23,10 @@ include ../make_version.mak
 # MOTIF_HOME	 - the full path to Motif header files
 # JAVA_JNI       - the full path to the java jni header files
 
-ifeq ($(PROGRAM_OUTPUT),)
-  PROGRAM_OUTPUT=eclipse
-endif
-
+PROGRAM_OUTPUT=eclipse
 PROGRAM_LIBRARY=eclipse_$(LIB_VERSION).so
 
+CC = cc_r
 # Define the object modules to be compiled and flags.
 #OBJS = eclipse.o eclipseUtil.o eclipseShm.o eclipseConfig.o eclipseMotif.o NgCommon.o NgImage.o NgImageData.o NgWinBMPFileFormat.o
 MAIN_OBJS = eclipseMain.o
@@ -37,8 +35,8 @@ DLL_OBJS	= eclipse.o eclipseMotif.o eclipseUtil.o eclipseJNI.o NgCommon.o NgImag
 
 EXEC = $(PROGRAM_OUTPUT)
 DLL = $(PROGRAM_LIBRARY)
-LIBS = -L$(MOTIF_HOME)/lib -lXm -lXt -lX11 -lpthread
-LFLAGS = -shared -fpic -Wl,--export-dynamic 
+LIBS = -L$(MOTIF_HOME)/lib -lXm -lXt -lX11
+LFLAGS = -G -bnoentry -bexpall -lm -lc_r -lC_r
 CFLAGS = -O -s \
 	-DNO_XINERAMA_EXTENSIONS \
 	-DDEFAULT_OS="\"$(DEFAULT_OS)\"" \
@@ -48,7 +46,7 @@ CFLAGS = -O -s \
 	-I./ \
 	-I../ \
 	-I$(MOTIF_HOME)/include \
-	-I$(JAVA_JNI)
+	-I/usr/java150/include
 
 all: $(EXEC) $(DLL)
 
@@ -77,12 +75,12 @@ $(EXEC): $(MAIN_OBJS) $(COMMON_OBJS)
 	$(CC) -o $(EXEC) $(MAIN_OBJS) $(COMMON_OBJS) $(LIBS)
 
 $(DLL): $(DLL_OBJS) $(COMMON_OBJS)
-	$(CC) $(LFLAGS) -o $(DLL) $(DLL_OBJS) $(COMMON_OBJS) $(LIBS)
+	ld $(LFLAGS) -o $(DLL) $(DLL_OBJS) $(COMMON_OBJS) $(LIBS)
 	
 install: all
 	cp $(EXEC) $(DLL) $(OUTPUT_DIR)
 	rm -f $(EXEC) $(MAIN_OBJS) $(COMMON_OBJS) $(DLL_OBJS)
 
 clean:
-	rm -f $(EXEC) $(MAIN_OBJS) $(COMMON_OBJS) $(DLL_OBJS)
+	rm -f $(EXEC) $(DLL) $(MAIN_OBJS) $(COMMON_OBJS) $(DLL_OBJS)
 	
