@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="org.eclipse.platform.launchers"
+      id="org.eclipse.equinox.executable"
       label="%featureName"
       version="3.3.0.qualifier">
 
