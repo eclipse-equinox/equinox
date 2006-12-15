@@ -2,6 +2,7 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" output="bundle_tests/test" path="bundles_src/test"/>
+	<classpathentry kind="src" output="bundle_tests/test2" path="bundles_src/test2"/>
 	<classpathentry kind="src" output="bundle_tests/chain.test" path="bundles_src/chain.test"/>
 	<classpathentry kind="src" output="bundle_tests/chain.test.a" path="bundles_src/chain.test.a"/>
 	<classpathentry kind="src" output="bundle_tests/chain.test.b" path="bundles_src/chain.test.b"/>
@@ -20,6 +21,12 @@
 	<classpathentry kind="src" output="bundle_tests/osgi.lazystart.b" path="bundles_src/osgi.lazystart.b"/>
 	<classpathentry kind="src" output="bundle_tests/osgi.lazystart.c" path="bundles_src/osgi.lazystart.c"/>
 	<classpathentry kind="src" output="bundle_tests/thread.locktest" path="bundles_src/thread.locktest"/>
+	<classpathentry kind="src" output="bundle_tests/buddy.registered.a" path="bundles_src/buddy.registered.a"/>
+	<classpathentry kind="src" output="bundle_tests/buddy.registered.a.test1" path="bundles_src/buddy.registered.a.test1"/>
+	<classpathentry kind="src" output="bundle_tests/buddy.registered.a.test2" path="bundles_src/buddy.registered.a.test2"/>
+	<classpathentry kind="src" output="bundle_tests/buddy.dependent.a" path="bundles_src/buddy.dependent.a"/>
+	<classpathentry kind="src" output="bundle_tests/buddy.dependent.a.test1" path="bundles_src/buddy.dependent.a.test1"/>
+	<classpathentry kind="src" output="bundle_tests/buddy.dependent.a.test2" path="bundles_src/buddy.dependent.a.test2"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="output" path="bin"/>

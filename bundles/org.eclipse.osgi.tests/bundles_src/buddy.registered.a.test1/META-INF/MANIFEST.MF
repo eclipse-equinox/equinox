@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: buddy.registered.a.test1
+Bundle-SymbolicName: buddy.registered.a.test1
+Bundle-Version: 1.0.0
+Bundle-Localization: plugin
+Import-Package: 
+ org.eclipse.osgi.tests.bundles,
+ org.osgi.framework;version="1.3.0"
+Require-Bundle: buddy.registered.a
+Eclipse-RegisterBuddy: buddy.registered.a

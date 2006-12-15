@@ -10,7 +10,10 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.bundles;
 
+import java.io.*;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Enumeration;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
@@ -487,5 +490,107 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 			testURL = new URL(urls[i], "../../g");
 			assertEquals("../../g", "/a/g", testURL.getPath());
 		}
+	}
+
+	public void testBootGetResources() throws Exception{
+		if (System.getProperty(Constants.FRAMEWORK_BOOTDELEGATION) != null)
+			return; // cannot really test this if this property is set
+		// make sure there is only one manifest found
+		Bundle test = installer.installBundle("test");
+		Enumeration manifests = test.getResources("META-INF/MANIFEST.MF");
+		assertNotNull("manifests", manifests);
+		ArrayList manifestURLs = new ArrayList();
+		while(manifests.hasMoreElements())
+			manifestURLs.add(manifests.nextElement());
+		assertEquals("manifest number", 1, manifestURLs.size());
+		URL manifest = (URL) manifestURLs.get(0);
+		assertEquals("host id", test.getBundleId(), Long.parseLong(manifest.getHost()));
+	}
+
+	public void testMultipleGetResources01() throws Exception {
+		Bundle test = installer.installBundle("test");
+		// test that we can get multiple resources from a bundle
+		Enumeration resources = test.getResources("data/resource1");
+		assertNotNull("resources", resources);
+		ArrayList resourceURLs = new ArrayList();
+		while(resources.hasMoreElements())
+			resourceURLs.add(resources.nextElement());
+		assertEquals("resource number", 2, resourceURLs.size());
+		assertEquals("root resource", "root classpath", readURL((URL) resourceURLs.get(0)));
+		assertEquals("stuff resource", "stuff classpath", readURL((URL) resourceURLs.get(1)));
+	}
+
+	public void testMultipleGetResources02() throws Exception {
+		installer.installBundle("test");
+		Bundle test2 = installer.installBundle("test2");
+		// test that we can get multiple resources from a bundle
+		Enumeration resources = test2.getResources("data/resource1");
+		assertNotNull("resources", resources);
+		ArrayList resourceURLs = new ArrayList();
+		while(resources.hasMoreElements())
+			resourceURLs.add(resources.nextElement());
+		assertEquals("resource number", 4, resourceURLs.size());
+		assertEquals("root resource", "root classpath", readURL((URL) resourceURLs.get(0)));
+		assertEquals("stuff resource", "stuff classpath", readURL((URL) resourceURLs.get(1)));
+		assertEquals("root resource", "root classpath test2", readURL((URL) resourceURLs.get(2)));
+		assertEquals("stuff resource", "stuff classpath test2", readURL((URL) resourceURLs.get(3)));
+	}
+
+	public void testBuddyClassLoadingRegistered1() throws Exception{
+		Bundle registeredA = installer.installBundle("buddy.registered.a");
+		installer.resolveBundles(new Bundle[] {registeredA});
+		Enumeration testFiles = registeredA.getResources("resources/test.txt");
+		assertNotNull("testFiles", testFiles);
+		ArrayList testURLs = new ArrayList();
+		while(testFiles.hasMoreElements())
+			testURLs.add(testFiles.nextElement());
+		assertEquals("manifest number", 1, testURLs.size());
+
+		Bundle registeredATest1 = installer.installBundle("buddy.registered.a.test1");
+		Bundle registeredATest2 = installer.installBundle("buddy.registered.a.test2");
+		installer.resolveBundles(new Bundle[] {registeredATest1, registeredATest2});
+		testFiles = registeredA.getResources("resources/test.txt");
+		assertNotNull("testFiles", testFiles);
+		testURLs = new ArrayList();
+		while(testFiles.hasMoreElements())
+			testURLs.add(testFiles.nextElement());
+		assertEquals("manifest number", 3, testURLs.size());
+	}
+
+	public void testBuddyClassLoadingDependent1() throws Exception{
+		Bundle dependentA = installer.installBundle("buddy.dependent.a");
+		installer.resolveBundles(new Bundle[] {dependentA});
+		Enumeration testFiles = dependentA.getResources("resources/test.txt");
+		assertNotNull("testFiles", testFiles);
+		ArrayList testURLs = new ArrayList();
+		while(testFiles.hasMoreElements())
+			testURLs.add(testFiles.nextElement());
+		assertEquals("manifest number", 1, testURLs.size());
+
+		Bundle dependentATest1 = installer.installBundle("buddy.dependent.a.test1");
+		Bundle dependentATest2 = installer.installBundle("buddy.dependent.a.test2");
+		installer.resolveBundles(new Bundle[] {dependentATest1, dependentATest2});
+		testFiles = dependentA.getResources("resources/test.txt");
+		assertNotNull("testFiles", testFiles);
+		testURLs = new ArrayList();
+		while(testFiles.hasMoreElements())
+			testURLs.add(testFiles.nextElement());
+		assertEquals("manifest number", 3, testURLs.size());
+	}
+
+	private String readURL(URL url) throws IOException {
+		StringBuffer sb = new StringBuffer();
+		BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
+		try {
+			for (String line = reader.readLine(); line != null;) {
+				sb.append(line);
+				line = reader.readLine();
+				if (line != null)
+					sb.append('\n');
+			}
+		} finally {
+			reader.close();
+		}
+		return sb.toString();
 	}
 }

@@ -1,0 +1,1 @@
+buddy.dependent.a.test1
