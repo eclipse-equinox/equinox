@@ -233,7 +233,7 @@ public class BundleHost extends AbstractBundle {
 					// only start the bundle if this is a simple CNFE
 					framework.secureAction.start(this, START_TRANSIENT);
 				} catch (BundleException be) {
-					framework.adaptor.getFrameworkLog().log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.WARNING, 0, be.getMessage(), 0, be, null ));
+					framework.adaptor.getFrameworkLog().log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.WARNING, 0, be.getMessage(), 0, be, null));
 				}
 			throw e;
 		}
@@ -266,7 +266,7 @@ public class BundleHost extends AbstractBundle {
 		loader = checkLoader();
 		if (loader == null)
 			return null;
-		return (loader.getResource(name));
+		return (loader.findResource(name));
 	}
 
 	public Enumeration getResources(String name) throws IOException {

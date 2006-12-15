@@ -42,7 +42,7 @@ public class DependentPolicy implements IBuddyPolicy {
 			return null;
 
 		Class result = null;
-        //size may change, so we must check it every time
+		//size may change, so we must check it every time
 		for (int i = 0; i < allDependents.size() && result == null; i++) {
 			BundleDescription searchedBundle = (BundleDescription) allDependents.get(i);
 			try {
@@ -68,9 +68,9 @@ public class DependentPolicy implements IBuddyPolicy {
 	public URL loadResource(String name) {
 		if (allDependents == null)
 			return null;
-		
+
 		URL result = null;
-        //size may change, so we must check it every time
+		//size may change, so we must check it every time
 		for (int i = 0; i < allDependents.size() && result == null; i++) {
 			BundleDescription searchedBundle = (BundleDescription) allDependents.get(i);
 			BundleLoaderProxy proxy = buddyRequester.getLoaderProxy(searchedBundle);
@@ -87,31 +87,22 @@ public class DependentPolicy implements IBuddyPolicy {
 	public Enumeration loadResources(String name) {
 		if (allDependents == null)
 			return null;
-		
-		Vector resources = null;
-        //size may change, so we must check it every time
+
+		Enumeration results = null;
+		//size may change, so we must check it every time
 		for (int i = 0; i < allDependents.size(); i++) {
 			BundleDescription searchedBundle = (BundleDescription) allDependents.get(i);
 			try {
 				BundleLoaderProxy proxy = buddyRequester.getLoaderProxy(searchedBundle);
 				if (proxy == null)
 					continue;
-				Enumeration result = proxy.getBundleLoader().findResources(name);
-                if (result != null) {
-                    if (resources == null)
-                        resources = new Vector();
-                    while (result.hasMoreElements()) {
-                        Object url = result.nextElement();
-                        if (!resources.contains(url)) //ignore exact duplicates
-                            resources.add(url);
-                    }
-                }
-                addDependent(i, searchedBundle);
+				results = BundleLoader.compoundEnumerations(results, proxy.getBundleLoader().findResources(name));
+				addDependent(i, searchedBundle);
 			} catch (IOException e) {
 				//Ignore and keep looking
 			}
 		}
-        return (resources == null) ? null : resources.elements();
+		return results;
 	}
 
 	private void basicAddImmediateDependents(BundleDescription root) {

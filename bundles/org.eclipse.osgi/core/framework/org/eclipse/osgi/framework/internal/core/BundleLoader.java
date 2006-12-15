@@ -302,20 +302,10 @@ public class BundleLoader implements ClassLoaderDelegate {
 		return createClassLoader().getResource(name);
 	}
 
-	/**
-	 * This method gets resources from the bundle.  The resource is searched 
-	 * for in the same manner as it would if it was being loaded from a bundle 
-	 * (i.e. all hosts, fragments, import, required bundles and 
-	 * local resources are searched).
-	 *
-	 * @param name the name of the desired resource.
-	 * @return the resulting resource URL or null if it does not exist.
-	 */
-	final Enumeration getResources(String name) throws IOException {
-		return createClassLoader().getResources(name);
-	}
-
 	final synchronized ClassLoader getParentClassLoader() {
+		if (parent != null)
+			return parent;
+		createClassLoader();
 		return parent;
 	}
 
@@ -579,21 +569,9 @@ public class BundleLoader implements ClassLoaderDelegate {
 			result = source.getResources(name);
 
 		// 5) search the local bundle
-		if (result == null)
-			result = findLocalResources(name);
-		else {
-			// compound the required source results with the local ones
-			Enumeration localResults = findLocalResources(name);
-			if (localResults != null) {
-				Vector compoundResults = new Vector();
-				while (result.hasMoreElements())
-					compoundResults.add(result.nextElement());
-				while (localResults.hasMoreElements())
-					compoundResults.add(localResults.nextElement());
-				result = compoundResults.elements();
-			}
-		}
-
+		// compound the required source results with the local ones
+		Enumeration localResults = findLocalResources(name);
+		result = compoundEnumerations(result, localResults);
 		// 6) attempt to find a dynamic import source; only do this if a required source was not found
 		if (result == null && source == null) {
 			source = findDynamicSource(pkgName);
@@ -602,21 +580,46 @@ public class BundleLoader implements ClassLoaderDelegate {
 		}
 		if (policy != null) {
 			Enumeration buddyResult = policy.doBuddyResourcesLoading(name);
-			if (buddyResult == null)
-				return result;
-			if (result == null)
-				return buddyResult;
-			Vector compoundResults = new Vector();
-			while (result.hasMoreElements())
-				compoundResults.add(result.nextElement());
-			while (buddyResult.hasMoreElements()) {
-				Object url = buddyResult.nextElement();
-				if (!compoundResults.contains(url)) //don't add duplicates
-					compoundResults.add(url);
-			}
-			result = compoundResults.elements();
+			result = compoundEnumerations(result, buddyResult);
 		}
 		return result;
+	}
+
+	/*
+	 * This method is used by Bundle.getResources to do proper parent delegation.
+	 */
+	Enumeration getResources(String name) throws IOException {
+		if ((name.length() > 1) && (name.charAt(0) == '/')) /* if name has a leading slash */
+			name = name.substring(1); /* remove leading slash before search */
+		String pkgName = getResourcePackageName(name);
+		// follow the OSGi delegation model
+		// First check the parent classloader for system resources, if it is a java resource.
+		Enumeration result = null;
+		if (pkgName.startsWith(JAVA_PACKAGE) || isBootDelegationPackage(pkgName)) {
+			// 1) if startsWith "java." delegate to parent and terminate search
+			// 2) if part of the bootdelegation list then delegate to parent and continue of failure
+			ClassLoader parentCL = getParentClassLoader();
+			result = parentCL == null ? null : parentCL.getResources(name);
+			if (pkgName.startsWith(JAVA_PACKAGE))
+				return result;
+		}
+		return compoundEnumerations(result, findResources(name));
+	}
+
+	static Enumeration compoundEnumerations(Enumeration list1, Enumeration list2) {
+		if (list2 == null || !list2.hasMoreElements())
+			return list1;
+		if (list1 == null || !list1.hasMoreElements())
+			return list2;
+		Vector compoundResults = new Vector();
+		while (list1.hasMoreElements())
+			compoundResults.add(list1.nextElement());
+		while (list2.hasMoreElements()) {
+			Object item = list2.nextElement();
+			if (!compoundResults.contains(item)) //don't add duplicates
+				compoundResults.add(item);
+		}
+		return compoundResults.elements();
 	}
 
 	/**
