@@ -117,6 +117,7 @@ public class HttpListener extends Thread implements ServiceFactory {
 				}
 			}
 
+			properties.put(HttpConfiguration.keyHttpPort, new Integer(serverSocket.getLocalPort()));
 			if (service == null) {
 				service = http.context.registerService(httpsvcClass, this, properties);
 			} else {
