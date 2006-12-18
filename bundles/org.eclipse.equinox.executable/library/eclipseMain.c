@@ -368,6 +368,8 @@ static _TCHAR* findLibrary(_TCHAR* library, _TCHAR* program)
 	
 	c = findFile(path, fragment);
 	free(fragment);
+	if (c == NULL)
+		return c;
 	fragment = c;
 	
 	result = findFile(fragment, _T_ECLIPSE("eclipse"));
