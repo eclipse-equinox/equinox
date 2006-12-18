@@ -195,7 +195,7 @@ _TCHAR* findVMLibrary( _TCHAR* command ) {
 						if(RegQueryValueEx(subKey, _T("RuntimeLib"), NULL, NULL, (void*)&lib, &length) == ERROR_SUCCESS) {
 							if (_tstat( lib, &stats ) == 0 && (stats.st_mode & S_IFREG) != 0)
 							{	/*library exists*/
-								path = malloc( length * sizeof(TCHAR*));
+								path = malloc( length * sizeof(TCHAR));
 								path[0] = _T('\0');
 								_tcscat(path, lib);
 								

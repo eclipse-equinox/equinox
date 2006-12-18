@@ -847,7 +847,7 @@ static _TCHAR* findStartupJar(){
 #ifdef MACOSX
 	pathLength += 9;
 #endif
-	pluginsPath = malloc( (pathLength + 1 + 7) * sizeof(char));
+	pluginsPath = malloc( (pathLength + 1 + 7) * sizeof(_TCHAR));
 	_tcscpy(pluginsPath, programDir);
 	if(pluginsPath[pathLength - 1] != dirSeparator) {
 		pluginsPath[pathLength] = dirSeparator;
