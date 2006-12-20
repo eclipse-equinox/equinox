@@ -124,7 +124,7 @@ int main( int argc, _TCHAR* argv[] )
     	GetModuleFileName( NULL, program, MAX_PATH_LENGTH );
     	argv[0] = program;
 #else
-    	program = malloc( strlen( argv[0] ) + 1 );
+    	program = malloc( (strlen( argv[0] ) + 1) * sizeof(_TCHAR) );
     	strcpy( program, argv[0] );
 #endif
     }
@@ -323,7 +323,7 @@ static _TCHAR* findLibrary(_TCHAR* library, _TCHAR* program)
 	_TCHAR* fragment;
 	_TCHAR* result;
 	_TCHAR* dot = _T_ECLIPSE(".");
-	int length;
+	int progLength, pathLength;
 	int fragmentLength;
 	struct _stat stats;
 	
@@ -351,15 +351,15 @@ static _TCHAR* findLibrary(_TCHAR* library, _TCHAR* program)
 	_tcscat(fragment, dot);
 	_tcscat(fragment, osArchArg);
 #endif	
-	length = _tcslen(programDir);
+	progLength = pathLength = _tcslen(programDir);
 #ifdef MACOSX
-	length += 9;
+	pathLength += 9;
 #endif
-	path = malloc( (length + 1 + 7 + 1) * sizeof(_TCHAR));
+	path = malloc( (pathLength + 1 + 7 + 1) * sizeof(_TCHAR));
 	_tcscpy(path, programDir);
-	if(path[length - 1] != dirSeparator) {
-		path[length] = dirSeparator;
-		path[length + 1] = 0;
+	if(path[progLength - 1] != dirSeparator) {
+		path[progLength] = dirSeparator;
+		path[progLength + 1] = 0;
 	}
 #ifdef MACOSX
 	_tcscat(path, _T_ECLIPSE("../../../"));
@@ -375,8 +375,7 @@ static _TCHAR* findLibrary(_TCHAR* library, _TCHAR* program)
 	result = findFile(fragment, _T_ECLIPSE("eclipse"));
 	
 	free(fragment);
-	if(path != programDir)
-		free(path);
+	free(path);
 	
 	return result; 
 }

@@ -39,10 +39,10 @@ static _TCHAR*  argVM[] = { NULL };
  * these are paths relative to the java exe, the shared library is
  * for example jvmLocations[0] + dirSeparator + vmLibrary */
 #define MAX_LOCATION_LENGTH 10 /* none of the jvmLocations strings should be longer than this */ 
-static const _TCHAR* jvmLocations [] = { _T("j9vm"),
-										 _T("client"), 
-										 _T("server"), 
-										 _T("classic"), 
+static const _TCHAR* jvmLocations [] = { _T("j9vm"), _T("..\\jre\\bin\\j9vm"),
+										 _T("client"), _T("..\\jre\\bin\\client"), 
+										 _T("server"), _T("..\\jre\\bin\\server"),
+										 _T("classic"), _T("..\\jre\\bin\\classic"),
 								 		 NULL };
 /* Show the Splash Window
  *

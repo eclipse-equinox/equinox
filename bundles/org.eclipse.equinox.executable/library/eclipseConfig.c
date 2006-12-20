@@ -57,7 +57,7 @@ int readConfigFile(_TCHAR* program, _TCHAR* arg0, int *argc, _TCHAR ***argv)
 	}
 #else
 	/* Append the extension */
-	config_file = (char*)realloc(config_file, strlen(config_file) + 5);
+	config_file = (char*)realloc(config_file, (strlen(config_file) + 5) * sizeof(_TCHAR));
 	strcat(config_file, ".ini");
 #endif
 	
@@ -68,7 +68,7 @@ int readConfigFile(_TCHAR* program, _TCHAR* arg0, int *argc, _TCHAR ***argv)
 	file = _tfopen(config_file, _T_ECLIPSE("rt"));	
 	if (file == NULL) return -3;
 
-	*argv = (_TCHAR **)malloc(1 + maxArgs * sizeof(_TCHAR*));
+	*argv = (_TCHAR **)malloc((1 + maxArgs) * sizeof(_TCHAR*));
 	
 	/* Make it look like a regular list of arguments that starts with the executable location and name */
 	(*argv)[0] = _tcsdup(arg0);

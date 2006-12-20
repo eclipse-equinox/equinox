@@ -815,7 +815,7 @@ static _TCHAR* findStartupJar(){
 	_TCHAR * file;
 	_TCHAR * pluginsPath;
 	struct _stat stats;
-	int pathLength;
+	int pathLength, progLength;
 	
 	if( startupArg != NULL ) {
 		/* startup jar was specified on the command line */
@@ -843,15 +843,15 @@ static _TCHAR* findStartupJar(){
 			return file;
 	}
 
-	pathLength = _tcslen(programDir);
+	progLength = pathLength = _tcslen(programDir);
 #ifdef MACOSX
 	pathLength += 9;
 #endif
-	pluginsPath = malloc( (pathLength + 1 + 7) * sizeof(_TCHAR));
+	pluginsPath = malloc( (pathLength + 1 + 7 + 1) * sizeof(_TCHAR));
 	_tcscpy(pluginsPath, programDir);
-	if(pluginsPath[pathLength - 1] != dirSeparator) {
-		pluginsPath[pathLength] = dirSeparator;
-		pluginsPath[pathLength + 1] = 0;
+	if(pluginsPath[progLength - 1] != dirSeparator) {
+		pluginsPath[progLength] = dirSeparator;
+		pluginsPath[progLength + 1] = 0;
 	}
 #ifdef MACOSX
 	_tcscat(pluginsPath, _T_ECLIPSE("../../../"));
@@ -863,9 +863,7 @@ static _TCHAR* findStartupJar(){
 	if(file != NULL)
 		return file;
 		
-	file = malloc( (_tcslen( DEFAULT_STARTUP ) + 1) * sizeof( _TCHAR ) );
-	file = _tcscpy( file, DEFAULT_STARTUP );
-	return file;
+	return _tcsdup(DEFAULT_STARTUP);
 }
 
 /* 
