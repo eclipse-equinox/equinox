@@ -64,8 +64,8 @@ public class CommandLineArgs {
 			// done checking obsolete for args.  Remember where an arg was found 
 			if (found) {
 				configArgs[configArgIndex++] = i;
-				// check if the obsolet arg had a second param
-				if (i < args.length && !args[i + 1].startsWith("-")) //$NON-NLS-1$
+				// check if the obsolete arg had a second param
+				if (i < (args.length -1) && !args[i + 1].startsWith("-")) //$NON-NLS-1$
 					configArgs[configArgIndex++] = ++i;
 				continue;
 			}
