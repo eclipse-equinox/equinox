@@ -168,43 +168,37 @@ public class PKCS7Processor implements CertificateChain, JarVerifierConstant {
 	}
 
 	public void validateCerts() throws CertificateExpiredException, CertificateNotYetValidException, InvalidKeyException, SignatureException {
-		if (certificates == null) {
+		if (certificates == null || certificates.length == 0) {
 			throw new SecurityException("There are no certificates in the signature block file!");
 		}
 
 		int len = certificates.length;
 
-		if (len == 1) {
-			X509Certificate currentX509Cert = (X509Certificate) certificates[0];
+		// check the certs validity and signatures
+		for (int i = 0; i < len; i++) {
+			X509Certificate currentX509Cert = (X509Certificate) certificates[i];
+
 			if (sigingTime == null)
 				currentX509Cert.checkValidity();
 			else
 				currentX509Cert.checkValidity(sigingTime);
-		} else {
 
-			// there are more than one certs
-			for (int i = 0; i < len - 1; i++) {
-				X509Certificate currentX509Cert = (X509Certificate) certificates[i];
-				// check if the cert is still valid
-				if (sigingTime != null)
-					currentX509Cert.checkValidity(sigingTime);
-				else
-					currentX509Cert.checkValidity();
-
-				X509Certificate nextX509Cert = (X509Certificate) certificates[i + 1];
-				// verify the current cert is signed by the private key that corresponds to the public key in the next cert
-				try {
+			try {
+				if (i == len - 1) {
+					currentX509Cert.verify(currentX509Cert.getPublicKey());
+				} else {
+					X509Certificate nextX509Cert = (X509Certificate) certificates[i + 1];
 					currentX509Cert.verify(nextX509Cert.getPublicKey());
-				} catch (NoSuchAlgorithmException e) {
-					SignedBundleHook.log(e.getMessage(), FrameworkLogEntry.ERROR, e);
-					throw new SecurityException(NLS.bind(JarVerifierMessages.No_Such_Algorithm_Excep, new String[] {e.getMessage()}));
-				} catch (NoSuchProviderException e) {
-					SignedBundleHook.log(e.getMessage(), FrameworkLogEntry.ERROR, e);
-					throw new SecurityException(NLS.bind(JarVerifierMessages.No_Such_Provider_Excep, new String[] {e.getMessage()}));
-				} catch (CertificateException e) {
-					SignedBundleHook.log(e.getMessage(), FrameworkLogEntry.ERROR, e);
-					throw new SecurityException(NLS.bind(JarVerifierMessages.Validate_Certs_Certificate_Exception, new String[] {e.getMessage()}));
 				}
+			} catch (NoSuchAlgorithmException e) {
+				SignedBundleHook.log(e.getMessage(), FrameworkLogEntry.ERROR, e);
+				throw new SecurityException(NLS.bind(JarVerifierMessages.No_Such_Algorithm_Excep, new String[] {e.getMessage()}));
+			} catch (NoSuchProviderException e) {
+				SignedBundleHook.log(e.getMessage(), FrameworkLogEntry.ERROR, e);
+				throw new SecurityException(NLS.bind(JarVerifierMessages.No_Such_Provider_Excep, new String[] {e.getMessage()}));
+			} catch (CertificateException e) {
+				SignedBundleHook.log(e.getMessage(), FrameworkLogEntry.ERROR, e);
+				throw new SecurityException(NLS.bind(JarVerifierMessages.Validate_Certs_Certificate_Exception, new String[] {e.getMessage()}));
 			}
 		}
 	}
