@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2006 IBM Corporation and others.
+ * Copyright (c) 2003, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -253,9 +253,9 @@ public class PackageAdminImpl implements PackageAdmin {
 		if (bundles == null)
 			return;
 		for (int i = 0; i < bundles.length; i++) {
-			if (!bundles[i].isResolved() || (!refreshPackages && (bundles[i].getBundleData().getStatus() & Constants.BUNDLE_LAZY_START) == 0))
+			if (!bundles[i].isResolved() || (!refreshPackages && ((bundles[i].getBundleData().getStatus() & Constants.BUNDLE_LAZY_START) == 0 || bundles[i].testStateChanging(Thread.currentThread()))))
 				// skip bundles that are not resolved or
-				// if we are doing resolveBundles then skip non-lazy start bundles
+				// if we are doing resolveBundles then skip non-lazy start bundles and bundles currently changing state by this thread
 				continue;
 			framework.resumeBundle(bundles[i]);
 		}
