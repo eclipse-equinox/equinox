@@ -60,57 +60,55 @@ int main( int argc, char* argv[] ) {
 
 	dumpArgs("start", argc, argv);
 	
-	if (argc > 1 && strncmp(argv[1], "-psn_", 5) == 0) {
+	/* find path to application bundle (ignoring case) */
+	char *pos= my_strcasestr(argv[0], APP_PACKAGE_PATTERN);
+	if (pos != NULL) {
+		int l= pos-argv[0] + 4;	// reserve space for ".app"
+		fgAppPackagePath= malloc(l+1);
+		strncpy(fgAppPackagePath, argv[0], l);
+		fgAppPackagePath[l]= '\0';	// terminate result
+	}
 	
-		/* find path to application bundle (ignoring case) */
-		char *pos= my_strcasestr(argv[0], APP_PACKAGE_PATTERN);
-		if (pos != NULL) {
-			int l= pos-argv[0] + 4;	// reserve space for ".app"
-			fgAppPackagePath= malloc(l+1);
-			strncpy(fgAppPackagePath, argv[0], l);
-			fgAppPackagePath[l]= '\0';	// terminate result
-		}
-		
-		/* Get the main bundle for the app */
-		CFBundleRef mainBundle= CFBundleGetMainBundle();
-		if (mainBundle != NULL) {
-		
-			/* Get an instance of the info plist.*/
-			CFDictionaryRef bundleInfoDict= CFBundleGetInfoDictionary(mainBundle);
-						
-			/* If we succeeded, look for our property. */
-			if (bundleInfoDict != NULL) {
-				CFArrayRef ar= CFDictionaryGetValue(bundleInfoDict, CFSTR("Eclipse"));
-				if (ar) {
-					CFIndex size= CFArrayGetCount(ar);
-					if (size > 0) {
-						int i;
-						char **old_argv= argv;
-						argv= (char**) calloc(size+2, sizeof(char*));
-						argc= 0;
-						argv[argc++]= old_argv[0];
-						for (i= 0; i < size; i++) {
-							CFStringRef sr= (CFStringRef) CFArrayGetValueAtIndex (ar, i);
-							CFIndex argStringSize= CFStringGetMaximumSizeForEncoding(CFStringGetLength(sr), kCFStringEncodingUTF8);
-							char *s= malloc(argStringSize);
-							if (CFStringGetCString(sr, s, argStringSize, kCFStringEncodingUTF8)) {
-								argv[argc++]= expandShell(s, fgAppPackagePath, NULL);
-							} else {
-								fprintf(fgConsoleLog, "can't extract bytes\n");
-							}
-							//free(s);
+	/* Get the main bundle for the app */
+	CFBundleRef mainBundle= CFBundleGetMainBundle();
+	if (mainBundle != NULL) {
+	
+		/* Get an instance of the info plist.*/
+		CFDictionaryRef bundleInfoDict= CFBundleGetInfoDictionary(mainBundle);
+					
+		/* If we succeeded, look for our property. */
+		if (bundleInfoDict != NULL) {
+			CFArrayRef ar= CFDictionaryGetValue(bundleInfoDict, CFSTR("Eclipse"));
+			if (ar) {
+				CFIndex size= CFArrayGetCount(ar);
+				if (size > 0) {
+					int i;
+					char **old_argv= argv;
+					argv= (char**) calloc(size+2, sizeof(char*));
+					argc= 0;
+					argv[argc++]= old_argv[0];
+					for (i= 0; i < size; i++) {
+						CFStringRef sr= (CFStringRef) CFArrayGetValueAtIndex (ar, i);
+						CFIndex argStringSize= CFStringGetMaximumSizeForEncoding(CFStringGetLength(sr), kCFStringEncodingUTF8);
+						char *s= malloc(argStringSize);
+						if (CFStringGetCString(sr, s, argStringSize, kCFStringEncodingUTF8)) {
+							argv[argc++]= expandShell(s, fgAppPackagePath, NULL);
+						} else {
+							fprintf(fgConsoleLog, "can't extract bytes\n");
 						}
+						//free(s);
 					}
-				} else {
-					fprintf(fgConsoleLog, "no Eclipse dict found\n");
 				}
 			} else {
-				fprintf(fgConsoleLog, "no bundle dict found\n");
+				fprintf(fgConsoleLog, "no Eclipse dict found\n");
 			}
 		} else {
-			fprintf(fgConsoleLog, "no bundle found\n");
+			fprintf(fgConsoleLog, "no bundle dict found\n");
 		}
+	} else {
+		fprintf(fgConsoleLog, "no bundle found\n");
 	}
+
 	int exitcode= original_main(argc, argv);
 	debug("<<<< exit(%d)\n", exitcode);
 	fclose(fgConsoleLog);
