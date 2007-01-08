@@ -20,7 +20,7 @@ package org.eclipse.equinox.app;
  * Clients may implement this interface.
  * </p>
  * 
- * @since 3.2
+ * @since 1.0
  */
 public interface IApplication {
 
