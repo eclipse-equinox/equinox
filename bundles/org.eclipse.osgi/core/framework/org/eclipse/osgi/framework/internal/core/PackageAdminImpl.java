@@ -200,13 +200,13 @@ public class PackageAdminImpl implements PackageAdmin {
 						BundleDescription description = bundles[i].getBundleDescription();
 						if (description != null && description.getBundleId() != 0 && !results.contains(description))
 							results.add(description);
-						// add in any singleton bundles if needed
+						// add in any bundles that have the same symbolic name see bug (169593)
 						AbstractBundle[] sameNames = framework.bundles.getBundles(bundles[i].getSymbolicName());
 						if (sameNames != null && sameNames.length > 1) {
 							for (int j = 0; j < sameNames.length; j++)
 								if (sameNames[j] != bundles[i]) {
 									BundleDescription sameName = sameNames[j].getBundleDescription();
-									if (sameName != null && sameName.getBundleId() != 0 && sameName.isSingleton() && !results.contains(sameName))
+									if (sameName != null && sameName.getBundleId() != 0 && !results.contains(sameName))
 										results.add(sameName);
 								}
 						}
