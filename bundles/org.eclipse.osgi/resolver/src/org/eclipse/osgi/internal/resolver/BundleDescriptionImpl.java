@@ -476,6 +476,9 @@ public class BundleDescriptionImpl extends BaseDescriptionImpl implements Bundle
 		setLazyLoaded(false);
 	}
 
+	/*
+	 * This method must be called while the state reader for the containing state is locked.
+	 */
 	void unload() {
 		if ((stateBits & LAZY_LOADED) == 0)
 			return;
