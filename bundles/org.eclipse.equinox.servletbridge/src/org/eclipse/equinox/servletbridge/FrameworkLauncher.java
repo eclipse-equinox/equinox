@@ -12,6 +12,7 @@
 package org.eclipse.equinox.servletbridge;
 
 import java.io.*;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.*;
 import java.util.*;
@@ -213,6 +214,12 @@ public class FrameworkLauncher {
 			Method runMethod = clazz.getMethod("startup", new Class[] {String[].class, Runnable.class}); //$NON-NLS-1$
 			runMethod.invoke(null, new Object[] {args, null});
 			frameworkContextClassLoader = Thread.currentThread().getContextClassLoader();
+		} catch (InvocationTargetException ite) {
+			Throwable t = ite.getTargetException();
+			if (t == null)
+				t = ite;
+			context.log("Error while starting Framework", t); //$NON-NLS-1$
+			throw new RuntimeException(t.getMessage());
 		} catch (Exception e) {
 			context.log("Error while starting Framework", e); //$NON-NLS-1$
 			throw new RuntimeException(e.getMessage());
@@ -231,19 +238,25 @@ public class FrameworkLauncher {
 		Properties launchProperties = loadProperties(RESOURCE_BASE + LAUNCH_INI);
 		for (Iterator it = launchProperties.entrySet().iterator(); it.hasNext();) {
 			Map.Entry entry = (Map.Entry) it.next();
-			if (entry.getValue().equals(NULL_IDENTIFIER))
-				initialPropertyMap.put(entry.getKey(), null);
+			String key = (String) entry.getKey();
+			String value = (String) entry.getValue(); 
+			if (key.endsWith("*"))
+				if (value.equals(NULL_IDENTIFIER)) {
+					clearPrefixedSystemProperties(key.substring(0, key.length() -1), initialPropertyMap);
+				}
+			else if (value.equals(NULL_IDENTIFIER))
+				initialPropertyMap.put(key, null);
 			else
-				initialPropertyMap.put(entry.getKey(), entry.getValue());
+				initialPropertyMap.put(entry.getKey(), entry.getValue());			
 		}
-
+		
 		try {
 			// install.area if not specified
-			if (!initialPropertyMap.containsKey(OSGI_INSTALL_AREA))
+			if (initialPropertyMap.get(OSGI_INSTALL_AREA) == null)
 				initialPropertyMap.put(OSGI_INSTALL_AREA, platformDirectory.toURL().toExternalForm());
 
 			// configuration.area if not specified
-			if (!initialPropertyMap.containsKey(OSGI_CONFIGURATION_AREA)) {
+			if (initialPropertyMap.get(OSGI_CONFIGURATION_AREA) == null) {
 				File configurationDirectory = new File(platformDirectory, "configuration"); //$NON-NLS-1$
 				if (!configurationDirectory.exists()) {
 					configurationDirectory.mkdirs();
@@ -252,7 +265,7 @@ public class FrameworkLauncher {
 			}
 
 			// instance.area if not specified
-			if (!initialPropertyMap.containsKey(OSGI_INSTANCE_AREA)) {
+			if (initialPropertyMap.get(OSGI_INSTANCE_AREA) == null) {
 				File workspaceDirectory = new File(platformDirectory, "workspace"); //$NON-NLS-1$
 				if (!workspaceDirectory.exists()) {
 					workspaceDirectory.mkdirs();
@@ -261,7 +274,7 @@ public class FrameworkLauncher {
 			}
 
 			// osgi.framework if not specified
-			if (!initialPropertyMap.containsKey(OSGI_FRAMEWORK)) {
+			if (initialPropertyMap.get(OSGI_FRAMEWORK) == null) {
 				// search for osgi.framework in osgi.install.area
 				String installArea = (String) initialPropertyMap.get(OSGI_INSTALL_AREA);
 
@@ -279,7 +292,20 @@ public class FrameworkLauncher {
 		} catch (MalformedURLException e) {
 			throw new RuntimeException("Error establishing location"); //$NON-NLS-1$
 		}
+		
 		return initialPropertyMap;
+	}
+
+	/**
+	 * clearPrefixedSystemProperties clears System Properties by wiritng null properties in the targetPropertyMap that match a prefix
+	 */		
+	private static void clearPrefixedSystemProperties(String prefix, Map targetPropertyMap) {
+		for (Iterator it = System.getProperties().keySet().iterator(); it.hasNext();) {
+			String propertyName = (String) it.next();
+			if (propertyName.startsWith(prefix) && !targetPropertyMap.containsKey(propertyName)) {
+				targetPropertyMap.put(propertyName, null);
+			}
+		}
 	}
 
 	/**
