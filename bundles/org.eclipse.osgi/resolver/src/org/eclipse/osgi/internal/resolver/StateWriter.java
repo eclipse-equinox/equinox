@@ -121,7 +121,6 @@ class StateWriter {
 				// the data is written at least once in the non-lazy state data
 				writeBundleDescription(bundles[i], outState, true);
 			outState.writeBoolean(state.isResolved());
-			state.setDynamicCacheChanged(false);
 		} finally {
 			if (outLazy != null) {
 				try {
@@ -470,7 +469,6 @@ class StateWriter {
 	public void saveStateDeprecated(StateImpl state, DataOutputStream output) throws IOException {
 		try {
 			writeStateDeprecated(state, output);
-			state.setDynamicCacheChanged(false);
 		} finally {
 			output.close();
 		}
