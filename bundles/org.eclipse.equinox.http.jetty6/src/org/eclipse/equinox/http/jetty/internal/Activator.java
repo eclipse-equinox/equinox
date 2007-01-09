@@ -9,53 +9,71 @@
 package org.eclipse.equinox.http.jetty.internal;
 
 import java.io.File;
-import java.io.IOException;
-import javax.servlet.*;
-import org.eclipse.equinox.http.servlet.HttpServiceServlet;
-import org.mortbay.http.*;
-import org.mortbay.jetty.servlet.ServletHandler;
-import org.mortbay.jetty.servlet.ServletHolder;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import org.osgi.framework.*;
+import org.osgi.service.cm.ManagedServiceFactory;
 
 public class Activator implements BundleActivator {
-	
-	private static final String CONTEXT_CLASSLOADER = "org.eclipse.equinox.http.jetty.ContextClassLoader"; //$NON-NLS-1$
-	private HttpServer server;
+
+	private static final String JETTY_WORK_DIR = "jettywork"; //$NON-NLS-1$
+	private static final String DEFAULT_PID = "default"; //$NON-NLS-1$
+	private static final String MANAGED_SERVICE_FACTORY_PID = "org.eclipse.equinox.http.jetty.config"; //$NON-NLS-1$
+
+	// OSGi Http Service suggest these properties for setting the default ports
+	private static final String ORG_OSGI_SERVICE_HTTP_PORT = "org.osgi.service.http.port"; //$NON-NLS-1$
+	private static final String ORG_OSGI_SERVICE_HTTP_PORT_SECURE = "org.osgi.service.http.port.secure"; //$NON-NLS-1$
+
+	// controls whether start() should automatically start an Http Service based on BundleContext properties (default is true)
+	private static final String AUTOSTART = "org.eclipse.equinox.http.jetty.autostart"; //$NON-NLS-1$
+
+	private HttpServerManager httpServerManager;
+	private ServiceRegistration registration;
 
 	public void start(BundleContext context) throws Exception {
+		File jettyWorkDir = new File(context.getDataFile(""), JETTY_WORK_DIR); //$NON-NLS-1$ 
+		jettyWorkDir.mkdir();
+		httpServerManager = new HttpServerManager(jettyWorkDir);
 
-		server = new HttpServer();
-
-		SocketListener httpListener = createHttpListener(context);
-		if (httpListener != null)
-			server.addListener(httpListener);
-
-		SocketListener httpsListener = createHttpsListener(context);
-		if (httpsListener != null)
-			server.addListener(httpsListener);
-
-		ServletHandler servlets = new ServletHandler();
-		servlets.setAutoInitializeServlets(true);
-
-		ServletHolder holder = servlets.addServlet("/*", InternalHttpServiceServlet.class.getName()); //$NON-NLS-1$
-		holder.setInitOrder(0);
-
-		HttpContext httpContext = createHttpContext(context);
-		httpContext.addHandler(servlets);
-
-		server.addContext(httpContext);
-		server.start();
+		String autostart = context.getProperty(AUTOSTART);
+		if (autostart == null || Boolean.valueOf(autostart).booleanValue()) {
+			Dictionary defaultSettings = createDefaultSettings(context);
+			httpServerManager.updated(DEFAULT_PID, defaultSettings);
+		}
+		
+		Dictionary dictionary = new Hashtable();
+		dictionary.put(Constants.SERVICE_PID, MANAGED_SERVICE_FACTORY_PID);
+		
+		registration = context.registerService(ManagedServiceFactory.class.getName(), httpServerManager, dictionary);
 	}
 
 	public void stop(BundleContext context) throws Exception {
-		server.stop();
-		server = null;
+		registration.unregister();
+		registration = null;
+
+		httpServerManager.shutdown();
+		httpServerManager = null;
 	}
 
-	private SocketListener createHttpListener(BundleContext context) {
+	private Dictionary createDefaultSettings(BundleContext context) {
+		final String PROPERTY_PREFIX = "org.eclipse.equinox.http.jetty."; //$NON-NLS-1$
+		Dictionary defaultSettings = new Hashtable();
+
+		// PID
+		defaultSettings.put(Constants.SERVICE_PID, DEFAULT_PID);
+
+		// HTTP Enabled (default is true)
+		String httpEnabledProperty = context.getProperty(PROPERTY_PREFIX + HttpServerManager.HTTP_ENABLED);
+		Boolean httpEnabled = (httpEnabledProperty == null) ? Boolean.TRUE : new Boolean(httpEnabledProperty);
+		defaultSettings.put(HttpServerManager.HTTP_ENABLED, httpEnabled);
+
+		
+		// HTTP Port
+		String httpPortProperty = context.getProperty(PROPERTY_PREFIX + HttpServerManager.HTTP_PORT);
+		if (httpPortProperty == null)
+			httpPortProperty = context.getProperty(ORG_OSGI_SERVICE_HTTP_PORT);
+
 		int httpPort = 80;
-		String httpPortProperty = context.getProperty("org.osgi.service.http.port"); //$NON-NLS-1$
 		if (httpPortProperty != null) {
 			try {
 				httpPort = Integer.parseInt(httpPortProperty);
@@ -63,134 +81,67 @@ public class Activator implements BundleActivator {
 				//(log this) ignore and use default
 			}
 		}
+		defaultSettings.put(HttpServerManager.HTTP_PORT, new Integer(httpPort));
 
-		if (httpPort < 1)
-			return null;
+		// HTTPS Enabled (default is false)
+		Boolean httpsEnabled = new Boolean(context.getProperty(PROPERTY_PREFIX + HttpServerManager.HTTPS_ENABLED));
+		defaultSettings.put(HttpServerManager.HTTPS_ENABLED, httpsEnabled);
 
-		SocketListener listener = new SocketListener();
-		listener.setPort(httpPort);
-		return listener;
-	}
+		if (httpsEnabled.booleanValue()) {
+			// HTTPS Port
+			String httpsPortProperty = context.getProperty(PROPERTY_PREFIX + HttpServerManager.HTTPS_PORT);
+			if (httpPortProperty == null)
+				httpPortProperty = context.getProperty(ORG_OSGI_SERVICE_HTTP_PORT_SECURE);
 
-	private SocketListener createHttpsListener(BundleContext context) {
-
-		String sslEnabled = context.getProperty("org.eclipse.equinox.http.jetty.ssl.enabled"); //$NON-NLS-1$
-		if (!Boolean.valueOf(sslEnabled).booleanValue())
-			return null;
-
-		int httpsPort = 443;
-		String httpsPortProperty = context.getProperty("org.osgi.service.http.port.secure"); //$NON-NLS-1$
-		if (httpsPortProperty != null) {
-			try {
-				httpsPort = Integer.parseInt(httpsPortProperty);
-			} catch (NumberFormatException e) {
-				//(log this) ignore and use default
+			int httpsPort = 443;
+			if (httpsPortProperty != null) {
+				try {
+					httpsPort = Integer.parseInt(httpsPortProperty);
+				} catch (NumberFormatException e) {
+					//(log this) ignore and use default
+				}
 			}
-		}
-		if (httpsPort < 1)
-			return null;
+			defaultSettings.put(HttpServerManager.HTTPS_PORT, new Integer(httpsPort));
 
-		SslListener listener = new SslListener();
-		listener.setPort(httpsPort);
+			// SSL SETTINGS
+			String keystore = context.getProperty(PROPERTY_PREFIX + HttpServerManager.SSL_KEYSTORE);
+			if (keystore != null)
+				defaultSettings.put(HttpServerManager.SSL_KEYSTORE, keystore);
 
-		String keyStore = context.getProperty("org.eclipse.equinox.http.jetty.ssl.keystore"); //$NON-NLS-1$
-		if (keyStore != null)
-			listener.setKeystore(keyStore);
+			String password = context.getProperty(PROPERTY_PREFIX + HttpServerManager.SSL_PASSWORD);
+			if (password != null)
+				defaultSettings.put(HttpServerManager.SSL_PASSWORD, password);
 
-		String password = context.getProperty("org.eclipse.equinox.http.jetty.ssl.password"); //$NON-NLS-1$
-		if (password != null)
-			listener.setPassword(password);
+			String keypassword = context.getProperty(PROPERTY_PREFIX + HttpServerManager.SSL_KEYPASSWORD);
+			if (keypassword != null)
+				defaultSettings.put(HttpServerManager.SSL_KEYPASSWORD, keypassword);
 
-		String keyPassword = context.getProperty("org.eclipse.equinox.http.jetty.ssl.keypassword"); //$NON-NLS-1$
-		if (keyPassword != null)
-			listener.setKeyPassword(keyPassword);
+			String needclientauth = context.getProperty(PROPERTY_PREFIX + HttpServerManager.SSL_NEEDCLIENTAUTH);
+			if (needclientauth != null)
+				defaultSettings.put(HttpServerManager.SSL_NEEDCLIENTAUTH, new Boolean(needclientauth));
 
-		String needClientAuth = context.getProperty("org.eclipse.equinox.http.jetty.ssl.needclientauth"); //$NON-NLS-1$
-		if (needClientAuth != null)
-			listener.setNeedClientAuth(Boolean.valueOf(needClientAuth).booleanValue());
+			String wantclientauth = context.getProperty(PROPERTY_PREFIX + HttpServerManager.SSL_WANTCLIENTAUTH);
+			if (wantclientauth != null)
+				defaultSettings.put(HttpServerManager.SSL_WANTCLIENTAUTH, new Boolean(wantclientauth));
 
-		String wantClientAuth = context.getProperty("org.eclipse.equinox.http.jetty.ssl.wantclientauth"); //$NON-NLS-1$
-		if (wantClientAuth != null)
-			listener.setWantClientAuth(Boolean.valueOf(wantClientAuth).booleanValue());
+			String protocol = context.getProperty(PROPERTY_PREFIX + HttpServerManager.SSL_PROTOCOL);
+			if (protocol != null)
+				defaultSettings.put(HttpServerManager.SSL_PROTOCOL, protocol);
 
-		String protocol = context.getProperty("org.eclipse.equinox.http.jetty.ssl.protocol"); //$NON-NLS-1$
-		if (protocol != null)
-			listener.setProtocol(protocol);
+			String algorithm = context.getProperty(PROPERTY_PREFIX + HttpServerManager.SSL_ALGORITHM);
+			if (algorithm != null)
+				defaultSettings.put(HttpServerManager.SSL_ALGORITHM, algorithm);
 
-		String algorithm = context.getProperty("org.eclipse.equinox.http.jetty.ssl.algorithm"); //$NON-NLS-1$
-		if (algorithm != null)
-			listener.setAlgorithm(algorithm);
-
-		String keystoreType = context.getProperty("org.eclipse.equinox.http.jetty.ssl.keystoretype"); //$NON-NLS-1$
-		if (keystoreType != null)
-			listener.setKeystoreType(keystoreType);
-
-		return listener;
-	}
-
-	private HttpContext createHttpContext(BundleContext context) {
-		String contextPathProperty = context.getProperty("org.eclipse.equinox.http.jetty.contextPath"); //$NON-NLS-1$
-		if (contextPathProperty == null)
-			contextPathProperty = "/"; //$NON-NLS-1$
-		HttpContext httpContext = new HttpContext();
-		httpContext.setAttribute(CONTEXT_CLASSLOADER, Thread.currentThread().getContextClassLoader());
-		httpContext.setClassLoader(this.getClass().getClassLoader());
-		httpContext.setContextPath(contextPathProperty);
-		File jettyWorkDir = new File(context.getDataFile(""), "jettywork"); //$NON-NLS-1$ //$NON-NLS-2$
-		jettyWorkDir.mkdir();
-		httpContext.setTempDirectory(jettyWorkDir);
-
-		return httpContext;
-	}
-	
-	public static class InternalHttpServiceServlet implements Servlet {
-		private static final long serialVersionUID = 7477982882399972088L;
-		private Servlet httpServiceServlet = new HttpServiceServlet();
-		private ClassLoader contextLoader;
-
-		public void init(ServletConfig config) throws ServletException {
-			ServletContext context = config.getServletContext();
-			contextLoader = (ClassLoader) context.getAttribute(CONTEXT_CLASSLOADER);
-			
-	        Thread thread = Thread.currentThread();
-	        ClassLoader current = thread.getContextClassLoader();
-			thread.setContextClassLoader(contextLoader);
-			try {
-				httpServiceServlet.init(config);
-			} finally {
-				thread.setContextClassLoader(current);
-			}
+			String keystoretype = context.getProperty(PROPERTY_PREFIX + HttpServerManager.SSL_KEYSTORETYPE);
+			if (keystoretype != null)
+				defaultSettings.put(HttpServerManager.SSL_KEYSTORETYPE, keystoretype);
 		}
 
-		public void destroy() {
-	        Thread thread = Thread.currentThread();
-	        ClassLoader current = thread.getContextClassLoader();
-			thread.setContextClassLoader(contextLoader);
-			try {
-				httpServiceServlet.destroy();
-			} finally {
-				thread.setContextClassLoader(current);
-			}			
-			contextLoader = null;
-		}
+		// Servlet Context Path
+		String contextpath = context.getProperty(PROPERTY_PREFIX + HttpServerManager.CONTEXT_PATH);
+		if (contextpath != null)
+			defaultSettings.put(HttpServerManager.CONTEXT_PATH, contextpath);
 
-		public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException {
-	        Thread thread = Thread.currentThread();
-	        ClassLoader current = thread.getContextClassLoader();
-			thread.setContextClassLoader(contextLoader);
-			try {
-				httpServiceServlet.service(req, res);
-			} finally {
-				thread.setContextClassLoader(current);
-			}
-		}
-
-		public ServletConfig getServletConfig() {
-			return httpServiceServlet.getServletConfig();
-		}
-
-		public String getServletInfo() {
-			return httpServiceServlet.getServletInfo();
-		}
+		return defaultSettings;
 	}
 }
