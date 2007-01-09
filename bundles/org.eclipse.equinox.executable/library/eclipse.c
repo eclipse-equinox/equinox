@@ -436,7 +436,10 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
         case 0: /* normal exit */
             break;
         case RESTART_LAST_EC:
-        	relaunchCommand = getRelaunchCommand(initialArgv);
+        	/* copy for relaunch, +1 to ensure NULL terminated */
+        	relaunchCommand = malloc((initialArgc + 1) * sizeof(_TCHAR*));
+        	memcpy(relaunchCommand, initialArgv, (initialArgc + 1) * sizeof(_TCHAR*));
+        	relaunchCommand[initialArgc] = 0;
         	break;
         case RESTART_NEW_EC:
             if (exitData != 0) {
@@ -888,6 +891,9 @@ static _TCHAR ** getRelaunchCommand( _TCHAR **vmCommand  )
 	
 	relaunch = malloc((1 + i + 1) * sizeof(_TCHAR *));
 	relaunch[idx++] = program;
+	if(begin == -1) {
+		begin = 1;
+	}
 	for (i = begin; vmCommand[i] != NULL; i++){
 		if (_tcsicmp(vmCommand[i], SHOWSPLASH) == 0) {
 			/* remove if the next argument is not the bitmap to show */
