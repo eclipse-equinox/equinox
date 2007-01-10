@@ -1710,8 +1710,8 @@ public class Main {
 		bridge.showSplash(location);
     	long handle = bridge.getSplashHandle();
     	if(handle != 0) {
-    		System.setProperty("org.eclipse.splash.handle", String.valueOf(handle));
-    		System.setProperty("org.eclipse.splash.bundle", location);
+    		System.setProperty("org.eclipse.equinox.launcher.splash.handle", String.valueOf(handle));
+    		System.setProperty("org.eclipse.equinox.launcher.splash.location", location);
     		bridge.updateSplash();
     	}
     }
