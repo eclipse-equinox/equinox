@@ -49,11 +49,16 @@ public class ContextFinder extends ClassLoader implements PrivilegedAction {
 	ArrayList basicFindClassLoaders() {
 		Class[] stack = contextFinder.getClassContext();
 		ArrayList result = new ArrayList(1);
+		ClassLoader previousLoader = null;
 		for (int i = 1; i < stack.length; i++) {
 			ClassLoader tmp = stack[i].getClassLoader();
 			if (stack[i] != ContextFinder.class && tmp != null && tmp != this) {
-				if (checkClassLoader(tmp))
-					result.add(tmp);
+				if (checkClassLoader(tmp)) {
+					if (previousLoader != tmp) {
+						result.add(tmp);
+						previousLoader = tmp;
+					}
+				}
 				// stop at the framework classloader or the first bundle classloader
 				if (tmp == finderClassLoader || tmp instanceof BundleClassLoader)
 					break;
