@@ -281,8 +281,4 @@ public class SystemBundle extends BundleHost {
 	protected void unresolvePermissions(AbstractBundle[] refreshedBundles) {
 		// Do nothing
 	}
-
-	public String getSymbolicName() {
-		return Constants.OSGI_SYSTEM_BUNDLE;
-	}
 }

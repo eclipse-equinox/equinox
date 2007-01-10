@@ -59,8 +59,8 @@ public class BundleRepository {
 	}
 
 	public AbstractBundle[] getBundles(String symbolicName) {
-		if (Constants.getInternalSymbolicName().equals(symbolicName))
-			symbolicName = Constants.OSGI_SYSTEM_BUNDLE;
+		if (Constants.OSGI_SYSTEM_BUNDLE.equals(symbolicName))
+			symbolicName = Constants.getInternalSymbolicName();
 		return (AbstractBundle[]) bundlesBySymbolicName.get(symbolicName);
 	}
 

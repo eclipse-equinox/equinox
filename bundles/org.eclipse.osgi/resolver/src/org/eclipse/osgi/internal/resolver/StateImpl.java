@@ -141,7 +141,9 @@ public abstract class StateImpl implements State {
 		return changes;
 	}
 
-	public BundleDescription[] getBundles(final String symbolicName) {
+	public BundleDescription[] getBundles(String symbolicName) {
+		if (Constants.OSGI_SYSTEM_BUNDLE.equals(symbolicName))
+			symbolicName = Constants.getInternalSymbolicName();
 		final List bundles = new ArrayList();
 		for (Iterator iter = bundleDescriptions.iterator(); iter.hasNext();) {
 			BundleDescription bundle = (BundleDescription) iter.next();
