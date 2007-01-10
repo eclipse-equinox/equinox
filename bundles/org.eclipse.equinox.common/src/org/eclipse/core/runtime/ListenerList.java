@@ -94,7 +94,7 @@ public class ListenerList {
 	 * Adds a listener to this list. This method has no effect if the <a href="#same">same</a>
 	 * listener is already registered.
 	 * 
-	 * @param listener the non @null listener to add
+	 * @param listener the non-<code>null</code> listener to add
 	 */
 	public synchronized void add(Object listener) {
 		// This method is synchronized to protect against multiple threads adding 
@@ -146,7 +146,7 @@ public class ListenerList {
 	 * Removes a listener from this list. Has no effect if the <a href="#same">same</a> 
 	 * listener was not already registered.
 	 *
-	 * @param listener the non @null listener to remove
+	 * @param listener the non-<code>null</code> listener to remove
 	 */
 	public synchronized void remove(Object listener) {
 		// This method is synchronized to protect against multiple threads adding 
