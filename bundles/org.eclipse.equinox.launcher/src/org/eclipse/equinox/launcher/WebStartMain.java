@@ -11,9 +11,16 @@
 package org.eclipse.equinox.launcher;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
+import java.net.JarURLConnection;
 import java.net.URL;
-import java.util.*;
+import java.net.URLConnection;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.StringTokenizer;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
@@ -26,14 +33,17 @@ public class WebStartMain extends Main {
 	private static final String PROP_WEBSTART_AUTOMATIC_INSTALLATION = "eclipse.webstart.automaticInstallation"; //$NON-NLS-1$
 	private static final String DEFAULT_OSGI_BUNDLES = "org.eclipse.equinox.common@2:start, org.eclipse.core.runtime@start"; //$NON-NLS-1$
 	private static final String PROP_OSGI_BUNDLES = "osgi.bundles"; //$NON-NLS-1$
-	private static final String PROP_WEBSTART_PRECISE_BUNDLEID = "eclipse.webstart.preciseBundleId"; //$NON-NLS-1$
 	
 
-	private String[] allJars = null; 	//List all the jars that are on the classpath
-	private Map bundleList = null; //Map an entry (the part before the @) from the osgi.bundles list to a list of URLs. Ie: org.eclipse.core.runtime --> file:c:/foo/org.eclipse.core.runtime_3.1.0/..., file:c:/bar/org.eclipse.core.runtime/... 
-	private Map bundleStartInfo = null; //Keep track of the start level info for each bundle from the osgi.bundle list.
+	private Map allBundles = null; 	// Map of all the bundles found on the classpath. Id -> ArrayList of BundleInfo
+	private List bundleList = null; //The list of bundles found on the osgi.bundle list 
 	
-	private boolean preciseIdExtraction = false; //Flag indicating if the extraction of the id must be done by looking at bundle ids.
+	private class BundleInfo {
+		String bsn;
+		String version;
+		String startData;
+		String location;
+	}
 	
 	public static void main(String[] args) {
 		System.setSecurityManager(null); //TODO Hack so that when the classloader loading the fwk is created we don't have funny permissions. This should be revisited. 
@@ -48,20 +58,17 @@ public class WebStartMain extends Main {
 	}
 
 	protected void basicRun(String[] args) throws Exception {
-		preciseIdExtraction = Boolean.getBoolean(PROP_WEBSTART_PRECISE_BUNDLEID);
 		setDefaultBundles();
-		addOSGiBundle();
 		initializeBundleListStructure();
-		mapURLsToBundleList();
+		discoverBundles();
 		//Set the fwk location since the regular lookup would not find it
 		String fwkURL = searchFor(framework, null);
+		if (fwkURL == null) {
+			//MESSAGE CAN"T FIND THE FWK
+		}
+		allBundles.remove(framework);
 		System.getProperties().put(PROP_FRAMEWORK, fwkURL);
 		super.basicRun(args);
-	}
-
-	private void addOSGiBundle() {
-		//Add osgi to the bundle list, so we can beneficiate of the infrastructure to find its location. It will be removed from the list later on 
-		System.getProperties().put(PROP_OSGI_BUNDLES, System.getProperty(PROP_OSGI_BUNDLES) + ',' + framework);
 	}
 
 	protected URL[] getBootPath(String base) throws IOException {
@@ -75,75 +82,106 @@ public class WebStartMain extends Main {
 	 * Null out all the fields containing data 
 	 */
 	private void cleanup() {
-		allJars = null;
+		allBundles = null;
 		bundleList = null;
-		bundleStartInfo = null;
 	}
 
 	/*
-	 * Find the target bundle among all the jars that are on the classpath.
+	 * Find the target bundle among all the bundles that are on the classpath.
 	 * The start parameter is not used in this context
 	 */
 	protected String searchFor(final String target, String start) {
-		ArrayList matches = (ArrayList) bundleList.get(target);
-		int numberOfURLs = matches.size();
-		if (numberOfURLs == 1) {
-			return extractInnerURL((String) matches.get(0));
+		ArrayList matches = (ArrayList) allBundles.get(target);
+		int numberOfMatches = matches.size();
+		if (numberOfMatches == 1) {
+			return ((BundleInfo) matches.get(0)).location;
 		}
-		if (numberOfURLs == 0)
+		if (numberOfMatches == 0)
 			return null;
-		String urls[] = new String[numberOfURLs];
-		return extractInnerURL(urls[findMax((String[]) matches.toArray(urls))]);
+		
+		String[] versions = new String[numberOfMatches];
+		int highest = 0;
+		for (int i = 0; i < versions.length; i++) {
+			versions[i] = (String) matches.get(i);
+			highest = findMax(versions);
+		}
+		return ((BundleInfo)matches.get(highest)).location;
 	}
 
-	/* 
-	 * Get all the jars available on the webstart classpath
-	 */
-	private String[] getAllJars() {
-		if (allJars != null)
-			return allJars;
+	protected BundleInfo findBundle(final String target, String version, boolean removeMatch) {
+		ArrayList matches = (ArrayList) allBundles.get(target);
+		int numberOfMatches = matches.size();
+		if (numberOfMatches == 1) {
+			//TODO Need to check the version
+			return (BundleInfo) matches.remove(0);
+		}
+		if (numberOfMatches == 0)
+			return null;
 
-		ArrayList collector = new ArrayList();
+		if (version != null) {
+			for (Iterator iterator = matches.iterator(); iterator.hasNext();) {
+				BundleInfo bi = (BundleInfo) iterator.next();
+				if (bi.version.equals(version)) {
+					iterator.remove();
+					return bi;
+				}
+			}
+			//TODO Need to log the fact that we could not find the version mentionned
+			return null;
+		} else {
+			String[] versions = new String[numberOfMatches];
+			int highest = 0;
+			for (int i = 0; i < versions.length; i++) {
+				versions[i] = (String) matches.get(i);
+				highest = findMax(versions);
+			}
+			return (BundleInfo) matches.remove(highest);
+		}
+	}
+	
+	/* 
+	 * Get all the bundles available on the webstart classpath
+	 */
+	private void discoverBundles() {
+		allBundles = new HashMap();
 		try {
 			Enumeration resources = WebStartMain.class.getClassLoader().getResources(JarFile.MANIFEST_NAME);
 			while (resources.hasMoreElements()) {
-				collector.add(((URL) resources.nextElement()).toExternalForm());
+				BundleInfo found = getBundleInfo((URL)resources.nextElement());
+				if (found == null)
+					continue;
+				ArrayList matching = (ArrayList) allBundles.get(found.bsn);
+				if(matching == null) {
+					matching = new ArrayList(1);
+					allBundles.put(found.bsn, matching);
+				}
+				matching.add(found);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		allJars = new String[collector.size()];
-		collector.toArray(allJars);
-		if (debug)
-			printArray("Jars found on the webstart path:\n", allJars); //$NON-//$NON-NLS-1$
+	}
 
-		return allJars;
+	private String extractInnerURL(URL url) {
+		try {
+			URLConnection connection = null;
+			try {
+				connection = url.openConnection();
+				if (connection instanceof JarURLConnection) {
+					return "file:" + ((JarURLConnection) connection).getJarFile().getName();
+				}
+			} finally {
+				if (connection != null)
+					connection.getInputStream().close();
+			}
+		} catch (IOException e) {
+			//Ignore and return the external form
+		}
+		return url.toExternalForm();
 	}
 
 	/*
-	 * Extract the inner URL from a string representing a JAR url string.
-	 */
-	private String extractInnerURL(String url) {
-		if (url.startsWith(JAR_SCHEME)) {
-			url = url.substring(url.indexOf(JAR_SCHEME) + 4);
-		}
-		int lastBang = url.lastIndexOf('!');
-		if (lastBang != -1) {
-			url = url.substring(0, lastBang);
-		}
-		return decode(url);
-	}
-
-	private void printArray(String header, String[] values) {
-		System.err.println(header);
-		for (int i = 0; i < values.length; i++) {
-			System.err.println("\t" + values[i]); //$NON-NLS-1$
-		}
-	}
-
-
-	/*
-	 * Initialize the data structure corresponding to the osgi.bundles list
+	 * Construct bundle info objects from items found on the osgi.bundles list
 	 */
 	private void initializeBundleListStructure() {
 		final char STARTLEVEL_SEPARATOR = '@';
@@ -151,12 +189,11 @@ public class WebStartMain extends Main {
 		//In webstart the bundles list can only contain bundle names with or without a version.
 		String prop = System.getProperty(PROP_OSGI_BUNDLES);
 		if (prop == null || prop.trim().equals("")) { //$NON-NLS-1$
-			bundleList = new HashMap(0);
+			bundleList = new ArrayList(0);
 			return;
 		}
 
-		bundleList = new HashMap(10);
-		bundleStartInfo = new HashMap(10);
+		bundleList = new ArrayList(10);
 		StringTokenizer tokens = new StringTokenizer(prop, ","); //$NON-NLS-1$
 		while (tokens.hasMoreTokens()) {
 			String token = tokens.nextToken().trim();
@@ -164,207 +201,64 @@ public class WebStartMain extends Main {
 			if (token.equals("")) //$NON-NLS-1$
 				continue;
 			int startLevelSeparator;
+			BundleInfo toAdd = new BundleInfo();
+			toAdd.bsn = bundleId;
 			if ((startLevelSeparator = token.lastIndexOf(STARTLEVEL_SEPARATOR)) != -1) {
-				bundleId = token.substring(0, startLevelSeparator);
-				bundleStartInfo.put(bundleId, token.substring(startLevelSeparator));
+				toAdd.bsn = token.substring(0, startLevelSeparator);
+				toAdd.startData = token.substring(startLevelSeparator);
+				//Note that here we don't try to parse the start attribute since this info is then used to recompose the value for osgi.bundles
 			}
-			bundleList.put(bundleId, new ArrayList(1)); // put a list with one element as it is likely that the element will be present
-		}
-		
-	}
-
-	/*
-	 * Associate urls from the list of jars with a bundle from the bundle list
-	 */
-	private void mapURLsToBundleList() {
-		String[] allJars = getAllJars();
-		for (int i = 0; i < allJars.length; i++) {
-			Object[] bundleInfo = extractBundleId(allJars[i]);
-			if (bundleInfo == null)
-				continue;
-			String bsn = (String) bundleInfo[0];
-			if (bsn == null)
-				continue;
-			String version = (String) bundleInfo[1];
-			ArrayList bundleURLs = null;
-			if (bsn != null && version != null) {
-				bundleURLs = (ArrayList) bundleList.get(bsn+ '_' + version);
-			}
-			
-			if (bundleURLs == null) {
-				bundleURLs = (ArrayList) bundleList.get(bsn);
-				if (bundleURLs == null)
-					continue;
-			}
-			bundleURLs.add(allJars[i]);
-			allJars[i] = null; //Remove the entry from the list
+			bundleList.add(toAdd);
 		}
 	}
 
-	/*
-	 * return a string of the form <bundle>_<version>
-	 */
-	private Object[] extractBundleId(String url) {
-		if (preciseIdExtraction)
-			return extractBundleIdFromManifest(url);
-		else 
-			return extractBundleIdFromBundleURL(url);
-	}
-
-	private Object[] extractBundleIdFromManifest(String url) {
+	private BundleInfo getBundleInfo(URL manifestURL) {
 		final String BUNDLE_SYMBOLICNAME = "Bundle-SymbolicName"; //$NON-NLS-1$
 		final String BUNDLE_VERSION = "Bundle-Version"; //$NON-NLS-1$
-		
+
 		Manifest mf;
 		try {
-			mf = new Manifest(new URL(url).openStream()); 
+			mf = new Manifest(manifestURL.openStream());
 			String symbolicNameString = mf.getMainAttributes().getValue(BUNDLE_SYMBOLICNAME);
-			if (symbolicNameString==null)
+			if (symbolicNameString == null)
 				return null;
-			
-			String bundleVersion = mf.getMainAttributes().getValue(BUNDLE_VERSION);
-			
+
+			BundleInfo result = new BundleInfo();
+			result.version = mf.getMainAttributes().getValue(BUNDLE_VERSION);
+			result.location = extractInnerURL(manifestURL); 
 			int pos = symbolicNameString.lastIndexOf(';');
-			if (pos != -1)
-				return new Object[] {symbolicNameString.substring(0, pos), bundleVersion};
-			return new Object[] {symbolicNameString, bundleVersion};
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-			//Ignore
-		} catch (IOException e) {e.printStackTrace();
-			//Ignore
+			if (pos != -1) { 
+				result.bsn = symbolicNameString.substring(0, pos);
+				return result;
+			}
+			result.bsn = symbolicNameString;
+			return result;
+		} catch (IOException e) {
+			if (debug)
+				e.printStackTrace();
 		}
 		return null;
-
 	}
-
-	private Object[] extractBundleIdFromBundleURL(String url) {
-		//First extract the relevant part of the URL
-		int lastBang = url.lastIndexOf('!');
-		if (lastBang == -1)
-			return null;
-		boolean jarSuffix = url.regionMatches(true, lastBang - 4, ".jar", 0, 4); //$NON-NLS-1$
-		int bundleIdStart = url.lastIndexOf('/', lastBang);
-		String fileName = url.substring(bundleIdStart + 3, lastBang - (jarSuffix ? 4 : 0)); // + 3 because URLs from webstart have a funny prefix
-		
-		//Separate the version from the bsn
-		String bsn = null;
-		String version = null;
-		int underScore = fileName.indexOf('_');
-		while (underScore >= 0) {
-			bsn = fileName.substring(0, underScore);
-			version = fileName.substring(underScore + 1);
-			if (! isValidVersion(version)) {
-				underScore = fileName.indexOf('_', underScore + 1);
-			} else {
-				break;
-			}
-		}
-		return new Object[] {bsn, version};
-	}
+	
 	
 	private void buildOSGiBundleList() {
-		//Remove the framework from the bundle list because it does not need to be installed. See addOSGiBundle
-		bundleList.remove(framework);
-
-		String[] jarsOnClasspath = getAllJars();
-		StringBuffer finalBundleList = new StringBuffer(jarsOnClasspath.length * 25);
-		
-		//Add the bundles from the bundle list.
-		Collection allSelectedBundles = bundleList.entrySet();
-		for (Iterator iter = allSelectedBundles.iterator(); iter.hasNext();) {
-			Map.Entry entry = (Map.Entry) iter.next();
-			ArrayList matches = (ArrayList) entry.getValue();
-			int numberOfURLs = matches.size();
-			
-			//Get the start info
-			String startInfo = (String) bundleStartInfo.get(entry.getKey());
-			if (startInfo == null)
-				startInfo = ""; //$NON-NLS-1$
-			
-			if (numberOfURLs == 1) {
-				finalBundleList.append(REFERENCE_SCHEME).append(extractInnerURL((String) matches.get(0))).append(startInfo).append(',');
-				continue;
-			}
-			if (numberOfURLs == 0)
-				continue;
-			String urls[] = new String[numberOfURLs];
-			int found = findMax((String[]) matches.toArray(urls));
-			for (int i = 0; i < urls.length; i++) {
-				if (i != found)
-					continue;
-				finalBundleList.append(REFERENCE_SCHEME).append(extractInnerURL((String) urls[found])).append(startInfo).append(',');
-			}
-		}
-		
-		//Add all the other bundles if required - the common case is to add those
-		if (! Boolean.FALSE.toString().equalsIgnoreCase(System.getProperties().getProperty(PROP_WEBSTART_AUTOMATIC_INSTALLATION))) {
-			for (int i = 0; i < jarsOnClasspath.length; i++) {
-				if (jarsOnClasspath[i] != null)
-					finalBundleList.append(REFERENCE_SCHEME).append(extractInnerURL(jarsOnClasspath[i])).append(',');
-			}			
+		StringBuffer finalBundleList = new StringBuffer(allBundles.size() * 30);
+		//First go through all the bundles of the bundle
+		for (Iterator iterator = bundleList.iterator(); iterator.hasNext();) {
+			BundleInfo searched = (BundleInfo) iterator.next();
+			BundleInfo found = findBundle(searched.bsn, searched.version, true);
+			finalBundleList.append(REFERENCE_SCHEME).append(found.location).append(searched.startData).append(',');
 		}
 
-		System.getProperties().put(PROP_OSGI_BUNDLES, finalBundleList.toString());
-		if (debug)
-			log(finalBundleList.toString());
-	}
-
-	private boolean isValidVersion(String version) {
-		int major = 0;
-		int minor = 0;
-		int micro = 0;
-		String qualifier = ""; //$NON-NLS-1$
-		final String SEPARATOR = ".";
-		
-		try {
-			StringTokenizer st = new StringTokenizer(version, SEPARATOR, true);
-			major = Integer.parseInt(st.nextToken());
-	
-			if (st.hasMoreTokens()) {
-				st.nextToken(); // consume delimiter
-				minor = Integer.parseInt(st.nextToken());
-	
-				if (st.hasMoreTokens()) {
-					st.nextToken(); // consume delimiter
-					micro = Integer.parseInt(st.nextToken());
-	
-					if (st.hasMoreTokens()) {
-						st.nextToken(); // consume delimiter
-						qualifier = st.nextToken();
-	
-						if (st.hasMoreTokens()) {
-							return false;
-						}
-					}
+		if (!Boolean.FALSE.toString().equalsIgnoreCase(System.getProperties().getProperty(PROP_WEBSTART_AUTOMATIC_INSTALLATION))) {
+			for (Iterator iterator = allBundles.values().iterator(); iterator.hasNext();) {
+				ArrayList toAdd = (ArrayList) iterator.next();
+				for (Iterator iterator2 = toAdd.iterator(); iterator2.hasNext();) {
+					BundleInfo bi = (BundleInfo) iterator2.next();
+					finalBundleList.append(REFERENCE_SCHEME).append(bi.location).append(',');
 				}
 			}
 		}
-		catch (NoSuchElementException e) {
-			return false;
-		}
-		catch (NumberFormatException e) {
-			return false;
-		}
-	
-		return isValidVersionSegment(major, minor, micro, qualifier);
-	}
-	
-	private boolean isValidVersionSegment(int major, int minor, int micro, String qualifier) {
-		if (major < 0) {
-			return false;
-		}
-		if (minor < 0) {
-			return false;
-		}
-		if (micro < 0) {
-		}
-		int length = qualifier.length();
-		for (int i = 0; i < length; i++) {
-			if ("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-".indexOf(qualifier.charAt(i)) == -1) { //$NON-NLS-1$
-				return false;
-			}
-		}
-		return true;
+		System.getProperties().put(PROP_OSGI_BUNDLES, finalBundleList.toString());
 	}
 }
