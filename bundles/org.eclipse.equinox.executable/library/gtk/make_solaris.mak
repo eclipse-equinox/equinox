@@ -21,7 +21,7 @@ include ../make_version.mak
 # DEFAULT_OS      - the default value of the "-os" switch
 # DEFAULT_OS_ARCH - the default value of the "-arch" switch
 # DEFAULT_WS      - the default value of the "-ws" switch
-# JAVA_JNI        - the directory containing the Java JNI headers
+# JAVA_HOME        - JAVA_HOME for JNI headers
 
 #ifeq ($(PROGRAM_OUTPUT),)
   PROGRAM_OUTPUT=eclipse
@@ -46,7 +46,7 @@ CFLAGS = -O -s \
 	-DDEFAULT_WS="\"$(DEFAULT_WS)\"" \
 	-I. \
 	-I.. \
-	-I$(JAVA_JNI) -I$(JAVA_JNI)/solaris \
+	-I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/solaris \
 	`pkg-config --cflags gtk+-2.0`
 
 all: $(EXEC) $(DLL)

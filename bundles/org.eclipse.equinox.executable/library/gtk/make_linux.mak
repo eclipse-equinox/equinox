@@ -21,7 +21,7 @@ include ../make_version.mak
 # DEFAULT_OS      - the default value of the "-os" switch
 # DEFAULT_OS_ARCH - the default value of the "-arch" switch
 # DEFAULT_WS      - the default value of the "-ws" switch
-# JAVA_JNI        
+# JAVA_HOME      - JAVA_HOME for jni headers      
 #default value for PROGRAM_OUTPUT
 ifeq ($(PROGRAM_OUTPUT),)
   PROGRAM_OUTPUT=eclipse
@@ -48,7 +48,7 @@ CFLAGS = -O -s -Wall\
 	-DDEFAULT_WS="\"$(DEFAULT_WS)\"" \
 	-I. \
 	-I.. \
-	-I$(JAVA_JNI) -I$(JAVA_JNI)/linux \
+	-I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux \
 	`pkg-config --cflags gtk+-2.0`
 
 all: $(EXEC) $(DLL)

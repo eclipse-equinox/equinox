@@ -18,7 +18,7 @@
 #       -os     <DEFAULT_OS>      - default Eclipse "-os" value
 #       -arch   <DEFAULT_OS_ARCH> - default Eclipse "-arch" value
 #       -ws     <DEFAULT_WS>      - default Eclipse "-ws" value
-#
+#       -java <JAVA_HOME>  - java install for jni headers
 #
 #    This script can also be invoked with the "clean" argument.
 
@@ -29,6 +29,7 @@ programOutput="eclipse"
 defaultOS=""
 defaultOSArch=""
 defaultWS="gtk"
+javaHome=""
 makefile=""
 if [ "$OS" = "" ];  then
     OS=`uname -s`
@@ -112,6 +113,9 @@ while [ "$1" != "" ]; do
     elif [ "$1" = "-output" ] && [ "$2" != "" ]; then
         programOutput="$2"
         shift
+    elif [ "$1" = "-java" ] && [ "$2" != "" ]; then
+        javaHome="$2"
+        shift
     else
         extraArgs="$extraArgs $1"
     fi
@@ -123,9 +127,9 @@ PROGRAM_OUTPUT="$programOutput"
 DEFAULT_OS="$defaultOS"
 DEFAULT_OS_ARCH="$defaultOSArch"
 DEFAULT_WS="$defaultWS"
-JAVA_JNI=/usr/jdk/instances/jdk1.5.0/include
+JAVA_HOME=$javaHome
 
-export OUTPUT_DIR PROGRAM_OUTPUT DEFAULT_OS DEFAULT_OS_ARCH DEFAULT_WS JAVA_JNI
+export OUTPUT_DIR PROGRAM_OUTPUT DEFAULT_OS DEFAULT_OS_ARCH DEFAULT_WS JAVA_HOME
 
 # If the OS is supported (a makefile exists)
 if [ "$makefile" != "" ]; then
