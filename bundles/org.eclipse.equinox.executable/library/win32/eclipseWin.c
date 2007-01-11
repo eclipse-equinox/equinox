@@ -11,6 +11,7 @@
  *******************************************************************************/
 
 #include "eclipseOS.h"
+#include "eclipseUtil.h"
 #include "eclipseCommon.h"
 
 #include <windows.h>
@@ -152,7 +153,7 @@ _TCHAR* findVMLibrary( _TCHAR* command ) {
 		location = _tcsrchr( command, dirSeparator ) + 1;
 		
 		/*check first to see if command already points to the library */
-		if (_tcscmp(location, vmLibrary) == 0) {
+		if (isVMLibrary(command)) {
 			return command;
 		}
 		
@@ -179,7 +180,7 @@ _TCHAR* findVMLibrary( _TCHAR* command ) {
 		}
 	}
 	
-	/* Not found yet, try the registry, we will use the first 1.4 or 1.5 vm we can find*/
+	/* Not found yet, try the registry, we will use the first vm >= 1.4 */
 	jreKeyName = _T("Software\\JavaSoft\\Java Runtime Environment");
 	for (i = 0; i < 2; i++) {
 		jreKey = NULL;
@@ -187,7 +188,7 @@ _TCHAR* findVMLibrary( _TCHAR* command ) {
 			j = 0;
 			while (RegEnumKeyEx(jreKey, j++, keyName, &length, 0, 0, 0, 0) == ERROR_SUCCESS) {  
 				/*look for a 1.4 or 1.5 vm*/ 
-				if( _tcsncmp(_T("1.4"), keyName, 3) == 0 || _tcsncmp(_T("1.5"), keyName, 3) == 0) {
+				if( _tcsncmp(_T("1.4"), keyName, 3) <= 0 ) {
 					subKey = NULL;
 					if(RegOpenKeyEx(jreKey, keyName, 0, KEY_READ, &subKey) == ERROR_SUCCESS) {
 						length = MAX_PATH;					

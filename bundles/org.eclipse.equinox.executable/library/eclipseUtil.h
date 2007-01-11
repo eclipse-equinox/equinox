@@ -15,6 +15,7 @@
 
 #ifdef UNICODE
 #define isJ9VM isJ9VMW
+#define isVMLibrary isVMLibraryW
 #endif
 
 /* Eclipse Launcher Utility Methods */
@@ -22,6 +23,8 @@
 /* Is the given Java VM J9 */
 extern int isJ9VM( _TCHAR* vm );
 
+/* Is the given file a shared library? */
+extern int isVMLibrary( _TCHAR* vm );
 
 #ifdef AIX 
 /* Get the version of the VM */

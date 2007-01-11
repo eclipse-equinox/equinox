@@ -37,6 +37,17 @@ int isJ9VM( _TCHAR* vm )
 	return (_tcsicmp( ch, _T_ECLIPSE("j9") ) == 0);
 }
 
+int isVMLibrary( _TCHAR* vm )
+{
+	_TCHAR *ch = _tcsrchr( vm, '.' );
+	if(ch == NULL)
+		return 0;
+#ifdef _WIN32
+	return (_tcsicmp(ch, _T_ECLIPSE(".dll")) == 0);
+#else
+	return (_tcsicmp(ch, _T_ECLIPSE(".so")) == 0);
+#endif
+}
 
 #ifdef AIX
 
