@@ -68,19 +68,21 @@ static const char* jvmLocations [] = { "j9vm", "../jre/bin/j9vm",
 								 	   NULL };
 
 /* Define local variables . */
-static int          saveArgc   = 0;
-static char**       saveArgv   = 0;
 static long			splashHandle = 0;
 
 /* Local functions */
 static void adjustLibraryPath( char * vmLibrary );
 static char * findLib(char * command);
 
+static void log_handler(const gchar* domain, GLogLevelFlags flags, const gchar* msg, gpointer data) {
+	/* nothing */
+}
 /* Create and Display the Splash Window */
 int showSplash( const char* featureImage )
 {
 	GtkAdjustment* vadj, *hadj;
 	int width, height;
+	guint handlerId;
 	GdkPixbuf * pixbuf;
 	GtkWidget * image;
 	GtkWidget * shellHandle, * vboxHandle, * scrolledHandle, * handle;
@@ -108,8 +110,11 @@ int showSplash( const char* featureImage )
 	gtk_fixed_set_has_window(GTK_FIXED(handle), TRUE);
 	GTK_WIDGET_SET_FLAGS(handle, GTK_CAN_FOCUS);
 	
-	/* TODO Avoid Warnings */
+	/* avoid gtk_scrolled_window_add warning */
+	handlerId = g_log_set_handler("Gtk", G_LOG_LEVEL_WARNING, &log_handler, NULL);
 	gtk_container_add(GTK_CONTAINER(scrolledHandle), handle);
+	g_log_remove_handler("Gtk", handlerId);
+	
 	gtk_widget_show(handle);
 	
 	gtk_container_add(GTK_CONTAINER(shellHandle), vboxHandle);
@@ -150,7 +155,6 @@ void takeDownSplash() {
 char** getArgVM( char* vm ) 
 {
     char** result;
-    char*  version;
 
     if (isJ9VM( vm )) 
         return argVM_J9;
