@@ -293,6 +293,8 @@ public class BundleHost extends AbstractBundle {
 	protected void startWorker(int options) throws BundleException {
 		if ((options & START_TRANSIENT) == 0) {
 			setStatus(Constants.BUNDLE_STARTED, true);
+			if (Debug.DEBUG && Debug.MONITOR_ACTIVATION)
+				new Exception("A persistent start has been called on bundle: " + getBundleData()).printStackTrace();
 		}
 		if (!framework.active || (state & ACTIVE) != 0)
 			return;
@@ -418,6 +420,8 @@ public class BundleHost extends AbstractBundle {
 	protected void stopWorker(int options) throws BundleException {
 		if ((options & STOP_TRANSIENT) == 0) {
 			setStatus(Constants.BUNDLE_STARTED, false);
+			if (Debug.DEBUG && Debug.MONITOR_ACTIVATION)
+				new Exception("A persistent start has been called on bundle: " + getBundleData()).printStackTrace();
 		}
 		if (framework.active) {
 			if ((state & (STOPPING | RESOLVED | INSTALLED)) != 0) {
