@@ -76,8 +76,8 @@ public class Main {
     protected String ws = null;
     protected String arch = null;
 
-    private String name = null; // The name to brand the launcher
-    private String launcher = null; // The full path to the launcher
+//    private String name = null; // The name to brand the launcher
+//    private String launcher = null; // The full path to the launcher
     private String library = null;
 
     private String vm = null;
@@ -115,8 +115,8 @@ public class Main {
     private static final String CONFIGURATION = "-configuration"; //$NON-NLS-1$
     private static final String NOSPLASH = "-nosplash"; //$NON-NLS-1$
     private static final String SHOWSPLASH = "-showsplash"; //$NON-NLS-1$
-    private static final String NAME = "-name"; //$NON-NLS-1$
-    private static final String LAUNCHER = "-launcher"; //$NON-NLS-1$
+//    private static final String NAME = "-name"; //$NON-NLS-1$
+//    private static final String LAUNCHER = "-launcher"; //$NON-NLS-1$
     private static final String LIBRARY = "-library"; //$NON-NLS-1$
 	private static final String NL = "-nl";  //$NON-NLS-1$
     private static final String ENDSPLASH = "-endsplash"; //$NON-NLS-1$
@@ -1296,17 +1296,17 @@ public class Main {
                 found = true;
             }
 
-            // look for the name to use by the launcher
-            if (args[i - 1].equalsIgnoreCase(NAME)) {
-                name = arg;
-                found = true;
-            }
-
-            // look for the launcher location
-            if (args[i - 1].equalsIgnoreCase(LAUNCHER)) {
-                launcher = arg;
-                found = true;
-            }
+//            // look for the name to use by the launcher
+//            if (args[i - 1].equalsIgnoreCase(NAME)) {
+//                name = arg;
+//                found = true;
+//            }
+//
+//            // look for the launcher location
+//            if (args[i - 1].equalsIgnoreCase(LAUNCHER)) {
+//                launcher = arg;
+//                found = true;
+//            }
             
             if (args[i - 1].equalsIgnoreCase(LIBRARY)) {
             	library = arg;
