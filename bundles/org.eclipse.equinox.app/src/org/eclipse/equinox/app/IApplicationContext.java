@@ -45,8 +45,9 @@ public interface IApplicationContext {
 	public Map getArguments();
 
 	/**
-	 * Will end the splash screen for the application.  This method should be 
-	 * called after the application is ready.
+	 * This method should be called once the application is completely initialized and running.
+	 * This method will perform certain operations that are needed once an application is running.  
+	 * One example is bringing down a splash screen if it exists.
 	 */
 	public void applicationRunning();
 
