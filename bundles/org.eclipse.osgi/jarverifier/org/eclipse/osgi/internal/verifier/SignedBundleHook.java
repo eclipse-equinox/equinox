@@ -48,9 +48,9 @@ public class SignedBundleHook implements AdaptorHook, BundleFileWrapperFactoryHo
 	private static BaseAdaptor ADAPTOR;
 	private static String SIGNED_BUNDLE_SUPPORT = "osgi.support.signature.verify"; //$NON-NLS-1$
 	private static int supportSignedBundles;
+	private static CertificateTrustAuthority trustAuthority = new DefaultTrustAuthority(VERIFY_ALL);
 	private ServiceRegistration certVerifierReg;
 	private ServiceRegistration trustAuthorityReg;
-	private CertificateTrustAuthority trustAuthority = new DefaultTrustAuthority(VERIFY_ALL);
 
 	public boolean matchDNChain(String pattern, String dnChain[]) {
 		boolean satisfied = false;
@@ -190,22 +190,25 @@ public class SignedBundleHook implements AdaptorHook, BundleFileWrapperFactoryHo
 
 	static CertificateTrustAuthority getTrustAuthority() {
 		// read the certs chain security property and open the service tracker if not null
+		BundleContext context = SignedBundleHook.getContext();
+		if (context == null)
+			return trustAuthority;
 		if (trustAuthorityTracker == null) {
 			// read the trust provider security property
-			String trustAuthority = Security.getProperty(JarVerifierConstant.TRUST_AUTHORITY);
+			String trustAuthorityProp = Security.getProperty(JarVerifierConstant.TRUST_AUTHORITY);
 			Filter filter = null;
-			if (trustAuthority != null)
+			if (trustAuthorityProp != null)
 				try {
-					filter = FrameworkUtil.createFilter("(&(" + Constants.OBJECTCLASS + "=" + CertificateTrustAuthority.class.getName() + ")(" + JarVerifierConstant.TRUST_AUTHORITY + "=" + trustAuthority + "))");  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$//$NON-NLS-5$
+					filter = FrameworkUtil.createFilter("(&(" + Constants.OBJECTCLASS + "=" + CertificateTrustAuthority.class.getName() + ")(" + JarVerifierConstant.TRUST_AUTHORITY + "=" + trustAuthorityProp + "))");  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$//$NON-NLS-5$
 				} catch (InvalidSyntaxException e) {
 					e.printStackTrace();
 					// do nothing just use no filter TODO we may want to log something
 				}
 			if (filter != null) {
-				trustAuthorityTracker = new ServiceTracker(SignedBundleHook.getContext(), filter, null);
+				trustAuthorityTracker = new ServiceTracker(context, filter, null);
 			}
 			else
-				trustAuthorityTracker = new ServiceTracker(SignedBundleHook.getContext(), CertificateTrustAuthority.class.getName(), null);
+				trustAuthorityTracker = new ServiceTracker(context, CertificateTrustAuthority.class.getName(), null);
 			trustAuthorityTracker.open();
 		}
 		return (CertificateTrustAuthority) trustAuthorityTracker.getService();
