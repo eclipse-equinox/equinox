@@ -71,13 +71,11 @@ public class WebStartMain extends Main {
 		super.basicRun(args);
 	}
 
-	protected URL[] getBootPath(String base) throws IOException {
-		URL[] result = super.getBootPath(base);
+	protected void beforeFwkInvocation() {
 		buildOSGiBundleList();
 		cleanup();
-		return result;
 	}
-
+	
 	/*
 	 * Null out all the fields containing data 
 	 */
@@ -92,23 +90,25 @@ public class WebStartMain extends Main {
 	 */
 	protected String searchFor(final String target, String start) {
 		ArrayList matches = (ArrayList) allBundles.get(target);
+		if (matches == null)
+			return null;
 		int numberOfMatches = matches.size();
 		if (numberOfMatches == 1) {
 			return ((BundleInfo) matches.get(0)).location;
 		}
 		if (numberOfMatches == 0)
 			return null;
-		
+
 		String[] versions = new String[numberOfMatches];
 		int highest = 0;
 		for (int i = 0; i < versions.length; i++) {
 			versions[i] = (String) matches.get(i);
 			highest = findMax(versions);
 		}
-		return ((BundleInfo)matches.get(highest)).location;
+		return ((BundleInfo) matches.get(highest)).location;
 	}
 
-	protected BundleInfo findBundle(final String target, String version, boolean removeMatch) {
+	private BundleInfo findBundle(final String target, String version, boolean removeMatch) {
 		ArrayList matches = (ArrayList) allBundles.get(target);
 		int numberOfMatches = matches.size();
 		if (numberOfMatches == 1) {
@@ -240,7 +240,7 @@ public class WebStartMain extends Main {
 		return null;
 	}
 	
-	
+	//Build the osgi bundle list. The allbundles data structure is changed during the process. 
 	private void buildOSGiBundleList() {
 		StringBuffer finalBundleList = new StringBuffer(allBundles.size() * 30);
 		//First go through all the bundles of the bundle

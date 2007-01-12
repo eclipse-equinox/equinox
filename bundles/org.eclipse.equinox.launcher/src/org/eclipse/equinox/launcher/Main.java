@@ -346,22 +346,18 @@ public class Main {
 			}
 			String fragmentName = buffer.toString();
 			String fragment = null;
-			if(bootLocation != null) {
-				try {
-					URL [] urls = getBootPath(bootLocation);
-					if(urls != null && urls.length > 0) {
-						//the last one is most interesting
-						File entryFile = new File(urls[urls.length - 1].getFile());
-						String dir = entryFile.getParent();
-						if( inDevelopmentMode ) {
-							String devDir = dir + "/" + PLUGIN_ID + "/fragments";
-							fragment = searchFor(fragmentName, devDir);
-						}
-						if(fragment == null)
-							fragment = searchFor(fragmentName, dir);
+			if (bootLocation != null) {
+				URL[] urls = defaultPath;
+				if (urls != null && urls.length > 0) {
+					//the last one is most interesting
+					File entryFile = new File(urls[urls.length - 1].getFile());
+					String dir = entryFile.getParent();
+					if (inDevelopmentMode) {
+						String devDir = dir + "/" + PLUGIN_ID + "/fragments";
+						fragment = searchFor(fragmentName, devDir);
 					}
-				} catch (IOException e) {
-					// ignore
+					if (fragment == null)
+						fragment = searchFor(fragmentName, dir);
 				}
 			}
 			if(fragment == null) {
@@ -414,10 +410,15 @@ public class Main {
         // the location of the boot plugin we are going to use
         handleSplash(bootPath);
 
+        beforeFwkInvocation();
         invokeFramework(passThruArgs, bootPath);
     }
 
-    protected void setSecurityPolicy(URL[] bootPath) {
+    protected void beforeFwkInvocation() {
+    	//Nothing to do.
+	}
+    
+	protected void setSecurityPolicy(URL[] bootPath) {
         String eclipseSecurity = System.getProperty(PROP_ECLIPSESECURITY);
         if (eclipseSecurity != null) {
             SecurityManager sm = System.getSecurityManager();
