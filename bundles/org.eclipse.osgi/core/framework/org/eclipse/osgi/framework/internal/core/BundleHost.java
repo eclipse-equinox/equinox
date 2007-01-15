@@ -280,7 +280,7 @@ public class BundleHost extends AbstractBundle {
 		if (loader == null)
 			return null;
 		Enumeration result = loader.getResources(name);
-		if (result.hasMoreElements())
+		if (result != null && result.hasMoreElements())
 			return result;
 		return null;
 	}
