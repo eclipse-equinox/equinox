@@ -334,7 +334,7 @@ static _TCHAR* findLibrary(_TCHAR* library, _TCHAR* program)
             return findFile(library, _T_ECLIPSE("eclipse"));
         } else {
         	/* file, return it */
-        	return library;
+        	return _tcsdup(library);
         }
 	}
 	

@@ -30,8 +30,8 @@ PROGRAM_LIBRARY = eclipse_$(LIB_VERSION).dll
 MAIN_OBJS = eclipseMain.obj  aeclipseMain.obj  
 COMMON_OBJS = eclipseConfig.obj eclipseCommon.obj   eclipseWinCommon.obj\
 			  aeclipseConfig.obj aeclipseCommon.obj  aeclipseWinCommon.obj
-DLL_OBJS	= eclipse.obj  eclipseWin.obj  eclipseUtil.obj  eclipseJNI.obj\
-	  		  aeclipse.obj aeclipseWin.obj aeclipseUtil.obj aeclipseJNI.obj
+DLL_OBJS	= eclipse.obj  eclipseWin.obj  eclipseUtil.obj  eclipseJNI.obj eclipseShm.obj\
+	  		  aeclipse.obj aeclipseWin.obj aeclipseUtil.obj aeclipseJNI.obj aeclipseShm.obj
 
 LIBS   = kernel32.lib user32.lib comctl32.lib msvcrt.lib
 DLL_LIBS = kernel32.lib user32.lib comctl32.lib gdi32.lib Advapi32.lib msvcrt.lib
@@ -73,6 +73,12 @@ eclipseWinCommon.obj: ../eclipseCommon.h eclipseWinCommon.c
 eclipseJNI.obj: ../eclipseCommon.h ../eclipseOS.h ../eclipseJNI.c
 	$(CC) $(DEBUG) $(wcflags) $(cvarsdll) /Fo$*.obj ../eclipseJNI.c
 
+eclipseShm.obj: ../eclipseShm.h ../eclipseUnicode.h ../eclipseShm.c
+	$(CC) $(DEBUG) $(wcflags) $(cvarsdll) /Fo$*.obj ../eclipseShm.c
+	
+aeclipseShm.obj: ../eclipseShm.h ../eclipseUnicode.h ../eclipseShm.c
+	$(CC) $(DEBUG) $(acflags) $(cvarsdll) /Fo$*.obj ../eclipseShm.c
+	
 aeclipseJNI.obj: ../eclipseCommon.h ../eclipseOS.h ../eclipseJNI.c
 	$(cc) $(DEBUG) $(acflags) $(cvarsdll) /FoaeclipseJNI.obj ../eclipseJNI.c
 		

@@ -51,8 +51,8 @@ endif
 MAIN_OBJS = eclipseMain.o  aeclipseMain.o  
 COMMON_OBJS = eclipseConfig.o eclipseCommon.o   eclipseWinCommon.o\
 			  aeclipseConfig.o aeclipseCommon.o  aeclipseWinCommon.o
-DLL_OBJS	= eclipse.o  eclipseWin.o  eclipseUtil.o  eclipseJNI.o\
-	  		  aeclipse.o aeclipseWin.o aeclipseUtil.o aeclipseJNI.o
+DLL_OBJS	= eclipse.o  eclipseWin.o  eclipseUtil.o  eclipseJNI.o eclipseShm.o\
+	  		  aeclipse.o aeclipseWin.o aeclipseUtil.o aeclipseJNI.o aeclipseShm.o
 	  		  
 LIBS	= -lkernel32 -luser32 -lgdi32 -lcomctl32 -lmsvcrt
 LDFLAGS = -mwindows -mno-cygwin
@@ -106,6 +106,12 @@ eclipseWin.o: ../eclipseOS.h ../eclipseUnicode.h eclipseWin.c
 
 eclipseJNI.o: ../eclipseUnicode.h ../eclipseJNI.c
 	$(CC) $(DEBUG) $(WCFLAGS) -c -o $@ ../eclipseJNI.c
+	
+eclipseShm.o: ../eclipseShm.h ../eclipseUnicode.h ../eclipseShm.c
+	$(CC) $(DEBUG) $(WCFLAGS) -c -o $@ ../eclipseShm.c
+	
+aeclipseShm.o: ../eclipseShm.h ../eclipseUnicode.h ../eclipseShm.c
+	$(CC) $(DEBUG) $(ACFLAGS) -c -o $@ ../eclipseShm.c
 	
 aeclipse.o: ../eclipseOS.h ../eclipseUnicode.h ../eclipseCommon.h ../eclipse.c
 	$(CC) $(DEBUG) $(ACFLAGS) -c -o $@ ../eclipse.c

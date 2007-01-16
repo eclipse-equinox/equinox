@@ -45,9 +45,9 @@ extern "C" {
 #endif
 /*
  * org_eclipse_equinox_launcher_JNIBridge#_set_exit_data
- * Signature: (Ljava/lang/String;)V
+ * Signature: (Ljava/lang/String;Ljava/lang/String;)V
  */
-JNIEXPORT void JNICALL set_exit_data(JNIEnv *, jobject, jstring);
+JNIEXPORT void JNICALL set_exit_data(JNIEnv *, jobject, jstring, jstring);
 
 /*
  * org_eclipse_equinox_launcher_JNIBridge#_update_splash

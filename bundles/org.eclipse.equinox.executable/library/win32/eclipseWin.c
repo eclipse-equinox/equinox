@@ -36,6 +36,14 @@ _TCHAR*  shippedVMDir  = _T("jre\\bin\\");
 /* Define the window system arguments for the Java VM. */
 static _TCHAR*  argVM[] = { NULL };
 
+/* Define local variables for running the JVM and detecting its exit. */
+static int     jvmProcess     = 0;
+static int     jvmExitCode    = 0;
+static int     jvmExitTimeout = 100;
+static int     jvmExitTimerId = 99;
+
+static void CALLBACK  detectJvmExit( HWND hwnd, UINT uMsg, UINT id, DWORD dwTime );
+
 /* define default locations in which to find the jvm shared library
  * these are paths relative to the java exe, the shared library is
  * for example jvmLocations[0] + dirSeparator + vmLibrary */
@@ -215,7 +223,7 @@ _TCHAR* findVMLibrary( _TCHAR* command ) {
 	return NULL;
 }
 
-void restartLauncher( _TCHAR* program, _TCHAR* args[] )
+static _TCHAR* buildCommandLine( _TCHAR* program, _TCHAR* args[] )
 {
 	int   index, length;
 	_TCHAR *commandLine, *ch, *space;
@@ -246,6 +254,11 @@ void restartLauncher( _TCHAR* program, _TCHAR* args[] )
 		*ch++ = _T(' ');
 	}
 	*ch = _T('\0');
+	return commandLine;
+}
+void restartLauncher( _TCHAR* program, _TCHAR* args[] )
+{
+	_TCHAR* commandLine = buildCommandLine(program, args);
 	
 	{
 	STARTUPINFO    si;
@@ -256,4 +269,77 @@ void restartLauncher( _TCHAR* program, _TCHAR* args[] )
     }   
 	}
 	free(commandLine);
+}
+
+int launchJavaVM( _TCHAR* program, _TCHAR* args[] )
+{
+	MSG msg;
+	_TCHAR* commandLine;
+	
+	commandLine = buildCommandLine(program, args);
+	
+	/*
+	* Start the Java virtual machine. Use CreateProcess() instead of spawnv()
+	* otherwise the arguments cannot be freed since spawnv() segments fault.
+	*/
+	{
+	STARTUPINFO    si;
+    PROCESS_INFORMATION  pi;
+    GetStartupInfo(&si);
+    if (CreateProcess(NULL, commandLine, NULL, NULL, TRUE, 0, NULL, NULL, &si, &pi)) {
+    	CloseHandle( pi.hThread );
+    	jvmProcess = (int)pi.hProcess;
+    }    
+	}
+
+	free( commandLine );
+	free( args );
+
+	/* If the child process (JVM) would not start */
+	if (jvmProcess == -1)
+	{
+		/* Return the error number. */
+		jvmExitCode = errno;
+		jvmProcess  = 0;
+	}
+
+	/* else */
+	else
+	{
+        /* Set a timer to detect JVM process termination. */
+        SetTimer( topWindow, jvmExitTimerId, jvmExitTimeout, detectJvmExit );
+
+    	/* Process messages until the JVM terminates.
+    	   This launcher process must continue to process events until the JVM exits
+    	   or else Windows 2K will hang if the desktop properties (e.g., background) are
+    	   changed by the user. Windows does a SendMessage() to every top level window
+    	   process, which blocks the caller until the process responds. */
+   		while (jvmProcess != 0)
+   		{
+   			GetMessage( &msg, NULL, 0, 0 );
+			TranslateMessage( &msg );
+			DispatchMessage( &msg );
+		}
+
+		/* Kill the timer. */
+        KillTimer( topWindow, jvmExitTimerId );
+	}
+
+	/* Return the exit code from the JVM. */
+	return jvmExitCode;
+}
+
+/* Detect JVM Process Termination */
+static void CALLBACK detectJvmExit( HWND hwnd, UINT uMsg, UINT id, DWORD dwTime )
+{
+    DWORD   exitCode;
+
+    /* If the JVM process has terminated */
+    if (!GetExitCodeProcess( (HANDLE)jvmProcess, &exitCode ) ||
+    		 exitCode != STILL_ACTIVE)
+    {
+    	/* Save the JVM exit code. This should cause the loop in startJavaVM() to exit. */
+        jvmExitCode = exitCode;
+        jvmProcess = 0;
+    }
 }

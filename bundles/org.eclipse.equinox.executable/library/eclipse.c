@@ -179,6 +179,8 @@
  */
 
 #include "eclipseOS.h"
+#include "eclipseUtil.h"
+#include "eclipseShm.h"
 #include "eclipseJNI.h"
 #include "eclipseConfig.h"
 #include "eclipseCommon.h"
@@ -208,7 +210,9 @@
 static _TCHAR*  program     = NULL;       /* full pathname of the program */
 static _TCHAR*  programDir  = NULL;       /* directory where program resides */
 static _TCHAR*  javaVM      = NULL;       /* full pathname of the Java VM to run */
+static _TCHAR*  vmLibrary   = NULL;		  /* full path of a java vm library for JNI invocation */
 static _TCHAR*  jarFile     = NULL;		  /* full pathname of the startup jar file to run */
+static _TCHAR*  sharedID    = NULL;       /* ID for the shared memory */
 
 _TCHAR*  exitData    = NULL;		  /* exit data set from Java */
 int		 initialArgc;
@@ -249,6 +253,7 @@ companion startup.jar file (in the same directory as the executable).");
 #define NOSPLASH     _T_ECLIPSE("-nosplash")
 #define LAUNCHER     _T_ECLIPSE("-launcher")
 #define SHOWSPLASH   _T_ECLIPSE("-showsplash")
+#define EXITDATA     _T_ECLIPSE("-exitdata")
 #define STARTUP      _T_ECLIPSE("-startup")
 #define LIBRARY		 _T_ECLIPSE("-library")
 #define VM           _T_ECLIPSE("-vm")
@@ -295,15 +300,17 @@ static int optionsSize = (sizeof(options) / sizeof(options[0]));
 
 /* Define the required VM arguments (all platforms). */
 static _TCHAR*  cp = NULL;
-static _TCHAR** reqVMarg[] = { &cp, NULL };		/* required VM args */
-static _TCHAR** userVMarg     = NULL;     		/* user specific args for the Java VM  */
+static _TCHAR*  cpValue = NULL;					
+static _TCHAR** reqVMarg[] = { &cp, &cpValue, NULL };	/* required VM args */
+static _TCHAR** userVMarg     = NULL;     				/* user specific args for the Java VM  */
 
 /* Local methods */
 static void     parseArgs( int* argc, _TCHAR* argv[] );
 static void     freeArgList( _TCHAR** data );
 static void     getVMCommand( int argc, _TCHAR* argv[], _TCHAR **vmArgv[], _TCHAR **progArgv[] );
+static _TCHAR** combineLists( _TCHAR** c1, _TCHAR** c2 );
 static _TCHAR** parseArgList( _TCHAR *data );
-static _TCHAR*  formatVmCommandMsg( _TCHAR* args[] );
+static _TCHAR*  formatVmCommandMsg( _TCHAR* args[], _TCHAR* vmArgs[], _TCHAR* progArgs[] );
 static _TCHAR*  getDefaultOfficialName();
 static _TCHAR*  findStartupJar();
 static _TCHAR** getRelaunchCommand( _TCHAR **vmCommand );
@@ -333,6 +340,8 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
     _TCHAR**  relaunchCommand = NULL;
     _TCHAR*   errorMsg;
     int       exitCode;
+    int 	  running = 1;
+    int 	  jniLaunching = 1;
 	 
 	/* arg[0] should be the full pathname of this program. */
     program = _tcsdup( argv[0] );
@@ -358,10 +367,14 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
     	exit( 1 );
     }
 
-    /* If the user did not specify a VM to be used */
-    if (vmName == NULL)
+    if (vmName != NULL) {
+    	/* user specified VM */
+    	javaVM = findCommand(vmName);
+    	jniLaunching = isVMLibrary(javaVM);
+    }
+    else if (vmName == NULL)
     {
-    	/* Determine which type of VM should be used. */
+    	/* VM not specified, Determine which type of VM should be used. */
     	vmName = defaultVM;
 
         /* Try to find the VM shipped with eclipse. */
@@ -384,9 +397,13 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
 		javaVM = findCommand( vmName );
 	}
 
-	javaVM = findVMLibrary( javaVM );
+	if(jniLaunching) {
+		vmLibrary = findVMLibrary( javaVM );
+		if(vmLibrary == NULL)
+			jniLaunching = 0;
+	}
 	/* If the VM was not found, display a message and exit. */
-	if (javaVM == NULL)
+	if (!jniLaunching && javaVM == NULL)
 	{
 		if (vmSearchPath != NULL) vmName = vmSearchPath; /* used default VM searching */
     	errorMsg = malloc( (_tcslen(noVMMsg) + _tcslen(officialName) + _tcslen(vmName) + 10) * sizeof(_TCHAR) );
@@ -407,102 +424,162 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
 	}
 
 #ifdef _WIN32
-	if(debug || needConsole) {
+	if( jniLaunching && (debug || needConsole) ) {
 		createConsole();
 	}
 #endif
 
-    /* If the showsplash option was given */
-    if (!noSplash && showSplashArg)
+    /* If the showsplash option was given and we are using JNI */
+    if (!noSplash && showSplashArg && jniLaunching)
     {
     	showSplash(showSplashArg);
     }
     
+    /* not using JNI launching, need some shared data */
+    if (!jniLaunching && createSharedData( &sharedID, MAX_SHARED_LENGTH )) {
+        if (debug) {
+   			if (debug) displayMessage( officialName, shareMsg );
+        }
+    }
+    
 	/* the startup jarFile goes on the classpath */
-	cp = malloc((_tcslen(CLASSPATH_PREFIX) + _tcslen(jarFile) + 1) * sizeof(_TCHAR));
-	cp = _tcscpy(cp, CLASSPATH_PREFIX);
-	_tcscat(cp, jarFile);
+    if(jniLaunching) {
+    	/* JNI launching, classpath is set using -Djava.class.path */
+		cp = malloc((_tcslen(CLASSPATH_PREFIX) + _tcslen(jarFile) + 1) * sizeof(_TCHAR));
+		cp = _tcscpy(cp, CLASSPATH_PREFIX);
+		_tcscat(cp, jarFile);
+    } else {
+    	/* exec java, jar is specified with -jar */
+    	cp = JAR;
+    	cpValue = malloc((_tcslen(jarFile) + 1) * sizeof(_TCHAR));
+    	_tcscpy(cpValue, jarFile);
+    }
 	
     /* Get the command to start the Java VM. */
     userVMarg = vmArgs;
     getVMCommand( argc, argv, &vmCommandArgs, &progCommandArgs );
 	
+    if (!jniLaunching) {
+    	vmCommand = combineLists(vmCommandArgs, progCommandArgs);
+    }
+    
     /* While the Java VM should be restarted */
-    vmCommand = vmCommandArgs;
-	vmCommandMsg = formatVmCommandMsg( vmCommand );
-	if (debug) _tprintf( goVMMsg, vmCommandMsg );
-	exitCode = startJavaVM(javaVM, vmCommandArgs, progCommandArgs );
-    switch( exitCode ) {
-        case 0: /* normal exit */
-            break;
-        case RESTART_LAST_EC:
-        	/* copy for relaunch, +1 to ensure NULL terminated */
-        	relaunchCommand = malloc((initialArgc + 1) * sizeof(_TCHAR*));
-        	memcpy(relaunchCommand, initialArgv, (initialArgc + 1) * sizeof(_TCHAR*));
-        	relaunchCommand[initialArgc] = 0;
-        	break;
-        case RESTART_NEW_EC:
-            if (exitData != 0) {
-		    	if (vmCommandList != NULL) freeArgList( vmCommandList );
-                vmCommandList = parseArgList( exitData );
-                relaunchCommand = getRelaunchCommand(vmCommandList);
-            } else {
-                if (debug) displayMessage( officialName, shareMsg );
-            }
-            break;
-		default: {
-			_TCHAR *title = _tcsdup(officialName);
-            vmCommand = NULL;
-            errorMsg = NULL;
-            if (exitData != 0) {
-            	errorMsg = exitData;
-                if (_tcslen( errorMsg ) == 0) {
-            	    free( errorMsg );
-            	    errorMsg = NULL;
-                } else {
-                    _TCHAR *str;
-                	if (_tcsncmp(errorMsg, _T_ECLIPSE("<title>"), _tcslen(_T_ECLIPSE("<title>"))) == 0) {
-						str = _tcsstr(errorMsg, _T_ECLIPSE("</title>"));
-						if (str != NULL) {
-							free( title );
-							str[0] = _T_ECLIPSE('\0');
-							title = _tcsdup( errorMsg + _tcslen(_T_ECLIPSE("<title>")) );
-							str = _tcsdup( str + _tcslen(_T_ECLIPSE("</title>")) );
-							free( errorMsg );
-							errorMsg = str;
-						}
-                	}
-                }
-            } else {
-                if (debug) displayMessage( title, shareMsg );
-            }
-            if (errorMsg == NULL) {
-                errorMsg = malloc( (_tcslen(exitMsg) + _tcslen(vmCommandMsg) + 10) * sizeof(_TCHAR) );
-                _stprintf( errorMsg, exitMsg, exitCode, vmCommandMsg );
-            }
-            displayMessage( title, errorMsg );
-            free( title );
-            free( errorMsg );
-            break;
-        }
+    while(running)
+    {
+		vmCommandMsg = formatVmCommandMsg( vmCommand, vmCommandArgs, progCommandArgs );
+		if (debug) _tprintf( goVMMsg, vmCommandMsg );
+
+		if(jniLaunching) {
+			exitCode = startJavaVM(vmLibrary, vmCommandArgs, progCommandArgs);
+		} else {
+			exitCode = launchJavaVM(javaVM, vmCommand);
+		}
+		
+	    switch( exitCode ) {
+	        case 0: /* normal exit */
+	        	running = 0;
+	            break;
+	        case RESTART_LAST_EC:
+	        	if (jniLaunching) {
+		        	/* copy for relaunch, +1 to ensure NULL terminated */
+		        	relaunchCommand = malloc((initialArgc + 1) * sizeof(_TCHAR*));
+		        	memcpy(relaunchCommand, initialArgv, (initialArgc + 1) * sizeof(_TCHAR*));
+		        	relaunchCommand[initialArgc] = 0;
+		        	running = 0;
+	        	}
+	        	break;
+	        	
+	        case RESTART_NEW_EC:
+	        	if(!jniLaunching) {
+	        		getSharedData( sharedID, &exitData );
+	        	}
+	            if (exitData != 0) {
+			    	if (vmCommandList != NULL) freeArgList( vmCommandList );
+			    	else free( vmCommand );
+	                vmCommandList = parseArgList( exitData );
+	                vmCommand = &vmCommandList[1]; /* command list starts with program */
+	                if (jniLaunching) {
+	                	relaunchCommand = getRelaunchCommand(vmCommand);
+	                	running = 0;
+	                }
+	            } else {
+	                if (debug) displayMessage( officialName, shareMsg );
+	            }
+	            break;
+			default: {
+				_TCHAR *title = _tcsdup(officialName);
+	            running = 0;
+	            errorMsg = NULL;
+	            if(!jniLaunching) {
+	        		getSharedData( sharedID, &exitData );
+	        	}
+	            if (exitData != 0) {
+	            	errorMsg = exitData;
+	                if (_tcslen( errorMsg ) == 0) {
+	            	    free( errorMsg );
+	            	    errorMsg = NULL;
+	                } else {
+	                    _TCHAR *str;
+	                	if (_tcsncmp(errorMsg, _T_ECLIPSE("<title>"), _tcslen(_T_ECLIPSE("<title>"))) == 0) {
+							str = _tcsstr(errorMsg, _T_ECLIPSE("</title>"));
+							if (str != NULL) {
+								free( title );
+								str[0] = _T_ECLIPSE('\0');
+								title = _tcsdup( errorMsg + _tcslen(_T_ECLIPSE("<title>")) );
+								str = _tcsdup( str + _tcslen(_T_ECLIPSE("</title>")) );
+								free( errorMsg );
+								errorMsg = str;
+							}
+	                	}
+	                }
+	            } else {
+	                if (debug) displayMessage( title, shareMsg );
+	            }
+	            if (errorMsg == NULL) {
+	                errorMsg = malloc( (_tcslen(exitMsg) + _tcslen(vmCommandMsg) + 10) * sizeof(_TCHAR) );
+	                _stprintf( errorMsg, exitMsg, exitCode, vmCommandMsg );
+	            }
+	            displayMessage( title, errorMsg );
+	            free( title );
+	            free( errorMsg );
+	            break;
+	        }
+	    }
+	    free( vmCommandMsg );
     }
     
     if(relaunchCommand != NULL)
     	restartLauncher(program, relaunchCommand);
     	
     /* Cleanup time. */
-    free( vmCommandMsg );
+    free( vmCommandArgs );
+    free( progCommandArgs );
     free( jarFile );
-    free( cp );
     free( programDir );
     free( program );
-    if ( vmSearchPath != NULL ) free( vmSearchPath );
-    if ( vmCommandList != NULL ) freeArgList( vmCommandList );
     free( officialName );
+    if ( cp != JAR )			 free( cp );
+    if ( cpValue != NULL)		 free( cpValue );
+    if ( vmSearchPath != NULL )  free( vmSearchPath );
+    if ( vmCommandList != NULL ) freeArgList( vmCommandList );
+    else if( exitData != NULL )	 free( exitData );
 
     return 0;
 }
 
+static _TCHAR** combineLists( _TCHAR** c1, _TCHAR** c2 ) {
+	int n1 = -1, n2 = -1;
+	_TCHAR** result;
+	
+	while(c1[++n1] != NULL) {}
+	while(c2[++n2] != NULL) {}
+	
+	result = malloc((n1 + n2 + 1) * sizeof(_TCHAR*));
+	memset(result, 0, (n1 + n2 + 1) * sizeof(_TCHAR*));
+	memcpy(result, c1, n1 * sizeof(_TCHAR*));
+	memcpy(result + n1, c2, n2 * sizeof(_TCHAR*));
+	return result;
+}
 /*
  * Parse arguments of the command.
  */
@@ -642,16 +719,18 @@ static void getVMCommand( int argc, _TCHAR* argv[], _TCHAR **vmArgv[], _TCHAR **
 		
 	/* For each required VM arg */
 	for (src = 0; src < nReqVMarg; src++)
-    	(*vmArgv)[ dst++ ] = *(reqVMarg[ src ]);
+		if( *(reqVMarg[src]) != NULL)
+			(*vmArgv)[ dst++ ] = *(reqVMarg[ src ]);
 	
 	(*vmArgv)[dst] = NULL;
 	
 	/* Program arguments */
     /*  OS <os> + WS <ws> + ARCH <arch> + LAUNCHER <launcher> + NAME <officialName> +
-     *  + LIBRARY <library> + SHOWSPLASH <cmd> + argv[] + VM + <vm> + VMARGS + vmArg + requiredVMargs
+     *  + LIBRARY <library> + SHOWSPLASH <cmd> + EXITDATA <cmd> + STARTUP <jar> + argv[] + VM + <vm> + 
+     * VMARGS + vmArg + requiredVMargs
      *  + NULL)
      */
-    totalProgArgs  = 2 + 2 + 2 + 2 + 2 + 2 + 2 + argc + 2 + 1 + nVMarg + nReqVMarg + 1;
+    totalProgArgs  = 2 + 2 + 2 + 2 + 2 + 2 + 2 + 2 + 2 + argc + 2 + 1 + nVMarg + nReqVMarg + 1;
 	*progArgv = malloc( totalProgArgs * sizeof( _TCHAR* ) );
     dst = 0;
     
@@ -679,11 +758,21 @@ static void getVMCommand( int argc, _TCHAR* argv[], _TCHAR **vmArgv[], _TCHAR **
 		(*progArgv)[ dst++ ] = library;
 	}
 	
+	/* the startup jar */
+	(*progArgv)[ dst++ ] = STARTUP;
+	(*progArgv)[ dst++ ] = jarFile;
+	
 	/* Append the show splash window command, if defined. */
     if (!noSplash)
     {
         (*progArgv)[ dst++ ] = SHOWSPLASH;
     }
+    
+	/* Append the exit data command. */
+	if (sharedID) {
+		(*progArgv)[ dst++ ] = EXITDATA;
+		(*progArgv)[ dst++ ] = sharedID;
+	}
 
 	/* Append the remaining user defined arguments. */
     for (src = 1; src < argc; src++)
@@ -693,7 +782,10 @@ static void getVMCommand( int argc, _TCHAR* argv[], _TCHAR **vmArgv[], _TCHAR **
 
     /* Append VM and VMARGS to be able to relaunch using exit data. */
 	(*progArgv)[ dst++ ] = VM;
-	(*progArgv)[ dst++ ] = javaVM;
+	if(vmLibrary != NULL)
+		(*progArgv)[ dst++ ] = vmLibrary;
+	else
+		(*progArgv)[ dst++ ] = javaVM;
     (*progArgv)[ dst++ ] = VMARGS;
     
 	for (src = 0; src < nVMarg; src++)
@@ -701,7 +793,8 @@ static void getVMCommand( int argc, _TCHAR* argv[], _TCHAR **vmArgv[], _TCHAR **
 	
     /* For each required VM arg */
     for (src = 0; src < nReqVMarg; src++)
-        (*progArgv)[ dst++ ] = *(reqVMarg[ src ]);
+    	if (*(reqVMarg[src]) != NULL)
+    		(*progArgv)[ dst++ ] = *(reqVMarg[ src ]);
 
     (*progArgv)[ dst++ ] = NULL;
 
@@ -712,19 +805,28 @@ static void getVMCommand( int argc, _TCHAR* argv[], _TCHAR **vmArgv[], _TCHAR **
   * This method formats a string with the JVM start command (and all arguments)
   * that can be used in displaying error messages. The string returned from this
   * method is probably not NLS compliant and must be deallocated by the caller.
+  * 
+  * The arguments in the message are either args (if not null) or the combination 
+  * of vmArgs + progArgs
   */
-static _TCHAR* formatVmCommandMsg( _TCHAR* args[] )
+static _TCHAR*  formatVmCommandMsg( _TCHAR* args[], _TCHAR* vmArgs[], _TCHAR* progArgs[] )
 {
 	int   index;
-    int   length;
+    int   length = 0;
+    _TCHAR** list;
     _TCHAR* ch;
     _TCHAR* message;
 
 	/* Determine the length of the message buffer. */
-	length = 0;
-	for (index = 0; args[index] != NULL; index++)
-	{
-		length += _tcslen(args[index]) + 1;
+	if(args != NULL) list = args;
+	else             list = vmArgs;
+	while(list != NULL) {
+		for (index = 0; list[index] != NULL; index++)
+		{
+			length += _tcslen(list[index]) + 1;
+		}
+		if(list == vmArgs) list = progArgs;
+		else 			   list = NULL;
 	}
 	message = malloc( (length + 5) * sizeof(_TCHAR) );
 	
@@ -732,13 +834,19 @@ static _TCHAR* formatVmCommandMsg( _TCHAR* args[] )
 	   on a new line. Otherwise, the Motif MessageBox does not automatically wrap
 	   the messages and the message window can extend beyond both sides of the display. */
 	ch = message;
-	for (index = 0; args[index] != NULL; index++)
-	{
-		if (args[index][0] == _T_ECLIPSE('-') && *(ch-1) == _T_ECLIPSE(' '))
-			*(ch-1) = _T_ECLIPSE('\n');
-		_tcscpy( ch, args[index] );
-		ch += _tcslen( args[index] );
-		*ch++ = _T_ECLIPSE(' ');
+	if(args != NULL) list = args;
+	else             list = vmArgs;
+	while(list != NULL) {
+		for (index = 0; list[index] != NULL; index++)
+		{
+			if (list[index][0] == _T_ECLIPSE('-') && *(ch-1) == _T_ECLIPSE(' '))
+				*(ch-1) = _T_ECLIPSE('\n');
+			_tcscpy( ch, list[index] );
+			ch += _tcslen( list[index] );
+			*ch++ = _T_ECLIPSE(' ');
+		}
+		if(list == vmArgs) list = progArgs;
+		else 			   list = NULL;
 	}
 	*ch = _T_ECLIPSE('\0');
 
@@ -883,7 +991,7 @@ static _TCHAR ** getRelaunchCommand( _TCHAR **vmCommand  )
 	if (vmCommand == NULL) return NULL;
 	while(vmCommand[++i] != NULL){
 		if ( begin == -1 && _tcsicmp( vmCommand[i], *reqVMarg[req] ) == 0) {
-			if(reqVMarg[++req] == NULL){
+			if(reqVMarg[++req] == NULL || *reqVMarg[req] == NULL){
 				begin = i + 1;
 			}
 		}
@@ -901,9 +1009,8 @@ static _TCHAR ** getRelaunchCommand( _TCHAR **vmCommand  )
 				i++;
 				continue;
 			}
-		} else if(_tcsicmp(vmCommand[i], JAR) == 0 ) {
-			/* skip -jar */
-			i++;
+		} else if(_tcsncmp(vmCommand[i], CLASSPATH_PREFIX, _tcslen(CLASSPATH_PREFIX)) == 0) {
+			/* skip -Djava.class.path=... */
 			continue;
 		}
 		relaunch[idx++] = vmCommand[i];
