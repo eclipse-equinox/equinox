@@ -184,7 +184,7 @@ static jstring newJavaString(JNIEnv *env, _TCHAR * str)
 static jobjectArray createRunArgs( JNIEnv *env, _TCHAR * args[] ) {
 	int index = 0, length = -1;
 	jclass stringClass;
-	jobjectArray stringArray;
+	jobjectArray stringArray = NULL;
 	jstring string;
 	
 	/*count the number of elements first*/

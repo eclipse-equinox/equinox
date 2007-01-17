@@ -33,7 +33,7 @@ PROGRAM_LIBRARY=$(PROGRAM_OUTPUT)_$(LIB_VERSION).so
 CC=gcc
 MAIN_OBJS = eclipseMain.o
 COMMON_OBJS = eclipseConfig.o eclipseCommon.o eclipseGtkCommon.o
-DLL_OBJS	= eclipse.o eclipseGtk.o eclipseUtil.o eclipseJNI.o eclipseMozilla.o
+DLL_OBJS	= eclipse.o eclipseGtk.o eclipseUtil.o eclipseJNI.o eclipseMozilla.o eclipseShm.o
 
 EXEC = $(PROGRAM_OUTPUT)
 DLL = $(PROGRAM_LIBRARY)
@@ -76,6 +76,9 @@ eclipseConfig.o: ../eclipseConfig.c ../eclipseConfig.h ../eclipseOS.h
 	
 eclipseMozilla.o: ../eclipseMozilla.c ../eclipseMozilla.h ../eclipseOS.h
 	$(CC) $(CFLAGS) -c ../eclipseMozilla.c -o eclipseMozilla.o
+
+eclipseShm.o: ../eclipseShm.h ../eclipseUnicode.h ../eclipseShm.c
+	$(CC) $(CFLAGS) -c ../eclipseShm.c -o eclipseShm.o
 
 $(EXEC): $(MAIN_OBJS) $(COMMON_OBJS)
 	$(CC) -o $(EXEC) $(MAIN_OBJS) $(COMMON_OBJS) $(LIBS)

@@ -289,3 +289,42 @@ void restartLauncher( char* program, char* args[] )
 	execv(program, args);
 }
 
+int launchJavaVM( char* program, char* args[] )
+{
+	int     jvmExitCode = 1;
+  	pid_t   jvmProcess;
+  	int     exitCode;
+  	int 	numArgs = -1;
+  	char ** command;
+  	
+#ifdef MOZILLA_FIX
+	fixEnvForMozilla();
+#endif /* MOZILLA_FIX */
+
+	while(args[++numArgs] != NULL) {}
+	command = malloc( (1 + numArgs + 1) * sizeof(char*));
+	memset(command, 0, (1 + numArgs + 1) * sizeof(char*));
+	command[0] = program;
+	memcpy(command + 1, args, numArgs * sizeof(char*));
+	
+	jvmProcess = fork();
+  	if (jvmProcess == 0) 
+    {
+    	/* Child process ... start the JVM */
+      	execv(program, command);
+
+      	/* The JVM would not start ... return error code to parent process. */
+      	_exit(errno);
+    }
+
+	/* If the JVM is still running, wait for it to terminate. */
+	if (jvmProcess != 0)
+	{
+		wait(&exitCode);
+      	if (WIFEXITED(exitCode))
+			jvmExitCode = WEXITSTATUS(exitCode);
+    }
+
+	free(command);
+	return jvmExitCode;
+}
