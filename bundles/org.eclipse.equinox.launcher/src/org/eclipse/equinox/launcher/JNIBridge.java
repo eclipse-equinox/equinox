@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006 IBM Corporation and others.
+ * Copyright (c) 2006, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at 
@@ -16,7 +16,7 @@ package org.eclipse.equinox.launcher;
  *
  */
 public class JNIBridge {
-	private native void _set_exit_data(String data);
+	private native void _set_exit_data(String sharedId, String data);
 	private native void _update_splash();
 	private native long  _get_splash_handle();
 	private native void _show_splash(String bitmap);
@@ -39,14 +39,14 @@ public class JNIBridge {
 		libraryLoaded = true;
 	}
 
-	public boolean setExitData(String data) {
+	public boolean setExitData(String sharedId, String data) {
 		try {
-			_set_exit_data(data);
+			_set_exit_data(sharedId, data);
 			return true;
 		} catch (UnsatisfiedLinkError e) {
 			if(!libraryLoaded){
 				loadLibrary();
-				return setExitData(data);
+				return setExitData(sharedId, data);
 			}
 			return false;
 		}
@@ -79,7 +79,7 @@ public class JNIBridge {
 	}
 
 	public long getSplashHandle() {
-		try {
+		try { 
 			return _get_splash_handle();
 		} catch (UnsatisfiedLinkError e) {
 			if(!libraryLoaded){

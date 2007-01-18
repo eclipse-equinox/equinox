@@ -79,6 +79,7 @@ public class Main {
 //    private String name = null; // The name to brand the launcher
 //    private String launcher = null; // The full path to the launcher
     private String library = null;
+    private String exitData = null;
 
     private String vm = null;
     private String[] vmargs = null;
@@ -115,6 +116,7 @@ public class Main {
     private static final String CONFIGURATION = "-configuration"; //$NON-NLS-1$
     private static final String NOSPLASH = "-nosplash"; //$NON-NLS-1$
     private static final String SHOWSPLASH = "-showsplash"; //$NON-NLS-1$
+    private static final String EXITDATA = "-exitdata"; //$NON-NLS-1$
 //    private static final String NAME = "-name"; //$NON-NLS-1$
 //    private static final String LAUNCHER = "-launcher"; //$NON-NLS-1$
     private static final String LIBRARY = "-library"; //$NON-NLS-1$
@@ -1157,7 +1159,7 @@ public class Main {
         String data = System.getProperty(PROP_EXITDATA);
         if (data == null)
             return;
-        bridge.setExitData(data);
+        bridge.setExitData(exitData, data);
     }
     
     /**
@@ -1297,6 +1299,11 @@ public class Main {
                 found = true;
             }
 
+            if (args[i - 1].equalsIgnoreCase(EXITDATA)) {
+            	exitData = arg;
+            	found = true;
+            }
+            
 //            // look for the name to use by the launcher
 //            if (args[i - 1].equalsIgnoreCase(NAME)) {
 //                name = arg;

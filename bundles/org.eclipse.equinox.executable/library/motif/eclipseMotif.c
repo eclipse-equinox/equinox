@@ -74,6 +74,9 @@ static const char* jvmLocations [] = { "j9vm",
 extern XtAppContext appContext;
 extern Widget       topWindow;
 
+static pid_t   jvmProcess = 0;
+static int     jvmExitCode;
+
 /* Define local variables for handling the splash window and its image. */
 static Widget shellHandle = 0;
 
@@ -405,4 +408,38 @@ void restartLauncher( char* program, char* args[] )
 {
 	/* just restart in-place */
 	execv(program, args);
+}
+
+int launchJavaVM( char* args[] ) 
+{
+    int    exitCode;
+
+#ifdef NETSCAPE_FIX
+	fixEnvForNetscape();
+#endif /* NETSCAPE_FIX */
+#ifdef MOZILLA_FIX
+	fixEnvForMozilla();
+#endif /* MOZILLA_FIX */
+
+	/* Create a child process for the JVM. */	
+	jvmProcess = fork();
+	if (jvmProcess == 0) 
+	{
+		/* Child process ... start the JVM */
+		execv( args[0], args );
+		
+		/* The JVM would not start ... return error code to parent process. */
+		jvmExitCode = errno;
+        exit( jvmExitCode );
+	}
+	
+	/* If the JVM is still running, wait for it to terminate. */
+	if (jvmProcess != 0)
+	{
+		wait( &exitCode );
+		jvmExitCode = ((exitCode & 0x00ff) == 0 ? (exitCode >> 8) : exitCode); /* see wait(2) */
+	}
+	
+	/* Return the exit code from the JVM. */
+	return jvmExitCode;
 }

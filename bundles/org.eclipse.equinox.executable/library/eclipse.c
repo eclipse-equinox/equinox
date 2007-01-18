@@ -349,7 +349,8 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
     parseArgs( &argc, argv );
 
 	/* Initialize official program name */
-	officialName = name != NULL ? _tcsdup( name ) : getDefaultOfficialName();
+    if (officialName != NULL)
+    	officialName = name != NULL ? _tcsdup( name ) : getDefaultOfficialName();
 
     /* Initialize the window system. */
     initWindowSystem( &argc, argv, !noSplash );
@@ -555,7 +556,6 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
     free( jarFile );
     free( programDir );
     free( program );
-    free( officialName );
     if ( vmCommand != NULL )	 free( vmCommand );
     if ( cp != JAR )			 free( cp );
     if ( cpValue != NULL)		 free( cpValue );

@@ -18,20 +18,20 @@
 					<value>org.eclipse.cdt.core.MakeErrorParser;org.eclipse.cdt.core.GCCErrorParser;org.eclipse.cdt.core.GASErrorParser;org.eclipse.cdt.core.GLDErrorParser;org.eclipse.cdt.core.VCErrorParser;</value>
 				</dictionary>
 				<dictionary>
-					<key>org.eclipse.cdt.make.core.environment</key>
-					<value>JAVA_JNI=C:/Dev/Java/IBM_1.5.0/include|DEFAULT_OS=${system_property:osgi.os}|DEFAULT_WS=${system_property:osgi.ws}|DEFAULT_OS_ARCH=${system_property:osgi.arch}|</value>
-				</dictionary>
-				<dictionary>
 					<key>org.eclipse.cdt.make.core.enableAutoBuild</key>
 					<value>false</value>
 				</dictionary>
 				<dictionary>
-					<key>org.eclipse.cdt.make.core.build.target.inc</key>
-					<value>all</value>
+					<key>org.eclipse.cdt.make.core.environment</key>
+					<value>JAVA_JNI=C:/Dev/Java/IBM_1.5.0/include|X11_HOME=/usr/X11R6|DEFAULT_OS=${system_property:osgi.os}|DEFAULT_WS=${system_property:osgi.ws}|MOTIF_HOME=/usr/X11|DEFAULT_OS_ARCH=${system_property:osgi.arch}|</value>
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.enableFullBuild</key>
 					<value>true</value>
+				</dictionary>
+				<dictionary>
+					<key>org.eclipse.cdt.make.core.build.target.inc</key>
+					<value>all</value>
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.enabledIncrementalBuild</key>
@@ -42,12 +42,12 @@
 					<value>\org.eclipse.equinox.executable\library\${system_property:osgi.ws}</value>
 				</dictionary>
 				<dictionary>
-					<key>org.eclipse.cdt.make.core.build.command</key>
-					<value>make</value>
-				</dictionary>
-				<dictionary>
 					<key>org.eclipse.cdt.make.core.build.target.clean</key>
 					<value>clean</value>
+				</dictionary>
+				<dictionary>
+					<key>org.eclipse.cdt.make.core.build.command</key>
+					<value>make</value>
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.enableCleanBuild</key>
