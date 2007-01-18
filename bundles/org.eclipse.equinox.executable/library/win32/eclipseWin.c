@@ -225,14 +225,15 @@ _TCHAR* findVMLibrary( _TCHAR* command ) {
 
 static _TCHAR* buildCommandLine( _TCHAR* program, _TCHAR* args[] )
 {
-	int   index, length;
+	int   index, length = 0;
 	_TCHAR *commandLine, *ch, *space;
 
 	/*
 	* Build the command line. Any argument with spaces must be in
 	* double quotes in the command line. 
 	*/
-	length = _tcslen(program) + 1;
+	if(program != NULL) 
+		length = _tcslen(program) + 1;
 	for (index = 0; args[index] != NULL; index++)
 	{
 		/* String length plus space character */
@@ -240,10 +241,13 @@ static _TCHAR* buildCommandLine( _TCHAR* program, _TCHAR* args[] )
 		/* Quotes */
 		if (_tcschr( args[ index ], _T(' ') ) != NULL) length += 2;
 	}
+	
 	commandLine = ch = malloc ( (length + 1) * sizeof(_TCHAR) );
-	_tcscpy(ch, program);
-	ch += _tcslen(program);
-	*ch++ = _T(' ');
+	if (program != NULL) {
+		_tcscpy(ch, program);
+		ch += _tcslen(program);
+		*ch++ = _T(' ');
+	}
 	for (index = 0; args[index] != NULL; index++)
 	{
 		space = _tcschr( args[ index ], _T(' '));
@@ -271,12 +275,12 @@ void restartLauncher( _TCHAR* program, _TCHAR* args[] )
 	free(commandLine);
 }
 
-int launchJavaVM( _TCHAR* program, _TCHAR* args[] )
+int launchJavaVM( _TCHAR* args[] )
 {
 	MSG msg;
 	_TCHAR* commandLine;
 	
-	commandLine = buildCommandLine(program, args);
+	commandLine = buildCommandLine(NULL, args);
 	
 	/*
 	* Start the Java virtual machine. Use CreateProcess() instead of spawnv()
@@ -293,7 +297,6 @@ int launchJavaVM( _TCHAR* program, _TCHAR* args[] )
 	}
 
 	free( commandLine );
-	free( args );
 
 	/* If the child process (JVM) would not start */
 	if (jvmProcess == -1)

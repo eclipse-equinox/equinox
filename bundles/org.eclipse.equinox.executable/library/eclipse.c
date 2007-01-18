@@ -210,7 +210,7 @@
 static _TCHAR*  program     = NULL;       /* full pathname of the program */
 static _TCHAR*  programDir  = NULL;       /* directory where program resides */
 static _TCHAR*  javaVM      = NULL;       /* full pathname of the Java VM to run */
-static _TCHAR*  vmLibrary   = NULL;		  /* full path of a java vm library for JNI invocation */
+static _TCHAR*  jniLib		= NULL;		  /* full path of a java vm library for JNI invocation */
 static _TCHAR*  jarFile     = NULL;		  /* full pathname of the startup jar file to run */
 static _TCHAR*  sharedID    = NULL;       /* ID for the shared memory */
 
@@ -306,9 +306,8 @@ static _TCHAR** userVMarg     = NULL;     				/* user specific args for the Java
 
 /* Local methods */
 static void     parseArgs( int* argc, _TCHAR* argv[] );
-static void     freeArgList( _TCHAR** data );
 static void     getVMCommand( int argc, _TCHAR* argv[], _TCHAR **vmArgv[], _TCHAR **progArgv[] );
-static _TCHAR** combineLists( _TCHAR** c1, _TCHAR** c2 );
+static _TCHAR** buildLaunchCommand( _TCHAR* program, _TCHAR** vmArgs, _TCHAR** progArgs );
 static _TCHAR** parseArgList( _TCHAR *data );
 static _TCHAR*  formatVmCommandMsg( _TCHAR* args[], _TCHAR* vmArgs[], _TCHAR* progArgs[] );
 static _TCHAR*  getDefaultOfficialName();
@@ -333,7 +332,6 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
     _TCHAR*   shippedVM    = NULL;
     _TCHAR*   vmSearchPath = NULL;
     _TCHAR**  vmCommand = NULL;
-    _TCHAR**  vmCommandList = NULL;
     _TCHAR**  vmCommandArgs = NULL;
     _TCHAR**  progCommandArgs = NULL;
     _TCHAR*   vmCommandMsg = NULL;
@@ -398,8 +396,8 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
 	}
 
 	if(jniLaunching) {
-		vmLibrary = findVMLibrary( javaVM );
-		if(vmLibrary == NULL)
+		jniLib = findVMLibrary( javaVM );
+		if(jniLib == NULL)
 			jniLaunching = 0;
 	}
 	/* If the VM was not found, display a message and exit. */
@@ -460,7 +458,7 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
     getVMCommand( argc, argv, &vmCommandArgs, &progCommandArgs );
 	
     if (!jniLaunching) {
-    	vmCommand = combineLists(vmCommandArgs, progCommandArgs);
+    	vmCommand = buildLaunchCommand(javaVM, vmCommandArgs, progCommandArgs);
     }
     
     /* While the Java VM should be restarted */
@@ -470,9 +468,9 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
 		if (debug) _tprintf( goVMMsg, vmCommandMsg );
 
 		if(jniLaunching) {
-			exitCode = startJavaVM(vmLibrary, vmCommandArgs, progCommandArgs);
+			exitCode = startJavaVM(jniLib, vmCommandArgs, progCommandArgs);
 		} else {
-			exitCode = launchJavaVM(javaVM, vmCommand);
+			exitCode = launchJavaVM(vmCommand);
 		}
 		
 	    switch( exitCode ) {
@@ -491,13 +489,12 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
 	        	
 	        case RESTART_NEW_EC:
 	        	if(!jniLaunching) {
+	        		if (exitData != NULL) free(exitData);
 	        		getSharedData( sharedID, &exitData );
 	        	}
 	            if (exitData != 0) {
-			    	if (vmCommandList != NULL) freeArgList( vmCommandList );
-			    	else free( vmCommand );
-	                vmCommandList = parseArgList( exitData );
-	                vmCommand = &vmCommandList[1]; /* command list starts with program */
+			    	free( vmCommand );
+	                vmCommand = parseArgList( exitData );
 	                if (jniLaunching) {
 	                	relaunchCommand = getRelaunchCommand(vmCommand);
 	                	running = 0;
@@ -510,7 +507,8 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
 				_TCHAR *title = _tcsdup(officialName);
 	            running = 0;
 	            errorMsg = NULL;
-	            if(!jniLaunching) {
+	            if (!jniLaunching) {
+	            	if (exitData != NULL) free(exitData);
 	        		getSharedData( sharedID, &exitData );
 	        	}
 	            if (exitData != 0) {
@@ -558,26 +556,27 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
     free( programDir );
     free( program );
     free( officialName );
+    if ( vmCommand != NULL )	 free( vmCommand );
     if ( cp != JAR )			 free( cp );
     if ( cpValue != NULL)		 free( cpValue );
     if ( vmSearchPath != NULL )  free( vmSearchPath );
-    if ( vmCommandList != NULL ) freeArgList( vmCommandList );
-    else if( exitData != NULL )	 free( exitData );
+    if ( exitData != NULL )		 free( exitData );
 
     return 0;
 }
 
-static _TCHAR** combineLists( _TCHAR** c1, _TCHAR** c2 ) {
-	int n1 = -1, n2 = -1;
+static _TCHAR** buildLaunchCommand( _TCHAR* program, _TCHAR** vmArgs, _TCHAR** progArgs ) {
+	int nVM = -1, nProg = -1;
 	_TCHAR** result;
 	
-	while(c1[++n1] != NULL) {}
-	while(c2[++n2] != NULL) {}
+	while(vmArgs[++nVM] != NULL) {}
+	while(progArgs[++nProg] != NULL) {}
 	
-	result = malloc((n1 + n2 + 1) * sizeof(_TCHAR*));
-	memset(result, 0, (n1 + n2 + 1) * sizeof(_TCHAR*));
-	memcpy(result, c1, n1 * sizeof(_TCHAR*));
-	memcpy(result + n1, c2, n2 * sizeof(_TCHAR*));
+	result = malloc((nVM + nProg + 2) * sizeof(_TCHAR*));
+	memset(result, 0, (nVM + nProg + 2) * sizeof(_TCHAR*));
+	result[0] = program;
+	memcpy(result + 1, vmArgs, nVM * sizeof(_TCHAR*));
+	memcpy(result + 1 + nVM, progArgs, nProg * sizeof(_TCHAR*));
 	return result;
 }
 /*
@@ -634,19 +633,7 @@ static void parseArgs( int* pArgc, _TCHAR* argv[] )
 }
 
 /*
- * Free the memory allocated by parseArgList().
- */
-static void freeArgList( _TCHAR** data ) {
-	if (data == NULL) return;
-	free( data [0] );
-	free( data );
-}
-
-/*
  * Parse the data into a list of arguments separated by \n.
- *
- * The list of strings returned by this function must be freed with
- * freeArgList().
  */
 static _TCHAR** parseArgList( _TCHAR* data ) {
     int totalArgs = 0, dst = 0, length;
@@ -782,8 +769,8 @@ static void getVMCommand( int argc, _TCHAR* argv[], _TCHAR **vmArgv[], _TCHAR **
 
     /* Append VM and VMARGS to be able to relaunch using exit data. */
 	(*progArgv)[ dst++ ] = VM;
-	if(vmLibrary != NULL)
-		(*progArgv)[ dst++ ] = vmLibrary;
+	if(jniLib != NULL)
+		(*progArgv)[ dst++ ] = jniLib;
 	else
 		(*progArgv)[ dst++ ] = javaVM;
     (*progArgv)[ dst++ ] = VMARGS;

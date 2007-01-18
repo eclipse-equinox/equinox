@@ -108,7 +108,7 @@ extern void takeDownSplash();
 extern void restartLauncher( _TCHAR* program, _TCHAR* args[] );
 
 /* launch the vm in a separate process and wait for it to finish */
-extern int launchJavaVM( _TCHAR* program, _TCHAR* args[] );
+extern int launchJavaVM( _TCHAR* args[] );
 
 #endif /* ECLIPSE_OS_H */
 
