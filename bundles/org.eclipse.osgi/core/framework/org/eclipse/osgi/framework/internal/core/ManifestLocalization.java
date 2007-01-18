@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2005 IBM Corporation and others.
+ * Copyright (c) 2004, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -69,6 +69,7 @@ public class ManifestLocalization {
 			}
 			localeHeaders.set(key, value);
 		}
+		localeHeaders.setReadOnly();
 		if (isDefaultLocale) {
 			defaultLocaleHeaders = localeHeaders;
 		}
@@ -105,7 +106,7 @@ public class ManifestLocalization {
 			return (ResourceBundle) (result.isEmpty() ? null : result);
 		String[] nlVarients = buildNLVariants(localeString);
 		BundleResourceBundle parent = null;
-		for (int i = nlVarients.length-1; i >= 0; i--) {
+		for (int i = nlVarients.length - 1; i >= 0; i--) {
 			BundleResourceBundle varientBundle = (BundleResourceBundle) cache.get(nlVarients[i]);
 			URL varientURL = findResource(propertiesLocation + (nlVarients[i].equals("") ? nlVarients[i] : '_' + nlVarients[i]) + ".properties"); //$NON-NLS-1$ //$NON-NLS-2$
 			if (varientURL != null) {
@@ -130,7 +131,7 @@ public class ManifestLocalization {
 				varientBundle = new EmptyResouceBundle();
 			}
 			if (parent != null)
-				varientBundle.setParent((ResourceBundle)parent);
+				varientBundle.setParent((ResourceBundle) parent);
 			cache.put(nlVarients[i], varientBundle);
 			parent = varientBundle;
 		}
@@ -174,36 +175,43 @@ public class ManifestLocalization {
 		return fileURL;
 	}
 
-	private abstract interface BundleResourceBundle{
+	private abstract interface BundleResourceBundle {
 		void setParent(ResourceBundle parent);
+
 		boolean isEmpty();
 	}
-	private class LocalizationResourceBundle extends PropertyResourceBundle implements BundleResourceBundle{
+
+	private class LocalizationResourceBundle extends PropertyResourceBundle implements BundleResourceBundle {
 		public LocalizationResourceBundle(InputStream in) throws IOException {
 			super(in);
 		}
+
 		public void setParent(ResourceBundle parent) {
 			super.setParent(parent);
 		}
+
 		public boolean isEmpty() {
 			return false;
 		}
 	}
 
-	private class EmptyResouceBundle extends ResourceBundle implements BundleResourceBundle{
+	private class EmptyResouceBundle extends ResourceBundle implements BundleResourceBundle {
 		public Enumeration getKeys() {
 			return null;
 		}
+
 		protected Object handleGetObject(String arg0) throws MissingResourceException {
 			return null;
 		}
+
 		public void setParent(ResourceBundle parent) {
 			super.setParent(parent);
 		}
+
 		public boolean isEmpty() {
 			if (parent == null)
 				return true;
-			return ((BundleResourceBundle)parent).isEmpty();
+			return ((BundleResourceBundle) parent).isEmpty();
 		}
 	}
 }

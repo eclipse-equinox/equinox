@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2006 IBM Corporation and others.
+ * Copyright (c) 2003, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,9 +12,9 @@
 package org.eclipse.osgi.framework.util;
 
 import java.io.*;
-import java.util.Dictionary;
-import java.util.Enumeration;
+import java.util.*;
 import org.eclipse.osgi.framework.internal.core.Msg;
+import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.BundleException;
 
@@ -29,10 +29,11 @@ import org.osgi.framework.BundleException;
  * </ul>
  * @since 3.1
  */
-public class Headers extends Dictionary {
-	Object[] headers;
-	Object[] values;
-	int size = 0;
+public class Headers extends Dictionary implements Map {
+	private boolean readOnly = false;
+	private Object[] headers;
+	private Object[] values;
+	private int size = 0;
 
 	/**
 	 * Create an empty Headers dictionary.
@@ -96,8 +97,7 @@ public class Headers extends Dictionary {
 			if (i == headers.length - 1) {
 				headers[i] = null;
 				values[i] = null;
-			}
-			else {
+			} else {
 				headers[i] = headers[i + 1];
 				values[i] = values[i + 1];
 			}
@@ -151,8 +151,10 @@ public class Headers extends Dictionary {
 	 * @since 3.2
 	 */
 	public synchronized Object set(Object key, Object value, boolean replace) {
+		if (readOnly)
+			throw new UnsupportedOperationException();
 		if (key instanceof String)
-			key = ((String)key).intern();
+			key = ((String) key).intern();
 		int i = getIndex(key);
 		if (value == null) { /* remove */
 			if (i != -1)
@@ -185,6 +187,10 @@ public class Headers extends Dictionary {
 		return set(key, value, false);
 	}
 
+	public synchronized void setReadOnly() {
+		readOnly = true;
+	}
+
 	/**
 	 * Returns the number of entries (distinct keys) in this dictionary.
 	 *
@@ -213,8 +219,10 @@ public class Headers extends Dictionary {
 	 * @param value header value.
 	 * @throws UnsupportedOperationException
 	 */
-	public Object put(Object key, Object value) {
-		throw new UnsupportedOperationException();
+	public synchronized Object put(Object key, Object value) {
+		if (readOnly)
+			throw new UnsupportedOperationException();
+		return set(key, value, true);
 	}
 
 	/**
@@ -232,69 +240,14 @@ public class Headers extends Dictionary {
 	}
 
 	public static Headers parseManifest(InputStream in) throws BundleException {
+		Headers headers = new Headers(10);
 		try {
-			Headers headers = new Headers(10);
-			BufferedReader br;
-			try {
-				br = new BufferedReader(new InputStreamReader(in, "UTF8")); //$NON-NLS-1$
-			} catch (UnsupportedEncodingException e) {
-				br = new BufferedReader(new InputStreamReader(in));
-			}
-
-			String header = null;
-			StringBuffer value = new StringBuffer(256);
-			boolean firstLine = true;
-
-			while (true) {
-				String line = br.readLine();
-				/* The java.util.jar classes in JDK 1.3 use the value of the last
-				 * encountered manifest header. So we do the same to emulate
-				 * this behavior. We no longer throw a BundleException
-				 * for duplicate manifest headers.
-				 */
-
-				if ((line == null) || (line.length() == 0)) /* EOF or empty line */
-				{
-					if (!firstLine) /* flush last line */
-					{
-						headers.set(header, value.toString().trim(), true);
-					}
-					break; /* done processing main attributes */
-				}
-
-				if (line.charAt(0) == ' ') /* continuation */
-				{
-					if (firstLine) /* if no previous line */
-					{
-						throw new BundleException(NLS.bind(Msg.MANIFEST_INVALID_SPACE, line));
-					}
-					value.append(line.substring(1));
-					continue;
-				}
-
-				if (!firstLine) {
-					headers.set(header, value.toString().trim(), true);
-					value.setLength(0); /* clear StringBuffer */
-				}
-
-				int colon = line.indexOf(':');
-				if (colon == -1) /* no colon */
-				{
-					throw new BundleException(NLS.bind(Msg.MANIFEST_INVALID_LINE_NOCOLON, line));
-				}
-				header = line.substring(0, colon).trim();
-				value.append(line.substring(colon + 1));
-				firstLine = false;
-			}
-			return headers;
+			ManifestElement.parseBundleManifest(in, headers);
 		} catch (IOException e) {
 			throw new BundleException(Msg.MANIFEST_IOEXCEPTION, e);
-		} finally {
-			try {
-				in.close();
-			} catch (IOException ee) {
-			}
 		}
+		headers.setReadOnly();
+		return headers;
 	}
 
 	class ArrayEnumeration implements Enumeration {
@@ -313,6 +266,34 @@ public class Headers extends Dictionary {
 		public Object nextElement() {
 			return array[cur++];
 		}
-		
+	}
+
+	public synchronized void clear() {
+		if (readOnly)
+			throw new UnsupportedOperationException();
+	}
+
+	public synchronized boolean containsKey(Object key) {
+		return getIndex(key) >= 0;
+	}
+
+	public boolean containsValue(Object var0) {
+		throw new UnsupportedOperationException();
+	}
+
+	public Set entrySet() {
+		throw new UnsupportedOperationException();
+	}
+
+	public Set keySet() {
+		throw new UnsupportedOperationException();
+	}
+
+	public void putAll(Map var0) {
+		throw new UnsupportedOperationException();
+	}
+
+	public Collection values() {
+		throw new UnsupportedOperationException();
 	}
 }

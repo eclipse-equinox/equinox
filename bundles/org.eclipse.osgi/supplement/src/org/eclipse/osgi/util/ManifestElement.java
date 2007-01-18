@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2006 IBM Corporation and others.
+ * Copyright (c) 2003, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,7 @@
 
 package org.eclipse.osgi.util;
 
+import java.io.*;
 import java.util.*;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.internal.core.Msg;
@@ -452,5 +453,80 @@ public class ManifestElement {
 				list.add(token);
 		}
 		return (String[]) list.toArray(new String[list.size()]);
+	}
+
+	/**
+	 * Parses a bundle manifest and puts the header/value pairs into the supplied Map.
+	 * Only the main section of the manifest is parsed (up to the first blank line).  All
+	 * other sections are ignored.  If a header is duplicated then only the last  
+	 * value is stored in the map.
+	 * <p>
+	 * The supplied input stream is consumed by this method and will be closed.
+	 * </p>
+	 * @param manifest an input stream for a bundle manifest.
+	 * @param headers a map used to put the header/value pairs from the bundle manifest
+	 * @throws BundleException if the manifest has an invalid syntax
+	 * @throws IOException if an error occurs while reading the manifest
+	 */
+	public static void parseBundleManifest(InputStream manifest, Map headers) throws IOException, BundleException {
+		BufferedReader br;
+		try {
+			br = new BufferedReader(new InputStreamReader(manifest, "UTF8")); //$NON-NLS-1$
+		} catch (UnsupportedEncodingException e) {
+			br = new BufferedReader(new InputStreamReader(manifest));
+		}
+		try {
+			String header = null;
+			StringBuffer value = new StringBuffer(256);
+			boolean firstLine = true;
+
+			while (true) {
+				String line = br.readLine();
+				/* The java.util.jar classes in JDK 1.3 use the value of the last
+				 * encountered manifest header. So we do the same to emulate
+				 * this behavior. We no longer throw a BundleException
+				 * for duplicate manifest headers.
+				 */
+
+				if ((line == null) || (line.length() == 0)) /* EOF or empty line */
+				{
+					if (!firstLine) /* flush last line */
+					{
+						headers.put(header, value.toString().trim());
+					}
+					break; /* done processing main attributes */
+				}
+
+				if (line.charAt(0) == ' ') /* continuation */
+				{
+					if (firstLine) /* if no previous line */
+					{
+						throw new BundleException(NLS.bind(Msg.MANIFEST_INVALID_SPACE, line));
+					}
+					value.append(line.substring(1));
+					continue;
+				}
+
+				if (!firstLine) {
+					headers.put(header, value.toString().trim());
+					value.setLength(0); /* clear StringBuffer */
+				}
+
+				int colon = line.indexOf(':');
+				if (colon == -1) /* no colon */
+				{
+					throw new BundleException(NLS.bind(Msg.MANIFEST_INVALID_LINE_NOCOLON, line));
+				}
+				header = line.substring(0, colon).trim();
+				value.append(line.substring(colon + 1));
+				firstLine = false;
+			}
+		} finally {
+			try {
+				br.close();
+			} catch (IOException ee) {
+				// do nothing
+			}
+		}
 	}
 }
