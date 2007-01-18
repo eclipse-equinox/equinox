@@ -39,6 +39,7 @@ int isJ9VM( _TCHAR* vm )
 
 int isVMLibrary( _TCHAR* vm )
 {
+	if (vm == NULL) return 0;
 	_TCHAR *ch = _tcsrchr( vm, '.' );
 	if(ch == NULL)
 		return 0;

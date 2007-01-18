@@ -493,7 +493,7 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
 	        		getSharedData( sharedID, &exitData );
 	        	}
 	            if (exitData != 0) {
-			    	free( vmCommand );
+	            	if (vmCommand != NULL) free( vmCommand );
 	                vmCommand = parseArgList( exitData );
 	                if (jniLaunching) {
 	                	relaunchCommand = getRelaunchCommand(vmCommand);
