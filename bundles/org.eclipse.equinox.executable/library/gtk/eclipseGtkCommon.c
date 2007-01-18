@@ -15,6 +15,7 @@
 
 #include <locale.h>
 #include <dlfcn.h>
+#include <stdio.h>
 #include <gtk/gtk.h>
 
 #define ECLIPSE_ICON  401
