@@ -39,8 +39,9 @@ int isJ9VM( _TCHAR* vm )
 
 int isVMLibrary( _TCHAR* vm )
 {
+	_TCHAR *ch = NULL;
 	if (vm == NULL) return 0;
-	_TCHAR *ch = _tcsrchr( vm, '.' );
+	ch = _tcsrchr( vm, '.' );
 	if(ch == NULL)
 		return 0;
 #ifdef _WIN32
