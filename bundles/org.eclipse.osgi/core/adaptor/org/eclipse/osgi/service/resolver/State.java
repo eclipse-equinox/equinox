@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2006 IBM Corporation and others.
+ * Copyright (c) 2003, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -414,7 +414,7 @@ public interface State {
 	 * @return the list of system packages
 	 */
 	public ExportPackageDescription[] getSystemPackages();
-	
+
 	/**
 	 * Returns a state helper object. State helpers provide convenience methods 
 	 * for manipulating states. 
@@ -428,4 +428,15 @@ public interface State {
 	 * @since 3.2
 	 */
 	public StateHelper getStateHelper();
+
+	/**
+	 * Returns the highest bundle ID.  The value -1 is returned if no 
+	 * bundles exist in this state.
+	 * <p>
+	 * Note that this method returns the highest bundle ID the ever existed in this 
+	 * this state object.  This bundle may have been removed from the state.
+	 * @return the highest bundle ID.
+	 * @since 3.3
+	 */
+	public long getHighestBundleId();
 }

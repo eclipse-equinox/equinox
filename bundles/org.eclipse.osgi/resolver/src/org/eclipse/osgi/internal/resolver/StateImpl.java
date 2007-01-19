@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2006 IBM Corporation and others.
+ * Copyright (c) 2003, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,6 +40,7 @@ public abstract class StateImpl implements State {
 	// only used for lazy loading of BundleDescriptions
 	private StateReader reader;
 	private Dictionary[] platformProperties = {new Hashtable(PROPS.length)}; // Dictionary here because of Filter API
+	private long highestBundleId = -1;
 
 	private static long cumulativeTime;
 
@@ -243,7 +244,7 @@ public abstract class StateImpl implements State {
 		// to support develoment mode we will resolveConstraints even if the resolve status == false
 		// we only do this if the resolved constraints are not null
 		if (selectedExports == null || resolvedRequires == null || resolvedImports == null)
-			unresolveConstraints(modifiable);			
+			unresolveConstraints(modifiable);
 		else
 			resolveConstraints(modifiable, hosts, selectedExports, resolvedRequires, resolvedImports);
 	}
@@ -413,7 +414,12 @@ public abstract class StateImpl implements State {
 	boolean basicAddBundle(BundleDescription description) {
 		((BundleDescriptionImpl) description).setContainingState(this);
 		((BundleDescriptionImpl) description).setStateBit(BundleDescriptionImpl.REMOVAL_PENDING, false);
-		return bundleDescriptions.add((BundleDescriptionImpl) description);
+		if (bundleDescriptions.add((BundleDescriptionImpl) description)) {
+			if (description.getBundleId() > getHighestBundleId())
+				highestBundleId = description.getBundleId();
+			return true;
+		}
+		return false;
 	}
 
 	void addResolvedBundle(BundleDescriptionImpl resolvedBundle) {
@@ -706,4 +712,9 @@ public abstract class StateImpl implements State {
 	public StateHelper getStateHelper() {
 		return StateHelperImpl.getInstance();
 	}
+
+	public long getHighestBundleId() {
+		return highestBundleId;
+	}
+
 }
