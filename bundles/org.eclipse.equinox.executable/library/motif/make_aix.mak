@@ -31,7 +31,7 @@ CC = cc_r
 #OBJS = eclipse.o eclipseUtil.o eclipseShm.o eclipseConfig.o eclipseMotif.o NgCommon.o NgImage.o NgImageData.o NgWinBMPFileFormat.o
 MAIN_OBJS = eclipseMain.o
 COMMON_OBJS = eclipseConfig.o eclipseCommon.o eclipseMotifCommon.o
-DLL_OBJS	= eclipse.o eclipseMotif.o eclipseUtil.o eclipseJNI.o NgCommon.o NgImage.o NgImageData.o NgWinBMPFileFormat.o
+DLL_OBJS	= eclipse.o eclipseMotif.o eclipseUtil.o eclipseJNI.o NgCommon.o NgImage.o NgImageData.o NgWinBMPFileFormat.o eclipseShm.o
 
 EXEC = $(PROGRAM_OUTPUT)
 DLL = $(PROGRAM_LIBRARY)
@@ -71,6 +71,9 @@ eclipseJNI.o: ../eclipseJNI.c ../eclipseCommon.h ../eclipseOS.h ../eclipseJNI.h
 eclipseConfig.o: ../eclipseConfig.c ../eclipseConfig.h ../eclipseOS.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
+eclipseShm.o: ../eclipseShm.h ../eclipseUnicode.h ../eclipseShm.c
+	$(CC) $(CFLAGS) -c $< -o $@
+	
 $(EXEC): $(MAIN_OBJS) $(COMMON_OBJS)
 	$(CC) -o $(EXEC) $(MAIN_OBJS) $(COMMON_OBJS) $(LIBS)
 

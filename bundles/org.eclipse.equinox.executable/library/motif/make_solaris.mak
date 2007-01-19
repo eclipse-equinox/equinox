@@ -20,6 +20,7 @@ include ../make_version.mak
 # DEFAULT_WS      - the default value of the "-ws" switch
 # X11_HOME	 - the full path to X11 header files
 # MOTIF_HOME	 - the full path to Motif header files
+# JAVA_HOME       - path to java for JNI headers
 
 ifeq ($(PROGRAM_OUTPUT),)
   PROGRAM_OUTPUT=eclipse
@@ -30,7 +31,7 @@ PROGRAM_LIBRARY=eclipse_$(LIB_VERSION).so
 # Define the object modules to be compiled and flags.
 MAIN_OBJS = eclipseMain.o
 COMMON_OBJS = eclipseConfig.o eclipseCommon.o eclipseMotifCommon.o
-DLL_OBJS	= eclipse.o eclipseMotif.o eclipseUtil.o eclipseJNI.o NgCommon.o NgImage.o NgImageData.o NgWinBMPFileFormat.o
+DLL_OBJS	= eclipse.o eclipseMotif.o eclipseUtil.o eclipseJNI.o NgCommon.o NgImage.o NgImageData.o NgWinBMPFileFormat.o eclipseShm.o
 
 EXEC = $(PROGRAM_OUTPUT)
 DLL = $(PROGRAM_LIBRARY)
@@ -47,7 +48,7 @@ CFLAGS = -O -s \
 	-I../ \
 	-I$(MOTIF_HOME)/include \
 	-I$(X11_HOME)/include \
-	-I$(JAVA_JNI)
+	-I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/solaris
 
 all: $(EXEC) $(DLL)
 
@@ -72,6 +73,9 @@ eclipseJNI.o: ../eclipseJNI.c ../eclipseCommon.h ../eclipseOS.h ../eclipseJNI.h
 eclipseConfig.o: ../eclipseConfig.c ../eclipseConfig.h ../eclipseOS.h
 	$(CC) $(CFLAGS) -c $^ -o $@
 
+eclipseShm.o: ../eclipseShm.h ../eclipseUnicode.h ../eclipseShm.c
+	$(CC) $(CFLAGS) -c $^ -o $@
+	
 $(EXEC): $(MAIN_OBJS) $(COMMON_OBJS)
 	$(CC) -o $(EXEC) $(MAIN_OBJS) $(COMMON_OBJS) $(LIBS)
 
