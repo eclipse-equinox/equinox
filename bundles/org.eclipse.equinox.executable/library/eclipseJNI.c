@@ -18,11 +18,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-static JNINativeMethod natives[] = {{"_update_splash", "()V", &update_splash},
-									{"_get_splash_handle", "()J", &get_splash_handle},
-									{"_set_exit_data", "(Ljava/lang/String;Ljava/lang/String;)V", &set_exit_data},
-									{"_show_splash", "(Ljava/lang/String;)V", &show_splash},
-									{"_takedown_splash", "()V", &takedown_splash}};
+static JNINativeMethod natives[] = {{"_update_splash", "()V", (void *)&update_splash},
+									{"_get_splash_handle", "()J", (void *)&get_splash_handle},
+									{"_set_exit_data", "(Ljava/lang/String;Ljava/lang/String;)V", (void *)&set_exit_data},
+									{"_show_splash", "(Ljava/lang/String;)V", (void *)&show_splash},
+									{"_takedown_splash", "()V", (void *)&takedown_splash}};
   
 /* local methods */
 static jstring newJavaString(JNIEnv *env, _TCHAR * str);
