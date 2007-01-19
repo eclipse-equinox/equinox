@@ -61,7 +61,7 @@ void initWindowSystem( int* pArgc, _TCHAR* argv[], int showSplash )
 	InitCommonControls();
     topWindow = CreateWindowEx (0,
 		_T("STATIC"),
-		officialName,
+		getOfficialName(),
 		SS_BITMAP | WS_POPUP,
 		CW_USEDEFAULT,
 		0,

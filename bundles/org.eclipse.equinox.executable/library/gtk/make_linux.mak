@@ -29,6 +29,10 @@ endif
 
 PROGRAM_LIBRARY=$(PROGRAM_OUTPUT)_$(LIB_VERSION).so
 
+ifeq ($(DEFAULT_JAVA),)
+  DEFAULT_JAVA=DEFAULT_JAVA_JNI
+endif
+
 # Define the object modules to be compiled and flags.
 CC=gcc
 MAIN_OBJS = eclipseMain.o
@@ -46,6 +50,7 @@ CFLAGS = -O -s -Wall\
 	-DDEFAULT_OS="\"$(DEFAULT_OS)\"" \
 	-DDEFAULT_OS_ARCH="\"$(DEFAULT_OS_ARCH)\"" \
 	-DDEFAULT_WS="\"$(DEFAULT_WS)\"" \
+	-D$(DEFAULT_JAVA) \
 	-I. \
 	-I.. \
 	-I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux \

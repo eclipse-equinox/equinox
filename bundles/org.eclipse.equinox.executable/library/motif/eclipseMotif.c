@@ -127,10 +127,10 @@ int showSplash( const char* featureImage )
     /* Note that XtSetArg is a macro, and the 1st argument will be evaluated twice
      * so increment nArgs on its own */
 	XtSetArg(args[nArgs], XmNmwmDecorations, 0);	nArgs++;
-    XtSetArg(args[nArgs], XmNtitle, officialName);	nArgs++;
+    XtSetArg(args[nArgs], XmNtitle, getOfficialName());	nArgs++;
     XtSetArg(args[nArgs], XmNwidth, width);			nArgs++;
     XtSetArg(args[nArgs], XmNheight, height);		nArgs++;
-	shellHandle = XtAppCreateShell(officialName, "", applicationShellWidgetClass, xDisplay, args, nArgs);								   
+	shellHandle = XtAppCreateShell(getOfficialName(), "", applicationShellWidgetClass, xDisplay, args, nArgs);								   
 	
 	nArgs = 0;
 	XtSetArg(args[nArgs++], XmNancestorSensitive, 1);
@@ -214,10 +214,12 @@ long getSplashHandle() {
 
 void dispatchMessages() {
 	XtInputMask mask;
-	/* Process any outstanding messages */
- 	while ((mask = XtAppPending(appContext)) != 0) {
- 		XtAppProcessEvent(appContext, mask);
-    }
+	if (appContext != NULL) {
+		/* Process any outstanding messages */
+	 	while ((mask = XtAppPending(appContext)) != 0) {
+	 		XtAppProcessEvent(appContext, mask);
+	 	}
+	}
 }
 
 void takeDownSplash()

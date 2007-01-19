@@ -86,7 +86,7 @@ void initWindowSystem( int* pArgc, char* argv[], int showSplash )
     PtSetArg( &arg[ nArgs++ ], Pt_ARG_WINDOW_RENDER_FLAGS, 0, ~0 ); 
     PtSetArg( &arg[ nArgs++ ], Pt_ARG_WINDOW_MANAGED_FLAGS, Ph_WM_TASKBAR | Ph_WM_CLOSE, ~0 ); 
     PtSetArg( &arg[ nArgs++ ], Pt_ARG_WINDOW_STATE, Ph_WM_STATE_ISFRONT, ~0 ); 
-    PtSetArg( &arg[ nArgs++ ], Pt_ARG_WINDOW_TITLE, officialName, ~0 ); 
+    PtSetArg( &arg[ nArgs++ ], Pt_ARG_WINDOW_TITLE, getOfficialName(), ~0 ); 
     topWindow = PtCreateWidget( PtWindow, Pt_NO_PARENT, nArgs, arg );
 }
 

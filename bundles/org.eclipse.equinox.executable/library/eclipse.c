@@ -213,6 +213,7 @@ static _TCHAR*  javaVM      = NULL;       /* full pathname of the Java VM to run
 static _TCHAR*  jniLib		= NULL;		  /* full path of a java vm library for JNI invocation */
 static _TCHAR*  jarFile     = NULL;		  /* full pathname of the startup jar file to run */
 static _TCHAR*  sharedID    = NULL;       /* ID for the shared memory */
+static _TCHAR*  officialName  = NULL;
 
 _TCHAR*  exitData    = NULL;		  /* exit data set from Java */
 int		 initialArgc;
@@ -349,8 +350,7 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
     parseArgs( &argc, argv );
 
 	/* Initialize official program name */
-    if (officialName != NULL)
-    	officialName = name != NULL ? _tcsdup( name ) : getDefaultOfficialName();
+   	officialName = name != NULL ? _tcsdup( name ) : getDefaultOfficialName();
 
     /* Initialize the window system. */
     initWindowSystem( &argc, argv, !noSplash );
@@ -394,6 +394,10 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
 		/* Either verify the VM specified by the user or
 		   attempt to find the VM in the user's PATH. */
 		javaVM = findCommand( vmName );
+#ifdef DEFAULT_JAVA_EXEC
+		/* if the default is exe, only do jnilaunching if a library was specified */
+		jniLaunching = isVMLibrary(javaVM);
+#endif
 	}
 
 	if(jniLaunching) {
@@ -556,6 +560,7 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
     free( jarFile );
     free( programDir );
     free( program );
+    free( officialName );
     if ( vmCommand != NULL )	 free( vmCommand );
     if ( cp != JAR )			 free( cp );
     if ( cpValue != NULL)		 free( cpValue );
@@ -840,6 +845,10 @@ static _TCHAR*  formatVmCommandMsg( _TCHAR* args[], _TCHAR* vmArgs[], _TCHAR* pr
 	return message;
 }
 
+_TCHAR* getOfficialName() {
+	return officialName;
+}
+
 /*
  * Determine the default official application name
  *
@@ -1002,6 +1011,8 @@ static _TCHAR ** getRelaunchCommand( _TCHAR **vmCommand  )
 		}
 		relaunch[idx++] = vmCommand[i];
 	}
+	if(_tcsicmp(relaunch[idx - 1], VMARGS) == 0) 
+		relaunch[idx - 1] = NULL;
 	relaunch[idx] = NULL;
 	return relaunch;
 }

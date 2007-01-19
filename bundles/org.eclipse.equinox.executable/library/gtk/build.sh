@@ -29,6 +29,7 @@ programOutput="eclipse"
 defaultOS=""
 defaultOSArch=""
 defaultWS="gtk"
+defaultJava=DEFAULT_JAVA_JNI
 javaHome=""
 makefile=""
 if [ "$OS" = "" ];  then
@@ -49,6 +50,7 @@ case $OS in
 		case $MODEL in
 			"x86_64")
 				defaultOSArch="x86_64"
+				defaultJava=DEFAULT_JAVA_EXEC
 				OUTPUT_DIR="../../bin/$defaultWS/$defaultOS/$defaultOSArch"
 				;;
 			i?86)
@@ -57,14 +59,17 @@ case $OS in
 				;;
 			"ppc")
 				defaultOSArch="ppc"
+				defaultJava=DEFAULT_JAVA_EXEC
 				OUTPUT_DIR="../../bin/$defaultWS/$defaultOS/$defaultOSArch"
 				;;
 			"ppc64")
 				defaultOSArch="ppc64"
+				defaultJava=DEFAULT_JAVA_EXEC
 				OUTPUT_DIR="../../bin/$defaultWS/$defaultOS/$defaultOSArch"
 				;;
 			"ia64")
 				defaultOSArch="ia64"
+				defaultJava=DEFAULT_JAVA_EXEC
 				OUTPUT_DIR="../../bin/$defaultWS/$defaultOS/$defaultOSArch"
 				;;
 			*)
@@ -128,8 +133,9 @@ DEFAULT_OS="$defaultOS"
 DEFAULT_OS_ARCH="$defaultOSArch"
 DEFAULT_WS="$defaultWS"
 JAVA_HOME=$javaHome
+DEFAULT_JAVA=$defaultJava
 
-export OUTPUT_DIR PROGRAM_OUTPUT DEFAULT_OS DEFAULT_OS_ARCH DEFAULT_WS JAVA_HOME
+export OUTPUT_DIR PROGRAM_OUTPUT DEFAULT_OS DEFAULT_OS_ARCH DEFAULT_WS JAVA_HOME DEFAULT_JAVA
 
 # If the OS is supported (a makefile exists)
 if [ "$makefile" != "" ]; then

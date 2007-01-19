@@ -40,6 +40,7 @@ static _TCHAR*  name          = NULL;			/* program name */
 static _TCHAR** userVMarg     = NULL;     		/* user specific args for the Java VM  */
 static _TCHAR*  programDir	  = NULL;			/* directory where program resides */
 static _TCHAR*  library		  = NULL;			/* pathname of the eclipse shared library */
+static _TCHAR*  officialName  = NULL;
 
 static int 	 	createUserArgs(int configArgc, _TCHAR **configArgv, int *argc, _TCHAR ***argv);
 static void  	parseArgs( int* argc, _TCHAR* argv[] );
@@ -268,6 +269,10 @@ _TCHAR* getProgramDir(_TCHAR* program)
 	free(programDir);
 	programDir = NULL;
 	return NULL;
+}
+
+_TCHAR* getOfficialName() {
+	return officialName;
 }
 
 /*

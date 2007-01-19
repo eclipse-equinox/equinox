@@ -50,7 +50,7 @@ int main( int argc, char* argv[] ) {
 	if (Gestalt(gestaltSystemVersion, &systemVersion) == noErr) {
 		systemVersion &= 0xffff;
 		if (systemVersion < 0x1020) {
-			displayMessage(officialName, "Eclipse requires Jaguar (Mac OS X >= 10.2)");
+			displayMessage(getOfficialName(), "Eclipse requires Jaguar (Mac OS X >= 10.2)");
 			return 0;
 		}
 	}

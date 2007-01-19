@@ -42,6 +42,7 @@ CFLAGS = -O -s \
 	-DDEFAULT_OS="\"$(DEFAULT_OS)\"" \
 	-DDEFAULT_OS_ARCH="\"$(DEFAULT_OS_ARCH)\"" \
 	-DDEFAULT_WS="\"$(DEFAULT_WS)\"" \
+	-DDEFAULT_JAVA_EXEC \
     -DAIX \
 	-I./ \
 	-I../ \

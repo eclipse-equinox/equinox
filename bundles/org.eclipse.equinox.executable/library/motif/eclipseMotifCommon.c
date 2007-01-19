@@ -76,7 +76,7 @@ void displayMessage( char* title, char* message )
     XtSetArg( arg[ nArgs ], XmNdialogType, XmDIALOG_MESSAGE ); nArgs++;
     XtSetArg( arg[ nArgs ], XmNtitle, title ); nArgs++;
     XtSetArg( arg[ nArgs ], XmNmessageString, msg ); nArgs++;
-    msgBox = XmCreateMessageDialog( topWindow, officialName, arg, nArgs );
+    msgBox = XmCreateMessageDialog( topWindow, getOfficialName(), arg, nArgs );
     XtUnmanageChild( XmMessageBoxGetChild( msgBox, XmDIALOG_CANCEL_BUTTON ) );
     XtUnmanageChild( XmMessageBoxGetChild( msgBox, XmDIALOG_HELP_BUTTON ) );
     XtManageChild( msgBox );
@@ -112,7 +112,7 @@ void initWindowSystem( int* pArgc, char* argv[], int showSplash )
     /* Create the top level shell that will not be used other than
        to initialize the application. */
 	XtSetLanguageProc (NULL, NULL, NULL);
-    topWindow = XtAppInitialize( &appContext, officialName, NULL, 0,
+    topWindow = XtAppInitialize( &appContext, getOfficialName(), NULL, 0,
                                  pArgc, argv, NULL, NULL, 0 ); 
     XtSetArg( arg[ 0 ], XmNmappedWhenManaged, False );
     XtSetValues( topWindow, arg, 1 );

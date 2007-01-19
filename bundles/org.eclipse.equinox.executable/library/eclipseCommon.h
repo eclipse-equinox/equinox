@@ -22,7 +22,7 @@
 #ifdef UNICODE
 #define pathSeparator pathSeparatorW
 #define dirSeparator dirSeparatorW
-#define officialName officialNameW
+#define getOfficialName getOfficialNameW
 #define parseArgs parseArgsW
 #define displayMessage displayMessageW
 #define getProgramDir getProgramDirW
@@ -56,8 +56,6 @@ extern _TCHAR*  wsArg;
 
 extern _TCHAR   dirSeparator;         /* '/' or '\\' */
 extern _TCHAR   pathSeparator;        /* separator used in PATH variable */
-extern _TCHAR*  officialName;		  /* Program official name           */
-
 
 extern char *toNarrow(_TCHAR* src);
 
@@ -72,6 +70,7 @@ extern _TCHAR* findFile( _TCHAR* path, _TCHAR* prefix);
 
 extern _TCHAR* getProgramDir();
 
+extern _TCHAR* getOfficialName();
 
 extern _TCHAR* resolveSymlinks( _TCHAR* path );
 
