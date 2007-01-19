@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2006 IBM Corporation and others.
+ * Copyright (c) 2004, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -293,11 +293,16 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 			return;
 		// no need to select singletons now; it will be done when we select the rest of the singleton bundles (bug 152042)
 		// find all available hosts to attach to.
+		boolean foundMatch = false;
 		BundleConstraint hostConstraint = bundle.getHost();
 		Object[] hosts = resolverBundles.get(hostConstraint.getVersionConstraint().getName());
 		for (int i = 0; i < hosts.length; i++)
-			if (((ResolverBundle) hosts[i]).isResolvable() && hostConstraint.isSatisfiedBy((ResolverBundle) hosts[i]))
+			if (((ResolverBundle) hosts[i]).isResolvable() && hostConstraint.isSatisfiedBy((ResolverBundle) hosts[i])) {
+				foundMatch = true;
 				resolverExports.put(((ResolverBundle) hosts[i]).attachFragment(bundle, true));
+			}
+		if (!foundMatch)
+			state.addResolverError(bundle.getBundle(), ResolverError.MISSING_FRAGMENT_HOST, bundle.getHost().getVersionConstraint().toString(), bundle.getHost().getVersionConstraint());
 	}
 
 	public synchronized void resolve(BundleDescription[] reRefresh, Dictionary[] platformProperties) {
@@ -578,8 +583,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		if (fragment.getHost().foundMatchingBundles()) {
 			stateResolveFragConstraints(fragment);
 			setBundleResolved(fragment);
-		} else
-			state.addResolverError(fragment.getBundle(), ResolverError.MISSING_FRAGMENT_HOST, fragment.getHost().getVersionConstraint().toString(), fragment.getHost().getVersionConstraint());
+		}
 	}
 
 	// This method will attempt to resolve the supplied bundle and any bundles that it is dependent on
