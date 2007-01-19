@@ -369,7 +369,12 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
     if (vmName != NULL) {
     	/* user specified VM */
     	javaVM = findCommand(vmName);
+#ifdef MACOSX
+    	/* always use JNI on the mac for now */
+    	jniLaunching = 1;
+#else
     	jniLaunching = isVMLibrary(javaVM);
+#endif
     }
     else if (vmName == NULL)
     {

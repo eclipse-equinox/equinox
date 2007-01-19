@@ -27,7 +27,7 @@ PROGRAM_LIBRARY=eclipse_$(LIB_VERSION).so
 # Define the object modules to be compiled and flags.
 MAIN_OBJS = eclipseMain.o eclipseCarbonMain.o
 COMMON_OBJS = eclipseConfig.o eclipseCommon.o eclipseCarbonCommon.o
-DLL_OBJS	= eclipse.o eclipseCarbon.o eclipseUtil.o eclipseJNI.o
+DLL_OBJS	= eclipse.o eclipseCarbon.o eclipseUtil.o eclipseJNI.o eclipseShm.o
 
 EXEC = $(PROGRAM_OUTPUT)
 DLL = $(PROGRAM_LIBRARY)
@@ -64,6 +64,9 @@ eclipseConfig.o: ../eclipseConfig.c ../eclipseConfig.h ../eclipseOS.h
 
 eclipseCommon.o: ../eclipseCommon.h ../eclipseUnicode.h ../eclipseCommon.c
 	$(CC) $(CFLAGS) -c ../eclipseCommon.c -o $@
+
+eclipseShm.o: ../eclipseShm.h ../eclipseUnicode.h ../eclipseShm.c
+	$(CC) $(CFLAGS) -c ../eclipseShm.c -o $@
 
 $(EXEC): $(MAIN_OBJS) $(COMMON_OBJS)
 	$(CC) -o $(EXEC) $(ARCHS) $(MAIN_OBJS) $(COMMON_OBJS) $(LIBS)

@@ -196,3 +196,9 @@ void restartLauncher( char* program, char* args[] )
 		_exit(errno);
 	}
 }
+
+int launchJavaVM( _TCHAR* args[] )
+{
+	/*for now always do JNI on Mac, should not come in here */
+	return -1;
+}
