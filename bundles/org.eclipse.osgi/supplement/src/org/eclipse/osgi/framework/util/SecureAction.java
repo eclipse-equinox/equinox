@@ -414,4 +414,13 @@ public class SecureAction {
 			throw (RuntimeException) e.getException();
 		}
 	}
+
+	/**
+	 * Starts a bundle
+	 * @param bundle
+	 * @throws BundleException
+	 */
+	public void start(final Bundle bundle) throws BundleException {
+		start(bundle, 0);
+	}
 }
