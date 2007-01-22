@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2006 IBM Corporation and others.
+ * Copyright (c) 2004, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -82,21 +82,21 @@ public class EclipseCommandProvider implements CommandProvider {
 				}
 				ci.println(bundle.getLocation() + " [" + bundle.getBundleId() + "]"); //$NON-NLS-1$ //$NON-NLS-2$
 				VersionConstraint[] unsatisfied = platformAdmin.getStateHelper().getUnsatisfiedConstraints(bundle);
-				if (unsatisfied.length == 0) {
-					ResolverError[] resolverErrors = platformAdmin.getState(false).getResolverErrors(bundle);
-					if (!bundle.isResolved() && resolverErrors.length > 0) {
-						for (int i = 0; i < resolverErrors.length; i++) {
-							ci.print("  "); //$NON-NLS-1$
-							ci.println(resolverErrors[i].toString());
-						}
-					} else {
-						ci.print("  "); //$NON-NLS-1$
-						ci.println(EclipseAdaptorMsg.ECLIPSE_CONSOLE_NO_CONSTRAINTS);
-					}
+				ResolverError[] resolverErrors = platformAdmin.getState(false).getResolverErrors(bundle);
+				for (int i = 0; i < resolverErrors.length; i++) {
+					if ((resolverErrors[i].getType() & (ResolverError.MISSING_FRAGMENT_HOST | ResolverError.MISSING_GENERIC_CAPABILITY | ResolverError.MISSING_IMPORT_PACKAGE | ResolverError.MISSING_REQUIRE_BUNDLE)) != 0)
+						continue;
+					ci.print("  "); //$NON-NLS-1$
+					ci.println(resolverErrors[i].toString());
 				}
+
 				for (int i = 0; i < unsatisfied.length; i++) {
 					ci.print("  "); //$NON-NLS-1$
 					ci.println(MessageHelper.getResolutionFailureMessage(unsatisfied[i]));
+				}
+				if (unsatisfied.length == 0 && resolverErrors.length == 0) {
+					ci.print("  "); //$NON-NLS-1$
+					ci.println(EclipseAdaptorMsg.ECLIPSE_CONSOLE_NO_CONSTRAINTS);
 				}
 				nextArg = ci.nextArgument();
 			}
@@ -114,17 +114,17 @@ public class EclipseCommandProvider implements CommandProvider {
 				activeCount++;
 			}
 		ci.print("  "); //$NON-NLS-1$
-		ci.println(NLS.bind(EclipseAdaptorMsg.ECLIPSE_CONSOLE_BUNDLES_ACTIVE, String.valueOf(activeCount))); 
+		ci.println(NLS.bind(EclipseAdaptorMsg.ECLIPSE_CONSOLE_BUNDLES_ACTIVE, String.valueOf(activeCount)));
 	}
-	
+
 	public void _getprop(CommandInterpreter ci) throws Exception {
 		Properties allProperties = FrameworkProperties.getProperties();
 		String filter = ci.nextArgument();
 		Enumeration propertyNames = allProperties.keys();
-		while(propertyNames.hasMoreElements()) {
+		while (propertyNames.hasMoreElements()) {
 			String prop = (String) propertyNames.nextElement();
 			if (filter == null || prop.startsWith(filter)) {
-				ci.println(prop+'='+allProperties.getProperty(prop));
+				ci.println(prop + '=' + allProperties.getProperty(prop));
 			}
 		}
 	}
