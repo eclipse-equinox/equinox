@@ -240,11 +240,11 @@ public class FrameworkLauncher {
 			Map.Entry entry = (Map.Entry) it.next();
 			String key = (String) entry.getKey();
 			String value = (String) entry.getValue(); 
-			if (key.endsWith("*"))
+			if (key.endsWith("*")) {
 				if (value.equals(NULL_IDENTIFIER)) {
 					clearPrefixedSystemProperties(key.substring(0, key.length() -1), initialPropertyMap);
 				}
-			else if (value.equals(NULL_IDENTIFIER))
+			} else if (value.equals(NULL_IDENTIFIER))
 				initialPropertyMap.put(key, null);
 			else
 				initialPropertyMap.put(entry.getKey(), entry.getValue());			
