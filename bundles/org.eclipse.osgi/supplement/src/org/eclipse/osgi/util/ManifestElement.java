@@ -462,13 +462,17 @@ public class ManifestElement {
 	 * value is stored in the map.
 	 * <p>
 	 * The supplied input stream is consumed by this method and will be closed.
+	 * If the supplied Map is null then a Map is created to put the header/value pairs into.
 	 * </p>
 	 * @param manifest an input stream for a bundle manifest.
-	 * @param headers a map used to put the header/value pairs from the bundle manifest
+	 * @param headers a map used to put the header/value pairs from the bundle manifest.  This value may be null.
 	 * @throws BundleException if the manifest has an invalid syntax
 	 * @throws IOException if an error occurs while reading the manifest
+	 * @return the map with the header/value pairs from the bundle manifest
 	 */
-	public static void parseBundleManifest(InputStream manifest, Map headers) throws IOException, BundleException {
+	public static Map parseBundleManifest(InputStream manifest, Map headers) throws IOException, BundleException {
+		if (headers == null)
+			headers = new HashMap();
 		BufferedReader br;
 		try {
 			br = new BufferedReader(new InputStreamReader(manifest, "UTF8")); //$NON-NLS-1$
@@ -528,5 +532,6 @@ public class ManifestElement {
 				// do nothing
 			}
 		}
+		return headers;
 	}
 }
