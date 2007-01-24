@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -69,6 +69,7 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 	private EclipseAppHandle activeGlobalSingleton;
 	private EclipseAppHandle activeScopedSingleton;
 	private HashMap activeLimited;
+	private String defaultAppId;
 
 	public EclipseAppContainer(BundleContext context, IExtensionRegistry extensionRegistry, ApplicationLauncher appLauncher) {
 		this.context = context;
@@ -167,6 +168,9 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 						}
 					}
 				}
+				String defaultApp = getDefaultAppId();
+				if (defaultApp != null && defaultApp.equals(appExtension.getUniqueIdentifier()))
+					flags |= EclipseAppDescriptor.FLAG_DEFAULT_APP;
 			}
 			appDescriptor = new EclipseAppDescriptor(Activator.getBundle(appExtension.getContributor()), appExtension.getUniqueIdentifier(), flags, cardinality, this);
 			// register the appDescriptor as a service
@@ -216,7 +220,7 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 
 	private void startDefaultApp() throws ApplicationException {
 		// find the default application
-		String applicationId = getApplicationId();
+		String applicationId = getDefaultAppId();
 		EclipseAppDescriptor defaultDesc = null;
 		Map args = null;
 		if (applicationId == null) {
@@ -344,19 +348,22 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 		}
 	}
 
-	String getApplicationId() {
+	private String getDefaultAppId() {
+		if (defaultAppId != null)
+			return defaultAppId;
 		// try commandLineProperties
-		String applicationId = CommandLineArgs.getApplication();
-		if (applicationId != null)
-			return applicationId;
+		defaultAppId = CommandLineArgs.getApplication();
+		if (defaultAppId != null)
+			return defaultAppId;
 
 		// try bundleContext properties
-		applicationId = context.getProperty(EclipseAppContainer.PROP_ECLIPSE_APPLICATION);
-		if (applicationId != null)
-			return applicationId;
+		defaultAppId = context.getProperty(EclipseAppContainer.PROP_ECLIPSE_APPLICATION);
+		if (defaultAppId != null)
+			return defaultAppId;
 
 		//Derive the application from the product information
-		return getBranding() == null ? null : getBranding().getApplication();
+		defaultAppId = getBranding() == null ? null : getBranding().getApplication();
+		return defaultAppId;
 	}
 
 	public IBranding getBranding() {

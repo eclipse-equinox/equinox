@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,6 +25,7 @@ import org.osgi.service.condpermadmin.ConditionInfo;
  */
 public class EclipseAppDescriptor extends ApplicationDescriptor {
 	static final String APP_TYPE = "eclipse.application.type"; //$NON-NLS-1$
+	static final String APP_DEFAULT = "eclipse.application.default"; //$NON-NLS-1$
 	static final String APP_TYPE_MAIN_THREAD = "main.thread"; //$NON-NLS-1$
 	static final String APP_TYPE_ANY_THREAD = "any.thread"; //$NON-NLS-1$
 	static final int FLAG_VISIBLE = 0x01;
@@ -34,6 +35,7 @@ public class EclipseAppDescriptor extends ApplicationDescriptor {
 	static final int FLAG_CARD_LIMITED = 0x10;
 	static final int FLAG_TYPE_MAIN_THREAD = 0x20;
 	static final int FLAG_TYPE_ANY_THREAD = 0x40;
+	static final int FLAG_DEFAULT_APP = 0x80;
 	private static long instanceID = 0;
 	private ServiceRegistration sr;
 	private Boolean locked = Boolean.FALSE;
@@ -96,7 +98,6 @@ public class EclipseAppDescriptor extends ApplicationDescriptor {
 				// this must mean the service was unregistered
 				// just ignore
 			}
-		
 	}
 
 	synchronized void setServiceRegistration(ServiceRegistration sr) {
@@ -125,6 +126,8 @@ public class EclipseAppDescriptor extends ApplicationDescriptor {
 		Boolean visible = (flags & FLAG_VISIBLE) != 0 ? Boolean.TRUE : Boolean.FALSE;
 		props.put(ApplicationDescriptor.APPLICATION_VISIBLE, visible);
 		props.put(APP_TYPE, getThreadTypeString());
+		if ((flags & FLAG_DEFAULT_APP) != 0)
+			props.put(APP_DEFAULT, Boolean.TRUE);
 		return props;
 	}
 
