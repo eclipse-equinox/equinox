@@ -11,6 +11,8 @@
 
 package org.eclipse.core.runtime.internal.adaptor;
 
+import java.lang.reflect.Method;
+import java.util.Map;
 import org.eclipse.core.runtime.adaptor.EclipseStarter;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
@@ -131,5 +133,22 @@ public class EclipseAppLauncher implements ApplicationLauncher {
 			((ApplicationRunnable)runnable).stop();
 			runningLock.acquire(60000); // timeout after 1 minute.
 		}
+	}
+
+	/*
+	 * Similar to the start method this method will restart the default method on current thread.
+	 * This method assumes that the default application was launched at least once and that an ApplicationDescriptor 
+	 * exists that can be used to relaunch the default application.
+	 */
+	public Object reStart(Object argument) throws Exception {
+		ServiceReference ref[] = null;
+		ref = context.getServiceReferences("org.osgi.service.application.ApplicationDescriptor", "(eclipse.application.default=true)");  //$NON-NLS-1$//$NON-NLS-2$
+		if (ref != null && ref.length > 0) {
+			Object defaultApp = context.getService(ref[0]);
+			Method launch = defaultApp.getClass().getMethod("launch", new Class[] {Map.class}); //$NON-NLS-1$
+			launch.invoke(defaultApp, new Object[] {null});
+			return start(argument);
+		}
+		throw new IllegalStateException(EclipseAdaptorMsg.ECLIPSE_STARTUP_ERROR_NO_APPLICATION);
 	}
 }

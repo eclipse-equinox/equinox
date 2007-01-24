@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2006 IBM Corporation and others.
+ * Copyright (c) 2003, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -130,6 +130,7 @@ public class EclipseStarter {
 	private static FrameworkLog log;
 	// directory of serch candidates keyed by directory abs path -> directory listing (bug 122024)
 	private static HashMap searchCandidates = new HashMap(4);
+	private static EclipseAppLauncher appLauncher;
 
 	/**
 	 * This is the main to start osgi.
@@ -325,7 +326,7 @@ public class EclipseStarter {
 	}
 
 	/**
-	 * Runs the applicaiton for which the platform was started. The platform 
+	 * Runs the application for which the platform was started. The platform 
 	 * must be running. 
 	 * <p>
 	 * The given argument is passed to the application being run.  If it is <code>null</code>
@@ -344,14 +345,17 @@ public class EclipseStarter {
 		// if we are just initializing, do not run the application just return.
 		if (initialize)
 			return new Integer(0);
-		boolean launchDefault = Boolean.valueOf(FrameworkProperties.getProperty(PROP_APPLICATION_LAUNCHDEFAULT, "true")).booleanValue(); //$NON-NLS-1$
-		// create the ApplicationLauncher and register it as a service
-		EclipseAppLauncher launcher = new EclipseAppLauncher(context, Boolean.valueOf(FrameworkProperties.getProperty(PROP_ALLOW_APPRELAUNCH)).booleanValue(), launchDefault, log);
-		context.registerService(ApplicationLauncher.class.getName(), launcher, null);
-		// must start the launcher AFTER service restration because this method 
-		// blocks and runs the application on the current thread.  This method 
-		// will return only after the application has stopped.
-		return launcher.start(argument);
+		if (appLauncher == null) {
+			boolean launchDefault = Boolean.valueOf(FrameworkProperties.getProperty(PROP_APPLICATION_LAUNCHDEFAULT, "true")).booleanValue(); //$NON-NLS-1$
+			// create the ApplicationLauncher and register it as a service
+			appLauncher = new EclipseAppLauncher(context, Boolean.valueOf(FrameworkProperties.getProperty(PROP_ALLOW_APPRELAUNCH)).booleanValue(), launchDefault, log);
+			appLauncherRegistration = context.registerService(ApplicationLauncher.class.getName(), appLauncher, null);
+			// must start the launcher AFTER service restration because this method 
+			// blocks and runs the application on the current thread.  This method 
+			// will return only after the application has stopped.
+			return appLauncher.start(argument);
+		}
+		return appLauncher.reStart(argument);
 	}
 
 	/**
@@ -383,6 +387,7 @@ public class EclipseStarter {
 		if (defaultMonitorRegistration != null)
 			defaultMonitorRegistration.unregister();
 		appLauncherRegistration = null;
+		appLauncher = null;
 		endSplashRegistration = null;
 		splashStreamRegistration = null;
 		defaultMonitorRegistration = null;
