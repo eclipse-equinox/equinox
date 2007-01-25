@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2006 IBM Corporation and others.
+ * Copyright (c) 2004, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -46,14 +46,11 @@ public class EclipseAdaptorMsg extends NLS {
 	
 	public static String ECLIPSE_CONSOLE_COMMANDS_HEADER;
 	public static String ECLIPSE_CONSOLE_HELP_DIAG_COMMAND_DESCRIPTION;
-	public static String ECLIPSE_CONSOLE_HELP_ACTIVE_COMMAND_DESCRIPTION;
-	public static String ECLIPSE_CONSOLE_HELP_GETPROP_COMMAND_DESCRIPTION;
 	public static String ECLIPSE_CONSOLE_NO_BUNDLE_SPECIFIED_ERROR;
 	public static String ECLIPSE_CONSOLE_NO_CONSTRAINTS_NO_PLATFORM_ADMIN_MESSAGE;
 	public static String ECLIPSE_CONSOLE_CANNOT_FIND_BUNDLE_ERROR;
 	public static String ECLIPSE_CONSOLE_NO_CONSTRAINTS;
 	public static String ECLIPSE_CONSOLE_OTHER_VERSION;
-	public static String ECLIPSE_CONSOLE_BUNDLES_ACTIVE;
 
 	public static String ECLIPSE_STARTUP_ALREADY_RUNNING;
 	public static String ECLIPSE_STARTUP_STARTUP_ERROR;

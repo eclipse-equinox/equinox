@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2006 IBM Corporation and others.
+ * Copyright (c) 2003, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,10 +12,12 @@
 package org.eclipse.osgi.framework.internal.core;
 
 import java.io.*;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.security.ProtectionDomain;
 import java.util.*;
+
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.eclipse.osgi.framework.launcher.Launcher;
@@ -66,6 +68,7 @@ import org.osgi.service.permissionadmin.PermissionAdmin;
  ---Extras---
  exec <command> - execute a command in a separate process and wait
  fork <command> - execute a command in a separate process
+ getprop <name> -  Displays the system properties with the given name, or all of them.
  ---Controlling StartLevel---
  sl {(<id>|<location>)} - display the start level for the specified bundle, or for the framework if no bundle specified
  setfwsl <start level> - set the framework start level
@@ -126,7 +129,6 @@ public class FrameworkCommandProvider implements CommandProvider {
 		addCommand("shutdown", ConsoleMsg.CONSOLE_HELP_SHUTDOWN_COMMAND_DESCRIPTION, help); //$NON-NLS-1$ 
 		addCommand("close", ConsoleMsg.CONSOLE_HELP_CLOSE_COMMAND_DESCRIPTION, help); //$NON-NLS-1$ 
 		addCommand("exit", ConsoleMsg.CONSOLE_HELP_EXIT_COMMAND_DESCRIPTION, help); //$NON-NLS-1$ 
-		addCommand("gc", ConsoleMsg.CONSOLE_HELP_GC_COMMAND_DESCRIPTION, help); //$NON-NLS-1$ 
 		addCommand("init", ConsoleMsg.CONSOLE_HELP_INIT_COMMAND_DESCRIPTION, help); //$NON-NLS-1$ 
 		addCommand("setprop", ConsoleMsg.CONSOLE_HELP_KEYVALUE_ARGUMENT_DESCRIPTION, ConsoleMsg.CONSOLE_HELP_SETPROP_COMMAND_DESCRIPTION, help); //$NON-NLS-1$  
 		addHeader(ConsoleMsg.CONSOLE_HELP_CONTROLLING_BUNDLES_HEADER, help);
@@ -137,17 +139,19 @@ public class FrameworkCommandProvider implements CommandProvider {
 		addCommand("refresh", ConsoleMsg.CONSOLE_HELP_REFRESH_COMMAND_DESCRIPTION, help); //$NON-NLS-1$ 
 		addCommand("update", ConsoleMsg.CONSOLE_HELP_UPDATE_COMMAND_DESCRIPTION, help); //$NON-NLS-1$ 
 		addHeader(ConsoleMsg.CONSOLE_HELP_DISPLAYING_STATUS_HEADER, help);
-		addCommand("status", ConsoleMsg.CONSOLE_HELP_STATUS_COMMAND_DESCRIPTION, help); //$NON-NLS-1$ 
-		addCommand("ss", ConsoleMsg.CONSOLE_HELP_SS_COMMAND_DESCRIPTION, help); //$NON-NLS-1$ 
+		addCommand("status", ConsoleMsg.CONSOLE_HELP_STATE_ARGUMENT_DESCRIPTION, ConsoleMsg.CONSOLE_HELP_STATUS_COMMAND_DESCRIPTION, help); //$NON-NLS-1$ 
+		addCommand("ss", ConsoleMsg.CONSOLE_HELP_STATE_ARGUMENT_DESCRIPTION, ConsoleMsg.CONSOLE_HELP_SS_COMMAND_DESCRIPTION, help); //$NON-NLS-1$ 
 		addCommand("services", ConsoleMsg.CONSOLE_HELP_FILTER_ARGUMENT_DESCRIPTION, ConsoleMsg.CONSOLE_HELP_SERVICES_COMMAND_DESCRIPTION, help); //$NON-NLS-1$ 
 		addCommand("packages", ConsoleMsg.CONSOLE_HELP_PACKAGES_ARGUMENT_DESCRIPTION, ConsoleMsg.CONSOLE_HELP_PACKAGES_COMMAND_DESCRIPTION, help); //$NON-NLS-1$ 
-		addCommand("bundles", ConsoleMsg.CONSOLE_HELP_BUNDLES_COMMAND_DESCRIPTION, help); //$NON-NLS-1$ 
+		addCommand("bundles", ConsoleMsg.CONSOLE_HELP_STATE_ARGUMENT_DESCRIPTION, ConsoleMsg.CONSOLE_HELP_BUNDLES_COMMAND_DESCRIPTION, help); //$NON-NLS-1$ 
 		addCommand("bundle", ConsoleMsg.CONSOLE_HELP_IDLOCATION_ARGUMENT_DESCRIPTION, ConsoleMsg.CONSOLE_HELP_BUNDLE_COMMAND_DESCRIPTION, help); //$NON-NLS-1$ 
 		addCommand("headers", ConsoleMsg.CONSOLE_HELP_IDLOCATION_ARGUMENT_DESCRIPTION, ConsoleMsg.CONSOLE_HELP_HEADERS_COMMAND_DESCRIPTION, help); //$NON-NLS-1$ 
 		addCommand("log", ConsoleMsg.CONSOLE_HELP_IDLOCATION_ARGUMENT_DESCRIPTION, ConsoleMsg.CONSOLE_HELP_LOG_COMMAND_DESCRIPTION, help); //$NON-NLS-1$ 
 		addHeader(ConsoleMsg.CONSOLE_HELP_EXTRAS_HEADER, help);
 		addCommand("exec", ConsoleMsg.CONSOLE_HELP_COMMAND_ARGUMENT_DESCRIPTION, ConsoleMsg.CONSOLE_HELP_EXEC_COMMAND_DESCRIPTION, help); //$NON-NLS-1$ 
-		addCommand("fork", ConsoleMsg.CONSOLE_HELP_COMMAND_ARGUMENT_DESCRIPTION, ConsoleMsg.CONSOLE_HELP_FORK_COMMAND_DESCRIPTION, help); //$NON-NLS-1$ 
+		addCommand("fork", ConsoleMsg.CONSOLE_HELP_COMMAND_ARGUMENT_DESCRIPTION, ConsoleMsg.CONSOLE_HELP_FORK_COMMAND_DESCRIPTION, help); //$NON-NLS-1$
+		addCommand("gc", ConsoleMsg.CONSOLE_HELP_GC_COMMAND_DESCRIPTION, help); //$NON-NLS-1$ 
+		addCommand("getprop ", ConsoleMsg.CONSOLE_HELP_GETPROP_ARGUMENT_DESCRIPTION, ConsoleMsg.CONSOLE_HELP_GETPROP_COMMAND_DESCRIPTION, help);//$NON-NLS-1$
 		addHeader(ConsoleMsg.STARTLEVEL_HELP_HEADING, help);
 		addCommand("sl", ConsoleMsg.CONSOLE_HELP_OPTIONAL_IDLOCATION_ARGUMENT_DESCRIPTION, ConsoleMsg.STARTLEVEL_HELP_SL, help); //$NON-NLS-1$ 
 		addCommand("setfwsl", ConsoleMsg.STARTLEVEL_ARGUMENT_DESCRIPTION, ConsoleMsg.STARTLEVEL_HELP_SETFWSL, help); //$NON-NLS-1$ 
@@ -402,6 +406,38 @@ public class FrameworkCommandProvider implements CommandProvider {
 		_status(intp);
 	}
 
+	private Object[] processOption(CommandInterpreter intp) {
+		String option = intp.nextArgument();
+		String filteredName = null;
+		int stateFilter = -1;
+		if (option != null && option.equals("-s")) {
+			String searchedState = intp.nextArgument();
+			StringTokenizer tokens = new StringTokenizer(searchedState, ",");
+			while (tokens.hasMoreElements()) {
+				String desiredState = (String) tokens.nextElement();
+				Field match = null;
+				try {
+					match = Bundle.class.getField(desiredState.toUpperCase());
+					if (stateFilter == -1)
+						stateFilter = 0;
+					stateFilter |= match.getInt(match);
+				} catch (NoSuchFieldException e) {
+					intp.println(ConsoleMsg.CONSOLE_INVALID_INPUT + ": " + desiredState);
+					return null;
+				} catch (IllegalAccessException e) {
+					intp.println(ConsoleMsg.CONSOLE_INVALID_INPUT + ": " + desiredState);
+					return null;
+				}
+			}
+		} else {
+			filteredName = option;
+		}
+		String tmp = intp.nextArgument();
+		if (tmp != null)
+			filteredName = tmp;
+		return new Object[] {filteredName, new Integer(stateFilter)};
+	}
+
 	/**
 	 *  Handle the status command.  Display installed bundles and registered services.
 	 *
@@ -414,6 +450,10 @@ public class FrameworkCommandProvider implements CommandProvider {
 			intp.println(ConsoleMsg.CONSOLE_FRAMEWORK_IS_SHUTDOWN_MESSAGE);
 		}
 		intp.println();
+
+		Object[] options = processOption(intp);
+		if (options == null)
+			return;
 
 		AbstractBundle[] bundles = (AbstractBundle[]) context.getBundles();
 		int size = bundles.length;
@@ -428,6 +468,8 @@ public class FrameworkCommandProvider implements CommandProvider {
 		intp.println(ConsoleMsg.CONSOLE_STATE_BUNDLE_FILE_NAME_HEADER);
 		for (int i = 0; i < size; i++) {
 			AbstractBundle bundle = bundles[i];
+			if (!match(bundle, (String) options[0], ((Integer) options[1]).intValue()))
+				continue;
 			intp.print(new Long(bundle.getBundleId()));
 			intp.print(tab);
 			intp.println(bundle.getLocation());
@@ -588,6 +630,10 @@ public class FrameworkCommandProvider implements CommandProvider {
 	 *  @param intp A CommandInterpreter object containing the command and it's arguments.
 	 */
 	public void _bundles(CommandInterpreter intp) throws Exception {
+		Object[] options = processOption(intp);
+		if (options == null)
+			return;
+
 		AbstractBundle[] bundles = (AbstractBundle[]) context.getBundles();
 		int size = bundles.length;
 
@@ -598,6 +644,8 @@ public class FrameworkCommandProvider implements CommandProvider {
 
 		for (int i = 0; i < size; i++) {
 			AbstractBundle bundle = bundles[i];
+			if (!match(bundle, (String) options[0], ((Integer) options[1]).intValue()))
+				continue;
 			long id = bundle.getBundleId();
 			intp.println(bundle);
 			intp.print("  "); //$NON-NLS-1$
@@ -1293,6 +1341,10 @@ public class FrameworkCommandProvider implements CommandProvider {
 			intp.println(ConsoleMsg.CONSOLE_FRAMEWORK_IS_SHUTDOWN_MESSAGE);
 		}
 
+		Object[] options = processOption(intp);
+		if (options == null)
+			return;
+
 		AbstractBundle[] bundles = (AbstractBundle[]) context.getBundles();
 		if (bundles.length == 0) {
 			intp.println(ConsoleMsg.CONSOLE_NO_INSTALLED_BUNDLES_ERROR);
@@ -1303,6 +1355,8 @@ public class FrameworkCommandProvider implements CommandProvider {
 			intp.println(ConsoleMsg.CONSOLE_STATE_BUNDLE_TITLE);
 			for (int i = 0; i < bundles.length; i++) {
 				AbstractBundle b = bundles[i];
+				if (!match(b, (String) options[0], ((Integer) options[1]).intValue()))
+					continue;
 				String label = b.getSymbolicName();
 				if (label == null || label.length() == 0)
 					label = b.toString();
@@ -1327,6 +1381,16 @@ public class FrameworkCommandProvider implements CommandProvider {
 				}
 			}
 		}
+	}
+
+	private boolean match(Bundle toFilter, String searchedName, int searchedState) {
+		if ((toFilter.getState() & searchedState) == 0) {
+			return false;
+		}
+		if (searchedName != null && toFilter.getSymbolicName() != null && toFilter.getSymbolicName().indexOf(searchedName) == -1) {
+			return false;
+		}
+		return true;
 	}
 
 	/**
@@ -1764,5 +1828,17 @@ public class FrameworkCommandProvider implements CommandProvider {
 			t.nextToken();
 		}
 		return t.nextToken();
+	}
+
+	public void _getprop(CommandInterpreter ci) throws Exception {
+		Properties allProperties = FrameworkProperties.getProperties();
+		String filter = ci.nextArgument();
+		Enumeration propertyNames = allProperties.keys();
+		while (propertyNames.hasMoreElements()) {
+			String prop = (String) propertyNames.nextElement();
+			if (filter == null || prop.startsWith(filter)) {
+				ci.println(prop + '=' + allProperties.getProperty(prop));
+			}
+		}
 	}
 }

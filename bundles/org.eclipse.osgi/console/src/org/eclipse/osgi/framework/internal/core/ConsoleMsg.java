@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2005 IBM Corporation and others.
+ * Copyright (c) 2004, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,7 +14,7 @@ import org.eclipse.osgi.util.NLS;
 
 public class ConsoleMsg extends NLS {
 	private static final String BUNDLE_NAME = "org.eclipse.osgi.framework.internal.core.ConsoleMessages"; //$NON-NLS-1$
-	
+
 	public static String CONSOLE_LINES_TO_SCROLL_NEGATIVE_ERROR;
 	public static String CONSOLE_NESTED_EXCEPTION;
 	public static String CONSOLE_ERROR_READING_RESOURCE;
@@ -33,22 +33,22 @@ public class ConsoleMsg extends NLS {
 	public static String CONSOLE_INVALID_INPUT;
 	public static String CONSOLE_TOO_MUCH_INVALID_INPUT;
 	public static String CONSOLE_MORE_ENTER_LINES;
-	
+
 	public static String CONSOLE_HELP_VALID_COMMANDS_HEADER;
 	public static String CONSOLE_LISTENING_ON_PORT;
 	public static String CONSOLE_PROMPT;
-	
+
 	public static String CONSOLE_TELNET_CONNECTION_REFUSED;
 	public static String CONSOLE_TELNET_CURRENTLY_USED;
 	public static String CONSOLE_TELNET_ONE_CLIENT_ONLY;
-	
+
 	public static String CONSOLE_UNINSTALLED_MESSAGE;
 	public static String CONSOLE_INSTALLED_MESSAGE;
 	public static String CONSOLE_RESOLVED_MESSAGE;
 	public static String CONSOLE_STARTING_MESSAGE;
 	public static String CONSOLE_STOPPING_MESSAGE;
 	public static String CONSOLE_ACTIVE_MESSAGE;
-	
+
 	public static String CONSOLE_HELP_CONTROLLING_FRAMEWORK_HEADER;
 	public static String CONSOLE_HELP_LAUNCH_COMMAND_DESCRIPTION;
 	public static String CONSOLE_HELP_SHUTDOWN_COMMAND_DESCRIPTION;
@@ -66,6 +66,7 @@ public class ConsoleMsg extends NLS {
 	public static String CONSOLE_HELP_REFRESH_COMMAND_DESCRIPTION;
 	public static String CONSOLE_HELP_DISPLAYING_STATUS_HEADER;
 	public static String CONSOLE_HELP_STATUS_COMMAND_DESCRIPTION;
+	public static String CONSOLE_HELP_STATE_ARGUMENT_DESCRIPTION;
 	public static String CONSOLE_HELP_SS_COMMAND_DESCRIPTION;
 	public static String CONSOLE_HELP_FILTER_ARGUMENT_DESCRIPTION;
 	public static String CONSOLE_HELP_SERVICES_COMMAND_DESCRIPTION;
@@ -78,6 +79,8 @@ public class ConsoleMsg extends NLS {
 	public static String CONSOLE_HELP_LOG_COMMAND_DESCRIPTION;
 	public static String CONSOLE_HELP_EXTRAS_HEADER;
 	public static String CONSOLE_HELP_COMMAND_ARGUMENT_DESCRIPTION;
+	public static String CONSOLE_HELP_GETPROP_COMMAND_DESCRIPTION;
+	public static String CONSOLE_HELP_GETPROP_ARGUMENT_DESCRIPTION;
 	public static String CONSOLE_HELP_EXEC_COMMAND_DESCRIPTION;
 	public static String CONSOLE_HELP_FORK_COMMAND_DESCRIPTION;
 	public static String STARTLEVEL_HELP_HEADING;
@@ -91,7 +94,7 @@ public class ConsoleMsg extends NLS {
 	public static String CONSOLE_HELP_PROFILE_HEADING;
 	public static String CONSOLE_HELP_PROFILELOG_DESCRIPTION;
 	public static String CONSOLE_HELP_UPDATE_COMMAND_DESCRIPTION;
-	
+
 	public static String CONSOLE_NO_BUNDLE_SPECIFIED_ERROR;
 	public static String CONSOLE_NOTHING_TO_INSTALL_ERROR;
 	public static String CONSOLE_BUNDLE_ID_MESSAGE;
@@ -116,7 +119,7 @@ public class ConsoleMsg extends NLS {
 	public static String CONSOLE_ID_MESSAGE;
 	public static String CONSOLE_STATUS_MESSAGE;
 	public static String CONSOLE_DATA_ROOT_MESSAGE;
-	
+
 	public static String CONSOLE_IMPORTED_PACKAGES_MESSAGE;
 	public static String CONSOLE_NO_IMPORTED_PACKAGES_MESSAGE;
 	public static String CONSOLE_HOST_MESSAGE;
@@ -156,18 +159,14 @@ public class ConsoleMsg extends NLS {
 	public static String CONSOLE_REQUIRES_MESSAGE;
 	public static String CONSOLE_CAN_NOT_USE_STARTLEVEL_NO_STARTLEVEL_SVC_ERROR;
 	public static String CONSOLE_CANNOT_FIND_BUNDLE_ERROR;
-	
-	
+
 	public static String STARTLEVEL_FRAMEWORK_ACTIVE_STARTLEVEL;
 	public static String STARTLEVEL_BUNDLE_STARTLEVEL;
 	public static String STARTLEVEL_NO_STARTLEVEL_GIVEN;
 	public static String STARTLEVEL_NO_STARTLEVEL_OR_BUNDLE_GIVEN;
 	public static String STARTLEVEL_INITIAL_BUNDLE_STARTLEVEL;
 	public static String STARTLEVEL_POSITIVE_INTEGER;
-	
-	
-	
-	
+
 	static {
 		// initialize resource bundles
 		NLS.initializeMessages(BUNDLE_NAME, ConsoleMsg.class);

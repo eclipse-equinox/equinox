@@ -10,14 +10,12 @@
  *******************************************************************************/
 package org.eclipse.core.runtime.internal.adaptor;
 
-import java.util.Enumeration;
-import java.util.Properties;
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
-import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.util.NLS;
-import org.osgi.framework.*;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 
 /**
  * Internal class.
@@ -37,10 +35,6 @@ public class EclipseCommandProvider implements CommandProvider {
 		help.append("---"); //$NON-NLS-1$
 		help.append(EclipseAdaptorMsg.NEW_LINE);
 		help.append("\tdiag - " + EclipseAdaptorMsg.ECLIPSE_CONSOLE_HELP_DIAG_COMMAND_DESCRIPTION);//$NON-NLS-1$
-		help.append(EclipseAdaptorMsg.NEW_LINE);
-		help.append("\tactive - " + EclipseAdaptorMsg.ECLIPSE_CONSOLE_HELP_ACTIVE_COMMAND_DESCRIPTION);//$NON-NLS-1$
-		help.append(EclipseAdaptorMsg.NEW_LINE);
-		help.append("\tgetprop " + EclipseAdaptorMsg.ECLIPSE_CONSOLE_HELP_GETPROP_COMMAND_DESCRIPTION);//$NON-NLS-1$
 		return help.toString();
 	}
 
@@ -102,30 +96,6 @@ public class EclipseCommandProvider implements CommandProvider {
 			}
 		} finally {
 			context.ungetService(platformAdminRef);
-		}
-	}
-
-	public void _active(CommandInterpreter ci) throws Exception {
-		Bundle[] allBundles = context.getBundles();
-		int activeCount = 0;
-		for (int i = 0; i < allBundles.length; i++)
-			if (allBundles[i].getState() == Bundle.ACTIVE) {
-				ci.println(allBundles[i]);
-				activeCount++;
-			}
-		ci.print("  "); //$NON-NLS-1$
-		ci.println(NLS.bind(EclipseAdaptorMsg.ECLIPSE_CONSOLE_BUNDLES_ACTIVE, String.valueOf(activeCount)));
-	}
-
-	public void _getprop(CommandInterpreter ci) throws Exception {
-		Properties allProperties = FrameworkProperties.getProperties();
-		String filter = ci.nextArgument();
-		Enumeration propertyNames = allProperties.keys();
-		while (propertyNames.hasMoreElements()) {
-			String prop = (String) propertyNames.nextElement();
-			if (filter == null || prop.startsWith(filter)) {
-				ci.println(prop + '=' + allProperties.getProperty(prop));
-			}
 		}
 	}
 }
