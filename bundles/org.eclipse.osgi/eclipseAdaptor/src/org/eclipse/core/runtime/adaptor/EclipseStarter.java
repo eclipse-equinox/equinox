@@ -17,7 +17,6 @@ import java.security.CodeSource;
 import java.security.ProtectionDomain;
 import java.util.*;
 import org.eclipse.core.runtime.internal.adaptor.*;
-import org.eclipse.core.runtime.internal.stats.StatsManager;
 import org.eclipse.osgi.framework.adaptor.FilePath;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
@@ -60,7 +59,6 @@ public class EclipseStarter {
 	private static OSGi osgi = null;
 	private static ServiceRegistration defaultMonitorRegistration = null;
 	private static ServiceRegistration appLauncherRegistration = null;
-	private static ServiceRegistration endSplashRegistration = null;
 	private static ServiceRegistration splashStreamRegistration = null;
 
 	// command line arguments
@@ -279,6 +277,8 @@ public class EclipseStarter {
 		osgi = new OSGi(adaptor);
 		if (Profile.PROFILE && Profile.STARTUP)
 			Profile.logTime("EclipseStarter.startup()", "OSGi created"); //$NON-NLS-1$ //$NON-NLS-2$
+		context = osgi.getBundleContext();
+		publishSplashScreen(endSplashHandler);
 		osgi.launch();
 		if (Profile.PROFILE && Profile.STARTUP)
 			Profile.logTime("EclipseStarter.startup()", "osgi launched"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -288,8 +288,6 @@ public class EclipseStarter {
 			if (Profile.PROFILE && Profile.STARTUP)
 				Profile.logTime("EclipseStarter.startup()", "console started"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
-		context = osgi.getBundleContext();
-		publishSplashScreen(endSplashHandler);
 		if ("true".equals(FrameworkProperties.getProperty(PROP_REFRESH_BUNDLES))) //$NON-NLS-1$
 			refreshPackages(getCurrentBundles(false));
 		if (Profile.PROFILE && Profile.STARTUP)
@@ -380,15 +378,12 @@ public class EclipseStarter {
 			return;
 		if (appLauncherRegistration != null)
 			appLauncherRegistration.unregister();
-		if (endSplashRegistration != null)
-			endSplashRegistration.unregister();
 		if (splashStreamRegistration != null)
 			splashStreamRegistration.unregister();
 		if (defaultMonitorRegistration != null)
 			defaultMonitorRegistration.unregister();
 		appLauncherRegistration = null;
 		appLauncher = null;
-		endSplashRegistration = null;
 		splashStreamRegistration = null;
 		defaultMonitorRegistration = null;
 		osgi.close();
@@ -505,22 +500,6 @@ public class EclipseStarter {
 	private static void publishSplashScreen(final Runnable endSplashHandler) {
 		if (endSplashHandler == null)
 			return;
-		// InternalPlatform now how to retrieve this later
-		Dictionary properties = new Hashtable();
-		properties.put("name", "splashscreen"); //$NON-NLS-1$ //$NON-NLS-2$
-		Runnable handler = new Runnable() {
-			public void run() {
-				if (EclipseStarter.debug) {
-					String timeString = FrameworkProperties.getProperty("eclipse.startTime"); //$NON-NLS-1$ 
-					long time = timeString == null ? 0L : Long.parseLong(timeString);
-					System.out.println("Application Started: " + (System.currentTimeMillis() - time)); //$NON-NLS-1$
-				}
-				StatsManager.doneBooting();
-				endSplashHandler.run();
-			}
-		};
-		endSplashRegistration = context.registerService(Runnable.class.getName(), handler, properties);
-
 		// register the output stream to the launcher if it exists
 		try {
 			Method method = endSplashHandler.getClass().getMethod("getOutputStream", new Class[0]); //$NON-NLS-1$

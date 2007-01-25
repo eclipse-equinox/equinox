@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006 IBM Corporation and others.
+ * Copyright (c) 2006, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,12 +11,15 @@
 package org.eclipse.core.runtime.internal.adaptor;
 
 import java.lang.reflect.Method;
+import org.eclipse.core.runtime.adaptor.EclipseStarter;
+import org.eclipse.core.runtime.internal.stats.StatsManager;
+import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.eclipse.osgi.service.runnable.StartupMonitor;
 
 public class DefaultStartupMonitor implements StartupMonitor {
 
 	private Method updateMethod = null;
-	private Object splashHandler = null;
+	private Runnable splashHandler = null;
 
 	/**
 	 * Create a new startup monitor using the given splash handler.  The splash handle must
@@ -25,7 +28,7 @@ public class DefaultStartupMonitor implements StartupMonitor {
 	 * @param splashHandler
 	 * @throws IllegalStateException
 	 */
-	public DefaultStartupMonitor(Object splashHandler) throws IllegalStateException {
+	public DefaultStartupMonitor(Runnable splashHandler) throws IllegalStateException {
 		this.splashHandler = splashHandler;
 
 		try {
@@ -51,5 +54,15 @@ public class DefaultStartupMonitor implements StartupMonitor {
 		} else {
 			//TODO maybe we could print something interesting to the console?
 		}
+	}
+
+	public void applicationRunning() {
+		if (EclipseStarter.debug) {
+			String timeString = FrameworkProperties.getProperty("eclipse.startTime"); //$NON-NLS-1$ 
+			long time = timeString == null ? 0L : Long.parseLong(timeString);
+			System.out.println("Application Started: " + (System.currentTimeMillis() - time)); //$NON-NLS-1$
+		}
+		StatsManager.doneBooting();
+		splashHandler.run();
 	}
 }
