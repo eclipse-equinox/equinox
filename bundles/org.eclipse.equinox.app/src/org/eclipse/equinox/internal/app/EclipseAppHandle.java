@@ -16,6 +16,7 @@ import org.eclipse.core.runtime.*;
 import org.eclipse.equinox.app.IApplication;
 import org.eclipse.equinox.app.IApplicationContext;
 import org.eclipse.osgi.service.runnable.ApplicationRunnable;
+import org.eclipse.osgi.service.runnable.StartupMonitor;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 import org.osgi.service.application.ApplicationHandle;
@@ -108,7 +109,7 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 			if ((this.status & (EclipseAppHandle.FLAG_STOPPING | EclipseAppHandle.FLAG_STOPPED)) != 0)
 				return;
 		// change the service properties to reflect the state change.
-		this.status = status; 
+		this.status = status;
 		handleRegistration.setProperties(getServiceProperties());
 		// if the status is stopped then unregister the service
 		if ((this.status & EclipseAppHandle.FLAG_STOPPED) != 0) {
@@ -168,8 +169,8 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 		// first set the application handle status to running
 		setAppStatus(EclipseAppHandle.FLAG_ACTIVE);
 		// now run the splash handler
-		final Runnable handler = getSplashHandler();
-		if (handler == null)
+		final ServiceReference[] monitors = getStartupMonitors();
+		if (monitors == null)
 			return;
 		SafeRunner.run(new ISafeRunnable() {
 			public void handleException(Throwable e) {
@@ -178,28 +179,48 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 			}
 
 			public void run() throws Exception {
-				handler.run();
+				for (int i = 0; i < monitors.length; i++) {
+					StartupMonitor monitor = (StartupMonitor) Activator.getContext().getService(monitors[i]);
+					if (monitor != null) {
+						monitor.applicationRunning();
+						Activator.getContext().ungetService(monitors[i]);
+					}
+				}
 			}
 		});
 	}
 
-	private Runnable getSplashHandler() {
-		ServiceReference[] ref;
-		try {
-			ref = Activator.getContext().getServiceReferences(Runnable.class.getName(), "(name=splashscreen)"); //$NON-NLS-1$
-		} catch (InvalidSyntaxException e) {
-			return null;
-		}
-		if (ref == null || ref.length == 0)
-			return null;
-		// assumes the endInitializationHandler is available as a service
+	private ServiceReference[] getStartupMonitors() {
+		// assumes theStartupMonitor is available as a service
 		// see EclipseStarter.publishSplashScreen
-		Runnable result = (Runnable) Activator.getContext().getService(ref[0]);
-		if (result != null) {
-			Activator.getContext().ungetService(ref[0]); // immediately unget the service because we are not using it long
-			return result;
+		ServiceReference[] refs = null;
+		try {
+			refs = Activator.getContext().getServiceReferences(StartupMonitor.class.getName(), null);
+		} catch (InvalidSyntaxException e) {
+			// ignore; this cannot happen
 		}
-		return null;
+		if (refs == null || refs.length == 0)
+			return null;
+		// Implement our own Comparator to sort services
+		Arrays.sort(refs, new Comparator() {
+			public int compare(Object o1, Object o2) {
+				// sort in descending order
+				// sort based on service ranking first; highest rank wins
+				ServiceReference ref1 = (ServiceReference) o1;
+				ServiceReference ref2 = (ServiceReference) o2;
+				Object property = ref1.getProperty(Constants.SERVICE_RANKING);
+				int rank1 = (property instanceof Integer) ? ((Integer) property).intValue() : 0;
+				property = ref2.getProperty(Constants.SERVICE_RANKING);
+				int rank2 = (property instanceof Integer) ? ((Integer) property).intValue() : 0;
+				if (rank1 != rank2)
+					return rank1 > rank2 ? -1 : 1;
+				// rankings are equal; sort by id, lowest id wins
+				long id1 = ((Long) (ref1.getProperty(Constants.SERVICE_ID)))	.longValue();
+				long id2 = ((Long) (ref2.getProperty(Constants.SERVICE_ID)))	.longValue();
+				return id2 > id1 ? -1 : 1;
+			}
+		});
+		return refs;
 	}
 
 	private IApplication getApplication() {
