@@ -62,7 +62,7 @@ void initWindowSystem( int* pArgc, _TCHAR* argv[], int showSplash )
     topWindow = CreateWindowEx (0,
 		_T("STATIC"),
 		getOfficialName(),
-		SS_BITMAP | WS_POPUP,
+		SS_BITMAP | WS_POPUP | WS_CLIPCHILDREN,
 		CW_USEDEFAULT,
 		0,
 		CW_USEDEFAULT,
