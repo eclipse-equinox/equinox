@@ -17,8 +17,8 @@ package org.eclipse.osgi.service.runnable;
  * primary thread during the startup process.  Clients with threading restrictions can
  * use this interface to process events that may have been collected from another thread.
  *  <p> 
- * Monitors shares time on the primary thread.  The primary thread used to run the application 
- * will not proceed until monitors return from any operations.  Because of this, monitors should 
+ * Monitors share time on the primary thread.  The primary thread used to run the application 
+ * will not proceed until monitors return from any operation.  Because of this, monitors should 
  * not perform long running operations.
  * </p>
  * <p>
@@ -46,7 +46,7 @@ public interface StartupMonitor {
 	 * <p>
 	 * If multiple monitors are registered then the platform will call all monitors.  The monitors are called
 	 * according to service ranking; monitors with higher service rankings are called first.  In case of a 
-	 * service ranking tie the service with the lowest service id is called first (i.e. the first monitor registerd).
+	 * service ranking tie the service with the lowest service id is called first (i.e. the first monitor registered).
 	 * </p>
 	 */
 	public void applicationRunning();
