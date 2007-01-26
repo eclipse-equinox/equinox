@@ -57,7 +57,7 @@ public class HttpServerManager implements ManagedServiceFactory {
 				// TODO: consider logging this, but we should still continue cleaning up 
 				e.printStackTrace();
 			}
-			File contextWorkDir = new File(workDir, DIR_PREFIX + pid.hashCode()); //$NON-NLS-1$
+			File contextWorkDir = new File(workDir, DIR_PREFIX + pid.hashCode());
 			deleteDirectory(contextWorkDir);
 		}
 	}
