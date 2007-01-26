@@ -22,6 +22,7 @@ import org.osgi.service.cm.ManagedServiceFactory;
 
 public class HttpServerManager implements ManagedServiceFactory {
 
+	private static final String DIR_PREFIX = "pid_"; //$NON-NLS-1$
 	private static final String INTERNAL_CONTEXT_CLASSLOADER = "org.eclipse.equinox.http.jetty.internal.ContextClassLoader"; //$NON-NLS-1$
 
 	// Http Service properties - the autostarted service will look these up in the BundleContext by prefixing with "org.eclipse.equinox.http.jetty."
@@ -56,7 +57,7 @@ public class HttpServerManager implements ManagedServiceFactory {
 				// TODO: consider logging this, but we should still continue cleaning up 
 				e.printStackTrace();
 			}
-			File contextWorkDir = new File(workDir, pid);
+			File contextWorkDir = new File(workDir, DIR_PREFIX + pid.hashCode()); //$NON-NLS-1$
 			deleteDirectory(contextWorkDir);
 		}
 	}
@@ -199,7 +200,7 @@ public class HttpServerManager implements ManagedServiceFactory {
 			contextPathProperty = "/"; //$NON-NLS-1$
 		httpContext.setContextPath(contextPathProperty);
 
-		File contextWorkDir = new File(workDir, (String) dictionary.get(Constants.SERVICE_PID));
+		File contextWorkDir = new File(workDir, DIR_PREFIX + dictionary.get(Constants.SERVICE_PID).hashCode());
 		contextWorkDir.mkdir();
 		httpContext.setTempDirectory(contextWorkDir);
 

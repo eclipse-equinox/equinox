@@ -27,6 +27,10 @@ public class Activator implements BundleActivator {
 	// controls whether start() should automatically start an Http Service based on BundleContext properties (default is true)
 	private static final String AUTOSTART = "org.eclipse.equinox.http.jetty.autostart"; //$NON-NLS-1$
 
+	// The staticServerManager is use by the start and stopServer methods and must be accessed in a static synchronized block
+	// to ensure it is correctly handled in terms of the bundle life-cycle.
+	private static HttpServerManager staticServerManager;
+	
 	private HttpServerManager httpServerManager;
 	private ServiceRegistration registration;
 
@@ -45,9 +49,11 @@ public class Activator implements BundleActivator {
 		dictionary.put(Constants.SERVICE_PID, MANAGED_SERVICE_FACTORY_PID);
 		
 		registration = context.registerService(ManagedServiceFactory.class.getName(), httpServerManager, dictionary);
+		setStaticServerManager(httpServerManager);
 	}
 
 	public void stop(BundleContext context) throws Exception {
+		setStaticServerManager(null);
 		registration.unregister();
 		registration = null;
 
@@ -144,4 +150,21 @@ public class Activator implements BundleActivator {
 
 		return defaultSettings;
 	}
+	
+	public synchronized static void startServer(String pid, Dictionary settings) throws Exception{
+		if (staticServerManager == null)
+			throw new IllegalStateException("Inactive"); //$NON-NLS-1$
+		
+		staticServerManager.updated(pid, settings);
+	}
+	
+	public synchronized static void stopServer(String pid) throws Exception {
+		if (staticServerManager != null)
+			staticServerManager.deleted(pid);
+	}
+	
+	private synchronized static void setStaticServerManager(HttpServerManager httpServerManager) {
+		staticServerManager = httpServerManager;
+	}
+	
 }

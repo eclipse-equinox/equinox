@@ -24,7 +24,7 @@ public class ProxyContext {
 	public ProxyContext(ServletContext servletContext) {
 		File tempDir = (File) servletContext.getAttribute(JAVAX_SERVLET_CONTEXT_TEMPDIR);
 		if (tempDir != null) {
-			proxyContextTempDir = new File(tempDir, "ProxyContextTemp"); //$NON-NLS-1$
+			proxyContextTempDir = new File(tempDir, "proxytemp"); //$NON-NLS-1$
 			deleteDirectory(proxyContextTempDir);
 			proxyContextTempDir.mkdirs();
 		}
@@ -91,7 +91,7 @@ public class ProxyContext {
 
 		public ContextAttributes(HttpContext httpContext) {
 			if (proxyContextTempDir != null) {
-				File contextTempDir = new File(proxyContextTempDir, "HttpContext" + httpContext.hashCode()); //$NON-NLS-1$
+				File contextTempDir = new File(proxyContextTempDir, "hc_" + httpContext.hashCode()); //$NON-NLS-1$
 				contextTempDir.mkdirs();
 				put(JAVAX_SERVLET_CONTEXT_TEMPDIR, contextTempDir);
 			}
