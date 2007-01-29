@@ -205,14 +205,9 @@ public class ServiceReferenceImpl implements ServiceReference, Comparable {
 	 */
 	public int compareTo(Object object) {
 		ServiceReferenceImpl other = (ServiceReferenceImpl) object;
-
-		int compare = this.getRanking() - other.getRanking();
-
-		if (compare == 0) /* rankings are equal */{ /* check service id */
-			return (int) (other.getId() - this.getId());
-		}
-
-		return compare;
+		if (this.getRanking() != other.getRanking())
+			return this.getRanking() > other.getRanking() ? -1 : 1;
+		return this.getId() > other.getId() ? 1 : -1;
 	}
 
 	public boolean isAssignableTo(Bundle bundle, String className) {
