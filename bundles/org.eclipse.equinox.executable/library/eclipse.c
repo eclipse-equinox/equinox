@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at 
@@ -224,10 +224,16 @@ _TCHAR** initialArgv;
 #define RESTART_LAST_EC    23
 #define RESTART_NEW_EC     24
 
+/* constants for launch mode */
+#define LAUNCH_JNI 1
+#define LAUNCH_EXE 2
+
+#define DEFAULT_EE _T_ECLIPSE("default.ee")
+
 /* Define error messages. (non-NLS) */
 static _TCHAR* exitMsg = _T_ECLIPSE("JVM terminated. Exit code=%d\n%s");
 static _TCHAR* goVMMsg = _T_ECLIPSE("Start VM: %s\n");
-static _TCHAR* pathMsg = _T_ECLIPSE("%s\n'%s' in your current PATH");
+static _TCHAR* pathMsg = _T_ECLIPSE("%s in your current PATH");
 static _TCHAR* shareMsg = _T_ECLIPSE("No exit data available.");
 static _TCHAR* noVMMsg =
 _T_ECLIPSE("A Java Runtime Environment (JRE) or Java Development Kit (JDK)\n\
@@ -265,6 +271,12 @@ companion startup.jar file (in the same directory as the executable).");
 #define CLASSPATH    _T_ECLIPSE("-classpath")
 #define JAR 		 _T_ECLIPSE("-jar")
 
+/* constants for ee options file */
+#define EE_EXECUTABLE 			_T_ECLIPSE("-Dee.executable=")
+#define EE_CONSOLE 	_T_ECLIPSE("-Dee.executable.console=")
+#define EE_VM_LIBRARY			_T_ECLIPSE("-Dee.vm.library=")
+#define EE_LIBRARY_PATH			_T_ECLIPSE("-Dee.library.path=")
+
 /* Define the variables to receive the option values. */
 static int     needConsole   = 0;				/* True: user wants a console	*/
 static int     debug         = 0;				/* True: output debugging info	*/
@@ -275,6 +287,12 @@ static _TCHAR * startupArg    = NULL;			/* path of the startup.jar the user want
 static _TCHAR*  vmName        = NULL;     		/* Java VM that the user wants to run */
 static _TCHAR*  name          = NULL;			/* program name */	
 static _TCHAR*  library       = NULL;			/* the shared library */
+
+/* variables for ee options */
+static _TCHAR* eeExecutable = NULL;
+static _TCHAR* eeConsole = NULL;
+static _TCHAR* eeLibrary = NULL;
+_TCHAR* eeLibPath = NULL;			/* this one is global so others can see it */
 
 /* Define a table for processing command line options. */
 typedef struct
@@ -299,15 +317,27 @@ static Option options[] = {
     { WS,			&wsArg,			NULL,			2 } };
 static int optionsSize = (sizeof(options) / sizeof(options[0]));
 
+static Option eeOptions[] = {
+	{ EE_EXECUTABLE,	&eeExecutable, 	NULL, 0 },
+	{ EE_CONSOLE,	 	&eeConsole,		NULL, 0 },
+	{ EE_VM_LIBRARY, 	&eeLibrary,		NULL, 0 },
+	{ EE_LIBRARY_PATH,	&eeLibPath, 	NULL, 0 }
+};
+static int eeOptionsSize = (sizeof(eeOptions) / sizeof(eeOptions[0]));
+
 /* Define the required VM arguments (all platforms). */
 static _TCHAR*  cp = NULL;
 static _TCHAR*  cpValue = NULL;					
 static _TCHAR** reqVMarg[] = { &cp, &cpValue, NULL };	/* required VM args */
-static _TCHAR** userVMarg     = NULL;     				/* user specific args for the Java VM  */
+static _TCHAR** userVMarg  = NULL;	     				/* user specific args for the Java VM  */
+static _TCHAR** eeVMarg = NULL;							/* vm args specified in ee file */
+static int nEEargs = 0;
 
 /* Local methods */
 static void     parseArgs( int* argc, _TCHAR* argv[] );
 static void     getVMCommand( int argc, _TCHAR* argv[], _TCHAR **vmArgv[], _TCHAR **progArgv[] );
+static int 		determineVM(_TCHAR** msg);
+static int 		processEEProps(_TCHAR* eeFile);
 static _TCHAR** buildLaunchCommand( _TCHAR* program, _TCHAR** vmArgs, _TCHAR** progArgs );
 static _TCHAR** parseArgList( _TCHAR *data );
 static _TCHAR*  formatVmCommandMsg( _TCHAR* args[], _TCHAR* vmArgs[], _TCHAR* progArgs[] );
@@ -330,17 +360,14 @@ JNIEXPORT void setInitialArgs(int argc, _TCHAR** argv, _TCHAR* lib) {
 /* vmArgs must be NULL terminated                                */
 JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
 {
-    _TCHAR*   shippedVM    = NULL;
-    _TCHAR*   vmSearchPath = NULL;
     _TCHAR**  vmCommand = NULL;
     _TCHAR**  vmCommandArgs = NULL;
     _TCHAR**  progCommandArgs = NULL;
-    _TCHAR*   vmCommandMsg = NULL;
     _TCHAR**  relaunchCommand = NULL;
-    _TCHAR*   errorMsg;
+    _TCHAR*   errorMsg = NULL, *msg = NULL;
     int       exitCode;
+    int 	  launchMode;
     int 	  running = 1;
-    int 	  jniLaunching = 1;
 	 
 	/* arg[0] should be the full pathname of this program. */
     program = _tcsdup( argv[0] );
@@ -366,58 +393,14 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
     	exit( 1 );
     }
 
-    if (vmName != NULL) {
-    	/* user specified VM */
-    	javaVM = findCommand(vmName);
-#ifdef MACOSX
-    	/* always use JNI on the mac for now */
-    	jniLaunching = 1;
-#else
-    	jniLaunching = isVMLibrary(javaVM);
-#endif
-    }
-    else if (vmName == NULL)
-    {
-    	/* VM not specified, Determine which type of VM should be used. */
-    	vmName = defaultVM;
-
-        /* Try to find the VM shipped with eclipse. */
-        shippedVM = malloc( (_tcslen( programDir ) + _tcslen( shippedVMDir ) + _tcslen( vmName ) + 10) * sizeof(_TCHAR) );
-        _stprintf( shippedVM, _T_ECLIPSE("%s%s%s"), programDir, shippedVMDir, vmName );
-        javaVM = findCommand( shippedVM );
-
-        /* Format a message to indicate the default VM search path. */
-        vmSearchPath = malloc( (_tcslen( pathMsg ) + _tcslen( shippedVM ) + _tcslen( vmName ) + 10) * sizeof(_TCHAR) );
-        _stprintf( vmSearchPath, pathMsg, shippedVM, vmName );
-        free( shippedVM );
-        shippedVM = NULL;
-	}
-
-	/* If a Java VM has not been found yet */
-	if (javaVM == NULL)
-	{
-		/* Either verify the VM specified by the user or
-		   attempt to find the VM in the user's PATH. */
-		javaVM = findCommand( vmName );
-#ifdef DEFAULT_JAVA_EXEC
-		/* if the default is exe, only do jnilaunching if a library was specified */
-		jniLaunching = isVMLibrary(javaVM);
-#endif
-	}
-
-	if(jniLaunching) {
-		jniLib = findVMLibrary( javaVM );
-		if(jniLib == NULL)
-			jniLaunching = 0;
-	}
-	/* If the VM was not found, display a message and exit. */
-	if (!jniLaunching && javaVM == NULL)
-	{
-		if (vmSearchPath != NULL) vmName = vmSearchPath; /* used default VM searching */
-    	errorMsg = malloc( (_tcslen(noVMMsg) + _tcslen(officialName) + _tcslen(vmName) + 10) * sizeof(_TCHAR) );
-    	_stprintf( errorMsg, noVMMsg, officialName, vmName );
+    launchMode = determineVM(&msg);
+    if (launchMode == -1) {
+    	/* problem */
+    	errorMsg = malloc((_tcslen(noVMMsg) + _tcslen(officialName) + _tcslen(msg) + 1) * sizeof(_TCHAR));
+    	_stprintf( errorMsg, noVMMsg, officialName, msg );
     	displayMessage( officialName, errorMsg );
     	free( errorMsg );
+    	free( msg );
     	exit(1);
 	}	
 	
@@ -432,26 +415,26 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
 	}
 
 #ifdef _WIN32
-	if( jniLaunching && (debug || needConsole) ) {
+	if( launchMode == LAUNCH_JNI && (debug || needConsole) ) {
 		createConsole();
 	}
 #endif
 
     /* If the showsplash option was given and we are using JNI */
-    if (!noSplash && showSplashArg && jniLaunching)
+    if (!noSplash && showSplashArg && launchMode == LAUNCH_JNI)
     {
     	showSplash(showSplashArg);
     }
     
     /* not using JNI launching, need some shared data */
-    if (!jniLaunching && createSharedData( &sharedID, MAX_SHARED_LENGTH )) {
+    if (launchMode == LAUNCH_EXE && createSharedData( &sharedID, MAX_SHARED_LENGTH )) {
         if (debug) {
    			if (debug) displayMessage( officialName, shareMsg );
         }
     }
     
 	/* the startup jarFile goes on the classpath */
-    if(jniLaunching) {
+    if (launchMode == LAUNCH_JNI) {
     	/* JNI launching, classpath is set using -Djava.class.path */
 		cp = malloc((_tcslen(CLASSPATH_PREFIX) + _tcslen(jarFile) + 1) * sizeof(_TCHAR));
 		cp = _tcscpy(cp, CLASSPATH_PREFIX);
@@ -467,17 +450,17 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
     userVMarg = vmArgs;
     getVMCommand( argc, argv, &vmCommandArgs, &progCommandArgs );
 	
-    if (!jniLaunching) {
+    if (launchMode == LAUNCH_EXE) {
     	vmCommand = buildLaunchCommand(javaVM, vmCommandArgs, progCommandArgs);
     }
     
     /* While the Java VM should be restarted */
     while(running)
     {
-		vmCommandMsg = formatVmCommandMsg( vmCommand, vmCommandArgs, progCommandArgs );
-		if (debug) _tprintf( goVMMsg, vmCommandMsg );
+		msg = formatVmCommandMsg( vmCommand, vmCommandArgs, progCommandArgs );
+		if (debug) _tprintf( goVMMsg, msg );
 
-		if(jniLaunching) {
+		if(launchMode == LAUNCH_JNI) {
 			exitCode = startJavaVM(jniLib, vmCommandArgs, progCommandArgs);
 		} else {
 			exitCode = launchJavaVM(vmCommand);
@@ -488,7 +471,7 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
 	        	running = 0;
 	            break;
 	        case RESTART_LAST_EC:
-	        	if (jniLaunching) {
+	        	if (launchMode == LAUNCH_JNI) {
 		        	/* copy for relaunch, +1 to ensure NULL terminated */
 		        	relaunchCommand = malloc((initialArgc + 1) * sizeof(_TCHAR*));
 		        	memcpy(relaunchCommand, initialArgv, (initialArgc + 1) * sizeof(_TCHAR*));
@@ -498,14 +481,14 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
 	        	break;
 	        	
 	        case RESTART_NEW_EC:
-	        	if(!jniLaunching) {
+	        	if(launchMode == LAUNCH_EXE) {
 	        		if (exitData != NULL) free(exitData);
 	        		getSharedData( sharedID, &exitData );
 	        	}
 	            if (exitData != 0) {
 	            	if (vmCommand != NULL) free( vmCommand );
 	                vmCommand = parseArgList( exitData );
-	                if (jniLaunching) {
+	                if (launchMode == LAUNCH_JNI) {
 	                	relaunchCommand = getRelaunchCommand(vmCommand);
 	                	running = 0;
 	                }
@@ -517,7 +500,7 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
 				_TCHAR *title = _tcsdup(officialName);
 	            running = 0;
 	            errorMsg = NULL;
-	            if (!jniLaunching) {
+	            if (launchMode == LAUNCH_EXE) {
 	            	if (exitData != NULL) free(exitData);
 	        		getSharedData( sharedID, &exitData );
 	        	}
@@ -544,8 +527,8 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
 	                if (debug) displayMessage( title, shareMsg );
 	            }
 	            if (errorMsg == NULL) {
-	                errorMsg = malloc( (_tcslen(exitMsg) + _tcslen(vmCommandMsg) + 10) * sizeof(_TCHAR) );
-	                _stprintf( errorMsg, exitMsg, exitCode, vmCommandMsg );
+	                errorMsg = malloc( (_tcslen(exitMsg) + _tcslen(msg) + 10) * sizeof(_TCHAR) );
+	                _stprintf( errorMsg, exitMsg, exitCode, msg );
 	            }
 	            displayMessage( title, errorMsg );
 	            free( title );
@@ -553,7 +536,7 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
 	            break;
 	        }
 	    }
-	    free( vmCommandMsg );
+	    free( msg );
     }
     
     if(relaunchCommand != NULL)
@@ -569,7 +552,6 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
     if ( vmCommand != NULL )	 free( vmCommand );
     if ( cp != JAR )			 free( cp );
     if ( cpValue != NULL)		 free( cpValue );
-    if ( vmSearchPath != NULL )  free( vmSearchPath );
     if ( exitData != NULL )		 free( exitData );
 
     return 0;
@@ -690,7 +672,7 @@ static void getVMCommand( int argc, _TCHAR* argv[], _TCHAR **vmArgv[], _TCHAR **
     int     dst;
 
 	/* If the user specified "-vmargs", add them instead of the default VM args. */
-	vmArg = (userVMarg != NULL) ? userVMarg : getArgVM( javaVM ); 
+	vmArg = (userVMarg != NULL) ? userVMarg : getArgVM( javaVM != NULL ? javaVM : jniLib ); 
  	
  	/* Calculate the number of VM arguments. */
  	while (vmArg[ nVMarg ] != NULL)
@@ -701,7 +683,7 @@ static void getVMCommand( int argc, _TCHAR* argv[], _TCHAR **vmArgv[], _TCHAR **
  		nReqVMarg++;
 
 	/* VM argument list */
-	totalVMArgs = nVMarg + nReqVMarg + 1;
+	totalVMArgs = nVMarg + nReqVMarg + nEEargs + 1;
 	*vmArgv = malloc( totalVMArgs * sizeof(_TCHAR*) );
 	
 	dst = 0;
@@ -713,11 +695,16 @@ static void getVMCommand( int argc, _TCHAR* argv[], _TCHAR **vmArgv[], _TCHAR **
 		}
     	(*vmArgv)[ dst++ ] = vmArg[ src ];
 	}
-		
+
+	if (eeVMarg != NULL)
+		for (src = 0; src < nEEargs; src++)
+			(*vmArgv)[ dst++ ] = eeVMarg[ src ];
+	
 	/* For each required VM arg */
 	for (src = 0; src < nReqVMarg; src++)
 		if( *(reqVMarg[src]) != NULL)
 			(*vmArgv)[ dst++ ] = *(reqVMarg[ src ]);
+	
 	
 	(*vmArgv)[dst] = NULL;
 	
@@ -727,7 +714,7 @@ static void getVMCommand( int argc, _TCHAR* argv[], _TCHAR **vmArgv[], _TCHAR **
      * VMARGS + vmArg + requiredVMargs
      *  + NULL)
      */
-    totalProgArgs  = 2 + 2 + 2 + 2 + 2 + 2 + 2 + 2 + 2 + argc + 2 + 1 + nVMarg + nReqVMarg + 1;
+    totalProgArgs  = 2 + 2 + 2 + 2 + 2 + 2 + 2 + 2 + 2 + argc + 2 + 1 + nVMarg + nEEargs + nReqVMarg + 1;
 	*progArgv = malloc( totalProgArgs * sizeof( _TCHAR* ) );
     dst = 0;
     
@@ -787,6 +774,10 @@ static void getVMCommand( int argc, _TCHAR* argv[], _TCHAR **vmArgv[], _TCHAR **
     
 	for (src = 0; src < nVMarg; src++)
     	(*progArgv)[ dst++ ] = vmArg[ src ];
+	
+	if (eeVMarg != NULL)
+		for (src = 0; src < nEEargs; src++)
+			(*progArgv)[ dst++ ] = eeVMarg[ src ];
 	
     /* For each required VM arg */
     for (src = 0; src < nReqVMarg; src++)
@@ -1049,3 +1040,198 @@ static void createConsole() {
 	*stderr = *fp;	
 }
 #endif
+
+/*
+ * determine the vm to use.
+ * return LAUNCH_JNI for launching with JNI invocation API. jniLib contains the name of the library
+ * returh LAUNCH_EXE for execing java, javaVM contains the path to the exe
+ * return -1 if problem finding vm, the passed in msg points to the places we looked.  Caller should free
+ * this memory.
+ */
+static int determineVM(_TCHAR** msg) {
+	_TCHAR* ch  = NULL;
+	_TCHAR* result = NULL;
+	_TCHAR* vmSearchPath = NULL;
+	int type = 0;
+	
+	/* vmName is passed in on command line with -vm */
+    if (vmName != NULL) {
+    	type = checkProvidedVMType(vmName);
+    	switch (type) {
+    	case VM_DIRECTORY:
+    		/* vmName is a directory, look for default.ee */
+    		ch = malloc((_tcslen(vmName) + 1 + _tcslen(DEFAULT_EE) + 1) * sizeof(_TCHAR));
+    		_stprintf( ch, _T_ECLIPSE("%s%c%s"), vmName, dirSeparator, DEFAULT_EE );
+    		
+    		result = findCommand(ch);
+    		free(ch);
+    		if (result == NULL) {
+    			/* No default.ee file, look for default VM */
+    			ch = malloc((_tcslen(vmName) + 1 + _tcslen(defaultVM) + 1) * sizeof(_TCHAR));
+    			_stprintf( ch, _T_ECLIPSE("%s%c%s"), vmName, dirSeparator, defaultVM );
+    			javaVM = findCommand(ch);
+    			free(ch);
+    			if (javaVM == NULL) {
+    				/* No vm executable, look for library */
+    				ch = malloc((_tcslen(vmName) + 1 + _tcslen(vmLibrary) + 1) * sizeof(_TCHAR));
+    				_stprintf( ch, _T_ECLIPSE("%s%c%s"), vmName, dirSeparator, vmLibrary );
+    				jniLib = findVMLibrary(ch);
+    				free(ch);
+    				if (jniLib != NULL) {
+    					return LAUNCH_JNI;
+    				}
+    				/* found nothing, return error */
+    				*msg = malloc( (3 * (_tcslen(vmName) + 2) + _tcslen(DEFAULT_EE) + _tcslen(defaultVM) + _tcslen(vmLibrary) + 1) * sizeof(_TCHAR));
+    				_stprintf( *msg, _T_ECLIPSE("%s%c%s\n%s%c%s\n%s%c%s"), vmName, dirSeparator, DEFAULT_EE, 
+    																	   vmName, dirSeparator, defaultVM,
+    																	   vmName, dirSeparator, vmLibrary);
+    				return -1;
+    			}
+    			break;
+    		}
+    		
+    		/* else default.ee does exist */
+    		vmName = result;
+    		/* fall through to VM_EE_PROPS*/
+    	case VM_EE_PROPS:
+    		if (processEEProps(vmName) != 0) {
+    			*msg = _tcsdup(vmName);
+    			return -1;
+    		}
+    		if (eeLibrary != NULL) {
+    			jniLib = findVMLibrary(eeLibrary);
+    			if (jniLib != NULL)
+    				return LAUNCH_JNI;
+    		}
+    			
+    		if (eeConsole != NULL && (debug || needConsole) ) {
+    			javaVM = findCommand(eeConsole);
+    			if (javaVM != NULL)
+    				return LAUNCH_EXE;
+    		}
+    		
+    		if (eeExecutable != NULL) {
+    			javaVM = findCommand(eeExecutable);
+    			if (javaVM != NULL)
+    				return LAUNCH_EXE;
+    		}
+    		
+    		*msg = _tcsdup(vmName);
+    		return -1;
+    		
+    	case VM_LIBRARY:
+    		ch = findCommand(vmName);
+    		if(ch != NULL) {
+    			jniLib = findVMLibrary(ch);
+    			return LAUNCH_JNI;
+    		}
+    		/* file didn't exist, error */
+    		if (_tcschr( vmName, dirSeparator ) == NULL) {
+    			/* if vmName doesn't contain a dirSeparator, we looked on the path */
+    			*msg = malloc((_tcslen(pathMsg) + _tcslen(vmName)) * sizeof(_TCHAR));
+    			_stprintf( *msg, pathMsg,vmName );
+    		} else {
+    			*msg = _tcsdup(vmName);
+    		}
+    		return -1;
+    		
+    	default:
+    		/*otherwise, assume executable */
+    		javaVM = findCommand(vmName);
+    		if(javaVM != NULL) {
+#ifdef MACOSX
+    			/* right now, we are always doing JNI on Mac */
+    			break; 
+#else
+    			return LAUNCH_EXE;
+#endif
+    		}
+    		/* file didn't exist, error */
+    		if (_tcschr( vmName, dirSeparator ) == NULL) {
+    			/* if vmName doesn't contain a dirSeparator, we looked on the path */
+    			*msg = malloc((_tcslen(pathMsg) + _tcslen(vmName)) * sizeof(_TCHAR));
+    			_stprintf( *msg, pathMsg, vmName );
+    		} else {
+    			*msg = _tcsdup(vmName);
+    		}
+   			return -1;
+    	}
+    }
+    
+    if (vmName == NULL) {
+    	/* no vm specified, Try to find the VM shipped with eclipse. */
+        ch = malloc( (_tcslen( programDir ) + _tcslen( shippedVMDir ) + _tcslen( defaultVM ) + 10) * sizeof(_TCHAR) );
+        _stprintf( ch, _T_ECLIPSE("%s%s%s"), programDir, shippedVMDir, defaultVM );
+        vmSearchPath = _tcsdup(ch);
+ 
+        javaVM = findCommand( ch );
+        free(ch);
+    }
+    
+    if (javaVM == NULL) {
+    	/* vm found yet, look for one on the search path */
+    	javaVM = findCommand(defaultVM);
+    	if (javaVM == NULL) {
+    		/* can't find vm, error */
+    		ch = malloc( (_tcslen(pathMsg) + _tcslen(defaultVM) + 1) * sizeof(_TCHAR));
+    		_stprintf(ch, pathMsg, defaultVM);
+    		
+    		if(vmSearchPath != NULL) {
+    			*msg = malloc((_tcslen(ch) + 1 + _tcslen(vmSearchPath) + 1) * sizeof(_TCHAR));
+    			_stprintf(*msg, _T_ECLIPSE("%s\n%s"), vmSearchPath, ch);
+    			free(ch);
+    		} else {
+    			*msg = ch;
+    		}
+    		return -1;
+    	}
+    }
+
+    if (vmSearchPath != NULL)
+    	free(vmSearchPath);
+    
+#ifndef DEFAULT_JAVA_EXEC
+    jniLib = findVMLibrary(javaVM);
+    if (jniLib != NULL) 
+    	return LAUNCH_JNI;
+#endif
+    
+    return LAUNCH_EXE;
+}
+
+static int processEEProps(_TCHAR* eeFile) 
+{
+	_TCHAR ** argv;
+	_TCHAR * ch;
+	int argc;
+	int index, i;
+	int matches = 0;
+	Option *option;
+	
+	if(readConfigFile(eeFile, &argc, &argv) != 0)
+		return -1;
+
+	nEEargs = argc;
+	eeVMarg = argv;
+	
+    for (index = 0; index < argc; index++){
+    	/* Find the corresponding argument is a option supported by the launcher */
+        option = NULL;
+        for (i = 0; option == NULL && i < eeOptionsSize; i++)
+        {
+        	if (_tcsncmp( argv[index], eeOptions[i].name, _tcslen(eeOptions[i].name) ) == 0) {
+        	    option = &eeOptions[i];
+        	    break;
+        	}
+       	}
+        if(option != NULL) {
+        	++matches;
+        	ch = malloc( (_tcslen(argv[index]) - _tcslen(option->name) + 1) *sizeof(_TCHAR));
+        	_tcscpy(ch, argv[index] + _tcslen(option->name));
+        	*(option->value) = ch;
+        	if(matches == eeOptionsSize)
+        		break;
+        }
+    }
+    return 0;
+}

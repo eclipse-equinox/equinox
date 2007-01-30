@@ -47,11 +47,12 @@ static void CALLBACK  detectJvmExit( HWND hwnd, UINT uMsg, UINT id, DWORD dwTime
 /* define default locations in which to find the jvm shared library
  * these are paths relative to the java exe, the shared library is
  * for example jvmLocations[0] + dirSeparator + vmLibrary */
-#define MAX_LOCATION_LENGTH 10 /* none of the jvmLocations strings should be longer than this */ 
+#define MAX_LOCATION_LENGTH 25 /* none of the jvmLocations strings should be longer than this */ 
 static const _TCHAR* jvmLocations [] = { _T("j9vm"), _T("..\\jre\\bin\\j9vm"),
 										 _T("client"), _T("..\\jre\\bin\\client"), 
 										 _T("server"), _T("..\\jre\\bin\\server"),
 										 _T("classic"), _T("..\\jre\\bin\\classic"),
+										 _T("jrockit"), _T("..\\jre\\bin\\jrockit"),
 								 		 NULL };
 /* Show the Splash Window
  *
@@ -166,7 +167,7 @@ _TCHAR* findVMLibrary( _TCHAR* command ) {
 		}
 		
 		pathLength = location - command;
-		path = malloc((pathLength + MAX_LOCATION_LENGTH + 1 + _tcslen(vmLibrary)) * sizeof(_TCHAR *));
+		path = malloc((pathLength + MAX_LOCATION_LENGTH + 1 + _tcslen(vmLibrary) + 1) * sizeof(_TCHAR));
 		_tcsncpy(path, command, pathLength);
 		location = &path[pathLength];
 		 
@@ -176,11 +177,7 @@ _TCHAR* findVMLibrary( _TCHAR* command ) {
 		 */
 		i = -1;
 		while(jvmLocations[++i] != NULL) {
-			int length = _tcslen(jvmLocations[i]);			
-			_tcscpy(location, jvmLocations[i]);
-			location[length] = dirSeparator;
-			location[length + 1] = _T('\0');
-			_tcscat(location, vmLibrary);
+			_stprintf(location, _T_ECLIPSE("%s%c%s"), jvmLocations[i], dirSeparator, vmLibrary);
 			if (_tstat( path, &stats ) == 0 && (stats.st_mode & S_IFREG) != 0)
 			{	/* found it */
 				return path;

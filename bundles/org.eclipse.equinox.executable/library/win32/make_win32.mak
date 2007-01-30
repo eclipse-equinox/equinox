@@ -117,4 +117,4 @@ install: all
 	del -f $(EXEC) $(MAIN_OBJS) $(DLL_OBJS) $(COMMON_OBJS) $(RES)
    
 clean:
-	del $(EXEC) $(DLL)$(MAIN_OBJS) $(DLL_OBJS) $(COMMON_OBJS) $(RES)
+	del $(EXEC) $(DLL) $(MAIN_OBJS) $(DLL_OBJS) $(COMMON_OBJS) $(RES)

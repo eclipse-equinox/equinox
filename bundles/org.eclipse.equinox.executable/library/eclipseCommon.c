@@ -186,7 +186,12 @@ _TCHAR* findCommand( _TCHAR* command )
         cmdPath = NULL;
     }
 
-	return resolveSymlinks(cmdPath);
+	ch = resolveSymlinks(cmdPath);
+	if (ch != cmdPath) {
+		free(cmdPath);
+		cmdPath = ch;
+	}
+	return cmdPath;
 }
 
 #if !defined(_WIN32) && !defined(MACOSX)
@@ -198,7 +203,6 @@ char * resolveSymlinks( char * path ) {
 	ch = path;
 	buffer = malloc(PATH_MAX);
     path = realpath(path, buffer);
-    free(ch);
     return path;
 }
 #endif

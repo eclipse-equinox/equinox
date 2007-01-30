@@ -45,35 +45,10 @@ static char*  argVM_JAVA[]        = { NULL };
 static char*  argVM_J9[]          = { "-jit", "-mca:1024", "-mco:1024", "-mn:256", "-mo:4096", 
 									  "-moi:16384", "-mx:262144", "-ms:16", "-mr:16", NULL };
 
-/* TODO need a better way of doing this*/
-#ifdef i386
-#define JAVA_ARCH "i386"
-#elif defined(__ppc__) || defined(__powerpc64__)
-#define JAVA_ARCH "ppc" 
-#elif defined(SOLARIS)
-#define JAVA_ARCH "sparc"
-#elif defined(__amd64__) || defined(__x86_64__) 
-#define JAVA_ARCH "amd64"
-#else
-#define JAVA_ARCH DEFAULT_OS_ARCH
-#endif
-
-#define MAX_LOCATION_LENGTH 30 /* none of the jvmLocations strings should be longer than this */ 
-static const char* jvmLocations [] = { "j9vm", "../jre/bin/j9vm",
-									   "classic", "../jre/bin/classic",
-									   "../lib/" JAVA_ARCH "/client",  
-									   "../lib/" JAVA_ARCH "/server",
-									   "../jre/lib/" JAVA_ARCH "/client",
-									   "../jre/lib/" JAVA_ARCH "/server",
-								 	   NULL };
-
 /* Define local variables . */
 static long			splashHandle = 0;
 
 /* Local functions */
-static void adjustLibraryPath( char * vmLibrary );
-static char * findLib(char * command);
-
 static void log_handler(const gchar* domain, GLogLevelFlags flags, const gchar* msg, gpointer data) {
 	/* nothing */
 }
@@ -162,131 +137,6 @@ char** getArgVM( char* vm )
     /* Use the default arguments for a standard Java VM */
     result = argVM_JAVA;
     return result;
-}
-
-char * findVMLibrary( char* command ) {
-	char * lib = findLib(command);
-	if( lib != NULL ) {
-		adjustLibraryPath(lib);
-	}
-	return lib;
-}
-static char * findLib(char * command) {
-	int i;
-	int pathLength;	
-	struct stat stats;
-	char * path;				/* path to resulting jvm shared library */
-	char * location;			/* points to begining of jvmLocations section of path */
-	
-	if (command != NULL) {
-		location = strrchr( command, dirSeparator ) + 1;
-		
-		/*check first to see if command already points to the library */
-		if (strcmp(location, vmLibrary) == 0) {
-			return command;
-		}
-		
-		pathLength = location - command;
-		path = malloc((pathLength + MAX_LOCATION_LENGTH + 1 + strlen(vmLibrary) + 1) * sizeof(char));
-		strncpy(path, command, pathLength);
-		location = &path[pathLength];
-		 
-		/* 
-		 * We are trying base/jvmLocations[*]/vmLibrary
-		 * where base is the directory containing the given java command, normally jre/bin
-		 */
-		i = -1;
-		while(jvmLocations[++i] != NULL) {
-			int length = strlen(jvmLocations[i]);			
-			strcpy(location, jvmLocations[i]);
-			location[length] = dirSeparator;
-			location[length + 1] = 0;
-			strcat(location, vmLibrary);
-			if (stat( path, &stats ) == 0 && (stats.st_mode & S_IFREG) != 0)
-			{	/* found it */
-				return path;
-			}
-		}
-	}
-	return NULL;
-}
-
-/* adjust the LD_LIBRARY_PATH for the vmLibrary */
-static void adjustLibraryPath( char * vmLibrary ) {
-	char * buffer;
-	char * path;
-	char * c;
-	char * vmPath;
-	char * vmParent;
-	char * ldPath;
-	char * newPath;
-	int vmPathFound = 0;
-	int vmParentFound = 0;
-	int ldPathLength = 0;
-	
-#ifdef MOZILLA_FIX
-	fixEnvForMozilla();
-#endif /* MOZILLA_FIX */
-
-	/* we want the directory containing the library, and the parent directory of that */
-	buffer = strdup(vmLibrary);	 
-	c = strrchr(buffer, dirSeparator);
-	*c = 0;
-	vmPath = strdup(buffer);
-	
-	c = strrchr(buffer, dirSeparator);
-	*c = 0;
-	vmParent = strdup(buffer);
-	free(buffer);
-	 
-	ldPath = (char*)getenv("LD_LIBRARY_PATH");
-	if(!ldPath)
-		ldPath = "";
-	buffer = malloc((strlen(ldPath) + 2) * sizeof(char));
-	strcpy(buffer, ldPath);
-	strcat(buffer, ":"); 
-	path = buffer;
-	while( (c = strchr(path, pathSeparator)) != NULL ) {
-		*c++ = 0;
-		if( !vmPathFound && strcmp(path, vmPath) == 0 ) {
-			vmPathFound = 1;
-		} else if( !vmParentFound && strcmp(path, vmParent) == 0 ) {
-			vmParentFound = 1;
-		} 
-		if(vmPathFound && vmParentFound)
-			break;
-		path = c;
-	}	
-	free(buffer);
-	
-	if( vmPathFound && vmParentFound ){
-		/*found both on the LD_LIBRARY_PATH, don't need to set it */
-		return;
-	}
-	
-	/* set the value for LD_LIBRARY_PATH */
-	ldPathLength = strlen(ldPath);
-	/* ldPath + separator + vmPath + separator + vmParent + NULL */
-	newPath = malloc((ldPathLength + 1 + strlen(vmPath) + 1 + strlen(vmParent) + 1) * sizeof(char));
-	strcpy(newPath, vmPath);
-	strncat(newPath, &pathSeparator, 1);
-	strcat(newPath, vmParent);
-	strncat(newPath, &pathSeparator, 1);
-	strcat(newPath, ldPath);
-	setenv( "LD_LIBRARY_PATH", newPath, 1);
-	
-	free(vmPath);
-	free(vmParent);
-	
-	/* now we must restart for this to take affect */
-	/* TODO what args do we restart with? */
-	execv(initialArgv[0], initialArgv);
-}
-
-void restartLauncher( char* program, char* args[] ) 
-{
-	/* just restart in-place */
-	execv(program, args);
 }
 
 int launchJavaVM( char* args[] )

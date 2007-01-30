@@ -30,6 +30,7 @@
 #define takeDownSplash takeDownSplashW
 #define restartLauncher restartLauncherW
 #define launchJavaVM launchJavaVMW
+#define eeLibPath eeLibPathW
 #endif
 
 /* Operating System Dependent Information */
@@ -43,6 +44,7 @@ extern _TCHAR*  exitData;		  		/* exit data set from Java */
 extern _TCHAR*  vmLibrary;				/* name of the VM shared library */
 extern int		initialArgc;			/* argc originally used to start launcher */
 extern _TCHAR**	initialArgv;			/* argv originally used to start launcher */
+extern _TCHAR*  eeLibPath;				/* library path specified in a .ee file */
 
 /* OS Specific Functions */
 

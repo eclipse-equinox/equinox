@@ -19,6 +19,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <sys/stat.h>
 
 #ifndef _WIN32
 #include <strings.h>
@@ -29,12 +30,62 @@
 /* Is the given VM J9 */
 int isJ9VM( _TCHAR* vm )
 {
-	_TCHAR *ch = _tcsrchr( vm, dirSeparator );
-	if (ch == NULL)
-	    ch = vm;
-	else
-	    ch++;
-	return (_tcsicmp( ch, _T_ECLIPSE("j9") ) == 0);
+	_TCHAR * ch = NULL, *ch2 = NULL;
+	int res = 0;
+	
+	if (vm == NULL)
+		return 0;
+	
+	ch = _tcsrchr( vm, dirSeparator );
+	if (isVMLibrary(vm)) {
+		/* a library, call it j9 if the parent dir is j9vm */
+		if(ch == NULL)
+			return 0;
+		ch[0] = 0;
+		ch2 = _tcsrchr(vm, dirSeparator);
+		if(ch2 != NULL) {
+			res = (_tcsicmp(ch2 + 1, _T_ECLIPSE("j9vm")) == 0);
+		}
+		ch[0] = dirSeparator;
+		return res;
+	} else {
+		if (ch == NULL)
+		    ch = vm;
+		else
+		    ch++;
+		return (_tcsicmp( ch, _T_ECLIPSE("j9") ) == 0);
+	}
+}
+
+int checkProvidedVMType( _TCHAR* vm ) 
+{
+	_TCHAR* ch = NULL;
+	struct _stat stats;
+	
+	if (vm == NULL) return VM_NOTHING;
+	
+	if (_tstat(vm, &stats) == 0 && (stats.st_mode & S_IFDIR) != 0) {
+		/* directory */
+		return VM_DIRECTORY;
+	}
+
+	ch = _tcsrchr( vm, '.' );
+	if(ch == NULL)
+		return VM_OTHER;
+	
+#ifdef _WIN32
+	if (_tcsicmp(ch, _T_ECLIPSE(".dll")) == 0)
+#else
+	if (_tcsicmp(ch, _T_ECLIPSE(".so")) == 0)
+#endif
+	{
+		return VM_LIBRARY;
+	}
+	
+	if (_tcsicmp(ch, _T_ECLIPSE(".ee")) == 0)
+		return VM_EE_PROPS;
+	
+	return VM_OTHER;
 }
 
 int isVMLibrary( _TCHAR* vm )

@@ -33,7 +33,8 @@ PROGRAM_LIBRARY=eclipse_$(LIB_VERSION).so
 CC=gcc
 MAIN_OBJS = eclipseMain.o
 COMMON_OBJS = eclipseConfig.o eclipseCommon.o eclipseMotifCommon.o
-DLL_OBJS	= eclipse.o eclipseMotif.o eclipseUtil.o eclipseJNI.o eclipseMozilla.o NgCommon.o NgImage.o NgImageData.o NgWinBMPFileFormat.o eclipseShm.o
+DLL_OBJS	= eclipse.o eclipseMotif.o eclipseUtil.o eclipseJNI.o eclipseMozilla.o eclipseShm.o eclipseNix.o \
+			  NgCommon.o NgImage.o NgImageData.o NgWinBMPFileFormat.o 
 
 EXEC = $(PROGRAM_OUTPUT)
 DLL = $(PROGRAM_LIBRARY)
@@ -79,6 +80,9 @@ eclipseMozilla.o: ../eclipseMozilla.c ../eclipseMozilla.h ../eclipseOS.h
 	$(CC) $(CFLAGS) -c $< -o $@
 	
 eclipseShm.o: ../eclipseShm.h ../eclipseUnicode.h ../eclipseShm.c
+	$(CC) $(CFLAGS) -c $< -o $@
+	
+eclipseNix.o: ../eclipseNix.c
 	$(CC) $(CFLAGS) -c $< -o $@
 	
 $(EXEC): $(MAIN_OBJS) $(COMMON_OBJS)

@@ -131,7 +131,7 @@ int main( int argc, _TCHAR* argv[] )
     }
     
     /* Parse configuration file arguments */
-	if (readConfigFile(program, argv[0], &configArgc, &configArgv) == 0)
+	if (readIniFile(program, &configArgc, &configArgv) == 0)
 	{
 		parseArgs (&configArgc, configArgv);
 	}
@@ -229,16 +229,17 @@ static void parseArgs( int* pArgc, _TCHAR* argv[] )
  */
 static int createUserArgs(int configArgc, _TCHAR **configArgv, int *argc, _TCHAR ***argv)
 {
-	 _TCHAR** newArray = (_TCHAR **)malloc((configArgc + *argc) * sizeof(_TCHAR *));
+	_TCHAR** newArray = (_TCHAR **)malloc((configArgc + *argc + 1) * sizeof(_TCHAR *));
 
-	memcpy(newArray, configArgv, configArgc * sizeof(_TCHAR *));	
+	newArray[0] = (*argv)[0];	/* use the original argv[0] */
+	memcpy(newArray + 1, configArgv, configArgc * sizeof(_TCHAR *));	
 	
 	/* Skip the argument zero (program path and name) */
-	memcpy(newArray + configArgc, *argv + 1, (*argc - 1) * sizeof(_TCHAR *));
+	memcpy(newArray + 1 + configArgc, *argv + 1, (*argc - 1) * sizeof(_TCHAR *));
 
 	/* Null terminate the new list of arguments and return it. */	 
 	*argv = newArray;
-	*argc += configArgc - 1;
+	*argc += configArgc;
 	(*argv)[*argc] = NULL;
 	
 	return 0;

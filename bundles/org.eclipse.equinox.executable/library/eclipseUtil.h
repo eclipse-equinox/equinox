@@ -16,7 +16,15 @@
 #ifdef UNICODE
 #define isJ9VM isJ9VMW
 #define isVMLibrary isVMLibraryW
+#define checkProvidedVMType checkProvidedVMTypeW
 #endif
+
+/* constants for checkProvidedVMType */
+#define VM_NOTHING		0		/* NULL was given as input */
+#define VM_OTHER		1		/* don't know, could be executable or could be nothing */
+#define VM_DIRECTORY	2		/* it is a directory */
+#define VM_LIBRARY		3		/* it is a library (isVmLibrary would return true) */
+#define VM_EE_PROPS		4		/* it is a vm .ee properties file */
 
 /* Eclipse Launcher Utility Methods */
 
@@ -25,6 +33,9 @@ extern int isJ9VM( _TCHAR* vm );
 
 /* Is the given file a shared library? */
 extern int isVMLibrary( _TCHAR* vm );
+
+/* determine what the provided -vm argument is referring to */ 
+extern int checkProvidedVMType( _TCHAR* vm );
 
 #ifdef AIX 
 /* Get the version of the VM */

@@ -30,14 +30,10 @@
 
 #endif
 
-int readConfigFile(_TCHAR* program, _TCHAR* arg0, int *argc, _TCHAR ***argv) 
+int readIniFile(_TCHAR* program, int *argc, _TCHAR ***argv) 
 {
 	_TCHAR* config_file = NULL;
-	_TCHAR buffer[1024];
-	_TCHAR argument[1024];
-	FILE *file = NULL;
-	int maxArgs = 128;
-	int index;
+	int result;
 	
 	if (program == NULL || argc == NULL || argv == NULL) return -1;
 
@@ -61,6 +57,19 @@ int readConfigFile(_TCHAR* program, _TCHAR* arg0, int *argc, _TCHAR ***argv)
 	strcat(config_file, ".ini");
 #endif
 	
+	result = readConfigFile(config_file, argc, argv);
+	free(config_file);
+	return result;
+}
+
+int readConfigFile( _TCHAR * config_file, int *argc, _TCHAR ***argv )
+{
+	_TCHAR buffer[1024];
+	_TCHAR argument[1024];
+	FILE *file = NULL;
+	int maxArgs = 128;
+	int index;
+	
 	/* Open the config file as a text file 
 	 * Note that carriage return-linefeed combination \r\n are automatically
 	 * translated into single linefeeds on input in the t (translated) mode.
@@ -70,9 +79,7 @@ int readConfigFile(_TCHAR* program, _TCHAR* arg0, int *argc, _TCHAR ***argv)
 
 	*argv = (_TCHAR **)malloc((1 + maxArgs) * sizeof(_TCHAR*));
 	
-	/* Make it look like a regular list of arguments that starts with the executable location and name */
-	(*argv)[0] = _tcsdup(arg0);
-	index = 1;
+	index = 0;
 	
 	/* Parse every line */	
 	while (_fgetts(buffer, 1024, file) != NULL)
@@ -100,7 +107,7 @@ int readConfigFile(_TCHAR* program, _TCHAR* arg0, int *argc, _TCHAR ***argv)
 	*argc = index;
 	
 	fclose(file);
-	free(config_file);
+	
 	return 0;
 }
 

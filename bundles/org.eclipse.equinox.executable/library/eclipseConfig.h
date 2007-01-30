@@ -13,6 +13,7 @@
 #define ECLIPSE_CONFIG_H
 
 #ifdef UNICODE
+#define readIniFile readIniFileW
 #define readConfigFile readConfigFileW
 #define freeConfig freeConfigW
 #endif
@@ -27,22 +28,25 @@
  * On a Unix like platform, for a program argument "/usr/eclipse/eclipse"
  * should correspond a configuration file "/usr/eclipse/eclipse.ini"
  *
- * The argument arg0 corresponds to the first argument received by
- * the main function. It will be duplicated and set in the first
- * position of the resulting list of arguments.
+ * This method will call readConfigFile to read the actual ini file
  *
- * The argument args refers to a newly allocated array of strings.
+ * Returns 0 if success.
+ */
+extern int readIniFile(_TCHAR* program, int *argc, _TCHAR ***argv);
+
+/**
+ * Reads the given configuration file 
+ * The argument argv refers to a newly allocated array of strings.
  * The first entry is the program name to mimic the expectations
  * from a typical argv list.
  * The last entry of that array is NULL. 
  * Each non NULL entry in that array must be freed by the caller 
  * as well as the array itself, using freeConfig().
- * The argument nArgs contains the number of string allocated.
+ * The argument argc contains the number of string allocated.
  *
  * Returns 0 if success.
  */
-extern int readConfigFile(_TCHAR* program, _TCHAR* arg0, int *nArgs, _TCHAR ***args);
-
+extern int readConfigFile( _TCHAR * config_file, int *argc, _TCHAR ***argv );
 /**
  * Free the memory allocated by readConfigFile().
  */
