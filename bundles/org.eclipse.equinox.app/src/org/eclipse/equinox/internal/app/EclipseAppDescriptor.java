@@ -39,13 +39,15 @@ public class EclipseAppDescriptor extends ApplicationDescriptor {
 	private static long instanceID = 0;
 	private ServiceRegistration sr;
 	private Boolean locked = Boolean.FALSE;
-	private EclipseAppContainer appContainer;
-	private Bundle contributor;
-	private int flags;
-	private int cardinality;
+	private final EclipseAppContainer appContainer;
+	private final Bundle contributor;
+	private final int flags;
+	private final int cardinality;
+	private final String name;
 
-	protected EclipseAppDescriptor(Bundle contributor, String pid, int flags, int cardinality, EclipseAppContainer appContainer) {
+	protected EclipseAppDescriptor(Bundle contributor, String pid, String name, int flags, int cardinality, EclipseAppContainer appContainer) {
 		super(pid);
+		this.name = name;
 		this.contributor = contributor;
 		this.appContainer = appContainer;
 		this.locked = AppPersistence.isLocked(this) ? Boolean.TRUE : Boolean.FALSE;
@@ -118,6 +120,8 @@ public class EclipseAppDescriptor extends ApplicationDescriptor {
 	Hashtable getServiceProperties() {
 		Hashtable props = new Hashtable(10);
 		props.put(ApplicationDescriptor.APPLICATION_PID, getApplicationId());
+		if (name != null)
+			props.put(ApplicationDescriptor.APPLICATION_NAME, name);
 		props.put(ApplicationDescriptor.APPLICATION_CONTAINER, Activator.PI_APP);
 		props.put(ApplicationDescriptor.APPLICATION_LOCATION, getLocation());
 		Boolean launchable = appContainer.isLocked(this) == 0 ? Boolean.TRUE : Boolean.FALSE;

@@ -82,7 +82,7 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 		// need to listen for system bundle stopping
 		context.addBundleListener(this);
 		String startDefaultProp = context.getProperty(EclipseAppContainer.PROP_ECLIPSE_APPLICATION_LAUNCH_DEFAULT);
-		if (startDefaultProp == null || "true".equalsIgnoreCase(context.getProperty(EclipseAppContainer.PROP_ECLIPSE_APPLICATION_LAUNCH_DEFAULT))) { //$NON-NLS-1$
+		if (startDefaultProp == null || "true".equalsIgnoreCase(startDefaultProp)) { //$NON-NLS-1$
 			boolean registerDescs = "true".equalsIgnoreCase(context.getProperty(EclipseAppContainer.PROP_ECLIPSE_REGISTER_APP_DESC)); //$NON-NLS-1$
 			// register all the descriptors if requested to
 			if (registerDescs)
@@ -172,7 +172,7 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 				if (defaultApp != null && defaultApp.equals(appExtension.getUniqueIdentifier()))
 					flags |= EclipseAppDescriptor.FLAG_DEFAULT_APP;
 			}
-			appDescriptor = new EclipseAppDescriptor(Activator.getBundle(appExtension.getContributor()), appExtension.getUniqueIdentifier(), flags, cardinality, this);
+			appDescriptor = new EclipseAppDescriptor(Activator.getBundle(appExtension.getContributor()), appExtension.getUniqueIdentifier(), appExtension.getLabel(), flags, cardinality, this);
 			// register the appDescriptor as a service
 			ServiceRegistration sr = (ServiceRegistration) AccessController.doPrivileged(new RegisterService(new String[] {ApplicationDescriptor.class.getName()}, appDescriptor, appDescriptor.getServiceProperties()));
 			appDescriptor.setServiceRegistration(sr);
