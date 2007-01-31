@@ -207,7 +207,7 @@ public class ServiceReferenceImpl implements ServiceReference, Comparable {
 		ServiceReferenceImpl other = (ServiceReferenceImpl) object;
 		if (this.getRanking() != other.getRanking())
 			return this.getRanking() > other.getRanking() ? -1 : 1;
-		return this.getId() > other.getId() ? 1 : -1;
+		return this.getId() == other.getId() ? 0 : this.getId() > other.getId() ? 1 : -1;
 	}
 
 	public boolean isAssignableTo(Bundle bundle, String className) {
@@ -237,7 +237,7 @@ public class ServiceReferenceImpl implements ServiceReference, Comparable {
 		if (producerBL.isBootDelegationPackage(pkgName)) {
 			SystemBundleLoader systemLoader = (SystemBundleLoader) registration.framework.systemBundle.getBundleLoader();
 			if (systemLoader.isEEPackage(pkgName))
-				return true;  // in this case we have a common source from the EE
+				return true; // in this case we have a common source from the EE
 		}
 		// 4) For the registrant bundle, find the wiring for the package.
 		PackageSource producerSource = producerBL.getPackageSource(pkgName);
