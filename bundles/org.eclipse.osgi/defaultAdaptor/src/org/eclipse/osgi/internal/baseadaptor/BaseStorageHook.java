@@ -18,6 +18,7 @@ import java.net.URLConnection;
 import java.util.*;
 import org.eclipse.core.runtime.adaptor.LocationManager;
 import org.eclipse.osgi.baseadaptor.*;
+import org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry;
 import org.eclipse.osgi.baseadaptor.bundlefile.ZipBundleFile;
 import org.eclipse.osgi.baseadaptor.hooks.AdaptorHook;
 import org.eclipse.osgi.baseadaptor.hooks.StorageHook;
@@ -217,9 +218,9 @@ public class BaseStorageHook implements StorageHook, AdaptorHook{
 					throw new BundleException(NLS.bind(AdaptorMsg.BUNDLE_NATIVECODE_EXCEPTION, nativeFile.getAbsolutePath()));
 				continue; // continue to next path
 			}
-			// extract the native code
-			File nativeFile = bundleData.getBundleFile().getFile(installPaths[i], true);
-			if (nativeFile == null)
+			// ensure the file exists in the bundle; it will get extracted later on demand
+			BundleEntry nativeEntry = bundleData.getBundleFile().getEntry(installPaths[i]);
+			if (nativeEntry == null)
 				throw new BundleException(NLS.bind(AdaptorMsg.BUNDLE_NATIVECODE_EXCEPTION, installPaths[i]));
 		}
 	}
