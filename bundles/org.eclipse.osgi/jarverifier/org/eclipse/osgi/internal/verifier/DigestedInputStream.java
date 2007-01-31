@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006 IBM Corporation and others.
+ * Copyright (c) 2006, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,19 +30,13 @@ class DigestedInputStream extends FilterInputStream {
 	 * thrown if the calculated digest doesn't match the passed digest.
 	 * 
 	 * @param in the stream to use as an input source.
-	 * @param digest the MessageDigest used to compute the digest.
+	 * @param digestAlgorithm the MessageDigest algorithm to use.
 	 * @param result the expected digest.
 	 */
-	DigestedInputStream(InputStream in, MessageDigest digest, byte result[], long size) {
+	DigestedInputStream(InputStream in, String digestAlgorithm, byte result[], long size) {
 		super(in);
 		this.remaining = size;
-		try {
-			this.digest = (MessageDigest) digest.clone();
-		} catch (CloneNotSupportedException e) {
-			// This shouldn't happen since MessageDigest supports clone!
-			throw new RuntimeException("MessageDigest must support clone"); //$NON-NLS-1$
-		}
-
+		this.digest = SignedBundleFile.getMessageDigest(digestAlgorithm);
 		this.result = result;
 	}
 

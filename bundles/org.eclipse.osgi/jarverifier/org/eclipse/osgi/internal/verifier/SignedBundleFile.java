@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006 IBM Corporation and others.
+ * Copyright (c) 2006, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,25 +28,13 @@ import org.eclipse.osgi.util.NLS;
  * signatures are found, the classes and resources are retrieved without checks.
  */
 public class SignedBundleFile extends BundleFile implements CertificateVerifier, JarVerifierConstant {
-	/**
-	 * A precomputed MD5 MessageDigest. We will clone this everytime we want to
-	 * use it.
-	 */
-	private static MessageDigest md5;
-	/**
-	 * A precomputed SHA1 MessageDigest. We will clone this everytime we want to
-	 * use it.
-	 */
-	private static MessageDigest sha1;
-
 	private static DefaultTrustAuthority trustAllAuthority = new DefaultTrustAuthority(0);
 	private BundleFile bundleFile;
 	CertificateChain[] chains;
 
 	/**
 	 * The key of the hashtable will be the name of the entry (type String). The
-	 * value will be MessageDigest to use. Before using the MessageDigest
-	 * must be cloned.
+	 * value will be MessageDigest algorithm to use.
 	 */
 	Hashtable digests4entries;
 	/**
@@ -91,14 +79,12 @@ public class SignedBundleFile extends BundleFile implements CertificateVerifier,
 				// Digest-Manifest
 				String digestName = sf.substring(start + 1, off);
 				if (digestName.equalsIgnoreCase(MD5_STR)) {
-					if (manifestMD5Result == null) {
-						manifestMD5Result = calculateDigest(getMD5(), manifestBytes);
-					}
+					if (manifestMD5Result == null)
+						manifestMD5Result = calculateDigest(getMessageDigest(MD5_STR), manifestBytes);
 					manfiestDigest = manifestMD5Result;
 				} else if (digestName.equalsIgnoreCase(SHA1_STR)) {
-					if (manifestSHAResult == null) {
-						manifestSHAResult = calculateDigest(getSHA1(), manifestBytes);
-					}
+					if (manifestSHAResult == null)
+						manifestSHAResult = calculateDigest(getMessageDigest(SHA1_STR), manifestBytes);
 					manfiestDigest = manifestSHAResult;
 				}
 				off += digestManifestSearchLen;
@@ -211,7 +197,7 @@ public class SignedBundleFile extends BundleFile implements CertificateVerifier,
 				String aDigestLine = getDigestLine(entryStr, digAlg);
 
 				if (aDigestLine != null) {
-					MessageDigest msgDigestObj = getDigestObjFromString(aDigestLine);
+					String msgDigestAlgorithm = getDigestAlgorithmFromString(aDigestLine);
 					byte digestResultsList[] = getDigestResultsList(aDigestLine);
 
 					//
@@ -238,7 +224,7 @@ public class SignedBundleFile extends BundleFile implements CertificateVerifier,
 					// duplicate entries unless the manifest file
 					// is tampered
 					if (!digests4entries.contains(entryName)) {
-						digests4entries.put(entryName, msgDigestObj);
+						digests4entries.put(entryName, msgDigestAlgorithm);
 						results4entries.put(entryName, digestResultsList);
 					}
 
@@ -358,26 +344,24 @@ public class SignedBundleFile extends BundleFile implements CertificateVerifier,
 		return rtvValue;
 	}
 
-	private MessageDigest getDigestObjFromString(String digestLines) {
-		MessageDigest mdList = null;
-
+	private String getDigestAlgorithmFromString(String digestLines) {
 		if (digestLines != null) {
 			// String sDigestLine = digestLines[i];
 			int indexDigest = digestLines.indexOf(MF_DIGEST_PART);
 			String sDigestAlgType = digestLines.substring(0, indexDigest);
 			if (sDigestAlgType.equalsIgnoreCase(MD5_STR)) {
-				// remember the "algorithm type" object
-				mdList = getMD5();
+				// remember the "algorithm type"
+				return MD5_STR;
 			} else if (sDigestAlgType.equalsIgnoreCase(SHA1_STR)) {
 				// remember the "algorithm type" object
-				mdList = getSHA1();
+				return SHA1_STR;
 			} else {
 				// unknown algorithm type, we will stop processing this entry
 				// break;
 				throw new SecurityException(NLS.bind(JarVerifierMessages.Algorithm_Not_Supported, sDigestAlgType));
 			}
 		}
-		return mdList;
+		return null;
 	}
 
 	/**
@@ -610,6 +594,9 @@ public class SignedBundleFile extends BundleFile implements CertificateVerifier,
 	}
 
 	public BundleEntry getEntry(String path) {
+		// strip off leading slashes so we can ensure the path matches the one provided in the manifest.
+		if (path.length() > 0 && path.charAt(0) == '/')
+			path = path.substring(1);
 		BundleEntry be = bundleFile.getEntry(path);
 		if (digests4entries == null)
 			return be;
@@ -663,17 +650,13 @@ public class SignedBundleFile extends BundleFile implements CertificateVerifier,
 
 		public InputStream getInputStream() throws IOException {
 			String name = getName();
-			MessageDigest digests = digests4entries == null ? null : (MessageDigest) digests4entries.get(name);
-			if (digests == null)
-				return null; // return null if the digest does not exist
-			byte results[] = (byte[]) results4entries.get(name);
-
-			/**
-			 * ELI: it is probbaly best to decode the value of digest into Base64 base.  This will only optimize the 
-			 * bad jar case.
-			 */
-
-			return new DigestedInputStream(nestedEntry.getInputStream(), digests, results, nestedEntry.getSize());
+			String digest = digests4entries == null ? null : (String) digests4entries.get(name);
+			if (digest == null)
+				 // the digest does not exist; this must be a corrupted jar
+				throw new IOException("Corrupted file: the digest does not exist for the file " + name); //$NON-NLS-1$
+ 			byte results[] = (byte[]) results4entries.get(name);
+			// TODO ELI: it is probbaly best to decode the value of digest into Base64 base.  This will only optimize the bad jar case.
+			return new DigestedInputStream(nestedEntry.getInputStream(), digest, results, nestedEntry.getSize());
 		}
 
 		public long getSize() {
@@ -759,24 +742,13 @@ public class SignedBundleFile extends BundleFile implements CertificateVerifier,
 		return chains != null;
 	}
 
-	static synchronized MessageDigest getMD5() {
-		if (md5 == null)
-			try {
-				md5 = MessageDigest.getInstance(MD5_STR);
-			} catch (NoSuchAlgorithmException e) {
-				SignedBundleHook.log(e.getMessage(), FrameworkLogEntry.ERROR, e);
-			}
-		return md5;
-	}
-
-	static synchronized MessageDigest getSHA1() {
-		if (sha1 == null)
-			try {
-				sha1 = MessageDigest.getInstance(SHA1_STR);
-			} catch (NoSuchAlgorithmException e) {
-				SignedBundleHook.log(e.getMessage(), FrameworkLogEntry.ERROR, e);
-			}
-		return sha1;
+	static synchronized MessageDigest getMessageDigest(String algorithm) {
+		try {
+			return MessageDigest.getInstance(algorithm);
+		} catch (NoSuchAlgorithmException e) {
+			SignedBundleHook.log(e.getMessage(), FrameworkLogEntry.ERROR, e);
+		}
+		return null;
 	}
 
 	//	static public void main(String args[]) throws IOException {

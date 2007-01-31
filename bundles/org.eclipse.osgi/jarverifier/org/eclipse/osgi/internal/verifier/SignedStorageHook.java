@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006 IBM Corporation and others.
+ * Copyright (c) 2006, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,7 +11,6 @@
 package org.eclipse.osgi.internal.verifier;
 
 import java.io.*;
-import java.security.MessageDigest;
 import java.security.cert.*;
 import java.util.*;
 import org.eclipse.osgi.baseadaptor.BaseData;
@@ -93,12 +92,12 @@ public class SignedStorageHook implements StorageHook {
 			results = new Hashtable(numEntries);
 			for (int i = 0; i < numEntries; i++) {
 				String entry = is.readUTF();
-				MessageDigest md;
+				String md;
 				byte[] result;
 				if (is.readInt() == 0)
-					md = SignedBundleFile.getMD5();
+					md = JarVerifierConstant.MD5_STR;
 				else
-					md = SignedBundleFile.getSHA1();
+					md = JarVerifierConstant.SHA1_STR;
 				result = new byte[is.readInt()];
 				is.readFully(result);
 				digests.put(entry, md);
@@ -167,10 +166,10 @@ public class SignedStorageHook implements StorageHook {
 			os.writeInt(digests.size());
 			for (Enumeration entries = digests.keys(); entries.hasMoreElements();) {
 				String entry = (String) entries.nextElement();
-				MessageDigest md = (MessageDigest) digests.get(entry);
+				String md = (String) digests.get(entry);
 				byte[] result = (byte[]) results.get(entry);
 				os.writeUTF(entry);
-				if (md == SignedBundleFile.getMD5())
+				if (md == JarVerifierConstant.MD2_STR)
 					os.writeInt(0);
 				else
 					os.writeInt(1);
