@@ -201,8 +201,8 @@ static void parseArgs( int* pArgc, _TCHAR* argv[] )
     /* Ensure the list of user argument is NULL terminated. */
     argv[ *pArgc ] = NULL;
 
-	/* For each user defined argument (excluding the program) */
-    for (index = 1; index < *pArgc; index++){
+	/* For each user defined argument */
+    for (index = 0; index < *pArgc; index++){
         if(_tcsicmp(argv[index], VMARGS) == 0) {
         	userVMarg = &argv[ index+1 ];
             argv[ index ] = NULL;

@@ -42,11 +42,12 @@ char*  shippedVMDir  = "jre/bin/";
 
 /* Define the special arguments for the various Java VMs. */
 static char*  argVM_JAVA[]        = { NULL };
-static char*  argVM_J9[]          = { "-jit", "-mca:1024", "-mco:1024", "-mn:256", "-mo:4096", 
-									  "-moi:16384", "-mx:262144", "-ms:16", "-mr:16", NULL };
 
 /* Define local variables . */
 static long			splashHandle = 0;
+static GtkWidget*   shellHandle = 0;
+static GdkPixbuf*	pixbuf = 0;
+static GtkWidget*   image = 0;
 
 /* Local functions */
 static void log_handler(const gchar* domain, GLogLevelFlags flags, const gchar* msg, gpointer data) {
@@ -58,13 +59,12 @@ int showSplash( const char* featureImage )
 	GtkAdjustment* vadj, *hadj;
 	int width, height;
 	guint handlerId;
-	GdkPixbuf * pixbuf;
-	GtkWidget * image;
-	GtkWidget * shellHandle, * vboxHandle, * scrolledHandle, * handle;
+	GtkWidget* vboxHandle, * scrolledHandle, * handle;
 	
 	initWindowSystem(&initialArgc, initialArgv, 1);
 	
 	shellHandle = gtk_window_new(GTK_WINDOW_POPUP);
+	gtk_signal_connect(GTK_OBJECT(shellHandle), "destroy", GTK_SIGNAL_FUNC(gtk_widget_destroyed), &shellHandle);
 	vboxHandle = gtk_vbox_new(FALSE, 0);
 	if(vboxHandle == 0)
 		return -1;
@@ -96,6 +96,7 @@ int showSplash( const char* featureImage )
 	
 	pixbuf = gdk_pixbuf_new_from_file(featureImage, NULL);
 	image = gtk_image_new_from_pixbuf(pixbuf);
+	gtk_signal_connect(GTK_OBJECT(image), "destroy", GTK_SIGNAL_FUNC(gtk_widget_destroyed), &image);
 	gtk_container_add(GTK_CONTAINER(handle), image);
 	gtk_widget_show(image);
 	
@@ -119,10 +120,15 @@ long getSplashHandle() {
 }
 
 void takeDownSplash() {
-	if(splashHandle != 0) {
-		gtk_widget_hide((GtkWidget*)splashHandle);
+	if(shellHandle != 0) {
+		gtk_widget_destroy(shellHandle);
+		if (image != NULL) {
+			gtk_widget_destroy(image);
+			gdk_pixbuf_unref(pixbuf);
+		}
 		dispatchMessages();
 		splashHandle = 0;
+		shellHandle = NULL;
 	}
 }
 
@@ -131,8 +137,8 @@ char** getArgVM( char* vm )
 {
     char** result;
 
-    if (isJ9VM( vm )) 
-        return argVM_J9;
+/*    if (isJ9VM( vm )) 
+        return argVM_J9;*/
     
     /* Use the default arguments for a standard Java VM */
     result = argVM_JAVA;
