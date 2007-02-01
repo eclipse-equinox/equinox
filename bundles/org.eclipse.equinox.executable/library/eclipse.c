@@ -550,7 +550,7 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
     free( program );
     free( officialName );
     if ( vmCommand != NULL )	 free( vmCommand );
-    if ( cp != JAR )			 free( cp );
+    if ( launchMode == LAUNCH_JNI ) free( cp );
     if ( cpValue != NULL)		 free( cpValue );
     if ( exitData != NULL )		 free( exitData );
 

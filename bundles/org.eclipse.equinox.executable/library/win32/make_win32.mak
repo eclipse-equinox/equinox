@@ -77,7 +77,7 @@ eclipseShm.obj: ../eclipseShm.h ../eclipseUnicode.h ../eclipseShm.c
 	$(CC) $(DEBUG) $(wcflags) $(cvarsdll) /Fo$*.obj ../eclipseShm.c
 	
 aeclipseShm.obj: ../eclipseShm.h ../eclipseUnicode.h ../eclipseShm.c
-	$(CC) $(DEBUG) $(acflags) $(cvarsdll) /Fo$*.obj ../eclipseShm.c
+	$(CC) $(DEBUG) $(acflags) $(cvarsdll) /FoaeclipseShm.obj ../eclipseShm.c
 	
 aeclipseJNI.obj: ../eclipseCommon.h ../eclipseOS.h ../eclipseJNI.c
 	$(cc) $(DEBUG) $(acflags) $(cvarsdll) /FoaeclipseJNI.obj ../eclipseJNI.c

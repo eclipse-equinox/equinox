@@ -276,7 +276,7 @@ int launchJavaVM( _TCHAR* args[] )
 {
 	MSG msg;
 	_TCHAR* commandLine;
-	
+	jvmProcess = -1;
 	commandLine = buildCommandLine(NULL, args);
 	
 	/*

@@ -24,11 +24,18 @@ static JNINativeMethod natives[] = {{"_update_splash", "()V", (void *)&update_sp
 									{"_show_splash", "(Ljava/lang/String;)V", (void *)&show_splash},
 									{"_takedown_splash", "()V", (void *)&takedown_splash}};
   
+#ifdef UNICODE
+#define setExitData setExitDataW
+#elif WIN32
+extern void setExitDataW(JNIEnv *env, jstring id, jstring s);
+#endif
+
 /* local methods */
 static jstring newJavaString(JNIEnv *env, _TCHAR * str);
-static void setExitData(JNIEnv *env, jstring id, jstring s);
 static void splash(JNIEnv *env, jstring s);
 static void registerNatives(JNIEnv *env);
+
+void setExitData(JNIEnv *env, jstring id, jstring s);
 
 /* JNI Methods                                 
  * we only want one version of the JNI functions 
@@ -56,7 +63,11 @@ JNIEXPORT void JNICALL set_exit_data(JNIEnv * env, jobject obj, jstring id, jstr
 	if(exitDataHook != NULL)
 		exitDataHook(env, id, s);
 	else /* hook was not set, just call the ANSI version */
+#ifdef WIN32
+		setExitDataW(env, id, s);
+#else
 		setExitData(env, id, s);
+#endif
 }
 
 JNIEXPORT void JNICALL update_splash(JNIEnv * env, jobject obj){
@@ -120,7 +131,7 @@ static void splash(JNIEnv *env, jstring s) {
 	}
 }
 
-static void setExitData(JNIEnv *env, jstring id, jstring s){
+void setExitData(JNIEnv *env, jstring id, jstring s){
 	const _TCHAR* data = NULL;
 	const _TCHAR* sharedId = NULL;
 	int length;
