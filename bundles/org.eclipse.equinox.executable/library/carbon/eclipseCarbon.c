@@ -30,6 +30,7 @@ char *findCommand(char *command);
 
 /* Global Variables */
 char*  defaultVM     = "java";
+char*  vmLibrary	 = "JavaVM";
 char*  shippedVMDir  = "jre/bin/";
 
 /* Define the window system arguments for the various Java VMs. */
@@ -69,6 +70,8 @@ int showSplash( const _TCHAR* featureImage )
 	EventTypeSpec draw = {kEventClassControl, kEventControlDraw};
 	ControlRef root;
 	
+	if(splashHandle != 0)
+		return 0; /*already showing */
 	/*debug("featureImage: %s\n", featureImage);*/
 
 	/*init();*/

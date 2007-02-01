@@ -184,6 +184,7 @@ _TCHAR* findCommand( _TCHAR* command )
     {
         free( cmdPath );
         cmdPath = NULL;
+        return cmdPath;
     }
 
 	ch = resolveSymlinks(cmdPath);

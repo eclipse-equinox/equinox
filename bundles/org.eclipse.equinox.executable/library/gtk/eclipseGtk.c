@@ -60,6 +60,9 @@ int showSplash( const char* featureImage )
 	int width, height;
 	guint handlerId;
 	GtkWidget* vboxHandle, * scrolledHandle, * handle;
+
+	if (splashHandle != 0)
+		return 0; /* already showing splash */
 	
 	initWindowSystem(&initialArgc, initialArgv, 1);
 	

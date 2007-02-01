@@ -937,6 +937,7 @@ static _TCHAR* findStartupJar(){
 			
 			/* still doesn't exit? */
 			if (_tstat( file, &stats ) != 0) {
+				free(file);
 				file = NULL;
 			}
 		}

@@ -114,6 +114,7 @@ void * findSymbol( void * handle, char * symbol ){
 }
 
 char * resolveSymlinks( char * path ) {
+	char * result = 0;
 	CFURLRef url, resolved;
 	CFStringRef string;
 	FSRef fsRef;
@@ -136,8 +137,9 @@ char * resolveSymlinks( char * path ) {
 				CFIndex length = CFStringGetMaximumSizeForEncoding(CFStringGetLength(string), kCFStringEncodingUTF8);
 				char *s = malloc(length);
 				if (CFStringGetCString(string, s, length, kCFStringEncodingUTF8)) {
-					free(path);
-					path = s;
+					result = s;
+				} else {
+					free(s);
 				}
 				CFRelease(string);
 				CFRelease(resolved);
@@ -145,5 +147,5 @@ char * resolveSymlinks( char * path ) {
 		}
 	}	
 	CFRelease(url); 
-	return path;
+	return result;
 }
