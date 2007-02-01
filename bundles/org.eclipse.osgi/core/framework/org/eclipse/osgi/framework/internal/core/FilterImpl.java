@@ -1373,6 +1373,25 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 		return "(" + org.osgi.framework.Constants.OBJECTCLASS + "=" + objectClass + ")";  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 	}
 
+	/**
+	 * Returns all the attributes contained within this filter
+	 * @return all the attributes contained within this filter
+	 */
+	public String[] getAttributes() {
+		ArrayList results = new ArrayList();
+		getAttributesInternal(results);
+		return (String[]) results.toArray(new String[results.size()]);
+	}
+
+	private void getAttributesInternal(ArrayList results) {
+		if (value instanceof FilterImpl[]) {
+			FilterImpl[] children = (FilterImpl[]) value;
+			for (int i = 0; i < children.length; i++)
+				children[i].getAttributesInternal(results);
+			return;
+		}
+		results.add(attr);
+	}
 
 	/**
 	 * Parser class for OSGi filter strings. This class parses

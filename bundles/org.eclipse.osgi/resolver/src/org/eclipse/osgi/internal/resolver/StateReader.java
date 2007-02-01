@@ -40,7 +40,7 @@ class StateReader {
 	private int numBundles;
 	private boolean accessedFlag = false;
 
-	public static final byte STATE_CACHE_VERSION = 25;
+	public static final byte STATE_CACHE_VERSION = 26;
 	public static final byte NULL = 0;
 	public static final byte OBJECT = 1;
 	public static final byte INDEX = 2;
@@ -86,15 +86,18 @@ class StateReader {
 			if (expectedTimestamp >= 0 && timestampRead != expectedTimestamp)
 				return false;
 			addToObjectTable(state, index);
+			// read the platform property keys
+			String[] platformPropKeys = (String[]) readPlatformProp(in);
+			state.addPlatformPropertyKeys(platformPropKeys);
 			int numSets = in.readInt();
 			Dictionary[] platformProps = new Dictionary[numSets];
 			for (int i = 0; i < numSets; i++) {
-				Hashtable props = new Hashtable(StateImpl.PROPS.length);
+				Hashtable props = new Hashtable(platformPropKeys.length);
 				int numProps = in.readInt();
 				for (int j = 0; j < numProps; j++) {
 					Object value = readPlatformProp(in);
-					if (value != null && j < StateImpl.PROPS.length)
-						props.put(StateImpl.PROPS[j], value);
+					if (value != null && j < platformPropKeys.length)
+						props.put(platformPropKeys[j], value);
 				}
 				platformProps[i] = props;
 			}
@@ -139,15 +142,18 @@ class StateReader {
 		if (expectedTimestamp >= 0 && timestampRead != expectedTimestamp)
 			return false;
 		addToObjectTable(state, index);
+		// read the platform property keys
+		String[] platformPropKeys = (String[]) readPlatformProp(in);
+		state.addPlatformPropertyKeys(platformPropKeys);
 		int numSets = in.readInt();
 		Dictionary[] platformProps = new Dictionary[numSets];
 		for (int i = 0; i < numSets; i++) {
-			Hashtable props = new Hashtable(StateImpl.PROPS.length);
+			Hashtable props = new Hashtable(platformPropKeys.length);
 			int numProps = in.readInt();
 			for (int j = 0; j < numProps; j++) {
 				Object value = readPlatformProp(in);
-				if (value != null && j < StateImpl.PROPS.length)
-					props.put(StateImpl.PROPS[j], value);
+				if (value != null && j < platformPropKeys.length)
+					props.put(platformPropKeys[j], value);
 			}
 			platformProps[i] = props;
 		}

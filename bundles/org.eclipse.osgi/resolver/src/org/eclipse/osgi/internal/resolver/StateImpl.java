@@ -14,14 +14,14 @@ import java.util.*;
 
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.debug.FrameworkDebugOptions;
-import org.eclipse.osgi.framework.internal.core.*;
+import org.eclipse.osgi.framework.internal.core.Constants;
+import org.eclipse.osgi.framework.internal.core.FilterImpl;
 import org.eclipse.osgi.framework.util.KeyedElement;
 import org.eclipse.osgi.framework.util.KeyedHashSet;
 import org.eclipse.osgi.internal.baseadaptor.StateManager;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.util.ManifestElement;
-import org.osgi.framework.BundleException;
-import org.osgi.framework.Version;
+import org.osgi.framework.*;
 
 public abstract class StateImpl implements State {
 	public static final String[] PROPS = {"osgi.os", "osgi.ws", "osgi.nl", "osgi.arch", Constants.OSGI_FRAMEWORK_SYSTEM_PACKAGES, Constants.OSGI_RESOLVER_MODE, Constants.FRAMEWORK_EXECUTIONENVIRONMENT, "osgi.resolveOptional", "osgi.genericAliases"}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
@@ -41,16 +41,29 @@ public abstract class StateImpl implements State {
 	private StateReader reader;
 	private Dictionary[] platformProperties = {new Hashtable(PROPS.length)}; // Dictionary here because of Filter API
 	private long highestBundleId = -1;
+	private HashSet platformPropertyKeys = new HashSet(PROPS.length);
 
 	private static long cumulativeTime;
 
+	// to prevent extra-package instantiation 
 	protected StateImpl() {
-		// to prevent extra-package instantiation 
+		// always add the default platform property keys.
+		addPlatformPropertyKeys(PROPS);
 	}
 
 	public boolean addBundle(BundleDescription description) {
 		if (!basicAddBundle(description))
 			return false;
+		String platformFilter = description.getPlatformFilter();
+		if (platformFilter != null) {
+			try {
+				// add any new platform filter propery keys this bundle is using
+				FilterImpl filter = (FilterImpl) FrameworkUtil.createFilter(platformFilter);
+				addPlatformPropertyKeys(filter.getAttributes());
+			} catch (InvalidSyntaxException e) {
+				// ignore this is handled in another place
+			}
+		}
 		resolved = false;
 		getDelta().recordBundleAdded((BundleDescriptionImpl) description);
 		if (Constants.getInternalSymbolicName().equals(description.getSymbolicName()))
@@ -517,14 +530,28 @@ public abstract class StateImpl implements State {
 	synchronized boolean setPlatformProperties(Dictionary[] platformProperties, boolean resetSystemExports) {
 		if (platformProperties.length == 0)
 			throw new IllegalArgumentException();
-		if (this.platformProperties.length != platformProperties.length) {
-			this.platformProperties = new Dictionary[platformProperties.length];
-			for (int i = 0; i < platformProperties.length; i++)
-				this.platformProperties[i] = new Hashtable(PROPS.length);
+		// copy the properties for our use internally
+		Dictionary[] newPlatformProperties = new Dictionary[platformProperties.length];
+		for (int i = 0; i < platformProperties.length; i++) {
+			newPlatformProperties[i] = new Hashtable(platformProperties[i].size());
+			synchronized (platformProperties[i]) {
+				for (Enumeration keys = platformProperties[i].keys(); keys.hasMoreElements();) {
+					Object key = keys.nextElement();
+					newPlatformProperties[i].put(key, platformProperties[i].get(key));
+				}
+			}
 		}
 		boolean result = false;
-		for (int i = 0; i < platformProperties.length; i++)
-			result |= setProps(this.platformProperties[i], platformProperties[i]);
+		if (this.platformProperties.length != newPlatformProperties.length) {
+			result = true;
+		} else {
+			// we need to see if any of the existing filter prop keys have changed
+			String[] keys = getPlatformPropertyKeys();
+			for (int i = 0; i < newPlatformProperties.length && !result; i++)
+				result |= changedProps(this.platformProperties[i], newPlatformProperties[i], keys);
+		}
+		// always do a complete replacement of the properties in case new bundles are added that uses new filter props
+		this.platformProperties = newPlatformProperties;
 		if (resetSystemExports && result)
 			resetSystemExports();
 		return result;
@@ -586,20 +613,14 @@ public abstract class StateImpl implements State {
 		return false;
 	}
 
-	private boolean setProps(Dictionary origProps, Dictionary newProps) {
-		boolean changed = false;
-		for (int i = 0; i < PROPS.length; i++) {
-			Object origProp = origProps.get(PROPS[i]);
-			Object newProp = newProps.get(PROPS[i]);
-			if (checkProp(origProp, newProp)) {
-				changed = true;
-				if (newProp == null)
-					origProps.remove(PROPS[i]);
-				else
-					origProps.put(PROPS[i], newProp);
-			}
+	private boolean changedProps(Dictionary origProps, Dictionary newProps, String[] keys) {
+		for (int i = 0; i < keys.length; i++) {
+			Object origProp = origProps.get(keys[i]);
+			Object newProp = newProps.get(keys[i]);
+			if (checkProp(origProp, newProp))
+				return true;
 		}
-		return changed;
+		return false;
 	}
 
 	public BundleDescription[] getRemovalPendings() {
@@ -711,6 +732,20 @@ public abstract class StateImpl implements State {
 
 	public StateHelper getStateHelper() {
 		return StateHelperImpl.getInstance();
+	}
+
+	void addPlatformPropertyKeys(String[] keys) {
+		synchronized (platformPropertyKeys) {
+			for (int i = 0; i < keys.length; i++)
+				if (!platformPropertyKeys.contains(keys[i]))
+					platformPropertyKeys.add(keys[i]);
+		}
+	}
+
+	String[] getPlatformPropertyKeys() {
+		synchronized (platformPropertyKeys) {
+			return (String[]) platformPropertyKeys.toArray(new String[platformPropertyKeys.size()]);
+		}
 	}
 
 	public long getHighestBundleId() {

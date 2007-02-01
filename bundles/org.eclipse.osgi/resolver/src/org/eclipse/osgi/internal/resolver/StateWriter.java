@@ -59,13 +59,16 @@ class StateWriter {
 		if (writePrefix(state, out))
 			return;
 		out.writeLong(state.getTimeStamp());
+		// write the platform property keys
+		String[] platformPropKeys = state.getPlatformPropertyKeys();
+		writePlatformProp(platformPropKeys, out);
 		Dictionary[] propSet = state.getPlatformProperties();
 		out.writeInt(propSet.length);
 		for (int i = 0; i < propSet.length; i++) {
 			Dictionary props = propSet[i];
-			out.writeInt(StateImpl.PROPS.length);
-			for (int j = 0; j < StateImpl.PROPS.length; j++)
-				writePlatformProp(props.get(StateImpl.PROPS[j]), out);
+			out.writeInt(platformPropKeys.length);
+			for (int j = 0; j < platformPropKeys.length; j++)
+				writePlatformProp(props.get(platformPropKeys[j]), out);
 		}
 		BundleDescription[] bundles = state.getBundles();
 		StateHelperImpl.getInstance().sortBundles(bundles);
@@ -105,13 +108,17 @@ class StateWriter {
 			if (writePrefix(state, outState))
 				return;
 			outState.writeLong(state.getTimeStamp());
+			// write the platform property keys
+			String[] platformPropKeys = state.getPlatformPropertyKeys();
+			writePlatformProp(platformPropKeys, outState);
+			// write the platform property values
 			Dictionary[] propSet = state.getPlatformProperties();
 			outState.writeInt(propSet.length);
 			for (int i = 0; i < propSet.length; i++) {
 				Dictionary props = propSet[i];
-				outState.writeInt(StateImpl.PROPS.length);
-				for (int j = 0; j < StateImpl.PROPS.length; j++)
-					writePlatformProp(props.get(StateImpl.PROPS[j]), outState);
+				outState.writeInt(platformPropKeys.length);
+				for (int j = 0; j < platformPropKeys.length; j++)
+					writePlatformProp(props.get(platformPropKeys[j]), outState);
 			}
 			outState.writeInt(bundles.length);
 			if (bundles.length == 0)
