@@ -24,8 +24,6 @@
 	<key>CFBundleVersion</key>
 		<string>3.2</string>
 		
-	<key>LSBackgroundOnly</key><string>1</string>
-		
 	<key>Eclipse</key>
 		<array>
 			<!-- to use a specific Java version (instead of the platform's default) uncomment one of the following options:
