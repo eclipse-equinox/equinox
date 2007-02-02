@@ -270,6 +270,7 @@ companion startup.jar file (in the same directory as the executable).");
 #define CP			 _T_ECLIPSE("-cp")
 #define CLASSPATH    _T_ECLIPSE("-classpath")
 #define JAR 		 _T_ECLIPSE("-jar")
+#define NOERROR		 _T_ECLIPSE("-suppressErrors")
 
 /* constants for ee options file */
 #define EE_EXECUTABLE 			_T_ECLIPSE("-Dee.executable=")
@@ -281,6 +282,7 @@ companion startup.jar file (in the same directory as the executable).");
 static int     needConsole   = 0;				/* True: user wants a console	*/
 static int     debug         = 0;				/* True: output debugging info	*/
 static int     noSplash      = 0;				/* True: do not show splash win	*/
+static int	   suppressErrors = 0;				/* True: do not display errors dialogs */
 
 static _TCHAR*  showSplashArg = NULL;			/* showsplash data (main launcher window) */
 static _TCHAR * startupArg    = NULL;			/* path of the startup.jar the user wants to run relative to the program path */
@@ -307,6 +309,7 @@ static Option options[] = {
     { CONSOLELOG,	NULL,			&needConsole,	0 },
     { DEBUG,		NULL,			&debug,			0 },
     { NOSPLASH,     NULL,           &noSplash,		1 },
+    { NOERROR,		NULL,			&suppressErrors, 1},
     { LIBRARY,		NULL,			NULL,			2 }, /* library was parsed by exe, just remove it */
     { OS,			&osArg,			NULL,			2 },
     { OSARCH,		&osArchArg,		NULL,			2 },
@@ -386,20 +389,24 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
     programDir = getProgramDir();
     if (programDir == NULL)
     {
-        errorMsg = malloc( (_tcslen(homeMsg) + _tcslen(officialName) + 10) * sizeof(_TCHAR) );
-        _stprintf( errorMsg, homeMsg, officialName );
-        displayMessage( officialName, errorMsg );
-        free( errorMsg );
+    	if (!suppressErrors) {
+	        errorMsg = malloc( (_tcslen(homeMsg) + _tcslen(officialName) + 10) * sizeof(_TCHAR) );
+	        _stprintf( errorMsg, homeMsg, officialName );
+	        displayMessage( officialName, errorMsg );
+	        free( errorMsg );
+    	}
     	exit( 1 );
     }
 
     launchMode = determineVM(&msg);
     if (launchMode == -1) {
     	/* problem */
-    	errorMsg = malloc((_tcslen(noVMMsg) + _tcslen(officialName) + _tcslen(msg) + 1) * sizeof(_TCHAR));
-    	_stprintf( errorMsg, noVMMsg, officialName, msg );
-    	displayMessage( officialName, errorMsg );
-    	free( errorMsg );
+    	if (!suppressErrors) {
+	    	errorMsg = malloc((_tcslen(noVMMsg) + _tcslen(officialName) + _tcslen(msg) + 1) * sizeof(_TCHAR));
+	    	_stprintf( errorMsg, noVMMsg, officialName, msg );
+	    	displayMessage( officialName, errorMsg );
+	    	free( errorMsg );
+    	}
     	free( msg );
     	exit(1);
 	}	
@@ -407,10 +414,12 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
 	/* Find the startup.jar */
 	jarFile = findStartupJar();
 	if(jarFile == NULL) {
-		errorMsg = malloc( (_tcslen(startupMsg) + _tcslen(officialName) + 10) * sizeof(_TCHAR) );
-        _stprintf( errorMsg, startupMsg, officialName );
-        displayMessage( officialName, errorMsg );
-        free( errorMsg );
+		if (!suppressErrors) {
+			errorMsg = malloc( (_tcslen(startupMsg) + _tcslen(officialName) + 10) * sizeof(_TCHAR) );
+	        _stprintf( errorMsg, startupMsg, officialName );
+	        displayMessage( officialName, errorMsg );
+	        free( errorMsg );
+		}
     	exit( 1 );
 	}
 
@@ -428,8 +437,8 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
     
     /* not using JNI launching, need some shared data */
     if (launchMode == LAUNCH_EXE && createSharedData( &sharedID, MAX_SHARED_LENGTH )) {
-        if (debug) {
-   			if (debug) displayMessage( officialName, shareMsg );
+        if (debug && !suppressErrors) {
+   			displayMessage( officialName, shareMsg );
         }
     }
     
@@ -493,46 +502,48 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
 	                	running = 0;
 	                }
 	            } else {
-	                if (debug) displayMessage( officialName, shareMsg );
+	                if (debug && !suppressErrors) displayMessage( officialName, shareMsg );
 	            }
 	            break;
 			default: {
 				_TCHAR *title = _tcsdup(officialName);
 	            running = 0;
-	            errorMsg = NULL;
-	            if (launchMode == LAUNCH_EXE) {
-	            	if (exitData != NULL) free(exitData);
-	        		getSharedData( sharedID, &exitData );
-	        	}
-	            if (exitData != 0) {
-	            	errorMsg = exitData;
-	                if (_tcslen( errorMsg ) == 0) {
-	            	    free( errorMsg );
-	            	    errorMsg = NULL;
-	                } else {
-	                    _TCHAR *str;
-	                	if (_tcsncmp(errorMsg, _T_ECLIPSE("<title>"), _tcslen(_T_ECLIPSE("<title>"))) == 0) {
-							str = _tcsstr(errorMsg, _T_ECLIPSE("</title>"));
-							if (str != NULL) {
-								free( title );
-								str[0] = _T_ECLIPSE('\0');
-								title = _tcsdup( errorMsg + _tcslen(_T_ECLIPSE("<title>")) );
-								str = _tcsdup( str + _tcslen(_T_ECLIPSE("</title>")) );
-								free( errorMsg );
-								errorMsg = str;
-							}
-	                	}
-	                }
-	            } else {
-	                if (debug) displayMessage( title, shareMsg );
+	            if(!suppressErrors) {
+		            errorMsg = NULL;
+		            if (launchMode == LAUNCH_EXE) {
+		            	if (exitData != NULL) free(exitData);
+		        		getSharedData( sharedID, &exitData );
+		        	}
+		            if (exitData != 0) {
+		            	errorMsg = exitData;
+		                if (_tcslen( errorMsg ) == 0) {
+		            	    free( errorMsg );
+		            	    errorMsg = NULL;
+		                } else {
+		                    _TCHAR *str;
+		                	if (_tcsncmp(errorMsg, _T_ECLIPSE("<title>"), _tcslen(_T_ECLIPSE("<title>"))) == 0) {
+								str = _tcsstr(errorMsg, _T_ECLIPSE("</title>"));
+								if (str != NULL) {
+									free( title );
+									str[0] = _T_ECLIPSE('\0');
+									title = _tcsdup( errorMsg + _tcslen(_T_ECLIPSE("<title>")) );
+									str = _tcsdup( str + _tcslen(_T_ECLIPSE("</title>")) );
+									free( errorMsg );
+									errorMsg = str;
+								}
+		                	}
+		                }
+		            } else {
+		                if (debug) displayMessage( title, shareMsg );
+		            }
+		            if (errorMsg == NULL) {
+		                errorMsg = malloc( (_tcslen(exitMsg) + _tcslen(msg) + 10) * sizeof(_TCHAR) );
+		                _stprintf( errorMsg, exitMsg, exitCode, msg );
+		            }
+		            displayMessage( title, errorMsg );
+		            free( errorMsg );
 	            }
-	            if (errorMsg == NULL) {
-	                errorMsg = malloc( (_tcslen(exitMsg) + _tcslen(msg) + 10) * sizeof(_TCHAR) );
-	                _stprintf( errorMsg, exitMsg, exitCode, msg );
-	            }
-	            displayMessage( title, errorMsg );
 	            free( title );
-	            free( errorMsg );
 	            break;
 	        }
 	    }

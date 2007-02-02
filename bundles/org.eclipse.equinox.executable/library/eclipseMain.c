@@ -17,6 +17,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 #include <locale.h>
 #include <sys/stat.h>
 
@@ -30,6 +31,7 @@ finding the entry point.");
 
 #define NAME         _T_ECLIPSE("-name")
 #define LIBRARY		 _T_ECLIPSE("-library")
+#define NOERROR		 _T_ECLIPSE("-suppressErrors")
 #define VMARGS       _T_ECLIPSE("-vmargs")		/* special option processing required */
 
 /* this typedef must match the run method in eclipse.c */
@@ -41,6 +43,7 @@ static _TCHAR** userVMarg     = NULL;     		/* user specific args for the Java V
 static _TCHAR*  programDir	  = NULL;			/* directory where program resides */
 static _TCHAR*  library		  = NULL;			/* pathname of the eclipse shared library */
 static _TCHAR*  officialName  = NULL;
+static int      suppressErrors = 0;				/* supress error dialogs */
 
 static int 	 	createUserArgs(int configArgc, _TCHAR **configArgv, int *argc, _TCHAR ***argv);
 static void  	parseArgs( int* argc, _TCHAR* argv[] );
@@ -118,6 +121,9 @@ int main( int argc, _TCHAR* argv[] )
 	 
 	 /* Determine the full pathname of this program. */
     program = findCommand( argv[0] );
+    if (_tcscmp(argv[0], program) != 0) {
+    	argv[0] = program;
+    }
     if (program == NULL)
     {
 #ifdef _WIN32
@@ -160,10 +166,12 @@ int main( int argc, _TCHAR* argv[] )
 	if(library != NULL)
 		handle = loadLibrary(library);
 	if(handle == NULL) {
-		errorMsg = malloc( (_tcslen(libraryMsg) + _tcslen(officialName) + 10) * sizeof(_TCHAR) );
-        _stprintf( errorMsg, libraryMsg, officialName );
-        displayMessage( officialName, errorMsg );
-        free( errorMsg );
+		if (!suppressErrors) {
+			errorMsg = malloc( (_tcslen(libraryMsg) + _tcslen(officialName) + 10) * sizeof(_TCHAR) );
+	        _stprintf( errorMsg, libraryMsg, officialName );
+	        displayMessage( officialName, errorMsg );
+	        free( errorMsg );
+		}
     	exit( 1 );
 	}
 
@@ -171,7 +179,8 @@ int main( int argc, _TCHAR* argv[] )
 	if(setArgs != NULL)
 		setArgs(initialArgc, initialArgv, library);
 	else {
-		displayMessage(officialName, entryMsg);
+		if(!suppressErrors)
+			displayMessage(officialName, entryMsg);
 		exit(1);
 	}
 	
@@ -179,13 +188,15 @@ int main( int argc, _TCHAR* argv[] )
 	if(runMethod != NULL)
 		exitCode = runMethod(argc, argv, userVMarg);
 	else { 
-		displayMessage(officialName, entryMsg);
+		if(!suppressErrors)
+			displayMessage(officialName, entryMsg);
 		exit(1);
 	}
 	unloadLibrary(handle);
 	
 	free( library );
     free( programDir );
+    free( program );
     free( officialName );
     
 	return exitCode;
@@ -211,6 +222,8 @@ static void parseArgs( int* pArgc, _TCHAR* argv[] )
         	name = argv[++index];
         } else if(_tcsicmp(argv[index], LIBRARY) == 0) {
         	library = argv[++index];
+        } else if(_tcsicmp(argv[index], NOERROR) == 0) {
+        	suppressErrors = 1;
         } 
     }
 }
