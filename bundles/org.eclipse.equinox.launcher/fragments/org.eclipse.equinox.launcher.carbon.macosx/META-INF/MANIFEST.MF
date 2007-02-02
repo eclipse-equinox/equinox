@@ -1,6 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Macosx Fragment
+Bundle-Name: %pluginName
+Bundle-Vendor: %providerName
 Bundle-SymbolicName: org.eclipse.equinox.launcher.carbon.macosx
 Bundle-Version: 1.0.0.qualifier
 Fragment-Host: org.eclipse.equinox.launcher;bundle-version="1.0.0"
