@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/BundleContext.java,v 1.19 2006/06/16 16:31:18 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/BundleContext.java,v 1.20 2007/01/27 03:18:02 hargrave Exp $
  * 
  * Copyright (c) OSGi Alliance (2000, 2006). All Rights Reserved.
  * 
@@ -69,7 +69,7 @@ import java.util.Dictionary;
  * The Framework is the only entity that can create <code>BundleContext</code>
  * objects and they are only valid within the Framework that created them.
  * 
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.20 $
  */
 
 public interface BundleContext {
@@ -150,7 +150,8 @@ public interface BundleContext {
 	 * 
 	 * <li>If the bundle has declared an Bundle-RequiredExecutionEnvironment
 	 * header, then the listed execution environments must be verified against
-	 * the installed execution environments. If they are not all present, a
+	 * the installed execution environments. If none of the listed execution 
+	 * environments match an installed execution environment, a
 	 * <code>BundleException</code> must be thrown.
 	 * 
 	 * <li>The bundle's state is set to <code>INSTALLED</code>.
