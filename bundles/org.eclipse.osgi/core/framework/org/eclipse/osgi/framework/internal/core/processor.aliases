@@ -23,5 +23,6 @@ PowerPC power ppc                       # Motorola/IBM Power PC
 Sparc                                   # SUN
 x86 pentium i386 i486 i586 i686         # Intel
 s390                                    # IBM System 390
+s390x                                  # IBM System 390 (64-bit)
 v850e                                   # NEC V850E
 x86-64 amd64 em64t x86_64               # 64 bit x86 architecture
