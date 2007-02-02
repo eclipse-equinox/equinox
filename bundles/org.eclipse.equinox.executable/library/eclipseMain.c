@@ -31,7 +31,7 @@ finding the entry point.");
 
 #define NAME         _T_ECLIPSE("-name")
 #define LIBRARY		 _T_ECLIPSE("-library")
-#define NOERROR		 _T_ECLIPSE("-suppressErrors")
+#define SUPRESSERRORS _T_ECLIPSE("-suppressErrors")
 #define VMARGS       _T_ECLIPSE("-vmargs")		/* special option processing required */
 
 /* this typedef must match the run method in eclipse.c */
@@ -222,7 +222,7 @@ static void parseArgs( int* pArgc, _TCHAR* argv[] )
         	name = argv[++index];
         } else if(_tcsicmp(argv[index], LIBRARY) == 0) {
         	library = argv[++index];
-        } else if(_tcsicmp(argv[index], NOERROR) == 0) {
+        } else if(_tcsicmp(argv[index], SUPRESSERRORS) == 0) {
         	suppressErrors = 1;
         } 
     }

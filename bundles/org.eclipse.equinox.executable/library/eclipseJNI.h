@@ -20,6 +20,7 @@
 #define getInvocationFunction getInvocationFunctionW
 #define launchJavaVM launchJavaVMW
 #define startJavaVM startJavaVMW
+#define cleanupVM cleanupVMW
 #endif
 
 #ifdef UNICODE
@@ -85,4 +86,6 @@ JNIEXPORT void JNICALL takedown_splash(JNIEnv *, jobject);
  * the termination was not normal.
  */
 extern int startJavaVM( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[] );
+
+extern void cleanupVM();
 #endif

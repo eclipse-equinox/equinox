@@ -62,7 +62,7 @@ EXEC	= $(PROGRAM_OUTPUT)
 DLL     = $(PROGRAM_LIBRARY)
 DEBUG	= $(CDEBUG)
 CFLAGS	= -g -s -Wall \
-	  -I. -I$(JAVA_JNI) $(SYSINC) \
+	  -I. -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/win32 $(SYSINC) \
 	  -D_WIN32 \
 	  -DWIN32_LEAN_AND_MEAN \
 	  -mno-cygwin

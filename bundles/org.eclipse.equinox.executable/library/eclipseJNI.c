@@ -34,8 +34,12 @@ extern void setExitDataW(JNIEnv *env, jstring id, jstring s);
 static jstring newJavaString(JNIEnv *env, _TCHAR * str);
 static void splash(JNIEnv *env, jstring s);
 static void registerNatives(JNIEnv *env);
+static int shouldShutdown(JNIEnv *env);
 
 void setExitData(JNIEnv *env, jstring id, jstring s);
+
+static JavaVM * jvm = 0;
+static JNIEnv *env = 0;
 
 /* JNI Methods                                 
  * we only want one version of the JNI functions 
@@ -235,8 +239,6 @@ int startJavaVM( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[] )
 	JNI_createJavaVM createJavaVM;
 	JavaVMInitArgs init_args;
 	JavaVMOption * options;
-	JavaVM * jvm;
-	JNIEnv *env;
 	
 	/* JNI reflection */
 	jclass mainClass = NULL;			/* The Main class to load */
@@ -303,7 +305,7 @@ int startJavaVM( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[] )
 			(*env)->ExceptionDescribe(env);
 			(*env)->ExceptionClear(env);
 		}
-		(*jvm)->DestroyJavaVM(jvm);
+		
 	}
 
 	/* toNarrow allocated new strings, free them */
@@ -311,10 +313,51 @@ int startJavaVM( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[] )
 		free( options[i].optionString );
 	}
 	free(options);
-	
-	unloadLibrary(jniLibrary);
 	return jvmExitCode;
 }
 
+void cleanupVM(int exitCode) {
+	if (jvm == 0 || env == 0)
+		return;
+	/* we call System.exit() unless osgi.noShutdown is set */
+	if (shouldShutdown(env)) {
+		jclass systemClass = NULL;
+		jmethodID exitMethod = NULL;
+		systemClass = (*env)->FindClass(env, "java/lang/System");
+		if (systemClass != NULL) {
+			exitMethod = (*env)->GetStaticMethodID(env, systemClass, "exit", "(I)V");
+			if (exitMethod != NULL) {
+				(*env)->CallStaticObjectMethod(env, systemClass, exitMethod, exitCode);
+			}
+		}
+		if ((*env)->ExceptionOccurred(env)) {
+			(*env)->ExceptionDescribe(env);
+			(*env)->ExceptionClear(env);
+		}
+	}
+	(*jvm)->DestroyJavaVM(jvm);
+}
+
+static int shouldShutdown(JNIEnv * env) {
+	jclass booleanClass = NULL;
+	jmethodID method = NULL;
+	jstring arg = NULL;
+	jboolean result = 0;
+	
+	booleanClass = (*env)->FindClass(env, "java/lang/Boolean");
+	if (booleanClass != NULL) {
+		method = (*env)->GetStaticMethodID(env, booleanClass, "getBoolean", "(Ljava/lang/String;)Z");
+		if (method != NULL) {
+			arg = newJavaString(env, _T_ECLIPSE("osgi.noShutdown"));
+			result = (*env)->CallStaticBooleanMethod(env, booleanClass, method, arg);
+			(*env)->DeleteLocalRef(env, arg);
+		}
+	}
+	if ((*env)->ExceptionOccurred(env)) {
+		(*env)->ExceptionDescribe(env);
+		(*env)->ExceptionClear(env);
+	}
+	return (result == 0);
+}
 
 

@@ -270,7 +270,7 @@ companion startup.jar file (in the same directory as the executable).");
 #define CP			 _T_ECLIPSE("-cp")
 #define CLASSPATH    _T_ECLIPSE("-classpath")
 #define JAR 		 _T_ECLIPSE("-jar")
-#define NOERROR		 _T_ECLIPSE("-suppressErrors")
+#define SUPRESSERRORS _T_ECLIPSE("-suppressErrors")
 
 /* constants for ee options file */
 #define EE_EXECUTABLE 			_T_ECLIPSE("-Dee.executable=")
@@ -309,7 +309,7 @@ static Option options[] = {
     { CONSOLELOG,	NULL,			&needConsole,	0 },
     { DEBUG,		NULL,			&debug,			0 },
     { NOSPLASH,     NULL,           &noSplash,		1 },
-    { NOERROR,		NULL,			&suppressErrors, 1},
+    { SUPRESSERRORS, NULL,			&suppressErrors, 1},
     { LIBRARY,		NULL,			NULL,			2 }, /* library was parsed by exe, just remove it */
     { OS,			&osArg,			NULL,			2 },
     { OSARCH,		&osArchArg,		NULL,			2 },
@@ -368,7 +368,7 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
     _TCHAR**  progCommandArgs = NULL;
     _TCHAR**  relaunchCommand = NULL;
     _TCHAR*   errorMsg = NULL, *msg = NULL;
-    int       exitCode;
+    int       exitCode = 0;
     int 	  launchMode;
     int 	  running = 1;
 	 
@@ -553,6 +553,9 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
     if(relaunchCommand != NULL)
     	restartLauncher(program, relaunchCommand);
     	
+    if (launchMode == LAUNCH_JNI)
+    	cleanupVM(exitCode);
+    
     /* Cleanup time. */
     free( vmCommandArgs );
     free( progCommandArgs );
