@@ -577,16 +577,7 @@ public class SignedBundleFile extends BundleFile implements CertificateVerifier,
 	 * Returns the Base64 encoded digest of the passed set of bytes.
 	 */
 	private String calculateDigest(MessageDigest digest, byte[] bytes) {
-		String result;
-		try {
-			digest = (MessageDigest) digest.clone();
-			result = new String(Base64.encode(digest.digest(bytes)));
-		} catch (CloneNotSupportedException e1) {
-			// Won't happen since clone is supported by
-			// MessageDigest
-			throw new SecurityException(digest.getAlgorithm() + " doesn't support clone()"); //$NON-NLS-1$
-		}
-		return result;
+		return new String(Base64.encode(digest.digest(bytes)));
 	}
 
 	public File getFile(String path, boolean nativeCode) {
