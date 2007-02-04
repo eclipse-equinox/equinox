@@ -168,6 +168,11 @@ public class StartLevelImpl implements StartLevel {
 		return manager.isBundlePersistentlyStarted(bundle);
 	}
 
+	
+	public boolean isBundleActivationPolicyUsed(Bundle bundle) {
+		return manager.isBundleActivationPolicyUsed(bundle);
+	}
+
 	/**
 	 * Return the assigned start level value for the specified Bundle.
 	 *
@@ -176,7 +181,6 @@ public class StartLevelImpl implements StartLevel {
 	 * @exception java.lang.IllegalArgumentException If the specified bundle has been uninstalled.
 	 */
 	public int getBundleStartLevel(Bundle bundle) {
-
 		return manager.getBundleStartLevel(bundle);
 	}
 
@@ -210,7 +214,6 @@ public class StartLevelImpl implements StartLevel {
 	 */
 	public void setBundleStartLevel(Bundle bundle, int newSL) {
 		manager.setBundleStartLevel(bundle, newSL);
-
 	}
 
 	public boolean isSettingStartLevel() {

@@ -275,9 +275,9 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	 * <ol>
 	 * <li> Return false if the bundle is a fragment
 	 * <li> Return false if the bundle is not at the correct start-level
-	 * <li> Return true if the bundle is persistently marked for start
-	 * <li> Return false if the bundle is not a lazy-start bundle
-	 * <li> Return false if the bunlde is not resolved
+	 * <li> Return false if the bundle is not persistently marked for start
+	 * <li> Return true if the bundle's activation policy is persistently ignored
+	 * <li> Return true if the bundle does not define an activation policy
 	 * <li> Transition to STARTING state and Fire LAZY_ACTIVATION event
 	 * <li> Return false
 	 * </ol>

@@ -293,6 +293,7 @@ public class BundleHost extends AbstractBundle {
 	protected void startWorker(int options) throws BundleException {
 		if ((options & START_TRANSIENT) == 0) {
 			setStatus(Constants.BUNDLE_STARTED, true);
+			setStatus(Constants.BUNDLE_ACTIVATION_POLICY, (options & START_ACTIVATION_POLICY) != 0);
 			if (Debug.DEBUG && Debug.MONITOR_ACTIVATION)
 				new Exception("A persistent start has been called on bundle: " + getBundleData()).printStackTrace();
 		}
@@ -312,6 +313,15 @@ public class BundleHost extends AbstractBundle {
 				throw new BundleException(msg, new BundleStatusException(msg, StatusException.CODE_WARNING, this));
 			}
 			return;
+		}
+		if ((options & START_ACTIVATION_POLICY) != 0 && (state & STARTING) == 0) {
+			// the bundle must use the activation policy here.
+			if ((bundledata.getStatus() & Constants.BUNDLE_LAZY_START) != 0) {
+				// now we must publish the LAZY_ACTIVATION event and return
+				state = STARTING;
+				framework.publishBundleEvent(BundleEvent.LAZY_ACTIVATION, this);
+				return;
+			}
 		}
 
 		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
@@ -380,12 +390,11 @@ public class BundleHost extends AbstractBundle {
 		if (getStartLevel() > framework.startLevelManager.getStartLevel())
 			return false;
 		int status = bundledata.getStatus();
-		// Return true if the bundle is persistently marked for start
-		if ((status & Constants.BUNDLE_STARTED) != 0)
-			return true;
-		// if not lazy-start return false
-		if ((status & Constants.BUNDLE_LAZY_START) == 0)
+		// Return false if the bundle is not persistently marked for start
+		if ((status & Constants.BUNDLE_STARTED) == 0)
 			return false;
+		if ((status & Constants.BUNDLE_ACTIVATION_POLICY) == 0 || (status & Constants.BUNDLE_LAZY_START) == 0)
+			return true;
 		if (!isResolved())
 			// should never transition from UNRESOLVED -> STARTING
 			return false;
@@ -427,6 +436,7 @@ public class BundleHost extends AbstractBundle {
 	protected void stopWorker(int options) throws BundleException {
 		if ((options & STOP_TRANSIENT) == 0) {
 			setStatus(Constants.BUNDLE_STARTED, false);
+			setStatus(Constants.BUNDLE_ACTIVATION_POLICY, false);
 			if (Debug.DEBUG && Debug.MONITOR_ACTIVATION)
 				new Exception("A persistent start has been called on bundle: " + getBundleData()).printStackTrace();
 		}

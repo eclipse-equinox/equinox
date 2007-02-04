@@ -89,6 +89,7 @@ public class Constants implements org.osgi.framework.Constants {
 	public static final int BUNDLE_STARTED = 0x00000001;
 	/** Lazy start flag bundle status */
 	public static final int BUNDLE_LAZY_START = 0x00000002;
+	public static final int BUNDLE_ACTIVATION_POLICY = 0x00000004;
 
 	/** Property file locations and default names. */
 	public static final String OSGI_PROPERTIES = "osgi.framework.properties"; //$NON-NLS-1$

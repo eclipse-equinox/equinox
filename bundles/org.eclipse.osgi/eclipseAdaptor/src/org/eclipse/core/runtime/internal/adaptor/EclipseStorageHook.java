@@ -34,6 +34,8 @@ import org.osgi.framework.Version;
 public final class EclipseStorageHook implements StorageHook, HookConfigurator {
 	// System property used to check timestamps of the bundles in the configuration
 	private static final String PROP_CHECK_CONFIG = "osgi.checkConfiguration"; //$NON-NLS-1$
+	private static final String PROP_COMPATIBILITY_LAZYSTART = "osgi.compatibility.eagerStart.LazyActivation"; //$NON-NLS-1$
+	private static final boolean COMPATIBILITY_LAZYSTART  = Boolean.valueOf(FrameworkProperties.getProperty(PROP_COMPATIBILITY_LAZYSTART, "true")).booleanValue(); //$NON-NLS-1$
 	private static final int STORAGE_VERION = 2;
 
 	public static final String KEY = EclipseStorageHook.class.getName();
@@ -96,8 +98,11 @@ public final class EclipseStorageHook implements StorageHook, HookConfigurator {
 				manifestType = Byte.parseByte(generatedFrom.getAttribute(PluginConverterImpl.MANIFEST_TYPE_ATTRIBUTE));
 			}
 		}
-		if (isAutoStartable())
+		if (isAutoStartable()) {
 			bundledata.setStatus(bundledata.getStatus() | Constants.BUNDLE_LAZY_START);
+			if (COMPATIBILITY_LAZYSTART)
+				bundledata.setStatus(bundledata.getStatus() | Constants.BUNDLE_STARTED | Constants.BUNDLE_ACTIVATION_POLICY);
+		}
 	}
 
 	public StorageHook load(BaseData target, DataInputStream in) throws IOException {
@@ -121,8 +126,14 @@ public final class EclipseStorageHook implements StorageHook, HookConfigurator {
 		storageHook.pluginClass = AdaptorUtil.readString(in, false);
 		storageHook.manifestTimeStamp = in.readLong();
 		storageHook.manifestType = in.readByte();
-		if (storageHook.isAutoStartable() && (target.getStatus() & Constants.BUNDLE_LAZY_START) == 0)
-			target.setStatus(target.getStatus() | Constants.BUNDLE_LAZY_START);
+		if (storageHook.isAutoStartable()) { 
+			if ((target.getStatus() & Constants.BUNDLE_LAZY_START) == 0)
+				target.setStatus(target.getStatus() | Constants.BUNDLE_LAZY_START);
+			// if the compatibility flag is set then we must make sure the persistent start bit is set and the activation policy bit;
+			// if the persistent start bit was already set then we should not set the activation policy bit because this is an "eager" started bundle.
+			if (COMPATIBILITY_LAZYSTART && (target.getStatus() & Constants.BUNDLE_STARTED ) == 0)
+				target.setStatus(target.getStatus() | Constants.BUNDLE_STARTED | Constants.BUNDLE_ACTIVATION_POLICY);
+		}
 		return storageHook;
 	}
 

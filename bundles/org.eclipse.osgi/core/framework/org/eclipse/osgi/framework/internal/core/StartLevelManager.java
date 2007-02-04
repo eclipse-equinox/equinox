@@ -323,13 +323,15 @@ public class StartLevelManager implements EventDispatcher, EventListener, Servic
 	 * @exception java.lang.IllegalArgumentException If the specified bundle has been uninstalled.
 	 */
 	public boolean isBundlePersistentlyStarted(org.osgi.framework.Bundle bundle) {
-
-		if (bundle.getState() == Bundle.UNINSTALLED) {
+		if (bundle.getState() == Bundle.UNINSTALLED)
 			throw new IllegalArgumentException(NLS.bind(Msg.BUNDLE_UNINSTALLED_EXCEPTION, ((AbstractBundle) bundle).getBundleData().getLocation()));
-		}
-		AbstractBundle b = (AbstractBundle) bundle;
-		int status = b.getBundleData().getStatus();
-		return ((status & Constants.BUNDLE_STARTED) == Constants.BUNDLE_STARTED);
+		return (((AbstractBundle) bundle).getBundleData().getStatus() & Constants.BUNDLE_STARTED) != 0;
+	}
+
+	public boolean isBundleActivationPolicyUsed(Bundle bundle) {
+		if (bundle.getState() == Bundle.UNINSTALLED)
+			throw new IllegalArgumentException(NLS.bind(Msg.BUNDLE_UNINSTALLED_EXCEPTION, ((AbstractBundle) bundle).getBundleData().getLocation()));
+		return (((AbstractBundle) bundle).getBundleData().getStatus() & Constants.BUNDLE_ACTIVATION_POLICY) != 0;
 	}
 
 	/**
