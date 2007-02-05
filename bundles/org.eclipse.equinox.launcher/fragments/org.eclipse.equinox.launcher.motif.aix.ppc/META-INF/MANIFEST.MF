@@ -6,3 +6,4 @@ Bundle-SymbolicName: org.eclipse.equinox.launcher.motif.aix.ppc
 Bundle-Version: 1.0.0.qualifier
 Fragment-Host: org.eclipse.equinox.launcher;bundle-version="1.0.0"
 Eclipse-PlatformFilter: (& (osgi.ws=motif) (osgi.os=aix) (osgi.arch=ppc))
+Bundle-Localization: launcher.motif.aix.ppc
