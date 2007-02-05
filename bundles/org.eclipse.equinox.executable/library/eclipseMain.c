@@ -121,9 +121,6 @@ int main( int argc, _TCHAR* argv[] )
 	 
 	 /* Determine the full pathname of this program. */
     program = findCommand( argv[0] );
-    if (_tcscmp(argv[0], program) != 0) {
-    	argv[0] = program;
-    }
     if (program == NULL)
     {
 #ifdef _WIN32
@@ -134,6 +131,8 @@ int main( int argc, _TCHAR* argv[] )
     	program = malloc( (strlen( argv[0] ) + 1) * sizeof(_TCHAR) );
     	strcpy( program, argv[0] );
 #endif
+    } else if (_tcscmp(argv[0], program) != 0) {
+    	argv[0] = program;
     }
     
     /* Parse configuration file arguments */
