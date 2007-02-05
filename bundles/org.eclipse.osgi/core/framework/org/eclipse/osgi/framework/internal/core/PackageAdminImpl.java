@@ -356,6 +356,9 @@ public class PackageAdminImpl implements PackageAdmin {
 				bundlesList.add(changedBundle);
 		}
 		AbstractBundle[] refresh = (AbstractBundle[]) bundlesList.toArray(new AbstractBundle[bundlesList.size()]);
+		// first sort by id/start-level order
+		Util.sort(refresh);
+		// then sort by dependency order
 		StartLevelManager.sortByDependency(refresh);
 		boolean[] previouslyResolved = new boolean[refresh.length];
 		AbstractBundle[] resolved = null;
