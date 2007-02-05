@@ -66,7 +66,8 @@ int showSplash( const char* featureImage )
 	
 	initWindowSystem(&initialArgc, initialArgv, 1);
 	
-	shellHandle = gtk_window_new(GTK_WINDOW_POPUP);
+	shellHandle = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	gtk_window_set_decorated(GTK_WINDOW(shellHandle), FALSE);
 	gtk_signal_connect(GTK_OBJECT(shellHandle), "destroy", GTK_SIGNAL_FUNC(gtk_widget_destroyed), &shellHandle);
 	vboxHandle = gtk_vbox_new(FALSE, 0);
 	if(vboxHandle == 0)
