@@ -327,7 +327,7 @@ void cleanupVM(int exitCode) {
 		if (systemClass != NULL) {
 			exitMethod = (*env)->GetStaticMethodID(env, systemClass, "exit", "(I)V");
 			if (exitMethod != NULL) {
-				(*env)->CallStaticObjectMethod(env, systemClass, exitMethod, exitCode);
+				(*env)->CallStaticVoidMethod(env, systemClass, exitMethod, exitCode);
 			}
 		}
 		if ((*env)->ExceptionOccurred(env)) {
