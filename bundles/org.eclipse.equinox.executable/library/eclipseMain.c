@@ -148,7 +148,7 @@ int main( int argc, _TCHAR* argv[] )
     /* Special case - user arguments specified in the config file
 	 * are appended to the user arguments passed from the command line.
 	 */
-	if (configArgc > 1)
+	if (configArgc > 0)
 	{	
 		createUserArgs(configArgc, configArgv, &argc, &argv);
 	}
