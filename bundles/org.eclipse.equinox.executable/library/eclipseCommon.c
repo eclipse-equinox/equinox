@@ -214,10 +214,24 @@ static int filter(struct dirent *dir) {
 #else
 static int filter(const struct dirent *dir) {
 #endif
+	char *c1, *c2;
+	
 	if(_tcslen(dir->d_name) <= prefixLength)
 		return 0;
-	return (_tcsncmp(dir->d_name, filterPrefix, prefixLength) == 0 && 
-	        dir->d_name[prefixLength] == _T_ECLIPSE('_'));
+	if (_tcsncmp(dir->d_name, filterPrefix, prefixLength) == 0 &&
+		dir->d_name[prefixLength] == '_') 
+	{
+		c1 = strchr(&dir->d_name[prefixLength + 1], '_');
+		if(c1 != NULL) {
+			c2 = strchr(&dir->d_name[prefixLength + 1], '.');
+			if (c2 != NULL) {
+				return c2 < c1;
+			} else 
+				return 0;
+		} else 
+			return 1;
+	}
+	return 0;
 }
 #endif
  /* 
