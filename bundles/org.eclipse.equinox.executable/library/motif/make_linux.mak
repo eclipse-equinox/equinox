@@ -29,6 +29,10 @@ endif
 
 PROGRAM_LIBRARY=eclipse_$(LIB_VERSION).so
 
+ifeq ($(DEFAULT_JAVA),)
+  DEFAULT_JAVA=DEFAULT_JAVA_JNI
+endif
+
 # Define the object modules to be compiled and flags.
 CC=gcc
 MAIN_OBJS = eclipseMain.o
@@ -46,6 +50,7 @@ CFLAGS = -g -s -Wall \
 	-DDEFAULT_OS="\"$(DEFAULT_OS)\"" \
 	-DDEFAULT_OS_ARCH="\"$(DEFAULT_OS_ARCH)\"" \
 	-DDEFAULT_WS="\"$(DEFAULT_WS)\"" \
+	-D$(DEFAULT_JAVA)\
 	-fPIC \
 	-I./ \
 	-I../ \
@@ -79,7 +84,7 @@ eclipseConfig.o: ../eclipseConfig.c ../eclipseConfig.h ../eclipseOS.h
 eclipseMozilla.o: ../eclipseMozilla.c ../eclipseMozilla.h ../eclipseOS.h
 	$(CC) $(CFLAGS) -c $< -o $@
 	
-eclipseShm.o: ../eclipseShm.h ../eclipseUnicode.h ../eclipseShm.c
+eclipseShm.o: ../eclipseShm.c ../eclipseShm.h ../eclipseUnicode.h 
 	$(CC) $(CFLAGS) -c $< -o $@
 	
 eclipseNix.o: ../eclipseNix.c

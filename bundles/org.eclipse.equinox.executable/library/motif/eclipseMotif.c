@@ -267,12 +267,6 @@ static void   fixEnvForNetscape()
 }
 #endif /* NETSCAPE_FIX */
 
-void restartLauncher( char* program, char* args[] ) 
-{
-	/* just restart in-place */
-	execv(program, args);
-}
-
 int launchJavaVM( char* args[] ) 
 {
     int    exitCode;

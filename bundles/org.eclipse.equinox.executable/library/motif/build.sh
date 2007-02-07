@@ -19,6 +19,7 @@
 #       -os     <DEFAULT_OS>      - default Eclipse "-os" value
 #       -arch   <DEFAULT_OS_ARCH> - default Eclipse "-arch" value
 #       -ws     <DEFAULT_WS>      - default Eclipse "-ws" value
+#		-java   <JAVA_HOME>		  - java insgtall for jni headers
 #
 #
 #    This script can also be invoked with the "clean" argument.
@@ -29,8 +30,9 @@ cd `dirname $0`
 programOutput="eclipse"
 defaultOS=""
 defaultOSArch=""
-defaultWS=""
+defaultWS="motif"
 makefile=""
+javaHome=""
 if [ "$OS" = "" ];  then
     OS=`uname -s`
 fi
@@ -53,7 +55,7 @@ case $OS in
 		defaultOSArch="x86"
 		defaultWS="motif"
 		X11_HOME=/usr/X11R6
-		MOTIF_HOME=/bluebird/teamswt/swt-builddir/motif21		
+		MOTIF_HOME=/usr
 		OUTPUT_DIR="../../bin/$defaultWS/$defaultOS/$defaultOSArch"
 		;;
 	"SunOS")
@@ -106,6 +108,9 @@ while [ "$1" != "" ]; do
     elif [ "$1" = "-output" ] && [ "$2" != "" ]; then
         programOutput="$2"
         shift
+	elif [ "$1" = "-java" ] && [ "$2" != "" ]; then
+        javaHome="$2"
+        shift
     else
         extraArgs="$extraArgs $1"
     fi
@@ -117,8 +122,9 @@ PROGRAM_OUTPUT="$programOutput"
 DEFAULT_OS="$defaultOS"
 DEFAULT_OS_ARCH="$defaultOSArch"
 DEFAULT_WS="$defaultWS"
+JAVA_HOME=$javaHome
 
-export OUTPUT_DIR PROGRAM_OUTPUT DEFAULT_OS DEFAULT_OS_ARCH DEFAULT_WS X11_HOME MOTIF_HOME
+export OUTPUT_DIR PROGRAM_OUTPUT DEFAULT_OS DEFAULT_OS_ARCH DEFAULT_WS X11_HOME MOTIF_HOME JAVA_HOME
 
 # If the OS is supported (a makefile exists)
 if [ "$makefile" != "" ]; then
