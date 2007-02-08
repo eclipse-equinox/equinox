@@ -38,6 +38,7 @@ DLL = $(PROGRAM_LIBRARY)
 LIBS = -L$(MOTIF_HOME)/lib -lXm -lXt -lX11
 LFLAGS = -G -bnoentry -bexpall -lm -lc_r -lC_r
 CFLAGS = -O -s \
+	-DMOTIF \
 	-DNO_XINERAMA_EXTENSIONS \
 	-DDEFAULT_OS="\"$(DEFAULT_OS)\"" \
 	-DDEFAULT_OS_ARCH="\"$(DEFAULT_OS_ARCH)\"" \

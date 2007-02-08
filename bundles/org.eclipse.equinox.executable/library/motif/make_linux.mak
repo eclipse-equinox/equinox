@@ -46,6 +46,7 @@ LIBS = -Xlinker -rpath -Xlinker . -L$(MOTIF_HOME)/lib -L$(X11_HOME)/lib -lXm -lX
 LFLAGS = -shared -fpic -Wl,--export-dynamic 
 CFLAGS = -g -s -Wall \
 	-DLINUX \
+	-DMOTIF \
 	-DMOZILLA_FIX \
 	-DDEFAULT_OS="\"$(DEFAULT_OS)\"" \
 	-DDEFAULT_OS_ARCH="\"$(DEFAULT_OS_ARCH)\"" \

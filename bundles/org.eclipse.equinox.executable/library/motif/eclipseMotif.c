@@ -86,6 +86,9 @@ int showSplash( const char* featureImage )
 	Screen* screen;
 	Widget scrolledHandle, drawingHandle, image;
 	
+	/* bug 171093, No splash on Motif for now */
+	return -1;
+	
 	initWindowSystem(&initialArgc, initialArgv, 1);
 	
 	xDisplay = XtOpenDisplay(appContext, NULL, NULL, NULL, 0, 0, argc, 0);
