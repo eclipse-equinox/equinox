@@ -20,6 +20,10 @@
 #include <Carbon/Carbon.h>
 #include <mach-o/dyld.h>
 
+#include "NgCommon.h"
+#include "NgImageData.h"
+#include "NgWinBMPFileFormat.h"
+
 #define startupJarName "startup.jar"
 #define LAUNCHER "-launcher"
 #define SPLASH_LAUNCHER "/Resources/Splash.app/Contents/"
@@ -39,23 +43,49 @@ static char*  argVM_JAVA[] = { "-XstartOnFirstThread", NULL };
 static WindowRef window;
 static ControlRef pane = NULL;
 static CGImageRef image = NULL;
-static long splashHandle = 0;
+static CGImageRef loadBMPImage(const char *image);
+
+typedef CGImageSourceRef (*CGImageSourceCreateWithURL_FUNC) (CFURLRef, CFDictionaryRef);
+typedef CGImageRef (*CGImageSourceCreateImageAtIndex_FUNC)(CGImageSourceRef, size_t, CFDictionaryRef);
+static CGImageSourceCreateWithURL_FUNC createWithURL = NULL;
+static CGImageSourceCreateImageAtIndex_FUNC createAtIndex = NULL;
 
 int main() {
 	return -1;
 }
 
-static OSStatus drawProc (EventHandlerCallRef eventHandlerCallRef, EventRef eventRef, HIViewRef viewRef) {
-	ControlRef control;
-	CGContextRef context;
-	
-	GetEventParameter(eventRef, kEventParamDirectObject, typeControlRef, NULL, 4, NULL, &control);
-	GetEventParameter(eventRef, kEventParamCGContextRef, typeCGContextRef, NULL, 4, NULL, &context);
-	
-	HIRect rect;
-	HIViewGetBounds(viewRef, &rect);
-	HIViewDrawCGImage(context, &rect, image);
+static OSStatus drawProc (EventHandlerCallRef eventHandlerCallRef, EventRef eventRef, void * data) {
+	int result = CallNextEventHandler(eventHandlerCallRef, eventRef);
+	if (image) {
+		ControlRef control;
+		CGContextRef context;
+		
+		GetEventParameter(eventRef, kEventParamDirectObject, typeControlRef, NULL, 4, NULL, &control);
+		GetEventParameter(eventRef, kEventParamCGContextRef, typeCGContextRef, NULL, 4, NULL, &context);
+		
+		HIRect rect;
+		HIViewGetBounds(control, &rect);
+		HIViewDrawCGImage(context, &rect, image);
+	} 
+	return result;
+}
+
+static OSStatus disposeProc (EventHandlerCallRef eventHandlerCallRef, EventRef eventRef, void * data) {
+	window = NULL;
 	return eventNotHandledErr;
+}
+
+void loadImageFns()
+{
+	static int initialized = 0;
+	static CFBundleRef bundle = NULL;
+	
+	if (!initialized) {
+		if (!bundle) bundle = CFBundleGetBundleWithIdentifier(CFSTR("com.apple.Carbon"));
+		if (bundle) createAtIndex = (CGImageSourceCreateImageAtIndex_FUNC)CFBundleGetFunctionPointerForName(bundle, CFSTR("CGImageSourceCreateImageAtIndex"));
+		if (bundle) createWithURL = (CGImageSourceCreateWithURL_FUNC)CFBundleGetFunctionPointerForName(bundle, CFSTR("CGImageSourceCreateWithURL"));
+		initialized = 1;
+	}
 }
 
 /* Show the Splash Window
@@ -68,27 +98,31 @@ int showSplash( const _TCHAR* featureImage )
 	int w, h, deviceWidth, deviceHeight;
 	int attributes;
 	EventTypeSpec draw = {kEventClassControl, kEventControlDraw};
+	EventTypeSpec dispose = {kEventClassWindow, kEventWindowDispose};
 	ControlRef root;
 	
-	if(splashHandle != 0)
+	if(window != NULL)
 		return 0; /*already showing */
-	/*debug("featureImage: %s\n", featureImage);*/
-
-	/*init();*/
-
-	CFStringRef imageString = CFStringCreateWithCString(kCFAllocatorDefault, featureImage, kCFStringEncodingASCII);
-	if(imageString != NULL) {
-		CFURLRef url = CFURLCreateWithFileSystemPath(kCFAllocatorDefault, imageString, kCFURLPOSIXPathStyle, false);
-		if(url != NULL) {
-			CGImageSourceRef imageSource = CGImageSourceCreateWithURL(url, NULL);
-			if(imageSource != NULL) {
-				image = CGImageSourceCreateImageAtIndex(imageSource, 0, NULL);
+	
+	loadImageFns();
+	if (createWithURL && createAtIndex) {
+		CFStringRef imageString = CFStringCreateWithCString(kCFAllocatorDefault, featureImage, kCFStringEncodingASCII);
+		if(imageString != NULL) {
+			CFURLRef url = CFURLCreateWithFileSystemPath(kCFAllocatorDefault, imageString, kCFURLPOSIXPathStyle, false);
+			if(url != NULL) {
+				CGImageSourceRef imageSource = createWithURL(url, NULL);
+				if(imageSource != NULL) {
+					image = createAtIndex(imageSource, 0, NULL);
+				}
+				CFRelease(url);
 			}
-			CFRelease(url);
 		}
+		CFRelease(imageString);		
+	} else {
+		image = loadBMPImage(featureImage);
 	}
-	CFRelease(imageString);
-	/* If the splash image data could not be loaded, return an error. */
+	
+	/*If the splash image data could not be loaded, return an error.*/ 
 	if (image == NULL)
 		return ENOENT;
 		
@@ -116,9 +150,9 @@ int showSplash( const _TCHAR* featureImage )
 		CreateUserPaneControl(window, &wRect, kControlSupportsEmbedding | kControlSupportsFocus | kControlGetsFocusOnClick, &pane);
 		HIViewAddSubview(root, pane);	
 
-		InstallEventHandler(GetControlEventTarget(pane), (EventHandlerUPP)drawProc, 1, &draw, pane, NULL);
+		InstallEventHandler(GetControlEventTarget(pane), (EventHandlerUPP)drawProc, 1, &draw, NULL, NULL);
+		InstallEventHandler(GetWindowEventTarget(window), (EventHandlerUPP)disposeProc, 1, &dispose, NULL, NULL);
 		ShowWindow(window);
-		splashHandle = (long)window;
 		dispatchMessages();
 	}
 
@@ -126,17 +160,20 @@ int showSplash( const _TCHAR* featureImage )
 }
 
 long getSplashHandle() {
-	return splashHandle;
+	return (long)window;
 }
 
 void takeDownSplash() {
-	if( splashHandle != 0) {
-		HideWindow(window);
+	if( window != 0) {
 		DisposeWindow(window);
-		dispatchMessages();
-		splashHandle = 0;
+		window = NULL;
 	}
+	if(image){
+		CGImageRelease(image);
+		image = NULL;
+	}	
 }	
+
 void dispatchMessages() {
 	EventRef event;
 	EventTargetRef target;
@@ -204,4 +241,66 @@ int launchJavaVM( _TCHAR* args[] )
 {
 	/*for now always do JNI on Mac, should not come in here */
 	return -1;
+}
+
+void disposeData(void *info, void *data, size_t size) 
+{
+	DisposePtr(data);
+}
+
+/**
+ * loadBMPImage
+ * Create a QuickDraw PixMap representing the given BMP file.
+ *
+ * bmpPathname: absolute path and name to the bmp file
+ *
+ * returned value: the PixMapHandle newly created if successful. 0 otherwise.
+ */
+static CGImageRef loadBMPImage (const char *bmpPathname) { 
+	ng_stream_t in;
+	ng_bitmap_image_t image;
+	ng_err_t err= ERR_OK;
+	CGImageRef ref;
+	UBYTE1* data = NULL;
+
+	NgInit();
+
+	if (NgStreamInit(&in, (char*) bmpPathname) != ERR_OK) {
+		NgError(ERR_NG, "Error can't open BMP file");
+		return 0;
+	}
+
+	NgBitmapImageInit(&image);
+	err= NgBmpDecoderReadImage (&in, &image);
+	NgStreamClose(&in);
+
+	if (err != ERR_OK) {
+		NgBitmapImageFree(&image);
+		return 0;
+	}
+
+	UBYTE4 srcDepth= NgBitmapImageBitCount(&image);
+	if (srcDepth != 24) {	/* We only support image depth of 24 bits */
+		NgBitmapImageFree(&image);
+		NgError (ERR_NG, "Error unsupported depth - only support 24 bit");
+		return 0;
+	}
+	
+	int width= (int)NgBitmapImageWidth(&image);
+	int height= (int)NgBitmapImageHeight(&image);
+	int rowBytes= width * 4;
+	int alphainfo = kCGImageAlphaNoneSkipFirst | (NgIsMSB() ? 0 : kCGBitmapByteOrder32Little);
+	data = (UBYTE1*)NewPtr(rowBytes * height);
+	CGDataProviderRef provider = CGDataProviderCreateWithData(0, data, rowBytes * height, (CGDataProviderReleaseDataCallback)disposeData);
+	
+	ref = CGImageCreate(width, height, 8, 32, width * 4, CGColorSpaceCreateDeviceRGB(), alphainfo, provider, NULL, 1, 0);
+	CGDataProviderRelease(provider);
+
+	/* 24 bit source to direct screen destination */
+	NgBitmapImageBlitDirectToDirect(NgBitmapImageImageData(&image), NgBitmapImageBytesPerRow(&image), width, height,
+		data, 32, rowBytes, NgIsMSB(), 0xff0000, 0x00ff00, 0x0000ff);
+
+	NgBitmapImageFree(&image);
+
+	return ref;
 }

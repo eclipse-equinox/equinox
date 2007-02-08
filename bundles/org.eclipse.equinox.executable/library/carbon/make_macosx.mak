@@ -27,7 +27,7 @@ PROGRAM_LIBRARY=eclipse_$(LIB_VERSION).so
 # Define the object modules to be compiled and flags.
 MAIN_OBJS = eclipseMain.o eclipseCarbonMain.o
 COMMON_OBJS = eclipseConfig.o eclipseCommon.o eclipseCarbonCommon.o
-DLL_OBJS	= eclipse.o eclipseCarbon.o eclipseUtil.o eclipseJNI.o eclipseShm.o
+DLL_OBJS	= eclipse.o eclipseCarbon.o eclipseUtil.o eclipseJNI.o eclipseShm.o NgImageData.o NgWinBMPFileFormat.o NgCommon.o
 
 EXEC = $(PROGRAM_OUTPUT)
 DLL = $(PROGRAM_LIBRARY)
@@ -67,6 +67,15 @@ eclipseCommon.o: ../eclipseCommon.h ../eclipseUnicode.h ../eclipseCommon.c
 
 eclipseShm.o: ../eclipseShm.h ../eclipseUnicode.h ../eclipseShm.c
 	$(CC) $(CFLAGS) -c ../eclipseShm.c -o $@
+
+NgCommon.o: ../motif/NgCommon.c
+	$(CC) $(CFLAGS) -c ../motif/NgCommon.c -o $@
+
+NgWinBMPFileFormat.o: ../motif/NgWinBMPFileFormat.c
+	$(CC) $(CFLAGS) -c ../motif/NgWinBMPFileFormat.c -o $@
+
+NgImageData.o: ../motif/NgImageData.c
+	$(CC) $(CFLAGS) -c ../motif/NgImageData.c -o $@
 
 $(EXEC): $(MAIN_OBJS) $(COMMON_OBJS)
 	$(CC) -o $(EXEC) $(ARCHS) $(MAIN_OBJS) $(COMMON_OBJS) $(LIBS)
