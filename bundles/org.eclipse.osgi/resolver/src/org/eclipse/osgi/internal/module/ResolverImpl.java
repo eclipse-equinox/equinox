@@ -314,7 +314,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		if (!initialized)
 			initialize();
 		developmentMode = platformProperties.length == 0 ? false : org.eclipse.osgi.framework.internal.core.Constants.DEVELOPMENT_MODE.equals(platformProperties[0].get(org.eclipse.osgi.framework.internal.core.Constants.OSGI_RESOLVER_MODE));
-		reRefresh = addHostsFromFragmentConstraints(reRefresh);
+		reRefresh = addDevConstraints(reRefresh);
 		// Unresolve all the supplied bundles and their dependents
 		if (reRefresh != null)
 			for (int i = 0; i < reRefresh.length; i++) {
@@ -358,27 +358,16 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 			ResolverImpl.log("*** END RESOLUTION ***"); //$NON-NLS-1$
 	}
 
-	private BundleDescription[] addHostsFromFragmentConstraints(BundleDescription[] reRefresh) {
+	private BundleDescription[] addDevConstraints(BundleDescription[] reRefresh) {
 		if (!developmentMode)
 			return reRefresh; // we don't care about this unless we are in development mode
-		// when in develoment mode we need to reRefresh hosts 
-		// of unresolved fragments that add new constraints 
+		// when in develoment mode we need to reRefresh hosts  of unresolved fragments that add new constraints 
+		// and reRefresh and unresolved bundles that have dependents
 		HashSet additionalRefresh = new HashSet();
-		ResolverBundle[] bundles = (ResolverBundle[]) unresolvedBundles.toArray(new ResolverBundle[unresolvedBundles.size()]);
-		for (int i = 0; i < bundles.length; i++) {
-			if (!bundles[i].isFragment())
-				continue;
-			ImportPackageSpecification[] newImports = bundles[i].getBundle().getImportPackages();
-			BundleSpecification[] newRequires = bundles[i].getBundle().getRequiredBundles();
-			if (newImports.length == 0 && newRequires.length == 0)
-				continue; // the fragment does not have its own constraints
-			BundleConstraint hostConstraint = bundles[i].getHost();
-			Object[] hosts = resolverBundles.get(hostConstraint.getVersionConstraint().getName());
-			for (int j = 0; j < hosts.length; j++)
-				if (hostConstraint.isSatisfiedBy((ResolverBundle) hosts[j]) && ((ResolverBundle) hosts[j]).isResolved())
-					// we found a host that is resolved;
-					// add it to the set of bundle to refresh so we can ensure this fragment is allowed to resolve
-					additionalRefresh.add(((ResolverBundle) hosts[j]).getBundle());
+		ResolverBundle[] unresolved = (ResolverBundle[]) unresolvedBundles.toArray(new ResolverBundle[unresolvedBundles.size()]);
+		for (int i = 0; i < unresolved.length; i++) {
+			addUnresolvedWithDependents(unresolved[i], additionalRefresh);
+			addHostsFromFragmentConstraints(unresolved[i], additionalRefresh);
 		}
 		if (additionalRefresh.size() == 0)
 			return reRefresh; // no new bundles found to refresh
@@ -387,6 +376,29 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 			for (int i = 0; i < reRefresh.length; i++)
 				additionalRefresh.add(reRefresh[i]);
 		return (BundleDescription[]) additionalRefresh.toArray(new BundleDescription[additionalRefresh.size()]);
+	}
+
+	private void addUnresolvedWithDependents(ResolverBundle unresolved, HashSet additionalRefresh) {
+		BundleDescription[] dependents = unresolved.getBundle().getDependents();
+		if (dependents.length > 0)
+			additionalRefresh.add(unresolved.getBundle());
+	}
+
+	private void addHostsFromFragmentConstraints(ResolverBundle unresolved, Set additionalRefresh) {
+		if (!unresolved.isFragment())
+			return;
+		ImportPackageSpecification[] newImports = unresolved.getBundle().getImportPackages();
+		BundleSpecification[] newRequires = unresolved.getBundle().getRequiredBundles();
+		if (newImports.length == 0 && newRequires.length == 0)
+			return; // the fragment does not have its own constraints
+		BundleConstraint hostConstraint = unresolved.getHost();
+		Object[] hosts = resolverBundles.get(hostConstraint.getVersionConstraint().getName());
+		for (int j = 0; j < hosts.length; j++)
+			if (hostConstraint.isSatisfiedBy((ResolverBundle) hosts[j]) && ((ResolverBundle) hosts[j]).isResolved())
+				// we found a host that is resolved;
+				// add it to the set of bundle to refresh so we can ensure this fragment is allowed to resolve
+				additionalRefresh.add(((ResolverBundle) hosts[j]).getBundle());
+
 	}
 
 	private void resolveOptionalConstraints(ResolverBundle[] bundles) {
