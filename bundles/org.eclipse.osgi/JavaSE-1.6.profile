@@ -10,7 +10,10 @@
 ###############################################################################
 org.osgi.framework.system.packages = \
  javax.accessibility,\
+ javax.activation,\
  javax.activity,\
+ javax.annotation,\
+ javax.annotation.processing,\
  javax.crypto,\
  javax.crypto.interfaces,\
  javax.crypto.spec,\
@@ -21,6 +24,12 @@ org.osgi.framework.system.packages = \
  javax.imageio.plugins.jpeg,\
  javax.imageio.spi,\
  javax.imageio.stream,\
+ javax.jws,\
+ javax.jws.soap,\
+ javax.lang.model,\
+ javax.lang.model.element,\
+ javax.lang.model.type,\
+ javax.lang.model.util,\
  javax.management,\
  javax.management.loading,\
  javax.management.modelmbean,\
@@ -44,6 +53,7 @@ org.osgi.framework.system.packages = \
  javax.rmi,\
  javax.rmi.CORBA,\
  javax.rmi.ssl,\
+ javax.script,\
  javax.security.auth,\
  javax.security.auth.callback,\
  javax.security.auth.kerberos,\
@@ -77,17 +87,41 @@ org.osgi.framework.system.packages = \
  javax.swing.text.rtf,\
  javax.swing.tree,\
  javax.swing.undo,\
+ javax.tools,\
  javax.transaction,\
  javax.transaction.xa,\
  javax.xml,\
+ javax.xml.bind,\
+ javax.xml.bind.annotation,\
+ javax.xml.bind.annotation.adapters,\
+ javax.xml.bind.attachment,\
+ javax.xml.bind.helpers,\
+ javax.xml.bind.util,\
+ javax.xml.crypto,\
+ javax.xml.crypto.dom,\
+ javax.xml.crypto.dsig,\
+ javax.xml.crypto.dsig.dom,\
+ javax.xml.crypto.dsig.keyinfo,\
+ javax.xml.crypto.dsig.spec,\
  javax.xml.datatype,\
  javax.xml.namespace,\
  javax.xml.parsers,\
+ javax.xml.soap,\
+ javax.xml.stream,\
+ javax.xml.stream.events,\
+ javax.xml.stream.util,\
  javax.xml.transform,\
  javax.xml.transform.dom,\
  javax.xml.transform.sax,\
+ javax.xml.transform.stax,\
  javax.xml.transform.stream,\
  javax.xml.validation,\
+ javax.xml.ws,\
+ javax.xml.ws.handler,\
+ javax.xml.ws.handler.soap,\
+ javax.xml.ws.http,\
+ javax.xml.ws.soap,\
+ javax.xml.ws.spi,\
  javax.xml.xpath,\
  org.ietf.jgss,\
  org.omg.CORBA,\
