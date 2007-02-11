@@ -27,7 +27,7 @@ public class HttpServiceTracker extends ServiceTracker {
 	private PackageAdmin packageAdmin;
 	private IExtensionRegistry registry;
 
-	private Map httpContextManagers = new HashMap();
+	Map httpContextManagers = new HashMap();
 	private Map servletManagers = new HashMap();
 	private Map resourceManagers = new HashMap();
 	private ServiceRegistration registration;

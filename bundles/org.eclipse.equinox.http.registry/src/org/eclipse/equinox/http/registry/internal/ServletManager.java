@@ -137,7 +137,7 @@ public class ServletManager implements ExtensionPointTracker.Listener {
 			destroyDelegate();
 		}
 
-		private synchronized void initializeDelegate() throws ServletException {
+		synchronized void initializeDelegate() throws ServletException {
 			if (delegate == null) {
 				try {
 					Servlet newDelegate = (Servlet) element.createExecutableExtension(CLASS);

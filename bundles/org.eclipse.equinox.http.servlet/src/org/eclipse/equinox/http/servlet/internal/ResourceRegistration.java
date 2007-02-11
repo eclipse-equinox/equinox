@@ -28,7 +28,7 @@ public class ResourceRegistration extends Registration {
 
 	private String internalName;
 	HttpContext httpContext;
-	private ServletContext servletContext;
+	ServletContext servletContext;
 	private AccessControlContext acc;
 
 	public ResourceRegistration(String internalName, HttpContext context, ServletContext servletContext, AccessControlContext acc) {

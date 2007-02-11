@@ -19,7 +19,7 @@ public class ProxyContext {
 
 	private String servletPath;
 	private HashMap attributesMap = new HashMap();
-	private File proxyContextTempDir;
+	File proxyContextTempDir;
 
 	public ProxyContext(ServletContext servletContext) {
 		File tempDir = (File) servletContext.getAttribute(JAVAX_SERVLET_CONTEXT_TEMPDIR);
