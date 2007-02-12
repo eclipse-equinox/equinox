@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006 IBM Corporation and others.
+ * Copyright (c) 2006, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,12 +11,13 @@
 package org.eclipse.core.launcher;
 
 /**
- * This is a TEMPORARY class to facilitate self hosting of this launcher startup jar
- *
+ * Main class for backwards compatibility.
+ * The real Main class is now org.eclipse.equinox.launcher.Main
  */
 public class Main {
 
 	/**
+	 * Pass our args along to the real Main class.
 	 * @param args
 	 */
 	public static void main(String[] args) {
