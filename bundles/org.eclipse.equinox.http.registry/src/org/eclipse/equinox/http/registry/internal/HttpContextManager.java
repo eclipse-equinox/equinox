@@ -171,10 +171,14 @@ public class HttpContextManager implements Listener {
 
 			Set result = new HashSet();
 			while (entryPaths.hasMoreElements()) {
+				String entryPath = (String) entryPaths.nextElement();
+				if (entryPath.charAt(0) != '/')
+					entryPath = "/" + entryPath; //$NON-NLS-1$
+				
 				if (bundlePath == null)	
-					result.add(entryPaths.nextElement());
+					result.add(entryPath);
 				else
-					result.add(((String)entryPaths.nextElement()).substring(bundlePath.length()));
+					result.add(entryPath.substring(bundlePath.length()));
 			}
 			return result;
 		}
