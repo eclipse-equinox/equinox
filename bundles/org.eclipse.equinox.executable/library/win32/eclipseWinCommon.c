@@ -37,6 +37,19 @@ HWND    topWindow = 0;
 
 static int initialized = 0;
 
+#ifdef UNICODE
+HINSTANCE g_hInstance = NULL;
+BOOL WINAPI DllMain(HANDLE hInstDLL, DWORD dwReason, LPVOID lpvReserved)
+{
+	if (dwReason == DLL_PROCESS_ATTACH) {
+		if (g_hInstance == NULL) g_hInstance = hInstDLL;
+	}
+	return TRUE;
+}
+#else
+extern HINSTANCE g_hInstance;
+#endif
+
 /* Display a Message */
 void displayMessage( _TCHAR* title, _TCHAR* message )
 {
@@ -54,6 +67,8 @@ void displayMessage( _TCHAR* title, _TCHAR* message )
  */
 void initWindowSystem( int* pArgc, _TCHAR* argv[], int showSplash )
 {
+	HINSTANCE module = NULL;
+	
 	if(initialized)
 		return;
     /* Create a window that has no decorations. */
@@ -71,30 +86,12 @@ void initWindowSystem( int* pArgc, _TCHAR* argv[], int showSplash )
 		NULL,
 		GetModuleHandle (NULL),
 		NULL);
-	SetClassLong(topWindow, GCL_HICON, (LONG)LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(ECLIPSE_ICON)));
-/*    
-    oldProc = (WNDPROC) GetWindowLong (topWindow, GWL_WNDPROC);
-    SetWindowLong (topWindow, GWL_WNDPROC, (LONG) WndProc);
-*/  
+    
+    module = (g_hInstance != NULL) ? g_hInstance : GetModuleHandle(NULL);
+    SetClassLong(topWindow, GCL_HICON, (LONG)LoadIcon(module, MAKEINTRESOURCE(ECLIPSE_ICON)));
+
 	initialized = 1;
 }
-
-/* Window Procedure for the Spash window.
- *
- * A special WndProc is needed to return the proper vlaue for WM_NCHITTEST.
- * It must also detect the message from the splash window process.
- */
-/*static LRESULT WINAPI WndProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
-{
-	switch (uMsg)
-	{
-		case WM_NCHITTEST: return HTCLIENT;
-		case WM_CLOSE:
-	    	PostQuitMessage(  0 );
-	    	break;
-	}
-	return CallWindowProc (oldProc, hwnd, uMsg, wParam, lParam);
-}*/
 
 /* Load the specified shared library
  */
