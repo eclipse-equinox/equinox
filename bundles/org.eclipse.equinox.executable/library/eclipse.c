@@ -299,6 +299,7 @@ static _TCHAR** parseArgList( _TCHAR *data );
 static _TCHAR*  formatVmCommandMsg( _TCHAR* args[], _TCHAR* vmArgs[], _TCHAR* progArgs[] );
 static _TCHAR*  getDefaultOfficialName();
 static _TCHAR*  findStartupJar();
+static _TCHAR*  findSplash(_TCHAR* splashArg);
 static _TCHAR** getRelaunchCommand( _TCHAR **vmCommand );
 
 #ifdef _WIN32
@@ -385,7 +386,10 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
     /* If the showsplash option was given and we are using JNI */
     if (!noSplash && showSplashArg && launchMode == LAUNCH_JNI)
     {
-    	showSplash(showSplashArg);
+    	_TCHAR *bitmap = findSplash(showSplashArg);
+    	showSplash(bitmap);
+    	if (bitmap != showSplashArg)
+    		free(bitmap);
     }
     
     /* not using JNI launching, need some shared data */
@@ -882,6 +886,76 @@ _TCHAR* getProgramDir( )
 
     free( programDir );
     return NULL;
+}
+
+static _TCHAR* findSplash(_TCHAR* splashArg) {
+	struct _stat stats;
+	_TCHAR *ch;
+	_TCHAR *path, *prefix;
+	int length;
+	
+	if (splashArg == NULL)
+		return NULL;
+	
+	splashArg = _tcsdup(splashArg);
+	length = _tcslen(splashArg);
+	/* _tstat doesn't seem to like dirSeparators on the end */
+	while (splashArg[length - 1] == dirSeparator) {
+		splashArg[--length] = 0;
+	}
+	
+	/* does splashArg exist */
+	if (_tstat(splashArg, &stats) == 0) {
+		/* pointing to a file */
+		if (stats.st_mode & S_IFREG) { 
+			/* file, use it*/
+			return splashArg;
+		} else if (stats.st_mode & S_IFDIR) { 
+			/*directory, look for splash.bmp*/
+			ch = malloc( (length + 12) * sizeof(_TCHAR));
+			_stprintf( ch, _T_ECLIPSE("%s%c%s"), splashArg, dirSeparator, _T_ECLIPSE("splash.bmp") );
+			if (_tstat(ch, &stats) == 0 && stats.st_mode & S_IFREG) {
+				free(splashArg);
+				return ch;
+			}
+			free(ch);
+		}
+		free(splashArg);
+		return NULL;
+	}
+	
+	/* doesn't exist, separate into path & prefix and look for a /path/prefix_<version> */
+	ch = _tcsrchr( splashArg, dirSeparator );
+	if (ch != NULL) {
+		if (splashArg[0] == dirSeparator || (_tcslen(splashArg) > 2 && splashArg[1] == _T_ECLIPSE(':')))
+		{	/*absolute path*/
+			path = _tcsdup(splashArg);
+			path[ch - splashArg] = 0;
+		} else {
+			/* relative path, prepend with programDir */
+			path = malloc( (_tcslen(programDir) + ch - splashArg + 2) * sizeof(_TCHAR));
+			*ch = 0;
+			_stprintf(path, _T_ECLIPSE("%s%c%s"), programDir, dirSeparator, splashArg);
+			*ch = dirSeparator;
+		}
+		prefix = _tcsdup(ch + 1);
+	} else {
+		/* No separator, treat splashArg as the prefix and look in the plugins dir */
+		path = malloc( (_tcslen(programDir) + 9) * sizeof(_TCHAR));
+		_stprintf(path, _T_ECLIPSE("%s%c%s"), programDir, dirSeparator, _T_ECLIPSE("plugins"));
+		prefix = _tcsdup(splashArg);
+	}
+	
+	ch = findFile(path, prefix);
+	free(path);
+	free(prefix);
+	free(splashArg);
+	if (ch != NULL) {
+		path = malloc((_tcslen(ch) + 12) * sizeof(_TCHAR));
+		_stprintf( path, _T_ECLIPSE("%s%c%s"), ch, dirSeparator, _T_ECLIPSE("splash.bmp") );
+		return path;
+	}
+	return NULL;
 }
 
 static _TCHAR* findStartupJar(){

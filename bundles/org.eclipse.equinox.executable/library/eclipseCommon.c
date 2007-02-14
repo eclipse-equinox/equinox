@@ -22,6 +22,7 @@
 #include <dirent.h>
 #include <limits.h>
 #endif
+#include <stdio.h>
 #include <stdlib.h>
 #include <sys/stat.h>
 
@@ -254,19 +255,23 @@ _TCHAR* findFile( _TCHAR* path, _TCHAR* prefix)
 	int count;
 #endif
 	
-	/* does path exist? */
-	if( _tstat(path, &stats) != 0 )
-		return NULL;
-
+	path = _tcsdup(path);
 	pathLength = _tcslen(path);
+	
+	/* strip dirSeparators off the end */
+	while (path[pathLength - 1] == dirSeparator) {
+		path[--pathLength] = 0;
+	}
+	
+	/* does path exist? */
+	if( _tstat(path, &stats) != 0 ) {
+		free(path);
+		return NULL;
+	}
 	
 #ifdef _WIN32
 	fileName = malloc( (_tcslen(path) + 1 + _tcslen(prefix) + 3) * sizeof(_TCHAR));
-	fileName = _tcscpy(fileName, path);
-	fileName[pathLength] = dirSeparator;
-	fileName[pathLength + 1] = 0;
-	_tcscat(fileName, prefix);
-	_tcscat(fileName, _T_ECLIPSE("_*")); 
+	_stprintf(fileName, _T_ECLIPSE("%s%c%s_*"), path, dirSeparator, prefix);
 	prefix = fileName;
 	
 	handle = FindFirstFile(prefix, &data);
@@ -299,7 +304,7 @@ _TCHAR* findFile( _TCHAR* path, _TCHAR* prefix)
 		result[pathLength + 1] = 0;
 		_tcscat(result, candidate);
 		free(candidate);
-		return result;
 	}
-	return NULL;
+	free(path);
+	return result;
 }
