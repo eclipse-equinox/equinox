@@ -12,89 +12,37 @@
 
 /* Eclipse Program Launcher
  *
- * This program performs the launching of the java VM used to
- * start the Eclipse or RCP java application.
- * As an implementation detail, this program serves two other
- * purposes: display a splash window and write to a segment
- * of shared memory.
- *
- * The java application receives the following arguments.
- * -launcher <launcher absolute name. e.g. d:\eclipse\eclipse.exe>
- * -name <application name. e.g. Eclipse>
- * If the splash window is to be displayed, the java application
- * will receive two extra arguments:
- *     -showsplash  <splash time out in seconds e.g. 600>
- *
- * When the Java program starts, it should determine the location of
- * the splash bitmap to be used. The Java program initiates the 
- * displaying of the splash window by executing the splash command 
- * as follows:
- *
- * Process splashProcess = Runtime.getRuntime().exec( array );
- * Where array stores String arguments in the following order:
- * 0. <launcher absolute name. e.g. d:\eclipse\eclipse.exe>
- * 1. -name
- * 2. <application name. e.g. Eclipse>
- * 3. -showsplash
- * 4. <splash time out in seconds e.g. 600>
- * 5. <absolute path of the splash screen e.g. d:\eclipse\splash.bmp>
- *
+ * This file forms the base of the eclipse_*.dll/so.  This dll is loaded by eclipse.exe
+ * to start a Java VM, or alternatively it is loaded from Java to show the splash
+ * screen or write to the shared memory.  See eclipseJNI.c for descriptions of the methods
+ * exposed to the Java program using JNI.
+ * 
+ * To display a splash screen before starting the java vm, the launcher should be started 
+ * with the location of the splash bitmap to use:
+ * -showsplash <path/to/splash.bmp>
+ * Otherwise, when the Java program starts, it should determine the location of
+ * the splash bitmap to be used and use the JNI method show_splash. 
+ * 
  * When the Java program initialization is complete, the splash window
- * is brought down by destroying the splash process as follows:
+ * is brought down by calling the JNI method takedown_splash.
  *
- *     splashProcess.destroy();
- *
- * Therefore, when the splash window is visible, there are actually three
- * processes running: 
- * 1) the main launcher process 
- * 2) the Java VM process (Eclipse or RCP application) 
- * 3) the splash window process.
- *
- * The splash screen process can also show progress information. The
- * communication between the Java VM process and the splash screen
- * process is done through the standard input pipe. Messages sent to
- * the splash screen process have this format:
- *
- *    <key>=<value><LF>
- *
- * and the recognized messages are:
- *
- *    value=50\n (changes the current progress value)
- *    maximum=100\n (changes the maximum progress value. Default is 100)
- *    message=starting...\n (changes the displayed message. Any char except LF is allowed)
- *    foreground=RRGGBB\n  (changes the foreground color of the message, i.e. cyan=(0 << 16 | 255 << 8 | 255 << 0))
- *    messageRect=10,10,100,20\n (changes the rectangle(x,y,width,height) where the message is displayed)
- *    progressRect=10,30,100,15\n (changes the rectangle(x,y,width,height) where the progress is displayed)
- *
- * Similarly, the Java application will receive two other arguments:
+ * The Java program can also call the get_splash_handle method to get the handle to the splash 
+ * window.  This can be passed to SWT to create SWT widgets in the splash screen.
+ * 
+ * The Java application will receive two other arguments:
  *    -exitdata <shared memory id>
  *
- * The exitdata command can be used by the Java application
- * to provide specific exit data to the main launcher process. The 
- * following causes another instance of the launcher to write to the 
- * segment of shared memory previously created by the
- * main launcher.
- *
- * Process exitDataProcess = Runtime.getRuntime().exec( array );
- * exitDataProcess.waitFor();
- * Where array stores String arguments in the following order:
- * 0. <launcher absolute name. e.g. d:\eclipse\eclipse.exe>
- * 1. -name
- * 2. <application name. e.g. Eclipse>
- * 3. -exitdata
- * 4. <shared memory id e.g. c60_7b4>
- * 5. <exit data that either contain a series of characters>
+ * The java program can call set_exit_data with this shared-memory-id
+ * to provide specific exit data to the launcher. 
  *
  * The exit data size must not exceed MAX_SHARED_LENGTH which is
- * 16Kb. The exit data process will exit with an exit code
- * different than 0 if that happens. The interpretation of the
- * exit data is dependent on the exit value of the java application.
+ * 16Kb. The interpretation of the exit data is dependent on the 
+ * exit value of the java application.
  *
  * The main launcher recognizes the following exit codes from the
  * Java application:
  *
- *    0
- *       - Exit normally.
+ *    0    - Exit normally.
  *    RESTART_LAST_EC = 23
  *       - restart the java VM again with the same arguments as the previous one.
  *    RESTART_NEW_EC  = 24
@@ -116,18 +64,21 @@
  *  -ws <gui>                  the window system to be used: win32, motif, gtk, ...
  *  -nosplash                  do not display the splash screen. The java application will
  *                             not receive the -showsplash command.
+ *  -showsplash <bitmap>	   show the given bitmap in the splash screen.
  *  -name <name>               application name displayed in error message dialogs and
  *                             splash screen window. Default value is computed from the
  *                             name of the executable - with the first letter capitalized
  *                             if possible. e.g. eclipse.exe defaults to the name Eclipse.
- *  -startup                   the startup jar to execute. The argument is first assumed to be
+ *  -startup <startup.jar>     the startup jar to execute. The argument is first assumed to be
  *                             relative to the path of the launcher. If such a file does not
  *                             exist, the argument is then treated as an absolute path.
- *                             The default is to execute a jar called startup.jar in the folder
- *                             where the launcher is located.
- *                             The jar must be an executable jar.
- *                             e.g. -startup myfolder/myJar.jar will cause the launcher to start
- *                             the application: java -jar <launcher folder>/myfolder/myJar.jar
+ *                             The default is find the plugins/org.eclipse.equinox.launcher jar
+ * 							   with the highest version number.
+ *                             The jar must contain an org.eclipse.equinox.launcher.Main class.
+ * 							   (unless JNI invocation is not being used, then the jar only needs to be
+ * 							   an executable jar)
+ * -library					   the location of the eclipse launcher shared library (this library) to use
+ * 							   By default, the launcher exe (see eclipseMain.c) finds
  *  <userArgs>                 arguments that are passed along to the Java application
  *                             (i.e, -data <path>, -debug, -console, -consoleLog, etc) 
  *  -vmargs <userVMargs> ...   a list of arguments for the VM itself
@@ -144,7 +95,9 @@
  *     -arch <user or default ARCH value>
  *     -launcher <absolute launcher name>
  *     -name <application name>
- *     [-showsplash <splash time out>]
+ * 	   -library <eclipse library location>
+ * 	   -startup <startup.jar location>
+ *     [-showsplash]
  *     [-exitdata <shared memory id>]
  *     <userArgs>
  *     -vm <javaVM>
@@ -568,7 +521,7 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
     if ( cpValue != NULL)		 free( cpValue );
     if ( exitData != NULL )		 free( exitData );
 
-    return 0;
+    return exitCode;
 }
 
 static _TCHAR** buildLaunchCommand( _TCHAR* program, _TCHAR** vmArgs, _TCHAR** progArgs ) {
