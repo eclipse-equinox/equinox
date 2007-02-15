@@ -230,7 +230,7 @@ void restartLauncher( char* program, char* args[] )
 	pid_t pid= fork();
 	if (pid == 0) {
 		/* Child process ... start the JVM */
-		execv(program, args);
+		execv(program != NULL ? program : args[0], args);
 
 		/* The JVM would not start ... return error code to parent process. */
 		_exit(errno);

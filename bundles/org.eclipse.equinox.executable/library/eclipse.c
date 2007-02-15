@@ -253,31 +253,38 @@ _TCHAR* eeLibPath = NULL;			/* this one is global so others can see it */
 typedef struct
 {
 	_TCHAR*  name;		/* the option recognized by the launcher */
-	_TCHAR** value;		/* the variable where the option value is saved */
-	int*   flag;		/* the variable that is set if the option is defined */
+	void*  value;		/* the variable where the option value is saved */
+						/* value is a _TCHAR** or int* depending on if VALUE_IS_FLAG is set */
+	int    flag;		/* flags */
 	int    remove;		/* the number of argments to remove from the list */
 } Option;
+
+/* flags for the Option struct */
+#define VALUE_IS_FLAG 	1   /* value is an int*, if not set, value is a _TCHAR** */
+#define OPTIONAL_VALUE  2  	/* value is optional, if next arg does not start with '-', */
+							/* don't assign it and only remove (remove - 1) arguments  */
+
 static Option options[] = {
-    { CONSOLE,		NULL,			&needConsole,	0 },
-    { CONSOLELOG,	NULL,			&needConsole,	0 },
-    { DEBUG,		NULL,			&debug,			0 },
-    { NOSPLASH,     NULL,           &noSplash,		1 },
-    { SUPRESSERRORS, NULL,			&suppressErrors, 1},
-    { LIBRARY,		NULL,			NULL,			2 }, /* library was parsed by exe, just remove it */
-    { OS,			&osArg,			NULL,			2 },
-    { OSARCH,		&osArchArg,		NULL,			2 },
-    { SHOWSPLASH,   &showSplashArg,	NULL,			2 },
-    { STARTUP,		&startupArg,	NULL,			2 },
-    { VM,           &vmName,		NULL,			2 },
-    { NAME,         &name,			NULL,			2 },
-    { WS,			&wsArg,			NULL,			2 } };
+    { CONSOLE,		&needConsole,	VALUE_IS_FLAG,	0 },
+    { CONSOLELOG,	&needConsole,	VALUE_IS_FLAG,	0 },
+    { DEBUG,		&debug,			VALUE_IS_FLAG,	0 },
+    { NOSPLASH,     &noSplash,      VALUE_IS_FLAG,	1 },
+    { SUPRESSERRORS, &suppressErrors, VALUE_IS_FLAG, 1},
+    { LIBRARY,		NULL,			0,			2 }, /* library was parsed by exe, just remove it */
+    { OS,			&osArg,			0,			2 },
+    { OSARCH,		&osArchArg,		0,			2 },
+    { SHOWSPLASH,   &showSplashArg,	OPTIONAL_VALUE,	2 },
+    { STARTUP,		&startupArg,	0,			2 },
+    { VM,           &vmName,		0,			2 },
+    { NAME,         &name,			0,			2 },
+    { WS,			&wsArg,			0,			2 } };
 static int optionsSize = (sizeof(options) / sizeof(options[0]));
 
 static Option eeOptions[] = {
-	{ EE_EXECUTABLE,	&eeExecutable, 	NULL, 0 },
-	{ EE_CONSOLE,	 	&eeConsole,		NULL, 0 },
-	{ EE_VM_LIBRARY, 	&eeLibrary,		NULL, 0 },
-	{ EE_LIBRARY_PATH,	&eeLibPath, 	NULL, 0 }
+	{ EE_EXECUTABLE,	&eeExecutable, 	0, 0 },
+	{ EE_CONSOLE,	 	&eeConsole,		0, 0 },
+	{ EE_VM_LIBRARY, 	&eeLibrary,		0, 0 },
+	{ EE_LIBRARY_PATH,	&eeLibPath, 	0, 0 }
 };
 static int eeOptionsSize = (sizeof(eeOptions) / sizeof(eeOptions[0]));
 
@@ -442,6 +449,7 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
 		        	relaunchCommand = malloc((initialArgc + 1) * sizeof(_TCHAR*));
 		        	memcpy(relaunchCommand, initialArgv, (initialArgc + 1) * sizeof(_TCHAR*));
 		        	relaunchCommand[initialArgc] = 0;
+		        	relaunchCommand[0] = program;
 		        	running = 0;
 	        	}
 	        	break;
@@ -508,7 +516,7 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
     }
     
     if(relaunchCommand != NULL)
-    	restartLauncher(program, relaunchCommand);
+    	restartLauncher(NULL, relaunchCommand);
     	
     if (launchMode == LAUNCH_JNI)
     	cleanupVM(exitCode);
@@ -572,14 +580,24 @@ static void parseArgs( int* pArgc, _TCHAR* argv[] )
        	/* If the option is recognized by the launcher */
        	if (option != NULL)
        	{
+       		int optional = 0;
        		/* If the option requires a value and there is one, extract the value. */
-       		if (option->value != NULL && (index+1) < *pArgc)
-       			*option->value = argv[ index+1 ];
+       		if (option->value != NULL) {
+       			if (option->flag & VALUE_IS_FLAG)
+       				*((int *)option->value) = 1;
+       			else if((index + 1) < *pArgc) {
+       				_TCHAR * next = argv[index + 1];
+       				if(!((option->flag & OPTIONAL_VALUE) && next[0] == _T_ECLIPSE('-'))) {
+       					*((_TCHAR**)option->value) = next;
+       				} else {
+       					/* value was optional, and the next arg starts with '-' */
+       					optional = 1;
+       				}
+       			}
+       		}
 
        		/* If the option requires a flag to be set, set it. */
-       		if (option->flag != NULL)
-       			*option->flag = 1;
-       		remArgs = option->remove;
+       		remArgs = option->remove - optional;
        	}
 
 		/* Remove any matched arguments from the list. */
@@ -723,6 +741,8 @@ static void getVMCommand( int argc, _TCHAR* argv[], _TCHAR **vmArgv[], _TCHAR **
     if (!noSplash)
     {
         (*progArgv)[ dst++ ] = SHOWSPLASH;
+        if(showSplashArg != NULL)
+        	(*progArgv)[ dst++ ] = showSplashArg;
     }
 #endif
     
@@ -1043,7 +1063,6 @@ static _TCHAR ** getRelaunchCommand( _TCHAR **vmCommand  )
 		if (_tcsicmp(vmCommand[i], SHOWSPLASH) == 0) {
 			/* remove if the next argument is not the bitmap to show */
 			if(vmCommand[i + 1] != NULL && vmCommand[i + 1][0] == _T_ECLIPSE('-')) {
-				i++;
 				continue;
 			}
 		} else if(_tcsncmp(vmCommand[i], CLASSPATH_PREFIX, _tcslen(CLASSPATH_PREFIX)) == 0) {
@@ -1273,7 +1292,10 @@ static int processEEProps(_TCHAR* eeFile)
         	++matches;
         	ch = malloc( (_tcslen(argv[index]) - _tcslen(option->name) + 1) *sizeof(_TCHAR));
         	_tcscpy(ch, argv[index] + _tcslen(option->name));
-        	*(option->value) = ch;
+        	if (option->flag & VALUE_IS_FLAG)
+        		*((int*)option->value) = 1;
+        	else
+        		*((_TCHAR**)option->value) = ch;
         	if(matches == eeOptionsSize)
         		break;
         }

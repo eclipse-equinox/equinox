@@ -207,6 +207,6 @@ static void adjustLibraryPath( char * vmLibrary ) {
 void restartLauncher( char* program, char* args[] ) 
 {
 	/* just restart in-place */
-	execv(program, args);
+	execv( program != NULL ? program : args[0], args);
 }
 
