@@ -103,6 +103,8 @@ int showSplash( const _TCHAR* featureImage )
 	
 	if(window != NULL)
 		return 0; /*already showing */
+	if (featureImage == NULL)
+		return ENOENT;
 	
 	loadImageFns();
 	if (createWithURL && createAtIndex) {
@@ -212,13 +214,18 @@ char * findVMLibrary( char* command ) {
 	if (start != NULL){
 		start += 10;
 		end = strchr( start, dirSeparator);
-		if (end != NULL) {
+		if (end != NULL && end > start) {
 			length = end - start;
-			version = malloc(length);
+			version = malloc(length + 1);
 			strncpy(version, start, length);
 			version[length] = 0;
 			
-			setenv("JAVA_JVM_VERSION", version, 1);
+			/*only set a version if it starts with a number */
+			if(strtol(version, NULL, 10) != 0 || version[0] == '0') {
+				setenv("JAVA_JVM_VERSION", version, 1);
+			}
+			
+			free(version);
 		} 
 	}
 	return "/System/Library/Frameworks/JavaVM.framework/Versions/Current/JavaVM";

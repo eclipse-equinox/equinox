@@ -394,9 +394,11 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
     if (!noSplash && showSplashArg && launchMode == LAUNCH_JNI)
     {
     	_TCHAR *bitmap = findSplash(showSplashArg);
-    	showSplash(bitmap);
-    	if (bitmap != showSplashArg)
-    		free(bitmap);
+    	if (bitmap != NULL) {
+	    	showSplash(bitmap);
+	    	if (bitmap != showSplashArg)
+	    		free(bitmap);
+    	}
     }
     
     /* not using JNI launching, need some shared data */

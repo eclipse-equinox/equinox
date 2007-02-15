@@ -73,6 +73,8 @@ int showSplash( const _TCHAR* featureImage )
 		/*splash screen is already showing, do nothing */
 		return 0;
 	}
+	if (featureImage == NULL)
+		return -1;
 	
 	/* if Java was started first and is calling back to show the splash, we might not
 	 * have initialized the window system yet

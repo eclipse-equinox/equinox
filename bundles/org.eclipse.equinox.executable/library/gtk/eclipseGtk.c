@@ -63,6 +63,8 @@ int showSplash( const char* featureImage )
 
 	if (splashHandle != 0)
 		return 0; /* already showing splash */
+	if (featureImage == NULL)
+		return -1;
 	
 	initWindowSystem(&initialArgc, initialArgv, 1);
 	
