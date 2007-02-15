@@ -151,30 +151,35 @@ public class HttpContextManager implements Listener {
 		public boolean handleSecurity(HttpServletRequest arg0, HttpServletResponse arg1) throws IOException {
 			return delegate.handleSecurity(arg0, arg1);
 		}
-
+		
 		public URL getResource(String resourceName) {
+			Enumeration entryPaths;
 			if (bundlePath == null)
-				return bundle.getEntry(resourceName);
+				entryPaths = bundle.findEntries(resourceName, null, false);
+			else
+				entryPaths = bundle.findEntries(bundlePath + resourceName, null, false);
 			
-			return bundle.getEntry(bundlePath + resourceName);
+			if (entryPaths != null && entryPaths.hasMoreElements())
+				return (URL) entryPaths.nextElement();
+			
+			return null;
 		}
 
 		public Set getResourcePaths(String path) {
-			Enumeration entryPaths = null;
+			Enumeration entryPaths;
 			if (bundlePath == null)
-				entryPaths = bundle.getEntryPaths(path);
+				entryPaths = bundle.findEntries(path, null, false);
 			else
-				entryPaths = bundle.getEntryPaths(bundlePath + path);
+				entryPaths = bundle.findEntries(path, null, false);
 			
 			if (entryPaths == null)
 				return null;
 
 			Set result = new HashSet();
 			while (entryPaths.hasMoreElements()) {
-				String entryPath = (String) entryPaths.nextElement();
-				if (entryPath.charAt(0) != '/')
-					entryPath = "/" + entryPath; //$NON-NLS-1$
-				
+				URL entryURL = (URL) entryPaths.nextElement();
+				String entryPath = entryURL.getFile();
+
 				if (bundlePath == null)	
 					result.add(entryPath);
 				else
