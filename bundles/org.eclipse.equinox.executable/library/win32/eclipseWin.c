@@ -43,6 +43,7 @@ static int     jvmExitTimeout = 100;
 static int     jvmExitTimerId = 99;
 
 static void CALLBACK  detectJvmExit( HWND hwnd, UINT uMsg, UINT id, DWORD dwTime );
+static _TCHAR* checkVMRegistryKey(HKEY jrekey, _TCHAR* subKeyName);
 
 /* define default locations in which to find the jvm shared library
  * these are paths relative to the java exe, the shared library is
@@ -154,10 +155,9 @@ _TCHAR* findVMLibrary( _TCHAR* command ) {
 	_TCHAR * location;			/* points to begining of jvmLocations section of path */
 	
 	/* for looking in the registry */
-	HKEY keys[2] = { HKEY_CURRENT_USER, HKEY_LOCAL_MACHINE };
-	HKEY jreKey = NULL, subKey = NULL;
+	HKEY jreKey = NULL;
 	DWORD length = MAX_PATH;
-	_TCHAR keyName[MAX_PATH], lib[MAX_PATH];
+	_TCHAR keyName[MAX_PATH];
 	_TCHAR * jreKeyName;		
 	
 	if (command != NULL) {
@@ -189,37 +189,55 @@ _TCHAR* findVMLibrary( _TCHAR* command ) {
 	
 	/* Not found yet, try the registry, we will use the first vm >= 1.4 */
 	jreKeyName = _T("Software\\JavaSoft\\Java Runtime Environment");
-	for (i = 0; i < 2; i++) {
-		jreKey = NULL;
-		if (RegOpenKeyEx(keys[i], jreKeyName, 0, KEY_READ, &jreKey) == ERROR_SUCCESS) {
-			j = 0;
-			while (RegEnumKeyEx(jreKey, j++, keyName, &length, 0, 0, 0, 0) == ERROR_SUCCESS) {  
-				/*look for a 1.4 or 1.5 vm*/ 
-				if( _tcsncmp(_T("1.4"), keyName, 3) <= 0 ) {
-					subKey = NULL;
-					if(RegOpenKeyEx(jreKey, keyName, 0, KEY_READ, &subKey) == ERROR_SUCCESS) {
-						length = MAX_PATH;					
-						/*The RuntimeLib value should point to the library we want*/
-						if(RegQueryValueEx(subKey, _T("RuntimeLib"), NULL, NULL, (void*)&lib, &length) == ERROR_SUCCESS) {
-							if (_tstat( lib, &stats ) == 0 && (stats.st_mode & S_IFREG) != 0)
-							{	/*library exists*/
-								path = malloc( length * sizeof(TCHAR));
-								path[0] = _T('\0');
-								_tcscat(path, lib);
-								
-								RegCloseKey(subKey);
-								RegCloseKey(jreKey);
-								return path;
-							}
-						}
-						RegCloseKey(subKey);
-					}
+	if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, jreKeyName, 0, KEY_READ, &jreKey) == ERROR_SUCCESS) {
+		if(RegQueryValueEx(jreKey, _T_ECLIPSE("CurrentVersion"), NULL, NULL, (void*)&keyName, &length) == ERROR_SUCCESS) {
+			path = checkVMRegistryKey(jreKey, keyName);
+			if (path != NULL) {
+				RegCloseKey(jreKey);
+				return path;
+			}
+		}
+		j = 0;
+		length = MAX_PATH;
+		while (RegEnumKeyEx(jreKey, j++, keyName, &length, 0, 0, 0, 0) == ERROR_SUCCESS) {  
+			/*look for a 1.4 or 1.5 vm*/ 
+			if( _tcsncmp(_T("1.4"), keyName, 3) <= 0 ) {
+				path = checkVMRegistryKey(jreKey, keyName);
+				if (path != NULL) {
+					RegCloseKey(jreKey);
+					return path;
 				}
 			}
-			RegCloseKey(jreKey);
 		}
+		RegCloseKey(jreKey);
 	}
 	return NULL;
+}
+
+/*
+ * Read the subKeyName subKey of jreKey and look to see if it has a Value 
+ * "RuntimeLib" which points to a jvm library we can use 
+ * 
+ * Does not close jreKey
+ */
+static _TCHAR* checkVMRegistryKey(HKEY jreKey, _TCHAR* subKeyName) {
+	_TCHAR value[MAX_PATH];
+	HKEY subKey = NULL;
+	DWORD length = MAX_PATH;
+	_TCHAR *result = NULL;
+	struct _stat stats;
+	
+	if(RegOpenKeyEx(jreKey, subKeyName, 0, KEY_READ, &subKey) == ERROR_SUCCESS) {				
+		/*The RuntimeLib value should point to the library we want*/
+		if(RegQueryValueEx(subKey, _T("RuntimeLib"), NULL, NULL, (void*)&value, &length) == ERROR_SUCCESS) {
+			if (_tstat( value, &stats ) == 0 && (stats.st_mode & S_IFREG) != 0)
+			{	/*library exists*/
+				result = _tcsdup(value);
+			}
+		}
+		RegCloseKey(subKey);
+	}
+	return result;
 }
 
 static _TCHAR* buildCommandLine( _TCHAR* program, _TCHAR* args[] )
