@@ -153,11 +153,18 @@ public class HttpContextManager implements Listener {
 		}
 		
 		public URL getResource(String resourceName) {
-			Enumeration entryPaths;
-			if (bundlePath == null)
-				entryPaths = bundle.findEntries(resourceName, null, false);
-			else
-				entryPaths = bundle.findEntries(bundlePath + resourceName, null, false);
+			if (bundlePath != null)
+				resourceName = bundlePath + resourceName;
+			
+			int lastSlash = resourceName.lastIndexOf('/');
+			if (lastSlash == -1)
+				return null;
+			
+			String path = resourceName.substring(0, lastSlash);
+			if (path.length() == 0)
+				path = "/"; //$NON-NLS-1$
+			String file = resourceName.substring(lastSlash + 1);
+			Enumeration entryPaths = bundle.findEntries(path, file, false);
 			
 			if (entryPaths != null && entryPaths.hasMoreElements())
 				return (URL) entryPaths.nextElement();
@@ -166,12 +173,10 @@ public class HttpContextManager implements Listener {
 		}
 
 		public Set getResourcePaths(String path) {
-			Enumeration entryPaths;
-			if (bundlePath == null)
-				entryPaths = bundle.findEntries(path, null, false);
-			else
-				entryPaths = bundle.findEntries(path, null, false);
+			if (bundlePath != null)
+				path = bundlePath + path;
 			
+			Enumeration entryPaths = bundle.findEntries(path, null, false);
 			if (entryPaths == null)
 				return null;
 
