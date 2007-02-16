@@ -23,6 +23,7 @@ import org.eclipse.equinox.http.jetty.internal.Activator;
  * 		name="ssl.algorithm" type="String"
  * 		name="ssl.keystoretype" type="String"
  * 		name="context.path" type="String"
+ * 		name="context.sessioninactiveinterval" type="Integer"
  * 		name="other.info" type="String"
  *
  */

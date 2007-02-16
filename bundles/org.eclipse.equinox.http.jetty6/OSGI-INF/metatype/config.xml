@@ -14,6 +14,7 @@
 		<AD id="ssl.algorithm" type="String" cardinality="1"/>
 		<AD id="ssl.keystoretype" type="String" cardinality="1"/>
 		<AD id="context.path" type="String" cardinality="1"/>
+		<AD id="context.sessioninactiveinterval" type="Integer" cardinality="1"/>
 		<AD id="other.info" type="String" cardinality="1"/>
 	</OCD>
 	<Designate pid="org.eclipse.equinox.http.jetty.config.designate" factoryPid="org.eclipse.equinox.http.jetty.config" bundle="*">

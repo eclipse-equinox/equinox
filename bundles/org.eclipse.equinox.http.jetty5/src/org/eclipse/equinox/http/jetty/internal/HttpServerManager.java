@@ -39,6 +39,7 @@ public class HttpServerManager implements ManagedServiceFactory {
 	static final String SSL_ALGORITHM = "ssl.algorithm"; //$NON-NLS-1$
 	static final String SSL_KEYSTORETYPE = "ssl.keystoretype"; //$NON-NLS-1$
 	static final String CONTEXT_PATH = "context.path"; //$NON-NLS-1$
+	static final String CONTEXT_SESSIONINACTIVEINTERVAL = "context.sessioninactiveinterval"; //$NON-NLS-1$
 	static final String OTHER_INFO = "other.info"; //$NON-NLS-1$
 
 	private Map servers = new HashMap();
@@ -95,6 +96,10 @@ public class HttpServerManager implements ManagedServiceFactory {
 		
 		HttpContext httpContext = createHttpContext(dictionary);
 		httpContext.addHandler(servlets);
+		
+		Integer sessionInactiveInterval = (Integer) dictionary.get(CONTEXT_SESSIONINACTIVEINTERVAL);
+		if (sessionInactiveInterval != null)
+			servlets.setSessionInactiveInterval(sessionInactiveInterval.intValue());
 
 		server.addContext(httpContext);
 		try {

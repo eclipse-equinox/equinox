@@ -148,6 +148,21 @@ public class Activator implements BundleActivator {
 		if (contextpath != null)
 			defaultSettings.put(HttpServerManager.CONTEXT_PATH, contextpath);
 
+		// Session Inactive Interval (timeout)
+		String sessionInactiveInterval = context.getProperty(PROPERTY_PREFIX + HttpServerManager.CONTEXT_SESSIONINACTIVEINTERVAL);
+		if (sessionInactiveInterval != null) {
+			try {
+				defaultSettings.put(HttpServerManager.CONTEXT_SESSIONINACTIVEINTERVAL, new Integer(sessionInactiveInterval));
+			} catch (NumberFormatException e) {
+				//(log this) ignore
+			}
+		}
+			
+		// Other Info
+		String otherInfo = context.getProperty(PROPERTY_PREFIX + HttpServerManager.OTHER_INFO);
+		if (otherInfo != null)
+			defaultSettings.put(HttpServerManager.OTHER_INFO, otherInfo);
+		
 		return defaultSettings;
 	}
 	
