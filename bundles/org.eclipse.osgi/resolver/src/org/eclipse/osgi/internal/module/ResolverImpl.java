@@ -633,9 +633,11 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 							resolverExports.remove(bundle.detachFragment((ResolverBundle) bundleMapping.get(genericRequires[i].getVersionConstraint().getBundle()), null));
 						continue;
 					}
-					failed = true;
-					if (!developmentMode)
+					if (!developmentMode) {
+						// fail fast; otherwise we want to attempt to resolver other constraints in dev mode
+						failed = true;
 						break;
+					}
 				}
 			}
 		}
@@ -654,9 +656,11 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 							resolverExports.remove(bundle.detachFragment((ResolverBundle) bundleMapping.get(requires[i].getVersionConstraint().getBundle()), requires[i]));
 						continue;
 					}
-					failed = true;
-					if (!developmentMode) // in dev mode continue to next constraint
+					if (!developmentMode) {
+						// fail fast; otherwise we want to attempt to resolver other constraints in dev mode
+						failed = true;
 						break;
+					}
 				}
 			}
 		}
@@ -676,9 +680,11 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 							resolverExports.remove(bundle.detachFragment((ResolverBundle) bundleMapping.get(imports[i].getBundleDescription()), imports[i]));
 						continue;
 					}
-					failed = true;
-					if (!developmentMode) // in dev mode continue to next constraint
+					if (!developmentMode) {
+						// fail fast; otherwise we want to attempt to resolver other constraints in dev mode
+						failed = true;
 						break;
+					}
 				}
 			}
 		}
