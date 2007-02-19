@@ -594,7 +594,8 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 			return;
 		if (fragment.getHost().foundMatchingBundles()) {
 			stateResolveFragConstraints(fragment);
-			setBundleResolved(fragment);
+			if (!developmentMode || state.getResolverErrors(fragment.getBundle()).length == 0)
+				setBundleResolved(fragment);
 		}
 	}
 
