@@ -108,12 +108,12 @@ void initWindowSystem( int* pArgc, char* argv[], int showSplash )
     	saveArgc = *pArgc;
     	saveArgv =  argv;
     }  
-    
+      
     /* Create the top level shell that will not be used other than
        to initialize the application. */
-	XtSetLanguageProc (NULL, NULL, NULL);
-    topWindow = XtAppInitialize( &appContext, getOfficialName(), NULL, 0,
-                                 pArgc, argv, NULL, NULL, 0 ); 
+    topWindow = XtInitialize(NULL, getOfficialName(), NULL, 0, pArgc, argv);
+	appContext = XtWidgetToApplicationContext(topWindow);
+	XtSetLanguageProc (appContext, NULL, NULL);
     XtSetArg( arg[ 0 ], XmNmappedWhenManaged, False );
     XtSetValues( topWindow, arg, 1 );
     XtRealizeWidget( topWindow );

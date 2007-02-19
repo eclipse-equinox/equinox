@@ -69,13 +69,17 @@ extern void   centreShell( Widget widget, Widget expose );
 static void   fixEnvForNetscape();
 #endif /* NETSCAPE_FIX */
 
+void takeDownSplashCB( Widget shell, XtPointer app_data, XtPointer widget_data ) {
+  shellHandle = NULL;
+}
+
 /* Show the Splash Window
  *
  * Create the splash window, load the pixmap and display the splash window.
  */
 int showSplash( const char* featureImage )
 {
-	int argc [] = {0};
+	int argc = 0;
 	int x, y;
 	unsigned int width, height, depth, border;
 	ArgList args;
@@ -86,12 +90,8 @@ int showSplash( const char* featureImage )
 	Screen* screen;
 	Widget scrolledHandle, drawingHandle, image;
 	
-	/* bug 171093, No splash on Motif for now */
-	return -1;
-	
 	initWindowSystem(&initialArgc, initialArgv, 1);
-	
-	xDisplay = XtOpenDisplay(appContext, NULL, NULL, NULL, 0, 0, argc, 0);
+	xDisplay = XtDisplay(topWindow);
     screen = XDefaultScreenOfDisplay( xDisplay );
     if (featureImage != NULL)
     {
@@ -114,6 +114,7 @@ int showSplash( const char* featureImage )
     XtSetArg(args[nArgs], XmNwidth, width);			nArgs++;
     XtSetArg(args[nArgs], XmNheight, height);		nArgs++;
 	shellHandle = XtAppCreateShell(getOfficialName(), "", applicationShellWidgetClass, xDisplay, args, nArgs);								   
+	XtAddCallback(shellHandle, XmNdestroyCallback, (XtCallbackProc) takeDownSplashCB, NULL);
 	
 	nArgs = 0;
 	XtSetArg(args[nArgs++], XmNancestorSensitive, 1);
@@ -209,8 +210,9 @@ void takeDownSplash()
 {
     if (shellHandle != 0) 
     {
-        XtUnrealizeWidget( shellHandle );
+        XtDestroyWidget( shellHandle );
         XFlush( XtDisplay( shellHandle ) );
+        shellHandle = NULL;
     }
 }
 

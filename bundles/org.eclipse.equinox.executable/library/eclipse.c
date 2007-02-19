@@ -738,15 +738,12 @@ static void getVMCommand( int argc, _TCHAR* argv[], _TCHAR **vmArgv[], _TCHAR **
 	(*progArgv)[ dst++ ] = jarFile;
 	
 	/* Append the show splash window command, if defined. */
-/*bug 171093, no splash on Motif for now */
-#ifndef MOTIF 
     if (!noSplash)
     {
         (*progArgv)[ dst++ ] = SHOWSPLASH;
         if(showSplashArg != NULL)
         	(*progArgv)[ dst++ ] = showSplashArg;
     }
-#endif
     
 	/* Append the exit data command. */
 	if (sharedID) {
