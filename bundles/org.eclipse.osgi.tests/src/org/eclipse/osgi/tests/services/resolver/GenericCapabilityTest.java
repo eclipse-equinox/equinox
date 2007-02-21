@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2005 IBM Corporation and others.
+ * Copyright (c) 2003, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -136,6 +136,48 @@ public class GenericCapabilityTest extends AbstractStateTest {
 		assertTrue("2.4", genSpecs[3].isResolved());
 		assertEquals("2.4.1", genSpecs[3].getSupplier(), genCapFrag.getGenericCapabilities()[0]);
 	}
+
+	public void testGenericsIntraFrags() throws BundleException {
+		State state = buildEmptyState();
+		long bundleID = 0;
+
+		Hashtable manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "org.eclipse.equinox.generic.frag.a");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		manifest.put(Constants.FRAGMENT_HOST, "org.eclipse.equinox.generic.host;bundle-version=\"1.0.0\"");
+		manifest.put("Eclipse-GenericCapability", "frag.a");
+		BundleDescription genFragA = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "org.eclipse.equinox.generic.host");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		BundleDescription genHost = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+
+		
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "org.eclipse.equinox.generic.frag.b");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		manifest.put(Constants.FRAGMENT_HOST, "org.eclipse.equinox.generic.host;bundle-version=\"1.0.0\"");
+		manifest.put("Eclipse-GenericRequire", "frag.a");
+		BundleDescription genFragB = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+
+		state.addBundle(genHost);
+		state.addBundle(genFragA);
+		state.addBundle(genFragB);
+
+		state.resolve();
+		assertTrue("1.0", genHost.isResolved());
+		assertTrue("1.1", genFragA.isResolved());
+		assertTrue("1.2", genFragB.isResolved());
+		GenericSpecification[] genSpecs = genFragB.getGenericRequires();
+		assertTrue("2.0", genSpecs.length == 1);
+		assertTrue("2.1", genSpecs[0].isResolved());
+		assertEquals("2.1.1", genSpecs[0].getSupplier(), genFragA.getGenericCapabilities()[0]);
+	}
+	
 
 	public void testGenericsAliases() throws BundleException {
 		State state = buildEmptyState();
