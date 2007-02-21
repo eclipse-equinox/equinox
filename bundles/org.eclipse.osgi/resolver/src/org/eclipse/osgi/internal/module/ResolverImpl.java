@@ -760,7 +760,12 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 				}
 				ResolverBundle[] capabilityHosts = capability.isFromFragment() ? capability.getResolverBundle().getHost().getMatchingBundles() : new ResolverBundle[] {capability.getResolverBundle()};
 				boolean foundResolvedMatch = false;
-				for (int j = 0; capabilityHosts != null && j < capabilityHosts.length; j++)
+				for (int j = 0; capabilityHosts != null && j < capabilityHosts.length; j++) {
+					if (capabilityHosts[j] == constraint.getBundle()) {
+						// the capability is from a fragment attached to this host do not recursively resolve the host again
+						foundResolvedMatch = true;
+						continue;
+					}
 					// if in dev mode then allow a constraint to resolve to an unresolved bundle
 					if (capabilityHosts[j].getState() == ResolverBundle.RESOLVED || (resolveBundle(capabilityHosts[j], cycle) || developmentMode)) {
 						foundResolvedMatch |= !capability.isFromFragment() ? true : capability.getResolverBundle().getHost().getMatchingBundles() != null;
@@ -769,6 +774,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 							if (!cycle.contains(capabilityHosts[j]))
 								cycle.add(capabilityHosts[j]);
 					}
+				}
 				if (!foundResolvedMatch) {
 					constraint.removeMatchingCapability(capability);
 					continue; // constraint hasn't resolved
