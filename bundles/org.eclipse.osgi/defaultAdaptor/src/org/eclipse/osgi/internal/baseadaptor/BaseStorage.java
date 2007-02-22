@@ -1093,9 +1093,11 @@ public class BaseStorage implements SynchronousBundleListener {
 				long delayTime;
 				do {
 					do {
-						if ((System.currentTimeMillis() - firstSaveTime) > max_total_delay_interval)
+						if ((System.currentTimeMillis() - firstSaveTime) > max_total_delay_interval) {
+							curSaveTime = lastSaveTime;
 							// Waiting time has been too long, so break to start saving State data to file.
 							break;
+						}
 						delayTime = Math.min(delay_interval, lastSaveTime - curSaveTime);
 						curSaveTime = lastSaveTime;
 						// wait for other save requests 
@@ -1107,7 +1109,6 @@ public class BaseStorage implements SynchronousBundleListener {
 							curSaveTime = lastSaveTime;
 							break;
 						}
-
 						// Continue the loop if 'lastSaveTime' is increased again during waiting.
 					} while (!shutdown && curSaveTime < lastSaveTime);
 					// Save State and Meta data.
