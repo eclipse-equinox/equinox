@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -57,49 +57,35 @@ public class DirBundleFile extends BundleFile {
 		return BundleFile.secureAction.exists(dirPath) && BundleFile.secureAction.isDirectory(dirPath);
 	}
 
-	public Enumeration getEntryPaths(final String path) {
+	public Enumeration getEntryPaths(String path) {
+		if (path.length() > 0 && path.charAt(0) == '/')
+			path = path.substring(1);
 		final java.io.File pathFile = new java.io.File(basefile, path);
 		if (!BundleFile.secureAction.exists(pathFile))
 			return null;
-		if (BundleFile.secureAction.isDirectory(pathFile)) {
-			final String[] fileList = BundleFile.secureAction.list(pathFile);
-			if (fileList == null || fileList.length == 0)
-				return null;
-			final String dirPath = path.length() == 0 || path.charAt(path.length() - 1) == '/' ? path : path + '/';
-			return new Enumeration() {
-				int cur = 0;
-
-				public boolean hasMoreElements() {
-					return fileList != null && cur < fileList.length;
-				}
-
-				public Object nextElement() {
-					if (!hasMoreElements()) {
-						throw new NoSuchElementException();
-					}
-					java.io.File childFile = new java.io.File(pathFile, fileList[cur]);
-					StringBuffer sb = new StringBuffer(dirPath).append(fileList[cur++]);
-					if (BundleFile.secureAction.isDirectory(childFile)) {
-						sb.append("/"); //$NON-NLS-1$
-					}
-					return sb.toString();
-				}
-
-			};
-		}
+		if (!BundleFile.secureAction.isDirectory(pathFile))
+			return null;
+		final String[] fileList = BundleFile.secureAction.list(pathFile);
+		if (fileList == null || fileList.length == 0)
+			return null;
+		final String dirPath = path.length() == 0 || path.charAt(path.length() - 1) == '/' ? path : path + '/';
 		return new Enumeration() {
 			int cur = 0;
 
 			public boolean hasMoreElements() {
-				return cur < 1;
+				return fileList != null && cur < fileList.length;
 			}
 
 			public Object nextElement() {
-				if (cur == 0) {
-					cur = 1;
-					return path;
+				if (!hasMoreElements()) {
+					throw new NoSuchElementException();
 				}
-				throw new NoSuchElementException();
+				java.io.File childFile = new java.io.File(pathFile, fileList[cur]);
+				StringBuffer sb = new StringBuffer(dirPath).append(fileList[cur++]);
+				if (BundleFile.secureAction.isDirectory(childFile)) {
+					sb.append("/"); //$NON-NLS-1$
+				}
+				return sb.toString();
 			}
 		};
 	}
