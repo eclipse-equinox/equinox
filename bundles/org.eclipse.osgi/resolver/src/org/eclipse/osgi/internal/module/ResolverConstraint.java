@@ -1,13 +1,11 @@
 /*******************************************************************************
- * Copyright (c) 2005 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * Copyright (c) 2005, 2007 IBM Corporation and others. All rights reserved. This
+ * program and the accompanying materials are made available under the terms of
+ * the Eclipse Public License v1.0 which accompanies this distribution, and is
+ * available at http://www.eclipse.org/legal/epl-v10.html
  * 
- * Contributors:
- *     IBM Corporation - initial API and implementation
- *******************************************************************************/
+ * Contributors: IBM Corporation - initial API and implementation
+ ******************************************************************************/
 package org.eclipse.osgi.internal.module;
 
 import org.eclipse.osgi.service.resolver.BundleDescription;
@@ -17,8 +15,10 @@ import org.eclipse.osgi.service.resolver.VersionConstraint;
  * A companion to VersionConstraint from the state used while resolving
  */
 public abstract class ResolverConstraint {
-	ResolverBundle bundle;
-	VersionConstraint constraint;
+	final protected ResolverBundle bundle;
+	final protected VersionConstraint constraint;
+	private VersionSupplier[] possibleSuppliers;
+	private int selectedSupplierIndex = 0;
 
 	ResolverConstraint(ResolverBundle bundle, VersionConstraint constraint) {
 		this.bundle = bundle;
@@ -63,4 +63,80 @@ public abstract class ResolverConstraint {
 
 	// returns whether this constraint is optional
 	abstract boolean isOptional();
+
+	public void setPossibleSuppliers(VersionSupplier[] possibleSuppliers) {
+		this.possibleSuppliers = possibleSuppliers;
+	}
+
+	void addPossibleSupplier(VersionSupplier supplier) {
+		if (supplier == null)
+			return;
+		// we hope multiple suppliers are rare so do simple array expansion here.
+		if (possibleSuppliers == null) {
+			possibleSuppliers = new VersionSupplier[] {supplier};
+			return;
+		}
+		VersionSupplier[] newSuppliers = new VersionSupplier[possibleSuppliers.length + 1];
+		System.arraycopy(possibleSuppliers, 0, newSuppliers, 0, possibleSuppliers.length);
+		newSuppliers[possibleSuppliers.length] = supplier;
+		possibleSuppliers = newSuppliers;
+	}
+
+	public void removePossibleSupplier(VersionSupplier supplier) {
+		if (possibleSuppliers == null || supplier == null)
+			return;
+		int index = -1;
+		for (int i = 0; i < possibleSuppliers.length; i++) {
+			if (possibleSuppliers[i] == supplier) {
+				index = i;
+				break;
+			}
+		}
+		if (index >= 0) {
+			if (possibleSuppliers.length == 1) {
+				possibleSuppliers = null;
+				return;
+			}
+			VersionSupplier[] newSuppliers = new VersionSupplier[possibleSuppliers.length - 1];
+			System.arraycopy(possibleSuppliers, 0, newSuppliers, 0, index);
+			if (index < possibleSuppliers.length - 1)
+				System.arraycopy(possibleSuppliers, index + 1, newSuppliers, index, possibleSuppliers.length - index - 1);
+		}
+	}
+
+	int getNumPossibleSuppliers() {
+		if (possibleSuppliers == null)
+			return 0;
+		return possibleSuppliers.length;
+	}
+
+	boolean selectNextSupplier() {
+		if (possibleSuppliers == null || selectedSupplierIndex >= possibleSuppliers.length)
+			return false;
+		selectedSupplierIndex += 1;
+		return selectedSupplierIndex < possibleSuppliers.length;
+	}
+
+	VersionSupplier getSelectedSupplier() {
+		if (possibleSuppliers == null || selectedSupplierIndex >= possibleSuppliers.length)
+			return null;
+		return possibleSuppliers[selectedSupplierIndex];
+	}
+
+	void setSelectedSupplier(int selectedSupplier) {
+		this.selectedSupplierIndex = selectedSupplier;
+	}
+
+	int getSelectedSupplierIndex() {
+		return this.selectedSupplierIndex;
+	}
+
+	VersionSupplier[] getPossibleSuppliers() {
+		return possibleSuppliers;
+	}
+
+	void clearPossibleSuppliers() {
+		possibleSuppliers = null;
+		selectedSupplierIndex = 0;
+	}
 }

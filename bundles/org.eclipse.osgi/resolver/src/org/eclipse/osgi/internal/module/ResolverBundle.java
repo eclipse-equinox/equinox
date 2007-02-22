@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2006 IBM Corporation and others.
+ * Copyright (c) 2004, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -116,19 +116,17 @@ public class ResolverBundle extends VersionSupplier {
 		return (ResolverExport[]) results.toArray(new ResolverExport[results.size()]);
 	}
 
-	void clearWires(boolean clearUnresolvable) {
+	void clearWires() {
 		ResolverImport[] allImports = getImportPackages();
-		for (int i = 0; i < allImports.length; i++) {
-			allImports[i].setMatchingExport(null);
-			if (clearUnresolvable)
-				allImports[i].clearUnresolvableWirings();
-		}
+		for (int i = 0; i < allImports.length; i++)
+			allImports[i].clearPossibleSuppliers();
 
 		if (host != null)
-			host.removeAllMatchingBundles();
+			host.clearPossibleSuppliers();
+
 		BundleConstraint[] allRequires = getRequires();
 		for (int i = 0; i < allRequires.length; i++)
-			allRequires[i].setMatchingBundle(null);
+			allRequires[i].clearPossibleSuppliers();
 
 		GenericConstraint[] allGenericRequires = getGenericRequires();
 		for (int i = 0; i < allGenericRequires.length; i++)
@@ -309,7 +307,7 @@ public class ResolverBundle extends VersionSupplier {
 			return new ResolverExport[0]; // cannot attach to fragments;
 		if (!getBundle().attachFragments() || (isResolved() && !getBundle().dynamicFragments()))
 			return new ResolverExport[0]; // host is restricting attachment
-		if (fragment.getHost().getMatchingBundles() != null && !((HostSpecification) fragment.getHost().getVersionConstraint()).isMultiHost())
+		if (fragment.getHost().getNumPossibleSuppliers() > 0 && !((HostSpecification) fragment.getHost().getVersionConstraint()).isMultiHost())
 			return new ResolverExport[0]; // fragment is restricting attachment
 
 		ImportPackageSpecification[] newImports = fragment.getBundle().getImportPackages();
@@ -327,7 +325,7 @@ public class ResolverBundle extends VersionSupplier {
 		if (fragments.contains(fragment))
 			return new ResolverExport[0];
 		fragments.add(fragment);
-		fragment.getHost().addMatchingBundle(this);
+		fragment.getHost().addPossibleSupplier(this);
 
 		if (newImports.length > 0) {
 			ArrayList hostImports = new ArrayList(newImports.length);
@@ -373,7 +371,7 @@ public class ResolverBundle extends VersionSupplier {
 		boolean result = false;
 		for (int i = 0; i < newImports.length; i++) {
 			ResolverImport hostImport = getImport(newImports[i].getName());
-			ResolverExport resolvedExport = hostImport == null ? null : hostImport.getMatchingExport();
+			ResolverExport resolvedExport = (ResolverExport) (hostImport == null ? null : hostImport.getSelectedSupplier());
 			if ((resolvedExport == null && isResolved()) || (resolvedExport != null && !newImports[i].isSatisfiedBy(resolvedExport.getExportPackageDescription()))) {
 				result = true;
 				resolver.getState().addResolverError(fragment, ResolverError.FRAGMENT_CONFLICT, newImports[i].toString(), newImports[i]);
@@ -381,7 +379,7 @@ public class ResolverBundle extends VersionSupplier {
 		}
 		for (int i = 0; i < newRequires.length; i++) {
 			BundleConstraint hostRequire = getRequire(newRequires[i].getName());
-			ResolverBundle resolvedRequire = hostRequire == null ? null : hostRequire.getMatchingBundle();
+			ResolverBundle resolvedRequire = (ResolverBundle) (hostRequire == null ? null : hostRequire.getSelectedSupplier());
 			if ((resolvedRequire == null && isResolved()) || (resolvedRequire != null && !newRequires[i].isSatisfiedBy(resolvedRequire.getBundle()))) {
 				result = true;
 				resolver.getState().addResolverError(fragment, ResolverError.FRAGMENT_CONFLICT, newRequires[i].toString(), newRequires[i]);
@@ -411,7 +409,7 @@ public class ResolverBundle extends VersionSupplier {
 			return new ResolverExport[0];
 
 		fragment.setNewFragmentExports(false);
-		fragment.getHost().removeMatchingBundle(this);
+		fragment.getHost().removePossibleSupplier(this);
 		ArrayList fragImports = (ArrayList) fragmentImports.remove(fragment.bundleID);
 		ArrayList fragRequires = (ArrayList) fragmentRequires.remove(fragment.bundleID);
 		ArrayList removedExports = (ArrayList) fragmentExports.remove(fragment.bundleID);
@@ -436,7 +434,7 @@ public class ResolverBundle extends VersionSupplier {
 						for (Iterator iOldImports = fragImports.iterator(); iOldImports.hasNext();) {
 							ResolverImport oldImport = (ResolverImport) iOldImports.next();
 							if (newImport.getName().equals(oldImport.getName()))
-								newImport.setMatchingExport(oldImport.getMatchingExport());
+								newImport.setPossibleSuppliers(oldImport.getPossibleSuppliers());
 						}
 					}
 				ArrayList newRequires = (ArrayList) fragmentRequires.get(remainingFrags[i].bundleID);
@@ -446,7 +444,7 @@ public class ResolverBundle extends VersionSupplier {
 						for (Iterator iOldRequires = fragRequires.iterator(); iOldRequires.hasNext();) {
 							BundleConstraint oldRequire = (BundleConstraint) iOldRequires.next();
 							if (newRequire.getName().equals(oldRequire.getName()))
-								newRequire.setMatchingBundle(oldRequire.getMatchingBundle());
+								newRequire.setPossibleSuppliers(oldRequire.getPossibleSuppliers());
 						}
 					}
 			}
