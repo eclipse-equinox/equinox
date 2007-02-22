@@ -133,8 +133,8 @@ public class GroupingChecker {
 		}
 		PackageRoots packageRoots = (PackageRoots) packages.get(packageName);
 		if (packageRoots == null) {
-				packageRoots = createPackageRoots(bundle, packageName, visited == null ? new ArrayList(1) : visited);
-				packages.put(packageName, packageRoots);
+			packageRoots = createPackageRoots(bundle, packageName, visited == null ? new ArrayList(1) : visited);
+			packages.put(packageName, packageRoots);
 		}
 		return packageRoots != null ? packageRoots : nullPackageRoots;
 	}
@@ -185,11 +185,25 @@ public class GroupingChecker {
 			}
 		}
 		if (export != null || roots.size() > 1) {
+			PackageRoots[] requiredRoots = (PackageRoots[]) roots.toArray(new PackageRoots[roots.size()]);
+			if (export == null) {
+				PackageRoots superSet = requiredRoots[0];
+				for (int i = 1; i < requiredRoots.length; i++) {
+					if (requiredRoots[i].superSet(superSet)) {
+						superSet = requiredRoots[i];
+					} else if (!superSet.superSet(requiredRoots[i])) {
+						superSet = null;
+						break;
+					}
+				}
+				if (superSet != null)
+					return superSet;
+			}
 			// in this case we cannot share the package roots object; must create one specific for this bundle
 			PackageRoots result = new PackageRoots(packageName, bundle);
 			// first merge all the roots from required bundles
-			for (Iterator iRoots = roots.iterator(); iRoots.hasNext();)
-				result.merge((PackageRoots) iRoots.next());
+			for (int i = 0; i < requiredRoots.length; i++)
+				result.merge(requiredRoots[i]);
 			if (export != null)
 				// always add this bundles export to the end if it exports the package
 				result.addRoot(export);
@@ -335,6 +349,10 @@ public class GroupingChecker {
 					return false;
 			}
 			return true;
+		}
+
+		public boolean superSet(PackageRoots subSet) {
+			return subSet(roots, subSet.roots);
 		}
 	}
 }
