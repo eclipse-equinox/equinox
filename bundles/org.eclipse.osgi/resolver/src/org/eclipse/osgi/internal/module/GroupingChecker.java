@@ -326,7 +326,8 @@ public class GroupingChecker {
 			for (int i = 0; i < subSet.length; i++) {
 				boolean found = false;
 				for (int j = 0; j < superSet.length; j++)
-					if (subSet[i] == superSet[j]) {
+					// compare by exporter in case the bundle exports the package multiple times
+					if (subSet[i].getExporter() == superSet[j].getExporter()) {
 						found = true;
 						break;
 					}
