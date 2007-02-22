@@ -13,6 +13,7 @@ import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.debug.FrameworkDebugOptions;
 import org.eclipse.osgi.internal.resolver.BundleDescriptionImpl;
+import org.eclipse.osgi.internal.resolver.ExportPackageDescriptionImpl;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.*;
@@ -627,8 +628,30 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 					multipleSuppliers.add(requires[j]);
 			ResolverImport[] imports = bundles[i].getImportPackages();
 			for (int j = 0; j < imports.length; j++) {
-				if (imports[j].getNumPossibleSuppliers() > 1)
-					multipleSuppliers.add(imports[j]);
+				if (imports[j].getNumPossibleSuppliers() > 1) {
+					Integer eeProfile = (Integer) ((ResolverExport) imports[j].getSelectedSupplier()).getExportPackageDescription().getDirective(ExportPackageDescriptionImpl.EQUINOX_EE);
+					if (eeProfile.intValue() < 0) {
+						// this is a normal package; always add it
+						multipleSuppliers.add(imports[j]);
+					} else {
+						// this is a system bunde export
+						// If other exporters of this package also require the system bundle
+						// then this package does not need to be added to the mix
+						// this is an optimization for bundles like org.eclipse.xerces
+						// that export lots of packages also exported by the system bundle on J2SE 1.4
+						VersionSupplier[] suppliers = imports[j].getPossibleSuppliers();
+						for (int suppliersIndex = 1; suppliersIndex < suppliers.length; suppliersIndex++) {
+							Integer ee = (Integer) ((ResolverExport) suppliers[suppliersIndex]).getExportPackageDescription().getDirective(ExportPackageDescriptionImpl.EQUINOX_EE);
+							if (ee.intValue() >= 0)
+								continue;
+							if (((ResolverExport) suppliers[suppliersIndex]).getExporter().getRequire(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME) == null)
+								if (((ResolverExport) suppliers[suppliersIndex]).getExporter().getRequire(Constants.SYSTEM_BUNDLE_SYMBOLICNAME) == null) {
+									multipleSuppliers.add(imports[j]);
+									break;
+								}
+						}
+					}
+				}
 			}
 		}
 		return (ResolverConstraint[]) multipleSuppliers.toArray(new ResolverConstraint[multipleSuppliers.size()]);
