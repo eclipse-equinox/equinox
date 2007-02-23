@@ -210,3 +210,6 @@ void restartLauncher( char* program, char* args[] )
 	execv( program != NULL ? program : args[0], args);
 }
 
+void processVMArgs(_TCHAR **vmargs[] ) {
+	/* nothing yet */
+}

@@ -311,3 +311,54 @@ static CGImageRef loadBMPImage (const char *bmpPathname) {
 
 	return ref;
 }
+
+#define DOCK_ICON_PREFIX "-Xdock:icon="
+#define DOCK_NAME_PREFIX "-Xdock:name="
+#define APP_ICON_PATTERN "APP_ICON_%d"
+#define APP_NAME_PATTERN "APP_NAME_%d"
+
+void processVMArgs(char **vmargs[] )
+{
+	int i = -1;
+	int pid = 0, pidLength = 1, temp = 0;
+	char * name = NULL, *icon = NULL;
+	char * c;
+	
+	if( *vmargs == NULL)
+		return;
+	
+	while( (*vmargs)[++i] != NULL ) {
+		/*-Xdock:icon -> APP_ICON_<pid>*/
+		if(_tcsncmp((*vmargs)[i], DOCK_ICON_PREFIX, _tcslen(DOCK_ICON_PREFIX)) == 0) {
+			icon = (*vmargs)[i] + _tcslen(DOCK_ICON_PREFIX);
+		} 
+		/*-Xdock:name -> APP_NAME_<pid>*/
+		else if(_tcsncmp((*vmargs)[i], DOCK_NAME_PREFIX, _tcslen(DOCK_NAME_PREFIX)) == 0) {
+			name = (*vmargs)[i] + _tcslen(DOCK_NAME_PREFIX);
+		}
+		if (name != NULL && icons != NULL) 
+			break;
+	}
+	
+	if (name == NULL && icon == NULL)
+		return;	/* don't need to do anything */
+	
+	temp = pid = getpid();
+	/* how many digits in pid? */
+	while (temp > 9) {
+		pidLength++;
+		temp /= 10;
+	}
+	
+	if (name != NULL) {
+		c = malloc( (_tcslen(APP_NAME_PATTERN) + pidLength + 1) * sizeof(char*));
+		_stprintf( c, APP_NAME_PATTERN, pid );
+		setenv(c, name, 1);
+	}
+	
+	if (icon != NULL) {
+		c = malloc( (_tcslen(icon) + _tcslen(APP_ICON_PATTERN) + pidLength + 1) * sizeof(char*));
+		_stprintf( c, APP_ICON_PATTERN, pid );
+		setenv(c, icon, 1);
+	}
+}

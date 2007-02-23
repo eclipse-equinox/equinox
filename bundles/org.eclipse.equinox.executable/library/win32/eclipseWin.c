@@ -363,3 +363,8 @@ static void CALLBACK detectJvmExit( HWND hwnd, UINT uMsg, UINT id, DWORD dwTime 
         jvmProcess = 0;
     }
 }
+
+void processVMArgs(_TCHAR **vmargs[] ) {
+	/* nothing yet */
+}
+}

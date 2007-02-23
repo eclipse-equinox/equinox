@@ -362,6 +362,8 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
     	exit( 1 );
     }
 
+    /* platform specific processing of user's vmargs */
+    processVMArgs(&vmArgs);
     launchMode = determineVM(&msg);
     if (launchMode == -1) {
     	/* problem */

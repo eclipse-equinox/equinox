@@ -112,5 +112,8 @@ extern void restartLauncher( _TCHAR* program, _TCHAR* args[] );
 /* launch the vm in a separate process and wait for it to finish */
 extern int launchJavaVM( _TCHAR* args[] );
 
+/* do any platform specific processing of the user vmargs */
+extern void processVMArgs(_TCHAR **vmargs[] );
+
 #endif /* ECLIPSE_OS_H */
 
