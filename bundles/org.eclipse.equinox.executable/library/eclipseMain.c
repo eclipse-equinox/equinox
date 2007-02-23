@@ -30,9 +30,11 @@ _T_ECLIPSE("There was a problem loading the shared library and \n\
 finding the entry point.");
 
 #define NAME         _T_ECLIPSE("-name")
-#define LIBRARY		 _T_ECLIPSE("-library")
-#define SUPRESSERRORS _T_ECLIPSE("-suppressErrors")
 #define VMARGS       _T_ECLIPSE("-vmargs")		/* special option processing required */
+/* New arguments have the form --launcher.<arg> to avoid collisions */
+#define LIBRARY		  _T_ECLIPSE("--launcher.library")
+#define SUPRESSERRORS _T_ECLIPSE("--launcher.suppressErrors")
+#define INI			  _T_ECLIPSE("--launcher.ini")
 
 /* this typedef must match the run method in eclipse.c */
 typedef int (*RunMethod)(int argc, _TCHAR* argv[], _TCHAR* vmArgs[]);
@@ -49,6 +51,7 @@ static int 	 	createUserArgs(int configArgc, _TCHAR **configArgv, int *argc, _TC
 static void  	parseArgs( int* argc, _TCHAR* argv[] );
 static _TCHAR* 	getDefaultOfficialName(_TCHAR* program);
 static _TCHAR*  findLibrary(_TCHAR* library, _TCHAR* program);
+static _TCHAR*  checkForIni(int argc, _TCHAR* argv[]);
  
 static int initialArgc;
 static _TCHAR** initialArgv;
@@ -93,10 +96,12 @@ int main( int argc, _TCHAR* argv[] )
 {
 	_TCHAR*  errorMsg;
 	_TCHAR*  program;
+	_TCHAR*  iniFile;
 	_TCHAR*  ch;
 	_TCHAR** configArgv = NULL;
 	int 	 configArgc = 0;
 	int      exitCode = 0;
+	int      ret = 0;
 	void *	 handle = 0;
 	RunMethod 		runMethod;
 	SetInitialArgs  setArgs;
@@ -136,7 +141,12 @@ int main( int argc, _TCHAR* argv[] )
     }
     
     /* Parse configuration file arguments */
-	if (readIniFile(program, &configArgc, &configArgv) == 0)
+    iniFile = checkForIni(argc, argv);
+    if (iniFile != NULL)
+    	ret = readConfigFile(iniFile, &configArgc, &configArgv);
+    else
+    	ret = readIniFile(program, &configArgc, &configArgv);
+	if (ret == 0)
 	{
 		parseArgs (&configArgc, configArgv);
 	}
@@ -225,6 +235,18 @@ static void parseArgs( int* pArgc, _TCHAR* argv[] )
         	suppressErrors = 1;
         } 
     }
+}
+
+/* We need to look for --launcher.ini before parsing the other args */
+static _TCHAR* checkForIni(int argc, _TCHAR* argv[]) 
+{
+	int index;
+	for(index = 0; index < (argc - 1); index++) {
+		if(_tcsicmp(argv[index], INI) == 0) {
+        	return argv[++index];
+        } 
+	}
+	return NULL;
 }
 
 /*

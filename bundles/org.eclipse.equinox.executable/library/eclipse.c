@@ -215,7 +215,6 @@ companion startup.jar file (in the same directory as the executable).");
 #define SHOWSPLASH   _T_ECLIPSE("-showsplash")
 #define EXITDATA     _T_ECLIPSE("-exitdata")
 #define STARTUP      _T_ECLIPSE("-startup")
-#define LIBRARY		 _T_ECLIPSE("-library")
 #define VM           _T_ECLIPSE("-vm")
 #define WS           _T_ECLIPSE("-ws")
 #define NAME         _T_ECLIPSE("-name")
@@ -223,7 +222,10 @@ companion startup.jar file (in the same directory as the executable).");
 #define CP			 _T_ECLIPSE("-cp")
 #define CLASSPATH    _T_ECLIPSE("-classpath")
 #define JAR 		 _T_ECLIPSE("-jar")
-#define SUPRESSERRORS _T_ECLIPSE("-suppressErrors")
+
+#define LIBRARY		  _T_ECLIPSE("--launcher.library")
+#define SUPRESSERRORS _T_ECLIPSE("--launcher.suppressErrors")
+#define INI			  _T_ECLIPSE("--launcher.ini")
 
 /* constants for ee options file */
 #define EE_EXECUTABLE 			_T_ECLIPSE("-Dee.executable=")
@@ -271,6 +273,7 @@ static Option options[] = {
     { NOSPLASH,     &noSplash,      VALUE_IS_FLAG,	1 },
     { SUPRESSERRORS, &suppressErrors, VALUE_IS_FLAG, 1},
     { LIBRARY,		NULL,			0,			2 }, /* library was parsed by exe, just remove it */
+    { INI,			NULL, 			0,			2 }, /* same with ini */
     { OS,			&osArg,			0,			2 },
     { OSARCH,		&osArchArg,		0,			2 },
     { SHOWSPLASH,   &showSplashArg,	OPTIONAL_VALUE,	2 },
