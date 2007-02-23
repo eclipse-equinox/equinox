@@ -117,8 +117,8 @@ public class Main {
     private static final String NOSPLASH = "-nosplash"; //$NON-NLS-1$
     private static final String SHOWSPLASH = "-showsplash"; //$NON-NLS-1$
     private static final String EXITDATA = "-exitdata"; //$NON-NLS-1$
-//    private static final String NAME = "-name"; //$NON-NLS-1$
-//    private static final String LAUNCHER = "-launcher"; //$NON-NLS-1$
+    private static final String NAME = "-name"; //$NON-NLS-1$
+    private static final String LAUNCHER = "-launcher"; //$NON-NLS-1$
     private static final String LIBRARY = "-library"; //$NON-NLS-1$
 	private static final String NL = "-nl";  //$NON-NLS-1$
     private static final String ENDSPLASH = "-endsplash"; //$NON-NLS-1$
@@ -1199,12 +1199,6 @@ public class Main {
             	found = true;
             }
             
-            // look for the command to use to show the splash screen
-            if (args[i].equalsIgnoreCase(SHOWSPLASH)) {
-                showSplash = true;
-                found = true;
-            }
-            
             // check if this is initialization pass
             if (args[i].equalsIgnoreCase(INITIALIZE)) {
                 initialize = true;
@@ -1222,6 +1216,16 @@ public class Main {
                 continue;
             }
 
+            // look for the command to use to show the splash screen
+            if (args[i].equalsIgnoreCase(SHOWSPLASH)) {
+                showSplash = true;
+                found = true;
+                //consume optional parameter for showsplash
+                if (i + 1 < args.length && !args[i+1].startsWith("-")) {
+                	configArgs[configArgIndex++] = i++;
+                }
+            }
+            
             // done checking for args.  Remember where an arg was found 
             if (found) {
                 configArgs[configArgIndex++] = i;
@@ -1304,17 +1308,19 @@ public class Main {
             	found = true;
             }
             
-//            // look for the name to use by the launcher
-//            if (args[i - 1].equalsIgnoreCase(NAME)) {
-//                name = arg;
-//                found = true;
-//            }
-//
-//            // look for the launcher location
-//            if (args[i - 1].equalsIgnoreCase(LAUNCHER)) {
-//                launcher = arg;
-//                found = true;
-//            }
+            // look for the name to use by the launcher
+            if (args[i - 1].equalsIgnoreCase(NAME)) {
+            	//not doing anything with this right now, but still consume it
+                //name = arg;
+                found = true;
+            }
+
+            // look for the launcher location
+            if (args[i - 1].equalsIgnoreCase(LAUNCHER)) {
+            	//not doing anything with this right now, but still consume it
+                //launcher = arg;
+                found = true;
+            }
             
             if (args[i - 1].equalsIgnoreCase(LIBRARY)) {
             	library = arg;
