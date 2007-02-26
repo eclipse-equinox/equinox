@@ -336,7 +336,7 @@ void processVMArgs(char **vmargs[] )
 		else if(_tcsncmp((*vmargs)[i], DOCK_NAME_PREFIX, _tcslen(DOCK_NAME_PREFIX)) == 0) {
 			name = (*vmargs)[i] + _tcslen(DOCK_NAME_PREFIX);
 		}
-		if (name != NULL && icons != NULL) 
+		if (name != NULL && icon != NULL) 
 			break;
 	}
 	
