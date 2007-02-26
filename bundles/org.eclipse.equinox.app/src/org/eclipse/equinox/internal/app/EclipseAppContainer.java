@@ -337,10 +337,14 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 				for (int i = 0; i < runningRefs.length; i++) {
 					ApplicationHandle handle = (ApplicationHandle) context.getService(runningRefs[i]);
 					try {
-						handle.destroy();
+						if (handle != null)
+							handle.destroy();
 					} catch (Throwable t) {
 						String message = NLS.bind(Messages.application_error_stopping, handle.getInstanceId());
 						Activator.log(new FrameworkLogEntry(Activator.PI_APP, FrameworkLogEntry.WARNING, 0, message, 0, t, null));
+					} finally {
+						if (handle != null)
+							context.ungetService(runningRefs[i]);
 					}
 				}
 		} catch (InvalidSyntaxException e) {
