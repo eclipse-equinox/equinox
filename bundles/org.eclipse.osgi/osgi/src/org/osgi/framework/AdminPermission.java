@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/AdminPermission.java,v 1.31 2006/09/28 21:32:40 hargrave Exp $
+ * $Header: /cvsroot/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/AdminPermission.java,v 1.22 2006/10/18 15:32:18 twatson Exp $
  * 
- * Copyright (c) OSGi Alliance (2000, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2000, 2007). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,9 +25,9 @@ import org.eclipse.osgi.framework.internal.core.AbstractBundle;
 import org.eclipse.osgi.framework.internal.core.FilterImpl;
 
 /**
- * Indicates the caller's authority to perform specific privileged
- * administrative operations on or to get sensitive information about a bundle.
- * The actions for this permission are:
+ * A bundle's authority to perform specific privileged administrative operations
+ * on or to get sensitive information about a bundle. The actions for this
+ * permission are:
  * 
  * <pre>
  *  Action               Methods
@@ -60,7 +60,7 @@ import org.eclipse.osgi.framework.internal.core.FilterImpl;
  * </pre>
  * 
  * <p>
- * The special action "*" will represent all actions.
+ * The special action &quot;*&quot; will represent all actions.
  * <p>
  * The name of this permission is a filter expression. The filter gives access
  * to the following parameters:
@@ -73,7 +73,8 @@ import org.eclipse.osgi.framework.internal.core.FilterImpl;
  * <li>name - The symbolic name of a bundle.</li>
  * </ul>
  * 
- * @version $Revision: 1.31 $
+ * @ThreadSafe
+ * @version $Revision: 1.34 $
  */
 
 public final class AdminPermission extends BasicPermission {

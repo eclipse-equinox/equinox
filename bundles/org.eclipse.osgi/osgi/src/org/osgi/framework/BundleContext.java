@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/BundleContext.java,v 1.21 2007/02/03 21:15:59 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/BundleContext.java,v 1.22 2007/02/21 16:49:05 hargrave Exp $
  * 
  * Copyright (c) OSGi Alliance (2000, 2007). All Rights Reserved.
  * 
@@ -69,7 +69,8 @@ import java.util.Dictionary;
  * The Framework is the only entity that can create <code>BundleContext</code>
  * objects and they are only valid within the Framework that created them.
  * 
- * @version $Revision: 1.21 $
+ * @ThreadSafe
+ * @version $Revision: 1.22 $
  */
 
 public interface BundleContext {

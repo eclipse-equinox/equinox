@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/Constants.java,v 1.29 2007/02/03 21:15:59 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/Constants.java,v 1.32 2007/02/20 00:07:22 hargrave Exp $
  *
  * Copyright (c) OSGi Alliance (2000, 2007). All Rights Reserved.
  *
@@ -19,15 +19,15 @@
 package org.osgi.framework;
 
 /**
- * Defines standard names for the OSGi environment property, service property,
- * and Manifest header attribute keys.
+ * Defines standard names for the OSGi environment system properties, service
+ * properties, and Manifest header attribute keys.
  * 
  * <p>
  * The values associated with these keys are of type
  * <code>java.lang.String</code>, unless otherwise indicated.
  * 
- * @version $Revision: 1.29 $
  * @since 1.1
+ * @version $Revision: 1.32 $
  */
 
 public interface Constants {
@@ -420,9 +420,9 @@ public interface Constants {
 	/**
 	 * Framework environment property (named
 	 * &quot;org.osgi.supports.framework.extension&quot;) identifying whether
-	 * the Framework supports framework extension bundles. If the value of this
-	 * property is <code>true</code>, then the Framework supports framework
-	 * extension bundles. The default value is <code>false</code>.
+	 * the Framework supports framework extension bundles. As of version 1.4,
+	 * the value of this property must be <code>true</code>. The Framework
+	 * must support framework extension bundles.
 	 * <p>
 	 * The value of this property may be retrieved by calling the
 	 * <code>BundleContext.getProperty</code> method.
@@ -449,9 +449,9 @@ public interface Constants {
 	/**
 	 * Framework environment property (named
 	 * &quot;org.osgi.supports.framework.fragment&quot;) identifying whether the
-	 * Framework supports fragment bundles. If the value of this property is
-	 * <code>true</code>, then the Framework supports fragment bundles. The
-	 * default value is <code>false</code>.
+	 * Framework supports fragment bundles. As of version 1.4, the value of this
+	 * property must be <code>true</code>. The Framework must support
+	 * fragment bundles.
 	 * <p>
 	 * The value of this property may be retrieved by calling the
 	 * <code>BundleContext.getProperty</code> method.
@@ -464,9 +464,9 @@ public interface Constants {
 	 * Framework environment property (named
 	 * &quot;org.osgi.supports.framework.requirebundle&quot;) identifying
 	 * whether the Framework supports the <code>Require-Bundle</code> manifest
-	 * header. If the value of this property is <code>true</code>, then the
-	 * Framework supports the <code>Require-Bundle</code> manifest header. The
-	 * default value is <code>false</code>.
+	 * header. As of version 1.4, the value of this property must be
+	 * <code>true</code>. The Framework must support the
+	 * <code>Require-Bundle</code> manifest header.
 	 * <p>
 	 * The value of this property may be retrieved by calling the
 	 * <code>BundleContext.getProperty</code> method.
@@ -1086,19 +1086,17 @@ public interface Constants {
 	 * Bundle activation policy (named &quot;lazy&quot;) declaring the bundle
 	 * must be activated when the first class load is made from the bundle.
 	 * <p>
-	 * A bundle with the lazy activation policy enters the
-	 * {@link Bundle#STARTING STARTING} state as soon as it is resolved, its
-	 * start level has been met, its persistent started state is
-	 * <code>true</code> and its persistent activation policy state is
-	 * <code>true</code>. The bundle will wait in the <code>STARTING</code>
-	 * state until the first class load from the bundle occurs. The bundle will
-	 * then be activated before the class is returned to the requestor.
+	 * A bundle with the lazy activation policy that is started with the
+	 * {@link Bundle#START_ACTIVATION_POLICY START_ACTIVATION_POLICY} option
+	 * will wait in the {@link Bundle#STARTING STARTING} state until the first
+	 * class load from the bundle occurs. The bundle will then be activated
+	 * before the class is returned to the requestor.
 	 * <p>
 	 * The activation policy value is specified as in the
 	 * Bundle-ActivationPolicy manifest header like:
 	 * 
 	 * <pre>
-	 *     Bundle-ActivationPolicy: lazy
+	 *       Bundle-ActivationPolicy: lazy
 	 * </pre>
 	 * 
 	 * @see Constants#BUNDLE_ACTIVATIONPOLICY

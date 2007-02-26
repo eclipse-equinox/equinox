@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/ServiceReference.java,v 1.17 2007/02/03 21:15:59 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/ServiceReference.java,v 1.20 2007/02/21 16:49:05 hargrave Exp $
  * 
  * Copyright (c) OSGi Alliance (2000, 2007). All Rights Reserved.
  * 
@@ -42,10 +42,11 @@ package org.osgi.framework;
  * <code>ServiceReference</code> objects associated with different
  * <code>ServiceRegistration</code> objects are not equal.
  * 
- * @version $Revision: 1.17 $
  * @see BundleContext#getServiceReference
  * @see BundleContext#getServiceReferences
  * @see BundleContext#getService
+ * @ThreadSafe
+ * @version $Revision: 1.20 $
  */
 
 public interface ServiceReference extends Comparable {
@@ -170,7 +171,7 @@ public interface ServiceReference extends Comparable {
 	 * service id.
 	 * 
 	 * @param reference The <code>ServiceReference</code> to be compared.
-	 * @return Returns a negative integer, zero, or a positive integer is this
+	 * @return Returns a negative integer, zero, or a positive integer if this
 	 *         <code>ServiceReference</code> is less than, equal to, or
 	 *         greater than the specified <code>ServiceReference</code>.
 	 * @since 1.4

@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/BundleActivator.java,v 1.12 2006/10/27 18:22:41 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/BundleActivator.java,v 1.14 2007/02/21 16:49:05 hargrave Exp $
  * 
- * Copyright (c) OSGi Alliance (2000, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2000, 2007). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,8 @@ package org.osgi.framework;
  * bundle's <code>BundleActivator</code> as required. If an instance's
  * <code>BundleActivator.start</code> method executes successfully, it is
  * guaranteed that the same instance's <code>BundleActivator.stop</code>
- * method will be called when the bundle is to be stopped.
+ * method will be called when the bundle is to be stopped. The Framework must
+ * not concurrently call a <code>BundleActivator</code> object.
  * 
  * <p>
  * <code>BundleActivator</code> is specified through the
@@ -45,7 +46,8 @@ package org.osgi.framework;
  * constructor that takes no parameters so that a <code>BundleActivator</code>
  * object can be created by <code>Class.newInstance()</code>.
  * 
- * @version $Revision: 1.12 $
+ * @NotThreadSafe
+ * @version $Revision: 1.14 $
  */
 
 public interface BundleActivator {

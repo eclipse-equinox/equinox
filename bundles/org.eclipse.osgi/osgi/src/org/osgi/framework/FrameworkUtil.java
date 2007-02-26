@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/FrameworkUtil.java,v 1.7 2006/07/26 20:37:49 hargrave Exp $
+ * $Header: /cvsroot/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/FrameworkUtil.java,v 1.7 2006/10/18 15:32:18 twatson Exp $
  * 
- * Copyright (c) OSGi Alliance (2005, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2005, 2007). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,9 @@ import org.eclipse.osgi.framework.internal.core.FilterImpl;
  * This class contains utility methods which access Framework functions that may
  * be useful to bundles.
  * 
- * @version $Revision: 1.7 $
  * @since 1.3
+ * @ThreadSafe
+ * @version $Revision: 1.10 $
  */
 public class FrameworkUtil {
 	/*
