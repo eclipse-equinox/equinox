@@ -31,6 +31,7 @@
 #define restartLauncher restartLauncherW
 #define launchJavaVM launchJavaVMW
 #define eeLibPath eeLibPathW
+#define processVMArgs processVMArgsW
 #endif
 
 /* Operating System Dependent Information */

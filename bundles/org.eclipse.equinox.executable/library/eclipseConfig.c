@@ -66,9 +66,10 @@ int readConfigFile( _TCHAR * config_file, int *argc, _TCHAR ***argv )
 {
 	_TCHAR buffer[1024];
 	_TCHAR argument[1024];
+	_TCHAR * arg;
 	FILE *file = NULL;
 	int maxArgs = 128;
-	int index;
+	int index, length;
 	
 	/* Open the config file as a text file 
 	 * Note that carriage return-linefeed combination \r\n are automatically
@@ -90,7 +91,13 @@ int readConfigFile( _TCHAR * config_file, int *argc, _TCHAR ***argv )
 		 */
 		if (_stscanf(buffer, _T_ECLIPSE("%[^\n]"), argument) == 1)
 		{
-			(*argv)[index] = _tcsdup(argument);
+			arg = _tcsdup(argument);
+			length = _tcslen(arg);
+			/* basic whitespace trimming */
+			while (arg[length - 1] == _T_ECLIPSE(' ') || arg[length - 1] == _T_ECLIPSE('\t')) {
+				arg[--length] = 0;
+			}
+			(*argv)[index] = arg;
 			index++;
 			
 			/* Grow the array of TCHAR*. Ensure one more entry is
