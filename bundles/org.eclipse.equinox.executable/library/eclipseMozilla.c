@@ -28,12 +28,17 @@ int filter(const struct dirent *dir)
 {
 	char* prefixes[] = {
 		"xulrunner-",
+		"mozilla-seamonkey-",
 		"mozilla-",
 		"firefox-",
 		NULL
 	};
 	int XULRUNNER_INDEX = 0;
+#if defined(__amd64__) || defined(__x86_64__) || defined(__powerpc64__)
+	char* root = "/usr/lib64/";
+#else
 	char* root = "/usr/lib/";
+#endif
 	char* testlib = "/components/libwidget_gtk2.so";
 	struct stat buf;
 	int index = 0;
@@ -102,7 +107,7 @@ void fixEnvForMozilla() {
 		{
 			struct stat buf;
 			FILE *file = NULL;
-#if defined(__amd64__) || defined(__x86_64__)
+#if defined(__amd64__) || defined(__x86_64__) || defined(__powerpc64__)
 			if (stat("/etc/gre64.conf", &buf) == 0)
 			{
 				file = fopen("/etc/gre64.conf", "r");
@@ -139,60 +144,72 @@ void fixEnvForMozilla() {
 		/* Try some common installation locations. */
 		if (grePath == NULL)
 		{
-			/* some other typical installation locations */
-			char* dirs[] = {
-				"/usr/lib/mozilla/",
-				"/usr/local/mozilla/",
-				"/opt/mozilla/",
-				"/usr/lib/firefox/",
-				"/usr/local/firefox/",
-				"/opt/firefox/",
-				"/usr/lib/MozillaFirebird/",
-				"/usr/local/MozillaFirebird/",
-				"/opt/MozillaFirebird/",
-				NULL
-			};
-			char* testlib = "components/libwidget_gtk2.so";
-			struct stat buf;
-			int index = 0;
-	
-			char* dir = dirs [index++];
-			while (dir != NULL)
+			/* try xulrunner-*, mozilla-*, firefox-* directories in /usr/lib/ */
+#if defined(__amd64__) || defined(__x86_64__) || defined(__powerpc64__)
+			char* dir = "/usr/lib64/";
+#else
+			char* dir = "/usr/lib/";
+#endif
+			struct dirent **namelist;
+			int i;
+			int count = scandir(dir, &namelist, filter, alphasort);
+			if (count > 0)
 			{
-				char* testpath = malloc (strlen(dir) + strlen(testlib) + 1);
-				strcpy(testpath, dir);
-				strcat(testpath, testlib);
-				int success = stat(testpath, &buf) == 0;
-				free(testpath);
-				if (success)
-				{
-					grePath = strdup(dir);
-					break;
+				/* count-1 is used below in an attempt to get the matched directory
+				 * with the latest version number.
+				 */
+				char* name = namelist [count - 1]->d_name;
+				grePath = malloc (strlen(dir) + strlen(name) + 1);
+				strcpy(grePath, dir);
+				strcat(grePath, name);
+				for (i = 0; i < count; i++) {
+					free(namelist [i]);
 				}
-				dir = dirs [index++];
+				free(namelist);
 			}
 
 			if (grePath == NULL)
 			{
-				/* now try xulrunner-*, mozilla-*, firefox-* directories in /usr/lib/ */
-				char* dir = "/usr/lib/";
-				struct dirent **namelist;
-				int i;
+				/* some other typical installation locations */
+				char* dirs[] = {
+#if defined(__amd64__) || defined(__x86_64__) || defined(__powerpc64__)
+					"/usr/lib64/xulrunner/",
+					"/usr/lib64/seamonkey/",
+					"/usr/lib64/mozilla/",
+					"/usr/lib64/firefox/",
+#endif
+					"/usr/lib/xulrunner/",
+					"/usr/lib/seamonkey/",
+					"/usr/lib/mozilla/",
+					"/usr/lib/firefox/",
+					"/usr/local/xulrunner/",
+					"/opt/xulrunner/",
+					"/usr/local/seamonkey/",
+					"/opt/seamonkey/",
+					"/usr/local/mozilla/",
+					"/opt/mozilla/",
+					"/usr/local/firefox/",
+					"/opt/firefox/",
+					NULL
+				};
+				char* testlib = "components/libwidget_gtk2.so";
+				struct stat buf;
+				int index = 0;
 
-				int count = scandir(dir, &namelist, filter, alphasort);
-				if (count > 0)
+				char* dir = dirs [index++];
+				while (dir != NULL)
 				{
-					/* count-1 is used below in an attempt to get the matched directory
-					 * with the latest version number.
-					 */
-					char* name = namelist [count - 1]->d_name;
-					grePath = malloc (strlen(dir) + strlen(name) + 1);
-					strcpy(grePath, dir);
-					strcat(grePath, name);
-					for (i = 0; i < count; i++) {
-						free(namelist [i]);
+					char* testpath = malloc (strlen(dir) + strlen(testlib) + 1);
+					strcpy(testpath, dir);
+					strcat(testpath, testlib);
+					int success = stat(testpath, &buf) == 0;
+					free(testpath);
+					if (success)
+					{
+						grePath = strdup(dir);
+						break;
 					}
-					free(namelist);
+					dir = dirs [index++];
 				}
 			}
 		}
