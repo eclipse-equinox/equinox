@@ -119,7 +119,7 @@ public class Main {
     private static final String EXITDATA = "-exitdata"; //$NON-NLS-1$
     private static final String NAME = "-name"; //$NON-NLS-1$
     private static final String LAUNCHER = "-launcher"; //$NON-NLS-1$
-    private static final String LIBRARY = "-library"; //$NON-NLS-1$
+    private static final String LIBRARY = "--launcher.library"; //$NON-NLS-1$
 	private static final String NL = "-nl";  //$NON-NLS-1$
     private static final String ENDSPLASH = "-endsplash"; //$NON-NLS-1$
     private static final String SPLASH_IMAGE = "splash.bmp"; //$NON-NLS-1$
