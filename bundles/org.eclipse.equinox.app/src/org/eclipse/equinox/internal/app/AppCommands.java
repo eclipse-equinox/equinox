@@ -21,7 +21,8 @@ import org.osgi.util.tracker.ServiceTracker;
 public class AppCommands implements CommandProvider {
 	private final static String LAUNCHABLE_APP_FILTER = "(&(application.locked=false)(application.launchable=true)(application.visible=true))"; //$NON-NLS-1$
 	private final static String ACTIVE_APP_FILTER = "(!(application.state=STOPPING))"; //$NON-NLS-1$
-
+	private final static String LOCKED_APP_FILTER = "(application.locked=true)"; //$NON-NLS-1$
+	
 	private static AppCommands instance;
 	private BundleContext context;
 	private ServiceTracker applicationDescriptors;
@@ -29,6 +30,7 @@ public class AppCommands implements CommandProvider {
 	private ServiceTracker scheduledApplications;
 	private Filter launchableApp;
 	private Filter activeApp;
+	private Filter lockedApp;
 	private ServiceRegistration providerRegistration;
 
 	static synchronized void create(BundleContext context) {
@@ -60,6 +62,7 @@ public class AppCommands implements CommandProvider {
 			scheduledApplications.open();
 			launchableApp = ctx.createFilter(LAUNCHABLE_APP_FILTER);
 			activeApp = ctx.createFilter(ACTIVE_APP_FILTER);
+			lockedApp = ctx.createFilter(LOCKED_APP_FILTER);
 			providerRegistration = ctx.registerService(CommandProvider.class.getName(), this, null);
 		} catch (InvalidSyntaxException e) {
 			// should not happen.
@@ -105,10 +108,23 @@ public class AppCommands implements CommandProvider {
 			return;
 		}
 		for (int i = 0; i < apps.length; i++) {
-			intp.print(apps[i].getProperty(ApplicationDescriptor.APPLICATION_PID));
-			intp.print(" ["); //$NON-NLS-1$
-			intp.print(launchableApp.match(getServiceProps(apps[i])) ? "enabled" : "disabled"); //$NON-NLS-1$ //$NON-NLS-2$
-			intp.println("]"); //$NON-NLS-1$
+			String application = (String) apps[i].getProperty(ApplicationDescriptor.APPLICATION_PID);
+			intp.print(application);
+
+			if (getApplication(applicationHandles.getServiceReferences(), application, true) != null)
+				intp.print(" [running]"); //$NON-NLS-1$ 
+
+			if (getApplication(scheduledApplications.getServiceReferences(), application, true) != null)
+				intp.print(" [scheduled]"); //$NON-NLS-1$ 
+
+			if (!launchableApp.match(getServiceProps(apps[i])))
+				intp.print(" [not launchable]"); //$NON-NLS-1$ 
+			else
+				intp.print(" [launchable]"); //$NON-NLS-1$ 
+
+			if (lockedApp.match(getServiceProps(apps[i])))
+				intp.print(" [locked]"); //$NON-NLS-1$ 
+			intp.println();
 		}
 	}
 
@@ -126,122 +142,131 @@ public class AppCommands implements CommandProvider {
 		}
 	}
 
+	private ServiceReference getApplication(ServiceReference[] apps, String targetId, boolean allowMultiple) {
+		ServiceReference result = null;
+		if (apps != null && targetId != null)
+			for (int i = 0; i < apps.length; i++) {
+				String id = (String) apps[i].getProperty(ApplicationDescriptor.APPLICATION_PID);
+				if (targetId.equals(id) || id.indexOf(targetId) >= 0) {
+					if (result != null) // we already found a match so this is ambiguous
+						return allowMultiple ? result : null;
+					result = apps[i];
+				}
+			}
+		return result;
+	}
+
 	public void _startApp(CommandInterpreter intp) throws Exception {
 		String appId = intp.nextArgument();
-		ServiceReference[] apps = applicationDescriptors.getServiceReferences();
-		if (apps != null && appId != null)
-			for (int i = 0; i < apps.length; i++)
-				if (appId.equals(apps[i].getProperty(ApplicationDescriptor.APPLICATION_PID))) {
-					ArrayList argList = new ArrayList();
-					String arg = null;
-					while ((arg = intp.nextArgument()) != null)
-						argList.add(arg);
-					String[] args = argList.size() == 0 ? null : (String[]) argList.toArray(new String[argList.size()]);
-					ApplicationDescriptor appDesc = (ApplicationDescriptor) context.getService(apps[i]);
-					try {
-						HashMap launchArgs = new HashMap(1);
-						if (args != null)
-							launchArgs.put(IApplicationContext.APPLICATION_ARGS, args);
-						appDesc.launch(launchArgs);
-						intp.println("Launched application: " + appId); //$NON-NLS-1$
-					} finally {
-						context.ungetService(apps[i]);
-					}
-					return;
-				}
-		intp.println("No application with the id \"" + appId + "\" exists."); //$NON-NLS-1$ //$NON-NLS-2$
+		ServiceReference application = getApplication(applicationDescriptors.getServiceReferences(), appId, false);
+		if (application == null)
+			intp.println("\"" + appId + "\" does not exist or is ambigous."); //$NON-NLS-1$ //$NON-NLS-2$
+		else {
+			ArrayList argList = new ArrayList();
+			String arg = null;
+			while ((arg = intp.nextArgument()) != null)
+				argList.add(arg);
+			String[] args = argList.size() == 0 ? null : (String[]) argList.toArray(new String[argList.size()]);
+			try {
+				HashMap launchArgs = new HashMap(1);
+				if (args != null)
+					launchArgs.put(IApplicationContext.APPLICATION_ARGS, args);
+				((ApplicationDescriptor) context.getService(application)).launch(launchArgs);
+				intp.println("Launched application: " + application.getProperty(ApplicationDescriptor.APPLICATION_PID)); //$NON-NLS-1$
+			} finally {
+				context.ungetService(application);
+			}
+			return;
+		}
 	}
 
 	public void _stopApp(CommandInterpreter intp) throws Exception {
-		String runningId = intp.nextArgument();
-		ServiceReference[] runningApps = applicationHandles.getServiceReferences();
-		if (runningApps != null && runningId != null)
-			for (int i = 0; i < runningApps.length; i++)
-				if (runningId.equals(runningApps[i].getProperty(ApplicationHandle.APPLICATION_PID))) {
-					if (activeApp.match(getServiceProps(runningApps[i]))) {
-						try {
-							ApplicationHandle appDesc = (ApplicationHandle) context.getService(runningApps[i]);
-							appDesc.destroy();
-							intp.println("Stopped application: " + runningId); //$NON-NLS-1$
-						} finally {
-							context.ungetService(runningApps[i]);
-						}
-					} else {
-						intp.println("Applicationi is already stopping: " + runningId); //$NON-NLS-1$
-					}
-					return;
+		String appId = intp.nextArgument();
+		ServiceReference application = getApplication(applicationHandles.getServiceReferences(), appId, false);
+		if (application == null)
+			intp.println("\"" + appId + "\" does not exist, is not running or is ambigous."); //$NON-NLS-1$ //$NON-NLS-2$
+		else {
+			if (activeApp.match(getServiceProps(application))) {
+				try {
+					ApplicationHandle appDesc = (ApplicationHandle) context.getService(application);
+					appDesc.destroy();
+					intp.println("Stopped application: " + appId); //$NON-NLS-1$
+				} finally {
+					context.ungetService(application);
 				}
-		intp.println("No running application with the id \"" + runningId + "\" exists."); //$NON-NLS-1$ //$NON-NLS-2$
+			} else {
+				intp.println("Applicationi is already stopping: " + application.getProperty(ApplicationDescriptor.APPLICATION_PID)); //$NON-NLS-1$
+			}
+			return;
+		}
 	}
 
 	public void _lockApp(CommandInterpreter intp) throws Exception {
 		String appId = intp.nextArgument();
-		ServiceReference[] apps = applicationDescriptors.getServiceReferences();
-		if (apps != null && appId != null)
-			for (int i = 0; i < apps.length; i++)
-				if (appId.equals(apps[i].getProperty(ApplicationDescriptor.APPLICATION_PID))) {
-					try {
-						ApplicationDescriptor appDesc = (ApplicationDescriptor) context.getService(apps[i]);
-						appDesc.lock();
-						intp.println("Locked application: " + appId); //$NON-NLS-1$
-					} finally {
-						context.ungetService(apps[i]);
-					}
-					return;
-				}
-		intp.println("No application with the id \"" + appId + "\" exists."); //$NON-NLS-1$ //$NON-NLS-2$
+		ServiceReference application = getApplication(applicationDescriptors.getServiceReferences(), appId, false);
+		if (application == null)
+			intp.println("\"" + appId + "\" does not exist or is ambigous."); //$NON-NLS-1$ //$NON-NLS-2$
+		else {
+			try {
+				ApplicationDescriptor appDesc = (ApplicationDescriptor) context.getService(application);
+				appDesc.lock();
+				intp.println("Locked application: " + application.getProperty(ApplicationDescriptor.APPLICATION_PID)); //$NON-NLS-1$
+			} finally {
+				context.ungetService(application);
+			}
+			return;
+		}
 	}
 
 	public void _unlockApp(CommandInterpreter intp) throws Exception {
 		String appId = intp.nextArgument();
-		ServiceReference[] apps = applicationDescriptors.getServiceReferences();
-		if (apps != null && appId != null)
-			for (int i = 0; i < apps.length; i++)
-				if (appId.equals(apps[i].getProperty(ApplicationDescriptor.APPLICATION_PID))) {
-					try {
-						ApplicationDescriptor appDesc = (ApplicationDescriptor) context.getService(apps[i]);
-						appDesc.unlock();
-						intp.println("Unlocked application: " + appId); //$NON-NLS-1$
-					} finally {
-						context.ungetService(apps[i]);
-					}
-					return;
-				}
-		intp.println("No application with the id \"" + appId + "\" exists."); //$NON-NLS-1$ //$NON-NLS-2$
+		ServiceReference application = getApplication(applicationDescriptors.getServiceReferences(), appId, false);
+		if (application == null)
+			intp.println("\"" + appId + "\" does not exist or is ambigous."); //$NON-NLS-1$ //$NON-NLS-2$
+		else {
+			try {
+				ApplicationDescriptor appDesc = (ApplicationDescriptor) context.getService(application);
+				appDesc.unlock();
+				intp.println("Unlocked application: " + application.getProperty(ApplicationDescriptor.APPLICATION_PID)); //$NON-NLS-1$
+			} finally {
+				context.ungetService(application);
+			}
+			return;
+		}
 	}
 
 	public void _schedApp(CommandInterpreter intp) throws Exception {
 		String appId = intp.nextArgument();
-		ServiceReference[] apps = applicationDescriptors.getServiceReferences();
-		if (apps != null && appId != null)
-			for (int i = 0; i < apps.length; i++)
-				if (appId.equals(apps[i].getProperty(ApplicationDescriptor.APPLICATION_PID))) {
-					try {
-						ApplicationDescriptor appDesc = (ApplicationDescriptor) context.getService(apps[i]);
-						String filter = intp.nextArgument();
-						boolean recure = Boolean.valueOf(intp.nextArgument()).booleanValue();
-						appDesc.schedule(null, null, "org/osgi/application/timer", filter, recure); //$NON-NLS-1$
-						intp.println("scheduled application: " + appId); //$NON-NLS-1$
-					} finally {
-						context.ungetService(apps[i]);
-					}
-					return;
-				}
-		intp.println("No application with the id \"" + appId + "\" exists."); //$NON-NLS-1$ //$NON-NLS-2$
+		ServiceReference application = getApplication(applicationDescriptors.getServiceReferences(), appId, false);
+		if (application == null)
+			intp.println("\"" + appId + "\" does not exist or is ambigous."); //$NON-NLS-1$ //$NON-NLS-2$
+		else {
+			try {
+				ApplicationDescriptor appDesc = (ApplicationDescriptor) context.getService(application);
+				String filter = intp.nextArgument();
+				boolean recure = Boolean.valueOf(intp.nextArgument()).booleanValue();
+				appDesc.schedule(null, null, "org/osgi/application/timer", filter, recure); //$NON-NLS-1$
+				intp.println("Scheduled application: " + application.getProperty(ApplicationDescriptor.APPLICATION_PID)); //$NON-NLS-1$
+			} finally {
+				context.ungetService(application);
+			}
+			return;
+		}
 	}
 
 	public void _unschedApp(CommandInterpreter intp) throws Exception {
-		String schedId = intp.nextArgument();
-		ServiceReference[] scheds = scheduledApplications.getServiceReferences();
-		if (scheds != null)
-			for (int i = 0; i < scheds.length; i++) {
-				ScheduledApplication schedApp = (ScheduledApplication) context.getService(scheds[i]);
-				try {
-					if (schedId.equals(schedApp.getApplicationDescriptor().getApplicationId()))
-						schedApp.remove();
-				} finally {
-					context.ungetService(scheds[i]);
-				}
+		String appId = intp.nextArgument();
+		ServiceReference application = getApplication(scheduledApplications.getServiceReferences(), appId, false);
+		if (application == null)
+			intp.println("\"" + appId + "\" does not exist or is ambigous."); //$NON-NLS-1$ //$NON-NLS-2$
+		else {
+			try {
+				ScheduledApplication schedApp = (ScheduledApplication) context.getService(application);
+				schedApp.remove();
+				intp.println("Unscheduled application: " + application.getProperty(ApplicationDescriptor.APPLICATION_PID)); //$NON-NLS-1$
+			} finally {
+				context.ungetService(application);
 			}
+		}
 	}
 }
