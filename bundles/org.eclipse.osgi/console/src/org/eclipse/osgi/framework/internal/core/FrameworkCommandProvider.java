@@ -79,7 +79,7 @@ import org.osgi.service.permissionadmin.PermissionAdmin;
  *  There is a method for each command which is named '_'+method.  The methods are
  *  invoked by a CommandInterpreter's execute method.
  */
-public class FrameworkCommandProvider implements CommandProvider {
+public class FrameworkCommandProvider implements CommandProvider, SynchronousBundleListener {
 
 	/** An instance of the OSGi framework */
 	private OSGi osgi;
@@ -93,11 +93,14 @@ public class FrameworkCommandProvider implements CommandProvider {
 	/** Strings used to format other strings */
 	private String tab = "\t"; //$NON-NLS-1$
 	private String newline = "\r\n"; //$NON-NLS-1$
+	
+	/** this list contains the bundles known to be lazily awaiting activation */ 
+	private final List lazyActivation = new ArrayList();
 
 	/**
 	 *  Constructor.
 	 *
-	 *  It registers itself as a CommandProvider with the highest ranking possible.
+	 *  initialize must be called after creating this object.
 	 *
 	 *  @param osgi The current instance of OSGi
 	 */
@@ -107,9 +110,23 @@ public class FrameworkCommandProvider implements CommandProvider {
 		slImpl = osgi.framework.startLevelManager;
 		condPermAdmin = osgi.framework.condPermAdmin;
 		permAdmin = osgi.framework.permissionAdmin;
+	}
+	
+	/**
+	 *  Intialize this CommandProvider.
+	 *
+	 *  Registers this object as a CommandProvider with the highest ranking possible.
+	 *  Adds this object as a SynchronousBundleListener.
+	 *
+	 *	@return this
+	 */
+	public FrameworkCommandProvider intialize() {
 		Dictionary props = new Hashtable();
 		props.put(Constants.SERVICE_RANKING, new Integer(Integer.MAX_VALUE));
 		context.registerService(CommandProvider.class.getName(), this, props);
+		
+		context.addBundleListener(this);
+		return this;
 	}
 
 	/**
@@ -474,7 +491,7 @@ public class FrameworkCommandProvider implements CommandProvider {
 			intp.print(tab);
 			intp.println(bundle.getLocation());
 			intp.print("  "); //$NON-NLS-1$
-			intp.print(getStateName(bundle.getState()));
+			intp.print(getStateName(bundle));
 			intp.println(bundle.bundledata);
 		}
 
@@ -651,7 +668,7 @@ public class FrameworkCommandProvider implements CommandProvider {
 			intp.print("  "); //$NON-NLS-1$
 			intp.print(NLS.bind(ConsoleMsg.CONSOLE_ID_MESSAGE, String.valueOf(id)));
 			intp.print(", "); //$NON-NLS-1$
-			intp.print(NLS.bind(ConsoleMsg.CONSOLE_STATUS_MESSAGE, getStateName(bundle.getState())));
+			intp.print(NLS.bind(ConsoleMsg.CONSOLE_STATUS_MESSAGE, getStateName(bundle)));
 			if (id != 0) {
 				File dataRoot = osgi.framework.getDataFile(bundle, ""); //$NON-NLS-1$
 
@@ -717,7 +734,7 @@ public class FrameworkCommandProvider implements CommandProvider {
 				intp.print("  "); //$NON-NLS-1$
 				intp.print(NLS.bind(ConsoleMsg.CONSOLE_ID_MESSAGE, String.valueOf(id)));
 				intp.print(", "); //$NON-NLS-1$
-				intp.print(NLS.bind(ConsoleMsg.CONSOLE_STATUS_MESSAGE, getStateName(bundle.getState())));
+				intp.print(NLS.bind(ConsoleMsg.CONSOLE_STATUS_MESSAGE, getStateName(bundle)));
 				if (id != 0) {
 					File dataRoot = osgi.framework.getDataFile(bundle, ""); //$NON-NLS-1$
 
@@ -1362,7 +1379,7 @@ public class FrameworkCommandProvider implements CommandProvider {
 					label = b.toString();
 				else
 					label = label + "_" + b.getVersion(); //$NON-NLS-1$
-				intp.println(b.getBundleId() + "\t" + getStateName(b.getState()) + label); //$NON-NLS-1$ 
+				intp.println(b.getBundleId() + "\t" + getStateName(b) + label); //$NON-NLS-1$ 
 				if (b.isFragment()) {
 					BundleLoaderProxy[] hosts = b.getHosts();
 					if (hosts != null)
@@ -1754,28 +1771,34 @@ public class FrameworkCommandProvider implements CommandProvider {
 	 *  @param state An int containing a state value
 	 *  @return A String describing the state
 	 */
-	protected String getStateName(int state) {
+	protected String getStateName(Bundle bundle) {
+		int state = bundle.getState();
 		switch (state) {
 			case Bundle.UNINSTALLED :
-				return (ConsoleMsg.CONSOLE_UNINSTALLED_MESSAGE);
+				return "UNINSTALLED "; //$NON-NLS-1$
 
 			case Bundle.INSTALLED :
-				return (ConsoleMsg.CONSOLE_INSTALLED_MESSAGE);
+				return "INSTALLED   "; //$NON-NLS-1$
 
 			case Bundle.RESOLVED :
-				return (ConsoleMsg.CONSOLE_RESOLVED_MESSAGE);
+				return "RESOLVED    "; //$NON-NLS-1$
 
 			case Bundle.STARTING :
-				return (ConsoleMsg.CONSOLE_STARTING_MESSAGE);
+				synchronized (lazyActivation) {
+					if (lazyActivation.contains(bundle)) {
+						return "«LAZY»      "; //$NON-NLS-1$
+					}
+					return "STARTING    "; //$NON-NLS-1$
+				}
 
 			case Bundle.STOPPING :
-				return (ConsoleMsg.CONSOLE_STOPPING_MESSAGE);
+				return "STOPPING    "; //$NON-NLS-1$
 
 			case Bundle.ACTIVE :
-				return (ConsoleMsg.CONSOLE_ACTIVE_MESSAGE);
+				return "ACTIVE      "; //$NON-NLS-1$
 
 			default :
-				return (Integer.toHexString(state));
+				return Integer.toHexString(state);
 		}
 	}
 
@@ -1840,5 +1863,27 @@ public class FrameworkCommandProvider implements CommandProvider {
 				ci.println(prop + '=' + allProperties.getProperty(prop));
 			}
 		}
+	}
+
+	/**
+	 * This is used to track lazily activated bundles.
+	 */
+	public void bundleChanged(BundleEvent event) {
+		int type = event.getType();
+		Bundle bundle = event.getBundle();
+		synchronized (lazyActivation) {
+			switch (type) {
+				case BundleEvent.LAZY_ACTIVATION:
+					if (!lazyActivation.contains(bundle)) {
+						lazyActivation.add(bundle);
+					}
+					break;
+			
+				default:
+					lazyActivation.remove(bundle);
+					break;
+			}
+		}
+		
 	}
 }

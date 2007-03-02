@@ -190,7 +190,7 @@ public class FrameworkConsole implements Runnable {
 		cptracker.open();
 
 		// register the OSGi command provider
-		osgicp = new FrameworkCommandProvider(osgi);
+		osgicp = new FrameworkCommandProvider(osgi).intialize();
 
 	}
 
@@ -403,7 +403,7 @@ public class FrameworkConsole implements Runnable {
 		public Socket getSocket() throws InterruptedException {
 			// wait for a socket to get assigned from the accepter thread
 			synchronized (lock) {
-				lock.wait();
+				lock.wait(); //TODO spurious wakeup not handled
 			}
 			setAcceptConnections(false);
 			return socket;
