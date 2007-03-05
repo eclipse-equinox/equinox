@@ -52,6 +52,8 @@ public class HttpServiceTracker extends ServiceTracker {
 
 	public synchronized Object addingService(ServiceReference reference) {
 		HttpService httpService = (HttpService) context.getService(reference);
+		if (httpService == null)
+			return null;
 
 		HttpContextManager httpContextManager = new HttpContextManager(httpService, packageAdmin, registry);
 		httpContextManager.start();
