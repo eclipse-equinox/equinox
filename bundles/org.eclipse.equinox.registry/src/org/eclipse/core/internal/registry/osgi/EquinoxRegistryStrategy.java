@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,10 +14,8 @@ import java.io.File;
 import java.util.Map;
 import org.eclipse.core.internal.registry.RegistryMessages;
 import org.eclipse.core.internal.runtime.RuntimeLog;
-import org.eclipse.core.runtime.*;
-import org.eclipse.core.runtime.jobs.ISchedulingRule;
-import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.core.runtime.spi.RegistryStrategy;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 
@@ -40,6 +38,8 @@ public class EquinoxRegistryStrategy extends RegistryStrategyOSGI {
 
 	private static boolean DEBUG_ECLIPSE_REGISTRY = OSGIUtils.getDefault().getBooleanDebugOption(OPTION_DEBUG, false);
 	private static boolean DEBUG_ECLIPSE_EVENTS = OSGIUtils.getDefault().getBooleanDebugOption(OPTION_DEBUG_EVENTS, false);
+
+	private boolean useJobs = true;
 
 	public EquinoxRegistryStrategy(File[] theStorageDir, boolean[] cacheReadOnly, Object key) {
 		super(theStorageDir, cacheReadOnly, key);
@@ -70,42 +70,25 @@ public class EquinoxRegistryStrategy extends RegistryStrategyOSGI {
 		return EquinoxUtils.getContainerTimestamp(context, ref);
 	}
 
-	//////////////////////////////////////////////////////////////////////////////////////////
-	// Use Eclipse job scheduling mechanism
-
-	private final static class ExtensionEventDispatcherJob extends Job {
-		// an "identy rule" that forces extension events to be queued		
-		private final static ISchedulingRule EXTENSION_EVENT_RULE = new ISchedulingRule() {
-			public boolean contains(ISchedulingRule rule) {
-				return rule == this;
-			}
-
-			public boolean isConflicting(ISchedulingRule rule) {
-				return rule == this;
-			}
-		};
-		private Map deltas;
-		private Object[] listenerInfos;
-		private Object registry;
-
-		public ExtensionEventDispatcherJob(Object[] listenerInfos, Map deltas, Object registry) {
-			// name not NL'd since it is a system job
-			super("Registry event dispatcher"); //$NON-NLS-1$
-			setSystem(true);
-			this.listenerInfos = listenerInfos;
-			this.deltas = deltas;
-			this.registry = registry;
-			// all extension event dispatching jobs use this rule
-			setRule(EXTENSION_EVENT_RULE);
-		}
-
-		public IStatus run(IProgressMonitor monitor) {
-			return RegistryStrategy.processChangeEvent(listenerInfos, deltas, registry);
-		}
-	}
-
+	/**
+	 * This method will attempt to use Eclipse Jobs mechanism to schedule registry events. If, at any time, 
+	 * Eclipse Jobs mechanism is missing, this method will fallback on the "internal" event scheduling
+	 * provided by the registry strategy.
+	 * 
+	 * Once the switch to the fallback mechanism occurred, no further attempt to use scheduling from the Jobs bundle
+	 * will be made (until registry bundle is restarted). Avoiding repeated checks in this scenario will ensure that 
+	 * most users see no performance degradation and that order of registry events remains consistent. 
+	 */
 	public final void scheduleChangeEvent(Object[] listeners, Map deltas, Object registry) {
-		new ExtensionEventDispatcherJob(listeners, deltas, registry).schedule();
+		if (useJobs) {
+			try {
+				new ExtensionEventDispatcherJob(listeners, deltas, registry).schedule();
+				return; // all done - most typical use case
+			} catch (NoClassDefFoundError e) {
+				useJobs = false; // Jobs are missing
+			}
+		}
+		super.scheduleChangeEvent(listeners, deltas, registry);
 	}
 
 }
