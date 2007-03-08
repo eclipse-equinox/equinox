@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006 IBM Corporation and others.
+ * Copyright (c) 2006, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Stefan Xenos - bug 174539 - add a 1-argument convert(...) method     
  *******************************************************************************/
 package org.eclipse.core.runtime;
 
@@ -337,6 +338,22 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 		root = rootInfo;
 		totalParent = totalWork;
 		this.totalForChildren = availableToChildren;
+	}
+
+	/**
+	 * <p>Converts an unknown (possibly null) IProgressMonitor into a SubMonitor. It is 
+	 * not necessary to call done() on the result, but the caller is responsible for calling 
+	 * done() on the argument. Calls beginTask on the argument.</p>
+	 * 
+	 * <p>This method should generally be called at the beginning of a method that accepts
+	 * an IProgressMonitor in order to convert the IProgressMonitor into a SubMonitor.</p> 
+	 * 
+	 * @param monitor monitor to convert to a SubMonitor instance or null. Treats null
+	 * as a new instance of <code>NullProgressMonitor</code>.
+	 * @return a SubMonitor instance that adapts the argument
+	 */
+	public static SubMonitor convert(IProgressMonitor monitor) {
+		return convert(monitor, "", 0); //$NON-NLS-1$
 	}
 
 	/**
