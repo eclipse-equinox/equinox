@@ -6,8 +6,9 @@
  * http://www.eclipse.org/legal/epl-v10.html
  * 
  * Contributors:
- *     IBM Corporation - initial API and implementation
+ *     Stefan Xenos - initial API and implementation
  *     Stefan Xenos - bug 174539 - add a 1-argument convert(...) method     
+ *     Stefan Xenos - bug 174040 - SubMonitor#convert doesn't always set task name
  *******************************************************************************/
 package org.eclipse.core.runtime;
 
@@ -66,7 +67,7 @@ package org.eclipse.core.runtime;
  * <p>This example demonstrates how the recommended usage of <code>SubMonitor</code> makes it unnecessary to call
  * IProgressMonitor.done() in most situations.</p>
  * 
- * <p>It is never necessary to call done() on a monitor obtained from <code>begin</code> or <code>progress.newChild()</code>. 
+ * <p>It is never necessary to call done() on a monitor obtained from <code>convert</code> or <code>progress.newChild()</code>. 
  * In this example, there is no guarantee that <code>monitor</code> is an instance of <code>SubMonitor</code>, making it 
  * necessary to call <code>monitor.done()</code>. The JavaDoc contract makes this the responsibility of the caller.</p> 
  * 
@@ -328,16 +329,62 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 	private final RootInfo root;
 
 	/**
+	 * A bitwise combination of the SUPPRESS_* flags.
+	 */
+	private final int flags;
+
+	/**
+	 * May be passed as a flag to newChild. Indicates that the calls
+	 * to subTask on the child should be ignored. Without this flag,
+	 * calling subTask on the child will result in a call to subTask
+	 * on its parent.
+	 */
+	public static final int SUPPRESS_SUBTASK = 0x0001;
+
+	/**
+	 * May be passed as a flag to newChild. Indicates that strings
+	 * passed into beginTask should be ignored. If this flag is
+	 * specified, then the progress monitor instance will accept null 
+	 * as the first argument to beginTask. Without this flag, any 
+	 * string passed to beginTask will result in a call to
+	 * setTaskName on the parent.
+	 */
+	public static final int SUPPRESS_BEGINTASK = 0x0002;
+
+	/**
+	 * May be passed as a flag to newChild. Indicates that strings
+	 * passed into setTaskName should be ignored. If this string
+	 * is omitted, then a call to setTaskName on the child will 
+	 * result in a call to setTaskName on the parent.
+	 */
+	public static final int SUPPRESS_SETTASKNAME = 0x0004;
+
+	/**
+	 * May be passed as a flag to newChild. Indicates that strings
+	 * passed to setTaskName, subTask, and beginTask should all be ignored.
+	 */
+	public static final int SUPPRESS_ALL_LABELS = SUPPRESS_SETTASKNAME | SUPPRESS_BEGINTASK | SUPPRESS_SUBTASK;
+
+	/**
+	 * May be passed as a flag to newChild. Indicates that strings
+	 * passed to setTaskName, subTask, and beginTask should all be propogated
+	 * to the parent.
+	 */
+	public static final int SUPPRESS_NONE = 0;
+
+	/**
 	 * Creates a new SubMonitor that will report its progress via
 	 * the given RootInfo.
 	 * @param rootInfo the root of this progress monitor tree
 	 * @param totalWork total work to perform on the given progress monitor
 	 * @param availableToChildren number of ticks allocated for this instance's children
+	 * @param flags a bitwise combination of the SUPPRESS_* constants
 	 */
-	private SubMonitor(RootInfo rootInfo, int totalWork, int availableToChildren) {
+	private SubMonitor(RootInfo rootInfo, int totalWork, int availableToChildren, int flags) {
 		root = rootInfo;
 		totalParent = totalWork;
 		this.totalForChildren = availableToChildren;
+		this.flags = flags;
 	}
 
 	/**
@@ -394,11 +441,13 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 			monitor = new NullProgressMonitor();
 
 		// Optimization: if the given monitor already a SubMonitor, no conversion is necessary
-		if (monitor instanceof SubMonitor)
-			return ((SubMonitor) monitor).setWorkRemaining(work);
+		if (monitor instanceof SubMonitor) {
+			monitor.beginTask(taskName, work);
+			return (SubMonitor) monitor;
+		}
 
 		monitor.beginTask(taskName, MINIMUM_RESOLUTION);
-		return new SubMonitor(new RootInfo(monitor), MINIMUM_RESOLUTION, work);
+		return new SubMonitor(new RootInfo(monitor), MINIMUM_RESOLUTION, work, SUPPRESS_NONE);
 	}
 
 	/**
@@ -409,7 +458,7 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 	 * number of ticks.</p>
 	 * 
 	 * <p>It doesn't matter how much progress has already been reported with this SubMonitor
-	 * instance. If you call setTicks(100), you will be able to report 100 more ticks of 
+	 * instance. If you call setWorkRemaining(100), you will be able to report 100 more ticks of 
 	 * work before the progress meter reaches 100%.</p>
 	 * 
 	 * @param workRemaining total number of remaining ticks
@@ -469,17 +518,27 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 	 * @see org.eclipse.core.runtime.IProgressMonitor#setTaskName(java.lang.String)
 	 */
 	public void setTaskName(String name) {
-		root.setTaskName(name);
+		if ((flags & SUPPRESS_SETTASKNAME) == 0)
+			root.setTaskName(name);
 	}
 
-	/* (non-Javadoc)
-	 * Starts a new main task. Since this progress monitor is a sub
-	 * progress monitor, the given name will NOT be used to update
-	 * the progress bar's main task label. That means the given 
-	 * string will be ignored.
+	/**
+	 * Starts a new main task. The string argument is ignored
+	 * if and only if the SUPPRESS_BEGINTASK flag has been set on this SubMonitor
+	 * instance. 
+	 * 
+	 * <p>This method is equivalent calling setWorkRemaining(...) on the reciever. Unless 
+	 * the SUPPRESS_BEGINTASK flag is set, this will also be equivalent to calling 
+	 * setTaskName(...) on the parent.</p>
+	 * 
+	 * @param name new main task name
+	 * @param totalWork number of ticks to allocate
+	 * 
 	 * @see org.eclipse.core.runtime.IProgressMonitor#beginTask(java.lang.String, int)
 	 */
 	public void beginTask(String name, int totalWork) {
+		if ((flags & SUPPRESS_BEGINTASK) == 0 && name != null)
+			root.setTaskName(name);
 		setWorkRemaining(totalWork);
 	}
 
@@ -511,7 +570,8 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 	 * @see org.eclipse.core.runtime.IProgressMonitor#subTask(java.lang.String)
 	 */
 	public void subTask(String name) {
-		root.subTask(name);
+		if ((flags & SUPPRESS_SUBTASK) == 0)
+			root.subTask(name);
 	}
 
 	/* (non-Javadoc)
@@ -589,11 +649,98 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 	 * @return new sub progress monitor that may be used in place of a new SubMonitor
 	 */
 	public SubMonitor newChild(int totalWork) {
+		return newChild(totalWork, SUPPRESS_BEGINTASK);
+	}
+
+	/**
+	 * <p>Creates a sub progress monitor that will consume the given number of ticks from the 
+	 * receiver. It is not necessary to call <code>beginTask</code> or <code>done</code> on the
+	 * result. However, the resulting progress monitor will not report any work after the first 
+	 * call to done() or before ticks are allocated. Ticks may be allocated by calling beginTask
+	 * or setWorkRemaining.</p>
+	 * 
+	 * <p>Each SubMonitor only has one active child at a time. Each time newChild() is called, the
+	 * result becomes the new active child and any unused progress from the previously-active child is
+	 * consumed.</p>
+	 * 
+	 * <p>This is property makes it unnecessary to call done() on a SubMonitor instance, since child
+	 * monitors are automatically cleaned up the next time the parent is touched.</p> 
+	 * 
+	 * <code><pre> 
+	 *      ////////////////////////////////////////////////////////////////////////////
+	 *      // Example 1: Typical usage of newChild
+	 *      void myMethod(IProgressMonitor parent) {
+	 *          SubMonitor progress = SubMonitor.convert(parent, 100); 
+	 *          doSomething(progress.newChild(50));
+	 *          doSomethingElse(progress.newChild(50));
+	 *      }
+	 *      
+	 *      ////////////////////////////////////////////////////////////////////////////
+	 *      // Example 2: Demonstrates the function of active children. Creating children
+	 *      // is sufficient to smoothly report progress, even if worked(...) and done()
+	 *      // are never called.
+	 *      void myMethod(IProgressMonitor parent) {
+	 *          SubMonitor progress = SubMonitor.convert(parent, 100);
+	 *          
+	 *          for (int i = 0; i < 100; i++) {
+	 *              // Creating the next child monitor will clean up the previous one,
+	 *              // causing progress to be reported smoothly even if we don't do anything
+	 *              // with the monitors we create
+	 *          	progress.newChild(1);
+	 *          }
+	 *      }
+	 *      
+	 *      ////////////////////////////////////////////////////////////////////////////
+	 *      // Example 3: Demonstrates a common anti-pattern
+	 *      void wrongMethod(IProgressMonitor parent) {
+	 *          SubMonitor progress = SubMonitor.convert(parent, 100);
+	 *          
+	 *          // WRONG WAY: Won't have the intended effect, as only one of these progress
+	 *          // monitors may be active at a time and the other will report no progress.
+	 *          callMethod(progress.newChild(50), computeValue(progress.newChild(50)));
+	 *      }
+	 *      
+	 *      void rightMethod(IProgressMonitor parent) {
+	 *          SubMonitor progress = SubMonitor.convert(parent, 100);
+	 *          
+	 *          // RIGHT WAY: Break up method calls so that only one SubMonitor is in use at a time.
+	 *          Object someValue = computeValue(progress.newChild(50));
+	 *          callMethod(progress.newChild(50), someValue);
+	 *      }
+	 * </pre></code>
+	 * 
+	 * @param totalWork number of ticks to consume from the reciever
+	 * @return new sub progress monitor that may be used in place of a new SubMonitor
+	 */
+	public SubMonitor newChild(int totalWork, int suppressFlags) {
 		double totalWorkDouble = totalWork;
 		totalWorkDouble = Math.min(totalWorkDouble, totalForChildren - usedForChildren);
 		cleanupActiveChild();
 
-		SubMonitor result = new SubMonitor(root, consume(totalWorkDouble), 0);
+		// Compute the flags for the child. We want the net effect to be as though the child is
+		// delegating to its parent, even though it is actually talking directly to the root.
+		// This means that we need to compute the flags such that - even if a label isn't 
+		// suppressed by the child - if that same label would have been suppressed when the
+		// child delegated to its parent, the child must explicitly suppress the label. 
+		int childFlags = SUPPRESS_NONE;
+
+		if ((flags & SUPPRESS_SETTASKNAME) != 0) {
+			// If the parent was ignoring labels passed to setTaskName, then the child will ignore
+			// labels passed to either beginTask or setTaskName - since both delegate to setTaskName
+			// on the parent
+			childFlags |= SUPPRESS_SETTASKNAME | SUPPRESS_BEGINTASK;
+		}
+
+		if ((flags & SUPPRESS_SUBTASK) != 0) {
+			// If the parent was suppressing labels passed to subTask, so will the child.
+			childFlags |= SUPPRESS_SUBTASK;
+		}
+
+		// Note: the SUPPRESS_BEGINTASK flag does not affect the child since there
+		// is no method on the child that would delegate to beginTask on the parent.
+		childFlags |= suppressFlags;
+
+		SubMonitor result = new SubMonitor(root, consume(totalWorkDouble), 0, childFlags);
 		lastSubMonitor = result;
 		return result;
 	}
