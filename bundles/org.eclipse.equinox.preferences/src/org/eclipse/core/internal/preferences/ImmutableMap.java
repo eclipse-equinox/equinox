@@ -39,10 +39,6 @@ public abstract class ImmutableMap implements Cloneable {
 		private int threshold;
 		private String[] valueTable;
 
-		private ArrayMap() {
-			this(16);
-		}
-
 		ArrayMap(int size) {
 			this.elementSize = 0;
 			//table size must always be a power of two
