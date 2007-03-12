@@ -49,6 +49,9 @@
          </appInfo>
       </annotation>
       <complexType>
+         <sequence>
+            <element ref="mime-mapping" minOccurs="0" maxOccurs="unbounded"/>
+         </sequence>
          <attribute name="name" type="string" use="required">
             <annotation>
                <documentation>
@@ -72,6 +75,33 @@ This attribute is used by the default httpcontext implementation when the class 
                <appInfo>
                   <meta.attribute kind="java" basedOn="org.osgi.service.http.HttpContext"/>
                </appInfo>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <element name="mime-mapping">
+      <annotation>
+         <appInfo>
+            <meta.element labelAttribute="extension"/>
+         </appInfo>
+         <documentation>
+            Similar to the Servlet Specification and its deployment descriptor&apos;s mime-mapping elements.
+         </documentation>
+      </annotation>
+      <complexType>
+         <attribute name="extension" type="string" use="required">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="mime-type" type="string" use="required">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
             </annotation>
          </attribute>
       </complexType>

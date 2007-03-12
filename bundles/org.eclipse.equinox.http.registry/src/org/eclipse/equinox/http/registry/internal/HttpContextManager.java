@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005 Cognos Incorporated.
+ * Copyright (c) 2007 Cognos Incorporated, IBM Corporation.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,6 +30,9 @@ public class HttpContextManager implements Listener {
 	private static final String NAME = "name"; //$NON-NLS-1$
 	private static final String CLASS = "class"; //$NON-NLS-1$
 	private static final String PATH = "path"; //$NON-NLS-1$
+	private static final String MIMEMAPPING = "mime-mapping"; //$NON-NLS-1$
+	private static final String MIMEEXTENSION = "extension"; //$NON-NLS-1$
+	private static final String MIMETYPE = "mime-type"; //$NON-NLS-1$
 
 	private Map contextsMap = new HashMap();
 	private PackageAdmin packageAdmin;
@@ -102,7 +105,18 @@ public class HttpContextManager implements Listener {
 			} else {
 				Bundle b = getBundle(extension.getContributor().getName());
 				String path = httpContextElement.getAttribute(PATH);
-				context = new DefaultHttpContextImpl(b, path);
+				Properties mimeMappings = null;
+				IConfigurationElement[] mimeMappingElements = httpContextElement.getChildren(MIMEMAPPING);
+				if (mimeMappingElements.length > 0) {
+					mimeMappings = new Properties();
+					for (int j = 0; j < mimeMappingElements.length; j++) {
+						IConfigurationElement urlMappingElement = mimeMappingElements[i];
+						String mimeExtension = urlMappingElement.getAttribute(MIMEEXTENSION);
+						String mimeType = urlMappingElement.getAttribute(MIMETYPE);
+						mimeMappings.put(mimeExtension, mimeType);
+					}
+				}				
+				context = new DefaultHttpContextImpl(b, path, mimeMappings);
 			}
 
 			NamedHttpContextImpl namedContext = (NamedHttpContextImpl) getHttpContext(httpContextName);
@@ -129,13 +143,14 @@ public class HttpContextManager implements Listener {
 		private Bundle bundle;
 		private HttpContext delegate;
 		private String bundlePath;
+		private Properties mimeMappings;
 
 		public DefaultHttpContextImpl(Bundle bundle) {
 			this.bundle = bundle;
 			delegate = httpService.createDefaultHttpContext();
 		}
 
-		public DefaultHttpContextImpl(Bundle b, String bundlePath) {
+		public DefaultHttpContextImpl(Bundle b, String bundlePath, Properties mimeMappings) {
 			this(b);
 			if (bundlePath != null) {
 				if (bundlePath.endsWith("/")) //$NON-NLS-1$
@@ -145,10 +160,20 @@ public class HttpContextManager implements Listener {
 					bundlePath = null;
 			}
 			this.bundlePath = bundlePath;
+			this.mimeMappings = mimeMappings;
 		}
 
-		public String getMimeType(String arg0) {
-			return delegate.getMimeType(arg0);
+		public String getMimeType(String name) {
+			if (mimeMappings != null) {
+				int dotIndex = name.lastIndexOf('.');
+				if (dotIndex != -1) {
+					String mimeExtension = name.substring(dotIndex + 1);
+					String mimeType = mimeMappings.getProperty(mimeExtension);
+					if (mimeType != null)
+						return mimeType;
+				}
+			}			
+			return delegate.getMimeType(name);
 		}
 
 		public boolean handleSecurity(HttpServletRequest arg0, HttpServletResponse arg1) throws IOException {
