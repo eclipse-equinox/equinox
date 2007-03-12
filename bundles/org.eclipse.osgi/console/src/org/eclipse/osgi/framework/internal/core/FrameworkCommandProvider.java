@@ -1786,7 +1786,7 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 			case Bundle.STARTING :
 				synchronized (lazyActivation) {
 					if (lazyActivation.contains(bundle)) {
-						return "«LAZY»      "; //$NON-NLS-1$
+						return "<<LAZY>>    "; //$NON-NLS-1$
 					}
 					return "STARTING    "; //$NON-NLS-1$
 				}
