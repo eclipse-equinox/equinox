@@ -1,13 +1,11 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2007 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- *
- * Contributors:
- *     IBM Corporation - initial API and implementation
- *******************************************************************************/
+ * Copyright (c) 2006, 2007 IBM Corporation and others. All rights reserved.
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * Contributors: IBM Corporation - initial API and implementation
+ ******************************************************************************/
 package org.eclipse.osgi.internal.verifier;
 
 import java.io.*;
@@ -24,7 +22,7 @@ import org.osgi.framework.BundleException;
 public class SignedStorageHook implements StorageHook {
 	static final String KEY = SignedStorageHook.class.getName();
 	static final int HASHCODE = KEY.hashCode();
-	private static final int STORAGE_VERSION = 1;
+	private static final int STORAGE_VERSION = 2;
 	private static ArrayList saveChainCache = new ArrayList(5);
 	private static long firstIDSaved = -1;
 	private static long lastIDSaved = -1;
@@ -77,8 +75,9 @@ public class SignedStorageHook implements StorageHook {
 				certsBytes[j] = new byte[numBytes];
 				is.readFully(certsBytes[j]);
 			}
+			long signingTime = is.readLong();
 			try {
-				chains[i] = new PKCS7Processor(chain, trusted, certsBytes);
+				chains[i] = new PKCS7Processor(chain, trusted, certsBytes, signingTime);
 			} catch (CertificateException e) {
 				throw new IOException(e.getMessage());
 			}
@@ -159,6 +158,7 @@ public class SignedStorageHook implements StorageHook {
 					os.writeInt(certBytes.length);
 					os.write(certBytes);
 				}
+			os.writeLong(chains[i].getSigningTime() != null ? chains[i].getSigningTime().getTime() : Long.MIN_VALUE);
 		}
 		if (digests == null)
 			os.writeInt(-1);

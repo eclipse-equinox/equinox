@@ -1,13 +1,11 @@
 /*******************************************************************************
- * Copyright (c) 2006 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * Copyright (c) 2006, 2007 IBM Corporation and others. All rights reserved.
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
  * 
- * Contributors:
- *     IBM Corporation - initial API and implementation
- *******************************************************************************/
+ * Contributors: IBM Corporation - initial API and implementation
+ ******************************************************************************/
 
 package org.eclipse.osgi.internal.verifier;
 
@@ -40,10 +38,14 @@ public interface JarVerifierConstant {
 	public static final int SHA1_OID[] = {1, 3, 14, 3, 2, 26};
 	public static final int DSA_OID[] = {1, 2, 840, 10040, 4, 1};
 	public static final int RSA_OID[] = {1, 2, 840, 113549, 1, 1, 1};
-	public static final int TIMESTAMP_OID[] = {1, 2, 840, 113549, 1, 9, 16, 2, 14};
-	public static final int SIGNING_TIME[] = {1, 2, 840, 113549, 1, 9, 5};
 
 	// constant for certs chain trust service
 	public static final String TRUST_AUTHORITY = "osgi.certificate.trust.authority"; //$NON-NLS-1$
 	public static final Object DEFAULT_TRUST_AUTHORITY = "org.eclipse.osgi"; //$NON-NLS-1$
+
+	// consttant for the timestamp related
+	public static final int TIMESTAMP_OID[] = {1, 2, 840, 113549, 1, 9, 16, 2, 14};
+	public static final int TIMESTAMP_TST_OID[] = {1, 2, 840, 113549, 1, 9, 16, 1, 4};
+	public static final int SIGNING_TIME[] = {1, 2, 840, 113549, 1, 9, 5};
+
 }

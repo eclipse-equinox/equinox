@@ -1,13 +1,11 @@
 /*******************************************************************************
- * Copyright (c) 2006 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * Copyright (c) 2006, 2007 IBM Corporation and others. All rights reserved.
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
  * 
- * Contributors:
- *     IBM Corporation - initial API and implementation
- *******************************************************************************/
+ * Contributors: IBM Corporation - initial API and implementation
+ ******************************************************************************/
 package org.eclipse.osgi.internal.verifier;
 
 import java.io.ByteArrayInputStream;
@@ -16,7 +14,11 @@ import java.math.BigInteger;
 import java.security.*;
 import java.security.cert.*;
 import java.security.cert.Certificate;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
+
 import javax.security.auth.x500.X500Principal;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.internal.provisional.verifier.CertificateChain;
@@ -40,6 +42,7 @@ public class PKCS7Processor implements CertificateChain, JarVerifierConstant {
 
 	private String certChain;
 	private Certificate[] certificates;
+	private Certificate[] tsaCertificates;
 	private boolean trusted;
 
 	// key(object id) = value(structure)
@@ -54,7 +57,7 @@ public class PKCS7Processor implements CertificateChain, JarVerifierConstant {
 	private String signatureAlgorithm;
 
 	private Certificate signerCert;
-	private Date sigingTime;
+	private Date signingTime;
 
 	String oid2String(int oid[]) {
 		StringBuffer sb = new StringBuffer();
@@ -103,12 +106,14 @@ public class PKCS7Processor implements CertificateChain, JarVerifierConstant {
 	 * (i % 16 == 15) System.out.println(); } System.out.println(); }
 	 */
 
-	public PKCS7Processor(String certChain, boolean trusted, byte[][] certificates) throws CertificateException {
+	public PKCS7Processor(String certChain, boolean trusted, byte[][] certificates, long signingTime) throws CertificateException {
 		this.certChain = certChain;
 		this.trusted = trusted;
 		this.certificates = new Certificate[certificates.length];
 		for (int i = 0; i < certificates.length; i++)
 			this.certificates[i] = certFact.generateCertificate(new ByteArrayInputStream(certificates[i]));
+		if (signingTime > Long.MIN_VALUE)
+			this.signingTime = new Date(signingTime);
 	}
 
 	public PKCS7Processor(byte pkcs7[], int pkcs7Offset, int pkcs7Length) throws IOException, CertificateException, NoSuchAlgorithmException {
@@ -132,7 +137,11 @@ public class PKCS7Processor implements CertificateChain, JarVerifierConstant {
 		bp = bp.stepInto(); // It is a structure;
 		bp.stepOver(); // Yeah, yeah version = 1
 		bp.stepOver(); // We'll see the digest stuff again; digestAlgorithms
-		bp.stepOver(); // We'll see the contentInfo in signerinfo
+
+		// process the encapContentInfo structure
+		processEncapContentInfo(bp);
+
+		bp.stepOver();
 
 		// PKCS7: check if the class tag is 0
 		if (bp.classOfTag == BERProcessor.CONTEXTSPECIFIC_TAGCLASS && bp.tag == 0) {
@@ -141,7 +150,7 @@ public class PKCS7Processor implements CertificateChain, JarVerifierConstant {
 		}
 
 		if (certs == null || certs.size() < 1)
-			throw new SecurityException("There are no certificates in the .RSA/.DSA file!");
+			throw new SecurityException("There are no certificates in the .RSA/.DSA file!"); //$NON-NLS-1$
 
 		// Okay, here are our certificates.
 		bp.stepOver();
@@ -151,25 +160,130 @@ public class PKCS7Processor implements CertificateChain, JarVerifierConstant {
 
 		processSignerInfos(bp, certs);
 
+		// construct the cert path
+		certs = constructCertPath(certs, signerCert);
+
 		// set the cert chain variable
+		int numCerts = certs.size();
 		StringBuffer sb = new StringBuffer();
-		for (int i = 0; i < certs.size(); i++) {
+		for (int i = 0; i < numCerts; i++) {
 			X509Certificate x509Cert = ((X509Certificate) certs.get(i));
 			sb.append(x509Cert.getSubjectDN().getName());
-			sb.append("; ");
+			sb.append("; "); //$NON-NLS-1$
 		}
 		certChain = sb.toString();
 
 		// initialize the certificates
-		certificates = (Certificate[]) certs.toArray(new Certificate[certs.size()]);
+		certificates = (Certificate[]) certs.toArray(new Certificate[numCerts]);
 
-		// determine the signing if there is
-		sigingTime = PKCS7DateParser.parseDate(this);
+		// if this pkcs7process is tsa asn.1 block, the signingTime should already be set
+		if (null == signingTime)
+			signingTime = PKCS7DateParser.parseDate(this);
+	}
+
+	private void processEncapContentInfo(BERProcessor bp) throws IOException {
+		// check immediately if TSTInfo is there
+		BERProcessor encapContentBERS = bp.stepInto();
+		if (Arrays.equals(encapContentBERS.getObjId(), TIMESTAMP_TST_OID)) {
+
+			// eContent
+			encapContentBERS.stepOver();
+			BERProcessor encapContentBERS1 = encapContentBERS.stepInto();
+
+			// obtain eContent octet structure
+			byte bytesman[] = encapContentBERS1.getBytes();
+			BERProcessor eContentStructure = new BERProcessor(bytesman, 0, bytesman.length);
+
+			// pointing at 'version Integer' now
+			BERProcessor eContentBER = eContentStructure.stepInto();
+			int tsaVersion = eContentBER.getIntValue().intValue();
+
+			if (tsaVersion != 1) {
+				throw new IOException("Not a version 1 time-stamp token"); //$NON-NLS-1$
+			}
+
+			// policty : TSAPolicyId
+			eContentBER.stepOver();
+
+			// messageImprint : MessageImprint
+			eContentBER.stepOver();
+
+			// serialNumber : INTEGER
+			eContentBER.stepOver();
+
+			// genTime : GeneralizedTime
+			eContentBER.stepOver();
+
+			// check time ends w/ 'Z'
+			String dateString = new String(eContentBER.getBytes());
+			if (!dateString.endsWith("Z")) { //$NON-NLS-1$
+				throw new IOException("Wrong dateformat used in time-stamp token"); //$NON-NLS-1$
+			}
+
+			// create the appropriate date time string format
+			// date format could be yyyyMMddHHmmss[.s...]Z or yyyyMMddHHmmssZ
+			int dotIndex = dateString.indexOf('.');
+			StringBuffer dateFormatSB = new StringBuffer("yyyyMMddHHmmss"); //$NON-NLS-1$
+			if (dotIndex != -1) {
+				// yyyyMMddHHmmss[.s...]Z, find out number of s in the bracket
+				int noS = dateString.indexOf('Z') - 1 - dotIndex;
+				dateFormatSB.append('.');
+
+				// append s	
+				for (int i = 0; i < noS; i++) {
+					dateFormatSB.append('s');
+				}
+			}
+			dateFormatSB.append("'Z'"); //$NON-NLS-1$
+
+			try {
+				DateFormat dateFormt = new SimpleDateFormat(dateFormatSB.toString());
+				dateFormt.setTimeZone(TimeZone.getTimeZone("GMT")); //$NON-NLS-1$
+				signingTime = dateFormt.parse(dateString);
+			} catch (ParseException e) {
+				throw new IOException(JarVerifierMessages.PKCS7_Parse_Signing_Time_1);
+			}
+		}
+	}
+
+	private List constructCertPath(List certs, Certificate targetCert) {
+		List certsList = new ArrayList();
+		certsList.add(targetCert);
+
+		X509Certificate currentCert = (X509Certificate) targetCert;
+		int numIteration = certs.size();
+		int i = 0;
+		while (i < numIteration) {
+
+			X500Principal subject = currentCert.getSubjectX500Principal();
+			X500Principal issuer = currentCert.getIssuerX500Principal();
+
+			if (subject.equals(issuer)) {
+				// the cert path has been constructed
+				break;
+			}
+
+			currentCert = null;
+			Iterator itr = certs.iterator();
+
+			while (itr.hasNext()) {
+				X509Certificate tempCert = (X509Certificate) itr.next();
+
+				if (tempCert.getSubjectX500Principal().equals(issuer)) {
+					certsList.add(tempCert);
+					currentCert = tempCert;
+				}
+			}
+
+			i++;
+		}
+
+		return certsList;
 	}
 
 	public void validateCerts() throws CertificateExpiredException, CertificateNotYetValidException, InvalidKeyException, SignatureException {
 		if (certificates == null || certificates.length == 0) {
-			throw new SecurityException("There are no certificates in the signature block file!");
+			throw new SecurityException("There are no certificates in the signature block file!"); //$NON-NLS-1$
 		}
 
 		int len = certificates.length;
@@ -178,14 +292,15 @@ public class PKCS7Processor implements CertificateChain, JarVerifierConstant {
 		for (int i = 0; i < len; i++) {
 			X509Certificate currentX509Cert = (X509Certificate) certificates[i];
 
-			if (sigingTime == null)
+			if (signingTime == null)
 				currentX509Cert.checkValidity();
 			else
-				currentX509Cert.checkValidity(sigingTime);
+				currentX509Cert.checkValidity(signingTime);
 
 			try {
 				if (i == len - 1) {
-					currentX509Cert.verify(currentX509Cert.getPublicKey());
+					if (currentX509Cert.getSubjectDN().equals(currentX509Cert.getIssuerDN()))
+						currentX509Cert.verify(currentX509Cert.getPublicKey());
 				} else {
 					X509Certificate nextX509Cert = (X509Certificate) certificates[i + 1];
 					currentX509Cert.verify(nextX509Cert.getPublicKey());
@@ -238,6 +353,7 @@ public class PKCS7Processor implements CertificateChain, JarVerifierConstant {
 				break;
 			}
 		}
+
 		if (newSignerCert == null)
 			throw new CertificateException("Signer certificate not in pkcs7block"); //$NON-NLS-1$
 
@@ -431,13 +547,16 @@ public class PKCS7Processor implements CertificateChain, JarVerifierConstant {
 			certsBERS.stepOver();
 		} while (!certsBERS.endOfSequence());
 
-		Collections.reverse(rtvList);
+		//		Collections.reverse(rtvList);
 		return rtvList;
 	}
 
 	void determineTrust(CertificateTrustAuthority certsTrust) {
 		try {
 			certsTrust.checkTrust(certificates);
+			if (null != tsaCertificates) {
+				certsTrust.checkTrust(tsaCertificates);
+			}
 			trusted = true;
 		} catch (CertificateException e) {
 			trusted = false;
@@ -445,7 +564,11 @@ public class PKCS7Processor implements CertificateChain, JarVerifierConstant {
 	}
 
 	public Date getSigningTime() {
-		return sigingTime;
+		return signingTime;
+	}
+
+	void setTSACertificates(Certificate[] tsaCertificates) {
+		this.tsaCertificates = tsaCertificates;
 	}
 
 	/*
