@@ -1,19 +1,16 @@
 /*******************************************************************************
- * Copyright (c) 2005 Cognos Incorporated.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
+ * Copyright (c) 2005 Cognos Incorporated. All rights reserved. This program and
+ * the accompanying materials are made available under the terms of the Eclipse
+ * Public License v1.0 which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  * 
- * Contributors:
- *     Cognos Incorporated - initial API and implementation
- *******************************************************************************/
+ * Contributors: Cognos Incorporated - initial API and implementation
+ ******************************************************************************/
 
 package org.eclipse.equinox.http.registry.internal;
 
 import java.io.IOException;
-import java.util.Dictionary;
-import java.util.Hashtable;
+import java.util.*;
 import javax.servlet.*;
 import org.eclipse.core.runtime.*;
 import org.osgi.service.http.*;
@@ -42,6 +39,8 @@ public class ServletManager implements ExtensionPointTracker.Listener {
 
 	private HttpContextManager httpContextManager;
 
+	private List registered = new ArrayList();
+
 	public ServletManager(HttpService httpService, HttpContextManager httpContextManager, IExtensionRegistry registry) {
 		this.httpService = httpService;
 		this.httpContextManager = httpContextManager;
@@ -58,51 +57,56 @@ public class ServletManager implements ExtensionPointTracker.Listener {
 
 	public void added(IExtension extension) {
 		IConfigurationElement[] elements = extension.getConfigurationElements();
-		if (elements.length != 1 || !SERVLET.equals(elements[0].getName()))
-			return;
+		for (int i = 0; i < elements.length; i++) {
+			IConfigurationElement servletElement = elements[i];
+			if (!SERVLET.equals(servletElement.getName()))
+				continue;
 
-		IConfigurationElement servletElement = elements[0];
-		ServletWrapper wrapper = new ServletWrapper(servletElement);
-		String alias = servletElement.getAttribute(ALIAS);
+			ServletWrapper wrapper = new ServletWrapper(servletElement);
+			String alias = servletElement.getAttribute(ALIAS);
 
-		Dictionary initparams = new Hashtable();
-		IConfigurationElement[] initParams = servletElement.getChildren(INIT_PARAM);
-		for (int i = 0; i < initParams.length; ++i) {
-			String paramName = initParams[i].getAttribute(PARAM_NAME);
-			String paramValue = initParams[i].getAttribute(PARAM_VALUE);
-			initparams.put(paramName, paramValue);
-		}
+			Dictionary initparams = new Hashtable();
+			IConfigurationElement[] initParams = servletElement.getChildren(INIT_PARAM);
+			for (int j = 0; j < initParams.length; ++j) {
+				String paramName = initParams[j].getAttribute(PARAM_NAME);
+				String paramValue = initParams[j].getAttribute(PARAM_VALUE);
+				initparams.put(paramName, paramValue);
+			}
 
-		boolean loadOnStartup = new Boolean(servletElement.getAttribute(LOAD_ON_STARTUP)).booleanValue();
+			boolean loadOnStartup = new Boolean(servletElement.getAttribute(LOAD_ON_STARTUP)).booleanValue();
 
-		String httpContextName = servletElement.getAttribute(HTTPCONTEXT_NAME);
-		HttpContext context = null;
-		if (httpContextName == null)
-			context = httpContextManager.getDefaultHttpContext(extension.getContributor().getName());
-		else
-			context = httpContextManager.getHttpContext(httpContextName);
+			String httpContextName = servletElement.getAttribute(HTTPCONTEXT_NAME);
+			HttpContext context = null;
+			if (httpContextName == null)
+				context = httpContextManager.getDefaultHttpContext(extension.getContributor().getName());
+			else
+				context = httpContextManager.getHttpContext(httpContextName);
 
-		try {
-			httpService.registerServlet(alias, wrapper, initparams, context);
-			if (loadOnStartup)
-				wrapper.initializeDelegate();
-		} catch (ServletException e) {
-			// this should never happen as the init() called is the ServletWrapper implementation
-			e.printStackTrace();
-		} catch (NamespaceException e) {
-			// TODO Should log this perhaps with the LogService?
-			e.printStackTrace();
+			try {
+				httpService.registerServlet(alias, wrapper, initparams, context);
+				registered.add(servletElement);
+				if (loadOnStartup)
+					wrapper.initializeDelegate();
+			} catch (ServletException e) {
+				// this should never happen as the init() called is the ServletWrapper implementation
+				e.printStackTrace();
+			} catch (NamespaceException e) {
+				// TODO Should log this perhaps with the LogService?
+				e.printStackTrace();
+			}
 		}
 	}
 
 	public void removed(IExtension extension) {
 		IConfigurationElement[] elements = extension.getConfigurationElements();
-		if (elements.length != 1 || !SERVLET.equals(elements[0].getName()))
-			return;
-
-		IConfigurationElement servletElement = elements[0];
-		String alias = servletElement.getAttribute(ALIAS);
-		httpService.unregister(alias);
+		for (int i = 0; i < elements.length; i++) {
+			IConfigurationElement servletElement = elements[i];
+			if (!SERVLET.equals(servletElement.getName()))
+				continue;
+			String alias = servletElement.getAttribute(ALIAS);
+			if (registered.remove(servletElement))
+				httpService.unregister(alias);
+		}
 	}
 
 	private static class ServletWrapper implements Servlet {

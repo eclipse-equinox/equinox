@@ -78,48 +78,51 @@ public class HttpContextManager implements Listener {
 		}
 		return null;
 	}
-	
+
 	public void added(IExtension extension) {
 		IConfigurationElement[] elements = extension.getConfigurationElements();
-		if (elements.length != 1 || !HTTPCONTEXT.equals(elements[0].getName()))
-			return;
+		for (int i = 0; i < elements.length; i++) {
+			IConfigurationElement httpContextElement = elements[i];
+			if (!HTTPCONTEXT.equals(httpContextElement.getName()))
+				continue;
 
-		IConfigurationElement httpContextElement = elements[0];
-		String httpContextName = httpContextElement.getAttribute(NAME);
-		if (httpContextName == null)
-			return;
+			String httpContextName = httpContextElement.getAttribute(NAME);
+			if (httpContextName == null)
+				continue;
 
-		HttpContext context = null;
-		String clazz = httpContextElement.getAttribute(CLASS);
-		if (clazz != null) {
-			try {
-				context = (HttpContext) httpContextElement.createExecutableExtension(CLASS);
-			} catch (CoreException e) {
-				// log it.
-				e.printStackTrace();
+			HttpContext context = null;
+			String clazz = httpContextElement.getAttribute(CLASS);
+			if (clazz != null) {
+				try {
+					context = (HttpContext) httpContextElement.createExecutableExtension(CLASS);
+				} catch (CoreException e) {
+					// log it.
+					e.printStackTrace();
+				}
+			} else {
+				Bundle b = getBundle(extension.getContributor().getName());
+				String path = httpContextElement.getAttribute(PATH);
+				context = new DefaultHttpContextImpl(b, path);
 			}
-		} else {
-			Bundle b = getBundle(extension.getContributor().getName());
-			String path = httpContextElement.getAttribute(PATH);
-			context = new DefaultHttpContextImpl(b, path);
-		}
 
-		NamedHttpContextImpl namedContext = (NamedHttpContextImpl) getHttpContext(httpContextName);
-		namedContext.addHttpContext(extension, context);
+			NamedHttpContextImpl namedContext = (NamedHttpContextImpl) getHttpContext(httpContextName);
+			namedContext.addHttpContext(extension, context);
+		}
 	}
 
 	public void removed(IExtension extension) {
 		IConfigurationElement[] elements = extension.getConfigurationElements();
-		if (elements.length != 1 || !HTTPCONTEXT.equals(elements[0].getName()))
-			return;
+		for (int i = 0; i < elements.length; i++) {
+			IConfigurationElement httpContextElement = elements[i];
+			if (!HTTPCONTEXT.equals(httpContextElement.getName()))
+				continue;
+			String httpContextName = httpContextElement.getAttribute(NAME);
+			if (httpContextName == null)
+				continue;
 
-		IConfigurationElement httpContextElement = elements[0];
-		String httpContextName = httpContextElement.getAttribute(NAME);
-		if (httpContextName == null)
-			return;
-		
-		NamedHttpContextImpl namedContext = (NamedHttpContextImpl) getHttpContext(httpContextName);
-		namedContext.removeHttpContext(extension);
+			NamedHttpContextImpl namedContext = (NamedHttpContextImpl) getHttpContext(httpContextName);
+			namedContext.removeHttpContext(extension);
+		}
 	}
 
 	private class DefaultHttpContextImpl implements HttpContext {
@@ -151,31 +154,31 @@ public class HttpContextManager implements Listener {
 		public boolean handleSecurity(HttpServletRequest arg0, HttpServletResponse arg1) throws IOException {
 			return delegate.handleSecurity(arg0, arg1);
 		}
-		
+
 		public URL getResource(String resourceName) {
 			if (bundlePath != null)
 				resourceName = bundlePath + resourceName;
-			
+
 			int lastSlash = resourceName.lastIndexOf('/');
 			if (lastSlash == -1)
 				return null;
-			
+
 			String path = resourceName.substring(0, lastSlash);
 			if (path.length() == 0)
 				path = "/"; //$NON-NLS-1$
 			String file = resourceName.substring(lastSlash + 1);
 			Enumeration entryPaths = bundle.findEntries(path, file, false);
-			
+
 			if (entryPaths != null && entryPaths.hasMoreElements())
 				return (URL) entryPaths.nextElement();
-			
+
 			return null;
 		}
 
 		public Set getResourcePaths(String path) {
 			if (bundlePath != null)
 				path = bundlePath + path;
-			
+
 			Enumeration entryPaths = bundle.findEntries(path, null, false);
 			if (entryPaths == null)
 				return null;
@@ -185,7 +188,7 @@ public class HttpContextManager implements Listener {
 				URL entryURL = (URL) entryPaths.nextElement();
 				String entryPath = entryURL.getFile();
 
-				if (bundlePath == null)	
+				if (bundlePath == null)
 					result.add(entryPath);
 				else
 					result.add(entryPath.substring(bundlePath.length()));

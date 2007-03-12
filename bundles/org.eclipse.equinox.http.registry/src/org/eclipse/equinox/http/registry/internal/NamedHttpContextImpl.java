@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2007 Cognos Incorporated, IBM Corporation.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * Contributors:
+ *     Cognos Incorporated - initial API and implementation
+ *******************************************************************************/
 package org.eclipse.equinox.http.registry.internal;
 
 import java.io.IOException;
@@ -16,7 +26,7 @@ public class NamedHttpContextImpl implements HttpContext {
 
 	public String getMimeType(String name) {
 		List contexts = getSnapshot();
-		for (Iterator it = contexts.iterator();it.hasNext();) {
+		for (Iterator it = contexts.iterator(); it.hasNext();) {
 			HttpContext context = (HttpContext) it.next();
 			String mimeType = context.getMimeType(name);
 			if (mimeType != null)
@@ -27,7 +37,7 @@ public class NamedHttpContextImpl implements HttpContext {
 
 	public URL getResource(String name) {
 		List contexts = getSnapshot();
-		for (Iterator it = contexts.iterator();it.hasNext();) {
+		for (Iterator it = contexts.iterator(); it.hasNext();) {
 			HttpContext context = (HttpContext) it.next();
 			URL resourceURL = context.getResource(name);
 			if (resourceURL != null)
@@ -38,7 +48,7 @@ public class NamedHttpContextImpl implements HttpContext {
 
 	public boolean handleSecurity(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 		List contexts = getSnapshot();
-		for (Iterator it = contexts.iterator();it.hasNext();) {
+		for (Iterator it = contexts.iterator(); it.hasNext();) {
 			HttpContext context = (HttpContext) it.next();
 			if (context.handleSecurity(req, resp) == false)
 				return false;
@@ -52,7 +62,7 @@ public class NamedHttpContextImpl implements HttpContext {
 
 		Set result = null;
 		List contexts = getSnapshot();
-		for (Iterator it = contexts.iterator();it.hasNext();) {
+		for (Iterator it = contexts.iterator(); it.hasNext();) {
 			HttpContext context = (HttpContext) it.next();
 			try {
 				Method getResourcePathsMethod = context.getClass().getMethod("getResourcePaths", new Class[] {String.class}); //$NON-NLS-1$
@@ -70,7 +80,7 @@ public class NamedHttpContextImpl implements HttpContext {
 		}
 		return result;
 	}
-	
+
 	public synchronized void addHttpContext(IExtension extension, HttpContext context) {
 		httpContexts.put(extension, context);
 		snapshot = null;
@@ -80,12 +90,12 @@ public class NamedHttpContextImpl implements HttpContext {
 		httpContexts.remove(extension);
 		snapshot = null;
 	}
-	
+
 	private synchronized List getSnapshot() {
 		if (snapshot == null)
 			snapshot = new ArrayList(httpContexts.values());
-		
+
 		return snapshot;
 	}
-	
+
 }

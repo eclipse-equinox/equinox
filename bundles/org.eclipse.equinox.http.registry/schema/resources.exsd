@@ -13,7 +13,7 @@
    <element name="extension">
       <complexType>
          <sequence>
-            <element ref="resource"/>
+            <element ref="resource" minOccurs="1" maxOccurs="unbounded"/>
          </sequence>
          <attribute name="point" type="string" use="required">
             <annotation>
@@ -62,7 +62,6 @@
             <annotation>
                <documentation>
                   The equivalent of the OSGi Http Services httpcontext in registerResource. The httpcontext-name is matched against the &quot;httpcontexts&quot; extension for a matching name. If this attribute is not provided the OSGi Http Service&apos;s DefaultHttpContext semantics are used.
-
                </documentation>
             </annotation>
          </attribute>
