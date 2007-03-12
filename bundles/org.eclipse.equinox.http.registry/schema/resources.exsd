@@ -43,6 +43,11 @@
    </element>
 
    <element name="resource">
+      <annotation>
+         <appInfo>
+            <meta.element labelAttribute="alias"/>
+         </appInfo>
+      </annotation>
       <complexType>
          <attribute name="alias" type="string" use="required">
             <annotation>

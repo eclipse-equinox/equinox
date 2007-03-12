@@ -43,6 +43,11 @@
    </element>
 
    <element name="servlet">
+      <annotation>
+         <appInfo>
+            <meta.element labelAttribute="alias"/>
+         </appInfo>
+      </annotation>
       <complexType>
          <sequence>
             <element ref="init-param" minOccurs="0" maxOccurs="unbounded"/>
@@ -83,6 +88,9 @@
 
    <element name="init-param">
       <annotation>
+         <appInfo>
+            <meta.element labelAttribute="name"/>
+         </appInfo>
          <documentation>
             Similar to the Servlet Specification and its deployment descriptor&apos;s init-param elements.
          </documentation>

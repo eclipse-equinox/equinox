@@ -43,6 +43,11 @@
    </element>
 
    <element name="httpcontext">
+      <annotation>
+         <appInfo>
+            <meta.element labelAttribute="name"/>
+         </appInfo>
+      </annotation>
       <complexType>
          <attribute name="name" type="string" use="required">
             <annotation>
