@@ -14,6 +14,7 @@ package org.eclipse.equinox.http.servlet.internal;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.Servlet;
 import javax.servlet.http.*;
+import org.osgi.service.http.HttpContext;
 
 public class HttpServletRequestAdaptor extends HttpServletRequestWrapper {
 
@@ -31,6 +32,22 @@ public class HttpServletRequestAdaptor extends HttpServletRequestWrapper {
 		this.alias = alias;
 		this.servlet = servlet;
 		isRequestDispatcherInclude = req.getAttribute(HttpServletRequestAdaptor.INCLUDE_REQUEST_URI_ATTRIBUTE) != null;
+	}
+	
+	public String getAuthType() {
+		String authType = (String) super.getAttribute(HttpContext.AUTHENTICATION_TYPE);
+		if (authType != null)
+			return authType;
+		
+		return super.getAuthType();
+	}
+
+	public String getRemoteUser() {
+		String remoteUser = (String) super.getAttribute(HttpContext.REMOTE_USER);
+		if (remoteUser != null)
+			return remoteUser;
+		
+		return super.getRemoteUser();
 	}
 
 	public String getPathInfo() {
