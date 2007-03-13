@@ -173,7 +173,7 @@ public class SystemBundleData extends BaseData {
 	}
 
 	public int getStatus() {
-		return 0;
+		return Constants.BUNDLE_STARTED;
 	}
 
 	public void save() {
