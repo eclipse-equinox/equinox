@@ -1279,6 +1279,61 @@ public class StateResolverTest extends AbstractStateTest {
 		assertNull("1.2 Packages are not consistent: " + isConsistent, isConsistent);
 	}
 
+	public void testRequireBundleUses() throws BundleException {
+		State state = buildEmptyState();
+		int id = 0;
+		Hashtable manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "A");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		manifest.put(Constants.EXPORT_PACKAGE, "a");
+		BundleDescription a_100 = state.getFactory().createBundleDescription(state, manifest, "a_100", id++);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "A");
+		manifest.put(Constants.BUNDLE_VERSION, "2.0.0");
+		manifest.put(Constants.EXPORT_PACKAGE, "a");
+		BundleDescription a_200 = state.getFactory().createBundleDescription(state, manifest, "a_200", id++);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "B");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		manifest.put(Constants.EXPORT_PACKAGE, "b; uses:=a");
+		manifest.put(Constants.REQUIRE_BUNDLE, "A; visibility:=reexport");
+		BundleDescription b_100 = state.getFactory().createBundleDescription(state, manifest, "b_100", id++);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "C");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		manifest.put(Constants.EXPORT_PACKAGE, "c; uses:=b");
+		manifest.put(Constants.REQUIRE_BUNDLE, "A, B");
+		BundleDescription c_100 = state.getFactory().createBundleDescription(state, manifest, "c_100", id++);
+
+		state.addBundle(a_100);
+		state.addBundle(b_100);
+		// first resolve just A and B
+		state.resolve();
+		assertTrue("0.1", a_100.isResolved());
+		assertTrue("0.2", b_100.isResolved());
+		// now add A v2 and resolve it
+		state.addBundle(a_200);
+		state.resolve();
+		assertTrue("1.1", a_200.isResolved());
+		// now add C and make sure it does not get packages from A v2
+		state.addBundle(c_100);
+		state.resolve();
+		assertTrue("1.2", c_100.isResolved());
+
+		ExportPackageDescription[] c1ResolvedImports = state.getStateHelper().getVisiblePackages(c_100);
+		assertTrue("2.1", c1ResolvedImports.length == 2);
+		int index = c1ResolvedImports[0].getName().equals("a") ? 0 : c1ResolvedImports[1].getName().equals("a") ? 1 : -1;
+		assertTrue("2.2", index >= 0);
+		assertEquals("2.2", c1ResolvedImports[index].getExporter(), a_100);
+	}
+
 	public void testCyclicTransitiveUses() throws BundleException {
 		State state = buildEmptyState();
 		Hashtable manifest = new Hashtable();
