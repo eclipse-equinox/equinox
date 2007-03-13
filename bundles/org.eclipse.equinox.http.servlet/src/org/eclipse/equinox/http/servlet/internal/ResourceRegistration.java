@@ -51,7 +51,7 @@ public class ResourceRegistration extends Registration {
 				int aliasLength = alias.equals("/") ? 0 : alias.length(); //$NON-NLS-1$
 				String resourcePath = internalName + pathInfo.substring(aliasLength);
 				URL testURL = httpContext.getResource(resourcePath);
-				if (testURL == null) {
+				if (testURL == null || resourcePath.endsWith("/")) { //$NON-NLS-1$
 					return false;
 				}
 				return writeResource(req, resp, resourcePath);
@@ -74,6 +74,10 @@ public class ResourceRegistration extends Registration {
 					URLConnection connection = url.openConnection();
 					long lastModified = connection.getLastModified();
 					int contentLength = connection.getContentLength();
+					
+					// check to ensure that we're dealing with a real resource and in particular not a directory
+					if (contentLength <= 0)
+						return Boolean.FALSE;
 
 					String etag = null;
 					if (lastModified != -1 && contentLength != -1)
