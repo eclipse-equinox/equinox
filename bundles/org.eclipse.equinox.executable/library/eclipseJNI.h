@@ -87,5 +87,5 @@ JNIEXPORT void JNICALL takedown_splash(JNIEnv *, jobject);
  */
 extern int startJavaVM( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[] );
 
-extern void cleanupVM();
+extern void cleanupVM( int );
 #endif

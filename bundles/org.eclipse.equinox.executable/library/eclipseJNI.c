@@ -47,7 +47,7 @@ static JNIEnv *env = 0;
  * able to call out to either, so we will set hooks depending on which version of 
  * registerNatives gets called.
  */
-#ifndef UNICODE
+#if (!defined(UNICODE) || defined(VISTA))
 void (* exitDataHook)(JNIEnv *env, jstring id, jstring s);
 void (* dispatchHook)();
 long (* splashHandleHook)();
@@ -61,13 +61,13 @@ extern void (* showSplashHook)(JNIEnv *env, jstring s);
 extern void (* takeDownHook)();
 #endif
 
-#ifndef UNICODE 
+#if (!defined(UNICODE) || defined(VISTA)) 
 /* JNI Callback methods */
 JNIEXPORT void JNICALL set_exit_data(JNIEnv * env, jobject obj, jstring id, jstring s){
 	if(exitDataHook != NULL)
 		exitDataHook(env, id, s);
 	else /* hook was not set, just call the ANSI version */
-#ifdef WIN32
+#if (defined(_WIN32) || defined(VISTA))
 		setExitDataW(env, id, s);
 #else
 		setExitData(env, id, s);

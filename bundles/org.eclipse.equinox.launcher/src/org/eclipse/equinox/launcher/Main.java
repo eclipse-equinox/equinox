@@ -1147,7 +1147,9 @@ public class Main {
             result = 13;
         } finally {
             // always try putting down the splash screen just in case the application failed to do so
-            takeDownSplash();           
+            takeDownSplash();   
+            if(bridge != null)
+            	bridge.uninitialize();
         }
         // Return an int exit code and ensure the system property is set.
         System.getProperties().put(PROP_EXITCODE, Integer.toString(result));
@@ -1157,7 +1159,7 @@ public class Main {
 
     private void setExitData() {
         String data = System.getProperty(PROP_EXITDATA);
-        if (data == null)
+        if (data == null || bridge == null)
             return;
         bridge.setExitData(exitData, data);
     }
@@ -1734,7 +1736,7 @@ public class Main {
      * Take down the splash screen. 
      */
     protected void takeDownSplash() {
-        if (splashDown) // splash is already down
+        if (splashDown || bridge == null) // splash is already down
             return;
 
         splashDown = bridge.takeDownSplash();;

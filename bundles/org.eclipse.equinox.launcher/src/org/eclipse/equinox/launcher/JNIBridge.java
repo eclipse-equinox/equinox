@@ -22,6 +22,9 @@ public class JNIBridge {
 	private native void _show_splash(String bitmap);
 	private native void _takedown_splash();
 	
+	private native int OleInitialize(int reserved);
+	private native void OleUninitialize();
+	
 	private String library;
 	private boolean libraryLoaded = false;
 	public JNIBridge(String library) {
@@ -31,6 +34,11 @@ public class JNIBridge {
 	private void loadLibrary() {
 		if(library != null) {
 			try {
+				if (library.indexOf("wpf") != -1)  {
+					String comLibrary = library.replaceAll("eclipse_", "com_");
+					System.load(comLibrary);
+					OleInitialize(0);
+				}
 				System.load(library);
 			} catch (UnsatisfiedLinkError e ) {
 				//failed
@@ -101,5 +109,19 @@ public class JNIBridge {
 			}
 			return false;
 		}
+	}
+	
+	public boolean uninitialize() {
+		if (libraryLoaded && library != null) {
+			if (library.indexOf("wpf") != -1)  {
+				try {
+					OleUninitialize();
+				} catch (UnsatisfiedLinkError e) {
+					// library not loaded
+					return false;
+				}
+			}
+		}
+		return true;
 	}
 }

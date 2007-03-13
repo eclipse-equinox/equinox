@@ -56,11 +56,12 @@ static _TCHAR*  checkForIni(int argc, _TCHAR* argv[]);
 static int initialArgc;
 static _TCHAR** initialArgv;
 
-#ifdef _WIN32
+#if (defined(_WIN32) || defined(VISTA))
 #ifdef UNICODE
 extern int main(int, char**);
 int mainW(int, wchar_t**);
 int wmain( int argc, wchar_t** argv ) {
+#ifndef VISTA
 	OSVERSIONINFOW info;
 	info.dwOSVersionInfoSize = sizeof(OSVERSIONINFOW);
 	/*
@@ -86,6 +87,7 @@ int wmain( int argc, wchar_t** argv ) {
 		free(newArgv);
 		return result;
 	}
+#endif
 	return mainW(argc, argv);
 }
 #define main mainW
