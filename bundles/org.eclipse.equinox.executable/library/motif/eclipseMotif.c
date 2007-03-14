@@ -90,6 +90,8 @@ int showSplash( const char* featureImage )
 	Screen* screen;
 	Widget scrolledHandle, drawingHandle, image;
 	
+	if (initialArgv == NULL) 
+		initialArgc = 0;
 	initWindowSystem(&initialArgc, initialArgv, 1);
 	xDisplay = XtDisplay(topWindow);
     screen = XDefaultScreenOfDisplay( xDisplay );

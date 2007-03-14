@@ -170,7 +170,7 @@ static _TCHAR*  officialName  = NULL;
 
 _TCHAR*  exitData    = NULL;		  /* exit data set from Java */
 int		 initialArgc;
-_TCHAR** initialArgv;
+_TCHAR** initialArgv = NULL;
 
  	
 /* Define the special exit codes returned from Eclipse. */

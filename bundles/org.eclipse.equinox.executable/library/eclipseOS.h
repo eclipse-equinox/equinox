@@ -32,6 +32,7 @@
 #define launchJavaVM launchJavaVMW
 #define eeLibPath eeLibPathW
 #define processVMArgs processVMArgsW
+#define initialArgv initialArgvW
 #endif
 
 /* Operating System Dependent Information */

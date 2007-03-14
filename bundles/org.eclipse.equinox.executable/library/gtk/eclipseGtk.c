@@ -66,6 +66,8 @@ int showSplash( const char* featureImage )
 	if (featureImage == NULL)
 		return -1;
 	
+	if (initialArgv == NULL)
+		initialArgc = 0;
 	initWindowSystem(&initialArgc, initialArgv, 1);
 	
 	shellHandle = gtk_window_new(GTK_WINDOW_TOPLEVEL);

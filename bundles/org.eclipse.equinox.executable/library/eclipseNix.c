@@ -141,31 +141,25 @@ static void adjustLibraryPath( char * vmLibrary ) {
 	} else {
 		numPaths = 2;
 		/* we want the directory containing the library, and the parent directory of that */
-		paths = malloc( 2 * sizeof(char*));
-		buffer = strdup(vmLibrary);	 
-		c = strrchr(buffer, dirSeparator);
-		*c = 0;
-		paths[0] = resolveSymlinks(buffer);
-		length = strlen(paths[0]);
-		paths[0] = realloc(paths[0], (length + 2) * sizeof(char));
-		paths[0][length] = pathSeparator;
-		paths[0][length + 1] = 0;
-		
-		c = strrchr(buffer, dirSeparator);
-		*c = 0;
-		paths[1] = resolveSymlinks(buffer);
-		length = strlen(paths[1]);
-		paths[1] = realloc(paths[1], (length + 2) * sizeof(char));
-		paths[1][length] = pathSeparator;
-		paths[1][length + 1] = 0;
-		
+		paths = malloc( numPaths * sizeof(char*));
+		buffer = strdup(vmLibrary);	
+		for (i = 0; i < numPaths; i++) {
+			c = strrchr(buffer, dirSeparator);
+			*c = 0;
+			paths[i] = resolveSymlinks(buffer);
+			length = strlen(paths[i]);
+			paths[i] = realloc(paths[i], (length + 2) * sizeof(char));
+			paths[i][length] = pathSeparator;
+			paths[i][length + 1] = 0;
+		}
 		free(buffer);	
 	}
  
 	ldPath = (char*)getenv(_T_ECLIPSE("LD_LIBRARY_PATH"));
-	if(!ldPath)
+	if (!ldPath) {
 		ldPath = _T_ECLIPSE("");
-	else {
+		needAdjust = 1;
+	} else {
 		buffer = malloc((strlen(ldPath) + 2) * sizeof(char));
 		sprintf(buffer, "%s%c", ldPath, pathSeparator);
 		for (i = 0; i < numPaths; i++) {
@@ -177,6 +171,7 @@ static void adjustLibraryPath( char * vmLibrary ) {
 				break;
 			}
 		}
+		free(buffer);
 	}
 	if (!needAdjust) {
 		for (i = 0; i < numPaths; i++)
