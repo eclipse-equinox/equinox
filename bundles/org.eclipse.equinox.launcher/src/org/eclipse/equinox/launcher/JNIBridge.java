@@ -35,9 +35,13 @@ public class JNIBridge {
 		if(library != null) {
 			try {
 				if (library.indexOf("wpf") != -1)  {
-					String comLibrary = library.replaceAll("eclipse_", "com_");
-					System.load(comLibrary);
-					OleInitialize(0);
+					int idx = library.indexOf("eclipse_");
+					if (idx != -1) {
+						String comLibrary = library.substring(0, idx) + "com_";
+						comLibrary += library.substring(idx + 8, library.length());
+						System.load(comLibrary);
+						OleInitialize(0);
+					}			
 				}
 				System.load(library);
 			} catch (UnsatisfiedLinkError e ) {
