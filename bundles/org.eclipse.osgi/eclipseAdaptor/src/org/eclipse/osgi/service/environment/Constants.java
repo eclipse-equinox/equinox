@@ -126,6 +126,12 @@ public interface Constants {
 	public static final String WS_WIN32 = "win32";//$NON-NLS-1$
 
 	/**
+	 * Constant string (value "wpf") indicating the platform is running on a
+	 * machine using the Windows Presentation Foundation sytstem.
+	 */
+	public static final String WS_WPF = "wpf"; //$NON-NLS-1$
+	
+	/**
 	 * Constant string (value "motif") indicating the platform is running on a
 	 * machine using the Motif windowing system.
 	 */

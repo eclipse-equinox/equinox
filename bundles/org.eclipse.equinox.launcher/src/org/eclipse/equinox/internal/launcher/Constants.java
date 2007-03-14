@@ -80,7 +80,13 @@ public class Constants {
 	 * machine using the Windows windowing system.
 	 */
 	public static final String WS_WIN32 = "win32";//$NON-NLS-1$
-
+	
+	/**
+	 * Constant string (value "wpf") indicating the platform is running on a
+	 * machine using the Windows Presendation Foundation system.
+	 */
+	public static final String WS_WPF = "wpf";//$NON-NLS-1$
+	
 	/**
 	 * Constant string (value "motif") indicating the platform is running on a
 	 * machine using the Motif windowing system.
