@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Http Service Registry Extensions
+Bundle-Name: %bundleName
 Bundle-SymbolicName: org.eclipse.equinox.http.registry;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: org.eclipse.equinox.http.registry.internal.Activator
@@ -17,3 +17,4 @@ Bundle-RequiredExecutionEnvironment: J2SE-1.4,
  CDC-1.0/Foundation-1.0,
  J2SE-1.3
 Export-Package: org.eclipse.equinox.http.registry
+Bundle-Vendor: %providerName

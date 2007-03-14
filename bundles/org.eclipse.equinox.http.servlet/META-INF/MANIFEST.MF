@@ -1,6 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Http Services Servlet
+Bundle-Name: %bundleName
+Bundle-Vendor: %bundleProvider
 Bundle-SymbolicName: org.eclipse.equinox.http.servlet
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: org.eclipse.equinox.http.servlet.internal.Activator

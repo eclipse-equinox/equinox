@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.0.0">
-	<OCD name="Http Server Configuration" id="server.config" description="Http Server Configuration">
+	<OCD name="%configurationName" id="server.config" description="%configurationDescription">
 		<AD id="http.enabled" type="Boolean" default="true"/>
 		<AD id="http.port" type="Integer" default="0"/>
 		<AD id="https.enabled" type="Boolean" default="false"/>
