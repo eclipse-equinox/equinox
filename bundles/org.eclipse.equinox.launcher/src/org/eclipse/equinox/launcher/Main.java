@@ -84,9 +84,9 @@ public class Main {
     private String vm = null;
     private String[] vmargs = null;
     private String[] commands = null;
-    private String[] extensionPaths = null;
+    String[] extensionPaths = null;
 
-    private JNIBridge bridge = null;
+    JNIBridge bridge = null;
     
     // splash handling
     private boolean showSplash = false;
@@ -287,7 +287,7 @@ public class Main {
     private String getOS() {
 		if (os != null)
 			return os;
-		String osName = System.getProperties().getProperty("os.name");
+		String osName = System.getProperties().getProperty("os.name"); //$NON-NLS-1$
 		if (osName.regionMatches(true, 0, Constants.OS_WIN32, 0, 3))
 			return Constants.OS_WIN32;
 		// EXCEPTION: All mappings of SunOS convert to Solaris
@@ -329,7 +329,7 @@ public class Main {
 		if (library != null) {
 			File lib = new File(library);
 			if(lib.isDirectory()) {
-				libPath = searchFor("eclipse", lib.getAbsolutePath());
+				libPath = searchFor("eclipse", lib.getAbsolutePath()); //$NON-NLS-1$
 			} else if(lib.exists()){
 				libPath = lib.getAbsolutePath();
 			}
@@ -355,7 +355,7 @@ public class Main {
 					File entryFile = new File(urls[urls.length - 1].getFile());
 					String dir = entryFile.getParent();
 					if (inDevelopmentMode) {
-						String devDir = dir + "/" + PLUGIN_ID + "/fragments";
+						String devDir = dir + "/" + PLUGIN_ID + "/fragments"; //$NON-NLS-1$ //$NON-NLS-2$
 						fragment = searchFor(fragmentName, devDir);
 					}
 					if (fragment == null)
@@ -365,11 +365,11 @@ public class Main {
 			if(fragment == null) {
 				URL install = getInstallLocation();
 				String location = install.getFile();
-				location += "/plugins/";
+				location += "/plugins/"; //$NON-NLS-1$
 				fragment = searchFor(fragmentName, location);
 			}
 			if(fragment != null)
-				libPath = searchFor("eclipse", fragment);
+				libPath = searchFor("eclipse", fragment); //$NON-NLS-1$
 		}
 		library = libPath;
 		bridge = new JNIBridge(library);
@@ -911,33 +911,31 @@ public class Main {
 
     private static URL buildURL(String spec, boolean trailingSlash) {
         if (spec == null)
-            return null;
-        boolean isFile = spec.startsWith(FILE_SCHEME);
-        try {
-            if (isFile) {
-                File toAdjust = new File(spec.substring(5));
-                if (toAdjust.isDirectory())
-                    return adjustTrailingSlash(toAdjust.toURL(), trailingSlash);
-                else
-                    return toAdjust.toURL();
-            } else
-                return new URL(spec);
-        } catch (MalformedURLException e) {
-            // if we failed and it is a file spec, there is nothing more we can do
-            // otherwise, try to make the spec into a file URL.
-            if (isFile)
-                return null;
-            try {
-                File toAdjust = new File(spec);
-                if (toAdjust.isDirectory())
-                    return adjustTrailingSlash(toAdjust.toURL(), trailingSlash);
-                else
-                    return toAdjust.toURL();
-            } catch (MalformedURLException e1) {
-                return null;
-            }
-        }
-    }
+			return null;
+		boolean isFile = spec.startsWith(FILE_SCHEME);
+		try {
+			if (isFile) {
+				File toAdjust = new File(spec.substring(5));
+				if (toAdjust.isDirectory())
+					return adjustTrailingSlash(toAdjust.toURL(), trailingSlash);
+				return toAdjust.toURL();
+			}
+			return new URL(spec);
+		} catch (MalformedURLException e) {
+			// if we failed and it is a file spec, there is nothing more we can do
+			// otherwise, try to make the spec into a file URL.
+			if (isFile)
+				return null;
+			try {
+				File toAdjust = new File(spec);
+				if (toAdjust.isDirectory())
+					return adjustTrailingSlash(toAdjust.toURL(), trailingSlash);
+				return toAdjust.toURL();
+			} catch (MalformedURLException e1) {
+				return null;
+			}
+		}
+	}
 
     private static URL adjustTrailingSlash(URL url, boolean trailingSlash) throws MalformedURLException {
         String file = url.getFile();
@@ -1223,7 +1221,7 @@ public class Main {
                 showSplash = true;
                 found = true;
                 //consume optional parameter for showsplash
-                if (i + 1 < args.length && !args[i+1].startsWith("-")) {
+                if (i + 1 < args.length && !args[i+1].startsWith("-")) { //$NON-NLS-1$
                 	configArgs[configArgIndex++] = i++;
                 }
             }
@@ -1575,7 +1573,7 @@ public class Main {
         if (path.toLowerCase().endsWith(".jar")) //$NON-NLS-1$
             path = path.substring(0, path.lastIndexOf("/") + 1); //$NON-NLS-1$
         if (path.toLowerCase().endsWith("/plugins/")) //$NON-NLS-1$ 
-        	path = path.substring(0, path.length() - "/plugins/".length());
+        	path = path.substring(0, path.length() - "/plugins/".length()); //$NON-NLS-1$
         try {
             try {
                 // create a file URL (via File) to normalize the form (e.g., put 
@@ -1726,8 +1724,8 @@ public class Main {
 		bridge.showSplash(location);
     	long handle = bridge.getSplashHandle();
     	if(handle != 0) {
-    		System.setProperty("org.eclipse.equinox.launcher.splash.handle", String.valueOf(handle));
-    		System.setProperty("org.eclipse.equinox.launcher.splash.location", location);
+    		System.setProperty("org.eclipse.equinox.launcher.splash.handle", String.valueOf(handle)); //$NON-NLS-1$
+    		System.setProperty("org.eclipse.equinox.launcher.splash.location", location); //$NON-NLS-1$
     		bridge.updateSplash();
     	}
     }
@@ -1736,17 +1734,17 @@ public class Main {
      * Take down the splash screen. 
      */
     protected void takeDownSplash() {
-        if (splashDown || bridge == null) // splash is already down
-            return;
+		if (splashDown || bridge == null) // splash is already down
+			return;
 
-        splashDown = bridge.takeDownSplash();;
-        
-        try {
-        	Runtime.getRuntime().removeShutdownHook(splashHandler);
-        } catch (Throwable e) {
-        	// OK to ignore this, happens when the VM is already shutting down
-        }
-    }
+		splashDown = bridge.takeDownSplash();
+
+		try {
+			Runtime.getRuntime().removeShutdownHook(splashHandler);
+		} catch (Throwable e) {
+			// OK to ignore this, happens when the VM is already shutting down
+		}
+	}
 
     /*
      * Return path of the splash image to use.  First search the defined splash path.
@@ -1987,9 +1985,9 @@ public class Main {
         }
         if (urlString.startsWith(PLATFORM_URL)) {
             String path = urlString.substring(PLATFORM_URL.length());
-            return getInstallLocation() + path;
-        } else
-            return urlString;
+			return getInstallLocation() + path;
+		}
+		return urlString;
     }
 
     /*
@@ -2257,7 +2255,7 @@ public class Main {
         private PermissionCollection allPermissions;
 
         // The AllPermission permission
-        private Permission allPermission = new AllPermission();
+        Permission allPermission = new AllPermission();
 
         EclipsePolicy(Policy policy, URL[] urls) {
             this.policy = policy;
@@ -2267,6 +2265,7 @@ public class Main {
 
                 // A simple PermissionCollection that only has AllPermission
                 public void add(Permission permission) {
+                	//no adding to this policy
                 }
 
                 public boolean implies(Permission permission) {
@@ -2285,8 +2284,8 @@ public class Main {
                             if (cur == 0) {
                                 cur = 1;
                                 return allPermission;
-                            } else
-                                throw new NoSuchElementException();
+                            }
+                            throw new NoSuchElementException();
                         }
                     };
                 }

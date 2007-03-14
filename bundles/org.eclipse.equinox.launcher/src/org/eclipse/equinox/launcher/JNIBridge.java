@@ -32,19 +32,19 @@ public class JNIBridge {
 	}
 	
 	private void loadLibrary() {
-		if(library != null) {
+		if (library != null) {
 			try {
-				if (library.indexOf("wpf") != -1)  {
-					int idx = library.indexOf("eclipse_");
+				if (library.indexOf("wpf") != -1) { //$NON-NLS-1$
+					int idx = library.indexOf("eclipse_"); //$NON-NLS-1$
 					if (idx != -1) {
-						String comLibrary = library.substring(0, idx) + "com_";
+						String comLibrary = library.substring(0, idx) + "com_"; //$NON-NLS-1$
 						comLibrary += library.substring(idx + 8, library.length());
 						System.load(comLibrary);
 						OleInitialize(0);
-					}			
+					}
 				}
 				System.load(library);
-			} catch (UnsatisfiedLinkError e ) {
+			} catch (UnsatisfiedLinkError e) {
 				//failed
 			}
 		}
@@ -117,7 +117,7 @@ public class JNIBridge {
 	
 	public boolean uninitialize() {
 		if (libraryLoaded && library != null) {
-			if (library.indexOf("wpf") != -1)  {
+			if (library.indexOf("wpf") != -1)  { //$NON-NLS-1$
 				try {
 					OleUninitialize();
 				} catch (UnsatisfiedLinkError e) {
