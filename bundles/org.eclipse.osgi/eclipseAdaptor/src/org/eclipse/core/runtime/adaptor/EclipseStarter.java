@@ -1212,29 +1212,28 @@ public class EclipseStarter {
 		String result = null;
 		Object[] maxVersion = null;
 		for (int i = 0; i < candidates.length; i++) {
-			String name = candidates[i];
-			if (!name.startsWith(target))
+			String candidateName = candidates[i];
+			if (!candidateName.startsWith(target))
 				continue;
 			boolean simpleJar = false;
-			if (name.length() > target.length() && name.charAt(target.length()) != '_') {
+			if (candidateName.length() > target.length() && candidateName.charAt(target.length()) != '_') {
 				// make sure this is not just a jar with no _version tacked on the end
-				if (name.length() == 4 + target.length() && name.endsWith(".jar")) //$NON-NLS-1$
+				if (candidateName.length() == 4 + target.length() && candidateName.endsWith(".jar")) //$NON-NLS-1$
 					simpleJar = true;
 				else
 					// name does not match the target properly with an _version at the end
 					continue;
 			}
-			String version = ""; //$NON-NLS-1$ // Note: directory with version suffix is always > than directory without version suffix
-			int index = name.indexOf('_');
-			if (index != -1)
-				version = name.substring(index + 1);
+			// Note: directory with version suffix is always > than directory without version suffix
+			String version = candidateName.length() > target.length() + 1 && candidateName.charAt(target.length()) == '_' ? candidateName.substring(target.length() + 1) : ""; //$NON-NLS-1$ 
 			Object[] currentVersion = getVersionElements(version);
-			File candidate = new File(start, candidates[i]);
-			if (compareVersion(maxVersion, currentVersion) < 0) {
-				result = candidate.getAbsolutePath();
+			if (currentVersion != null && compareVersion(maxVersion, currentVersion) < 0) {
+				File candidate = new File(start, candidateName);
 				// if simple jar; make sure it is really a file before accepting it
-				if (!simpleJar || candidate.isFile())
+				if (!simpleJar || candidate.isFile()) {
+					result = candidate.getAbsolutePath();
 					maxVersion = currentVersion;
+				}
 			}
 		}
 		if (result == null)
@@ -1248,26 +1247,28 @@ public class EclipseStarter {
 	 * with suitable defaults.
 	 * @return an array of size 4; first three elements are of type Integer (representing
 	 * major, minor and service) and the fourth element is of type String (representing
-	 * qualifier). Note, that returning anything else will cause exceptions in the caller.
+	 * qualifier).  A value of null is returned if there are no valid Integers.  Note, that 
+	 * returning anything else will cause exceptions in the caller.
 	 */
 	private static Object[] getVersionElements(String version) {
-		Object[] result = {new Integer(0), new Integer(0), new Integer(0), ""}; //$NON-NLS-1$
+		Object[] result = {new Integer(-1), new Integer(-1), new Integer(-1), ""}; //$NON-NLS-1$
 		StringTokenizer t = new StringTokenizer(version, "."); //$NON-NLS-1$
 		String token;
-		int i = 0;
-		while (t.hasMoreTokens() && i < 4) {
+		for (int i = 0; t.hasMoreTokens() && i < 4; i++) {
 			token = t.nextToken();
 			if (i < 3) {
 				// major, minor or service ... numeric values
 				try {
-					result[i++] = new Integer(token);
+					result[i] = new Integer(token);
 				} catch (Exception e) {
-					// invalid number format - use default numbers (0) for the rest
+					if (i == 0)
+						return null; // return null if no valid numbers are present
+					// invalid number format - use default numbers (-1) for the rest
 					break;
 				}
 			} else {
 				// qualifier ... string value
-				result[i++] = token;
+				result[i] = token;
 			}
 		}
 		return result;
