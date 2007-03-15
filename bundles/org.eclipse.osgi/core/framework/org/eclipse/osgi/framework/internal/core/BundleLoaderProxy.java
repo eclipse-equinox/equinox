@@ -30,14 +30,14 @@ public class BundleLoaderProxy implements RequiredBundle {
 	// The BundleLoader that this BundleLoaderProxy is managing
 	private BundleLoader loader;
 	// The Bundle that this BundleLoaderProxy is for
-	private BundleHost bundle;
+	final private BundleHost bundle;
 	// the BundleDescription for the Bundle
-	private BundleDescription description;
+	final private BundleDescription description;
 	// Indicates if this BundleLoaderProxy is stale; 
 	// this is true when the bundle is updated or uninstalled.
 	private boolean stale = false;
 	// cached of package sources for the bundle
-	private KeyedHashSet pkgSources;
+	final private KeyedHashSet pkgSources;
 
 	public BundleLoaderProxy(BundleHost bundle, BundleDescription description) {
 		this.bundle = bundle;
