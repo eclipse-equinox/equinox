@@ -586,13 +586,16 @@ public class BundleHost extends AbstractBundle {
 	}
 
 	protected BundleLoader getBundleLoader() {
-		return getLoaderProxy().getBundleLoader();
+		BundleLoaderProxy curProxy = getLoaderProxy();
+		return curProxy == null ? null : curProxy.getBundleLoader();
 	}
 
 	protected synchronized BundleLoaderProxy getLoaderProxy() {
 		if (proxy != null)
 			return proxy;
 		BundleDescription bundleDescription = getBundleDescription();
+		if (bundleDescription == null)
+			return null;
 		proxy = new BundleLoaderProxy(this, bundleDescription);
 		bundleDescription.setUserObject(proxy);
 		return proxy;
