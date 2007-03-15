@@ -55,4 +55,25 @@ public final class ContributorFactoryOSGi {
 
 		return new RegistryContributor(id, name, hostId, hostName);
 	}
+
+	/**
+	 * Returns the OSGi bundle used to define this contributor. If a fragment
+	 * was used to create the contributor, the fragment is returned. 
+	 * 
+	 * <p>The method may return null if the contributor is not based on a bundle, 
+	 * if the bundle can't be found, or if the bundle is presently unresolved or 
+	 * uninstalled.</p>
+	 * 
+	 * @param contributor bundle-based registry contributor
+	 * @return the actual OSGi bundle associated with this contributor
+	 * @since org.eclipse.equinox.registry 3.3
+	 */
+	public static Bundle resolve(IContributor contributor) {
+		if (contributor == null)
+			return null;
+		if (!(contributor instanceof RegistryContributor))
+			return null;
+		String symbolicName = ((RegistryContributor) contributor).getActualName();
+		return OSGIUtils.getDefault().getBundle(symbolicName);
+	}
 }
