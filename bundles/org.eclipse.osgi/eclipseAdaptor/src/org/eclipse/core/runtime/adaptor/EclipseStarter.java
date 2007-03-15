@@ -11,7 +11,8 @@
 package org.eclipse.core.runtime.adaptor;
 
 import java.io.*;
-import java.lang.reflect.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.net.*;
 import java.security.CodeSource;
 import java.security.ProtectionDomain;
@@ -19,8 +20,8 @@ import java.util.*;
 import org.eclipse.core.runtime.internal.adaptor.*;
 import org.eclipse.osgi.framework.adaptor.FilePath;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
-import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
-import org.eclipse.osgi.framework.internal.core.OSGi;
+import org.eclipse.osgi.framework.internal.core.*;
+import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.internal.profile.Profile;
@@ -606,7 +607,8 @@ public class EclipseStarter {
 
 		// install the initialBundles that are not already installed.
 		ArrayList startBundles = new ArrayList(installEntries.length);
-		installBundles(initialBundles, curInitBundles, startBundles, toRefresh);
+		ArrayList lazyActivationBundles = new ArrayList(installEntries.length);
+		installBundles(initialBundles, curInitBundles, startBundles, lazyActivationBundles, toRefresh);
 
 		// If we installed/uninstalled something, force a refresh of all installed/uninstalled bundles
 		if (!toRefresh.isEmpty())
@@ -614,7 +616,8 @@ public class EclipseStarter {
 
 		// schedule all basic bundles to be started
 		Bundle[] startInitBundles = (Bundle[]) startBundles.toArray(new Bundle[startBundles.size()]);
-		startBundles(startInitBundles);
+		Bundle[] lazyInitBundles = (Bundle[]) lazyActivationBundles.toArray(new Bundle[lazyActivationBundles.size()]);
+		startBundles(startInitBundles, lazyInitBundles);
 
 		if (debug)
 			System.out.println("Time to load bundles: " + (System.currentTimeMillis() - startTime)); //$NON-NLS-1$
@@ -1018,7 +1021,7 @@ public class EclipseStarter {
 		}
 	}
 
-	private static void installBundles(InitialBundle[] initialBundles, Bundle[] curInitBundles, ArrayList startBundles, List toRefresh) {
+	private static void installBundles(InitialBundle[] initialBundles, Bundle[] curInitBundles, ArrayList startBundles, ArrayList lazyActivationBundles, List toRefresh) {
 		ServiceReference reference = context.getServiceReference(StartLevel.class.getName());
 		StartLevel startService = null;
 		if (reference != null)
@@ -1030,6 +1033,9 @@ public class EclipseStarter {
 				if (osgiBundle == null) {
 					InputStream in = initialBundles[i].location.openStream();
 					osgiBundle = context.installBundle(initialBundles[i].locationString, in);
+					// only check for lazy activation header if this is a newly installed bundle and is not marked for persistent start
+					if (!initialBundles[i].start)
+						checkLazyActivationPolicy(osgiBundle, lazyActivationBundles);
 				}
 				// always set the startlevel incase it has changed (bug 111549)
 				// this is a no-op if the level is the same as previous launch.
@@ -1052,17 +1058,58 @@ public class EclipseStarter {
 		context.ungetService(reference);
 	}
 
-	private static void startBundles(Bundle[] bundles) {
-		for (int i = 0; i < bundles.length; i++) {
-			Bundle bundle = bundles[i];
-			try {
-				bundle.start();
-			} catch (BundleException e) {
-				if ((bundle.getState() & Bundle.RESOLVED) != 0) {
-					// only log errors if the bundle is resolved
-					FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_FAILED_START, bundle.getLocation()), 0, e, null);
-					log.log(entry);
+	private static void checkLazyActivationPolicy(Bundle target, ArrayList lazyActivationBundles) {
+		// check the bundle manifest to see if it defines a lazy activation policy
+		Dictionary headers = target.getHeaders(""); //$NON-NLS-1$
+		boolean lazyActivate = false;
+		// first look for the OSGi defined Bundle-ActivationPolicy header
+		String activationPolicy = (String) headers.get(Constants.BUNDLE_ACTIVATIONPOLICY);
+		try {
+			if (activationPolicy != null) {
+				ManifestElement[] elements = ManifestElement.parseHeader(Constants.BUNDLE_ACTIVATIONPOLICY, activationPolicy);
+				if (elements != null && elements.length > 0) {
+					// if the value is "lazy" then it has a lazy activation poliyc
+					if (Constants.ACTIVATION_LAZY.equals(elements[0].getValue()))
+						lazyActivate = true;
 				}
+			} else {
+				// check for Eclipse specific lazy start headers "Eclipse-LazyStart" and "Eclipse-AutoStart"
+				String eclipseLazyStart = (String) headers.get(Constants.ECLIPSE_LAZYSTART);
+				if (eclipseLazyStart == null)
+					eclipseLazyStart = (String) headers.get(Constants.ECLIPSE_AUTOSTART);
+				ManifestElement[] elements = ManifestElement.parseHeader(Constants.ECLIPSE_LAZYSTART, eclipseLazyStart);
+				if (elements != null && elements.length > 0) {
+					// if the value is true then it is lazy activated
+					if ("true".equals(elements[0].getValue())) //$NON-NLS-1$
+						lazyActivate = true;
+					// otherwise it is only lazy activated if it defines an exceptions directive.
+					else if (elements[0].getDirective("exceptions") != null) //$NON-NLS-1$
+						lazyActivate = true;
+				}
+			}
+		} catch (BundleException be) {
+			// ignore this
+		}
+		if (lazyActivate)
+			// add to list of lazy activation bundles; cannot start now because we don't want to trigger a resolve operation
+			lazyActivationBundles.add(target);
+	}
+
+	private static void startBundles(Bundle[] startBundles, Bundle[] lazyBundles) {
+		for (int i = 0; i < startBundles.length; i++)
+			startBundle(startBundles[i], 0);
+		for (int i = 0; i < lazyBundles.length; i++)
+			startBundle(lazyBundles[i], Bundle.START_ACTIVATION_POLICY);
+	}
+
+	private static void startBundle(Bundle bundle, int options) {
+		try {
+			bundle.start(options);
+		} catch (BundleException e) {
+			if ((bundle.getState() & Bundle.RESOLVED) != 0) {
+				// only log errors if the bundle is resolved
+				FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_FAILED_START, bundle.getLocation()), 0, e, null);
+				log.log(entry);
 			}
 		}
 	}
