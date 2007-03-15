@@ -266,6 +266,10 @@ typedef struct
 #define OPTIONAL_VALUE  2  	/* value is optional, if next arg does not start with '-', */
 							/* don't assign it and only remove (remove - 1) arguments  */
 
+/* flags being used by EE options */
+#define EE_ADJUST_PATH	4   /* value is a path, do processing on relative paths to try and make them absolute */
+#define EE_PATH_LIST	8   /* value is a list of paths */
+
 static Option options[] = {
     { CONSOLE,		&needConsole,	VALUE_IS_FLAG,	0 },
     { CONSOLELOG,	&needConsole,	VALUE_IS_FLAG,	0 },
@@ -284,10 +288,10 @@ static Option options[] = {
 static int optionsSize = (sizeof(options) / sizeof(options[0]));
 
 static Option eeOptions[] = {
-	{ EE_EXECUTABLE,	&eeExecutable, 	0, 0 },
-	{ EE_CONSOLE,	 	&eeConsole,		0, 0 },
-	{ EE_VM_LIBRARY, 	&eeLibrary,		0, 0 },
-	{ EE_LIBRARY_PATH,	&eeLibPath, 	0, 0 }
+	{ EE_EXECUTABLE,	&eeExecutable, 	EE_ADJUST_PATH, 0 },
+	{ EE_CONSOLE,	 	&eeConsole,		EE_ADJUST_PATH, 0 },
+	{ EE_VM_LIBRARY, 	&eeLibrary,		EE_ADJUST_PATH, 0 },
+	{ EE_LIBRARY_PATH,	&eeLibPath, 	EE_ADJUST_PATH | EE_PATH_LIST, 0 }
 };
 static int eeOptionsSize = (sizeof(eeOptions) / sizeof(eeOptions[0]));
 
@@ -983,31 +987,22 @@ static _TCHAR* findSplash(_TCHAR* splashArg) {
 }
 
 static _TCHAR* findStartupJar(){
-	_TCHAR * file;
+	_TCHAR * file, *ch;
 	_TCHAR * pluginsPath;
 	struct _stat stats;
 	int pathLength, progLength;
 	
 	if( startupArg != NULL ) {
 		/* startup jar was specified on the command line */
-		
-		/* Construct the absolute name of the startup jar */
-		file = malloc( (_tcslen( programDir ) + _tcslen( startupArg ) + 1) * sizeof( _TCHAR ) );
-		file = _tcscpy( file, programDir );
-	  	file = _tcscat( file, startupArg );
-	
-		/* If the file does not exist, treat the argument as an absolute path */
-		if (_tstat( file, &stats ) != 0)
-		{
-			free( file );
-			file = malloc( (_tcslen( startupArg ) + 1) * sizeof( _TCHAR ) );
-			file = _tcscpy( file, startupArg );
-			
-			/* still doesn't exit? */
-			if (_tstat( file, &stats ) != 0) {
-				free(file);
-				file = NULL;
-			}
+		ch = _tcsdup(startupArg);
+		/* check path will check relative paths against programDir and workingDir */
+		file = checkPath(ch, programDir, 0);
+		if(file != ch)
+			free(ch);
+		/* check existence */
+		if (_tstat( file, &stats ) != 0) {
+			free(file);
+			file = NULL;
 		}
 		/* TODO What should the policy here be, if we didn't find what they
 		 * specified?  (Its harder to specify equinox.startup on the mac.) */
@@ -1124,6 +1119,7 @@ static int determineVM(_TCHAR** msg) {
 	
 	/* vmName is passed in on command line with -vm */
     if (vmName != NULL) {
+    	vmName = checkPath(vmName, programDir, 0);
     	type = checkProvidedVMType(vmName);
     	switch (type) {
     	case VM_DIRECTORY:
@@ -1270,7 +1266,8 @@ static int determineVM(_TCHAR** msg) {
 static int processEEProps(_TCHAR* eeFile) 
 {
 	_TCHAR ** argv;
-	_TCHAR * ch;
+	_TCHAR * c1, * c2;
+	_TCHAR * eeDir;
 	int argc;
 	int index, i;
 	int matches = 0;
@@ -1281,6 +1278,13 @@ static int processEEProps(_TCHAR* eeFile)
 
 	nEEargs = argc;
 	eeVMarg = argv;
+	
+	eeDir = _tcsdup(eeFile);
+	c1 = _tcsrchr( eeDir, dirSeparator );
+	if (c1 != NULL)
+    {
+    	*(c1+1) = _T_ECLIPSE('\0');
+    }
 	
     for (index = 0; index < argc; index++){
     	/* Find the corresponding argument is a option supported by the launcher */
@@ -1293,16 +1297,29 @@ static int processEEProps(_TCHAR* eeFile)
         	}
        	}
         if(option != NULL) {
-        	++matches;
-        	ch = malloc( (_tcslen(argv[index]) - _tcslen(option->name) + 1) *sizeof(_TCHAR));
-        	_tcscpy(ch, argv[index] + _tcslen(option->name));
+        	++matches;	
         	if (option->flag & VALUE_IS_FLAG)
         		*((int*)option->value) = 1;
-        	else
-        		*((_TCHAR**)option->value) = ch;
+        	else {
+        		c1 = malloc( (_tcslen(argv[index]) - _tcslen(option->name) + 1) *sizeof(_TCHAR));
+            	_tcscpy(c1, argv[index] + _tcslen(option->name));
+        		if (option->flag & EE_ADJUST_PATH && option->flag & EE_PATH_LIST) {
+        			c2 = checkPathList(c1, eeDir, 1);
+       				free(c1);
+    				c1 = c2;
+        		} else if (option->flag & EE_ADJUST_PATH) {
+        			c2 = checkPath(c1, eeDir, 1);
+        			if (c2 != c1) {
+        				free(c1);
+        				c1 = c2;
+        			}
+        		}
+    			*((_TCHAR**)option->value) = c1;
+        	}
         	if(matches == eeOptionsSize)
         		break;
         }
     }
+    free(eeDir);
     return 0;
 }

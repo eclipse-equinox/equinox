@@ -17,6 +17,8 @@
 #define isJ9VM isJ9VMW
 #define isVMLibrary isVMLibraryW
 #define checkProvidedVMType checkProvidedVMTypeW
+#define checkPath checkPathW
+#define checkPathList checkPathListW
 #endif
 
 /* constants for checkProvidedVMType */
@@ -36,6 +38,12 @@ extern int isVMLibrary( _TCHAR* vm );
 
 /* determine what the provided -vm argument is referring to */ 
 extern int checkProvidedVMType( _TCHAR* vm );
+
+/* check the given path and attempt to make it absolute if it is relative */
+extern _TCHAR* checkPath( _TCHAR* path, _TCHAR* programDir, int reverseOrder );
+
+/* take a list of path separated with pathSeparator and run them through checkPath */
+extern _TCHAR * checkPathList( _TCHAR* pathList, _TCHAR* programDir, int reverseOrder);
 
 #ifdef AIX 
 /* Get the version of the VM */

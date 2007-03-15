@@ -20,8 +20,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/stat.h>
-
-#ifndef _WIN32
+#ifdef _WIN32
+#include <direct.h>
+#else
+#include <unistd.h>
 #include <strings.h>
 #endif
 
@@ -86,6 +88,97 @@ int checkProvidedVMType( _TCHAR* vm )
 		return VM_EE_PROPS;
 	
 	return VM_OTHER;
+}
+
+/*
+ * If path is relative, attempt to make it absolute by 
+ * 1) check relative to working directory
+ * 2) check relative to provided programDir
+ * If reverseOrder, then check the programDir before the working dir
+ */
+_TCHAR* checkPath( _TCHAR* path, _TCHAR* programDir, int reverseOrder ) 
+{
+	int cwdSize = MAX_PATH_LENGTH * sizeof(_TCHAR);
+	int i;
+	_TCHAR * workingDir, * buffer, * result;
+	_TCHAR * paths[2];
+	struct _stat stats;
+	
+	/* If the command was an abolute pathname, use it as is. */
+    if (path[0] == dirSeparator ||
+       (_tcslen( path ) > 2 && path[1] == _T_ECLIPSE(':')))
+    {
+    	return path;
+    }
+    
+    /* get the current working directory */
+    workingDir = malloc(cwdSize);
+    while ( _tgetcwd( workingDir, cwdSize ) == NULL ){
+    	cwdSize *= 2;
+    	workingDir = realloc(workingDir, cwdSize);
+    }
+    
+    paths[0] = reverseOrder ? programDir : workingDir;
+    paths[1] = reverseOrder ? workingDir : programDir;
+    
+    /* just make a buffer big enough to hold everything */
+    buffer = malloc((_tcslen(paths[0]) + _tcslen(paths[1]) + _tcslen(path) + 2) * sizeof(_TCHAR));
+    for ( i = 0; i < 2; i++ ) {
+    	_stprintf(buffer, _T_ECLIPSE("%s%c%s"), paths[i], dirSeparator, path);
+    	if (_tstat(buffer, &stats) == 0) {
+    		result = _tcsdup(buffer);
+    		break;
+    	}
+    }
+    
+    free(buffer);
+    free(workingDir);
+    
+    /* if we found something, return it, otherwise, return the original */
+    return result != NULL ? result : path;
+}
+
+/*
+ * pathList is a pathSeparator separated list of paths, run each through
+ * checkPath and recombine the results.
+ * New memory is always allocated for the result
+ */
+_TCHAR * checkPathList( _TCHAR* pathList, _TCHAR* programDir, int reverseOrder) {
+	_TCHAR * c1, *c2;
+	_TCHAR * checked, *result;
+	int checkedLength = 0, resultLength = 0;
+	int bufferLength = _tcslen(pathList);
+	
+	result = malloc(bufferLength * sizeof(_TCHAR));
+	c1 = pathList;
+    while (c1 != NULL && *c1 != _T_ECLIPSE('\0'))
+    {
+    	c2 = _tcschr(c1, pathSeparator);
+		if (c2 != NULL)
+			*c2 = 0;
+		
+		checked = checkPath(c1, programDir, reverseOrder);
+		checkedLength = _tcslen(checked);
+		if (resultLength + checkedLength + 1> bufferLength) {
+			bufferLength += checkedLength + 1;
+			result = realloc(result, bufferLength * sizeof(_TCHAR));
+		}
+		
+		if(resultLength > 0) {
+			result[resultLength++] = pathSeparator;
+			result[resultLength] = _T_ECLIPSE('\0');
+		}
+		_tcscpy(result + resultLength, checked);
+		resultLength += checkedLength;
+		
+		if(checked != c1)
+			free(checked);
+		if(c2 != NULL)
+			*(c2++) = pathSeparator;
+		c1 = c2;
+	}
+    
+    return result;
 }
 
 int isVMLibrary( _TCHAR* vm )
