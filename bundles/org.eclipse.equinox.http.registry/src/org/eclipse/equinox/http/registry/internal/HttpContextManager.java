@@ -120,7 +120,7 @@ public class HttpContextManager implements Listener {
 			}
 
 			NamedHttpContextImpl namedContext = (NamedHttpContextImpl) getHttpContext(httpContextName);
-			namedContext.addHttpContext(extension, context);
+			namedContext.addHttpContext(httpContextElement, context);
 		}
 	}
 
@@ -135,7 +135,7 @@ public class HttpContextManager implements Listener {
 				continue;
 
 			NamedHttpContextImpl namedContext = (NamedHttpContextImpl) getHttpContext(httpContextName);
-			namedContext.removeHttpContext(extension);
+			namedContext.removeHttpContext(httpContextElement);
 		}
 	}
 

@@ -16,7 +16,7 @@ import java.net.URL;
 import java.util.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.eclipse.core.runtime.IExtension;
+import org.eclipse.core.runtime.IConfigurationElement;
 import org.osgi.service.http.HttpContext;
 
 public class NamedHttpContextImpl implements HttpContext {
@@ -81,13 +81,13 @@ public class NamedHttpContextImpl implements HttpContext {
 		return result;
 	}
 
-	public synchronized void addHttpContext(IExtension extension, HttpContext context) {
-		httpContexts.put(extension, context);
+	public synchronized void addHttpContext(IConfigurationElement httpContextElement, HttpContext context) {
+		httpContexts.put(httpContextElement, context);
 		snapshot = null;
 	}
 
-	public synchronized void removeHttpContext(IExtension extension) {
-		httpContexts.remove(extension);
+	public synchronized void removeHttpContext(IConfigurationElement httpContextElement) {
+		httpContexts.remove(httpContextElement);
 		snapshot = null;
 	}
 
