@@ -100,7 +100,7 @@ _TCHAR* checkPath( _TCHAR* path, _TCHAR* programDir, int reverseOrder )
 {
 	int cwdSize = MAX_PATH_LENGTH * sizeof(_TCHAR);
 	int i;
-	_TCHAR * workingDir, * buffer, * result;
+	_TCHAR * workingDir, * buffer, * result = NULL;
 	_TCHAR * paths[2];
 	struct _stat stats;
 	
