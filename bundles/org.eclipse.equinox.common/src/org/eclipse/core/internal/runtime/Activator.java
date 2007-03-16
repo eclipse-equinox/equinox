@@ -12,7 +12,9 @@ package org.eclipse.core.internal.runtime;
 
 import java.net.URL;
 import java.util.*;
-import org.eclipse.core.internal.boot.*;
+import org.eclipse.core.internal.boot.PlatformURLBaseConnection;
+import org.eclipse.core.internal.boot.PlatformURLHandler;
+import org.eclipse.core.runtime.IAdapterManager;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.service.debug.DebugOptions;
@@ -38,6 +40,7 @@ public class Activator implements BundleActivator {
 	private static BundleContext bundleContext;
 	private static Activator singleton;
 	private ServiceRegistration platformURLConverterService = null;
+	private ServiceRegistration adapterManagerService = null;
 	private ServiceTracker installLocationTracker = null;
 	private ServiceTracker instanceLocationTracker = null;
 	private ServiceTracker configLocationTracker = null;
@@ -53,6 +56,7 @@ public class Activator implements BundleActivator {
 	public static Activator getDefault() {
 		return singleton;
 	}
+
 	/**
 	 * Print a debug message to the console. 
 	 * Pre-pend the message with the current date and the name of the current thread.
@@ -76,6 +80,7 @@ public class Activator implements BundleActivator {
 		Dictionary urlProperties = new Hashtable();
 		urlProperties.put("protocol", "platform"); //$NON-NLS-1$ //$NON-NLS-2$
 		platformURLConverterService = context.registerService(URLConverter.class.getName(), new PlatformURLConverter(), urlProperties);
+		adapterManagerService = context.registerService(IAdapterManager.class.getName(), AdapterManager.getDefault(), null);
 		installPlatformURLSupport();
 	}
 
@@ -240,6 +245,10 @@ public class Activator implements BundleActivator {
 		if (platformURLConverterService != null) {
 			platformURLConverterService.unregister();
 			platformURLConverterService = null;
+		}
+		if (adapterManagerService != null) {
+			adapterManagerService.unregister();
+			adapterManagerService = null;
 		}
 		if (installLocationTracker != null) {
 			installLocationTracker.close();
