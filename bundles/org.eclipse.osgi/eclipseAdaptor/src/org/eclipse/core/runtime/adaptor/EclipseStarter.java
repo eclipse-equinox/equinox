@@ -1034,8 +1034,8 @@ public class EclipseStarter {
 					InputStream in = initialBundles[i].location.openStream();
 					osgiBundle = context.installBundle(initialBundles[i].locationString, in);
 					// only check for lazy activation header if this is a newly installed bundle and is not marked for persistent start
-					if (!initialBundles[i].start)
-						checkLazyActivationPolicy(osgiBundle, lazyActivationBundles);
+					if (!initialBundles[i].start && hasLazyActivationPolicy(osgiBundle))
+						lazyActivationBundles.add(osgiBundle);
 				}
 				// always set the startlevel incase it has changed (bug 111549)
 				// this is a no-op if the level is the same as previous launch.
@@ -1058,11 +1058,14 @@ public class EclipseStarter {
 		context.ungetService(reference);
 	}
 
-	private static void checkLazyActivationPolicy(Bundle target, ArrayList lazyActivationBundles) {
+	private static boolean hasLazyActivationPolicy(Bundle target) {
 		// check the bundle manifest to see if it defines a lazy activation policy
 		Dictionary headers = target.getHeaders(""); //$NON-NLS-1$
-		boolean lazyActivate = false;
-		// first look for the OSGi defined Bundle-ActivationPolicy header
+		// first check to see if this is a fragment bundle
+		String fragmentHost = (String) headers.get(Constants.FRAGMENT_HOST);
+		if (fragmentHost != null)
+			return false; // do not activate fragment bundles
+		// look for the OSGi defined Bundle-ActivationPolicy header
 		String activationPolicy = (String) headers.get(Constants.BUNDLE_ACTIVATIONPOLICY);
 		try {
 			if (activationPolicy != null) {
@@ -1070,7 +1073,7 @@ public class EclipseStarter {
 				if (elements != null && elements.length > 0) {
 					// if the value is "lazy" then it has a lazy activation poliyc
 					if (Constants.ACTIVATION_LAZY.equals(elements[0].getValue()))
-						lazyActivate = true;
+						return true;
 				}
 			} else {
 				// check for Eclipse specific lazy start headers "Eclipse-LazyStart" and "Eclipse-AutoStart"
@@ -1081,18 +1084,16 @@ public class EclipseStarter {
 				if (elements != null && elements.length > 0) {
 					// if the value is true then it is lazy activated
 					if ("true".equals(elements[0].getValue())) //$NON-NLS-1$
-						lazyActivate = true;
+						return true;
 					// otherwise it is only lazy activated if it defines an exceptions directive.
 					else if (elements[0].getDirective("exceptions") != null) //$NON-NLS-1$
-						lazyActivate = true;
+						return true;
 				}
 			}
 		} catch (BundleException be) {
 			// ignore this
 		}
-		if (lazyActivate)
-			// add to list of lazy activation bundles; cannot start now because we don't want to trigger a resolve operation
-			lazyActivationBundles.add(target);
+		return false;
 	}
 
 	private static void startBundles(Bundle[] startBundles, Bundle[] lazyBundles) {
