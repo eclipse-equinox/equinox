@@ -34,10 +34,79 @@ _TCHAR* wsArg        = _T_ECLIPSE(DEFAULT_WS);	/* the SWT supported GUI to be us
 /* Local Variables */
 #ifndef _WIN32
 static _TCHAR* filterPrefix = NULL;  /* prefix for the find files filter */
-static int     prefixLength = 0;
 #endif
+static int     prefixLength = 0;
 
+typedef struct {
+	int segment[3];
+	_TCHAR * qualifier;
+} Version;
 
+static void freeVersion(Version *version)
+{
+	if(version->qualifier)
+		free(version->qualifier);
+	free(version);
+}
+
+static Version* parseVersion(const _TCHAR * str) {
+	_TCHAR *copy;
+	_TCHAR *c1, *c2 = NULL;
+	int i = 0;
+	
+	Version *version = malloc(sizeof(Version));
+	memset(version, 0, sizeof(Version));
+	
+	c1 = copy = _tcsdup(str);
+	while (c1 && *c1 != 0)
+	{
+		if (i < 3) {
+			version->segment[i] = (int)_tcstol(c1, &c2, 10);
+			/* if the next character is not '.', then we couldn't
+			 * parse as a int, the remainder is not valid (or we are at the end)*/
+			if (*c2 && *c2 != _T_ECLIPSE('.'))
+				break;
+			c2++; /* increment past the . */
+		} else {
+			c2 = _tcschr(c1, _T_ECLIPSE('.'));
+			if(c2 != NULL) {
+				*c2 = 0;
+				version->qualifier = _tcsdup(c1);
+				*c2 = _T_ECLIPSE('.'); /* put the dot back */
+			} else {
+				if(_tcsicmp(c1, _T_ECLIPSE("jar")) == 0)
+					version->qualifier = 0;
+				else
+					version->qualifier = _tcsdup(c1);
+			}
+			break;
+		}
+		c1 = c2;
+		i++;
+	}
+	free(copy);
+	return version;
+}
+
+static int compareVersions(const _TCHAR* str1, const _TCHAR* str2) {
+	int result = 0, i = 0;
+	Version *v1 = parseVersion(str1);
+	Version *v2 = parseVersion(str2);
+	
+	while (result == 0 && i < 3) {
+		result = v1->segment[i] - v2->segment[i];
+		i++;
+	}
+	if(result == 0) {
+		_TCHAR * q1 = v1->qualifier ? v1->qualifier : _T_ECLIPSE("");
+		_TCHAR * q2 = v2->qualifier ? v2->qualifier : _T_ECLIPSE("");
+		result =  _tcscmp(q1, q2);
+	}
+	
+	freeVersion(v1);
+	freeVersion(v2);
+	return result;
+}
 /**
  * Convert a wide string to a narrow one
  * Caller must free the null terminated string returned.
@@ -234,6 +303,14 @@ static int filter(const struct dirent *dir) {
 	}
 	return 0;
 }
+
+static int sorter(const void *a, const void *b) 
+{
+	struct dirent * dirA = *((struct dirent **)a);
+	struct dirent * dirB = *((struct dirent **)b);
+	
+	return compareVersions(dirA->d_name + prefixLength + 1, dirB->d_name + prefixLength + 1);
+}
 #endif
  /* 
  * Looks for files of the form /path/prefix_version.<extension> and returns the full path to
@@ -272,15 +349,15 @@ _TCHAR* findFile( _TCHAR* path, _TCHAR* prefix)
 #ifdef _WIN32
 	fileName = malloc( (_tcslen(path) + 1 + _tcslen(prefix) + 3) * sizeof(_TCHAR));
 	_stprintf(fileName, _T_ECLIPSE("%s%c%s_*"), path, dirSeparator, prefix);
-	prefix = fileName;
+	prefixLength = _tcslen(prefix);
 	
-	handle = FindFirstFile(prefix, &data);
+	handle = FindFirstFile(fileName, &data);
 	if(handle != INVALID_HANDLE_VALUE) {
 		candidate = _tcsdup(data.cFileName);
 		while(FindNextFile(handle, &data) != 0) {
 			fileName = data.cFileName;
 			/* compare, take the highest version */
-			if( _tcscmp(candidate, fileName) < 0) {
+			if( compareVersions(candidate + prefixLength + 1, fileName + prefixLength + 1) < 0) {
 				free(candidate);
 				candidate = _tcsdup(fileName);
 			}
@@ -291,7 +368,7 @@ _TCHAR* findFile( _TCHAR* path, _TCHAR* prefix)
 	filterPrefix = prefix;
 	prefixLength = _tcslen(prefix);
 	/* TODO should write out own comparator to better handle OSGi versions */
-	count = scandir(path, &files, &filter, alphasort);
+	count = scandir(path, &files, &filter, &sorter);
 	if(count > 0) {
 		candidate = _tcsdup(files[count - 1]->d_name);
 	}

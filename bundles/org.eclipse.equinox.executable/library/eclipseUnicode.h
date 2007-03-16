@@ -93,6 +93,7 @@
 #define _tfopen fopen
 #define _tgetcwd getcwd
 #define _tgetenv getenv
+#define _tcstol strtol
 #ifndef LINUX
 #define _totupper toupper
 #endif /* LINUX */
