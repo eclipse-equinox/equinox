@@ -7,6 +7,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Alex Blewitt (bug 172969)
  *******************************************************************************/
 package org.eclipse.core.runtime.adaptor;
 
@@ -1505,5 +1506,19 @@ public class EclipseStarter {
 			else
 				FrameworkProperties.clearProperty((String) entry.getKey());
 		}
+	}
+
+	/**
+	 * Returns the context of the system bundle.  A value of 
+	 * <code>null</code> is returned if the platform is not running.
+	 * @return the context of the system bundle
+	 * @throws java.lang.SecurityException If the caller does not have the
+	 *         appropriate <code>AdminPermission[system.bundle,CONTEXT]</code>, and
+	 *         the Java Runtime Environment supports permissions.
+	 */
+	public static BundleContext getSystemBundleContext() {
+		if (context == null || !running)
+			return null;
+		return context.getBundle().getBundleContext();
 	}
 }
