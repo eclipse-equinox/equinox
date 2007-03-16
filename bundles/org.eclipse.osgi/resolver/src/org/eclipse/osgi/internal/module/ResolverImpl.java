@@ -1189,14 +1189,14 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		ResolverBundle host = (ResolverBundle) rb.getHost().getSelectedSupplier();
 		ImportPackageSpecification[] imports = rb.getBundle().getImportPackages();
 		for (int i = 0; i < imports.length; i++) {
-			ResolverImport hostImport = host.getImport(imports[i].getName());
+			ResolverImport hostImport = host == null ? null : host.getImport(imports[i].getName());
 			ResolverExport export = (ResolverExport) (hostImport == null ? null : hostImport.getSelectedSupplier());
 			BaseDescription supplier = export == null ? null : export.getExportPackageDescription();
 			state.resolveConstraint(imports[i], supplier);
 		}
 		BundleSpecification[] requires = rb.getBundle().getRequiredBundles();
 		for (int i = 0; i < requires.length; i++) {
-			BundleConstraint hostRequire = host.getRequire(requires[i].getName());
+			BundleConstraint hostRequire = host == null ? null : host.getRequire(requires[i].getName());
 			ResolverBundle bundle = (ResolverBundle) (hostRequire == null ? null : hostRequire.getSelectedSupplier());
 			BaseDescription supplier = bundle == null ? null : bundle.getBundle();
 			state.resolveConstraint(requires[i], supplier);
