@@ -911,31 +911,31 @@ public class Main {
 
     private static URL buildURL(String spec, boolean trailingSlash) {
         if (spec == null)
-			return null;
-		boolean isFile = spec.startsWith(FILE_SCHEME);
-		try {
-			if (isFile) {
-				File toAdjust = new File(spec.substring(5));
-				if (toAdjust.isDirectory())
-					return adjustTrailingSlash(toAdjust.toURL(), trailingSlash);
-				return toAdjust.toURL();
+            return null;
+        boolean isFile = spec.startsWith(FILE_SCHEME);
+        try {
+            if (isFile) {
+                File toAdjust = new File(spec.substring(5));
+                if (toAdjust.isDirectory())
+                    return adjustTrailingSlash(toAdjust.toURL(), trailingSlash);
+                    return toAdjust.toURL();
 			}
-			return new URL(spec);
-		} catch (MalformedURLException e) {
-			// if we failed and it is a file spec, there is nothing more we can do
-			// otherwise, try to make the spec into a file URL.
-			if (isFile)
-				return null;
-			try {
-				File toAdjust = new File(spec);
-				if (toAdjust.isDirectory())
-					return adjustTrailingSlash(toAdjust.toURL(), trailingSlash);
-				return toAdjust.toURL();
-			} catch (MalformedURLException e1) {
-				return null;
-			}
-		}
-	}
+                return new URL(spec);
+        } catch (MalformedURLException e) {
+            // if we failed and it is a file spec, there is nothing more we can do
+            // otherwise, try to make the spec into a file URL.
+            if (isFile)
+                return null;
+            try {
+                File toAdjust = new File(spec);
+                if (toAdjust.isDirectory())
+                    return adjustTrailingSlash(toAdjust.toURL(), trailingSlash);
+                    return toAdjust.toURL();
+            } catch (MalformedURLException e1) {
+                return null;
+            }
+        }
+    }
 
     private static URL adjustTrailingSlash(URL url, boolean trailingSlash) throws MalformedURLException {
         String file = url.getFile();
@@ -1015,7 +1015,9 @@ public class Main {
 
         File fileTest = null;
         try {
-            fileTest = File.createTempFile("writtableArea", null, installDir); //$NON-NLS-1$
+        	// we use the .dll suffix to properly test on Vista virtual directories
+        	// on Vista you are not allowed to write executable files on virtual directories like "Program Files"
+            fileTest = File.createTempFile("writtableArea", ".dll", installDir); //$NON-NLS-1$ //$NON-NLS-2$
         } catch (IOException e) {
             //If an exception occured while trying to create the file, it means that it is not writtable
             return false;
@@ -1042,6 +1044,18 @@ public class Main {
         if (installURL == null)
             return null;
         File installDir = new File(installURL.getFile());
+        // compute an install dir hash to prevent configuration area collisions with other eclipse installs
+        int hashCode;
+        try {
+        	hashCode = installDir.getCanonicalPath().hashCode();
+        } catch (IOException ioe) {
+        	// fall back to absolute path
+        	hashCode = installDir.getAbsolutePath().hashCode();
+        }
+       	if (hashCode < 0)
+       		hashCode = -(hashCode);
+       	String installDirHash = String.valueOf(hashCode);
+
         String appName = "." + ECLIPSE; //$NON-NLS-1$
         File eclipseProduct = new File(installDir, PRODUCT_SITE_MARKER);
         if (eclipseProduct.exists()) {
@@ -1054,11 +1068,16 @@ public class Main {
                 String appVersion = props.getProperty(PRODUCT_SITE_VERSION);
                 if (appVersion == null || appVersion.trim().length() == 0)
                     appVersion = ""; //$NON-NLS-1$
-                appName += File.separator + appId + "_" + appVersion; //$NON-NLS-1$
+                appName += File.separator + appId + "_" + appVersion + "_" + installDirHash; //$NON-NLS-1$ //$NON-NLS-2$
             } catch (IOException e) {
                 // Do nothing if we get an exception.  We will default to a standard location 
                 // in the user's home dir.
+            	// add the hash to help prevent collisions
+            	appName += File.separator + installDirHash;
             }
+        } else {
+        	// add the hash to help prevent collisions
+        	appName += File.separator + installDirHash;
         }
         String userHome = System.getProperty(PROP_USER_HOME);
         return new File(userHome, appName + "/" + pathAppendage).getAbsolutePath(); //$NON-NLS-1$
@@ -1145,7 +1164,7 @@ public class Main {
             result = 13;
         } finally {
             // always try putting down the splash screen just in case the application failed to do so
-            takeDownSplash();   
+            takeDownSplash();           
             if(bridge != null)
             	bridge.uninitialize();
         }
@@ -1734,17 +1753,17 @@ public class Main {
      * Take down the splash screen. 
      */
     protected void takeDownSplash() {
-		if (splashDown || bridge == null) // splash is already down
-			return;
+        if (splashDown || bridge == null) // splash is already down
+            return;
 
 		splashDown = bridge.takeDownSplash();
-
-		try {
-			Runtime.getRuntime().removeShutdownHook(splashHandler);
-		} catch (Throwable e) {
-			// OK to ignore this, happens when the VM is already shutting down
-		}
-	}
+        
+        try {
+        	Runtime.getRuntime().removeShutdownHook(splashHandler);
+        } catch (Throwable e) {
+        	// OK to ignore this, happens when the VM is already shutting down
+        }
+    }
 
     /*
      * Return path of the splash image to use.  First search the defined splash path.
@@ -1985,9 +2004,9 @@ public class Main {
         }
         if (urlString.startsWith(PLATFORM_URL)) {
             String path = urlString.substring(PLATFORM_URL.length());
-			return getInstallLocation() + path;
+            return getInstallLocation() + path;
 		}
-		return urlString;
+            return urlString;
     }
 
     /*
@@ -2285,7 +2304,7 @@ public class Main {
                                 cur = 1;
                                 return allPermission;
                             }
-                            throw new NoSuchElementException();
+                                throw new NoSuchElementException();
                         }
                     };
                 }

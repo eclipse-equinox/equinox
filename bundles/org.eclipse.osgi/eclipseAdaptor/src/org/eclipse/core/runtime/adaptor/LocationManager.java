@@ -232,7 +232,9 @@ public class LocationManager {
 
 		File fileTest = null;
 		try {
-			fileTest = File.createTempFile("writtableArea", null, installDir); //$NON-NLS-1$
+			// we use the .dll suffix to properly test on Vista virtual directories
+        	// on Vista you are not allowed to write executable files on virtual directories like "Program Files"
+            fileTest = File.createTempFile("writtableArea", ".dll", installDir); //$NON-NLS-1$ //$NON-NLS-2$
 		} catch (IOException e) {
 			//If an exception occured while trying to create the file, it means that it is not writtable
 			return false;
@@ -253,6 +255,18 @@ public class LocationManager {
 		if (installURL == null)
 			return null;
 		File installDir = new File(installURL.getFile());
+		// compute an install dir hash to prevent configuration area collisions with other eclipse installs
+        int hashCode;
+        try {
+        	hashCode = installDir.getCanonicalPath().hashCode();
+        } catch (IOException ioe) {
+        	// fall back to absolute path
+        	hashCode = installDir.getAbsolutePath().hashCode();
+        }
+       	if (hashCode < 0)
+       		hashCode = -(hashCode);
+       	String installDirHash = String.valueOf(hashCode);
+
 		String appName = "." + ECLIPSE; //$NON-NLS-1$
 		File eclipseProduct = new File(installDir, PRODUCT_SITE_MARKER);
 		if (eclipseProduct.exists()) {
@@ -265,12 +279,17 @@ public class LocationManager {
 				String appVersion = props.getProperty(PRODUCT_SITE_VERSION);
 				if (appVersion == null || appVersion.trim().length() == 0)
 					appVersion = ""; //$NON-NLS-1$
-				appName += File.separator + appId + "_" + appVersion; //$NON-NLS-1$
+				appName += File.separator + appId + "_" + appVersion + "_" + installDirHash; //$NON-NLS-1$ //$NON-NLS-2$
 			} catch (IOException e) {
 				// Do nothing if we get an exception.  We will default to a standard location 
 				// in the user's home dir.
+            	// add the hash to help prevent collisions
+            	appName += File.separator + installDirHash;
 			}
-		}
+		} else {
+        	// add the hash to help prevent collisions
+        	appName += File.separator + installDirHash;
+        }
 		String userHome = FrameworkProperties.getProperty(PROP_USER_HOME);
 		return new File(userHome, appName + "/" + pathAppendage).getAbsolutePath(); //$NON-NLS-1$
 	}
