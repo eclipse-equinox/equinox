@@ -14,7 +14,7 @@ Import-Package: org.eclipse.equinox.jsp.jasper,
  javax.servlet.http;version="2.4"
 Require-Bundle: org.eclipse.equinox.registry,
  org.eclipse.equinox.common
-Export-Package: org.eclipse.equinox.jsp.jasper.registry
+Export-Package: org.eclipse.equinox.jsp.jasper.registry;uses:="org.eclipse.core.runtime"
 Bundle-RequiredExecutionEnvironment: J2SE-1.4,
  CDC-1.0/Foundation-1.0,
  J2SE-1.3

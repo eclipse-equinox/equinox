@@ -7,9 +7,9 @@ Bundle-Localization: plugin
 Export-Package: org.eclipse.core.internal.registry;x-friends:="org.eclipse.core.runtime",
  org.eclipse.core.internal.registry.osgi;x-friends:="org.eclipse.core.runtime",
  org.eclipse.core.internal.registry.spi;x-internal:=true,
- org.eclipse.core.runtime; registry="split"; mandatory:="registry",
- org.eclipse.core.runtime.dynamichelpers,
- org.eclipse.core.runtime.spi
+ org.eclipse.core.runtime;registry=split;mandatory:=registry;uses:="org.eclipse.core.runtime.spi,org.osgi.framework",
+ org.eclipse.core.runtime.dynamichelpers;uses:="org.eclipse.core.runtime",
+ org.eclipse.core.runtime.spi;uses:="org.eclipse.core.runtime,javax.xml.parsers"
 Require-Bundle: org.eclipse.equinox.common;bundle-version="[3.2.0,4.0.0)"
 Bundle-Vendor: %providerName
 Bundle-Activator: org.eclipse.core.internal.registry.osgi.Activator
