@@ -6,7 +6,7 @@
          <meta.schema plugin="org.eclipse.equinox.http.registry" id="httpcontexts" name="Http Service Httpcontexts"/>
       </appInfo>
       <documentation>
-         Provides an OSGi Http Service HttpContext identified by a name. Any httpcontext extension declared with the same name will share the same single instance of the Httpcontext.
+         Provides an OSGi Http Service HttpContext identified by id.
       </documentation>
    </annotation>
 
@@ -45,25 +45,18 @@
    <element name="httpcontext">
       <annotation>
          <appInfo>
-            <meta.element labelAttribute="name"/>
+            <meta.element labelAttribute="id"/>
          </appInfo>
       </annotation>
       <complexType>
          <sequence>
+            <element ref="resource-mapping" minOccurs="0" maxOccurs="unbounded"/>
             <element ref="mime-mapping" minOccurs="0" maxOccurs="unbounded"/>
          </sequence>
-         <attribute name="name" type="string" use="required">
+         <attribute name="id" type="string" use="required">
             <annotation>
                <documentation>
-                  The name of the Httpcontext instance. Httpcontexts extensions that share the same name will share the same instance and availability of resources.
-               </documentation>
-            </annotation>
-         </attribute>
-         <attribute name="path" type="string">
-            <annotation>
-               <documentation>
-                  The bundle path where resources can be loaded from. 
-This attribute is used by the default httpcontext implementation when the class atribute is empty.
+                  
                </documentation>
             </annotation>
          </attribute>
@@ -107,6 +100,18 @@ This attribute is used by the default httpcontext implementation when the class 
       </complexType>
    </element>
 
+   <element name="resource-mapping">
+      <complexType>
+         <attribute name="path" type="string">
+            <annotation>
+               <documentation>
+                  The bundle path where resources can be loaded from.
+               </documentation>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
    <annotation>
       <appInfo>
          <meta.section type="since"/>
@@ -127,12 +132,13 @@ This attribute is used by the default httpcontext implementation when the class 
            id=&quot;testHttpcontext&quot;
            point=&quot;org.eclipse.equinox.http.registry.httpcontexts&quot;&gt;
         &lt;httpcontext
-              name=&quot;testintest&quot;
-              path=&quot;/test&quot;/&gt;
+              id=&quot;testintest&quot;&gt;
+           &lt;resource-mapping path=&quot;/test&quot;/&gt;
+        &lt;/httpcontext&gt;
      &lt;/extension&gt;
 &lt;/pre&gt;
 
-This httpcontexts extension will make resources in &quot;/test&quot; accessible via the OSGi Http Service&apos;s HttpContext getResource method.
+This httpcontexts extension will make resources from &quot;/test&quot; in the contributing bundle accessible via the OSGi Http Service&apos;s HttpContext getResource method.
       </documentation>
    </annotation>
 

@@ -69,10 +69,10 @@
                </documentation>
             </annotation>
          </attribute>
-         <attribute name="httpcontext-name" type="string">
+         <attribute name="httpcontextId" type="string">
             <annotation>
                <documentation>
-                  The equivalent of the OSGi Http Services httpcontext in registerServlet. The httpcontext-name is matched against the &quot;httpcontexts&quot; extension for a matching name. If this attribute is not provided the OSGi Http Service&apos;s DefaultHttpContext semantics are used.
+                  The equivalent of the OSGi Http Services httpcontext in registerResource. The httpcontextId is matched against the &quot;httpcontexts&quot; extension for a matching id. If this attribute is not provided the OSGi Http Service&apos;s DefaultHttpContext semantics are used.
                </documentation>
             </annotation>
          </attribute>

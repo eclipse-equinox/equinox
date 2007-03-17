@@ -14,7 +14,7 @@ package org.eclipse.equinox.http.registry.internal;
 import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.core.runtime.IExtensionRegistry;
-import org.eclipse.equinox.http.registry.NamedHttpContextService;
+import org.eclipse.equinox.http.registry.HttpContextExtensionService;
 import org.osgi.framework.*;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
@@ -27,10 +27,8 @@ public class HttpServiceTracker extends ServiceTracker {
 	private PackageAdmin packageAdmin;
 	private IExtensionRegistry registry;
 
-	Map httpContextManagers = new HashMap();
-	private Map servletManagers = new HashMap();
-	private Map resourceManagers = new HashMap();
 	private ServiceRegistration registration;
+	Map httpRegistryManagers = new HashMap();
 
 	public HttpServiceTracker(BundleContext context, PackageAdmin packageAdmin, IExtensionRegistry registry) {
 		super(context, HttpService.class.getName(), null);
@@ -41,7 +39,7 @@ public class HttpServiceTracker extends ServiceTracker {
 
 	public void open() {
 		super.open();
-		registration = context.registerService(NamedHttpContextService.class.getName(), new NamedHttpContextServiceImpl(), null);
+		registration = context.registerService(HttpContextExtensionService.class.getName(), new HttpContextExtensionServiceFactory(), null);
 	}
 
 	public void close() {
@@ -51,21 +49,13 @@ public class HttpServiceTracker extends ServiceTracker {
 	}
 
 	public synchronized Object addingService(ServiceReference reference) {
-		HttpService httpService = (HttpService) context.getService(reference);
+		HttpService httpService = (HttpService) super.addingService(reference);
 		if (httpService == null)
 			return null;
 
-		HttpContextManager httpContextManager = new HttpContextManager(httpService, packageAdmin, registry);
-		httpContextManager.start();
-		httpContextManagers.put(reference, httpContextManager);
-
-		ServletManager servletManager = new ServletManager(httpService, httpContextManager, registry);
-		servletManager.start();
-		servletManagers.put(reference, servletManager);
-
-		ResourceManager resourceManager = new ResourceManager(httpService, httpContextManager, registry);
-		resourceManager.start();
-		resourceManagers.put(reference, resourceManager);
+		HttpRegistryManager httpRegistryManager = new HttpRegistryManager(reference, httpService, packageAdmin, registry);
+		httpRegistryManager.start();
+		httpRegistryManagers.put(reference, httpRegistryManager);
 
 		return httpService;
 	}
@@ -75,32 +65,39 @@ public class HttpServiceTracker extends ServiceTracker {
 	}
 
 	public synchronized void removedService(ServiceReference reference, Object service) {
-		HttpContextManager httpContextManager = (HttpContextManager) httpContextManagers.remove(reference);
-		if (httpContextManager != null) {
-			httpContextManager.stop();
-		}
-
-		ServletManager servletManager = (ServletManager) servletManagers.remove(reference);
-		if (servletManager != null) {
-			servletManager.stop();
-		}
-
-		ResourceManager resourceManager = (ResourceManager) resourceManagers.remove(reference);
-		if (resourceManager != null) {
-			resourceManager.stop();
+		HttpRegistryManager httpRegistryManager = (HttpRegistryManager) httpRegistryManagers.remove(reference);
+		if (httpRegistryManager != null) {
+			httpRegistryManager.stop();
 		}
 		super.removedService(reference, service);
 	}
 
-	public class NamedHttpContextServiceImpl implements NamedHttpContextService {
+	public class HttpContextExtensionServiceFactory implements ServiceFactory {
 
-		public HttpContext getNamedHttpContext(ServiceReference httpServiceReference, String httpContextName) {
+		public Object getService(Bundle bundle, ServiceRegistration registration) {
+			return new HttpContextExtensionServiceImpl(bundle);
+		}
+
+		public void ungetService(Bundle bundle, ServiceRegistration registration, Object service) {
+			// do nothing
+		}
+	}
+
+	public class HttpContextExtensionServiceImpl implements HttpContextExtensionService {
+
+		private Bundle bundle;
+
+		public HttpContextExtensionServiceImpl(Bundle bundle) {
+			this.bundle = bundle;
+		}
+
+		public HttpContext getHttpContext(ServiceReference httpServiceReference, String httpContextId) {
 			synchronized (HttpServiceTracker.this) {
-				HttpContextManager httpContextManager = (HttpContextManager) httpContextManagers.get(httpServiceReference);
-				if (httpContextManager == null)
+				HttpRegistryManager httpRegistryManager = (HttpRegistryManager) httpRegistryManagers.get(httpServiceReference);
+				if (httpRegistryManager == null)
 					return null;
 
-				return httpContextManager.getHttpContext(httpContextName);
+				return httpRegistryManager.getHttpContext(httpContextId, bundle);
 			}
 		}
 	}

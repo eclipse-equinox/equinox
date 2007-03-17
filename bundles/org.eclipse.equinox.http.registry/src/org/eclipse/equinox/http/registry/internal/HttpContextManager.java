@@ -11,51 +11,33 @@
 
 package org.eclipse.equinox.http.registry.internal;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.*;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
+import java.util.List;
 import org.eclipse.core.runtime.*;
 import org.eclipse.equinox.http.registry.internal.ExtensionPointTracker.Listener;
 import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
-import org.osgi.service.http.HttpService;
-import org.osgi.service.packageadmin.PackageAdmin;
 
 public class HttpContextManager implements Listener {
 
 	private static final String HTTPCONTEXTS_EXTENSION_POINT = "org.eclipse.equinox.http.registry.httpcontexts"; //$NON-NLS-1$
 	private static final String HTTPCONTEXT = "httpcontext"; //$NON-NLS-1$
 	private static final String NAME = "name"; //$NON-NLS-1$
+	private static final String ID = "id"; //$NON-NLS-1$
 	private static final String CLASS = "class"; //$NON-NLS-1$
 	private static final String PATH = "path"; //$NON-NLS-1$
 	private static final String MIMEMAPPING = "mime-mapping"; //$NON-NLS-1$
 	private static final String MIMEEXTENSION = "extension"; //$NON-NLS-1$
 	private static final String MIMETYPE = "mime-type"; //$NON-NLS-1$
+	private static final String RESOURCEMAPPING = "resource-mapping"; //$NON-NLS-1$
 
-	private Map contextsMap = new HashMap();
-	private PackageAdmin packageAdmin;
-	HttpService httpService;
+	private List registered = new ArrayList();
+	private HttpRegistryManager httpRegistryManager;
 	private ExtensionPointTracker tracker;
 
-	public HttpContextManager(HttpService httpService, PackageAdmin packageAdmin, IExtensionRegistry registry) {
-		this.httpService = httpService;
-		this.packageAdmin = packageAdmin;
+	public HttpContextManager(HttpRegistryManager httpRegistryManager, IExtensionRegistry registry) {
+		this.httpRegistryManager = httpRegistryManager;
 		tracker = new ExtensionPointTracker(registry, HTTPCONTEXTS_EXTENSION_POINT, this);
-	}
-
-	public HttpContext getDefaultHttpContext(String bundleName) {
-		return new DefaultHttpContextImpl(getBundle(bundleName));
-	}
-
-	public synchronized HttpContext getHttpContext(String httpContextName) {
-		HttpContext context = (HttpContext) contextsMap.get(httpContextName);
-		if (context == null) {
-			context = new NamedHttpContextImpl();
-			contextsMap.put(httpContextName, context);
-		}
-		return context;
 	}
 
 	public void start() {
@@ -64,22 +46,6 @@ public class HttpContextManager implements Listener {
 
 	public void stop() {
 		tracker.close();
-		synchronized (this) {
-			contextsMap.clear();
-		}
-	}
-
-	private Bundle getBundle(String symbolicName) {
-		Bundle[] bundles = packageAdmin.getBundles(symbolicName, null);
-		if (bundles == null)
-			return null;
-		//Return the first bundle that is not installed or uninstalled
-		for (int i = 0; i < bundles.length; i++) {
-			if ((bundles[i].getState() & (Bundle.INSTALLED | Bundle.UNINSTALLED)) == 0) {
-				return bundles[i];
-			}
-		}
-		return null;
 	}
 
 	public void added(IExtension extension) {
@@ -89,9 +55,15 @@ public class HttpContextManager implements Listener {
 			if (!HTTPCONTEXT.equals(httpContextElement.getName()))
 				continue;
 
-			String httpContextName = httpContextElement.getAttribute(NAME);
-			if (httpContextName == null)
-				continue;
+			String httpContextId = httpContextElement.getAttribute(ID);
+			if (httpContextId == null) {
+				httpContextId = httpContextElement.getAttribute(NAME);
+				if (httpContextId == null)
+					continue;
+			}
+
+			if (httpContextId.indexOf('.') == -1)
+				httpContextId = httpContextElement.getNamespaceIdentifier() + "." + httpContextId; //$NON-NLS-1$
 
 			HttpContext context = null;
 			String clazz = httpContextElement.getAttribute(CLASS);
@@ -103,24 +75,32 @@ public class HttpContextManager implements Listener {
 					e.printStackTrace();
 				}
 			} else {
-				Bundle b = getBundle(extension.getContributor().getName());
-				String path = httpContextElement.getAttribute(PATH);
-				Properties mimeMappings = null;
+				Bundle contributingBundle = httpRegistryManager.getBundle(extension.getContributor());
+				DefaultRegistryHttpContext defaultContext = httpRegistryManager.createDefaultRegistryHttpContext();
+
+				String oldPath = httpContextElement.getAttribute(PATH);
+				if (oldPath != null)
+					defaultContext.addResourceMapping(contributingBundle, oldPath);
+
+				IConfigurationElement[] resourceMappingElements = httpContextElement.getChildren(RESOURCEMAPPING);
+				for (int j = 0; j < resourceMappingElements.length; j++) {
+					IConfigurationElement resourceMappingElement = resourceMappingElements[i];
+					String path = resourceMappingElement.getAttribute(PATH);
+					defaultContext.addResourceMapping(contributingBundle, path);
+				}
+
 				IConfigurationElement[] mimeMappingElements = httpContextElement.getChildren(MIMEMAPPING);
-				if (mimeMappingElements.length > 0) {
-					mimeMappings = new Properties();
-					for (int j = 0; j < mimeMappingElements.length; j++) {
-						IConfigurationElement urlMappingElement = mimeMappingElements[i];
-						String mimeExtension = urlMappingElement.getAttribute(MIMEEXTENSION);
-						String mimeType = urlMappingElement.getAttribute(MIMETYPE);
-						mimeMappings.put(mimeExtension, mimeType);
-					}
-				}				
-				context = new DefaultHttpContextImpl(b, path, mimeMappings);
+				for (int j = 0; j < mimeMappingElements.length; j++) {
+					IConfigurationElement mimeMappingElement = mimeMappingElements[i];
+					String mimeExtension = mimeMappingElement.getAttribute(MIMEEXTENSION);
+					String mimeType = mimeMappingElement.getAttribute(MIMETYPE);
+					defaultContext.addMimeMapping(mimeExtension, mimeType);
+				}
+				context = defaultContext;
 			}
 
-			NamedHttpContextImpl namedContext = (NamedHttpContextImpl) getHttpContext(httpContextName);
-			namedContext.addHttpContext(httpContextElement, context);
+			if (httpRegistryManager.addHttpContextContribution(httpContextId, context, extension.getContributor()))
+				registered.add(httpContextElement);
 		}
 	}
 
@@ -130,95 +110,18 @@ public class HttpContextManager implements Listener {
 			IConfigurationElement httpContextElement = elements[i];
 			if (!HTTPCONTEXT.equals(httpContextElement.getName()))
 				continue;
-			String httpContextName = httpContextElement.getAttribute(NAME);
-			if (httpContextName == null)
-				continue;
 
-			NamedHttpContextImpl namedContext = (NamedHttpContextImpl) getHttpContext(httpContextName);
-			namedContext.removeHttpContext(httpContextElement);
-		}
-	}
-
-	private class DefaultHttpContextImpl implements HttpContext {
-		private Bundle bundle;
-		private HttpContext delegate;
-		private String bundlePath;
-		private Properties mimeMappings;
-
-		public DefaultHttpContextImpl(Bundle bundle) {
-			this.bundle = bundle;
-			delegate = httpService.createDefaultHttpContext();
-		}
-
-		public DefaultHttpContextImpl(Bundle b, String bundlePath, Properties mimeMappings) {
-			this(b);
-			if (bundlePath != null) {
-				if (bundlePath.endsWith("/")) //$NON-NLS-1$
-					bundlePath = bundlePath.substring(0, bundlePath.length() - 1);
-
-				if (bundlePath.length() == 0)
-					bundlePath = null;
+			String httpContextId = httpContextElement.getAttribute(ID);
+			if (httpContextId == null) {
+				httpContextId = httpContextElement.getAttribute(NAME);
+				if (httpContextId == null)
+					continue;
 			}
-			this.bundlePath = bundlePath;
-			this.mimeMappings = mimeMappings;
-		}
+			if (httpContextId.indexOf('.') == -1)
+				httpContextId = httpContextElement.getNamespaceIdentifier() + "." + httpContextId; //$NON-NLS-1$
 
-		public String getMimeType(String name) {
-			if (mimeMappings != null) {
-				int dotIndex = name.lastIndexOf('.');
-				if (dotIndex != -1) {
-					String mimeExtension = name.substring(dotIndex + 1);
-					String mimeType = mimeMappings.getProperty(mimeExtension);
-					if (mimeType != null)
-						return mimeType;
-				}
-			}			
-			return delegate.getMimeType(name);
-		}
-
-		public boolean handleSecurity(HttpServletRequest arg0, HttpServletResponse arg1) throws IOException {
-			return delegate.handleSecurity(arg0, arg1);
-		}
-
-		public URL getResource(String resourceName) {
-			if (bundlePath != null)
-				resourceName = bundlePath + resourceName;
-
-			int lastSlash = resourceName.lastIndexOf('/');
-			if (lastSlash == -1)
-				return null;
-
-			String path = resourceName.substring(0, lastSlash);
-			if (path.length() == 0)
-				path = "/"; //$NON-NLS-1$
-			String file = resourceName.substring(lastSlash + 1);
-			Enumeration entryPaths = bundle.findEntries(path, file, false);
-
-			if (entryPaths != null && entryPaths.hasMoreElements())
-				return (URL) entryPaths.nextElement();
-
-			return null;
-		}
-
-		public Set getResourcePaths(String path) {
-			if (bundlePath != null)
-				path = bundlePath + path;
-
-			Enumeration entryPaths = bundle.findEntries(path, null, false);
-			if (entryPaths == null)
-				return null;
-
-			Set result = new HashSet();
-			while (entryPaths.hasMoreElements()) {
-				URL entryURL = (URL) entryPaths.nextElement();
-				String entryPath = entryURL.getFile();
-
-				if (bundlePath == null)
-					result.add(entryPath);
-				else
-					result.add(entryPath.substring(bundlePath.length()));
-			}
-			return result;
+			if (registered.remove(httpContextElement))
+				httpRegistryManager.removeHttpContextContribution(httpContextId);
 		}
 	}
 }

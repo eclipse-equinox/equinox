@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.util.*;
 import javax.servlet.*;
 import org.eclipse.core.runtime.*;
-import org.osgi.service.http.*;
 
 public class ServletManager implements ExtensionPointTracker.Listener {
 
@@ -33,17 +32,16 @@ public class ServletManager implements ExtensionPointTracker.Listener {
 
 	private static final String LOAD_ON_STARTUP = "load-on-startup"; //$NON-NLS-1$
 
-	private HttpService httpService;
+	private static final String HTTPCONTEXT_ID = "httpcontextId"; //$NON-NLS-1$
 
 	private ExtensionPointTracker tracker;
 
-	private HttpContextManager httpContextManager;
+	private HttpRegistryManager httpRegistryManager;
 
 	private List registered = new ArrayList();
 
-	public ServletManager(HttpService httpService, HttpContextManager httpContextManager, IExtensionRegistry registry) {
-		this.httpService = httpService;
-		this.httpContextManager = httpContextManager;
+	public ServletManager(HttpRegistryManager httpRegistryManager, IExtensionRegistry registry) {
+		this.httpRegistryManager = httpRegistryManager;
 		tracker = new ExtensionPointTracker(registry, SERVLETS_EXTENSION_POINT, this);
 	}
 
@@ -64,6 +62,8 @@ public class ServletManager implements ExtensionPointTracker.Listener {
 
 			ServletWrapper wrapper = new ServletWrapper(servletElement);
 			String alias = servletElement.getAttribute(ALIAS);
+			if (alias == null)
+				continue; // alias is mandatory - ignore this.
 
 			Dictionary initparams = new Hashtable();
 			IConfigurationElement[] initParams = servletElement.getChildren(INIT_PARAM);
@@ -74,26 +74,19 @@ public class ServletManager implements ExtensionPointTracker.Listener {
 			}
 
 			boolean loadOnStartup = new Boolean(servletElement.getAttribute(LOAD_ON_STARTUP)).booleanValue();
+			if (loadOnStartup)
+				wrapper.setLoadOnStartup();
 
-			String httpContextName = servletElement.getAttribute(HTTPCONTEXT_NAME);
-			HttpContext context = null;
-			if (httpContextName == null)
-				context = httpContextManager.getDefaultHttpContext(extension.getContributor().getName());
-			else
-				context = httpContextManager.getHttpContext(httpContextName);
-
-			try {
-				httpService.registerServlet(alias, wrapper, initparams, context);
-				registered.add(servletElement);
-				if (loadOnStartup)
-					wrapper.initializeDelegate();
-			} catch (ServletException e) {
-				// this should never happen as the init() called is the ServletWrapper implementation
-				e.printStackTrace();
-			} catch (NamespaceException e) {
-				// TODO Should log this perhaps with the LogService?
-				e.printStackTrace();
+			String httpContextId = servletElement.getAttribute(HTTPCONTEXT_ID);
+			if (httpContextId == null) {
+				httpContextId = servletElement.getAttribute(HTTPCONTEXT_NAME);
 			}
+
+			if (httpContextId != null && httpContextId.indexOf('.') == -1)
+				httpContextId = servletElement.getNamespaceIdentifier() + "." + httpContextId; //$NON-NLS-1$
+
+			if (httpRegistryManager.addServletContribution(alias, wrapper, initparams, httpContextId, extension.getContributor()))
+				registered.add(servletElement);
 		}
 	}
 
@@ -101,11 +94,10 @@ public class ServletManager implements ExtensionPointTracker.Listener {
 		IConfigurationElement[] elements = extension.getConfigurationElements();
 		for (int i = 0; i < elements.length; i++) {
 			IConfigurationElement servletElement = elements[i];
-			if (!SERVLET.equals(servletElement.getName()))
-				continue;
-			String alias = servletElement.getAttribute(ALIAS);
-			if (registered.remove(servletElement))
-				httpService.unregister(alias);
+			if (registered.remove(servletElement)) {
+				String alias = servletElement.getAttribute(ALIAS);
+				httpRegistryManager.removeContribution(alias);
+			}
 		}
 	}
 
@@ -115,13 +107,20 @@ public class ServletManager implements ExtensionPointTracker.Listener {
 		private IConfigurationElement element;
 		private Servlet delegate;
 		private ServletConfig config;
+		private boolean loadOnStartup = false;
 
 		public ServletWrapper(IConfigurationElement element) {
 			this.element = element;
 		}
 
+		public void setLoadOnStartup() {
+			this.loadOnStartup = true;
+		}
+
 		public void init(ServletConfig config) throws ServletException {
 			this.config = config;
+			if (loadOnStartup)
+				initializeDelegate();
 		}
 
 		public ServletConfig getServletConfig() {
@@ -141,7 +140,7 @@ public class ServletManager implements ExtensionPointTracker.Listener {
 			destroyDelegate();
 		}
 
-		synchronized void initializeDelegate() throws ServletException {
+		private void initializeDelegate() throws ServletException {
 			if (delegate == null) {
 				try {
 					Servlet newDelegate = (Servlet) element.createExecutableExtension(CLASS);
@@ -153,7 +152,7 @@ public class ServletManager implements ExtensionPointTracker.Listener {
 			}
 		}
 
-		private synchronized void destroyDelegate() {
+		private void destroyDelegate() {
 			if (delegate != null) {
 				Servlet doomedDelegate = delegate;
 				delegate = null;
