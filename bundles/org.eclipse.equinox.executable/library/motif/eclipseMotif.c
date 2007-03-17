@@ -79,7 +79,6 @@ void takeDownSplashCB( Widget shell, XtPointer app_data, XtPointer widget_data )
  */
 int showSplash( const char* featureImage )
 {
-	int argc = 0;
 	int x, y;
 	unsigned int width, height, depth, border;
 	ArgList args;
@@ -213,7 +212,7 @@ void takeDownSplash()
     if (shellHandle != 0) 
     {
         XtDestroyWidget( shellHandle );
-        XFlush( XtDisplay( shellHandle ) );
+        /*XFlush( XtDisplay( shellHandle ) );*/
         shellHandle = NULL;
     }
 }

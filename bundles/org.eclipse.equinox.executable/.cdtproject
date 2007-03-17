@@ -58,56 +58,56 @@
 </item>
 <item id="org.eclipse.cdt.make.core.buildtargets">
 <buildTargets>
-<target name="all" path="library/carbon" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
+<target name="all" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="library/carbon">
 <buildCommand>make</buildCommand>
 <buildArguments>-f make_macosx.mak</buildArguments>
 <buildTarget>all</buildTarget>
 <stopOnError>false</stopOnError>
 <useDefaultCommand>false</useDefaultCommand>
 </target>
-<target name="clean" path="library/carbon" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
+<target name="clean" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="library/carbon">
 <buildCommand>make</buildCommand>
 <buildArguments>-f make_macosx.mak</buildArguments>
 <buildTarget>clean</buildTarget>
 <stopOnError>false</stopOnError>
 <useDefaultCommand>false</useDefaultCommand>
 </target>
-<target name="linux-all" path="library/motif" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>make</buildCommand>
-<buildArguments>-f make_linux.mak</buildArguments>
-<buildTarget>all</buildTarget>
-<stopOnError>false</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-</target>
-<target name="clean" path="library/motif" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>make</buildCommand>
-<buildArguments>-f make_linux.mak</buildArguments>
-<buildTarget>clean</buildTarget>
-<stopOnError>false</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-</target>
-<target name="all-mingw" path="library/win32" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
+<target name="all-mingw" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="library/win32">
 <buildCommand>make</buildCommand>
 <buildArguments>-f make_mingw.mak</buildArguments>
 <buildTarget>all</buildTarget>
 <stopOnError>false</stopOnError>
 <useDefaultCommand>false</useDefaultCommand>
 </target>
-<target name="clean" path="library/win32" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
+<target name="clean" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="library/win32">
 <buildCommand>make</buildCommand>
 <buildArguments>-f make_mingw.mak</buildArguments>
 <buildTarget>clean</buildTarget>
 <stopOnError>false</stopOnError>
 <useDefaultCommand>false</useDefaultCommand>
 </target>
-<target name="linux-all" path="library/gtk" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
+<target name="linux-all" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="library/motif">
 <buildCommand>make</buildCommand>
-<buildArguments>-f make_linux.mak</buildArguments>
+<buildArguments>-f make_linux.mak JAVA_HOME=/usr/java/1.5 DEFAULT_WS=motif</buildArguments>
 <buildTarget>all</buildTarget>
 <stopOnError>false</stopOnError>
 <useDefaultCommand>false</useDefaultCommand>
 </target>
-<target name="clean" path="library/gtk" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
+<target name="clean" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="library/motif">
+<buildCommand>make</buildCommand>
+<buildArguments>-f make_linux.mak</buildArguments>
+<buildTarget>clean</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>false</useDefaultCommand>
+</target>
+<target name="linux-all" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="library/gtk">
+<buildCommand>make</buildCommand>
+<buildArguments>-f make_linux.mak JAVA_HOME=/usr/java/1.5</buildArguments>
+<buildTarget>all</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>false</useDefaultCommand>
+</target>
+<target name="clean" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="library/gtk">
 <buildCommand>make</buildCommand>
 <buildArguments>-f make_linux.mak</buildArguments>
 <buildTarget>clean</buildTarget>

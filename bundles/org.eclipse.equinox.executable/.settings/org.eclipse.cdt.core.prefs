@@ -1,3 +1,4 @@
-#Mon Nov 13 14:48:49 EST 2006
+#Sat Mar 17 13:50:53 EDT 2007
 eclipse.preferences.version=1
+indexer/indexerId=org.eclipse.cdt.core.fastIndexer
 indexerId=org.eclipse.cdt.core.fastIndexer

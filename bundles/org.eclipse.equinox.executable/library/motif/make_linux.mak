@@ -44,7 +44,7 @@ EXEC = $(PROGRAM_OUTPUT)
 DLL = $(PROGRAM_LIBRARY)
 LIBS = -Xlinker -rpath -Xlinker . -L$(MOTIF_HOME)/lib -L$(X11_HOME)/lib -lXm -lXt -lX11 -lXinerama -lpthread
 LFLAGS = -shared -fpic -Wl,--export-dynamic 
-CFLAGS = -g -s -Wall \
+CFLAGS = -O -s -Wall \
 	-DLINUX \
 	-DMOTIF \
 	-DMOZILLA_FIX \
