@@ -177,7 +177,9 @@ public class HttpRegistryManager {
 	}
 
 	public Bundle getBundle(IContributor contributor) {
-		String symbolicName = contributor.getName();
+		return getBundle(contributor.getName());
+	}
+	public Bundle getBundle(String symbolicName) {
 		Bundle[] bundles = packageAdmin.getBundles(symbolicName, null);
 		if (bundles == null)
 			return null;

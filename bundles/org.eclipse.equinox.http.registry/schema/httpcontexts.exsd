@@ -109,6 +109,13 @@
                </documentation>
             </annotation>
          </attribute>
+         <attribute name="bundle" type="string">
+            <annotation>
+               <documentation>
+                  The bundle from where resources are loaded from. If the &quot;bundle&quot; attribute is not present the contributing bundle is used.
+               </documentation>
+            </annotation>
+         </attribute>
       </complexType>
    </element>
 

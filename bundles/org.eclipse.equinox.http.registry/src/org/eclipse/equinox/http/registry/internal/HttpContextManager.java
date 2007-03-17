@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.eclipse.core.runtime.*;
 import org.eclipse.equinox.http.registry.internal.ExtensionPointTracker.Listener;
+import org.osgi.framework.AdminPermission;
 import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
 
@@ -30,6 +31,7 @@ public class HttpContextManager implements Listener {
 	private static final String MIMEEXTENSION = "extension"; //$NON-NLS-1$
 	private static final String MIMETYPE = "mime-type"; //$NON-NLS-1$
 	private static final String RESOURCEMAPPING = "resource-mapping"; //$NON-NLS-1$
+	private static final String BUNDLE = "bundle"; //$NON-NLS-1$
 
 	private List registered = new ArrayList();
 	private HttpRegistryManager httpRegistryManager;
@@ -86,7 +88,19 @@ public class HttpContextManager implements Listener {
 				for (int j = 0; j < resourceMappingElements.length; j++) {
 					IConfigurationElement resourceMappingElement = resourceMappingElements[i];
 					String path = resourceMappingElement.getAttribute(PATH);
-					defaultContext.addResourceMapping(contributingBundle, path);
+					Bundle resourceBundle = contributingBundle;
+					String bundleName = resourceMappingElement.getAttribute(BUNDLE);
+					if (bundleName != null) {
+						resourceBundle = httpRegistryManager.getBundle(bundleName);
+						if (resourceBundle == null)
+							continue;
+						if (System.getSecurityManager() != null) {
+							AdminPermission resourcePermission = new AdminPermission(resourceBundle, "resource");  //$NON-NLS-1$
+							if (!contributingBundle.hasPermission(resourcePermission))
+								continue;
+						}
+					}					
+					defaultContext.addResourceMapping(resourceBundle, path);
 				}
 
 				IConfigurationElement[] mimeMappingElements = httpContextElement.getChildren(MIMEMAPPING);
