@@ -87,9 +87,9 @@ public class HttpRegistryManager {
 	}
 
 	public void stop() {
-		httpContextManager.stop();
-		servletManager.stop();
 		resourceManager.stop();
+		servletManager.stop();
+		httpContextManager.stop();
 	}
 
 	public synchronized boolean addResourcesContribution(String alias, String baseName, String httpContextId, IContributor contributor) {
@@ -179,6 +179,7 @@ public class HttpRegistryManager {
 	public Bundle getBundle(IContributor contributor) {
 		return getBundle(contributor.getName());
 	}
+
 	public Bundle getBundle(String symbolicName) {
 		Bundle[] bundles = packageAdmin.getBundles(symbolicName, null);
 		if (bundles == null)

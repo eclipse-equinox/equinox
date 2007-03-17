@@ -13,6 +13,7 @@
    <element name="extension">
       <complexType>
          <sequence>
+            <element ref="serviceSelector" minOccurs="0" maxOccurs="1"/>
             <element ref="servlet" minOccurs="1" maxOccurs="unbounded"/>
          </sequence>
          <attribute name="point" type="string" use="required">
@@ -50,7 +51,6 @@
       </annotation>
       <complexType>
          <sequence>
-            <element ref="serviceSelector"/>
             <element ref="init-param" minOccurs="0" maxOccurs="unbounded"/>
          </sequence>
          <attribute name="class" type="string" use="required">
