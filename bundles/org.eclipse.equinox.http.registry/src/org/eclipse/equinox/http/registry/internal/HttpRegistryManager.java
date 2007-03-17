@@ -76,8 +76,8 @@ public class HttpRegistryManager {
 		this.packageAdmin = packageAdmin;
 
 		httpContextManager = new HttpContextManager(this, registry);
-		servletManager = new ServletManager(this, registry);
-		resourceManager = new ResourceManager(this, registry);
+		servletManager = new ServletManager(this, reference, registry);
+		resourceManager = new ResourceManager(this, reference, registry);
 	}
 
 	public void start() {

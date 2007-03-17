@@ -12,6 +12,7 @@ package org.eclipse.equinox.http.registry.internal;
 import java.util.ArrayList;
 import java.util.List;
 import org.eclipse.core.runtime.*;
+import org.osgi.framework.*;
 
 public class ResourceManager implements ExtensionPointTracker.Listener {
 
@@ -26,6 +27,12 @@ public class ResourceManager implements ExtensionPointTracker.Listener {
 	private static final String RESOURCE = "resource"; //$NON-NLS-1$
 
 	private static final String HTTPCONTEXT_ID = "httpcontextId"; //$NON-NLS-1$
+	
+	private static final String SERVICESELECTOR = "serviceSelector"; //$NON-NLS-1$
+
+	private static final String CLASS = "class"; //$NON-NLS-1$
+
+	private static final String FILTER = "filter"; //$NON-NLS-1$
 
 	private ExtensionPointTracker tracker;
 
@@ -33,8 +40,11 @@ public class ResourceManager implements ExtensionPointTracker.Listener {
 
 	private HttpRegistryManager httpRegistryManager;
 
-	public ResourceManager(HttpRegistryManager httpRegistryManager, IExtensionRegistry registry) {
+	private ServiceReference reference;
+
+	public ResourceManager(HttpRegistryManager httpRegistryManager, ServiceReference reference, IExtensionRegistry registry) {
 		this.httpRegistryManager = httpRegistryManager;
+		this.reference = reference;
 		tracker = new ExtensionPointTracker(registry, RESOURCES_EXTENSION_POINT, this);
 	}
 
@@ -48,6 +58,42 @@ public class ResourceManager implements ExtensionPointTracker.Listener {
 
 	public void added(IExtension extension) {
 		IConfigurationElement[] elements = extension.getConfigurationElements();
+		for (int i = 0; i < elements.length; i++) {
+			IConfigurationElement serviceSelectorElement = elements[i];
+			if (!SERVICESELECTOR.equals(serviceSelectorElement.getName()))
+				continue;
+			
+			org.osgi.framework.Filter serviceSelector = null;
+			String clazz = serviceSelectorElement.getAttribute(CLASS);
+			if (clazz != null) {
+				try {
+					serviceSelector = (org.osgi.framework.Filter) serviceSelectorElement.createExecutableExtension(CLASS);
+				} catch (CoreException e) {
+					// log it.
+					e.printStackTrace();
+					return;
+				}
+			} else {
+				String filter = serviceSelectorElement.getAttribute(FILTER);
+				if (filter == null)
+					return;
+				
+				try {
+					serviceSelector = FrameworkUtil.createFilter(filter);
+				} catch (InvalidSyntaxException e) {
+					// log it.
+					e.printStackTrace();
+					return;
+				}
+			}
+			
+			if (! serviceSelector.match(reference))
+				return;
+			
+			break;
+		}
+		
+		
 		for (int i = 0; i < elements.length; i++) {
 			IConfigurationElement resourceElement = elements[i];
 			if (!RESOURCE.equals(resourceElement.getName()))

@@ -13,6 +13,7 @@
    <element name="extension">
       <complexType>
          <sequence>
+            <element ref="serviceSelector"/>
             <element ref="resource" minOccurs="1" maxOccurs="unbounded"/>
          </sequence>
          <attribute name="point" type="string" use="required">
@@ -68,6 +69,33 @@
                <documentation>
                   The equivalent of the OSGi Http Services httpcontext in registerResource. The httpcontextId is matched against the &quot;httpcontexts&quot; extension for a matching id. If this attribute is not provided the OSGi Http Service&apos;s DefaultHttpContext semantics are used.
                </documentation>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <element name="serviceSelector">
+      <annotation>
+         <documentation>
+            The serviceSelector allow filtering of the HttpService instances with which to register resources
+         </documentation>
+      </annotation>
+      <complexType>
+         <attribute name="filter" type="string">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="class" type="string">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+               <appInfo>
+                  <meta.attribute kind="java" basedOn="org.osgi.framework.Filter"/>
+               </appInfo>
             </annotation>
          </attribute>
       </complexType>

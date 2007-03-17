@@ -75,6 +75,7 @@ public class HttpContextManager implements Listener {
 				} catch (CoreException e) {
 					// log it.
 					e.printStackTrace();
+					continue;
 				}
 			} else {
 				Bundle contributingBundle = httpRegistryManager.getBundle(extension.getContributor());

@@ -50,6 +50,7 @@
       </annotation>
       <complexType>
          <sequence>
+            <element ref="serviceSelector"/>
             <element ref="init-param" minOccurs="0" maxOccurs="unbounded"/>
          </sequence>
          <attribute name="class" type="string" use="required">
@@ -108,6 +109,28 @@
                <documentation>
                   
                </documentation>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <element name="serviceSelector">
+      <complexType>
+         <attribute name="filter" type="string">
+            <annotation>
+               <documentation>
+                  The serviceSelector allow filtering of the HttpService instances with which to register servlets.
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="class" type="string">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+               <appInfo>
+                  <meta.attribute kind="java" basedOn="org.osgi.framework.Filter"/>
+               </appInfo>
             </annotation>
          </attribute>
       </complexType>
