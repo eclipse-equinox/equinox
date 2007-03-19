@@ -10,7 +10,7 @@ Require-Bundle: org.eclipse.equinox.common;bundle-version="[3.2.0,4.0.0)",
  org.eclipse.equinox.registry;bundle-version="[3.2.0,4.0.0)";resolution:=optional
 Export-Package: org.eclipse.core.internal.preferences;x-friends:="org.eclipse.core.resources,org.eclipse.core.runtime",
  org.eclipse.core.internal.preferences.exchange;x-friends:="org.eclipse.core.runtime",
- org.eclipse.core.runtime.preferences;uses:="org.eclipse.core.runtime,org.osgi.service.prefs,org.eclipse.core.internal.preferences",
+ org.eclipse.core.runtime.preferences,
  org.osgi.service.prefs;version="1.1"
 Eclipse-LazyStart: true; exceptions="org.eclipse.core.internal.preferences.exchange"
 Import-Package: org.eclipse.osgi.framework.log,
