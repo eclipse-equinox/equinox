@@ -32,7 +32,6 @@ public interface StateHelper {
 	public static int ACCESS_DISCOURAGED = 0x02;
 
 	/**
-	 * EXPERIMENTAL <p>
 	 * An option to include packages available from the execution environment when 
 	 * getting the visible packages of a bundle.
 	 * @see StateHelper#getVisiblePackages(BundleDescription, int)
@@ -178,8 +177,6 @@ public interface StateHelper {
 	public ExportPackageDescription[] getVisiblePackages(BundleDescription bundle);
 
 	/**
-	 * EXPERIMENTAL API <p>
-	 * 
 	 * Returns a list of all packages that the specified bundle has access to which are
 	 * exported by other bundles.  This takes into account all constraint specifications
 	 * from the specified bundle (Import-Package, Require-Bundle etc).  A deep dependancy
