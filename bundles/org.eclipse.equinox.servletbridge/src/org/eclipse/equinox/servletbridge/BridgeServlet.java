@@ -75,8 +75,12 @@ public class BridgeServlet extends HttpServlet {
 	 *  
 	 */
 	protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		String pathInfo = req.getPathInfo();
+		// Check if this is being handled by an extension mapping
+		if (pathInfo == null && isExtensionMapping(req.getServletPath()))
+			req = new ExtensionMappingRequest(req);
+		
 		if (enableFrameworkControls) {
-			String pathInfo = req.getPathInfo();
 			if (pathInfo != null && pathInfo.startsWith("/sp_")) { //$NON-NLS-1$
 				if (serviceFrameworkControls(req, resp)) {
 					return;
@@ -97,6 +101,18 @@ public class BridgeServlet extends HttpServlet {
 			releaseDelegateReference();
 			Thread.currentThread().setContextClassLoader(original);
 		}
+	}
+
+	private boolean isExtensionMapping(String servletPath) {
+		if (servletPath == null)
+			return false;
+
+		String lastSegment = servletPath;
+		int lastSlash = servletPath.lastIndexOf('/');
+		if (lastSlash != -1)
+			lastSegment = servletPath.substring(lastSlash + 1);
+			
+		return lastSegment.indexOf('.') != -1;
 	}
 
 	/**
@@ -223,6 +239,21 @@ public class BridgeServlet extends HttpServlet {
 				}
 			}
 			oldProxy.destroy();
+		}
+	}
+	
+	public class ExtensionMappingRequest extends HttpServletRequestWrapper {
+
+		public ExtensionMappingRequest(HttpServletRequest req) {
+			super(req);
+		}
+
+		public String getPathInfo() {
+			return super.getServletPath();
+		}
+
+		public String getServletPath() {
+			return "";
 		}
 	}
 }

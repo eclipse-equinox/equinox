@@ -39,4 +39,11 @@
 		<servlet-name>equinoxbridgeservlet</servlet-name>
 		<url-pattern>/*</url-pattern>
 	</servlet-mapping>
+	<!--
+	  This is required if your application bundles expose JSPs. 
+	-->	
+	<servlet-mapping>
+		<servlet-name>equinoxbridgeservlet</servlet-name>
+		<url-pattern>*.jsp</url-pattern>
+	</servlet-mapping>	
 </web-app>
