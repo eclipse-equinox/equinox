@@ -24,6 +24,10 @@ import javax.servlet.http.*;
  */
 public class BridgeServlet extends HttpServlet {
 
+	static final String INCLUDE_REQUEST_URI_ATTRIBUTE = "javax.servlet.include.request_uri"; //$NON-NLS-1$
+	static final String INCLUDE_SERVLET_PATH_ATTRIBUTE = "javax.servlet.include.servlet_path"; //$NON-NLS-1$
+	static final String INCLUDE_PATH_INFO_ATTRIBUTE = "javax.servlet.include.path_info"; //$NON-NLS-1$
+	
 	private static final long serialVersionUID = 2825667412474494674L;
 	private static BridgeServlet instance;
 	private HttpServlet delegate;
@@ -75,19 +79,31 @@ public class BridgeServlet extends HttpServlet {
 	 *  
 	 */
 	protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		String pathInfo = req.getPathInfo();
-		// Check if this is being handled by an extension mapping
-		if (pathInfo == null && isExtensionMapping(req.getServletPath()))
-			req = new ExtensionMappingRequest(req);
 		
-		if (enableFrameworkControls) {
-			if (pathInfo != null && pathInfo.startsWith("/sp_")) { //$NON-NLS-1$
-				if (serviceFrameworkControls(req, resp)) {
-					return;
+		
+		if (req.getAttribute(INCLUDE_REQUEST_URI_ATTRIBUTE) == null) {
+			String pathInfo = req.getPathInfo();
+			// Check if this is being handled by an extension mapping
+			if (pathInfo == null && isExtensionMapping(req.getServletPath()))
+				req = new ExtensionMappingRequest(req);
+			
+			if (enableFrameworkControls) {
+				if (pathInfo != null && pathInfo.startsWith("/sp_")) { //$NON-NLS-1$
+					if (serviceFrameworkControls(req, resp)) {
+						return;
+					}
 				}
 			}
+		} else {
+			String pathInfo = (String) req.getAttribute(INCLUDE_PATH_INFO_ATTRIBUTE);
+			// Check if this is being handled by an extension mapping
+			if (pathInfo == null || pathInfo.length() == 0) {
+				String servletPath = (String) req.getAttribute(INCLUDE_SERVLET_PATH_ATTRIBUTE);
+				if (isExtensionMapping(servletPath))
+					req = new IncludedExtensionMappingRequest(req);
+			}
 		}
-
+		
 		ClassLoader original = Thread.currentThread().getContextClassLoader();
 		HttpServlet servletReference = acquireDelegateReference();
 		if (servletReference == null) {
@@ -242,7 +258,7 @@ public class BridgeServlet extends HttpServlet {
 		}
 	}
 	
-	public class ExtensionMappingRequest extends HttpServletRequestWrapper {
+	public static class ExtensionMappingRequest extends HttpServletRequestWrapper {
 
 		public ExtensionMappingRequest(HttpServletRequest req) {
 			super(req);
@@ -256,4 +272,22 @@ public class BridgeServlet extends HttpServlet {
 			return "";
 		}
 	}
+	
+	public static class IncludedExtensionMappingRequest extends HttpServletRequestWrapper {
+
+		public IncludedExtensionMappingRequest(HttpServletRequest req) {
+			super(req);
+		}
+
+		public Object getAttribute(String attributeName) {
+			if (attributeName.equals(INCLUDE_SERVLET_PATH_ATTRIBUTE)) {
+				return ""; //$NON-NLS-1$
+			} else if (attributeName.equals(INCLUDE_PATH_INFO_ATTRIBUTE)) {
+				String servletPath = (String) super.getAttribute(INCLUDE_SERVLET_PATH_ATTRIBUTE);
+				return servletPath;
+			}
+			return super.getAttribute(attributeName);
+		}
+	}
+
 }
