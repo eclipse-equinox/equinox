@@ -258,7 +258,7 @@ public class BridgeServlet extends HttpServlet {
 		}
 	}
 	
-	public static class ExtensionMappingRequest extends HttpServletRequestWrapper {
+	static class ExtensionMappingRequest extends HttpServletRequestWrapper {
 
 		public ExtensionMappingRequest(HttpServletRequest req) {
 			super(req);
@@ -273,7 +273,7 @@ public class BridgeServlet extends HttpServlet {
 		}
 	}
 	
-	public static class IncludedExtensionMappingRequest extends HttpServletRequestWrapper {
+	static class IncludedExtensionMappingRequest extends HttpServletRequestWrapper {
 
 		public IncludedExtensionMappingRequest(HttpServletRequest req) {
 			super(req);
