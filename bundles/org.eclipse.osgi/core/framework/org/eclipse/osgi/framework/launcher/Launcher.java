@@ -121,6 +121,9 @@ public class Launcher {
 	 *  @param args The command line arguments
 	 */
 	protected void doIt(String[] args) {
+		// set the compatibility boot delegation flag to false to get "standard" OSGi behavior WRT boot delegation (bug 178477)
+		if (FrameworkProperties.getProperty(Constants.OSGI_COMPATIBILITY_BOOTDELEGATION) == null)
+			FrameworkProperties.setProperty(Constants.OSGI_COMPATIBILITY_BOOTDELEGATION, "false"); //$NON-NLS-1$
 		String[] consoleArgs = parseArgs(args);
 
 		FrameworkAdaptor adaptor = null;

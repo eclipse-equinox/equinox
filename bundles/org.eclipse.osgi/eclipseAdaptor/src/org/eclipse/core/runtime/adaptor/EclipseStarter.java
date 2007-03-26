@@ -141,6 +141,9 @@ public class EclipseStarter {
 			FrameworkProperties.setProperty("eclipse.startTime", Long.toString(System.currentTimeMillis())); //$NON-NLS-1$
 		if (FrameworkProperties.getProperty(PROP_NOSHUTDOWN) == null)
 			FrameworkProperties.setProperty(PROP_NOSHUTDOWN, "true"); //$NON-NLS-1$
+		// set the compatibility boot delegation flag to false to get "standard" OSGi behavior WRT boot delegation (bug 178477)
+		if (FrameworkProperties.getProperty(Constants.OSGI_COMPATIBILITY_BOOTDELEGATION) == null)
+			FrameworkProperties.setProperty(Constants.OSGI_COMPATIBILITY_BOOTDELEGATION, "false"); //$NON-NLS-1$
 		run(args, null);
 	}
 
