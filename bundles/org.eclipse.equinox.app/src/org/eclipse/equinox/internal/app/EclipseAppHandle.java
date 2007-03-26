@@ -39,7 +39,7 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 
 	private ServiceRegistration handleRegistration;
 	private int status = EclipseAppHandle.FLAG_STARTING;
-	private Map arguments;
+	private final Map arguments;
 	private Object application;
 
 	/*
@@ -54,6 +54,8 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 	}
 
 	synchronized public String getState() {
+		if (handleRegistration == null)
+			throw new IllegalStateException(NLS.bind(Messages.application_error_state_stopped, getInstanceId()));
 		switch (status) {
 			case FLAG_STARTING :
 				return STARTING;
@@ -79,7 +81,7 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 		setAppStatus(EclipseAppHandle.FLAG_STOPPED);
 	}
 
-	void setServiceRegistration(ServiceRegistration sr) {
+	synchronized void setServiceRegistration(ServiceRegistration sr) {
 		this.handleRegistration = sr;
 	}
 
@@ -110,11 +112,14 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 				return;
 		// change the service properties to reflect the state change.
 		this.status = status;
+		if (handleRegistration == null)
+			return;
 		handleRegistration.setProperties(getServiceProperties());
 		// if the status is stopped then unregister the service
 		if ((this.status & EclipseAppHandle.FLAG_STOPPED) != 0) {
 			handleRegistration.unregister();
 			((EclipseAppDescriptor) getApplicationDescriptor()).getContainerManager().unlock(this);
+			handleRegistration = null;
 		}
 	}
 
@@ -223,7 +228,7 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 		return refs;
 	}
 
-	private IApplication getApplication() {
+	private synchronized IApplication getApplication() {
 		return (IApplication) ((application instanceof IApplication) ? application : null);
 	}
 

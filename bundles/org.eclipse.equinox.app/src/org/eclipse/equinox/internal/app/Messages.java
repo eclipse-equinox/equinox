@@ -22,6 +22,7 @@ public class Messages extends NLS {
 	public static String application_returned;
 	public static String application_errorStartDefault;
 	public static String application_error_stopping;
+	public static String application_error_state_stopped;
 
 	// product
 	public static String provider_invalid;
