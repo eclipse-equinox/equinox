@@ -107,9 +107,11 @@ public class ManifestLocalization {
 		String[] nlVarients = buildNLVariants(localeString);
 		BundleResourceBundle parent = null;
 		for (int i = nlVarients.length - 1; i >= 0; i--) {
-			BundleResourceBundle varientBundle = (BundleResourceBundle) cache.get(nlVarients[i]);
+			BundleResourceBundle varientBundle = null;
 			URL varientURL = findResource(propertiesLocation + (nlVarients[i].equals("") ? nlVarients[i] : '_' + nlVarients[i]) + ".properties"); //$NON-NLS-1$ //$NON-NLS-2$
-			if (varientURL != null) {
+			if (varientURL == null) {
+				varientBundle = (BundleResourceBundle) cache.get(nlVarients[i]);
+			} else {
 				InputStream resourceStream = null;
 				try {
 					resourceStream = varientURL.openStream();
