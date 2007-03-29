@@ -263,7 +263,7 @@ public class Launcher {
 		tok.getChar(); // advance to next token
 		// and next token is either adaptor class name or ":" if we should use the default adaptor
 		String adp = tok.getToken(":"); //$NON-NLS-1$
-		if (adp.length() > 0) {
+		if (adp != null && adp.length() > 0) {
 			adaptorClassName = adp;
 		}
 
