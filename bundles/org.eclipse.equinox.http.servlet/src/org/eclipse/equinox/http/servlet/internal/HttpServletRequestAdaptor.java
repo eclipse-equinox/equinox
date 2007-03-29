@@ -57,7 +57,11 @@ public class HttpServletRequestAdaptor extends HttpServletRequestWrapper {
 		if (alias.equals("/")) { //$NON-NLS-1$
 			return super.getPathInfo();
 		}
-		return super.getPathInfo().substring(alias.length());
+		String pathInfo = super.getPathInfo().substring(alias.length());
+		if (pathInfo.length() == 0)
+			return null;
+		
+		return pathInfo;
 	}
 
 	public String getServletPath() {
@@ -99,7 +103,12 @@ public class HttpServletRequestAdaptor extends HttpServletRequestWrapper {
 				if (alias.equals("/")) { //$NON-NLS-1$
 					return pathInfo;
 				}
-				return pathInfo.substring(alias.length());
+				
+				pathInfo = pathInfo.substring(alias.length());
+				if (pathInfo.length() == 0)
+					return null;
+				
+				return pathInfo;
 			}
 		}
 
