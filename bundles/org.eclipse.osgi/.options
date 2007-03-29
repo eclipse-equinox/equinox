@@ -70,7 +70,6 @@ org.eclipse.osgi/defaultprofile/buffersize = 256
 org.eclipse.osgi/monitor/classes=false
 
 # monitor bundle activation
-org.eclipse.osgi/debug/monitorbundles=false
 org.eclipse.osgi/monitor/activation=false
 
 # monitor resource bundle (*.properties) loading
