@@ -203,7 +203,11 @@ public class FrameworkConsole implements Runnable {
 			if (useSocketStream) {
 				while (true) {
 					getSocketStream(port);
-					console();
+					try {
+						console();
+					} catch (IOException ioe) {
+						// ignore; this is likely caused because the client got disconnected
+					}
 				}
 			} else {
 				getDefaultStreams();
