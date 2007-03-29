@@ -269,7 +269,7 @@ public class BridgeServlet extends HttpServlet {
 		}
 
 		public String getServletPath() {
-			return "";
+			return ""; //$NON-NLS-1$
 		}
 	}
 	
