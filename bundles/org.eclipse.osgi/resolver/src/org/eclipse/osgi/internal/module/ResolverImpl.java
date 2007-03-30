@@ -825,7 +825,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 					state.addResolverError(imports[i].getVersionConstraint().getBundle(), ResolverError.MISSING_IMPORT_PACKAGE, imports[i].getVersionConstraint().toString(), imports[i].getVersionConstraint());
 					if (imports[i].isFromFragment()) {
 						if (!developmentMode) // only detach fragments when not in devmode
-							resolverExports.remove(bundle.detachFragment((ResolverBundle) bundleMapping.get(imports[i].getBundleDescription()), imports[i]));
+							resolverExports.remove(bundle.detachFragment((ResolverBundle) bundleMapping.get(imports[i].getVersionConstraint().getBundle()), imports[i]));
 						continue;
 					}
 					if (!developmentMode) {
