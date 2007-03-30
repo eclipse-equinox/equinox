@@ -633,18 +633,23 @@ public abstract class StateImpl implements State {
 		BundleDescriptionImpl importer = (BundleDescriptionImpl) importingBundle;
 		if (importer.getDynamicStamp(requestedPackage) == getTimeStamp())
 			return null;
-		fullyLoad();
-		// ask the resolver to resolve our dynamic import
-		ExportPackageDescriptionImpl result = (ExportPackageDescriptionImpl) resolver.resolveDynamicImport(importingBundle, requestedPackage);
-		if (result == null)
-			importer.setDynamicStamp(requestedPackage, new Long(getTimeStamp()));
-		else {
-			importer.setDynamicStamp(requestedPackage, null); // remove any cached timestamp
-			// need to add the result to the list of resolved imports
-			importer.addDynamicResolvedImport(result);
+		try {
+			resolving = true;
+			fullyLoad();
+			// ask the resolver to resolve our dynamic import
+			ExportPackageDescriptionImpl result = (ExportPackageDescriptionImpl) resolver.resolveDynamicImport(importingBundle, requestedPackage);
+			if (result == null)
+				importer.setDynamicStamp(requestedPackage, new Long(getTimeStamp()));
+			else {
+				importer.setDynamicStamp(requestedPackage, null); // remove any cached timestamp
+				// need to add the result to the list of resolved imports
+				importer.addDynamicResolvedImport(result);
+			}
+			setDynamicCacheChanged(true);
+			return result;
+		} finally {
+			resolving = false;
 		}
-		setDynamicCacheChanged(true);
-		return result;
 	}
 
 	void setReader(StateReader reader) {
