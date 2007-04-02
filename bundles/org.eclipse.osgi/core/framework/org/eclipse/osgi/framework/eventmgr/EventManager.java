@@ -24,9 +24,9 @@ import org.eclipse.osgi.framework.eventmgr.EventListeners.ListElement;
  * to deliver a SomeEvent to a set of SomeEventListeners.  
  * <pre>
  *
- * 		// Create an EventManager with a name for an asynchronous event dispatch thread
- * 		EventManager eventManager = new EventManager("SomeEvent Async Event Dispatcher Thread");
- * 		// Create an EventListeners to hold the list of SomeEventListeners
+ * 	// Create an EventManager with a name for an asynchronous event dispatch thread
+ * 	EventManager eventManager = new EventManager("SomeEvent Async Event Dispatcher Thread");
+ * 	// Create an EventListeners to hold the list of SomeEventListeners
  *		EventListeners eventListeners = new EventListeners();
  *
  *		// Add a SomeEventListener to the listener list
@@ -52,7 +52,10 @@ import org.eclipse.osgi.framework.eventmgr.EventListeners.ListElement;
  *		// Remove the listener from the listener list
  *	    eventListeners.removeListener(someEventListener);
  *
- *		// Close EventManager to clean when done to terminate async event dispatch thread
+ *		// Close EventManager to clean when done to terminate async event dispatch thread.
+ *		// Note that closing the event manager while asynchronously delivering events 
+ *		// may cause some events to not be delivered before the async event dispatch 
+ *		// thread terminates
  *		eventManager.close();
  * </pre>
  * 
@@ -131,7 +134,10 @@ public class EventManager {
 	/**
 	 * This method can be called to release any resources associated with this
 	 * EventManager.
-	 *
+	 * <p>
+	 * Closing this EventManager while it is asynchronously delivering events 
+	 * may cause some events to not be delivered before the async event dispatch 
+	 * thread terminates.
 	 */
 	public synchronized void close() {
 		if (thread != null) {
