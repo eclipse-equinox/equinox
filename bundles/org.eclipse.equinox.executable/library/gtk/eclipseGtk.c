@@ -87,8 +87,7 @@ int showSplash( const char* featureImage )
 	gtk_container_add(GTK_CONTAINER(vboxHandle), scrolledHandle);
 	gtk_box_set_child_packing(GTK_BOX(vboxHandle), scrolledHandle, TRUE, TRUE, 0, GTK_PACK_END);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolledHandle), GTK_POLICY_NEVER, GTK_POLICY_NEVER);
-	gtk_widget_show(scrolledHandle);
-	
+
 	handle = gtk_fixed_new();
 	gtk_fixed_set_has_window(GTK_FIXED(handle), TRUE);
 	GTK_WIDGET_SET_FLAGS(handle, GTK_CAN_FOCUS);
@@ -98,21 +97,17 @@ int showSplash( const char* featureImage )
 	gtk_container_add(GTK_CONTAINER(scrolledHandle), handle);
 	g_log_remove_handler("Gtk", handlerId);
 	
-	gtk_widget_show(handle);
-	
 	gtk_container_add(GTK_CONTAINER(shellHandle), vboxHandle);
 	
 	pixbuf = gdk_pixbuf_new_from_file(featureImage, NULL);
 	image = gtk_image_new_from_pixbuf(pixbuf);
 	gtk_signal_connect(GTK_OBJECT(image), "destroy", GTK_SIGNAL_FUNC(gtk_widget_destroyed), &image);
 	gtk_container_add(GTK_CONTAINER(handle), image);
-	gtk_widget_show(image);
 	
 	width  = gdk_pixbuf_get_width(pixbuf);
 	height = gdk_pixbuf_get_height(pixbuf);
-	gtk_window_resize(GTK_WINDOW(shellHandle), width, height);
 	gtk_window_set_position(GTK_WINDOW(shellHandle), GTK_WIN_POS_CENTER);
-	gtk_widget_show(shellHandle);
+	gtk_window_resize(GTK_WINDOW(shellHandle), width, height);
 	gtk_widget_show_all(GTK_WIDGET(shellHandle));
 	splashHandle = (long)G_OBJECT(shellHandle);
 	dispatchMessages();
