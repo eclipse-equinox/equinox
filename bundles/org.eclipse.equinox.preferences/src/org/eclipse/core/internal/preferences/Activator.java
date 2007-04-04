@@ -32,6 +32,8 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 	 * as an OSGi service.
 	 */
 	private static final String PROP_REGISTER_PERF_SERVICE = "eclipse.service.pref"; //$NON-NLS-1$
+	// the system property
+	private static final String PROP_CUSTOMIZATION = "eclipse.pluginCustomization"; //$NON-NLS-1$
 	
 	/**
 	 * Track the registry service - only register preference service if the registry is 
@@ -139,10 +141,17 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 	}
 
 	/**
-	 * Look for the plug-in customization file.
-	 * @param args - command line arguments
+	 * Look for the plug-in customization file in the system properties and command-line args.
 	 */
 	private void processCommandLine() {
+		// check the value of the system property first because its quicker.
+		// if it exists, then set it otherwise look at the command-line arguments.
+		String value = bundleContext.getProperty(PROP_CUSTOMIZATION);
+		if (value != null) {
+			DefaultPreferences.pluginCustomizationFile = value;
+			return;
+		}
+
 		ServiceTracker environmentTracker = new ServiceTracker(bundleContext, EnvironmentInfo.class.getName(), null);
 		environmentTracker.open();
 		EnvironmentInfo environmentInfo = (EnvironmentInfo) environmentTracker.getService();
