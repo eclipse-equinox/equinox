@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2006 IBM Corporation and others.
+ * Copyright (c) 2004, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Gunnar Wagenknecht - Bug 179695 - [prefs] NPE when using Preferences API without a product
  *******************************************************************************/
 package org.eclipse.core.internal.preferences;
 
@@ -184,10 +185,14 @@ public class DefaultPreferences extends EclipsePreferences {
 					productTranslation = productSpecials.getProductTranslation();
 				}
 				productTracker.close();
-			} else
+			} else {
 				PrefsMessages.message("Product-specified preferences called before plugin is started"); //$NON-NLS-1$
+			}
+			if (productCustomization == null)
+				productCustomization = new Properties();
 		}
-		applyDefaults(null, productCustomization, productTranslation);
+		if (!productCustomization.isEmpty())
+			applyDefaults(null, productCustomization, productTranslation);
 	}
 
 	/* (non-Javadoc)
