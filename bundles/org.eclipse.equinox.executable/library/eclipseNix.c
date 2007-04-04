@@ -33,7 +33,7 @@
 #define JAVA_ARCH DEFAULT_OS_ARCH
 #endif
 
-#define MAX_LOCATION_LENGTH 30 /* none of the jvmLocations strings should be longer than this */ 
+#define MAX_LOCATION_LENGTH 40 /* none of the jvmLocations strings should be longer than this */ 
 static const char* jvmLocations [] = { "j9vm", "../jre/bin/j9vm",
 									   "classic", "../jre/bin/classic",
 									   "../lib/" JAVA_ARCH "/client",  
@@ -42,6 +42,7 @@ static const char* jvmLocations [] = { "j9vm", "../jre/bin/j9vm",
 									   "../jre/lib/" JAVA_ARCH "/client",
 									   "../jre/lib/" JAVA_ARCH "/server",
 									   "../jre/lib/" JAVA_ARCH "/jrockit",
+									   "../lib/jvm/jre/lib/" JAVA_ARCH "/client",
 								 	   NULL };
 
 static void adjustLibraryPath( char * vmLibrary );
