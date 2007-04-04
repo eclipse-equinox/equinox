@@ -355,7 +355,11 @@ public class BundleNativeCode {
 			bundle.framework.publishFrameworkEvent(FrameworkEvent.ERROR, bundle, be);
 			return false;
 		}
-		return filter.match(FrameworkProperties.getProperties());
+		try {
+			return filter.match(FrameworkProperties.getProperties());
+		} catch (IllegalStateException e) {
+			return filter.matchCase(FrameworkProperties.getProperties());
+		}
 	}
 
 	/**

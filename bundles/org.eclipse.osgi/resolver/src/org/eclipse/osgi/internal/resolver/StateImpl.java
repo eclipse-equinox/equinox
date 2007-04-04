@@ -16,8 +16,7 @@ import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.debug.FrameworkDebugOptions;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.internal.core.FilterImpl;
-import org.eclipse.osgi.framework.util.KeyedElement;
-import org.eclipse.osgi.framework.util.KeyedHashSet;
+import org.eclipse.osgi.framework.util.*;
 import org.eclipse.osgi.internal.baseadaptor.StateManager;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.util.ManifestElement;
@@ -342,7 +341,16 @@ public abstract class StateImpl implements State {
 				BundleDescription[] removed = getRemovalPendings();
 				reResolve = mergeBundles(reResolve, removed);
 			}
-			resolver.resolve(reResolve, platformProperties);
+			// use the Headers class to handle ignoring case while matching keys (bug 180817)
+			Headers[] tmpPlatformProperties = new Headers[platformProperties.length];
+			for (int i = 0; i < platformProperties.length; i++) {
+				tmpPlatformProperties[i] = new Headers(platformProperties[i].size());
+				for (Enumeration keys = platformProperties[i].keys(); keys.hasMoreElements();) {
+					Object key = keys.nextElement();
+					tmpPlatformProperties[i].put(key, platformProperties[i].get(key));
+				}
+			}
+			resolver.resolve(reResolve, tmpPlatformProperties);
 			resolved = removalPendings.size() == 0;
 
 			StateDelta savedChanges = changes == null ? new StateDeltaImpl(this) : changes;

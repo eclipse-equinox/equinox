@@ -271,7 +271,8 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		try {
 			Filter filter = FrameworkUtil.createFilter(platformFilter);
 			for (int i = 0; i < platformProperties.length; i++)
-				if (filter.match(platformProperties[i]))
+				// using matchCase here in case of duplicate case invarient keys (bug 180817)
+				if (filter.matchCase(platformProperties[i]))
 					return true;
 		} catch (InvalidSyntaxException e) {
 			// return false below
