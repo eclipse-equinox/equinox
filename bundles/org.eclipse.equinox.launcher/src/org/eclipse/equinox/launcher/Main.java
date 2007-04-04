@@ -1902,6 +1902,12 @@ public class Main {
 			return null;
 		// cache the splash in the OSGi sub-dir in the config area
 		File splash = new File(configURL.getPath(), OSGI);
+		//include the name of the jar in the cache location
+		File jarFile = new File(jarPath);
+		String cache = jarFile.getName();
+		if(cache.endsWith(".jar")) //$NON-NLS-1$
+			cache = cache.substring(0, cache.length() - 4);
+		splash = new File(splash, cache);
 		splash = new File(splash, splashPath);
 		// if we have already extracted this file before, then return
 		if (splash.exists()) {
