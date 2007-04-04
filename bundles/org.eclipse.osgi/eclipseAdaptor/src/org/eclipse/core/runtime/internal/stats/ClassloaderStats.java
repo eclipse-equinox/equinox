@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -33,7 +33,7 @@ public class ClassloaderStats {
 	private static ArrayList packageFilters = new ArrayList(4); // filters on a package basis 
 	private static Set pluginFilters = new HashSet(5); // filters on a plugin basis
 
-	private static Stack classStack = new Stack(); // represents the classes that are currently being loaded
+	private static Hashtable classStacks = new Hashtable(); // represents the classes that are currently being loaded
 	/**
 	 * a dictionary of the classloaderStats (key: pluginId, value: ClassloaderStats) 
 	 */
@@ -104,8 +104,13 @@ public class ClassloaderStats {
 		}
 	}
 
-	public static Stack getClassStack() {
-		return classStack;
+	public static synchronized Stack getClassStack() {
+		Stack result = (Stack) classStacks.get(Thread.currentThread());
+		if (result == null) {
+			result = new Stack();
+			classStacks.put(Thread.currentThread(), result);
+		}
+		return result;
 	}
 
 	public static ClassloaderStats[] getLoaders() {
@@ -151,7 +156,7 @@ public class ClassloaderStats {
 	}
 
 	private synchronized void startLoadClass(String name) {
-		classStack.push(findClass(name));
+		getClassStack().push(findClass(name));
 	}
 
 	// internal method that return the existing classStats or creates one
@@ -161,7 +166,7 @@ public class ClassloaderStats {
 	}
 
 	private synchronized void endLoadClass(String name, boolean success) {
-		ClassStats current = (ClassStats) classStack.pop();
+		ClassStats current = (ClassStats) getClassStack().pop();
 		if (!success) {
 			failureCount++;
 			return;
@@ -175,6 +180,7 @@ public class ClassloaderStats {
 		traceLoad(name, current);
 
 		// is there something on the load stack. if so, link them together...
+		Stack classStack = getClassStack();
 		if (classStack.size() != 0) {
 			// get the time spent loading cli and subtract its load time from the class that requires loading
 			ClassStats previous = ((ClassStats) classStack.peek());
@@ -205,6 +211,7 @@ public class ClassloaderStats {
 				output.println("Loading class: " + name); //$NON-NLS-1$
 				output.println("Class loading stack:"); //$NON-NLS-1$
 				output.println("\t" + name); //$NON-NLS-1$
+				Stack classStack = getClassStack();
 				for (int i = classStack.size() - 1; i >= 0; i--)
 					output.println("\t" + ((ClassStats) classStack.get(i)).getClassName()); //$NON-NLS-1$
 				output.println("Stack trace:"); //$NON-NLS-1$
