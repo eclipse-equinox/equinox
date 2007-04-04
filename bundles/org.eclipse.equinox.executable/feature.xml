@@ -127,5 +127,27 @@
          version="0.0.0"
          fragment="true"
          unpack="true"/>
-
+         
+	<plugin
+         id="org.eclipse.equinox.launcher.gtk.linux.S390"
+         os="linux"
+         ws="gtk"
+         arch="S390"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         fragment="true"
+         unpack="true"/>
+         
+	<plugin
+         id="org.eclipse.equinox.launcher.gtk.linux.S390x"
+         os="linux"
+         ws="gtk"
+         arch="S390x"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         fragment="true"
+         unpack="true"/>
+        
 </feature>

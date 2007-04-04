@@ -44,10 +44,6 @@
 	</target>
 	
 	<target name="pre.gather.bin.parts">
-		<!-- copy over contributed binaries -->
-		<copy todir="${feature.directory}/bin">
-			<fileset dir="${basedir}/contributed/bin" />
-		</copy>
 	</target>
 	
 	<!-- ===================================================================== -->
@@ -58,24 +54,7 @@
 	<!--   target.folder - destination folder                                  -->
 	<!-- ===================================================================== -->
 	<target name="post.gather.bin.parts">
-		<move file="${feature.directory}/target.build.properties" tofile="${feature.directory}/build.properties"/>
-		<move file="${feature.directory}/target.build.xml" tofile="${feature.directory}/build.xml"/>
-		
-		<!-- remove empty directories.  I couldn't get includeEmptyDirs to work -->
-		<!-- on the move or delete, so copy, delete and move back               -->
-		<copy includeEmptyDirs="false" todir="${feature.directory}/tempBin" >
-			<fileset dir="${feature.directory}/bin" />
-		</copy>
-		<delete dir="${feature.directory}/bin" />
-		<move  todir="${feature.directory}/bin" >
-			<fileset dir="${feature.directory}/tempBin" />
-		</move>
-		
-		<!-- rename eclipse launchers to "launcher" -->
-		<move todir="${feature.directory}/bin" verbose="true">
-			<fileset dir="${feature.directory}/bin" />
-			<regexpmapper from="^(.*[/\\])eclipse(.exe)?$" to="\1launcher\2"/>
-		</move>
+		<chmod perm="755" dir="${target.folder}" includes="eclipse_*" />
 	</target>
 	
 	<!-- ===================================================================== -->
