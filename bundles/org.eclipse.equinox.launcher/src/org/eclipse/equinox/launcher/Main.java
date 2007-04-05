@@ -169,7 +169,7 @@ public class Main {
     private static final String PROP_REQUIRED_JAVA_VERSION = "osgi.requiredJavaVersion"; //$NON-NLS-1$
     private static final String PROP_PARENT_CLASSLOADER = "osgi.parentClassloader"; //$NON-NLS-1$
 	private static final String PROP_NL = "osgi.nl";  //$NON-NLS-1$
-    private static final String PROP_NOSHUTDOWN = "osgi.noShutdown"; //$NON-NLS-1$
+    static final String PROP_NOSHUTDOWN = "osgi.noShutdown"; //$NON-NLS-1$
     private static final String PROP_DEBUG = "osgi.debug"; //$NON-NLS-1$	
 	
     private static final String PROP_EXITCODE = "eclipse.exitcode"; //$NON-NLS-1$

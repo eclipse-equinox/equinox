@@ -48,7 +48,8 @@ public class WebStartMain extends Main {
 	public static void main(String[] args) {
 		System.setSecurityManager(null); //TODO Hack so that when the classloader loading the fwk is created we don't have funny permissions. This should be revisited. 
 		int result = new WebStartMain().run(args);
-		System.exit(result);
+		if (!Boolean.getBoolean(PROP_NOSHUTDOWN))
+			System.exit(result);
 	}
 
 	private void setDefaultBundles() {
