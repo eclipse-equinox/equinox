@@ -7,6 +7,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Josh Arnold - Bug 180080 Equinox Application Admin spec violations
  *******************************************************************************/
 
 package org.eclipse.equinox.internal.app;
@@ -33,8 +34,8 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 	private static final int FLAG_STOPPING = 0x04;
 	// Indicates the application is stopped
 	private static final int FLAG_STOPPED = 0x08;
-	private static final String STARTING = "starting"; //$NON-NLS-1$
-	private static final String STOPPED = "stopped"; //$NON-NLS-1$
+	private static final String STARTING = "org.eclipse.equinox.app.starting"; //$NON-NLS-1$
+	private static final String STOPPED = "org.eclipse.equinox.app.stopped"; //$NON-NLS-1$
 	private static final String PROP_ECLIPSE_EXITCODE = "eclipse.exitcode"; //$NON-NLS-1$
 
 	private ServiceRegistration handleRegistration;
@@ -118,8 +119,8 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 		handleRegistration.setProperties(getServiceProperties());
 		// if the status is stopped then unregister the service
 		if ((this.status & EclipseAppHandle.FLAG_STOPPED) != 0) {
-			handleRegistration.unregister();
 			((EclipseAppDescriptor) getApplicationDescriptor()).getContainerManager().unlock(this);
+			handleRegistration.unregister();
 			handleRegistration = null;
 		}
 	}

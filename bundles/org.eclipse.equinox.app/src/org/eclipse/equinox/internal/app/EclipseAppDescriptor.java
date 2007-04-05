@@ -36,7 +36,7 @@ public class EclipseAppDescriptor extends ApplicationDescriptor {
 	static final int FLAG_TYPE_MAIN_THREAD = 0x20;
 	static final int FLAG_TYPE_ANY_THREAD = 0x40;
 	static final int FLAG_DEFAULT_APP = 0x80;
-	private static long instanceID = 0;
+	private long instanceID = 0;
 	private ServiceRegistration sr;
 	private Boolean locked = Boolean.FALSE;
 	private final EclipseAppContainer appContainer;
@@ -145,7 +145,7 @@ public class EclipseAppDescriptor extends ApplicationDescriptor {
 	 * Returns the appHandle.  If it does not exist then one is created.
 	 */
 	private EclipseAppHandle createAppHandle(Map arguments) {
-		EclipseAppHandle newAppHandle = new EclipseAppHandle(EclipseAppDescriptor.getInstanceID(this), arguments, this);
+		EclipseAppHandle newAppHandle = new EclipseAppHandle(getInstanceID(), arguments, this);
 		ServiceRegistration appHandleReg = (ServiceRegistration) AccessController.doPrivileged(appContainer.getRegServiceAction(new String[] {ApplicationHandle.class.getName(), IApplicationContext.class.getName()}, newAppHandle, newAppHandle.getServiceProperties()));
 		newAppHandle.setServiceRegistration(appHandleReg);
 		return newAppHandle;
@@ -191,13 +191,11 @@ public class EclipseAppDescriptor extends ApplicationDescriptor {
 		return cardinality;
 	}
 
-	private static String getInstanceID(EclipseAppDescriptor eclipseApp) {
-		// if the app is a singleton or has a limit of 1 just return the application id
-		if ((eclipseApp.getCardinalityType() & (FLAG_CARD_SINGLETON_GLOGAL | FLAG_CARD_SINGLETON_SCOPED)) != 0 || eclipseApp.getCardinality() == 1)
-			return eclipseApp.getApplicationId();
+	private synchronized String getInstanceID() {
+		// make sure the instanceID has not reached the max
+		if (instanceID == Long.MAX_VALUE)
+			instanceID = 0;
 		// create a unique instance id
-		synchronized (EclipseAppDescriptor.class) {
-			return eclipseApp.getApplicationId() + "_" + instanceID++; //$NON-NLS-1$
-		}
+		return getApplicationId() + "." + instanceID++; //$NON-NLS-1$
 	}
 }
