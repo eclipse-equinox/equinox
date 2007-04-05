@@ -18,7 +18,7 @@ import org.osgi.framework.Constants;
 /*
  * A companion to BundleDescription from the state used while resolving.
  */
-public class ResolverBundle extends VersionSupplier {
+public class ResolverBundle extends VersionSupplier implements Comparable{
 	public static final int UNRESOLVED = 0;
 	public static final int RESOLVING = 1;
 	public static final int RESOLVED = 2;
@@ -496,5 +496,20 @@ public class ResolverBundle extends VersionSupplier {
 
 	ResolverBundle[] getFragments() {
 		return  fragments == null ? new ResolverBundle[0] : (ResolverBundle[]) fragments.toArray(new ResolverBundle[fragments.size()]);
+	}
+
+	/*
+	 * This is used to sort bundles by BSN.  This is needed to fix bug 174930
+	 * If both BSNs are null then 0 is returned
+	 * If this BSN is null the 1 is returned
+	 * If the other BSN is null then -1 is returned
+	 * otherwise String.compareTo is used
+	 */
+	public int compareTo(Object o) {
+		String bsn = getName();
+		String otherBsn = ((ResolverBundle) o).getName();
+		if (bsn == null)
+			return otherBsn == null ? 0 : 1;
+		return otherBsn == null ? -1 : bsn.compareTo(otherBsn);
 	}
 }

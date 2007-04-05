@@ -455,6 +455,9 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 	}
 
 	private void resolveBundles0(ResolverBundle[] bundles, Dictionary[] platformProperties, ArrayList rejectedSingletons) {
+		if (developmentMode) 
+			// need to sort bundles to keep consistent order for fragment attachment (bug 174930)
+			Arrays.sort(bundles);
 		// First attach all fragments to the matching hosts
 		for (int i = 0; i < bundles.length; i++)
 			attachFragment(bundles[i], rejectedSingletons);
