@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2006 IBM Corporation and others.
+ * Copyright (c) 2004, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -83,14 +83,13 @@ public class LocationManager {
 		// if the config property was set, munge it for backwards compatibility.
 		String location = FrameworkProperties.getProperty(PROP_CONFIG_AREA);
 		if (location != null) {
-			location = buildURL(location, false).toExternalForm();
 			if (location.endsWith(".cfg")) { //$NON-NLS-1$
 				int index = location.lastIndexOf('/');
+				if (index < 0)
+					index = location.lastIndexOf('\\');
 				location = location.substring(0, index + 1);
+				FrameworkProperties.setProperty(PROP_CONFIG_AREA, location);
 			}
-			if (!location.endsWith("/")) //$NON-NLS-1$
-				location += "/"; //$NON-NLS-1$
-			FrameworkProperties.setProperty(PROP_CONFIG_AREA, location);
 		}
 	}
 
