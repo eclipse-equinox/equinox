@@ -478,6 +478,7 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
 	                	running = 0;
 	                }
 	            } else {
+	            	running = 0;
 	                if (debug && !suppressErrors) displayMessage( officialName, shareMsg );
 	            }
 	            break;
