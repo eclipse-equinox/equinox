@@ -50,6 +50,8 @@ static int     jvmExitTimerId = 99;
 
 static void CALLBACK  detectJvmExit ();
 static _TCHAR* checkVMRegistryKey(HKEY jrekey, _TCHAR* subKeyName);
+static void adjustSearchPath( _TCHAR * vmLibrary );
+static _TCHAR* findLib( _TCHAR* command );
 
 /* define default locations in which to find the jvm shared library
  * these are paths relative to the java exe, the shared library is
@@ -216,7 +218,75 @@ _TCHAR** getArgVM( _TCHAR *vm )
 /*
  * Find the VM shared library starting from the java executable 
  */
-_TCHAR* findVMLibrary( _TCHAR* command ) {
+_TCHAR * findVMLibrary( _TCHAR* command ) {
+	_TCHAR* lib = findLib(command);
+	if( lib != NULL ) {
+		adjustSearchPath(lib);
+	}
+	return lib;
+}
+
+void adjustSearchPath( _TCHAR* vmLib ){
+	_TCHAR ** paths;
+	_TCHAR * path = NULL, *newPath = NULL;
+	_TCHAR * buffer, *c;
+	int i, length;
+	int needAdjust = 0, freePath = 0;
+	
+	/* we want the directory containing the library, and the parent directory of that */
+	paths = (_TCHAR**) malloc( 2 * sizeof(_TCHAR*));
+	buffer = _tcsdup(vmLib);	 
+	for (i = 0; i < 2; i++ ){
+		c = _tcsrchr(buffer, dirSeparator);
+		*c = 0;
+		length = _tcslen(buffer);
+		paths[i] = (_TCHAR*) malloc((length + 2) * sizeof(_TCHAR));
+		_stprintf( paths[i], _T_ECLIPSE("%s%c"), buffer, pathSeparator );
+	}	
+	free(buffer);
+	
+	/* first call to GetEnvironmentVariable tells us how big to make the buffer */
+	length = GetEnvironmentVariable(_T_ECLIPSE("PATH"), path, 0);
+	if (length > 0) {
+		path = (_TCHAR*)malloc(length * sizeof(_TCHAR));
+		GetEnvironmentVariable(_T_ECLIPSE("PATH"), path, length);
+		freePath = 1;
+	} else {
+		path = _T_ECLIPSE("");
+		freePath = 0;
+		needAdjust = 1;
+	}
+	
+	if(length > 0) {
+		buffer = (_TCHAR*)malloc((_tcslen(path) + 2) * sizeof(_TCHAR));
+		_stprintf(buffer, _T_ECLIPSE("%s%c"), path, pathSeparator);
+		/* check if each of our paths is already on the search path */
+		for (i = 0; i < 2; i++) {
+			c = _tcsstr(buffer, paths[i]);
+			if ( c == NULL || !(c == buffer || *(c - 1) == pathSeparator))
+			{
+				/* entry not found */
+				needAdjust = 1;
+				break;
+			}
+		}
+		free(buffer);
+	}
+
+	newPath = (_TCHAR*)malloc((length + 1 + _tcslen(paths[0]) + 1 + _tcslen(paths[1]) + 1) * sizeof(_TCHAR));
+	_stprintf(newPath, _T_ECLIPSE("%s%s%s"), paths[0], paths[1], path);
+
+	SetEnvironmentVariable( _T_ECLIPSE("PATH"), newPath);
+	
+	for (i = 0; i < 2; i++)
+		free(paths[i]);
+	free(paths);
+	free(newPath);
+	if (freePath)
+		free(path);
+}
+
+static _TCHAR* findLib( _TCHAR* command ) {
 	int i, j;
 	int pathLength;	
 	struct _stat stats;
