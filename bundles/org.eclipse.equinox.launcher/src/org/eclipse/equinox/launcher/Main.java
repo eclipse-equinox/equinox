@@ -137,8 +137,6 @@ public class Main {
     protected static final String REFERENCE_SCHEME = "reference:"; //$NON-NLS-1$
     protected static final String JAR_SCHEME = "jar:"; //$NON-NLS-1$
     
-    private static final String DEFAULT_JRE_REQUIRED = "1.4.1"; //$NON-NLS-1$
-    
     // constants: configuration file location
     private static final String CONFIG_DIR = "configuration/"; //$NON-NLS-1$
     private static final String CONFIG_FILE = "config.ini"; //$NON-NLS-1$
@@ -393,7 +391,7 @@ public class Main {
         processConfiguration();
         
         //ensure minimum Java version
-        if (!checkVersion(System.getProperty("java.version"), System.getProperty(PROP_REQUIRED_JAVA_VERSION, DEFAULT_JRE_REQUIRED))) //$NON-NLS-1$
+        if (!checkVersion(System.getProperty("java.version"), System.getProperty(PROP_REQUIRED_JAVA_VERSION))) //$NON-NLS-1$
             return;
         
         // need to ensure that getInstallLocation is called at least once to initialize the value.
