@@ -667,8 +667,10 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 			return;
 		for (int i = cycleSize - 1; i >= 0; i--) {
 			ResolverBundle cycleBundle = (ResolverBundle) cycle.get(i);
-			if (!cycleBundle.isResolvable())
+			if (!cycleBundle.isResolvable()) {
 				cycle.remove(i); // remove this from the list of bundles that need reresolved
+				continue;
+			}
 			// Check that we haven't wired to any dropped exports
 			ResolverImport[] imports = cycleBundle.getImportPackages();
 			for (int j = 0; j < imports.length; j++) {
