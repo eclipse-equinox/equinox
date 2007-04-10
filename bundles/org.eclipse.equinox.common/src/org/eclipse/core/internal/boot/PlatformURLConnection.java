@@ -19,6 +19,7 @@ import org.eclipse.core.internal.runtime.Activator;
 import org.eclipse.core.internal.runtime.CommonMessages;
 import org.eclipse.osgi.service.debug.DebugOptions;
 import org.eclipse.osgi.util.NLS;
+import org.osgi.framework.Version;
 
 /**
  * Platform URL support
@@ -321,13 +322,31 @@ public abstract class PlatformURLConnection extends URLConnection {
 	}
 
 	protected String getId(String spec) {
-		int i = spec.lastIndexOf('_');
-		return i >= 0 ? spec.substring(0, i) : spec;
+		String id = (String) parse(spec)[0];
+		return id == null ? spec : id;
 	}
 
 	protected String getVersion(String spec) {
-		int i = spec.lastIndexOf('_');
-		return i >= 0 ? spec.substring(i + 1, spec.length()) : ""; //$NON-NLS-1$
+		Version version = (Version) parse(spec)[1];
+		return version == null ? "" : version.toString(); //$NON-NLS-1$
+	}
+
+	private Object[] parse(String spec) {
+		String bsn = null;
+		Version version = null;
+		int underScore = spec.indexOf('_');
+		while (underScore >= 0) {
+			bsn = spec.substring(0, underScore);
+			try {
+				version = Version.parseVersion(spec.substring(underScore + 1));
+			} catch (IllegalArgumentException iae) {
+				// continue to next underscore
+				underScore = spec.indexOf('_', underScore + 1);
+				continue;
+			}
+			break;
+		}
+		return new Object[] {bsn, version};
 	}
 
 	void setResolvedURL(URL url) throws IOException {
