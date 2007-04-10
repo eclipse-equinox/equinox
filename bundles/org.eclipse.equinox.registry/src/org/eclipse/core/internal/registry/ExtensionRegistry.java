@@ -894,7 +894,7 @@ public class ExtensionRegistry implements IExtensionRegistry {
 
 	public boolean addContribution(InputStream is, IContributor contributor, boolean persist, String contributionName, ResourceBundle translationBundle, Object key) {
 		if (!checkReadWriteAccess(key, persist))
-			throw new IllegalArgumentException("Unauthorized access to the ExtensionRegistry.addXMLContribution() method. Check if proper access token is supplied."); //$NON-NLS-1$
+			throw new IllegalArgumentException("Unauthorized access to the ExtensionRegistry.addContribution() method. Check if proper access token is supplied."); //$NON-NLS-1$
 		if (contributionName == null)
 			contributionName = ""; //$NON-NLS-1$
 
