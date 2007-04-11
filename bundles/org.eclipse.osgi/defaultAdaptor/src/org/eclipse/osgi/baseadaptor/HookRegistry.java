@@ -63,6 +63,8 @@ public final class HookRegistry {
 	 */
 	public static final String PROP_HOOK_CONFIGURATORS = "osgi.hook.configurators"; //$NON-NLS-1$
 
+	private static final String BUILTIN_HOOKS = "builtin.hooks"; //$NON-NLS-1$
+
 	private BaseAdaptor adaptor;
 	private boolean readonly = false;
 	private AdaptorHook[] adaptorHooks = new AdaptorHook[0];
@@ -110,6 +112,7 @@ public final class HookRegistry {
 			errors.add(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, "getResources error on " + HookRegistry.HOOK_CONFIGURATORS_FILE, 0, e, null)); //$NON-NLS-1$
 			return;
 		}
+		int curBuiltin = 0;
 		while (hookConfigurators.hasMoreElements()) {
 			URL url = (URL) hookConfigurators.nextElement();
 			try {
@@ -119,10 +122,15 @@ public final class HookRegistry {
 				String hooksValue = configuratorProps.getProperty(HOOK_CONFIGURATORS);
 				if (hooksValue == null)
 					continue;
+				boolean builtin = Boolean.valueOf(configuratorProps.getProperty(BUILTIN_HOOKS)).booleanValue();
 				String[] configurators = ManifestElement.getArrayFromList(hooksValue, ","); //$NON-NLS-1$
 				for (int i = 0; i < configurators.length; i++)
-					if (!configuratorList.contains(configurators[i]))
-						configuratorList.add(configurators[i]);
+					if (!configuratorList.contains(configurators[i])) {
+						if (builtin) // make sure the built-in configurators are listed first (bug 170881)
+							configuratorList.add(curBuiltin++, configurators[i]);
+						else
+							configuratorList.add(configurators[i]);
+					}
 			} catch (IOException e) {
 				errors.add(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, "error loading: " + url.toExternalForm(), 0, e, null)); //$NON-NLS-1$
 				// ignore and continue to next URL
