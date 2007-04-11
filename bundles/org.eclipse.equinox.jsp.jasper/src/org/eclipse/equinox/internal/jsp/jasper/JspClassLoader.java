@@ -37,8 +37,7 @@ public class JspClassLoader extends URLClassLoader {
 		public URL getResource(String name) {
 			return null;
 		}
-
-		public Enumeration getResources(String name) throws IOException {
+		public Enumeration findResources(String name) throws IOException {
 			return new Enumeration() {
 				public boolean hasMoreElements() {
 					return false;
@@ -48,12 +47,10 @@ public class JspClassLoader extends URLClassLoader {
 				}				
 			};
 		}
-
 		public Class loadClass(String name) throws ClassNotFoundException {
 			throw new ClassNotFoundException(name);
 		}		
 	};
-
 
 	public JspClassLoader(Bundle bundle) {
 		super(new URL[0], new BundleProxyClassLoader(bundle, new BundleProxyClassLoader(JASPERBUNDLE, new JSPContextFinder(EMPTY_CLASSLOADER))));
