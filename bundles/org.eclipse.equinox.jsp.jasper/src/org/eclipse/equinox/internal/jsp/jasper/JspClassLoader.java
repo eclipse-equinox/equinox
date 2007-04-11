@@ -7,6 +7,7 @@
  *******************************************************************************/
 package org.eclipse.equinox.internal.jsp.jasper;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -23,16 +24,39 @@ import org.osgi.framework.Constants;
  * loading classes which should be done by the other contained class loaders.
  * 
  * The rest of the ClassLoader is as follows:
- * 1) Thread-ContextClassLoader (top - parent)
+ * 1) Thread-ContextClassLoader (top - parent) -- see ContextFinder
  * 2) Jasper Bundle
  * 3) The Bundle referenced at JSPServlet creation
  */
 public class JspClassLoader extends URLClassLoader {
 
 	private static final Bundle JASPERBUNDLE = Activator.getBundle(org.apache.jasper.servlet.JspServlet.class);
+	private static final ClassLoader PARENT = JspClassLoader.class.getClassLoader().getParent();
+	private static final String JAVA_PACKAGE = "java.";	 //$NON-NLS-1$
+	private static final ClassLoader EMPTY_CLASSLOADER = new ClassLoader() {
+		public URL getResource(String name) {
+			return null;
+		}
+
+		public Enumeration getResources(String name) throws IOException {
+			return new Enumeration() {
+				public boolean hasMoreElements() {
+					return false;
+				}
+				public Object nextElement() {
+					return null;
+				}				
+			};
+		}
+
+		public Class loadClass(String name) throws ClassNotFoundException {
+			throw new ClassNotFoundException(name);
+		}		
+	};
+
 
 	public JspClassLoader(Bundle bundle) {
-		super(new URL[0], new BundleProxyClassLoader(bundle, new BundleProxyClassLoader(JASPERBUNDLE, Thread.currentThread().getContextClassLoader())));
+		super(new URL[0], new BundleProxyClassLoader(bundle, new BundleProxyClassLoader(JASPERBUNDLE, new JSPContextFinder(EMPTY_CLASSLOADER))));
 		addBundleClassPathJars(bundle);
 		Bundle[] fragments = Activator.getFragments(bundle);
 		if (fragments != null) {
@@ -63,6 +87,12 @@ public class JspClassLoader extends URLClassLoader {
 				}
 			}
 		}
+	}
+
+	protected Class loadClass(String name, boolean resolve) throws ClassNotFoundException {
+		if (PARENT != null && name.startsWith(JAVA_PACKAGE))
+			return PARENT.loadClass(name);
+		return super.loadClass(name, resolve);
 	}
 
 	// Classes should "not" be loaded by this classloader from the URLs - it is just used for TLD resource discovery.
