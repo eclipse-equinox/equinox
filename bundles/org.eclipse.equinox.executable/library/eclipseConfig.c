@@ -93,6 +93,11 @@ int readConfigFile( _TCHAR * config_file, int *argc, _TCHAR ***argv )
 		{
 			arg = _tcsdup(argument);
 			length = _tcslen(arg);
+			
+			/* watch for comments */
+			if(arg[0] == _T_ECLIPSE('#'))
+				continue;
+			
 			/* basic whitespace trimming */
 			while (arg[length - 1] == _T_ECLIPSE(' ') || arg[length - 1] == _T_ECLIPSE('\t')) {
 				arg[--length] = 0;
