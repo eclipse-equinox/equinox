@@ -117,7 +117,7 @@ char *toNarrow(_TCHAR* src)
 	int byteCount = WideCharToMultiByte (CP_ACP, 0, (wchar_t *)src, -1, NULL, 0, NULL, NULL);
 	char *dest = malloc(byteCount+1);
 	dest[byteCount] = 0;
-	WideCharToMultiByte (CP_UTF8, 0, (wchar_t *)src, -1, dest, byteCount, NULL, NULL);
+	WideCharToMultiByte (CP_ACP, 0, (wchar_t *)src, -1, dest, byteCount, NULL, NULL);
 	return dest;
 #else
 	return (char*)_tcsdup(src);
