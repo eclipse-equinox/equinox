@@ -729,6 +729,14 @@ static void getVMCommand( int argc, _TCHAR* argv[], _TCHAR **vmArgv[], _TCHAR **
         (*progArgv)[ dst++ ] = osArchArg;
     }
 
+	/* Append the show splash window command, if defined. */
+    if (!noSplash)
+    {
+        (*progArgv)[ dst++ ] = SHOWSPLASH;
+        if(showSplashArg != NULL)
+        	(*progArgv)[ dst++ ] = showSplashArg;
+    }
+    
 	/* Append the launcher command */
 	(*progArgv)[ dst++ ] = LAUNCHER;
 	(*progArgv)[ dst++ ] = program;
@@ -746,14 +754,6 @@ static void getVMCommand( int argc, _TCHAR* argv[], _TCHAR **vmArgv[], _TCHAR **
 	/* the startup jar */
 	(*progArgv)[ dst++ ] = STARTUP;
 	(*progArgv)[ dst++ ] = jarFile;
-	
-	/* Append the show splash window command, if defined. */
-    if (!noSplash)
-    {
-        (*progArgv)[ dst++ ] = SHOWSPLASH;
-        if(showSplashArg != NULL)
-        	(*progArgv)[ dst++ ] = showSplashArg;
-    }
     
 	/* Append the exit data command. */
 	if (sharedID) {
