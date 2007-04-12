@@ -614,7 +614,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 						if (conflicts == null)
 							conflicts = new ArrayList(1);
 						conflicts.add(requires[j]);
-						foundConflict = true;
+						foundConflict = !requires[j].isOptional(); // only record the conflicts upto the first non-optional
 					}
 				}
 			}
@@ -628,7 +628,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 						if (conflicts == null)
 							conflicts = new ArrayList(1);
 						conflicts.add(imports[j]);
-						foundConflict = true;
+						foundConflict = !imports[j].isOptional(); // only record the conflicts upto the first non-optional
 					}
 				}
 			}
