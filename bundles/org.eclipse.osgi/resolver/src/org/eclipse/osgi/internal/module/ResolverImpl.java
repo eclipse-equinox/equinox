@@ -1525,6 +1525,10 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		// if not removed then add to the list of unresolvedBundles,
 		// passing false for devmode because we need all fragments detached
 		setBundleUnresolved(bundle, removed, false);
+		if (developmentMode)
+			// when in devmode setBundleUnresolved does not detach fragments (bug 182141)
+			// but in this case the fragments really should be detached
+			bundle.detachAllFragments();
 		// Get bundles dependent on 'bundle'
 		BundleDescription[] dependents = bundle.getBundle().getDependents();
 		state.resolveBundle(bundle.getBundle(), false, null, null, null, null);
