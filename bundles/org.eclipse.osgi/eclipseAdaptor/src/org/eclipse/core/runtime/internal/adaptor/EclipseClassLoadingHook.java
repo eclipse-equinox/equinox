@@ -65,7 +65,7 @@ public class EclipseClassLoadingHook implements ClassLoadingHook, HookConfigurat
 		if (lastIndex < 0)
 			return null;
 		String packageName = name.substring(0, lastIndex);
-		Package pkg = (Package) manager.getBaseClassLoader().publicGetPackage(packageName);
+		Object pkg = manager.getBaseClassLoader().publicGetPackage(packageName);
 		if (pkg != null)
 			return null;
 
