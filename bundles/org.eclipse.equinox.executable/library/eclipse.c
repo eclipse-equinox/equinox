@@ -232,6 +232,8 @@ companion startup.jar file (in the same directory as the executable).");
 #define EE_CONSOLE 	_T_ECLIPSE("-Dee.executable.console=")
 #define EE_VM_LIBRARY			_T_ECLIPSE("-Dee.vm.library=")
 #define EE_LIBRARY_PATH			_T_ECLIPSE("-Dee.library.path=")
+#define EE_HOME					_T_ECLIPSE("-Dee.home=")
+#define EE_FILENAME				_T_ECLIPSE("-Dee.filename=")
 
 /* Define the variables to receive the option values. */
 static int     needConsole   = 0;				/* True: user wants a console	*/
@@ -1321,6 +1323,19 @@ static int processEEProps(_TCHAR* eeFile)
         		break;
         }
     }
+    /* set ee.home and ee.filename variables */
+    argv = realloc(argv, (nEEargs + 2) * sizeof(_TCHAR*));
+    
+    c1 = malloc( (_tcslen(EE_HOME) + _tcslen(eeFile) + 1) * sizeof(_TCHAR));
+    _stprintf(c1, _T_ECLIPSE("%s%s"), EE_HOME, eeDir);
+    argv[nEEargs++] = c1;
+    
+    c1 = malloc( (_tcslen(EE_FILENAME) + _tcslen(eeFile) + 1) * sizeof(_TCHAR));
+    _stprintf(c1, _T_ECLIPSE("%s%s"), EE_FILENAME, eeFile);
+    argv[nEEargs++] = c1;
+    
+    argv[nEEargs] = NULL;
+    
     free(eeDir);
     return 0;
 }
