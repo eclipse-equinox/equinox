@@ -390,10 +390,6 @@ public class Main {
         setupVMProperties();
         processConfiguration();
         
-        //ensure minimum Java version
-        if (!checkVersion(System.getProperty("java.version"), System.getProperty(PROP_REQUIRED_JAVA_VERSION))) //$NON-NLS-1$
-            return;
-        
         // need to ensure that getInstallLocation is called at least once to initialize the value.
         // Do this AFTER processing the configuration to allow the configuration to set
         // the install location.  
@@ -404,6 +400,11 @@ public class Main {
         
         //Set up the JNI bridge.  We need to know the install location to find the shared library
         setupJNI(bootPath);
+        
+        //ensure minimum Java version, do this after JNI is set up so that we can write an error message 
+        //with exitdata if we fail.
+        if (!checkVersion(System.getProperty("java.version"), System.getProperty(PROP_REQUIRED_JAVA_VERSION))) //$NON-NLS-1$
+            return;
         
         setSecurityPolicy(bootPath);
         // splash handling is done here, because the default case needs to know
