@@ -23,14 +23,6 @@
 #define cleanupVM cleanupVMW
 #endif
 
-#ifdef UNICODE
-#define JNI_GetStringChars(env, s) 			 (*env)->GetStringChars(env, s, 0)
-#define JNI_ReleaseStringChars(env, s, data) (*env)->ReleaseStringChars(env, s, data)
-#else
-#define JNI_GetStringChars(env, s) 			 (*env)->GetStringUTFChars(env, s, 0)
-#define JNI_ReleaseStringChars(env, s, data) (*env)->ReleaseStringUTFChars(env, s, data)
-#endif
-
 typedef jint (JNICALL *JNI_createJavaVM)(JavaVM **pvm, JNIEnv **env, void *args);
 
 /* JNI Callback methods */

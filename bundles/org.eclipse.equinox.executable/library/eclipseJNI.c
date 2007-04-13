@@ -35,6 +35,8 @@ static jstring newJavaString(JNIEnv *env, _TCHAR * str);
 static void splash(JNIEnv *env, jstring s);
 static void registerNatives(JNIEnv *env);
 static int shouldShutdown(JNIEnv *env);
+static void JNI_ReleaseStringChars(JNIEnv *env, jstring s, const _TCHAR* data);
+static const _TCHAR* JNI_GetStringChars(JNIEnv *env, jstring str);
 
 void setExitData(JNIEnv *env, jstring id, jstring s);
 
@@ -164,6 +166,45 @@ void setExitData(JNIEnv *env, jstring id, jstring s){
 			(*env)->ExceptionClear(env);
 		}
 	}
+}
+
+/* Get a _TCHAR* from a jstring, string should be released later with JNI_ReleaseStringChars */
+static const _TCHAR * JNI_GetStringChars(JNIEnv *env, jstring str) {
+	const _TCHAR * result = NULL;
+#ifdef UNICODE
+	result = (*env)->GetStringChars(env, str, 0);
+#else
+	_TCHAR* buffer = NULL;
+	jclass stringClass = (*env)->FindClass(env, "java/lang/String");
+	if (stringClass != NULL) {
+		jmethodID getBytesMethod = (*env)->GetMethodID(env, stringClass, "getBytes", "()[B");
+		if (getBytesMethod != NULL) {
+			jbyteArray bytes = (*env)->CallObjectMethod(env, str, getBytesMethod);
+			if (!(*env)->ExceptionOccurred(env)) {
+				jint length = (*env)->GetArrayLength(env, bytes);
+				buffer = malloc( (length + 1) * sizeof(_TCHAR*));
+				(*env)->GetByteArrayRegion(env, bytes, 0, length, (jbyte*)buffer);
+				buffer[length] = 0;
+			}
+			(*env)->DeleteLocalRef(env, bytes);
+		}
+	}
+	if(buffer == NULL) {
+		(*env)->ExceptionDescribe(env);
+		(*env)->ExceptionClear(env);
+	}
+	result = buffer;
+#endif
+	return result;
+}
+
+/* Release the string that was obtained using JNI_GetStringChars */
+static void JNI_ReleaseStringChars(JNIEnv *env, jstring s, const _TCHAR* data) {
+#ifdef UNICODE
+	(*env)->ReleaseStringChars(env, s, data);
+#else
+	free((_TCHAR*)data);
+#endif
 }
 
 static jstring newJavaString(JNIEnv *env, _TCHAR * str)
