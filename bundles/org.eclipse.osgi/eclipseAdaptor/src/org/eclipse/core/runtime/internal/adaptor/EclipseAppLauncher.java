@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,7 +23,7 @@ import org.eclipse.osgi.service.runnable.*;
 import org.osgi.framework.*;
 
 public class EclipseAppLauncher implements ApplicationLauncher {
-	private ParameterizedRunnable runnable = null;
+	volatile private ParameterizedRunnable runnable = null;
 	private Object appContext = null;
 	private Semaphore runningLock = new Semaphore(1);
 	private Semaphore waitForAppLock = new Semaphore(0);
@@ -129,8 +129,9 @@ public class EclipseAppLauncher implements ApplicationLauncher {
 		// all future application launches.
 		if (runningLock.acquire(-1))
 			return; // no application is currently running.
-		if (runnable instanceof ApplicationRunnable) {
-			((ApplicationRunnable)runnable).stop();
+		ParameterizedRunnable currentRunnable = runnable;
+		if (currentRunnable instanceof ApplicationRunnable) {
+			((ApplicationRunnable)currentRunnable).stop();
 			runningLock.acquire(60000); // timeout after 1 minute.
 		}
 	}
