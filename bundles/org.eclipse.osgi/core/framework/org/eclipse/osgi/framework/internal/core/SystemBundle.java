@@ -18,8 +18,6 @@ import java.security.Permission;
 import java.security.ProtectionDomain;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.osgi.framework.*;
-import org.osgi.framework.AdminPermission;
-import org.osgi.framework.BundleException;
 
 /**
  * This class subclasses Bundle to provide a system Bundle
@@ -196,6 +194,9 @@ public class SystemBundle extends BundleHost {
 		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 			Debug.println("->Framework shutdown"); //$NON-NLS-1$
 		}
+		// fire the STOPPED event here.
+		// All bundles have been unloaded, but there may be a boot strap listener that is interested (bug 182742)
+		framework.publishBundleEvent(BundleEvent.STOPPED, this);
 	}
 
 	protected void suspend(boolean lock) {
