@@ -169,7 +169,13 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 	}
 
 	public void stop() {
-		destroy();
+		try {
+			destroy();
+		} catch (IllegalStateException e) {
+			// Do nothing; we don't care that the application was already stopped
+			// return with no error
+		}
+
 	}
 
 	public void applicationRunning() {
