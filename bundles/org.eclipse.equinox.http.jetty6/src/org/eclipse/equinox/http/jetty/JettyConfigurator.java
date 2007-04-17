@@ -19,8 +19,10 @@ import org.eclipse.equinox.http.jetty.internal.Activator;
  * Settings:
  * 		name="http.enabled" type="Boolean" (default: true)
  * 		name="http.port" type="Integer" (default: 0 -- first available port)
+ * 		name="http.host" type="String" (default: 0.0.0.0 -- all network adapters)
  * 		name="https.enabled" type="Boolean" (default: false)
  * 		name="https.port" type="Integer" (default: 0 -- first available port)
+ * 		name="https.host" type="String" (default: 0.0.0.0 -- all network adapters)
  * 		name="ssl.keystore" type="String"
  * 		name="ssl.password" type="String"
  * 		name="ssl.keypassword" type="String"
@@ -44,15 +46,15 @@ public class JettyConfigurator {
 		settings.put(Constants.SERVICE_PID, pid);
 		Activator.startServer(pid, settings);
 	}
-	
+
 	public static void stopServer(String id) throws Exception {
 		checkConfigurationPermission();
-		Activator.stopServer(PID_PREFIX + id);		
+		Activator.stopServer(PID_PREFIX + id);
 	}
-	
+
 	private static void checkConfigurationPermission() throws SecurityException {
 		SecurityManager sm = System.getSecurityManager();
-		if (sm != null) 
-			sm.checkPermission(configurationPermission );
+		if (sm != null)
+			sm.checkPermission(configurationPermission);
 	}
 }

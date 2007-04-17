@@ -30,7 +30,7 @@ public class Activator implements BundleActivator {
 	// The staticServerManager is use by the start and stopServer methods and must be accessed in a static synchronized block
 	// to ensure it is correctly handled in terms of the bundle life-cycle.
 	private static HttpServerManager staticServerManager;
-	
+
 	private HttpServerManager httpServerManager;
 	private ServiceRegistration registration;
 
@@ -44,10 +44,10 @@ public class Activator implements BundleActivator {
 			Dictionary defaultSettings = createDefaultSettings(context);
 			httpServerManager.updated(DEFAULT_PID, defaultSettings);
 		}
-		
+
 		Dictionary dictionary = new Hashtable();
 		dictionary.put(Constants.SERVICE_PID, MANAGED_SERVICE_FACTORY_PID);
-		
+
 		registration = context.registerService(ManagedServiceFactory.class.getName(), httpServerManager, dictionary);
 		setStaticServerManager(httpServerManager);
 	}
@@ -73,7 +73,6 @@ public class Activator implements BundleActivator {
 		Boolean httpEnabled = (httpEnabledProperty == null) ? Boolean.TRUE : new Boolean(httpEnabledProperty);
 		defaultSettings.put(HttpServerManager.HTTP_ENABLED, httpEnabled);
 
-		
 		// HTTP Port
 		String httpPortProperty = context.getProperty(PROPERTY_PREFIX + HttpServerManager.HTTP_PORT);
 		if (httpPortProperty == null)
@@ -88,6 +87,11 @@ public class Activator implements BundleActivator {
 			}
 		}
 		defaultSettings.put(HttpServerManager.HTTP_PORT, new Integer(httpPort));
+
+		// HTTP Host (default is 0.0.0.0)
+		String httpHost = context.getProperty(PROPERTY_PREFIX + HttpServerManager.HTTP_HOST);
+		if (httpHost != null)
+			defaultSettings.put(HttpServerManager.HTTP_HOST, httpHost);
 
 		// HTTPS Enabled (default is false)
 		Boolean httpsEnabled = new Boolean(context.getProperty(PROPERTY_PREFIX + HttpServerManager.HTTPS_ENABLED));
@@ -108,6 +112,11 @@ public class Activator implements BundleActivator {
 				}
 			}
 			defaultSettings.put(HttpServerManager.HTTPS_PORT, new Integer(httpsPort));
+
+			// HTTPS Host (default is 0.0.0.0)
+			String httpsHost = context.getProperty(PROPERTY_PREFIX + HttpServerManager.HTTPS_HOST);
+			if (httpsHost != null)
+				defaultSettings.put(HttpServerManager.HTTPS_HOST, httpsHost);
 
 			// SSL SETTINGS
 			String keystore = context.getProperty(PROPERTY_PREFIX + HttpServerManager.SSL_KEYSTORE);
@@ -157,29 +166,29 @@ public class Activator implements BundleActivator {
 				//(log this) ignore
 			}
 		}
-			
+
 		// Other Info
 		String otherInfo = context.getProperty(PROPERTY_PREFIX + HttpServerManager.OTHER_INFO);
 		if (otherInfo != null)
 			defaultSettings.put(HttpServerManager.OTHER_INFO, otherInfo);
-		
+
 		return defaultSettings;
 	}
-	
-	public synchronized static void startServer(String pid, Dictionary settings) throws Exception{
+
+	public synchronized static void startServer(String pid, Dictionary settings) throws Exception {
 		if (staticServerManager == null)
 			throw new IllegalStateException("Inactive"); //$NON-NLS-1$
-		
+
 		staticServerManager.updated(pid, settings);
 	}
-	
+
 	public synchronized static void stopServer(String pid) throws Exception {
 		if (staticServerManager != null)
 			staticServerManager.deleted(pid);
 	}
-	
+
 	private synchronized static void setStaticServerManager(HttpServerManager httpServerManager) {
 		staticServerManager = httpServerManager;
 	}
-	
+
 }

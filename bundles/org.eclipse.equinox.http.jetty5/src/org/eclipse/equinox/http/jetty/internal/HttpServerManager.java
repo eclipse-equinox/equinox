@@ -10,6 +10,7 @@ package org.eclipse.equinox.http.jetty.internal;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.UnknownHostException;
 import java.util.*;
 import javax.servlet.*;
 import org.eclipse.equinox.http.servlet.HttpServiceServlet;
@@ -28,7 +29,9 @@ public class HttpServerManager implements ManagedServiceFactory {
 	// Http Service properties - the autostarted service will look these up in the BundleContext by prefixing with "org.eclipse.equinox.http.jetty."
 	static final String HTTP_ENABLED = "http.enabled"; //$NON-NLS-1$
 	static final String HTTP_PORT = "http.port"; //$NON-NLS-1$
+	static final String HTTP_HOST = "http.host"; //$NON-NLS-1$
 	static final String HTTPS_ENABLED = "https.enabled"; //$NON-NLS-1$
+	static final String HTTPS_HOST = "https.host"; //$NON-NLS-1$
 	static final String HTTPS_PORT = "https.port"; //$NON-NLS-1$
 	static final String SSL_KEYSTORE = "ssl.keystore"; //$NON-NLS-1$
 	static final String SSL_PASSWORD = "ssl.password"; //$NON-NLS-1$
@@ -87,16 +90,16 @@ public class HttpServerManager implements ManagedServiceFactory {
 		holder.setInitParameter(Constants.SERVICE_DESCRIPTION, "Equinox Jetty-based Http Service"); //$NON-NLS-1$
 		if (httpListener != null)
 			holder.setInitParameter(HTTP_PORT, new Integer(httpListener.getPort()).toString());
-		if (httpsListener != null)	
+		if (httpsListener != null)
 			holder.setInitParameter(HTTPS_PORT, new Integer(httpsListener.getPort()).toString());
-		
+
 		String otherInfo = (String) dictionary.get(OTHER_INFO);
 		if (otherInfo != null)
 			holder.setInitParameter(OTHER_INFO, otherInfo);
-		
+
 		HttpContext httpContext = createHttpContext(dictionary);
 		httpContext.addHandler(servlets);
-		
+
 		Integer sessionInactiveInterval = (Integer) dictionary.get(CONTEXT_SESSIONINACTIVEINTERVAL);
 		if (sessionInactiveInterval != null)
 			servlets.setSessionInactiveInterval(sessionInactiveInterval.intValue());
@@ -122,13 +125,25 @@ public class HttpServerManager implements ManagedServiceFactory {
 		Boolean httpEnabled = (Boolean) dictionary.get(HTTP_ENABLED);
 		if (httpEnabled != null && !httpEnabled.booleanValue())
 			return null;
-		
+
 		Integer httpPort = (Integer) dictionary.get(HTTP_PORT);
 		if (httpPort == null)
 			return null;
 
 		SocketListener listener = new SocketListener();
 		listener.setPort(httpPort.intValue());
+
+		String httpHost = (String) dictionary.get(HTTP_HOST);
+		if (httpHost != null) {
+			try {
+				listener.setHost(httpHost);
+			} catch (UnknownHostException e) {
+				// if the host name is invalid we do not want to create this listener
+				e.printStackTrace();
+				return null;
+			}
+		}
+
 		if (listener.getPort() == 0) {
 			try {
 				listener.open();
@@ -136,7 +151,7 @@ public class HttpServerManager implements ManagedServiceFactory {
 				// this would be unexpected since we're opening the next available port 
 				e.printStackTrace();
 			}
-		}		
+		}
 		return listener;
 	}
 
@@ -151,6 +166,17 @@ public class HttpServerManager implements ManagedServiceFactory {
 
 		SslListener listener = new SslListener();
 		listener.setPort(httpsPort.intValue());
+
+		String httpsHost = (String) dictionary.get(HTTPS_HOST);
+		if (httpsHost != null) {
+			try {
+				listener.setHost(httpsHost);
+			} catch (UnknownHostException e) {
+				// if the host name is invalid we do not want to use this listener
+				e.printStackTrace();
+				return null;
+			}
+		}
 
 		String keyStore = (String) dictionary.get(SSL_KEYSTORE);
 		if (keyStore != null)
@@ -191,7 +217,7 @@ public class HttpServerManager implements ManagedServiceFactory {
 				// this would be unexpected since we're opening the next available port 
 				e.printStackTrace();
 			}
-		}	
+		}
 		return listener;
 	}
 
