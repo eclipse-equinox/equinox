@@ -166,6 +166,7 @@ public class Main {
     private static final String PROP_LOGFILE = "osgi.logfile"; //$NON-NLS-1$
     private static final String PROP_REQUIRED_JAVA_VERSION = "osgi.requiredJavaVersion"; //$NON-NLS-1$
     private static final String PROP_PARENT_CLASSLOADER = "osgi.parentClassloader"; //$NON-NLS-1$
+    private static final String PROP_FRAMEWORK_PARENT_CLASSLOADER = "osgi.frameworkParentClassloader"; //$NON-NLS-1$
 	private static final String PROP_NL = "osgi.nl";  //$NON-NLS-1$
     static final String PROP_NOSHUTDOWN = "osgi.noShutdown"; //$NON-NLS-1$
     private static final String PROP_DEBUG = "osgi.debug"; //$NON-NLS-1$	
@@ -188,6 +189,7 @@ public class Main {
     private static final String PARENT_CLASSLOADER_APP = "app"; //$NON-NLS-1$
     private static final String PARENT_CLASSLOADER_EXT = "ext"; //$NON-NLS-1$
     private static final String PARENT_CLASSLOADER_BOOT = "boot"; //$NON-NLS-1$
+    private static final String PARENT_CLASSLOADER_CURRENT = "current"; //$NON-NLS-1$
 
     // log file handling
     protected static final String SESSION = "!SESSION"; //$NON-NLS-1$
@@ -459,7 +461,7 @@ public class Main {
     }
 
     private void invokeFramework(String[] passThruArgs, URL[] bootPath) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, Error, Exception, InvocationTargetException {
-        String type = System.getProperty(PROP_PARENT_CLASSLOADER, PARENT_CLASSLOADER_BOOT);
+        String type = System.getProperty(PROP_FRAMEWORK_PARENT_CLASSLOADER, System.getProperty(PROP_PARENT_CLASSLOADER, PARENT_CLASSLOADER_BOOT));
         ClassLoader parent = null;
         if (PARENT_CLASSLOADER_APP.equalsIgnoreCase(type))
             parent = ClassLoader.getSystemClassLoader();
@@ -467,7 +469,8 @@ public class Main {
             ClassLoader appCL = ClassLoader.getSystemClassLoader();
             if (appCL != null)
                 parent = appCL.getParent();
-        }
+        } else if (PARENT_CLASSLOADER_CURRENT.equalsIgnoreCase(type))
+              	parent = this.getClass().getClassLoader();
         URLClassLoader loader = new StartupClassLoader(bootPath, parent);
         Class clazz = loader.loadClass(STARTER);
         Method method = clazz.getDeclaredMethod("run", new Class[] {String[].class, Runnable.class}); //$NON-NLS-1$
