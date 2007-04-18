@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 1999, 2005 IBM Corporation.
+ * Copyright (c) 1999, 2007 IBM Corporation.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,11 +24,13 @@ import javax.servlet.ServletOutputStream;
 
 //BUGBUG - override print methods for better performance!!!!
 class ServletOutputStreamImpl extends ServletOutputStream {
+	private static final int mtuSize = 1460;
+
 	/** Actual output stream */
-	private OutputStream realOut;
+	final private BufferedOutputStream realOut;
 
 	/** response object */
-	private HttpServletResponseImpl response;
+	final private HttpServletResponseImpl response;
 
 	/** false if the ServletOutputStream has been closed */
 	private boolean open;
@@ -49,7 +51,11 @@ class ServletOutputStreamImpl extends ServletOutputStream {
 	private boolean closing;
 
 	ServletOutputStreamImpl(OutputStream realOut, HttpServletResponseImpl response) {
-		this.realOut = realOut;
+		if (realOut instanceof BufferedOutputStream)
+			this.realOut = (BufferedOutputStream) realOut;
+		else
+			// use a common mtuSize as the buffer size (bug 179282)
+			this.realOut = new BufferedOutputStream(realOut, mtuSize);
 		this.response = response;
 
 		// BUGBUG Make the default buffer size configurable.
