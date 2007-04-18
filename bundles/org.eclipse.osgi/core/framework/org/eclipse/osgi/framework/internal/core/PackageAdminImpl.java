@@ -217,6 +217,10 @@ public class PackageAdminImpl implements PackageAdmin {
 			State systemState = framework.adaptor.getState();
 			BundleDelta[] delta = systemState.resolve(descriptions).getChanges();
 			refreshedBundles = processDelta(delta, refreshPackages);
+			// if we end up refreshing the system bundle or one of its fragments the framework will be shutdown and 
+			// should be re-started. This call should return without doing further work.
+			if (!framework.isActive())
+				return;
 			if (refreshPackages) {
 				AbstractBundle[] allBundles = framework.getAllBundles();
 				for (int i = 0; i < allBundles.length; i++)
@@ -240,9 +244,11 @@ public class PackageAdminImpl implements PackageAdmin {
 		} finally {
 			if (Profile.PROFILE && Profile.STARTUP)
 				Profile.logExit("resolve bundles"); //$NON-NLS-1$
-			framework.publishBundleEvent(Framework.BATCHEVENT_END, framework.systemBundle);
-			if (refreshPackages)
-				framework.publishFrameworkEvent(FrameworkEvent.PACKAGES_REFRESHED, framework.systemBundle, null);
+			if (framework.isActive()) {
+				framework.publishBundleEvent(Framework.BATCHEVENT_END, framework.systemBundle);
+				if (refreshPackages)
+					framework.publishFrameworkEvent(FrameworkEvent.PACKAGES_REFRESHED, framework.systemBundle, null);
+			}
 		}
 	}
 
@@ -383,7 +389,8 @@ public class PackageAdminImpl implements PackageAdmin {
 					// must publish PACKAGE_REFRESHED event here because we are done.
 					if (refreshPackages)
 						framework.publishFrameworkEvent(FrameworkEvent.PACKAGES_REFRESHED, framework.systemBundle, null);
-					restartFramework();
+					framework.shutdown();
+					return null;
 				}
 				// now suspend each bundle and grab its state change lock.
 				if (refreshPackages)
@@ -463,11 +470,6 @@ public class PackageAdminImpl implements PackageAdmin {
 				framework.publishBundleEvent(BundleEvent.RESOLVED, resolved[i]);
 
 		return refresh;
-	}
-
-	private void restartFramework() {
-		framework.shutdown();
-		System.exit(23);
 	}
 
 	public RequiredBundle[] getRequiredBundles(String symbolicName) {

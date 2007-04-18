@@ -169,7 +169,7 @@ public class EclipseStarter {
 		try {
 			startup(args, endSplashHandler);
 			startupFailed = false;
-			if (Boolean.valueOf(FrameworkProperties.getProperty(PROP_IGNOREAPP)).booleanValue())
+			if (Boolean.valueOf(FrameworkProperties.getProperty(PROP_IGNOREAPP)).booleanValue() || isForcedRestart())
 				return null;
 			return run(null);
 		} catch (Throwable e) {
@@ -187,6 +187,10 @@ public class EclipseStarter {
 				e.printStackTrace();
 		} finally {
 			try {
+				// The application typically sets the exit code however the framework can request that
+				// it be re-started. We need to check for this and potentially override the exit code.
+				if (isForcedRestart())
+					FrameworkProperties.setProperty(PROP_EXITCODE, "23"); //$NON-NLS-1$
 				if (!Boolean.valueOf(FrameworkProperties.getProperty(PROP_NOSHUTDOWN)).booleanValue())
 					shutdown();
 			} catch (Throwable e) {
@@ -205,11 +209,6 @@ public class EclipseStarter {
 				if (report != null && report.length() > 0)
 					System.out.println(report);
 			}
-		}
-		// first check to see if the framework is forcing a restart
-		if (Boolean.valueOf(FrameworkProperties.getProperty(PROP_FORCED_RESTART)).booleanValue()) {
-			FrameworkProperties.setProperty(PROP_EXITCODE, "23"); //$NON-NLS-1$
-			return null;
 		}
 		// we only get here if an error happened
 		FrameworkProperties.setProperty(PROP_EXITCODE, "13"); //$NON-NLS-1$
@@ -293,12 +292,14 @@ public class EclipseStarter {
 			if (Profile.PROFILE && Profile.STARTUP)
 				Profile.logTime("EclipseStarter.startup()", "console started"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
-		if ("true".equals(FrameworkProperties.getProperty(PROP_REFRESH_BUNDLES))) //$NON-NLS-1$
-			refreshPackages(getCurrentBundles(false));
+		if ("true".equals(FrameworkProperties.getProperty(PROP_REFRESH_BUNDLES)) && refreshPackages(getCurrentBundles(false))) //$NON-NLS-1$
+			return context; // cannot continue; refreshPackages shutdown the framework
 		if (Profile.PROFILE && Profile.STARTUP)
 			Profile.logTime("EclipseStarter.startup()", "loading basic bundles"); //$NON-NLS-1$ //$NON-NLS-2$
 		long stateStamp = adaptor.getState().getTimeStamp();
 		Bundle[] startBundles = loadBasicBundles();
+		if (startBundles == null)
+			return context; // cannot continue; loadBasicBundles caused refreshPackages to shutdown the framework
 		// set the framework start level to the ultimate value.  This will actually start things
 		// running if they are persistently active.
 		setStartLevel(getStartLevel());
@@ -588,6 +589,7 @@ public class EclipseStarter {
 	/*
 	 * Ensure all basic bundles are installed, resolved and scheduled to start. Returns an array containing
 	 * all basic bundles that are marked to start. 
+	 * Returns null if the framework has been shutdown as a result of refreshPackages
 	 */
 	private static Bundle[] loadBasicBundles() throws IOException {
 		long startTime = System.currentTimeMillis();
@@ -615,8 +617,8 @@ public class EclipseStarter {
 		installBundles(initialBundles, curInitBundles, startBundles, lazyActivationBundles, toRefresh);
 
 		// If we installed/uninstalled something, force a refresh of all installed/uninstalled bundles
-		if (!toRefresh.isEmpty())
-			refreshPackages((Bundle[]) toRefresh.toArray(new Bundle[toRefresh.size()]));
+		if (!toRefresh.isEmpty() && refreshPackages((Bundle[]) toRefresh.toArray(new Bundle[toRefresh.size()])))
+			return null; // cannot continue; refreshPackages shutdown the framework
 
 		// schedule all basic bundles to be started
 		Bundle[] startInitBundles = (Bundle[]) startBundles.toArray(new Bundle[startBundles.size()]);
@@ -669,13 +671,14 @@ public class EclipseStarter {
 		return (InitialBundle[]) result.toArray(new InitialBundle[result.size()]);
 	}
 
-	private static void refreshPackages(Bundle[] bundles) {
+	// returns true if the refreshPackages operation caused the framework to shutdown
+	private static boolean refreshPackages(Bundle[] bundles) {
 		ServiceReference packageAdminRef = context.getServiceReference(PackageAdmin.class.getName());
 		PackageAdmin packageAdmin = null;
 		if (packageAdminRef != null) {
 			packageAdmin = (PackageAdmin) context.getService(packageAdminRef);
 			if (packageAdmin == null)
-				return;
+				return false;
 		}
 		// TODO this is such a hack it is silly.  There are still cases for race conditions etc
 		// but this should allow for some progress...
@@ -690,7 +693,7 @@ public class EclipseStarter {
 		packageAdmin.refreshPackages(bundles);
 		context.ungetService(packageAdminRef);
 		updateSplash(semaphore, listener);
-		if (Boolean.valueOf(FrameworkProperties.getProperty(PROP_FORCED_RESTART)).booleanValue()) {
+		if (isForcedRestart()) {
 			// wait for the system bundle to stop
 			Bundle systemBundle = context.getBundle(0);
 			int i = 0;
@@ -702,7 +705,9 @@ public class EclipseStarter {
 					break;
 				}
 			}
+			return true;
 		}
+		return false;
 	}
 
 	/**
@@ -1523,5 +1528,9 @@ public class EclipseStarter {
 		if (context == null || !running)
 			return null;
 		return context.getBundle().getBundleContext();
+	}
+
+	private static  boolean isForcedRestart() {
+		return Boolean.valueOf(FrameworkProperties.getProperty(PROP_FORCED_RESTART)).booleanValue();
 	}
 }
