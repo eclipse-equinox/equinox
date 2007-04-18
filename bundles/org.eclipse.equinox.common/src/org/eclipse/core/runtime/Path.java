@@ -342,7 +342,7 @@ public class Path implements IPath, Cloneable {
 					//stack pop
 				}
 				//collapse current references
-			} else if (!segment.equals(".") || (i == 0 && !isAbsolute())) //$NON-NLS-1$
+			} else if (!segment.equals(".") || segmentCount == 1) //$NON-NLS-1$
 				stack[stackPointer++] = segment; //stack push
 		}
 		//if the number of segments hasn't changed, then no modification needed
