@@ -25,7 +25,7 @@ import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
 /**
- * The launcher ot start eclipse using webstart.
+ * The launcher to start eclipse using webstart.
  * To use this launcher, the client must accept to give all security permissions. 
  */
 //The bundles are discovered by finding all the jars on the classpath. Then they are added with their full path to the osgi.bundles list.
@@ -33,6 +33,7 @@ public class WebStartMain extends Main {
 	private static final String PROP_WEBSTART_AUTOMATIC_INSTALLATION = "eclipse.webstart.automaticInstallation"; //$NON-NLS-1$
 	private static final String DEFAULT_OSGI_BUNDLES = "org.eclipse.equinox.common@2:start, org.eclipse.core.runtime@start"; //$NON-NLS-1$
 	private static final String PROP_OSGI_BUNDLES = "osgi.bundles"; //$NON-NLS-1$
+	private static final String PROP_CHECK_CONFIG = "osgi.checkConfiguration"; //$NON-NLS-1$
 	
 
 	private Map allBundles = null; 	// Map of all the bundles found on the classpath. Id -> ArrayList of BundleInfo
@@ -73,6 +74,9 @@ public class WebStartMain extends Main {
 	}
 
 	protected void beforeFwkInvocation() {
+		// set the check config option so we pick up modified bundle jars (bug 152825)
+		if (System.getProperty(PROP_CHECK_CONFIG) == null)
+			System.getProperties().put(PROP_CHECK_CONFIG, "true"); //$NON-NLS-1$
 		buildOSGiBundleList();
 		cleanup();
 	}
