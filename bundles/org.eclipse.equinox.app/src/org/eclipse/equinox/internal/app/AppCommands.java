@@ -22,9 +22,6 @@ public class AppCommands implements CommandProvider {
 	private final static String LAUNCHABLE_APP_FILTER = "(&(application.locked=false)(application.launchable=true)(application.visible=true))"; //$NON-NLS-1$
 	private final static String ACTIVE_APP_FILTER = "(!(application.state=STOPPING))"; //$NON-NLS-1$
 	private final static String LOCKED_APP_FILTER = "(application.locked=true)"; //$NON-NLS-1$
-	private final static int PERFECT_MATCH = 0x01;
-	private final static int AMBIGUOUS_MATCH = 0x02;
-
 	
 	private static AppCommands instance;
 	private BundleContext context;
