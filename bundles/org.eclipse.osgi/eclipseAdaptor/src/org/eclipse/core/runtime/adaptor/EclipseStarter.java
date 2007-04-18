@@ -126,7 +126,8 @@ public class EclipseStarter {
 	// Console information
 	protected static final String DEFAULT_CONSOLE_CLASS = "org.eclipse.osgi.framework.internal.core.FrameworkConsole"; //$NON-NLS-1$
 	private static final String CONSOLE_NAME = "OSGi Console"; //$NON-NLS-1$
-
+	
+	private static Runnable console;
 	private static FrameworkLog log;
 	// directory of serch candidates keyed by directory abs path -> directory listing (bug 122024)
 	private static HashMap searchCandidates = new HashMap(4);
@@ -286,9 +287,9 @@ public class EclipseStarter {
 		osgi.launch();
 		if (Profile.PROFILE && Profile.STARTUP)
 			Profile.logTime("EclipseStarter.startup()", "osgi launched"); //$NON-NLS-1$ //$NON-NLS-2$
-		String console = FrameworkProperties.getProperty(PROP_CONSOLE);
-		if (console != null) {
-			startConsole(osgi, new String[0], console);
+		String consolePort = FrameworkProperties.getProperty(PROP_CONSOLE);
+		if (consolePort != null) {
+			startConsole(osgi, new String[0], consolePort);
 			if (Profile.PROFILE && Profile.STARTUP)
 				Profile.logTime("EclipseStarter.startup()", "console started"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
@@ -392,6 +393,7 @@ public class EclipseStarter {
 		appLauncher = null;
 		splashStreamRegistration = null;
 		defaultMonitorRegistration = null;
+		stopConsole();
 		osgi.close();
 		osgi = null;
 		context = null;
@@ -732,8 +734,8 @@ public class EclipseStarter {
 				parameters = new Object[] {equinox, new Integer(consolePort), consoleArgs};
 			}
 			Constructor constructor = consoleClass.getConstructor(parameterTypes);
-			Object console = constructor.newInstance(parameters);
-			Thread t = new Thread(((Runnable) console), CONSOLE_NAME);
+			console = (Runnable) constructor.newInstance(parameters);
+			Thread t = new Thread(console, CONSOLE_NAME);
 			t.start();
 		} catch (NumberFormatException nfe) {
 			// TODO log or something other than write on System.err
@@ -742,6 +744,21 @@ public class EclipseStarter {
 			System.out.println(NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_FAILED_FIND, CONSOLE_NAME));
 		}
 
+	}
+
+ 	/**
+	 *  Stops the OSGi Command console
+	 *
+	 */
+	private static void stopConsole() {
+		if (console == null)
+			return;
+		try {
+			Method shutdownMethod = console.getClass().getMethod("shutdown", null); //$NON-NLS-1$
+			shutdownMethod.invoke(console, null);
+		} catch (Exception ex) {
+			System.err.println(ex.getMessage());
+		}
 	}
 
 	/**

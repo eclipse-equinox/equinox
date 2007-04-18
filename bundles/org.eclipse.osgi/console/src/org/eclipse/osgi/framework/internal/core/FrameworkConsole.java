@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2006 IBM Corporation and others.
+ * Copyright (c) 2003, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,32 +27,33 @@ import org.osgi.util.tracker.ServiceTracker;
  */
 public class FrameworkConsole implements Runnable {
 	/** The stream to receive commands on  */
-	protected Reader in;
+	protected BufferedReader in;
 	/** The stream to write command results to */
 	protected PrintWriter out;
 	/** The current bundle context */
-	protected org.osgi.framework.BundleContext context;
+	protected final org.osgi.framework.BundleContext context;
 	/** The current osgi instance */
-	protected OSGi osgi;
+	protected final OSGi osgi;
 	/** The command line arguments passed at launch time*/
-	protected String[] args;
+	protected final String[] args;
 	/** The OSGi Command Provider */
-	protected CommandProvider osgicp;
+	protected final CommandProvider osgicp;
 	/** A tracker containing the service object of all registered command providers */
-	protected ServiceTracker cptracker;
+	protected final ServiceTracker cptracker;
 
 	/** Default code page which must be supported by all JVMs */
-	static String defaultEncoding = "iso8859-1"; //$NON-NLS-1$
+	static final String defaultEncoding = "iso8859-1"; //$NON-NLS-1$
 	/** The current setting for code page */
-	static String encoding = FrameworkProperties.getProperty("osgi.console.encoding", FrameworkProperties.getProperty("file.encoding", defaultEncoding)); //$NON-NLS-1$ //$NON-NLS-2$
+	static final String encoding = FrameworkProperties.getProperty("osgi.console.encoding", FrameworkProperties.getProperty("file.encoding", defaultEncoding)); //$NON-NLS-1$ //$NON-NLS-2$
 
 	/** set to true if accepting commands from port */
-	protected boolean useSocketStream = false;
+	protected final boolean useSocketStream;
 	protected boolean disconnect = false;
-	protected int port = 0;
-	protected ServerSocket ss = null;
+	protected final int port;
 	protected ConsoleSocketGetter scsg = null;
 	protected Socket s;
+	boolean blockOnready = FrameworkProperties.getProperty("osgi.dev") != null || FrameworkProperties.getProperty("osgi.console.blockOnReady") != null; //$NON-NLS-1$ //$NON-NLS-2$
+	volatile boolean shutdown = false;
 
 	/**
 	 Constructor for FrameworkConsole.
@@ -62,10 +63,7 @@ public class FrameworkConsole implements Runnable {
 	 @param args - any arguments passed on the command line when Launcher is started.
 	 */
 	public FrameworkConsole(OSGi osgi, String[] args) {
-		this.args = args;
-		this.osgi = osgi;
-
-		initialize();
+		this(osgi, args, 0, false);
 	}
 
 	/**
@@ -76,20 +74,42 @@ public class FrameworkConsole implements Runnable {
 	 @param args - any arguments passed on the command line when Launcher is started.
 	 */
 	public FrameworkConsole(OSGi osgi, int port, String[] args) {
-		this.useSocketStream = true;
-		this.port = port;
+		this(osgi, args, port, true);
+	}
+
+	private FrameworkConsole(OSGi osgi, String[] args, int port, boolean useSocketStream) {
 		this.args = args;
 		this.osgi = osgi;
+		this.useSocketStream = useSocketStream;
+		this.port = port;
+		this.context = osgi.getBundleContext();
 
-		initialize();
+		// set up a service tracker to track CommandProvider registrations
+		this.cptracker = new ServiceTracker(context, CommandProvider.class.getName(), null);
+		this.cptracker.open();
+
+		// register the OSGi command provider
+		this.osgicp = new FrameworkCommandProvider(osgi).intialize();
 	}
 
 	/**
 	 *  Open streams for system.in and system.out
 	 */
 	private void getDefaultStreams() {
-		in = createBufferedReader(System.in);
-		out = createPrintWriter(System.out);
+		InputStream is = new FilterInputStream(System.in) {
+			public void close() throws IOException {
+				// We don't want to close System.in
+			}
+		};
+		in = createBufferedReader(is);
+
+		OutputStream os = new FilterOutputStream(System.out) {
+			public void close() throws IOException {
+				// We don't want to close System.out
+			}
+		};
+		out = createPrintWriter(os);
+		disconnect = false;
 	}
 
 	/**
@@ -97,18 +117,24 @@ public class FrameworkConsole implements Runnable {
 	 *
 	 * @param port number to listen on
 	 */
-	private void getSocketStream(int port) {
+	private void getSocketStream() {
 		try {
 			System.out.println(NLS.bind(ConsoleMsg.CONSOLE_LISTENING_ON_PORT, String.valueOf(port)));
-			if (ss == null) {
-				ss = new ServerSocket(port);
-				scsg = new ConsoleSocketGetter(ss);
+			synchronized (this) {
+				if (scsg == null)
+					scsg = new ConsoleSocketGetter(new ServerSocket(port));
+				scsg.setAcceptConnections(true);
 			}
-			scsg.setAcceptConnections(true);
-			s = scsg.getSocket();
-
-			in = createBufferedReader(s.getInputStream());
-			out = createPrintWriter(s.getOutputStream());
+			// get socket outside of sync block
+			Socket temp = scsg.getSocket();
+			if (temp == null)
+				return;
+			synchronized (this) {
+				s = temp;
+				in = createBufferedReader(s.getInputStream());
+				out = createPrintWriter(s.getOutputStream());
+				disconnect = false;
+			}
 		} catch (UnknownHostException uhe) {
 			uhe.printStackTrace();
 		} catch (Exception e) {
@@ -139,7 +165,7 @@ public class FrameworkConsole implements Runnable {
 	 * @param _out An OutputStream to wrap with a PrintWriter
 	 * @return a PrintWriter
 	 */
-	private PrintWriter createPrintWriter(OutputStream _out) {
+	PrintWriter createPrintWriter(OutputStream _out) {
 		PrintWriter writer;
 		try {
 			writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(_out, encoding)), true);
@@ -163,7 +189,7 @@ public class FrameworkConsole implements Runnable {
 	 * @return The currently active BufferedReader
 	 */
 	public BufferedReader getReader() {
-		return (BufferedReader) in;
+		return in;
 	}
 
 	/**
@@ -175,46 +201,24 @@ public class FrameworkConsole implements Runnable {
 	}
 
 	/**
-	 *  Initialize common things:
-	 *  - system bundle context
-	 *  - ServiceTracker to track CommandProvider registrations
-	 *  - create OSGi CommandProvider object
-	 */
-	private void initialize() {
-		getDefaultStreams();
-
-		context = osgi.getBundleContext();
-
-		// set up a service tracker to track CommandProvider registrations
-		cptracker = new ServiceTracker(context, CommandProvider.class.getName(), null);
-		cptracker.open();
-
-		// register the OSGi command provider
-		osgicp = new FrameworkCommandProvider(osgi).intialize();
-
-	}
-
-	/**
 	 * Begin doing the active part of the class' code. Starts up the console.
 	 */
 	public void run() {
 		try {
 			console(args);
-			if (useSocketStream) {
-				while (true) {
-					getSocketStream(port);
-					try {
-						console();
-					} catch (IOException ioe) {
-						// ignore; this is likely caused because the client got disconnected
-					}
-				}
-			} else {
-				getDefaultStreams();
-				console();
-			}
 		} catch (IOException e) {
 			e.printStackTrace(out);
+		}
+		while (!shutdown) {
+			if (useSocketStream)
+				getSocketStream();
+			else
+				getDefaultStreams();
+			try {
+				console();
+			} catch (IOException e) {
+				e.printStackTrace(out);
+			}
 		}
 	}
 
@@ -246,25 +250,20 @@ public class FrameworkConsole implements Runnable {
 	 * @throws IOException
 	 */
 	protected void console() throws IOException {
-		Object lock = new Object();
-		disconnect = false;
 		// wait to receive commands from console and handle them
-		BufferedReader br = (BufferedReader) in;
+		BufferedReader br = in;
 		//cache the console prompt String
 		String consolePrompt = "\r\n" + ConsoleMsg.CONSOLE_PROMPT; //$NON-NLS-1$
-		boolean block = FrameworkProperties.getProperty("osgi.dev") != null || FrameworkProperties.getProperty("osgi.console.blockOnReady") != null; //$NON-NLS-1$ //$NON-NLS-2$
-		while (!disconnect) {
+		while (!disconnected()) {
 			out.print(consolePrompt);
 			out.flush();
 
 			String cmdline = null;
-			if (block && !useSocketStream) {
+			if (blockOnready && !useSocketStream) {
 				// bug 40066: avoid waiting on input stream - apparently generates contention with other native calls 
 				try {
-					synchronized (lock) {
-						while (!br.ready())
-							lock.wait(300);
-					}
+					while (!br.ready())
+						Thread.sleep(300);
 					cmdline = br.readLine();
 				} catch (InterruptedException e) {
 					// do nothing; probably got disconnected
@@ -272,11 +271,8 @@ public class FrameworkConsole implements Runnable {
 			} else
 				cmdline = br.readLine();
 
-			if (cmdline == null) {
-				break;
-			}
-
-			docommand(cmdline);
+			if (cmdline != null && !shutdown)
+				docommand(cmdline);
 		}
 	}
 
@@ -300,12 +296,31 @@ public class FrameworkConsole implements Runnable {
 	 * Disconnects from console if useSocketStream is set to true.  This
 	 * will cause the console to close from a telnet session.
 	 */
+	public synchronized void disconnect() {
+		if (!disconnect) {
+			disconnect = true;
+			if (out != null)
+				out.close();
+			if (s != null)
+				try {
+					s.close();
+				} catch (IOException ioe) {
+					// do nothing
+				}
+			if (in != null)
+				try {
+					in.close();
+				} catch (IOException ioe) {
+					// do nothing
+				}
+		}
+	}
 
-	void disconnect() throws IOException {
-		disconnect = true;
-		out.close();
-		in.close();
-		s.close();
+	/**
+	 * @return are we still connected?
+	 */
+	private synchronized boolean disconnected() {
+		return disconnect;
 	}
 
 	/**
@@ -317,7 +332,7 @@ public class FrameworkConsole implements Runnable {
 		String input;
 		try {
 			/** The buffered input reader on standard in. */
-			input = ((BufferedReader) in).readLine();
+			input = in.readLine();
 			System.out.println("<" + input + ">"); //$NON-NLS-1$//$NON-NLS-2$
 		} catch (IOException e) {
 			input = ""; //$NON-NLS-1$
@@ -346,6 +361,23 @@ public class FrameworkConsole implements Runnable {
 	}
 
 	/**
+	 * Stops the console so the thread can be GC'ed
+	 * @throws IOException 
+	 *
+	 */
+	public synchronized void shutdown() {
+		shutdown = true;
+		cptracker.close();
+		disconnect();
+		if (scsg != null)
+			try {
+				scsg.shutdown();
+			} catch (IOException e) {
+				System.err.println(e.getMessage());
+			}
+	}
+
+	/**
 	 * ConsoleSocketGetter - provides a Thread that listens on the port
 	 * for FrameworkConsole.  If acceptConnections is set to true then
 	 * the thread will notify the getSocket method to return the socket.
@@ -355,13 +387,13 @@ public class FrameworkConsole implements Runnable {
 	class ConsoleSocketGetter implements Runnable {
 
 		/** The ServerSocket to accept connections from */
-		ServerSocket server;
+		private final ServerSocket server;
 		/** The current socket to be returned by getSocket */
-		Socket socket;
+		private Socket socket;
 		/** if set to true then allow the socket to be returned by getSocket */
-		boolean acceptConnections = true;
+		private boolean acceptConnections = true;
 		/** Lock object to synchronize returning of the socket */
-		Object lock = new Object();
+		private final Object lock = new Object();
 
 		/**
 		 * Constructor - sets the server and starts the thread to
@@ -372,14 +404,14 @@ public class FrameworkConsole implements Runnable {
 		ConsoleSocketGetter(ServerSocket server) {
 			this.server = server;
 			Thread t = new Thread(this, "ConsoleSocketGetter"); //$NON-NLS-1$
+			t.setDaemon(true);
 			t.start();
 		}
 
 		public void run() {
-			while (true) {
-
+			while (!shutdown) {
 				try {
-					socket = ss.accept();
+					socket = server.accept();
 					if (!acceptConnections) {
 						PrintWriter o = createPrintWriter(socket.getOutputStream());
 						o.println(ConsoleMsg.CONSOLE_TELNET_CONNECTION_REFUSED);
@@ -393,7 +425,8 @@ public class FrameworkConsole implements Runnable {
 						}
 					}
 				} catch (Exception e) {
-					e.printStackTrace();
+					if (!shutdown)
+						e.printStackTrace();
 				}
 
 			}
@@ -420,6 +453,10 @@ public class FrameworkConsole implements Runnable {
 		 */
 		public void setAcceptConnections(boolean acceptConnections) {
 			this.acceptConnections = acceptConnections;
+		}
+
+		public void shutdown() throws IOException {
+			server.close();
 		}
 	}
 
