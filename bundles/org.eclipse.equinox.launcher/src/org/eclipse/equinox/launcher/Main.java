@@ -373,7 +373,8 @@ public class Main {
 				libPath = searchFor("eclipse", fragment); //$NON-NLS-1$
 		}
 		library = libPath;
-		bridge = new JNIBridge(library);
+		if(library != null)
+			bridge = new JNIBridge(library);
 	}
     
     /**
@@ -1711,7 +1712,7 @@ public class Main {
     private void handleSplash(URL[] defaultPath) {
         // run without splash if we are initializing or nosplash 
         // was specified (splashdown = true)
-        if (initialize || splashDown) {
+        if (initialize || splashDown || bridge == null) {
             showSplash = false;
             endSplash = null;
             return;
