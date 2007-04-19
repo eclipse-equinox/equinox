@@ -39,11 +39,13 @@ public class FrameworkLauncher {
 	protected static final String FILE_SCHEME = "file:"; //$NON-NLS-1$
 	protected static final String FRAMEWORK_BUNDLE_NAME = "org.eclipse.osgi"; //$NON-NLS-1$
 	protected static final String STARTER = "org.eclipse.core.runtime.adaptor.EclipseStarter"; //$NON-NLS-1$
+	protected static final String FRAMEWORKPROPERTIES = "org.eclipse.osgi.framework.internal.core.FrameworkProperties"; //$NON-NLS-1$
 	protected static final String NULL_IDENTIFIER = "@null"; //$NON-NLS-1$
 	protected static final String OSGI_FRAMEWORK = "osgi.framework"; //$NON-NLS-1$
 	protected static final String OSGI_INSTANCE_AREA = "osgi.instance.area"; //$NON-NLS-1$
 	protected static final String OSGI_CONFIGURATION_AREA = "osgi.configuration.area"; //$NON-NLS-1$
 	protected static final String OSGI_INSTALL_AREA = "osgi.install.area"; //$NON-NLS-1$
+	protected static final String OSGI_FORCED_RESTART = "osgi.forcedRestart"; //$NON-NLS-1$
 	protected static final String RESOURCE_BASE = "/WEB-INF/eclipse/"; //$NON-NLS-1$
 	protected static final String LAUNCH_INI = "launch.ini"; //$NON-NLS-1$
 
@@ -211,8 +213,15 @@ public class FrameworkLauncher {
 			Method setInitialProperties = clazz.getMethod("setInitialProperties", new Class[] {Map.class}); //$NON-NLS-1$
 			setInitialProperties.invoke(null, new Object[] {initalPropertyMap});
 
+			Method registerFrameworkShutdownHandler = clazz.getDeclaredMethod("internalAddFrameworkShutdownHandler", new Class[] {Runnable.class}); //$NON-NLS-1$
+			if (! registerFrameworkShutdownHandler.isAccessible())
+				registerFrameworkShutdownHandler.setAccessible(true);
+			Runnable restartHandler = createRestartHandler();
+			registerFrameworkShutdownHandler.invoke(null, new Object[] {restartHandler});
+			
 			Method runMethod = clazz.getMethod("startup", new Class[] {String[].class, Runnable.class}); //$NON-NLS-1$
 			runMethod.invoke(null, new Object[] {args, null});
+			
 			frameworkContextClassLoader = Thread.currentThread().getContextClassLoader();
 		} catch (InvocationTargetException ite) {
 			Throwable t = ite.getTargetException();
@@ -226,6 +235,30 @@ public class FrameworkLauncher {
 		} finally {
 			Thread.currentThread().setContextClassLoader(original);
 		}
+	}
+
+	private Runnable createRestartHandler() throws ClassNotFoundException, NoSuchMethodException {
+		Class frameworkPropertiesClazz = frameworkClassLoader.loadClass(FRAMEWORKPROPERTIES);
+		final Method getProperty = frameworkPropertiesClazz.getMethod("getProperty", new Class[] {String.class}); //$NON-NLS-1$
+		Runnable restartHandler = new Runnable() {
+			public void run() {
+				try {
+					String forcedRestart = (String) getProperty.invoke(null, new Object[] {OSGI_FORCED_RESTART});
+					if (Boolean.valueOf(forcedRestart).booleanValue()) {
+						stop();
+						start();
+					}
+				} catch (InvocationTargetException ite) {
+					Throwable t = ite.getTargetException();
+					if (t == null)
+						t = ite;
+					throw new RuntimeException(t.getMessage());
+				} catch (Exception e) {
+					throw new RuntimeException(e.getMessage());
+				}
+			}				
+		};
+		return restartHandler;
 	}
 
 	/** buildInitialPropertyMap create the inital set of properties from the contents of launch.ini
