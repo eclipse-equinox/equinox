@@ -90,6 +90,7 @@ public class Main {
     
     // splash handling
     private boolean showSplash = false;
+    private String splashLocation = null;
     private String endSplash = null;
     private boolean initialize = false;
     private boolean splashDown = false;
@@ -1244,6 +1245,7 @@ public class Main {
                 //consume optional parameter for showsplash
                 if (i + 1 < args.length && !args[i+1].startsWith("-")) { //$NON-NLS-1$
                 	configArgs[configArgIndex++] = i++;
+                	splashLocation = args[i];
                 }
             }
             
@@ -1736,17 +1738,17 @@ public class Main {
             return;
 
         // determine the splash location
-        String location = getSplashLocation(defaultPath);
+        splashLocation = getSplashLocation(defaultPath);
         if (debug)
-            System.out.println("Splash location:\n    " + location); //$NON-NLS-1$
-        if (location == null)
+            System.out.println("Splash location:\n    " + splashLocation); //$NON-NLS-1$
+        if (splashLocation == null)
             return;
         
-		bridge.showSplash(location);
+		bridge.showSplash(splashLocation);
     	long handle = bridge.getSplashHandle();
     	if(handle != 0) {
     		System.setProperty("org.eclipse.equinox.launcher.splash.handle", String.valueOf(handle)); //$NON-NLS-1$
-    		System.setProperty("org.eclipse.equinox.launcher.splash.location", location); //$NON-NLS-1$
+    		System.setProperty("org.eclipse.equinox.launcher.splash.location", splashLocation); //$NON-NLS-1$
     		bridge.updateSplash();
     	}
     }
@@ -1773,6 +1775,12 @@ public class Main {
      * so the return value here is the file system path.
      */
     private String getSplashLocation(URL[] bootPath) {
+    	//check the path passed in from -showsplash first.  The old launcher passed a timeout value
+    	//as the argument, so only use it if it isn't a number and the file exists.
+    	if(splashLocation != null && !Character.isDigit(splashLocation.charAt(0)) && new File(splashLocation).exists()) {
+    		System.getProperties().put(PROP_SPLASHLOCATION, splashLocation);
+    		return splashLocation;
+    	}
         String result = System.getProperty(PROP_SPLASHLOCATION);
         if (result != null)
             return result;

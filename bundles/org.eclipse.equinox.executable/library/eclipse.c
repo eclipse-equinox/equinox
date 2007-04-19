@@ -243,6 +243,7 @@ static int     noSplash      = 0;				/* True: do not show splash win	*/
 static int	   suppressErrors = 0;				/* True: do not display errors dialogs */
 
 static _TCHAR*  showSplashArg = NULL;			/* showsplash data (main launcher window) */
+static _TCHAR*  splashBitmap  = NULL;			/* the actual splash bitmap */
 static _TCHAR * startupArg    = NULL;			/* path of the startup.jar the user wants to run relative to the program path */
 static _TCHAR*  vmName        = NULL;     		/* Java VM that the user wants to run */
 static _TCHAR*  name          = NULL;			/* program name */	
@@ -406,11 +407,9 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
     /* If the showsplash option was given and we are using JNI */
     if (!noSplash && showSplashArg && launchMode == LAUNCH_JNI)
     {
-    	_TCHAR *bitmap = findSplash(showSplashArg);
-    	if (bitmap != NULL) {
-	    	showSplash(bitmap);
-	    	if (bitmap != showSplashArg)
-	    		free(bitmap);
+    	splashBitmap = findSplash(showSplashArg);
+    	if (splashBitmap != NULL) {
+	    	showSplash(splashBitmap);
     	}
     }
     
@@ -554,6 +553,7 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
     if ( launchMode == LAUNCH_JNI ) free( cp );
     if ( cpValue != NULL)		 free( cpValue );
     if ( exitData != NULL )		 free( exitData );
+    if ( splashBitmap != NULL )  free( splashBitmap );
 
     return exitCode;
 }
@@ -743,8 +743,8 @@ static void getVMCommand( int argc, _TCHAR* argv[], _TCHAR **vmArgv[], _TCHAR **
     if (!noSplash)
     {
         (*progArgv)[ dst++ ] = SHOWSPLASH;
-        if(showSplashArg != NULL)
-        	(*progArgv)[ dst++ ] = showSplashArg;
+        if(splashBitmap != NULL)
+        	(*progArgv)[ dst++ ] = splashBitmap;
     }
     
 	/* Append the launcher command */
