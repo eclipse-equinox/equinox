@@ -132,6 +132,7 @@ public class EclipseStarter {
 	// directory of serch candidates keyed by directory abs path -> directory listing (bug 122024)
 	private static HashMap searchCandidates = new HashMap(4);
 	private static EclipseAppLauncher appLauncher;
+	private static List shutdownHandlers;
 
 	/**
 	 * This is the main to start osgi.
@@ -283,6 +284,7 @@ public class EclipseStarter {
 		if (Profile.PROFILE && Profile.STARTUP)
 			Profile.logTime("EclipseStarter.startup()", "OSGi created"); //$NON-NLS-1$ //$NON-NLS-2$
 		context = osgi.getBundleContext();
+		registerFrameworkShutdownHandlers();
 		publishSplashScreen(endSplashHandler);
 		osgi.launch();
 		if (Profile.PROFILE && Profile.STARTUP)
@@ -1549,5 +1551,65 @@ public class EclipseStarter {
 
 	private static  boolean isForcedRestart() {
 		return Boolean.valueOf(FrameworkProperties.getProperty(PROP_FORCED_RESTART)).booleanValue();
+	}
+
+	/*
+	 * NOTE: This is an internal/experimental method used by launchers that need to react when the framework
+	 * is shutdown internally.
+	 * 
+	 * Adds a framework shutdown handler. <p>
+	 * A handler implements the {@link Runnable} interface.  When the framework is shutdown
+	 * the {@link Runnable#run()} method is called for each registered handler.  Handlers should 
+	 * make no assumptions on the thread it is being called from.  If a handler object is 
+	 * registered multiple times it will be called once for each registration.
+	 * <p>
+	 * At the time a handler is called the framework is shutdown.  Handlers must not depend on 
+	 * a running framework to execute or attempt to load additional classes from bundles 
+	 * installed in the framework.
+	 * @param handler the framework shutdown handler
+	 * @throws IllegalStateException if the platform is already running
+	 */
+	static void internalAddFrameworkShutdownHandler(Runnable handler) {
+		if (running)
+			throw new IllegalStateException(EclipseAdaptorMsg.ECLIPSE_STARTUP_ALREADY_RUNNING);
+
+		if (shutdownHandlers == null)
+			shutdownHandlers = new ArrayList();
+
+		shutdownHandlers.add(handler);
+	}
+
+	/*
+	 * NOTE: This is an internal/experimental method used by launchers that need to react when the framework
+	 * is shutdown internally.
+	 * 
+	 * Removes a framework shutdown handler. <p>
+	 * @param handler the framework shutdown handler
+	 * @throws IllegalStateException if the platform is already running
+	 */
+	static void internalRemoveFrameworkShutdownHandler(Runnable handler) {
+		if (running)
+			throw new IllegalStateException(EclipseAdaptorMsg.ECLIPSE_STARTUP_ALREADY_RUNNING);
+
+		if (shutdownHandlers != null)
+			shutdownHandlers.remove(handler);
+	}
+
+	private static void registerFrameworkShutdownHandlers() {
+		if (shutdownHandlers == null)
+			return;
+
+		final Bundle systemBundle = context.getBundle();
+		for (Iterator it = shutdownHandlers.iterator(); it.hasNext();) {
+			final Runnable handler = (Runnable) it.next();
+			BundleListener listener = new BundleListener() {
+				public void bundleChanged(BundleEvent event) {
+					if (event.getBundle() == systemBundle && event.getType() == BundleEvent.STOPPED) {
+						handler.run();
+					}
+				}
+			};
+			context.addBundleListener(listener);
+		}
 	}
 }
