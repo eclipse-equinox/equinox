@@ -217,7 +217,8 @@ public class FrameworkConsole implements Runnable {
 			try {
 				console();
 			} catch (IOException e) {
-				e.printStackTrace(out);
+				if (!shutdown)
+					e.printStackTrace(out);
 			}
 		}
 	}
@@ -299,20 +300,23 @@ public class FrameworkConsole implements Runnable {
 	public synchronized void disconnect() {
 		if (!disconnect) {
 			disconnect = true;
-			if (out != null)
-				out.close();
-			if (s != null)
-				try {
-					s.close();
-				} catch (IOException ioe) {
-					// do nothing
-				}
-			if (in != null)
-				try {
-					in.close();
-				} catch (IOException ioe) {
-					// do nothing
-				}
+			// We don't want to close System.in and System.out
+			if (useSocketStream) {
+				if (s != null)
+					try {
+						s.close();
+					} catch (IOException ioe) {
+						// do nothing
+					}
+				if (out != null)
+					out.close();
+				if (in != null)
+					try {
+						in.close();
+					} catch (IOException ioe) {
+						// do nothing
+					}
+			}
 		}
 	}
 
