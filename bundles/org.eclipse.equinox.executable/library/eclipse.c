@@ -196,13 +196,13 @@ was found after searching the following locations:\n\
 %s");
 static _TCHAR* startupMsg =
 _T_ECLIPSE("The %s executable launcher was unable to locate its \n\
-companion startup jar file.");
+companion launcher jar.");
 
 static _TCHAR* homeMsg =
 _T_ECLIPSE("The %s executable launcher was unable to locate its \n\
-companion startup.jar file (in the same directory as the executable).");
+home directory.");
 
-#define DEFAULT_STARTUP 		_T_ECLIPSE("startup.jar")
+#define OLD_STARTUP 		_T_ECLIPSE("startup.jar")
 #define CLASSPATH_PREFIX        _T_ECLIPSE("-Djava.class.path=")
 
 /* Define constants for the options recognized by the launcher. */
@@ -1018,10 +1018,7 @@ static _TCHAR* findStartupJar(){
 			free(file);
 			file = NULL;
 		}
-		/* TODO What should the policy here be, if we didn't find what they
-		 * specified?  (Its harder to specify equinox.startup on the mac.) */
-		if(file != NULL)
-			return file;
+		return file;
 	}
 
 	progLength = pathLength = _tcslen(programDir);
@@ -1043,8 +1040,13 @@ static _TCHAR* findStartupJar(){
 	file = findFile(pluginsPath, DEFAULT_EQUINOX_STARTUP);
 	if(file != NULL)
 		return file;
+	
+	/* old startup.jar? */
+	file = checkPath(OLD_STARTUP, programDir, 0);
+	if (_tstat( file, &stats ) == 0)
+		return (file == OLD_STARTUP) ? _tcsdup(OLD_STARTUP) : file;
 		
-	return _tcsdup(DEFAULT_STARTUP);
+	return NULL;
 }
 
 /* 
