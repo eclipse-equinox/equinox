@@ -227,6 +227,7 @@ companion startup.jar file (in the same directory as the executable).");
 #define LIBRARY		  _T_ECLIPSE("--launcher.library")
 #define SUPRESSERRORS _T_ECLIPSE("--launcher.suppressErrors")
 #define INI			  _T_ECLIPSE("--launcher.ini")
+#define SECOND_THREAD _T_ECLIPSE("--launcher.secondThread")
 
 /* constants for ee options file */
 #define EE_EXECUTABLE 			_T_ECLIPSE("-Dee.executable=")
@@ -241,7 +242,8 @@ static int     needConsole   = 0;				/* True: user wants a console	*/
 static int     debug         = 0;				/* True: output debugging info	*/
 static int     noSplash      = 0;				/* True: do not show splash win	*/
 static int	   suppressErrors = 0;				/* True: do not display errors dialogs */
-
+       int     secondThread  = 0;				/* True: start the VM on a second thread */
+       
 static _TCHAR*  showSplashArg = NULL;			/* showsplash data (main launcher window) */
 static _TCHAR*  splashBitmap  = NULL;			/* the actual splash bitmap */
 static _TCHAR * startupArg    = NULL;			/* path of the startup.jar the user wants to run relative to the program path */
@@ -280,6 +282,7 @@ static Option options[] = {
     { DEBUG,		&debug,			VALUE_IS_FLAG,	0 },
     { NOSPLASH,     &noSplash,      VALUE_IS_FLAG,	1 },
     { SUPRESSERRORS, &suppressErrors, VALUE_IS_FLAG, 1},
+    { SECOND_THREAD, &secondThread, VALUE_IS_FLAG,  1 },
     { LIBRARY,		NULL,			0,			2 }, /* library was parsed by exe, just remove it */
     { INI,			NULL, 			0,			2 }, /* same with ini */
     { OS,			&osArg,			0,			2 },

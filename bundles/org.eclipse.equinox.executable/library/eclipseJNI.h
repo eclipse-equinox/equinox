@@ -18,8 +18,7 @@
 #define loadVMLibrary loadVMLibraryW
 #define unloadVMLibrary unloadVMLibraryW
 #define getInvocationFunction getInvocationFunctionW
-#define launchJavaVM launchJavaVMW
-#define startJavaVM startJavaVMW
+#define startJavaJNI startJavaJNIW
 #define cleanupVM cleanupVMW
 #endif
 
@@ -77,7 +76,7 @@ JNIEXPORT void JNICALL takedown_splash(JNIEnv *, jobject);
  * be returned to the main launcher, which will display a message if
  * the termination was not normal.
  */
-extern int startJavaVM( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[] );
+extern int startJavaJNI( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[] );
 
 extern void cleanupVM( int );
 #endif

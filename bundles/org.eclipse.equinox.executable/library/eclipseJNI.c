@@ -271,7 +271,7 @@ static jobjectArray createRunArgs( JNIEnv *env, _TCHAR * args[] ) {
 	return stringArray;
 }
 					 
-int startJavaVM( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[] )
+int startJavaJNI( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[] )
 {
 	int i;
 	int numVMArgs = -1;
@@ -358,8 +358,17 @@ int startJavaVM( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[] )
 }
 
 void cleanupVM(int exitCode) {
-	if (jvm == 0 || env == 0)
+	JNIEnv * localEnv = env;
+	if (jvm == 0)
 		return;
+	
+	if (secondThread)
+		(*jvm)->AttachCurrentThread(jvm, (void**)&localEnv, NULL);
+	else
+		localEnv = env;
+	if (localEnv == 0)
+		return;
+	
 	/* we call System.exit() unless osgi.noShutdown is set */
 	if (shouldShutdown(env)) {
 		jclass systemClass = NULL;

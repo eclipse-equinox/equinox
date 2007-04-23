@@ -15,6 +15,7 @@ extern "C" {
 #include "eclipseOS.h"
 #include "eclipseUtil.h"
 #include "eclipseCommon.h"
+#include "eclipseJNI.h"
 
 #include <process.h>
 #include <stdio.h>
@@ -505,6 +506,11 @@ static void CALLBACK detectJvmExit ()
 
 void processVMArgs(_TCHAR **vmargs[] ) {
 //	/* nothing yet */
+}
+
+int startJavaJNI( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[] )
+{
+	return startJavaJNI(libPath, vmArgs, progArgs);
 }
 
 } // extern "C"

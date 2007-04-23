@@ -30,9 +30,11 @@
 #define takeDownSplash takeDownSplashW
 #define restartLauncher restartLauncherW
 #define launchJavaVM launchJavaVMW
+#define startJavaVM startJavaVMW
 #define eeLibPath eeLibPathW
 #define processVMArgs processVMArgsW
 #define initialArgv initialArgvW
+#define secondThread secondThreadW
 #endif
 
 /* Operating System Dependent Information */
@@ -47,6 +49,7 @@ extern _TCHAR*  vmLibrary;				/* name of the VM shared library */
 extern int		initialArgc;			/* argc originally used to start launcher */
 extern _TCHAR**	initialArgv;			/* argv originally used to start launcher */
 extern _TCHAR*  eeLibPath;				/* library path specified in a .ee file */
+extern int		secondThread;			/* whether or not to start the vm on a second thread */
 
 /* OS Specific Functions */
 
@@ -113,6 +116,9 @@ extern void restartLauncher( _TCHAR* program, _TCHAR* args[] );
 
 /* launch the vm in a separate process and wait for it to finish */
 extern int launchJavaVM( _TCHAR* args[] );
+
+/* launch the vm in this process using JNI invocation */
+extern int startJavaVM( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[] );
 
 /* do any platform specific processing of the user vmargs */
 extern void processVMArgs(_TCHAR **vmargs[] );

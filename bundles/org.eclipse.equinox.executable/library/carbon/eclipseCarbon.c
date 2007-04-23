@@ -14,12 +14,13 @@
 
 #include "eclipseOS.h"
 #include "eclipseCommon.h"
+#include "eclipseJNI.h"
 
 #include <unistd.h>
 #include <CoreServices/CoreServices.h>
 #include <Carbon/Carbon.h>
 #include <mach-o/dyld.h>
-
+#include <pthread.h>
 #include "NgCommon.h"
 #include "NgImageData.h"
 #include "NgWinBMPFileFormat.h"
@@ -44,6 +45,19 @@ static WindowRef window;
 static ControlRef pane = NULL;
 static CGImageRef image = NULL;
 static CGImageRef loadBMPImage(const char *image);
+
+/* thread stuff */
+typedef struct {
+	_TCHAR * libPath;
+	_TCHAR ** vmArgs;
+	_TCHAR ** progArgs;
+	int result;
+} StartVMArgs;
+
+static CFRunLoopRef loopRef = NULL;
+static void * startThread(void * init); 
+static void runEventLoop(CFRunLoopRef ref);
+static void dummyCallback(void * info) {}
 
 typedef CGImageSourceRef (*CGImageSourceCreateWithURL_FUNC) (CFURLRef, CFDictionaryRef);
 typedef CGImageRef (*CGImageSourceCreateImageAtIndex_FUNC)(CGImageSourceRef, size_t, CFDictionaryRef);
@@ -248,6 +262,66 @@ int launchJavaVM( _TCHAR* args[] )
 {
 	/*for now always do JNI on Mac, should not come in here */
 	return -1;
+}
+
+int startJavaVM( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[] )
+{
+	if (secondThread == 0)
+		return startJavaVM(libPath, vmArgs, progArgs);
+
+	/* else, --launcher.secondThread was specified, create a new thread and run the 
+	 * vm on it.  This main thread will run the CFRunLoop 
+	 */
+	pthread_t thread;
+	struct rlimit limit = {0, 0};
+	int stackSize = 0;
+	if (getrlimit(RLIMIT_STACK, &limit) == 0) {
+		if (limit.rlim_cur != 0) {
+			stackSize = limit.rlim_cur;
+		}
+	}
+	
+	/* initialize thread attributes */
+	pthread_attr_t attributes;
+	pthread_attr_init(&attributes);
+	pthread_attr_setscope(&attributes, PTHREAD_SCOPE_SYSTEM);
+	pthread_attr_setdetachstate(&attributes, PTHREAD_CREATE_DETACHED);
+	if (stackSize != 0)
+		pthread_attr_setstacksize(&attributes, stackSize);
+	
+	/* arguments to start the vm */
+	StartVMArgs args;
+	args.libPath = libPath;
+	args.vmArgs = vmArgs;
+	args.progArgs = progArgs;
+	
+	loopRef = CFRunLoopGetCurrent();
+	
+	/* create the thread */
+	pthread_create( &thread, &attributes, &startThread, &args);
+	pthread_attr_destroy(&attributes);
+		
+	runEventLoop(loopRef);
+	
+	return args.result;
+}
+
+void * startThread(void * init) {
+	StartVMArgs *args = (StartVMArgs *) init;
+	args->result = startJavaJNI(args->libPath, args->vmArgs, args->progArgs);
+	return NULL;
+}
+
+void runEventLoop(CFRunLoopRef ref) {
+	CFRunLoopSourceContext sourceContext = { .version = 0, .info = NULL, .retain = NULL, .release = NULL,
+											 .copyDescription = NULL, .equal = NULL, .hash = NULL, 
+											 .schedule = NULL, .cancel = NULL, .perform = &dummyCallback };
+	
+	CFRunLoopSourceRef sourceRef = CFRunLoopSourceCreate(NULL, 0, &sourceContext);
+	CFRunLoopAddSource(ref, sourceRef,  kCFRunLoopCommonModes);
+	
+	CFRunLoopRun();
+	CFRelease(sourceRef);
 }
 
 void disposeData(void *info, void *data, size_t size) 

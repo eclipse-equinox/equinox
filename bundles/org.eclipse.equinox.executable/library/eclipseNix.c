@@ -14,6 +14,8 @@
 #include "eclipseCommon.h"
 #include "eclipseMozilla.h"
 #include "eclipseUtil.h"
+#include "eclipseJNI.h"
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <stdlib.h>
@@ -208,4 +210,9 @@ void restartLauncher( char* program, char* args[] )
 
 void processVMArgs(_TCHAR **vmargs[] ) {
 	/* nothing yet */
+}
+
+int startJavaVM( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[] )
+{
+	return startJavaJNI(libPath, vmArgs, progArgs);
 }

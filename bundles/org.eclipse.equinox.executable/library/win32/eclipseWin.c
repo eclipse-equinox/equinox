@@ -13,6 +13,7 @@
 #include "eclipseOS.h"
 #include "eclipseUtil.h"
 #include "eclipseCommon.h"
+#include "eclipseJNI.h"
 
 #include <windows.h>
 #include <commctrl.h>
@@ -435,4 +436,9 @@ static void CALLBACK detectJvmExit( HWND hwnd, UINT uMsg, UINT id, DWORD dwTime 
 
 void processVMArgs(_TCHAR **vmargs[] ) {
 	/* nothing yet */
+}
+
+int startJavaVM( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[] )
+{
+	return startJavaJNI(libPath, vmArgs, progArgs);
 }
