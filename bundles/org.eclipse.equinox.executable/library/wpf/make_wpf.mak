@@ -36,6 +36,7 @@ LFLAGS =  -CLRTHREADATTRIBUTE:STA /NODEFAULTLIB:LIBCMT /INCREMENTAL:NO /RELEASE 
 DLL_LFLAGS = -CLRTHREADATTRIBUTE:STA /NODEFAULTLIB:LIBCMT /INCREMENTAL:NO /PDB:NONE -dll /BASE:0x10000000 /DLL
 RES    = eclipse.res
 EXEC   = eclipse.exe
+CONSOLE = eclipse.com
 DLL    = $(PROGRAM_LIBRARY)
 DEBUG  = #$(cdebug)
 
@@ -50,7 +51,7 @@ DOTNET_HOME = C:\WINDOWS\Microsoft.NET\Framework\v2.0.50727
 CPPFLAGS = -clr /FU"$(WPF_HOME)\PresentationCore.dll" /FU"$(WPF_HOME)\PresentationFramework.dll" /FU$(DOTNET_HOME)\System.Data.dll /FU$(DOTNET_HOME)\System.dll /FU$(DOTNET_HOME)\System.Xml.dll /FU"$(WPF_HOME)\UIAutomationProvider.dll" /FU"$(WPF_HOME)\UIAutomationTypes.dll" /FU"$(WPF_HOME)\WindowsBase.dll"
 
 	
-all: $(EXEC) $(DLL) com
+all: $(EXEC) $(DLL) com $(CONSOLE)
 
 eclipseMain.obj: ../eclipseUnicode.h ../eclipseCommon.h ../eclipseMain.c 
 	$(CC) $(DEBUG) $(CFLAGS) $(cvarsdll) /Fo$*.obj ../eclipseMain.c
@@ -84,6 +85,11 @@ $(EXEC): $(MAIN_OBJS) $(COMMON_OBJS)
     link $(LFLAGS) -out:$(PROGRAM_OUTPUT) $(MAIN_OBJS) $(COMMON_OBJS) $(RES) $(LIBS)
     mt.exe -manifest $(PROGRAM_OUTPUT).manifest -outputresource:$(PROGRAM_OUTPUT);2
 
+$(CONSOLE): $(MAIN_OBJS) $(COMMON_OBJS)
+    rc.exe -r -fo $(RES) eclipse.rc
+    link $(LFLAGS) -out:$(CONSOLE) $(MAIN_OBJS) $(COMMON_OBJS) $(RES) $(LIBS)
+    mt.exe -manifest $(PROGRAM_OUTPUT).manifest -outputresource:$(CONSOLE);2
+    
 $(DLL): $(DLL_OBJS) $(COMMON_OBJS)
     link $(DLL_LFLAGS) -out:$(PROGRAM_LIBRARY) $(DLL_OBJS) $(COMMON_OBJS)  $(DLL_LIBS)
     mt.exe -manifest $(PROGRAM_LIBRARY).manifest -outputresource:$(PROGRAM_LIBRARY);2

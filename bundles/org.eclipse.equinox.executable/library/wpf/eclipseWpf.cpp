@@ -508,7 +508,7 @@ void processVMArgs(_TCHAR **vmargs[] ) {
 //	/* nothing yet */
 }
 
-int startJavaJNI( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[] )
+int startJavaVM( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[] )
 {
 	return startJavaJNI(libPath, vmArgs, progArgs);
 }
