@@ -36,9 +36,11 @@ DLL_OBJS	= eclipse.obj  eclipseWin.obj  eclipseUtil.obj  eclipseJNI.obj eclipseS
 LIBS   = kernel32.lib user32.lib comctl32.lib msvcrt.lib
 DLL_LIBS = kernel32.lib user32.lib comctl32.lib gdi32.lib Advapi32.lib msvcrt.lib
 LFLAGS = /NODEFAULTLIB /INCREMENTAL:NO /RELEASE /NOLOGO -subsystem:windows,4.0 -entry:wmainCRTStartup
+CONSOLEFLAGS = /NODEFAULTLIB /INCREMENTAL:NO /RELEASE /NOLOGO -subsystem:console,4.0 -entry:wmainCRTStartup
 DLL_LFLAGS = /NODEFAULTLIB /INCREMENTAL:NO /PDB:NONE /RELEASE /NOLOGO -entry:_DllMainCRTStartup@12 -dll /BASE:0x10000000 /DLL
 RES    = eclipse.res
 EXEC   = eclipse.exe
+CONSOLE = eclipse.com
 DLL    = $(PROGRAM_LIBRARY)
 DEBUG  = #$(cdebug)
 acflags = -I.. -DDEFAULT_OS="\"$(DEFAULT_OS)\"" \
@@ -47,7 +49,7 @@ acflags = -I.. -DDEFAULT_OS="\"$(DEFAULT_OS)\"" \
 	-I$(JAVA_HOME)\include -I$(JAVA_HOME)\include\win32 \
 	$(cflags)
 wcflags = -DUNICODE $(acflags)
-all: $(EXEC) $(DLL)
+all: $(EXEC) $(DLL) $(CONSOLE)
 
 eclipseMain.obj: ../eclipseUnicode.h ../eclipseCommon.h ../eclipseMain.c 
 	$(cc) $(DEBUG) $(wcflags) $(cvarsdll) /Fo$*.obj ../eclipseMain.c
@@ -105,6 +107,9 @@ aeclipseWinCommon.obj: ../eclipseCommon.h eclipseWinCommon.c
 
 $(EXEC): $(MAIN_OBJS) $(COMMON_OBJS) $(RES)
     $(link) $(LFLAGS) -out:$(PROGRAM_OUTPUT) $(MAIN_OBJS) $(COMMON_OBJS) $(RES) $(LIBS)
+
+$(CONSOLE): $(MAIN_OBJS) $(COMMON_OBJS) $(RES)
+    $(link) $(CONSOLEFLAGS) -out:$(CONSOLE) $(MAIN_OBJS) $(COMMON_OBJS) $(RES) $(LIBS)
 
 $(DLL): $(DLL_OBJS) $(COMMON_OBJS)
     $(link) $(DLL_LFLAGS) -out:$(PROGRAM_LIBRARY) $(DLL_OBJS) $(COMMON_OBJS) $(RES) $(DLL_LIBS)

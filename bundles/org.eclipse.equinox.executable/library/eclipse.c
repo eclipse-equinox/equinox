@@ -1097,13 +1097,8 @@ static void createConsole() {
 	long stdHandle;
 	int conHandle;
 	FILE *fp;
-
-	/* AttachConsole only exists for XP and up, look for it dynamically */
-	BOOL (*attachConsole) (DWORD processId) = NULL;
-	attachConsole = findSymbol(GetModuleHandle(_T_ECLIPSE("Kernel32.dll")), _T_ECLIPSE("AttachConsole"));
 	
-	if (attachConsole == NULL || !attachConsole(-1))
-		AllocConsole();
+	AllocConsole();
 	
 	/* redirect stdout */
 	stdHandle = (long)GetStdHandle(STD_OUTPUT_HANDLE);
