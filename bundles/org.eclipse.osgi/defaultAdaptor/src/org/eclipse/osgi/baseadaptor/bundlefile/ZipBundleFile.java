@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -161,6 +161,9 @@ public class ZipBundleFile extends BundleFile {
 					/* the entry is already cached */
 					if (Debug.DEBUG && Debug.DEBUG_GENERAL)
 						Debug.println("File already present: " + nested.getPath()); //$NON-NLS-1$
+					if (nested.isDirectory())
+						// must ensure the complete directory is extracted (bug 182585)
+						extractDirectory(zipEntry.getName());
 				} else {
 					if (zipEntry.getName().endsWith("/")) { //$NON-NLS-1$
 						if (!nested.mkdirs()) {
