@@ -123,7 +123,7 @@ public interface IProgressMonitor {
 	 * installment, as opposed to a cumulative amount of work done
 	 * to date.
 	 *
-	 * @param work the number of work units just completed
+	 * @param work a non-negative number of work units just completed
 	 */
 	public void worked(int work);
 }

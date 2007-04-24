@@ -382,7 +382,7 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 	 */
 	private SubMonitor(RootInfo rootInfo, int totalWork, int availableToChildren, int flags) {
 		root = rootInfo;
-		totalParent = totalWork;
+		totalParent = (totalWork > 0) ? totalWork : 0;
 		this.totalForChildren = availableToChildren;
 		this.flags = flags;
 	}
@@ -561,7 +561,7 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 	 * @see org.eclipse.core.runtime.IProgressMonitor#internalWorked(double)
 	 */
 	public void internalWorked(double work) {
-		int delta = consume(work);
+		int delta = consume((work > 0.0d) ? work : 0.0d);
 		if (delta != 0)
 			root.worked(delta);
 	}
@@ -713,7 +713,7 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 	 * @return new sub progress monitor that may be used in place of a new SubMonitor
 	 */
 	public SubMonitor newChild(int totalWork, int suppressFlags) {
-		double totalWorkDouble = totalWork;
+		double totalWorkDouble = (totalWork > 0) ? totalWork : 0.0d;
 		totalWorkDouble = Math.min(totalWorkDouble, totalForChildren - usedForChildren);
 		cleanupActiveChild();
 
