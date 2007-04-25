@@ -242,7 +242,7 @@ char * findVMLibrary( char* command ) {
 			free(version);
 		} 
 	}
-	return "/System/Library/Frameworks/JavaVM.framework/Versions/Current/JavaVM";
+	return JAVA_FRAMEWORK;
 }
 
 

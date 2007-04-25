@@ -23,6 +23,8 @@
 char   dirSeparator  = '/';
 char   pathSeparator = ':';
 
+static CFBundleRef javaVMBundle = NULL;
+
 void initWindowSystem( int* pArgc, _TCHAR* argv[], int showSplash );
 
 int initialized = 0;
@@ -95,22 +97,38 @@ void displayMessage(char *title, char *message)
 /* Load the specified shared library
  */
 void * loadLibrary( char * library ){
-	void * result= dlopen(library, RTLD_NOW);
-	if(result == 0) 
-		printf("%s\n",dlerror());
-	return result;
+	if (strcmp(library, JAVA_FRAMEWORK) == 0) {
+		CFURLRef url = CFURLCreateFromFileSystemRepresentation(kCFAllocatorDefault, (const UInt8 *)JAVA_FRAMEWORK, strlen(JAVA_FRAMEWORK), true);
+		javaVMBundle = CFBundleCreate(kCFAllocatorDefault, url);
+		CFRelease(url);
+		return (void*) &javaVMBundle;
+	} else {
+		void * result= dlopen(library, RTLD_NOW);
+		if(result == 0) 
+			printf("%s\n",dlerror());
+		return result;
+	}
 }
 
 /* Unload the shared library
  */
 void unloadLibrary( void * handle ){
-	dlclose(handle);
+	if (handle == &javaVMBundle)
+		CFRelease(javaVMBundle);
+	else
+		dlclose(handle);
 }
  
 /* Find the given symbol in the shared library
  */
 void * findSymbol( void * handle, char * symbol ){
-	return dlsym(handle, symbol);
+	if(handle == &javaVMBundle) {
+		CFStringRef string = CFStringCreateWithCString(kCFAllocatorDefault, symbol, kCFStringEncodingASCII);
+		void * ptr = CFBundleGetFunctionPointerForName(javaVMBundle, string);
+		CFRelease(string);
+		return ptr;
+	} else
+		return dlsym(handle, symbol);
 }
 
 char * resolveSymlinks( char * path ) {

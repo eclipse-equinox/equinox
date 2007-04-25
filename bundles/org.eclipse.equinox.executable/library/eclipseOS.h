@@ -37,6 +37,10 @@
 #define secondThread secondThreadW
 #endif
 
+#ifdef MACOSX
+#define JAVA_FRAMEWORK "/System/Library/Frameworks/JavaVM.framework"
+#endif
+
 /* Operating System Dependent Information */
 
 /*** See eclipse.c for information on the launcher runtime architecture ***/
