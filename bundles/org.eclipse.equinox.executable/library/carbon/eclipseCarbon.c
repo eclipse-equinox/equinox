@@ -267,7 +267,7 @@ int launchJavaVM( _TCHAR* args[] )
 int startJavaVM( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[] )
 {
 	if (secondThread == 0)
-		return startJavaVM(libPath, vmArgs, progArgs);
+		return startJavaJNI(libPath, vmArgs, progArgs);
 
 	/* else, --launcher.secondThread was specified, create a new thread and run the 
 	 * vm on it.  This main thread will run the CFRunLoop 
