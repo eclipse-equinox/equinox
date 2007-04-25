@@ -349,28 +349,45 @@ public class Main {
 			}
 			String fragmentName = buffer.toString();
 			String fragment = null;
-			if (bootLocation != null) {
+			if (inDevelopmentMode) {
+				String devPathList = devClassPathProps.getProperty(PLUGIN_ID);
+				String[] locations = getArrayFromList(devPathList);
+				if (locations.length > 0) {
+					File location = new File(locations[0]);
+					if (location.isAbsolute()) {
+						String dir = location.getParent();
+						fragment = searchFor(fragmentName, dir);
+						if (fragment != null)
+							libPath = searchFor("eclipse", fragment); //$NON-NLS-1$
+					}
+				}
+			}
+			if (libPath == null && bootLocation != null) {
 				URL[] urls = defaultPath;
 				if (urls != null && urls.length > 0) {
 					//the last one is most interesting
-					File entryFile = new File(urls[urls.length - 1].getFile());
-					String dir = entryFile.getParent();
-					if (inDevelopmentMode) {
-						String devDir = dir + "/" + PLUGIN_ID + "/fragments"; //$NON-NLS-1$ //$NON-NLS-2$
-						fragment = searchFor(fragmentName, devDir);
+					for (int i = urls.length - 1; i >= 0 && libPath == null; i--) {
+						File entryFile = new File(urls[i].getFile());
+						String dir = entryFile.getParent();
+						if (inDevelopmentMode) {
+							String devDir = dir + "/" + PLUGIN_ID + "/fragments"; //$NON-NLS-1$ //$NON-NLS-2$
+							fragment = searchFor(fragmentName, devDir);
+						}
+						if (fragment == null)
+							fragment = searchFor(fragmentName, dir);
+						if (fragment != null)
+							libPath = searchFor("eclipse", fragment); //$NON-NLS-1$
 					}
-					if (fragment == null)
-						fragment = searchFor(fragmentName, dir);
 				}
 			}
-			if(fragment == null) {
+			if(libPath == null) {
 				URL install = getInstallLocation();
 				String location = install.getFile();
 				location += "/plugins/"; //$NON-NLS-1$
 				fragment = searchFor(fragmentName, location);
+				if (fragment != null)
+					libPath = searchFor("eclipse", fragment); //$NON-NLS-1$
 			}
-			if(fragment != null)
-				libPath = searchFor("eclipse", fragment); //$NON-NLS-1$
 		}
 		library = libPath;
 		if(library != null)
@@ -1747,7 +1764,7 @@ public class Main {
         
 		bridge.showSplash(splashLocation);
     	long handle = bridge.getSplashHandle();
-    	if(handle != 0) {
+    	if(handle != 0 && handle != -1) {
     		System.setProperty("org.eclipse.equinox.launcher.splash.handle", String.valueOf(handle)); //$NON-NLS-1$
     		System.setProperty("org.eclipse.equinox.launcher.splash.location", splashLocation); //$NON-NLS-1$
     		bridge.updateSplash();
