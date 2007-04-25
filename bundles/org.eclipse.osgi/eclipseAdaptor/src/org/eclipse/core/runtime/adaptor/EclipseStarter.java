@@ -126,7 +126,7 @@ public class EclipseStarter {
 	// Console information
 	protected static final String DEFAULT_CONSOLE_CLASS = "org.eclipse.osgi.framework.internal.core.FrameworkConsole"; //$NON-NLS-1$
 	private static final String CONSOLE_NAME = "OSGi Console"; //$NON-NLS-1$
-	
+
 	private static Runnable console;
 	private static FrameworkLog log;
 	// directory of serch candidates keyed by directory abs path -> directory listing (bug 122024)
@@ -748,7 +748,7 @@ public class EclipseStarter {
 
 	}
 
- 	/**
+	/**
 	 *  Stops the OSGi Command console
 	 *
 	 */
@@ -1054,36 +1054,40 @@ public class EclipseStarter {
 		StartLevel startService = null;
 		if (reference != null)
 			startService = (StartLevel) context.getService(reference);
-		for (int i = 0; i < initialBundles.length; i++) {
-			Bundle osgiBundle = getBundleByLocation(initialBundles[i].locationString, curInitBundles);
-			try {
-				// don't need to install if it is already installed
-				if (osgiBundle == null) {
-					InputStream in = initialBundles[i].location.openStream();
-					osgiBundle = context.installBundle(initialBundles[i].locationString, in);
-					// only check for lazy activation header if this is a newly installed bundle and is not marked for persistent start
-					if (!initialBundles[i].start && hasLazyActivationPolicy(osgiBundle))
-						lazyActivationBundles.add(osgiBundle);
+		try {
+			for (int i = 0; i < initialBundles.length; i++) {
+				Bundle osgiBundle = getBundleByLocation(initialBundles[i].locationString, curInitBundles);
+				try {
+					// don't need to install if it is already installed
+					if (osgiBundle == null) {
+						InputStream in = initialBundles[i].location.openStream();
+						osgiBundle = context.installBundle(initialBundles[i].locationString, in);
+						// only check for lazy activation header if this is a newly installed bundle and is not marked for persistent start
+						if (!initialBundles[i].start && hasLazyActivationPolicy(osgiBundle))
+							lazyActivationBundles.add(osgiBundle);
+					}
+					// always set the startlevel incase it has changed (bug 111549)
+					// this is a no-op if the level is the same as previous launch.
+					if ((osgiBundle.getState() & Bundle.UNINSTALLED) == 0 && initialBundles[i].level >= 0 && startService != null)
+						startService.setBundleStartLevel(osgiBundle, initialBundles[i].level);
+					// if this bundle is supposed to be started then add it to the start list
+					if (initialBundles[i].start)
+						startBundles.add(osgiBundle);
+					// include basic bundles in case they were not resolved before
+					if ((osgiBundle.getState() & Bundle.INSTALLED) != 0)
+						toRefresh.add(osgiBundle);
+				} catch (BundleException e) {
+					FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_FAILED_INSTALL, initialBundles[i].location), 0, e, null);
+					log.log(entry);
+				} catch (IOException e) {
+					FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_FAILED_INSTALL, initialBundles[i].location), 0, e, null);
+					log.log(entry);
 				}
-				// always set the startlevel incase it has changed (bug 111549)
-				// this is a no-op if the level is the same as previous launch.
-				if ((osgiBundle.getState() & Bundle.UNINSTALLED) == 0 && initialBundles[i].level >= 0 && startService != null)
-					startService.setBundleStartLevel(osgiBundle, initialBundles[i].level);
-				// if this bundle is supposed to be started then add it to the start list
-				if (initialBundles[i].start)
-					startBundles.add(osgiBundle);
-				// include basic bundles in case they were not resolved before
-				if ((osgiBundle.getState() & Bundle.INSTALLED) != 0)
-					toRefresh.add(osgiBundle);
-			} catch (BundleException e) {
-				FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_FAILED_INSTALL, initialBundles[i].location), 0, e, null);
-				log.log(entry);
-			} catch (IOException e) {
-				FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_FAILED_INSTALL, initialBundles[i].location), 0, e, null);
-				log.log(entry);
 			}
+		} finally {
+			if (reference != null)
+				context.ungetService(reference);
 		}
-		context.ungetService(reference);
 	}
 
 	private static boolean hasLazyActivationPolicy(Bundle target) {
@@ -1549,7 +1553,7 @@ public class EclipseStarter {
 		return context.getBundle().getBundleContext();
 	}
 
-	private static  boolean isForcedRestart() {
+	private static boolean isForcedRestart() {
 		return Boolean.valueOf(FrameworkProperties.getProperty(PROP_FORCED_RESTART)).booleanValue();
 	}
 
