@@ -325,7 +325,6 @@ static _TCHAR** getRelaunchCommand( _TCHAR **vmCommand );
 
 #ifdef _WIN32
 static void     createConsole();
-static void 	releaseConsole();
 #endif
 
 /* Record the arguments that were used to start the original executable */
@@ -532,13 +531,7 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
 	    }
 	    free( msg );
     }
-    
-#ifdef _WIN32
-	if( launchMode == LAUNCH_JNI && (debug || needConsole) ) {
-		releaseConsole();
-	}
-#endif
-	
+
     if(relaunchCommand != NULL)
     	restartLauncher(NULL, relaunchCommand);
     	
@@ -1117,19 +1110,6 @@ static void createConsole() {
 	conHandle = _open_osfhandle(stdHandle, _O_TEXT);
 	fp = _fdopen(conHandle, "r");
 	*stderr = *fp;	
-	
-	printf("\r\n");
-}
-
-static void releaseConsole() {
-	char * narrow = toNarrow(officialName);
-	printf("\r\n\r\n--");
-	printf(narrow);
-	printf(" finished--\r\n");
-	free(narrow);
-	
-	fflush(stdout);
-	FreeConsole();
 }
 #endif
 
