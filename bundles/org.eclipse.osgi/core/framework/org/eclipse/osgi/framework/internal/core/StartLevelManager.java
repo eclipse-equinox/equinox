@@ -31,6 +31,7 @@ import org.osgi.framework.*;
  * If present, there will only be a single instance of this service
  * registered in the framework.
  */
+// TODO there is no need to use ServiceFactory anymore (bug 184275)
 public class StartLevelManager implements EventDispatcher, EventListener, ServiceFactory {
 
 	protected static Framework framework;
@@ -51,6 +52,8 @@ public class StartLevelManager implements EventDispatcher, EventListener, Servic
 	private static final Object lock = new Object();
 
 	volatile private boolean settingStartLevel = false;
+
+	private StartLevelImpl implementation;
 
 	/** This constructor is called by the Framework */
 	protected StartLevelManager(Framework framework) {
@@ -784,8 +787,10 @@ public class StartLevelManager implements EventDispatcher, EventListener, Servic
 	 * @pre sReg!=null
 	 * @return StartLevel object
 	 */
-	public Object getService(Bundle owner, ServiceRegistration registration) {
-		return new StartLevelImpl(owner, framework);
+	public synchronized Object getService(Bundle owner, ServiceRegistration registration) {
+		if (implementation == null)
+			implementation = new StartLevelImpl(framework.systemBundle, framework);
+		return implementation;
 	}
 
 	/**

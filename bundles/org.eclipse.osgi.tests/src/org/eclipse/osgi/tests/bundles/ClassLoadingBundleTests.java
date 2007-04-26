@@ -212,13 +212,13 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		// test transient start by loadClass
 		startLevel.setStartLevel(startLevel.getStartLevel() + 15);
 		Object[] expectedFrameworkEvents = new Object[1];
-		expectedFrameworkEvents[0] = new FrameworkEvent(FrameworkEvent.STARTLEVEL_CHANGED, OSGiTestsActivator.getContext().getBundle(), null);
+		expectedFrameworkEvents[0] = new FrameworkEvent(FrameworkEvent.STARTLEVEL_CHANGED, OSGiTestsActivator.getContext().getBundle(0), null);
 		Object[] actualFrameworkEvents = frameworkListenerResults.getResults(1);
 		compareResults(expectedFrameworkEvents, actualFrameworkEvents);
 	
 		startLevel.setStartLevel(startLevel.getStartLevel() - 15);
 		expectedFrameworkEvents = new Object[1];
-		expectedFrameworkEvents[0] = new FrameworkEvent(FrameworkEvent.STARTLEVEL_CHANGED, OSGiTestsActivator.getContext().getBundle(), null);
+		expectedFrameworkEvents[0] = new FrameworkEvent(FrameworkEvent.STARTLEVEL_CHANGED, OSGiTestsActivator.getContext().getBundle(0), null);
 		actualFrameworkEvents = frameworkListenerResults.getResults(1);
 		compareResults(expectedFrameworkEvents, actualFrameworkEvents);
 
@@ -234,13 +234,13 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 
 		startLevel.setStartLevel(startLevel.getStartLevel() + 15);
 		expectedFrameworkEvents = new Object[1];
-		expectedFrameworkEvents[0] = new FrameworkEvent(FrameworkEvent.STARTLEVEL_CHANGED, OSGiTestsActivator.getContext().getBundle(), null);
+		expectedFrameworkEvents[0] = new FrameworkEvent(FrameworkEvent.STARTLEVEL_CHANGED, OSGiTestsActivator.getContext().getBundle(0), null);
 		actualFrameworkEvents = frameworkListenerResults.getResults(1);
 		compareResults(expectedFrameworkEvents, actualFrameworkEvents);
 
 		startLevel.setStartLevel(startLevel.getStartLevel() - 15);
 		expectedFrameworkEvents = new Object[1];
-		expectedFrameworkEvents[0] = new FrameworkEvent(FrameworkEvent.STARTLEVEL_CHANGED, OSGiTestsActivator.getContext().getBundle(), null);
+		expectedFrameworkEvents[0] = new FrameworkEvent(FrameworkEvent.STARTLEVEL_CHANGED, OSGiTestsActivator.getContext().getBundle(0), null);
 		actualFrameworkEvents = frameworkListenerResults.getResults(1);
 		compareResults(expectedFrameworkEvents, actualFrameworkEvents);
 
@@ -251,7 +251,7 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		// now load a class while start-level is met.
 		startLevel.setStartLevel(startLevel.getStartLevel() + 15);
 		expectedFrameworkEvents = new Object[1];
-		expectedFrameworkEvents[0] = new FrameworkEvent(FrameworkEvent.STARTLEVEL_CHANGED, OSGiTestsActivator.getContext().getBundle(), null);
+		expectedFrameworkEvents[0] = new FrameworkEvent(FrameworkEvent.STARTLEVEL_CHANGED, OSGiTestsActivator.getContext().getBundle(0), null);
 		actualFrameworkEvents = frameworkListenerResults.getResults(1);
 		compareResults(expectedFrameworkEvents, actualFrameworkEvents);
 
@@ -263,7 +263,7 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 
 		startLevel.setStartLevel(startLevel.getStartLevel() - 15);
 		expectedFrameworkEvents = new Object[1];
-		expectedFrameworkEvents[0] = new FrameworkEvent(FrameworkEvent.STARTLEVEL_CHANGED, OSGiTestsActivator.getContext().getBundle(), null);
+		expectedFrameworkEvents[0] = new FrameworkEvent(FrameworkEvent.STARTLEVEL_CHANGED, OSGiTestsActivator.getContext().getBundle(0), null);
 		actualFrameworkEvents = frameworkListenerResults.getResults(1);
 		compareResults(expectedFrameworkEvents, actualFrameworkEvents);
 
@@ -283,13 +283,13 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		// test transient start Bundle.start(START_TRANSIENT)
 		startLevel.setStartLevel(startLevel.getStartLevel() + 15);
 		Object[] expectedFrameworkEvents = new Object[1];
-		expectedFrameworkEvents[0] = new FrameworkEvent(FrameworkEvent.STARTLEVEL_CHANGED, OSGiTestsActivator.getContext().getBundle(), null);
+		expectedFrameworkEvents[0] = new FrameworkEvent(FrameworkEvent.STARTLEVEL_CHANGED, OSGiTestsActivator.getContext().getBundle(0), null);
 		Object[] actualFrameworkEvents = frameworkListenerResults.getResults(1);
 		compareResults(expectedFrameworkEvents, actualFrameworkEvents);
 	
 		startLevel.setStartLevel(startLevel.getStartLevel() - 15);
 		expectedFrameworkEvents = new Object[1];
-		expectedFrameworkEvents[0] = new FrameworkEvent(FrameworkEvent.STARTLEVEL_CHANGED, OSGiTestsActivator.getContext().getBundle(), null);
+		expectedFrameworkEvents[0] = new FrameworkEvent(FrameworkEvent.STARTLEVEL_CHANGED, OSGiTestsActivator.getContext().getBundle(0), null);
 		actualFrameworkEvents = frameworkListenerResults.getResults(1);
 		compareResults(expectedFrameworkEvents, actualFrameworkEvents);
 
@@ -310,13 +310,13 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 
 		startLevel.setStartLevel(startLevel.getStartLevel() + 15);
 		expectedFrameworkEvents = new Object[1];
-		expectedFrameworkEvents[0] = new FrameworkEvent(FrameworkEvent.STARTLEVEL_CHANGED, OSGiTestsActivator.getContext().getBundle(), null);
+		expectedFrameworkEvents[0] = new FrameworkEvent(FrameworkEvent.STARTLEVEL_CHANGED, OSGiTestsActivator.getContext().getBundle(0), null);
 		actualFrameworkEvents = frameworkListenerResults.getResults(1);
 		compareResults(expectedFrameworkEvents, actualFrameworkEvents);
 
 		startLevel.setStartLevel(startLevel.getStartLevel() - 15);
 		expectedFrameworkEvents = new Object[1];
-		expectedFrameworkEvents[0] = new FrameworkEvent(FrameworkEvent.STARTLEVEL_CHANGED, OSGiTestsActivator.getContext().getBundle(), null);
+		expectedFrameworkEvents[0] = new FrameworkEvent(FrameworkEvent.STARTLEVEL_CHANGED, OSGiTestsActivator.getContext().getBundle(0), null);
 		actualFrameworkEvents = frameworkListenerResults.getResults(1);
 		compareResults(expectedFrameworkEvents, actualFrameworkEvents);
 
@@ -327,7 +327,7 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		// now call start(START_TRANSIENT) while start-level is met.
 		startLevel.setStartLevel(startLevel.getStartLevel() + 15);
 		expectedFrameworkEvents = new Object[1];
-		expectedFrameworkEvents[0] = new FrameworkEvent(FrameworkEvent.STARTLEVEL_CHANGED, OSGiTestsActivator.getContext().getBundle(), null);
+		expectedFrameworkEvents[0] = new FrameworkEvent(FrameworkEvent.STARTLEVEL_CHANGED, OSGiTestsActivator.getContext().getBundle(0), null);
 		actualFrameworkEvents = frameworkListenerResults.getResults(1);
 		compareResults(expectedFrameworkEvents, actualFrameworkEvents);
 
@@ -340,7 +340,7 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 
 		startLevel.setStartLevel(startLevel.getStartLevel() - 15);
 		expectedFrameworkEvents = new Object[1];
-		expectedFrameworkEvents[0] = new FrameworkEvent(FrameworkEvent.STARTLEVEL_CHANGED, OSGiTestsActivator.getContext().getBundle(), null);
+		expectedFrameworkEvents[0] = new FrameworkEvent(FrameworkEvent.STARTLEVEL_CHANGED, OSGiTestsActivator.getContext().getBundle(0), null);
 		actualFrameworkEvents = frameworkListenerResults.getResults(1);
 		compareResults(expectedFrameworkEvents, actualFrameworkEvents);
 
@@ -361,7 +361,7 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		// test that the bundle is started when start-level is met
 		startLevel.setStartLevel(startLevel.getStartLevel() + 15);
 		Object[] expectedFrameworkEvents = new Object[1];
-		expectedFrameworkEvents[0] = new FrameworkEvent(FrameworkEvent.STARTLEVEL_CHANGED, OSGiTestsActivator.getContext().getBundle(), null);
+		expectedFrameworkEvents[0] = new FrameworkEvent(FrameworkEvent.STARTLEVEL_CHANGED, OSGiTestsActivator.getContext().getBundle(0), null);
 		Object[] actualFrameworkEvents = frameworkListenerResults.getResults(1);
 		compareResults(expectedFrameworkEvents, actualFrameworkEvents);
 
@@ -372,7 +372,7 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 
 		startLevel.setStartLevel(startLevel.getStartLevel() - 15);
 		expectedFrameworkEvents = new Object[1];
-		expectedFrameworkEvents[0] = new FrameworkEvent(FrameworkEvent.STARTLEVEL_CHANGED, OSGiTestsActivator.getContext().getBundle(), null);
+		expectedFrameworkEvents[0] = new FrameworkEvent(FrameworkEvent.STARTLEVEL_CHANGED, OSGiTestsActivator.getContext().getBundle(0), null);
 		actualFrameworkEvents = frameworkListenerResults.getResults(1);
 		compareResults(expectedFrameworkEvents, actualFrameworkEvents);
 
@@ -384,7 +384,7 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		// now call stop(STOP_TRANSIENT) while the start-level is met.
 		startLevel.setStartLevel(startLevel.getStartLevel() + 15);
 		expectedFrameworkEvents = new Object[1];
-		expectedFrameworkEvents[0] = new FrameworkEvent(FrameworkEvent.STARTLEVEL_CHANGED, OSGiTestsActivator.getContext().getBundle(), null);
+		expectedFrameworkEvents[0] = new FrameworkEvent(FrameworkEvent.STARTLEVEL_CHANGED, OSGiTestsActivator.getContext().getBundle(0), null);
 		actualFrameworkEvents = frameworkListenerResults.getResults(1);
 		compareResults(expectedFrameworkEvents, actualFrameworkEvents);
 
@@ -402,14 +402,14 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 
 		startLevel.setStartLevel(startLevel.getStartLevel() - 15);
 		expectedFrameworkEvents = new Object[1];
-		expectedFrameworkEvents[0] = new FrameworkEvent(FrameworkEvent.STARTLEVEL_CHANGED, OSGiTestsActivator.getContext().getBundle(), null);
+		expectedFrameworkEvents[0] = new FrameworkEvent(FrameworkEvent.STARTLEVEL_CHANGED, OSGiTestsActivator.getContext().getBundle(0), null);
 		actualFrameworkEvents = frameworkListenerResults.getResults(1);
 		compareResults(expectedFrameworkEvents, actualFrameworkEvents);
 
 		// now make sure the bundle still restarts when start-level is met
 		startLevel.setStartLevel(startLevel.getStartLevel() + 15);
 		expectedFrameworkEvents = new Object[1];
-		expectedFrameworkEvents[0] = new FrameworkEvent(FrameworkEvent.STARTLEVEL_CHANGED, OSGiTestsActivator.getContext().getBundle(), null);
+		expectedFrameworkEvents[0] = new FrameworkEvent(FrameworkEvent.STARTLEVEL_CHANGED, OSGiTestsActivator.getContext().getBundle(0), null);
 		actualFrameworkEvents = frameworkListenerResults.getResults(1);
 		compareResults(expectedFrameworkEvents, actualFrameworkEvents);
 
@@ -420,7 +420,7 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 
 		startLevel.setStartLevel(startLevel.getStartLevel() - 15);
 		expectedFrameworkEvents = new Object[1];
-		expectedFrameworkEvents[0] = new FrameworkEvent(FrameworkEvent.STARTLEVEL_CHANGED, OSGiTestsActivator.getContext().getBundle(), null);
+		expectedFrameworkEvents[0] = new FrameworkEvent(FrameworkEvent.STARTLEVEL_CHANGED, OSGiTestsActivator.getContext().getBundle(0), null);
 		actualFrameworkEvents = frameworkListenerResults.getResults(1);
 		compareResults(expectedFrameworkEvents, actualFrameworkEvents);
 
