@@ -6,3 +6,6 @@ eclipse.res
 *.lib
 eclipse_*.dll
 com_*.dll
+eclipsec.exe
+eclipsec.exe.manifest
+eclipse_*.dll.manifest

@@ -5,3 +5,4 @@ eclipse.res
 *.exp
 *.lib
 eclipse_*.dll
+eclipsec.exe
