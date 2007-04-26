@@ -33,10 +33,11 @@ DLL_OBJS	= eclipse.obj  eclipseWpf.obj  eclipseUtil.obj  eclipseJNI.obj eclipseS
 LIBS   = kernel32.lib msvcrt.lib mscoree.lib
 DLL_LIBS = kernel32.lib Advapi32.lib msvcrt.lib
 LFLAGS =  -CLRTHREADATTRIBUTE:STA /NODEFAULTLIB:LIBCMT /INCREMENTAL:NO /RELEASE /NOLOGO -subsystem:windows,4.0 -entry:wmainCRTStartup
+CONSOLEFLAGS =  -CLRTHREADATTRIBUTE:STA /NODEFAULTLIB:LIBCMT /INCREMENTAL:NO /RELEASE /NOLOGO -subsystem:console,4.0 -entry:wmainCRTStartup
 DLL_LFLAGS = -CLRTHREADATTRIBUTE:STA /NODEFAULTLIB:LIBCMT /INCREMENTAL:NO /PDB:NONE -dll /BASE:0x10000000 /DLL
 RES    = eclipse.res
 EXEC   = eclipse.exe
-CONSOLE = eclipse.com
+CONSOLE = eclipsec.exe
 DLL    = $(PROGRAM_LIBRARY)
 DEBUG  = #$(cdebug)
 
@@ -87,7 +88,7 @@ $(EXEC): $(MAIN_OBJS) $(COMMON_OBJS)
 
 $(CONSOLE): $(MAIN_OBJS) $(COMMON_OBJS)
     rc.exe -r -fo $(RES) eclipse.rc
-    link $(LFLAGS) -out:$(CONSOLE) $(MAIN_OBJS) $(COMMON_OBJS) $(RES) $(LIBS)
+    link $(CONSOLEFLAGS) -out:$(CONSOLE) $(MAIN_OBJS) $(COMMON_OBJS) $(LIBS)
     mt.exe -manifest $(PROGRAM_OUTPUT).manifest -outputresource:$(CONSOLE);2
     
 $(DLL): $(DLL_OBJS) $(COMMON_OBJS)

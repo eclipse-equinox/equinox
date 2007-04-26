@@ -56,8 +56,10 @@ DLL_OBJS	= eclipse.o  eclipseWin.o  eclipseUtil.o  eclipseJNI.o eclipseShm.o\
 	  		  
 LIBS	= -lkernel32 -luser32 -lgdi32 -lcomctl32 -lmsvcrt
 LDFLAGS = -mwindows -mno-cygwin
+CONSOLEFLAGS = -mconsole -mno-cygwin
 DLL_LDFLAGS = -mno-cygwin -shared -Wl,--export-all-symbols -Wl,--kill-at
 RES	= eclipse.res
+CONSOLE = eclipsec.exe
 EXEC	= $(PROGRAM_OUTPUT)
 DLL     = $(PROGRAM_LIBRARY)
 DEBUG	= $(CDEBUG)
@@ -72,7 +74,7 @@ ACFLAGS = -I.. -DDEFAULT_OS="\"$(DEFAULT_OS)\"" \
 	  $(DEBUG) $(CFLAGS)
 WCFLAGS	= -DUNICODE $(ACFLAGS)
 
-all: $(EXEC) $(DLL)
+all: $(EXEC) $(DLL) $(CONSOLE)
 
 eclipseMain.o: ../eclipseUnicode.h ../eclipseCommon.h ../eclipseMain.c 
 	$(CC) $(DEBUG) $(WCFLAGS) -c -o $@ ../eclipseMain.c
@@ -134,12 +136,15 @@ $(RES): eclipse.rc
 $(EXEC): $(MAIN_OBJS) $(COMMON_OBJS) $(RES)
 	$(CC) $(LDFLAGS) -o $(EXEC) $(MAIN_OBJS) $(COMMON_OBJS) $(RES) $(LIBS)
 
+$(CONSOLE): $(MAIN_OBJS) $(COMMON_OBJS) 
+	$(CC) $(CONSOLEFLAGS) -o $(CONSOLE) $(MAIN_OBJS) $(COMMON_OBJS) $(LIBS)
+	
 $(DLL): $(DLL_OBJS) $(COMMON_OBJS)
 	$(CC) $(DLL_LDFLAGS) -o $(DLL) $(DLL_OBJS) $(COMMON_OBJS) $(LIBS)
 	
 install: all
-	cp $(EXEC) $(DLL) $(OUTPUT_DIR)
-	rm -f $(EXEC) $(DLL_OBJS) $(COMMON_OBJS) $(MAIN_OBJS) $(RES)
+	cp $(EXEC) $(DLL) $(CONSOLE) $(OUTPUT_DIR) 
+	rm -f $(EXEC) $(DLL_OBJS) $(COMMON_OBJS) $(MAIN_OBJS) $(RES) $(CONSOLE)
 
 clean:
-	$(RM) $(EXEC) $(DLL) $(DLL_OBJS) $(COMMON_OBJS) $(MAIN_OBJS) $(RES)
+	$(RM) $(EXEC) $(DLL) $(DLL_OBJS) $(COMMON_OBJS) $(MAIN_OBJS) $(RES) $(CONSOLE)

@@ -40,7 +40,7 @@ CONSOLEFLAGS = /NODEFAULTLIB /INCREMENTAL:NO /RELEASE /NOLOGO -subsystem:console
 DLL_LFLAGS = /NODEFAULTLIB /INCREMENTAL:NO /PDB:NONE /RELEASE /NOLOGO -entry:_DllMainCRTStartup@12 -dll /BASE:0x10000000 /DLL
 RES    = eclipse.res
 EXEC   = eclipse.exe
-CONSOLE = eclipse.com
+CONSOLE = eclipsec.exe
 DLL    = $(PROGRAM_LIBRARY)
 DEBUG  = #$(cdebug)
 acflags = -I.. -DDEFAULT_OS="\"$(DEFAULT_OS)\"" \
@@ -108,8 +108,8 @@ aeclipseWinCommon.obj: ../eclipseCommon.h eclipseWinCommon.c
 $(EXEC): $(MAIN_OBJS) $(COMMON_OBJS) $(RES)
     $(link) $(LFLAGS) -out:$(PROGRAM_OUTPUT) $(MAIN_OBJS) $(COMMON_OBJS) $(RES) $(LIBS)
 
-$(CONSOLE): $(MAIN_OBJS) $(COMMON_OBJS) $(RES)
-    $(link) $(CONSOLEFLAGS) -out:$(CONSOLE) $(MAIN_OBJS) $(COMMON_OBJS) $(RES) $(LIBS)
+$(CONSOLE): $(MAIN_OBJS) $(COMMON_OBJS)
+    $(link) $(CONSOLEFLAGS) -out:$(CONSOLE) $(MAIN_OBJS) $(COMMON_OBJS) $(LIBS)
 
 $(DLL): $(DLL_OBJS) $(COMMON_OBJS)
     $(link) $(DLL_LFLAGS) -out:$(PROGRAM_LIBRARY) $(DLL_OBJS) $(COMMON_OBJS) $(RES) $(DLL_LIBS)
