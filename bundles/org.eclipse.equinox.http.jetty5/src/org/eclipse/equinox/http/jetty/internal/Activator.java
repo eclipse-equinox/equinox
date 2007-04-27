@@ -9,10 +9,12 @@
 package org.eclipse.equinox.http.jetty.internal;
 
 import java.io.File;
+import java.lang.reflect.Method;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.framework.*;
 import org.osgi.service.cm.ManagedServiceFactory;
+import org.osgi.service.startlevel.StartLevel;
 
 public class Activator implements BundleActivator {
 
@@ -25,6 +27,7 @@ public class Activator implements BundleActivator {
 	private static final String ORG_OSGI_SERVICE_HTTP_PORT_SECURE = "org.osgi.service.http.port.secure"; //$NON-NLS-1$
 
 	// controls whether start() should automatically start an Http Service based on BundleContext properties (default is true)
+	// Note: only used if the bundle is explicitly started (e.g. not "lazy" activated)
 	private static final String AUTOSTART = "org.eclipse.equinox.http.jetty.autostart"; //$NON-NLS-1$
 
 	// The staticServerManager is use by the start and stopServer methods and must be accessed in a static synchronized block
@@ -40,7 +43,7 @@ public class Activator implements BundleActivator {
 		httpServerManager = new HttpServerManager(jettyWorkDir);
 
 		String autostart = context.getProperty(AUTOSTART);
-		if (autostart == null || Boolean.valueOf(autostart).booleanValue()) {
+		if ((autostart == null || Boolean.valueOf(autostart).booleanValue()) && ! isBundleActivationPolicyUsed(context)) {
 			Dictionary defaultSettings = createDefaultSettings(context);
 			httpServerManager.updated(DEFAULT_PID, defaultSettings);
 		}
@@ -50,6 +53,25 @@ public class Activator implements BundleActivator {
 
 		registration = context.registerService(ManagedServiceFactory.class.getName(), httpServerManager, dictionary);
 		setStaticServerManager(httpServerManager);
+	}
+
+	private boolean isBundleActivationPolicyUsed(BundleContext context) {
+		ServiceReference reference = context.getServiceReference(StartLevel.class.getName());
+		StartLevel sl =  ((reference != null) ? (StartLevel) context.getService(reference) : null);
+		if (sl != null) {
+			try {
+				Bundle bundle = context.getBundle();
+				Method isBundleActivationPolicyUsed = StartLevel.class.getMethod("isBundleActivationPolicyUsed", new Class[] {Bundle.class}); //$NON-NLS-1$
+				Boolean result = (Boolean) isBundleActivationPolicyUsed.invoke(sl, new Object[] {bundle});
+				return result.booleanValue();
+			} catch (Exception e) {
+				// ignore
+				// Bundle Activation Policy only available in StartLevel Service 1.1
+			} finally {
+				context.ungetService(reference);
+			}
+		}
+		return false;
 	}
 
 	public void stop(BundleContext context) throws Exception {
