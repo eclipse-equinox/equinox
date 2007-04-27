@@ -573,7 +573,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 				Debug.println("Service object is null"); //$NON-NLS-1$
 			}
 
-			throw new NullPointerException(Msg.SERVICE_ARGUMENT_NULL_EXCEPTION); 
+			throw new IllegalArgumentException(Msg.SERVICE_ARGUMENT_NULL_EXCEPTION); 
 		}
 
 		int size = clazzes.length;
