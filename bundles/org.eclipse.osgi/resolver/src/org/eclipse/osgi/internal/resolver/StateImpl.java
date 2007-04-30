@@ -69,6 +69,7 @@ public abstract class StateImpl implements State {
 			resetSystemExports();
 		if (resolver != null)
 			resolver.bundleAdded(description);
+		updateTimeStamp();
 		return true;
 	}
 
@@ -105,6 +106,7 @@ public abstract class StateImpl implements State {
 				}
 			}
 		}
+		updateTimeStamp();
 		return true;
 	}
 
@@ -141,6 +143,7 @@ public abstract class StateImpl implements State {
 				}
 			}
 		}
+		updateTimeStamp();
 		return true;
 	}
 
@@ -362,7 +365,8 @@ public abstract class StateImpl implements State {
 				cumulativeTime = cumulativeTime + time;
 				FrameworkDebugOptions.getDefault().setOption("org.eclipse.core.runtime.adaptor/resolver/timing/value", Long.toString(cumulativeTime)); //$NON-NLS-1$
 			}
-
+			if (savedChanges.getChanges().length > 0)
+				updateTimeStamp();
 			return savedChanges;
 		} finally {
 			resolving = false;
@@ -490,6 +494,12 @@ public abstract class StateImpl implements State {
 
 	public void setTimeStamp(long newTimeStamp) {
 		timeStamp = newTimeStamp;
+	}
+
+	private void updateTimeStamp() {
+		if (getTimeStamp() == Long.MAX_VALUE)
+			setTimeStamp(0);
+		setTimeStamp(getTimeStamp() + 1);
 	}
 
 	public StateObjectFactory getFactory() {
