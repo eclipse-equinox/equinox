@@ -136,7 +136,11 @@ $(RES): eclipse.rc
 $(EXEC): $(MAIN_OBJS) $(COMMON_OBJS) $(RES)
 	$(CC) $(LDFLAGS) -o $(EXEC) $(MAIN_OBJS) $(COMMON_OBJS) $(RES) $(LIBS)
 
+#the console version needs a flag set, should look for a better way to do this
 $(CONSOLE): $(MAIN_OBJS) $(COMMON_OBJS) 
+	rm -f eclipseConfig.o aeclipseConfig.o
+	$(CC) $(DEBUG) $(WCFLAGS) -D_WIN32_CONSOLE -c -o eclipseConfig.o ../eclipseConfig.c
+	$(CC) $(DEBUG) $(ACFLAGS) -D_WIN32_CONSOLE -c -o aeclipseConfig.o ../eclipseConfig.c
 	$(CC) $(CONSOLEFLAGS) -o $(CONSOLE) $(MAIN_OBJS) $(COMMON_OBJS) $(LIBS)
 	
 $(DLL): $(DLL_OBJS) $(COMMON_OBJS)

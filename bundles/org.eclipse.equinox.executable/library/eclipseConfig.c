@@ -15,6 +15,7 @@
 #ifdef _WIN32
 
 #include <stdio.h>
+#include <sys/stat.h>
 
 #ifdef __MINGW32__
 #include <stdlib.h>
@@ -50,6 +51,16 @@ int readIniFile(_TCHAR* program, int *argc, _TCHAR ***argv)
 			return -2;
 		}
 		_tcscpy(extension, _T_ECLIPSE(".ini"));
+#ifdef _WIN32_CONSOLE
+		{
+			/* We are the console version, if the ini file does not exist, try
+			 * removing the 'c' from the end of the program name */
+			struct _stat stats; 
+			if (_tstat( config_file, &stats ) != 0 && *(extension - 1) == _T('c')) {
+				_tcscpy(extension - 1, extension);
+			}
+		}
+#endif
 	}
 #else
 	/* Append the extension */

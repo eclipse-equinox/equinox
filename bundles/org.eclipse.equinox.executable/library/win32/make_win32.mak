@@ -108,7 +108,11 @@ aeclipseWinCommon.obj: ../eclipseCommon.h eclipseWinCommon.c
 $(EXEC): $(MAIN_OBJS) $(COMMON_OBJS) $(RES)
     $(link) $(LFLAGS) -out:$(PROGRAM_OUTPUT) $(MAIN_OBJS) $(COMMON_OBJS) $(RES) $(LIBS)
 
+#the console version needs a flag set, should look for a better way to do this
 $(CONSOLE): $(MAIN_OBJS) $(COMMON_OBJS)
+	del -f eclipseConfig.obj aeclipseConfig.obj
+	$(cc) $(DEBUG) $(wcflags) $(cvarsdll) -D_WIN32_CONSOLE /FoeclipseConfig.obj ../eclipseConfig.c
+	$(cc) $(DEBUG) $(acflags) $(cvarsdll) -D_WIN32_CONSOLE /FoaeclipseConfig.obj ../eclipseConfig.c
     $(link) $(CONSOLEFLAGS) -out:$(CONSOLE) $(MAIN_OBJS) $(COMMON_OBJS) $(LIBS)
 
 $(DLL): $(DLL_OBJS) $(COMMON_OBJS)

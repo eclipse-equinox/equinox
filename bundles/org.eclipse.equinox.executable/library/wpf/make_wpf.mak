@@ -87,7 +87,8 @@ $(EXEC): $(MAIN_OBJS) $(COMMON_OBJS)
     mt.exe -manifest $(PROGRAM_OUTPUT).manifest -outputresource:$(PROGRAM_OUTPUT);2
 
 $(CONSOLE): $(MAIN_OBJS) $(COMMON_OBJS)
-    rc.exe -r -fo $(RES) eclipse.rc
+	del -f eclipseConfig.obj
+    $(CC) $(DEBUG) $(CFLAGS) $(cvarsdll) -D_WIN32_CONSOLE /FoeclipseConfig.obj ../eclipseConfig.c
     link $(CONSOLEFLAGS) -out:$(CONSOLE) $(MAIN_OBJS) $(COMMON_OBJS) $(LIBS)
     mt.exe -manifest $(PROGRAM_OUTPUT).manifest -outputresource:$(CONSOLE);2
     
