@@ -7,7 +7,7 @@
  * 
  * Contributors:
  *     Cognos Incorporated - initial API and implementation
- *     IBM Corporation - comments, and costmetic changes
+ *     IBM Corporation - comments, and cosmetic changes
  *******************************************************************************/
 
 package org.eclipse.equinox.http.servlet.internal;
