@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2005 IBM Corporation and others.
+ * Copyright (c) 2004, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,11 +10,12 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.services.resolver;
 
+import java.util.Hashtable;
 import junit.framework.Test;
 import junit.framework.TestSuite;
-import org.eclipse.osgi.service.resolver.BundleDescription;
-import org.eclipse.osgi.service.resolver.State;
+import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.Constants;
 
 public class StateCycleTest extends AbstractStateTest {
 
@@ -163,4 +164,44 @@ public class StateCycleTest extends AbstractStateTest {
 		assertTrue("3.0", bundleD.isResolved());
 	}
 
+	public void test185285() throws BundleException {
+		// if two versions of the same bundle export and import two different packages at the same version
+		// then we should resolve both sets of imports to the first bundle installed.
+		State state = buildEmptyState();
+		Hashtable manifest = new Hashtable();
+		long bundleID = 0;
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "X");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		manifest.put(Constants.EXPORT_PACKAGE, "foo; version=\"1.0.0\", bar; version=\"1.0.0\"");
+		manifest.put(Constants.IMPORT_PACKAGE, "foo, bar");
+		BundleDescription a_100 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "X");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.1");
+		manifest.put(Constants.EXPORT_PACKAGE, "foo; version=\"1.0.0\", bar; version=\"1.0.0\"");
+		manifest.put(Constants.IMPORT_PACKAGE, "foo, bar");
+		BundleDescription a_101 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+
+		state.addBundle(a_100);
+		state.addBundle(a_101);
+
+		state.resolve();
+		assertTrue("1.0", a_100.isResolved());
+		assertTrue("1.1", a_101.isResolved());
+		ExportPackageDescription[] selectedExportsA100 = a_100.getSelectedExports();
+		ExportPackageDescription[] selectedExportsA101 = a_101.getSelectedExports();
+		assertTrue("2.0", selectedExportsA100.length == 2);
+		assertTrue("2.1", selectedExportsA101.length == 0);
+		ExportPackageDescription[] resolvedImportsA100 = a_100.getResolvedImports();
+		ExportPackageDescription[] resolvedImportsA101 = a_100.getResolvedImports();
+		assertTrue("3.0", resolvedImportsA100.length == 2);
+		assertTrue("3.1", resolvedImportsA101.length == 2);
+		for (int i = 0; i < resolvedImportsA100.length; i++) {
+			assertTrue("3.2.1." + i, selectedExportsA100[i] == resolvedImportsA100[i]);
+			assertTrue("3.2.1." + i, selectedExportsA100[i] == resolvedImportsA101[i]);
+		}
+	}
 }

@@ -1136,6 +1136,8 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 					continue; // Must not attempt to resolve an exporter when dynamic
 				if (imp.getBundle() == export.getExporter() && !export.getExportPackageDescription().isRoot())
 					continue; // Can't wire to our own re-export
+				if (imp.getSelectedSupplier() != null && ((ResolverExport)imp.getSelectedSupplier()).getExporter() == imp.getBundle())
+					break; // We wired to ourselves; nobody else matters
 				export.getExporter().addRef(imp.getBundle());
 				// first add the possible supplier; this is done before resolving the supplier bundle to prevent endless cycle loops.
 				imp.addPossibleSupplier(export);
