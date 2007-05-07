@@ -110,9 +110,13 @@ int readConfigFile( _TCHAR * config_file, int *argc, _TCHAR ***argv )
 				continue;
 			
 			/* basic whitespace trimming */
-			while (arg[length - 1] == _T_ECLIPSE(' ') || arg[length - 1] == _T_ECLIPSE('\t')) {
+			while (length > 0 && (arg[length - 1] == _T_ECLIPSE(' ') || arg[length - 1] == _T_ECLIPSE('\t'))) {
 				arg[--length] = 0;
 			}
+			/* ignore empty lines */
+			if (length == 0)
+				continue;
+			
 			(*argv)[index] = arg;
 			index++;
 			
