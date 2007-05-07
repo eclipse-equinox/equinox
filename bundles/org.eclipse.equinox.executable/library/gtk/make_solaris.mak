@@ -1,5 +1,5 @@
 #*******************************************************************************
-# Copyright (c) 2000, 2005 IBM Corporation and others.
+# Copyright (c) 2000, 2007 IBM Corporation and others.
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v1.0
 # which accompanies this distribution, and is available at 
@@ -9,6 +9,7 @@
 #     IBM Corporation - initial API and implementation
 #     Kevin Cornell (Rational Software Corporation)
 #     Tom Tromey (Red Hat, Inc.)
+# Martin Oberhuber (Wind River) - [176805] Support building with gcc and debug
 #*******************************************************************************
 include ../make_version.mak
 # Makefile for creating the GTK eclipse launcher program.
@@ -33,14 +34,18 @@ PROGRAM_LIBRARY=$(PROGRAM_OUTPUT)_$(LIB_VERSION).so
 MAIN_OBJS = eclipseMain.o
 COMMON_OBJS = eclipseConfig.o eclipseCommon.o eclipseGtkCommon.o
 DLL_OBJS	= eclipse.o eclipseGtk.o eclipseUtil.o eclipseJNI.o eclipseShm.o eclipseNix.o
+PICFLAG = -K PIC
+# Optimize and remove all debugging information by default
+OPTFLAG = -O -s
+# OPTFLAG = -g
 
 EXEC = $(PROGRAM_OUTPUT)
 DLL = $(PROGRAM_LIBRARY)
 LIBS = `pkg-config --libs-only-L gtk+-2.0` -lgtk-x11-2.0 -lgdk_pixbuf-2.0 -lgobject-2.0 -lgdk-x11-2.0 -lglib-2.0 -lthread -ldl -lc
-LFLAGS = -shared 
-CFLAGS = -O -s \
+LFLAGS = -G
+CFLAGS = $(OPTFLAG) \
 	-DSOLARIS \
-	-K PIC \
+	$(PICFLAG) \
 	-DDEFAULT_OS="\"$(DEFAULT_OS)\"" \
 	-DDEFAULT_OS_ARCH="\"$(DEFAULT_OS_ARCH)\"" \
 	-DDEFAULT_WS="\"$(DEFAULT_WS)\"" \
@@ -82,7 +87,7 @@ $(EXEC): $(MAIN_OBJS) $(COMMON_OBJS)
 	$(CC) -o $(EXEC) $(MAIN_OBJS) $(COMMON_OBJS) $(LIBS)
 
 $(DLL): $(DLL_OBJS) $(COMMON_OBJS)
-	cc -G -o $(DLL) $(DLL_OBJS) $(COMMON_OBJS) $(LIBS)
+	$(CC) $(LFLAGS) -o $(DLL) $(DLL_OBJS) $(COMMON_OBJS) $(LIBS)
 
 install: all
 	cp $(EXEC) $(DLL) $(OUTPUT_DIR)

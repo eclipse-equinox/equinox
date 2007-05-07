@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Andrew Niefer
+ * Martin Oberhuber (Wind River) - [176805] Support Solaris9 by adding setenv()
  *******************************************************************************/
  
 #include "eclipseCommon.h"
@@ -107,6 +108,7 @@ static int compareVersions(const _TCHAR* str1, const _TCHAR* str2) {
 	freeVersion(v2);
 	return result;
 }
+
 /**
  * Convert a wide string to a narrow one
  * Caller must free the null terminated string returned.
@@ -123,7 +125,41 @@ char *toNarrow(_TCHAR* src)
 	return (char*)_tcsdup(src);
 #endif
 }
- 	
+
+
+/**
+ * Set an environment variable.
+ * Solaris versions <= Solaris 9 did not know setenv in libc,
+ * so emulate it here.
+ */
+#if defined(SOLARIS)
+int setenv (const char *name, const char *value, int replace)
+{
+	int namelen, valuelen, rc;
+	char *var;
+	if (replace == 0) {
+		const char *oldval = getenv(name);
+		if (oldval != NULL) {
+			return 0;
+	    }
+	}
+	namelen = strlen(name);
+	valuelen = strlen(value);
+	var = malloc( (namelen + valuelen + 2) * sizeof(char) );
+	if (var == NULL) {
+		return -1;
+	}
+	/* Use strncpy as protection, in case a thread modifies var
+	 * after we obtained its length */
+	strncpy(var, name, namelen);
+	var[namelen] = '=';
+	strncpy( &var[namelen + 1], value, valuelen);
+	var[namelen + valuelen + 1] = '\0';
+	rc = putenv(var);
+	if (rc != 0) rc = -1; /*putenv returns non-zero on error; setenv -1*/
+	return rc;
+}
+#endif
  	
  /*
  * Find the absolute pathname to where a command resides.
@@ -303,14 +339,6 @@ static int filter(const struct dirent *dir) {
 	}
 	return 0;
 }
-
-static int sorter(const void *a, const void *b) 
-{
-	struct dirent * dirA = *((struct dirent **)a);
-	struct dirent * dirB = *((struct dirent **)b);
-	
-	return compareVersions(dirA->d_name + prefixLength + 1, dirB->d_name + prefixLength + 1);
-}
 #endif
  /* 
  * Looks for files of the form /path/prefix_version.<extension> and returns the full path to
@@ -328,8 +356,8 @@ _TCHAR* findFile( _TCHAR* path, _TCHAR* prefix)
 	WIN32_FIND_DATA data;
 	HANDLE handle;
 #else	
-	struct dirent **files;
-	int count;
+	DIR *dir = NULL;
+	struct dirent * entry = NULL;
 #endif
 	
 	path = _tcsdup(path);
@@ -367,11 +395,22 @@ _TCHAR* findFile( _TCHAR* path, _TCHAR* prefix)
 #else
 	filterPrefix = prefix;
 	prefixLength = _tcslen(prefix);
-	/* TODO should write out own comparator to better handle OSGi versions */
-	count = scandir(path, &files, &filter, &sorter);
-	if(count > 0) {
-		candidate = _tcsdup(files[count - 1]->d_name);
+	if ((dir = opendir(path)) == NULL) {
+		free(path);
+		return NULL;
 	}
+
+	while ((entry = readdir(dir)) != NULL) {
+		if (filter(entry)) {
+			if (candidate == NULL) {
+				candidate = _tcsdup(entry->d_name);
+			} else if (compareVersions(candidate + prefixLength + 1, entry->d_name + prefixLength + 1) < 0) {
+				free(candidate);
+				candidate = _tcsdup(entry->d_name);
+			}
+		}
+	}
+	closedir(dir);
 #endif
 
 	if(candidate != NULL) {

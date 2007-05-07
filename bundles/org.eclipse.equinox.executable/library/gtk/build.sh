@@ -9,6 +9,7 @@
 # Contributors:
 #     IBM Corporation - initial API and implementation
 #     Kevin Cornell (Rational Software Corporation)
+# Martin Oberhuber (Wind River) - [176805] Support building with gcc and debug
 #*******************************************************************************
 #
 # Usage: sh build.sh [<optional switches>] [clean]
@@ -20,7 +21,12 @@
 #       -ws     <DEFAULT_WS>      - default Eclipse "-ws" value
 #       -java <JAVA_HOME>  - java install for jni headers
 #
-#    This script can also be invoked with the "clean" argument.
+#   All other arguments are directly passed to the "make" program.
+#   This script can also be invoked with the "clean" argument.
+#
+#   Examples:
+#   sh build.sh clean
+#   sh build.sh -java /usr/j2se OPTFLAG=-g PICFLAG=-fpic
 
 cd `dirname $0`
 
@@ -144,7 +150,10 @@ if [ "$makefile" != "" ]; then
 	else
 		echo "Building $OS launcher. Defaults: -os $DEFAULT_OS -arch $DEFAULT_OS_ARCH -ws $DEFAULT_WS"
 		make -f $makefile clean
-		make -f $makefile all
+		case x$CC in
+		  x*gcc*) make -f $makefile all PICFLAG=-fpic ;;
+		  *)      make -f $makefile all ;;
+		esac
 	fi
 else
 	echo "Unknown OS $OS -- build aborted"
