@@ -8,6 +8,7 @@
 # Contributors:
 #     IBM Corporation - initial API and implementation
 #     Kevin Cornell (Rational Software Corporation)
+# Martin Oberhuber (Wind River) - [185734] Support building with gcc and debug
 #*******************************************************************************
 include ../make_version.mak
 # Makefile for creating the Solaris/Motif eclipse launcher program.
@@ -22,9 +23,9 @@ include ../make_version.mak
 # MOTIF_HOME	 - the full path to Motif header files
 # JAVA_HOME       - path to java for JNI headers
 
-ifeq ($(PROGRAM_OUTPUT),)
+#ifeq ($(PROGRAM_OUTPUT),)
   PROGRAM_OUTPUT=eclipse
-endif
+#endif
 
 PROGRAM_LIBRARY=eclipse_$(LIB_VERSION).so
 
@@ -33,13 +34,19 @@ MAIN_OBJS = eclipseMain.o
 COMMON_OBJS = eclipseConfig.o eclipseCommon.o eclipseMotifCommon.o
 DLL_OBJS	= eclipse.o eclipseMotif.o eclipseUtil.o eclipseJNI.o eclipseShm.o eclipseNix.o\
 			  NgCommon.o NgImage.o NgImageData.o NgWinBMPFileFormat.o 
+PICFLAG = -K PIC
+# Optimize and remove all debugging information by default
+OPTFLAG = -O -s
+# OPTFLAG = -g
 
 EXEC = $(PROGRAM_OUTPUT)
 DLL = $(PROGRAM_LIBRARY)
-LIBS = -L$(MOTIF_HOME)/lib -L$(X11_HOME)/lib -lXm -lXt -lX11 -lintl -lpthread
-LFLAGS = -shared -Wl,--export-dynamic 
-CFLAGS = -O -s \
+LIBS = -L$(MOTIF_HOME)/lib -L$(X11_HOME)/lib -lXm -lXt -lX11 -lintl -lpthread -ldl -lc
+#LFLAGS = -shared -Wl,--export-dynamic 
+LFLAGS = -G
+CFLAGS =$(OPTFLAG) \
 	-DSOLARIS \
+	$(PICFLAG) \
 	-DNO_XINERAMA_EXTENSIONS \
 	-DNETSCAPE_FIX \
 	-DDEFAULT_OS="\"$(DEFAULT_OS)\"" \
@@ -57,28 +64,28 @@ all: $(EXEC) $(DLL)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 eclipseMain.o: ../eclipseMain.c ../eclipseUnicode.h ../eclipseCommon.h  
-	$(CC) $(CFLAGS) -c $^ -o $@
+	$(CC) $(CFLAGS) -c ../eclipseMain.c -o $@
 	
 eclipse.o: ../eclipse.c ../eclipseOS.h ../eclipseCommon.h ../eclipseJNI.h
-	$(CC) $(CFLAGS) -c $^ -o $@
+	$(CC) $(CFLAGS) -c ../eclipse.c -o $@
 
 eclipseCommon.o: ../eclipseCommon.c ../eclipseCommon.h ../eclipseUnicode.h 
-	$(CC) $(CFLAGS) -c $^ -o $@
+	$(CC) $(CFLAGS) -c ../eclipseCommon.c -o $@
 	
 eclipseUtil.o: ../eclipseUtil.c ../eclipseUtil.h ../eclipseOS.h
-	$(CC) $(CFLAGS) -c $^ -o $@
+	$(CC) $(CFLAGS) -c ../eclipseUtil.c -o $@
 
 eclipseJNI.o: ../eclipseJNI.c ../eclipseCommon.h ../eclipseOS.h ../eclipseJNI.h
-	$(CC) $(CFLAGS) -c $^ -o $@
+	$(CC) $(CFLAGS) -c ../eclipseJNI.c -o $@
 	
 eclipseConfig.o: ../eclipseConfig.c ../eclipseConfig.h ../eclipseOS.h
-	$(CC) $(CFLAGS) -c $^ -o $@
+	$(CC) $(CFLAGS) -c ../eclipseConfig.c -o $@
 
 eclipseShm.o: ../eclipseShm.h ../eclipseUnicode.h ../eclipseShm.c
-	$(CC) $(CFLAGS) -c $^ -o $@
+	$(CC) $(CFLAGS) -c ../eclipseShm.c -o $@
 	
 eclipseNix.o: ../eclipseNix.c
-	$(CC) $(CFLAGS) -c $^ -o $@
+	$(CC) $(CFLAGS) -c ../eclipseNix.c -o $@
 	
 $(EXEC): $(MAIN_OBJS) $(COMMON_OBJS)
 	$(CC) -o $(EXEC) $(MAIN_OBJS) $(COMMON_OBJS) $(LIBS)

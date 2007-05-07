@@ -10,6 +10,7 @@
 #     IBM Corporation - initial API and implementation
 #     Kevin Cornell (Rational Software Corporation)
 #     Sumit Sarkar (Hewlett-Packard)
+# Martin Oberhuber (Wind River) - [185734] Support building with gcc and debug
 #*******************************************************************************
 #
 # Usage: sh build.sh [<optional switches>] [clean]
@@ -21,8 +22,12 @@
 #       -ws     <DEFAULT_WS>      - default Eclipse "-ws" value
 #		-java   <JAVA_HOME>		  - java insgtall for jni headers
 #
+#   All other arguments are directly passed to the "make" program.
+#   This script can also be invoked with the "clean" argument.
 #
-#    This script can also be invoked with the "clean" argument.
+#   Examples:
+#   sh build.sh clean
+#   sh build.sh -java /usr/j2se OPTFLAG=-g PICFLAG=-fpic
 
 cd `dirname $0`
 
@@ -59,6 +64,8 @@ case $OS in
 		OUTPUT_DIR="../../bin/$defaultWS/$defaultOS/$defaultOSArch"
 		;;
 	"SunOS")
+		PATH=/usr/ccs/bin:/opt/SUNWspro/bin:$PATH
+		export PATH
 		makefile="make_solaris.mak"
 		defaultOS="solaris"
 		defaultOSArch="sparc"
@@ -133,7 +140,10 @@ if [ "$makefile" != "" ]; then
 	else
 		echo "Building $OS launcher. Defaults: -os $DEFAULT_OS -arch $DEFAULT_OS_ARCH -ws $DEFAULT_WS"
 		make -f $makefile clean
-		make -f $makefile all
+		case x$CC in
+		  x*gcc*) make -f $makefile all PICFLAG=-fpic ;;
+		  *)      make -f $makefile all ;;
+		esac
 	fi
 else
 	echo "Unknown OS ($OS) -- build aborted"

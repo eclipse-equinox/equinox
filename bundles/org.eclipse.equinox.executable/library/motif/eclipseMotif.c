@@ -66,7 +66,7 @@ static Widget shellHandle = 0;
 extern void   centreShell( Widget widget, Widget expose );
 
 #ifdef NETSCAPE_FIX
-static void   fixEnvForNetscape();
+void   fixEnvForNetscape();
 #endif /* NETSCAPE_FIX */
 
 void takeDownSplashCB( Widget shell, XtPointer app_data, XtPointer widget_data ) {
@@ -221,7 +221,7 @@ void takeDownSplash()
 extern char* findCommand( char*);
 static const char*  XFILESEARCHPATH = "XFILESEARCHPATH";
 
-static void   fixEnvForNetscape()
+void   fixEnvForNetscape()
 {
 	char*  netscapePath     = NULL;
 	char*  netscapeResource = NULL;

@@ -50,7 +50,7 @@ static const char* jvmLocations [] = { "j9vm", "../jre/bin/j9vm",
 static void adjustLibraryPath( char * vmLibrary );
 static char * findLib(char * command);
 #ifdef NETSCAPE_FIX
-static void   fixEnvForNetscape();
+extern void   fixEnvForNetscape();
 #endif /* NETSCAPE_FIX */
 
 char * findVMLibrary( char* command ) {
