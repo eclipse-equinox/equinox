@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2006 IBM Corporation and others.
+ * Copyright (c) 2004, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,11 +7,13 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Danail Nachev (Prosyst) - bug 185654
  *******************************************************************************/
 package org.eclipse.core.runtime.internal.adaptor;
 
 import java.io.*;
 import java.nio.channels.FileLock;
+import java.nio.channels.OverlappingFileLockException;
 import org.eclipse.osgi.util.NLS;
 
 /**
@@ -37,11 +39,15 @@ public class Locker_JavaNio implements Locker {
 			// produce a more specific message for clients
 			String specificMessage = NLS.bind(EclipseAdaptorMsg.location_cannotLockNIO, new Object[] {lockFile, ioe.getMessage(), "\"-D" + BasicLocation.PROP_OSGI_LOCKING + "=none\""}); //$NON-NLS-1$ //$NON-NLS-2$
 			throw new IOException(specificMessage);
+		} catch (OverlappingFileLockException e) {
+			// handle it as null result
+			fileLock = null;
+		} finally {
+			if (fileLock != null)
+				return true;
+			raFile.close();
+			raFile = null;
 		}
-		if (fileLock != null)
-			return true;
-		raFile.close();
-		raFile = null;
 		return false;
 	}
 
