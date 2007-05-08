@@ -41,7 +41,7 @@ OPTFLAG = -O -s
 
 EXEC = $(PROGRAM_OUTPUT)
 DLL = $(PROGRAM_LIBRARY)
-LIBS = -L$(MOTIF_HOME)/lib -L$(X11_HOME)/lib -lXm -lXt -lX11 -lintl -lpthread -ldl -lc
+LIBS = -L$(MOTIF_HOME)/lib -L$(X11_HOME)/lib -lXm -lXt -lX11 -lintl -lthread -ldl -lc
 #LFLAGS = -shared -Wl,--export-dynamic 
 LFLAGS = -G
 CFLAGS =$(OPTFLAG) \
