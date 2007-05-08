@@ -60,8 +60,18 @@ void displayMessage(char* title, char* message)
 /* Initialize the Window System */
 void initWindowSystem(int* pArgc, char* argv[], int showSplash)
 {
+	int defaultArgc = 1;
+	char * defaultArgv [] = { "", 0 };
+	
     if(gtkInitialized)
     	return;
+    
+	if (argv == NULL) {
+		/* gtk_init_check on Solaris 9 doesn't like NULL or empty argv */
+		pArgc = &defaultArgc;
+		argv = defaultArgv;
+	}
+	
     /* Save the arguments in case displayMessage() is called in the main launcher. */ 
     if (saveArgv == 0)
     {
