@@ -1149,7 +1149,8 @@ static int determineVM(_TCHAR** msg) {
     				ch = malloc((_tcslen(vmName) + 1 + _tcslen(vmLibrary) + 1) * sizeof(_TCHAR));
     				_stprintf( ch, _T_ECLIPSE("%s%c%s"), vmName, dirSeparator, vmLibrary );
     				jniLib = findVMLibrary(ch);
-    				free(ch);
+    				if (jniLib != ch)
+    					free(ch);
     				if (jniLib != NULL) {
     					return LAUNCH_JNI;
     				}
@@ -1196,6 +1197,8 @@ static int determineVM(_TCHAR** msg) {
     		ch = findCommand(vmName);
     		if(ch != NULL) {
     			jniLib = findVMLibrary(ch);
+    			if (ch != jniLib)
+    				free(ch);
     			return LAUNCH_JNI;
     		}
     		/* file didn't exist, error */

@@ -218,9 +218,8 @@ char * findVMLibrary( char* command ) {
 	int length;
 	
 	/*check first to see if command already points to the library */
-	start = strrchr( command, dirSeparator ) + 1;
-	if (strcmp(start, "JavaVM") == 0) {
-		return command;
+	if (strcmp(command, JAVA_FRAMEWORK) == 0) {
+		return JAVA_FRAMEWORK;
 	}
 		
 	/* select a version to use based on the command */	
