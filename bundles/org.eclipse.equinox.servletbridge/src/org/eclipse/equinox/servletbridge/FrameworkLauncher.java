@@ -213,11 +213,7 @@ public class FrameworkLauncher {
 			Method setInitialProperties = clazz.getMethod("setInitialProperties", new Class[] {Map.class}); //$NON-NLS-1$
 			setInitialProperties.invoke(null, new Object[] {initalPropertyMap});
 
-			Method registerFrameworkShutdownHandler = clazz.getDeclaredMethod("internalAddFrameworkShutdownHandler", new Class[] {Runnable.class}); //$NON-NLS-1$
-			if (! registerFrameworkShutdownHandler.isAccessible())
-				registerFrameworkShutdownHandler.setAccessible(true);
-			Runnable restartHandler = createRestartHandler();
-			registerFrameworkShutdownHandler.invoke(null, new Object[] {restartHandler});
+			registerRestartHandler(clazz);
 			
 			Method runMethod = clazz.getMethod("startup", new Class[] {String[].class, Runnable.class}); //$NON-NLS-1$
 			runMethod.invoke(null, new Object[] {args, null});
@@ -235,6 +231,21 @@ public class FrameworkLauncher {
 		} finally {
 			Thread.currentThread().setContextClassLoader(original);
 		}
+	}
+
+	private void registerRestartHandler(Class starterClazz) throws NoSuchMethodException, ClassNotFoundException, IllegalAccessException, InvocationTargetException {
+		Method registerFrameworkShutdownHandler = null;
+		try {
+			registerFrameworkShutdownHandler = starterClazz.getDeclaredMethod("internalAddFrameworkShutdownHandler", new Class[] {Runnable.class}); //$NON-NLS-1$
+		} catch (NoSuchMethodException e) {
+			// Ok. However we will not support restart events. Log this as info
+			context.log(starterClazz.getName() + " does not support setting a shutdown handler. Restart handling is disabled."); //$NON-NLS-1$
+			return;
+		}
+		if (! registerFrameworkShutdownHandler.isAccessible())
+			registerFrameworkShutdownHandler.setAccessible(true);
+		Runnable restartHandler = createRestartHandler();
+		registerFrameworkShutdownHandler.invoke(null, new Object[] {restartHandler});
 	}
 
 	private Runnable createRestartHandler() throws ClassNotFoundException, NoSuchMethodException {
@@ -261,7 +272,7 @@ public class FrameworkLauncher {
 		return restartHandler;
 	}
 
-	/** buildInitialPropertyMap create the inital set of properties from the contents of launch.ini
+	/** buildInitialPropertyMap create the initial set of properties from the contents of launch.ini
 	 * and for a few other properties necessary to launch defaults are supplied if not provided.
 	 * The value '@null' will set the map value to null.
 	 * @return a map containing the initial properties
@@ -330,7 +341,7 @@ public class FrameworkLauncher {
 	}
 
 	/**
-	 * clearPrefixedSystemProperties clears System Properties by wiritng null properties in the targetPropertyMap that match a prefix
+	 * clearPrefixedSystemProperties clears System Properties by writing null properties in the targetPropertyMap that match a prefix
 	 */		
 	private static void clearPrefixedSystemProperties(String prefix, Map targetPropertyMap) {
 		for (Iterator it = System.getProperties().keySet().iterator(); it.hasNext();) {
