@@ -116,7 +116,7 @@ $(CONSOLE): $(MAIN_OBJS) $(COMMON_OBJS)
     $(link) $(CONSOLEFLAGS) -out:$(CONSOLE) $(MAIN_OBJS) $(COMMON_OBJS) $(LIBS)
 
 $(DLL): $(DLL_OBJS) $(COMMON_OBJS)
-    $(link) $(DLL_LFLAGS) -out:$(PROGRAM_LIBRARY) $(DLL_OBJS) $(COMMON_OBJS) $(RES) $(DLL_LIBS)
+    $(link) $(DLL_LFLAGS) -out:$(PROGRAM_LIBRARY) $(DLL_OBJS) $(COMMON_OBJS) $(DLL_LIBS)
 
 $(RES): eclipse.rc
     $(rc) -r -fo $(RES) eclipse.rc

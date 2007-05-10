@@ -67,14 +67,15 @@ void displayMessage( _TCHAR* title, _TCHAR* message )
  */
 void initWindowSystem( int* pArgc, _TCHAR* argv[], int showSplash )
 {
-	HINSTANCE module = NULL;
+	HINSTANCE module = GetModuleHandle(NULL);
+	HICON icon = NULL;
 	
 	if(initialized)
 		return;
     /* Create a window that has no decorations. */
     
 	InitCommonControls();
-    topWindow = CreateWindowEx (0,
+    topWindow = CreateWindowEx ( WS_EX_TOOLWINDOW,
 		_T("STATIC"),
 		getOfficialName(),
 		SS_BITMAP | WS_POPUP | WS_CLIPCHILDREN,
@@ -84,11 +85,12 @@ void initWindowSystem( int* pArgc, _TCHAR* argv[], int showSplash )
 		0,
 		NULL,
 		NULL,
-		GetModuleHandle (NULL),
+		module,
 		NULL);
-    
-    module = (g_hInstance != NULL) ? g_hInstance : GetModuleHandle(NULL);
-    SetClassLong(topWindow, GCL_HICON, (LONG)LoadIcon(module, MAKEINTRESOURCE(ECLIPSE_ICON)));
+
+    icon = LoadIcon(module, MAKEINTRESOURCE(ECLIPSE_ICON));
+    if (icon != NULL)
+    	SetClassLong(topWindow, GCL_HICON, (LONG)icon);
 
 	initialized = 1;
 }
