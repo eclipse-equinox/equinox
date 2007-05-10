@@ -21,7 +21,8 @@ FreeBSD                                  # Free BSD
 HPUX                                     # Hewlett Packard
 IRIX                                     # Sillicon Graphics
 Linux                                    # Open source
-MacOS                                    # Apple
+MacOS "Mac OS"                   # Apple
+MacOSX "Mac OS X"              # Apple 
 NetBSD                                   # Open source
 Netware                                  # Novell
 OpenBSD                                  # Open source
