@@ -1928,8 +1928,8 @@ public class Main {
 		URL configURL = buildURL(configLocation, false);
 		if (configURL == null)
 			return null;
-		// cache the splash in the OSGi sub-dir in the config area
-		File splash = new File(configURL.getPath(), OSGI);
+		// cache the splash in the equinox launcher sub-dir in the config area
+		File splash = new File(configURL.getPath(), PLUGIN_ID);
 		//include the name of the jar in the cache location
 		File jarFile = new File(jarPath);
 		String cache = jarFile.getName();
