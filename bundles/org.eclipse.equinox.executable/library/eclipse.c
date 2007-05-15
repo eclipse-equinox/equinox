@@ -1128,6 +1128,12 @@ static int determineVM(_TCHAR** msg) {
 	
 	/* vmName is passed in on command line with -vm */
     if (vmName != NULL) {
+    	int length = _tcslen(vmName);
+    	/* remove the trailing separator */
+    	if (vmName[length - 1] == _T_ECLIPSE('/') || vmName[length - 1] == _T_ECLIPSE('\\')) {
+    		vmName[length - 1] = 0;
+    	}
+    	
     	vmName = checkPath(vmName, programDir, 0);
     	type = checkProvidedVMType(vmName);
     	switch (type) {
