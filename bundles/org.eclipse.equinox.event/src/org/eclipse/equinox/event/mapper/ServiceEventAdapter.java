@@ -33,11 +33,6 @@ public class ServiceEventAdapter extends EventAdapter {
 		this.event = event;
 	}
 
-	// override super's method to force syncronous event delivery
-	protected void redeliverInternal(Event converted) {
-		eventAdmin.sendEvent(converted);
-	}
-
 	/**
 	 * @return
 	 * @see org.eclipse.equinox.event.mapper.EventAdapter#convert()
