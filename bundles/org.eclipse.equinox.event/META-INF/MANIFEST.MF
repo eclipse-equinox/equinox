@@ -12,9 +12,11 @@ Import-Package: org.eclipse.osgi.framework.eventmgr,
  org.osgi.service.upnp,
  org.osgi.service.useradmin,
  org.osgi.service.wireadmin,
- org.osgi.util.tracker
+ org.osgi.util.tracker,
+ org.eclipse.osgi.util
 Export-Package: org.eclipse.equinox.event; x-internal:=true,
  org.eclipse.equinox.event.mapper; x-internal:=true
 Bundle-Vendor: %bundleVendor
 Export-Service: org.osgi.service.event.EventAdmin
 Bundle-Localization: plugin
+Bundle-RequiredExecutionEnvironment: OSGi/Minimum-1.1

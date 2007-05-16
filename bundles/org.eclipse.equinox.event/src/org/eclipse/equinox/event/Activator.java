@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,29 +12,25 @@
 package org.eclipse.equinox.event;
 
 import org.eclipse.equinox.event.mapper.EventRedeliverer;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
+import org.osgi.framework.*;
 
 public class Activator implements BundleActivator {
-	private EventRedeliverer    _eventRedeliverer= null;
-	private ServiceRegistration _eventAdminService = null;
+	private EventRedeliverer    eventRedeliverer;
+	private ServiceRegistration eventAdminService;
+	private EventAdminImpl eventAdmin;
+	
 	public void start(BundleContext bundleContext) {
-		
-		_eventAdminService = bundleContext.registerService("org.osgi.service.event.EventAdmin", //$NON-NLS-1$
-				new EventAdminImpl(bundleContext),null);
-		_eventRedeliverer  = new EventRedeliverer(bundleContext);
-		_eventRedeliverer.open();
-		
+		eventAdmin = new EventAdminImpl(bundleContext);
+		eventAdmin.start();
+		eventAdminService = bundleContext.registerService("org.osgi.service.event.EventAdmin", //$NON-NLS-1$
+				eventAdmin,null);
+		eventRedeliverer  = new EventRedeliverer(bundleContext);
+		eventRedeliverer.open();
 	}
 	
 	public void stop(BundleContext bundleContext) {
-		
-		_eventRedeliverer.close();
-		_eventRedeliverer=null;
-		_eventAdminService.unregister();
-		_eventAdminService=null;
-			
+		eventRedeliverer.close();
+		eventAdminService.unregister();
+		eventAdmin.stop();
 	}
-
 }
