@@ -58,6 +58,16 @@ static const _TCHAR* jvmLocations [] = { _T("j9vm"), _T("..\\jre\\bin\\j9vm"),
 										 _T("classic"), _T("..\\jre\\bin\\classic"),
 										 _T("jrockit"), _T("..\\jre\\bin\\jrockit"),
 								 		 NULL };
+
+/* for detecting sun vms */
+typedef struct {
+	WORD language;
+	WORD codepage;
+} TRANSLATIONS;
+
+#define COMPANY_NAME_KEY _T_ECLIPSE("\\StringFileInfo\\%04x%04x\\CompanyName")
+#define SUN_MICROSYSTEMS _T_ECLIPSE("Sun Microsystems")
+
 /* Show the Splash Window
  *
  * Open the bitmap, insert into the splash window and display it.
@@ -441,4 +451,42 @@ void processVMArgs(_TCHAR **vmargs[] ) {
 int startJavaVM( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[] )
 {
 	return startJavaJNI(libPath, vmArgs, progArgs);
+}
+
+int isSunVM( _TCHAR * vm ) {
+	int result = 0;
+	DWORD infoSize;
+	DWORD handle;
+	void * info;
+	
+	_TCHAR * key, *value;
+	int i, valueSize;
+	
+	if (vm == NULL)
+		return 0;
+	
+	infoSize = GetFileVersionInfoSize(vm, &handle);
+	if (infoSize > 0) {
+		info = malloc(infoSize);
+		if (GetFileVersionInfo(vm, 0,  infoSize, info)) {
+			TRANSLATIONS * translations;
+			int translationsSize;
+			VerQueryValue(info,  _T_ECLIPSE("\\VarFileInfo\\Translation"), (void *) &translations, &translationsSize);
+			
+			/* this size is only right because %04x is 4 characters */
+			key = malloc( (_tcslen(COMPANY_NAME_KEY) + 1) * sizeof(_TCHAR));
+			for (i = 0; i < (translationsSize / sizeof(TRANSLATIONS)); i++) {
+				_stprintf(key, COMPANY_NAME_KEY, translations[i].language, translations[i].codepage);
+				
+				VerQueryValue(info, key, (void *)&value, &valueSize);
+				if (_tcsncmp(value, SUN_MICROSYSTEMS, _tcslen(SUN_MICROSYSTEMS)) == 0) {
+					result = 1;
+					break;
+				}
+			}
+			free(key);
+		}
+		free(info);
+	}
+	return result;
 }

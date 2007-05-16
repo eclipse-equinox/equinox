@@ -54,7 +54,7 @@ COMMON_OBJS = eclipseConfig.o eclipseCommon.o   eclipseWinCommon.o\
 DLL_OBJS	= eclipse.o  eclipseWin.o  eclipseUtil.o  eclipseJNI.o eclipseShm.o\
 	  		  aeclipse.o aeclipseWin.o aeclipseUtil.o aeclipseJNI.o aeclipseShm.o
 	  		  
-LIBS	= -lkernel32 -luser32 -lgdi32 -lcomctl32 -lmsvcrt
+LIBS	= -lkernel32 -luser32 -lgdi32 -lcomctl32 -lmsvcrt -lversion
 LDFLAGS = -mwindows -mno-cygwin
 CONSOLEFLAGS = -mconsole -mno-cygwin
 DLL_LDFLAGS = -mno-cygwin -shared -Wl,--export-all-symbols -Wl,--kill-at

@@ -35,6 +35,7 @@
 #define processVMArgs processVMArgsW
 #define initialArgv initialArgvW
 #define secondThread secondThreadW
+#define isSunVM isSunVMW
 #endif
 
 #ifdef MACOSX
@@ -126,6 +127,9 @@ extern int startJavaVM( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[] );
 
 /* do any platform specific processing of the user vmargs */
 extern void processVMArgs(_TCHAR **vmargs[] );
+
+/* is this a Sun VM, returns 0 if we don't know */
+extern int isSunVM( _TCHAR * vm );
 
 #endif /* ECLIPSE_OS_H */
 

@@ -216,3 +216,8 @@ int startJavaVM( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[] )
 {
 	return startJavaJNI(libPath, vmArgs, progArgs);
 }
+
+int isSunVM( _TCHAR * vm ) {
+	/* don't know how to decide on this platform */
+	return 0;
+}

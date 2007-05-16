@@ -228,6 +228,9 @@ home directory.");
 #define SUPRESSERRORS _T_ECLIPSE("--launcher.suppressErrors")
 #define INI			  _T_ECLIPSE("--launcher.ini")
 #define SECOND_THREAD _T_ECLIPSE("--launcher.secondThread")
+#define PERM_GEN	  _T_ECLIPSE("--launcher.XXMaxPermSize")
+
+#define XXPERMGEN	  _T_ECLIPSE("-XX:MaxPermSize=")
 
 /* constants for ee options file */
 #define EE_EXECUTABLE 			_T_ECLIPSE("-Dee.executable=")
@@ -250,6 +253,7 @@ static _TCHAR * startupArg    = NULL;			/* path of the startup.jar the user want
 static _TCHAR*  vmName        = NULL;     		/* Java VM that the user wants to run */
 static _TCHAR*  name          = NULL;			/* program name */	
 static _TCHAR*  library       = NULL;			/* the shared library */
+static _TCHAR*  permGen  	  = NULL;			/* perm gen size for sun */
 
 /* variables for ee options */
 static _TCHAR* eeExecutable = NULL;
@@ -291,6 +295,7 @@ static Option options[] = {
     { STARTUP,		&startupArg,	0,			2 },
     { VM,           &vmName,		0,			2 },
     { NAME,         &name,			0,			2 },
+    { PERM_GEN,		&permGen,		0,			2 },
     { WS,			&wsArg,			0,			2 } };
 static int optionsSize = (sizeof(options) / sizeof(options[0]));
 
@@ -656,6 +661,31 @@ static _TCHAR** parseArgList( _TCHAR* data ) {
     return execArg;
 }
 
+static void adjustVMArgs( _TCHAR *vm, _TCHAR **vmArgv[] ) {
+	/* Sun VMs need some extra perm gen space */
+	if (isSunVM(vm) && permGen != NULL) {
+		int specified = 0, i = -1;
+		
+		/* first check to see if it is already specified */
+		while ( (*vmArgv)[++i] != NULL) {
+			/* we are also counting the number of args here */
+			if (!specified && _tcsncmp((*vmArgv)[i], XXPERMGEN, _tcslen(XXPERMGEN)) == 0) {
+				specified = 1;
+			}
+		}
+		
+		if (!specified) {
+			_TCHAR ** oldArgs = *vmArgv;
+			_TCHAR *newArg = malloc((_tcslen(XXPERMGEN) + _tcslen(permGen) + 1) * sizeof(_TCHAR));
+			_stprintf(newArg, _T_ECLIPSE("%s%s"), XXPERMGEN, permGen);
+			
+			*vmArgv = malloc((i + 1) * sizeof(_TCHAR *));
+			memcpy(*vmArgv, oldArgs, i * sizeof(_TCHAR *));
+			(*vmArgv)[i] = newArg;
+			(*vmArgv)[i + 1] = 0;
+		}
+	}
+}
 /*
  * Get the command and arguments to start the Java VM.
  *
@@ -681,6 +711,8 @@ static void getVMCommand( int argc, _TCHAR* argv[], _TCHAR **vmArgv[], _TCHAR **
 	/* If the user specified "-vmargs", add them instead of the default VM args. */
 	vmArg = (userVMarg != NULL) ? userVMarg : getArgVM( javaVM != NULL ? javaVM : jniLib ); 
  	
+	adjustVMArgs(javaVM != NULL ? javaVM : jniLib, &vmArg);
+	
  	/* Calculate the number of VM arguments. */
  	while (vmArg[ nVMarg ] != NULL)
  		nVMarg++;

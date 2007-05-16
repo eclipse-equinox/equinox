@@ -31,7 +31,7 @@ COMMON_OBJS = eclipseConfig.obj eclipseCommon.obj  eclipseWpfCommon.obj
 DLL_OBJS	= eclipse.obj  eclipseWpf.obj  eclipseUtil.obj  eclipseJNI.obj eclipseShm.obj
 
 LIBS   = kernel32.lib msvcrt.lib mscoree.lib
-DLL_LIBS = kernel32.lib Advapi32.lib msvcrt.lib
+DLL_LIBS = kernel32.lib Advapi32.lib msvcrt.lib version.lib
 LFLAGS =  -CLRTHREADATTRIBUTE:STA /NODEFAULTLIB:LIBCMT /INCREMENTAL:NO /RELEASE /NOLOGO -subsystem:windows,4.0 -entry:wmainCRTStartup
 CONSOLEFLAGS =  -CLRTHREADATTRIBUTE:STA /NODEFAULTLIB:LIBCMT /INCREMENTAL:NO /RELEASE /NOLOGO -subsystem:console,4.0 -entry:wmainCRTStartup
 DLL_LFLAGS = -CLRTHREADATTRIBUTE:STA /NODEFAULTLIB:LIBCMT /INCREMENTAL:NO /PDB:NONE -dll /BASE:0x10000000 /DLL

@@ -435,3 +435,7 @@ void processVMArgs(char **vmargs[] )
 		setenv(c, icon, 1);
 	}
 }
+
+int isSunVM( _TCHAR * vm ) {
+	return (strncmp(vm, JAVA_FRAMEWORK, strlen(JAVA_FRAMEWORK)) == 0);
+}
