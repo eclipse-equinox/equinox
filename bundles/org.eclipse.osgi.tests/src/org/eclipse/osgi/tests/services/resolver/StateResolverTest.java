@@ -1930,6 +1930,57 @@ public class StateResolverTest extends AbstractStateTest {
 		assertFalse("1.3", testFrag101.isResolved());
 		assertTrue("1.4", testDependent.isResolved());
 	}
+
+	public void testBug187616() throws BundleException {
+		State state = buildEmptyState();
+		Hashtable manifest = new Hashtable();
+		long bundleID = 0;
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "test.host; singleton:=true");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		BundleDescription testHost100 = state.getFactory().createBundleDescription(state, manifest, "test.host100", bundleID++);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "test.host; singleton:=true");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.1");
+		BundleDescription testHost101 = state.getFactory().createBundleDescription(state, manifest, "test.host101", bundleID++);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "test.frag; singleton:=true");
+		manifest.put(Constants.FRAGMENT_HOST, "test.host; bundle-version=\"[1.0.0,2.0.0)\"");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		BundleDescription testFrag100 = state.getFactory().createBundleDescription(state, manifest, "test.frag100", bundleID++);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "test.frag; singleton:=true");
+		manifest.put(Constants.FRAGMENT_HOST, "test.host; bundle-version=\"[1.0.0,2.0.0)\"");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.1");
+		BundleDescription testFrag101 = state.getFactory().createBundleDescription(state, manifest, "test.frag101", bundleID++);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "test.dependent; singleton:=true");
+		manifest.put(Constants.REQUIRE_BUNDLE, "test.host; bundle-version=\"[1.0.0,2.0.0)\"");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		BundleDescription testDependent = state.getFactory().createBundleDescription(state, manifest, "test.frag101", bundleID++);
+
+		state.addBundle(testHost100);
+		state.addBundle(testFrag100);
+		state.addBundle(testHost101);
+		state.addBundle(testFrag101);
+		state.addBundle(testDependent);
+		StateDelta stateDelta = state.resolve();
+		assertFalse("1.0", testHost100.isResolved());
+		assertTrue("1.1", testHost101.isResolved());
+		assertFalse("1.2", testFrag100.isResolved());
+		assertTrue("1.3", testFrag101.isResolved());
+		assertTrue("1.4", testDependent.isResolved());
+		BundleDelta[] bDelta = stateDelta.getChanges(BundleDelta.ADDED | BundleDelta.RESOLVED, false);
+		assertTrue("2.0", bDelta.length == 5);
+	}
 }
 //testFragmentUpdateNoVersionChanged()
 //testFragmentUpdateVersionChanged()
