@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005 Cognos Incorporated.
+ * Copyright (c) 2005, 2007 Cognos Incorporated, IBM Corp
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -74,7 +74,7 @@ public class ResourceRegistration extends Registration {
 					URLConnection connection = url.openConnection();
 					long lastModified = connection.getLastModified();
 					int contentLength = connection.getContentLength();
-					
+
 					// check to ensure that we're dealing with a real resource and in particular not a directory
 					if (contentLength <= 0)
 						return Boolean.FALSE;
@@ -116,23 +116,17 @@ public class ResourceRegistration extends Registration {
 					if (etag != null)
 						resp.setHeader(ETAG, etag);
 
-					InputStream is = null;
 					try {
-						is = connection.getInputStream();
 						OutputStream os = resp.getOutputStream();
-						byte[] buffer = new byte[8192];
-						int bytesRead = is.read(buffer);
-						int writtenContentLength = 0;
-						while (bytesRead != -1) {
-							os.write(buffer, 0, bytesRead);
-							writtenContentLength += bytesRead;
-							bytesRead = is.read(buffer);
-						}
+						int writtenContentLength = writeResourceToOutputStream(connection, os);
 						if (contentLength == -1 || contentLength != writtenContentLength)
 							resp.setContentLength(writtenContentLength);
-					} finally {
-						if (is != null)
-							is.close();
+					} catch (IllegalStateException e) { // can occur if the response output is already open as a Writer
+						Writer writer = resp.getWriter();
+						writeResourceToWriter(connection, writer);
+						// Since ContentLength is a measure of the number of bytes contained in the body
+						// of a message when we use a Writer we lose control of the exact byte count and
+						// defer the problem to the Servlet Engine's Writer implementation.
 					}
 					return Boolean.TRUE;
 				}
@@ -143,4 +137,44 @@ public class ResourceRegistration extends Registration {
 		return result.booleanValue();
 	}
 
+	int writeResourceToOutputStream(URLConnection connection, OutputStream os) throws IOException {
+		InputStream is = connection.getInputStream();
+		try {
+			byte[] buffer = new byte[8192];
+			int bytesRead = is.read(buffer);
+			int writtenContentLength = 0;
+			while (bytesRead != -1) {
+				os.write(buffer, 0, bytesRead);
+				writtenContentLength += bytesRead;
+				bytesRead = is.read(buffer);
+			}
+			return writtenContentLength;
+		} finally {
+			if (is != null)
+				is.close();
+		}
+	}
+
+	void writeResourceToWriter(URLConnection connection, Writer writer) throws IOException {
+		InputStream is = connection.getInputStream();
+		try {
+			Reader reader = new InputStreamReader(connection.getInputStream());
+			try {
+				char[] buffer = new char[8192];
+				int charsRead = reader.read(buffer);
+				while (charsRead != -1) {
+					writer.write(buffer, 0, charsRead);
+					charsRead = reader.read(buffer);
+				}
+			} finally {
+				if (reader != null) {
+					reader.close(); // will also close input stream
+					is = null;
+				}
+			}
+		} finally {
+			if (is != null)
+				is.close();
+		}
+	}
 }
