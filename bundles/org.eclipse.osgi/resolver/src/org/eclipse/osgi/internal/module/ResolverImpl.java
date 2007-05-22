@@ -1244,18 +1244,21 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 	private void setBundleUnresolved(ResolverBundle bundle, boolean removed, boolean isDevMode) {
 		if (bundle.getState() == ResolverBundle.UNRESOLVED)
 			return;
-		if (bundle.getBundle().isResolved()) {
-			resolverExports.remove(bundle.getExportPackages());
-			if (removed)
-				resolverGenerics.remove(bundle.getGenericCapabilities());
-			bundle.initialize(false);
-			if (!removed)
-				resolverExports.put(bundle.getExportPackages());
+		resolverExports.remove(bundle.getExportPackages());
+		if (removed)
+			resolverGenerics.remove(bundle.getGenericCapabilities());
+		ResolverBundle[] fragments = bundle.getFragments();
+		bundle.detachAllFragments();
+		bundle.initialize(false);
+		if (isDevMode) {
+			// re-attach fragments in devmode
+			for (int i = 0; i < fragments.length; i++)
+				bundle.attachFragment(fragments[i], true);
 		}
-		if (!removed)
+		if (!removed) {
+			resolverExports.put(bundle.getExportPackages());
 			unresolvedBundles.add(bundle);
-		if (!isDevMode)
-			bundle.detachAllFragments();
+		}
 		bundle.setState(ResolverBundle.UNRESOLVED);
 	}
 
