@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2005 IBM Corporation and others.
+ * Copyright (c) 2003, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,10 +10,13 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.services.resolver;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.eclipse.osgi.service.resolver.*;
+import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.*;
 
 public class StateResolverTest extends AbstractStateTest {
@@ -1853,6 +1856,50 @@ public class StateResolverTest extends AbstractStateTest {
 		assertTrue("2.0", a.getResolvedImports()[1].getExporter() == systemB);
 		assertTrue("2.1", b_updated.getResolvedImports()[0].getExporter() == systemB);
 	}
+
+
+	public void testPlatformPropertiesBug188075() throws BundleException, IOException {
+		State state = buildEmptyState();
+		int bundleID = 0;
+
+		Hashtable manifest = new Hashtable();
+
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "A");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put("Eclipse-PlatformFilter", "(!(test=value))");
+		BundleDescription a = state.getFactory().createBundleDescription(state, manifest, "A", bundleID++);
+
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "B");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put("Eclipse-PlatformFilter", "(test=value)");
+		BundleDescription b = state.getFactory().createBundleDescription(state, manifest, "B", bundleID++);
+
+		Dictionary props = new Hashtable();
+		props.put("test", "value");
+
+		state.setPlatformProperties(props);
+		state.addBundle(a);
+		state.addBundle(b);
+		state.resolve();
+
+		assertFalse("1.1", a.isResolved());
+		assertTrue("1.2", b.isResolved());
+
+		BundleContext context = OSGiTestsActivator.getContext();
+		File stateCache = context.getDataFile("statecache");
+		stateCache.mkdirs();
+		StateObjectFactory.defaultFactory.writeState(state, stateCache);
+		state = StateObjectFactory.defaultFactory.readState(stateCache);
+		props = state.getPlatformProperties()[0];
+		assertEquals("2.0", "value",  props.get("test"));
+		BundleDescription aCache = state.getBundle("A", null);
+		BundleDescription bCache = state.getBundle("B", null);
+		assertFalse("2.1", aCache.isResolved());
+		assertTrue("2.2", bCache.isResolved());
+	}
+
 
 	private ExportPackageDescription[] isConsistent(ExportPackageDescription[] pkgs1, ExportPackageDescription[] pkgs2) {
 		for (int i = 0; i < pkgs1.length; i++)

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2005 IBM Corporation and others.
+ * Copyright (c) 2003, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1389,8 +1389,13 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 			for (int i = 0; i < children.length; i++)
 				children[i].getAttributesInternal(results);
 			return;
+		} else if (value instanceof FilterImpl) {
+			// The NOT operation only has one child filter (bug 188075)
+			((FilterImpl) value).getAttributesInternal(results);
+			return;
 		}
-		results.add(attr);
+		if (attr != null)
+			results.add(attr);
 	}
 
 	/**
