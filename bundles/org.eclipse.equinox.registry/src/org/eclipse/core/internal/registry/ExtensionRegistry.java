@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Danail Nachev - exception handling for registry listeners (bug 188369)
  *******************************************************************************/
 package org.eclipse.core.internal.registry;
 
@@ -790,14 +791,22 @@ public class ExtensionRegistry implements IExtensionRegistry {
 	//////////////////////////////////////////////////////////////////////////////////////////
 	// Registry change events processing
 
-	public IStatus processChangeEvent(Object[] listenerInfos, Map deltas) {
-		MultiStatus result = new MultiStatus(RegistryMessages.OWNER_NAME, IStatus.OK, RegistryMessages.plugin_eventListenerError, null);
+	public IStatus processChangeEvent(Object[] listenerInfos, final Map deltas) {
+		final MultiStatus result = new MultiStatus(RegistryMessages.OWNER_NAME, IStatus.OK, RegistryMessages.plugin_eventListenerError, null);
 		for (int i = 0; i < listenerInfos.length; i++) {
-			ListenerInfo listenerInfo = (ListenerInfo) listenerInfos[i];
+			final ListenerInfo listenerInfo = (ListenerInfo) listenerInfos[i];
 			if (listenerInfo.filter != null && !deltas.containsKey(listenerInfo.filter))
 				continue;
 			if (listenerInfo.listener instanceof IRegistryChangeListener)
-				((IRegistryChangeListener) listenerInfo.listener).registryChanged(new RegistryChangeEvent(deltas, listenerInfo.filter));
+				SafeRunner.run(new ISafeRunnable() {
+					public void run() throws Exception {
+						((IRegistryChangeListener) listenerInfo.listener).registryChanged(new RegistryChangeEvent(deltas, listenerInfo.filter));
+					}
+
+					public void handleException(Throwable exception) {
+						result.add(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, RegistryMessages.plugin_eventListenerError, exception));
+					}
+				});
 		}
 		for (Iterator iter = deltas.values().iterator(); iter.hasNext();) {
 			((RegistryDelta) iter.next()).getObjectManager().close();
