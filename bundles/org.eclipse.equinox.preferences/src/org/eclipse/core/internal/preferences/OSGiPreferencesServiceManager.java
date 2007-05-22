@@ -7,6 +7,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Danail Nachev (ProSyst) - bug 188070
  *******************************************************************************/
 package org.eclipse.core.internal.preferences;
 
@@ -72,9 +73,10 @@ public class OSGiPreferencesServiceManager implements ServiceFactory, BundleList
 	public Object getService(Bundle bundle, ServiceRegistration registration) {
 		String qualifier = getQualifier(bundle);
 		//remember we created prefs for this bundle
-		prefBundles.put(qualifier, ""); //$NON-NLS-1$
+		Preferences bundlesNode = getBundlesNode();
+		bundlesNode.put(qualifier, ""); //$NON-NLS-1$
 		try {
-			prefBundles.flush();
+			bundlesNode.flush();
 		} catch (BackingStoreException e) {
 			//best effort
 		}
@@ -122,7 +124,20 @@ public class OSGiPreferencesServiceManager implements ServiceFactory, BundleList
 		new ConfigurationScope().getNode(qualifier).removeNode();
 
 		//remove from our list of bundles with prefs
-		prefBundles.remove(qualifier);
-		prefBundles.flush();
+		Preferences bundlesNode = getBundlesNode();
+		bundlesNode.remove(qualifier);
+		bundlesNode.flush();
+	}
+	
+	private Preferences getBundlesNode() {
+		try {
+			if (prefBundles == null || !prefBundles.nodeExists("")) { //$NON-NLS-1$
+				prefBundles = new ConfigurationScope().getNode(ORG_ECLIPSE_CORE_INTERNAL_PREFERENCES_OSGI);
+			}
+			return prefBundles;
+		} catch (BackingStoreException e) {
+			// ignore
+		}
+		return null;
 	}
 }
