@@ -1128,20 +1128,26 @@ static void createConsole() {
 	/* redirect stdout */
 	stdHandle = (long)GetStdHandle(STD_OUTPUT_HANDLE);
 	conHandle = _open_osfhandle(stdHandle, _O_TEXT);
-	fp = _fdopen(conHandle, "w");
-	*stdout = *fp;
+	if (conHandle != -1) {
+		fp = _fdopen(conHandle, "w");
+		*stdout = *fp;
+	}
 	
 	/* redirect stdin */
 	stdHandle = (long)GetStdHandle(STD_INPUT_HANDLE);
 	conHandle = _open_osfhandle(stdHandle, _O_TEXT);
-	fp = _fdopen(conHandle, "r");
-	*stdin = *fp;
+	if (conHandle != -1) {
+		fp = _fdopen(conHandle, "r");
+		*stdin = *fp;
+	}
 	
 	/* stderr */
 	stdHandle = (long)GetStdHandle(STD_ERROR_HANDLE);
 	conHandle = _open_osfhandle(stdHandle, _O_TEXT);
-	fp = _fdopen(conHandle, "r");
-	*stderr = *fp;	
+	if (conHandle != -1) {
+		fp = _fdopen(conHandle, "r");
+		*stderr = *fp;
+	}
 }
 #endif
 
