@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005 Cognos Incorporated.
+ * Copyright (c) 2005, 2007 Cognos Incorporated, IBM Corporation
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,6 +15,7 @@ import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.*;
+import java.security.*;
 import java.util.*;
 import java.util.jar.*;
 import javax.servlet.ServletConfig;
@@ -59,7 +60,46 @@ public class FrameworkLauncher {
 
 	private static final String CONFIG_COMMANDLINE = "commandline"; //$NON-NLS-1$
 	private static final String CONFIG_EXTENDED_FRAMEWORK_EXPORTS = "extendedFrameworkExports"; //$NON-NLS-1$
-	
+
+	static final PermissionCollection allPermissions = new PermissionCollection() {
+		private static final long serialVersionUID = 482874725021998286L;
+		// The AllPermission permission
+		Permission allPermission = new AllPermission();
+
+		// A simple PermissionCollection that only has AllPermission
+		public void add(Permission permission) {
+			// do nothing
+		}
+
+		public boolean implies(Permission permission) {
+			return true;
+		}
+
+		public Enumeration elements() {
+			return new Enumeration() {
+				int cur = 0;
+
+				public boolean hasMoreElements() {
+					return cur < 1;
+				}
+
+				public Object nextElement() {
+					if (cur == 0) {
+						cur = 1;
+						return allPermission;
+					}
+					throw new NoSuchElementException();
+				}
+			};
+		}
+	};
+
+	static {
+		// We do this to ensure the anonymous Enumeration class in allPermissions is pre-loaded 
+		if (allPermissions.elements() == null)
+			throw new IllegalStateException();
+	}
+
 	protected ServletConfig config;
 	protected ServletContext context;
 	private File platformDirectory;
@@ -109,7 +149,7 @@ public class FrameworkLauncher {
 		copyResource(RESOURCE_BASE + "features/", new File(platformDirectory, "features")); //$NON-NLS-1$ //$NON-NLS-2$
 		File plugins = new File(platformDirectory, "plugins"); //$NON-NLS-1$
 		copyResource(RESOURCE_BASE + "plugins/", plugins); //$NON-NLS-1$
-		deployExtensionBundle(plugins);		
+		deployExtensionBundle(plugins);
 		copyResource(RESOURCE_BASE + ".eclipseproduct", new File(platformDirectory, ".eclipseproduct")); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
@@ -123,30 +163,28 @@ public class FrameworkLauncher {
 		File extensionBundleDir = new File(plugins, "org.eclipse.equinox.servletbridge.extensionbundle_1.0.0"); //$NON-NLS-1$
 		if (extensionBundle.exists() || (extensionBundleDir.exists() && extensionBundleDir.isDirectory()))
 			return;
-		
+
 		Manifest mf = new Manifest();
 		Attributes attribs = mf.getMainAttributes();
-		attribs.putValue(MANIFEST_VERSION,"1.0"); //$NON-NLS-1$
-		attribs.putValue(BUNDLE_MANIFEST_VERSION,"2"); //$NON-NLS-1$
-		attribs.putValue(BUNDLE_NAME,"Servletbridge Extension Bundle"); //$NON-NLS-1$
-		attribs.putValue(BUNDLE_SYMBOLIC_NAME,"org.eclipse.equinox.servletbridge.extensionbundle"); //$NON-NLS-1$
-		attribs.putValue(BUNDLE_VERSION,"1.0.0"); //$NON-NLS-1$
-		attribs.putValue(FRAGMENT_HOST,"system.bundle; extension:=framework"); //$NON-NLS-1$
+		attribs.putValue(MANIFEST_VERSION, "1.0"); //$NON-NLS-1$
+		attribs.putValue(BUNDLE_MANIFEST_VERSION, "2"); //$NON-NLS-1$
+		attribs.putValue(BUNDLE_NAME, "Servletbridge Extension Bundle"); //$NON-NLS-1$
+		attribs.putValue(BUNDLE_SYMBOLIC_NAME, "org.eclipse.equinox.servletbridge.extensionbundle"); //$NON-NLS-1$
+		attribs.putValue(BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
+		attribs.putValue(FRAGMENT_HOST, "system.bundle; extension:=framework"); //$NON-NLS-1$
 
 		String servletVersion = context.getMajorVersion() + "." + context.getMinorVersion(); //$NON-NLS-1$
-		String packageExports = 
-			"org.eclipse.equinox.servletbridge; version=1.0" + //$NON-NLS-1$
-			", javax.servlet; version=" + servletVersion + //$NON-NLS-1$
-			", javax.servlet.http; version=" + servletVersion + //$NON-NLS-1$
-			", javax.servlet.resources; version=" + servletVersion; //$NON-NLS-1$
-
+		String packageExports = "org.eclipse.equinox.servletbridge; version=1.0" + //$NON-NLS-1$
+				", javax.servlet; version=" + servletVersion + //$NON-NLS-1$
+				", javax.servlet.http; version=" + servletVersion + //$NON-NLS-1$
+				", javax.servlet.resources; version=" + servletVersion; //$NON-NLS-1$
 
 		String extendedExports = config.getInitParameter(CONFIG_EXTENDED_FRAMEWORK_EXPORTS);
-		if (extendedExports != null && extendedExports.trim().length()!=0)
+		if (extendedExports != null && extendedExports.trim().length() != 0)
 			packageExports += ", " + extendedExports; //$NON-NLS-1$
-		
+
 		attribs.putValue(EXPORT_PACKAGE, packageExports);
-		
+
 		try {
 			JarOutputStream jos = null;
 			try {
@@ -158,7 +196,7 @@ public class FrameworkLauncher {
 			}
 		} catch (IOException e) {
 			context.log("Error generating extension bundle", e); //$NON-NLS-1$
-		}		
+		}
 	}
 
 	/** undeploy is the reverse operation of deploy and removes the OSGi framework libraries from their
@@ -214,10 +252,10 @@ public class FrameworkLauncher {
 			setInitialProperties.invoke(null, new Object[] {initalPropertyMap});
 
 			registerRestartHandler(clazz);
-			
+
 			Method runMethod = clazz.getMethod("startup", new Class[] {String[].class, Runnable.class}); //$NON-NLS-1$
 			runMethod.invoke(null, new Object[] {args, null});
-			
+
 			frameworkContextClassLoader = Thread.currentThread().getContextClassLoader();
 		} catch (InvocationTargetException ite) {
 			Throwable t = ite.getTargetException();
@@ -242,7 +280,7 @@ public class FrameworkLauncher {
 			context.log(starterClazz.getName() + " does not support setting a shutdown handler. Restart handling is disabled."); //$NON-NLS-1$
 			return;
 		}
-		if (! registerFrameworkShutdownHandler.isAccessible())
+		if (!registerFrameworkShutdownHandler.isAccessible())
 			registerFrameworkShutdownHandler.setAccessible(true);
 		Runnable restartHandler = createRestartHandler();
 		registerFrameworkShutdownHandler.invoke(null, new Object[] {restartHandler});
@@ -267,7 +305,7 @@ public class FrameworkLauncher {
 				} catch (Exception e) {
 					throw new RuntimeException(e.getMessage());
 				}
-			}				
+			}
 		};
 		return restartHandler;
 	}
@@ -283,17 +321,17 @@ public class FrameworkLauncher {
 		for (Iterator it = launchProperties.entrySet().iterator(); it.hasNext();) {
 			Map.Entry entry = (Map.Entry) it.next();
 			String key = (String) entry.getKey();
-			String value = (String) entry.getValue(); 
+			String value = (String) entry.getValue();
 			if (key.endsWith("*")) { //$NON-NLS-1$
 				if (value.equals(NULL_IDENTIFIER)) {
-					clearPrefixedSystemProperties(key.substring(0, key.length() -1), initialPropertyMap);
+					clearPrefixedSystemProperties(key.substring(0, key.length() - 1), initialPropertyMap);
 				}
 			} else if (value.equals(NULL_IDENTIFIER))
 				initialPropertyMap.put(key, null);
 			else
-				initialPropertyMap.put(entry.getKey(), entry.getValue());			
+				initialPropertyMap.put(entry.getKey(), entry.getValue());
 		}
-		
+
 		try {
 			// install.area if not specified
 			if (initialPropertyMap.get(OSGI_INSTALL_AREA) == null)
@@ -336,13 +374,13 @@ public class FrameworkLauncher {
 		} catch (MalformedURLException e) {
 			throw new RuntimeException("Error establishing location"); //$NON-NLS-1$
 		}
-		
+
 		return initialPropertyMap;
 	}
 
 	/**
 	 * clearPrefixedSystemProperties clears System Properties by writing null properties in the targetPropertyMap that match a prefix
-	 */		
+	 */
 	private static void clearPrefixedSystemProperties(String prefix, Map targetPropertyMap) {
 		for (Iterator it = System.getProperties().keySet().iterator(); it.hasNext();) {
 			String propertyName = (String) it.next();
@@ -703,6 +741,10 @@ public class FrameworkLauncher {
 			return clazz;
 		}
 
+		// we want to ensure that the framework has AllPermissions
+		protected PermissionCollection getPermissions(CodeSource codesource) {
+			return allPermissions;
+		}
 	}
 
 }
