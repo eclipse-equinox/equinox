@@ -12,10 +12,13 @@ package org.eclipse.equinox.launcher;
 
 
 /**
- * @author aniefer
- *
+ * <b>Note:</b> This class should not be referenced programmatically by
+ * other Java code. This class exists only for the purpose of interacting with
+ * a native launcher. To launch Eclipse programmatically, use 
+ * org.eclipse.core.runtime.adaptor.EclipseStarter. This class is not API.
  */
 public class JNIBridge {
+	//TODO: This class should not be public
 	private native void _set_exit_data(String sharedId, String data);
 	private native void _update_splash();
 	private native long  _get_splash_handle();

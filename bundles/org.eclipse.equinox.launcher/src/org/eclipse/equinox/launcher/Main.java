@@ -22,6 +22,12 @@ import org.eclipse.equinox.internal.launcher.Constants;
 
 /**
  * The launcher for Eclipse.
+ * 
+ * <b>Note:</b> This class should not be referenced programmatically by
+ * other Java code. This class exists only for the purpose of launching Eclipse
+ * from the command line. To launch Eclipse programmatically, use 
+ * org.eclipse.core.runtime.adaptor.EclipseStarter. The fields and methods
+ * on this class are not API.
  */
 public class Main {
     /**

@@ -25,8 +25,14 @@ import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
 /**
- * The launcher to start eclipse using webstart.
- * To use this launcher, the client must accept to give all security permissions. 
+ * The launcher to start eclipse using webstart. To use this launcher, the client 
+ * must accept to give all security permissions.
+ * <p>
+ * <b>Note:</b> This class should not be referenced programmatically by
+ * other Java code. This class exists only for the purpose of launching Eclipse
+ * using Java webstart. To launch Eclipse programmatically, use 
+ * org.eclipse.core.runtime.adaptor.EclipseStarter. The fields and methods
+ * on this class are not API.
  */
 //The bundles are discovered by finding all the jars on the classpath. Then they are added with their full path to the osgi.bundles list.
 public class WebStartMain extends Main {
