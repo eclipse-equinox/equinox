@@ -135,6 +135,7 @@ public class Main {
 	private static final String OS = "-os";  //$NON-NLS-1$
 	private static final String WS = "-ws"; //$NON-NLS-1$
 	private static final String ARCH = "-arch"; //$NON-NLS-1$
+	private static final String STARTUP = "-startup"; //$NON-NLS-1$
 	
     private static final String OSGI = "org.eclipse.osgi"; //$NON-NLS-1$
     private static final String STARTER = "org.eclipse.core.runtime.adaptor.EclipseStarter"; //$NON-NLS-1$
@@ -1362,6 +1363,13 @@ public class Main {
                 found = true;
             }
 
+            // look for the startup jar used 
+            if (args[i - 1].equalsIgnoreCase(STARTUP)) {
+            	//not doing anything with this right now, but still consume it
+                //startup = arg;
+                found = true;
+            }
+            
             // look for the launcher location
             if (args[i - 1].equalsIgnoreCase(LAUNCHER)) {
             	//not doing anything with this right now, but still consume it
