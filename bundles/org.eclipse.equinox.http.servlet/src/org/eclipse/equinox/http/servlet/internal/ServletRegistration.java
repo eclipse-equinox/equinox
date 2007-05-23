@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005 Cognos Incorporated.
+ * Copyright (c) 2005-2007 Cognos Incorporated, IBM Corporation and others
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,9 +7,8 @@
  * 
  * Contributors:
  *     Cognos Incorporated - initial API and implementation
- *     IBM Corporation - comments
+ *     IBM Corporation - bug fixes and enhancements
  *******************************************************************************/
-
 package org.eclipse.equinox.http.servlet.internal;
 
 import java.io.IOException;
