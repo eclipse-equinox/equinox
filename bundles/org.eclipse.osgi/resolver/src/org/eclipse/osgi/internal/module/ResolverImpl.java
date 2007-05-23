@@ -1242,23 +1242,20 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 
 	// Move a bundle to UNRESOLVED
 	private void setBundleUnresolved(ResolverBundle bundle, boolean removed, boolean isDevMode) {
-		if (bundle.getState() == ResolverBundle.UNRESOLVED)
-			return;
-		resolverExports.remove(bundle.getExportPackages());
-		if (removed)
-			resolverGenerics.remove(bundle.getGenericCapabilities());
-		ResolverBundle[] fragments = bundle.getFragments();
-		bundle.detachAllFragments();
-		bundle.initialize(false);
-		if (isDevMode) {
-			// re-attach fragments in devmode
-			for (int i = 0; i < fragments.length; i++)
-				bundle.attachFragment(fragments[i], true);
+		if (!isDevMode) {
+			// when not in devmode we want to force the initialization
+			// of the bundle and its exports.  This is needed to
+			// force proper attachement of fragments.
+			resolverExports.remove(bundle.getExportPackages());
+			if (removed)
+				resolverGenerics.remove(bundle.getGenericCapabilities());
+			bundle.detachAllFragments();
+			bundle.initialize(false);
+			if (!removed)
+				resolverExports.put(bundle.getExportPackages());
 		}
-		if (!removed) {
-			resolverExports.put(bundle.getExportPackages());
+		if (!removed && !unresolvedBundles.contains(bundle))
 			unresolvedBundles.add(bundle);
-		}
 		bundle.setState(ResolverBundle.UNRESOLVED);
 	}
 
@@ -1530,10 +1527,6 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		// if not removed then add to the list of unresolvedBundles,
 		// passing false for devmode because we need all fragments detached
 		setBundleUnresolved(bundle, removed, false);
-		if (developmentMode)
-			// when in devmode setBundleUnresolved does not detach fragments (bug 182141)
-			// but in this case the fragments really should be detached
-			bundle.detachAllFragments();
 		// Get bundles dependent on 'bundle'
 		BundleDescription[] dependents = bundle.getBundle().getDependents();
 		state.resolveBundle(bundle.getBundle(), false, null, null, null, null);
