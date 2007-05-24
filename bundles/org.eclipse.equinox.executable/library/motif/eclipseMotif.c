@@ -89,6 +89,9 @@ int showSplash( const char* featureImage )
 	Screen* screen;
 	Widget scrolledHandle, drawingHandle, image;
 	
+	if (shellHandle != 0)
+		return 0; /* already showing splash */
+	
 	if (initialArgv == NULL) 
 		initialArgc = 0;
 	initWindowSystem(&initialArgc, initialArgv, 1);
