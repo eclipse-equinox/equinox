@@ -57,7 +57,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 	// Repository for generics
 	private VersionHashMap resolverGenerics = null;
 	// List of unresolved bundles
-	private ArrayList unresolvedBundles = null;
+	private ArrayList unresolvedBundles = null; // TODO make this a Set
 	// Keys are BundleDescriptions, values are ResolverBundles
 	private HashMap bundleMapping = null;
 	private GroupingChecker groupingChecker;
@@ -1241,20 +1241,26 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 	}
 
 	// Move a bundle to UNRESOLVED
-	private void setBundleUnresolved(ResolverBundle bundle, boolean removed, boolean isDevMode) {
-		if (!isDevMode) {
-			// when not in devmode we want to force the initialization
-			// of the bundle and its exports.  This is needed to
-			// force proper attachement of fragments.
+	private void setBundleUnresolved(ResolverBundle bundle, boolean removed, boolean keepFragsAttached) {
+		if (bundle.getState() == ResolverBundle.UNRESOLVED && !developmentMode)
+			// in this case there is nothing more to do
+			return;
+		// Note that when in dev mode we only want to force the fragment detach if asked to;
+		// this would be done only when forcing a dependency chain to unresolve from unresolveBundle method
+		if (removed || !keepFragsAttached) {
+			// Force the initialization of the bundle, its exports and its capabilities.  This is needed to force proper attachment of fragments.
 			resolverExports.remove(bundle.getExportPackages());
-			if (removed)
-				resolverGenerics.remove(bundle.getGenericCapabilities());
+			resolverGenerics.remove(bundle.getGenericCapabilities());
 			bundle.detachAllFragments();
 			bundle.initialize(false);
-			if (!removed)
+			if (!removed) {
+				// add back the available exports/capabilities
 				resolverExports.put(bundle.getExportPackages());
+				resolverGenerics.put(bundle.getGenericCapabilities());
+			}
 		}
-		if (!removed && !unresolvedBundles.contains(bundle))
+		// TODO unresolvedBundles should be a set; for now only need to do a contains check in devMode.
+		if (!removed && (!developmentMode || !unresolvedBundles.contains(bundle)))
 			unresolvedBundles.add(bundle);
 		bundle.setState(ResolverBundle.UNRESOLVED);
 	}
