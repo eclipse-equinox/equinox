@@ -75,6 +75,147 @@ public class GenericCapabilityTest extends AbstractStateTest {
 		assertEquals("2.3.1", genSpecs[2].getSupplier(), genCap.getGenericCapabilities()[2]);
 	}
 
+	public void testGenericsUpdate() throws BundleException {
+		State state = buildEmptyState();
+		Hashtable manifest = new Hashtable();
+		long bundleID = 0;
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "genericCapablity");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		StringBuffer capabililty = new StringBuffer();
+		capabililty.append("foo; version=\"1.3.1\"; attr1=\"value1\"; attr2=\"value2\","); 
+		capabililty.append("bar:bartype; version=\"1.4.1\"; attr1=\"value1\"; attr2=\"value2\",");
+		capabililty.append("test.types:testtype;"); 
+		capabililty.append(" aVersion:version=\"2.0.0\";");
+		capabililty.append(" aLong:long=\"10000000000\";");
+		capabililty.append(" aDouble:double=\"1.000109\";");
+		capabililty.append(" aUri:uri=\"file:/test\";");
+		capabililty.append(" aSet:set=\"a,b,c,d\";");
+		capabililty.append(" aString:string=\"someString\"");
+		manifest.put(GENERIC_CAPABILITY, capabililty.toString());
+		BundleDescription genCap = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "genericRequire");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		StringBuffer required = new StringBuffer();
+		required.append("foo; selection-filter=\"(version>=1.3.0)\",");
+		required.append("bar:bartype; selection-filter=\"(attr1=value1)\",");
+		required.append("test.types:testtype; selection-filter=\"(&(aVersion>=2.0.0)(aLong>=5555)(aDouble>=1.00)(aUri=file:/test)(aSet=c)(aString=someString))\"");
+		manifest.put(GENERIC_REQUIRE, required.toString());
+		BundleDescription genReq = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+
+		state.addBundle(genCap);
+		state.addBundle(genReq);
+
+		state.resolve();
+		assertTrue("1.0", genCap.isResolved());
+		assertTrue("1.1", genReq.isResolved());
+		GenericSpecification[] genSpecs = genReq.getGenericRequires();
+		assertTrue("2.0", genSpecs.length == 3);
+		assertTrue("2.1", genSpecs[0].isResolved());
+		assertEquals("2.1.1", genSpecs[0].getSupplier(), genCap.getGenericCapabilities()[0]);
+		assertTrue("2.2", genSpecs[1].isResolved());
+		assertEquals("2.2.1", genSpecs[1].getSupplier(), genCap.getGenericCapabilities()[1]);
+		assertTrue("2.3", genSpecs[2].isResolved());
+		assertEquals("2.3.1", genSpecs[2].getSupplier(), genCap.getGenericCapabilities()[2]);
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "genericCapablity");
+		manifest.put(Constants.BUNDLE_VERSION, "2.0.0");
+		capabililty = new StringBuffer();
+		capabililty.append("foo; version=\"1.3.2\"; attr1=\"value1\"; attr2=\"value2\","); 
+		capabililty.append("bar:bartype; version=\"1.4.2\"; attr1=\"value1\"; attr2=\"value2\",");
+		capabililty.append("test.types:testtype;"); 
+		capabililty.append(" aVersion:version=\"2.0.1\";");
+		capabililty.append(" aLong:long=\"10000000000\";");
+		capabililty.append(" aDouble:double=\"1.000109\";");
+		capabililty.append(" aUri:uri=\"file:/test\";");
+		capabililty.append(" aSet:set=\"a,b,c,d\";");
+		capabililty.append(" aString:string=\"someString\"");
+		manifest.put(GENERIC_CAPABILITY, capabililty.toString());
+		BundleDescription genCap2 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), genCap.getBundleId());
+		
+		state.updateBundle(genCap2);
+		state.resolve(new BundleDescription[] {genCap2});
+
+		assertTrue("3.0", genCap2.isResolved());
+		assertTrue("3.1", genReq.isResolved());
+		genSpecs = genReq.getGenericRequires();
+		assertTrue("4.0", genSpecs.length == 3);
+		assertTrue("4.1", genSpecs[0].isResolved());
+		assertEquals("4.1.1", genSpecs[0].getSupplier(), genCap2.getGenericCapabilities()[0]);
+		assertTrue("4.2", genSpecs[1].isResolved());
+		assertEquals("4.2.1", genSpecs[1].getSupplier(), genCap2.getGenericCapabilities()[1]);
+		assertTrue("4.3", genSpecs[2].isResolved());
+		assertEquals("4.3.1", genSpecs[2].getSupplier(), genCap2.getGenericCapabilities()[2]);
+
+	}
+
+	public void testGenericsRefresh() throws BundleException {
+		State state = buildEmptyState();
+		Hashtable manifest = new Hashtable();
+		long bundleID = 0;
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "genericCapablity");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		StringBuffer capabililty = new StringBuffer();
+		capabililty.append("foo; version=\"1.3.1\"; attr1=\"value1\"; attr2=\"value2\","); 
+		capabililty.append("bar:bartype; version=\"1.4.1\"; attr1=\"value1\"; attr2=\"value2\",");
+		capabililty.append("test.types:testtype;"); 
+		capabililty.append(" aVersion:version=\"2.0.0\";");
+		capabililty.append(" aLong:long=\"10000000000\";");
+		capabililty.append(" aDouble:double=\"1.000109\";");
+		capabililty.append(" aUri:uri=\"file:/test\";");
+		capabililty.append(" aSet:set=\"a,b,c,d\";");
+		capabililty.append(" aString:string=\"someString\"");
+		manifest.put(GENERIC_CAPABILITY, capabililty.toString());
+		BundleDescription genCap = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "genericRequire");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		StringBuffer required = new StringBuffer();
+		required.append("foo; selection-filter=\"(version>=1.3.0)\",");
+		required.append("bar:bartype; selection-filter=\"(attr1=value1)\",");
+		required.append("test.types:testtype; selection-filter=\"(&(aVersion>=2.0.0)(aLong>=5555)(aDouble>=1.00)(aUri=file:/test)(aSet=c)(aString=someString))\"");
+		manifest.put(GENERIC_REQUIRE, required.toString());
+		BundleDescription genReq = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+
+		state.addBundle(genCap);
+		state.addBundle(genReq);
+
+		state.resolve();
+		assertTrue("1.0", genCap.isResolved());
+		assertTrue("1.1", genReq.isResolved());
+		GenericSpecification[] genSpecs = genReq.getGenericRequires();
+		assertTrue("2.0", genSpecs.length == 3);
+		assertTrue("2.1", genSpecs[0].isResolved());
+		assertEquals("2.1.1", genSpecs[0].getSupplier(), genCap.getGenericCapabilities()[0]);
+		assertTrue("2.2", genSpecs[1].isResolved());
+		assertEquals("2.2.1", genSpecs[1].getSupplier(), genCap.getGenericCapabilities()[1]);
+		assertTrue("2.3", genSpecs[2].isResolved());
+		assertEquals("2.3.1", genSpecs[2].getSupplier(), genCap.getGenericCapabilities()[2]);
+
+
+		state.resolve(new BundleDescription[] {genCap});
+
+		assertTrue("3.0", genCap.isResolved());
+		assertTrue("3.1", genReq.isResolved());
+		genSpecs = genReq.getGenericRequires();
+		assertTrue("4.0", genSpecs.length == 3);
+		assertTrue("4.1", genSpecs[0].isResolved());
+		assertEquals("4.1.1", genSpecs[0].getSupplier(), genCap.getGenericCapabilities()[0]);
+		assertTrue("4.2", genSpecs[1].isResolved());
+		assertEquals("4.2.1", genSpecs[1].getSupplier(), genCap.getGenericCapabilities()[1]);
+		assertTrue("4.3", genSpecs[2].isResolved());
+		assertEquals("4.3.1", genSpecs[2].getSupplier(), genCap.getGenericCapabilities()[2]);
+
+	}
+
 	public void testGenericsFrags() throws BundleException {
 		State state = buildEmptyState();
 		Hashtable manifest = new Hashtable();
