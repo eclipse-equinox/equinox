@@ -73,6 +73,16 @@ case $OS in
 				defaultJava=DEFAULT_JAVA_EXEC
 				OUTPUT_DIR="../../bin/$defaultWS/$defaultOS/$defaultOSArch"
 				;;
+			"s390")
+				defaultOSArch="s390"
+				defaultJava=DEFAULT_JAVA_EXEC
+				OUTPUT_DIR="../../contributed/$defaultWS/$defaultOS/$defaultOSArch"
+				;;
+			"s390x")
+				defaultOSArch="s390x"
+				defaultJava=DEFAULT_JAVA_EXEC
+				OUTPUT_DIR="../../contributed/$defaultWS/$defaultOS/$defaultOSArch"
+				;;
 			"ia64")
 				defaultOSArch="ia64"
 				defaultJava=DEFAULT_JAVA_EXEC
