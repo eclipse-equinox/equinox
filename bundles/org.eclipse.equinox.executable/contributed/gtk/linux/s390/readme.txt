@@ -1,0 +1,1 @@
+This folder will hold gtk.linux.s390 binaries when they are contributed.
