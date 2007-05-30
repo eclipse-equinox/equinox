@@ -129,10 +129,10 @@
          unpack="true"/>
          
 	<plugin
-         id="org.eclipse.equinox.launcher.gtk.linux.S390"
+         id="org.eclipse.equinox.launcher.gtk.linux.s390"
          os="linux"
          ws="gtk"
-         arch="S390"
+         arch="s390"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -140,10 +140,10 @@
          unpack="true"/>
          
 	<plugin
-         id="org.eclipse.equinox.launcher.gtk.linux.S390x"
+         id="org.eclipse.equinox.launcher.gtk.linux.s390x"
          os="linux"
          ws="gtk"
-         arch="S390x"
+         arch="s390x"
          download-size="0"
          install-size="0"
          version="0.0.0"
