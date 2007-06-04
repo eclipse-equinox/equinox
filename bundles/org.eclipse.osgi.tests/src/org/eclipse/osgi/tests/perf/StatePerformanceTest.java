@@ -44,7 +44,7 @@ public class StatePerformanceTest extends AbstractStateTest {
 			int exportPackageCount = random.nextInt(5);
 			ExportPackageDescription[] exportPackages = new ExportPackageDescription[exportPackageCount];
 			for (int j = 0; j < exportPackages.length; j++) {
-				String packageName = "package." + ++exportedPackages;
+				String packageName = "package." + exportedPackages++;
 				Version packageVersion = Version.parseVersion("1.0.0");
 				exportPackages[j] = stateFactory.createExportPackageDescription(packageName, packageVersion, null, null, true, null);
 			}
