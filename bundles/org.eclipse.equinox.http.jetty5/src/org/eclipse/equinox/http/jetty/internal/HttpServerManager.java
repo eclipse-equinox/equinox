@@ -292,11 +292,8 @@ public class HttpServerManager implements ManagedServiceFactory {
 		}
 	}
 
-	/**
-	 * deleteDirectory is a convenience method to recursively delete a directory
-	 * @param directory - the directory to delete.
-	 * @return was the delete succesful
-	 */
+
+	// deleteDirectory is a convenience method to recursively delete a directory
 	private static boolean deleteDirectory(File directory) {
 		if (directory.exists() && directory.isDirectory()) {
 			File[] files = directory.listFiles();

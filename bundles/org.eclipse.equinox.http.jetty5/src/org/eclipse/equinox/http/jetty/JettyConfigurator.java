@@ -43,6 +43,12 @@ public class JettyConfigurator {
 	private static final String PID_PREFIX = "org.eclipse.equinox.http.jetty.JettyConfigurator."; //$NON-NLS-1$
 	private static Permission configurationPermission = new ConfigurationPermission("*", ConfigurationPermission.CONFIGURE); //$NON-NLS-1$
 
+	/**
+	 * Creates an instance of Jetty parameterized with a dictionary of settings
+	 * @param id The identifier for the server instance
+	 * @param settings The dictionary of settings used to configure the server instance
+	 * @throws Exception If the server failed to start for any reason
+	 */
 	public static void startServer(String id, Dictionary settings) throws Exception {
 		checkConfigurationPermission();
 		String pid = PID_PREFIX + id;
@@ -50,6 +56,11 @@ public class JettyConfigurator {
 		Activator.startServer(pid, settings);
 	}
 
+	/**
+	 * Stops a previously started instance of Jetty. If the identified instance is not started this will call will do nothing.
+	 * @param id The identifier for the server instance
+	 * @throws Exception If the server failed to stop for any reason.
+	 */
 	public static void stopServer(String id) throws Exception {
 		checkConfigurationPermission();
 		Activator.stopServer(PID_PREFIX + id);

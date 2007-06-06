@@ -24,7 +24,7 @@ public interface HttpContextExtensionService {
 	 * returns the HttpContext associated with the HttpService reference and http context name
 	 *
 	 * @param httpServiceReference The ServiceReference of the http service to which this HttpContext applies
-	 * @param httpContextName The name of the HttpContext. Must be provided
+	 * @param httpContextId The name of the HttpContext. Must be provided
 	 * 
 	 * @return The HttpContext associated with the "id" and Http Service Reference; <code>null</code>
 	 *         if the HttpContext is unavailable.
