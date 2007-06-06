@@ -21,7 +21,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 
 /**
- * Jasper requires that this classloader be an instance of URLClassLoader.
+ * Jasper requires that this class loader be an instance of URLClassLoader.
  * At runtime it uses the URLClassLoader's getURLs method to find jar files that are in turn searched for TLDs. In a webapp
  * these jar files would normally be located in WEB-INF/lib. In the OSGi context, this behaviour is provided by returning the
  * URLs of the jar files contained on the Bundle-ClassPath. Other than jar file tld resources this classloader is not used for
