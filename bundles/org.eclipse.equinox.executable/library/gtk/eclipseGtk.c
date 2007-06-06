@@ -107,6 +107,8 @@ int showSplash( const char* featureImage )
 	width  = gdk_pixbuf_get_width(pixbuf);
 	height = gdk_pixbuf_get_height(pixbuf);
 	gtk_window_set_position(GTK_WINDOW(shellHandle), GTK_WIN_POS_CENTER);
+	if (getOfficialName() != NULL)
+		gtk_window_set_title(GTK_WINDOW(shellHandle), getOfficialName());
 	gtk_window_resize(GTK_WINDOW(shellHandle), width, height);
 	gtk_widget_show_all(GTK_WIDGET(shellHandle));
 	splashHandle = (long)G_OBJECT(shellHandle);
