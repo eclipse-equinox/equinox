@@ -100,14 +100,14 @@
          <attribute name="name" type="string" use="required">
             <annotation>
                <documentation>
-                  
+                  The initial parameter&apos;s name
                </documentation>
             </annotation>
          </attribute>
          <attribute name="value" type="string" use="required">
             <annotation>
                <documentation>
-                  
+                  The initial parameter&apos;s value
                </documentation>
             </annotation>
          </attribute>
@@ -126,7 +126,7 @@
          <attribute name="class" type="string">
             <annotation>
                <documentation>
-                  
+                  If used the class must be an instance of org.osgi.framework.Filter
                </documentation>
                <appInfo>
                   <meta.attribute kind="java" basedOn="org.osgi.framework.Filter"/>

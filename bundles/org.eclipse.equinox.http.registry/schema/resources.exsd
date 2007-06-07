@@ -84,14 +84,14 @@
          <attribute name="filter" type="string">
             <annotation>
                <documentation>
-                  
+                  The serviceSelector allow filtering of the HttpService instances with which to register resources.
                </documentation>
             </annotation>
          </attribute>
          <attribute name="class" type="string">
             <annotation>
                <documentation>
-                  
+                  If used the class must be an instance of org.osgi.framework.Filter
                </documentation>
                <appInfo>
                   <meta.attribute kind="java" basedOn="org.osgi.framework.Filter"/>

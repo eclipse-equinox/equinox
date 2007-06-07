@@ -56,7 +56,7 @@
          <attribute name="id" type="string" use="required">
             <annotation>
                <documentation>
-                  
+                  The identifier associate with this httpcontext. Outside of this bundle it must be referred to by its full name including bundle namespace.
                </documentation>
             </annotation>
          </attribute>
@@ -86,14 +86,14 @@
          <attribute name="extension" type="string" use="required">
             <annotation>
                <documentation>
-                  
+                  The file extension to associate. For example: ps
                </documentation>
             </annotation>
          </attribute>
          <attribute name="mime-type" type="string" use="required">
             <annotation>
                <documentation>
-                  
+                  The associated mime-type. For example: application/postscript
                </documentation>
             </annotation>
          </attribute>
