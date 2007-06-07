@@ -16,11 +16,15 @@ import org.eclipse.equinox.internal.jsp.jasper.registry.Activator;
 import org.eclipse.equinox.jsp.jasper.JspServlet;
 import org.osgi.framework.Bundle;
 
-/** 
+/**
+ * <p> 
  * The JSPFactory can be used in conjunction with org.eclipse.equinox.http.registry and the Servlets extension point
  * to allow the use of JSPs declaratively with the extension registry.
+ * </p>
+ * <p>
  * JSPFactory will accept a "path" parameter corresponding to the base path in the bundle to look up JSP resources.
  * This parameter can be set using the ":" separator approach or by xml parameter.
+ * </p>
  * e.g. class="org.eclipse.equinox.jsp.jasper.registry.JSPFactory:/A/PATH" or &lt;parameter name="path" value="/A/PATH"/&gt;
  */
 public class JSPFactory implements IExecutableExtensionFactory, IExecutableExtension {

@@ -30,22 +30,29 @@ import org.eclipse.equinox.internal.jsp.jasper.JspClassLoader;
 import org.osgi.framework.Bundle;
 
 /**
+ * <p>
  * JSPServlet wraps the Apache Jasper Servlet making it appropriate for running in an OSGi environment under the Http Service.
  * The Jasper JSPServlet makes use of the Thread Context Classloader to support compile and runtime of JSPs and to accommodate running
  * in an OSGi environment, a Bundle is used to provide the similar context normally provided by the webapp.
- * 
+ * </p>
+ * <p>
  *  The Jasper Servlet will search the ServletContext to find JSPs, tag library descriptors, and additional information in the web.xml
  *  as per the JSP 2.0 specification. In addition to the ServletContext this implementation will search the bundle (but not attached
  *  fragments) for matching resources in a manner consistent with the Http Service's notion of a resource. By using alias and bundleResourcePath the JSP lookup should be in 
  *  line with the resource mapping specified in {102.4} of the OSGi HttpService.
- *  
+ *  </p>
+ *  <p>
  *  TLD discovery is slightly different, to clarify it occurs in one of three ways:
- *  1) declarations found in /WEB-INF/web.xml (found either on the bundleResourcePath in the bundle or in the ServletContext)
- *  2) tld files found under /WEB-INF (found either on the bundleResourcePath in the bundle or in the ServletContext)
- *  3) tld files found in jars on the Bundle-Classpath (see org.eclipse.equinox.internal.jsp.jasper.JSPClassLoader)
- *  
+ *  <ol>
+ *  <li> declarations found in /WEB-INF/web.xml (found either on the bundleResourcePath in the bundle or in the ServletContext)</li>
+ *  <li> tld files found under /WEB-INF (found either on the bundleResourcePath in the bundle or in the ServletContext)</li>
+ *  <li> tld files found in jars on the Bundle-Classpath (see org.eclipse.equinox.internal.jsp.jasper.JSPClassLoader)</li>
+ *  </ol>
+ *  </p>
+ *  <p>
  *  Other than the setting and resetting of the thread context classloader and additional resource lookups in the bundle the JSPServlet
  *  is behaviourally consistent with the JSP 2.0 specification and regular Jasper operation.
+ *  </p>
  */
 
 public class JspServlet extends HttpServlet {
