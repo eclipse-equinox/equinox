@@ -6,7 +6,7 @@
          <meta.schema plugin="org.eclipse.equinox.http.registry" id="resources" name="Http Service Resources"/>
       </appInfo>
       <documentation>
-         This extension mimics and borrows the symantics of the OSGi HttpService registerResource method.
+         This extension mimics and borrows the semantics of the OSGi HttpService registerResource method.
       </documentation>
    </annotation>
 
@@ -136,7 +136,7 @@ This equivalent to the OSGi Http Service&apos;s registerResource method.
          <meta.section type="apiInfo"/>
       </appInfo>
       <documentation>
-         No Java code is requied for this extension point.
+         
       </documentation>
    </annotation>
 
