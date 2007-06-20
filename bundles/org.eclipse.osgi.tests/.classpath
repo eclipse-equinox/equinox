@@ -27,6 +27,10 @@
 	<classpathentry kind="src" output="bundle_tests/buddy.dependent.a" path="bundles_src/buddy.dependent.a"/>
 	<classpathentry kind="src" output="bundle_tests/buddy.dependent.a.test1" path="bundles_src/buddy.dependent.a.test1"/>
 	<classpathentry kind="src" output="bundle_tests/buddy.dependent.a.test2" path="bundles_src/buddy.dependent.a.test2"/>
+	<classpathentry kind="src" output="bundle_tests/nativetest.a1" path="bundles_src/nativetest.a1"/>
+	<classpathentry kind="src" output="bundle_tests/nativetest.a2" path="bundles_src/nativetest.a2"/>
+	<classpathentry kind="src" output="bundle_tests/nativetest.b1" path="bundles_src/nativetest.b1"/>
+	<classpathentry kind="src" output="bundle_tests/nativetest.b2" path="bundles_src/nativetest.b2"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="output" path="bin"/>

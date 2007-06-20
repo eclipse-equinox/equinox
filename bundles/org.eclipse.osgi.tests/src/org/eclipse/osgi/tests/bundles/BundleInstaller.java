@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006 IBM Corporation and others.
+ * Copyright (c) 2006, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -56,6 +56,34 @@ public class BundleInstaller {
 		Bundle bundle =  context.installBundle(location);
 		bundles.put(name, bundle);
 		return bundle;
+	}
+
+	synchronized public Bundle updateBundle(String fromName, String toName) throws BundleException {
+		if (bundles == null)
+			return null;
+		Bundle fromBundle = (Bundle) bundles.get(fromName);
+		if (fromBundle == null)
+			throw new BundleException("The bundle to update does not exist!! " + fromName);
+		String bundleFileName = rootLocation + "/" + toName;
+		URL bundleURL = context.getBundle().getEntry(bundleFileName);
+		if (bundleURL == null)
+			bundleURL = context.getBundle().getEntry(bundleFileName + ".jar");
+		try {
+			bundleURL = ((URLConverter) converter.getService()).resolve(bundleURL);
+		} catch (IOException e) {
+			throw new BundleException("Converter error", e);
+		}
+		String location = bundleURL.toExternalForm();
+		if ("file".equals(bundleURL.getProtocol()))
+			location = "reference:" + location;
+		try {
+			fromBundle.update(new URL(location).openStream());
+		} catch (Exception e) {
+			throw new BundleException("Errors when updating bundle " + fromBundle, e);
+		}
+		bundles.remove(fromName);
+		bundles.put(toName, fromBundle);
+		return fromBundle;
 	}
 
 	synchronized public Bundle uninstallBundle(String name) throws BundleException {
