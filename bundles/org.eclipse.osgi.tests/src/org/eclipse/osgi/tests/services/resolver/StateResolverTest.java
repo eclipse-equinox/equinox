@@ -1173,6 +1173,93 @@ public class StateResolverTest extends AbstractStateTest {
 		assertFalse("1.9", import10.isResolved());
 	}
 
+	public void testSingletonsSelection6() throws BundleException {
+		State state = buildEmptyState();
+
+		// test the selection algorithm of the resolver to pick the bundles which
+		// resolve the largest set of bundles
+		Hashtable manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "sdk; " + Constants.SINGLETON_DIRECTIVE + ":=true");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.REQUIRE_BUNDLE, "platform; bundle-version=\"[1.0,2.0]\"");
+		BundleDescription sdk10 = state.getFactory().createBundleDescription(state, manifest, "sdk10", 0);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "platform; " + Constants.SINGLETON_DIRECTIVE + ":=true");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.REQUIRE_BUNDLE, "rcp; bundle-version=\"[1.0,2.0]\"");
+		BundleDescription platform10 = state.getFactory().createBundleDescription(state, manifest, "platform10", 1);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "rcp; " + Constants.SINGLETON_DIRECTIVE + ":=true");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		BundleDescription rcp10 = state.getFactory().createBundleDescription(state, manifest, "rcp10", 2);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "gef; " + Constants.SINGLETON_DIRECTIVE + ":=true");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.REQUIRE_BUNDLE, "rcp; bundle-version=\"[1.0,1.0]\"");
+		BundleDescription gef10 = state.getFactory().createBundleDescription(state, manifest, "gef10", 3);
+
+		state.addBundle(sdk10);
+		state.addBundle(platform10);
+		state.addBundle(rcp10);
+		state.addBundle(gef10);
+		state.resolve();
+
+		assertTrue("1.0", sdk10.isResolved());
+		assertTrue("1.1", platform10.isResolved());
+		assertTrue("1.2", rcp10.isResolved());
+		assertTrue("1.3", gef10.isResolved());
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "sdk; " + Constants.SINGLETON_DIRECTIVE + ":=true");
+		manifest.put(Constants.BUNDLE_VERSION, "2.0");
+		manifest.put(Constants.REQUIRE_BUNDLE, "platform; bundle-version=\"[1.0,2.0]\"");
+		BundleDescription sdk20 = state.getFactory().createBundleDescription(state, manifest, "sdk20", 4);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "platform; " + Constants.SINGLETON_DIRECTIVE + ":=true");
+		manifest.put(Constants.BUNDLE_VERSION, "2.0");
+		manifest.put(Constants.REQUIRE_BUNDLE, "rcp; bundle-version=\"[1.0,2.0]\"");
+		BundleDescription platform20 = state.getFactory().createBundleDescription(state, manifest, "platform20", 5);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "rcp; " + Constants.SINGLETON_DIRECTIVE + ":=true");
+		manifest.put(Constants.BUNDLE_VERSION, "2.0");
+		BundleDescription rcp20 = state.getFactory().createBundleDescription(state, manifest, "rcp20", 6);
+
+		state.removeBundle(sdk10);
+		state.removeBundle(platform10);
+		state.removeBundle(rcp10);
+		state.removeBundle(gef10);
+		
+		// reorder the bundles to test that order of bundles does not effect resolution outcome
+		state.addBundle(sdk20);
+		state.addBundle(platform20);
+		state.addBundle(rcp20);
+		state.addBundle(sdk10);
+		state.addBundle(platform10);
+		state.addBundle(rcp10);
+		state.addBundle(gef10);
+		state.resolve(false);
+
+		assertTrue("2.0", sdk20.isResolved());
+		assertTrue("2.1", platform20.isResolved());
+		assertTrue("2.2", rcp10.isResolved());
+		assertTrue("2.3", gef10.isResolved());
+		assertFalse("2.4", sdk10.isResolved());
+		assertFalse("2.5", platform10.isResolved());
+		assertFalse("2.6", rcp20.isResolved());
+	}
+
 	public void testNonSingletonsSameVersion() throws BundleException {
 		// this is a testcase to handle how PDE build is using the state
 		// with multiple singleton bundles installed with the same BSN and version
