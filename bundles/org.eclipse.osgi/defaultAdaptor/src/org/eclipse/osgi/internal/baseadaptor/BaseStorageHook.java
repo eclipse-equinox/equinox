@@ -91,7 +91,10 @@ public class BaseStorageHook implements StorageHook, AdaptorHook{
 			if ("true".equals(singleton)) //$NON-NLS-1$
 				bundleType |= BundleData.TYPE_SINGLETON;
 		}
-		target.setClassPathString((String) manifest.get(Constants.BUNDLE_CLASSPATH));
+		// check that the classpath is valid
+		String classpath = (String) manifest.get(Constants.BUNDLE_CLASSPATH);
+		ManifestElement.parseHeader(Constants.BUNDLE_CLASSPATH, classpath);
+		target.setClassPathString(classpath);
 		target.setActivator((String) manifest.get(Constants.BUNDLE_ACTIVATOR));
 		String host = (String) manifest.get(Constants.FRAGMENT_HOST);
 		if (host != null) {
