@@ -12,7 +12,6 @@ import java.io.*;
 import java.security.cert.*;
 import java.util.*;
 import org.eclipse.osgi.baseadaptor.BaseData;
-import org.eclipse.osgi.baseadaptor.bundlefile.BundleFile;
 import org.eclipse.osgi.baseadaptor.hooks.StorageHook;
 import org.eclipse.osgi.framework.util.KeyedElement;
 import org.eclipse.osgi.internal.provisional.verifier.CertificateChain;
@@ -119,14 +118,13 @@ public class SignedStorageHook implements StorageHook {
 			saveChainCache.clear();
 		if (lastIDSaved == bundledata.getBundleID())
 			firstIDSaved = lastIDSaved = -1;
-		BundleFile bundleFile = bundledata.getBundleFile();
+		SignedBundleFile signedFile = signedBundleFile;
 		CertificateChain[] chains = null;
 		String md5Result = null;
 		String shaResult = null;
 		Hashtable digests = null;
 		Hashtable results = null;
-		if (bundleFile instanceof SignedBundleFile) {
-			SignedBundleFile signedFile = (SignedBundleFile) bundleFile;
+		if (signedFile != null) {
 			chains = signedFile.chains;
 			md5Result = signedFile.manifestMD5Result;
 			shaResult = signedFile.manifestSHAResult;
@@ -219,10 +217,7 @@ public class SignedStorageHook implements StorageHook {
 	}
 
 	public boolean matchDNChain(String pattern) {
-		BundleFile base = bundledata.getBundleFile();
-		if (!(base instanceof SignedBundleFile))
-			return false;
-		return ((SignedBundleFile) base).matchDNChain(pattern);
+		return signedBundleFile == null ? false : signedBundleFile.matchDNChain(pattern);
 	}
 
 	public int getKeyHashCode() {

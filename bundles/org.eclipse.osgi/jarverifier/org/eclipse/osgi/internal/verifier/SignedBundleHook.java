@@ -116,13 +116,17 @@ public class SignedBundleHook implements AdaptorHook, BundleFileWrapperFactoryHo
 			if (bundleFile != null) {
 				SignedStorageHook hook = (SignedStorageHook) data.getStorageHook(SignedStorageHook.KEY);
 				SignedBundleFile signedBaseFile;
-				if (base && hook != null && hook.signedBundleFile != null)
+				if (base && hook != null) {
+					if (hook.signedBundleFile == null)
+						hook.signedBundleFile = new SignedBundleFile();
 					signedBaseFile = hook.signedBundleFile;
-				else
+				} else
 					signedBaseFile = new SignedBundleFile();
 				signedBaseFile.setBundleFile(bundleFile, supportSignedBundles);
 				if (signedBaseFile.isSigned()) // only use the signed file if there are certs
 					bundleFile = signedBaseFile;
+				else if (base) // if the base is not signed null out the hook.signedBundleFile
+					hook.signedBundleFile = null;
 			}
 		} catch (IOException e) {
 			// do nothing; its not your responsibility the error will be addressed later
@@ -166,10 +170,11 @@ public class SignedBundleHook implements AdaptorHook, BundleFileWrapperFactoryHo
 		BundleData data = ((AbstractBundle) bundle).getBundleData();
 		if (!(data instanceof BaseData))
 			throw new IllegalArgumentException("Invalid bundle object.  No BaseData found."); //$NON-NLS-1$
-		BundleFile bundleFile = ((BaseData) data).getBundleFile();
-		if (bundleFile instanceof SignedBundleFile)
-			return (SignedBundleFile) bundleFile; // just reuse the verifier from the bundle file
-		return getVerifier(bundleFile.getBaseFile()); // must create a new verifier using the raw file
+		SignedStorageHook hook = (SignedStorageHook) ((BaseData)data).getStorageHook(SignedStorageHook.KEY);
+		SignedBundleFile signedBundle = hook != null ? hook.signedBundleFile : null;
+		if (signedBundle != null)
+			return signedBundle; // just reuse the verifier from the bundle file
+		return getVerifier(((BaseData)data).getBundleFile().getBaseFile()); // must create a new verifier using the raw file
 	}
 
 	static void log(String msg, int severity, Throwable t) {
