@@ -193,13 +193,13 @@ public class HttpServerManager implements ManagedServiceFactory {
 		if (keyPassword != null)
 			listener.setKeyPassword(keyPassword);
 
-		String needClientAuth = (String) dictionary.get(SSL_NEEDCLIENTAUTH);
+		Boolean needClientAuth = (Boolean) dictionary.get(SSL_NEEDCLIENTAUTH);
 		if (needClientAuth != null)
-			listener.setNeedClientAuth(Boolean.valueOf(needClientAuth).booleanValue());
+			listener.setNeedClientAuth(needClientAuth.booleanValue());
 
-		String wantClientAuth = (String) dictionary.get(SSL_WANTCLIENTAUTH);
+		Boolean wantClientAuth = (Boolean) dictionary.get(SSL_WANTCLIENTAUTH);
 		if (wantClientAuth != null)
-			listener.setWantClientAuth(Boolean.valueOf(wantClientAuth).booleanValue());
+			listener.setWantClientAuth(wantClientAuth.booleanValue());
 
 		String protocol = (String) dictionary.get(SSL_PROTOCOL);
 		if (protocol != null)
