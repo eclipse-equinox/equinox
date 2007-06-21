@@ -991,12 +991,13 @@ public class BaseStorage implements SynchronousBundleListener {
 		File[] files = null;
 		try {
 			String[] paths = bundleData.getClassPath();
-			// TODO need to be smarter about dev path here
-			if (FrameworkProperties.getProperty("osgi.dev") != null) { //$NON-NLS-1$
+			if (DevClassPathHelper.inDevelopmentMode()) { //$NON-NLS-1$
+				String[] devPaths = DevClassPathHelper.getDevClassPath(bundleData.getSymbolicName());
 				String[] origPaths = paths;
-				paths = new String[origPaths.length + 1];
+				
+				paths = new String[origPaths.length + devPaths.length];
 				System.arraycopy(origPaths, 0, paths, 0, origPaths.length);
-				paths[paths.length - 1] = "bin"; //$NON-NLS-1$
+				System.arraycopy(devPaths, 0, paths, origPaths.length, devPaths.length);
 			}
 			ArrayList results = new ArrayList(paths.length);
 			for (int i = 0; i < paths.length; i++) {
