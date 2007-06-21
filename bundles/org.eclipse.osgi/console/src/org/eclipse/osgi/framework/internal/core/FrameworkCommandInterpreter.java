@@ -31,6 +31,7 @@ import org.osgi.framework.Bundle;
  * FrameworkCommandInterpreter provides several print methods which handle the "More" command.
  */
 public class FrameworkCommandInterpreter implements CommandInterpreter {
+	private static final String WS_DELIM = " \t\n\r\f"; //$NON-NLS-1$
 
 	/** The command line in StringTokenizer form */
 	private StringTokenizer tok;
@@ -75,28 +76,32 @@ public class FrameworkCommandInterpreter implements CommandInterpreter {
 	 @return A string containing the next argument on the command line
 	 */
 	public String nextArgument() {
-		if (tok == null || !tok.hasMoreElements()) {
+		if (tok == null || !tok.hasMoreElements())
 			return null;
-		}
-		String token = tok.nextToken();
-		//check for quotes
-		int index = token.indexOf('"');
-		if (index != -1) {
-			//if we only have one quote, find the second quote
-			if (index == token.lastIndexOf('"')) {
-				token += tok.nextToken("\""); //$NON-NLS-1$
+		
+		String arg = tok.nextToken();
+		if (arg.startsWith("\"")) { //$NON-NLS-1$
+			if (arg.endsWith("\"")) { //$NON-NLS-1$
+				if (arg.length() >= 2)
+					// strip the beginning and ending quotes
+					return arg.substring(1, arg.length() - 1);
 			}
-			StringBuffer buf = new StringBuffer(token);
-
-			//strip quotes
-			while (index != -1) {
-				buf.deleteCharAt(index);
-				token = buf.toString();
-				index = token.indexOf('"');
+			String remainingArg = tok.nextToken("\""); //$NON-NLS-1$
+			arg = arg.substring(1) + remainingArg;
+			// skip to next whitespace separated token
+			tok.nextToken(WS_DELIM);
+		} else if (arg.startsWith("'")) { //$NON-NLS-1$ //$NON-NLS-2$
+			if (arg.endsWith("'")) { //$NON-NLS-1$
+				if (arg.length() >= 2)
+					// strip the beginning and ending quotes
+					return arg.substring(1, arg.length() - 1);
 			}
-			return buf.toString();
+			String remainingArg = tok.nextToken("'"); //$NON-NLS-1$
+			arg = arg.substring(1) + remainingArg;
+			// skip to next whitespace separated token
+			tok.nextToken(WS_DELIM);
 		}
-		return (token);
+		return arg;
 	}
 
 	/**
