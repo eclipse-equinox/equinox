@@ -44,7 +44,7 @@ Bundle-NativeCode: nativefile2.txt;
  osname="Windows NT (unknown)";
  osname="Windows Vista";
  osname=Win32,
- nativefile.txt;
+ nativefile2.txt;
  processor=x86;
  processor=ppc;
  osname=macosx
