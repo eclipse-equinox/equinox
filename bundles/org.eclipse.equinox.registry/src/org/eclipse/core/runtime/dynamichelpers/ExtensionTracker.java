@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2006 IBM Corporation and others.
+ * Copyright (c) 2004, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Sebastian Davids - fix for the bug 178028 (removals not propagated to handlers)
  *******************************************************************************/
 package org.eclipse.core.runtime.dynamichelpers;
 
@@ -15,16 +16,7 @@ import java.util.Map;
 import org.eclipse.core.internal.registry.RegistryMessages;
 import org.eclipse.core.internal.runtime.ReferenceHashSet;
 import org.eclipse.core.internal.runtime.RuntimeLog;
-import org.eclipse.core.runtime.IExtension;
-import org.eclipse.core.runtime.IExtensionDelta;
-import org.eclipse.core.runtime.IExtensionPoint;
-import org.eclipse.core.runtime.IExtensionRegistry;
-import org.eclipse.core.runtime.IRegistryChangeEvent;
-import org.eclipse.core.runtime.IRegistryChangeListener;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.ListenerList;
-import org.eclipse.core.runtime.RegistryFactory;
-import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.*;
 
 /**
  * Implementation of the IExtensionTracker.
@@ -179,9 +171,10 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 
 			ReferenceHashSet associatedObjects = (ReferenceHashSet) extensionToObjects.remove(delta.getExtension());
 			if (associatedObjects == null)
-				return;
-			//Copy the objects early so we don't hold the lock too long
-			removedObjects = associatedObjects.toArray();
+				removedObjects = EMPTY_ARRAY;
+			else
+				//Copy the objects early so we don't hold the lock too long
+				removedObjects = associatedObjects.toArray();
 		}
 		notify(delta, removedObjects);
 	}
