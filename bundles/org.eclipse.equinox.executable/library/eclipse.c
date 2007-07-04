@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Kevin Cornell (Rational Software Corporation)
+ *	   Markus Schorn (Wind River Systems), bug 193340
  *******************************************************************************/
 
 /* Eclipse Program Launcher
@@ -679,7 +680,7 @@ static void adjustVMArgs( _TCHAR *vm, _TCHAR **vmArgv[] ) {
 			_TCHAR *newArg = malloc((_tcslen(XXPERMGEN) + _tcslen(permGen) + 1) * sizeof(_TCHAR));
 			_stprintf(newArg, _T_ECLIPSE("%s%s"), XXPERMGEN, permGen);
 			
-			*vmArgv = malloc((i + 1) * sizeof(_TCHAR *));
+			*vmArgv = malloc((i + 2) * sizeof(_TCHAR *));
 			memcpy(*vmArgv, oldArgs, i * sizeof(_TCHAR *));
 			(*vmArgv)[i] = newArg;
 			(*vmArgv)[i + 1] = 0;
