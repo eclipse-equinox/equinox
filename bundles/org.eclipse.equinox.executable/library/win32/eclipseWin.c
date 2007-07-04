@@ -266,6 +266,15 @@ static _TCHAR* findLib( _TCHAR* command ) {
 				return path;
 			}
 		}
+		
+		/* if command is eclipse/jre, don't look in registry */
+		 location = malloc( (_tcslen( getProgramDir() ) + _tcslen( shippedVMDir ) + 1) * sizeof(_TCHAR) );
+        _stprintf( location, _T_ECLIPSE("%s%s"), getProgramDir(), shippedVMDir );
+        if( _tcsncmp(command, location, _tcslen(location)) == 0) {
+        	free(location);
+        	return NULL;
+        }
+        free(location);
 	}
 	
 	/* Not found yet, try the registry, we will use the first vm >= 1.4 */
