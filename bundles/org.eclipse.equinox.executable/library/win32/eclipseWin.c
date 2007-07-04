@@ -146,6 +146,7 @@ void takeDownSplash() {
 	if(topWindow != NULL) {
 		DestroyWindow(topWindow);
 		dispatchMessages();
+		topWindow = 0;
 	}
 }
 
