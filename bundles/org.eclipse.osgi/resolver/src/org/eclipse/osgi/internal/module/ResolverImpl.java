@@ -1413,7 +1413,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 			String importName = resolverImports[j].getName();
 			// If the import uses a wildcard, then temporarily replace this with the requested package
 			if (importName.equals("*") || //$NON-NLS-1$
-					(importName.endsWith(".*") && requestedPackage.startsWith(importName.substring(0, importName.length() - 2)))) { //$NON-NLS-1$
+					(importName.endsWith(".*") && requestedPackage.startsWith(importName.substring(0, importName.length() - 1)))) { //$NON-NLS-1$
 				resolverImports[j].setName(requestedPackage);
 			}
 			// Resolve the import
