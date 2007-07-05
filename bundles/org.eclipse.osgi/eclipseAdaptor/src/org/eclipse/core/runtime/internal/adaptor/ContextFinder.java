@@ -108,7 +108,7 @@ public class ContextFinder extends ClassLoader implements PrivilegedAction {
 		((Set) cycleDetector.get()).remove(name);
 	}
 
-	protected synchronized Class loadClass(String arg0, boolean arg1) throws ClassNotFoundException {
+	protected Class loadClass(String arg0, boolean arg1) throws ClassNotFoundException {
 		//Shortcut cycle
 		if (startLoading(arg0) == false)
 			throw new ClassNotFoundException(arg0);
