@@ -24,6 +24,10 @@ NODEBUG=1
 !include <ntwin32.mak>
 !include <..\make_version.mak>
 
+PROGRAM_OUTPUT=eclipse.exe
+# Separate filename from extention
+PROGRAM_NAME=$(PROGRAM_OUTPUT:.exe=)
+
 PROGRAM_LIBRARY = eclipse_$(LIB_VERSION).dll
 
 # Define the object modules to be compiled and flags.
@@ -38,9 +42,9 @@ DLL_LIBS = kernel32.lib user32.lib comctl32.lib gdi32.lib Advapi32.lib msvcrt.li
 LFLAGS = /NODEFAULTLIB /INCREMENTAL:NO /RELEASE /NOLOGO -subsystem:windows,4.0 -entry:wmainCRTStartup
 CONSOLEFLAGS = /NODEFAULTLIB /INCREMENTAL:NO /RELEASE /NOLOGO -subsystem:console,4.0 -entry:wmainCRTStartup
 DLL_LFLAGS = /NODEFAULTLIB /INCREMENTAL:NO /PDB:NONE /RELEASE /NOLOGO -entry:_DllMainCRTStartup@12 -dll /BASE:0x10000000 /DLL
-RES    = eclipse.res
-EXEC   = eclipse.exe
-CONSOLE = eclipsec.exe
+RES	= $(PROGRAM_NAME).res
+EXEC	= $(PROGRAM_OUTPUT)
+CONSOLE = $(PROGRAM_NAME)c.exe
 DLL    = $(PROGRAM_LIBRARY)
 DEBUG  = #$(cdebug)
 acflags = -I.. -DDEFAULT_OS="\"$(DEFAULT_OS)\"" \
@@ -118,7 +122,7 @@ $(CONSOLE): $(MAIN_OBJS) $(COMMON_OBJS)
 $(DLL): $(DLL_OBJS) $(COMMON_OBJS)
     $(link) $(DLL_LFLAGS) -out:$(PROGRAM_LIBRARY) $(DLL_OBJS) $(COMMON_OBJS) $(DLL_LIBS)
 
-$(RES): eclipse.rc
+$(RES): $(PROGRAM_NAME).rc
     $(rc) -r -fo $(RES) eclipse.rc
 
 install: all

@@ -24,6 +24,9 @@ NODEBUG=1
 !include <..\make_version.mak>
 
 PROGRAM_LIBRARY = eclipse_$(LIB_VERSION).dll
+PROGRAM_OUTPUT=eclipse.exe
+# Separate filename from extention
+PROGRAM_NAME=$(PROGRAM_OUTPUT:.exe=)
 
 # Define the object modules to be compiled and flags.
 MAIN_OBJS = eclipseMain.obj  
@@ -35,9 +38,9 @@ DLL_LIBS = kernel32.lib Advapi32.lib msvcrt.lib version.lib
 LFLAGS =  -CLRTHREADATTRIBUTE:STA /NODEFAULTLIB:LIBCMT /INCREMENTAL:NO /RELEASE /NOLOGO -subsystem:windows,4.0 -entry:wmainCRTStartup
 CONSOLEFLAGS =  -CLRTHREADATTRIBUTE:STA /NODEFAULTLIB:LIBCMT /INCREMENTAL:NO /RELEASE /NOLOGO -subsystem:console,4.0 -entry:wmainCRTStartup
 DLL_LFLAGS = -CLRTHREADATTRIBUTE:STA /NODEFAULTLIB:LIBCMT /INCREMENTAL:NO /PDB:NONE -dll /BASE:0x10000000 /DLL
-RES    = eclipse.res
-EXEC   = eclipse.exe
-CONSOLE = eclipsec.exe
+RES    = $(PROGRAM_NAME).res
+EXEC   = $(PROGRAM_OUTPUT)
+CONSOLE = $(PROGRAM_NAME)c.exe
 DLL    = $(PROGRAM_LIBRARY)
 DEBUG  = #$(cdebug)
 
@@ -82,7 +85,7 @@ eclipseShm.obj: ../eclipseShm.h ../eclipseUnicode.h ../eclipseShm.c
 	$(CC) $(DEBUG) $(CFLAGS) $(cvarsdll) /Fo$*.obj ../eclipseShm.c
 	
 $(EXEC): $(MAIN_OBJS) $(COMMON_OBJS)
-    rc.exe -r -fo $(RES) eclipse.rc
+    rc.exe -r -fo $(RES) $(PROGRAM_NAME).rc
     link $(LFLAGS) -out:$(PROGRAM_OUTPUT) $(MAIN_OBJS) $(COMMON_OBJS) $(RES) $(LIBS)
     mt.exe -manifest $(PROGRAM_OUTPUT).manifest -outputresource:$(PROGRAM_OUTPUT);2
 

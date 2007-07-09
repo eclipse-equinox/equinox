@@ -26,6 +26,10 @@ include ../make_version.mak
 ifeq ($(PROGRAM_OUTPUT),)
   PROGRAM_OUTPUT=eclipse.exe
 endif
+
+# Separate filename from extention
+PROGRAM_NAME=$(PROGRAM_OUTPUT:.exe=)
+
 PROGRAM_LIBRARY=eclipse_$(LIB_VERSION).dll
 
 # Allow for cross-compiling under linux
@@ -58,8 +62,8 @@ LIBS	= -lkernel32 -luser32 -lgdi32 -lcomctl32 -lmsvcrt -lversion
 LDFLAGS = -mwindows -mno-cygwin
 CONSOLEFLAGS = -mconsole -mno-cygwin
 DLL_LDFLAGS = -mno-cygwin -shared -Wl,--export-all-symbols -Wl,--kill-at
-RES	= eclipse.res
-CONSOLE = eclipsec.exe
+RES	= $(PROGRAM_NAME).res
+CONSOLE = $(PROGRAM_NAME)c.exe
 EXEC	= $(PROGRAM_OUTPUT)
 DLL     = $(PROGRAM_LIBRARY)
 DEBUG	= $(CDEBUG)
@@ -130,7 +134,7 @@ aeclipseWin.o: ../eclipseOS.h ../eclipseUnicode.h eclipseWin.c
 aeclipseJNI.o: ../eclipseUnicode.h ../eclipseJNI.c
 	$(CC) $(DEBUG) $(ACFLAGS) -c -o $@ ../eclipseJNI.c
 	
-$(RES): eclipse.rc
+$(RES): $(PROGRAM_NAME).rc
 	$(RC) --output-format=coff --include-dir=.. -o $@ $<
 
 $(EXEC): $(MAIN_OBJS) $(COMMON_OBJS) $(RES)
