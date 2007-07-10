@@ -15,10 +15,11 @@ import java.io.*;
 import java.lang.reflect.Array;
 import java.util.*;
 import javax.xml.parsers.ParserConfigurationException;
-import org.eclipse.core.internal.registry.spi.ConfigurationElementDescription;
 import org.eclipse.core.internal.registry.spi.ConfigurationElementAttribute;
+import org.eclipse.core.internal.registry.spi.ConfigurationElementDescription;
 import org.eclipse.core.runtime.*;
-import org.eclipse.core.runtime.spi.*;
+import org.eclipse.core.runtime.spi.RegistryContributor;
+import org.eclipse.core.runtime.spi.RegistryStrategy;
 import org.eclipse.osgi.storagemanager.StorageManager;
 import org.eclipse.osgi.util.NLS;
 import org.xml.sax.InputSource;
@@ -386,6 +387,30 @@ public class ExtensionRegistry implements IExtensionRegistry {
 		access.enterRead();
 		try {
 			return registryObjects.getExtensionsFromNamespace(namespaceName);
+		} finally {
+			access.exitRead();
+		}
+	}
+
+	public IExtension[] getExtensions(IContributor contributor) {
+		if (!(contributor instanceof RegistryContributor))
+			throw new IllegalArgumentException(); // should never happen
+		String contributorId = ((RegistryContributor) contributor).getActualId();
+		access.enterRead();
+		try {
+			return registryObjects.getExtensionsFromContributor(contributorId);
+		} finally {
+			access.exitRead();
+		}
+	}
+
+	public IExtensionPoint[] getExtensionPoints(IContributor contributor) {
+		if (!(contributor instanceof RegistryContributor))
+			throw new IllegalArgumentException(); // should never happen
+		String contributorId = ((RegistryContributor) contributor).getActualId();
+		access.enterRead();
+		try {
+			return registryObjects.getExtensionPointsFromContributor(contributorId);
 		} finally {
 			access.exitRead();
 		}

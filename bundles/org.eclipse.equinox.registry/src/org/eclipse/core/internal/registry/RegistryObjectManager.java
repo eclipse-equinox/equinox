@@ -33,6 +33,8 @@ public class RegistryObjectManager implements IObjectManager {
 	static final int[] EMPTY_INT_ARRAY = new int[0];
 	static final String[] EMPTY_STRING_ARRAY = new String[0];
 
+	static final ExtensionHandle[] EMPTY_EXTENSIONS_ARRAY = new ExtensionHandle[0];
+
 	static int UNKNOWN = -1;
 
 	// key: extensionPointName, value: object id
@@ -683,11 +685,10 @@ public class RegistryObjectManager implements IObjectManager {
 						collectChildren(tmp, 0, result);
 					}
 				}
-			}
-			else if (object instanceof ExtensionPoint) {
+			} else if (object instanceof ExtensionPoint) {
 				// by now extensions of this extension point have been marked as orphans
 				Map orphans = getOrphans();
-				String name = ((ExtensionPoint)object).getUniqueIdentifier();
+				String name = ((ExtensionPoint) object).getUniqueIdentifier();
 				int[] extensions = (int[]) orphans.get(name);
 				if (extensions != null) {
 					for (int j = 0; j < extensions.length; j++) {
@@ -765,8 +766,6 @@ public class RegistryObjectManager implements IObjectManager {
 		return (ExtensionPointHandle[]) getHandles(namespaceExtensionPoints, EXTENSION_POINT);
 	}
 
-	static final ExtensionHandle[] EMPTY_EXTENSIONS_ARRAY = new ExtensionHandle[0];
-
 	// This method filters out extensions with no extension point
 	synchronized public ExtensionHandle[] getExtensionsFromNamespace(String namespaceName) {
 		RegistryIndexElement indexElement = getNamespaceIndex(namespaceName);
@@ -783,5 +782,15 @@ public class RegistryObjectManager implements IObjectManager {
 			return EMPTY_EXTENSIONS_ARRAY;
 		ExtensionHandle[] result = new ExtensionHandle[tmp.size()];
 		return (ExtensionHandle[]) tmp.toArray(result);
+	}
+
+	public ExtensionHandle[] getExtensionsFromContributor(String contributorId) {
+		int[] ids = getExtensionsFrom(contributorId); // never null
+		return (ExtensionHandle[]) getHandles(ids, RegistryObjectManager.EXTENSION);
+	}
+
+	public ExtensionPointHandle[] getExtensionPointsFromContributor(String contributorId) {
+		int[] ids = getExtensionPointsFrom(contributorId); // never null
+		return (ExtensionPointHandle[]) getHandles(ids, RegistryObjectManager.EXTENSION_POINT);
 	}
 }

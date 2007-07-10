@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2006 IBM Corporation and others.
+ * Copyright (c) 2003, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -218,6 +218,17 @@ public interface IExtensionRegistry {
 	public IExtensionPoint[] getExtensionPoints(String namespace);
 
 	/**
+	 * Returns all extension points supplied by the contributor, or <code>null</code> 
+	 * if there are no such extension points.
+	 * 
+	 * @param contributor the contributor for the extensions (for OSGi registry, bundles and 
+	 * fragments are different contributors)
+	 * @return the extension points, or <code>null</code>
+	 * @since 3.4
+	 */
+	public IExtensionPoint[] getExtensionPoints(IContributor contributor);
+
+	/**
 	 * Returns all extensions declared in the given namespace. Returns an empty array if 
 	 * no extensions are declared in the namespace.
 	 * 
@@ -226,6 +237,16 @@ public interface IExtensionRegistry {
 	 * @return the extensions in this registry declared in the given namespace 
 	 */
 	public IExtension[] getExtensions(String namespace);
+
+	/**
+	 * Returns all extensions supplied by the contributor, or <code>null</code> if there 
+	 * are no such extensions.
+	 * @param contributor the contributor for the extensions (for OSGi registry, bundles and 
+	 * fragments are different contributors)
+	 * @return the extensions, or <code>null</code>
+	 * @since 3.4
+	 */
+	public IExtension[] getExtensions(IContributor contributor);
 
 	/**
 	 * Returns all namespaces currently used by extensions and extension points in this 
