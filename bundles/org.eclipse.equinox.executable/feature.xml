@@ -2,7 +2,7 @@
 <feature
       id="org.eclipse.equinox.executable"
       label="%featureName"
-      version="3.3.0.qualifier">
+      version="3.3.100.qualifier">
 
    <description>
       %description
@@ -12,14 +12,14 @@
       %license
    </license>
 
-	<plugin
+   <plugin
          id="org.eclipse.equinox.launcher"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
 
-	<plugin
+   <plugin
          id="org.eclipse.equinox.launcher.gtk.solaris.sparc"
          os="solaris"
          ws="gtk"
@@ -27,20 +27,18 @@
          download-size="0"
          install-size="0"
          version="0.0.0"
-         fragment="true"
-         unpack="true"/>
+         fragment="true"/>
 
-	<plugin
+   <plugin
          id="org.eclipse.equinox.launcher.carbon.macosx"
          os="macosx"
          ws="carbon"
          download-size="0"
          install-size="0"
          version="0.0.0"
-         fragment="true"
-         unpack="true"/>
+         fragment="true"/>
 
-	<plugin
+   <plugin
          id="org.eclipse.equinox.launcher.gtk.linux.ppc"
          os="linux"
          ws="gtk"
@@ -48,10 +46,9 @@
          download-size="0"
          install-size="0"
          version="0.0.0"
-         fragment="true"
-         unpack="true"/>
+         fragment="true"/>
 
-	<plugin
+   <plugin
          id="org.eclipse.equinox.launcher.gtk.linux.x86"
          os="linux"
          ws="gtk"
@@ -59,10 +56,9 @@
          download-size="0"
          install-size="0"
          version="0.0.0"
-         fragment="true"
-         unpack="true"/>  
+         fragment="true"/>
 
-	<plugin
+   <plugin
          id="org.eclipse.equinox.launcher.gtk.linux.x86_64"
          os="linux"
          ws="gtk"
@@ -70,10 +66,9 @@
          download-size="0"
          install-size="0"
          version="0.0.0"
-         fragment="true"
-         unpack="true"/>
+         fragment="true"/>
 
-	<plugin
+   <plugin
          id="org.eclipse.equinox.launcher.motif.aix.ppc"
          os="aix"
          ws="motif"
@@ -81,10 +76,9 @@
          download-size="0"
          install-size="0"
          version="0.0.0"
-         fragment="true"
-         unpack="true"/>
+         fragment="true"/>
 
-	<plugin
+   <plugin
          id="org.eclipse.equinox.launcher.motif.hpux.PA_RISC"
          os="hpux"
          ws="motif"
@@ -92,10 +86,9 @@
          download-size="0"
          install-size="0"
          version="0.0.0"
-         fragment="true"
-         unpack="true"/>
-         
-	<plugin
+         fragment="true"/>
+
+   <plugin
          id="org.eclipse.equinox.launcher.motif.linux.x86"
          os="linux"
          ws="motif"
@@ -103,10 +96,9 @@
          download-size="0"
          install-size="0"
          version="0.0.0"
-         fragment="true"
-         unpack="true"/>
-         
-	<plugin
+         fragment="true"/>
+
+   <plugin
          id="org.eclipse.equinox.launcher.win32.win32.x86"
          os="win32"
          ws="win32"
@@ -114,9 +106,8 @@
          download-size="0"
          install-size="0"
          version="0.0.0"
-         fragment="true"
-         unpack="true"/>
-         
+         fragment="true"/>
+
    <plugin
          id="org.eclipse.equinox.launcher.wpf.win32.x86"
          os="win32"
@@ -125,10 +116,9 @@
          download-size="0"
          install-size="0"
          version="0.0.0"
-         fragment="true"
-         unpack="true"/>
-         
-	<plugin
+         fragment="true"/>
+
+   <plugin
          id="org.eclipse.equinox.launcher.gtk.linux.s390"
          os="linux"
          ws="gtk"
@@ -136,10 +126,9 @@
          download-size="0"
          install-size="0"
          version="0.0.0"
-         fragment="true"
-         unpack="true"/>
-         
-	<plugin
+         fragment="true"/>
+
+   <plugin
          id="org.eclipse.equinox.launcher.gtk.linux.s390x"
          os="linux"
          ws="gtk"
@@ -147,7 +136,6 @@
          download-size="0"
          install-size="0"
          version="0.0.0"
-         fragment="true"
-         unpack="true"/>
-        
+         fragment="true"/>
+
 </feature>
