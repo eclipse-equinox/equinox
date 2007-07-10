@@ -42,12 +42,15 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 	private int status = EclipseAppHandle.FLAG_STARTING;
 	private final Map arguments;
 	private Object application;
+	private final Boolean defaultAppInstance;
+	private Object result;
 
 	/*
 	 * Constructs a handle for a single running instance of a eclipse application.
 	 */
 	EclipseAppHandle(String instanceId, Map arguments, EclipseAppDescriptor descriptor) {
 		super(instanceId, descriptor);
+		defaultAppInstance = arguments == null || arguments.get(EclipseAppDescriptor.APP_DEFAULT) == null ? Boolean.FALSE : (Boolean) arguments.remove(EclipseAppDescriptor.APP_DEFAULT); 
 		if (arguments == null)
 			this.arguments = new HashMap(2);
 		else
@@ -96,6 +99,8 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 		props.put(ApplicationHandle.APPLICATION_STATE, getState());
 		props.put(ApplicationHandle.APPLICATION_DESCRIPTOR, getApplicationDescriptor().getApplicationId());
 		props.put(EclipseAppDescriptor.APP_TYPE, ((EclipseAppDescriptor) getApplicationDescriptor()).getThreadTypeString());
+		if (defaultAppInstance.booleanValue())
+			props.put(EclipseAppDescriptor.APP_DEFAULT, defaultAppInstance);
 		return props;
 	}
 
@@ -142,7 +147,7 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 				arguments.put(IApplicationContext.APPLICATION_ARGS, context);
 			}
 		}
-		Object result;
+		Object tempResult = null;
 		try {
 			Object app;
 			synchronized (this) {
@@ -150,19 +155,24 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 				app = application;
 			}
 			if (app instanceof IApplication)
-				result = ((IApplication) app).start(this);
+				tempResult = ((IApplication) app).start(this);
 			else
-				result = EclipseAppContainer.callMethod(app, "run", new Class[] {Object.class}, new Object[] {context}); //$NON-NLS-1$
+				tempResult = EclipseAppContainer.callMethod(app, "run", new Class[] {Object.class}, new Object[] {context}); //$NON-NLS-1$
 		} finally {
 			synchronized (this) {
+				result = tempResult;
 				application = null;
+				notify();
 			}
 			// The application exited itself; notify the app context
 			setAppStatus(EclipseAppHandle.FLAG_STOPPED);
 		}
 		int exitCode = result instanceof Integer ? ((Integer) result).intValue() : 0;
-		// use the long way to set the property to compile against eeminimum
-		System.getProperties().setProperty(PROP_ECLIPSE_EXITCODE, Integer.toString(exitCode));
+		// only set the exit code property if this is the default application
+		if (isDefault())
+			// use the long way to set the property to compile against eeminimum
+			// TODO strange that this is done here instead of by EclipseStarter
+			System.getProperties().setProperty(PROP_ECLIPSE_EXITCODE, Integer.toString(exitCode));
 		if (Activator.DEBUG)
 			System.out.println(NLS.bind(Messages.application_returned, (new String[] {getApplicationDescriptor().getApplicationId(), result == null ? "null" : result.toString()}))); //$NON-NLS-1$
 		return result;
@@ -281,5 +291,19 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 	public String getBrandingProperty(String key) {
 		IBranding branding = ((EclipseAppDescriptor) getApplicationDescriptor()).getContainerManager().getBranding();
 		return branding == null ? null : branding.getProperty(key);
+	}
+
+	boolean isDefault() {
+		return defaultAppInstance.booleanValue();
+	}
+
+	synchronized Object waitForResult(int timeout) {
+		if (result == null)
+			try {
+				wait(timeout); // only wait for the specified amount of time
+			} catch (InterruptedException e) {
+				// Do nothing; return quickly
+			}
+		return result;
 	}
 }

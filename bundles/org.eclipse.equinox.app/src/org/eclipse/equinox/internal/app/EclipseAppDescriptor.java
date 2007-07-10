@@ -71,7 +71,11 @@ public class EclipseAppDescriptor extends ApplicationDescriptor {
 			appContainer.launch(appHandle);
 		} catch (Throwable t) {
 			// be sure to destroy the appHandle if an error occurs
-			appHandle.destroy();
+			try {
+				appHandle.destroy();
+			} catch (Throwable destroyError) {
+				// ignore and clean up
+			}
 			if (t instanceof Exception)
 				throw (Exception) t;
 			throw (Error) t;

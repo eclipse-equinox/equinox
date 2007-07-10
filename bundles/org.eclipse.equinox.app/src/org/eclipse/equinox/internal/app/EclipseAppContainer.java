@@ -70,6 +70,7 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 	private EclipseAppHandle activeScopedSingleton;
 	private HashMap activeLimited;
 	private String defaultAppId;
+	private DefaultApplicationListener defaultAppListener;
 
 	public EclipseAppContainer(BundleContext context, IExtensionRegistry extensionRegistry, ApplicationLauncher appLauncher) {
 		this.context = context;
@@ -222,17 +223,16 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 		// find the default application
 		String applicationId = getDefaultAppId();
 		EclipseAppDescriptor defaultDesc = null;
-		Map args = null;
+		Map args = new HashMap(2);
+		args.put(EclipseAppDescriptor.APP_DEFAULT, Boolean.TRUE);
 		if (applicationId == null) {
 			// the application id is not set; use a descriptor that will throw an exception
-			args = new HashMap(2);
 			args.put(ErrorApplication.ERROR_EXCEPTION, new RuntimeException(Messages.application_noIdFound));
 			defaultDesc = getAppDescriptor(EXT_ERROR_APP);
 		} else {
 			defaultDesc = getAppDescriptor(applicationId);
 			if (defaultDesc == null) {
 				// the application id is not available in the registry; use a descriptor that will throw an exception
-				args = new HashMap(2);
 				args.put(ErrorApplication.ERROR_EXCEPTION, new RuntimeException(NLS.bind(Messages.application_notFound, applicationId, getAvailableAppsMsg())));
 				defaultDesc = getAppDescriptor(EXT_ERROR_APP);
 			}
@@ -297,9 +297,16 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 			// to ensure it is launched on the main thread
 			if (appLauncher == null)
 				throw new IllegalStateException();
-			appLauncher.launch(appHandle, appHandle.getArguments().get(IApplicationContext.APPLICATION_ARGS));
+			if (defaultAppListener != null)
+				defaultAppListener.launch(appHandle);
+			else
+				appLauncher.launch(appHandle, appHandle.getArguments().get(IApplicationContext.APPLICATION_ARGS));
 		} else {
 			AnyThreadAppLauncher.launchEclipseApplication(appHandle);
+			boolean isDefault = appHandle.isDefault();
+			defaultAppListener = new DefaultApplicationListener();
+			if (isDefault && appLauncher != null)
+				appLauncher.launch(defaultAppListener, null);
 		}
 	}
 
