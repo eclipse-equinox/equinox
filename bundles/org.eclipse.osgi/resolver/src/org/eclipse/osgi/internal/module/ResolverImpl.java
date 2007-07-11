@@ -880,15 +880,23 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 				ResolverImpl.log("  - " + bundle + " is unresolvable"); //$NON-NLS-1$ //$NON-NLS-2$
 			return false;
 		}
-		if (bundle.getState() == ResolverBundle.RESOLVED) {
-			// 'bundle' is already resolved so just return
-			if (DEBUG)
-				ResolverImpl.log("  - " + bundle + " already resolved"); //$NON-NLS-1$ //$NON-NLS-2$
-			return true;
-		} else if (bundle.getState() == ResolverBundle.UNRESOLVED) {
-			// 'bundle' is UNRESOLVED so move to RESOLVING
-			bundle.clearWires();
-			setBundleResolving(bundle);
+		switch (bundle.getState()) {
+			case ResolverBundle.RESOLVED :
+				// 'bundle' is already resolved so just return
+				if (DEBUG)
+					ResolverImpl.log("  - " + bundle + " already resolved"); //$NON-NLS-1$ //$NON-NLS-2$
+				return true;
+			case ResolverBundle.UNRESOLVED :
+				// 'bundle' is UNRESOLVED so move to RESOLVING
+				bundle.clearWires();
+				setBundleResolving(bundle);
+				break;
+			case ResolverBundle.RESOLVING : 
+				if (cycle.contains(bundle))
+					return true;
+				break;
+			default :
+				break;
 		}
 
 		boolean failed = false;
