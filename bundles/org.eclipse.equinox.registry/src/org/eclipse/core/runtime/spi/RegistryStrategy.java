@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -155,11 +155,32 @@ public class RegistryStrategy {
 	/**
 	 * Override this method to provide additional processing performed 
 	 * when the registry is created and started. Overrides should call
+	 * <code>super.onStart()</code> at the beginning of the processing.
+	 * <p>
+	 * <strong>NOTE</strong>: Avoid placing duplicate functionality in 
+	 * this method and {@link #onStart(IExtensionRegistry, boolean)} as 
+	 * both methods will be called on the registry startup.
+	 * </p>
+	 * @param registry the extension registry being started
+	 * 
+	 * @deprecated use {@link #onStart(IExtensionRegistry, boolean)}. 
+	 */
+	public void onStart(IExtensionRegistry registry) {
+		// The default implementation
+	}
+	
+	/**
+	 * Override this method to provide additional processing performed 
+	 * when the registry is created and started. Overrides should call
 	 * <code>super.onStart()</code> at the beginning of the processing. 
 	 * 
 	 * @param registry the extension registry being started
+	 * @param loadedFromCache true is registry contents was loaded from 
+	 * cache when the registry was created 
+	 * 
+	 * @since 3.4
 	 */
-	public void onStart(IExtensionRegistry registry) {
+	public void onStart(IExtensionRegistry registry, boolean loadedFromCache) {
 		// The default implementation
 	}
 

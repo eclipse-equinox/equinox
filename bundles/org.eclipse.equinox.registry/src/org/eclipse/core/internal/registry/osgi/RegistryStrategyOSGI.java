@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -189,16 +189,15 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 	private EclipseBundleListener pluginBundleListener = null;
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.core.runtime.spi.RegistryStrategy#onStart(org.eclipse.core.runtime.IExtensionRegistry)
+	 * @see org.eclipse.core.runtime.spi.RegistryStrategy#onStart(org.eclipse.core.runtime.IExtensionRegistry, boolean)
 	 */
-	public void onStart(IExtensionRegistry registry) {
-		super.onStart(registry);
+	public void onStart(IExtensionRegistry registry, boolean loadedFromCache) {
+		super.onStart(registry, loadedFromCache);
+		
 		if (!(registry instanceof ExtensionRegistry))
 			return;
-		ExtensionRegistry theRegistry = (ExtensionRegistry) registry;
-
 		// register a listener to catch new bundle installations/resolutions.
-		pluginBundleListener = new EclipseBundleListener(theRegistry, token, this);
+		pluginBundleListener = new EclipseBundleListener((ExtensionRegistry) registry, token, this);
 		Activator.getContext().addBundleListener(pluginBundleListener);
 
 		// populate the registry with all the currently installed bundles.
@@ -207,7 +206,7 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 		// to add/remove a bundle from the registry.  This is ok since
 		// the registry is a synchronized object and will not add the
 		// same bundle twice.
-		if (!theRegistry.filledFromCache())
+		if (!loadedFromCache)
 			pluginBundleListener.processBundles(Activator.getContext().getBundles());
 	}
 

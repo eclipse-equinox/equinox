@@ -61,10 +61,6 @@ public class ExtensionRegistry implements IExtensionRegistry {
 
 	private RegistryObjectManager registryObjects = null;
 
-	// set to "true" if registry was able to use cache to populate it's content. 
-	// if "false", content is empty and might need to be filled in
-	protected boolean isRegistryFilledFromCache = false;
-
 	// Table reader associated with this extension registry
 	protected TableReader theTableReader = new TableReader(this);
 
@@ -580,6 +576,8 @@ public class ExtensionRegistry implements IExtensionRegistry {
 		this.userToken = userToken;
 		registryObjects = new RegistryObjectManager(this);
 
+		boolean isRegistryFilledFromCache = false; // indicates if registry was able to use cache to populate it's content 
+
 		if (strategy.cacheUse()) {
 			// Try to read the registry from the cache first. If that fails, create a new registry
 			long start = 0;
@@ -638,7 +636,8 @@ public class ExtensionRegistry implements IExtensionRegistry {
 			});
 
 		// Do extra start processing if specified in the registry strategy
-		strategy.onStart(this);
+		strategy.onStart(this); // preserve for backward compatibility; might be removed later
+		strategy.onStart(this, isRegistryFilledFromCache);
 	}
 
 	/**
@@ -803,10 +802,6 @@ public class ExtensionRegistry implements IExtensionRegistry {
 			}
 		}
 		return false;
-	}
-
-	public boolean filledFromCache() {
-		return isRegistryFilledFromCache;
 	}
 
 	public Object createExecutableExtension(RegistryContributor defaultContributor, String className, String requestedContributorName) throws CoreException {
