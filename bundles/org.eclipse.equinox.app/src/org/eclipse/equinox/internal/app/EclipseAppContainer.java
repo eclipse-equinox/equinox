@@ -39,6 +39,7 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 	private static final String PT_APP_CARDINALITY_SINGLETON_GLOBAL = "singleton-global"; //$NON-NLS-1$
 	private static final String PT_APP_CARDINALITY_SINGLETON_SCOPED = "singleton-scoped"; //$NON-NLS-1$
 	private static final String PT_APP_CARDINALITY_UNLIMITED = "*"; //$NON-NLS-1$
+	private static final String PT_APP_ICON = "icon"; //$NON-NLS-1$
 	private static final String PT_PRODUCTS = "products"; //$NON-NLS-1$
 	private static final String EXT_ERROR_APP = "org.eclipse.equinox.app.error"; //$NON-NLS-1$
 
@@ -132,6 +133,7 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 	}
 
 	private EclipseAppDescriptor createAppDescriptor(IExtension appExtension) {
+		String iconPath = null;
 		synchronized (apps) {
 			EclipseAppDescriptor appDescriptor = (EclipseAppDescriptor) apps.get(appExtension.getUniqueIdentifier());
 			if (appDescriptor != null)
@@ -172,8 +174,9 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 				String defaultApp = getDefaultAppId();
 				if (defaultApp != null && defaultApp.equals(appExtension.getUniqueIdentifier()))
 					flags |= EclipseAppDescriptor.FLAG_DEFAULT_APP;
+				iconPath = configs[0].getAttribute(PT_APP_ICON);
 			}
-			appDescriptor = new EclipseAppDescriptor(Activator.getBundle(appExtension.getContributor()), appExtension.getUniqueIdentifier(), appExtension.getLabel(), flags, cardinality, this);
+			appDescriptor = new EclipseAppDescriptor(Activator.getBundle(appExtension.getContributor()), appExtension.getUniqueIdentifier(), appExtension.getLabel(), iconPath, flags, cardinality, this);
 			// register the appDescriptor as a service
 			ServiceRegistration sr = (ServiceRegistration) AccessController.doPrivileged(new RegisterService(new String[] {ApplicationDescriptor.class.getName()}, appDescriptor, appDescriptor.getServiceProperties()));
 			appDescriptor.setServiceRegistration(sr);

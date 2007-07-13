@@ -126,6 +126,16 @@ The default value is &quot;main&quot;.
                </restriction>
             </simpleType>
          </attribute>
+         <attribute name="icon" type="string">
+            <annotation>
+               <documentation>
+                  Path to a resource that should be used as the application icon.  The path may be translated to provide a different icon according to the locale.
+               </documentation>
+               <appInfo>
+                  <meta.attribute kind="resource"/>
+               </appInfo>
+            </annotation>
+         </attribute>
       </complexType>
    </element>
 

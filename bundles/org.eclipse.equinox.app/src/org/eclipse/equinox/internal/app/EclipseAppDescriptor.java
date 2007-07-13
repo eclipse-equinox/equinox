@@ -11,6 +11,7 @@
 
 package org.eclipse.equinox.internal.app;
 
+import java.net.URL;
 import java.security.AccessController;
 import java.util.*;
 import org.eclipse.equinox.app.IApplicationContext;
@@ -44,8 +45,9 @@ public class EclipseAppDescriptor extends ApplicationDescriptor {
 	private final int flags;
 	private final int cardinality;
 	private final String name;
+	private final URL iconURL;
 
-	protected EclipseAppDescriptor(Bundle contributor, String pid, String name, int flags, int cardinality, EclipseAppContainer appContainer) {
+	protected EclipseAppDescriptor(Bundle contributor, String pid, String name, String iconPath, int flags, int cardinality, EclipseAppContainer appContainer) {
 		super(pid);
 		this.name = name;
 		this.contributor = contributor;
@@ -53,6 +55,25 @@ public class EclipseAppDescriptor extends ApplicationDescriptor {
 		this.locked = AppPersistence.isLocked(this) ? Boolean.TRUE : Boolean.FALSE;
 		this.flags = flags;
 		this.cardinality = cardinality;
+		URL iconResult = null;
+		// this bit of code is complex because we want to search fragments;
+		// that can only be done by using the Bundle.findEntries method which
+		// requires the path to be split up between the base and the file name!!
+		if (iconPath != null && iconPath.length() > 0) {
+			if (iconPath.charAt(0) == '/')
+				iconPath = iconPath.substring(1);
+			String baseIconDir = "/"; //$NON-NLS-1$
+			String iconFile = iconPath;
+			int lastSlash = iconPath.lastIndexOf('/');
+			if (lastSlash > 0 && lastSlash < iconPath.length() - 1) {
+				baseIconDir = iconPath.substring(0, lastSlash);
+				iconFile = iconPath.substring(lastSlash + 1);
+			}
+			Enumeration urls = contributor.findEntries(baseIconDir, iconFile, false);
+			if (urls != null && urls.hasMoreElements())
+				iconResult = (URL) urls.nextElement();
+		}
+		this.iconURL = iconResult;
 	}
 
 	protected Map getPropertiesSpecific(String locale) {
@@ -136,6 +157,8 @@ public class EclipseAppDescriptor extends ApplicationDescriptor {
 		props.put(APP_TYPE, getThreadTypeString());
 		if ((flags & FLAG_DEFAULT_APP) != 0)
 			props.put(APP_DEFAULT, Boolean.TRUE);
+		if (iconURL != null)
+			props.put(ApplicationDescriptor.APPLICATION_ICON, iconURL);
 		return props;
 	}
 
