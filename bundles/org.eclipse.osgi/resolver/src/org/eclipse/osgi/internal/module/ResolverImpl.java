@@ -57,7 +57,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 	// Repository for generics
 	private VersionHashMap resolverGenerics = null;
 	// List of unresolved bundles
-	private ArrayList unresolvedBundles = null; // TODO make this a Set
+	private HashSet unresolvedBundles = null;
 	// Keys are BundleDescriptions, values are ResolverBundles
 	private HashMap bundleMapping = null;
 	private GroupingChecker groupingChecker;
@@ -77,7 +77,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		resolverExports = new VersionHashMap(this);
 		resolverBundles = new VersionHashMap(this);
 		resolverGenerics = new VersionHashMap(this);
-		unresolvedBundles = new ArrayList();
+		unresolvedBundles = new HashSet();
 		bundleMapping = new HashMap();
 		BundleDescription[] bundles = state.getBundles();
 		groupingChecker = new GroupingChecker();
@@ -1482,21 +1482,14 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		if (!initialized)
 			return;
 
-		boolean alreadyThere = false;
-		for (int i = 0; i < unresolvedBundles.size(); i++) {
-			ResolverBundle rb = (ResolverBundle) unresolvedBundles.get(i);
-			if (rb.getBundle() == bundle) {
-				alreadyThere = true;
-			}
-		}
-		if (!alreadyThere) {
-			ResolverBundle rb = new ResolverBundle(bundle, this);
-			bundleMapping.put(bundle, rb);
-			unresolvedBundles.add(rb);
-			resolverExports.put(rb.getExportPackages());
-			resolverBundles.put(rb.getName(), rb);
-			resolverGenerics.put(rb.getGenericCapabilities());
-		}
+		if (bundleMapping.get(bundle) != null)
+			return; // this description already exists in the resolver
+		ResolverBundle rb = new ResolverBundle(bundle, this);
+		bundleMapping.put(bundle, rb);
+		unresolvedBundles.add(rb);
+		resolverExports.put(rb.getExportPackages());
+		resolverBundles.put(rb.getName(), rb);
+		resolverGenerics.put(rb.getGenericCapabilities());
 	}
 
 	public void bundleRemoved(BundleDescription bundle, boolean pending) {
