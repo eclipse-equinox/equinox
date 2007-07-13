@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2005 IBM Corporation and others.
+ * Copyright (c) 2003, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,7 +20,7 @@ import org.eclipse.osgi.framework.eventmgr.EventListeners.ListElement;
  * ListenerQueue for dispatching events. EventListeners objects
  * should be used to manage listener lists.
  *
- * <p>This example uses the ficticous SomeEvent class and shows how to use this package 
+ * <p>This example uses the fictitious SomeEvent class and shows how to use this package 
  * to deliver a SomeEvent to a set of SomeEventListeners.  
  * <pre>
  *
@@ -88,7 +88,7 @@ import org.eclipse.osgi.framework.eventmgr.EventListeners.ListElement;
  * Level 2 dispatch is used as the final event deliverer and must cast the listener 
  * and event objects to the proper type before calling the listener. Level 2 dispatch
  * will cancel delivery of an event 
- * to a bundle that has stopped bewteen the time the snapshot was created and the
+ * to a bundle that has stopped between the time the snapshot was created and the
  * attempt was made to deliver the event.
  * 
  * <p> The highly dynamic nature of the OSGi framework had necessitated these features for 
@@ -101,14 +101,19 @@ public class EventManager {
 
 	/**
 	 * EventThread for asynchronous dispatch of events.
-     * Access to this field must be protected by a synchronized region.
+	 * Access to this field must be protected by a synchronized region.
 	 */
 	private EventThread thread;
 
 	/**
-	 * EventThread Name
+	 * Thread name used for asynchronous event delivery
 	 */
 	protected final String threadName;
+
+	/**
+	 * The thread group used for asynchronous event delivery
+	 */
+	protected final ThreadGroup threadGroup;
 
 	/**
 	 * EventManager constructor. An EventManager object is responsible for
@@ -116,7 +121,7 @@ public class EventManager {
 	 *
 	 */
 	public EventManager() {
-		this(null);
+		this(null, null);
 	}
 
 	/**
@@ -124,11 +129,25 @@ public class EventManager {
 	 * the delivery of events to listeners via an EventDispatcher.
 	 *
 	 * @param threadName The name to give the event thread associated with
-	 * this EventManager.
+	 * this EventManager.  A <code>null</code> value is allowed.
 	 */
 	public EventManager(String threadName) {
+		this(threadName, null);
+	}
+
+	/**
+	 * EventManager constructor. An EventManager object is responsible for
+	 * the delivery of events to listeners via an EventDispatcher.
+	 *
+	 * @param threadName The name to give the event thread associated with
+	 * this EventManager.  A <code>null</code> value is allowed.
+	 * @param threadGroup The thread group to use for the asynchronous event
+	 * thread associated with this EventManager. A <code>null</code> value is allowed.
+	 */
+	public EventManager(String threadName, ThreadGroup threadGroup) {
 		thread = null;
 		this.threadName = threadName;
+		this.threadGroup = threadGroup;
 	}
 
 	/**
@@ -156,12 +175,7 @@ public class EventManager {
 	synchronized EventThread getEventThread() {
 		if (thread == null) {
 			/* if there is no thread, then create a new one */
-			if (threadName == null) {
-				thread = new EventThread();
-			} 
-			else {
-				thread = new EventThread(threadName);
-			}
+			thread = new EventThread(threadGroup, threadName);
 			thread.start(); /* start the new thread */
 		}
 
@@ -187,14 +201,13 @@ public class EventManager {
 		int size = listeners.length;
 		for (int i = 0; i < size; i++) { /* iterate over the list of listeners */
 			ListElement listener = listeners[i];
-			if (listener == null) {		/* a null element terminates the list */
+			if (listener == null) { /* a null element terminates the list */
 				break;
 			}
 			try {
 				/* Call the EventDispatcher to complete the delivery of the event. */
 				dispatcher.dispatchEvent(listener.primary, listener.companion, eventAction, eventObject);
-			} 
-			catch (Throwable t) {
+			} catch (Throwable t) {
 				/* Consume and ignore any exceptions thrown by the listener */
 				if (DEBUG) {
 					System.out.println("Exception in " + listener.primary); //$NON-NLS-1$
@@ -254,25 +267,28 @@ public class EventManager {
 		 * Constructor for the event thread. 
 		 * @param threadName Name of the EventThread 
 		 */
+		EventThread(ThreadGroup threadGroup, String threadName) {
+			super(threadGroup, threadName);
+			running = true;
+			head = null;
+			tail = null;
+
+			setDaemon(true); /* Mark thread as daemon thread */
+		}
+
+		/**
+		 * Constructor for the event thread. 
+		 * @param threadName Name of the EventThread 
+		 */
 		EventThread(String threadName) {
-			super(threadName);
-			init();
+			this(null, threadName);
 		}
 
 		/**
 		 * Constructor for the event thread.
 		 */
 		EventThread() {
-			super();
-			init();
-		}
-
-		private void init() {
-			running = true;
-			head = null;
-			tail = null;
-
-			setDaemon(true); /* Mark thread as daemon thread */
+			this(null, null);
 		}
 
 		/**
@@ -296,14 +312,12 @@ public class EventManager {
 					}
 					EventManager.dispatchEvent(item.listeners, item.dispatcher, item.action, item.object);
 				}
-			}
-			catch (RuntimeException e) {
+			} catch (RuntimeException e) {
 				if (EventManager.DEBUG) {
 					e.printStackTrace();
 				}
 				throw e;
-			}
-			catch (Error e) {
+			} catch (Error e) {
 				if (EventManager.DEBUG) {
 					e.printStackTrace();
 				}
@@ -322,10 +336,10 @@ public class EventManager {
 		 * @param o Object for this event
 		 */
 		synchronized void postEvent(ListElement[] l, EventDispatcher d, int a, Object o) {
-			if (!isAlive()) {	/* If the thread is not alive, throw an exception */
+			if (!isAlive()) { /* If the thread is not alive, throw an exception */
 				throw new IllegalStateException();
 			}
-			
+
 			Queued item = new Queued(l, d, a, o);
 
 			if (head == null) /* if the queue was empty */
@@ -353,8 +367,7 @@ public class EventManager {
 			while (running && (head == null)) {
 				try {
 					wait();
-				} 
-				catch (InterruptedException e) {
+				} catch (InterruptedException e) {
 				}
 			}
 
