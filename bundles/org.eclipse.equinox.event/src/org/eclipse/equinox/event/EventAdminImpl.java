@@ -31,7 +31,7 @@ public class EventAdminImpl implements EventAdmin {
 	private volatile EventManager		eventManager;
 
 	/**
-	 * Constructer for EventAdminImpl.
+	 * Constructor for EventAdminImpl.
 	 * 
 	 * @param context BundleContext
 	 */
@@ -46,7 +46,9 @@ public class EventAdminImpl implements EventAdmin {
 	 */
 	void start() {
 		log.open();
-		eventManager = new EventManager(EventAdminMsg.EVENT_ASYNC_THREAD_NAME);
+		ThreadGroup eventGroup = new ThreadGroup("Equinox Event Admin"); //$NON-NLS-1$
+		eventGroup.setDaemon(true);
+		eventManager = new EventManager(EventAdminMsg.EVENT_ASYNC_THREAD_NAME, eventGroup);
 		handlers.open();
 	}
 

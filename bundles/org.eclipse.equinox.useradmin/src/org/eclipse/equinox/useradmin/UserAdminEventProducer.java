@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2001, 2006 IBM Corporation and others.
+ * Copyright (c) 2001, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -37,7 +37,9 @@ public class UserAdminEventProducer extends ServiceTracker implements EventDispa
 		super(context, userAdminListenerClass, null);
 		this.userAdmin = userAdmin;
 		this.log = log;
-		eventManager = new EventManager("UserAdmin Event Dispatcher"); //$NON-NLS-1$
+		ThreadGroup eventGroup = new ThreadGroup("Equinox User Admin"); //$NON-NLS-1$
+		eventGroup.setDaemon(true);
+		eventManager = new EventManager("UserAdmin Event Dispatcher", eventGroup); //$NON-NLS-1$
 		listeners = new EventListeners();
 
 		open();
