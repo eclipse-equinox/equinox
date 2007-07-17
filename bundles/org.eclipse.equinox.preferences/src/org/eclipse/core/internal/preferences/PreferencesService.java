@@ -136,12 +136,26 @@ public class PreferencesService implements IPreferencesService {
 				// iterate over the preferences in this node and set them
 				// in the global space.
 				String[] keys = epNode.properties.keys();
+				
+				// if this node was removed then we need to create a new one
+				if (removed)
+					globalNode = (IEclipsePreferences) root.node(node.absolutePath());
+				
+				// the list for properties to remove
+				List propsToRemove = new ArrayList();
+				for (int i = 0; i < globalNode.keys().length; i++){
+					propsToRemove.add(globalNode.keys()[i]);
+				}
+	
 				if (keys.length > 0) {
-					// if this node was removed then we need to create a new one
-					if (removed)
-						globalNode = (IEclipsePreferences) root.node(node.absolutePath());
+					String key = null;
 					for (int i = 0; i < keys.length; i++) {
-						String key = keys[i];
+						key = keys[i];
+						
+						// preferences that are not in the applied node
+						// will be removed
+						propsToRemove.remove(key);
+						
 						// intern strings we import because some people
 						// in their property change listeners use identity
 						// instead of equals. See bug 20193 and 20534.
@@ -153,6 +167,15 @@ public class PreferencesService implements IPreferencesService {
 							globalNode.put(key, value);
 						}
 					}
+				}
+					
+				String keyToRemove = null;
+				for (Iterator it = propsToRemove.iterator(); it.hasNext(); ){
+					keyToRemove = (String) it.next();
+					keyToRemove = keyToRemove.intern();
+					if (EclipsePreferences.DEBUG_PREFERENCE_SET)
+						PrefsMessages.message("Removing: " + globalNode.absolutePath() + '/' + keyToRemove); //$NON-NLS-1$
+					globalNode.remove(keyToRemove);
 				}
 
 				// keep visiting children
