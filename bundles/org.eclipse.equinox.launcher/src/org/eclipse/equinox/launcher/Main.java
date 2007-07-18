@@ -1779,8 +1779,8 @@ public class Main {
 		bridge.showSplash(splashLocation);
     	long handle = bridge.getSplashHandle();
     	if(handle != 0 && handle != -1) {
-    		System.setProperty("org.eclipse.equinox.launcher.splash.handle", String.valueOf(handle)); //$NON-NLS-1$
-    		System.setProperty("org.eclipse.equinox.launcher.splash.location", splashLocation); //$NON-NLS-1$
+    		System.getProperties().put("org.eclipse.equinox.launcher.splash.handle", String.valueOf(handle)); //$NON-NLS-1$
+    		System.getProperties().put("org.eclipse.equinox.launcher.splash.location", splashLocation); //$NON-NLS-1$
     		bridge.updateSplash();
     	}
     }

@@ -42,11 +42,11 @@ public class JNIBridge {
 					if (idx != -1) {
 						String comLibrary = library.substring(0, idx) + "com_"; //$NON-NLS-1$
 						comLibrary += library.substring(idx + 8, library.length());
-						System.load(comLibrary);
+						Runtime.getRuntime().load(comLibrary);
 						OleInitialize(0);
 					}
 				}
-				System.load(library);
+				Runtime.getRuntime().load(library);
 			} catch (UnsatisfiedLinkError e) {
 				//failed
 			}
