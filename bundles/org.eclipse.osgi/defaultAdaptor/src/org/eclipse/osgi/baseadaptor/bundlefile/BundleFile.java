@@ -185,4 +185,8 @@ abstract public class BundleFile {
 			e.printStackTrace();
 		}
 	}
+
+	public String toString() {
+		return String.valueOf(basefile);
+	}
 }
