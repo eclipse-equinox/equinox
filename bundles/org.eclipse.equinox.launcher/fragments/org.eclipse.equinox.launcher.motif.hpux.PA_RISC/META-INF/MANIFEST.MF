@@ -4,6 +4,6 @@ Bundle-Name: %pluginName
 Bundle-Vendor: %providerName
 Bundle-SymbolicName: org.eclipse.equinox.launcher.motif.hpux.PA_RISC
 Bundle-Version: 1.0.0.qualifier
-Fragment-Host: org.eclipse.equinox.launcher;bundle-version="1.0.0"
+Fragment-Host: org.eclipse.equinox.launcher;bundle-version="[1.0.0,1.1.0)"
 Eclipse-PlatformFilter: (& (osgi.ws=motif) (osgi.os=hpux) (osgi.arch=PA_RISC))
 Bundle-Localization: launcher.motif.hpux.PA_RISC

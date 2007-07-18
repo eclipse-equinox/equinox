@@ -4,6 +4,6 @@ Bundle-Name: %pluginName
 Bundle-Vendor: %providerName
 Bundle-SymbolicName: org.eclipse.equinox.launcher.gtk.solaris.sparc
 Bundle-Version: 1.0.100.qualifier
-Fragment-Host: org.eclipse.equinox.launcher;bundle-version="1.0.0"
+Fragment-Host: org.eclipse.equinox.launcher;bundle-version="[1.0.0,1.1.0)"
 Eclipse-PlatformFilter: (& (osgi.ws=gtk) (osgi.os=solaris) (osgi.arch=sparc))
 Bundle-Localization: launcher.gtk.solaris.sparc
