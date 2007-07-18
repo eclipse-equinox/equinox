@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -194,6 +194,28 @@ public class AdaptorUtil {
 		} catch (IOException e) {
 			throw new BundleException(NLS.bind(EclipseAdaptorMsg.ECLIPSE_DATA_ERROR_READING_MANIFEST, bundledata.getLocation()), e);
 		}
+	}
+	
+	public static boolean canWrite(File installDir) {
+		if (installDir.canWrite() == false)
+			return false;
+
+		if (!installDir.isDirectory())
+			return false;
+
+		File fileTest = null;
+		try {
+			// we use the .dll suffix to properly test on Vista virtual directories
+        	// on Vista you are not allowed to write executable files on virtual directories like "Program Files"
+            fileTest = File.createTempFile("writtableArea", ".dll", installDir); //$NON-NLS-1$ //$NON-NLS-2$
+		} catch (IOException e) {
+			//If an exception occured while trying to create the file, it means that it is not writtable
+			return false;
+		} finally {
+			if (fileTest != null)
+				fileTest.delete();
+		}
+		return true;
 	}
 
 }

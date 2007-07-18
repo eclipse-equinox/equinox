@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.internal.adaptor.BasicLocation;
 import org.eclipse.core.runtime.internal.adaptor.LocationHelper;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
+import org.eclipse.osgi.internal.baseadaptor.AdaptorUtil;
 import org.eclipse.osgi.service.datalocation.Location;
 
 /**
@@ -215,33 +216,11 @@ public class LocationManager {
 		URL installURL = computeInstallConfigurationLocation();
 		if (installURL != null) {
 			File installDir = new File(installURL.getFile());
-			if ("file".equals(installURL.getProtocol()) && canWrite(installDir)) //$NON-NLS-1$
+			if ("file".equals(installURL.getProtocol()) && AdaptorUtil.canWrite(installDir)) //$NON-NLS-1$
 				return new File(installDir, CONFIG_DIR).getAbsolutePath();
 		}
 		// We can't write in the eclipse install dir so try for some place in the user's home dir
 		return computeDefaultUserAreaLocation(CONFIG_DIR);
-	}
-
-	private static boolean canWrite(File installDir) {
-		if (installDir.canWrite() == false)
-			return false;
-
-		if (!installDir.isDirectory())
-			return false;
-
-		File fileTest = null;
-		try {
-			// we use the .dll suffix to properly test on Vista virtual directories
-        	// on Vista you are not allowed to write executable files on virtual directories like "Program Files"
-            fileTest = File.createTempFile("writtableArea", ".dll", installDir); //$NON-NLS-1$ //$NON-NLS-2$
-		} catch (IOException e) {
-			//If an exception occured while trying to create the file, it means that it is not writtable
-			return false;
-		} finally {
-			if (fileTest != null)
-				fileTest.delete();
-		}
-		return true;
 	}
 
 	private static String computeDefaultUserAreaLocation(String pathAppendage) {
