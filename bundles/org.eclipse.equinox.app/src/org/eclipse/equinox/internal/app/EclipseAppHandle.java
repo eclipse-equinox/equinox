@@ -38,12 +38,13 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 	private static final String STOPPED = "org.eclipse.equinox.app.stopped"; //$NON-NLS-1$
 	private static final String PROP_ECLIPSE_EXITCODE = "eclipse.exitcode"; //$NON-NLS-1$
 
-	private ServiceRegistration handleRegistration;
+	private volatile ServiceRegistration handleRegistration;
 	private int status = EclipseAppHandle.FLAG_STARTING;
 	private final Map arguments;
 	private Object application;
 	private final Boolean defaultAppInstance;
 	private Object result;
+	private boolean setResult = false;
 
 	/*
 	 * Constructs a handle for a single running instance of a eclipse application.
@@ -90,6 +91,16 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 		this.handleRegistration = sr;
 	}
 
+	ServiceReference getServiceReference() {
+		ServiceRegistration reg = handleRegistration;
+		if (reg == null)
+			return null;
+		try {
+			return reg.getReference();
+		} catch (IllegalStateException e) {
+			return null; // this will happen if the service has been unregistered already
+		}
+	}
 	/*
 	 * Gets a snapshot of the current service properties.
 	 */
@@ -161,11 +172,12 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 		} finally {
 			synchronized (this) {
 				result = tempResult;
+				setResult = true;
 				application = null;
 				notify();
+				// The application exited itself; notify the app context
+				setAppStatus(EclipseAppHandle.FLAG_STOPPED);
 			}
-			// The application exited itself; notify the app context
-			setAppStatus(EclipseAppHandle.FLAG_STOPPED);
 		}
 		int exitCode = result instanceof Integer ? ((Integer) result).intValue() : 0;
 		// only set the exit code property if this is the default application
@@ -298,7 +310,7 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 	}
 
 	synchronized Object waitForResult(int timeout) {
-		if (result == null)
+		if (!setResult)
 			try {
 				wait(timeout); // only wait for the specified amount of time
 			} catch (InterruptedException e) {

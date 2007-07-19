@@ -55,17 +55,17 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 	static final int LOCKED_SINGLETON_LIMITED_RUNNING = 4;
 	static final int LOCKED_MAIN_THREAD_RUNNING = 5;
 
-	BundleContext context;
+	final BundleContext context;
 	// A map of ApplicationDescriptors keyed by eclipse application ID
-	private HashMap apps = new HashMap();
+	final private HashMap apps = new HashMap();
 
-	private IExtensionRegistry extensionRegistry;
-	private ApplicationLauncher appLauncher;
+	final private IExtensionRegistry extensionRegistry;
+	final private ApplicationLauncher appLauncher;
 	private IBranding branding;
 	private boolean missingProductReported;
 
 	// the currently active application handles
-	private Collection activeHandles = new ArrayList();
+	final private Collection activeHandles = new ArrayList();
 	private EclipseAppHandle activeMain;
 	private EclipseAppHandle activeGlobalSingleton;
 	private EclipseAppHandle activeScopedSingleton;
@@ -300,16 +300,26 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 			// to ensure it is launched on the main thread
 			if (appLauncher == null)
 				throw new IllegalStateException();
-			if (defaultAppListener != null)
-				defaultAppListener.launch(appHandle);
+			DefaultApplicationListener curDefaultApplicationListener = null;
+			synchronized (this) {
+				curDefaultApplicationListener = defaultAppListener;
+			}
+			if (curDefaultApplicationListener != null)
+				curDefaultApplicationListener.launch(appHandle);
 			else
 				appLauncher.launch(appHandle, appHandle.getArguments().get(IApplicationContext.APPLICATION_ARGS));
 		} else {
 			AnyThreadAppLauncher.launchEclipseApplication(appHandle);
 			boolean isDefault = appHandle.isDefault();
-			defaultAppListener = new DefaultApplicationListener();
-			if (isDefault && appLauncher != null)
-				appLauncher.launch(defaultAppListener, null);
+			DefaultApplicationListener curDefaultApplicationListener = null;
+			if (isDefault) {
+				synchronized (this) {
+					if (defaultAppListener == null )
+						defaultAppListener = new DefaultApplicationListener(appHandle);
+					curDefaultApplicationListener = defaultAppListener;
+				}
+				appLauncher.launch(curDefaultApplicationListener, null);
+			}
 		}
 	}
 

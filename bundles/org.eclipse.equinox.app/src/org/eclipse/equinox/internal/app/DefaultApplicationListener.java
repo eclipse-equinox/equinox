@@ -28,27 +28,35 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 public class DefaultApplicationListener implements ApplicationRunnable, ServiceTrackerCustomizer {
 	private boolean running = true; // indicates the default application is running
 	private EclipseAppHandle launchMainApp; // a handle to a main threaded application
-	private ServiceTracker handleTracker; // tracks the default application handle
-	private Object result;
+	private final ServiceTracker handleTracker; // tracks the default application handle
+	private Object result; // holds the result from the default application
+
+	public DefaultApplicationListener(EclipseAppHandle defaultApp) {
+		ServiceReference defaultRef = defaultApp.getServiceReference();
+		if (defaultRef == null) {
+			// service has been unregistered; application has ended already, 
+			// save the result for latter
+			result = defaultApp.waitForResult(100);
+			handleTracker = null;
+			return;
+		}
+		ServiceTracker defaultAppTracker = new ServiceTracker(Activator.getContext(), defaultRef, this);
+		defaultAppTracker.open();
+		EclipseAppHandle trackedApp = (EclipseAppHandle) defaultAppTracker.getService();
+		if (trackedApp == null) {
+			// service has been unregistered; application has ended aready,
+			// save the result for latter
+			result = defaultApp.waitForResult(100);
+			handleTracker = null;
+		} else {
+			handleTracker = defaultAppTracker;
+		}
+	}
 
 	public Object run(Object context) {
-		BundleContext bc = Activator.getContext();
-		// we assume there is only one handle created with eclipse.application.default set to true
-		ServiceReference[] defaultHandle = null;
+		if (handleTracker == null)
+			return getResult(); // app has ended, return the result
 		try {
-			String handleFilter = "(" + EclipseAppDescriptor.APP_DEFAULT + "=true)"; //$NON-NLS-1$ //$NON-NLS-2$
-			defaultHandle = bc.getServiceReferences(ApplicationHandle.class.getName(), handleFilter);
-		} catch (InvalidSyntaxException e) {
-			// do nothing; already tested the filter above
-		}
-		if (defaultHandle == null || defaultHandle.length == 0 || defaultHandle.length > 1) {
-			return null; // application may have ended already
-		}
-		handleTracker = new ServiceTracker(bc, defaultHandle[0], this);
-		handleTracker.open();
-		try {
-			if (handleTracker.getService() == null)
-				return null; // this check should not be needed; just a safety check
 			while (waitOnRunning()) {
 				EclipseAppHandle mainHandle = getMainHandle();
 				if (mainHandle != null) {
@@ -60,7 +68,7 @@ public class DefaultApplicationListener implements ApplicationRunnable, ServiceT
 						String message = NLS.bind(Messages.application_error_starting, mainHandle.getInstanceId());
 						Activator.log(new FrameworkLogEntry(Activator.PI_APP, FrameworkLogEntry.WARNING, 0, message, 0, e, null));
 					}
-					setMainHandle(null);
+					unsetMainHandle(mainHandle);
 				}
 			}
 		} finally {
@@ -73,11 +81,14 @@ public class DefaultApplicationListener implements ApplicationRunnable, ServiceT
 		return launchMainApp;
 	}
 
-	private synchronized void setMainHandle(EclipseAppHandle mainHandle) {
-		launchMainApp = mainHandle;
+	private synchronized void unsetMainHandle(EclipseAppHandle mainHandle) {
+		if (launchMainApp == mainHandle)
+			launchMainApp = null;
 	}
 
 	private synchronized boolean waitOnRunning() {
+		if (!running)
+			return false;
 		try {
 			wait(100);
 		} catch (InterruptedException e) {
@@ -130,7 +141,7 @@ public class DefaultApplicationListener implements ApplicationRunnable, ServiceT
 		this.notify();
 	}
 
-	synchronized Object getResult() {
+	private synchronized Object getResult() {
 		return result;
 	}
 }
