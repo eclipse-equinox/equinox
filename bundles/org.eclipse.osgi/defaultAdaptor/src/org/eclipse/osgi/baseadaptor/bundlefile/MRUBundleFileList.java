@@ -25,8 +25,9 @@ public class MRUBundleFileList implements EventDispatcher{
 	private static final String PROP_FILE_LIMIT = "osgi.bundlefile.limit"; //$NON-NLS-1$
 	private static final int MIN = 10;
 	private static final int PROP_FILE_LIMIT_VALUE;
+	private static final ThreadLocal closingBundleFile = new ThreadLocal();
 	static {
-		int propValue = 0;
+		int propValue = 50; // TODO change this to "0" before the final release (see bug 194943)
 		try {
 			String prop = BundleFile.secureAction.getProperty(PROP_FILE_LIMIT);
 			if (prop != null)
@@ -170,9 +171,12 @@ public class MRUBundleFileList implements EventDispatcher{
 
 	public final void dispatchEvent(Object eventListener, Object listenerObject, int eventAction, Object eventObject) {
 		try {
+			closingBundleFile.set(eventObject);
 			((BundleFile) eventObject).close();
 		} catch (IOException e) {
 			// TODO should log ??
+		} finally {
+			closingBundleFile.set(null);
 		}
 	}
 
@@ -193,5 +197,21 @@ public class MRUBundleFileList implements EventDispatcher{
 	public void shutdown() {
 		if (bundleFileCloserManager != null)
 			bundleFileCloserManager.close();
+	}
+
+	/**
+	 * Returns true if this MRUBundleFileList is currently closing the specified bundle file on the current thread.
+	 * @param bundleFile the bundle file
+	 * @return true if the bundle file is being closed on the current thread
+	 */
+	public boolean isClosing(BundleFile bundleFile) {
+		if (fileLimit < MIN)
+			return false; // MRU is disabled
+		// check the thread local variable
+		return closingBundleFile.get() == bundleFile;
+	}
+
+	public boolean isEnabled() {
+		return fileLimit >= MIN;
 	}
 }

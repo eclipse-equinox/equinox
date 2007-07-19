@@ -48,7 +48,18 @@ public class ZipBundleEntry extends BundleEntry {
 	 * @exception java.io.IOException
 	 */
 	public InputStream getInputStream() throws IOException {
-		return ((ZipBundleFile) bundleFile).getZipFile().getInputStream(zipEntry);
+		if (!ZipBundleFile.mruList.isEnabled())
+			return ((ZipBundleFile) bundleFile).getZipFile().getInputStream(zipEntry);
+		ZipBundleFile zipBundleFile = (ZipBundleFile) bundleFile;
+		zipBundleFile.incrementReference();
+		try {
+			return new ZipBundleEntryInputStream(zipBundleFile.getZipFile().getInputStream(zipEntry));
+		} catch (Throwable e) {
+			zipBundleFile.decrementReference();
+			if (e instanceof IOException)
+				throw (IOException) e;
+			throw (RuntimeException) e;
+		}
 	}
 
 	/**
@@ -98,5 +109,49 @@ public class ZipBundleEntry extends BundleEntry {
 			//This can not happen. 
 		}
 		return null;
+	}
+
+	private class ZipBundleEntryInputStream extends InputStream{
+		private final InputStream stream;
+		private boolean closed = false;
+		public ZipBundleEntryInputStream(InputStream stream) {
+			this.stream = stream;
+		}
+		public int available() throws IOException {
+			return stream.available();
+		}
+		public void close() throws IOException {
+			try {
+				stream.close();
+			} finally {
+				synchronized (this) {
+					if (closed)
+						return;
+					closed = true;
+				}
+				((ZipBundleFile)bundleFile).decrementReference();
+			}
+		}
+		public void mark(int var0) {
+			stream.mark(var0);
+		}
+		public boolean markSupported() {
+			return stream.markSupported();
+		}
+		public int read() throws IOException {
+			return stream.read();
+		}
+		public int read(byte[] var0, int var1, int var2) throws IOException {
+			return stream.read(var0, var1, var2);
+		}
+		public int read(byte[] var0) throws IOException {
+			return stream.read(var0);
+		}
+		public void reset() throws IOException {
+			stream.reset();
+		}
+		public long skip(long var0) throws IOException {
+			return stream.skip(var0);
+		}
 	}
 }

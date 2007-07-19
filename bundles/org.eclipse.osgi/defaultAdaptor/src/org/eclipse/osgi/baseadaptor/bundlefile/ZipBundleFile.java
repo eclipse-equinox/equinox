@@ -42,6 +42,8 @@ public class ZipBundleFile extends BundleFile {
 	 */
 	protected boolean closed = true;
 
+	private int referenceCount = 0;
+
 	/**
 	 * Constructs a ZipBundle File
 	 * @param basefile the base file
@@ -285,6 +287,21 @@ public class ZipBundleFile extends BundleFile {
 
 	public synchronized void close() throws IOException {
 		if (!closed) {
+			if (referenceCount > 0 && mruList.isClosing(this)) {
+				// there are some opened streams to this BundleFile still;
+				// wait for them all to close because this is being closed by the MRUBundleFileList
+				try {
+					wait(1000); // timeout after 1 second
+				} catch (InterruptedException e) {
+					// do nothing for now ...
+				}
+				if (referenceCount != 0 || closed)
+					// either another thread closed the bundle file or we timed waiting for all the reference inputstreams to close
+					// If the referenceCount did not reach zero then this bundle file will remain open until the
+					// bundle file is closed explicitly (i.e. bundle is updated/uninstalled or framework is shutdown)
+					return; 
+
+			}
 			closed = true;
 			zipFile.close();
 			mruList.remove(this);
@@ -300,5 +317,16 @@ public class ZipBundleFile extends BundleFile {
 	 */
 	public static void shutdown() {
 		mruList.shutdown();
+	}
+
+	synchronized void incrementReference() {
+		referenceCount += 1;
+	}
+
+	synchronized void decrementReference() {
+		referenceCount = Math.max(0, referenceCount - 1);
+		// only notify if the referenceCount is zero.
+		if (referenceCount == 0)
+			notify();
 	}
 }
