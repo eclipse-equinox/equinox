@@ -204,6 +204,8 @@ public class FrameworkConsole implements Runnable {
 	 * Begin doing the active part of the class' code. Starts up the console.
 	 */
 	public void run() {
+		// always grap the default streams
+		getDefaultStreams();
 		try {
 			console(args);
 		} catch (IOException e) {
@@ -212,8 +214,6 @@ public class FrameworkConsole implements Runnable {
 		while (!shutdown) {
 			if (useSocketStream)
 				getSocketStream();
-			else
-				getDefaultStreams();
 			try {
 				console();
 			} catch (IOException e) {
