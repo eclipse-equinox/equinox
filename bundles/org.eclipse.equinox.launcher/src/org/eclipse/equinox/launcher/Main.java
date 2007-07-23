@@ -112,6 +112,10 @@ public class Main {
     }
     private final Thread splashHandler = new SplashHandler();
 
+    //splash screen system properties
+    public static final String SPLASH_HANDLE = "org.eclipse.equinox.launcher.splash.handle"; //$NON-NLS-1$
+    public static final String SPLASH_LOCATION = "org.eclipse.equinox.launcher.splash.location"; //$NON-NLS-1$
+    
     // command line args
     private static final String FRAMEWORK = "-framework"; //$NON-NLS-1$
     private static final String INSTALL = "-install"; //$NON-NLS-1$
@@ -1779,8 +1783,8 @@ public class Main {
 		bridge.showSplash(splashLocation);
     	long handle = bridge.getSplashHandle();
     	if(handle != 0 && handle != -1) {
-    		System.getProperties().put("org.eclipse.equinox.launcher.splash.handle", String.valueOf(handle)); //$NON-NLS-1$
-    		System.getProperties().put("org.eclipse.equinox.launcher.splash.location", splashLocation); //$NON-NLS-1$
+    		System.getProperties().put(SPLASH_HANDLE, String.valueOf(handle));
+    		System.getProperties().put(SPLASH_LOCATION, splashLocation);
     		bridge.updateSplash();
     	}
     }
@@ -1793,6 +1797,7 @@ public class Main {
             return;
 
 		splashDown = bridge.takeDownSplash();
+		System.getProperties().remove(SPLASH_HANDLE);
         
         try {
         	Runtime.getRuntime().removeShutdownHook(splashHandler);
