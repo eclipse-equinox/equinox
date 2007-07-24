@@ -504,6 +504,7 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
 		        	}
 		            if (exitData != 0) {
 		            	errorMsg = exitData;
+		            	exitData = NULL;
 		                if (_tcslen( errorMsg ) == 0) {
 		            	    free( errorMsg );
 		            	    errorMsg = NULL;
