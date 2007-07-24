@@ -485,6 +485,8 @@ public class PKCS7Processor implements CertificateChain, JarVerifierConstant {
 		if (certificates == null)
 			return false;
 		CertificateChain chain = (CertificateChain) obj;
+		if((signingTime == null ? chain.getSigningTime() != null : !signingTime.equals(chain.getSigningTime())))
+			return false;
 		if (trusted != chain.isTrusted() || (certChain == null ? chain.getChain() != null : !certChain.equals(chain.getChain())))
 			return false;
 		Certificate[] otherCerts = chain.getCertificates();
