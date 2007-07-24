@@ -19,6 +19,8 @@
 #define checkProvidedVMType checkProvidedVMTypeW
 #define checkPath checkPathW
 #define checkPathList checkPathListW
+#define concatStrings concatStringsW
+#define containsPaths containsPathsW
 #endif
 
 /* constants for checkProvidedVMType */
@@ -44,6 +46,12 @@ extern _TCHAR* checkPath( _TCHAR* path, _TCHAR* programDir, int reverseOrder );
 
 /* take a list of path separated with pathSeparator and run them through checkPath */
 extern _TCHAR * checkPathList( _TCHAR* pathList, _TCHAR* programDir, int reverseOrder);
+
+/* take a NULL terminated array of strings and concatenate them together into one string */
+extern _TCHAR * concatStrings(_TCHAR** strs);
+
+/* check that the buffer contains all the given paths */
+extern int containsPaths(_TCHAR * str, _TCHAR** paths);
 
 #ifdef AIX 
 /* Get the version of the VM */

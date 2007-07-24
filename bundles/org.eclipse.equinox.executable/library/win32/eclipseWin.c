@@ -169,27 +169,18 @@ _TCHAR * findVMLibrary( _TCHAR* command ) {
 void adjustSearchPath( _TCHAR* vmLib ){
 	_TCHAR ** paths;
 	_TCHAR * path = NULL, *newPath = NULL;
-	_TCHAR * buffer, *c;
+	_TCHAR * c;
 	int i, length;
 	int needAdjust = 0, freePath = 0;
 	
-	/* we want the directory containing the library, and the parent directory of that */
-	paths = (_TCHAR**) malloc( 2 * sizeof(_TCHAR*));
-	buffer = _tcsdup(vmLib);	 
-	for (i = 0; i < 2; i++ ){
-		c = _tcsrchr(buffer, dirSeparator);
-		*c = 0;
-		length = _tcslen(buffer);
-		paths[i] = malloc((length + 2) * sizeof(_TCHAR));
-		_stprintf( paths[i], _T_ECLIPSE("%s%c"), buffer, pathSeparator );
-	}	
-	free(buffer);
+	paths = getVMLibrarySearchPath(vmLib);
 	
 	/* first call to GetEnvironmentVariable tells us how big to make the buffer */
 	length = GetEnvironmentVariable(_T_ECLIPSE("PATH"), path, 0);
 	if (length > 0) {
 		path = malloc(length * sizeof(_TCHAR));
 		GetEnvironmentVariable(_T_ECLIPSE("PATH"), path, length);
+		needAdjust = !containsPaths(path, paths);
 		freePath = 1;
 	} else {
 		path = _T_ECLIPSE("");
@@ -197,31 +188,18 @@ void adjustSearchPath( _TCHAR* vmLib ){
 		needAdjust = 1;
 	}
 	
-	if(length > 0) {
-		buffer = malloc((_tcslen(path) + 2) * sizeof(_TCHAR));
-		_stprintf(buffer, _T_ECLIPSE("%s%c"), path, pathSeparator);
-		/* check if each of our paths is already on the search path */
-		for (i = 0; i < 2; i++) {
-			c = _tcsstr(buffer, paths[i]);
-			if ( c == NULL || !(c == buffer || *(c - 1) == pathSeparator))
-			{
-				/* entry not found */
-				needAdjust = 1;
-				break;
-			}
-		}
-		free(buffer);
+	if (needAdjust) {
+		c = concatStrings(paths);
+		newPath = malloc((_tcslen(c) + length + 1) * sizeof(_TCHAR));
+		_stprintf(newPath, _T_ECLIPSE("%s%s"), c, path);
+		SetEnvironmentVariable( _T_ECLIPSE("PATH"), newPath);
+		free(c);
+		free(newPath);
 	}
-
-	newPath = malloc((length + 1 + _tcslen(paths[0]) + 1 + _tcslen(paths[1]) + 1) * sizeof(_TCHAR));
-	_stprintf(newPath, _T_ECLIPSE("%s%s%s"), paths[0], paths[1], path);
-
-	SetEnvironmentVariable( _T_ECLIPSE("PATH"), newPath);
 	
-	for (i = 0; i < 2; i++)
+	for (i = 0; paths[i] != NULL; i++)
 		free(paths[i]);
 	free(paths);
-	free(newPath);
 	if (freePath)
 		free(path);
 }
@@ -246,7 +224,9 @@ static _TCHAR* findLib( _TCHAR* command ) {
 		
 		/*check first to see if command already points to the library */
 		if (isVMLibrary(command)) {
-			return command;
+			if (_tstat( command, &stats ) == 0 && (stats.st_mode & S_IFREG) != 0)
+				return command; 	/* exists */
+			return NULL; /* doesn't exist */
 		}
 		
 		pathLength = location - command;

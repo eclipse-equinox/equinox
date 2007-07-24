@@ -181,6 +181,50 @@ _TCHAR * checkPathList( _TCHAR* pathList, _TCHAR* programDir, int reverseOrder) 
     return result;
 }
 
+_TCHAR * concatStrings(_TCHAR** strs) {
+	_TCHAR * result;
+	int i = -1, length = 0;
+	/* first count how large a buffer we need */
+	while( strs[++i] != NULL) {
+		length += _tcslen(strs[i]);
+	}
+	
+	result = malloc((length + 1) * sizeof(_TCHAR));
+	result[0] = 0;
+	i = -1;
+	while(strs[++i] != NULL) {
+		result = _tcscat(result, strs[i]);
+	}
+	return result;
+}
+
+/*
+ * buffer contains a pathSeparator separated list of paths, check 
+ * that it contains all the paths given.  Each path is expected to be
+ * terminated with a pathSeparator character.
+ */
+int containsPaths(_TCHAR * str, _TCHAR** paths) {
+	_TCHAR * buffer;
+	_TCHAR * c;
+	int i;
+	
+	/* terminate the string with a pathSeparator */
+	buffer = malloc((_tcslen(str) + 2) * sizeof(_TCHAR));
+	_stprintf(buffer, _T_ECLIPSE("%s%c"), str, pathSeparator);
+	
+	for (i = 0; paths[i] != NULL; i++) {
+		c = _tcsstr(buffer, paths[i]);
+		if ( c == NULL || !(c == buffer || *(c - 1) == pathSeparator))
+		{
+			/* entry not found */
+			free(buffer);
+			return 0;
+		}
+	}
+	free(buffer);
+	return 1;
+}
+
 int isVMLibrary( _TCHAR* vm )
 {
 	_TCHAR *ch = NULL;

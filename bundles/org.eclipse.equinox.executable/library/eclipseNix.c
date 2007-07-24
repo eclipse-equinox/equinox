@@ -102,8 +102,6 @@ static char * findLib(char * command) {
 
 /* adjust the LD_LIBRARY_PATH for the vmLibrary */
 static void adjustLibraryPath( char * vmLibrary ) {
-	char * buffer;
-	char * path;
 	char * c;
 	char * ldPath;
 	char * newPath;
@@ -120,64 +118,17 @@ static void adjustLibraryPath( char * vmLibrary ) {
 	fixEnvForNetscape();
 #endif /* NETSCAPE_FIX */
 	
-	if (eeLibPath != NULL) {
-		/*count number of path elements */
-		numPaths = 1;
-		c = eeLibPath;
-		while( (c = strchr(c, pathSeparator)) != NULL) {
-			numPaths++;
-			c++;
-		}
-		paths = malloc(numPaths * sizeof(char*));
-		path = buffer = _tcsdup(eeLibPath);
-		for (i = 0; i < numPaths; i++) {
-			c = strchr(path, pathSeparator);
-			if(c != NULL) *c++ = 0;
-			paths[i] = resolveSymlinks(path);
-			length = strlen(paths[i]);
-			paths[i] = realloc(paths[i], (length + 2) * sizeof(char));
-			paths[i][length] = pathSeparator;
-			paths[i][length + 1] = 0;
-			path = c;
-		}
-		free(buffer);
-	} else {
-		numPaths = 2;
-		/* we want the directory containing the library, and the parent directory of that */
-		paths = malloc( numPaths * sizeof(char*));
-		buffer = strdup(vmLibrary);	
-		for (i = 0; i < numPaths; i++) {
-			c = strrchr(buffer, dirSeparator);
-			*c = 0;
-			paths[i] = resolveSymlinks(buffer);
-			length = strlen(paths[i]);
-			paths[i] = realloc(paths[i], (length + 2) * sizeof(char));
-			paths[i][length] = pathSeparator;
-			paths[i][length + 1] = 0;
-		}
-		free(buffer);	
-	}
+	paths = getVMLibrarySearchPath(vmLibrary);
  
 	ldPath = (char*)getenv(_T_ECLIPSE("LD_LIBRARY_PATH"));
 	if (!ldPath) {
 		ldPath = _T_ECLIPSE("");
 		needAdjust = 1;
 	} else {
-		buffer = malloc((strlen(ldPath) + 2) * sizeof(char));
-		sprintf(buffer, "%s%c", ldPath, pathSeparator);
-		for (i = 0; i < numPaths; i++) {
-			c = strstr(buffer, paths[i]);
-			if ( c == NULL || !(c == buffer || *(c - 1) == pathSeparator))
-			{
-				/* entry not found */
-				needAdjust = 1;
-				break;
-			}
-		}
-		free(buffer);
+		needAdjust = !containsPaths(ldPath, paths);
 	}
 	if (!needAdjust) {
-		for (i = 0; i < numPaths; i++)
+		for (i = 0; paths[i] != NULL; i++)
 			free(paths[i]);
 		free(paths);
 		return;
@@ -185,19 +136,18 @@ static void adjustLibraryPath( char * vmLibrary ) {
 	
 	/* set the value for LD_LIBRARY_PATH */
 	length = strlen(ldPath);
-	if (eeLibPath != NULL) {
-		newPath = malloc((length + 1 + strlen(eeLibPath) + 1) * sizeof(char));
-		sprintf(newPath, "%s%c%s", eeLibPath, pathSeparator, ldPath);
-	} else { 
-		newPath = malloc((length + 1 + strlen(paths[0]) + 1 + strlen(paths[1]) + 1) * sizeof(char));
-		sprintf(newPath, "%s%c%s%c%s", paths[0], pathSeparator, paths[1], pathSeparator, ldPath);
-	}
+	c = concatStrings(paths);
+	newPath = malloc((_tcslen(c) + length + 1) * sizeof(_TCHAR));
+	_stprintf(newPath, _T_ECLIPSE("%s%s"), c, ldPath);
+	
 	setenv( "LD_LIBRARY_PATH", newPath, 1);
+	free(newPath);
+	free(c);
 	
 	for (i = 0; i < numPaths; i++)
 		free(paths[i]);
 	free(paths);
-	
+
 	/* now we must restart for this to take affect */
 	restartLauncher(initialArgv[0], initialArgv);
 }

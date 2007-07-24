@@ -1394,3 +1394,76 @@ static int processEEProps(_TCHAR* eeFile)
     free(eeDir);
     return 0;
 }
+
+/* returns an array of paths that should be place on the search path for loading
+ * the vm shared libraries.
+ * Each entry is terminated with the platform path separator.
+ * Entries are either from the ee.library.path or calculated from the path to the
+ * vm shared library itself.
+ */
+_TCHAR ** getVMLibrarySearchPath(_TCHAR * vmLibrary) {
+	_TCHAR ** paths = NULL;
+	_TCHAR * buffer = NULL;
+	_TCHAR * path, * entry, *c;
+	_TCHAR separator;
+	int numPaths = 2;
+	int i;
+	
+	buffer = (eeLibPath != NULL) ? _tcsdup(eeLibPath) : _tcsdup(vmLibrary);	
+#ifdef WIN32
+	/* On windows we sometimes get '/' instead of '\', just always use '/'  */
+	i = -1;
+	while (buffer[++i] != 0) {
+		if (buffer[i] == _T_ECLIPSE('\\')) 
+			buffer[i] = _T_ECLIPSE('/');
+	}
+#endif
+	
+	separator = (eeLibPath != NULL) ? pathSeparator : _T_ECLIPSE('/');
+	
+	if (eeLibPath != NULL) {
+		/* count number of path elements */
+		numPaths = 1;
+		c = eeLibPath;
+		while( (c = _tcschr(c, pathSeparator)) != NULL) {
+			numPaths++;
+			c++;
+		}
+	} 
+		
+	paths = malloc((numPaths + 1) * sizeof(_TCHAR*));
+	paths[numPaths] = NULL;
+		
+	/* We are either splitting eeLibPath (eg path1:path2), or we are extracting
+	 * from libPath where we want the directory containing the library and the
+	 * parent directory of that */
+	for (i = 0; i < numPaths; i++) {
+		c = _tcsrchr(buffer, separator);
+		if (c != 0) {
+			*c++ = 0;
+			if (eeLibPath != NULL) { 
+				path = c;		/* we want from c to the end */
+			} else { 
+				path = buffer; 	/* we want from the start to c */
+			}
+		} else {
+			if (eeLibPath != NULL) {
+				path = buffer;
+			} else {
+				paths[i] = NULL;
+				break;
+			}
+		}
+		if (path != NULL) {
+			entry = resolveSymlinks(path); /* this may be a new string */
+			paths[i] = malloc((_tcslen(entry) + 2) * sizeof(_TCHAR));
+			_stprintf( paths[i], _T_ECLIPSE("%s%c"), entry, pathSeparator );
+			if (entry != path)
+				free(entry);
+			path = NULL;
+		}
+	}
+	
+	free(buffer);
+	return paths;
+}
