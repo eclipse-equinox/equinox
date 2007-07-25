@@ -498,6 +498,20 @@ public class PKCS7Processor implements CertificateChain, JarVerifierConstant {
 		return true;
 	}
 
+	public int hashCode() {
+		int hashCode = 0;
+		if (signingTime != null)
+			hashCode += signingTime.hashCode();
+		if (trusted)
+			hashCode += 1;
+		if (certChain != null)
+			hashCode += certChain.hashCode();
+		if (certificates != null)
+			for (int i = 0; i < certificates.length; i++)
+				hashCode += certificates[i].hashCode();
+		return hashCode;
+	}
+
 	public void verifySFSignature(byte data[], int dataOffset, int dataLength) throws InvalidKeyException, NoSuchAlgorithmException, SignatureException {
 		Signature sig = Signature.getInstance(digestAlgorithm + "with" + signatureAlgorithm); //$NON-NLS-1$
 		sig.initVerify(signerCert.getPublicKey());
