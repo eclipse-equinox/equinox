@@ -403,15 +403,29 @@ public class FrameworkLauncher {
 			while (tokenizer.hasMoreTokens()) {
 				String arg = tokenizer.nextToken();
 				if (arg.startsWith("\"")) { //$NON-NLS-1$
-					String remainingArg = tokenizer.nextToken("\""); //$NON-NLS-1$
-					arg = arg.substring(1) + remainingArg;
-					// skip to next whitespace separated token
-					tokenizer.nextToken(WS_DELIM);
+					if (arg.endsWith("\"")) { //$NON-NLS-1$ 
+		 				if (arg.length() >= 2) {
+		 					// strip the beginning and ending quotes 
+		 					arg = arg.substring(1, arg.length() - 1);
+		 				}
+		 			} else {
+						String remainingArg = tokenizer.nextToken("\""); //$NON-NLS-1$
+						arg = arg.substring(1) + remainingArg;
+						// skip to next whitespace separated token
+						tokenizer.nextToken(WS_DELIM);
+		 			}
 				} else if (arg.startsWith("'")) { //$NON-NLS-1$
-					String remainingArg = tokenizer.nextToken("'"); //$NON-NLS-1$
-					arg = arg.substring(1) + remainingArg;
-					// skip to next whitespace separated token
-					tokenizer.nextToken(WS_DELIM);
+		 			if (arg.endsWith("'")) { //$NON-NLS-1$ 
+		 				if (arg.length() >= 2) {
+		 					// strip the beginning and ending quotes 
+		 					arg = arg.substring(1, arg.length() - 1);
+		 				}
+		 			} else {
+						String remainingArg = tokenizer.nextToken("'"); //$NON-NLS-1$
+						arg = arg.substring(1) + remainingArg;
+						// skip to next whitespace separated token
+						tokenizer.nextToken(WS_DELIM);
+		 			}
 				}
 				args.add(arg);
 			}
