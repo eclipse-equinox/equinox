@@ -21,27 +21,8 @@ import org.eclipse.equinox.http.jetty.internal.Activator;
  * JettyConfigurator provides API level access for creating configured instances of a Jetty-based Http Service.
  * The created instances are not persistent across re-starts of the bundle.
  * </p>
- * Settings: <br />
- * <ul>
- * 		<li>name="http.enabled" type="Boolean" (default: true)</li>
- * 		<li>name="http.port" type="Integer" (default: 0 -- first available port)</li>
- * 		<li>name="http.host" type="String" (default: 0.0.0.0 -- all network adapters)</li>
- * 		<li>name="https.enabled" type="Boolean" (default: false)</li>
- * 		<li>name="https.port" type="Integer" (default: 0 -- first available port)</li>
- * 		<li>name="https.host" type="String" (default: 0.0.0.0 -- all network adapters)</li>
- * 		<li>name="ssl.keystore" type="String"</li>
- * 		<li>name="ssl.password" type="String"</li>
- * 		<li>name="ssl.keypassword" type="String"</li>
- * 		<li>name="ssl.needclientauth" type="Boolean"</li>
- * 		<li>name="ssl.wantclientauth" type="Boolean"</li>
- * 		<li>name="ssl.protocol" type="String"</li>
- * 		<li>name="ssl.algorithm" type="String"</li>
- * 		<li>name="ssl.keystoretype" type="String"</li>
- * 		<li>name="context.path" type="String"</li>
- * 		<li>name="context.sessioninactiveinterval" type="Integer"</li>
- * 		<li>name="other.info" type="String"</li>
- * </ul>
- *
+ * 
+ * @see org.eclipse.equinox.http.jetty.JettyConstants
  */
 public class JettyConfigurator {
 	private static final String PID_PREFIX = "org.eclipse.equinox.http.jetty.JettyConfigurator."; //$NON-NLS-1$

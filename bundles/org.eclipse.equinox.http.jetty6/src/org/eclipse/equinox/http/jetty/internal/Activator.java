@@ -16,6 +16,7 @@ import java.io.File;
 import java.lang.reflect.Method;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import org.eclipse.equinox.http.jetty.JettyConstants;
 import org.osgi.framework.*;
 import org.osgi.service.cm.ManagedServiceFactory;
 import org.osgi.service.startlevel.StartLevel;
@@ -95,12 +96,12 @@ public class Activator implements BundleActivator {
 		defaultSettings.put(Constants.SERVICE_PID, DEFAULT_PID);
 
 		// HTTP Enabled (default is true)
-		String httpEnabledProperty = context.getProperty(PROPERTY_PREFIX + HttpServerManager.HTTP_ENABLED);
+		String httpEnabledProperty = context.getProperty(PROPERTY_PREFIX + JettyConstants.HTTP_ENABLED);
 		Boolean httpEnabled = (httpEnabledProperty == null) ? Boolean.TRUE : new Boolean(httpEnabledProperty);
-		defaultSettings.put(HttpServerManager.HTTP_ENABLED, httpEnabled);
+		defaultSettings.put(JettyConstants.HTTP_ENABLED, httpEnabled);
 
 		// HTTP Port
-		String httpPortProperty = context.getProperty(PROPERTY_PREFIX + HttpServerManager.HTTP_PORT);
+		String httpPortProperty = context.getProperty(PROPERTY_PREFIX + JettyConstants.HTTP_PORT);
 		if (httpPortProperty == null)
 			httpPortProperty = context.getProperty(ORG_OSGI_SERVICE_HTTP_PORT);
 
@@ -112,20 +113,20 @@ public class Activator implements BundleActivator {
 				//(log this) ignore and use default
 			}
 		}
-		defaultSettings.put(HttpServerManager.HTTP_PORT, new Integer(httpPort));
+		defaultSettings.put(JettyConstants.HTTP_PORT, new Integer(httpPort));
 
 		// HTTP Host (default is 0.0.0.0)
-		String httpHost = context.getProperty(PROPERTY_PREFIX + HttpServerManager.HTTP_HOST);
+		String httpHost = context.getProperty(PROPERTY_PREFIX + JettyConstants.HTTP_HOST);
 		if (httpHost != null)
-			defaultSettings.put(HttpServerManager.HTTP_HOST, httpHost);
+			defaultSettings.put(JettyConstants.HTTP_HOST, httpHost);
 
 		// HTTPS Enabled (default is false)
-		Boolean httpsEnabled = new Boolean(context.getProperty(PROPERTY_PREFIX + HttpServerManager.HTTPS_ENABLED));
-		defaultSettings.put(HttpServerManager.HTTPS_ENABLED, httpsEnabled);
+		Boolean httpsEnabled = new Boolean(context.getProperty(PROPERTY_PREFIX + JettyConstants.HTTPS_ENABLED));
+		defaultSettings.put(JettyConstants.HTTPS_ENABLED, httpsEnabled);
 
 		if (httpsEnabled.booleanValue()) {
 			// HTTPS Port
-			String httpsPortProperty = context.getProperty(PROPERTY_PREFIX + HttpServerManager.HTTPS_PORT);
+			String httpsPortProperty = context.getProperty(PROPERTY_PREFIX + JettyConstants.HTTPS_PORT);
 			if (httpPortProperty == null)
 				httpPortProperty = context.getProperty(ORG_OSGI_SERVICE_HTTP_PORT_SECURE);
 
@@ -137,66 +138,66 @@ public class Activator implements BundleActivator {
 					//(log this) ignore and use default
 				}
 			}
-			defaultSettings.put(HttpServerManager.HTTPS_PORT, new Integer(httpsPort));
+			defaultSettings.put(JettyConstants.HTTPS_PORT, new Integer(httpsPort));
 
 			// HTTPS Host (default is 0.0.0.0)
-			String httpsHost = context.getProperty(PROPERTY_PREFIX + HttpServerManager.HTTPS_HOST);
+			String httpsHost = context.getProperty(PROPERTY_PREFIX + JettyConstants.HTTPS_HOST);
 			if (httpsHost != null)
-				defaultSettings.put(HttpServerManager.HTTPS_HOST, httpsHost);
+				defaultSettings.put(JettyConstants.HTTPS_HOST, httpsHost);
 
 			// SSL SETTINGS
-			String keystore = context.getProperty(PROPERTY_PREFIX + HttpServerManager.SSL_KEYSTORE);
+			String keystore = context.getProperty(PROPERTY_PREFIX + JettyConstants.SSL_KEYSTORE);
 			if (keystore != null)
-				defaultSettings.put(HttpServerManager.SSL_KEYSTORE, keystore);
+				defaultSettings.put(JettyConstants.SSL_KEYSTORE, keystore);
 
-			String password = context.getProperty(PROPERTY_PREFIX + HttpServerManager.SSL_PASSWORD);
+			String password = context.getProperty(PROPERTY_PREFIX + JettyConstants.SSL_PASSWORD);
 			if (password != null)
-				defaultSettings.put(HttpServerManager.SSL_PASSWORD, password);
+				defaultSettings.put(JettyConstants.SSL_PASSWORD, password);
 
-			String keypassword = context.getProperty(PROPERTY_PREFIX + HttpServerManager.SSL_KEYPASSWORD);
+			String keypassword = context.getProperty(PROPERTY_PREFIX + JettyConstants.SSL_KEYPASSWORD);
 			if (keypassword != null)
-				defaultSettings.put(HttpServerManager.SSL_KEYPASSWORD, keypassword);
+				defaultSettings.put(JettyConstants.SSL_KEYPASSWORD, keypassword);
 
-			String needclientauth = context.getProperty(PROPERTY_PREFIX + HttpServerManager.SSL_NEEDCLIENTAUTH);
+			String needclientauth = context.getProperty(PROPERTY_PREFIX + JettyConstants.SSL_NEEDCLIENTAUTH);
 			if (needclientauth != null)
-				defaultSettings.put(HttpServerManager.SSL_NEEDCLIENTAUTH, new Boolean(needclientauth));
+				defaultSettings.put(JettyConstants.SSL_NEEDCLIENTAUTH, new Boolean(needclientauth));
 
-			String wantclientauth = context.getProperty(PROPERTY_PREFIX + HttpServerManager.SSL_WANTCLIENTAUTH);
+			String wantclientauth = context.getProperty(PROPERTY_PREFIX + JettyConstants.SSL_WANTCLIENTAUTH);
 			if (wantclientauth != null)
-				defaultSettings.put(HttpServerManager.SSL_WANTCLIENTAUTH, new Boolean(wantclientauth));
+				defaultSettings.put(JettyConstants.SSL_WANTCLIENTAUTH, new Boolean(wantclientauth));
 
-			String protocol = context.getProperty(PROPERTY_PREFIX + HttpServerManager.SSL_PROTOCOL);
+			String protocol = context.getProperty(PROPERTY_PREFIX + JettyConstants.SSL_PROTOCOL);
 			if (protocol != null)
-				defaultSettings.put(HttpServerManager.SSL_PROTOCOL, protocol);
+				defaultSettings.put(JettyConstants.SSL_PROTOCOL, protocol);
 
-			String algorithm = context.getProperty(PROPERTY_PREFIX + HttpServerManager.SSL_ALGORITHM);
+			String algorithm = context.getProperty(PROPERTY_PREFIX + JettyConstants.SSL_ALGORITHM);
 			if (algorithm != null)
-				defaultSettings.put(HttpServerManager.SSL_ALGORITHM, algorithm);
+				defaultSettings.put(JettyConstants.SSL_ALGORITHM, algorithm);
 
-			String keystoretype = context.getProperty(PROPERTY_PREFIX + HttpServerManager.SSL_KEYSTORETYPE);
+			String keystoretype = context.getProperty(PROPERTY_PREFIX + JettyConstants.SSL_KEYSTORETYPE);
 			if (keystoretype != null)
-				defaultSettings.put(HttpServerManager.SSL_KEYSTORETYPE, keystoretype);
+				defaultSettings.put(JettyConstants.SSL_KEYSTORETYPE, keystoretype);
 		}
 
 		// Servlet Context Path
-		String contextpath = context.getProperty(PROPERTY_PREFIX + HttpServerManager.CONTEXT_PATH);
+		String contextpath = context.getProperty(PROPERTY_PREFIX + JettyConstants.CONTEXT_PATH);
 		if (contextpath != null)
-			defaultSettings.put(HttpServerManager.CONTEXT_PATH, contextpath);
+			defaultSettings.put(JettyConstants.CONTEXT_PATH, contextpath);
 
 		// Session Inactive Interval (timeout)
-		String sessionInactiveInterval = context.getProperty(PROPERTY_PREFIX + HttpServerManager.CONTEXT_SESSIONINACTIVEINTERVAL);
+		String sessionInactiveInterval = context.getProperty(PROPERTY_PREFIX + JettyConstants.CONTEXT_SESSIONINACTIVEINTERVAL);
 		if (sessionInactiveInterval != null) {
 			try {
-				defaultSettings.put(HttpServerManager.CONTEXT_SESSIONINACTIVEINTERVAL, new Integer(sessionInactiveInterval));
+				defaultSettings.put(JettyConstants.CONTEXT_SESSIONINACTIVEINTERVAL, new Integer(sessionInactiveInterval));
 			} catch (NumberFormatException e) {
 				//(log this) ignore
 			}
 		}
 
 		// Other Info
-		String otherInfo = context.getProperty(PROPERTY_PREFIX + HttpServerManager.OTHER_INFO);
+		String otherInfo = context.getProperty(PROPERTY_PREFIX + JettyConstants.OTHER_INFO);
 		if (otherInfo != null)
-			defaultSettings.put(HttpServerManager.OTHER_INFO, otherInfo);
+			defaultSettings.put(JettyConstants.OTHER_INFO, otherInfo);
 
 		return defaultSettings;
 	}

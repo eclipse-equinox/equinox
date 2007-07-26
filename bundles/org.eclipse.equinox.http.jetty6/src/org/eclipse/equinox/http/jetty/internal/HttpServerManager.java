@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.*;
 import javax.servlet.*;
+import org.eclipse.equinox.http.jetty.JettyConstants;
 import org.eclipse.equinox.http.servlet.HttpServiceServlet;
 import org.mortbay.http.*;
 import org.mortbay.jetty.servlet.ServletHandler;
@@ -28,25 +29,6 @@ public class HttpServerManager implements ManagedServiceFactory {
 
 	private static final String DIR_PREFIX = "pid_"; //$NON-NLS-1$
 	private static final String INTERNAL_CONTEXT_CLASSLOADER = "org.eclipse.equinox.http.jetty.internal.ContextClassLoader"; //$NON-NLS-1$
-
-	// Http Service properties - the autostarted service will look these up in the BundleContext by prefixing with "org.eclipse.equinox.http.jetty."
-	static final String HTTP_ENABLED = "http.enabled"; //$NON-NLS-1$
-	static final String HTTP_PORT = "http.port"; //$NON-NLS-1$
-	static final String HTTP_HOST = "http.host"; //$NON-NLS-1$
-	static final String HTTPS_ENABLED = "https.enabled"; //$NON-NLS-1$
-	static final String HTTPS_HOST = "https.host"; //$NON-NLS-1$
-	static final String HTTPS_PORT = "https.port"; //$NON-NLS-1$
-	static final String SSL_KEYSTORE = "ssl.keystore"; //$NON-NLS-1$
-	static final String SSL_PASSWORD = "ssl.password"; //$NON-NLS-1$
-	static final String SSL_KEYPASSWORD = "ssl.keypassword"; //$NON-NLS-1$
-	static final String SSL_NEEDCLIENTAUTH = "ssl.needclientauth"; //$NON-NLS-1$
-	static final String SSL_WANTCLIENTAUTH = "ssl.wantclientauth"; //$NON-NLS-1$
-	static final String SSL_PROTOCOL = "ssl.protocol"; //$NON-NLS-1$
-	static final String SSL_ALGORITHM = "ssl.algorithm"; //$NON-NLS-1$
-	static final String SSL_KEYSTORETYPE = "ssl.keystoretype"; //$NON-NLS-1$
-	static final String CONTEXT_PATH = "context.path"; //$NON-NLS-1$
-	static final String CONTEXT_SESSIONINACTIVEINTERVAL = "context.sessioninactiveinterval"; //$NON-NLS-1$
-	static final String OTHER_INFO = "other.info"; //$NON-NLS-1$
 
 	private Map servers = new HashMap();
 	private File workDir;
@@ -92,18 +74,18 @@ public class HttpServerManager implements ManagedServiceFactory {
 		holder.setInitParameter(Constants.SERVICE_VENDOR, "Eclipse.org"); //$NON-NLS-1$
 		holder.setInitParameter(Constants.SERVICE_DESCRIPTION, "Equinox Jetty-based Http Service"); //$NON-NLS-1$
 		if (httpListener != null)
-			holder.setInitParameter(HTTP_PORT, new Integer(httpListener.getPort()).toString());
+			holder.setInitParameter(JettyConstants.HTTP_PORT, new Integer(httpListener.getPort()).toString());
 		if (httpsListener != null)
-			holder.setInitParameter(HTTPS_PORT, new Integer(httpsListener.getPort()).toString());
+			holder.setInitParameter(JettyConstants.HTTPS_PORT, new Integer(httpsListener.getPort()).toString());
 
-		String otherInfo = (String) dictionary.get(OTHER_INFO);
+		String otherInfo = (String) dictionary.get(JettyConstants.OTHER_INFO);
 		if (otherInfo != null)
-			holder.setInitParameter(OTHER_INFO, otherInfo);
+			holder.setInitParameter(JettyConstants.OTHER_INFO, otherInfo);
 
 		HttpContext httpContext = createHttpContext(dictionary);
 		httpContext.addHandler(servlets);
 
-		Integer sessionInactiveInterval = (Integer) dictionary.get(CONTEXT_SESSIONINACTIVEINTERVAL);
+		Integer sessionInactiveInterval = (Integer) dictionary.get(JettyConstants.CONTEXT_SESSIONINACTIVEINTERVAL);
 		if (sessionInactiveInterval != null)
 			servlets.setSessionInactiveInterval(sessionInactiveInterval.intValue());
 
@@ -125,18 +107,18 @@ public class HttpServerManager implements ManagedServiceFactory {
 	}
 
 	private SocketListener createHttpListener(Dictionary dictionary) {
-		Boolean httpEnabled = (Boolean) dictionary.get(HTTP_ENABLED);
+		Boolean httpEnabled = (Boolean) dictionary.get(JettyConstants.HTTP_ENABLED);
 		if (httpEnabled != null && !httpEnabled.booleanValue())
 			return null;
 
-		Integer httpPort = (Integer) dictionary.get(HTTP_PORT);
+		Integer httpPort = (Integer) dictionary.get(JettyConstants.HTTP_PORT);
 		if (httpPort == null)
 			return null;
 
 		SocketListener listener = new SocketListener();
 		listener.setPort(httpPort.intValue());
 
-		String httpHost = (String) dictionary.get(HTTP_HOST);
+		String httpHost = (String) dictionary.get(JettyConstants.HTTP_HOST);
 		if (httpHost != null) {
 			try {
 				listener.setHost(httpHost);
@@ -159,18 +141,18 @@ public class HttpServerManager implements ManagedServiceFactory {
 	}
 
 	private SocketListener createHttpsListener(Dictionary dictionary) {
-		Boolean httpsEnabled = (Boolean) dictionary.get(HTTPS_ENABLED);
+		Boolean httpsEnabled = (Boolean) dictionary.get(JettyConstants.HTTPS_ENABLED);
 		if (httpsEnabled == null || !httpsEnabled.booleanValue())
 			return null;
 
-		Integer httpsPort = (Integer) dictionary.get(HTTPS_PORT);
+		Integer httpsPort = (Integer) dictionary.get(JettyConstants.HTTPS_PORT);
 		if (httpsPort == null)
 			return null;
 
 		SslListener listener = new SslListener();
 		listener.setPort(httpsPort.intValue());
 
-		String httpsHost = (String) dictionary.get(HTTPS_HOST);
+		String httpsHost = (String) dictionary.get(JettyConstants.HTTPS_HOST);
 		if (httpsHost != null) {
 			try {
 				listener.setHost(httpsHost);
@@ -181,35 +163,35 @@ public class HttpServerManager implements ManagedServiceFactory {
 			}
 		}
 
-		String keyStore = (String) dictionary.get(SSL_KEYSTORE);
+		String keyStore = (String) dictionary.get(JettyConstants.SSL_KEYSTORE);
 		if (keyStore != null)
 			listener.setKeystore(keyStore);
 
-		String password = (String) dictionary.get(SSL_PASSWORD);
+		String password = (String) dictionary.get(JettyConstants.SSL_PASSWORD);
 		if (password != null)
 			listener.setPassword(password);
 
-		String keyPassword = (String) dictionary.get(SSL_KEYPASSWORD);
+		String keyPassword = (String) dictionary.get(JettyConstants.SSL_KEYPASSWORD);
 		if (keyPassword != null)
 			listener.setKeyPassword(keyPassword);
 
-		Boolean needClientAuth = (Boolean) dictionary.get(SSL_NEEDCLIENTAUTH);
+		Boolean needClientAuth = (Boolean) dictionary.get(JettyConstants.SSL_NEEDCLIENTAUTH);
 		if (needClientAuth != null)
 			listener.setNeedClientAuth(needClientAuth.booleanValue());
 
-		Boolean wantClientAuth = (Boolean) dictionary.get(SSL_WANTCLIENTAUTH);
+		Boolean wantClientAuth = (Boolean) dictionary.get(JettyConstants.SSL_WANTCLIENTAUTH);
 		if (wantClientAuth != null)
 			listener.setWantClientAuth(wantClientAuth.booleanValue());
 
-		String protocol = (String) dictionary.get(SSL_PROTOCOL);
+		String protocol = (String) dictionary.get(JettyConstants.SSL_PROTOCOL);
 		if (protocol != null)
 			listener.setProtocol(protocol);
 
-		String algorithm = (String) dictionary.get(SSL_ALGORITHM);
+		String algorithm = (String) dictionary.get(JettyConstants.SSL_ALGORITHM);
 		if (algorithm != null)
 			listener.setAlgorithm(algorithm);
 
-		String keystoreType = (String) dictionary.get(SSL_KEYSTORETYPE);
+		String keystoreType = (String) dictionary.get(JettyConstants.SSL_KEYSTORETYPE);
 		if (keystoreType != null)
 			listener.setKeystoreType(keystoreType);
 
@@ -229,7 +211,7 @@ public class HttpServerManager implements ManagedServiceFactory {
 		httpContext.setAttribute(INTERNAL_CONTEXT_CLASSLOADER, Thread.currentThread().getContextClassLoader());
 		httpContext.setClassLoader(this.getClass().getClassLoader());
 
-		String contextPathProperty = (String) dictionary.get(CONTEXT_PATH);
+		String contextPathProperty = (String) dictionary.get(JettyConstants.CONTEXT_PATH);
 		if (contextPathProperty == null)
 			contextPathProperty = "/"; //$NON-NLS-1$
 		httpContext.setContextPath(contextPathProperty);
