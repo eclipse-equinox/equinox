@@ -7,6 +7,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Alex Blewitt (bug 196071)
  *******************************************************************************/
 package org.eclipse.equinox.internal.app;
 
@@ -22,7 +23,7 @@ public class AppCommands implements CommandProvider {
 	private final static String LAUNCHABLE_APP_FILTER = "(&(application.locked=false)(application.launchable=true)(application.visible=true))"; //$NON-NLS-1$
 	private final static String ACTIVE_APP_FILTER = "(!(application.state=STOPPING))"; //$NON-NLS-1$
 	private final static String LOCKED_APP_FILTER = "(application.locked=true)"; //$NON-NLS-1$
-	
+
 	private static AppCommands instance;
 	private BundleContext context;
 	private ServiceTracker applicationDescriptors;
@@ -143,24 +144,24 @@ public class AppCommands implements CommandProvider {
 	}
 
 	private ServiceReference getApplication(ServiceReference[] apps, String targetId, String idKey, boolean perfectMatch) {
+		if (apps == null || targetId == null)
+			return null;
+
 		ServiceReference result = null;
-		if (apps != null && targetId != null)
-			for (int i = 0; i < apps.length; i++) {
-				String id = (String) apps[i].getProperty(idKey);
-				if (perfectMatch) {
-					if (targetId.equals(id)) // perfect match return it
-						return apps[i];
-				} else if (id.indexOf(targetId) >= 0) {
-					if (result != null) {
-						if (!id.equals(result.getProperty(idKey)))
-							// this is ambiguous
-							return null;
-					} else {
-						result = apps[i];
-					}
-				}
+		boolean ambigous = false;
+		for (int i = 0; i < apps.length; i++) {
+			String id = (String) apps[i].getProperty(idKey);
+			if (targetId.equals(id))
+				return apps[i]; // always return a perfect match
+			if (perfectMatch)
+				continue;
+			if (id.indexOf(targetId) >= 0) {
+				if (result != null)
+					ambigous = true;
+				result = apps[i];
 			}
-		return result;
+		}
+		return ambigous ? null : result;
 	}
 
 	public void _startApp(CommandInterpreter intp) throws Exception {
@@ -190,7 +191,10 @@ public class AppCommands implements CommandProvider {
 
 	public void _stopApp(CommandInterpreter intp) throws Exception {
 		String appId = intp.nextArgument();
-		ServiceReference application = getApplication(applicationHandles.getServiceReferences(), appId, ApplicationHandle.APPLICATION_DESCRIPTOR, false);
+		// first search for the application instance id
+		ServiceReference application = getApplication(applicationHandles.getServiceReferences(), appId, ApplicationHandle.APPLICATION_PID, false);
+		if (application == null)
+			application = getApplication(applicationHandles.getServiceReferences(), appId, ApplicationHandle.APPLICATION_DESCRIPTOR, false);
 		if (application == null)
 			intp.println("\"" + appId + "\" does not exist, is not running or is ambigous."); //$NON-NLS-1$ //$NON-NLS-2$
 		else {
