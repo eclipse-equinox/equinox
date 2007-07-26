@@ -95,9 +95,11 @@ public class ProxyServlet extends HttpServlet {
 				registration = (Registration) registrations.get(alias);
 			else {
 				registration = (Registration) registrations.get(alias + extensionAlias);
-				if (registration != null) // extensions should be handled on the full alias
-					alias = HttpServletRequestAdaptor.getDispatchPathInfo(req);
-				else
+				if (registration != null) {
+					// for ServletRegistrations extensions should be handled on the full alias
+					if (registration instanceof ServletRegistration)
+						alias = HttpServletRequestAdaptor.getDispatchPathInfo(req);
+				} else
 					registration = (Registration) registrations.get(alias);
 			}
 
