@@ -175,13 +175,21 @@ public class HttpServerManager implements ManagedServiceFactory {
 		if (keyPassword != null)
 			listener.setKeyPassword(keyPassword);
 
-		Boolean needClientAuth = (Boolean) dictionary.get(JettyConstants.SSL_NEEDCLIENTAUTH);
-		if (needClientAuth != null)
-			listener.setNeedClientAuth(needClientAuth.booleanValue());
+		Object needClientAuth = dictionary.get(JettyConstants.SSL_NEEDCLIENTAUTH);
+		if (needClientAuth != null) {
+			if (needClientAuth instanceof String)
+				needClientAuth = new Boolean((String)needClientAuth);
+			
+			listener.setNeedClientAuth(((Boolean) needClientAuth).booleanValue());
+		}
 
-		Boolean wantClientAuth = (Boolean) dictionary.get(JettyConstants.SSL_WANTCLIENTAUTH);
-		if (wantClientAuth != null)
-			listener.setWantClientAuth(wantClientAuth.booleanValue());
+		Object wantClientAuth = (Boolean) dictionary.get(JettyConstants.SSL_WANTCLIENTAUTH);
+		if (wantClientAuth != null) {
+			if (wantClientAuth instanceof String)
+				wantClientAuth = new Boolean((String)wantClientAuth);
+			
+			listener.setWantClientAuth(((Boolean) wantClientAuth).booleanValue());
+		}
 
 		String protocol = (String) dictionary.get(JettyConstants.SSL_PROTOCOL);
 		if (protocol != null)
