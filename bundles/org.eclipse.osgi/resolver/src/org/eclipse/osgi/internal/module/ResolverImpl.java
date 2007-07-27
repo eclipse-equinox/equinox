@@ -37,7 +37,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 	public static boolean DEBUG_GROUPING = false;
 	public static boolean DEBUG_CYCLES = false;
 	private static int MAX_MULTIPLE_SUPPLIERS_MERGE = 10;
-	private static int MAX_MULTIPLE_SUPPLERS=25;
+	private static long MAX_COMBINATIONS = 1000000;
 
 	private static String[][] CURRENT_EES;
 
@@ -458,7 +458,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 	}
 
 	private void resolveBundles0(ResolverBundle[] bundles, Dictionary[] platformProperties, ArrayList rejectedSingletons) {
-		if (developmentMode) 
+		if (developmentMode)
 			// need to sort bundles to keep consistent order for fragment attachment (bug 174930)
 			Arrays.sort(bundles);
 		// First attach all fragments to the matching hosts
@@ -534,26 +534,37 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 			return null; // the first selected have no conflicts; return without iterating over all combinations
 		}
 		ResolverConstraint[][] multipleSuppliers = getMultipleSuppliers(bundles, packageConstraints, bundleConstraints);
-		ArrayList conflictingBundles = null;
-		if (multipleSuppliers.length > 0 && multipleSuppliers.length < MAX_MULTIPLE_SUPPLERS) {
+		ArrayList conflicts = null;
+		if (multipleSuppliers.length > 0 && getNumCombinations(multipleSuppliers) < MAX_COMBINATIONS) {
 			int[] bestCombination = new int[multipleSuppliers.length];
-			conflictingBundles = findBestCombination(bundles, multipleSuppliers, bestCombination, initialConflicts);
+			conflicts = findBestCombination(bundles, multipleSuppliers, bestCombination, initialConflicts);
 			for (int i = 0; i < bestCombination.length; i++) {
 				for (int j = 0; j < multipleSuppliers[i].length; j++)
 					multipleSuppliers[i][j].setSelectedSupplier(bestCombination[i]);
 			}
 		} else {
 			// either there are no multiple suppliers or the multiple suppliers list is way to big to process in a timely manner.
-			conflictingBundles = initialConflicts;
+			conflicts = initialConflicts;
 		}
 		// do not need to keep uses data in memory
 		groupingChecker.clear();
-		return conflictingBundles;
+		return conflicts;
 	}
 
-	private void getCombination(ResolverConstraint[][] multipleSuppliers, int[] combination) {
+	private long getNumCombinations(ResolverConstraint[][] multipleSuppliers) {
+		if (multipleSuppliers == null || multipleSuppliers.length == 0)
+			return 0;
+		long numCombinations = multipleSuppliers[0][0].getNumPossibleSuppliers();
+		for (int i = 1; i < multipleSuppliers.length; i++)
+			if (multipleSuppliers[i].length > 0)
+				numCombinations *= multipleSuppliers[i][0].getNumPossibleSuppliers();
+		return numCombinations;
+	}
+
+	private int[] getCombination(ResolverConstraint[][] multipleSuppliers, int[] combination) {
 		for (int i = 0; i < combination.length; i++)
 			combination[i] = multipleSuppliers[i][0].getSelectedSupplierIndex();
+		return combination;
 	}
 
 	private ArrayList findBestCombination(ResolverBundle[] bundles, ResolverConstraint[][] multipleSuppliers, int[] bestCombination, ArrayList bestConflicts) {
@@ -561,16 +572,56 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		// or we have run out of combinations
 		// if all combinations are tried then return the combination with the lowest number of conflicts
 		int bestConflictCount = getConflictCount(bestConflicts);
+		ResolverBundle[] bestConflictBundles = getConflictedBundles(bestConflicts);
 		while (bestConflictCount != 0 && getNextCombination(multipleSuppliers)) {
-			ArrayList conflicts = getConflicts(bundles, null, null);
+			if (DEBUG_GROUPING)
+				printCombination(getCombination(multipleSuppliers, new int[multipleSuppliers.length]));
+			// first count the conflicts for the bundles with conflicts from the best combination
+			// this significantly reduces the time it takes to populate the GroupingChecker for cases where
+			// the combination is no better.
+			ArrayList conflicts = getConflicts(bestConflictBundles, null, null);
 			int conflictCount = getConflictCount(conflicts);
+			if (conflictCount >= bestConflictCount)
+				// no need to test the other bundles;
+				// this combination is no better for the bundles which conflict with the current best combination
+				continue;
+			// this combination improves upon the conflicts for the bundles which conflict with the current best combination;
+			// do an complete conflict count
+			conflicts = getConflicts(bundles, null, null);
+			conflictCount = getConflictCount(conflicts);
 			if (conflictCount < bestConflictCount) {
+				// this combination is better that the current best combination; save this combination as the current best
 				bestConflictCount = conflictCount;
 				bestConflicts = conflicts;
 				getCombination(multipleSuppliers, bestCombination);
+				bestConflictBundles = getConflictedBundles(bestConflicts);
 			}
 		}
 		return bestConflicts;
+	}
+
+	private void printCombination(int[] curCombination) {
+		StringBuffer sb = new StringBuffer();
+		sb.append('[');
+		for (int i = 0; i < curCombination.length; i++) {
+			sb.append(curCombination[i]);
+			if (i < curCombination.length - 1)
+				sb.append(',');
+		}
+		sb.append(']');
+		System.out.println(sb.toString());
+	}
+
+	private ResolverBundle[] getConflictedBundles(ArrayList bestConflicts) {
+		if (bestConflicts == null)
+			return new ResolverBundle[0];
+		ArrayList conflictedBundles = new ArrayList(bestConflicts.size());
+		for (Iterator iConflicts = bestConflicts.iterator(); iConflicts.hasNext();) {
+			ResolverConstraint constraint = (ResolverConstraint) iConflicts.next();
+			if (!conflictedBundles.contains(constraint.getBundle()))
+				conflictedBundles.add(constraint.getBundle());
+		}
+		return (ResolverBundle[]) conflictedBundles.toArray(new ResolverBundle[conflictedBundles.size()]);
 	}
 
 	private boolean getNextCombination(ResolverConstraint[][] multipleSuppliers) {
@@ -602,34 +653,38 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 	private ArrayList getConflicts(ResolverBundle[] bundles, HashSet packageConstraints, HashSet bundleConstraints) {
 		groupingChecker.clear();
 		ArrayList conflicts = null;
-		for (int i = 0; i < bundles.length; i++) {
-			boolean foundConflict = false;
-			BundleConstraint[] requires = bundles[i].getRequires();
-			for (int j = 0; j < requires.length; j++) {
-				ResolverBundle selectedSupplier = (ResolverBundle) requires[j].getSelectedSupplier();
-				PackageRoots[][] conflict = selectedSupplier == null ? null : groupingChecker.isConsistent(bundles[i], selectedSupplier);
-				if (conflict != null) {
-					addConflictNames(conflict, packageConstraints, bundleConstraints);
-					if (!foundConflict) {
-						if (conflicts == null)
-							conflicts = new ArrayList(1);
-						conflicts.add(requires[j]);
-						foundConflict = !requires[j].isOptional(); // only record the conflicts upto the first non-optional
-					}
+		for (int i = 0; i < bundles.length; i++)
+			conflicts = addConflicts(bundles[i], packageConstraints, bundleConstraints, conflicts);
+		return conflicts;
+	}
+
+	private ArrayList addConflicts(ResolverBundle bundle, HashSet packageConstraints, HashSet bundleConstraints, ArrayList conflicts) {
+		boolean foundConflict = false;
+		BundleConstraint[] requires = bundle.getRequires();
+		for (int i = 0; i < requires.length; i++) {
+			ResolverBundle selectedSupplier = (ResolverBundle) requires[i].getSelectedSupplier();
+			PackageRoots[][] conflict = selectedSupplier == null ? null : groupingChecker.isConsistent(bundle, selectedSupplier);
+			if (conflict != null) {
+				addConflictNames(conflict, packageConstraints, bundleConstraints);
+				if (!foundConflict) {
+					if (conflicts == null)
+						conflicts = new ArrayList(1);
+					conflicts.add(requires[i]);
+					foundConflict = !requires[i].isOptional(); // only record the conflicts upto the first non-optional
 				}
 			}
-			ResolverImport[] imports = bundles[i].getImportPackages();
-			for (int j = 0; j < imports.length; j++) {
-				ResolverExport selectedSupplier = (ResolverExport) imports[j].getSelectedSupplier();
-				PackageRoots[][] conflict = selectedSupplier == null ? null : groupingChecker.isConsistent(bundles[i], selectedSupplier);
-				if (conflict != null) {
-					addConflictNames(conflict, packageConstraints, bundleConstraints);
-					if (!foundConflict) {
-						if (conflicts == null)
-							conflicts = new ArrayList(1);
-						conflicts.add(imports[j]);
-						foundConflict = !imports[j].isOptional(); // only record the conflicts upto the first non-optional
-					}
+		}
+		ResolverImport[] imports = bundle.getImportPackages();
+		for (int i = 0; i < imports.length; i++) {
+			ResolverExport selectedSupplier = (ResolverExport) imports[i].getSelectedSupplier();
+			PackageRoots[][] conflict = selectedSupplier == null ? null : groupingChecker.isConsistent(bundle, selectedSupplier);
+			if (conflict != null) {
+				addConflictNames(conflict, packageConstraints, bundleConstraints);
+				if (!foundConflict) {
+					if (conflicts == null)
+						conflicts = new ArrayList(1);
+					conflicts.add(imports[i]);
+					foundConflict = !imports[i].isOptional(); // only record the conflicts upto the first non-optional
 				}
 			}
 		}
@@ -657,7 +712,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 					if (exporter != null && exporter.getName() != null)
 						bundleConstraints.add(exporter.getName());
 				}
-			}
+		}
 	}
 
 	// get a list of resolver constraints that have multiple suppliers
@@ -715,13 +770,13 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 				// we still have too big of a list; filter out constraints that are not in conflict
 				Iterator iResults = results.iterator();
 				results = new ArrayList();
-				while (iResults.hasNext())  {
+				while (iResults.hasNext()) {
 					ResolverConstraint[] constraints = (ResolverConstraint[]) iResults.next();
 					ResolverConstraint constraint = constraints.length > 0 ? constraints[0] : null;
 					if (constraint instanceof ResolverImport) {
 						if (packageConstraints.contains(constraint.getName()))
 							results.add(constraints);
-					} else if (constraint instanceof BundleConstraint) { 
+					} else if (constraint instanceof BundleConstraint) {
 						if (bundleConstraints.contains(constraint.getName()))
 							results.add(constraints);
 					}
@@ -891,7 +946,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 				bundle.clearWires();
 				setBundleResolving(bundle);
 				break;
-			case ResolverBundle.RESOLVING : 
+			case ResolverBundle.RESOLVING :
 				if (cycle.contains(bundle))
 					return true;
 				break;
@@ -1148,7 +1203,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 					continue; // Must not attempt to resolve an exporter when dynamic
 				if (imp.getBundle() == export.getExporter() && !export.getExportPackageDescription().isRoot())
 					continue; // Can't wire to our own re-export
-				if (imp.getSelectedSupplier() != null && ((ResolverExport)imp.getSelectedSupplier()).getExporter() == imp.getBundle())
+				if (imp.getSelectedSupplier() != null && ((ResolverExport) imp.getSelectedSupplier()).getExporter() == imp.getBundle())
 					break; // We wired to ourselves; nobody else matters
 				export.getExporter().addRef(imp.getBundle());
 				// first add the possible supplier; this is done before resolving the supplier bundle to prevent endless cycle loops.
@@ -1199,6 +1254,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 			return true; // If the import is optional then just return true
 		return false;
 	}
+
 	// Check if the import can be resolved to a re-exported package (has no export object to match to)
 	private boolean resolveImportReprovide(ResolverImport imp, ArrayList cycle) {
 		String bsn = ((ImportPackageSpecification) imp.getVersionConstraint()).getBundleSymbolicName();
