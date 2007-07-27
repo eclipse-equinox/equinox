@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,11 +31,11 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 	public static boolean DEBUG = false;
 	private static BundleContext context;
 	// PackageAdmin is a system service that never goes away as long 
-	// as the framwork is active.  No need to track it!!
+	// as the framework is active.  No need to track it!!
 	private static PackageAdmin packageAdmin;
 	private static EclipseAppContainer container;
 	// tracks the FrameworkLog service
-	private static ServiceTracker frameworkLog;
+	private volatile static ServiceTracker _frameworkLogTracker;
 	// tracks the extension registry and app launcher services
 	private ServiceTracker registryTracker;
 	private ServiceTracker launcherTracker;
@@ -57,6 +57,8 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 		registryTracker.open();
 		launcherTracker = new ServiceTracker(context, ApplicationLauncher.class.getName(), this);
 		launcherTracker.open();
+		_frameworkLogTracker = new ServiceTracker(context, FrameworkLog.class.getName(), null);
+		_frameworkLogTracker.open();
 		// start the app commands for the console
 		try {
 			AppCommands.create(context);
@@ -80,9 +82,9 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 		launcherTracker = null;
 		// unset the app manager context after the container has been stopped
 		AppPersistence.stop();
-		if (frameworkLog != null) {
-			frameworkLog.close();
-			frameworkLog = null;
+		if (_frameworkLogTracker != null) {
+			_frameworkLogTracker.close();
+			_frameworkLogTracker = null;
 		}
 		packageAdmin = null; // we do not unget PackageAdmin here; let the framework do it for us
 		context = null;
@@ -219,20 +221,9 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 	}
 
 	static void log(FrameworkLogEntry entry) {
-		BundleContext bc = context;
-		if (bc == null)
-			return;
-		ServiceReference ref = null;
-		try {
-			ref = bc.getServiceReference(FrameworkLog.class.getName());
-			if (ref == null)
-				return;
-			FrameworkLog log = (FrameworkLog) context.getService(ref);
-			if (log != null)
-				log.log(entry);
-		} finally {
-			if (ref != null)
-				bc.ungetService(ref);
-		}
+		ServiceTracker frameworkLogTracker = _frameworkLogTracker;
+		FrameworkLog log = frameworkLogTracker == null ? null : (FrameworkLog) frameworkLogTracker.getService();
+		if (log != null)
+			log.log(entry);
 	}
 }
