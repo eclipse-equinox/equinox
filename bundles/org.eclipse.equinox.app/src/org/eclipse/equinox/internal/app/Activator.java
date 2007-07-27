@@ -29,11 +29,11 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 	public static final String PI_APP = "org.eclipse.equinox.app"; //$NON-NLS-1$
 	public static boolean DEBUG = false;
-	private static BundleContext context;
+	private volatile static BundleContext _context;
 	// PackageAdmin is a system service that never goes away as long 
 	// as the framework is active.  No need to track it!!
-	private static PackageAdmin packageAdmin;
-	private static EclipseAppContainer container;
+	private volatile static PackageAdmin _packageAdmin;
+	private volatile static EclipseAppContainer container;
 	// tracks the FrameworkLog service
 	private volatile static ServiceTracker _frameworkLogTracker;
 	// tracks the extension registry and app launcher services
@@ -43,25 +43,27 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 	private ApplicationLauncher launcher;
 
 	public void start(BundleContext bc) {
-		context = bc;
+		_context = bc;
 		// doing simple get service here because we expect the PackageAdmin service to always be available
-		ServiceReference ref = context.getServiceReference(PackageAdmin.class.getName());
+		ServiceReference ref = bc.getServiceReference(PackageAdmin.class.getName());
 		if (ref != null)
-			packageAdmin = (PackageAdmin) context.getService(ref);
-		getDebugOptions(context);
-		processCommandLineArgs();
+			_packageAdmin = (PackageAdmin) bc.getService(ref);
+		_frameworkLogTracker = new ServiceTracker(bc, FrameworkLog.class.getName(), this);
+		_frameworkLogTracker.open();
+		getDebugOptions(bc);
+		processCommandLineArgs(bc);
 		// set the app manager context before starting the container
-		AppPersistence.start(context);
+		AppPersistence.start(bc);
 		// we must have an extension registry started before we can start the container
-		registryTracker = new ServiceTracker(context, IExtensionRegistry.class.getName(), this);
+		registryTracker = new ServiceTracker(bc, IExtensionRegistry.class.getName(), this);
 		registryTracker.open();
-		launcherTracker = new ServiceTracker(context, ApplicationLauncher.class.getName(), this);
+		launcherTracker = new ServiceTracker(bc, ApplicationLauncher.class.getName(), this);
 		launcherTracker.open();
-		_frameworkLogTracker = new ServiceTracker(context, FrameworkLog.class.getName(), null);
+		_frameworkLogTracker = new ServiceTracker(bc, FrameworkLog.class.getName(), null);
 		_frameworkLogTracker.open();
 		// start the app commands for the console
 		try {
-			AppCommands.create(context);
+			AppCommands.create(bc);
 		} catch (NoClassDefFoundError e) {
 			// catch incase CommandProvider is not available
 		}
@@ -70,7 +72,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 	public void stop(BundleContext bc) {
 		// stop the app commands for the console
 		try {
-			AppCommands.destroy(context);
+			AppCommands.destroy(bc);
 		} catch (NoClassDefFoundError e) {
 			// catch incase CommandProvider is not available
 		}
@@ -86,8 +88,8 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 			_frameworkLogTracker.close();
 			_frameworkLogTracker = null;
 		}
-		packageAdmin = null; // we do not unget PackageAdmin here; let the framework do it for us
-		context = null;
+		_packageAdmin = null; // we do not unget PackageAdmin here; let the framework do it for us
+		_context = null;
 	}
 
 	private void getDebugOptions(BundleContext context) {
@@ -99,41 +101,54 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 		context.ungetService(debugRef);
 	}
 
-	private void processCommandLineArgs() {
-		ServiceReference infoRef = context.getServiceReference(EnvironmentInfo.class.getName());
+	private void processCommandLineArgs(BundleContext bc) {
+		ServiceReference infoRef = bc.getServiceReference(EnvironmentInfo.class.getName());
 		if (infoRef == null)
 			return;
-		EnvironmentInfo envInfo = (EnvironmentInfo) context.getService(infoRef);
+		EnvironmentInfo envInfo = (EnvironmentInfo) bc.getService(infoRef);
 		if (envInfo == null)
 			return;
 		String[] args = envInfo.getNonFrameworkArgs();
-		context.ungetService(infoRef);
+		bc.ungetService(infoRef);
 		CommandLineArgs.processCommandLine(args);
 	}
 
 	public Object addingService(ServiceReference reference) {
-		if (container != null)
-			return null; // container is already started; do nothing
-		Object service = context.getService(reference);
+		BundleContext context = _context;
+		if (context == null)
+			return null; // really should never happen since we close the tracker before nulling out context
+		Object service = null;
 		boolean needed = false;
-		if (launcher == null && service instanceof ApplicationLauncher) {
-			launcher = (ApplicationLauncher) service;
-			needed = true;
-		}
-		if (registry == null && service instanceof IExtensionRegistry) {
-			registry = (IExtensionRegistry) service;
-			needed = true;
-		}
-		if (needed) {
-			if (registry != null && launcher != null) {
-				// create and start the app container
-				container = new EclipseAppContainer(context, registry, launcher);
-				container.start();
+		EclipseAppContainer startContainer = null;
+		synchronized (this) {
+			if (container != null)
+				return null; // container is already started; do nothing
+
+			service = context.getService(reference);
+			if (launcher == null && service instanceof ApplicationLauncher) {
+				launcher = (ApplicationLauncher) service;
+				needed = true;
 			}
+			if (registry == null && service instanceof IExtensionRegistry) {
+				registry = (IExtensionRegistry) service;
+				needed = true;
+			}
+			if (needed) {
+				if (registry != null && launcher != null) {
+					// create and start the app container
+					container = new EclipseAppContainer(context, registry, launcher);
+					startContainer = container;
+				}
+			}
+		}
+		// must not start the container while holding a lock because this will register additional services
+		if (startContainer != null) {
+			startContainer.start();
 			return service;
 		}
 		// this means there is more than one registry or launcher; we don't need a second one
-		context.ungetService(reference);
+		if (service != null)
+			context.ungetService(reference);
 		return null;
 	}
 
@@ -142,16 +157,21 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 	}
 
 	public void removedService(ServiceReference reference, Object service) {
-		// either the registry or launcher is going away
-		if (service == registry)
-			registry = null;
-		if (service == launcher)
-			launcher = null;
-		if (container == null)
-			return; // do nothing; we have not started the container yet
-		// stop the app container
-		container.stop();
-		container = null;
+		EclipseAppContainer currentContainer = null;
+		synchronized (this) {
+			// either the registry or launcher is going away
+			if (service == registry)
+				registry = null;
+			if (service == launcher)
+				launcher = null;
+			if (container == null)
+				return; // do nothing; we have not started the container yet
+			currentContainer = container;
+			container = null;
+		}
+		// stop the app container outside the sync block
+		if (currentContainer != null)
+			currentContainer.stop();
 	}
 
 	// helper used to protect callers from permission checks when opening service trackers
@@ -194,12 +214,14 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 		if (contributor instanceof RegistryContributor) {
 			try {
 				long id = Long.parseLong(((RegistryContributor) contributor).getActualId());
+				BundleContext context = _context;
 				if (context != null)
 					return context.getBundle(id);
 			} catch (NumberFormatException e) {
 				// try using the name of the contributor below
 			}
 		}
+		PackageAdmin packageAdmin = _packageAdmin;
 		if (packageAdmin == null)
 			return null;
 		Bundle[] bundles = packageAdmin.getBundles(contributor.getName(), null);
@@ -213,7 +235,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 	}
 
 	static BundleContext getContext() {
-		return context;
+		return _context;
 	}
 
 	public static EclipseAppContainer getContainer() {
