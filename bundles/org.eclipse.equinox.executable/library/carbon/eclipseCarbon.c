@@ -175,8 +175,8 @@ int showSplash( const _TCHAR* featureImage )
 	return 0;
 }
 
-long getSplashHandle() {
-	return (long)window;
+jlong getSplashHandle() {
+	return (jlong)window;
 }
 
 void takeDownSplash() {

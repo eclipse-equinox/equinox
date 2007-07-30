@@ -80,7 +80,8 @@ int readConfigFile( _TCHAR * config_file, int *argc, _TCHAR ***argv )
 	_TCHAR * arg;
 	FILE *file = NULL;
 	int maxArgs = 128;
-	int index, length;
+	int index;
+	size_t length;
 	
 	/* Open the config file as a text file 
 	 * Note that carriage return-linefeed combination \r\n are automatically

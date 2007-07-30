@@ -90,7 +90,11 @@ void initWindowSystem( int* pArgc, _TCHAR* argv[], int showSplash )
 
     icon = LoadIcon(module, MAKEINTRESOURCE(ECLIPSE_ICON));
     if (icon != NULL)
+#ifdef WIN64
+    	SetClassLongPtr(topWindow, GCLP_HICON, (LONG_PTR)icon);
+#else
     	SetClassLong(topWindow, GCL_HICON, (LONG)icon);
+#endif
 
 	initialized = 1;
 }

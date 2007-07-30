@@ -26,14 +26,23 @@ int createSharedData(_TCHAR** id, int size) {
 	if (mapHandle == 0) return -1;
 	if (id != NULL) {
 		*id = malloc(18 * sizeof(_TCHAR));
+#ifdef WIN64
+		_stprintf(*id, _T_ECLIPSE("%lx_%lx"), GetCurrentProcessId(), (DWORDLONG) mapHandle);
+#else
 		_stprintf(*id, _T_ECLIPSE("%lx_%lx"), GetCurrentProcessId(), (DWORD) mapHandle);
+#endif
 	}
 	return 0;
 }
 
 static int getShmID(const _TCHAR* id, LPDWORD processID, LPHANDLE handle) {
 	if (id != NULL && _tcslen(id) > 0) {
-		DWORD i1, i2;
+		DWORD i1;
+#ifdef WIN64
+		DWORDLONG i2;
+#else
+		DWORD i2;
+#endif
 		if (_stscanf(id, _T_ECLIPSE("%lx_%lx"), &i1, &i2) != 2) return -1;
 		*processID = (DWORD)i1;
 		*handle = (HANDLE)i2;
@@ -67,7 +76,7 @@ int getSharedData(_TCHAR* id, _TCHAR** data) {
 	sharedData = MapViewOfFile(handle, FILE_MAP_WRITE, 0, 0, 0);
 	if (sharedData == NULL) return -1;
 	if (data != NULL) {
-		int length = (_tcslen(sharedData) + 1) * sizeof(_TCHAR);
+		size_t length = (_tcslen(sharedData) + 1) * sizeof(_TCHAR);
 		newData = malloc(length);
 		memcpy(newData, sharedData, length);
 	}
@@ -99,7 +108,7 @@ int setSharedData(const _TCHAR* id, const _TCHAR* data) {
 	sharedData = MapViewOfFile(mapHandle, FILE_MAP_WRITE, 0, 0, 0);
 	if (sharedData == NULL) return -1;
 	if (data != NULL) {
-		int length = (_tcslen(data) + 1) * sizeof(_TCHAR);
+		size_t length = (_tcslen(data) + 1) * sizeof(_TCHAR);
 		memcpy(sharedData, data, length);
 	} else {
 		memset(sharedData, 0, sizeof(_TCHAR));

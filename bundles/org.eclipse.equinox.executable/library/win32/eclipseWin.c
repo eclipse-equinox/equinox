@@ -38,10 +38,10 @@ _TCHAR*  shippedVMDir  = _T("jre\\bin\\");
 static _TCHAR*  argVM[] = { NULL };
 
 /* Define local variables for running the JVM and detecting its exit. */
-static int     jvmProcess     = 0;
+static HANDLE  jvmProcess     = 0;
 static int     jvmExitCode    = 0;
-static int     jvmExitTimeout = 100;
-static int     jvmExitTimerId = 99;
+static UINT    jvmExitTimeout = 100;
+static UINT_PTR jvmExitTimerId = 99;
 
 static void CALLBACK  detectJvmExit( HWND hwnd, UINT uMsg, UINT id, DWORD dwTime );
 static _TCHAR* checkVMRegistryKey(HKEY jrekey, _TCHAR* subKeyName);
@@ -138,8 +138,8 @@ void dispatchMessages() {
 	}
 }
 
-long getSplashHandle() {
-	return (long)topWindow;
+jlong getSplashHandle() {
+	return (jlong)topWindow;
 }
 
 void takeDownSplash() {
@@ -208,7 +208,7 @@ void adjustSearchPath( _TCHAR* vmLib ){
  */
 static _TCHAR* findLib( _TCHAR* command ) {
 	int i, j;
-	int pathLength;	
+	size_t pathLength;	
 	struct _stat stats;
 	_TCHAR * path;				/* path to resulting jvm shared library */
 	_TCHAR * location;			/* points to begining of jvmLocations section of path */
@@ -229,7 +229,7 @@ static _TCHAR* findLib( _TCHAR* command ) {
 			return NULL; /* doesn't exist */
 		}
 		
-		pathLength = location - command;
+		pathLength = (size_t) (location - command);
 		path = malloc((pathLength + MAX_LOCATION_LENGTH + 1 + _tcslen(vmLibrary) + 1) * sizeof(_TCHAR));
 		_tcsncpy(path, command, pathLength);
 		location = &path[pathLength];
@@ -312,7 +312,8 @@ static _TCHAR* checkVMRegistryKey(HKEY jreKey, _TCHAR* subKeyName) {
 
 static _TCHAR* buildCommandLine( _TCHAR* program, _TCHAR* args[] )
 {
-	int   index, length = 0;
+	int   index;
+	size_t length = 0;
 	_TCHAR *commandLine, *ch, *space;
 
 	/*
@@ -366,7 +367,7 @@ int launchJavaVM( _TCHAR* args[] )
 {
 	MSG msg;
 	_TCHAR* commandLine;
-	jvmProcess = -1;
+	jvmProcess = 0;
 	commandLine = buildCommandLine(NULL, args);
 	
 	/*
@@ -379,22 +380,15 @@ int launchJavaVM( _TCHAR* args[] )
     GetStartupInfo(&si);
     if (CreateProcess(NULL, commandLine, NULL, NULL, TRUE, 0, NULL, NULL, &si, &pi)) {
     	CloseHandle( pi.hThread );
-    	jvmProcess = (int)pi.hProcess;
-    }    
+    	jvmProcess = pi.hProcess;
+    } else {
+    	jvmExitCode = errno;
+    }
 	}
 
 	free( commandLine );
 
-	/* If the child process (JVM) would not start */
-	if (jvmProcess == -1)
-	{
-		/* Return the error number. */
-		jvmExitCode = errno;
-		jvmProcess  = 0;
-	}
-
-	/* else */
-	else
+	if (jvmProcess > 0)
 	{
         /* Set a timer to detect JVM process termination. */
         SetTimer( topWindow, jvmExitTimerId, jvmExitTimeout, detectJvmExit );

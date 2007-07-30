@@ -120,7 +120,7 @@ void dispatchMessages() {
 	while(g_main_context_iteration(0,0) != 0) {}
 }
 
-long getSplashHandle() {
+jlong getSplashHandle() {
 	return splashHandle;
 }
 

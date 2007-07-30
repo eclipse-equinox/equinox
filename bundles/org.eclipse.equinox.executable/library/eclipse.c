@@ -642,7 +642,8 @@ static void parseArgs( int* pArgc, _TCHAR* argv[] )
  * Parse the data into a list of arguments separated by \n.
  */
 static _TCHAR** parseArgList( _TCHAR* data ) {
-    int totalArgs = 0, dst = 0, length;
+    int totalArgs = 0, dst = 0;
+    size_t length;
     _TCHAR *ch1, *ch2, **execArg;
     length = _tcslen( data );
     ch1 = ch2 = data;
@@ -843,7 +844,7 @@ static void getVMCommand( int argc, _TCHAR* argv[], _TCHAR **vmArgv[], _TCHAR **
 static _TCHAR*  formatVmCommandMsg( _TCHAR* args[], _TCHAR* vmArgs[], _TCHAR* progArgs[] )
 {
 	int   index;
-    int   length = 0;
+    size_t length = 0;
     _TCHAR** list;
     _TCHAR* ch;
     _TCHAR* message;
@@ -961,7 +962,7 @@ static _TCHAR* findSplash(_TCHAR* splashArg) {
 	struct _stat stats;
 	_TCHAR *ch;
 	_TCHAR *path, *prefix;
-	int length;
+	size_t length;
 	
 	if (splashArg == NULL)
 		return NULL;
@@ -1031,7 +1032,7 @@ static _TCHAR* findStartupJar(){
 	_TCHAR * file, *ch;
 	_TCHAR * pluginsPath;
 	struct _stat stats;
-	int pathLength, progLength;
+	size_t pathLength, progLength;
 	
 	if( startupArg != NULL ) {
 		/* startup jar was specified on the command line */
@@ -1121,14 +1122,17 @@ static _TCHAR ** getRelaunchCommand( _TCHAR **vmCommand  )
 
 #ifdef _WIN32
 static void createConsole() {
-	long stdHandle;
+#ifndef WIN64
+#define intptr_t long
+#endif
+	intptr_t stdHandle;
 	int conHandle;
 	FILE *fp;
 	
 	AllocConsole();
 	
 	/* redirect stdout */
-	stdHandle = (long)GetStdHandle(STD_OUTPUT_HANDLE);
+	stdHandle = (intptr_t) GetStdHandle(STD_OUTPUT_HANDLE);
 	conHandle = _open_osfhandle(stdHandle, _O_TEXT);
 	if (conHandle != -1) {
 		fp = _fdopen(conHandle, "w");
@@ -1136,7 +1140,7 @@ static void createConsole() {
 	}
 	
 	/* redirect stdin */
-	stdHandle = (long)GetStdHandle(STD_INPUT_HANDLE);
+	stdHandle = (intptr_t) GetStdHandle(STD_INPUT_HANDLE);
 	conHandle = _open_osfhandle(stdHandle, _O_TEXT);
 	if (conHandle != -1) {
 		fp = _fdopen(conHandle, "r");
@@ -1144,7 +1148,7 @@ static void createConsole() {
 	}
 	
 	/* stderr */
-	stdHandle = (long)GetStdHandle(STD_ERROR_HANDLE);
+	stdHandle = (intptr_t) GetStdHandle(STD_ERROR_HANDLE);
 	conHandle = _open_osfhandle(stdHandle, _O_TEXT);
 	if (conHandle != -1) {
 		fp = _fdopen(conHandle, "r");
@@ -1168,7 +1172,7 @@ static int determineVM(_TCHAR** msg) {
 	
 	/* vmName is passed in on command line with -vm */
     if (vmName != NULL) {
-    	int length = _tcslen(vmName);
+    	size_t length = _tcslen(vmName);
     	/* remove the trailing separator */
     	if (vmName[length - 1] == _T_ECLIPSE('/') || vmName[length - 1] == _T_ECLIPSE('\\')) {
     		vmName[length - 1] = 0;

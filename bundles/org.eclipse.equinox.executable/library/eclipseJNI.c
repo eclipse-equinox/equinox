@@ -52,13 +52,13 @@ static JNIEnv *env = 0;
 #if (!defined(UNICODE) || defined(VISTA))
 void (* exitDataHook)(JNIEnv *env, jstring id, jstring s);
 void (* dispatchHook)();
-long (* splashHandleHook)();
+jlong (* splashHandleHook)();
 void (* showSplashHook)(JNIEnv *env, jstring s);
 void (* takeDownHook)();
 #else
 extern void (* exitDataHook)(JNIEnv *env, jstring id, jstring s);
 extern void (* dispatchHook)();
-extern long (* splashHandleHook)();
+extern jlong (* splashHandleHook)();
 extern void (* showSplashHook)(JNIEnv *env, jstring s);
 extern void (* takeDownHook)();
 #endif
@@ -140,7 +140,7 @@ static void splash(JNIEnv *env, jstring s) {
 void setExitData(JNIEnv *env, jstring id, jstring s){
 	const _TCHAR* data = NULL;
 	const _TCHAR* sharedId = NULL;
-	int length;
+	size_t length;
 	 
 	if(s != NULL) {
 		length = (*env)->GetStringLength(env, s);
@@ -181,7 +181,7 @@ static const _TCHAR * JNI_GetStringChars(JNIEnv *env, jstring str) {
 		if (getBytesMethod != NULL) {
 			jbyteArray bytes = (*env)->CallObjectMethod(env, str, getBytesMethod);
 			if (!(*env)->ExceptionOccurred(env)) {
-				jint length = (*env)->GetArrayLength(env, bytes);
+				jsize length = (*env)->GetArrayLength(env, bytes);
 				buffer = malloc( (length + 1) * sizeof(_TCHAR*));
 				(*env)->GetByteArrayRegion(env, bytes, 0, length, (jbyte*)buffer);
 				buffer[length] = 0;
@@ -210,7 +210,7 @@ static void JNI_ReleaseStringChars(JNIEnv *env, jstring s, const _TCHAR* data) {
 static jstring newJavaString(JNIEnv *env, _TCHAR * str)
 {
 	jstring newString = NULL;
-	int length = _tcslen(str);
+	size_t length = _tcslen(str);
 	
 #ifdef UNICODE
 	newString = (*env)->NewString(env, str, length);

@@ -197,9 +197,9 @@ void dispatchMessages() {
 	Globals::frame = nullptr;
 }
 
-long getSplashHandle() {
+jlong getSplashHandle() {
 	Window^ window = Globals::window;
-	return (long)(int)GCHandle::ToIntPtr(GCHandle::Alloc(window));
+	return (jlong)(int)GCHandle::ToIntPtr(GCHandle::Alloc(window));
 }
 
 void takeDownSplash() {

@@ -13,6 +13,7 @@
 #ifndef ECLIPSE_OS_H
 #define ECLIPSE_OS_H
 
+#include <jni.h>
 #include "eclipseUnicode.h"
 
 #ifdef UNICODE
@@ -114,7 +115,7 @@ extern _TCHAR * findVMLibrary( _TCHAR * command );
 
 extern void dispatchMessages();
 
-extern long getSplashHandle();
+extern jlong getSplashHandle();
 
 extern void takeDownSplash();
 

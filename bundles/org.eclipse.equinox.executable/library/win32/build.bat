@@ -31,34 +31,44 @@
 @rem want this to be done by this script.
 @rem 
 @rem ******
-@echo off
 
-IF NOT "%JAVA_HOME%"=="" GOTO MSVC
-rem *****
-rem Javah
-rem *****
-set JAVA_HOME=j:\teamswt\swt-builddir\ibm-jdk1.4.1
-set path=%JAVA_HOME%;%path%
 
-:MSVC
+IF x.%1==x.x86_64 GOTO X86_64
+
+:X86
+IF x.%JAVA_HOME%==x. set JAVA_HOME=C:\Dev\Java\IBM_1.5.0
+set javaHome=%JAVA_HOME%
 if not "%MSVC_HOME%" == "" goto MAKE
 set MSVC_HOME=k:\dev\products\msvc60\vc98
 call %MSVC_HOME%\bin\vcvars32.bat
 if not "%mssdk%" == "" goto MAKE
 set mssdk=K:\dev\PRODUCTS\PLATSDK\feb2003
 call %mssdk%\setenv.bat
+IF x.%1==x.x86 shift
+set defaultOSArch=x86
+set makefile=make_win32.mak
+GOTO MAKE
+
+:X86_64
+shift
+set defaultOSArch=x86_64
+IF x.%JAVA_HOME%==x. set JAVA_HOME=C:\Dev\Java\ibm-sdk-n142p-win64-x86
+IF "x.%mssdk%" == "x."   set mssdk="C:\Program Files\MS_SDK_2003_R2"
+echo %mssdk%
+set javaHome=%JAVA_HOME%
+set makefile=make_win64.mak
+call %mssdk%\setenv /X64 /RETAIL
+GOTO MAKE
 
 :MAKE
-
+echo Making!1
 rem --------------------------
 rem Define default values for environment variables used in the makefiles.
 rem --------------------------
 set programOutput=eclipse.exe
 set programLibrary=eclipse.dll
 set defaultOS=win32
-set defaultOSArch=x86
 set defaultWS=win32
-set makefile=make_win32.mak
 set OS=Windows
 
 rem --------------------------

@@ -146,8 +146,8 @@ _TCHAR* checkPath( _TCHAR* path, _TCHAR* programDir, int reverseOrder )
 _TCHAR * checkPathList( _TCHAR* pathList, _TCHAR* programDir, int reverseOrder) {
 	_TCHAR * c1, *c2;
 	_TCHAR * checked, *result;
-	int checkedLength = 0, resultLength = 0;
-	int bufferLength = _tcslen(pathList);
+	size_t checkedLength = 0, resultLength = 0;
+	size_t bufferLength = _tcslen(pathList);
 	
 	result = malloc(bufferLength * sizeof(_TCHAR));
 	c1 = pathList;
@@ -183,7 +183,8 @@ _TCHAR * checkPathList( _TCHAR* pathList, _TCHAR* programDir, int reverseOrder) 
 
 _TCHAR * concatStrings(_TCHAR** strs) {
 	_TCHAR * result;
-	int i = -1, length = 0;
+	int i = -1;
+	size_t length = 0;
 	/* first count how large a buffer we need */
 	while( strs[++i] != NULL) {
 		length += _tcslen(strs[i]);

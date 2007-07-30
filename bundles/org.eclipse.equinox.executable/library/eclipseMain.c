@@ -365,8 +365,8 @@ static _TCHAR* findLibrary(_TCHAR* library, _TCHAR* program)
 	_TCHAR* fragment;
 	_TCHAR* result;
 	_TCHAR* dot = _T_ECLIPSE(".");
-	int progLength, pathLength;
-	int fragmentLength;
+	size_t progLength, pathLength;
+	size_t fragmentLength;
 	struct _stat stats;
 	
 	if (library != NULL) {

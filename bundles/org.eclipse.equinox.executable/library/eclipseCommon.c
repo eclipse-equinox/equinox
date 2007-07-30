@@ -47,7 +47,7 @@ _TCHAR* wsArg        = _T_ECLIPSE(DEFAULT_WS);	/* the SWT supported GUI to be us
 #ifndef _WIN32
 static _TCHAR* filterPrefix = NULL;  /* prefix for the find files filter */
 #endif
-static int     prefixLength = 0;
+static size_t     prefixLength = 0;
 
 typedef struct {
 	int segment[3];
@@ -181,7 +181,7 @@ int setenv (const char *name, const char *value, int replace)
 _TCHAR* findCommand( _TCHAR* command )
 {
     _TCHAR*  cmdPath;
-    int    length;
+    size_t   length;
     _TCHAR*  ch;
     _TCHAR*  dir;
     _TCHAR*  path;
@@ -250,7 +250,8 @@ _TCHAR* findCommand( _TCHAR* command )
                     /* Remove quotes */
 	                if (_tcschr( cmdPath, _T_ECLIPSE('"') ) != NULL)
 	                {
-	                    int i = 0, j = 0, c;
+	                    int i = 0, j = 0;
+	                    _TCHAR c;
 	                    length = _tcslen( cmdPath );
 	                    while (i < length) {
 	                        c = cmdPath[ i++ ];
@@ -358,7 +359,7 @@ static int filter(const struct dirent *dir) {
 _TCHAR* findFile( _TCHAR* path, _TCHAR* prefix)
 {
 	struct _stat stats;
-	int pathLength;
+	size_t pathLength;
 	_TCHAR* candidate = NULL;
 	_TCHAR* result = NULL;
 	

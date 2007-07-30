@@ -196,8 +196,8 @@ char** getArgVM( char* vm )
 }
 
 
-long getSplashHandle() {
-	return (long)shellHandle;
+jlong getSplashHandle() {
+	return (jlong)shellHandle;
 }
 
 void dispatchMessages() {
