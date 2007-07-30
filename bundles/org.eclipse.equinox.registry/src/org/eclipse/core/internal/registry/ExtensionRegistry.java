@@ -18,8 +18,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.eclipse.core.internal.registry.spi.ConfigurationElementAttribute;
 import org.eclipse.core.internal.registry.spi.ConfigurationElementDescription;
 import org.eclipse.core.runtime.*;
-import org.eclipse.core.runtime.spi.RegistryContributor;
-import org.eclipse.core.runtime.spi.RegistryStrategy;
+import org.eclipse.core.runtime.spi.*;
 import org.eclipse.osgi.storagemanager.StorageManager;
 import org.eclipse.osgi.util.NLS;
 import org.xml.sax.InputSource;
@@ -28,7 +27,7 @@ import org.xml.sax.SAXException;
 /**
  * An implementation for the extension registry API.
  */
-public class ExtensionRegistry implements IExtensionRegistry {
+public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionRegistry {
 
 	protected class ListenerInfo {
 		public String filter;
@@ -482,6 +481,15 @@ public class ExtensionRegistry implements IExtensionRegistry {
 		remove(removedContributorId);
 		if (timestamp != 0)
 			aggregatedTimestamp.remove(timestamp);
+	}
+
+	public void removeContributor(IContributor contributor, Object key) {
+		if (!(contributor instanceof RegistryContributor))
+			throw new IllegalArgumentException(); // should never happen
+		if (!checkReadWriteAccess(key, true))
+			throw new IllegalArgumentException("Unauthorized access to the ExtensionRegistry.removeContributor() method. Check if proper access token is supplied."); //$NON-NLS-1$
+		String contributorId = ((RegistryContributor) contributor).getActualId();
+		remove(contributorId);
 	}
 
 	/**
