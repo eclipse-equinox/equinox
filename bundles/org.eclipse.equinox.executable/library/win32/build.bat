@@ -31,7 +31,7 @@
 @rem want this to be done by this script.
 @rem 
 @rem ******
-
+@echo off
 
 IF x.%1==x.x86_64 GOTO X86_64
 
@@ -60,8 +60,7 @@ set makefile=make_win64.mak
 call %mssdk%\setenv /X64 /RETAIL
 GOTO MAKE
 
-:MAKE
-echo Making!1
+:MAKE 
 rem --------------------------
 rem Define default values for environment variables used in the makefiles.
 rem --------------------------
