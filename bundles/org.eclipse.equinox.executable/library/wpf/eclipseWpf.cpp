@@ -260,7 +260,7 @@ void adjustSearchPath( _TCHAR* vmLib ){
 
 	if (needAdjust) {
 		c = concatStrings(paths);
-		newPath = malloc((_tcslen(c) + length + 1) * sizeof(_TCHAR));
+		newPath = (_TCHAR*)malloc((_tcslen(c) + length + 1) * sizeof(_TCHAR));
 		_stprintf(newPath, _T_ECLIPSE("%s%s"), c, path);
 		SetEnvironmentVariable( _T_ECLIPSE("PATH"), newPath);
 		free(c);
