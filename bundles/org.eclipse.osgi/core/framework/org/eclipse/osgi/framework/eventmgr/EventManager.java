@@ -222,6 +222,8 @@ public class EventManager {
 	 */
 
 	static class EventThread extends Thread {
+		private static int nextThreadNumber;
+
 		/**
 		 * Queued is a nested top-level (non-member) class. This class
 		 * represents the items which are placed on the asynch dispatch queue.
@@ -268,12 +270,16 @@ public class EventManager {
 		 * @param threadName Name of the EventThread 
 		 */
 		EventThread(ThreadGroup threadGroup, String threadName) {
-			super(threadGroup, threadName);
+			super(threadGroup, threadName == null ? getNextName() : threadName);
 			running = true;
 			head = null;
 			tail = null;
 
 			setDaemon(true); /* Mark thread as daemon thread */
+		}
+
+		private static synchronized String getNextName() {
+			return "EventThread-" + nextThreadNumber++; //$NON-NLS-1$
 		}
 
 		/**
