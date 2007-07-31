@@ -279,7 +279,7 @@ public class EventManager {
 		}
 
 		private static synchronized String getNextName() {
-			return "EventThread-" + nextThreadNumber++; //$NON-NLS-1$
+			return "EventManagerThread-" + nextThreadNumber++; //$NON-NLS-1$
 		}
 
 		/**
