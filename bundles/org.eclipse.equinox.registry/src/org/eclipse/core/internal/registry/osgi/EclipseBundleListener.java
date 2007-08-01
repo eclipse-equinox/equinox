@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2006 IBM Corporation and others.
+ * Copyright (c) 2003, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -138,10 +138,10 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 	}
 
 	private void addBundle(Bundle bundle) {
-		String contributorId = Long.toString(bundle.getBundleId());
 		// if the given bundle already exists in the registry then return.
 		// note that this does not work for update cases.
-		if (registry.hasContribution(contributorId))
+		IContributor contributor = ContributorFactoryOSGi.createContributor(bundle);
+		if (registry.hasContributor(contributor))
 			return;
 		URL pluginManifest = getExtensionURL(bundle, registry.debug());
 		if (pluginManifest == null)
@@ -164,15 +164,7 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 		long timestamp = 0;
 		if (strategy.checkContributionsTimestamp())
 			timestamp = strategy.getExtendedTimestamp(bundle, pluginManifest);
-		IContributor contributor = ContributorFactoryOSGi.createContributor(bundle);
 		registry.addContribution(is, contributor, true, pluginManifest.getPath(), translationBundle, token, timestamp);
-
-		// bug 70941
-		// need to ensure we can find resource bundles from fragments
-		// The code below no longer seems necessary as all runtime plugins are installed
-		// before the corresponding Message classes are instantiated. 
-		//		if (RuntimeUtils.PI_RUNTIME.equals(bundleModel.getNamespace()))
-		//			Messages.reloadMessages();
 	}
 
 	private static boolean isSingleton(Bundle bundle) {

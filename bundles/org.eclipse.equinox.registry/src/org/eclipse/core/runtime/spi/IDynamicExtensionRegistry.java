@@ -38,12 +38,20 @@ public interface IDynamicExtensionRegistry {
 	/**
 	 * Removes all extensions and extension points provided by the contributor.
 	 * <p>
-	 * This method is an access controlled method. At present this method requires
-	 * master token to be passed as an argument. Access tokens are specified when the registry 
-	 * is constructed. Access tokens are controlled by registry implementers.
+	 * This method is an access controlled method. Access tokens are specified when the registry 
+	 * is constructed by the registry implementers.
 	 * </p>
 	 * @see org.eclipse.core.runtime.RegistryFactory#createRegistry(RegistryStrategy, Object, Object)
+	 * @param contributor the contributor to be removed
+	 * @param key registry access key
 	 */
 	public void removeContributor(IContributor contributor, Object key);
+
+	/**
+	 * Finds out if registry has the contributor. 
+	 * @param contributor registry contributor
+	 * @return true if the registry has this contributor; false otherwise
+	 */
+	public boolean hasContributor(IContributor contributor);
 
 }
