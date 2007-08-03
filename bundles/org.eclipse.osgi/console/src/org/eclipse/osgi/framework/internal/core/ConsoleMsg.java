@@ -34,7 +34,6 @@ public class ConsoleMsg extends NLS {
 	public static String CONSOLE_TOO_MUCH_INVALID_INPUT;
 	public static String CONSOLE_MORE_ENTER_LINES;
 
-	public static String CONSOLE_HELP_VALID_COMMANDS_HEADER;
 	public static String CONSOLE_LISTENING_ON_PORT;
 	public static String CONSOLE_PROMPT;
 

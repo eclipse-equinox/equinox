@@ -29,12 +29,12 @@ public class EclipseCommandProvider implements CommandProvider {
 
 	public String getHelp() {
 		StringBuffer help = new StringBuffer(512);
-		help.append(EclipseAdaptorMsg.NEW_LINE);
 		help.append("---"); //$NON-NLS-1$
 		help.append(EclipseAdaptorMsg.ECLIPSE_CONSOLE_COMMANDS_HEADER);
 		help.append("---"); //$NON-NLS-1$
 		help.append(EclipseAdaptorMsg.NEW_LINE);
 		help.append("\tdiag - " + EclipseAdaptorMsg.ECLIPSE_CONSOLE_HELP_DIAG_COMMAND_DESCRIPTION);//$NON-NLS-1$
+		help.append(EclipseAdaptorMsg.NEW_LINE);
 		return help.toString();
 	}
 

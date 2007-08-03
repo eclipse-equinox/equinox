@@ -393,7 +393,6 @@ public class FrameworkCommandInterpreter implements CommandInterpreter {
 	 */
 	public String getHelp() {
 		StringBuffer help = new StringBuffer(256);
-		help.append(newline);
 		help.append(ConsoleMsg.CONSOLE_HELP_CONTROLLING_CONSOLE_HEADING);
 		help.append(newline);
 		help.append(tab);
@@ -405,6 +404,7 @@ public class FrameworkCommandInterpreter implements CommandInterpreter {
 			help.append("disconnect - "); //$NON-NLS-1$
 			help.append(ConsoleMsg.CONSOLE_HELP_DISCONNECT);
 		}
+		help.append(newline);
 		return help.toString();
 	}
 

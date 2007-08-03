@@ -138,9 +138,6 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 	 */
 	public String getHelp() {
 		StringBuffer help = new StringBuffer(1024);
-		help.append(newline);
-		help.append(ConsoleMsg.CONSOLE_HELP_VALID_COMMANDS_HEADER);
-		help.append(newline);
 		addHeader(ConsoleMsg.CONSOLE_HELP_CONTROLLING_FRAMEWORK_HEADER, help);
 		addCommand("launch", ConsoleMsg.CONSOLE_HELP_LAUNCH_COMMAND_DESCRIPTION, help); //$NON-NLS-1$ 
 		addCommand("shutdown", ConsoleMsg.CONSOLE_HELP_SHUTDOWN_COMMAND_DESCRIPTION, help); //$NON-NLS-1$ 
