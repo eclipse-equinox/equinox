@@ -12,6 +12,9 @@
 package org.eclipse.osgi.internal.baseadaptor;
 
 import java.io.*;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -218,4 +221,22 @@ public class AdaptorUtil {
 		return true;
 	}
 
+	public static URL encodeFileURL(File file) throws MalformedURLException {
+		try {
+			Method toURI = File.class.getMethod("toURI", null); //$NON-NLS-1$
+			Object uri = toURI.invoke(file, null);
+			Method toURL = uri.getClass().getMethod("toURL", null); //$NON-NLS-1$
+			return (URL) toURL.invoke(uri, null);
+		} catch (NoSuchMethodException e) {
+			// use toURL.
+		} catch (IllegalAccessException e) {
+			// use toURL.
+		} catch (InvocationTargetException e) {
+			if (e.getTargetException() instanceof MalformedURLException)
+				throw (MalformedURLException) e.getTargetException();
+			// use toURL
+		}
+		// TODO should we do this by hand ourselves?
+		return file.toURL();
+	}
 }

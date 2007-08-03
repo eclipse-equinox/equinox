@@ -925,7 +925,7 @@ public class BaseStorage implements SynchronousBundleListener {
 				continue;
 			Throwable exceptionLog = null;
 			try {
-				addURLMethod.invoke(cl, new Object[] {files[i].toURL()});
+				addURLMethod.invoke(cl, new Object[] {AdaptorUtil.encodeFileURL(files[i])});
 			} catch (InvocationTargetException e) {
 				exceptionLog = e.getTargetException();
 			} catch (Throwable t) {
