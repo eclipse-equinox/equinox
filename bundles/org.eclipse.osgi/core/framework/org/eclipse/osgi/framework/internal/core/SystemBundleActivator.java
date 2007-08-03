@@ -57,6 +57,8 @@ public class SystemBundleActivator implements BundleActivator {
 		// this is done after the adaptor.frameworkStart has been called
 		// this should be the first time the resolver State is accessed
 		framework.packageAdmin.setResolvedBundles(bundle);
+		// reinitialize the system bundles localization to take into account system bundle fragments
+		framework.systemBundle.manifestLocalization = null;
 	}
 
 	public void stop(BundleContext context) throws Exception {
