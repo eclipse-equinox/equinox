@@ -1853,9 +1853,9 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 	public void _getprop(CommandInterpreter ci) throws Exception {
 		Properties allProperties = FrameworkProperties.getProperties();
 		String filter = ci.nextArgument();
-		Enumeration propertyNames = allProperties.keys();
-		while (propertyNames.hasMoreElements()) {
-			String prop = (String) propertyNames.nextElement();
+		Iterator propertyNames = new TreeSet(allProperties.keySet()).iterator();
+		while (propertyNames.hasNext()) {
+			String prop = (String) propertyNames.next();
 			if (filter == null || prop.startsWith(filter)) {
 				ci.println(prop + '=' + allProperties.getProperty(prop));
 			}
