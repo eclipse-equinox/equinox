@@ -114,8 +114,6 @@ public class FrameworkConsole implements Runnable {
 
 	/**
 	 *  Open a socket and create input and output streams
-	 *
-	 * @param port number to listen on
 	 */
 	private void getSocketStream() {
 		try {
@@ -366,8 +364,6 @@ public class FrameworkConsole implements Runnable {
 
 	/**
 	 * Stops the console so the thread can be GC'ed
-	 * @throws IOException 
-	 *
 	 */
 	public synchronized void shutdown() {
 		shutdown = true;

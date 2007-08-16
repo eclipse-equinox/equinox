@@ -19,7 +19,6 @@ import java.util.*;
  * Implementation of a sort algorithm for computing the node order. This
  * algorithm handles cycles in the node reference graph in a reasonable way.
  * 
- * @see org.eclipse.core.runtime.internal.adaptor.BundleStopper#stopBundles()
  * @since 3.0
  */
 public class ComputeNodeOrder {
@@ -443,7 +442,7 @@ public class ComputeNodeOrder {
 	}
 
 	/**
-	 * Sorts the given list of probject in a manner that honors the given
+	 * Sorts the given list of projects in a manner that honors the given
 	 * project reference relationships. That is, if project A references project
 	 * B, then the resulting order will list B before A if possible. For graphs
 	 * that do not contain cycles, the result is the same as a conventional
@@ -462,7 +461,7 @@ public class ComputeNodeOrder {
 	 * algorithm is in section 23.5.
 	 * </p>
 	 * 
-	 * @param projects a list of projects (element type:
+	 * @param objects a list of projects (element type:
 	 * <code>IProject</code>)
 	 * @param references a list of project references [A,B] meaning that A
 	 * references B (element type: <code>IProject[]</code>)

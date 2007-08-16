@@ -289,7 +289,7 @@ public class BundleFragment extends AbstractBundle {
 
 	/**
 	 * Adds a host bundle for this fragment.
-	 * @param value the BundleHost to add to the set of host bundles
+	 * @param host the BundleHost to add to the set of host bundles
 	 */
 	protected boolean addHost(BundleLoaderProxy host) {
 		if (host == null) 

@@ -1763,9 +1763,9 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 	}
 
 	/**
-	 *  Given a state value, return the string describing that state.
+	 *  Given a bundle, return the string describing that bundle's state.
 	 *
-	 *  @param state An int containing a state value
+	 *  @param bundle A bundle to return the state of
 	 *  @return A String describing the state
 	 */
 	protected String getStateName(Bundle bundle) {

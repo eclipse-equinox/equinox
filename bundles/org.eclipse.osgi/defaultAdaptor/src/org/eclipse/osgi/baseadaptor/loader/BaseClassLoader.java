@@ -49,21 +49,21 @@ public interface BaseClassLoader extends BundleClassLoader {
 	Class defineClass(String name, byte[] classbytes, ClasspathEntry classpathEntry, BundleEntry entry);
 
 	/**
-	 * A public version of the {@link ClassLoader#findLoadedClass(java.lang.String)} method.
+	 * A public version of the ClassLoader.findLoadedClass(java.lang.String) method.
 	 * @param classname the class name to find.
 	 * @return a loaded class
 	 */
 	Class publicFindLoaded(String classname);
 
 	/**
-	 * A public version of the {@link ClassLoader#getPackage(java.lang.String)} method.
+	 * A public version of the ClassLoader#getPackage(java.lang.String) method.
 	 * @param pkgname the package name to get.
 	 * @return the package or null if it does not exist
 	 */
 	Object publicGetPackage(String pkgname);
 
 	/**
-	 * A public version of the {@link ClassLoader#definePackage(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.net.URL)} method.
+	 * A public version of the ClassLoader#definePackage(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.net.URL) method.
 	 * @return a defined Package
 	 */
 	Object publicDefinePackage(String name, String specTitle, String specVersion, String specVendor, String implTitle, String implVersion, String implVendor, URL sealBase);

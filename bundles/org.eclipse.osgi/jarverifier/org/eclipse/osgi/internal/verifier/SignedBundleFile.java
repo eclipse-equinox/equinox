@@ -284,7 +284,6 @@ public class SignedBundleFile extends BundleFile implements CertificateVerifier,
 	 * 				   "MD5-Digest: [base64 encoded MD5 digest data]"
 	 * 				   "SHA1-Digest: [base64 encoded SHA1 digest dat]"
 	 * 
-	 * @param	manifestEntry	a entry contains either one or multiple digest lines
 	 * @param	desireDigestAlg	a string representing the desire digest value to be returned if there are
 	 * 							multiple digest lines.
 	 * 							If this value is null, return whatever digest value is in the entry.
@@ -437,7 +436,7 @@ public class SignedBundleFile extends BundleFile implements CertificateVerifier,
 	 * before using them from the bundle file.
 	 * 
 	 * @param bundleFile the BundleFile to extract elements from.
-	 * @param the support flags for this signed bundle
+	 * @param supportFlags the support flags for this signed bundle
 	 * @throws IOException
 	 */
 	void setBundleFile(BundleFile bundleFile, int supportFlags) throws IOException {

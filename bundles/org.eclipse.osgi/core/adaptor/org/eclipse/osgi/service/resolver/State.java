@@ -334,7 +334,7 @@ public interface State {
 
 	/**
 	 * Returns all exported packages in this state, according to the OSGi rules for resolution. 
-	 * @see org.osgi.service.packageadmin.PackageAdmin#getExportedPackages(Bundle)
+	 * @see org.osgi.service.packageadmin.PackageAdmin#getExportedPackages(org.osgi.framework.Bundle)
 	 */
 	public ExportPackageDescription[] getExportedPackages();
 

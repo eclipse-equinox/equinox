@@ -44,7 +44,7 @@ public interface StateObjectFactory {
 	/**
 	 * Creates an empty state with or without a resolver.
 	 * 
-	 * @param createResolver true if the created state should be initialized with a resolver.
+	 * @param resolver true if the created state should be initialized with a resolver.
 	 * @return the created state
 	 * @since 3.2
 	 */
