@@ -27,9 +27,9 @@ import org.eclipse.core.runtime.IPath;
  * </p>
  * <p>
  * Note about product preference customization:
- * Clients who define their own {@link org.eclipse.core.runtime.IProduct} 
+ * Clients who define their own org.eclipse.core.runtime.IProduct 
  * are able to specify a product key of "<code>preferenceCustomization</code>".
- * (defined as a constant in {@link org.eclipse.ui.branding.IProductConstants})
+ * (defined as a constant in org.eclipse.ui.branding.IProductConstants)
  * Its value is either a {@link java.net.URL} or a file-system path to a 
  * file whose contents are used to customize default preferences. 
  * </p>

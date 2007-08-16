@@ -34,7 +34,7 @@ public final class RuntimeLog {
 	private static ArrayList queuedMessages = new ArrayList(5);
 
 	/**
-	 * @see Platform#addLogListener(ILogListener)
+	 * See org.eclipse.core.runtime.Platform#addLogListener(ILogListener)
 	 */
 	public static void addLogListener(ILogListener listener) {
 		synchronized (logListeners) {
@@ -60,7 +60,7 @@ public final class RuntimeLog {
 	}
 
 	/**
-	 * @see Platform#removeLogListener(ILogListener)
+	 * See org.eclipse.core.runtime.Platform#removeLogListener(ILogListener)
 	 */
 	public static void removeLogListener(ILogListener listener) {
 		synchronized (logListeners) {

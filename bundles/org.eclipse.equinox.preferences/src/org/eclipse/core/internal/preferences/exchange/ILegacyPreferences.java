@@ -18,12 +18,11 @@ package org.eclipse.core.internal.preferences.exchange;
  */
 public interface ILegacyPreferences {
 	/**
-	 * The method tries to initialize the preferences using the legacy Plugin method.
+	 * The method tries to initialize the preferences using the legacy 
+	 * Plugin#initializeDefaultPluginPreferences method.
 	 * 
 	 * @param object - plugin to initialize
 	 * @param name - ID of the plugin to be initialized
-	 * 
-	 * @see Plugin#initializeDefaultPluginPreferences
 	 */
 	public Object init(Object object, String name);
 }

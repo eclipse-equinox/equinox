@@ -78,8 +78,8 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	 * Sets new cache file manager. If existing file manager was owned by the registry,
 	 * closes it.
 	 *  
-	 * @param newFileManager - new cache file manager
-	 * @param registryOwnsManager - true: life cycle of the file manager is controlled by the registry
+	 * @param cacheBase the base location for the registry cache
+	 * @param isCacheReadOnly whether the file cache is read only
 	 */
 	protected void setFileManager(File cacheBase, boolean isCacheReadOnly) {
 		if (cacheStorageManager != null)

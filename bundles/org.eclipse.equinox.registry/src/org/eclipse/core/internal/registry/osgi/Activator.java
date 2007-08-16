@@ -71,8 +71,6 @@ public class Activator implements BundleActivator {
 	 * Look for the no registry cache flag and check to see if we should NOT be lazily loading plug-in 
 	 * definitions from the registry cache file.
 	 * NOTE: this command line processing is only performed in the presence of OSGi
-	 * 
-	 * @param args - command line arguments
 	 */
 	private void processCommandLine() {
 		// use a string here instead of the class to prevent class loading.

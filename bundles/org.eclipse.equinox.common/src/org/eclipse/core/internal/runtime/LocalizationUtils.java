@@ -23,9 +23,9 @@ public class LocalizationUtils {
 	 * use the NLS-based translation routine. If it falls, the method returns the original
 	 * non-translated key.
 	 * 
-	 * @param key case-sensetive name of the filed in the translation file representing 
+	 * @param key case-sensitive name of the filed in the translation file representing 
 	 * the string to be translated
-	 * @return
+	 * @return The localized message or the non-translated key
 	 */
 	static public String safeLocalize(String key) {
 		try {

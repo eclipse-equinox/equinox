@@ -51,8 +51,6 @@ public class OSGiPreferencesServiceImpl implements PreferencesService {
 		/**
 		 * If pathName is absolute make it "absolute" with respect to this root.
 		 * If pathName is relative, just return it
-		 * @param pathName
-		 * @return
 		 */
 		private String fixPath(String pathName) {
 			if (pathName.startsWith("/")) {

@@ -240,8 +240,8 @@ public class ReferenceMap {
 	}
 
 	/**
-	 * @param key
-	 * @return
+	 * @param key The key to remove
+	 * @return The removed map value
 	 */
 	private Object doRemove(int key) {
 		int index = indexFor(key);

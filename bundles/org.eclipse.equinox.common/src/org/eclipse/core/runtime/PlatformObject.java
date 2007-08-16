@@ -19,12 +19,13 @@ import org.eclipse.core.internal.runtime.AdapterManager;
  * <p>
  * Note: In situations where it would be awkward to subclass this
  * class, the same affect can be achieved simply by implementing
- * the <code>IAdaptable</code> interface and explicitly forwarding
- * the <code>getAdapter</code> request to the platform's 
- * adapter manager. The method would look like:
+ * the {@link IAdaptable} interface and explicitly forwarding
+ * the <code>getAdapter</code> request to an implementation
+ * of the {@link IAdapterManager} service. The method would look like:
  * <pre>
  *     public Object getAdapter(Class adapter) {
- *         return Platform.getAdapterManager().getAdapter(this, adapter);
+ *         IAdapterManager manager = ...;//lookup the IAdapterManager service         
+ *         return manager.getAdapter(this, adapter);
  *     }
  * </pre>
  * </p><p>
@@ -33,7 +34,7 @@ import org.eclipse.core.internal.runtime.AdapterManager;
  * Clients may subclass.
  * </p>
  *
- * @see Platform#getAdapterManager()
+ * @see IAdapterManager
  * @see IAdaptable
  */
 public abstract class PlatformObject implements IAdaptable {
@@ -60,7 +61,6 @@ public abstract class PlatformObject implements IAdaptable {
 	 * @param adapter the class to adapt to
 	 * @return the adapted object or <code>null</code>
 	 * @see IAdaptable#getAdapter(Class)
-	 * @see Platform#getAdapterManager()
 	 */
 	public Object getAdapter(Class adapter) {
 		return AdapterManager.getDefault().getAdapter(this, adapter);

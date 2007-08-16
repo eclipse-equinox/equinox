@@ -46,7 +46,6 @@ public interface IProgressMonitorWithBlocking extends IProgressMonitor {
 	 * reason why this operation is blocked, or <code>null</code> if this
 	 * information is not available.
 	 * @see #clearBlocked()
-	 * @see org.eclipse.core.runtime.jobs.IJobStatus
 	 */
 	public void setBlocked(IStatus reason);
 
