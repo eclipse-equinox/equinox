@@ -59,6 +59,12 @@ public interface Constants {
 	public static final String OS_MACOSX = "macosx";//$NON-NLS-1$
 
 	/**
+	 * Constant string (value "epoc32") indicating the platform is running on a
+	 * Epoc 32-bit Symbian operating system.
+	 */
+	public static final String OS_EPOC32 = "epoc32";//$NON-NLS-1$
+
+	/**
 	 * Constant string (value "unknown") indicating the platform is running on a
 	 * machine running an unknown operating system.
 	 */
