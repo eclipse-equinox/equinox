@@ -188,7 +188,7 @@ public class EclipseEnvironmentInfo implements EnvironmentInfo {
 		if (os.equals(Constants.OS_WIN32))
 			return Constants.WS_WIN32;
 		if (os.equals(Constants.OS_LINUX))
-			return Constants.WS_MOTIF;
+			return Constants.WS_GTK;
 		if (os.equals(Constants.OS_MACOSX))
 			return Constants.WS_CARBON;
 		if (os.equals(Constants.OS_HPUX))
@@ -196,7 +196,7 @@ public class EclipseEnvironmentInfo implements EnvironmentInfo {
 		if (os.equals(Constants.OS_AIX))
 			return Constants.WS_MOTIF;
 		if (os.equals(Constants.OS_SOLARIS))
-			return Constants.WS_MOTIF;
+			return Constants.WS_GTK;
 		if (os.equals(Constants.OS_QNX))
 			return Constants.WS_PHOTON;
 		return Constants.WS_UNKNOWN;

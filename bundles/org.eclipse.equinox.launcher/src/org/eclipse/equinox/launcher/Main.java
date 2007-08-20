@@ -291,7 +291,7 @@ public class Main {
 		if (os.equals(Constants.OS_AIX))
 			return Constants.WS_MOTIF;
 		if (os.equals(Constants.OS_SOLARIS))
-			return Constants.WS_MOTIF;
+			return Constants.WS_GTK;
 		if (os.equals(Constants.OS_QNX))
 			return Constants.WS_PHOTON;
 		return Constants.WS_UNKNOWN;
