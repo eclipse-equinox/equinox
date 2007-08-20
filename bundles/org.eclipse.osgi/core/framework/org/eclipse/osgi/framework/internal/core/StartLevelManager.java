@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2005 IBM Corporation and others.
+ * Copyright (c) 2003, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,6 +19,7 @@ import org.eclipse.osgi.framework.eventmgr.*;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
+import org.osgi.service.startlevel.StartLevel;
 
 /**
  * StartLevel service implementation for the OSGi specification.
@@ -31,8 +32,7 @@ import org.osgi.framework.*;
  * If present, there will only be a single instance of this service
  * registered in the framework.
  */
-// TODO there is no need to use ServiceFactory anymore (bug 184275)
-public class StartLevelManager implements EventDispatcher, EventListener, ServiceFactory {
+public class StartLevelManager implements EventDispatcher, EventListener, StartLevel {
 
 	protected static Framework framework;
 	protected static EventManager eventManager;
@@ -52,8 +52,6 @@ public class StartLevelManager implements EventDispatcher, EventListener, Servic
 	private static final Object lock = new Object();
 
 	volatile private boolean settingStartLevel = false;
-
-	private StartLevelImpl implementation;
 
 	/** This constructor is called by the Framework */
 	protected StartLevelManager(Framework framework) {
@@ -235,7 +233,7 @@ public class StartLevelManager implements EventDispatcher, EventListener, Servic
 
 	}
 
-	protected void setStartLevel(int newSL) {
+	public void setStartLevel(int newSL) {
 		setStartLevel(newSL, framework.systemBundle);
 	}
 
@@ -776,32 +774,6 @@ public class StartLevelManager implements EventDispatcher, EventListener, Servic
 				Debug.println("SLL: Bundle Startlevel set to " + newSL); //$NON-NLS-1$
 			}
 		}
-	}
-
-	/**
-	 * Returns a StartLevel object, created for each requesting bundle.
-	 * 
-	 * @param owner bundle, requested to get StartLevel service.
-	 * @pre callerBundle!=null
-	 * @param registration ServiceRegistration of the StartLevel service
-	 * @pre sReg!=null
-	 * @return StartLevel object
-	 */
-	public synchronized Object getService(Bundle owner, ServiceRegistration registration) {
-		if (implementation == null)
-			implementation = new StartLevelImpl(framework.systemBundle, framework);
-		return implementation;
-	}
-
-	/**
-	 * Does nothing, as the StartLevel bundle does not keep references to StartLevel objects.
-	 *
-	 * @param owner bundle requesting to unget StartLevel service.
-	 * @param registration ServiceRegistration of StartLevel
-	 * @param service Service object, already been got by this bundle.
-	 */
-	public void ungetService(Bundle owner, ServiceRegistration registration, Object service) {
-		// do nothing;
 	}
 
 	public boolean isSettingStartLevel() {

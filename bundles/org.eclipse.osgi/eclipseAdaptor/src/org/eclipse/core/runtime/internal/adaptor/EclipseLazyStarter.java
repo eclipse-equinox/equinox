@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006 IBM Corporation and others.
+ * Copyright (c) 2006, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -38,7 +38,7 @@ import org.osgi.service.startlevel.StartLevel;
 public class EclipseLazyStarter implements ClassLoadingStatsHook, AdaptorHook, HookConfigurator {
 	private static final boolean throwErrorOnFailedStart = "true".equals(FrameworkProperties.getProperty("osgi.compatibility.errorOnFailedStart", "true"));  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 	private static final SecureAction secureAction = (SecureAction) AccessController.doPrivileged(SecureAction.createSecureAction());
-	private StartLevelImpl startLevelService;
+	private StartLevelManager startLevelService;
 	private ServiceReference slRef;
 	private BaseAdaptor adaptor;
 	// holds the current activation trigger class and the ClasspathManagers that need to be activated
@@ -155,7 +155,7 @@ public class EclipseLazyStarter implements ClassLoadingStatsHook, AdaptorHook, H
 				if (error != null)
 					throw error;
 			}
-			StartLevelImpl sl = startLevelService;
+			StartLevelManager sl = startLevelService;
 			return sl != null && ((sl.getStartLevel() == bundledata.getStartLevel() && sl.isSettingStartLevel()));
 		}
 		return true;
@@ -205,7 +205,7 @@ public class EclipseLazyStarter implements ClassLoadingStatsHook, AdaptorHook, H
 	public void frameworkStart(BundleContext context) throws BundleException {
 		slRef = context.getServiceReference(StartLevel.class.getName());
 		if (slRef != null)
-			startLevelService = (StartLevelImpl) context.getService(slRef);
+			startLevelService = (StartLevelManager) context.getService(slRef);
 	}
 
 	public void frameworkStop(BundleContext context) throws BundleException {
