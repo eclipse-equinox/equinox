@@ -23,6 +23,7 @@ public class AllTests extends TestSuite {
 	
 	public AllTests() {
 		addTest(new TestSuite(ManifestElementTestCase.class));
+		addTest(new TestSuite(NLSTestCase.class));
 		addBidiTests();
 		addLatinTests();
 	}

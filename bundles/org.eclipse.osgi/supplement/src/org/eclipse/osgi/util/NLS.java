@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005 IBM Corporation and others.
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -144,7 +144,7 @@ public abstract class NLS {
 			bufLen += argZero.length() - 3;
 		if (argOne != null)
 			bufLen += argOne.length() - 3;
-		StringBuffer buffer = new StringBuffer(bufLen);
+		StringBuffer buffer = new StringBuffer(bufLen < 0 ? 0 : bufLen);
 		for (int i = 0; i < length; i++) {
 			char c = message.charAt(i);
 			switch (c) {
