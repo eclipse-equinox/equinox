@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004 IBM Corporation and others.
+ * Copyright (c) 2004, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -42,7 +42,7 @@ public class EnvironmentInfoTest extends TestCase {
 		assertEquals("1.0", Constants.OS_LINUX, EclipseEnvironmentInfo.guessOS("Linux"));
 		assertEquals("1.1", Constants.OS_LINUX, EclipseEnvironmentInfo.guessOS("linux"));
 		assertEquals("1.2", Constants.OS_UNKNOWN, EclipseEnvironmentInfo.guessOS("linux xyz"));
-		assertEquals("2.0", Constants.WS_MOTIF, EclipseEnvironmentInfo.guessWS(Constants.OS_LINUX));
+		assertEquals("2.0", Constants.WS_GTK, EclipseEnvironmentInfo.guessWS(Constants.OS_LINUX));
 	}
 
 	public void testMacOSX() {
@@ -66,7 +66,7 @@ public class EnvironmentInfoTest extends TestCase {
 		assertEquals("1.3", Constants.OS_SOLARIS, EclipseEnvironmentInfo.guessOS("sunos"));
 		assertEquals("1.4", Constants.OS_UNKNOWN, EclipseEnvironmentInfo.guessOS("solaris xyz"));
 		assertEquals("1.4", Constants.OS_UNKNOWN, EclipseEnvironmentInfo.guessOS("sunos xyz"));
-		assertEquals("2.0", Constants.WS_MOTIF, EclipseEnvironmentInfo.guessWS(Constants.OS_SOLARIS));
+		assertEquals("2.0", Constants.WS_GTK, EclipseEnvironmentInfo.guessWS(Constants.OS_SOLARIS));
 	}
 
 	public void testWindows() {
