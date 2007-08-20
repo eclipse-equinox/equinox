@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2005 IBM Corporation and others.
+ * Copyright (c) 2003, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -154,6 +154,12 @@ public interface Constants {
 	 * machine using the Carbon windowing system (Mac OS X).
 	 */
 	public static final String WS_CARBON = "carbon";//$NON-NLS-1$
+	
+	/**
+	 * Constant string (value "s60") indicating the platform is running on a
+	 * machine using the S60 windowing system.
+	 */
+	public static final String WS_S60 = "s60";//$NON-NLS-1$
 
 	/**
 	 * Constant string (value "unknown") indicating the platform is running on a
