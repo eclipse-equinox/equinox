@@ -649,7 +649,7 @@ public class EclipseStarter {
 			String name = installEntries[i];
 			int level = defaultStartLevel;
 			boolean start = false;
-			int index = name.indexOf('@');
+			int index = name.lastIndexOf('@');
 			if (index >= 0) {
 				String[] attributes = getArrayFromList(name.substring(index + 1, name.length()), ":"); //$NON-NLS-1$
 				name = name.substring(0, index);
