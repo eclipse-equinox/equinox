@@ -834,11 +834,11 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		int cycleSize = cycle.size();
 		if (cycleSize == 0)
 			return;
-		for (int i = cycleSize - 1; i >= 0; i--) {
-			ResolverBundle cycleBundle = (ResolverBundle) cycle.get(i);
+		cycleLoop: for (Iterator iCycle = cycle.iterator(); iCycle.hasNext();) {
+			ResolverBundle cycleBundle = (ResolverBundle) iCycle.next();
 			if (!cycleBundle.isResolvable()) {
-				cycle.remove(i); // remove this from the list of bundles that need reresolved
-				continue;
+				iCycle.remove(); // remove this bundle from the list of bundles that need re-resolved
+				continue cycleLoop;
 			}
 			// Check that we haven't wired to any dropped exports
 			ResolverImport[] imports = cycleBundle.getImportPackages();
@@ -855,12 +855,13 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 					cycleBundle.setResolvable(false);
 					cycleBundle.clearRefs();
 					state.addResolverError(imports[j].getVersionConstraint().getBundle(), ResolverError.MISSING_IMPORT_PACKAGE, imports[j].getVersionConstraint().toString(), imports[j].getVersionConstraint());
-					cycle.remove(i);
+					iCycle.remove();
+					continue cycleLoop;
 				}
 			}
 		}
-		boolean reresolveCycle = cycle.size() != cycleSize; //we removed an unresolvable bundle; must reresolve remaining cycle
-		if (reresolveCycle) {
+		if (cycle.size() != cycleSize) {
+			//we removed an un-resolvable bundle; must re-resolve remaining cycle
 			for (int i = 0; i < cycle.size(); i++) {
 				ResolverBundle cycleBundle = (ResolverBundle) cycle.get(i);
 				cycleBundle.clearWires();

@@ -101,6 +101,7 @@ public abstract class ResolverConstraint {
 			System.arraycopy(possibleSuppliers, 0, newSuppliers, 0, index);
 			if (index < possibleSuppliers.length - 1)
 				System.arraycopy(possibleSuppliers, index + 1, newSuppliers, index, possibleSuppliers.length - index - 1);
+			possibleSuppliers = newSuppliers;
 		}
 	}
 
