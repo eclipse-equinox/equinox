@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006 IBM Corporation and others.
+ * Copyright (c) 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,14 +11,17 @@
 
 package org.eclipse.osgi.tests.util;
 
-import junit.framework.TestCase;
+import org.eclipse.core.tests.harness.CoreTest;
 import org.eclipse.osgi.util.NLS;
-import org.osgi.framework.BundleException;
 
-public class NLSTestCase extends TestCase {
+public class NLSTestCase extends CoreTest {
 
-	public void testEmptyMessageBug200296() throws BundleException {
-		NLS.bind("", new Integer(0));
+	public void testEmptyMessageBug200296() {
+		try {
+			NLS.bind("", new Integer(0));
+		} catch (NegativeArraySizeException e) {
+			fail("1.0", e);
+		}
 	}
 
 }
