@@ -1251,7 +1251,6 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 
 	/**
 	 * This method was created in VisualAge.
-	 * @return java.lang.String
 	 * @param requestLine java.lang.String
 	 */
 	protected void parseRequestLine(String requestLine) {

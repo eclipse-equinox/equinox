@@ -42,7 +42,7 @@ public class LogServiceImpl implements LogService {
 	 * Required by LogService Interface.
 	 * Log a bundle message.  The ServiceDescription field and the
 	 * Throwable field of the LogEntry will be set to null.
-	 * @param int level - The severity of the message.  (Should be one of the
+	 * @param level - The severity of the message.  (Should be one of the
 	 * four predefined severities.)
 	 * @param String message - Human readable string describing the condition.
 	 */
@@ -60,7 +60,7 @@ public class LogServiceImpl implements LogService {
 	 * Required by LogService Interface.
 	 * Log a bundle message.  The ServiceDescription field
 	 * of the LogEntry will be set to null.
-	 * @param int level - The severity of the message.  (Should be one of the
+	 * @param level - The severity of the message.  (Should be one of the
 	 * four predefined severities.)
 	 * @param String message - Human readable string describing the condition.
 	 * @param Throwable exception - The exception that reflects the condition.

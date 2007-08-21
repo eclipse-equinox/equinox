@@ -101,7 +101,7 @@ public class LogEntry implements org.osgi.service.log.LogEntry, Cloneable {
 	/**
 	 * Returns the exception that was recorded with this log entry.
 	 * 
-	 * A {@link LoggedException) that contains information about
+	 * A {@link LoggedException} that contains information about
 	 * the original exception is returned.
 	 */
 	public Throwable getException() {

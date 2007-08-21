@@ -324,7 +324,7 @@ public class DeviceTracker extends ServiceTracker {
 		 *
 		 * @param key header name.
 		 * @param value header value.
-		 * @throws UnsupportedOperationException.
+		 * @throws UnsupportedOperationException
 		 */
 		public Object put(Object key, Object value) {
 			throw new UnsupportedOperationException();
@@ -334,7 +334,7 @@ public class DeviceTracker extends ServiceTracker {
 		 * Override remove to disable it. This Dictionary is readonly once built.
 		 *
 		 * @param key header name.
-		 * @throws UnsupportedOperationException.
+		 * @throws UnsupportedOperationException
 		 */
 		public Object remove(Object key) {
 			throw new UnsupportedOperationException();

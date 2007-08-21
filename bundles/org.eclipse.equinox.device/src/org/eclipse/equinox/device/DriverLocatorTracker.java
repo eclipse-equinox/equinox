@@ -194,7 +194,6 @@ public class DriverLocatorTracker extends ServiceTracker {
 	 * Get an <code>InputStream</code> from which the driver bundle providing a driver with the giving ID can be installed.
 	 *
 	 * @param id the ID of the driver that needs to be installed.
-	 * @return the <code>InputStream</code> from which the driver
 	 * bundle can be installed
 	 */
 

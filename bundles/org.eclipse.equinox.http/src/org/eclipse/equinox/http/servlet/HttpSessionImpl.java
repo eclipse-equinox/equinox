@@ -445,7 +445,7 @@ public class HttpSessionImpl implements HttpSession {
 	 * If the session has expired, invalidate it.
 	 * If the session is invalid, throw an IllegalStateException
 	 *
-	 * @throws IllegalStateException.
+	 * @throws IllegalStateException
 	 */
 	private void checkValid() {
 		if (canExpire) {
