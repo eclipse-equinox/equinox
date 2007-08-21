@@ -85,7 +85,8 @@ int readConfigFile( _TCHAR * config_file, int *argc, _TCHAR ***argv )
 	
 	/* Open the config file as a text file 
 	 * Note that carriage return-linefeed combination \r\n are automatically
-	 * translated into single linefeeds on input in the t (translated) mode.
+	 * translated into single linefeeds on input in the t (translated) mode
+	 * on windows, on other platforms we will strip the \r as whitespace.
 	 */	
 	file = _tfopen(config_file, _T_ECLIPSE("rt"));	
 	if (file == NULL) return -3;
@@ -111,7 +112,10 @@ int readConfigFile( _TCHAR * config_file, int *argc, _TCHAR ***argv )
 				continue;
 			
 			/* basic whitespace trimming */
-			while (length > 0 && (arg[length - 1] == _T_ECLIPSE(' ') || arg[length - 1] == _T_ECLIPSE('\t'))) {
+			while (length > 0 && (arg[length - 1] == _T_ECLIPSE(' ')  || 
+					              arg[length - 1] == _T_ECLIPSE('\t') || 
+					              arg[length - 1] == _T_ECLIPSE('\r'))) 
+			{
 				arg[--length] = 0;
 			}
 			/* ignore empty lines */
