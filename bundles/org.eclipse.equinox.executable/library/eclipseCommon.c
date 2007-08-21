@@ -44,10 +44,8 @@ _TCHAR* osArchArg    = _T_ECLIPSE(DEFAULT_OS_ARCH);
 _TCHAR* wsArg        = _T_ECLIPSE(DEFAULT_WS);	/* the SWT supported GUI to be used */
 
 /* Local Variables */
-#ifndef _WIN32
 static _TCHAR* filterPrefix = NULL;  /* prefix for the find files filter */
-#endif
-static size_t     prefixLength = 0;
+static size_t  prefixLength = 0;
 
 typedef struct {
 	int segment[3];
@@ -326,22 +324,26 @@ char * resolveSymlinks( char * path ) {
 }
 #endif
 
-#ifndef _WIN32
+#ifdef _WIN32
+static int filter(_TCHAR* candidate) {
+#else
 #ifdef MACOSX
 static int filter(struct dirent *dir) {
 #else
 static int filter(const struct dirent *dir) {
 #endif
-	char *c1, *c2;
+	char * candidate = dir->d_name;
+#endif
+	_TCHAR *c1, *c2;
 	
-	if(_tcslen(dir->d_name) <= prefixLength)
+	if(_tcslen(candidate) <= prefixLength)
 		return 0;
-	if (_tcsncmp(dir->d_name, filterPrefix, prefixLength) == 0 &&
-		dir->d_name[prefixLength] == '_') 
+	if (_tcsncmp(candidate, filterPrefix, prefixLength) == 0 &&
+		candidate[prefixLength] == '_') 
 	{
-		c1 = strchr(&dir->d_name[prefixLength + 1], '_');
+		c1 = _tcschr(&candidate[prefixLength + 1], '_');
 		if(c1 != NULL) {
-			c2 = strchr(&dir->d_name[prefixLength + 1], '.');
+			c2 = _tcschr(&candidate[prefixLength + 1], '.');
 			if (c2 != NULL) {
 				return c2 < c1;
 			} else 
@@ -351,7 +353,7 @@ static int filter(const struct dirent *dir) {
 	}
 	return 0;
 }
-#endif
+
  /* 
  * Looks for files of the form /path/prefix_version.<extension> and returns the full path to
  * the file with the largest version number
@@ -386,27 +388,30 @@ _TCHAR* findFile( _TCHAR* path, _TCHAR* prefix)
 		return NULL;
 	}
 	
+	filterPrefix = prefix;
+	prefixLength = _tcslen(prefix);
 #ifdef _WIN32
 	fileName = malloc( (_tcslen(path) + 1 + _tcslen(prefix) + 3) * sizeof(_TCHAR));
 	_stprintf(fileName, _T_ECLIPSE("%s%c%s_*"), path, dirSeparator, prefix);
-	prefixLength = _tcslen(prefix);
 	
 	handle = FindFirstFile(fileName, &data);
 	if(handle != INVALID_HANDLE_VALUE) {
-		candidate = _tcsdup(data.cFileName);
+		if (filter(data.cFileName))
+			candidate = _tcsdup(data.cFileName);
 		while(FindNextFile(handle, &data) != 0) {
-			fileName = data.cFileName;
-			/* compare, take the highest version */
-			if( compareVersions(candidate + prefixLength + 1, fileName + prefixLength + 1) < 0) {
-				free(candidate);
-				candidate = _tcsdup(fileName);
+			if (filter(data.cFileName)) {
+				if (candidate == NULL) {
+					candidate = _tcsdup(data.cFileName);
+				} else if( compareVersions(candidate + prefixLength + 1, fileName + prefixLength + 1) < 0) {
+					/* compare, take the highest version */
+					free(candidate);
+					candidate = _tcsdup(fileName);
+				}
 			}
 		}
 		FindClose(handle);
 	}
 #else
-	filterPrefix = prefix;
-	prefixLength = _tcslen(prefix);
 	if ((dir = opendir(path)) == NULL) {
 		free(path);
 		return NULL;
