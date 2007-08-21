@@ -545,6 +545,11 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
     if (launchMode == LAUNCH_JNI)
     	cleanupVM(exitCode);
     
+    if (sharedID != NULL) {
+    	destroySharedData( sharedID );
+    	free( sharedID );
+    }
+    
     /* Cleanup time. */
     free( vmCommandArgs );
     free( progCommandArgs );
