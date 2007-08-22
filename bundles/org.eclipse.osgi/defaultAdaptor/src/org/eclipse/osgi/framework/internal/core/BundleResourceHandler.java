@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2006 IBM Corporation and others.
+ * Copyright (c) 2004, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,8 +13,11 @@ package org.eclipse.osgi.framework.internal.core;
 
 import java.io.IOException;
 import java.net.*;
+import org.eclipse.osgi.baseadaptor.BaseAdaptor;
 import org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry;
 import org.eclipse.osgi.baseadaptor.loader.BaseClassLoader;
+import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
+import org.eclipse.osgi.framework.internal.protocol.ProtocolActivator;
 import org.eclipse.osgi.internal.baseadaptor.AdaptorMsg;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
@@ -23,20 +26,26 @@ import org.osgi.framework.*;
  * URLStreamHandler the bundleentry and bundleresource protocols.
  */
 
-public abstract class BundleResourceHandler extends URLStreamHandler {
-	public static final String SECURITY_AUTHORIZED = "SECURITY_AUTHORIZED"; //$NON-NLS-1$
-	protected static BundleContext context;
+public abstract class BundleResourceHandler extends URLStreamHandler implements ProtocolActivator {
+	public static final String SECURITY_CHECKED = "SECURITY_CHECKED"; //$NON-NLS-1$
+	public static final String SECURITY_UNCHECKED = "SECURITY_UNCHECKED"; //$NON-NLS-1$
+	private BaseAdaptor adaptor;
 	protected BundleEntry bundleEntry;
 
 	/**
 	 * Constructor for a bundle protocol resource URLStreamHandler.
 	 */
 	public BundleResourceHandler() {
-		this(null);
+		this(null, null);
 	}
 
-	public BundleResourceHandler(BundleEntry bundleEntry) {
+	public BundleResourceHandler(BundleEntry bundleEntry, BaseAdaptor adaptor) {
 		this.bundleEntry = bundleEntry;
+		this.adaptor = adaptor;
+	}
+
+	public void start(BundleContext context, FrameworkAdaptor baseAdaptor) {
+		this.adaptor = (BaseAdaptor) baseAdaptor;
 	}
 
 	/** 
@@ -109,13 +118,16 @@ public abstract class BundleResourceHandler extends URLStreamHandler {
 
 		// Check the permission of the caller to see if they
 		// are allowed access to the resource.
-		checkAdminPermission(context.getBundle(Long.parseLong(bundleId)));
+		String authorized = SECURITY_UNCHECKED;
+		Bundle bundle = adaptor == null ? null : adaptor.getContext().getBundle(Long.parseLong(bundleId));
+		if (checkAuthorization(bundle))
+			authorized = SECURITY_CHECKED;
 
 		// Setting the authority portion of the URL to SECURITY_ATHORIZED
 		// ensures that this URL was created by using this parseURL
 		// method.  The openConnection method will only open URLs
 		// that have the authority set to this.
-		setURL(url, url.getProtocol(), bundleId, resIndex, SECURITY_AUTHORIZED, null, path, null, url.getRef());
+		setURL(url, url.getProtocol(), bundleId, resIndex, authorized, null, path, null, url.getRef());
 	}
 
 	/**
@@ -143,17 +155,15 @@ public abstract class BundleResourceHandler extends URLStreamHandler {
 		} catch (NumberFormatException nfe) {
 			throw new MalformedURLException(NLS.bind(AdaptorMsg.URL_INVALID_BUNDLE_ID, bidString));
 		}
-		bundle = (AbstractBundle) context.getBundle(bundleID);
+		bundle = adaptor == null ? null : (AbstractBundle) adaptor.getContext().getBundle(bundleID);
+		if (bundle == null)
+			throw new IOException(NLS.bind(AdaptorMsg.URL_NO_BUNDLE_FOUND, url.toExternalForm()));
 		// check to make sure that this URL was created using the
 		// parseURL method.  This ensures the security check was done
 		// at URL construction.
-		if (!url.getAuthority().equals(SECURITY_AUTHORIZED)) {
+		if (!url.getAuthority().equals(SECURITY_CHECKED)) {
 			// No admin security check was made better check now.
-			checkAdminPermission(bundle);
-		}
-
-		if (bundle == null) {
-			throw new IOException(NLS.bind(AdaptorMsg.URL_NO_BUNDLE_FOUND, url.toExternalForm()));
+			checkAuthorization(bundle);
 		}
 		return (new BundleURLConnection(url, findBundleEntry(url, bundle)));
 	}
@@ -201,10 +211,6 @@ public abstract class BundleResourceHandler extends URLStreamHandler {
 		return (result.toString());
 	}
 
-	public static void setContext(BundleContext context) {
-		BundleResourceHandler.context = context;
-	}
-
 	protected int hashCode(URL url) {
 		int hash = 0;
 		String protocol = url.getProtocol();
@@ -215,9 +221,14 @@ public abstract class BundleResourceHandler extends URLStreamHandler {
 		if (host != null)
 			hash += host.hashCode();
 
+		hash += url.getPort();
+
 		String path = url.getPath();
 		if (path != null)
 			hash += path.hashCode();
+
+		if (adaptor != null)
+			hash += adaptor.hashCode();
 		return hash;
 	}
 
@@ -238,6 +249,9 @@ public abstract class BundleResourceHandler extends URLStreamHandler {
 	}
 
 	protected boolean sameFile(URL url1, URL url2) {
+		// do a hashcode test to allow each handler to check the adaptor first
+		if (url1.hashCode() != url2.hashCode())
+			return false;
 		String p1 = url1.getProtocol();
 		String p2 = url2.getProtocol();
 		if (!((p1 == p2) || (p1 != null && p1.equalsIgnoreCase(p2))))
@@ -249,25 +263,24 @@ public abstract class BundleResourceHandler extends URLStreamHandler {
 		if (url1.getPort() != url2.getPort())
 			return false;
 
-		String a1 = url1.getAuthority();
-		String a2 = url2.getAuthority();
-		if (!((a1 == a2) || (a1 != null && a1.equals(a2))))
-			return false;
-
 		String path1 = url1.getPath();
 		String path2 = url2.getPath();
 		if (!((path1 == path2) || (path1 != null && path1.equals(path2))))
 			return false;
 
 		return true;
+		// note that the authority is not checked here because it can be different for two
+		// URLs depending on how they were constructed.
 	}
 
-	protected void checkAdminPermission(Bundle bundle) {
+	protected boolean checkAuthorization(Bundle bundle) {
 		SecurityManager sm = System.getSecurityManager();
-
-		if (sm != null) {
-			sm.checkPermission(new AdminPermission(bundle, AdminPermission.RESOURCE));
-		}
+		if (sm == null)
+			return true;
+		if (bundle == null)
+			return false;
+		sm.checkPermission(new AdminPermission(bundle, AdminPermission.RESOURCE));
+		return true;
 	}
 
 	protected static BaseClassLoader getBundleClassLoader(AbstractBundle bundle) {

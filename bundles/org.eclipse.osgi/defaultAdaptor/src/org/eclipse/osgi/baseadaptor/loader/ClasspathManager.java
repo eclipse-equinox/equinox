@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,12 +11,14 @@
 
 package org.eclipse.osgi.baseadaptor.loader;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.security.ProtectionDomain;
 import java.util.*;
 import org.eclipse.osgi.baseadaptor.BaseData;
-import org.eclipse.osgi.baseadaptor.bundlefile.*;
+import org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry;
+import org.eclipse.osgi.baseadaptor.bundlefile.BundleFile;
 import org.eclipse.osgi.baseadaptor.hooks.ClassLoadingHook;
 import org.eclipse.osgi.baseadaptor.hooks.ClassLoadingStatsHook;
 import org.eclipse.osgi.framework.adaptor.BundleData;
@@ -329,7 +331,7 @@ public class ClasspathManager {
 	}
 
 	private URL findResourceImpl(String name, BundleFile bundlefile, int index) {
-		return bundlefile.getResourceURL(name, data.getBundleID(), index);
+		return bundlefile.getResourceURL(name, data, index);
 	}
 
 	/**

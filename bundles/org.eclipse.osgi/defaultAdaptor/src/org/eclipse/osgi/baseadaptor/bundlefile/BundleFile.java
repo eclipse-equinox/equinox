@@ -11,11 +11,14 @@
 
 package org.eclipse.osgi.baseadaptor.bundlefile;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.AccessController;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import org.eclipse.osgi.baseadaptor.BaseData;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.eclipse.osgi.framework.internal.protocol.bundleresource.Handler;
@@ -116,6 +119,7 @@ abstract public class BundleFile {
 	 * @param path the path to the resource
 	 * @param hostBundleID the host bundle ID
 	 * @return a URL to access the contents of the entry specified by the path
+	 * @deprecated use {@link #getResourceURL(String, BaseData, int)}
 	 */
 	public URL getResourceURL(String path, long hostBundleID) {
 		return getResourceURL(path, hostBundleID, 0);
@@ -127,16 +131,34 @@ abstract public class BundleFile {
 	 * @param hostBundleID the host bundle ID
 	 * @param index the resource index
 	 * @return a URL to access the contents of the entry specified by the path
+	 * @deprecated use {@link #getResourceURL(String, BaseData, int)}
 	 */
 	public URL getResourceURL(String path, long hostBundleID, int index) {
+		return internalGetResourceURL(path, null, hostBundleID, index);
+	}
+
+	/**
+	 * Returns a URL to access the contents of the entry specified by the path
+	 * @param path the path to the resource
+	 * @param hostData the host BaseData
+	 * @param index the resource index
+	 * @return a URL to access the contents of the entry specified by the path
+	 */
+	public URL getResourceURL(String path, BaseData hostData, int index) {
+		return internalGetResourceURL(path, hostData, 0, index);
+	}
+
+	private URL internalGetResourceURL(String path, BaseData hostData, long hostBundleID, int index) {
 		BundleEntry bundleEntry = getEntry(path);
 		if (bundleEntry == null)
 			return null;
+		if (hostData != null)
+			hostBundleID = hostData.getBundleID();
 		if (path.length() == 0 || path.charAt(0) != '/')
 			path = '/' + path;
 		try {
 			//use the constant string for the protocol to prevent duplication
-			return secureAction.getURL(Constants.OSGI_RESOURCE_URL_PROTOCOL, Long.toString(hostBundleID), index, path, new Handler(bundleEntry));
+			return secureAction.getURL(Constants.OSGI_RESOURCE_URL_PROTOCOL, Long.toString(hostBundleID), index, path, new Handler(bundleEntry, hostData == null ? null : hostData.getAdaptor()));
 		} catch (MalformedURLException e) {
 			return null;
 		}
@@ -173,8 +195,7 @@ abstract public class BundleFile {
 			if ("[fullpath]".equals(temp[i])) { //$NON-NLS-1$
 				command.add(file.getAbsolutePath());
 				foundFullPath = true;
-			}
-			else 
+			} else
 				command.add(temp[i]);
 		}
 		if (!foundFullPath)

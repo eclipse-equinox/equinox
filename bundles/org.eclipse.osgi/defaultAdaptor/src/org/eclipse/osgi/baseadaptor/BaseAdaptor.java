@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,7 +40,7 @@ import org.osgi.framework.*;
  * @see AdaptorHook
  * @since 3.2
  */
-public class BaseAdaptor implements FrameworkAdaptor{
+public class BaseAdaptor implements FrameworkAdaptor {
 	// System property used to set the parent classloader type (boot is the default)
 	private static final String PROP_PARENT_CLASSLOADER = "osgi.parentClassloader"; //$NON-NLS-1$
 	// A parent classloader type that specifies the application classloader
@@ -252,7 +252,6 @@ public class BaseAdaptor implements FrameworkAdaptor{
 	public void frameworkStart(BundleContext fwContext) throws BundleException {
 		this.context = fwContext;
 		stopping = false;
-		BundleResourceHandler.setContext(fwContext);
 		// always start the storage first
 		storage.frameworkStart(fwContext);
 		AdaptorHook[] adaptorHooks = getHookRegistry().getAdaptorHooks();
@@ -271,7 +270,6 @@ public class BaseAdaptor implements FrameworkAdaptor{
 			adaptorHooks[i].frameworkStop(fwContext);
 		// stop the storage last
 		storage.frameworkStop(fwContext);
-		fwContext = null;
 	}
 
 	/**
@@ -373,7 +371,7 @@ public class BaseAdaptor implements FrameworkAdaptor{
 			public void watchBundle(Bundle bundle, int type) {
 				for (int i = 0; i < watchers.length; i++)
 					watchers[i].watchBundle(bundle, type);
-			}	
+			}
 		};
 		return bundleWatcher;
 	}
@@ -512,7 +510,7 @@ public class BaseAdaptor implements FrameworkAdaptor{
 		StorageHook[] hooks = hookRegistry.getStorageHooks();
 		for (int i = 0; i < hooks.length && storage == null; i++)
 			if (hooks[i] instanceof BaseStorageHook)
-				storage = ((BaseStorageHook)hooks[i]).getStorage();
+				storage = ((BaseStorageHook) hooks[i]).getStorage();
 		return storage;
 	}
 }

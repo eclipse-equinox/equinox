@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2006 IBM Corporation and others.
+ * Copyright (c) 2004, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,9 +14,11 @@ package org.eclipse.osgi.framework.internal.protocol.bundleentry;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
+import org.eclipse.osgi.baseadaptor.BaseAdaptor;
 import org.eclipse.osgi.baseadaptor.BaseData;
 import org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry;
-import org.eclipse.osgi.framework.internal.core.*;
+import org.eclipse.osgi.framework.internal.core.AbstractBundle;
+import org.eclipse.osgi.framework.internal.core.BundleResourceHandler;
 
 /**
  * URLStreamHandler the bundleentry protocol.
@@ -31,8 +33,8 @@ public class Handler extends BundleResourceHandler {
 		super();
 	}
 
-	public Handler(BundleEntry bundleEntry) {
-		super(bundleEntry);
+	public Handler(BundleEntry bundleEntry, BaseAdaptor adaptor) {
+		super(bundleEntry, adaptor);
 	}
 
 	protected BundleEntry findBundleEntry(URL url, AbstractBundle bundle) throws IOException {

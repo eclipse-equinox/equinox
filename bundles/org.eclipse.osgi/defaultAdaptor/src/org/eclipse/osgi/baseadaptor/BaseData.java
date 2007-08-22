@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,7 +18,8 @@ import java.net.URL;
 import java.util.*;
 import org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry;
 import org.eclipse.osgi.baseadaptor.bundlefile.BundleFile;
-import org.eclipse.osgi.baseadaptor.hooks.*;
+import org.eclipse.osgi.baseadaptor.hooks.ClassLoadingHook;
+import org.eclipse.osgi.baseadaptor.hooks.StorageHook;
 import org.eclipse.osgi.baseadaptor.loader.BaseClassLoader;
 import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.debug.Debug;
@@ -100,7 +101,7 @@ public class BaseData implements BundleData {
 			path = '/' + path;
 		try {
 			//use the constant string for the protocol to prevent duplication
-			return new URL(Constants.OSGI_ENTRY_URL_PROTOCOL, Long.toString(id), 0, path, new Handler(entry));
+			return new URL(Constants.OSGI_ENTRY_URL_PROTOCOL, Long.toString(id), 0, path, new Handler(entry, adaptor));
 		} catch (MalformedURLException e) {
 			return null;
 		}
@@ -474,7 +475,6 @@ public class BaseData implements BundleData {
 		this.fileName = fileName;
 	}
 
-	
 	/**
 	 * Return a string representation of the bundle that can be used in debug messages.
 	 * 
@@ -483,10 +483,10 @@ public class BaseData implements BundleData {
 	public String toString() {
 		String name = getSymbolicName();
 		if (name == null)
-			return getLocation(); 
+			return getLocation();
 		Version ver = getVersion();
 		if (ver == null)
 			return name;
-		return name+"_"+ver; //$NON-NLS-1$
+		return name + "_" + ver; //$NON-NLS-1$
 	}
 }
