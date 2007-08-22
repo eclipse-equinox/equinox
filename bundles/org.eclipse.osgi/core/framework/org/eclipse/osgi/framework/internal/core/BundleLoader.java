@@ -428,7 +428,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 		if (result == null && policy != null)
 			result = policy.doBuddyClassLoading(name);
 		// hack to support backwards compatibiility for bootdelegation
-		if (parentCL != null && checkParent && !bootDelegation && bundle.framework.compatibiltyBootDelegation && result == null && source == null && !isExportedPackage(pkgName))
+		if (parentCL != null && checkParent && !bootDelegation && bundle.framework.compatibiltyBootDelegation)
 			// we don't need to continue if a CNFE is thrown here.
 			return parentCL.loadClass(name);
 		// last resort; do class context trick to work around VM bugs
@@ -528,7 +528,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 		if (result == null && policy != null)
 			result = policy.doBuddyResourceLoading(name);
 		// hack to support backwards compatibiility for bootdelegation
-		if (parentCL != null && checkParent && !bootDelegation && bundle.framework.compatibiltyBootDelegation && result == null && source == null && !isExportedPackage(pkgName))
+		if (parentCL != null && checkParent && !bootDelegation && bundle.framework.compatibiltyBootDelegation)
 			// we don't need to continue if the resource is not found here
 			return parentCL.getResource(name);
 		// last resort; do class context trick to work around VM bugs
