@@ -91,54 +91,6 @@ int checkProvidedVMType( _TCHAR* vm )
 }
 
 /*
- * If path is relative, attempt to make it absolute by 
- * 1) check relative to working directory
- * 2) check relative to provided programDir
- * If reverseOrder, then check the programDir before the working dir
- */
-_TCHAR* checkPath( _TCHAR* path, _TCHAR* programDir, int reverseOrder ) 
-{
-	int cwdSize = MAX_PATH_LENGTH * sizeof(_TCHAR);
-	int i;
-	_TCHAR * workingDir, * buffer, * result = NULL;
-	_TCHAR * paths[2];
-	struct _stat stats;
-	
-	/* If the command was an abolute pathname, use it as is. */
-    if (path[0] == dirSeparator ||
-       (_tcslen( path ) > 2 && path[1] == _T_ECLIPSE(':')))
-    {
-    	return path;
-    }
-    
-    /* get the current working directory */
-    workingDir = malloc(cwdSize);
-    while ( _tgetcwd( workingDir, cwdSize ) == NULL ){
-    	cwdSize *= 2;
-    	workingDir = realloc(workingDir, cwdSize);
-    }
-    
-    paths[0] = reverseOrder ? programDir : workingDir;
-    paths[1] = reverseOrder ? workingDir : programDir;
-    
-    /* just make a buffer big enough to hold everything */
-    buffer = malloc((_tcslen(paths[0]) + _tcslen(paths[1]) + _tcslen(path) + 2) * sizeof(_TCHAR));
-    for ( i = 0; i < 2; i++ ) {
-    	_stprintf(buffer, _T_ECLIPSE("%s%c%s"), paths[i], dirSeparator, path);
-    	if (_tstat(buffer, &stats) == 0) {
-    		result = _tcsdup(buffer);
-    		break;
-    	}
-    }
-    
-    free(buffer);
-    free(workingDir);
-    
-    /* if we found something, return it, otherwise, return the original */
-    return result != NULL ? result : path;
-}
-
-/*
  * pathList is a pathSeparator separated list of paths, run each through
  * checkPath and recombine the results.
  * New memory is always allocated for the result

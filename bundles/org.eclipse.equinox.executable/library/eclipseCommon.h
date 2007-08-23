@@ -38,6 +38,7 @@
 #define wsArg wsArgW
 #define osArchArg osArchArgW
 #define resolveSymlinks resolveSymlinksW
+#define checkPath checkPathW
 #endif
 
 #ifdef UNICODE
@@ -94,5 +95,8 @@ extern void unloadLibrary( void * handle );
 /* Find the given symbol in the shared library
  */
 extern void * findSymbol( void * handle, _TCHAR * symbol );
+
+/* check the given path and attempt to make it absolute if it is relative */
+extern _TCHAR* checkPath( _TCHAR* path, _TCHAR* programDir, int reverseOrder );
 
 #endif

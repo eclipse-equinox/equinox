@@ -370,14 +370,19 @@ static _TCHAR* findLibrary(_TCHAR* library, _TCHAR* program)
 	struct _stat stats;
 	
 	if (library != NULL) {
-		if (_tstat(library, &stats) == 0 && (stats.st_mode & S_IFDIR) != 0)
+		path = checkPath(library, programDir, 0);
+		if (_tstat(path, &stats) == 0 && (stats.st_mode & S_IFDIR) != 0) 
         {
-            /* directory */
-            return findFile(library, _T_ECLIPSE("eclipse"));
+            /* directory, find the highest version eclipse_* library */
+            result = findFile(path, _T_ECLIPSE("eclipse"));
         } else {
         	/* file, return it */
-        	return _tcsdup(library);
+        	result = _tcsdup(path);
         }
+
+		if (path != library)
+			free(path);
+		return result;
 	}
 	
 	/* build the equinox.launcher fragment name */
