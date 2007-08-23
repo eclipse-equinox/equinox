@@ -23,23 +23,29 @@ public class ContextFinder extends ClassLoader implements PrivilegedAction {
 			return super.getClassContext();
 		}
 	}
+
 	//This is used to detect cycle that could be caused while delegating the loading to other classloaders
 	//It keeps track on a thread basis of the set of requested classes and resources
 	private static ThreadLocal cycleDetector = new ThreadLocal();
 	static ClassLoader finderClassLoader;
 	static Finder contextFinder;
+	static ClassLoader parentlessClassLoader;
 	static {
 		AccessController.doPrivileged(new PrivilegedAction() {
 			public Object run() {
 				finderClassLoader = ContextFinder.class.getClassLoader();
 				contextFinder = new Finder();
+				parentlessClassLoader = new ClassLoader(null) {/*parentless classloader*/};
 				return null;
 			}
 		});
 	}
 
+	private final ClassLoader parentContextClassLoader;
+
 	public ContextFinder(ClassLoader contextClassLoader) {
 		super(contextClassLoader);
+		this.parentContextClassLoader = contextClassLoader != null ? contextClassLoader : parentlessClassLoader;
 	}
 
 	// Return a list of all classloaders on the stack that are neither the 
@@ -121,7 +127,8 @@ public class ContextFinder extends ClassLoader implements PrivilegedAction {
 				} catch (ClassNotFoundException e) {
 					// go to the next class loader
 				}
-			return super.loadClass(arg0, arg1);
+			// avoid calling super.loadClass here because it checks the local cache (bug 127963)
+			return parentContextClassLoader.loadClass(arg0);
 		} finally {
 			stopLoading(arg0);
 		}
