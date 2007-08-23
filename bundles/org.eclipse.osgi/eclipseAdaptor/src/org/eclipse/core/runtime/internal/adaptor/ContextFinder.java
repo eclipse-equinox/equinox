@@ -29,13 +29,11 @@ public class ContextFinder extends ClassLoader implements PrivilegedAction {
 	private static ThreadLocal cycleDetector = new ThreadLocal();
 	static ClassLoader finderClassLoader;
 	static Finder contextFinder;
-	static ClassLoader parentlessClassLoader;
 	static {
 		AccessController.doPrivileged(new PrivilegedAction() {
 			public Object run() {
 				finderClassLoader = ContextFinder.class.getClassLoader();
 				contextFinder = new Finder();
-				parentlessClassLoader = new ClassLoader(null) {/*parentless classloader*/};
 				return null;
 			}
 		});
@@ -45,7 +43,7 @@ public class ContextFinder extends ClassLoader implements PrivilegedAction {
 
 	public ContextFinder(ClassLoader contextClassLoader) {
 		super(contextClassLoader);
-		this.parentContextClassLoader = contextClassLoader != null ? contextClassLoader : parentlessClassLoader;
+		this.parentContextClassLoader = contextClassLoader != null ? contextClassLoader : new ClassLoader(null) {/*parentless classloader*/};
 	}
 
 	// Return a list of all classloaders on the stack that are neither the 
