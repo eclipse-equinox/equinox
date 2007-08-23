@@ -479,7 +479,8 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
 	        case RESTART_NEW_EC:
 	        	if(launchMode == LAUNCH_EXE) {
 	        		if (exitData != NULL) free(exitData);
-	        		getSharedData( sharedID, &exitData );
+	        		if (getSharedData( sharedID, &exitData ) != 0)
+	        			exitData = NULL;
 	        	}
 	            if (exitData != 0) {
 	            	if (vmCommand != NULL) free( vmCommand );
@@ -500,7 +501,8 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
 		            errorMsg = NULL;
 		            if (launchMode == LAUNCH_EXE) {
 		            	if (exitData != NULL) free(exitData);
-		        		getSharedData( sharedID, &exitData );
+		        		if (getSharedData( sharedID, &exitData ) != 0)
+		        			exitData = NULL;
 		        	}
 		            if (exitData != 0) {
 		            	errorMsg = exitData;
