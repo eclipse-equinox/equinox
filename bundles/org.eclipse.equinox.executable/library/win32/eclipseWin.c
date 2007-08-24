@@ -220,7 +220,7 @@ static _TCHAR* findLib( _TCHAR* command ) {
 	_TCHAR * jreKeyName;		
 	
 	if (command != NULL) {
-		location = _tcsrchr( command, dirSeparator ) + 1;
+		location = lastDirSeparator( command ) + 1;
 		
 		/*check first to see if command already points to the library */
 		if (isVMLibrary(command)) {
@@ -444,7 +444,8 @@ int isSunVM( _TCHAR * vm ) {
 	void * info;
 	
 	_TCHAR * key, *value;
-	int i, valueSize;
+	size_t i;
+	int valueSize;
 	
 	if (vm == NULL)
 		return 0;

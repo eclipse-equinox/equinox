@@ -83,6 +83,7 @@
 #define _stscanf sscanf
 #define _tcscat strcat
 #define _tcschr strchr
+#define _tcspbrk strpbrk
 #define _tcscmp strcmp
 #define _tcscpy strcpy
 #define _tcsdup strdup

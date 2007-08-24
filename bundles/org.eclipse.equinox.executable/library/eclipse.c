@@ -911,7 +911,7 @@ static _TCHAR* getDefaultOfficialName()
 	_TCHAR *ch = NULL;
 	
 	/* Skip the directory part */
-	ch = _tcsrchr( program, dirSeparator );
+	ch = lastDirSeparator( program );
 	if (ch == NULL) ch = program;
 	else ch++;
 	
@@ -954,7 +954,7 @@ _TCHAR* getProgramDir( )
 
     programDir = malloc( (_tcslen( program ) + 1) * sizeof(_TCHAR) );
     _tcscpy( programDir, program );
-    ch = _tcsrchr( programDir, dirSeparator );
+    ch = lastDirSeparator( programDir );
 	if (ch != NULL)
     {
     	*(ch+1) = _T_ECLIPSE('\0');
@@ -977,7 +977,7 @@ static _TCHAR* findSplash(_TCHAR* splashArg) {
 	splashArg = _tcsdup(splashArg);
 	length = _tcslen(splashArg);
 	/* _tstat doesn't seem to like dirSeparators on the end */
-	while (splashArg[length - 1] == dirSeparator) {
+	while (IS_DIR_SEPARATOR(splashArg[length - 1])) {
 		splashArg[--length] = 0;
 	}
 	
@@ -1002,9 +1002,9 @@ static _TCHAR* findSplash(_TCHAR* splashArg) {
 	}
 	
 	/* doesn't exist, separate into path & prefix and look for a /path/prefix_<version> */
-	ch = _tcsrchr( splashArg, dirSeparator );
+	ch = lastDirSeparator( splashArg );
 	if (ch != NULL) {
-		if (splashArg[0] == dirSeparator || (_tcslen(splashArg) > 2 && splashArg[1] == _T_ECLIPSE(':')))
+		if (IS_ABSOLUTE(splashArg))
 		{	/*absolute path*/
 			path = _tcsdup(splashArg);
 			path[ch - splashArg] = 0;
@@ -1062,7 +1062,7 @@ static _TCHAR* findStartupJar(){
 #endif
 	pluginsPath = malloc( (pathLength + 1 + 7 + 1) * sizeof(_TCHAR));
 	_tcscpy(pluginsPath, programDir);
-	if(pluginsPath[progLength - 1] != dirSeparator) {
+	if(!IS_DIR_SEPARATOR(pluginsPath[progLength - 1])) {
 		pluginsPath[progLength] = dirSeparator;
 		pluginsPath[progLength + 1] = 0;
 	}
@@ -1259,7 +1259,7 @@ static int determineVM(_TCHAR** msg) {
     			return LAUNCH_JNI;
     		}
     		/* file didn't exist, error */
-    		if (_tcschr( vmName, dirSeparator ) == NULL) {
+    		if (firstDirSeparator( vmName ) == NULL) {
     			/* if vmName doesn't contain a dirSeparator, we looked on the path */
     			*msg = malloc((_tcslen(pathMsg) + _tcslen(vmName)) * sizeof(_TCHAR));
     			_stprintf( *msg, pathMsg,vmName );
@@ -1280,7 +1280,7 @@ static int determineVM(_TCHAR** msg) {
 #endif
     		}
     		/* file didn't exist, error */
-    		if (_tcschr( vmName, dirSeparator ) == NULL) {
+    		if (firstDirSeparator( vmName ) == NULL) {
     			/* if vmName doesn't contain a dirSeparator, we looked on the path */
     			*msg = malloc((_tcslen(pathMsg) + _tcslen(vmName)) * sizeof(_TCHAR));
     			_stprintf( *msg, pathMsg, vmName );
@@ -1349,7 +1349,7 @@ static int processEEProps(_TCHAR* eeFile)
 	eeVMarg = argv;
 	
 	eeDir = _tcsdup(eeFile);
-	c1 = _tcsrchr( eeDir, dirSeparator );
+	c1 = lastDirSeparator( eeDir );
 	if (c1 != NULL)
     {
     	*(c1+1) = _T_ECLIPSE('\0');

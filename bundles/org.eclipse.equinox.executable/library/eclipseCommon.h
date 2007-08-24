@@ -39,6 +39,8 @@
 #define osArchArg osArchArgW
 #define resolveSymlinks resolveSymlinksW
 #define checkPath checkPathW
+#define lastDirSeparator lastDirSeparatorW
+#define firstDirSeparator firstDirSeparatorW
 #endif
 
 #ifdef UNICODE
@@ -50,6 +52,14 @@
 #endif
 
 #define DEFAULT_EQUINOX_STARTUP _T_ECLIPSE("org.eclipse.equinox.launcher")
+
+#ifdef _WIN32
+#define IS_ABSOLUTE(path) (path[0] == _T_ECLIPSE('/') || path[0] == _T_ECLIPSE('\\') || (path[0] != 0 && path[1] == _T_ECLIPSE(':')))
+#define IS_DIR_SEPARATOR(c) (c == _T_ECLIPSE('/') || c == _T_ECLIPSE('\\'))
+#else
+#define IS_ABSOLUTE(path) (path[0] == dirSeparator)
+#define IS_DIR_SEPARATOR(c) (c == dirSeparator)
+#endif
 
 extern _TCHAR*  osArg;
 extern _TCHAR*  osArchArg;
@@ -99,4 +109,7 @@ extern void * findSymbol( void * handle, _TCHAR * symbol );
 /* check the given path and attempt to make it absolute if it is relative */
 extern _TCHAR* checkPath( _TCHAR* path, _TCHAR* programDir, int reverseOrder );
 
+extern _TCHAR * lastDirSeparator(_TCHAR* str);
+
+extern _TCHAR * firstDirSeparator(_TCHAR* str);
 #endif

@@ -38,13 +38,13 @@ int isJ9VM( _TCHAR* vm )
 	if (vm == NULL)
 		return 0;
 	
-	ch = _tcsrchr( vm, dirSeparator );
+	ch = lastDirSeparator( vm );
 	if (isVMLibrary(vm)) {
 		/* a library, call it j9 if the parent dir is j9vm */
 		if(ch == NULL)
 			return 0;
 		ch[0] = 0;
-		ch2 = _tcsrchr(vm, dirSeparator);
+		ch2 = lastDirSeparator(vm);
 		if(ch2 != NULL) {
 			res = (_tcsicmp(ch2 + 1, _T_ECLIPSE("j9vm")) == 0);
 		}
@@ -71,7 +71,7 @@ int checkProvidedVMType( _TCHAR* vm )
 		return VM_DIRECTORY;
 	}
 
-	ch = _tcsrchr( vm, '.' );
+	ch = _tcsrchr( vm, _T_ECLIPSE('.') );
 	if(ch == NULL)
 		return VM_OTHER;
 	

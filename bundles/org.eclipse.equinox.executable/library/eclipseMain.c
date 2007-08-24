@@ -295,7 +295,7 @@ _TCHAR* getProgramDir(_TCHAR* program)
 
     programDir = malloc( (_tcslen( program ) + 1) * sizeof(_TCHAR) );
     _tcscpy( programDir, program );
-    ch = _tcsrchr( programDir, dirSeparator );
+    ch = lastDirSeparator( programDir );
 	if (ch != NULL)
     {
     	*(ch+1) = _T_ECLIPSE('\0');
@@ -327,7 +327,7 @@ static _TCHAR* getDefaultOfficialName(_TCHAR* program)
 	_TCHAR *ch = NULL;
 	
 	/* Skip the directory part */
-	ch = _tcsrchr( program, dirSeparator );
+	ch = lastDirSeparator( program );
 	if (ch == NULL) ch = program;
 	else ch++;
 	
@@ -404,7 +404,7 @@ static _TCHAR* findLibrary(_TCHAR* library, _TCHAR* program)
 #endif
 	path = malloc( (pathLength + 1 + 7 + 1) * sizeof(_TCHAR));
 	_tcscpy(path, programDir);
-	if(path[progLength - 1] != dirSeparator) {
+	if (!IS_DIR_SEPARATOR(path[progLength - 1])) {
 		path[progLength] = dirSeparator;
 		path[progLength + 1] = 0;
 	}

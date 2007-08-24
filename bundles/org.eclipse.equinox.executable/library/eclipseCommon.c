@@ -186,8 +186,7 @@ _TCHAR* findCommand( _TCHAR* command )
     struct _stat stats;
 
     /* If the command was an abolute pathname, use it as is. */
-    if (command[0] == dirSeparator ||
-       (_tcslen( command ) > 2 && command[1] == _T_ECLIPSE(':')))
+    if (IS_ABSOLUTE(command))
     {
         length = _tcslen( command );
         cmdPath = malloc( (length + EXTRA) * sizeof(_TCHAR) ); /* add extra space for a possible ".exe" extension */
@@ -197,15 +196,15 @@ _TCHAR* findCommand( _TCHAR* command )
     else
     {
         /* If the command string contains a path separator */
-        if (_tcschr( command, dirSeparator ) != NULL)
+        if (firstDirSeparator( command ) != NULL)
         {
             /* It must be relative to the current directory. */
             length = MAX_PATH_LENGTH + EXTRA + _tcslen( command );
             cmdPath = malloc( length * sizeof (_TCHAR));
             _tgetcwd( cmdPath, length );
-            if (cmdPath[ _tcslen( cmdPath ) - 1 ] != dirSeparator)
+            length = _tcslen(cmdPath);
+            if (!IS_DIR_SEPARATOR(cmdPath[ length - 1 ]))
             {
-                length = _tcslen( cmdPath );
                 cmdPath[ length ] = dirSeparator;
                 cmdPath[ length+1 ] = _T_ECLIPSE('\0');
             }
@@ -248,7 +247,7 @@ _TCHAR* findCommand( _TCHAR* command )
                     /* Remove quotes */
 	                if (_tcschr( cmdPath, _T_ECLIPSE('"') ) != NULL)
 	                {
-	                    int i = 0, j = 0;
+	                    size_t i = 0, j = 0;
 	                    _TCHAR c;
 	                    length = _tcslen( cmdPath );
 	                    while (i < length) {
@@ -261,13 +260,13 @@ _TCHAR* findCommand( _TCHAR* command )
 #endif
 	                /* Determine if the executable resides in this directory. */
 	                if (cmdPath[0] == _T_ECLIPSE('.') &&
-	                   (_tcslen(cmdPath) == 1 || (_tcslen(cmdPath) == 2 && cmdPath[1] == dirSeparator)))
+	                   (_tcslen(cmdPath) == 1 || (_tcslen(cmdPath) == 2 && IS_DIR_SEPARATOR(cmdPath[1]))))
 	                {
 	                	_tgetcwd( cmdPath, MAX_PATH_LENGTH );
 	                }
-	                if (cmdPath[ _tcslen( cmdPath ) - 1 ] != dirSeparator)
+	                length = _tcslen(cmdPath);
+	                if (!IS_DIR_SEPARATOR(cmdPath[ length - 1 ]))
 	                {
-	                    length = _tcslen( cmdPath );
 	                    cmdPath[ length ] = dirSeparator;
 	                    cmdPath[ length+1 ] = _T_ECLIPSE('\0');
 	                }
@@ -378,7 +377,7 @@ _TCHAR* findFile( _TCHAR* path, _TCHAR* prefix)
 	pathLength = _tcslen(path);
 	
 	/* strip dirSeparators off the end */
-	while (path[pathLength - 1] == dirSeparator) {
+	while (IS_DIR_SEPARATOR(path[pathLength - 1])) {
 		path[--pathLength] = 0;
 	}
 	
@@ -457,9 +456,7 @@ _TCHAR* checkPath( _TCHAR* path, _TCHAR* programDir, int reverseOrder )
 	struct _stat stats;
 	
 	/* If the command was an abolute pathname, use it as is. */
-    if (path[0] == dirSeparator ||
-       (_tcslen( path ) > 2 && path[1] == _T_ECLIPSE(':')))
-    {
+    if (IS_ABSOLUTE(path)) {
     	return path;
     }
     
@@ -490,3 +487,24 @@ _TCHAR* checkPath( _TCHAR* path, _TCHAR* programDir, int reverseOrder )
     return result != NULL ? result : path;
 }
 
+_TCHAR * lastDirSeparator(_TCHAR* str) {
+#ifndef _WIN32
+	return _tcsrchr(str, dirSeparator);
+#else
+	int i = -1;
+	_TCHAR * c = NULL;
+	while (str[++i] != 0) {
+		if (str[i] == _T_ECLIPSE('\\') || str[i] == _T_ECLIPSE('/'))
+			c = &str[i];
+	}
+	return c;
+#endif
+}
+
+_TCHAR * firstDirSeparator(_TCHAR* str) {
+#ifdef _WIN32
+	return _tcspbrk(str, _T_ECLIPSE("\\/"));
+#else
+	return _tcschr(str, dirSeparator);
+#endif
+}
