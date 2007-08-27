@@ -20,16 +20,19 @@ import org.eclipse.core.runtime.*;
 import org.eclipse.equinox.app.IApplicationContext;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.service.runnable.ApplicationLauncher;
+import org.eclipse.osgi.service.runnable.ParameterizedRunnable;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 import org.osgi.service.application.*;
+import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 /*
  * A MEG application container that understands eclipse applications.  This 
  * container will discover installed eclipse applications and register the 
  * appropriate ApplicatoinDescriptor service with the service registry.
  */
-public class EclipseAppContainer implements IRegistryChangeListener, SynchronousBundleListener {
+public class EclipseAppContainer implements IRegistryChangeListener, SynchronousBundleListener, ServiceTrackerCustomizer {
 	private static final String PI_RUNTIME = "org.eclipse.core.runtime"; //$NON-NLS-1$
 	private static final String PT_APPLICATIONS = "applications"; //$NON-NLS-1$
 	private static final String PT_APP_VISIBLE = "visible"; //$NON-NLS-1$
@@ -60,7 +63,7 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 	final private HashMap apps = new HashMap();
 
 	final private IExtensionRegistry extensionRegistry;
-	final private ApplicationLauncher appLauncher;
+	final private ServiceTracker launcherTracker;
 	private IBranding branding;
 	private boolean missingProductReported;
 
@@ -72,14 +75,16 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 	private HashMap activeLimited;
 	private String defaultAppId;
 	private DefaultApplicationListener defaultAppListener;
+	private ParameterizedRunnable defaultMainThreadAppHandle; // holds the default app handle to be run on the main thread
 
-	public EclipseAppContainer(BundleContext context, IExtensionRegistry extensionRegistry, ApplicationLauncher appLauncher) {
+	public EclipseAppContainer(BundleContext context, IExtensionRegistry extensionRegistry) {
 		this.context = context;
 		this.extensionRegistry = extensionRegistry;
-		this.appLauncher = appLauncher;
+		launcherTracker = new ServiceTracker(context, ApplicationLauncher.class.getName(), this);
 	}
 
 	void start() {
+		launcherTracker.open();
 		extensionRegistry.addRegistryChangeListener(this);
 		// need to listen for system bundle stopping
 		context.addBundleListener(this);
@@ -113,6 +118,7 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 		apps.clear();
 		branding = null;
 		missingProductReported = false;
+		launcherTracker.close();
 	}
 
 	/*
@@ -295,13 +301,22 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 
 	void launch(EclipseAppHandle appHandle) throws Exception {
 		lock(appHandle);
+		boolean isDefault = appHandle.isDefault();
 		if (((EclipseAppDescriptor) appHandle.getApplicationDescriptor()).getThreadType() == EclipseAppDescriptor.FLAG_TYPE_MAIN_THREAD) {
-			// use the ApplicationLauncher provided by the framework 
-			// to ensure it is launched on the main thread
-			if (appLauncher == null)
-				throw new IllegalStateException();
+			// use the ApplicationLauncher provided by the framework to ensure it is launched on the main thread
 			DefaultApplicationListener curDefaultApplicationListener = null;
+			ApplicationLauncher appLauncher = null;
 			synchronized (this) {
+				appLauncher = (ApplicationLauncher) launcherTracker.getService();
+				if (appLauncher == null) {
+					if (isDefault) {
+						// we need to wait to allow the ApplicationLauncher to get registered;
+						// save the handle to be launched as soon as the ApplicationLauncher is available
+						defaultMainThreadAppHandle = appHandle;
+						return;
+					}
+					throw new ApplicationException(ApplicationException.APPLICATION_INTERNAL_ERROR);
+				}
 				curDefaultApplicationListener = defaultAppListener;
 			}
 			if (curDefaultApplicationListener != null)
@@ -310,13 +325,20 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 				appLauncher.launch(appHandle, appHandle.getArguments().get(IApplicationContext.APPLICATION_ARGS));
 		} else {
 			AnyThreadAppLauncher.launchEclipseApplication(appHandle);
-			boolean isDefault = appHandle.isDefault();
 			DefaultApplicationListener curDefaultApplicationListener = null;
 			if (isDefault) {
+				ApplicationLauncher appLauncher = null;
 				synchronized (this) {
-					if (defaultAppListener == null )
+					appLauncher = (ApplicationLauncher) launcherTracker.getService();
+					if (defaultAppListener == null)
 						defaultAppListener = new DefaultApplicationListener(appHandle);
 					curDefaultApplicationListener = defaultAppListener;
+					if (appLauncher == null) {
+						// we need to wait to allow the ApplicationLauncher to get registered;
+						// save the default app listener to be launched as soon as the ApplicationLauncher is available
+						defaultMainThreadAppHandle = curDefaultApplicationListener;
+						return;
+					}
 				}
 				appLauncher.launch(curDefaultApplicationListener, null);
 			}
@@ -566,5 +588,29 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 			Activator.log(new FrameworkLogEntry(Activator.PI_APP, FrameworkLogEntry.ERROR, 0, "Error in invoking method.", 0, error, null));
 		}
 		return null;
+	}
+
+	public Object addingService(ServiceReference reference) {
+		ApplicationLauncher appLauncher;
+		ParameterizedRunnable appRunnable;
+		synchronized (this) {
+			appLauncher = (ApplicationLauncher) context.getService(reference);
+			// see if there is a default main threaded application waiting to run 
+			appRunnable = defaultMainThreadAppHandle;
+			// null out so we do not attempt to start this handle again
+			defaultMainThreadAppHandle = null;
+		}
+		if (appRunnable != null)
+			// found a main threaded app; start it now that the app launcher is available
+			appLauncher.launch(appRunnable, appRunnable instanceof EclipseAppHandle ? ((EclipseAppHandle) appRunnable).getArguments().get(IApplicationContext.APPLICATION_ARGS) : null);
+		return appLauncher;
+	}
+
+	public void modifiedService(ServiceReference reference, Object service) {
+		// Do nothing
+	}
+
+	public void removedService(ServiceReference reference, Object service) {
+		// Do nothing
 	}
 }

@@ -20,7 +20,6 @@ import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.service.debug.DebugOptions;
 import org.eclipse.osgi.service.environment.EnvironmentInfo;
-import org.eclipse.osgi.service.runnable.ApplicationLauncher;
 import org.osgi.framework.*;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.util.tracker.ServiceTracker;
@@ -38,9 +37,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 	private volatile static ServiceTracker _frameworkLogTracker;
 	// tracks the extension registry and app launcher services
 	private ServiceTracker registryTracker;
-	private ServiceTracker launcherTracker;
 	private IExtensionRegistry registry;
-	private ApplicationLauncher launcher;
 
 	public void start(BundleContext bc) {
 		_context = bc;
@@ -57,8 +54,6 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 		// we must have an extension registry started before we can start the container
 		registryTracker = new ServiceTracker(bc, IExtensionRegistry.class.getName(), this);
 		registryTracker.open();
-		launcherTracker = new ServiceTracker(bc, ApplicationLauncher.class.getName(), this);
-		launcherTracker.open();
 		_frameworkLogTracker = new ServiceTracker(bc, FrameworkLog.class.getName(), null);
 		_frameworkLogTracker.open();
 		// start the app commands for the console
@@ -79,9 +74,6 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 		// close the registry tracker; this will stop the container if it was started
 		registryTracker.close();
 		registryTracker = null;
-		// close the launcher tracker
-		launcherTracker.close();
-		launcherTracker = null;
 		// unset the app manager context after the container has been stopped
 		AppPersistence.stop();
 		if (_frameworkLogTracker != null) {
@@ -118,27 +110,17 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 		if (context == null)
 			return null; // really should never happen since we close the tracker before nulling out context
 		Object service = null;
-		boolean needed = false;
 		EclipseAppContainer startContainer = null;
 		synchronized (this) {
 			if (container != null)
 				return null; // container is already started; do nothing
 
 			service = context.getService(reference);
-			if (launcher == null && service instanceof ApplicationLauncher) {
-				launcher = (ApplicationLauncher) service;
-				needed = true;
-			}
 			if (registry == null && service instanceof IExtensionRegistry) {
 				registry = (IExtensionRegistry) service;
-				needed = true;
-			}
-			if (needed) {
-				if (registry != null && launcher != null) {
-					// create and start the app container
-					container = new EclipseAppContainer(context, registry, launcher);
-					startContainer = container;
-				}
+				// create and start the app container
+				container = new EclipseAppContainer(context, registry);
+				startContainer = container;
 			}
 		}
 		// must not start the container while holding a lock because this will register additional services
@@ -146,7 +128,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 			startContainer.start();
 			return service;
 		}
-		// this means there is more than one registry or launcher; we don't need a second one
+		// this means there is more than one registry; we don't need a second one
 		if (service != null)
 			context.ungetService(reference);
 		return null;
@@ -162,8 +144,6 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 			// either the registry or launcher is going away
 			if (service == registry)
 				registry = null;
-			if (service == launcher)
-				launcher = null;
 			if (container == null)
 				return; // do nothing; we have not started the container yet
 			currentContainer = container;
