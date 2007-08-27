@@ -862,8 +862,18 @@ public class Main {
 
 		ArrayList matches = new ArrayList(2);
 		for (int i = 0; i < candidates.length; i++)
-			if (candidates[i].equals(target) || candidates[i].startsWith(target + "_")) //$NON-NLS-1$
+			if (candidates[i].equals(target))
 				matches.add(candidates[i]);
+			else if (candidates[i].startsWith(target + "_")) { //$NON-NLS-1$
+				// is the remainder a version, or was the '_' part of the id?
+				int c1 = candidates[i].indexOf('.', target.length() + 1);
+				if (c1 < 0)
+					continue; // '_' wasn't the start of a version, no match
+				int c2 = candidates[i].indexOf('_', target.length() + 1);
+				if (c2 < 0 || c1 < c2) //ok if no more '_'s or if the '.' comes first
+					matches.add(candidates[i]);
+			}
+
 		String[] names = (String[]) matches.toArray(new String[matches.size()]);
 		int result = findMax(names);
 		if (result == -1)
