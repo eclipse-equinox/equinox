@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2005 IBM Corporation and others.
+ * Copyright (c) 2004, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -52,6 +52,11 @@ public abstract class VersionSupplier {
 	 * returns the BundleDescription which supplies this VersionSupplier
 	 */
 	abstract public BundleDescription getBundle();
+
+	/*
+	 * returns the ResolverBundle which supplies this VersionSupplier 
+	 */
+	abstract ResolverBundle getResolverBundle();
 
 	public String toString() {
 		return base.toString();

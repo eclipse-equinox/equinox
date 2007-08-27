@@ -1550,6 +1550,13 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 	}
 
 	public void bundleRemoved(BundleDescription bundle, boolean pending) {
+		ResolverBundle rb = initialized ? (ResolverBundle) bundleMapping.get(bundle) : null;
+		if (rb != null)
+			rb.setUninstalled();
+		internalBundleRemoved(bundle, pending);
+	}
+
+	private void internalBundleRemoved(BundleDescription bundle, boolean pending) {
 		// check if there are any dependants
 		if (pending)
 			removalPending.put(new Long(bundle.getBundleId()), bundle);
@@ -1604,7 +1611,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 	}
 
 	public void bundleUpdated(BundleDescription newDescription, BundleDescription existingDescription, boolean pending) {
-		bundleRemoved(existingDescription, pending);
+		internalBundleRemoved(existingDescription, pending);
 		bundleAdded(newDescription);
 	}
 

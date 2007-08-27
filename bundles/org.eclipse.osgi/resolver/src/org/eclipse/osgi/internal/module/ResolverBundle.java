@@ -18,7 +18,7 @@ import org.osgi.framework.Constants;
 /*
  * A companion to BundleDescription from the state used while resolving.
  */
-public class ResolverBundle extends VersionSupplier implements Comparable{
+public class ResolverBundle extends VersionSupplier implements Comparable {
 	public static final int UNRESOLVED = 0;
 	public static final int RESOLVING = 1;
 	public static final int RESOLVED = 2;
@@ -40,7 +40,7 @@ public class ResolverBundle extends VersionSupplier implements Comparable{
 	private boolean resolvable = true;
 	// Internal resolver state for this bundle
 	private int state = UNRESOLVED;
-
+	private boolean uninstalled = false;
 	private ResolverImpl resolver;
 	private boolean newFragmentExports;
 	private ArrayList refs;
@@ -111,7 +111,7 @@ public class ResolverBundle extends VersionSupplier implements Comparable{
 		// it is faster to ask the VersionHashMap for this package name and then compare the exporter to this
 		Object[] resolverExports = resolver.getResolverExports().get(name);
 		for (int i = 0; i < resolverExports.length; i++)
-			if (((ResolverExport)resolverExports[i]).getExporter() == this)
+			if (((ResolverExport) resolverExports[i]).getExporter() == this)
 				results.add(resolverExports[i]);
 		return (ResolverExport[]) results.toArray(new ResolverExport[results.size()]);
 	}
@@ -252,6 +252,10 @@ public class ResolverBundle extends VersionSupplier implements Comparable{
 
 	public BundleDescription getBundle() {
 		return (BundleDescription) getBaseDescription();
+	}
+
+	public ResolverBundle getResolverBundle() {
+		return this;
 	}
 
 	ResolverImport getImport(String name) {
@@ -495,7 +499,7 @@ public class ResolverBundle extends VersionSupplier implements Comparable{
 	}
 
 	ResolverBundle[] getFragments() {
-		return  fragments == null ? new ResolverBundle[0] : (ResolverBundle[]) fragments.toArray(new ResolverBundle[fragments.size()]);
+		return fragments == null ? new ResolverBundle[0] : (ResolverBundle[]) fragments.toArray(new ResolverBundle[fragments.size()]);
 	}
 
 	/*
@@ -511,5 +515,13 @@ public class ResolverBundle extends VersionSupplier implements Comparable{
 		if (bsn == null)
 			return otherBsn == null ? 0 : 1;
 		return otherBsn == null ? -1 : bsn.compareTo(otherBsn);
+	}
+
+	void setUninstalled() {
+		uninstalled = true;
+	}
+
+	boolean isUninstalled() {
+		return uninstalled;
 	}
 }

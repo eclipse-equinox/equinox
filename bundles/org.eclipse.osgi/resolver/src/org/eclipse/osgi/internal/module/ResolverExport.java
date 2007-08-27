@@ -37,6 +37,10 @@ public class ResolverExport extends VersionSupplier {
 		return resolverBundle;
 	}
 
+	ResolverBundle getResolverBundle() {
+		return getExporter();
+	}
+
 	String[] getUsesDirective() {
 		return (String[]) getExportPackageDescription().getDirective(Constants.USES_DIRECTIVE);
 	}

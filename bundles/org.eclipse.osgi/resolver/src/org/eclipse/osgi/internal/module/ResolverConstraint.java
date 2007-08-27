@@ -44,7 +44,7 @@ public abstract class ResolverConstraint {
 	boolean isSatisfiedBy(VersionSupplier vs) {
 		if (!bundle.getResolver().getPermissionChecker().checkPermission(constraint, vs.getBaseDescription()))
 			return false;
-		return constraint.isSatisfiedBy(vs.getBaseDescription());
+		return !vs.getResolverBundle().isUninstalled() && constraint.isSatisfiedBy(vs.getBaseDescription());
 	}
 
 	// returns the companion VersionConstraint object from the State
