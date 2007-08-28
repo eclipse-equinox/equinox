@@ -11,16 +11,8 @@
 package org.eclipse.equinox.launcher;
 
 import java.io.IOException;
-import java.net.JarURLConnection;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.StringTokenizer;
+import java.net.*;
+import java.util.*;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
@@ -40,18 +32,17 @@ public class WebStartMain extends Main {
 	private static final String DEFAULT_OSGI_BUNDLES = "org.eclipse.equinox.common@2:start, org.eclipse.core.runtime@start"; //$NON-NLS-1$
 	private static final String PROP_OSGI_BUNDLES = "osgi.bundles"; //$NON-NLS-1$
 	private static final String PROP_CHECK_CONFIG = "osgi.checkConfiguration"; //$NON-NLS-1$
-	
 
-	private Map allBundles = null; 	// Map of all the bundles found on the classpath. Id -> ArrayList of BundleInfo
+	private Map allBundles = null; // Map of all the bundles found on the classpath. Id -> ArrayList of BundleInfo
 	private List bundleList = null; //The list of bundles found on the osgi.bundle list 
-	
+
 	private class BundleInfo {
 		String bsn;
 		String version;
 		String startData;
 		String location;
 	}
-	
+
 	public static void main(String[] args) {
 		System.setSecurityManager(null); //TODO Hack so that when the classloader loading the fwk is created we don't have funny permissions. This should be revisited. 
 		int result = new WebStartMain().run(args);
@@ -86,7 +77,7 @@ public class WebStartMain extends Main {
 		buildOSGiBundleList();
 		cleanup();
 	}
-	
+
 	/*
 	 * Null out all the fields containing data 
 	 */
@@ -113,7 +104,7 @@ public class WebStartMain extends Main {
 		String[] versions = new String[numberOfMatches];
 		int highest = 0;
 		for (int i = 0; i < versions.length; i++) {
-			versions[i] = (String) matches.get(i);
+			versions[i] = ((BundleInfo) matches.get(i)).version;
 			highest = findMax(versions);
 		}
 		return ((BundleInfo) matches.get(highest)).location;
@@ -137,19 +128,18 @@ public class WebStartMain extends Main {
 					return bi;
 				}
 			}
-			//TODO Need to log the fact that we could not find the version mentionned
+			//TODO Need to log the fact that we could not find the version mentioned
 			return null;
-		} else {
-			String[] versions = new String[numberOfMatches];
-			int highest = 0;
-			for (int i = 0; i < versions.length; i++) {
-				versions[i] = (String) matches.get(i);
-				highest = findMax(versions);
-			}
-			return (BundleInfo) matches.remove(highest);
 		}
+		String[] versions = new String[numberOfMatches];
+		int highest = 0;
+		for (int i = 0; i < versions.length; i++) {
+			versions[i] = ((BundleInfo) matches.get(i)).version;
+			highest = findMax(versions);
+		}
+		return (BundleInfo) matches.remove(highest);
 	}
-	
+
 	/* 
 	 * Get all the bundles available on the webstart classpath
 	 */
@@ -158,11 +148,11 @@ public class WebStartMain extends Main {
 		try {
 			Enumeration resources = WebStartMain.class.getClassLoader().getResources(JarFile.MANIFEST_NAME);
 			while (resources.hasMoreElements()) {
-				BundleInfo found = getBundleInfo((URL)resources.nextElement());
+				BundleInfo found = getBundleInfo((URL) resources.nextElement());
 				if (found == null)
 					continue;
 				ArrayList matching = (ArrayList) allBundles.get(found.bsn);
-				if(matching == null) {
+				if (matching == null) {
 					matching = new ArrayList(1);
 					allBundles.put(found.bsn, matching);
 				}
@@ -226,6 +216,7 @@ public class WebStartMain extends Main {
 	private BundleInfo getBundleInfo(URL manifestURL) {
 		final String BUNDLE_SYMBOLICNAME = "Bundle-SymbolicName"; //$NON-NLS-1$
 		final String BUNDLE_VERSION = "Bundle-Version"; //$NON-NLS-1$
+		final String DEFAULT_VERSION = "0.0.0"; //$NON-NLS-1$
 
 		Manifest mf;
 		try {
@@ -235,10 +226,11 @@ public class WebStartMain extends Main {
 				return null;
 
 			BundleInfo result = new BundleInfo();
-			result.version = mf.getMainAttributes().getValue(BUNDLE_VERSION);
-			result.location = extractInnerURL(manifestURL); 
+			String version = mf.getMainAttributes().getValue(BUNDLE_VERSION);
+			result.version = (version != null) ? version : DEFAULT_VERSION;
+			result.location = extractInnerURL(manifestURL);
 			int pos = symbolicNameString.lastIndexOf(';');
-			if (pos != -1) { 
+			if (pos != -1) {
 				result.bsn = symbolicNameString.substring(0, pos);
 				return result;
 			}
@@ -250,7 +242,7 @@ public class WebStartMain extends Main {
 		}
 		return null;
 	}
-	
+
 	//Build the osgi bundle list. The allbundles data structure is changed during the process. 
 	private void buildOSGiBundleList() {
 		StringBuffer finalBundleList = new StringBuffer(allBundles.size() * 30);
