@@ -741,7 +741,6 @@ public class StateResolverTest extends AbstractStateTest {
 		manifest.put(Constants.REQUIRE_BUNDLE, "gef");
 		BundleDescription cycle10 = state.getFactory().createBundleDescription(state, manifest, "gef10", 4);
 
-
 		state.addBundle(sdk10);
 		state.addBundle(platform10);
 		state.addBundle(rcp10);
@@ -837,7 +836,6 @@ public class StateResolverTest extends AbstractStateTest {
 		manifest.put(Constants.FRAGMENT_HOST, "platform; bundle-version=2.0");
 		BundleDescription platform_frag210 = state.getFactory().createBundleDescription(state, manifest, "platform.frag210", bundleID++);
 
-
 		manifest = new Hashtable();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "rcp; " + Constants.SINGLETON_DIRECTIVE + ":=true");
@@ -857,7 +855,6 @@ public class StateResolverTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0");
 		manifest.put(Constants.FRAGMENT_HOST, "rcp; bundle-version=2.0");
 		BundleDescription rcp_frag210 = state.getFactory().createBundleDescription(state, manifest, "rcp.frag210", bundleID++);
-
 
 		manifest = new Hashtable();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
@@ -978,7 +975,6 @@ public class StateResolverTest extends AbstractStateTest {
 		manifest.put(Constants.FRAGMENT_HOST, "platform; bundle-version=2.0");
 		BundleDescription platform_frag210 = state.getFactory().createBundleDescription(state, manifest, "platform.frag210", bundleID++);
 
-
 		manifest = new Hashtable();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "rcp; " + Constants.SINGLETON_DIRECTIVE + ":=true");
@@ -999,7 +995,6 @@ public class StateResolverTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0");
 		manifest.put(Constants.FRAGMENT_HOST, "rcp; bundle-version=2.0");
 		BundleDescription rcp_frag210 = state.getFactory().createBundleDescription(state, manifest, "rcp.frag210", bundleID++);
-
 
 		manifest = new Hashtable();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
@@ -1090,7 +1085,7 @@ public class StateResolverTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.1");
 		manifest.put(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT, "J2SE-1.6");
 		BundleDescription base11 = state.getFactory().createBundleDescription(state, manifest, "base11", id++);
-	
+
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "requires; " + Constants.SINGLETON_DIRECTIVE + ":=true");
@@ -1240,7 +1235,7 @@ public class StateResolverTest extends AbstractStateTest {
 		state.removeBundle(platform10);
 		state.removeBundle(rcp10);
 		state.removeBundle(gef10);
-		
+
 		// reorder the bundles to test that order of bundles does not effect resolution outcome
 		state.addBundle(sdk20);
 		state.addBundle(platform20);
@@ -1499,7 +1494,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertTrue("2.3", b1_100.isResolved());
 		assertTrue("2.4", c1_100.isResolved());
 		assertTrue("2.5", d1_100.isResolved());
-		
+
 		b1ResolvedImports = b1_100.getResolvedImports();
 		d1ResolvedImports = d1_100.getResolvedImports();
 		isConsistent = isConsistent(b1ResolvedImports, d1ResolvedImports);
@@ -1672,7 +1667,7 @@ public class StateResolverTest extends AbstractStateTest {
 		state.addBundle(w1_100);
 		state.addBundle(x1_100);
 		state.addBundle(y1_100);
-		
+
 		state.resolve();
 
 		assertTrue("0.1", w1_100.isResolved());
@@ -1778,7 +1773,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertTrue("1.3", b1_100.isResolved());
 		assertTrue("1.4", c1_100.isResolved());
 		assertFalse("1.5", d1_100.isResolved());
-		
+
 		manifest = new Hashtable();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "A1.Frag");
@@ -1882,6 +1877,56 @@ public class StateResolverTest extends AbstractStateTest {
 		assertTrue("3.4", aExports[1] == bImports[1]);
 	}
 
+	public void testFragmentsMultipleVersion() throws BundleException {
+		State state = buildEmptyState();
+		int bundleID = 0;
+		// test the selection algorithm of the resolver to pick the bundles which
+		// resolve the largest set of bundles; with fragments using Import-Package
+		Hashtable manifest = new Hashtable();
+
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "A");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		BundleDescription a1 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + '_' + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "AFrag");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.FRAGMENT_HOST, "A");
+		BundleDescription aFrag1 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + '_' + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "A");
+		manifest.put(Constants.BUNDLE_VERSION, "2.0");
+		BundleDescription a2 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + '_' + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "AFrag");
+		manifest.put(Constants.BUNDLE_VERSION, "2.0");
+		manifest.put(Constants.FRAGMENT_HOST, "A");
+		BundleDescription aFrag2 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + '_' + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+
+		state.addBundle(a1);
+		state.addBundle(aFrag1);
+		state.addBundle(a2);
+		state.addBundle(aFrag2);
+		state.resolve();
+		assertTrue("0.1", a1.isResolved());
+		assertTrue("0.2", aFrag1.isResolved());
+		assertTrue("0.3", a2.isResolved());
+		assertTrue("0.4", aFrag2.isResolved());
+
+		state.removeBundle(a2);
+		state.resolve(false);
+		assertTrue("1.1", a1.isResolved());
+		assertTrue("1.2", aFrag2.isResolved());
+		assertFalse("1.3", aFrag1.isResolved());
+		assertEquals("1.4", a1, aFrag2.getHost().getSupplier());
+	}
+
 	public void testReexportPackage() throws BundleException {
 		State state = buildEmptyState();
 		Hashtable manifest = new Hashtable();
@@ -1915,7 +1960,6 @@ public class StateResolverTest extends AbstractStateTest {
 		manifest.put(Constants.EXPORT_PACKAGE, "d");
 		manifest.put(Constants.REQUIRE_BUNDLE, "A1; visibility:=reexport");
 		BundleDescription d1_100 = state.getFactory().createBundleDescription(state, manifest, "d1_100", 3);
-
 
 		state.addBundle(a1_100);
 		state.addBundle(b1_100);
@@ -2011,7 +2055,6 @@ public class StateResolverTest extends AbstractStateTest {
 		assertTrue("2.1", b_updated.getResolvedImports()[0].getExporter() == systemB);
 	}
 
-
 	public void testPlatformPropertiesBug188075() throws BundleException, IOException {
 		State state = buildEmptyState();
 		int bundleID = 0;
@@ -2047,19 +2090,18 @@ public class StateResolverTest extends AbstractStateTest {
 		StateObjectFactory.defaultFactory.writeState(state, stateCache);
 		state = StateObjectFactory.defaultFactory.readState(stateCache);
 		props = state.getPlatformProperties()[0];
-		assertEquals("2.0", "value",  props.get("test"));
+		assertEquals("2.0", "value", props.get("test"));
 		BundleDescription aCache = state.getBundle("A", null);
 		BundleDescription bCache = state.getBundle("B", null);
 		assertFalse("2.1", aCache.isResolved());
 		assertTrue("2.2", bCache.isResolved());
 	}
 
-
 	private ExportPackageDescription[] isConsistent(ExportPackageDescription[] pkgs1, ExportPackageDescription[] pkgs2) {
 		for (int i = 0; i < pkgs1.length; i++)
 			for (int j = 0; j < pkgs2.length; j++)
 				if (pkgs1[i].getName().equals(pkgs2[j].getName()) && pkgs1[i] != pkgs2[j])
-					return new ExportPackageDescription[] {pkgs1[i], pkgs2[j]}; 
+					return new ExportPackageDescription[] {pkgs1[i], pkgs2[j]};
 		return null;
 	}
 

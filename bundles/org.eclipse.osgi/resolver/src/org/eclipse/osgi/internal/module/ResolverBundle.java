@@ -326,6 +326,14 @@ public class ResolverBundle extends VersionSupplier implements Comparable {
 			fragment.setNewFragmentExports(true);
 
 		initFragments();
+		// need to make sure there is not already another version of this fragment 
+		// already attached to this host
+		for (Iterator iFragments = fragments.iterator(); iFragments.hasNext();) {
+			ResolverBundle existingFragment = (ResolverBundle) iFragments.next();
+			String bsn = existingFragment.getName();
+			if (bsn != null && bsn.equals(fragment.getName()))
+				return new ResolverExport[0];
+		}
 		if (fragments.contains(fragment))
 			return new ResolverExport[0];
 		fragments.add(fragment);
