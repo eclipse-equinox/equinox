@@ -19,7 +19,8 @@ import java.util.*;
 import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.util.KeyedElement;
-import org.eclipse.osgi.service.resolver.*;
+import org.eclipse.osgi.service.resolver.BundleDescription;
+import org.eclipse.osgi.service.resolver.ResolverError;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 
@@ -427,7 +428,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 			completeStateChange();
 		}
 	}
-	
+
 	/**
 	 * Internal worker to stop a bundle.
 	 * 
@@ -714,10 +715,6 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 			BundleData newBundleData = storage.begin();
 			// Must call framework createBundle to check execution environment.
 			final AbstractBundle newBundle = framework.createAndVerifyBundle(newBundleData);
-			String[] nativepaths = framework.selectNativeCode(newBundle);
-			if (nativepaths != null) {
-				newBundleData.installNativeCode(nativepaths);
-			}
 			boolean exporting;
 			int st = getState();
 			synchronized (bundles) {
@@ -752,9 +749,9 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 			try {
 				storage.undo();
 				if (reloaded) /*
-				 * if we loaded from the new version of the
-				 * bundle
-				 */{
+							 * if we loaded from the new version of the
+							 * bundle
+							 */{
 					synchronized (bundles) {
 						reload(oldBundle); /* revert to old version */
 					}
@@ -1147,9 +1144,9 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 						start = System.currentTimeMillis();
 					}
 					statechangeLock.wait(5000); /*
-					 * wait for other thread to
-					 * finish changing state
-					 */
+									 * wait for other thread to
+									 * finish changing state
+									 */
 					if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 						long end = System.currentTimeMillis();
 						if (end - start > 0)
@@ -1172,9 +1169,9 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 			if (stateChanging != null) {
 				stateChanging = null;
 				statechangeLock.notify(); /*
-				 * notify one waiting thread that the
-				 * state change is complete
-				 */
+							 * notify one waiting thread that the
+							 * state change is complete
+							 */
 			}
 		}
 	}
@@ -1535,7 +1532,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 					fileStart = 0;
 				else if (lastSlash != entry.length() - 1)
 					fileStart = lastSlash + 1;
-				else { 
+				else {
 					fileEnd = lastSlash; // leave the lastSlash out
 					if (secondToLastSlash < 0)
 						fileStart = 0;
@@ -1560,17 +1557,20 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 		private static final long serialVersionUID = 7201911791818929100L;
 		private int code;
 		private Object status;
+
 		BundleStatusException(String message, int code, Object status) {
 			super(message);
 			this.code = code;
 			this.status = status;
 		}
+
 		public Object getStatus() {
 			return status;
 		}
+
 		public int getStatusCode() {
 			return code;
 		}
-		
+
 	}
 }

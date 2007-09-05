@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2006 IBM Corporation and others.
+ * Copyright (c) 2003, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -111,6 +111,11 @@ public class BundleDescriptionImpl extends BaseDescriptionImpl implements Bundle
 		if (lazyData.genericCapabilities == null)
 			return EMPTY_GENERICDESCS;
 		return lazyData.genericCapabilities;
+	}
+
+	public NativeCodeSpecification getNativeCodeSpecification() {
+		fullyLoad();
+		return lazyData.nativeCode;
 	}
 
 	public ExportPackageDescription[] getExportPackages() {
@@ -249,6 +254,19 @@ public class BundleDescriptionImpl extends BaseDescriptionImpl implements Bundle
 		if (genericRequires != null)
 			for (int i = 0; i < genericRequires.length; i++)
 				((VersionConstraintImpl) genericRequires[i]).setBundle(this);
+	}
+
+	protected void setNativeCodeSpecification(NativeCodeSpecification nativeCode) {
+		checkLazyData();
+		lazyData.nativeCode = nativeCode;
+		if (nativeCode != null) {
+			((NativeCodeSpecificationImpl) nativeCode).setBundle(this);
+			NativeCodeDescription[] suppliers = nativeCode.getPossibleSuppliers();
+			if (suppliers != null)
+				for (int i = 0; i < suppliers.length; i++)
+					((NativeCodeDescriptionImpl) suppliers[i]).setSupplier(this);
+		}
+
 	}
 
 	protected int getStateBits() {
@@ -450,7 +468,7 @@ public class BundleDescriptionImpl extends BaseDescriptionImpl implements Bundle
 		synchronized (reader) {
 			if (isFullyLoaded()) {
 				reader.setAccessedFlag(true); // set reader accessed flag
-			return;
+				return;
 			}
 			try {
 				reader.fullyLoad(this);
@@ -543,6 +561,7 @@ public class BundleDescriptionImpl extends BaseDescriptionImpl implements Bundle
 		ImportPackageSpecification[] importPackages;
 		GenericDescription[] genericCapabilities;
 		GenericSpecification[] genericRequires;
+		NativeCodeSpecification nativeCode;
 
 		ExportPackageDescription[] selectedExports;
 		BundleDescription[] resolvedRequires;

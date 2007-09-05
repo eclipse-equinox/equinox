@@ -170,4 +170,9 @@ public class ReadOnlyState implements State {
 	public long getHighestBundleId() {
 		return target.getHighestBundleId();
 	}
+
+	public void setNativePathsInvalid(NativeCodeDescription nativeCodeDescription, boolean hasInvalidPaths) {
+		throw new UnsupportedOperationException();
+	}
+
 }

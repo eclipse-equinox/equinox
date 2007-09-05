@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2006 IBM Corporation and others.
+ * Copyright (c) 2004, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,13 +10,12 @@
  *******************************************************************************/
 package org.eclipse.osgi.service.resolver;
 
-
 /**
  * A helper class that provides convenience methods for manipulating 
  * state objects. <code>PlatformAdmin</code> provides an access point
  * for a state helper.
  * <p>
- * Clients should not implement this interface.
+ * This interface is not intended to be implemented by clients.
  * </p>
  * @since 3.1
  * @see PlatformAdmin#getStateHelper

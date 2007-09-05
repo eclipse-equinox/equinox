@@ -10,9 +10,14 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.bundles;
 
+import java.io.*;
 import junit.framework.Test;
 import junit.framework.TestSuite;
+import org.eclipse.osgi.internal.baseadaptor.StateManager;
+import org.eclipse.osgi.service.resolver.PlatformAdmin;
+import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.ServiceReference;
 
 public class NativeCodeBundleTests extends AbstractBundleTests {
 	public static Test suite() {
@@ -27,7 +32,7 @@ public class NativeCodeBundleTests extends AbstractBundleTests {
 
 		installer.updateBundle("nativetest.a1", "nativetest.a2");
 		nativetestA1.start();
-		nativetestA1.stop();		
+		nativetestA1.stop();
 		Object[] a2Results = simpleResults.getResults(1);
 		assertTrue("1.0", a1Results.length == 1);
 		assertTrue("1.1", a2Results.length == 1);
@@ -44,12 +49,87 @@ public class NativeCodeBundleTests extends AbstractBundleTests {
 
 		installer.updateBundle("nativetest.b1", "nativetest.b2");
 		nativetestB1.start();
-		nativetestB1.stop();		
+		nativetestB1.stop();
 		Object[] b2Results = simpleResults.getResults(1);
 		assertTrue("1.0", b1Results.length == 1);
 		assertTrue("1.1", b2Results.length == 1);
 		assertNotNull("1.2", b1Results[0]);
 		assertNotNull("1.3", b2Results[0]);
 		assertFalse("1.4", b1Results[0].equals(b2Results[0]));
+	}
+
+	public void testNativeCode03() throws Exception {
+		System.setProperty("nativecodetest", "1");
+		setPlatformProperties();
+		Bundle nativetestC = installer.installBundle("nativetest.c");
+		nativetestC.start();
+		nativetestC.stop();
+		Object[] results = simpleResults.getResults(1);
+
+		assertTrue("1.0", results.length == 1);
+		assertEquals("1.1", "libs.test1", getContent((String) results[0]));
+	}
+
+	public void testNativeCode04() throws Exception {
+		System.setProperty("nativecodetest", "unresolved");
+		setPlatformProperties();
+		Bundle nativetestC = installer.installBundle("nativetest.c");
+		installer.resolveBundles(new Bundle[] {nativetestC});
+		assertTrue("1.0", nativetestC.getState() == Bundle.INSTALLED);
+	}
+
+	public void testNativeCode05() throws Exception {
+		System.setProperty("nativecodetest", "2");
+		setPlatformProperties();
+		Bundle nativetestC = installer.installBundle("nativetest.c");
+		nativetestC.start();
+		nativetestC.stop();
+		Object[] results = simpleResults.getResults(1);
+
+		assertTrue("1.0", results.length == 1);
+		assertEquals("1.1", "libs.test3", getContent((String) results[0]));
+	}
+
+	public void testNativeCode06() throws Exception {
+		System.setProperty("nativecodetest", "3");
+		setPlatformProperties();
+		Bundle nativetestC = installer.installBundle("nativetest.c");
+		nativetestC.start();
+		nativetestC.stop();
+		Object[] results = simpleResults.getResults(1);
+
+		assertTrue("1.0", results.length == 1);
+		assertEquals("1.1", "libs.test2", getContent((String) results[0]));
+	}
+
+	public void testNativeCode07() throws Exception {
+		Bundle nativetestC = installer.installBundle("nativetest.d");
+		nativetestC.start();
+		nativetestC.stop();
+		Object[] results = simpleResults.getResults(1);
+
+		assertTrue("1.0", results.length == 1);
+		assertNull("1.1", results[0]);
+	}
+
+	private void setPlatformProperties() {
+		ServiceReference ref = OSGiTestsActivator.getContext().getServiceReference(PlatformAdmin.class.getName());
+		if (ref != null) {
+			try {
+				StateManager stateManager = (StateManager) OSGiTestsActivator.getContext().getService(ref);
+				stateManager.getSystemState().setPlatformProperties(System.getProperties());
+			} finally {
+				OSGiTestsActivator.getContext().ungetService(ref);
+			}
+		}
+	}
+
+	private String getContent(String file) throws IOException {
+		BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+		try {
+			return br.readLine();
+		} finally {
+			br.close();
+		}
 	}
 }

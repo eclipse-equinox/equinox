@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2006 IBM Corporation and others.
+ * Copyright (c) 2003, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,9 @@ package org.eclipse.osgi.service.resolver;
 /**
  * ResolverErrors represent a single error that prevents a bundle from resolving
  * in a <code>State</code> object.
+ *  * <p>
+ * This interface is not intended to be implemented by clients.
+ * </p>
  * @since 3.2
  */
 public interface ResolverError {
@@ -120,6 +123,18 @@ public interface ResolverError {
 	 * resolved because the required generic capability could not be resolved.
 	 */
 	public static final int MISSING_GENERIC_CAPABILITY = 0x8000;
+
+	/**
+	 * Error type constant (bit mask) indicating that a bundle could not be
+	 * resolved because no match was found for the  native code specification.
+	 */
+	public static final int NO_NATIVECODE_MATCH = 0x10000;
+
+	/**
+	 * Error type constant (bit mask) indicating that a bundle could not be
+	 * resolved because the matching native code paths are invalid.
+	 */
+	public static final int INVALID_NATIVECODE_PATHS = 0x20000;
 
 	/**
 	 * Returns the bundle which this ResolverError is for

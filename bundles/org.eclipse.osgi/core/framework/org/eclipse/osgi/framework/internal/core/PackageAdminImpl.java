@@ -345,8 +345,17 @@ public class PackageAdminImpl implements PackageAdmin {
 				applyRemovalPending(bundleDeltas[i]);
 			if ((type & BundleDelta.RESOLVED) != 0) {
 				AbstractBundle bundle = setResolved(bundleDeltas[i].getBundle());
-				if (bundle != null && bundle.isResolved())
+				if (bundle != null && bundle.isResolved()) {
+					NativeCodeSpecification nativeCode = bundleDeltas[i].getBundle().getNativeCodeSpecification();
+					if (nativeCode != null && nativeCode.getSupplier() != null)
+						try {
+							BundleData data = bundle.getBundleData();
+							data.installNativeCode(((NativeCodeDescription) nativeCode.getSupplier()).getNativePaths());
+						} catch (BundleException e) {
+							framework.publishFrameworkEvent(FrameworkEvent.ERROR, bundle, e);
+						}
 					results.add(bundle);
+				}
 			}
 		}
 		return (AbstractBundle[]) (results.size() == 0 ? null : results.toArray(new AbstractBundle[results.size()]));

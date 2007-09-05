@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2006 IBM Corporation and others.
+ * Copyright (c) 2003, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -101,6 +101,8 @@ class StateBuilder {
 		result.setGenericRequires(createGenericRequires(genericRequires));
 		ManifestElement[] genericCapabilities = getGenericCapabilities(manifest, genericAliases);
 		result.setGenericCapabilities(createGenericCapabilities(genericCapabilities));
+		ManifestElement[] nativeCode = ManifestElement.parseHeader(Constants.BUNDLE_NATIVECODE, (String) manifest.get(Constants.BUNDLE_NATIVECODE));
+		result.setNativeCodeSpecification(createNativeCode(nativeCode));
 		return result;
 	}
 
@@ -474,6 +476,50 @@ class StateBuilder {
 			}
 		}
 		return (GenericDescription[]) results.toArray(new GenericDescription[results.size()]);
+	}
+
+	private static NativeCodeSpecification createNativeCode(ManifestElement[] nativeCode) throws BundleException {
+		if (nativeCode == null)
+			return null;
+		NativeCodeSpecificationImpl result = new NativeCodeSpecificationImpl();
+		result.setName(Constants.BUNDLE_NATIVECODE);
+		int length = nativeCode.length;
+		boolean optional = false;
+		if (length > 0 && nativeCode[length - 1].getValue().equals("*")) { //$NON-NLS-1$
+			result.setOptional(true);
+			length--;
+		}
+		NativeCodeDescriptionImpl[] suppliers = new NativeCodeDescriptionImpl[length];
+		for (int i = 0; i < length; i++) {
+			suppliers[i] = createNativeCodeDescription(nativeCode[i]);
+		}
+		result.setPossibleSuppliers(suppliers);
+		return result;
+	}
+
+	private static NativeCodeDescriptionImpl createNativeCodeDescription(ManifestElement manifestElement) throws BundleException {
+		NativeCodeDescriptionImpl result = new NativeCodeDescriptionImpl();
+		result.setName(Constants.BUNDLE_NATIVECODE);
+		result.setNativePaths(manifestElement.getValueComponents());
+		result.setOSNames(manifestElement.getAttributes(Constants.BUNDLE_NATIVECODE_OSNAME));
+		result.setProcessors(manifestElement.getAttributes(Constants.BUNDLE_NATIVECODE_PROCESSOR));
+		result.setOSVersions(createVersionRanges(manifestElement.getAttributes(Constants.BUNDLE_NATIVECODE_OSVERSION)));
+		result.setLanguages(manifestElement.getAttributes(Constants.BUNDLE_NATIVECODE_LANGUAGE));
+		try {
+			result.setFilter(manifestElement.getAttribute(Constants.SELECTION_FILTER_ATTRIBUTE));
+		} catch (InvalidSyntaxException e) {
+			throw new BundleException(Constants.SELECTION_FILTER_ATTRIBUTE, e);
+		}
+		return result;
+	}
+
+	private static VersionRange[] createVersionRanges(String[] ranges) {
+		if (ranges == null)
+			return null;
+		VersionRange[] result = new VersionRange[ranges.length];
+		for (int i = 0; i < result.length; i++)
+			result[i] = new VersionRange(ranges[i]);
+		return result;
 	}
 
 	private static VersionRange getVersionRange(String versionRange) {

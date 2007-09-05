@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2006 IBM Corporation and others.
+ * Copyright (c) 2003, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,7 +13,8 @@ package org.eclipse.osgi.service.resolver;
 /**
  * This class represents a specific version of a bundle in the system.
  * <p>
- * Clients may implement this interface.
+ * This interface is not intended to be implemented by clients.  The
+ * {@link StateObjectFactory} should be used to construct instances.
  * </p>
  * @since 3.1
  */
@@ -227,4 +228,12 @@ public interface BundleDescription extends BaseDescription {
 	 * @return the list of execution environments that are required.
 	 */
 	public String[] getExecutionEnvironments();
+
+	/**
+	 *  Returns the native code specification for this bundle.  A value
+	 *  of <code>null</code> is returned if there is no native code
+	 *  specification.
+	 * @return the native code specification.
+	 */
+	public NativeCodeSpecification getNativeCodeSpecification();
 }

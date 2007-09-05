@@ -17,7 +17,8 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.*;
 import org.eclipse.core.runtime.adaptor.LocationManager;
-import org.eclipse.osgi.baseadaptor.*;
+import org.eclipse.osgi.baseadaptor.BaseAdaptor;
+import org.eclipse.osgi.baseadaptor.BaseData;
 import org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry;
 import org.eclipse.osgi.baseadaptor.bundlefile.ZipBundleFile;
 import org.eclipse.osgi.baseadaptor.hooks.AdaptorHook;
@@ -33,7 +34,7 @@ import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 
-public class BaseStorageHook implements StorageHook, AdaptorHook{
+public class BaseStorageHook implements StorageHook, AdaptorHook {
 	public static final String KEY = BaseStorageHook.class.getName();
 	public static final int HASHCODE = KEY.hashCode();
 	public static final int DEL_BUNDLE_STORE = 0x01;
@@ -212,19 +213,23 @@ public class BaseStorageHook implements StorageHook, AdaptorHook{
 	}
 
 	public void installNativePaths(String[] installPaths) throws BundleException {
+		validateNativePaths(installPaths);
 		this.nativePaths = installPaths;
-		for (int i = 0; i < installPaths.length; i++) {
-			if (installPaths[i].startsWith(EXTERNAL_LIB_PREFIX)) {
-				String path = substituteVars(installPaths[i].substring(EXTERNAL_LIB_PREFIX.length()));
+	}
+
+	public void validateNativePaths(String[] nativePaths) throws BundleException {
+		for (int i = 0; i < nativePaths.length; i++) {
+			if (nativePaths[i].startsWith(EXTERNAL_LIB_PREFIX)) {
+				String path = substituteVars(nativePaths[i].substring(EXTERNAL_LIB_PREFIX.length()));
 				File nativeFile = new File(path);
 				if (!nativeFile.exists())
 					throw new BundleException(NLS.bind(AdaptorMsg.BUNDLE_NATIVECODE_EXCEPTION, nativeFile.getAbsolutePath()));
 				continue; // continue to next path
 			}
 			// ensure the file exists in the bundle; it will get extracted later on demand
-			BundleEntry nativeEntry = bundleData.getBundleFile().getEntry(installPaths[i]);
+			BundleEntry nativeEntry = bundleData.getBundleFile().getEntry(nativePaths[i]);
 			if (nativeEntry == null)
-				throw new BundleException(NLS.bind(AdaptorMsg.BUNDLE_NATIVECODE_EXCEPTION, installPaths[i]));
+				throw new BundleException(NLS.bind(AdaptorMsg.BUNDLE_NATIVECODE_EXCEPTION, nativePaths[i]));
 		}
 	}
 

@@ -21,6 +21,9 @@ import org.osgi.framework.*;
 
 public class StateObjectFactoryImpl implements StateObjectFactory {
 
+	/**
+	 * @deprecated
+	 */
 	public BundleDescription createBundleDescription(Dictionary manifest, String location, long id) throws BundleException {
 		return createBundleDescription(null, manifest, location, id);
 	}
@@ -31,16 +34,26 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		return result;
 	}
 
+	/**
+	 * @deprecated
+	 */
 	public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location, BundleSpecification[] required, HostSpecification host, ImportPackageSpecification[] imports, ExportPackageDescription[] exports, String[] providedPackages, boolean singleton) {
 		return createBundleDescription(id, symbolicName, version, location, required, host, imports, exports, providedPackages, singleton, true, true, null, null, null, null);
 	}
 
+	/**
+	 * @deprecated
+	 */
 	public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location, BundleSpecification[] required, HostSpecification host, ImportPackageSpecification[] imports, ExportPackageDescription[] exports, String[] providedPackages, boolean singleton, boolean attachFragments, boolean dynamicFragments, String platformFilter, String executionEnvironment, GenericSpecification[] genericRequires, GenericDescription[] genericCapabilities) {
 		// bug 154137 we need to parse the executionEnvironment param; no need to check for null, ManifestElement does that for us.
 		return createBundleDescription(id, symbolicName, version, location, required, host, imports, exports, singleton, attachFragments, dynamicFragments, platformFilter, ManifestElement.getArrayFromList(executionEnvironment), genericRequires, genericCapabilities);
 	}
 
 	public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location, BundleSpecification[] required, HostSpecification host, ImportPackageSpecification[] imports, ExportPackageDescription[] exports, boolean singleton, boolean attachFragments, boolean dynamicFragments, String platformFilter, String[] executionEnvironments, GenericSpecification[] genericRequires, GenericDescription[] genericCapabilities) {
+		return createBundleDescription(id, symbolicName, version, location, required, host, imports, exports, singleton, attachFragments, dynamicFragments, platformFilter, executionEnvironments, genericRequires, genericCapabilities, null);
+	}
+
+	public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location, BundleSpecification[] required, HostSpecification host, ImportPackageSpecification[] imports, ExportPackageDescription[] exports, boolean singleton, boolean attachFragments, boolean dynamicFragments, String platformFilter, String[] executionEnvironments, GenericSpecification[] genericRequires, GenericDescription[] genericCapabilities, NativeCodeSpecification nativeCode) {
 		BundleDescriptionImpl bundle = new BundleDescriptionImpl();
 		bundle.setBundleId(id);
 		bundle.setSymbolicName(symbolicName);
@@ -57,6 +70,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		bundle.setExecutionEnvironments(executionEnvironments);
 		bundle.setGenericRequires(genericRequires);
 		bundle.setGenericCapabilities(genericCapabilities);
+		bundle.setNativeCodeSpecification(nativeCode);
 		return bundle;
 	}
 
@@ -91,7 +105,34 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		bundle.setExecutionEnvironments(original.getExecutionEnvironments());
 		bundle.setGenericCapabilities(createGenericCapabilities(original.getGenericCapabilities()));
 		bundle.setGenericRequires(createGenericRequires(original.getGenericRequires()));
+		bundle.setNativeCodeSpecification(createNativeCodeSpecification(original.getNativeCodeSpecification()));
 		return bundle;
+	}
+
+	private NativeCodeSpecification createNativeCodeSpecification(NativeCodeSpecification original) {
+		if (original == null)
+			return null;
+		NativeCodeSpecificationImpl result = new NativeCodeSpecificationImpl();
+		result.setName(original.getName());
+		result.setOptional(original.isOptional());
+		NativeCodeDescription[] originalDescriptions = original.getPossibleSuppliers();
+		NativeCodeDescriptionImpl[] newDescriptions = new NativeCodeDescriptionImpl[originalDescriptions.length];
+		for (int i = 0; i < originalDescriptions.length; i++) {
+			newDescriptions[i] = new NativeCodeDescriptionImpl();
+			newDescriptions[i].setName(originalDescriptions[i].getName());
+			newDescriptions[i].setNativePaths(originalDescriptions[i].getNativePaths());
+			newDescriptions[i].setProcessors(originalDescriptions[i].getProcessors());
+			newDescriptions[i].setOSNames(originalDescriptions[i].getOSNames());
+			newDescriptions[i].setOSVersions(originalDescriptions[i].getOSVersions());
+			newDescriptions[i].setLanguages(originalDescriptions[i].getLanguages());
+			try {
+				newDescriptions[i].setFilter(originalDescriptions[i].getFilter().toString());
+			} catch (InvalidSyntaxException e) {
+				// this is already tested from the orginal filter
+			}
+		}
+		result.setPossibleSuppliers(newDescriptions);
+		return result;
 	}
 
 	private GenericDescription[] createGenericCapabilities(GenericDescription[] genericCapabilities) {
@@ -227,12 +268,35 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		return result;
 	}
 
+	public NativeCodeDescription createNativeCodeDescription(String[] nativePaths, String[] processors, String[] osNames, VersionRange[] osVersions, String[] languages, String filter) throws InvalidSyntaxException {
+		NativeCodeDescriptionImpl result = new NativeCodeDescriptionImpl();
+		result.setName(Constants.BUNDLE_NATIVECODE);
+		result.setNativePaths(nativePaths);
+		result.setProcessors(processors);
+		result.setOSNames(osNames);
+		result.setOSVersions(osVersions);
+		result.setLanguages(languages);
+		result.setFilter(filter);
+		return result;
+	}
+
+	public NativeCodeSpecification createNativeCodeSpecification(NativeCodeDescription[] nativeCodeDescriptions, boolean optional) {
+		NativeCodeSpecificationImpl result = new NativeCodeSpecificationImpl();
+		result.setName(Constants.BUNDLE_NATIVECODE);
+		result.setOptional(optional);
+		result.setPossibleSuppliers(nativeCodeDescriptions);
+		return result;
+	}
+
 	public SystemState createSystemState() {
 		SystemState state = new SystemState();
 		state.setFactory(this);
 		return state;
 	}
 
+	/**
+	 * @deprecated
+	 */
 	public State createState() {
 		return internalCreateState();
 	}
@@ -271,10 +335,16 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		return restoredState;
 	}
 
+	/**
+	 * @deprecated
+	 */
 	public State readState(InputStream stream) throws IOException {
 		return internalReadStateDeprecated(internalCreateState(), new DataInputStream(stream), -1);
 	}
 
+	/**
+	 * @deprecated
+	 */
 	public State readState(DataInputStream stream) throws IOException {
 		return internalReadStateDeprecated(internalCreateState(), stream, -1);
 	}
@@ -315,6 +385,9 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		return toRestore;
 	}
 
+	/**
+	 * @deprecated
+	 */
 	public void writeState(State state, DataOutputStream stream) throws IOException {
 		internalWriteStateDeprecated(state, stream);
 	}
@@ -328,6 +401,9 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		writer.saveState((StateImpl) state, stateFile, lazyFile);
 	}
 
+	/**
+	 * @deprecated
+	 */
 	public void writeState(State state, OutputStream stream) throws IOException {
 		internalWriteStateDeprecated(state, new DataOutputStream(stream));
 	}

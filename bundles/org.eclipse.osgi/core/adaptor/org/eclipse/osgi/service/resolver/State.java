@@ -20,7 +20,8 @@ import org.osgi.framework.Version;
  * presented to the resolver relative to this state (i.e., both resolved and
  * unresolved).
  * <p>
- * Clients may implement this interface.
+ * This interface is not intended to be implemented by clients.  The
+ * {@link StateObjectFactory} should be used to construct instances.
  * </p>
  * @since 3.1
  */
@@ -366,16 +367,31 @@ public interface State {
 
 	/**
 	 * Sets the platform properties of the state.  The platform properties
-	 * are used to match platform filters that are specified in Eclipse-PlatformFilter
-	 * bundle manifest header.  The following propreties are supported by the
-	 * state: <p>
-	 * osgi.nl - the platform language setting<br>
-	 * osgi.os - the platform operating system<br>
-	 * osgi.arch - the platform architecture<br>
-	 * osgi.ws - the platform windowing system<br>
-	 * org.osgi.framework.system.packages - the packages exported by the system bundle <br>
-	 * osgi.resolverMode - the resolver mode.  A value of "strict" will set the resolver mode to strict.<br>
-	 * org.osgi.framework.executionenvironment - the comma separated list of supported execution environments <br>
+	 * are used to resolve the following constraints:
+	 * <ul>
+	 * <li> The execution environment requirements (i.e. Bundle-RequiredExecutionEnvironment).</li>
+	 * <li>The platform filter requirements (i.e. Eclipse-PlatformFilter).</li>
+	 * <li>The native code requirements (i.e. Bundle-NativeCode).</li>
+	 * </ul>
+	 * Arbitrary keys  may be used in the platform properties but the following keys have a specified meaning:
+	 * <ul>
+	 * <li>osgi.nl - the platform language setting.</li>
+	 * <li>osgi.os - the platform operating system.</li>
+	 * <li>osgi.arch - the platform architecture.</li>
+	 * <li>osgi.ws - the platform windowing system.</li>
+	 * <li>osgi.resolverMode - the resolver mode.  A value of "strict" will set the resolver mode to strict.</li>
+	 * <li>org.osgi.framework.system.packages - the packages exported by the system bundle.</li>
+	 * <li>org.osgi.framework.executionenvironment - the comma separated list of supported execution environments.  
+	 * This property is then used to resolve the required execution environment the bundles in a state.</li>
+	 * <li>org.osgi.framework.os.name - the name of the operating system.  This property is used to resolve the osname attribute of 
+	 * bundle native code (i.e. Bundle-NativeCode).</li>
+	 * <li>org.osgi.framework.os.version - the version of the operating system.  This property is used to resolve the osversion attribute 
+	 * of bundle native code (i.e. Bundle-NativeCode).</li>
+	 * <li>org.osgi.framework.processor - the processor name.  This property is used to resolve the processor attribute 
+	 * of bundle native code (i.e. Bundle-NativeCode).</li>
+	 * <li>org.osgi.framework.language - the language being used.  This property is used to resolve the language attribute 
+	 * of bundle native code (i.e. Bundle-NativeCode).</li>
+	 * </ul>
 	 * <p>
 	 * The values used for the supported properties can be <tt>String</tt> type
 	 * to specify a single value for the property or they can by <tt>String[]</tt>
@@ -389,9 +405,7 @@ public interface State {
 
 	/**
 	 * Sets the platform properties of the state to a list of platform properties.  
-	 * The platform properties are used to match platform filters that are specified 
-	 * in Eclipse-PlatformFilter bundle manifest header. 
-	 * @see #setPlatformProperties(Dictionary) for a list of supported properties.  
+	 * @see #setPlatformProperties(Dictionary)
 	 * 
 	 * @param platformProperties a set of platform properties for the state
 	 * @return false if the platformProperties specified do not change any of the
@@ -439,4 +453,16 @@ public interface State {
 	 * @since 3.3
 	 */
 	public long getHighestBundleId();
+
+	/**
+	 * Sets the native code paths of a native code description as invalid.  Native
+	 * code paths are invalid if they can not be found in the bundle content.
+	 * <p>
+	 * The framework, or some other entity which has access to bundle content,
+	 * will call this method to validate or invalidate native code paths.
+	 * </p>
+	 * @param nativeCodeDescription the native code description.
+	 * @param hasInvalidNativePaths true if the native code paths are invalid; false otherwise.
+	 */
+	public void setNativePathsInvalid(NativeCodeDescription nativeCodeDescription, boolean hasInvalidNativePaths);
 }

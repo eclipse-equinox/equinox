@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2005 IBM Corporation and others.
+ * Copyright (c) 2003, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,7 +16,8 @@ import java.util.Map;
  * A representation of one package import constraint as seen in a 
  * bundle manifest and managed by a state and resolver.
  * <p>
- * Clients may implement this interface.
+ * This interface is not intended to be implemented by clients.  The
+ * {@link StateObjectFactory} should be used to construct instances.
  * </p>
  * @since 3.1
  */
@@ -32,7 +33,7 @@ public interface ImportPackageSpecification extends VersionConstraint {
 	/**
 	 * The dynamic resolution directive value.
 	 */
-	public static final String RESOLUTION_DYNAMIC  = "dynamic"; //$NON-NLS-1$
+	public static final String RESOLUTION_DYNAMIC = "dynamic"; //$NON-NLS-1$
 
 	/**
 	 * Returns the symbolic name of the bundle this import package must be resolved to.

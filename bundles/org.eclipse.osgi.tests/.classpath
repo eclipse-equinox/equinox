@@ -31,6 +31,8 @@
 	<classpathentry kind="src" output="bundle_tests/nativetest.a2" path="bundles_src/nativetest.a2"/>
 	<classpathentry kind="src" output="bundle_tests/nativetest.b1" path="bundles_src/nativetest.b1"/>
 	<classpathentry kind="src" output="bundle_tests/nativetest.b2" path="bundles_src/nativetest.b2"/>
+	<classpathentry kind="src" output="bundle_tests/nativetest.c" path="bundles_src/nativetest.c"/>
+	<classpathentry kind="src" output="bundle_tests/nativetest.d" path="bundles_src/nativetest.d"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="output" path="bin"/>

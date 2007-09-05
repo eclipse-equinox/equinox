@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2005 IBM Corporation and others.
+ * Copyright (c) 2004, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,6 +31,8 @@ public class StateMsg extends NLS {
 	public static String RES_ERROR_USES_CONFLICT;
 	public static String RES_ERROR_SINGLETON_CONFLICT;
 	public static String RES_ERROR_PLATFORM_FILTER;
+	public static String RES_ERROR_NO_NATIVECODE_MATCH;
+	public static String RES_ERROR_NATIVECODE_PATH_INVALID;
 	public static String RES_ERROR_UNKNOWN;
 
 	static {

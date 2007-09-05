@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2006 IBM Corporation and others.
+ * Copyright (c) 2003, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -109,7 +109,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 	SecureAction secureAction = (SecureAction) AccessController.doPrivileged(SecureAction.createSecureAction());
 	// cache of AdminPermissions keyed by Bundle ID
 	private HashMap adminPermissions = new HashMap();
-	
+
 	// we need to hold these so that we can unregister them at shutdown
 	private StreamHandlerFactory streamHandlerFactory;
 	private ContentHandlerFactory contentHandlerFactory;
@@ -130,14 +130,14 @@ public class Framework implements EventDispatcher, EventPublisher {
 
 		public GetDataFileAction(AbstractBundle bundle, String filename) {
 			this.bundle = bundle;
-			this.filename= filename;
+			this.filename = filename;
 		}
 
 		public Object run() {
 			return bundle.getBundleData().getDataFile(filename);
 		}
 	}
-	
+
 	/**
 	 * Constructor for the Framework instance. This method initializes the
 	 * framework to an unlaunched state.
@@ -333,7 +333,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 
 	private void setBootDelegation() {
 		// set the compatibility boot delegation flag
-		compatibiltyBootDelegation = "true".equals(FrameworkProperties.getProperty(Constants.OSGI_COMPATIBILITY_BOOTDELEGATION));  //$NON-NLS-1$
+		compatibiltyBootDelegation = "true".equals(FrameworkProperties.getProperty(Constants.OSGI_COMPATIBILITY_BOOTDELEGATION)); //$NON-NLS-1$
 		// set the boot delegation according to the osgi boot delegation property
 		String bootDelegationProp = properties.getProperty(Constants.OSGI_BOOTDELEGATION);
 		if (bootDelegationProp == null)
@@ -419,7 +419,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 				else {
 					// look for JavaSE if 1.6 or greater; otherwise look for J2SE
 					Version v16 = new Version("1.6"); //$NON-NLS-1$
-					 javaEdition = J2SE;
+					javaEdition = J2SE;
 					try {
 						javaVersion = new Version(javaSpecVersion);
 						if (v16.compareTo(javaVersion) <= 0)
@@ -502,8 +502,8 @@ public class Framework implements EventDispatcher, EventPublisher {
 		URL result = systemBundle.getEntry(entry);
 		if (result == null) {
 			// Check the ClassLoader in case we're launched off the Java boot classpath
-			ClassLoader loader=getClass().getClassLoader();
-			result = loader==null ? ClassLoader.getSystemResource(entry) : loader.getResource(entry);
+			ClassLoader loader = getClass().getClassLoader();
+			result = loader == null ? ClassLoader.getSystemResource(entry) : loader.getResource(entry);
 		}
 		return result;
 	}
@@ -642,54 +642,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 				throw new BundleException(NLS.bind(Msg.BUNDLE_INSTALL_SAME_UNIQUEID, new Object[] {installedBundle.getSymbolicName(), installedBundle.getVersion().toString(), installedBundle.getLocation()}));
 			}
 		}
-		verifyExecutionEnvironment(bundledata.getManifest());
 		return AbstractBundle.createBundle(bundledata, this);
-	}
-
-	/**
-	 * Verifies that the framework supports one of the required Execution
-	 * Environments
-	 * 
-	 * @param manifest
-	 *            BundleManifest of the bundle to verify the Execution
-	 *            Enviroment for
-	 * @return boolean true if the required Execution Enviroment is available.
-	 * @throws BundleException
-	 *             if the framework does not support the required Execution
-	 *             Environment.
-	 */
-	protected boolean verifyExecutionEnvironment(Dictionary manifest) throws BundleException {
-		if (!Boolean.valueOf(FrameworkProperties.getProperty(Constants.ECLIPSE_EE_INSTALL_VERIFY, Boolean.TRUE.toString())).booleanValue()) //$NON-NLS-1$
-			return true;
-		String headerValue = (String) manifest.get(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT);
-		/* If no required EE is in the manifest return true */
-		if (headerValue == null) {
-			return true;
-		}
-		ManifestElement[] bundleRequiredEE = ManifestElement.parseHeader(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT, headerValue);
-		if (bundleRequiredEE.length == 0) {
-			return true;
-		}
-		String systemEE = FrameworkProperties.getProperty(Constants.FRAMEWORK_EXECUTIONENVIRONMENT);
-		if (systemEE != null && !systemEE.equals("")) { //$NON-NLS-1$
-			ManifestElement[] systemEEs = ManifestElement.parseHeader(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT, systemEE);
-			for (int i = 0; i < systemEEs.length; i++) {
-				for (int j = 0; j < bundleRequiredEE.length; j++) {
-					if (systemEEs[i].getValue().equals(bundleRequiredEE[j].getValue())) {
-						return true;
-					}
-				}
-			}
-		}
-		/* If we got here then no matching EE is available, throw exception. */
-		StringBuffer bundleEE = new StringBuffer(25);
-		for (int i = 0; i < bundleRequiredEE.length; i++) {
-			if (i > 0) {
-				bundleEE.append(","); //$NON-NLS-1$
-			}
-			bundleEE.append(bundleRequiredEE[i].getValue());
-		}
-		throw new BundleException(NLS.bind(Msg.BUNDLE_INSTALL_REQUIRED_EE_EXCEPTION, bundleEE.toString()));
 	}
 
 	/**
@@ -913,14 +866,6 @@ public class Framework implements EventDispatcher, EventPublisher {
 					bundleStats.watchBundle(bundle, BundleWatcher.START_INSTALLING);
 			}
 			try {
-				// Select the native code paths for the bundle;
-				// this is not done by the adaptor because this
-				// should be a static algorithm spec'ed by OSGi
-				// that we do not allow to be adapted.
-				String[] nativepaths = selectNativeCode(bundle);
-				if (nativepaths != null) {
-					bundledata.installNativeCode(nativepaths);
-				}
 				bundle.load();
 				if (System.getSecurityManager() != null) {
 					final boolean extension = (bundledata.getType() & (BundleData.TYPE_BOOTCLASSPATH_EXTENSION | BundleData.TYPE_FRAMEWORK_EXTENSION)) != 0;
@@ -969,72 +914,6 @@ public class Framework implements EventDispatcher, EventPublisher {
 			throw new BundleException(t.getMessage(), t);
 		}
 		return bundle;
-	}
-
-	/**
-	 * Selects a native code clause and return a list of the bundle entries for
-	 * native code to be installed.
-	 * 
-	 * @param bundle
-	 *            Bundle's manifest
-	 * @return a list of Strings of the bundle entries to install or <tt>null</tt>
-	 *         if there are no native code clauses.
-	 * @throws BundleException
-	 *             If there is no suitable clause.
-	 */
-	String[] selectNativeCode(org.osgi.framework.Bundle bundle) throws BundleException {
-		String headerValue = (String) ((AbstractBundle) bundle).getBundleData().getManifest().get(Constants.BUNDLE_NATIVECODE);
-		if (headerValue == null) {
-			return (null);
-		}
-		ManifestElement[] elements = ManifestElement.parseHeader(Constants.BUNDLE_NATIVECODE, headerValue);
-		ArrayList bundleNativeCodes = new ArrayList(elements.length);
-		int length = elements.length;
-		boolean optional = false;
-		if (elements[length - 1].getValue().equals("*")) { //$NON-NLS-1$
-			optional = true;
-			length--;
-		}
-		String processor = getProperty(Constants.FRAMEWORK_PROCESSOR);
-		String osname = getProperty(Constants.FRAMEWORK_OS_NAME);
-		Version osversion;
-		try {
-			osversion = Version.parseVersion(getProperty(Constants.FRAMEWORK_OS_VERSION));
-		} catch (Exception e) {
-			osversion = Version.emptyVersion;
-		}
-		String language = getProperty(Constants.FRAMEWORK_LANGUAGE);
-		for (int i = 0; i < length; i++) {
-			BundleNativeCode bnc = new BundleNativeCode(elements[i], (AbstractBundle) bundle);
-			// Pass 1: perform processor/osname/filter matching
-			// Pass 2: perform osversion matching
-			// Pass 3: perform language matching
-			// If there is not a match on all three, then the native code clause is not selected.
-			if (bnc.matchProcessorOSNameFilter(processor, osname) > 0 && bnc.matchOSVersion(osversion) != null && bnc.matchLanguage(language) > 0)
-				bundleNativeCodes.add(bnc);
-		}
-
-		if (bundleNativeCodes.size() == 0)
-			return noMatches(optional);
-		// find the highest ranking one with priority on the osversion then the language
-		Iterator iter = bundleNativeCodes.iterator();
-		BundleNativeCode highestRanking = (BundleNativeCode) iter.next();
-		while (iter.hasNext()) {
-			BundleNativeCode bnc = (BundleNativeCode) iter.next();
-			if (isBncGreaterThan(bnc, highestRanking, osversion, language))
-				highestRanking = bnc;
-		}
-		return highestRanking.getPaths();
-	}
-
-	private boolean isBncGreaterThan(BundleNativeCode candidate, BundleNativeCode highestRanking, Version version, String language) {
-		Version currentHigh = highestRanking.matchOSVersion(version);
-		Version candidateHigh = candidate.matchOSVersion(version);
-		if (currentHigh.compareTo(candidateHigh) < 0)
-			return true;
-		if (highestRanking.matchLanguage(language) < candidate.matchLanguage(language))
-			return true;
-		return false;
 	}
 
 	/**
@@ -1332,7 +1211,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 	 */
 	protected File getDataFile(final AbstractBundle bundle, final String filename) {
 		return (File) AccessController.doPrivileged(new GetDataFileAction(bundle, filename));
-			}
+	}
 
 	/**
 	 * Check for specific AdminPermission (RFC 73)
@@ -1346,7 +1225,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 	// gets AdminPermission objects from a cache to reduce the number of AdminPermission
 	// objects that are created.
 	private AdminPermission getAdminPermission(Bundle bundle, String action) {
-		synchronized(adminPermissions) {
+		synchronized (adminPermissions) {
 			Long ID = new Long(bundle.getBundleId());
 			HashMap bundlePermissions = (HashMap) adminPermissions.get(ID);
 			if (bundlePermissions == null) {
@@ -1540,7 +1419,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 		}
 		/* Collect snapshot of BundleListeners; only if the event is NOT STARTING or STOPPING or LAZY_ACTIVATION */
 		ListenerQueue listenersAsync = null;
-		if (bundleEvent != null && (event.getType() & (BundleEvent.STARTING | BundleEvent.STOPPING | BundleEvent.LAZY_ACTIVATION)) == 0)  {
+		if (bundleEvent != null && (event.getType() & (BundleEvent.STARTING | BundleEvent.STOPPING | BundleEvent.LAZY_ACTIVATION)) == 0) {
 			/* queue to hold set of listeners */
 			listenersAsync = new ListenerQueue(eventManager);
 			/* queue to hold set of BundleContexts w/ listeners */
@@ -1659,13 +1538,6 @@ public class Framework implements EventDispatcher, EventPublisher {
 		}
 	}
 
-	private String[] noMatches(boolean optional) throws BundleException {
-		if (optional) {
-			return null;
-		}
-		throw new BundleException(Msg.BUNDLE_NATIVECODE_MATCH_EXCEPTION);
-	}
-
 	private void initializeContextFinder() {
 		Thread current = Thread.currentThread();
 		Throwable error = null;
@@ -1739,15 +1611,15 @@ public class Framework implements EventDispatcher, EventPublisher {
 		contentHandlerFactory = chf;
 	}
 
-	private static void forceContentHandlerFactory(ContentHandlerFactory chf) throws Exception{
+	private static void forceContentHandlerFactory(ContentHandlerFactory chf) throws Exception {
 		Field factoryField = getStaticField(URLConnection.class, java.net.ContentHandlerFactory.class);
 		if (factoryField == null)
 			throw new Exception("Could not find ContentHandlerFactory field"); //$NON-NLS-1$
-		synchronized(URLConnection.class) {
+		synchronized (URLConnection.class) {
 			java.net.ContentHandlerFactory factory = (java.net.ContentHandlerFactory) factoryField.get(null);
 			// doing a null check here just in case, but it would be really strange if it was null, 
 			// because we failed to set the factory normally!!
-			
+
 			if (factory != null) {
 				try {
 					factory.getClass().getMethod("isMultiplexing", null); //$NON-NLS-1$
@@ -1763,7 +1635,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 			factoryField.set(null, null);
 			// always attempt to clear the handlers cache
 			// This allows an optomization for the single framework use-case
-			resetContentHandlers();					
+			resetContentHandlers();
 			URLConnection.setContentHandlerFactory(factory);
 		}
 	}
@@ -1772,10 +1644,10 @@ public class Framework implements EventDispatcher, EventPublisher {
 		try {
 			Field factoryField = getStaticField(URLConnection.class, java.net.ContentHandlerFactory.class);
 			if (factoryField == null)
-				return;  // oh well, we tried.
-			synchronized(URLConnection.class) {
+				return; // oh well, we tried.
+			synchronized (URLConnection.class) {
 				java.net.ContentHandlerFactory factory = (java.net.ContentHandlerFactory) factoryField.get(null);
-				
+
 				if (factory == contentHandlerFactory) {
 					factory = (java.net.ContentHandlerFactory) contentHandlerFactory.designateSuccessor();
 				} else {
@@ -1792,12 +1664,12 @@ public class Framework implements EventDispatcher, EventPublisher {
 				// Also it appears most java libraries actually do not clear the cache
 				// when setContentHandlerFactory is called, go figure!!
 				resetContentHandlers();
-				if (factory != null) 
+				if (factory != null)
 					URLConnection.setContentHandlerFactory(factory);
 			}
 		} catch (Exception e) {
 			// ignore and continue closing the framework
-		}		
+		}
 	}
 
 	private static void resetContentHandlers() throws IllegalAccessException {
@@ -1826,13 +1698,13 @@ public class Framework implements EventDispatcher, EventPublisher {
 		streamHandlerFactory = shf;
 	}
 
-	private static void forceURLStreamHandlerFactory(StreamHandlerFactory shf) throws Exception{
+	private static void forceURLStreamHandlerFactory(StreamHandlerFactory shf) throws Exception {
 		Field factoryField = getStaticField(URL.class, URLStreamHandlerFactory.class);
 		if (factoryField == null)
 			throw new Exception("Could not find URLStreamHandlerFactory field"); //$NON-NLS-1$
 		// look for a lock to synchronize on
 		Object lock = getURLStreamHandlerFactoryLock();
-		synchronized(lock) {
+		synchronized (lock) {
 			URLStreamHandlerFactory factory = (URLStreamHandlerFactory) factoryField.get(null);
 			// doing a null check here just in case, but it would be really strange if it was null, 
 			// because we failed to set the factory normally!!
@@ -1876,7 +1748,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 				// but we want to be sure to clear it here just in case the parent is null.
 				// In this case the call below would not occur.
 				resetURLStreamHandlers();
-				if (factory != null) 
+				if (factory != null)
 					URL.setURLStreamHandlerFactory(factory);
 			}
 		} catch (Exception e) {
@@ -1896,7 +1768,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 		}
 		return lock;
 	}
-	
+
 	private static void resetURLStreamHandlers() throws IllegalAccessException {
 		Field handlersField = getStaticField(URL.class, Hashtable.class);
 		if (handlersField != null) {

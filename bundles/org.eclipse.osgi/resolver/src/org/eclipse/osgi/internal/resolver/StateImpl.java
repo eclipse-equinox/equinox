@@ -23,7 +23,7 @@ import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.*;
 
 public abstract class StateImpl implements State {
-	public static final String[] PROPS = {"osgi.os", "osgi.ws", "osgi.nl", "osgi.arch", Constants.OSGI_FRAMEWORK_SYSTEM_PACKAGES, Constants.OSGI_RESOLVER_MODE, Constants.FRAMEWORK_EXECUTIONENVIRONMENT, "osgi.resolveOptional", "osgi.genericAliases"}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
+	public static final String[] PROPS = {"osgi.os", "osgi.ws", "osgi.nl", "osgi.arch", Constants.OSGI_FRAMEWORK_SYSTEM_PACKAGES, Constants.OSGI_RESOLVER_MODE, Constants.FRAMEWORK_EXECUTIONENVIRONMENT, "osgi.resolveOptional", "osgi.genericAliases", Constants.FRAMEWORK_OS_NAME, Constants.FRAMEWORK_OS_VERSION, Constants.FRAMEWORK_PROCESSOR, Constants.FRAMEWORK_LANGUAGE}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
 	transient private Resolver resolver;
 	transient private StateDeltaImpl changes;
 	transient private boolean resolving = false;
@@ -61,6 +61,15 @@ public abstract class StateImpl implements State {
 				addPlatformPropertyKeys(filter.getAttributes());
 			} catch (InvalidSyntaxException e) {
 				// ignore this is handled in another place
+			}
+		}
+		NativeCodeSpecification nativeCode = description.getNativeCodeSpecification();
+		if (nativeCode != null) {
+			NativeCodeDescription[] suppliers = nativeCode.getPossibleSuppliers();
+			for (int i = 0; i < suppliers.length; i++) {
+				FilterImpl filter = (FilterImpl) suppliers[i].getFilter();
+				if (filter != null)
+					addPlatformPropertyKeys(filter.getAttributes());
 			}
 		}
 		resolved = false;
@@ -548,29 +557,37 @@ public abstract class StateImpl implements State {
 	synchronized boolean setPlatformProperties(Dictionary[] platformProperties, boolean resetSystemExports) {
 		if (platformProperties.length == 0)
 			throw new IllegalArgumentException();
-		// copy the properties for our use internally
+		// copy the properties for our use internally;
+		// only copy String and String[] values
 		Dictionary[] newPlatformProperties = new Dictionary[platformProperties.length];
 		for (int i = 0; i < platformProperties.length; i++) {
 			newPlatformProperties[i] = new Hashtable(platformProperties[i].size());
 			synchronized (platformProperties[i]) {
 				for (Enumeration keys = platformProperties[i].keys(); keys.hasMoreElements();) {
 					Object key = keys.nextElement();
-					newPlatformProperties[i].put(key, platformProperties[i].get(key));
+					Object value = platformProperties[i].get(key);
+					if (value instanceof String || value instanceof String[])
+						newPlatformProperties[i].put(key, value);
 				}
 			}
 		}
 		boolean result = false;
+		boolean performResetSystemExports = false;
 		if (this.platformProperties.length != newPlatformProperties.length) {
 			result = true;
+			performResetSystemExports = true;
 		} else {
 			// we need to see if any of the existing filter prop keys have changed
 			String[] keys = getPlatformPropertyKeys();
-			for (int i = 0; i < newPlatformProperties.length && !result; i++)
+			for (int i = 0; i < newPlatformProperties.length && !result; i++) {
 				result |= changedProps(this.platformProperties[i], newPlatformProperties[i], keys);
+				if (resetSystemExports)
+					performResetSystemExports |= checkProp(this.platformProperties[i].get(Constants.FRAMEWORK_SYSTEMPACKAGES), newPlatformProperties[i].get(Constants.FRAMEWORK_SYSTEMPACKAGES));
+			}
 		}
 		// always do a complete replacement of the properties in case new bundles are added that uses new filter props
 		this.platformProperties = newPlatformProperties;
-		if (resetSystemExports && result)
+		if (performResetSystemExports)
 			resetSystemExports();
 		return result;
 	}
@@ -775,4 +792,7 @@ public abstract class StateImpl implements State {
 		return highestBundleId;
 	}
 
+	public void setNativePathsInvalid(NativeCodeDescription nativeCodeDescription, boolean hasInvalidNativePaths) {
+		((NativeCodeDescriptionImpl) nativeCodeDescription).setInvalidNativePaths(hasInvalidNativePaths);
+	}
 }

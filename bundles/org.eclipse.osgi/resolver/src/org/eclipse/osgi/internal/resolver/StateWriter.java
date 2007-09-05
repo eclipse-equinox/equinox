@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2006 IBM Corporation and others.
+ * Copyright (c) 2003, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,8 +13,7 @@ package org.eclipse.osgi.internal.resolver;
 import java.io.*;
 import java.util.*;
 import org.eclipse.osgi.service.resolver.*;
-import org.osgi.framework.Constants;
-import org.osgi.framework.Version;
+import org.osgi.framework.*;
 
 class StateWriter {
 
@@ -297,6 +296,8 @@ class StateWriter {
 				writeGenericSpecification(genericRequires[i], out);
 		}
 
+		writeNativeCode(bundle.getNativeCodeSpecification(), out);
+
 		// save the size of the lazy data
 		((BundleDescriptionImpl) bundle).setLazyDataSize(out.size() - dataStart);
 	}
@@ -312,6 +313,7 @@ class StateWriter {
 		if (writePrefix(exportPackageDesc, out))
 			return;
 		writeBaseDescription(exportPackageDesc, out);
+		writeBundleDescription(exportPackageDesc.getExporter(), out, false);
 		out.writeBoolean(exportPackageDesc.isRoot());
 		writeMap(out, exportPackageDesc.getAttributes());
 		writeMap(out, exportPackageDesc.getDirectives());
@@ -321,6 +323,7 @@ class StateWriter {
 		if (writePrefix(description, out))
 			return;
 		writeBaseDescription(description, out);
+		writeBundleDescription(description.getSupplier(), out, false);
 		writeStringOrNull(description.getType() == GenericDescription.DEFAULT_TYPE ? null : description.getType(), out);
 		Dictionary attrs = description.getAttributes();
 		Map mapAttrs = new HashMap(attrs.size());
@@ -342,6 +345,54 @@ class StateWriter {
 				writeGenericDescription(suppliers[i], out);
 		out.writeInt(specification.getResolution());
 		writeStringOrNull(specification.getMatchingFilter(), out);
+	}
+
+	private void writeNativeCode(NativeCodeSpecification nativeCodeSpecification, DataOutputStream out) throws IOException {
+		if (nativeCodeSpecification == null) {
+			out.writeBoolean(false);
+			return;
+		}
+		out.writeBoolean(true);
+		out.writeBoolean(nativeCodeSpecification.isOptional());
+		NativeCodeDescription[] nativeDescs = nativeCodeSpecification.getPossibleSuppliers();
+		int numDescs = nativeDescs == null ? 0 : nativeDescs.length;
+		out.writeInt(numDescs);
+		int supplierIndex = -1;
+		for (int i = 0; i < numDescs; i++) {
+			if (nativeDescs[i] == nativeCodeSpecification.getSupplier())
+				supplierIndex = i;
+			writeNativeCodeDescription(nativeDescs[i], out);
+		}
+		out.writeInt(supplierIndex);
+	}
+
+	private void writeNativeCodeDescription(NativeCodeDescription nativeCodeDescription, DataOutputStream out) throws IOException {
+		writeBaseDescription(nativeCodeDescription, out);
+		writeBundleDescription(nativeCodeDescription.getSupplier(), out, false);
+		Filter filter = nativeCodeDescription.getFilter();
+		writeStringOrNull(filter == null ? null : filter.toString(), out);
+		writeStringArray(nativeCodeDescription.getLanguages(), out);
+		writeStringArray(nativeCodeDescription.getNativePaths(), out);
+		writeStringArray(nativeCodeDescription.getOSNames(), out);
+		writeVersionRanges(nativeCodeDescription.getOSVersions(), out);
+		writeStringArray(nativeCodeDescription.getProcessors(), out);
+		out.writeBoolean(nativeCodeDescription.hasInvalidNativePaths());
+	}
+
+	private void writeVersionRanges(VersionRange[] ranges, DataOutputStream out) throws IOException {
+		out.writeInt(ranges == null ? 0 : ranges.length);
+		if (ranges == null)
+			return;
+		for (int i = 0; i < ranges.length; i++)
+			writeVersionRange(ranges[i], out);
+	}
+
+	private void writeStringArray(String[] strings, DataOutputStream out) throws IOException {
+		out.writeInt(strings == null ? 0 : strings.length);
+		if (strings == null)
+			return;
+		for (int i = 0; i < strings.length; i++)
+			writeStringOrNull(strings[i], out);
 	}
 
 	private void writeMap(DataOutputStream out, Map source) throws IOException {

@@ -265,6 +265,28 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 			return false;
 		}
 
+		// check the native code specification
+		NativeCodeSpecification nativeCode = bundle.getNativeCodeSpecification();
+		if (nativeCode != null) {
+			NativeCodeDescription[] nativeCodeSuppliers = nativeCode.getPossibleSuppliers();
+			NativeCodeDescription highestRanked = null;
+			for (int i = 0; i < nativeCodeSuppliers.length; i++)
+				if (nativeCode.isSatisfiedBy(nativeCodeSuppliers[i]) && (highestRanked == null || highestRanked.compareTo(nativeCodeSuppliers[i]) < 0))
+					highestRanked = nativeCodeSuppliers[i];
+			if (highestRanked == null) {
+				if (!nativeCode.isOptional()) {
+					state.addResolverError(bundle, ResolverError.NO_NATIVECODE_MATCH, nativeCode.toString(), nativeCode);
+					return false;
+				}
+			} else {
+				if (highestRanked.hasInvalidNativePaths()) {
+					state.addResolverError(bundle, ResolverError.INVALID_NATIVECODE_PATHS, highestRanked.toString(), nativeCode);
+					return false;
+				}
+			}
+			state.resolveConstraint(nativeCode, highestRanked);
+		}
+
 		// check the platform filter
 		String platformFilter = bundle.getPlatformFilter();
 		if (platformFilter == null)

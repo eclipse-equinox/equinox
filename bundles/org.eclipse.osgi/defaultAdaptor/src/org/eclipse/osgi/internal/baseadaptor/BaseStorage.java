@@ -19,7 +19,8 @@ import java.util.*;
 import org.eclipse.core.runtime.adaptor.EclipseStarter;
 import org.eclipse.core.runtime.adaptor.LocationManager;
 import org.eclipse.core.runtime.internal.adaptor.EclipseAdaptorMsg;
-import org.eclipse.osgi.baseadaptor.*;
+import org.eclipse.osgi.baseadaptor.BaseAdaptor;
+import org.eclipse.osgi.baseadaptor.BaseData;
 import org.eclipse.osgi.baseadaptor.bundlefile.*;
 import org.eclipse.osgi.baseadaptor.hooks.*;
 import org.eclipse.osgi.framework.adaptor.*;
@@ -613,8 +614,8 @@ public class BaseStorage implements SynchronousBundleListener {
 		if (result == null && content instanceof File) {
 			File file = (File) content;
 			if (file.isDirectory())
-				result =  new DirBundleFile(file);
-			else 
+				result = new DirBundleFile(file);
+			else
 				result = new ZipBundleFile(file, data);
 		}
 
@@ -939,7 +940,7 @@ public class BaseStorage implements SynchronousBundleListener {
 			cl.loadClass("thisIsNotAClass"); // initialize the new urls  //$NON-NLS-1$
 		} catch (ClassNotFoundException e) {
 			// do nothing
-		} 
+		}
 	}
 
 	/**
@@ -994,7 +995,7 @@ public class BaseStorage implements SynchronousBundleListener {
 			if (DevClassPathHelper.inDevelopmentMode()) { //$NON-NLS-1$
 				String[] devPaths = DevClassPathHelper.getDevClassPath(bundleData.getSymbolicName());
 				String[] origPaths = paths;
-				
+
 				paths = new String[origPaths.length + devPaths.length];
 				System.arraycopy(origPaths, 0, paths, 0, origPaths.length);
 				System.arraycopy(devPaths, 0, paths, origPaths.length, devPaths.length);
@@ -1035,17 +1036,94 @@ public class BaseStorage implements SynchronousBundleListener {
 			return;
 		}
 		State systemState = stateManager.getSystemState();
+		BundleDescription oldDescription = null;
+		BundleDescription newDescription = null;
 		switch (type) {
 			case BundleEvent.UPDATED :
-				systemState.removeBundle(bundleData.getBundleID());
+				oldDescription = systemState.removeBundle(bundleData.getBundleID());
 				// fall through to INSTALLED
 			case BundleEvent.INSTALLED :
-				BundleDescription newDescription = stateManager.getFactory().createBundleDescription(systemState, bundleData.getManifest(), bundleData.getLocation(), bundleData.getBundleID());
+				newDescription = stateManager.getFactory().createBundleDescription(systemState, bundleData.getManifest(), bundleData.getLocation(), bundleData.getBundleID());
 				systemState.addBundle(newDescription);
 				break;
 			case BundleEvent.UNINSTALLED :
 				systemState.removeBundle(bundleData.getBundleID());
 				break;
+		}
+
+		if (newDescription != null) {
+			boolean verified = false;
+			try {
+				verifyEEandNativeCode(newDescription, bundleData, systemState);
+				validateNativeCodePaths(newDescription, (BaseData) bundleData);
+				verified = true;
+			} finally {
+				if (!verified) {
+					if (newDescription != null)
+						systemState.removeBundle(newDescription);
+					if (oldDescription != null)
+						systemState.addBundle(oldDescription);
+				}
+			}
+		}
+	}
+
+	private void validateNativeCodePaths(BundleDescription newDescription, BaseData data) {
+		NativeCodeSpecification nativeCode = newDescription.getNativeCodeSpecification();
+		if (nativeCode == null)
+			return;
+		NativeCodeDescription nativeCodeDescs[] = nativeCode.getPossibleSuppliers();
+		for (int i = 0; i < nativeCodeDescs.length; i++) {
+			BaseStorageHook storageHook = (BaseStorageHook) data.getStorageHook(BaseStorageHook.KEY);
+			if (storageHook != null)
+				try {
+					storageHook.validateNativePaths(nativeCodeDescs[i].getNativePaths());
+				} catch (BundleException e) {
+					stateManager.getSystemState().setNativePathsInvalid(nativeCodeDescs[i], true);
+				}
+		}
+	}
+
+	private void verifyEEandNativeCode(BundleDescription newDescription, BundleData bundleData, State systemState) throws BundleException {
+		if (!Boolean.valueOf(FrameworkProperties.getProperty(Constants.ECLIPSE_EE_INSTALL_VERIFY, Boolean.TRUE.toString())).booleanValue() || newDescription == null)
+			return;
+		// do backwards compatibility for fail on install
+		// check EE
+		String[] ees = newDescription.getExecutionEnvironments();
+		if (ees.length > 0) {
+			String systemEE = FrameworkProperties.getProperty(Constants.FRAMEWORK_EXECUTIONENVIRONMENT);
+			if (systemEE != null && !systemEE.equals("")) { //$NON-NLS-1$
+				ManifestElement[] systemEEs = ManifestElement.parseHeader(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT, systemEE);
+				boolean matchedEE = false;
+				for (int i = 0; i < systemEEs.length && !matchedEE; i++)
+					for (int j = 0; j < ees.length & !matchedEE; j++)
+						if (systemEEs[i].getValue().equals(ees[j]))
+							matchedEE = true;
+				if (!matchedEE) {
+					StringBuffer bundleEE = new StringBuffer(25);
+					for (int i = 0; i < ees.length; i++) {
+						if (i > 0)
+							bundleEE.append(","); //$NON-NLS-1$
+						bundleEE.append(ees[i]);
+					}
+					throw new BundleException("Cannot match Execution Environment: " + bundleEE.toString()); //$NON-NLS-1$
+				}
+			}
+		}
+		// check native code
+		NativeCodeSpecification nativeCode = newDescription.getNativeCodeSpecification();
+		if (nativeCode != null) {
+			systemState.setPlatformProperties(new Dictionary[] {FrameworkProperties.getProperties()});
+			NativeCodeDescription[] nativeCodeSuppliers = nativeCode.getPossibleSuppliers();
+			NativeCodeDescription highestRanked = null;
+			for (int i = 0; i < nativeCodeSuppliers.length; i++)
+				if (nativeCode.isSatisfiedBy(nativeCodeSuppliers[i]) && (highestRanked == null || highestRanked.compareTo(nativeCodeSuppliers[i]) < 0))
+					highestRanked = nativeCodeSuppliers[i];
+			if (highestRanked == null) {
+				if (!nativeCode.isOptional())
+					throw new BundleException("Unsatisfied Bundle-NativeCode: " + nativeCode.toString()); //$NON-NLS-1$
+			} else
+				bundleData.installNativeCode(highestRanked.getNativePaths());
 		}
 	}
 
@@ -1161,10 +1239,10 @@ public class BaseStorage implements SynchronousBundleListener {
 			return;
 		BaseData data = (BaseData) ((AbstractBundle) event.getBundle()).getBundleData();
 		try {
-		if ((data.getType() & BundleData.TYPE_FRAMEWORK_EXTENSION) != 0)
-			processFrameworkExtension(data, EXTENSION_INITIALIZE);
-		else if ((data.getType() & BundleData.TYPE_BOOTCLASSPATH_EXTENSION) != 0)
-			processBootExtension(data, EXTENSION_INITIALIZE);
+			if ((data.getType() & BundleData.TYPE_FRAMEWORK_EXTENSION) != 0)
+				processFrameworkExtension(data, EXTENSION_INITIALIZE);
+			else if ((data.getType() & BundleData.TYPE_BOOTCLASSPATH_EXTENSION) != 0)
+				processBootExtension(data, EXTENSION_INITIALIZE);
 		} catch (BundleException e) {
 			// do nothing;
 		}

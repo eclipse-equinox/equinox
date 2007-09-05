@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2006 IBM Corporation and others.
+ * Copyright (c) 2003, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,7 +19,7 @@ import org.osgi.framework.*;
 /**
  * A factory for states and their component objects.  
  * <p>
- * Clients may implement this interface.
+ * This interface is not intended to be implemented by clients.
  * </p>
  * @since 3.1
  */
@@ -134,6 +134,28 @@ public interface StateObjectFactory {
 	 */
 	public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location, BundleSpecification[] required, HostSpecification host, ImportPackageSpecification[] imports, ExportPackageDescription[] exports, boolean singleton, boolean attachFragments, boolean dynamicFragments, String platformFilter, String[] executionEnvironments, GenericSpecification[] genericRequires, GenericDescription[] genericCapabilities);
 
+	/**
+	 * Creates a bundle description from the given parameters.
+	 * 
+	 * @param id id for the bundle 
+	 * @param symbolicName symbolic name for the bundle (may be  <code>null</code>) 
+	 * @param version version for the bundle (may be <code>null</code>)
+	 * @param location location for the bundle (may be <code>null</code>)
+	 * @param required version constraints for all required bundles (may be  <code>null</code>)
+	 * @param host version constraint specifying the host for the bundle to be created. Should be <code>null</code> if the bundle is not a fragment
+	 * @param imports version constraints for all packages imported  (may be <code>null</code>)
+	 * @param exports package descriptions of all the exported packages (may be <code>null</code>)
+	 * @param singleton whether the bundle created should be a singleton
+	 * @param attachFragments whether the bundle allows fragments to attach
+	 * @param dynamicFragments whether the bundle allows fragments to dynamically attach
+	 * @param platformFilter the platform filter (may be <code>null</code>)
+	 * @param executionEnvironments the execution environment (may be <code>null</code>)
+	 * @param genericRequires the version constraints for all required capabilities (may be <code>null</code>)
+	 * @param genericCapabilities the specifications of all the capabilities of the bundle (may be <code>null</code>)
+	 * @param nativeCode the native code specification of the bundle (may be <code>null</code>)
+	 * @return the created bundle description
+	 */
+	public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location, BundleSpecification[] required, HostSpecification host, ImportPackageSpecification[] imports, ExportPackageDescription[] exports, boolean singleton, boolean attachFragments, boolean dynamicFragments, String platformFilter, String[] executionEnvironments, GenericSpecification[] genericRequires, GenericDescription[] genericCapabilities, NativeCodeSpecification nativeCode);
 
 	/**
 	 * Returns a bundle description based on the information in the supplied manifest dictionary.
@@ -266,6 +288,27 @@ public interface StateObjectFactory {
 	 * @throws InvalidSyntaxException if the matching filter is invalid
 	 */
 	public GenericSpecification createGenericSpecification(String name, String type, String matchingFilter, boolean optional, boolean multiple) throws InvalidSyntaxException;
+
+	/**
+	 * Creates a native code specification from the given parameters
+	 * @param nativeCodeDescriptions the native code descriptors
+	 * @param optional whether the specification is optional
+	 * @return the created native code specification
+	 */
+	public NativeCodeSpecification createNativeCodeSpecification(NativeCodeDescription[] nativeCodeDescriptions, boolean optional);
+
+	/**
+	 * Creates a native code description from the given parameters
+	 * @param nativePaths the native code paths (may be <code>null</code>)
+	 * @param processors the supported processors (may be <code>null</code>)
+	 * @param osNames the supported operating system names (may be <code>null</code>)
+	 * @param osVersions the supported operating system version ranges (may be <code>null</code>)
+	 * @param languages the supported languages (may be <code>null</code>)
+	 * @param filter the selection filter (may be <code>null</code>)
+	 * @return the created native code description
+	 * @throws InvalidSyntaxException if the selection filter is invalid
+	 */
+	public NativeCodeDescription createNativeCodeDescription(String[] nativePaths, String[] processors, String[] osNames, VersionRange[] osVersions, String[] languages, String filter) throws InvalidSyntaxException;
 
 	/**
 	 * Creates an import package specification that is a copy of the given constraint

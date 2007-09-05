@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2006 IBM Corporation and others.
+ * Copyright (c) 2003, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,7 +40,7 @@ class StateReader {
 	private int numBundles;
 	private boolean accessedFlag = false;
 
-	public static final byte STATE_CACHE_VERSION = 26;
+	public static final byte STATE_CACHE_VERSION = 27;
 	public static final byte NULL = 0;
 	public static final byte OBJECT = 1;
 	public static final byte INDEX = 2;
@@ -330,6 +330,8 @@ class StateReader {
 			result.setGenericRequires(reqs);
 		}
 
+		result.setNativeCodeSpecification(readNativeCode(in));
+
 		result.setFullyLoaded(true); // set fully loaded before setting the dependencies
 		// No need to add bundle dependencies for hosts, imports or requires;
 		// This is done by readBundleDescription
@@ -356,6 +358,7 @@ class StateReader {
 		addToObjectTable(exportPackageDesc, tableIndex);
 		exportPackageDesc.setTableIndex(tableIndex);
 		readBaseDescription(exportPackageDesc, in);
+		exportPackageDesc.setExporter(readBundleDescription(in));
 		exportPackageDesc.setRoot(in.readBoolean());
 		exportPackageDesc.setAttributes(readMap(in));
 		exportPackageDesc.setDirectives(readMap(in));
@@ -456,6 +459,7 @@ class StateReader {
 		GenericDescriptionImpl result = new GenericDescriptionImpl();
 		addToObjectTable(result, tableIndex);
 		readBaseDescription(result, in);
+		result.setSupplier(readBundleDescription(in));
 		result.setType(readString(in, false));
 		Map mapAttrs = readMap(in);
 		Dictionary attrs = new Hashtable();
@@ -484,6 +488,60 @@ class StateReader {
 		} catch (InvalidSyntaxException e) {
 			// do nothing this filter was tested before
 		}
+		return result;
+	}
+
+	private NativeCodeSpecification readNativeCode(DataInputStream in) throws IOException {
+		if (!in.readBoolean())
+			return null;
+		NativeCodeSpecificationImpl result = new NativeCodeSpecificationImpl();
+		result.setOptional(in.readBoolean());
+		int numNativeDesc = in.readInt();
+		NativeCodeDescriptionImpl[] nativeDescs = new NativeCodeDescriptionImpl[numNativeDesc];
+		for (int i = 0; i < numNativeDesc; i++)
+			nativeDescs[i] = readNativeCodeDescription(in);
+		result.setPossibleSuppliers(nativeDescs);
+		int supplierIndex = in.readInt();
+		if (supplierIndex >= 0)
+			result.setSupplier(nativeDescs[supplierIndex]);
+		return result;
+	}
+
+	private NativeCodeDescriptionImpl readNativeCodeDescription(DataInputStream in) throws IOException {
+		NativeCodeDescriptionImpl result = new NativeCodeDescriptionImpl();
+		readBaseDescription(result, in);
+		result.setSupplier(readBundleDescription(in));
+		try {
+			result.setFilter(readString(in, false));
+		} catch (InvalidSyntaxException e) {
+			// do nothing, this filter was tested before
+		}
+		result.setLanguages(readStringArray(in));
+		result.setNativePaths(readStringArray(in));
+		result.setOSNames(readStringArray(in));
+		result.setOSVersions(readVersionRanges(in));
+		result.setProcessors(readStringArray(in));
+		result.setInvalidNativePaths(in.readBoolean());
+		return result;
+	}
+
+	private VersionRange[] readVersionRanges(DataInputStream in) throws IOException {
+		int num = in.readInt();
+		if (num == 0)
+			return null;
+		VersionRange[] result = new VersionRange[num];
+		for (int i = 0; i < num; i++)
+			result[i] = readVersionRange(in);
+		return result;
+	}
+
+	private String[] readStringArray(DataInputStream in) throws IOException {
+		int num = in.readInt();
+		if (num == 0)
+			return null;
+		String[] result = new String[num];
+		for (int i = 0; i < num; i++)
+			result[i] = readString(in, false);
 		return result;
 	}
 

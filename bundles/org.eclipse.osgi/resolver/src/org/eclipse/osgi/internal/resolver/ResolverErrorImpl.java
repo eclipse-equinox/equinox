@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006 IBM Corporation and others.
+ * Copyright (c) 2006, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,6 +18,7 @@ public class ResolverErrorImpl implements ResolverError {
 	private int type;
 	private String data;
 	private VersionConstraint unsatisfied;
+
 	public ResolverErrorImpl(BundleDescriptionImpl bundle, int type, String data, VersionConstraint unsatisfied) {
 		this.bundle = bundle;
 		this.data = data;
@@ -65,6 +66,10 @@ public class ResolverErrorImpl implements ResolverError {
 				return NLS.bind(StateMsg.RES_ERROR_SINGLETON_CONFLICT, getData());
 			case ResolverError.PLATFORM_FILTER :
 				return NLS.bind(StateMsg.RES_ERROR_PLATFORM_FILTER, getData());
+			case ResolverError.NO_NATIVECODE_MATCH :
+				return NLS.bind(StateMsg.RES_ERROR_NO_NATIVECODE_MATCH, getData());
+			case ResolverError.INVALID_NATIVECODE_PATHS :
+				return NLS.bind(StateMsg.RES_ERROR_NATIVECODE_PATH_INVALID, getData());
 			default :
 				return StateMsg.RES_ERROR_UNKNOWN;
 		}
