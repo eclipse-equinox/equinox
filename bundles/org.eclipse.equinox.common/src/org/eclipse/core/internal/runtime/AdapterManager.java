@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     David Green - fix factories with non-standard class loading (bug 200068) 
  *******************************************************************************/
 package org.eclipse.core.internal.runtime;
 
@@ -155,15 +156,28 @@ public final class AdapterManager implements IAdapterManager {
 	private Class classForName(IAdapterFactory factory, String typeName) {
 		Class clazz = cachedClassForName(factory, typeName);
 		if (clazz == null) {
-			try {
-				if (factory instanceof IAdapterFactoryExt)
-					factory = ((IAdapterFactoryExt) factory).loadFactory(false);
-				if (factory != null) {
+			if (factory instanceof IAdapterFactoryExt)
+				factory = ((IAdapterFactoryExt) factory).loadFactory(false);
+			if (factory != null) {
+				try {
 					clazz = factory.getClass().getClassLoader().loadClass(typeName);
-					cacheClassLookup(factory, clazz);
+				} catch (ClassNotFoundException e) {
+					// it is possible that the default bundle classloader is unaware of this class
+					// but the adaptor factory can load it in some other way. See bug 200068.
+					if (typeName == null)
+						return null;
+					Class[] adapterList = factory.getAdapterList();
+					clazz = null;
+					for (int i = 0; i < adapterList.length; i++) {
+						if (typeName.equals(adapterList[i].getName())) {
+							clazz = adapterList[i];
+							break;
+						}
+					}
+					if (clazz == null)
+						return null; // class not yet loaded
 				}
-			} catch (ClassNotFoundException e) {
-				// class not yet loaded
+				cacheClassLookup(factory, clazz);
 			}
 		}
 		return clazz;
