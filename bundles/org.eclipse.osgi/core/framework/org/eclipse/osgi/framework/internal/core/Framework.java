@@ -291,7 +291,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 		if (value == null) {
 			value = properties.getProperty(Constants.JVM_OS_ARCH);
 			if (value != null) {
-				properties.put(Constants.FRAMEWORK_PROCESSOR, value);
+				properties.put(Constants.FRAMEWORK_PROCESSOR, aliasMapper.aliasProcessor(value));
 			}
 		}
 		value = properties.getProperty(Constants.FRAMEWORK_OS_NAME);
@@ -315,10 +315,36 @@ public class Framework implements EventDispatcher, EventPublisher {
 		if (value == null) {
 			value = properties.getProperty(Constants.JVM_OS_VERSION);
 			if (value != null) {
+				// only use the value upto the first space
 				int space = value.indexOf(' ');
 				if (space > 0) {
 					value = value.substring(0, space);
 				}
+				// fix up cases where the os version does not make a valid Version string.
+				int major = 0, minor = 0, micro = 0;
+				String qualifier = ""; //$NON-NLS-1$
+				try {
+					StringTokenizer st = new StringTokenizer(value, ".", true); //$NON-NLS-1$
+					major = parseVersionInt(st.nextToken());
+
+					if (st.hasMoreTokens()) {
+						st.nextToken(); // consume delimiter
+						minor = parseVersionInt(st.nextToken());
+
+						if (st.hasMoreTokens()) {
+							st.nextToken(); // consume delimiter
+							micro = parseVersionInt(st.nextToken());
+
+							if (st.hasMoreTokens()) {
+								st.nextToken(); // consume delimiter
+								qualifier = st.nextToken();
+							}
+						}
+					}
+				} catch (NoSuchElementException e) {
+					// ignore, use the values parsed so far
+				}
+				value = new Version(major, minor, micro, qualifier).toString();
 				properties.put(Constants.FRAMEWORK_OS_VERSION, value);
 			}
 		}
@@ -329,6 +355,24 @@ public class Framework implements EventDispatcher, EventPublisher {
 		// set the support properties for fragments and require-bundle (bug 173090)
 		properties.put(Constants.SUPPORTS_FRAMEWORK_FRAGMENT, "true");
 		properties.put(Constants.SUPPORTS_FRAMEWORK_REQUIREBUNDLE, "true");
+	}
+
+	private int parseVersionInt(String value) {
+		try {
+			return Integer.parseInt(value);
+		} catch (NumberFormatException e) {
+			// try up to the first non-number char
+			StringBuffer sb = new StringBuffer(value.length());
+			char[] chars = value.toCharArray();
+			for (int i = 0; i < chars.length; i++) {
+				if (!Character.isDigit(chars[i]))
+					break;
+				sb.append(chars[i]);
+			}
+			if (sb.length() > 0)
+				return Integer.parseInt(sb.toString());
+			return 0;
+		}
 	}
 
 	private void setBootDelegation() {
