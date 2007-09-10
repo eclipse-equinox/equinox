@@ -484,7 +484,6 @@ class StateBuilder {
 		NativeCodeSpecificationImpl result = new NativeCodeSpecificationImpl();
 		result.setName(Constants.BUNDLE_NATIVECODE);
 		int length = nativeCode.length;
-		boolean optional = false;
 		if (length > 0 && nativeCode[length - 1].getValue().equals("*")) { //$NON-NLS-1$
 			result.setOptional(true);
 			length--;
