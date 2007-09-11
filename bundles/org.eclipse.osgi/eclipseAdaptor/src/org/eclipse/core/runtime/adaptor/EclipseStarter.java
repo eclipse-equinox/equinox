@@ -652,14 +652,20 @@ public class EclipseStarter {
 			int index = name.lastIndexOf('@');
 			if (index >= 0) {
 				String[] attributes = getArrayFromList(name.substring(index + 1, name.length()), ":"); //$NON-NLS-1$
-				name = name.substring(0, index);
 				for (int j = 0; j < attributes.length; j++) {
 					String attribute = attributes[j];
 					if (attribute.equals("start")) //$NON-NLS-1$
 						start = true;
-					else
-						level = Integer.parseInt(attribute);
+					else {
+						try {
+							level = Integer.parseInt(attribute);
+						} catch (NumberFormatException e) { // bug 188089
+							index = name.length();
+							continue;
+						}
+					}
 				}
+				name = name.substring(0, index);
 			}
 			URL location = searchForBundle(name, syspath);
 			if (location == null) {
