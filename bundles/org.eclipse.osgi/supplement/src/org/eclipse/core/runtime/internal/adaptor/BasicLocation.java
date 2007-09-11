@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2006 IBM Corporation and others.
+ * Copyright (c) 2004, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,21 +20,28 @@ import org.eclipse.osgi.service.datalocation.Location;
  * Internal class.
  */
 public class BasicLocation implements Location {
-	private static class MockLocker implements Locker {
+	static class MockLocker implements Locker {
 		public boolean lock() throws IOException {
 			// locking always successful
 			return true;
 		}
+
+		public boolean isLocked() {
+			// this lock is never locked
+			return false;
+		}
+
 		public void release() {
 			// nothing to release
 		}
 
 	}
-	private boolean isReadOnly;
+
+	final private boolean isReadOnly;
 	private URL location = null;
 	private Location parent;
-	private URL defaultValue;
-	private String property;
+	final private URL defaultValue;
+	final private String property;
 
 	// locking related fields
 	private File lockFile;
@@ -45,7 +52,7 @@ public class BasicLocation implements Location {
 
 	private static boolean isRunningWithNio() {
 		try {
-			 Class.forName("java.nio.channels.FileLock"); //$NON-NLS-1$
+			Class.forName("java.nio.channels.FileLock"); //$NON-NLS-1$
 		} catch (ClassNotFoundException e) {
 			return false;
 		}
@@ -55,28 +62,25 @@ public class BasicLocation implements Location {
 	public static Locker createLocker(File lock, String lockMode) {
 		if (lockMode == null)
 			lockMode = FrameworkProperties.getProperty(PROP_OSGI_LOCKING);
-		
+
 		if ("none".equals(lockMode)) //$NON-NLS-1$
 			return new MockLocker();
-		
+
 		if ("java.io".equals(lockMode)) //$NON-NLS-1$
 			return new Locker_JavaIo(lock);
-		
+
 		if ("java.nio".equals(lockMode)) { //$NON-NLS-1$
-			if (isRunningWithNio()) {
+			if (isRunningWithNio())
 				return new Locker_JavaNio(lock);
-			} else {
-				// TODO should we return null here.  NIO was requested but we could not do it...
-				return new Locker_JavaIo(lock);
-			}
-		} 
-		
-		//	Backup case if an invalid value has been specified
-		if (isRunningWithNio()) {
-			return new Locker_JavaNio(lock);
-		} else {
+			// TODO should we return null here.  NIO was requested but we could not do it...
 			return new Locker_JavaIo(lock);
 		}
+
+		//	Backup case if an invalid value has been specified
+		if (isRunningWithNio())
+			return new Locker_JavaNio(lock);
+		return new Locker_JavaIo(lock);
+
 	}
 
 	public BasicLocation(String property, URL defaultValue, boolean isReadOnly) {
@@ -94,7 +98,7 @@ public class BasicLocation implements Location {
 		return defaultValue;
 	}
 
-	public Location getParentLocation() {
+	public synchronized Location getParentLocation() {
 		return parent;
 	}
 
@@ -151,6 +155,15 @@ public class BasicLocation implements Location {
 		return lock(lockFile);
 	}
 
+	public synchronized boolean isLocked() throws IOException {
+		if (!isSet())
+			return false;
+		return isLocked(lockFile);
+	}
+
+	/*
+	 * This must be called while holding the synchronization lock for (this)
+	 */
 	private boolean lock(File lock) throws IOException {
 		if (lock == null || isReadOnly)
 			return false;
@@ -163,7 +176,7 @@ public class BasicLocation implements Location {
 		setLocker(lock);
 		if (locker == null)
 			return true;
-		boolean locked = false; 
+		boolean locked = false;
 		try {
 			locked = locker.lock();
 			return locked;
@@ -173,6 +186,21 @@ public class BasicLocation implements Location {
 		}
 	}
 
+	/*
+	 * This must be called while holding the synchronization lock for (this)
+	 */
+	private boolean isLocked(File lock) throws IOException {
+		if (lock == null || isReadOnly)
+			return true;
+		if (!lock.exists())
+			return false;
+		setLocker(lock);
+		return locker.isLocked();
+	}
+
+	/*
+	 * This must be called while holding the synchronization lock for (this)
+	 */
 	private void setLocker(File lock) {
 		if (locker != null)
 			return;
@@ -183,5 +211,11 @@ public class BasicLocation implements Location {
 	public synchronized void release() {
 		if (locker != null)
 			locker.release();
+	}
+
+	public Location createLocation(Location parentLocation, URL defaultLocation, boolean readonly) {
+		BasicLocation result = new BasicLocation(null, defaultLocation, readonly);
+		result.setParent(parentLocation);
+		return result;
 	}
 }

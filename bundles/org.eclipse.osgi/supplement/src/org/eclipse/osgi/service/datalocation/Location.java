@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2006 IBM Corporation and others.
+ * Copyright (c) 2004, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -139,4 +139,21 @@ public interface Location {
 	 * is taken.
 	 */
 	public void release();
+
+	/**
+	 * Returns <code>true</code> if this location is locked and <code>false</code>
+	 * otherwise.
+	 * @return boolean value indicating whether or not this location is locked
+	 * @throws IOException if there was an unexpected problem reading the lock
+	 */
+	public boolean isLocked() throws IOException;
+
+	/**
+	 * Constructs a new location.
+	 * @param parent the parent location.  A <code>null</code> value is allowed.
+	 * @param defaultValue the default value of the location. A <code>null</code> value is allowed.
+	 * @param readonly true if the location is read-only.
+	 * @return a new location.
+	 */
+	public Location createLocation(Location parent, URL defaultValue, boolean readonly);
 }

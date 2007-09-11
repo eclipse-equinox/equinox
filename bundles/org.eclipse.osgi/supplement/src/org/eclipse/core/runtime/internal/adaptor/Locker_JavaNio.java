@@ -20,7 +20,7 @@ import org.eclipse.osgi.util.NLS;
  * Internal class.
  */
 public class Locker_JavaNio implements Locker {
-	private File lockFile;
+	private final File lockFile;
 	private FileLock fileLock;
 	private RandomAccessFile raFile;
 
@@ -67,6 +67,29 @@ public class Locker_JavaNio implements Locker {
 				//don't complain, we're making a best effort to clean up
 			}
 			raFile = null;
+		}
+	}
+
+	public synchronized boolean isLocked() throws IOException {
+		if (fileLock != null)
+			return true;
+		try {
+			RandomAccessFile temp = new RandomAccessFile(lockFile, "rw"); //$NON-NLS-1$
+			FileLock tempLock = null;
+			try {
+				tempLock = temp.getChannel().tryLock();
+				if (tempLock != null) {
+					tempLock.release(); // allow IOException to propagate because that would mean it is still locked
+					return false;
+				}
+				return true;
+			} catch (OverlappingFileLockException e) {
+				return true;
+			} finally {
+				temp.close();
+			}
+		} catch (FileNotFoundException e) {
+			return false;
 		}
 	}
 }
