@@ -427,16 +427,18 @@ public class BundleLoader implements ClassLoaderDelegate {
 		// do buddy policy loading
 		if (result == null && policy != null)
 			result = policy.doBuddyClassLoading(name);
+		if (result != null)
+			return result;
 		// hack to support backwards compatibiility for bootdelegation
-		if (parentCL != null && checkParent && !bootDelegation && bundle.framework.compatibiltyBootDelegation)
+		// or last resort; do class context trick to work around VM bugs
+		if (parentCL != null && !bootDelegation && ((checkParent && bundle.framework.compatibiltyBootDelegation) || isRequestFromVM()))
 			// we don't need to continue if a CNFE is thrown here.
-			return parentCL.loadClass(name);
-		// last resort; do class context trick to work around VM bugs
-		if (parentCL != null && result == null && !bootDelegation && isRequestFromVM())
-			result = parentCL.loadClass(name);
-		if (result == null)
-			throw new ClassNotFoundException(name);
-		return result;
+			try {
+				return parentCL.loadClass(name);
+			} catch (ClassNotFoundException e) {
+				// we want to generate our own exception below
+			}
+		throw new ClassNotFoundException(name);
 	}
 
 	private boolean isRequestFromVM() {
@@ -527,13 +529,13 @@ public class BundleLoader implements ClassLoaderDelegate {
 		// do buddy policy loading
 		if (result == null && policy != null)
 			result = policy.doBuddyResourceLoading(name);
+		if (result != null)
+			return result;
 		// hack to support backwards compatibiility for bootdelegation
-		if (parentCL != null && checkParent && !bootDelegation && bundle.framework.compatibiltyBootDelegation)
+		// or last resort; do class context trick to work around VM bugs
+		if (parentCL != null && !bootDelegation && ((checkParent && bundle.framework.compatibiltyBootDelegation) || isRequestFromVM()))
 			// we don't need to continue if the resource is not found here
 			return parentCL.getResource(name);
-		// last resort; do class context trick to work around VM bugs
-		if (parentCL != null && result == null && !bootDelegation && isRequestFromVM())
-			result = parentCL.getResource(name);
 		return result;
 	}
 
