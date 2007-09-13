@@ -912,7 +912,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 			try {
 				bundle.load();
 				if (System.getSecurityManager() != null) {
-					final boolean extension = (bundledata.getType() & (BundleData.TYPE_BOOTCLASSPATH_EXTENSION | BundleData.TYPE_FRAMEWORK_EXTENSION)) != 0;
+					final boolean extension = (bundledata.getType() & (BundleData.TYPE_BOOTCLASSPATH_EXTENSION | BundleData.TYPE_FRAMEWORK_EXTENSION | BundleData.TYPE_EXTCLASSPATH_EXTENSION)) != 0;
 					// must check for AllPermission before allow a bundle extension to be installed
 					if (extension && !bundle.hasPermission(new AllPermission()))
 						throw new BundleException(Msg.BUNDLE_EXTENSION_PERMISSION, new SecurityException(Msg.BUNDLE_EXTENSION_PERMISSION));
@@ -958,7 +958,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 			throw new BundleException(t.getMessage(), t);
 		}
 		return bundle;
-	}
+		}
 
 	/**
 	 * Retrieve the bundle that has the given unique identifier.
@@ -1578,7 +1578,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 				}
 				BundleContextImpl context = (BundleContextImpl) l;
 				publishFrameworkEvent(FrameworkEvent.ERROR, context.bundle, t);
-			}
+	}
 		}
 	}
 

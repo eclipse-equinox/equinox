@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2005 IBM Corporation and others.
+ * Copyright (c) 2003, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,8 +17,6 @@ import java.net.URL;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import org.osgi.framework.*;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleException;
 
 /**
  * The <code>BundleData</code> represents a single bundle that is persistently 
@@ -35,14 +33,15 @@ import org.osgi.framework.BundleException;
 public interface BundleData {
 
 	/** The BundleData is for a fragment bundle */
-	public static final int TYPE_FRAGMENT =					0x00000001;
+	public static final int TYPE_FRAGMENT = 0x00000001;
 	/** The BundleData is for a framework extension bundle */
-	public static final int TYPE_FRAMEWORK_EXTENSION =		0x00000002;
+	public static final int TYPE_FRAMEWORK_EXTENSION = 0x00000002;
 	/** The BundleData is for a bootclasspath extension bundle */
-	public static final int TYPE_BOOTCLASSPATH_EXTENSION =	0x00000004;
+	public static final int TYPE_BOOTCLASSPATH_EXTENSION = 0x00000004;
 	/** The BundleData is for a singleton bundle */
-	public static final int TYPE_SINGLETON =				0x00000008;
-	
+	public static final int TYPE_SINGLETON = 0x00000008;
+	/** The BundleData is for an extension classpath bundle */
+	public static final int TYPE_EXTCLASSPATH_EXTENSION = 0x00000010;
 
 	/**
 	 * Creates the ClassLoader for the BundleData.  The ClassLoader created

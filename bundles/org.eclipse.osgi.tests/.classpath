@@ -40,7 +40,11 @@
 	<classpathentry kind="src" output="bundle_tests/xfriends.test1" path="bundles_src/xfriends.test1"/>
 	<classpathentry kind="src" output="bundle_tests/xfriends.test2" path="bundles_src/xfriends.test2"/>
 	<classpathentry kind="src" output="bundle_tests/xfriends.test3" path="bundles_src/xfriends.test3"/>
+	<classpathentry kind="src" output="bundle_tests/ext.framework.a" path="bundles_src/ext.framework.a"/>
+	<classpathentry kind="src" output="bundle_tests/ext.framework.a.importer" path="bundles_src/ext.framework.a.importer"/>
+	<classpathentry kind="src" output="bundle_tests/ext.extclasspath.a" path="bundles_src/ext.extclasspath.a"/>
+	<classpathentry kind="src" output="bundle_tests/ext.extclasspath.a.importer" path="bundles_src/ext.extclasspath.a.importer"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.4"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

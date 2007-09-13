@@ -598,7 +598,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 			Debug.println("update location " + bundledata.getLocation()); //$NON-NLS-1$
 		}
 		framework.checkAdminPermission(this, AdminPermission.LIFECYCLE);
-		if ((bundledata.getType() & (BundleData.TYPE_BOOTCLASSPATH_EXTENSION | BundleData.TYPE_FRAMEWORK_EXTENSION)) != 0)
+		if ((bundledata.getType() & (BundleData.TYPE_BOOTCLASSPATH_EXTENSION | BundleData.TYPE_FRAMEWORK_EXTENSION | BundleData.TYPE_EXTCLASSPATH_EXTENSION)) != 0)
 			// need special permission to update extensions
 			framework.checkAdminPermission(this, AdminPermission.EXTENSIONLIFECYCLE);
 		checkValid();
@@ -646,7 +646,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 			Debug.println("   from: " + in); //$NON-NLS-1$
 		}
 		framework.checkAdminPermission(this, AdminPermission.LIFECYCLE);
-		if ((bundledata.getType() & (BundleData.TYPE_BOOTCLASSPATH_EXTENSION | BundleData.TYPE_FRAMEWORK_EXTENSION)) != 0)
+		if ((bundledata.getType() & (BundleData.TYPE_BOOTCLASSPATH_EXTENSION | BundleData.TYPE_FRAMEWORK_EXTENSION | BundleData.TYPE_EXTCLASSPATH_EXTENSION)) != 0)
 			// need special permission to update extensions
 			framework.checkAdminPermission(this, AdminPermission.EXTENSIONLIFECYCLE);
 		checkValid();
@@ -724,7 +724,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 			// indicate we have loaded from the new version of the bundle
 			reloaded = true;
 			if (System.getSecurityManager() != null) {
-				final boolean extension = (bundledata.getType() & (BundleData.TYPE_BOOTCLASSPATH_EXTENSION | BundleData.TYPE_FRAMEWORK_EXTENSION)) != 0;
+				final boolean extension = (bundledata.getType() & (BundleData.TYPE_BOOTCLASSPATH_EXTENSION | BundleData.TYPE_FRAMEWORK_EXTENSION | BundleData.TYPE_EXTCLASSPATH_EXTENSION)) != 0;
 				// must check for AllPermission before allow a bundle extension to be updated
 				if (extension && !hasPermission(new AllPermission()))
 					throw new BundleException(Msg.BUNDLE_EXTENSION_PERMISSION, new SecurityException(Msg.BUNDLE_EXTENSION_PERMISSION));
@@ -749,9 +749,9 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 			try {
 				storage.undo();
 				if (reloaded) /*
-							 * if we loaded from the new version of the
-							 * bundle
-							 */{
+																 * if we loaded from the new version of the
+																 * bundle
+																 */{
 					synchronized (bundles) {
 						reload(oldBundle); /* revert to old version */
 					}
@@ -821,7 +821,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 			Debug.println("uninstall location: " + bundledata.getLocation()); //$NON-NLS-1$
 		}
 		framework.checkAdminPermission(this, AdminPermission.LIFECYCLE);
-		if ((bundledata.getType() & (BundleData.TYPE_BOOTCLASSPATH_EXTENSION | BundleData.TYPE_FRAMEWORK_EXTENSION)) != 0)
+		if ((bundledata.getType() & (BundleData.TYPE_BOOTCLASSPATH_EXTENSION | BundleData.TYPE_FRAMEWORK_EXTENSION | BundleData.TYPE_EXTCLASSPATH_EXTENSION)) != 0)
 			// need special permission to uninstall extensions
 			framework.checkAdminPermission(this, AdminPermission.EXTENSIONLIFECYCLE);
 		checkValid();
@@ -1144,9 +1144,9 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 						start = System.currentTimeMillis();
 					}
 					statechangeLock.wait(5000); /*
-									 * wait for other thread to
-									 * finish changing state
-									 */
+																					 * wait for other thread to
+																					 * finish changing state
+																					 */
 					if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 						long end = System.currentTimeMillis();
 						if (end - start > 0)
@@ -1169,9 +1169,9 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 			if (stateChanging != null) {
 				stateChanging = null;
 				statechangeLock.notify(); /*
-							 * notify one waiting thread that the
-							 * state change is complete
-							 */
+																 * notify one waiting thread that the
+																 * state change is complete
+																 */
 			}
 		}
 	}

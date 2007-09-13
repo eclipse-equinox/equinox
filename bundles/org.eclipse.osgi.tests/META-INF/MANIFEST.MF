@@ -14,3 +14,4 @@ Require-Bundle:
 Eclipse-LazyStart: true
 Bundle-Activator: org.eclipse.osgi.tests.OSGiTestsActivator
 Export-Package: org.eclipse.osgi.tests.bundles
+Bundle-RequiredExecutionEnvironment: J2SE-1.4

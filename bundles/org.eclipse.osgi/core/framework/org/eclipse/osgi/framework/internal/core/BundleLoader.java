@@ -888,7 +888,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 			addDynamicImportPackage((String[]) dynamicImports.toArray(new String[dynamicImports.size()]));
 	}
 
-	final synchronized void attachFragment(BundleFragment fragment) throws BundleException {
+	synchronized void attachFragment(BundleFragment fragment) throws BundleException {
 		if (classloader == null)
 			return;
 		String[] classpath = fragment.getBundleData().getClassPath();

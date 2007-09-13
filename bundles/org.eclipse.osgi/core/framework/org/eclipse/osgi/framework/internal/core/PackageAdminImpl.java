@@ -394,6 +394,8 @@ public class PackageAdminImpl implements PackageAdmin {
 						restart = true;
 					else if ((refresh[i].bundledata.getType() & BundleData.TYPE_BOOTCLASSPATH_EXTENSION) != 0)
 						restart = true;
+					else if ((refresh[i].bundledata.getType() & BundleData.TYPE_EXTCLASSPATH_EXTENSION) != 0 && previouslyResolved[i])
+						restart = true;
 				}
 				if (restart) {
 					FrameworkProperties.setProperty("osgi.forcedRestart", "true"); //$NON-NLS-1$ //$NON-NLS-2$

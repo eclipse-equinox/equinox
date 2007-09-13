@@ -43,7 +43,11 @@ public class BundleInstaller {
 	}
 
 	synchronized public Bundle installBundle(String name) throws BundleException {
-		if (bundles == null)
+		return installBundle(name, true);
+	}
+
+	synchronized public Bundle installBundle(String name, boolean track) throws BundleException {
+		if (bundles == null && track)
 			return null;
 		String bundleFileName = rootLocation + "/" + name;
 		URL bundleURL = context.getBundle().getEntry(bundleFileName);
@@ -58,7 +62,8 @@ public class BundleInstaller {
 		if ("file".equals(bundleURL.getProtocol()))
 			location = "reference:" + location;
 		Bundle bundle = context.installBundle(location);
-		bundles.put(name, bundle);
+		if (track)
+			bundles.put(name, bundle);
 		return bundle;
 	}
 

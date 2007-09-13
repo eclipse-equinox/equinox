@@ -105,8 +105,10 @@ public class BaseStorageHook implements StorageHook, AdaptorHook {
 				String extensionType = hostElement[0].getDirective("extension"); //$NON-NLS-1$
 				if (extensionType == null || extensionType.equals("framework")) //$NON-NLS-1$
 					bundleType |= BundleData.TYPE_FRAMEWORK_EXTENSION;
-				else
+				else if (extensionType.equals("bootclasspath")) //$NON-NLS-1$
 					bundleType |= BundleData.TYPE_BOOTCLASSPATH_EXTENSION;
+				else if (extensionType.equals("extclasspath")) //$NON-NLS-1$
+					bundleType |= BundleData.TYPE_EXTCLASSPATH_EXTENSION;
 			}
 		}
 		target.setType(bundleType);

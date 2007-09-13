@@ -96,7 +96,9 @@ public class BaseStorage implements SynchronousBundleListener {
 	/**
 	 * The add URL method used to support framework extensions
 	 */
-	private Method addURLMethod;
+	private final Method addFwkURLMethod;
+	private final Method addExtURLMethod;
+
 	/**
 	 * The list of configured framework extensions
 	 */
@@ -117,6 +119,9 @@ public class BaseStorage implements SynchronousBundleListener {
 
 	BaseStorage() {
 		// make constructor package private
+		// initialize the addXYZURLMethods to support framework extensions
+		addFwkURLMethod = findAddURLMethod(getFwkClassLoader(), "addURL"); //$NON-NLS-1$
+		addExtURLMethod = findAddURLMethod(getExtClassLoader(), "addURL"); //$NON-NLS-1$
 	}
 
 	public void initialize(BaseAdaptor adaptor) throws IOException {
@@ -124,10 +129,7 @@ public class BaseStorage implements SynchronousBundleListener {
 		setDebugOptions();
 		if (Boolean.valueOf(FrameworkProperties.getProperty(BaseStorage.PROP_CLEAN)).booleanValue())
 			cleanOSGiCache();
-		// initialize the addURLMethod to support framework extensions
-		ClassLoader fwloader = BaseStorage.class.getClassLoader();
-		if (fwloader != null)
-			addURLMethod = findaddURLMethod(fwloader.getClass());
+
 		// we need to set the install path as soon as possible so we can determine
 		// the absolute location of install relative URLs
 		Location installLoc = LocationManager.getInstallLocation();
@@ -145,7 +147,50 @@ public class BaseStorage implements SynchronousBundleListener {
 			storageHooks.add(hooks[i]);
 	}
 
-	private void setDebugOptions() {
+	private static Method findAddURLMethod(ClassLoader cl, String name) {
+		if (cl == null)
+			return null;
+		return findMethod(cl.getClass(), name, new Class[] {URL.class});
+	}
+
+	// recursively searches a class and it's superclasses for a (potentially inaccessable) method
+	private static Method findMethod(Class clazz, String name, Class[] args) {
+		if (clazz == null)
+			return null; // ends the recursion when getSuperClass returns null
+		try {
+			Method result = clazz.getDeclaredMethod(name, args);
+			result.setAccessible(true);
+			return result;
+		} catch (NoSuchMethodException e) {
+			// do nothing look in super class below
+		} catch (SecurityException e) {
+			// if we do not have the permissions then we will not find the method
+		}
+		return findMethod(clazz.getSuperclass(), name, args);
+	}
+
+	private static void callAddURLMethod(ClassLoader cl, Method meth, URL arg) throws InvocationTargetException {
+		try {
+			meth.invoke(cl, new Object[] {arg});
+		} catch (Throwable t) {
+			throw new InvocationTargetException(t);
+		}
+	}
+
+	private ClassLoader getFwkClassLoader() {
+		return this.getClass().getClassLoader();
+	}
+
+	private ClassLoader getExtClassLoader() {
+		ClassLoader cl = ClassLoader.getSystemClassLoader();
+		ClassLoader extcl = cl.getParent();
+		while ((extcl != null) && (extcl.getParent() != null)) {
+			extcl = extcl.getParent();
+		}
+		return extcl;
+	}
+
+	private static void setDebugOptions() {
 		FrameworkDebugOptions options = FrameworkDebugOptions.getDefault();
 		// may be null if debugging is not enabled
 		if (options == null)
@@ -783,7 +828,7 @@ public class BaseStorage implements SynchronousBundleListener {
 
 	public void addProperties(Properties properties) {
 		// set the extension support if we found the addURL method
-		if (addURLMethod != null)
+		if (addFwkURLMethod != null)
 			properties.put(Constants.SUPPORTS_FRAMEWORK_EXTENSION, "true"); //$NON-NLS-1$
 		// store bundleStore back into adaptor properties for others to see
 		properties.put(BaseStorage.PROP_BUNDLE_STORE, getBundleStoreRoot().getAbsolutePath());
@@ -873,6 +918,9 @@ public class BaseStorage implements SynchronousBundleListener {
 		} else if ((bundleData.getType() & BundleData.TYPE_BOOTCLASSPATH_EXTENSION) != 0) {
 			validateExtension(bundleData);
 			processBootExtension(bundleData, type);
+		} else if ((bundleData.getType() & BundleData.TYPE_EXTCLASSPATH_EXTENSION) != 0) {
+			validateExtension(bundleData);
+			processExtExtension(bundleData, type);
 		}
 	}
 
@@ -898,8 +946,18 @@ public class BaseStorage implements SynchronousBundleListener {
 	 * @throws BundleException on errors or if framework extensions are not supported
 	 */
 	protected void processFrameworkExtension(BaseData bundleData, byte type) throws BundleException {
-		if (addURLMethod == null)
+		if (addFwkURLMethod == null)
 			throw new BundleException("Framework extensions are not supported.", new UnsupportedOperationException()); //$NON-NLS-1$
+		addExtensionContent(bundleData, type, getFwkClassLoader(), addFwkURLMethod);
+	}
+
+	protected void processExtExtension(BaseData bundleData, byte type) throws BundleException {
+		if (addExtURLMethod == null)
+			throw new BundleException("Extension classpath extensions are not supported.", new UnsupportedOperationException()); //$NON-NLS-1$
+		addExtensionContent(bundleData, type, getExtClassLoader(), addExtURLMethod);
+	}
+
+	private void addExtensionContent(BaseData bundleData, byte type, ClassLoader addToLoader, Method addToMethod) throws BundleException {
 		if ((type & (EXTENSION_UNINSTALLED | EXTENSION_UPDATED)) != 0)
 			// if uninstalled or updated then do nothing framework must be restarted.
 			return;
@@ -920,24 +978,21 @@ public class BaseStorage implements SynchronousBundleListener {
 		File[] files = getExtensionFiles(bundleData);
 		if (files == null)
 			return;
-		ClassLoader cl = getClass().getClassLoader();
+
 		for (int i = 0; i < files.length; i++) {
 			if (files[i] == null)
 				continue;
-			Throwable exceptionLog = null;
 			try {
-				addURLMethod.invoke(cl, new Object[] {AdaptorUtil.encodeFileURL(files[i])});
+				callAddURLMethod(addToLoader, addToMethod, AdaptorUtil.encodeFileURL(files[i]));
 			} catch (InvocationTargetException e) {
-				exceptionLog = e.getTargetException();
-			} catch (Throwable t) {
-				exceptionLog = t;
-			} finally {
-				if (exceptionLog != null)
-					adaptor.getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, bundleData.getBundle(), exceptionLog);
+				adaptor.getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, bundleData.getBundle(), e);
+			} catch (MalformedURLException e) {
+				adaptor.getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, bundleData.getBundle(), e);
 			}
 		}
+
 		try {
-			cl.loadClass("thisIsNotAClass"); // initialize the new urls  //$NON-NLS-1$
+			addToLoader.loadClass("thisIsNotAClass"); // initialize the new urls  //$NON-NLS-1$
 		} catch (ClassNotFoundException e) {
 			// do nothing
 		}
@@ -1127,21 +1182,6 @@ public class BaseStorage implements SynchronousBundleListener {
 		}
 	}
 
-	private static Method findaddURLMethod(Class clazz) {
-		if (clazz == null)
-			return null; // ends the recursion when getSuperClass returns null
-		try {
-			Method result = clazz.getDeclaredMethod("addURL", new Class[] {URL.class}); //$NON-NLS-1$ 
-			result.setAccessible(true);
-			return result;
-		} catch (NoSuchMethodException e) {
-			// do nothing look in super class below
-		} catch (SecurityException e) {
-			// if we do not have the permissions then we will not find the method
-		}
-		return findaddURLMethod(clazz.getSuperclass());
-	}
-
 	private class StateSaver implements Runnable {
 		private long delay_interval = 30000; // 30 seconds.
 		private long max_total_delay_interval = 1800000; // 30 minutes.
@@ -1243,6 +1283,8 @@ public class BaseStorage implements SynchronousBundleListener {
 				processFrameworkExtension(data, EXTENSION_INITIALIZE);
 			else if ((data.getType() & BundleData.TYPE_BOOTCLASSPATH_EXTENSION) != 0)
 				processBootExtension(data, EXTENSION_INITIALIZE);
+			else if ((data.getType() & BundleData.TYPE_EXTCLASSPATH_EXTENSION) != 0)
+				processExtExtension(data, EXTENSION_INITIALIZE);
 		} catch (BundleException e) {
 			// do nothing;
 		}
