@@ -10,7 +10,8 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.bundles;
 
-import junit.framework.*;
+import junit.framework.TestCase;
+import org.eclipse.osgi.internal.baseadaptor.StateManager;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.FrameworkEvent;
@@ -37,7 +38,6 @@ public class AbstractBundleTests extends TestCase {
 		frameworkListenerResults = new EventListenerTestResults();
 		OSGiTestsActivator.getContext().addFrameworkListener(frameworkListenerResults);
 	}
-	
 
 	protected void tearDown() throws Exception {
 		installer.shutdown();
@@ -67,7 +67,6 @@ public class AbstractBundleTests extends TestCase {
 			return;
 		failNotEquals(message, toString(expected), toString(actual));
 	}
-
 
 	private static boolean isEqual(Object expected, Object actual) {
 		if (!expected.getClass().isAssignableFrom(actual.getClass()))
@@ -101,7 +100,7 @@ public class AbstractBundleTests extends TestCase {
 			case FrameworkEvent.ERROR :
 				result.append("ERROR");
 				break;
-			case FrameworkEvent.INFO:
+			case FrameworkEvent.INFO :
 				result.append("INFO");
 				break;
 			case FrameworkEvent.PACKAGES_REFRESHED :
@@ -138,13 +137,13 @@ public class AbstractBundleTests extends TestCase {
 			case BundleEvent.STARTED :
 				result.append("STARTED");
 				break;
-			case BundleEvent.STARTING:
+			case BundleEvent.STARTING :
 				result.append("STARTING");
 				break;
 			case BundleEvent.STOPPED :
 				result.append("STOPPED");
 				break;
-			case BundleEvent.UNINSTALLED:
+			case BundleEvent.UNINSTALLED :
 				result.append("UNINSTALLED");
 				break;
 			case BundleEvent.UNRESOLVED :
@@ -158,5 +157,10 @@ public class AbstractBundleTests extends TestCase {
 		}
 		result.append("] ").append(event.getSource());
 		return result.toString();
+	}
+
+	public void setPlatformProperties() {
+		StateManager stateManager = (StateManager) installer.getPlatformAdmin();
+		stateManager.getSystemState().setPlatformProperties(System.getProperties());
 	}
 }

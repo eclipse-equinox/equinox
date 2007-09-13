@@ -19,6 +19,7 @@ public abstract class PackageSource implements KeyedElement {
 	protected String id;
 
 	public PackageSource(String id) {
+		// others depend on the id being interned; see SingleSourcePackage.equals
 		this.id = id.intern();
 	}
 
@@ -49,7 +50,9 @@ public abstract class PackageSource implements KeyedElement {
 	}
 
 	public abstract Class loadClass(String name) throws ClassNotFoundException;
+
 	public abstract URL getResource(String name);
+
 	public abstract Enumeration getResources(String name) throws IOException;
 
 	//TODO See how this relates with FilteredSourcePackage. Overwriting or doing a double dispatch might be good.

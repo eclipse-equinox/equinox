@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2005 IBM Corporation and others.
+ * Copyright (c) 2003, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,13 +15,9 @@ import java.util.Enumeration;
 
 public class SingleSourcePackage extends PackageSource {
 	BundleLoaderProxy supplier;
-	// this is the index of the ExportPackageDescription 
-	// into the list of exported packages of the supplier
-	// a valid of -1 indicates it is unknown or does not matter
-	protected int expid;
-	public SingleSourcePackage(String id, int expid, BundleLoaderProxy supplier) {
+
+	public SingleSourcePackage(String id, BundleLoaderProxy supplier) {
 		super(id);
-		this.expid = expid;
 		this.supplier = supplier;
 	}
 
@@ -51,6 +47,7 @@ public class SingleSourcePackage extends PackageSource {
 		if (!(source instanceof SingleSourcePackage))
 			return false;
 		SingleSourcePackage singleSource = (SingleSourcePackage) source;
-		return supplier == singleSource.supplier && expid == singleSource.expid;
+		// we do an == test on id because the id is interned in the constructor of PackageSource
+		return supplier == singleSource.supplier && id == singleSource.getId();
 	}
 }

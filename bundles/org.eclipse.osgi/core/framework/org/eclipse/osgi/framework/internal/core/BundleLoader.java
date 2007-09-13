@@ -795,7 +795,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 		// now add the locally provided package.
 		if (local != null && local.isFriend(symbolicName)) {
 			if (local instanceof BundleLoaderProxy.ReexportPackageSource)
-				local = new SingleSourcePackage(packageName, -1, proxy);
+				local = new SingleSourcePackage(packageName, proxy);
 			result.add(local);
 		}
 	}
@@ -984,7 +984,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 		// if the package is exported then we need to get the local source
 		PackageSource localSource = proxy.getPackageSource(pkgName);
 		if (localSource instanceof BundleLoaderProxy.ReexportPackageSource)
-			localSource = new SingleSourcePackage(pkgName, -1, proxy);
+			localSource = new SingleSourcePackage(pkgName, proxy);
 		if (result == null)
 			return localSource;
 		if (localSource == null)

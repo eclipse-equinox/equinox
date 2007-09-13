@@ -16,8 +16,11 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import junit.framework.Test;
 import junit.framework.TestSuite;
+import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.*;
+import org.osgi.service.packageadmin.ExportedPackage;
+import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.startlevel.StartLevel;
 
 public class ClassLoadingBundleTests extends AbstractBundleTests {
@@ -566,6 +569,88 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		assertEquals("stuff resource", "stuff classpath", readURL((URL) resourceURLs.get(1))); //$NON-NLS-1$ //$NON-NLS-2$
 		assertEquals("root resource", "root classpath test2", readURL((URL) resourceURLs.get(2))); //$NON-NLS-1$ //$NON-NLS-2$
 		assertEquals("stuff resource", "stuff classpath test2", readURL((URL) resourceURLs.get(3))); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+	public void testMultipleExportFragments01() throws Exception {
+		Bundle host = installer.installBundle("host.multiple.exports"); //$NON-NLS-1$
+		Bundle frag = installer.installBundle("frag.multiple.exports"); //$NON-NLS-1$
+		installer.resolveBundles(new Bundle[] {host, frag});
+		PackageAdmin packageAdmin = installer.getPackageAdmin();
+		ExportedPackage[] hostExports = packageAdmin.getExportedPackages(host);
+		assertEquals("Number host exports", 3, hostExports == null ? 0 : hostExports.length); //$NON-NLS-1$
+
+		PlatformAdmin platformAdmin = installer.getPlatformAdmin();
+		State systemState = platformAdmin.getState(false);
+		BundleDescription hostDesc = systemState.getBundle(host.getBundleId());
+		ExportPackageDescription[] hostExportDescs = hostDesc.getSelectedExports();
+		assertEquals("Number host export descriptions", 3, hostExportDescs.length); //$NON-NLS-1$
+
+		assertEquals("Check export name", "host.multiple.exports", hostExportDescs[0].getName()); //$NON-NLS-1$//$NON-NLS-2$
+		assertEquals("Check include directive", "Public*", (String) hostExportDescs[0].getDirective("include")); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+
+		assertEquals("Check export name", "host.multiple.exports.onlyone", hostExportDescs[1].getName()); //$NON-NLS-1$ //$NON-NLS-2$
+
+		assertEquals("Check export name", "host.multiple.exports", hostExportDescs[2].getName()); //$NON-NLS-1$ //$NON-NLS-2$
+		assertEquals("Check include directive", "private", (String) hostExportDescs[2].getAttributes().get("scope")); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+	}
+
+	public void testMultipleExportFragments02() throws Exception {
+		Bundle host = installer.installBundle("host.multiple.exports"); //$NON-NLS-1$
+		Bundle frag = installer.installBundle("frag.multiple.exports"); //$NON-NLS-1$
+		Bundle client1 = installer.installBundle("client1.multiple.exports"); //$NON-NLS-1$
+
+		installer.resolveBundles(new Bundle[] {host, frag, client1});
+		client1.start();
+		client1.stop();
+		Object[] expectedEvents = new Object[4];
+		expectedEvents[0] = "host.multiple.exports.PublicClass1"; //$NON-NLS-1$
+		expectedEvents[1] = "host.multiple.exports.PublicClass2"; //$NON-NLS-1$
+		expectedEvents[2] = "success"; //$NON-NLS-1$
+		expectedEvents[3] = "success"; //$NON-NLS-1$
+		Object[] actualEvents = simpleResults.getResults(4);
+		compareResults(expectedEvents, actualEvents);
+	}
+
+	public void testMultipleExportFragments03() throws Exception {
+		Bundle host = installer.installBundle("host.multiple.exports"); //$NON-NLS-1$
+		Bundle frag = installer.installBundle("frag.multiple.exports"); //$NON-NLS-1$
+		Bundle client2 = installer.installBundle("client2.multiple.exports"); //$NON-NLS-1$
+
+		installer.resolveBundles(new Bundle[] {host, frag, client2});
+		client2.start();
+		client2.stop();
+		Object[] expectedEvents = new Object[4];
+		expectedEvents[0] = "host.multiple.exports.PublicClass1"; //$NON-NLS-1$
+		expectedEvents[1] = "host.multiple.exports.PublicClass2"; //$NON-NLS-1$
+		expectedEvents[2] = "host.multiple.exports.PrivateClass1"; //$NON-NLS-1$
+		expectedEvents[3] = "host.multiple.exports.PrivateClass2"; //$NON-NLS-1$
+		Object[] actualEvents = simpleResults.getResults(4);
+		compareResults(expectedEvents, actualEvents);
+	}
+
+	public void testXFriends() throws Exception {
+		System.setProperty("osgi.resolverMode", "strict");
+		setPlatformProperties();
+		try {
+			Bundle test1 = installer.installBundle("xfriends.test1"); //$NON-NLS-1$
+			Bundle test2 = installer.installBundle("xfriends.test2"); //$NON-NLS-1$
+			Bundle test3 = installer.installBundle("xfriends.test3"); //$NON-NLS-1$
+			installer.resolveBundles(new Bundle[] {test1, test2, test3});
+			test2.start();
+			test2.stop();
+			test3.start();
+			test3.stop();
+			Object[] expectedEvents = new Object[4];
+			expectedEvents[0] = "xfriends.test1.onlyforfriends.TestFriends"; //$NON-NLS-1$
+			expectedEvents[1] = "xfriends.test1.external.TestFriends"; //$NON-NLS-1$
+			expectedEvents[2] = "success"; //$NON-NLS-1$
+			expectedEvents[3] = "xfriends.test1.external.TestFriends"; //$NON-NLS-1$
+			Object[] actualEvents = simpleResults.getResults(4);
+			compareResults(expectedEvents, actualEvents);
+		} finally {
+			System.getProperties().remove("osgi.resolverMode");
+			setPlatformProperties();
+		}
 	}
 
 	// TODO temporarily disable til we can debug the build test machine on Win XP

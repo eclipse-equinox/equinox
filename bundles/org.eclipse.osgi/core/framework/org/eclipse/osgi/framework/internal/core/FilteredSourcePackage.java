@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2005 IBM Corporation and others.
+ * Copyright (c) 2004, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,8 +20,8 @@ public class FilteredSourcePackage extends SingleSourcePackage {
 	String[] excludes;
 	String[] friends;
 
-	public FilteredSourcePackage(String name, int expid, BundleLoaderProxy supplier, String includes, String excludes, String[] friends) {
-		super(name, expid, supplier);
+	public FilteredSourcePackage(String name, BundleLoaderProxy supplier, String includes, String excludes, String[] friends) {
+		super(name, supplier);
 		if (includes != null)
 			this.includes = ManifestElement.getArrayFromList(includes);
 		if (excludes != null)
@@ -43,11 +43,13 @@ public class FilteredSourcePackage extends SingleSourcePackage {
 			return null;
 		return super.getResource(name);
 	}
+
 	public Enumeration getResources(String name) {
 		if (isFiltered(name, getId()))
 			return null;
 		return super.getResources(name);
 	}
+
 	public Class loadClass(String name) throws ClassNotFoundException {
 		if (isFiltered(name, getId()))
 			return null;
@@ -84,12 +86,12 @@ public class FilteredSourcePackage extends SingleSourcePackage {
 				continue;
 			if (list[i].charAt(0) == ALL && len == 1)
 				return true; // handles "*" wild card
-			if (list[i].charAt(len-1) == ALL)
-				if (name.startsWith(list[i].substring(0, len-1)))
+			if (list[i].charAt(len - 1) == ALL)
+				if (name.startsWith(list[i].substring(0, len - 1)))
 					return true;
 			if (name.equals(list[i]))
 				return true;
-			
+
 		}
 		return false;
 	}

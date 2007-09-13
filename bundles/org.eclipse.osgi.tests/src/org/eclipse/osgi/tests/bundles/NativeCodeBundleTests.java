@@ -13,11 +13,7 @@ package org.eclipse.osgi.tests.bundles;
 import java.io.*;
 import junit.framework.Test;
 import junit.framework.TestSuite;
-import org.eclipse.osgi.internal.baseadaptor.StateManager;
-import org.eclipse.osgi.service.resolver.PlatformAdmin;
-import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.ServiceReference;
 
 public class NativeCodeBundleTests extends AbstractBundleTests {
 	public static Test suite() {
@@ -110,18 +106,6 @@ public class NativeCodeBundleTests extends AbstractBundleTests {
 
 		assertTrue("1.0", results.length == 1);
 		assertNull("1.1", results[0]);
-	}
-
-	private void setPlatformProperties() {
-		ServiceReference ref = OSGiTestsActivator.getContext().getServiceReference(PlatformAdmin.class.getName());
-		if (ref != null) {
-			try {
-				StateManager stateManager = (StateManager) OSGiTestsActivator.getContext().getService(ref);
-				stateManager.getSystemState().setPlatformProperties(System.getProperties());
-			} finally {
-				OSGiTestsActivator.getContext().ungetService(ref);
-			}
-		}
 	}
 
 	private String getContent(String file) throws IOException {

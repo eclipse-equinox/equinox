@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2006 IBM Corporation and others.
+ * Copyright (c) 2003, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,7 +15,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import org.eclipse.osgi.framework.util.KeyedHashSet;
-import org.eclipse.osgi.service.resolver.*;
+import org.eclipse.osgi.service.resolver.BundleDescription;
+import org.eclipse.osgi.service.resolver.ExportPackageDescription;
 import org.osgi.framework.*;
 import org.osgi.service.packageadmin.RequiredBundle;
 
@@ -160,7 +161,7 @@ public class BundleLoaderProxy implements RequiredBundle {
 		// successfully get stored into pkgSources
 		PackageSource pkgSource = (PackageSource) pkgSources.getByKey(pkgName);
 		if (pkgSource == null) {
-			pkgSource = new SingleSourcePackage(pkgName, -1, this);
+			pkgSource = new SingleSourcePackage(pkgName, this);
 			synchronized (pkgSources) {
 				pkgSources.add(pkgSource);
 			}
@@ -178,6 +179,7 @@ public class BundleLoaderProxy implements RequiredBundle {
 		boolean strict = Constants.STRICT_MODE.equals(bundle.framework.adaptor.getState().getPlatformProperties()[0].get(Constants.OSGI_RESOLVER_MODE));
 		return (export.getDirective(Constants.INCLUDE_DIRECTIVE) != null) || (export.getDirective(Constants.EXCLUDE_DIRECTIVE) != null) || (strict && export.getDirective(Constants.FRIENDS_DIRECTIVE) != null);
 	}
+
 	// creates a PackageSource from an ExportPackageDescription.  This is called when initializing
 	// a BundleLoader to ensure that the proper PackageSource gets created and used for
 	// filtered and reexport packages.  The storeSource flag is used by initialize to indicate
@@ -200,18 +202,7 @@ public class BundleLoaderProxy implements RequiredBundle {
 					friends = null; // do not pay attention to friends if not in strict mode
 			}
 			if (includes != null || excludes != null || friends != null) {
-				ExportPackageDescription[] exports = description.getExportPackages();
-				int index = -1;
-				int first = -1;
-				for (int i = 0; i < exports.length; i++) {
-					if (first == -1 && exports[i].getName().equals(export.getName()))
-						first = i;
-					if (exports[i] == export && first != i) {
-						index = i;
-						break;
-					}
-				}
-				pkgSource = new FilteredSourcePackage(export.getName(), index, this, includes, excludes, friends);
+				pkgSource = new FilteredSourcePackage(export.getName(), this, includes, excludes, friends);
 			}
 		}
 
@@ -227,8 +218,12 @@ public class BundleLoaderProxy implements RequiredBundle {
 		} else {
 			// we are not storing the special case sources, but pkgSource == null this means this
 			// is a normal package source; get it and return it.
-			if (pkgSource == null)
+			if (pkgSource == null) {
 				pkgSource = getPackageSource(export.getName());
+				// the first export cached may not be a simple single source like we need.
+				if (pkgSource.getClass() != SingleSourcePackage.class)
+					return new SingleSourcePackage(export.getName(), this);
+			}
 		}
 
 		return pkgSource;

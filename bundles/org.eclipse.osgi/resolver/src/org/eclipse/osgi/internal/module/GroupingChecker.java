@@ -147,7 +147,7 @@ public class GroupingChecker {
 			}
 		}
 		// check if the bundle exports the package
-		ResolverExport export = bundle.getExport(packageName);
+		ResolverExport[] exports = bundle.getExports(packageName);
 		ArrayList roots = new ArrayList(0);
 		// check roots from required bundles
 		BundleConstraint[] requires = bundle.getRequires();
@@ -176,9 +176,9 @@ public class GroupingChecker {
 				}
 			}
 		}
-		if (export != null || roots.size() > 1) {
+		if (exports.length > 0 || roots.size() > 1) {
 			PackageRoots[] requiredRoots = (PackageRoots[]) roots.toArray(new PackageRoots[roots.size()]);
-			if (export == null) {
+			if (exports.length == 0) {
 				PackageRoots superSet = requiredRoots[0];
 				for (int i = 1; i < requiredRoots.length; i++) {
 					if (requiredRoots[i].superSet(superSet)) {
@@ -196,9 +196,9 @@ public class GroupingChecker {
 			// first merge all the roots from required bundles
 			for (int i = 0; i < requiredRoots.length; i++)
 				result.merge(requiredRoots[i]);
-			if (export != null)
-				// always add this bundles export to the end if it exports the package
-				result.addRoot(export);
+			// always add this bundles exports to the end if it exports the package
+			for (int i = 0; i < exports.length; i++)
+				result.addRoot(exports[i]);
 			return result;
 		}
 		return (PackageRoots) (roots.size() == 0 ? nullPackageRoots : roots.get(0));
@@ -237,7 +237,7 @@ public class GroupingChecker {
 			if (exportBSN != null) {
 				// first one wins
 				for (int i = 0; i < roots.length; i++)
-					if (exportBSN.equals(roots[i].getExporter().getName()))
+					if (export.getExporter() != roots[i].getExporter() && exportBSN.equals(roots[i].getExporter().getName()))
 						return;
 			}
 			if (!contains(export, roots)) {

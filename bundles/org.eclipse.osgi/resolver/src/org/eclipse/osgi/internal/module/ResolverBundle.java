@@ -11,7 +11,7 @@
 package org.eclipse.osgi.internal.module;
 
 import java.util.*;
-import org.eclipse.osgi.internal.resolver.ExportPackageDescriptionImpl;
+import java.util.Map.Entry;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.Constants;
 
@@ -294,14 +294,6 @@ public class ResolverBundle extends VersionSupplier implements Comparable {
 		return false;
 	}
 
-	private boolean isExported(String packageName) {
-		ResolverExport export = getExport(packageName);
-		if (export == null)
-			return false;
-		// let exports from a bundle manifest be exported in addition to the ones from the vm profile
-		return 0 > ((Integer) export.getExportPackageDescription().getDirective(ExportPackageDescriptionImpl.EQUINOX_EE)).intValue();
-	}
-
 	private boolean isRequired(String bundleName) {
 		return getRequire(bundleName) != null;
 	}
@@ -366,7 +358,13 @@ public class ResolverBundle extends VersionSupplier implements Comparable {
 		if (newExports.length > 0 && dynamicAttach) {
 			StateObjectFactory factory = resolver.getState().getFactory();
 			for (int i = 0; i < newExports.length; i++) {
-				if (!isExported(newExports[i].getName())) {
+				ResolverExport currentExports[] = getExports(newExports[i].getName());
+				boolean foundEquivalent = false;
+				for (int j = 0; j < currentExports.length && !foundEquivalent; j++) {
+					if (equivalentExports(currentExports[j], newExports[i]))
+						foundEquivalent = true;
+				}
+				if (!foundEquivalent) {
 					ExportPackageDescription hostExport = factory.createExportPackageDescription(newExports[i].getName(), newExports[i].getVersion(), newExports[i].getDirectives(), newExports[i].getAttributes(), newExports[i].isRoot(), getBundle());
 					hostExports.add(new ResolverExport(this, hostExport));
 				}
@@ -374,6 +372,41 @@ public class ResolverBundle extends VersionSupplier implements Comparable {
 			fragmentExports.put(fragment.bundleID, hostExports);
 		}
 		return (ResolverExport[]) hostExports.toArray(new ResolverExport[hostExports.size()]);
+	}
+
+	private boolean equivalentExports(ResolverExport existingExport, ExportPackageDescription newDescription) {
+		ExportPackageDescription existingDescription = existingExport.getExportPackageDescription();
+		if (!existingDescription.getName().equals(newDescription.getName()))
+			return false;
+		if (!existingDescription.getVersion().equals(newDescription.getVersion()))
+			return false;
+		if (!equivalentMaps(existingDescription.getAttributes(), newDescription.getAttributes()))
+			return false;
+		if (!equivalentMaps(existingDescription.getDirectives(), newDescription.getDirectives()))
+			return false;
+		return true;
+	}
+
+	private boolean equivalentMaps(Map existingDirectives, Map newDirectives) {
+		if (existingDirectives == null && newDirectives == null)
+			return true;
+		if (existingDirectives == null ? newDirectives != null : newDirectives == null)
+			return false;
+		if (existingDirectives.size() != newDirectives.size())
+			return false;
+		for (Iterator entries = existingDirectives.entrySet().iterator(); entries.hasNext();) {
+			Entry entry = (Entry) entries.next();
+			Object newValue = newDirectives.get(entry.getKey());
+			if (newValue == null || entry.getValue().getClass() != newValue.getClass())
+				return false;
+			if (newValue instanceof String[]) {
+				if (!Arrays.equals((Object[]) entry.getValue(), (Object[]) newValue))
+					return false;
+			} else if (!entry.getValue().equals(newValue)) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	boolean constraintsConflict(BundleDescription fragment, ImportPackageSpecification[] newImports, BundleSpecification[] newRequires, GenericSpecification[] newGenericRequires) {

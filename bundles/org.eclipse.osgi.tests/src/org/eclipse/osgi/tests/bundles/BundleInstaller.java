@@ -13,6 +13,7 @@ package org.eclipse.osgi.tests.bundles;
 import java.io.IOException;
 import java.net.URL;
 import java.util.*;
+import org.eclipse.osgi.service.resolver.PlatformAdmin;
 import org.eclipse.osgi.service.urlconversion.URLConverter;
 import org.osgi.framework.*;
 import org.osgi.service.packageadmin.PackageAdmin;
@@ -26,6 +27,7 @@ public class BundleInstaller {
 	private ServiceTracker packageAdmin;
 	private ServiceTracker startlevel;
 	private ServiceTracker converter;
+	private ServiceTracker platformAdmin;
 
 	public BundleInstaller(String bundlesRoot, BundleContext context) throws InvalidSyntaxException {
 		this.context = context;
@@ -36,6 +38,8 @@ public class BundleInstaller {
 		startlevel.open();
 		packageAdmin = new ServiceTracker(context, PackageAdmin.class.getName(), null);
 		packageAdmin.open();
+		platformAdmin = new ServiceTracker(context, PlatformAdmin.class.getName(), null);
+		platformAdmin.open();
 	}
 
 	synchronized public Bundle installBundle(String name) throws BundleException {
@@ -53,7 +57,7 @@ public class BundleInstaller {
 		String location = bundleURL.toExternalForm();
 		if ("file".equals(bundleURL.getProtocol()))
 			location = "reference:" + location;
-		Bundle bundle =  context.installBundle(location);
+		Bundle bundle = context.installBundle(location);
 		bundles.put(name, bundle);
 		return bundle;
 	}
@@ -117,6 +121,7 @@ public class BundleInstaller {
 		packageAdmin.close();
 		startlevel.close();
 		converter.close();
+		platformAdmin.close();
 		bundles = null;
 		return result;
 	}
@@ -164,5 +169,13 @@ public class BundleInstaller {
 
 	public StartLevel getStartLevel() {
 		return (StartLevel) startlevel.getService();
+	}
+
+	public PackageAdmin getPackageAdmin() {
+		return (PackageAdmin) packageAdmin.getService();
+	}
+
+	public PlatformAdmin getPlatformAdmin() {
+		return (PlatformAdmin) platformAdmin.getService();
 	}
 }

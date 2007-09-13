@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: xfriends.test1
+Bundle-SymbolicName: xfriends.test1
+Bundle-Version: 1.0.0
+Export-Package: xfriends.test1.onlyforfriends; x-friends:="xfriends.test2",
+ xfriends.test1.external

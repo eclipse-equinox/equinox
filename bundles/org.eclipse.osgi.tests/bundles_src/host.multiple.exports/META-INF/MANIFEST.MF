@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: host.multiple.exports
+Bundle-SymbolicName: host.multiple.exports
+Bundle-Version: 1.0.0
+Export-Package: host.multiple.exports; include:="Public*",
+ host.multiple.exports.onlyone;
+  version=1.0.0;
+  include:="Public*"; 
+  exclude:="PublicExclude*";
+  uses:="host.multiple.exports";
+  mantatory:="test1";
+  test1=value;
+  test2=value

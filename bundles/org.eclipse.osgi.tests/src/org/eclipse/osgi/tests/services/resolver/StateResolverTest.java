@@ -1364,6 +1364,73 @@ public class StateResolverTest extends AbstractStateTest {
 		assertNull("1.2 Packages are not consistent: " + isConsistent, isConsistent);
 	}
 
+	public void testMultipleExportsUses01() throws BundleException {
+		State state = buildEmptyState();
+		Hashtable manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "A1");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		manifest.put(Constants.EXPORT_PACKAGE, "a; version=2.0; uses:=d, d; version=2.0");
+		BundleDescription a1_100 = state.getFactory().createBundleDescription(state, manifest, "a1_100", 0);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "A2");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		manifest.put(Constants.EXPORT_PACKAGE, "a; version=1.0; uses:=d, d; version=1.0");
+		BundleDescription a2_100 = state.getFactory().createBundleDescription(state, manifest, "a2_100", 1);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "B1");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		manifest.put(Constants.EXPORT_PACKAGE, "b, b; mandatory:=\"test\"; test=value; uses:=d");
+		manifest.put(Constants.IMPORT_PACKAGE, "a;bundle-symbolic-name=A2, d");
+		BundleDescription b1_100 = state.getFactory().createBundleDescription(state, manifest, "b1_100", 2);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "C1");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		manifest.put(Constants.EXPORT_PACKAGE, "c; uses:=b");
+		manifest.put(Constants.IMPORT_PACKAGE, "b; test=value, d");
+		BundleDescription c1_100 = state.getFactory().createBundleDescription(state, manifest, "c1_100", 3);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "D1");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		manifest.put(Constants.IMPORT_PACKAGE, "a, c, d");
+		BundleDescription d1_100 = state.getFactory().createBundleDescription(state, manifest, "d1_100", 4);
+
+		state.addBundle(a1_100);
+		state.addBundle(a2_100);
+		state.addBundle(b1_100);
+		state.addBundle(c1_100);
+		state.addBundle(d1_100);
+		state.resolve();
+
+		ExportPackageDescription[] b1ResolvedImports = b1_100.getResolvedImports();
+		ExportPackageDescription[] d1ResolvedImports = d1_100.getResolvedImports();
+		ExportPackageDescription[] isConsistent = isConsistent(b1ResolvedImports, d1ResolvedImports);
+		assertNull("1.1 Packages are not consistent: " + isConsistent, isConsistent);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "B1");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		manifest.put(Constants.EXPORT_PACKAGE, "b; uses:=a");
+		manifest.put(Constants.IMPORT_PACKAGE, "a;bundle-symbolic-name=A1");
+		b1_100 = state.getFactory().createBundleDescription(state, manifest, "b1_100", 2);
+		state.updateBundle(b1_100);
+		state.resolve();
+
+		b1ResolvedImports = b1_100.getResolvedImports();
+		d1ResolvedImports = d1_100.getResolvedImports();
+		isConsistent = isConsistent(b1ResolvedImports, d1ResolvedImports);
+		assertNull("1.2 Packages are not consistent: " + isConsistent, isConsistent);
+	}
+
 	public void testRequireBundleUses() throws BundleException {
 		State state = buildEmptyState();
 		int id = 0;
