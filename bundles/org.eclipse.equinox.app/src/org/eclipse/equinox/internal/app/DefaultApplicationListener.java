@@ -14,7 +14,7 @@ package org.eclipse.equinox.internal.app;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.service.runnable.ApplicationRunnable;
 import org.eclipse.osgi.util.NLS;
-import org.osgi.framework.*;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.application.ApplicationHandle;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -64,7 +64,7 @@ public class DefaultApplicationListener implements ApplicationRunnable, ServiceT
 					// note that we cannot hold the this lock while launching a main threaded application
 					try {
 						mainHandle.run(null);
-					} catch (Exception e) {
+					} catch (Throwable e) {
 						String message = NLS.bind(Messages.application_error_starting, mainHandle.getInstanceId());
 						Activator.log(new FrameworkLogEntry(Activator.PI_APP, FrameworkLogEntry.WARNING, 0, message, 0, e, null));
 					}
@@ -101,7 +101,7 @@ public class DefaultApplicationListener implements ApplicationRunnable, ServiceT
 		if (handleTracker == null)
 			return;
 		// force the default application to quit
-		ApplicationHandle handle =(ApplicationHandle) handleTracker.getService();
+		ApplicationHandle handle = (ApplicationHandle) handleTracker.getService();
 		if (handle != null) {
 			try {
 				handle.destroy();
@@ -136,6 +136,7 @@ public class DefaultApplicationListener implements ApplicationRunnable, ServiceT
 			}
 		this.notify();
 	}
+
 	synchronized void launch(EclipseAppHandle app) {
 		launchMainApp = app;
 		this.notify();
