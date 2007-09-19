@@ -300,7 +300,6 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 	}
 
 	void launch(EclipseAppHandle appHandle) throws Exception {
-		lock(appHandle);
 		boolean isDefault = appHandle.isDefault();
 		if (((EclipseAppDescriptor) appHandle.getApplicationDescriptor()).getThreadType() == EclipseAppDescriptor.FLAG_TYPE_MAIN_THREAD) {
 			// use the ApplicationLauncher provided by the framework to ensure it is launched on the main thread
@@ -475,23 +474,19 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 			case NOT_LOCKED :
 				break;
 			case LOCKED_SINGLETON_GLOBAL_RUNNING :
-				throw new ApplicationException(ApplicationException.APPLICATION_INTERNAL_ERROR, NLS.bind(Messages.singleton_running, activeGlobalSingleton.getInstanceId()));
+				throw new ApplicationException(ApplicationException.APPLICATION_NOT_LAUNCHABLE, NLS.bind(Messages.singleton_running, activeGlobalSingleton.getInstanceId()));
 			case LOCKED_SINGLETON_GLOBAL_APPS_RUNNING :
-				throw new ApplicationException(ApplicationException.APPLICATION_INTERNAL_ERROR, Messages.apps_running);
+				throw new ApplicationException(ApplicationException.APPLICATION_NOT_LAUNCHABLE, Messages.apps_running);
 			case LOCKED_SINGLETON_SCOPED_RUNNING :
-				throw new ApplicationException(ApplicationException.APPLICATION_INTERNAL_ERROR, NLS.bind(Messages.singleton_running, activeScopedSingleton.getInstanceId()));
+				throw new ApplicationException(ApplicationException.APPLICATION_NOT_LAUNCHABLE, NLS.bind(Messages.singleton_running, activeScopedSingleton.getInstanceId()));
 			case LOCKED_SINGLETON_LIMITED_RUNNING :
-				throw new ApplicationException(ApplicationException.APPLICATION_INTERNAL_ERROR, NLS.bind(Messages.max_running, eclipseApp.getApplicationId()));
+				throw new ApplicationException(ApplicationException.APPLICATION_NOT_LAUNCHABLE, NLS.bind(Messages.max_running, eclipseApp.getApplicationId()));
 			case LOCKED_MAIN_THREAD_RUNNING :
-				throw new ApplicationException(ApplicationException.APPLICATION_INTERNAL_ERROR, NLS.bind(Messages.main_running, activeMain.getInstanceId()));
+				throw new ApplicationException(ApplicationException.APPLICATION_NOT_LAUNCHABLE, NLS.bind(Messages.main_running, activeMain.getInstanceId()));
 			default :
 				break;
 		}
 
-		if (eclipseApp.getThreadType() == EclipseAppDescriptor.FLAG_TYPE_MAIN_THREAD) {
-			if (activeMain != null)
-				throw new IllegalStateException(Messages.main_running + activeMain.getInstanceId());
-		}
 		// ok we can now successfully lock the container
 		switch (eclipseApp.getCardinalityType()) {
 			case EclipseAppDescriptor.FLAG_CARD_SINGLETON_GLOGAL :

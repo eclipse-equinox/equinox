@@ -20,6 +20,7 @@ import org.eclipse.osgi.service.runnable.ApplicationRunnable;
 import org.eclipse.osgi.service.runnable.StartupMonitor;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
+import org.osgi.service.application.ApplicationException;
 import org.osgi.service.application.ApplicationHandle;
 
 /*
@@ -51,7 +52,7 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 	 */
 	EclipseAppHandle(String instanceId, Map arguments, EclipseAppDescriptor descriptor) {
 		super(instanceId, descriptor);
-		defaultAppInstance = arguments == null || arguments.get(EclipseAppDescriptor.APP_DEFAULT) == null ? Boolean.FALSE : (Boolean) arguments.remove(EclipseAppDescriptor.APP_DEFAULT); 
+		defaultAppInstance = arguments == null || arguments.get(EclipseAppDescriptor.APP_DEFAULT) == null ? Boolean.FALSE : (Boolean) arguments.remove(EclipseAppDescriptor.APP_DEFAULT);
 		if (arguments == null)
 			this.arguments = new HashMap(2);
 		else
@@ -79,7 +80,7 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 		// when this method is called we must force the application to exit.
 		// first set the status to stopping
 		setAppStatus(EclipseAppHandle.FLAG_STOPPING);
-		// now force the appliction to stop
+		// now force the application to stop
 		IApplication app = getApplication();
 		if (app != null)
 			app.stop();
@@ -101,6 +102,7 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 			return null; // this will happen if the service has been unregistered already
 		}
 	}
+
 	/*
 	 * Gets a snapshot of the current service properties.
 	 */
@@ -123,7 +125,7 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 		if (this.status == status)
 			return;
 		if ((status & EclipseAppHandle.FLAG_STARTING) != 0)
-			throw new IllegalArgumentException("Cannot set app status to ACTIVE"); //$NON-NLS-1$
+			throw new IllegalArgumentException("Cannot set app status to starting"); //$NON-NLS-1$
 		// if status is stopping and the context is already stopping then return
 		if ((status & EclipseAppHandle.FLAG_STOPPING) != 0)
 			if ((this.status & (EclipseAppHandle.FLAG_STOPPING | EclipseAppHandle.FLAG_STOPPED)) != 0)
@@ -162,8 +164,11 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 		try {
 			Object app;
 			synchronized (this) {
+				if ((status & (EclipseAppHandle.FLAG_STARTING | EclipseAppHandle.FLAG_STOPPING)) == 0)
+					throw new ApplicationException(ApplicationException.APPLICATION_INTERNAL_ERROR, NLS.bind(Messages.application_instance_stopped, getInstanceId()));
 				application = getConfiguration().createExecutableExtension("run"); //$NON-NLS-1$
 				app = application;
+				notifyAll();
 			}
 			if (app instanceof IApplication)
 				tempResult = ((IApplication) app).start(this);
@@ -174,20 +179,22 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 				result = tempResult;
 				setResult = true;
 				application = null;
-				notify();
+				notifyAll();
 				// The application exited itself; notify the app context
+				setAppStatus(EclipseAppHandle.FLAG_STOPPING); // must ensure the STOPPING event is fired
 				setAppStatus(EclipseAppHandle.FLAG_STOPPED);
 			}
 		}
-		int exitCode = result instanceof Integer ? ((Integer) result).intValue() : 0;
 		// only set the exit code property if this is the default application
-		if (isDefault())
+		if (isDefault()) {
+			int exitCode = tempResult instanceof Integer ? ((Integer) tempResult).intValue() : 0;
 			// use the long way to set the property to compile against eeminimum
 			// TODO strange that this is done here instead of by EclipseStarter
 			System.getProperties().setProperty(PROP_ECLIPSE_EXITCODE, Integer.toString(exitCode));
+		}
 		if (Activator.DEBUG)
-			System.out.println(NLS.bind(Messages.application_returned, (new String[] {getApplicationDescriptor().getApplicationId(), result == null ? "null" : result.toString()}))); //$NON-NLS-1$
-		return result;
+			System.out.println(NLS.bind(Messages.application_returned, (new String[] {getApplicationDescriptor().getApplicationId(), tempResult == null ? "null" : tempResult.toString()}))); //$NON-NLS-1$
+		return tempResult;
 	}
 
 	public void stop() {
@@ -250,8 +257,8 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 				if (rank1 != rank2)
 					return rank1 > rank2 ? -1 : 1;
 				// rankings are equal; sort by id, lowest id wins
-				long id1 = ((Long) (ref1.getProperty(Constants.SERVICE_ID)))	.longValue();
-				long id2 = ((Long) (ref2.getProperty(Constants.SERVICE_ID)))	.longValue();
+				long id1 = ((Long) (ref1.getProperty(Constants.SERVICE_ID))).longValue();
+				long id2 = ((Long) (ref2.getProperty(Constants.SERVICE_ID))).longValue();
 				return id2 > id1 ? -1 : 1;
 			}
 		});
@@ -259,6 +266,14 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 	}
 
 	private synchronized IApplication getApplication() {
+		if (handleRegistration != null && application == null)
+			// the handle has been initialized by the container but the launcher has not
+			// gotten around to creating the application object and starting it yet.
+			try {
+				wait(5000); // timeout after a while in case there was an internal error and there will be no application created
+			} catch (InterruptedException e) {
+				// do nothing
+			}
 		return (IApplication) ((application instanceof IApplication) ? application : null);
 	}
 
@@ -309,13 +324,19 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 		return defaultAppInstance.booleanValue();
 	}
 
-	synchronized Object waitForResult(int timeout) {
-		if (!setResult)
+	public synchronized Object waitForResult(int timeout) {
+		if (handleRegistration == null)
+			return result;
+		long startTime = System.currentTimeMillis();
+		long delay = timeout;
+		while (!setResult && delay > 0) {
 			try {
-				wait(timeout); // only wait for the specified amount of time
+				wait(delay); // only wait for the specified amount of time
 			} catch (InterruptedException e) {
 				// Do nothing; return quickly
 			}
+			delay -= (System.currentTimeMillis() - startTime);
+		}
 		return result;
 	}
 }

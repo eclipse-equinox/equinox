@@ -15,9 +15,9 @@ import java.net.URL;
 import java.security.AccessController;
 import java.util.*;
 import org.eclipse.equinox.app.IApplicationContext;
-import org.osgi.framework.*;
-import org.osgi.service.application.ApplicationDescriptor;
-import org.osgi.service.application.ApplicationHandle;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.application.*;
 import org.osgi.service.condpermadmin.BundleSignerCondition;
 import org.osgi.service.condpermadmin.ConditionInfo;
 
@@ -171,8 +171,9 @@ public class EclipseAppDescriptor extends ApplicationDescriptor {
 	/*
 	 * Returns the appHandle.  If it does not exist then one is created.
 	 */
-	private EclipseAppHandle createAppHandle(Map arguments) {
+	private EclipseAppHandle createAppHandle(Map arguments) throws ApplicationException {
 		EclipseAppHandle newAppHandle = new EclipseAppHandle(getInstanceID(), arguments, this);
+		appContainer.lock(newAppHandle);
 		ServiceRegistration appHandleReg = (ServiceRegistration) AccessController.doPrivileged(appContainer.getRegServiceAction(new String[] {ApplicationHandle.class.getName(), IApplicationContext.class.getName()}, newAppHandle, newAppHandle.getServiceProperties()));
 		newAppHandle.setServiceRegistration(appHandleReg);
 		return newAppHandle;
