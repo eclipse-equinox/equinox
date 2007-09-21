@@ -53,6 +53,8 @@ public class BundleInstaller {
 		URL bundleURL = context.getBundle().getEntry(bundleFileName);
 		if (bundleURL == null)
 			bundleURL = context.getBundle().getEntry(bundleFileName + ".jar");
+		if (bundleURL == null)
+			throw new BundleException("Could not find bundle to install at: " + name);
 		try {
 			bundleURL = ((URLConverter) converter.getService()).resolve(bundleURL);
 		} catch (IOException e) {
@@ -111,7 +113,11 @@ public class BundleInstaller {
 		ArrayList result = new ArrayList(bundles.size());
 		for (Iterator iter = bundles.values().iterator(); iter.hasNext();) {
 			Bundle bundle = (Bundle) iter.next();
-			bundle.uninstall();
+			try {
+				bundle.uninstall();
+			} catch (IllegalStateException e) {
+				// ignore; bundle probably already uninstalled
+			}
 			result.add(bundle);
 		}
 		bundles.clear();
