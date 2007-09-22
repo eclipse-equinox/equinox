@@ -291,7 +291,9 @@ public class ApplicationAdminTest extends OSGiTest {
 		try {
 			ApplicationHandle handle = (ApplicationHandle) tracker.waitForService(61000);
 			assertNotNull("Should find an application handle", handle); //$NON-NLS-1$
+			handleTracker.waitForEvent(handle.getInstanceId(), ApplicationHandle.RUNNING);
 			handle.destroy();
+			handleTracker.waitForEvent(handle.getInstanceId(), REMOVED);
 			HashMap results = (HashMap) ((EclipseAppHandle) handle).waitForResult(1000);
 			assertNotNull("Null results", results); //$NON-NLS-1$
 			HashMap args = new HashMap();
@@ -349,7 +351,9 @@ public class ApplicationAdminTest extends OSGiTest {
 			scheduledApp.getApplicationDescriptor().unlock();
 			ApplicationHandle handle = (ApplicationHandle) tracker.waitForService(61000);
 			assertNotNull("Should find an application handle", handle); //$NON-NLS-1$
+			handleTracker.waitForEvent(handle.getInstanceId(), ApplicationHandle.RUNNING);
 			handle.destroy();
+			handleTracker.waitForEvent(handle.getInstanceId(), REMOVED);
 			HashMap results = (HashMap) ((EclipseAppHandle) handle).waitForResult(1000);
 			assertNotNull("Null results", results); //$NON-NLS-1$
 			HashMap args = new HashMap();
