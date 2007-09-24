@@ -325,7 +325,7 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 	}
 
 	public synchronized Object waitForResult(int timeout) {
-		if (handleRegistration == null)
+		if (handleRegistration == null && application == null)
 			return result;
 		long startTime = System.currentTimeMillis();
 		long delay = timeout;
