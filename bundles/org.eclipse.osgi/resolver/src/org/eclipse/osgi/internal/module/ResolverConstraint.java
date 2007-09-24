@@ -16,7 +16,7 @@ import org.eclipse.osgi.service.resolver.VersionConstraint;
  */
 public abstract class ResolverConstraint {
 	final protected ResolverBundle bundle;
-	final protected VersionConstraint constraint;
+	protected VersionConstraint constraint;
 	private VersionSupplier[] possibleSuppliers;
 	private int selectedSupplierIndex = 0;
 
@@ -139,5 +139,9 @@ public abstract class ResolverConstraint {
 	void clearPossibleSuppliers() {
 		possibleSuppliers = null;
 		selectedSupplierIndex = 0;
+	}
+
+	void setVersionConstraint(VersionConstraint constraint) {
+		this.constraint = constraint;
 	}
 }

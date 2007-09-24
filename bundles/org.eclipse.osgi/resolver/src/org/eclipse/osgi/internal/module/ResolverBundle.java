@@ -450,51 +450,87 @@ public class ResolverBundle extends VersionSupplier implements Comparable {
 			return new ResolverExport[0];
 		initFragments();
 
+		// must save off old imports and requires before we remove the fragment;
+		// this will be used to merge the constraints of the same name from the remaining fragments 
+		ResolverImport[] oldImports = getImportPackages();
+		BundleConstraint[] oldRequires = getRequires();
 		if (!fragments.remove(fragment))
 			return new ResolverExport[0];
 
 		fragment.setNewFragmentExports(false);
 		fragment.getHost().removePossibleSupplier(this);
-		ArrayList fragImports = (ArrayList) fragmentImports.remove(fragment.bundleID);
-		ArrayList fragRequires = (ArrayList) fragmentRequires.remove(fragment.bundleID);
+		fragmentImports.remove(fragment.bundleID);
+		fragmentRequires.remove(fragment.bundleID);
 		ArrayList removedExports = (ArrayList) fragmentExports.remove(fragment.bundleID);
 		fragmentGenericRequires.remove(fragment.bundleID);
 		if (reason != null) {
+			// the fragment is being detached because one of its imports or requires cannot be resolved;
+			// we need to check the remaining fragment constraints to make sure they do not have
+			// the same unresolved constraint.
 			ResolverBundle[] remainingFrags = (ResolverBundle[]) fragments.toArray(new ResolverBundle[fragments.size()]);
 			for (int i = 0; i < remainingFrags.length; i++) {
-				resolver.getResolverExports().remove(detachFragment(remainingFrags[i], null));
-				VersionConstraint[] constraints;
-				if (reason instanceof ResolverImport)
-					constraints = remainingFrags[i].getBundle().getImportPackages();
-				else
-					constraints = remainingFrags[i].getBundle().getRequiredBundles();
-				for (int j = 0; j < constraints.length; j++)
-					if (reason.getName().equals(constraints[j].getName()))
-						continue; // this fragment should remained unattached.
-				resolver.getResolverExports().put(attachFragment(remainingFrags[i], true));
-				ArrayList newImports = (ArrayList) fragmentImports.get(remainingFrags[i].bundleID);
-				if (newImports != null && fragImports != null)
-					for (Iterator iNewImports = newImports.iterator(); iNewImports.hasNext();) {
-						ResolverImport newImport = (ResolverImport) iNewImports.next();
-						for (Iterator iOldImports = fragImports.iterator(); iOldImports.hasNext();) {
-							ResolverImport oldImport = (ResolverImport) iOldImports.next();
-							if (newImport.getName().equals(oldImport.getName()))
-								newImport.setPossibleSuppliers(oldImport.getPossibleSuppliers());
-						}
-					}
-				ArrayList newRequires = (ArrayList) fragmentRequires.get(remainingFrags[i].bundleID);
-				if (newRequires != null && fragRequires != null)
-					for (Iterator iNewRequires = newRequires.iterator(); iNewRequires.hasNext();) {
-						BundleConstraint newRequire = (BundleConstraint) iNewRequires.next();
-						for (Iterator iOldRequires = fragRequires.iterator(); iOldRequires.hasNext();) {
-							BundleConstraint oldRequire = (BundleConstraint) iOldRequires.next();
-							if (newRequire.getName().equals(oldRequire.getName()))
-								newRequire.setPossibleSuppliers(oldRequire.getPossibleSuppliers());
-						}
-					}
+				ArrayList additionalImports = new ArrayList(0);
+				ArrayList additionalRequires = new ArrayList(0);
+				if (hasUnresolvedConstraint(reason, fragment, remainingFrags[i], oldImports, oldRequires, additionalImports, additionalRequires))
+					continue;
+				// merge back the additional imports or requires which the detached fragment has in common with the remaining fragment
+				if (additionalImports.size() > 0) {
+					ArrayList remainingImports = (ArrayList) fragmentImports.get(remainingFrags[i].bundleID);
+					if (remainingImports == null)
+						fragmentImports.put(remainingFrags[i].bundleID, additionalImports);
+					else
+						remainingImports.addAll(additionalImports);
+				}
+				if (additionalRequires.size() > 0) {
+					ArrayList remainingRequires = (ArrayList) fragmentRequires.get(remainingFrags[i].bundleID);
+					if (remainingRequires == null)
+						fragmentRequires.put(remainingFrags[i].bundleID, additionalRequires);
+					else
+						remainingRequires.addAll(additionalRequires);
+				}
 			}
 		}
 		return removedExports == null ? new ResolverExport[0] : (ResolverExport[]) removedExports.toArray(new ResolverExport[removedExports.size()]);
+	}
+
+	private boolean hasUnresolvedConstraint(ResolverConstraint reason, ResolverBundle detachedFragment, ResolverBundle remainingFragment, ResolverImport[] oldImports, BundleConstraint[] oldRequires, ArrayList additionalImports, ArrayList additionalRequires) {
+		ImportPackageSpecification[] remainingFragImports = remainingFragment.getBundle().getImportPackages();
+		BundleSpecification[] remainingFragRequires = remainingFragment.getBundle().getRequiredBundles();
+		VersionConstraint[] constraints;
+		if (reason instanceof ResolverImport)
+			constraints = remainingFragImports;
+		else
+			constraints = remainingFragRequires;
+		for (int i = 0; i < constraints.length; i++)
+			if (reason.getName().equals(constraints[i].getName())) {
+				resolver.getResolverExports().remove(detachFragment(remainingFragment, null));
+				return true;
+			}
+		for (int i = 0; i < oldImports.length; i++) {
+			if (oldImports[i].getVersionConstraint().getBundle() != detachedFragment.getBundle())
+				continue; // the constraint is not from the detached fragment
+			for (int j = 0; j < remainingFragImports.length; j++) {
+				if (oldImports[i].getName().equals(remainingFragImports[j].getName())) {
+					// same constraint, must reuse the constraint object but swap out the fragment info
+					additionalImports.add(oldImports[i]);
+					oldImports[i].setVersionConstraint(remainingFragImports[j]);
+					break;
+				}
+			}
+		}
+		for (int i = 0; i < oldRequires.length; i++) {
+			if (oldRequires[i].getVersionConstraint().getBundle() != detachedFragment.getBundle())
+				continue; // the constraint is not from the detached fragment
+			for (int j = 0; j < remainingFragRequires.length; j++) {
+				if (oldRequires[i].getName().equals(remainingFragRequires[j].getName())) {
+					// same constraint, must reuse the constraint object but swap out the fragment info
+					additionalRequires.add(oldRequires[i]);
+					oldRequires[i].setVersionConstraint(remainingFragRequires[j]);
+					break;
+				}
+			}
+		}
+		return false;
 	}
 
 	void detachAllFragments() {
