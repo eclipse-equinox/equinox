@@ -69,7 +69,7 @@ public class HttpServiceImpl implements HttpService {
 		if (aliases.remove(alias)) {
 			proxy.unregister(alias, true);
 		} else {
-			// TODO perhaps this is too strong a reacttion ?
+			// TODO perhaps this is too strong a reaction ?
 			throw new IllegalArgumentException("Alias not found."); //$NON-NLS-1$
 		}
 	}
