@@ -336,7 +336,7 @@ public class ManifestElement {
 			headerValues.add(next);
 
 			if (Debug.DEBUG && Debug.DEBUG_MANIFEST)
-				Debug.print("paserHeader: " + next); //$NON-NLS-1$
+				Debug.print("parseHeader: " + next); //$NON-NLS-1$
 			boolean directive = false;
 			char c = tokenizer.getChar();
 			// Header values may be a list of ';' separated values.  Just append them all into one value until the first '=' or ','
