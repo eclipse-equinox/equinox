@@ -581,8 +581,20 @@ public class ApplicationAdminTest extends OSGiTest {
 				}
 				found = eventFound(instance, state);
 			}
-			if (!found)
-				fail("failed waiting for handle event: " + instance + " " + state); //$NON-NLS-1$ //$NON-NLS-2$
+			if (!found) {
+				Object[][] foundEvents = getEvents();
+				String foundEventsMsg;
+				if (foundEvents.length > 0) {
+					StringBuffer eventsBuffer = new StringBuffer();
+					eventsBuffer.append("\nFound the following events: \n"); //$NON-NLS-1$
+					for (int i = 0; i < foundEvents.length; i++)
+						eventsBuffer.append(" handle event: ").append(foundEvents[i][0]).append(" ").append(foundEvents[i][1]).append("\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					foundEventsMsg = eventsBuffer.toString();
+				} else {
+					foundEventsMsg = "\nNo events recorded"; //$NON-NLS-1$
+				}
+				fail("failed waiting for handle event: " + instance + " " + state + foundEventsMsg); //$NON-NLS-1$ //$NON-NLS-2$
+			}
 		}
 
 		public synchronized String[][] getEvents() {
@@ -648,8 +660,20 @@ public class ApplicationAdminTest extends OSGiTest {
 				}
 				found = eventFound(pid, type, locked, launchable);
 			}
-			if (!found)
-				fail("failed waiting for descriptor event: " + pid + " " + type + " " + locked + " " + launchable); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			if (!found) {
+				Object[][] foundEvents = getEvents();
+				String foundEventsMsg;
+				if (foundEvents.length > 0) {
+					StringBuffer eventsBuffer = new StringBuffer();
+					eventsBuffer.append("\nFound the following events: \n"); //$NON-NLS-1$
+					for (int i = 0; i < foundEvents.length; i++)
+						eventsBuffer.append(" descriptor event: ").append(foundEvents[i][0]).append(" ").append(foundEvents[i][1]).append(" ").append(foundEvents[i][2]).append(" ").append(foundEvents[i][3]).append("\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+					foundEventsMsg = eventsBuffer.toString();
+				} else {
+					foundEventsMsg = "\nNo events recorded"; //$NON-NLS-1$
+				}
+				fail("failed waiting for descriptor event: " + pid + " " + type + " " + locked + " " + launchable + foundEventsMsg); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			}
 		}
 
 		public synchronized Object[][] getEvents() {
