@@ -18,6 +18,7 @@
  *    Apache Software Foundation - Initial implementation
  *    Pascal Rapicault, IBM -  Pascal remove the entrySet() implementation because it relied on another class.
  *    IBM - change to int keys, remove support for weak references, and remove unused methods
+ *    Rafik Jaouani - fix for the timing problem in case an item with the same key is added (bug 205117) 
  */
 package org.eclipse.core.internal.registry;
 
@@ -241,20 +242,26 @@ public class ReferenceMap {
 
 	/**
 	 * @param key The key to remove
+	 * @param cleanup true if doing map maintenance; false if it is a real request to remove
 	 * @return The removed map value
 	 */
-	private Object doRemove(int key) {
+	private Object doRemove(int key, boolean cleanup) {
 		int index = indexFor(key);
 		IEntry previous = null;
 		IEntry entry = table[index];
 		while (entry != null) {
 			if (key == entry.getKey()) {
-				if (previous == null)
-					table[index] = entry.getNext();
-				else
-					previous.setNext(entry.getNext());
-				this.size--;
-				return entry.getValue();
+				// See bug 205117 - in case an item with the same key value was added
+				// items with NULL value always removed; 
+				// items with non-NULL values are removed only on user request
+				if (!cleanup || (entry.getValue() == null)) {
+					if (previous == null)
+						table[index] = entry.getNext();
+					else
+						previous.setNext(entry.getNext());
+					this.size--;
+					return entry.getValue();
+				}
 			}
 			previous = entry;
 			entry = entry.getNext();
@@ -327,7 +334,7 @@ public class ReferenceMap {
 	private void purge() {
 		Reference ref = queue.poll();
 		while (ref != null) {
-			doRemove(((IEntry) ref).getKey());
+			doRemove(((IEntry) ref).getKey(), true);
 			ref.clear();
 			ref = queue.poll();
 		}
@@ -378,7 +385,7 @@ public class ReferenceMap {
 	 */
 	public Object remove(int key) {
 		purge();
-		return doRemove(key);
+		return doRemove(key, false);
 	}
 
 	/**
