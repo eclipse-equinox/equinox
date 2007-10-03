@@ -11,7 +11,6 @@
 package org.eclipse.osgi.internal.resolver;
 
 import java.util.*;
-
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.debug.FrameworkDebugOptions;
 import org.eclipse.osgi.framework.internal.core.Constants;
@@ -23,7 +22,11 @@ import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.*;
 
 public abstract class StateImpl implements State {
-	public static final String[] PROPS = {"osgi.os", "osgi.ws", "osgi.nl", "osgi.arch", Constants.OSGI_FRAMEWORK_SYSTEM_PACKAGES, Constants.OSGI_RESOLVER_MODE, Constants.FRAMEWORK_EXECUTIONENVIRONMENT, "osgi.resolveOptional", "osgi.genericAliases", Constants.FRAMEWORK_OS_NAME, Constants.FRAMEWORK_OS_VERSION, Constants.FRAMEWORK_PROCESSOR, Constants.FRAMEWORK_LANGUAGE}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
+	private static final String OSGI_OS = "osgi.os"; //$NON-NLS-1$
+	private static final String OSGI_WS = "osgi.ws"; //$NON-NLS-1$
+	private static final String OSGI_NL = "osgi.nl"; //$NON-NLS-1$
+	private static final String OSGI_ARCH = "osgi.arch"; //$NON-NLS-1$
+	public static final String[] PROPS = {OSGI_OS, OSGI_WS, OSGI_NL, OSGI_ARCH, Constants.OSGI_FRAMEWORK_SYSTEM_PACKAGES, Constants.OSGI_RESOLVER_MODE, Constants.FRAMEWORK_EXECUTIONENVIRONMENT, "osgi.resolveOptional", "osgi.genericAliases", Constants.FRAMEWORK_OS_NAME, Constants.FRAMEWORK_OS_VERSION, Constants.FRAMEWORK_PROCESSOR, Constants.FRAMEWORK_LANGUAGE}; //$NON-NLS-1$ //$NON-NLS-2$
 	transient private Resolver resolver;
 	transient private StateDeltaImpl changes;
 	transient private boolean resolving = false;
@@ -570,6 +573,19 @@ public abstract class StateImpl implements State {
 						newPlatformProperties[i].put(key, value);
 				}
 			}
+			// make sure the bundle native code osgi properties have decent defaults
+			if (newPlatformProperties[i].get(Constants.FRAMEWORK_OS_NAME) == null && newPlatformProperties[i].get(OSGI_OS) != null)
+				newPlatformProperties[i].put(Constants.FRAMEWORK_OS_NAME, newPlatformProperties[i].get(OSGI_OS));
+			if (newPlatformProperties[i].get(Constants.FRAMEWORK_PROCESSOR) == null && newPlatformProperties[i].get(OSGI_ARCH) != null)
+				newPlatformProperties[i].put(Constants.FRAMEWORK_PROCESSOR, newPlatformProperties[i].get(OSGI_ARCH));
+			if (newPlatformProperties[i].get(Constants.FRAMEWORK_LANGUAGE) == null && newPlatformProperties[i].get(OSGI_NL) instanceof String) {
+				String osgiNL = (String) newPlatformProperties[i].get(OSGI_NL);
+				int idx = osgiNL.indexOf('_');
+				if (idx >= 0)
+					osgiNL = osgiNL.substring(0, idx);
+				newPlatformProperties[i].put(Constants.FRAMEWORK_LANGUAGE, osgiNL);
+			}
+
 		}
 		boolean result = false;
 		boolean performResetSystemExports = false;

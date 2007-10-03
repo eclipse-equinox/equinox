@@ -126,7 +126,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 			newDescriptions[i].setOSVersions(originalDescriptions[i].getOSVersions());
 			newDescriptions[i].setLanguages(originalDescriptions[i].getLanguages());
 			try {
-				newDescriptions[i].setFilter(originalDescriptions[i].getFilter().toString());
+				newDescriptions[i].setFilter(originalDescriptions[i].getFilter() == null ? null : originalDescriptions[i].getFilter().toString());
 			} catch (InvalidSyntaxException e) {
 				// this is already tested from the orginal filter
 			}

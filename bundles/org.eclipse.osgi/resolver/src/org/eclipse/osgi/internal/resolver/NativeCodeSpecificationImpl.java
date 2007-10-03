@@ -60,13 +60,21 @@ public class NativeCodeSpecificationImpl extends VersionConstraintImpl implement
 				match = true;
 			else {
 				String platformOS = (String) platformProps[i].get(Constants.FRAMEWORK_OS_NAME);
+				Object aliasedPlatformOS = platformOS == null ? null : aliasMapper.aliasOSName(platformOS);
+				String[] platformOSes;
+				if (aliasedPlatformOS instanceof Collection)
+					platformOSes = (String[]) ((Collection) aliasedPlatformOS).toArray(new String[((Collection) aliasedPlatformOS).size()]);
+				else
+					platformOSes = aliasedPlatformOS == null ? new String[0] : new String[] {(String) aliasedPlatformOS};
 				for (int j = 0; j < osNames.length && !match; j++) {
 					Object aliasedName = aliasMapper.aliasOSName(osNames[j]);
-					if (aliasedName instanceof String) {
-						if (aliasedName.equals(platformOS))
+					for (int k = 0; k < platformOSes.length; k++) {
+						if (aliasedName instanceof String) {
+							if (aliasedName.equals(platformOSes[k]))
+								match = true;
+						} else if (((Collection) aliasedName).contains(platformOSes[k])) {
 							match = true;
-					} else if (platformOS != null && ((Collection) aliasedName).contains(platformOS)) {
-						match = true;
+						}
 					}
 				}
 			}
@@ -104,7 +112,7 @@ public class NativeCodeSpecificationImpl extends VersionConstraintImpl implement
 			match = false;
 
 			VersionRange[] osVersions = nativeSupplier.getOSVersions();
-			if (osVersions.length == 0)
+			if (osVersions.length == 0 || platformProps[i].get(Constants.FRAMEWORK_OS_VERSION) == null)
 				match = true;
 			else {
 				Version osversion;

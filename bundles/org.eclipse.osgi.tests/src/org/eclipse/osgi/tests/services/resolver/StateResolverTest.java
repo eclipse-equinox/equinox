@@ -2794,6 +2794,28 @@ public class StateResolverTest extends AbstractStateTest {
 		BundleDelta[] bDelta = stateDelta.getChanges(BundleDelta.ADDED | BundleDelta.RESOLVED, false);
 		assertTrue("2.0", bDelta.length == 5);
 	}
+
+	public void testNativeCodeResolution01() throws BundleException {
+		State state = buildEmptyState();
+		Dictionary[] props = new Dictionary[] {new Hashtable()};
+		props[0].put("osgi.ws", "win32");
+		props[0].put("osgi.os", "win32");
+		props[0].put("osgi.arch", "x86");
+		props[0].put("osgi.nl", "en_US");
+		state.setPlatformProperties(props);
+
+		Hashtable manifest = new Hashtable();
+		long bundleID = 0;
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "NativeBundle");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		manifest.put(Constants.BUNDLE_NATIVECODE, "Bundle-NativeCode: nativefile1.txt;processor=x86;osname=Windows2000;osname=\"Windows 2003\";osname=Windows95;osname=Windows98;osname=WindowsNT;osname=WindowsXP;osname=\"Windows NT (unknown)\";osname=\"Windows Vista\"; language=en");
+		BundleDescription testNativeBundle = state.getFactory().createBundleDescription(state, manifest, "NativeBundle", bundleID++);
+		state.addBundle(testNativeBundle);
+		state.resolve();
+		assertTrue("1.0", testNativeBundle.isResolved());
+
+	}
 }
 //testFragmentUpdateNoVersionChanged()
 //testFragmentUpdateVersionChanged()
