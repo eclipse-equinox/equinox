@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2006, 2007 Cognos Incorporated, IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -162,11 +162,9 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 		URLStreamHandler handler = factory.findAuthorizedURLStreamHandler(protocol);
 		if (handler != null) {
 			try {
-				// the handler is set because of a check in setURL (called internally in parseURL)
-				// to ensure that this handler and the URL's handler are the same.				
+				// set the real handler for the URL
 				handlerField.set(arg0, handler);
 				parseURLMethod.invoke(handler, new Object[] {arg0, arg1, new Integer(arg2), new Integer(arg3)});
-				handlerField.set(arg0, this);
 				return;
 			} catch (Exception e) {
 				factory.adaptor.getFrameworkLog().log(new FrameworkLogEntry(MultiplexingURLStreamHandler.class.getName(), "parseURL", FrameworkLogEntry.ERROR, e, null)); //$NON-NLS-1$
@@ -193,11 +191,9 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 		URLStreamHandler handler = factory.findAuthorizedURLStreamHandler(protocol);
 		if (handler != null) {
 			try {
-				// the handler is set because of a check in setURL to ensure that this handler
-				// and the URL's handler are the same.
+				// set the real handler for the URL
 				handlerField.set(arg0, handler);
 				setURLMethod.invoke(handler, new Object[] {arg0, arg1, arg2, new Integer(arg3), arg4, arg5, arg6, arg7, arg8});
-				handlerField.set(arg0, this);
 				return;
 			} catch (Exception e) {
 				factory.adaptor.getFrameworkLog().log(new FrameworkLogEntry(MultiplexingURLStreamHandler.class.getName(), "setURL", FrameworkLogEntry.ERROR, e, null)); //$NON-NLS-1$
