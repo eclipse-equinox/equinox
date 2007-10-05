@@ -78,7 +78,7 @@ extern void displayMessage( _TCHAR* title, _TCHAR* message );
  * The showSplash flag indicates the splash window will be displayed by
  * this process (e.g., value will be zero for the main launcher).
  */
-extern void initWindowSystem( int* argc, _TCHAR* argv[], int showSplash );
+extern int initWindowSystem( int* argc, _TCHAR* argv[], int showSplash );
 
 
 /** Show the Splash Window

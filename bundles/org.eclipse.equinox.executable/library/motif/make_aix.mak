@@ -29,13 +29,15 @@ PROGRAM_LIBRARY=eclipse_$(LIB_VERSION).so
 CC = cc_r
 # Define the object modules to be compiled and flags.
 MAIN_OBJS = eclipseMain.o
-COMMON_OBJS = eclipseConfig.o eclipseCommon.o eclipseMotifCommon.o
+COMMON_OBJS = eclipseConfig.o eclipseCommon.o eclipseMotifCommon.o eclipseMotifInit.o
 DLL_OBJS	= eclipse.o eclipseMotif.o eclipseUtil.o eclipseJNI.o eclipseShm.o eclipseNix.o\
 			  NgCommon.o NgImage.o NgImageData.o NgWinBMPFileFormat.o 
 
 EXEC = $(PROGRAM_OUTPUT)
 DLL = $(PROGRAM_LIBRARY)
-LIBS = -L$(MOTIF_HOME)/lib -lXm -lXt -lX11
+LIBS = -L$(MOTIF_HOME)/lib -ldl -lXm -lXt -lX11
+MOTIF_LIBS = -DXM_LIB="\"libXm.a(shr_32.o)\"" -DXT_LIB="\"libXt.a(shr4.o)\"" -DX11_LIB="\"libX11.a(shr4.o)\""
+#MOTIF_LIBS = -DXM_LIB="NULL" -DXT_LIB="NULL" -DX11_LIB="NULL"
 LFLAGS = -G -bnoentry -bexpall -lm -lc_r -lC_r
 CFLAGS = -O -s \
 	-DMOTIF \
@@ -43,6 +45,7 @@ CFLAGS = -O -s \
 	-DDEFAULT_OS="\"$(DEFAULT_OS)\"" \
 	-DDEFAULT_OS_ARCH="\"$(DEFAULT_OS_ARCH)\"" \
 	-DDEFAULT_WS="\"$(DEFAULT_WS)\"" \
+	$(MOTIF_LIBS) \
 	-DDEFAULT_JAVA_EXEC \
     -DAIX \
 	-I./ \

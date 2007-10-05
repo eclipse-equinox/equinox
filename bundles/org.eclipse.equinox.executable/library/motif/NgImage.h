@@ -17,6 +17,23 @@
 #include <X11/Xos.h>
 #include <X11/Intrinsic.h>
 
+struct NG_PTRS {
+	GC 			(*XCreateGC)			(Display*, Drawable, unsigned long, XGCValues*);
+	XImage *	(*XCreateImage)			(Display*, Visual*, unsigned int, int, int, char*, unsigned int, unsigned int, int, int);
+	Pixmap 		(*XCreatePixmap)		(Display*, Drawable, unsigned int, unsigned int, unsigned int);		        
+	Colormap 	(*XDefaultColormap)		(Display*, int);
+	int 		(*XDefaultDepthOfScreen)(Screen*);
+	Window 		(*XDefaultRootWindow)	(Display*);
+	int 		(*XDefaultScreen)		(Display*);
+	Screen *	(*XDefaultScreenOfDisplay)(Display*);
+	Visual *	(*XDefaultVisual)		(Display*, int);
+	int 		(*XFreeGC)				(Display*, GC);
+	int 		(*XFreePixmap)			(Display*, Pixmap);
+	int 		(*XPutImage)			(Display*, Drawable, GC, XImage*, int, int, int, int, unsigned int, unsigned int);
+	int 		(*XQueryColor)			(Display*, Colormap, XColor*);
+	char *		(*XtMalloc)				(Cardinal);
+};
+
 /**
  * loadBMPImage
  * Create a pixmap representing the given BMP file, for the specified display and screen.

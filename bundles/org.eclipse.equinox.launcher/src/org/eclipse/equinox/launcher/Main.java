@@ -99,7 +99,7 @@ public class Main {
 	private String splashLocation = null;
 	private String endSplash = null;
 	private boolean initialize = false;
-	private boolean splashDown = false;
+	protected boolean splashDown = false;
 
 	public final class SplashHandler extends Thread {
 		public void run() {
@@ -107,7 +107,7 @@ public class Main {
 		}
 
 		public void updateSplash() {
-			if (bridge != null) {
+			if (bridge != null && !splashDown) {
 				bridge.updateSplash();
 			}
 		}
@@ -1806,6 +1806,9 @@ public class Main {
 			System.getProperties().put(SPLASH_HANDLE, String.valueOf(handle));
 			System.getProperties().put(SPLASH_LOCATION, splashLocation);
 			bridge.updateSplash();
+		} else {
+			// couldn't show the splash screen for some reason
+			splashDown = true;
 		}
 	}
 

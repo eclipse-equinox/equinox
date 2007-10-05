@@ -362,9 +362,6 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
 
 	/* Initialize official program name */
    	officialName = name != NULL ? _tcsdup( name ) : getDefaultOfficialName();
-
-    /* Initialize the window system. */
-    initWindowSystem( &argc, argv, !noSplash );
     
     /* Find the directory where the Eclipse program is installed. */
     programDir = getProgramDir();
@@ -951,7 +948,8 @@ _TCHAR* getProgramDir( )
 {
 	_TCHAR*  ch;
 	_TCHAR*  programDir;
-
+	if (program == NULL)
+		return NULL;
     programDir = malloc( (_tcslen( program ) + 1) * sizeof(_TCHAR) );
     _tcscpy( programDir, program );
     ch = lastDirSeparator( programDir );

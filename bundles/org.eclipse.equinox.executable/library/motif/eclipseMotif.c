@@ -14,16 +14,10 @@
 /* UNIX/Motif specific logic for displaying the splash screen. */
 #include "eclipseCommon.h"
 #include "eclipseMozilla.h"
+#include "eclipseMotif.h"
 #include "eclipseOS.h"
 #include "eclipseUtil.h"
 #include "NgImage.h"
-
-#include <Xm/XmAll.h>
-#include <X11/X.h>
-#include <X11/Xlib.h>
-#include <X11/IntrinsicP.h>
-#include <X11/Intrinsic.h>
-#include <X11/Shell.h>
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -94,9 +88,13 @@ int showSplash( const char* featureImage )
 	
 	if (initialArgv == NULL) 
 		initialArgc = 0;
-	initWindowSystem(&initialArgc, initialArgv, 1);
-	xDisplay = XtDisplay(topWindow);
-    screen = XDefaultScreenOfDisplay( xDisplay );
+
+	if (initWindowSystem(&initialArgc, initialArgv, 1) != 0) {
+		return -1;
+	}
+
+	xDisplay = motif_XtDisplay(topWindow);
+    screen = motif.XDefaultScreenOfDisplay( xDisplay );
     if (featureImage != NULL)
     {
     	splashPixmap = loadBMPImage(xDisplay, screen, (char*)featureImage);
@@ -105,7 +103,7 @@ int showSplash( const char* featureImage )
     if (splashPixmap == 0)
     	return ENOENT;
     
-    XGetGeometry (xDisplay, splashPixmap, &root, &x, &y, &width, &height, &border, &depth);
+    motif.XGetGeometry (xDisplay, splashPixmap, &root, &x, &y, &width, &height, &border, &depth);
     
     /* make sure we never pass more than 20 args */
     args = malloc(10 * sizeof(Arg));
@@ -113,50 +111,50 @@ int showSplash( const char* featureImage )
     nArgs = 0;
     /* Note that XtSetArg is a macro, and the 1st argument will be evaluated twice
      * so increment nArgs on its own */
-	XtSetArg(args[nArgs], XmNmwmDecorations, 0);	nArgs++;
-    XtSetArg(args[nArgs], XmNtitle, getOfficialName());	nArgs++;
-    XtSetArg(args[nArgs], XmNwidth, width);			nArgs++;
-    XtSetArg(args[nArgs], XmNheight, height);		nArgs++;
-	shellHandle = XtAppCreateShell(getOfficialName(), "", applicationShellWidgetClass, xDisplay, args, nArgs);								   
-	XtAddCallback(shellHandle, XmNdestroyCallback, (XtCallbackProc) takeDownSplashCB, NULL);
+	motif_XtSetArg(args[nArgs], XmNmwmDecorations, 0);	nArgs++;
+    motif_XtSetArg(args[nArgs], XmNtitle, getOfficialName());	nArgs++;
+    motif_XtSetArg(args[nArgs], XmNwidth, width);			nArgs++;
+    motif_XtSetArg(args[nArgs], XmNheight, height);		nArgs++;
+	shellHandle = motif.XtAppCreateShell(getOfficialName(), "", *motif.applicationShellWidgetClass, xDisplay, args, nArgs);								   
+	motif.XtAddCallback(shellHandle, XmNdestroyCallback, (XtCallbackProc) takeDownSplashCB, NULL);
 	
 	nArgs = 0;
-	XtSetArg(args[nArgs++], XmNancestorSensitive, 1);
-	scrolledHandle = XmCreateMainWindow(shellHandle, NULL, args, nArgs);
+	motif_XtSetArg(args[nArgs++], XmNancestorSensitive, 1);
+	scrolledHandle = motif.XmCreateMainWindow(shellHandle, NULL, args, nArgs);
 	if(scrolledHandle == 0)
 		return -1;
-	XtManageChild(scrolledHandle);
+	motif.XtManageChild(scrolledHandle);
 	
 	nArgs = 0;
-	XtSetArg(args[nArgs], XmNancestorSensitive, 1);			nArgs++;
-    XtSetArg(args[nArgs], XmNborderWidth, 0);				nArgs++;
-    /*XtSetArg(args[nArgs], XmNbackground, 0xFF00FF);			nArgs++; */
-    XtSetArg(args[nArgs], XmNmarginWidth, 0);				nArgs++;
-    XtSetArg(args[nArgs], XmNmarginHeight, 0);				nArgs++;
-    XtSetArg(args[nArgs], XmNresizePolicy, XmRESIZE_NONE);	nArgs++;
-    XtSetArg(args[nArgs], XmNtraversalOn, 1);				nArgs++;
-	drawingHandle = XmCreateDrawingArea(scrolledHandle, NULL, args, nArgs);
+	motif_XtSetArg(args[nArgs], XmNancestorSensitive, 1);			nArgs++;
+    motif_XtSetArg(args[nArgs], XmNborderWidth, 0);					nArgs++;
+    /*motif_XtSetArg(args[nArgs], XmNbackground, 0xFF00FF);			nArgs++; */
+    motif_XtSetArg(args[nArgs], XmNmarginWidth, 0);					nArgs++;
+    motif_XtSetArg(args[nArgs], XmNmarginHeight, 0);				nArgs++;
+    motif_XtSetArg(args[nArgs], XmNresizePolicy, XmRESIZE_NONE);	nArgs++;
+    motif_XtSetArg(args[nArgs], XmNtraversalOn, 1);					nArgs++;
+	drawingHandle = motif.XmCreateDrawingArea(scrolledHandle, NULL, args, nArgs);
 	if(drawingHandle == 0)
 		return -1;
-	XtManageChild(drawingHandle);
+	motif.XtManageChild(drawingHandle);
 	
 	nArgs = 0;
-	XtSetArg(args[nArgs], XmNlabelType, XmPIXMAP);		nArgs++;
-    XtSetArg(args[nArgs], XmNlabelPixmap, splashPixmap);nArgs++;
-    XtSetArg(args[nArgs], XmNwidth, width);				nArgs++;
-    XtSetArg(args[nArgs], XmNheight, height);			nArgs++;
-    XtSetArg(args[nArgs], XmNmarginWidth, 0);			nArgs++;
-    XtSetArg(args[nArgs], XmNmarginHeight, 0);			nArgs++;
-    image = XmCreateLabelGadget ( drawingHandle, "", args, nArgs );
-    XtManageChild( image );
+	motif_XtSetArg(args[nArgs], XmNlabelType, XmPIXMAP);		nArgs++;
+    motif_XtSetArg(args[nArgs], XmNlabelPixmap, splashPixmap);	nArgs++;
+    motif_XtSetArg(args[nArgs], XmNwidth, width);				nArgs++;
+    motif_XtSetArg(args[nArgs], XmNheight, height);				nArgs++;
+    motif_XtSetArg(args[nArgs], XmNmarginWidth, 0);				nArgs++;
+    motif_XtSetArg(args[nArgs], XmNmarginHeight, 0);			nArgs++;
+    image = motif.XmCreateLabelGadget ( drawingHandle, "", args, nArgs );
+    motif.XtManageChild( image );
 	
-	XtRealizeWidget(shellHandle);
-	XtSetMappedWhenManaged(shellHandle, 1);
+	motif.XtRealizeWidget(shellHandle);
+	motif.XtSetMappedWhenManaged(shellHandle, 1);
 
-	if(XtIsTopLevelShell(shellHandle))
-		XtMapWidget(shellHandle);
+	if(motif_XtIsTopLevelShell(shellHandle))
+		motif_XtMapWidget(shellHandle);
 	else
-		XtPopup(shellHandle, XtGrabNone);
+		motif.XtPopup(shellHandle, XtGrabNone);
 		
 	/* Centre the splash screen and display it. */
     centreShell( shellHandle, drawingHandle );
@@ -202,10 +200,10 @@ jlong getSplashHandle() {
 
 void dispatchMessages() {
 	XtInputMask mask;
-	if (appContext != NULL) {
+	if (appContext != NULL && motif.XtAppPending != 0) {
 		/* Process any outstanding messages */
-	 	while ((mask = XtAppPending(appContext)) != 0) {
-	 		XtAppProcessEvent(appContext, mask);
+	 	while ((mask = motif.XtAppPending(appContext)) != 0) {
+	 		motif.XtAppProcessEvent(appContext, mask);
 	 	}
 	}
 }
@@ -214,7 +212,7 @@ void takeDownSplash()
 {
     if (shellHandle != 0) 
     {
-        XtDestroyWidget( shellHandle );
+        motif.XtDestroyWidget( shellHandle );
         /*XFlush( XtDisplay( shellHandle ) );*/
         shellHandle = NULL;
     }
@@ -287,6 +285,18 @@ int launchJavaVM( char* args[] )
 	fixEnvForMozilla();
 #endif /* MOZILLA_FIX */
 
+	{
+		/* put the root of eclipse on the LD_LIBRARY_PATH */
+		char * ldPath = (char*)getenv(_T_ECLIPSE("LD_LIBRARY_PATH"));
+		char * root = getProgramDir();
+		if (root != NULL) {
+			char * newPath = malloc((strlen(root) + strlen(ldPath) + 2) * sizeof(char));
+			sprintf(newPath, "%s%c%s", root, pathSeparator, ldPath);
+			setenv("LD_LIBRARY_PATH", newPath, 1);
+			free(newPath);
+		}
+	}
+	
 	/* Create a child process for the JVM. */	
 	jvmProcess = fork();
 	if (jvmProcess == 0) 

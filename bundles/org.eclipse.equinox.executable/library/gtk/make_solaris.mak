@@ -32,7 +32,7 @@ PROGRAM_LIBRARY=$(PROGRAM_OUTPUT)_$(LIB_VERSION).so
 
 # Define the object modules to be compiled and flags.
 MAIN_OBJS = eclipseMain.o
-COMMON_OBJS = eclipseConfig.o eclipseCommon.o eclipseGtkCommon.o
+COMMON_OBJS = eclipseConfig.o eclipseCommon.o eclipseGtkCommon.o eclipseGtkInit.o
 DLL_OBJS	= eclipse.o eclipseGtk.o eclipseUtil.o eclipseJNI.o eclipseShm.o eclipseNix.o
 PICFLAG = -K PIC
 # Optimize and remove all debugging information by default
@@ -41,7 +41,9 @@ OPTFLAG = -O -s
 
 EXEC = $(PROGRAM_OUTPUT)
 DLL = $(PROGRAM_LIBRARY)
-LIBS = `pkg-config --libs-only-L gtk+-2.0` -lgtk-x11-2.0 -lgdk_pixbuf-2.0 -lgobject-2.0 -lgdk-x11-2.0 -lglib-2.0 -lthread -ldl -lc
+#LIBS = `pkg-config --libs-only-L gtk+-2.0` -lgtk-x11-2.0 -lgdk_pixbuf-2.0 -lgobject-2.0 -lgdk-x11-2.0 -lglib-2.0 -lthread -ldl -lc
+LIBS = -lthread -ldl -lc
+GTK_LIBS = -DGTK_LIB="\"libgtk-x11-2.0.so.0\"" -DGDK_LIB="\"libgdk-x11-2.0.so.0\"" -DPIXBUF_LIB="\"libgdk_pixbuf-2.0.so.0\"" -DGOBJ_LIB="\"libgobject-2.0.so.0\""
 LFLAGS = -G
 CFLAGS = $(OPTFLAG) \
 	-DSOLARIS \
@@ -49,6 +51,7 @@ CFLAGS = $(OPTFLAG) \
 	-DDEFAULT_OS="\"$(DEFAULT_OS)\"" \
 	-DDEFAULT_OS_ARCH="\"$(DEFAULT_OS_ARCH)\"" \
 	-DDEFAULT_WS="\"$(DEFAULT_WS)\"" \
+	$(GTK_LIBS) \
 	-I. \
 	-I.. \
 	-I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/solaris \
@@ -65,9 +68,12 @@ eclipseMain.o: ../eclipseUnicode.h ../eclipseCommon.h ../eclipseMain.c
 eclipseCommon.o: ../eclipseCommon.h ../eclipseUnicode.h ../eclipseCommon.c
 	$(CC) $(CFLAGS) -c ../eclipseCommon.c
 
-eclipseGtkCommon.o: ../eclipseCommon.h ../eclipseOS.h eclipseGtkCommon.c
+eclipseGtkCommon.o: ../eclipseCommon.h ../eclipseOS.h eclipseGtk.h eclipseGtkCommon.c
 	$(CC) $(CFLAGS) -c eclipseGtkCommon.c -o eclipseGtkCommon.o
 
+eclipseGtkInit.o: ../eclipseCommon.h eclipseGtk.h eclipseGtkInit.c
+	$(CC) $(CFLAGS) -c eclipseGtkInit.c -o eclipseGtkInit.o
+	
 eclipseUtil.o: ../eclipseUtil.c ../eclipseUtil.h ../eclipseOS.h
 	$(CC) $(CFLAGS) -c ../eclipseUtil.c -o eclipseUtil.o
 

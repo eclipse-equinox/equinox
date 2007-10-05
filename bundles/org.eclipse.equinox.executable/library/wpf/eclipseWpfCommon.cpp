@@ -26,11 +26,7 @@ extern "C" {
 _TCHAR   dirSeparator  = _T('\\');
 _TCHAR   pathSeparator = _T(';');
 
-void initWindowSystem( int* pArgc, _TCHAR* argv[], int showSplash );
-void displayMessage( _TCHAR* title, _TCHAR* message );
-
 static int initialized = 0;
-
 
 /* Load the specified shared library
  */
@@ -81,10 +77,11 @@ void displayMessage( _TCHAR* title, _TCHAR* message )
  * Return the window handle as the data for the splash command.
  *
  */
-void initWindowSystem( int* pArgc, _TCHAR* argv[], int showSplash )
+int initWindowSystem( int* pArgc, _TCHAR* argv[], int showSplash )
 {
 	
 	if(initialized)
-		return;
+		return 0;
 	initialized = 1;
+	return 0;
 }

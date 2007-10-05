@@ -13,13 +13,73 @@
 #include "NgImageData.h"
 #include "NgImage.h"
 #include "NgWinBMPFileFormat.h"
+#include <dlfcn.h>
 
+struct NG_PTRS ng;
+
+#define FN_TABLE_ENTRY(fn) { (void**)&ng.fn, #fn } 
+typedef struct {
+	void ** fnPtr;
+	char * fnName;
+} FN_TABLE;
+static FN_TABLE x11Functions[] = {	FN_TABLE_ENTRY(XCreateGC),
+									FN_TABLE_ENTRY(XCreateImage),
+									FN_TABLE_ENTRY(XCreatePixmap),		        
+									FN_TABLE_ENTRY(XDefaultColormap),
+									FN_TABLE_ENTRY(XDefaultDepthOfScreen),
+									FN_TABLE_ENTRY(XDefaultRootWindow),
+									FN_TABLE_ENTRY(XDefaultScreen),
+									FN_TABLE_ENTRY(XDefaultScreenOfDisplay),
+									FN_TABLE_ENTRY(XDefaultVisual),
+									FN_TABLE_ENTRY(XFreeGC),
+									FN_TABLE_ENTRY(XFreePixmap),
+									FN_TABLE_ENTRY(XPutImage),
+									FN_TABLE_ENTRY(XQueryColor),
+									{ NULL, NULL }
+								};
+
+static FN_TABLE xtFunctions[] = {	FN_TABLE_ENTRY(XtMalloc), {NULL, NULL} };
+
+int NGImageInit() {
+	int i = 0;
+	void * fn;
+#ifdef AIX
+	void * x11Lib = dlopen(X11_LIB, RTLD_LAZY | RTLD_MEMBER);
+	void * xtLib = dlopen(XT_LIB, RTLD_LAZY | RTLD_MEMBER);
+#else
+	void * x11Lib = dlopen(X11_LIB, RTLD_LAZY);
+	void * xtLib = dlopen(XT_LIB, RTLD_LAZY);
+#endif		
+	/* initialize ptr struct to 0's */
+	memset(&ng, 0, sizeof(struct NG_PTRS));
+	
+
+	if (x11Lib == NULL || xtLib == NULL)
+		return -1;
+	
+	for (i = 0; x11Functions[i].fnName != NULL; i++) {
+		fn = dlsym(x11Lib, x11Functions[i].fnName);
+		if (fn != 0)
+			*(x11Functions[i].fnPtr) = fn;
+		else
+			return -1;
+	}
+	
+	for (i = 0; xtFunctions[i].fnName != NULL; i++) {
+		fn = dlsym(xtLib, xtFunctions[i].fnName);
+		if (fn != 0)
+			*(xtFunctions[i].fnPtr) = fn;
+		else
+			return -1;
+	}
+	return 0;
+}
 /**
  * Return the nbr of entries in the default color palette
  */
 int getNbrColorsXPalette(Display *xDisplay)
 {
-	Visual *visual = XDefaultVisual (xDisplay, XDefaultScreen(xDisplay));
+	Visual *visual = ng.XDefaultVisual (xDisplay, ng.XDefaultScreen(xDisplay));
 	return visual->map_entries;
 }
 
@@ -32,11 +92,11 @@ ng_err_t getXPalette (Display *xDisplay, int numColors, char* palette)
 	XColor color;
 	int i;
 	int index = 0;
-	int colormap = XDefaultColormap (xDisplay, XDefaultScreen(xDisplay));
+	int colormap = ng.XDefaultColormap (xDisplay, ng.XDefaultScreen(xDisplay));
 	for (i = 0; i < numColors; i++)
 	{
 		color.pixel = i;
-		XQueryColor (xDisplay, colormap, &color);
+		ng.XQueryColor (xDisplay, colormap, &color);
 		palette[index++] = ((color.red >> 8) & 0xFF);
 		palette[index++] = ((color.green >> 8) & 0xFF);
 		palette[index++] = ((color.blue >> 8) & 0xFF);
@@ -69,7 +129,7 @@ ng_err_t putImage(ng_bitmap_image_t *image, int srcX, int srcY, int srcWidth, in
 		numColors = getNbrColorsXPalette (xDisplay);
 		if (numColors == 0)
 			return NgError (ERR_NG, "Error pseudo-color mode detected, no colors available");
-		numColors = 1 << XDefaultDepthOfScreen (XDefaultScreenOfDisplay (xDisplay));
+		numColors = 1 << ng.XDefaultDepthOfScreen (ng.XDefaultScreenOfDisplay (xDisplay));
 		screenDirect = 0;
 	} else
 	{
@@ -79,11 +139,11 @@ ng_err_t putImage(ng_bitmap_image_t *image, int srcX, int srcY, int srcWidth, in
 		screenDirect = 1;
 	}
 	
-	xImagePtr = XCreateImage(xDisplay, visual, screenDepth, ZPixmap, 0, 0, srcWidth, srcHeight, 32, 0);
+	xImagePtr = ng.XCreateImage(xDisplay, visual, screenDepth, ZPixmap, 0, 0, srcWidth, srcHeight, 32, 0);
 	if (xImagePtr == NULL) return NgError (ERR_NG, "Error XCreateImage failed");
 	bufSize = xImagePtr->bytes_per_line * srcHeight;
 
-	xImagePtr->data = (char*) XtMalloc (bufSize);
+	xImagePtr->data = (char*) ng.XtMalloc (bufSize);
 	sbpp = NgBitmapImageBytesPerRow(image);
 	dbpp = xImagePtr->bytes_per_line;
 	
@@ -104,11 +164,11 @@ ng_err_t putImage(ng_bitmap_image_t *image, int srcX, int srcY, int srcWidth, in
 		NgFree (palette);
 	}
 	
-	tempGC = XCreateGC (xDisplay, drawable, 0, NULL);	
-	XPutImage(xDisplay, drawable, tempGC, xImagePtr, 0, 0, 0, 0, srcWidth, srcHeight);
+	tempGC = ng.XCreateGC (xDisplay, drawable, 0, NULL);	
+	ng.XPutImage(xDisplay, drawable, tempGC, xImagePtr, 0, 0, 0, 0, srcWidth, srcHeight);
 	
 	XDestroyImage (xImagePtr);
-	XFreeGC (xDisplay, tempGC);
+	ng.XFreeGC (xDisplay, tempGC);
 	return ERR_OK;
 }
 
@@ -118,8 +178,8 @@ ng_err_t init(ng_bitmap_image_t *image, Display *xDisplay, int screenDepth, int 
 	int width = (int)NgBitmapImageWidth(image);
 	int height = (int)NgBitmapImageHeight(image);
 	
-	Visual *visual = XDefaultVisual(xDisplay, XDefaultScreen(xDisplay));
-	*pixmap = XCreatePixmap(xDisplay, drawable, width, height, screenDepth);
+	Visual *visual = ng.XDefaultVisual(xDisplay, ng.XDefaultScreen(xDisplay));
+	*pixmap = ng.XCreatePixmap(xDisplay, drawable, width, height, screenDepth);
 	if (*pixmap == 0) 
 	{
 		return NgError (ERR_NG, "Error XCreatePixmap failed");
@@ -127,7 +187,7 @@ ng_err_t init(ng_bitmap_image_t *image, Display *xDisplay, int screenDepth, int 
 	err = putImage(image, 0, 0, width, height, 0, 0, xDisplay, visual, screenDepth, *pixmap);
 	if (err != ERR_OK) 
 	{
-		XFreePixmap (xDisplay, *pixmap);
+		ng.XFreePixmap (xDisplay, *pixmap);
 		return NgError (err, "Error putImage failed");
 	}
 	
@@ -145,15 +205,20 @@ ng_err_t init(ng_bitmap_image_t *image, Display *xDisplay, int screenDepth, int 
  * returned value: the pixmap newly created if successful. 0 otherwise.
  */
 Pixmap loadBMPImage (Display *display, Screen *screen, char *bmpPathname) {
-	Window drawable = XDefaultRootWindow (display);
+	Window drawable;
 	ng_stream_t in;
 	ng_bitmap_image_t image;
 	ng_err_t err = ERR_OK;
-	int screenDepth = XDefaultDepthOfScreen (screen);
+	int screenDepth;
 	Pixmap pixmap;
 
+	/* this must be called before any X functions are used */
+	NGImageInit();
 	NgInit();
-		
+	
+	drawable = ng.XDefaultRootWindow (display);
+	screenDepth = ng.XDefaultDepthOfScreen (screen);
+	
 	if (NgStreamInit (&in, bmpPathname) != ERR_OK)
 	{
 		NgError (ERR_NG, "Error can't open BMP file");

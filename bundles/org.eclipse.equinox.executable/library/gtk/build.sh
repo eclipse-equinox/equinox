@@ -97,7 +97,8 @@ case $OS in
 		makefile="make_solaris.mak"
 		defaultOS="solaris"
 		OUTPUT_DIR="../../bin/$defaultWS/$defaultOS/$defaultOSArch"
-		PATH=/usr/ccs/bin:/opt/SUNWspro/bin:$PATH
+		#PATH=/usr/ccs/bin:/opt/SUNWspro/bin:$PATH
+		PATH=/usr/ccs/bin:/export/home/SUNWspro/bin:$PATH
 		export PATH
 		if [ "$PROC" = "" ];  then
 		    PROC=`uname -p`

@@ -15,6 +15,7 @@
 #include "eclipseCommon.h"
 #include "eclipseOS.h"
 #include "eclipseUtil.h"
+#include "eclipseGtk.h"
 
 #include <signal.h>
 #include <unistd.h>
@@ -31,9 +32,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <locale.h>
-
-#include <gtk/gtk.h>
-#include <gdk-pixbuf/gdk-pixbuf.h>
 
 /* Global Variables */
 char*  defaultVM     = "java";
@@ -68,56 +66,59 @@ int showSplash( const char* featureImage )
 	
 	if (initialArgv == NULL)
 		initialArgc = 0;
-	initWindowSystem(&initialArgc, initialArgv, 1);
 	
-	shellHandle = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-	gtk_window_set_decorated(GTK_WINDOW(shellHandle), FALSE);
-	gtk_signal_connect(GTK_OBJECT(shellHandle), "destroy", GTK_SIGNAL_FUNC(gtk_widget_destroyed), &shellHandle);
-	vboxHandle = gtk_vbox_new(FALSE, 0);
+	if( initWindowSystem(&initialArgc, initialArgv, 1) != 0)
+		return -1;
+	
+	shellHandle = gtk.gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	gtk.gtk_window_set_decorated((GtkWindow*)(shellHandle), FALSE);
+	gtk.gtk_signal_connect((GtkObject*)shellHandle, "destroy", (GtkSignalFunc)(gtk.gtk_widget_destroyed), &shellHandle);
+	vboxHandle = gtk.gtk_vbox_new(FALSE, 0);
 	if(vboxHandle == 0)
 		return -1;
 		
-	vadj = GTK_ADJUSTMENT(gtk_adjustment_new(0, 0, 100, 1, 10, 10));
-	hadj = GTK_ADJUSTMENT(gtk_adjustment_new(0, 0, 100, 1, 10, 10));
+	vadj = (GtkAdjustment*)gtk.gtk_adjustment_new(0, 0, 100, 1, 10, 10);
+	hadj = (GtkAdjustment*)gtk.gtk_adjustment_new(0, 0, 100, 1, 10, 10);
 	if (vadj == 0 || hadj == 0) 
 		return -1;
 		
-	scrolledHandle = gtk_scrolled_window_new(hadj, vadj);
+	scrolledHandle = gtk.gtk_scrolled_window_new(hadj, vadj);
 	
-	gtk_container_add(GTK_CONTAINER(vboxHandle), scrolledHandle);
-	gtk_box_set_child_packing(GTK_BOX(vboxHandle), scrolledHandle, TRUE, TRUE, 0, GTK_PACK_END);
-	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolledHandle), GTK_POLICY_NEVER, GTK_POLICY_NEVER);
+	gtk.gtk_container_add((GtkContainer*)(vboxHandle), scrolledHandle);
+	gtk.gtk_box_set_child_packing((GtkBox*)(vboxHandle), scrolledHandle, TRUE, TRUE, 0, GTK_PACK_END);
+	gtk.gtk_scrolled_window_set_policy((GtkScrolledWindow*)(scrolledHandle), GTK_POLICY_NEVER, GTK_POLICY_NEVER);
 
-	handle = gtk_fixed_new();
-	gtk_fixed_set_has_window(GTK_FIXED(handle), TRUE);
-	GTK_WIDGET_SET_FLAGS(handle, GTK_CAN_FOCUS);
+	handle = gtk.gtk_fixed_new();
+	gtk.gtk_fixed_set_has_window((GtkFixed*)(handle), TRUE);
+	((GtkObject*)handle)->flags |= GTK_CAN_FOCUS;	/*GTK_WIDGET_SET_FLAGS(handle, GTK_CAN_FOCUS);*/
 	
 	/* avoid gtk_scrolled_window_add warning */
-	handlerId = g_log_set_handler("Gtk", G_LOG_LEVEL_WARNING, &log_handler, NULL);
-	gtk_container_add(GTK_CONTAINER(scrolledHandle), handle);
-	g_log_remove_handler("Gtk", handlerId);
+	handlerId = gtk.g_log_set_handler("Gtk", G_LOG_LEVEL_WARNING, &log_handler, NULL);
+	gtk.gtk_container_add((GtkContainer*)(scrolledHandle), handle);
+	gtk.g_log_remove_handler("Gtk", handlerId);
 	
-	gtk_container_add(GTK_CONTAINER(shellHandle), vboxHandle);
+	gtk.gtk_container_add((GtkContainer*)(shellHandle), vboxHandle);
 	
-	pixbuf = gdk_pixbuf_new_from_file(featureImage, NULL);
-	image = gtk_image_new_from_pixbuf(pixbuf);
-	gtk_signal_connect(GTK_OBJECT(image), "destroy", GTK_SIGNAL_FUNC(gtk_widget_destroyed), &image);
-	gtk_container_add(GTK_CONTAINER(handle), image);
+	pixbuf = gtk.gdk_pixbuf_new_from_file(featureImage, NULL);
+	image = gtk.gtk_image_new_from_pixbuf(pixbuf);
+	gtk.gtk_signal_connect((GtkObject*)(image), "destroy", (GtkSignalFunc)(gtk.gtk_widget_destroyed), &image);
+	gtk.gtk_container_add((GtkContainer*)(handle), image);
 	
-	width  = gdk_pixbuf_get_width(pixbuf);
-	height = gdk_pixbuf_get_height(pixbuf);
-	gtk_window_set_position(GTK_WINDOW(shellHandle), GTK_WIN_POS_CENTER);
+	width  = gtk.gdk_pixbuf_get_width(pixbuf);
+	height = gtk.gdk_pixbuf_get_height(pixbuf);
+	gtk.gtk_window_set_position((GtkWindow*)(shellHandle), GTK_WIN_POS_CENTER);
 	if (getOfficialName() != NULL)
-		gtk_window_set_title(GTK_WINDOW(shellHandle), getOfficialName());
-	gtk_window_resize(GTK_WINDOW(shellHandle), width, height);
-	gtk_widget_show_all(GTK_WIDGET(shellHandle));
-	splashHandle = (long)G_OBJECT(shellHandle);
+		gtk.gtk_window_set_title((GtkWindow*)(shellHandle), getOfficialName());
+	gtk.gtk_window_resize((GtkWindow*)(shellHandle), width, height);
+	gtk.gtk_widget_show_all((GtkWidget*)(shellHandle));
+	splashHandle = (long)shellHandle;
 	dispatchMessages();
 	return 0;
 }
 
 void dispatchMessages() {
-	while(g_main_context_iteration(0,0) != 0) {}
+	if (gtk.g_main_context_iteration != 0)
+		while(gtk.g_main_context_iteration(0,0) != 0) {}
 }
 
 jlong getSplashHandle() {
@@ -126,10 +127,10 @@ jlong getSplashHandle() {
 
 void takeDownSplash() {
 	if(shellHandle != 0) {
-		gtk_widget_destroy(shellHandle);
+		gtk.gtk_widget_destroy(shellHandle);
 		if (image != NULL) {
-			gtk_widget_destroy(image);
-			gdk_pixbuf_unref(pixbuf);
+			gtk.gtk_widget_destroy(image);
+			gtk.g_object_unref(pixbuf);
 		}
 		dispatchMessages();
 		splashHandle = 0;

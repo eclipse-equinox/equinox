@@ -22,9 +22,6 @@
 _TCHAR   dirSeparator  = _T('\\');
 _TCHAR   pathSeparator = _T(';');
 
-void initWindowSystem( int* pArgc, _TCHAR* argv[], int showSplash );
-/*static LRESULT WINAPI WndProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);*/
-
 /* Global Main Window*/
 #ifdef UNICODE
 extern HWND topWindow;
@@ -65,13 +62,13 @@ void displayMessage( _TCHAR* title, _TCHAR* message )
  * Return the window handle as the data for the splash command.
  *
  */
-void initWindowSystem( int* pArgc, _TCHAR* argv[], int showSplash )
+int initWindowSystem( int* pArgc, _TCHAR* argv[], int showSplash )
 {
 	HINSTANCE module = GetModuleHandle(NULL);
 	HICON icon = NULL;
 	
 	if(initialized)
-		return;
+		return 0;
     /* Create a window that has no decorations. */
     
 	InitCommonControls();
@@ -97,6 +94,7 @@ void initWindowSystem( int* pArgc, _TCHAR* argv[], int showSplash )
 #endif
 
 	initialized = 1;
+	return 0;
 }
 
 /* Load the specified shared library

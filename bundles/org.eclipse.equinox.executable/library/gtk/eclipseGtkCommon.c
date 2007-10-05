@@ -12,25 +12,16 @@
  
 #include "eclipseCommon.h"
 #include "eclipseOS.h"
+#include "eclipseGtk.h"
 
 #include <locale.h>
 #include <dlfcn.h>
 #include <stdio.h>
-#include <gtk/gtk.h>
 
 #define ECLIPSE_ICON  401
 
 char   dirSeparator  = '/';
 char   pathSeparator = ':';
-
-void initWindowSystem( int* pArgc, _TCHAR* argv[], int showSplash );
-
-/* Global Main Window*/
-/*#ifdef UNICODE
-extern HWND topWindow;
-#else
-HWND    topWindow = 0;
-#endif*/
 
 /* Define local variables for the main window. */
 static int          saveArgc   = 0;		/* arguments after they were parsed, for window system */
@@ -38,33 +29,44 @@ static char**       saveArgv   = 0;
 
 gboolean     gtkInitialized = FALSE;
 
+#ifdef SOLARIS
+/* a call to this function appears inline in glib/gstring.h on Solaris,
+   so provide a definition here and hook it up
+   */
+GString* g_string_insert_c (GString *string, gssize pos, gchar c) {
+	return gtk.g_string_insert_c(string, pos, c);
+}
+#endif
+
 /* Display a Message */
 void displayMessage(char* title, char* message)
 {
 	GtkWidget* dialog;
 	
     /* If GTK has not been initialized yet, do it now. */
-    if (!gtkInitialized) 
-    {
-		initWindowSystem( &saveArgc, saveArgv, 1 );
-    }
+    if (initWindowSystem( &saveArgc, saveArgv, 1 ) != 0)
+    	return;
 
-  	dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_DESTROY_WITH_PARENT,
+  	dialog = gtk.gtk_message_dialog_new(NULL, GTK_DIALOG_DESTROY_WITH_PARENT,
 				   					GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
 				   					"%s", message);
-  	gtk_window_set_title(GTK_WINDOW (dialog), title);
-  	gtk_dialog_run(GTK_DIALOG (dialog));
-  	gtk_widget_destroy(dialog);
+  	gtk.gtk_window_set_title((GtkWindow*)dialog, title);
+  	gtk.gtk_dialog_run((GtkDialog*)dialog);
+  	gtk.gtk_widget_destroy(dialog);
 }
 
 /* Initialize the Window System */
-void initWindowSystem(int* pArgc, char* argv[], int showSplash)
+int initWindowSystem(int* pArgc, char* argv[], int showSplash)
 {
 	int defaultArgc = 1;
 	char * defaultArgv [] = { "", 0 };
 	
     if(gtkInitialized)
-    	return;
+    	return 0;
+    
+    /* load the GTK libraries and initialize function pointers */
+    if (loadGtk() != 0)
+    	return -1;
     
 	if (argv == NULL) {
 		/* gtk_init_check on Solaris 9 doesn't like NULL or empty argv */
@@ -80,10 +82,11 @@ void initWindowSystem(int* pArgc, char* argv[], int showSplash)
     }  
 
 	/* Initialize GTK. */
-	gtk_set_locale();
-	gtk_init_check(pArgc, &argv);
-	gdk_set_program_class(getOfficialName());
+    gtk.gtk_set_locale();
+    gtk.gtk_init_check(pArgc, &argv);
+	/*_gdk_set_program_class(getOfficialName());*/
 	gtkInitialized = TRUE;
+	return 0;
 }
 
 /* Load the specified shared library

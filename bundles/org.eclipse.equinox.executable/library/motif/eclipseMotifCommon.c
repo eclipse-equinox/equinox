@@ -12,20 +12,11 @@
  
 #include "eclipseCommon.h"
 #include "eclipseOS.h"
+#include "eclipseMotif.h"
 
 #include <locale.h>
 #include <dlfcn.h>
 #include <stdlib.h>
-#include <Xm/XmAll.h>
-#include <X11/X.h>
-#include <X11/Xlib.h>
-#include <X11/IntrinsicP.h>
-#include <X11/Intrinsic.h>
-#include <X11/Shell.h>
-
-#ifndef NO_XINERAMA_EXTENSIONS
-#include <X11/extensions/Xinerama.h>
-#endif
 
 #define ECLIPSE_ICON  401
 
@@ -33,7 +24,6 @@ char   dirSeparator  = '/';
 char   pathSeparator = ':';
 
 void centreShell( Widget widget, Widget expose );
-void initWindowSystem( int* pArgc, _TCHAR* argv[], int showSplash );
 
 /* Global Variables */
 XtAppContext appContext = 0;
@@ -55,53 +45,52 @@ void displayMessage( char* title, char* message )
     int           nArgs;
     XEvent        event;
     
-    /* If there is no associated display, just print the error and return. */
+    /* If there is no associated display, or we fail to initialize Xt, just print the error and return. */
     displayName = getenv("DISPLAY");
-    if (displayName == NULL || strlen(displayName) == 0) 
+    if ( displayName == NULL || strlen(displayName) == 0 ||
+        (topWindow == 0 && initWindowSystem( &saveArgc, saveArgv, 1 ) != 0)	) 
     {
-    	printf( "%s: %s\n", title, message );
     	return;
     }
-   
-    /* If Xt has not been initialized yet, do it now. */
-    if (topWindow == 0) 
-    {
-		initWindowSystem( &saveArgc, saveArgv, 1 );
-    }
-    
-	msg = XmStringGenerate( message, NULL, XmCHARSET_TEXT, NULL );
+	msg = motif.XmStringGenerate( message, NULL, XmCHARSET_TEXT, NULL );
 
-    /* Output a simple message box. */
+    /* Output a simple message box. */ 
     nArgs = 0;
-    XtSetArg( arg[ nArgs ], XmNdialogType, XmDIALOG_MESSAGE ); nArgs++;
-    XtSetArg( arg[ nArgs ], XmNtitle, title ); nArgs++;
-    XtSetArg( arg[ nArgs ], XmNmessageString, msg ); nArgs++;
-    msgBox = XmCreateMessageDialog( topWindow, getOfficialName(), arg, nArgs );
-    XtUnmanageChild( XmMessageBoxGetChild( msgBox, XmDIALOG_CANCEL_BUTTON ) );
-    XtUnmanageChild( XmMessageBoxGetChild( msgBox, XmDIALOG_HELP_BUTTON ) );
-    XtManageChild( msgBox );
+    
+    motif_XtSetArg( arg[ nArgs ], XmNdialogType, XmDIALOG_MESSAGE ); nArgs++;
+    motif_XtSetArg( arg[ nArgs ], XmNtitle, title ); nArgs++;
+    motif_XtSetArg( arg[ nArgs ], XmNmessageString, msg ); nArgs++;
+    msgBox = motif.XmCreateMessageDialog( topWindow, getOfficialName(), arg, nArgs );
+
+    motif.XtUnmanageChild( motif.XmMessageBoxGetChild( msgBox, XmDIALOG_CANCEL_BUTTON ) );
+    motif.XtUnmanageChild( motif.XmMessageBoxGetChild( msgBox, XmDIALOG_HELP_BUTTON ) );
+    motif.XtManageChild( msgBox );
     centreShell( msgBox, msgBox );
-    if (msg != 0) XmStringFree (msg);
+    if (msg != 0) motif.XmStringFree (msg);
 
     /* Wait for the OK button to be pressed. */
-    while (XtIsRealized( msgBox ) && XtIsManaged( msgBox ))
+    while (motif_XtIsRealized( msgBox ) && motif.XtIsManaged( msgBox ))
     {
-        XtAppNextEvent( appContext, &event );
-        XtDispatchEvent( &event );
+        motif.XtAppNextEvent( appContext, &event );
+        motif.XtDispatchEvent( &event );
     }
-    XtDestroyWidget( msgBox );
+    motif.XtDestroyWidget( msgBox );
 }
 
 /* Initialize Window System
  *
  * Initialize the Xt and Xlib.
  */
-void initWindowSystem( int* pArgc, char* argv[], int showSplash )
+int initWindowSystem( int* pArgc, char* argv[], int showSplash )
 {
     Arg     arg[20];
     
     if(motifInitialized == 1)
-    	return;
+    	return 0;
+    
+    if (loadMotif() != 0)
+    	return -1;
+    
     /* Save the arguments in case displayMessage() is called in the main launcher. */ 
     if (saveArgv == 0)
     {
@@ -110,14 +99,20 @@ void initWindowSystem( int* pArgc, char* argv[], int showSplash )
     }  
       
     /* Create the top level shell that will not be used other than
-       to initialize the application. */
+       to initialize the application. 
+     */
+#ifdef AIX
     topWindow = XtInitialize(NULL, getOfficialName(), NULL, 0, pArgc, argv);
-	appContext = XtWidgetToApplicationContext(topWindow);
-	XtSetLanguageProc (appContext, NULL, NULL);
-    XtSetArg( arg[ 0 ], XmNmappedWhenManaged, False );
-    XtSetValues( topWindow, arg, 1 );
-    XtRealizeWidget( topWindow );
+#else
+	topWindow = motif.XtInitialize(NULL, getOfficialName(), NULL, 0, pArgc, argv);
+#endif
+	appContext = motif.XtWidgetToApplicationContext(topWindow);
+	motif.XtSetLanguageProc (appContext, NULL, NULL);
+	motif_XtSetArg( arg[ 0 ], XmNmappedWhenManaged, False );
+    motif.XtSetValues( topWindow, arg, 1 );
+    motif.XtRealizeWidget( topWindow );
     motifInitialized = 1;
+    return 0;
 }
 
 /* Centre the shell on the screen. */
@@ -140,27 +135,27 @@ void centreShell( Widget widget, Widget expose )
 #endif
 	
     /* Realize the shell to calculate its width/height. */
-    XtRealizeWidget( widget );
+    motif.XtRealizeWidget( widget );
 
     /* Get the desired dimensions of the shell. */
     nArgs = 0;
-    XtSetArg( arg[ nArgs ], XmNwidth,  &width  ); nArgs++;
-    XtSetArg( arg[ nArgs ], XmNheight, &height ); nArgs++;
-    XtSetArg( arg[ nArgs ], XmNscreen, &screen ); nArgs++;
-    XtGetValues( widget, arg, nArgs );
+    motif_XtSetArg( arg[ nArgs ], XmNwidth,  &width  ); nArgs++;
+    motif_XtSetArg( arg[ nArgs ], XmNheight, &height ); nArgs++;
+    motif_XtSetArg( arg[ nArgs ], XmNscreen, &screen ); nArgs++;
+    motif.XtGetValues( widget, arg, nArgs );
 
 	screenWidth = screen->width;
 	screenHeight = screen->height;
 #ifndef NO_XINERAMA_EXTENSIONS
-	display = XtDisplay( widget );
-	if (XineramaIsActive( display )) {
-		info = XineramaQueryScreens( display, &monitorCount );
+	display = motif_XtDisplay( widget );
+	if (motif.XineramaIsActive != 0 && motif.XineramaIsActive( display )) {
+		info = motif.XineramaQueryScreens( display, &monitorCount );
 		if (info != 0) {
 			if (monitorCount > 1) {
 				screenWidth = info->width;
 				screenHeight = info->height;
 			}
-			XFree (info);
+			motif.XFree (info);
 		}
 	}
 #endif
@@ -171,28 +166,28 @@ void centreShell( Widget widget, Widget expose )
 
     /* Set the new shell position and display it. */
     nArgs = 0;
-    XtSetArg( arg[ nArgs ], XmNx, x ); nArgs++;
-    XtSetArg( arg[ nArgs ], XmNy, y ); nArgs++;
-    XtSetValues( widget, arg, nArgs );
-    XtMapWidget( widget );
+    motif_XtSetArg( arg[ nArgs ], XmNx, x ); nArgs++;
+    motif_XtSetArg( arg[ nArgs ], XmNy, y ); nArgs++;
+    motif.XtSetValues( widget, arg, nArgs );
+    motif_XtMapWidget( widget );
 
     /* Wait for an expose event on the desired widget. This wait loop is required when
      * the startVM command fails and the message box is created before the splash
      * window is displayed. Without this wait, the message box sometimes appears
      * under the splash window and the user cannot see it.
      */
-    context = XtWidgetToApplicationContext( widget );
+    context = motif.XtWidgetToApplicationContext( widget );
     waiting = True;
     while (waiting) 
     {
-        XtAppNextEvent( context, &event );
-        if (event.xany.type == Expose && event.xany.window == XtWindow( expose )) 
+        motif.XtAppNextEvent( context, &event );
+        if (event.xany.type == Expose && event.xany.window == motif_XtWindow( expose )) 
         {
             waiting = False;
         }
-        XtDispatchEvent( &event );
+        motif.XtDispatchEvent( &event );
     }
-    XFlush( XtDisplay( widget ) );
+    motif.XFlush( motif_XtDisplay( widget ) );
 }
 
 /* Load the specified shared library

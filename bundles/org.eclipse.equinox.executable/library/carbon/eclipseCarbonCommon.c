@@ -25,8 +25,6 @@ char   pathSeparator = ':';
 
 static CFBundleRef javaVMBundle = NULL;
 
-void initWindowSystem( int* pArgc, _TCHAR* argv[], int showSplash );
-
 int initialized = 0;
 
 static void init() {
@@ -46,7 +44,7 @@ static void init() {
  *
  * Initialize Carbon.
  */
-void initWindowSystem( int* pArgc, char* argv[], int showSplash )
+int initWindowSystem( int* pArgc, char* argv[], int showSplash )
 {
 	char *homeDir = getProgramDir();
 	/*debug("install dir: %s\n", homeDir);*/
@@ -55,6 +53,8 @@ void initWindowSystem( int* pArgc, char* argv[], int showSplash )
     
 	if (showSplash)
 		init();
+	
+	return 0;
 }
 
 /* Display a Message */

@@ -31,7 +31,7 @@ PROGRAM_LIBRARY=eclipse_$(LIB_VERSION).so
 
 # Define the object modules to be compiled and flags.
 MAIN_OBJS = eclipseMain.o
-COMMON_OBJS = eclipseConfig.o eclipseCommon.o eclipseMotifCommon.o
+COMMON_OBJS = eclipseConfig.o eclipseCommon.o eclipseMotifCommon.o  eclipseMotifInit.o
 DLL_OBJS	= eclipse.o eclipseMotif.o eclipseUtil.o eclipseJNI.o eclipseShm.o eclipseNix.o\
 			  NgCommon.o NgImage.o NgImageData.o NgWinBMPFileFormat.o 
 PICFLAG = -K PIC
@@ -41,7 +41,8 @@ OPTFLAG = -O -s
 
 EXEC = $(PROGRAM_OUTPUT)
 DLL = $(PROGRAM_LIBRARY)
-LIBS = -L$(MOTIF_HOME)/lib -L$(X11_HOME)/lib -lXm -lXt -lX11 -lintl -lthread -ldl -lc
+LIBS = -L$(MOTIF_HOME)/lib -L$(X11_HOME)/lib -lintl -lthread -ldl -lc
+MOTIF_LIBS = -DXM_LIB="\"libXm.so.4\"" -DXT_LIB="\"libXt.so.4\"" -DX11_LIB="\"libX11.so.4\"" -DXIN_LIB="\"libXinerama.so.1\""
 #LFLAGS = -shared -Wl,--export-dynamic 
 LFLAGS = -G
 CFLAGS =$(OPTFLAG) \
@@ -52,6 +53,7 @@ CFLAGS =$(OPTFLAG) \
 	-DDEFAULT_OS="\"$(DEFAULT_OS)\"" \
 	-DDEFAULT_OS_ARCH="\"$(DEFAULT_OS_ARCH)\"" \
 	-DDEFAULT_WS="\"$(DEFAULT_WS)\"" \
+	$(MOTIF_LIBS) \
 	-I./ \
 	-I../ \
 	-I$(MOTIF_HOME)/include \
