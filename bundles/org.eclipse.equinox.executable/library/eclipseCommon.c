@@ -326,6 +326,10 @@ char * resolveSymlinks( char * path ) {
 	ch = path;
 	buffer = malloc(PATH_MAX);
     path = realpath(path, buffer);
+    if (path != buffer)
+    	free(buffer);
+    if (path == NULL)
+    	return ch; /* failed to resolve the links, return original path */
     return path;
 }
 #endif
