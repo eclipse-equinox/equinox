@@ -178,6 +178,11 @@ int setenv (const char *name, const char *value, int replace)
 #define EXTRA 20
 _TCHAR* findCommand( _TCHAR* command )
 {
+	return findSymlinkCommand( command, 1 );
+}
+
+_TCHAR* findSymlinkCommand( _TCHAR* command, int resolve )
+{
     _TCHAR*  cmdPath;
     size_t   length;
     _TCHAR*  ch;
@@ -302,10 +307,12 @@ _TCHAR* findCommand( _TCHAR* command )
         return cmdPath;
     }
 
-	ch = resolveSymlinks(cmdPath);
-	if (ch != cmdPath) {
-		free(cmdPath);
-		cmdPath = ch;
+	if (resolve) {
+		ch = resolveSymlinks(cmdPath);
+		if (ch != cmdPath) {
+			free(cmdPath);
+			cmdPath = ch;
+		}
 	}
 	return cmdPath;
 }

@@ -1197,7 +1197,7 @@ static int determineVM(_TCHAR** msg) {
     			/* No default.ee file, look for default VM */
     			ch = malloc((_tcslen(vmName) + 1 + _tcslen(defaultVM) + 1) * sizeof(_TCHAR));
     			_stprintf( ch, _T_ECLIPSE("%s%c%s"), vmName, dirSeparator, defaultVM );
-    			javaVM = findCommand(ch);
+    			javaVM = findSymlinkCommand(ch, 0);
     			free(ch);
     			if (javaVM == NULL) {
     				/* No vm executable, look for library */
@@ -1234,13 +1234,13 @@ static int determineVM(_TCHAR** msg) {
     		}
     			
     		if (eeConsole != NULL && (debug || needConsole) ) {
-    			javaVM = findCommand(eeConsole);
+    			javaVM = findSymlinkCommand(eeConsole, 0);
     			if (javaVM != NULL)
     				return LAUNCH_EXE;
     		}
     		
     		if (eeExecutable != NULL) {
-    			javaVM = findCommand(eeExecutable);
+    			javaVM = findSymlinkCommand(eeExecutable, 0);
     			if (javaVM != NULL)
     				return LAUNCH_EXE;
     		}
@@ -1268,7 +1268,7 @@ static int determineVM(_TCHAR** msg) {
     		
     	default:
     		/*otherwise, assume executable */
-    		javaVM = findCommand(vmName);
+    		javaVM = findSymlinkCommand(vmName, 0);
     		if(javaVM != NULL) {
 #ifdef MACOSX
     			/* right now, we are always doing JNI on Mac */
@@ -1295,13 +1295,13 @@ static int determineVM(_TCHAR** msg) {
         _stprintf( ch, _T_ECLIPSE("%s%s%s"), programDir, shippedVMDir, defaultVM );
         vmSearchPath = _tcsdup(ch);
  
-        javaVM = findCommand( ch );
+        javaVM = findSymlinkCommand( ch, 0 );
         free(ch);
     }
     
     if (javaVM == NULL) {
-    	/* vm found yet, look for one on the search path */
-    	javaVM = findCommand(defaultVM);
+    	/* vm not found yet, look for one on the search path, but don't resolve symlinks */
+    	javaVM = findSymlinkCommand(defaultVM, 0);
     	if (javaVM == NULL) {
     		/* can't find vm, error */
     		ch = malloc( (_tcslen(pathMsg) + _tcslen(defaultVM) + 1) * sizeof(_TCHAR));
@@ -1322,7 +1322,11 @@ static int determineVM(_TCHAR** msg) {
     	free(vmSearchPath);
     
 #ifndef DEFAULT_JAVA_EXEC
-    jniLib = findVMLibrary(javaVM);
+	/* resolve symlinks for finding the library */
+	ch = resolveSymlinks(javaVM);
+    jniLib = findVMLibrary(ch);
+    if (ch != jniLib && ch != javaVM)
+		free(ch);
     if (jniLib != NULL) 
     	return LAUNCH_JNI;
 #endif

@@ -27,6 +27,7 @@
 #define displayMessage displayMessageW
 #define getProgramDir getProgramDirW
 #define findCommand findCommandW
+#define findSymlinkCommand findSymlinkCommandW
 #define findFile findFileW
 #define loadLibrary loadLibraryW
 #define unloadLibrary unloadLibraryW
@@ -74,8 +75,14 @@ extern char *toNarrow(_TCHAR* src);
  * Find the absolute pathname to where a command resides.
  *
  * The string returned by the function must be freed.
+ * Symlinks are resolved
  */
 extern _TCHAR* findCommand( _TCHAR* command );
+
+/*
+ * Same as findCommand but optionally resolve symlinks
+ */
+extern _TCHAR* findSymlinkCommand( _TCHAR* command, int resolve );
 
 extern _TCHAR* findFile( _TCHAR* path, _TCHAR* prefix);
 
