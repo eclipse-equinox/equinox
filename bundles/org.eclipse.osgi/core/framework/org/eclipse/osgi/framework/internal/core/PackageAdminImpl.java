@@ -94,7 +94,7 @@ public class PackageAdminImpl implements PackageAdmin {
 				ExportedPackageImpl exportedPackage = createExportedPackage(allDescriptions[i]);
 				if (exportedPackage == null)
 					continue;
-				if (bundle == null || exportedPackage.supplier.getBundle() == bundle)
+				if (bundle == null || exportedPackage.getBundle() == bundle)
 					allExports.add(exportedPackage);
 			}
 		}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2006 IBM Corporation and others.
+ * Copyright (c) 2003, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,9 +19,9 @@ import org.osgi.service.packageadmin.ExportedPackage;
 
 public class ExportedPackageImpl implements ExportedPackage {
 
-	String specVersion;
-	ExportPackageDescription exportedPackage;
-	BundleLoaderProxy supplier;
+	private final String specVersion;
+	private final ExportPackageDescription exportedPackage;
+	private final BundleLoaderProxy supplier;
 
 	public ExportedPackageImpl(ExportPackageDescription exportedPackage, BundleLoaderProxy supplier) {
 		this.exportedPackage = exportedPackage;
@@ -29,6 +29,8 @@ public class ExportedPackageImpl implements ExportedPackage {
 		Version version = exportedPackage.getVersion();
 		if (version != null)
 			this.specVersion = version.toString();
+		else
+			this.specVersion = null;
 	}
 
 	public String getName() {
@@ -38,6 +40,13 @@ public class ExportedPackageImpl implements ExportedPackage {
 	public org.osgi.framework.Bundle getExportingBundle() {
 		if (supplier.isStale())
 			return null;
+		return supplier.getBundleHost();
+	}
+
+	/*
+	 * get the bundle without checking if it is stale
+	 */
+	AbstractBundle getBundle() {
 		return supplier.getBundleHost();
 	}
 
@@ -54,12 +63,13 @@ public class ExportedPackageImpl implements ExportedPackage {
 			if (!(bundles[i] instanceof BundleHost))
 				continue;
 			BundleLoader loader = ((BundleHost) bundles[i]).getBundleLoader();
-			if (loader == null)
-				continue;
+			if (loader == null || loader.getBundle() == supplier.getBundle())
+				continue; // do not include include the exporter of the package
 			PackageSource importerSource = loader.getPackageSource(getName());
 			if (supplierSource != null && supplierSource.hasCommonSource(importerSource))
 				importers.add(bundles[i]);
 		}
+		// TODO need to get clarification from OSGi on what is returned by getImportingBundles when there is no importers
 		return (Bundle[]) importers.toArray(new Bundle[importers.size()]);
 	}
 
@@ -82,7 +92,7 @@ public class ExportedPackageImpl implements ExportedPackage {
 		StringBuffer result = new StringBuffer(getName());
 		if (specVersion != null) {
 			result.append("; ").append(Constants.VERSION_ATTRIBUTE); //$NON-NLS-1$
-			result.append("=\"").append(specVersion).append("\"");  //$NON-NLS-1$//$NON-NLS-2$
+			result.append("=\"").append(specVersion).append("\""); //$NON-NLS-1$//$NON-NLS-2$
 		}
 		return result.toString();
 	}
