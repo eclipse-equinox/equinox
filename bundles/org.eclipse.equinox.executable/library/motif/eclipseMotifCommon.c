@@ -84,6 +84,7 @@ void displayMessage( char* title, char* message )
 int initWindowSystem( int* pArgc, char* argv[], int showSplash )
 {
     Arg     arg[20];
+    char * officialName;
     
     if(motifInitialized == 1)
     	return 0;
@@ -97,14 +98,18 @@ int initWindowSystem( int* pArgc, char* argv[], int showSplash )
     	saveArgc = *pArgc;
     	saveArgv =  argv;
     }  
-      
+
+    officialName = getOfficialName();
+    if (officialName != NULL)
+    	setenv("RESOURCE_NAME", getOfficialName(), 1);
+    
     /* Create the top level shell that will not be used other than
        to initialize the application. 
      */
 #ifdef AIX
-    topWindow = XtInitialize(NULL, getOfficialName(), NULL, 0, pArgc, argv);
+    topWindow = XtInitialize(NULL, officialName, NULL, 0, pArgc, argv);
 #else
-	topWindow = motif.XtInitialize(NULL, getOfficialName(), NULL, 0, pArgc, argv);
+	topWindow = motif.XtInitialize(NULL, officialName, NULL, 0, pArgc, argv);
 #endif
 	appContext = motif.XtWidgetToApplicationContext(topWindow);
 	motif.XtSetLanguageProc (appContext, NULL, NULL);
