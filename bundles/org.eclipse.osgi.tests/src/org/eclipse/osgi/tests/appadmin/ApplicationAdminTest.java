@@ -215,6 +215,8 @@ public class ApplicationAdminTest extends OSGiTest {
 			descriptionTracker.waitForEvent(testAppPID, ADDED, Boolean.FALSE, Boolean.TRUE);
 			ApplicationDescriptor app = getApplication(testAppPID);
 			app.lock();
+			Boolean locked = (Boolean) app.getProperties("").get(ApplicationDescriptor.APPLICATION_LOCKED); //$NON-NLS-1$
+			assertTrue("Application should be locked", locked.booleanValue()); //$NON-NLS-1$
 			descriptionTracker.waitForEvent(testAppPID, MODIFIED, Boolean.TRUE, Boolean.TRUE);
 			app.unlock();
 			descriptionTracker.waitForEvent(testAppPID, MODIFIED, Boolean.FALSE, Boolean.TRUE);
