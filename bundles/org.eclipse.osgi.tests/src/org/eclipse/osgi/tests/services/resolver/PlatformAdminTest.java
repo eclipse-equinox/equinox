@@ -66,6 +66,7 @@ public class PlatformAdminTest extends AbstractStateTest {
 		BundleDescription a = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + manifest.get(Constants.BUNDLE_VERSION), id++);
 		try {
 			BundleDescription aPrime = state.getFactory().createBundleDescription(a);
+			assertEquals("Copy is not equal", a, aPrime);
 		} catch (Throwable t) {
 			fail("Unexpected error while cloning a BundleDescription", t);
 		}
