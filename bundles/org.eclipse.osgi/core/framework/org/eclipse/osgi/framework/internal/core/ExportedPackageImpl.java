@@ -69,7 +69,6 @@ public class ExportedPackageImpl implements ExportedPackage {
 			if (supplierSource != null && supplierSource.hasCommonSource(importerSource))
 				importers.add(bundles[i]);
 		}
-		// TODO need to get clarification from OSGi on what is returned by getImportingBundles when there is no importers
 		return (Bundle[]) importers.toArray(new Bundle[importers.size()]);
 	}
 
