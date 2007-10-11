@@ -100,11 +100,11 @@ public class BundleLoaderProxy implements RequiredBundle {
 		// This is VERY slow; but never gets called in regular execution.
 		BundleDescription[] dependents = description.getDependents();
 		if (dependents == null || dependents.length == 0)
-			return null;
+			return new Bundle[0];
 		ArrayList result = new ArrayList(dependents.length);
 		for (int i = 0; i < dependents.length; i++)
 			addRequirers(dependents[i], result);
-		return result.size() == 0 ? null : (Bundle[]) result.toArray(new org.osgi.framework.Bundle[result.size()]);
+		return (Bundle[]) result.toArray(new org.osgi.framework.Bundle[result.size()]);
 	}
 
 	void addRequirers(BundleDescription dependent, ArrayList result) {
