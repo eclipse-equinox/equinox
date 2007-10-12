@@ -35,6 +35,12 @@
 #define JAVA_ARCH DEFAULT_OS_ARCH
 #endif
 
+#ifdef AIX
+#define LIB_PATH_VAR _T_ECLIPSE("LIBPATH")
+#else
+#define LIB_PATH_VAR _T_ECLIPSE("LD_LIBRARY_PATH")
+#endif
+
 #define MAX_LOCATION_LENGTH 40 /* none of the jvmLocations strings should be longer than this */ 
 static const char* jvmLocations [] = { "j9vm", "../jre/bin/j9vm",
 									   "classic", "../jre/bin/classic",
@@ -120,7 +126,7 @@ static void adjustLibraryPath( char * vmLibrary ) {
 	
 	paths = getVMLibrarySearchPath(vmLibrary);
  
-	ldPath = (char*)getenv(_T_ECLIPSE("LD_LIBRARY_PATH"));
+	ldPath = (char*)getenv(LIB_PATH_VAR);
 	if (!ldPath) {
 		ldPath = _T_ECLIPSE("");
 		needAdjust = 1;
@@ -140,7 +146,7 @@ static void adjustLibraryPath( char * vmLibrary ) {
 	newPath = malloc((_tcslen(c) + length + 1) * sizeof(_TCHAR));
 	_stprintf(newPath, _T_ECLIPSE("%s%s"), c, ldPath);
 	
-	setenv( "LD_LIBRARY_PATH", newPath, 1);
+	setenv( LIB_PATH_VAR, newPath, 1);
 	free(newPath);
 	free(c);
 	

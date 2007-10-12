@@ -37,7 +37,6 @@ EXEC = $(PROGRAM_OUTPUT)
 DLL = $(PROGRAM_LIBRARY)
 LIBS = -L$(MOTIF_HOME)/lib -ldl -lXm -lXt -lX11
 MOTIF_LIBS = -DXM_LIB="\"libXm.a(shr_32.o)\"" -DXT_LIB="\"libXt.a(shr4.o)\"" -DX11_LIB="\"libX11.a(shr4.o)\""
-#MOTIF_LIBS = -DXM_LIB="NULL" -DXT_LIB="NULL" -DX11_LIB="NULL"
 LFLAGS = -G -bnoentry -bexpall -lm -lc_r -lC_r
 CFLAGS = -O -s \
 	-DMOTIF \
@@ -46,7 +45,6 @@ CFLAGS = -O -s \
 	-DDEFAULT_OS_ARCH="\"$(DEFAULT_OS_ARCH)\"" \
 	-DDEFAULT_WS="\"$(DEFAULT_WS)\"" \
 	$(MOTIF_LIBS) \
-	-DDEFAULT_JAVA_EXEC \
     -DAIX \
 	-I./ \
 	-I../ \

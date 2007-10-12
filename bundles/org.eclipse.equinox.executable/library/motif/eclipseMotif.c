@@ -285,6 +285,7 @@ int launchJavaVM( char* args[] )
 	fixEnvForMozilla();
 #endif /* MOZILLA_FIX */
 
+#ifdef LINUX
 	{
 		/* put the root of eclipse on the LD_LIBRARY_PATH */
 		char * ldPath = (char*)getenv(_T_ECLIPSE("LD_LIBRARY_PATH"));
@@ -296,6 +297,7 @@ int launchJavaVM( char* args[] )
 			free(newPath);
 		}
 	}
+#endif
 	
 	/* Create a child process for the JVM. */	
 	jvmProcess = fork();
