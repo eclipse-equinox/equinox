@@ -240,6 +240,7 @@ home directory.");
 #define EE_LIBRARY_PATH			_T_ECLIPSE("-Dee.library.path=")
 #define EE_HOME					_T_ECLIPSE("-Dee.home=")
 #define EE_FILENAME				_T_ECLIPSE("-Dee.filename=")
+#define EE_HOME_VAR				_T_ECLIPSE("${ee.home}")
 
 /* Define the variables to receive the option values. */
 static int     needConsole   = 0;				/* True: user wants a console	*/
@@ -1358,6 +1359,16 @@ static int processEEProps(_TCHAR* eeFile)
     }
 	
     for (index = 0; index < argc; index++){
+    	/* replace ${ee.home} with eeDir, loop in case there is more than one per argument */
+    	while( (c1 = _tcsstr(argv[index], EE_HOME_VAR)) != NULL)
+    	{
+    		c2 = malloc( (_tcslen(argv[index]) + _tcslen(eeDir) + 1) * sizeof(_TCHAR));
+    		*c1 = 0;
+    		_stprintf(c2, _T_ECLIPSE("%s%s%s"), argv[index], eeDir, c1 + 10); /* ${ee.home} is 10 characters */
+    		free(argv[index]);
+    		argv[index] = c2;
+    	}
+    	
     	/* Find the corresponding argument is a option supported by the launcher */
         option = NULL;
         for (i = 0; option == NULL && i < eeOptionsSize; i++)

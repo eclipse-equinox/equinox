@@ -71,7 +71,7 @@ CFLAGS	= -g -s -Wall \
 	  -I. -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/win32 $(SYSINC) \
 	  -D_WIN32 \
 	  -DWIN32_LEAN_AND_MEAN \
-	  -mno-cygwin
+	  -mno-cygwin -D__int64="long long"
 ACFLAGS = -I.. -DDEFAULT_OS="\"$(DEFAULT_OS)\"" \
 	  -DDEFAULT_OS_ARCH="\"$(DEFAULT_OS_ARCH)\"" \
 	  -DDEFAULT_WS="\"$(DEFAULT_WS)\"" \
