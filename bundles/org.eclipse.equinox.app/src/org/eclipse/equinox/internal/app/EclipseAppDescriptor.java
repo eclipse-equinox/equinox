@@ -46,6 +46,7 @@ public class EclipseAppDescriptor extends ApplicationDescriptor {
 	private final int cardinality;
 	private final String name;
 	private final URL iconURL;
+	private final boolean[] registrationLock = new boolean[] {true};
 
 	protected EclipseAppDescriptor(Bundle contributor, String pid, String name, String iconPath, int flags, int cardinality, EclipseAppContainer appContainer) {
 		super(pid);
@@ -127,12 +128,25 @@ public class EclipseAppDescriptor extends ApplicationDescriptor {
 			}
 	}
 
-	synchronized void setServiceRegistration(ServiceRegistration sr) {
-		this.sr = sr;
+	void setServiceRegistration(ServiceRegistration sr) {
+		synchronized (registrationLock) {
+			this.sr = sr;
+			registrationLock[0] = sr != null;
+			registrationLock.notifyAll();
+		}
+
 	}
 
-	private synchronized ServiceRegistration getServiceRegistration() {
-		return sr;
+	private ServiceRegistration getServiceRegistration() {
+		synchronized (registrationLock) {
+			if (sr == null && registrationLock[0])
+				try {
+					registrationLock.wait(1000); // timeout after 1 second
+				} catch (InterruptedException e) {
+					// nothing
+				}
+			return sr;
+		}
 	}
 
 	private synchronized Boolean getLocked() {
@@ -193,10 +207,10 @@ public class EclipseAppDescriptor extends ApplicationDescriptor {
 		return true;
 	}
 
-	public synchronized void unregister() {
-		ServiceRegistration temp = sr;
+	public void unregister() {
+		ServiceRegistration temp = getServiceRegistration();
 		if (temp != null) {
-			sr = null;
+			setServiceRegistration(null);
 			temp.unregister();
 		}
 	}

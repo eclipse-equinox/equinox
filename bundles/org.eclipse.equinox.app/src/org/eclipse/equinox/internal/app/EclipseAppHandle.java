@@ -46,6 +46,7 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 	private final Boolean defaultAppInstance;
 	private Object result;
 	private boolean setResult = false;
+	private final boolean[] registrationLock = new boolean[] {true};
 
 	/*
 	 * Constructs a handle for a single running instance of a eclipse application.
@@ -70,7 +71,7 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 			case FLAG_STOPPED :
 			default :
 				// must only check this if the status is STOPPED; otherwise we throw exceptions before we have set the registration.
-				if (handleRegistration == null)
+				if (getServiceRegistration() == null)
 					throw new IllegalStateException(NLS.bind(Messages.application_error_state_stopped, getInstanceId()));
 				return STOPPED;
 		}
@@ -88,12 +89,29 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 		setAppStatus(EclipseAppHandle.FLAG_STOPPED);
 	}
 
-	synchronized void setServiceRegistration(ServiceRegistration sr) {
-		this.handleRegistration = sr;
+	void setServiceRegistration(ServiceRegistration sr) {
+		synchronized (registrationLock) {
+			this.handleRegistration = sr;
+			registrationLock[0] = sr != null;
+			registrationLock.notifyAll();
+		}
+	}
+
+	private ServiceRegistration getServiceRegistration() {
+		synchronized (registrationLock) {
+			if (handleRegistration == null && registrationLock[0]) {
+				try {
+					registrationLock.wait(1000); // timeout after 1 second
+				} catch (InterruptedException e) {
+					// nothing
+				}
+			}
+			return handleRegistration;
+		}
 	}
 
 	ServiceReference getServiceReference() {
-		ServiceRegistration reg = handleRegistration;
+		ServiceRegistration reg = getServiceRegistration();
 		if (reg == null)
 			return null;
 		try {
@@ -132,14 +150,15 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 				return;
 		// change the service properties to reflect the state change.
 		this.status = status;
-		if (handleRegistration == null)
+		ServiceRegistration handleReg = getServiceRegistration();
+		if (handleReg == null)
 			return;
-		handleRegistration.setProperties(getServiceProperties());
+		handleReg.setProperties(getServiceProperties());
 		// if the status is stopped then unregister the service
 		if ((this.status & EclipseAppHandle.FLAG_STOPPED) != 0) {
 			((EclipseAppDescriptor) getApplicationDescriptor()).getContainerManager().unlock(this);
-			handleRegistration.unregister();
-			handleRegistration = null;
+			handleReg.unregister();
+			setServiceRegistration(null);
 		}
 	}
 
