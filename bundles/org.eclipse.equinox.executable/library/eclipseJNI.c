@@ -319,7 +319,7 @@ int startJavaJNI( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[] )
 #endif
 	init_args.options = options;
 	init_args.nOptions = numVMArgs;
-	init_args.ignoreUnrecognized = JNI_TRUE;
+	init_args.ignoreUnrecognized = JNI_FALSE;
 	
 	if( createJavaVM(&jvm, &env, &init_args) == 0 ) {
 		registerNatives(env);
