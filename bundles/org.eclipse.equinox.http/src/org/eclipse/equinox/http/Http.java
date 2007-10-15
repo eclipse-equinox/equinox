@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 1999, 2006 IBM Corporation and others.
+ * Copyright (c) 1999, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -49,6 +49,7 @@ public class Http {
 	 */
 	protected void initialize() throws Exception {
 		log = new LogTracker(context, System.out);
+		log.open();
 
 		securityTracker = new HttpSecurityTracker(context);
 
@@ -198,7 +199,7 @@ public class Http {
 		try {
 			socket = new HttpsServerSocket(context, port, backlog, address);
 		} catch (UnsupportedOperationException ex) {
-			throw new IOException(NLS.bind(HttpMsg.HTTP_INVALID_SCHEME_EXCEPTION, "https"));  //$NON-NLS-1$
+			throw new IOException(NLS.bind(HttpMsg.HTTP_INVALID_SCHEME_EXCEPTION, "https")); //$NON-NLS-1$
 		}
 		return (socket);
 	}

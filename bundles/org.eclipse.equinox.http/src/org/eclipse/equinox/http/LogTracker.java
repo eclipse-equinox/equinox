@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 1998, 2006 IBM Corporation and others.
+ * Copyright (c) 1998, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,8 +11,8 @@
 package org.eclipse.equinox.http;
 
 import java.io.PrintStream;
-import java.text.DateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.log.LogService;
@@ -28,12 +28,7 @@ public class LogTracker extends ServiceTracker implements LogService {
 	protected final static String clazz = "org.osgi.service.log.LogService"; //$NON-NLS-1$
 
 	/** PrintStream to use if LogService is unavailable */
-	protected PrintStream out;
-
-	/** Calendar and DateFormat to user if LogService is unavailable */
-	private static Calendar calendar;
-	private static DateFormat dateFormat;
-	private String timestamp;
+	private final PrintStream out;
 
 	/**
 	 * Create new LogTracker.
@@ -44,9 +39,6 @@ public class LogTracker extends ServiceTracker implements LogService {
 	public LogTracker(BundleContext context, PrintStream out) {
 		super(context, clazz, null);
 		this.out = out;
-		calendar = Calendar.getInstance();
-		dateFormat = DateFormat.getDateTimeInstance();
-		open();
 	}
 
 	/*
@@ -103,7 +95,7 @@ public class LogTracker extends ServiceTracker implements LogService {
 			synchronized (out) {
 				// Bug #113286.  If no log service present and messages are being
 				// printed to stdout, prepend message with a timestamp.
-				timestamp = dateFormat.format(calendar.getTime());
+				String timestamp = getDate(new Date());
 				out.print(timestamp + " "); //$NON-NLS-1$
 
 				switch (level) {
@@ -147,5 +139,35 @@ public class LogTracker extends ServiceTracker implements LogService {
 				}
 			}
 		}
+	}
+	
+	// from EclipseLog to avoid using DateFormat -- see bug 149892#c10
+	private String getDate(Date date) {
+			Calendar c = Calendar.getInstance();
+			c.setTime(date);
+			StringBuffer sb = new StringBuffer();
+			appendPaddedInt(c.get(Calendar.YEAR), 4, sb).append('-');
+			appendPaddedInt(c.get(Calendar.MONTH) + 1, 2, sb).append('-');
+			appendPaddedInt(c.get(Calendar.DAY_OF_MONTH), 2, sb).append(' ');
+			appendPaddedInt(c.get(Calendar.HOUR_OF_DAY), 2, sb).append(':');
+			appendPaddedInt(c.get(Calendar.MINUTE), 2, sb).append(':');
+			appendPaddedInt(c.get(Calendar.SECOND), 2, sb).append('.');
+			appendPaddedInt(c.get(Calendar.MILLISECOND), 3, sb);
+			return sb.toString();
+	}
+	
+	private StringBuffer appendPaddedInt(int value, int pad, StringBuffer buffer) {
+		pad = pad - 1;
+		if (pad == 0)
+			return buffer.append(Integer.toString(value));
+		int padding = (int) Math.pow(10, pad);
+		if (value >= padding)
+			return buffer.append(Integer.toString(value));
+		while (padding > value && padding > 1) {
+			buffer.append('0');
+			padding = padding / 10;
+		}
+		buffer.append(value);
+		return buffer;
 	}
 }
