@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2005 IBM Corporation and others.
+ * Copyright (c) 2003, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,6 +18,11 @@ import java.security.PermissionCollection;
  *
  */
 abstract class BundlePermissionCollection extends PermissionCollection {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -8054232817714497294L;
+
 	/**
 	 * Unresolves all permissions in this collection.  This should flush
 	 * any cached Permission and PermissionCollection objects which may 
