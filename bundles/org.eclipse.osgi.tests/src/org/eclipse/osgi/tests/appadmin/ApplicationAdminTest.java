@@ -64,7 +64,11 @@ public class ApplicationAdminTest extends OSGiTest {
 
 	private ApplicationDescriptor getApplication(String appName) {
 		try {
-			ServiceReference[] refs = getContext().getServiceReferences(ApplicationDescriptor.class.getName(), "(" + ApplicationDescriptor.APPLICATION_PID + "=" + appName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			BundleContext context = getContext();
+			assertNotNull("BundleContext is null!!", context); //$NON-NLS-1$
+			Class appDescClass = ApplicationDescriptor.class;
+			assertNotNull("ApplicationDescriptor.class is null!!", appDescClass); //$NON-NLS-1$
+			ServiceReference[] refs = context.getServiceReferences(appDescClass.getName(), "(" + ApplicationDescriptor.APPLICATION_PID + "=" + appName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			if (refs == null || refs.length == 0) {
 				refs = getContext().getServiceReferences(ApplicationDescriptor.class.getName(), null);
 				String availableApps = ""; //$NON-NLS-1$
@@ -511,7 +515,11 @@ public class ApplicationAdminTest extends OSGiTest {
 
 	private ScheduledApplication getScheduleApplication(String scheduleID, boolean failOnMissing) {
 		try {
-			ServiceReference[] refs = getContext().getServiceReferences(ScheduledApplication.class.getName(), "(" + ScheduledApplication.SCHEDULE_ID + "=" + scheduleID + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			BundleContext context = getContext();
+			assertNotNull("BundleContext is null!!", context); //$NON-NLS-1$
+			Class schedAppClass = ScheduledApplication.class;
+			assertNotNull("ScheduledApplication.class is null!!", schedAppClass); //$NON-NLS-1$
+			ServiceReference[] refs = getContext().getServiceReferences(schedAppClass.getName(), "(" + ScheduledApplication.SCHEDULE_ID + "=" + scheduleID + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			if (refs == null || refs.length == 0) {
 				if (!failOnMissing)
 					return null;
