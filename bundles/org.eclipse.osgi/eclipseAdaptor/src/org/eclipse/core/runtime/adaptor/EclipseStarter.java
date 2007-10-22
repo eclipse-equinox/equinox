@@ -19,8 +19,7 @@ import java.security.CodeSource;
 import java.security.ProtectionDomain;
 import java.util.*;
 import org.eclipse.core.runtime.internal.adaptor.*;
-import org.eclipse.osgi.framework.adaptor.FilePath;
-import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
+import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.internal.core.*;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.log.FrameworkLog;
@@ -1067,7 +1066,15 @@ public class EclipseStarter {
 					// don't need to install if it is already installed
 					if (osgiBundle == null) {
 						InputStream in = initialBundles[i].location.openStream();
-						osgiBundle = context.installBundle(initialBundles[i].locationString, in);
+						try {
+							osgiBundle = context.installBundle(initialBundles[i].locationString, in);
+						} catch (BundleException e) {
+							StatusException status = e instanceof StatusException ? (StatusException) e : null;
+							if (status != null && status.getStatusCode() == StatusException.CODE_OK && status.getStatus() instanceof Bundle) {
+								osgiBundle = (Bundle) status.getStatus();
+							} else
+								throw e;
+						}
 						// only check for lazy activation header if this is a newly installed bundle and is not marked for persistent start
 						if (!initialBundles[i].start && hasLazyActivationPolicy(osgiBundle))
 							lazyActivationBundles.add(osgiBundle);

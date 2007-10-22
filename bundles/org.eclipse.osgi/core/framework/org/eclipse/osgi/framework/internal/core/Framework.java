@@ -683,10 +683,30 @@ public class Framework implements EventDispatcher, EventPublisher {
 		if (bundledata.getSymbolicName() != null) {
 			AbstractBundle installedBundle = getBundleBySymbolicName(bundledata.getSymbolicName(), bundledata.getVersion());
 			if (installedBundle != null && installedBundle.getBundleId() != bundledata.getBundleID()) {
-				throw new BundleException(NLS.bind(Msg.BUNDLE_INSTALL_SAME_UNIQUEID, new Object[] {installedBundle.getSymbolicName(), installedBundle.getVersion().toString(), installedBundle.getLocation()}));
+				String msg = NLS.bind(Msg.BUNDLE_INSTALL_SAME_UNIQUEID, new Object[] {installedBundle.getSymbolicName(), installedBundle.getVersion().toString(), installedBundle.getLocation()});
+				throw new DuplicateBundleException(msg, installedBundle);
 			}
 		}
 		return AbstractBundle.createBundle(bundledata, this);
+	}
+
+	private class DuplicateBundleException extends BundleException implements StatusException {
+		private static final long serialVersionUID = 135669822846323624L;
+		private final Bundle duplicate;
+
+		public DuplicateBundleException(String msg, Bundle duplicate) {
+			super(msg);
+			this.duplicate = duplicate;
+		}
+
+		public Object getStatus() {
+			return duplicate;
+		}
+
+		public int getStatusCode() {
+			return StatusException.CODE_OK;
+		}
+
 	}
 
 	/**
@@ -958,7 +978,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 			throw new BundleException(t.getMessage(), t);
 		}
 		return bundle;
-		}
+	}
 
 	/**
 	 * Retrieve the bundle that has the given unique identifier.
@@ -1578,7 +1598,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 				}
 				BundleContextImpl context = (BundleContextImpl) l;
 				publishFrameworkEvent(FrameworkEvent.ERROR, context.bundle, t);
-	}
+			}
 		}
 	}
 
