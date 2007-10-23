@@ -307,7 +307,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 	}
 
 	// Attach fragment to its host
-	private void attachFragment(ResolverBundle bundle, ArrayList rejectedSingletons, ArrayList processedFragments) {
+	private void attachFragment(ResolverBundle bundle, ArrayList rejectedSingletons, Collection processedFragments) {
 		if (processedFragments.contains(bundle.getName()))
 			return;
 		processedFragments.add(bundle.getName());
@@ -499,7 +499,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 			// need to sort bundles to keep consistent order for fragment attachment (bug 174930)
 			Arrays.sort(bundles);
 		// First attach all fragments to the matching hosts
-		ArrayList processedFragments = new ArrayList(bundles.length);
+		Collection processedFragments = new HashSet(bundles.length);
 		for (int i = 0; i < bundles.length; i++)
 			attachFragment(bundles[i], rejectedSingletons, processedFragments);
 
