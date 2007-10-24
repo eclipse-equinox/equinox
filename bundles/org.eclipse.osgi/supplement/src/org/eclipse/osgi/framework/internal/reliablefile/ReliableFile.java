@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2006 IBM Corporation and others.
+ * Copyright (c) 2003, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -83,34 +83,42 @@ public class ReliableFile {
 	private static final byte identifier2[] = {'.', 'v', '1', '\n'};
 
 	private static final int BUF_SIZE = 4096;
-	private static int maxInputStreamBuffer = 128 * 1024; //128k
-	private static int defaultMaxGenerations = 2;
-	private static boolean fileSharing = true;
-	//our cache of the last lookuped up generations for a file
+	private static final int maxInputStreamBuffer;
+	private static final int defaultMaxGenerations;
+	private static final boolean fileSharing;
+	//our cache of the last looked up generations for a file
 	private static File lastGenerationFile = null;
 	private static int[] lastGenerations = null;
 
 	static {
 		String prop = FrameworkProperties.getProperty(PROP_MAX_BUFFER);
+		int tmpMaxInput = 128 * 1024; //128k
 		if (prop != null) {
 			try {
-				maxInputStreamBuffer = Integer.parseInt(prop);
+				tmpMaxInput = Integer.parseInt(prop);
 			} catch (NumberFormatException e) {/*ignore*/
 			}
 		}
+		maxInputStreamBuffer = tmpMaxInput;
+
+		int tmpDefaultMax = 2;
 		prop = FrameworkProperties.getProperty(PROP_MAX_GENERATIONS);
 		if (prop != null) {
 			try {
-				defaultMaxGenerations = Integer.parseInt(prop);
+				tmpDefaultMax = Integer.parseInt(prop);
 			} catch (NumberFormatException e) {/*ignore*/
 			}
 		}
+		defaultMaxGenerations = tmpDefaultMax;
+
 		prop = FrameworkProperties.getProperty(PROP_OSGI_LOCKING);
+		boolean tmpFileSharing = true;
 		if (prop != null) {
 			if (prop.equals("none")) { //$NON-NLS-1$
-				fileSharing = false;
+				tmpFileSharing = false;
 			}
 		}
+		fileSharing = tmpFileSharing;
 	}
 
 	/** File object for original reference file */
@@ -249,20 +257,18 @@ public class ReliableFile {
 			CacheInfo info;
 			synchronized (cacheFiles) {
 				info = (CacheInfo) cacheFiles.get(file);
-			}
-			long timeStamp = file.lastModified();
-			if (info == null || timeStamp != info.timeStamp) {
-				try {
-					is = new FileInputStream(file);
-					if (is.available() < maxInputStreamBuffer)
-						is = new BufferedInputStream(is);
-					Checksum cksum = getChecksumCalculator();
-					int filetype = getStreamType(is, cksum);
-					info = new CacheInfo(filetype, cksum, timeStamp);
-					synchronized (cacheFiles) {
+				long timeStamp = file.lastModified();
+				if (info == null || timeStamp != info.timeStamp) {
+					try {
+						is = new FileInputStream(file);
+						if (is.available() < maxInputStreamBuffer)
+							is = new BufferedInputStream(is);
+						Checksum cksum = getChecksumCalculator();
+						int filetype = getStreamType(is, cksum);
+						info = new CacheInfo(filetype, cksum, timeStamp);
 						cacheFiles.put(file, info);
+					} catch (IOException e) {/*ignore*/
 					}
-				} catch (IOException e) {/*ignore*/
 				}
 			}
 
@@ -359,7 +365,7 @@ public class ReliableFile {
 	/**
 	 * Close the target file for reading.
 	 *
-	 * @param checksum Checksum of the file contenets
+	 * @param checksum Checksum of the file contents
 	 * @throws IOException If an error occurs closing the file.
 	 */
 	void closeOutputFile(Checksum checksum) throws IOException {
@@ -682,10 +688,7 @@ public class ReliableFile {
 	 */
 	int getSignatureSize() throws IOException {
 		if (inputFile != null) {
-			CacheInfo info;
-			synchronized (cacheFiles) {
-				info = (CacheInfo) cacheFiles.get(inputFile);
-			}
+			CacheInfo info = (CacheInfo) cacheFiles.get(inputFile);
 			if (info != null) {
 				switch (info.filetype) {
 					case FILETYPE_VALID :
