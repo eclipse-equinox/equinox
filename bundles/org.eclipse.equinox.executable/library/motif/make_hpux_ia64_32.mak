@@ -22,21 +22,22 @@ include ../make_version.mak
 # X11_HOME	 - the full path to X11 header files
 # MOTIF_HOME	 - the full path to Motif header files
 
-ifeq ($(PROGRAM_OUTPUT),)
-  PROGRAM_OUTPUT=eclipse
-endif
+#ifeq ($(PROGRAM_OUTPUT),)
+#  PROGRAM_OUTPUT=eclipse
+#endif
 
 PROGRAM_LIBRARY=eclipse_$(LIB_VERSION).so
 
 # Define the object modules to be compiled and flags.
 MAIN_OBJS = eclipseMain.o
-COMMON_OBJS = eclipseConfig.o eclipseCommon.o eclipseMotifCommon.o
+COMMON_OBJS = eclipseConfig.o eclipseCommon.o eclipseMotifCommon.o eclipseMotifInit.o
 DLL_OBJS	= eclipse.o eclipseMotif.o eclipseUtil.o eclipseJNI.o eclipseNix.o eclipseShm.o \
 			  NgCommon.o NgImage.o NgImageData.o NgWinBMPFileFormat.o
 
 EXEC = $(PROGRAM_OUTPUT)
 DLL = $(PROGRAM_LIBRARY)
 LIBS = -L$(MOTIF_HOME)/lib -L$(X11_HOME)/lib -lXm -lXt -lX11 -lpthread
+MOTIF_LIBS = -DXM_LIB="\"libXm.so.2\"" -DXT_LIB="\"libXt.so.6\"" -DX11_LIB="\"libX11.so.6\""
 LFLAGS = -shared -Wl,--export-dynamic
 CFLAGS = -O -s \
 	-DNO_XINERAMA_EXTENSIONS \
@@ -44,6 +45,7 @@ CFLAGS = -O -s \
 	-DDEFAULT_OS="\"$(DEFAULT_OS)\"" \
 	-DDEFAULT_OS_ARCH="\"$(DEFAULT_OS_ARCH)\"" \
 	-DDEFAULT_WS="\"$(DEFAULT_WS)\"" \
+	$(MOTIF_LIBS) \
 	+Z \
 	-I./ \
 	-I../ \
