@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005 IBM Corporation.
+ * Copyright (c) 2005, 2007 IBM Corporation.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,12 +22,12 @@ import org.osgi.service.event.EventAdmin;
  */
 public class FrameworkEventAdapter extends EventAdapter {
 	// constants for Event topic substring
-	public static final String	HEADER				= "org/osgi/framework/FrameworkEvent";
-	public static final String	STARTLEVEL_CHANGED	= "STARTLEVEL_CHANGED";
-	public static final String	STARTED				= "STARTED";
-	public static final String	PACKAGES_REFRESHED	= "PACKAGES_REFRESHED";
-	public static final String	ERROR				= "ERROR";
-	protected FrameworkEvent	event;
+	public static final String HEADER = "org/osgi/framework/FrameworkEvent";
+	public static final String STARTLEVEL_CHANGED = "STARTLEVEL_CHANGED";
+	public static final String STARTED = "STARTED";
+	public static final String PACKAGES_REFRESHED = "PACKAGES_REFRESHED";
+	public static final String ERROR = "ERROR";
+	protected FrameworkEvent event;
 
 	public FrameworkEventAdapter(FrameworkEvent event, EventAdmin eventAdmin) {
 		super(eventAdmin);
@@ -35,7 +35,6 @@ public class FrameworkEventAdapter extends EventAdapter {
 	}
 
 	/**
-	 * @return
 	 * @see org.eclipse.equinox.event.mapper.EventAdapter#convert()
 	 */
 	public Event convert() {

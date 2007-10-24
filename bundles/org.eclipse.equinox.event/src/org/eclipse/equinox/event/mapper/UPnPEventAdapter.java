@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005 IBM Corporation.
+ * Copyright (c) 2005, 2007 IBM Corporation.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,17 +21,16 @@ import org.osgi.service.event.EventAdmin;
  */
 public class UPnPEventAdapter extends EventAdapter {
 	// constants for Event topic substring
-	public static final String	TOPIC			= "org/osgi/service/upnp/UPnPEvent";
+	public static final String TOPIC = "org/osgi/service/upnp/UPnPEvent";
 	// constants for Event properties
-	public static final String	UPNP_DEVICEID	= "upnp.deviceId";
-	public static final String	UPNP_SERVICEID	= "upnp.serviceId";
-	public static final String	UPNP_EVENTS		= "upnp.events";
-	private String				deviceId;
-	private String				serviceId;
-	private Dictionary			events;
+	public static final String UPNP_DEVICEID = "upnp.deviceId";
+	public static final String UPNP_SERVICEID = "upnp.serviceId";
+	public static final String UPNP_EVENTS = "upnp.events";
+	private String deviceId;
+	private String serviceId;
+	private Dictionary events;
 
-	public UPnPEventAdapter(String deviceId, String serviceId,
-			Dictionary events, EventAdmin eventAdmin) {
+	public UPnPEventAdapter(String deviceId, String serviceId, Dictionary events, EventAdmin eventAdmin) {
 		super(eventAdmin);
 		this.deviceId = deviceId;
 		this.serviceId = serviceId;
@@ -39,7 +38,6 @@ public class UPnPEventAdapter extends EventAdapter {
 	}
 
 	/**
-	 * @return
 	 * @see org.eclipse.equinox.event.mapper.EventAdapter#convert()
 	 */
 	public Event convert() {

@@ -21,7 +21,7 @@ import org.osgi.service.event.EventHandler;
 import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
 
-public class EventHandlerTracker extends ServiceTracker implements EventDispatcher{
+public class EventHandlerTracker extends ServiceTracker implements EventDispatcher {
 	private final LogService log;
 	//* List<EventHandlerWrapper> of all handlers with topic of "*"
 	private final List globalWildcard;
@@ -49,7 +49,7 @@ public class EventHandlerTracker extends ServiceTracker implements EventDispatch
 	}
 
 	public void modifiedService(ServiceReference reference, Object service) {
-		EventHandlerWrapper wrapper = (EventHandlerWrapper)service;
+		EventHandlerWrapper wrapper = (EventHandlerWrapper) service;
 		synchronized (this) {
 			unbucket(wrapper);
 			if (wrapper.init()) {
@@ -57,12 +57,12 @@ public class EventHandlerTracker extends ServiceTracker implements EventDispatch
 				return;
 			}
 		}
-		
+
 		wrapper.flush(); // needs to be called outside sync region
 	}
 
 	public void removedService(ServiceReference reference, Object service) {
-		EventHandlerWrapper wrapper = (EventHandlerWrapper)service;
+		EventHandlerWrapper wrapper = (EventHandlerWrapper) service;
 		synchronized (this) {
 			unbucket(wrapper);
 		}
@@ -106,7 +106,7 @@ public class EventHandlerTracker extends ServiceTracker implements EventDispatch
 			}
 		}
 	}
-	
+
 	/**
 	 * Remove the wrapper from the buckets.
 	 * 
@@ -145,21 +145,21 @@ public class EventHandlerTracker extends ServiceTracker implements EventDispatch
 			}
 		}
 	}
-	
+
 	/**
 	 * Return the set of handlers which subscribe to the event topic.
 	 * A set is used to ensure a handler is not called for an event more than once.
 	 * 
 	 * @param topic
-	 * @return
+	 * @return a set of handlers
 	 */
 	public synchronized Set getHandlers(final String topic) {
 		// Use a set to remove duplicates
 		Set handlers = new HashSet();
-		
+
 		// Add the "*" handlers
 		handlers.addAll(globalWildcard);
-		
+
 		// Add the handlers with partial matches
 		if (partialWildcard.size() > 0) {
 			int index = topic.length();
@@ -174,7 +174,7 @@ public class EventHandlerTracker extends ServiceTracker implements EventDispatch
 				index = subTopic.lastIndexOf('/');
 			}
 		}
-		
+
 		// Add the handlers for matching topic names
 		List wrappers = (List) topicName.get(topic);
 		if (wrappers != null) {
@@ -183,7 +183,7 @@ public class EventHandlerTracker extends ServiceTracker implements EventDispatch
 
 		return handlers;
 	}
-	
+
 	/**
 	 * Dispatches Event to EventHandlers
 	 * 
@@ -195,6 +195,6 @@ public class EventHandlerTracker extends ServiceTracker implements EventDispatch
 	 *      java.lang.Object, int, java.lang.Object)
 	 */
 	public void dispatchEvent(Object eventListener, Object listenerObject, int eventAction, Object eventObject) {
-		((EventHandlerWrapper) eventListener).handleEvent((Event) eventObject, (Permission)listenerObject);
+		((EventHandlerWrapper) eventListener).handleEvent((Event) eventObject, (Permission) listenerObject);
 	}
 }

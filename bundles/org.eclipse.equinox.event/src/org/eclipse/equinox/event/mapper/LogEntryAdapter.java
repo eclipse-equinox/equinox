@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005 IBM Corporation.
+ * Copyright (c) 2005, 2007 IBM Corporation.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,13 +24,13 @@ import org.osgi.service.log.LogService;
  */
 public class LogEntryAdapter extends EventAdapter {
 	// constants for Event topic substring
-	public static final String	TOPIC		= "org/osgi/service/log/LogEntry";
+	public static final String TOPIC = "org/osgi/service/log/LogEntry";
 	// constants for Event properties
-	public static final String	TIMESTAMP	= "timestamp";
-	public static final String	MESSAGE		= "message";
-	public static final String	LOG_LEVEL	= "log.level";
-	public static final String	LOG_ENTRY	= "log.entry";
-	private LogEntry			entry;
+	public static final String TIMESTAMP = "timestamp";
+	public static final String MESSAGE = "message";
+	public static final String LOG_LEVEL = "log.level";
+	public static final String LOG_ENTRY = "log.entry";
+	private LogEntry entry;
 
 	public LogEntryAdapter(LogEntry entry, EventAdmin eventAdmin) {
 		super(eventAdmin);
@@ -38,19 +38,18 @@ public class LogEntryAdapter extends EventAdapter {
 	}
 
 	/**
-	 * @return
 	 * @see org.eclipse.equinox.event.mapper.EventAdapter#convert()
 	 */
 	public Event convert() {
 		String topic = TOPIC;
 		int level = entry.getLevel();
 		switch (level) {
-			case LogService.LOG_ERROR:
-			case LogService.LOG_WARNING:
-			case LogService.LOG_INFO:
-			case LogService.LOG_DEBUG:
+			case LogService.LOG_ERROR :
+			case LogService.LOG_WARNING :
+			case LogService.LOG_INFO :
+			case LogService.LOG_DEBUG :
 				break;
-			default:
+			default :
 				// other log levels are represented by their decimal value
 				topic += Constants.TOPIC_SEPARATOR + level;
 		}

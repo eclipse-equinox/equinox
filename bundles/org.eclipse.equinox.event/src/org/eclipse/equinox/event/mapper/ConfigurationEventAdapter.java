@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005 IBM Corporation.
+ * Copyright (c) 2005, 2007 IBM Corporation.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,22 +21,20 @@ import org.osgi.service.event.EventAdmin;
  */
 public class ConfigurationEventAdapter extends EventAdapter {
 	// constants for Event topic substring
-	public static final String	HEADER			= "org/osgi/service/cm/ConfigurationEvent";
-	public static final String	CM_UPDATED		= "CM_UPDATED";
-	public static final String	CM_DELETED		= "CM_DELETED";
+	public static final String HEADER = "org/osgi/service/cm/ConfigurationEvent";
+	public static final String CM_UPDATED = "CM_UPDATED";
+	public static final String CM_DELETED = "CM_DELETED";
 	// constants for Event properties
-	public static final String	CM_FACTORY_PID	= "cm.factoryPid";
-	public static final String	CM_PID			= "cm.pid";
-	private ConfigurationEvent	event;
+	public static final String CM_FACTORY_PID = "cm.factoryPid";
+	public static final String CM_PID = "cm.pid";
+	private ConfigurationEvent event;
 
-	public ConfigurationEventAdapter(ConfigurationEvent event,
-			EventAdmin eventAdmin) {
+	public ConfigurationEventAdapter(ConfigurationEvent event, EventAdmin eventAdmin) {
 		super(eventAdmin);
 		this.event = event;
 	}
 
 	/**
-	 * @return
 	 * @see org.eclipse.equinox.event.mapper.EventAdapter#convert()
 	 */
 	public Event convert() {
@@ -55,8 +53,7 @@ public class ConfigurationEventAdapter extends EventAdapter {
 		Hashtable properties = new Hashtable();
 		ServiceReference ref = event.getReference();
 		if (ref == null) {
-			throw new RuntimeException(
-					"ServiceEvent.getServiceReference() is null");
+			throw new RuntimeException("ServiceEvent.getServiceReference() is null");
 		}
 		properties.put(CM_PID, event.getPid());
 		if (event.getFactoryPid() != null) {

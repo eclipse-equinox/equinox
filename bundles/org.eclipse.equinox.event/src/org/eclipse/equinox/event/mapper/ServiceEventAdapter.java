@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005 IBM Corporation.
+ * Copyright (c) 2005, 2007 IBM Corporation.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,15 +18,15 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 
 /**
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class ServiceEventAdapter extends EventAdapter {
 	// constants for Event topic substring
-	public static final String	HEADER			= "org/osgi/framework/ServiceEvent";
-	public static final String	UNREGISTERING	= "UNREGISTERING";
-	public static final String	MODIFIED		= "MODIFIED";
-	public static final String	REGISTERED		= "REGISTERED";
-	private ServiceEvent		event;
+	public static final String HEADER = "org/osgi/framework/ServiceEvent";
+	public static final String UNREGISTERING = "UNREGISTERING";
+	public static final String MODIFIED = "MODIFIED";
+	public static final String REGISTERED = "REGISTERED";
+	private ServiceEvent event;
 
 	public ServiceEventAdapter(ServiceEvent event, EventAdmin eventAdmin) {
 		super(eventAdmin);
@@ -34,7 +34,6 @@ public class ServiceEventAdapter extends EventAdapter {
 	}
 
 	/**
-	 * @return
 	 * @see org.eclipse.equinox.event.mapper.EventAdapter#convert()
 	 */
 	public Event convert() {

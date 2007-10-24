@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005 IBM Corporation.
+ * Copyright (c) 2005, 2007 IBM Corporation.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,7 +21,7 @@ import org.osgi.service.event.EventAdmin;
  * @version $Revision: 1.1 $
  */
 public abstract class EventAdapter {
-	final EventAdmin	eventAdmin;
+	final EventAdmin eventAdmin;
 
 	/**
 	 * @param event
@@ -32,7 +32,7 @@ public abstract class EventAdapter {
 	}
 
 	/**
-	 * @return
+	 * @return event
 	 */
 	public abstract Event convert();
 
@@ -71,12 +71,10 @@ public abstract class EventAdapter {
 		}
 	}
 
-	public void putServiceReferenceProperties(Hashtable properties,
-			ServiceReference ref) {
+	public void putServiceReferenceProperties(Hashtable properties, ServiceReference ref) {
 		// assertion ref != null
 		properties.put(Constants.SERVICE, ref);
-		properties.put(Constants.SERVICE_ID, ref
-				.getProperty(org.osgi.framework.Constants.SERVICE_ID));
+		properties.put(Constants.SERVICE_ID, ref.getProperty(org.osgi.framework.Constants.SERVICE_ID));
 		Object o = ref.getProperty(org.osgi.framework.Constants.SERVICE_PID);
 		if ((o != null) && (o instanceof String)) {
 			properties.put(Constants.SERVICE_PID, (String) o);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005 IBM Corporation.
+ * Copyright (c) 2005, 2007 IBM Corporation.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,15 +21,15 @@ import org.osgi.service.event.EventAdmin;
  */
 public class BundleEventAdapter extends EventAdapter {
 	// constants for Event topic substring
-	public static final String	HEADER		= "org/osgi/framework/BundleEvent";
-	public static final String	INSTALLED	= "INSTALLED";
-	public static final String	STOPPED		= "STOPPED";
-	public static final String	STARTED		= "STARTED";
-	public static final String	UPDATED		= "UPDATED";
-	public static final String	UNINSTALLED	= "UNINSTALLED";
-	public static final String	RESOLVED	= "RESOLVED";
-	public static final String	UNRESOLVED	= "UNRESOLVED";
-	private BundleEvent			event;
+	public static final String HEADER = "org/osgi/framework/BundleEvent";
+	public static final String INSTALLED = "INSTALLED";
+	public static final String STOPPED = "STOPPED";
+	public static final String STARTED = "STARTED";
+	public static final String UPDATED = "UPDATED";
+	public static final String UNINSTALLED = "UNINSTALLED";
+	public static final String RESOLVED = "RESOLVED";
+	public static final String UNRESOLVED = "UNRESOLVED";
+	private BundleEvent event;
 
 	public BundleEventAdapter(BundleEvent event, EventAdmin eventAdmin) {
 		super(eventAdmin);
@@ -37,7 +37,7 @@ public class BundleEventAdapter extends EventAdapter {
 	}
 
 	/**
-	 * @return
+	 * @return event
 	 * @see org.eclipse.equinox.event.mapper.EventAdapter#convert()
 	 */
 	public Event convert() {
@@ -66,15 +66,14 @@ public class BundleEventAdapter extends EventAdapter {
 				break;
 			default :
 				// unknown events must be send as their decimal value
-				typename = ""+event.getType();
+				typename = "" + event.getType();
 		}
 		String topic = HEADER + Constants.TOPIC_SEPARATOR + typename;
 		Hashtable properties = new Hashtable();
 		Bundle bundle = event.getBundle();
 		if (bundle == null) {
 			throw new RuntimeException("BundleEvent.getBundle() returns null");
-		}
-		else {
+		} else {
 			putBundleProperties(properties, bundle);
 		}
 		properties.put(Constants.EVENT, event);
