@@ -46,7 +46,7 @@ public class ReliableFile {
 	 */
 	public static final int GENERATION_LATEST = 0;
 	/**
-	 * Keep intinite backup files
+	 * Keep infinite backup files
 	 */
 	public static final int GENERATIONS_INFINITE = 0;
 
@@ -75,13 +75,12 @@ public class ReliableFile {
 	 */
 	public static final String PROP_OSGI_LOCKING = "osgi.locking"; //$NON-NLS-1$
 
-	protected static final int FILETYPE_UNKNOWN = -1;
-	protected static final int FILETYPE_VALID = 0;
-	protected static final int FILETYPE_CORRUPT = 1;
-	protected static final int FILETYPE_NOSIGNATURE = 2;
+	private static final int FILETYPE_VALID = 0;
+	private static final int FILETYPE_CORRUPT = 1;
+	private static final int FILETYPE_NOSIGNATURE = 2;
 
-	protected static final byte identifier1[] = {'.', 'c', 'r', 'c'};
-	protected static final byte identifier2[] = {'.', 'v', '1', '\n'};
+	private static final byte identifier1[] = {'.', 'c', 'r', 'c'};
+	private static final byte identifier2[] = {'.', 'v', '1', '\n'};
 
 	private static final int BUF_SIZE = 4096;
 	private static int maxInputStreamBuffer = 128 * 1024; //128k
@@ -92,14 +91,14 @@ public class ReliableFile {
 	private static int[] lastGenerations = null;
 
 	static {
-		String prop = FrameworkProperties.getProperty(PROP_MAX_BUFFER); 
+		String prop = FrameworkProperties.getProperty(PROP_MAX_BUFFER);
 		if (prop != null) {
 			try {
 				maxInputStreamBuffer = Integer.parseInt(prop);
 			} catch (NumberFormatException e) {/*ignore*/
 			}
 		}
-		prop = FrameworkProperties.getProperty(PROP_MAX_GENERATIONS); 
+		prop = FrameworkProperties.getProperty(PROP_MAX_GENERATIONS);
 		if (prop != null) {
 			try {
 				defaultMaxGenerations = Integer.parseInt(prop);
@@ -135,7 +134,7 @@ public class ReliableFile {
 	 * @return A ReliableFile object for the target file.
 	 * @throws IOException If the target file is a directory.
 	 */
-	protected static ReliableFile getReliableFile(String name) throws IOException {
+	static ReliableFile getReliableFile(String name) throws IOException {
 		return getReliableFile(new File(name));
 	}
 
@@ -150,7 +149,7 @@ public class ReliableFile {
 	 * @return A ReliableFile object for the target file.
 	 * @throws IOException If the target file is a directory.
 	 */
-	protected static ReliableFile getReliableFile(File file) throws IOException {
+	static ReliableFile getReliableFile(File file) throws IOException {
 		if (file.isDirectory()) {
 			throw new FileNotFoundException("file is a directory"); //$NON-NLS-1$
 		}
@@ -175,7 +174,7 @@ public class ReliableFile {
 		int[] generations = null;
 		try {
 			String name = file.getName();
-			String prefix = name + '.'; 
+			String prefix = name + '.';
 			int prefixLen = prefix.length();
 			File parent = new File(file.getParent());
 			String[] files = parent.list();
@@ -219,7 +218,7 @@ public class ReliableFile {
 	 * @return An InputStream object which can be used to read the target file.
 	 * @throws IOException If an error occurs preparing the file.
 	 */
-	protected InputStream getInputStream(int generation, int openMask) throws IOException {
+	InputStream getInputStream(int generation, int openMask) throws IOException {
 		if (inputFile != null) {
 			throw new IOException("Input stream already open"); //$NON-NLS-1$
 		}
@@ -243,7 +242,7 @@ public class ReliableFile {
 			}
 			File file;
 			if (generations[idx] != 0)
-				file = new File(parent, name + '.' + generations[idx]); 
+				file = new File(parent, name + '.' + generations[idx]);
 			else
 				file = referenceFile;
 			InputStream is = null;
@@ -319,7 +318,7 @@ public class ReliableFile {
 	 * @return An OutputStream object which can be used to write the target file.
 	 * @throws IOException IOException If an error occurs preparing the file.
 	 */
-	protected OutputStream getOutputStream(boolean append, int appendGeneration) throws IOException {
+	OutputStream getOutputStream(boolean append, int appendGeneration) throws IOException {
 		if (outputFile != null)
 			throw new IOException("Output stream is already open"); //$NON_NLS-1$ //$NON-NLS-1$
 		String name = referenceFile.getName();
@@ -329,7 +328,7 @@ public class ReliableFile {
 		if (!append) {
 			OutputStream os = new FileOutputStream(tmpFile);
 			outputFile = tmpFile;
-			return os; 
+			return os;
 		}
 
 		InputStream is;
@@ -363,7 +362,7 @@ public class ReliableFile {
 	 * @param checksum Checksum of the file contenets
 	 * @throws IOException If an error occurs closing the file.
 	 */
-	protected void closeOutputFile(Checksum checksum) throws IOException {
+	void closeOutputFile(Checksum checksum) throws IOException {
 		if (outputFile == null)
 			throw new IOException("Output stream is not open"); //$NON-NLS-1$
 		int[] generations = getFileGenerations(referenceFile);
@@ -389,7 +388,7 @@ public class ReliableFile {
 	 * Abort the current output stream and do not update the reliable file table.
 	 *
 	 */
-	protected void abortOutputFile() {
+	void abortOutputFile() {
 		if (outputFile == null)
 			return;
 		outputFile.delete();
@@ -397,7 +396,7 @@ public class ReliableFile {
 		appendChecksum = null;
 	}
 
-	protected File getOutputFile() {
+	File getOutputFile() {
 		return outputFile;
 	}
 
@@ -507,7 +506,7 @@ public class ReliableFile {
 	 * <code>false</code> otherwise.
 	 */
 	public static boolean exists(File file) {
-		String prefix = file.getName() + '.'; 
+		String prefix = file.getName() + '.';
 		File parent = new File(file.getParent());
 		int prefixLen = prefix.length();
 		String[] files = parent.list();
@@ -559,7 +558,7 @@ public class ReliableFile {
 
 	/**
 	 * Returns the a version number of a reliable managed file. The version can be expected
-	 * to be unique for each successfule file update.
+	 * to be unique for each successful file update.
 	 * 
 	 * @param file the file to determine the version of.
 	 * @return a unique version of this current file. A value of -1 indicates the file does
@@ -664,7 +663,7 @@ public class ReliableFile {
 	 * @param checksum the checksum value to append to the file.
 	 * @throws IOException if a write error occurs.
 	 */
-	protected void writeChecksumSignature(OutputStream out, Checksum checksum) throws IOException {
+	void writeChecksumSignature(OutputStream out, Checksum checksum) throws IOException {
 		// tag on our signature and checksum
 		out.write(ReliableFile.identifier1);
 		out.write(intToHex((int) checksum.getValue()));
@@ -681,7 +680,7 @@ public class ReliableFile {
 	 * @throws IOException if getInputStream() or getOutputStream has not been
 	 * called.
 	 */
-	protected int getSignatureSize() throws IOException {
+	int getSignatureSize() throws IOException {
 		if (inputFile != null) {
 			CacheInfo info;
 			synchronized (cacheFiles) {
@@ -709,7 +708,7 @@ public class ReliableFile {
 	 * current file contents.
 	 * @throws IOException if getOutputStream for append has not been called.
 	 */
-	protected Checksum getFileChecksum() throws IOException {
+	Checksum getFileChecksum() throws IOException {
 		if (appendChecksum == null)
 			throw new IOException("Checksum is invalid!"); //$NON-NLS-1$
 		return appendChecksum;
@@ -721,7 +720,7 @@ public class ReliableFile {
 	 * @return Object implementing Checksum interface used to calculate
 	 * a reliable file checksum
 	 */
-	protected Checksum getChecksumCalculator() {
+	Checksum getChecksumCalculator() {
 		// Using CRC32 because Adler32 isn't in the eeMinimum library.
 		return new CRC32();
 	}
