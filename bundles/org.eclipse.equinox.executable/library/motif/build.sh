@@ -36,6 +36,7 @@ programOutput="eclipse"
 defaultOS=""
 defaultOSArch=""
 defaultWS="motif"
+defaultJava=DEFAULT_JAVA_JNI
 makefile=""
 javaHome=""
 if [ "$OS" = "" ];  then
@@ -64,7 +65,8 @@ case $OS in
 		OUTPUT_DIR="../../bin/$defaultWS/$defaultOS/$defaultOSArch"
 		;;
 	"SunOS")
-		PATH=/usr/ccs/bin:/opt/SUNWspro/bin:$PATH
+#		PATH=/usr/ccs/bin:/opt/SUNWspro/bin:$PATH
+		PATH=/usr/ccs/bin:/export/home/SUNWspro/bin:$PATH
 		export PATH
 		makefile="make_solaris.mak"
 		defaultOS="solaris"
@@ -85,6 +87,8 @@ case $OS in
 				defaultOSArch="ia64_32"
 				defaultWS="motif"
 				OUTPUT_DIR="../../bin/$defaultWS/$defaultOS/$defaultOSArch"
+				javaHome="/opt/java1.5"
+				defaultJava=DEFAULT_JAVA_EXEC
 				;;
         	*)
 				makefile="make_hpux_PA_RISC.mak"
@@ -130,8 +134,9 @@ DEFAULT_OS="$defaultOS"
 DEFAULT_OS_ARCH="$defaultOSArch"
 DEFAULT_WS="$defaultWS"
 JAVA_HOME=$javaHome
+DEFAULT_JAVA=$defaultJava
 
-export OUTPUT_DIR PROGRAM_OUTPUT DEFAULT_OS DEFAULT_OS_ARCH DEFAULT_WS X11_HOME MOTIF_HOME JAVA_HOME
+export OUTPUT_DIR PROGRAM_OUTPUT DEFAULT_OS DEFAULT_OS_ARCH DEFAULT_WS X11_HOME MOTIF_HOME JAVA_HOME DEFAULT_JAVA
 
 # If the OS is supported (a makefile exists)
 if [ "$makefile" != "" ]; then

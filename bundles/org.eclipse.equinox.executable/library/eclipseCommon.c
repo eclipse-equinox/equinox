@@ -141,7 +141,7 @@ char *toNarrow(_TCHAR* src)
  * Solaris versions <= Solaris 9 did not know setenv in libc,
  * so emulate it here.
  */
-#if defined(SOLARIS)
+#if defined(SOLARIS) || defined(HPUX)
 int setenv (const char *name, const char *value, int replace)
 {
 	int namelen, valuelen, rc;
