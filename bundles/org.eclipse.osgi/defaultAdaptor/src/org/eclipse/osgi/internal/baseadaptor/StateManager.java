@@ -305,4 +305,16 @@ public class StateManager implements PlatformAdmin, Runnable {
 				}
 		}
 	}
+
+	public void addDisabledInfo(DisabledInfo disabledInfo) {
+		if (systemState == null)
+			throw new IllegalStateException(); // should never happen
+		systemState.addDisabledInfo(disabledInfo);
+	}
+
+	public void removeDisabledInfo(DisabledInfo disabledInfo) {
+		if (systemState == null)
+			throw new IllegalStateException(); // should never happen
+		systemState.removeDisabledInfo(disabledInfo);
+	}
 }

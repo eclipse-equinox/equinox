@@ -24,6 +24,7 @@ public class AllTests extends TestCase {
 
 	public static Test suite() {
 		TestSuite suite = new TestSuite(AllTests.class.getName());
+		suite.addTest(DisabledInfoTest.suite());
 		suite.addTest(PlatformAdminTest.suite());
 		suite.addTest(StateResolverTest.suite());
 		suite.addTest(StateCycleTest.suite());

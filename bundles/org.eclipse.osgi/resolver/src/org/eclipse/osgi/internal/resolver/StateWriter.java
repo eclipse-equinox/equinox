@@ -120,12 +120,15 @@ class StateWriter {
 					writePlatformProp(props.get(platformPropKeys[j]), outState);
 			}
 			outState.writeInt(bundles.length);
-			if (bundles.length == 0)
-				return;
 			for (int i = 0; i < bundles.length; i++)
 				// write out each bundle with the force flag set to make sure
 				// the data is written at least once in the non-lazy state data
 				writeBundleDescription(bundles[i], outState, true);
+			// write the DisabledInfos
+			DisabledInfo[] infos = state.getDisabledInfos();
+			outState.writeInt(infos.length);
+			for (int i = 0; i < infos.length; i++)
+				writeDisabledInfo(infos[i], outState);
 			outState.writeBoolean(state.isResolved());
 		} finally {
 			if (outLazy != null) {
@@ -300,6 +303,12 @@ class StateWriter {
 
 		// save the size of the lazy data
 		((BundleDescriptionImpl) bundle).setLazyDataSize(out.size() - dataStart);
+	}
+
+	private void writeDisabledInfo(DisabledInfo disabledInfo, DataOutputStream out) throws IOException {
+		writeStringOrNull(disabledInfo.getPolicyName(), out);
+		writeStringOrNull(disabledInfo.getMessage(), out);
+		writeBundleDescription(disabledInfo.getBundle(), out, false);
 	}
 
 	private void writeBundleSpec(BundleSpecificationImpl bundle, DataOutputStream out) throws IOException {

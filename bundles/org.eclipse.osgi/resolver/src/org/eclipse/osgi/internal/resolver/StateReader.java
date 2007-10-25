@@ -40,7 +40,7 @@ class StateReader {
 	private int numBundles;
 	private boolean accessedFlag = false;
 
-	public static final byte STATE_CACHE_VERSION = 27;
+	public static final byte STATE_CACHE_VERSION = 28;
 	public static final byte NULL = 0;
 	public static final byte OBJECT = 1;
 	public static final byte INDEX = 2;
@@ -103,13 +103,17 @@ class StateReader {
 			}
 			state.setPlatformProperties(platformProps, false);
 			numBundles = in.readInt();
-			if (numBundles == 0)
-				return true;
 			for (int i = 0; i < numBundles; i++) {
 				BundleDescriptionImpl bundle = readBundleDescription(in);
 				state.basicAddBundle(bundle);
 				if (bundle.isResolved())
 					state.addResolvedBundle(bundle);
+			}
+			// read the DisabledInfos
+			int numDisableInfos = in.readInt();
+			for (int i = 0; i < numDisableInfos; i++) {
+				DisabledInfo info = readDisabledInfo(in);
+				state.addDisabledInfo(info);
 			}
 			state.setTimeStamp(timestampRead);
 			state.setResolved(in.readBoolean());
@@ -363,6 +367,10 @@ class StateReader {
 		exportPackageDesc.setAttributes(readMap(in));
 		exportPackageDesc.setDirectives(readMap(in));
 		return exportPackageDesc;
+	}
+
+	private DisabledInfo readDisabledInfo(DataInputStream in) throws IOException {
+		return new DisabledInfo(readString(in, false), readString(in, false), readBundleDescription(in));
 	}
 
 	private Map readMap(DataInputStream in) throws IOException {

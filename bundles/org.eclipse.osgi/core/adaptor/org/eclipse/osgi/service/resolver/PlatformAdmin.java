@@ -89,4 +89,20 @@ public interface PlatformAdmin {
 	 * @return a state object factory
 	 */
 	public StateObjectFactory getFactory();
+
+	/**
+	 * Adds the disabled info to the state managed by this platform admin. 
+	 *  If a disable info already exists for the specified policy and the specified bundle 
+	 *  then it is replaced with the given disabled info.
+	 * @param disabledInfo the disabled info to add.
+	 * @throws IllegalArgumentException if the <code>BundleDescription</code> for
+	 * the specified disabled info does not exist in the state managed by this platform admin.
+	 */
+	public void addDisabledInfo(DisabledInfo disabledInfo);
+
+	/**
+	 * Removes the disabled info from the state managed by this platform admin.
+	 * @param disabledInfo the disabled info to remove
+	 */
+	public void removeDisabledInfo(DisabledInfo disabledInfo);
 }

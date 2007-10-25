@@ -137,6 +137,12 @@ public interface ResolverError {
 	public static final int INVALID_NATIVECODE_PATHS = 0x20000;
 
 	/**
+	 * Error type constant (bit mask) indicating that a bundle could not be
+	 * resolved because the bundle was disabled
+	 */
+	public static final int DISABLED_BUNDLE = 0x40000;
+
+	/**
 	 * Returns the bundle which this ResolverError is for
 	 * @return the bundle which this ResolverError is for
 	 */

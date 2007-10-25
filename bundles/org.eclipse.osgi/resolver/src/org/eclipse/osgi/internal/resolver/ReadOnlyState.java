@@ -11,7 +11,6 @@
 package org.eclipse.osgi.internal.resolver;
 
 import java.util.Dictionary;
-
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Version;
@@ -172,6 +171,26 @@ public class ReadOnlyState implements State {
 	}
 
 	public void setNativePathsInvalid(NativeCodeDescription nativeCodeDescription, boolean hasInvalidPaths) {
+		throw new UnsupportedOperationException();
+	}
+
+	public BundleDescription[] getDisabledBundles() {
+		return target.getDisabledBundles();
+	}
+
+	public void addDisabledInfo(DisabledInfo disabledInfo) {
+		throw new UnsupportedOperationException();
+	}
+
+	public DisabledInfo[] getDisabledInfos(BundleDescription bundle) {
+		return target.getDisabledInfos(bundle);
+	}
+
+	public DisabledInfo getDisabledInfo(BundleDescription bundle, String policyName) {
+		return target.getDisabledInfo(bundle, policyName);
+	}
+
+	public void removeDisabledInfo(DisabledInfo disabledInfo) {
 		throw new UnsupportedOperationException();
 	}
 

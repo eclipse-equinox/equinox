@@ -11,7 +11,6 @@
 package org.eclipse.osgi.service.resolver;
 
 import java.util.Dictionary;
-
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Version;
 
@@ -465,4 +464,44 @@ public interface State {
 	 * @param hasInvalidNativePaths true if the native code paths are invalid; false otherwise.
 	 */
 	public void setNativePathsInvalid(NativeCodeDescription nativeCodeDescription, boolean hasInvalidNativePaths);
+
+	/**
+	 * Returns an array of BundleDescriptions for the bundles that are disabled
+	 * in the system. Use {@link #getDisabledInfos(BundleDescription)} to interrogate the reason that
+	 * each bundle is disabled.
+	 * @return the array of disabled bundles
+	 */
+	public BundleDescription[] getDisabledBundles();
+
+	/**
+	 * Adds the disabled info to this state.  If a disable info already exists
+	 * for the specified policy and the specified bundle then it is replaced with 
+	 * the given disabled info.
+	 * @param disabledInfo the disabled info to add.
+	 * @throws IllegalArgumentException if the <code>BundleDescription</code> for
+	 * the specified disabled info does not exist in this state.
+	 */
+	public void addDisabledInfo(DisabledInfo disabledInfo);
+
+	/**
+	 * Removes the disabled info from the state.
+	 * @param disabledInfo the disabled info to remove
+	 */
+	public void removeDisabledInfo(DisabledInfo disabledInfo);
+
+	/**
+	 * Returns an array of disabled info for the specified bundle.  If no disabled info exist
+	 * then an empty array is returned.
+	 * @param bundle the bundle to get the disabled info for.
+	 * @return the array of disabled info.
+	 */
+	public DisabledInfo[] getDisabledInfos(BundleDescription bundle);
+
+	/**
+	 * Returns the disabled info for the specified bundle with the specified policy name.
+	 * If no disabled info exists then <code>null</code> is returned.
+	 * @param bundle the bundle to get the disabled info for
+	 * @return the disabled info.
+	 */
+	public DisabledInfo getDisabledInfo(BundleDescription bundle, String policyName);
 }

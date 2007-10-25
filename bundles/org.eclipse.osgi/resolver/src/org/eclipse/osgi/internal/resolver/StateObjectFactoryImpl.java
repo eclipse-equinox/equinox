@@ -312,8 +312,13 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		StateImpl newState = internalCreateState();
 		newState.setTimeStamp(original.getTimeStamp());
 		BundleDescription[] bundles = original.getBundles();
-		for (int i = 0; i < bundles.length; i++)
-			newState.basicAddBundle(createBundleDescription(bundles[i]));
+		for (int i = 0; i < bundles.length; i++) {
+			BundleDescription newBundle = createBundleDescription(bundles[i]);
+			newState.basicAddBundle(newBundle);
+			DisabledInfo[] infos = original.getDisabledInfos(bundles[i]);
+			for (int j = 0; j < infos.length; j++)
+				newState.addDisabledInfo(new DisabledInfo(infos[j].getPolicyName(), infos[j].getMessage(), newBundle));
+		}
 		newState.setResolved(false);
 		newState.setPlatformProperties(original.getPlatformProperties());
 		return newState;

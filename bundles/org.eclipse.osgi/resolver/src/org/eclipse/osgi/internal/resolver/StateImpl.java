@@ -19,6 +19,7 @@ import org.eclipse.osgi.framework.util.*;
 import org.eclipse.osgi.internal.baseadaptor.StateManager;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.util.ManifestElement;
+import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 
 public abstract class StateImpl implements State {
@@ -27,6 +28,7 @@ public abstract class StateImpl implements State {
 	private static final String OSGI_NL = "osgi.nl"; //$NON-NLS-1$
 	private static final String OSGI_ARCH = "osgi.arch"; //$NON-NLS-1$
 	public static final String[] PROPS = {OSGI_OS, OSGI_WS, OSGI_NL, OSGI_ARCH, Constants.OSGI_FRAMEWORK_SYSTEM_PACKAGES, Constants.OSGI_RESOLVER_MODE, Constants.FRAMEWORK_EXECUTIONENVIRONMENT, "osgi.resolveOptional", "osgi.genericAliases", Constants.FRAMEWORK_OS_NAME, Constants.FRAMEWORK_OS_VERSION, Constants.FRAMEWORK_PROCESSOR, Constants.FRAMEWORK_LANGUAGE}; //$NON-NLS-1$ //$NON-NLS-2$
+	private static final DisabledInfo[] EMPTY_DISABLEDINFOS = new DisabledInfo[0];
 	transient private Resolver resolver;
 	transient private StateDeltaImpl changes;
 	transient private boolean resolving = false;
@@ -37,6 +39,7 @@ public abstract class StateImpl implements State {
 	private HashMap resolverErrors = new HashMap();
 	private StateObjectFactory factory;
 	private KeyedHashSet resolvedBundles = new KeyedHashSet();
+	private HashMap disabledBundles = new HashMap();
 	boolean fullyLoaded = false;
 	private boolean dynamicCacheChanged = false;
 	// only used for lazy loading of BundleDescriptions
@@ -92,6 +95,17 @@ public abstract class StateImpl implements State {
 		if (!bundleDescriptions.remove(existing))
 			return false;
 		resolvedBundles.remove(existing);
+		synchronized (disabledBundles) {
+			ArrayList infos = (ArrayList) disabledBundles.remove(existing);
+			if (infos != null) {
+				ArrayList newInfos = new ArrayList(infos.size());
+				for (Iterator iInfos = infos.iterator(); iInfos.hasNext();) {
+					DisabledInfo info = (DisabledInfo) iInfos.next();
+					newInfos.add(new DisabledInfo(info.getPolicyName(), info.getMessage(), newDescription));
+				}
+				disabledBundles.put(newDescription, newInfos);
+			}
+		}
 		existing.setStateBit(BundleDescriptionImpl.REMOVAL_PENDING, true);
 		if (!basicAddBundle(newDescription))
 			return false;
@@ -133,6 +147,9 @@ public abstract class StateImpl implements State {
 		if (!bundleDescriptions.remove((KeyedElement) toRemove))
 			return false;
 		resolvedBundles.remove((KeyedElement) toRemove);
+		synchronized (disabledBundles) {
+			disabledBundles.remove(toRemove);
+		}
 		resolved = false;
 		getDelta().recordBundleRemoved((BundleDescriptionImpl) toRemove);
 		((BundleDescriptionImpl) toRemove).setStateBit(BundleDescriptionImpl.REMOVAL_PENDING, true);
@@ -810,5 +827,81 @@ public abstract class StateImpl implements State {
 
 	public void setNativePathsInvalid(NativeCodeDescription nativeCodeDescription, boolean hasInvalidNativePaths) {
 		((NativeCodeDescriptionImpl) nativeCodeDescription).setInvalidNativePaths(hasInvalidNativePaths);
+	}
+
+	public BundleDescription[] getDisabledBundles() {
+		synchronized (disabledBundles) {
+			return (BundleDescription[]) disabledBundles.keySet().toArray(new BundleDescription[0]);
+		}
+	}
+
+	public void addDisabledInfo(DisabledInfo disabledInfo) {
+		if (getBundle(disabledInfo.getBundle().getBundleId()) != disabledInfo.getBundle())
+			throw new IllegalArgumentException(NLS.bind(StateMsg.BUNDLE_NOT_IN_STATE, disabledInfo.getBundle()));
+		synchronized (disabledBundles) {
+			ArrayList currentInfos = (ArrayList) disabledBundles.get(disabledInfo.getBundle());
+			if (currentInfos == null) {
+				currentInfos = new ArrayList(1);
+				currentInfos.add(disabledInfo);
+				disabledBundles.put(disabledInfo.getBundle(), currentInfos);
+			} else {
+				Iterator it = currentInfos.iterator();
+				while (it.hasNext()) {
+					DisabledInfo currentInfo = (DisabledInfo) it.next();
+					if (disabledInfo.getPolicyName().equals(currentInfo.getPolicyName())) {
+						currentInfos.remove(currentInfo);
+						break;
+					}
+				}
+				currentInfos.add(disabledInfo);
+			}
+		}
+	}
+
+	public void removeDisabledInfo(DisabledInfo disabledInfo) {
+		synchronized (disabledBundles) {
+			ArrayList currentInfos = (ArrayList) disabledBundles.get(disabledInfo.getBundle());
+			if ((currentInfos != null) && currentInfos.contains(disabledInfo)) {
+				currentInfos.remove(disabledInfo);
+				if (currentInfos.isEmpty()) {
+					disabledBundles.remove(disabledInfo.getBundle());
+				}
+			}
+		}
+	}
+
+	public DisabledInfo getDisabledInfo(BundleDescription bundle, String policyName) {
+		synchronized (disabledBundles) {
+			ArrayList currentInfos = (ArrayList) disabledBundles.get(bundle);
+			if (currentInfos == null)
+				return null;
+			Iterator it = currentInfos.iterator();
+			while (it.hasNext()) {
+				DisabledInfo currentInfo = (DisabledInfo) it.next();
+				if (currentInfo.getPolicyName().equals(policyName)) {
+					return currentInfo;
+				}
+			}
+			return null;
+		}
+	}
+
+	public DisabledInfo[] getDisabledInfos(BundleDescription bundle) {
+		synchronized (disabledBundles) {
+			ArrayList currentInfos = (ArrayList) disabledBundles.get(bundle);
+			return currentInfos == null ? EMPTY_DISABLEDINFOS : (DisabledInfo[]) currentInfos.toArray(new DisabledInfo[currentInfos.size()]);
+		}
+	}
+
+	/*
+	 * Used by StateWriter to get all the DisabledInfo objects to persist
+	 */
+	DisabledInfo[] getDisabledInfos() {
+		ArrayList results = new ArrayList();
+		synchronized (disabledBundles) {
+			for (Iterator allDisabledInfos = disabledBundles.values().iterator(); allDisabledInfos.hasNext();)
+				results.addAll((Collection) allDisabledInfos.next());
+		}
+		return (DisabledInfo[]) results.toArray(new DisabledInfo[results.size()]);
 	}
 }

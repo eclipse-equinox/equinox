@@ -15,6 +15,8 @@ import org.eclipse.osgi.util.NLS;
 public class StateMsg extends NLS {
 	private static final String BUNDLE_NAME = "org.eclipse.osgi.internal.resolver.StateMessages"; //$NON-NLS-1$
 
+	public static String BUNDLE_NOT_IN_STATE;
+
 	public static String COMMIT_INVALID_TIMESTAMP;
 	public static String HEADER_REQUIRED;
 	public static String HEADER_PACKAGE_DUPLICATES;
