@@ -89,6 +89,7 @@ public class ReliableFile {
 	//our cache of the last looked up generations for a file
 	private static File lastGenerationFile = null;
 	private static int[] lastGenerations = null;
+	private static final Object lastGenerationLock = new Object();
 
 	static {
 		String prop = FrameworkProperties.getProperty(PROP_MAX_BUFFER);
@@ -174,10 +175,14 @@ public class ReliableFile {
 	}
 
 	private static int[] getFileGenerations(File file) {
-		if (!fileSharing && lastGenerationFile != null) {
-			//shortcut maybe, only if filesharing is not supported
-			if (file.equals(lastGenerationFile))
-				return lastGenerations;
+		if (!fileSharing) {
+			synchronized (lastGenerationLock) {
+				if (lastGenerationFile != null) {
+					//shortcut maybe, only if filesharing is not supported
+					if (file.equals(lastGenerationFile))
+						return lastGenerations;
+				}
+			}
 		}
 		int[] generations = null;
 		try {
@@ -211,8 +216,10 @@ public class ReliableFile {
 			return generations;
 		} finally {
 			if (!fileSharing) {
-				lastGenerationFile = file;
-				lastGenerations = generations;
+				synchronized (lastGenerationLock) {
+					lastGenerationFile = file;
+					lastGenerations = generations;
+				}
 			}
 		}
 	}
