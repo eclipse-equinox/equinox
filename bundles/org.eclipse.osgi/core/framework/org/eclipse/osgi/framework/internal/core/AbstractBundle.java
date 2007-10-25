@@ -748,10 +748,11 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 		} catch (Throwable t) {
 			try {
 				storage.undo();
-				if (reloaded) /*
-																 * if we loaded from the new version of the
-																 * bundle
-																 */{
+				if (reloaded)
+				/*
+				 * if we loaded from the new version of the
+				 * bundle
+				 */{
 					synchronized (bundles) {
 						reload(oldBundle); /* revert to old version */
 					}
@@ -1143,10 +1144,11 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 						Debug.println(" Waiting for state to change in bundle " + this); //$NON-NLS-1$
 						start = System.currentTimeMillis();
 					}
-					statechangeLock.wait(5000); /*
-																					 * wait for other thread to
-																					 * finish changing state
-																					 */
+					statechangeLock.wait(5000);
+					/*
+					 * wait for other thread to
+					 * finish changing state
+					 */
 					if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 						long end = System.currentTimeMillis();
 						if (end - start > 0)
@@ -1168,10 +1170,11 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 		synchronized (statechangeLock) {
 			if (stateChanging != null) {
 				stateChanging = null;
-				statechangeLock.notify(); /*
-																 * notify one waiting thread that the
-																 * state change is complete
-																 */
+				statechangeLock.notify();
+				/*
+				 * notify one waiting thread that the
+				 * state change is complete
+				 */
 			}
 		}
 	}
@@ -1388,7 +1391,8 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	}
 
 	public int getKeyHashCode() {
-		return (int) getBundleId();
+		long id = getBundleId();
+		return (int) (id ^ (id >>> 32));
 	}
 
 	public boolean compare(KeyedElement other) {

@@ -347,7 +347,7 @@ public class BundleDescriptionImpl extends BaseDescriptionImpl implements Bundle
 	}
 
 	public int getKeyHashCode() {
-		return (int) (bundleId % Integer.MAX_VALUE);
+		return (int) (bundleId ^ (bundleId >>> 32));
 	}
 
 	/* TODO Determine if we need more than just Object ID type of hashcode.
