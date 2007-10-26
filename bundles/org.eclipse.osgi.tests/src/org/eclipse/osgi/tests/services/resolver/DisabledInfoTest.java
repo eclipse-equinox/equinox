@@ -128,6 +128,51 @@ public class DisabledInfoTest extends AbstractStateTest {
 		}
 	}
 
+	public void testDisabledInfo04() throws BundleException {
+		State state = buildTestState();
+		BundleDescription b1 = state.getBundleByLocation(B1_LOCATION);
+		BundleDescription b2 = state.getBundleByLocation(B2_LOCATION);
+		BundleDescription b3 = state.getBundleByLocation(B3_LOCATION);
+
+		DisabledInfo info1 = new DisabledInfo(POLICY, "message 1", b1);
+		DisabledInfo info2 = new DisabledInfo(POLICY, "message 1", b2);
+		DisabledInfo info3 = new DisabledInfo(POLICY, "message 1", b3);
+
+		state.resolve();
+		assertTrue("b1 resolved", b1.isResolved());
+		assertTrue("b2 resolved", b2.isResolved());
+		assertTrue("b3 resolved", b3.isResolved());
+
+		state.addDisabledInfo(info1);
+		state.addDisabledInfo(info2);
+		state.addDisabledInfo(info3);
+
+		BundleDescription[] disabledBundles = state.getDisabledBundles();
+		assertNotNull("disabledBundles", disabledBundles);
+		assertEquals("disabledBundles length", 3, disabledBundles.length);
+		assertTrue("b1 not found", disabledBundles[0] == b1 || disabledBundles[1] == b1 || disabledBundles[2] == b1);
+		assertTrue("b2 not found", disabledBundles[0] == b2 || disabledBundles[1] == b2 || disabledBundles[2] == b2);
+		assertTrue("b3 not found", disabledBundles[0] == b3 || disabledBundles[1] == b3 || disabledBundles[2] == b3);
+
+		state.removeDisabledInfo(info1);
+		disabledBundles = state.getDisabledBundles();
+		assertNotNull("disabledBundles", disabledBundles);
+		assertEquals("disabledBundles length", 2, disabledBundles.length);
+		assertTrue("b2 not found", disabledBundles[0] == b2 || disabledBundles[1] == b2);
+		assertTrue("b3 not found", disabledBundles[0] == b3 || disabledBundles[1] == b3);
+
+		state.removeDisabledInfo(info2);
+		disabledBundles = state.getDisabledBundles();
+		assertNotNull("disabledBundles", disabledBundles);
+		assertEquals("disabledBundles length", 1, disabledBundles.length);
+		assertTrue("b3 not found", disabledBundles[0] == b3);
+
+		state.removeDisabledInfo(info3);
+		disabledBundles = state.getDisabledBundles();
+		assertNotNull("disabledBundles", disabledBundles);
+		assertEquals("disabledBundles length", 0, disabledBundles.length);
+	}
+
 	private State buildTestState() throws BundleException {
 		State state = buildEmptyState();
 		final String B1_MANIFEST = "Bundle-ManifestVersion: 1\n" + "Bundle-SymbolicName: b1\n" + "Bundle-Version: 1.0\n" + "Import-Package: b2";
