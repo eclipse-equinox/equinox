@@ -70,6 +70,8 @@ public class ResolverErrorImpl implements ResolverError {
 				return NLS.bind(StateMsg.RES_ERROR_NO_NATIVECODE_MATCH, getData());
 			case ResolverError.INVALID_NATIVECODE_PATHS :
 				return NLS.bind(StateMsg.RES_ERROR_NATIVECODE_PATH_INVALID, getData());
+			case ResolverError.DISABLED_BUNDLE :
+				return NLS.bind(StateMsg.RES_ERROR_DISABLEDBUNDLE, getData());
 			default :
 				return StateMsg.RES_ERROR_UNKNOWN;
 		}
