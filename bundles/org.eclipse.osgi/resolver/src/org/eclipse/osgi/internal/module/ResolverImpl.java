@@ -233,9 +233,11 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		DisabledInfo[] disabledInfos = state.getDisabledInfos(bundle);
 		if (disabledInfos.length > 0) {
 			StringBuffer message = new StringBuffer();
-			for (int i = 0; i < disabledInfos.length; i++)
-				// TODO localize "Policy: " ???
-				message.append("Policy: ").append(disabledInfos[i].getPolicyName()).append("; ").append(disabledInfos[i].getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
+			for (int i = 0; i < disabledInfos.length; i++) {
+				if (i > 0)
+					message.append(' ');
+				message.append('\"').append(disabledInfos[i].getPolicyName()).append(':').append(disabledInfos[i].getMessage()).append('\"');
+			}
 			state.addResolverError(bundle, ResolverError.DISABLED_BUNDLE, message.toString(), null);
 			return false; // fail because we are disable
 		}
