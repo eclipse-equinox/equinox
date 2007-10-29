@@ -856,6 +856,7 @@ public abstract class StateImpl implements State {
 				currentInfos.add(disabledInfo);
 			}
 		}
+		updateTimeStamp();
 	}
 
 	public void removeDisabledInfo(DisabledInfo disabledInfo) {
@@ -868,6 +869,7 @@ public abstract class StateImpl implements State {
 				}
 			}
 		}
+		updateTimeStamp();
 	}
 
 	public DisabledInfo getDisabledInfo(BundleDescription bundle, String policyName) {
