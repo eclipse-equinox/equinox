@@ -364,6 +364,14 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
 	/* Initialize official program name */
    	officialName = name != NULL ? _tcsdup( name ) : getDefaultOfficialName();
     
+#ifdef MACOSX
+   	/* Most platforms, we will initialize the window system later before trying to do any
+   	 * graphics.  On Mac, we need it initialized to get the dock icon properly, so always do 
+   	 * it now.
+   	 */
+    initWindowSystem( &argc, argv, !noSplash );
+#endif
+    
     /* Find the directory where the Eclipse program is installed. */
     programDir = getProgramDir();
     if (programDir == NULL)
