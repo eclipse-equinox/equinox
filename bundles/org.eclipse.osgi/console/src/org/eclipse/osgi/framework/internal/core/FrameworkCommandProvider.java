@@ -17,7 +17,6 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.security.ProtectionDomain;
 import java.util.*;
-
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.eclipse.osgi.framework.launcher.Launcher;
@@ -89,12 +88,13 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 	private StartLevelManager slImpl;
 	private ConditionalPermissionAdmin condPermAdmin;
 	private PermissionAdmin permAdmin;
+	private PlatformAdmin platAdmin;
 
 	/** Strings used to format other strings */
 	private String tab = "\t"; //$NON-NLS-1$
 	private String newline = "\r\n"; //$NON-NLS-1$
-	
-	/** this list contains the bundles known to be lazily awaiting activation */ 
+
+	/** this list contains the bundles known to be lazily awaiting activation */
 	private final List lazyActivation = new ArrayList();
 
 	/**
@@ -111,7 +111,7 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 		condPermAdmin = osgi.framework.condPermAdmin;
 		permAdmin = osgi.framework.permissionAdmin;
 	}
-	
+
 	/**
 	 *  Intialize this CommandProvider.
 	 *
@@ -124,7 +124,7 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 		Dictionary props = new Hashtable();
 		props.put(Constants.SERVICE_RANKING, new Integer(Integer.MAX_VALUE));
 		context.registerService(CommandProvider.class.getName(), this, props);
-		
+
 		context.addBundleListener(this);
 		return this;
 	}
@@ -1775,6 +1775,9 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 				return "UNINSTALLED "; //$NON-NLS-1$
 
 			case Bundle.INSTALLED :
+				if (isDisabled(bundle)) {
+					return "<DISABLED>  "; //$NON-NLS-1$	
+				}
 				return "INSTALLED   "; //$NON-NLS-1$
 
 			case Bundle.RESOLVED :
@@ -1797,6 +1800,29 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 			default :
 				return Integer.toHexString(state);
 		}
+	}
+
+	private boolean isDisabled(Bundle bundle) {
+		boolean disabled = false;
+		ServiceReference platformAdminRef = null;
+		try {
+			platformAdminRef = context.getServiceReference(PlatformAdmin.class.getName());
+			if (platformAdminRef != null) {
+				platAdmin = (PlatformAdmin) context.getService(platformAdminRef);
+				if (platAdmin != null) {
+					State state = platAdmin.getState();
+					BundleDescription bundleDesc = state.getBundle(bundle.getBundleId());
+					DisabledInfo[] disabledInfos = state.getDisabledInfos(bundleDesc);
+					if ((disabledInfos != null) && (disabledInfos.length != 0)) {
+						disabled = true;
+					}
+				}
+			}
+		} finally {
+			if (platformAdminRef != null)
+				context.ungetService(platformAdminRef);
+		}
+		return disabled;
 	}
 
 	/**
@@ -1870,17 +1896,17 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 		Bundle bundle = event.getBundle();
 		synchronized (lazyActivation) {
 			switch (type) {
-				case BundleEvent.LAZY_ACTIVATION:
+				case BundleEvent.LAZY_ACTIVATION :
 					if (!lazyActivation.contains(bundle)) {
 						lazyActivation.add(bundle);
 					}
 					break;
-			
-				default:
+
+				default :
 					lazyActivation.remove(bundle);
 					break;
 			}
 		}
-		
+
 	}
 }

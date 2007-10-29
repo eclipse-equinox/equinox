@@ -21,6 +21,9 @@ import org.osgi.framework.ServiceReference;
  * Internal class.
  */
 public class EclipseCommandProvider implements CommandProvider {
+
+	private static final String POLICY_CONSOLE = "console"; //$NON-NLS-1$
+	private PlatformAdmin platformAdmin;
 	private BundleContext context;
 
 	public EclipseCommandProvider(BundleContext context) {
@@ -34,6 +37,12 @@ public class EclipseCommandProvider implements CommandProvider {
 		help.append("---"); //$NON-NLS-1$
 		help.append(EclipseAdaptorMsg.NEW_LINE);
 		help.append("\tdiag - " + EclipseAdaptorMsg.ECLIPSE_CONSOLE_HELP_DIAG_COMMAND_DESCRIPTION);//$NON-NLS-1$
+		help.append(EclipseAdaptorMsg.NEW_LINE);
+		help.append("\tenableBundle - " + EclipseAdaptorMsg.ECLIPSE_CONSOLE_HELP_ENABLE_COMMAND_DESCRIPTION);//$NON-NLS-1$
+		help.append(EclipseAdaptorMsg.NEW_LINE);
+		help.append("\tdisableBundle - " + EclipseAdaptorMsg.ECLIPSE_CONSOLE_HELP_DISABLE_COMMAND_DESCRIPTION);//$NON-NLS-1$
+		help.append(EclipseAdaptorMsg.NEW_LINE);
+		help.append("\tdisabledBundles - " + EclipseAdaptorMsg.ECLIPSE_CONSOLE_HELP_LD_COMMAND_DESCRIPTION);//$NON-NLS-1$
 		help.append(EclipseAdaptorMsg.NEW_LINE);
 		return help.toString();
 	}
@@ -50,23 +59,32 @@ public class EclipseCommandProvider implements CommandProvider {
 		return null;
 	}
 
+	private PlatformAdmin getPlatformAdmin(CommandInterpreter ci) {
+		if (platformAdmin == null) {
+			ServiceReference platformAdminRef = context.getServiceReference(PlatformAdmin.class.getName());
+			if (platformAdminRef == null) {
+				ci.print("  "); //$NON-NLS-1$
+				ci.println(EclipseAdaptorMsg.ECLIPSE_CONSOLE_NO_CONSTRAINTS_NO_PLATFORM_ADMIN_MESSAGE);
+				return null;
+			}
+			platformAdmin = (PlatformAdmin) context.getService(platformAdminRef);
+		}
+		return platformAdmin;
+	}
+
+	private void ungetPlatformAdmin() {
+		ServiceReference platformAdminRef = context.getServiceReference(PlatformAdmin.class.getName());
+		context.ungetService(platformAdminRef);
+	}
+
 	public void _diag(CommandInterpreter ci) throws Exception {
 		String nextArg = ci.nextArgument();
 		if (nextArg == null) {
 			ci.println(EclipseAdaptorMsg.ECLIPSE_CONSOLE_NO_BUNDLE_SPECIFIED_ERROR);
 			return;
 		}
-		ServiceReference platformAdminRef = context.getServiceReference(PlatformAdmin.class.getName());
-		if (platformAdminRef == null) {
-			ci.print("  "); //$NON-NLS-1$
-			ci.println(EclipseAdaptorMsg.ECLIPSE_CONSOLE_NO_CONSTRAINTS_NO_PLATFORM_ADMIN_MESSAGE);
-			return;
-		}
 		try {
-			PlatformAdmin platformAdmin = (PlatformAdmin) context.getService(platformAdminRef);
-			if (platformAdmin == null)
-				return;
-			State systemState = platformAdmin.getState(false);
+			State systemState = getPlatformAdmin(ci).getState(false);
 			while (nextArg != null) {
 				BundleDescription bundle = getBundleDescriptionFromToken(systemState, nextArg);
 				if (bundle == null) {
@@ -95,7 +113,96 @@ public class EclipseCommandProvider implements CommandProvider {
 				nextArg = ci.nextArgument();
 			}
 		} finally {
-			context.ungetService(platformAdminRef);
+			ungetPlatformAdmin();
 		}
+	}
+
+
+	public void _enableBundle(CommandInterpreter ci) throws Exception {
+		String nextArg = ci.nextArgument();
+		if (nextArg == null) {
+			ci.println(EclipseAdaptorMsg.ECLIPSE_CONSOLE_NO_BUNDLE_SPECIFIED_ERROR);
+			return;
+		}
+		try {
+			State systemState = getPlatformAdmin(ci).getState(false);
+			while (nextArg != null) {
+				BundleDescription bundleDesc = getBundleDescriptionFromToken(systemState, nextArg);
+				if (bundleDesc == null) {
+					ci.println(NLS.bind(EclipseAdaptorMsg.ECLIPSE_CONSOLE_CANNOT_FIND_BUNDLE_ERROR, nextArg));
+					nextArg = ci.nextArgument();
+					continue;
+				}
+				DisabledInfo[] infos = systemState.getDisabledInfos(bundleDesc);
+				for (int i = 0; i < infos.length; i++) {
+					getPlatformAdmin(ci).removeDisabledInfo(infos[i]);
+				}
+				nextArg = ci.nextArgument();
+			}
+		} finally {
+			ungetPlatformAdmin();
+		}
+	}
+
+	public void _disableBundle(CommandInterpreter ci) throws Exception {
+		String nextArg = ci.nextArgument();
+		if (nextArg == null) {
+			ci.println(EclipseAdaptorMsg.ECLIPSE_CONSOLE_NO_BUNDLE_SPECIFIED_ERROR);
+			return;
+		}
+		try {
+			State systemState = getPlatformAdmin(ci).getState(false);
+			while (nextArg != null) {
+				BundleDescription bundleDesc = getBundleDescriptionFromToken(systemState, nextArg);
+				if (bundleDesc == null) {
+					ci.println(NLS.bind(EclipseAdaptorMsg.ECLIPSE_CONSOLE_CANNOT_FIND_BUNDLE_ERROR, nextArg));
+					nextArg = ci.nextArgument();
+					continue;
+				}
+				DisabledInfo info = new DisabledInfo(POLICY_CONSOLE, EclipseAdaptorMsg.ECLIPSE_CONSOLE_BUNDLE_DISABLED_MESSAGE, bundleDesc);
+				getPlatformAdmin(ci).addDisabledInfo(info);
+				nextArg = ci.nextArgument();
+			}
+		} finally {
+			ungetPlatformAdmin();
+		}
+	}
+
+	public void _disabledBundles(CommandInterpreter ci) throws Exception {
+
+		try {
+			State systemState = getPlatformAdmin(ci).getState(false);
+			BundleDescription[] disabledBundles = systemState.getDisabledBundles();
+
+			ci.println(NLS.bind(EclipseAdaptorMsg.ECLIPSE_CONSOLE_DISABLED_COUNT_MESSAGE, String.valueOf(disabledBundles.length)));
+
+			if (disabledBundles.length > 0) {
+				ci.println();
+			}
+			for (int i = 0; i < disabledBundles.length; i++) {
+				DisabledInfo[] disabledInfos = systemState.getDisabledInfos(disabledBundles[i]);
+
+				ci.println(NLS.bind(EclipseAdaptorMsg.ECLIPSE_CONSOLE_DISABLED_BUNDLE_HEADER, formatBundleName(disabledBundles[i]), String.valueOf(disabledBundles[i].getBundleId())));
+				ci.print(NLS.bind(EclipseAdaptorMsg.ECLIPSE_CONSOLE_DISABLED_BUNDLE_REASON1, disabledInfos[0].getMessage(), disabledInfos[0].getPolicyName()));
+
+				for (int j = 1; j < disabledInfos.length; j++) {
+					ci.print(NLS.bind(EclipseAdaptorMsg.ECLIPSE_CONSOLE_DISABLED_BUNDLE_REASON1, disabledInfos[j].getMessage(), String.valueOf(disabledInfos[j].getPolicyName())));
+				}
+
+				ci.println();
+			}
+		} finally {
+			ungetPlatformAdmin();
+		}
+	}
+
+	private String formatBundleName(BundleDescription b) {
+		String label = b.getSymbolicName();
+		if (label == null || label.length() == 0)
+			label = b.toString();
+		else
+			label = label + "_" + b.getVersion(); //$NON-NLS-1$
+
+		return label;
 	}
 }
