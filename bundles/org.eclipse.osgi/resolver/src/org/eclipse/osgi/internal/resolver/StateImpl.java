@@ -586,8 +586,7 @@ public abstract class StateImpl implements State {
 				for (Enumeration keys = platformProperties[i].keys(); keys.hasMoreElements();) {
 					Object key = keys.nextElement();
 					Object value = platformProperties[i].get(key);
-					if (value instanceof String || value instanceof String[])
-						newPlatformProperties[i].put(key, value);
+					newPlatformProperties[i].put(key, value);
 				}
 			}
 			// make sure the bundle native code osgi properties have decent defaults
@@ -668,17 +667,18 @@ public abstract class StateImpl implements State {
 			return false;
 		if (origObj.getClass() != newObj.getClass())
 			return true;
-		if (origObj instanceof String)
-			return !origObj.equals(newObj);
-		String[] origProps = (String[]) origObj;
-		String[] newProps = (String[]) newObj;
-		if (origProps.length != newProps.length)
-			return true;
-		for (int i = 0; i < origProps.length; i++) {
-			if (!origProps[i].equals(newProps[i]))
+		if (origObj instanceof String[]) {
+			String[] origProps = (String[]) origObj;
+			String[] newProps = (String[]) newObj;
+			if (origProps.length != newProps.length)
 				return true;
+			for (int i = 0; i < origProps.length; i++) {
+				if (!origProps[i].equals(newProps[i]))
+					return true;
+			}
+			return false;
 		}
-		return false;
+		return !origObj.equals(newObj);
 	}
 
 	private boolean changedProps(Dictionary origProps, Dictionary newProps, String[] keys) {

@@ -2667,6 +2667,57 @@ public class StateResolverTest extends AbstractStateTest {
 		assertTrue("2.2", bCache.isResolved());
 	}
 
+	public void testPlatformPropertiesBug207500() throws BundleException, IOException {
+		State state = buildEmptyState();
+		int bundleID = 0;
+
+		Hashtable manifest = new Hashtable();
+
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "A");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put("Eclipse-PlatformFilter", "(test=value1)");
+		BundleDescription a = state.getFactory().createBundleDescription(state, manifest, "A", bundleID++);
+
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "B");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put("Eclipse-PlatformFilter", "(test=value2)");
+		BundleDescription b = state.getFactory().createBundleDescription(state, manifest, "B", bundleID++);
+
+		Dictionary props = new Hashtable();
+		props.put("test", new CatchAllValue("*"));
+
+		state.setPlatformProperties(props);
+		state.addBundle(a);
+		state.addBundle(b);
+		state.resolve();
+
+		// Both should resolve
+		assertTrue("1.1", a.isResolved());
+		assertTrue("1.2", b.isResolved());
+
+		BundleContext context = OSGiTestsActivator.getContext();
+		File stateCache = context.getDataFile("statecache");
+		stateCache.mkdirs();
+		StateObjectFactory.defaultFactory.writeState(state, stateCache);
+		state = StateObjectFactory.defaultFactory.readState(stateCache);
+		props = state.getPlatformProperties()[0];
+		// we do not persist custom properties
+		assertNull("2.0", props.get("test"));
+		BundleDescription aCache = state.getBundle("A", null);
+		BundleDescription bCache = state.getBundle("B", null);
+		assertTrue("2.1", aCache.isResolved());
+		assertTrue("2.2", bCache.isResolved());
+
+		// re-resolve without the custom value
+		state.setResolver(platformAdmin.getResolver());
+		state.resolve(false);
+		// both should fail to resolve
+		assertFalse("3.1", aCache.isResolved());
+		assertFalse("3.2", bCache.isResolved());
+	}
+
 	private ExportPackageDescription[] isConsistent(ExportPackageDescription[] pkgs1, ExportPackageDescription[] pkgs2) {
 		for (int i = 0; i < pkgs1.length; i++)
 			for (int j = 0; j < pkgs2.length; j++)
@@ -2815,6 +2866,16 @@ public class StateResolverTest extends AbstractStateTest {
 		state.resolve();
 		assertTrue("1.0", testNativeBundle.isResolved());
 
+	}
+
+	public static class CatchAllValue {
+		public CatchAllValue(String s) {
+			//do nothing
+		}
+
+		public boolean equals(Object obj) {
+			return true;
+		}
 	}
 }
 //testFragmentUpdateNoVersionChanged()

@@ -161,7 +161,7 @@ class StateWriter {
 	}
 
 	private void writePlatformProp(Object obj, DataOutputStream out) throws IOException {
-		if (obj == null)
+		if (!(obj instanceof String) && !(obj instanceof String[]))
 			out.writeByte(StateReader.NULL);
 		else {
 			out.writeByte(StateReader.OBJECT);
