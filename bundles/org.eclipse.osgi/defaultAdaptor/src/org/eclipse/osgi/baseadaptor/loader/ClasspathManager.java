@@ -449,7 +449,7 @@ public class ClasspathManager {
 
 	private Class findClassImpl(String name, ClasspathEntry classpathEntry, ClassLoadingStatsHook[] hooks) {
 		if (Debug.DEBUG && Debug.DEBUG_LOADER)
-			Debug.println("BundleClassLoader[" + data + "].findClass(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
+			Debug.println("BundleClassLoader[" + classpathEntry.getBundleFile() + "].findClass(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
 		String filename = name.replace('.', '/').concat(".class"); //$NON-NLS-1$
 		BundleEntry entry = classpathEntry.getBundleFile().getEntry(filename);
 		if (entry == null)
@@ -460,12 +460,12 @@ public class ClasspathManager {
 			classbytes = entry.getBytes();
 		} catch (IOException e) {
 			if (Debug.DEBUG && Debug.DEBUG_LOADER)
-				Debug.println("  IOException reading " + filename + " from " + data); //$NON-NLS-1$ //$NON-NLS-2$
+				Debug.println("  IOException reading " + filename + " from " + classpathEntry.getBundleFile()); //$NON-NLS-1$ //$NON-NLS-2$
 			return null;
 		}
 
 		if (Debug.DEBUG && Debug.DEBUG_LOADER) {
-			Debug.println("  read " + classbytes.length + " bytes from " + filename); //$NON-NLS-1$ //$NON-NLS-2$
+			Debug.println("  read " + classbytes.length + " bytes from " + classpathEntry.getBundleFile() + "/" + filename); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			Debug.println("  defining class " + name); //$NON-NLS-1$
 		}
 
