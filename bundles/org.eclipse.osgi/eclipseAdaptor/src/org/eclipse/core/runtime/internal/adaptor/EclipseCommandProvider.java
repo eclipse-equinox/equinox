@@ -22,7 +22,7 @@ import org.osgi.framework.ServiceReference;
  */
 public class EclipseCommandProvider implements CommandProvider {
 
-	private static final String POLICY_CONSOLE = "console"; //$NON-NLS-1$
+	private static final String POLICY_CONSOLE = "org.eclipse.osgi.framework.console"; //$NON-NLS-1$
 	private PlatformAdmin platformAdmin;
 	private BundleContext context;
 
@@ -116,7 +116,6 @@ public class EclipseCommandProvider implements CommandProvider {
 			ungetPlatformAdmin();
 		}
 	}
-
 
 	public void _enableBundle(CommandInterpreter ci) throws Exception {
 		String nextArg = ci.nextArgument();
