@@ -2667,7 +2667,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertTrue("2.2", bCache.isResolved());
 	}
 
-	public void testPlatformPropertiesBug207500() throws BundleException, IOException {
+	public void testPlatformPropertiesBug207500a() throws BundleException, IOException {
 		State state = buildEmptyState();
 		int bundleID = 0;
 
@@ -2716,6 +2716,31 @@ public class StateResolverTest extends AbstractStateTest {
 		// both should fail to resolve
 		assertFalse("3.1", aCache.isResolved());
 		assertFalse("3.2", bCache.isResolved());
+	}
+
+	public void testPlatformPropertiesBug207500b() throws BundleException, IOException {
+		State state = buildEmptyState();
+		int bundleID = 0;
+
+		Hashtable manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "a");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		manifest.put(Constants.BUNDLE_NATIVECODE, "libwrapper-linux-x86-32.so; wrapper-linux-x86-32; osname=linux; processor=x86");
+		BundleDescription a = state.getFactory().createBundleDescription(state, manifest, "A", bundleID++);
+
+		Dictionary props = new Hashtable();
+		props.put("osgi.os", new CatchAllValue("*"));
+		props.put("osgi.arch", new CatchAllValue("*"));
+		props.put("osgi.lang", new CatchAllValue("*"));
+		props.put("osgi.ws", new CatchAllValue("*"));
+
+		state.setPlatformProperties(props);
+		state.addBundle(a);
+		state.resolve();
+
+		// should resolve
+		assertTrue("1.1", a.isResolved());
 	}
 
 	private ExportPackageDescription[] isConsistent(ExportPackageDescription[] pkgs1, ExportPackageDescription[] pkgs2) {

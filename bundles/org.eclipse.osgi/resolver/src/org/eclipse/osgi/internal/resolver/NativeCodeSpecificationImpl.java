@@ -10,8 +10,7 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
 
-import java.util.Collection;
-import java.util.Dictionary;
+import java.util.*;
 import org.eclipse.osgi.framework.internal.core.AliasMapper;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.service.resolver.*;
@@ -59,21 +58,23 @@ public class NativeCodeSpecificationImpl extends VersionConstraintImpl implement
 			if (osNames.length == 0)
 				match = true;
 			else {
-				String platformOS = (String) platformProps[i].get(Constants.FRAMEWORK_OS_NAME);
-				Object aliasedPlatformOS = platformOS == null ? null : aliasMapper.aliasOSName(platformOS);
-				String[] platformOSes;
+				Object platformOS = platformProps[i].get(Constants.FRAMEWORK_OS_NAME);
+				Object aliasedPlatformOS = platformOS == null || !(platformOS instanceof String) ? platformOS : aliasMapper.aliasOSName((String) platformOS);
+				Object[] platformOSes;
 				if (aliasedPlatformOS instanceof Collection)
-					platformOSes = (String[]) ((Collection) aliasedPlatformOS).toArray(new String[((Collection) aliasedPlatformOS).size()]);
+					platformOSes = ((Collection) aliasedPlatformOS).toArray();
 				else
-					platformOSes = aliasedPlatformOS == null ? new String[0] : new String[] {(String) aliasedPlatformOS};
+					platformOSes = aliasedPlatformOS == null ? new Object[0] : new Object[] {aliasedPlatformOS};
 				for (int j = 0; j < osNames.length && !match; j++) {
 					Object aliasedName = aliasMapper.aliasOSName(osNames[j]);
 					for (int k = 0; k < platformOSes.length; k++) {
 						if (aliasedName instanceof String) {
-							if (aliasedName.equals(platformOSes[k]))
+							if (platformOSes[k].equals(aliasedName))
 								match = true;
-						} else if (((Collection) aliasedName).contains(platformOSes[k])) {
-							match = true;
+						} else {
+							for (Iterator iAliases = ((Collection) aliasedName).iterator(); iAliases.hasNext() && !match;)
+								if (platformOSes[k].equals(iAliases.next()))
+									match = true;
 						}
 					}
 				}
@@ -86,10 +87,10 @@ public class NativeCodeSpecificationImpl extends VersionConstraintImpl implement
 			if (processors.length == 0)
 				match = true;
 			else {
-				String platformProcessor = (String) platformProps[i].get(Constants.FRAMEWORK_PROCESSOR);
+				Object platformProcessor = platformProps[i].get(Constants.FRAMEWORK_PROCESSOR);
 				for (int j = 0; j < processors.length && !match; j++) {
 					String aliasedProcessor = aliasMapper.aliasProcessor(processors[j]);
-					if (aliasedProcessor.equals(platformProcessor))
+					if (platformProcessor.equals(aliasedProcessor))
 						match = true;
 				}
 			}
@@ -101,9 +102,9 @@ public class NativeCodeSpecificationImpl extends VersionConstraintImpl implement
 			if (languages.length == 0l)
 				match = true;
 			else {
-				String platformLanguage = (String) platformProps[i].get(Constants.FRAMEWORK_LANGUAGE);
+				Object platformLanguage = platformProps[i].get(Constants.FRAMEWORK_LANGUAGE);
 				for (int j = 0; j < languages.length && !match; j++) {
-					if (languages[j].equalsIgnoreCase(platformLanguage))
+					if ((platformLanguage instanceof String) ? ((String) platformLanguage).equalsIgnoreCase(languages[j]) : platformLanguage.equals(languages[j]))
 						match = true;
 				}
 			}
