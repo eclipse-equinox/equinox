@@ -265,8 +265,13 @@ int launchJavaVM( _TCHAR* args[] )
 
 int startJavaVM( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[] )
 {
-	if (secondThread == 0)
+	if (secondThread == 0) {
+		/* Set an environment variable that tells the AWT (if started) we started the JVM on the main thread. */
+		char firstThreadEnvVariable[80];
+		sprintf(firstThreadEnvVariable, "JAVA_STARTED_ON_FIRST_THREAD_%d", getpid());
+		setenv(firstThreadEnvVariable, "1", 1);
 		return startJavaJNI(libPath, vmArgs, progArgs);
+	}
 
 	/* else, --launcher.secondThread was specified, create a new thread and run the 
 	 * vm on it.  This main thread will run the CFRunLoop 
