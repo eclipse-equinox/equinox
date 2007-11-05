@@ -484,16 +484,15 @@ public final class StorageManager {
 		if (stamp == tableStamp || stamp == -1)
 			return;
 		Properties diskTable = new Properties();
+		InputStream input = new ReliableFileInputStream(tableFile);
 		try {
-			InputStream input;
-			input = new ReliableFileInputStream(tableFile);
+			diskTable.load(input);
+		} finally {
 			try {
-				diskTable.load(input);
-			} finally {
 				input.close();
+			} catch (IOException e) {
+				// ignore
 			}
-		} catch (IOException e) {
-			throw e; // rethrow the exception, we have nothing to add here
 		}
 		tableStamp = stamp;
 		for (Enumeration e = diskTable.keys(); e.hasMoreElements();) {
@@ -546,18 +545,14 @@ public final class StorageManager {
 			props.put(file, value);
 		}
 		ReliableFileOutputStream fileStream = new ReliableFileOutputStream(tableFile);
+		boolean error = true;
 		try {
-			boolean error = true;
-			try {
-				props.store(fileStream, "safe table"); //$NON-NLS-1$
-				fileStream.close();
-				error = false;
-			} finally {
-				if (error)
-					fileStream.abort();
-			}
-		} catch (IOException e) {
-			throw new IOException(EclipseAdaptorMsg.fileManager_couldNotSave);
+			props.store(fileStream, "safe table"); //$NON-NLS-1$
+			fileStream.close();
+			error = false;
+		} finally {
+			if (error)
+				fileStream.abort();
 		}
 		tableStamp = ReliableFile.lastModifiedVersion(tableFile);
 	}
@@ -640,10 +635,6 @@ public final class StorageManager {
 					}
 				}
 			}
-		} catch (IOException e) {
-			//If the exception comes from the updateTable(), there has been a problem in reading the file.		 
-			//If an exception occured in the save, then the table won't be up to date!
-			throw e;
 		} finally {
 			release();
 		}

@@ -25,7 +25,6 @@ public class EclipseAdaptorMsg extends NLS {
 	public static String ECLIPSE_CACHEDMANIFEST_UNEXPECTED_EXCEPTION;
 
 	public static String fileManager_cannotLock;
-	public static String fileManager_couldNotSave;
 	public static String fileManager_updateFailed;
 	public static String fileManager_illegalInReadOnlyMode;
 	public static String fileManager_notOpen;
