@@ -1261,6 +1261,8 @@ public class BaseStorage implements SynchronousBundleListener {
 		void requestSave() {
 			State systemState = adaptor.getState();
 			synchronized (systemState) {
+				if (shutdown)
+					return; // do not start another thread if we have already shutdown
 				lastSaveTime = System.currentTimeMillis();
 				if (runningThread == null) {
 					runningThread = new Thread(this, "State Saver"); //$NON-NLS-1$
