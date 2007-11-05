@@ -21,13 +21,13 @@ import org.eclipse.osgi.framework.eventmgr.*;
  * file limit.
  * @since 3.2
  */
-public class MRUBundleFileList implements EventDispatcher{
+public class MRUBundleFileList implements EventDispatcher {
 	private static final String PROP_FILE_LIMIT = "osgi.bundlefile.limit"; //$NON-NLS-1$
 	private static final int MIN = 10;
 	private static final int PROP_FILE_LIMIT_VALUE;
 	private static final ThreadLocal closingBundleFile = new ThreadLocal();
 	static {
-		int propValue = 50; // TODO change this to "0" before the final release (see bug 194943)
+		int propValue = 0; // disable by default
 		try {
 			String prop = BundleFile.secureAction.getProperty(PROP_FILE_LIMIT);
 			if (prop != null)
@@ -83,7 +83,7 @@ public class MRUBundleFileList implements EventDispatcher{
 		BundleFile toRemove = null;
 		synchronized (this) {
 			if (bundleFile.getMruIndex() >= 0)
-				return;  // do nothing; someone is trying add a bundleFile that is already in an MRU list
+				return; // do nothing; someone is trying add a bundleFile that is already in an MRU list
 			int index = 0; // default to the first slot
 			if (numOpen < fileLimit) {
 				// numOpen does not exceed the fileLimit
@@ -103,7 +103,7 @@ public class MRUBundleFileList implements EventDispatcher{
 						index = i;
 				toRemove = bundleFileList[index];
 				if (toRemove.getMruIndex() != index)
-					throw new IllegalStateException("The BundleFile has the incorrect mru index: " + index  + " != " + toRemove.getMruIndex());  //$NON-NLS-1$//$NON-NLS-2$
+					throw new IllegalStateException("The BundleFile has the incorrect mru index: " + index + " != " + toRemove.getMruIndex()); //$NON-NLS-1$//$NON-NLS-2$
 				removeInternal(toRemove);
 			}
 			// found an index to place to bundleFile to be opened
