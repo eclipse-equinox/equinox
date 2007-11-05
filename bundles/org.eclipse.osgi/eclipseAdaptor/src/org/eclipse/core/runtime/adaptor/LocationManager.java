@@ -101,7 +101,7 @@ public class LocationManager {
 		// do install location initialization first since others may depend on it
 		// assumes that the property is already set
 		installLocation = buildLocation(PROP_INSTALL_AREA, null, "", true); //$NON-NLS-1$
-		
+
 		Location temp = buildLocation(PROP_USER_AREA_DEFAULT, null, "", false); //$NON-NLS-1$
 		URL defaultLocation = temp == null ? null : temp.getURL();
 		if (defaultLocation == null)
@@ -214,10 +214,13 @@ public class LocationManager {
 		//    exist, use "eclipse" as the application-id.
 
 		URL installURL = computeInstallConfigurationLocation();
-		if (installURL != null) {
+		if (installURL != null && "file".equals(installURL.getProtocol())) { //$NON-NLS-1$
 			File installDir = new File(installURL.getFile());
-			if ("file".equals(installURL.getProtocol()) && AdaptorUtil.canWrite(installDir)) //$NON-NLS-1$
-				return new File(installDir, CONFIG_DIR).getAbsolutePath();
+			File defaultConfigDir = new File(installDir, CONFIG_DIR);
+			if (!defaultConfigDir.exists())
+				defaultConfigDir.mkdirs();
+			if (defaultConfigDir.exists() && AdaptorUtil.canWrite(defaultConfigDir))
+				return defaultConfigDir.getAbsolutePath();
 		}
 		// We can't write in the eclipse install dir so try for some place in the user's home dir
 		return computeDefaultUserAreaLocation(CONFIG_DIR);
@@ -234,16 +237,16 @@ public class LocationManager {
 			return null;
 		File installDir = new File(installURL.getFile());
 		// compute an install dir hash to prevent configuration area collisions with other eclipse installs
-        int hashCode;
-        try {
-        	hashCode = installDir.getCanonicalPath().hashCode();
-        } catch (IOException ioe) {
-        	// fall back to absolute path
-        	hashCode = installDir.getAbsolutePath().hashCode();
-        }
-       	if (hashCode < 0)
-       		hashCode = -(hashCode);
-       	String installDirHash = String.valueOf(hashCode);
+		int hashCode;
+		try {
+			hashCode = installDir.getCanonicalPath().hashCode();
+		} catch (IOException ioe) {
+			// fall back to absolute path
+			hashCode = installDir.getAbsolutePath().hashCode();
+		}
+		if (hashCode < 0)
+			hashCode = -(hashCode);
+		String installDirHash = String.valueOf(hashCode);
 
 		String appName = "." + ECLIPSE; //$NON-NLS-1$
 		File eclipseProduct = new File(installDir, PRODUCT_SITE_MARKER);
@@ -261,13 +264,13 @@ public class LocationManager {
 			} catch (IOException e) {
 				// Do nothing if we get an exception.  We will default to a standard location 
 				// in the user's home dir.
-            	// add the hash to help prevent collisions
-            	appName += File.separator + installDirHash;
+				// add the hash to help prevent collisions
+				appName += File.separator + installDirHash;
 			}
 		} else {
-        	// add the hash to help prevent collisions
-        	appName += File.separator + installDirHash;
-        }
+			// add the hash to help prevent collisions
+			appName += File.separator + installDirHash;
+		}
 		String userHome = FrameworkProperties.getProperty(PROP_USER_HOME);
 		return new File(userHome, appName + "/" + pathAppendage).getAbsolutePath(); //$NON-NLS-1$
 	}
