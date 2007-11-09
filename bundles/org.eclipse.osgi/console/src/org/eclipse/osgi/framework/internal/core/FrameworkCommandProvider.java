@@ -1810,7 +1810,7 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 			if (platformAdminRef != null) {
 				platAdmin = (PlatformAdmin) context.getService(platformAdminRef);
 				if (platAdmin != null) {
-					State state = platAdmin.getState();
+					State state = platAdmin.getState(false);
 					BundleDescription bundleDesc = state.getBundle(bundle.getBundleId());
 					DisabledInfo[] disabledInfos = state.getDisabledInfos(bundleDesc);
 					if ((disabledInfos != null) && (disabledInfos.length != 0)) {
