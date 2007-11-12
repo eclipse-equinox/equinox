@@ -80,6 +80,7 @@
 #define _fgetts fgets
 #define _stat stat
 #define _stprintf sprintf
+#define _ftprintf fprintf
 #define _stscanf sscanf
 #define _tcscat strcat
 #define _tcschr strchr
