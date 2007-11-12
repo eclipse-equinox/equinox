@@ -18,14 +18,14 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 
 /**
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class ServiceEventAdapter extends EventAdapter {
 	// constants for Event topic substring
-	public static final String HEADER = "org/osgi/framework/ServiceEvent";
-	public static final String UNREGISTERING = "UNREGISTERING";
-	public static final String MODIFIED = "MODIFIED";
-	public static final String REGISTERED = "REGISTERED";
+	public static final String HEADER = "org/osgi/framework/ServiceEvent"; //$NON-NLS-1$
+	public static final String UNREGISTERING = "UNREGISTERING"; //$NON-NLS-1$
+	public static final String MODIFIED = "MODIFIED"; //$NON-NLS-1$
+	public static final String REGISTERED = "REGISTERED"; //$NON-NLS-1$
 	private ServiceEvent event;
 
 	public ServiceEventAdapter(ServiceEvent event, EventAdmin eventAdmin) {

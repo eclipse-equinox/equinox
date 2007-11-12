@@ -17,18 +17,18 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 
 /**
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class BundleEventAdapter extends EventAdapter {
 	// constants for Event topic substring
-	public static final String HEADER = "org/osgi/framework/BundleEvent";
-	public static final String INSTALLED = "INSTALLED";
-	public static final String STOPPED = "STOPPED";
-	public static final String STARTED = "STARTED";
-	public static final String UPDATED = "UPDATED";
-	public static final String UNINSTALLED = "UNINSTALLED";
-	public static final String RESOLVED = "RESOLVED";
-	public static final String UNRESOLVED = "UNRESOLVED";
+	public static final String HEADER = "org/osgi/framework/BundleEvent"; //$NON-NLS-1$
+	public static final String INSTALLED = "INSTALLED"; //$NON-NLS-1$
+	public static final String STOPPED = "STOPPED"; //$NON-NLS-1$
+	public static final String STARTED = "STARTED"; //$NON-NLS-1$
+	public static final String UPDATED = "UPDATED"; //$NON-NLS-1$
+	public static final String UNINSTALLED = "UNINSTALLED"; //$NON-NLS-1$
+	public static final String RESOLVED = "RESOLVED"; //$NON-NLS-1$
+	public static final String UNRESOLVED = "UNRESOLVED"; //$NON-NLS-1$
 	private BundleEvent event;
 
 	public BundleEventAdapter(BundleEvent event, EventAdmin eventAdmin) {
@@ -66,16 +66,15 @@ public class BundleEventAdapter extends EventAdapter {
 				break;
 			default :
 				// unknown events must be send as their decimal value
-				typename = "" + event.getType();
+				typename = Integer.toString(event.getType());
 		}
 		String topic = HEADER + Constants.TOPIC_SEPARATOR + typename;
 		Hashtable properties = new Hashtable();
 		Bundle bundle = event.getBundle();
 		if (bundle == null) {
-			throw new RuntimeException("BundleEvent.getBundle() returns null");
-		} else {
-			putBundleProperties(properties, bundle);
+			throw new RuntimeException("BundleEvent.getBundle() returns null"); //$NON-NLS-1$
 		}
+		putBundleProperties(properties, bundle);
 		properties.put(Constants.EVENT, event);
 		Event converted = new Event(topic, properties);
 		return converted;

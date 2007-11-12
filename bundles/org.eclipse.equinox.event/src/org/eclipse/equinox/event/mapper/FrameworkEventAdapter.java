@@ -18,15 +18,15 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 
 /**
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class FrameworkEventAdapter extends EventAdapter {
 	// constants for Event topic substring
-	public static final String HEADER = "org/osgi/framework/FrameworkEvent";
-	public static final String STARTLEVEL_CHANGED = "STARTLEVEL_CHANGED";
-	public static final String STARTED = "STARTED";
-	public static final String PACKAGES_REFRESHED = "PACKAGES_REFRESHED";
-	public static final String ERROR = "ERROR";
+	public static final String HEADER = "org/osgi/framework/FrameworkEvent"; //$NON-NLS-1$
+	public static final String STARTLEVEL_CHANGED = "STARTLEVEL_CHANGED"; //$NON-NLS-1$
+	public static final String STARTED = "STARTED"; //$NON-NLS-1$
+	public static final String PACKAGES_REFRESHED = "PACKAGES_REFRESHED"; //$NON-NLS-1$
+	public static final String ERROR = "ERROR"; //$NON-NLS-1$
 	protected FrameworkEvent event;
 
 	public FrameworkEventAdapter(FrameworkEvent event, EventAdmin eventAdmin) {

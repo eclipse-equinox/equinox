@@ -18,7 +18,7 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 
 /**
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public abstract class EventAdapter {
 	final EventAdmin eventAdmin;
@@ -77,11 +77,11 @@ public abstract class EventAdapter {
 		properties.put(Constants.SERVICE_ID, ref.getProperty(org.osgi.framework.Constants.SERVICE_ID));
 		Object o = ref.getProperty(org.osgi.framework.Constants.SERVICE_PID);
 		if ((o != null) && (o instanceof String)) {
-			properties.put(Constants.SERVICE_PID, (String) o);
+			properties.put(Constants.SERVICE_PID, o);
 		}
 		Object o2 = ref.getProperty(org.osgi.framework.Constants.OBJECTCLASS);
 		if ((o2 != null) && (o2 instanceof String[])) {
-			properties.put(Constants.SERVICE_OBJECTCLASS, (String[]) o2);
+			properties.put(Constants.SERVICE_OBJECTCLASS, o2);
 		}
 	}
 
