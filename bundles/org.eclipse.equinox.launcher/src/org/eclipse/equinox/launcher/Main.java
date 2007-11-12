@@ -188,6 +188,7 @@ public class Main {
 
 	private static final String PROP_EXITCODE = "eclipse.exitcode"; //$NON-NLS-1$
 	private static final String PROP_EXITDATA = "eclipse.exitdata"; //$NON-NLS-1$
+	private static final String PROP_LAUNCHER = "eclipse.launcher"; //$NON-NLS-1$
 
 	private static final String PROP_VM = "eclipse.vm"; //$NON-NLS-1$
 	private static final String PROP_VMARGS = "eclipse.vmargs"; //$NON-NLS-1$
@@ -1398,6 +1399,7 @@ public class Main {
 			if (args[i - 1].equalsIgnoreCase(LAUNCHER)) {
 				//not doing anything with this right now, but still consume it
 				//launcher = arg;
+				System.getProperties().put(PROP_LAUNCHER, arg);
 				found = true;
 			}
 
