@@ -138,6 +138,13 @@
 		</copy>
 		<chmod perm="755" dir="${feature.base}/solaris.gtk.sparc/${collectingFolder}" includes="${launcherName}" /> 
 	</target>
+	<target name="rootFilessolaris_motif_sparc">
+		<mkdir dir="${feature.base}/solaris.motif.sparc/${collectingFolder}"/>
+		<copy todir="${feature.base}/solaris.motif.sparc/${collectingFolder}" failonerror="true" overwrite="true">
+			<fileset dir="${basedir}/contributed/motif/solaris/sparc" includes="**"			/>
+		</copy>
+		<chmod perm="755" dir="${feature.base}/solaris.motif.sparc/${collectingFolder}" includes="${launcherName}" /> 
+	</target>
 	<target name="rootFilesaix_motif_ppc">
 		<mkdir dir="${feature.base}/aix.motif.ppc/${collectingFolder}"/>
 		<copy todir="${feature.base}/aix.motif.ppc/${collectingFolder}" failonerror="true" overwrite="true">
@@ -184,6 +191,7 @@
 		<antcall target="rootFileslinux_gtk_ia64"/>
 		<antcall target="rootFileslinux_motif_x86"/>
 		<antcall target="rootFilessolaris_gtk_sparc"/>
+		<antcall target="rootFilessolaris_motif_sparc"/>
 		<antcall target="rootFilesaix_motif_ppc"/>
 		<antcall target="rootFileshpux_motif_PA_RISC"/>
 		<antcall target="rootFileshpux_motif_ia64"/>

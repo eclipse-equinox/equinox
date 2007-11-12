@@ -28,6 +28,16 @@
          install-size="0"
          version="0.0.0"
          fragment="true"/>
+            
+	<plugin
+         id="org.eclipse.equinox.launcher.motif.solaris.sparc"
+         os="solaris"
+         ws="motif"
+         arch="sparc"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         fragment="true"/>
 
    <plugin
          id="org.eclipse.equinox.launcher.carbon.macosx"
