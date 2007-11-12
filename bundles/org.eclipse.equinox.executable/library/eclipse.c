@@ -376,12 +376,13 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
     programDir = getProgramDir();
     if (programDir == NULL)
     {
-    	if (!suppressErrors) {
-	        errorMsg = malloc( (_tcslen(homeMsg) + _tcslen(officialName) + 10) * sizeof(_TCHAR) );
-	        _stprintf( errorMsg, homeMsg, officialName );
-	        displayMessage( officialName, errorMsg );
-	        free( errorMsg );
-    	}
+        errorMsg = malloc( (_tcslen(homeMsg) + _tcslen(officialName) + 10) * sizeof(_TCHAR) );
+        _stprintf( errorMsg, homeMsg, officialName );
+        if (!suppressErrors)
+        	displayMessage( officialName, errorMsg );
+        else
+        	_ftprintf(stderr, _T_ECLIPSE("%s:\n%s\n"), officialName, errorMsg); 
+        free( errorMsg );
     	exit( 1 );
     }
 
@@ -390,12 +391,13 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
     launchMode = determineVM(&msg);
     if (launchMode == -1) {
     	/* problem */
-    	if (!suppressErrors) {
-	    	errorMsg = malloc((_tcslen(noVMMsg) + _tcslen(officialName) + _tcslen(msg) + 1) * sizeof(_TCHAR));
-	    	_stprintf( errorMsg, noVMMsg, officialName, msg );
-	    	displayMessage( officialName, errorMsg );
-	    	free( errorMsg );
-    	}
+    	errorMsg = malloc((_tcslen(noVMMsg) + _tcslen(officialName) + _tcslen(msg) + 1) * sizeof(_TCHAR));
+    	_stprintf( errorMsg, noVMMsg, officialName, msg );
+    	if (!suppressErrors)
+    		displayMessage( officialName, errorMsg );
+    	else
+    		_ftprintf(stderr, _T_ECLIPSE("%s:\n%s\n"), officialName, errorMsg);
+    	free( errorMsg );
     	free( msg );
     	exit(1);
 	}	
@@ -403,12 +405,13 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
 	/* Find the startup.jar */
 	jarFile = findStartupJar();
 	if(jarFile == NULL) {
-		if (!suppressErrors) {
-			errorMsg = malloc( (_tcslen(startupMsg) + _tcslen(officialName) + 10) * sizeof(_TCHAR) );
-	        _stprintf( errorMsg, startupMsg, officialName );
-	        displayMessage( officialName, errorMsg );
-	        free( errorMsg );
-		}
+		errorMsg = malloc( (_tcslen(startupMsg) + _tcslen(officialName) + 10) * sizeof(_TCHAR) );
+        _stprintf( errorMsg, startupMsg, officialName );
+        if (!suppressErrors)
+    		displayMessage( officialName, errorMsg );
+    	else
+    		_ftprintf(stderr, _T_ECLIPSE("%s:\n%s\n"), officialName, errorMsg);
+        free( errorMsg );
     	exit( 1 );
 	}
 
@@ -429,8 +432,11 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
     
     /* not using JNI launching, need some shared data */
     if (launchMode == LAUNCH_EXE && createSharedData( &sharedID, MAX_SHARED_LENGTH )) {
-        if (debug && !suppressErrors) {
-   			displayMessage( officialName, shareMsg );
+        if (debug) {
+        	if (!suppressErrors) 
+        		displayMessage( officialName, shareMsg );
+        	else
+           		_ftprintf(stderr, _T_ECLIPSE("%s:\n%s\n"), officialName, shareMsg);
         }
     }
     
@@ -497,49 +503,60 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
 	                }
 	            } else {
 	            	running = 0;
-	                if (debug && !suppressErrors) displayMessage( officialName, shareMsg );
+	                if (debug) {
+	                	if (!suppressErrors) 
+        	        		displayMessage( officialName, shareMsg );
+        	        	else
+        	           		_ftprintf(stderr, _T_ECLIPSE("%s:\n%s\n"), officialName, shareMsg);
+	                }
 	            }
 	            break;
 			default: {
 				_TCHAR *title = _tcsdup(officialName);
 	            running = 0;
-	            if(!suppressErrors) {
-		            errorMsg = NULL;
-		            if (launchMode == LAUNCH_EXE) {
-		            	if (exitData != NULL) free(exitData);
-		        		if (getSharedData( sharedID, &exitData ) != 0)
-		        			exitData = NULL;
-		        	}
-		            if (exitData != 0) {
-		            	errorMsg = exitData;
-		            	exitData = NULL;
-		                if (_tcslen( errorMsg ) == 0) {
-		            	    free( errorMsg );
-		            	    errorMsg = NULL;
-		                } else {
-		                    _TCHAR *str;
-		                	if (_tcsncmp(errorMsg, _T_ECLIPSE("<title>"), _tcslen(_T_ECLIPSE("<title>"))) == 0) {
-								str = _tcsstr(errorMsg, _T_ECLIPSE("</title>"));
-								if (str != NULL) {
-									free( title );
-									str[0] = _T_ECLIPSE('\0');
-									title = _tcsdup( errorMsg + _tcslen(_T_ECLIPSE("<title>")) );
-									str = _tcsdup( str + _tcslen(_T_ECLIPSE("</title>")) );
-									free( errorMsg );
-									errorMsg = str;
-								}
-		                	}
-		                }
-		            } else {
-		                if (debug) displayMessage( title, shareMsg );
-		            }
-		            if (errorMsg == NULL) {
-		                errorMsg = malloc( (_tcslen(exitMsg) + _tcslen(msg) + 10) * sizeof(_TCHAR) );
-		                _stprintf( errorMsg, exitMsg, exitCode, msg );
-		            }
-		            displayMessage( title, errorMsg );
-		            free( errorMsg );
+	            errorMsg = NULL;
+	            if (launchMode == LAUNCH_EXE) {
+	            	if (exitData != NULL) free(exitData);
+	        		if (getSharedData( sharedID, &exitData ) != 0)
+	        			exitData = NULL;
+	        	}
+	            if (exitData != 0) {
+	            	errorMsg = exitData;
+	            	exitData = NULL;
+	                if (_tcslen( errorMsg ) == 0) {
+	            	    free( errorMsg );
+	            	    errorMsg = NULL;
+	                } else {
+	                    _TCHAR *str;
+	                	if (_tcsncmp(errorMsg, _T_ECLIPSE("<title>"), _tcslen(_T_ECLIPSE("<title>"))) == 0) {
+							str = _tcsstr(errorMsg, _T_ECLIPSE("</title>"));
+							if (str != NULL) {
+								free( title );
+								str[0] = _T_ECLIPSE('\0');
+								title = _tcsdup( errorMsg + _tcslen(_T_ECLIPSE("<title>")) );
+								str = _tcsdup( str + _tcslen(_T_ECLIPSE("</title>")) );
+								free( errorMsg );
+								errorMsg = str;
+							}
+	                	}
+	                }
+	            } else {
+	            	 if (debug) {
+	                	if (!suppressErrors) 
+        	        		displayMessage( title, shareMsg );
+        	        	else
+        	           		_ftprintf(stderr, _T_ECLIPSE("%s:\n%s\n"), title, shareMsg);
+	                }
 	            }
+	            if (errorMsg == NULL) {
+	                errorMsg = malloc( (_tcslen(exitMsg) + _tcslen(msg) + 10) * sizeof(_TCHAR) );
+	                _stprintf( errorMsg, exitMsg, exitCode, msg );
+	            }
+	            if (!suppressErrors)
+	            	displayMessage( title, errorMsg );
+	            else 
+	            	_ftprintf(stderr, _T_ECLIPSE("%s:\n%s\n"), title, errorMsg);
+	            free( errorMsg );
 	            free( title );
 	            break;
 	        }

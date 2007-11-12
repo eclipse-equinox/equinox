@@ -177,12 +177,13 @@ int main( int argc, _TCHAR* argv[] )
 	if(library != NULL)
 		handle = loadLibrary(library);
 	if(handle == NULL) {
-		if (!suppressErrors) {
-			errorMsg = malloc( (_tcslen(libraryMsg) + _tcslen(officialName) + 10) * sizeof(_TCHAR) );
-	        _stprintf( errorMsg, libraryMsg, officialName );
-	        displayMessage( officialName, errorMsg );
-	        free( errorMsg );
-		}
+		errorMsg = malloc( (_tcslen(libraryMsg) + _tcslen(officialName) + 10) * sizeof(_TCHAR) );
+        _stprintf( errorMsg, libraryMsg, officialName );
+        if (!suppressErrors)
+        	displayMessage( officialName, errorMsg );
+        else
+        	_ftprintf(stderr, _T_ECLIPSE("%s:\n%s\n"), officialName, errorMsg);
+        free( errorMsg );
     	exit( 1 );
 	}
 
@@ -201,6 +202,8 @@ int main( int argc, _TCHAR* argv[] )
 	else { 
 		if(!suppressErrors)
 			displayMessage(officialName, entryMsg);
+		else 
+			_ftprintf(stderr, _T_ECLIPSE("%s:\n%s\n"), officialName, entryMsg);
 		exit(1);
 	}
 	unloadLibrary(handle);
