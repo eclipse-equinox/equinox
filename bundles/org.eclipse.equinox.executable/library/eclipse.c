@@ -319,7 +319,7 @@ static int nEEargs = 0;
 
 /* Local methods */
 static void     parseArgs( int* argc, _TCHAR* argv[] );
-static void     getVMCommand( int argc, _TCHAR* argv[], _TCHAR **vmArgv[], _TCHAR **progArgv[] );
+static void     getVMCommand( int launchMode, int argc, _TCHAR* argv[], _TCHAR **vmArgv[], _TCHAR **progArgv[] );
 static int 		determineVM(_TCHAR** msg);
 static int 		processEEProps(_TCHAR* eeFile);
 static _TCHAR** buildLaunchCommand( _TCHAR* program, _TCHAR** vmArgs, _TCHAR** progArgs );
@@ -449,7 +449,7 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
 	
     /* Get the command to start the Java VM. */
     userVMarg = vmArgs;
-    getVMCommand( argc, argv, &vmCommandArgs, &progCommandArgs );
+    getVMCommand( launchMode, argc, argv, &vmCommandArgs, &progCommandArgs );
 	
     if (launchMode == LAUNCH_EXE) {
     	vmCommand = buildLaunchCommand(javaVM, vmCommandArgs, progCommandArgs);
@@ -714,7 +714,7 @@ static void adjustVMArgs( _TCHAR *vm, _TCHAR **vmArgv[] ) {
  * 
  * Arguments are split into 2: vm arguments and program arguments
  */
-static void getVMCommand( int argc, _TCHAR* argv[], _TCHAR **vmArgv[], _TCHAR **progArgv[] )
+static void getVMCommand( int launchMode, int argc, _TCHAR* argv[], _TCHAR **vmArgv[], _TCHAR **progArgv[] )
 {
 	_TCHAR** vmArg;
     int     nReqVMarg = 0;
@@ -725,9 +725,9 @@ static void getVMCommand( int argc, _TCHAR* argv[], _TCHAR **vmArgv[], _TCHAR **
     int     dst;
 
 	/* If the user specified "-vmargs", add them instead of the default VM args. */
-	vmArg = (userVMarg != NULL) ? userVMarg : getArgVM( javaVM != NULL ? javaVM : jniLib ); 
+	vmArg = (userVMarg != NULL) ? userVMarg : getArgVM( (launchMode == LAUNCH_JNI) ? jniLib : javaVM ); 
  	
-	adjustVMArgs(javaVM != NULL ? javaVM : jniLib, &vmArg);
+	adjustVMArgs((launchMode == LAUNCH_JNI) ? jniLib : javaVM, &vmArg);
 	
  	/* Calculate the number of VM arguments. */
  	while (vmArg[ nVMarg ] != NULL)
