@@ -32,11 +32,12 @@ public class Activator implements BundleActivator, ServiceFactory, ServiceTracke
 	protected PreferencesService prefs;
 	protected BundleContext context;
 	protected ServiceTracker prefsTracker;
+	protected UserAdminEventAdapter eventAdapter;
 
-    public Activator() {
-    	//a public constructor is required for a BundleActivator
-    }
-	
+	public Activator() {
+		//a public constructor is required for a BundleActivator
+	}
+
 	/**
 	 * Required by BundleActivator Interface.
 	 */
@@ -44,16 +45,23 @@ public class Activator implements BundleActivator, ServiceFactory, ServiceTracke
 		this.context = context_;
 		prefsTracker = new ServiceTracker(context, PreferencesService.class.getName(), this);
 		prefsTracker.open();
+
+		eventAdapter = new UserAdminEventAdapter(context_);
+		eventAdapter.start();
 	}
 
 	/**
 	 * Required by BundleActivator Interface.
 	 */
 	public void stop(BundleContext context_) throws Exception {
-		prefsTracker.close();
-        unregisterUserAdminService();
-	}
+		if (eventAdapter != null) {
+			eventAdapter.stop();
+			eventAdapter = null;
+		}
 
+		prefsTracker.close();
+		unregisterUserAdminService();
+	}
 
 	public Object getService(Bundle bundle, ServiceRegistration registration_) {
 		userAdmin.setServiceReference(registration_.getReference());
@@ -61,7 +69,7 @@ public class Activator implements BundleActivator, ServiceFactory, ServiceTracke
 	}
 
 	public void ungetService(Bundle bundle, ServiceRegistration registration_, Object service) {
-	   //do nothing
+		//do nothing
 	}
 
 	public Object addingService(ServiceReference reference) {
@@ -78,7 +86,7 @@ public class Activator implements BundleActivator, ServiceFactory, ServiceTracke
 	}
 
 	public void modifiedService(ServiceReference reference, Object service) {
-            // do nothing
+		// do nothing
 	}
 
 	public void removedService(ServiceReference reference, Object service) {
@@ -88,7 +96,6 @@ public class Activator implements BundleActivator, ServiceFactory, ServiceTracke
 		}
 		context.ungetService(reference);
 	}
-
 
 	/**
 	 * Register the UserAdmin service.
@@ -104,10 +111,9 @@ public class Activator implements BundleActivator, ServiceFactory, ServiceTracke
 		registration = context.registerService(userAdminClazz, this, properties);
 		userAdmin.setServiceReference(registration.getReference());
 	}
-	
+
 	protected void unregisterUserAdminService() {
-		if(registration != null)
-		{
+		if (registration != null) {
 			registration.unregister();
 			registration = null;
 			userAdmin.destroy();
