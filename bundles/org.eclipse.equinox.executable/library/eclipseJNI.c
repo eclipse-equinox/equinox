@@ -314,13 +314,12 @@ int startJavaJNI( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[] )
 		
 #ifdef MACOSX
 	init_args.version = JNI_VERSION_1_4;
-	init_args.ignoreUnrecognized = JNI_TRUE;
 #else		
 	init_args.version = JNI_VERSION_1_2;
-	init_args.ignoreUnrecognized = JNI_FALSE;
 #endif
 	init_args.options = options;
 	init_args.nOptions = numVMArgs;
+	init_args.ignoreUnrecognized = JNI_TRUE;
 	
 	if( createJavaVM(&jvm, &env, &init_args) == 0 ) {
 		registerNatives(env);
