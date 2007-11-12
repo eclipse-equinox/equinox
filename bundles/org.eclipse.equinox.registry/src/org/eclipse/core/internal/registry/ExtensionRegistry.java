@@ -31,9 +31,9 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 
 	protected class ListenerInfo {
 		public String filter;
-		public IRegistryChangeListener listener;
+		public EventListener listener;
 
-		public ListenerInfo(IRegistryChangeListener listener, String filter) {
+		public ListenerInfo(EventListener listener, String filter) {
 			this.listener = listener;
 			this.filter = filter;
 		}
@@ -69,6 +69,11 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	protected RegistryStrategy strategy; // overridable portions of the registry functionality
 
 	private RegistryTimestamp aggregatedTimestamp = new RegistryTimestamp(); // tracks current contents of the registry
+
+	// encapsulates processing of new registry deltas
+	private CombinedEventDelta eventDelta = null;
+	// marks a new extended delta. The namespace that normally would not exists is used for this purpose
+	private final static String notNamespace = ""; //$NON-NLS-1$
 
 	public RegistryObjectManager getObjectManager() {
 		return registryObjects;
@@ -106,8 +111,10 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	private void add(Contribution element) {
 		access.enterWrite();
 		try {
+			eventDelta = CombinedEventDelta.recordAddition();
 			basicAdd(element, true);
 			fireRegistryChangeEvent();
+			eventDelta = null;
 		} finally {
 			access.exitWrite();
 		}
@@ -137,6 +144,8 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 		System.arraycopy(existingExtensions, 0, newExtensions, 0, existingExtensions.length);
 		newExtensions[newExtensions.length - 1] = extension;
 		link(extPoint, newExtensions);
+		if (eventDelta != null)
+			eventDelta.rememberExtension(extPoint, extension);
 		return recordChange(extPoint, extension, IExtensionDelta.ADDED);
 	}
 
@@ -146,10 +155,14 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	 */
 	private String addExtensionPoint(int extPoint) {
 		ExtensionPoint extensionPoint = (ExtensionPoint) registryObjects.getObject(extPoint, RegistryObjectManager.EXTENSION_POINT);
+		if (eventDelta != null)
+			eventDelta.rememberExtensionPoint(extensionPoint);
 		int[] orphans = registryObjects.removeOrphans(extensionPoint.getUniqueIdentifier());
 		if (orphans == null)
 			return null;
 		link(extensionPoint, orphans);
+		if (eventDelta != null)
+			eventDelta.rememberExtensions(extensionPoint, orphans);
 		return recordChange(extensionPoint, orphans, IExtensionDelta.ADDED);
 	}
 
@@ -171,15 +184,27 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 		return affectedNamespaces;
 	}
 
-	public void addRegistryChangeListener(IRegistryChangeListener listener) {
-		// this is just a convenience API - no need to do any sync'ing here		
-		addRegistryChangeListener(listener, null);
+	public void addListener(IRegistryEventListener listener) {
+		addListenerInternal(listener, null);
 	}
 
-	public void addRegistryChangeListener(IRegistryChangeListener listener, String filter) {
+	public void addListener(IRegistryEventListener listener, String extensionPointId) {
+		addListenerInternal(listener, extensionPointId);
+	}
+
+	private void addListenerInternal(EventListener listener, String filter) {
 		synchronized (listeners) {
 			listeners.add(new ListenerInfo(listener, filter));
 		}
+	}
+
+	public void addRegistryChangeListener(IRegistryChangeListener listener) {
+		// this is just a convenience API - no need to do any sync'ing here		
+		addListenerInternal(listener, null);
+	}
+
+	public void addRegistryChangeListener(IRegistryChangeListener listener, String filter) {
+		addListenerInternal(listener, filter);
 	}
 
 	private void basicAdd(Contribution element, boolean link) {
@@ -194,6 +219,8 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 		for (Iterator iter = affectedNamespaces.iterator(); iter.hasNext();) {
 			getDelta((String) iter.next()).setObjectManager(manager);
 		}
+		if (eventDelta != null)
+			eventDelta.setObjectManager(manager);
 	}
 
 	private void basicRemove(String contributorId) {
@@ -222,9 +249,13 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	 * Broadcasts (asynchronously) the event to all interested parties.
 	 */
 	private void fireRegistryChangeEvent() {
+		// pack new extended delta together with the rest of deltas using invalid namespace
+		deltas.put(notNamespace, eventDelta);
 		// if there is nothing to say, just bail out
-		if (deltas.isEmpty() || listeners.isEmpty())
+		if (listeners.isEmpty()) {
+			deltas.clear();
 			return;
+		}
 		// for thread safety, create tmp collections
 		Object[] tmpListeners = listeners.getListeners();
 		Map tmpDeltas = new HashMap(this.deltas);
@@ -467,8 +498,9 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	private String recordChange(ExtensionPoint extPoint, int[] extensions, int kind) {
 		if (listeners.isEmpty())
 			return null;
+		String namespace = extPoint.getNamespace();
 		if (extensions == null || extensions.length == 0)
-			return null;
+			return namespace;
 		RegistryDelta pluginDelta = getDelta(extPoint.getNamespace());
 		for (int i = 0; i < extensions.length; i++) {
 			ExtensionDelta extensionDelta = new ExtensionDelta();
@@ -477,7 +509,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 			extensionDelta.setKind(kind);
 			pluginDelta.addExtensionDelta(extensionDelta);
 		}
-		return extPoint.getNamespace();
+		return namespace;
 	}
 
 	public void remove(String removedContributorId, long timestamp) {
@@ -506,8 +538,10 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	public void remove(String removedContributorId) {
 		access.enterWrite();
 		try {
+			eventDelta = CombinedEventDelta.recordRemoval();
 			basicRemove(removedContributorId);
 			fireRegistryChangeEvent();
+			eventDelta = null;
 		} finally {
 			access.exitWrite();
 		}
@@ -536,6 +570,8 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 					newExtensions[j++] = existingExtensions[i];
 		}
 		link(extPoint, newExtensions);
+		if (eventDelta != null)
+			eventDelta.rememberExtension(extPoint, extensionId);
 		return recordChange(extPoint, extension.getObjectId(), IExtensionDelta.REMOVED);
 	}
 
@@ -543,12 +579,14 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 		ExtensionPoint extensionPoint = (ExtensionPoint) registryObjects.getObject(extPoint, RegistryObjectManager.EXTENSION_POINT);
 		registryObjects.removeExtensionPointFromNamespaceIndex(extPoint, extensionPoint.getNamespace());
 		int[] existingExtensions = extensionPoint.getRawChildren();
-		if (existingExtensions == null || existingExtensions.length == 0) {
-			return null;
+		if (existingExtensions != null && existingExtensions.length != 0) {
+			registryObjects.addOrphans(extensionPoint.getUniqueIdentifier(), existingExtensions);
+			link(extensionPoint, RegistryObjectManager.EMPTY_INT_ARRAY);
 		}
-		//Remove the extension point from the registry object
-		registryObjects.addOrphans(extensionPoint.getUniqueIdentifier(), existingExtensions);
-		link(extensionPoint, RegistryObjectManager.EMPTY_INT_ARRAY);
+		if (eventDelta != null) {
+			eventDelta.rememberExtensionPoint(extensionPoint);
+			eventDelta.rememberExtensions(extensionPoint, existingExtensions);
+		}
 		return recordChange(extensionPoint, existingExtensions, IExtensionDelta.REMOVED);
 	}
 
@@ -572,6 +610,12 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	}
 
 	public void removeRegistryChangeListener(IRegistryChangeListener listener) {
+		synchronized (listeners) {
+			listeners.remove(new ListenerInfo(listener, null));
+		}
+	}
+
+	public void removeListener(IRegistryEventListener listener) {
 		synchronized (listeners) {
 			listeners.remove(new ListenerInfo(listener, null));
 		}
@@ -822,36 +866,61 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	//////////////////////////////////////////////////////////////////////////////////////////
 	// Registry change events processing
 
-	public IStatus processChangeEvent(Object[] listenerInfos, final Map deltas) {
+	public IStatus processChangeEvent(Object[] listenerInfos, final Map scheduledDeltas) {
+		// Separate new event delta from the pack
+		final CombinedEventDelta extendedDelta = (CombinedEventDelta) scheduledDeltas.remove(notNamespace);
+
 		final MultiStatus result = new MultiStatus(RegistryMessages.OWNER_NAME, IStatus.OK, RegistryMessages.plugin_eventListenerError, null);
 		for (int i = 0; i < listenerInfos.length; i++) {
 			final ListenerInfo listenerInfo = (ListenerInfo) listenerInfos[i];
-			if (listenerInfo.filter != null && !deltas.containsKey(listenerInfo.filter))
-				continue;
-			if (listenerInfo.listener instanceof IRegistryChangeListener)
-				SafeRunner.run(new ISafeRunnable() {
-					public void run() throws Exception {
-						((IRegistryChangeListener) listenerInfo.listener).registryChanged(new RegistryChangeEvent(deltas, listenerInfo.filter));
-					}
+			if ((listenerInfo.listener instanceof IRegistryChangeListener) && scheduledDeltas.size() != 0) {
+				if (listenerInfo.filter == null || scheduledDeltas.containsKey(listenerInfo.filter)) {
+					SafeRunner.run(new ISafeRunnable() {
+						public void run() throws Exception {
+							((IRegistryChangeListener) listenerInfo.listener).registryChanged(new RegistryChangeEvent(scheduledDeltas, listenerInfo.filter));
+						}
 
-					public void handleException(Throwable exception) {
-						result.add(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, RegistryMessages.plugin_eventListenerError, exception));
-					}
-				});
+						public void handleException(Throwable exception) {
+							result.add(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, RegistryMessages.plugin_eventListenerError, exception));
+						}
+					});
+				}
+			}
+			if (listenerInfo.listener instanceof IRegistryEventListener) {
+				IRegistryEventListener extensionListener = (IRegistryEventListener) listenerInfo.listener;
+				IExtension[] extensions = extendedDelta.getExtensions(listenerInfo.filter);
+				IExtensionPoint[] extensionPoints = extendedDelta.getExtensionPoints(listenerInfo.filter);
+
+				// notification order - on addition: extension points; then extensions
+				if (extendedDelta.isAddition()) {
+					if (extensionPoints != null)
+						extensionListener.added(extensionPoints);
+					if (extensions != null)
+						extensionListener.added(extensions);
+				} else { // on removal: extensions; then extension points
+					if (extensions != null)
+						extensionListener.removed(extensions);
+					if (extensionPoints != null)
+						extensionListener.removed(extensionPoints);
+				}
+			}
 		}
-		for (Iterator iter = deltas.values().iterator(); iter.hasNext();) {
+		for (Iterator iter = scheduledDeltas.values().iterator(); iter.hasNext();) {
 			((RegistryDelta) iter.next()).getObjectManager().close();
 		}
+		IObjectManager manager = extendedDelta.getObjectManager();
+		if (manager != null)
+			manager.close();
 		return result;
 	}
 
 	private RegistryEventThread eventThread = null; // registry event loop
-	private final List queue = new LinkedList(); // stores registry events info
+	protected final List queue = new LinkedList(); // stores registry events info
 
 	// Registry events notifications are done on a separate thread in a sequential manner
 	// (first in - first processed)
-	public void scheduleChangeEvent(Object[] listenerInfos, Map deltas) {
-		QueueElement newElement = new QueueElement(listenerInfos, deltas);
+	public void scheduleChangeEvent(Object[] listenerInfos, Map scheduledDeltas) {
+		QueueElement newElement = new QueueElement(listenerInfos, scheduledDeltas);
 		if (eventThread == null) {
 			eventThread = new RegistryEventThread(this);
 			eventThread.start();
@@ -865,10 +934,10 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	// The pair of values we store in the event queue
 	private class QueueElement {
 		Object[] listenerInfos;
-		Map deltas;
+		Map scheduledDeltas;
 
 		QueueElement(Object[] infos, Map deltas) {
-			this.deltas = deltas;
+			this.scheduledDeltas = deltas;
 			listenerInfos = infos;
 		}
 	}
@@ -894,7 +963,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 					}
 					element = (QueueElement) queue.remove(0);
 				}
-				registry.processChangeEvent(element.listenerInfos, element.deltas);
+				registry.processChangeEvent(element.listenerInfos, element.scheduledDeltas);
 			}
 		}
 	}
@@ -1214,20 +1283,23 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 
 		access.enterWrite();
 		try {
+			eventDelta = CombinedEventDelta.recordRemoval();
 			String namespace;
 			if (isExtensionPoint)
 				namespace = removeExtensionPoint(id);
 			else
 				namespace = removeExtension(id);
-
 			Map removed = new HashMap(1);
 			removed.put(new Integer(id), registryObject);
 			registryObjects.removeObjects(removed);
 			registryObjects.addNavigableObjects(removed);
-			getDelta(namespace).setObjectManager(registryObjects.createDelegatingObjectManager(removed));
+			IObjectManager manager = registryObjects.createDelegatingObjectManager(removed);
+			getDelta(namespace).setObjectManager(manager);
+			eventDelta.setObjectManager(manager);
 
 			registryObjects.unlinkChildFromContributions(id);
 			fireRegistryChangeEvent();
+			eventDelta = null;
 		} finally {
 			access.exitWrite();
 		}

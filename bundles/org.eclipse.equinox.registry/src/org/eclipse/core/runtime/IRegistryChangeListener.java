@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2006 IBM Corporation and others.
+ * Copyright (c) 2003, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,10 +13,12 @@ package org.eclipse.core.runtime;
 import java.util.EventListener;
 
 /**
+ * <b>Note:</b> for new implementations consider using {@link IRegistryEventListener}.
+ * <p>
  * A registry change listener is notified of changes to extensions points in the 
  * registry.  These changes arise from subsequent manipulation of the registry after 
  * it was initially created.
- * <p>
+ * </p><p>
  * This interface can be used without OSGi running.
  * </p><p>
  * Clients may implement this interface.

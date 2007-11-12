@@ -55,6 +55,8 @@ import java.util.ResourceBundle;
  */
 public interface IExtensionRegistry {
 	/**
+	 * <b>Note:</b> for new implementations consider using {@link #addListener(IRegistryEventListener, String)}.
+	 * <p> 
 	 * Adds the given listener for registry change events related to extension points 
 	 * in the given namespace.
 	 * Has no effect if an identical listener is already registered. After 
@@ -62,7 +64,7 @@ public interface IExtensionRegistry {
 	 * related to extension points in the specified namespace. If no namespace 
 	 * is specified, the listener will receive notifications for changes to 
 	 * extension points in any namespace.  
-	 * <p>
+	 * </p><p>
 	 * Once registered, a listener starts receiving notification of changes to
 	 *  the registry. Registry change notifications are sent asynchronously.
 	 * The listener continues to receive notifications until it is removed. 
@@ -76,10 +78,12 @@ public interface IExtensionRegistry {
 	public void addRegistryChangeListener(IRegistryChangeListener listener, String namespace);
 
 	/**
+	 * <b>Note:</b> for new implementations consider using {@link #addListener(IRegistryEventListener)}.
+	 * <p>
 	 * Adds the given listener for registry change events.
 	 * Has no effect if an identical listener is already registered.
 	 * 
-	 * <p>
+	 * </p><p>
 	 * This method is equivalent to:
 	 * <pre>
 	 *     addRegistryChangeListener(listener,null);
@@ -374,4 +378,66 @@ public interface IExtensionRegistry {
 	 * @since org.eclipse.equinox.registry 3.2
 	 */
 	public void stop(Object token) throws IllegalArgumentException;
+
+	/**
+	 * Adds the given listener for registry change events. Listener will be notified
+	 * on changes to all extension points and underlying extensions.
+	 * <p>
+	 * Depending on activity, listners of this type might receive a large number 
+	 * of modifications and negatively impact overall system performance. Whenever
+	 * possible, consider registering listener specific to an extension point rather
+	 * than a "global" listener.
+	 * </p><p>
+	 * Once registered, a listener starts receiving notification of changes to
+	 * the registry. Registry change notifications are sent asynchronously.
+	 * The listener continues to receive notifications until it is removed. 
+	 * </p><p>
+	 * This method has no effect if the listener is already registered. 
+	 * </p><p>
+	 * <b>Note:</b> This is a preliminary form of a new API that might change or be removed 
+	 * altogether prior to 3.4 release. It is being made available at this early stage to solicit 
+	 * feedback from early adopters.
+	 * </p>
+	 * @param listener the listener
+	 * @since 3.4 
+	 */
+	public void addListener(IRegistryEventListener listener);
+
+	/**
+	 * Adds the given listener for registry change events related to specified 
+	 * extension point.
+	 * <p>
+	 * Once registered, a listener starts receiving notification of changes to
+	 * the registry. Registry change notifications are sent asynchronously.
+	 * The listener continues to receive notifications until it is removed. 
+	 * </p><p>
+	 * This method has no effect if the listener is already registered. 
+	 * </p><p>
+	 * <b>Note:</b> This is a preliminary form of a new API that might change or be removed 
+	 * altogether prior to 3.4 release. It is being made available at this early stage to solicit 
+	 * feedback from early adopters.
+	 * </p>
+	 * @param listener the listener
+	 * @param extensionPointId the unique identifier of extension point
+	 * @see IExtensionPoint#getUniqueIdentifier()
+	 * @since 3.4 
+	 */
+	public void addListener(IRegistryEventListener listener, String extensionPointId);
+
+	/**
+	 * Removes the given registry change listener from this registry.
+	 * <p>
+	 * This method has no effect if the listener is not registered. 
+	 * </p><p>
+	 * <b>Note:</b> This is a preliminary form of a new API that might change or be removed 
+	 * altogether prior to 3.4 release. It is being made available at this early stage to solicit 
+	 * feedback from early adopters.
+	 * </p>
+	 * @param listener the listener
+	 * @see #addListener(IRegistryEventListener)
+	 * @see #addListener(IRegistryEventListener, String)
+	 * @since 3.4 
+	 */
+	public void removeListener(IRegistryEventListener listener);
+
 }
