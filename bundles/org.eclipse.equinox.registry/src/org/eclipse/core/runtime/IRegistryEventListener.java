@@ -67,7 +67,7 @@ public interface IRegistryEventListener extends EventListener {
 	 * The extension points supplied as the argument are valid only for the duration of the 
 	 * invocation of this method.
 	 * </p>
-	 * @param extensions extension points removed from the registry
+	 * @param extensionPoints extension points removed from the registry
 	 */
 	public void removed(IExtensionPoint[] extensionPoints);
 
