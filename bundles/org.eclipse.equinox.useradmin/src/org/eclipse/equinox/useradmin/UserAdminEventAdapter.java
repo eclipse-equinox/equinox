@@ -40,7 +40,7 @@ public class UserAdminEventAdapter implements UserAdminListener {
 
 	private BundleContext context;
 	private ServiceRegistration userAdminRegistration;
-	private ServiceTracker eventAdminTracker;
+	private volatile ServiceTracker eventAdminTracker;
 
 	public UserAdminEventAdapter(BundleContext context) {
 		this.context = context;
@@ -55,8 +55,9 @@ public class UserAdminEventAdapter implements UserAdminListener {
 	}
 
 	public void stop() throws Exception {
-		if (eventAdminTracker != null) {
-			eventAdminTracker.close();
+		ServiceTracker currentTracker = eventAdminTracker;
+		if (currentTracker != null) {
+			currentTracker.close();
 			eventAdminTracker = null;
 		}
 		if (userAdminRegistration != null) {
@@ -67,7 +68,8 @@ public class UserAdminEventAdapter implements UserAdminListener {
 	}
 
 	public void roleChanged(UserAdminEvent event) {
-		EventAdmin eventAdmin = eventAdminTracker == null ? null : ((EventAdmin) eventAdminTracker.getService());
+		ServiceTracker currentTracker = eventAdminTracker;
+		EventAdmin eventAdmin = currentTracker == null ? null : ((EventAdmin) currentTracker.getService());
 		if (eventAdmin != null) {
 			String typename = null;
 			switch (event.getType()) {
