@@ -25,7 +25,7 @@ public class Activator implements BundleActivator, ServiceFactory, ServiceTracke
 	 *      BundleActivator Interface implementation
 	 * ----------------------------------------------------------------------
 	 */
-
+	private static final String EVENT_ADMIN_CLASS = "org.osgi.service.event.EventAdmin"; //$NON-NLS-1$
 	protected ServiceRegistration registration;
 	protected UserAdmin userAdmin;
 	protected static String userAdminClazz = "org.osgi.service.useradmin.UserAdmin"; //$NON-NLS-1$
@@ -46,8 +46,20 @@ public class Activator implements BundleActivator, ServiceFactory, ServiceTracke
 		prefsTracker = new ServiceTracker(context, PreferencesService.class.getName(), this);
 		prefsTracker.open();
 
-		eventAdapter = new UserAdminEventAdapter(context_);
-		eventAdapter.start();
+		if (checkEventAdmin()) {
+			eventAdapter = new UserAdminEventAdapter(context_);
+			eventAdapter.start();
+		}
+	}
+
+	private static boolean checkEventAdmin() {
+		// cannot support scheduling without the event admin package
+		try {
+			Class.forName(EVENT_ADMIN_CLASS);
+			return true;
+		} catch (ClassNotFoundException e) {
+			return false;
+		}
 	}
 
 	/**
