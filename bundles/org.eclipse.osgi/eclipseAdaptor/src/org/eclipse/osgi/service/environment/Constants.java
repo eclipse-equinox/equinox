@@ -12,6 +12,9 @@ package org.eclipse.osgi.service.environment;
 
 /**
  * @since 3.0
+ * <p>
+ * This interface is not intended to be implemented by clients.
+ * </p>
  */
 public interface Constants {
 	//TODO These constants need to be aligned with the OSGi ones. See page 64-588 of the spec
@@ -136,7 +139,7 @@ public interface Constants {
 	 * machine using the Windows Presentation Foundation sytstem.
 	 */
 	public static final String WS_WPF = "wpf"; //$NON-NLS-1$
-	
+
 	/**
 	 * Constant string (value "motif") indicating the platform is running on a
 	 * machine using the Motif windowing system.
@@ -160,7 +163,7 @@ public interface Constants {
 	 * machine using the Carbon windowing system (Mac OS X).
 	 */
 	public static final String WS_CARBON = "carbon";//$NON-NLS-1$
-	
+
 	/**
 	 * Constant string (value "s60") indicating the platform is running on a
 	 * machine using the S60 windowing system.
