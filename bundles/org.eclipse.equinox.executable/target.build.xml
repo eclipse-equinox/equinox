@@ -55,6 +55,16 @@
 		<chmod perm="755" dir="${feature.base}/win32.win32.x86_64/${collectingFolder}" includes="${launcherName}" /> 
 	</target>
 	
+	<target name="rootFileswin32_win32_ia64">
+		<mkdir dir="${feature.base}/win32.win32.ia64/${collectingFolder}"/>
+		<copy todir="${feature.base}/win32.win32.ia64/${collectingFolder}" failonerror="true" overwrite="true">
+			<fileset dir="${basedir}/contributed/win32/win32/ia64">
+				<include name="launcher.exe"/>
+			</fileset>
+		</copy>
+		<chmod perm="755" dir="${feature.base}/win32.win32.ia64/${collectingFolder}" includes="${launcherName}" /> 
+	</target>
+			
 	<target name="rootFileswin32_wpf_x86">
 		<mkdir dir="${feature.base}/win32.wpf.x86/${collectingFolder}"/>
 		<copy todir="${feature.base}/win32.wpf.x86/${collectingFolder}/" failonerror="true" overwrite="true">
@@ -182,6 +192,8 @@
 	<target name="rootFilesgroup_group_group">
 		<antcall target="rootFileswin32_win32_x86"/>
 		<antcall target="rootFileswin32_wpf_x86"/>
+		<antcall target="rootFileswin32_win32_x86_64"/>
+		<antcall target="rootFileswin32_win32_ia64"/>
 		<antcall target="rootFilesmacosx_carbon_ppc"/>
 		<antcall target="rootFilesmacosx_carbon_x86"/>
 		<antcall target="rootFileslinux_gtk_x86"/>

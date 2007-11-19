@@ -34,6 +34,7 @@
 @echo off
 
 IF x.%1==x.x86_64 GOTO X86_64
+IF x.%1==x.ia64 GOTO IA64
 
 :X86
 IF x.%JAVA_HOME%==x. set JAVA_HOME=C:\Dev\Java\IBM_1.5.0
@@ -54,10 +55,19 @@ shift
 set defaultOSArch=x86_64
 IF x.%JAVA_HOME%==x. set JAVA_HOME=C:\Dev\Java\ibm-sdk-n142p-win64-x86
 IF "x.%mssdk%" == "x."   set mssdk="C:\Program Files\MS_SDK_2003_R2"
-echo %mssdk%
 set javaHome=%JAVA_HOME%
 set makefile=make_win64.mak
 call %mssdk%\setenv /X64 /RETAIL
+GOTO MAKE
+
+:IA64
+shift
+set defaultOSArch=ia64
+IF x.%JAVA_HOME%==x. set JAVA_HOME=C:\Dev\Java\jdk-1_5_0_04-fcs-bin-b05-windows-ia64
+IF "x.%mssdk%" == "x."   set mssdk="C:\Program Files\MS_SDK_2003_R2"
+set javaHome=%JAVA_HOME%
+set makefile=make_win64_ia64.mak
+call %mssdk%\setenv /SRV64 /RETAIL
 GOTO MAKE
 
 :MAKE 

@@ -44,10 +44,6 @@
 	</target>
 	
 	<target name="pre.gather.bin.parts">
-		<!-- copy over contributed binaries -->
-		<copy todir="${feature.directory}/bin">
-			<fileset dir="${basedir}/contributed/bin" />
-		</copy>
 	</target>
 	
 	<!-- ===================================================================== -->
