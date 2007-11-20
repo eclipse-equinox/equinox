@@ -141,6 +141,10 @@ public class ExtensionsParser extends DefaultHandler {
 
 	private ArrayList processedExtensionIds = null;
 
+	// Keep track of elements added into the registry manager in case we encounter a error 
+	// and need to rollback
+	private ArrayList addedRegistryObjects = new ArrayList(5);
+
 	public ExtensionsParser(MultiStatus status, ExtensionRegistry registry) {
 		super();
 		this.status = status;
@@ -279,8 +283,23 @@ public class ExtensionsParser extends DefaultHandler {
 	 * @see org.xml.sax.helpers.DefaultHandler#fatalError(org.xml.sax.SAXParseException)
 	 */
 	public void fatalError(SAXParseException ex) throws SAXException {
+		cleanup();
 		logStatus(ex);
 		throw ex;
+	}
+
+	/**
+	 * Remove all elements that we have added so far into registry manager
+	 */
+	private void cleanup() {
+		for (Iterator i = addedRegistryObjects.iterator(); i.hasNext();) {
+			RegistryObject object = (RegistryObject) i.next();
+			if (object instanceof ExtensionPoint) {
+				String id = ((ExtensionPoint) object).getUniqueIdentifier();
+				objectManager.removeExtensionPoint(id);
+			} else
+				objectManager.remove(object.getObjectId(), true);
+		}
 	}
 
 	private void handleExtensionPointState(String elementName) {
@@ -313,6 +332,7 @@ public class ExtensionsParser extends DefaultHandler {
 		// configuration property for each attribute
 		parseConfigurationElementAttributes(attributes);
 		objectManager.add(currentConfigurationElement, true);
+		addedRegistryObjects.add(currentConfigurationElement);
 	}
 
 	private void handleInitialState(String elementName, Attributes attributes) {
@@ -481,6 +501,7 @@ public class ExtensionsParser extends DefaultHandler {
 		}
 
 		objectManager.add(currentExtension, true);
+		addedRegistryObjects.add(currentExtension);
 	}
 
 	//todo: Are all three methods needed??
@@ -557,6 +578,7 @@ public class ExtensionsParser extends DefaultHandler {
 		if (currentExtPoint.getNamespace() == null)
 			currentExtPoint.setNamespace(contribution.getDefaultNamespace());
 		currentExtPoint.setContributorId(contribution.getContributorId());
+		addedRegistryObjects.add(currentExtPoint);
 
 		// Now populate the the vector just below us on the objectStack with this extension point
 		scratchVectors[EXTENSION_POINT_INDEX].add(currentExtPoint);
@@ -612,7 +634,7 @@ public class ExtensionsParser extends DefaultHandler {
 	 * @see org.xml.sax.ContentHandler#processingInstruction
 	 * @since 3.0
 	 */
-	public void processingInstruction(String target, String data) throws SAXException {
+	public void processingInstruction(String target, String data) {
 		// Since 3.0, a processing instruction of the form <?eclipse version="3.0"?> at
 		// the start of the manifest file is used to indicate the plug-in manifest
 		// schema version in effect. Pre-3.0 (i.e., 2.1) plug-in manifest files do not
