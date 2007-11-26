@@ -1306,6 +1306,11 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 		return true;
 	}
 
+	public IContributor[] getAllContributors() {
+		Collection contributors = registryObjects.getContributors().values();
+		return (IContributor[]) contributors.toArray(new IContributor[contributors.size()]);
+	}
+
 	/**
 	 * <strong>EXPERIMENTAL</strong>. This method has been added as part of a work in progress. 
 	 * There is a guarantee neither that this API will work nor that it will remain the same. 

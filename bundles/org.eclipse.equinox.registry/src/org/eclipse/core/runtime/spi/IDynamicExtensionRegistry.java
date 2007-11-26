@@ -54,4 +54,10 @@ public interface IDynamicExtensionRegistry {
 	 */
 	public boolean hasContributor(IContributor contributor);
 
+	/**
+	 * Returns all contributors associated with the registry at this time.
+	 * @return all contributors associated with the registry
+	 */
+	public IContributor[] getAllContributors();
+
 }
