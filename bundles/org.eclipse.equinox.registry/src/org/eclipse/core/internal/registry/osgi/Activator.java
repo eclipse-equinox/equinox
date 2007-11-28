@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,7 @@ package org.eclipse.core.internal.registry.osgi;
 
 import java.io.File;
 import java.util.Hashtable;
+import org.eclipse.core.internal.adapter.AdapterManagerListener;
 import org.eclipse.core.internal.registry.*;
 import org.eclipse.core.runtime.*;
 import org.eclipse.core.runtime.spi.RegistryStrategy;
@@ -43,6 +44,7 @@ public class Activator implements BundleActivator {
 	private ServiceRegistration registryRegistration;
 	private ServiceRegistration commandRegistration;
 	private RegistryProviderOSGI defaultProvider;
+	private AdapterManagerListener adapterManagerListener = null;
 
 	/**
 	 * This method is called upon plug-in activation
@@ -52,12 +54,15 @@ public class Activator implements BundleActivator {
 		RegistryProperties.setContext(bundleContext);
 		processCommandLine();
 		startRegistry();
+		adapterManagerListener = new AdapterManagerListener(); // after extension registry
 	}
 
 	/**
 	 * This method is called when the plug-in is stopped
 	 */
 	public void stop(BundleContext context) throws Exception {
+		if (adapterManagerListener != null)
+			adapterManagerListener.stop(); // before extension registry
 		stopRegistry();
 		RegistryProperties.setContext(null);
 		bundleContext = null;

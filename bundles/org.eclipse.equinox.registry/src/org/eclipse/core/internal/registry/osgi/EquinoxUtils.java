@@ -65,4 +65,20 @@ public class EquinoxUtils {
 		}
 		return null;
 	}
+
+	/**
+	 * Returns true if OSGi in not available
+	 */
+	public static boolean isActive(String bundleId) {
+		// the try-catch block should take care
+		try {
+			org.osgi.framework.Bundle bundle = OSGIUtils.getDefault().getBundle(bundleId);
+			if (bundle == null)
+				return false; // should never happen
+			return (bundle.getState() == Bundle.ACTIVE);
+		} catch (NoClassDefFoundError noClass) {
+			// expected if OSGi is not available; behave as if contributor is active
+			return true;
+		}
+	}
 }
