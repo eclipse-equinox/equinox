@@ -154,8 +154,14 @@ org.osgi.framework.system.packages = \
  org.omg.stub.java.rmi,\
  org.w3c.dom,\
  org.w3c.dom.bootstrap,\
+ org.w3c.dom.css,\
  org.w3c.dom.events,\
+ org.w3c.dom.html,\
  org.w3c.dom.ls,\
+ org.w3c.dom.ranges,\
+ org.w3c.dom.stylesheets,\
+ org.w3c.dom.traversal,\
+ org.w3c.dom.views ,\
  org.xml.sax,\
  org.xml.sax.ext,\
  org.xml.sax.helpers
