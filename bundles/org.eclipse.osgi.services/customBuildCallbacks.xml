@@ -120,6 +120,8 @@
 	<!--   destination.temp.folder - destination folder                        -->
 	<!-- ===================================================================== -->
 	<target name="post.gather.sources">
+		<unzip src="${target.folder}/src.zip" dest="${target.folder}" overwrite="false"/>
+		<delete file="${destination.temp.folder}/src.zip" />	
 	</target>
 
 	<!-- ===================================================================== -->
