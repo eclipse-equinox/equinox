@@ -14,7 +14,7 @@ package org.eclipse.osgi.framework.internal.core;
 import java.io.IOException;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.util.ArrayList;
+import java.util.*;
 import org.eclipse.osgi.framework.adaptor.BundleClassLoader;
 import org.eclipse.osgi.framework.adaptor.BundleData;
 import org.eclipse.osgi.framework.debug.Debug;
@@ -338,6 +338,11 @@ public class PackageAdminImpl implements PackageAdmin {
 	}
 
 	private AbstractBundle[] applyDeltas(BundleDelta[] bundleDeltas) throws BundleException {
+		Arrays.sort(bundleDeltas, new Comparator() {
+			public int compare(Object delta0, Object delta1) {
+				return (int) (((BundleDelta) delta0).getBundle().getBundleId() - ((BundleDelta) delta1).getBundle().getBundleId());
+			}
+		});
 		ArrayList results = new ArrayList(bundleDeltas.length);
 		for (int i = 0; i < bundleDeltas.length; i++) {
 			int type = bundleDeltas[i].getType();

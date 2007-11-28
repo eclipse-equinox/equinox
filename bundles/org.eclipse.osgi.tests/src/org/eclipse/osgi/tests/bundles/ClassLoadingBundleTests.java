@@ -686,6 +686,26 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		assertEquals("Wrong importer", importerExporter2, newImporters[0]);
 	}
 
+	public void testBug207847() throws BundleException {
+		Bundle test = installer.installBundle("test"); //$NON-NLS-1$
+		installer.resolveBundles(new Bundle[] {test});
+		test.start();
+
+		Bundle frag1 = installer.installBundle("test.fragment1"); //$NON-NLS-1$
+		Bundle frag2 = installer.installBundle("test.fragment2"); //$NON-NLS-1$
+		Bundle frag3 = installer.installBundle("test.fragment3"); //$NON-NLS-1$
+		Bundle frag4 = installer.installBundle("test.fragment4"); //$NON-NLS-1$
+		Bundle frag5 = installer.installBundle("test.fragment5"); //$NON-NLS-1$
+		installer.resolveBundles(new Bundle[] {frag1, frag2, frag3, frag4, frag5});
+
+		assertTrue("host is not resolved", (test.getState() & Bundle.ACTIVE) != 0); //$NON-NLS-1$
+		assertTrue("frag1 is not resolved", (frag1.getState() & Bundle.RESOLVED) != 0); //$NON-NLS-1$
+		assertTrue("frag2 is not resolved", (frag2.getState() & Bundle.RESOLVED) != 0); //$NON-NLS-1$
+		assertTrue("frag3 is not resolved", (frag3.getState() & Bundle.RESOLVED) != 0); //$NON-NLS-1$
+		assertTrue("frag4 is not resolved", (frag4.getState() & Bundle.RESOLVED) != 0); //$NON-NLS-1$
+		assertTrue("frag5 is not resolved", (frag5.getState() & Bundle.RESOLVED) != 0); //$NON-NLS-1$
+	}
+
 	// TODO temporarily disable til we can debug the build test machine on Win XP
 	//	public void testBuddyClassLoadingRegistered1() throws Exception{
 	//		Bundle registeredA = installer.installBundle("buddy.registered.a");
