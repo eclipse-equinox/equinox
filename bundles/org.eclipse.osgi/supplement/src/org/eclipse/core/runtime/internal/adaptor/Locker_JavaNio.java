@@ -8,12 +8,12 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Danail Nachev (Prosyst) - bug 185654
+ *     Andrei Loskutov - bug 44735
  *******************************************************************************/
 package org.eclipse.core.runtime.internal.adaptor;
 
 import java.io.*;
-import java.nio.channels.FileLock;
-import java.nio.channels.OverlappingFileLockException;
+import java.nio.channels.*;
 import org.eclipse.osgi.util.NLS;
 
 /**
@@ -31,7 +31,11 @@ public class Locker_JavaNio implements Locker {
 	public synchronized boolean lock() throws IOException {
 		raFile = new RandomAccessFile(lockFile, "rw"); //$NON-NLS-1$
 		try {
-			fileLock = raFile.getChannel().tryLock();
+			/*
+			 * fix for bug http://bugs.sun.com/view_bug.do?bug_id=6628575 and
+			 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=44735#c17
+			 */
+			fileLock = raFile.getChannel().tryLock(0, 1, false);
 		} catch (IOException ioe) {
 			// print exception if debugging
 			if (BasicLocation.DEBUG)
@@ -77,7 +81,11 @@ public class Locker_JavaNio implements Locker {
 			RandomAccessFile temp = new RandomAccessFile(lockFile, "rw"); //$NON-NLS-1$
 			FileLock tempLock = null;
 			try {
-				tempLock = temp.getChannel().tryLock();
+				/*
+				 * fix for bug http://bugs.sun.com/view_bug.do?bug_id=6628575 and
+				 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=44735#c17
+				 */
+				tempLock = temp.getChannel().tryLock(0, 1, false);
 				if (tempLock != null) {
 					tempLock.release(); // allow IOException to propagate because that would mean it is still locked
 					return false;
