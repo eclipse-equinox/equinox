@@ -337,13 +337,12 @@ public class PackageAdminImpl implements PackageAdmin {
 		return bundle;
 	}
 
-	private AbstractBundle[] applyDeltas(BundleDelta[] bundleDeltas) throws BundleException {
+	private void applyDeltas(BundleDelta[] bundleDeltas) throws BundleException {
 		Arrays.sort(bundleDeltas, new Comparator() {
 			public int compare(Object delta0, Object delta1) {
 				return (int) (((BundleDelta) delta0).getBundle().getBundleId() - ((BundleDelta) delta1).getBundle().getBundleId());
 			}
 		});
-		ArrayList results = new ArrayList(bundleDeltas.length);
 		for (int i = 0; i < bundleDeltas.length; i++) {
 			int type = bundleDeltas[i].getType();
 			if ((type & (BundleDelta.REMOVAL_PENDING | BundleDelta.REMOVAL_COMPLETE)) != 0)
@@ -359,11 +358,9 @@ public class PackageAdminImpl implements PackageAdmin {
 						} catch (BundleException e) {
 							framework.publishFrameworkEvent(FrameworkEvent.ERROR, bundle, e);
 						}
-					results.add(bundle);
 				}
 			}
 		}
-		return (AbstractBundle[]) (results.size() == 0 ? null : results.toArray(new AbstractBundle[results.size()]));
 	}
 
 	private AbstractBundle[] processDelta(BundleDelta[] bundleDeltas, boolean refreshPackages) {
@@ -383,7 +380,6 @@ public class PackageAdminImpl implements PackageAdmin {
 		// then sort by dependency order
 		StartLevelManager.sortByDependency(refresh);
 		boolean[] previouslyResolved = new boolean[refresh.length];
-		AbstractBundle[] resolved = null;
 		try {
 			try {
 				if (Debug.DEBUG && Debug.DEBUG_PACKAGEADMIN) {
@@ -420,11 +416,12 @@ public class PackageAdminImpl implements PackageAdmin {
 				}
 
 				synchronized (framework.bundles) {
-					for (int i = 0; i < refresh.length; i++)
+					for (int i = refresh.length - 1; i >= 0; i--)
 						refresh[i].refresh();
 				}
 				// send out unresolved events outside synch block (defect #80610)
-				for (int i = 0; i < refresh.length; i++) {
+				// send out unresolved events in reverse dependency order (defect #207505)
+				for (int i = refresh.length - 1; i >= 0; i--) {
 					// send out unresolved events
 					if (previouslyResolved[i])
 						framework.publishBundleEvent(BundleEvent.UNRESOLVED, refresh[i]);
@@ -437,7 +434,7 @@ public class PackageAdminImpl implements PackageAdmin {
 					Debug.println("refreshPackages: applying deltas to bundles"); //$NON-NLS-1$
 				}
 				synchronized (framework.bundles) {
-					resolved = applyDeltas(bundleDeltas);
+					applyDeltas(bundleDeltas);
 				}
 
 			} finally {
@@ -480,9 +477,9 @@ public class PackageAdminImpl implements PackageAdmin {
 		// send out any resolved.  This must be done after the state change locks have been release.
 		if (Debug.DEBUG && Debug.DEBUG_PACKAGEADMIN)
 			Debug.println("refreshPackages: send out RESOLVED events"); //$NON-NLS-1$
-		if (resolved != null)
-			for (int i = 0; i < resolved.length; i++)
-				framework.publishBundleEvent(BundleEvent.RESOLVED, resolved[i]);
+		for (int i = 0; i < refresh.length; i++)
+			if (refresh[i].isResolved())
+				framework.publishBundleEvent(BundleEvent.RESOLVED, refresh[i]);
 
 		return refresh;
 	}
