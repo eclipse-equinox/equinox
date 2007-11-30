@@ -4,9 +4,16 @@ Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.equinox.common; singleton:=true
 Bundle-Version: 3.4.0.qualifier
 Bundle-Localization: plugin
-Export-Package: org.eclipse.core.internal.runtime;x-friends:="org.eclipse.core.contenttype,org.eclipse.core.jobs,org.eclipse.equinox.preferences,org.eclipse.equinox.registry,org.eclipse.core.runtime,org.eclipse.core.runtime.compatibility"; common="split"; mandatory:="common",
- org.eclipse.core.internal.boot;x-friends:="org.eclipse.core.resources,org.eclipse.core.runtime.compatibility,org.eclipse.pde.build",
- org.eclipse.core.runtime; common="split"; mandatory:="common"
+Export-Package: org.eclipse.core.internal.boot;x-friends:="org.eclipse.core.resources,org.eclipse.core.runtime.compatibility,org.eclipse.pde.build",
+ org.eclipse.core.internal.runtime;common=split;mandatory:=common;
+  x-friends:="org.eclipse.core.contenttype,
+   org.eclipse.core.jobs,
+   org.eclipse.equinox.preferences,
+   org.eclipse.equinox.registry,
+   org.eclipse.core.runtime,
+   org.eclipse.core.runtime.compatibility,
+   org.eclipse.core.filesystem",
+ org.eclipse.core.runtime;common=split;mandatory:=common
 Bundle-Vendor: %providerName
 Bundle-Activator: org.eclipse.core.internal.runtime.Activator
 Import-Package: org.eclipse.osgi.framework.log,
