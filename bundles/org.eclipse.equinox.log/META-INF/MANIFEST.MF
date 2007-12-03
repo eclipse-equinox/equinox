@@ -1,16 +1,19 @@
 Bundle-ManifestVersion: 2
 Bundle-Vendor: %bundleVendor
-Bundle-Version: 1.0.200.qualifier
+Bundle-Version: 1.1.0.qualifier
 Bundle-Activator: org.eclipse.equinox.log.Activator
 Bundle-Copyright: %bundleCopyright
 Bundle-SymbolicName: org.eclipse.equinox.log
 Bundle-Name: %bundleName
 Export-Service: org.osgi.service.log.LogReaderService,
  org.osgi.service.log.LogService
-Import-Package: org.eclipse.osgi.framework.eventmgr; version="1.1",
+Import-Package: org.eclipse.osgi.framework.eventmgr;version="1.1",
+ org.eclipse.osgi.util,
  org.osgi.framework;version="1.1",
  org.osgi.service.cm;version="1.0",
+ org.osgi.service.event;version="1.0";resolution:=optional,
  org.osgi.service.log;version="1.2",
- org.eclipse.osgi.util
+ org.osgi.util.tracker;version="1.1"
 Export-Package: org.eclipse.equinox.log;x-internal:=true
 Bundle-Localization: plugin
+Bundle-RequiredExecutionEnvironment: OSGi/Minimum-1.1

@@ -32,6 +32,7 @@ public class Activator implements BundleActivator, EventDispatcher, BundleListen
 	protected ServiceRegistration logservice;
 	protected ServiceRegistration logreaderservice;
 	protected ServiceRegistration logmanagedservice;
+	protected LogEntryEventAdapter eventAdapter;
 
 	/** default log size value */
 	protected static final int DEFAULT_LOG_SIZE = 100;
@@ -58,6 +59,8 @@ public class Activator implements BundleActivator, EventDispatcher, BundleListen
 	/** Pid that log service uses when it registers a CM Managed Service */
 	protected static final String LOGSERVICEPID = "org.eclipse.equinox.log.Log"; //$NON-NLS-1$
 
+	private static final String EVENT_ADMIN_CLASS = "org.osgi.service.event.EventAdmin"; //$NON-NLS-1$
+
 	/**
 	 * BundleActivator.start method. We can now initialize the bundle
 	 * and register the services.
@@ -81,6 +84,10 @@ public class Activator implements BundleActivator, EventDispatcher, BundleListen
 		bundleContext.addFrameworkListener(this);
 
 		registerLogService();
+		if (checkEventAdmin()) {
+			eventAdapter = new LogEntryEventAdapter(bundleContext);
+			eventAdapter.start();
+		}
 		registerLogReaderService();
 
 		registerManagedService();
@@ -91,7 +98,11 @@ public class Activator implements BundleActivator, EventDispatcher, BundleListen
 	 * execution.
 	 *
 	 */
-	public synchronized void stop(BundleContext bundleContext) {
+	public synchronized void stop(BundleContext bundleContext) throws Exception {
+		if (eventAdapter != null) {
+			eventAdapter.stop();
+			eventAdapter = null;
+		}
 		if (logmanagedservice != null) {
 			logmanagedservice.unregister();
 			logmanagedservice = null;
@@ -301,19 +312,19 @@ public class Activator implements BundleActivator, EventDispatcher, BundleListen
 
 			case BundleEvent.STARTING :
 				return ("BundleEvent STARTING"); //$NON-NLS-1$
-				
+
 			case BundleEvent.STOPPED :
 				return ("BundleEvent STOPPED"); //$NON-NLS-1$
 
 			case BundleEvent.STOPPING :
 				return ("BundleEvent STOPPING"); //$NON-NLS-1$
-				
+
 			case BundleEvent.UNINSTALLED :
 				return ("BundleEvent UNINSTALLED"); //$NON-NLS-1$
 
 			case BundleEvent.UNRESOLVED :
 				return ("BundleEvent UNRESOLVED"); //$NON-NLS-1$
-			
+
 			case BundleEvent.UPDATED :
 				return ("BundleEvent UPDATED"); //$NON-NLS-1$
 
@@ -353,7 +364,7 @@ public class Activator implements BundleActivator, EventDispatcher, BundleListen
 
 			case FrameworkEvent.INFO :
 				return ("FrameworkEvent INFO"); //$NON-NLS-1$
-				
+
 			case FrameworkEvent.PACKAGES_REFRESHED :
 				return ("FrameworkEvent PACKAGES REFRESHED"); //$NON-NLS-1$
 
@@ -362,7 +373,7 @@ public class Activator implements BundleActivator, EventDispatcher, BundleListen
 
 			case FrameworkEvent.STARTLEVEL_CHANGED :
 				return ("FrameworkEvent STARTLEVEL CHANGED"); //$NON-NLS-1$
-				
+
 			case FrameworkEvent.WARNING :
 				return ("FrameworkEvent WARNING"); //$NON-NLS-1$
 
@@ -530,5 +541,15 @@ public class Activator implements BundleActivator, EventDispatcher, BundleListen
 		properties.put(Constants.SERVICE_PID, LogReaderService.class.getName());
 
 		logreaderservice = context.registerService(org.osgi.service.log.LogReaderService.class.getName(), new LogReaderServiceFactory(this), properties);
+	}
+
+	private static boolean checkEventAdmin() {
+		// cannot support scheduling without the event admin package
+		try {
+			Class.forName(EVENT_ADMIN_CLASS);
+			return true;
+		} catch (ClassNotFoundException e) {
+			return false;
+		}
 	}
 }
