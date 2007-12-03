@@ -286,20 +286,20 @@ public class Main {
 	private String getWS() {
 		if (ws != null)
 			return ws;
-		String os = getOS();
-		if (os.equals(Constants.OS_WIN32))
+		String osName = getOS();
+		if (osName.equals(Constants.OS_WIN32))
 			return Constants.WS_WIN32;
-		if (os.equals(Constants.OS_LINUX))
+		if (osName.equals(Constants.OS_LINUX))
 			return Constants.WS_GTK;
-		if (os.equals(Constants.OS_MACOSX))
+		if (osName.equals(Constants.OS_MACOSX))
 			return Constants.WS_CARBON;
-		if (os.equals(Constants.OS_HPUX))
+		if (osName.equals(Constants.OS_HPUX))
 			return Constants.WS_MOTIF;
-		if (os.equals(Constants.OS_AIX))
+		if (osName.equals(Constants.OS_AIX))
 			return Constants.WS_MOTIF;
-		if (os.equals(Constants.OS_SOLARIS))
+		if (osName.equals(Constants.OS_SOLARIS))
 			return Constants.WS_GTK;
-		if (os.equals(Constants.OS_QNX))
+		if (osName.equals(Constants.OS_QNX))
 			return Constants.WS_PHOTON;
 		return Constants.WS_UNKNOWN;
 	}
@@ -378,7 +378,7 @@ public class Main {
 						String dir = location.getParent();
 						fragment = searchFor(fragmentName, dir);
 						if (fragment != null)
-							libPath = searchFor("eclipse", fragment); //$NON-NLS-1$
+							libPath = getLibraryFromFragment(fragment);
 					}
 				}
 			}
@@ -396,7 +396,7 @@ public class Main {
 						if (fragment == null)
 							fragment = searchFor(fragmentName, dir);
 						if (fragment != null)
-							libPath = searchFor("eclipse", fragment); //$NON-NLS-1$
+							libPath = getLibraryFromFragment(fragment);
 					}
 				}
 			}
@@ -406,12 +406,57 @@ public class Main {
 				location += "/plugins/"; //$NON-NLS-1$
 				fragment = searchFor(fragmentName, location);
 				if (fragment != null)
-					libPath = searchFor("eclipse", fragment); //$NON-NLS-1$
+					libPath = getLibraryFromFragment(fragment);
 			}
 		}
 		library = libPath;
 		if (library != null)
 			bridge = new JNIBridge(library);
+	}
+
+	private String getLibraryFromFragment(String fragment) {
+		File frag = new File(fragment);
+		if (!frag.exists())
+			return null;
+
+		if (frag.isDirectory())
+			return searchFor("eclipse", fragment); //$NON-NLS-1$;
+
+		ZipFile fragmentJar = null;
+		try {
+			fragmentJar = new ZipFile(frag);
+		} catch (IOException e) {
+			log("Exception opening JAR file: " + fragment); //$NON-NLS-1$
+			log(e);
+			return null;
+		}
+
+		Enumeration entries = fragmentJar.entries();
+		String entry = null;
+		while (entries.hasMoreElements()) {
+			ZipEntry zipEntry = (ZipEntry) entries.nextElement();
+			if (zipEntry.getName().startsWith("eclipse_")) { //$NON-NLS-1$
+				entry = zipEntry.getName();
+				try {
+					fragmentJar.close();
+				} catch (IOException e) {
+					//ignore
+				}
+				break;
+			}
+		}
+		if (entry != null) {
+			String lib = extractFromJAR(fragment, entry);
+			if (!getOS().equals("win32")) { //$NON-NLS-1$
+				try {
+					Runtime.getRuntime().exec(new String[] {"chmod", "755", lib}).waitFor(); //$NON-NLS-1$ //$NON-NLS-2$
+				} catch (Throwable e) {
+					//ignore
+				}
+			}
+			return lib;
+		}
+		return null;
 	}
 
 	/**
@@ -1901,7 +1946,7 @@ public class Main {
 			for (int j = 0; j < searchPath.length; j++) {
 				// do we have a JAR?
 				if (isJAR(searchPath[j])) {
-					String result = extractSplashFromJAR(searchPath[j], nlVariants[i]);
+					String result = extractFromJAR(searchPath[j], nlVariants[i]);
 					if (result != null)
 						return result;
 				} else {
@@ -1963,10 +2008,10 @@ public class Main {
 	 * Look for the specified spash file in the given JAR and extract it to the config 
 	 * area for caching purposes.
 	 */
-	private String extractSplashFromJAR(String jarPath, String splashPath) {
+	private String extractFromJAR(String jarPath, String jarEntry) {
 		String configLocation = System.getProperty(PROP_CONFIG_AREA);
 		if (configLocation == null) {
-			log("Configuration area not set yet. Unable to extract splash from JAR'd plug-in: " + jarPath); //$NON-NLS-1$
+			log("Configuration area not set yet. Unable to extract " + jarEntry + " from JAR'd plug-in: " + jarPath); //$NON-NLS-1$ //$NON-NLS-2$
 			return null;
 		}
 		URL configURL = buildURL(configLocation, false);
@@ -1980,7 +2025,7 @@ public class Main {
 		if (cache.endsWith(".jar")) //$NON-NLS-1$
 			cache = cache.substring(0, cache.length() - 4);
 		splash = new File(splash, cache);
-		splash = new File(splash, splashPath);
+		splash = new File(splash, jarEntry);
 		// if we have already extracted this file before, then return
 		if (splash.exists()) {
 			// if we are running with -clean then delete the cached splash file
@@ -1999,11 +2044,11 @@ public class Main {
 		try {
 			file = new ZipFile(jarPath);
 		} catch (IOException e) {
-			log("Exception looking for splash  in JAR file: " + jarPath); //$NON-NLS-1$
+			log("Exception looking for " + jarEntry + " in JAR file: " + jarPath); //$NON-NLS-1$ //$NON-NLS-2$
 			log(e);
 			return null;
 		}
-		ZipEntry entry = file.getEntry(splashPath.replace(File.separatorChar, '/'));
+		ZipEntry entry = file.getEntry(jarEntry.replace(File.separatorChar, '/'));
 		if (entry == null)
 			return null;
 		InputStream input = null;
