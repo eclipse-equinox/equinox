@@ -1,0 +1,1 @@
+This folder will hold gtk.solaris.x86 binaries when they are contributed.
