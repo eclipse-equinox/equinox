@@ -88,7 +88,7 @@ public class HttpContextManager implements Listener {
 
 				IConfigurationElement[] resourceMappingElements = httpContextElement.getChildren(RESOURCEMAPPING);
 				for (int j = 0; j < resourceMappingElements.length; j++) {
-					IConfigurationElement resourceMappingElement = resourceMappingElements[i];
+					IConfigurationElement resourceMappingElement = resourceMappingElements[j];
 					String path = resourceMappingElement.getAttribute(PATH);
 					Bundle resourceBundle = contributingBundle;
 					String bundleName = resourceMappingElement.getAttribute(BUNDLE);
@@ -97,17 +97,17 @@ public class HttpContextManager implements Listener {
 						if (resourceBundle == null)
 							continue;
 						if (System.getSecurityManager() != null) {
-							AdminPermission resourcePermission = new AdminPermission(resourceBundle, "resource");  //$NON-NLS-1$
+							AdminPermission resourcePermission = new AdminPermission(resourceBundle, "resource"); //$NON-NLS-1$
 							if (!contributingBundle.hasPermission(resourcePermission))
 								continue;
 						}
-					}					
+					}
 					defaultContext.addResourceMapping(resourceBundle, path);
 				}
 
 				IConfigurationElement[] mimeMappingElements = httpContextElement.getChildren(MIMEMAPPING);
 				for (int j = 0; j < mimeMappingElements.length; j++) {
-					IConfigurationElement mimeMappingElement = mimeMappingElements[i];
+					IConfigurationElement mimeMappingElement = mimeMappingElements[j];
 					String mimeExtension = mimeMappingElement.getAttribute(MIMEEXTENSION);
 					String mimeType = mimeMappingElement.getAttribute(MIMETYPE);
 					defaultContext.addMimeMapping(mimeExtension, mimeType);
