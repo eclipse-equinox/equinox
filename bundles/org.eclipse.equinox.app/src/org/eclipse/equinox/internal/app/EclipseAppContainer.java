@@ -46,8 +46,8 @@ public class EclipseAppContainer implements IRegistryEventListener, SynchronousB
 	private static final String PT_PRODUCTS = "products"; //$NON-NLS-1$
 	private static final String EXT_ERROR_APP = "org.eclipse.equinox.app.error"; //$NON-NLS-1$
 
-	private static final String PROP_PRODUCT = "eclipse.product"; //$NON-NLS-1$
-	private static final String PROP_ECLIPSE_APPLICATION = "eclipse.application"; //$NON-NLS-1$
+	static final String PROP_PRODUCT = "eclipse.product"; //$NON-NLS-1$
+	static final String PROP_ECLIPSE_APPLICATION = "eclipse.application"; //$NON-NLS-1$
 	private static final String PROP_ECLIPSE_APPLICATION_LAUNCH_DEFAULT = "eclipse.application.launchDefault"; //$NON-NLS-1$
 
 	static final int NOT_LOCKED = 0;

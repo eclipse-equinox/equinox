@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.equinox.internal.app;
 
+import org.eclipse.osgi.service.environment.EnvironmentInfo;
+
 public class CommandLineArgs {
 	// obsolete command line args
 	private static final String NO_PACKAGE_PREFIXES = "-noPackagePrefixes"; //$NON-NLS-1$
@@ -35,7 +37,8 @@ public class CommandLineArgs {
 	private static String product;
 	private static String application;
 
-	static String[] processCommandLine(String[] args) {
+	static String[] processCommandLine(EnvironmentInfo envInfo) {
+		String[] args = envInfo.getNonFrameworkArgs();
 		if (args == null)
 			return args;
 		if (args.length == 0)
@@ -75,7 +78,7 @@ public class CommandLineArgs {
 			if (found) {
 				configArgs[configArgIndex++] = i;
 				// check if the obsolete arg had a second param
-				if (i < (args.length -1) && !args[i + 1].startsWith("-")) //$NON-NLS-1$
+				if (i < (args.length - 1) && !args[i + 1].startsWith("-")) //$NON-NLS-1$
 					configArgs[configArgIndex++] = ++i;
 				continue;
 			}
@@ -88,15 +91,15 @@ public class CommandLineArgs {
 			// look for the product to run
 			// treat -feature as a synonym for -product for compatibility.
 			if (args[i - 1].equalsIgnoreCase(PRODUCT) || args[i - 1].equalsIgnoreCase(FEATURE)) {
-				// use the long way to set the property to compile against eeminimum
 				product = arg;
+				envInfo.setProperty(EclipseAppContainer.PROP_PRODUCT, product);
 				found = true;
 			}
 
 			// look for the application to run.  
 			if (args[i - 1].equalsIgnoreCase(APPLICATION)) {
-				// use the long way to set the property to compile against eeminimum
 				application = arg;
+				envInfo.setProperty(EclipseAppContainer.PROP_ECLIPSE_APPLICATION, application);
 				found = true;
 			}
 

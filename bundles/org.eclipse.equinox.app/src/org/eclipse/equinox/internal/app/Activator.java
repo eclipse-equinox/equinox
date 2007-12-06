@@ -100,9 +100,8 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 		EnvironmentInfo envInfo = (EnvironmentInfo) bc.getService(infoRef);
 		if (envInfo == null)
 			return;
-		String[] args = envInfo.getNonFrameworkArgs();
 		bc.ungetService(infoRef);
-		CommandLineArgs.processCommandLine(args);
+		CommandLineArgs.processCommandLine(envInfo);
 	}
 
 	public Object addingService(ServiceReference reference) {
