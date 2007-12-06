@@ -46,6 +46,14 @@ public class CoreException extends Exception {
 
 	/**
 	 * Returns the status object for this exception.
+	 * <p>
+	 *   <b>IMPORTANT:</b><br>
+	 *   The result must NOT be used to log a <code>CoreException</code>
+	 *   (e.g., using <code>yourPlugin.getLog().log(status);</code>),
+	 *   since that code pattern hides the original stacktrace.
+	 *   Instead, create a new {@link Status} with your plug-in ID and
+	 *   this <code>CoreException</code>, and log that new status.
+	 * </p>
 	 *
 	 * @return a status object
 	 */
