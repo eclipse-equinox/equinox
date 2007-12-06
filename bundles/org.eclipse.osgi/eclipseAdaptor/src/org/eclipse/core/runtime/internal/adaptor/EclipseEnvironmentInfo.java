@@ -121,7 +121,7 @@ public class EclipseEnvironmentInfo implements EnvironmentInfo {
 						break;
 					default :
 						// if the user passed us in a bogus value then log a message and use the default
-						System.err.println(NLS.bind(EclipseAdaptorMsg.error_badNL, nl)); 
+						System.err.println(NLS.bind(EclipseAdaptorMsg.error_badNL, nl));
 						userLocale = Locale.getDefault();
 						break;
 				}
@@ -222,5 +222,13 @@ public class EclipseEnvironmentInfo implements EnvironmentInfo {
 		if (osName.regionMatches(true, 0, INTERNAL_OS_MACOSX, 0, INTERNAL_OS_MACOSX.length()))
 			return Constants.OS_MACOSX;
 		return Constants.OS_UNKNOWN;
+	}
+
+	public String getProperty(String key) {
+		return FrameworkProperties.getProperty(key);
+	}
+
+	public String setProperty(String key, String value) {
+		return FrameworkProperties.setProperty(key, value);
 	}
 }
