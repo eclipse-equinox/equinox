@@ -32,7 +32,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
  * container will discover installed eclipse applications and register the 
  * appropriate ApplicatoinDescriptor service with the service registry.
  */
-public class EclipseAppContainer implements IRegistryChangeListener, SynchronousBundleListener, ServiceTrackerCustomizer {
+public class EclipseAppContainer implements IRegistryEventListener, SynchronousBundleListener, ServiceTrackerCustomizer {
 	private static final String PI_RUNTIME = "org.eclipse.core.runtime"; //$NON-NLS-1$
 	private static final String PT_APPLICATIONS = "applications"; //$NON-NLS-1$
 	private static final String PT_APP_VISIBLE = "visible"; //$NON-NLS-1$
@@ -49,7 +49,6 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 	private static final String PROP_PRODUCT = "eclipse.product"; //$NON-NLS-1$
 	private static final String PROP_ECLIPSE_APPLICATION = "eclipse.application"; //$NON-NLS-1$
 	private static final String PROP_ECLIPSE_APPLICATION_LAUNCH_DEFAULT = "eclipse.application.launchDefault"; //$NON-NLS-1$
-	private static final String PROP_ECLIPSE_REGISTER_APP_DESC = "eclipse.application.registerDescriptors"; //$NON-NLS-1$
 
 	static final int NOT_LOCKED = 0;
 	static final int LOCKED_SINGLETON_GLOBAL_RUNNING = 1;
@@ -85,27 +84,19 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 
 	void start() {
 		launcherTracker.open();
-		extensionRegistry.addRegistryChangeListener(this);
+		extensionRegistry.addListener(this, PI_RUNTIME + '.' + PT_APPLICATIONS);
 		// need to listen for system bundle stopping
 		context.addBundleListener(this);
+		// register all the descriptors
+		registerAppDescriptors();
 		String startDefaultProp = context.getProperty(EclipseAppContainer.PROP_ECLIPSE_APPLICATION_LAUNCH_DEFAULT);
 		if (startDefaultProp == null || "true".equalsIgnoreCase(startDefaultProp)) { //$NON-NLS-1$
-			boolean registerDescs = "true".equalsIgnoreCase(context.getProperty(EclipseAppContainer.PROP_ECLIPSE_REGISTER_APP_DESC)); //$NON-NLS-1$
-			// register all the descriptors if requested to
-			if (registerDescs)
-				registerAppDescriptors();
 			// Start the default application
 			try {
 				startDefaultApp();
 			} catch (ApplicationException e) {
 				Activator.log(new FrameworkLogEntry(Activator.PI_APP, FrameworkLogEntry.ERROR, 0, Messages.application_errorStartDefault, 0, e, null));
-				if (!registerDescs)
-					// if an error occurred then register all desciptors if they were not registered already.
-					registerAppDescriptors();
 			}
-		} else {
-			// we are not running the default application; we should register all applications
-			registerAppDescriptors();
 		}
 	}
 
@@ -113,7 +104,7 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 		// stop all applications
 		stopAllApps();
 		context.removeBundleListener(this);
-		extensionRegistry.removeRegistryChangeListener(this);
+		extensionRegistry.removeListener(this);
 		// flush the apps
 		apps.clear();
 		branding = null;
@@ -139,6 +130,8 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 	}
 
 	private EclipseAppDescriptor createAppDescriptor(IExtension appExtension) {
+		if (Activator.DEBUG)
+			System.out.println("Creating application descriptor: " + appExtension.getUniqueIdentifier()); //$NON-NLS-1$
 		String iconPath = null;
 		synchronized (apps) {
 			EclipseAppDescriptor appDescriptor = (EclipseAppDescriptor) apps.get(appExtension.getUniqueIdentifier());
@@ -193,6 +186,8 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 	}
 
 	private EclipseAppDescriptor removeAppDescriptor(String applicationId) {
+		if (Activator.DEBUG)
+			System.out.println("Removing application descriptor: " + applicationId); //$NON-NLS-1$
 		synchronized (apps) {
 			EclipseAppDescriptor appDescriptor = (EclipseAppDescriptor) apps.remove(applicationId);
 			if (appDescriptor == null)
@@ -340,24 +335,6 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 					}
 				}
 				appLauncher.launch(curDefaultApplicationListener, null);
-			}
-		}
-	}
-
-	public void registryChanged(IRegistryChangeEvent event) {
-		processAppDeltas(event.getExtensionDeltas(PI_RUNTIME, PT_APPLICATIONS));
-		processAppDeltas(event.getExtensionDeltas(Activator.PI_APP, PT_APPLICATIONS));
-	}
-
-	private void processAppDeltas(IExtensionDelta[] deltas) {
-		for (int i = 0; i < deltas.length; i++) {
-			switch (deltas[i].getKind()) {
-				case IExtensionDelta.ADDED :
-					createAppDescriptor(deltas[i].getExtension());
-					break;
-				case IExtensionDelta.REMOVED :
-					removeAppDescriptor(deltas[i].getExtension().getUniqueIdentifier());
-					break;
 			}
 		}
 	}
@@ -607,5 +584,23 @@ public class EclipseAppContainer implements IRegistryChangeListener, Synchronous
 
 	public void removedService(ServiceReference reference, Object service) {
 		// Do nothing
+	}
+
+	public void added(IExtension[] extensions) {
+		for (int i = 0; i < extensions.length; i++)
+			createAppDescriptor(extensions[i]);
+	}
+
+	public void added(IExtensionPoint[] extensionPoints) {
+		// nothing
+	}
+
+	public void removed(IExtension[] extensions) {
+		for (int i = 0; i < extensions.length; i++)
+			removeAppDescriptor(extensions[i].getUniqueIdentifier());
+	}
+
+	public void removed(IExtensionPoint[] extensionPoints) {
+		// nothing
 	}
 }

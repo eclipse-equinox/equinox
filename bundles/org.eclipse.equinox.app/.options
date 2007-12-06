@@ -1,0 +1,4 @@
+#### Debugging options for org.eclipse.equinox.app
+
+# Turn on general debugging for org.eclipse.osgi
+org.eclipse.equinox.app/debug=false
