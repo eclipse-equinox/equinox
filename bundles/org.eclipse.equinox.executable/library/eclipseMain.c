@@ -50,6 +50,7 @@ static int      suppressErrors = 0;				/* supress error dialogs */
 static int 	 	createUserArgs(int configArgc, _TCHAR **configArgv, int *argc, _TCHAR ***argv);
 static void  	parseArgs( int* argc, _TCHAR* argv[] );
 static _TCHAR* 	getDefaultOfficialName(_TCHAR* program);
+static _TCHAR*  findProgram(_TCHAR* argv[]);
 static _TCHAR*  findLibrary(_TCHAR* library, _TCHAR* program);
 static _TCHAR*  checkForIni(int argc, _TCHAR* argv[]);
  
@@ -127,20 +128,7 @@ int main( int argc, _TCHAR* argv[] )
 	 }
 	 
 	 /* Determine the full pathname of this program. */
-    program = findCommand( argv[0] );
-    if (program == NULL)
-    {
-#ifdef _WIN32
-    	program = malloc( MAX_PATH_LENGTH + 1 );
-    	GetModuleFileName( NULL, program, MAX_PATH_LENGTH );
-    	argv[0] = program;
-#else
-    	program = malloc( (strlen( argv[0] ) + 1) * sizeof(_TCHAR) );
-    	strcpy( program, argv[0] );
-#endif
-    } else if (_tcscmp(argv[0], program) != 0) {
-    	argv[0] = program;
-    }
+	 program = findProgram(argv);
     
     /* Parse configuration file arguments */
     iniFile = checkForIni(argc, argv);
@@ -214,6 +202,40 @@ int main( int argc, _TCHAR* argv[] )
     free( officialName );
     
 	return exitCode;
+}
+
+static _TCHAR* findProgram(_TCHAR* argv[]) {
+	_TCHAR * program;
+#ifdef _WIN32
+	 /* windows, make sure we are looking for the .exe */
+	_TCHAR * ch;
+	int length = _tcslen(argv[0]);
+	ch = malloc( (length + 5) * sizeof(_TCHAR));
+	_tcscpy(ch, argv[0]);
+	 
+	if (length <= 4 || _tcsicmp( &ch[ length - 4 ], _T_ECLIPSE(".exe") ) != 0)
+		_tcscat(ch, _T_ECLIPSE(".exe"));
+	
+	program = findCommand(ch);
+	if (ch != program)
+		free(ch);
+#else
+	program = findCommand( argv[0] );
+#endif
+    if (program == NULL)
+    {
+#ifdef _WIN32
+    	program = malloc( MAX_PATH_LENGTH + 1 );
+    	GetModuleFileName( NULL, program, MAX_PATH_LENGTH );
+    	argv[0] = program;
+#else
+    	program = malloc( (strlen( argv[0] ) + 1) * sizeof(_TCHAR) );
+    	strcpy( program, argv[0] );
+#endif
+    } else if (_tcscmp(argv[0], program) != 0) {
+    	argv[0] = program;
+    }
+    return program;
 }
 
 /*

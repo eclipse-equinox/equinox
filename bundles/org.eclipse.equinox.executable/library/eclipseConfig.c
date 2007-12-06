@@ -38,8 +38,9 @@ int readIniFile(_TCHAR* program, int *argc, _TCHAR ***argv)
 	
 	if (program == NULL || argc == NULL || argv == NULL) return -1;
 
-	/* Get a copy */
-	config_file = _tcsdup(program);
+	/* Get a copy with room for .ini at the end */
+	config_file = malloc( (_tcslen(program) + 5) * sizeof(_TCHAR));
+	_tcscpy(config_file, program);
 	
 #ifdef _WIN32
 	{
@@ -47,8 +48,8 @@ int readIniFile(_TCHAR* program, int *argc, _TCHAR ***argv)
 		_TCHAR *extension = _tcsrchr(config_file, _T_ECLIPSE('.'));
 		if (extension == NULL || _tcslen(extension) < 4)
 		{
-			free(config_file);
-			return -2;
+			/* does not end with an extension, just append .ini */
+			extension = config_file + _tcslen(config_file);
 		}
 		_tcscpy(extension, _T_ECLIPSE(".ini"));
 #ifdef _WIN32_CONSOLE
@@ -64,7 +65,6 @@ int readIniFile(_TCHAR* program, int *argc, _TCHAR ***argv)
 	}
 #else
 	/* Append the extension */
-	config_file = (char*)realloc(config_file, (strlen(config_file) + 5) * sizeof(_TCHAR));
 	strcat(config_file, ".ini");
 #endif
 	
