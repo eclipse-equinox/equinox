@@ -1897,7 +1897,7 @@ public class Main {
 			ArrayList path = new ArrayList(entries.length);
 			for (int i = 0; i < entries.length; i++) {
 				String entry = resolve(entries[i]);
-				if (entry == null || entry.startsWith(FILE_SCHEME)) {
+				if (entry != null && entry.startsWith(FILE_SCHEME)) {
 					File entryFile = new File(entry.substring(5).replace('/', File.separatorChar));
 					entry = searchFor(entryFile.getName(), entryFile.getParent());
 					if (entry != null)
