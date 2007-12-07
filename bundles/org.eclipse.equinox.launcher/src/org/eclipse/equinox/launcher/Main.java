@@ -1791,23 +1791,18 @@ public class Main {
 
 	/*
 	 * Handle splash screen.
-	 * We support 2 startup scenarios:
+	 *  The splash screen is displayed natively.  Whether or not the splash screen
+	 *  was displayed by the launcher, we invoke JNIBridge.showSplash() and the 
+	 *  native code handles the case of the splash screen already existing.
 	 * 
-	 * (1) the executable launcher put up the splash screen. In that
-	 *     scenario we are invoked with -endsplash command which is
-	 *     fully formed to take down the splash screen
+	 * The -showsplash argument may indicate the bitmap used by the native launcher,
+	 * or the bitmap location may be extracted from the config.ini
 	 * 
-	 * (2) the executable launcher did not put up the splash screen,
-	 *     but invokes Eclipse with partially formed -showsplash command.
-	 *     In this scenario we determine which splash to display (based on 
-	 *     feature information) and then call -showsplash command. 
+	 * We pass a handler (Runnable) to the platform which is called as a result of the
+	 * launched application calling Platform.endSplash(). This handle calls 
+	 * JNIBridge.takeDownSplash and the native code will close the splash screen.
 	 * 
-	 * In both scenarios we pass a handler (Runnable) to the platform.
-	 * The handler is called as a result of the launched application calling
-	 * Platform.endSplash(). In the first scenario this results in the
-	 * -endsplash command being executed. In the second scenario this
-	 * results in the process created as a result of the -showsplash command
-	 * being destroyed.
+	 * The -endsplash argument is longer used and has the same result as -nosplash
 	 * 
 	 * @param defaultPath search path for the boot plugin
 	 */
