@@ -221,6 +221,15 @@ _TCHAR* findSymlinkCommand( _TCHAR* command, int resolve )
         {
             /* Get the directory PATH where executables reside. */
             path = _tgetenv( _T_ECLIPSE("PATH") );
+#ifdef _WIN32
+            /* on windows, prepend the current directory */
+            ch = malloc((_tcslen(path) + MAX_PATH_LENGTH + 2) * sizeof(_TCHAR));
+            _tgetcwd( ch, MAX_PATH_LENGTH );
+            length = _tcslen(ch);
+            ch[length] = pathSeparator;
+            _tcscpy(&ch[length + 1], path);
+            path = ch;
+#endif
             if (!path)
             {
 	            return NULL;
