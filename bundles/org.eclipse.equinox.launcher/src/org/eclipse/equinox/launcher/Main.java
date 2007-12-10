@@ -1907,20 +1907,6 @@ public class Main {
 				return result;
 			}
 		}
-
-		// can't find it on the splashPath so look for a default splash
-		String temp = bootPath[0].getFile(); // take the first path element
-		temp = temp.replace('/', File.separatorChar);
-		int ix = temp.lastIndexOf("plugins" + File.separator); //$NON-NLS-1$
-		if (ix != -1) {
-			int pix = temp.indexOf(File.separator, ix + 8);
-			if (pix != -1) {
-				temp = temp.substring(0, pix);
-				result = searchForSplash(new String[] {temp});
-				if (result != null)
-					System.getProperties().put(PROP_SPLASHLOCATION, result);
-			}
-		}
 		return result;
 	}
 
