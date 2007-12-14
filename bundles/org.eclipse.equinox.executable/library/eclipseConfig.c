@@ -46,7 +46,7 @@ int readIniFile(_TCHAR* program, int *argc, _TCHAR ***argv)
 	{
 		/* Search for the extension .exe and replace it with .ini */
 		_TCHAR *extension = _tcsrchr(config_file, _T_ECLIPSE('.'));
-		if (extension == NULL || _tcslen(extension) < 4)
+		if (extension == NULL)
 		{
 			/* does not end with an extension, just append .ini */
 			extension = config_file + _tcslen(config_file);
