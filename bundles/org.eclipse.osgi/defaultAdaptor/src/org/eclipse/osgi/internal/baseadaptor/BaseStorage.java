@@ -1095,11 +1095,15 @@ public class BaseStorage implements SynchronousBundleListener {
 		BundleDescription newDescription = null;
 		switch (type) {
 			case BundleEvent.UPDATED :
-				oldDescription = systemState.removeBundle(bundleData.getBundleID());
 				// fall through to INSTALLED
 			case BundleEvent.INSTALLED :
+				if (type == BundleEvent.UPDATED)
+					oldDescription = systemState.getBundle(bundleData.getBundleID());
 				newDescription = stateManager.getFactory().createBundleDescription(systemState, bundleData.getManifest(), bundleData.getLocation(), bundleData.getBundleID());
-				systemState.addBundle(newDescription);
+				if (oldDescription == null)
+					systemState.addBundle(newDescription);
+				else
+					systemState.updateBundle(newDescription);
 				break;
 			case BundleEvent.UNINSTALLED :
 				systemState.removeBundle(bundleData.getBundleID());
@@ -1114,10 +1118,10 @@ public class BaseStorage implements SynchronousBundleListener {
 				verified = true;
 			} finally {
 				if (!verified) {
-					if (newDescription != null)
-						systemState.removeBundle(newDescription);
 					if (oldDescription != null)
-						systemState.addBundle(oldDescription);
+						systemState.updateBundle(oldDescription);
+					else
+						systemState.removeBundle(newDescription);
 				}
 			}
 		}

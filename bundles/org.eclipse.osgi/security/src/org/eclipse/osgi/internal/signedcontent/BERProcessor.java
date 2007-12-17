@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006 IBM Corporation and others.
+ * Copyright (c) 2006, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,9 +9,10 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.osgi.internal.verifier;
+package org.eclipse.osgi.internal.signedcontent;
 
 import java.math.BigInteger;
+import java.security.SignatureException;
 
 /**
  * This is a simple class that processes BER structures. This class
@@ -82,8 +83,9 @@ public class BERProcessor {
 	 * @param buffer the buffer containing the BER structures.
 	 * @param offset the offset into <code>buffer</code> to the start of the first structure.
 	 * @param len the length of the BER structure.
+	 * @throws SignatureException 
 	 */
-	public BERProcessor(byte buffer[], int offset, int len) {
+	public BERProcessor(byte buffer[], int offset, int len) throws SignatureException {
 		this.buffer = buffer;
 		this.offset = offset;
 		lastOffset = len + offset;
@@ -96,7 +98,7 @@ public class BERProcessor {
 	 * <code>offset</code> is modified outside of those methods, this method will need to
 	 * be invoked.
 	 */
-	public void processStructure() {
+	public void processStructure() throws SignatureException {
 		// Don't process if we are at the end
 		if (offset == -1)
 			return;
@@ -111,7 +113,7 @@ public class BERProcessor {
 			tag = tagNumber;
 			endOffset = offset + 1;
 		} else {
-			throw new IllegalArgumentException("Can't handle tags > 32"); //$NON-NLS-1$
+			throw new SignatureException("Can't handle tags > 32"); //$NON-NLS-1$
 		}
 		if ((buffer[endOffset] & 0x80) == 0) {
 			// section 8.1.3.4 (doing the short form of the length)
@@ -121,7 +123,7 @@ public class BERProcessor {
 			// section 8.1.3.5 (doing the long form of the length)
 			int octetCount = buffer[endOffset] & 0x7f;
 			if (octetCount > 3)
-				throw new ArrayIndexOutOfBoundsException("ContentLength octet count too large: " + octetCount); //$NON-NLS-1$
+				throw new SignatureException("ContentLength octet count too large: " + octetCount); //$NON-NLS-1$
 			contentLength = 0;
 			endOffset++;
 			for (int i = 0; i < octetCount; i++) {
@@ -137,7 +139,7 @@ public class BERProcessor {
 		if (contentLength != -1)
 			endOffset += contentLength;
 		if (endOffset > lastOffset)
-			throw new ArrayIndexOutOfBoundsException(endOffset + " > " + lastOffset); //$NON-NLS-1$
+			throw new SignatureException("Content length too large: " + endOffset + " > " + lastOffset); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	/**
@@ -190,12 +192,13 @@ public class BERProcessor {
 
 	/**
 	 * Returns a BERProcessor for the content of the current structure.
+	 * @throws SignatureException 
 	 */
-	public BERProcessor stepInto() {
+	public BERProcessor stepInto() throws SignatureException {
 		return new BERProcessor(buffer, contentOffset, contentLength);
 	}
 
-	public void stepOver() {
+	public void stepOver() throws SignatureException {
 		offset = endOffset;
 		if (endOffset >= lastOffset) {
 			offset = -1;

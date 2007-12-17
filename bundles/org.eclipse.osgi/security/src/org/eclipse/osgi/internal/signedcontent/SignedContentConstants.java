@@ -7,9 +7,9 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-package org.eclipse.osgi.internal.verifier;
+package org.eclipse.osgi.internal.signedcontent;
 
-public interface JarVerifierConstant {
+public interface SignedContentConstants {
 
 	public static final String SHA1_STR = "SHA1"; //$NON-NLS-1$
 	public static final String MD5_STR = "MD5"; //$NON-NLS-1$
@@ -39,11 +39,15 @@ public interface JarVerifierConstant {
 	public static final int DSA_OID[] = {1, 2, 840, 10040, 4, 1};
 	public static final int RSA_OID[] = {1, 2, 840, 113549, 1, 1, 1};
 
-	// constant for certs chain trust service
-	public static final String TRUST_AUTHORITY = "osgi.certificate.trust.authority"; //$NON-NLS-1$
-	public static final Object DEFAULT_TRUST_AUTHORITY = "org.eclipse.osgi"; //$NON-NLS-1$
+	// constant for trust engine service
+	public static final String TRUST_ENGINE = "osgi.signedcontent.trust.engine"; //$NON-NLS-1$
+	public static final Object DEFAULT_TRUST_ENGINE = "org.eclipse.osgi"; //$NON-NLS-1$
 
-	// consttant for the timestamp related
+	// constants for authorization engine service
+	public static final String AUTHORIZATION_ENGINE = "osgi.signedcontent.authorization.engine"; //$NON-NLS-1$
+	public static final Object DEFAULT_AUTHORIZATION_ENGINE = "org.eclipse.osgi"; //$NON-NLS-1$
+
+	// constant for the timestamp related
 	public static final int TIMESTAMP_OID[] = {1, 2, 840, 113549, 1, 9, 16, 2, 14};
 	public static final int TIMESTAMP_TST_OID[] = {1, 2, 840, 113549, 1, 9, 16, 1, 4};
 	public static final int SIGNING_TIME[] = {1, 2, 840, 113549, 1, 9, 5};

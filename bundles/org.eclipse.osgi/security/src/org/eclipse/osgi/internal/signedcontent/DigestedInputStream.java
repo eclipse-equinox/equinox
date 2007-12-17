@@ -9,10 +9,16 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.osgi.internal.verifier;
+package org.eclipse.osgi.internal.signedcontent;
 
-import java.io.*;
+import java.io.FilterInputStream;
+import java.io.IOException;
 import java.security.MessageDigest;
+import org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry;
+import org.eclipse.osgi.baseadaptor.bundlefile.BundleFile;
+import org.eclipse.osgi.signedcontent.InvalidContentException;
+import org.eclipse.osgi.signedcontent.SignerInfo;
+import org.eclipse.osgi.util.NLS;
 
 /**
  * This InputStream will calculate the digest of bytes as they are read. At the
@@ -20,9 +26,11 @@ import java.security.MessageDigest;
  * if the calculated digest do not match the expected digests.
  */
 class DigestedInputStream extends FilterInputStream {
-	MessageDigest digest;
-	byte result[];
-	long remaining;
+	private final MessageDigest digests[];
+	private final byte result[][];
+	private final BundleEntry entry;
+	private final BundleFile bundleFile;
+	private long remaining;
 
 	/**
 	 * Constructs an InputStream that uses another InputStream as a source and
@@ -30,14 +38,19 @@ class DigestedInputStream extends FilterInputStream {
 	 * thrown if the calculated digest doesn't match the passed digest.
 	 * 
 	 * @param in the stream to use as an input source.
-	 * @param digestAlgorithm the MessageDigest algorithm to use.
-	 * @param result the expected digest.
+	 * @param signerInfos the signers.
+	 * @param results the expected digest.
+	 * @throws IOException 
 	 */
-	DigestedInputStream(InputStream in, String digestAlgorithm, byte result[], long size) {
-		super(in);
+	DigestedInputStream(BundleEntry entry, BundleFile bundleFile, SignerInfo[] signerInfos, byte results[][], long size) throws IOException {
+		super(entry.getInputStream());
+		this.entry = entry;
+		this.bundleFile = bundleFile;
 		this.remaining = size;
-		this.digest = SignedBundleFile.getMessageDigest(digestAlgorithm);
-		this.result = result;
+		this.digests = new MessageDigest[signerInfos.length];
+		for (int i = 0; i < signerInfos.length; i++)
+			this.digests[i] = SignatureBlockProcessor.getMessageDigest(signerInfos[i].getMessageDigestAlgorithm());
+		this.result = results;
 	}
 
 	/**
@@ -69,7 +82,8 @@ class DigestedInputStream extends FilterInputStream {
 			return -1;
 		int c = super.read();
 		if (c != -1) {
-			digest.update((byte) c);
+			for (int i = 0; i < digests.length; i++)
+				digests[i].update((byte) c);
 			remaining--;
 		} else {
 			// We hit eof so set remaining to zero
@@ -80,11 +94,13 @@ class DigestedInputStream extends FilterInputStream {
 		return c;
 	}
 
-	private void verifyDigests() throws IOException {
+	private void verifyDigests() throws InvalidContentException {
 		// Check the digest at end of file
-		byte rc[] = digest.digest();
-		if (!MessageDigest.isEqual(result, rc))
-			throw new IOException("Corrupted file: the digest is valid for " + digest.getAlgorithm()); //$NON-NLS-1$
+		for (int i = 0; i < digests.length; i++) {
+			byte rc[] = digests[i].digest();
+			if (!MessageDigest.isEqual(result[i], rc))
+				throw new InvalidContentException(NLS.bind(SignedContentMessages.File_In_Jar_Is_Tampered, entry.getName(), bundleFile.getBaseFile()), null);
+		}
 	}
 
 	/**
@@ -102,7 +118,8 @@ class DigestedInputStream extends FilterInputStream {
 			return -1;
 		int rc = super.read(b, off, len);
 		if (rc != -1) {
-			digest.update(b, off, rc);
+			for (int i = 0; i < digests.length; i++)
+				digests[i].update(b, off, rc);
 			remaining -= rc;
 		} else {
 			// We hit eof so set remaining to zero

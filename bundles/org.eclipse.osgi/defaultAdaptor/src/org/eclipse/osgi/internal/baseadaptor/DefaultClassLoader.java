@@ -24,8 +24,9 @@ import org.eclipse.osgi.baseadaptor.loader.*;
 import org.eclipse.osgi.framework.adaptor.BundleData;
 import org.eclipse.osgi.framework.adaptor.ClassLoaderDelegate;
 import org.eclipse.osgi.framework.debug.Debug;
-import org.eclipse.osgi.internal.provisional.verifier.CertificateChain;
-import org.eclipse.osgi.internal.provisional.verifier.CertificateVerifier;
+import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
+import org.eclipse.osgi.signedcontent.SignedContent;
+import org.eclipse.osgi.signedcontent.SignerInfo;
 
 /**
  * The default implemention of <code>BaseClassLoader</code>.  This implementation extends
@@ -38,7 +39,10 @@ public class DefaultClassLoader extends ClassLoader implements BaseClassLoader {
 	 * A PermissionCollection for AllPermissions; shared across all ProtectionDomains when security is disabled
 	 */
 	protected static final PermissionCollection ALLPERMISSIONS;
+	private final static String CLASS_CERTIFICATE_SUPPORT = "osgi.support.class.certificate"; //$NON-NLS-1$
+	private static final boolean CLASS_CERTIFICATE;
 	static {
+		CLASS_CERTIFICATE = Boolean.valueOf(FrameworkProperties.getProperty(CLASS_CERTIFICATE_SUPPORT, "true")).booleanValue(); //$NON-NLS-1$
 		AllPermission allPerm = new AllPermission();
 		ALLPERMISSIONS = allPerm.newPermissionCollection();
 		if (ALLPERMISSIONS != null)
@@ -219,9 +223,11 @@ public class DefaultClassLoader extends ClassLoader implements BaseClassLoader {
 				// this is done just incase someone sets the security manager later
 				permissions = ALLPERMISSIONS;
 			Certificate[] certs = null;
-			if (bundlefile instanceof CertificateVerifier) {
-				CertificateChain[] chains = ((CertificateVerifier) bundlefile).getChains();
-				certs = chains == null || chains.length == 0 ? null : chains[0].getCertificates();
+			SignedContent signedContent = (bundlefile instanceof SignedContent) ? (SignedContent) bundlefile : null;
+			if (CLASS_CERTIFICATE && signedContent != null && signedContent.isSigned()) {
+				SignerInfo[] signers = signedContent.getSignerInfos();
+				if (signers.length > 0)
+					certs = signers[0].getCertificateChain();
 			}
 			return new ProtectionDomain(new CodeSource(bundlefile.getBaseFile().toURL(), certs), permissions);
 		} catch (MalformedURLException e) {

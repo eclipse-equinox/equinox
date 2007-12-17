@@ -470,6 +470,7 @@ public interface State {
 	 * in the system. Use {@link #getDisabledInfos(BundleDescription)} to interrogate the reason that
 	 * each bundle is disabled.
 	 * @return the array of disabled bundles.  An empty array is returned if no bundles are disabled.
+	 * @see DisabledInfo
 	 */
 	public BundleDescription[] getDisabledBundles();
 

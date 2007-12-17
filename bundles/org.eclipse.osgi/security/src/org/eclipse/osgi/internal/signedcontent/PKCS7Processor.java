@@ -6,31 +6,25 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-package org.eclipse.osgi.internal.verifier;
+package org.eclipse.osgi.internal.signedcontent;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.math.BigInteger;
 import java.security.*;
 import java.security.cert.*;
 import java.security.cert.Certificate;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.text.*;
 import java.util.*;
-
 import javax.security.auth.x500.X500Principal;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
-import org.eclipse.osgi.internal.provisional.verifier.CertificateChain;
-import org.eclipse.osgi.internal.provisional.verifier.CertificateTrustAuthority;
 import org.eclipse.osgi.util.NLS;
 
 /**
  * This class processes a PKCS7 file. See RFC 2315 for specifics.
  */
-public class PKCS7Processor implements CertificateChain, JarVerifierConstant {
+public class PKCS7Processor implements SignedContentConstants {
 
-	private static CertificateFactory certFact;
+	static CertificateFactory certFact;
 
 	static {
 		try {
@@ -40,10 +34,11 @@ public class PKCS7Processor implements CertificateChain, JarVerifierConstant {
 		}
 	}
 
-	private String certChain;
+	private final String signer;
+	private final String file;
+
 	private Certificate[] certificates;
 	private Certificate[] tsaCertificates;
-	private boolean trusted;
 
 	// key(object id) = value(structure)
 	private Map signedAttrs;
@@ -59,7 +54,7 @@ public class PKCS7Processor implements CertificateChain, JarVerifierConstant {
 	private Certificate signerCert;
 	private Date signingTime;
 
-	String oid2String(int oid[]) {
+	private static String oid2String(int oid[]) {
 		StringBuffer sb = new StringBuffer();
 		for (int i = 0; i < oid.length; i++) {
 			if (i > 0)
@@ -69,7 +64,7 @@ public class PKCS7Processor implements CertificateChain, JarVerifierConstant {
 		return sb.toString();
 	}
 
-	String findEncryption(int encOid[]) throws NoSuchAlgorithmException {
+	private static String findEncryption(int encOid[]) throws NoSuchAlgorithmException {
 		if (Arrays.equals(DSA_OID, encOid)) {
 			return "DSA"; //$NON-NLS-1$
 		}
@@ -79,7 +74,7 @@ public class PKCS7Processor implements CertificateChain, JarVerifierConstant {
 		throw new NoSuchAlgorithmException("No algorithm found for " + oid2String(encOid)); //$NON-NLS-1$
 	}
 
-	String findDigest(int digestOid[]) throws NoSuchAlgorithmException {
+	private static String findDigest(int digestOid[]) throws NoSuchAlgorithmException {
 		if (Arrays.equals(SHA1_OID, digestOid)) {
 			return SHA1_STR;
 		}
@@ -92,32 +87,9 @@ public class PKCS7Processor implements CertificateChain, JarVerifierConstant {
 		throw new NoSuchAlgorithmException("No algorithm found for " + oid2String(digestOid)); //$NON-NLS-1$
 	}
 
-	/*
-	 * static void printBP(BERProcessor bp, int depth) {
-	 * System.out.print(depth); for(int i = 0; i < depth; i++)
-	 * System.out.print(" "); System.out.println(bp); }
-	 * 
-	 * static void dumpSeq(BERProcessor bp, int depth) {
-	 * while(!bp.endOfSequence()) { printBP(bp, depth); if (bp.constructed) {
-	 * dumpSeq(bp.stepInto(), depth+1); } bp.stepOver(); } }
-	 * 
-	 * void hexDump(byte buffer[], int off, int len) { for(int i = 0; i < len;
-	 * i++) { System.out.print(Integer.toString(buffer[i]&0xff, 16) + " "); if
-	 * (i % 16 == 15) System.out.println(); } System.out.println(); }
-	 */
-
-	public PKCS7Processor(String certChain, boolean trusted, byte[][] certificates, long signingTime) throws CertificateException {
-		this.certChain = certChain;
-		this.trusted = trusted;
-		this.certificates = new Certificate[certificates.length];
-		for (int i = 0; i < certificates.length; i++)
-			this.certificates[i] = certFact.generateCertificate(new ByteArrayInputStream(certificates[i]));
-		if (signingTime > Long.MIN_VALUE)
-			this.signingTime = new Date(signingTime);
-	}
-
-	public PKCS7Processor(byte pkcs7[], int pkcs7Offset, int pkcs7Length) throws IOException, CertificateException, NoSuchAlgorithmException {
-
+	public PKCS7Processor(byte pkcs7[], int pkcs7Offset, int pkcs7Length, String signer, String file) throws CertificateException, NoSuchAlgorithmException, InvalidKeyException, SignatureException, NoSuchProviderException {
+		this.signer = signer;
+		this.file = file;
 		// First grab the certificates
 		List certs = null;
 
@@ -128,7 +100,7 @@ public class PKCS7Processor implements CertificateChain, JarVerifierConstant {
 		// PKCS7: Step into the ContentType
 		bp = bp.stepInto();
 		if (!Arrays.equals(bp.getObjId(), SIGNEDDATA_OID)) {
-			throw new IOException("Not a valid PKCS#7 file"); //$NON-NLS-1$
+			throw new SignatureException(NLS.bind(SignedContentMessages.PKCS7_Invalid_File, signer, file));
 		}
 
 		// PKCS7: Process the SignedData structure
@@ -163,25 +135,15 @@ public class PKCS7Processor implements CertificateChain, JarVerifierConstant {
 		// construct the cert path
 		certs = constructCertPath(certs, signerCert);
 
-		// set the cert chain variable
-		int numCerts = certs.size();
-		StringBuffer sb = new StringBuffer();
-		for (int i = 0; i < numCerts; i++) {
-			X509Certificate x509Cert = ((X509Certificate) certs.get(i));
-			sb.append(x509Cert.getSubjectDN().getName());
-			sb.append("; "); //$NON-NLS-1$
-		}
-		certChain = sb.toString();
-
 		// initialize the certificates
-		certificates = (Certificate[]) certs.toArray(new Certificate[numCerts]);
-
+		certificates = (Certificate[]) certs.toArray(new Certificate[certs.size()]);
+		verifyCerts();
 		// if this pkcs7process is tsa asn.1 block, the signingTime should already be set
-		if (null == signingTime)
-			signingTime = PKCS7DateParser.parseDate(this);
+		if (signingTime == null)
+			signingTime = PKCS7DateParser.parseDate(this, signer, file);
 	}
 
-	private void processEncapContentInfo(BERProcessor bp) throws IOException {
+	private void processEncapContentInfo(BERProcessor bp) throws SignatureException {
 		// check immediately if TSTInfo is there
 		BERProcessor encapContentBERS = bp.stepInto();
 		if (Arrays.equals(encapContentBERS.getObjId(), TIMESTAMP_TST_OID)) {
@@ -198,9 +160,8 @@ public class PKCS7Processor implements CertificateChain, JarVerifierConstant {
 			BERProcessor eContentBER = eContentStructure.stepInto();
 			int tsaVersion = eContentBER.getIntValue().intValue();
 
-			if (tsaVersion != 1) {
-				throw new IOException("Not a version 1 time-stamp token"); //$NON-NLS-1$
-			}
+			if (tsaVersion != 1)
+				throw new SignatureException("Not a version 1 time-stamp token"); //$NON-NLS-1$
 
 			// policty : TSAPolicyId
 			eContentBER.stepOver();
@@ -216,9 +177,8 @@ public class PKCS7Processor implements CertificateChain, JarVerifierConstant {
 
 			// check time ends w/ 'Z'
 			String dateString = new String(eContentBER.getBytes());
-			if (!dateString.endsWith("Z")) { //$NON-NLS-1$
-				throw new IOException("Wrong dateformat used in time-stamp token"); //$NON-NLS-1$
-			}
+			if (!dateString.endsWith("Z")) //$NON-NLS-1$
+				throw new SignatureException("Wrong dateformat used in time-stamp token"); //$NON-NLS-1$
 
 			// create the appropriate date time string format
 			// date format could be yyyyMMddHHmmss[.s...]Z or yyyyMMddHHmmssZ
@@ -241,7 +201,7 @@ public class PKCS7Processor implements CertificateChain, JarVerifierConstant {
 				dateFormt.setTimeZone(TimeZone.getTimeZone("GMT")); //$NON-NLS-1$
 				signingTime = dateFormt.parse(dateString);
 			} catch (ParseException e) {
-				throw new IOException(JarVerifierMessages.PKCS7_Parse_Signing_Time_1);
+				throw new SignatureException(SignedContentMessages.PKCS7_Parse_Signing_Time);
 			}
 		}
 	}
@@ -281,9 +241,9 @@ public class PKCS7Processor implements CertificateChain, JarVerifierConstant {
 		return certsList;
 	}
 
-	public void validateCerts() throws CertificateExpiredException, CertificateNotYetValidException, InvalidKeyException, SignatureException {
+	public void verifyCerts() throws InvalidKeyException, SignatureException, CertificateException, NoSuchAlgorithmException, NoSuchProviderException {
 		if (certificates == null || certificates.length == 0) {
-			throw new SecurityException("There are no certificates in the signature block file!"); //$NON-NLS-1$
+			throw new CertificateException("There are no certificates in the signature block file!"); //$NON-NLS-1$
 		}
 
 		int len = certificates.length;
@@ -291,34 +251,17 @@ public class PKCS7Processor implements CertificateChain, JarVerifierConstant {
 		// check the certs validity and signatures
 		for (int i = 0; i < len; i++) {
 			X509Certificate currentX509Cert = (X509Certificate) certificates[i];
-
-			if (signingTime == null)
-				currentX509Cert.checkValidity();
-			else
-				currentX509Cert.checkValidity(signingTime);
-
-			try {
-				if (i == len - 1) {
-					if (currentX509Cert.getSubjectDN().equals(currentX509Cert.getIssuerDN()))
-						currentX509Cert.verify(currentX509Cert.getPublicKey());
-				} else {
-					X509Certificate nextX509Cert = (X509Certificate) certificates[i + 1];
-					currentX509Cert.verify(nextX509Cert.getPublicKey());
-				}
-			} catch (NoSuchAlgorithmException e) {
-				SignedBundleHook.log(e.getMessage(), FrameworkLogEntry.ERROR, e);
-				throw new SecurityException(NLS.bind(JarVerifierMessages.No_Such_Algorithm_Excep, new String[] {e.getMessage()}));
-			} catch (NoSuchProviderException e) {
-				SignedBundleHook.log(e.getMessage(), FrameworkLogEntry.ERROR, e);
-				throw new SecurityException(NLS.bind(JarVerifierMessages.No_Such_Provider_Excep, new String[] {e.getMessage()}));
-			} catch (CertificateException e) {
-				SignedBundleHook.log(e.getMessage(), FrameworkLogEntry.ERROR, e);
-				throw new SecurityException(NLS.bind(JarVerifierMessages.Validate_Certs_Certificate_Exception, new String[] {e.getMessage()}));
+			if (i == len - 1) {
+				if (currentX509Cert.getSubjectDN().equals(currentX509Cert.getIssuerDN()))
+					currentX509Cert.verify(currentX509Cert.getPublicKey());
+			} else {
+				X509Certificate nextX509Cert = (X509Certificate) certificates[i + 1];
+				currentX509Cert.verify(nextX509Cert.getPublicKey());
 			}
 		}
 	}
 
-	private Certificate processSignerInfos(BERProcessor bp, List certs) throws CertificateException, NoSuchAlgorithmException {
+	private Certificate processSignerInfos(BERProcessor bp, List certs) throws CertificateException, NoSuchAlgorithmException, SignatureException {
 		// We assume there is only one SingerInfo element 
 
 		// PKCS7: SignerINFOS processing
@@ -328,7 +271,7 @@ public class PKCS7Processor implements CertificateChain, JarVerifierConstant {
 		// make sure the version is 1
 		BigInteger signerInfoVersion = bp.getIntValue();
 		if (signerInfoVersion.intValue() != 1) {
-			throw new CertificateException(JarVerifierMessages.PKCS7_SignerInfo_Version_Not_Supported);
+			throw new CertificateException(SignedContentMessages.PKCS7_SignerInfo_Version_Not_Supported);
 		}
 
 		// PKCS7: version CMSVersion 
@@ -390,7 +333,7 @@ public class PKCS7Processor implements CertificateChain, JarVerifierConstant {
 		return newSignerCert;
 	}
 
-	private void processUnsignedAttributes(BERProcessor bp) {
+	private void processUnsignedAttributes(BERProcessor bp) throws SignatureException {
 
 		if (bp.classOfTag == BERProcessor.CONTEXTSPECIFIC_TAGCLASS && bp.tag == 1) {
 
@@ -420,7 +363,7 @@ public class PKCS7Processor implements CertificateChain, JarVerifierConstant {
 		}
 	}
 
-	private void processSignedAttributes(BERProcessor bp) {
+	private void processSignedAttributes(BERProcessor bp) throws SignatureException {
 		if (bp.classOfTag == BERProcessor.CONTEXTSPECIFIC_TAGCLASS) {
 
 			// process the signed attributes
@@ -444,72 +387,8 @@ public class PKCS7Processor implements CertificateChain, JarVerifierConstant {
 		}
 	}
 
-	/**
-	 * Returns the Certificate of the signer of this PKCS7Block
-	 */
-	public Certificate getSigner() {
-		if (certificates == null || certificates.length == 0)
-			return null;
-		return certificates[0];
-	}
-
-	public Certificate getRoot() {
-		if (certificates == null || certificates.length == 0)
-			return null;
-		return certificates[certificates.length - 1];
-	}
-
 	public Certificate[] getCertificates() {
-		return certificates;
-	}
-
-	/**
-	 * Returns the list of X500 distinguished names that make up the signature chain. Each
-	 * distinguished name is separated by a ';'.
-	 */
-	public String getChain() {
-		return certChain;
-	}
-
-	/**
-	 * Returns true if the signer certificate is trusted
-	 * @return true if the signer certificate is trusted
-	 */
-	public boolean isTrusted() {
-		return trusted;
-	}
-
-	public boolean equals(Object obj) {
-		if (!(obj instanceof CertificateChain))
-			return false;
-		if (certificates == null)
-			return false;
-		CertificateChain chain = (CertificateChain) obj;
-		if((signingTime == null ? chain.getSigningTime() != null : !signingTime.equals(chain.getSigningTime())))
-			return false;
-		if (trusted != chain.isTrusted() || (certChain == null ? chain.getChain() != null : !certChain.equals(chain.getChain())))
-			return false;
-		Certificate[] otherCerts = chain.getCertificates();
-		if (otherCerts == null || certificates.length != otherCerts.length)
-			return false;
-		for (int i = 0; i < certificates.length; i++)
-			if (!certificates[i].equals(otherCerts[i]))
-				return false;
-		return true;
-	}
-
-	public int hashCode() {
-		int hashCode = 0;
-		if (signingTime != null)
-			hashCode += signingTime.hashCode();
-		if (trusted)
-			hashCode += 1;
-		if (certChain != null)
-			hashCode += certChain.hashCode();
-		if (certificates != null)
-			for (int i = 0; i < certificates.length; i++)
-				hashCode += certificates[i].hashCode();
-		return hashCode;
+		return certificates == null ? new Certificate[0] : certificates;
 	}
 
 	public void verifySFSignature(byte data[], int dataOffset, int dataLength) throws InvalidKeyException, NoSuchAlgorithmException, SignatureException {
@@ -517,7 +396,7 @@ public class PKCS7Processor implements CertificateChain, JarVerifierConstant {
 		sig.initVerify(signerCert.getPublicKey());
 		sig.update(data, dataOffset, dataLength);
 		if (!sig.verify(signature)) {
-			throw new SignatureException(JarVerifierMessages.Signature_Not_Verify);
+			throw new SignatureException(NLS.bind(SignedContentMessages.Signature_Not_Verify, signer, file));
 		}
 	}
 
@@ -545,8 +424,9 @@ public class PKCS7Processor implements CertificateChain, JarVerifierConstant {
 	 * @return		a List of certificates from target cert to root cert in order
 	 * 
 	 * @throws CertificateException
+	 * @throws SignatureException 
 	 */
-	private List processCertificates(BERProcessor bp) throws CertificateException {
+	private List processCertificates(BERProcessor bp) throws CertificateException, SignatureException {
 		List rtvList = new ArrayList(3);
 
 		// Step into the first certificate-element
@@ -567,18 +447,6 @@ public class PKCS7Processor implements CertificateChain, JarVerifierConstant {
 		return rtvList;
 	}
 
-	void determineTrust(CertificateTrustAuthority certsTrust) {
-		try {
-			certsTrust.checkTrust(certificates);
-			if (null != tsaCertificates) {
-				certsTrust.checkTrust(tsaCertificates);
-			}
-			trusted = true;
-		} catch (CertificateException e) {
-			trusted = false;
-		}
-	}
-
 	public Date getSigningTime() {
 		return signingTime;
 	}
@@ -587,15 +455,8 @@ public class PKCS7Processor implements CertificateChain, JarVerifierConstant {
 		this.tsaCertificates = tsaCertificates;
 	}
 
-	/*
-	 public static void main(String[] args) throws InvalidKeyException, CertificateException, NoSuchAlgorithmException, SignatureException, KeyStoreException, IOException {
-	 byte buffer[] = new byte[65536];
-	 int len = System.in.read(buffer);
-	 byte manifestBuff[] = new byte[65536];
-	 int rc = new FileInputStream("man").read(manifestBuff);
-	 PKCS7Processor p7 = new PKCS7Processor(buffer, 0, len, manifestBuff, 0, rc);
-	 System.out.println(p7.getSignerCertificate());
-	 System.out.println(p7.getCertificateChain());
-	 }
-	 */
+	public Certificate[] getTSACertificates() {
+		return (tsaCertificates == null) ? new Certificate[0] : tsaCertificates;
+	}
+
 }

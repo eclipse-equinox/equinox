@@ -23,8 +23,7 @@ package org.eclipse.osgi.service.resolver;
  * </p>
  *@see State
  */
-public class DisabledInfo {
-
+public final class DisabledInfo {
 	private final String policyName;
 	private final String message;
 	private final BundleDescription bundle;
