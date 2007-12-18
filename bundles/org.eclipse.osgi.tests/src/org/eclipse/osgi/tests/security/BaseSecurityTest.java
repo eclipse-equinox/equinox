@@ -1,0 +1,176 @@
+/*******************************************************************************
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *******************************************************************************/
+package org.eclipse.osgi.tests.security;
+
+import java.io.*;
+import java.net.URL;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.cert.Certificate;
+import java.util.ArrayList;
+import java.util.Hashtable;
+import org.eclipse.core.tests.harness.CoreTest;
+import org.eclipse.core.tests.session.ConfigurationSessionTestSuite;
+import org.eclipse.osgi.internal.service.security.KeyStoreTrustEngine;
+import org.eclipse.osgi.service.security.AuthorizationEngine;
+import org.eclipse.osgi.service.security.TrustEngine;
+import org.eclipse.osgi.signedcontent.SignedContentFactory;
+import org.eclipse.osgi.tests.OSGiTestsActivator;
+import org.osgi.framework.*;
+
+public class BaseSecurityTest extends CoreTest {
+
+	private static char[] PASSWORD_DEFAULT = {'c', 'h', 'a', 'n', 'g', 'e', 'i', 't'};
+	private static String TYPE_DEFAULT = "JKS";
+
+	protected static final String BUNDLE_SECURITY_TESTS = "org.eclipse.osgi.tests"; //$NON-NLS-1$
+
+	public BaseSecurityTest() {
+		super();
+	}
+
+	public BaseSecurityTest(String name) {
+		super(name);
+	}
+
+	private static KeyStore supportStore;
+	static {
+		try {
+			URL supportUrl = OSGiTestsActivator.getContext().getBundle().getEntry("test_files/security/keystore.jks");
+			supportStore = KeyStore.getInstance(TYPE_DEFAULT);
+			supportStore.load(supportUrl.openStream(), PASSWORD_DEFAULT);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	private ServiceRegistration trustReg = null;
+
+	protected static void addDefaultSecurityBundles(ConfigurationSessionTestSuite suite) {
+		String[] ids = ConfigurationSessionTestSuite.MINIMAL_BUNDLE_SET;
+		for (int i = 0; i < ids.length; i++) {
+			suite.addBundle(ids[i]);
+		}
+		suite.addBundle(BUNDLE_SECURITY_TESTS);
+	}
+
+	protected static Certificate getTestCertificate(String alias) throws KeyStoreException {
+		return supportStore.getCertificate(alias);
+	}
+
+	protected static Certificate[] getTestCertificateChain(String[] aliases) throws KeyStoreException {
+		ArrayList certs = new ArrayList(aliases.length);
+		for (int i = 0; i < aliases.length; i++) {
+			certs.add(getTestCertificate(aliases[i]));
+		}
+		return (Certificate[]) certs.toArray(new Certificate[] {});
+	}
+
+	protected void registerEclipseTrustEngine() throws Exception {
+		// make a copy of cacerts file and use that at runtime
+		URL eclipseURL = OSGiTestsActivator.getContext().getBundle().getEntry("test_files/security/eclipse.jks");
+		File tempEngine = OSGiTestsActivator.getContext().getDataFile("temp.jks");
+
+		copy(eclipseURL.openStream(), tempEngine);
+
+		KeyStoreTrustEngine dummyTE = new KeyStoreTrustEngine(tempEngine.getAbsolutePath(), "JKS", "changeit".toCharArray());
+		Hashtable properties = new Hashtable(7);
+		properties.put(Constants.SERVICE_RANKING, new Integer(Integer.MAX_VALUE));
+
+		trustReg = OSGiTestsActivator.getContext().registerService(TrustEngine.class.getName(), dummyTE, properties);
+	}
+
+	protected void tearDown() throws Exception {
+		if (trustReg != null)
+			trustReg.unregister();
+	}
+
+	public static void copy(InputStream in, File dst) throws IOException {
+		//		InputStream in = new FileInputStream(src);
+		OutputStream out = new FileOutputStream(dst);
+
+		byte[] buf = new byte[1024];
+		int len;
+		while ((len = in.read(buf)) > 0) {
+			out.write(buf, 0, len);
+		}
+		in.close();
+		out.close();
+	}
+
+	protected SignedContentFactory getSignedContentFactory() {
+		ServiceReference ref = OSGiTestsActivator.getContext().getServiceReference(SignedContentFactory.class.getName());
+		assertNotNull("No SignedContentFactory service", ref);
+		SignedContentFactory factory = (SignedContentFactory) OSGiTestsActivator.getContext().getService(ref);
+		OSGiTestsActivator.getContext().ungetService(ref);
+		return factory;
+	}
+
+	protected TrustEngine getTrustEngine() {
+		ServiceReference ref = OSGiTestsActivator.getContext().getServiceReference(TrustEngine.class.getName());
+		assertNotNull("No TrustEngine available", ref);
+		TrustEngine engine = (TrustEngine) OSGiTestsActivator.getContext().getService(ref);
+		OSGiTestsActivator.getContext().ungetService(ref);
+		return engine;
+	}
+
+	protected AuthorizationEngine getAuthorizationEngine() {
+		ServiceReference ref = OSGiTestsActivator.getContext().getServiceReference(AuthorizationEngine.class.getName());
+		assertNotNull("No AuthorizationEngine available", ref);
+		AuthorizationEngine engine = (AuthorizationEngine) OSGiTestsActivator.getContext().getService(ref);
+		OSGiTestsActivator.getContext().ungetService(ref);
+		return engine;
+	}
+
+	protected Bundle installBundle(String bundlePath) {
+		URL bundleURL = OSGiTestsActivator.getContext().getBundle().getEntry(bundlePath);
+		assertNotNull("Bundle URL is null " + bundlePath, bundleURL);
+		try {
+			return OSGiTestsActivator.getContext().installBundle(bundlePath, bundleURL.openStream());
+		} catch (Exception e) {
+			fail("unexpected install exception", e);
+		}
+		return null;
+	}
+
+	protected static String getTestJarPath(String jarName) {
+		return "test_files/security/bundles/" + jarName + ".jar";
+	}
+
+	protected static void setAuthorizationEnabled(ConfigurationSessionTestSuite suite) {
+		try {
+			suite.getSetup().setSystemProperty("osgi.signedcontent.support", "all"); //$NON-NLS-1$//$NON-NLS-2$
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	protected static void setAuthorizationPolicy(ConfigurationSessionTestSuite suite, String policy) {
+		try {
+			suite.getSetup().setSystemProperty("osgi.signedcontent.authorization.engine.policy", policy); //$NON-NLS-1$//$NON-NLS-2$
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	protected static void setEclipseTrustEngine(ConfigurationSessionTestSuite suite) {
+		try {
+			URL eclipseURL = OSGiTestsActivator.getContext().getBundle().getEntry("test_files/security/eclipse.jks");
+			File tempFile = File.createTempFile("keystore", ".jks");
+
+			copy(eclipseURL.openStream(), tempFile);
+
+			suite.getSetup().setSystemProperty("osgi.framework.keystore", tempFile.toURL().toExternalForm()); //$NON-NLS-1$//$NON-NLS-2$
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+}
