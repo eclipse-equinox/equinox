@@ -431,6 +431,29 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		compareResults(expectedEvents, actualEvents);
 	}
 
+	public void testBug213791() throws Exception {
+		// install a bundle and call start(START_ACTIVATION_POLICY) twice
+		Bundle osgiA = installer.installBundle("osgi.lazystart.a"); //$NON-NLS-1$
+		installer.resolveBundles(new Bundle[] {osgiA});
+
+		osgiA.start(Bundle.START_ACTIVATION_POLICY);
+		Object[] expectedEvents = new Object[0];
+		Object[] actualEvents = simpleResults.getResults(0);
+		compareResults(expectedEvents, actualEvents);
+
+		osgiA.start(Bundle.START_ACTIVATION_POLICY);
+		expectedEvents = new Object[0];
+		actualEvents = simpleResults.getResults(0);
+		compareResults(expectedEvents, actualEvents);
+
+		osgiA.loadClass("osgi.lazystart.a.ATest"); //$NON-NLS-1$
+		expectedEvents = new Object[1];
+		expectedEvents[0] = new BundleEvent(BundleEvent.STARTED, osgiA);
+		actualEvents = simpleResults.getResults(1);
+		compareResults(expectedEvents, actualEvents);
+
+	}
+
 	public void testThreadLock() throws Exception {
 		Bundle threadLockTest = installer.installBundle("thread.locktest"); //$NON-NLS-1$
 		threadLockTest.loadClass("thread.locktest.ATest"); //$NON-NLS-1$

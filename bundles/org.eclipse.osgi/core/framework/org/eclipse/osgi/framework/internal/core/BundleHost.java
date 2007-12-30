@@ -305,7 +305,7 @@ public class BundleHost extends AbstractBundle {
 				throw new BundleException(getResolutionFailureMessage());
 		}
 
-		if (getStartLevel() > framework.startLevelManager.getStartLevel()){
+		if (getStartLevel() > framework.startLevelManager.getStartLevel()) {
 			if ((options & START_TRANSIENT) != 0) {
 				// throw exception if this is a transient start
 				String msg = NLS.bind(Msg.BUNDLE_TRANSIENT_START_ERROR, this);
@@ -314,14 +314,13 @@ public class BundleHost extends AbstractBundle {
 			}
 			return;
 		}
-		if ((options & START_ACTIVATION_POLICY) != 0 && (state & STARTING) == 0) {
+		if ((options & START_ACTIVATION_POLICY) != 0 && (bundledata.getStatus() & Constants.BUNDLE_LAZY_START) != 0) {
 			// the bundle must use the activation policy here.
-			if ((bundledata.getStatus() & Constants.BUNDLE_LAZY_START) != 0) {
-				// now we must publish the LAZY_ACTIVATION event and return
-				state = STARTING;
-				framework.publishBundleEvent(BundleEvent.LAZY_ACTIVATION, this);
+			if ((state & RESOLVED) == 0)
 				return;
-			}
+			// now we must publish the LAZY_ACTIVATION event and return
+			state = STARTING;
+			framework.publishBundleEvent(BundleEvent.LAZY_ACTIVATION, this);
 		}
 
 		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
