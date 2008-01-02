@@ -316,11 +316,12 @@ public class BundleHost extends AbstractBundle {
 		}
 		if ((options & START_ACTIVATION_POLICY) != 0 && (bundledata.getStatus() & Constants.BUNDLE_LAZY_START) != 0) {
 			// the bundle must use the activation policy here.
-			if ((state & RESOLVED) == 0)
-				return;
-			// now we must publish the LAZY_ACTIVATION event and return
-			state = STARTING;
-			framework.publishBundleEvent(BundleEvent.LAZY_ACTIVATION, this);
+			if ((state & RESOLVED) != 0) {
+				// now we must publish the LAZY_ACTIVATION event and return
+				state = STARTING;
+				framework.publishBundleEvent(BundleEvent.LAZY_ACTIVATION, this);
+			}
+			return;
 		}
 
 		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {

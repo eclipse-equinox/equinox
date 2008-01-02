@@ -435,7 +435,8 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		// install a bundle and call start(START_ACTIVATION_POLICY) twice
 		Bundle osgiA = installer.installBundle("osgi.lazystart.a"); //$NON-NLS-1$
 		installer.resolveBundles(new Bundle[] {osgiA});
-
+		if (osgiA.getState() == Bundle.STARTING)
+			osgiA.stop();
 		osgiA.start(Bundle.START_ACTIVATION_POLICY);
 		Object[] expectedEvents = new Object[0];
 		Object[] actualEvents = simpleResults.getResults(0);
