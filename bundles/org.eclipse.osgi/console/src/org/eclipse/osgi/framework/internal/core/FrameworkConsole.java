@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2007 IBM Corporation and others.
+ * Copyright (c) 2003, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -115,7 +115,7 @@ public class FrameworkConsole implements Runnable {
 	/**
 	 *  Open a socket and create input and output streams
 	 */
-	private void getSocketStream() {
+	private boolean getSocketStream() {
 		try {
 			System.out.println(NLS.bind(ConsoleMsg.CONSOLE_LISTENING_ON_PORT, String.valueOf(port)));
 			synchronized (this) {
@@ -126,18 +126,20 @@ public class FrameworkConsole implements Runnable {
 			// get socket outside of sync block
 			Socket temp = scsg.getSocket();
 			if (temp == null)
-				return;
+				return false;
 			synchronized (this) {
 				s = temp;
 				in = createBufferedReader(s.getInputStream());
 				out = createPrintWriter(s.getOutputStream());
 				disconnect = false;
 			}
+			return true;
 		} catch (UnknownHostException uhe) {
 			uhe.printStackTrace();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		return false;
 	}
 
 	/**
@@ -202,21 +204,26 @@ public class FrameworkConsole implements Runnable {
 	 * Begin doing the active part of the class' code. Starts up the console.
 	 */
 	public void run() {
-		// always grap the default streams
+		// always grab the default streams
 		getDefaultStreams();
 		try {
+			// process any arguments from the command line
 			console(args);
 		} catch (IOException e) {
 			e.printStackTrace(out);
 		}
 		while (!shutdown) {
-			if (useSocketStream)
-				getSocketStream();
+			if (useSocketStream && !getSocketStream())
+				return;
 			try {
 				console();
 			} catch (IOException e) {
 				if (!shutdown)
 					e.printStackTrace(out);
+				if (!useSocketStream) {
+					// better just return; the standard console has failed us.  Don't want to get in an endless loop (bug 212313)
+					return;
+				}
 			}
 		}
 	}
