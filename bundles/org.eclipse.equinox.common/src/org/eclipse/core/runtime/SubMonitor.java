@@ -562,6 +562,8 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 	 * @see org.eclipse.core.runtime.IProgressMonitor#internalWorked(double)
 	 */
 	public void internalWorked(double work) {
+		cleanupActiveChild();
+
 		int delta = consume((work > 0.0d) ? work : 0.0d);
 		if (delta != 0)
 			root.worked(delta);
