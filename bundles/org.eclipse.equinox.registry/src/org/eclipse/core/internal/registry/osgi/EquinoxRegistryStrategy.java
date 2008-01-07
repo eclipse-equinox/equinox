@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * Copyright (c) 2005, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Danail Nachev - bug 203599 - events if jobs bundle has been stopped     
  *******************************************************************************/
 package org.eclipse.core.internal.registry.osgi;
 
@@ -86,6 +87,8 @@ public class EquinoxRegistryStrategy extends RegistryStrategyOSGI {
 				return; // all done - most typical use case
 			} catch (NoClassDefFoundError e) {
 				useJobs = false; // Jobs are missing
+			} catch (IllegalStateException e) {
+				useJobs = false; // Jobs bundles was stopped
 			}
 		}
 		super.scheduleChangeEvent(listeners, deltas, registry);
