@@ -9,6 +9,7 @@
  *     Stefan Xenos - initial API and implementation
  *     Stefan Xenos - bug 174539 - add a 1-argument convert(...) method     
  *     Stefan Xenos - bug 174040 - SubMonitor#convert doesn't always set task name
+ *     Stefan Xenos - bug 206942 - updated javadoc to recommend better constants for infinite progress
  *******************************************************************************/
 package org.eclipse.core.runtime;
 
@@ -195,14 +196,14 @@ package org.eclipse.core.runtime;
  * 
  * <pre>
  *      void doSomething(IProgressMonitor monitor, LinkedListNode node) {
- *          SubMonitor progress = SubMonitor.convert(monitor, 100);
+ *          SubMonitor progress = SubMonitor.convert(monitor);
  *
  *			while (node != null) {
  *              // Regardless of the amount of progress reported so far,
- *              // use 5% of the space remaining in the monitor to process the next node.
- *              progress.setWorkRemaining(100);
+ *              // use 0.01% of the space remaining in the monitor to process the next node.
+ *              progress.setWorkRemaining(10000);
  *              
- *				doWorkOnElement(node, progress.newChild(5));
+ *				doWorkOnElement(node, progress.newChild(1));
  *
  *              node = node.next;
  *          }
