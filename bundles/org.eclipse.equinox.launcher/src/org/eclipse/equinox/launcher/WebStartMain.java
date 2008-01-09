@@ -36,7 +36,7 @@ public class WebStartMain extends Main {
 	private Map allBundles = null; // Map of all the bundles found on the classpath. Id -> ArrayList of BundleInfo
 	private List bundleList = null; //The list of bundles found on the osgi.bundle list 
 
-	private class BundleInfo {
+	protected class BundleInfo {
 		String bsn;
 		String version;
 		String startData;
@@ -112,10 +112,10 @@ public class WebStartMain extends Main {
 
 	private BundleInfo findBundle(final String target, String version, boolean removeMatch) {
 		ArrayList matches = (ArrayList) allBundles.get(target);
-		int numberOfMatches = matches.size();
+		int numberOfMatches = matches != null ? matches.size() : 0;
 		if (numberOfMatches == 1) {
 			//TODO Need to check the version
-			return (BundleInfo) matches.remove(0);
+			return (BundleInfo) (removeMatch ? matches.remove(0) : matches.get(0));
 		}
 		if (numberOfMatches == 0)
 			return null;
@@ -124,7 +124,8 @@ public class WebStartMain extends Main {
 			for (Iterator iterator = matches.iterator(); iterator.hasNext();) {
 				BundleInfo bi = (BundleInfo) iterator.next();
 				if (bi.version.equals(version)) {
-					iterator.remove();
+					if (removeMatch)
+						iterator.remove();
 					return bi;
 				}
 			}
@@ -137,7 +138,7 @@ public class WebStartMain extends Main {
 			versions[i] = ((BundleInfo) matches.get(i)).version;
 			highest = findMax(versions);
 		}
-		return (BundleInfo) matches.remove(highest);
+		return (BundleInfo) (removeMatch ? matches.remove(highest) : matches.get(highest));
 	}
 
 	/* 
@@ -169,7 +170,7 @@ public class WebStartMain extends Main {
 			try {
 				connection = url.openConnection();
 				if (connection instanceof JarURLConnection) {
-					return "file:" + ((JarURLConnection) connection).getJarFile().getName();
+					return "file:" + ((JarURLConnection) connection).getJarFile().getName(); //$NON-NLS-1$
 				}
 			} finally {
 				if (connection != null)
@@ -250,7 +251,8 @@ public class WebStartMain extends Main {
 		for (Iterator iterator = bundleList.iterator(); iterator.hasNext();) {
 			BundleInfo searched = (BundleInfo) iterator.next();
 			BundleInfo found = findBundle(searched.bsn, searched.version, true);
-			finalBundleList.append(REFERENCE_SCHEME).append(found.location).append(searched.startData).append(',');
+			if (found != null)
+				finalBundleList.append(REFERENCE_SCHEME).append(found.location).append(searched.startData).append(',');
 		}
 
 		if (!Boolean.FALSE.toString().equalsIgnoreCase(System.getProperties().getProperty(PROP_WEBSTART_AUTOMATIC_INSTALLATION))) {
