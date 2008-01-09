@@ -935,7 +935,7 @@ public class Main {
 		int result = -1;
 		Object maxVersion = null;
 		for (int i = 0; i < candidates.length; i++) {
-			String name = candidates[i];
+			String name = (candidates[i] != null) ? candidates[i] : ""; //$NON-NLS-1$
 			String version = ""; //$NON-NLS-1$ // Note: directory with version suffix is always > than directory without version suffix
 			int index = name.indexOf('_');
 			if (index != -1)
