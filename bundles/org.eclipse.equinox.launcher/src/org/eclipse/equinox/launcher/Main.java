@@ -1015,6 +1015,11 @@ public class Main {
 		try {
 			if (isFile) {
 				File toAdjust = new File(spec.substring(5));
+				if (!toAdjust.isAbsolute()) {
+					String installArea = System.getProperties().getProperty(PROP_INSTALL_AREA);
+					if (installArea != null)
+						toAdjust = new File(installArea, toAdjust.getPath());
+				}
 				if (toAdjust.isDirectory())
 					return adjustTrailingSlash(toAdjust.toURL(), trailingSlash);
 				return toAdjust.toURL();
@@ -1607,6 +1612,8 @@ public class Main {
 		// setup the path to the framework
 		String urlString = System.getProperty(PROP_FRAMEWORK, null);
 		if (urlString != null) {
+			//ensure that the install location is set before resolving framework
+			getInstallLocation();
 			URL url = buildURL(urlString, true);
 			System.getProperties().put(PROP_FRAMEWORK, url.toExternalForm());
 			bootLocation = resolve(urlString);
