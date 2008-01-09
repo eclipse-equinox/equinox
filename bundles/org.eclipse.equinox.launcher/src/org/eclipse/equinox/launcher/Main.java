@@ -415,6 +415,9 @@ public class Main {
 	}
 
 	private String getLibraryFromFragment(String fragment) {
+		if (fragment.startsWith(FILE_SCHEME))
+			fragment = fragment.substring(5);
+
 		File frag = new File(fragment);
 		if (!frag.exists())
 			return null;
@@ -1932,14 +1935,16 @@ public class Main {
 
 		for (int i = 0; i < nlVariants.length; i++) {
 			for (int j = 0; j < searchPath.length; j++) {
+				String path = searchPath[j];
+				if (path.startsWith(FILE_SCHEME))
+					path = path.substring(5);
 				// do we have a JAR?
-				if (isJAR(searchPath[j])) {
-					String result = extractFromJAR(searchPath[j], nlVariants[i]);
+				if (isJAR(path)) {
+					String result = extractFromJAR(path, nlVariants[i]);
 					if (result != null)
 						return result;
 				} else {
 					// we have a file or a directory
-					String path = searchPath[j];
 					if (!path.endsWith(File.separator))
 						path += File.separator;
 					path += nlVariants[i];
