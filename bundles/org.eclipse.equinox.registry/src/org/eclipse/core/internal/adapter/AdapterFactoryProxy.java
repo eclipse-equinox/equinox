@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2007 IBM Corporation and others. All rights reserved.
+ * Copyright (c) 2004, 2008 IBM Corporation and others. All rights reserved.
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
@@ -122,8 +122,8 @@ class AdapterFactoryProxy implements IAdapterFactory, IAdapterFactoryExt {
 		try {
 			factory = (IAdapterFactory) element.createExecutableExtension("class"); //$NON-NLS-1$
 		} catch (CoreException e) {
-			String msg = e.getStatus().getMessage();
-			RuntimeLog.log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, 0, msg, null));
+			String msg = NLS.bind(RegistryMessages.adapters_cantInstansiate, getAdaptableType(), element.getContributor().getName());
+			RuntimeLog.log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, 0, msg, e));
 		}
 		return factory;
 	}
