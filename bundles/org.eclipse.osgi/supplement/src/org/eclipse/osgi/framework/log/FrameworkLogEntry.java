@@ -45,12 +45,11 @@ public class FrameworkLogEntry {
 	public static final int ERROR = 0x04;
 
 	/**
-	 * Status type severity (bit mask, value 8) indicating this log entry represents a cancelation.
+	 * Status type severity (bit mask, value 8) indicating this log entry represents a cancellation.
 	 * @see #getSeverity()
 	 * @since 3.2
 	 */
 	public static final int CANCEL = 0x08;
-
 
 	// It would be nice to rename some of these fields but we cannot change the getter method
 	// names without breaking clients.  Changing only the field names would be confusing.
