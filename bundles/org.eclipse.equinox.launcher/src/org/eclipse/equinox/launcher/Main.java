@@ -1020,8 +1020,12 @@ public class Main {
 				File toAdjust = new File(spec.substring(5));
 				if (!toAdjust.isAbsolute()) {
 					String installArea = System.getProperties().getProperty(PROP_INSTALL_AREA);
-					if (installArea != null)
-						toAdjust = new File(installArea, toAdjust.getPath());
+					if (installArea != null) {
+						if (installArea.startsWith(FILE_SCHEME))
+							toAdjust = new File(installArea.substring(5), toAdjust.getPath());
+						else if (new File(installArea).exists())
+							toAdjust = new File(installArea, toAdjust.getPath());
+					}
 				}
 				if (toAdjust.isDirectory())
 					return adjustTrailingSlash(toAdjust.toURL(), trailingSlash);
