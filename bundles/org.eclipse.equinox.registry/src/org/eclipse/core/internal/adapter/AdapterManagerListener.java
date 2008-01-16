@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,7 +10,8 @@
  *******************************************************************************/
 package org.eclipse.core.internal.adapter;
 
-import java.util.*;
+import java.util.Iterator;
+import java.util.List;
 import org.eclipse.core.internal.runtime.AdapterManager;
 import org.eclipse.core.internal.runtime.IAdapterManagerProvider;
 import org.eclipse.core.runtime.*;
@@ -19,7 +20,7 @@ import org.eclipse.core.runtime.*;
  * Portions of the AdapterManager that deal with the Eclipse extension registry
  * were moved into this class.
  */
-public final class AdapterManagerListener implements IRegistryChangeListener, IAdapterManagerProvider {
+public final class AdapterManagerListener implements IRegistryEventListener, IAdapterManagerProvider {
 	public static final String ADAPTER_POINT_ID = "org.eclipse.core.runtime.adapters"; //$NON-NLS-1$
 
 	private AdapterManager theAdapterManager;
@@ -54,7 +55,7 @@ public final class AdapterManagerListener implements IRegistryChangeListener, IA
 				}
 			}
 		}
-		RegistryFactory.getRegistry().addRegistryChangeListener(this);
+		RegistryFactory.getRegistry().addListener(this, ADAPTER_POINT_ID);
 		return factoriesAdded;
 	}
 
@@ -67,44 +68,34 @@ public final class AdapterManagerListener implements IRegistryChangeListener, IA
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.core.runtime.IRegistryChangeListener#registryChanged(org.eclipse.core.runtime.IRegistryChangeEvent)
-	 */
-	public synchronized void registryChanged(IRegistryChangeEvent event) {
-		//find the set of changed adapter extensions
-		HashSet toRemove = null;
-		IExtensionDelta[] deltas = event.getExtensionDeltas();
-		boolean found = false;
-		for (int i = 0; i < deltas.length; i++) {
-			//we only care about extensions to the adapters extension point
-			if (!ADAPTER_POINT_ID.equals(deltas[i].getExtensionPoint().getUniqueIdentifier()))
-				continue;
-			found = true;
-			if (deltas[i].getKind() == IExtensionDelta.ADDED)
-				registerExtension(deltas[i].getExtension());
-			else {
-				//create the hash set lazily
-				if (toRemove == null)
-					toRemove = new HashSet();
-				toRemove.add(deltas[i].getExtension().getUniqueIdentifier());
-			}
-		}
-		//need to discard cached state for the changed extensions
-		if (found)
-			theAdapterManager.flushLookup();
-		if (toRemove == null)
-			return;
-		//remove any factories belonging to extensions that are going away
-		for (Iterator it = theAdapterManager.getFactories().values().iterator(); it.hasNext();) {
-			for (Iterator it2 = ((List) it.next()).iterator(); it2.hasNext();) {
-				IAdapterFactory factory = (IAdapterFactory) it2.next();
-				if (factory instanceof AdapterFactoryProxy) {
-					String ext = ((AdapterFactoryProxy) factory).getOwnerId();
-					if (toRemove.contains(ext))
+	public synchronized void added(IExtension[] extensions) {
+		for (int i = 0; i < extensions.length; i++)
+			registerExtension(extensions[i]);
+		theAdapterManager.flushLookup();
+	}
+
+	public synchronized void removed(IExtension[] extensions) {
+		theAdapterManager.flushLookup();
+		for (int i = 0; i < extensions.length; i++) {
+			for (Iterator it = theAdapterManager.getFactories().values().iterator(); it.hasNext();) {
+				for (Iterator it2 = ((List) it.next()).iterator(); it2.hasNext();) {
+					IAdapterFactory factory = (IAdapterFactory) it2.next();
+					if (!(factory instanceof AdapterFactoryProxy))
+						continue;
+					if (((AdapterFactoryProxy) factory).originatesFrom(extensions[i]))
 						it2.remove();
 				}
 			}
 		}
+	}
+
+	public synchronized void added(IExtensionPoint[] extensionPoints) {
+		// nothing to do
+	}
+
+	public synchronized void removed(IExtensionPoint[] extensionPoints) {
+		// all extensions should have been removed by this point by #removed(IExtension[] extensions)
+		// nothing to do
 	}
 
 	/*
@@ -112,6 +103,6 @@ public final class AdapterManagerListener implements IRegistryChangeListener, IA
 	 * invoked during platform shutdown.
 	 */
 	public synchronized void stop() {
-		RegistryFactory.getRegistry().removeRegistryChangeListener(this);
+		RegistryFactory.getRegistry().removeListener(this);
 	}
 }

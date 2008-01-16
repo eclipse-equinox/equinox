@@ -9,6 +9,7 @@
 package org.eclipse.core.internal.adapter;
 
 import java.util.ArrayList;
+import org.eclipse.core.internal.registry.Handle;
 import org.eclipse.core.internal.registry.RegistryMessages;
 import org.eclipse.core.internal.runtime.IAdapterFactoryExt;
 import org.eclipse.core.internal.runtime.RuntimeLog;
@@ -34,6 +35,8 @@ class AdapterFactoryProxy implements IAdapterFactory, IAdapterFactoryExt {
 	 */
 	private String ownerId;
 
+	private int internalOwnerID = -1;
+
 	/**
 	 * Creates a new factory proxy based on the given configuration element.
 	 * Returns the new proxy, or null if the element could not be created.
@@ -41,11 +44,25 @@ class AdapterFactoryProxy implements IAdapterFactory, IAdapterFactoryExt {
 	public static AdapterFactoryProxy createProxy(IConfigurationElement element) {
 		AdapterFactoryProxy result = new AdapterFactoryProxy();
 		result.element = element;
-		result.ownerId = element.getDeclaringExtension().getUniqueIdentifier();
+		IExtension extension = element.getDeclaringExtension();
+		result.ownerId = extension.getUniqueIdentifier();
+		if (extension instanceof Handle)
+			result.internalOwnerID = ((Handle) extension).getId();
 		if ("factory".equals(element.getName())) //$NON-NLS-1$
 			return result;
 		result.logError();
 		return null;
+	}
+
+	public boolean originatesFrom(IExtension extension) {
+		String id = extension.getUniqueIdentifier();
+		if (id != null) // match by public ID declared in XML
+			return id.equals(ownerId);
+
+		if (!(extension instanceof Handle))
+			return false; // should never happen
+
+		return (internalOwnerID == ((Handle) extension).getId());
 	}
 
 	String getAdaptableType() {
@@ -87,10 +104,6 @@ class AdapterFactoryProxy implements IAdapterFactory, IAdapterFactoryExt {
 
 	IExtension getExtension() {
 		return element.getDeclaringExtension();
-	}
-
-	String getOwnerId() {
-		return ownerId;
 	}
 
 	/**
