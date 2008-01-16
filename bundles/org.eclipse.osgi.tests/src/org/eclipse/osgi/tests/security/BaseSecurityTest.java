@@ -81,7 +81,7 @@ public class BaseSecurityTest extends CoreTest {
 
 		copy(eclipseURL.openStream(), tempEngine);
 
-		KeyStoreTrustEngine dummyTE = new KeyStoreTrustEngine(tempEngine.getAbsolutePath(), "JKS", "changeit".toCharArray());
+		KeyStoreTrustEngine dummyTE = new KeyStoreTrustEngine(tempEngine.getAbsolutePath(), "JKS", "changeit".toCharArray(), "temp.jks");
 		Hashtable properties = new Hashtable(7);
 		properties.put(Constants.SERVICE_RANKING, new Integer(Integer.MAX_VALUE));
 

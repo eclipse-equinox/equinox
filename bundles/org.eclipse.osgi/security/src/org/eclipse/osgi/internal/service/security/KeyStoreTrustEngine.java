@@ -35,9 +35,10 @@ public class KeyStoreTrustEngine extends TrustEngine {
 
 	private KeyStore keyStore;
 
-	private String type;
-	private String path;
-	private char[] password;
+	private final String type;
+	private final String path;
+	private final char[] password;
+	private final String name;
 
 	/**
 	 * Create a new KeyStoreTrustEngine that is backed by a KeyStore 
@@ -45,10 +46,11 @@ public class KeyStoreTrustEngine extends TrustEngine {
 	 * @param type - the type of keystore at the path location
 	 * @param password - the password required to unlock the keystore
 	 */
-	public KeyStoreTrustEngine(String path, String type, char[] password) { //TODO: This should be a *CallbackHandler*
+	public KeyStoreTrustEngine(String path, String type, char[] password, String name) { //TODO: This should be a *CallbackHandler*
 		this.path = path;
 		this.type = type;
 		this.password = password;
+		this.name = name;
 	}
 
 	/**
@@ -254,6 +256,6 @@ public class KeyStoreTrustEngine extends TrustEngine {
 	}
 
 	public String getName() {
-		return "System"; //$NON-NLS-1$
+		return name;
 	}
 }

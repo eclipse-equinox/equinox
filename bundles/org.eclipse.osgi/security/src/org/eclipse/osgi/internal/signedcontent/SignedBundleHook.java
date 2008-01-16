@@ -104,7 +104,7 @@ public class SignedBundleHook implements AdaptorHook, BundleFileWrapperFactoryHo
 		Hashtable properties = new Hashtable(7);
 		properties.put(Constants.SERVICE_RANKING, new Integer(Integer.MIN_VALUE));
 		properties.put(SignedContentConstants.TRUST_ENGINE, SignedContentConstants.DEFAULT_TRUST_ENGINE);
-		KeyStoreTrustEngine systemTrustEngine = new KeyStoreTrustEngine(CACERTS_PATH, CACERTS_TYPE, null);
+		KeyStoreTrustEngine systemTrustEngine = new KeyStoreTrustEngine(CACERTS_PATH, CACERTS_TYPE, null, "System"); //$NON-NLS-1$
 		systemTrustEngineReg = context.registerService(TrustEngine.class.getName(), systemTrustEngine, properties);
 		String osgiTrustPath = context.getProperty(OSGI_KEYSTORE);
 		if (osgiTrustPath != null) {
@@ -112,7 +112,7 @@ public class SignedBundleHook implements AdaptorHook, BundleFileWrapperFactoryHo
 				URL url = new URL(osgiTrustPath);
 				if ("file".equals(url.getProtocol())) { //$NON-NLS-1$
 					String path = url.getPath();
-					osgiTrustEngineReg = context.registerService(TrustEngine.class.getName(), new KeyStoreTrustEngine(path, CACERTS_TYPE, null), null);
+					osgiTrustEngineReg = context.registerService(TrustEngine.class.getName(), new KeyStoreTrustEngine(path, CACERTS_TYPE, null, OSGI_KEYSTORE), null);
 				}
 			} catch (MalformedURLException e) {
 				SignedBundleHook.log("Invalid setting for " + OSGI_KEYSTORE, FrameworkLogEntry.WARNING, e); //$NON-NLS-1$
