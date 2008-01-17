@@ -743,6 +743,7 @@ public class EclipseStarter {
 			Constructor constructor = consoleClass.getConstructor(parameterTypes);
 			console = (Runnable) constructor.newInstance(parameters);
 			Thread t = new Thread(console, CONSOLE_NAME);
+			t.setDaemon(false);
 			t.start();
 		} catch (NumberFormatException nfe) {
 			// TODO log or something other than write on System.err
