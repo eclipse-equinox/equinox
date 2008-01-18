@@ -181,6 +181,8 @@ int main( int argc, _TCHAR* argv[] )
 	else {
 		if(!suppressErrors)
 			displayMessage(officialName, entryMsg);
+		else 
+			_ftprintf(stderr, _T_ECLIPSE("%s:\n%s\n"), officialName, entryMsg);
 		exit(1);
 	}
 	
