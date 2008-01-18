@@ -44,6 +44,8 @@ public class DefaultApplicationListener implements ApplicationRunnable, ServiceT
 		defaultAppTracker.open();
 		EclipseAppHandle trackedApp = (EclipseAppHandle) defaultAppTracker.getService();
 		if (trackedApp == null) {
+			// close tracker since we do not care about tracking the app (bug 215764)
+			defaultAppTracker.close();
 			// service has been unregistered; application has ended aready,
 			// save the result for latter
 			result = defaultApp.waitForResult(100);
