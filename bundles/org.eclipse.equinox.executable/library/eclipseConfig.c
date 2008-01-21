@@ -75,13 +75,18 @@ int readIniFile(_TCHAR* program, int *argc, _TCHAR ***argv)
 
 int readConfigFile( _TCHAR * config_file, int *argc, _TCHAR ***argv )
 {
-	_TCHAR buffer[1024];
-	_TCHAR argument[1024];
+	_TCHAR * buffer;
+	_TCHAR * argument;
 	_TCHAR * arg;
 	FILE *file = NULL;
 	int maxArgs = 128;
 	int index;
+	size_t bufferSize = 1024;
 	size_t length;
+	
+	/* allocate buffers */
+	buffer =  (_TCHAR*)malloc(bufferSize * sizeof(_TCHAR));
+	argument = (_TCHAR*)malloc(bufferSize * sizeof(_TCHAR));
 	
 	/* Open the config file as a text file 
 	 * Note that carriage return-linefeed combination \r\n are automatically
@@ -96,20 +101,32 @@ int readConfigFile( _TCHAR * config_file, int *argc, _TCHAR ***argv )
 	index = 0;
 	
 	/* Parse every line */	
-	while (_fgetts(buffer, 1024, file) != NULL)
+	while (_fgetts(buffer, bufferSize, file) != NULL)
 	{
+		/* did we fill the buffer without reaching the end of a line? */
+		while (buffer[bufferSize - 2] != _T_ECLIPSE('\n') && _tcslen(buffer) == (bufferSize - 1)) {
+			bufferSize += 1024;
+			buffer = (_TCHAR*)realloc(buffer, bufferSize * sizeof(_TCHAR));
+			argument =  (_TCHAR*)realloc(argument, bufferSize * sizeof(_TCHAR));
+			buffer[bufferSize - 2] = 0;
+			
+			/* read the next chunk to overwrite the \0 left by the last read */
+			if(_fgetts(buffer + bufferSize - 1025, 1025, file) == NULL)
+				break;
+		}
+		
 		/* Extract the string prior to the first newline character.
 		 * We don't have to worry about \r\n combinations since the file
 		 * is opened in translated mode.
 		 */
 		if (_stscanf(buffer, _T_ECLIPSE("%[^\n]"), argument) == 1)
 		{
+			/* watch for comments */
+			if(argument[0] == _T_ECLIPSE('#'))
+				continue;
+
 			arg = _tcsdup(argument);
 			length = _tcslen(arg);
-			
-			/* watch for comments */
-			if(arg[0] == _T_ECLIPSE('#'))
-				continue;
 			
 			/* basic whitespace trimming */
 			while (length > 0 && (arg[length - 1] == _T_ECLIPSE(' ')  || 
@@ -119,8 +136,10 @@ int readConfigFile( _TCHAR * config_file, int *argc, _TCHAR ***argv )
 				arg[--length] = 0;
 			}
 			/* ignore empty lines */
-			if (length == 0)
+			if (length == 0) {
+				free(arg);
 				continue;
+			}
 			
 			(*argv)[index] = arg;
 			index++;
@@ -139,7 +158,8 @@ int readConfigFile( _TCHAR * config_file, int *argc, _TCHAR ***argv )
 	*argc = index;
 	
 	fclose(file);
-	
+	free(buffer);
+	free(argument);
 	return 0;
 }
 
