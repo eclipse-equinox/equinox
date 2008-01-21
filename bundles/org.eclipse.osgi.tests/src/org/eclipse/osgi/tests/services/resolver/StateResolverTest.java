@@ -2931,6 +2931,25 @@ public class StateResolverTest extends AbstractStateTest {
 		assertTrue("1.0", testNativeBundle.isResolved());
 	}
 
+	public void testNativeCodeResolution04() throws BundleException {
+		State state = buildEmptyState();
+		Dictionary[] props = new Dictionary[] {new Hashtable()};
+		props[0].put(Constants.FRAMEWORK_OS_NAME, "DoesNotExist"); // Use different case for osname
+		props[0].put(Constants.FRAMEWORK_PROCESSOR, "InVaLid"); // Use different case for processor
+		state.setPlatformProperties(props);
+
+		Hashtable manifest = new Hashtable();
+		long bundleID = 0;
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "NativeBundle");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		manifest.put(Constants.BUNDLE_NATIVECODE, "Bundle-NativeCode: nativefile1.txt;processor=iNvAlid;osname=doeSnoTexist");
+		BundleDescription testNativeBundle = state.getFactory().createBundleDescription(state, manifest, "NativeBundle", bundleID++);
+		state.addBundle(testNativeBundle);
+		state.resolve();
+		assertTrue("1.0", testNativeBundle.isResolved());
+	}
+
 	public static class CatchAllValue {
 		public CatchAllValue(String s) {
 			//do nothing
