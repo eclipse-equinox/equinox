@@ -88,25 +88,28 @@ public class NativeCodeSpecificationImpl extends VersionConstraintImpl implement
 				match = true;
 			else {
 				Object platformProcessor = platformProps[i].get(Constants.FRAMEWORK_PROCESSOR);
-				for (int j = 0; j < processors.length && !match; j++) {
-					String aliasedProcessor = aliasMapper.aliasProcessor(processors[j]);
-					if (platformProcessor.equals(aliasedProcessor))
-						match = true;
-				}
+				Object aliasedPlatformProcessor = platformProcessor == null || !(platformProcessor instanceof String) ? platformProcessor : aliasMapper.aliasProcessor((String) platformProcessor);
+				if (aliasedPlatformProcessor != null)
+					for (int j = 0; j < processors.length && !match; j++) {
+						String aliasedProcessor = aliasMapper.aliasProcessor(processors[j]);
+						if (aliasedPlatformProcessor.equals(aliasedProcessor))
+							match = true;
+					}
 			}
 			if (!match)
 				return false;
 			match = false;
 
 			String[] languages = nativeSupplier.getLanguages();
-			if (languages.length == 0l)
+			if (languages.length == 0)
 				match = true;
 			else {
 				Object platformLanguage = platformProps[i].get(Constants.FRAMEWORK_LANGUAGE);
-				for (int j = 0; j < languages.length && !match; j++) {
-					if ((platformLanguage instanceof String) ? ((String) platformLanguage).equalsIgnoreCase(languages[j]) : platformLanguage.equals(languages[j]))
-						match = true;
-				}
+				if (platformLanguage != null)
+					for (int j = 0; j < languages.length && !match; j++) {
+						if ((platformLanguage instanceof String) ? ((String) platformLanguage).equalsIgnoreCase(languages[j]) : platformLanguage.equals(languages[j]))
+							match = true;
+					}
 			}
 			if (!match)
 				return false;
