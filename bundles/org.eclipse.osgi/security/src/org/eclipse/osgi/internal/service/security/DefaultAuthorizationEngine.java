@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 IBM Corporation and others.
+ * Copyright (c) 2007, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,8 +14,7 @@ import java.security.cert.CertificateException;
 import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.eclipse.osgi.internal.baseadaptor.DevClassPathHelper;
 import org.eclipse.osgi.service.resolver.*;
-import org.eclipse.osgi.service.security.AuthorizationEngine;
-import org.eclipse.osgi.service.security.AuthorizationEvent;
+import org.eclipse.osgi.service.security.*;
 import org.eclipse.osgi.signedcontent.SignedContent;
 import org.eclipse.osgi.signedcontent.SignerInfo;
 import org.osgi.framework.Bundle;
@@ -99,7 +98,10 @@ public class DefaultAuthorizationEngine extends AuthorizationEngine {
 		return true;
 	}
 
-	protected int doGetSeverity() {
-		return 0;
+	public int getStatus() {
+		if (0 != systemState.getDisabledBundles().length) {
+			return AuthorizationStatus.ERROR;
+		}
+		return AuthorizationStatus.OK;
 	}
 }

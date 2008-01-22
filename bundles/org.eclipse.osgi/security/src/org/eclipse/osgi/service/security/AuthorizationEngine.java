@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * Copyright (c) 2005, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -67,11 +67,14 @@ public abstract class AuthorizationEngine {
 	 */
 	protected abstract AuthorizationEvent doAuthorize(SignedContent content, Object context);
 
-	public int getSeverity() {
-		return doGetSeverity();
-	}
-
-	protected abstract int doGetSeverity();
+	/**
+	 * Return the current status of the Authorization system.
+	 * 
+	 * @return A value of {@link AuthorizationStatus#OK} or {@link AuthorizationStatus#ERROR}
+	 * @see AuthorizationStatus#OK
+	 * @see AuthorizationStatus#ERROR
+	 */
+	abstract public int getStatus();
 
 	class AuthEventDispatcher implements EventDispatcher {
 		public void dispatchEvent(Object eventListener, Object listenerObject, int eventAction, Object eventObject) {
