@@ -218,22 +218,8 @@ public class PackageAdminImpl implements PackageAdmin {
 			}
 			State systemState = framework.adaptor.getState();
 			BundleDelta[] delta = systemState.resolve(descriptions).getChanges();
-			refreshedBundles = processDelta(delta, refreshPackages);
-			// if we end up refreshing the system bundle or one of its fragments the framework will be shutdown and 
-			// should be re-started. This call should return without doing further work.
-			if (!framework.isActive())
-				return;
-			if (refreshPackages) {
-				AbstractBundle[] allBundles = framework.getAllBundles();
-				for (int i = 0; i < allBundles.length; i++)
-					allBundles[i].unresolvePermissions();
-				// increment the system state timestamp if we are refreshing packages.
-				// this is needed incase we suspended a bundle from processing the delta (bug 167483)
-				if (delta.length > 0)
-					systemState.setTimeStamp(systemState.getTimeStamp() == Long.MAX_VALUE ? 0 : systemState.getTimeStamp() + 1);
-			}
-			// always resume bundles incase we have lazy-start bundles
-			resumeBundles(refreshedBundles, refreshPackages);
+			refreshedBundles = processDelta(delta, refreshPackages, systemState);
+
 		} catch (Throwable t) {
 			if (Debug.DEBUG && Debug.DEBUG_PACKAGEADMIN) {
 				Debug.println("PackageAdminImpl.doResolveBundles: Error occured :"); //$NON-NLS-1$
@@ -254,7 +240,7 @@ public class PackageAdminImpl implements PackageAdmin {
 		}
 	}
 
-	private void resumeBundles(AbstractBundle[] bundles, boolean refreshPackages) {
+	private void resumeBundles(AbstractBundle[] bundles, boolean refreshPackages, int[] previousStates) {
 		if (Debug.DEBUG && Debug.DEBUG_PACKAGEADMIN) {
 			Debug.println("PackageAdminImpl: restart the bundles"); //$NON-NLS-1$
 		}
@@ -265,7 +251,14 @@ public class PackageAdminImpl implements PackageAdmin {
 				// skip bundles that are not resolved or
 				// if we are doing resolveBundles then skip non-lazy start bundles and bundles currently changing state by this thread
 				continue;
-			framework.resumeBundle(bundles[i]);
+			if (previousStates[i] == Bundle.ACTIVE)
+				try {
+					bundles[i].start(Bundle.START_TRANSIENT);
+				} catch (BundleException e) {
+					framework.publishFrameworkEvent(FrameworkEvent.ERROR, bundles[i], e);
+				}
+			else
+				framework.resumeBundle(bundles[i]);
 		}
 	}
 
@@ -363,7 +356,7 @@ public class PackageAdminImpl implements PackageAdmin {
 		}
 	}
 
-	private AbstractBundle[] processDelta(BundleDelta[] bundleDeltas, boolean refreshPackages) {
+	private AbstractBundle[] processDelta(BundleDelta[] bundleDeltas, boolean refreshPackages, State systemState) {
 		ArrayList bundlesList = new ArrayList(bundleDeltas.length);
 		// get all the bundles that are going to be refreshed
 		for (int i = 0; i < bundleDeltas.length; i++) {
@@ -380,6 +373,7 @@ public class PackageAdminImpl implements PackageAdmin {
 		// then sort by dependency order
 		StartLevelManager.sortByDependency(refresh);
 		boolean[] previouslyResolved = new boolean[refresh.length];
+		int[] previousStates = new int[refresh.length];
 		try {
 			try {
 				if (Debug.DEBUG && Debug.DEBUG_PACKAGEADMIN) {
@@ -405,8 +399,10 @@ public class PackageAdminImpl implements PackageAdmin {
 				}
 				// now suspend each bundle and grab its state change lock.
 				if (refreshPackages)
-					for (int i = refresh.length - 1; i >= 0; i--)
+					for (int i = refresh.length - 1; i >= 0; i--) {
+						previousStates[i] = refresh[i].getState();
 						suspendBundle(refresh[i]);
+					}
 				/*
 				 * Refresh the bundles which will unexport the packages.
 				 * This will move RESOLVED bundles to the INSTALLED state.
@@ -481,6 +477,21 @@ public class PackageAdminImpl implements PackageAdmin {
 			if (refresh[i].isResolved())
 				framework.publishBundleEvent(BundleEvent.RESOLVED, refresh[i]);
 
+		// if we end up refreshing the system bundle or one of its fragments the framework will be shutdown and 
+		// should be re-started. This call should return without doing further work.
+		if (!framework.isActive())
+			return refresh;
+		if (refreshPackages) {
+			AbstractBundle[] allBundles = framework.getAllBundles();
+			for (int i = 0; i < allBundles.length; i++)
+				allBundles[i].unresolvePermissions();
+			// increment the system state timestamp if we are refreshing packages.
+			// this is needed incase we suspended a bundle from processing the delta (bug 167483)
+			if (bundleDeltas.length > 0)
+				systemState.setTimeStamp(systemState.getTimeStamp() == Long.MAX_VALUE ? 0 : systemState.getTimeStamp() + 1);
+		}
+		// always resume bundles incase we have lazy-start bundles
+		resumeBundles(refresh, refreshPackages, previousStates);
 		return refresh;
 	}
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2007 IBM Corporation and others.
+ * Copyright (c) 2003, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -672,10 +672,10 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	 * Update worker. Assumes the caller has the state change lock.
 	 */
 	protected void updateWorker(PrivilegedExceptionAction action) throws BundleException {
-		boolean bundleActive = false;
+		int previousState = 0;
 		if (!isFragment())
-			bundleActive = (state & (ACTIVE | STARTING)) != 0;
-		if (bundleActive) {
+			previousState = state;
+		if ((previousState & (ACTIVE | STARTING)) != 0) {
 			try {
 				stopWorker(STOP_TRANSIENT);
 			} catch (BundleException e) {
@@ -693,9 +693,9 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 				throw (RuntimeException) pae.getException();
 			throw (BundleException) pae.getException();
 		} finally {
-			if (bundleActive) {
+			if ((previousState & (ACTIVE | STARTING)) != 0) {
 				try {
-					startWorker(START_TRANSIENT);
+					startWorker(START_TRANSIENT | ((previousState & STARTING) != 0 ? START_ACTIVATION_POLICY : 0));
 				} catch (BundleException e) {
 					framework.publishFrameworkEvent(FrameworkEvent.ERROR, this, e);
 				}
