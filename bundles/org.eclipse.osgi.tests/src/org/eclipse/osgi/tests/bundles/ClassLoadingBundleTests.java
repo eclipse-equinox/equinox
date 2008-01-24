@@ -69,7 +69,7 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		compareResults(expectedEvents, actualEvents);
 	}
 
-	public void testMultiChainDepedencies() throws Exception {
+	public void testMultiChainDepedencies01() throws Exception {
 		Bundle chainTest = installer.installBundle("chain.test"); //$NON-NLS-1$
 		Bundle chainTestA = installer.installBundle("chain.test.a"); //$NON-NLS-1$
 		Bundle chainTestB = installer.installBundle("chain.test.b"); //$NON-NLS-1$
@@ -94,6 +94,55 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		installer.refreshPackages(new Bundle[] {chainTestC, chainTestD});
 
 		Object[] actualEvents = simpleResults.getResults(8);
+		compareResults(expectedEvents, actualEvents);
+	}
+
+	public void testMultiChainDepedencies02() throws Exception {
+		Bundle chainTestA = installer.installBundle("chain.test.a"); //$NON-NLS-1$
+		Bundle chainTestB = installer.installBundle("chain.test.b"); //$NON-NLS-1$
+		Bundle chainTestC = installer.installBundle("chain.test.c"); //$NON-NLS-1$
+		Bundle chainTestD = installer.installBundle("chain.test.d"); //$NON-NLS-1$
+		syncListenerResults.getResults(0);
+		installer.resolveBundles(new Bundle[] {chainTestA, chainTestB, chainTestC, chainTestD});
+
+		Object[] expectedEvents = new Object[8];
+		expectedEvents[0] = new BundleEvent(BundleEvent.RESOLVED, chainTestD);
+		expectedEvents[1] = new BundleEvent(BundleEvent.RESOLVED, chainTestC);
+		expectedEvents[2] = new BundleEvent(BundleEvent.RESOLVED, chainTestB);
+		expectedEvents[3] = new BundleEvent(BundleEvent.RESOLVED, chainTestA);
+		expectedEvents[4] = new BundleEvent(BundleEvent.LAZY_ACTIVATION, chainTestD);
+		expectedEvents[5] = new BundleEvent(BundleEvent.LAZY_ACTIVATION, chainTestC);
+		expectedEvents[6] = new BundleEvent(BundleEvent.LAZY_ACTIVATION, chainTestB);
+		expectedEvents[7] = new BundleEvent(BundleEvent.LAZY_ACTIVATION, chainTestA);
+
+		Object[] actualEvents = syncListenerResults.getResults(8);
+		compareResults(expectedEvents, actualEvents);
+
+		installer.refreshPackages(new Bundle[] {chainTestC, chainTestD});
+
+		expectedEvents = new Object[20];
+		expectedEvents[0] = new BundleEvent(BundleEvent.STOPPING, chainTestA);
+		expectedEvents[1] = new BundleEvent(BundleEvent.STOPPED, chainTestA);
+		expectedEvents[2] = new BundleEvent(BundleEvent.STOPPING, chainTestB);
+		expectedEvents[3] = new BundleEvent(BundleEvent.STOPPED, chainTestB);
+		expectedEvents[4] = new BundleEvent(BundleEvent.STOPPING, chainTestC);
+		expectedEvents[5] = new BundleEvent(BundleEvent.STOPPED, chainTestC);
+		expectedEvents[6] = new BundleEvent(BundleEvent.STOPPING, chainTestD);
+		expectedEvents[7] = new BundleEvent(BundleEvent.STOPPED, chainTestD);
+		expectedEvents[8] = new BundleEvent(BundleEvent.UNRESOLVED, chainTestA);
+		expectedEvents[9] = new BundleEvent(BundleEvent.UNRESOLVED, chainTestB);
+		expectedEvents[10] = new BundleEvent(BundleEvent.UNRESOLVED, chainTestC);
+		expectedEvents[11] = new BundleEvent(BundleEvent.UNRESOLVED, chainTestD);
+		expectedEvents[12] = new BundleEvent(BundleEvent.RESOLVED, chainTestD);
+		expectedEvents[13] = new BundleEvent(BundleEvent.RESOLVED, chainTestC);
+		expectedEvents[14] = new BundleEvent(BundleEvent.RESOLVED, chainTestB);
+		expectedEvents[15] = new BundleEvent(BundleEvent.RESOLVED, chainTestA);
+		expectedEvents[16] = new BundleEvent(BundleEvent.LAZY_ACTIVATION, chainTestD);
+		expectedEvents[17] = new BundleEvent(BundleEvent.LAZY_ACTIVATION, chainTestC);
+		expectedEvents[18] = new BundleEvent(BundleEvent.LAZY_ACTIVATION, chainTestB);
+		expectedEvents[19] = new BundleEvent(BundleEvent.LAZY_ACTIVATION, chainTestA);
+
+		actualEvents = syncListenerResults.getResults(12);
 		compareResults(expectedEvents, actualEvents);
 	}
 
