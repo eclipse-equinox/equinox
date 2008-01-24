@@ -32,13 +32,16 @@ import org.osgi.framework.*;
 /**
  * Core OSGi Framework class.
  */
-public class Framework implements EventDispatcher, EventPublisher {
+public class Framework implements EventDispatcher, EventPublisher, Runnable {
 	// System property used to set the context classloader parent classloader type (ccl is the default)
 	private static final String PROP_CONTEXTCLASSLOADER_PARENT = "osgi.contextClassLoaderParent"; //$NON-NLS-1$
 	private static final String CONTEXTCLASSLOADER_PARENT_APP = "app"; //$NON-NLS-1$
 	private static final String CONTEXTCLASSLOADER_PARENT_EXT = "ext"; //$NON-NLS-1$
 	private static final String CONTEXTCLASSLOADER_PARENT_BOOT = "boot"; //$NON-NLS-1$
 	private static final String CONTEXTCLASSLOADER_PARENT_FWK = "fwk"; //$NON-NLS-1$
+
+	private static final String PROP_FRAMEWORK_THREAD = "osgi.framework.activeThreadType"; //$NON-NLS-1$
+	private static final String THREAD_NORMAL = "normal"; //$NON-NLS-1$
 
 	private static String J2SE = "J2SE-"; //$NON-NLS-1$
 	private static String JAVASE = "JavaSE-"; //$NON-NLS-1$
@@ -625,6 +628,8 @@ public class Framework implements EventDispatcher, EventPublisher {
 		}
 		/* mark framework as started */
 		active = true;
+		if (THREAD_NORMAL.equals(FrameworkProperties.getProperty(PROP_FRAMEWORK_THREAD)))
+			new Thread(this, "Framework Active Thread").start(); //$NON-NLS-1$
 		/* Resume systembundle */
 		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 			Debug.println("Trying to launch framework"); //$NON-NLS-1$
@@ -671,6 +676,7 @@ public class Framework implements EventDispatcher, EventPublisher {
 		}
 		/* mark framework as stopped */
 		active = false;
+		notifyAll();
 	}
 
 	/**
@@ -1839,6 +1845,24 @@ public class Framework implements EventDispatcher, EventPublisher {
 			Hashtable handlers = (Hashtable) handlersField.get(null);
 			if (handlers != null)
 				handlers.clear();
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Runnable#run()
+	 * This thread monitors the framework active status and terminates when the framework is
+	 * shutdown.  This is needed to ensure the VM does not exist because of the lack of a
+	 * non-daemon thread (bug 215730)
+	 */
+	public void run() {
+		synchronized (this) {
+			while (active)
+				try {
+					this.wait(1000);
+				} catch (InterruptedException e) {
+					// do nothing
+				}
 		}
 	}
 }
