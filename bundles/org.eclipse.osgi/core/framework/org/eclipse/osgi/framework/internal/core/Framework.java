@@ -628,8 +628,11 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 		}
 		/* mark framework as started */
 		active = true;
-		if (THREAD_NORMAL.equals(FrameworkProperties.getProperty(PROP_FRAMEWORK_THREAD)))
-			new Thread(this, "Framework Active Thread").start(); //$NON-NLS-1$
+		if (THREAD_NORMAL.equals(FrameworkProperties.getProperty(PROP_FRAMEWORK_THREAD))) {
+			Thread fwkThread = new Thread(this, "Framework Active Thread"); //$NON-NLS-1$
+			fwkThread.setDaemon(false);
+			fwkThread.start();
+		}
 		/* Resume systembundle */
 		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 			Debug.println("Trying to launch framework"); //$NON-NLS-1$
