@@ -54,10 +54,15 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	 * @param framework
 	 *            Framework this bundle is running in
 	 */
-	protected static AbstractBundle createBundle(BundleData bundledata, Framework framework) throws BundleException {
+	protected static AbstractBundle createBundle(BundleData bundledata, Framework framework, boolean setBundle) throws BundleException {
+		AbstractBundle result;
 		if ((bundledata.getType() & BundleData.TYPE_FRAGMENT) > 0)
-			return new BundleFragment(bundledata, framework);
-		return new BundleHost(bundledata, framework);
+			result = new BundleFragment(bundledata, framework);
+		else
+			result = new BundleHost(bundledata, framework);
+		if (setBundle)
+			bundledata.setBundle(result);
+		return result;
 	}
 
 	/**
@@ -74,7 +79,6 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 		stateChanging = null;
 		this.bundledata = bundledata;
 		this.framework = framework;
-		bundledata.setBundle(this);
 	}
 
 	/**
@@ -707,14 +711,14 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	 * Update worker. Assumes the caller has the state change lock.
 	 */
 	protected void updateWorkerPrivileged(URLConnection source, AccessControlContext callerContext) throws BundleException {
-		AbstractBundle oldBundle = AbstractBundle.createBundle(bundledata, framework);
+		AbstractBundle oldBundle = AbstractBundle.createBundle(bundledata, framework, false);
 		boolean reloaded = false;
 		BundleOperation storage = framework.adaptor.updateBundle(this.bundledata, source);
 		BundleRepository bundles = framework.getBundles();
 		try {
 			BundleData newBundleData = storage.begin();
 			// Must call framework createBundle to check execution environment.
-			final AbstractBundle newBundle = framework.createAndVerifyBundle(newBundleData);
+			final AbstractBundle newBundle = framework.createAndVerifyBundle(newBundleData, false);
 			boolean exporting;
 			int st = getState();
 			synchronized (bundles) {

@@ -241,7 +241,7 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 		if (bundleDatas != null) {
 			for (int i = 0; i < bundleDatas.length; i++) {
 				try {
-					AbstractBundle bundle = AbstractBundle.createBundle(bundleDatas[i], this);
+					AbstractBundle bundle = AbstractBundle.createBundle(bundleDatas[i], this, true);
 					bundles.add(bundle);
 				} catch (BundleException be) {
 					// This is not a fatal error. Publish the framework event.
@@ -268,6 +268,7 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 	private void createSystemBundle() {
 		try {
 			systemBundle = new SystemBundle(this);
+			systemBundle.getBundleData().setBundle(systemBundle);
 		} catch (BundleException e) { // fatal error
 			e.printStackTrace();
 			throw new RuntimeException(NLS.bind(Msg.OSGI_SYSTEMBUNDLE_CREATE_EXCEPTION, e.getMessage()));
@@ -687,7 +688,7 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 	 * 
 	 * @param bundledata the BundleData of the Bundle to create
 	 */
-	AbstractBundle createAndVerifyBundle(BundleData bundledata) throws BundleException {
+	AbstractBundle createAndVerifyBundle(BundleData bundledata, boolean setBundle) throws BundleException {
 		// Check for a bundle already installed with the same symbolic name and version.
 		if (bundledata.getSymbolicName() != null) {
 			AbstractBundle installedBundle = getBundleBySymbolicName(bundledata.getSymbolicName(), bundledata.getVersion());
@@ -696,7 +697,7 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 				throw new DuplicateBundleException(msg, installedBundle);
 			}
 		}
-		return AbstractBundle.createBundle(bundledata, this);
+		return AbstractBundle.createBundle(bundledata, this, setBundle);
 	}
 
 	private class DuplicateBundleException extends BundleException implements StatusException {
@@ -932,7 +933,7 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 		final AbstractBundle bundle;
 		try {
 			BundleData bundledata = storage.begin();
-			bundle = createAndVerifyBundle(bundledata);
+			bundle = createAndVerifyBundle(bundledata, true);
 			if (Debug.DEBUG) {
 				BundleWatcher bundleStats = adaptor.getBundleWatcher();
 				if (bundleStats != null)

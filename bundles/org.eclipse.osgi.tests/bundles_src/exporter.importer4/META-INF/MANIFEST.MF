@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name:  exporter.importer4
+Bundle-SymbolicName: exporter.importer4
+Bundle-Version: 1.0.0
+Import-Package: exporter.importer.test; version=1.0
+Bundle-ActivationPolicy: lazy

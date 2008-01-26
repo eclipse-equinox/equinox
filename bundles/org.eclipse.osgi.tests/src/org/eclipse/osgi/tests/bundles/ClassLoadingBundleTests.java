@@ -763,6 +763,21 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		assertEquals("Wrong importer", importerExporter2, newImporters[0]);
 	}
 
+	public void testImporterExporter02() throws BundleException {
+		Bundle importerExporter3 = installer.installBundle("exporter.importer3"); //$NON-NLS-1$
+		Bundle importerExporter4 = installer.installBundle("exporter.importer4"); //$NON-NLS-1$
+		installer.resolveBundles(new Bundle[] {importerExporter3, importerExporter4});
+
+		importerExporter3.start();
+		importerExporter3.stop();
+		importerExporter3.update();
+		try {
+			importerExporter3.start();
+		} catch (Throwable t) {
+			fail("Unexpected exception", t); //$NON-NLS-1$
+		}
+	}
+
 	public void testBug207847() throws BundleException {
 		Bundle test = installer.installBundle("test"); //$NON-NLS-1$
 		installer.resolveBundles(new Bundle[] {test});

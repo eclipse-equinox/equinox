@@ -10,13 +10,13 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.bundles;
 
-import junit.framework.TestCase;
+import org.eclipse.core.tests.harness.CoreTest;
 import org.eclipse.osgi.internal.baseadaptor.StateManager;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.FrameworkEvent;
 
-public class AbstractBundleTests extends TestCase {
+public class AbstractBundleTests extends CoreTest {
 	public static int BUNDLE_LISTENER = 0x01;
 	public static int SYNC_BUNDLE_LISTENER = 0x02;
 	public static int SIMPLE_RESULTS = 0x04;
