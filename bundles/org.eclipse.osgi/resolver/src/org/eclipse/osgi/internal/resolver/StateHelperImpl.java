@@ -11,7 +11,6 @@
 package org.eclipse.osgi.internal.resolver;
 
 import java.util.*;
-
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.service.resolver.*;
 
@@ -90,7 +89,7 @@ public class StateHelperImpl implements StateHelper {
 		BundleDescription[] bundles = state.getBundles();
 		for (int i = 0; i < bundles.length; i++) {
 			if (resolved && !bundles[i].isResolved())
-				continue;  // discard unresolved bundles
+				continue; // discard unresolved bundles
 			GenericDescription[] generics = bundles[i].getGenericCapabilities();
 			for (int j = 0; j < generics.length; j++) {
 				GenericDescription description = generics[j];
@@ -109,29 +108,38 @@ public class StateHelperImpl implements StateHelper {
 		Map packages = getExportedPackageMap(state);
 		Map generics = getGenericsMap(state, false);
 		HashSet result = new HashSet(11);
-		for (int i = 0; i < bundles.length; i++) {
-			BundleDescription description = bundles[i];
+		ArrayList bundleList = new ArrayList(bundles.length);
+		for (int i = 0; i < bundles.length; i++)
+			bundleList.add(bundles[i]);
+		for (int i = 0; i < bundleList.size(); i++) {
+			BundleDescription description = (BundleDescription) bundleList.get(i);
 			VersionConstraint[] constraints = getUnsatisfiedConstraints(description);
 			for (int j = 0; j < constraints.length; j++) {
 				VersionConstraint constraint = constraints[j];
-				boolean satisfied = false;
+				BaseDescription satisfied = null;
 				if (constraint instanceof BundleSpecification || constraint instanceof HostSpecification) {
 					BundleDescription[] suppliers = state.getBundles(constraint.getName());
-					for (int k = 0; k < suppliers.length && !satisfied; k++) 
-						satisfied |= constraint.isSatisfiedBy(suppliers[k]);
+					for (int k = 0; k < suppliers.length && satisfied == null; k++)
+						satisfied = constraint.isSatisfiedBy(suppliers[k]) ? suppliers[k] : null;
 				} else if (constraint instanceof ImportPackageSpecification) {
 					Set exports = (Set) packages.get(constraint.getName());
-					if (exports != null) 
-						for (Iterator iter = exports.iterator(); iter.hasNext() && !satisfied;)
-							satisfied |= constraint.isSatisfiedBy((ExportPackageDescription) iter.next());
+					if (exports != null)
+						for (Iterator iter = exports.iterator(); iter.hasNext() && satisfied == null;) {
+							ExportPackageDescription exportDesc = (ExportPackageDescription) iter.next();
+							satisfied = constraint.isSatisfiedBy(exportDesc) ? exportDesc : null;
+						}
 				} else if (constraint instanceof GenericSpecification) {
 					Set genericSet = (Set) generics.get(constraint.getName());
-					if (genericSet != null) 
-						for (Iterator iter = genericSet.iterator(); iter.hasNext() && !satisfied;)
-							satisfied |= constraint.isSatisfiedBy((GenericDescription) iter.next());
+					if (genericSet != null)
+						for (Iterator iter = genericSet.iterator(); iter.hasNext() && satisfied == null;) {
+							GenericDescription genDesc = (GenericDescription) iter.next();
+							satisfied = constraint.isSatisfiedBy(genDesc) ? genDesc : null;
+						}
 				}
-				if (!satisfied)
+				if (satisfied == null)
 					result.add(constraint);
+				else if (!satisfied.getSupplier().isResolved() && !bundleList.contains(satisfied.getSupplier()))
+					bundleList.add(satisfied.getSupplier());
 			}
 		}
 		return (VersionConstraint[]) result.toArray(new VersionConstraint[result.size()]);
@@ -321,7 +329,7 @@ public class StateHelperImpl implements StateHelper {
 		HashSet exportNames = new HashSet(exports.length); // set is used to improve performance of duplicate check.
 		for (int i = 0; i < exports.length; i++)
 			if ((pkgNames == null || pkgNames.contains(exports[i].getName())) && !isSystemExport(exports[i], options) && isFriend(symbolicName, exports[i], strict) && !importList.contains(exports[i].getName()) && !pkgSet.contains(exports[i])) {
-				if (!exportNames.contains(exports[i].getName())) { 
+				if (!exportNames.contains(exports[i].getName())) {
 					// only add the first export
 					orderedPkgList.add(exports[i]);
 					pkgSet.add(exports[i]);

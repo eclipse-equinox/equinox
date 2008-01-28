@@ -393,6 +393,38 @@ public class PlatformAdminBundleTests extends AbstractBundleTests {
 		} catch (IllegalArgumentException e) {
 			// expected
 		}
-
 	}
+
+	public void testUnresolvedLeaves01() throws Exception {
+		Bundle chainTestA = installer.installBundle("chain.test.a");
+		Bundle chainTestB = installer.installBundle("chain.test.b");
+		Bundle chainTestC = installer.installBundle("chain.test.c");
+		Bundle[] allBundles = new Bundle[] {chainTestA, chainTestB, chainTestC};
+
+		PlatformAdmin pa = installer.getPlatformAdmin();
+		State systemState = pa.getState(false);
+		BundleDescription testADesc = systemState.getBundle(chainTestA.getBundleId());
+		BundleDescription testBDesc = systemState.getBundle(chainTestB.getBundleId());
+		BundleDescription testCDesc = systemState.getBundle(chainTestC.getBundleId());
+		assertNotNull("testADesc null!!", testADesc);
+		assertNotNull("testBDesc null!!", testBDesc);
+		assertNotNull("testCDesc null!!", testCDesc);
+
+		installer.resolveBundles(allBundles);
+		assertFalse("testADesc is resolved!!", testADesc.isResolved());
+		assertFalse("testBDesc is resolved!!", testBDesc.isResolved());
+		assertFalse("testCDesc is resolved!!", testCDesc.isResolved());
+
+		// ok finally we can start testing!!
+		VersionConstraint[] unsatifiedLeaves = pa.getStateHelper().getUnsatisfiedLeaves(new BundleDescription[] {testADesc});
+		assertNotNull("Unsatified constraints is null!!", unsatifiedLeaves);
+		assertEquals("Wrong number of constraints!!", 2, unsatifiedLeaves.length);
+		for (int i = 0; i < unsatifiedLeaves.length; i++) {
+			assertTrue("Constraint type is not import package: " + unsatifiedLeaves[i], unsatifiedLeaves[i] instanceof ImportPackageSpecification);
+			assertEquals("Package name is wrong: " + i, "chain.test.d", unsatifiedLeaves[i].getName());
+			if (unsatifiedLeaves[i].getBundle() != testBDesc && unsatifiedLeaves[i].getBundle() != testCDesc)
+				fail("Wrong bundle for the constraint: " + unsatifiedLeaves[i].getBundle());
+		}
+	}
+
 }

@@ -102,13 +102,32 @@ public class EclipseCommandProvider implements CommandProvider {
 					ci.println(resolverErrors[i].toString());
 				}
 
-				for (int i = 0; i < unsatisfied.length; i++) {
-					ci.print("  "); //$NON-NLS-1$
-					ci.println(MessageHelper.getResolutionFailureMessage(unsatisfied[i]));
-				}
 				if (unsatisfied.length == 0 && resolverErrors.length == 0) {
 					ci.print("  "); //$NON-NLS-1$
 					ci.println(EclipseAdaptorMsg.ECLIPSE_CONSOLE_NO_CONSTRAINTS);
+				}
+				if (unsatisfied.length > 0) {
+					ci.print("  "); //$NON-NLS-1$
+					ci.println(EclipseAdaptorMsg.ECLIPSE_CONSOLE_DIRECT_CONSTRAINTS);
+				}
+				for (int i = 0; i < unsatisfied.length; i++) {
+					ci.print("    "); //$NON-NLS-1$
+					ci.println(MessageHelper.getResolutionFailureMessage(unsatisfied[i]));
+				}
+				VersionConstraint[] unsatisfiedLeaves = platformAdmin.getStateHelper().getUnsatisfiedLeaves(new BundleDescription[] {bundle});
+				boolean foundLeaf = false;
+				for (int i = 0; i < unsatisfiedLeaves.length; i++) {
+					if (unsatisfiedLeaves[i].getBundle() == bundle)
+						continue;
+					if (!foundLeaf) {
+						foundLeaf = true;
+						ci.print("  "); //$NON-NLS-1$
+						ci.println(EclipseAdaptorMsg.ECLIPSE_CONSOLE_LEAF_CONSTRAINTS);
+					}
+					ci.print("    "); //$NON-NLS-1$
+					ci.println(unsatisfiedLeaves[i].getBundle().getLocation() + " [" + unsatisfiedLeaves[i].getBundle().getBundleId() + "]"); //$NON-NLS-1$ //$NON-NLS-2$
+					ci.print("      "); //$NON-NLS-1$
+					ci.println(MessageHelper.getResolutionFailureMessage(unsatisfiedLeaves[i]));
 				}
 				nextArg = ci.nextArgument();
 			}
