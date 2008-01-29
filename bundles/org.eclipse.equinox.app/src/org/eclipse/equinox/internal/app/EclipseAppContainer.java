@@ -416,7 +416,7 @@ public class EclipseAppContainer implements IRegistryEventListener, SynchronousB
 					Object provider = element.createExecutableExtension("run"); //$NON-NLS-1$
 					Object[] products = (Object[]) EclipseAppContainer.callMethod(provider, "getProducts", null, null); //$NON-NLS-1$
 					for (int j = 0; j < products.length; j++) {
-						if (productId.equalsIgnoreCase((String) EclipseAppContainer.callMethod(products[j], "getId", null, null))) {
+						if (productId.equalsIgnoreCase((String) EclipseAppContainer.callMethod(products[j], "getId", null, null))) { //$NON-NLS-1$
 							branding = new ProviderExtensionBranding(products[j]);
 							return branding;
 						}
@@ -557,7 +557,7 @@ public class EclipseAppContainer implements IRegistryEventListener, SynchronousB
 			error = e.getTargetException();
 		}
 		if (error != null) {
-			Activator.log(new FrameworkLogEntry(Activator.PI_APP, FrameworkLogEntry.ERROR, 0, "Error in invoking method.", 0, error, null));
+			Activator.log(new FrameworkLogEntry(Activator.PI_APP, FrameworkLogEntry.ERROR, 0, "Error in invoking method.", 0, error, null)); //$NON-NLS-1$
 		}
 		return null;
 	}
