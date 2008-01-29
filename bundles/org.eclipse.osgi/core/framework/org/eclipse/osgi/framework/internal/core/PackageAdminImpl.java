@@ -187,7 +187,6 @@ public class PackageAdminImpl implements PackageAdmin {
 			if (Profile.PROFILE && Profile.STARTUP)
 				Profile.logEnter("resolve bundles"); //$NON-NLS-1$
 			framework.publishBundleEvent(Framework.BATCHEVENT_BEGIN, framework.systemBundle);
-			AbstractBundle[] refreshedBundles = null;
 			BundleDescription[] descriptions = null;
 			synchronized (framework.bundles) {
 				int numBundles = bundles == null ? 0 : bundles.length;
@@ -218,8 +217,7 @@ public class PackageAdminImpl implements PackageAdmin {
 			}
 			State systemState = framework.adaptor.getState();
 			BundleDelta[] delta = systemState.resolve(descriptions).getChanges();
-			refreshedBundles = processDelta(delta, refreshPackages, systemState);
-
+			processDelta(delta, refreshPackages, systemState);
 		} catch (Throwable t) {
 			if (Debug.DEBUG && Debug.DEBUG_PACKAGEADMIN) {
 				Debug.println("PackageAdminImpl.doResolveBundles: Error occured :"); //$NON-NLS-1$
