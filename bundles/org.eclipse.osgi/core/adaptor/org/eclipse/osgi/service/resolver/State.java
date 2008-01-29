@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2007 IBM Corporation and others.
+ * Copyright (c) 2003, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,9 +27,18 @@ import org.osgi.framework.Version;
 public interface State {
 	/**
 	 * Adds the given bundle to this state.
+	 * <p>
+	 * If the bundle already exists in another state then an <code>IllegalStateException</code>
+	 * will be thrown.  Note that even if you remove a <code>BundleDescription</code> from
+	 * one <code>State</code> object using {@link State#removeBundle(BundleDescription)} it 
+	 * may still be considered as removing pending if other bundles in that state depend on the
+	 * bundle you removed.  To complete a pending removal a call must be done to 
+	 * {@link State#resolve(BundleDescription[])} with the removed bundle.
+	 * </p>
 	 * 
 	 * @param description the description to add
 	 * @return a boolean indicating whether the bundle was successfully added
+	 * @throws IllegalStateException if the bundle already exists in another state
 	 */
 	public boolean addBundle(BundleDescription description);
 

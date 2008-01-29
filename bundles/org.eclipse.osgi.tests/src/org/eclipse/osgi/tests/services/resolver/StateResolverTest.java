@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2007 IBM Corporation and others.
+ * Copyright (c) 2003, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -2948,6 +2948,166 @@ public class StateResolverTest extends AbstractStateTest {
 		state.addBundle(testNativeBundle);
 		state.resolve();
 		assertTrue("1.0", testNativeBundle.isResolved());
+	}
+
+	public void testMultiStateAdd01() throws BundleException {
+		State state1 = buildEmptyState();
+
+		// test the selection algorithm of the resolver to pick the bundles which
+		// resolve the largest set of bundles
+		Hashtable manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "sdk; " + Constants.SINGLETON_DIRECTIVE + ":=true");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.REQUIRE_BUNDLE, "platform; bundle-version=\"[1.0,2.0]\"");
+		BundleDescription sdk10 = state1.getFactory().createBundleDescription(state1, manifest, "sdk10", 0);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "platform; " + Constants.SINGLETON_DIRECTIVE + ":=true");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.REQUIRE_BUNDLE, "rcp; bundle-version=\"[1.0,2.0]\"");
+		BundleDescription platform10 = state1.getFactory().createBundleDescription(state1, manifest, "platform10", 1);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "rcp; " + Constants.SINGLETON_DIRECTIVE + ":=true");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		BundleDescription rcp10 = state1.getFactory().createBundleDescription(state1, manifest, "rcp10", 2);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "gef; " + Constants.SINGLETON_DIRECTIVE + ":=true");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.REQUIRE_BUNDLE, "rcp; bundle-version=\"[1.0,1.0]\"");
+		BundleDescription gef10 = state1.getFactory().createBundleDescription(state1, manifest, "gef10", 3);
+
+		state1.addBundle(sdk10);
+		state1.addBundle(platform10);
+		state1.addBundle(rcp10);
+		state1.addBundle(gef10);
+		state1.resolve();
+		assertTrue("1.0", sdk10.isResolved());
+		assertTrue("1.1", platform10.isResolved());
+		assertTrue("1.2", rcp10.isResolved());
+		assertTrue("1.3", gef10.isResolved());
+
+		State state2 = buildEmptyState();
+		try {
+			state2.addBundle(rcp10);
+			fail("Expected IllegalStateException on adding to multiple states");
+		} catch (IllegalStateException e) {
+			// expected
+		}
+	}
+
+	public void testMultiStateAdd02() throws BundleException {
+		State state1 = buildEmptyState();
+
+		// test the selection algorithm of the resolver to pick the bundles which
+		// resolve the largest set of bundles
+		Hashtable manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "sdk; " + Constants.SINGLETON_DIRECTIVE + ":=true");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.REQUIRE_BUNDLE, "platform; bundle-version=\"[1.0,2.0]\"");
+		BundleDescription sdk10 = state1.getFactory().createBundleDescription(state1, manifest, "sdk10", 0);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "platform; " + Constants.SINGLETON_DIRECTIVE + ":=true");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.REQUIRE_BUNDLE, "rcp; bundle-version=\"[1.0,2.0]\"");
+		BundleDescription platform10 = state1.getFactory().createBundleDescription(state1, manifest, "platform10", 1);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "rcp; " + Constants.SINGLETON_DIRECTIVE + ":=true");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		BundleDescription rcp10 = state1.getFactory().createBundleDescription(state1, manifest, "rcp10", 2);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "gef; " + Constants.SINGLETON_DIRECTIVE + ":=true");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.REQUIRE_BUNDLE, "rcp; bundle-version=\"[1.0,1.0]\"");
+		BundleDescription gef10 = state1.getFactory().createBundleDescription(state1, manifest, "gef10", 3);
+
+		state1.addBundle(sdk10);
+		state1.addBundle(platform10);
+		state1.addBundle(rcp10);
+		state1.addBundle(gef10);
+		state1.resolve();
+		assertTrue("1.0", sdk10.isResolved());
+		assertTrue("1.1", platform10.isResolved());
+		assertTrue("1.2", rcp10.isResolved());
+		assertTrue("1.3", gef10.isResolved());
+
+		// remove the rcp10 bundle.  The bundle will be removal pending
+		// this should still throw an exception until the removal is no longer pending
+		state1.removeBundle(rcp10);
+		State state2 = buildEmptyState();
+		try {
+			state2.addBundle(rcp10);
+			fail("Expected IllegalStateException on adding to multiple states");
+		} catch (IllegalStateException e) {
+			// expected
+		}
+	}
+
+	public void testMultiStateAdd03() throws BundleException {
+		State state1 = buildEmptyState();
+
+		// test the selection algorithm of the resolver to pick the bundles which
+		// resolve the largest set of bundles
+		Hashtable manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "sdk; " + Constants.SINGLETON_DIRECTIVE + ":=true");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.REQUIRE_BUNDLE, "platform; bundle-version=\"[1.0,2.0]\"");
+		BundleDescription sdk10 = state1.getFactory().createBundleDescription(state1, manifest, "sdk10", 0);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "platform; " + Constants.SINGLETON_DIRECTIVE + ":=true");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.REQUIRE_BUNDLE, "rcp; bundle-version=\"[1.0,2.0]\"");
+		BundleDescription platform10 = state1.getFactory().createBundleDescription(state1, manifest, "platform10", 1);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "rcp; " + Constants.SINGLETON_DIRECTIVE + ":=true");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		BundleDescription rcp10 = state1.getFactory().createBundleDescription(state1, manifest, "rcp10", 2);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "gef; " + Constants.SINGLETON_DIRECTIVE + ":=true");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.REQUIRE_BUNDLE, "rcp; bundle-version=\"[1.0,1.0]\"");
+		BundleDescription gef10 = state1.getFactory().createBundleDescription(state1, manifest, "gef10", 3);
+
+		state1.addBundle(sdk10);
+		state1.addBundle(platform10);
+		state1.addBundle(rcp10);
+		state1.addBundle(gef10);
+		state1.resolve();
+		assertTrue("1.0", sdk10.isResolved());
+		assertTrue("1.1", platform10.isResolved());
+		assertTrue("1.2", rcp10.isResolved());
+		assertTrue("1.3", gef10.isResolved());
+
+		// remove the rcp10 bundle.  The bundle will be removal pending
+		// this should still throw an exception until the removal is no longer pending
+		state1.removeBundle(rcp10);
+		state1.resolve(new BundleDescription[] {rcp10});
+		State state2 = buildEmptyState();
+
+		try {
+			state2.addBundle(rcp10);
+		} catch (IllegalStateException e) {
+			fail("Unexpected IllegalStateException on adding to state", e);
+		}
 	}
 
 	public static class CatchAllValue {

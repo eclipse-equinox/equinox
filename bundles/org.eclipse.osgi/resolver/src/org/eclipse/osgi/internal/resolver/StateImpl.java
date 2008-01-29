@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2007 IBM Corporation and others.
+ * Copyright (c) 2003, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -466,6 +466,13 @@ public abstract class StateImpl implements State {
 	}
 
 	boolean basicAddBundle(BundleDescription description) {
+		StateImpl origState = (StateImpl) description.getContainingState();
+		if (origState != null && origState != this) {
+			if (origState.removalPendings.contains(description))
+				throw new IllegalStateException(NLS.bind(StateMsg.BUNDLE_PENDING_REMOVE_STATE, description.toString()));
+			if (origState.getBundle(description.getBundleId()) == description)
+				throw new IllegalStateException(NLS.bind(StateMsg.BUNDLE_IN_OTHER_STATE, description.toString()));
+		}
 		((BundleDescriptionImpl) description).setContainingState(this);
 		((BundleDescriptionImpl) description).setStateBit(BundleDescriptionImpl.REMOVAL_PENDING, false);
 		if (bundleDescriptions.add((BundleDescriptionImpl) description)) {
