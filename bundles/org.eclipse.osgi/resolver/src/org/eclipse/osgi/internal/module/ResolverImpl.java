@@ -27,14 +27,14 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 	private static final String OPTION_IMPORTS = RESOLVER + "/imports"; //$NON-NLS-1$
 	private static final String OPTION_REQUIRES = RESOLVER + "/requires"; //$NON-NLS-1$
 	private static final String OPTION_GENERICS = RESOLVER + "/generics"; //$NON-NLS-1$
-	private static final String OPTION_GROUPING = RESOLVER + "/grouping"; //$NON-NLS-1$
+	private static final String OPTION_USES = RESOLVER + "/uses"; //$NON-NLS-1$
 	private static final String OPTION_CYCLES = RESOLVER + "/cycles"; //$NON-NLS-1$
 	public static boolean DEBUG = false;
 	public static boolean DEBUG_WIRING = false;
 	public static boolean DEBUG_IMPORTS = false;
 	public static boolean DEBUG_REQUIRES = false;
 	public static boolean DEBUG_GENERICS = false;
-	public static boolean DEBUG_GROUPING = false;
+	public static boolean DEBUG_USES = false;
 	public static boolean DEBUG_CYCLES = false;
 	private static int MAX_MULTIPLE_SUPPLIERS_MERGE = 10;
 	private static int MAX_USES_TIME_BASE = 30000; // 30 seconds
@@ -554,6 +554,8 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 				else
 					conflictedBundle = conflict.getBundle();
 				if (conflictedBundle != null) {
+					if (DEBUG_USES)
+						System.out.println("Found conflicting constraint: " + conflict + " in bundle " + conflictedBundle); //$NON-NLS-1$//$NON-NLS-2$
 					conflictedBundles.add(conflictedBundle);
 					int type = conflict instanceof ResolverImport ? ResolverError.IMPORT_PACKAGE_USES_CONFLICT : ResolverError.REQUIRE_BUNDLE_USES_CONFLICT;
 					state.addResolverError(conflictedBundle.getBundle(), type, conflict.getVersionConstraint().toString(), conflict.getVersionConstraint());
@@ -586,17 +588,17 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		}
 		ResolverConstraint[][] multipleSuppliers = getMultipleSuppliers(bundles, packageConstraints, bundleConstraints);
 		ArrayList conflicts = null;
-		if (multipleSuppliers.length > 0) {
-			int[] bestCombination = new int[multipleSuppliers.length];
-			conflicts = findBestCombination(bundles, multipleSuppliers, bestCombination, initialConflicts);
-			for (int i = 0; i < bestCombination.length; i++) {
-				for (int j = 0; j < multipleSuppliers[i].length; j++)
-					multipleSuppliers[i][j].setSelectedSupplier(bestCombination[i]);
-			}
-		} else {
-			// either there are no multiple suppliers or the multiple suppliers list is way to big to process in a timely manner.
-			conflicts = initialConflicts;
+		int[] bestCombination = new int[multipleSuppliers.length];
+		conflicts = findBestCombination(bundles, multipleSuppliers, bestCombination, initialConflicts);
+		if (DEBUG_USES) {
+			System.out.print("Best combination found: "); //$NON-NLS-1$
+			printCombination(bestCombination);
 		}
+		for (int i = 0; i < bestCombination.length; i++) {
+			for (int j = 0; j < multipleSuppliers[i].length; j++)
+				multipleSuppliers[i][j].setSelectedSupplier(bestCombination[i]);
+		}
+
 		// do not need to keep uses data in memory
 		groupingChecker.clear();
 		return conflicts;
@@ -617,17 +619,20 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		int bestConflictCount = getConflictCount(bestConflicts);
 		ResolverBundle[] bestConflictBundles = getConflictedBundles(bestConflicts);
 		while (bestConflictCount != 0 && (System.currentTimeMillis() - initialTime) < timeLimit && getNextCombination(multipleSuppliers)) {
-			if (DEBUG_GROUPING)
+			if (DEBUG_USES)
 				printCombination(getCombination(multipleSuppliers, new int[multipleSuppliers.length]));
 			// first count the conflicts for the bundles with conflicts from the best combination
 			// this significantly reduces the time it takes to populate the GroupingChecker for cases where
 			// the combination is no better.
 			ArrayList conflicts = getConflicts(bestConflictBundles, null, null);
 			int conflictCount = getConflictCount(conflicts);
-			if (conflictCount >= bestConflictCount)
+			if (conflictCount >= bestConflictCount) {
+				if (DEBUG_USES)
+					System.out.println("Combination is not better that current best: " + conflictCount + ">=" + bestConflictCount); //$NON-NLS-1$ //$NON-NLS-2$
 				// no need to test the other bundles;
 				// this combination is no better for the bundles which conflict with the current best combination
 				continue;
+			}
 			// this combination improves upon the conflicts for the bundles which conflict with the current best combination;
 			// do an complete conflict count
 			conflicts = getConflicts(bundles, null, null);
@@ -638,6 +643,10 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 				bestConflicts = conflicts;
 				getCombination(multipleSuppliers, bestCombination);
 				bestConflictBundles = getConflictedBundles(bestConflicts);
+				if (DEBUG_USES)
+					System.out.println("Combination selected as current best: number of conflicts: " + bestConflictCount); //$NON-NLS-1$
+			} else if (DEBUG_USES) {
+				System.out.println("Combination is not better that current best: " + conflictCount + ">=" + bestConflictCount); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
 		return bestConflicts;
@@ -1690,7 +1699,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		DEBUG_IMPORTS = options.getBooleanOption(OPTION_IMPORTS, false);
 		DEBUG_REQUIRES = options.getBooleanOption(OPTION_REQUIRES, false);
 		DEBUG_GENERICS = options.getBooleanOption(OPTION_GENERICS, false);
-		DEBUG_GROUPING = options.getBooleanOption(OPTION_GROUPING, false);
+		DEBUG_USES = options.getBooleanOption(OPTION_USES, false);
 		DEBUG_CYCLES = options.getBooleanOption(OPTION_CYCLES, false);
 	}
 

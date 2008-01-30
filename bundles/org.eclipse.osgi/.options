@@ -39,8 +39,8 @@ org.eclipse.osgi/resolver/wiring = false
 org.eclipse.osgi/resolver/imports = false
 # Prints out Require-Bundle information
 org.eclipse.osgi/resolver/requires = false
-# Prints out package grouping information form the "uses" clause
-org.eclipse.osgi/resolver/grouping = false
+# Prints out debug information form the "uses" clause
+org.eclipse.osgi/resolver/uses = false
 # Prints out cycle information
 org.eclipse.osgi/resolver/cycles = false
 # Prints out Eclipse-GenericRequire information
