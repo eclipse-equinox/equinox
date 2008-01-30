@@ -2871,6 +2871,34 @@ public class StateResolverTest extends AbstractStateTest {
 		assertTrue("2.0", bDelta.length == 5);
 	}
 
+	public void testBug217150() throws BundleException {
+		State state = buildEmptyState();
+		Hashtable manifest = new Hashtable();
+		long bundleID = 0;
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "test.host; singleton:=true");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		BundleDescription testHost100 = state.getFactory().createBundleDescription(state, manifest, "test.host100", bundleID++);
+
+		manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "test.frag; singleton:=true");
+		manifest.put(Constants.FRAGMENT_HOST, "test.host; bundle-version=\"[1.0.0,2.0.0)\"");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		BundleDescription testFrag100 = state.getFactory().createBundleDescription(state, manifest, "test.frag100", bundleID++);
+
+		try {
+			BundleDescription[] frags = testHost100.getFragments();
+			assertNotNull("Fragments is null", frags);
+			assertEquals("Unexpected number of fragments", 0, frags.length);
+			BundleDescription[] hosts = testFrag100.getHost().getHosts();
+			assertNotNull("Hosts is null", hosts);
+			assertEquals("Unexpected number of hosts", 0, hosts.length);
+		} catch (Throwable t) {
+			fail("unexpected exception", t);
+		}
+	}
+
 	public void testNativeCodeResolution01() throws BundleException {
 		State state = buildEmptyState();
 		Dictionary[] props = new Dictionary[] {new Hashtable()};
