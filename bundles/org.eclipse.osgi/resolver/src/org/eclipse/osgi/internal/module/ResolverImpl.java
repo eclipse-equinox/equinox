@@ -37,7 +37,8 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 	public static boolean DEBUG_GROUPING = false;
 	public static boolean DEBUG_CYCLES = false;
 	private static int MAX_MULTIPLE_SUPPLIERS_MERGE = 10;
-	private static long MAX_COMBINATIONS = 1000000;
+	private static int MAX_USES_TIME_BASE = 30000; // 30 seconds
+	private static int MAX_USES_TIME_LIMIT = 90000; // 90 seconds
 
 	private static String[][] CURRENT_EES;
 
@@ -585,7 +586,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		}
 		ResolverConstraint[][] multipleSuppliers = getMultipleSuppliers(bundles, packageConstraints, bundleConstraints);
 		ArrayList conflicts = null;
-		if (multipleSuppliers.length > 0 && getNumCombinations(multipleSuppliers) < MAX_COMBINATIONS) {
+		if (multipleSuppliers.length > 0) {
 			int[] bestCombination = new int[multipleSuppliers.length];
 			conflicts = findBestCombination(bundles, multipleSuppliers, bestCombination, initialConflicts);
 			for (int i = 0; i < bestCombination.length; i++) {
@@ -601,16 +602,6 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		return conflicts;
 	}
 
-	private long getNumCombinations(ResolverConstraint[][] multipleSuppliers) {
-		if (multipleSuppliers == null || multipleSuppliers.length == 0)
-			return 0;
-		long numCombinations = multipleSuppliers[0][0].getNumPossibleSuppliers();
-		for (int i = 1; i < multipleSuppliers.length; i++)
-			if (multipleSuppliers[i].length > 0)
-				numCombinations *= multipleSuppliers[i][0].getNumPossibleSuppliers();
-		return numCombinations;
-	}
-
 	private int[] getCombination(ResolverConstraint[][] multipleSuppliers, int[] combination) {
 		for (int i = 0; i < combination.length; i++)
 			combination[i] = multipleSuppliers[i][0].getSelectedSupplierIndex();
@@ -621,9 +612,11 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		// now iterate over every possible combination until either zero conflicts are found 
 		// or we have run out of combinations
 		// if all combinations are tried then return the combination with the lowest number of conflicts
+		long initialTime = System.currentTimeMillis();
+		long timeLimit = Math.min(MAX_USES_TIME_BASE + (bundles.length * 30), MAX_USES_TIME_LIMIT);
 		int bestConflictCount = getConflictCount(bestConflicts);
 		ResolverBundle[] bestConflictBundles = getConflictedBundles(bestConflicts);
-		while (bestConflictCount != 0 && getNextCombination(multipleSuppliers)) {
+		while (bestConflictCount != 0 && (System.currentTimeMillis() - initialTime) < timeLimit && getNextCombination(multipleSuppliers)) {
 			if (DEBUG_GROUPING)
 				printCombination(getCombination(multipleSuppliers, new int[multipleSuppliers.length]));
 			// first count the conflicts for the bundles with conflicts from the best combination
