@@ -134,7 +134,7 @@ public class BundleDescriptionImpl extends BaseDescriptionImpl implements Bundle
 	public BundleDescription[] getFragments() {
 		if (host != null)
 			return EMPTY_BUNDLEDESCS;
-		return containingState == null ? null : containingState.getFragments(this);
+		return containingState == null ? EMPTY_BUNDLEDESCS : containingState.getFragments(this);
 	}
 
 	public HostSpecification getHost() {
