@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2007 IBM Corporation and others.
+ * Copyright (c) 2004, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,7 @@
 
 package org.eclipse.osgi.framework.internal.core;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
 import java.security.AccessController;
@@ -45,6 +46,15 @@ public class BundleLoader implements ClassLoaderDelegate {
 		}
 	});
 	public final static ClassLoader FW_CLASSLOADER = getClassLoader(Framework.class);
+
+	private static final int PRE_CLASS = 1;
+	private static final int POST_CLASS = 2;
+	private static final int PRE_RESOURCE = 3;
+	private static final int POST_RESOURCE = 4;
+	private static final int PRE_RESOURCES = 5;
+	private static final int POST_RESOURCES = 6;
+	private static final int PRE_LIBRARY = 7;
+	private static final int POST_LIBRARY = 8;
 
 	private static final boolean USE_GLOBAL_DEADLOCK_AVOIDANCE_LOCK = "true".equals(FrameworkProperties.getProperty("osgi.classloader.singleThreadLoads")); //$NON-NLS-1$//$NON-NLS-2$
 	private static final List waitingList = USE_GLOBAL_DEADLOCK_AVOIDANCE_LOCK ? new ArrayList(0) : null;
@@ -391,8 +401,16 @@ public class BundleLoader implements ClassLoaderDelegate {
 				// we want to continue
 				bootDelegation = true;
 			}
-
 		Class result = null;
+		try {
+			result = (Class) searchHooks(name, PRE_CLASS);
+		} catch (ClassNotFoundException e) {
+			throw e;
+		} catch (FileNotFoundException e) {
+			// will not happen
+		}
+		if (result != null)
+			return result;
 		// 3) search the imported packages
 		PackageSource source = findImportedSource(pkgName);
 		if (source != null) {
@@ -424,6 +442,14 @@ public class BundleLoader implements ClassLoaderDelegate {
 			}
 		}
 
+		if (result == null)
+			try {
+				result = (Class) searchHooks(name, POST_CLASS);
+			} catch (ClassNotFoundException e) {
+				throw e;
+			} catch (FileNotFoundException e) {
+				// will not happen
+			}
 		// do buddy policy loading
 		if (result == null && policy != null)
 			result = policy.doBuddyClassLoading(name);
@@ -439,6 +465,42 @@ public class BundleLoader implements ClassLoaderDelegate {
 				// we want to generate our own exception below
 			}
 		throw new ClassNotFoundException(name);
+	}
+
+	private Object searchHooks(String name, int type) throws ClassNotFoundException, FileNotFoundException {
+		ClassLoaderDelegateHook[] delegateHooks = bundle.framework.delegateHooks;
+		if (delegateHooks == null)
+			return null;
+		Object result = null;
+		for (int i = 0; i < delegateHooks.length && result == null; i++) {
+			switch (type) {
+				case PRE_CLASS :
+					result = delegateHooks[i].preFindClass(name, createClassLoader(), bundle.bundledata);
+					break;
+				case POST_CLASS :
+					result = delegateHooks[i].postFindClass(name, createClassLoader(), bundle.bundledata);
+					break;
+				case PRE_RESOURCE :
+					result = delegateHooks[i].preFindResource(name, createClassLoader(), bundle.bundledata);
+					break;
+				case POST_RESOURCE :
+					result = delegateHooks[i].postFindResource(name, createClassLoader(), bundle.bundledata);
+					break;
+				case PRE_RESOURCES :
+					result = delegateHooks[i].preFindResources(name, createClassLoader(), bundle.bundledata);
+					break;
+				case POST_RESOURCES :
+					result = delegateHooks[i].postFindResources(name, createClassLoader(), bundle.bundledata);
+					break;
+				case PRE_LIBRARY :
+					result = delegateHooks[i].preFindLibrary(name, createClassLoader(), bundle.bundledata);
+					break;
+				case POST_LIBRARY :
+					result = delegateHooks[i].postFindLibrary(name, createClassLoader(), bundle.bundledata);
+					break;
+			}
+		}
+		return result;
 	}
 
 	private boolean isRequestFromVM() {
@@ -503,6 +565,15 @@ public class BundleLoader implements ClassLoaderDelegate {
 		}
 
 		URL result = null;
+		try {
+			result = (URL) searchHooks(name, PRE_RESOURCE);
+		} catch (FileNotFoundException e) {
+			return null;
+		} catch (ClassNotFoundException e) {
+			// will not happen
+		}
+		if (result != null)
+			return result;
 		// 3) search the imported packages
 		PackageSource source = findImportedSource(pkgName);
 		if (source != null)
@@ -526,6 +597,14 @@ public class BundleLoader implements ClassLoaderDelegate {
 				return source.getResource(name);
 		}
 
+		if (result == null)
+			try {
+				result = (URL) searchHooks(name, POST_RESOURCE);
+			} catch (FileNotFoundException e) {
+				return null;
+			} catch (ClassNotFoundException e) {
+				// will not happen
+			}
 		// do buddy policy loading
 		if (result == null && policy != null)
 			result = policy.doBuddyResourceLoading(name);
@@ -562,6 +641,15 @@ public class BundleLoader implements ClassLoaderDelegate {
 			name = name.substring(1); /* remove leading slash before search */
 		String pkgName = getResourcePackageName(name);
 		Enumeration result = null;
+		try {
+			result = (Enumeration) searchHooks(name, PRE_RESOURCES);
+		} catch (ClassNotFoundException e) {
+			// will not happen
+		} catch (FileNotFoundException e) {
+			return null;
+		}
+		if (result != null)
+			return result;
 		// start at step 3 because of the comment above about ClassLoader#getResources
 		// 3) search the imported packages
 		PackageSource source = findImportedSource(pkgName);
@@ -584,6 +672,14 @@ public class BundleLoader implements ClassLoaderDelegate {
 			if (source != null)
 				return source.getResources(name);
 		}
+		if (result == null)
+			try {
+				result = (Enumeration) searchHooks(name, POST_RESOURCES);
+			} catch (ClassNotFoundException e) {
+				// will not happen
+			} catch (FileNotFoundException e) {
+				return null;
+			}
 		if (policy != null) {
 			Enumeration buddyResult = policy.doBuddyResourcesLoading(name);
 			result = compoundEnumerations(result, buddyResult);
@@ -665,21 +761,36 @@ public class BundleLoader implements ClassLoaderDelegate {
 	}
 
 	final String findLocalLibrary(final String name) {
-		String result = bundle.getBundleData().findLibrary(name);
+		String result = null;
+		try {
+			result = (String) searchHooks(name, PRE_LIBRARY);
+		} catch (FileNotFoundException e) {
+			return null;
+		} catch (ClassNotFoundException e) {
+			// will not happen
+		}
+		if (result != null)
+			return result;
+		result = bundle.getBundleData().findLibrary(name);
 		if (result != null)
 			return result;
 
-		org.osgi.framework.Bundle[] fragments = bundle.getFragments();
-		if (fragments == null || fragments.length == 0)
-			return null;
-
 		// look in fragments imports ...
-		for (int i = 0; i < fragments.length; i++) {
-			result = ((AbstractBundle) fragments[i]).getBundleData().findLibrary(name);
-			if (result != null)
-				return result;
+		org.osgi.framework.Bundle[] fragments = bundle.getFragments();
+		if (fragments != null)
+			for (int i = 0; i < fragments.length; i++) {
+				result = ((AbstractBundle) fragments[i]).getBundleData().findLibrary(name);
+				if (result != null)
+					return result;
+			}
+		try {
+			return (String) searchHooks(name, POST_LIBRARY);
+		} catch (FileNotFoundException e) {
+			return null; // this is not necessary; but being consistent in case another step is added below
+		} catch (ClassNotFoundException e) {
+			// will not happen
 		}
-		return result;
+		return null;
 	}
 
 	/*

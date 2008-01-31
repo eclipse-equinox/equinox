@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2007 IBM Corporation and others.
+ * Copyright (c) 2003, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,6 +16,7 @@ import java.net.*;
 import java.security.*;
 import java.util.*;
 import org.eclipse.core.runtime.internal.adaptor.ContextFinder;
+import org.eclipse.osgi.baseadaptor.BaseAdaptor;
 import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.eventmgr.*;
@@ -103,7 +104,7 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 	boolean bootDelegateAll = false;
 	boolean contextBootDelegation = "true".equals(FrameworkProperties.getProperty("osgi.context.bootdelegation", "true")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	boolean compatibiltyBootDelegation = false;
-
+	ClassLoaderDelegateHook[] delegateHooks;
 	/**
 	 * The AliasMapper used to alias OS Names.
 	 */
@@ -160,6 +161,7 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 			Profile.logEnter("Framework.initialze()", null); //$NON-NLS-1$
 		long start = System.currentTimeMillis();
 		this.adaptor = adaptor;
+		delegateHooks = adaptor instanceof BaseAdaptor ? ((BaseAdaptor) adaptor).getHookRegistry().getClassLoaderDelegateHooks() : null;
 		active = false;
 		installSecurityManager();
 		if (Debug.DEBUG && Debug.DEBUG_SECURITY) {

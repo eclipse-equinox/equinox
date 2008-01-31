@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,8 +15,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 import org.eclipse.osgi.baseadaptor.hooks.*;
-import org.eclipse.osgi.framework.adaptor.BundleWatcher;
-import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
+import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.util.ManifestElement;
@@ -71,6 +70,7 @@ public final class HookRegistry {
 	private BundleWatcher[] watchers = new BundleWatcher[0];
 	private ClassLoadingHook[] classLoadingHooks = new ClassLoadingHook[0];
 	private ClassLoadingStatsHook[] classLoadingStatsHooks = new ClassLoadingStatsHook[0];
+	private ClassLoaderDelegateHook[] classLoaderDelegateHooks = new ClassLoaderDelegateHook[0];
 	private StorageHook[] storageHooks = new StorageHook[0];
 	private BundleFileFactoryHook[] bundleFileFactoryHooks = new BundleFileFactoryHook[0];
 	private BundleFileWrapperFactoryHook[] bundleFileWrapperFactoryHooks = new BundleFileWrapperFactoryHook[0];
@@ -210,6 +210,14 @@ public final class HookRegistry {
 	}
 
 	/**
+	 * Returns the list of configured class loader delegate hooks.
+	 * @return the list of configured class loader delegate hooks.
+	 */
+	public ClassLoaderDelegateHook[] getClassLoaderDelegateHooks() {
+		return classLoaderDelegateHooks;
+	}
+
+	/**
 	 * Returns the list of configured storage hooks.
 	 * @return the list of configured storage hooks.
 	 */
@@ -263,6 +271,14 @@ public final class HookRegistry {
 	 */
 	public void addClassLoadingStatsHook(ClassLoadingStatsHook classLoadingStatsHook) {
 		classLoadingStatsHooks = (ClassLoadingStatsHook[]) add(classLoadingStatsHook, classLoadingStatsHooks, new ClassLoadingStatsHook[classLoadingStatsHooks.length + 1]);
+	}
+
+	/**
+	 * Adds a class loader delegate hook to this hook registry.
+	 * @param classLoaderDelegateHook a class loader delegate hook.
+	 */
+	public void addClassLoaderDelegateHook(ClassLoaderDelegateHook classLoaderDelegateHook) {
+		classLoaderDelegateHooks = (ClassLoaderDelegateHook[]) add(classLoaderDelegateHook, classLoaderDelegateHooks, new ClassLoaderDelegateHook[classLoaderDelegateHooks.length + 1]);
 	}
 
 	/**
