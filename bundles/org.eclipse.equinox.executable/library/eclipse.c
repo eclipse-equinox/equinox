@@ -468,7 +468,7 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
 		if (debug) _tprintf( goVMMsg, msg );
 
 		if(launchMode == LAUNCH_JNI) {
-			exitCode = startJavaVM(jniLib, vmCommandArgs, progCommandArgs);
+			exitCode = startJavaVM(jniLib, vmCommandArgs, progCommandArgs, jarFile);
 		} else {
 			exitCode = launchJavaVM(vmCommand);
 		}

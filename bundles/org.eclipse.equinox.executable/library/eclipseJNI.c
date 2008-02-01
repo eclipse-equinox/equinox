@@ -37,6 +37,7 @@ static void registerNatives(JNIEnv *env);
 static int shouldShutdown(JNIEnv *env);
 static void JNI_ReleaseStringChars(JNIEnv *env, jstring s, const _TCHAR* data);
 static const _TCHAR* JNI_GetStringChars(JNIEnv *env, jstring str);
+static char * getMainClass(JNIEnv *env, _TCHAR * jarFile);
 
 void setExitData(JNIEnv *env, jstring id, jstring s);
 
@@ -271,7 +272,7 @@ static jobjectArray createRunArgs( JNIEnv *env, _TCHAR * args[] ) {
 	return stringArray;
 }
 					 
-int startJavaJNI( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[] )
+int startJavaJNI( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[], _TCHAR* jarFile )
 {
 	int i;
 	int numVMArgs = -1;
@@ -280,6 +281,7 @@ int startJavaJNI( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[] )
 	JNI_createJavaVM createJavaVM;
 	JavaVMInitArgs init_args;
 	JavaVMOption * options;
+	char * mainClassName = NULL;
 	
 	/* JNI reflection */
 	jclass mainClass = NULL;			/* The Main class to load */
@@ -324,7 +326,20 @@ int startJavaJNI( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[] )
 	if( createJavaVM(&jvm, &env, &init_args) == 0 ) {
 		registerNatives(env);
 		
-		mainClass = (*env)->FindClass(env, "org/eclipse/equinox/launcher/Main");
+		mainClassName = getMainClass(env, jarFile);
+		if (mainClassName != NULL) {
+			mainClass = (*env)->FindClass(env, mainClassName);
+			free(mainClassName);
+		}
+		
+		if (mainClass == NULL) {
+			if ((*env)->ExceptionOccurred(env)) {
+				(*env)->ExceptionDescribe(env);
+				(*env)->ExceptionClear(env);
+			}
+			mainClass = (*env)->FindClass(env, "org/eclipse/equinox/launcher/Main");
+		}	
+
 		if(mainClass != NULL) {
 			mainConstructor = (*env)->GetMethodID(env, mainClass, "<init>", "()V");
 			if(mainConstructor != NULL) {
@@ -355,6 +370,105 @@ int startJavaJNI( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[] )
 	}
 	free(options);
 	return jvmExitCode;
+}
+
+static char * getMainClass(JNIEnv *env, _TCHAR * jarFile) {
+	jclass jarFileClass, manifestClass, attributesClass = NULL;
+	jmethodID jarFileConstructor, getManifestMethod, getMainAttributesMethod, closeJarMethod, getValueMethod = NULL;
+	jobject jarFileObject, manifest, attributes;
+	jstring mainClassString = NULL;
+	jstring jarFileString, headerString;
+	const _TCHAR *mainClass;
+	
+	/* get the classes we need */
+	jarFileClass = (*env)->FindClass(env, "java/util/jar/JarFile");
+	if (jarFileClass != NULL) {
+		manifestClass = (*env)->FindClass(env, "java/util/jar/Manifest");
+		if (manifestClass != NULL) {
+			attributesClass = (*env)->FindClass(env, "java/util/jar/Attributes");
+		}
+	}
+	if ((*env)->ExceptionOccurred(env)) {
+		(*env)->ExceptionDescribe(env);
+		(*env)->ExceptionClear(env);
+	}
+	if (attributesClass == NULL)
+		return NULL;
+	
+	/* find the methods */
+	jarFileConstructor = (*env)->GetMethodID(env, jarFileClass, "<init>", "(Ljava/lang/String;Z)V");
+	if(jarFileConstructor != NULL) {
+		getManifestMethod = (*env)->GetMethodID(env, jarFileClass, "getManifest", "()Ljava/util/jar/Manifest;");
+		if(getManifestMethod != NULL) {
+			closeJarMethod = (*env)->GetMethodID(env, jarFileClass, "close", "()V");
+			if (closeJarMethod != NULL) {
+				getMainAttributesMethod = (*env)->GetMethodID(env, manifestClass, "getMainAttributes", "()Ljava/util/jar/Attributes;");
+				if (getMainAttributesMethod != NULL) {
+					getValueMethod = (*env)->GetMethodID(env, attributesClass, "getValue", "(Ljava/lang/String;)Ljava/lang/String;");
+				}
+			}
+		}
+	}
+	if ((*env)->ExceptionOccurred(env)) {
+		(*env)->ExceptionDescribe(env);
+		(*env)->ExceptionClear(env);
+	}
+	if (getValueMethod == NULL)
+		return NULL;
+	
+	/* jarFileString = new String(jarFile); */
+	jarFileString = newJavaString(env, jarFile);
+	 /* headerString = new String("Main-Class"); */
+	 headerString = newJavaString(env, _T_ECLIPSE("Main-Class"));
+	if (jarFileString != NULL && headerString != NULL) {
+		/* jarfileObject = new JarFile(jarFileString, false); */
+		jarFileObject = (*env)->NewObject(env, jarFileClass, jarFileConstructor, jarFileString, JNI_FALSE);
+		if (jarFileObject != NULL) { 
+			/* manifest = jarFileObject.getManifest(); */
+			 manifest = (*env)->CallObjectMethod(env, jarFileObject, getManifestMethod);
+			 if (manifest != NULL) {
+				 /*jarFileObject.close() */
+				 (*env)->CallVoidMethod(env, jarFileObject, closeJarMethod);
+				 if (!(*env)->ExceptionOccurred(env)) {
+					 /* attributes = manifest.getMainAttributes(); */
+					 attributes = (*env)->CallObjectMethod(env, manifest, getMainAttributesMethod);
+					 if (attributes != NULL) {
+						 /* mainClassString = attributes.getValue(headerString); */
+						 mainClassString = (*env)->CallObjectMethod(env, attributes, getValueMethod, headerString);
+					 }
+				 }
+			 }
+			 (*env)->DeleteLocalRef(env, jarFileObject);
+		}
+	}
+	
+	if (jarFileString != NULL)
+		(*env)->DeleteLocalRef(env, jarFileString);
+	if (headerString != NULL)
+		(*env)->DeleteLocalRef(env, headerString);
+	
+	if ((*env)->ExceptionOccurred(env)) {
+		(*env)->ExceptionDescribe(env);
+		(*env)->ExceptionClear(env);
+	}
+	
+	if (mainClassString == NULL)
+		return NULL;
+	
+	mainClass = JNI_GetStringChars(env, mainClassString);
+	if(mainClass != NULL) {
+		int i = -1;
+		char *result = toNarrow(mainClass);
+		JNI_ReleaseStringChars(env, mainClassString, mainClass);
+		
+		/* replace all the '.' with '/' */
+		while(result[++i] != '\0') {
+			if(result[i] == '.')
+				result[i] = '/';
+		}
+		return result;
+	}
+	return NULL;
 }
 
 void cleanupVM(int exitCode) {

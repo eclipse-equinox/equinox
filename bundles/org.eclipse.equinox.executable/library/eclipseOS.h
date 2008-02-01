@@ -125,7 +125,7 @@ extern void restartLauncher( _TCHAR* program, _TCHAR* args[] );
 extern int launchJavaVM( _TCHAR* args[] );
 
 /* launch the vm in this process using JNI invocation */
-extern int startJavaVM( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[] );
+extern int startJavaVM( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[], _TCHAR* jarFile );
 
 /* do any platform specific processing of the user vmargs */
 extern void processVMArgs(_TCHAR **vmargs[] );

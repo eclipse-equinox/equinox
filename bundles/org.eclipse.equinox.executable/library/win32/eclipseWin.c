@@ -422,7 +422,7 @@ static void CALLBACK detectJvmExit( HWND hwnd, UINT uMsg, UINT id, DWORD dwTime 
     if (!GetExitCodeProcess( (HANDLE)jvmProcess, &exitCode ) ||
     		 exitCode != STILL_ACTIVE)
     {
-    	/* Save the JVM exit code. This should cause the loop in startJavaVM() to exit. */
+    	/* Save the JVM exit code. This should cause the loop in launchJavaVM() to exit. */
         jvmExitCode = exitCode;
         jvmProcess = 0;
     }
@@ -432,9 +432,9 @@ void processVMArgs(_TCHAR **vmargs[] ) {
 	/* nothing yet */
 }
 
-int startJavaVM( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[] )
+int startJavaVM( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[], _TCHAR* jarFile )
 {
-	return startJavaJNI(libPath, vmArgs, progArgs);
+	return startJavaJNI(libPath, vmArgs, progArgs, jarFile);
 }
 
 int isSunVM( _TCHAR * vm ) {

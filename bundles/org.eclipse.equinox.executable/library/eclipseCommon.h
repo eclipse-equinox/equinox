@@ -69,7 +69,7 @@ extern _TCHAR*  wsArg;
 extern _TCHAR   dirSeparator;         /* '/' or '\\' */
 extern _TCHAR   pathSeparator;        /* separator used in PATH variable */
 
-extern char *toNarrow(_TCHAR* src);
+extern char *toNarrow(const _TCHAR* src);
 
  /*
  * Find the absolute pathname to where a command resides.

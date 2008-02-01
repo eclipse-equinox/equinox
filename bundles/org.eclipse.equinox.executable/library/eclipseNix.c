@@ -168,9 +168,9 @@ void processVMArgs(_TCHAR **vmargs[] ) {
 	/* nothing yet */
 }
 
-int startJavaVM( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[] )
+int startJavaVM( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[], _TCHAR* jarFile )
 {
-	return startJavaJNI(libPath, vmArgs, progArgs);
+	return startJavaJNI(libPath, vmArgs, progArgs, jarFile);
 }
 
 int isSunVM( _TCHAR * vm ) {

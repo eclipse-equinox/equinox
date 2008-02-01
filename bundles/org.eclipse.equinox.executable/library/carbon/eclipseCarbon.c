@@ -51,6 +51,7 @@ typedef struct {
 	_TCHAR * libPath;
 	_TCHAR ** vmArgs;
 	_TCHAR ** progArgs;
+	_TCHAR * jarFile;
 	int result;
 } StartVMArgs;
 
@@ -263,14 +264,14 @@ int launchJavaVM( _TCHAR* args[] )
 	return -1;
 }
 
-int startJavaVM( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[] )
+int startJavaVM( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[], _TCHAR* jarFile )
 {
 	if (secondThread == 0) {
 		/* Set an environment variable that tells the AWT (if started) we started the JVM on the main thread. */
 		char firstThreadEnvVariable[80];
 		sprintf(firstThreadEnvVariable, "JAVA_STARTED_ON_FIRST_THREAD_%d", getpid());
 		setenv(firstThreadEnvVariable, "1", 1);
-		return startJavaJNI(libPath, vmArgs, progArgs);
+		return startJavaJNI(libPath, vmArgs, progArgs, jarFile);
 	}
 
 	/* else, --launcher.secondThread was specified, create a new thread and run the 
@@ -298,6 +299,7 @@ int startJavaVM( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[] )
 	args.libPath = libPath;
 	args.vmArgs = vmArgs;
 	args.progArgs = progArgs;
+	args.jarFile = jarFile;
 	
 	loopRef = CFRunLoopGetCurrent();
 	
@@ -312,7 +314,7 @@ int startJavaVM( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[] )
 
 void * startThread(void * init) {
 	StartVMArgs *args = (StartVMArgs *) init;
-	args->result = startJavaJNI(args->libPath, args->vmArgs, args->progArgs);
+	args->result = startJavaJNI(args->libPath, args->vmArgs, args->progArgs, args->jarFile);
 	return NULL;
 }
 

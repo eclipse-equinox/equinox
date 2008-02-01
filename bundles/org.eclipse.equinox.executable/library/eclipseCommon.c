@@ -122,7 +122,7 @@ static int compareVersions(const _TCHAR* str1, const _TCHAR* str2) {
  * Convert a wide string to a narrow one
  * Caller must free the null terminated string returned.
  */
-char *toNarrow(_TCHAR* src)
+char *toNarrow(const _TCHAR* src)
 {
 #ifdef UNICODE
 	int byteCount = WideCharToMultiByte (CP_ACP, 0, (wchar_t *)src, -1, NULL, 0, NULL, NULL);
