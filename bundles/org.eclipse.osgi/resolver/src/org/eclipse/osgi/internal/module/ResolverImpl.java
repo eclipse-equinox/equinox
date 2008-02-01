@@ -12,6 +12,7 @@ import java.util.*;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.debug.FrameworkDebugOptions;
+import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.eclipse.osgi.internal.module.GroupingChecker.PackageRoots;
 import org.eclipse.osgi.internal.resolver.BundleDescriptionImpl;
 import org.eclipse.osgi.internal.resolver.ExportPackageDescriptionImpl;
@@ -578,13 +579,17 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 	}
 
 	private ArrayList findBestCombination(ResolverBundle[] bundles) {
+		String usesMode = FrameworkProperties.getProperty("osgi.resolver.usesMode"); //$NON-NLS-1$
+		if ("ignore".equals(usesMode)) //$NON-NLS-1$
+			return null;
 		HashSet bundleConstraints = new HashSet();
 		HashSet packageConstraints = new HashSet();
-		// first tryout the initial selections
+		// first try out the initial selections
 		ArrayList initialConflicts = getConflicts(bundles, packageConstraints, bundleConstraints);
-		if (initialConflicts == null) {
+		if (initialConflicts == null || "tryFirst".equals(usesMode)) { //$NON-NLS-1$
 			groupingChecker.clear();
-			return null; // the first selected have no conflicts; return without iterating over all combinations
+			// the first combination have no conflicts or we only are trying the first combination; return without iterating over all combinations
+			return initialConflicts;
 		}
 		ResolverConstraint[][] multipleSuppliers = getMultipleSuppliers(bundles, packageConstraints, bundleConstraints);
 		ArrayList conflicts = null;
