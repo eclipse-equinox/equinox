@@ -134,7 +134,10 @@ public class BundleDescriptionImpl extends BaseDescriptionImpl implements Bundle
 	public BundleDescription[] getFragments() {
 		if (host != null)
 			return EMPTY_BUNDLEDESCS;
-		return containingState == null ? EMPTY_BUNDLEDESCS : containingState.getFragments(this);
+		StateImpl currentState = (StateImpl) getContainingState();
+		if (currentState == null)
+			throw new IllegalStateException("BundleDescription does not belong to a state."); //$NON-NLS-1$
+		return currentState.getFragments(this);
 	}
 
 	public HostSpecification getHost() {
@@ -464,7 +467,10 @@ public class BundleDescriptionImpl extends BaseDescriptionImpl implements Bundle
 	private void fullyLoad() {
 		if ((stateBits & LAZY_LOADED) == 0)
 			return;
-		StateReader reader = containingState.getReader();
+		StateImpl currentState = (StateImpl) getContainingState();
+		StateReader reader = currentState == null ? null : currentState.getReader();
+		if (reader == null)
+			throw new IllegalStateException("No valid reader for the bundle description"); //$NON-NLS-1$
 		synchronized (reader) {
 			if (isFullyLoaded()) {
 				reader.setAccessedFlag(true); // set reader accessed flag
@@ -500,6 +506,9 @@ public class BundleDescriptionImpl extends BaseDescriptionImpl implements Bundle
 	void unload() {
 		if ((stateBits & LAZY_LOADED) == 0)
 			return;
+		StateImpl currentState = (StateImpl) getContainingState();
+		if (currentState == null)
+			throw new IllegalStateException("BundleDescription does not belong to a State."); //$NON-NLS-1$
 		if (!isFullyLoaded())
 			return;
 		setFullyLoaded(false);
@@ -508,7 +517,7 @@ public class BundleDescriptionImpl extends BaseDescriptionImpl implements Bundle
 		if (tempData == null || tempData.selectedExports == null)
 			return;
 		for (int i = 0; i < tempData.selectedExports.length; i++)
-			containingState.getReader().objectTable.remove(new Integer(((ExportPackageDescriptionImpl) tempData.selectedExports[i]).getTableIndex()));
+			currentState.getReader().objectTable.remove(new Integer(((ExportPackageDescriptionImpl) tempData.selectedExports[i]).getTableIndex()));
 	}
 
 	void setDynamicStamps(HashMap dynamicStamps) {

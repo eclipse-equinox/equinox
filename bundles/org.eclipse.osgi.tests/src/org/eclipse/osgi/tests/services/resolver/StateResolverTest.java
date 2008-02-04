@@ -2889,13 +2889,9 @@ public class StateResolverTest extends AbstractStateTest {
 
 		try {
 			BundleDescription[] frags = testHost100.getFragments();
-			assertNotNull("Fragments is null", frags);
-			assertEquals("Unexpected number of fragments", 0, frags.length);
-			BundleDescription[] hosts = testFrag100.getHost().getHosts();
-			assertNotNull("Hosts is null", hosts);
-			assertEquals("Unexpected number of hosts", 0, hosts.length);
-		} catch (Throwable t) {
-			fail("unexpected exception", t);
+			fail("Expected to get an exception here!!!");
+		} catch (IllegalStateException e) {
+			// Expected exception.
 		}
 	}
 
