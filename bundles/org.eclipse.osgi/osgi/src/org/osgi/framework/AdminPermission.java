@@ -1,5 +1,5 @@
 /*
- * $Header: /cvsroot/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/AdminPermission.java,v 1.22 2006/10/18 15:32:18 twatson Exp $
+ * $Header: /cvsroot/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/AdminPermission.java,v 1.23 2007/02/26 16:37:21 twatson Exp $
  * 
  * Copyright (c) OSGi Alliance (2000, 2007). All Rights Reserved.
  * 
@@ -74,7 +74,7 @@ import org.eclipse.osgi.framework.internal.core.FilterImpl;
  * </ul>
  * 
  * @ThreadSafe
- * @version $Revision: 1.34 $
+ * @version $Revision: 1.23 $
  */
 
 public final class AdminPermission extends BasicPermission {
@@ -815,7 +815,8 @@ public final class AdminPermission extends BasicPermission {
 	    				
 	    				//found signer value - escape '*'s
 	    				while (!(filter.charAt(pos) == ')' && filter.charAt(pos-1) != '\\')) {
-	    					if (filter.charAt(pos) == '*') {
+	    					// only add an escape if it is not already escaped
+	    					if (filter.charAt(pos) == '*' && filter.charAt(pos-1) != '\\') {
 	    						filterBuf.insert(pos+numAsteriskFound,'\\');
 	    						numAsteriskFound++;
 	    					}
