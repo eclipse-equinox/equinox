@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2007 IBM Corporation and others. All rights reserved.
+ * Copyright (c) 2004, 2008 IBM Corporation and others. All rights reserved.
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
@@ -8,11 +8,12 @@
  ******************************************************************************/
 package org.eclipse.osgi.internal.module;
 
+import java.security.AccessController;
 import java.util.*;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.debug.FrameworkDebugOptions;
-import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
+import org.eclipse.osgi.framework.util.SecureAction;
 import org.eclipse.osgi.internal.module.GroupingChecker.PackageRoots;
 import org.eclipse.osgi.internal.resolver.BundleDescriptionImpl;
 import org.eclipse.osgi.internal.resolver.ExportPackageDescriptionImpl;
@@ -40,6 +41,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 	private static int MAX_MULTIPLE_SUPPLIERS_MERGE = 10;
 	private static int MAX_USES_TIME_BASE = 30000; // 30 seconds
 	private static int MAX_USES_TIME_LIMIT = 90000; // 90 seconds
+	private static final SecureAction secureAction = (SecureAction) AccessController.doPrivileged(SecureAction.createSecureAction());
 
 	private static String[][] CURRENT_EES;
 
@@ -579,7 +581,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 	}
 
 	private ArrayList findBestCombination(ResolverBundle[] bundles) {
-		String usesMode = FrameworkProperties.getProperty("osgi.resolver.usesMode"); //$NON-NLS-1$
+		String usesMode = secureAction.getProperty("osgi.resolver.usesMode"); //$NON-NLS-1$
 		if ("ignore".equals(usesMode)) //$NON-NLS-1$
 			return null;
 		HashSet bundleConstraints = new HashSet();
