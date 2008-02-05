@@ -2880,19 +2880,22 @@ public class StateResolverTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
 		BundleDescription testHost100 = state.getFactory().createBundleDescription(state, manifest, "test.host100", bundleID++);
 
+		try {
+			testHost100.getFragments();
+			fail("Expected to get an exception here!!!");
+		} catch (IllegalStateException e) {
+			// Expected exception.
+		}
+
 		manifest = new Hashtable();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "test.frag; singleton:=true");
 		manifest.put(Constants.FRAGMENT_HOST, "test.host; bundle-version=\"[1.0.0,2.0.0)\"");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
 		BundleDescription testFrag100 = state.getFactory().createBundleDescription(state, manifest, "test.frag100", bundleID++);
-
-		try {
-			BundleDescription[] frags = testHost100.getFragments();
-			fail("Expected to get an exception here!!!");
-		} catch (IllegalStateException e) {
-			// Expected exception.
-		}
+		BundleDescription[] hosts = testFrag100.getHost().getHosts();
+		assertNotNull("hosts is null", hosts);
+		assertEquals("Unexpected number of hosts", 0, hosts.length);
 	}
 
 	public void testNativeCodeResolution01() throws BundleException {
