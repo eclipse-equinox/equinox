@@ -136,8 +136,8 @@ public class WebStartMain extends Main {
 		int highest = 0;
 		for (int i = 0; i < versions.length; i++) {
 			versions[i] = ((BundleInfo) matches.get(i)).version;
-			highest = findMax(versions);
 		}
+		highest = findMax(versions);
 		return (BundleInfo) (removeMatch ? matches.remove(highest) : matches.get(highest));
 	}
 
