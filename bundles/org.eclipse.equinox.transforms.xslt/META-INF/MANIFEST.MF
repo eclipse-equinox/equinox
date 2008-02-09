@@ -1,11 +1,13 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: XSLT Transform Extension
+Bundle-Name: %bundleName
+Bundle-Vendor: %providerName
 Bundle-SymbolicName: org.eclipse.equinox.transforms.xslt
 Bundle-Version: 1.0.0.qualifier
 Bundle-RequiredExecutionEnvironment: J2SE-1.4
 Import-Package: org.osgi.framework;version="1.3.0"
 Eclipse-LazyStart: true
+Bundle-Localization: bundle
 Require-Bundle: system.bundle,
  org.eclipse.equinox.transforms.util;bundle-version="1.0.0"
 Export-Package: org.eclipse.equinox.transforms.xslt
