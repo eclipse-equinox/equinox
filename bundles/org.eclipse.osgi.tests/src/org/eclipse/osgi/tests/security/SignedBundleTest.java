@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 IBM Corporation and others.
+ * Copyright (c) 2007, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -168,8 +168,8 @@ public class SignedBundleTest extends BaseSecurityTest {
 			fail("Unexpected exception", e);
 		} finally {
 			try {
-				getTrustEngine().removeTrustAnchor("ca1_leafa");
 				testBundle.uninstall();
+				getTrustEngine().removeTrustAnchor("ca1_leafa");
 			} catch (Exception e) {
 				fail("Failed to uninstall bundle", e);
 			}
@@ -217,9 +217,9 @@ public class SignedBundleTest extends BaseSecurityTest {
 			fail("Unexpected exception", e);
 		} finally {
 			try {
+				testBundle.uninstall();
 				getTrustEngine().removeTrustAnchor("ca1_leafa");
 				getTrustEngine().removeTrustAnchor("ca2_leafa");
-				testBundle.uninstall();
 			} catch (Exception e) {
 				fail("Failed to uninstall bundle", e);
 			}
@@ -308,8 +308,8 @@ public class SignedBundleTest extends BaseSecurityTest {
 			fail("Unexpected exception", e);
 		} finally {
 			try {
-				getTrustEngine().removeTrustAnchor("ca1_leafa");
 				testBundle.uninstall();
+				getTrustEngine().removeTrustAnchor("ca1_leafa");
 			} catch (Exception e) {
 				fail("Failed to uninstall bundle", e);
 			}
@@ -354,8 +354,8 @@ public class SignedBundleTest extends BaseSecurityTest {
 			fail("Unexpected exception", e);
 		} finally {
 			try {
-				getTrustEngine().removeTrustAnchor("ca1_leafa");
 				testBundle.uninstall();
+				getTrustEngine().removeTrustAnchor("ca1_leafa");
 			} catch (Exception e) {
 				fail("Failed to uninstall bundle", e);
 			}
@@ -385,8 +385,8 @@ public class SignedBundleTest extends BaseSecurityTest {
 			fail("Unexpected exception", e);
 		} finally {
 			try {
-				getTrustEngine().removeTrustAnchor("ca1_leafa");
 				testBundle.uninstall();
+				getTrustEngine().removeTrustAnchor("ca1_leafa");
 			} catch (Exception e) {
 				fail("Failed to uninstall bundle", e);
 			}
