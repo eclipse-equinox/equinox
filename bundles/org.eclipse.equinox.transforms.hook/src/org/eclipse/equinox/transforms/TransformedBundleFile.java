@@ -200,9 +200,7 @@ public class TransformedBundleFile extends BundleFile {
 													dir.getAbsolutePath()));
 						}
 						/* copy the entry to the cache */
-						long start = System.currentTimeMillis();
 						AdaptorUtil.readFile(in, nested);
-						System.out.println("Time to readFile:" + (System.currentTimeMillis()-start));
 						if (nativeCode)
 							setPermissions(nested);
 					}
