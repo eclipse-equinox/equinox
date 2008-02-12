@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2005 IBM Corporation and others.
+ * Copyright (c) 2004, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -98,7 +98,6 @@ public class Constants implements org.osgi.framework.Constants {
 	/** OSGI system package property */
 	public static final String OSGI_FRAMEWORK_SYSTEM_PACKAGES = "org.osgi.framework.system.packages"; //$NON-NLS-1$
 	public static final String OSGI_BOOTDELEGATION = "org.osgi.framework.bootdelegation"; //$NON-NLS-1$
-	public static final String OSGI_SYSTEM_BUNDLE = "system.bundle"; //$NON-NLS-1$
 	private static String INTERNAL_SYSTEM_BUNDLE = "org.eclipse.osgi"; //$NON-NLS-1$
 
 	public static String getInternalSymbolicName() {
@@ -129,6 +128,8 @@ public class Constants implements org.osgi.framework.Constants {
 	public static final String OSGI_RESOLVER_MODE = "osgi.resolverMode"; //$NON-NLS-1$
 	public static final String STRICT_MODE = "strict"; //$NON-NLS-1$
 	public static final String DEVELOPMENT_MODE = "development"; //$NON-NLS-1$
+
+	public static final String STATE_SYSTEM_BUNDLE = "osgi.system.bundle"; //$NON-NLS-1$
 
 	public static final String OSGI_FRAMEWORKBEGINNINGSTARTLEVEL = "osgi.framework.beginningstartlevel"; //$NON-NLS-1$
 
@@ -232,12 +233,12 @@ public class Constants implements org.osgi.framework.Constants {
 	 */
 	public final static String REQUIRE_PACKAGES_ATTRIBUTE = "require-packages"; //$NON-NLS-1$
 
-	 /**
-	 * The key used to designate the buddy loader associated with a given bundle.
-	 */
-	 public final static String BUDDY_LOADER = "Eclipse-BuddyPolicy"; //$NON-NLS-1$
+	/**
+	* The key used to designate the buddy loader associated with a given bundle.
+	*/
+	public final static String BUDDY_LOADER = "Eclipse-BuddyPolicy"; //$NON-NLS-1$
 
-	 public final static String REGISTERED_POLICY = "Eclipse-RegisterBuddy";  //$NON-NLS-1$
+	public final static String REGISTERED_POLICY = "Eclipse-RegisterBuddy"; //$NON-NLS-1$
 
 	/**
 	 * Manifest header (named &quot;Reexport-Package&quot;) identifying the
@@ -250,7 +251,7 @@ public class Constants implements org.osgi.framework.Constants {
 	 * 
 	 * @deprecated
 	 */
-	 public final static String REEXPORT_PACKAGE = "Reexport-Package"; //$NON-NLS-1$
+	public final static String REEXPORT_PACKAGE = "Reexport-Package"; //$NON-NLS-1$
 
 	static public final String INTERNAL_HANDLER_PKGS = "equinox.interal.handler.pkgs"; //$NON-NLS-1$
 

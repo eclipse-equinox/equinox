@@ -13,6 +13,7 @@ import java.util.*;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.debug.FrameworkDebugOptions;
+import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.util.SecureAction;
 import org.eclipse.osgi.internal.module.GroupingChecker.PackageRoots;
 import org.eclipse.osgi.internal.resolver.BundleDescriptionImpl;
@@ -363,6 +364,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 
 		if (!initialized)
 			initialize();
+		// set developmentMode each resolution
 		developmentMode = platformProperties.length == 0 ? false : org.eclipse.osgi.framework.internal.core.Constants.DEVELOPMENT_MODE.equals(platformProperties[0].get(org.eclipse.osgi.framework.internal.core.Constants.OSGI_RESOLVER_MODE));
 		reRefresh = addDevConstraints(reRefresh);
 		// Unresolve all the supplied bundles and their dependents
@@ -802,7 +804,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 							Integer ee = (Integer) ((ResolverExport) suppliers[suppliersIndex]).getExportPackageDescription().getDirective(ExportPackageDescriptionImpl.EQUINOX_EE);
 							if (ee.intValue() >= 0)
 								continue;
-							if (((ResolverExport) suppliers[suppliersIndex]).getExporter().getRequire(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME) == null)
+							if (((ResolverExport) suppliers[suppliersIndex]).getExporter().getRequire(getSystemBundle()) == null)
 								if (((ResolverExport) suppliers[suppliersIndex]).getExporter().getRequire(Constants.SYSTEM_BUNDLE_SYMBOLICNAME) == null) {
 									multipleImportSupplierList.add(imports[j]);
 									break;
@@ -849,6 +851,14 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 				results.add(new ResolverConstraint[] {(ResolverConstraint) iMultipleRequireSuppliers.next()});
 		}
 		return (ResolverConstraint[][]) results.toArray(new ResolverConstraint[results.size()][]);
+	}
+
+	String getSystemBundle() {
+		Dictionary[] platformProperties = state.getPlatformProperties();
+		String systemBundle = (String) (platformProperties.length == 0 ? null : platformProperties[0].get(Constants.STATE_SYSTEM_BUNDLE));
+		if (systemBundle == null)
+			systemBundle = Constants.getInternalSymbolicName();
+		return systemBundle;
 	}
 
 	private void addMergedSuppliers(ArrayList mergedSuppliers, HashMap constraints) {

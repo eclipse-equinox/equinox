@@ -2550,7 +2550,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertEquals("1.4", b1ResolvedImports[2].getExporter(), a1_100);
 	}
 
-	public void testPlatformProperties() throws BundleException {
+	public void testPlatformProperties01() throws BundleException {
 		State state = buildEmptyState();
 		int bundleID = 0;
 		// test the selection algorithm of the resolver to pick the bundles which
@@ -2623,6 +2623,297 @@ public class StateResolverTest extends AbstractStateTest {
 
 		assertTrue("2.0", a.getResolvedImports()[1].getExporter() == systemB);
 		assertTrue("2.1", b_updated.getResolvedImports()[0].getExporter() == systemB);
+	}
+
+	public void testPlatformProperties02() throws BundleException {
+		// same as 01 except use alias system.bundle to another name "test.system.bundle"
+		State state = buildEmptyState();
+		int bundleID = 0;
+		// test the selection algorithm of the resolver to pick the bundles which
+		// resolve the largest set of bundles; with fragments using Import-Package
+		Hashtable manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "test.system.bundle");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		BundleDescription systemBundle = state.getFactory().createBundleDescription(state, manifest, "test.system.bundle", bundleID++);
+
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "A");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.IMPORT_PACKAGE, "pkg.b, pkg.system.b");
+		manifest.put(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT, "J2SE-1.4");
+		BundleDescription a = state.getFactory().createBundleDescription(state, manifest, "A", bundleID++);
+
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "B");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.EXPORT_PACKAGE, "pkg.b");
+		manifest.put(Constants.IMPORT_PACKAGE, "pkg.system.b");
+		manifest.put(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT, "J2SE-1.2");
+		BundleDescription b = state.getFactory().createBundleDescription(state, manifest, "B", bundleID++);
+
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "system.b");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.EXPORT_PACKAGE, "pkg.system.b");
+		manifest.put(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT, "J2SE-1.2");
+		BundleDescription systemB = state.getFactory().createBundleDescription(state, manifest, "system.b", bundleID++);
+
+		Dictionary[] props = new Dictionary[] {new Hashtable(), new Hashtable()};
+		props[0].put("org.osgi.framework.system.packages", "pkg.system.a, pkg.system.c");
+		props[0].put("org.osgi.framework.executionenvironment", "J2SE-1.2");
+		props[0].put("osgi.system.bundle", "test.system.bundle"); // set the system.bundle to another system bundle (other than org.eclipse.osgi)
+		props[1].put("org.osgi.framework.system.packages", "pkg.system.a, pkg.system.b, pkg.system.c");
+		props[1].put("org.osgi.framework.executionenvironment", "J2SE-1.4");
+
+		state.setPlatformProperties(props);
+		state.addBundle(systemBundle);
+		state.addBundle(a);
+		state.addBundle(b);
+		state.addBundle(systemB);
+		state.resolve();
+
+		assertTrue("1.0", systemBundle.isResolved());
+		assertTrue("1.1", a.isResolved());
+		assertTrue("1.2", b.isResolved());
+		assertTrue("1.3", systemB.isResolved());
+
+		assertTrue("2.0", a.getResolvedImports()[1].getExporter() == systemBundle);
+		assertTrue("2.1", b.getResolvedImports()[0].getExporter() == systemB);
+
+		// now test the uses clause for pkg.b such that bundle 'A' will be forced to used
+		// pkg.system from bundle 'system.b'
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "B");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.EXPORT_PACKAGE, "pkg.b; uses:=\"pkg.system.b\"");
+		manifest.put(Constants.IMPORT_PACKAGE, "pkg.system.b");
+		manifest.put(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT, "J2SE-1.2");
+		BundleDescription b_updated = state.getFactory().createBundleDescription(state, manifest, "B", b.getBundleId());
+		state.updateBundle(b_updated);
+		state.resolve(new BundleDescription[] {b_updated});
+
+		assertTrue("3.0", systemBundle.isResolved());
+		assertTrue("3.1", a.isResolved());
+		assertTrue("3.2", b_updated.isResolved());
+		assertTrue("3.3", systemB.isResolved());
+
+		assertTrue("2.0", a.getResolvedImports()[1].getExporter() == systemB);
+		assertTrue("2.1", b_updated.getResolvedImports()[0].getExporter() == systemB);
+	}
+
+	public void testPlatformProperties03() throws BundleException {
+		// test that require-bundle, fragment-host, and import-package of system.bundle can be aliased properly
+		State state = buildEmptyState();
+		int bundleID = 0;
+		String configuredSystemBundle = "org.eclipse.osgi";
+		// test the selection algorithm of the resolver to pick the bundles which
+		// resolve the largest set of bundles; with fragments using Import-Package
+		Hashtable manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, configuredSystemBundle);
+		manifest.put(Constants.EXPORT_PACKAGE, "system.bundle.exported.pkg");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		BundleDescription systemBundle = state.getFactory().createBundleDescription(state, manifest, configuredSystemBundle, bundleID++);
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "A");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.REQUIRE_BUNDLE, "system.bundle");
+		BundleDescription a = state.getFactory().createBundleDescription(state, manifest, "A", bundleID++);
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "B");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.REQUIRE_BUNDLE, configuredSystemBundle);
+		BundleDescription b = state.getFactory().createBundleDescription(state, manifest, "B", bundleID++);
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "C");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.IMPORT_PACKAGE, "system.bundle.exported.pkg; bundle-symbolic-name=\"system.bundle\"");
+		BundleDescription c = state.getFactory().createBundleDescription(state, manifest, "C", bundleID++);
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "D");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.IMPORT_PACKAGE, "system.bundle.exported.pkg; bundle-symbolic-name=\"" + configuredSystemBundle + "\"");
+		BundleDescription d = state.getFactory().createBundleDescription(state, manifest, "D", bundleID++);
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "E");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.IMPORT_PACKAGE, "pkg.system.a; bundle-symbolic-name=\"system.bundle\"");
+		BundleDescription e = state.getFactory().createBundleDescription(state, manifest, "E", bundleID++);
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "F");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.IMPORT_PACKAGE, "pkg.system.a; bundle-symbolic-name=\"" + configuredSystemBundle + "\"");
+		BundleDescription f = state.getFactory().createBundleDescription(state, manifest, "F", bundleID++);
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "G");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.FRAGMENT_HOST, "system.bundle");
+		BundleDescription g = state.getFactory().createBundleDescription(state, manifest, "G", bundleID++);
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "H");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.FRAGMENT_HOST, configuredSystemBundle);
+		BundleDescription h = state.getFactory().createBundleDescription(state, manifest, "H", bundleID++);
+
+		Dictionary[] props = new Dictionary[] {new Hashtable(), new Hashtable()};
+		props[0].put("org.osgi.framework.system.packages", "pkg.system.a, pkg.system.b");
+		props[0].put("org.osgi.framework.executionenvironment", "J2SE-1.2");
+
+		state.setPlatformProperties(props);
+		state.addBundle(systemBundle);
+		state.addBundle(a);
+		state.addBundle(b);
+		state.addBundle(c);
+		state.addBundle(d);
+		state.addBundle(e);
+		state.addBundle(f);
+		state.addBundle(g);
+		state.addBundle(h);
+		state.resolve();
+
+		assertTrue("1.0", systemBundle.isResolved());
+		assertTrue("1.1", a.isResolved());
+		assertTrue("1.2", b.isResolved());
+		assertTrue("1.3", c.isResolved());
+		assertTrue("1.4", d.isResolved());
+		assertTrue("1.5", e.isResolved());
+		assertTrue("1.6", f.isResolved());
+		assertTrue("1.7", g.isResolved());
+		assertTrue("1.8", h.isResolved());
+
+		assertTrue("2.0", a.getResolvedRequires()[0] == systemBundle);
+		assertTrue("2.1", b.getResolvedRequires()[0] == systemBundle);
+		assertTrue("2.2", c.getResolvedImports()[0].getExporter() == systemBundle);
+		assertTrue("2.3", d.getResolvedImports()[0].getExporter() == systemBundle);
+		assertTrue("2.4", e.getResolvedImports()[0].getExporter() == systemBundle);
+		assertTrue("2.5", f.getResolvedImports()[0].getExporter() == systemBundle);
+		assertTrue("2.6", g.getHost().getHosts()[0] == systemBundle);
+		assertTrue("2.7", h.getHost().getHosts()[0] == systemBundle);
+	}
+
+	public void testPlatformProperties04() throws BundleException {
+		// same as 03 except use a different system.bundle alias other than org.eclipse.osgi
+		// test that require-bundle, fragment-host, and import-package of system.bundle can be aliased properly
+		State state = buildEmptyState();
+		int bundleID = 0;
+		String configuredSystemBundle = "test.system.bundle";
+		// test the selection algorithm of the resolver to pick the bundles which
+		// resolve the largest set of bundles; with fragments using Import-Package
+		Hashtable manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, configuredSystemBundle);
+		manifest.put(Constants.EXPORT_PACKAGE, "system.bundle.exported.pkg");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		BundleDescription systemBundle = state.getFactory().createBundleDescription(state, manifest, configuredSystemBundle, bundleID++);
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "A");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.REQUIRE_BUNDLE, "system.bundle");
+		BundleDescription a = state.getFactory().createBundleDescription(state, manifest, "A", bundleID++);
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "B");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.REQUIRE_BUNDLE, configuredSystemBundle);
+		BundleDescription b = state.getFactory().createBundleDescription(state, manifest, "B", bundleID++);
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "C");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.IMPORT_PACKAGE, "system.bundle.exported.pkg; bundle-symbolic-name=\"system.bundle\"");
+		BundleDescription c = state.getFactory().createBundleDescription(state, manifest, "C", bundleID++);
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "D");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.IMPORT_PACKAGE, "system.bundle.exported.pkg; bundle-symbolic-name=\"" + configuredSystemBundle + "\"");
+		BundleDescription d = state.getFactory().createBundleDescription(state, manifest, "D", bundleID++);
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "E");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.IMPORT_PACKAGE, "pkg.system.a; bundle-symbolic-name=\"system.bundle\"");
+		BundleDescription e = state.getFactory().createBundleDescription(state, manifest, "E", bundleID++);
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "F");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.IMPORT_PACKAGE, "pkg.system.a; bundle-symbolic-name=\"" + configuredSystemBundle + "\"");
+		BundleDescription f = state.getFactory().createBundleDescription(state, manifest, "F", bundleID++);
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "G");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.FRAGMENT_HOST, "system.bundle");
+		BundleDescription g = state.getFactory().createBundleDescription(state, manifest, "G", bundleID++);
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "H");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.FRAGMENT_HOST, configuredSystemBundle);
+		BundleDescription h = state.getFactory().createBundleDescription(state, manifest, "H", bundleID++);
+
+		Dictionary[] props = new Dictionary[] {new Hashtable(), new Hashtable()};
+		props[0].put("org.osgi.framework.system.packages", "pkg.system.a, pkg.system.b");
+		props[0].put("org.osgi.framework.executionenvironment", "J2SE-1.2");
+		props[0].put("osgi.system.bundle", configuredSystemBundle); // set the system.bundle to another system bundle (other than org.eclipse.osgi)
+
+		state.setPlatformProperties(props);
+		state.addBundle(systemBundle);
+		state.addBundle(a);
+		state.addBundle(b);
+		state.addBundle(c);
+		state.addBundle(d);
+		state.addBundle(e);
+		state.addBundle(f);
+		state.addBundle(g);
+		state.addBundle(h);
+		state.resolve();
+
+		assertTrue("1.0", systemBundle.isResolved());
+		assertTrue("1.1", a.isResolved());
+		assertTrue("1.2", b.isResolved());
+		assertTrue("1.3", c.isResolved());
+		assertTrue("1.4", d.isResolved());
+		assertTrue("1.5", e.isResolved());
+		assertTrue("1.6", f.isResolved());
+		assertTrue("1.7", g.isResolved());
+		assertTrue("1.8", h.isResolved());
+
+		assertTrue("2.0", a.getResolvedRequires()[0] == systemBundle);
+		assertTrue("2.1", b.getResolvedRequires()[0] == systemBundle);
+		assertTrue("2.2", c.getResolvedImports()[0].getExporter() == systemBundle);
+		assertTrue("2.3", d.getResolvedImports()[0].getExporter() == systemBundle);
+		assertTrue("2.4", e.getResolvedImports()[0].getExporter() == systemBundle);
+		assertTrue("2.5", f.getResolvedImports()[0].getExporter() == systemBundle);
+		assertTrue("2.6", g.getHost().getHosts()[0] == systemBundle);
+		assertTrue("2.7", h.getHost().getHosts()[0] == systemBundle);
 	}
 
 	public void testPlatformPropertiesBug188075() throws BundleException, IOException {

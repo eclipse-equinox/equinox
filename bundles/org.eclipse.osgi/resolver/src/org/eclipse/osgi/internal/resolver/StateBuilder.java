@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2007 IBM Corporation and others.
+ * Copyright (c) 2003, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -586,6 +586,7 @@ class StateBuilder {
 		if (elements.length == 0 || elements[0].getDirective(Constants.EXTENSION_DIRECTIVE) == null)
 			return;
 		String hostName = elements[0].getValue();
+		// XXX: The extension bundle check is done against system.bundle and org.eclipse.osgi
 		if (!hostName.equals(Constants.SYSTEM_BUNDLE_SYMBOLICNAME) && !hostName.equals(Constants.getInternalSymbolicName()))
 			throw new BundleException(NLS.bind(StateMsg.HEADER_EXTENSION_ERROR, hostName));
 	}

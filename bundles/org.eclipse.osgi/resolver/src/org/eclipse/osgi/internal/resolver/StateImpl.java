@@ -27,7 +27,7 @@ public abstract class StateImpl implements State {
 	private static final String OSGI_WS = "osgi.ws"; //$NON-NLS-1$
 	private static final String OSGI_NL = "osgi.nl"; //$NON-NLS-1$
 	private static final String OSGI_ARCH = "osgi.arch"; //$NON-NLS-1$
-	public static final String[] PROPS = {OSGI_OS, OSGI_WS, OSGI_NL, OSGI_ARCH, Constants.OSGI_FRAMEWORK_SYSTEM_PACKAGES, Constants.OSGI_RESOLVER_MODE, Constants.FRAMEWORK_EXECUTIONENVIRONMENT, "osgi.resolveOptional", "osgi.genericAliases", Constants.FRAMEWORK_OS_NAME, Constants.FRAMEWORK_OS_VERSION, Constants.FRAMEWORK_PROCESSOR, Constants.FRAMEWORK_LANGUAGE}; //$NON-NLS-1$ //$NON-NLS-2$
+	public static final String[] PROPS = {OSGI_OS, OSGI_WS, OSGI_NL, OSGI_ARCH, Constants.OSGI_FRAMEWORK_SYSTEM_PACKAGES, Constants.OSGI_RESOLVER_MODE, Constants.FRAMEWORK_EXECUTIONENVIRONMENT, "osgi.resolveOptional", "osgi.genericAliases", Constants.FRAMEWORK_OS_NAME, Constants.FRAMEWORK_OS_VERSION, Constants.FRAMEWORK_PROCESSOR, Constants.FRAMEWORK_LANGUAGE, Constants.STATE_SYSTEM_BUNDLE}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	private static final DisabledInfo[] EMPTY_DISABLEDINFOS = new DisabledInfo[0];
 	transient private Resolver resolver;
 	transient private StateDeltaImpl changes;
@@ -80,7 +80,7 @@ public abstract class StateImpl implements State {
 		}
 		resolved = false;
 		getDelta().recordBundleAdded((BundleDescriptionImpl) description);
-		if (Constants.getInternalSymbolicName().equals(description.getSymbolicName()))
+		if (getSystemBundle().equals(description.getSymbolicName()))
 			resetSystemExports();
 		if (resolver != null)
 			resolver.bundleAdded(description);
@@ -111,7 +111,7 @@ public abstract class StateImpl implements State {
 			return false;
 		resolved = false;
 		getDelta().recordBundleUpdated((BundleDescriptionImpl) newDescription);
-		if (Constants.getInternalSymbolicName().equals(newDescription.getSymbolicName()))
+		if (getSystemBundle().equals(newDescription.getSymbolicName()))
 			resetSystemExports();
 		if (resolver != null) {
 			boolean pending = existing.getDependents().length > 0;
@@ -187,8 +187,8 @@ public abstract class StateImpl implements State {
 	}
 
 	public BundleDescription[] getBundles(String symbolicName) {
-		if (Constants.OSGI_SYSTEM_BUNDLE.equals(symbolicName))
-			symbolicName = Constants.getInternalSymbolicName();
+		if (Constants.SYSTEM_BUNDLE_SYMBOLICNAME.equals(symbolicName))
+			symbolicName = getSystemBundle();
 		final List bundles = new ArrayList();
 		for (Iterator iter = bundleDescriptions.iterator(); iter.hasNext();) {
 			BundleDescription bundle = (BundleDescription) iter.next();
@@ -620,8 +620,10 @@ public abstract class StateImpl implements State {
 			String[] keys = getPlatformPropertyKeys();
 			for (int i = 0; i < newPlatformProperties.length && !result; i++) {
 				result |= changedProps(this.platformProperties[i], newPlatformProperties[i], keys);
-				if (resetSystemExports)
+				if (resetSystemExports) {
 					performResetSystemExports |= checkProp(this.platformProperties[i].get(Constants.FRAMEWORK_SYSTEMPACKAGES), newPlatformProperties[i].get(Constants.FRAMEWORK_SYSTEMPACKAGES));
+					performResetSystemExports |= checkProp(this.platformProperties[i].get(Constants.SYSTEM_BUNDLE_SYMBOLICNAME), newPlatformProperties[i].get(Constants.SYSTEM_BUNDLE_SYMBOLICNAME));
+				}
 			}
 		}
 		// always do a complete replacement of the properties in case new bundles are added that uses new filter props
@@ -632,7 +634,7 @@ public abstract class StateImpl implements State {
 	}
 
 	private void resetSystemExports() {
-		BundleDescription[] systemBundles = getBundles(Constants.getInternalSymbolicName());
+		BundleDescription[] systemBundles = getBundles(Constants.SYSTEM_BUNDLE_SYMBOLICNAME);
 		if (systemBundles.length > 0) {
 			BundleDescriptionImpl systemBundle = (BundleDescriptionImpl) systemBundles[0];
 			ExportPackageDescription[] exports = systemBundle.getExportPackages();
@@ -696,6 +698,13 @@ public abstract class StateImpl implements State {
 				return true;
 		}
 		return false;
+	}
+
+	public String getSystemBundle() {
+		String symbolicName = null;
+		if (platformProperties != null && platformProperties.length > 0)
+			symbolicName = (String) platformProperties[0].get(Constants.STATE_SYSTEM_BUNDLE); //$NON-NLS-1$
+		return symbolicName != null ? symbolicName : Constants.getInternalSymbolicName();
 	}
 
 	public BundleDescription[] getRemovalPendings() {
@@ -763,7 +772,7 @@ public abstract class StateImpl implements State {
 
 	public ExportPackageDescription[] getSystemPackages() {
 		ArrayList result = new ArrayList();
-		BundleDescription[] systemBundles = getBundles(Constants.getInternalSymbolicName());
+		BundleDescription[] systemBundles = getBundles(Constants.SYSTEM_BUNDLE_SYMBOLICNAME);
 		if (systemBundles.length > 0) {
 			BundleDescriptionImpl systemBundle = (BundleDescriptionImpl) systemBundles[0];
 			ExportPackageDescription[] exports = systemBundle.getExportPackages();

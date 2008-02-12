@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2006 IBM Corporation and others.
+ * Copyright (c) 2003, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -46,6 +46,8 @@ public class ImportPackageSpecificationImpl extends VersionConstraintImpl implem
 	}
 
 	public String getBundleSymbolicName() {
+		if (Constants.SYSTEM_BUNDLE_SYMBOLICNAME.equals(symbolicName))
+			return ((StateImpl) getBundle().getContainingState()).getSystemBundle();
 		return symbolicName;
 	}
 
@@ -82,10 +84,10 @@ public class ImportPackageSpecificationImpl extends VersionConstraintImpl implem
 					return false;
 			}
 		}
-
-		if (symbolicName != null) {
+		String exporterSymbolicName = getBundleSymbolicName();
+		if (exporterSymbolicName != null) {
 			BundleDescription exporter = pkgDes.getExporter();
-			if (!symbolicName.equals(exporter.getSymbolicName()))
+			if (!exporterSymbolicName.equals(exporter.getSymbolicName()))
 				return false;
 			if (getBundleVersionRange() != null && !getBundleVersionRange().isIncluded(exporter.getVersion()))
 				return false;
@@ -116,7 +118,7 @@ public class ImportPackageSpecificationImpl extends VersionConstraintImpl implem
 		if (mandatory != null) {
 			for (int i = 0; i < mandatory.length; i++) {
 				if (Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE.equals(mandatory[i])) {
-					if (symbolicName == null)
+					if (exporterSymbolicName == null)
 						return false;
 				} else if (Constants.BUNDLE_VERSION_ATTRIBUTE.equals(mandatory[i])) {
 					if (bundleVersionRange == null)
@@ -133,10 +135,10 @@ public class ImportPackageSpecificationImpl extends VersionConstraintImpl implem
 			}
 		}
 		// finally check the ee index
-		if (((BundleDescriptionImpl)getBundle()).getEquinoxEE() < 0)
+		if (((BundleDescriptionImpl) getBundle()).getEquinoxEE() < 0)
 			return true;
 		int eeIndex = ((Integer) pkgDes.getDirective(ExportPackageDescriptionImpl.EQUINOX_EE)).intValue();
-		return eeIndex < 0 || eeIndex == ((BundleDescriptionImpl)getBundle()).getEquinoxEE();
+		return eeIndex < 0 || eeIndex == ((BundleDescriptionImpl) getBundle()).getEquinoxEE();
 	}
 
 	protected void setBundleSymbolicName(String symbolicName) {

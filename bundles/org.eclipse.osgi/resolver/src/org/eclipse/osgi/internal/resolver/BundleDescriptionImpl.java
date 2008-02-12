@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2007 IBM Corporation and others.
+ * Copyright (c) 2003, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -223,8 +223,6 @@ public class BundleDescriptionImpl extends BaseDescriptionImpl implements Bundle
 		lazyData.importPackages = importPackages;
 		if (importPackages != null) {
 			for (int i = 0; i < importPackages.length; i++) {
-				if (Constants.OSGI_SYSTEM_BUNDLE.equals(importPackages[i].getBundleSymbolicName()))
-					((ImportPackageSpecificationImpl) importPackages[i]).setBundleSymbolicName(Constants.getInternalSymbolicName());
 				((ImportPackageSpecificationImpl) importPackages[i]).setBundle(this);
 				if (ImportPackageSpecification.RESOLUTION_DYNAMIC.equals(importPackages[i].getDirective(Constants.RESOLUTION_DIRECTIVE)))
 					stateBits |= HAS_DYNAMICIMPORT;
@@ -237,8 +235,6 @@ public class BundleDescriptionImpl extends BaseDescriptionImpl implements Bundle
 		lazyData.requiredBundles = requiredBundles;
 		if (requiredBundles != null)
 			for (int i = 0; i < requiredBundles.length; i++) {
-				if (Constants.OSGI_SYSTEM_BUNDLE.equals(requiredBundles[i].getName()))
-					((VersionConstraintImpl) requiredBundles[i]).setName(Constants.getInternalSymbolicName());
 				((VersionConstraintImpl) requiredBundles[i]).setBundle(this);
 			}
 	}
@@ -298,8 +294,6 @@ public class BundleDescriptionImpl extends BaseDescriptionImpl implements Bundle
 	protected void setHost(HostSpecification host) {
 		this.host = host;
 		if (host != null) {
-			if (Constants.OSGI_SYSTEM_BUNDLE.equals(host.getName()))
-				((VersionConstraintImpl) host).setName(Constants.getInternalSymbolicName());
 			((VersionConstraintImpl) host).setBundle(this);
 		}
 	}

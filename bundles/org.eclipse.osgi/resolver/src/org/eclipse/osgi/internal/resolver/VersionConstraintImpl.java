@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2005 IBM Corporation and others.
+ * Copyright (c) 2003, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
 
+import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.service.resolver.*;
 
 public abstract class VersionConstraintImpl implements VersionConstraint {
@@ -19,6 +20,8 @@ public abstract class VersionConstraintImpl implements VersionConstraint {
 	private BaseDescription supplier;
 
 	public String getName() {
+		if (Constants.SYSTEM_BUNDLE_SYMBOLICNAME.equals(name))
+			return ((StateImpl) bundle.getContainingState()).getSystemBundle();
 		return name;
 	}
 
@@ -43,6 +46,7 @@ public abstract class VersionConstraintImpl implements VersionConstraint {
 	public boolean isSatisfiedBy(BaseDescription supplier) {
 		return false;
 	}
+
 	protected void setName(String name) {
 		this.name = name;
 	}

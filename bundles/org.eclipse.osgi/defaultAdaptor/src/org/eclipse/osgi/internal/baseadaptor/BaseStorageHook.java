@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * Copyright (c) 2005, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -101,7 +101,7 @@ public class BaseStorageHook implements StorageHook, AdaptorHook {
 		if (host != null) {
 			bundleType |= BundleData.TYPE_FRAGMENT;
 			ManifestElement[] hostElement = ManifestElement.parseHeader(Constants.FRAGMENT_HOST, host);
-			if (Constants.getInternalSymbolicName().equals(hostElement[0].getValue()) || Constants.OSGI_SYSTEM_BUNDLE.equals(hostElement[0].getValue())) {
+			if (Constants.getInternalSymbolicName().equals(hostElement[0].getValue()) || Constants.SYSTEM_BUNDLE_SYMBOLICNAME.equals(hostElement[0].getValue())) {
 				String extensionType = hostElement[0].getDirective("extension"); //$NON-NLS-1$
 				if (extensionType == null || extensionType.equals("framework")) //$NON-NLS-1$
 					bundleType |= BundleData.TYPE_FRAMEWORK_EXTENSION;
